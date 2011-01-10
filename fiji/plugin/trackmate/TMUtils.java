@@ -5,8 +5,12 @@ import ij.ImageStack;
 import ij.gui.Roi;
 import ij.process.ImageProcessor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.TreeMap;
 
 import mpicbg.imglib.image.Image;
 import mpicbg.imglib.image.ImagePlusAdapter;
@@ -15,7 +19,7 @@ import mpicbg.imglib.type.numeric.RealType;
 /**
  * List of static utilities for the {@link TrackMate_} plugin
  */
-public class Utils {
+public class TMUtils {
 	
 	/**
 	 * Return a 3D stack or a 2D slice as an {@link Image} corresponding to the frame number <code>iFrame</code>
@@ -44,6 +48,103 @@ public class Utils {
 	}
 
 
+	/**
+	 * Convenience static method that executes the thresholding part.
+	 * <p>
+	 * Given a list of spots, only spots with the feature satisfying the threshold given
+	 * in argument are returned. 
+	 */
+	public static TreeMap<Integer, List<Spot>> thresholdSpots(final TreeMap<Integer, List<Spot>> spots, final FeatureThreshold featureThreshold) {
+		TreeMap<Integer, List<Spot>> selectedSpots = new TreeMap<Integer, List<Spot>>();
+		Collection<Spot> spotThisFrame, spotToRemove;
+		List<Spot> spotToKeep;
+		Float val, tval;	
+
+		for (int timepoint : spots.keySet()) {
+
+			spotThisFrame = spots.get(timepoint);
+			spotToKeep = new ArrayList<Spot>(spotThisFrame);
+			spotToRemove = new ArrayList<Spot>(spotThisFrame.size());
+
+			tval = featureThreshold.value;
+			if (null != tval) {
+
+				if (featureThreshold.isAbove) {
+					for (Spot spot : spotToKeep) {
+						val = spot.getFeature(featureThreshold.feature);
+						if (null == val)
+							continue;
+						if ( val < tval)
+							spotToRemove.add(spot);
+					}
+
+				} else {
+					for (Spot spot : spotToKeep) {
+						val = spot.getFeature(featureThreshold.feature);
+						if (null == val)
+							continue;
+						if ( val > tval)
+							spotToRemove.add(spot);
+					}
+				}
+				spotToKeep.removeAll(spotToRemove); // no need to treat them multiple times
+				
+			}
+			
+			selectedSpots.put(timepoint, spotToKeep);
+		}
+		return selectedSpots;
+	}
+	
+	/**
+	 * Convenience static method that executes the thresholding part.
+	 * <p>
+	 * Given a list of spots, only spots with the feature satisfying <b>all</b> of the thresholds given
+	 * in argument are returned. 
+	 */
+	public static TreeMap<Integer, List<Spot>> thresholdSpots(final TreeMap<Integer, List<Spot>> spots, final List<FeatureThreshold> featureThresholds) {
+		TreeMap<Integer, List<Spot>> selectedSpots = new TreeMap<Integer, List<Spot>>();
+		Collection<Spot> spotThisFrame, spotToRemove;
+		List<Spot> spotToKeep;
+		Float val, tval;	
+		
+		for (int timepoint : spots.keySet()) {
+			
+			spotThisFrame = spots.get(timepoint);
+			spotToKeep = new ArrayList<Spot>(spotThisFrame);
+			spotToRemove = new ArrayList<Spot>(spotThisFrame.size());
+
+			for (FeatureThreshold threshold : featureThresholds) {
+
+				tval = threshold.value;
+				if (null == tval)
+					continue;
+				spotToRemove.clear();
+
+				if (threshold.isAbove) {
+					for (Spot spot : spotToKeep) {
+						val = spot.getFeature(threshold.feature);
+						if (null == val)
+							continue;
+						if ( val < tval)
+							spotToRemove.add(spot);
+					}
+
+				} else {
+					for (Spot spot : spotToKeep) {
+						val = spot.getFeature(threshold.feature);
+						if (null == val)
+							continue;
+						if ( val > tval)
+							spotToRemove.add(spot);
+					}
+				}
+				spotToKeep.removeAll(spotToRemove); // no need to treat them multiple times
+			}
+			selectedSpots.put(timepoint, spotToKeep);
+		}
+		return selectedSpots;
+	}
 	
 	
 	
@@ -119,6 +220,47 @@ public class Utils {
 	}
 	
 	/**
+	 * Return a map of {@link Feature} values for the spot collection given.
+	 * Each feature maps a double array, with 1 element per {@link Spot}, all pooled
+	 * together.
+	 */
+	public static EnumMap<Feature, double[]> getFeatureValues(Collection<? extends Collection<Spot>> spots) {
+		 EnumMap<Feature, double[]> featureValues = new  EnumMap<Feature, double[]>(Feature.class);
+		if (null == spots || spots.isEmpty())
+			return featureValues;
+		int index;
+		Float val;
+		boolean noDataFlag = true;
+		// Get the total quantity of spot we have
+		int spotNumber = 0;
+		for(Collection<? extends Spot> collection : spots)
+			spotNumber += collection.size();
+		
+		for(Feature feature : Feature.values()) {
+			// Make a double array to comply to JFreeChart histograms
+			double[] values = new double[spotNumber];
+			index = 0;
+			for(Collection<? extends Spot> collection : spots) {
+				for (Spot spot : collection) {
+					val = spot.getFeature(feature);
+					if (null == val)
+						continue;
+					values[index] = val; 
+					index++;
+					noDataFlag = false;
+				}
+				if (noDataFlag)
+					featureValues.put(feature, null);
+				else 
+					featureValues.put(feature, values);
+			}
+		}
+		return featureValues;
+	}
+
+
+	
+	/**
 	 * Return the optimal bin number for a histogram of the data given in array, using the 
 	 * Freedman and Diaconis rule (bin_space = 2*IQR/n^(1/3)).
 	 * It is ensured that the bin number returned is not smaller and no bigger than the bounds given
@@ -126,8 +268,8 @@ public class Utils {
 	 */
 	public static final int getNBins(final double[] values, int minBinNumber, int maxBinNumber) {
 		final int size = values.length;
-		final double q1 = Utils.getPercentile(values, 0.25);
-		final double q3 = Utils.getPercentile(values, 0.75);
+		final double q1 = getPercentile(values, 0.25);
+		final double q3 = getPercentile(values, 0.75);
 		final double iqr = q3 - q1;
 		final double binWidth = 2 * iqr * Math.pow(size, -0.33);
 		final double[] range = getRange(values);
@@ -153,7 +295,7 @@ public class Utils {
 	 * Create a histogram from the data given.
 	 */
 	public static final int[] histogram(final double data[], final int nBins) {
-		final double[] range = Utils.getRange(data);
+		final double[] range = getRange(data);
 		final double binWidth = range[0]/nBins;
 		final int[] hist = new int[nBins];
 		int index;
