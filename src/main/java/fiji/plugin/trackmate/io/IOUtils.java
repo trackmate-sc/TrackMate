@@ -27,6 +27,7 @@ import org.jdom2.DataConversionException;
 import org.jdom2.Element;
 
 import fiji.plugin.trackmate.Logger;
+import fiji.util.NumberParser;
 
 /**
  * A collection of static utilities for the input/output of xml files.
@@ -246,7 +247,7 @@ public class IOUtils {
 		}
 		try
 		{
-			final double val = Double.parseDouble( str );
+			final double val = NumberParser.parseDouble( str );
 			settings.put( parameterKey, val );
 		}
 		catch ( final NumberFormatException nfe )
@@ -267,7 +268,7 @@ public class IOUtils {
 		}
 		try
 		{
-			final int val = Integer.parseInt( str );
+			final int val = NumberParser.parseInteger( str );
 			settings.put( parameterKey, val );
 		}
 		catch ( final NumberFormatException nfe )

@@ -37,6 +37,7 @@ import javax.swing.SwingConstants;
 import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
 import fiji.plugin.trackmate.gui.panels.components.JPanelFeatureSelectionGui;
 import fiji.plugin.trackmate.tracking.LAPUtils;
+import fiji.util.NumberParser;
 
 public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 
@@ -132,20 +133,20 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 	public Map<String, Object> getSettings() {
 		Map<String, Object> settings = LAPUtils.getDefaultLAPSettingsMap();
 
-		settings.put(KEY_LINKING_MAX_DISTANCE, Double.parseDouble(jTextFieldLinkingMaxDistance.getText()));
+		settings.put(KEY_LINKING_MAX_DISTANCE, NumberParser.parseDouble(jTextFieldLinkingMaxDistance.getText()));
 		settings.put(KEY_LINKING_FEATURE_PENALTIES, jPanelLinkingFeatures.getFeaturePenalties());
 
 		settings.put(KEY_ALLOW_GAP_CLOSING, jCheckBoxAllowGapClosing.isSelected());
-		settings.put(KEY_GAP_CLOSING_MAX_DISTANCE, Double.parseDouble(jTextFieldGapClosingMaxDistance.getText()));
-		settings.put(KEY_GAP_CLOSING_MAX_FRAME_GAP, Integer.parseInt(jTextFieldGapClosingMaxFrameInterval.getText()));
+		settings.put(KEY_GAP_CLOSING_MAX_DISTANCE, NumberParser.parseDouble(jTextFieldGapClosingMaxDistance.getText()));
+		settings.put(KEY_GAP_CLOSING_MAX_FRAME_GAP, NumberParser.parseInteger(jTextFieldGapClosingMaxFrameInterval.getText()));
 		settings.put(KEY_GAP_CLOSING_FEATURE_PENALTIES, jPanelGapClosing.getFeaturePenalties());
 
 		settings.put(KEY_ALLOW_TRACK_SPLITTING, jCheckBoxAllowSplitting.isSelected());
-		settings.put(KEY_SPLITTING_MAX_DISTANCE, Double.parseDouble(jTextFieldSplittingMaxDistance.getText()));
+		settings.put(KEY_SPLITTING_MAX_DISTANCE, NumberParser.parseDouble(jTextFieldSplittingMaxDistance.getText()));
 		settings.put(KEY_SPLITTING_FEATURE_PENALTIES, jPanelSplittingFeatures.getFeaturePenalties());
 
 		settings.put(KEY_ALLOW_TRACK_MERGING, jCheckBoxAllowMerging.isSelected());
-		settings.put(KEY_MERGING_MAX_DISTANCE, Double.parseDouble(jTextFieldMergingMaxDistance.getText()));
+		settings.put(KEY_MERGING_MAX_DISTANCE, NumberParser.parseDouble(jTextFieldMergingMaxDistance.getText()));
 		settings.put(KEY_MERGING_FEATURE_PENALTIES, jPanelMergingFeatures.getFeaturePenalties());
 
 		return settings;
