@@ -23,20 +23,24 @@ import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.util.CropImgView;
 import fiji.plugin.trackmate.util.TMUtils;
 
-
 /**
- * <p>The TrackMate_ class runs on the currently active time-lapse image (2D or 3D)
- * and both identifies and tracks bright spots over time.</p>
- *
- * <p><b>Required input:</b> A 2D or 3D time-lapse image with bright blobs.</p>
- *
- * @author Nicholas Perry, Jean-Yves Tinevez - Institut Pasteur - July 2010 - 2011 - 2012 - 2013
- *
+ * <p>
+ * The TrackMate_ class runs on the currently active time-lapse image (2D or 3D)
+ * and both identifies and tracks bright spots over time.
+ * </p>
+ * 
+ * <p>
+ * <b>Required input:</b> A 2D or 3D time-lapse image with bright blobs.
+ * </p>
+ * 
+ * @author Nicholas Perry, Jean-Yves Tinevez - Institut Pasteur - July 2010 -
+ *         2011 - 2012 - 2013
+ * 
  */
 public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 
 	public static final String PLUGIN_NAME_STR = "TrackMate";
-	public static final String PLUGIN_NAME_VERSION = "2.1.0";
+	public static final String PLUGIN_NAME_VERSION = "2.2.0-SNAPSHOT";
 
 	/**
 	 * The model this trackmate will shape.
@@ -68,37 +72,38 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 	 * PROTECTED METHODS
 	 */
 
-
 	/**
 	 * This method exists for the following reason:
 	 * <p>
-	 * The detector receives at each frame a cropped image to operate on, depending
-	 * on the user specifying a ROI. It therefore returns spots whose coordinates are
-	 * with respect to the top-left corner of the ROI, not of the original image.
+	 * The detector receives at each frame a cropped image to operate on,
+	 * depending on the user specifying a ROI. It therefore returns spots whose
+	 * coordinates are with respect to the top-left corner of the ROI, not of
+	 * the original image.
 	 * <p>
-	 * This method modifies the given spots to put them back in the image coordinate
-	 * system. Additionally, is a non-square ROI was specified (e.g. a polygon), it
-	 * prunes the spots that are not within the polygon of the ROI.
-	 * @param spotsThisFrame  the spot list to inspect
-	 * @param settings  the {@link Settings} object that will be used to retrieve the image ROI
-	 * and cropping information
-	 * @return  a list of spot. Depending on the presence of a polygon ROI, it might be a new,
-	 * pruned list. Or not.
+	 * This method modifies the given spots to put them back in the image
+	 * coordinate system. Additionally, is a non-square ROI was specified (e.g.
+	 * a polygon), it prunes the spots that are not within the polygon of the
+	 * ROI.
+	 * 
+	 * @param spotsThisFrame
+	 *            the spot list to inspect
+	 * @param settings
+	 *            the {@link Settings} object that will be used to retrieve the
+	 *            image ROI and cropping information
+	 * @return a list of spot. Depending on the presence of a polygon ROI, it
+	 *         might be a new, pruned list. Or not.
 	 */
 	protected List<Spot> translateAndPruneSpots(final List<Spot> spotsThisFrame, final Settings settings) {
 
 		// Put them back in the right referential
 		final double[] calibration = TMUtils.getSpatialCalibration(settings.imp);
-		TMUtils.translateSpots(spotsThisFrame,
-				settings.xstart * calibration[0],
-				settings.ystart * calibration[1],
-				settings.zstart * calibration[2]);
+		TMUtils.translateSpots(spotsThisFrame, settings.xstart * calibration[0], settings.ystart * calibration[1], settings.zstart * calibration[2]);
 		List<Spot> prunedSpots;
 		// Prune if outside of ROI
 		if (null != settings.polygon) {
 			prunedSpots = new ArrayList<Spot>();
 			for (final Spot spot : spotsThisFrame) {
-				if (settings.polygon.contains(spot.getFeature(Spot.POSITION_X)/calibration[0], spot.getFeature(Spot.POSITION_Y)/calibration[1]))
+				if (settings.polygon.contains(spot.getFeature(Spot.POSITION_X) / calibration[0], spot.getFeature(Spot.POSITION_Y) / calibration[1]))
 					prunedSpots.add(spot);
 			}
 		} else {
@@ -119,7 +124,6 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 		return settings;
 	}
 
-
 	/*
 	 * PROCESSES
 	 */
@@ -127,13 +131,15 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 	/**
 	 * Calculate all features for all detected spots.
 	 * <p>
-	 * Features are calculated for each spot, using their location, and the raw image.
-	 * Features to be calculated and analyzers are taken from the settings field
-	 * of this object.
-	 *
-	 * @param doLogIt if <code>true</code>, the {@link Logger} of the model will be notified.
-	 * @return <code>true</code> if the calculation was performed successfully, <code>false</code>
-	 * otherwise.
+	 * Features are calculated for each spot, using their location, and the raw
+	 * image. Features to be calculated and analyzers are taken from the
+	 * settings field of this object.
+	 * 
+	 * @param doLogIt
+	 *            if <code>true</code>, the {@link Logger} of the model will be
+	 *            notified.
+	 * @return <code>true</code> if the calculation was performed successfully,
+	 *         <code>false</code> otherwise.
 	 */
 	public boolean computeSpotFeatures(final boolean doLogIt) {
 		final Logger logger = model.getLogger();
@@ -145,7 +151,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 			}
 			return true;
 		} else {
-			errorMessage = "Spot features calculation failed:\n"+calculator.getErrorMessage();
+			errorMessage = "Spot features calculation failed:\n" + calculator.getErrorMessage();
 			return false;
 		}
 	}
@@ -153,18 +159,20 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 	/**
 	 * Calculate all features for all detected spots.
 	 * <p>
-	 * Features are calculated for each spot, using their location, and the raw image.
-	 * Features to be calculated and analyzers are taken from the settings field
-	 * of this object.
-	 *
-	 * @param doLogIt if <code>true</code>, the {@link Logger} of the model will be notified.
-	 * @return <code>true</code> if the calculation was performed successfuly, <code>false</code>
-	 * otherwise.
+	 * Features are calculated for each spot, using their location, and the raw
+	 * image. Features to be calculated and analyzers are taken from the
+	 * settings field of this object.
+	 * 
+	 * @param doLogIt
+	 *            if <code>true</code>, the {@link Logger} of the model will be
+	 *            notified.
+	 * @return <code>true</code> if the calculation was performed successfuly,
+	 *         <code>false</code> otherwise.
 	 */
 	public boolean computeEdgeFeatures(final boolean doLogIt) {
 		final Logger logger = model.getLogger();
 		final EdgeFeatureCalculator calculator = new EdgeFeatureCalculator(model, settings);
-		if (!calculator.checkInput() || ! calculator.process()) {
+		if (!calculator.checkInput() || !calculator.process()) {
 			errorMessage = "Edge features calculation failed:\n" + calculator.getErrorMessage();
 			return false;
 		}
@@ -176,6 +184,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 
 	/**
 	 * Calculate all features for all tracks.
+	 * 
 	 * @return
 	 */
 	public boolean computeTrackFeatures(final boolean doLogIt) {
@@ -187,30 +196,34 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 			}
 			return true;
 		} else {
-			errorMessage = "Track features calculation failed:\n"+calculator.getErrorMessage();
+			errorMessage = "Track features calculation failed:\n" + calculator.getErrorMessage();
 			return false;
-		}	}
+		}
+	}
 
 	/**
 	 * Execute the tracking part.
 	 * <p>
-	 * This method links all the selected spots from the thresholding part using the selected tracking algorithm.
-	 * This tracking process will generate a graph (more precisely a {@link SimpleWeightedGraph}) made of the spot
+	 * This method links all the selected spots from the thresholding part using
+	 * the selected tracking algorithm. This tracking process will generate a
+	 * graph (more precisely a {@link SimpleWeightedGraph}) made of the spot
 	 * election for its vertices, and edges representing the links.
 	 * <p>
-	 * The {@link ModelChangeListener}s of this model will be notified when the successful process is over.
+	 * The {@link ModelChangeListener}s of this model will be notified when the
+	 * successful process is over.
+	 * 
 	 * @see #getTrackGraph()
 	 */
 	public boolean execTracking() {
 		final Logger logger = model.getLogger();
 		logger.log("Starting tracking process.\n");
-		final SpotTracker tracker =  settings.tracker;
+		final SpotTracker tracker = settings.tracker;
 		tracker.setTarget(model.getSpots(), settings.trackerSettings);
 		if (tracker.checkInput() && tracker.process()) {
 			model.getTrackModel().setGraph(tracker.getResult());
 			return true;
 		} else {
-			errorMessage = "Tracking process failed:\n"+tracker.getErrorMessage();
+			errorMessage = "Tracking process failed:\n" + tracker.getErrorMessage();
 			return false;
 		}
 	}
@@ -218,9 +231,11 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 	/**
 	 * Execute the detection part.
 	 * <p>
-	 * This method configure the chosen {@link Settings#detectorFactory} with the source image
-	 * and the detectr settings and execute the detection process for all the frames set
-	 * in the {@link Settings} object of the target model.
+	 * This method configure the chosen {@link Settings#detectorFactory} with
+	 * the source image and the detectr settings and execute the detection
+	 * process for all the frames set in the {@link Settings} object of the
+	 * target model.
+	 * 
 	 * @return true if the whole detection step has executed correctly.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -234,12 +249,12 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 			return false;
 		}
 		if (null == settings.detectorSettings) {
-			errorMessage  = "Detector settings is null.\n";
+			errorMessage = "Detector settings is null.\n";
 			return false;
 		}
 
 		/*
-		 *  Prepare cropped image
+		 * Prepare cropped image
 		 */
 		final ImgPlus rawImg = TMUtils.rawWraps(settings.imp);
 		ImgPlus img;
@@ -247,12 +262,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 		// Check if we indeed wish to crop the source image. To this, we check
 		// the crop cube settings
 
-		if (settings.xstart != 0
-				|| settings.ystart != 0
-				|| settings.zstart != 0
-				|| settings.xend != settings.imp.getWidth()-1
-				|| settings.yend != settings.imp.getHeight()-1
-				|| settings.zend != settings.imp.getNSlices()-1) {
+		if (settings.xstart != 0 || settings.ystart != 0 || settings.zstart != 0 || settings.xend != settings.imp.getWidth() - 1 || settings.yend != settings.imp.getHeight() - 1 || settings.zend != settings.imp.getNSlices() - 1) {
 			// Yes, we want to crop
 
 			final long[] max = new long[rawImg.numDimensions()];
@@ -268,7 +278,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 			// Y, we must have it
 			final int yindex = TMUtils.findYAxisIndex(rawImg);
 			if (yindex < 0) {
-				errorMessage  = "Source image has no Y axis.\n";
+				errorMessage = "Source image has no Y axis.\n";
 				return false;
 			}
 			min[yindex] = settings.ystart;
@@ -322,10 +332,11 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 		final AtomicInteger ai = new AtomicInteger(settings.tstart);
 		for (int ithread = 0; ithread < threads.length; ithread++) {
 
-			threads[ithread] = new Thread("TrackMate spot detection thread "+(1+ithread)+"/"+threads.length) {
+			threads[ithread] = new Thread("TrackMate spot detection thread " + (1 + ithread) + "/" + threads.length) {
 				private boolean wasInterrupted() {
 					try {
-						if (isInterrupted()) return true;
+						if (isInterrupted())
+							return true;
 						sleep(0);
 						return false;
 					} catch (final InterruptedException e) {
@@ -336,56 +347,58 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 				@Override
 				public void run() {
 
-					for (int frame = ai.getAndIncrement(); frame <= settings.tend; frame = ai.getAndIncrement()) try {
+					for (int frame = ai.getAndIncrement(); frame <= settings.tend; frame = ai.getAndIncrement())
+						try {
 
-						// Yield detector for target frame
-						final SpotDetector<?> detector = factory.getDetector(frame);
+							// Yield detector for target frame
+							final SpotDetector<?> detector = factory.getDetector(frame);
 
-						if (wasInterrupted()) return;
+							if (wasInterrupted())
+								return;
 
-						// Execute detection
-						if (ok.get() && detector.checkInput() && detector.process()) {
-							// On success,
-							// Get results,
-							final List<Spot> spotsThisFrame = detector.getResult();
-							// Translate individual spots back to top-left corner of the image, if
-							// the raw image was cropped.
-							TMUtils.translateSpots(spotsThisFrame, dx, dy, dz);
-							// Prune if outside of ROI
-							List<Spot> prunedSpots;
-							if (null != settings.polygon) {
-								prunedSpots = new ArrayList<Spot>();
-								for (final Spot spot : spotsThisFrame) {
-									if (settings.polygon.contains(spot.getFeature(Spot.POSITION_X)/calibration[0], spot.getFeature(Spot.POSITION_Y)/calibration[1]))
-										prunedSpots.add(spot);
+							// Execute detection
+							if (ok.get() && detector.checkInput() && detector.process()) {
+								// On success,
+								// Get results,
+								final List<Spot> spotsThisFrame = detector.getResult();
+								// Translate individual spots back to top-left corner of the image, if
+								// the raw image was cropped.
+								TMUtils.translateSpots(spotsThisFrame, dx, dy, dz);
+								// Prune if outside of ROI
+								List<Spot> prunedSpots;
+								if (null != settings.polygon) {
+									prunedSpots = new ArrayList<Spot>();
+									for (final Spot spot : spotsThisFrame) {
+										if (settings.polygon.contains(spot.getFeature(Spot.POSITION_X) / calibration[0], spot.getFeature(Spot.POSITION_Y) / calibration[1]))
+											prunedSpots.add(spot);
+									}
+								} else {
+									prunedSpots = spotsThisFrame;
 								}
+								// Add detection feature other than position
+								for (final Spot spot : prunedSpots) {
+									spot.putFeature(Spot.POSITION_T, frame * settings.dt); // FRAME will be set upon adding to SpotCollection
+								}
+								// Store final results for this frame
+								spots.put(frame, prunedSpots);
+								// Report
+								spotFound.addAndGet(prunedSpots.size());
+								logger.setProgress(progress.incrementAndGet() / (double) numFrames);
+
 							} else {
-								prunedSpots = spotsThisFrame;
+								// Fail: exit and report error.
+								ok.set(false);
+								errorMessage = detector.getErrorMessage();
+								return;
 							}
-							// Add detection feature other than position
-							for (final Spot spot : prunedSpots) {
-								spot.putFeature(Spot.POSITION_T, frame * settings.dt); // FRAME will be set upon adding to SpotCollection
+
+						} catch (final RuntimeException e) {
+							final Throwable cause = e.getCause();
+							if (cause != null && cause instanceof InterruptedException) {
+								return;
 							}
-							// Store final results for this frame
-							spots.put(frame, prunedSpots);
-							// Report
-							spotFound.addAndGet(prunedSpots.size());
-							logger.setProgress(progress.incrementAndGet() / (double)numFrames );
-
-						} else {
-							// Fail: exit and report error.
-							ok.set(false);
-							errorMessage = detector.getErrorMessage();
-							return;
+							throw e;
 						}
-
-					} catch (final RuntimeException e) {
-						final Throwable cause = e.getCause();
-						if (cause != null && cause instanceof InterruptedException) {
-							return;
-						}
-						throw e;
-					}
 				}
 			};
 		}
@@ -399,13 +412,15 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 			ok.set(false);
 			if (e.getCause() != null && e.getCause() instanceof InterruptedException) {
 				errorMessage = "Detection workers interrupted.\n";
-				for (final Thread thread : threads) thread.interrupt();
+				for (final Thread thread : threads)
+					thread.interrupt();
 				for (final Thread thread : threads) {
-					if (thread.isAlive()) try {
-						thread.join();
-					} catch (final InterruptedException e2) {
-						// ignore
-					}
+					if (thread.isAlive())
+						try {
+							thread.join();
+						} catch (final InterruptedException e2) {
+							// ignore
+						}
 				}
 			} else {
 				throw e;
@@ -414,10 +429,10 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 		model.setSpots(spots, true);
 
 		if (ok.get()) {
-			logger.log("Found "+spotFound.get()+" spots.\n");
+			logger.log("Found " + spotFound.get() + " spots.\n");
 		} else {
-			logger.error("Detection failed after "+progress.get()+" frames:\n"+errorMessage);
-			logger.log("Found "+spotFound.get()+" spots prior failure.\n");
+			logger.error("Detection failed after " + progress.get() + " frames:\n" + errorMessage);
+			logger.log("Found " + spotFound.get() + " spots prior failure.\n");
 		}
 		logger.setProgress(1);
 		logger.setStatus("");
@@ -426,20 +441,26 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 
 	/**
 	 * Execute the initial spot filtering part.
-	 *<p>
-	 * Because of the presence of noise, it is possible that some of the regional maxima found in the detection step have
-	 * identified noise, rather than objects of interest. This can generates a very high number of spots, which is
-	 * inconvenient to deal with when it comes to  computing their features, or displaying them.
 	 * <p>
-	 * Any {@link SpotDetector} is expected to at least compute the {@link SpotFeature#QUALITY} value for each spot
-	 * it creates, so it is possible to set up an initial filtering on this Feature, prior to any other operation.
+	 * Because of the presence of noise, it is possible that some of the
+	 * regional maxima found in the detection step have identified noise, rather
+	 * than objects of interest. This can generates a very high number of spots,
+	 * which is inconvenient to deal with when it comes to computing their
+	 * features, or displaying them.
 	 * <p>
-	 * This method simply takes all the detected spots, and discard those whose quality value is below the threshold set
-	 * by {@link #setInitialSpotFilter(Float)}. The spot field is overwritten, and discarded spots can't be recalled.
+	 * Any {@link SpotDetector} is expected to at least compute the
+	 * {@link SpotFeature#QUALITY} value for each spot it creates, so it is
+	 * possible to set up an initial filtering on this Feature, prior to any
+	 * other operation.
 	 * <p>
-	 * The {@link ModelChangeListener}s of this model will be notified with a {@link ModelChangeEvent#SPOTS_COMPUTED}
-	 * event.
-	 *
+	 * This method simply takes all the detected spots, and discard those whose
+	 * quality value is below the threshold set by
+	 * {@link #setInitialSpotFilter(Float)}. The spot field is overwritten, and
+	 * discarded spots can't be recalled.
+	 * <p>
+	 * The {@link ModelChangeListener}s of this model will be notified with a
+	 * {@link ModelChangeEvent#SPOTS_COMPUTED} event.
+	 * 
 	 * @see #getSpots()
 	 * @see #setInitialFilter(Float)
 	 */
@@ -461,17 +482,21 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 
 	/**
 	 * Execute the spot feature filtering part.
-	 *<p>
-	 * Because of the presence of noise, it is possible that some of the regional maxima found in the detection step have
-	 * identified noise, rather than objects of interest. A filtering operation based on the calculated features in this
-	 * step should allow to rule them out.
 	 * <p>
-	 * This method simply takes all the detected spots, and mark as visible
-	 * the spots whose features satisfy all of the filters entered with the method {@link #addFilter(SpotFilter)}.
+	 * Because of the presence of noise, it is possible that some of the
+	 * regional maxima found in the detection step have identified noise, rather
+	 * than objects of interest. A filtering operation based on the calculated
+	 * features in this step should allow to rule them out.
 	 * <p>
-	 * The {@link ModelChangeListener}s of this model will be notified with a {@link ModelChangeEvent#SPOTS_FILTERED}
-	 * event.
-	 * @param doLogIt  if true, will send a message to the {@link Model#logger}.
+	 * This method simply takes all the detected spots, and mark as visible the
+	 * spots whose features satisfy all of the filters entered with the method
+	 * {@link #addFilter(SpotFilter)}.
+	 * <p>
+	 * The {@link ModelChangeListener}s of this model will be notified with a
+	 * {@link ModelChangeEvent#SPOTS_FILTERED} event.
+	 * 
+	 * @param doLogIt
+	 *            if true, will send a message to the {@link Model#logger}.
 	 * @see #getFilteredSpots()
 	 */
 	public boolean execSpotFiltering(final boolean doLogIt) {
@@ -493,7 +518,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 		try {
 			for (final Integer trackID : model.getTrackModel().trackIDs(false)) {
 				boolean trackIsOk = true;
-				for(final FeatureFilter filter : settings.getTrackFilters()) {
+				for (final FeatureFilter filter : settings.getTrackFilters()) {
 					final Double tval = filter.value;
 					final Double val = model.getFeatureModel().getTrackFeature(trackID, filter.feature);
 					if (null == val)
@@ -518,7 +543,6 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 		}
 		return true;
 	}
-
 
 	@Override
 	public String toString() {
@@ -595,5 +619,3 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 	};
 
 }
-
-
