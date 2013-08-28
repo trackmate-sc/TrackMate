@@ -583,17 +583,31 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 		if (!execInitialSpotFiltering()) {
 			return false;
 		}
-		computeSpotFeatures(true);
+
+		if (!computeSpotFeatures(true)) {
+			return false;
+		}
+
 		if (!execSpotFiltering(true)) {
 			return false;
 		}
+
 		if (!execTracking()) {
 			return false;
 		}
-		computeTrackFeatures(true);
+
+		if (!computeTrackFeatures(true)) {
+			return false;
+		}
+
 		if (!execTrackFiltering(true)) {
 			return false;
 		}
+
+		if (!computeEdgeFeatures(true)) {
+			return false;
+		}
+
 		return true;
 	}
 
