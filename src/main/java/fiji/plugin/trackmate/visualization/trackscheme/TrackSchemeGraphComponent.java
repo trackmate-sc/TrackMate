@@ -51,10 +51,11 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 
 	/** If true, will paint background decorations. */
 	private boolean doPaintDecorations = TrackScheme.DEFAULT_DO_PAINT_DECORATIONS;
-	/** The time unit. We need it to paint the correct row times. */
-	private final String timeUnits = "frame";
-	/** The frame interval. We need it to paint the correct row times. */
-	private final double dt = 1;
+
+	//	/** The time unit. We need it to paint the correct row times. */
+	//	private final String timeUnits = "frame";
+	//	/** The frame interval. We need it to paint the correct row times. */
+	//	private final double dt = 1;
 
 	/*
 	 * CONSTRUCTOR
@@ -377,8 +378,8 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 		if (xcs > paintBounds.x) {
 			while (y < height) {
 				if (y > paintBounds.y - ycs && y < paintBounds.y + paintBounds.height) {
-					final int frame = y / ycs;
-					g.drawString(String.format("%.1f " + timeUnits, frame * dt), x, y);
+					final int frame = y / ycs - 1;
+					//					g.drawString(String.format("%.1f " + timeUnits, frame * dt), x, y);
 					g.drawString(String.format("frame %d", frame), x, Math.round(y + 12 * scale));
 				}
 				y += ycs;
