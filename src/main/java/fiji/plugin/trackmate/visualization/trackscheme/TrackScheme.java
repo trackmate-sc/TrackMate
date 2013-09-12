@@ -54,12 +54,7 @@ public class TrackScheme extends AbstractTrackMateModelView {
 	private static final boolean DEBUG = false;
 	private static final boolean DEBUG_SELECTION = false;
 	public static final String KEY = "TrackScheme";
-	public static final String INFO_TEXT = "<html>" +
-			"TrackScheme displays the tracking results as track lanes, <br>" +
-			"ignoring the spot actual position. " +
-			"<p>" +
-			"Tracks can be edited through link creation and removal." +
-			"</html>";
+	public static final String INFO_TEXT = "<html>" + "TrackScheme displays the tracking results as track lanes, <br>" + "ignoring the spot actual position. " + "<p>" + "Tracks can be edited through link creation and removal." + "</html>";
 	static final int Y_COLUMN_SIZE = 96;
 	static final int X_COLUMN_SIZE = 160;
 
@@ -220,9 +215,17 @@ public class TrackScheme extends AbstractTrackMateModelView {
 	}
 
 	/**
+<<<<<<< HEAD
 	 * Updates or creates a cell for the target spot. Is called after the user modified a spot 
 	 * (location, radius, ...) somewhere else. 
 	 * @param spot  the spot that was modified.
+=======
+	 * Updates or creates a cell for the target spot. Is called after the user
+	 * modified a spot (location, radius, ...) somewhere else.
+	 * 
+	 * @param spot
+	 *            the spot that was modified.
+>>>>>>> 31da94c... TrackMate_: basic key handling in TrackScheme
 	 */
 	private mxICell updateCellOf(final Spot spot) {
 
@@ -283,7 +286,13 @@ public class TrackScheme extends AbstractTrackMateModelView {
 
 	/**
 	 * Import a whole track from the {@link Model} and make it visible
+<<<<<<< HEAD
 	 * @param trackIndex  the index of the track to show in TrackScheme 
+=======
+	 * 
+	 * @param trackIndex
+	 *            the index of the track to show in TrackScheme
+>>>>>>> 31da94c... TrackMate_: basic key handling in TrackScheme
 	 */
 	private void importTrack(int trackIndex) {
 		model.beginUpdate();
@@ -312,10 +321,20 @@ public class TrackScheme extends AbstractTrackMateModelView {
 	}
 
 	/**
+<<<<<<< HEAD
 	 * This method is called when the user has created manually an edge in the graph, by dragging
 	 * a link between two spot cells. It checks whether the matching edge in the model exists, 
 	 * and tune what should be done accordingly.
 	 * @param cell  the mxCell of the edge that has been manually created.
+=======
+	 * This method is called when the user has created manually an edge in the
+	 * graph, by dragging a link between two spot cells. It checks whether the
+	 * matching edge in the model exists, and tune what should be done
+	 * accordingly.
+	 * 
+	 * @param cell
+	 *            the mxCell of the edge that has been manually created.
+>>>>>>> 31da94c... TrackMate_: basic key handling in TrackScheme
 	 */
 	protected void addEdgeManually(mxCell cell) {
 		if (cell.isEdge()) {
@@ -722,11 +741,24 @@ public class TrackScheme extends AbstractTrackMateModelView {
 	 */
 
 	/**
+<<<<<<< HEAD
 	 * Called when the user makes a selection change in the graph. Used to forward this event 
 	 * to the {@link InfoPane} and to other {@link SelectionChangeListener}s.
 	 * @param model the selection model 
 	 * @param added  the cells  <b>removed</b> from selection (careful, inverted)
 	 * @param removed  the cells <b>added</b> to selection (careful, inverted)
+=======
+	 * Called when the user makes a selection change in the graph. Used to
+	 * forward this event to the {@link InfoPane} and to other
+	 * {@link SelectionChangeListener}s.
+	 * 
+	 * @param model
+	 *            the selection model
+	 * @param added
+	 *            the cells <b>removed</b> from selection (careful, inverted)
+	 * @param removed
+	 *            the cells <b>added</b> to selection (careful, inverted)
+>>>>>>> 31da94c... TrackMate_: basic key handling in TrackScheme
 	 */
 	private void userChangedSelection(mxGraphSelectionModel mxGSmodel, Collection<Object> added, Collection<Object> removed) { // Seems to be inverted
 		if (!doFireSelectionChangeEvent)
@@ -911,7 +943,12 @@ public class TrackScheme extends AbstractTrackMateModelView {
 
 	/**
 	 * Toggle whether drag-&-drop linking is allowed.
+<<<<<<< HEAD
 	 * @return  the current settings value, after toggling.
+=======
+	 * 
+	 * @return the current settings value, after toggling.
+>>>>>>> 31da94c... TrackMate_: basic key handling in TrackScheme
 	 */
 	public boolean toggleLinking() {
 		boolean enabled = gui.graphComponent.getConnectionHandler().isEnabled();
@@ -921,7 +958,12 @@ public class TrackScheme extends AbstractTrackMateModelView {
 
 	/**
 	 * Toggle whether thumbnail capture is enabled.
+<<<<<<< HEAD
 	 * @return  the current settings value, after toggling.
+=======
+	 * 
+	 * @return the current settings value, after toggling.
+>>>>>>> 31da94c... TrackMate_: basic key handling in TrackScheme
 	 */
 	public boolean toggleThumbnail() {
 		if (!doThumbnailCapture && !thumbnailCaptured) {

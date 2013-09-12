@@ -19,11 +19,14 @@ public class TrackSchemePopupMenu extends JPopupMenu {
 
 	private static final long serialVersionUID = -1L;
 
-	/**  The cell where the right-click was made, <code>null</code> if the right-click is made out of a cell. */
+	/**
+	 * The cell where the right-click was made, <code>null</code> if the
+	 * right-click is made out of a cell.
+	 */
 	private final Object cell;
-	/**  The TrackScheme instance. */
+	/** The TrackScheme instance. */
 	private final TrackScheme trackScheme;
-	/**  The right-click location. */
+	/** The right-click location. */
 	private final Point point;
 
 	public TrackSchemePopupMenu(final TrackScheme trackScheme, final Object cell, final Point point) {
@@ -33,11 +36,9 @@ public class TrackSchemePopupMenu extends JPopupMenu {
 		init();
 	}
 
-
 	/*
 	 * ACTIONS
 	 */
-
 
 	private void selectWholeTrack(final ArrayList<mxCell> vertices, final ArrayList<mxCell> edges) {
 		trackScheme.selectTrack(vertices, edges, 0);
@@ -51,7 +52,6 @@ public class TrackSchemePopupMenu extends JPopupMenu {
 		trackScheme.selectTrack(vertices, edges, 1);
 	}
 
-	
 	private void editSpotName() {
 		trackScheme.getGUI().graphComponent.startEditingAtCell(cell);
 	}
@@ -66,12 +66,14 @@ public class TrackSchemePopupMenu extends JPopupMenu {
 		trackScheme.getGraph().foldCells(!trackScheme.getGraph().isCellCollapsed(parent), false, new Object[] { parent });
 	}
 
-	private void multiEditSpotName(final ArrayList<mxCell> vertices, EventObject triggerEvent) {
-		/* We want to display the editing window in the cell that is the closer
-		 to where the user clicked. That is not perfect, because we can imaging the click
-		 is made for from the selected cells, and that the editing window will not even
-		 be displayed on the screen. No idea for that yet, because JGraphX is expecting to
-		 receive a cell as location for the editing window.
+	private void multiEditSpotName(final ArrayList<mxCell> vertices, final EventObject triggerEvent) {
+		/*
+		 * We want to display the editing window in the cell that is the closer
+		 * to where the user clicked. That is not perfect, because we can
+		 * imagine the click is made for from the selected cells, and that the
+		 * editing window will not even be displayed on the screen. No idea for
+		 * that yet, because JGraphX is expecting to receive a cell as location
+		 * for the editing window.
 		 */
 		final mxCell tc = getClosestCell(vertices);
 		vertices.remove(tc);
@@ -80,8 +82,8 @@ public class TrackSchemePopupMenu extends JPopupMenu {
 		graphComponent.addListener(mxEvent.LABEL_CHANGED, new mxIEventListener() {
 
 			@Override
-			public void invoke(Object sender, mxEventObject evt) {
-				for (mxCell cell : vertices) {
+			public void invoke(final Object sender, final mxEventObject evt) {
+				for (final mxCell cell : vertices) {
 					cell.setValue(tc.getValue());
 					trackScheme.getGraph().getSpotFor(cell).setName(tc.getValue().toString());
 				}
@@ -92,15 +94,15 @@ public class TrackSchemePopupMenu extends JPopupMenu {
 	}
 
 	/**
-	 * Return, from the given list of cell, the one which is the closer to the {@link #point} of this
-	 * instance.
+	 * Return, from the given list of cell, the one which is the closer to the
+	 * {@link #point} of this instance.
 	 */
-	private mxCell getClosestCell(Iterable<mxCell> vertices) {
+	private mxCell getClosestCell(final Iterable<mxCell> vertices) {
 		double min_dist = Double.POSITIVE_INFINITY;
 		mxCell target_cell = null;
-		for (mxCell cell : vertices) {
-			Point location = cell.getGeometry().getPoint();
-			double dist = location.distanceSq(point);
+		for (final mxCell cell : vertices) {
+			final Point location = cell.getGeometry().getPoint();
+			final double dist = location.distanceSq(point);
 			if (dist < min_dist) {
 				min_dist = dist;
 				target_cell = cell;
@@ -128,29 +130,36 @@ public class TrackSchemePopupMenu extends JPopupMenu {
 		final Object[] selection = trackScheme.getGraph().getSelectionCells();
 		final ArrayList<mxCell> vertices = new ArrayList<mxCell>();
 		final ArrayList<mxCell> edges = new ArrayList<mxCell>();
-		for(Object obj : selection) {
-			mxCell cell = (mxCell) obj;
-			if (cell.isVertex()) 
+		for (final Object obj : selection) {
+			final mxCell cell = (mxCell) obj;
+			if (cell.isVertex())
 				vertices.add(cell);
-			else if (cell.isEdge()) 
+			else if (cell.isEdge())
 				edges.add(cell);
 		}
 
-		
-
 		// Select whole tracks
 		if (vertices.size() > 0 || edges.size() > 0) {
-			
+
 			add(new AbstractAction("Select whole track") {
-				public void actionPerformed(ActionEvent e) { selectWholeTrack(vertices, edges);	}
+				@Override
+				public void actionPerformed(final ActionEvent e) {
+					selectWholeTrack(vertices, edges);
+				}
 			});
 
 			add(new AbstractAction("Select track downwards") {
-				public void actionPerformed(ActionEvent e) { selectTrackDownwards(vertices, edges);	}
+				@Override
+				public void actionPerformed(final ActionEvent e) {
+					selectTrackDownwards(vertices, edges);
+				}
 			});
 
 			add(new AbstractAction("Select track upwards") {
-				public void actionPerformed(ActionEvent e) { selectTrackUpwards(vertices, edges);	}
+				@Override
+				public void actionPerformed(final ActionEvent e) {
+					selectTrackUpwards(vertices, edges);
+				}
 			});
 
 		}
@@ -158,29 +167,30 @@ public class TrackSchemePopupMenu extends JPopupMenu {
 		if (cell != null) {
 			// Edit
 			add(new AbstractAction("Edit spot name") {
-				public void actionPerformed(ActionEvent e) { editSpotName(); }
+				@Override
+				public void actionPerformed(final ActionEvent e) {
+					editSpotName();
+				}
 			});
 
-			// Fold
-//			add(new AbstractAction("Fold/Unfold branch") {
-//				public void actionPerformed(ActionEvent e) { toggleBranchFolding(); }
-//			});
-
-
-		} else { 
+		} else {
 
 			if (vertices.size() > 1) {
 
 				// Multi edit
-				add(new AbstractAction("Edit " + vertices.size() +" spot names") {
-					public void actionPerformed(ActionEvent e) { multiEditSpotName(vertices, e); }
+				add(new AbstractAction("Edit " + vertices.size() + " spot names") {
+					@Override
+					public void actionPerformed(final ActionEvent e) {
+						multiEditSpotName(vertices, e);
+					}
 				});
 			}
 
 			// Link
-			Action linkAction = new AbstractAction("Link " + trackScheme.getSelectionModel().getSpotSelection().size() +" spots") {
-				public void actionPerformed(ActionEvent e) { 
-					linkSpots(); 
+			final Action linkAction = new AbstractAction("Link " + trackScheme.getSelectionModel().getSpotSelection().size() + " spots") {
+				@Override
+				public void actionPerformed(final ActionEvent e) {
+					linkSpots();
 				}
 			};
 			if (trackScheme.getSelectionModel().getSpotSelection().size() > 1) {
@@ -190,8 +200,11 @@ public class TrackSchemePopupMenu extends JPopupMenu {
 
 		// Remove
 		if (selection.length > 0) {
-			Action removeAction = new AbstractAction("Remove spots and links") {
-				public void actionPerformed(ActionEvent e) { remove(); 	}
+			final Action removeAction = new AbstractAction("Remove spots and links") {
+				@Override
+				public void actionPerformed(final ActionEvent e) {
+					remove();
+				}
 			};
 			add(removeAction);
 		}
