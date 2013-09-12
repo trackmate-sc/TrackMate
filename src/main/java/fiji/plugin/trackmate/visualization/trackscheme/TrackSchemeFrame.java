@@ -21,6 +21,7 @@ import com.mxgraph.model.mxICell;
 import com.mxgraph.swing.handler.mxRubberband;
 
 import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.util.TrackNavigator;
 
 public class TrackSchemeFrame extends JFrame  {
 
@@ -129,7 +130,7 @@ public class TrackSchemeFrame extends JFrame  {
 
 		new mxRubberband(gc);
 		//		new mxKeyboardHandler(gc);
-		new TrackSchemeKeyboardHandler(gc);
+		new TrackSchemeKeyboardHandler(gc, new TrackNavigator(trackScheme.getModel(), trackScheme.getSelectionModel()));
 
 		// Popup menu
 		gc.getGraphControl().addMouseListener(new MouseAdapter() {

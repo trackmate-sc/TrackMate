@@ -300,7 +300,6 @@ public class TMUtils {
 					}
 				}
 				spotToKeep.removeAll(spotToRemove); // no need to treat them multiple times
-
 			}
 
 			selectedSpots.put(timepoint, spotToKeep);
@@ -396,10 +395,8 @@ public class TMUtils {
 	 * is not found, then the calibration for this axis takes the value of 1.
 	 */
 	public static final double[] getSpatialCalibration(final ImgPlusMetadata img) {
-
 		final AxisType[] axesQuery = new AxisType[] { Axes.X, Axes.Y, Axes.Z };
 		final double[] calibration = Util.getArrayFromValue(1d, 3);
-
 		int index = 0;
 		for (final AxisType axisType : axesQuery) {
 			final int dimensionIndex = img.dimensionIndex(axisType);
