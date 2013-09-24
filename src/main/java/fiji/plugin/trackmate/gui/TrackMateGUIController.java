@@ -244,16 +244,29 @@ public class TrackMateGUIController implements ActionListener {
 
 	/**
 	 * Sets the GUI current state via a key string. Registered descriptors are
-	 * parsed until one is found that has a matching key. Then it is displayed.
-	 * If a matching key is not found, nothing is done, and an error is logged
-	 * in the {@link LogPanel}.
+	 * parsed until one is found that has a matching key (
+	 * {@link WizardPanelDescriptor#getKey()}). Then it is displayed. If a
+	 * matching key is not found, nothing is done, and an error is logged in the
+	 * {@link LogPanel}.
+	 * <p>
+	 * This method is typically called to restore a saved GUI state.
 	 * 
 	 * @param stateKey
 	 *            the target state string.
 	 */
 	public void setGUIStateString(final String stateKey) {
 		for (final WizardPanelDescriptor descriptor : registeredDescriptors) {
+
 			if (stateKey.equals(descriptor.getKey())) {
+
+				if (descriptor.equals(spotFilterDescriptor)) {
+					/*
+					 * Special case: we need this otherwise the component of
+					 * this descriptor is not instantiated.
+					 */
+					spotFilterDescriptor.aboutToDisplayPanel();
+				}
+
 				guimodel.currentDescriptor = descriptor;
 				gui.show(descriptor);
 				if (null == nextDescriptor(descriptor)) {
@@ -268,6 +281,7 @@ public class TrackMateGUIController implements ActionListener {
 				}
 				descriptor.displayingPanel();
 				return;
+
 			}
 		}
 

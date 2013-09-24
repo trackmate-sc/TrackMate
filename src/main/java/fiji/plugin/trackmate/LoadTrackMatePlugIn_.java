@@ -75,7 +75,7 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		}
 
 		final Logger logger = Logger.IJ_LOGGER; // logPanel.getLogger();
-		final File tmpFile = IOUtils.askForFileForLoading(file, "Load a TrackMate XML file", frame, logger );
+		final File tmpFile = IOUtils.askForFileForLoading(file, "Load a TrackMate XML file", frame, logger);
 		if (null == tmpFile) {
 			return;
 		}
@@ -85,10 +85,10 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		TmXmlReader reader = new TmXmlReader(file);
 		final Version version = new Version(reader.getVersion());
 		if (version.compareTo(new Version("2.0.0")) < 0) {
-			logger.log("Detecting a file version " + version +". Using the right reader.\n", Logger.GREEN_COLOR);
+			logger.log("Detecting a file version " + version + ". Using the right reader.\n", Logger.GREEN_COLOR);
 			reader = new TmXmlReader_v12(file);
 		} else if (version.compareTo(new Version("2.1.0")) < 0) {
-			logger.log("Detecting a file version " + version +". Using the right reader.\n", Logger.GREEN_COLOR);
+			logger.log("Detecting a file version " + version + ". Using the right reader.\n", Logger.GREEN_COLOR);
 			reader = new TmXmlReader_v20(file);
 		}
 		if (!reader.isReadingOk()) {
@@ -108,16 +108,16 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		final TrackMate trackmate = new TrackMate(model, settings);
 
 		// Tune model and settings to be usable in the GUI even with old versions
-		 if (version.compareTo(new Version("2.0.0")) < 0) {
-			 settings.addEdgeAnalyzer(new EdgeTargetAnalyzer(model));
-			 settings.addEdgeAnalyzer(new EdgeVelocityAnalyzer(model));
-			 trackmate.computeEdgeFeatures(true);
-			 model.setLogger(Logger.IJ_LOGGER);
-			 trackmate.computeEdgeFeatures(true);
-		 } else if (version.compareTo(new Version("2.1.0")) < 0) {
-			 model.setLogger(Logger.IJ_LOGGER);
-//			 trackmate.computeTrackFeatures(true);
-		 }
+		if (version.compareTo(new Version("2.0.0")) < 0) {
+			settings.addEdgeAnalyzer(new EdgeTargetAnalyzer(model));
+			settings.addEdgeAnalyzer(new EdgeVelocityAnalyzer(model));
+			trackmate.computeEdgeFeatures(true);
+			model.setLogger(Logger.IJ_LOGGER);
+			trackmate.computeEdgeFeatures(true);
+		} else if (version.compareTo(new Version("2.1.0")) < 0) {
+			model.setLogger(Logger.IJ_LOGGER);
+			//			 trackmate.computeTrackFeatures(true);
+		}
 
 		final TrackMateGUIController controller = new TrackMateGUIController(trackmate);
 
@@ -127,8 +127,7 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		final SpotAnalyzerProvider spotAnalyzerProvider = controller.getSpotAnalyzerProvider();
 		final EdgeAnalyzerProvider edgeAnalyzerProvider = controller.getEdgeAnalyzerProvider();
 		final TrackAnalyzerProvider trackAnalyzerProvider = controller.getTrackAnalyzerProvider();
-		reader.readSettings(settings, detectorProvider, trackerProvider,
-				spotAnalyzerProvider, edgeAnalyzerProvider, trackAnalyzerProvider);
+		reader.readSettings(settings, detectorProvider, trackerProvider, spotAnalyzerProvider, edgeAnalyzerProvider, trackAnalyzerProvider);
 
 		// GUI position
 		GuiUtils.positionWindow(controller.getGUI(), settings.imp.getWindow());
@@ -151,6 +150,7 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 			newlogger.error("Some errors occured while reading file:\n");
 			newlogger.error(reader.getErrorMessage());
 		}
+
 		controller.setGUIStateString(guiState);
 
 		// Setup and render views
@@ -195,7 +195,7 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 	 */
 	public static void main(final String[] args) {
 		ImageJ.main(args);
-		SomeDialogDescriptor.file =  new File(AppUtils.getBaseDirectory(TrackMate.class), "samples/FakeTracks.xml");
+		SomeDialogDescriptor.file = new File(AppUtils.getBaseDirectory(TrackMate.class), "samples/FakeTracks.xml");
 		final LoadTrackMatePlugIn_ plugIn = new LoadTrackMatePlugIn_();
 		plugIn.run(null);
 	}
