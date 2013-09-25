@@ -14,6 +14,10 @@
 	<version>2.2.0-SNAPSHOT</version>
 	<name>plugins/TrackMate_.jar</name>
 	<description></description>
+	
+	<properties>
+	<imglib2.version>2.0.0-SNAPSHOT</imglib2.version>
+	</properties>
 
 	<dependencies>
 		<dependency>
