@@ -37,11 +37,9 @@ public class TrackIndexAnalyzer implements TrackAnalyzer {
 		FEATURE_DIMENSIONS.put(TRACK_ID, Dimension.NONE);
 	}
 
-	private final Model model;
 	private long processingTime;
 
-	public TrackIndexAnalyzer(final Model model) {
-		this.model = model;
+	public TrackIndexAnalyzer() {
 	}
 
 	/**
@@ -53,7 +51,7 @@ public class TrackIndexAnalyzer implements TrackAnalyzer {
 	}
 
 	@Override
-	public void process(final Collection<Integer> trackIDs) {
+	public void process(final Collection<Integer> trackIDs, final Model model) {
 		final long start = System.currentTimeMillis();
 		final FeatureModel fm = model.getFeatureModel();
 		int index = 0;

@@ -16,21 +16,21 @@ import fiji.plugin.trackmate.providers.TrackerProvider;
 
 public class TmXmlReaderTestDrive {
 
-	public static void main(String args[]) {
+	public static void main(final String args[]) {
 
-		File file = new File(AppUtils.getBaseDirectory(TrackMate.class), "samples/FakeTracks.xml");
-		System.out.println("Opening file: "+file.getAbsolutePath());		
-		TmXmlReader reader = new TmXmlReader(file);
-		Model model = reader.getModel();
-		
-		Settings settings = new Settings();
-		reader.readSettings(settings, new DetectorProvider(model), new TrackerProvider(model), 
-				new SpotAnalyzerProvider(model), new EdgeAnalyzerProvider(model), new TrackAnalyzerProvider(model));
-		
-		System.out.println(settings); 
+		final File file = new File(AppUtils.getBaseDirectory(TrackMate.class), "samples/FakeTracks.xml");
+		System.out.println("Opening file: "+file.getAbsolutePath());
+		final TmXmlReader reader = new TmXmlReader(file);
+		final Model model = reader.getModel();
+
+		final Settings settings = new Settings();
+		reader.readSettings(settings, new DetectorProvider(model), new TrackerProvider(model),
+ new SpotAnalyzerProvider(model), new EdgeAnalyzerProvider(model), new TrackAnalyzerProvider());
+
+		System.out.println(settings);
 		System.out.println(model);
-		System.out.println(model.getFeatureModel().echo()); 
-		
+		System.out.println(model.getFeatureModel().echo());
+
 	}
 
 

@@ -35,7 +35,7 @@ public class BadEdgeRemoval_TestDrive {
 
 		final Model model = reader.getModel();
 		final Settings settings = new Settings();
-		reader.readSettings(settings, null, null, new SpotAnalyzerProvider(model), new EdgeAnalyzerProvider(model), new TrackAnalyzerProvider(model));
+		reader.readSettings(settings, null, null, new SpotAnalyzerProvider(model), new EdgeAnalyzerProvider(model), new TrackAnalyzerProvider());
 		final ImagePlus imp = settings.imp;
 
 		new ModelFeatureUpdater(model, settings);

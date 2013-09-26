@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package fiji.plugin.trackmate.features.track;
 
@@ -14,10 +14,10 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
+import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.ModelChangeListener;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.Model;
 
 /**
  * @author Jean-Yves Tinevez
@@ -37,7 +37,7 @@ public class TrackIndexAnalyzerTest {
 			for (int i = 0; i < N_TRACKS; i++) {
 				Spot previous = null;
 				for (int j = 0; j < DEPTH; j++) {
-					Spot spot = new Spot(new double[3]);
+					final Spot spot = new Spot(new double[3]);
 					model.addSpotTo(spot, j);
 					if (null != previous) {
 						model.addEdge(previous, spot, 1);
@@ -56,19 +56,19 @@ public class TrackIndexAnalyzerTest {
 	@Test
 	public final void testProcess() {
 		// Compute track index
-		Set<Integer> trackIDs = model.getTrackModel().trackIDs(true);
-		TrackIndexAnalyzer analyzer = new TrackIndexAnalyzer(model);
-		analyzer.process(trackIDs);
+		final Set<Integer> trackIDs = model.getTrackModel().trackIDs(true);
+		final TrackIndexAnalyzer analyzer = new TrackIndexAnalyzer();
+		analyzer.process(trackIDs, model);
 
 		// Collect track indices
-		ArrayList<Integer> trackIndices = new ArrayList<Integer>(trackIDs.size());
-		for (Integer trackID : trackIDs) {
+		final ArrayList<Integer> trackIndices = new ArrayList<Integer>(trackIDs.size());
+		for (final Integer trackID : trackIDs) {
 			trackIndices.add(model.getFeatureModel().getTrackFeature(trackID, TrackIndexAnalyzer.TRACK_INDEX).intValue());
 		}
 
 		//Check values: they must be 0, 1, 2, ... in the order of the filtered track IDs (which reflect track names order)
 		for (int i = 0; i < N_TRACKS; i++) {
-			assertEquals("Bad track index:", (long) i, trackIndices.get(i).longValue());
+			assertEquals("Bad track index:", i, trackIndices.get(i).longValue());
 		}
 	}
 
@@ -81,13 +81,13 @@ public class TrackIndexAnalyzerTest {
 
 		// Compute track index
 		Set<Integer> trackIDs = model.getTrackModel().trackIDs(true);
-		final TestTrackIndexAnalyzer analyzer = new TestTrackIndexAnalyzer(model);
-		analyzer.process(trackIDs);
+		final TestTrackIndexAnalyzer analyzer = new TestTrackIndexAnalyzer();
+		analyzer.process(trackIDs, model);
 		assertTrue(analyzer.hasBeenCalled);
 
 		// Collect track indices
-		ArrayList<Integer> trackIndices = new ArrayList<Integer>(trackIDs.size());
-		for (Integer trackID : trackIDs) {
+		final ArrayList<Integer> trackIndices = new ArrayList<Integer>(trackIDs.size());
+		for (final Integer trackID : trackIDs) {
 			trackIndices.add(model.getFeatureModel().getTrackFeature(trackID, TrackIndexAnalyzer.TRACK_INDEX).intValue());
 		}
 
@@ -95,27 +95,27 @@ public class TrackIndexAnalyzerTest {
 		analyzer.hasBeenCalled = false;
 
 		// Prepare listener -> forward to analyzer
-		ModelChangeListener listener = new ModelChangeListener() {
+		final ModelChangeListener listener = new ModelChangeListener() {
 			@Override
-			public void modelChanged(ModelChangeEvent event) {
+			public void modelChanged(final ModelChangeEvent event) {
 				if (analyzer.isLocal()) {
-					analyzer.process(event.getTrackUpdated());
+					analyzer.process(event.getTrackUpdated(), model);
 				} else {
-					analyzer.process(model.getTrackModel().trackIDs(true));
+					analyzer.process(model.getTrackModel().trackIDs(true), model);
 				}
 			}
 		};
 
 		/*
 		 *  Modify the model a first time:
-		 *  We attach a new spot to an existing track. It must not modify the 
-		 *  track indices, nor generate a call to recalculate them. 
+		 *  We attach a new spot to an existing track. It must not modify the
+		 *  track indices, nor generate a call to recalculate them.
 		 */
 		model.addModelChangeListener(listener);
 		model.beginUpdate();
 		try {
-			Spot targetSpot = model.getSpots().iterator(0, true).next();
-			Spot newSpot = model.addSpotTo(new Spot(new double[3]), 1);
+			final Spot targetSpot = model.getSpots().iterator(0, true).next();
+			final Spot newSpot = model.addSpotTo(new Spot(new double[3]), 1);
 			model.addEdge(targetSpot, newSpot, 1);
 		} finally {
 			model.endUpdate();
@@ -130,7 +130,7 @@ public class TrackIndexAnalyzerTest {
 		model.addModelChangeListener(listener);
 		model.beginUpdate();
 		try {
-			Spot targetSpot = model.getSpots().iterator(DEPTH/2, true).next();
+			final Spot targetSpot = model.getSpots().iterator(DEPTH/2, true).next();
 			model.removeSpot(targetSpot);
 		} finally {
 			model.endUpdate();
@@ -141,12 +141,12 @@ public class TrackIndexAnalyzerTest {
 
 		// There must N_TRACKS+1 indices now
 		trackIDs = model.getTrackModel().trackIDs(true);
-		assertEquals((long) N_TRACKS+1,	(long) trackIDs.size());
+		assertEquals((long) N_TRACKS+1,	trackIDs.size());
 
 		// With correct indices
-		Iterator<Integer> it = trackIDs.iterator();
+		final Iterator<Integer> it = trackIDs.iterator();
 		for (int i = 0; i < trackIDs.size(); i++) {
-			assertEquals((long) i, model.getFeatureModel().getTrackFeature(it.next(), TrackIndexAnalyzer.TRACK_INDEX).longValue());
+			assertEquals(i, model.getFeatureModel().getTrackFeature(it.next(), TrackIndexAnalyzer.TRACK_INDEX).longValue());
 		}
 		// FIXME
 		// FAILS BECAUSE TRANCK INDEX IS A GLOBAL TRACK ANALYZER AND NEEDS TO RECOMPUTE FOR THE WHOLE MODEL
@@ -161,14 +161,10 @@ public class TrackIndexAnalyzerTest {
 
 		private boolean hasBeenCalled = false;
 
-		public TestTrackIndexAnalyzer(Model model) {
-			super(model);
-		}
-
 		@Override
-		public void process(Collection<Integer> trackIDs) {
+		public void process(final Collection<Integer> trackIDs, final Model model) {
 			hasBeenCalled = true;
-			super.process(trackIDs);
+			super.process(trackIDs, model);
 		}
 	}
 

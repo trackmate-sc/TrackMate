@@ -76,10 +76,8 @@ public class TrackSpeedStatisticsAnalyzer implements TrackAnalyzer, MultiThreade
 
 	private int numThreads;
 	private long processingTime;
-	private final Model model;
 
-	public TrackSpeedStatisticsAnalyzer(final Model model) {
-		this.model = model;
+	public TrackSpeedStatisticsAnalyzer() {
 		setNumThreads();
 	}
 
@@ -93,7 +91,7 @@ public class TrackSpeedStatisticsAnalyzer implements TrackAnalyzer, MultiThreade
 	}
 
 	@Override
-	public void process(final Collection<Integer> trackIDs) {
+	public void process(final Collection<Integer> trackIDs, final Model model) {
 
 		if (trackIDs.isEmpty()) {
 			return;
@@ -105,6 +103,7 @@ public class TrackSpeedStatisticsAnalyzer implements TrackAnalyzer, MultiThreade
 		final Thread[] threads = SimpleMultiThreading.newThreads(numThreads);
 		for (int i = 0; i < threads.length; i++) {
 			threads[i] = new Thread("TrackLocationAnalyzer thread " + i) {
+
 				@Override
 				public void run() {
 					Integer trackID;

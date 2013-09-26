@@ -63,10 +63,8 @@ public class TrackBranchingAnalyzer implements TrackAnalyzer, MultiThreaded {
 
 	private int numThreads;
 	private long processingTime;
-	private final Model model;
 
-	public TrackBranchingAnalyzer(final Model model) {
-		this.model = model;
+	public TrackBranchingAnalyzer() {
 		setNumThreads();
 	}
 
@@ -76,7 +74,7 @@ public class TrackBranchingAnalyzer implements TrackAnalyzer, MultiThreaded {
 	}
 
 	@Override
-	public void process(final Collection<Integer> trackIDs) {
+	public void process(final Collection<Integer> trackIDs, final Model model) {
 
 		if (trackIDs.isEmpty()) {
 			return;

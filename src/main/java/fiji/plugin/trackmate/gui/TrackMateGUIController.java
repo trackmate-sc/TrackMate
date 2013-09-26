@@ -196,7 +196,7 @@ public class TrackMateGUIController implements ActionListener {
 	 * Creates a new {@link TrackMateGUIController} instance, set to operate on
 	 * the specified {@link TrackMate} instance and with the specified
 	 * {@link ImagePlus} as a starting source.
-	 * 
+	 *
 	 * @param trackmate
 	 *            the instance that will be piloted by the new controller.
 	 * @param imp
@@ -231,7 +231,7 @@ public class TrackMateGUIController implements ActionListener {
 	/**
 	 * Exposes the {@link SelectionModel} shared amongst all
 	 * {@link SelectionChangeListener}s controlled by this instance.
-	 * 
+	 *
 	 * @return the {@link SelectionModel}.
 	 */
 	public SelectionModel getSelectionModel() {
@@ -250,7 +250,7 @@ public class TrackMateGUIController implements ActionListener {
 	 * {@link LogPanel}.
 	 * <p>
 	 * This method is typically called to restore a saved GUI state.
-	 * 
+	 *
 	 * @param stateKey
 	 *            the target state string.
 	 */
@@ -291,7 +291,7 @@ public class TrackMateGUIController implements ActionListener {
 	/**
 	 * Returns the {@link ViewProvider} instance, serving
 	 * {@link TrackMateModelView}s to this GUI
-	 * 
+	 *
 	 * @return the view provider.
 	 */
 	public ViewProvider getViewProvider() {
@@ -301,7 +301,7 @@ public class TrackMateGUIController implements ActionListener {
 	/**
 	 * Returns the {@link DetectorProvider} instance, serving
 	 * {@link SpotDetectorFactory}s to this GUI
-	 * 
+	 *
 	 * @return the detector provider.
 	 */
 	public DetectorProvider getDetectorProvider() {
@@ -311,7 +311,7 @@ public class TrackMateGUIController implements ActionListener {
 	/**
 	 * Returns the {@link SpotAnalyzerProvider} instance, serving
 	 * {@link SpotAnalyzerFactory}s to this GUI.
-	 * 
+	 *
 	 * @return the spot analyzer provider.
 	 */
 	public SpotAnalyzerProvider getSpotAnalyzerProvider() {
@@ -321,7 +321,7 @@ public class TrackMateGUIController implements ActionListener {
 	/**
 	 * Returns the {@link EdgeAnalyzerProvider} instance, serving
 	 * {@link EdgeAnalyzer}s to this GUI.
-	 * 
+	 *
 	 * @return the edge analyzer provider.
 	 */
 	public EdgeAnalyzerProvider getEdgeAnalyzerProvider() {
@@ -331,7 +331,7 @@ public class TrackMateGUIController implements ActionListener {
 	/**
 	 * Returns the {@link TrackAnalyzerProvider} instance, serving
 	 * {@link TrackAnalyzer}s to this GUI.
-	 * 
+	 *
 	 * @return the track analyzer provider.
 	 */
 	public TrackAnalyzerProvider getTrackAnalyzerProvider() {
@@ -341,7 +341,7 @@ public class TrackMateGUIController implements ActionListener {
 	/**
 	 * Returns the {@link TrackerProvider} instance, serving {@link SpotTracker}
 	 * s to this GUI.
-	 * 
+	 *
 	 * @return the tracker provider.
 	 */
 	public TrackerProvider getTrackerProvider() {
@@ -372,7 +372,7 @@ public class TrackMateGUIController implements ActionListener {
 	protected void createProviders() {
 		spotAnalyzerProvider = new SpotAnalyzerProvider(trackmate.getModel());
 		edgeAnalyzerProvider = new EdgeAnalyzerProvider(trackmate.getModel());
-		trackAnalyzerProvider = new TrackAnalyzerProvider(trackmate.getModel());
+		trackAnalyzerProvider = new TrackAnalyzerProvider();
 		detectorProvider = new DetectorProvider(trackmate.getModel());
 		viewProvider = new ViewProvider(trackmate.getModel(), trackmate.getSettings(), selectionModel);
 		trackerProvider = new TrackerProvider(trackmate.getModel());
@@ -381,7 +381,7 @@ public class TrackMateGUIController implements ActionListener {
 
 	/**
 	 * Creates the map of next descriptor for each descriptor.
-	 * 
+	 *
 	 * @return
 	 */
 	protected Collection<WizardPanelDescriptor> createDescriptors() {
@@ -721,7 +721,7 @@ public class TrackMateGUIController implements ActionListener {
 	/**
 	 * Returns the starting display settings that will be passed to any new view
 	 * registered within this GUI.
-	 * 
+	 *
 	 * @param model
 	 *            the model this GUI will configure; might be required by some
 	 *            display settings.
