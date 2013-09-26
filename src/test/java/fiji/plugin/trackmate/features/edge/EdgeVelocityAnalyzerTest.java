@@ -11,10 +11,10 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.junit.Before;
 import org.junit.Test;
 
+import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.ModelChangeListener;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.features.edges.EdgeVelocityAnalyzer;
 
 public class EdgeVelocityAnalyzerTest {
@@ -33,9 +33,9 @@ public class EdgeVelocityAnalyzerTest {
 
 		model = new Model();
 		model.beginUpdate();
-		
+
 		final String[] posFeats = Spot.POSITION_FEATURES;
-		
+
 		try {
 
 			for (int i = 0; i < N_TRACKS; i++) {
@@ -43,19 +43,19 @@ public class EdgeVelocityAnalyzerTest {
 				Spot previous = null;
 
 				for (int j = 0; j <= DEPTH; j++) {
-					Spot spot = new Spot(new double[3]); 
+					final Spot spot = new Spot(new double[3]);
 					spot.putFeature(posFeats[i%3], Double.valueOf(i+j)); // rotate displacement dimension
 					spot.putFeature(Spot.POSITION_T, Double.valueOf(2*j));
 					model.addSpotTo(spot, j);
 					if (null != previous) {
-						DefaultWeightedEdge edge = model.addEdge(previous, spot, j);
-						double d = spot.getFeature(posFeats[i%3]).doubleValue() - previous.getFeature(posFeats[i%3]).doubleValue();
+						final DefaultWeightedEdge edge = model.addEdge(previous, spot, j);
+						final double d = spot.getFeature(posFeats[i%3]).doubleValue() - previous.getFeature(posFeats[i%3]).doubleValue();
 						edgeD.put(edge, d);
 						edgeV.put(edge, d/2);
 
 					}
 					previous = spot;
-					
+
 					// save one middle spot
 					if (i == 0 && j == DEPTH/2) {
 						aspot = spot;
@@ -71,11 +71,11 @@ public class EdgeVelocityAnalyzerTest {
 	@Test
 	public final void testProcess() {
 		// Process model
-		EdgeVelocityAnalyzer analyzer = new EdgeVelocityAnalyzer(model);
-		analyzer.process(model.getTrackModel().edgeSet());
+		final EdgeVelocityAnalyzer analyzer = new EdgeVelocityAnalyzer();
+		analyzer.process(model.getTrackModel().edgeSet(), model);
 
 		// Collect features
-		for (DefaultWeightedEdge edge :model.getTrackModel().edgeSet()) {
+		for (final DefaultWeightedEdge edge :model.getTrackModel().edgeSet()) {
 			assertEquals(edgeV.get(edge).doubleValue(), model.getFeatureModel().getEdgeFeature(edge, EdgeVelocityAnalyzer.VELOCITY).doubleValue(), Double.MIN_VALUE);
 			assertEquals(edgeD.get(edge).doubleValue(), model.getFeatureModel().getEdgeFeature(edge, EdgeVelocityAnalyzer.DISPLACEMENT).doubleValue(), Double.MIN_VALUE);
 		}
@@ -84,32 +84,32 @@ public class EdgeVelocityAnalyzerTest {
 	@Test
 	public final void testModelChanged() {
 		// Initial calculation
-		final TestEdgeVelocityAnalyzer analyzer = new TestEdgeVelocityAnalyzer(model);
-		analyzer.process(model.getTrackModel().edgeSet());
+		final TestEdgeVelocityAnalyzer analyzer = new TestEdgeVelocityAnalyzer();
+		analyzer.process(model.getTrackModel().edgeSet(), model);
 
 		// Prepare listener
 		model.addModelChangeListener(new ModelChangeListener() {
 			@Override
-			public void modelChanged(ModelChangeEvent event) {
-				HashSet<DefaultWeightedEdge> edgesToUpdate = new HashSet<DefaultWeightedEdge>();
-				for (DefaultWeightedEdge edge : event.getEdges()) {
+			public void modelChanged(final ModelChangeEvent event) {
+				final HashSet<DefaultWeightedEdge> edgesToUpdate = new HashSet<DefaultWeightedEdge>();
+				for (final DefaultWeightedEdge edge : event.getEdges()) {
 					if (event.getEdgeFlag(edge) != ModelChangeEvent.FLAG_EDGE_REMOVED) {
 						edgesToUpdate.add(edge);
 					}
 				}
 				if (analyzer.isLocal()) {
 
-					analyzer.process(edgesToUpdate );
+					analyzer.process(edgesToUpdate, model);
 
 				} else {
 
 					// Get the all the edges of the track they belong to
-					HashSet<DefaultWeightedEdge> globalEdgesToUpdate = new HashSet<DefaultWeightedEdge>();
-					for (DefaultWeightedEdge edge : edgesToUpdate) {
-						Integer motherTrackID = model.getTrackModel().trackIDOf(edge);
+					final HashSet<DefaultWeightedEdge> globalEdgesToUpdate = new HashSet<DefaultWeightedEdge>();
+					for (final DefaultWeightedEdge edge : edgesToUpdate) {
+						final Integer motherTrackID = model.getTrackModel().trackIDOf(edge);
 						globalEdgesToUpdate.addAll(model.getTrackModel().trackEdges(motherTrackID));
 					}
-					analyzer.process(globalEdgesToUpdate);
+					analyzer.process(globalEdgesToUpdate, model);
 				}
 			}
 		});
@@ -122,7 +122,7 @@ public class EdgeVelocityAnalyzerTest {
 		} finally {
 			model.endUpdate();
 		}
-		
+
 		// We must have received 2 edges to analyzer
 		assertTrue(analyzer.hasBeenRun);
 		assertEquals(2, analyzer.edges.size());
@@ -133,16 +133,12 @@ public class EdgeVelocityAnalyzerTest {
 		private boolean hasBeenRun = false;
 		private Collection<DefaultWeightedEdge> edges;
 
-		public TestEdgeVelocityAnalyzer(Model model) {
-			super(model);
-		}
-
 		@Override
-		public void process(Collection<DefaultWeightedEdge> edges) {
+		public void process(final Collection<DefaultWeightedEdge> edges, final Model model) {
 			this.hasBeenRun = true;
 			this.edges = edges;
-			super.process(edges);
+			super.process(edges, model);
 		}
 
-	}	
+	}
 }

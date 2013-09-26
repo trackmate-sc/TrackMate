@@ -21,7 +21,6 @@ import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
-
 public class HyperStackDisplayerTestDrive {
 
 	public static void main(final String[] args) throws JDOMException, IOException {
@@ -33,8 +32,7 @@ public class HyperStackDisplayerTestDrive {
 
 		final Model model = reader.getModel();
 		final Settings settings = new Settings();
-		reader.readSettings(settings, null, null,
- new SpotAnalyzerProvider(model), new EdgeAnalyzerProvider(model), new TrackAnalyzerProvider());
+		reader.readSettings(settings, null, null, new SpotAnalyzerProvider(model), new EdgeAnalyzerProvider(), new TrackAnalyzerProvider());
 		final ImagePlus imp = settings.imp;
 
 		new ModelFeatureUpdater(model, settings);

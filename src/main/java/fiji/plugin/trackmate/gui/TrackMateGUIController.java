@@ -371,7 +371,7 @@ public class TrackMateGUIController implements ActionListener {
 
 	protected void createProviders() {
 		spotAnalyzerProvider = new SpotAnalyzerProvider(trackmate.getModel());
-		edgeAnalyzerProvider = new EdgeAnalyzerProvider(trackmate.getModel());
+		edgeAnalyzerProvider = new EdgeAnalyzerProvider();
 		trackAnalyzerProvider = new TrackAnalyzerProvider();
 		detectorProvider = new DetectorProvider(trackmate.getModel());
 		viewProvider = new ViewProvider(trackmate.getModel(), trackmate.getSettings(), selectionModel);

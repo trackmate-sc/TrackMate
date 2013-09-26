@@ -62,7 +62,7 @@ public class TrackVisualizerTestDrive {
 		final Model model = reader.getModel();
 		final Settings settings = new Settings();
 		reader.readSettings(settings, null, null,
- new SpotAnalyzerProvider(model), new EdgeAnalyzerProvider(model), new TrackAnalyzerProvider());
+ new SpotAnalyzerProvider(model), new EdgeAnalyzerProvider(), new TrackAnalyzerProvider());
 		final TrackMate trackmate = new TrackMate(model, settings);
 		new ModelFeatureUpdater(model, settings);
 
