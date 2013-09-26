@@ -24,7 +24,7 @@ public class TmXmlReaderTestDrive {
 		final Model model = reader.getModel();
 
 		final Settings settings = new Settings();
-		reader.readSettings(settings, new DetectorProvider(model), new TrackerProvider(model), new SpotAnalyzerProvider(model), new EdgeAnalyzerProvider(), new TrackAnalyzerProvider());
+		reader.readSettings(settings, new DetectorProvider(model), new TrackerProvider(model), new SpotAnalyzerProvider(), new EdgeAnalyzerProvider(), new TrackAnalyzerProvider());
 
 		System.out.println(settings);
 		System.out.println(model);

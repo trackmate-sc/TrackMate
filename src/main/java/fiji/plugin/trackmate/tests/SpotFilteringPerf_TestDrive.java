@@ -26,7 +26,7 @@ public class SpotFilteringPerf_TestDrive {
 		final TmXmlReader reader = new TmXmlReader(file);
 		final Model model = reader.getModel();
 		final Settings settings = new Settings();
-		reader.readSettings(settings, null, null, new SpotAnalyzerProvider(model), new EdgeAnalyzerProvider(), new TrackAnalyzerProvider());
+		reader.readSettings(settings, null, null, new SpotAnalyzerProvider(), new EdgeAnalyzerProvider(), new TrackAnalyzerProvider());
 		final TrackMate trackmate = new TrackMate(model, settings);
 		System.out.println("Done loading.");
 

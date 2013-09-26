@@ -97,8 +97,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.imglib2.meta.ImgPlus;
-
 import org.jdom2.Attribute;
 import org.jdom2.DataConversionException;
 import org.jdom2.Element;
@@ -135,7 +133,6 @@ import fiji.plugin.trackmate.tracking.FastLAPTracker;
 import fiji.plugin.trackmate.tracking.SimpleFastLAPTracker;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTracker;
-import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 
@@ -235,11 +232,10 @@ public class TmXmlReader_v12 extends TmXmlReader {
 
 		// Feature analyzers. By default, we add them all.
 
-		final ImgPlus<?> img = TMUtils.rawWraps(settings.imp);
 		settings.clearSpotAnalyzerFactories();
 		final List<String> spotAnalyzerKeys = spotAnalyzerProvider.getAvailableSpotFeatureAnalyzers();
 		for (final String key : spotAnalyzerKeys) {
-			final SpotAnalyzerFactory<?> spotFeatureAnalyzer = spotAnalyzerProvider.getSpotFeatureAnalyzer(key, img);
+			final SpotAnalyzerFactory<?> spotFeatureAnalyzer = spotAnalyzerProvider.getSpotFeatureAnalyzer(key);
 			settings.addSpotAnalyzerFactory(spotFeatureAnalyzer);
 		}
 

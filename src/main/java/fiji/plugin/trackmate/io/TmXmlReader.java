@@ -85,8 +85,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.imglib2.meta.ImgPlus;
-
 import org.jdom2.Attribute;
 import org.jdom2.DataConversionException;
 import org.jdom2.Document;
@@ -119,7 +117,6 @@ import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.providers.ViewProvider;
 import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 
 
@@ -976,7 +973,6 @@ public class TmXmlReader {
 
 				} else {
 
-					final ImgPlus<?> img = TMUtils.rawWraps(settings.imp);
 					final List<Element> children = spotAnalyzerEl.getChildren(ANALYSER_ELEMENT_KEY);
 					for (final Element child : children) {
 
@@ -987,7 +983,7 @@ public class TmXmlReader {
 							continue;
 						}
 
-						final SpotAnalyzerFactory<?> spotAnalyzer = spotAnalyzerProvider.getSpotFeatureAnalyzer(key, img);
+						final SpotAnalyzerFactory<?> spotAnalyzer = spotAnalyzerProvider.getSpotFeatureAnalyzer(key);
 						if (null == spotAnalyzer) {
 							logger.error("Unknown spot analyzer key: " + key + ".\n");
 							ok = false;

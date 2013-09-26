@@ -2,14 +2,12 @@ package fiji.plugin.trackmate.gui;
 
 import java.util.List;
 
-import net.imglib2.meta.ImgPlus;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.gui.descriptors.WizardPanelDescriptor;
-import fiji.plugin.trackmate.util.TMUtils;
 
 public class ManualTrackingGUIController extends TrackMateGUIController {
 
@@ -44,11 +42,10 @@ public class ManualTrackingGUIController extends TrackMateGUIController {
 
 		final Settings settings = trackmate.getSettings();
 
-		final ImgPlus<?> img = TMUtils.rawWraps(settings.imp);
 		settings.clearSpotAnalyzerFactories();
 		final List<String> spotAnalyzerKeys = spotAnalyzerProvider.getAvailableSpotFeatureAnalyzers();
 		for (final String key : spotAnalyzerKeys) {
-			final SpotAnalyzerFactory<?> spotFeatureAnalyzer = spotAnalyzerProvider.getSpotFeatureAnalyzer(key, img);
+			final SpotAnalyzerFactory<?> spotFeatureAnalyzer = spotAnalyzerProvider.getSpotFeatureAnalyzer(key);
 			settings.addSpotAnalyzerFactory(spotFeatureAnalyzer);
 		}
 
