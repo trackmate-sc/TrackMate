@@ -14,6 +14,7 @@ import org.jdom2.Element;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
+import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
@@ -57,6 +58,29 @@ public class ExportTracksToXML extends AbstractTMAction {
 	 * METHODS
 	 */
 
+	/**
+	 * Static utility that silently exports tracks in a simplified xml format,
+	 * describe in this class.
+	 *
+	 * @param model
+	 *            the {@link Model} that contains the tracks to export.
+	 * @param settings
+	 *            a {@link Settings} object, only used to read its
+	 *            {@link Settings#dt} field, the frame interval.
+	 * @param file
+	 *            the file to save to.
+	 * @throws FileNotFoundException
+	 *             if the target file cannot be written.
+	 * @throws IOException
+	 *             if there is a problem writing the file.
+	 */
+	public static void export(final Model model, final Settings settings, final File file) throws FileNotFoundException, IOException {
+		final Element root = marshall(model, settings, Logger.VOID_LOGGER);
+		final Document document = new Document(root);
+		final XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
+		outputter.output(document, new FileOutputStream(file));
+	}
+
 	@Override
 	public void execute(final TrackMate trackmate) {
 
@@ -69,7 +93,7 @@ public class ExportTracksToXML extends AbstractTMAction {
 		}
 
 		logger.log("  Preparing XML data.\n");
-		final Element root = marshall(model, trackmate.getSettings());
+		final Element root = marshall(model, trackmate.getSettings(), logger);
 
 		File folder;
 		try {
@@ -114,7 +138,7 @@ public class ExportTracksToXML extends AbstractTMAction {
 		return NAME;
 	}
 
-	private Element marshall(final Model model, final Settings settings) {
+	private static Element marshall(final Model model, final Settings settings, final Logger logger) {
 		logger.setStatus("Marshalling...");
 		final Element content = new Element(CONTENT_KEY);
 
