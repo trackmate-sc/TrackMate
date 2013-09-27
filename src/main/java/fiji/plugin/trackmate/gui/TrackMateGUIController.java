@@ -17,7 +17,6 @@ import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_C
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_DISPLAY_DEPTH;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_DISPLAY_MODE;
 import ij.IJ;
-import ij.ImagePlus;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -194,13 +193,12 @@ public class TrackMateGUIController implements ActionListener {
 
 	/**
 	 * Creates a new {@link TrackMateGUIController} instance, set to operate on
-	 * the specified {@link TrackMate} instance and with the specified
-	 * {@link ImagePlus} as a starting source.
+	 * the specified {@link TrackMate} instance.
+	 * <p>
+	 * Subclassers want to override this method to return the correct type.
 	 *
 	 * @param trackmate
 	 *            the instance that will be piloted by the new controller.
-	 * @param imp
-	 *            the {@link ImagePlus} that will be used as a source.
 	 * @return a new instance of the controller.
 	 */
 	public TrackMateGUIController createOn(final TrackMate trackmate) {
@@ -374,7 +372,7 @@ public class TrackMateGUIController implements ActionListener {
 		edgeAnalyzerProvider = new EdgeAnalyzerProvider();
 		trackAnalyzerProvider = new TrackAnalyzerProvider();
 		detectorProvider = new DetectorProvider();
-		viewProvider = new ViewProvider(trackmate.getModel(), trackmate.getSettings(), selectionModel);
+		viewProvider = new ViewProvider();
 		trackerProvider = new TrackerProvider();
 		actionProvider = new ActionProvider();
 	}
@@ -761,6 +759,14 @@ public class TrackMateGUIController implements ActionListener {
 			previous();
 
 		} else if (event == gui.LOAD_BUTTON_PRESSED && guimodel.actionFlag) {
+
+			/*
+			 * TODO: There is actually NO load button anymore. The user load the
+			 * data directly through another plugin call. We left this code here
+			 * intact in case I change my mind. Removing it will actually
+			 * trigger an appreciable simplification of the code, but I let it
+			 * linger here a bit more. - Sep 2013
+			 */
 
 			guimodel.actionFlag = false;
 			gui.jButtonNext.setText("Resume");

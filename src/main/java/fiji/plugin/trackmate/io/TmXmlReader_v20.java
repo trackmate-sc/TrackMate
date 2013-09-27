@@ -68,6 +68,7 @@ import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
@@ -132,9 +133,9 @@ public class TmXmlReader_v20 extends TmXmlReader {
 	 * We default to the main hyperstack view.
 	 */
 	@Override
-	public Collection<TrackMateModelView> getViews(final ViewProvider provider) {
+	public Collection<TrackMateModelView> getViews(final ViewProvider provider, final Model model, final Settings settings, final SelectionModel selectionModel) {
 		final Collection<TrackMateModelView> views = new ArrayList<TrackMateModelView>(1);
-		final TrackMateModelView view = provider.getView(HyperStackDisplayer.NAME);
+		final TrackMateModelView view = provider.getView(HyperStackDisplayer.NAME, model, settings, selectionModel);
 		views.add(view);
 		return views;
 	}

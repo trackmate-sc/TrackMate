@@ -104,7 +104,7 @@ public class LoadDescriptor extends SomeDialogDescriptor {
 
 		// Views
 		final ViewProvider viewProvider = newcontroller.getViewProvider();
-		final Collection<TrackMateModelView> views = reader.getViews(viewProvider);
+		final Collection<TrackMateModelView> views = reader.getViews(viewProvider, model, settings, newcontroller.getSelectionModel());
 		for (final TrackMateModelView view : views) {
 			if (view.getKey().equals(TrackScheme.KEY)) {
 				final TrackScheme trackscheme = (TrackScheme) view;

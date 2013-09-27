@@ -100,6 +100,7 @@ import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Logger.StringBuilderLogger;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
@@ -136,8 +137,11 @@ public class TmXmlReader {
 	protected ConcurrentHashMap<Integer, Spot> cache;
 	protected StringBuilderLogger logger = new StringBuilderLogger();
 	protected final Element root;
-	/** If <code>false</code>, an error occured during reading.
-	 * @see #getErrorMessage(). */
+	/**
+	 * If <code>false</code>, an error occurred during reading.
+	 *
+	 * @see #getErrorMessage().
+	 */
 	protected boolean ok = true;
 
 	/*
@@ -205,14 +209,23 @@ public class TmXmlReader {
 	}
 
 	/**
-	 * Returns the collection of views that were saved in this file. The views returned
-	 * are not rendered yet.
-	 * @param provider  the {@link ViewProvider} to instantiate the view. Each saved
-	 * view must be known by the specified provider.
+	 * Returns the collection of views that were saved in this file. The views
+	 * returned are not rendered yet.
+	 * 
+	 * @param provider
+	 *            the {@link ViewProvider} to instantiate the view. Each saved
+	 *            view must be known by the specified provider.
+	 * @param model
+	 *            the model to display in the views.
+	 * @param settings
+	 *            the settings to build the views.
+	 * @param selectionModel
+	 *            the {@link SelectionModel} model that will be shared with the
+	 *            new views.
 	 * @return the collection of views.
 	 * @see TrackMateModelView#render()
 	 */
-	public Collection<TrackMateModelView> getViews(final ViewProvider provider) {
+	public Collection<TrackMateModelView> getViews(final ViewProvider provider, final Model model, final Settings settings, final SelectionModel selectionModel) {
 		final Element guiel = root.getChild(GUI_STATE_ELEMENT_KEY);
 		if (null != guiel) {
 
@@ -225,7 +238,7 @@ public class TmXmlReader {
 					logger.error("Could not find view key attribute for element " + child +".\n");
 					ok = false;
 				} else {
-					final TrackMateModelView view = provider.getView(viewKey);
+					final TrackMateModelView view = provider.getView(viewKey, model, settings, selectionModel);
 					if (null == view) {
 						logger.error("Unknown view for key " + viewKey +".\n");
 						ok = false;

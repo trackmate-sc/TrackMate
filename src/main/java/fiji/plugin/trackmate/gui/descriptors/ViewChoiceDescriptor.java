@@ -4,6 +4,8 @@ import java.awt.Component;
 import java.util.ArrayList;
 import java.util.List;
 
+import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateGUIModel;
 import fiji.plugin.trackmate.gui.panels.ListChooserPanel;
@@ -52,6 +54,8 @@ public class ViewChoiceDescriptor implements WizardPanelDescriptor {
 	@Override
 	public void aboutToHidePanel() {
 		final int index = component.getChoice();
+		final TrackMate trackmate = controller.getPlugin();
+		final SelectionModel selectionModel = controller.getSelectionModel();
 		new Thread("TrackMate view rendering thread") {
 			@Override
 			public void run() {
@@ -61,7 +65,7 @@ public class ViewChoiceDescriptor implements WizardPanelDescriptor {
 					return; // it is already on.
 				}
 
-				final TrackMateModelView view = viewProvider.getView(viewName);
+				final TrackMateModelView view = viewProvider.getView(viewName, trackmate.getModel(), trackmate.getSettings(), selectionModel);
 				for (final String settingKey : guimodel.getDisplaySettings().keySet()) {
 					view.setDisplaySettings(settingKey, guimodel.getDisplaySettings().get(settingKey));
 				}
