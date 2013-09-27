@@ -18,9 +18,9 @@ import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
 import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
@@ -38,14 +38,15 @@ public class ISBIChallengeExporter extends AbstractTMAction {
 				"Only tracks are exported. If there is no track, this action " +
 				"does nothing. " +
 				"</html>";
+	private final TrackMateGUIController	controller;
 
 
 	/*
 	 * CONSTRUCTOR
 	 */
-	
-	public ISBIChallengeExporter(TrackMate trackmate, TrackMateGUIController controller) {
-		super(trackmate, controller);
+
+	public ISBIChallengeExporter(final TrackMateGUIController controller) {
+		this.controller = controller;
 		this.icon = ICON;
 	}
 
@@ -55,47 +56,47 @@ public class ISBIChallengeExporter extends AbstractTMAction {
 	 */
 
 	@Override
-	public void execute() {
+	public void execute(final TrackMate trackmate) {
 		final Model model = trackmate.getModel();
 		File file;
-		File folder = new File(System.getProperty("user.dir")).getParentFile().getParentFile();
+		final File folder = new File(System.getProperty("user.dir")).getParentFile().getParentFile();
 		try {
 			String filename = trackmate.getSettings().imageFileName;
 			filename = filename.substring(0, filename.indexOf("."));
 			file = new File(folder.getPath() + File.separator + filename +"_ISBI.xml");
-		} catch (NullPointerException npe) {
+		} catch (final NullPointerException npe) {
 			file = new File(folder.getPath() + File.separator + "ISBIChallenge2012Result.xml");
 		}
 		file = IOUtils.askForFileForSaving(file, controller.getGUI(), logger);
 
 		exportToFile(model, trackmate.getSettings(), file);
 	}
-	
-	public static void exportToFile(final Model model, Settings settings, final File file) {
+
+	public static void exportToFile(final Model model, final Settings settings, final File file) {
 		final Logger logger = model.getLogger();
 		logger.log("Exporting to ISBI 2012 particle tracking challenge format.\n");
-		int ntracks = model.getTrackModel().nTracks(true);
+		final int ntracks = model.getTrackModel().nTracks(true);
 		if (ntracks == 0) {
 			logger.log("No visible track found. Aborting.\n");
 			return;
 		}
 
 		logger.log("  Preparing XML data.\n");
-		Element root = marshall(model, settings);
+		final Element root = marshall(model, settings);
 
 		logger.log("  Writing to file.\n");
-		Document document = new Document(root);
-		XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
+		final Document document = new Document(root);
+		final XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
 		try {
 			outputter.output(document, new FileOutputStream(file));
-		} catch (FileNotFoundException e) {
+		} catch (final FileNotFoundException e) {
 			logger.error("Trouble writing to "+file+":\n" + e.getMessage());
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			logger.error("Trouble writing to "+file+":\n" + e.getMessage());
 		}
 		logger.log("Done.\n");
 	}
-	
+
 
 	@Override
 	public String getInfoText() {
@@ -107,17 +108,17 @@ public class ISBIChallengeExporter extends AbstractTMAction {
 		return NAME;
 	}
 
-	private static final Element marshall(Model model, Settings settings) {
+	private static final Element marshall(final Model model, final Settings settings) {
 		final Logger logger = model.getLogger();
-		
-		Element root = new Element("root");
-		Element content = new Element(CONTENT_KEY);
+
+		final Element root = new Element("root");
+		final Element content = new Element(CONTENT_KEY);
 
 		// Extract from file name
-		String filename = settings.imageFileName; // VIRUS snr 7 density mid.tif
-		String pattern = "^(\\w+) " + SNR_ATT +" (\\d+) " + DENSITY_ATT + " (\\w+)\\.";	
-		Pattern r = Pattern.compile(pattern);
-		Matcher m = r.matcher(filename);
+		final String filename = settings.imageFileName; // VIRUS snr 7 density mid.tif
+		final String pattern = "^(\\w+) " + SNR_ATT +" (\\d+) " + DENSITY_ATT + " (\\w+)\\.";
+		final Pattern r = Pattern.compile(pattern);
+		final Matcher m = r.matcher(filename);
 		String snr_val;
 		String density_val;
 		String scenario_val;
@@ -136,23 +137,23 @@ public class ISBIChallengeExporter extends AbstractTMAction {
 		content.setAttribute(DATE_ATT, new Date().toString());
 
 		logger.setStatus("Marshalling...");
-		Integer[] visibleTracks = model.getTrackModel().trackIDs(true).toArray(new Integer[] {});
+		final Integer[] visibleTracks = model.getTrackModel().trackIDs(true).toArray(new Integer[] {});
 		for (int i = 0 ; i < model.getTrackModel().nTracks(true) ; i++) {
 
-			Element trackElement = new Element(TRACK_KEY);
-			int trackindex = visibleTracks[i];
-			Set<Spot> track = model.getTrackModel().trackSpots(trackindex);
-			// Sort them by time 
-			TreeSet<Spot> sortedTrack = new TreeSet<Spot>(Spot.timeComparator);
+			final Element trackElement = new Element(TRACK_KEY);
+			final int trackindex = visibleTracks[i];
+			final Set<Spot> track = model.getTrackModel().trackSpots(trackindex);
+			// Sort them by time
+			final TreeSet<Spot> sortedTrack = new TreeSet<Spot>(Spot.timeComparator);
 			sortedTrack.addAll(track);
-			
-			for (Spot spot : sortedTrack) {
-				int t = spot.getFeature(Spot.FRAME).intValue();
-				double x = spot.getFeature(Spot.POSITION_X);
-				double y = spot.getFeature(Spot.POSITION_Y);
-				double z = spot.getFeature(Spot.POSITION_Z);
 
-				Element spotElement = new Element(SPOT_KEY);
+			for (final Spot spot : sortedTrack) {
+				final int t = spot.getFeature(Spot.FRAME).intValue();
+				final double x = spot.getFeature(Spot.POSITION_X);
+				final double y = spot.getFeature(Spot.POSITION_Y);
+				final double z = spot.getFeature(Spot.POSITION_Z);
+
+				final Element spotElement = new Element(SPOT_KEY);
 				spotElement.setAttribute(T_ATT, ""+t);
 				spotElement.setAttribute(X_ATT, ""+x);
 				spotElement.setAttribute(Y_ATT, ""+y);

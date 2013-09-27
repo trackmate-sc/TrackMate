@@ -11,10 +11,9 @@ import javax.swing.ImageIcon;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
 import fiji.plugin.trackmate.FeatureModel;
+import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 
 public class ExportStatsToIJAction extends AbstractTMAction {
@@ -35,37 +34,36 @@ public class ExportStatsToIJAction extends AbstractTMAction {
 				"of this export." +
 				"</html>";
 
-	public ExportStatsToIJAction(TrackMate trackmate, TrackMateGUIController controller) {
-		super(trackmate, controller);
+	public ExportStatsToIJAction() {
 		this.icon = ICON;
 	}
 
 	@Override
-	public void execute() {
+	public void execute(final TrackMate trackmate) {
 		logger.log("Exporting statistics.\n");
-		
+
 		// Model
 		final Model model = trackmate.getModel();
 		final FeatureModel fm = model.getFeatureModel();
-		
+
 		// Export spots
 		logger.log("  - Exporting spot statistics...");
-		Set<Integer> trackIDs = model.getTrackModel().trackIDs(true);
-		Collection<String> spotFeatures = trackmate.getModel().getFeatureModel().getSpotFeatures();
+		final Set<Integer> trackIDs = model.getTrackModel().trackIDs(true);
+		final Collection<String> spotFeatures = trackmate.getModel().getFeatureModel().getSpotFeatures();
 
 		// Create table
-		ResultsTable spotTable = new ResultsTable();
-		
+		final ResultsTable spotTable = new ResultsTable();
+
 		// Parse spots to insert values as objects
-		for (Integer trackID : trackIDs) {
-			Set<Spot> track = model.getTrackModel().trackSpots(trackID);
-			for (Spot spot : track) {
+		for (final Integer trackID : trackIDs) {
+			final Set<Spot> track = model.getTrackModel().trackSpots(trackID);
+			for (final Spot spot : track) {
 				spotTable.incrementCounter();
 				spotTable.addLabel(spot.getName());
 				spotTable.addValue("ID", spot.ID());
 				spotTable.addValue("TRACK_ID", trackID);
-				for (String feature : spotFeatures) {
-					Double val = spot.getFeature(feature);
+				for (final String feature : spotFeatures) {
+					final Double val = spot.getFeature(feature);
 					if (null == val) {
 						continue;
 					}
@@ -74,50 +72,50 @@ public class ExportStatsToIJAction extends AbstractTMAction {
 			}
 		}
 		logger.log(" Done.\n");
-		
-		
+
+
 		// Export edges
 		logger.log("  - Exporting links statistics...");
 		// Yield available edge feature
-		Collection<String> edgeFeatures = fm.getEdgeFeatures();
-		
+		final Collection<String> edgeFeatures = fm.getEdgeFeatures();
+
 		// Create table
-		ResultsTable edgeTable = new ResultsTable();
-		
+		final ResultsTable edgeTable = new ResultsTable();
+
 		// Sort by track
-		for (Integer trackID : trackIDs) {
-			
-			Set<DefaultWeightedEdge> track = model.getTrackModel().trackEdges(trackID);
-			for (DefaultWeightedEdge edge : track) {
+		for (final Integer trackID : trackIDs) {
+
+			final Set<DefaultWeightedEdge> track = model.getTrackModel().trackEdges(trackID);
+			for (final DefaultWeightedEdge edge : track) {
 				edgeTable.incrementCounter();
 				edgeTable.addLabel(edge.toString());
-				for(String feature : edgeFeatures) {
-					Object o = fm.getEdgeFeature(edge, feature);
+				for(final String feature : edgeFeatures) {
+					final Object o = fm.getEdgeFeature(edge, feature);
 					if (o instanceof String) {
 						continue;
 					}
-					Number d = (Number) o;
+					final Number d = (Number) o;
 					edgeTable.addValue(feature, d.doubleValue());
 				}
-				
+
 			}
 		}
 		logger.log(" Done.\n");
-		
+
 		// Export tracks
 		logger.log("  - Exporting tracks statistics...");
 		// Yield available edge feature
-		Collection<String> trackFeatures = fm.getTrackFeatures();
+		final Collection<String> trackFeatures = fm.getTrackFeatures();
 
 		// Create table
-		ResultsTable trackTable = new ResultsTable();
+		final ResultsTable trackTable = new ResultsTable();
 
 		// Sort by track
-		for (Integer trackID : trackIDs) {
+		for (final Integer trackID : trackIDs) {
 			trackTable.incrementCounter();
 			trackTable.addLabel(model.getTrackModel().name(trackID));
-			for (String feature : trackFeatures) {
-				Double val = fm.getTrackFeature(trackID, feature);
+			for (final String feature : trackFeatures) {
+				final Double val = fm.getTrackFeature(trackID, feature);
 				if (null == val) {
 					System.out.println("Got a null feature value for feature " + feature + " on trackID " + trackID);
 				} else {
@@ -137,7 +135,7 @@ public class ExportStatsToIJAction extends AbstractTMAction {
 	public String getInfoText() {
 		return INFO_TEXT;
 	}
-	
+
 	@Override
 	public String toString() {
 		return NAME;

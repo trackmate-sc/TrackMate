@@ -17,7 +17,6 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.util.ExportableChartPanel;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackSchemeFrame;
 
@@ -31,13 +30,12 @@ public class PlotNSpotsVsTimeAction extends AbstractTMAction {
 			"of time. Only the filtered spots are taken into account. " +
 			"</html>";
 
-	public PlotNSpotsVsTimeAction(final TrackMate trackmate, final TrackMateGUIController controller) {
-		super(trackmate, controller);
+	public PlotNSpotsVsTimeAction() {
 		this.icon = ICON;
 	}
 
 	@Override
-	public void execute() {
+	public void execute(final TrackMate trackmate) {
 		// Collect data
 		final Model model = trackmate.getModel();
 		final Settings settings = trackmate.getSettings();

@@ -26,29 +26,36 @@ import fiji.plugin.trackmate.Logger;
  *
  */
 public class IOUtils {
-	
+
 
 
 
 	/**
 	 * Prompts the user for a xml file to save to.
-	 *  
-	 * @param file  a default file, will be used to display a default choice in the file chooser.
-	 * @param parent  the {@link Frame} to lock on this dialog.
-	 * @param logger  a {@link Logger} to report what is happening.
-	 * @return  the selected file, or <code>null</code> if the user pressed the "cancel" button.
+	 * 
+	 * @param file
+	 *            a default file, will be used to display a default choice in
+	 *            the file chooser.
+	 * @param parent
+	 *            the {@link Frame} to lock on this dialog. It can be
+	 *            <code>null</code>; in that case, native dialogs will not be
+	 *            used on Macs.
+	 * @param logger
+	 *            a {@link Logger} to report what is happening.
+	 * @return the selected file, or <code>null</code> if the user pressed the
+	 *         "cancel" button.
 	 */
-	public static File askForFileForSaving(File file, Frame parent, Logger logger) {
+	public static File askForFileForSaving(File file, final Frame parent, final Logger logger) {
 
-		if(IJ.isMacintosh()) {
+		if (IJ.isMacintosh() && parent != null) {
 			// use the native file dialog on the mac
-			FileDialog dialog =	new FileDialog(parent, "Save to a XML file", FileDialog.SAVE);
+			final FileDialog dialog =	new FileDialog(parent, "Save to a XML file", FileDialog.SAVE);
 			dialog.setIconImage(TRACKMATE_ICON.getImage());
 			dialog.setDirectory(file.getParent());
 			dialog.setFile(file.getName());
-			FilenameFilter filter = new FilenameFilter() {
+			final FilenameFilter filter = new FilenameFilter() {
 				@Override
-				public boolean accept(File dir, String name) {
+				public boolean accept(final File dir, final String name) {
 					return name.endsWith(".xml");
 				}
 			};
@@ -63,50 +70,50 @@ public class IOUtils {
 				selectedFile += ".xml";
 			file = new File(dialog.getDirectory(), selectedFile);
 		} else {
-			JFileChooser fileChooser = new JFileChooser(file.getParent()) {
+			final JFileChooser fileChooser = new JFileChooser(file.getParent()) {
 				private static final long serialVersionUID = 1L;
 				@Override
-			    protected JDialog createDialog( Component parent ) throws HeadlessException {
-			        JDialog dialog = super.createDialog( parent );
+			    protected JDialog createDialog( final Component parent ) throws HeadlessException {
+			        final JDialog dialog = super.createDialog( parent );
 			        dialog.setIconImage( TRACKMATE_ICON.getImage() );
 			        return dialog;
 			    }
 			};
 			fileChooser.setSelectedFile(file);
-			FileNameExtensionFilter filter = new FileNameExtensionFilter("XML files", "xml");
+			final FileNameExtensionFilter filter = new FileNameExtensionFilter("XML files", "xml");
 			fileChooser.setFileFilter(filter);
 
-			int returnVal = fileChooser.showSaveDialog(parent);
+			final int returnVal = fileChooser.showSaveDialog(parent);
 			if(returnVal == JFileChooser.APPROVE_OPTION) {
 				file = fileChooser.getSelectedFile();
 			} else {
 				logger.log("Save data aborted.\n");
-				return null;  	    		
+				return null;
 			}
 		}
 		return file;
 	}
-	
+
 	/**
 	 * Prompts the user for a xml file to load from.
-	 *  
+	 *
 	 * @param file  a default file, will be used to display a default choice in the file chooser.
-	 * @param title  the title to display on the file chooser window 
+	 * @param title  the title to display on the file chooser window
 	 * @param parent  the {@link Frame} to lock on this dialog.
 	 * @param logger  a {@link Logger} to report what is happening.
 	 * @return  the selected file, or <code>null</code> if the user pressed the "cancel" button.
 	 */
-	public static File askForFileForLoading(File file, String title, Frame parent, Logger logger) {
+	public static File askForFileForLoading(File file, final String title, final Frame parent, final Logger logger) {
 
 		if(IJ.isMacintosh()) {
 			// use the native file dialog on the mac
-			FileDialog dialog =	new FileDialog(parent, title, FileDialog.LOAD);
+			final FileDialog dialog =	new FileDialog(parent, title, FileDialog.LOAD);
 			dialog.setIconImage(TRACKMATE_ICON.getImage());
 			dialog.setDirectory(file.getParent());
 			dialog.setFile(file.getName());
-			FilenameFilter filter = new FilenameFilter() {
+			final FilenameFilter filter = new FilenameFilter() {
 				@Override
-				public boolean accept(File dir, String name) {
+				public boolean accept(final File dir, final String name) {
 					return name.endsWith(".xml");
 				}
 			};
@@ -121,26 +128,26 @@ public class IOUtils {
 				selectedFile += ".xml";
 			file = new File(dialog.getDirectory(), selectedFile);
 		} else {
-			JFileChooser fileChooser = new JFileChooser(file.getParent()) {
+			final JFileChooser fileChooser = new JFileChooser(file.getParent()) {
 				private static final long serialVersionUID = 1L;
 				@Override
-			    protected JDialog createDialog( Component parent ) throws HeadlessException {
-			        JDialog dialog = super.createDialog( parent );
+			    protected JDialog createDialog( final Component parent ) throws HeadlessException {
+			        final JDialog dialog = super.createDialog( parent );
 			        dialog.setIconImage( TRACKMATE_ICON.getImage() );
 			        return dialog;
 			    }
 			};
 			fileChooser.setName(title);
 			fileChooser.setSelectedFile(file);
-			FileNameExtensionFilter filter = new FileNameExtensionFilter("XML files", "xml");
+			final FileNameExtensionFilter filter = new FileNameExtensionFilter("XML files", "xml");
 			fileChooser.setFileFilter(filter);
 
-			int returnVal = fileChooser.showOpenDialog(parent);
+			final int returnVal = fileChooser.showOpenDialog(parent);
 			if(returnVal == JFileChooser.APPROVE_OPTION) {
 				file = fileChooser.getSelectedFile();
 			} else {
 				logger.log("Load data aborted.\n");
-				return null;  	    		
+				return null;
 			}
 		}
 		return file;
@@ -149,70 +156,70 @@ public class IOUtils {
 
 
 
-	/** 
+	/**
 	 * Read and return an integer attribute from a JDom {@link Element}, and substitute a default value of 0
 	 * if the attribute is not found or of the wrong type.
 	 */
-	public static final int readIntAttribute(Element element, String name, Logger logger) {
+	public static final int readIntAttribute(final Element element, final String name, final Logger logger) {
 		return readIntAttribute(element, name, logger, 0);
 	}
 
-	public static final int readIntAttribute(Element element, String name, Logger logger, int defaultValue) {
+	public static final int readIntAttribute(final Element element, final String name, final Logger logger, final int defaultValue) {
 		int val = defaultValue;
-		Attribute att = element.getAttribute(name);
+		final Attribute att = element.getAttribute(name);
 		if (null == att) {
 			logger.error("Could not find attribute "+name+" for element "+element.getName()+", substituting default value: "+defaultValue+".\n");
 			return val;
 		}
 		try {
 			val = att.getIntValue();
-		} catch (DataConversionException e) {	
+		} catch (final DataConversionException e) {
 			logger.error("Cannot read the attribute "+name+" of the element "+element.getName()+", substituting default value: "+defaultValue+".\n");
 		}
 		return val;
 	}
 
-	public static final double readFloatAttribute(Element element, String name, Logger logger) {
+	public static final double readFloatAttribute(final Element element, final String name, final Logger logger) {
 		double val = 0;
-		Attribute att = element.getAttribute(name);
+		final Attribute att = element.getAttribute(name);
 		if (null == att) {
 			logger.error("Could not find attribute "+name+" for element "+element.getName()+", substituting default value.\n");
 			return val;
 		}
 		try {
 			val = att.getFloatValue();
-		} catch (DataConversionException e) {	
-			logger.error("Cannot read the attribute "+name+" of the element "+element.getName()+", substituting default value.\n"); 
+		} catch (final DataConversionException e) {
+			logger.error("Cannot read the attribute "+name+" of the element "+element.getName()+", substituting default value.\n");
 		}
 		return val;
 	}
 
-	public static final double readDoubleAttribute(Element element, String name, Logger logger) {
+	public static final double readDoubleAttribute(final Element element, final String name, final Logger logger) {
 		double val = 0;
-		Attribute att = element.getAttribute(name);
+		final Attribute att = element.getAttribute(name);
 		if (null == att) {
 			logger.error("Could not find attribute "+name+" for element "+element.getName()+", substituting default value.\n");
 			return val;
 		}
 		try {
 			val = att.getDoubleValue();
-		} catch (DataConversionException e) {	
-			logger.error("Cannot read the attribute "+name+" of the element "+element.getName()+", substituting default value.\n"); 
+		} catch (final DataConversionException e) {
+			logger.error("Cannot read the attribute "+name+" of the element "+element.getName()+", substituting default value.\n");
 		}
 		return val;
 	}
 
-	public static final boolean readBooleanAttribute(Element element, String name, Logger logger) {
+	public static final boolean readBooleanAttribute(final Element element, final String name, final Logger logger) {
 		boolean val = false;
-		Attribute att = element.getAttribute(name);
+		final Attribute att = element.getAttribute(name);
 		if (null == att) {
 			logger.error("Could not find attribute "+name+" for element "+element.getName()+", substituting default value.\n");
 			return val;
 		}
 		try {
 			val = att.getBooleanValue();
-		} catch (DataConversionException e) {	
-			logger.error("Cannot read the attribute "+name+" of the element "+element.getName()+", substituting default value.\n"); 
+		} catch (final DataConversionException e) {
+			logger.error("Cannot read the attribute "+name+" of the element "+element.getName()+", substituting default value.\n");
 		}
 		return val;
 	}

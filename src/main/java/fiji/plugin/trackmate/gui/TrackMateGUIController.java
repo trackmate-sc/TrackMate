@@ -376,7 +376,7 @@ public class TrackMateGUIController implements ActionListener {
 		detectorProvider = new DetectorProvider(trackmate.getModel());
 		viewProvider = new ViewProvider(trackmate.getModel(), trackmate.getSettings(), selectionModel);
 		trackerProvider = new TrackerProvider(trackmate.getModel());
-		actionProvider = new ActionProvider(trackmate, this);
+		actionProvider = new ActionProvider();
 	}
 
 	/**
@@ -541,7 +541,7 @@ public class TrackMateGUIController implements ActionListener {
 		/*
 		 * Offer to take some actions on the data.
 		 */
-		actionChooserDescriptor = new ActionChooserDescriptor(actionProvider);
+		actionChooserDescriptor = new ActionChooserDescriptor(actionProvider, trackmate, this);
 
 		/*
 		 * Save descriptor
@@ -944,8 +944,8 @@ public class TrackMateGUIController implements ActionListener {
 			@Override
 			public void run() {
 				try {
-					final ExportStatsToIJAction action = new ExportStatsToIJAction(trackmate, TrackMateGUIController.this);
-					action.execute();
+					final ExportStatsToIJAction action = new ExportStatsToIJAction();
+					action.execute(trackmate);
 				} finally {
 					gui.show(configureViewsDescriptor);
 					restoreButtonsState();

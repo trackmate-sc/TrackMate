@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package fiji.plugin.trackmate.action;
 
@@ -26,37 +26,34 @@ import fiji.plugin.trackmate.util.Version;
 
 /**
  * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> Aug 13, 2013
- * 
+ *
  */
 public class MergeFileAction extends AbstractTMAction {
 
 	public static final ImageIcon ICON = new ImageIcon(TrackMateWizard.class.getResource("images/arrow_merge.png"));
 	public static final String NAME = "Merge a TrackMate file";
-	//@formatter:off
-	public static final String INFO_TEXT = "<html>" 
-			+ "Merge the current model with the data from another <br>" 
+
+	public static final String INFO_TEXT = "<html>"
+			+ "Merge the current model with the data from another <br>"
 			+ "file, specified by the user. This is useful <i>e.g.</i> <br>"
 			+ "if two operators have been annotating the same datasets <br>"
 			+ "and want to merge their work in a single file."
-			+ "<p>" 
+			+ "<p>"
 			+ "Only the spots belonging to visible tracks are imported <br>"
 			+ "from the taret file, which makes this action non-entirely <br>"
 			+ "symmetrical.  Numerical features are re-calculated using <br>"
 			+ "the current settings. There is no check that the imported <br>"
 			+ "data was generated on the raw source."
 			+ "</html>";
-	//@formatter:on
-	/**
-	 * @param trackmate
-	 * @param controller
-	 */
-	public MergeFileAction(final TrackMate trackmate, final TrackMateGUIController controller) {
-		super(trackmate, controller);
+	private final TrackMateGUIController	controller;
+
+	public MergeFileAction(final TrackMateGUIController controller) {
+		this.controller = controller;
 		this.icon = ICON;
 	}
 
 	@Override
-	public void execute() {
+	public void execute(final TrackMate trackmate) {
 
 		File file = SomeDialogDescriptor.file;
 		if (null == file) {

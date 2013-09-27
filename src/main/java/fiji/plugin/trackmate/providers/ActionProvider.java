@@ -28,8 +28,13 @@ public class ActionProvider {
 	 * will be used as keys to access relevant action classes.
 	 */
 	protected List<String> names;
-	protected final TrackMate trackmate;
-	protected final TrackMateGUIController controller;
+	protected CopyOverlayAction			copyOverlayAction;
+	protected PlotNSpotsVsTimeAction	plotNSpotsVsTimeAction;
+	protected CaptureOverlayAction		captureOverlayAction;
+	protected ResetSpotTimeFeatureAction	resetSpotTimeFeatureAction;
+	protected RecalculateFeatureAction		recalculateFeatureAction;
+	protected RadiusToEstimatedAction		radiusToEstimatedAction;
+	protected ResetRadiusAction				resetRadiusAction;
 
 	/*
 	 * BLANK CONSTRUCTOR
@@ -43,16 +48,14 @@ public class ActionProvider {
 	 * If you want to add custom actions to TrackMate, a simple way is to extend
 	 * this factory so that it is registered with the custom actions and provide
 	 * this extended factory to the {@link TrackMate} trackmate.
-	 * 
+	 *
 	 * @param trackmate
 	 *            the {@link TrackMate} instance these actions will operate on.
 	 * @param guiController
 	 *            the {@link TrackMateGUIController} controller that controls
 	 *            the GUI these actions are launched from.
 	 */
-	public ActionProvider(final TrackMate trackmate, final TrackMateGUIController controller) {
-		this.trackmate = trackmate;
-		this.controller = controller;
+	public ActionProvider() {
 		registerActions();
 	}
 
@@ -61,9 +64,18 @@ public class ActionProvider {
 	 */
 
 	/**
-	 * Register the standard actions shipped with TrackMate.
+	 * Registers the standard actions shipped with TrackMate, and instantiates
+	 * some of them.
 	 */
 	protected void registerActions() {
+		this.copyOverlayAction = new CopyOverlayAction();
+		this.plotNSpotsVsTimeAction = new PlotNSpotsVsTimeAction();
+		this.captureOverlayAction = new CaptureOverlayAction();
+		this.resetSpotTimeFeatureAction = new ResetSpotTimeFeatureAction();
+		this.recalculateFeatureAction = new RecalculateFeatureAction();
+		this.radiusToEstimatedAction = new RadiusToEstimatedAction();
+		this.resetRadiusAction = new ResetRadiusAction();
+
 		// Names
 		names = new ArrayList<String>(10);
 		names.add(ExportTracksToXML.NAME);
@@ -84,46 +96,46 @@ public class ActionProvider {
 	 * Returns a new instance of the target action identified by the key
 	 * parameter. If the key is unknown to this factory, <code>null</code> is
 	 * returned.
-	 * 
+	 *
 	 * @return a new {@link TrackMateAction}.
 	 */
-	public TrackMateAction getAction(final String key) {
+	public TrackMateAction getAction(final String key, final TrackMateGUIController controller) {
 
 		if (ExtractTrackStackAction.NAME.equals(key)) {
-			return new ExtractTrackStackAction(trackmate, controller);
+			return new ExtractTrackStackAction(controller.getSelectionModel());
 
 		} else if (LinkNew3DViewerAction.NAME.equals(key)) {
-			return new LinkNew3DViewerAction(trackmate, controller);
+			return new LinkNew3DViewerAction(controller);
 
 		} else if (CopyOverlayAction.NAME.equals(key)) {
-			return new CopyOverlayAction(trackmate, controller);
+			return copyOverlayAction;
 
 		} else if (PlotNSpotsVsTimeAction.NAME.equals(key)) {
-			return new PlotNSpotsVsTimeAction(trackmate, controller);
+			return plotNSpotsVsTimeAction;
 
 		} else if (CaptureOverlayAction.NAME.equals(key)) {
-			return new CaptureOverlayAction(trackmate, controller);
+			return captureOverlayAction;
 
 		} else if (ResetSpotTimeFeatureAction.NAME.equals(key)) {
-			return new ResetSpotTimeFeatureAction(trackmate, controller);
+			return resetSpotTimeFeatureAction;
 
 		} else if (RecalculateFeatureAction.NAME.equals(key)) {
-			return new RecalculateFeatureAction(trackmate, controller);
+			return recalculateFeatureAction;
 
 		} else if (RadiusToEstimatedAction.NAME.equals(key)) {
-			return new RadiusToEstimatedAction(trackmate, controller);
+			return radiusToEstimatedAction;
 
 		} else if (ResetRadiusAction.NAME.equals(key)) {
-			return new ResetRadiusAction(trackmate, controller);
+			return resetRadiusAction;
 
 		} else if (ExportTracksToXML.NAME.equals(key)) {
-			return new ExportTracksToXML(trackmate, controller);
+			return new ExportTracksToXML(controller);
 
 		} else if (ISBIChallengeExporter.NAME.equals(key)) {
-			return new ISBIChallengeExporter(trackmate, controller);
+			return new ISBIChallengeExporter(controller);
 
 		} else if (MergeFileAction.NAME.equals(key)) {
-			return new MergeFileAction(trackmate, controller);
+			return new MergeFileAction(controller);
 		}
 
 		return null;
