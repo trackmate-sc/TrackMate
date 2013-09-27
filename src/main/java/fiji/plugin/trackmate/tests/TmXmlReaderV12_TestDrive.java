@@ -22,7 +22,7 @@ public class TmXmlReaderV12_TestDrive {
 		final TmXmlReader reader = new TmXmlReader_v12(file);
 		final Model model = reader.getModel();
 		final Settings settings = new Settings();
-		reader.readSettings(settings, new DetectorProvider(model), new TrackerProvider(model), new SpotAnalyzerProvider(), new EdgeAnalyzerProvider(), new TrackAnalyzerProvider());
+		reader.readSettings(settings, new DetectorProvider(), new TrackerProvider(model), new SpotAnalyzerProvider(), new EdgeAnalyzerProvider(), new TrackAnalyzerProvider());
 
 		System.out.println(model);
 		System.out.println(settings);

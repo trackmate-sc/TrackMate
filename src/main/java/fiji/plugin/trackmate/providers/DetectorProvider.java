@@ -21,9 +21,9 @@ import java.util.Map;
 
 import org.jdom2.Element;
 
+import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.detection.DetectorKeys;
 import fiji.plugin.trackmate.detection.DogDetectorFactory;
 import fiji.plugin.trackmate.detection.DownsampleLogDetectorFactory;
@@ -43,22 +43,24 @@ public class DetectorProvider extends AbstractProvider {
 	 * BLANK CONSTRUCTOR
 	 */
 
-	private Model model;
+	protected LogDetectorFactory<?>	logDetectorFactory;
+	protected DogDetectorFactory<?>	dogDetectorFactory;
+	protected DownsampleLogDetectorFactory<?>	downsampleLogDetectorFactory;
+	protected ManualDetectorFactory<?>			manualDetectorFactory;
 
 	/**
-	 * This provider provides the GUI with the spot detectors currently available in the 
-	 * current TrackMate version. Each detector is identified by a key String, which can be used 
-	 * to retrieve new instance of the detector, settings for the target detector and a 
+	 * This provider provides the GUI with the spot detectors currently available in the
+	 * current TrackMate version. Each detector is identified by a key String, which can be used
+	 * to retrieve new instance of the detector, settings for the target detector and a
 	 * GUI panel able to configure these settings.
 	 * <p>
 	 * If you want to add custom detectors to TrackMate GUI, a simple way is to extend this
-	 * factory so that it is registered with the custom detectors and pass this 
+	 * factory so that it is registered with the custom detectors and pass this
 	 * extended provider to the {@link TrackMate} trackmate.
-	 * @param settings 
-	 * @param model 
+	 * @param settings
+	 * @param model
 	 */
-	public DetectorProvider(Model model) {
-		this.model = model;
+	public DetectorProvider() {
 		registerDetectors();
 		currentKey = LogDetectorFactory.DETECTOR_KEY;
 	}
@@ -69,9 +71,16 @@ public class DetectorProvider extends AbstractProvider {
 	 */
 
 	/**
-	 * Register the standard detectors shipped with TrackMate.
+	 * Registers the standard detectors shipped with TrackMate, and instantiates
+	 * their factories.
 	 */
+	@SuppressWarnings("rawtypes")
 	protected void registerDetectors() {
+		// Instances
+		this.dogDetectorFactory = new DogDetectorFactory();
+		this.logDetectorFactory = new LogDetectorFactory();
+		this.manualDetectorFactory = new ManualDetectorFactory();
+		this.downsampleLogDetectorFactory = new DownsampleLogDetectorFactory();
 		// keys
 		keys = new ArrayList<String>(4);
 		keys.add(LogDetectorFactory.DETECTOR_KEY);
@@ -93,16 +102,16 @@ public class DetectorProvider extends AbstractProvider {
 	}
 
 	/**
-	 * Marshalls a settings map to a JDom element, ready for saving to XML. 
+	 * Marshalls a settings map to a JDom element, ready for saving to XML.
 	 * The element is <b>updated</b> with new attributes.
 	 * <p>
 	 * Only parameters specific to the target detector factory are marshalled.
 	 * The element also always receive an attribute named {@value DetectorKeys#XML_ATTRIBUTE_DETECTOR_NAME}
 	 * that saves the target {@link SpotDetectorFactory} key.
-	 * 
+	 *
 	 * @return true if marshalling was successful. If not, check {@link #getErrorMessage()}
 	 */
-	public boolean marshall(final Map<String, Object> settings, Element element) {
+	public boolean marshall(final Map<String, Object> settings, final Element element) {
 
 		element.setAttribute(XML_ATTRIBUTE_DETECTOR_NAME, currentKey);
 
@@ -110,11 +119,11 @@ public class DetectorProvider extends AbstractProvider {
 
 			return writeRadius(settings, element);
 
-		} else if (currentKey.equals(LogDetectorFactory.DETECTOR_KEY) 
+		} else if (currentKey.equals(LogDetectorFactory.DETECTOR_KEY)
 				|| currentKey.equals(DogDetectorFactory.DETECTOR_KEY)) {
 
 			return writeTargetChannel(settings, element)
-					&& writeRadius(settings, element) 
+					&& writeRadius(settings, element)
 					&& writeThreshold(settings, element)
 					&& writeDoMedian(settings, element)
 					&& writeDoSubPixel(settings, element);
@@ -122,8 +131,8 @@ public class DetectorProvider extends AbstractProvider {
 		} else if (currentKey.equals(DownsampleLogDetectorFactory.DETECTOR_KEY)) {
 
 			return writeTargetChannel(settings, element)
-					&& writeRadius(settings, element) 
-					&& writeThreshold(settings, element) 
+					&& writeRadius(settings, element)
+					&& writeThreshold(settings, element)
 					&& writeDownsamplingFactor(settings, element);
 
 		} else {
@@ -135,23 +144,23 @@ public class DetectorProvider extends AbstractProvider {
 	}
 
 	/**
-	 * Un-marshalls a JDom element to update a settings map, and sets the target 
-	 * detector factory of this provider from the element. 
+	 * Un-marshalls a JDom element to update a settings map, and sets the target
+	 * detector factory of this provider from the element.
 	 * <p>
-	 * Concretely: the detector key is read from the element, and is used to set 
-	 * the target {@link #currentKey} of this provider. The the specific settings 
+	 * Concretely: the detector key is read from the element, and is used to set
+	 * the target {@link #currentKey} of this provider. The the specific settings
 	 * map for the targeted detector factory is updated from the element.
-	 * 
+	 *
 	 * @param element the JDom element to read from.
 	 * @param settings the map to update. Is cleared prior to updating, so that it contains
 	 * only the parameters specific to the target detector factory.
 	 * @return true if unmarshalling was successful. If not, check {@link #getErrorMessage()}
 	 */
-	public boolean unmarshall(final Element element, Map<String, Object> settings) {
-		
+	public boolean unmarshall(final Element element, final Map<String, Object> settings) {
+
 		settings.clear();
 
-		String detectorKey = element.getAttributeValue(XML_ATTRIBUTE_DETECTOR_NAME);
+		final String detectorKey = element.getAttributeValue(XML_ATTRIBUTE_DETECTOR_NAME);
 		if (null == detectorKey) {
 			errorMessage = "Detector element not found, using default detector.\n";
 			currentKey = LogDetectorFactory.DETECTOR_KEY;
@@ -164,13 +173,13 @@ public class DetectorProvider extends AbstractProvider {
 			return false;
 		}
 
-		StringBuilder errorHolder = new StringBuilder();
-		
+		final StringBuilder errorHolder = new StringBuilder();
+
 		if (currentKey.equals(ManualDetectorFactory.DETECTOR_KEY)) {
 
 			return readDoubleAttribute(element, settings, KEY_RADIUS, errorHolder);
 
-		} else if (currentKey.equals(LogDetectorFactory.DETECTOR_KEY) 
+		} else if (currentKey.equals(LogDetectorFactory.DETECTOR_KEY)
 				|| currentKey.equals(DogDetectorFactory.DETECTOR_KEY)) {
 
 			ok = true;
@@ -192,16 +201,16 @@ public class DetectorProvider extends AbstractProvider {
 			errorMessage = "Unknow detector factory key: "+currentKey+".\n";
 			return false;
 		}
-		
+
 		if (!checkSettingsValidity(settings)) {
 			ok = false;
 			errorHolder.append(errorMessage); // get the error from validoty check
 		}
-		
+
 		if (!ok) {
 			errorMessage = errorHolder.toString();
 		}
-		
+
 		return ok;
 	}
 
@@ -209,23 +218,23 @@ public class DetectorProvider extends AbstractProvider {
 
 
 	/**
-	 * @return a new instance of the target detector identified by the key parameter. If 
+	 * @return a new instance of the target detector identified by the key parameter. If
 	 * the key is unknown to this provider, return <code>null</code>.
 	 */
 	@SuppressWarnings("rawtypes")
 	public SpotDetectorFactory getDetectorFactory() {
 
 		if (currentKey.equals(LogDetectorFactory.DETECTOR_KEY)) {
-			return new LogDetectorFactory();
+			return logDetectorFactory;
 
 		} else if (currentKey.equals(DogDetectorFactory.DETECTOR_KEY)){
-			return new DogDetectorFactory();
+			return dogDetectorFactory;
 
 		} else if (currentKey.equals(DownsampleLogDetectorFactory.DETECTOR_KEY)) {
-			return new DownsampleLogDetectorFactory();
+			return downsampleLogDetectorFactory;
 
 		} else if (currentKey.equals(ManualDetectorFactory.DETECTOR_KEY)) {
-			return new ManualDetectorFactory();
+			return manualDetectorFactory;
 
 		} else {
 			return null;
@@ -233,14 +242,14 @@ public class DetectorProvider extends AbstractProvider {
 	}
 
 	/**
-	 * Returns a new default settings map suitable for the target detector identified by 
-	 * the {@link #currentKey}. Settings are instantiated with default values.  
-	 * If the key is unknown to this provider, <code>null</code> is returned. 
+	 * Returns a new default settings map suitable for the target detector identified by
+	 * the {@link #currentKey}. Settings are instantiated with default values.
+	 * If the key is unknown to this provider, <code>null</code> is returned.
 	 */
 	public Map<String, Object> getDefaultSettings() {
-		Map<String, Object> settings = new HashMap<String, Object>();
+		final Map<String, Object> settings = new HashMap<String, Object>();
 
-		if (currentKey.equals(LogDetectorFactory.DETECTOR_KEY) 
+		if (currentKey.equals(LogDetectorFactory.DETECTOR_KEY)
 				|| currentKey.equals(DogDetectorFactory.DETECTOR_KEY)) {
 			settings.put(KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL);
 			settings.put(KEY_RADIUS, DEFAULT_RADIUS);
@@ -289,13 +298,16 @@ public class DetectorProvider extends AbstractProvider {
 	}
 
 	/**
-	 * Returns a new GUI panel able to configure the settings suitable for the target detector 
-	 * factory. If the key is unknown to this provider, <code>null</code> is returned.
+	 * Returns a new GUI panel able to configure the settings suitable for the
+	 * target detector factory. If the key is unknown to this provider,
+	 * <code>null</code> is returned.
+	 * 
+	 * @param model
 	 */
-	public ConfigurationPanel getDetectorConfigurationPanel(Settings settings) 	{
-		
-		ImagePlus imp = settings.imp;
-		
+	public ConfigurationPanel getDetectorConfigurationPanel(final Settings settings, final Model model) {
+
+		final ImagePlus imp = settings.imp;
+
 		if (currentKey.equals(LogDetectorFactory.DETECTOR_KEY)) {
 			return new LogDetectorConfigurationPanel(imp, LogDetectorFactory.INFO_TEXT, LogDetectorFactory.NAME, model);
 
@@ -325,19 +337,19 @@ public class DetectorProvider extends AbstractProvider {
 			return false;
 		}
 
-		StringBuilder errorHolder = new StringBuilder();
+		final StringBuilder errorHolder = new StringBuilder();
 		if (currentKey.equals(ManualDetectorFactory.DETECTOR_KEY)) {
 
-			boolean ok = ManualDetectorFactory.checkInput(settings, errorHolder);
+			final boolean ok = ManualDetectorFactory.checkInput(settings, errorHolder);
 			if (!ok) {
 				errorMessage = errorHolder.toString();
 			}
 			return ok;
 
-		} else if (currentKey.equals(LogDetectorFactory.DETECTOR_KEY) 
+		} else if (currentKey.equals(LogDetectorFactory.DETECTOR_KEY)
 				|| currentKey.equals(DogDetectorFactory.DETECTOR_KEY)) {
 
-			boolean ok = LogDetectorFactory.checkInput(settings, errorHolder);
+			final boolean ok = LogDetectorFactory.checkInput(settings, errorHolder);
 			if (!ok) {
 				errorMessage = errorHolder.toString();
 			}
@@ -345,7 +357,7 @@ public class DetectorProvider extends AbstractProvider {
 
 		} else if (currentKey.equals(DownsampleLogDetectorFactory.DETECTOR_KEY)) {
 
-			boolean ok = DownsampleLogDetectorFactory.checkInput(settings, errorHolder);
+			final boolean ok = DownsampleLogDetectorFactory.checkInput(settings, errorHolder);
 			if (!ok) {
 				errorMessage = errorHolder.toString();
 			}
@@ -363,27 +375,27 @@ public class DetectorProvider extends AbstractProvider {
 	 * PROTECTED METHODS
 	 */
 
-	protected boolean writeTargetChannel(final Map<String, Object> settings, Element element) {
+	protected boolean writeTargetChannel(final Map<String, Object> settings, final Element element) {
 		return writeAttribute(settings, element, KEY_TARGET_CHANNEL, Integer.class);
 	}
 
-	protected boolean writeRadius(final Map<String, Object> settings, Element element) {
+	protected boolean writeRadius(final Map<String, Object> settings, final Element element) {
 		return writeAttribute(settings, element, KEY_RADIUS, Double.class);
 	}
 
-	protected boolean writeThreshold(final Map<String, Object> settings, Element element) {
+	protected boolean writeThreshold(final Map<String, Object> settings, final Element element) {
 		return writeAttribute(settings, element, KEY_THRESHOLD, Double.class);
 	}
 
-	protected boolean writeDoMedian(final Map<String, Object> settings, Element element) {
+	protected boolean writeDoMedian(final Map<String, Object> settings, final Element element) {
 		return writeAttribute(settings, element, KEY_DO_MEDIAN_FILTERING, Boolean.class);
 	}
 
-	protected boolean writeDoSubPixel(final Map<String, Object> settings, Element element) {
+	protected boolean writeDoSubPixel(final Map<String, Object> settings, final Element element) {
 		return writeAttribute(settings, element, KEY_DO_SUBPIXEL_LOCALIZATION, Boolean.class);
 	}
 
-	protected boolean writeDownsamplingFactor(final Map<String, Object> settings, Element element) {
+	protected boolean writeDownsamplingFactor(final Map<String, Object> settings, final Element element) {
 		return writeAttribute(settings, element, KEY_DOWNSAMPLE_FACTOR, Integer.class);
 	}
 }
