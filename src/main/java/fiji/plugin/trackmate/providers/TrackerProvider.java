@@ -26,7 +26,6 @@ import java.util.Map;
 
 import org.jdom2.Element;
 
-import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.SpotDetector;
@@ -51,8 +50,6 @@ public class TrackerProvider extends AbstractProvider  {
 	protected static final String XML_ELEMENT_NAME_SPLITTING = "TrackSplitting";
 	protected static final String XML_ELEMENT_NAME_FEATURE_PENALTIES = "FeaturePenalties";
 
-	protected final Model model;
-
 	/*
 	 * CONSTRUCTOR
 	 */
@@ -71,8 +68,7 @@ public class TrackerProvider extends AbstractProvider  {
 	 * factory so that it is registered with the custom trackers and pass this
 	 * extended provider to the {@link TrackMate} trackmate.
 	 */
-	public TrackerProvider(final Model model) {
-		this.model = model;
+	public TrackerProvider() {
 		this.currentKey = SimpleFastLAPTracker.TRACKER_KEY;
 		registerTrackers();
 	}
@@ -107,23 +103,24 @@ public class TrackerProvider extends AbstractProvider  {
 	}
 
 	/**
-	 * Returns a new instance of the target tracker identified by the key parameter.
-	 * If the key is unknown to this factory, <code>null</code> is returned.
-	 * The tracker returned is <b>not</b> configured.
+	 * Returns a new instance of the target tracker identified by the key
+	 * parameter. If the key is unknown to this factory, <code>null</code> is
+	 * returned. The tracker returned is <b>not</b> configured.
+	 * 
 	 * @return a new {@link SpotTracker}.
+	 * @see AbstractProvider#select(String)
 	 */
 	public SpotTracker getTracker() {
 
-		final Logger logger = model.getLogger();
 		SpotTracker tracker;
 		if (currentKey.equals(SimpleFastLAPTracker.TRACKER_KEY)) {
-			tracker = new SimpleFastLAPTracker(logger);
+			tracker = new SimpleFastLAPTracker();
 
 		} else if (currentKey.equals(FastLAPTracker.TRACKER_KEY)) {
-			tracker = new FastLAPTracker(logger);
+			tracker = new FastLAPTracker();
 
 		} else if (currentKey.equals(NearestNeighborTracker.TRACKER_KEY)) {
-			tracker = new NearestNeighborTracker(logger);
+			tracker = new NearestNeighborTracker();
 
 		} else if (currentKey.equals(ManualTracker.TRACKER_KEY)) {
 			tracker = new ManualTracker();
@@ -135,8 +132,10 @@ public class TrackerProvider extends AbstractProvider  {
 	}
 
 	/**
-	 * @return the html String containing a descriptive information about the target tracker,
-	 * or <code>null</code> if it is unknown to this factory.
+	 * Returns the html String containing a descriptive information about the
+	 * target tracker, or <code>null</code> if it is unknown to this factory.
+	 *
+	 * @see AbstractProvider#select(String)
 	 */
 	public String getInfoText() {
 		if (currentKey.equals(SimpleFastLAPTracker.TRACKER_KEY)) {
@@ -157,9 +156,11 @@ public class TrackerProvider extends AbstractProvider  {
 	}
 
 	/**
-	 * Returns the name of the target tracker,
-	 * or <code>null</code> if it is unknown to this factory.
+	 * Returns the name of the target tracker, or <code>null</code> if it is
+	 * unknown to this factory.
+	 *
 	 * @return a String representation of the selected tracker.
+	 * @see AbstractProvider#select(String)
 	 */
 	public String getName() {
 		if (currentKey.equals(SimpleFastLAPTracker.TRACKER_KEY)) {
@@ -180,11 +181,14 @@ public class TrackerProvider extends AbstractProvider  {
 	}
 
 	/**
-	 * Returns a new GUI panel able to configure the settings suitable for the target tracker
-	 * identified by the key parameter.
-	 * If the key is unknown to this factory, <code>null</code> is returned.
+	 * Returns a new GUI panel able to configure the settings suitable for the
+	 * target tracker identified by the key parameter. If the key is unknown to
+	 * this factory, <code>null</code> is returned.
+	 *
+	 * @return a new configuration panel.
+	 * @see AbstractProvider#select(String)
 	 */
-	public ConfigurationPanel getTrackerConfigurationPanel() 	{
+	public ConfigurationPanel getTrackerConfigurationPanel(final Model model) {
 
 		final String trackerName = getName();
 		final String spaceUnits = model.getSpaceUnits();
@@ -206,9 +210,13 @@ public class TrackerProvider extends AbstractProvider  {
 	}
 
 	/**
-	 * @return a new default settings map suitable for the target tracker identified by
-	 * the {@link #currentKey}. Settings are instantiated with default values.
-	 * If the key is unknown to this provider, <code>null</code> is returned.
+	 * Returns a new default settings map suitable for the target tracker
+	 * identified by the {@link #currentKey}. Settings are instantiated with
+	 * default values. If the key is unknown to this provider, <code>null</code>
+	 * is returned.
+	 *
+	 * @return a settings map.
+	 * @see AbstractProvider#select(String)
 	 */
 	public Map<String, Object> getDefaultSettings() {
 		Map<String, Object> settings;
@@ -228,14 +236,17 @@ public class TrackerProvider extends AbstractProvider  {
 	}
 
 	/**
-	 * Marshalls a settings map to a JDom element, ready for saving to XML.
-	 * The element is <b>updated</b> with new attributes.
+	 * Marshalls a settings map to a JDom element, ready for saving to XML. The
+	 * element is <b>updated</b> with new attributes.
 	 * <p>
 	 * Only parameters specific to the target tracker factory are marshalled.
-	 * The element also always receive an attribute named {@value TrackerKeys#XML_ATTRIBUTE_DETECTOR_NAME}
-	 * that saves the target {@link SpotTracker} key.
+	 * The element also always receive an attribute named
+	 * {@value TrackerKeys#XML_ATTRIBUTE_DETECTOR_NAME} that saves the target
+	 * {@link SpotTracker} key.
 	 *
-	 * @return true if marshalling was successful. If not, check {@link #getErrorMessage()}
+	 * @return true if marshalling was successful. If not, check
+	 *         {@link #getErrorMessage()}
+	 * @see AbstractProvider#select(String)
 	 */
 	public boolean marshall(final Map<String, Object> settings, final Element element) {
 
@@ -312,7 +323,7 @@ public class TrackerProvider extends AbstractProvider  {
 
 		} else {
 
-			errorMessage = "Unknow detector factory key: "+currentKey+".\n";
+			errorMessage = "Unknow tracker key: " + currentKey + ".\n";
 			return false;
 		}
 	}
@@ -322,13 +333,17 @@ public class TrackerProvider extends AbstractProvider  {
 	 * tracker of this provider from the element.
 	 * <p>
 	 * Concretely: the tracker key is read from the element, and is used to set
-	 * the target {@link #currentKey} of this provider. The the specific settings
-	 * map for the targeted tracker is updated from the element.
+	 * the target {@link #currentKey} of this provider. The the specific
+	 * settings map for the targeted tracker is updated from the element.
 	 *
-	 * @param element the JDom element to read from.
-	 * @param settings the map to update. Is cleared prior to updating, so that it contains
-	 * only the parameters specific to the target tracker.
-	 * @return true if unmarshalling was successful. If not, check {@link #getErrorMessage()}
+	 * @param element
+	 *            the JDom element to read from.
+	 * @param settings
+	 *            the map to update. Is cleared prior to updating, so that it
+	 *            contains only the parameters specific to the target tracker.
+	 * @return true if unmarshalling was successful. If not, check
+	 *         {@link #getErrorMessage()}
+	 * @see AbstractProvider#select(String)
 	 */
 	public boolean unmarshall(final Element element, final Map<String, Object> settings) {
 
@@ -459,26 +474,32 @@ public class TrackerProvider extends AbstractProvider  {
 	}
 
 
-	/**  @return a list of the tracker keys available through this provider.  */
+	/** Returns a list of the tracker keys available through this provider. */
 	public List<String> getTrackerKeys() {
 		return keys;
 	}
 
-	/**  @return a list of the tracker info texts available through this provider.  */
+	/**
+	 * Returns a list of the tracker info texts available through this provider.
+	 */
 	public List<String> getTrackerInfoTexts() {
 		return infoTexts;
 	}
 
-	/**  @return a list of the tracker names available through this provider.  */
+	/** Returns a list of the tracker names available through this provider. */
 	public List<String> getTrackerNames() {
 		return names;
 	}
 
 	/**
-	 * Check the validity of the given settings map for the target {@link SpotDetector}
-	 * set in this provider. The validity check is strict: we check that all needed parameters
-	 * are here and are of the right class, and that there is no extra unwanted parameters.
-	 * @return  true if the settings map can be used with the target factory. If not, check {@link #getErrorMessage()}
+	 * Checks the validity of the given settings map for the target
+	 * {@link SpotDetector} set in this provider. The validity check is strict:
+	 * we check that all needed parameters are here and are of the right class,
+	 * and that there is no extra unwanted parameters.
+	 *
+	 * @return true if the settings map can be used with the target factory. If
+	 *         not, check {@link #getErrorMessage()}
+	 * @see AbstractProvider#select(String)
 	 */
 	public boolean checkSettingsValidity(final Map<String, Object> settings) {
 		if (null == settings) {
@@ -512,7 +533,7 @@ public class TrackerProvider extends AbstractProvider  {
 
 		} else {
 
-			errorMessage = "Unknow detector factory key: "+currentKey+".\n";
+			errorMessage = "Unknow tracker key: " + currentKey + ".\n";
 			return false;
 
 		}
@@ -521,6 +542,8 @@ public class TrackerProvider extends AbstractProvider  {
 	/**
 	 * A utility method that builds a string representation of a settings map
 	 * owing to the currently selected tracker in this provider.
+	 *
+	 * @see AbstractProvider#select(String)
 	 */
 	@SuppressWarnings("unchecked")
 	public String toString(final Map<String, Object> sm) {

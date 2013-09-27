@@ -31,62 +31,62 @@ import fiji.plugin.trackmate.tracking.hungarian.AssignmentProblem;
 import fiji.plugin.trackmate.tracking.hungarian.HungarianAlgorithm;
 
 /**
- * 
+ *
  * <h2>Overview</h2>
- * 
+ *
  * <p>
  * This class tracks objects by formulating the problem as a Linear Assignment
  * Problem.
- * 
+ *
  * <p>
  * For reference, see: Jaqaman, K. et al.
  * "Robust single-particle tracking in live-cell time-lapse sequences." Nature
  * Methods, 2008.
- * 
+ *
  * <p>
  * In this tracking framework, tracking is divided into two steps:
- * 
+ *
  * <ol>
  * <li>Identify individual track segments</li>
  * <li>Gap closing, merging and splitting</li>
  * </ol>
- * 
+ *
  * <p>
  * Both steps are treated as a linear assignment problem. To solve the problems,
  * a cost matrix is created for each step, and the Hungarian Algorithm is used
  * to determine the cost-minimizing assignments. The results of the calculations
  * are the complete tracks of the objects. For more details on the Hungarian
  * Algorithm, see http://en.wikipedia.org/wiki/Hungarian_algorithm.
- * 
+ *
  * <h2>Cost Matrices</h2>
- * 
+ *
  * Since there are two discrete steps to tracking using this framework, two
  * distinct classes of cost matrices are required to solve the problem. The user
  * can either choose to use the cost matrices / functions from the paper (for
  * Brownian motion), or can supply their own cost matrices.
- * 
+ *
  * <p>
  * One matrix corresponds to step (1) above, and is used to assign individual
  * objects to track segments. A track segment is created by linking the objects
  * between consecutive frames, with the condition that at an object in one frame
  * can link to at most one other object in another frame. The options for a
  * object assignment at this step are:
- * 
+ *
  * <ul>
  * <li>Object linking (an object in frame t is linked one-to-one to a object in
  * frame t+1)</li>
  * <li>Object in frame t not linked to an object in frame t+1 (track end)</li>
  * <li>Object in frame t+1 not linked to an object in frame t (track start)</li>
  * </ul>
- * 
+ *
  * <p>
  * The cost matrix for this step is illustrated in Figure 1b in the paper, and
  * is described in more detail in {@link LinkingCostMatrixCreator}.
- * 
+ *
  * <p>
  * The other matrix corresponds to step (2) above, and is used to link together
  * the track segments into final tracks. Track segments can be:
- * 
+ *
  * <ul>
  * <li>Linked end-to-tail (gap closing)</li>
  * <li>Split (the start of one track is linked to the middle of another track)</li>
@@ -94,23 +94,23 @@ import fiji.plugin.trackmate.tracking.hungarian.HungarianAlgorithm;
  * <li>Terminated (track ends)</li>
  * <li>Initiated (track starts)</li>
  * </ul>
- * 
+ *
  * <p>
  * The cost matrix for this step is illustrated in Figure 1c in the paper, and
  * is described in more detail in {@link TrackSegmentCostMatrixCreator}.
- * 
+ *
  * <p>
  * Solving both LAPs yields complete tracks.
- * 
+ *
  * <h2>How to use this class</h2>
- * 
+ *
  * <p>
  * To use the default cost matrices/function, use the default constructor, and
  * simply call {@link #process()}.
- * 
+ *
  * <p>
  * If you wish to using your specify your own cost matrices:
- * 
+ *
  * <ol>
  * <li>Instantiate this class normally.
  * <li>Set the linking cost matrix using {@link #setLinkingCosts(ArrayList)}.</li>
@@ -121,7 +121,7 @@ import fiji.plugin.trackmate.tracking.hungarian.HungarianAlgorithm;
  * <li>Run {@link #linkTrackSegmentsToFinalTracks(ArrayList)} to compute the
  * final tracks.</li>
  * </ol>
- * 
+ *
  * @author Nicholas Perry
  */
 public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotTracker {
@@ -134,7 +134,7 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 	private static final boolean DEBUG = false;
 
 	/** Logger used to echo progress on tracking. */
-	protected final Logger logger;
+	protected Logger logger	= Logger.VOID_LOGGER;
 
 	/** The cost matrix for linking individual track segments (step 2). */
 	protected double[][] segmentCosts = null;
@@ -184,17 +184,6 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 	/** The settings map that configures this tracker. */
 	protected Map<String, Object> settings;
 
-	/*
-	 * CONSTRUCTOR
-	 */
-
-	public LAPTracker(final Logger logger) {
-		this.logger = logger;
-	}
-
-	public LAPTracker() {
-		this(Logger.VOID_LOGGER);
-	}
 
 	/*
 	 * PROTECTED METHODS
@@ -241,7 +230,7 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 	/**
 	 * Set the cost matrix used for step 2, linking track segments into final
 	 * tracks.
-	 * 
+	 *
 	 * @param segmentCosts
 	 *            The cost matrix, with structure matching figure 1c in the
 	 *            paper.
@@ -253,7 +242,7 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 	/**
 	 * Get the cost matrix used for step 2, linking track segments into final
 	 * tracks.
-	 * 
+	 *
 	 * @return The cost matrix.
 	 */
 	public double[][] getSegmentCosts() {
@@ -262,7 +251,7 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 
 	/**
 	 * Returns the track segments computed from step (1).
-	 * 
+	 *
 	 * @return Returns a reference to the track segments, or null if
 	 *         {@link #computeTrackSegments()} hasn't been executed.
 	 */
@@ -380,7 +369,7 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 
 	/**
 	 * Creates the cost matrix used to link track segments (step 2).
-	 * 
+	 *
 	 * @return True if executes successfully, false otherwise.
 	 */
 	public boolean createTrackSegmentCostMatrix() {
@@ -398,7 +387,7 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 
 	/**
 	 * Creates the track segments computed from step 1.
-	 * 
+	 *
 	 * @return True if execution completes successfully.
 	 */
 	public boolean linkObjectsToTrackSegments() {
@@ -416,7 +405,7 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 
 	/**
 	 * Creates the final tracks computed from step 2.
-	 * 
+	 *
 	 * @see TrackSegmentCostMatrixCreator#getMiddlePoints()
 	 * @param middlePoints
 	 *            A list of the middle points of the track segments.
@@ -461,7 +450,7 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 	 * in the next frame. Then compute the optimal track segments using this
 	 * cost matrix. Finally, update the {@link #trackGraph} field with found
 	 * links.
-	 * 
+	 *
 	 * @see LAPTracker#createFrameToFrameLinkingCostMatrix(List, List,
 	 *      TrackerSettings)
 	 */
@@ -572,7 +561,7 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 	 * Hook for subclassers.
 	 * <p>
 	 * Create the cost matrix required in the frame to frame linking.
-	 * 
+	 *
 	 * @param t0
 	 *            the list of spots in the first frame
 	 * @param t1
@@ -595,7 +584,7 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 	/**
 	 * Compute the optimal final track using the cost matrix
 	 * {@link LAPTracker#segmentCosts}.
-	 * 
+	 *
 	 * @return True if executes correctly, false otherwise.
 	 */
 	public int[][] solveLAPForFinalTracks() {
@@ -631,11 +620,11 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 	 * and appropriately links the track segments. Before this method is called,
 	 * the Spots in the track segments are connected within themselves, but not
 	 * between track segments.
-	 * 
+	 *
 	 * Thus, we only care here if the result was a 'gap closing,' 'merging,' or
 	 * 'splitting' event, since the others require no change to the existing
 	 * structure of the track segments.
-	 * 
+	 *
 	 * Method: for each solution of the LAP, determine if it's a gap closing,
 	 * merging, or splitting event. If so, appropriately link the track segment
 	 * Spots.
@@ -743,6 +732,11 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 	@Override
 	public String getKey() {
 		return TRACKER_KEY;
+	}
+
+	@Override
+	public void setLogger(final Logger logger) {
+		this.logger = logger;
 	}
 
 }

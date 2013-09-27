@@ -44,10 +44,11 @@ public class NNTrackerTest {
 
 		// 2 - Track the test spots
 		final long start = System.currentTimeMillis();
-		final NearestNeighborTracker tracker = new NearestNeighborTracker(Logger.DEFAULT_LOGGER);
+		final NearestNeighborTracker tracker = new NearestNeighborTracker();
 		final Map<String, Object> settings = new HashMap<String, Object>();
 		settings.put(KEY_LINKING_MAX_DISTANCE, 15d);
 		tracker.setTarget(model.getSpots(), settings );
+		tracker.setLogger(Logger.DEFAULT_LOGGER);
 
 		if (!tracker.checkInput())
 			System.err.println("Error checking input: "+tracker.getErrorMessage());

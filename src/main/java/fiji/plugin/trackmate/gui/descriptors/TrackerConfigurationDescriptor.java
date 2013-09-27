@@ -32,7 +32,7 @@ public class TrackerConfigurationDescriptor implements WizardPanelDescriptor {
 	 */
 	private void updateComponent() {
 		// Regenerate panel
-		configPanel = trackerProvider.getTrackerConfigurationPanel();
+		configPanel = trackerProvider.getTrackerConfigurationPanel(trackmate.getModel());
 		Map<String, Object> settings = trackmate.getSettings().trackerSettings;
 		// Bulletproof null
 		if (null == settings || !trackerProvider.checkSettingsValidity(settings)) {

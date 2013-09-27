@@ -28,14 +28,14 @@ import fiji.plugin.trackmate.util.TMUtils;
  * The TrackMate_ class runs on the currently active time-lapse image (2D or 3D)
  * and both identifies and tracks bright spots over time.
  * </p>
- * 
+ *
  * <p>
  * <b>Required input:</b> A 2D or 3D time-lapse image with bright blobs.
  * </p>
- * 
+ *
  * @author Nicholas Perry, Jean-Yves Tinevez - Institut Pasteur - July 2010 -
  *         2011 - 2012 - 2013
- * 
+ *
  */
 public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 
@@ -84,7 +84,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 	 * coordinate system. Additionally, is a non-square ROI was specified (e.g.
 	 * a polygon), it prunes the spots that are not within the polygon of the
 	 * ROI.
-	 * 
+	 *
 	 * @param spotsThisFrame
 	 *            the spot list to inspect
 	 * @param settings
@@ -134,7 +134,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 	 * Features are calculated for each spot, using their location, and the raw
 	 * image. Features to be calculated and analyzers are taken from the
 	 * settings field of this object.
-	 * 
+	 *
 	 * @param doLogIt
 	 *            if <code>true</code>, the {@link Logger} of the model will be
 	 *            notified.
@@ -162,7 +162,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 	 * Features are calculated for each spot, using their location, and the raw
 	 * image. Features to be calculated and analyzers are taken from the
 	 * settings field of this object.
-	 * 
+	 *
 	 * @param doLogIt
 	 *            if <code>true</code>, the {@link Logger} of the model will be
 	 *            notified.
@@ -184,7 +184,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 
 	/**
 	 * Calculate all features for all tracks.
-	 * 
+	 *
 	 * @return
 	 */
 	public boolean computeTrackFeatures(final boolean doLogIt) {
@@ -211,13 +211,14 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 	 * <p>
 	 * The {@link ModelChangeListener}s of this model will be notified when the
 	 * successful process is over.
-	 * 
+	 *
 	 * @see #getTrackGraph()
 	 */
 	public boolean execTracking() {
 		final Logger logger = model.getLogger();
 		logger.log("Starting tracking process.\n");
 		final SpotTracker tracker = settings.tracker;
+		tracker.setLogger(logger);
 		tracker.setTarget(model.getSpots(), settings.trackerSettings);
 		if (tracker.checkInput() && tracker.process()) {
 			model.getTrackModel().setGraph(tracker.getResult());
@@ -235,7 +236,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 	 * the source image and the detectr settings and execute the detection
 	 * process for all the frames set in the {@link Settings} object of the
 	 * target model.
-	 * 
+	 *
 	 * @return true if the whole detection step has executed correctly.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -460,7 +461,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 	 * <p>
 	 * The {@link ModelChangeListener}s of this model will be notified with a
 	 * {@link ModelChangeEvent#SPOTS_COMPUTED} event.
-	 * 
+	 *
 	 * @see #getSpots()
 	 * @see #setInitialFilter(Float)
 	 */
@@ -494,7 +495,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 	 * <p>
 	 * The {@link ModelChangeListener}s of this model will be notified with a
 	 * {@link ModelChangeEvent#SPOTS_FILTERED} event.
-	 * 
+	 *
 	 * @param doLogIt
 	 *            if true, will send a message to the {@link Model#logger}.
 	 * @see #getFilteredSpots()

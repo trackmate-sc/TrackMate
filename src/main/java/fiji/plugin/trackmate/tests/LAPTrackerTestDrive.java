@@ -40,7 +40,7 @@ public class LAPTrackerTestDrive {
 		final TmXmlReader reader = new TmXmlReader(file);
 		final Model model = reader.getModel();
 		final Settings settings = new Settings();
-		reader.readSettings(settings, null, new TrackerProvider(model), null, null, null);
+		reader.readSettings(settings, null, new TrackerProvider(), null, null, null);
 
 		System.out.println("Spots: "+ model.getSpots());
 		System.out.println("Found "+model.getTrackModel().nTracks(false)+" tracks in the file:");
@@ -61,8 +61,9 @@ public class LAPTrackerTestDrive {
 
 		// 2 - Track the test spots
 		final long start = System.currentTimeMillis();
-		final LAPTracker lap = new LAPTracker(Logger.DEFAULT_LOGGER);
+		final LAPTracker lap = new LAPTracker();
 		lap.setTarget(model.getSpots(), ts);
+		lap.setLogger(Logger.DEFAULT_LOGGER);
 
 		if (!lap.checkInput())
 			System.err.println("Error checking input: "+lap.getErrorMessage());
