@@ -1,8 +1,5 @@
 package fiji.plugin.trackmate.providers;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackBranchingAnalyzer;
@@ -20,12 +17,8 @@ import fiji.plugin.trackmate.features.track.TrackSpeedStatisticsAnalyzer;
  * Feature key names are for historical reason all capitalized in an enum manner. For instance: POSITION_X,
  * MAX_INTENSITY, etc... They must be suitable to be used as a attribute key in an xml file.
  */
-public class TrackAnalyzerProvider {
+public class TrackAnalyzerProvider extends AbstractFeatureAnalyzerProvider<TrackAnalyzer> {
 
-
-	/** The detector names, in the order they will appear in the GUI.
-	 * These names will be used as keys to access relevant track analyzer classes.  */
-	protected List<String> names;
 	/**
 	 * The {@link TrackIndexAnalyzer} has an internal state useful for lazy
 	 * computation of track features.
@@ -41,13 +34,15 @@ public class TrackAnalyzerProvider {
 	 */
 
 	/**
-	 * This provider provides the GUI with the model trackFeatureAnalyzers currently available in the
-	 * TrackMate trackmate. Each trackFeatureAnalyzer is identified by a key String, which can be used
-	 * to retrieve new instance of the trackFeatureAnalyzer.
+	 * This provider provides the GUI with the model trackFeatureAnalyzers
+	 * currently available in the TrackMate trackmate. Each trackFeatureAnalyzer
+	 * is identified by a key String, which can be used to retrieve new instance
+	 * of the trackFeatureAnalyzer.
 	 * <p>
-	 * If you want to add custom trackFeatureAnalyzers to TrackMate, a simple way is to extend this
-	 * factory so that it is registered with the custom trackFeatureAnalyzers and provide this
-	 * extended factory to the {@link TrackMate} trackmate.
+	 * If you want to add custom trackFeatureAnalyzers to TrackMate, a simple
+	 * way is to extend this factory so that it is registered with the custom
+	 * trackFeatureAnalyzers and provide this extended factory to the
+	 * {@link TrackMate} trackmate.
 	 */
 	public TrackAnalyzerProvider() {
 		registerTrackFeatureAnalyzers();
@@ -64,52 +59,16 @@ public class TrackAnalyzerProvider {
 	 */
 	protected void registerTrackFeatureAnalyzers() {
 		this.trackIndexAnalyzer = new TrackIndexAnalyzer();
-		this.trackDurationAnalyzer = new TrackDurationAnalyzer();
 		this.trackBranchingAnalyzer = new TrackBranchingAnalyzer();
 		this.trackSpeedStatisticsAnalyzer = new TrackSpeedStatisticsAnalyzer();
 		this.trackLocationAnalyzer = new TrackLocationAnalyzer();
-		// Names
-		names = new ArrayList<String>(4);
-		names.add(TrackBranchingAnalyzer.KEY);
-		names.add(TrackDurationAnalyzer.KEY);
-		names.add(TrackSpeedStatisticsAnalyzer.KEY);
-		names.add(TrackLocationAnalyzer.KEY);
-		names.add(TrackIndexAnalyzer.KEY);
-	}
+		// Duration analyzer is currently disabled.
+		this.trackDurationAnalyzer = new TrackDurationAnalyzer();
 
-	/**
-	 * Returns the instance of the target trackFeatureAnalyzer identified by the
-	 * key parameter. If the key is unknown to this factory, <code>null</code>
-	 * is returned.
-	 */
-	public TrackAnalyzer getTrackFeatureAnalyzer(final String key) {
-
-		if (key.equals(TrackDurationAnalyzer.KEY)) {
-			return trackDurationAnalyzer;
-
-		} else if (key.equals(TrackBranchingAnalyzer.KEY)) {
-			return trackBranchingAnalyzer;
-
-		} else if (key.equals(TrackSpeedStatisticsAnalyzer.KEY)) {
-			return trackSpeedStatisticsAnalyzer;
-
-		} else if (key.equals(TrackLocationAnalyzer.KEY)) {
-			return trackLocationAnalyzer;
-
-		} else if (key.equals(TrackIndexAnalyzer.KEY)) {
-			return trackIndexAnalyzer;
-
-		} else {
-			return null;
-		}
-	}
-
-	/**
-	 * Returns a list of the trackFeatureAnalyzer names available through this
-	 * provider.
-	 */
-	public List<String> getAvailableTrackFeatureAnalyzers() {
-		return names;
+		registerAnalyzer(TrackBranchingAnalyzer.KEY, trackBranchingAnalyzer);
+		registerAnalyzer(TrackSpeedStatisticsAnalyzer.KEY, trackSpeedStatisticsAnalyzer);
+		registerAnalyzer(TrackLocationAnalyzer.KEY, trackLocationAnalyzer);
+		registerAnalyzer(TrackIndexAnalyzer.KEY, trackIndexAnalyzer);
 	}
 
 }

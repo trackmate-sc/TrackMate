@@ -211,7 +211,7 @@ public class TmXmlReader {
 	/**
 	 * Returns the collection of views that were saved in this file. The views
 	 * returned are not rendered yet.
-	 * 
+	 *
 	 * @param provider
 	 *            the {@link ViewProvider} to instantiate the view. Each saved
 	 *            view must be known by the specified provider.
@@ -981,7 +981,7 @@ public class TmXmlReader {
 			} else {
 
 				if (settings.imp == null) {
-					logger.error("The source image is not loaded; cannot instantiates spot analzers.\n");
+					logger.error("The source image is not loaded; cannot instantiates spot analyzers.\n");
 					ok = false;
 
 				} else {
@@ -996,7 +996,7 @@ public class TmXmlReader {
 							continue;
 						}
 
-						final SpotAnalyzerFactory<?> spotAnalyzer = spotAnalyzerProvider.getSpotFeatureAnalyzer(key);
+						final SpotAnalyzerFactory<?> spotAnalyzer = spotAnalyzerProvider.getFeatureAnalyzer(key);
 						if (null == spotAnalyzer) {
 							logger.error("Unknown spot analyzer key: " + key + ".\n");
 							ok = false;
@@ -1031,7 +1031,7 @@ public class TmXmlReader {
 						continue;
 					}
 
-					final EdgeAnalyzer edgeAnalyzer = edgeAnalyzerProvider.getEdgeFeatureAnalyzer(key);
+					final EdgeAnalyzer edgeAnalyzer = edgeAnalyzerProvider.getFeatureAnalyzer(key);
 					if (null == edgeAnalyzer) {
 						logger.error("Unknown edge analyzer key: " + key + ".\n");
 						ok = false;
@@ -1061,7 +1061,7 @@ public class TmXmlReader {
 						continue;
 					}
 
-					final TrackAnalyzer trackAnalyzer = trackAnalyzerProvider.getTrackFeatureAnalyzer(key);
+					final TrackAnalyzer trackAnalyzer = trackAnalyzerProvider.getFeatureAnalyzer(key);
 					if (null == trackAnalyzer) {
 						logger.error("Unknown track analyzer key: " + key + ".\n");
 						ok = false;
