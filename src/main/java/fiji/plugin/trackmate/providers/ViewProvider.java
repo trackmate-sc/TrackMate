@@ -1,6 +1,9 @@
 package fiji.plugin.trackmate.providers;
 
+import ij.IJ;
 import ij.ImagePlus;
+import ij.process.ImageConverter;
+import ij.process.StackConverter;
 import ij3d.Content;
 import ij3d.ContentCreator;
 import ij3d.Image3DUniverse;
@@ -87,8 +90,30 @@ public class ViewProvider {
 			universe.show();
 			final ImagePlus imp = settings.imp;
 			if (null != imp) {
-				final Content cimp = ContentCreator.createContent(imp.getShortTitle(), imp, 0, 1, 0, new Color3f(Color.WHITE), 0, new boolean[] { true, true, true });
-				universe.addContentLater(cimp);
+
+				if (imp.getType() == ImagePlus.GRAY8 || imp.getType() == ImagePlus.COLOR_256 || imp.getType() == ImagePlus.COLOR_RGB) {
+					// Everything is fine, we can do that natively.
+					final Content cimp = ContentCreator.createContent(imp.getShortTitle(), imp, 0, 1, 0, new Color3f(Color.WHITE), 0, new boolean[] { true, true, true });
+					universe.addContentLater(cimp);
+
+				} else {
+					// We have to convert. I think it is more honest to prompt the user for this.
+					if (IJ.showMessageWithCancel("Conversion required.", "We need to duplicate the source image on 8-bit. Do it?")) {
+
+						final ImagePlus duplicate = imp.duplicate();
+						final int s = duplicate.getStackSize();
+						if (s == 1) {
+							new ImageConverter(duplicate).convertToGray8();
+						} else {
+							new StackConverter(duplicate).convertToGray8();
+						}
+
+						final Content cimp = ContentCreator.createContent(imp.getShortTitle(), duplicate, 0, 1, 0, new Color3f(Color.WHITE), 0, new boolean[] { true, true, true });
+						universe.addContentLater(cimp);
+					}
+				}
+
+
 			}
 
 			return new SpotDisplayer3D(model, selectionModel, universe);
