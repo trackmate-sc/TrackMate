@@ -209,9 +209,9 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 	 * graph (more precisely a {@link SimpleWeightedGraph}) made of the spot
 	 * election for its vertices, and edges representing the links.
 	 * <p>
-	 * The {@link ModelChangeListener}s of this model will be notified when the
+	 * The {@link ModelChangeListener}s of the model will be notified when the
 	 * successful process is over.
-	 *
+	 * 
 	 * @see #getTrackGraph()
 	 */
 	public boolean execTracking() {
@@ -221,7 +221,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 		tracker.setLogger(logger);
 		tracker.setTarget(model.getSpots(), settings.trackerSettings);
 		if (tracker.checkInput() && tracker.process()) {
-			model.getTrackModel().setGraph(tracker.getResult());
+			model.setTracks(tracker.getResult(), true);
 			return true;
 		} else {
 			errorMessage = "Tracking process failed:\n" + tracker.getErrorMessage();

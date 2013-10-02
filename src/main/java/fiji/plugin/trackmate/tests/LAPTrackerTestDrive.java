@@ -84,7 +84,7 @@ public class LAPTrackerTestDrive {
 		System.out.println();
 
 		// Pass the new graph
-		model.getTrackModel().setGraph(lap.getResult());
+		model.setTracks(lap.getResult(), true);
 
 		System.out.println("Track visibility after new graph allocation:");
 		System.out.println("On the following tracks ID:");

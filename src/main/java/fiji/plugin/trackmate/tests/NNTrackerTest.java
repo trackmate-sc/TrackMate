@@ -55,7 +55,7 @@ public class NNTrackerTest {
 		if (!tracker.process())
 			System.err.println("Error in process: "+tracker.getErrorMessage());
 		final long end = System.currentTimeMillis();
-		model.getTrackModel().setGraph(tracker.getResult());
+		model.setTracks(tracker.getResult(), true);
 
 		// 3 - Print out results for testing
 		System.out.println();

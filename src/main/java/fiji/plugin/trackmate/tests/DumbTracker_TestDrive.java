@@ -80,7 +80,7 @@ public class DumbTracker_TestDrive {
 
 		final Model model = new Model();
 		model.setSpots(spots, false);
-		model.getTrackModel().setGraph(tracker.getResult());
+		model.setTracks(tracker.getResult(), false);
 
 		final SelectionModel selectionModel = new SelectionModel(model);
 
