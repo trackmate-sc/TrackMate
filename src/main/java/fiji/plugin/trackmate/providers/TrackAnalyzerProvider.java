@@ -62,13 +62,13 @@ public class TrackAnalyzerProvider extends AbstractFeatureAnalyzerProvider<Track
 		this.trackBranchingAnalyzer = new TrackBranchingAnalyzer();
 		this.trackSpeedStatisticsAnalyzer = new TrackSpeedStatisticsAnalyzer();
 		this.trackLocationAnalyzer = new TrackLocationAnalyzer();
-		// Duration analyzer is currently disabled.
 		this.trackDurationAnalyzer = new TrackDurationAnalyzer();
 
-		registerAnalyzer(TrackBranchingAnalyzer.KEY, trackBranchingAnalyzer);
+		registerAnalyzer(TrackIndexAnalyzer.KEY, trackIndexAnalyzer);
 		registerAnalyzer(TrackSpeedStatisticsAnalyzer.KEY, trackSpeedStatisticsAnalyzer);
 		registerAnalyzer(TrackLocationAnalyzer.KEY, trackLocationAnalyzer);
-		registerAnalyzer(TrackIndexAnalyzer.KEY, trackIndexAnalyzer);
+		registerAnalyzer(TrackBranchingAnalyzer.KEY, trackBranchingAnalyzer);
+		registerAnalyzer(TrackDurationAnalyzer.KEY, trackDurationAnalyzer);
 	}
 
 }
