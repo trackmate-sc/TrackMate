@@ -134,7 +134,7 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView {
 							spotGroupNode.remove(spot);
 							break;
 
-						case ModelChangeEvent.FLAG_SPOT_ADDED:
+						case ModelChangeEvent.FLAG_SPOT_ADDED: {
 
 							// Sphere location and radius
 							final double[] coords = new double[3];
@@ -148,7 +148,54 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView {
 							color.w = 0;
 							spotGroupNode.add(spot, center, color);
 							break;
+						}
 
+						case ModelChangeEvent.FLAG_SPOT_FRAME_CHANGED: {
+
+							// Where did it belonged?
+							Integer targetFrame = -1;
+							for (final Integer f : blobs.keySet()) {
+								if (blobs.get(f).centers.containsKey(spot)) {
+									targetFrame = f;
+									break;
+								}
+							}
+
+							if (targetFrame < 0) {
+								System.err.println("[SpotDisplayer3D] Could not find the frame spot " + spot + " belongs to.");
+								return;
+							}
+
+							blobs.get(targetFrame).remove(spot);
+							// Sphere location and radius
+							final double[] coords = new double[3];
+							TMUtils.localize(spot, coords);
+							final Double radius = spot.getFeature(Spot.RADIUS);
+							final double[] pos = new double[] { coords[0], coords[1], coords[2], radius * radiusRatio };
+							final Point4d center = new Point4d(pos);
+
+							// Sphere color
+							final Color4f color = new Color4f(spotColorGenerator.color(spot));
+							color.w = 0;
+							spotGroupNode.add(spot, center, color);
+							break;
+						}
+
+						case ModelChangeEvent.FLAG_SPOT_MODIFIED: {
+							spotGroupNode.remove(spot);
+							// Sphere location and radius
+							final double[] coords = new double[3];
+							TMUtils.localize(spot, coords);
+							final Double radius = spot.getFeature(Spot.RADIUS);
+							final double[] pos = new double[] { coords[0], coords[1], coords[2], radius * radiusRatio };
+							final Point4d center = new Point4d(pos);
+
+							// Sphere color
+							final Color4f color = new Color4f(spotColorGenerator.color(spot));
+							color.w = 0;
+							spotGroupNode.add(spot, center, color);
+							break;
+						}
 					}
 
 				}
