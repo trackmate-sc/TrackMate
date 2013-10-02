@@ -76,32 +76,33 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView {
 	public void modelChanged(final ModelChangeEvent event) {
 		if (DEBUG) {
 			System.out.println("[SpotDisplayer3D: modelChanged() called with event ID: "+event.getEventID());
+			System.out.println(event);
 		}
 		switch (event.getEventID()) {
-		case ModelChangeEvent.SPOTS_COMPUTED:
-			spotContent = makeSpotContent();
-			universe.removeContent(SPOT_CONTENT_NAME);
-			universe.addContent(spotContent);
-			break;
-		case ModelChangeEvent.SPOTS_FILTERED:
-			for (final int frame : blobs.keySet()) {
-				final SpotGroupNode<Spot> frameBlobs = blobs.get(frame);
-				for (final Iterator<Spot> it = model.getSpots().iterator(frame, false); it.hasNext();) {
-					final Spot spot = it.next();
-					final boolean visible = spot.getFeature(SpotCollection.VISIBLITY).compareTo(SpotCollection.ZERO) > 0;
-					frameBlobs.setVisible(spot, visible);
+			case ModelChangeEvent.SPOTS_COMPUTED:
+				spotContent = makeSpotContent();
+				universe.removeContent(SPOT_CONTENT_NAME);
+				universe.addContent(spotContent);
+				break;
+			case ModelChangeEvent.SPOTS_FILTERED:
+				for (final int frame : blobs.keySet()) {
+					final SpotGroupNode<Spot> frameBlobs = blobs.get(frame);
+					for (final Iterator<Spot> it = model.getSpots().iterator(frame, false); it.hasNext();) {
+						final Spot spot = it.next();
+						final boolean visible = spot.getFeature(SpotCollection.VISIBLITY).compareTo(SpotCollection.ZERO) > 0;
+						frameBlobs.setVisible(spot, visible);
+					}
 				}
-			}
-			break;
-		case ModelChangeEvent.TRACKS_COMPUTED:
-			trackContent = makeTrackContent();
-			universe.removeContent(TRACK_CONTENT_NAME);
-			universe.addContent(trackContent);
-			break;
-		case ModelChangeEvent.TRACKS_VISIBILITY_CHANGED:
-			updateTrackColors();
-			trackNode.setTrackVisible(model.getTrackModel().trackIDs(true));
-			break;
+				break;
+			case ModelChangeEvent.TRACKS_COMPUTED:
+				trackContent = makeTrackContent();
+				universe.removeContent(TRACK_CONTENT_NAME);
+				universe.addContent(trackContent);
+				break;
+			case ModelChangeEvent.TRACKS_VISIBILITY_CHANGED:
+				updateTrackColors();
+				trackNode.setTrackVisible(model.getTrackModel().trackIDs(true));
+				break;
 
 		}
 	}
@@ -164,7 +165,7 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView {
 			}
 		} else if (key == KEY_SPOTS_VISIBLE) {
 			spotContent.setVisible((Boolean) value);
-		} else if (key == KEY_TRACKS_VISIBLE) {
+		} else if (key == KEY_TRACKS_VISIBLE && null != trackContent) {
 			trackContent.setVisible((Boolean) value);
 		} else if (key == KEY_TRACK_DISPLAY_MODE && null != trackNode) {
 			trackNode.setTrackDisplayMode((Integer) value);
@@ -287,7 +288,7 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView {
 			final SpotGroupNode<Spot> spotGroup = blobs.get(frame);
 			for (final Iterator<Spot> iterator = model.getSpots().iterator(frame, false); iterator.hasNext();) {
 				final Spot spot = iterator.next();
-				spotGroup.setRadius(spot, radiusRatio*spot.getFeature(Spot.RADIUS));
+				spotGroup.setRadius(spot, radiusRatio * spot.getFeature(Spot.RADIUS));
 			}
 		}
 	}
