@@ -227,7 +227,7 @@ public class TrackScheme extends AbstractTrackMateModelView {
 	/**
 	 * Updates or creates a cell for the target spot. Is called after the user
 	 * modified a spot (location, radius, ...) somewhere else.
-	 * 
+	 *
 	 * @param spot
 	 *            the spot that was modified.
 	 */
@@ -290,7 +290,7 @@ public class TrackScheme extends AbstractTrackMateModelView {
 
 	/**
 	 * Import a whole track from the {@link Model} and make it visible.
-	 * 
+	 *
 	 * @param trackIndex
 	 *            the index of the track to show in TrackScheme
 	 */
@@ -325,7 +325,7 @@ public class TrackScheme extends AbstractTrackMateModelView {
 	 * graph, by dragging a link between two spot cells. It checks whether the
 	 * matching edge in the model exists, and tune what should be done
 	 * accordingly.
-	 * 
+	 *
 	 * @param cell
 	 *            the mxCell of the edge that has been manually created.
 	 */
@@ -388,7 +388,7 @@ public class TrackScheme extends AbstractTrackMateModelView {
 						// We also need now to check if the edge belonged to a visible track. If not,
 						// we make it visible.
 						final int ID = model.getTrackModel().trackIDOf(edge);
-						// This will work, because track indices will be reprocessed only after the graphModel.endUpdate() 
+						// This will work, because track indices will be reprocessed only after the graphModel.endUpdate()
 						// reaches 0. So now, it's like we are dealing with the track indices priori to modification.
 						if (model.getTrackModel().isVisible(ID)) {
 							if (DEBUG) {
@@ -722,7 +722,7 @@ public class TrackScheme extends AbstractTrackMateModelView {
 	 * Called when the user makes a selection change in the graph. Used to
 	 * forward this event to the {@link InfoPane} and to other
 	 * {@link SelectionChangeListener}s.
-	 * 
+	 *
 	 * @param model
 	 *            the selection model
 	 * @param added
@@ -848,13 +848,13 @@ public class TrackScheme extends AbstractTrackMateModelView {
 				final mxCell cell = (mxCell) obj;
 				if (null != cell) {
 					if (cell.isVertex()) {
-						// Build list of removed spots 
+						// Build list of removed spots
 						final Spot spot = graph.getSpotFor(cell);
 						spotsToRemove.add(spot);
-						// Clean maps 
+						// Clean maps
 						graph.removeMapping(spot);
 					} else if (cell.isEdge()) {
-						// Build list of removed edges 
+						// Build list of removed edges
 						final DefaultWeightedEdge edge = graph.getEdgeFor(cell);
 						if (null == edge)
 							continue;
@@ -911,7 +911,7 @@ public class TrackScheme extends AbstractTrackMateModelView {
 
 	/**
 	 * Toggle whether drag-&-drop linking is allowed.
-	 * 
+	 *
 	 * @return the current settings value, after toggling.
 	 */
 	public boolean toggleLinking() {
@@ -922,7 +922,7 @@ public class TrackScheme extends AbstractTrackMateModelView {
 
 	/**
 	 * Toggle whether thumbnail capture is enabled.
-	 * 
+	 *
 	 * @return the current settings value, after toggling.
 	 */
 	public boolean toggleThumbnail() {
@@ -954,7 +954,7 @@ public class TrackScheme extends AbstractTrackMateModelView {
 		graph.getModel().beginUpdate();
 		try {
 
-			// Collect edges 
+			// Collect edges
 			final Set<Integer> trackIDs = model.getTrackModel().trackIDs(true);
 			final HashMap<Integer, Set<mxCell>> edgeMap = new HashMap<Integer, Set<mxCell>>(trackIDs.size());
 			for (final Integer trackID : trackIDs) {
@@ -1036,6 +1036,7 @@ public class TrackScheme extends AbstractTrackMateModelView {
 			}
 		}
 		unlaidSpotColumn = maxLength;
+		gui.graphComponent.refresh();
 	}
 
 	public void captureUndecorated() {
@@ -1119,7 +1120,7 @@ public class TrackScheme extends AbstractTrackMateModelView {
 						System.out.println("[TrackScheme] linkSpots: creating cell " + previousCell + " for spot " + previousSpot);
 					}
 				}
-				// Check if the model does not have already a edge for these 2 spots (that is 
+				// Check if the model does not have already a edge for these 2 spots (that is
 				// the case if the 2 spot are in an invisible track, which track scheme does not
 				// know of).
 				DefaultWeightedEdge edge = model.getTrackModel().getEdge(previousSpot, currentSpot);
