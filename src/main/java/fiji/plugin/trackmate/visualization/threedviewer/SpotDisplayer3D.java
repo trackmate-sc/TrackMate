@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.TreeMap;
 
 import javax.media.j3d.BadTransformException;
@@ -78,12 +79,15 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView {
 			System.out.println("[SpotDisplayer3D: modelChanged() called with event ID: "+event.getEventID());
 			System.out.println(event);
 		}
+
 		switch (event.getEventID()) {
+
 			case ModelChangeEvent.SPOTS_COMPUTED:
 				spotContent = makeSpotContent();
 				universe.removeContent(SPOT_CONTENT_NAME);
 				universe.addContent(spotContent);
 				break;
+
 			case ModelChangeEvent.SPOTS_FILTERED:
 				for (final int frame : blobs.keySet()) {
 					final SpotGroupNode<Spot> frameBlobs = blobs.get(frame);
@@ -94,15 +98,30 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView {
 					}
 				}
 				break;
+
 			case ModelChangeEvent.TRACKS_COMPUTED:
 				trackContent = makeTrackContent();
 				universe.removeContent(TRACK_CONTENT_NAME);
 				universe.addContent(trackContent);
 				break;
+
 			case ModelChangeEvent.TRACKS_VISIBILITY_CHANGED:
 				updateTrackColors();
 				trackNode.setTrackVisible(model.getTrackModel().trackIDs(true));
 				break;
+
+			case ModelChangeEvent.MODEL_MODIFIED: {
+				final Set<Spot> spotsModified = event.getSpots();
+				for (final Spot spot : spotsModified) {
+					final int spotFlag = event.getSpotFlag(spot);
+					if (spotFlag == ModelChangeEvent.FLAG_SPOT_REMOVED) {
+						final int frame = spot.getFeature(Spot.FRAME).intValue();
+						final SpotGroupNode<Spot> spotGroupNode = blobs.get(frame);
+						spotGroupNode.remove(spot);
+					}
+				}
+
+			}
 
 		}
 	}

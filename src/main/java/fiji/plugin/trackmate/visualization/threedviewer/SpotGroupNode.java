@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.media.j3d.Appearance;
+import javax.media.j3d.BranchGroup;
 import javax.media.j3d.ColoringAttributes;
 import javax.media.j3d.Font3D;
 import javax.media.j3d.LineAttributes;
@@ -54,9 +55,13 @@ public class SpotGroupNode<K> extends ContentNode {
 	 * Hold the mesh of each spot.
 	 */
 	protected HashMap<K, CustomTriangleMesh> meshes;
+	/**
+	 * Hold the text of each spot.
+	 */
+	protected Map<K, TransformGroup> texts;
 
 	/**
-	 * Switch used for spot display. 
+	 * Switch used for spot display.
 	 */
 	protected Switch spotSwitch;
 	/**
@@ -68,7 +73,7 @@ public class SpotGroupNode<K> extends ContentNode {
 	 */
 	protected BitSet switchMask;
 	/**
-	 * Map that links the spot keys to their indices in the Switch. 
+	 * Map that links the spot keys to their indices in the Switch.
 	 * @see #spotSwitch
 	 */
 	protected HashMap<K, Integer> indices;
@@ -79,7 +84,7 @@ public class SpotGroupNode<K> extends ContentNode {
 	/**
 	 * The font size
 	 */
-	private float fontsize = 3;
+	private final float fontsize = 3;
 
 
 	/**
@@ -90,7 +95,7 @@ public class SpotGroupNode<K> extends ContentNode {
 	 * Colors are specified by a {@link Color4f} map. The <code>x</code>,  <code>y</code>,  <code>z</code>
 	 * are used to specify the R, G and B component, and the <code>w</code> field the spot transparency.
 	 * <p>
-	 * The arguments are copied on creation, ensuring that are unmodified by this class, and vice-versa. 
+	 * The arguments are copied on creation, ensuring that are unmodified by this class, and vice-versa.
 	 * @param centers
 	 * @param colors
 	 */
@@ -107,7 +112,7 @@ public class SpotGroupNode<K> extends ContentNode {
 		textSwitch.setCapability(Switch.ALLOW_SWITCH_WRITE);
 		textSwitch.setCapability(Switch.ALLOW_CHILDREN_WRITE);
 		textSwitch.setCapability(Switch.ALLOW_CHILDREN_EXTEND);
-		//		
+		//
 		this.switchMask = new BitSet();
 		makeMeshes();
 	}
@@ -119,14 +124,14 @@ public class SpotGroupNode<K> extends ContentNode {
 	 * are used to specify the spot center, and the <code>w</code> field its radius.
 	 * The same color is used for all the spots, with a transparency of 0.
 	 * <p>
-	 * The arguments are copied on creation, ensuring that are unmodified by this class, and vice-versa. 
+	 * The arguments are copied on creation, ensuring that are unmodified by this class, and vice-versa.
 	 * @param centers
 	 * @param colors
 	 */
-	public SpotGroupNode(HashMap<K, Point4d> centers, Color3f color) {
+	public SpotGroupNode(final HashMap<K, Point4d> centers, final Color3f color) {
 		this.centers = new HashMap<K, Point4d>(centers);
 		this.colors = new HashMap<K, Color4f>(centers.size());
-		for(K key : centers.keySet()) {
+		for(final K key : centers.keySet()) {
 			colors.put(key, new Color4f(color.x, color.y, color.z, 0));
 		}
 		this.spotSwitch = new Switch(Switch.CHILD_MASK);
@@ -138,44 +143,44 @@ public class SpotGroupNode<K> extends ContentNode {
 		textSwitch.setCapability(Switch.ALLOW_SWITCH_WRITE);
 		textSwitch.setCapability(Switch.ALLOW_CHILDREN_WRITE);
 		textSwitch.setCapability(Switch.ALLOW_CHILDREN_EXTEND);
-		//	
+		//
 		this.switchMask = new BitSet();
 		makeMeshes();
 	}
-	
-	
+
+
 	@Override
 	public String toString() {
-		StringBuilder str = new StringBuilder();
+		final StringBuilder str = new StringBuilder();
 		str.append("SpotGroupNode with " + centers.size() + " spots.\n");
 		str.append("  - showLabels: " + showLabels + "\n");
 		str.append("  - fontSize: " + fontsize + "\n");
 		//
-		Tuple3d center = new Point3d();
+		final Tuple3d center = new Point3d();
 		getCenter(center);
 		str.append("  - center: " + center + "\n");
 		//
-		Tuple3d min = new Point3d();
+		final Tuple3d min = new Point3d();
 		getMin(min);
 		str.append("  - min: " + min + "\n");
 		//
-		Tuple3d max = new Point3d();
+		final Tuple3d max = new Point3d();
 		getMax(max);
 		str.append("  - max: " + max + "\n");
 		//
 		str.append("  - content:\n");
-		for (K spot : centers.keySet()) {
-			int index = indices.get(spot);
-			str.append("     - " + spot + ": color = " +colors.get(spot) + "; center = " 
-					+ centers.get(spot) + "; visible = " + switchMask.get(index)  + "\n"); 
+		for (final K spot : centers.keySet()) {
+			final int index = indices.get(spot);
+			str.append("     - " + spot + ": color = " +colors.get(spot) + "; center = "
+					+ centers.get(spot) + "; visible = " + switchMask.get(index)  + "\n");
 		}
 		return str.toString();
 	}
-	
+
 	/*
 	 * PRIVATE METHODS
 	 */
-	
+
 
 	/**
 	 * Re-create the {@link #meshes} field with spot meshes, from the fields {@link #centers} and {@link #colors}.
@@ -188,50 +193,58 @@ public class SpotGroupNode<K> extends ContentNode {
 		Color4f color;
 		Point4d center;
 		meshes = new HashMap<K, CustomTriangleMesh>(centers.size());
+		texts = new HashMap<K, TransformGroup>(centers.size());
 		indices = new HashMap<K, Integer>(centers.size());
 		spotSwitch.removeAllChildren();
 		textSwitch.removeAllChildren();
 		int index = 0;
 
-		Font3D font3D = new Font3D(SMALL_FONT.deriveFont(fontsize), null);
-		Appearance textAp = new Appearance();
-		LineAttributes lineAttributes = new LineAttributes(1, 1, true);
+		final Font3D font3D = new Font3D(SMALL_FONT.deriveFont(fontsize), null);
+		final Appearance textAp = new Appearance();
+		final LineAttributes lineAttributes = new LineAttributes(1, 1, true);
 		textAp.setLineAttributes(lineAttributes);
-		Color3f color3 = new Color3f(TrackMateModelView.DEFAULT_SPOT_COLOR);
+		final Color3f color3 = new Color3f(TrackMateModelView.DEFAULT_SPOT_COLOR);
 		textAp.setColoringAttributes(new ColoringAttributes(color3, ColoringAttributes.FASTEST));
-		
-		for (K key : centers.keySet()) {
+
+		for (final K key : centers.keySet()) {
 			center = centers.get(key);
 			color = colors.get(key);
-			
+
 			// Create mesh for the ball
 			points = createSphere(center.x, center.y, center.z, center.w);
 			node = new CustomTriangleMesh(points, new Color3f(color.x, color.y, color.z), color.w);
 			// Add it to the switch. We keep an index of the position it is added to for later retrieval by key
 			meshes.put(key, node);
-			spotSwitch.addChild(node); // at index
+			final BranchGroup bg = new BranchGroup();
+			bg.setCapability(BranchGroup.ALLOW_DETACH);
+			bg.addChild(node);
+			spotSwitch.addChild(bg); // at index
 			indices.put(key, index); // store index for key
 			index++;
-			
+
 			// Deal with the text
-			Transform3D translation = new Transform3D();
+			final Transform3D translation = new Transform3D();
 			translation.rotX(Math.PI);
 			translation.setTranslation(new Vector3d(center.x + 1.5f*center.w, center.y, center.z));
-			TransformGroup tg = new TransformGroup(translation);
-			
-			OrientedShape3D textShape = new OrientedShape3D();
+			final TransformGroup tg = new TransformGroup(translation);
+
+			final OrientedShape3D textShape = new OrientedShape3D();
 			textShape.setAlignmentMode(OrientedShape3D.ROTATE_NONE);
-			
-			Text3D textGeom = new Text3D(font3D, key.toString());
-				
+
+			final Text3D textGeom = new Text3D(font3D, key.toString());
+
 			textGeom.setAlignment(Text3D.ALIGN_FIRST);
 			textShape.addGeometry(textGeom);
 			textShape.setAppearance(textAp);
-			
-			tg.addChild(textShape);
-			textSwitch.addChild(tg);
 
-			
+			tg.addChild(textShape);
+			texts.put(key, tg);
+
+			final BranchGroup bg2 = new BranchGroup();
+			bg2.addChild(tg);
+			bg2.setCapability(BranchGroup.ALLOW_DETACH);
+			textSwitch.addChild(bg2);
+
 		}
 		switchMask = new BitSet(centers.size());
 		switchMask.set(0, centers.size(), true);
@@ -245,7 +258,40 @@ public class SpotGroupNode<K> extends ContentNode {
 		addChild(spotSwitch);
 		addChild(textSwitch);
 	}
-	
+
+	public void remove(final K key) {
+		// Remove from generic holders
+		final int index = indices.remove(key);
+		centers.remove(key);
+		colors.remove(key);
+
+		// Remove spot from scene
+		final CustomTriangleMesh mesh = meshes.remove(key);
+		spotSwitch.removeChild(mesh.getParent());
+
+		// Remove text from scene
+		final TransformGroup tg = texts.remove(key);
+		textSwitch.removeChild(tg.getParent());
+
+		// Rebuild visibility mask
+		final BitSet bitSet = new BitSet(switchMask.length());
+		for (int i = 0; i < index; i++) {
+			bitSet.set(i, switchMask.get(i));
+		}
+		for (int i = index + 1; i < switchMask.length(); i++) {
+			bitSet.set(i - 1, switchMask.get(i));
+		}
+		switchMask = bitSet;
+
+		// Pass new visibility mask
+		spotSwitch.setChildMask(bitSet);
+		if (showLabels) {
+			textSwitch.setChildMask(bitSet);
+		} else {
+			textSwitch.setChildMask(new BitSet(centers.size()));
+		}
+	}
+
 	/**
 	 * Create the list of points of the mesh of sphere, centered on (x, y, z) of radius r, based on
 	 * the {@link #globe} cache calculated by {@link #generateGlobe()}.
@@ -253,40 +299,40 @@ public class SpotGroupNode<K> extends ContentNode {
 	 * Will throw a NPE if {@link #generateGlobe()} is not called before.
 	 */
 	private List<Point3f> createSphere(final double x, final double y, final double z, final double r) {
-		
+
 		// Create triangular faces and add them to the list
 		final ArrayList<Point3f> list = new ArrayList<Point3f>();
 		for (int j=0; j<globe.length-1; j++) { // the parallels
 			for (int k=0; k<globe[0].length -1; k++) { // meridian points
 				if(j != globe.length-2) {
-					
+
 					// Half quadrant (a triangle)
 					list.add(new Point3f(
-							(float) (globe[j+1][k+1][0] * r + x), 
-							(float) (globe[j+1][k+1][1] * r + y), 
+							(float) (globe[j+1][k+1][0] * r + x),
+							(float) (globe[j+1][k+1][1] * r + y),
 							(float) (globe[j+1][k+1][2] * r + z)));
 					list.add(new Point3f(
-							(float) (globe[j][k][0] * r + x), 
-							(float) (globe[j][k][1] * r + y), 
+							(float) (globe[j][k][0] * r + x),
+							(float) (globe[j][k][1] * r + y),
 							(float) (globe[j][k][2] * r + z)));
 					list.add(new Point3f(
-							(float) (globe[j+1][k][0] * r + x), 
-							(float) (globe[j+1][k][1] * r + y), 
+							(float) (globe[j+1][k][0] * r + x),
+							(float) (globe[j+1][k][1] * r + y),
 							(float) (globe[j+1][k][2] * r + z)));
 				}
 				if(j != 0) {
 					// The other half quadrant
 					list.add(new Point3f(
-							(float) (globe[j][k][0] * r + x), 
-							(float) (globe[j][k][1] * r + y), 
+							(float) (globe[j][k][0] * r + x),
+							(float) (globe[j][k][1] * r + y),
 							(float) (globe[j][k][2] * r + z)));
 					list.add(new Point3f(
-							(float) (globe[j+1][k+1][0] * r + x), 
-							(float) (globe[j+1][k+1][1] * r + y), 
+							(float) (globe[j+1][k+1][0] * r + x),
+							(float) (globe[j+1][k+1][1] * r + y),
 							(float) (globe[j+1][k+1][2] * r + z)));
 					list.add(new Point3f(
-							(float) (globe[j][k+1][0] * r + x), 
-							(float) (globe[j][k+1][1] * r + y), 
+							(float) (globe[j][k+1][0] * r + x),
+							(float) (globe[j][k+1][1] * r + y),
 							(float) (globe[j][k+1][2] * r + z)));
 				}
 			}
@@ -298,15 +344,15 @@ public class SpotGroupNode<K> extends ContentNode {
 	/*
 	 * SINGLE ELEMENT GETTERS/SETTERS
 	 */
-	
+
 	/**
 	 * Set the visibility of all spots given in argument to <code>true<code>, all the others
 	 * are set to invisible.
 	 */
-	public void setVisible(Iterable<K> toShow) {
+	public void setVisible(final Iterable<K> toShow) {
 		switchMask = new BitSet(meshes.size());
 		Integer index;
-		for(K key : toShow) {
+		for(final K key : toShow) {
 			index = indices.get(key);
 			if (null == index)
 				continue;
@@ -315,7 +361,7 @@ public class SpotGroupNode<K> extends ContentNode {
 		spotSwitch.setChildMask(switchMask);
 	}
 
-	public void setShowLabels(boolean showLabels) {
+	public void setShowLabels(final boolean showLabels) {
 		this.showLabels = showLabels;
 		if (showLabels) {
 			textSwitch.setChildMask(switchMask);
@@ -327,35 +373,35 @@ public class SpotGroupNode<K> extends ContentNode {
 	/**
 	 * Set the visibility of all spots.
 	 */
-	public void setVisible(boolean visible) {
+	public void setVisible(final boolean visible) {
 		switchMask.set(0, switchMask.size()-1, visible);
 		spotSwitch.setChildMask(switchMask);
 	}
-	
+
 	/**
 	 * Set the visibility of the spot <code>key</code>.
 	 */
 	public void setVisible(final K key, final boolean visible) {
-		Integer index = indices.get(key);
-		if (null == index) 
+		final Integer index = indices.get(key);
+		if (null == index)
 			return;
 		switchMask.set(index, visible);
 		spotSwitch.setChildMask(switchMask);
 	}
-	
+
 	/**
 	 * Set the color of all spots.
 	 */
-	public void setColor(Color3f color) {
-		for (CustomTriangleMesh mesh : meshes.values()) 
+	public void setColor(final Color3f color) {
+		for (final CustomTriangleMesh mesh : meshes.values())
 			mesh.setColor(color);
 	}
-	
+
 	/**
 	 * Set the color of the spot <code>key</code>. Its transparency is unchanged.
 	 */
 	public void setColor(final K key, final Color3f color) {
-		CustomTriangleMesh mesh = meshes.get(key);
+		final CustomTriangleMesh mesh = meshes.get(key);
 		if (null == mesh)
 			return;
 		mesh.setColor(color);
@@ -363,106 +409,106 @@ public class SpotGroupNode<K> extends ContentNode {
 		colors.get(key).y = color.y;
 		colors.get(key).z = color.z;
 	}
-	
+
 	public Color4f getColor(final K key) {
 		return colors.get(key);
 	}
-	
+
 	public Color3f getColor3f(final K key) {
 		return new Color3f(colors.get(key).x, colors.get(key).y, colors.get(key).z);
 	}
-	
+
 	/**
 	 * Set the color of the spot <code>key</code>. Its transparency set by the <code>w</code>
 	 * field of the {@link Color4f} argument.
 	 */
 	public void setColor(final K key, final Color4f color) {
-		CustomTriangleMesh mesh = meshes.get(key);
+		final CustomTriangleMesh mesh = meshes.get(key);
 		if (null == mesh)
 			return;
 		mesh.setColor(new Color3f(color.x, color.y, color.z));
 		mesh.setTransparency(color.w);
 		colors.put(key, new Color4f(color));
 	}
-	
+
 	/**
 	 * Set the transparency of the spot <code>key</code>. Its color is unchanged.
 	 */
 	public void setTransparency(final K key, final float transparency) {
-		CustomTriangleMesh mesh = meshes.get(key);
+		final CustomTriangleMesh mesh = meshes.get(key);
 		if (null == mesh)
 			return;
 		mesh.setTransparency(transparency);
 		colors.get(key).w = transparency;
 	}
-	
+
 	/**
 	 * Move the spot <code>key</code> center to the position given by the {@link Point3f}.
 	 * Its radius is unchanged.
 	 */
 	public void setCenter(final K key, final Point3d center) {
-		CustomTriangleMesh mesh = meshes.get(key);
+		final CustomTriangleMesh mesh = meshes.get(key);
 		if (null == mesh)
 			return;
-		double r = centers.get(key).w;
+		final double r = centers.get(key).w;
 		mesh.setMesh(createSphere(center.x, center.y, center.z, r));
 		centers.get(key).x = center.x;
 		centers.get(key).y = center.y;
 		centers.get(key).z = center.z;
 	}
-	
+
 	/**
-	 * Move the spot <code>key</code> center to the position given by the 
+	 * Move the spot <code>key</code> center to the position given by the
 	 * <code>x</code>,  <code>y</code>,  <code>z</code> fields of the {@link Point4d}.
 	 * Its radius is set by the <code>w</code> field.
 	 */
 	public void setCenter(final K key, final Point4d center) {
-		CustomTriangleMesh mesh = meshes.get(key);
+		final CustomTriangleMesh mesh = meshes.get(key);
 		if (null == mesh)
 			return;
 		mesh.setMesh(createSphere(center.x, center.y, center.z, center.w));
 		centers.put(key, new Point4d(center));
 	}
-	
+
 	/**
 	 * Change the radius of the spot <code>key</code>. Its position is unchanged.
 	 */
 	public void setRadius(final K key, final double radius) {
-		CustomTriangleMesh mesh = meshes.get(key);
+		final CustomTriangleMesh mesh = meshes.get(key);
 		if (null == mesh)
 			return;
-		Point4d center = centers.get(key);
-		List<Point3f> newmesh = createSphere(center.x, center.y, center.z, radius);
+		final Point4d center = centers.get(key);
+		final List<Point3f> newmesh = createSphere(center.x, center.y, center.z, radius);
 		mesh.setMesh(newmesh);
 		center.w = radius;
 	}
-	
+
 	/*
 	 * CONTENTNODE METHODS
 	 */
 
 	@Override
-	public void colorUpdated(Color3f color) { 
-		for(CustomTriangleMesh mesh : meshes.values()) 
+	public void colorUpdated(final Color3f color) {
+		for(final CustomTriangleMesh mesh : meshes.values())
 			mesh.setColor(color);
 	}
-	
+
 	@Override
-	public void transparencyUpdated(float transparency) {
-		for(CustomTriangleMesh mesh : meshes.values()) 
+	public void transparencyUpdated(final float transparency) {
+		for(final CustomTriangleMesh mesh : meshes.values())
 			mesh.setTransparency(transparency);
 	}
-	
+
 	@Override
-	public void shadeUpdated(boolean shaded) {
-		for (CustomTriangleMesh mesh : meshes.values())
+	public void shadeUpdated(final boolean shaded) {
+		for (final CustomTriangleMesh mesh : meshes.values())
 			 mesh.setShaded(shaded);
 	}
-	
+
 	@Override
-	public void getCenter(Tuple3d center) {
+	public void getCenter(final Tuple3d center) {
 		double x = 0, y = 0, z = 0;
-		for (Point4d c : centers.values()) {
+		for (final Point4d c : centers.values()) {
 			x += c.x;
 			y += c.y;
 			z += c.z;
@@ -477,11 +523,11 @@ public class SpotGroupNode<K> extends ContentNode {
 
 
 	@Override
-	public void getMax(Tuple3d max) {
+	public void getMax(final Tuple3d max) {
 		double xmax = Double.NEGATIVE_INFINITY;
 		double ymax = Double.NEGATIVE_INFINITY;
 		double zmax = Double.NEGATIVE_INFINITY;
-		for (Point4d center : centers.values()) {
+		for (final Point4d center : centers.values()) {
 			if (xmax < center.x + center.w)
 				xmax =  center.x + center.w;
 			if (ymax < center.y + center.w)
@@ -495,11 +541,11 @@ public class SpotGroupNode<K> extends ContentNode {
 	}
 
 	@Override
-	public void getMin(Tuple3d min) {
+	public void getMin(final Tuple3d min) {
 		double xmin = Double.POSITIVE_INFINITY;
 		double ymin = Double.POSITIVE_INFINITY;
 		double zmin = Double.POSITIVE_INFINITY;
-		for (Point4d center : centers.values()) {
+		for (final Point4d center : centers.values()) {
 			if (xmin > center.x - center.w)
 				xmin =  center.x - center.w;
 			if (ymin > center.y - center.w)
@@ -516,34 +562,34 @@ public class SpotGroupNode<K> extends ContentNode {
 	@Override
 	public float getVolume() {
 		float volume = 0;
-		for (CustomTriangleMesh mesh : meshes.values()) 
+		for (final CustomTriangleMesh mesh : meshes.values())
 			volume += mesh.getVolume();
 		return volume;
 	}
 
 
 	@Override
-	public void channelsUpdated(boolean[] channels) {}
+	public void channelsUpdated(final boolean[] channels) {}
 	@Override
-	public void thresholdUpdated(int threshold) {}
+	public void thresholdUpdated(final int threshold) {}
 	@Override
-	public void eyePtChanged(View view) {}
+	public void eyePtChanged(final View view) {}
 
 	@Override
-	public void lutUpdated(int[] r, int[] g, int[] b, int[] a) {}
+	public void lutUpdated(final int[] r, final int[] g, final int[] b, final int[] a) {}
 
 	@Override
-	public void swapDisplayedData(String path, String name) {}
+	public void swapDisplayedData(final String path, final String name) {}
 
 	@Override
-	public void restoreDisplayedData(String path, String name) {}
+	public void restoreDisplayedData(final String path, final String name) {}
 
 	@Override
 	public void clearDisplayedData() {}
 
 
-	/** 
-	 * Generate a globe of radius 1.0 that can be used for any Ball. First dimension is Z, 
+	/**
+	 * Generate a globe of radius 1.0 that can be used for any Ball. First dimension is Z,
 	 * then comes a double array x,y. Minimal accepted meridians and parallels is 3.
 	 * <p>
 	 * Taken from Albert and Bene's MeshMaker, simply changed the primitives from double to float.
@@ -575,8 +621,8 @@ public class SpotGroupNode<K> extends ContentNode {
 		angle_increase = (float) (Math.PI / parallels);   // = 180 / parallels in radians
 		final float[][][] xyz = new float[parallels+1][xy_points.length][3];
 		for (int p=1; p<xyz.length-1; p++) {
-			float radius = (float) Math.sin(angle_increase*p);
-			float Z = (float) Math.cos(angle_increase*p);
+			final float radius = (float) Math.sin(angle_increase*p);
+			final float Z = (float) Math.cos(angle_increase*p);
 			for (int mm=0; mm<xyz[0].length-1; mm++) {
 				//scaling circle to appropriate radius, and positioning the Z
 				xyz[p][mm][0] = xy_points[mm][0] * radius;
@@ -600,5 +646,5 @@ public class SpotGroupNode<K> extends ContentNode {
 
 		return xyz;
 	}
-	
+
 }
