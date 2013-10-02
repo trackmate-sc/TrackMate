@@ -44,7 +44,7 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView {
 			"be in sync with the hyperstack displayer. " +
 			"</html>";
 	public static final int DEFAULT_RESAMPLING_FACTOR = 4;
-	public static final int DEFAULT_THRESHOLD = 50;
+	//	public static final int DEFAULT_THRESHOLD = 50;
 
 	private static final boolean DEBUG = false;
 	private static final String TRACK_CONTENT_NAME = "Tracks";

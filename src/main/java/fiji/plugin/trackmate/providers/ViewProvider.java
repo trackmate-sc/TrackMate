@@ -1,6 +1,8 @@
 package fiji.plugin.trackmate.providers;
 
 import ij.ImagePlus;
+import ij3d.Content;
+import ij3d.ContentCreator;
 import ij3d.Image3DUniverse;
 
 import java.awt.Color;
@@ -85,8 +87,8 @@ public class ViewProvider {
 			universe.show();
 			final ImagePlus imp = settings.imp;
 			if (null != imp) {
-				universe.addVoltex(imp, new Color3f(Color.WHITE),
-						imp.getShortTitle(), 0, new boolean[] {true, true, true}, 1);
+				final Content cimp = ContentCreator.createContent(imp.getShortTitle(), imp, 0, 1, 0, new Color3f(Color.WHITE), 0, new boolean[] { true, true, true });
+				universe.addContentLater(cimp);
 			}
 
 			return new SpotDisplayer3D(model, selectionModel, universe);
