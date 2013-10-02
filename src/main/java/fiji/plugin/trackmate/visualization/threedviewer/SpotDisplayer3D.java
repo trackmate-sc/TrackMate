@@ -196,12 +196,40 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView {
 							spotGroupNode.add(spot, center, color);
 							break;
 						}
-					}
 
+						default: {
+							System.err.println("[SpotDisplayer3D] Unknown spot flag ID: " + spotFlag);
+						}
+					}
 				}
 
+				/*
+				 * Deal with edges
+				 */
+
+				for (final DefaultWeightedEdge edge : event.getEdges()) {
+					final int edgeFlag = event.getEdgeFlag(edge);
+					switch (edgeFlag) {
+						case ModelChangeEvent.FLAG_EDGE_ADDED:
+						case ModelChangeEvent.FLAG_EDGE_MODIFIED:
+						case ModelChangeEvent.FLAG_EDGE_REMOVED: {
+							trackNode.makeMeshes();
+							updateTrackColors();
+							break;
+						}
+
+						default: {
+							System.err.println("[SpotDisplayer3D] Unknown edge flag ID: " + edgeFlag);
+						}
+
+					}
+				}
+				break;
 			}
 
+			default: {
+				System.err.println("[SpotDisplayer3D] Unknown event ID: " + event.getEventID());
+			}
 		}
 	}
 
