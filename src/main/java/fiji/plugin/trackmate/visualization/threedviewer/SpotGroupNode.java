@@ -35,6 +35,20 @@ public class SpotGroupNode<K> extends ContentNode {
 
 	private static final int DEFAULT_MERIDIAN_NUMBER = 12;
 	private static final int DEFAULT_PARALLEL_NUMBER = 12;
+
+	/**
+	 * The font size
+	 */
+	private final float fontsize = 3;
+	private final Font3D font3D = new Font3D(SMALL_FONT.deriveFont(fontsize), null);
+	private final Appearance textAp = new Appearance();
+	private final LineAttributes lineAttributes = new LineAttributes(1, 1, true);
+	private final Color3f color3 = new Color3f(TrackMateModelView.DEFAULT_SPOT_COLOR);
+	{
+		textAp.setLineAttributes(lineAttributes);
+		textAp.setColoringAttributes(new ColoringAttributes(color3, ColoringAttributes.FASTEST));
+	}
+
 	/**
 	 * Holder (cache) for the coordinates of the mesh of a globe of radius 1,
 	 * centered at (0, 0, 0), that will be used to generate all spheres in this
@@ -81,10 +95,7 @@ public class SpotGroupNode<K> extends ContentNode {
 	 * If true, the text label will be displayed next to the balls.
 	 */
 	private boolean showLabels = false;
-	/**
-	 * The font size
-	 */
-	private final float fontsize = 3;
+
 
 
 	/**
@@ -188,10 +199,6 @@ public class SpotGroupNode<K> extends ContentNode {
 	 * This resets the {@link #spotSwitch} and the {@link #switchMask} fields with new values.
 	 */
 	protected void makeMeshes() {
-		List<Point3f> points;
-		CustomTriangleMesh node;
-		Color4f color;
-		Point4d center;
 		meshes = new HashMap<K, CustomTriangleMesh>(centers.size());
 		texts = new HashMap<K, TransformGroup>(centers.size());
 		indices = new HashMap<K, Integer>(centers.size());
@@ -199,20 +206,13 @@ public class SpotGroupNode<K> extends ContentNode {
 		textSwitch.removeAllChildren();
 		int index = 0;
 
-		final Font3D font3D = new Font3D(SMALL_FONT.deriveFont(fontsize), null);
-		final Appearance textAp = new Appearance();
-		final LineAttributes lineAttributes = new LineAttributes(1, 1, true);
-		textAp.setLineAttributes(lineAttributes);
-		final Color3f color3 = new Color3f(TrackMateModelView.DEFAULT_SPOT_COLOR);
-		textAp.setColoringAttributes(new ColoringAttributes(color3, ColoringAttributes.FASTEST));
-
 		for (final K key : centers.keySet()) {
-			center = centers.get(key);
-			color = colors.get(key);
+			final Point4d center = centers.get(key);
+			final Color4f color = colors.get(key);
 
 			// Create mesh for the ball
-			points = createSphere(center.x, center.y, center.z, center.w);
-			node = new CustomTriangleMesh(points, new Color3f(color.x, color.y, color.z), color.w);
+			final List<Point3f> points = createSphere(center.x, center.y, center.z, center.w);
+			final CustomTriangleMesh node = new CustomTriangleMesh(points, new Color3f(color.x, color.y, color.z), color.w);
 			// Add it to the switch. We keep an index of the position it is added to for later retrieval by key
 			meshes.put(key, node);
 			final BranchGroup bg = new BranchGroup();
@@ -257,6 +257,56 @@ public class SpotGroupNode<K> extends ContentNode {
 		removeAllChildren();
 		addChild(spotSwitch);
 		addChild(textSwitch);
+	}
+
+	public void add(final K key, final Point4d center, final Color4f color) {
+
+		// Sphere
+		final List<Point3f> points = createSphere(center.x, center.y, center.z, center.w);
+		final CustomTriangleMesh node = new CustomTriangleMesh(points, new Color3f(color.x, color.y, color.z), color.w);
+		final BranchGroup bg1 = new BranchGroup();
+		bg1.setCapability(BranchGroup.ALLOW_DETACH);
+		bg1.addChild(node);
+		spotSwitch.addChild(bg1);
+
+		// Text
+		final Text3D textGeom = new Text3D(font3D, key.toString());
+		textGeom.setAlignment(Text3D.ALIGN_FIRST);
+
+		final OrientedShape3D textShape = new OrientedShape3D();
+		textShape.setAlignmentMode(OrientedShape3D.ROTATE_NONE);
+		textShape.addGeometry(textGeom);
+		textShape.setAppearance(textAp);
+
+		final Transform3D translation = new Transform3D();
+		translation.rotX(Math.PI);
+		translation.setTranslation(new Vector3d(center.x + 1.5f * center.w, center.y, center.z));
+		final TransformGroup tg = new TransformGroup(translation);
+		tg.addChild(textShape);
+		final BranchGroup bg2 = new BranchGroup();
+		bg2.setCapability(BranchGroup.ALLOW_DETACH);
+		bg2.addChild(tg);
+		textSwitch.addChild(bg2);
+
+		final int index = centers.size();
+		indices.put(key, index);
+		final BitSet bitSet = new BitSet(switchMask.length());
+		for (int i = 0; i < switchMask.length(); i++) {
+			bitSet.set(i, switchMask.get(i));
+		}
+		bitSet.set(switchMask.length(), true);
+		switchMask = bitSet;
+		spotSwitch.setChildMask(switchMask);
+		if (showLabels) {
+			textSwitch.setChildMask(switchMask);
+		} else {
+			textSwitch.setChildMask(new BitSet(centers.size()));
+		}
+
+		texts.put(key, tg);
+		meshes.put(key, node);
+		colors.put(key, color);
+		centers.put(key, center);
 	}
 
 	public void remove(final K key) {

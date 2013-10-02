@@ -14,6 +14,7 @@ import java.util.TreeMap;
 
 import javax.media.j3d.BadTransformException;
 import javax.vecmath.Color3f;
+import javax.vecmath.Color4f;
 import javax.vecmath.Point4d;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -111,14 +112,45 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView {
 				break;
 
 			case ModelChangeEvent.MODEL_MODIFIED: {
+
+				/*
+				 * Deal with spots first.
+				 */
+
+				// Useful fields.
+				@SuppressWarnings("unchecked")
+				final FeatureColorGenerator<Spot> spotColorGenerator = (FeatureColorGenerator<Spot>) displaySettings.get(KEY_SPOT_COLORING);
+				final float radiusRatio = (Float) displaySettings.get(KEY_SPOT_RADIUS_RATIO);
+
+				// Iterate each spot of the event.
 				final Set<Spot> spotsModified = event.getSpots();
 				for (final Spot spot : spotsModified) {
 					final int spotFlag = event.getSpotFlag(spot);
-					if (spotFlag == ModelChangeEvent.FLAG_SPOT_REMOVED) {
-						final int frame = spot.getFeature(Spot.FRAME).intValue();
-						final SpotGroupNode<Spot> spotGroupNode = blobs.get(frame);
-						spotGroupNode.remove(spot);
+					final int frame = spot.getFeature(Spot.FRAME).intValue();
+					final SpotGroupNode<Spot> spotGroupNode = blobs.get(frame);
+
+					switch (spotFlag) {
+						case ModelChangeEvent.FLAG_SPOT_REMOVED:
+							spotGroupNode.remove(spot);
+							break;
+
+						case ModelChangeEvent.FLAG_SPOT_ADDED:
+
+							// Sphere location and radius
+							final double[] coords = new double[3];
+							TMUtils.localize(spot, coords);
+							final Double radius = spot.getFeature(Spot.RADIUS);
+							final double[] pos = new double[] {coords[0], coords[1], coords[2], radius*radiusRatio};
+							final Point4d center = new Point4d(pos);
+
+							// Sphere color
+							final Color4f color = new Color4f(spotColorGenerator.color(spot));
+							color.w = 0;
+							spotGroupNode.add(spot, center, color);
+							break;
+
 					}
+
 				}
 
 			}
