@@ -102,7 +102,7 @@ public class TMUtils {
 	/**
 	 * Check that the given map has all some keys. Two String collection allows
 	 * specifying that some keys are mandatory, other are optional.
-	 * 
+	 *
 	 * @param map
 	 *            the map to inspect.
 	 * @param mandatoryKeys
@@ -145,7 +145,7 @@ public class TMUtils {
 	/**
 	 * Check the presence and the validity of a key in a map, and test it is of
 	 * the desired class.
-	 * 
+	 *
 	 * @param map
 	 *            the map to inspect.
 	 * @param key
@@ -212,7 +212,7 @@ public class TMUtils {
 	 * overlapping, only the one that has the highest value of the
 	 * {@link SpotFeature} given in argument is retained, and the other one is
 	 * discarded.
-	 * 
+	 *
 	 * @param spots
 	 *            the list of spot to suppress. It will be sorted by descending
 	 *            feature value by this call.
@@ -395,13 +395,15 @@ public class TMUtils {
 	 * is not found, then the calibration for this axis takes the value of 1.
 	 */
 	public static final double[] getSpatialCalibration(final ImgPlusMetadata img) {
-		final AxisType[] axesQuery = new AxisType[] { Axes.X, Axes.Y, Axes.Z };
 		final double[] calibration = Util.getArrayFromValue(1d, 3);
-		int index = 0;
-		for (final AxisType axisType : axesQuery) {
-			final int dimensionIndex = img.dimensionIndex(axisType);
-			if (dimensionIndex >= 0) {
-				calibration[index++] = img.calibration(dimensionIndex);
+
+		for (int d = 0; d < img.numDimensions(); d++) {
+			if (img.axis(d).type() == Axes.X) {
+				calibration[0] = img.averageScale(d);
+			} else if (img.axis(d).type() == Axes.Y) {
+				calibration[1] = img.averageScale(d);
+			} else if (img.axis(d).type() == Axes.Z) {
+				calibration[2] = img.averageScale(d);
 			}
 		}
 		return calibration;
@@ -454,7 +456,7 @@ public class TMUtils {
 
 	/**
 	 * Returns <code>[range, min, max]</code> of the given double array.
-	 * 
+	 *
 	 * @return A double[] of length 3, where index 0 is the range, index 1 is
 	 *         the min, and index 2 is the max.
 	 */
@@ -533,7 +535,7 @@ public class TMUtils {
 	/**
 	 * Create a histogram from the data given, with a default number of bins
 	 * given by {@link #getNBins(double[])}.
-	 * 
+	 *
 	 * @param data
 	 * @return
 	 */
@@ -567,7 +569,7 @@ public class TMUtils {
 	 * thresholds the histogram in 2 classes. The threshold is performed using
 	 * the Otsu Threshold Method, {@link http
 	 * ://www.labbookpages.co.uk/software/imgProc/otsuThreshold.html}.
-	 * 
+	 *
 	 * @param hist
 	 *            the histogram array
 	 * @param nPoints
@@ -616,7 +618,7 @@ public class TMUtils {
 
 	/**
 	 * Computes the square Euclidean distance between two spots.
-	 * 
+	 *
 	 * @param i
 	 *            Spot i.
 	 * @param j
