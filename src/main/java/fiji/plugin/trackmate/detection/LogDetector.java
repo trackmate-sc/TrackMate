@@ -8,7 +8,7 @@ import net.imglib2.RandomAccess;
 import net.imglib2.algorithm.MultiThreaded;
 import net.imglib2.algorithm.fft2.FFTConvolution;
 import net.imglib2.algorithm.math.PickImagePeaks;
-import net.imglib2.display.RealFloatConverter;
+import net.imglib2.converter.RealFloatConverter;
 import net.imglib2.exception.IncompatibleTypeException;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgFactory;
@@ -44,10 +44,10 @@ public class LogDetector <T extends RealType<T>  & NativeType<T>> implements Spo
 	protected String baseErrorMessage;
 	protected String errorMessage;
 	/** The list of {@link Spot} that will be populated by this detector. */
-	protected List<Spot> spots = new ArrayList<Spot>(); // because this implementation is fast to add elements at the end of the list
+	protected List<Spot> spots = new ArrayList<Spot>();
 	/** The processing time in ms. */
 	protected long processingTime;
-	private int numThreads;
+	protected int numThreads;
 
 	/*
 	 * CONSTRUCTORS
@@ -98,7 +98,7 @@ public class LogDetector <T extends RealType<T>  & NativeType<T>> implements Spo
 			errorMessage = baseErrorMessage + "Failed creating float image factory: " + e.getMessage();
 			return false;
 		}
-		Img<FloatType> floatImg = toFloatImg(img, factory);
+		Img<FloatType> floatImg = copyToFloatImg(img, factory);
 
 		// Deal with median filter:
 		if (doMedianFilter) {
@@ -184,7 +184,7 @@ public class LogDetector <T extends RealType<T>  & NativeType<T>> implements Spo
 		}
 
 		// Create spots
-		spots.clear();
+		spots = new ArrayList<Spot>(peaks.size());
 		for (int j = 0; j < peaks.size(); j++) {
 
 			final SubPixelLocalization<FloatType> peak = peaks.get(j);
@@ -197,6 +197,8 @@ public class LogDetector <T extends RealType<T>  & NativeType<T>> implements Spo
 			spot.putFeature(Spot.RADIUS, Double.valueOf(radius));
 			spots.add(spot);
 		}
+		// Prune overlapping spots
+		spots = TMUtils.suppressSpots(spots, Spot.QUALITY);
 
 		final long end = System.currentTimeMillis();
 		processingTime = end - start;
@@ -228,8 +230,8 @@ public class LogDetector <T extends RealType<T>  & NativeType<T>> implements Spo
 	/**
 	 * Apply a simple 3x3 median filter to the target image.
 	 */
-	protected Img<FloatType> applyMedianFilter(final Img<FloatType> image) {
-		final MedianFilter3x3<FloatType> medFilt = new MedianFilter3x3<FloatType>(image);
+	protected <R extends RealType<R>> Img<R> applyMedianFilter(final Img<R> image) {
+		final MedianFilter3x3<R> medFilt = new MedianFilter3x3<R>(image);
 		if (!medFilt.checkInput() || !medFilt.process()) {
 			errorMessage = baseErrorMessage + "Failed in applying median filter";
 			return null;
@@ -268,15 +270,13 @@ public class LogDetector <T extends RealType<T>  & NativeType<T>> implements Spo
 		return numThreads;
 	}
 
-	private static final <T extends RealType<T>> Img<FloatType> toFloatImg(final Img<T> input, final ImgFactory<FloatType> factory)
- {
+	public static final <T extends RealType<T>> Img<FloatType> copyToFloatImg(final Img<T> input, final ImgFactory<FloatType> factory) {
 		final Img<FloatType> output = factory.create(input, new FloatType());
 		final Cursor<T> in = input.cursor();
 		final Cursor<FloatType> out = output.cursor();
 		final RealFloatConverter<T> c = new RealFloatConverter<T>();
 
-		while (in.hasNext())
-		{
+		while (in.hasNext()) {
 			in.fwd();
 			out.fwd();
 			c.convert(in.get(), out.get());
