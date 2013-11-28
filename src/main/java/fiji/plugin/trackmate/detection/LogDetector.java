@@ -32,7 +32,6 @@ public class LogDetector <T extends RealType<T>  & NativeType<T>> implements Spo
 	 */
 
 	private final static String BASE_ERROR_MESSAGE = "LogDetector: ";
-
 	private final static Img<FloatType> laplacianKernel2D = createLaplacianKernel(2);
 	private final static Img<FloatType> laplacianKernel3D = createLaplacianKernel(3);
 
@@ -122,12 +121,9 @@ public class LogDetector <T extends RealType<T>  & NativeType<T>> implements Spo
 		}
 
 		final Img<FloatType> gaussianKernel = createGaussianKernel(factory, sigmas);
-		//		ImageJFunctions.showFloat(floatImg.copy(), "Source"); // DEBUG
-		//		ImageJFunctions.showFloat(gaussianKernel, "Gaussian kernel"); // DEBUG
 
 		final FFTConvolution<FloatType> fftconv1 = new FFTConvolution<FloatType>(floatImg, gaussianKernel);
 		fftconv1.run();
-		//		ImageJFunctions.showFloat(floatImg.copy(), "Conv by Gaussian kernel"); // DEBUG
 
 		final Img<FloatType> laplacianKernel;
 		switch (img.numDimensions()) {
@@ -141,10 +137,8 @@ public class LogDetector <T extends RealType<T>  & NativeType<T>> implements Spo
 				errorMessage = baseErrorMessage + "Cannot deal with dimensionality " + img.numDimensions() + "D for single frames.";
 				return false;
 		}
-		//		ImageJFunctions.showFloat(laplacianKernel, "Laplacian kernel"); // DEBUG
 		final FFTConvolution<FloatType> fftconv2 = new FFTConvolution<FloatType>(floatImg, laplacianKernel);
 		fftconv2.run();
-		//		ImageJFunctions.showFloat(floatImg.copy(), "Conv by Log"); // DEBUG
 
 		final PickImagePeaks<FloatType> peakPicker = new PickImagePeaks<FloatType>(floatImg);
 		final double[] suppressionRadiuses = new double[img.numDimensions()];
@@ -220,11 +214,11 @@ public class LogDetector <T extends RealType<T>  & NativeType<T>> implements Spo
 		Img<FloatType> laplacianKernel = null;
 		final ArrayImgFactory<FloatType> factory = new ArrayImgFactory<FloatType>();
 		if (numDim == 3) {
-			final float laplacianArray[][][] = new float[][][]{ { {0,-1/18,0},{-1/18,-1/18,-1/18},{0,-1/18,0} }, { {-1/18,-1/18,-1/18}, {-1/18,1,-1/18}, {-1/18,-1/18,-1/18} }, { {0,-1/18,0},{-1/18,-1/18,-1/18},{0,-1/18,0} } }; // laplace kernel found here: http://en.wikipedia.org/wiki/Discrete_Laplace_operator
+			final float laplacianArray[][][] = new float[][][] { { { 0f, -1f / 18, 0f }, { -1f / 18, -1f / 18, -1f / 18 }, { 0, -1f / 18, 0 } }, { { -1f / 18, -1f / 18, -1f / 18 }, { -1f / 18, 1f, -1f / 18 }, { -1f / 18, -1f / 18, -1f / 18 } }, { { 0f, -1f / 18, 0f }, { -1f / 18, -1f / 18, -1f / 18 }, { 0f, -1f / 18, 0f } } };
 			laplacianKernel = factory.create(new int[] { 3, 3, 3 }, new FloatType());
 			quickKernel3D(laplacianArray, laplacianKernel);
 		} else if (numDim == 2) {
-			final float laplacianArray[][] = new float[][]{ {-1/8,-1/8,-1/8},{-1/8,1,-1/8},{-1/8,-1/8,-1/8} }; // laplace kernel found here: http://en.wikipedia.org/wiki/Discrete_Laplace_operator
+			final float laplacianArray[][] = new float[][] { { -1f / 8, -1f / 8, -1f / 8 }, { -1f / 8, 1f, -1f / 8 }, { -1f / 8, -1f / 8, -1f / 8 } }; // laplace kernel found here: http://en.wikipedia.org/wiki/Discrete_Laplace_operator
 			laplacianKernel = factory.create(new int[] { 3, 3 }, new FloatType());
 			quickKernel2D(laplacianArray, laplacianKernel);
 		}
@@ -345,8 +339,7 @@ public class LogDetector <T extends RealType<T>  & NativeType<T>> implements Spo
 				pos[0] = i;
 				pos[1] = j;
 				cursor.setPosition(pos);
-				//				System.out.println(vals[i][j]);// DEBUG
-				cursor.get().setReal(vals[i][j]);
+				cursor.get().set(vals[i][j]);
 			}
 	}
 
