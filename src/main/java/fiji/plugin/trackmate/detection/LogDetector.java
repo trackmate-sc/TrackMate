@@ -3,21 +3,17 @@ package fiji.plugin.trackmate.detection;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
 import net.imglib2.algorithm.MultiThreaded;
 import net.imglib2.algorithm.fft2.FFTConvolution;
 import net.imglib2.algorithm.math.PickImagePeaks;
-import net.imglib2.converter.RealFloatConverter;
 import net.imglib2.exception.IncompatibleTypeException;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgFactory;
-import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.util.Util;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.detection.subpixel.QuadraticSubpixelLocalization;
 import fiji.plugin.trackmate.detection.subpixel.SubPixelLocalization;
@@ -32,8 +28,6 @@ public class LogDetector <T extends RealType<T>  & NativeType<T>> implements Spo
 	 */
 
 	private final static String BASE_ERROR_MESSAGE = "LogDetector: ";
-	private final static Img<FloatType> laplacianKernel2D = createLaplacianKernel(2);
-	private final static Img<FloatType> laplacianKernel3D = createLaplacianKernel(3);
 
 	/** The image to segment. Will not modified. */
 	protected ImgPlus<T> img;
@@ -98,7 +92,7 @@ public class LogDetector <T extends RealType<T>  & NativeType<T>> implements Spo
 			errorMessage = baseErrorMessage + "Failed creating float image factory: " + e.getMessage();
 			return false;
 		}
-		Img<FloatType> floatImg = copyToFloatImg(img, factory);
+		Img<FloatType> floatImg = DetectionUtils.copyToFloatImg(img, factory);
 
 		// Deal with median filter:
 		if (doMedianFilter) {
@@ -108,40 +102,13 @@ public class LogDetector <T extends RealType<T>  & NativeType<T>> implements Spo
 			}
 		}
 
-		/*
-		 * Build gaussian kernel.
-		 */
-
-		final double sigma = radius / Math.sqrt(img.numDimensions()); // optimal sigma for LoG approach and dimensionality
-		// Turn it in pixel coordinates
-		final double[] calibration = TMUtils.getSpatialCalibration(img);
-		final double[] sigmas = new double[img.numDimensions()];
-		for (int i = 0; i < sigmas.length; i++) {
-			sigmas[i] = sigma / calibration[i];
-		}
-
-		final Img<FloatType> gaussianKernel = createGaussianKernel(factory, sigmas);
-
-		final FFTConvolution<FloatType> fftconv1 = new FFTConvolution<FloatType>(floatImg, gaussianKernel);
-		fftconv1.run();
-
-		final Img<FloatType> laplacianKernel;
-		switch (img.numDimensions()) {
-			case 2:
-				laplacianKernel = laplacianKernel2D;
-				break;
-			case 3:
-				laplacianKernel = laplacianKernel3D;
-				break;
-			default:
-				errorMessage = baseErrorMessage + "Cannot deal with dimensionality " + img.numDimensions() + "D for single frames.";
-				return false;
-		}
-		final FFTConvolution<FloatType> fftconv2 = new FFTConvolution<FloatType>(floatImg, laplacianKernel);
-		fftconv2.run();
+		final Img<FloatType> kernel = DetectionUtils.createLoGKernel(radius, img);
+		final FFTConvolution<FloatType> fftconv = new FFTConvolution<FloatType>(floatImg, kernel);
+		fftconv.run();
 
 		final PickImagePeaks<FloatType> peakPicker = new PickImagePeaks<FloatType>(floatImg);
 		final double[] suppressionRadiuses = new double[img.numDimensions()];
+		final double[] calibration = TMUtils.getSpatialCalibration(img);
 		for (int i = 0; i < img.numDimensions(); i++)
 			suppressionRadiuses[i] = radius / calibration [i];
 		peakPicker.setSuppression(suppressionRadiuses); // in pixels
@@ -206,27 +173,6 @@ public class LogDetector <T extends RealType<T>  & NativeType<T>> implements Spo
 		return true;
 	}
 
-
-	/*
-	 * PRIVATE METHODS
-	 */
-
-
-	private static final Img<FloatType> createLaplacianKernel(final int numDim) {
-		Img<FloatType> laplacianKernel = null;
-		final ArrayImgFactory<FloatType> factory = new ArrayImgFactory<FloatType>();
-		if (numDim == 3) {
-			final float laplacianArray[][][] = new float[][][] { { { 0f, -1f / 18, 0f }, { -1f / 18, -1f / 18, -1f / 18 }, { 0, -1f / 18, 0 } }, { { -1f / 18, -1f / 18, -1f / 18 }, { -1f / 18, 1f, -1f / 18 }, { -1f / 18, -1f / 18, -1f / 18 } }, { { 0f, -1f / 18, 0f }, { -1f / 18, -1f / 18, -1f / 18 }, { 0f, -1f / 18, 0f } } };
-			laplacianKernel = factory.create(new int[] { 3, 3, 3 }, new FloatType());
-			quickKernel3D(laplacianArray, laplacianKernel);
-		} else if (numDim == 2) {
-			final float laplacianArray[][] = new float[][] { { -1f / 8, -1f / 8, -1f / 8 }, { -1f / 8, 1f, -1f / 8 }, { -1f / 8, -1f / 8, -1f / 8 } }; // laplace kernel found here: http://en.wikipedia.org/wiki/Discrete_Laplace_operator
-			laplacianKernel = factory.create(new int[] { 3, 3 }, new FloatType());
-			quickKernel2D(laplacianArray, laplacianKernel);
-		}
-		return laplacianKernel;
-	}
-
 	/**
 	 * Apply a simple 3x3 median filter to the target image.
 	 */
@@ -269,78 +215,4 @@ public class LogDetector <T extends RealType<T>  & NativeType<T>> implements Spo
 	public int getNumThreads() {
 		return numThreads;
 	}
-
-	public static final <T extends RealType<T>> Img<FloatType> copyToFloatImg(final Img<T> input, final ImgFactory<FloatType> factory) {
-		final Img<FloatType> output = factory.create(input, new FloatType());
-		final Cursor<T> in = input.cursor();
-		final Cursor<FloatType> out = output.cursor();
-		final RealFloatConverter<T> c = new RealFloatConverter<T>();
-
-		while (in.hasNext()) {
-			in.fwd();
-			out.fwd();
-			c.convert(in.get(), out.get());
-		}
-		return output;
-	}
-
-	private static final Img<FloatType> createGaussianKernel(final ImgFactory<FloatType> factory, final double[] sigmas) {
-		final int numDimensions = sigmas.length;
-
-		final int[] imageSize = new int[numDimensions];
-		final double[][] kernel = new double[numDimensions][];
-
-		for (int d = 0; d < numDimensions; ++d) {
-			kernel[d] = Util.createGaussianKernel1DDouble(sigmas[d], true);
-			imageSize[d] = kernel[d].length;
-		}
-
-		final Img<FloatType> kernelImg = factory.create(imageSize, new FloatType());
-
-		final Cursor<FloatType> cursor = kernelImg.localizingCursor();
-		final int[] position = new int[numDimensions];
-
-		while (cursor.hasNext()) {
-			cursor.fwd();
-			cursor.localize(position);
-
-			float value = 1;
-
-			for (int d = 0; d < numDimensions; ++d)
-				value *= kernel[d][position[d]];
-
-			cursor.get().set(value);
-		}
-
-		return kernelImg;
-	}
-
-	private static void quickKernel3D(final float[][][] vals, final Img<FloatType> kern) {
-		final RandomAccess<FloatType> cursor = kern.randomAccess();
-		final int[] pos = new int[3];
-
-		for (int i = 0; i < vals.length; ++i)
-			for (int j = 0; j < vals[i].length; ++j)
-				for (int k = 0; k < vals[j].length; ++k) {
-					pos[0] = i;
-					pos[1] = j;
-					pos[2] = k;
-					cursor.setPosition(pos);
-					cursor.get().set(vals[i][j][k]);
-				}
-	}
-
-	private static final void quickKernel2D(final float[][] vals, final Img<FloatType> kern) {
-		final RandomAccess<FloatType> cursor = kern.randomAccess();
-		final int[] pos = new int[2];
-
-		for (int i = 0; i < vals.length; ++i)
-			for (int j = 0; j < vals[i].length; ++j) {
-				pos[0] = i;
-				pos[1] = j;
-				cursor.setPosition(pos);
-				cursor.get().set(vals[i][j]);
-			}
-	}
-
 }
