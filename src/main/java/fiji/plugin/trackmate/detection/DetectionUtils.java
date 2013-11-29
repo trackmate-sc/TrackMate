@@ -32,10 +32,15 @@ public class DetectionUtils {
 	 * @return a new image containing the LoG kernel.
 	 */
 	public static final <R extends RealType<R>> Img<FloatType> createLoGKernel(final double radius, final ImgPlusMetadata metadata) {
-		final double sigma = radius / metadata.numDimensions(); // optimal sigma for LoG approach and dimensionality
+		return createLoGKernel( radius, metadata.numDimensions(), TMUtils.getSpatialCalibration( metadata ) );
+	}
+
+	public static final < R extends RealType< R >> Img< FloatType > createLoGKernel( final double radius, final int nDims, final double[] calibration )
+	{
+		final double sigma = radius / nDims; // optimal sigma for LoG approach
+		// and dimensionality
 		// Turn it in pixel coordinates
-		final double[] calibration = TMUtils.getSpatialCalibration(metadata);
-		final double[] sigmas = new double[metadata.numDimensions()];
+		final double[] sigmas = new double[ nDims ];
 		for (int i = 0; i < sigmas.length; i++) {
 			sigmas[i] = sigma / calibration[i];
 		}
@@ -90,15 +95,15 @@ public class DetectionUtils {
 						{ -3f/96f, -10f/96f, -3f/96f },
 						{ 0f, 		-3f/96f, 	0f },
 					}, 	{
-							{ -3f/96f, 		-10f/96f, 		-3f/96f },
-							{ -10f/96f, 	1f, 			-10f/96f },
-							{ -3f/96f, 		-10f/96f, 		-3f/96f }
+						{ -3f/96f, 		-10f/96f, 		-3f/96f },
+						{ -10f/96f, 	1f, 			-10f/96f },
+						{ -3f/96f, 		-10f/96f, 		-3f/96f }
 					}, {
 						{ 0f, 		-3f/96f, 	0f },
 						{ -3f/96f, -10f/96f, -3f/96f },
 						{ 0f, 		-3f/96f, 	0f },
 					}
-				};
+			};
 			final long midz = kernel.dimension(2) / 2;
 			for (int z = 0; z < 3; z++) {
 				ra.setPosition(midz + z - 1, 2);
