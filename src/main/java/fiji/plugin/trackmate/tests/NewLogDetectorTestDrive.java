@@ -1,23 +1,25 @@
 package fiji.plugin.trackmate.tests;
 
 import fiji.plugin.trackmate.detection.DetectionUtils;
-import ij.ImageJ;
 import ij.ImagePlus;
-import ij.gui.PointRoi;
 import io.scif.img.ImgIOException;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import net.imglib2.Point;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.fft2.FFTConvolution;
 import net.imglib2.algorithm.localextrema.LocalExtrema;
+import net.imglib2.algorithm.localextrema.RefinedPeak;
+import net.imglib2.algorithm.localextrema.SubpixelLocalization;
 import net.imglib2.exception.IncompatibleTypeException;
 import net.imglib2.img.ImagePlusAdapter;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgFactory;
-import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.meta.Axes;
 import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.real.FloatType;
@@ -30,6 +32,8 @@ public class NewLogDetectorTestDrive {
 	@SuppressWarnings( { "rawtypes", "unchecked" } )
 	public static void main(final String[] args) throws ImgIOException, IncompatibleTypeException {
 
+		final int nThreads = Runtime.getRuntime().availableProcessors();
+
 		// final File file = new File(
 		// "/Users/JeanYves/Desktop/Data/FakeTracks.tif" );
 		// final File file = new
@@ -41,41 +45,64 @@ public class NewLogDetectorTestDrive {
 		final ImgPlus img = ImagePlusAdapter.wrapImgPlus( new ImagePlus( file.getAbsolutePath() ) );
 
 		final int timeDim = img.dimensionIndex(Axes.TIME);
-		final IntervalView frame = Views.hyperSlice( img, timeDim, 0 );
+		final long nTimepoints = img.dimension( timeDim );
 
-		ImageJ.main( args );
-		final ImagePlus imp = ImageJFunctions.show(frame);
-		System.out.println("Source has " + img.numDimensions() + " dims. Hyperslice has " + frame.numDimensions() + " dims.");
+		final double[] calibration = new double[ 3 ];
+		calibration[ 0 ] = img.averageScale( 0 );
+		calibration[ 1 ] = img.averageScale( 1 );
+		calibration[ 2 ] = img.averageScale( 2 );
+		// No visible benefit to do that out of the loop.
+		final Img< FloatType > kernel = DetectionUtils.createLoGKernel( 4, img.numDimensions() - 1, calibration );
 
-		final double[] calibration = new double[3];
-		calibration[0] = 1; // img.averageScale(0);
-		calibration[1] = 1; //img.averageScale(1);
-		calibration[2] = 1; //img.averageScale(2);
-		final long start = System.currentTimeMillis();
-
-		final Img< FloatType > kernel = DetectionUtils.createLoGKernel( 4, frame.numDimensions(), calibration );
-		final RandomAccessibleInterval<FloatType> output = new ArrayImgFactory().create(frame, new FloatType());
-		FFTConvolution.convolve(Views.extendZero(frame), frame, Views.extendZero(kernel), kernel, output, new ArrayImgFactory());
-
-		final long t1 = System.currentTimeMillis();
-		System.out.println( "Convolution done in " + ( t1 - start ) + " ms." );
-
-		final ArrayList< Point > peaks = LocalExtrema.findLocalExtrema( output, new LocalExtrema.MaximumCheck( new FloatType( 1f ) ), 1 );
-
-		final long end = System.currentTimeMillis();
-		final int npoints = peaks.size();
-		System.out.println( "Extrema finding done in " + ( end - t1 ) + " ms." );
-		System.out.println( "Detection done in " + ( end - start ) + " ms. Found " + peaks.size() + " spots." );
-
-		final float[] oy = new float[ npoints ];
-		final float[] ox = new float[ npoints ];
-		for ( int i = 0; i < ox.length; i++ )
+		final ExecutorService threadPool = Executors.newFixedThreadPool( nThreads );
+		for ( int i = 0; i < nTimepoints; i++ )
 		{
-			ox[ i ] = peaks.get( i ).getFloatPosition( 0 );
-			oy[ i ] = peaks.get( i ).getFloatPosition( 1 );
+
+			final long timepoint = i;
+			final Runnable runnable = new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					final IntervalView frame = Views.hyperSlice( img, timeDim, timepoint );
+
+					final long start = System.currentTimeMillis();
+
+					final RandomAccessibleInterval<FloatType> output = new ArrayImgFactory().create(frame, new FloatType());
+					FFTConvolution.convolve(Views.extendZero(frame), frame, Views.extendZero(kernel), kernel, output, new ArrayImgFactory());
+
+					final long t1 = System.currentTimeMillis();
+					System.out.println( timepoint + ": Convolution done in " + ( t1 - start ) + " ms." );
+
+					final ArrayList< Point > peaks = LocalExtrema.findLocalExtrema( output, new LocalExtrema.MaximumCheck( new FloatType( 1f ) ), 1 );
+					final long t2 = System.currentTimeMillis();
+					System.out.println( timepoint + ": Extrema finding done in " + ( t2 - t1 ) + " ms." );
+
+					final SubpixelLocalization< Point, FloatType > spl = new SubpixelLocalization< Point, FloatType >( output.numDimensions() );
+					spl.setAllowMaximaTolerance( true );
+					spl.setMaxNumMoves( 10 );
+					spl.setNumThreads( 1 );
+					final ArrayList< RefinedPeak< Point > > refined = spl.process( peaks, output, output );
+					final long end = System.currentTimeMillis();
+					System.out.println( timepoint + ": Sub-pixel refinment done in " + ( end - t2 ) + " ms." );
+
+					System.out.println( timepoint + ": Detection done in " + ( end - start ) + " ms. Found " + refined.size() + " spots." );
+				}
+			};
+			threadPool.execute( runnable );
+
 		}
-		final PointRoi roi = new PointRoi( ox, oy, npoints );
-		imp.setRoi( roi );
+
+		threadPool.shutdown();
+		try
+		{
+			threadPool.awaitTermination( 1000, TimeUnit.DAYS );
+		}
+		catch ( final InterruptedException e )
+		{
+			e.printStackTrace();
+		}
+
 
 	}
 
