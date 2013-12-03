@@ -3,10 +3,11 @@ package fiji.plugin.trackmate.detection;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.imglib2.Point;
 import net.imglib2.RandomAccess;
 import net.imglib2.algorithm.MultiThreaded;
 import net.imglib2.algorithm.fft2.FFTConvolution;
-import net.imglib2.algorithm.math.PickImagePeaks;
+import net.imglib2.algorithm.localextrema.LocalExtrema;
 import net.imglib2.exception.IncompatibleTypeException;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgFactory;
@@ -106,36 +107,21 @@ public class LogDetector <T extends RealType<T>  & NativeType<T>> implements Spo
 		final FFTConvolution<FloatType> fftconv = new FFTConvolution<FloatType>(floatImg, kernel);
 		fftconv.run();
 
-		final PickImagePeaks<FloatType> peakPicker = new PickImagePeaks<FloatType>(floatImg);
-		final double[] suppressionRadiuses = new double[img.numDimensions()];
-		final double[] calibration = TMUtils.getSpatialCalibration(img);
-		for (int i = 0; i < img.numDimensions(); i++)
-			suppressionRadiuses[i] = radius / calibration [i];
-		peakPicker.setSuppression(suppressionRadiuses); // in pixels
-		peakPicker.setAllowBorderPeak(true);
-
-		if (!peakPicker.checkInput() || !peakPicker.process()) {
-			errorMessage = baseErrorMessage +"Could not run the peak picker algorithm:\n" + peakPicker.getErrorMessage();
-			return false;
-		}
+		final FloatType ftThresh = new FloatType((float) threshold);
+		final ArrayList<Point> points = LocalExtrema.findLocalExtrema(floatImg, new LocalExtrema.MaximumCheck<FloatType>(ftThresh), numThreads);
 
 		// Get peaks location and values
-		final ArrayList<long[]> centers = peakPicker.getPeakList();
 		final RandomAccess<FloatType> cursor = floatImg.randomAccess();
 		// Prune values lower than threshold
 		final List<SubPixelLocalization<FloatType>> peaks = new ArrayList<SubPixelLocalization<FloatType>>();
-		final List<FloatType> pruned_values = new ArrayList<FloatType>();
 		final LocationType specialPoint = LocationType.MAX;
-		for (int i = 0; i < centers.size(); i++) {
-			final long[] center = centers.get(i);
-			cursor.setPosition(center);
+		for (final Point point : points) {
+			cursor.setPosition(point);
 			final FloatType value = cursor.get().copy();
-			if (value.getRealDouble() < threshold) {
-				break; // because peaks are sorted, we can exit loop here
-			}
-			final SubPixelLocalization<FloatType> peak = new SubPixelLocalization<FloatType>(center, value, specialPoint);
+			final long[] coords = new long[point.numDimensions()];
+			point.localize(coords);
+			final SubPixelLocalization<FloatType> peak = new SubPixelLocalization<FloatType>(coords, value, specialPoint);
 			peaks.add(peak);
-			pruned_values.add(value);
 		}
 
 		// Do sub-pixel localization
@@ -152,6 +138,7 @@ public class LogDetector <T extends RealType<T>  & NativeType<T>> implements Spo
 
 		// Create spots
 		spots = new ArrayList<Spot>(peaks.size());
+		final double[] calibration = TMUtils.getSpatialCalibration(img);
 		for (int j = 0; j < peaks.size(); j++) {
 
 			final SubPixelLocalization<FloatType> peak = peaks.get(j);
@@ -164,8 +151,6 @@ public class LogDetector <T extends RealType<T>  & NativeType<T>> implements Spo
 			spot.putFeature(Spot.RADIUS, Double.valueOf(radius));
 			spots.add(spot);
 		}
-		// Prune overlapping spots
-		spots = TMUtils.suppressSpots(spots, Spot.QUALITY);
 
 		final long end = System.currentTimeMillis();
 		processingTime = end - start;
