@@ -32,15 +32,15 @@ public class NewLogDetectorTestDrive {
 	@SuppressWarnings( { "rawtypes", "unchecked" } )
 	public static void main(final String[] args) throws ImgIOException, IncompatibleTypeException {
 
-		final int nThreads = Runtime.getRuntime().availableProcessors();
+		final int nThreads = 1; //Runtime.getRuntime().availableProcessors();
 
 		// final File file = new File(
 		// "/Users/JeanYves/Desktop/Data/FakeTracks.tif" );
-		// final File file = new
-		// File("/Users/tinevez/Projects/JYTinevez/ISBI/ChallengeData/VIRUS/VIRUS snr 7 density mid.tif");
+		final File file = new
+		File("/Users/tinevez/Projects/JYTinevez/ISBI/ChallengeData/VIRUS/VIRUS snr 7 density mid.tif");
 		// final File file = new File(
 		// "/Users/JeanYves/Desktop/Data/FakeTracks.tif" );
-		final File file = new File( "/Users/JeanYves/Documents/Projects/ISBI/VIRUS/VIRUS snr 4 density mid.tif" );
+		//		final File file = new File( "/Users/JeanYves/Documents/Projects/ISBI/VIRUS/VIRUS snr 4 density mid.tif" );
 
 		final ImgPlus img = ImagePlusAdapter.wrapImgPlus( new ImagePlus( file.getAbsolutePath() ) );
 
@@ -52,7 +52,6 @@ public class NewLogDetectorTestDrive {
 		calibration[ 1 ] = img.averageScale( 1 );
 		calibration[ 2 ] = img.averageScale( 2 );
 		// No visible benefit to do that out of the loop.
-		final Img< FloatType > kernel = DetectionUtils.createLoGKernel( 4, img.numDimensions() - 1, calibration );
 
 		final ExecutorService threadPool = Executors.newFixedThreadPool( nThreads );
 		for ( int i = 0; i < nTimepoints; i++ )
@@ -68,25 +67,25 @@ public class NewLogDetectorTestDrive {
 
 					final long start = System.currentTimeMillis();
 
+					final Img<FloatType> kernel = DetectionUtils.createLoGKernel(4, img.numDimensions() - 1, calibration);
 					final RandomAccessibleInterval<FloatType> output = new ArrayImgFactory().create(frame, new FloatType());
 					FFTConvolution.convolve(Views.extendZero(frame), frame, Views.extendZero(kernel), kernel, output, new ArrayImgFactory());
 
 					final long t1 = System.currentTimeMillis();
 					System.out.println( timepoint + ": Convolution done in " + ( t1 - start ) + " ms." );
 
-					final ArrayList< Point > peaks = LocalExtrema.findLocalExtrema( output, new LocalExtrema.MaximumCheck( new FloatType( 1f ) ), 1 );
+					final ArrayList<Point> peaks = LocalExtrema.findLocalExtrema(output, new LocalExtrema.MaximumCheck(new FloatType(1f)), 1);
 					final long t2 = System.currentTimeMillis();
-					System.out.println( timepoint + ": Extrema finding done in " + ( t2 - t1 ) + " ms." );
+					System.out.println(timepoint + ": Extrema finding done in " + (t2 - t1) + " ms.");
 
-					final SubpixelLocalization< Point, FloatType > spl = new SubpixelLocalization< Point, FloatType >( output.numDimensions() );
-					spl.setAllowMaximaTolerance( true );
-					spl.setMaxNumMoves( 10 );
-					spl.setNumThreads( 1 );
-					final ArrayList< RefinedPeak< Point > > refined = spl.process( peaks, output, output );
+					final SubpixelLocalization<Point, FloatType> spl = new SubpixelLocalization<Point, FloatType>(output.numDimensions());
+					spl.setAllowMaximaTolerance(true);
+					spl.setMaxNumMoves(10);
+					spl.setNumThreads(1);
+					final ArrayList<RefinedPeak<Point>> refined = spl.process(peaks, output, output);
 					final long end = System.currentTimeMillis();
-					System.out.println( timepoint + ": Sub-pixel refinment done in " + ( end - t2 ) + " ms." );
-
-					System.out.println( timepoint + ": Detection done in " + ( end - start ) + " ms. Found " + refined.size() + " spots." );
+					System.out.println(timepoint + ": Sub-pixel refinment done in " + (end - t2) + " ms.");
+					System.out.println(timepoint + ": Detection done in " + (end - start) + " ms. Found " + refined.size() + " spots.");
 				}
 			};
 			threadPool.execute( runnable );
