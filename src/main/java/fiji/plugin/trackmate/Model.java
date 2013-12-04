@@ -253,7 +253,7 @@ public class Model
 
 	/**
 	 * Removes all the tracks from this model.
-	 * 
+	 *
 	 * @param doNotify
 	 *            if <code>true</code>, model listeners will be notified with a
 	 *            {@link ModelChangeEvent#TRACKS_COMPUTED} event.
@@ -314,6 +314,24 @@ public class Model
 	public SpotCollection getSpots()
 	{
 		return spots;
+	}
+
+	/**
+	 * Removes all the spots from this model.
+	 * 
+	 * @param doNotify
+	 *            if <code>true</code>, model listeners will be notified with a
+	 *            {@link ModelChangeEvent#SPOTS_COMPUTED} event.
+	 */
+	public void clearSpots( final boolean doNotify )
+	{
+		spots.clear();
+		if ( doNotify )
+		{
+			final ModelChangeEvent event = new ModelChangeEvent( this, ModelChangeEvent.SPOTS_COMPUTED );
+			for ( final ModelChangeListener listener : modelChangeListeners )
+				listener.modelChanged( event );
+		}
 	}
 
 	/**

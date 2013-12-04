@@ -91,7 +91,12 @@ public class DetectorConfigurationDescriptor implements WizardPanelDescriptor
 
 	@Override
 	public void comingBackToPanel()
-	{}
+	{
+		/*
+		 * We clear the spot content here.
+		 */
+		trackmate.getModel().clearSpots( true );
+	}
 
 	@Override
 	public String getKey()

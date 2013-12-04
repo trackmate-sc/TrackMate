@@ -105,7 +105,14 @@ public class TrackerChoiceDescriptor implements WizardPanelDescriptor
 
 	@Override
 	public void comingBackToPanel()
-	{}
+	{
+		/*
+		 * We clear the tracks here. We don't do it at the tracker configuration
+		 * panel, because we want the user to be able to visually see the
+		 * changes a parameter tuning cause.
+		 */
+		trackmate.getModel().clearTracks( true );
+	}
 
 	private void setCurrentChoiceFromPlugin()
 	{
