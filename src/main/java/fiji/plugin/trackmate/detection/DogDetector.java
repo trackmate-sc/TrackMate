@@ -101,7 +101,7 @@ public class DogDetector< T extends RealType< T > & NativeType< T >> extends Log
 		 */
 
 		final FloatType val = new FloatType();
-		val.setReal( threshold * ( sigma2 / sigma1 - 1.0 ) );
+		val.setReal( threshold );
 		final IntervalView< FloatType > dogWithBorder = Views.interval( Views.extendZero( dog ), Intervals.expand( dog, 1 ) );
 		final LocalNeighborhoodCheck< Point, FloatType > localNeighborhoodCheck = new LocalExtrema.MaximumCheck< FloatType >( val );
 		final ArrayList< Point > peaks = LocalExtrema.findLocalExtrema( dogWithBorder, localNeighborhoodCheck, numThreads );
@@ -127,9 +127,6 @@ public class DogDetector< T extends RealType< T > & NativeType< T >> extends Log
 			{
 				ra.setPosition( refinedPeak.getOriginalPeak() );
 				final double quality = ra.get().getRealDouble();
-				if ( quality < threshold )
-					continue;
-
 				final double[] coords = new double[ 3 ];
 				for ( int i = 0; i < img.numDimensions(); i++ )
 					coords[ i ] = refinedPeak.getDoublePosition( i ) * calibration[ i ];
@@ -148,9 +145,6 @@ public class DogDetector< T extends RealType< T > & NativeType< T >> extends Log
 			{
 				ra.setPosition( peak );
 				final double quality = ra.get().getRealDouble();
-				if ( quality < threshold )
-					continue;
-
 				final double[] coords = new double[ 3 ];
 				for ( int i = 0; i < img.numDimensions(); i++ )
 					coords[ i ] = peak.getDoublePosition( i ) * calibration[ i ];
