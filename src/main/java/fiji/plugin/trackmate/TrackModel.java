@@ -164,6 +164,14 @@ public class TrackModel
 	}
 
 	/**
+	 * Removes all the tracks from this model.
+	 */
+	void clear()
+	{
+		setGraph( new SimpleWeightedGraph< Spot, DefaultWeightedEdge >( DefaultWeightedEdge.class ) );
+	}
+
+	/**
 	 * This method is meant to help building a model from a serialized source,
 	 * such as a saved file. It allows specifying the exact mapping of track IDs
 	 * to the connected sets. The model content is completely replaced by the

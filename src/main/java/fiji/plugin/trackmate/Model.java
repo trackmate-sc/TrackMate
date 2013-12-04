@@ -18,9 +18,9 @@ import fiji.plugin.trackmate.features.FeatureFilter;
  * through user manual editing and automatic processing. To avoid conflicting
  * accesses to the data, some specialized methods had to be created, hopefully
  * built in coherent sets.
- * 
+ *
  * @author Jean-Yves Tinevez <tinevez@pasteur.fr> - 2010-2013
- * 
+ *
  */
 public class Model
 {
@@ -250,6 +250,24 @@ public class Model
 	/*
 	 * TRACK METHODS: WE DELEGATE TO THE TRACK GRAPH MODEL
 	 */
+
+	/**
+	 * Removes all the tracks from this model.
+	 * 
+	 * @param doNotify
+	 *            if <code>true</code>, model listeners will be notified with a
+	 *            {@link ModelChangeEvent#TRACKS_COMPUTED} event.
+	 */
+	public void clearTracks( final boolean doNotify )
+	{
+		trackModel.clear();
+		if ( doNotify )
+		{
+			final ModelChangeEvent event = new ModelChangeEvent( this, ModelChangeEvent.TRACKS_COMPUTED );
+			for ( final ModelChangeListener listener : modelChangeListeners )
+				listener.modelChanged( event );
+		}
+	}
 
 	/**
 	 * Returns the {@link TrackModel} that manages the tracks for this model.
