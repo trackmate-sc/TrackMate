@@ -37,35 +37,44 @@ import fiji.plugin.trackmate.util.TMUtils;
  *         2011 - 2012 - 2013
  *
  */
-public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
+public class TrackMate implements Benchmark, MultiThreaded, Algorithm
+{
 
 	public static final String PLUGIN_NAME_STR = "TrackMate";
+
 	public static final String PLUGIN_NAME_VERSION = "2.2.0-SNAPSHOT";
 
 	/**
 	 * The model this trackmate will shape.
 	 */
 	protected final Model model;
+
 	protected final Settings settings;
+
 	protected long processingTime;
+
 	protected String errorMessage;
+
 	protected int numThreads = Runtime.getRuntime().availableProcessors();
 
 	/*
 	 * CONSTRUCTORS
 	 */
 
-	public TrackMate(final Settings settings) {
-		this(new Model(), settings);
+	public TrackMate( final Settings settings )
+	{
+		this( new Model(), settings );
 	}
 
-	public TrackMate(final Model model, final Settings settings) {
+	public TrackMate( final Model model, final Settings settings )
+	{
 		this.model = model;
 		this.settings = settings;
 	}
 
-	public TrackMate() {
-		this(new Model(), new Settings());
+	public TrackMate()
+	{
+		this( new Model(), new Settings() );
 	}
 
 	/*
@@ -93,20 +102,25 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 	 * @return a list of spot. Depending on the presence of a polygon ROI, it
 	 *         might be a new, pruned list. Or not.
 	 */
-	protected List<Spot> translateAndPruneSpots(final List<Spot> spotsThisFrame, final Settings settings) {
+	protected List< Spot > translateAndPruneSpots( final List< Spot > spotsThisFrame, final Settings settings )
+	{
 
 		// Put them back in the right referential
-		final double[] calibration = TMUtils.getSpatialCalibration(settings.imp);
-		TMUtils.translateSpots(spotsThisFrame, settings.xstart * calibration[0], settings.ystart * calibration[1], settings.zstart * calibration[2]);
-		List<Spot> prunedSpots;
+		final double[] calibration = TMUtils.getSpatialCalibration( settings.imp );
+		TMUtils.translateSpots( spotsThisFrame, settings.xstart * calibration[ 0 ], settings.ystart * calibration[ 1 ], settings.zstart * calibration[ 2 ] );
+		List< Spot > prunedSpots;
 		// Prune if outside of ROI
-		if (null != settings.polygon) {
-			prunedSpots = new ArrayList<Spot>();
-			for (final Spot spot : spotsThisFrame) {
-				if (settings.polygon.contains(spot.getFeature(Spot.POSITION_X) / calibration[0], spot.getFeature(Spot.POSITION_Y) / calibration[1]))
-					prunedSpots.add(spot);
+		if ( null != settings.polygon )
+		{
+			prunedSpots = new ArrayList< Spot >();
+			for ( final Spot spot : spotsThisFrame )
+			{
+				if ( settings.polygon.contains( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ], spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) )
+					prunedSpots.add( spot );
 			}
-		} else {
+		}
+		else
+		{
 			prunedSpots = spotsThisFrame;
 		}
 		return prunedSpots;
@@ -116,11 +130,13 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 	 * METHODS
 	 */
 
-	public Model getModel() {
+	public Model getModel()
+	{
 		return model;
 	}
 
-	public Settings getSettings() {
+	public Settings getSettings()
+	{
 		return settings;
 	}
 
@@ -141,16 +157,21 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 	 * @return <code>true</code> if the calculation was performed successfully,
 	 *         <code>false</code> otherwise.
 	 */
-	public boolean computeSpotFeatures(final boolean doLogIt) {
+	public boolean computeSpotFeatures( final boolean doLogIt )
+	{
 		final Logger logger = model.getLogger();
-		logger.log("Computing spot features.\n");
-		final SpotFeatureCalculator calculator = new SpotFeatureCalculator(model, settings);
-		if (calculator.checkInput() && calculator.process()) {
-			if (doLogIt) {
-				logger.log("Computation done in " + calculator.getProcessingTime() + " ms.\n");
+		logger.log( "Computing spot features.\n" );
+		final SpotFeatureCalculator calculator = new SpotFeatureCalculator( model, settings );
+		if ( calculator.checkInput() && calculator.process() )
+		{
+			if ( doLogIt )
+			{
+				logger.log( "Computation done in " + calculator.getProcessingTime() + " ms.\n" );
 			}
 			return true;
-		} else {
+		}
+		else
+		{
 			errorMessage = "Spot features calculation failed:\n" + calculator.getErrorMessage();
 			return false;
 		}
@@ -169,15 +190,18 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 	 * @return <code>true</code> if the calculation was performed successfuly,
 	 *         <code>false</code> otherwise.
 	 */
-	public boolean computeEdgeFeatures(final boolean doLogIt) {
+	public boolean computeEdgeFeatures( final boolean doLogIt )
+	{
 		final Logger logger = model.getLogger();
-		final EdgeFeatureCalculator calculator = new EdgeFeatureCalculator(model, settings);
-		if (!calculator.checkInput() || !calculator.process()) {
+		final EdgeFeatureCalculator calculator = new EdgeFeatureCalculator( model, settings );
+		if ( !calculator.checkInput() || !calculator.process() )
+		{
 			errorMessage = "Edge features calculation failed:\n" + calculator.getErrorMessage();
 			return false;
 		}
-		if (doLogIt) {
-			logger.log("Computation done in " + calculator.getProcessingTime() + " ms.\n");
+		if ( doLogIt )
+		{
+			logger.log( "Computation done in " + calculator.getProcessingTime() + " ms.\n" );
 		}
 		return true;
 	}
@@ -187,15 +211,20 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 	 *
 	 * @return
 	 */
-	public boolean computeTrackFeatures(final boolean doLogIt) {
+	public boolean computeTrackFeatures( final boolean doLogIt )
+	{
 		final Logger logger = model.getLogger();
-		final TrackFeatureCalculator calculator = new TrackFeatureCalculator(model, settings);
-		if (calculator.checkInput() && calculator.process()) {
-			if (doLogIt) {
-				logger.log("Computation done in " + calculator.getProcessingTime() + " ms.\n");
+		final TrackFeatureCalculator calculator = new TrackFeatureCalculator( model, settings );
+		if ( calculator.checkInput() && calculator.process() )
+		{
+			if ( doLogIt )
+			{
+				logger.log( "Computation done in " + calculator.getProcessingTime() + " ms.\n" );
 			}
 			return true;
-		} else {
+		}
+		else
+		{
 			errorMessage = "Track features calculation failed:\n" + calculator.getErrorMessage();
 			return false;
 		}
@@ -211,19 +240,23 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 	 * <p>
 	 * The {@link ModelChangeListener}s of the model will be notified when the
 	 * successful process is over.
-	 * 
+	 *
 	 * @see #getTrackGraph()
 	 */
-	public boolean execTracking() {
+	public boolean execTracking()
+	{
 		final Logger logger = model.getLogger();
-		logger.log("Starting tracking process.\n");
+		logger.log( "Starting tracking process.\n" );
 		final SpotTracker tracker = settings.tracker;
-		tracker.setLogger(logger);
-		tracker.setTarget(model.getSpots(), settings.trackerSettings);
-		if (tracker.checkInput() && tracker.process()) {
-			model.setTracks(tracker.getResult(), true);
+		tracker.setLogger( logger );
+		tracker.setTarget( model.getSpots(), settings.trackerSettings );
+		if ( tracker.checkInput() && tracker.process() )
+		{
+			model.setTracks( tracker.getResult(), true );
 			return true;
-		} else {
+		}
+		else
+		{
 			errorMessage = "Tracking process failed:\n" + tracker.getErrorMessage();
 			return false;
 		}
@@ -239,17 +272,20 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 	 *
 	 * @return true if the whole detection step has executed correctly.
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public boolean execDetection() {
+	@SuppressWarnings( { "rawtypes", "unchecked" } )
+	public boolean execDetection()
+	{
 		final Logger logger = model.getLogger();
-		logger.log("Starting detection process.\n");
+		logger.log( "Starting detection process.\n" );
 
-		final SpotDetectorFactory<?> factory = settings.detectorFactory;
-		if (null == factory) {
+		final SpotDetectorFactory< ? > factory = settings.detectorFactory;
+		if ( null == factory )
+		{
 			errorMessage = "Detector factory is null.\n";
 			return false;
 		}
-		if (null == settings.detectorSettings) {
+		if ( null == settings.detectorSettings )
+		{
 			errorMessage = "Detector settings is null.\n";
 			return false;
 		}
@@ -257,186 +293,232 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 		/*
 		 * Prepare cropped image
 		 */
-		final ImgPlus rawImg = TMUtils.rawWraps(settings.imp);
+		final ImgPlus rawImg = TMUtils.rawWraps( settings.imp );
 		ImgPlus img;
 
 		// Check if we indeed wish to crop the source image. To this, we check
 		// the crop cube settings
 
-		if (settings.xstart != 0 || settings.ystart != 0 || settings.zstart != 0 || settings.xend != settings.imp.getWidth() - 1 || settings.yend != settings.imp.getHeight() - 1 || settings.zend != settings.imp.getNSlices() - 1) {
+		if ( settings.xstart != 0 || settings.ystart != 0 || settings.zstart != 0 || settings.xend != settings.imp.getWidth() - 1 || settings.yend != settings.imp.getHeight() - 1 || settings.zend != settings.imp.getNSlices() - 1 )
+		{
 			// Yes, we want to crop
 
-			final long[] max = new long[rawImg.numDimensions()];
-			final long[] min = new long[rawImg.numDimensions()];
+			final long[] max = new long[ rawImg.numDimensions() ];
+			final long[] min = new long[ rawImg.numDimensions() ];
 			// X, we must have it
-			final int xindex = TMUtils.findXAxisIndex(rawImg);
-			if (xindex < 0) {
+			final int xindex = TMUtils.findXAxisIndex( rawImg );
+			if ( xindex < 0 )
+			{
 				errorMessage = "Source image has no X axis.\n";
 				return false;
 			}
-			min[xindex] = settings.xstart;
-			max[xindex] = settings.xend;
+			min[ xindex ] = settings.xstart;
+			max[ xindex ] = settings.xend;
 			// Y, we must have it
-			final int yindex = TMUtils.findYAxisIndex(rawImg);
-			if (yindex < 0) {
+			final int yindex = TMUtils.findYAxisIndex( rawImg );
+			if ( yindex < 0 )
+			{
 				errorMessage = "Source image has no Y axis.\n";
 				return false;
 			}
-			min[yindex] = settings.ystart;
-			max[yindex] = settings.yend;
+			min[ yindex ] = settings.ystart;
+			max[ yindex ] = settings.yend;
 			// Z, we MIGHT have it
-			final int zindex = TMUtils.findZAxisIndex(rawImg);
-			if (zindex >= 0) {
-				min[zindex] = settings.zstart;
-				max[zindex] = settings.zend;
+			final int zindex = TMUtils.findZAxisIndex( rawImg );
+			if ( zindex >= 0 )
+			{
+				min[ zindex ] = settings.zstart;
+				max[ zindex ] = settings.zend;
 			}
 			// CHANNEL, we might have it
-			final int cindex = TMUtils.findCAxisIndex(rawImg);
-			if (cindex >= 0) {
-				min[cindex] = 0;
-				max[cindex] = settings.imp.getNChannels();
+			final int cindex = TMUtils.findCAxisIndex( rawImg );
+			if ( cindex >= 0 )
+			{
+				min[ cindex ] = 0;
+				max[ cindex ] = settings.imp.getNChannels();
 			}
-			// TIME, we might have it, but anyway we leave the start & end management to the threads below
-			final int tindex = TMUtils.findTAxisIndex(rawImg);
-			if (tindex >= 0) {
-				min[tindex] = 0;
-				max[tindex] = settings.imp.getNFrames();
+			// TIME, we might have it, but anyway we leave the start & end
+			// management to the threads below
+			final int tindex = TMUtils.findTAxisIndex( rawImg );
+			if ( tindex >= 0 )
+			{
+				min[ tindex ] = 0;
+				max[ tindex ] = settings.imp.getNFrames();
 			}
 			// crop: we now have a cropped view of the source image
-			final CropImgView cropView = new CropImgView(rawImg, min, max);
+			final CropImgView cropView = new CropImgView( rawImg, min, max );
 			// Put back metadata in a new ImgPlus
-			img = new ImgPlus(cropView, rawImg);
+			img = new ImgPlus( cropView, rawImg );
 
-		} else {
+		}
+		else
+		{
 			img = rawImg;
 		}
 
-		factory.setTarget(img, settings.detectorSettings);
+		factory.setTarget( img, settings.detectorSettings );
 
 		final int numFrames = settings.tend - settings.tstart + 1;
 		// Final results holder, for all frames
 		final SpotCollection spots = new SpotCollection();
-		spots.setNumThreads(numThreads);
+		spots.setNumThreads( numThreads );
 		// To report progress
-		final AtomicInteger spotFound = new AtomicInteger(0);
-		final AtomicInteger progress = new AtomicInteger(0);
+		final AtomicInteger spotFound = new AtomicInteger( 0 );
+		final AtomicInteger progress = new AtomicInteger( 0 );
 		// To translate spots, later
-		final double[] calibration = TMUtils.getSpatialCalibration(settings.imp);
-		final double dx = settings.xstart * calibration[0];
-		final double dy = settings.ystart * calibration[1];
-		final double dz = settings.zstart * calibration[2];
+		final double[] calibration = TMUtils.getSpatialCalibration( settings.imp );
+		final double dx = settings.xstart * calibration[ 0 ];
+		final double dy = settings.ystart * calibration[ 1 ];
+		final double dz = settings.zstart * calibration[ 2 ];
 
-		final Thread[] threads = SimpleMultiThreading.newThreads(numThreads);
-		final AtomicBoolean ok = new AtomicBoolean(true);
+		final Thread[] threads = SimpleMultiThreading.newThreads( numThreads );
+		final AtomicBoolean ok = new AtomicBoolean( true );
 
 		// Prepare the thread array
-		final AtomicInteger ai = new AtomicInteger(settings.tstart);
-		for (int ithread = 0; ithread < threads.length; ithread++) {
+		final AtomicInteger ai = new AtomicInteger( settings.tstart );
+		for ( int ithread = 0; ithread < threads.length; ithread++ )
+		{
 
-			threads[ithread] = new Thread("TrackMate spot detection thread " + (1 + ithread) + "/" + threads.length) {
-				private boolean wasInterrupted() {
-					try {
-						if (isInterrupted())
+			threads[ ithread ] = new Thread( "TrackMate spot detection thread " + ( 1 + ithread ) + "/" + threads.length )
+			{
+				private boolean wasInterrupted()
+				{
+					try
+					{
+						if ( isInterrupted() )
 							return true;
-						sleep(0);
+						sleep( 0 );
 						return false;
-					} catch (final InterruptedException e) {
+					}
+					catch ( final InterruptedException e )
+					{
 						return true;
 					}
 				}
 
 				@Override
-				public void run() {
+				public void run()
+				{
 
-					for (int frame = ai.getAndIncrement(); frame <= settings.tend; frame = ai.getAndIncrement())
-						try {
+					for ( int frame = ai.getAndIncrement(); frame <= settings.tend; frame = ai.getAndIncrement() )
+						try
+						{
 
 							// Yield detector for target frame
-							final SpotDetector<?> detector = factory.getDetector(frame);
+							final SpotDetector< ? > detector = factory.getDetector( frame );
 
-							if (wasInterrupted())
+							if ( wasInterrupted() )
 								return;
 
 							// Execute detection
-							if (ok.get() && detector.checkInput() && detector.process()) {
+							if ( ok.get() && detector.checkInput() && detector.process() )
+							{
 								// On success,
 								// Get results,
-								final List<Spot> spotsThisFrame = detector.getResult();
-								// Translate individual spots back to top-left corner of the image, if
+								final List< Spot > spotsThisFrame = detector.getResult();
+								// Translate individual spots back to top-left
+								// corner of the image, if
 								// the raw image was cropped.
-								TMUtils.translateSpots(spotsThisFrame, dx, dy, dz);
+								TMUtils.translateSpots( spotsThisFrame, dx, dy, dz );
 								// Prune if outside of ROI
-								List<Spot> prunedSpots;
-								if (null != settings.polygon) {
-									prunedSpots = new ArrayList<Spot>();
-									for (final Spot spot : spotsThisFrame) {
-										if (settings.polygon.contains(spot.getFeature(Spot.POSITION_X) / calibration[0], spot.getFeature(Spot.POSITION_Y) / calibration[1]))
-											prunedSpots.add(spot);
+								List< Spot > prunedSpots;
+								if ( null != settings.polygon )
+								{
+									prunedSpots = new ArrayList< Spot >();
+									for ( final Spot spot : spotsThisFrame )
+									{
+										if ( settings.polygon.contains( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ], spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) )
+											prunedSpots.add( spot );
 									}
-								} else {
+								}
+								else
+								{
 									prunedSpots = spotsThisFrame;
 								}
 								// Add detection feature other than position
-								for (final Spot spot : prunedSpots) {
-									spot.putFeature(Spot.POSITION_T, frame * settings.dt); // FRAME will be set upon adding to SpotCollection
+								for ( final Spot spot : prunedSpots )
+								{
+									spot.putFeature( Spot.POSITION_T, frame * settings.dt ); // FRAME
+																								// will
+																								// be
+																								// set
+																								// upon
+																								// adding
+																								// to
+																								// SpotCollection
 								}
 								// Store final results for this frame
-								spots.put(frame, prunedSpots);
+								spots.put( frame, prunedSpots );
 								// Report
-								spotFound.addAndGet(prunedSpots.size());
-								logger.setProgress(progress.incrementAndGet() / (double) numFrames);
+								spotFound.addAndGet( prunedSpots.size() );
+								logger.setProgress( progress.incrementAndGet() / ( double ) numFrames );
 
-							} else {
+							}
+							else
+							{
 								// Fail: exit and report error.
-								ok.set(false);
+								ok.set( false );
 								errorMessage = detector.getErrorMessage();
 								return;
 							}
 
-						} catch (final RuntimeException e) {
+						}
+						catch ( final RuntimeException e )
+						{
 							final Throwable cause = e.getCause();
-							if (cause != null && cause instanceof InterruptedException) {
-								return;
-							}
+							if ( cause != null && cause instanceof InterruptedException ) { return; }
 							throw e;
 						}
 				}
 			};
 		}
 
-		logger.setStatus("Detection...");
-		logger.setProgress(0);
+		logger.setStatus( "Detection..." );
+		logger.setProgress( 0 );
 
-		try {
-			SimpleMultiThreading.startAndJoin(threads);
-		} catch (final RuntimeException e) {
-			ok.set(false);
-			if (e.getCause() != null && e.getCause() instanceof InterruptedException) {
+		try
+		{
+			SimpleMultiThreading.startAndJoin( threads );
+		}
+		catch ( final RuntimeException e )
+		{
+			ok.set( false );
+			if ( e.getCause() != null && e.getCause() instanceof InterruptedException )
+			{
 				errorMessage = "Detection workers interrupted.\n";
-				for (final Thread thread : threads)
+				for ( final Thread thread : threads )
 					thread.interrupt();
-				for (final Thread thread : threads) {
-					if (thread.isAlive())
-						try {
+				for ( final Thread thread : threads )
+				{
+					if ( thread.isAlive() )
+						try
+						{
 							thread.join();
-						} catch (final InterruptedException e2) {
+						}
+						catch ( final InterruptedException e2 )
+						{
 							// ignore
 						}
 				}
-			} else {
+			}
+			else
+			{
 				throw e;
 			}
 		}
-		model.setSpots(spots, true);
+		model.setSpots( spots, true );
 
-		if (ok.get()) {
-			logger.log("Found " + spotFound.get() + " spots.\n");
-		} else {
-			logger.error("Detection failed after " + progress.get() + " frames:\n" + errorMessage);
-			logger.log("Found " + spotFound.get() + " spots prior failure.\n");
+		if ( ok.get() )
+		{
+			logger.log( "Found " + spotFound.get() + " spots.\n" );
 		}
-		logger.setProgress(1);
-		logger.setStatus("");
+		else
+		{
+			logger.error( "Detection failed after " + progress.get() + " frames:\n" + errorMessage );
+			logger.log( "Found " + spotFound.get() + " spots prior failure.\n" );
+		}
+		logger.setProgress( 1 );
+		logger.setStatus( "" );
 		return ok.get();
 	}
 
@@ -465,19 +547,20 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 	 * @see #getSpots()
 	 * @see #setInitialFilter(Float)
 	 */
-	public boolean execInitialSpotFiltering() {
+	public boolean execInitialSpotFiltering()
+	{
 		final Logger logger = model.getLogger();
-		logger.log("Starting initial filtering process.\n");
+		logger.log( "Starting initial filtering process.\n" );
 
 		final Double initialSpotFilterValue = settings.initialSpotFilterValue;
-		final FeatureFilter featureFilter = new FeatureFilter(Spot.QUALITY, initialSpotFilterValue, true);
+		final FeatureFilter featureFilter = new FeatureFilter( Spot.QUALITY, initialSpotFilterValue, true );
 
 		SpotCollection spots = model.getSpots();
-		spots.filter(featureFilter);
+		spots.filter( featureFilter );
 
 		spots = spots.crop();
 
-		model.setSpots(spots, true); // Forget about the previous one
+		model.setSpots( spots, true ); // Forget about the previous one
 		return true;
 	}
 
@@ -500,53 +583,68 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 	 *            if true, will send a message to the {@link Model#logger}.
 	 * @see #getFilteredSpots()
 	 */
-	public boolean execSpotFiltering(final boolean doLogIt) {
-		if (doLogIt) {
+	public boolean execSpotFiltering( final boolean doLogIt )
+	{
+		if ( doLogIt )
+		{
 			final Logger logger = model.getLogger();
-			logger.log("Starting spot filtering process.\n");
+			logger.log( "Starting spot filtering process.\n" );
 		}
-		model.filterSpots(settings.getSpotFilters(), true);
+		model.filterSpots( settings.getSpotFilters(), true );
 		return true;
 	}
 
-	public boolean execTrackFiltering(final boolean doLogIt) {
-		if (doLogIt) {
+	public boolean execTrackFiltering( final boolean doLogIt )
+	{
+		if ( doLogIt )
+		{
 			final Logger logger = model.getLogger();
-			logger.log("Starting track filtering process.\n");
+			logger.log( "Starting track filtering process.\n" );
 		}
 
 		model.beginUpdate();
-		try {
-			for (final Integer trackID : model.getTrackModel().trackIDs(false)) {
+		try
+		{
+			for ( final Integer trackID : model.getTrackModel().trackIDs( false ) )
+			{
 				boolean trackIsOk = true;
-				for (final FeatureFilter filter : settings.getTrackFilters()) {
+				for ( final FeatureFilter filter : settings.getTrackFilters() )
+				{
 					final Double tval = filter.value;
-					final Double val = model.getFeatureModel().getTrackFeature(trackID, filter.feature);
-					if (null == val)
+					final Double val = model.getFeatureModel().getTrackFeature( trackID, filter.feature );
+					if ( null == val )
 						continue;
 
-					if (filter.isAbove) {
-						if (val < tval) {
+					if ( filter.isAbove )
+					{
+						if ( val < tval )
+						{
 							trackIsOk = false;
 							break;
 						}
-					} else {
-						if (val > tval) {
+					}
+					else
+					{
+						if ( val > tval )
+						{
 							trackIsOk = false;
 							break;
 						}
 					}
 				}
-				model.setTrackVisibility(trackID, trackIsOk);
+				model.setTrackVisibility( trackID, trackIsOk );
 			}
-		} finally {
+		}
+		finally
+		{
 			model.endUpdate();
 		}
 		return true;
 	}
 
 	@Override
-	public String toString() {
+	public String toString()
+	{
 		return PLUGIN_NAME_STR + "v" + PLUGIN_NAME_VERSION;
 	}
 
@@ -555,16 +653,20 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 	 */
 
 	@Override
-	public boolean checkInput() {
-		if (null == model) {
+	public boolean checkInput()
+	{
+		if ( null == model )
+		{
 			errorMessage = "The model is null.\n";
 			return false;
 		}
-		if (null == settings) {
+		if ( null == settings )
+		{
 			errorMessage = "Settings are null";
 			return false;
 		}
-		if (!settings.checkValidity()) {
+		if ( !settings.checkValidity() )
+		{
 			errorMessage = settings.getErrorMessage();
 			return false;
 		}
@@ -572,64 +674,54 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 	}
 
 	@Override
-	public String getErrorMessage() {
+	public String getErrorMessage()
+	{
 		return errorMessage;
 	}
 
 	@Override
-	public boolean process() {
-		if (!execDetection()) {
-			return false;
-		}
-		if (!execInitialSpotFiltering()) {
-			return false;
-		}
+	public boolean process()
+	{
+		if ( !execDetection() ) { return false; }
+		if ( !execInitialSpotFiltering() ) { return false; }
 
-		if (!computeSpotFeatures(true)) {
-			return false;
-		}
+		if ( !computeSpotFeatures( true ) ) { return false; }
 
-		if (!execSpotFiltering(true)) {
-			return false;
-		}
+		if ( !execSpotFiltering( true ) ) { return false; }
 
-		if (!execTracking()) {
-			return false;
-		}
+		if ( !execTracking() ) { return false; }
 
-		if (!computeTrackFeatures(true)) {
-			return false;
-		}
+		if ( !computeTrackFeatures( true ) ) { return false; }
 
-		if (!execTrackFiltering(true)) {
-			return false;
-		}
+		if ( !execTrackFiltering( true ) ) { return false; }
 
-		if (!computeEdgeFeatures(true)) {
-			return false;
-		}
+		if ( !computeEdgeFeatures( true ) ) { return false; }
 
 		return true;
 	}
 
 	@Override
-	public int getNumThreads() {
+	public int getNumThreads()
+	{
 		return numThreads;
 	}
 
 	@Override
-	public void setNumThreads() {
+	public void setNumThreads()
+	{
 		this.numThreads = Runtime.getRuntime().availableProcessors();
 	}
 
 	@Override
-	public void setNumThreads(final int numThreads) {
+	public void setNumThreads( final int numThreads )
+	{
 		this.numThreads = numThreads;
 
 	}
 
 	@Override
-	public long getProcessingTime() {
+	public long getProcessingTime()
+	{
 		return processingTime;
 	};
 
