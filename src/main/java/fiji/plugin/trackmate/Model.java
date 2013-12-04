@@ -18,11 +18,12 @@ import fiji.plugin.trackmate.features.FeatureFilter;
  * through user manual editing and automatic processing. To avoid conflicting
  * accesses to the data, some specialized methods had to be created, hopefully
  * built in coherent sets.
- *
- * @author Jean-Yves Tinevez <tinevez@pasteur.fr> - 2010-2011
- *
+ * 
+ * @author Jean-Yves Tinevez <tinevez@pasteur.fr> - 2010-2013
+ * 
  */
-public class Model {
+public class Model
+{
 
 	/*
 	 * CONSTANTS
@@ -56,10 +57,15 @@ public class Model {
 	 * events are fired. Initial value is 0.
 	 */
 	private int updateLevel = 0;
-	private final HashSet<Spot> spotsAdded = new HashSet<Spot>();
-	private final HashSet<Spot> spotsRemoved = new HashSet<Spot>();
-	private final HashSet<Spot> spotsMoved = new HashSet<Spot>();
-	private final HashSet<Spot> spotsUpdated = new HashSet<Spot>();
+
+	private final HashSet< Spot > spotsAdded = new HashSet< Spot >();
+
+	private final HashSet< Spot > spotsRemoved = new HashSet< Spot >();
+
+	private final HashSet< Spot > spotsMoved = new HashSet< Spot >();
+
+	private final HashSet< Spot > spotsUpdated = new HashSet< Spot >();
+
 	/**
 	 * The event cache. During a transaction, some modifications might trigger
 	 * the need to fire a model change event. We want to fire these events only
@@ -76,13 +82,15 @@ public class Model {
 	 * for it needs to be configured with modification spot and edge targets, so
 	 * it uses a different system (see {@link #flushUpdate()}).
 	 */
-	private final HashSet<Integer> eventCache = new HashSet<Integer>();
+	private final HashSet< Integer > eventCache = new HashSet< Integer >();
 
 	// OTHERS
 
 	/** The logger to append processes messages */
 	private Logger logger = Logger.DEFAULT_LOGGER;
+
 	private String spaceUnits = "pixels";
+
 	private String timeUnits = "frames";
 
 	// LISTENERS
@@ -91,14 +99,15 @@ public class Model {
 	 * The list of listeners listening to model content change, that is, changes
 	 * in {@link #spots}, {@link #filteredSpots} and {@link #trackGraph}.
 	 */
-	Set<ModelChangeListener> modelChangeListeners = new LinkedHashSet<ModelChangeListener>();
+	Set< ModelChangeListener > modelChangeListeners = new LinkedHashSet< ModelChangeListener >();
 
 	/*
 	 * CONSTRUCTOR
 	 */
 
-	public Model() {
-		featureModel = new FeatureModel(this);
+	public Model()
+	{
+		featureModel = new FeatureModel( this );
 		trackModel = new TrackModel();
 	}
 
@@ -107,38 +116,51 @@ public class Model {
 	 */
 
 	@Override
-	public String toString() {
+	public String toString()
+	{
 		final StringBuilder str = new StringBuilder();
 
-		str.append('\n');
-		if (null == spots || spots.keySet().size() == 0) {
-			str.append("No spots.\n");
-		} else {
-			str.append("Contains " + spots.getNSpots(false) + " spots in total.\n");
+		str.append( '\n' );
+		if ( null == spots || spots.keySet().size() == 0 )
+		{
+			str.append( "No spots.\n" );
 		}
-		if (spots.getNSpots(true) == 0) {
-			str.append("No filtered spots.\n");
-		} else {
-			str.append("Contains " + spots.getNSpots(true) + " filtered spots.\n");
+		else
+		{
+			str.append( "Contains " + spots.getNSpots( false ) + " spots in total.\n" );
 		}
-
-		str.append('\n');
-		if (trackModel.nTracks(false) == 0) {
-			str.append("No tracks.\n");
-		} else {
-			str.append("Contains " + trackModel.nTracks(false) + " tracks in total.\n");
+		if ( spots.getNSpots( true ) == 0 )
+		{
+			str.append( "No filtered spots.\n" );
 		}
-		if (trackModel.nTracks(true) == 0) {
-			str.append("No filtered tracks.\n");
-		} else {
-			str.append("Contains " + trackModel.nTracks(true) + " filtered tracks.\n");
+		else
+		{
+			str.append( "Contains " + spots.getNSpots( true ) + " filtered spots.\n" );
 		}
 
-		str.append('\n');
-		str.append("Physical units:\n  space units: " + spaceUnits + "\n  time units: " + timeUnits + '\n');
+		str.append( '\n' );
+		if ( trackModel.nTracks( false ) == 0 )
+		{
+			str.append( "No tracks.\n" );
+		}
+		else
+		{
+			str.append( "Contains " + trackModel.nTracks( false ) + " tracks in total.\n" );
+		}
+		if ( trackModel.nTracks( true ) == 0 )
+		{
+			str.append( "No filtered tracks.\n" );
+		}
+		else
+		{
+			str.append( "Contains " + trackModel.nTracks( true ) + " filtered tracks.\n" );
+		}
 
-		str.append('\n');
-		str.append(featureModel.toString());
+		str.append( '\n' );
+		str.append( "Physical units:\n  space units: " + spaceUnits + "\n  time units: " + timeUnits + '\n' );
+
+		str.append( '\n' );
+		str.append( featureModel.toString() );
 
 		return str.toString();
 	}
@@ -147,15 +169,18 @@ public class Model {
 	 * DEAL WITH MODEL CHANGE LISTENER
 	 */
 
-	public void addModelChangeListener(final ModelChangeListener listener) {
-		modelChangeListeners.add(listener);
+	public void addModelChangeListener( final ModelChangeListener listener )
+	{
+		modelChangeListeners.add( listener );
 	}
 
-	public boolean removeModelChangeListener(final ModelChangeListener listener) {
-		return modelChangeListeners.remove(listener);
+	public boolean removeModelChangeListener( final ModelChangeListener listener )
+	{
+		return modelChangeListeners.remove( listener );
 	}
 
-	public Set<ModelChangeListener> getModelChangeListener() {
+	public Set< ModelChangeListener > getModelChangeListener()
+	{
 		return modelChangeListeners;
 	}
 
@@ -171,7 +196,8 @@ public class Model {
 	 * @param timeUnits
 	 *            the time units (e.g. min).
 	 */
-	public void setPhysicalUnits(final String spaceUnits, final String timeUnits) {
+	public void setPhysicalUnits( final String spaceUnits, final String timeUnits )
+	{
 		this.spaceUnits = spaceUnits;
 		this.timeUnits = timeUnits;
 	}
@@ -182,7 +208,8 @@ public class Model {
 	 * @return the spatial units.
 	 * @return the spatial units.
 	 */
-	public String getSpaceUnits() {
+	public String getSpaceUnits()
+	{
 		return spaceUnits;
 	}
 
@@ -191,7 +218,8 @@ public class Model {
 	 *
 	 * @return the time units.
 	 */
-	public String getTimeUnits() {
+	public String getTimeUnits()
+	{
 		return timeUnits;
 	}
 
@@ -199,19 +227,22 @@ public class Model {
 	 * GRAPH MODIFICATION
 	 */
 
-	public synchronized void beginUpdate() {
+	public synchronized void beginUpdate()
+	{
 		updateLevel++;
-		if (DEBUG)
-			System.out.println("[TrackMateModel] #beginUpdate: increasing update level to " + updateLevel + ".");
+		if ( DEBUG )
+			System.out.println( "[TrackMateModel] #beginUpdate: increasing update level to " + updateLevel + "." );
 	}
 
-	public synchronized void endUpdate() {
+	public synchronized void endUpdate()
+	{
 		updateLevel--;
-		if (DEBUG)
-			System.out.println("[TrackMateModel] #endUpdate: decreasing update level to " + updateLevel + ".");
-		if (updateLevel == 0) {
-			if (DEBUG)
-				System.out.println("[TrackMateModel] #endUpdate: update level is 0, calling flushUpdate().");
+		if ( DEBUG )
+			System.out.println( "[TrackMateModel] #endUpdate: decreasing update level to " + updateLevel + "." );
+		if ( updateLevel == 0 )
+		{
+			if ( DEBUG )
+				System.out.println( "[TrackMateModel] #endUpdate: update level is 0, calling flushUpdate()." );
 			flushUpdate();
 		}
 	}
@@ -223,7 +254,8 @@ public class Model {
 	/**
 	 * Returns the {@link TrackModel} that manages the tracks for this model.
 	 */
-	public TrackModel getTrackModel() {
+	public TrackModel getTrackModel()
+	{
 		return trackModel;
 	}
 
@@ -241,12 +273,14 @@ public class Model {
 	 *            if <code>true</code>, model listeners will be notified with a
 	 *            {@link ModelChangeEvent#TRACKS_COMPUTED} event.
 	 */
-	public void setTracks(final SimpleWeightedGraph<Spot, DefaultWeightedEdge> graph, final boolean doNotify) {
-		trackModel.setGraph(graph);
-		if (doNotify) {
-			final ModelChangeEvent event = new ModelChangeEvent(this, ModelChangeEvent.TRACKS_COMPUTED);
-			for (final ModelChangeListener listener : modelChangeListeners)
-				listener.modelChanged(event);
+	public void setTracks( final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph, final boolean doNotify )
+	{
+		trackModel.setGraph( graph );
+		if ( doNotify )
+		{
+			final ModelChangeEvent event = new ModelChangeEvent( this, ModelChangeEvent.TRACKS_COMPUTED );
+			for ( final ModelChangeListener listener : modelChangeListeners )
+				listener.modelChanged( event );
 		}
 	}
 
@@ -256,47 +290,52 @@ public class Model {
 
 	/**
 	 * Returns the spot collection managed by this model.
-	 * 
+	 *
 	 * @return the spot collection managed by this model.
 	 */
-	public SpotCollection getSpots() {
+	public SpotCollection getSpots()
+	{
 		return spots;
 	}
 
 	/**
 	 * Set the {@link SpotCollection} managed by this model.
-	 * 
+	 *
 	 * @param doNotify
 	 *            if true, will file a {@link ModelChangeEvent#SPOTS_COMPUTED}
 	 *            event.
 	 * @param spots
 	 *            the {@link SpotCollection} to set.
 	 */
-	public void setSpots(final SpotCollection spots, final boolean doNotify) {
+	public void setSpots( final SpotCollection spots, final boolean doNotify )
+	{
 		this.spots = spots;
-		if (doNotify) {
-			final ModelChangeEvent event = new ModelChangeEvent(this, ModelChangeEvent.SPOTS_COMPUTED);
-			for (final ModelChangeListener listener : modelChangeListeners)
-				listener.modelChanged(event);
+		if ( doNotify )
+		{
+			final ModelChangeEvent event = new ModelChangeEvent( this, ModelChangeEvent.SPOTS_COMPUTED );
+			for ( final ModelChangeListener listener : modelChangeListeners )
+				listener.modelChanged( event );
 		}
 	}
 
 	/**
 	 * Filters the {@link SpotCollection} managed by this model with the
 	 * {@link FeatureFilter}s specified.
-	 * 
+	 *
 	 * @param spotFilters
 	 *            the {@link FeatureFilter} collection to use for filtering.
 	 * @param doNotify
 	 *            if true, will file a {@link ModelChangeEvent#SPOTS_FILTERED}
 	 *            event.
 	 */
-	public void filterSpots(final Collection<FeatureFilter> spotFilters, final boolean doNotify) {
-		spots.filter(spotFilters);
-		if (doNotify) {
-			final ModelChangeEvent event = new ModelChangeEvent(this, ModelChangeEvent.SPOTS_FILTERED);
-			for (final ModelChangeListener listener : modelChangeListeners)
-				listener.modelChanged(event);
+	public void filterSpots( final Collection< FeatureFilter > spotFilters, final boolean doNotify )
+	{
+		spots.filter( spotFilters );
+		if ( doNotify )
+		{
+			final ModelChangeEvent event = new ModelChangeEvent( this, ModelChangeEvent.SPOTS_FILTERED );
+			for ( final ModelChangeListener listener : modelChangeListeners )
+				listener.modelChanged( event );
 		}
 
 	}
@@ -309,14 +348,16 @@ public class Model {
 	 * Set the logger that will receive the messages from the processes
 	 * occurring within this trackmate.
 	 */
-	public void setLogger(final Logger logger) {
+	public void setLogger( final Logger logger )
+	{
 		this.logger = logger;
 	}
 
 	/**
 	 * Return the logger currently set for this model.
 	 */
-	public Logger getLogger() {
+	public Logger getLogger()
+	{
 		return logger;
 	}
 
@@ -324,7 +365,8 @@ public class Model {
 	 * FEATURES
 	 */
 
-	public FeatureModel getFeatureModel() {
+	public FeatureModel getFeatureModel()
+	{
 		return featureModel;
 	}
 
@@ -362,22 +404,26 @@ public class Model {
 	 * @return the spot that was moved, or <code>null</code> if it could not be
 	 *         found in the source frame
 	 */
-	public synchronized Spot moveSpotFrom(final Spot spotToMove, final Integer fromFrame, final Integer toFrame) {
-		final boolean ok = spots.remove(spotToMove, fromFrame);
-		if (!ok) {
-			if (DEBUG) {
-				System.err.println("[TrackMateModel] Could not find spot " + spotToMove + " in frame " + fromFrame);
+	public synchronized Spot moveSpotFrom( final Spot spotToMove, final Integer fromFrame, final Integer toFrame )
+	{
+		final boolean ok = spots.remove( spotToMove, fromFrame );
+		if ( !ok )
+		{
+			if ( DEBUG )
+			{
+				System.err.println( "[TrackMateModel] Could not find spot " + spotToMove + " in frame " + fromFrame );
 			}
 			return null;
 		}
-		spots.add(spotToMove, toFrame);
-		if (DEBUG) {
-			System.out.println("[TrackMateModel] Moving " + spotToMove + " from frame " + fromFrame + " to frame " + toFrame);
+		spots.add( spotToMove, toFrame );
+		if ( DEBUG )
+		{
+			System.out.println( "[TrackMateModel] Moving " + spotToMove + " from frame " + fromFrame + " to frame " + toFrame );
 		}
 
 		// Mark for update spot and edges
-		trackModel.edgesModified.addAll(trackModel.edgesOf(spotToMove));
-		spotsMoved.add(spotToMove);
+		trackModel.edgesModified.addAll( trackModel.edgesOf( spotToMove ) );
+		spotsMoved.add( spotToMove );
 		return spotToMove;
 	}
 
@@ -399,13 +445,15 @@ public class Model {
 	 *
 	 * @return the spot just added.
 	 */
-	public synchronized Spot addSpotTo(final Spot spotToAdd, final Integer toFrame) {
-		spots.add(spotToAdd, toFrame);
-		spotsAdded.add(spotToAdd); // TRANSACTION
-		if (DEBUG) {
-			System.out.println("[TrackMateModel] Adding spot " + spotToAdd + " to frame " + toFrame);
+	public synchronized Spot addSpotTo( final Spot spotToAdd, final Integer toFrame )
+	{
+		spots.add( spotToAdd, toFrame );
+		spotsAdded.add( spotToAdd ); // TRANSACTION
+		if ( DEBUG )
+		{
+			System.out.println( "[TrackMateModel] Adding spot " + spotToAdd + " to frame " + toFrame );
 		}
-		trackModel.addSpot(spotToAdd);
+		trackModel.addSpot( spotToAdd );
 		return spotToAdd;
 	}
 
@@ -429,18 +477,26 @@ public class Model {
 	 *            the spot to remove.
 	 * @return the spot removed, or <code>null</code> if it could not be found.
 	 */
-	public synchronized Spot removeSpot(final Spot spotToRemove) {
-		final int fromFrame = spotToRemove.getFeature(Spot.FRAME).intValue();
-		if (spots.remove(spotToRemove, fromFrame)) {
-			spotsRemoved.add(spotToRemove); // TRANSACTION
-			if (DEBUG) {
-				System.out.println("[TrackMateModel] Removing spot " + spotToRemove + " from frame " + fromFrame);
+	public synchronized Spot removeSpot( final Spot spotToRemove )
+	{
+		final int fromFrame = spotToRemove.getFeature( Spot.FRAME ).intValue();
+		if ( spots.remove( spotToRemove, fromFrame ) )
+		{
+			spotsRemoved.add( spotToRemove ); // TRANSACTION
+			if ( DEBUG )
+			{
+				System.out.println( "[TrackMateModel] Removing spot " + spotToRemove + " from frame " + fromFrame );
 			}
-			trackModel.removeSpot(spotToRemove); // changes to edges will be caught automatically by the TrackGraphModel
+			trackModel.removeSpot( spotToRemove ); // changes to edges will be
+													// caught automatically by
+													// the TrackGraphModel
 			return spotToRemove;
-		} else {
-			if (DEBUG) {
-				System.err.println("[TrackMateModel] The spot " + spotToRemove + " cannot be found in frame " + fromFrame);
+		}
+		else
+		{
+			if ( DEBUG )
+			{
+				System.err.println( "[TrackMateModel] The spot " + spotToRemove + " cannot be found in frame " + fromFrame );
 			}
 			return null;
 
@@ -467,11 +523,14 @@ public class Model {
 	 * @param spotToUpdate
 	 *            the spot to mark for update
 	 */
-	public synchronized void updateFeatures(final Spot spotToUpdate) {
-		spotsUpdated.add(spotToUpdate); // Enlist for feature update when transaction is marked as finished
-		final Set<DefaultWeightedEdge> touchingEdges = trackModel.edgesOf(spotToUpdate);
-		if (null != touchingEdges) {
-			trackModel.edgesModified.addAll(touchingEdges);
+	public synchronized void updateFeatures( final Spot spotToUpdate )
+	{
+		spotsUpdated.add( spotToUpdate ); // Enlist for feature update when
+											// transaction is marked as finished
+		final Set< DefaultWeightedEdge > touchingEdges = trackModel.edgesOf( spotToUpdate );
+		if ( null != touchingEdges )
+		{
+			trackModel.edgesModified.addAll( touchingEdges );
 		}
 	}
 
@@ -498,8 +557,9 @@ public class Model {
 	 *            the weight of the edge.
 	 * @return the edge created.
 	 */
-	public synchronized DefaultWeightedEdge addEdge(final Spot source, final Spot target, final double weight) {
-		return trackModel.addEdge(source, target, weight);
+	public synchronized DefaultWeightedEdge addEdge( final Spot source, final Spot target, final double weight )
+	{
+		return trackModel.addEdge( source, target, weight );
 	}
 
 	/**
@@ -512,8 +572,9 @@ public class Model {
 	 *            the target spot.
 	 * @return the edge between the two spots, if it existed.
 	 */
-	public synchronized DefaultWeightedEdge removeEdge(final Spot source, final Spot target) {
-		return trackModel.removeEdge(source, target);
+	public synchronized DefaultWeightedEdge removeEdge( final Spot source, final Spot target )
+	{
+		return trackModel.removeEdge( source, target );
 	}
 
 	/**
@@ -536,8 +597,9 @@ public class Model {
 	 * @return <code>true</code> if the edge existed in the model and was
 	 *         successfully, <code>false</code> otherwise.
 	 */
-	public synchronized boolean removeEdge(final DefaultWeightedEdge edge) {
-		return trackModel.removeEdge(edge);
+	public synchronized boolean removeEdge( final DefaultWeightedEdge edge )
+	{
+		return trackModel.removeEdge( edge );
 	}
 
 	/**
@@ -560,8 +622,9 @@ public class Model {
 	 * @param weight
 	 *            the weight to set.
 	 */
-	public synchronized void setEdgeWeight(final DefaultWeightedEdge edge, final double weight) {
-		trackModel.setEdgeWeight(edge, weight);
+	public synchronized void setEdgeWeight( final DefaultWeightedEdge edge, final double weight )
+	{
+		trackModel.setEdgeWeight( edge, weight );
 	}
 
 	/**
@@ -586,11 +649,13 @@ public class Model {
 	 *            the desired visibility.
 	 * @return the specified track visibility prior to calling this method.
 	 */
-	public synchronized boolean setTrackVisibility(final Integer trackID, final boolean visible) {
-		final boolean oldvis = trackModel.setVisibility(trackID, visible);
+	public synchronized boolean setTrackVisibility( final Integer trackID, final boolean visible )
+	{
+		final boolean oldvis = trackModel.setVisibility( trackID, visible );
 		final boolean modified = oldvis != visible;
-		if (modified) {
-			eventCache.add(ModelChangeEvent.TRACKS_VISIBILITY_CHANGED);
+		if ( modified )
+		{
+			eventCache.add( ModelChangeEvent.TRACKS_VISIBILITY_CHANGED );
 		}
 		return oldvis;
 	}
@@ -602,12 +667,14 @@ public class Model {
 	/**
 	 * Fire events. Regenerate fields derived from the filtered graph.
 	 */
-	private void flushUpdate() {
+	private void flushUpdate()
+	{
 
-		if (DEBUG) {
-			System.out.println("[TrackMateModel] #flushUpdate().");
-			System.out.println("[TrackMateModel] #flushUpdate(): Event cache is :" + eventCache);
-			System.out.println("[TrackMateModel] #flushUpdate(): Track content is:\n" + trackModel.echo());
+		if ( DEBUG )
+		{
+			System.out.println( "[TrackMateModel] #flushUpdate()." );
+			System.out.println( "[TrackMateModel] #flushUpdate(): Event cache is :" + eventCache );
+			System.out.println( "[TrackMateModel] #flushUpdate(): Track content is:\n" + trackModel.echo() );
 		}
 
 		/*
@@ -619,91 +686,111 @@ public class Model {
 		final int nEdgesToSignal = trackModel.edgesAdded.size() + trackModel.edgesRemoved.size() + trackModel.edgesModified.size();
 
 		// Do we have tracks to update?
-		final HashSet<Integer> tracksToUpdate = new HashSet<Integer>(trackModel.tracksUpdated);
+		final HashSet< Integer > tracksToUpdate = new HashSet< Integer >( trackModel.tracksUpdated );
 
 		// We also want to update the tracks that have edges that were modified
-		for (final DefaultWeightedEdge modifiedEdge : trackModel.edgesModified) {
-			tracksToUpdate.add(trackModel.trackIDOf(modifiedEdge));
+		for ( final DefaultWeightedEdge modifiedEdge : trackModel.edgesModified )
+		{
+			tracksToUpdate.add( trackModel.trackIDOf( modifiedEdge ) );
 		}
 
 		// Deal with new or moved spots: we need to update their features.
 		final int nSpotsToUpdate = spotsAdded.size() + spotsMoved.size() + spotsUpdated.size();
-		if (nSpotsToUpdate > 0) {
-			final HashSet<Spot> spotsToUpdate = new HashSet<Spot>(nSpotsToUpdate);
-			spotsToUpdate.addAll(spotsAdded);
-			spotsToUpdate.addAll(spotsMoved);
-			spotsToUpdate.addAll(spotsUpdated);
+		if ( nSpotsToUpdate > 0 )
+		{
+			final HashSet< Spot > spotsToUpdate = new HashSet< Spot >( nSpotsToUpdate );
+			spotsToUpdate.addAll( spotsAdded );
+			spotsToUpdate.addAll( spotsMoved );
+			spotsToUpdate.addAll( spotsUpdated );
 		}
 
 		// Initialize event
-		final ModelChangeEvent event = new ModelChangeEvent(this, ModelChangeEvent.MODEL_MODIFIED);
+		final ModelChangeEvent event = new ModelChangeEvent( this, ModelChangeEvent.MODEL_MODIFIED );
 
 		// Configure it with spots to signal.
 		final int nSpotsToSignal = nSpotsToUpdate + spotsRemoved.size();
-		if (nSpotsToSignal > 0) {
-			event.addAllSpots(spotsAdded);
-			event.addAllSpots(spotsRemoved);
-			event.addAllSpots(spotsMoved);
-			event.addAllSpots(spotsUpdated);
+		if ( nSpotsToSignal > 0 )
+		{
+			event.addAllSpots( spotsAdded );
+			event.addAllSpots( spotsRemoved );
+			event.addAllSpots( spotsMoved );
+			event.addAllSpots( spotsUpdated );
 
-			for (final Spot spot : spotsAdded) {
-				event.putSpotFlag(spot, ModelChangeEvent.FLAG_SPOT_ADDED);
+			for ( final Spot spot : spotsAdded )
+			{
+				event.putSpotFlag( spot, ModelChangeEvent.FLAG_SPOT_ADDED );
 			}
-			for (final Spot spot : spotsRemoved) {
-				event.putSpotFlag(spot, ModelChangeEvent.FLAG_SPOT_REMOVED);
+			for ( final Spot spot : spotsRemoved )
+			{
+				event.putSpotFlag( spot, ModelChangeEvent.FLAG_SPOT_REMOVED );
 			}
-			for (final Spot spot : spotsMoved) {
-				event.putSpotFlag(spot, ModelChangeEvent.FLAG_SPOT_FRAME_CHANGED);
+			for ( final Spot spot : spotsMoved )
+			{
+				event.putSpotFlag( spot, ModelChangeEvent.FLAG_SPOT_FRAME_CHANGED );
 			}
-			for (final Spot spot : spotsUpdated) {
-				event.putSpotFlag(spot, ModelChangeEvent.FLAG_SPOT_MODIFIED);
+			for ( final Spot spot : spotsUpdated )
+			{
+				event.putSpotFlag( spot, ModelChangeEvent.FLAG_SPOT_MODIFIED );
 			}
 		}
 
 		// Configure it with edges to signal.
-		if (nEdgesToSignal > 0) {
-			event.addAllEdges(trackModel.edgesAdded);
-			event.addAllEdges(trackModel.edgesRemoved);
-			event.addAllEdges(trackModel.edgesModified);
+		if ( nEdgesToSignal > 0 )
+		{
+			event.addAllEdges( trackModel.edgesAdded );
+			event.addAllEdges( trackModel.edgesRemoved );
+			event.addAllEdges( trackModel.edgesModified );
 
-			for (final DefaultWeightedEdge edge : trackModel.edgesAdded) {
-				event.putEdgeFlag(edge, ModelChangeEvent.FLAG_EDGE_ADDED);
+			for ( final DefaultWeightedEdge edge : trackModel.edgesAdded )
+			{
+				event.putEdgeFlag( edge, ModelChangeEvent.FLAG_EDGE_ADDED );
 			}
-			for (final DefaultWeightedEdge edge : trackModel.edgesRemoved) {
-				event.putEdgeFlag(edge, ModelChangeEvent.FLAG_EDGE_REMOVED);
+			for ( final DefaultWeightedEdge edge : trackModel.edgesRemoved )
+			{
+				event.putEdgeFlag( edge, ModelChangeEvent.FLAG_EDGE_REMOVED );
 			}
-			for (final DefaultWeightedEdge edge : trackModel.edgesModified) {
-				event.putEdgeFlag(edge, ModelChangeEvent.FLAG_EDGE_MODIFIED);
+			for ( final DefaultWeightedEdge edge : trackModel.edgesModified )
+			{
+				event.putEdgeFlag( edge, ModelChangeEvent.FLAG_EDGE_MODIFIED );
 			}
 		}
 
 		// Configure it with the tracks we found need updating
-		event.setTracksUpdated(tracksToUpdate);
+		event.setTracksUpdated( tracksToUpdate );
 
-		try {
-			if (nEdgesToSignal + nSpotsToSignal > 0) {
-				if (DEBUG) {
-					System.out.println("[TrackMateModel] #flushUpdate(): firing model modified event");
-					System.out.println("[TrackMateModel] to " + modelChangeListeners);
+		try
+		{
+			if ( nEdgesToSignal + nSpotsToSignal > 0 )
+			{
+				if ( DEBUG )
+				{
+					System.out.println( "[TrackMateModel] #flushUpdate(): firing model modified event" );
+					System.out.println( "[TrackMateModel] to " + modelChangeListeners );
 
 				}
-				for (final ModelChangeListener listener : modelChangeListeners) {
-					listener.modelChanged(event);
+				for ( final ModelChangeListener listener : modelChangeListeners )
+				{
+					listener.modelChanged( event );
 				}
 			}
 
 			// Fire events stored in the event cache
-			for (final int eventID : eventCache) {
-				if (DEBUG) {
-					System.out.println("[TrackMateModel] #flushUpdate(): firing event with ID " + eventID);
+			for ( final int eventID : eventCache )
+			{
+				if ( DEBUG )
+				{
+					System.out.println( "[TrackMateModel] #flushUpdate(): firing event with ID " + eventID );
 				}
-				final ModelChangeEvent cachedEvent = new ModelChangeEvent(this, eventID);
-				for (final ModelChangeListener listener : modelChangeListeners) {
-					listener.modelChanged(cachedEvent);
+				final ModelChangeEvent cachedEvent = new ModelChangeEvent( this, eventID );
+				for ( final ModelChangeListener listener : modelChangeListeners )
+				{
+					listener.modelChanged( cachedEvent );
 				}
 			}
 
-		} finally {
+		}
+		finally
+		{
 			spotsAdded.clear();
 			spotsRemoved.clear();
 			spotsMoved.clear();
