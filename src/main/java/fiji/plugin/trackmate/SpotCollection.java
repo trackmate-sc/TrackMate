@@ -112,7 +112,7 @@ public class SpotCollection implements MultiThreaded
 	}
 
 	/**
-	 * Add the given spot to this collection, at the specified frame, and mark
+	 * Adds the given spot to this collection, at the specified frame, and mark
 	 * it as visible.
 	 * <p>
 	 * If the frame does not exist yet in the collection, it is created and
@@ -133,7 +133,7 @@ public class SpotCollection implements MultiThreaded
 	}
 
 	/**
-	 * Remove the given spot from this collection, at the specified frame.
+	 * Removes the given spot from this collection, at the specified frame.
 	 * <p>
 	 * If the spot frame collection does not exist yet, nothing is done and
 	 * <code>false</code> is returned. If the spot cannot be found in the frame
@@ -147,7 +147,7 @@ public class SpotCollection implements MultiThreaded
 	}
 
 	/**
-	 * Mark all the content of this collection as visible or invisible,
+	 * Marks all the content of this collection as visible or invisible,
 	 *
 	 * @param visible
 	 *            if true, all spots will be marked as visible.
@@ -193,6 +193,14 @@ public class SpotCollection implements MultiThreaded
 		}
 	}
 
+	/**
+	 * Filters out the content of this collection using the specified
+	 * {@link FeatureFilter}. Spots that are filtered out are marked as
+	 * invisible, and visible otherwise.
+	 *
+	 * @param featurefilter
+	 *            the filter to use.
+	 */
 	public final void filter( final FeatureFilter featurefilter )
 	{
 
@@ -266,6 +274,15 @@ public class SpotCollection implements MultiThreaded
 		}
 	}
 
+	/**
+	 * Filters out the content of this collection using the specified
+	 * {@link FeatureFilter} collection. Spots that are filtered out are marked
+	 * as invisible, and visible otherwise. To be marked as visible, a spot must
+	 * pass <b>all</b> of the specified filters (AND chaining).
+	 *
+	 * @param filters
+	 *            the filter collection to use.
+	 */
 	public final void filter( final Collection< FeatureFilter > filters )
 	{
 
@@ -766,6 +783,14 @@ public class SpotCollection implements MultiThreaded
 	public NavigableSet< Integer > keySet()
 	{
 		return content.keySet();
+	}
+
+	/**
+	 * Removes all the content from this collection.
+	 */
+	public void clear()
+	{
+		content.clear();
 	}
 
 	/*
