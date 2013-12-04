@@ -1039,9 +1039,13 @@ public class TrackMateGUIController implements ActionListener
 
 	private void previous()
 	{
-		// Move to previous panel, but do not execute its actions
+		// Move to previous panel, but do not execute its forward-navigation
+		// actions.
 		final WizardPanelDescriptor olDescriptor = guimodel.currentDescriptor;
 		final WizardPanelDescriptor panelDescriptor = previousDescriptor( olDescriptor );
+		// Execute its backward-navigation actions.
+		panelDescriptor.comingBackToPanel();
+		// Do whatever we do when the panel is shown.
 		panelDescriptor.displayingPanel();
 		gui.show( panelDescriptor );
 		guimodel.currentDescriptor = panelDescriptor;

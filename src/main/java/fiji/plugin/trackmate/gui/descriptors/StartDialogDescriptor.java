@@ -62,7 +62,7 @@ public class StartDialogDescriptor implements WizardPanelDescriptor
 	/**
 	 * Returns <code>true</code> if the {@link ImagePlus} selected is valid and
 	 * can be processed.
-	 * 
+	 *
 	 * @return a boolean flag.
 	 */
 	public boolean isImpValid()
@@ -172,6 +172,10 @@ public class StartDialogDescriptor implements WizardPanelDescriptor
 	}
 
 	@Override
+	public void comingBackToPanel()
+	{}
+
+	@Override
 	public String getKey()
 	{
 		return KEY;
@@ -192,7 +196,7 @@ public class StartDialogDescriptor implements WizardPanelDescriptor
 
 	/**
 	 * Removes an ActionListener from this panel.
-	 * 
+	 *
 	 * @return true if the listener was in the ActionListener collection of this
 	 *         instance.
 	 */

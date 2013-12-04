@@ -103,6 +103,10 @@ public class TrackerChoiceDescriptor implements WizardPanelDescriptor
 		}
 	}
 
+	@Override
+	public void comingBackToPanel()
+	{}
+
 	private void setCurrentChoiceFromPlugin()
 	{
 

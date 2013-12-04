@@ -89,8 +89,11 @@ public class TrackingDescriptor implements WizardPanelDescriptor
 		{
 			e.printStackTrace();
 		}
-
 	}
+
+	@Override
+	public void comingBackToPanel()
+	{}
 
 	@Override
 	public String getKey()

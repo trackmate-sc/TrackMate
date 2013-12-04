@@ -11,7 +11,7 @@ public class LogPanelDescriptor implements WizardPanelDescriptor
 
 	private final LogPanel logPanel;
 
-	public LogPanelDescriptor( LogPanel logPanel )
+	public LogPanelDescriptor( final LogPanel logPanel )
 	{
 		this.logPanel = logPanel;
 	}
@@ -32,6 +32,10 @@ public class LogPanelDescriptor implements WizardPanelDescriptor
 
 	@Override
 	public void aboutToHidePanel()
+	{}
+
+	@Override
+	public void comingBackToPanel()
 	{}
 
 	@Override

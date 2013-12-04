@@ -123,6 +123,10 @@ public class TrackFilterDescriptor implements WizardPanelDescriptor
 	}
 
 	@Override
+	public void comingBackToPanel()
+	{}
+
+	@Override
 	public String getKey()
 	{
 		return KEY;
@@ -139,7 +143,7 @@ public class TrackFilterDescriptor implements WizardPanelDescriptor
 
 	/**
 	 * Removes an ActionListener from this panel.
-	 * 
+	 *
 	 * @return true if the listener was in the ActionListener collection of this
 	 *         instance.
 	 */
@@ -176,7 +180,7 @@ public class TrackFilterDescriptor implements WizardPanelDescriptor
 
 	/**
 	 * Remove a ChangeListener from this panel.
-	 * 
+	 *
 	 * @return true if the listener was in listener collection of this instance.
 	 */
 	public boolean removeChangeListener( final ChangeListener listener )

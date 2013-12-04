@@ -8,9 +8,9 @@ import fiji.plugin.trackmate.gui.LogPanel;
 /**
  * An abstract class made for describing panels that generate a dialog, like
  * save and load panels.
- * 
+ *
  * @author Jean-Yves Tinevez
- * 
+ *
  */
 public abstract class SomeDialogDescriptor implements WizardPanelDescriptor
 {
@@ -44,5 +44,9 @@ public abstract class SomeDialogDescriptor implements WizardPanelDescriptor
 
 	@Override
 	public void aboutToHidePanel()
+	{}
+
+	@Override
+	public void comingBackToPanel()
 	{}
 }

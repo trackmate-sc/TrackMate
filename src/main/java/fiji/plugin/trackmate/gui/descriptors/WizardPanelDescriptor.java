@@ -5,6 +5,31 @@ import java.awt.Component;
 /**
  * A base descriptor class used to reference a Component panel for the Wizard,
  * as well as provide general rules as to how the panel should behave.
+ * <p>
+ * Four methods are used to plug actions when the user navigate through the GUI.
+ * When the user "navigates forward" - that is when the GUI flow to go in the
+ * classical direction - the following chain of events are triggered upon
+ * pressing 'Next':
+ * <ol>
+ * <li>The descriptor currently displayed executes {@link #aboutToHidePanel()}.
+ * <li>The identity of the next descriptor is determined.
+ * <li>This descriptor executes {@link #aboutToDisplayPanel()}.
+ * <li>The descriptor component is displayed on the GUI.
+ * <li>The descriptor executes {@link #displayingPanel()}.
+ * </ol>
+ * <p>
+ * When the user navigates backward, the following chain of events are triggered
+ * upon pressing 'Previous':
+ * <ol>
+ * <li>The identity of the descriptor to navigate to is determined.
+ * <li>The descriptor executes {@link #comingBackToPanel()}.
+ * <li>The descriptor executes {@link #displayingPanel()}.
+ * <li>The descriptor component is displayed on the GUI.
+ * </ol>
+ * <p>
+ * Therefore, only {@link #displayingPanel()} is executed in both directions,
+ * and is used typically to set up and refresh what is displayed on the
+ * descriptor component.
  */
 public interface WizardPanelDescriptor
 {
@@ -43,4 +68,9 @@ public interface WizardPanelDescriptor
 	 */
 	public void aboutToHidePanel();
 
+	/**
+	 * This method is used to perform functionality when the panel is visited by
+	 * navigating backward.
+	 */
+	public void comingBackToPanel();
 }

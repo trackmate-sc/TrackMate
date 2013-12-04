@@ -44,6 +44,10 @@ public class GrapherDescriptor implements WizardPanelDescriptor
 	{}
 
 	@Override
+	public void comingBackToPanel()
+	{}
+
+	@Override
 	public String getKey()
 	{
 		return KEY;
