@@ -1,21 +1,28 @@
 package fiji.plugin.trackmate.detection;
 
 import java.util.ArrayList;
-import java.util.List;
 
+import net.imglib2.Cursor;
+import net.imglib2.IterableInterval;
+import net.imglib2.Point;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.algorithm.legacy.scalespace.DifferenceOfGaussian;
-import net.imglib2.algorithm.legacy.scalespace.DifferenceOfGaussianPeak;
-import net.imglib2.algorithm.legacy.scalespace.SubpixelLocalization;
+import net.imglib2.algorithm.dog.DifferenceOfGaussian;
+import net.imglib2.algorithm.gauss3.Gauss3;
+import net.imglib2.algorithm.localextrema.LocalExtrema;
+import net.imglib2.algorithm.localextrema.LocalExtrema.LocalNeighborhoodCheck;
+import net.imglib2.algorithm.localextrema.RefinedPeak;
+import net.imglib2.algorithm.localextrema.SubpixelLocalization;
+import net.imglib2.exception.IncompatibleTypeException;
 import net.imglib2.img.Img;
-import net.imglib2.img.ImgFactory;
 import net.imglib2.meta.ImgPlus;
-import net.imglib2.outofbounds.OutOfBoundsFactory;
-import net.imglib2.outofbounds.OutOfBoundsMirrorExpWindowingFactory;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.util.Intervals;
+import net.imglib2.util.Util;
+import net.imglib2.view.IntervalView;
+import net.imglib2.view.Views;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.util.TMUtils;
 
@@ -45,97 +52,104 @@ public class DogDetector<T extends RealType<T> & NativeType<T>> extends LogDetec
 
 		final long start = System.currentTimeMillis();
 
-		// Deal with median filter:
-		Img<T> intermediateImage = img;
+		/*
+		 * Do median filtering (or not).
+		 */
+
+		Img<T> frame = img;
 		if (doMedianFilter) {
-			intermediateImage = applyMedianFilter(intermediateImage);
-			if (null == intermediateImage) {
+			frame = applyMedianFilter(frame);
+			if (null == frame) {
 				return false;
 			}
 		}
+
+		/*
+		 * Do DoG computation.
+		 */
 
 		final double[] calibration = TMUtils.getSpatialCalibration(img);
 
-		// First we need an image factory
-		final ImgFactory<T> imageFactory = img.factory();
+		final FloatType type = new FloatType();
+		final RandomAccessibleInterval<FloatType> dog = Util.getArrayOrCellImgFactory(frame, type).create(frame, type);
+		final RandomAccessibleInterval<FloatType> dog2 = Util.getArrayOrCellImgFactory(frame, type).create(frame, type);
 
-		// And the out of bounds strategies for both types. It needs to be a value-oobs, with a constant
-		// value of 0; otherwise, we will miss maxima on the border of the image.
-		final OutOfBoundsFactory<T, RandomAccessibleInterval<T>> oobs2 = new OutOfBoundsMirrorExpWindowingFactory<T, RandomAccessibleInterval<T>>();
-
-		final double[] sigma1 = new double[img.numDimensions()];
-		final double[] sigma2 = new double[img.numDimensions()];
-		for (int i = 0; i < sigma2.length; i++) {
-			sigma1[i] = 2 / (1 + Math.sqrt(img.numDimensions())) * radius / calibration[i]; // in pixel units
-			sigma2[i] = Math.sqrt(img.numDimensions()) * sigma1[i];
+		final double sigma1 = radius / Math.sqrt(frame.numDimensions()) * 0.9;
+		final double sigma2 = radius / Math.sqrt(frame.numDimensions()) * 1.1;
+		final double[][] sigmas = DifferenceOfGaussian.computeSigmas(0.5, 2, calibration, sigma1, sigma2);
+		try {
+			Gauss3.gauss(sigmas[1], Views.extendMirrorSingle(frame), dog2, numThreads);
+			Gauss3.gauss(sigmas[0], Views.extendMirrorSingle(frame), dog, numThreads);
+		} catch (final IncompatibleTypeException e) {
+			e.printStackTrace();
 		}
 
-		final DifferenceOfGaussian<T> dog = new DifferenceOfGaussian<T>(intermediateImage, imageFactory, oobs2, sigma1, sigma2, threshold, 1.0);
+		final IterableInterval<FloatType> dogIterable = Views.iterable(dog);
+		final IterableInterval<FloatType> tmpIterable = Views.iterable(dog2);
+		final Cursor<FloatType> dogCursor = dogIterable.cursor();
+		final Cursor<FloatType> tmpCursor = tmpIterable.cursor();
+		while (dogCursor.hasNext())
+			dogCursor.next().sub(tmpCursor.next());
+
 		/*
-		 * The DogDetector class will be called in a multi-threaded way, so the
-		 * DifferenceOfGaussianRealNI does not need to be multi-threaded. On top
-		 * of that, reports from users on win32 platform indicate that
-		 * multi-threading generates some silent problems, with some frames
-		 * (first ones being not present in the final SpotColleciton. On 64-bit
-		 * platforms, I could see that keeping the DogRNI multi-threaded
-		 * translated by a speedup of about 10%, which I sacrifice without
-		 * hesitation if i can make the trackmate more stable.
+		 * Find DoG maxima.
 		 */
-		dog.setNumThreads(1);
 
-		// Keep laplace image if needed
-		if (doSubPixelLocalization)
-			dog.setKeepDoGImg(true);
+		final FloatType val = new FloatType();
+		val.setReal(threshold * (sigma2 / sigma1 - 1.0));
+		final IntervalView<FloatType> dogWithBorder = Views.interval(Views.extendZero(dog), Intervals.expand(dog, 1));
+		final LocalNeighborhoodCheck<Point, FloatType> localNeighborhoodCheck = new LocalExtrema.MaximumCheck<FloatType>(val);
+		final ArrayList<Point> peaks = LocalExtrema.findLocalExtrema(dogWithBorder, localNeighborhoodCheck, numThreads);
 
-		// Execute
-		if (!dog.checkInput() || !dog.process()) {
-			errorMessage = baseErrorMessage + dog.getErrorMessage();
-			return false;
-		}
+		if (doSubPixelLocalization) {
 
-		// Get all peaks
-		final List<DifferenceOfGaussianPeak<FloatType>> list = dog.getPeaks();
-		final RandomAccess<T> cursor = img.randomAccess();
+			/*
+			 * Sub-pixel localize them.
+			 */
 
-		// Prune non-relevant peaks
-		List<DifferenceOfGaussianPeak<FloatType>> pruned_list = new ArrayList<DifferenceOfGaussianPeak<FloatType>>();
-		for (final DifferenceOfGaussianPeak<FloatType> dogpeak : list) {
-			if ((dogpeak.getPeakType() != DifferenceOfGaussian.SpecialPoint.MAX))
-				continue;
-			cursor.setPosition(dogpeak);
-			if (cursor.get().getRealDouble() < threshold)
-				continue;
+			final SubpixelLocalization<Point, FloatType> spl = new SubpixelLocalization<Point, FloatType>(dog.numDimensions());
+			spl.setNumThreads(numThreads);
+			spl.setReturnInvalidPeaks(true);
+			spl.setCanMoveOutside(true);
+			spl.setAllowMaximaTolerance(true);
+			spl.setMaxNumMoves(10);
+			final ArrayList<RefinedPeak<Point>> refined = spl.process(peaks, dogWithBorder, dog);
 
-			pruned_list.add(dogpeak);
-		}
+			spots = new ArrayList<Spot>(refined.size());
+			final RandomAccess<FloatType> ra = dog.randomAccess();
+			for (final RefinedPeak<Point> refinedPeak : refined) {
+				ra.setPosition(refinedPeak.getOriginalPeak());
+				final double quality = ra.get().getRealDouble();
+				if (quality < threshold)
+					continue;
 
-		// Deal with sub-pixel localization if required
-		if (doSubPixelLocalization && pruned_list.size() > 0) {
-			final Img<FloatType> laplacian = dog.getDoGImg();
-			final SubpixelLocalization<FloatType> locator = new SubpixelLocalization<FloatType>(laplacian, pruned_list);
-			locator.setNumThreads(1); // Since the calls to a segmenter  are already multi-threaded.
-			if (!locator.checkInput() || !locator.process()) {
-				errorMessage = baseErrorMessage + locator.getErrorMessage();
-				return false;
-			}
-			pruned_list = locator.getDoGPeaks();
-		}
-
-		// Create spots
-		spots.clear();
-		for (final DifferenceOfGaussianPeak<FloatType> dogpeak : pruned_list) {
-			final double[] coords = new double[3];
-			if (doSubPixelLocalization) {
+				final double[] coords = new double[3];
 				for (int i = 0; i < img.numDimensions(); i++)
-					coords[i] = dogpeak.getSubPixelPosition(i) * calibration[i];
-			} else {
-				for (int i = 0; i < img.numDimensions(); i++)
-					coords[i] = dogpeak.getDoublePosition(i) * calibration[i];
+					coords[i] = refinedPeak.getDoublePosition(i) * calibration[i];
+				final Spot spot = new Spot(coords);
+				spot.putFeature(Spot.QUALITY, Double.valueOf(quality));
+				spot.putFeature(Spot.RADIUS, radius);
+				spots.add(spot);
 			}
-			final Spot spot = new Spot(coords);
-			spot.putFeature(Spot.QUALITY, Double.valueOf(-dogpeak.getValue().get()));
-			spot.putFeature(Spot.RADIUS, radius);
-			spots.add(spot);
+
+		} else {
+			spots = new ArrayList<Spot>(peaks.size());
+			final RandomAccess<FloatType> ra = dog.randomAccess();
+			for (final Point peak : peaks) {
+				ra.setPosition(peak);
+				final double quality = ra.get().getRealDouble();
+				if (quality < threshold)
+					continue;
+
+				final double[] coords = new double[3];
+				for (int i = 0; i < img.numDimensions(); i++)
+					coords[i] = peak.getDoublePosition(i) * calibration[i];
+				final Spot spot = new Spot(coords);
+				spot.putFeature(Spot.QUALITY, Double.valueOf(quality));
+				spot.putFeature(Spot.RADIUS, radius);
+				spots.add(spot);
+			}
+
 		}
 
 		final long end = System.currentTimeMillis();

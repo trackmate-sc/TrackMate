@@ -76,6 +76,7 @@ public class NewDogDetectorTestDrive {
 			final int ft = t;
 
 			final Runnable command = new Runnable() {
+				@SuppressWarnings("unused")
 				@Override
 				public void run() {
 
@@ -159,6 +160,7 @@ public class NewDogDetectorTestDrive {
 			final int ft = t;
 
 			final Runnable command = new Runnable() {
+				@SuppressWarnings("unused")
 				@Override
 				public void run() {
 
