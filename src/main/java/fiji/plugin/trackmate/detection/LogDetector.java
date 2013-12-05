@@ -22,7 +22,8 @@ import fiji.plugin.trackmate.detection.subpixel.SubPixelLocalization.LocationTyp
 import fiji.plugin.trackmate.detection.util.MedianFilter3x3;
 import fiji.plugin.trackmate.util.TMUtils;
 
-public class LogDetector <T extends RealType<T>  & NativeType<T>> implements SpotDetector<T>, MultiThreaded {
+public class LogDetector< T extends RealType< T > & NativeType< T >> implements SpotDetector< T >, MultiThreaded
+{
 
 	/*
 	 * FIELDS
@@ -31,24 +32,34 @@ public class LogDetector <T extends RealType<T>  & NativeType<T>> implements Spo
 	private final static String BASE_ERROR_MESSAGE = "LogDetector: ";
 
 	/** The image to segment. Will not modified. */
-	protected ImgPlus<T> img;
+	protected ImgPlus< T > img;
+
 	protected double radius;
+
 	protected double threshold;
+
 	protected boolean doSubPixelLocalization;
+
 	protected boolean doMedianFilter;
+
 	protected String baseErrorMessage;
+
 	protected String errorMessage;
+
 	/** The list of {@link Spot} that will be populated by this detector. */
-	protected List<Spot> spots = new ArrayList<Spot>();
+	protected List< Spot > spots = new ArrayList< Spot >();
+
 	/** The processing time in ms. */
 	protected long processingTime;
+
 	protected int numThreads;
 
 	/*
 	 * CONSTRUCTORS
 	 */
 
-	public LogDetector(final ImgPlus<T> img, final double radius, final double threshold, final boolean doSubPixelLocalization, final boolean doMedianFilter) {
+	public LogDetector( final ImgPlus< T > img, final double radius, final double threshold, final boolean doSubPixelLocalization, final boolean doMedianFilter )
+	{
 		this.img = img;
 		this.radius = radius;
 		this.threshold = threshold;
@@ -63,93 +74,103 @@ public class LogDetector <T extends RealType<T>  & NativeType<T>> implements Spo
 	 */
 
 	@Override
-	public boolean checkInput() {
-		if (null == img) {
+	public boolean checkInput()
+	{
+		if ( null == img )
+		{
 			errorMessage = baseErrorMessage + "Image is null.";
 			return false;
 		}
-		if (!(img.numDimensions() == 2 || img.numDimensions() == 3)) {
-			errorMessage = baseErrorMessage + "Image must be 2D or 3D, got " + img.numDimensions() +"D.";
+		if ( !( img.numDimensions() == 2 || img.numDimensions() == 3 ) )
+		{
+			errorMessage = baseErrorMessage + "Image must be 2D or 3D, got " + img.numDimensions() + "D.";
 			return false;
 		}
 		return true;
 	};
 
-
 	@Override
-	public boolean process() {
+	public boolean process()
+	{
 
 		final long start = System.currentTimeMillis();
-
 
 		/*
 		 * Copy to float for convolution.
 		 */
 
-		ImgFactory<FloatType> factory = null;
-		try {
-			factory = img.factory().imgFactory(new FloatType());
-		} catch (final IncompatibleTypeException e) {
+		ImgFactory< FloatType > factory = null;
+		try
+		{
+			factory = img.factory().imgFactory( new FloatType() );
+		}
+		catch ( final IncompatibleTypeException e )
+		{
 			errorMessage = baseErrorMessage + "Failed creating float image factory: " + e.getMessage();
 			return false;
 		}
-		Img<FloatType> floatImg = DetectionUtils.copyToFloatImg(img, factory);
+		Img< FloatType > floatImg = DetectionUtils.copyToFloatImg( img, factory );
 
 		// Deal with median filter:
-		if (doMedianFilter) {
-			floatImg = applyMedianFilter(floatImg);
-			if (null == floatImg) {
-				return false;
-			}
+		if ( doMedianFilter )
+		{
+			floatImg = applyMedianFilter( floatImg );
+			if ( null == floatImg ) { return false; }
 		}
 
-		final Img<FloatType> kernel = DetectionUtils.createLoGKernel(radius, img);
-		final FFTConvolution<FloatType> fftconv = new FFTConvolution<FloatType>(floatImg, kernel);
+		final Img< FloatType > kernel = DetectionUtils.createLoGKernel( radius, img );
+		final FFTConvolution< FloatType > fftconv = new FFTConvolution< FloatType >( floatImg, kernel );
 		fftconv.run();
 
-		final FloatType ftThresh = new FloatType((float) threshold);
-		final ArrayList<Point> points = LocalExtrema.findLocalExtrema(floatImg, new LocalExtrema.MaximumCheck<FloatType>(ftThresh), numThreads);
+		final FloatType ftThresh = new FloatType( ( float ) threshold );
+		final ArrayList< Point > points = LocalExtrema.findLocalExtrema( floatImg, new LocalExtrema.MaximumCheck< FloatType >( ftThresh ), numThreads );
 
 		// Get peaks location and values
-		final RandomAccess<FloatType> cursor = floatImg.randomAccess();
+		final RandomAccess< FloatType > cursor = floatImg.randomAccess();
 		// Prune values lower than threshold
-		final List<SubPixelLocalization<FloatType>> peaks = new ArrayList<SubPixelLocalization<FloatType>>();
+		final List< SubPixelLocalization< FloatType >> peaks = new ArrayList< SubPixelLocalization< FloatType >>();
 		final LocationType specialPoint = LocationType.MAX;
-		for (final Point point : points) {
-			cursor.setPosition(point);
+		for ( final Point point : points )
+		{
+			cursor.setPosition( point );
 			final FloatType value = cursor.get().copy();
-			final long[] coords = new long[point.numDimensions()];
-			point.localize(coords);
-			final SubPixelLocalization<FloatType> peak = new SubPixelLocalization<FloatType>(coords, value, specialPoint);
-			peaks.add(peak);
+			final long[] coords = new long[ point.numDimensions() ];
+			point.localize( coords );
+			final SubPixelLocalization< FloatType > peak = new SubPixelLocalization< FloatType >( coords, value, specialPoint );
+			peaks.add( peak );
 		}
 
 		// Do sub-pixel localization
-		if (doSubPixelLocalization && !peaks.isEmpty()) {
-			// Create localizer and apply it to the list. The list object will be updated
-			final QuadraticSubpixelLocalization<FloatType> locator = new QuadraticSubpixelLocalization<FloatType>(floatImg, peaks);
-			locator.setNumThreads(numThreads);
-			locator.setCanMoveOutside(true);
-			if ( !locator.checkInput() || !locator.process() )	{
+		if ( doSubPixelLocalization && !peaks.isEmpty() )
+		{
+			// Create localizer and apply it to the list. The list object will
+			// be updated
+			final QuadraticSubpixelLocalization< FloatType > locator = new QuadraticSubpixelLocalization< FloatType >( floatImg, peaks );
+			locator.setNumThreads( numThreads );
+			locator.setCanMoveOutside( true );
+			if ( !locator.checkInput() || !locator.process() )
+			{
 				errorMessage = baseErrorMessage + locator.getErrorMessage();
 				return false;
 			}
 		}
 
 		// Create spots
-		spots = new ArrayList<Spot>(peaks.size());
-		final double[] calibration = TMUtils.getSpatialCalibration(img);
-		for (int j = 0; j < peaks.size(); j++) {
+		spots = new ArrayList< Spot >( peaks.size() );
+		final double[] calibration = TMUtils.getSpatialCalibration( img );
+		for ( int j = 0; j < peaks.size(); j++ )
+		{
 
-			final SubPixelLocalization<FloatType> peak = peaks.get(j);
-			final double[] coords = new double[3];
-			for (int i = 0; i < img.numDimensions(); i++) {
-				coords[i] = peak.getDoublePosition(i) * calibration[i];
+			final SubPixelLocalization< FloatType > peak = peaks.get( j );
+			final double[] coords = new double[ 3 ];
+			for ( int i = 0; i < img.numDimensions(); i++ )
+			{
+				coords[ i ] = peak.getDoublePosition( i ) * calibration[ i ];
 			}
-			final Spot spot = new Spot(coords);
-			spot.putFeature(Spot.QUALITY, Double.valueOf(peak.getValue().get()));
-			spot.putFeature(Spot.RADIUS, Double.valueOf(radius));
-			spots.add(spot);
+			final Spot spot = new Spot( coords );
+			spot.putFeature( Spot.QUALITY, Double.valueOf( peak.getValue().get() ) );
+			spot.putFeature( Spot.RADIUS, Double.valueOf( radius ) );
+			spots.add( spot );
 		}
 
 		final long end = System.currentTimeMillis();
@@ -161,9 +182,11 @@ public class LogDetector <T extends RealType<T>  & NativeType<T>> implements Spo
 	/**
 	 * Apply a simple 3x3 median filter to the target image.
 	 */
-	protected <R extends RealType<R>> Img<R> applyMedianFilter(final Img<R> image) {
-		final MedianFilter3x3<R> medFilt = new MedianFilter3x3<R>(image);
-		if (!medFilt.checkInput() || !medFilt.process()) {
+	protected < R extends RealType< R >> Img< R > applyMedianFilter( final Img< R > image )
+	{
+		final MedianFilter3x3< R > medFilt = new MedianFilter3x3< R >( image );
+		if ( !medFilt.checkInput() || !medFilt.process() )
+		{
 			errorMessage = baseErrorMessage + "Failed in applying median filter";
 			return null;
 		}
@@ -171,33 +194,38 @@ public class LogDetector <T extends RealType<T>  & NativeType<T>> implements Spo
 	}
 
 	@Override
-	public List<Spot> getResult() {
+	public List< Spot > getResult()
+	{
 		return spots;
 	}
 
 	@Override
-	public String getErrorMessage() {
-		return errorMessage ;
+	public String getErrorMessage()
+	{
+		return errorMessage;
 	}
 
-
 	@Override
-	public long getProcessingTime() {
+	public long getProcessingTime()
+	{
 		return processingTime;
 	}
 
 	@Override
-	public void setNumThreads() {
+	public void setNumThreads()
+	{
 		this.numThreads = Runtime.getRuntime().availableProcessors();
 	}
 
 	@Override
-	public void setNumThreads(final int numThreads) {
+	public void setNumThreads( final int numThreads )
+	{
 		this.numThreads = numThreads;
 	}
 
 	@Override
-	public int getNumThreads() {
+	public int getNumThreads()
+	{
 		return numThreads;
 	}
 }
