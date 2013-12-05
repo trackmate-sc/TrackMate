@@ -1,20 +1,17 @@
 package fiji.plugin.trackmate.detection.semiauto;
 
 import ij.ImagePlus;
-import net.imglib2.img.Img;
-import net.imglib2.img.array.ArrayImgFactory;
-import net.imglib2.meta.Axes;
-import net.imglib2.meta.AxisType;
+import net.imglib2.FinalInterval;
+import net.imglib2.RandomAccessible;
 import net.imglib2.meta.ImgPlus;
-import net.imglib2.meta.view.HyperSliceImgPlus;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.view.Views;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.util.CropImgView;
 import fiji.plugin.trackmate.util.TMUtils;
 
 public class SemiAutoTracker< T extends RealType< T > & NativeType< T >> extends AbstractSemiAutoTracker< T >
@@ -39,6 +36,7 @@ public class SemiAutoTracker< T extends RealType< T > & NativeType< T >> extends
 		 */
 
 		final int tindex = TMUtils.findTAxisIndex( img );
+		final int cindex = TMUtils.findCAxisIndex( img );
 		if ( frame >= img.dimension( tindex ) )
 		{
 			logger.log( "Spot: " + spot + ": No more time-points.\n" );
@@ -79,12 +77,10 @@ public class SemiAutoTracker< T extends RealType< T > & NativeType< T >> extends
 
 		final int targetChannel = 0; // TODO when spot will store the channel
 										// they are created on, use it.
-		final ImgPlus< T > imgC = HyperSliceImgPlus.fixChannelAxis( img, targetChannel );
-		final ImgPlus< T > imgT = HyperSliceImgPlus.fixTimeAxis( imgC, frame );
 
-		final long width = imgT.dimension( 0 );
-		final long height = imgT.dimension( 1 );
-		final long depth = imgT.dimension( 2 );
+		final long width = img.dimension( 0 );
+		final long height = img.dimension( 1 );
+		final long depth = img.dimension( 2 );
 
 		final long x0 = Math.max( 0, x - r );
 		final long y0 = Math.max( 0, y - r );
@@ -109,29 +105,35 @@ public class SemiAutoTracker< T extends RealType< T > & NativeType< T >> extends
 			max = new long[] { x1, y1 };
 		}
 
-		final Img< T > cropimg = new CropImgView< T >( imgT, min, max, new ArrayImgFactory< T >() );
-
 		/*
 		 * The transform that will put back the global coordinates. In our case
-		 * it is just a translation.
+		 * it is just a scaling.
 		 */
 
 		final AffineTransform3D transform = new AffineTransform3D();
 		for ( int i = 0; i < max.length; i++ )
 		{
-			transform.set( min[ i ] * cal[ i ], i, 3 );
+			transform.set( cal[ i ], i, i );
 		}
 
 		/*
 		 * Give it a calibration
 		 */
 
-		final AxisType[] axes = new AxisType[] { Axes.X, Axes.Y, Axes.Z };
-		final ImgPlus< T > imgplus = new ImgPlus< T >( cropimg, "crop", axes, cal );
 
 		final SpotNeighborhood< T > sn = new SpotNeighborhood< T >();
-		sn.source = imgplus;
+		RandomAccessible< T > source = img;
+		if ( tindex >= 0 )
+		{
+			source = Views.hyperSlice( source, tindex, frame );
+		}
+		if ( cindex >= 0 )
+		{
+			source = Views.hyperSlice( source, cindex, targetChannel );
+		}
+		sn.source = source;
 		sn.transform = transform;
+		sn.interval = new FinalInterval( min, max );
 
 		return sn;
 	}

@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.detection.semiauto;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -8,9 +9,9 @@ import java.util.TreeSet;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import net.imglib2.Interval;
+import net.imglib2.RandomAccessible;
 import net.imglib2.algorithm.Algorithm;
 import net.imglib2.algorithm.MultiThreaded;
-import net.imglib2.meta.ImgPlus;
 import net.imglib2.multithreading.SimpleMultiThreading;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
@@ -22,7 +23,6 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.detection.LogDetector;
 import fiji.plugin.trackmate.detection.SpotDetector;
 import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.util.TMUtils;
 
 /**
  * A class made to perform semi-automated tracking of spots in TrackMate &
@@ -168,6 +168,9 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 	 */
 	public void processSpot( final Spot initialSpot )
 	{
+		// Fake calibration; will be tuned using the transform..
+		final double[] calibration = new double[ 3 ];
+		Arrays.fill( calibration, 1d );
 
 		/*
 		 * Initial spot
@@ -181,14 +184,8 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 			 * Extract spot & features
 			 */
 
-			final int frame = spot.getFeature( Spot.FRAME ).intValue() + 1; // We
-																			// want
-																			// to
-																			// segment
-																			// in
-																			// the
-																			// next
-																			// frame
+			// We want to segment in the next frame.
+			final int frame = spot.getFeature( Spot.FRAME ).intValue() + 1;
 			final double radius = spot.getFeature( Spot.RADIUS );
 			final double quality = spot.getFeature( Spot.QUALITY );
 
@@ -199,7 +196,7 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 			final SpotNeighborhood< T > sn = getNeighborhood( spot, frame );
 			if ( null == sn ) { return; }
 
-			final ImgPlus< T > source = sn.source;
+			final RandomAccessible< T > source = sn.source;
 			final Interval interval = sn.interval;
 			final AffineTransform3D transform = sn.transform;
 
@@ -207,7 +204,7 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 			 * Detect spots
 			 */
 
-			final SpotDetector< T > detector = createDetector( source, interval, radius, quality * qualityThreshold );
+			final SpotDetector< T > detector = createDetector( source, interval, calibration, radius, quality * qualityThreshold );
 
 			if ( !detector.checkInput() || !detector.process() )
 			{
@@ -344,6 +341,9 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 	 *            the source image.
 	 * @param interval
 	 *            defines the neighborhood to inspect.
+	 * @param calibration
+	 *            the pixel sizes to convert pixel coordinates into image
+	 *            coordinates.
 	 * @param radius
 	 *            the expected spot radius.
 	 * @param quality
@@ -351,9 +351,8 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 	 *            discarded.
 	 * @return a new {@link SpotTracker}.
 	 */
-	protected SpotDetector< T > createDetector( final ImgPlus< T > img, final Interval interval, final double radius, final double quality )
+	protected SpotDetector< T > createDetector( final RandomAccessible< T > img, final Interval interval, final double[] calibration, final double radius, final double quality )
 	{
-		final double[] calibration = TMUtils.getSpatialCalibration( img );
 		final LogDetector< T > detector = new LogDetector< T >( img, interval, calibration, radius, quality, true, false );
 		detector.setNumThreads( 1 );
 		return detector;
@@ -406,7 +405,7 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 	public static class SpotNeighborhood< R >
 	{
 		/** The source image. */
-		public ImgPlus< R > source;
+		public RandomAccessible< R > source;
 
 		/** The neighborhood in the source image to inspect. */
 		public Interval interval;
