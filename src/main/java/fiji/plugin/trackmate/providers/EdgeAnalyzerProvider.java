@@ -51,7 +51,7 @@ public class EdgeAnalyzerProvider extends AbstractFeatureAnalyzerProvider< EdgeA
 		this.edgeTimeLocationAnalyzer = new EdgeTimeLocationAnalyzer();
 		this.edgeVelocityAnalyzer = new EdgeVelocityAnalyzer();
 		// Names
-		registerAnalyzer( EdgeVelocityAnalyzer.KEY, edgeTargetAnalyzer );
+		registerAnalyzer( EdgeVelocityAnalyzer.KEY, edgeVelocityAnalyzer );
 		registerAnalyzer( EdgeTimeLocationAnalyzer.KEY, edgeTimeLocationAnalyzer );
 		registerAnalyzer( EdgeTargetAnalyzer.KEY, edgeTargetAnalyzer );
 	}
