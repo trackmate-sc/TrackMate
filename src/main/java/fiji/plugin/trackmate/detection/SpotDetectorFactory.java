@@ -2,6 +2,7 @@ package fiji.plugin.trackmate.detection;
 
 import java.util.Map;
 
+import net.imglib2.Interval;
 import net.imglib2.img.Img;
 import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.NativeType;
@@ -20,11 +21,17 @@ public interface SpotDetectorFactory< T extends RealType< T > & NativeType< T >>
 	 * Returns a new {@link SpotDetector} configured to operate on the given
 	 * target frame. This factory must be first given the {@link ImgPlus} and
 	 * the settings map, through the {@link #setTarget(ImgPlus, Map)} method.
-	 *
+	 * 
+	 * @param interval
+	 *            the interval that determines the region in the source image to
+	 *            operate on. This must <b>not</b> have a dimension for time
+	 *            (<i>e.g.</i> if the source image is 2D+T (3D), then the
+	 *            interval must be 2D; if the source image is 3D without time,
+	 *            then the interval must be 3D).
 	 * @param frame
 	 *            the frame index in the source image to operate on
 	 */
-	public SpotDetector< T > getDetector( final int frame );
+	public SpotDetector< T > getDetector( final Interval interval, int frame );
 
 	/**
 	 * Configure this factory to operate on the given source image (possibly

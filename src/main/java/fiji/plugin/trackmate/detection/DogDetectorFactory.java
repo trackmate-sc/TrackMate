@@ -3,12 +3,13 @@ package fiji.plugin.trackmate.detection;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DO_MEDIAN_FILTERING;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DO_SUBPIXEL_LOCALIZATION;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
-import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
-import net.imglib2.meta.ImgPlus;
-import net.imglib2.meta.view.HyperSliceImgPlus;
+import net.imglib2.Interval;
+import net.imglib2.RandomAccessible;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.view.Views;
+import fiji.plugin.trackmate.util.TMUtils;
 
 public class DogDetectorFactory<T extends RealType<T> & NativeType<T>> extends LogDetectorFactory<T> {
 
@@ -16,8 +17,8 @@ public class DogDetectorFactory<T extends RealType<T> & NativeType<T>> extends L
 	/*
 	 * CONSTANTS
 	 */
-	
-	/** A string key identifying this factory. */ 
+
+	/** A string key identifying this factory. */
 	public static final String DETECTOR_KEY = "DOG_DETECTOR";
 	/** The pretty name of the target detector. */
 	public static final String NAME = "DoG detector";
@@ -30,29 +31,41 @@ public class DogDetectorFactory<T extends RealType<T> & NativeType<T>> extends L
 			"Spots found too close are suppressed. This segmenter can do sub-pixel <br>" +
 			"localization of spots using a quadratic fitting scheme. It is based on <br>" +
 			"the scale-space framework made by Stephan Preibisch for ImgLib. " +
-			"</html>";	
+			"</html>";
 
 	/*
 	 * METHODS
 	 */
 
 	@Override
-	public SpotDetector<T> getDetector(final int frame) {
-		final int targetChannel = (Integer) settings.get(KEY_TARGET_CHANNEL) - 1; // parameter is 1-based
-		final ImgPlus<T> imgC = HyperSliceImgPlus.fixChannelAxis(img, targetChannel);
-		final ImgPlus<T> imgT = HyperSliceImgPlus.fixTimeAxis(imgC, frame);
+	public SpotDetector< T > getDetector( final Interval interval, final int frame )
+	{
 		final double radius = (Double) settings.get(KEY_RADIUS);
 		final double threshold = (Double) settings.get(KEY_THRESHOLD);
 		final boolean doMedian = (Boolean) settings.get(KEY_DO_MEDIAN_FILTERING);
 		final boolean doSubpixel = (Boolean) settings.get(KEY_DO_SUBPIXEL_LOCALIZATION);
-		return new DogDetector<T>(imgT, radius, threshold, doSubpixel, doMedian);
+		final double[] calibration = TMUtils.getSpatialCalibration( img );
+
+		final int timeDim = TMUtils.findTAxisIndex( img );
+		final RandomAccessible< T > imFrame;
+		if ( timeDim < 0 )
+		{
+			imFrame = img;
+		}
+		else
+		{
+			imFrame = Views.hyperSlice( img, timeDim, frame );
+		}
+		final DogDetector< T > detector = new DogDetector< T >( imFrame, interval, calibration, radius, threshold, doSubpixel, doMedian );
+		detector.setNumThreads( 1 );
+		return detector;
 	}
-	
+
 	@Override
 	public String getKey() {
 		return DETECTOR_KEY;
 	}
-	
+
 	@Override
 	public String toString() {
 		return NAME;

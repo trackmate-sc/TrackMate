@@ -3,24 +3,20 @@ package fiji.plugin.trackmate.detection;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.imglib2.Point;
-import net.imglib2.RandomAccess;
+import net.imglib2.Interval;
+import net.imglib2.RandomAccessible;
 import net.imglib2.algorithm.MultiThreaded;
 import net.imglib2.algorithm.fft2.FFTConvolution;
-import net.imglib2.algorithm.localextrema.LocalExtrema;
-import net.imglib2.exception.IncompatibleTypeException;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgFactory;
-import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.util.Util;
+import net.imglib2.view.IntervalView;
+import net.imglib2.view.Views;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.detection.subpixel.QuadraticSubpixelLocalization;
-import fiji.plugin.trackmate.detection.subpixel.SubPixelLocalization;
-import fiji.plugin.trackmate.detection.subpixel.SubPixelLocalization.LocationType;
 import fiji.plugin.trackmate.detection.util.MedianFilter3x3;
-import fiji.plugin.trackmate.util.TMUtils;
 
 public class LogDetector< T extends RealType< T > & NativeType< T >> implements SpotDetector< T >, MultiThreaded
 {
@@ -32,7 +28,7 @@ public class LogDetector< T extends RealType< T > & NativeType< T >> implements 
 	private final static String BASE_ERROR_MESSAGE = "LogDetector: ";
 
 	/** The image to segment. Will not modified. */
-	protected ImgPlus< T > img;
+	protected RandomAccessible< T > img;
 
 	protected double radius;
 
@@ -54,13 +50,19 @@ public class LogDetector< T extends RealType< T > & NativeType< T >> implements 
 
 	protected int numThreads;
 
+	protected final Interval interval;
+
+	protected final double[] calibration;
+
 	/*
 	 * CONSTRUCTORS
 	 */
 
-	public LogDetector( final ImgPlus< T > img, final double radius, final double threshold, final boolean doSubPixelLocalization, final boolean doMedianFilter )
+	public LogDetector( final RandomAccessible< T > img, final Interval interval, final double[] calibration, final double radius, final double threshold, final boolean doSubPixelLocalization, final boolean doMedianFilter )
 	{
 		this.img = img;
+		this.interval = interval;
+		this.calibration = calibration;
 		this.radius = radius;
 		this.threshold = threshold;
 		this.doSubPixelLocalization = doSubPixelLocalization;
@@ -99,17 +101,8 @@ public class LogDetector< T extends RealType< T > & NativeType< T >> implements 
 		 * Copy to float for convolution.
 		 */
 
-		ImgFactory< FloatType > factory = null;
-		try
-		{
-			factory = img.factory().imgFactory( new FloatType() );
-		}
-		catch ( final IncompatibleTypeException e )
-		{
-			errorMessage = baseErrorMessage + "Failed creating float image factory: " + e.getMessage();
-			return false;
-		}
-		Img< FloatType > floatImg = DetectionUtils.copyToFloatImg( img, factory );
+		final ImgFactory< FloatType > factory = Util.getArrayOrCellImgFactory( interval, new FloatType() );
+		Img< FloatType > floatImg = DetectionUtils.copyToFloatImg( img, interval, factory );
 
 		// Deal with median filter:
 		if ( doMedianFilter )
@@ -118,63 +111,30 @@ public class LogDetector< T extends RealType< T > & NativeType< T >> implements 
 			if ( null == floatImg ) { return false; }
 		}
 
-		final Img< FloatType > kernel = DetectionUtils.createLoGKernel( radius, img );
+		int ndims = interval.numDimensions();
+		for ( int d = 0; d < interval.numDimensions(); d++ )
+		{
+			// Squeeze singleton dimensions
+			if ( interval.dimension( d ) <= 1 )
+			{
+				ndims--;
+			}
+		}
+		final Img< FloatType > kernel = DetectionUtils.createLoGKernel( radius, ndims, calibration );
 		final FFTConvolution< FloatType > fftconv = new FFTConvolution< FloatType >( floatImg, kernel );
 		fftconv.run();
 
-		final FloatType ftThresh = new FloatType( ( float ) threshold );
-		final ArrayList< Point > points = LocalExtrema.findLocalExtrema( floatImg, new LocalExtrema.MaximumCheck< FloatType >( ftThresh ), numThreads );
-
-		// Get peaks location and values
-		final RandomAccess< FloatType > cursor = floatImg.randomAccess();
-		// Prune values lower than threshold
-		final List< SubPixelLocalization< FloatType >> peaks = new ArrayList< SubPixelLocalization< FloatType >>();
-		final LocationType specialPoint = LocationType.MAX;
-		for ( final Point point : points )
+		final long[] minopposite = new long[ interval.numDimensions() ];
+		interval.min( minopposite );
+		for ( int d = 0; d < minopposite.length; d++ )
 		{
-			cursor.setPosition( point );
-			final FloatType value = cursor.get().copy();
-			final long[] coords = new long[ point.numDimensions() ];
-			point.localize( coords );
-			final SubPixelLocalization< FloatType > peak = new SubPixelLocalization< FloatType >( coords, value, specialPoint );
-			peaks.add( peak );
+			minopposite[ d ] = -minopposite[ d ];
 		}
-
-		// Do sub-pixel localization
-		if ( doSubPixelLocalization && !peaks.isEmpty() )
-		{
-			// Create localizer and apply it to the list. The list object will
-			// be updated
-			final QuadraticSubpixelLocalization< FloatType > locator = new QuadraticSubpixelLocalization< FloatType >( floatImg, peaks );
-			locator.setNumThreads( numThreads );
-			locator.setCanMoveOutside( true );
-			if ( !locator.checkInput() || !locator.process() )
-			{
-				errorMessage = baseErrorMessage + locator.getErrorMessage();
-				return false;
-			}
-		}
-
-		// Create spots
-		spots = new ArrayList< Spot >( peaks.size() );
-		final double[] calibration = TMUtils.getSpatialCalibration( img );
-		for ( int j = 0; j < peaks.size(); j++ )
-		{
-
-			final SubPixelLocalization< FloatType > peak = peaks.get( j );
-			final double[] coords = new double[ 3 ];
-			for ( int i = 0; i < img.numDimensions(); i++ )
-			{
-				coords[ i ] = peak.getDoublePosition( i ) * calibration[ i ];
-			}
-			final Spot spot = new Spot( coords );
-			spot.putFeature( Spot.QUALITY, Double.valueOf( peak.getValue().get() ) );
-			spot.putFeature( Spot.RADIUS, Double.valueOf( radius ) );
-			spots.add( spot );
-		}
+		final IntervalView< FloatType > to = Views.offset( floatImg, minopposite );
+		spots = DetectionUtils.findLocalMaxima( to, threshold, calibration, radius, doSubPixelLocalization, numThreads );
 
 		final long end = System.currentTimeMillis();
-		processingTime = end - start;
+		this.processingTime = end - start;
 
 		return true;
 	}

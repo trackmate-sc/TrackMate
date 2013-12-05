@@ -14,7 +14,7 @@ import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.view.Views;
 import fiji.plugin.trackmate.detection.LogDetector;
-import fiji.plugin.trackmate.detection.OldLogDetector;
+import fiji.plugin.trackmate.util.TMUtils;
 
 public class LogDetectorPerformance {
 
@@ -39,20 +39,6 @@ public class LogDetectorPerformance {
 
 
 		{
-			System.out.println("Old implementation: ");
-			for (int i = 0; i < nwarmups; i++) {
-				execTestWOld(imgplus, rad);
-			}
-			final long start = System.currentTimeMillis();
-			for (int i = 0; i < ntests; i++) {
-				execTestWOld(imgplus, rad);
-			}
-			final long end = System.currentTimeMillis();
-			System.out.println("  Image detection done in " + ((double) (end - start) / ntests) + " ms per run.");
-		}
-
-
-		{
 			System.out.println("New implementation: ");
 			for (int i = 0; i < nwarmups; i++) {
 				execTest(imgplus, rad);
@@ -68,17 +54,7 @@ public class LogDetectorPerformance {
 	}
 
 	private static final void execTest(final ImgPlus<UnsignedShortType> imgplus, final double rad) {
-		final LogDetector<UnsignedShortType> detector = new LogDetector<UnsignedShortType>(imgplus, rad, 0, false, false);
-		detector.setNumThreads(1);
-		if (!detector.checkInput() || !detector.process()) {
-			System.out.println(detector.getErrorMessage());
-			return;
-		}
-		detector.getResult();
-	}
-
-	private static final void execTestWOld(final ImgPlus<UnsignedShortType> imgplus, final double rad) {
-		final OldLogDetector<UnsignedShortType> detector = new OldLogDetector<UnsignedShortType>(imgplus, rad, 0, false, false);
+		final LogDetector< UnsignedShortType > detector = new LogDetector< UnsignedShortType >( imgplus, imgplus, TMUtils.getSpatialCalibration( imgplus ), rad, 0, false, false );
 		detector.setNumThreads(1);
 		if (!detector.checkInput() || !detector.process()) {
 			System.out.println(detector.getErrorMessage());

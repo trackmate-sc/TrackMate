@@ -1,10 +1,13 @@
 package fiji.plugin.trackmate;
 
+import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import net.imglib2.FinalInterval;
 import net.imglib2.algorithm.Algorithm;
 import net.imglib2.algorithm.Benchmark;
 import net.imglib2.algorithm.MultiThreaded;
@@ -20,7 +23,6 @@ import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.SpotFeatureCalculator;
 import fiji.plugin.trackmate.features.TrackFeatureCalculator;
 import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.util.CropImgView;
 import fiji.plugin.trackmate.util.TMUtils;
 
 /**
@@ -291,70 +293,78 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 		}
 
 		/*
-		 * Prepare cropped image
+		 * Prepare interval
 		 */
-		final ImgPlus rawImg = TMUtils.rawWraps( settings.imp );
-		ImgPlus img;
+		final ImgPlus img = TMUtils.rawWraps( settings.imp );
 
-		// Check if we indeed wish to crop the source image. To this, we check
-		// the crop cube settings
+		final long[] max = new long[ img.numDimensions() ];
+		final long[] min = new long[ img.numDimensions() ];
 
-		if ( settings.xstart != 0 || settings.ystart != 0 || settings.zstart != 0 || settings.xend != settings.imp.getWidth() - 1 || settings.yend != settings.imp.getHeight() - 1 || settings.zend != settings.imp.getNSlices() - 1 )
+		// X, we must have it
+		final int xindex = TMUtils.findXAxisIndex( img );
+		if ( xindex < 0 )
 		{
-			// Yes, we want to crop
+			errorMessage = "Source image has no X axis.\n";
+			return false;
+		}
+		min[ xindex ] = settings.xstart;
+		max[ xindex ] = settings.xend;
+		// Y, we must have it
+		final int yindex = TMUtils.findYAxisIndex( img );
+		if ( yindex < 0 )
+		{
+			errorMessage = "Source image has no Y axis.\n";
+			return false;
+		}
+		min[ yindex ] = settings.ystart;
+		max[ yindex ] = settings.yend;
+		// Z, we MIGHT have it
+		final int zindex = TMUtils.findZAxisIndex( img );
+		if ( zindex >= 0 )
+		{
+			min[ zindex ] = settings.zstart;
+			max[ zindex ] = settings.zend;
+		}
+		// CHANNEL, we might have it
+		final int cindex = TMUtils.findCAxisIndex( img );
+		if ( cindex >= 0 )
+		{
+			min[ cindex ] = ( Integer ) settings.detectorSettings.get( KEY_TARGET_CHANNEL ) - 1;
+			max[ cindex ] = min[ cindex ];
+		}
+		// TIME, we might have it, but anyway we leave the start & end
+		// management to the threads below
+		final int tindex = TMUtils.findTAxisIndex( img );
 
-			final long[] max = new long[ rawImg.numDimensions() ];
-			final long[] min = new long[ rawImg.numDimensions() ];
-			// X, we must have it
-			final int xindex = TMUtils.findXAxisIndex( rawImg );
-			if ( xindex < 0 )
+		/*
+		 * We want to exclude time (if we have it) from out interval and source,
+		 * so that we can provide the detector instance with a hyperslice that
+		 * does NOT have time as a dimension.
+		 */
+		final long[] intervalMin;
+		final long[] intervalMax;
+		if ( tindex >= 0 )
+		{
+			intervalMin = new long[ min.length - 1 ];
+			intervalMax = new long[ min.length - 1 ];
+			int nindex = -1;
+			for ( int d = 0; d < min.length; d++ )
 			{
-				errorMessage = "Source image has no X axis.\n";
-				return false;
+				if ( d == tindex )
+				{
+					continue;
+				}
+				nindex++;
+				intervalMin[ nindex ] = min[ d ];
+				intervalMax[ nindex ] = max[ d ];
 			}
-			min[ xindex ] = settings.xstart;
-			max[ xindex ] = settings.xend;
-			// Y, we must have it
-			final int yindex = TMUtils.findYAxisIndex( rawImg );
-			if ( yindex < 0 )
-			{
-				errorMessage = "Source image has no Y axis.\n";
-				return false;
-			}
-			min[ yindex ] = settings.ystart;
-			max[ yindex ] = settings.yend;
-			// Z, we MIGHT have it
-			final int zindex = TMUtils.findZAxisIndex( rawImg );
-			if ( zindex >= 0 )
-			{
-				min[ zindex ] = settings.zstart;
-				max[ zindex ] = settings.zend;
-			}
-			// CHANNEL, we might have it
-			final int cindex = TMUtils.findCAxisIndex( rawImg );
-			if ( cindex >= 0 )
-			{
-				min[ cindex ] = 0;
-				max[ cindex ] = settings.imp.getNChannels();
-			}
-			// TIME, we might have it, but anyway we leave the start & end
-			// management to the threads below
-			final int tindex = TMUtils.findTAxisIndex( rawImg );
-			if ( tindex >= 0 )
-			{
-				min[ tindex ] = 0;
-				max[ tindex ] = settings.imp.getNFrames();
-			}
-			// crop: we now have a cropped view of the source image
-			final CropImgView cropView = new CropImgView( rawImg, min, max );
-			// Put back metadata in a new ImgPlus
-			img = new ImgPlus( cropView, rawImg );
-
 		}
 		else
 		{
-			img = rawImg;
+			intervalMin = min;
+			intervalMax = max;
 		}
+		final FinalInterval interval = new FinalInterval( intervalMin, intervalMax );
 
 		factory.setTarget( img, settings.detectorSettings );
 
@@ -367,9 +377,6 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 		final AtomicInteger progress = new AtomicInteger( 0 );
 		// To translate spots, later
 		final double[] calibration = TMUtils.getSpatialCalibration( settings.imp );
-		final double dx = settings.xstart * calibration[ 0 ];
-		final double dy = settings.ystart * calibration[ 1 ];
-		final double dz = settings.zstart * calibration[ 2 ];
 
 		final Thread[] threads = SimpleMultiThreading.newThreads( numThreads );
 		final AtomicBoolean ok = new AtomicBoolean( true );
@@ -403,9 +410,8 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 					for ( int frame = ai.getAndIncrement(); frame <= settings.tend; frame = ai.getAndIncrement() )
 						try
 						{
-
 							// Yield detector for target frame
-							final SpotDetector< ? > detector = factory.getDetector( frame );
+							final SpotDetector< ? > detector = factory.getDetector( interval, frame );
 
 							if ( wasInterrupted() )
 								return;
@@ -413,14 +419,8 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 							// Execute detection
 							if ( ok.get() && detector.checkInput() && detector.process() )
 							{
-								// On success,
-								// Get results,
+								// On success, get results.
 								final List< Spot > spotsThisFrame = detector.getResult();
-								// Translate individual spots back to top-left
-								// corner of the image, if
-								// the raw image was cropped.
-								TMUtils.translateSpots( spotsThisFrame, dx, dy, dz );
-								// Prune if outside of ROI
 								List< Spot > prunedSpots;
 								if ( null != settings.polygon )
 								{
@@ -438,14 +438,9 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 								// Add detection feature other than position
 								for ( final Spot spot : prunedSpots )
 								{
-									spot.putFeature( Spot.POSITION_T, frame * settings.dt ); // FRAME
-																								// will
-																								// be
-																								// set
-																								// upon
-																								// adding
-																								// to
-																								// SpotCollection
+									// FRAME will be set upon adding to
+									// SpotCollection.
+									spot.putFeature( Spot.POSITION_T, frame * settings.dt );
 								}
 								// Store final results for this frame
 								spots.put( frame, prunedSpots );

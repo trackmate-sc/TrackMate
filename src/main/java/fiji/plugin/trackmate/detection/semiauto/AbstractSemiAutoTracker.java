@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import net.imglib2.Interval;
 import net.imglib2.algorithm.Algorithm;
 import net.imglib2.algorithm.MultiThreaded;
 import net.imglib2.meta.ImgPlus;
@@ -21,6 +22,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.detection.LogDetector;
 import fiji.plugin.trackmate.detection.SpotDetector;
 import fiji.plugin.trackmate.tracking.SpotTracker;
+import fiji.plugin.trackmate.util.TMUtils;
 
 /**
  * A class made to perform semi-automated tracking of spots in TrackMate &
@@ -42,7 +44,7 @@ import fiji.plugin.trackmate.tracking.SpotTracker;
  * <li>spots of high quality are found, but too far from the initial spot;
  * <li>the source has no time-point left.
  * </ul>
- * 
+ *
  * @author Jean-Yves Tinevez - 2013
  * @param <T>
  *            the type of the source. Must extend {@link RealType} and
@@ -86,7 +88,7 @@ public abstract class AbstractSemiAutoTracker<T extends RealType<T> & NativeType
 
 	/**
 	 * Configures this semi-automatic tracker.
-	 * 
+	 *
 	 * @param qualityThreshold
 	 *            the fraction of the initial quality above which we keep new
 	 *            spots. The highest, the more intolerant.
@@ -140,7 +142,7 @@ public abstract class AbstractSemiAutoTracker<T extends RealType<T> & NativeType
 	 * <li>the raw image has exhausted all its time-points.
 	 * </ul>
 	 * This method can be called concurrently on several spots.
-	 * 
+	 *
 	 * @param initialSpot
 	 *            the spot to start detection with.
 	 */
@@ -177,7 +179,10 @@ public abstract class AbstractSemiAutoTracker<T extends RealType<T> & NativeType
 			 * Detect spots
 			 */
 
-			final SpotDetector<T> detector = createDetector(neighborhood, radius, quality * qualityThreshold);
+			final SpotDetector< T > detector = null;// createDetector(neighborhood,
+													// radius, quality *
+													// qualityThreshold); //
+													// FIXME
 
 			if (!detector.checkInput() || !detector.process()) {
 				ok = false;
@@ -265,7 +270,7 @@ public abstract class AbstractSemiAutoTracker<T extends RealType<T> & NativeType
 	 * This method is a hook for subclassers. It exposes the newly found spot
 	 * just before it is added to the {@link Model}. This method allows concrete
 	 * implementation to add some specific post-treatment to detected spots.
-	 * 
+	 *
 	 * @param newSpot
 	 *            the spot that just has been found by the detection mechanism.
 	 * @param previousSpot
@@ -283,7 +288,7 @@ public abstract class AbstractSemiAutoTracker<T extends RealType<T> & NativeType
 	 * of time frames in the raw source has been exhausted, or if the specified
 	 * spot misses some information. This will be dealt with gracefully in the
 	 * {@link #process()} method.
-	 * 
+	 *
 	 * @param spot
 	 *            the spot the desired neighborhood is centered on.
 	 * @param frame
@@ -299,7 +304,7 @@ public abstract class AbstractSemiAutoTracker<T extends RealType<T> & NativeType
 	/**
 	 * Returns a new instance of a {@link SpotDetector} that will inspect the
 	 * neighborhood.
-	 * 
+	 *
 	 * @param img
 	 *            the neighborhood to inspect.
 	 * @param radius
@@ -309,8 +314,10 @@ public abstract class AbstractSemiAutoTracker<T extends RealType<T> & NativeType
 	 *            discarded.
 	 * @return a new {@link SpotTracker}.
 	 */
-	protected SpotDetector<T> createDetector(final ImgPlus<T> img, final double radius, final double quality) {
-		final LogDetector<T> detector = new LogDetector<T>(img, radius, quality, true, false);
+	protected SpotDetector< T > createDetector( final ImgPlus< T > img, final Interval interval, final double radius, final double quality )
+	{
+		final double[] calibration = TMUtils.getSpatialCalibration( img );
+		final LogDetector< T > detector = new LogDetector< T >( img, interval, calibration, radius, quality, true, false );
 		detector.setNumThreads(1);
 		return detector;
 	}

@@ -1,7 +1,19 @@
 package fiji.plugin.trackmate.detection;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import net.imglib2.Cursor;
+import net.imglib2.Interval;
+import net.imglib2.Point;
+import net.imglib2.RandomAccess;
+import net.imglib2.RandomAccessible;
+import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.gauss3.Gauss3;
+import net.imglib2.algorithm.localextrema.LocalExtrema;
+import net.imglib2.algorithm.localextrema.LocalExtrema.LocalNeighborhoodCheck;
+import net.imglib2.algorithm.localextrema.RefinedPeak;
+import net.imglib2.algorithm.localextrema.SubpixelLocalization;
 import net.imglib2.converter.RealFloatConverter;
 import net.imglib2.exception.IncompatibleTypeException;
 import net.imglib2.img.Img;
@@ -10,37 +22,34 @@ import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.array.ArrayRandomAccess;
 import net.imglib2.img.basictypeaccess.array.FloatArray;
-import net.imglib2.meta.ImgPlusMetadata;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.util.Intervals;
+import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
-import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.Spot;
 
 public class DetectionUtils
 {
 
 	/**
 	 * Creates a laplacian of gaussian (LoG) kernel tuned for blobs with a
-	 * radius specified <b>using calibrated units</b>. The specified metadata is
-	 * used to determine the dimensionality of the kernel and to map it on a
+	 * radius specified <b>using calibrated units</b>. The specified calibration
+	 * is used to determine the dimensionality of the kernel and to map it on a
 	 * pixel grid.
 	 *
 	 * @param radius
-	 *            the blob radius (in physical unit).
-	 * @param metadata
-	 *            a metadata object used to retrieve the dimensionality and the
-	 *            physical calibration.
+	 *            the blob radius (in image unit).
+	 * @param nDims
+	 *            the dimensionality of the desired kernel. Must be 2 or 3.
+	 * @param calibration
+	 *            the pixel sizes, specified as <code>double[]</code> array.
 	 * @return a new image containing the LoG kernel.
 	 */
-	public static final < R extends RealType< R >> Img< FloatType > createLoGKernel( final double radius, final ImgPlusMetadata metadata )
-	{
-		return createLoGKernel( radius, metadata.numDimensions(), TMUtils.getSpatialCalibration( metadata ) );
-	}
-
 	public static final < R extends RealType< R >> Img< FloatType > createLoGKernel( final double radius, final int nDims, final double[] calibration )
 	{
-		final double sigma = radius / nDims; // optimal sigma for LoG approach
-		// and dimensionality
+		// optimal sigma for LoG approach and dimensionality
+		final double sigma = radius / nDims;
 		// Turn it in pixel coordinates
 		final double[] sigmas = new double[ nDims ];
 		for ( int i = 0; i < sigmas.length; i++ )
@@ -68,28 +77,101 @@ public class DetectionUtils
 	}
 
 	/**
-	 * Copy the specified source image on a float image.
+	 * Copy an interval of the specified source image on a float image.
 	 *
-	 * @param input
-	 *            the image to copy.
+	 * @param img
+	 *            the source image.
+	 * @param interval
+	 *            the interval in the source image to copy.
 	 * @param factory
 	 *            a factory used to build the float image.
-	 * @return a new float image.
+	 * @return a new float Img. Careful: even if the specified interval does not
+	 *         start at (0, 0), the new image will have its first pixel at
+	 *         coordinates (0, 0).
 	 */
-	public static final < T extends RealType< T >> Img< FloatType > copyToFloatImg( final Img< T > input, final ImgFactory< FloatType > factory )
+	public static final < T extends RealType< T >> Img< FloatType > copyToFloatImg( final RandomAccessible< T > img, final Interval interval, final ImgFactory< FloatType > factory )
 	{
-		final Img< FloatType > output = factory.create( input, new FloatType() );
-		final Cursor< T > in = input.cursor();
+		final Img< FloatType > output = factory.create( interval, new FloatType() );
+		final long[] min = new long[ interval.numDimensions() ];
+		interval.min( min );
+		final RandomAccess< T > in = Views.offset( img, min ).randomAccess();
 		final Cursor< FloatType > out = output.cursor();
 		final RealFloatConverter< T > c = new RealFloatConverter< T >();
 
-		while ( in.hasNext() )
+		while ( out.hasNext() )
 		{
-			in.fwd();
 			out.fwd();
+			in.setPosition( out );
 			c.convert( in.get(), out.get() );
 		}
+
 		return output;
+	}
+
+	public static final List< Spot > findLocalMaxima( final RandomAccessibleInterval< FloatType > source, final double threshold, final double[] calibration, final double radius, final boolean doSubPixelLocalization, final int numThreads )
+	{
+		/*
+		 * Find maxima.
+		 */
+
+		final FloatType val = new FloatType();
+		val.setReal( threshold );
+		final LocalNeighborhoodCheck< Point, FloatType > localNeighborhoodCheck = new LocalExtrema.MaximumCheck< FloatType >( val );
+		final IntervalView< FloatType > dogWithBorder = Views.interval( Views.extendZero( source ), Intervals.expand( source, 1 ) );
+		final ArrayList< Point > peaks = LocalExtrema.findLocalExtrema( dogWithBorder, localNeighborhoodCheck, numThreads );
+
+		final ArrayList< Spot > spots;
+		if ( doSubPixelLocalization )
+		{
+
+			/*
+			 * Sub-pixel localize them.
+			 */
+
+			final SubpixelLocalization< Point, FloatType > spl = new SubpixelLocalization< Point, FloatType >( source.numDimensions() );
+			spl.setNumThreads( numThreads );
+			spl.setReturnInvalidPeaks( true );
+			spl.setCanMoveOutside( true );
+			spl.setAllowMaximaTolerance( true );
+			spl.setMaxNumMoves( 10 );
+			final ArrayList< RefinedPeak< Point >> refined = spl.process( peaks, dogWithBorder, source );
+
+			spots = new ArrayList< Spot >( refined.size() );
+			final RandomAccess< FloatType > ra = source.randomAccess();
+			for ( final RefinedPeak< Point > refinedPeak : refined )
+			{
+				ra.setPosition( refinedPeak.getOriginalPeak() );
+				final double quality = ra.get().getRealDouble();
+				final double[] coords = new double[ 3 ];
+				for ( int i = 0; i < source.numDimensions(); i++ )
+					coords[ i ] = refinedPeak.getDoublePosition( i ) * calibration[ i ];
+				final Spot spot = new Spot( coords );
+				spot.putFeature( Spot.QUALITY, Double.valueOf( quality ) );
+				spot.putFeature( Spot.RADIUS, Double.valueOf( radius ) );
+				spots.add( spot );
+			}
+
+		}
+		else
+		{
+			spots = new ArrayList< Spot >( peaks.size() );
+			final RandomAccess< FloatType > ra = source.randomAccess();
+			for ( final Point peak : peaks )
+			{
+				ra.setPosition( peak );
+				final double quality = ra.get().getRealDouble();
+				final double[] coords = new double[ 3 ];
+				for ( int i = 0; i < source.numDimensions(); i++ )
+					coords[ i ] = peak.getDoublePosition( i ) * calibration[ i ];
+				final Spot spot = new Spot( coords );
+				spot.putFeature( Spot.QUALITY, Double.valueOf( quality ) );
+				spot.putFeature( Spot.RADIUS, Double.valueOf( radius ) );
+				spots.add( spot );
+			}
+
+		}
+
+		return spots;
 	}
 
 	private static final void writeLaplacianKernel( final ArrayImg< FloatType, FloatArray > kernel )
