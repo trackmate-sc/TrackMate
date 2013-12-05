@@ -16,7 +16,6 @@ import net.imglib2.util.Util;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.detection.util.MedianFilter3x3;
 
 public class LogDetector< T extends RealType< T > & NativeType< T >> implements SpotDetector< T >, MultiThreaded
 {
@@ -104,11 +103,18 @@ public class LogDetector< T extends RealType< T > & NativeType< T >> implements 
 		final ImgFactory< FloatType > factory = Util.getArrayOrCellImgFactory( interval, new FloatType() );
 		Img< FloatType > floatImg = DetectionUtils.copyToFloatImg( img, interval, factory );
 
-		// Deal with median filter:
+		/*
+		 * Do median filtering (or not).
+		 */
+
 		if ( doMedianFilter )
 		{
-			floatImg = applyMedianFilter( floatImg );
-			if ( null == floatImg ) { return false; }
+			floatImg = DetectionUtils.applyMedianFilter( floatImg );
+			if ( null == floatImg )
+			{
+				errorMessage = BASE_ERROR_MESSAGE + "Failed to apply median filter.";
+				return false;
+			}
 		}
 
 		int ndims = interval.numDimensions();
@@ -137,20 +143,6 @@ public class LogDetector< T extends RealType< T > & NativeType< T >> implements 
 		this.processingTime = end - start;
 
 		return true;
-	}
-
-	/**
-	 * Apply a simple 3x3 median filter to the target image.
-	 */
-	protected < R extends RealType< R >> Img< R > applyMedianFilter( final Img< R > image )
-	{
-		final MedianFilter3x3< R > medFilt = new MedianFilter3x3< R >( image );
-		if ( !medFilt.checkInput() || !medFilt.process() )
-		{
-			errorMessage = baseErrorMessage + "Failed in applying median filter";
-			return null;
-		}
-		return medFilt.getResult();
 	}
 
 	@Override

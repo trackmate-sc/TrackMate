@@ -22,12 +22,14 @@ import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.array.ArrayRandomAccess;
 import net.imglib2.img.basictypeaccess.array.FloatArray;
+import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.detection.util.MedianFilter;
 
 public class DetectionUtils
 {
@@ -106,6 +108,19 @@ public class DetectionUtils
 		}
 
 		return output;
+	}
+
+	/**
+	 * Apply a simple 3x3 median filter to the target image.
+	 */
+	public static final < R extends RealType< R > & NativeType< R >> Img< R > applyMedianFilter( final RandomAccessibleInterval< R > image )
+	{
+		final MedianFilter< R > medFilt = new MedianFilter< R >( image, 1 );
+		if ( !medFilt.checkInput() || !medFilt.process() )
+		{
+			return null;
+		}
+		return medFilt.getResult();
 	}
 
 	public static final List< Spot > findLocalMaxima( final RandomAccessibleInterval< FloatType > source, final double threshold, final double[] calibration, final double radius, final boolean doSubPixelLocalization, final int numThreads )

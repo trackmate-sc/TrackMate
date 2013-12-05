@@ -1,7 +1,6 @@
 package fiji.plugin.trackmate.detection;
 
 import net.imglib2.Cursor;
-import net.imglib2.ExtendedRandomAccessibleInterval;
 import net.imglib2.Interval;
 import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccessible;
@@ -44,24 +43,27 @@ public class DogDetector< T extends RealType< T > & NativeType< T >> extends Log
 
 		final long start = System.currentTimeMillis();
 
-		final RandomAccessibleInterval< T > view = Views.interval( img, interval );
-		final ExtendedRandomAccessibleInterval< T, RandomAccessibleInterval< T >> extended = Views.extendMirrorSingle( view );
+		RandomAccessibleInterval< T > view = Views.interval( img, interval );
 
 		/*
 		 * Do median filtering (or not).
 		 */
 
-		// Img< T > frame = img;
-		// if ( doMedianFilter )
-		// {
-		// frame = applyMedianFilter( frame );
-		// if ( null == frame ) { return false; }
-		// }
+		if ( doMedianFilter )
+		{
+			view = DetectionUtils.applyMedianFilter( view );
+			if ( null == view )
+			{
+				errorMessage = BASE_ERROR_MESSAGE + "Failed to apply median filter.";
+				return false;
+			}
+		}
 
 		/*
 		 * Do DoG computation.
 		 */
 
+		final RandomAccessible< T > extended = Views.extendMirrorSingle( view );
 		// We need to shift coordinates by -min[] to have the correct location.
 		final long[] min = new long[ interval.numDimensions() ];
 		interval.min( min );
