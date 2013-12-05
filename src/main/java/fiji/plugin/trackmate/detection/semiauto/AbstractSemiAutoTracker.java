@@ -51,21 +51,33 @@ import fiji.plugin.trackmate.util.TMUtils;
  *            {@link NativeType} to use with most TrackMate {@link SpotDetector}
  *            s.
  */
-public abstract class AbstractSemiAutoTracker<T extends RealType<T> & NativeType<T>> implements Algorithm, MultiThreaded {
+public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeType< T >> implements Algorithm, MultiThreaded
+{
 
 	/** Minimal size of neighborhoods, in spot diameter units. */
 	protected static final double NEIGHBORHOOD_FACTOR = 2d;
+
 	protected static final String BASE_ERROR_MESSAGE = "[SemiAutoTracker] ";
+
 	private static final double QUALITY_THRESHOLD = 0.2d;
+
 	private static final double DISTANCE_TOLERANCE = 1.1d;
+
 	private final Model model;
+
 	private final SelectionModel selectionModel;
+
 	protected String errorMessage;
+
 	private int numThreads;
+
 	protected boolean ok;
+
 	protected final Logger logger;
+
 	/** How close must be the new spot found to be accepted, in radius units. */
 	protected double distanceTolerance = DISTANCE_TOLERANCE;
+
 	/**
 	 * The fraction of the initial quality above which we keep new spots. The
 	 * highest, the more intolerant.
@@ -76,7 +88,8 @@ public abstract class AbstractSemiAutoTracker<T extends RealType<T> & NativeType
 	 * CONSTRUCTOR
 	 */
 
-	public AbstractSemiAutoTracker(final Model model, final SelectionModel selectionModel, final Logger logger) {
+	public AbstractSemiAutoTracker( final Model model, final SelectionModel selectionModel, final Logger logger )
+	{
 		this.model = model;
 		this.selectionModel = selectionModel;
 		this.logger = logger;
@@ -96,38 +109,45 @@ public abstract class AbstractSemiAutoTracker<T extends RealType<T> & NativeType
 	 *            how close must be the new spot found to be accepted, in radius
 	 *            units.
 	 */
-	public void setParameters(final double qualityThreshold, final double distanceTolerance) {
+	public void setParameters( final double qualityThreshold, final double distanceTolerance )
+	{
 		this.qualityThreshold = qualityThreshold;
 		this.distanceTolerance = distanceTolerance;
 	}
 
 	@Override
-	public boolean process() {
-		final Set<Spot> spots = new HashSet<Spot>(selectionModel.getSpotSelection());
-		if (spots.isEmpty()) {
+	public boolean process()
+	{
+		final Set< Spot > spots = new HashSet< Spot >( selectionModel.getSpotSelection() );
+		if ( spots.isEmpty() )
+		{
 			errorMessage = BASE_ERROR_MESSAGE + "No spots in selection.\n";
 			return false;
 		}
 		selectionModel.clearSelection();
 
-		final int nThreads = Math.min(numThreads, spots.size());
-		final ArrayBlockingQueue<Spot> queue = new ArrayBlockingQueue<Spot>(spots.size(), false, spots);
+		final int nThreads = Math.min( numThreads, spots.size() );
+		final ArrayBlockingQueue< Spot > queue = new ArrayBlockingQueue< Spot >( spots.size(), false, spots );
 
 		ok = true;
-		final ThreadGroup semiAutoTrackingThreadgroup = new ThreadGroup("Semi-automatic tracking threads");
-		final Thread[] threads = SimpleMultiThreading.newThreads(nThreads);
-		for (int i = 0; i < threads.length; i++) {
-			threads[i] = new Thread(semiAutoTrackingThreadgroup, new Runnable() {
+		final ThreadGroup semiAutoTrackingThreadgroup = new ThreadGroup( "Semi-automatic tracking threads" );
+		final Thread[] threads = SimpleMultiThreading.newThreads( nThreads );
+		for ( int i = 0; i < threads.length; i++ )
+		{
+			threads[ i ] = new Thread( semiAutoTrackingThreadgroup, new Runnable()
+			{
 				@Override
-				public void run() {
+				public void run()
+				{
 					Spot spot;
-					while ((spot = queue.poll()) != null) {
-						processSpot(spot);
+					while ( ( spot = queue.poll() ) != null )
+					{
+						processSpot( spot );
 					}
 				}
-			});
+			} );
 		}
-		SimpleMultiThreading.startAndJoin(threads);
+		SimpleMultiThreading.startAndJoin( threads );
 		return ok;
 	}
 
@@ -146,45 +166,51 @@ public abstract class AbstractSemiAutoTracker<T extends RealType<T> & NativeType
 	 * @param initialSpot
 	 *            the spot to start detection with.
 	 */
-	public void processSpot(final Spot initialSpot) {
+	public void processSpot( final Spot initialSpot )
+	{
 
 		/*
 		 * Initial spot
 		 */
 		Spot spot = initialSpot;
 
-		while (true) {
+		while ( true )
+		{
 
 			/*
 			 * Extract spot & features
 			 */
 
-			final int frame = spot.getFeature(Spot.FRAME).intValue() + 1; // We want to segment in the next frame
-			final double radius = spot.getFeature(Spot.RADIUS);
-			final double quality = spot.getFeature(Spot.QUALITY);
+			final int frame = spot.getFeature( Spot.FRAME ).intValue() + 1; // We
+																			// want
+																			// to
+																			// segment
+																			// in
+																			// the
+																			// next
+																			// frame
+			final double radius = spot.getFeature( Spot.RADIUS );
+			final double quality = spot.getFeature( Spot.QUALITY );
 
 			/*
 			 * Get neighborhood
 			 */
 
-			final SpotNeighborhood<T> sn = getNeighborhood(spot, frame);
-			if (null == sn) {
-				return;
-			}
+			final SpotNeighborhood< T > sn = getNeighborhood( spot, frame );
+			if ( null == sn ) { return; }
 
-			final ImgPlus<T> neighborhood = sn.neighborhood;
+			final ImgPlus< T > source = sn.source;
+			final Interval interval = sn.interval;
 			final AffineTransform3D transform = sn.transform;
 
 			/*
 			 * Detect spots
 			 */
 
-			final SpotDetector< T > detector = null;// createDetector(neighborhood,
-													// radius, quality *
-													// qualityThreshold); //
-													// FIXME
+			final SpotDetector< T > detector = createDetector( source, interval, radius, quality * qualityThreshold );
 
-			if (!detector.checkInput() || !detector.process()) {
+			if ( !detector.checkInput() || !detector.process() )
+			{
 				ok = false;
 				errorMessage = detector.getErrorMessage();
 				return;
@@ -194,9 +220,10 @@ public abstract class AbstractSemiAutoTracker<T extends RealType<T> & NativeType
 			 * Get results
 			 */
 
-			final List<Spot> detectedSpots = detector.getResult();
-			if (detectedSpots.isEmpty()) {
-				logger.log("Spot: " + initialSpot + ": No suitable spot found.\n");
+			final List< Spot > detectedSpots = detector.getResult();
+			if ( detectedSpots.isEmpty() )
+			{
+				logger.log( "Spot: " + initialSpot + ": No suitable spot found.\n" );
 				return;
 			}
 
@@ -205,33 +232,38 @@ public abstract class AbstractSemiAutoTracker<T extends RealType<T> & NativeType
 			 */
 
 			final String[] features = new String[] { Spot.POSITION_X, Spot.POSITION_Y, Spot.POSITION_Z };
-			for (final Spot ds : detectedSpots) {
-				final double[] coords = new double[3];
-				ds.localize(coords);
-				final double[] target = new double[3];
-				transform.apply(coords, target);
-				for (int i = 0; i < target.length; i++) {
-					ds.putFeature(features[i], target[i]);
+			for ( final Spot ds : detectedSpots )
+			{
+				final double[] coords = new double[ 3 ];
+				ds.localize( coords );
+				final double[] target = new double[ 3 ];
+				transform.apply( coords, target );
+				for ( int i = 0; i < target.length; i++ )
+				{
+					ds.putFeature( features[ i ], target[ i ] );
 				}
 			}
 
 			// Sort then by ascending quality
-			final TreeSet<Spot> sortedSpots = new TreeSet<Spot>(Spot.featureComparator(Spot.QUALITY));
-			sortedSpots.addAll(detectedSpots);
+			final TreeSet< Spot > sortedSpots = new TreeSet< Spot >( Spot.featureComparator( Spot.QUALITY ) );
+			sortedSpots.addAll( detectedSpots );
 
 			boolean found = false;
 			Spot target = null;
-			for (final Iterator<Spot> iterator = sortedSpots.descendingIterator(); iterator.hasNext();) {
+			for ( final Iterator< Spot > iterator = sortedSpots.descendingIterator(); iterator.hasNext(); )
+			{
 				final Spot candidate = iterator.next();
-				if (candidate.squareDistanceTo(spot) < distanceTolerance * distanceTolerance * radius * radius) {
+				if ( candidate.squareDistanceTo( spot ) < distanceTolerance * distanceTolerance * radius * radius )
+				{
 					found = true;
 					target = candidate;
 					break;
 				}
 			}
 
-			if (!found) {
-				logger.log("Spot: " + initialSpot + ": Suitable spot found, but outside the tolerance radius.\n");
+			if ( !found )
+			{
+				logger.log( "Spot: " + initialSpot + ": Suitable spot found, but outside the tolerance radius.\n" );
 				return;
 			}
 
@@ -239,21 +271,24 @@ public abstract class AbstractSemiAutoTracker<T extends RealType<T> & NativeType
 			 * Expose new spot
 			 */
 
-			exposeSpot(target, spot);
+			exposeSpot( target, spot );
 
 			/*
 			 * Update model
 			 */
 
 			// spot
-			target.putFeature(Spot.RADIUS, radius);
-			target.putFeature(Spot.POSITION_T, Double.valueOf(frame));
+			target.putFeature( Spot.RADIUS, radius );
+			target.putFeature( Spot.POSITION_T, Double.valueOf( frame ) );
 
 			model.beginUpdate();
-			try {
-				model.addSpotTo(target, frame);
-				model.addEdge(spot, target, spot.squareDistanceTo(target));
-			} finally {
+			try
+			{
+				model.addSpotTo( target, frame );
+				model.addEdge( spot, target, spot.squareDistanceTo( target ) );
+			}
+			finally
+			{
 				model.endUpdate();
 			}
 
@@ -277,7 +312,7 @@ public abstract class AbstractSemiAutoTracker<T extends RealType<T> & NativeType
 	 *            the spot in the previous frame whose neighborhood has been
 	 *            investigated to find the new spot. Already part of the model.
 	 */
-	protected abstract void exposeSpot(Spot newSpot, Spot previousSpot);
+	protected abstract void exposeSpot( Spot newSpot, Spot previousSpot );
 
 	/**
 	 * Returns a small neighborhood around the specified spot, but taken at the
@@ -299,14 +334,16 @@ public abstract class AbstractSemiAutoTracker<T extends RealType<T> & NativeType
 	 *         calibration, so that the found spots can have their coordinates
 	 *         put back in the raw source coordinate system.
 	 */
-	protected abstract SpotNeighborhood<T> getNeighborhood(Spot spot, int frame);
+	protected abstract SpotNeighborhood< T > getNeighborhood( Spot spot, int frame );
 
 	/**
 	 * Returns a new instance of a {@link SpotDetector} that will inspect the
 	 * neighborhood.
 	 *
 	 * @param img
-	 *            the neighborhood to inspect.
+	 *            the source image.
+	 * @param interval
+	 *            defines the neighborhood to inspect.
 	 * @param radius
 	 *            the expected spot radius.
 	 * @param quality
@@ -318,17 +355,20 @@ public abstract class AbstractSemiAutoTracker<T extends RealType<T> & NativeType
 	{
 		final double[] calibration = TMUtils.getSpatialCalibration( img );
 		final LogDetector< T > detector = new LogDetector< T >( img, interval, calibration, radius, quality, true, false );
-		detector.setNumThreads(1);
+		detector.setNumThreads( 1 );
 		return detector;
 	}
 
 	@Override
-	public boolean checkInput() {
-		if (null == model) {
+	public boolean checkInput()
+	{
+		if ( null == model )
+		{
 			errorMessage = BASE_ERROR_MESSAGE + "model is null.\n";
 			return false;
 		}
-		if (null == selectionModel) {
+		if ( null == selectionModel )
+		{
 			errorMessage = BASE_ERROR_MESSAGE + "selectionModel is null.\n";
 			return false;
 		}
@@ -336,22 +376,26 @@ public abstract class AbstractSemiAutoTracker<T extends RealType<T> & NativeType
 	}
 
 	@Override
-	public String getErrorMessage() {
+	public String getErrorMessage()
+	{
 		return errorMessage;
 	}
 
 	@Override
-	public void setNumThreads() {
+	public void setNumThreads()
+	{
 		this.numThreads = Runtime.getRuntime().availableProcessors();
 	}
 
 	@Override
-	public void setNumThreads(final int numThreads) {
+	public void setNumThreads( final int numThreads )
+	{
 		this.numThreads = numThreads;
 	}
 
 	@Override
-	public int getNumThreads() {
+	public int getNumThreads()
+	{
 		return numThreads;
 	}
 
@@ -359,9 +403,14 @@ public abstract class AbstractSemiAutoTracker<T extends RealType<T> & NativeType
 	 * A utility class made to return the information on a neighborhood
 	 * generated from a source around a {@link Spot}.
 	 */
-	public static class SpotNeighborhood<R> {
-		/** The neighborhood, as a calibrated {@link ImgPlus}. */
-		public ImgPlus<R> neighborhood;
+	public static class SpotNeighborhood< R >
+	{
+		/** The source image. */
+		public ImgPlus< R > source;
+
+		/** The neighborhood in the source image to inspect. */
+		public Interval interval;
+
 		/**
 		 * Affine transform that will convert the spot coordinates in the
 		 * neighborhood reference to the global coordinate system.
