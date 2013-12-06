@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tests;
+package fiji.plugin.trackmate.interactivetests;
 
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
 import ij.ImagePlus;

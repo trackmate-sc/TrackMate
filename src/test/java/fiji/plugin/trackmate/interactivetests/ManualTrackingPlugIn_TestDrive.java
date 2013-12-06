@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tests;
+package fiji.plugin.trackmate.interactivetests;
 
 import fiji.SampleImageLoader;
 import fiji.plugin.trackmate.ManualTrackingPlugIn_;

@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tests;
+package fiji.plugin.trackmate.interactivetests;
 
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import ij.ImagePlus;
