@@ -14,7 +14,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 import net.imglib2.img.ImagePlusAdapter;
 import net.imglib2.meta.Axes;
@@ -26,7 +25,6 @@ import net.imglib2.util.Util;
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.features.FeatureFilter;
 
 /**
  * List of static utilities for the {@link TrackMate} trackmate
@@ -203,160 +201,6 @@ public class TMUtils {
 		}
 	}
 
-	/**
-	 * Create a new list of spots, made from the given list by excluding
-	 * overlapping spots.
-	 * <p>
-	 * Overlapping is checked by ensuring that the two compared spots are no
-	 * closer than the sum of their respective radius. If two spots are
-	 * overlapping, only the one that has the highest value of the
-	 * {@link SpotFeature} given in argument is retained, and the other one is
-	 * discarded.
-	 *
-	 * @param spots
-	 *            the list of spot to suppress. It will be sorted by descending
-	 *            feature value by this call.
-	 * @param feature
-	 *            the feature to consider when choosing what spot to retain in
-	 *            an overlapping couple.
-	 * @return a new pruned list of non-overlapping spots. Incidentally, this
-	 *         list will be sorted by descending feature value.
-	 */
-	public static final List<Spot> suppressSpots(final List<Spot> spots, final String feature) {
-		Collections.sort(spots, createDescendingComparatorFor(feature));
-		final List<Spot> acceptedSpots = new ArrayList<Spot>(spots.size());
-		boolean ok;
-		double r2;
-		for (final Spot spot : spots) {
-			ok = true;
-			for (final Spot target : acceptedSpots) {
-				r2 = (spot.getFeature(Spot.RADIUS) + target.getFeature(Spot.RADIUS)) * (spot.getFeature(Spot.RADIUS) + target.getFeature(Spot.RADIUS));
-				if (spot.squareDistanceTo(target) < r2) {
-					ok = false;
-					break;
-				}
-			}
-			if (ok)
-				acceptedSpots.add(spot);
-		}
-		return acceptedSpots;
-	}
-
-	public static final Comparator<Spot> createAscendingComparatorFor(final String feature) {
-		return new Comparator<Spot>() {
-			@Override
-			public int compare(final Spot o1, final Spot o2) {
-				return o1.getFeature(feature).compareTo(o2.getFeature(feature));
-			}
-		};
-	}
-
-	public static final Comparator<Spot> createDescendingComparatorFor(final String feature) {
-		return new Comparator<Spot>() {
-			@Override
-			public int compare(final Spot o1, final Spot o2) {
-				return o2.getFeature(feature).compareTo(o1.getFeature(feature));
-			}
-		};
-	}
-
-	/**
-	 * Convenience static method that executes the thresholding part.
-	 * <p>
-	 * Given a list of spots, only spots with the feature satisfying the
-	 * threshold given in argument are returned.
-	 */
-	public static TreeMap<Integer, List<Spot>> thresholdSpots(final TreeMap<Integer, List<Spot>> spots, final FeatureFilter filter) {
-		final TreeMap<Integer, List<Spot>> selectedSpots = new TreeMap<Integer, List<Spot>>();
-		Collection<Spot> spotThisFrame, spotToRemove;
-		List<Spot> spotToKeep;
-		Double val, tval;
-
-		for (final int timepoint : spots.keySet()) {
-
-			spotThisFrame = spots.get(timepoint);
-			spotToKeep = new ArrayList<Spot>(spotThisFrame);
-			spotToRemove = new ArrayList<Spot>(spotThisFrame.size());
-
-			tval = filter.value;
-			if (null != tval) {
-
-				if (filter.isAbove) {
-					for (final Spot spot : spotToKeep) {
-						val = spot.getFeature(filter.feature);
-						if (null == val)
-							continue;
-						if (val < tval)
-							spotToRemove.add(spot);
-					}
-
-				} else {
-					for (final Spot spot : spotToKeep) {
-						val = spot.getFeature(filter.feature);
-						if (null == val)
-							continue;
-						if (val > tval)
-							spotToRemove.add(spot);
-					}
-				}
-				spotToKeep.removeAll(spotToRemove); // no need to treat them multiple times
-			}
-
-			selectedSpots.put(timepoint, spotToKeep);
-		}
-		return selectedSpots;
-	}
-
-	/**
-	 * Convenience static method that executes the thresholding part.
-	 * <p>
-	 * Given a list of spots, only spots with the feature satisfying <b>all</b>
-	 * of the thresholds given in argument are returned.
-	 */
-	public static TreeMap<Integer, List<Spot>> thresholdSpots(final TreeMap<Integer, List<Spot>> spots, final List<FeatureFilter> filters) {
-		final TreeMap<Integer, List<Spot>> selectedSpots = new TreeMap<Integer, List<Spot>>();
-		Collection<Spot> spotThisFrame, spotToRemove;
-		List<Spot> spotToKeep;
-		Double val, tval;
-
-		for (final int timepoint : spots.keySet()) {
-
-			spotThisFrame = spots.get(timepoint);
-			spotToKeep = new ArrayList<Spot>(spotThisFrame);
-			spotToRemove = new ArrayList<Spot>(spotThisFrame.size());
-
-			for (final FeatureFilter threshold : filters) {
-
-				tval = threshold.value;
-				if (null == tval)
-					continue;
-				spotToRemove.clear();
-
-				if (threshold.isAbove) {
-					for (final Spot spot : spotToKeep) {
-						val = spot.getFeature(threshold.feature);
-						if (null == val)
-							continue;
-						if (val < tval)
-							spotToRemove.add(spot);
-					}
-
-				} else {
-					for (final Spot spot : spotToKeep) {
-						val = spot.getFeature(threshold.feature);
-						if (null == val)
-							continue;
-						if (val > tval)
-							spotToRemove.add(spot);
-					}
-				}
-				spotToKeep.removeAll(spotToRemove); // no need to treat them multiple times
-			}
-			selectedSpots.put(timepoint, spotToKeep);
-		}
-		return selectedSpots;
-	}
-
 	/*
 	 * ImgPlus & calibration & axes
 	 */
@@ -365,7 +209,8 @@ public class TMUtils {
 	 * Returns the index of the target axis in the given metadata. Return -1 if
 	 * the axis was not found.
 	 */
-	public static final int findAxisIndex(final ImgPlusMetadata img, final AxisType axis) {
+	private static final int findAxisIndex( final ImgPlusMetadata img, final AxisType axis )
+	{
 		return img.dimensionIndex(axis);
 	}
 
@@ -460,7 +305,8 @@ public class TMUtils {
 	 * @return A double[] of length 3, where index 0 is the range, index 1 is
 	 *         the min, and index 2 is the max.
 	 */
-	public static final double[] getRange(final double[] data) {
+	private static final double[] getRange( final double[] data )
+	{
 		double min = Double.POSITIVE_INFINITY;
 		double max = Double.NEGATIVE_INFINITY;
 		double value;
@@ -511,14 +357,16 @@ public class TMUtils {
 	 * ensured that the bin number returned is not smaller than 8 and no bigger
 	 * than 256.
 	 */
-	public static final int getNBins(final double[] values) {
+	private static final int getNBins( final double[] values )
+	{
 		return getNBins(values, 8, 256);
 	}
 
 	/**
 	 * Create a histogram from the data given.
 	 */
-	public static final int[] histogram(final double data[], final int nBins) {
+	private static final int[] histogram( final double data[], final int nBins )
+	{
 		final double[] range = getRange(data);
 		final double binWidth = range[0] / nBins;
 		final int[] hist = new int[nBins];
@@ -533,17 +381,6 @@ public class TMUtils {
 	}
 
 	/**
-	 * Create a histogram from the data given, with a default number of bins
-	 * given by {@link #getNBins(double[])}.
-	 *
-	 * @param data
-	 * @return
-	 */
-	public static final int[] histogram(final double data[]) {
-		return histogram(data, getNBins(data));
-	}
-
-	/**
 	 * Return a threshold for the given data, using an Otsu histogram
 	 * thresholding method.
 	 */
@@ -555,7 +392,8 @@ public class TMUtils {
 	 * Return a threshold for the given data, using an Otsu histogram
 	 * thresholding method with a given bin number.
 	 */
-	public static final double otsuThreshold(final double[] data, final int nBins) {
+	private static final double otsuThreshold( final double[] data, final int nBins )
+	{
 		final int[] hist = histogram(data, nBins);
 		final int thresholdIndex = otsuThresholdIndex(hist, data.length);
 		final double[] range = getRange(data);
@@ -576,7 +414,8 @@ public class TMUtils {
 	 *            the number of data items this histogram was built on
 	 * @return the bin index of the histogram that thresholds it
 	 */
-	public static final int otsuThresholdIndex(final int[] hist, final int nPoints) {
+	private static final int otsuThresholdIndex( final int[] hist, final int nPoints )
+	{
 		final int total = nPoints;
 
 		double sum = 0;
@@ -614,35 +453,6 @@ public class TMUtils {
 			}
 		}
 		return threshold;
-	}
-
-	/**
-	 * Computes the square Euclidean distance between two spots.
-	 *
-	 * @param i
-	 *            Spot i.
-	 * @param j
-	 *            Spot j.
-	 * @return The Euclidean distance between Featurable i and j, based on their
-	 *         position features X, Y, Z.
-	 */
-	public static final double euclideanDistanceSquared(final Spot i, final Spot j) {
-		final Double xi, xj, yi, yj, zi, zj;
-		double eucD = 0;
-		xi = i.getFeature(Spot.POSITION_X);
-		xj = j.getFeature(Spot.POSITION_X);
-		yi = i.getFeature(Spot.POSITION_Y);
-		yj = j.getFeature(Spot.POSITION_Y);
-		zi = i.getFeature(Spot.POSITION_Z);
-		zj = j.getFeature(Spot.POSITION_Z);
-
-		if (xj != null && xi != null)
-			eucD += (xj - xi) * (xj - xi);
-		if (yj != null && yi != null)
-			eucD += (yj - yi) * (yj - yi);
-		if (zj != null && zi != null)
-			eucD += (zj - zi) * (zj - zi);
-		return eucD;
 	}
 
 	/**
