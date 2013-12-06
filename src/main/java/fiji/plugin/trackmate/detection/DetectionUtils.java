@@ -15,9 +15,9 @@ import net.imglib2.algorithm.localextrema.LocalExtrema.LocalNeighborhoodCheck;
 import net.imglib2.algorithm.localextrema.RefinedPeak;
 import net.imglib2.algorithm.localextrema.SubpixelLocalization;
 import net.imglib2.converter.RealFloatConverter;
-import net.imglib2.exception.IncompatibleTypeException;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgFactory;
+import net.imglib2.img.array.ArrayCursor;
 import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.array.ArrayRandomAccess;
@@ -51,7 +51,7 @@ public class DetectionUtils
 	public static final < R extends RealType< R >> Img< FloatType > createLoGKernel( final double radius, final int nDims, final double[] calibration )
 	{
 		// optimal sigma for LoG approach and dimensionality
-		final double sigma = radius / nDims;
+		final double sigma = radius / Math.sqrt( nDims );
 		// Turn it in pixel coordinates
 		final double[] sigmas = new double[ nDims ];
 		for ( int i = 0; i < sigmas.length; i++ )
@@ -61,20 +61,33 @@ public class DetectionUtils
 
 		final int[] hksizes = Gauss3.halfkernelsizes( sigmas );
 		final long[] sizes = new long[ hksizes.length ];
+		final long[] middle = new long[ hksizes.length ];
 		for ( int d = 0; d < sizes.length; d++ )
 		{
 			sizes[ d ] = 3 + 2 * hksizes[ d ];
+			middle[ d ] = 1 + hksizes[ d ];
 		}
 		final ArrayImg< FloatType, FloatArray > kernel = ArrayImgs.floats( sizes );
-		writeLaplacianKernel( kernel );
-		try
+
+		final ArrayCursor< FloatType > c = kernel.cursor();
+		final long[] coords = new long[ nDims ];
+
+		while ( c.hasNext() )
 		{
-			Gauss3.gauss( sigmas, Views.extendZero( kernel ), kernel );
+			c.fwd();
+			c.localize( coords );
+
+			double mantissa = 0;
+			double exponent = 0;
+			for ( int d = 0; d < coords.length; d++ )
+			{
+				final double x = ( coords[ d ] - middle[ d ] );
+				mantissa += x * x / sigmas[ d ] / sigmas[ d ] / sigmas[ d ] / sigmas[ d ] - 1d / sigmas[ d ] / sigmas[ d ];
+				exponent += -x * x / 2d / sigmas[ d ] / sigmas[ d ];
+			}
+			c.get().setReal( -mantissa * Math.exp( exponent ) );
 		}
-		catch ( final IncompatibleTypeException e )
-		{
-			e.printStackTrace();
-		}
+
 		return kernel;
 	}
 
