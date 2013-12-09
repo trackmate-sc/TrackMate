@@ -9,7 +9,6 @@ import net.imglib2.Point;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.algorithm.gauss3.Gauss3;
 import net.imglib2.algorithm.localextrema.LocalExtrema;
 import net.imglib2.algorithm.localextrema.LocalExtrema.LocalNeighborhoodCheck;
 import net.imglib2.algorithm.localextrema.RefinedPeak;
@@ -20,7 +19,6 @@ import net.imglib2.img.ImgFactory;
 import net.imglib2.img.array.ArrayCursor;
 import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.img.array.ArrayRandomAccess;
 import net.imglib2.img.basictypeaccess.array.FloatArray;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
@@ -50,28 +48,38 @@ public class DetectionUtils
 	 */
 	public static final < R extends RealType< R >> Img< FloatType > createLoGKernel( final double radius, final int nDims, final double[] calibration )
 	{
-		// optimal sigma for LoG approach and dimensionality
+		// Optimal sigma for LoG approach and dimensionality.
 		final double sigma = radius / Math.sqrt( nDims );
-		// Turn it in pixel coordinates
-		final double[] sigmas = new double[ nDims ];
-		for ( int i = 0; i < sigmas.length; i++ )
+		final double[] sigmaPixels = new double[ nDims ];
+		for ( int i = 0; i < sigmaPixels.length; i++ )
 		{
-			sigmas[ i ] = sigma / calibration[ i ];
+			sigmaPixels[ i ] = sigma / calibration[ i ];
 		}
 
-		final int[] hksizes = Gauss3.halfkernelsizes( sigmas );
-		final long[] sizes = new long[ hksizes.length ];
-		final long[] middle = new long[ hksizes.length ];
-		for ( int d = 0; d < sizes.length; d++ )
+		final int n = sigmaPixels.length;
+		final long[] sizes = new long[ n ];
+		final long[] middle = new long[ n ];
+		for ( int d = 0; d < n; ++d )
 		{
-			sizes[ d ] = 3 + 2 * hksizes[ d ];
-			middle[ d ] = 1 + hksizes[ d ];
+			// From Tobias Gauss3
+			final int hksizes = Math.max( 2, ( int ) ( 3 * sigmaPixels[ d ] + 0.5 ) + 1 );
+			sizes[ d ] = 3 + 2 * hksizes;
+			middle[ d ] = 1 + hksizes;
+
 		}
 		final ArrayImg< FloatType, FloatArray > kernel = ArrayImgs.floats( sizes );
 
 		final ArrayCursor< FloatType > c = kernel.cursor();
 		final long[] coords = new long[ nDims ];
 
+		/*
+		 * The gaussian normalization factor, divided by a constant value. This
+		 * is a fudge factor, that more or less put the quality values close to
+		 * the maximal value of a blob of optimal radius.
+		 */
+		final double C = 1d / 20d * Math.pow( 1d / sigma / Math.sqrt( 2 * Math.PI ), nDims );
+
+		// Work in image coordinates
 		while ( c.hasNext() )
 		{
 			c.fwd();
@@ -81,11 +89,11 @@ public class DetectionUtils
 			double exponent = 0;
 			for ( int d = 0; d < coords.length; d++ )
 			{
-				final double x = ( coords[ d ] - middle[ d ] );
-				mantissa += x * x / sigmas[ d ] / sigmas[ d ] / sigmas[ d ] / sigmas[ d ] - 1d / sigmas[ d ] / sigmas[ d ];
-				exponent += -x * x / 2d / sigmas[ d ] / sigmas[ d ];
+				final double x = calibration[ d ] * ( coords[ d ] - middle[ d ] );
+				mantissa += -C * ( x * x / sigma / sigma - 1d );
+				exponent += -x * x / 2d / sigma / sigma;
 			}
-			c.get().setReal( -mantissa * Math.exp( exponent ) );
+			c.get().setReal( mantissa * Math.exp( exponent ) );
 		}
 
 		return kernel;
@@ -200,45 +208,5 @@ public class DetectionUtils
 		}
 
 		return spots;
-	}
-
-	private static final void writeLaplacianKernel( final ArrayImg< FloatType, FloatArray > kernel )
-	{
-		final int numDim = kernel.numDimensions();
-		final long midx = kernel.dimension( 0 ) / 2;
-		final long midy = kernel.dimension( 1 ) / 2;
-		final ArrayRandomAccess< FloatType > ra = kernel.randomAccess();
-		if ( numDim == 3 )
-		{
-			final float laplacianArray[][][] = new float[][][] { { { 0f, -3f / 96f, 0f }, { -3f / 96f, -10f / 96f, -3f / 96f }, { 0f, -3f / 96f, 0f }, }, { { -3f / 96f, -10f / 96f, -3f / 96f }, { -10f / 96f, 1f, -10f / 96f }, { -3f / 96f, -10f / 96f, -3f / 96f } }, { { 0f, -3f / 96f, 0f }, { -3f / 96f, -10f / 96f, -3f / 96f }, { 0f, -3f / 96f, 0f }, } };
-			final long midz = kernel.dimension( 2 ) / 2;
-			for ( int z = 0; z < 3; z++ )
-			{
-				ra.setPosition( midz + z - 1, 2 );
-				for ( int y = 0; y < 3; y++ )
-				{
-					ra.setPosition( midy + y - 1, 1 );
-					for ( int x = 0; x < 3; x++ )
-					{
-						ra.setPosition( midx + x - 1, 0 );
-						ra.get().set( laplacianArray[ x ][ y ][ z ] );
-					}
-				}
-			}
-
-		}
-		else if ( numDim == 2 )
-		{
-			final float laplacianArray[][] = new float[][] { { -0.05f, -0.2f, -0.05f }, { -0.2f, 1f, -0.2f }, { -0.05f, -0.2f, -0.05f } };
-			for ( int y = 0; y < 3; y++ )
-			{
-				ra.setPosition( midy + y - 1, 1 );
-				for ( int x = 0; x < 3; x++ )
-				{
-					ra.setPosition( midx + x - 1, 0 );
-					ra.get().set( laplacianArray[ x ][ y ] );
-				}
-			}
-		}
 	}
 }
