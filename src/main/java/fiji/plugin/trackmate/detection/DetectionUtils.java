@@ -46,7 +46,7 @@ public class DetectionUtils
 	 *            the pixel sizes, specified as <code>double[]</code> array.
 	 * @return a new image containing the LoG kernel.
 	 */
-	public static final < R extends RealType< R >> Img< FloatType > createLoGKernel( final double radius, final int nDims, final double[] calibration )
+	public static final Img< FloatType > createLoGKernel( final double radius, final int nDims, final double[] calibration )
 	{
 		// Optimal sigma for LoG approach and dimensionality.
 		final double sigma = radius / Math.sqrt( nDims );
@@ -153,7 +153,7 @@ public class DetectionUtils
 		final FloatType val = new FloatType();
 		val.setReal( threshold );
 		final LocalNeighborhoodCheck< Point, FloatType > localNeighborhoodCheck = new LocalExtrema.MaximumCheck< FloatType >( val );
-		final IntervalView< FloatType > dogWithBorder = Views.interval( Views.extendZero( source ), Intervals.expand( source, 1 ) );
+		final IntervalView< FloatType > dogWithBorder = Views.interval( Views.extendMirrorSingle(  source ), Intervals.expand( source, 1 ) );
 		final ArrayList< Point > peaks = LocalExtrema.findLocalExtrema( dogWithBorder, localNeighborhoodCheck, numThreads );
 
 		final ArrayList< Spot > spots;
