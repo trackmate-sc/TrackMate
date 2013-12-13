@@ -104,22 +104,14 @@ public class SemiAutoTracker< T extends RealType< T > & NativeType< T >> extends
 			min = new long[] { x0, y0 };
 			max = new long[] { x1, y1 };
 		}
+		final FinalInterval interval = new FinalInterval( min, max );
 
 		/*
 		 * The transform that will put back the global coordinates. In our case
-		 * it is just a scaling.
+		 * it is just the identity.
 		 */
 
 		final AffineTransform3D transform = new AffineTransform3D();
-		for ( int i = 0; i < max.length; i++ )
-		{
-			transform.set( cal[ i ], i, i );
-		}
-
-		/*
-		 * Give it a calibration
-		 */
-
 
 		final SpotNeighborhood< T > sn = new SpotNeighborhood< T >();
 		RandomAccessible< T > source = img;
@@ -133,7 +125,8 @@ public class SemiAutoTracker< T extends RealType< T > & NativeType< T >> extends
 		}
 		sn.source = source;
 		sn.transform = transform;
-		sn.interval = new FinalInterval( min, max );
+		sn.interval = interval;
+		sn.calibration = cal;
 
 		return sn;
 	}

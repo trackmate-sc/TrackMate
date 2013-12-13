@@ -1,6 +1,5 @@
 package fiji.plugin.trackmate.detection.semiauto;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -168,10 +167,6 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 	 */
 	public void processSpot( final Spot initialSpot )
 	{
-		// Fake calibration; will be tuned using the transform..
-		final double[] calibration = new double[ 3 ];
-		Arrays.fill( calibration, 1d );
-
 		/*
 		 * Initial spot
 		 */
@@ -199,6 +194,7 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 			final RandomAccessible< T > source = sn.source;
 			final Interval interval = sn.interval;
 			final AffineTransform3D transform = sn.transform;
+			final double[] calibration = sn.calibration;
 
 			/*
 			 * Detect spots
@@ -407,12 +403,28 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 		/** The source image. */
 		public RandomAccessible< R > source;
 
-		/** The neighborhood in the source image to inspect. */
+		/**
+		 * The source image calibration. That is: the pixel sizes in all
+		 * dimensions, to account for anisotropy in the source image
+		 * (<i>e.g.</i>dz might larger that dx, and the detector needs to
+		 * exploit that).
+		 * <p>
+		 * The segmented spots will be returned with coordinates scaled with
+		 * this calibration (image coordinates).
+		 */
+		public double[] calibration;
+
+		/**
+		 * The neighborhood in the source image to inspect, in pixel
+		 * coordinates.
+		 */
 		public Interval interval;
 
 		/**
-		 * Affine transform that will convert the spot coordinates in the
-		 * neighborhood reference to the global coordinate system.
+		 * An affine transform that will convert the spot coordinates in the
+		 * calibrated image coordinates to the global coordinate system whatever
+		 * it is. If you do not have fancy rotations and multi-sources handling,
+		 * this is most likely the identity transform.
 		 */
 		public AffineTransform3D transform;
 	}
