@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.interactivetests;
 
 import fiji.plugin.trackmate.util.TMUtils;
+import ij.ImageJ;
 import io.scif.img.ImgIOException;
 import io.scif.img.ImgOpener;
 
@@ -21,6 +22,11 @@ import net.imglib2.algorithm.localextrema.LocalExtrema.LocalNeighborhoodCheck;
 import net.imglib2.algorithm.localextrema.RefinedPeak;
 import net.imglib2.algorithm.localextrema.SubpixelLocalization;
 import net.imglib2.exception.IncompatibleTypeException;
+import net.imglib2.img.array.ArrayImg;
+import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.img.array.ArrayRandomAccess;
+import net.imglib2.img.basictypeaccess.array.FloatArray;
+import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.meta.Axes;
 import net.imglib2.meta.ImgPlus;
 import net.imglib2.meta.view.HyperSliceImgPlus;
@@ -34,7 +40,25 @@ import net.imglib2.view.Views;
 
 public class NewDogDetectorTestDrive {
 
-	public static <T extends NumericType<T> & NativeType<T>> void main(final String[] args) throws ImgIOException {
+	public static void main( final String[] args )
+	{
+		final ArrayImg< FloatType, FloatArray > img = ArrayImgs.floats( 64, 64, 64 );
+		final ArrayRandomAccess< FloatType > randomAccess = img.randomAccess();
+		randomAccess.setPosition( new long[] { 31, 31, 31 } );
+		randomAccess.get().set( 1000 );
+
+		final RandomAccessibleInterval< FloatType > dog = img.copy();
+
+		final double[] sigma1 = new double[] { 3, 6, 3 };
+		final double[] sigma2 = new double[] { 3.1, 6.2, 3.1 };
+		DifferenceOfGaussian.DoG( sigma1, sigma2, Views.extendZero( img ), dog, 1 );
+
+		ImageJ.main( args );
+		ImageJFunctions.show( dog );
+	}
+
+	public static < T extends NumericType< T > & NativeType< T >> void main2( final String[] args ) throws ImgIOException
+	{
 
 		final double minPeakValue = 7;
 
