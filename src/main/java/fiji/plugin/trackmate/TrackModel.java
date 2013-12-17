@@ -469,6 +469,35 @@ public class TrackModel
 	}
 
 	/**
+	 * Returns the set of track IDs managed by this model, unsorted. This method
+	 * exists to provide better performance for callers that do not need the IDs
+	 * to be sorted.
+	 * 
+	 * @param visibleOnly
+	 *            if <code>true</code>, only visible track IDs will be returned.
+	 * @return the set of track IDs.
+	 */
+	public Set< Integer > unsortedTrackIDs( final boolean visibleOnly )
+	{
+		if ( !visibleOnly )
+		{
+			return visibility.keySet();
+		}
+		else
+		{
+			final Set< Integer > vids = new LinkedHashSet< Integer >( visibility.size() );
+			for ( final Integer id : visibility.keySet() )
+			{
+				if ( visibility.get( id ) )
+				{
+					vids.add( id );
+				}
+			}
+			return vids;
+		}
+	}
+
+	/**
 	 * Returns the name of the track with the specified ID.
 	 *
 	 * @param id

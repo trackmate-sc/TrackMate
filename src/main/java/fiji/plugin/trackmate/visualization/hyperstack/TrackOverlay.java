@@ -102,7 +102,7 @@ public class TrackOverlay extends Roi
 		final int currentFrame = imp.getFrame() - 1;
 		final int trackDisplayMode = ( Integer ) displaySettings.get( TrackMateModelView.KEY_TRACK_DISPLAY_MODE );
 		final int trackDisplayDepth = ( Integer ) displaySettings.get( TrackMateModelView.KEY_TRACK_DISPLAY_DEPTH );
-		final Set< Integer > filteredTrackKeys = model.getTrackModel().trackIDs( true );
+		final Set< Integer > filteredTrackKeys = model.getTrackModel().unsortedTrackIDs( true );
 
 		g2d.setStroke( new BasicStroke( 2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND ) );
 		if ( trackDisplayMode == TrackMateModelView.TRACK_DISPLAY_MODE_LOCAL || trackDisplayMode == TrackMateModelView.TRACK_DISPLAY_MODE_LOCAL_QUICK )
