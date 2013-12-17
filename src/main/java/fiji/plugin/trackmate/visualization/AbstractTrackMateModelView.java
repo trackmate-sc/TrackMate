@@ -117,6 +117,8 @@ public abstract class AbstractTrackMateModelView implements SelectionChangeListe
 		displaySettings.put( KEY_TRACK_DISPLAY_DEPTH, DEFAULT_TRACK_DISPLAY_DEPTH );
 		displaySettings.put( KEY_TRACK_COLORING, new DummyTrackColorGenerator() );
 		displaySettings.put( KEY_COLORMAP, DEFAULT_COLOR_MAP );
+		displaySettings.put( KEY_LIMIT_DRAWING_DEPTH, DEFAULT_LIMIT_DRAWING_DEPTH );
+		displaySettings.put( KEY_DRAWING_DEPTH, DEFAULT_DRAWING_DEPTH );
 		return displaySettings;
 	}
 

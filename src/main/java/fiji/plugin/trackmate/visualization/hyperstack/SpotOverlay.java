@@ -84,6 +84,9 @@ public class SpotOverlay extends Roi
 		if ( !spotVisible || spots.getNSpots( true ) == 0 )
 			return;
 
+		final boolean doLimitDrawingDepth = ( Boolean ) displaySettings.get( TrackMateModelView.KEY_LIMIT_DRAWING_DEPTH );
+		final double drawingDepth = ( Double ) displaySettings.get( TrackMateModelView.KEY_DRAWING_DEPTH );
+
 		final Graphics2D g2d = ( Graphics2D ) g;
 		// Save graphic device original settings
 		final AffineTransform originalTransform = g2d.getTransform();
@@ -114,8 +117,12 @@ public class SpotOverlay extends Roi
 
 			final Color color = colorGenerator.color( spot );
 			g2d.setColor( color );
-			drawSpot( g2d, spot, zslice, xcorner, ycorner, mag );
 
+			final double z = spot.getFeature( Spot.POSITION_Z ).doubleValue();
+			if ( doLimitDrawingDepth && Math.abs( z - zslice ) > drawingDepth )
+				continue;
+
+			drawSpot( g2d, spot, zslice, xcorner, ycorner, mag );
 		}
 
 		// Deal with spot selection

@@ -67,7 +67,7 @@ public interface TrackMateModelView extends InfoTextable
 	/**
 	 * Defines the key for the spot name display. Values are boolean. If
 	 * <code>false</code>, spot names are not visible.
-	 * */
+	 */
 	public static final String KEY_DISPLAY_SPOT_NAMES = "DisplaySpotNames";
 
 	/**
@@ -89,6 +89,21 @@ public interface TrackMateModelView extends InfoTextable
 	 * {@link InterpolatePaintScale#Jet}.
 	 */
 	public static final String KEY_COLORMAP = "ColorMap";
+
+	/**
+	 * Defines the key for the drawing depth, for views that can use this
+	 * settings. The draw depth is the max distance between the view plane and
+	 * any object for this object to be drawn. Accepted values are
+	 * <code>double</code>. The values must be specified in image units.
+	 */
+	public static final String KEY_DRAWING_DEPTH = "DrawingDepth";
+
+	/**
+	 * Defines the key for limiting the drawing depth. Values are boolean. If
+	 * <code>true</code>, drawing depth will be limited by the values specified
+	 * by {@link #KEY_DRAWING_DEPTH}.
+	 */
+	public static final String KEY_LIMIT_DRAWING_DEPTH = "LimitDrawingDepth";
 
 	/*
 	 * VALUES
@@ -174,7 +189,7 @@ public interface TrackMateModelView extends InfoTextable
 	public static final int DEFAULT_TRACK_DISPLAY_MODE = TRACK_DISPLAY_MODE_WHOLE;
 
 	/**
-	 * The default track display mode
+	 * The default track display mode.
 	 */
 	public static final int DEFAULT_TRACK_DISPLAY_DEPTH = 10;
 
@@ -183,7 +198,15 @@ public interface TrackMateModelView extends InfoTextable
 	 */
 	public static final InterpolatePaintScale DEFAULT_COLOR_MAP = InterpolatePaintScale.Jet;
 
-	public static final int DEFAULT_DRAW_DEPTH = 10;
+	/**
+	 * The default drawing depth, in image units.
+	 */
+	public static final double DEFAULT_DRAWING_DEPTH = 10d;
+
+	/**
+	 * The default drawing depth limitation mode..
+	 */
+	public static final boolean DEFAULT_LIMIT_DRAWING_DEPTH = false;
 
 	/*
 	 * INTERFACE METHODS

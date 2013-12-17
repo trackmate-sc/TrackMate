@@ -4,6 +4,8 @@ import static fiji.plugin.trackmate.gui.TrackMateWizard.BIG_FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_DISPLAY_SPOT_NAMES;
+import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_DRAWING_DEPTH;
+import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_LIMIT_DRAWING_DEPTH;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_SPOTS_VISIBLE;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_SPOT_COLORING;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_SPOT_RADIUS_RATIO;
@@ -119,6 +121,12 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 	private PerEdgeFeatureColorGenerator edgeColorGenerator;
 
 	private FeatureColorGenerator< Spot > spotColorGenerator;
+
+	private JNumericTextField textFieldDrawingDepth;
+
+	private JPanel jpanelDrawingDepth;
+
+	private JLabel lblDrawingDepthUnits;
 
 	/*
 	 * CONSTRUCTOR
@@ -318,6 +326,12 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 			trackColorGUI.setColorFeature( trackColorGenerator.getFeature() );
 		}
 
+		/*
+		 * Units
+		 */
+
+		lblDrawingDepthUnits.setText( model.getSpaceUnits() );
+
 	}
 
 	/*
@@ -355,7 +369,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 				jPanelTrackOptionsLayout.setAlignment( FlowLayout.LEFT );
 				jPanelTrackOptions.setLayout( jPanelTrackOptionsLayout );
 				this.add( jPanelTrackOptions );
-				jPanelTrackOptions.setBounds( 10, 212, 280, 880 );
+				jPanelTrackOptions.setBounds( 10, 193, 280, 160 );
 				jPanelTrackOptions.setBorder( new LineBorder( new java.awt.Color( 192, 192, 192 ), 1, true ) );
 				{
 					jLabelTrackDisplayMode = new JLabel();
@@ -451,7 +465,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 				this.add( jCheckBoxDisplayTracks );
 				jCheckBoxDisplayTracks.setText( "Display tracks" );
 				jCheckBoxDisplayTracks.setFont( FONT );
-				jCheckBoxDisplayTracks.setBounds( 10, 188, 233, 23 );
+				jCheckBoxDisplayTracks.setBounds( 10, 169, 233, 23 );
 				jCheckBoxDisplayTracks.setSelected( true );
 				jCheckBoxDisplayTracks.addActionListener( new ActionListener()
 				{
@@ -472,7 +486,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 				this.add( jCheckBoxDisplaySpots );
 				jCheckBoxDisplaySpots.setText( "Display spots" );
 				jCheckBoxDisplaySpots.setFont( FONT );
-				jCheckBoxDisplaySpots.setBounds( 10, 38, 280, 23 );
+				jCheckBoxDisplaySpots.setBounds( 10, 30, 280, 23 );
 				jCheckBoxDisplaySpots.setSelected( true );
 				jCheckBoxDisplaySpots.addActionListener( new ActionListener()
 				{
@@ -504,7 +518,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 				jPanelSpotOptionsLayout.setAlignment( FlowLayout.LEFT );
 				jPanelSpotOptions.setLayout( jPanelSpotOptionsLayout );
 				this.add( jPanelSpotOptions );
-				jPanelSpotOptions.setBounds( 10, 63, 280, 110 );
+				jPanelSpotOptions.setBounds( 10, 55, 280, 110 );
 				jPanelSpotOptions.setBorder( new LineBorder( new java.awt.Color( 192, 192, 192 ), 1, true ) );
 				{
 					final JLabel jLabelSpotRadius = new JLabel();
@@ -569,10 +583,96 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 				}
 			}
 			{
+				/*
+				 * DRAWING DEPTH
+				 */
+
+				jpanelDrawingDepth = new JPanel()
+				{
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public void setEnabled( final boolean enabled )
+					{
+						for ( final Component c : getComponents() )
+							c.setEnabled( enabled );
+					};
+				};
+				final FlowLayout flowLayout = ( FlowLayout ) jpanelDrawingDepth.getLayout();
+				flowLayout.setAlignment( FlowLayout.LEFT );
+				jpanelDrawingDepth.setBounds( 10, 365, 280, 34 );
+				add( jpanelDrawingDepth );
+				jpanelDrawingDepth.setBorder( new LineBorder( new java.awt.Color( 192, 192, 192 ), 1, true ) );
+
+				final JCheckBox chckbxDrawingDepth = new JCheckBox( "Limit drawing depth" );
+				chckbxDrawingDepth.setFont( SMALL_FONT );
+				chckbxDrawingDepth.setSelected( TrackMateModelView.DEFAULT_LIMIT_DRAWING_DEPTH );
+				jpanelDrawingDepth.add( chckbxDrawingDepth );
+				chckbxDrawingDepth.addActionListener( new ActionListener()
+				{
+					@Override
+					public void actionPerformed( final ActionEvent e )
+					{
+						final Boolean oldValue = ( Boolean ) displaySettings.get( KEY_LIMIT_DRAWING_DEPTH );
+						final Boolean newValue = chckbxDrawingDepth.isSelected();
+
+						textFieldDrawingDepth.setEnabled( newValue );
+						lblDrawingDepthUnits.setEnabled( newValue );
+
+						displaySettings.put( KEY_LIMIT_DRAWING_DEPTH, newValue );
+
+						final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_LIMIT_DRAWING_DEPTH, newValue, oldValue );
+						fireDisplaySettingsChange( event );
+					}
+				} );
+
+				textFieldDrawingDepth = new JNumericTextField( TrackMateModelView.DEFAULT_DRAWING_DEPTH );
+				textFieldDrawingDepth.setFont( SMALL_FONT );
+				jpanelDrawingDepth.add( textFieldDrawingDepth );
+				textFieldDrawingDepth.setColumns( 3 );
+				textFieldDrawingDepth.addActionListener( new ActionListener()
+				{
+					@Override
+					public void actionPerformed( final ActionEvent e )
+					{
+						final Double oldValue = ( Double ) displaySettings.get( KEY_DRAWING_DEPTH );
+						final Double newValue = textFieldDrawingDepth.getValue();
+						displaySettings.put( KEY_DRAWING_DEPTH, newValue );
+
+						final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_DRAWING_DEPTH, newValue, oldValue );
+						fireDisplaySettingsChange( event );
+					}
+				} );
+				textFieldDrawingDepth.addFocusListener( new FocusListener()
+				{
+					@Override
+					public void focusLost( final FocusEvent e )
+					{
+						final Double oldValue = ( Double ) displaySettings.get( KEY_SPOT_RADIUS_RATIO );
+						final Double newValue = textFieldDrawingDepth.getValue();
+						displaySettings.put( KEY_DRAWING_DEPTH, newValue );
+
+						final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_DRAWING_DEPTH, newValue, oldValue );
+						fireDisplaySettingsChange( event );
+					}
+
+					@Override
+					public void focusGained( final FocusEvent e )
+					{}
+				} );
+
+				lblDrawingDepthUnits = new JLabel( model.getSpaceUnits() );
+				lblDrawingDepthUnits.setFont( SMALL_FONT );
+				jpanelDrawingDepth.add( lblDrawingDepthUnits );
+
+				textFieldDrawingDepth.setEnabled( chckbxDrawingDepth.isSelected() );
+				lblDrawingDepthUnits.setEnabled( chckbxDrawingDepth.isSelected() );
+			}
+			{
 				jLabelDisplayOptions = new JLabel();
 				jLabelDisplayOptions.setText( "Display options" );
 				jLabelDisplayOptions.setFont( BIG_FONT );
-				jLabelDisplayOptions.setBounds( 20, 11, 280, 20 );
+				jLabelDisplayOptions.setBounds( 14, 6, 280, 20 );
 				jLabelDisplayOptions.setHorizontalAlignment( SwingConstants.LEFT );
 				this.add( jLabelDisplayOptions );
 			}
@@ -609,6 +709,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 				} );
 				this.add( jButtonDoAnalysis );
 			}
+
 		}
 		catch ( final Exception e )
 		{

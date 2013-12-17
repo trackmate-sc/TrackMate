@@ -76,6 +76,10 @@ public class TrackOverlay extends Roi
 		if ( !tracksVisible || model.getTrackModel().nTracks( true ) == 0 )
 			return;
 
+		final boolean doLimitDrawingDepth = ( Boolean ) displaySettings.get( TrackMateModelView.KEY_LIMIT_DRAWING_DEPTH );
+		final double drawingDepth = ( Double ) displaySettings.get( TrackMateModelView.KEY_DRAWING_DEPTH );
+		final double zslice = ( imp.getSlice() - 1 ) * calibration[ 2 ];
+
 		final Graphics2D g2d = ( Graphics2D ) g;
 		// Save graphic device original settings
 		final AffineTransform originalTransform = g2d.getTransform();
@@ -147,6 +151,12 @@ public class TrackOverlay extends Roi
 
 					source = model.getTrackModel().getEdgeSource( edge );
 					target = model.getTrackModel().getEdgeTarget( edge );
+
+					final double zs = source.getFeature( Spot.POSITION_Z ).doubleValue();
+					final double zt = target.getFeature( Spot.POSITION_Z ).doubleValue();
+					if ( doLimitDrawingDepth && Math.abs( zs - zslice ) > drawingDepth && Math.abs( zt - zslice ) > drawingDepth )
+						continue;
+
 					g2d.setColor( colorGenerator.color( edge ) );
 					drawEdge( g2d, source, target, xcorner, ycorner, magnification );
 				}
@@ -180,6 +190,12 @@ public class TrackOverlay extends Roi
 						continue;
 
 					target = model.getTrackModel().getEdgeTarget( edge );
+
+					final double zs = source.getFeature( Spot.POSITION_Z ).doubleValue();
+					final double zt = target.getFeature( Spot.POSITION_Z ).doubleValue();
+					if ( doLimitDrawingDepth && Math.abs( zs - zslice ) > drawingDepth && Math.abs( zt - zslice ) > drawingDepth )
+						continue;
+
 					g2d.setColor( colorGenerator.color( edge ) );
 					drawEdge( g2d, source, target, xcorner, ycorner, magnification );
 				}

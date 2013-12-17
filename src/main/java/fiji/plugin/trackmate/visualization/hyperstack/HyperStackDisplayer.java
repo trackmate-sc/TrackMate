@@ -244,7 +244,7 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 	{
 		boolean dorefresh = false;
 
-		if ( key == TrackMateModelView.KEY_SPOT_COLORING )
+		if ( key == TrackMateModelView.KEY_SPOT_COLORING || key == TrackMateModelView.KEY_LIMIT_DRAWING_DEPTH || key == KEY_DRAWING_DEPTH )
 		{
 			dorefresh = true;
 
