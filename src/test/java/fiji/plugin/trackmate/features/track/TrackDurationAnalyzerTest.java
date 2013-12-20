@@ -19,122 +19,150 @@ import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.ModelChangeListener;
 import fiji.plugin.trackmate.Spot;
 
-public class TrackDurationAnalyzerTest {
+public class TrackDurationAnalyzerTest
+{
 
 	private static final int N_TRACKS = 10;
-	private static final int DEPTH = 9; // must be at least 6 to avoid tracks too shorts - may make this test fail sometimes
+
+	private static final int DEPTH = 9; // must be at least 6 to avoid tracks
+										// too shorts - may make this test fail
+										// sometimes
+
 	private Model model;
-	private HashMap<Integer, Double> expectedDuration;
-	private HashMap<Integer, Double> expectedStart;
-	private HashMap<Integer, Double> expectedStop;
-	private HashMap<Integer, Double> expectedDisplacement;
+
+	private HashMap< Integer, Double > expectedDuration;
+
+	private HashMap< Integer, Double > expectedStart;
+
+	private HashMap< Integer, Double > expectedStop;
+
+	private HashMap< Integer, Double > expectedDisplacement;
+
 	private int key;
 
 	@Before
-	public void setUp() {
+	public void setUp()
+	{
 		final Random ran = new Random();
 		model = new Model();
 		model.beginUpdate();
-		try {
+		try
+		{
 
-			expectedDuration 	= new HashMap<Integer, Double>(N_TRACKS);
-			expectedStart 		= new HashMap<Integer, Double>(N_TRACKS);
-			expectedStop 		= new HashMap<Integer, Double>(N_TRACKS);
-			expectedDisplacement = new HashMap<Integer, Double>(N_TRACKS);
+			expectedDuration = new HashMap< Integer, Double >( N_TRACKS );
+			expectedStart = new HashMap< Integer, Double >( N_TRACKS );
+			expectedStop = new HashMap< Integer, Double >( N_TRACKS );
+			expectedDisplacement = new HashMap< Integer, Double >( N_TRACKS );
 
-			for (int i = 0; i < N_TRACKS; i++) {
+			for ( int i = 0; i < N_TRACKS; i++ )
+			{
 
 				Spot previous = null;
 
-				final int start = ran.nextInt(DEPTH);
-				final int stop = start + DEPTH + ran.nextInt(DEPTH);
+				final int start = ran.nextInt( DEPTH );
+				final int stop = start + DEPTH + ran.nextInt( DEPTH );
 				final int duration = stop - start;
 				final double displacement = ran.nextDouble();
 
-				final HashSet<Spot> track = new HashSet<Spot>();
-				for (int j = start; j <= stop ; j++) {
-					final Spot spot = new Spot(new double[3]);
-					spot.putFeature(Spot.POSITION_T, Double.valueOf(j));
-					model.addSpotTo(spot, j);
-					track.add(spot);
-					if (null != previous) {
-						model.addEdge(previous, spot, 1);
+				final HashSet< Spot > track = new HashSet< Spot >();
+				for ( int j = start; j <= stop; j++ )
+				{
+					final Spot spot = new Spot( new double[ 3 ] );
+					spot.putFeature( Spot.POSITION_T, Double.valueOf( j ) );
+					model.addSpotTo( spot, j );
+					track.add( spot );
+					if ( null != previous )
+					{
+						model.addEdge( previous, spot, 1 );
 					}
 					previous = spot;
 				}
-				previous.putFeature(Spot.POSITION_X, displacement);
+				previous.putFeature( Spot.POSITION_X, displacement );
 
-				key = model.getTrackModel().trackIDOf(previous);
-				expectedDuration.put(key, Double.valueOf(duration));
-				expectedStart.put(key, Double.valueOf(start));
-				expectedStop.put(key, Double.valueOf(stop));
-				expectedDisplacement.put(key, displacement);
+				key = model.getTrackModel().trackIDOf( previous );
+				expectedDuration.put( key, Double.valueOf( duration ) );
+				expectedStart.put( key, Double.valueOf( start ) );
+				expectedStop.put( key, Double.valueOf( stop ) );
+				expectedDisplacement.put( key, displacement );
 			}
 
-		} finally {
+		}
+		finally
+		{
 			model.endUpdate();
 		}
 	}
 
 	@Test
-	public final void testProcess() {
+	public final void testProcess()
+	{
 		// Process model
 		final TrackDurationAnalyzer analyzer = new TrackDurationAnalyzer();
-		analyzer.process(model.getTrackModel().trackIDs(true), model);
+		analyzer.process( model.getTrackModel().trackIDs( true ), model );
 
 		// Collect features
-		for (final Integer trackID : model.getTrackModel().trackIDs(true)) {
+		for ( final Integer trackID : model.getTrackModel().trackIDs( true ) )
+		{
 
-			assertEquals(expectedDisplacement.get(trackID), model.getFeatureModel().getTrackFeature(trackID, TrackDurationAnalyzer.TRACK_DISPLACEMENT));
-			assertEquals(expectedStart.get(trackID), model.getFeatureModel().getTrackFeature(trackID, TrackDurationAnalyzer.TRACK_START));
-			assertEquals(expectedStop.get(trackID), model.getFeatureModel().getTrackFeature(trackID, TrackDurationAnalyzer.TRACK_STOP));
-			assertEquals(expectedDuration.get(trackID), model.getFeatureModel().getTrackFeature(trackID, TrackDurationAnalyzer.TRACK_DURATION));
+			assertEquals( expectedDisplacement.get( trackID ), model.getFeatureModel().getTrackFeature( trackID, TrackDurationAnalyzer.TRACK_DISPLACEMENT ) );
+			assertEquals( expectedStart.get( trackID ), model.getFeatureModel().getTrackFeature( trackID, TrackDurationAnalyzer.TRACK_START ) );
+			assertEquals( expectedStop.get( trackID ), model.getFeatureModel().getTrackFeature( trackID, TrackDurationAnalyzer.TRACK_STOP ) );
+			assertEquals( expectedDuration.get( trackID ), model.getFeatureModel().getTrackFeature( trackID, TrackDurationAnalyzer.TRACK_DURATION ) );
 
 		}
 	}
 
 	@Test
-	public final void testModelChanged() {
+	public final void testModelChanged()
+	{
 		// Copy old keys
-		final HashSet<Integer> oldKeys = new HashSet<Integer>(model.getTrackModel().trackIDs(true));
+		final HashSet< Integer > oldKeys = new HashSet< Integer >( model.getTrackModel().trackIDs( true ) );
 
 		// First analysis
 		final TestTrackDurationAnalyzer analyzer = new TestTrackDurationAnalyzer();
-		analyzer.process(oldKeys, model);
+		analyzer.process( oldKeys, model );
 
 		// Reset analyzer
 		analyzer.hasBeenCalled = false;
 		analyzer.keys = null;
 
 		// Prepare listener for model change
-		final ModelChangeListener listener = new ModelChangeListener() {
+		final ModelChangeListener listener = new ModelChangeListener()
+		{
 			@Override
-			public void modelChanged(final ModelChangeEvent event) {
-				analyzer.process(event.getTrackUpdated(), model);
+			public void modelChanged( final ModelChangeEvent event )
+			{
+				analyzer.process( event.getTrackUpdated(), model );
 			}
 		};
-		model.addModelChangeListener(listener);
+		model.addModelChangeListener( listener );
 
 		// Add a new track to the model - the old tracks should not be affected
 		model.beginUpdate();
-		try {
-			final Spot spot1 = model.addSpotTo(new Spot(new double[3]), 0);
-			spot1.putFeature(Spot.POSITION_T, 0d);
-			final Spot spot2 = model.addSpotTo(new Spot(new double[3]), 1);
-			spot2.putFeature(Spot.POSITION_T, 1d);
-			model.addEdge(spot1, spot2, 1);
+		try
+		{
+			final Spot spot1 = model.addSpotTo( new Spot( new double[ 3 ] ), 0 );
+			spot1.putFeature( Spot.POSITION_T, 0d );
+			final Spot spot2 = model.addSpotTo( new Spot( new double[ 3 ] ), 1 );
+			spot2.putFeature( Spot.POSITION_T, 1d );
+			model.addEdge( spot1, spot2, 1 );
 
-		} finally {
+		}
+		finally
+		{
 			model.endUpdate();
 		}
 
 		// The analyzer must have done something:
-		assertTrue(analyzer.hasBeenCalled);
+		assertTrue( analyzer.hasBeenCalled );
 
-		// Check the track IDs the analyzer received - none of the old keys must be in it
-		for (final Integer calledKey : analyzer.keys) {
-			if (oldKeys.contains(calledKey)) {
-				fail("Track with ID " + calledKey + " should not have been re-analyzed.");
+		// Check the track IDs the analyzer received - none of the old keys must
+		// be in it
+		for ( final Integer calledKey : analyzer.keys )
+		{
+			if ( oldKeys.contains( calledKey ) )
+			{
+				fail( "Track with ID " + calledKey + " should not have been re-analyzed." );
 			}
 		}
 
@@ -142,124 +170,141 @@ public class TrackDurationAnalyzerTest {
 		analyzer.hasBeenCalled = false;
 		analyzer.keys = null;
 
-		// New change: graft a new spot on the first track - it should be re-analyzed
+		// New change: graft a new spot on the first track - it should be
+		// re-analyzed
 		final Integer firstKey = oldKeys.iterator().next();
-		final TreeSet<Spot> sortedTrack = new TreeSet<Spot>(Spot.frameComparator);
-		sortedTrack.addAll( model.getTrackModel().trackSpots(firstKey));
+		final TreeSet< Spot > sortedTrack = new TreeSet< Spot >( Spot.frameComparator );
+		sortedTrack.addAll( model.getTrackModel().trackSpots( firstKey ) );
 		final Spot firstSpot = sortedTrack.first();
 		Spot newSpot = null;
-		final int firstFrame = firstSpot.getFeature(Spot.FRAME).intValue();
+		final int firstFrame = firstSpot.getFeature( Spot.FRAME ).intValue();
 		model.beginUpdate();
-		try {
-			newSpot = model.addSpotTo(new Spot(new double[3]), firstFrame + 1);
-			newSpot.putFeature(Spot.POSITION_T, Double.valueOf(firstFrame + 1));
-			model.addEdge(firstSpot, newSpot, 1);
-		} finally {
+		try
+		{
+			newSpot = model.addSpotTo( new Spot( new double[ 3 ] ), firstFrame + 1 );
+			newSpot.putFeature( Spot.POSITION_T, Double.valueOf( firstFrame + 1 ) );
+			model.addEdge( firstSpot, newSpot, 1 );
+		}
+		finally
+		{
 			model.endUpdate();
 		}
 
 		// The analyzer must have done something:
-		assertTrue(analyzer.hasBeenCalled);
+		assertTrue( analyzer.hasBeenCalled );
 
-		// Check the track IDs: must be of size 1, and they to the track with firstSpot and newSpot in it
-		assertEquals(1, analyzer.keys.size());
+		// Check the track IDs: must be of size 1, and they to the track with
+		// firstSpot and newSpot in it
+		assertEquals( 1, analyzer.keys.size() );
 		// The ID of the modified track has changed
 		final Integer newKey = analyzer.keys.iterator().next();
-		assertTrue(model.getTrackModel().trackSpots(newKey).contains(firstSpot));
-		assertTrue(model.getTrackModel().trackSpots(newKey).contains(newSpot));
+		assertTrue( model.getTrackModel().trackSpots( newKey ).contains( firstSpot ) );
+		assertTrue( model.getTrackModel().trackSpots( newKey ).contains( newSpot ) );
 
-		// But the track features for this track should not have changed: the grafting did not affect
+		// But the track features for this track should not have changed: the
+		// grafting did not affect
 		// start nor stop nor displacement
-		assertEquals(expectedDisplacement.get(firstKey), model.getFeatureModel().getTrackFeature(newKey, TrackDurationAnalyzer.TRACK_DISPLACEMENT));
-		assertEquals(expectedStart.get(firstKey), model.getFeatureModel().getTrackFeature(newKey, TrackDurationAnalyzer.TRACK_START));
-		assertEquals(expectedStop.get(firstKey), model.getFeatureModel().getTrackFeature(newKey, TrackDurationAnalyzer.TRACK_STOP));
-		assertEquals(expectedDuration.get(firstKey), model.getFeatureModel().getTrackFeature(newKey, TrackDurationAnalyzer.TRACK_DURATION));
-
+		assertEquals( expectedDisplacement.get( firstKey ), model.getFeatureModel().getTrackFeature( newKey, TrackDurationAnalyzer.TRACK_DISPLACEMENT ) );
+		assertEquals( expectedStart.get( firstKey ), model.getFeatureModel().getTrackFeature( newKey, TrackDurationAnalyzer.TRACK_START ) );
+		assertEquals( expectedStop.get( firstKey ), model.getFeatureModel().getTrackFeature( newKey, TrackDurationAnalyzer.TRACK_STOP ) );
+		assertEquals( expectedDuration.get( firstKey ), model.getFeatureModel().getTrackFeature( newKey, TrackDurationAnalyzer.TRACK_DURATION ) );
 
 	}
 
 	@Test
-	public final void testModelChanged2() {
+	public final void testModelChanged2()
+	{
 		// Copy old keys
-		final HashSet<Integer> oldKeys = new HashSet<Integer>(model.getTrackModel().trackIDs(true));
+		final HashSet< Integer > oldKeys = new HashSet< Integer >( model.getTrackModel().trackIDs( true ) );
 
 		// First analysis
 		final TestTrackDurationAnalyzer analyzer = new TestTrackDurationAnalyzer();
-		analyzer.process(oldKeys, model);
+		analyzer.process( oldKeys, model );
 
 		// Reset analyzer
 		analyzer.hasBeenCalled = false;
 		analyzer.keys = null;
 
 		// Prepare listener for model change
-		final ModelChangeListener listener = new ModelChangeListener() {
+		final ModelChangeListener listener = new ModelChangeListener()
+		{
 			@Override
-			public void modelChanged(final ModelChangeEvent event) {
-				analyzer.process(event.getTrackUpdated(), model);
+			public void modelChanged( final ModelChangeEvent event )
+			{
+				analyzer.process( event.getTrackUpdated(), model );
 			}
 		};
-		model.addModelChangeListener(listener);
+		model.addModelChangeListener( listener );
 
 		// Get a track
-		final Integer aKey = model.getTrackModel().trackIDs(true).iterator().next();
+		final Integer aKey = model.getTrackModel().trackIDs( true ).iterator().next();
 
 		// Store feature for later
-		final double oldVal = model.getFeatureModel().getTrackFeature(aKey, TrackDurationAnalyzer.TRACK_DURATION);
+		final double oldVal = model.getFeatureModel().getTrackFeature( aKey, TrackDurationAnalyzer.TRACK_DURATION );
 		final double increment = 10d;
 
-		// Move the last spot of a track further in time to change duration and stop feature
-		final TreeSet<Spot> sortedTrack = new TreeSet<Spot>(Spot.frameComparator);
-		sortedTrack.addAll(model.getTrackModel().trackSpots(aKey));
+		// Move the last spot of a track further in time to change duration and
+		// stop feature
+		final TreeSet< Spot > sortedTrack = new TreeSet< Spot >( Spot.frameComparator );
+		sortedTrack.addAll( model.getTrackModel().trackSpots( aKey ) );
 		final Spot aspot = sortedTrack.last();
 
-		//Move a spot in time
+		// Move a spot in time
 		model.beginUpdate();
-		try {
-			aspot.putFeature(Spot.POSITION_T, aspot.getFeature(Spot.POSITION_T) + increment);
-			model.updateFeatures(aspot);
-		} finally {
+		try
+		{
+			aspot.putFeature( Spot.POSITION_T, aspot.getFeature( Spot.POSITION_T ) + increment );
+			model.updateFeatures( aspot );
+		}
+		finally
+		{
 			model.endUpdate();
 		}
 
 		// The analyzer must have done something:
-		assertTrue(analyzer.hasBeenCalled);
+		assertTrue( analyzer.hasBeenCalled );
 
-		// Check the track IDs: must be of size 1, be the one of the track we modified
-		assertEquals(1, analyzer.keys.size());
-		assertEquals(aKey.longValue(), analyzer.keys.iterator().next().longValue());
+		// Check the track IDs: must be of size 1, be the one of the track we
+		// modified
+		assertEquals( 1, analyzer.keys.size() );
+		assertEquals( aKey.longValue(), analyzer.keys.iterator().next().longValue() );
 
 		// Check that the feature has been updated properly
-		assertEquals(oldVal+increment, model.getFeatureModel().getTrackFeature(aKey, TrackDurationAnalyzer.TRACK_DURATION).doubleValue(), Double.MIN_VALUE);
+		assertEquals( oldVal + increment, model.getFeatureModel().getTrackFeature( aKey, TrackDurationAnalyzer.TRACK_DURATION ).doubleValue(), Double.MIN_VALUE );
 	}
 
 	@Test
-	public final void testModelChanged3() {
+	public final void testModelChanged3()
+	{
 		// Copy old keys
-		final HashSet<Integer> oldKeys = new HashSet<Integer>(model.getTrackModel().trackIDs(true));
+		final HashSet< Integer > oldKeys = new HashSet< Integer >( model.getTrackModel().trackIDs( true ) );
 
 		// First analysis
 		final TestTrackDurationAnalyzer analyzer = new TestTrackDurationAnalyzer();
-		analyzer.process(oldKeys, model);
+		analyzer.process( oldKeys, model );
 
 		// Reset analyzer
 		analyzer.hasBeenCalled = false;
 		analyzer.keys = null;
 
 		// Prepare listener for model change
-		final ModelChangeListener listener = new ModelChangeListener() {
+		final ModelChangeListener listener = new ModelChangeListener()
+		{
 			@Override
-			public void modelChanged(final ModelChangeEvent event) {
-				analyzer.process(event.getTrackUpdated(), model);
+			public void modelChanged( final ModelChangeEvent event )
+			{
+				analyzer.process( event.getTrackUpdated(), model );
 			}
 		};
-		model.addModelChangeListener(listener);
+		model.addModelChangeListener( listener );
 
 		// Get its middle spot
-		final TreeSet<Spot> sortedTrack = new TreeSet<Spot>(Spot.frameComparator);
-		sortedTrack.addAll(model.getTrackModel().trackSpots(key));
+		final TreeSet< Spot > sortedTrack = new TreeSet< Spot >( Spot.frameComparator );
+		sortedTrack.addAll( model.getTrackModel().trackSpots( key ) );
 		Spot aspot = null;
-		final Iterator<Spot> it = sortedTrack.iterator();
-		for (int i = 0; i < sortedTrack.size()/2; i++) {
+		final Iterator< Spot > it = sortedTrack.iterator();
+		for ( int i = 0; i < sortedTrack.size() / 2; i++ )
+		{
 			aspot = it.next();
 		}
 		// Store first and last spot for later
@@ -268,42 +313,45 @@ public class TrackDurationAnalyzerTest {
 
 		// Remove it
 		model.beginUpdate();
-		try {
-			model.removeSpot(aspot);
-		} finally {
+		try
+		{
+			model.removeSpot( aspot );
+		}
+		finally
+		{
 			model.endUpdate();
 		}
 
 		// The analyzer must have done something:
-		assertTrue(analyzer.hasBeenCalled);
+		assertTrue( analyzer.hasBeenCalled );
 
-		// Check the track IDs: must be of size 2: the two track that were created from the removal
-		assertEquals(2, analyzer.keys.size());
-		for (final Integer targetKey : analyzer.keys) {
-			assertTrue(
-					targetKey.equals(model.getTrackModel().trackIDOf(firstSpot))
-					|| targetKey.equals(model.getTrackModel().trackIDOf(lastSpot))
-					);
+		// Check the track IDs: must be of size 2: the two track that were
+		// created from the removal
+		assertEquals( 2, analyzer.keys.size() );
+		for ( final Integer targetKey : analyzer.keys )
+		{
+			assertTrue( targetKey.equals( model.getTrackModel().trackIDOf( firstSpot ) ) || targetKey.equals( model.getTrackModel().trackIDOf( lastSpot ) ) );
 		}
 
 	}
-
 
 	/**
-	 *  Subclass of {@link TrackIndexAnalyzer} to monitor method calls.
+	 * Subclass of {@link TrackIndexAnalyzer} to monitor method calls.
 	 */
-	private static final class TestTrackDurationAnalyzer extends TrackDurationAnalyzer {
+	private static final class TestTrackDurationAnalyzer extends TrackDurationAnalyzer
+	{
 
 		private boolean hasBeenCalled = false;
-		private Collection<Integer> keys;
+
+		private Collection< Integer > keys;
 
 		@Override
-		public void process(final Collection<Integer> trackIDs, final Model model) {
+		public void process( final Collection< Integer > trackIDs, final Model model )
+		{
 			hasBeenCalled = true;
 			keys = trackIDs;
-			super.process(trackIDs, model);
+			super.process( trackIDs, model );
 		}
 	}
-
 
 }

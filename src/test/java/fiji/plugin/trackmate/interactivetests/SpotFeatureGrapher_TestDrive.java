@@ -22,74 +22,81 @@ import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
-public class SpotFeatureGrapher_TestDrive {
+public class SpotFeatureGrapher_TestDrive
+{
 
-	public static void main(final String[] args) throws JDOMException, IOException {
+	public static void main( final String[] args ) throws JDOMException, IOException
+	{
 
 		// Load objects
-		final File file = new File(AppUtils.getBaseDirectory(TrackMate.class), "samples/FakeTracks.xml");
-		final TmXmlReader reader = new TmXmlReader(file);
+		final File file = new File( AppUtils.getBaseDirectory( TrackMate.class ), "samples/FakeTracks.xml" );
+		final TmXmlReader reader = new TmXmlReader( file );
 		final Model model = reader.getModel();
 
-		final HashSet<String> Y = new HashSet<String>(1);
-		Y.add(Spot.POSITION_T);
-		final List<Spot> spots = new ArrayList<Spot>(model.getSpots().getNSpots(true));
-		for (final Iterator<Spot> it = model.getSpots().iterator(true); it.hasNext();) {
-			spots.add(it.next());
+		final HashSet< String > Y = new HashSet< String >( 1 );
+		Y.add( Spot.POSITION_T );
+		final List< Spot > spots = new ArrayList< Spot >( model.getSpots().getNSpots( true ) );
+		for ( final Iterator< Spot > it = model.getSpots().iterator( true ); it.hasNext(); )
+		{
+			spots.add( it.next() );
 		}
 
-		final SpotFeatureGrapher grapher = new SpotFeatureGrapher(Spot.POSITION_X, Y, spots , model);
+		final SpotFeatureGrapher grapher = new SpotFeatureGrapher( Spot.POSITION_X, Y, spots, model );
 		grapher.render();
 
 		final TrackIndexAnalyzer analyzer = new TrackIndexAnalyzer();
-		analyzer.process(model.getTrackModel().trackIDs(true), model); // needed for trackScheme
-
-		final TrackScheme trackScheme = new TrackScheme(model, new SelectionModel(model));
+		analyzer.process( model.getTrackModel().trackIDs( true ), model );
+		// needed for trackScheme
+		final TrackScheme trackScheme = new TrackScheme( model, new SelectionModel( model ) );
 		trackScheme.render();
 
 	}
 
 	/**
-	 *  Another example: spots that go in spiral
+	 * Another example: spots that go in spiral
 	 */
-	@SuppressWarnings("unused")
-	private static Model getSpiralModel() {
+	@SuppressWarnings( "unused" )
+	private static Model getSpiralModel()
+	{
 
 		final int N_SPOTS = 50;
-		final List<Spot> spots = new ArrayList<Spot>(N_SPOTS);
+		final List< Spot > spots = new ArrayList< Spot >( N_SPOTS );
 		final SpotCollection sc = new SpotCollection();
-		for (int i = 0; i < N_SPOTS; i++) {
-			final double[] coordinates = new double[3];
-			coordinates[0] = 100 + 100 * i / 100. * Math.cos(i / 100. * 5 * 2*Math.PI);
-			coordinates[1] = 100 + 100 * i / 100. * Math.sin(i / 100. * 5 * 2*Math.PI);
-			coordinates[2] = 0;
-			final Spot spot = new Spot(coordinates);
-			spot.putFeature(Spot.POSITION_T, Double.valueOf(i));
-			spot.putFeature(Spot.RADIUS, Double.valueOf(2));
+		for ( int i = 0; i < N_SPOTS; i++ )
+		{
+			final double[] coordinates = new double[ 3 ];
+			coordinates[ 0 ] = 100 + 100 * i / 100. * Math.cos( i / 100. * 5 * 2 * Math.PI );
+			coordinates[ 1 ] = 100 + 100 * i / 100. * Math.sin( i / 100. * 5 * 2 * Math.PI );
+			coordinates[ 2 ] = 0;
+			final Spot spot = new Spot( coordinates );
+			spot.putFeature( Spot.POSITION_T, Double.valueOf( i ) );
+			spot.putFeature( Spot.RADIUS, Double.valueOf( 2 ) );
 
-			spots.add(spot);
+			spots.add( spot );
 
-			final List<Spot> ts = new ArrayList<Spot>(1);
-			ts.add(spot);
-			sc.put(i, ts);
-			spot.putFeature(SpotCollection.VISIBLITY, SpotCollection.ONE);
+			final List< Spot > ts = new ArrayList< Spot >( 1 );
+			ts.add( spot );
+			sc.put( i, ts );
+			spot.putFeature( SpotCollection.VISIBLITY, SpotCollection.ONE );
 		}
 
 		final Model model = new Model();
-		model.setSpots(sc, false);
+		model.setSpots( sc, false );
 
-		final SimpleWeightedGraph<Spot, DefaultWeightedEdge> graph = new SimpleWeightedGraph<Spot, DefaultWeightedEdge>(DefaultWeightedEdge.class);
-		for (final Spot spot : spots) {
-			graph.addVertex(spot);
+		final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph = new SimpleWeightedGraph< Spot, DefaultWeightedEdge >( DefaultWeightedEdge.class );
+		for ( final Spot spot : spots )
+		{
+			graph.addVertex( spot );
 		}
-		Spot source = spots.get(0);
-		for (int i = 1; i < N_SPOTS; i++) {
-			final Spot target = spots.get(i);
-			final DefaultWeightedEdge edge = graph.addEdge(source, target);
-			graph.setEdgeWeight(edge, 1);
+		Spot source = spots.get( 0 );
+		for ( int i = 1; i < N_SPOTS; i++ )
+		{
+			final Spot target = spots.get( i );
+			final DefaultWeightedEdge edge = graph.addEdge( source, target );
+			graph.setEdgeWeight( edge, 1 );
 			source = target;
 		}
-		model.setTracks(graph, true);
+		model.setTracks( graph, true );
 
 		return model;
 	}
