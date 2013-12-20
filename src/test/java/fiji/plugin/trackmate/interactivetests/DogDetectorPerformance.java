@@ -22,7 +22,7 @@ public class DogDetectorPerformance {
 		performance3D();
 	}
 
-	private static void image2DSizePerformance() throws IncompatibleTypeException
+	protected static void image2DSizePerformance() throws IncompatibleTypeException
 	{
 
 		final int nwarmups = 5;
@@ -66,7 +66,7 @@ public class DogDetectorPerformance {
 		}
 	}
 
-	private static void image3DSizePerformance() throws IncompatibleTypeException
+	protected static void image3DSizePerformance() throws IncompatibleTypeException
 	{
 
 		final int nwarmups = 2;
@@ -119,7 +119,7 @@ public class DogDetectorPerformance {
 		System.out.println( "|}" );
 	}
 
-	private static void performance2D() throws IncompatibleTypeException
+	protected static void performance2D() throws IncompatibleTypeException
 	{
 
 		final int nwarmups = 5;
@@ -164,7 +164,7 @@ public class DogDetectorPerformance {
 		}
 	}
 
-	private static void performance3D() throws IncompatibleTypeException
+	protected static void performance3D() throws IncompatibleTypeException
 	{
 
 		final int nwarmups = 1;

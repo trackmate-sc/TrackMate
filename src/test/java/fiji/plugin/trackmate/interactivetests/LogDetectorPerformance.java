@@ -22,7 +22,7 @@ public class LogDetectorPerformance {
 		image2DSizePerformance();
 	}
 
-	private static void image2DSizePerformance() throws IncompatibleTypeException
+	protected static void image2DSizePerformance() throws IncompatibleTypeException
 	{
 
 		final int nwarmups = 5;
@@ -66,7 +66,7 @@ public class LogDetectorPerformance {
 		}
 	}
 
-	private static void performance2D() throws IncompatibleTypeException
+	protected static void performance2D() throws IncompatibleTypeException
 	{
 
 		final int nwarmups = 5;
@@ -111,7 +111,7 @@ public class LogDetectorPerformance {
 		}
 	}
 
-	private static void performance3D() throws IncompatibleTypeException
+	protected static void performance3D() throws IncompatibleTypeException
 	{
 
 		final int nwarmups = 5;
