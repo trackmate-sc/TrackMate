@@ -36,17 +36,16 @@ public class SpotGroupNodeTestDrive
 		Point4d center;
 		Color4f color;
 		Spot spot;
-		final double[] coords = new double[ 3 ];
 		for ( int i = 0; i < N_BLOBS; i++ )
 		{
-			coords[ 0 ] = WIDTH * ran.nextDouble();
-			coords[ 1 ] = HEIGHT * ran.nextDouble();
-			coords[ 2 ] = DEPTH * ran.nextDouble();
+			final double x = WIDTH * ran.nextDouble();
+			final double y = HEIGHT * ran.nextDouble();
+			final double z = DEPTH * ran.nextDouble();
 
-			center = new Point4d( coords[ 0 ], coords[ 1 ], coords[ 2 ], RADIUS + ran.nextGaussian() );
+			center = new Point4d( x, y, z, RADIUS + ran.nextGaussian() );
 			color = new Color4f( new Color( Color.HSBtoRGB( ran.nextFloat(), 1, 1 ) ) );
 			color.w = ran.nextFloat();
-			spot = new fiji.plugin.trackmate.Spot( coords );
+			spot = new Spot( x, y, z );
 			centers.put( spot, center );
 			colors.put( spot, color );
 		}

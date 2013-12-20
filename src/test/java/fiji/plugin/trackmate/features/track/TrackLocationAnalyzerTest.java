@@ -54,8 +54,7 @@ public class TrackLocationAnalyzerTest
 				for ( int j = 0; j <= DEPTH; j++ )
 				{
 					// We use deterministic locations
-					final double[] location = new double[] { j + i, j + i, j + i };
-					final Spot spot = new Spot( location );
+					final Spot spot = new Spot( j + i, j + i, j + i );
 					model.addSpotTo( spot, j );
 					track.add( spot );
 					if ( null != previous )
@@ -126,9 +125,9 @@ public class TrackLocationAnalyzerTest
 		model.beginUpdate();
 		try
 		{
-			final Spot spot1 = model.addSpotTo( new Spot( new double[ 3 ] ), 0 );
+			final Spot spot1 = model.addSpotTo( new Spot( 0d, 0d, 0d ), 0 );
 			spot1.putFeature( Spot.POSITION_T, 0d );
-			final Spot spot2 = model.addSpotTo( new Spot( new double[ 3 ] ), 1 );
+			final Spot spot2 = model.addSpotTo( new Spot( 0d, 0d, 0d ), 1 );
 			spot2.putFeature( Spot.POSITION_T, 1d );
 			model.addEdge( spot1, spot2, 1 );
 

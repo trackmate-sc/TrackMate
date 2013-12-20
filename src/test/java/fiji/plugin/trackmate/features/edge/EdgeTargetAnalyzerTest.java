@@ -53,7 +53,7 @@ public class EdgeTargetAnalyzerTest
 
 				for ( int j = 0; j <= DEPTH; j++ )
 				{
-					final Spot spot = new Spot( new double[ 3 ] );
+					final Spot spot = new Spot( 0d, 0d, 0d );
 					model.addSpotTo( spot, j );
 					if ( null != previous )
 					{

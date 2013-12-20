@@ -55,7 +55,7 @@ public class EdgeVelocityAnalyzerTest
 
 				for ( int j = 0; j <= DEPTH; j++ )
 				{
-					final Spot spot = new Spot( new double[ 3 ] );
+					final Spot spot = new Spot( 0d, 0d, 0d );
 					spot.putFeature( posFeats[ i % 3 ], Double.valueOf( i + j ) ); // rotate
 																					// displacement
 																					// dimension

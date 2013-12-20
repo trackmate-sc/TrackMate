@@ -64,11 +64,10 @@ public class SpotFeatureGrapher_TestDrive
 		final SpotCollection sc = new SpotCollection();
 		for ( int i = 0; i < N_SPOTS; i++ )
 		{
-			final double[] coordinates = new double[ 3 ];
-			coordinates[ 0 ] = 100 + 100 * i / 100. * Math.cos( i / 100. * 5 * 2 * Math.PI );
-			coordinates[ 1 ] = 100 + 100 * i / 100. * Math.sin( i / 100. * 5 * 2 * Math.PI );
-			coordinates[ 2 ] = 0;
-			final Spot spot = new Spot( coordinates );
+			final double x = 100d + 100 * i / 100. * Math.cos( i / 100. * 5 * 2 * Math.PI );
+			final double y = 100d + 100 * i / 100. * Math.sin( i / 100. * 5 * 2 * Math.PI );
+			final double z = 0d;
+			final Spot spot = new Spot( x, y, z );
 			spot.putFeature( Spot.POSITION_T, Double.valueOf( i ) );
 			spot.putFeature( Spot.RADIUS, Double.valueOf( 2 ) );
 

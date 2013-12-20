@@ -21,7 +21,7 @@ public class SpotNeighborhoodTest
 		// 3D
 		final ArrayImg< UnsignedShortType, ShortArray > image = ArrayImgs.unsignedShorts( 100, 100, 100 );
 		final ImgPlus< UnsignedShortType > img = new ImgPlus< UnsignedShortType >( image );
-		final Spot spot = new Spot( new double[] { 50, 50, 50 } );
+		final Spot spot = new Spot( 50d, 50d, 50d );
 		spot.putFeature( Spot.RADIUS, 30d );
 		final SpotNeighborhood< UnsignedShortType > neighborhood = new SpotNeighborhood< UnsignedShortType >( spot, img );
 		final SpotNeighborhoodCursor< UnsignedShortType > cursor = neighborhood.cursor();
@@ -35,7 +35,7 @@ public class SpotNeighborhoodTest
 		// 2D
 		final ArrayImg< UnsignedShortType, ShortArray > image2 = ArrayImgs.unsignedShorts( 100, 100 );
 		final ImgPlus< UnsignedShortType > img2 = new ImgPlus< UnsignedShortType >( image2 );
-		final Spot spot2 = new Spot( new double[] { 50, 50, 0 } );
+		final Spot spot2 = new Spot( 50d, 50d, 0d );
 		spot2.putFeature( Spot.RADIUS, 30d );
 		final SpotNeighborhood< UnsignedShortType > neighborhood2 = new SpotNeighborhood< UnsignedShortType >( spot2, img2 );
 		final SpotNeighborhoodCursor< UnsignedShortType > cursor2 = neighborhood2.cursor();

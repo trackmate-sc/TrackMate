@@ -14,9 +14,13 @@ import net.imglib2.util.Util;
 import fiji.plugin.trackmate.util.AlphanumComparator;
 
 /**
- * Plain implementation of the {@link Spot} interface.
+ * A {@link RealLocalizable} implementation, used in TrackMate to represent a
+ * detection.
+ * <p>
+ * On top of being a {@link RealLocalizable}, it can store additional numerical
+ * named features, with a {@link Map}-like syntax. *
  *
- * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> Sep 16, 2010, 2012
+ * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> Sep 16, 2010, 2013
  *
  */
 public class Spot extends AbstractEuclideanSpace implements RealLocalizable
@@ -41,30 +45,36 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable
 	 * CONSTRUCTORS
 	 */
 
-	/**
-	 * Instantiate a Spot.
-	 * <p>
-	 * The given coordinate double array <b>must</b> have 3 elements. If the 3rd
-	 * one is not used (2D case), it can be set to a constant value 0. This
-	 * constructor ensures that none of the {@link Spot#POSITION_FEATURES} will
-	 * be <code>null</code>, and ensure relevance when calculating distances and
-	 * so on.
-	 */
-	public Spot( final double[] coordinates, final String name )
+	public Spot( final double x, final double y, final double z, final String name )
 	{
 		super( 3 );
 		this.ID = IDcounter.incrementAndGet();
-		for ( int i = 0; i < 3; i++ )
-			putFeature( POSITION_FEATURES[ i ], coordinates[ i ] );
+		putFeature( POSITION_X, Double.valueOf( x ) );
+		putFeature( POSITION_Y, Double.valueOf( y ) );
+		putFeature( POSITION_Z, Double.valueOf( z ) );
 		if ( null == name )
+		{
 			this.name = "ID" + ID;
+		}
 		else
+		{
 			this.name = name;
+		}
 	}
 
-	public Spot( final double[] coordinates )
+	public Spot( final double x, final double y, final double z )
 	{
-		this( coordinates, null );
+		this( x, y, z, null );
+	}
+
+	public Spot( final RealLocalizable location, final String name )
+	{
+		this( location.getDoublePosition( 0 ), location.getDoublePosition( 1 ), location.getDoublePosition( 2 ), name );
+	}
+
+	public Spot( final RealLocalizable location )
+	{
+		this( location, null );
 	}
 
 	/**
@@ -376,7 +386,6 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable
 	@Override
 	public double getDoublePosition( final int d )
 	{
-		assert ( d > 0 && d < n );
 		return getFeature( POSITION_FEATURES[ d ] );
 	}
 

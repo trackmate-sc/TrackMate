@@ -178,10 +178,7 @@ public class DetectionUtils
 			{
 				ra.setPosition( refinedPeak.getOriginalPeak() );
 				final double quality = ra.get().getRealDouble();
-				final double[] coords = new double[ 3 ];
-				for ( int i = 0; i < source.numDimensions(); i++ )
-					coords[ i ] = refinedPeak.getDoublePosition( i ) * calibration[ i ];
-				final Spot spot = new Spot( coords );
+				final Spot spot = new Spot( refinedPeak.getDoublePosition( 0 ) * calibration[ 0 ], refinedPeak.getDoublePosition( 1 ) * calibration[ 1 ], refinedPeak.getDoublePosition( 2 ) * calibration[ 2 ] );
 				spot.putFeature( Spot.QUALITY, Double.valueOf( quality ) );
 				spot.putFeature( Spot.RADIUS, Double.valueOf( radius ) );
 				spots.add( spot );
@@ -196,10 +193,7 @@ public class DetectionUtils
 			{
 				ra.setPosition( peak );
 				final double quality = ra.get().getRealDouble();
-				final double[] coords = new double[ 3 ];
-				for ( int i = 0; i < source.numDimensions(); i++ )
-					coords[ i ] = peak.getDoublePosition( i ) * calibration[ i ];
-				final Spot spot = new Spot( coords );
+				final Spot spot = new Spot( peak.getDoublePosition( 0 ) * calibration[ 0 ], peak.getDoublePosition( 1 ) * calibration[ 1 ], peak.getDoublePosition( 2 ) * calibration[ 2 ] );
 				spot.putFeature( Spot.QUALITY, Double.valueOf( quality ) );
 				spot.putFeature( Spot.RADIUS, Double.valueOf( radius ) );
 				spots.add( spot );

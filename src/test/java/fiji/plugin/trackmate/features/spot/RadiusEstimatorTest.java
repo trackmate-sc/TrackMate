@@ -32,9 +32,9 @@ public class RadiusEstimatorTest< T extends NativeType< T > & RealType< T >>
 	{
 
 		final byte on = ( byte ) 255;
-		final Spot s1 = new Spot( new double[] { 100, 100, 100 } );
-		final Spot s2 = new Spot( new double[] { 100, 100, 200 } );
-		final Spot s3 = new Spot( new double[] { 100, 100, 300 } );
+		final Spot s1 = new Spot( 100, 100, 100 );
+		final Spot s2 = new Spot( 100, 100, 200 );
+		final Spot s3 = new Spot( 100, 100, 300 );
 		final Spot[] spots = new Spot[] { s1, s2, s3 };
 		final double[] radiuses = new double[] { 12, 20, 32 };
 		final double[] calibration = new double[] { 1, 1, 1 };
@@ -75,9 +75,9 @@ public class RadiusEstimatorTest< T extends NativeType< T > & RealType< T >>
 	{
 
 		final byte on = ( byte ) 255;
-		final Spot s1 = new Spot( new double[] { 100, 100, 100 } );
-		final Spot s2 = new Spot( new double[] { 100, 100, 200 } );
-		final Spot s3 = new Spot( new double[] { 100, 100, 300 } );
+		final Spot s1 = new Spot( 100, 100, 100 );
+		final Spot s2 = new Spot( 100, 100, 200 );
+		final Spot s3 = new Spot( 100, 100, 300 );
 		final Spot[] spots = new Spot[] { s1, s2, s3 };
 		final double[] radiuses = new double[] { 12, 20, 32 };
 		final double[] calibration = new double[] { 1, 1, 1 };

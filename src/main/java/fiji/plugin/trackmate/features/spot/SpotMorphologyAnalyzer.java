@@ -372,7 +372,7 @@ public class SpotMorphologyAnalyzer< T extends RealType< T >> extends Independen
 		ImageJFunctions.show( imgplus );
 
 		start = System.currentTimeMillis();
-		final Spot spot = new Spot( new double[] { center[ 0 ], center[ 1 ], 0 } );
+		final Spot spot = new Spot( center[ 0 ], center[ 1 ], 0d );
 		spot.putFeature( Spot.RADIUS, Double.valueOf( max_radius ) );
 
 		final SpotMorphologyAnalyzer< UnsignedByteType > bm = new SpotMorphologyAnalyzer< UnsignedByteType >( imgplus, null );

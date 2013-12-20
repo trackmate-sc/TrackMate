@@ -43,8 +43,8 @@ public class LAPTrackerTest
 			final double[] coords1 = new double[] { 1d, 1d * i, 0 };
 			final double[] coords2 = new double[] { 2d, 1d * i, 0 };
 
-			final Spot spot1 = new Spot( coords1 );
-			final Spot spot2 = new Spot( coords2 );
+			final Spot spot1 = new Spot( coords1[ 0 ], coords1[ 1 ], coords1[ 2 ] );
+			final Spot spot2 = new Spot( coords2[ 0 ], coords2[ 1 ], coords2[ 2 ] );
 			spot1.putFeature( Spot.POSITION_T, Double.valueOf( i ) );
 			spot2.putFeature( Spot.POSITION_T, Double.valueOf( i ) );
 			spot1.setName( "G1T" + i );
@@ -106,8 +106,8 @@ public class LAPTrackerTest
 			final double[] coords1 = new double[] { ( i % 2 ), 1d * i, 0 };
 			final double[] coords2 = new double[] { ( ( i + 1 ) % 2 ), 1d * i, 0 };
 
-			final Spot spot1 = new Spot( coords1 );
-			final Spot spot2 = new Spot( coords2 );
+			final Spot spot1 = new Spot( coords1[ 0 ], coords1[ 1 ], coords1[ 2 ] );
+			final Spot spot2 = new Spot( coords2[ 0 ], coords2[ 1 ], coords2[ 2 ] );
 			spot1.putFeature( Spot.POSITION_T, Double.valueOf( i ) );
 			spot2.putFeature( Spot.POSITION_T, Double.valueOf( i ) );
 			spot1.setName( "G1T" + i );

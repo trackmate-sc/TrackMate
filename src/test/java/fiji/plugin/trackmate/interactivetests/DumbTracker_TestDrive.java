@@ -27,7 +27,7 @@ public class DumbTracker_TestDrive
 		{
 			for ( int j = 0; j <= Math.min( i, 5 ); j++ )
 			{
-				final Spot spot = new Spot( new double[] { 1 + 10 * ( j + ranAmpl * ran.nextGaussian() ), 1 + 5 * ( i + ranAmpl * ran.nextDouble() ), 0 } );
+				final Spot spot = new Spot( 1d + 10 * ( j + ranAmpl * ran.nextGaussian() ), 1d + 5 * ( i + ranAmpl * ran.nextDouble() ), 0d );
 				spot.putFeature( Spot.RADIUS, 1d );
 				spots.add( spot, i );
 			}
@@ -37,7 +37,7 @@ public class DumbTracker_TestDrive
 		{
 			for ( int j = 0; j < 15 - i; j++ )
 			{
-				final Spot spot = new Spot( new double[] { 1 + 10 * ( j + ranAmpl * ran.nextGaussian() ), 1 + 5 * ( i + ranAmpl * ran.nextDouble() ), 0 } );
+				final Spot spot = new Spot( 1d + 10 * ( j + ranAmpl * ran.nextGaussian() ), 1d + 5 * ( i + ranAmpl * ran.nextDouble() ), 0d );
 				spot.putFeature( Spot.RADIUS, 1d );
 				spots.add( spot, i );
 			}
@@ -51,7 +51,7 @@ public class DumbTracker_TestDrive
 		{
 			for ( int j = 0; j <= Math.min( i, 5 ); j++ )
 			{
-				final Spot spot = new Spot( new double[] { 1 + 10 * ( j + ranAmpl * ran.nextGaussian() ), 1 + 5 * ( i + ranAmpl * ran.nextDouble() ), 0 } );
+				final Spot spot = new Spot( 1d + 10 * ( j + ranAmpl * ran.nextGaussian() ), 1d + 5 * ( i + ranAmpl * ran.nextDouble() ), 0d );
 				spot.putFeature( Spot.RADIUS, 1d );
 				spots.add( spot, i );
 			}
@@ -61,7 +61,7 @@ public class DumbTracker_TestDrive
 		{
 			for ( int j = 0; j < 5; j++ )
 			{
-				final Spot spot = new Spot( new double[] { 1 + 10 * ( j + ranAmpl * ran.nextGaussian() ), 1 + 5 * ( i - 10 + ranAmpl * ran.nextDouble() ), 0 } );
+				final Spot spot = new Spot( 1d + 10 * ( j + ranAmpl * ran.nextGaussian() ), 1d + 5 * ( i - 10 + ranAmpl * ran.nextDouble() ), 0d );
 				spot.putFeature( Spot.RADIUS, 1d );
 				spots.add( spot, i );
 			}

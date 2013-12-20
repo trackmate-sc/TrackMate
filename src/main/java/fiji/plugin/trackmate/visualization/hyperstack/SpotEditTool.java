@@ -777,9 +777,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 					for ( final Iterator< Spot > it = spots.iterator( currentFrame - 1, true ); it.hasNext(); )
 					{
 						final Spot spot = it.next();
-						final double[] coords = new double[ 3 ];
-						TMUtils.localize( spot, coords );
-						final Spot newSpot = new Spot( coords, spot.getName() );
+						final Spot newSpot = new Spot( spot, spot.getName() );
 						// Deal with features
 						Double val;
 						for ( final String key : featuresKey )
@@ -941,7 +939,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 			SwingUtilities.convertPointFromScreen( mouseLocation, canvas );
 		}
 		final double[] calibration = TMUtils.getSpatialCalibration( imp );
-		return new Spot( new double[] { ( -0.5 + canvas.offScreenXD( mouseLocation.x ) ) * calibration[ 0 ], ( -0.5 + canvas.offScreenYD( mouseLocation.y ) ) * calibration[ 1 ], ( imp.getSlice() - 1 ) * calibration[ 2 ] } );
+		return new Spot( ( -0.5d + canvas.offScreenXD( mouseLocation.x ) ) * calibration[ 0 ], ( -0.5d + canvas.offScreenYD( mouseLocation.y ) ) * calibration[ 1 ], ( imp.getSlice() - 1 ) * calibration[ 2 ] );
 	}
 
 	@Override
