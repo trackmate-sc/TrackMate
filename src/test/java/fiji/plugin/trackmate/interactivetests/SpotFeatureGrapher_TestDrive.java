@@ -67,9 +67,8 @@ public class SpotFeatureGrapher_TestDrive
 			final double x = 100d + 100 * i / 100. * Math.cos( i / 100. * 5 * 2 * Math.PI );
 			final double y = 100d + 100 * i / 100. * Math.sin( i / 100. * 5 * 2 * Math.PI );
 			final double z = 0d;
-			final Spot spot = new Spot( x, y, z );
+			final Spot spot = new Spot( x, y, z, 2d, -1d );
 			spot.putFeature( Spot.POSITION_T, Double.valueOf( i ) );
-			spot.putFeature( Spot.RADIUS, Double.valueOf( 2 ) );
 
 			spots.add( spot );
 

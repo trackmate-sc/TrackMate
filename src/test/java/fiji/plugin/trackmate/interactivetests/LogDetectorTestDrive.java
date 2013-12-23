@@ -63,7 +63,7 @@ public class LogDetectorTestDrive
 		// Put the blobs in the image
 		for ( int i = 0; i < N_BLOBS; i++ )
 		{
-			final Spot tmpSpot = new Spot( centers.get( i )[ 0 ], centers.get( i )[ 1 ], centers.get( i )[ 2 ] );
+			final Spot tmpSpot = new Spot( centers.get( i )[ 0 ], centers.get( i )[ 1 ], centers.get( i )[ 2 ], radiuses[ i ], -1d );
 			tmpSpot.putFeature( Spot.RADIUS, radiuses[ i ] );
 			final SpotNeighborhood< UnsignedByteType > sphere = new SpotNeighborhood< UnsignedByteType >( tmpSpot, img );
 			for ( final UnsignedByteType pixel : sphere )

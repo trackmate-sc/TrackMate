@@ -55,7 +55,7 @@ public class EdgeTimeAndLocationAnalyzerTest
 
 				for ( int j = 0; j <= DEPTH; j++ )
 				{
-					final Spot spot = new Spot( i + j, i + j, i + j );
+					final Spot spot = new Spot( i + j, i + j, i + j, 1d, -1d );
 					spot.putFeature( Spot.POSITION_T, Double.valueOf( j ) );
 					model.addSpotTo( spot, j );
 					if ( null != previous )

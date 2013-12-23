@@ -18,9 +18,18 @@ import fiji.plugin.trackmate.util.AlphanumComparator;
  * detection.
  * <p>
  * On top of being a {@link RealLocalizable}, it can store additional numerical
- * named features, with a {@link Map}-like syntax. *
+ * named features, with a {@link Map}-like syntax. Constructors enforce the
+ * specification of the spot location in 3D space (if Z is unused, put 0), the
+ * spot radius, and the spot quality. This somewhat cumbersome syntax is made to
+ * avoid any bad surprise with missing features in a subsequent use. The spot
+ * temporal features ({@link #FRAME} and {@link #POSITION_T}) are set upon
+ * adding to a {@link SpotCollection}.
+ * <p>
+ * Each spot received at creation a unique ID (as an <code>int</code>), used
+ * later for saving, retrieving and loading. Interfering with this value will
+ * predictively cause undesired behavior.
  *
- * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> Sep 16, 2010, 2013
+ * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> 2010, 2013
  *
  */
 public class Spot extends AbstractEuclideanSpace implements RealLocalizable
@@ -45,13 +54,31 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable
 	 * CONSTRUCTORS
 	 */
 
-	public Spot( final double x, final double y, final double z, final String name )
+	/**
+	 * Creates a new spot.
+	 *
+	 * @param x
+	 *            the spot X coordinates, in image units.
+	 * @param y
+	 *            the spot Y coordinates, in image units.
+	 * @param z
+	 *            the spot Z coordinates, in image units.
+	 * @param radius
+	 *            the spot radius, in image units.
+	 * @param quality
+	 *            the spot quality.
+	 * @param name
+	 *            the spot name.
+	 */
+	public Spot( final double x, final double y, final double z, final double radius, final double quality, final String name )
 	{
 		super( 3 );
 		this.ID = IDcounter.incrementAndGet();
 		putFeature( POSITION_X, Double.valueOf( x ) );
 		putFeature( POSITION_Y, Double.valueOf( y ) );
 		putFeature( POSITION_Z, Double.valueOf( z ) );
+		putFeature( RADIUS, Double.valueOf( radius ) );
+		putFeature( QUALITY, Double.valueOf( quality ) );
 		if ( null == name )
 		{
 			this.name = "ID" + ID;
@@ -62,25 +89,78 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable
 		}
 	}
 
-	public Spot( final double x, final double y, final double z )
+	/**
+	 * Creates a new spot, and gives it a default name.
+	 *
+	 * @param x
+	 *            the spot X coordinates, in image units.
+	 * @param y
+	 *            the spot Y coordinates, in image units.
+	 * @param z
+	 *            the spot Z coordinates, in image units.
+	 * @param radius
+	 *            the spot radius, in image units.
+	 * @param quality
+	 *            the spot quality.
+	 */
+	public Spot( final double x, final double y, final double z, final double radius, final double quality )
 	{
-		this( x, y, z, null );
+		this( x, y, z, radius, quality, null );
 	}
 
-	public Spot( final RealLocalizable location, final String name )
+	/**
+	 * Creates a new spot, taking its 3D coordinates from a
+	 * {@link RealLocalizable}. The {@link RealLocalizable} must have at least 3
+	 * dimensions, and must return coordinates in image units.
+	 *
+	 * @param location
+	 *            the {@link RealLocalizable} that contains the spot locatiob.
+	 * @param radius
+	 *            the spot radius, in image units.
+	 * @param quality
+	 *            the spot quality.
+	 * @param name
+	 *            the spot name.
+	 */
+	public Spot( final RealLocalizable location, final double radius, final double quality, final String name )
 	{
-		this( location.getDoublePosition( 0 ), location.getDoublePosition( 1 ), location.getDoublePosition( 2 ), name );
+		this( location.getDoublePosition( 0 ), location.getDoublePosition( 1 ), location.getDoublePosition( 2 ), radius, quality, name );
 	}
 
-	public Spot( final RealLocalizable location )
+	/**
+	 * Creates a new spot, taking its 3D coordinates from a
+	 * {@link RealLocalizable}. The {@link RealLocalizable} must have at least 3
+	 * dimensions, and must return coordinates in image units. The spot will get
+	 * a default name.
+	 *
+	 * @param location
+	 *            the {@link RealLocalizable} that contains the spot locatiob.
+	 * @param radius
+	 *            the spot radius, in image units.
+	 * @param quality
+	 *            the spot quality.
+	 */
+	public Spot( final RealLocalizable location, final double radius, final double quality )
 	{
-		this( location, null );
+		this( location, radius, quality, null );
+	}
+
+	/**
+	 * Creates a new spot, taking its location, its radius, its quality value
+	 * and its name from the specified spot.
+	 *
+	 * @param spot
+	 *            the spot to read from.
+	 */
+	public Spot( final Spot spot )
+	{
+		this( spot, spot.getFeature( RADIUS ), spot.getFeature( QUALITY ), spot.getName() );
 	}
 
 	/**
 	 * Blank constructor meant to be used when loading a spot collection from a
 	 * file. <b>Will</b> mess with the {@link #IDcounter} field, so this
-	 * constructor should not be used for normal spot creation.
+	 * constructor <u>should not be used for normal spot creation</u>.
 	 *
 	 * @param ID
 	 *            the spot ID to set
@@ -200,7 +280,10 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable
 	 */
 
 	/**
-	 * @return and exposes the storage Map of features for this spot.
+	 * Exposes the storage map of features for this spot. Altering the returned
+	 * map will alter the spot.
+	 *
+	 * @return a map of {@link String}s to {@link Double}s.
 	 */
 	public Map< String, Double > getFeatures()
 	{
@@ -208,10 +291,12 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable
 	}
 
 	/**
-	 * @return The value corresponding to the specified spot feature.
+	 * Returns the value corresponding to the specified spot feature.
+	 *
 	 * @param feature
 	 *            The feature string to retrieve the stored value for.
-	 *            <code>null</code> if it has not been set.
+	 * @return the feature value, as a {@link Double}. Will be <code>null</code>
+	 *         if it has not been set.
 	 */
 	public final Double getFeature( final String feature )
 	{
@@ -219,7 +304,13 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable
 	}
 
 	/**
-	 * Store the specified feature value for this spot.
+	 * Stores the specified feature value for this spot.
+	 *
+	 * @param feature
+	 *            the name of the feature to store, as a {@link String}.
+	 * @param value
+	 *            the value to store, as a {@link Double}. Using
+	 *            <code>null</code> will have unpredicted outcomes.
 	 */
 	public final void putFeature( final String feature, final Double value )
 	{
@@ -227,9 +318,17 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable
 	}
 
 	/**
-	 * @return the difference of the feature value of this spot with the one of
-	 *         the given spot. By construction, this operation is anti-symmetric
-	 *         (A.diffTo(B) = - B.diffTo(A)).
+	 * Returns the difference of the feature value for this spot with the one of
+	 * the specified spot. By construction, this operation is anti-symmetric (
+	 * <code>A.diffTo(B) = - B.diffTo(A)</code>).
+	 * <p>
+	 * Will generate a {@link NullPointerException} if one of the spots does not
+	 * store the named feature.
+	 *
+	 * @param s
+	 *            the spot to compare to.
+	 * @param feature
+	 *            the name of the feature to use for calculation.
 	 */
 	public double diffTo( final Spot s, final String feature )
 	{
@@ -239,15 +338,24 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable
 	}
 
 	/**
-	 * @return the absolute normalized difference of the feature value of this
-	 *         spot with the one of the given spot.
-	 *         <p>
-	 *         If <code>a</code> and <code>b</code> are the feature values, then
-	 *         the absolute normalized difference is defined as
-	 *         <code> Math.abs( a - b) / ( (a+b)/2 )</code>.
-	 *         <p>
-	 *         By construction, this operation is symmetric
-	 *         (A.normalizeDiffTo(B) = B.normalizeDiffTo(A)).
+	 * Returns the absolute normalized difference of the feature value of this
+	 * spot with the one of the given spot.
+	 * <p>
+	 * If <code>a</code> and <code>b</code> are the feature values, then the
+	 * absolute normalized difference is defined as
+	 * <code>Math.abs( a - b) / ( (a+b)/2 )</code>.
+	 * <p>
+	 * By construction, this operation is symmetric (
+	 * <code>A.normalizeDiffTo(B) =
+	 * B.normalizeDiffTo(A)</code>).
+	 * <p>
+	 * Will generate a {@link NullPointerException} if one of the spots does not
+	 * store the named feature.
+	 *
+	 * @param s
+	 *            the spot to compare to.
+	 * @param feature
+	 *            the name of the feature to use for calculation.
 	 */
 	public double normalizeDiffTo( final Spot s, final String feature )
 	{
@@ -260,8 +368,11 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable
 	}
 
 	/**
-	 * @return the square distance from this spot to another, using the x,y,z
-	 *         position features.
+	 * Returns the square distance from this spot to the specified spot.
+	 * 
+	 * @param s
+	 *            the spot to compute the square distance to.
+	 * @return the square distance as a <code>double</code>.
 	 */
 	public double squareDistanceTo( final Spot s )
 	{

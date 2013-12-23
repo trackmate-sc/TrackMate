@@ -21,17 +21,17 @@ public class ModelTest {
 	public void testTrackVisibility() {
 		final Model model = new Model();
 		// Build track 1 with 5 spots
-		final Spot s1 = new Spot( 0d, 0d, 0d, "S1" );
-		final Spot s2 = new Spot( 0d, 0d, 0d, "S2" );
-		final Spot s3 = new Spot( 0d, 0d, 0d, "S3" );
-		final Spot s4 = new Spot( 0d, 0d, 0d, "S4" );
-		final Spot s5 = new Spot( 0d, 0d, 0d, "S5" );
+		final Spot s1 = new Spot( 0d, 0d, 0d, 1d, -1d, "S1" );
+		final Spot s2 = new Spot( 0d, 0d, 0d, 1d, -1d, "S2" );
+		final Spot s3 = new Spot( 0d, 0d, 0d, 1d, -1d, "S3" );
+		final Spot s4 = new Spot( 0d, 0d, 0d, 1d, -1d, "S4" );
+		final Spot s5 = new Spot( 0d, 0d, 0d, 1d, -1d, "S5" );
 		// Build track 2 with 2 spots
-		final Spot s6 = new Spot( 0d, 0d, 0d, "S6" );
-		final Spot s7 = new Spot( 0d, 0d, 0d, "S7" );
+		final Spot s6 = new Spot( 0d, 0d, 0d, 1d, -1d, "S6" );
+		final Spot s7 = new Spot( 0d, 0d, 0d, 1d, -1d, "S7" );
 		// Build track 3 with 2 spots
-		final Spot s8 = new Spot( 0d, 0d, 0d, "S8" );
-		final Spot s9 = new Spot( 0d, 0d, 0d, "S9" );
+		final Spot s8 = new Spot( 0d, 0d, 0d, 1d, -1d, "S8" );
+		final Spot s9 = new Spot( 0d, 0d, 0d, 1d, -1d, "S9" );
 
 		model.beginUpdate();
 		try {
@@ -140,11 +140,11 @@ public class ModelTest {
 		assertEquals(0, model.getTrackModel().nTracks(false));
 
 		// Build track with 5 spots
-		final Spot s1 = new Spot( 0d, 0d, 0d, "S1" );
-		final Spot s2 = new Spot( 0d, 0d, 0d, "S2" );
-		final Spot s3 = new Spot( 0d, 0d, 0d, "S3" );
-		final Spot s4 = new Spot( 0d, 0d, 0d, "S4" );
-		final Spot s5 = new Spot( 0d, 0d, 0d, "S5" );
+		final Spot s1 = new Spot( 0d, 0d, 0d, 1d, -1d, "S1" );
+		final Spot s2 = new Spot( 0d, 0d, 0d, 1d, -1d, "S2" );
+		final Spot s3 = new Spot( 0d, 0d, 0d, 1d, -1d, "S3" );
+		final Spot s4 = new Spot( 0d, 0d, 0d, 1d, -1d, "S4" );
+		final Spot s5 = new Spot( 0d, 0d, 0d, 1d, -1d, "S5" );
 		model.beginUpdate();
 		try {
 			model.addSpotTo(s1, 0);
@@ -223,11 +223,11 @@ public class ModelTest {
 		model.addModelChangeListener(eventLogger);
 
 
-		final Spot s1 = new Spot( 0d, 0d, 0d, "S1" );
-		final Spot s2 = new Spot( 0d, 0d, 0d, "S2" );
-		final Spot s3 = new Spot( 0d, 0d, 0d, "S3" );
-		final Spot s4 = new Spot( 0d, 0d, 0d, "S4" );
-		final Spot s5 = new Spot( 0d, 0d, 0d, "S5" );
+		final Spot s1 = new Spot( 0d, 0d, 0d, 1d, -1d, "S1" );
+		final Spot s2 = new Spot( 0d, 0d, 0d, 1d, -1d, "S2" );
+		final Spot s3 = new Spot( 0d, 0d, 0d, 1d, -1d, "S3" );
+		final Spot s4 = new Spot( 0d, 0d, 0d, 1d, -1d, "S4" );
+		final Spot s5 = new Spot( 0d, 0d, 0d, 1d, -1d, "S5" );
 
 		//		System.out.println("Create the graph in one update:");
 		model.beginUpdate();
@@ -365,7 +365,7 @@ public class ModelTest {
 				Spot previous = null;
 				Spot spot = null;
 				for (int j = 0; j < DEPTH; j++) {
-					spot = new Spot( 0d, 0d, 0d );
+					spot = new Spot( 0d, 0d, 0d, 1d, -1d );
 					model.addSpotTo(spot, j);
 					if (i == 0) {
 						trackSpots.add(spot);
@@ -434,11 +434,11 @@ public class ModelTest {
 		// Add an event listener now
 		model.addModelChangeListener(new EventLogger());
 
-		final Spot s1 = new Spot( 0d, 0d, 0d, "S1" );
-		final Spot s2 = new Spot( 0d, 0d, 0d, "S2" );
-		final Spot s3 = new Spot( 0d, 0d, 0d, "S3" );
-		final Spot s4 = new Spot( 0d, 0d, 0d, "S4" );
-		final Spot s5 = new Spot( 0d, 0d, 0d, "S5" );
+		final Spot s1 = new Spot( 0d, 0d, 0d, 1d, -1d, "S1" );
+		final Spot s2 = new Spot( 0d, 0d, 0d, 1d, -1d, "S2" );
+		final Spot s3 = new Spot( 0d, 0d, 0d, 1d, -1d, "S3" );
+		final Spot s4 = new Spot( 0d, 0d, 0d, 1d, -1d, "S4" );
+		final Spot s5 = new Spot( 0d, 0d, 0d, 1d, -1d, "S5" );
 
 
 		System.out.println("Create the graph in one update:");

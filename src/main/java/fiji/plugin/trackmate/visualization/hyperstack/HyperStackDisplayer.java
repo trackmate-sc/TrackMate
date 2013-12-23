@@ -94,6 +94,16 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 	 * PUBLIC METHODS
 	 */
 
+	/**
+	 * Exposes the {@link ImagePlus} on which the model is drawn by this view.
+	 * 
+	 * @return the ImagePlus used in this view.
+	 */
+	public ImagePlus getImp()
+	{
+		return imp;
+	}
+
 	@Override
 	public void modelChanged( final ModelChangeEvent event )
 	{

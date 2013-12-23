@@ -58,7 +58,7 @@ public class SortedDepthFirstIteratorTest
 		{
 
 			// Root
-			root = new Spot( 0d, 0d, 0d, "Root" );
+			root = new Spot( 0d, 0d, 0d, 1d, -1d, "Root" );
 			model.addSpotTo( root, 0 );
 
 			// First level
@@ -68,7 +68,7 @@ public class SortedDepthFirstIteratorTest
 			{
 
 				names[ i ] = randomString( 5 );
-				final Spot spotChild = new Spot( 0d, 0d, 0d, names[ i ] );
+				final Spot spotChild = new Spot( 0d, 0d, 0d,  1d, -1d,names[ i ] );
 				model.addSpotTo( spotChild, 1 );
 				model.addEdge( root, spotChild, -1 );
 				spots[ 0 ][ i ] = spotChild;
@@ -76,7 +76,7 @@ public class SortedDepthFirstIteratorTest
 				spots[ 0 ][ i ] = spotChild;
 				for ( int j = 1; j < spots.length; j++ )
 				{
-					final Spot spot = new Spot( 0d, 0d, 0d, "  " + j + "_" + randomString( 3 ) );
+					final Spot spot = new Spot( 0d, 0d, 0d, 1d, -1d, "  " + j + "_" + randomString( 3 ) );
 					spots[ j ][ i ] = spot;
 					model.addSpotTo( spot, j + 1 );
 					model.addEdge( spots[ j - 1 ][ i ], spots[ j ][ i ], -1 );

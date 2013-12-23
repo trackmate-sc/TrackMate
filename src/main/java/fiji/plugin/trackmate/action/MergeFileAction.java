@@ -105,7 +105,7 @@ public class MergeFileAction extends AbstractTMAction {
 				Spot newSpot = null; // we keep a reference to the new spot, needed below
 				for (final Spot oldSpot : spots) {
 					// An awkward way to avoid spot ID conflicts after loading two files
-					newSpot = new Spot( oldSpot, oldSpot.getName() );
+					newSpot = new Spot( oldSpot );
 					for (final String feature : oldSpot.getFeatures().keySet()) {
 						newSpot.putFeature(feature, oldSpot.getFeature(feature));
 					}

@@ -56,9 +56,7 @@ public class BlobDescriptiveStatisticsTest
 
 		}
 
-		spot = new Spot( CENTER[ 0 ], CENTER[ 1 ], CENTER[ 2 ], "1" );
-		spot.putFeature( Spot.RADIUS, RADIUS );
-
+		spot = new Spot( CENTER[ 0 ], CENTER[ 1 ], CENTER[ 2 ], RADIUS, -1d, "1" );
 	}
 
 	@Test
@@ -80,8 +78,7 @@ public class BlobDescriptiveStatisticsTest
 		final BlobDescriptiveStatisticsTest test = new BlobDescriptiveStatisticsTest();
 		test.setUp();
 
-		final Spot tmpSpot = new Spot( CENTER[ 0 ], CENTER[ 1 ], CENTER[ 2 ] );
-		tmpSpot.putFeature( Spot.RADIUS, RADIUS );
+		final Spot tmpSpot = new Spot( CENTER[ 0 ], CENTER[ 1 ], CENTER[ 2 ], RADIUS, -1d );
 		final SpotNeighborhood< UnsignedShortType > disc = new SpotNeighborhood< UnsignedShortType >( tmpSpot, test.img2D );
 		for ( final UnsignedShortType pixel : disc )
 		{

@@ -52,7 +52,7 @@ public class TrackSpeedStatisticsAnalyzerTest
 				for ( int j = 0; j <= DEPTH; j++ )
 				{
 					// We use deterministic locations
-					final Spot spot = new Spot( j * i, i, i );
+					final Spot spot = new Spot( j * i, i, i, 1d, -1d );
 					spot.putFeature( Spot.POSITION_T, Double.valueOf( j ) );
 					model.addSpotTo( spot, j );
 					track.add( spot );
@@ -108,7 +108,7 @@ public class TrackSpeedStatisticsAnalyzerTest
 			for ( int j = 0; j <= DEPTH; j++ )
 			{
 				// We use deterministic locations
-				final Spot spot = new Spot( j * j, 0d, 0d );
+				final Spot spot = new Spot( j * j, 0d, 0d, 1d, -1d );
 				spot.putFeature( Spot.POSITION_T, Double.valueOf( j ) );
 				model2.addSpotTo( spot, j );
 				track.add( spot );
@@ -178,9 +178,9 @@ public class TrackSpeedStatisticsAnalyzerTest
 		model.beginUpdate();
 		try
 		{
-			final Spot spot1 = model.addSpotTo( new Spot( 0d, 0d, 0d ), 0 );
+			final Spot spot1 = model.addSpotTo( new Spot( 0d, 0d, 0d, 1d, -1d ), 0 );
 			spot1.putFeature( Spot.POSITION_T, 0d );
-			final Spot spot2 = model.addSpotTo( new Spot( 0d, 0d, 0d ), 1 );
+			final Spot spot2 = model.addSpotTo( new Spot( 0d, 0d, 0d, 1d, -1d ), 1 );
 			spot2.putFeature( Spot.POSITION_T, 1d );
 			model.addEdge( spot1, spot2, 1 );
 

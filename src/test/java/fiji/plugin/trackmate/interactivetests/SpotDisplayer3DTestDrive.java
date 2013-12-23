@@ -76,8 +76,7 @@ public class SpotDisplayer3DTestDrive
 		// Put the blobs in the image
 		for ( int i = 0; i < N_BLOBS; i++ )
 		{
-			final Spot tmpSpot = new Spot( centers.get( i )[ 0 ], centers.get( i )[ 1 ], centers.get( i )[ 2 ] );
-			tmpSpot.putFeature( Spot.RADIUS, radiuses[ i ] );
+			final Spot tmpSpot = new Spot( centers.get( i )[ 0 ], centers.get( i )[ 1 ], centers.get( i )[ 2 ], radiuses[ i ], -1d );
 			final SpotNeighborhood< UnsignedByteType > sphere = new SpotNeighborhood< UnsignedByteType >( tmpSpot, img );
 			for ( final UnsignedByteType pixel : sphere )
 			{
@@ -103,10 +102,8 @@ public class SpotDisplayer3DTestDrive
 		Spot spot;
 		for ( int i = 0; i < N_BLOBS; i++ )
 		{
-			spot = new Spot( centers.get( i )[ 0 ], centers.get( i )[ 1 ], centers.get( i )[ 2 ], "Spot " + i );
+			spot = new Spot( centers.get( i )[ 0 ], centers.get( i )[ 1 ], centers.get( i )[ 2 ], RADIUS, -1d, "Spot " + i );
 			spot.putFeature( Spot.POSITION_T, Double.valueOf( 0 ) );
-			spot.putFeature( Spot.RADIUS, RADIUS );
-			spot.putFeature( Spot.QUALITY, RADIUS );
 			spots.add( spot );
 		}
 

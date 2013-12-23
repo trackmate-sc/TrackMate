@@ -31,12 +31,12 @@ public class RadiusEstimatorTest< T extends NativeType< T > & RealType< T >>
 	public void testEstimatorOnPerfectSpheres()
 	{
 
-		final byte on = ( byte ) 255;
-		final Spot s1 = new Spot( 100, 100, 100 );
-		final Spot s2 = new Spot( 100, 100, 200 );
-		final Spot s3 = new Spot( 100, 100, 300 );
-		final Spot[] spots = new Spot[] { s1, s2, s3 };
 		final double[] radiuses = new double[] { 12, 20, 32 };
+		final byte on = ( byte ) 255;
+		final Spot s1 = new Spot( 100d, 100d, 100d, radiuses[ 0 ], -1d );
+		final Spot s2 = new Spot( 100d, 100d, 200d, radiuses[ 1 ], -1d );
+		final Spot s3 = new Spot( 100d, 100d, 300d, radiuses[ 2 ], -1d );
+		final Spot[] spots = new Spot[] { s1, s2, s3 };
 		final double[] calibration = new double[] { 1, 1, 1 };
 		final AxisType[] axes = new AxisType[] { Axes.X, Axes.Y, Axes.Z };
 
@@ -44,16 +44,13 @@ public class RadiusEstimatorTest< T extends NativeType< T > & RealType< T >>
 		final Img< UnsignedByteType > img = new ArrayImgFactory< UnsignedByteType >().create( new int[] { 200, 200, 400 }, new UnsignedByteType() );
 		final ImgPlus< UnsignedByteType > testImage = new ImgPlus< UnsignedByteType >( img, "Test", axes, calibration );
 
-		int index = 0;
 		for ( final Spot s : spots )
 		{
-			s.putFeature( Spot.RADIUS, radiuses[ index ] );
 			final SpotNeighborhood< UnsignedByteType > sphere = new SpotNeighborhood< UnsignedByteType >( s, testImage );
 			for ( final UnsignedByteType pixel : sphere )
 			{
 				pixel.set( on );
 			}
-			index++;
 		}
 
 		// Apply the estimator
@@ -75,11 +72,11 @@ public class RadiusEstimatorTest< T extends NativeType< T > & RealType< T >>
 	{
 
 		final byte on = ( byte ) 255;
-		final Spot s1 = new Spot( 100, 100, 100 );
-		final Spot s2 = new Spot( 100, 100, 200 );
-		final Spot s3 = new Spot( 100, 100, 300 );
-		final Spot[] spots = new Spot[] { s1, s2, s3 };
 		final double[] radiuses = new double[] { 12, 20, 32 };
+		final Spot s1 = new Spot( 100, 100, 100, radiuses[ 0 ], -1d );
+		final Spot s2 = new Spot( 100, 100, 200, radiuses[ 1 ], -1d );
+		final Spot s3 = new Spot( 100, 100, 300, radiuses[ 2 ], -1d );
+		final Spot[] spots = new Spot[] { s1, s2, s3 };
 		final double[] calibration = new double[] { 1, 1, 1 };
 		final AxisType[] axes = new AxisType[] { Axes.X, Axes.Y, Axes.Z };
 
@@ -87,16 +84,13 @@ public class RadiusEstimatorTest< T extends NativeType< T > & RealType< T >>
 		final Img< UnsignedByteType > img = new ArrayImgFactory< UnsignedByteType >().create( new int[] { 200, 200, 400 }, new UnsignedByteType() );
 		final ImgPlus< UnsignedByteType > testImage = new ImgPlus< UnsignedByteType >( img, "Test", axes, calibration );
 
-		int index = 0;
 		for ( final Spot s : spots )
 		{
-			s.putFeature( Spot.RADIUS, radiuses[ index ] );
 			final SpotNeighborhood< UnsignedByteType > sphere = new SpotNeighborhood< UnsignedByteType >( s, testImage );
 			for ( final UnsignedByteType pixel : sphere )
 			{
 				pixel.set( on );
 			}
-			index++;
 		}
 
 		final ij.ImagePlus imp = ImageJFunctions.wrap( testImage, testImage.toString() );

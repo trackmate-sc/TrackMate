@@ -45,7 +45,7 @@ public class SpotGroupNodeTestDrive
 			center = new Point4d( x, y, z, RADIUS + ran.nextGaussian() );
 			color = new Color4f( new Color( Color.HSBtoRGB( ran.nextFloat(), 1, 1 ) ) );
 			color.w = ran.nextFloat();
-			spot = new Spot( x, y, z );
+			spot = new Spot( x, y, z, 1d, -1d );
 			centers.put( spot, center );
 			colors.put( spot, color );
 		}
