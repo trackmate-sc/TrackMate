@@ -188,7 +188,7 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 			 * Get neighborhood
 			 */
 
-			final SpotNeighborhood< T > sn = getNeighborhood( spot, frame );
+			final SearchRegion< T > sn = getNeighborhood( spot, frame );
 			if ( null == sn ) { return; }
 
 			final RandomAccessible< T > source = sn.source;
@@ -322,12 +322,12 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 	 * @param frame
 	 *            the frame in the source image the desired neighborhood as to
 	 *            be taken.
-	 * @return the neighborhood, as a {@link SpotNeighborhood}. Concrete
+	 * @return the neighborhood, as a {@link SearchRegion}. Concrete
 	 *         implementations have to specify the neighborhood location and
 	 *         calibration, so that the found spots can have their coordinates
 	 *         put back in the raw source coordinate system.
 	 */
-	protected abstract SpotNeighborhood< T > getNeighborhood( Spot spot, int frame );
+	protected abstract SearchRegion< T > getNeighborhood( Spot spot, int frame );
 
 	/**
 	 * Returns a new instance of a {@link SpotDetector} that will inspect the
@@ -398,7 +398,7 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 	 * A utility class made to return the information on a neighborhood
 	 * generated from a source around a {@link Spot}.
 	 */
-	public static class SpotNeighborhood< R >
+	public static class SearchRegion< R >
 	{
 		/** The source image. */
 		public RandomAccessible< R > source;
