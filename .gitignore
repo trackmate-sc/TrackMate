@@ -1,4 +1,6 @@
 /target
+jars/
+plugins/
 .classpath
 .gitignore
 .project
