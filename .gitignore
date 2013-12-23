@@ -1,6 +1,7 @@
 /target
 jars/
 plugins/
+samples/
 .classpath
 .gitignore
 .project
