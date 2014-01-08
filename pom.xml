@@ -142,6 +142,13 @@
 		</dependency>
 	</dependencies>
 
+	<scm>
+		<connection>scm:git:git://github.com/fiji/TrackMate</connection>
+		<developerConnection>scm:git:git@github.com:fiji/TrackMate</developerConnection>
+		<tag>HEAD</tag>
+		<url>https://github.com/fiji/TrackMate</url>
+	</scm>
+
 	<!-- NB: for project parent -->
 	<repositories>
 		<repository>
