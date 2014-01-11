@@ -5,6 +5,7 @@ import java.util.Map;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
+import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 
@@ -55,5 +56,10 @@ public class ManualTracker implements SpotTracker {
 
 	@Override
 	public void setTarget(final SpotCollection spots, final Map<String, Object> settings) {}
+
+	@Override
+	public void setLogger(final Logger logger) {
+		// not needed
+	}
 
 }

@@ -7,6 +7,7 @@ import net.imglib2.algorithm.OutputAlgorithm;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
+import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
@@ -43,4 +44,7 @@ public interface SpotTracker extends  OutputAlgorithm<SimpleWeightedGraph<Spot, 
 	 * In the spot collection, only visible spots are considered for tracking.
 	 */
 	public void setTarget(final SpotCollection spots, final Map<String, Object> settings);
+
+	/** Sets the logger to use for logging messages. */
+	public void setLogger(final Logger logger);
 }
