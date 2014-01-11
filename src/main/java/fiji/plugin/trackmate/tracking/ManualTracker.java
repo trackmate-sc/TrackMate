@@ -44,6 +44,11 @@ public class ManualTracker implements SpotTracker {
 	}
 
 	@Override
+	public String getInfo() {
+		return INFO_TEXT;
+	}
+
+	@Override
 	public String toString() {
 		return NAME;
 	}

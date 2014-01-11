@@ -207,6 +207,11 @@ public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm	impl
 		return TRACKER_KEY;
 	}
 
+	@Override
+	public String getInfo() {
+		return INFO_TEXT;
+	}
+
 	public static boolean checkInput(final Map<String, Object> settings, final StringBuilder errrorHolder) {
 		boolean ok = checkParameter(settings, KEY_LINKING_MAX_DISTANCE, Double.class, errrorHolder);
 		final List<String> mandatoryKeys = new ArrayList<String>();

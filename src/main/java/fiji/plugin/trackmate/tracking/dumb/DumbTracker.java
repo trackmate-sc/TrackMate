@@ -18,6 +18,7 @@ import fiji.plugin.trackmate.tracking.SpotTracker;
 public class DumbTracker implements SpotTracker {
 
 	public static final String KEY = "DUMB_TRACKER";
+	private static final String INFO_TEXT = "<html>Very dumb tracker</html>";
 	private static final String BASE_ERROR_MESSAGE = "[DumbTracker] ";
 	/**
 	 * How many times the std of previously created link distances
@@ -306,6 +307,11 @@ public class DumbTracker implements SpotTracker {
 	@Override
 	public String getKey() {
 		return KEY;
+	}
+
+	@Override
+	public String getInfo() {
+		return INFO_TEXT;
 	}
 
 	@Override

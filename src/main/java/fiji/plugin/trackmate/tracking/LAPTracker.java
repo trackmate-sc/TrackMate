@@ -722,4 +722,9 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 		return TRACKER_KEY;
 	}
 
+	@Override
+	public String getInfo() {
+		return INFO_TEXT;
+	}
+
 }

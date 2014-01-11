@@ -31,5 +31,10 @@ public class SimpleFastLAPTracker extends FastLAPTracker {
 	@Override
 	public String getKey() {
 		return TRACKER_KEY;
-}
+	}
+
+	@Override
+	public String getInfo() {
+		return INFO_TEXT;
+	}
 }
