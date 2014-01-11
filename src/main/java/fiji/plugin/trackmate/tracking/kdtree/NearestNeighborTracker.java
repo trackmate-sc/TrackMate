@@ -18,6 +18,7 @@ import net.imglib2.multithreading.SimpleMultiThreading;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
+import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
@@ -25,6 +26,7 @@ import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.util.TMUtils;
 
+@Plugin(type = SpotTracker.class)
 public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm	implements SpotTracker {
 
 	/*

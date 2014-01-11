@@ -6,6 +6,7 @@ import net.imglib2.algorithm.OutputAlgorithm;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
+import org.scijava.plugin.SciJavaPlugin;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
@@ -31,7 +32,7 @@ import fiji.plugin.trackmate.SpotCollection;
  * is not allowed. This must be enforced by implementations.
  * </ul>
  */
-public interface SpotTracker extends  OutputAlgorithm<SimpleWeightedGraph<Spot, DefaultWeightedEdge>> {
+public interface SpotTracker extends  OutputAlgorithm<SimpleWeightedGraph<Spot, DefaultWeightedEdge>>, SciJavaPlugin {
 
 	/** @return a unique String identifier for this tracker. */
 	public String getKey();

@@ -1,7 +1,10 @@
 package fiji.plugin.trackmate.tracking;
 
+import org.scijava.plugin.Plugin;
+
 import fiji.plugin.trackmate.Logger;
 
+@Plugin(type = SpotTracker.class)
 public class SimpleFastLAPTracker extends FastLAPTracker {
 
 

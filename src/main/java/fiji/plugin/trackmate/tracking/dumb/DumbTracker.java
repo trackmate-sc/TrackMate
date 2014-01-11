@@ -16,6 +16,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 
+// disabled so it is not shown to the user: @Plugin(type = SpotTracker.class)
 public class DumbTracker implements SpotTracker {
 
 	public static final String KEY = "DUMB_TRACKER";

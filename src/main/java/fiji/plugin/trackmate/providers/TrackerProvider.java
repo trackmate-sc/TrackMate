@@ -25,8 +25,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.jdom2.Element;
+import org.scijava.Context;
+import org.scijava.InstantiableException;
+import org.scijava.log.LogService;
+import org.scijava.plugin.PluginInfo;
+import org.scijava.plugin.PluginService;
 
-import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.SpotDetector;
@@ -52,6 +56,7 @@ public class TrackerProvider extends AbstractProvider  {
 	protected static final String XML_ELEMENT_NAME_FEATURE_PENALTIES = "FeaturePenalties";
 
 	protected final Model model;
+	protected Map<String, SpotTracker> implementations;
 
 	/*
 	 * CONSTRUCTOR
@@ -86,24 +91,26 @@ public class TrackerProvider extends AbstractProvider  {
 	 * Registers the standard trackers shipped with TrackMate.
 	 */
 	protected void registerTrackers() {
-		// keys
 		keys = new ArrayList<String>();
-		keys.add(SimpleFastLAPTracker.TRACKER_KEY);
-		keys.add(FastLAPTracker.TRACKER_KEY);
-		keys.add(NearestNeighborTracker.TRACKER_KEY);
-		keys.add(ManualTracker.TRACKER_KEY);
-		// infoTexts
 		infoTexts = new ArrayList<String>();
-		infoTexts.add(SimpleFastLAPTracker.INFO_TEXT);
-		infoTexts.add(FastLAPTracker.INFO_TEXT);
-		infoTexts.add(NearestNeighborTracker.INFO_TEXT);
-		infoTexts.add(ManualTracker.INFO_TEXT);
-		// Names
 		names = new ArrayList<String>();
-		names.add(SimpleFastLAPTracker.NAME);
-		names.add(FastLAPTracker.NAME);
-		names.add(NearestNeighborTracker.NAME);
-		names.add(ManualTracker.NAME);
+		implementations = new HashMap<String, SpotTracker>();
+
+		final Context context = new Context(LogService.class, PluginService.class);
+		final LogService log = context.getService(LogService.class);
+		final PluginService pluginService = context.getService(PluginService.class);
+		for (final PluginInfo<SpotTracker> info : pluginService.getPluginsOfType(SpotTracker.class)) {
+			try {
+				final SpotTracker tracker = info.createInstance();
+				implementations.put(tracker.getName(), tracker);
+				keys.add(tracker.getKey());
+				infoTexts.add(tracker.getInfo());
+				names.add(tracker.getName());
+			}
+			catch (InstantiableException e) {
+				log.error("Could not instantiate " + info.getClassName(), e);
+			}
+		}
 	}
 
 	/**
@@ -113,24 +120,8 @@ public class TrackerProvider extends AbstractProvider  {
 	 * @return a new {@link SpotTracker}.
 	 */
 	public SpotTracker getTracker() {
-
-		final Logger logger = model.getLogger();
-		SpotTracker tracker;
-		if (currentKey.equals(SimpleFastLAPTracker.TRACKER_KEY)) {
-			tracker = new SimpleFastLAPTracker(logger);
-
-		} else if (currentKey.equals(FastLAPTracker.TRACKER_KEY)) {
-			tracker = new FastLAPTracker(logger);
-
-		} else if (currentKey.equals(NearestNeighborTracker.TRACKER_KEY)) {
-			tracker = new NearestNeighborTracker(logger);
-
-		} else if (currentKey.equals(ManualTracker.TRACKER_KEY)) {
-			tracker = new ManualTracker();
-
-		} else {
-			return null;
-		}
+		SpotTracker tracker = implementations.get(currentKey);
+		tracker.setLogger(model.getLogger());
 		return tracker;
 	}
 
@@ -139,21 +130,8 @@ public class TrackerProvider extends AbstractProvider  {
 	 * or <code>null</code> if it is unknown to this factory.
 	 */
 	public String getInfoText() {
-		if (currentKey.equals(SimpleFastLAPTracker.TRACKER_KEY)) {
-			return SimpleFastLAPTracker.INFO_TEXT;
-
-		} else if (currentKey.equals(FastLAPTracker.TRACKER_KEY)) {
-			return FastLAPTracker.INFO_TEXT;
-
-		} else if (currentKey.equals(NearestNeighborTracker.TRACKER_KEY)) {
-			return NearestNeighborTracker.INFO_TEXT;
-
-		} else if (currentKey.equals(ManualTracker.TRACKER_KEY)) {
-			return ManualTracker.INFO_TEXT;
-
-		} else {
-			return null;
-		}
+		final SpotTracker tracker = implementations.get(currentKey);
+		return tracker == null ? null : tracker.getInfo();
 	}
 
 	/**
@@ -162,21 +140,8 @@ public class TrackerProvider extends AbstractProvider  {
 	 * @return a String representation of the selected tracker.
 	 */
 	public String getName() {
-		if (currentKey.equals(SimpleFastLAPTracker.TRACKER_KEY)) {
-			return SimpleFastLAPTracker.NAME;
-
-		} else if (currentKey.equals(FastLAPTracker.TRACKER_KEY)) {
-			return FastLAPTracker.NAME;
-
-		} else if (currentKey.equals(NearestNeighborTracker.TRACKER_KEY)) {
-			return NearestNeighborTracker.NAME;
-
-		} else if (currentKey.equals(ManualTracker.TRACKER_KEY)) {
-			return ManualTracker.NAME;
-
-		} else {
-			return null;
-		}
+		final SpotTracker tracker = implementations.get(currentKey);
+		return tracker == null ? null : tracker.getName();
 	}
 
 	/**

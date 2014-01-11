@@ -1,9 +1,12 @@
 package fiji.plugin.trackmate.tracking;
 
+import org.scijava.plugin.Plugin;
+
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.tracking.hungarian.AssignmentAlgorithm;
 import fiji.plugin.trackmate.tracking.hungarian.MunkresKuhnAlgorithm;
 
+@Plugin(type = SpotTracker.class)
 public class FastLAPTracker extends LAPTracker {
 
 	public static final String TRACKER_KEY = "FAST_LAP_TRACKER";
