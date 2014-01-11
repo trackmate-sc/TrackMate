@@ -131,7 +131,7 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 
 
 	/** Logger used to echo progress on tracking. */
-	protected final Logger logger;
+	protected Logger logger;
 
 	/** The cost matrix for linking individual track segments (step 2). */
 	protected double[][] segmentCosts = null;
@@ -721,5 +721,23 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 	public String getKey() {
 		return TRACKER_KEY;
 	}
+
+	@Override
+	public String getInfo() {
+		return INFO_TEXT;
+	}
+
+	@Override
+	public String getName() {
+		return NAME;
+	}
+
+	@Override
+	public void setLogger(final Logger logger) {
+		this.logger = logger;
+	}
+
+	@Override
+	public void toString(Map<String, Object> sm, StringBuilder str) { }
 
 }

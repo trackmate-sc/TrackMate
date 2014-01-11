@@ -11,13 +11,16 @@ import java.util.Set;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
+import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 
+// disabled so it is not shown to the user: @Plugin(type = SpotTracker.class)
 public class DumbTracker implements SpotTracker {
 
 	public static final String KEY = "DUMB_TRACKER";
+	private static final String INFO_TEXT = "<html>Very dumb tracker</html>";
 	private static final String BASE_ERROR_MESSAGE = "[DumbTracker] ";
 	/**
 	 * How many times the std of previously created link distances
@@ -309,10 +312,24 @@ public class DumbTracker implements SpotTracker {
 	}
 
 	@Override
+	public String getInfo() {
+		return INFO_TEXT;
+	}
+
+	@Override
+	public String getName() {
+		return "Dumb tracker";
+	}
+
+	@Override
 	public void setTarget(final SpotCollection spots, final Map<String, Object> settings) {
 		this.spots = spots;
 	}
 
+	@Override
+	public void setLogger(final Logger logger) {
+		// not needed
+	}
 
 	/*
 	 * STATIC METHODS
@@ -325,5 +342,8 @@ public class DumbTracker implements SpotTracker {
 		}
 		return indices;
 	}
+
+	@Override
+	public void toString(Map<String, Object> sm, StringBuilder str) { }
 
 }

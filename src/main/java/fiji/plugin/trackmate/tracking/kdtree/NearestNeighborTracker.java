@@ -18,6 +18,7 @@ import net.imglib2.multithreading.SimpleMultiThreading;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
+import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
@@ -25,6 +26,7 @@ import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.util.TMUtils;
 
+@Plugin(type = SpotTracker.class)
 public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm	implements SpotTracker {
 
 	/*
@@ -50,7 +52,7 @@ public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm	impl
 				" </html>";
 
 	protected SpotCollection spots;
-	protected final Logger logger;
+	protected Logger logger;
 	protected SimpleWeightedGraph<Spot,DefaultWeightedEdge> graph;
 	protected Map<String, Object> settings;
 
@@ -207,6 +209,16 @@ public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm	impl
 		return TRACKER_KEY;
 	}
 
+	@Override
+	public String getInfo() {
+		return INFO_TEXT;
+	}
+
+	@Override
+	public String getName() {
+		return NAME;
+	}
+
 	public static boolean checkInput(final Map<String, Object> settings, final StringBuilder errrorHolder) {
 		boolean ok = checkParameter(settings, KEY_LINKING_MAX_DISTANCE, Double.class, errrorHolder);
 		final List<String> mandatoryKeys = new ArrayList<String>();
@@ -214,4 +226,15 @@ public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm	impl
 		ok = ok & checkMapKeys(settings, mandatoryKeys, null, errrorHolder);
 		return ok;
 	}
+
+	@Override
+	public void setLogger(final Logger logger) {
+		this.logger = logger;
+	}
+
+	@Override
+	public void toString(Map<String, Object> sm, StringBuilder str) {
+		str.append(String.format("  Max distance: %.1f\n", (Double) sm.get(KEY_LINKING_MAX_DISTANCE)));
+	}
+
 }
