@@ -487,7 +487,6 @@ public class TrackerProvider extends AbstractProvider  {
 	 * A utility method that builds a string representation of a settings map
 	 * owing to the currently selected tracker in this provider.
 	 */
-	@SuppressWarnings("unchecked")
 	public String toString(final Map<String, Object> sm) {
 
 		if (!checkSettingsValidity(sm)) {
@@ -495,43 +494,9 @@ public class TrackerProvider extends AbstractProvider  {
 		}
 
 		final StringBuilder str = new StringBuilder();
-		if (currentKey.equals(FastLAPTracker.TRACKER_KEY) || currentKey.equals(SimpleFastLAPTracker.TRACKER_KEY)) {
-
-			str.append("  Linking conditions:\n");
-			str.append(String.format("    - max distance: %.1f\n", (Double) sm.get(KEY_LINKING_MAX_DISTANCE)));
-			str.append(LAPUtils.echoFeaturePenalties((Map<String, Double>) sm.get(KEY_LINKING_FEATURE_PENALTIES)));
-
-			if ((Boolean) sm.get(KEY_ALLOW_GAP_CLOSING)) {
-				str.append("  Gap-closing conditions:\n");
-				str.append(String.format("    - max distance: %.1f\n", (Double) sm.get(KEY_GAP_CLOSING_MAX_DISTANCE)));
-				str.append(String.format("    - max frame gap: %d\n", (Integer) sm.get(KEY_GAP_CLOSING_MAX_FRAME_GAP)));
-				str.append(LAPUtils.echoFeaturePenalties((Map<String, Double>) sm.get(KEY_GAP_CLOSING_FEATURE_PENALTIES)));
-			} else {
-				str.append("  Gap-closing not allowed.\n");
-			}
-
-			if ((Boolean) sm.get(KEY_ALLOW_TRACK_SPLITTING)) {
-				str.append("  Track splitting conditions:\n");
-				str.append(String.format("    - max distance: %.1f\n", (Double) sm.get(KEY_SPLITTING_MAX_DISTANCE)));
-				str.append(LAPUtils.echoFeaturePenalties((Map<String, Double>) sm.get(KEY_SPLITTING_FEATURE_PENALTIES)));
-			} else {
-				str.append("  Track splitting not allowed.\n");
-			}
-
-			if ((Boolean) sm.get(KEY_ALLOW_TRACK_MERGING)) {
-				str.append("  Track merging conditions:\n");
-				str.append(String.format("    - max distance: %.1f\n", (Double) sm.get(KEY_MERGING_MAX_DISTANCE)));
-				str.append(LAPUtils.echoFeaturePenalties((Map<String, Double>) sm.get(KEY_MERGING_FEATURE_PENALTIES)));
-			} else {
-				str.append("  Track merging not allowed.\n");
-			}
-
-		} else if (currentKey.equals(NearestNeighborTracker.TRACKER_KEY)) {
-			str.append(String.format("  Max distance: %.1f\n", (Double) sm.get(KEY_LINKING_MAX_DISTANCE)));
-
-		} else if (currentKey.equals(ManualTracker.TRACKER_KEY)) {
-			str.append("  Manual tracking.\n");
-
+		final SpotTracker tracker = implementations.get(currentKey);
+		if (tracker != null) {
+			tracker.toString(sm, str);
 		}
 		return str.toString();
 	}

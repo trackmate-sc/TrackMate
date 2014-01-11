@@ -231,4 +231,10 @@ public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm	impl
 	public void setLogger(final Logger logger) {
 		this.logger = logger;
 	}
+
+	@Override
+	public void toString(Map<String, Object> sm, StringBuilder str) {
+		str.append(String.format("  Max distance: %.1f\n", (Double) sm.get(KEY_LINKING_MAX_DISTANCE)));
+	}
+
 }

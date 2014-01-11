@@ -68,4 +68,9 @@ public class ManualTracker implements SpotTracker {
 		// not needed
 	}
 
+	@Override
+	public void toString(Map<String, Object> sm, StringBuilder str) {
+		str.append("  Manual tracking.\n");
+	}
+
 }

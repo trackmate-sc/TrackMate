@@ -343,4 +343,7 @@ public class DumbTracker implements SpotTracker {
 		return indices;
 	}
 
+	@Override
+	public void toString(Map<String, Object> sm, StringBuilder str) { }
+
 }

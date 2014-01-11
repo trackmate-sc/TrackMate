@@ -1,5 +1,20 @@
 package fiji.plugin.trackmate.tracking;
 
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_GAP_CLOSING;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_MERGING;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_SPLITTING;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_FRAME_GAP;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_MAX_DISTANCE;
+
+import java.util.Map;
+
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Logger;
@@ -61,6 +76,39 @@ public class FastLAPTracker extends LAPTracker {
 	@Override
 	public String getName() {
 		return NAME;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public void toString(Map<String, Object> sm, StringBuilder str) {
+		str.append("  Linking conditions:\n");
+		str.append(String.format("    - max distance: %.1f\n", (Double) sm.get(KEY_LINKING_MAX_DISTANCE)));
+		str.append(LAPUtils.echoFeaturePenalties((Map<String, Double>) sm.get(KEY_LINKING_FEATURE_PENALTIES)));
+
+		if ((Boolean) sm.get(KEY_ALLOW_GAP_CLOSING)) {
+			str.append("  Gap-closing conditions:\n");
+			str.append(String.format("    - max distance: %.1f\n", (Double) sm.get(KEY_GAP_CLOSING_MAX_DISTANCE)));
+			str.append(String.format("    - max frame gap: %d\n", (Integer) sm.get(KEY_GAP_CLOSING_MAX_FRAME_GAP)));
+			str.append(LAPUtils.echoFeaturePenalties((Map<String, Double>) sm.get(KEY_GAP_CLOSING_FEATURE_PENALTIES)));
+		} else {
+			str.append("  Gap-closing not allowed.\n");
+		}
+
+		if ((Boolean) sm.get(KEY_ALLOW_TRACK_SPLITTING)) {
+			str.append("  Track splitting conditions:\n");
+			str.append(String.format("    - max distance: %.1f\n", (Double) sm.get(KEY_SPLITTING_MAX_DISTANCE)));
+			str.append(LAPUtils.echoFeaturePenalties((Map<String, Double>) sm.get(KEY_SPLITTING_FEATURE_PENALTIES)));
+		} else {
+			str.append("  Track splitting not allowed.\n");
+		}
+
+		if ((Boolean) sm.get(KEY_ALLOW_TRACK_MERGING)) {
+			str.append("  Track merging conditions:\n");
+			str.append(String.format("    - max distance: %.1f\n", (Double) sm.get(KEY_MERGING_MAX_DISTANCE)));
+			str.append(LAPUtils.echoFeaturePenalties((Map<String, Double>) sm.get(KEY_MERGING_FEATURE_PENALTIES)));
+		} else {
+			str.append("  Track merging not allowed.\n");
+		}
 	}
 
 }

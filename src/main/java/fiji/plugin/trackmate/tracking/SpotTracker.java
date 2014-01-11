@@ -51,4 +51,11 @@ public interface SpotTracker extends  OutputAlgorithm<SimpleWeightedGraph<Spot, 
 
 	/** Sets the logger to use for logging messages. */
 	public void setLogger(final Logger logger);
+
+	/**
+	 * A utility method that builds a string representation of a settings map
+	 * owing to the currently selected tracker in this provider.
+	 */
+	public void toString(final Map<String, Object> sm, final StringBuilder str);
+
 }
