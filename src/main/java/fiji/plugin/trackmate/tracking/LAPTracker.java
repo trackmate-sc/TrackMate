@@ -728,6 +728,11 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 	}
 
 	@Override
+	public String getName() {
+		return NAME;
+	}
+
+	@Override
 	public void setLogger(final Logger logger) {
 		this.logger = logger;
 	}

@@ -55,6 +55,11 @@ public class ManualTracker implements SpotTracker {
 	}
 
 	@Override
+	public String getName() {
+		return NAME;
+	}
+
+	@Override
 	public void setTarget(final SpotCollection spots, final Map<String, Object> settings) {}
 
 	@Override

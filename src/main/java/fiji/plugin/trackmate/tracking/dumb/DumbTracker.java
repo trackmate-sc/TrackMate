@@ -316,6 +316,11 @@ public class DumbTracker implements SpotTracker {
 	}
 
 	@Override
+	public String getName() {
+		return "Dumb tracker";
+	}
+
+	@Override
 	public void setTarget(final SpotCollection spots, final Map<String, Object> settings) {
 		this.spots = spots;
 	}

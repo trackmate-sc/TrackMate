@@ -54,4 +54,10 @@ public class FastLAPTracker extends LAPTracker {
 	public String getInfo() {
 		return INFO_TEXT;
 	}
+
+	@Override
+	public String getName() {
+		return NAME;
+	}
+
 }

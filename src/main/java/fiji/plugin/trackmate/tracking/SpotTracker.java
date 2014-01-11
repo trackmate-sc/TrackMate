@@ -39,6 +39,9 @@ public interface SpotTracker extends  OutputAlgorithm<SimpleWeightedGraph<Spot, 
 	/** @return an informative description to show to the user. */
 	public String getInfo();
 
+	/** @return the name of this tracker to show to the user. */
+	public String getName();
+
 	/**
 	 * Set the spot collection and the settings map to use with this tracker.
 	 * In the spot collection, only visible spots are considered for tracking.
