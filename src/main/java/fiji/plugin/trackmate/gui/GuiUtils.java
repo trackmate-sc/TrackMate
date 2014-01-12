@@ -9,44 +9,53 @@ import java.awt.Point;
 
 import javax.swing.JFrame;
 
-public class GuiUtils {
-
-	
+public class GuiUtils
+{
 
 	/**
 	 * Positions a JFrame more or less cleverly next a {@link Component}.
 	 */
-	public static void positionWindow(JFrame gui, Component component) {
+	public static void positionWindow( final JFrame gui, final Component component )
+	{
 
-
-		if (null != component) {
-
+		if ( null != component )
+		{
 			// Get total size of all screens
-			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-			GraphicsDevice[] gs = ge.getScreenDevices();
+			final GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+			final GraphicsDevice[] gs = ge.getScreenDevices();
 			int screenWidth = 0;
-			for (int i=0; i<gs.length; i++) {
-				DisplayMode dm = gs[i].getDisplayMode();
+			for ( int i = 0; i < gs.length; i++ )
+			{
+				final DisplayMode dm = gs[ i ].getDisplayMode();
 				screenWidth += dm.getWidth();
 			}
 
-			Point windowLoc = component.getLocation();
-			Dimension windowSize = component.getSize();
-			Dimension guiSize = gui.getSize();
-			if (guiSize.width > windowLoc.x) {
-				if (guiSize.width > screenWidth - (windowLoc.x + windowSize.width)) {
-					gui.setLocationRelativeTo(null); // give up
-				} else {
-					gui.setLocation(windowLoc.x+windowSize.width, windowLoc.y); // put it to the right
+			final Point windowLoc = component.getLocation();
+			final Dimension windowSize = component.getSize();
+			final Dimension guiSize = gui.getSize();
+			if ( guiSize.width > windowLoc.x )
+			{
+				if ( guiSize.width > screenWidth - ( windowLoc.x + windowSize.width ) )
+				{
+					gui.setLocationRelativeTo( null ); // give up
 				}
-			} else {
-				gui.setLocation(windowLoc.x-guiSize.width, windowLoc.y); // put it to the left
+				else
+				{
+					// put it to the right
+					gui.setLocation( windowLoc.x + windowSize.width, windowLoc.y );
+				}
+			}
+			else
+			{
+				// put it to the left
+				gui.setLocation( windowLoc.x - guiSize.width, windowLoc.y );
 			}
 
-		} else {
-			gui.setLocationRelativeTo(null);
+		}
+		else
+		{
+			gui.setLocationRelativeTo( null );
 		}
 	}
-	
-	
+
 }
