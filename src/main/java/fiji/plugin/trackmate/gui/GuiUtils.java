@@ -1,5 +1,8 @@
 package fiji.plugin.trackmate.gui;
 
+import ij.ImagePlus;
+import ij.measure.Calibration;
+
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.DisplayMode;
@@ -8,6 +11,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 public class GuiUtils
 {
@@ -55,6 +59,27 @@ public class GuiUtils
 		else
 		{
 			gui.setLocationRelativeTo( null );
+		}
+	}
+
+	public static final void userCheckImpDimensions( final ImagePlus imp )
+	{
+		final int[] dims = imp.getDimensions();
+		if ( dims[ 4 ] == 1 && dims[ 3 ] > 1 )
+		{
+			switch ( JOptionPane.showConfirmDialog( null, "It appears this image has 1 timepoint but " + dims[ 3 ] + " slices.\n" + "Do you want to swap Z and T?", "Z/T swapped?", JOptionPane.YES_NO_CANCEL_OPTION ) )
+			{
+			case JOptionPane.YES_OPTION:
+				imp.setDimensions( dims[ 2 ], dims[ 4 ], dims[ 3 ] );
+				final Calibration calibration = imp.getCalibration();
+				if ( calibration.frameInterval == 0 )
+				{
+					calibration.frameInterval = 1;
+				}
+				break;
+			case JOptionPane.CANCEL_OPTION:
+				return;
+			}
 		}
 	}
 

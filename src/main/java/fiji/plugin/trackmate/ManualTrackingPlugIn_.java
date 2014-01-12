@@ -18,6 +18,7 @@ public class ManualTrackingPlugIn_ extends TrackMatePlugIn_ implements PlugIn
 
 		final ImagePlus imp = WindowManager.getCurrentImage();
 		if ( null == imp ) { return; }
+		GuiUtils.userCheckImpDimensions( imp );
 
 		settings = createSettings( imp );
 		trackmate = createTrackMate();
