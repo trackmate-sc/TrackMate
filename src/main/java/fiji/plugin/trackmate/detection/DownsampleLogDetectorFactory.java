@@ -31,6 +31,7 @@ import net.imglib2.type.numeric.RealType;
 import net.imglib2.view.Views;
 
 import org.jdom2.Element;
+import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
@@ -38,6 +39,7 @@ import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.panels.detector.DownSampleLogDetectorConfigurationPanel;
 import fiji.plugin.trackmate.util.TMUtils;
 
+@Plugin( type = SpotDetectorFactory.class )
 public class DownsampleLogDetectorFactory< T extends RealType< T > & NativeType< T >> extends LogDetectorFactory< T >
 {
 

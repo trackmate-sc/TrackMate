@@ -8,6 +8,7 @@ import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 
 import org.jdom2.Element;
+import org.scijava.plugin.SciJavaPlugin;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
@@ -21,7 +22,7 @@ import fiji.plugin.trackmate.gui.ConfigurationPanel;
  * detector parameters from/to XML, and of generating a suitable configuration
  * panel for GUI interaction.
  */
-public interface SpotDetectorFactory< T extends RealType< T > & NativeType< T >>
+public interface SpotDetectorFactory< T extends RealType< T > & NativeType< T >> extends SciJavaPlugin
 {
 
 	/**

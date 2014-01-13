@@ -1,12 +1,16 @@
 package fiji.plugin.trackmate.providers;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.scijava.Context;
+import org.scijava.InstantiableException;
+import org.scijava.log.LogService;
+import org.scijava.plugin.PluginInfo;
+import org.scijava.plugin.PluginService;
 
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.detection.DogDetectorFactory;
-import fiji.plugin.trackmate.detection.DownsampleLogDetectorFactory;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
-import fiji.plugin.trackmate.detection.ManualDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 
 public class DetectorProvider extends AbstractProvider {
@@ -15,10 +19,7 @@ public class DetectorProvider extends AbstractProvider {
 	 * BLANK CONSTRUCTOR
 	 */
 
-	protected LogDetectorFactory<?>	logDetectorFactory;
-	protected DogDetectorFactory<?>	dogDetectorFactory;
-	protected DownsampleLogDetectorFactory<?>	downsampleLogDetectorFactory;
-	protected ManualDetectorFactory<?>			manualDetectorFactory;
+	protected Map< String, SpotDetectorFactory< ? > > implementations;
 
 	/**
 	 * This provider provides the GUI with the spot detectors currently available in the
@@ -43,34 +44,36 @@ public class DetectorProvider extends AbstractProvider {
 	 */
 
 	/**
-	 * Registers the standard detectors shipped with TrackMate, and instantiates
-	 * their factories.
+	 * Discovers the detector factories in the current application context and
+	 * registers them in this provider.
 	 */
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings( "rawtypes" )
 	protected void registerDetectors() {
-		// Instances
-		this.dogDetectorFactory = new DogDetectorFactory();
-		this.logDetectorFactory = new LogDetectorFactory();
-		this.manualDetectorFactory = new ManualDetectorFactory();
-		this.downsampleLogDetectorFactory = new DownsampleLogDetectorFactory();
-		// keys
-		keys = new ArrayList<String>(4);
-		keys.add(LogDetectorFactory.DETECTOR_KEY);
-		keys.add(DogDetectorFactory.DETECTOR_KEY);
-		keys.add(DownsampleLogDetectorFactory.DETECTOR_KEY);
-		keys.add(ManualDetectorFactory.DETECTOR_KEY);
-		// names
-		names = new ArrayList<String>(4);
-		names.add(LogDetectorFactory.NAME);
-		names.add(DogDetectorFactory.NAME);
-		names.add(DownsampleLogDetectorFactory.NAME);
-		names.add(ManualDetectorFactory.NAME);
-		// infoTexts
-		infoTexts = new ArrayList<String>(4);
-		infoTexts.add(LogDetectorFactory.INFO_TEXT);
-		infoTexts.add(DogDetectorFactory.INFO_TEXT);
-		infoTexts.add(DownsampleLogDetectorFactory.INFO_TEXT);
-		infoTexts.add(ManualDetectorFactory.INFO_TEXT);
+		implementations = new HashMap< String, SpotDetectorFactory< ? > >();
+		// Find the rest from the context.
+		final Context context = new Context( LogService.class, PluginService.class );
+		final LogService log = context.getService( LogService.class );
+		final PluginService pluginService = context.getService( PluginService.class );
+		for ( final PluginInfo< SpotDetectorFactory > info : pluginService.getPluginsOfType( SpotDetectorFactory.class ) )
+		{
+			try
+			{
+				final SpotDetectorFactory< ? > detectorFactory = info.createInstance();
+				implementations.put( detectorFactory.getName(), detectorFactory );
+				keys.add( detectorFactory.getKey() );
+				infoTexts.add( detectorFactory.getInfoText() );
+				names.add( detectorFactory.getName() );
+			}
+			catch ( final InstantiableException e )
+			{
+				log.error( "Could not instantiate " + info.getClassName(), e );
+			}
+		}
+
+		if ( implementations.size() < 1 )
+		{
+			log.error( "Could not find any detector factory.\n" );
+		}
 	}
 
 	/**
@@ -78,24 +81,10 @@ public class DetectorProvider extends AbstractProvider {
 	 * parameter. If the key is unknown to this provider, return
 	 * <code>null</code>.
 	 */
-	@SuppressWarnings("rawtypes")
-	public SpotDetectorFactory getDetectorFactory() {
-
-		if (currentKey.equals(LogDetectorFactory.DETECTOR_KEY)) {
-			return logDetectorFactory;
-
-		} else if (currentKey.equals(DogDetectorFactory.DETECTOR_KEY)){
-			return dogDetectorFactory;
-
-		} else if (currentKey.equals(DownsampleLogDetectorFactory.DETECTOR_KEY)) {
-			return downsampleLogDetectorFactory;
-
-		} else if (currentKey.equals(ManualDetectorFactory.DETECTOR_KEY)) {
-			return manualDetectorFactory;
-
-		} else {
-			return null;
-		}
+	public SpotDetectorFactory< ? > getDetectorFactory()
+	{
+		final SpotDetectorFactory< ? > detectorFactory = implementations.get( currentKey );
+		return detectorFactory;
 	}
 
 }

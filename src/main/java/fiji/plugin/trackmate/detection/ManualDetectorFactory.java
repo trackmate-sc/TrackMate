@@ -19,12 +19,14 @@ import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 
 import org.jdom2.Element;
+import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.panels.detector.BasicDetectorConfigurationPanel;
 
+@Plugin( type = SpotDetectorFactory.class )
 public class ManualDetectorFactory< T extends RealType< T > & NativeType< T >> implements SpotDetectorFactory< T >
 {
 
