@@ -138,4 +138,13 @@ public interface SpotDetectorFactory< T extends RealType< T > & NativeType< T >>
 	 */
 	public Map< String, Object > getDefaultSettings();
 
+	/**
+	 * Check that the given settings map is suitable for target detector.
+	 * 
+	 * @param settings
+	 *            the map to test.
+	 * @return <code>true</code> if the settings map is valid.
+	 */
+	public boolean checkSettings( final Map< String, Object > settings );
+
 }

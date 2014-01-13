@@ -67,19 +67,11 @@ public class ManualDetectorFactory< T extends RealType< T > & NativeType< T >> i
 	public boolean setTarget( final ImgPlus< T > img, final Map< String, Object > settings )
 	{
 		this.settings = settings;
-		return checkInput( settings );
+		return checkSettings( settings );
 	}
 
-	/**
-	 * Check that the given settings map is suitable for the manual detector.
-	 * 
-	 * @param settings
-	 *            the map to test.
-	 * @param errorHolder
-	 *            if not suitable, will contain an error message.
-	 * @return true if the settings map is valid.
-	 */
-	private boolean checkInput( final Map< String, Object > settings )
+	@Override
+	public boolean checkSettings( final Map< String, Object > settings )
 	{
 		final StringBuilder errorHolder = new StringBuilder();
 		boolean ok = true;
@@ -126,7 +118,7 @@ public class ManualDetectorFactory< T extends RealType< T > & NativeType< T >> i
 			errorMessage = errorHolder.toString();
 			return false;
 		}
-		return checkInput( settings );
+		return checkSettings( settings );
 	}
 
 	@Override

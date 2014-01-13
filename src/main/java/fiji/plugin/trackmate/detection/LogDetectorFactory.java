@@ -78,7 +78,7 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 	{
 		this.img = img;
 		this.settings = settings;
-		return checkInput( settings );
+		return checkSettings( settings );
 	}
 
 	@Override
@@ -118,14 +118,8 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 		return errorMessage;
 	}
 
-	/**
-	 * Check that the given settings map is suitable for LoG based detectors.
-	 * 
-	 * @param settings
-	 *            the map to test.
-	 * @return true if the settings map is valid.
-	 */
-	private boolean checkInput( final Map< String, Object > settings )
+	@Override
+	public boolean checkSettings( final Map< String, Object > settings )
 	{
 		boolean ok = true;
 		final StringBuilder errorHolder = new StringBuilder();
@@ -185,7 +179,7 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 			errorMessage = errorHolder.toString();
 			return false;
 		}
-		return checkInput( settings );
+		return checkSettings( settings );
 	}
 
 	@Override

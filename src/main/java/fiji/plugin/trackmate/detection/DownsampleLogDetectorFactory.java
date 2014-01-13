@@ -85,7 +85,7 @@ public class DownsampleLogDetectorFactory< T extends RealType< T > & NativeType<
 	{
 		this.img = img;
 		this.settings = settings;
-		return checkInput( settings );
+		return checkSettings( settings );
 	}
 
 	@Override
@@ -117,17 +117,8 @@ public class DownsampleLogDetectorFactory< T extends RealType< T > & NativeType<
 		return settings;
 	}
 
-	/**
-	 * Check that the given settings map is suitable for the Downsample LoG
-	 * detector.
-	 * 
-	 * @param settings
-	 *            the map to test.
-	 * @param errorHolder
-	 *            if not suitable, will contain an error message.
-	 * @return true if the settings map is valid.
-	 */
-	private boolean checkInput( final Map< String, Object > settings )
+	@Override
+	public boolean checkSettings( final Map< String, Object > settings )
 	{
 		boolean ok = true;
 		final StringBuilder errorHolder = new StringBuilder();
@@ -190,7 +181,7 @@ public class DownsampleLogDetectorFactory< T extends RealType< T > & NativeType<
 			errorMessage = errorHolder.toString();
 			return false;
 		}
-		return checkInput( settings );
+		return checkSettings( settings );
 	}
 
 }
