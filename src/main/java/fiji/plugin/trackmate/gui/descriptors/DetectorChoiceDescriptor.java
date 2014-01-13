@@ -98,9 +98,9 @@ public class DetectorChoiceDescriptor implements WizardPanelDescriptor
 		// ones
 		// only if the old ones are absent or not compatible with it.
 		final Map< String, Object > currentSettings = trackmate.getSettings().detectorSettings;
-		if ( !detectorProvider.checkSettingsValidity( currentSettings ) )
+		if ( !factory.checkSettings( currentSettings ) )
 		{
-			final Map< String, Object > defaultSettings = detectorProvider.getDefaultSettings();
+			final Map< String, Object > defaultSettings = factory.getDefaultSettings();
 			trackmate.getSettings().detectorSettings = defaultSettings;
 		}
 

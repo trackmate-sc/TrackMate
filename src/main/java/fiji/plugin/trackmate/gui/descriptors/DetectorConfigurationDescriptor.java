@@ -5,6 +5,7 @@ import java.util.Map;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.providers.DetectorProvider;
@@ -45,15 +46,16 @@ public class DetectorConfigurationDescriptor implements WizardPanelDescriptor
 	 */
 	private void updateComponent()
 	{
+		final SpotDetectorFactory< ? > factory = trackmate.getSettings().detectorFactory;
 		// Regenerate panel
-		configPanel = detectorProvider.getDetectorConfigurationPanel( trackmate.getSettings(), trackmate.getModel() );
+		configPanel = factory.getDetectorConfigurationPanel( trackmate.getSettings(), trackmate.getModel() );
 		// We assume the provider is already configured with the right target
 		// detector factory
 		Map< String, Object > settings = trackmate.getSettings().detectorSettings;
 		// Bulletproof null
-		if ( null == settings || !detectorProvider.checkSettingsValidity( settings ) )
+		if ( null == settings || !factory.checkSettings( settings ) )
 		{
-			settings = detectorProvider.getDefaultSettings();
+			settings = factory.getDefaultSettings();
 		}
 		configPanel.setSettings( settings );
 	}
@@ -78,13 +80,14 @@ public class DetectorConfigurationDescriptor implements WizardPanelDescriptor
 	@Override
 	public void aboutToHidePanel()
 	{
+		final SpotDetectorFactory< ? > factory = trackmate.getSettings().detectorFactory;
 		Map< String, Object > settings = configPanel.getSettings();
-		final boolean settingsOk = detectorProvider.checkSettingsValidity( settings );
+		final boolean settingsOk = factory.checkSettings( settings );
 		if ( !settingsOk )
 		{
 			final Logger logger = trackmate.getModel().getLogger();
 			logger.error( "Config panel returned bad settings map:\n" + detectorProvider.getErrorMessage() + "Using defaults settings.\n" );
-			settings = detectorProvider.getDefaultSettings();
+			settings = factory.getDefaultSettings();
 		}
 		trackmate.getSettings().detectorSettings = settings;
 	}

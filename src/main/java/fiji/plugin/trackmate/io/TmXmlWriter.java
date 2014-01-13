@@ -302,7 +302,7 @@ public class TmXmlWriter {
 			if (!ok) {
 				logger.error(provider.getErrorMessage());
 			} else {
-				provider.marshall(settings.detectorSettings, el);
+				settings.detectorFactory.marshall( settings.detectorSettings, el );
 			}
 
 			logger.log("  Added detector settings.\n");
@@ -631,7 +631,9 @@ public class TmXmlWriter {
 		for (final String feature : spot.getFeatures().keySet()) {
 			val = spot.getFeature(feature);
 			if (null == val)
+			{
 				continue;
+			}
 			featureAttribute = new Attribute(feature, val.toString());
 			attributes.add(featureAttribute);
 		}
