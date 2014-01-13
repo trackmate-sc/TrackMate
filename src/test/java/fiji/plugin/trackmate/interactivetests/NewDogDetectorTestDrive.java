@@ -63,8 +63,9 @@ public class NewDogDetectorTestDrive {
 		final double minPeakValue = 7;
 
 		final File file = new File("/Users/tinevez/Projects/JYTinevez/ISBI/ChallengeData/VIRUS/VIRUS snr 7 density mid.tif");
+		final ImgPlus< ? > raw = new ImgOpener().openImg( file.getAbsolutePath() );
 		@SuppressWarnings("unchecked")
-		final ImgPlus<T> img = new ImgOpener().openImg(file.getAbsolutePath());
+		final ImgPlus< T > img = ( ImgPlus< T > ) raw;
 
 		//		// warmup
 		//		measure(img, 20, minPeakValue);
