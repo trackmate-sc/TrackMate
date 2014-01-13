@@ -1,21 +1,41 @@
 package fiji.plugin.trackmate.detection;
 
+import static fiji.plugin.trackmate.detection.DetectionUtils.readDoubleAttribute;
+import static fiji.plugin.trackmate.detection.DetectionUtils.readIntegerAttribute;
+import static fiji.plugin.trackmate.detection.DetectionUtils.writeDownsamplingFactor;
+import static fiji.plugin.trackmate.detection.DetectionUtils.writeRadius;
+import static fiji.plugin.trackmate.detection.DetectionUtils.writeTargetChannel;
+import static fiji.plugin.trackmate.detection.DetectionUtils.writeThreshold;
+import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_DOWNSAMPLE_FACTOR;
+import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_RADIUS;
+import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_TARGET_CHANNEL;
+import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_THRESHOLD;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DOWNSAMPLE_FACTOR;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
+import static fiji.plugin.trackmate.detection.DetectorKeys.XML_ATTRIBUTE_DETECTOR_NAME;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
+import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.view.Views;
+
+import org.jdom2.Element;
+
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.gui.ConfigurationPanel;
+import fiji.plugin.trackmate.gui.panels.detector.DownSampleLogDetectorConfigurationPanel;
 import fiji.plugin.trackmate.util.TMUtils;
 
 public class DownsampleLogDetectorFactory< T extends RealType< T > & NativeType< T >> extends LogDetectorFactory< T >
@@ -61,27 +81,40 @@ public class DownsampleLogDetectorFactory< T extends RealType< T > & NativeType<
 	}
 
 	@Override
+	public boolean setTarget( final ImgPlus< T > img, final Map< String, Object > settings )
+	{
+		this.img = img;
+		this.settings = settings;
+		return checkInput( settings );
+	}
+
+	@Override
 	public String getKey()
 	{
 		return DETECTOR_KEY;
 	}
 
 	@Override
-	public String toString()
+	public String getName()
 	{
 		return NAME;
 	}
 
 	@Override
-	public boolean checkInput()
+	public String getInfoText()
 	{
-		final StringBuilder errorHolder = new StringBuilder();
-		final boolean ok = checkInput( settings, errorHolder );
-		if ( !ok )
-		{
-			errorMessage = errorHolder.toString();
-		}
-		return ok;
+		return INFO_TEXT;
+	}
+
+	@Override
+	public Map< String, Object > getDefaultSettings()
+	{
+		final Map< String, Object > settings = new HashMap< String, Object >();
+		settings.put( KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL );
+		settings.put( KEY_RADIUS, DEFAULT_RADIUS );
+		settings.put( KEY_THRESHOLD, DEFAULT_THRESHOLD );
+		settings.put( KEY_DOWNSAMPLE_FACTOR, DEFAULT_DOWNSAMPLE_FACTOR );
+		return settings;
 	}
 
 	/**
@@ -94,9 +127,10 @@ public class DownsampleLogDetectorFactory< T extends RealType< T > & NativeType<
 	 *            if not suitable, will contain an error message.
 	 * @return true if the settings map is valid.
 	 */
-	public static final boolean checkInput( final Map< String, Object > settings, final StringBuilder errorHolder )
+	private boolean checkInput( final Map< String, Object > settings )
 	{
 		boolean ok = true;
+		final StringBuilder errorHolder = new StringBuilder();
 		ok = ok & checkParameter( settings, KEY_TARGET_CHANNEL, Integer.class, errorHolder );
 		ok = ok & checkParameter( settings, KEY_RADIUS, Double.class, errorHolder );
 		ok = ok & checkParameter( settings, KEY_THRESHOLD, Double.class, errorHolder );
@@ -107,7 +141,56 @@ public class DownsampleLogDetectorFactory< T extends RealType< T > & NativeType<
 		mandatoryKeys.add( KEY_THRESHOLD );
 		mandatoryKeys.add( KEY_DOWNSAMPLE_FACTOR );
 		ok = ok & checkMapKeys( settings, mandatoryKeys, null, errorHolder );
+		if ( !ok )
+		{
+			errorMessage = errorHolder.toString();
+		}
 		return ok;
+	}
+
+	@Override
+	public ConfigurationPanel getDetectorConfigurationPanel( final Settings settings, final Model model )
+	{
+		return new DownSampleLogDetectorConfigurationPanel( settings.imp, model );
+	}
+
+	@Override
+	public boolean marshall( final Map< String, Object > settings, final Element element )
+	{
+		element.setAttribute( XML_ATTRIBUTE_DETECTOR_NAME, DETECTOR_KEY );
+		final StringBuilder errorHolder = new StringBuilder();
+		final boolean ok = writeTargetChannel( settings, element, errorHolder ) && writeRadius( settings, element, errorHolder ) && writeThreshold( settings, element, errorHolder ) && writeDownsamplingFactor( settings, element, errorHolder );
+		if ( !ok )
+		{
+			errorMessage = errorHolder.toString();
+		}
+		return ok;
+	}
+
+	@Override
+	public boolean unmarshall( final Element element, final Map< String, Object > settings )
+	{
+		settings.clear();
+
+		final String detectorKey = element.getAttributeValue( XML_ATTRIBUTE_DETECTOR_NAME );
+		if ( null == detectorKey )
+		{
+			errorMessage = "Detector element not found.\n";
+			return false;
+		}
+
+		final StringBuilder errorHolder = new StringBuilder();
+		boolean ok = true;
+		ok = ok & readDoubleAttribute( element, settings, KEY_RADIUS, errorHolder );
+		ok = ok & readDoubleAttribute( element, settings, KEY_THRESHOLD, errorHolder );
+		ok = ok & readIntegerAttribute( element, settings, KEY_DOWNSAMPLE_FACTOR, errorHolder );
+		ok = ok & readIntegerAttribute( element, settings, KEY_TARGET_CHANNEL, errorHolder );
+		if ( !ok )
+		{
+			errorMessage = errorHolder.toString();
+			return false;
+		}
+		return checkInput( settings );
 	}
 
 }

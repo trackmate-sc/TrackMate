@@ -137,4 +137,5 @@ public interface SpotDetectorFactory< T extends RealType< T > & NativeType< T >>
 	 * @return a new map.
 	 */
 	public Map< String, Object > getDefaultSettings();
+
 }

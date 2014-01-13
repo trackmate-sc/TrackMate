@@ -1,10 +1,15 @@
 package fiji.plugin.trackmate.detection;
 
+import static fiji.plugin.trackmate.detection.DetectionUtils.readDoubleAttribute;
+import static fiji.plugin.trackmate.detection.DetectionUtils.writeRadius;
+import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_RADIUS;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
+import static fiji.plugin.trackmate.detection.DetectorKeys.XML_ATTRIBUTE_DETECTOR_NAME;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +17,13 @@ import net.imglib2.Interval;
 import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
+
+import org.jdom2.Element;
+
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.gui.ConfigurationPanel;
+import fiji.plugin.trackmate.gui.panels.detector.BasicDetectorConfigurationPanel;
 
 public class ManualDetectorFactory< T extends RealType< T > & NativeType< T >> implements SpotDetectorFactory< T >
 {
@@ -46,10 +58,35 @@ public class ManualDetectorFactory< T extends RealType< T > & NativeType< T >> i
 	}
 
 	@Override
-	public boolean checkInput()
+	public String getErrorMessage()
+	{
+		return errorMessage;
+	}
+
+	@Override
+	public boolean setTarget( final ImgPlus< T > img, final Map< String, Object > settings )
+	{
+		this.settings = settings;
+		return checkInput( settings );
+	}
+
+	/**
+	 * Check that the given settings map is suitable for the manual detector.
+	 * 
+	 * @param settings
+	 *            the map to test.
+	 * @param errorHolder
+	 *            if not suitable, will contain an error message.
+	 * @return true if the settings map is valid.
+	 */
+	private boolean checkInput( final Map< String, Object > settings )
 	{
 		final StringBuilder errorHolder = new StringBuilder();
-		final boolean ok = checkInput( settings, errorHolder );
+		boolean ok = true;
+		ok = ok & checkParameter( settings, KEY_RADIUS, Double.class, errorHolder );
+		final List< String > mandatoryKeys = new ArrayList< String >();
+		mandatoryKeys.add( KEY_RADIUS );
+		ok = ok & checkMapKeys( settings, mandatoryKeys, null, errorHolder );
 		if ( !ok )
 		{
 			errorMessage = errorHolder.toString();
@@ -58,33 +95,63 @@ public class ManualDetectorFactory< T extends RealType< T > & NativeType< T >> i
 	}
 
 	@Override
-	public String getErrorMessage()
+	public boolean marshall( final Map< String, Object > settings, final Element element )
 	{
-		return errorMessage;
-	}
-
-	/**
-	 * Check that the given settings map is suitable for the manual segmenter.
-	 * 
-	 * @param settings
-	 *            the map to test.
-	 * @param errorHolder
-	 *            if not suitable, will contain an error message.
-	 * @return true if the settings map is valid.
-	 */
-	public static final boolean checkInput( final Map< String, Object > settings, final StringBuilder errorHolder )
-	{
-		boolean ok = true;
-		ok = ok & checkParameter( settings, KEY_RADIUS, Double.class, errorHolder );
-		final List< String > mandatoryKeys = new ArrayList< String >();
-		mandatoryKeys.add( KEY_RADIUS );
-		ok = ok & checkMapKeys( settings, mandatoryKeys, null, errorHolder );
+		element.setAttribute( XML_ATTRIBUTE_DETECTOR_NAME, DETECTOR_KEY );
+		final StringBuilder errorHolder = new StringBuilder();
+		final boolean ok = writeRadius( settings, element, errorHolder );
+		if ( !ok )
+		{
+			errorMessage = errorHolder.toString();
+		}
 		return ok;
 	}
 
 	@Override
-	public void setTarget( final ImgPlus< T > img, final Map< String, Object > settings )
+	public boolean unmarshall( final Element element, final Map< String, Object > settings )
 	{
-		this.settings = settings;
+		settings.clear();
+
+		final String detectorKey = element.getAttributeValue( XML_ATTRIBUTE_DETECTOR_NAME );
+		if ( null == detectorKey )
+		{
+			errorMessage = "Detector element not found.\n";
+			return false;
+		}
+
+		final StringBuilder errorHolder = new StringBuilder();
+		final boolean ok = readDoubleAttribute( element, settings, KEY_RADIUS, errorHolder );
+		if ( !ok )
+		{
+			errorMessage = errorHolder.toString();
+			return false;
+		}
+		return checkInput( settings );
+	}
+
+	@Override
+	public ConfigurationPanel getDetectorConfigurationPanel( final Settings settings, final Model model )
+	{
+		return new BasicDetectorConfigurationPanel( settings.imp, INFO_TEXT, NAME, model );
+	}
+
+	@Override
+	public String getInfoText()
+	{
+		return INFO_TEXT;
+	}
+
+	@Override
+	public String getName()
+	{
+		return NAME;
+	}
+
+	@Override
+	public Map< String, Object > getDefaultSettings()
+	{
+		final Map< String, Object > settings = new HashMap< String, Object >();
+		settings.put( KEY_RADIUS, DEFAULT_RADIUS );
+		return settings;
 	}
 }
