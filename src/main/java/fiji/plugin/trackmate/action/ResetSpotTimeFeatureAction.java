@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package fiji.plugin.trackmate.action;
 
@@ -11,7 +11,6 @@ import javax.swing.ImageIcon;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 
 /**
@@ -25,26 +24,25 @@ public class ResetSpotTimeFeatureAction extends AbstractTMAction {
 	public static final String NAME = "Reset spot time";
 	public static final String INFO_TEXT = "<html>" +
 			"Reset the time feature of all spots: it is set to the frame number "  +
-			"times the time resolution. " +
+			"times the frame interval. " +
 			"</html>";
-	
-	public ResetSpotTimeFeatureAction(TrackMate trackmate, TrackMateGUIController controller) {
-		super(trackmate, controller);
+
+	public ResetSpotTimeFeatureAction() {
 		this.icon = ICON;
 	}
-	
+
 	@Override
-	public void execute() {
+	public void execute(final TrackMate trackmate) {
 		logger.log("Reset spot time.\n");
 		double dt = trackmate.getSettings().dt;
 		if (dt == 0) {
 			dt = 1;
 		}
-		SpotCollection spots = trackmate.getModel().getSpots(); 
-		Set<Integer> frames = spots.keySet();
-		for(int frame : frames) {
-			for (Iterator<Spot> iterator = spots.iterator(frame, true); iterator.hasNext();) {
-				iterator.next().putFeature(Spot.POSITION_T, frame * dt); 
+		final SpotCollection spots = trackmate.getModel().getSpots();
+		final Set<Integer> frames = spots.keySet();
+		for(final int frame : frames) {
+			for (final Iterator<Spot> iterator = spots.iterator(frame, true); iterator.hasNext();) {
+				iterator.next().putFeature(Spot.POSITION_T, frame * dt);
 			}
 			logger.setProgress((double) (frame + 1) / frames.size());
 		}

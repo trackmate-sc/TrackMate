@@ -57,16 +57,12 @@ public class EdgeTimeLocationAnalyzer implements EdgeAnalyzer, MultiThreaded {
 
 	private int numThreads;
 	private long processingTime;
-	private final FeatureModel featureModel;
-	private final Model model;
 
 	/*
 	 * CONSTRUCTOR
 	 */
 
-	public EdgeTimeLocationAnalyzer(final Model model) {
-		this.model = model;
-		this.featureModel = model.getFeatureModel();
+	public EdgeTimeLocationAnalyzer() {
 		setNumThreads();
 	}
 
@@ -77,11 +73,13 @@ public class EdgeTimeLocationAnalyzer implements EdgeAnalyzer, MultiThreaded {
 
 
 	@Override
-	public void process(final Collection<DefaultWeightedEdge> edges) {
+	public void process(final Collection<DefaultWeightedEdge> edges, final Model model) {
 
 		if (edges.isEmpty()) {
 			return;
 		}
+
+		final FeatureModel featureModel = model.getFeatureModel();
 
 		final ArrayBlockingQueue<DefaultWeightedEdge> queue = new ArrayBlockingQueue<DefaultWeightedEdge>(edges.size(), false, edges);
 

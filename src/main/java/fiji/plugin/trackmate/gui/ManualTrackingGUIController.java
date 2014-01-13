@@ -2,14 +2,12 @@ package fiji.plugin.trackmate.gui;
 
 import java.util.List;
 
-import net.imglib2.meta.ImgPlus;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.gui.descriptors.WizardPanelDescriptor;
-import fiji.plugin.trackmate.util.TMUtils;
 
 public class ManualTrackingGUIController extends TrackMateGUIController {
 
@@ -44,25 +42,24 @@ public class ManualTrackingGUIController extends TrackMateGUIController {
 
 		final Settings settings = trackmate.getSettings();
 
-		final ImgPlus<?> img = TMUtils.rawWraps(settings.imp);
 		settings.clearSpotAnalyzerFactories();
-		final List<String> spotAnalyzerKeys = spotAnalyzerProvider.getAvailableSpotFeatureAnalyzers();
+		final List<String> spotAnalyzerKeys = spotAnalyzerProvider.getAvailableFeatureAnalyzers();
 		for (final String key : spotAnalyzerKeys) {
-			final SpotAnalyzerFactory<?> spotFeatureAnalyzer = spotAnalyzerProvider.getSpotFeatureAnalyzer(key, img);
+			final SpotAnalyzerFactory<?> spotFeatureAnalyzer = spotAnalyzerProvider.getFeatureAnalyzer(key);
 			settings.addSpotAnalyzerFactory(spotFeatureAnalyzer);
 		}
 
 		settings.clearEdgeAnalyzers();
-		final List<String> edgeAnalyzerKeys = edgeAnalyzerProvider.getAvailableEdgeFeatureAnalyzers();
+		final List<String> edgeAnalyzerKeys = edgeAnalyzerProvider.getAvailableFeatureAnalyzers();
 		for (final String key : edgeAnalyzerKeys) {
-			final EdgeAnalyzer edgeAnalyzer = edgeAnalyzerProvider.getEdgeFeatureAnalyzer(key);
+			final EdgeAnalyzer edgeAnalyzer = edgeAnalyzerProvider.getFeatureAnalyzer(key);
 			settings.addEdgeAnalyzer(edgeAnalyzer);
 		}
 
 		settings.clearTrackAnalyzers();
-		final List<String> trackAnalyzerKeys = trackAnalyzerProvider.getAvailableTrackFeatureAnalyzers();
+		final List<String> trackAnalyzerKeys = trackAnalyzerProvider.getAvailableFeatureAnalyzers();
 		for (final String key : trackAnalyzerKeys) {
-			final TrackAnalyzer trackAnalyzer = trackAnalyzerProvider.getTrackFeatureAnalyzer(key);
+			final TrackAnalyzer trackAnalyzer = trackAnalyzerProvider.getFeatureAnalyzer(key);
 			settings.addTrackAnalyzer(trackAnalyzer);
 		}
 

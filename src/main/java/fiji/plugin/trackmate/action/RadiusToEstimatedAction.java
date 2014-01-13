@@ -4,12 +4,11 @@ import java.util.Iterator;
 
 import javax.swing.ImageIcon;
 
+import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.features.spot.SpotRadiusEstimatorFactory;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 
 public class RadiusToEstimatedAction extends AbstractTMAction {
@@ -18,12 +17,11 @@ public class RadiusToEstimatedAction extends AbstractTMAction {
 	public static final ImageIcon ICON = new ImageIcon(TrackMateWizard.class.getResource("images/lightbulb.png"));
 	public static final String NAME = "Set radius to estimated value";
 	public static final String INFO_TEXT =  "<html>" +
-			"This action changes the radius feature of all retained spots <br> " +
-			"to its estimated value, calculated with the radius estimator <br> " +
+			"This action changes the radius feature of all spots <br> " + 
+			"to its estimated value, calculated with the radius estimator.<br> " +
 			"</html>" ;
 
-	public RadiusToEstimatedAction(TrackMate trackmate, TrackMateGUIController controller) {
-		super(trackmate, controller);
+	public RadiusToEstimatedAction() {
 		this.icon = ICON;
 	}
 
@@ -38,18 +36,18 @@ public class RadiusToEstimatedAction extends AbstractTMAction {
 	}
 
 	@Override
-	public void execute() {
+	public void execute(final TrackMate trackmate) {
 		logger.log("Setting all spot radiuses to their estimated value.\n");
-		Model model = trackmate.getModel();
-		SpotCollection spots = model.getSpots();
+		final Model model = trackmate.getModel();
+		final SpotCollection spots = model.getSpots();
 		int valid = 0;
 		int invalid = 0;
 
 		model.beginUpdate();
 		try {
-			for (Iterator<Spot> iterator = spots.iterator(true); iterator.hasNext(); ) {
-				Spot spot = iterator.next();
-				Double diameter = spot.getFeature(SpotRadiusEstimatorFactory.ESTIMATED_DIAMETER);
+			for (final Iterator<Spot> iterator = spots.iterator(true); iterator.hasNext(); ) {
+				final Spot spot = iterator.next();
+				final Double diameter = spot.getFeature(SpotRadiusEstimatorFactory.ESTIMATED_DIAMETER);
 				if (null == diameter || diameter == 0) {
 					invalid++;
 				} else {

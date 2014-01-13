@@ -11,15 +11,15 @@ import net.imglib2.meta.view.HyperSliceImgPlus;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import fiji.plugin.trackmate.Dimension;
-import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Spot;
 
 public class SpotContrastAndSNRAnalyzerFactory<T extends RealType<T> & NativeType<T>> implements SpotAnalyzerFactory<T> {
-	
+
 	/*
 	 * FIELDS
 	 */
-	
+
 	/** The single feature key name that this analyzer computes. */
 	public static final String						CONTRAST = 	"CONTRAST";
 	public static final String						SNR = 		"SNR";
@@ -37,26 +37,14 @@ public class SpotContrastAndSNRAnalyzerFactory<T extends RealType<T> & NativeTyp
 		FEATURE_DIMENSIONS.put(CONTRAST, Dimension.NONE);
 		FEATURE_DIMENSIONS.put(SNR, Dimension.NONE);
 	}
-	public static final String KEY = "Spot contrast and SNR"; 
+	public static final String KEY = "Spot contrast and SNR";
 
-	private final Model model;
-	private final ImgPlus<T> img;
-
-	/*
-	 * CONSTRUCTOR
-	 */
-	
-	public SpotContrastAndSNRAnalyzerFactory(final Model model, final ImgPlus<T> img) {
-		this.model = model;
-		this.img = img;
-	}
-	
 	/*
 	 * METHODS
 	 */
-	
+
 	@Override
-	public SpotContrastAndSNRAnalyzer<T> getAnalyzer(int frame, int channel) {
+	public SpotContrastAndSNRAnalyzer<T> getAnalyzer(final Model model, final ImgPlus<T> img, final int frame, final int channel) {
 		final ImgPlus<T> imgC = HyperSliceImgPlus.fixChannelAxis(img, channel);
 		final ImgPlus<T> imgCT = HyperSliceImgPlus.fixTimeAxis(imgC, frame);
 		final Iterator<Spot> spots = model.getSpots().iterator(frame, false);

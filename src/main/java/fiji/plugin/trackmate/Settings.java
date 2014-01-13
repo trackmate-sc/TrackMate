@@ -2,6 +2,7 @@ package fiji.plugin.trackmate;
 
 import ij.ImagePlus;
 import ij.gui.Roi;
+import ij.io.FileInfo;
 
 import java.awt.Polygon;
 import java.awt.Rectangle;
@@ -127,8 +128,15 @@ public class Settings {
 		}
 
 		// File info
-		this.imageFileName = imp.getOriginalFileInfo().fileName;
-		this.imageFolder = imp.getOriginalFileInfo().directory;
+		final FileInfo fileInfo = imp.getOriginalFileInfo();
+		if (null != fileInfo) {
+			this.imageFileName = fileInfo.fileName;
+			this.imageFolder = fileInfo.directory;
+		} else {
+			this.imageFileName = imp.getShortTitle();
+			this.imageFolder = "";
+
+		}
 		// Image size
 		this.width = imp.getWidth();
 		this.height = imp.getHeight();

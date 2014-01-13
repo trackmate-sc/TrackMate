@@ -17,7 +17,6 @@ import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_C
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_DISPLAY_DEPTH;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_DISPLAY_MODE;
 import ij.IJ;
-import ij.ImagePlus;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -86,70 +85,112 @@ import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.trackscheme.SpotImageUpdater;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
-public class TrackMateGUIController implements ActionListener {
+public class TrackMateGUIController implements ActionListener
+{
 
 	/*
 	 * FIELDS
 	 */
 
 	private static final boolean DEBUG = false;
+
 	protected final Logger logger;
+
 	/** The trackmate piloted here. */
 	protected final TrackMate trackmate;
+
 	/** The GUI controlled by this controller. */
 	protected final TrackMateWizard gui;
+
 	protected final TrackMateGUIModel guimodel;
 
 	protected SpotAnalyzerProvider spotAnalyzerProvider;
+
 	protected EdgeAnalyzerProvider edgeAnalyzerProvider;
+
 	protected TrackAnalyzerProvider trackAnalyzerProvider;
+
 	protected DetectorProvider detectorProvider;
+
 	protected ViewProvider viewProvider;
+
 	protected TrackerProvider trackerProvider;
+
 	protected ActionProvider actionProvider;
 
 	protected DetectorConfigurationDescriptor detectorConfigurationDescriptor;
+
 	protected DetectorChoiceDescriptor detectorChoiceDescriptor;
+
 	protected StartDialogDescriptor startDialoDescriptor;
+
 	protected DetectionDescriptor detectionDescriptor;
+
 	protected InitFilterDescriptor initFilterDescriptor;
+
 	protected ViewChoiceDescriptor viewChoiceDescriptor;
+
 	protected SpotFilterDescriptor spotFilterDescriptor;
+
 	protected TrackerChoiceDescriptor trackerChoiceDescriptor;
+
 	protected TrackerConfigurationDescriptor trackerConfigurationDescriptor;
+
 	protected TrackingDescriptor trackingDescriptor;
+
 	protected GrapherDescriptor grapherDescriptor;
+
 	protected TrackFilterDescriptor trackFilterDescriptor;
+
 	protected ConfigureViewsDescriptor configureViewsDescriptor;
+
 	protected ActionChooserDescriptor actionChooserDescriptor;
+
 	protected LogPanelDescriptor logPanelDescriptor;
+
 	protected SaveDescriptor saveDescriptor;
+
 	protected LoadDescriptor loadDescriptor;
 
-	protected Collection<WizardPanelDescriptor> registeredDescriptors;
+	protected Collection< WizardPanelDescriptor > registeredDescriptors;
 
 	protected SelectionModel selectionModel;
+
 	protected PerTrackFeatureColorGenerator trackColorGenerator;
+
 	protected PerEdgeFeatureColorGenerator edgeColorGenerator;
-	protected FeatureColorGenerator<Spot> spotColorGenerator;
+
+	protected FeatureColorGenerator< Spot > spotColorGenerator;
 
 	/*
 	 * CONSTRUCTOR
 	 */
 
-	public TrackMateGUIController(final TrackMate trackmate) {
+	public TrackMateGUIController( final TrackMate trackmate )
+	{
 
-		// I can't stand the metal look. If this is a problem, contact me (jeanyves.tinevez@gmail.com)
-		if (IJ.isMacOSX() || IJ.isWindows()) {
-			try {
-				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-			} catch (final ClassNotFoundException e) {
+		// I can't stand the metal look. If this is a problem, contact me
+		// (jeanyves.tinevez@gmail.com)
+		if ( IJ.isMacOSX() || IJ.isWindows() )
+		{
+			try
+			{
+				UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
+			}
+			catch ( final ClassNotFoundException e )
+			{
 				e.printStackTrace();
-			} catch (final InstantiationException e) {
+			}
+			catch ( final InstantiationException e )
+			{
 				e.printStackTrace();
-			} catch (final IllegalAccessException e) {
+			}
+			catch ( final IllegalAccessException e )
+			{
 				e.printStackTrace();
-			} catch (final UnsupportedLookAndFeelException e) {
+			}
+			catch ( final UnsupportedLookAndFeelException e )
+			{
 				e.printStackTrace();
 			}
 		}
@@ -160,11 +201,11 @@ public class TrackMateGUIController implements ActionListener {
 		 * Instantiate GUI
 		 */
 
-		this.gui = new TrackMateWizard(this);
+		this.gui = new TrackMateWizard( this );
 		this.logger = gui.getLogger();
 
 		// Feature updater
-		new ModelFeatureUpdater(trackmate.getModel(), trackmate.getSettings());
+		new ModelFeatureUpdater( trackmate.getModel(), trackmate.getSettings() );
 
 		// Feature colorers
 		this.spotColorGenerator = createSpotColorGenerator();
@@ -173,7 +214,7 @@ public class TrackMateGUIController implements ActionListener {
 
 		// 0.
 		this.guimodel = new TrackMateGUIModel();
-		this.guimodel.setDisplaySettings(createDisplaySettings(trackmate.getModel()));
+		this.guimodel.setDisplaySettings( createDisplaySettings( trackmate.getModel() ) );
 		// 1.
 		createSelectionModel();
 		// 2.
@@ -181,9 +222,9 @@ public class TrackMateGUIController implements ActionListener {
 		// 3.
 		registeredDescriptors = createDescriptors();
 
-		trackmate.getModel().setLogger(logger);
-		gui.setVisible(true);
-		gui.addActionListener(this);
+		trackmate.getModel().setLogger( logger );
+		gui.setVisible( true );
+		gui.addActionListener( this );
 
 		init();
 	}
@@ -194,143 +235,178 @@ public class TrackMateGUIController implements ActionListener {
 
 	/**
 	 * Creates a new {@link TrackMateGUIController} instance, set to operate on
-	 * the specified {@link TrackMate} instance and with the specified
-	 * {@link ImagePlus} as a starting source.
-	 * 
+	 * the specified {@link TrackMate} instance.
+	 * <p>
+	 * Subclassers want to override this method to return the correct type.
+	 *
 	 * @param trackmate
 	 *            the instance that will be piloted by the new controller.
-	 * @param imp
-	 *            the {@link ImagePlus} that will be used as a source.
 	 * @return a new instance of the controller.
 	 */
-	public TrackMateGUIController createOn(final TrackMate trackmate) {
-		return new TrackMateGUIController(trackmate);
+	public TrackMateGUIController createOn( final TrackMate trackmate )
+	{
+		return new TrackMateGUIController( trackmate );
 	}
 
 	/**
 	 * Closes the GUI controlled by this instance.
 	 */
-	public void quit() {
+	public void quit()
+	{
 		gui.dispose();
 	}
 
 	/**
 	 * Exposes the {@link TrackMateWizard} instance controlled here.
 	 */
-	public TrackMateWizard getGUI() {
+	public TrackMateWizard getGUI()
+	{
 		return gui;
 	}
 
 	/**
 	 * Exposes the {@link TrackMate} trackmate piloted by the wizard.
 	 */
-	public TrackMate getPlugin() {
+	public TrackMate getPlugin()
+	{
 		return trackmate;
 	}
 
 	/**
 	 * Exposes the {@link SelectionModel} shared amongst all
 	 * {@link SelectionChangeListener}s controlled by this instance.
-	 * 
+	 *
 	 * @return the {@link SelectionModel}.
 	 */
-	public SelectionModel getSelectionModel() {
+	public SelectionModel getSelectionModel()
+	{
 		return selectionModel;
 	}
 
-	public TrackMateGUIModel getGuimodel() {
+	public TrackMateGUIModel getGuimodel()
+	{
 		return guimodel;
 	}
 
 	/**
 	 * Sets the GUI current state via a key string. Registered descriptors are
-	 * parsed until one is found that has a matching key. Then it is displayed.
-	 * If a matching key is not found, nothing is done, and an error is logged
-	 * in the {@link LogPanel}.
-	 * 
+	 * parsed until one is found that has a matching key (
+	 * {@link WizardPanelDescriptor#getKey()}). Then it is displayed. If a
+	 * matching key is not found, nothing is done, and an error is logged in the
+	 * {@link LogPanel}.
+	 * <p>
+	 * This method is typically called to restore a saved GUI state.
+	 *
 	 * @param stateKey
 	 *            the target state string.
 	 */
-	public void setGUIStateString(final String stateKey) {
-		for (final WizardPanelDescriptor descriptor : registeredDescriptors) {
-			if (stateKey.equals(descriptor.getKey())) {
-				guimodel.currentDescriptor = descriptor;
-				gui.show(descriptor);
-				if (null == nextDescriptor(descriptor)) {
-					gui.setNextButtonEnabled(false);
-				} else {
-					gui.setNextButtonEnabled(true);
+	public void setGUIStateString( final String stateKey )
+	{
+		for ( final WizardPanelDescriptor descriptor : registeredDescriptors )
+		{
+
+			if ( stateKey.equals( descriptor.getKey() ) )
+			{
+
+				if ( descriptor.equals( spotFilterDescriptor ) )
+				{
+					/*
+					 * Special case: we need this otherwise the component of
+					 * this descriptor is not instantiated.
+					 */
+					spotFilterDescriptor.aboutToDisplayPanel();
 				}
-				if (null == previousDescriptor(descriptor)) {
-					gui.setPreviousButtonEnabled(false);
-				} else {
-					gui.setPreviousButtonEnabled(true);
+
+				guimodel.currentDescriptor = descriptor;
+				gui.show( descriptor );
+				if ( null == nextDescriptor( descriptor ) )
+				{
+					gui.setNextButtonEnabled( false );
+				}
+				else
+				{
+					gui.setNextButtonEnabled( true );
+				}
+				if ( null == previousDescriptor( descriptor ) )
+				{
+					gui.setPreviousButtonEnabled( false );
+				}
+				else
+				{
+					gui.setPreviousButtonEnabled( true );
 				}
 				descriptor.displayingPanel();
 				return;
+
 			}
 		}
 
-		logger.error("Cannot move to state " + stateKey + ". Unknown state.\n");
+		logger.error( "Cannot move to state " + stateKey + ". Unknown state.\n" );
 	}
 
 	/**
 	 * Returns the {@link ViewProvider} instance, serving
 	 * {@link TrackMateModelView}s to this GUI
-	 * 
+	 *
 	 * @return the view provider.
 	 */
-	public ViewProvider getViewProvider() {
+	public ViewProvider getViewProvider()
+	{
 		return viewProvider;
 	}
 
 	/**
 	 * Returns the {@link DetectorProvider} instance, serving
 	 * {@link SpotDetectorFactory}s to this GUI
-	 * 
+	 *
 	 * @return the detector provider.
 	 */
-	public DetectorProvider getDetectorProvider() {
+	public DetectorProvider getDetectorProvider()
+	{
 		return detectorProvider;
 	}
 
 	/**
 	 * Returns the {@link SpotAnalyzerProvider} instance, serving
 	 * {@link SpotAnalyzerFactory}s to this GUI.
-	 * 
+	 *
 	 * @return the spot analyzer provider.
 	 */
-	public SpotAnalyzerProvider getSpotAnalyzerProvider() {
+	public SpotAnalyzerProvider getSpotAnalyzerProvider()
+	{
 		return spotAnalyzerProvider;
 	}
 
 	/**
 	 * Returns the {@link EdgeAnalyzerProvider} instance, serving
 	 * {@link EdgeAnalyzer}s to this GUI.
-	 * 
+	 *
 	 * @return the edge analyzer provider.
 	 */
-	public EdgeAnalyzerProvider getEdgeAnalyzerProvider() {
+	public EdgeAnalyzerProvider getEdgeAnalyzerProvider()
+	{
 		return edgeAnalyzerProvider;
 	}
 
 	/**
 	 * Returns the {@link TrackAnalyzerProvider} instance, serving
 	 * {@link TrackAnalyzer}s to this GUI.
-	 * 
+	 *
 	 * @return the track analyzer provider.
 	 */
-	public TrackAnalyzerProvider getTrackAnalyzerProvider() {
+	public TrackAnalyzerProvider getTrackAnalyzerProvider()
+	{
 		return trackAnalyzerProvider;
 	}
 
 	/**
 	 * Returns the {@link TrackerProvider} instance, serving {@link SpotTracker}
 	 * s to this GUI.
-	 * 
+	 *
 	 * @return the tracker provider.
 	 */
-	public TrackerProvider getTrackerProvider() {
+	public TrackerProvider getTrackerProvider()
+	{
 		return trackerProvider;
 	}
 
@@ -338,394 +414,504 @@ public class TrackMateGUIController implements ActionListener {
 	 * PROTECTED METHODS
 	 */
 
-	protected void createSelectionModel() {
-		selectionModel = new SelectionModel(trackmate.getModel());
+	protected void createSelectionModel()
+	{
+		selectionModel = new SelectionModel( trackmate.getModel() );
 	}
 
-	protected FeatureColorGenerator<Spot> createSpotColorGenerator() {
-		return new SpotColorGenerator(trackmate.getModel());
+	protected FeatureColorGenerator< Spot > createSpotColorGenerator()
+	{
+		return new SpotColorGenerator( trackmate.getModel() );
 	}
 
-	protected PerEdgeFeatureColorGenerator createEdgeColorGenerator() {
-		return new PerEdgeFeatureColorGenerator(trackmate.getModel(), EdgeVelocityAnalyzer.VELOCITY);
+	protected PerEdgeFeatureColorGenerator createEdgeColorGenerator()
+	{
+		return new PerEdgeFeatureColorGenerator( trackmate.getModel(), EdgeVelocityAnalyzer.VELOCITY );
 	}
 
-	protected PerTrackFeatureColorGenerator createTrackColorGenerator() {
-		final PerTrackFeatureColorGenerator generator = new PerTrackFeatureColorGenerator(trackmate.getModel(), TrackIndexAnalyzer.TRACK_INDEX);
+	protected PerTrackFeatureColorGenerator createTrackColorGenerator()
+	{
+		final PerTrackFeatureColorGenerator generator = new PerTrackFeatureColorGenerator( trackmate.getModel(), TrackIndexAnalyzer.TRACK_INDEX );
 		return generator;
 	}
 
-	protected void createProviders() {
-		spotAnalyzerProvider = new SpotAnalyzerProvider(trackmate.getModel());
-		edgeAnalyzerProvider = new EdgeAnalyzerProvider(trackmate.getModel());
-		trackAnalyzerProvider = new TrackAnalyzerProvider(trackmate.getModel());
-		detectorProvider = new DetectorProvider(trackmate.getModel());
-		viewProvider = new ViewProvider(trackmate.getModel(), trackmate.getSettings(), selectionModel);
-		trackerProvider = new TrackerProvider(trackmate.getModel());
-		actionProvider = new ActionProvider(trackmate, this);
+	protected void createProviders()
+	{
+		spotAnalyzerProvider = new SpotAnalyzerProvider();
+		edgeAnalyzerProvider = new EdgeAnalyzerProvider();
+		trackAnalyzerProvider = new TrackAnalyzerProvider();
+		detectorProvider = new DetectorProvider();
+		viewProvider = new ViewProvider();
+		trackerProvider = new TrackerProvider();
+		actionProvider = new ActionProvider();
 	}
 
 	/**
 	 * Creates the map of next descriptor for each descriptor.
-	 * 
+	 *
 	 * @return
 	 */
-	protected Collection<WizardPanelDescriptor> createDescriptors() {
+	protected Collection< WizardPanelDescriptor > createDescriptors()
+	{
 
 		/*
 		 * Logging panel: receive message, share with the TrackMateModel
 		 */
 		final LogPanel logPanel = gui.getLogPanel();
-		logPanelDescriptor = new LogPanelDescriptor(logPanel);
+		logPanelDescriptor = new LogPanelDescriptor( logPanel );
 
 		/*
 		 * Start panel
 		 */
-		startDialoDescriptor = new StartDialogDescriptor(this);
-		// Listen if the selected imp is valid and toggle next button accordingly.
-		startDialoDescriptor.addActionListener(new ActionListener() {
+		startDialoDescriptor = new StartDialogDescriptor( this );
+		// Listen if the selected imp is valid and toggle next button
+		// accordingly.
+		startDialoDescriptor.addActionListener( new ActionListener()
+		{
 			@Override
-			public void actionPerformed(final ActionEvent e) {
-				if (startDialoDescriptor.isImpValid()) {
-					gui.setNextButtonEnabled(true);
-				} else {
-					gui.setNextButtonEnabled(false);
+			public void actionPerformed( final ActionEvent e )
+			{
+				if ( startDialoDescriptor.isImpValid() )
+				{
+					gui.setNextButtonEnabled( true );
+				}
+				else
+				{
+					gui.setNextButtonEnabled( false );
 				}
 			}
-		});
+		} );
 
 		/*
 		 * Choose detector
 		 */
-		detectorChoiceDescriptor = new DetectorChoiceDescriptor(detectorProvider, trackmate, this);
+		detectorChoiceDescriptor = new DetectorChoiceDescriptor( detectorProvider, trackmate, this );
 
 		/*
 		 * Configure chosen detector
 		 */
-		detectorConfigurationDescriptor = new DetectorConfigurationDescriptor(detectorProvider, trackmate, this);
+		detectorConfigurationDescriptor = new DetectorConfigurationDescriptor( detectorProvider, trackmate, this );
 
 		/*
 		 * Execute and report detection progress
 		 */
-		detectionDescriptor = new DetectionDescriptor(this);
+		detectionDescriptor = new DetectionDescriptor( this );
 
 		/*
 		 * Initial spot filter: discard obvious spurious spot based on quality.
 		 */
-		initFilterDescriptor = new InitFilterDescriptor(trackmate, this);
+		initFilterDescriptor = new InitFilterDescriptor( trackmate, this );
 
 		/*
 		 * Select and render a view
 		 */
 		// We need the GUI model to register the created view there.
-		viewChoiceDescriptor = new ViewChoiceDescriptor(viewProvider, guimodel, this);
+		viewChoiceDescriptor = new ViewChoiceDescriptor( viewProvider, guimodel, this );
 
 		/*
 		 * Spot filtering
 		 */
-		spotFilterDescriptor = new SpotFilterDescriptor(trackmate, spotColorGenerator, this);
+		spotFilterDescriptor = new SpotFilterDescriptor( trackmate, spotColorGenerator, this );
 		// display color changed
-		spotFilterDescriptor.addActionListener(new ActionListener() {
+		spotFilterDescriptor.addActionListener( new ActionListener()
+		{
 
 			@Override
-			public void actionPerformed(final ActionEvent event) {
-				if (event == spotFilterDescriptor.getComponent().COLOR_FEATURE_CHANGED) {
+			public void actionPerformed( final ActionEvent event )
+			{
+				if ( event == spotFilterDescriptor.getComponent().COLOR_FEATURE_CHANGED )
+				{
 					final String targetFeature = spotFilterDescriptor.getComponent().getColorFeature();
-					spotColorGenerator.setFeature(targetFeature);
-					for (final TrackMateModelView view : guimodel.views) {
-						view.setDisplaySettings(TrackMateModelView.KEY_SPOT_COLORING, spotColorGenerator);
+					spotColorGenerator.setFeature( targetFeature );
+					for ( final TrackMateModelView view : guimodel.views )
+					{
+						view.setDisplaySettings( TrackMateModelView.KEY_SPOT_COLORING, spotColorGenerator );
 					}
 				}
 			}
-		});
+		} );
 		// Filtered
-		spotFilterDescriptor.addChangeListener(new ChangeListener() {
+		spotFilterDescriptor.addChangeListener( new ChangeListener()
+		{
 			@Override
-			public void stateChanged(final ChangeEvent event) {
-				// We set the thresholds field of the model but do not touch its selected spot field yet.
-				trackmate.getSettings().setSpotFilters(spotFilterDescriptor.getComponent().getFeatureFilters());
-				trackmate.execSpotFiltering(false);
+			public void stateChanged( final ChangeEvent event )
+			{
+				// We set the thresholds field of the model but do not touch its
+				// selected spot field yet.
+				trackmate.getSettings().setSpotFilters( spotFilterDescriptor.getComponent().getFeatureFilters() );
+				trackmate.execSpotFiltering( false );
 			}
-		});
+		} );
 
 		/*
 		 * Choose a tracker
 		 */
-		trackerChoiceDescriptor = new TrackerChoiceDescriptor(trackerProvider, trackmate, this);
+		trackerChoiceDescriptor = new TrackerChoiceDescriptor( trackerProvider, trackmate, this );
 
 		/*
 		 * Configure chosen tracker
 		 */
-		trackerConfigurationDescriptor = new TrackerConfigurationDescriptor(trackerProvider, trackmate, this);
+		trackerConfigurationDescriptor = new TrackerConfigurationDescriptor( trackerProvider, trackmate, this );
 
 		/*
 		 * Execute tracking
 		 */
-		trackingDescriptor = new TrackingDescriptor(this);
+		trackingDescriptor = new TrackingDescriptor( this );
 
 		/*
 		 * Track filtering
 		 */
-		trackFilterDescriptor = new TrackFilterDescriptor(trackmate, trackColorGenerator, this);
-		trackFilterDescriptor.addActionListener(new ActionListener() {
+		trackFilterDescriptor = new TrackFilterDescriptor( trackmate, trackColorGenerator, this );
+		trackFilterDescriptor.addActionListener( new ActionListener()
+		{
 			@Override
-			public void actionPerformed(final ActionEvent event) {
-				if (trackFilterDescriptor.getComponent().getColorCategory().equals(ColorByFeatureGUIPanel.Category.DEFAULT)) {
-					trackColorGenerator.setFeature(null);
-				} else {
-					trackColorGenerator.setFeature(trackFilterDescriptor.getComponent().getColorFeature());
+			public void actionPerformed( final ActionEvent event )
+			{
+				if ( trackFilterDescriptor.getComponent().getColorCategory().equals( ColorByFeatureGUIPanel.Category.DEFAULT ) )
+				{
+					trackColorGenerator.setFeature( null );
 				}
-				for (final TrackMateModelView view : guimodel.views) {
-					view.setDisplaySettings(TrackMateModelView.KEY_TRACK_COLORING, trackColorGenerator);
+				else
+				{
+					trackColorGenerator.setFeature( trackFilterDescriptor.getComponent().getColorFeature() );
+				}
+				for ( final TrackMateModelView view : guimodel.views )
+				{
+					view.setDisplaySettings( TrackMateModelView.KEY_TRACK_COLORING, trackColorGenerator );
 					view.refresh();
 				}
 			}
-		});
-		trackFilterDescriptor.addChangeListener(new ChangeListener() {
+		} );
+		trackFilterDescriptor.addChangeListener( new ChangeListener()
+		{
 			@Override
-			public void stateChanged(final ChangeEvent event) {
-				// We set the thresholds field of the model but do not touch its selected spot field yet.
-				trackmate.getSettings().setTrackFilters(trackFilterDescriptor.getComponent().getFeatureFilters());
-				trackmate.execTrackFiltering(false);
+			public void stateChanged( final ChangeEvent event )
+			{
+				// We set the thresholds field of the model but do not touch its
+				// selected spot field yet.
+				trackmate.getSettings().setTrackFilters( trackFilterDescriptor.getComponent().getFeatureFilters() );
+				trackmate.execTrackFiltering( false );
 			}
-		});
+		} );
 
 		/*
 		 * Finished, let's change the display settings.
 		 */
-		configureViewsDescriptor = new ConfigureViewsDescriptor(trackmate, spotColorGenerator, edgeColorGenerator, trackColorGenerator, this);
-		configureViewsDescriptor.getComponent().addActionListener(new ActionListener() {
+		configureViewsDescriptor = new ConfigureViewsDescriptor( trackmate, spotColorGenerator, edgeColorGenerator, trackColorGenerator, this );
+		configureViewsDescriptor.getComponent().addActionListener( new ActionListener()
+		{
 			@Override
-			public void actionPerformed(final ActionEvent event) {
-				if (event == configureViewsDescriptor.getComponent().TRACK_SCHEME_BUTTON_PRESSED) {
+			public void actionPerformed( final ActionEvent event )
+			{
+				if ( event == configureViewsDescriptor.getComponent().TRACK_SCHEME_BUTTON_PRESSED )
+				{
 					launchTrackScheme();
 
-				} else if (event == configureViewsDescriptor.getComponent().DO_ANALYSIS_BUTTON_PRESSED) {
+				}
+				else if ( event == configureViewsDescriptor.getComponent().DO_ANALYSIS_BUTTON_PRESSED )
+				{
 					launchDoAnalysis();
 
-				} else {
-					System.out.println("[TrackMateGUIController] Caught unknown event: " + event);
+				}
+				else
+				{
+					System.out.println( "[TrackMateGUIController] Caught unknown event: " + event );
 				}
 			}
-		});
-		configureViewsDescriptor.getComponent().addDisplaySettingsChangeListener(new DisplaySettingsListener() {
+		} );
+		configureViewsDescriptor.getComponent().addDisplaySettingsChangeListener( new DisplaySettingsListener()
+		{
 			@Override
-			public void displaySettingsChanged(final DisplaySettingsEvent event) {
-				guimodel.getDisplaySettings().put(event.getKey(), event.getNewValue());
-				for (final TrackMateModelView view : guimodel.views) {
-					view.setDisplaySettings(event.getKey(), event.getNewValue());
+			public void displaySettingsChanged( final DisplaySettingsEvent event )
+			{
+				guimodel.getDisplaySettings().put( event.getKey(), event.getNewValue() );
+				for ( final TrackMateModelView view : guimodel.views )
+				{
+					view.setDisplaySettings( event.getKey(), event.getNewValue() );
 					view.refresh();
 				}
 			}
-		});
+		} );
 
 		/*
 		 * Export and graph features.
 		 */
-		grapherDescriptor = new GrapherDescriptor(trackmate, this);
+		grapherDescriptor = new GrapherDescriptor( trackmate, this );
 
 		/*
 		 * Offer to take some actions on the data.
 		 */
-		actionChooserDescriptor = new ActionChooserDescriptor(actionProvider);
+		actionChooserDescriptor = new ActionChooserDescriptor( actionProvider, trackmate, this );
 
 		/*
 		 * Save descriptor
 		 */
-		saveDescriptor = new SaveDescriptor(this, detectorProvider, trackerProvider);
+		saveDescriptor = new SaveDescriptor( this, detectorProvider, trackerProvider );
 
 		/*
 		 * Load descriptor
 		 */
-		loadDescriptor = new LoadDescriptor(this);
+		loadDescriptor = new LoadDescriptor( this );
 
 		/*
 		 * Store created descriptors
 		 */
-		final ArrayList<WizardPanelDescriptor> descriptors = new ArrayList<WizardPanelDescriptor>(16);
-		descriptors.add(actionChooserDescriptor);
-		descriptors.add(configureViewsDescriptor);
-		descriptors.add(detectorChoiceDescriptor);
-		descriptors.add(detectorConfigurationDescriptor);
-		descriptors.add(detectionDescriptor);
-		descriptors.add(grapherDescriptor);
-		descriptors.add(initFilterDescriptor);
-		descriptors.add(loadDescriptor);
-		descriptors.add(logPanelDescriptor);
-		descriptors.add(saveDescriptor);
-		descriptors.add(spotFilterDescriptor);
-		descriptors.add(startDialoDescriptor);
-		descriptors.add(trackFilterDescriptor);
-		descriptors.add(trackerChoiceDescriptor);
-		descriptors.add(trackerConfigurationDescriptor);
-		descriptors.add(trackingDescriptor);
-		descriptors.add(viewChoiceDescriptor);
+		final ArrayList< WizardPanelDescriptor > descriptors = new ArrayList< WizardPanelDescriptor >( 16 );
+		descriptors.add( actionChooserDescriptor );
+		descriptors.add( configureViewsDescriptor );
+		descriptors.add( detectorChoiceDescriptor );
+		descriptors.add( detectorConfigurationDescriptor );
+		descriptors.add( detectionDescriptor );
+		descriptors.add( grapherDescriptor );
+		descriptors.add( initFilterDescriptor );
+		descriptors.add( loadDescriptor );
+		descriptors.add( logPanelDescriptor );
+		descriptors.add( saveDescriptor );
+		descriptors.add( spotFilterDescriptor );
+		descriptors.add( startDialoDescriptor );
+		descriptors.add( trackFilterDescriptor );
+		descriptors.add( trackerChoiceDescriptor );
+		descriptors.add( trackerConfigurationDescriptor );
+		descriptors.add( trackingDescriptor );
+		descriptors.add( viewChoiceDescriptor );
 		return descriptors;
 	}
 
-	protected WizardPanelDescriptor getFirstDescriptor() {
+	protected WizardPanelDescriptor getFirstDescriptor()
+	{
 		return startDialoDescriptor;
 	}
 
-	protected WizardPanelDescriptor nextDescriptor(final WizardPanelDescriptor currentDescriptor) {
+	protected WizardPanelDescriptor nextDescriptor( final WizardPanelDescriptor currentDescriptor )
+	{
 
-		if (currentDescriptor == startDialoDescriptor) {
+		if ( currentDescriptor == startDialoDescriptor )
+		{
 			return detectorChoiceDescriptor;
 
-		} else if (currentDescriptor == detectorChoiceDescriptor) {
+		}
+		else if ( currentDescriptor == detectorChoiceDescriptor )
+		{
 			return detectorConfigurationDescriptor;
 
-		} else if (currentDescriptor == detectorConfigurationDescriptor) {
+		}
+		else if ( currentDescriptor == detectorConfigurationDescriptor )
+		{
 
-			if (trackmate.getSettings().detectorFactory.getKey().equals(ManualDetectorFactory.DETECTOR_KEY)) {
+			if ( trackmate.getSettings().detectorFactory.getKey().equals( ManualDetectorFactory.DETECTOR_KEY ) )
+			{
 				return viewChoiceDescriptor;
-			} else {
+			}
+			else
+			{
 				return detectionDescriptor;
 			}
 
-		} else if (currentDescriptor == detectionDescriptor) {
+		}
+		else if ( currentDescriptor == detectionDescriptor )
+		{
 			return initFilterDescriptor;
 
-		} else if (currentDescriptor == initFilterDescriptor) {
+		}
+		else if ( currentDescriptor == initFilterDescriptor )
+		{
 			return viewChoiceDescriptor;
 
-		} else if (currentDescriptor == viewChoiceDescriptor) {
+		}
+		else if ( currentDescriptor == viewChoiceDescriptor )
+		{
 			return spotFilterDescriptor;
 
-		} else if (currentDescriptor == spotFilterDescriptor) {
+		}
+		else if ( currentDescriptor == spotFilterDescriptor )
+		{
 			return trackerChoiceDescriptor;
 
-		} else if (currentDescriptor == trackerChoiceDescriptor) {
-			if (null == trackmate.getSettings().tracker || trackmate.getSettings().tracker.getKey().equals(ManualTracker.TRACKER_KEY)) {
+		}
+		else if ( currentDescriptor == trackerChoiceDescriptor )
+		{
+			if ( null == trackmate.getSettings().tracker || trackmate.getSettings().tracker.getKey().equals( ManualTracker.TRACKER_KEY ) )
+			{
 				return trackFilterDescriptor;
-			} else {
+			}
+			else
+			{
 				return trackerConfigurationDescriptor;
 			}
 
-		} else if (currentDescriptor == trackerConfigurationDescriptor) {
+		}
+		else if ( currentDescriptor == trackerConfigurationDescriptor )
+		{
 			return trackingDescriptor;
 
-		} else if (currentDescriptor == trackingDescriptor) {
+		}
+		else if ( currentDescriptor == trackingDescriptor )
+		{
 			return trackFilterDescriptor;
 
-		} else if (currentDescriptor == trackFilterDescriptor) {
+		}
+		else if ( currentDescriptor == trackFilterDescriptor )
+		{
 			return configureViewsDescriptor;
 
-		} else if (currentDescriptor == configureViewsDescriptor) {
+		}
+		else if ( currentDescriptor == configureViewsDescriptor )
+		{
 			return grapherDescriptor;
 
-		} else if (currentDescriptor == grapherDescriptor) {
+		}
+		else if ( currentDescriptor == grapherDescriptor )
+		{
 			return actionChooserDescriptor;
 
-		} else if (currentDescriptor == actionChooserDescriptor) {
+		}
+		else if ( currentDescriptor == actionChooserDescriptor )
+		{
 			return null;
 
-		} else {
-			throw new IllegalArgumentException("Next descriptor for " + currentDescriptor + " is unknown.");
+		}
+		else
+		{
+			throw new IllegalArgumentException( "Next descriptor for " + currentDescriptor + " is unknown." );
 		}
 	}
 
-	protected WizardPanelDescriptor previousDescriptor(final WizardPanelDescriptor currentDescriptor) {
+	protected WizardPanelDescriptor previousDescriptor( final WizardPanelDescriptor currentDescriptor )
+	{
 
-		if (currentDescriptor == startDialoDescriptor) {
+		if ( currentDescriptor == startDialoDescriptor )
+		{
 			return null;
 
-		} else if (currentDescriptor == detectorChoiceDescriptor) {
+		}
+		else if ( currentDescriptor == detectorChoiceDescriptor )
+		{
 			return startDialoDescriptor;
 
-		} else if (currentDescriptor == detectorConfigurationDescriptor) {
+		}
+		else if ( currentDescriptor == detectorConfigurationDescriptor )
+		{
 			return detectorChoiceDescriptor;
 
-		} else if (currentDescriptor == detectionDescriptor) {
+		}
+		else if ( currentDescriptor == detectionDescriptor )
+		{
 			return detectorConfigurationDescriptor;
 
-		} else if (currentDescriptor == initFilterDescriptor) {
+		}
+		else if ( currentDescriptor == initFilterDescriptor )
+		{
 			return detectionDescriptor;
 
-		} else if (currentDescriptor == viewChoiceDescriptor) {
+		}
+		else if ( currentDescriptor == viewChoiceDescriptor )
+		{
 			return detectorConfigurationDescriptor;
 
-		} else if (currentDescriptor == spotFilterDescriptor) {
+		}
+		else if ( currentDescriptor == spotFilterDescriptor )
+		{
 			return viewChoiceDescriptor;
 
-		} else if (currentDescriptor == trackerChoiceDescriptor) {
+		}
+		else if ( currentDescriptor == trackerChoiceDescriptor )
+		{
 			return spotFilterDescriptor;
 
-		} else if (currentDescriptor == trackerConfigurationDescriptor) {
+		}
+		else if ( currentDescriptor == trackerConfigurationDescriptor )
+		{
 			return trackerChoiceDescriptor;
 
-		} else if (currentDescriptor == trackingDescriptor) {
+		}
+		else if ( currentDescriptor == trackingDescriptor )
+		{
 			return trackerConfigurationDescriptor;
 
-		} else if (currentDescriptor == trackFilterDescriptor) {
-			if (null == trackmate.getSettings().tracker || trackmate.getSettings().tracker.getKey().equals(ManualTracker.TRACKER_KEY)) {
+		}
+		else if ( currentDescriptor == trackFilterDescriptor )
+		{
+			if ( null == trackmate.getSettings().tracker || trackmate.getSettings().tracker.getKey().equals( ManualTracker.TRACKER_KEY ) )
+			{
 				return trackerChoiceDescriptor;
-			} else {
+			}
+			else
+			{
 				return trackerConfigurationDescriptor;
 			}
 
-		} else if (currentDescriptor == configureViewsDescriptor) {
+		}
+		else if ( currentDescriptor == configureViewsDescriptor )
+		{
 			return trackFilterDescriptor;
 
-		} else if (currentDescriptor == grapherDescriptor) {
+		}
+		else if ( currentDescriptor == grapherDescriptor )
+		{
 			return configureViewsDescriptor;
 
-		} else if (currentDescriptor == actionChooserDescriptor) {
+		}
+		else if ( currentDescriptor == actionChooserDescriptor )
+		{
 			return grapherDescriptor;
 
-		} else {
-			throw new IllegalArgumentException("Previous descriptor for " + currentDescriptor + " is unknown.");
+		}
+		else
+		{
+			throw new IllegalArgumentException( "Previous descriptor for " + currentDescriptor + " is unknown." );
 		}
 	}
 
 	/**
 	 * Display the first panel
 	 */
-	protected void init() {
+	protected void init()
+	{
 		// We need to listen to events happening on the View configuration
-		configureViewsDescriptor.getComponent().addActionListener(this);
+		configureViewsDescriptor.getComponent().addActionListener( this );
 
 		// Get start panel id
-		gui.setPreviousButtonEnabled(false);
+		gui.setPreviousButtonEnabled( false );
 		final WizardPanelDescriptor panelDescriptor = getFirstDescriptor();
 		guimodel.currentDescriptor = panelDescriptor;
 
 		final String welcomeMessage = TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION + " started on:\n" + TMUtils.getCurrentTimeString() + '\n';
 		// Log GUI processing start
-		gui.getLogger().log(welcomeMessage, Logger.BLUE_COLOR);
+		gui.getLogger().log( welcomeMessage, Logger.BLUE_COLOR );
 
 		// Execute about to be displayed action of the new one
 		panelDescriptor.aboutToDisplayPanel();
 
 		// Display matching panel
-		gui.show(panelDescriptor);
+		gui.show( panelDescriptor );
 
-		//  Show the panel in the dialog, and execute action after display
+		// Show the panel in the dialog, and execute action after display
 		panelDescriptor.displayingPanel();
 	}
 
 	/**
 	 * Returns the starting display settings that will be passed to any new view
 	 * registered within this GUI.
-	 * 
+	 *
 	 * @param model
 	 *            the model this GUI will configure; might be required by some
 	 *            display settings.
 	 * @return a map of display settings mappings.
 	 */
-	protected Map<String, Object> createDisplaySettings(final Model model) {
-		final Map<String, Object> displaySettings = new HashMap<String, Object>();
-		displaySettings.put(KEY_COLOR, DEFAULT_SPOT_COLOR);
-		displaySettings.put(KEY_HIGHLIGHT_COLOR, DEFAULT_HIGHLIGHT_COLOR);
-		displaySettings.put(KEY_SPOTS_VISIBLE, true);
-		displaySettings.put(KEY_DISPLAY_SPOT_NAMES, false);
-		displaySettings.put(KEY_SPOT_COLORING, spotColorGenerator);
-		displaySettings.put(KEY_SPOT_RADIUS_RATIO, 1.0f);
-		displaySettings.put(KEY_TRACKS_VISIBLE, true);
-		displaySettings.put(KEY_TRACK_DISPLAY_MODE, DEFAULT_TRACK_DISPLAY_MODE);
-		displaySettings.put(KEY_TRACK_DISPLAY_DEPTH, DEFAULT_TRACK_DISPLAY_DEPTH);
-		displaySettings.put(KEY_TRACK_COLORING, trackColorGenerator);
-		displaySettings.put(KEY_COLORMAP, DEFAULT_COLOR_MAP);
+	protected Map< String, Object > createDisplaySettings( final Model model )
+	{
+		final Map< String, Object > displaySettings = new HashMap< String, Object >();
+		displaySettings.put( KEY_COLOR, DEFAULT_SPOT_COLOR );
+		displaySettings.put( KEY_HIGHLIGHT_COLOR, DEFAULT_HIGHLIGHT_COLOR );
+		displaySettings.put( KEY_SPOTS_VISIBLE, true );
+		displaySettings.put( KEY_DISPLAY_SPOT_NAMES, false );
+		displaySettings.put( KEY_SPOT_COLORING, spotColorGenerator );
+		displaySettings.put( KEY_SPOT_RADIUS_RATIO, 1.0f );
+		displaySettings.put( KEY_TRACKS_VISIBLE, true );
+		displaySettings.put( KEY_TRACK_DISPLAY_MODE, DEFAULT_TRACK_DISPLAY_MODE );
+		displaySettings.put( KEY_TRACK_DISPLAY_DEPTH, DEFAULT_TRACK_DISPLAY_DEPTH );
+		displaySettings.put( KEY_TRACK_COLORING, trackColorGenerator );
+		displaySettings.put( KEY_COLORMAP, DEFAULT_COLOR_MAP );
 		return displaySettings;
 	}
 
@@ -734,134 +920,170 @@ public class TrackMateGUIController implements ActionListener {
 	 */
 
 	@Override
-	public void actionPerformed(final ActionEvent event) {
-		if (DEBUG)
-			System.out.println("[TrackMateGUIController] Caught event " + event);
+	public void actionPerformed( final ActionEvent event )
+	{
+		if ( DEBUG )
+			System.out.println( "[TrackMateGUIController] Caught event " + event );
 
-		if (event == gui.NEXT_BUTTON_PRESSED && guimodel.actionFlag) {
+		if ( event == gui.NEXT_BUTTON_PRESSED && guimodel.actionFlag )
+		{
 
 			next();
 
-		} else if (event == gui.PREVIOUS_BUTTON_PRESSED && guimodel.actionFlag) {
+		}
+		else if ( event == gui.PREVIOUS_BUTTON_PRESSED && guimodel.actionFlag )
+		{
 
 			previous();
 
-		} else if (event == gui.LOAD_BUTTON_PRESSED && guimodel.actionFlag) {
+		}
+		else if ( event == gui.LOAD_BUTTON_PRESSED && guimodel.actionFlag )
+		{
+
+			/*
+			 * TODO: There is actually NO load button anymore. The user load the
+			 * data directly through another plugin call. We left this code here
+			 * intact in case I change my mind. Removing it will actually
+			 * trigger an appreciable simplification of the code, but I let it
+			 * linger here a bit more. - Sep 2013
+			 */
 
 			guimodel.actionFlag = false;
-			gui.jButtonNext.setText("Resume");
+			gui.jButtonNext.setText( "Resume" );
 			disableButtonsAndStoreState();
 			load();
 			restoreButtonsState();
 
-		} else if (event == gui.SAVE_BUTTON_PRESSED && guimodel.actionFlag) {
+		}
+		else if ( event == gui.SAVE_BUTTON_PRESSED && guimodel.actionFlag )
+		{
 
 			guimodel.actionFlag = false;
-			gui.jButtonNext.setText("Resume");
+			gui.jButtonNext.setText( "Resume" );
 			disableButtonsAndStoreState();
-			new Thread("TrackMate saving thread") {
+			new Thread( "TrackMate saving thread" )
+			{
 				@Override
-				public void run() {
+				public void run()
+				{
 					save();
-					gui.jButtonNext.setEnabled(true);
+					gui.jButtonNext.setEnabled( true );
 				};
 			}.start();
 
-		} else if ((event == gui.NEXT_BUTTON_PRESSED || event == gui.PREVIOUS_BUTTON_PRESSED || event == gui.LOAD_BUTTON_PRESSED || event == gui.SAVE_BUTTON_PRESSED) && !guimodel.actionFlag) {
+		}
+		else if ( ( event == gui.NEXT_BUTTON_PRESSED || event == gui.PREVIOUS_BUTTON_PRESSED || event == gui.LOAD_BUTTON_PRESSED || event == gui.SAVE_BUTTON_PRESSED ) && !guimodel.actionFlag )
+		{
 
 			// Display previous panel, but do not execute its actions
 			guimodel.actionFlag = true;
-			gui.show(guimodel.previousDescriptor);
+			gui.show( guimodel.previousDescriptor );
 
 			// Put back buttons
-			gui.jButtonNext.setText("Next");
+			gui.jButtonNext.setText( "Next" );
 			restoreButtonsState();
 
-		} else if (event == gui.LOG_BUTTON_PRESSED) {
+		}
+		else if ( event == gui.LOG_BUTTON_PRESSED )
+		{
 
-			if (guimodel.displayingLog) {
+			if ( guimodel.displayingLog )
+			{
 
 				restoreButtonsState();
-				gui.show(guimodel.previousDescriptor);
+				gui.show( guimodel.previousDescriptor );
 				guimodel.displayingLog = false;
 
-			} else {
+			}
+			else
+			{
 
 				disableButtonsAndStoreState();
 				guimodel.previousDescriptor = guimodel.currentDescriptor;
-				gui.show(logPanelDescriptor);
-				gui.setLogButtonEnabled(true);
+				gui.show( logPanelDescriptor );
+				gui.setLogButtonEnabled( true );
 				guimodel.displayingLog = true;
 			}
 		}
 	}
 
-	private void next() {
+	private void next()
+	{
 
-		gui.setNextButtonEnabled(false);
+		gui.setNextButtonEnabled( false );
 
 		// Execute leave action of the old panel
 		final WizardPanelDescriptor oldDescriptor = guimodel.currentDescriptor;
-		if (oldDescriptor != null) {
+		if ( oldDescriptor != null )
+		{
 			oldDescriptor.aboutToHidePanel();
 		}
 
 		// Find and store new one to display
-		final WizardPanelDescriptor panelDescriptor = nextDescriptor(oldDescriptor);
+		final WizardPanelDescriptor panelDescriptor = nextDescriptor( oldDescriptor );
 		guimodel.currentDescriptor = panelDescriptor;
 
 		// Re-enable the previous button, in case it was disabled
-		gui.setPreviousButtonEnabled(true);
+		gui.setPreviousButtonEnabled( true );
 
 		// Execute about to be displayed action of the new one
 		panelDescriptor.aboutToDisplayPanel();
 
 		// Display matching panel
-		gui.show(panelDescriptor);
+		gui.show( panelDescriptor );
 
-		//  Show the panel in the dialog, and execute action after display
+		// Show the panel in the dialog, and execute action after display
 		panelDescriptor.displayingPanel();
 
 	}
 
-	private void previous() {
-		// Move to previous panel, but do not execute its actions
+	private void previous()
+	{
+		// Move to previous panel, but do not execute its forward-navigation
+		// actions.
 		final WizardPanelDescriptor olDescriptor = guimodel.currentDescriptor;
-		final WizardPanelDescriptor panelDescriptor = previousDescriptor(olDescriptor);
+		final WizardPanelDescriptor panelDescriptor = previousDescriptor( olDescriptor );
+		// Execute its backward-navigation actions.
+		panelDescriptor.comingBackToPanel();
+		// Do whatever we do when the panel is shown.
 		panelDescriptor.displayingPanel();
-		gui.show(panelDescriptor);
+		gui.show( panelDescriptor );
 		guimodel.currentDescriptor = panelDescriptor;
 
-		// Check if the new panel has a next panel. If not, disable the next button
-		if (null == previousDescriptor(panelDescriptor)) {
-			gui.setPreviousButtonEnabled(false);
+		// Check if the new panel has a next panel. If not, disable the next
+		// button
+		if ( null == previousDescriptor( panelDescriptor ) )
+		{
+			gui.setPreviousButtonEnabled( false );
 		}
 
 		// Re-enable the previous button, in case it was disabled
-		gui.setNextButtonEnabled(true);
+		gui.setNextButtonEnabled( true );
 	}
 
-	private void load() {
+	private void load()
+	{
 		// Store current state
 		guimodel.previousDescriptor = guimodel.currentDescriptor;
 
 		// Move to load state and show log panel
 		loadDescriptor.aboutToDisplayPanel();
-		gui.show(loadDescriptor);
+		gui.show( loadDescriptor );
 
 		// Instantiate GuiReader, ask for file, and load it in memory
 		loadDescriptor.displayingPanel();
 	}
 
-	private void save() {
+	private void save()
+	{
 		// Store current state
 		guimodel.previousDescriptor = guimodel.currentDescriptor;
 
 		// Move to save state and execute
 		saveDescriptor.aboutToDisplayPanel();
 
-		gui.show(saveDescriptor);
-		gui.getLogger().log(TMUtils.getCurrentTimeString() + '\n', Logger.BLUE_COLOR);
+		gui.show( saveDescriptor );
+		gui.getLogger().log( TMUtils.getCurrentTimeString() + '\n', Logger.BLUE_COLOR );
 		saveDescriptor.displayingPanel();
 	}
 
@@ -869,16 +1091,17 @@ public class TrackMateGUIController implements ActionListener {
 	 * Disable the 4 bottom buttons and memorize their state to that they can be
 	 * restored when calling {@link #restoreButtonsState()}.
 	 */
-	public void disableButtonsAndStoreState() {
+	public void disableButtonsAndStoreState()
+	{
 		guimodel.loadButtonState = gui.jButtonLoad.isEnabled();
 		guimodel.saveButtonState = gui.jButtonSave.isEnabled();
 		guimodel.previousButtonState = gui.jButtonPrevious.isEnabled();
 		guimodel.nextButtonState = gui.jButtonNext.isEnabled();
-		gui.setLoadButtonEnabled(false);
-		gui.setSaveButtonEnabled(false);
-		gui.setPreviousButtonEnabled(false);
-		gui.setNextButtonEnabled(false);
-		gui.setLogButtonEnabled(false);
+		gui.setLoadButtonEnabled( false );
+		gui.setSaveButtonEnabled( false );
+		gui.setPreviousButtonEnabled( false );
+		gui.setNextButtonEnabled( false );
+		gui.setLogButtonEnabled( false );
 	}
 
 	/**
@@ -886,56 +1109,69 @@ public class TrackMateGUIController implements ActionListener {
 	 * {@link #disableButtonsAndStoreState()}. Do nothing if
 	 * {@link #disableButtonsAndStoreState()} was not called before.
 	 */
-	public void restoreButtonsState() {
-		gui.setLoadButtonEnabled(guimodel.loadButtonState);
-		gui.setSaveButtonEnabled(guimodel.saveButtonState);
-		gui.setPreviousButtonEnabled(guimodel.previousButtonState);
-		gui.setNextButtonEnabled(guimodel.nextButtonState);
-		gui.setLogButtonEnabled(true);
+	public void restoreButtonsState()
+	{
+		gui.setLoadButtonEnabled( guimodel.loadButtonState );
+		gui.setSaveButtonEnabled( guimodel.saveButtonState );
+		gui.setPreviousButtonEnabled( guimodel.previousButtonState );
+		gui.setNextButtonEnabled( guimodel.nextButtonState );
+		gui.setLogButtonEnabled( true );
 	}
 
-	private void launchTrackScheme() {
+	private void launchTrackScheme()
+	{
 		final JButton button = configureViewsDescriptor.getComponent().getTrackSchemeButton();
-		button.setEnabled(false);
-		new Thread("Launching TrackScheme thread") {
+		button.setEnabled( false );
+		new Thread( "Launching TrackScheme thread" )
+		{
 			@Override
-			public void run() {
-				final TrackScheme trackscheme = new TrackScheme(trackmate.getModel(), selectionModel);
-				final SpotImageUpdater thumbnailUpdater = new SpotImageUpdater(trackmate.getSettings());
-				trackscheme.setSpotImageUpdater(thumbnailUpdater);
-				for (final String settingKey : guimodel.getDisplaySettings().keySet()) {
-					trackscheme.setDisplaySettings(settingKey, guimodel.getDisplaySettings().get(settingKey));
+			public void run()
+			{
+				final TrackScheme trackscheme = new TrackScheme( trackmate.getModel(), selectionModel );
+				final SpotImageUpdater thumbnailUpdater = new SpotImageUpdater( trackmate.getSettings() );
+				trackscheme.setSpotImageUpdater( thumbnailUpdater );
+				for ( final String settingKey : guimodel.getDisplaySettings().keySet() )
+				{
+					trackscheme.setDisplaySettings( settingKey, guimodel.getDisplaySettings().get( settingKey ) );
 				}
 				trackscheme.render();
-				guimodel.addView(trackscheme);
+				guimodel.addView( trackscheme );
 				// De-register
-				trackscheme.getGUI().addWindowListener(new WindowAdapter() {
+				trackscheme.getGUI().addWindowListener( new WindowAdapter()
+				{
 					@Override
-					public void windowClosing(final WindowEvent e) {
-						guimodel.removeView(trackscheme);
+					public void windowClosing( final WindowEvent e )
+					{
+						guimodel.removeView( trackscheme );
 					}
-				});
+				} );
 
-				button.setEnabled(true);
+				button.setEnabled( true );
 			};
 		}.start();
 	}
 
-	private void launchDoAnalysis() {
+	private void launchDoAnalysis()
+	{
 		final JButton button = configureViewsDescriptor.getComponent().getDoAnalysisButton();
-		button.setEnabled(false);
+		button.setEnabled( false );
 		disableButtonsAndStoreState();
-		gui.show(logPanelDescriptor);
-		new Thread("TrackMate export analysis to IJ thread.") {
+		gui.show( logPanelDescriptor );
+		new Thread( "TrackMate export analysis to IJ thread." )
+		{
 			@Override
-			public void run() {
-				try {
-					final ExportStatsToIJAction action = new ExportStatsToIJAction(trackmate, TrackMateGUIController.this);
-					action.execute();
-				} finally {
-					gui.show(configureViewsDescriptor);
+			public void run()
+			{
+				try
+				{
+					final ExportStatsToIJAction action = new ExportStatsToIJAction();
+					action.execute( trackmate );
+				}
+				finally
+				{
+					gui.show( configureViewsDescriptor );
 					restoreButtonsState();
-					button.setEnabled(true);
+					button.setEnabled( true );
 				}
 			};
 		}.start();

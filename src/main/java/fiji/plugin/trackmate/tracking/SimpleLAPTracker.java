@@ -1,6 +1,5 @@
 package fiji.plugin.trackmate.tracking;
 
-import fiji.plugin.trackmate.Logger;
 
 
 public class SimpleLAPTracker extends LAPTracker {
@@ -13,14 +12,6 @@ public class SimpleLAPTracker extends LAPTracker {
 				"a distance and time condition. Track splitting and merging are not allowed, resulting <br>" +
 				"in having non-branching tracks." +
 				" </html>";
-
-	public SimpleLAPTracker(final Logger logger) {
-		super(logger);
-	}
-
-	public SimpleLAPTracker() {
-		this(Logger.VOID_LOGGER);
-	}
 
 	@Override
 	public String toString() {

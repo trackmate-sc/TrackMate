@@ -7,13 +7,13 @@ import java.util.Map;
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 
 /**
  * A class dedicated to centralizing the calculation of the numerical features of tracks,
- * through {@link TrackAnalyzer}s.  
+ * through {@link TrackAnalyzer}s.
  * @author Jean-Yves Tinevez - 2013
  *
  */
@@ -27,11 +27,11 @@ public class TrackFeatureCalculator extends MultiThreadedBenchmarkAlgorithm {
 		this.settings = settings;
 		this.model = model;
 	}
-	
+
 	/*
 	 * METHODS
 	 */
-	
+
 	@Override
 	public boolean checkInput() {
 		if (null == model) {
@@ -44,41 +44,41 @@ public class TrackFeatureCalculator extends MultiThreadedBenchmarkAlgorithm {
 		}
 		return true;
 	}
-	
+
 	/**
-	 * Calculates the track features configured in the {@link Settings} 
+	 * Calculates the track features configured in the {@link Settings}
 	 * for all the tracks of this model.
 	 */
 	@Override
 	public boolean process() {
-		long start = System.currentTimeMillis();
-		
+		final long start = System.currentTimeMillis();
+
 		// Clean
 		model.getFeatureModel().clearTrackFeatures();
 
 		// Declare what you do.
-		for (TrackAnalyzer analyzer : settings.getTrackAnalyzers()) {
-			Collection<String> features = analyzer.getFeatures();
-			Map<String, String> featureNames = analyzer.getFeatureNames();
-			Map<String, String> featureShortNames = analyzer.getFeatureShortNames();
-			Map<String, Dimension> featureDimensions = analyzer.getFeatureDimensions();
+		for (final TrackAnalyzer analyzer : settings.getTrackAnalyzers()) {
+			final Collection<String> features = analyzer.getFeatures();
+			final Map<String, String> featureNames = analyzer.getFeatureNames();
+			final Map<String, String> featureShortNames = analyzer.getFeatureShortNames();
+			final Map<String, Dimension> featureDimensions = analyzer.getFeatureDimensions();
 			model.getFeatureModel().declareTrackFeatures(features, featureNames, featureShortNames, featureDimensions);
 		}
-		
+
 		// Do it.
 		computeTrackFeaturesAgent(model.getTrackModel().trackIDs(false), settings.getTrackAnalyzers(), true);
-		
-		long end = System.currentTimeMillis();
+
+		final long end = System.currentTimeMillis();
 		processingTime = end - start;
 		return true;
 	}
-	
+
 	/**
-	 * Calculates all the track features configured in the {@link Settings} object 
-	 * for the specified tracks. 
+	 * Calculates all the track features configured in the {@link Settings} object
+	 * for the specified tracks.
 	 */
-	public void computeTrackFeatures(final Collection<Integer> trackIDs, boolean doLogIt) {
-		List<TrackAnalyzer> trackFeatureAnalyzers = settings.getTrackAnalyzers();
+	public void computeTrackFeatures(final Collection<Integer> trackIDs, final boolean doLogIt) {
+		final List<TrackAnalyzer> trackFeatureAnalyzers = settings.getTrackAnalyzers();
 		computeTrackFeaturesAgent(trackIDs, trackFeatureAnalyzers, doLogIt);
 	}
 
@@ -89,18 +89,18 @@ public class TrackFeatureCalculator extends MultiThreadedBenchmarkAlgorithm {
 	/**
 	 * Calculate all features for the tracks with the given IDs.
 	 */
-	private void computeTrackFeaturesAgent(final Collection<Integer> trackIDs, final List<TrackAnalyzer> analyzers, boolean doLogIt) {
+	private void computeTrackFeaturesAgent(final Collection<Integer> trackIDs, final List<TrackAnalyzer> analyzers, final boolean doLogIt) {
 		final Logger logger = model.getLogger();
 		if (doLogIt) {
-			logger.log("Computing track features:\n", Logger.BLUE_COLOR);		
+			logger.log("Computing track features:\n", Logger.BLUE_COLOR);
 		}
-		
-		for (TrackAnalyzer analyzer : analyzers) {
+
+		for (final TrackAnalyzer analyzer : analyzers) {
 			analyzer.setNumThreads(numThreads);
 			if (analyzer.isLocal()) {
-				analyzer.process(trackIDs);
+				analyzer.process(trackIDs, model);
 			} else {
-				analyzer.process(model.getTrackModel().trackIDs(false));
+				analyzer.process(model.getTrackModel().trackIDs(false), model);
 			}
 			if (doLogIt)
 				logger.log("  - " + analyzer.getKey() + " in " + analyzer.getProcessingTime() + " ms.\n");

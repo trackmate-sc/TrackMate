@@ -31,9 +31,10 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 	private HashMap<Integer,Color> colorMap;
 	private final Model model;
 	private String feature;
-	private Integer trackID;
 
-	public PerTrackFeatureColorGenerator(Model model, String feature) {
+	private Color color;
+
+	public PerTrackFeatureColorGenerator(final Model model, final String feature) {
 		this.model = model;
 		model.addModelChangeListener(this);
 		setFeature(feature);
@@ -50,7 +51,7 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 	 * @throws IllegalArgumentException if the specified feature is unknown to the feature model.
 	 */
 	@Override
-	public void setFeature(String feature) {
+	public void setFeature(final String feature) {
 		// Special case: if null, then all tracks should be green
 		if (null == feature) {
 			this.feature = null;
@@ -73,12 +74,12 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 	}
 
 	private synchronized void refreshNull() {
-		TrackModel trackModel = model.getTrackModel();
-		Set<Integer> trackIDs = trackModel.trackIDs(true);
+		final TrackModel trackModel = model.getTrackModel();
+		final Set<Integer> trackIDs = trackModel.trackIDs(true);
 
 		// Create value->color map
 		colorMap = new HashMap<Integer, Color>(trackIDs.size());
-		for (Integer trackID : trackIDs) {
+		for (final Integer trackID : trackIDs) {
 			colorMap.put(trackID, DEFAULT_TRACK_COLOR);
 		}
 	}
@@ -87,29 +88,29 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 	 * A shortcut for the track index feature
 	 */
 	private synchronized void refreshIndex() {
-		TrackModel trackModel = model.getTrackModel();
-		Set<Integer> trackIDs = trackModel.trackIDs(true);
+		final TrackModel trackModel = model.getTrackModel();
+		final Set<Integer> trackIDs = trackModel.trackIDs(true);
 
 		// Create value->color map
 		colorMap = new HashMap<Integer, Color>(trackIDs.size());
 		int index = 0;
-		for (Integer trackID : trackIDs) {
-			Color color = generator.getPaint( (double) index++ / (trackIDs.size()-1) );
+		for (final Integer trackID : trackIDs) {
+			final Color color = generator.getPaint( (double) index++ / (trackIDs.size()-1) );
 			colorMap.put(trackID, color);
 		}
 	}
 
 	private synchronized void refresh() {
-		TrackModel trackModel = model.getTrackModel();
-		Set<Integer> trackIDs = trackModel.trackIDs(true);
+		final TrackModel trackModel = model.getTrackModel();
+		final Set<Integer> trackIDs = trackModel.trackIDs(true);
 
 		// Get min & max & all values
-		FeatureModel fm = model .getFeatureModel();
+		final FeatureModel fm = model .getFeatureModel();
 		double min = Double.POSITIVE_INFINITY;
 		double max = Double.NEGATIVE_INFINITY;
-		HashMap<Integer, Double> values = new HashMap<Integer, Double>(trackIDs.size());
-		for (Integer trackID : trackIDs) {
-			Double val = fm.getTrackFeature(trackID, feature);
+		final HashMap<Integer, Double> values = new HashMap<Integer, Double>(trackIDs.size());
+		for (final Integer trackID : trackIDs) {
+			final Double val = fm.getTrackFeature(trackID, feature);
 			values.put(trackID, val);
 			if (val < min) {
 				min = val;
@@ -121,8 +122,8 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 
 		// Create value->color map
 		colorMap = new HashMap<Integer, Color>(trackIDs.size());
-		for (Integer trackID : values.keySet()) {
-			Double val = values.get(trackID);
+		for (final Integer trackID : values.keySet()) {
+			final Double val = values.get(trackID);
 			Color color;
 			if (null == val) {
 				color = DEFAULT_TRACK_COLOR;
@@ -135,9 +136,9 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 
 
 	@Override
-	public void modelChanged(ModelChangeEvent event) {
+	public void modelChanged(final ModelChangeEvent event) {
 		if (event.getEventID() ==  ModelChangeEvent.MODEL_MODIFIED) {
-			Set<DefaultWeightedEdge> edges = event.getEdges();
+			final Set<DefaultWeightedEdge> edges = event.getEdges();
 			if (edges.size() > 0) {
 				if (null == feature) {
 					refreshNull();
@@ -151,13 +152,15 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 	}
 
 	@Override
-	public Color color(DefaultWeightedEdge edge) {
-		return colorMap.get(trackID);
+	public Color color( final DefaultWeightedEdge edge )
+	{
+		return color;
 	}
 
 	@Override
-	public synchronized void setCurrentTrackID(Integer trackID) {
-		this.trackID = trackID;
+	public void setCurrentTrackID( final Integer trackID )
+	{
+		this.color = colorMap.get( trackID );
 	}
 
 	@Override

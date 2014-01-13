@@ -11,15 +11,15 @@ import net.imglib2.meta.view.HyperSliceImgPlus;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import fiji.plugin.trackmate.Dimension;
-import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Spot;
 
 public class SpotRadiusEstimatorFactory<T extends RealType<T> & NativeType<T>>  implements SpotAnalyzerFactory<T> {
-	
+
 	/*
 	 * CONSTANT
 	 */
-	
+
 	/** The single feature key name that this analyzer computes. */
 	public static final String						ESTIMATED_DIAMETER = "ESTIMATED_DIAMETER";
 	public static final ArrayList<String> 			FEATURES = new ArrayList<String>(1);
@@ -33,23 +33,12 @@ public class SpotRadiusEstimatorFactory<T extends RealType<T> & NativeType<T>>  
 		FEATURE_DIMENSIONS.put(ESTIMATED_DIAMETER, Dimension.LENGTH);
 	}
 	public static final String KEY = "Spot radius estimator";
-	private final Model model;
-	private final ImgPlus<T> img;
-	
-	/*
-	 * CONSTRUCTOR
-	 */
-	
-	public SpotRadiusEstimatorFactory(final Model model, final ImgPlus<T> img) {
-		this.model = model;
-		this.img = img;
-	}
-	
+
 	/*
 	 * METHODS
 	 */
 	@Override
-	public SpotRadiusEstimator<T> getAnalyzer(int frame, int channel) {
+	public SpotRadiusEstimator<T> getAnalyzer(final Model model, final ImgPlus<T> img, final int frame, final int channel) {
 		final ImgPlus<T> imgC = HyperSliceImgPlus.fixChannelAxis(img, channel);
 		final ImgPlus<T> imgCT = HyperSliceImgPlus.fixTimeAxis(imgC, frame);
 		final Iterator<Spot> spots = model.getSpots().iterator(frame, false);
@@ -80,5 +69,5 @@ public class SpotRadiusEstimatorFactory<T extends RealType<T> & NativeType<T>>  
 	public Map<String, Dimension> getFeatureDimensions() {
 		return FEATURE_DIMENSIONS;
 	}
-	
+
 }

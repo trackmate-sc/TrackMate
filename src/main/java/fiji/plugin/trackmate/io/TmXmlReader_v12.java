@@ -97,8 +97,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.imglib2.meta.ImgPlus;
-
 import org.jdom2.Attribute;
 import org.jdom2.DataConversionException;
 import org.jdom2.Element;
@@ -109,6 +107,7 @@ import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
@@ -135,7 +134,6 @@ import fiji.plugin.trackmate.tracking.FastLAPTracker;
 import fiji.plugin.trackmate.tracking.SimpleFastLAPTracker;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTracker;
-import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 
@@ -235,25 +233,24 @@ public class TmXmlReader_v12 extends TmXmlReader {
 
 		// Feature analyzers. By default, we add them all.
 
-		final ImgPlus<?> img = TMUtils.rawWraps(settings.imp);
 		settings.clearSpotAnalyzerFactories();
-		final List<String> spotAnalyzerKeys = spotAnalyzerProvider.getAvailableSpotFeatureAnalyzers();
+		final List<String> spotAnalyzerKeys = spotAnalyzerProvider.getAvailableFeatureAnalyzers();
 		for (final String key : spotAnalyzerKeys) {
-			final SpotAnalyzerFactory<?> spotFeatureAnalyzer = spotAnalyzerProvider.getSpotFeatureAnalyzer(key, img);
+			final SpotAnalyzerFactory<?> spotFeatureAnalyzer = spotAnalyzerProvider.getFeatureAnalyzer(key);
 			settings.addSpotAnalyzerFactory(spotFeatureAnalyzer);
 		}
 
 		settings.clearEdgeAnalyzers();
-		final List<String> edgeAnalyzerKeys = edgeAnalyzerProvider.getAvailableEdgeFeatureAnalyzers();
+		final List<String> edgeAnalyzerKeys = edgeAnalyzerProvider.getAvailableFeatureAnalyzers();
 		for (final String key : edgeAnalyzerKeys) {
-			final EdgeAnalyzer edgeAnalyzer = edgeAnalyzerProvider.getEdgeFeatureAnalyzer(key);
+			final EdgeAnalyzer edgeAnalyzer = edgeAnalyzerProvider.getFeatureAnalyzer(key);
 			settings.addEdgeAnalyzer(edgeAnalyzer);
 		}
 
 		settings.clearTrackAnalyzers();
-		final List<String> trackAnalyzerKeys = trackAnalyzerProvider.getAvailableTrackFeatureAnalyzers();
+		final List<String> trackAnalyzerKeys = trackAnalyzerProvider.getAvailableFeatureAnalyzers();
 		for (final String key : trackAnalyzerKeys) {
-			final TrackAnalyzer trackAnalyzer = trackAnalyzerProvider.getTrackFeatureAnalyzer(key);
+			final TrackAnalyzer trackAnalyzer = trackAnalyzerProvider.getFeatureAnalyzer(key);
 			settings.addTrackAnalyzer(trackAnalyzer);
 		}
 	}
@@ -264,9 +261,9 @@ public class TmXmlReader_v12 extends TmXmlReader {
 	}
 
 	@Override
-	public Collection<TrackMateModelView> getViews(final ViewProvider provider) {
+	public Collection<TrackMateModelView> getViews(final ViewProvider provider, final Model model, final Settings settings, final SelectionModel selectionModel) {
 		final Collection<TrackMateModelView> views = new ArrayList<TrackMateModelView>(1);
-		views.add(provider.getView(HyperStackDisplayer.NAME));
+		views.add(provider.getView(HyperStackDisplayer.NAME, model, settings, selectionModel));
 		return views ;
 	}
 

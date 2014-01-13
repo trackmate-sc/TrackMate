@@ -50,22 +50,9 @@ public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm	impl
 				" </html>";
 
 	protected SpotCollection spots;
-	protected final Logger logger;
+	protected Logger logger	= Logger.VOID_LOGGER;
 	protected SimpleWeightedGraph<Spot,DefaultWeightedEdge> graph;
 	protected Map<String, Object> settings;
-
-	/*
-	 * CONSTRUCTOR
-	 */
-
-	public NearestNeighborTracker(final Logger logger) {
-		this.logger = logger;
-	}
-
-	public NearestNeighborTracker() {
-		this(Logger.VOID_LOGGER);
-	}
-
 
 	/*
 	 * PUBLIC METHODS
@@ -213,5 +200,10 @@ public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm	impl
 		mandatoryKeys.add(KEY_LINKING_MAX_DISTANCE);
 		ok = ok & checkMapKeys(settings, mandatoryKeys, null, errrorHolder);
 		return ok;
+	}
+
+	@Override
+	public void setLogger(final Logger logger) {
+		this.logger = logger;
 	}
 }

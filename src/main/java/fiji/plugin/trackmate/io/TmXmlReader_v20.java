@@ -60,8 +60,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.imglib2.meta.ImgPlus;
-
 import org.jdom2.Attribute;
 import org.jdom2.DataConversionException;
 import org.jdom2.Element;
@@ -70,6 +68,7 @@ import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
@@ -97,7 +96,6 @@ import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.providers.ViewProvider;
 import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 
@@ -135,9 +133,9 @@ public class TmXmlReader_v20 extends TmXmlReader {
 	 * We default to the main hyperstack view.
 	 */
 	@Override
-	public Collection<TrackMateModelView> getViews(final ViewProvider provider) {
+	public Collection<TrackMateModelView> getViews(final ViewProvider provider, final Model model, final Settings settings, final SelectionModel selectionModel) {
 		final Collection<TrackMateModelView> views = new ArrayList<TrackMateModelView>(1);
-		final TrackMateModelView view = provider.getView(HyperStackDisplayer.NAME);
+		final TrackMateModelView view = provider.getView(HyperStackDisplayer.NAME, model, settings, selectionModel);
 		views.add(view);
 		return views;
 	}
@@ -239,25 +237,24 @@ public class TmXmlReader_v20 extends TmXmlReader {
 		settings.setTrackFilters(getTrackFeatureFilters());
 
 		// Analyzers - we add them all
-		final ImgPlus<?> img = TMUtils.rawWraps(settings.imp);
 		settings.clearSpotAnalyzerFactories();
-		final List<String> spotAnalyzerKeys = spotAnalyzerProvider.getAvailableSpotFeatureAnalyzers();
+		final List<String> spotAnalyzerKeys = spotAnalyzerProvider.getAvailableFeatureAnalyzers();
 		for (final String key : spotAnalyzerKeys) {
-			final SpotAnalyzerFactory<?> spotFeatureAnalyzer = spotAnalyzerProvider.getSpotFeatureAnalyzer(key, img);
+			final SpotAnalyzerFactory<?> spotFeatureAnalyzer = spotAnalyzerProvider.getFeatureAnalyzer(key);
 			settings.addSpotAnalyzerFactory(spotFeatureAnalyzer);
 		}
 
 		settings.clearEdgeAnalyzers();
-		final List<String> edgeAnalyzerKeys = edgeAnalyzerProvider.getAvailableEdgeFeatureAnalyzers();
+		final List<String> edgeAnalyzerKeys = edgeAnalyzerProvider.getAvailableFeatureAnalyzers();
 		for (final String key : edgeAnalyzerKeys) {
-			final EdgeAnalyzer edgeAnalyzer = edgeAnalyzerProvider.getEdgeFeatureAnalyzer(key);
+			final EdgeAnalyzer edgeAnalyzer = edgeAnalyzerProvider.getFeatureAnalyzer(key);
 			settings.addEdgeAnalyzer(edgeAnalyzer);
 		}
 
 		settings.clearTrackAnalyzers();
-		final List<String> trackAnalyzerKeys = trackAnalyzerProvider.getAvailableTrackFeatureAnalyzers();
+		final List<String> trackAnalyzerKeys = trackAnalyzerProvider.getAvailableFeatureAnalyzers();
 		for (final String key : trackAnalyzerKeys) {
-			final TrackAnalyzer trackAnalyzer = trackAnalyzerProvider.getTrackFeatureAnalyzer(key);
+			final TrackAnalyzer trackAnalyzer = trackAnalyzerProvider.getFeatureAnalyzer(key);
 			settings.addTrackAnalyzer(trackAnalyzer);
 		}
 
@@ -454,7 +451,7 @@ public class TmXmlReader_v20 extends TmXmlReader {
 	 * <p>
 	 * If the detector settings XML element is not present in the file, the
 	 * {@link Settings} object is not updated.
-	 * 
+	 *
 	 * @param settings
 	 *            the base {@link Settings} object to update.
 	 * @param provider
@@ -491,7 +488,7 @@ public class TmXmlReader_v20 extends TmXmlReader {
 	 * tracker info can be read, but cannot be understood (most likely because
 	 * the class the XML refers to is unknown) then a default object is
 	 * substituted.
-	 * 
+	 *
 	 * @param settings
 	 *            the base {@link Settings} object to update.
 	 * @param provider
@@ -531,7 +528,7 @@ public class TmXmlReader_v20 extends TmXmlReader {
 	 * It is therefore sensible to call this method first, just afther
 	 * {@link #parse()}ing the file. If not called, this method will be called
 	 * anyway by the other methods to build the cache.
-	 * 
+	 *
 	 * @return a {@link SpotCollection}. Return <code>null</code> if the spot
 	 *         section is not present in the file.
 	 */

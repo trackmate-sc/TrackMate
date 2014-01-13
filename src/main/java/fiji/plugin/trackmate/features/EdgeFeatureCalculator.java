@@ -10,13 +10,13 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 
 /**
  * A class dedicated to centralizing the calculation of the numerical features of spots,
- * through {@link EdgeAnalyzer}s.  
+ * through {@link EdgeAnalyzer}s.
  * @author Jean-Yves Tinevez - 2013
  *
  */
@@ -30,11 +30,11 @@ public class EdgeFeatureCalculator extends MultiThreadedBenchmarkAlgorithm {
 		this.settings = settings;
 		this.model = model;
 	}
-	
+
 	/*
 	 * METHODS
 	 */
-	
+
 	@Override
 	public boolean checkInput() {
 		if (null == model) {
@@ -47,61 +47,61 @@ public class EdgeFeatureCalculator extends MultiThreadedBenchmarkAlgorithm {
 		}
 		return true;
 	}
-	
+
 	/**
-	 * Calculates the edge features configured in the {@link Settings} 
+	 * Calculates the edge features configured in the {@link Settings}
 	 * for all the edges of this model.
 	 */
 	@Override
 	public boolean process() {
-		long start = System.currentTimeMillis();
+		final long start = System.currentTimeMillis();
 
 		// Clean
 		model.getFeatureModel().clearEdgeFeatures();
 
 		// Declare what you do.
-		for (EdgeAnalyzer analyzer : settings.getEdgeAnalyzers()) {
-			Collection<String> features = analyzer.getFeatures();
-			Map<String, String> featureNames = analyzer.getFeatureNames();
-			Map<String, String> featureShortNames = analyzer.getFeatureShortNames();
-			Map<String, Dimension> featureDimensions = analyzer.getFeatureDimensions();
+		for (final EdgeAnalyzer analyzer : settings.getEdgeAnalyzers()) {
+			final Collection<String> features = analyzer.getFeatures();
+			final Map<String, String> featureNames = analyzer.getFeatureNames();
+			final Map<String, String> featureShortNames = analyzer.getFeatureShortNames();
+			final Map<String, Dimension> featureDimensions = analyzer.getFeatureDimensions();
 			model.getFeatureModel().declareEdgeFeatures(features, featureNames, featureShortNames, featureDimensions);
 		}
 
 		// Do it.
 		computeEdgeFeaturesAgent(model.getTrackModel().edgeSet(), settings.getEdgeAnalyzers(), true);
-		
-		long end = System.currentTimeMillis();
+
+		final long end = System.currentTimeMillis();
 		processingTime = end - start;
 		return true;
 	}
-	
-	
+
+
 
 	/**
-	 * Calculates all the edge features configured in the {@link Settings} object 
-	 * for the specified edges. 
+	 * Calculates all the edge features configured in the {@link Settings} object
+	 * for the specified edges.
 	 */
-	public void computeSpotFeatures(final Collection<DefaultWeightedEdge> edges, boolean doLogIt) {
-		List<EdgeAnalyzer> spotFeatureAnalyzers = settings.getEdgeAnalyzers();
+	public void computeSpotFeatures(final Collection<DefaultWeightedEdge> edges, final boolean doLogIt) {
+		final List<EdgeAnalyzer> spotFeatureAnalyzers = settings.getEdgeAnalyzers();
 		computeEdgeFeaturesAgent(edges, spotFeatureAnalyzers, doLogIt);
 	}
-	
-	
+
+
 
 	/*
 	 * PRIVATE METHODS
 	 */
-	
-	private void computeEdgeFeaturesAgent(final Collection<DefaultWeightedEdge> edges, final List<EdgeAnalyzer> analyzers, boolean doLogIt) {
+
+	private void computeEdgeFeaturesAgent(final Collection<DefaultWeightedEdge> edges, final List<EdgeAnalyzer> analyzers, final boolean doLogIt) {
 		final Logger logger = model.getLogger();
 		if (doLogIt) {
-			logger.log("Computing edge features:\n", Logger.BLUE_COLOR);		
+			logger.log("Computing edge features:\n", Logger.BLUE_COLOR);
 		}
-		
-		for (EdgeAnalyzer analyzer : analyzers) {
+
+		for (final EdgeAnalyzer analyzer : analyzers) {
 			analyzer.setNumThreads(numThreads);
-			analyzer.process(edges);
+			analyzer.process(edges, model);
 			if (doLogIt)
 				logger.log("  - " + analyzer.getKey() + " in " + analyzer.getProcessingTime() + " ms.\n");
 		}
