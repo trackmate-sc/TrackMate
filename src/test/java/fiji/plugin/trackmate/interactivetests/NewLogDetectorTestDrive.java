@@ -22,6 +22,8 @@ import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.meta.Axes;
 import net.imglib2.meta.ImgPlus;
+import net.imglib2.type.NativeType;
+import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
@@ -30,7 +32,8 @@ public class NewLogDetectorTestDrive {
 
 
 	@SuppressWarnings( { "rawtypes", "unchecked" } )
-	public static void main(final String[] args) throws ImgIOException, IncompatibleTypeException {
+	public static < T extends NumericType< T > & NativeType< T >> void main( final String[] args ) throws ImgIOException, IncompatibleTypeException
+	{
 
 		final int nThreads = 1; //Runtime.getRuntime().availableProcessors();
 
@@ -42,7 +45,7 @@ public class NewLogDetectorTestDrive {
 		// "/Users/JeanYves/Desktop/Data/FakeTracks.tif" );
 		//		final File file = new File( "/Users/JeanYves/Documents/Projects/ISBI/VIRUS/VIRUS snr 4 density mid.tif" );
 
-		final ImgPlus< ? > img = ImagePlusAdapter.wrapImgPlus( new ImagePlus( file.getAbsolutePath() ) );
+		final ImgPlus< T > img = ImagePlusAdapter.wrapImgPlus( new ImagePlus( file.getAbsolutePath() ) );
 
 		final int timeDim = img.dimensionIndex(Axes.TIME);
 		final long nTimepoints = img.dimension( timeDim );
