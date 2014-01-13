@@ -5,3 +5,6 @@
 /.classpath
 /.project
 /.settings/
+
+## Interactive tests ##
+/samples/
