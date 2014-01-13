@@ -28,7 +28,7 @@ public interface SpotDetectorFactory< T extends RealType< T > & NativeType< T >>
 	 * Returns a new {@link SpotDetector} configured to operate on the given
 	 * target frame. This factory must be first given the {@link ImgPlus} and
 	 * the settings map, through the {@link #setTarget(ImgPlus, Map)} method.
-	 *
+	 * 
 	 * @param interval
 	 *            the interval that determines the region in the source image to
 	 *            operate on. This must <b>not</b> have a dimension for time
@@ -60,14 +60,14 @@ public interface SpotDetectorFactory< T extends RealType< T > & NativeType< T >>
 
 	/**
 	 * Returns a unique String identifier for this factory.
-	 *
+	 * 
 	 * @return a unique String key.
 	 */
 	public String getKey();
 
 	/**
 	 * Returns a meaningful error message for the last action on this factory.
-	 *
+	 * 
 	 * @see #setTarget(ImgPlus, Map)
 	 * @see #marshall(Map, Element)
 	 * @see #unmarshall(Element, Map)
@@ -82,7 +82,7 @@ public interface SpotDetectorFactory< T extends RealType< T > & NativeType< T >>
 	 * The element also always receive an attribute named
 	 * {@value DetectorKeys#XML_ATTRIBUTE_DETECTOR_NAME} that saves the target
 	 * {@link SpotDetectorFactory} key.
-	 *
+	 * 
 	 * @return <code>true</code> if marshalling was successful. If not, check
 	 *         {@link #getErrorMessage()}
 	 */
@@ -90,7 +90,7 @@ public interface SpotDetectorFactory< T extends RealType< T > & NativeType< T >>
 
 	/**
 	 * Un-marshalls a JDom element to update a settings map.
-	 *
+	 * 
 	 * @param element
 	 *            the JDom element to read from.
 	 * @param settings
@@ -105,7 +105,7 @@ public interface SpotDetectorFactory< T extends RealType< T > & NativeType< T >>
 	/**
 	 * Returns a new GUI panel able to configure the settings suitable for this
 	 * specific detector factory.
-	 *
+	 * 
 	 * @param settings
 	 *            the current settings, used to get info to display on the GUI
 	 *            panel.
@@ -118,14 +118,14 @@ public interface SpotDetectorFactory< T extends RealType< T > & NativeType< T >>
 	/**
 	 * Returns the html String containing a descriptive information about the
 	 * target detector.
-	 *
+	 * 
 	 * @return a html string.
 	 */
 	public String getInfoText();
 
 	/**
 	 * Returns the meaningful name of this detector.
-	 *
+	 * 
 	 * @return a user-compliant name.
 	 */
 	public String getName();
@@ -133,7 +133,7 @@ public interface SpotDetectorFactory< T extends RealType< T > & NativeType< T >>
 	/**
 	 * Returns a new default settings map suitable for the target detector.
 	 * Settings are instantiated with default values.
-	 *
+	 * 
 	 * @return a new map.
 	 */
 	public Map< String, Object > getDefaultSettings();

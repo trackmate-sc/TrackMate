@@ -37,7 +37,7 @@ public class DetectionUtils
 	 * radius specified <b>using calibrated units</b>. The specified calibration
 	 * is used to determine the dimensionality of the kernel and to map it on a
 	 * pixel grid.
-	 *
+	 * 
 	 * @param radius
 	 *            the blob radius (in image unit).
 	 * @param nDims
@@ -101,7 +101,7 @@ public class DetectionUtils
 
 	/**
 	 * Copy an interval of the specified source image on a float image.
-	 *
+	 * 
 	 * @param img
 	 *            the source image.
 	 * @param interval
@@ -137,10 +137,7 @@ public class DetectionUtils
 	public static final < R extends RealType< R > & NativeType< R >> Img< R > applyMedianFilter( final RandomAccessibleInterval< R > image )
 	{
 		final MedianFilter< R > medFilt = new MedianFilter< R >( image, 1 );
-		if ( !medFilt.checkInput() || !medFilt.process() )
-		{
-			return null;
-		}
+		if ( !medFilt.checkInput() || !medFilt.process() ) { return null; }
 		return medFilt.getResult();
 	}
 
@@ -153,7 +150,7 @@ public class DetectionUtils
 		final FloatType val = new FloatType();
 		val.setReal( threshold );
 		final LocalNeighborhoodCheck< Point, FloatType > localNeighborhoodCheck = new LocalExtrema.MaximumCheck< FloatType >( val );
-		final IntervalView< FloatType > dogWithBorder = Views.interval( Views.extendMirrorSingle(  source ), Intervals.expand( source, 1 ) );
+		final IntervalView< FloatType > dogWithBorder = Views.interval( Views.extendMirrorSingle( source ), Intervals.expand( source, 1 ) );
 		final ArrayList< Point > peaks = LocalExtrema.findLocalExtrema( dogWithBorder, localNeighborhoodCheck, numThreads );
 
 		final ArrayList< Spot > spots;
