@@ -42,7 +42,7 @@ public class NewLogDetectorTestDrive {
 		// "/Users/JeanYves/Desktop/Data/FakeTracks.tif" );
 		//		final File file = new File( "/Users/JeanYves/Documents/Projects/ISBI/VIRUS/VIRUS snr 4 density mid.tif" );
 
-		final ImgPlus img = ImagePlusAdapter.wrapImgPlus( new ImagePlus( file.getAbsolutePath() ) );
+		final ImgPlus< ? > img = ImagePlusAdapter.wrapImgPlus( new ImagePlus( file.getAbsolutePath() ) );
 
 		final int timeDim = img.dimensionIndex(Axes.TIME);
 		final long nTimepoints = img.dimension( timeDim );
