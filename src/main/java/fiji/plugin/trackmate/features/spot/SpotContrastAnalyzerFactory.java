@@ -14,23 +14,29 @@ import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 
-public class SpotContrastAnalyzerFactory<T extends RealType<T> & NativeType<T>> implements SpotAnalyzerFactory<T> {
+public class SpotContrastAnalyzerFactory< T extends RealType< T > & NativeType< T >> implements SpotAnalyzerFactory< T >
+{
 
 	/*
 	 * FIELDS
 	 */
 
 	/** The single feature key name that this analyzer computes. */
-	public static final String						KEY = "CONTRAST";
-	private static final ArrayList<String> 			FEATURES = new ArrayList<String>(1);
-	private static final HashMap<String, String> 	FEATURE_NAMES = new HashMap<String, String>(1);
-	private static final HashMap<String, String> 	FEATURE_SHORT_NAMES = new HashMap<String, String>(1);
-	private static final HashMap<String, Dimension> FEATURE_DIMENSIONS = new HashMap<String, Dimension>(1);
-	static {
-		FEATURES.add(KEY);
-		FEATURE_NAMES.put(KEY, "Contrast");
-		FEATURE_SHORT_NAMES.put(KEY, "Contrast");
-		FEATURE_DIMENSIONS.put(KEY, Dimension.NONE);
+	public static final String KEY = "CONTRAST";
+
+	private static final ArrayList< String > FEATURES = new ArrayList< String >( 1 );
+
+	private static final HashMap< String, String > FEATURE_NAMES = new HashMap< String, String >( 1 );
+
+	private static final HashMap< String, String > FEATURE_SHORT_NAMES = new HashMap< String, String >( 1 );
+
+	private static final HashMap< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 1 );
+	static
+	{
+		FEATURES.add( KEY );
+		FEATURE_NAMES.put( KEY, "Contrast" );
+		FEATURE_SHORT_NAMES.put( KEY, "Contrast" );
+		FEATURE_DIMENSIONS.put( KEY, Dimension.NONE );
 	}
 
 	/*
@@ -38,35 +44,41 @@ public class SpotContrastAnalyzerFactory<T extends RealType<T> & NativeType<T>> 
 	 */
 
 	@Override
-	public final SpotContrastAnalyzer<T> getAnalyzer(final Model model, final ImgPlus<T> img, final int frame, final int channel) {
-		final ImgPlus<T> imgC = HyperSliceImgPlus.fixChannelAxis(img, channel);
-		final ImgPlus<T> imgCT = HyperSliceImgPlus.fixTimeAxis(imgC, frame);
-		final Iterator<Spot> spots = model.getSpots().iterator(frame, false);
-		return new SpotContrastAnalyzer<T>(imgCT, spots);
+	public final SpotContrastAnalyzer< T > getAnalyzer( final Model model, final ImgPlus< T > img, final int frame, final int channel )
+	{
+		final ImgPlus< T > imgC = HyperSliceImgPlus.fixChannelAxis( img, channel );
+		final ImgPlus< T > imgCT = HyperSliceImgPlus.fixTimeAxis( imgC, frame );
+		final Iterator< Spot > spots = model.getSpots().iterator( frame, false );
+		return new SpotContrastAnalyzer< T >( imgCT, spots );
 	}
 
 	@Override
-	public String getKey() {
+	public String getKey()
+	{
 		return KEY;
 	}
 
 	@Override
-	public List<String> getFeatures() {
+	public List< String > getFeatures()
+	{
 		return FEATURES;
 	}
 
 	@Override
-	public Map<String, String> getFeatureShortNames() {
+	public Map< String, String > getFeatureShortNames()
+	{
 		return FEATURE_SHORT_NAMES;
 	}
 
 	@Override
-	public Map<String, String> getFeatureNames() {
+	public Map< String, String > getFeatureNames()
+	{
 		return FEATURE_NAMES;
 	}
 
 	@Override
-	public Map<String, Dimension> getFeatureDimensions() {
+	public Map< String, Dimension > getFeatureDimensions()
+	{
 		return FEATURE_DIMENSIONS;
 	}
 

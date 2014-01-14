@@ -11,23 +11,25 @@ import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
  * Interface for factories that can generate a {@link SpotAnalyzer} configured
  * to operate on a specific frame of a model.
  * <p>
- * Concrete implementation should declare what features they can compute numerically,
- * and make this info available in the {@link SpotAnalyzerProvider} that returns
- * them.
+ * Concrete implementation should declare what features they can compute
+ * numerically, and make this info available in the {@link SpotAnalyzerProvider}
+ * that returns them.
  * <p>
- * Feature key names are for historical reason all capitalized in an enum manner. For instance: POSITION_X,
- * MAX_INTENSITY, etc... They must be suitable to be used as a attribute key in an xml file.
- *
+ * Feature key names are for historical reason all capitalized in an enum
+ * manner. For instance: POSITION_X, MAX_INTENSITY, etc... They must be suitable
+ * to be used as a attribute key in an xml file.
+ * 
  * @author Jean-Yves Tinevez - 2012
  */
-public interface SpotAnalyzerFactory<T extends RealType<T> & NativeType<T>> extends FeatureAnalyzer {
+public interface SpotAnalyzerFactory< T extends RealType< T > & NativeType< T >> extends FeatureAnalyzer
+{
 
 	/**
 	 * Returns a configured {@link SpotAnalyzer} ready to operate on the given
 	 * frame (0-based) and given channel (0-based). The target frame image and
 	 * the target spots are retrieved from the {@link Model} thanks to the given
 	 * frame and channel index.
-	 *
+	 * 
 	 * @param model
 	 *            the {@link Model} to take the spots from.
 	 * @param img
@@ -37,8 +39,6 @@ public interface SpotAnalyzerFactory<T extends RealType<T> & NativeType<T>> exte
 	 * @param channel
 	 *            the target channel to operate on.
 	 */
-	public SpotAnalyzer<T> getAnalyzer(final Model model, ImgPlus<T> img, int frame, int channel);
-
-
+	public SpotAnalyzer< T > getAnalyzer( final Model model, ImgPlus< T > img, int frame, int channel );
 
 }
