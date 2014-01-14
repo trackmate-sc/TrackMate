@@ -4,6 +4,9 @@ import java.util.Collection;
 
 import net.imglib2.algorithm.Benchmark;
 import net.imglib2.algorithm.MultiThreaded;
+
+import org.scijava.plugin.SciJavaPlugin;
+
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.features.FeatureAnalyzer;
 
@@ -30,15 +33,15 @@ import fiji.plugin.trackmate.features.FeatureAnalyzer;
  * modified tracks every time a change happens. It will be called from the
  * {@link Model} after a {@link Model#endUpdate()}, before any listener gets
  * notified.
- * 
+ *
  * @author Jean-Yves Tinevez
  */
-public interface TrackAnalyzer extends Benchmark, FeatureAnalyzer, MultiThreaded
+public interface TrackAnalyzer extends Benchmark, FeatureAnalyzer, MultiThreaded, SciJavaPlugin
 {
 
 	/**
 	 * Compute the features of the track whose ID is given.
-	 * 
+	 *
 	 * @param trackIDs
 	 *            the IDs of the track whose features are to be calculated.
 	 * @param model
@@ -53,6 +56,12 @@ public interface TrackAnalyzer extends Benchmark, FeatureAnalyzer, MultiThreaded
 	 * be re-calculated only for this track. If <code>false</code>, any model
 	 * modification involving edges will trigger a recalculation over all the
 	 * visible tracks of the model.
+	 * <p>
+	 * Example of a local track feature: the number of spots in a track. It does
+	 * not depend on the number of spots in other tracks.
+	 * <p>
+	 * Example of a non-local track feature: the rank of the track sorted by its
+	 * number of spots, compared to other tracks.
 	 */
 	public boolean isLocal();
 

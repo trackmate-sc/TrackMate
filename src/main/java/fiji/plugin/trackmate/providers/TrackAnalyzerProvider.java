@@ -1,12 +1,15 @@
 package fiji.plugin.trackmate.providers;
 
+import java.util.HashMap;
+
+import org.scijava.Context;
+import org.scijava.InstantiableException;
+import org.scijava.log.LogService;
+import org.scijava.plugin.PluginInfo;
+import org.scijava.plugin.PluginService;
+
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
-import fiji.plugin.trackmate.features.track.TrackBranchingAnalyzer;
-import fiji.plugin.trackmate.features.track.TrackDurationAnalyzer;
-import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
-import fiji.plugin.trackmate.features.track.TrackLocationAnalyzer;
-import fiji.plugin.trackmate.features.track.TrackSpeedStatisticsAnalyzer;
 
 /**
  * A provider for the track analyzers provided in the GUI.
@@ -20,20 +23,6 @@ import fiji.plugin.trackmate.features.track.TrackSpeedStatisticsAnalyzer;
  */
 public class TrackAnalyzerProvider extends AbstractFeatureAnalyzerProvider< TrackAnalyzer >
 {
-
-	/**
-	 * The {@link TrackIndexAnalyzer} has an internal state useful for lazy
-	 * computation of track features.
-	 */
-	protected TrackIndexAnalyzer trackIndexAnalyzer;
-
-	protected TrackDurationAnalyzer trackDurationAnalyzer;
-
-	protected TrackBranchingAnalyzer trackBranchingAnalyzer;
-
-	protected TrackSpeedStatisticsAnalyzer trackSpeedStatisticsAnalyzer;
-
-	protected TrackLocationAnalyzer trackLocationAnalyzer;
 
 	/*
 	 * BLANK CONSTRUCTOR
@@ -60,22 +49,38 @@ public class TrackAnalyzerProvider extends AbstractFeatureAnalyzerProvider< Trac
 	 */
 
 	/**
-	 * Instantiates and registers the standard trackFeatureAnalyzes shipped with
-	 * TrackMate.
+	 * Discovers the track feature analyzers in the current application context
+	 * and registers them in this provider.
 	 */
 	protected void registerTrackFeatureAnalyzers()
 	{
-		this.trackIndexAnalyzer = new TrackIndexAnalyzer();
-		this.trackBranchingAnalyzer = new TrackBranchingAnalyzer();
-		this.trackSpeedStatisticsAnalyzer = new TrackSpeedStatisticsAnalyzer();
-		this.trackLocationAnalyzer = new TrackLocationAnalyzer();
-		this.trackDurationAnalyzer = new TrackDurationAnalyzer();
+		final HashMap< String, TrackAnalyzer > implementations = new HashMap< String, TrackAnalyzer >();
 
-		registerAnalyzer( TrackIndexAnalyzer.KEY, trackIndexAnalyzer );
-		registerAnalyzer( TrackSpeedStatisticsAnalyzer.KEY, trackSpeedStatisticsAnalyzer );
-		registerAnalyzer( TrackLocationAnalyzer.KEY, trackLocationAnalyzer );
-		registerAnalyzer( TrackBranchingAnalyzer.KEY, trackBranchingAnalyzer );
-		registerAnalyzer( TrackDurationAnalyzer.KEY, trackDurationAnalyzer );
+		final Context context = new Context( LogService.class, PluginService.class );
+		final LogService log = context.getService( LogService.class );
+		final PluginService pluginService = context.getService( PluginService.class );
+		for ( final PluginInfo< TrackAnalyzer > info : pluginService.getPluginsOfType( TrackAnalyzer.class ) )
+		{
+			try
+			{
+				final TrackAnalyzer analyzer = info.createInstance();
+				implementations.put( analyzer.getKey(), analyzer );
+			}
+			catch ( final InstantiableException e )
+			{
+				log.error( "Could not instantiate " + info.getClassName(), e );
+			}
+		}
+
+		for ( final TrackAnalyzer analyzer : implementations.values() )
+		{
+			registerAnalyzer( analyzer.getKey(), analyzer );
+		}
+
+		if ( implementations.size() < 1 )
+		{
+			log.error( "Could not find any spot feature analyzer factory.\n" );
+		}
 	}
 
 }
