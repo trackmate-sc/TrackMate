@@ -17,7 +17,15 @@ import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 
-@Plugin( type = SpotAnalyzerFactory.class )
+/**
+ * A factory for {@link SpotContrastAndSNRAnalyzer}s. Because the analyzers of
+ * this factory depends on some features defined in
+ * {@link SpotIntensityAnalyzer}s, we use a higher priority, so that computation
+ * are done after the aforementioned analyzer are done.
+ * 
+ * @author Jean- Yves Tinevez
+ */
+@Plugin( type = SpotAnalyzerFactory.class, priority = 1d )
 public class SpotContrastAndSNRAnalyzerFactory< T extends RealType< T > & NativeType< T >> implements SpotAnalyzerFactory< T >
 {
 

@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.providers;
 
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.List;
 
 import org.scijava.Context;
 import org.scijava.InstantiableException;
@@ -13,7 +14,8 @@ import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 /**
  * A provider for the spot analyzer factories provided in the GUI.
  */
-public class SpotAnalyzerProvider extends AbstractFeatureAnalyzerProvider< SpotAnalyzerFactory< ? >>
+@SuppressWarnings( "rawtypes" )
+public class SpotAnalyzerProvider extends AbstractFeatureAnalyzerProvider< SpotAnalyzerFactory >
 {
 
 	/*
@@ -39,35 +41,25 @@ public class SpotAnalyzerProvider extends AbstractFeatureAnalyzerProvider< SpotA
 	 * Discovers the spot feature analyzer factories in the current application
 	 * context and registers them in this provider.
 	 */
-	@SuppressWarnings( "rawtypes" )
 	protected void registerSpotFeatureAnalyzers()
 	{
-		final HashMap< String, SpotAnalyzerFactory< ? >> implementations = new HashMap< String, SpotAnalyzerFactory< ? > >();
-
 		final Context context = new Context( LogService.class, PluginService.class );
 		final LogService log = context.getService( LogService.class );
 		final PluginService pluginService = context.getService( PluginService.class );
-		for ( final PluginInfo< SpotAnalyzerFactory > info : pluginService.getPluginsOfType( SpotAnalyzerFactory.class ) )
+		final List< PluginInfo< SpotAnalyzerFactory >> infos = pluginService.getPluginsOfType( SpotAnalyzerFactory.class );
+		Collections.sort( infos, priorityComparator );
+
+		for ( final PluginInfo< SpotAnalyzerFactory > info : infos )
 		{
 			try
 			{
 				final SpotAnalyzerFactory< ? > analyzer = info.createInstance();
-				implementations.put( analyzer.getKey(), analyzer );
+				registerAnalyzer( analyzer.getKey(), analyzer );
 			}
 			catch ( final InstantiableException e )
 			{
 				log.error( "Could not instantiate " + info.getClassName(), e );
 			}
-		}
-
-		for ( final SpotAnalyzerFactory< ? > analyzer : implementations.values() )
-		{
-			registerAnalyzer( analyzer.getKey(), analyzer );
-		}
-
-		if ( implementations.size() < 1 )
-		{
-			log.error( "Could not find any spot feature analyzer factory.\n" );
 		}
 	}
 }
