@@ -298,14 +298,15 @@ public class TmXmlWriter {
 		final Element el = new Element(DETECTOR_SETTINGS_ELEMENT_KEY);
 
 		if (null != settings.detectorFactory) {
-			final boolean ok = provider.select(settings.detectorFactory.getKey());
-			if (!ok) {
-				logger.error(provider.getErrorMessage());
-			} else {
-				settings.detectorFactory.marshall( settings.detectorSettings, el );
+			final boolean ok = settings.detectorFactory.marshall( settings.detectorSettings, el );
+			if ( !ok )
+			{
+				logger.error( settings.detectorFactory.getErrorMessage() );
 			}
-
-			logger.log("  Added detector settings.\n");
+			else
+			{
+				logger.log( "  Added detector settings.\n" );
+			}
 		}
 
 		return el;

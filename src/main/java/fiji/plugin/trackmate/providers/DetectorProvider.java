@@ -2,6 +2,7 @@ package fiji.plugin.trackmate.providers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.scijava.Context;
@@ -11,16 +12,22 @@ import org.scijava.plugin.PluginInfo;
 import org.scijava.plugin.PluginService;
 
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 
-public class DetectorProvider extends AbstractProvider {
+public class DetectorProvider
+{
 
 	/*
 	 * BLANK CONSTRUCTOR
 	 */
 
 	protected Map< String, SpotDetectorFactory< ? > > implementations;
+
+	protected List< String > keys;
+
+	protected List< String > infoTexts;
+
+	protected List< String > names;
 
 	/**
 	 * This provider provides the GUI with the spot detectors currently available in the
@@ -36,7 +43,6 @@ public class DetectorProvider extends AbstractProvider {
 	 */
 	public DetectorProvider() {
 		registerDetectors();
-		currentKey = LogDetectorFactory.DETECTOR_KEY;
 	}
 
 
@@ -51,10 +57,7 @@ public class DetectorProvider extends AbstractProvider {
 	@SuppressWarnings( "rawtypes" )
 	protected void registerDetectors() {
 		implementations = new HashMap< String, SpotDetectorFactory< ? > >();
-		keys = new ArrayList< String >();
-		infoTexts = new ArrayList< String >();
-		names = new ArrayList< String >();
-		// Find the rest from the context.
+
 		final Context context = new Context( LogService.class, PluginService.class );
 		final LogService log = context.getService( LogService.class );
 		final PluginService pluginService = context.getService( PluginService.class );
@@ -64,14 +67,21 @@ public class DetectorProvider extends AbstractProvider {
 			{
 				final SpotDetectorFactory< ? > detectorFactory = info.createInstance();
 				implementations.put( detectorFactory.getKey(), detectorFactory );
-				keys.add( detectorFactory.getKey() );
-				infoTexts.add( detectorFactory.getInfoText() );
-				names.add( detectorFactory.getName() );
 			}
 			catch ( final InstantiableException e )
 			{
 				log.error( "Could not instantiate " + info.getClassName(), e );
 			}
+		}
+
+		keys = new ArrayList< String >( implementations.size() );
+		infoTexts = new ArrayList< String >( implementations.size() );
+		names = new ArrayList< String >( implementations.size() );
+		for ( final SpotDetectorFactory< ? > detectorFactory : implementations.values() )
+		{
+			keys.add( detectorFactory.getKey() );
+			infoTexts.add( detectorFactory.getInfoText() );
+			names.add( detectorFactory.getName() );
 		}
 
 		if ( implementations.size() < 1 )
@@ -81,14 +91,55 @@ public class DetectorProvider extends AbstractProvider {
 	}
 
 	/**
-	 * Returns a new instance of the target detector identified by the key
-	 * parameter. If the key is unknown to this provider, return
+	 * Returns a new instance of the target detector factory identified by the
+	 * key parameter. If the key is unknown to this provider, returns
 	 * <code>null</code>.
+	 * <p>
+	 * Querying twice the same detector factory with this method returns the
+	 * same instance.
+	 *
+	 * @return the desired {@link SpotDetectorFactory} instance.
 	 */
-	public SpotDetectorFactory< ? > getDetectorFactory()
+	public SpotDetectorFactory< ? > getDetectorFactory( final String key )
 	{
-		final SpotDetectorFactory< ? > detectorFactory = implementations.get( currentKey );
+		final SpotDetectorFactory< ? > detectorFactory = implementations.get( key );
 		return detectorFactory;
+	}
+
+	/**
+	 * Returns the keys of all the spot detectors known to this provider. The
+	 * list share the same index than for {@link #getNames()} and
+	 * {@link #getInfoTexts()}.
+	 *
+	 * @return the keys, as a list of strings.
+	 */
+	public List< String > getKeys()
+	{
+		return keys;
+	}
+
+	/**
+	 * Returns the names of all the spot detectors known to this provider. The
+	 * list share the same index than for {@link #getKeys()} and
+	 * {@link #getInfoTexts()}.
+	 *
+	 * @return the detector names, as a list of strings.
+	 */
+	public List< String > getNames()
+	{
+		return names;
+	}
+
+	/**
+	 * Returns the info texts of all the spot detectors known to this provider.
+	 * The list share the same index than for {@link #getKeys()} and
+	 * {@link #getNames()}.
+	 *
+	 * @return the detector info texts, as a list of strings.
+	 */
+	public List< String > getInfoTexts()
+	{
+		return infoTexts;
 	}
 
 }

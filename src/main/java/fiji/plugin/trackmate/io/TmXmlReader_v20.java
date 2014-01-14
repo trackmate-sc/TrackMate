@@ -480,14 +480,19 @@ public class TmXmlReader_v20 extends TmXmlReader {
 			logger.error( "Could not find the detector element in file.\n" );
 			return;
 		}
-		boolean ok = provider.select( detectorKey );
-		final SpotDetectorFactory< ? > factory = provider.getDetectorFactory();
+
+		final SpotDetectorFactory< ? > factory = provider.getDetectorFactory(detectorKey);
+		if (null == factory) {
+			logger.error( "The detector identified by the key " + detectorKey + " is unknown to TrackMate.\n" );
+			ok = false;
+			return;
+		}
 
 		final Map< String, Object > ds = new HashMap< String, Object >();
-		ok = ok && factory.unmarshall( element, ds );
+		ok = factory.unmarshall( element, ds );
 
 		if (!ok) {
-			logger.error(provider.getErrorMessage());
+			logger.error( factory.getErrorMessage() );
 			this.ok = false;
 			return;
 		}

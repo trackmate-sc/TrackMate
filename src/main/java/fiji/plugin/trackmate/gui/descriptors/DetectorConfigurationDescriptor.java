@@ -8,7 +8,6 @@ import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.providers.DetectorProvider;
 
 public class DetectorConfigurationDescriptor implements WizardPanelDescriptor
 {
@@ -17,16 +16,13 @@ public class DetectorConfigurationDescriptor implements WizardPanelDescriptor
 
 	private final TrackMate trackmate;
 
-	private final DetectorProvider detectorProvider;
-
 	private ConfigurationPanel configPanel;
 
 	private final TrackMateGUIController controller;
 
-	public DetectorConfigurationDescriptor( final DetectorProvider detectorProvider, final TrackMate trackmate, final TrackMateGUIController controller )
+	public DetectorConfigurationDescriptor( final TrackMate trackmate, final TrackMateGUIController controller )
 	{
 		this.trackmate = trackmate;
-		this.detectorProvider = detectorProvider;
 		this.controller = controller;
 	}
 
@@ -86,7 +82,7 @@ public class DetectorConfigurationDescriptor implements WizardPanelDescriptor
 		if ( !settingsOk )
 		{
 			final Logger logger = trackmate.getModel().getLogger();
-			logger.error( "Config panel returned bad settings map:\n" + detectorProvider.getErrorMessage() + "Using defaults settings.\n" );
+			logger.error( "Config panel returned bad settings map:\n" + factory.getErrorMessage() + "Using defaults settings.\n" );
 			settings = factory.getDefaultSettings();
 		}
 		trackmate.getSettings().detectorSettings = settings;
