@@ -15,94 +15,112 @@ import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 
-public class TrackDurationAnalyzer implements TrackAnalyzer, MultiThreaded {
+public class TrackDurationAnalyzer implements TrackAnalyzer, MultiThreaded
+{
 
 	public static final String KEY = "Track duration";
-	public static final String 		TRACK_DURATION = "TRACK_DURATION";
-	public static final String 		TRACK_START = "TRACK_START";
-	public static final String 		TRACK_STOP = "TRACK_STOP";
-	public static final String 		TRACK_DISPLACEMENT = "TRACK_DISPLACEMENT";
 
-	public static final List<String> FEATURES = new ArrayList<String>(4);
-	public static final Map<String, String> FEATURE_NAMES = new HashMap<String, String>(4);
-	public static final Map<String, String> FEATURE_SHORT_NAMES = new HashMap<String, String>(4);
-	public static final Map<String, Dimension> FEATURE_DIMENSIONS = new HashMap<String, Dimension>(4);
+	public static final String TRACK_DURATION = "TRACK_DURATION";
 
-	static {
-		FEATURES.add(TRACK_DURATION);
-		FEATURES.add(TRACK_START);
-		FEATURES.add(TRACK_STOP);
-		FEATURES.add(TRACK_DISPLACEMENT);
+	public static final String TRACK_START = "TRACK_START";
 
-		FEATURE_NAMES.put(TRACK_DURATION, "Duration of track");
-		FEATURE_NAMES.put(TRACK_START, "Track start");
-		FEATURE_NAMES.put(TRACK_STOP, "Track stop");
-		FEATURE_NAMES.put(TRACK_DISPLACEMENT, "Track displacement");
+	public static final String TRACK_STOP = "TRACK_STOP";
 
-		FEATURE_SHORT_NAMES.put(TRACK_DURATION, "Duration");
-		FEATURE_SHORT_NAMES.put(TRACK_START, "T start");
-		FEATURE_SHORT_NAMES.put(TRACK_STOP, "T stop");
-		FEATURE_SHORT_NAMES.put(TRACK_DISPLACEMENT, "Displacement");
+	public static final String TRACK_DISPLACEMENT = "TRACK_DISPLACEMENT";
 
-		FEATURE_DIMENSIONS.put(TRACK_DURATION, Dimension.TIME);
-		FEATURE_DIMENSIONS.put(TRACK_START, Dimension.TIME);
-		FEATURE_DIMENSIONS.put(TRACK_STOP, Dimension.TIME);
-		FEATURE_DIMENSIONS.put(TRACK_DISPLACEMENT, Dimension.LENGTH);
+	public static final List< String > FEATURES = new ArrayList< String >( 4 );
+
+	public static final Map< String, String > FEATURE_NAMES = new HashMap< String, String >( 4 );
+
+	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< String, String >( 4 );
+
+	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 4 );
+
+	static
+	{
+		FEATURES.add( TRACK_DURATION );
+		FEATURES.add( TRACK_START );
+		FEATURES.add( TRACK_STOP );
+		FEATURES.add( TRACK_DISPLACEMENT );
+
+		FEATURE_NAMES.put( TRACK_DURATION, "Duration of track" );
+		FEATURE_NAMES.put( TRACK_START, "Track start" );
+		FEATURE_NAMES.put( TRACK_STOP, "Track stop" );
+		FEATURE_NAMES.put( TRACK_DISPLACEMENT, "Track displacement" );
+
+		FEATURE_SHORT_NAMES.put( TRACK_DURATION, "Duration" );
+		FEATURE_SHORT_NAMES.put( TRACK_START, "T start" );
+		FEATURE_SHORT_NAMES.put( TRACK_STOP, "T stop" );
+		FEATURE_SHORT_NAMES.put( TRACK_DISPLACEMENT, "Displacement" );
+
+		FEATURE_DIMENSIONS.put( TRACK_DURATION, Dimension.TIME );
+		FEATURE_DIMENSIONS.put( TRACK_START, Dimension.TIME );
+		FEATURE_DIMENSIONS.put( TRACK_STOP, Dimension.TIME );
+		FEATURE_DIMENSIONS.put( TRACK_DISPLACEMENT, Dimension.LENGTH );
 	}
 
 	private int numThreads;
+
 	private long processingTime;
 
-	public TrackDurationAnalyzer() {
+	public TrackDurationAnalyzer()
+	{
 		setNumThreads();
 	}
 
 	@Override
-	public boolean isLocal() {
+	public boolean isLocal()
+	{
 		return true;
 	}
 
 	@Override
-	public void process(final Collection<Integer> trackIDs, final Model model) {
+	public void process( final Collection< Integer > trackIDs, final Model model )
+	{
 
-		if (trackIDs.isEmpty()) {
-			return;
-		}
+		if ( trackIDs.isEmpty() ) { return; }
 
-		final ArrayBlockingQueue<Integer> queue = new ArrayBlockingQueue<Integer>(trackIDs.size(), false, trackIDs);
+		final ArrayBlockingQueue< Integer > queue = new ArrayBlockingQueue< Integer >( trackIDs.size(), false, trackIDs );
 		final FeatureModel fm = model.getFeatureModel();
 
-		final Thread[] threads = SimpleMultiThreading.newThreads(numThreads);
-		for (int i = 0; i < threads.length; i++) {
-			threads[i] = new Thread("TrackLocationAnalyzer thread " + i) {
+		final Thread[] threads = SimpleMultiThreading.newThreads( numThreads );
+		for ( int i = 0; i < threads.length; i++ )
+		{
+			threads[ i ] = new Thread( "TrackLocationAnalyzer thread " + i )
+			{
 				@Override
-				public void run() {
+				public void run()
+				{
 					Integer trackID;
-					while ((trackID = queue.poll()) != null) {
+					while ( ( trackID = queue.poll() ) != null )
+					{
 
 						// I love brute force.
-						final Set<Spot> track = model.getTrackModel().trackSpots(trackID);
+						final Set< Spot > track = model.getTrackModel().trackSpots( trackID );
 						double minT = Double.POSITIVE_INFINITY;
 						double maxT = Double.NEGATIVE_INFINITY;
 						Double t;
 						Spot startSpot = null;
 						Spot endSpot = null;
-						for (final Spot spot : track) {
-							t = spot.getFeature(Spot.POSITION_T);
-							if (t < minT) {
+						for ( final Spot spot : track )
+						{
+							t = spot.getFeature( Spot.POSITION_T );
+							if ( t < minT )
+							{
 								minT = t;
 								startSpot = spot;
 							}
-							if (t > maxT) {
+							if ( t > maxT )
+							{
 								maxT = t;
 								endSpot = spot;
 							}
 						}
 
-						fm.putTrackFeature(trackID, TRACK_DURATION, (maxT-minT));
-						fm.putTrackFeature(trackID, TRACK_START, minT);
-						fm.putTrackFeature(trackID, TRACK_STOP, maxT);
-						fm.putTrackFeature(trackID, TRACK_DISPLACEMENT, Math.sqrt(startSpot.squareDistanceTo(endSpot)));
+						fm.putTrackFeature( trackID, TRACK_DURATION, ( maxT - minT ) );
+						fm.putTrackFeature( trackID, TRACK_START, minT );
+						fm.putTrackFeature( trackID, TRACK_STOP, maxT );
+						fm.putTrackFeature( trackID, TRACK_DISPLACEMENT, Math.sqrt( startSpot.squareDistanceTo( endSpot ) ) );
 
 					}
 				}
@@ -110,54 +128,63 @@ public class TrackDurationAnalyzer implements TrackAnalyzer, MultiThreaded {
 		}
 
 		final long start = System.currentTimeMillis();
-		SimpleMultiThreading.startAndJoin(threads);
+		SimpleMultiThreading.startAndJoin( threads );
 		final long end = System.currentTimeMillis();
 		processingTime = end - start;
 	}
 
 	@Override
-	public int getNumThreads() {
+	public int getNumThreads()
+	{
 		return numThreads;
 	}
 
 	@Override
-	public void setNumThreads() {
+	public void setNumThreads()
+	{
 		this.numThreads = Runtime.getRuntime().availableProcessors();
 	}
 
 	@Override
-	public void setNumThreads(final int numThreads) {
+	public void setNumThreads( final int numThreads )
+	{
 		this.numThreads = numThreads;
 
 	}
 
 	@Override
-	public long getProcessingTime() {
+	public long getProcessingTime()
+	{
 		return processingTime;
 	}
 
 	@Override
-	public List<String> getFeatures() {
+	public List< String > getFeatures()
+	{
 		return FEATURES;
 	}
 
 	@Override
-	public Map<String, String> getFeatureShortNames() {
+	public Map< String, String > getFeatureShortNames()
+	{
 		return FEATURE_SHORT_NAMES;
 	}
 
 	@Override
-	public Map<String, String> getFeatureNames() {
+	public Map< String, String > getFeatureNames()
+	{
 		return FEATURE_NAMES;
 	}
 
 	@Override
-	public Map<String, Dimension> getFeatureDimensions() {
+	public Map< String, Dimension > getFeatureDimensions()
+	{
 		return FEATURE_DIMENSIONS;
 	}
 
 	@Override
-	public String getKey() {
+	public String getKey()
+	{
 		return KEY;
 	}
 }
