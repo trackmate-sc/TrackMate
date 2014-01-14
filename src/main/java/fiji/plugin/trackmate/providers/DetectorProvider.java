@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.providers;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,6 +51,9 @@ public class DetectorProvider extends AbstractProvider {
 	@SuppressWarnings( "rawtypes" )
 	protected void registerDetectors() {
 		implementations = new HashMap< String, SpotDetectorFactory< ? > >();
+		keys = new ArrayList< String >();
+		infoTexts = new ArrayList< String >();
+		names = new ArrayList< String >();
 		// Find the rest from the context.
 		final Context context = new Context( LogService.class, PluginService.class );
 		final LogService log = context.getService( LogService.class );
@@ -59,7 +63,7 @@ public class DetectorProvider extends AbstractProvider {
 			try
 			{
 				final SpotDetectorFactory< ? > detectorFactory = info.createInstance();
-				implementations.put( detectorFactory.getName(), detectorFactory );
+				implementations.put( detectorFactory.getKey(), detectorFactory );
 				keys.add( detectorFactory.getKey() );
 				infoTexts.add( detectorFactory.getInfoText() );
 				names.add( detectorFactory.getName() );
