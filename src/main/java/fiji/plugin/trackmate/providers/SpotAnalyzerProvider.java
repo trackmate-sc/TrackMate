@@ -1,7 +1,6 @@
 package fiji.plugin.trackmate.providers;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import org.scijava.Context;
 import org.scijava.InstantiableException;
@@ -16,8 +15,6 @@ import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
  */
 public class SpotAnalyzerProvider extends AbstractFeatureAnalyzerProvider< SpotAnalyzerFactory< ? >>
 {
-
-	protected Map< String, SpotAnalyzerFactory< ? >> implementations;
 
 	/*
 	 * CONSTRUCTOR
@@ -45,7 +42,7 @@ public class SpotAnalyzerProvider extends AbstractFeatureAnalyzerProvider< SpotA
 	@SuppressWarnings( "rawtypes" )
 	protected void registerSpotFeatureAnalyzers()
 	{
-		implementations = new HashMap< String, SpotAnalyzerFactory< ? > >();
+		final HashMap< String, SpotAnalyzerFactory< ? >> implementations = new HashMap< String, SpotAnalyzerFactory< ? > >();
 
 		final Context context = new Context( LogService.class, PluginService.class );
 		final LogService log = context.getService( LogService.class );
