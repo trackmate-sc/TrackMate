@@ -15,6 +15,7 @@ import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 
+// Commented out to discard it from TrackMate @Plugin( type = SpotAnalyzerFactory.class )
 public class SpotMorphologyAnalyzerFactory< T extends RealType< T > & NativeType< T >> implements SpotAnalyzerFactory< T >
 {
 

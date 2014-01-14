@@ -1,10 +1,15 @@
 package fiji.plugin.trackmate.providers;
 
-import fiji.plugin.trackmate.TrackMate;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.scijava.Context;
+import org.scijava.InstantiableException;
+import org.scijava.log.LogService;
+import org.scijava.plugin.PluginInfo;
+import org.scijava.plugin.PluginService;
+
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
-import fiji.plugin.trackmate.features.spot.SpotContrastAndSNRAnalyzerFactory;
-import fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory;
-import fiji.plugin.trackmate.features.spot.SpotRadiusEstimatorFactory;
 
 /**
  * A provider for the spot analyzer factories provided in the GUI.
@@ -12,29 +17,17 @@ import fiji.plugin.trackmate.features.spot.SpotRadiusEstimatorFactory;
 public class SpotAnalyzerProvider extends AbstractFeatureAnalyzerProvider< SpotAnalyzerFactory< ? >>
 {
 
-	@SuppressWarnings( "rawtypes" )
-	protected SpotAnalyzerFactory spotIntensityAnalyzerFactory;
-
-	@SuppressWarnings( "rawtypes" )
-	protected SpotAnalyzerFactory spotContrastAndSNRAnalyzerFactory;
-
-	@SuppressWarnings( "rawtypes" )
-	protected SpotAnalyzerFactory spotRadiusEstimatorFactory;
+	protected Map< String, SpotAnalyzerFactory< ? >> implementations;
 
 	/*
 	 * CONSTRUCTOR
 	 */
 
 	/**
-	 * This provider provides the GUI with the model spotFeatureAnalyzers
-	 * currently available in the TrackMate trackmate. Each spotFeatureAnalyzer
-	 * is identified by a key String, which can be used to retrieve new instance
-	 * of the spotFeatureAnalyzer.
-	 * <p>
-	 * If you want to add custom spotFeatureAnalyzers to TrackMate, a simple way
-	 * is to extend this factory so that it is registered with the custom
-	 * spotFeatureAnalyzers and provide this extended factory to the
-	 * {@link TrackMate} trackmate.
+	 * This provider provides the GUI with the spotFeatureAnalyzers currently
+	 * available in TrackMate. Each spotFeatureAnalyzer is identified by a key
+	 * String, which can be used to retrieve new instance of the
+	 * spotFeatureAnalyzer.
 	 */
 	public SpotAnalyzerProvider()
 	{
@@ -46,17 +39,38 @@ public class SpotAnalyzerProvider extends AbstractFeatureAnalyzerProvider< SpotA
 	 */
 
 	/**
-	 * Registers the standard spotFeatureAnalyzers shipped with TrackMate.
+	 * Discovers the spot feature analyzer factories in the current application
+	 * context and registers them in this provider.
 	 */
 	@SuppressWarnings( "rawtypes" )
 	protected void registerSpotFeatureAnalyzers()
 	{
-		this.spotIntensityAnalyzerFactory = new SpotIntensityAnalyzerFactory();
-		this.spotContrastAndSNRAnalyzerFactory = new SpotContrastAndSNRAnalyzerFactory();
-		this.spotRadiusEstimatorFactory = new SpotRadiusEstimatorFactory();
-		// Here order matters.
-		registerAnalyzer( SpotIntensityAnalyzerFactory.KEY, spotIntensityAnalyzerFactory );
-		registerAnalyzer( SpotContrastAndSNRAnalyzerFactory.KEY, spotContrastAndSNRAnalyzerFactory );
-		registerAnalyzer( SpotRadiusEstimatorFactory.KEY, spotRadiusEstimatorFactory );
+		implementations = new HashMap< String, SpotAnalyzerFactory< ? > >();
+
+		final Context context = new Context( LogService.class, PluginService.class );
+		final LogService log = context.getService( LogService.class );
+		final PluginService pluginService = context.getService( PluginService.class );
+		for ( final PluginInfo< SpotAnalyzerFactory > info : pluginService.getPluginsOfType( SpotAnalyzerFactory.class ) )
+		{
+			try
+			{
+				final SpotAnalyzerFactory< ? > analyzer = info.createInstance();
+				implementations.put( analyzer.getKey(), analyzer );
+			}
+			catch ( final InstantiableException e )
+			{
+				log.error( "Could not instantiate " + info.getClassName(), e );
+			}
+		}
+
+		for ( final SpotAnalyzerFactory< ? > analyzer : implementations.values() )
+		{
+			registerAnalyzer( analyzer.getKey(), analyzer );
+		}
+
+		if ( implementations.size() < 1 )
+		{
+			log.error( "Could not find any spot feature analyzer factory.\n" );
+		}
 	}
 }

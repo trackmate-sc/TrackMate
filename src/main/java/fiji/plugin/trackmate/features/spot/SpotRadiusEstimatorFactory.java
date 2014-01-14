@@ -10,10 +10,14 @@ import net.imglib2.meta.ImgPlus;
 import net.imglib2.meta.view.HyperSliceImgPlus;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
+
+import org.scijava.plugin.Plugin;
+
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 
+@Plugin( type = SpotAnalyzerFactory.class )
 public class SpotRadiusEstimatorFactory< T extends RealType< T > & NativeType< T >> implements SpotAnalyzerFactory< T >
 {
 
