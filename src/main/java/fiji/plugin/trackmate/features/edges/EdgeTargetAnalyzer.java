@@ -17,80 +17,94 @@ import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 
-public class EdgeTargetAnalyzer implements EdgeAnalyzer, MultiThreaded {
+public class EdgeTargetAnalyzer implements EdgeAnalyzer, MultiThreaded
+{
 
 	public static final String KEY = "Edge target";
+
 	/*
 	 * FEATURE NAMES
 	 */
 	public static final String SPOT_SOURCE_ID = "SPOT_SOURCE_ID";
+
 	public static final String SPOT_TARGET_ID = "SPOT_TARGET_ID";
+
 	public static final String EDGE_COST = "LINK_COST";
 
-	public static final List<String> FEATURES = new ArrayList<String>(4);
-	public static final Map<String, String> FEATURE_NAMES = new HashMap<String, String>(4);
-	public static final Map<String, String> FEATURE_SHORT_NAMES = new HashMap<String, String>(4);
-	public static final Map<String, Dimension> FEATURE_DIMENSIONS = new HashMap<String, Dimension>(4);
+	public static final List< String > FEATURES = new ArrayList< String >( 4 );
 
-	static {
-		FEATURES.add(SPOT_SOURCE_ID);
-		FEATURES.add(SPOT_TARGET_ID);
-		FEATURES.add(EDGE_COST);
+	public static final Map< String, String > FEATURE_NAMES = new HashMap< String, String >( 4 );
 
-		FEATURE_NAMES.put(SPOT_SOURCE_ID, "Source spot ID");
-		FEATURE_NAMES.put(SPOT_TARGET_ID, "Target spot ID");
-		FEATURE_NAMES.put(EDGE_COST, "Link cost");
+	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< String, String >( 4 );
 
-		FEATURE_SHORT_NAMES.put(SPOT_SOURCE_ID, "Source ID");
-		FEATURE_SHORT_NAMES.put(SPOT_TARGET_ID, "Target ID");
-		FEATURE_SHORT_NAMES.put(EDGE_COST, "Cost");
+	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 4 );
 
-		FEATURE_DIMENSIONS.put(SPOT_SOURCE_ID, Dimension.NONE);
-		FEATURE_DIMENSIONS.put(SPOT_TARGET_ID, Dimension.NONE);
-		FEATURE_DIMENSIONS.put(EDGE_COST, Dimension.NONE);
+	static
+	{
+		FEATURES.add( SPOT_SOURCE_ID );
+		FEATURES.add( SPOT_TARGET_ID );
+		FEATURES.add( EDGE_COST );
+
+		FEATURE_NAMES.put( SPOT_SOURCE_ID, "Source spot ID" );
+		FEATURE_NAMES.put( SPOT_TARGET_ID, "Target spot ID" );
+		FEATURE_NAMES.put( EDGE_COST, "Link cost" );
+
+		FEATURE_SHORT_NAMES.put( SPOT_SOURCE_ID, "Source ID" );
+		FEATURE_SHORT_NAMES.put( SPOT_TARGET_ID, "Target ID" );
+		FEATURE_SHORT_NAMES.put( EDGE_COST, "Cost" );
+
+		FEATURE_DIMENSIONS.put( SPOT_SOURCE_ID, Dimension.NONE );
+		FEATURE_DIMENSIONS.put( SPOT_TARGET_ID, Dimension.NONE );
+		FEATURE_DIMENSIONS.put( EDGE_COST, Dimension.NONE );
 	}
 
 	private int numThreads;
+
 	private long processingTime;
 
 	/*
 	 * CONSTRUCTOR
 	 */
 
-	public EdgeTargetAnalyzer() {
+	public EdgeTargetAnalyzer()
+	{
 		setNumThreads();
 	}
 
 	@Override
-	public boolean isLocal() {
+	public boolean isLocal()
+	{
 		return true;
 	}
 
 	@Override
-	public void process(final Collection<DefaultWeightedEdge> edges, final Model model) {
+	public void process( final Collection< DefaultWeightedEdge > edges, final Model model )
+	{
 
-		if (edges.isEmpty()) {
-			return;
-		}
+		if ( edges.isEmpty() ) { return; }
 
 		final FeatureModel featureModel = model.getFeatureModel();
 
-		final ArrayBlockingQueue<DefaultWeightedEdge> queue = new ArrayBlockingQueue<DefaultWeightedEdge>(edges.size(), false, edges);
+		final ArrayBlockingQueue< DefaultWeightedEdge > queue = new ArrayBlockingQueue< DefaultWeightedEdge >( edges.size(), false, edges );
 
-		final Thread[] threads = SimpleMultiThreading.newThreads(numThreads);
-		for (int i = 0; i < threads.length; i++) {
-			threads[i] = new Thread("EdgeTargetAnalyzer thread " + i) {
+		final Thread[] threads = SimpleMultiThreading.newThreads( numThreads );
+		for ( int i = 0; i < threads.length; i++ )
+		{
+			threads[ i ] = new Thread( "EdgeTargetAnalyzer thread " + i )
+			{
 				@Override
-				public void run() {
+				public void run()
+				{
 					DefaultWeightedEdge edge;
-					while ((edge = queue.poll()) != null) {
+					while ( ( edge = queue.poll() ) != null )
+					{
 						// Edge weight
-						featureModel.putEdgeFeature(edge, EDGE_COST, model.getTrackModel().getEdgeWeight(edge));
+						featureModel.putEdgeFeature( edge, EDGE_COST, model.getTrackModel().getEdgeWeight( edge ) );
 						// Source & target name & ID
-						final Spot source = model.getTrackModel().getEdgeSource(edge);
-						featureModel.putEdgeFeature(edge, SPOT_SOURCE_ID, Double.valueOf(source.ID()));
-						final Spot target = model.getTrackModel().getEdgeTarget(edge);
-						featureModel.putEdgeFeature(edge, SPOT_TARGET_ID, Double.valueOf(target.ID()));
+						final Spot source = model.getTrackModel().getEdgeSource( edge );
+						featureModel.putEdgeFeature( edge, SPOT_SOURCE_ID, Double.valueOf( source.ID() ) );
+						final Spot target = model.getTrackModel().getEdgeTarget( edge );
+						featureModel.putEdgeFeature( edge, SPOT_TARGET_ID, Double.valueOf( target.ID() ) );
 					}
 
 				}
@@ -98,55 +112,63 @@ public class EdgeTargetAnalyzer implements EdgeAnalyzer, MultiThreaded {
 		}
 
 		final long start = System.currentTimeMillis();
-		SimpleMultiThreading.startAndJoin(threads);
+		SimpleMultiThreading.startAndJoin( threads );
 		final long end = System.currentTimeMillis();
 		processingTime = end - start;
 	}
 
-
 	@Override
-	public String getKey() {
+	public String getKey()
+	{
 		return KEY;
 	}
 
 	@Override
-	public int getNumThreads() {
+	public int getNumThreads()
+	{
 		return numThreads;
 	}
 
 	@Override
-	public void setNumThreads() {
+	public void setNumThreads()
+	{
 		this.numThreads = Runtime.getRuntime().availableProcessors();
 	}
 
 	@Override
-	public void setNumThreads(final int numThreads) {
+	public void setNumThreads( final int numThreads )
+	{
 		this.numThreads = numThreads;
 
 	}
 
 	@Override
-	public long getProcessingTime() {
+	public long getProcessingTime()
+	{
 		return processingTime;
 	}
 
 	@Override
-	public List<String> getFeatures() {
+	public List< String > getFeatures()
+	{
 		return FEATURES;
 	}
 
 	@Override
-	public Map<String, String> getFeatureShortNames() {
+	public Map< String, String > getFeatureShortNames()
+	{
 		return FEATURE_SHORT_NAMES;
 	}
 
 	@Override
-	public Map<String, String> getFeatureNames() {
+	public Map< String, String > getFeatureNames()
+	{
 		return FEATURE_NAMES;
 	}
 
 	@Override
-	public Map<String, Dimension> getFeatureDimensions() {
+	public Map< String, Dimension > getFeatureDimensions()
+	{
 		return FEATURE_DIMENSIONS;
 	};
 }

@@ -11,7 +11,8 @@ import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.features.FeatureAnalyzer;
 
-public interface EdgeAnalyzer extends Benchmark, FeatureAnalyzer, MultiThreaded {
+public interface EdgeAnalyzer extends Benchmark, FeatureAnalyzer, MultiThreaded
+{
 
 	/**
 	 * Scores a collection of link between two spots. The results must be stored
@@ -19,7 +20,7 @@ public interface EdgeAnalyzer extends Benchmark, FeatureAnalyzer, MultiThreaded 
 	 * <p>
 	 * Note: ideally concrete implementation should work in a multi-threaded
 	 * fashion for performance reason, when possible.
-	 *
+	 * 
 	 * @param edges
 	 *            the collection of edges whose features are to be calculated.
 	 * @param model
@@ -27,15 +28,15 @@ public interface EdgeAnalyzer extends Benchmark, FeatureAnalyzer, MultiThreaded 
 	 * 
 	 * @author Jean-Yves Tinevez
 	 */
-	public void process(final Collection<DefaultWeightedEdge> edges, Model model);
+	public void process( final Collection< DefaultWeightedEdge > edges, Model model );
 
 	/**
-	 * Returns <code>true</code> if this analyzer is a local analyzer. That is: a modification that
-	 * affects only one edge requires the edge features to be re-calculated only for
-	 * this edge. If <code>false</code>, any model modification involving an edge will trigger
-	 * a recalculation over the whole track this edge belong to.
+	 * Returns <code>true</code> if this analyzer is a local analyzer. That is:
+	 * a modification that affects only one edge requires the edge features to
+	 * be re-calculated only for this edge. If <code>false</code>, any model
+	 * modification involving an edge will trigger a recalculation over the
+	 * whole track this edge belong to.
 	 */
 	public boolean isLocal();
-
 
 }
