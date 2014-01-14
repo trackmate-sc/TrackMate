@@ -1,22 +1,21 @@
 package fiji.plugin.trackmate.providers;
 
+import java.util.HashMap;
+
+import org.scijava.Context;
+import org.scijava.InstantiableException;
+import org.scijava.log.LogService;
+import org.scijava.plugin.PluginInfo;
+import org.scijava.plugin.PluginService;
+
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
-import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
-import fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer;
-import fiji.plugin.trackmate.features.edges.EdgeVelocityAnalyzer;
 
 /**
  * A provider for the edge analyzers provided in the GUI.
  */
 public class EdgeAnalyzerProvider extends AbstractFeatureAnalyzerProvider< EdgeAnalyzer >
 {
-
-	protected EdgeTargetAnalyzer edgeTargetAnalyzer;
-
-	protected EdgeVelocityAnalyzer edgeVelocityAnalyzer;
-
-	protected EdgeTimeLocationAnalyzer edgeTimeLocationAnalyzer;
 
 	/*
 	 * CONSTRUCTOR
@@ -43,17 +42,38 @@ public class EdgeAnalyzerProvider extends AbstractFeatureAnalyzerProvider< EdgeA
 	 */
 
 	/**
-	 * Register the standard spotFeatureAnalyzers shipped with TrackMate.
+	 * Discovers the edge feature analyzer factories in the current application
+	 * context and registers them in this provider.
 	 */
 	protected void registerEdgeFeatureAnalyzers()
 	{
-		this.edgeTargetAnalyzer = new EdgeTargetAnalyzer();
-		this.edgeTimeLocationAnalyzer = new EdgeTimeLocationAnalyzer();
-		this.edgeVelocityAnalyzer = new EdgeVelocityAnalyzer();
-		// Names
-		registerAnalyzer( EdgeVelocityAnalyzer.KEY, edgeVelocityAnalyzer );
-		registerAnalyzer( EdgeTimeLocationAnalyzer.KEY, edgeTimeLocationAnalyzer );
-		registerAnalyzer( EdgeTargetAnalyzer.KEY, edgeTargetAnalyzer );
+		final HashMap< String, EdgeAnalyzer > implementations = new HashMap< String, EdgeAnalyzer >();
+
+		final Context context = new Context( LogService.class, PluginService.class );
+		final LogService log = context.getService( LogService.class );
+		final PluginService pluginService = context.getService( PluginService.class );
+		for ( final PluginInfo< EdgeAnalyzer > info : pluginService.getPluginsOfType( EdgeAnalyzer.class ) )
+		{
+			try
+			{
+				final EdgeAnalyzer analyzer = info.createInstance();
+				implementations.put( analyzer.getKey(), analyzer );
+			}
+			catch ( final InstantiableException e )
+			{
+				log.error( "Could not instantiate " + info.getClassName(), e );
+			}
+		}
+
+		for ( final EdgeAnalyzer analyzer : implementations.values() )
+		{
+			registerAnalyzer( analyzer.getKey(), analyzer );
+		}
+
+		if ( implementations.size() < 1 )
+		{
+			log.error( "Could not find any spot feature analyzer factory.\n" );
+		}
 	}
 
 }
