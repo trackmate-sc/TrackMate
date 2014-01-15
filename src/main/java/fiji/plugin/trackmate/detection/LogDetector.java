@@ -128,6 +128,7 @@ public class LogDetector< T extends RealType< T > & NativeType< T >> implements 
 		}
 		final Img< FloatType > kernel = DetectionUtils.createLoGKernel( radius, ndims, calibration );
 		final FFTConvolution< FloatType > fftconv = new FFTConvolution< FloatType >( floatImg, kernel );
+		fftconv.setNumThreads( numThreads );
 		fftconv.run();
 
 		final long[] minopposite = new long[ interval.numDimensions() ];

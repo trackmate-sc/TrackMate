@@ -19,7 +19,7 @@ import fiji.plugin.trackmate.util.TMUtils;
 public class LogDetectorPerformance {
 
 	public static void main(final String[] args) throws IncompatibleTypeException {
-		image2DSizePerformance();
+		performance3D();
 	}
 
 	protected static void image2DSizePerformance() throws IncompatibleTypeException
@@ -30,7 +30,7 @@ public class LogDetectorPerformance {
 		final int nspots = 200;
 		final double rad = 3d;
 
-		final int[] sizes = new int[] { 16, 32, 64, 128, 256, 512, 1024, 2048 };
+		final int[] sizes = new int[] { 16, 32, 64, 128, 256, 512, 1024, 1536, 2048 };
 
 		System.out.println( "2D performance: finding 200 spots in a uint16 image:" );
 		System.out.println( "Image size\tTime(ms)" );
@@ -64,6 +64,59 @@ public class LogDetectorPerformance {
 				System.out.println( size + "\t" + ( ( double ) ( end - start ) / ntests ) );
 			}
 		}
+	}
+
+	protected static void image3DSizePerformance() throws IncompatibleTypeException
+	{
+
+		final int nwarmups = 2;
+		final int ntests = 10;
+		final int nspots = 200;
+		final double rad = 3d;
+
+		final int[] sizes = new int[] { 16, 32, 64, 128, 256, 512 };
+
+		System.out.println( "3D performance: finding 200 spots in a 3D uint16 image:" );
+		System.out.println( "! align=\"left\"|N (pixels)" );
+		System.out.println( "!Image size" );
+		System.out.println( "!Time (ms)" );
+		for ( final int size : sizes )
+		{
+			final ArrayImg< UnsignedShortType, ShortArray > img = ArrayImgs.unsignedShorts( size, size, size );
+			final ArrayRandomAccess< UnsignedShortType > ra = img.randomAccess();
+			final Random ran = new Random();
+			for ( int i = 0; i < nspots; i++ )
+			{
+				for ( int d = 0; d < img.numDimensions(); d++ )
+				{
+					ra.setPosition( ran.nextInt( ( int ) img.dimension( d ) ), d );
+				}
+				ra.get().set( 5000 );
+			}
+
+			final RandomAccessible< UnsignedShortType > source = Views.extendMirrorSingle( img );
+			Gauss3.gauss( rad / Math.sqrt( 2 ), source, img );
+			final ImgPlus< UnsignedShortType > imgplus = new ImgPlus< UnsignedShortType >( img );
+
+			{
+				for ( int i = 0; i < nwarmups; i++ )
+				{
+					execTest( imgplus, rad );
+				}
+				final long start = System.currentTimeMillis();
+				for ( int i = 0; i < ntests; i++ )
+				{
+					execTest( imgplus, rad );
+				}
+				final long end = System.currentTimeMillis();
+
+				System.out.println( "|-" );
+				System.out.println( "|" + img.size() );
+				System.out.println( "|" + size + "x" + size + "x" + size );
+				System.out.println( "|" + ( ( double ) ( end - start ) / ntests ) );
+			}
+		}
+		System.out.println( "|}" );
 	}
 
 	protected static void performance2D() throws IncompatibleTypeException
@@ -123,7 +176,7 @@ public class LogDetectorPerformance {
 		final int height = width;
 		final int depth = width;
 
-		System.out.println( "2D performance: finding 200 spots in a " + width + "x" + height + "x" + height + " uint16 image:" );
+		System.out.println( "3D performance: finding 200 spots in a " + width + "x" + height + "x" + height + " uint16 image:" );
 		System.out.println( "Radius\tTime(ms)" );
 		for ( final double rad : radiuses )
 		{

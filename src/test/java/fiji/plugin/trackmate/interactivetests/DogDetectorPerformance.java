@@ -74,7 +74,7 @@ public class DogDetectorPerformance {
 		final int nspots = 200;
 		final double rad = 3d;
 
-		final int[] sizes = new int[] { 16, 32, 64, 128, 256, 512, 1024 };
+		final int[] sizes = new int[] { 16, 32, 64, 128, 256, 512 };
 
 		System.out.println( "3D performance: finding 200 spots in a 3D uint16 image:" );
 		System.out.println( "! align=\"left\"|N (pixels)" );
@@ -176,7 +176,7 @@ public class DogDetectorPerformance {
 		final int height = width;
 		final int depth = width;
 
-		System.out.println( "2D performance: finding 200 spots in a " + width + "x" + height + "x" + height + " uint16 image:" );
+		System.out.println( "3D performance: finding 200 spots in a " + width + "x" + height + "x" + height + " uint16 image:" );
 		System.out.println( "Radius\tTime(ms)" );
 		for ( final double rad : radiuses )
 		{
