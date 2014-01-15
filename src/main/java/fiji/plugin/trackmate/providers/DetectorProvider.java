@@ -1,52 +1,33 @@
 package fiji.plugin.trackmate.providers;
 
-import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_DOWNSAMPLE_FACTOR;
-import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_DO_MEDIAN_FILTERING;
-import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_DO_SUBPIXEL_LOCALIZATION;
-import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_RADIUS;
-import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_TARGET_CHANNEL;
-import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_THRESHOLD;
-import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DOWNSAMPLE_FACTOR;
-import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DO_MEDIAN_FILTERING;
-import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DO_SUBPIXEL_LOCALIZATION;
-import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
-import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
-import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
-import static fiji.plugin.trackmate.detection.DetectorKeys.XML_ATTRIBUTE_DETECTOR_NAME;
-import ij.ImagePlus;
-
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import org.jdom2.Element;
+import org.scijava.Context;
+import org.scijava.InstantiableException;
+import org.scijava.log.LogService;
+import org.scijava.plugin.PluginInfo;
+import org.scijava.plugin.PluginService;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.detection.DetectorKeys;
-import fiji.plugin.trackmate.detection.DogDetectorFactory;
-import fiji.plugin.trackmate.detection.DownsampleLogDetectorFactory;
-import fiji.plugin.trackmate.detection.LogDetectorFactory;
-import fiji.plugin.trackmate.detection.ManualDetectorFactory;
-import fiji.plugin.trackmate.detection.SpotDetector;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
-import fiji.plugin.trackmate.gui.ConfigurationPanel;
-import fiji.plugin.trackmate.gui.panels.detector.BasicDetectorConfigurationPanel;
-import fiji.plugin.trackmate.gui.panels.detector.DogDetectorConfigurationPanel;
-import fiji.plugin.trackmate.gui.panels.detector.DownSampleLogDetectorConfigurationPanel;
-import fiji.plugin.trackmate.gui.panels.detector.LogDetectorConfigurationPanel;
 
-public class DetectorProvider extends AbstractProvider {
+public class DetectorProvider
+{
 
 	/*
 	 * BLANK CONSTRUCTOR
 	 */
 
-	protected LogDetectorFactory<?>	logDetectorFactory;
-	protected DogDetectorFactory<?>	dogDetectorFactory;
-	protected DownsampleLogDetectorFactory<?>	downsampleLogDetectorFactory;
-	protected ManualDetectorFactory<?>			manualDetectorFactory;
+	protected Map< String, SpotDetectorFactory< ? > > implementations;
+
+	protected List< String > keys;
+
+	protected List< String > infoTexts;
+
+	protected List< String > names;
 
 	/**
 	 * This provider provides the GUI with the spot detectors currently available in the
@@ -62,7 +43,6 @@ public class DetectorProvider extends AbstractProvider {
 	 */
 	public DetectorProvider() {
 		registerDetectors();
-		currentKey = LogDetectorFactory.DETECTOR_KEY;
 	}
 
 
@@ -71,331 +51,95 @@ public class DetectorProvider extends AbstractProvider {
 	 */
 
 	/**
-	 * Registers the standard detectors shipped with TrackMate, and instantiates
-	 * their factories.
+	 * Discovers the detector factories in the current application context and
+	 * registers them in this provider.
 	 */
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings( "rawtypes" )
 	protected void registerDetectors() {
-		// Instances
-		this.dogDetectorFactory = new DogDetectorFactory();
-		this.logDetectorFactory = new LogDetectorFactory();
-		this.manualDetectorFactory = new ManualDetectorFactory();
-		this.downsampleLogDetectorFactory = new DownsampleLogDetectorFactory();
-		// keys
-		keys = new ArrayList<String>(4);
-		keys.add(LogDetectorFactory.DETECTOR_KEY);
-		keys.add(DogDetectorFactory.DETECTOR_KEY);
-		keys.add(DownsampleLogDetectorFactory.DETECTOR_KEY);
-		keys.add(ManualDetectorFactory.DETECTOR_KEY);
-		// names
-		names = new ArrayList<String>(4);
-		names.add(LogDetectorFactory.NAME);
-		names.add(DogDetectorFactory.NAME);
-		names.add(DownsampleLogDetectorFactory.NAME);
-		names.add(ManualDetectorFactory.NAME);
-		// infoTexts
-		infoTexts = new ArrayList<String>(4);
-		infoTexts.add(LogDetectorFactory.INFO_TEXT);
-		infoTexts.add(DogDetectorFactory.INFO_TEXT);
-		infoTexts.add(DownsampleLogDetectorFactory.INFO_TEXT);
-		infoTexts.add(ManualDetectorFactory.INFO_TEXT);
+		implementations = new HashMap< String, SpotDetectorFactory< ? > >();
+
+		final Context context = new Context( LogService.class, PluginService.class );
+		final LogService log = context.getService( LogService.class );
+		final PluginService pluginService = context.getService( PluginService.class );
+		for ( final PluginInfo< SpotDetectorFactory > info : pluginService.getPluginsOfType( SpotDetectorFactory.class ) )
+		{
+			try
+			{
+				final SpotDetectorFactory< ? > detectorFactory = info.createInstance();
+				implementations.put( detectorFactory.getKey(), detectorFactory );
+			}
+			catch ( final InstantiableException e )
+			{
+				log.error( "Could not instantiate " + info.getClassName(), e );
+			}
+		}
+
+		keys = new ArrayList< String >( implementations.size() );
+		infoTexts = new ArrayList< String >( implementations.size() );
+		names = new ArrayList< String >( implementations.size() );
+		for ( final SpotDetectorFactory< ? > detectorFactory : implementations.values() )
+		{
+			keys.add( detectorFactory.getKey() );
+			infoTexts.add( detectorFactory.getInfoText() );
+			names.add( detectorFactory.getName() );
+		}
+
+		if ( implementations.size() < 1 )
+		{
+			log.error( "Could not find any detector factory.\n" );
+		}
 	}
 
 	/**
-	 * Marshalls a settings map to a JDom element, ready for saving to XML.
-	 * The element is <b>updated</b> with new attributes.
+	 * Returns a new instance of the target detector factory identified by the
+	 * key parameter. If the key is unknown to this provider, returns
+	 * <code>null</code>.
 	 * <p>
-	 * Only parameters specific to the target detector factory are marshalled.
-	 * The element also always receive an attribute named {@value DetectorKeys#XML_ATTRIBUTE_DETECTOR_NAME}
-	 * that saves the target {@link SpotDetectorFactory} key.
+	 * Querying twice the same detector factory with this method returns the
+	 * same instance.
 	 *
-	 * @return true if marshalling was successful. If not, check {@link #getErrorMessage()}
+	 * @return the desired {@link SpotDetectorFactory} instance.
 	 */
-	public boolean marshall(final Map<String, Object> settings, final Element element) {
-
-		element.setAttribute(XML_ATTRIBUTE_DETECTOR_NAME, currentKey);
-
-		if (currentKey.equals(ManualDetectorFactory.DETECTOR_KEY)) {
-
-			return writeRadius(settings, element);
-
-		} else if (currentKey.equals(LogDetectorFactory.DETECTOR_KEY)
-				|| currentKey.equals(DogDetectorFactory.DETECTOR_KEY)) {
-
-			return writeTargetChannel(settings, element)
-					&& writeRadius(settings, element)
-					&& writeThreshold(settings, element)
-					&& writeDoMedian(settings, element)
-					&& writeDoSubPixel(settings, element);
-
-		} else if (currentKey.equals(DownsampleLogDetectorFactory.DETECTOR_KEY)) {
-
-			return writeTargetChannel(settings, element)
-					&& writeRadius(settings, element)
-					&& writeThreshold(settings, element)
-					&& writeDownsamplingFactor(settings, element);
-
-		} else {
-
-			errorMessage = "Unknow detector factory key: "+currentKey+".\n";
-			return false;
-
-		}
+	public SpotDetectorFactory< ? > getDetectorFactory( final String key )
+	{
+		final SpotDetectorFactory< ? > detectorFactory = implementations.get( key );
+		return detectorFactory;
 	}
 
 	/**
-	 * Un-marshalls a JDom element to update a settings map, and sets the target
-	 * detector factory of this provider from the element.
-	 * <p>
-	 * Concretely: the detector key is read from the element, and is used to set
-	 * the target {@link #currentKey} of this provider. The the specific settings
-	 * map for the targeted detector factory is updated from the element.
+	 * Returns the keys of all the spot detectors known to this provider. The
+	 * list share the same index than for {@link #getNames()} and
+	 * {@link #getInfoTexts()}.
 	 *
-	 * @param element the JDom element to read from.
-	 * @param settings the map to update. Is cleared prior to updating, so that it contains
-	 * only the parameters specific to the target detector factory.
-	 * @return true if unmarshalling was successful. If not, check {@link #getErrorMessage()}
+	 * @return the keys, as a list of strings.
 	 */
-	public boolean unmarshall(final Element element, final Map<String, Object> settings) {
-
-		settings.clear();
-
-		final String detectorKey = element.getAttributeValue(XML_ATTRIBUTE_DETECTOR_NAME);
-		if (null == detectorKey) {
-			errorMessage = "Detector element not found, using default detector.\n";
-			currentKey = LogDetectorFactory.DETECTOR_KEY;
-			return false;
-		}
-		// Try to set the state of this provider from the key read in xml.
-		boolean ok = select(detectorKey);
-		if (!ok) {
-			errorMessage = "Detector key found in XML ("+detectorKey+") is unknown to this provider.\n";
-			return false;
-		}
-
-		final StringBuilder errorHolder = new StringBuilder();
-
-		if (currentKey.equals(ManualDetectorFactory.DETECTOR_KEY)) {
-
-			return readDoubleAttribute(element, settings, KEY_RADIUS, errorHolder);
-
-		} else if (currentKey.equals(LogDetectorFactory.DETECTOR_KEY)
-				|| currentKey.equals(DogDetectorFactory.DETECTOR_KEY)) {
-
-			ok = true;
-			ok = ok & readDoubleAttribute(element, settings, KEY_RADIUS, errorHolder);
-			ok = ok & readDoubleAttribute(element, settings, KEY_THRESHOLD, errorHolder);
-			ok = ok & readBooleanAttribute(element, settings, KEY_DO_SUBPIXEL_LOCALIZATION, errorHolder);
-			ok = ok & readBooleanAttribute(element, settings, KEY_DO_MEDIAN_FILTERING, errorHolder);
-			ok = ok & readIntegerAttribute(element, settings, KEY_TARGET_CHANNEL, errorHolder);
-
-		} else if (currentKey.equals(DownsampleLogDetectorFactory.DETECTOR_KEY)) {
-
-			ok = ok & readDoubleAttribute(element, settings, KEY_RADIUS, errorHolder);
-			ok = ok & readDoubleAttribute(element, settings, KEY_THRESHOLD, errorHolder);
-			ok = ok & readIntegerAttribute(element, settings, KEY_DOWNSAMPLE_FACTOR, errorHolder);
-			ok = ok & readIntegerAttribute(element, settings, KEY_TARGET_CHANNEL, errorHolder);
-
-		} else {
-
-			errorMessage = "Unknow detector factory key: "+currentKey+".\n";
-			return false;
-		}
-
-		if (!checkSettingsValidity(settings)) {
-			ok = false;
-			errorHolder.append(errorMessage); // get the error from validoty check
-		}
-
-		if (!ok) {
-			errorMessage = errorHolder.toString();
-		}
-
-		return ok;
-	}
-
-
-
-
-	/**
-	 * @return a new instance of the target detector identified by the key parameter. If
-	 * the key is unknown to this provider, return <code>null</code>.
-	 */
-	@SuppressWarnings("rawtypes")
-	public SpotDetectorFactory getDetectorFactory() {
-
-		if (currentKey.equals(LogDetectorFactory.DETECTOR_KEY)) {
-			return logDetectorFactory;
-
-		} else if (currentKey.equals(DogDetectorFactory.DETECTOR_KEY)){
-			return dogDetectorFactory;
-
-		} else if (currentKey.equals(DownsampleLogDetectorFactory.DETECTOR_KEY)) {
-			return downsampleLogDetectorFactory;
-
-		} else if (currentKey.equals(ManualDetectorFactory.DETECTOR_KEY)) {
-			return manualDetectorFactory;
-
-		} else {
-			return null;
-		}
+	public List< String > getKeys()
+	{
+		return keys;
 	}
 
 	/**
-	 * Returns a new default settings map suitable for the target detector identified by
-	 * the {@link #currentKey}. Settings are instantiated with default values.
-	 * If the key is unknown to this provider, <code>null</code> is returned.
+	 * Returns the names of all the spot detectors known to this provider. The
+	 * list share the same index than for {@link #getKeys()} and
+	 * {@link #getInfoTexts()}.
+	 *
+	 * @return the detector names, as a list of strings.
 	 */
-	public Map<String, Object> getDefaultSettings() {
-		final Map<String, Object> settings = new HashMap<String, Object>();
-
-		if (currentKey.equals(LogDetectorFactory.DETECTOR_KEY)
-				|| currentKey.equals(DogDetectorFactory.DETECTOR_KEY)) {
-			settings.put(KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL);
-			settings.put(KEY_RADIUS, DEFAULT_RADIUS);
-			settings.put(KEY_THRESHOLD, DEFAULT_THRESHOLD);
-			settings.put(KEY_DO_MEDIAN_FILTERING, DEFAULT_DO_MEDIAN_FILTERING);
-			settings.put(KEY_DO_SUBPIXEL_LOCALIZATION, DEFAULT_DO_SUBPIXEL_LOCALIZATION);
-
-		} else if (currentKey.equals(DownsampleLogDetectorFactory.DETECTOR_KEY)) {
-			settings.put(KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL);
-			settings.put(KEY_RADIUS, DEFAULT_RADIUS);
-			settings.put(KEY_THRESHOLD, DEFAULT_THRESHOLD);
-			settings.put(KEY_DOWNSAMPLE_FACTOR, DEFAULT_DOWNSAMPLE_FACTOR);
-
-		} else if (currentKey.equals(ManualDetectorFactory.DETECTOR_KEY)) {
-			settings.put(KEY_RADIUS, DEFAULT_RADIUS);
-
-		} else {
-			return null;
-		}
-
-		return settings;
-
+	public List< String > getNames()
+	{
+		return names;
 	}
 
 	/**
-	 * Returns the html String containing a descriptive information about the target detector,
-	 * or <code>null</code> if it is unknown to this provider.
+	 * Returns the info texts of all the spot detectors known to this provider.
+	 * The list share the same index than for {@link #getKeys()} and
+	 * {@link #getNames()}.
+	 *
+	 * @return the detector info texts, as a list of strings.
 	 */
-	public String getInfoText() {
-
-		if (currentKey.equals(LogDetectorFactory.DETECTOR_KEY)) {
-			return LogDetectorFactory.INFO_TEXT;
-
-		} else if (currentKey.equals(DogDetectorFactory.DETECTOR_KEY)){
-			return DogDetectorFactory.INFO_TEXT;
-
-		} else if (currentKey.equals(DownsampleLogDetectorFactory.DETECTOR_KEY)) {
-			return DownsampleLogDetectorFactory.INFO_TEXT;
-
-		} else if (currentKey.equals(ManualDetectorFactory.DETECTOR_KEY)) {
-			return ManualDetectorFactory.INFO_TEXT;
-
-		} else {
-			return null;
-		}
+	public List< String > getInfoTexts()
+	{
+		return infoTexts;
 	}
 
-	/**
-	 * Returns a new GUI panel able to configure the settings suitable for the
-	 * target detector factory. If the key is unknown to this provider,
-	 * <code>null</code> is returned.
-	 * 
-	 * @param model
-	 */
-	public ConfigurationPanel getDetectorConfigurationPanel(final Settings settings, final Model model) {
-
-		final ImagePlus imp = settings.imp;
-
-		if (currentKey.equals(LogDetectorFactory.DETECTOR_KEY)) {
-			return new LogDetectorConfigurationPanel(imp, LogDetectorFactory.INFO_TEXT, LogDetectorFactory.NAME, model);
-
-		} else if (currentKey.equals(DogDetectorFactory.DETECTOR_KEY)){
-			return new DogDetectorConfigurationPanel(imp, DogDetectorFactory.INFO_TEXT, DogDetectorFactory.NAME, model);
-
-		} else if (currentKey.equals(DownsampleLogDetectorFactory.DETECTOR_KEY)) {
-			return new DownSampleLogDetectorConfigurationPanel(imp, model);
-
-		} else if (currentKey.equals(ManualDetectorFactory.DETECTOR_KEY)) {
-			return new BasicDetectorConfigurationPanel(imp, ManualDetectorFactory.INFO_TEXT, ManualDetectorFactory.NAME, model);
-
-		} else {
-			return null;
-		}
-	}
-
-	/**
-	 * Check the validity of the given settings map for the target {@link SpotDetector}
-	 * set in this provider. The validity check is strict: we check that all needed parameters
-	 * are here and are of the right class, and that there is no extra unwanted parameters.
-	 * @return  true if the settings map can be used with the target factory. If not, check {@link #getErrorMessage()}
-	 */
-	public boolean checkSettingsValidity(final Map<String, Object> settings) {
-		if (null == settings) {
-			errorMessage = "Settings map is null.\n";
-			return false;
-		}
-
-		final StringBuilder errorHolder = new StringBuilder();
-		if (currentKey.equals(ManualDetectorFactory.DETECTOR_KEY)) {
-
-			final boolean ok = ManualDetectorFactory.checkInput(settings, errorHolder);
-			if (!ok) {
-				errorMessage = errorHolder.toString();
-			}
-			return ok;
-
-		} else if (currentKey.equals(LogDetectorFactory.DETECTOR_KEY)
-				|| currentKey.equals(DogDetectorFactory.DETECTOR_KEY)) {
-
-			final boolean ok = LogDetectorFactory.checkInput(settings, errorHolder);
-			if (!ok) {
-				errorMessage = errorHolder.toString();
-			}
-			return ok;
-
-		} else if (currentKey.equals(DownsampleLogDetectorFactory.DETECTOR_KEY)) {
-
-			final boolean ok = DownsampleLogDetectorFactory.checkInput(settings, errorHolder);
-			if (!ok) {
-				errorMessage = errorHolder.toString();
-			}
-			return ok;
-
-		} else {
-
-			errorMessage = "Unknow detector factory key: "+currentKey+".\n";
-			return false;
-
-		}
-	}
-
-	/*
-	 * PROTECTED METHODS
-	 */
-
-	protected boolean writeTargetChannel(final Map<String, Object> settings, final Element element) {
-		return writeAttribute(settings, element, KEY_TARGET_CHANNEL, Integer.class);
-	}
-
-	protected boolean writeRadius(final Map<String, Object> settings, final Element element) {
-		return writeAttribute(settings, element, KEY_RADIUS, Double.class);
-	}
-
-	protected boolean writeThreshold(final Map<String, Object> settings, final Element element) {
-		return writeAttribute(settings, element, KEY_THRESHOLD, Double.class);
-	}
-
-	protected boolean writeDoMedian(final Map<String, Object> settings, final Element element) {
-		return writeAttribute(settings, element, KEY_DO_MEDIAN_FILTERING, Boolean.class);
-	}
-
-	protected boolean writeDoSubPixel(final Map<String, Object> settings, final Element element) {
-		return writeAttribute(settings, element, KEY_DO_SUBPIXEL_LOCALIZATION, Boolean.class);
-	}
-
-	protected boolean writeDownsamplingFactor(final Map<String, Object> settings, final Element element) {
-		return writeAttribute(settings, element, KEY_DOWNSAMPLE_FACTOR, Integer.class);
-	}
 }

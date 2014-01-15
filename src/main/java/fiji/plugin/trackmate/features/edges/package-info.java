@@ -5,10 +5,10 @@
  * All analyzers should implement {@link fiji.plugin.trackmate.features.edges.EdgeAnalyzer},
  * which is limited to the independent analysis of a single edge.
  * <p>
- * Note that this class design might change heavily in the future since we might meet 
- * more demanding tasks.
- *  
- * @author Jean-Yves Tinevez
+ * Registration of analyzers is done through SciJava plugins discovery mechanism. Annotate your
+ * class with <code>@Plugin( type = EdgeAnalyzer.class )</code> to have it used in TrackMate.
  *
+ * @author Jean-Yves Tinevez
  */
 package fiji.plugin.trackmate.features.edges;
+

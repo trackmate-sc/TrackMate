@@ -490,7 +490,7 @@ public class TrackMateGUIController implements ActionListener
 		/*
 		 * Configure chosen detector
 		 */
-		detectorConfigurationDescriptor = new DetectorConfigurationDescriptor( detectorProvider, trackmate, this );
+		detectorConfigurationDescriptor = new DetectorConfigurationDescriptor( trackmate, this );
 
 		/*
 		 * Execute and report detection progress
