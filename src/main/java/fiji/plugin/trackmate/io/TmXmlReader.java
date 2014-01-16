@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.io;
 
+import static fiji.plugin.trackmate.detection.DetectorKeys.XML_ATTRIBUTE_DETECTOR_NAME;
 import static fiji.plugin.trackmate.io.IOUtils.readBooleanAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.readIntAttribute;
@@ -590,18 +591,33 @@ public class TmXmlReader {
 	 */
 	private void getDetectorSettings(final Element settingsElement, final Settings settings, final DetectorProvider provider) {
 		final Element element = settingsElement.getChild(DETECTOR_SETTINGS_ELEMENT_KEY);
-		final Map<String, Object> ds = new HashMap<String, Object>();
-		// All the hard work is delegated to the provider.
-		final boolean ok = provider.unmarshall(element, ds);
+		// Get the detector key
+		final String detectorKey = element.getAttributeValue( XML_ATTRIBUTE_DETECTOR_NAME );
+		if ( null == detectorKey )
+		{
+			logger.error( "Could not find the detector element in file.\n" );
+			return;
+		}
+
+		final SpotDetectorFactory< ? > factory = provider.getDetectorFactory( detectorKey );
+		if ( null == factory )
+		{
+			logger.error( "The detector identified by the key " + detectorKey + " is unknown to TrackMate.\n" );
+			this.ok = false;
+			return;
+		}
+
+		final Map< String, Object > ds = new HashMap< String, Object >();
+		ok = factory.unmarshall( element, ds );
 
 		if (!ok) {
-			logger.error(provider.getErrorMessage());
+			logger.error( factory.getErrorMessage() );
 			this.ok = false;
 			return;
 		}
 
 		settings.detectorSettings = ds;
-		settings.detectorFactory = provider.getDetectorFactory();
+		settings.detectorFactory = factory;
 	}
 
 	/**
@@ -879,7 +895,9 @@ public class TmXmlReader {
 
 		String name = spotEl.getAttributeValue(SPOT_NAME_ATTRIBUTE_NAME);
 		if (null == name || name.equals(""))
+		{
 			name = "ID"+ID;
+		}
 		spot.setName(name);
 		atts.remove(SPOT_NAME_ATTRIBUTE_NAME);
 

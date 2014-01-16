@@ -39,9 +39,9 @@ public class TrackMatePlugIn_ implements PlugIn
 	/**
 	 * Hook for subclassers: <br>
 	 * Creates the {@link Settings} instance that will be used to tune the
-	 * {@link TrackMate} instance. It is iniatialized by default with values
+	 * {@link TrackMate} instance. It is initialized by default with values
 	 * taken from the current {@link ImagePlus}.
-	 * 
+	 *
 	 * @return a new {@link Settings} instance.
 	 */
 	protected Settings createSettings( final ImagePlus imp )
@@ -54,7 +54,7 @@ public class TrackMatePlugIn_ implements PlugIn
 	/**
 	 * Hook for subclassers: <br>
 	 * Creates the TrackMate instance that will be controlled in the GUI.
-	 * 
+	 *
 	 * @return a new {@link TrackMate} instance.
 	 */
 	protected TrackMate createTrackMate()
@@ -72,6 +72,7 @@ public class TrackMatePlugIn_ implements PlugIn
 	public static void main( final String[] args )
 	{
 		ImageJ.main( args );
+		new ImagePlus( "samples/FakeTracks.tif" ).show();
 		new TrackMatePlugIn_().run( null );
 	}
 
