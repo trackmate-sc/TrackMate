@@ -53,7 +53,6 @@ public class TrackScheme extends AbstractTrackMateModelView {
 	 */
 	private static final boolean DEBUG = false;
 	private static final boolean DEBUG_SELECTION = false;
-	public static final String KEY = "TrackScheme";
 	public static final String INFO_TEXT = "<html>" + "TrackScheme displays the tracking results as track lanes, <br>" + "ignoring the spot actual position. " + "<p>" + "Tracks can be edited through link creation and removal." + "</html>";
 	static final int Y_COLUMN_SIZE = 96;
 	static final int X_COLUMN_SIZE = 160;
@@ -184,11 +183,6 @@ public class TrackScheme extends AbstractTrackMateModelView {
 	 */
 	public TrackSchemeGraphLayout getGraphLayout() {
 		return graphLayout;
-	}
-
-	@Override
-	public String getKey() {
-		return KEY;
 	}
 
 	/*
@@ -686,11 +680,6 @@ public class TrackScheme extends AbstractTrackMateModelView {
 	@Override
 	public void clear() {
 		System.out.println("[TrackScheme] clear() called");
-	}
-
-	@Override
-	public String getInfoText() {
-		return "<html>InfoText for TrachScheme is not redacted.</html>";
 	}
 
 	@Override

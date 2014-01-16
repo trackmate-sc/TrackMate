@@ -32,19 +32,7 @@ import fiji.plugin.trackmate.visualization.TrackColorGenerator;
 
 public class SpotDisplayer3D extends AbstractTrackMateModelView {
 
-	public static final String NAME = "3D Viewer";
-	public static final String INFO_TEXT = "<html>" +
-			"This invokes a new 3D viewer (over time) window, which receive a <br> " +
-			"8-bit copy of the image data. Spots and tracks are rendered in 3D. <br>" +
-			"All the spots 3D shapes are calculated during the rendering step, which <br>" +
-			"can take long." +
-			"<p>" +
-			"This displayer does not allow manual editing of spots. Use it only for <br>" +
-			"for very specific cases where you need to have a good 3D image to judge <br>" +
-			"the quality of detection and tracking. If you don't, use the hyperstack <br>" +
-			"displayer; you can generate a 3D viewer at the last step of tracking that will <br>" +
-			"be in sync with the hyperstack displayer. " +
-			"</html>";
+
 	public static final int DEFAULT_RESAMPLING_FACTOR = 4;
 	//	public static final int DEFAULT_THRESHOLD = 50;
 
@@ -304,21 +292,6 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView {
 	public void clear() {
 		universe.removeContent(SPOT_CONTENT_NAME);
 		universe.removeContent(TRACK_CONTENT_NAME);
-	}
-
-	@Override
-	public String getInfoText() {
-		return INFO_TEXT;
-	}
-
-	@Override
-	public String toString() {
-		return NAME;
-	}
-
-	@Override
-	public String getKey() {
-		return NAME;
 	}
 
 	/*

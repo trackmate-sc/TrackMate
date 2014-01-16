@@ -139,7 +139,8 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		final ViewProvider viewProvider = controller.getViewProvider();
 		final Collection<TrackMateModelView> views = reader.getViews(viewProvider, model, settings, controller.getSelectionModel());
 		for (final TrackMateModelView view : views) {
-			if (view.getKey().equals(TrackScheme.KEY)) {
+			if ( view instanceof TrackScheme )
+			{
 				final TrackScheme trackscheme = (TrackScheme) view;
 				trackscheme.setSpotImageUpdater(new SpotImageUpdater(settings));
 			}

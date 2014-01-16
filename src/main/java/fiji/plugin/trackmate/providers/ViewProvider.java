@@ -1,33 +1,30 @@
 package fiji.plugin.trackmate.providers;
 
-import ij.IJ;
-import ij.ImagePlus;
-import ij.process.ImageConverter;
-import ij.process.StackConverter;
-import ij3d.Content;
-import ij3d.ContentCreator;
-import ij3d.Image3DUniverse;
-
-import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import javax.vecmath.Color3f;
+import org.scijava.Context;
+import org.scijava.InstantiableException;
+import org.scijava.log.LogService;
+import org.scijava.plugin.PluginInfo;
+import org.scijava.plugin.PluginService;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
-import fiji.plugin.trackmate.visualization.threedviewer.SpotDisplayer3D;
-import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
+import fiji.plugin.trackmate.visualization.ViewFactory;
 
 public class ViewProvider {
+	/**
+	 * The view keys, in the order they will appear in the GUI.
+	 */
+	protected List< String > names = new ArrayList< String >();
 
-	/** The view names, in the order they will appear in the GUI.
-	 * These names will be used as keys to access relevant view classes.  */
-	protected List<String> names;
+	protected List< String > selectableKeys = new ArrayList< String >();
+
+	protected Map< String, ViewFactory > views = new HashMap< String, ViewFactory >();
 
 	/*
 	 * BLANK CONSTRUCTOR
@@ -47,114 +44,61 @@ public class ViewProvider {
 	}
 
 
-	/*
-	 * METHODS
-	 */
 
-	/**
-	 * Register the standard views shipped with TrackMate.
-	 */
-	protected void registerViews() { // We do not put TrackScheme here. It has its own launcher in the last panel
-		// Names
-		names = new ArrayList<String>(2);
-		names.add(HyperStackDisplayer.NAME);
-		names.add(SpotDisplayer3D.NAME);
-	}
-
-	/**
-	 * Returns a new instance of the target view identified by the key
-	 * parameter. If the key is unknown to this factory, <code>null</code> is
-	 * returned.
-	 *
-	 * @param key
-	 *            the key of the desired view.
-	 * @param model
-	 *            the model to display in the view.
-	 * @param settings
-	 *            a {@link Settings} object, which specific implementation might
-	 *            use to display the model.
-	 * @param selectionModel
-	 *            the {@link SelectionModel} model to share in the created view.
-	 * @return a new view of the specified model.
-	 */
-	public TrackMateModelView getView(final String key, final Model model, final Settings settings, final SelectionModel selectionModel) {
-
-		if (key.equals(HyperStackDisplayer.NAME)) {
-
-			final ImagePlus imp = settings.imp;
-			return new HyperStackDisplayer(model, selectionModel, imp);
-
-		} else if (key.equals(SpotDisplayer3D.NAME)) {
-
-			final Image3DUniverse universe = new Image3DUniverse();
-			universe.show();
-			final ImagePlus imp = settings.imp;
-			if (null != imp) {
-
-				if (imp.getType() == ImagePlus.GRAY8 || imp.getType() == ImagePlus.COLOR_256 || imp.getType() == ImagePlus.COLOR_RGB) {
-					// Everything is fine, we can do that natively.
-					final Content cimp = ContentCreator.createContent(imp.getShortTitle(), imp, 0, 1, 0, new Color3f(Color.WHITE), 0, new boolean[] { true, true, true });
-					universe.addContentLater(cimp);
-
-				} else {
-					// We have to convert. I think it is more honest to prompt the user for this.
-					if (IJ.showMessageWithCancel("Conversion required.", "We need to duplicate the source image on 8-bit. Do it?")) {
-
-						final ImagePlus duplicate = imp.duplicate();
-						final int s = duplicate.getStackSize();
-						if (s == 1) {
-							new ImageConverter(duplicate).convertToGray8();
-						} else {
-							new StackConverter(duplicate).convertToGray8();
-						}
-
-						final Content cimp = ContentCreator.createContent(imp.getShortTitle(), duplicate, 0, 1, 0, new Color3f(Color.WHITE), 0, new boolean[] { true, true, true });
-						universe.addContentLater(cimp);
-					}
-				}
-
-
-			}
-
-			return new SpotDisplayer3D(model, selectionModel, universe);
-
-		} else if (key.equals(TrackScheme.KEY)) {
-
-			return new TrackScheme(model, selectionModel);
-
-		} else {
-			return null;
+	private void registerView( final String key, final ViewFactory view, final boolean selectable )
+	{
+		names.add( key );
+		views.put( key, view );
+		if ( selectable )
+		{
+			selectableKeys.add( key );
 		}
 	}
 
-	/**
-	 * Returns a list of the view names available through this factory.
-	 */
-	public List<String> getAvailableViews() {
+	public ViewFactory getView( final String key )
+	{
+		return views.get( key );
+	}
+
+	public List< String > getAvailableViews()
+	{
 		return names;
 	}
 
-	/**
-	 * Returns the html String containing a descriptive information about the
-	 * target view, or <code>null</code> if it is unknown to this factory.
-	 */
-	public String getInfoText(final String key) {
-
-		if (key.equals(HyperStackDisplayer.NAME)) {
-
-			return HyperStackDisplayer.INFO_TEXT;
-
-		} else if (key.equals(SpotDisplayer3D.NAME)) {
-
-			return SpotDisplayer3D.INFO_TEXT;
-
-		} else if (key.equals(TrackScheme.KEY)) {
-
-			return TrackScheme.INFO_TEXT;
-
-		} else {
-			return null;
-		}
+	public List< String > getSelectableViews()
+	{
+		return selectableKeys;
 	}
 
+	protected void registerViews()
+	{
+		final Context context = new Context( LogService.class, PluginService.class );
+		final LogService log = context.getService( LogService.class );
+		final PluginService pluginService = context.getService( PluginService.class );
+		final List< PluginInfo< ViewFactory >> infos = pluginService.getPluginsOfType( ViewFactory.class );
+
+		final Comparator< PluginInfo< ViewFactory >> priorityComparator = new Comparator< PluginInfo< ViewFactory > >()
+		{
+			@Override
+			public int compare( final PluginInfo< ViewFactory > o1, final PluginInfo< ViewFactory > o2 )
+			{
+				return o1.getPriority() > o2.getPriority() ? 1 : o1.getPriority() < o2.getPriority() ? -1 : 0;
+			}
+		};
+
+		Collections.sort( infos, priorityComparator );
+
+		for ( final PluginInfo< ViewFactory > info : infos )
+		{
+			try
+			{
+				final ViewFactory view = info.createInstance();
+				registerView( view.getKey(), view, info.isSelectable() );
+			}
+			catch ( final InstantiableException e )
+			{
+				log.error( "Could not instantiate " + info.getClassName(), e );
+			}
+		}
+	}
 }

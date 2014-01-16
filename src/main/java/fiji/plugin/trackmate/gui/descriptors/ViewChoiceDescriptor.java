@@ -11,7 +11,8 @@ import fiji.plugin.trackmate.gui.TrackMateGUIModel;
 import fiji.plugin.trackmate.gui.panels.ListChooserPanel;
 import fiji.plugin.trackmate.providers.ViewProvider;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
+import fiji.plugin.trackmate.visualization.ViewFactory;
+import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayerFactory;
 
 public class ViewChoiceDescriptor implements WizardPanelDescriptor
 {
@@ -31,11 +32,12 @@ public class ViewChoiceDescriptor implements WizardPanelDescriptor
 		this.viewProvider = viewProvider;
 		this.guimodel = guimodel;
 		this.controller = controller;
-		final List< String > viewerNames = viewProvider.getAvailableViews();
+		// Only views that are set to be selectable in the menu.
+		final List< String > viewerNames = viewProvider.getSelectableViews();
 		final List< String > infoTexts = new ArrayList< String >( viewerNames.size() );
 		for ( final String key : viewerNames )
 		{
-			infoTexts.add( viewProvider.getInfoText( key ) );
+			infoTexts.add( viewProvider.getView( key ).getInfoText() );
 		}
 		this.component = new ListChooserPanel( viewerNames, infoTexts, "view" );
 	}
@@ -71,15 +73,13 @@ public class ViewChoiceDescriptor implements WizardPanelDescriptor
 			@Override
 			public void run()
 			{
-				final String viewName = viewProvider.getAvailableViews().get( index );
+				final String viewName = viewProvider.getSelectableViews().get( index );
 
-				if ( viewName.equals( HyperStackDisplayer.NAME ) ) { return; // it
-																				// is
-																				// already
-																				// on.
+				if ( viewName.equals( HyperStackDisplayerFactory.KEY ) ) { return;
 				}
 
-				final TrackMateModelView view = viewProvider.getView( viewName, trackmate.getModel(), trackmate.getSettings(), selectionModel );
+				final ViewFactory factory = viewProvider.getView( viewName );
+				final TrackMateModelView view = factory.getView( trackmate.getModel(), trackmate.getSettings(), selectionModel );
 				for ( final String settingKey : guimodel.getDisplaySettings().keySet() )
 				{
 					view.setDisplaySettings( settingKey, guimodel.getDisplaySettings().get( settingKey ) );

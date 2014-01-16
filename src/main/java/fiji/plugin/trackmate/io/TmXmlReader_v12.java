@@ -136,7 +136,7 @@ import fiji.plugin.trackmate.tracking.SimpleFastLAPTracker;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTracker;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
+import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayerFactory;
 
 /**
  * A compatibility xml loader than can load TrackMate xml file saved for version
@@ -264,7 +264,7 @@ public class TmXmlReader_v12 extends TmXmlReader {
 	@Override
 	public Collection<TrackMateModelView> getViews(final ViewProvider provider, final Model model, final Settings settings, final SelectionModel selectionModel) {
 		final Collection<TrackMateModelView> views = new ArrayList<TrackMateModelView>(1);
-		views.add(provider.getView(HyperStackDisplayer.NAME, model, settings, selectionModel));
+		views.add( provider.getView( HyperStackDisplayerFactory.KEY ).getView( model, settings, selectionModel ) );
 		return views ;
 	}
 

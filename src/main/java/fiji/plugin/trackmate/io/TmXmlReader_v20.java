@@ -98,7 +98,7 @@ import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.providers.ViewProvider;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
+import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayerFactory;
 
 public class TmXmlReader_v20 extends TmXmlReader {
 
@@ -136,7 +136,7 @@ public class TmXmlReader_v20 extends TmXmlReader {
 	@Override
 	public Collection<TrackMateModelView> getViews(final ViewProvider provider, final Model model, final Settings settings, final SelectionModel selectionModel) {
 		final Collection<TrackMateModelView> views = new ArrayList<TrackMateModelView>(1);
-		final TrackMateModelView view = provider.getView(HyperStackDisplayer.NAME, model, settings, selectionModel);
+		final TrackMateModelView view = provider.getView( HyperStackDisplayerFactory.KEY ).getView( model, settings, selectionModel );
 		views.add(view);
 		return views;
 	}

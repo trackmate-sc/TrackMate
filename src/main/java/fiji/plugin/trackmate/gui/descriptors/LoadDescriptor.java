@@ -118,7 +118,7 @@ public class LoadDescriptor extends SomeDialogDescriptor
 		final Collection< TrackMateModelView > views = reader.getViews( viewProvider, model, settings, newcontroller.getSelectionModel() );
 		for ( final TrackMateModelView view : views )
 		{
-			if ( view.getKey().equals( TrackScheme.KEY ) )
+			if ( view instanceof TrackScheme )
 			{
 				final TrackScheme trackscheme = ( TrackScheme ) view;
 				trackscheme.setSpotImageUpdater( new SpotImageUpdater( settings ) );

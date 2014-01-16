@@ -5,11 +5,10 @@ import java.util.Map;
 
 import org.jfree.chart.renderer.InterpolatePaintScale;
 
-import fiji.plugin.trackmate.InfoTextable;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 
-public interface TrackMateModelView extends InfoTextable
+public interface TrackMateModelView
 {
 
 	/*
@@ -264,8 +263,4 @@ public interface TrackMateModelView extends InfoTextable
 	 */
 	public Model getModel();
 
-	/**
-	 * Returns a unique identifier that identifies this view.
-	 */
-	public String getKey();
 }
