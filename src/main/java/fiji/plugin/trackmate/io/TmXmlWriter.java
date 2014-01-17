@@ -315,14 +315,13 @@ public class TmXmlWriter {
 	protected Element echoTrackerSettings(final Settings settings, final TrackerProvider provider) {
 		final Element el = new Element(TRACKER_SETTINGS_ELEMENT_KEY);
 
-		if (null == settings.tracker) {
+		if ( null == settings.trackerFactory ) {
 			return el;
 		}
-		final boolean ok = provider.select(settings.tracker.getKey());
+		final boolean ok = settings.trackerFactory.marshall( settings.trackerSettings, el );
 		if (!ok) {
-			logger.error(provider.getErrorMessage());
+			logger.error( settings.trackerFactory.getErrorMessage() );
 		} else {
-			provider.marshall(settings.trackerSettings, el);
 		}
 
 		logger.log("  Added tracker settings.\n");

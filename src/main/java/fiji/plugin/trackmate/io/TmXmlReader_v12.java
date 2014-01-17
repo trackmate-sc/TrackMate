@@ -131,10 +131,11 @@ import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.providers.ViewProvider;
-import fiji.plugin.trackmate.tracking.FastLAPTracker;
-import fiji.plugin.trackmate.tracking.SimpleFastLAPTracker;
+import fiji.plugin.trackmate.tracking.FastLAPTrackerFactory;
+import fiji.plugin.trackmate.tracking.SimpleFastLAPTrackerFactory;
 import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTracker;
+import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
+import fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTrackerFactory;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 
@@ -781,33 +782,39 @@ public class TmXmlReader_v12 extends TmXmlReader {
 		if (null == trackerClassName) {
 			logger.error("\nTracker class is not present.\n");
 			logger.error("Substituting default.\n");
-			trackerKey = SimpleFastLAPTracker.TRACKER_KEY;
+			trackerKey = SimpleFastLAPTrackerFactory.TRACKER_KEY;
 
 		} else {
 
-			if (trackerClassName.equals("fiji.plugin.trackmate.tracking.SimpleFastLAPTracker") ||
-					trackerClassName.equals("fiji.plugin.trackmate.tracking.SimpleLAPTracker")) {
-				trackerKey = SimpleFastLAPTracker.TRACKER_KEY; // convert to simple fast version
-
-			} else if (trackerClassName.equals("fiji.plugin.trackmate.tracking.FastLAPTracker") ||
-					trackerClassName.equals("fiji.plugin.trackmate.tracking.LAPTracker")) {
-				trackerKey = FastLAPTracker.TRACKER_KEY; // convert to fast version
-
-			} else if (trackerClassName.equals("fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTracker")) {
-				trackerKey = NearestNeighborTracker.TRACKER_KEY;
-
-			} else {
-				logger.error("\nUnknown tracker: "+trackerClassName+".\n");
-				logger.error("Substituting default.\n");
-				trackerKey = SimpleFastLAPTracker.TRACKER_KEY;
+			if ( trackerClassName.equals( "fiji.plugin.trackmate.tracking.SimpleFastLAPTracker" ) || trackerClassName.equals( "fiji.plugin.trackmate.tracking.SimpleLAPTracker" ) )
+			{
+				// convert to simple fast version
+				trackerKey = SimpleFastLAPTrackerFactory.TRACKER_KEY;
+			}
+			else if ( trackerClassName.equals( "fiji.plugin.trackmate.tracking.FastLAPTracker" ) || trackerClassName.equals( "fiji.plugin.trackmate.tracking.LAPTracker" ) )
+			{
+				// convert to fast version
+				trackerKey = FastLAPTrackerFactory.TRACKER_KEY;
+			}
+			else if ( trackerClassName.equals( "fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTracker" ) )
+			{
+				trackerKey = NearestNeighborTrackerFactory.TRACKER_KEY;
+			}
+			else
+			{
+				logger.error( "\nUnknown tracker: " + trackerClassName + ".\n" );
+				logger.error( "Substituting default.\n" );
+				trackerKey = SimpleFastLAPTrackerFactory.TRACKER_KEY;
 			}
 		}
-		final boolean ok = provider.select(trackerKey);
-		if (!ok) {
-			logger.error(provider.getErrorMessage());
+		SpotTrackerFactory factory = provider.getFactory( trackerKey );
+		if ( null == factory )
+		{
+			logger.error( "\nUnknown tracker: " + trackerClassName + ".\n" );
 			logger.error("Substituting default tracker.\n");
+			factory = new SimpleFastLAPTrackerFactory();
 		}
-		settings.tracker = provider.getTracker();
+		settings.trackerFactory = factory;
 
 		// Deal with tracker settings
 		{
@@ -819,15 +826,15 @@ public class TmXmlReader_v12 extends TmXmlReader {
 
 				logger.error("\nTracker settings class is not present.\n");
 				logger.error("Substituting default one.\n");
-				ts = provider.getDefaultSettings();
+				ts = factory.getDefaultSettings();
 
 			} else {
 
 				// All LAP trackers
 				if (trackerSettingsClassName.equals("fiji.plugin.trackmate.tracking.LAPTrackerSettings"))  {
 
-					if (trackerKey.equals(SimpleFastLAPTracker.TRACKER_KEY)
-							|| trackerKey.equals(FastLAPTracker.TRACKER_KEY)) {
+					if ( trackerKey.equals( SimpleFastLAPTrackerFactory.TRACKER_KEY ) || trackerKey.equals( FastLAPTrackerFactory.TRACKER_KEY ) )
+					{
 
 						/*
 						 *  Read
@@ -901,7 +908,8 @@ public class TmXmlReader_v12 extends TmXmlReader {
 
 				} else if (trackerSettingsClassName.equals("fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTrackerSettings"))  {
 
-					if (trackerKey.equals(NearestNeighborTracker.TRACKER_KEY)) {
+					if ( trackerKey.equals( NearestNeighborTrackerFactory.TRACKER_KEY ) )
+					{
 
 						// The saved class matched, we can updated the settings created above with the file content
 						final double maxDist = readDoubleAttribute(element, MAX_LINKING_DISTANCE_ATTRIBUTE, Logger.VOID_LOGGER);

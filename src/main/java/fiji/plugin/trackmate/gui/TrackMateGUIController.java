@@ -74,7 +74,7 @@ import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.providers.ViewProvider;
-import fiji.plugin.trackmate.tracking.ManualTracker;
+import fiji.plugin.trackmate.tracking.ManualTrackerFactory;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
@@ -730,7 +730,7 @@ public class TrackMateGUIController implements ActionListener
 		}
 		else if ( currentDescriptor == trackerChoiceDescriptor )
 		{
-			if ( null == trackmate.getSettings().tracker || trackmate.getSettings().tracker.getKey().equals( ManualTracker.TRACKER_KEY ) )
+			if ( null == trackmate.getSettings().trackerFactory || trackmate.getSettings().trackerFactory.getKey().equals( ManualTrackerFactory.TRACKER_KEY ) )
 			{
 				return trackFilterDescriptor;
 			}
@@ -831,7 +831,7 @@ public class TrackMateGUIController implements ActionListener
 		}
 		else if ( currentDescriptor == trackFilterDescriptor )
 		{
-			if ( null == trackmate.getSettings().tracker || trackmate.getSettings().tracker.getKey().equals( ManualTracker.TRACKER_KEY ) )
+			if ( null == trackmate.getSettings().trackerFactory || trackmate.getSettings().trackerFactory.getKey().equals( ManualTrackerFactory.TRACKER_KEY ) )
 			{
 				return trackerChoiceDescriptor;
 			}

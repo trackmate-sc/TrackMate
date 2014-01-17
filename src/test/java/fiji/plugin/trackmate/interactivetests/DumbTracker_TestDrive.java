@@ -63,15 +63,14 @@ public class DumbTracker_TestDrive
 			}
 		}
 
-		final DumbTracker tracker = new DumbTracker();
-		tracker.setTarget( spots, null );
+		final DumbTracker tracker = new DumbTracker( spots );
 		if ( !tracker.checkInput() || !tracker.process() )
 		{
 			System.err.println( tracker.getErrorMessage() );
 			return;
 		}
 
-		System.out.println( "Done!" );// DEBUG
+		System.out.println( "Done!" );
 
 		final Model model = new Model();
 		model.setSpots( spots, false );

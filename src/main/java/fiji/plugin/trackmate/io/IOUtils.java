@@ -1,5 +1,11 @@
 package fiji.plugin.trackmate.io;
 
+import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DOWNSAMPLE_FACTOR;
+import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DO_MEDIAN_FILTERING;
+import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DO_SUBPIXEL_LOCALIZATION;
+import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
+import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
+import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.TRACKMATE_ICON;
 import ij.IJ;
 
@@ -9,6 +15,8 @@ import java.awt.Frame;
 import java.awt.HeadlessException;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.List;
+import java.util.Map;
 
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -32,7 +40,7 @@ public class IOUtils {
 
 	/**
 	 * Prompts the user for a xml file to save to.
-	 * 
+	 *
 	 * @param file
 	 *            a default file, will be used to display a default choice in
 	 *            the file chooser.
@@ -224,4 +232,182 @@ public class IOUtils {
 		return val;
 	}
 
+	/*
+	 * EXTRA UN-MARSHALLING UTILS Using another syntax.
+	 */
+
+	public static final boolean readDoubleAttribute( final Element element, final Map< String, Object > settings, final String parameterKey, final StringBuilder errorHolder )
+	{
+		final String str = element.getAttributeValue( parameterKey );
+		if ( null == str )
+		{
+			errorHolder.append( "Attribute " + parameterKey + " could not be found in XML element.\n" );
+			return false;
+		}
+		try
+		{
+			final double val = Double.parseDouble( str );
+			settings.put( parameterKey, val );
+		}
+		catch ( final NumberFormatException nfe )
+		{
+			errorHolder.append( "Could not read " + parameterKey + " attribute as a double value. Got " + str + ".\n" );
+			return false;
+		}
+		return true;
+	}
+
+	public static final boolean readIntegerAttribute( final Element element, final Map< String, Object > settings, final String parameterKey, final StringBuilder errorHolder )
+	{
+		final String str = element.getAttributeValue( parameterKey );
+		if ( null == str )
+		{
+			errorHolder.append( "Attribute " + parameterKey + " could not be found in XML element.\n" );
+			return false;
+		}
+		try
+		{
+			final int val = Integer.parseInt( str );
+			settings.put( parameterKey, val );
+		}
+		catch ( final NumberFormatException nfe )
+		{
+			errorHolder.append( "Could not read " + parameterKey + " attribute as an integer value. Got " + str + ".\n" );
+			return false;
+		}
+		return true;
+	}
+
+	public static final boolean readBooleanAttribute( final Element element, final Map< String, Object > settings, final String parameterKey, final StringBuilder errorHolder )
+	{
+		final String str = element.getAttributeValue( parameterKey );
+		if ( null == str )
+		{
+			errorHolder.append( "Attribute " + parameterKey + " could not be found in XML element.\n" );
+			return false;
+		}
+		try
+		{
+			final boolean val = Boolean.parseBoolean( str );
+			settings.put( parameterKey, val );
+		}
+		catch ( final NumberFormatException nfe )
+		{
+			errorHolder.append( "Could not read " + parameterKey + " attribute as an boolean value. Got " + str + "." );
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Unmarshall the attributes of a JDom element in a map of doubles. Mappings
+	 * are <b>added</b> to the specified map. If a value is found not to be a
+	 * double, an error is returned.
+	 *
+	 * @return <code>true</code> if all values were found and mapped as doubles,
+	 *         <code>false</code> otherwise and the error holder is updated.
+	 */
+	public static boolean unmarshallMap( final Element element, final Map< String, Double > map, final StringBuilder errorHolder )
+	{
+		boolean ok = true;
+		final List< Attribute > attributes = element.getAttributes();
+		for ( final Attribute att : attributes )
+		{
+			final String key = att.getName();
+			try
+			{
+				final double val = att.getDoubleValue();
+				map.put( key, val );
+			}
+			catch ( final DataConversionException e )
+			{
+				errorHolder.append( "Could not convert the " + key + " attribute to double. Got " + att.getValue() + ".\n" );
+				ok = false;
+			}
+		}
+		return ok;
+	}
+
+	/*
+	 * MARSHALLING UTILS
+	 */
+
+	public static final boolean writeTargetChannel( final Map< String, Object > settings, final Element element, final StringBuilder errorHolder )
+	{
+		return writeAttribute( settings, element, KEY_TARGET_CHANNEL, Integer.class, errorHolder );
+	}
+
+	public static final boolean writeRadius( final Map< String, Object > settings, final Element element, final StringBuilder errorHolder )
+	{
+		return writeAttribute( settings, element, KEY_RADIUS, Double.class, errorHolder );
+	}
+
+	public static final boolean writeThreshold( final Map< String, Object > settings, final Element element, final StringBuilder errorHolder )
+	{
+		return writeAttribute( settings, element, KEY_THRESHOLD, Double.class, errorHolder );
+	}
+
+	public static final boolean writeDoMedian( final Map< String, Object > settings, final Element element, final StringBuilder errorHolder )
+	{
+		return writeAttribute( settings, element, KEY_DO_MEDIAN_FILTERING, Boolean.class, errorHolder );
+	}
+
+	public static final boolean writeDoSubPixel( final Map< String, Object > settings, final Element element, final StringBuilder errorHolder )
+	{
+		return writeAttribute( settings, element, KEY_DO_SUBPIXEL_LOCALIZATION, Boolean.class, errorHolder );
+	}
+
+	public static final boolean writeDownsamplingFactor( final Map< String, Object > settings, final Element element, final StringBuilder errorHolder )
+	{
+		return writeAttribute( settings, element, KEY_DOWNSAMPLE_FACTOR, Integer.class, errorHolder );
+	}
+
+	/**
+	 * Add a parameter attribute to the given element, taken from the given
+	 * settings map. Basic checks are made to ensure that the parameter value
+	 * can be found and is of the right class.
+	 * 
+	 * @param settings
+	 *            the map to take the parameter value from
+	 * @param element
+	 *            the JDom element to update
+	 * @param parameterKey
+	 *            the key to the parameter value in the map
+	 * @param expectedClass
+	 *            the expected class for the value
+	 * @return <code>true</code> if the parameter was found, of the right class,
+	 *         and was successfully added to the element, <code>false</code> if
+	 *         not, and updated the specified error holder.
+	 */
+	public static final boolean writeAttribute( final Map< String, Object > settings, final Element element, final String parameterKey, final Class< ? > expectedClass, final StringBuilder errorHolder )
+	{
+		final Object obj = settings.get( parameterKey );
+
+		if ( null == obj )
+		{
+			errorHolder.append( "Could not find parameter " + parameterKey + " in settings map.\n" );
+			return false;
+		}
+
+		if ( !expectedClass.isInstance( obj ) )
+		{
+			errorHolder.append( "Exoected " + parameterKey + " parameter to be a " + expectedClass.getName() + " but was a " + obj.getClass().getName() + ".\n" );
+			return false;
+		}
+
+		element.setAttribute( parameterKey, "" + obj );
+		return true;
+	}
+
+	/**
+	 * Stores the given mapping in a given JDom element, using attributes in a
+	 * KEY="VALUE" fashion.
+	 */
+	public static void marshallMap( final Map< String, Double > map, final Element element )
+	{
+		for ( final String key : map.keySet() )
+		{
+			element.setAttribute( key, map.get( key ).toString() );
+		}
+	}
 }

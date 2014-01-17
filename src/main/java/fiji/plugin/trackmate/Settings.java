@@ -19,7 +19,7 @@ import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
-import fiji.plugin.trackmate.tracking.SpotTracker;
+import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 
 /**
@@ -70,7 +70,7 @@ public class Settings {
 	 * for each target frame. */
 	public SpotDetectorFactory<?> detectorFactory;
 	/** The the tracker to use. */
-	public SpotTracker tracker;
+	public SpotTrackerFactory trackerFactory;
 
 	public Map<String, Object> detectorSettings = new HashMap<String, Object>();
 	public Map<String, Object> trackerSettings = new HashMap<String, Object>();
@@ -284,10 +284,11 @@ public class Settings {
 
 		str.append('\n');
 		str.append("Particle linking:\n");
-		if (null == tracker) {
+		if ( null == trackerFactory )
+		{
 			str.append("No spot tracker set.\n");
 		} else {
-			str.append("Tracker: " + tracker.toString() + ".\n");
+			str.append( "Tracker: " + trackerFactory.toString() + ".\n" );
 			if (null == trackerSettings) {
 				str.append("No tracker settings found.\n");
 			} else {
@@ -328,12 +329,14 @@ public class Settings {
 			errorMessage = "Initial spot quality threshold is not set.\n";
 			return false;
 		}
-		if (null == tracker) {
-			errorMessage = "The tracker in settings is null.\n";
+		if ( null == trackerFactory )
+		{
+			errorMessage = "The tracker factory is null.\n";
 			return false;
 		}
-		if (!tracker.checkInput()) {
-			errorMessage = "The tracker has invalid input:\n"+tracker.getErrorMessage();
+		if ( !trackerFactory.checkSettingsValidity( trackerSettings ) )
+		{
+			errorMessage = "The tracker has invalid input:\n" + trackerFactory.getErrorMessage();
 			return false;
 		}
 		return true;

@@ -126,10 +126,6 @@ import fiji.plugin.trackmate.tracking.hungarian.HungarianAlgorithm;
  */
 public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotTracker {
 
-	public static final String TRACKER_KEY = "LAP_TRACKER";
-	public static final String NAME = "LAP Tracker";
-	public static final String INFO_TEXT = "<html>" + "This tracker is based on the Linear Assignment Problem mathematical framework. <br>" + "Its implementation is derived from the following paper: <br>" + "<i>Robust single-particle tracking in live-cell time-lapse sequences</i> - <br>" + "Jaqaman <i> et al.</i>, 2008, Nature Methods. <br>" + "</html>";
-
 	private final static String BASE_ERROR_MESSAGE = "LAPTracker: ";
 	private static final boolean DEBUG = false;
 
@@ -180,10 +176,19 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 	/** The graph this tracker will use to link spots. */
 	protected SimpleWeightedGraph<Spot, DefaultWeightedEdge> graph;
 	/** The Spot collection that will be linked in the {@link #graph.} */
-	protected SpotCollection spots;
+	protected final SpotCollection spots;
 	/** The settings map that configures this tracker. */
-	protected Map<String, Object> settings;
+	protected final Map< String, Object > settings;
 
+	/*
+	 * CONSTRUCTOR
+	 */
+
+	public LAPTracker( final SpotCollection spots, final Map< String, Object > settings )
+	{
+		this.spots = spots;
+		this.settings = settings;
+	}
 
 	/*
 	 * PROTECTED METHODS
@@ -203,12 +208,6 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 	/*
 	 * METHODS
 	 */
-
-	@Override
-	public void setTarget(final SpotCollection spots, final Map<String, Object> settings) {
-		this.spots = spots;
-		this.settings = settings;
-	}
 
 	/**
 	 * Reset any link created in the graph result in this tracker, effectively
@@ -722,16 +721,6 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 			}
 		}
 
-	}
-
-	@Override
-	public String toString() {
-		return NAME;
-	}
-
-	@Override
-	public String getKey() {
-		return TRACKER_KEY;
 	}
 
 	@Override

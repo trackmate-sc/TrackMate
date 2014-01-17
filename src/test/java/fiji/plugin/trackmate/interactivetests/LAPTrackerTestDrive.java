@@ -61,8 +61,7 @@ public class LAPTrackerTestDrive {
 
 		// 2 - Track the test spots
 		final long start = System.currentTimeMillis();
-		final LAPTracker lap = new LAPTracker();
-		lap.setTarget(model.getSpots(), ts);
+		final LAPTracker lap = new LAPTracker( model.getSpots(), ts );
 		lap.setLogger(Logger.DEFAULT_LOGGER);
 
 		if (!lap.checkInput())

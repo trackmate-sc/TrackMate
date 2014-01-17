@@ -1,10 +1,10 @@
 package fiji.plugin.trackmate.detection;
 
-import static fiji.plugin.trackmate.detection.DetectionUtils.readDoubleAttribute;
-import static fiji.plugin.trackmate.detection.DetectionUtils.writeRadius;
 import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_RADIUS;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
 import static fiji.plugin.trackmate.detection.DetectorKeys.XML_ATTRIBUTE_DETECTOR_NAME;
+import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
+import static fiji.plugin.trackmate.io.IOUtils.writeRadius;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
 

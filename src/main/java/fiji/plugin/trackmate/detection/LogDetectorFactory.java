@@ -1,13 +1,5 @@
 package fiji.plugin.trackmate.detection;
 
-import static fiji.plugin.trackmate.detection.DetectionUtils.readBooleanAttribute;
-import static fiji.plugin.trackmate.detection.DetectionUtils.readDoubleAttribute;
-import static fiji.plugin.trackmate.detection.DetectionUtils.readIntegerAttribute;
-import static fiji.plugin.trackmate.detection.DetectionUtils.writeDoMedian;
-import static fiji.plugin.trackmate.detection.DetectionUtils.writeDoSubPixel;
-import static fiji.plugin.trackmate.detection.DetectionUtils.writeRadius;
-import static fiji.plugin.trackmate.detection.DetectionUtils.writeTargetChannel;
-import static fiji.plugin.trackmate.detection.DetectionUtils.writeThreshold;
 import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_DO_MEDIAN_FILTERING;
 import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_DO_SUBPIXEL_LOCALIZATION;
 import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_RADIUS;
@@ -19,6 +11,14 @@ import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
 import static fiji.plugin.trackmate.detection.DetectorKeys.XML_ATTRIBUTE_DETECTOR_NAME;
+import static fiji.plugin.trackmate.io.IOUtils.readBooleanAttribute;
+import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
+import static fiji.plugin.trackmate.io.IOUtils.readIntegerAttribute;
+import static fiji.plugin.trackmate.io.IOUtils.writeDoMedian;
+import static fiji.plugin.trackmate.io.IOUtils.writeDoSubPixel;
+import static fiji.plugin.trackmate.io.IOUtils.writeRadius;
+import static fiji.plugin.trackmate.io.IOUtils.writeTargetChannel;
+import static fiji.plugin.trackmate.io.IOUtils.writeThreshold;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
 

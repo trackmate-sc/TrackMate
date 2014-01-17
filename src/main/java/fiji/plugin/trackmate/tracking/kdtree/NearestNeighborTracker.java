@@ -31,38 +31,27 @@ public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm	impl
 	 * FIELDS
 	 */
 
-	public static final String TRACKER_KEY = "NEAREST_NEIGHBOR_TRACKER";
-	public static final String NAME = "Nearest neighbor search";
-	public static final String INFO_TEXT = "<html>" +
-				"This tracker is the most simple one, and is based on nearest neighbor <br>" +
-				"search. The spots in the target frame are searched for the nearest neighbor <br> " +
-				"of each spot in the source frame. If the spots found are closer than the <br>" +
-				"maximal allowed distance, a link between the two is created. <br>" +
-				"<p>" +
-				"The nearest neighbor search relies upon the KD-tree technique implemented <br>" +
-				"in imglib by Johannes Schindelin and friends. This ensure a very efficient " +
-				"tracking and makes this tracker suitable for situation where a huge number <br>" +
-				"of particles are to be tracked over a very large number of frames. However, <br>" +
-				"because of the naiveness of its principles, it can result in pathological <br>" +
-				"tracks. It can only do frame-to-frame linking; there cannot be any track <br>" +
-				"merging or splitting, and gaps will not be closed. Also, the end results are non-" +
-				"deterministic." +
-				" </html>";
+	protected final SpotCollection spots;
 
-	protected SpotCollection spots;
-	protected Logger logger	= Logger.VOID_LOGGER;
-	protected SimpleWeightedGraph<Spot,DefaultWeightedEdge> graph;
-	protected Map<String, Object> settings;
+	protected final Map< String, Object > settings;
+
+	protected Logger logger = Logger.VOID_LOGGER;
+
+	protected SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph;
+
+	/*
+	 * CONSTRUCTOR
+	 */
+
+	public NearestNeighborTracker( final SpotCollection spots, final Map< String, Object > settings )
+	{
+		this.spots = spots;
+		this.settings = settings;
+	}
 
 	/*
 	 * PUBLIC METHODS
 	 */
-
-	@Override
-	public void setTarget(final SpotCollection spots, final Map<String, Object> settings) {
-		this.spots = spots;
-		this.settings = settings;
-	}
 
 	@Override
 	public boolean checkInput() {
@@ -172,11 +161,6 @@ public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm	impl
 	}
 
 	@Override
-	public String toString() {
-		return NAME;
-	}
-
-	@Override
 	public SimpleWeightedGraph<Spot, DefaultWeightedEdge> getResult() {
 		return graph;
 	}
@@ -187,11 +171,6 @@ public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm	impl
 		while (it.hasNext()) {
 			graph.addVertex(it.next());
 		}
-	}
-
-	@Override
-	public String getKey() {
-		return TRACKER_KEY;
 	}
 
 	public static boolean checkInput(final Map<String, Object> settings, final StringBuilder errrorHolder) {

@@ -50,6 +50,7 @@ import static fiji.plugin.trackmate.io.TmXmlKeys_v20.SPOT_ID_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys_v20.SPOT_NAME_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.io.TmXmlKeys_v20.TRACKER_SETTINGS_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys_v20.TRACK_FILTER_COLLECTION_ELEMENT_KEY;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.XML_ATTRIBUTE_TRACKER_NAME;
 import ij.IJ;
 import ij.ImagePlus;
 
@@ -97,6 +98,7 @@ import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.providers.ViewProvider;
 import fiji.plugin.trackmate.tracking.SpotTracker;
+import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 
@@ -525,18 +527,36 @@ public class TmXmlReader_v20 extends TmXmlReader {
 			return;
 		}
 
+		// Get the tracker key
+		final String trackerKey = element.getAttributeValue( XML_ATTRIBUTE_TRACKER_NAME );
+		if ( null == trackerKey )
+		{
+			logger.error( "Could not find the tracker element in file.\n" );
+			return;
+		}
+
+		final SpotTrackerFactory factory = provider.getFactory( trackerKey );
+		if ( null == factory )
+		{
+			logger.error( "The tracker identified by the key " + trackerKey + " is unknown to TrackMate.\n" );
+			this.ok = false;
+			return;
+		}
+
+		// All the hard work is delegated to the factory.
 		final Map<String, Object> ds = new HashMap<String, Object>();
-		// All the hard work is delegated to the provider.
-		final boolean ok = provider.unmarshall(element, ds);
+		final boolean ok = factory.unmarshall( element, ds );
 
 		if (!ok) {
-			logger.error(provider.getErrorMessage());
+			logger.error( factory.getErrorMessage() );
+			this.ok = false;
 			return;
 		}
 
 		settings.trackerSettings = ds;
-		settings.tracker = provider.getTracker();
+		settings.trackerFactory = factory;
 	}
+
 
 	/**
 	 * Read the list of all spots stored in this file.

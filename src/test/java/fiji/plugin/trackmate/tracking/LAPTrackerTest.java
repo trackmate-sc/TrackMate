@@ -72,8 +72,7 @@ public class LAPTrackerTest
 		trackerSettings.put( KEY_ALLOW_GAP_CLOSING, false );
 
 		// Instantiate tracker
-		final LAPTracker tracker = new LAPTracker();
-		tracker.setTarget( spotCollection, trackerSettings );
+		final LAPTracker tracker = new LAPTracker( spotCollection, trackerSettings );
 
 		// Check process
 		if ( !tracker.checkInput() || !tracker.process() )
@@ -144,8 +143,7 @@ public class LAPTrackerTest
 		}
 
 		// Instantiate tracker
-		final LAPTracker tracker = new LAPTracker();
-		tracker.setTarget( spotCollection, trackerSettings );
+		final LAPTracker tracker = new LAPTracker( spotCollection, trackerSettings );
 
 		// Check process
 		if ( !tracker.checkInput() || !tracker.process() )
