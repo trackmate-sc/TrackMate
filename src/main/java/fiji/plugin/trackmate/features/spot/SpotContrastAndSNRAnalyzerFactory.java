@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.ImageIcon;
+
 import net.imglib2.meta.ImgPlus;
 import net.imglib2.meta.view.HyperSliceImgPlus;
 import net.imglib2.type.NativeType;
@@ -22,7 +24,7 @@ import fiji.plugin.trackmate.Spot;
  * this factory depends on some features defined in
  * {@link SpotIntensityAnalyzer}s, we use a higher priority, so that computation
  * are done after the aforementioned analyzer are done.
- * 
+ *
  * @author Jean- Yves Tinevez
  */
 @Plugin( type = SpotAnalyzerFactory.class, priority = 1d )
@@ -100,6 +102,24 @@ public class SpotContrastAndSNRAnalyzerFactory< T extends RealType< T > & Native
 	public Map< String, Dimension > getFeatureDimensions()
 	{
 		return FEATURE_DIMENSIONS;
+	}
+
+	@Override
+	public String getInfoText()
+	{
+		return null;
+	}
+
+	@Override
+	public ImageIcon getIcon()
+	{
+		return null;
+	}
+
+	@Override
+	public String getName()
+	{
+		return KEY;
 	}
 
 }

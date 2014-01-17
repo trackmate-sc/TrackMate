@@ -84,6 +84,10 @@ public abstract class AbstractFeatureAnalyzerProvider< K extends FeatureAnalyzer
 
 		for ( final PluginInfo< K > info : infos )
 		{
+			if ( !info.isEnabled() )
+			{
+				continue;
+			}
 			try
 			{
 				final K analyzer = info.createInstance();

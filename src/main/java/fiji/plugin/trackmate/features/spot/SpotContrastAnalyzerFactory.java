@@ -6,15 +6,20 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.ImageIcon;
+
 import net.imglib2.meta.ImgPlus;
 import net.imglib2.meta.view.HyperSliceImgPlus;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
+
+import org.scijava.plugin.Plugin;
+
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 
-//Commented out to discard it from TrackMate @Plugin( type = SpotAnalyzerFactory.class )
+@Plugin( type = SpotAnalyzerFactory.class, enabled = false )
 public class SpotContrastAnalyzerFactory< T extends RealType< T > & NativeType< T >> implements SpotAnalyzerFactory< T >
 {
 
@@ -81,6 +86,24 @@ public class SpotContrastAnalyzerFactory< T extends RealType< T > & NativeType< 
 	public Map< String, Dimension > getFeatureDimensions()
 	{
 		return FEATURE_DIMENSIONS;
+	}
+
+	@Override
+	public String getInfoText()
+	{
+		return null;
+	}
+
+	@Override
+	public ImageIcon getIcon()
+	{
+		return null;
+	}
+
+	@Override
+	public String getName()
+	{
+		return KEY;
 	}
 
 }
