@@ -6,10 +6,13 @@ import java.util.Iterator;
 
 import javax.swing.ImageIcon;
 
+import org.scijava.plugin.Plugin;
+
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 
 public class ResetRadiusAction extends AbstractTMAction {
@@ -17,15 +20,13 @@ public class ResetRadiusAction extends AbstractTMAction {
 
 	public static final ImageIcon ICON = new ImageIcon(TrackMateWizard.class.getResource("images/lightbulb_off.png"));
 	public static final String NAME = "Reset radius to default value";
+
+	public static final String KEY = "RESET_RADIUS_TO_DEFAULT";
 	public static final String INFO_TEXT = "<html>" +
 				"This action resets the radius of all retained spots back to the value <br> " +
 				"given in the detector settings. " +
 				"</html>";
 	private static final double FALL_BACK_RADIUS = 5;
-
-	public ResetRadiusAction() {
-		this.icon = ICON;
-	}
 
 	@Override
 	public void execute(final TrackMate trackmate) {
@@ -52,13 +53,38 @@ public class ResetRadiusAction extends AbstractTMAction {
 		logger.log("Done.\n");
 	}
 
-	@Override
-	public String getInfoText() {
-		return INFO_TEXT;
-	}
+	@Plugin( type = TrackMateActionFactory.class )
+	public static class Factory implements TrackMateActionFactory
+	{
 
-	@Override
-	public String toString() {
-		return NAME;
+		@Override
+		public String getInfoText()
+		{
+			return INFO_TEXT;
+		}
+
+		@Override
+		public String getName()
+		{
+			return NAME;
+		}
+
+		@Override
+		public String getKey()
+		{
+			return KEY;
+		}
+
+		@Override
+		public ImageIcon getIcon()
+		{
+			return ICON;
+		}
+
+		@Override
+		public TrackMateAction create( final TrackMateGUIController controller )
+		{
+			return new ResetRadiusAction();
+		}
 	}
 }

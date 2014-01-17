@@ -9,8 +9,11 @@ import java.awt.event.ActionListener;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 
+import org.scijava.plugin.Plugin;
+
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.panels.ConfigureViewsPanel;
 import fiji.plugin.trackmate.gui.panels.components.ImagePlusChooser;
@@ -22,6 +25,8 @@ public class CopyOverlayAction extends AbstractTMAction {
 
 	public static final ImageIcon ICON = new ImageIcon(TrackMateWizard.class.getResource("images/page_copy.png"));
 	public static final String NAME = "Copy overlay to...";
+
+	public static final String KEY = "COPY_OVERLAY";
 	public static final String INFO_TEXT = "<html>" +
 			"This action copies the overlay (spots and tracks) to a new existing ImageJ window <br> " +
 			"or to a new 3D viewer window. This can be useful to have the tracks and spots <br> " +
@@ -29,15 +34,6 @@ public class CopyOverlayAction extends AbstractTMAction {
 			+ "<p>"
 			+ "The new view will be independent, and will have its own control panel.<br> " +
 			"</html>" ;
-
-	/**
-	 * Creates a new {@link CopyOverlayAction}. This action generates a new view
-	 * of the model contained in a {@link TrackMate} instance in a
-	 * {@link ImagePlus} specified by the user.
-	 */
-	public CopyOverlayAction() {
-		icon = ICON;
-	}
 
 	@Override
 	public void execute(final TrackMate trackmate) {
@@ -90,14 +86,39 @@ public class CopyOverlayAction extends AbstractTMAction {
 		impChooser.addActionListener(copyOverlayListener);
 	}
 
-	@Override
-	public String getInfoText() {
-		return INFO_TEXT;
-	}
+	@Plugin( type = TrackMateActionFactory.class )
+	public static class Factory implements TrackMateActionFactory
+	{
 
-	@Override
-	public String toString() {
-		return NAME;
-	}
+		@Override
+		public String getInfoText()
+		{
+			return INFO_TEXT;
+		}
 
+		@Override
+		public String getName()
+		{
+			return NAME;
+		}
+
+		@Override
+		public String getKey()
+		{
+			return KEY;
+		}
+
+		@Override
+		public TrackMateAction create( final TrackMateGUIController controller )
+		{
+			return new CopyOverlayAction();
+		}
+
+		@Override
+		public ImageIcon getIcon()
+		{
+			return ICON;
+		}
+
+	}
 }

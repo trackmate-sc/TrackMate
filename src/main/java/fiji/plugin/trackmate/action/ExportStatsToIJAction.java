@@ -9,11 +9,13 @@ import java.util.Set;
 import javax.swing.ImageIcon;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
+import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 
 public class ExportStatsToIJAction extends AbstractTMAction {
@@ -21,6 +23,8 @@ public class ExportStatsToIJAction extends AbstractTMAction {
 
 	public static final ImageIcon ICON = new ImageIcon(TrackMateWizard.class.getResource("images/calculator.png"));
 	public static final String NAME = "Export statistics to tables";
+
+	public static final String KEY = "EXPORT_STATS_TO_IJ";
 	public static final String INFO_TEXT = "<html>" +
 				"Compute and export all statistics to 3 ImageJ results table." +
 				"Statistisc are separated in features computed for:" +
@@ -33,10 +37,6 @@ public class ExportStatsToIJAction extends AbstractTMAction {
 				"that spots and links that are not in a filtered tracks are not part" +
 				"of this export." +
 				"</html>";
-
-	public ExportStatsToIJAction() {
-		this.icon = ICON;
-	}
 
 	@Override
 	public void execute(final TrackMate trackmate) {
@@ -131,14 +131,40 @@ public class ExportStatsToIJAction extends AbstractTMAction {
 		trackTable.show("Track statistics");
 	}
 
-	@Override
-	public String getInfoText() {
-		return INFO_TEXT;
-	}
+	// Invisible because called on the view config panel.
+	@Plugin( type = TrackMateActionFactory.class, visible = false )
+	public static class Factory implements TrackMateActionFactory
+	{
 
-	@Override
-	public String toString() {
-		return NAME;
-	}
+		@Override
+		public String getInfoText()
+		{
+			return INFO_TEXT;
+		}
 
+		@Override
+		public String getKey()
+		{
+			return KEY;
+		}
+
+		@Override
+		public TrackMateAction create( final TrackMateGUIController controller )
+		{
+			return new ExportStatsToIJAction();
+		}
+
+		@Override
+		public ImageIcon getIcon()
+		{
+			return ICON;
+		}
+
+		@Override
+		public String getName()
+		{
+			return NAME;
+		}
+
+	}
 }

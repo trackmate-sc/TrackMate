@@ -4,6 +4,8 @@ import ij3d.Image3DUniverse;
 
 import javax.swing.ImageIcon;
 
+import org.scijava.plugin.Plugin;
+
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
@@ -11,9 +13,11 @@ import fiji.plugin.trackmate.visualization.threedviewer.SpotDisplayer3D;
 
 public class LinkNew3DViewerAction extends AbstractTMAction {
 
+	private static final String NAME = "Link with new 3D viewer";
 
-	public static final String NAME = "Link with new 3D viewer";
-	public static final String INFO_TEXT = "<html>" +
+	private final static String KEY = "NEW_3DVIEWER";
+
+	private static final String INFO_TEXT = "<html>" +
 			"This action opens a new 3D viewer, containing only the overlay (spot and tracks), <br> " +
 			"properly linked to the current controller." +
 			"<p>" +
@@ -24,7 +28,6 @@ public class LinkNew3DViewerAction extends AbstractTMAction {
 
 	public LinkNew3DViewerAction(final TrackMateGUIController controller) {
 		this.controller = controller;
-		this.icon = ICON;
 	}
 
 	@Override
@@ -46,14 +49,38 @@ public class LinkNew3DViewerAction extends AbstractTMAction {
 		}.start();
 	}
 
-	@Override
-	public String getInfoText() {
-		return INFO_TEXT;
-	}
+	@Plugin( type = TrackMateActionFactory.class )
+	public static class Factory implements TrackMateActionFactory
+	{
 
-	@Override
-	public String toString() {
-		return NAME;
-	}
+		@Override
+		public String getInfoText()
+		{
+			return INFO_TEXT;
+		}
 
+		@Override
+		public String getName()
+		{
+			return NAME;
+		}
+
+		@Override
+		public String getKey()
+		{
+			return KEY;
+		}
+
+		@Override
+		public ImageIcon getIcon()
+		{
+			return ICON;
+		}
+
+		@Override
+		public TrackMateAction create( final TrackMateGUIController controller )
+		{
+			return new LinkNew3DViewerAction( controller );
+		}
+	}
 }

@@ -11,12 +11,14 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.DefaultXYDataset;
+import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.util.ExportableChartPanel;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackSchemeFrame;
 
@@ -25,14 +27,12 @@ public class PlotNSpotsVsTimeAction extends AbstractTMAction {
 
 	public static final ImageIcon ICON = new ImageIcon(TrackSchemeFrame.class.getResource("resources/plots.png"));
 	public static final String NAME = "Plot N spots vs time";
+
+	public static final String KEY = "PLOT_NSPOTS_VS_TIME";
 	public static final String INFO_TEXT =  "<html>" +
 			"Plot the number of spots in each frame as a function <br>" +
 			"of time. Only the filtered spots are taken into account. " +
 			"</html>";
-
-	public PlotNSpotsVsTimeAction() {
-		this.icon = ICON;
-	}
 
 	@Override
 	public void execute(final TrackMate trackmate) {
@@ -80,14 +80,39 @@ public class PlotNSpotsVsTimeAction extends AbstractTMAction {
 		frame.setVisible(true);
 	}
 
-	@Override
-	public String getInfoText() {
-		return INFO_TEXT;
-	}
 
-	@Override
-	public String toString() {
-		return NAME;
-	}
+	@Plugin( type = TrackMateActionFactory.class )
+	public static class Factory implements TrackMateActionFactory
+	{
 
+		@Override
+		public String getInfoText()
+		{
+			return INFO_TEXT;
+		}
+
+		@Override
+		public String getName()
+		{
+			return NAME;
+		}
+
+		@Override
+		public String getKey()
+		{
+			return KEY;
+		}
+
+		@Override
+		public ImageIcon getIcon()
+		{
+			return ICON;
+		}
+
+		@Override
+		public TrackMateAction create( final TrackMateGUIController controller )
+		{
+			return new PlotNSpotsVsTimeAction();
+		}
+	}
 }

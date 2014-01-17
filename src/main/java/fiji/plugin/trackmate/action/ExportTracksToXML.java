@@ -13,6 +13,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
+import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
@@ -26,10 +27,10 @@ import fiji.plugin.trackmate.util.TMUtils;
 
 public class ExportTracksToXML extends AbstractTMAction {
 
-
-
 	public static final ImageIcon ICON = new ImageIcon(TrackMateWizard.class.getResource("images/page_save.png"));
 	public static final String NAME = "Export tracks to XML file";
+
+	public static final String KEY = "EXPORT_TRACKS_TO_XML_SIMPLE";
 	public static final String INFO_TEXT = "<html>" +
 				"Export the tracks in the current model content to a XML " +
 				"file in a simple format. " +
@@ -43,15 +44,16 @@ public class ExportTracksToXML extends AbstractTMAction {
 				"As such, this format <u>cannot</u> handle track merging and " +
 				"splitting properly, and is suited only for non-branching tracks." +
 				"</html>";
-	private final TrackMateGUIController	controller;
+
+	private final TrackMateGUIController controller;
 
 	/*
 	 * CONSTRUCTOR
 	 */
 
-	public ExportTracksToXML(final TrackMateGUIController controller) {
+	public ExportTracksToXML( final TrackMateGUIController controller )
+	{
 		this.controller = controller;
-		this.icon = ICON;
 	}
 
 	/*
@@ -128,16 +130,6 @@ public class ExportTracksToXML extends AbstractTMAction {
 		logger.log("Done.\n");
 	}
 
-	@Override
-	public String getInfoText() {
-		return INFO_TEXT;
-	}
-
-	@Override
-	public String toString() {
-		return NAME;
-	}
-
 	private static Element marshall(final Model model, final Settings settings, final Logger logger) {
 		logger.setStatus("Marshalling...");
 		final Element content = new Element(CONTENT_KEY);
@@ -207,4 +199,38 @@ public class ExportTracksToXML extends AbstractTMAction {
 	private static final String T_ATT = "t";
 
 
+	@Plugin( type = TrackMateActionFactory.class )
+	public static class Factory implements TrackMateActionFactory
+	{
+
+		@Override
+		public String getInfoText()
+		{
+			return INFO_TEXT;
+		}
+
+		@Override
+		public String getName()
+		{
+			return NAME;
+		}
+
+		@Override
+		public String getKey()
+		{
+			return KEY;
+		}
+
+		@Override
+		public TrackMateAction create( final TrackMateGUIController controller )
+		{
+			return new ExportTracksToXML( controller );
+		}
+
+		@Override
+		public ImageIcon getIcon()
+		{
+			return ICON;
+		}
+	}
 }

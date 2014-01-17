@@ -1,40 +1,29 @@
 package fiji.plugin.trackmate.providers;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import javax.swing.ImageIcon;
+import org.scijava.Context;
+import org.scijava.InstantiableException;
+import org.scijava.log.LogService;
+import org.scijava.plugin.PluginInfo;
+import org.scijava.plugin.PluginService;
 
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.action.CaptureOverlayAction;
-import fiji.plugin.trackmate.action.CopyOverlayAction;
-import fiji.plugin.trackmate.action.ExportTracksToXML;
-import fiji.plugin.trackmate.action.ExtractTrackStackAction;
-import fiji.plugin.trackmate.action.ISBIChallengeExporter;
-import fiji.plugin.trackmate.action.LinkNew3DViewerAction;
-import fiji.plugin.trackmate.action.MergeFileAction;
-import fiji.plugin.trackmate.action.PlotNSpotsVsTimeAction;
-import fiji.plugin.trackmate.action.RadiusToEstimatedAction;
-import fiji.plugin.trackmate.action.RecalculateFeatureAction;
-import fiji.plugin.trackmate.action.ResetRadiusAction;
-import fiji.plugin.trackmate.action.ResetSpotTimeFeatureAction;
-import fiji.plugin.trackmate.action.TrackMateAction;
+import fiji.plugin.trackmate.action.TrackMateActionFactory;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 
 public class ActionProvider {
 
-	/**
-	 * The action names, in the order they will appear in the GUI. These names
-	 * will be used as keys to access relevant action classes.
-	 */
-	protected List<String> names;
-	protected CopyOverlayAction			copyOverlayAction;
-	protected PlotNSpotsVsTimeAction	plotNSpotsVsTimeAction;
-	protected CaptureOverlayAction		captureOverlayAction;
-	protected ResetSpotTimeFeatureAction	resetSpotTimeFeatureAction;
-	protected RecalculateFeatureAction		recalculateFeatureAction;
-	protected RadiusToEstimatedAction		radiusToEstimatedAction;
-	protected ResetRadiusAction				resetRadiusAction;
+	protected List< String > keys = new ArrayList< String >();
+
+	protected List< String > visibleKeys = new ArrayList< String >();
+
+	protected Map< String, TrackMateActionFactory > factories = new HashMap< String, TrackMateActionFactory >();
 
 	/*
 	 * BLANK CONSTRUCTOR
@@ -68,169 +57,58 @@ public class ActionProvider {
 	 * some of them.
 	 */
 	protected void registerActions() {
-		this.copyOverlayAction = new CopyOverlayAction();
-		this.plotNSpotsVsTimeAction = new PlotNSpotsVsTimeAction();
-		this.captureOverlayAction = new CaptureOverlayAction();
-		this.resetSpotTimeFeatureAction = new ResetSpotTimeFeatureAction();
-		this.recalculateFeatureAction = new RecalculateFeatureAction();
-		this.radiusToEstimatedAction = new RadiusToEstimatedAction();
-		this.resetRadiusAction = new ResetRadiusAction();
+		final Context context = new Context( LogService.class, PluginService.class );
+		final LogService log = context.getService( LogService.class );
+		final PluginService pluginService = context.getService( PluginService.class );
+		final List< PluginInfo< TrackMateActionFactory >> infos = pluginService.getPluginsOfType( TrackMateActionFactory.class );
 
-		// Names
-		names = new ArrayList<String>(10);
-		names.add(ExportTracksToXML.NAME);
-		names.add(ExtractTrackStackAction.NAME);
-		names.add(LinkNew3DViewerAction.NAME);
-		names.add(CopyOverlayAction.NAME);
-		names.add(PlotNSpotsVsTimeAction.NAME);
-		names.add(CaptureOverlayAction.NAME);
-		//		names.add(ResetSpotTimeFeatureAction.NAME);
-		names.add(RecalculateFeatureAction.NAME);
-		names.add(RadiusToEstimatedAction.NAME);
-		names.add(ResetRadiusAction.NAME);
-		names.add(MergeFileAction.NAME);
-		//		names.add(fiji.plugin.trackmate.action.ISBIChallengeExporter.NAME);
-	}
+		final Comparator< PluginInfo< TrackMateActionFactory >> priorityComparator = new Comparator< PluginInfo< TrackMateActionFactory > >()
+		{
+			@Override
+			public int compare( final PluginInfo< TrackMateActionFactory > o1, final PluginInfo< TrackMateActionFactory > o2 )
+			{
+				return o1.getPriority() > o2.getPriority() ? 1 : o1.getPriority() < o2.getPriority() ? -1 : 0;
+			}
+		};
 
-	/**
-	 * Returns a new instance of the target action identified by the key
-	 * parameter. If the key is unknown to this factory, <code>null</code> is
-	 * returned.
-	 *
-	 * @return a new {@link TrackMateAction}.
-	 */
-	public TrackMateAction getAction(final String key, final TrackMateGUIController controller) {
+		Collections.sort( infos, priorityComparator );
 
-		if (ExtractTrackStackAction.NAME.equals(key)) {
-			return new ExtractTrackStackAction(controller.getSelectionModel());
-
-		} else if (LinkNew3DViewerAction.NAME.equals(key)) {
-			return new LinkNew3DViewerAction(controller);
-
-		} else if (CopyOverlayAction.NAME.equals(key)) {
-			return copyOverlayAction;
-
-		} else if (PlotNSpotsVsTimeAction.NAME.equals(key)) {
-			return plotNSpotsVsTimeAction;
-
-		} else if (CaptureOverlayAction.NAME.equals(key)) {
-			return captureOverlayAction;
-
-		} else if (ResetSpotTimeFeatureAction.NAME.equals(key)) {
-			return resetSpotTimeFeatureAction;
-
-		} else if (RecalculateFeatureAction.NAME.equals(key)) {
-			return recalculateFeatureAction;
-
-		} else if (RadiusToEstimatedAction.NAME.equals(key)) {
-			return radiusToEstimatedAction;
-
-		} else if (ResetRadiusAction.NAME.equals(key)) {
-			return resetRadiusAction;
-
-		} else if (ExportTracksToXML.NAME.equals(key)) {
-			return new ExportTracksToXML(controller);
-
-		} else if (ISBIChallengeExporter.NAME.equals(key)) {
-			return new ISBIChallengeExporter(controller);
-
-		} else if (MergeFileAction.NAME.equals(key)) {
-			return new MergeFileAction(controller);
+		for ( final PluginInfo< TrackMateActionFactory > info : infos )
+		{
+			try
+			{
+				final TrackMateActionFactory factory = info.createInstance();
+				register( factory.getKey(), factory, info.isVisible() );
+			}
+			catch ( final InstantiableException e )
+			{
+				log.error( "Could not instantiate " + info.getClassName(), e );
+			}
 		}
-
-		return null;
 	}
 
-	/**
-	 * @return the html String containing a descriptive information about the
-	 *         target action, or <code>null</code> if it is unknown to this
-	 *         factory.
-	 */
-	public String getInfoText(final String key) {
-		if (ExtractTrackStackAction.NAME.equals(key)) {
-			return ExtractTrackStackAction.INFO_TEXT;
-
-		} else if (LinkNew3DViewerAction.NAME.equals(key)) {
-			return LinkNew3DViewerAction.INFO_TEXT;
-
-		} else if (CopyOverlayAction.NAME.equals(key)) {
-			return CopyOverlayAction.INFO_TEXT;
-
-		} else if (PlotNSpotsVsTimeAction.NAME.equals(key)) {
-			return PlotNSpotsVsTimeAction.INFO_TEXT;
-
-		} else if (CaptureOverlayAction.NAME.equals(key)) {
-			return CaptureOverlayAction.INFO_TEXT;
-
-		} else if (ResetSpotTimeFeatureAction.NAME.equals(key)) {
-			return ResetSpotTimeFeatureAction.INFO_TEXT;
-
-		} else if (RecalculateFeatureAction.NAME.equals(key)) {
-			return RecalculateFeatureAction.INFO_TEXT;
-
-		} else if (RadiusToEstimatedAction.NAME.equals(key)) {
-			return RadiusToEstimatedAction.INFO_TEXT;
-
-		} else if (ResetRadiusAction.NAME.equals(key)) {
-			return ResetRadiusAction.INFO_TEXT;
-
-		} else if (ExportTracksToXML.NAME.equals(key)) {
-			return ExportTracksToXML.INFO_TEXT;
-
-		} else if (MergeFileAction.NAME.equals(key)) {
-			return MergeFileAction.INFO_TEXT;
+	private void register( final String key, final TrackMateActionFactory action, final boolean visible )
+	{
+		keys.add( key );
+		factories.put( key, action );
+		if ( visible )
+		{
+			visibleKeys.add( key );
 		}
-
-		return null;
 	}
 
-	/**
-	 * @return the descriptive icon for target action, or <code>null</code> if
-	 *         it is unknown to this factory.
-	 */
-	public ImageIcon getIcon(final String key) {
-		if (ExtractTrackStackAction.NAME.equals(key)) {
-			return ExtractTrackStackAction.ICON;
-
-		} else if (LinkNew3DViewerAction.NAME.equals(key)) {
-			return LinkNew3DViewerAction.ICON;
-
-		} else if (CopyOverlayAction.NAME.equals(key)) {
-			return CopyOverlayAction.ICON;
-
-		} else if (PlotNSpotsVsTimeAction.NAME.equals(key)) {
-			return PlotNSpotsVsTimeAction.ICON;
-
-		} else if (CaptureOverlayAction.NAME.equals(key)) {
-			return CaptureOverlayAction.ICON;
-
-		} else if (ResetSpotTimeFeatureAction.NAME.equals(key)) {
-			return ResetSpotTimeFeatureAction.ICON;
-
-		} else if (RecalculateFeatureAction.NAME.equals(key)) {
-			return RecalculateFeatureAction.ICON;
-
-		} else if (RadiusToEstimatedAction.NAME.equals(key)) {
-			return RadiusToEstimatedAction.ICON;
-
-		} else if (ResetRadiusAction.NAME.equals(key)) {
-			return ResetRadiusAction.ICON;
-
-		} else if (ExportTracksToXML.NAME.equals(key)) {
-			return ExportTracksToXML.ICON;
-
-		} else if (MergeFileAction.NAME.equals(key)) {
-			return MergeFileAction.ICON;
-		}
-
-		return null;
+	public TrackMateActionFactory getFactory( final String key )
+	{
+		return factories.get( key );
 	}
 
-	/**
-	 * @return a list of the detector names available through this factory.
-	 */
-	public List<String> getAvailableActions() {
-		return names;
+	public List< String > getAvailableActions()
+	{
+		return keys;
 	}
 
+	public List< String > getVisibleActions()
+	{
+		return visibleKeys;
+	}
 }

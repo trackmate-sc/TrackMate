@@ -15,14 +15,20 @@ import java.awt.Robot;
 
 import javax.swing.ImageIcon;
 
+import org.scijava.plugin.Plugin;
+
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackSchemeFrame;
 
 public class CaptureOverlayAction extends AbstractTMAction {
 
 
+
 	public static final ImageIcon ICON = new ImageIcon(TrackSchemeFrame.class.getResource("resources/camera_go.png"));
 	public static final String NAME = "Capture overlay";
+
+	public static final String KEY = "CAPTURE_OVERLAY";
 	public static final String INFO_TEXT = "<html>" +
 			"If the current displayer is the HyperstackDisplayer, this action <br>" +
 			"will capture the TrackMate overlay with current display settings. <br>" +
@@ -33,10 +39,6 @@ public class CaptureOverlayAction extends AbstractTMAction {
 			"overlay is redrawn. The current zoom is taken into account. <br>" +
 			"Also, make sure nothing is moved over the image while capturing. "+
 			"</html>";
-
-	public CaptureOverlayAction() {
-		this.icon = ICON;
-	}
 
 	@Override
 	public void execute(final TrackMate trackmate) {
@@ -78,14 +80,39 @@ public class CaptureOverlayAction extends AbstractTMAction {
 		}
 	}
 
-	@Override
-	public String getInfoText() {
-		return INFO_TEXT;
-	}
+	@Plugin( type = TrackMateActionFactory.class )
+	public static class Factory implements TrackMateActionFactory
+	{
 
-	@Override
-	public String toString() {
-		return NAME;
-	}
+		@Override
+		public String getInfoText()
+		{
+			return INFO_TEXT;
+		}
 
+		@Override
+		public String getKey()
+		{
+			return KEY;
+		}
+
+		@Override
+		public TrackMateAction create( final TrackMateGUIController controller )
+		{
+			return new CaptureOverlayAction();
+		}
+
+		@Override
+		public ImageIcon getIcon()
+		{
+			return ICON;
+		}
+
+		@Override
+		public String getName()
+		{
+			return NAME;
+		}
+
+	}
 }

@@ -18,12 +18,14 @@ import net.imglib2.meta.ImgPlus;
 import net.imglib2.meta.view.HyperSliceImgPlus;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
+import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.trackscheme.SpotIconGrabber;
@@ -32,6 +34,8 @@ public class ExtractTrackStackAction extends AbstractTMAction {
 
 
 	public static final String NAME = "Extract track stack";
+
+	public static final String KEY = "EXTRACT_TRACK_STACK";
 	public static final String INFO_TEXT =  "<html> " +
 			"Generate a stack of images taken from the track " +
 			"that joins two selected spots. " +
@@ -56,7 +60,6 @@ public class ExtractTrackStackAction extends AbstractTMAction {
 
 	public ExtractTrackStackAction(final SelectionModel selectionModel) {
 		this.selectionModel = selectionModel;
-		this.icon = ICON;
 	}
 
 	/*
@@ -189,14 +192,40 @@ public class ExtractTrackStackAction extends AbstractTMAction {
 
 	}
 
-	@Override
-	public String getInfoText() {
-		return INFO_TEXT;
-	}
+	@Plugin( type = TrackMateActionFactory.class )
+	public static class Factory implements TrackMateActionFactory
+	{
 
-	@Override
-	public String toString() {
-		return NAME;
-	}
+		@Override
+		public String getInfoText()
+		{
+			return INFO_TEXT;
+		}
 
+		@Override
+		public String getName()
+		{
+			return NAME;
+		}
+
+		@Override
+		public String getKey()
+		{
+			return KEY;
+		}
+
+		@Override
+		public ImageIcon getIcon()
+		{
+			return ICON;
+		}
+
+		@Override
+		public TrackMateAction create( final TrackMateGUIController controller )
+		{
+			return new ExtractTrackStackAction( controller.getSelectionModel() );
+		}
+
+
+	}
 }

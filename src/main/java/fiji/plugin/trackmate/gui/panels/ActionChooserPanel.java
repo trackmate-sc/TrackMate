@@ -51,15 +51,18 @@ public class ActionChooserPanel {
 
 		this.controller = controller;
 		this.trackmate = trackmate;
-		final List<String> actions = actionProvider.getAvailableActions();
-		final List<String> infoTexts = new ArrayList<String>(actions.size());
-		icons = new ArrayList<ImageIcon>(actions.size());
-		for(final String key : actions) {
-			infoTexts.add( actionProvider.getInfoText(key) );
-			icons.add( actionProvider.getIcon(key) );
+		final List< String > actionKeys = actionProvider.getVisibleActions();
+		final List< String > names = new ArrayList< String >( actionKeys.size() );
+		final List< String > infoTexts = new ArrayList< String >( actionKeys.size() );
+		icons = new ArrayList< ImageIcon >( actionKeys.size() );
+		for ( final String key : actionKeys )
+		{
+			infoTexts.add( actionProvider.getFactory( key ).getInfoText() );
+			icons.add( actionProvider.getFactory( key ).getIcon() );
+			names.add( actionProvider.getFactory( key ).getName() );
 		}
 
-		this.panel = new ListChooserPanel(actions, infoTexts, "action");
+		this.panel = new ListChooserPanel( names, infoTexts, "action" );
 		this.logPanel = new LogPanel();
 		this.logger = logPanel.getLogger();
 		this.actionProvider = actionProvider;
@@ -97,10 +100,10 @@ public class ActionChooserPanel {
 							executeButton.setEnabled(false);
 							panel.fireAction(ACTION_STARTED);
 							final int actionIndex = panel.getChoice();
-							final String actionName = actionProvider.getAvailableActions().get(actionIndex);
-							final TrackMateAction action = actionProvider.getAction(actionName, controller);
+							final String actionKey = actionProvider.getVisibleActions().get( actionIndex );
+							final TrackMateAction action = actionProvider.getFactory( actionKey ).create( controller );
 							if (null == action) {
-								logger.error("Unknown action: " + actionName + ".\n");
+								logger.error( "Unknown action: " + actionKey + ".\n" );
 							} else {
 								action.setLogger(logger);
 								action.execute(trackmate);

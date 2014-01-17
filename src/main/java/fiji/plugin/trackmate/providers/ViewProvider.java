@@ -90,7 +90,6 @@ public class ViewProvider {
 
 		for ( final PluginInfo< ViewFactory > info : infos )
 		{
-			System.out.println( info + "->" + info.isSelectable() );// DEBUG
 			try
 			{
 				final ViewFactory view = info.createInstance();

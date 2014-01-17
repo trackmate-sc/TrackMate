@@ -10,6 +10,7 @@ import java.util.Set;
 import javax.swing.ImageIcon;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
+import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
@@ -24,14 +25,12 @@ import fiji.plugin.trackmate.io.TmXmlReader_v12;
 import fiji.plugin.trackmate.io.TmXmlReader_v20;
 import fiji.plugin.trackmate.util.Version;
 
-/**
- * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> Aug 13, 2013
- *
- */
 public class MergeFileAction extends AbstractTMAction {
 
 	public static final ImageIcon ICON = new ImageIcon(TrackMateWizard.class.getResource("images/arrow_merge.png"));
 	public static final String NAME = "Merge a TrackMate file";
+
+	public static final String KEY = "MERGE_OTHER_FILE";
 
 	public static final String INFO_TEXT = "<html>"
 			+ "Merge the current model with the data from another <br>"
@@ -49,7 +48,6 @@ public class MergeFileAction extends AbstractTMAction {
 
 	public MergeFileAction(final TrackMateGUIController controller) {
 		this.controller = controller;
-		this.icon = ICON;
 	}
 
 	@Override
@@ -149,13 +147,39 @@ public class MergeFileAction extends AbstractTMAction {
 
 	}
 
-	@Override
-	public String getInfoText() {
-		return INFO_TEXT;
-	}
+	// Not visible yet, one day maybe. // TODO more tests
+	@Plugin( type = TrackMateActionFactory.class, visible = false )
+	public static class Factory implements TrackMateActionFactory
+	{
 
-	@Override
-	public String toString() {
-		return NAME;
+		@Override
+		public String getInfoText()
+		{
+			return INFO_TEXT;
+		}
+
+		@Override
+		public String getName()
+		{
+			return NAME;
+		}
+
+		@Override
+		public String getKey()
+		{
+			return KEY;
+		}
+
+		@Override
+		public ImageIcon getIcon()
+		{
+			return ICON;
+		}
+
+		@Override
+		public TrackMateAction create( final TrackMateGUIController controller )
+		{
+			return new MergeFileAction( controller );
+		}
 	}
 }
