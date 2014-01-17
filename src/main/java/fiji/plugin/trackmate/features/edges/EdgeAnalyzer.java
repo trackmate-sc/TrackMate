@@ -6,10 +6,10 @@ import net.imglib2.algorithm.Benchmark;
 import net.imglib2.algorithm.MultiThreaded;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
-import org.scijava.plugin.SciJavaPlugin;
 
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.TrackMateModule;
 import fiji.plugin.trackmate.features.FeatureAnalyzer;
 
 /**
@@ -19,7 +19,7 @@ import fiji.plugin.trackmate.features.FeatureAnalyzer;
  *
  * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com>
  */
-public interface EdgeAnalyzer extends Benchmark, FeatureAnalyzer, MultiThreaded, SciJavaPlugin
+public interface EdgeAnalyzer extends Benchmark, FeatureAnalyzer, MultiThreaded, TrackMateModule
 {
 
 	/**
