@@ -1,13 +1,11 @@
 package fiji.plugin.trackmate.visualization;
 
-import org.scijava.plugin.SciJavaPlugin;
-
-import fiji.plugin.trackmate.InfoTextable;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.TrackMateModule;
 
-public interface ViewFactory extends SciJavaPlugin, InfoTextable
+public interface ViewFactory extends TrackMateModule
 {
 
 	/**
@@ -23,17 +21,5 @@ public interface ViewFactory extends SciJavaPlugin, InfoTextable
 	 * @return a new view of the specified model.
 	 */
 	public TrackMateModelView create( final Model model, final Settings settings, final SelectionModel selectionModel );
-
-	/**
-	 * Returns the name of the concrete view.
-	 */
-	public String getName();
-
-	/**
-	 * Return the unique key that identifies this view.
-	 *
-	 * @return the key, as a String.
-	 */
-	public String getKey();
 
 }

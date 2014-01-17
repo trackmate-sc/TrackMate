@@ -2,6 +2,8 @@ package fiji.plugin.trackmate.visualization.hyperstack;
 
 import ij.ImagePlus;
 
+import javax.swing.ImageIcon;
+
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
@@ -41,6 +43,12 @@ public class HyperStackDisplayerFactory implements ViewFactory
 	public String getKey()
 	{
 		return HyperStackDisplayer.KEY;
+	}
+
+	@Override
+	public ImageIcon getIcon()
+	{
+		return null;
 	}
 
 }

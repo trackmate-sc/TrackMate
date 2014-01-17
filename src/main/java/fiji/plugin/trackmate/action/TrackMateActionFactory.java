@@ -4,10 +4,10 @@ import javax.swing.ImageIcon;
 
 import org.scijava.plugin.SciJavaPlugin;
 
-import fiji.plugin.trackmate.InfoTextable;
+import fiji.plugin.trackmate.TrackMateModule;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 
-public interface TrackMateActionFactory extends SciJavaPlugin, InfoTextable
+public interface TrackMateActionFactory extends SciJavaPlugin, TrackMateModule
 {
 	public TrackMateAction create( TrackMateGUIController controller );
 

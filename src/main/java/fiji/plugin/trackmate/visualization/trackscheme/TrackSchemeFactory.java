@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.visualization.trackscheme;
 
+import javax.swing.ImageIcon;
+
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
@@ -17,12 +19,6 @@ public class TrackSchemeFactory implements ViewFactory
 {
 
 	@Override
-	public String getInfoText()
-	{
-		return "<html>Not redacted!</html>";
-	}
-
-	@Override
 	public TrackMateModelView create( final Model model, final Settings settings, final SelectionModel selectionModel )
 	{
 		return new TrackScheme( model, selectionModel );
@@ -38,6 +34,18 @@ public class TrackSchemeFactory implements ViewFactory
 	public String getKey()
 	{
 		return TrackScheme.KEY;
+	}
+
+	@Override
+	public ImageIcon getIcon()
+	{
+		return null;
+	}
+
+	@Override
+	public String getInfoText()
+	{
+		return "<html>Not redacted!</html>";
 	}
 
 }

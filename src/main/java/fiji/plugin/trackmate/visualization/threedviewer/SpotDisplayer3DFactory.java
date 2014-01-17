@@ -10,6 +10,7 @@ import ij3d.Image3DUniverse;
 
 import java.awt.Color;
 
+import javax.swing.ImageIcon;
 import javax.vecmath.Color3f;
 
 import org.scijava.plugin.Plugin;
@@ -28,11 +29,7 @@ public class SpotDisplayer3DFactory implements ViewFactory
 
 	public static final String INFO_TEXT = "<html>" + "This invokes a new 3D viewer (over time) window, which receive a <br> " + "8-bit copy of the image data. Spots and tracks are rendered in 3D. <br>" + "All the spots 3D shapes are calculated during the rendering step, which <br>" + "can take long." + "<p>" + "This displayer does not allow manual editing of spots. Use it only for <br>" + "for very specific cases where you need to have a good 3D image to judge <br>" + "the quality of detection and tracking. If you don't, use the hyperstack <br>" + "displayer; you can generate a 3D viewer at the last step of tracking that will <br>" + "be in sync with the hyperstack displayer. " + "</html>";
 
-	@Override
-	public String getInfoText()
-	{
-		return INFO_TEXT;
-	}
+
 
 	@Override
 	public TrackMateModelView create( final Model model, final Settings settings, final SelectionModel selectionModel )
@@ -88,6 +85,18 @@ public class SpotDisplayer3DFactory implements ViewFactory
 	public String getKey()
 	{
 		return SpotDisplayer3D.KEY;
+	}
+
+	@Override
+	public String getInfoText()
+	{
+		return INFO_TEXT;
+	}
+
+	@Override
+	public ImageIcon getIcon()
+	{
+		return null;
 	}
 
 }
