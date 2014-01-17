@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import javax.swing.ImageIcon;
+
 import net.imglib2.algorithm.MultiThreaded;
 import net.imglib2.multithreading.SimpleMultiThreading;
 
@@ -243,6 +245,24 @@ public class TrackBranchingAnalyzer implements TrackAnalyzer, MultiThreaded
 
 	@Override
 	public String getKey()
+	{
+		return KEY;
+	}
+
+	@Override
+	public String getInfoText()
+	{
+		return null;
+	}
+
+	@Override
+	public ImageIcon getIcon()
+	{
+		return null;
+	}
+
+	@Override
+	public String getName()
 	{
 		return KEY;
 	}

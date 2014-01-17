@@ -4,10 +4,8 @@ import java.util.Collection;
 
 import net.imglib2.algorithm.Benchmark;
 import net.imglib2.algorithm.MultiThreaded;
-
-import org.scijava.plugin.SciJavaPlugin;
-
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.TrackMateModule;
 import fiji.plugin.trackmate.features.FeatureAnalyzer;
 
 /**
@@ -36,7 +34,7 @@ import fiji.plugin.trackmate.features.FeatureAnalyzer;
  *
  * @author Jean-Yves Tinevez
  */
-public interface TrackAnalyzer extends Benchmark, FeatureAnalyzer, MultiThreaded, SciJavaPlugin
+public interface TrackAnalyzer extends Benchmark, FeatureAnalyzer, MultiThreaded, TrackMateModule
 {
 
 	/**

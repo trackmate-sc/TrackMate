@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.ImageIcon;
+
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Dimension;
@@ -48,9 +50,6 @@ public class TrackIndexAnalyzer implements TrackAnalyzer
 	}
 
 	private long processingTime;
-
-	public TrackIndexAnalyzer()
-	{}
 
 	/**
 	 * {@link TrackIndexAnalyzer} is not local, since the indices are
@@ -134,5 +133,23 @@ public class TrackIndexAnalyzer implements TrackAnalyzer
 	public int getNumThreads()
 	{
 		return 1;
+	}
+
+	@Override
+	public String getInfoText()
+	{
+		return null;
+	}
+
+	@Override
+	public ImageIcon getIcon()
+	{
+		return null;
+	}
+
+	@Override
+	public String getName()
+	{
+		return KEY;
 	}
 }
