@@ -20,11 +20,11 @@ public class ViewProvider {
 	/**
 	 * The view keys, in the order they will appear in the GUI.
 	 */
-	protected List< String > names = new ArrayList< String >();
+	protected List< String > keys = new ArrayList< String >();
 
-	protected List< String > selectableKeys = new ArrayList< String >();
+	protected List< String > visibleKeys = new ArrayList< String >();
 
-	protected Map< String, ViewFactory > views = new HashMap< String, ViewFactory >();
+	protected Map< String, ViewFactory > factories = new HashMap< String, ViewFactory >();
 
 	/*
 	 * BLANK CONSTRUCTOR
@@ -45,29 +45,29 @@ public class ViewProvider {
 
 
 
-	private void registerView( final String key, final ViewFactory view, final boolean selectable )
+	private void registerView( final String key, final ViewFactory view, final boolean visible )
 	{
-		names.add( key );
-		views.put( key, view );
-		if ( selectable )
+		keys.add( key );
+		factories.put( key, view );
+		if ( visible )
 		{
-			selectableKeys.add( key );
+			visibleKeys.add( key );
 		}
 	}
 
-	public ViewFactory getView( final String key )
+	public ViewFactory getFactory( final String key )
 	{
-		return views.get( key );
+		return factories.get( key );
 	}
 
 	public List< String > getAvailableViews()
 	{
-		return names;
+		return keys;
 	}
 
-	public List< String > getSelectableViews()
+	public List< String > getVisibleViews()
 	{
-		return selectableKeys;
+		return visibleKeys;
 	}
 
 	protected void registerViews()
@@ -90,10 +90,11 @@ public class ViewProvider {
 
 		for ( final PluginInfo< ViewFactory > info : infos )
 		{
+			System.out.println( info + "->" + info.isSelectable() );// DEBUG
 			try
 			{
 				final ViewFactory view = info.createInstance();
-				registerView( view.getKey(), view, info.isSelectable() );
+				registerView( view.getKey(), view, info.isVisible() );
 			}
 			catch ( final InstantiableException e )
 			{

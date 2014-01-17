@@ -240,8 +240,8 @@ public class TmXmlReader {
 					logger.error("Could not find view key attribute for element " + child +".\n");
 					ok = false;
 				} else {
-					final ViewFactory factory = provider.getView( viewKey );
-					final TrackMateModelView view = factory.getView( model, settings, selectionModel );
+					final ViewFactory factory = provider.getFactory( viewKey );
+					final TrackMateModelView view = factory.create( model, settings, selectionModel );
 					if (null == view) {
 						logger.error("Unknown view for key " + viewKey +".\n");
 						ok = false;

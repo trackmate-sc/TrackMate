@@ -32,7 +32,7 @@ import fiji.plugin.trackmate.visualization.TrackColorGenerator;
 
 public class SpotDisplayer3D extends AbstractTrackMateModelView {
 
-
+	static final String KEY = "3DVIEWER";
 	public static final int DEFAULT_RESAMPLING_FACTOR = 4;
 	//	public static final int DEFAULT_THRESHOLD = 50;
 
@@ -454,5 +454,11 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView {
 		final Color highlightColor = (Color) displaySettings.get(KEY_HIGHLIGHT_COLOR);
 		for(final DefaultWeightedEdge edge :edges)
 			trackNode.setColor(edge, highlightColor);
+	}
+
+	@Override
+	public String getKey()
+	{
+		return KEY;
 	}
 }

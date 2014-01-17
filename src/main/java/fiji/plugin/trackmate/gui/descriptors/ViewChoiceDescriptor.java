@@ -12,7 +12,7 @@ import fiji.plugin.trackmate.gui.panels.ListChooserPanel;
 import fiji.plugin.trackmate.providers.ViewProvider;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewFactory;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayerFactory;
+import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 
 public class ViewChoiceDescriptor implements WizardPanelDescriptor
 {
@@ -32,12 +32,14 @@ public class ViewChoiceDescriptor implements WizardPanelDescriptor
 		this.viewProvider = viewProvider;
 		this.guimodel = guimodel;
 		this.controller = controller;
-		// Only views that are set to be selectable in the menu.
-		final List< String > viewerNames = viewProvider.getSelectableViews();
-		final List< String > infoTexts = new ArrayList< String >( viewerNames.size() );
-		for ( final String key : viewerNames )
+		// Only views that are set to be visible in the menu.
+		final List< String > visibleKeys = viewProvider.getVisibleViews();
+		final List< String > viewerNames = new ArrayList< String >( visibleKeys.size() );
+		final List< String > infoTexts = new ArrayList< String >( visibleKeys.size() );
+		for ( final String key : visibleKeys )
 		{
-			infoTexts.add( viewProvider.getView( key ).getInfoText() );
+			infoTexts.add( viewProvider.getFactory( key ).getInfoText() );
+			viewerNames.add( viewProvider.getFactory( key ).getName() );
 		}
 		this.component = new ListChooserPanel( viewerNames, infoTexts, "view" );
 	}
@@ -73,13 +75,14 @@ public class ViewChoiceDescriptor implements WizardPanelDescriptor
 			@Override
 			public void run()
 			{
-				final String viewName = viewProvider.getSelectableViews().get( index );
+				final String viewName = viewProvider.getVisibleViews().get( index );
 
-				if ( viewName.equals( HyperStackDisplayerFactory.KEY ) ) { return;
-				}
+				// The HyperStack view is already used in the GUI, no need to
+				// re-instantiate it.
+				if ( viewName.equals( HyperStackDisplayer.KEY ) ) { return; }
 
-				final ViewFactory factory = viewProvider.getView( viewName );
-				final TrackMateModelView view = factory.getView( trackmate.getModel(), trackmate.getSettings(), selectionModel );
+				final ViewFactory factory = viewProvider.getFactory( viewName );
+				final TrackMateModelView view = factory.create( trackmate.getModel(), trackmate.getSettings(), selectionModel );
 				for ( final String settingKey : guimodel.getDisplaySettings().keySet() )
 				{
 					view.setDisplaySettings( settingKey, guimodel.getDisplaySettings().get( settingKey ) );

@@ -22,7 +22,7 @@ public interface ViewFactory extends SciJavaPlugin, InfoTextable
 	 *            the {@link SelectionModel} model to share in the created view.
 	 * @return a new view of the specified model.
 	 */
-	public TrackMateModelView getView( final Model model, final Settings settings, final SelectionModel selectionModel );
+	public TrackMateModelView create( final Model model, final Settings settings, final SelectionModel selectionModel );
 
 	/**
 	 * Returns the name of the concrete view.

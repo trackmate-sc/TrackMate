@@ -33,6 +33,8 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 
 	private Roi initialROI;
 
+	public static final String KEY = "HYPERSTACKDISPLAYER";
+
 	/*
 	 * CONSTRUCTORS
 	 */
@@ -92,7 +94,7 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 
 	/**
 	 * Exposes the {@link ImagePlus} on which the model is drawn by this view.
-	 * 
+	 *
 	 * @return the ImagePlus used in this view.
 	 */
 	public ImagePlus getImp()
@@ -257,5 +259,11 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 		{
 			refresh();
 		}
+	}
+
+	@Override
+	public String getKey()
+	{
+		return KEY;
 	}
 }

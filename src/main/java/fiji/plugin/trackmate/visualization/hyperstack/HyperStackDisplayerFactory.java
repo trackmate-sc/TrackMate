@@ -18,10 +18,8 @@ public class HyperStackDisplayerFactory implements ViewFactory
 
 	private static final String NAME = "HyperStack Displayer";
 
-	public static final String KEY = "HYPERSTACKDISPLAYER";
-
 	@Override
-	public TrackMateModelView getView( final Model model, final Settings settings, final SelectionModel selectionModel )
+	public TrackMateModelView create( final Model model, final Settings settings, final SelectionModel selectionModel )
 	{
 		final ImagePlus imp = settings.imp;
 		return new HyperStackDisplayer( model, selectionModel, imp );
@@ -42,7 +40,7 @@ public class HyperStackDisplayerFactory implements ViewFactory
 	@Override
 	public String getKey()
 	{
-		return KEY;
+		return HyperStackDisplayer.KEY;
 	}
 
 }

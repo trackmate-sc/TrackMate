@@ -8,7 +8,11 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewFactory;
 
-@Plugin( type = ViewFactory.class, selectable = false )
+/*
+ * We annotate the TrackScheme factory to be NOT visible,
+ * because we do not want it to show in the GUI menu.
+ */
+@Plugin( type = ViewFactory.class, visible = false )
 public class TrackSchemeFactory implements ViewFactory
 {
 
@@ -19,7 +23,7 @@ public class TrackSchemeFactory implements ViewFactory
 	}
 
 	@Override
-	public TrackMateModelView getView( final Model model, final Settings settings, final SelectionModel selectionModel )
+	public TrackMateModelView create( final Model model, final Settings settings, final SelectionModel selectionModel )
 	{
 		return new TrackScheme( model, selectionModel );
 	}
@@ -33,7 +37,7 @@ public class TrackSchemeFactory implements ViewFactory
 	@Override
 	public String getKey()
 	{
-		return "TRACKSCHEME";
+		return TrackScheme.KEY;
 	}
 
 }

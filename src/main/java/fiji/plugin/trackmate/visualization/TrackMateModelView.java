@@ -263,4 +263,15 @@ public interface TrackMateModelView
 	 */
 	public Model getModel();
 
+	/**
+	 * Returns the unique key that identifies this view.
+	 * <p>
+	 * Careful: this key <b>must</b> be the same that for the
+	 * {@link ViewFactory} that can instantiates this view. This is to
+	 * facilitate saving/loading.
+	 *
+	 * @return the key, as a String.
+	 */
+	public String getKey();
+
 }

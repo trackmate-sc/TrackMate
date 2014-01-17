@@ -74,6 +74,8 @@ public class TrackScheme extends AbstractTrackMateModelView {
 	/** Do we capture thumbnails by default? */
 	static final boolean DEFAULT_THUMBNAILS_ENABLED = false;
 
+	static final String KEY = "TRACKSCHEME";
+
 	/*
 	 * FIELDS
 	 */
@@ -1176,6 +1178,12 @@ public class TrackScheme extends AbstractTrackMateModelView {
 		}
 		// Forward to selection model
 		selectionModel.selectTrack(inspectionSpots, inspectionEdges, direction);
+	}
+
+	@Override
+	public String getKey()
+	{
+		return KEY;
 	}
 
 }

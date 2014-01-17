@@ -28,8 +28,6 @@ public class SpotDisplayer3DFactory implements ViewFactory
 
 	public static final String INFO_TEXT = "<html>" + "This invokes a new 3D viewer (over time) window, which receive a <br> " + "8-bit copy of the image data. Spots and tracks are rendered in 3D. <br>" + "All the spots 3D shapes are calculated during the rendering step, which <br>" + "can take long." + "<p>" + "This displayer does not allow manual editing of spots. Use it only for <br>" + "for very specific cases where you need to have a good 3D image to judge <br>" + "the quality of detection and tracking. If you don't, use the hyperstack <br>" + "displayer; you can generate a 3D viewer at the last step of tracking that will <br>" + "be in sync with the hyperstack displayer. " + "</html>";
 
-	private static final String KEY = "3DVIEWER";
-
 	@Override
 	public String getInfoText()
 	{
@@ -37,7 +35,7 @@ public class SpotDisplayer3DFactory implements ViewFactory
 	}
 
 	@Override
-	public TrackMateModelView getView( final Model model, final Settings settings, final SelectionModel selectionModel )
+	public TrackMateModelView create( final Model model, final Settings settings, final SelectionModel selectionModel )
 	{
 		final Image3DUniverse universe = new Image3DUniverse();
 		universe.show();
@@ -89,7 +87,7 @@ public class SpotDisplayer3DFactory implements ViewFactory
 	@Override
 	public String getKey()
 	{
-		return KEY;
+		return SpotDisplayer3D.KEY;
 	}
 
 }
