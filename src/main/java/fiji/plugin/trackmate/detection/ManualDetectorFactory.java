@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.ImageIcon;
+
 import net.imglib2.Interval;
 import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.NativeType;
@@ -147,5 +149,11 @@ public class ManualDetectorFactory< T extends RealType< T > & NativeType< T >> i
 		final Map< String, Object > settings = new HashMap< String, Object >();
 		settings.put( KEY_RADIUS, DEFAULT_RADIUS );
 		return settings;
+	}
+
+	@Override
+	public ImageIcon getIcon()
+	{
+		return null;
 	}
 }

@@ -8,10 +8,10 @@ import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 
 import org.jdom2.Element;
-import org.scijava.plugin.SciJavaPlugin;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.TrackMateModule;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 
 /**
@@ -22,14 +22,14 @@ import fiji.plugin.trackmate.gui.ConfigurationPanel;
  * detector parameters from/to XML, and of generating a suitable configuration
  * panel for GUI interaction.
  */
-public interface SpotDetectorFactory< T extends RealType< T > & NativeType< T >> extends SciJavaPlugin
+public interface SpotDetectorFactory< T extends RealType< T > & NativeType< T >> extends TrackMateModule
 {
 
 	/**
 	 * Returns a new {@link SpotDetector} configured to operate on the given
 	 * target frame. This factory must be first given the {@link ImgPlus} and
 	 * the settings map, through the {@link #setTarget(ImgPlus, Map)} method.
-	 * 
+	 *
 	 * @param interval
 	 *            the interval that determines the region in the source image to
 	 *            operate on. This must <b>not</b> have a dimension for time
@@ -48,7 +48,7 @@ public interface SpotDetectorFactory< T extends RealType< T > & NativeType< T >>
 	 * Also checks the validity of the given settings map for this factory. If
 	 * check fails, return <code>false</code>, an error message can be obtained
 	 * through {@link #getErrorMessage()}.
-	 * 
+	 *
 	 * @param img
 	 *            the {@link ImgPlus} to operate on, possible 5D.
 	 * @param settings
@@ -60,15 +60,8 @@ public interface SpotDetectorFactory< T extends RealType< T > & NativeType< T >>
 	public boolean setTarget( final ImgPlus< T > img, final Map< String, Object > settings );
 
 	/**
-	 * Returns a unique String identifier for this factory.
-	 * 
-	 * @return a unique String key.
-	 */
-	public String getKey();
-
-	/**
 	 * Returns a meaningful error message for the last action on this factory.
-	 * 
+	 *
 	 * @see #setTarget(ImgPlus, Map)
 	 * @see #marshall(Map, Element)
 	 * @see #unmarshall(Element, Map)
@@ -83,7 +76,7 @@ public interface SpotDetectorFactory< T extends RealType< T > & NativeType< T >>
 	 * The element also always receive an attribute named
 	 * {@value DetectorKeys#XML_ATTRIBUTE_DETECTOR_NAME} that saves the target
 	 * {@link SpotDetectorFactory} key.
-	 * 
+	 *
 	 * @return <code>true</code> if marshalling was successful. If not, check
 	 *         {@link #getErrorMessage()}
 	 */
@@ -91,7 +84,7 @@ public interface SpotDetectorFactory< T extends RealType< T > & NativeType< T >>
 
 	/**
 	 * Un-marshalls a JDom element to update a settings map.
-	 * 
+	 *
 	 * @param element
 	 *            the JDom element to read from.
 	 * @param settings
@@ -106,7 +99,7 @@ public interface SpotDetectorFactory< T extends RealType< T > & NativeType< T >>
 	/**
 	 * Returns a new GUI panel able to configure the settings suitable for this
 	 * specific detector factory.
-	 * 
+	 *
 	 * @param settings
 	 *            the current settings, used to get info to display on the GUI
 	 *            panel.
@@ -115,21 +108,6 @@ public interface SpotDetectorFactory< T extends RealType< T > & NativeType< T >>
 	 *            panel.
 	 */
 	public ConfigurationPanel getDetectorConfigurationPanel( final Settings settings, final Model model );
-
-	/**
-	 * Returns the html String containing a descriptive information about the
-	 * target detector.
-	 * 
-	 * @return a html string.
-	 */
-	public String getInfoText();
-
-	/**
-	 * Returns the meaningful name of this detector.
-	 * 
-	 * @return a user-compliant name.
-	 */
-	public String getName();
 
 	/**
 	 * Returns a new default settings map suitable for the target detector.
@@ -141,7 +119,7 @@ public interface SpotDetectorFactory< T extends RealType< T > & NativeType< T >>
 
 	/**
 	 * Check that the given settings map is suitable for target detector.
-	 * 
+	 *
 	 * @param settings
 	 *            the map to test.
 	 * @return <code>true</code> if the settings map is valid.

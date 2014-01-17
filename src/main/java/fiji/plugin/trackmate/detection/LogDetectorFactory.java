@@ -27,6 +27,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.ImageIcon;
+
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.meta.ImgPlus;
@@ -214,5 +216,10 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 		return settings;
 	}
 
+	@Override
+	public ImageIcon getIcon()
+	{
+		return null;
+	}
 
 }
