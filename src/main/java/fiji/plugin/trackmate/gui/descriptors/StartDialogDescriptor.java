@@ -122,28 +122,28 @@ public class StartDialogDescriptor implements WizardPanelDescriptor
 
 		settings.clearSpotAnalyzerFactories();
 		final SpotAnalyzerProvider spotAnalyzerProvider = controller.getSpotAnalyzerProvider();
-		final List< String > spotAnalyzerKeys = spotAnalyzerProvider.getAvailableFeatureAnalyzers();
+		final List< String > spotAnalyzerKeys = spotAnalyzerProvider.getKeys();
 		for ( final String key : spotAnalyzerKeys )
 		{
-			final SpotAnalyzerFactory< ? > spotFeatureAnalyzer = spotAnalyzerProvider.getFeatureAnalyzer( key );
+			final SpotAnalyzerFactory< ? > spotFeatureAnalyzer = spotAnalyzerProvider.getFactory( key );
 			settings.addSpotAnalyzerFactory( spotFeatureAnalyzer );
 		}
 
 		settings.clearEdgeAnalyzers();
 		final EdgeAnalyzerProvider edgeAnalyzerProvider = controller.getEdgeAnalyzerProvider();
-		final List< String > edgeAnalyzerKeys = edgeAnalyzerProvider.getAvailableFeatureAnalyzers();
+		final List< String > edgeAnalyzerKeys = edgeAnalyzerProvider.getKeys();
 		for ( final String key : edgeAnalyzerKeys )
 		{
-			final EdgeAnalyzer edgeAnalyzer = edgeAnalyzerProvider.getFeatureAnalyzer( key );
+			final EdgeAnalyzer edgeAnalyzer = edgeAnalyzerProvider.getFactory( key );
 			settings.addEdgeAnalyzer( edgeAnalyzer );
 		}
 
 		settings.clearTrackAnalyzers();
 		final TrackAnalyzerProvider trackAnalyzerProvider = controller.getTrackAnalyzerProvider();
-		final List< String > trackAnalyzerKeys = trackAnalyzerProvider.getAvailableFeatureAnalyzers();
+		final List< String > trackAnalyzerKeys = trackAnalyzerProvider.getKeys();
 		for ( final String key : trackAnalyzerKeys )
 		{
-			final TrackAnalyzer trackAnalyzer = trackAnalyzerProvider.getFeatureAnalyzer( key );
+			final TrackAnalyzer trackAnalyzer = trackAnalyzerProvider.getFactory( key );
 			settings.addTrackAnalyzer( trackAnalyzer );
 		}
 
@@ -217,7 +217,9 @@ public class StartDialogDescriptor implements WizardPanelDescriptor
 	private void fireAction( final ActionEvent e )
 	{
 		for ( final ActionListener l : actionListeners )
+		{
 			l.actionPerformed( e );
+		}
 	}
 
 }

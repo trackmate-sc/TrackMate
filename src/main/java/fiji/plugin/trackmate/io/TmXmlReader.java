@@ -603,7 +603,7 @@ public class TmXmlReader {
 			return;
 		}
 
-		final SpotDetectorFactory< ? > factory = provider.getDetectorFactory( detectorKey );
+		final SpotDetectorFactory< ? > factory = provider.getFactory( detectorKey );
 		if ( null == factory )
 		{
 			logger.error( "The detector identified by the key " + detectorKey + " is unknown to TrackMate.\n" );
@@ -1035,7 +1035,7 @@ public class TmXmlReader {
 							continue;
 						}
 
-						final SpotAnalyzerFactory<?> spotAnalyzer = spotAnalyzerProvider.getFeatureAnalyzer(key);
+						final SpotAnalyzerFactory< ? > spotAnalyzer = spotAnalyzerProvider.getFactory( key );
 						if (null == spotAnalyzer) {
 							logger.error("Unknown spot analyzer key: " + key + ".\n");
 							ok = false;
@@ -1070,7 +1070,7 @@ public class TmXmlReader {
 						continue;
 					}
 
-					final EdgeAnalyzer edgeAnalyzer = edgeAnalyzerProvider.getFeatureAnalyzer(key);
+					final EdgeAnalyzer edgeAnalyzer = edgeAnalyzerProvider.getFactory( key );
 					if (null == edgeAnalyzer) {
 						logger.error("Unknown edge analyzer key: " + key + ".\n");
 						ok = false;
@@ -1100,7 +1100,7 @@ public class TmXmlReader {
 						continue;
 					}
 
-					final TrackAnalyzer trackAnalyzer = trackAnalyzerProvider.getFeatureAnalyzer(key);
+					final TrackAnalyzer trackAnalyzer = trackAnalyzerProvider.getFactory( key );
 					if (null == trackAnalyzer) {
 						logger.error("Unknown track analyzer key: " + key + ".\n");
 						ok = false;

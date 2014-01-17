@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.gui.descriptors;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -29,8 +30,14 @@ public class DetectorChoiceDescriptor implements WizardPanelDescriptor
 		this.trackmate = trackmate;
 		this.detectorProvider = detectorProvider;
 		this.controller = controller;
-		final List< String > detectorNames = detectorProvider.getNames();
-		final List< String > infoTexts = detectorProvider.getInfoTexts();
+		final List< String > visibleKeys = detectorProvider.getVisibleKeys();
+		final List< String > detectorNames = new ArrayList< String >( visibleKeys.size() );
+		final List< String > infoTexts = new ArrayList< String >( visibleKeys.size() );
+		for ( final String key : visibleKeys )
+		{
+			detectorNames.add( detectorProvider.getFactory( key ).getName() );
+			infoTexts.add( detectorProvider.getFactory( key ).getInfoText() );
+		}
 		this.component = new ListChooserPanel( detectorNames, infoTexts, "detector" );
 		setCurrentChoiceFromPlugin();
 	}
@@ -84,10 +91,10 @@ public class DetectorChoiceDescriptor implements WizardPanelDescriptor
 
 		// Configure the detector provider with choice made in panel
 		final int index = component.getChoice();
-		final String key = detectorProvider.getKeys().get( index );
+		final String key = detectorProvider.getVisibleKeys().get( index );
 
 		// Configure trackmate settings with selected detector
-		final SpotDetectorFactory< ? > factory = detectorProvider.getDetectorFactory( key );
+		final SpotDetectorFactory< ? > factory = detectorProvider.getFactory( key );
 
 		if ( null == factory )
 		{

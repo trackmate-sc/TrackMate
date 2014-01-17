@@ -56,7 +56,7 @@ public class DetectionDescriptor implements WizardPanelDescriptor
 		controller.disableButtonsAndStoreState();
 		final Settings settings = trackmate.getSettings();
 		final Logger logger = logPanel.getLogger();
-		logger.log( "Starting detection using " + settings.detectorFactory.toString() + "\n", Logger.BLUE_COLOR );
+		logger.log( "Starting detection using " + settings.detectorFactory.getName() + "\n", Logger.BLUE_COLOR );
 		logger.log( "with settings:\n" );
 		logger.log( TMUtils.echoMap( settings.detectorSettings, 2 ) );
 

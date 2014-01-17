@@ -12,16 +12,17 @@ import fiji.plugin.trackmate.features.track.TrackAnalyzer;
  * manner. For instance: POSITION_X, MAX_INTENSITY, etc... They must be suitable
  * to be used as a attribute key in an xml file.
  */
-public class TrackAnalyzerProvider extends AbstractFeatureAnalyzerProvider< TrackAnalyzer >
+public class TrackAnalyzerProvider extends AbstractProvider< TrackAnalyzer >
 {
-	/**
-	 * This provider provides the GUI with the model trackFeatureAnalyzers
-	 * currently available in TrackMate. Each trackFeatureAnalyzer is identified
-	 * by a key String, which can be used to retrieve new instance of the
-	 * trackFeatureAnalyzer.
-	 */
+
 	public TrackAnalyzerProvider()
 	{
-		registerFeatureAnalyzers( TrackAnalyzer.class );
+		super( TrackAnalyzer.class );
+	}
+
+	public static void main( final String[] args )
+	{
+		final TrackAnalyzerProvider provider = new TrackAnalyzerProvider();
+		System.out.println( provider.echo() );
 	}
 }

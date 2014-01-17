@@ -51,7 +51,7 @@ public class ActionChooserPanel {
 
 		this.controller = controller;
 		this.trackmate = trackmate;
-		final List< String > actionKeys = actionProvider.getVisibleActions();
+		final List< String > actionKeys = actionProvider.getVisibleKeys();
 		final List< String > names = new ArrayList< String >( actionKeys.size() );
 		final List< String > infoTexts = new ArrayList< String >( actionKeys.size() );
 		icons = new ArrayList< ImageIcon >( actionKeys.size() );
@@ -100,7 +100,7 @@ public class ActionChooserPanel {
 							executeButton.setEnabled(false);
 							panel.fireAction(ACTION_STARTED);
 							final int actionIndex = panel.getChoice();
-							final String actionKey = actionProvider.getVisibleActions().get( actionIndex );
+							final String actionKey = actionProvider.getVisibleKeys().get( actionIndex );
 							final TrackMateAction action = actionProvider.getFactory( actionKey ).create( controller );
 							if (null == action) {
 								logger.error( "Unknown action: " + actionKey + ".\n" );
