@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.tracking.hungarian;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -31,6 +32,31 @@ public class JonkerVolgenantTest
 			}
 		}
 		return m;
+	}
+
+	@Test
+	public void speedTest()
+	{
+		MunkresKuhnAlgorithm munkresKuhn = new MunkresKuhnAlgorithm();
+		JonkerVolgenantAlgorithm jonkerVolgenant = new JonkerVolgenantAlgorithm();
+		seed = 17;
+		int n = 100;
+		long start1 = System.currentTimeMillis();
+		for ( int i = 0; i < n; i++ )
+		{
+			double[][] weights = generateMatrix( 100 );
+			munkresKuhn.computeAssignments( weights );
+		}
+		long end1 = System.currentTimeMillis();
+		long start2 = System.currentTimeMillis();
+		for ( int i = 0; i < n; i++ )
+		{
+			double[][] weights = generateMatrix( 100 );
+			jonkerVolgenant.computeAssignments( weights );
+		}
+		long end2 = System.currentTimeMillis();
+		System.err.println( "Munkres-Kuhn: " + ( end1 - start1 ) + "ms, Jonker-Volgenant: " + ( end2 - start2 ) + "ms" );
+		assertTrue( end1 - start1 > end2 - start2 );
 	}
 
 	@Test
