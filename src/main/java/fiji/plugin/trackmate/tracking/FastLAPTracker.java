@@ -4,7 +4,7 @@ import java.util.Map;
 
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.tracking.hungarian.AssignmentAlgorithm;
-import fiji.plugin.trackmate.tracking.hungarian.MunkresKuhnAlgorithm;
+import fiji.plugin.trackmate.tracking.hungarian.JonkerVolgenantAlgorithm;
 
 public class FastLAPTracker extends LAPTracker {
 
@@ -15,6 +15,6 @@ public class FastLAPTracker extends LAPTracker {
 
 	@Override
 	protected AssignmentAlgorithm createAssignmentProblemSolver() {
-		return new MunkresKuhnAlgorithm();
+		return new JonkerVolgenantAlgorithm();
 	}
 }
