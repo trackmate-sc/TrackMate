@@ -107,8 +107,18 @@ public class Model
 
 	public Model()
 	{
-		featureModel = new FeatureModel( this );
-		trackModel = new TrackModel();
+		featureModel = createFeatureModel();
+		trackModel = createTrackModel();
+	}
+
+	protected TrackModel createTrackModel()
+	{
+		return new TrackModel();
+	}
+
+	protected FeatureModel createFeatureModel()
+	{
+		return new FeatureModel( this );
 	}
 
 	/*
@@ -318,7 +328,7 @@ public class Model
 
 	/**
 	 * Removes all the spots from this model.
-	 * 
+	 *
 	 * @param doNotify
 	 *            if <code>true</code>, model listeners will be notified with a
 	 *            {@link ModelChangeEvent#SPOTS_COMPUTED} event.
