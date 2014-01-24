@@ -272,7 +272,7 @@ public class TmXmlReader {
 		if (null == modelElement) {
 			return null;
 		}
-		final Model model = new Model();
+		final Model model = createModel();
 
 		// Physical units
 		final String spaceUnits = modelElement.getAttributeValue(SPATIAL_UNITS_ATTRIBUTE_NAME);
@@ -312,6 +312,11 @@ public class TmXmlReader {
 		return model;
 	}
 
+
+	protected Model createModel()
+	{
+		return new Model();
+	}
 
 	/**
 	 * Reads the settings element of the file, and sets the fields of the specified

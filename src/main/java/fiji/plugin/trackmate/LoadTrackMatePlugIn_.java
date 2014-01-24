@@ -82,7 +82,7 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		file = tmpFile;
 
 		// Read the file content
-		TmXmlReader reader = new TmXmlReader(file);
+		TmXmlReader reader = createReader( file );
 		final Version version = new Version(reader.getVersion());
 		if (version.compareTo(new Version("2.0.0")) < 0) {
 			logger.log("Detecting a file version " + version + ". Using the right reader.\n", Logger.GREEN_COLOR);
@@ -102,10 +102,10 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		// Model
 		final Model model = reader.getModel();
 		// Settings -> empty for now.
-		final Settings settings = new Settings();
+		final Settings settings = createSettings();
 
 		// With this we can create a new controller from the provided one:
-		final TrackMate trackmate = new TrackMate(model, settings);
+		final TrackMate trackmate = createTrackMate( model, settings );
 
 		// Tune model and settings to be usable in the GUI even with old versions
 		if (version.compareTo(new Version("2.0.0")) < 0) {
@@ -128,6 +128,9 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		final EdgeAnalyzerProvider edgeAnalyzerProvider = controller.getEdgeAnalyzerProvider();
 		final TrackAnalyzerProvider trackAnalyzerProvider = controller.getTrackAnalyzerProvider();
 		reader.readSettings(settings, detectorProvider, trackerProvider, spotAnalyzerProvider, edgeAnalyzerProvider, trackAnalyzerProvider);
+
+		// Hook actions
+		postRead( trackmate );
 
 		// GUI position
 		GuiUtils.positionWindow(controller.getGUI(), settings.imp.getWindow());
@@ -172,6 +175,32 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		model.getLogger().log("File loaded on " + TMUtils.getCurrentTimeString() + '\n', Logger.BLUE_COLOR);
 	}
 
+
+	/**
+	 * Hook for subclassers: The {@link TrackMate} object is loaded and properly
+	 * configured. This method is called just before the controller and GUI are
+	 * launched.
+	 * 
+	 * @param trackmate
+	 */
+	protected void postRead( final TrackMate trackmate )
+	{
+	}
+
+	protected TrackMate createTrackMate( final Model model, final Settings settings )
+	{
+		return new TrackMate( model, settings );
+	}
+
+	protected TmXmlReader createReader( final File file )
+	{
+		return new TmXmlReader( file );
+	}
+
+	protected Settings createSettings()
+	{
+		return new Settings();
+	}
 
 	@Override
 	public void displayingPanel() {
