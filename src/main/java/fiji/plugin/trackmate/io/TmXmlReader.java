@@ -312,7 +312,13 @@ public class TmXmlReader {
 		return model;
 	}
 
-
+	/**
+	 * Hook for subclassers:<br>
+	 * Creates the instance of {@link Model} that will be built upon loading
+	 * with this reader.
+	 *
+	 * @return a new {@link Model} instance.
+	 */
 	protected Model createModel()
 	{
 		return new Model();

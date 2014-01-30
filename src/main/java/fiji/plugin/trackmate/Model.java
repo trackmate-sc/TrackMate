@@ -111,11 +111,31 @@ public class Model
 		trackModel = createTrackModel();
 	}
 
+	/*
+	 * HOOKS
+	 */
+
+	/**
+	 * Instantiates a blank {@link TrackModel} to use whithin this model.
+	 * <p>
+	 * Subclassers can override this method to have the model work with their
+	 * own subclass of {@link TrackModel}.
+	 *
+	 * @return a new instance of {@link TrackModel}.
+	 */
 	protected TrackModel createTrackModel()
 	{
 		return new TrackModel();
 	}
 
+	/**
+	 * Instantiates a blank {@link FeatureModel} to use whithin this model.
+	 * <p>
+	 * Subclassers can override this method to have the model work with their
+	 * own subclass of {@link FeatureModel}.
+	 * 
+	 * @return a new instance of {@link FeatureModel}.
+	 */
 	protected FeatureModel createFeatureModel()
 	{
 		return new FeatureModel( this );

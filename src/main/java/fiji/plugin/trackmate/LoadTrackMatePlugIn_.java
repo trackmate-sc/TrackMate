@@ -43,6 +43,10 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 
 	private JFrame frame;
 
+	private Model model;
+
+	private Settings settings;
+
 	private static final String KEY = "LoadPlugin";
 
 	public LoadTrackMatePlugIn_()
@@ -115,12 +119,12 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		// Log
 		final String logText = reader.getLog() + '\n';
 		// Model
-		final Model model = reader.getModel();
+		model = reader.getModel();
 		// Settings -> empty for now.
-		final Settings settings = createSettings();
+		settings = createSettings();
 
 		// With this we can create a new controller from the provided one:
-		final TrackMate trackmate = createTrackMate( model, settings );
+		final TrackMate trackmate = createTrackMate();
 
 		// Tune model and settings to be usable in the GUI even with old
 		// versions
@@ -200,31 +204,6 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		model.getLogger().log( "File loaded on " + TMUtils.getCurrentTimeString() + '\n', Logger.BLUE_COLOR );
 	}
 
-	/**
-	 * Hook for subclassers: The {@link TrackMate} object is loaded and properly
-	 * configured. This method is called just before the controller and GUI are
-	 * launched.
-	 *
-	 * @param trackmate
-	 */
-	protected void postRead( final TrackMate trackmate )
-	{}
-
-	protected TrackMate createTrackMate( final Model model, final Settings settings )
-	{
-		return new TrackMate( model, settings );
-	}
-
-	protected TmXmlReader createReader( final File file )
-	{
-		return new TmXmlReader( file );
-	}
-
-	protected Settings createSettings()
-	{
-		return new Settings();
-	}
-
 	@Override
 	public void displayingPanel()
 	{
@@ -240,6 +219,57 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 	{
 		return KEY;
 	}
+
+	/*
+	 * HOOKS
+	 */
+
+	/**
+	 * Hook for subclassers:<br>
+	 * The {@link TrackMate} object is loaded and properly configured. This
+	 * method is called just before the controller and GUI are launched.
+	 *
+	 * @param trackmate
+	 *            the {@link TrackMate} instance that was fledged after loading.
+	 */
+	protected void postRead( final TrackMate trackmate )
+	{}
+
+	/**
+	 * Hook for subclassers: <br>
+	 * Creates the TrackMate instance that will be controlled in the GUI.
+	 *
+	 * @return a new {@link TrackMate} instance.
+	 */
+	protected TrackMate createTrackMate()
+	{
+		return new TrackMate( model, settings );
+	}
+
+	/**
+	 * Hook for subclassers: <br>
+	 * Creates the {@link TmXmlReader} instance that will be used to load the
+	 * file.
+	 *
+	 * @return a new {@link TmXmlReader} instance.
+	 */
+	protected TmXmlReader createReader( final File file )
+	{
+		return new TmXmlReader( file );
+	}
+
+	/**
+	 * Hook for subclassers: <br>
+	 * Creates the {@link Settings} instance that will be used to tune the
+	 *
+	 * @return a new {@link Settings} instance.
+	 */
+	protected Settings createSettings()
+	{
+		return new Settings();
+	}
+
+
 
 	/*
 	 * MAIN METHOD

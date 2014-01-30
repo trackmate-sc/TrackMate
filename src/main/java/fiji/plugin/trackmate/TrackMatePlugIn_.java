@@ -14,6 +14,8 @@ public class TrackMatePlugIn_ implements PlugIn
 
 	protected Settings settings;
 
+	protected Model model;
+
 	@Override
 	public void run( final String arg0 )
 	{
@@ -23,6 +25,7 @@ public class TrackMatePlugIn_ implements PlugIn
 		GuiUtils.userCheckImpDimensions( imp );
 
 		settings = createSettings( imp );
+		model = createModel();
 		trackmate = createTrackMate();
 
 		/*
@@ -34,6 +37,23 @@ public class TrackMatePlugIn_ implements PlugIn
 		{
 			GuiUtils.positionWindow( controller.getGUI(), imp.getWindow() );
 		}
+	}
+
+	/*
+	 * HOOKS
+	 */
+
+	/**
+	 * Hook for subclassers: <br>
+	 * Creates the {@link Model} instance that will be used to store data in the
+	 * {@link TrackMate} instance.
+	 *
+	 * @return a new {@link Model} instance.
+	 */
+
+	protected Model createModel()
+	{
+		return new Model();
 	}
 
 	/**
@@ -59,7 +79,7 @@ public class TrackMatePlugIn_ implements PlugIn
 	 */
 	protected TrackMate createTrackMate()
 	{
-		return new TrackMate( settings );
+		return new TrackMate( model, settings );
 	}
 
 	/*
