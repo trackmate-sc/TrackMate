@@ -440,6 +440,8 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 					jLabelFrameDepth.setPreferredSize( new java.awt.Dimension( 103, 14 ) );
 				}
 				{
+					displaySettings.put( KEY_TRACK_DISPLAY_DEPTH, Integer.valueOf( TrackMateModelView.DEFAULT_TRACK_DISPLAY_DEPTH ) );
+
 					jTextFieldFrameDepth = new JTextField();
 					jPanelTrackOptions.add( jTextFieldFrameDepth );
 					jTextFieldFrameDepth.setFont( SMALL_FONT );
@@ -450,12 +452,19 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 						@Override
 						public void actionPerformed( final ActionEvent e )
 						{
-							final Integer depth = Integer.parseInt( jTextFieldFrameDepth.getText() );
 							final Integer oldValue = ( Integer ) displaySettings.get( KEY_TRACK_DISPLAY_DEPTH );
-							displaySettings.put( KEY_TRACK_DISPLAY_DEPTH, depth );
+							try
+							{
+								final Integer depth = Integer.parseInt( jTextFieldFrameDepth.getText() );
+								displaySettings.put( KEY_TRACK_DISPLAY_DEPTH, depth );
 
-							final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_TRACK_DISPLAY_DEPTH, depth, oldValue );
-							fireDisplaySettingsChange( event );
+								final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_TRACK_DISPLAY_DEPTH, depth, oldValue );
+								fireDisplaySettingsChange( event );
+							}
+							catch ( final NumberFormatException nfe )
+							{
+								jTextFieldFrameDepth.setText( "" + oldValue );
+							}
 						}
 					} );
 				}
