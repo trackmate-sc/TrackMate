@@ -93,7 +93,6 @@ public class LogDetector< T extends RealType< T > & NativeType< T >> implements 
 	@Override
 	public boolean process()
 	{
-
 		final long start = System.currentTimeMillis();
 
 		/*

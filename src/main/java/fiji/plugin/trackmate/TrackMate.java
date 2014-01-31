@@ -377,7 +377,16 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 		// To translate spots, later
 		final double[] calibration = TMUtils.getSpatialCalibration( settings.imp );
 
-		final Thread[] threads = SimpleMultiThreading.newThreads( numThreads );
+		/*
+		 * Fine tune multi-threading: If we have 10 threads and 15 frames to
+		 * process, we process 10 frames at once, and allocate 1 thread per
+		 * frame. But if we have 10 threads and 2 frames, we process the 2
+		 * frames at once, and allocate 5 threads per frame if we can.
+		 */
+		final int nSimultaneousFrames = Math.min( numThreads, numFrames );
+		final int threadsPerFrame = Math.max( 1, numThreads / nSimultaneousFrames );
+
+		final Thread[] threads = SimpleMultiThreading.newThreads( nSimultaneousFrames );
 		final AtomicBoolean ok = new AtomicBoolean( true );
 
 		// Prepare the thread array
@@ -411,6 +420,11 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 						{
 							// Yield detector for target frame
 							final SpotDetector< ? > detector = factory.getDetector( interval, frame );
+							if ( detector instanceof MultiThreaded )
+							{
+								final MultiThreaded md = ( MultiThreaded ) detector;
+								md.setNumThreads( threadsPerFrame );
+							}
 
 							if ( wasInterrupted() )
 								return;
