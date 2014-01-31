@@ -92,7 +92,10 @@ public class TrackMatePlugIn_ implements PlugIn
 	public static void main( final String[] args )
 	{
 		ImageJ.main( args );
-		new ImagePlus( "samples/FakeTracks.tif" ).show();
+		// new ImagePlus( "samples/FakeTracks.tif" ).show();
+		final ImagePlus imp = new ImagePlus( "/Users/tinevez/Desktop/Data/FakeTracks2C.tif" );
+		imp.setOpenAsHyperStack( true );
+		imp.show();
 		new TrackMatePlugIn_().run( null );
 	}
 

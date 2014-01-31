@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.imglib2.Cursor;
+import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.Point;
 import net.imglib2.RandomAccess;
@@ -37,7 +38,7 @@ public class DetectionUtils
 	 * radius specified <b>using calibrated units</b>. The specified calibration
 	 * is used to determine the dimensionality of the kernel and to map it on a
 	 * pixel grid.
-	 * 
+	 *
 	 * @param radius
 	 *            the blob radius (in image unit).
 	 * @param nDims
@@ -101,7 +102,7 @@ public class DetectionUtils
 
 	/**
 	 * Copy an interval of the specified source image on a float image.
-	 * 
+	 *
 	 * @param img
 	 *            the source image.
 	 * @param interval
@@ -129,6 +130,40 @@ public class DetectionUtils
 		}
 
 		return output;
+	}
+
+	/**
+	 * Returns a new {@link Interval}, built by squeezing out singleton
+	 * dimensions from the specified interval.
+	 *
+	 * @param interval
+	 *            the interval to squeeze.
+	 * @return a new interval.
+	 */
+	public static final Interval squeeze( final Interval interval )
+	{
+		int nNonSingletonDimensions = 0;
+		for ( int d = 0; d < interval.numDimensions(); d++ )
+		{
+			if ( interval.dimension( d ) > 1 )
+			{
+				nNonSingletonDimensions++;
+			}
+		}
+
+		final long[] min = new long[ nNonSingletonDimensions ];
+		final long[] max = new long[ nNonSingletonDimensions ];
+		int index = 0;
+		for ( int d = 0; d < interval.numDimensions(); d++ )
+		{
+			if ( interval.dimension( d ) > 1 )
+			{
+				min[ index ] = interval.min( d );
+				max[ index ] = interval.max( d );
+				index++;
+			}
+		}
+		return new FinalInterval( min, max );
 	}
 
 	/**

@@ -60,7 +60,7 @@ public class LogDetector< T extends RealType< T > & NativeType< T >> implements 
 	public LogDetector( final RandomAccessible< T > img, final Interval interval, final double[] calibration, final double radius, final double threshold, final boolean doSubPixelLocalization, final boolean doMedianFilter )
 	{
 		this.img = img;
-		this.interval = interval;
+		this.interval = DetectionUtils.squeeze( interval );
 		this.calibration = calibration;
 		this.radius = radius;
 		this.threshold = threshold;
@@ -116,6 +116,7 @@ public class LogDetector< T extends RealType< T > & NativeType< T >> implements 
 				return false;
 			}
 		}
+
 
 		int ndims = interval.numDimensions();
 		for ( int d = 0; d < interval.numDimensions(); d++ )

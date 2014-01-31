@@ -94,15 +94,27 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 		final boolean doSubpixel = ( Boolean ) settings.get( KEY_DO_SUBPIXEL_LOCALIZATION );
 		final double[] calibration = TMUtils.getSpatialCalibration( img );
 
-		final int timeDim = TMUtils.findTAxisIndex( img );
-		final RandomAccessible< T > imFrame;
-		if ( timeDim < 0 )
+		RandomAccessible< T > imFrame;
+		final int cDim = TMUtils.findCAxisIndex( img );
+		if ( cDim < 0 )
 		{
 			imFrame = img;
 		}
 		else
 		{
-			imFrame = Views.hyperSlice( img, timeDim, frame );
+			// In ImgLib2, dimensions are 0-based.
+			final int channel = ( Integer ) settings.get( KEY_TARGET_CHANNEL ) - 1;
+			imFrame = Views.hyperSlice( img, cDim, channel );
+		}
+
+		int timeDim = TMUtils.findTAxisIndex( img );
+		if ( timeDim >= 0 )
+		{
+			if ( cDim >= 0 && timeDim > cDim )
+			{
+				timeDim--;
+			}
+			imFrame = Views.hyperSlice( imFrame, timeDim, frame );
 		}
 		final LogDetector< T > detector = new LogDetector< T >( imFrame, interval, calibration, radius, threshold, doSubpixel, doMedian );
 		detector.setNumThreads( 1 ); // in TrackMate context, we use 1 thread
