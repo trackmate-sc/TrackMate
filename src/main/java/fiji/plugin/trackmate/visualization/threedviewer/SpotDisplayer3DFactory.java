@@ -21,7 +21,7 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewFactory;
 
-@Plugin( type = ViewFactory.class )
+@Plugin( type = ViewFactory.class, priority = 1d )
 public class SpotDisplayer3DFactory implements ViewFactory
 {
 
