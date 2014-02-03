@@ -801,7 +801,7 @@ public class TrackMateGUIController implements ActionListener
 		}
 		else if ( currentDescriptor == initFilterDescriptor )
 		{
-			return detectionDescriptor;
+			return detectorConfigurationDescriptor;
 
 		}
 		else if ( currentDescriptor == viewChoiceDescriptor )
@@ -1034,7 +1034,6 @@ public class TrackMateGUIController implements ActionListener
 
 		// Show the panel in the dialog, and execute action after display
 		panelDescriptor.displayingPanel();
-
 	}
 
 	private void previous()
