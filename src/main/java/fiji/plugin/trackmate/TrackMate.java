@@ -44,7 +44,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 
 	public static final String PLUGIN_NAME_STR = "TrackMate";
 
-	public static final String PLUGIN_NAME_VERSION = "2.2.0-rc2";
+	public static final String PLUGIN_NAME_VERSION = "2.2.0-rc3";
 
 	/**
 	 * The model this trackmate will shape.
