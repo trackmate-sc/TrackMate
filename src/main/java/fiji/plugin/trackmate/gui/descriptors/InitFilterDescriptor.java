@@ -1,7 +1,6 @@
 package fiji.plugin.trackmate.gui.descriptors;
 
 import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
@@ -36,7 +35,8 @@ public class InitFilterDescriptor implements WizardPanelDescriptor
 	@Override
 	public void aboutToDisplayPanel()
 	{
-
+		trackmate.getModel().getLogger().log( "Computing spot quality histogram...\n", Logger.BLUE_COLOR );
+		final long start = System.currentTimeMillis();
 		final SpotCollection spots = trackmate.getModel().getSpots();
 
 		final double[] values = new double[ spots.getNSpots( false ) ];
@@ -49,6 +49,8 @@ public class InitFilterDescriptor implements WizardPanelDescriptor
 
 		final Double initialFilterValue = trackmate.getSettings().initialSpotFilterValue;
 		component.setInitialFilterValue( initialFilterValue );
+		final long end = System.currentTimeMillis();
+		trackmate.getModel().getLogger().log( String.format( "Histogram calculated in %.1f s.\n", ( end - start ) / 1e3f ), Logger.BLUE_COLOR );
 	}
 
 	@Override
@@ -61,27 +63,12 @@ public class InitFilterDescriptor implements WizardPanelDescriptor
 	public void aboutToHidePanel()
 	{
 
-		final Model model = trackmate.getModel();
-		final Logger logger = model.getLogger();
 		final FeatureFilter initialThreshold = component.getFeatureThreshold();
-		final String str = "Initial thresholding with a quality threshold above " + String.format( "%.1f", initialThreshold.value ) + " ...\n";
-		logger.log( str, Logger.BLUE_COLOR );
-		final int ntotal = model.getSpots().getNSpots( false );
 		trackmate.getSettings().initialSpotFilterValue = initialThreshold.value;
-		trackmate.execInitialSpotFiltering();
-		final int nselected = model.getSpots().getNSpots( false );
-		logger.log( String.format( "Retained %d spots out of %d.\n", nselected, ntotal ) );
 
 		/*
-		 * We have some spots so we need to compute spot features will we render
-		 * them.
+		 * We will do the filtering in the next panel.
 		 */
-		logger.log( "Calculating spot features...\n", Logger.BLUE_COLOR );
-		// Calculate features
-		final long start = System.currentTimeMillis();
-		trackmate.computeSpotFeatures( true );
-		final long end = System.currentTimeMillis();
-		logger.log( String.format( "Calculating features done in %.1f s.\n", ( end - start ) / 1e3f ), Logger.BLUE_COLOR );
 	}
 
 	@Override

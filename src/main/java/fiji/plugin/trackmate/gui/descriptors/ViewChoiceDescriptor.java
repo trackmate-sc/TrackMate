@@ -4,6 +4,10 @@ import java.awt.Component;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.Icon;
+
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
@@ -61,7 +65,40 @@ public class ViewChoiceDescriptor implements WizardPanelDescriptor
 	@Override
 	public void displayingPanel()
 	{
-		controller.getGUI().setNextButtonEnabled( true );
+		final String oldText = controller.getGUI().getNextButton().getText();
+		final Icon oldIcon = controller.getGUI().getNextButton().getIcon();
+		controller.getGUI().getNextButton().setText( "Please wait..." );
+		controller.getGUI().getNextButton().setIcon( null );
+		new Thread( "TrackMate spot feature calculation thread." )
+		{
+			@Override
+			public void run()
+			{
+				final TrackMate trackmate = controller.getPlugin();
+				final Model model = trackmate.getModel();
+				final Logger logger = model.getLogger();
+				final String str = "Initial thresholding with a quality threshold above " + String.format( "%.1f", trackmate.getSettings().initialSpotFilterValue ) + " ...\n";
+				logger.log( str, Logger.BLUE_COLOR );
+				final int ntotal = model.getSpots().getNSpots( false );
+				trackmate.execInitialSpotFiltering();
+				final int nselected = model.getSpots().getNSpots( false );
+				logger.log( String.format( "Retained %d spots out of %d.\n", nselected, ntotal ) );
+
+				/*
+				 * We have some spots so we need to compute spot features will
+				 * we render them.
+				 */
+				logger.log( "Calculating spot features...\n", Logger.BLUE_COLOR );
+				// Calculate features
+				final long start = System.currentTimeMillis();
+				trackmate.computeSpotFeatures( true );
+				final long end = System.currentTimeMillis();
+				logger.log( String.format( "Calculating features done in %.1f s.\n", ( end - start ) / 1e3f ), Logger.BLUE_COLOR );
+				controller.getGUI().getNextButton().setText( oldText );
+				controller.getGUI().getNextButton().setIcon( oldIcon );
+				controller.getGUI().setNextButtonEnabled( true );
+			}
+		}.start();
 	}
 
 	@Override
