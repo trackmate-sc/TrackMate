@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.gui.descriptors;
 
+import javax.swing.Icon;
+
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
@@ -35,28 +37,44 @@ public class InitFilterDescriptor implements WizardPanelDescriptor
 	@Override
 	public void aboutToDisplayPanel()
 	{
-		trackmate.getModel().getLogger().log( "Computing spot quality histogram...\n", Logger.BLUE_COLOR );
-		final long start = System.currentTimeMillis();
-		final SpotCollection spots = trackmate.getModel().getSpots();
-
-		final double[] values = new double[ spots.getNSpots( false ) ];
-		int index = 0;
-		for ( final Spot spot : spots.iterable( false ) )
-		{
-			values[ index++ ] = spot.getFeature( Spot.QUALITY );
-		}
-		component.setValues( values );
-
-		final Double initialFilterValue = trackmate.getSettings().initialSpotFilterValue;
-		component.setInitialFilterValue( initialFilterValue );
-		final long end = System.currentTimeMillis();
-		trackmate.getModel().getLogger().log( String.format( "Histogram calculated in %.1f s.\n", ( end - start ) / 1e3f ), Logger.BLUE_COLOR );
-	}
+}
 
 	@Override
 	public void displayingPanel()
 	{
-		controller.getGUI().setNextButtonEnabled( true );
+		new Thread( "TrackMate quality histogram calculation thread." )
+		{
+			@Override
+			public void run()
+			{
+				final String oldText = controller.getGUI().getNextButton().getText();
+				final Icon oldIcon = controller.getGUI().getNextButton().getIcon();
+				controller.getGUI().getNextButton().setIcon( null );
+				controller.getGUI().getNextButton().setText( "Please wait..." );
+
+				trackmate.getModel().getLogger().log( "Computing spot quality histogram...\n", Logger.BLUE_COLOR );
+				final long start = System.currentTimeMillis();
+				final SpotCollection spots = trackmate.getModel().getSpots();
+
+				final double[] values = new double[ spots.getNSpots( false ) ];
+				int index = 0;
+				for ( final Spot spot : spots.iterable( false ) )
+				{
+					values[ index++ ] = spot.getFeature( Spot.QUALITY );
+				}
+				component.setValues( values );
+
+				final Double initialFilterValue = trackmate.getSettings().initialSpotFilterValue;
+				component.setInitialFilterValue( initialFilterValue );
+				final long end = System.currentTimeMillis();
+				trackmate.getModel().getLogger().log( String.format( "Histogram calculated in %.1f s.\n", ( end - start ) / 1e3f ), Logger.BLUE_COLOR );
+
+				controller.getGUI().getNextButton().setText( oldText );
+				controller.getGUI().getNextButton().setIcon( oldIcon );
+				controller.getGUI().setNextButtonEnabled( true );
+
+			}
+		}.start();
 	}
 
 	@Override
