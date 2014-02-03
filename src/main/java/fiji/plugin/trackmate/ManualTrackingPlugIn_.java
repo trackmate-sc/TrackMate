@@ -30,6 +30,7 @@ public class ManualTrackingPlugIn_ extends TrackMatePlugIn_ implements PlugIn
 		GuiUtils.userCheckImpDimensions( imp );
 
 		settings = createSettings( imp );
+		model = createModel();
 		trackmate = createTrackMate();
 
 		/*
