@@ -95,6 +95,7 @@ public class DetectorConfigurationDescriptor implements WizardPanelDescriptor
 		 * We clear the spot content here.
 		 */
 		trackmate.getModel().clearSpots( true );
+		controller.getSelectionModel().clearSpotSelection();
 	}
 
 	@Override

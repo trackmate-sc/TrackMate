@@ -120,6 +120,7 @@ public class TrackerChoiceDescriptor implements WizardPanelDescriptor
 		 * changes a parameter tuning cause.
 		 */
 		trackmate.getModel().clearTracks( true );
+		controller.getSelectionModel().clearEdgeSelection();
 	}
 
 	private void setCurrentChoiceFromPlugin()
