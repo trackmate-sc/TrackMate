@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import net.imglib2.algorithm.Algorithm;
+import net.imglib2.algorithm.Benchmark;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.traverse.GraphIterator;
@@ -34,8 +35,10 @@ import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
-public class TrackSplitter implements Algorithm
+public class TrackSplitter implements Algorithm, Benchmark
 {
+
+	private static final String BASE_ERROR_MSG = "";
 
 	private final Model model;
 
@@ -45,28 +48,62 @@ public class TrackSplitter implements Algorithm
 
 	private Map< Spot, Spot > links;
 
+	private Map< Integer, Collection< List< Spot >>> branchesPerTrack;
+
+	private Map< Integer, Map< Spot, Spot >> linksPerTrack;
+
+	private long processingTime;
+
 	public TrackSplitter( final Model model )
 	{
 		this.model = model;
 	}
 
 	@Override
+	public long getProcessingTime()
+	{
+		return processingTime;
+	}
+
+	@Override
 	public boolean checkInput()
 	{
+		final long start = System.currentTimeMillis();
+		for ( final DefaultWeightedEdge edge : model.getTrackModel().edgeSet() )
+		{
+			final Spot source = model.getTrackModel().getEdgeSource( edge );
+			final Spot target = model.getTrackModel().getEdgeTarget( edge );
+			if ( source.diffTo( target, Spot.FRAME ) == 0d )
+			{
+				errorMessage = BASE_ERROR_MSG + "Cannot deal with links between two spots in the same frame (" + source + " & " + target + ").\n";
+				return false;
+			}
+		}
+		final long end = System.currentTimeMillis();
+		processingTime = end - start;
 		return true;
 	}
 
 	@Override
 	public boolean process()
 	{
+		final long startT = System.currentTimeMillis();
+
 		final TrackModel tm = model.getTrackModel();
 		final Set< Integer > trackIDs = tm.trackIDs( true );
 		branches = new ArrayList< List< Spot >>();
+		branchesPerTrack = new HashMap< Integer, Collection<List< Spot >>>();
 		links = new HashMap< Spot, Spot >();
+		linksPerTrack = new HashMap< Integer, Map< Spot, Spot >>();
 		for ( final Integer trackID : trackIDs )
 		{
-			System.out.println();// DEBUG
-			System.out.println( "For track " + trackID );// DEBUG
+
+			/*
+			 * Per track holders.
+			 */
+
+			branchesPerTrack.put( trackID, new ArrayList< List< Spot > >() );
+			linksPerTrack.put( trackID, new HashMap< Spot, Spot >() );
 
 			/*
 			 * Identify leaves
@@ -146,7 +183,6 @@ public class TrackSplitter implements Algorithm
 					branch.add( it.next() ); // is start.
 				}
 
-				System.out.println( "\nStarting at spot " + start );// DEBUG
 				Spot previous;
 
 				/*
@@ -167,7 +203,7 @@ public class TrackSplitter implements Algorithm
 						leaves.add( successor );
 						// Store links with successors.
 						links.put( start, successor );
-						System.out.println( "Adding " + successor + " as a new leaf." );// DEBUG
+						linksPerTrack.get( trackID ).put( start, successor );
 					}
 					Collections.sort( leaves, Spot.frameComparator );
 					previous = next;
@@ -188,11 +224,9 @@ public class TrackSplitter implements Algorithm
 					if ( tm.edgesOf( spot ).size() > 2 )
 					{
 						// We have a fusion or a split
-						System.out.println( "  Found a fusion/split at " + spot + " in " + tm.edgesOf( spot ).size() + " parts." );// DEBUG.
 						leaves.remove( previous );
 						if ( visited.contains( spot ) )
 						{
-							System.out.println( "    Already visited, we stop before." );// DEBUG
 							break;
 						}
 						visited.add( spot );
@@ -204,7 +238,6 @@ public class TrackSplitter implements Algorithm
 						// Determine whether we have a fusion or something else.
 						if ( predecessors.size() > 1 && successors.size() <= 1 )
 						{
-							System.out.println( "    We have a fusion point." );// DEBUG
 							if ( ( successors.size() == 1 ) && ( Math.abs( spot.diffTo( successors.iterator().next(), Spot.FRAME ) ) < 2 ) )
 							{
 								// No gap. Everything is fine, and we will
@@ -213,6 +246,7 @@ public class TrackSplitter implements Algorithm
 								for ( final Spot predecessor : predecessors )
 								{
 									links.put( predecessor, spot );
+									linksPerTrack.get( trackID ).put( predecessor, spot );
 								}
 							}
 							else
@@ -223,21 +257,20 @@ public class TrackSplitter implements Algorithm
 									final Spot next = successors.iterator().next();
 									leaves.add( next );
 									links.put( spot, next );
+									linksPerTrack.get( trackID ).put( spot, next );
 								}
 
 								predecessors.remove( previous );
 								for ( final Spot predecessor : predecessors )
 								{
 									links.put( predecessor, spot );
+									linksPerTrack.get( trackID ).put( predecessor, spot );
 								}
-
-								System.out.println( "    Attaching " + spot + " to current branch." );// DEBUG
 							}
 
 						}
 						else if ( predecessors.size() <= 1 && successors.size() > 1 )
 						{
-							System.out.println( "    We have a split point." );// DEBUG
 							leaves.addAll( successors );
 
 							// Split point get to the mother branch, if they do
@@ -255,17 +288,17 @@ public class TrackSplitter implements Algorithm
 								final Spot target = successors.iterator().next();
 								attachTo.put( target, spot );
 								links.put( previous, spot );
-								System.out.println( "    Attaching " + spot + " to " + target + " for next branch." );// DEBUG
+								linksPerTrack.get( trackID ).put( previous, spot );
 								successors.remove( target );
 							}
 							for ( final Spot successor : successors )
 							{
 								links.put( successor, spot );
+								linksPerTrack.get( trackID ).put( successor, spot );
 							}
 						}
 						else
 						{
-							System.out.println( "    We have a complex point." );// DEBUG
 							leaves.addAll( successors );
 							predecessors.remove( previous );
 							leaves.addAll( predecessors );
@@ -280,6 +313,7 @@ public class TrackSplitter implements Algorithm
 								// Yes. Shoot. Finish this branch and memorize
 								// the link.
 								links.put( previous, spot );
+								linksPerTrack.get( trackID ).put( previous, spot );
 								// Attach the current spot to a future branch.
 								final Spot target = successors.iterator().next();
 								attachTo.put( target, spot );
@@ -288,10 +322,12 @@ public class TrackSplitter implements Algorithm
 							for ( final Spot successor : successors )
 							{
 								links.put( successor, spot );
+								linksPerTrack.get( trackID ).put( successor, spot );
 							}
 							for ( final Spot predecessor : predecessors )
 							{
 								links.put( predecessor, spot );
+								linksPerTrack.get( trackID ).put( predecessor, spot );
 							}
 
 
@@ -308,7 +344,6 @@ public class TrackSplitter implements Algorithm
 					if ( tm.edgesOf( spot ).size() == 1 )
 					{
 						// We have reached a leaf.
-						System.out.println( "  Reached a leaf at " + spot + "." );// DEBUG
 						branch.add( spot );
 						leaves.remove( spot );
 						break;
@@ -322,9 +357,9 @@ public class TrackSplitter implements Algorithm
 					if ( Math.abs( spot.diffTo( previous, Spot.FRAME ) ) > 1 )
 					{
 						// We have a gap.
-						System.out.println( "  Found a gap between " + spot + " and " + previous + "." );// DEBUG
 						leaves.add( spot );
 						links.put( previous, spot );
+						linksPerTrack.get( trackID ).put( previous, spot );
 						Collections.sort( leaves, Spot.frameComparator );
 						break;
 					}
@@ -351,14 +386,16 @@ public class TrackSplitter implements Algorithm
 				if ( branch.size() > 0 )
 				{
 					// Ignore singletons.
-					System.out.println( "Finished branch " + branch );// DEBUG
-					System.out.println( "Current leaves: " + leaves );// DEBUG
 					branches.add( branch );
+					branchesPerTrack.get( trackID ).add( branch );
 				}
 			}
 			while ( !leaves.isEmpty() );
 
 		}
+
+		final long endT = System.currentTimeMillis();
+		processingTime = endT - startT;
 
 		return true;
 	}
@@ -368,6 +405,67 @@ public class TrackSplitter implements Algorithm
 	{
 		return errorMessage;
 	}
+
+	/**
+	 * Returns the collection of branches built by this algorithm.
+	 * <p>
+	 * Branches are returned as list of spot. It is ensured that the spots are
+	 * ordered in the list by increasing frame number, and that two consecutive
+	 * spot are separated by exactly one frame.
+	 * 
+	 * @return the collection of branches.
+	 */
+	public Collection< List< Spot >> getBranches()
+	{
+		return branches;
+	}
+
+	/**
+	 * Returns the mapping of each source track ID to the branches it was split
+	 * in.
+	 * <p>
+	 * Branches are returned as list of spot. It is ensured that the spots are
+	 * ordered in the list by increasing frame number, and that two consecutive
+	 * spot are separated by exactly one frame.
+	 * 
+	 * @return a mapping of collections of branches.
+	 */
+	public Map< Integer, Collection< List< Spot >>> getBranchesPerTrack()
+	{
+		return branchesPerTrack;
+	}
+
+	/**
+	 * Returns the links cut by this algorithm when splitting the model in
+	 * linear, consecutive branches.
+	 * <p>
+	 * These links are returned as map with the keys and values being the spots
+	 * of the edges that have been cut.
+	 * 
+	 * @return a map.
+	 */
+	public Map< Spot, Spot > getCutLinks()
+	{
+		return links;
+	}
+
+	/**
+	 * Returns the mapping of each source track ID to the links that were cut in
+	 * it to split it in branches. *
+	 * <p>
+	 * These links are returned as map with the keys and values being the spots
+	 * of the edges that have been cut.
+	 * 
+	 * @return the mapping of track IDs to the links as a map.
+	 */
+	public Map< Integer, Map< Spot, Spot >> getLinksPerTrack()
+	{
+		return linksPerTrack;
+	}
+
+	/*
+	 * STATIC METHODS
+	 */
 
 	private static final Set< Spot > successorsOf( final Spot spot, final TrackModel tm )
 	{
@@ -431,7 +529,11 @@ public class TrackSplitter implements Algorithm
 		displayer.render();
 
 		final TrackSplitter splitter = new TrackSplitter( model );
-		splitter.process();
+		if ( !splitter.checkInput() || !splitter.process() )
+		{
+			System.err.println( splitter.getErrorMessage() );
+			return;
+		}
 
 		System.out.println();// DEBUG
 		System.out.println( "Found " + splitter.branches.size() + " branches." );// DEBUG
@@ -490,5 +592,6 @@ public class TrackSplitter implements Algorithm
 
 
 	}
+
 
 }
