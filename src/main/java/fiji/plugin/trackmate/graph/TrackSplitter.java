@@ -198,7 +198,22 @@ public class TrackSplitter implements Algorithm
 						if ( predecessors.size() > 1 && successors.size() <= 1 )
 						{
 							System.out.println( "    We have a fusion point." );// DEBUG
-							leaves.add( spot );
+							if ( ( successors.size() == 1 ) && ( Math.abs( spot.diffTo( successors.iterator().next(), Spot.FRAME ) ) < 2 ) )
+							{
+								// No gap. Everything is fine, and we will
+								// process this later.
+								leaves.add( spot );
+							}
+							else
+							{
+								branch.add( spot );
+								if ( successors.size() == 1 )
+								{
+									leaves.add( successors.iterator().next() );
+								}
+								System.out.println( "    Attaching " + spot + " to current branch." );// DEBUG
+							}
+
 						}
 						else if ( predecessors.size() <= 1 && successors.size() > 1 )
 						{
@@ -206,8 +221,10 @@ public class TrackSplitter implements Algorithm
 							leaves.addAll( successors );
 							// Split point get to the mother branch, if they do
 							// not make a gap.
-							if ( Math.abs( spot.diffTo( previous, Spot.FRAME ) ) == 1 )
+							if ( Math.abs( spot.diffTo( previous, Spot.FRAME ) ) < 2 )
 							{
+								// No gap. Everything is fine and we attach the
+								// split point to the current branch.
 								branch.add( spot );
 							}
 							else
@@ -343,7 +360,7 @@ public class TrackSplitter implements Algorithm
 		// TrackMate.class ), "samples/FakeTracks.xml" );
 		// final File file = new File( AppUtils.getBaseDirectory(
 		// TrackMate.class ), "samples/FakeTracks_MergeGap.xml" );
-		final File file = new File( AppUtils.getBaseDirectory( TrackMate.class ), "samples/FakeTracks_GapMerge.xml" );
+		final File file = new File( AppUtils.getBaseDirectory( TrackMate.class ), "samples/FakeTracks_GapSplit.xml" );
 		// final File file = new File( AppUtils.getBaseDirectory(
 		// TrackMate.class ), "samples/FakeTracks_Loops.xml" );
 		// final File file = new File( AppUtils.getBaseDirectory(
