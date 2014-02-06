@@ -6,9 +6,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -87,6 +89,16 @@ public class TrackSplitter implements Algorithm
 			Collections.sort( leaves, Spot.frameComparator );
 
 			/*
+			 * Special case: we may have to attach spot to a what we think is a
+			 * leaf in the case of very exotic branches. Namely: if we have a
+			 * gap just before a split, we want to attach the lonely split point
+			 * to one of the successor branch. Or if we have a gap just after a
+			 * fusion, we want to attach the merging point to one of the
+			 * ancestor. We store this weird mapping here.
+			 */
+			final Map< Spot, Spot > attachTo = new HashMap< Spot, Spot >();
+
+			/*
 			 * Nucleate a branch for each leaf.
 			 */
 
@@ -96,10 +108,39 @@ public class TrackSplitter implements Algorithm
 				final Spot start = leaves.iterator().next();
 				leaves.remove( start );
 
+				/*
+				 * Initiate the branch
+				 */
+
 				final List< Spot > branch = new ArrayList< Spot >();
 				// Ensures we always move forward in time.
 				final GraphIterator< Spot, DefaultWeightedEdge > it = tm.getDepthFirstIterator( start, true );
-				branch.add( it.next() ); // is start.
+
+				/*
+				 * Check if we have a spot to attach to this branch nucleus.
+				 */
+
+				final Spot attached = attachTo.get( start );
+				if ( null != attached )
+				{
+					if ( start.diffTo( attached, Spot.FRAME ) > 0 )
+					{
+						// attached comes BEFORE
+						branch.add( attached );
+						branch.add( it.next() ); // is start;
+					}
+					else
+					{
+						// attached comes AFTER
+						branch.add( it.next() ); // is start;
+						branch.add( attached );
+					}
+				}
+				else
+				{
+					branch.add( it.next() ); // is start.
+				}
+
 				System.out.println( "\nStarting at spot " + start );// DEBUG
 				Spot previous;
 
@@ -162,9 +203,21 @@ public class TrackSplitter implements Algorithm
 						else if ( predecessors.size() <= 1 && successors.size() > 1 )
 						{
 							System.out.println( "    We have a split point." );// DEBUG
-							// Split point get to the mother branch.
-							branch.add( spot );
 							leaves.addAll( successors );
+							// Split point get to the mother branch, if they do
+							// not make a gap.
+							if ( Math.abs( spot.diffTo( previous, Spot.FRAME ) ) == 1 )
+							{
+								branch.add( spot );
+							}
+							else
+							{
+								// A gap: we attach it on one of the successors,
+								// but we will do it later.
+								final Spot target = successors.iterator().next();
+								attachTo.put( target, spot );
+								System.out.println( "    Attaching " + spot + " to " + target + " for next branch." );// DEBUG
+							}
 						}
 						else
 						{
@@ -225,7 +278,7 @@ public class TrackSplitter implements Algorithm
 				 */
 				visited.add( previous );
 
-				if ( branch.size() > 1 )
+				if ( branch.size() > 0 )
 				{
 					// Ignore singletons.
 					System.out.println( "Finished branch " + branch );// DEBUG
@@ -288,7 +341,9 @@ public class TrackSplitter implements Algorithm
 	{
 		// final File file = new File( AppUtils.getBaseDirectory(
 		// TrackMate.class ), "samples/FakeTracks.xml" );
-		final File file = new File( AppUtils.getBaseDirectory( TrackMate.class ), "samples/FakeTracks_MergeGap.xml" );
+		// final File file = new File( AppUtils.getBaseDirectory(
+		// TrackMate.class ), "samples/FakeTracks_MergeGap.xml" );
+		final File file = new File( AppUtils.getBaseDirectory( TrackMate.class ), "samples/FakeTracks_GapMerge.xml" );
 		// final File file = new File( AppUtils.getBaseDirectory(
 		// TrackMate.class ), "samples/FakeTracks_Loops.xml" );
 		// final File file = new File( AppUtils.getBaseDirectory(
