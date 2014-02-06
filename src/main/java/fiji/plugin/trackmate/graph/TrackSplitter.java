@@ -25,8 +25,10 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
+import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.io.TmXmlReader;
+import fiji.plugin.trackmate.visualization.PerEdgeFeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.PerTrackFeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
@@ -40,6 +42,8 @@ public class TrackSplitter implements Algorithm
 	private String errorMessage;
 
 	private Collection< List< Spot >> branches;
+
+	private Map< Spot, Spot > links;
 
 	public TrackSplitter( final Model model )
 	{
@@ -58,6 +62,7 @@ public class TrackSplitter implements Algorithm
 		final TrackModel tm = model.getTrackModel();
 		final Set< Integer > trackIDs = tm.trackIDs( true );
 		branches = new ArrayList< List< Spot >>();
+		links = new HashMap< Spot, Spot >();
 		for ( final Integer trackID : trackIDs )
 		{
 			System.out.println();// DEBUG
@@ -160,6 +165,8 @@ public class TrackSplitter implements Algorithm
 					{
 						// Will nucleate their own branch
 						leaves.add( successor );
+						// Store links with successors.
+						links.put( start, successor );
 						System.out.println( "Adding " + successor + " as a new leaf." );// DEBUG
 					}
 					Collections.sort( leaves, Spot.frameComparator );
@@ -203,14 +210,27 @@ public class TrackSplitter implements Algorithm
 								// No gap. Everything is fine, and we will
 								// process this later.
 								leaves.add( spot );
+								for ( final Spot predecessor : predecessors )
+								{
+									links.put( predecessor, spot );
+								}
 							}
 							else
 							{
 								branch.add( spot );
 								if ( successors.size() == 1 )
 								{
-									leaves.add( successors.iterator().next() );
+									final Spot next = successors.iterator().next();
+									leaves.add( next );
+									links.put( spot, next );
 								}
+
+								predecessors.remove( previous );
+								for ( final Spot predecessor : predecessors )
+								{
+									links.put( predecessor, spot );
+								}
+
 								System.out.println( "    Attaching " + spot + " to current branch." );// DEBUG
 							}
 
@@ -219,6 +239,7 @@ public class TrackSplitter implements Algorithm
 						{
 							System.out.println( "    We have a split point." );// DEBUG
 							leaves.addAll( successors );
+
 							// Split point get to the mother branch, if they do
 							// not make a gap.
 							if ( Math.abs( spot.diffTo( previous, Spot.FRAME ) ) < 2 )
@@ -233,16 +254,47 @@ public class TrackSplitter implements Algorithm
 								// but we will do it later.
 								final Spot target = successors.iterator().next();
 								attachTo.put( target, spot );
+								links.put( previous, spot );
 								System.out.println( "    Attaching " + spot + " to " + target + " for next branch." );// DEBUG
+								successors.remove( target );
+							}
+							for ( final Spot successor : successors )
+							{
+								links.put( successor, spot );
 							}
 						}
 						else
 						{
 							System.out.println( "    We have a complex point." );// DEBUG
-							branch.add( spot );
 							leaves.addAll( successors );
 							predecessors.remove( previous );
 							leaves.addAll( predecessors );
+							// Check if we have a gap at this point.
+							if ( Math.abs( spot.diffTo( previous, Spot.FRAME ) ) < 2 )
+							{
+								// No. Life is easy.
+								branch.add( spot );
+							}
+							else
+							{
+								// Yes. Shoot. Finish this branch and memorize
+								// the link.
+								links.put( previous, spot );
+								// Attach the current spot to a future branch.
+								final Spot target = successors.iterator().next();
+								attachTo.put( target, spot );
+								successors.remove( target );
+							}
+							for ( final Spot successor : successors )
+							{
+								links.put( successor, spot );
+							}
+							for ( final Spot predecessor : predecessors )
+							{
+								links.put( predecessor, spot );
+							}
+
+
 						}
 						Collections.sort( leaves, Spot.frameComparator );
 						break;
@@ -272,6 +324,7 @@ public class TrackSplitter implements Algorithm
 						// We have a gap.
 						System.out.println( "  Found a gap between " + spot + " and " + previous + "." );// DEBUG
 						leaves.add( spot );
+						links.put( previous, spot );
 						Collections.sort( leaves, Spot.frameComparator );
 						break;
 					}
@@ -360,7 +413,9 @@ public class TrackSplitter implements Algorithm
 		// TrackMate.class ), "samples/FakeTracks.xml" );
 		// final File file = new File( AppUtils.getBaseDirectory(
 		// TrackMate.class ), "samples/FakeTracks_MergeGap.xml" );
-		final File file = new File( AppUtils.getBaseDirectory( TrackMate.class ), "samples/FakeTracks_GapSplit.xml" );
+		final File file = new File( AppUtils.getBaseDirectory( TrackMate.class ), "samples/FakeTracks_ComplexPoints.xml" );
+		// final File file = new File( AppUtils.getBaseDirectory(
+		// TrackMate.class ), "samples/FakeTracks_GapSplit.xml" );
 		// final File file = new File( AppUtils.getBaseDirectory(
 		// TrackMate.class ), "samples/FakeTracks_Loops.xml" );
 		// final File file = new File( AppUtils.getBaseDirectory(
@@ -380,6 +435,7 @@ public class TrackSplitter implements Algorithm
 
 		System.out.println();// DEBUG
 		System.out.println( "Found " + splitter.branches.size() + " branches." );// DEBUG
+		System.out.println( "Links: " + splitter.links );// DEBUG
 
 		final Model model2 = new Model();
 		model2.beginUpdate();
@@ -398,6 +454,17 @@ public class TrackSplitter implements Algorithm
 					previous = spot;
 				}
 			}
+
+			// Links
+			for ( final Spot source : splitter.links.keySet() )
+			{
+				final Spot target = splitter.links.get( source );
+				try {
+					model2.addEdge( source, target, -2d );
+				} catch (final NullPointerException npe) {
+					System.err.println( "Could not add the edge " + source + "-" + target + ": already exists." );// DEBUG
+				}
+			}
 		}
 		finally
 		{
@@ -406,15 +473,18 @@ public class TrackSplitter implements Algorithm
 
 		final TrackIndexAnalyzer analyzer = new TrackIndexAnalyzer();
 		analyzer.process( model2.getTrackModel().trackIDs( true ), model2 );
+		final EdgeTargetAnalyzer edgeAnalyzer = new EdgeTargetAnalyzer();
+		edgeAnalyzer.process( model2.getTrackModel().edgeSet(), model2 );
 
+		final PerTrackFeatureColorGenerator tcg = new PerTrackFeatureColorGenerator( model2, TrackIndexAnalyzer.TRACK_ID );
+		final PerEdgeFeatureColorGenerator ecg = new PerEdgeFeatureColorGenerator( model2, EdgeTargetAnalyzer.EDGE_COST );
 
 		final SelectionModel sm2 = new SelectionModel( model2 );
 		final HyperStackDisplayer displayer2 = new HyperStackDisplayer( model2, sm2 );
-		final PerTrackFeatureColorGenerator tcg = new PerTrackFeatureColorGenerator( model2, TrackIndexAnalyzer.TRACK_ID );
-		displayer2.setDisplaySettings( TrackMateModelView.KEY_TRACK_COLORING, tcg );
+		displayer2.setDisplaySettings( TrackMateModelView.KEY_TRACK_COLORING, ecg );
 		displayer2.render();
 		final TrackScheme trackScheme = new TrackScheme( model2, sm2 );
-		trackScheme.setDisplaySettings( TrackMateModelView.KEY_TRACK_COLORING, tcg );
+		trackScheme.setDisplaySettings( TrackMateModelView.KEY_TRACK_COLORING, ecg );
 		trackScheme.render();
 
 
