@@ -214,7 +214,10 @@ public class ContinousBranchesDecomposition implements Algorithm, Benchmark
 				for ( final Spot successor : startSuccessors )
 				{
 					// Will nucleate their own branch
-					leaves.add( successor );
+					if ( !leaves.contains( successor ) )
+					{
+						leaves.add( successor );
+					}
 					// Store links with successors.
 					links.add( new Spot[] { start, successor } );
 				}
@@ -258,7 +261,10 @@ public class ContinousBranchesDecomposition implements Algorithm, Benchmark
 						{
 							// No gap. Everything is fine, and we will
 							// process this later.
-							leaves.add( spot );
+							if ( !leaves.contains( spot ) )
+							{
+								leaves.add( spot );
+							}
 							for ( final Spot predecessor : predecessors )
 							{
 								links.add( new Spot[] { predecessor, spot } );
@@ -270,7 +276,10 @@ public class ContinousBranchesDecomposition implements Algorithm, Benchmark
 							if ( successors.size() == 1 )
 							{
 								final Spot next = successors.iterator().next();
-								leaves.add( next );
+								if ( !leaves.contains( next ) )
+								{
+									leaves.add( next );
+								}
 								links.add( new Spot[] { spot, next } );
 							}
 
@@ -289,7 +298,13 @@ public class ContinousBranchesDecomposition implements Algorithm, Benchmark
 						 * SPLIT
 						 */
 
-						leaves.addAll( successors );
+						for ( final Spot successor : successors )
+						{
+							if ( !leaves.contains( successor ) )
+							{
+								leaves.add( successor );
+							}
+						}
 
 						// Split point get to the mother branch, if they do
 						// not make a gap.
@@ -339,9 +354,21 @@ public class ContinousBranchesDecomposition implements Algorithm, Benchmark
 					}
 					else
 					{
-						leaves.addAll( successors );
+						for ( final Spot successor : successors )
+						{
+							if ( !leaves.contains( successor ) )
+							{
+								leaves.add( successor );
+							}
+						}
 						predecessors.remove( previous );
-						leaves.addAll( predecessors );
+						for ( final Spot predecessor : predecessors )
+						{
+							if ( !leaves.contains( predecessor ) )
+							{
+								leaves.add( predecessor );
+							}
+						}
 						// Check if we have a gap at this point.
 						if ( Math.abs( spot.diffTo( previous, Spot.FRAME ) ) < 2 )
 						{
@@ -408,6 +435,18 @@ public class ContinousBranchesDecomposition implements Algorithm, Benchmark
 		}
 		while ( !leaves.isEmpty() );
 
+		System.out.println( "At this stage, we have:" );// DEBUG
+		System.out.println( "Branches:" );// DEBUG
+		for ( final List< Spot > branch : branches )
+		{
+			System.out.println( "  " + branch );// DEBUG
+		}
+		System.out.println( "Links:" );// DEBUG
+		for ( final Spot[] link : links )
+		{
+			System.out.println( "  " + link[ 0 ] + "-" + link[ 1 ] );// DEBUG
+		}
+
 		/*
 		 * 2nd pass: Cut along gaps.
 		 */
@@ -429,7 +468,15 @@ public class ContinousBranchesDecomposition implements Algorithm, Benchmark
 					links.add( new Spot[] { previous, spot } );
 					newBranch = new ArrayList< Spot >();
 					newBranch.add( spot );
-					continue;
+					if ( it.hasNext() )
+					{
+						previous = spot;
+						continue;
+					}
+					else
+					{
+						break;
+					}
 				}
 				newBranch.add( spot );
 				previous = spot;
