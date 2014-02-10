@@ -21,13 +21,13 @@ public class FromContinuousBranches implements OutputAlgorithm< SimpleWeightedGr
 
 	private final Collection< List< Spot >> branches;
 
-	private final Collection< Spot[] > links;
+	private final Collection< List< Spot >> links;
 
 	private String errorMessage;
 
 	private SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph;
 
-	public FromContinuousBranches( final Collection< List< Spot >> branches, final Collection< Spot[] > links )
+	public FromContinuousBranches( final Collection< List< Spot >> branches, final Collection< List< Spot >> links )
 	{
 		this.branches = branches;
 		this.links = links;
@@ -53,20 +53,21 @@ public class FromContinuousBranches implements OutputAlgorithm< SimpleWeightedGr
 			errorMessage = BASE_ERROR_MSG + "links are null.";
 			return false;
 		}
-		for ( final Spot[] link : links )
+		for ( final List< Spot > link : links )
 		{
-			if ( link.length != 2 )
+			if ( link.size() != 2 )
 			{
 				errorMessage = BASE_ERROR_MSG + "A link is not made of two spots.";
 				return false;
 			}
-			if ( !checkIfInBranches( link[ 0 ] ) ) {
-				errorMessage = BASE_ERROR_MSG + "A spot in a link is not present in the branch collection: " + link[ 0 ] + " in the link " + link[ 0 ] + "-" + link[ 1 ] + ".";
+			if ( !checkIfInBranches( link.get( 0 ) ) )
+			{
+				errorMessage = BASE_ERROR_MSG + "A spot in a link is not present in the branch collection: " + link.get( 0 ) + " in the link " + link.get( 0 ) + "-" + link.get( 1 ) + ".";
 				return false;
 			}
-			if ( !checkIfInBranches( link[ 1 ] ) )
+			if ( !checkIfInBranches( link.get( 1 ) ) )
 			{
-				errorMessage = BASE_ERROR_MSG + "A spot in a link is not present in the branch collection: " + link[ 1 ] + " in the link " + link[ 0 ] + "-" + link[ 1 ] + ".";
+				errorMessage = BASE_ERROR_MSG + "A spot in a link is not present in the branch collection: " + link.get( 1 ) + " in the link " + link.get( 0 ) + "-" + link.get( 1 ) + ".";
 				return false;
 			}
 		}
@@ -101,9 +102,9 @@ public class FromContinuousBranches implements OutputAlgorithm< SimpleWeightedGr
 			}
 		}
 
-		for ( final Spot[] link : links )
+		for ( final List< Spot > link : links )
 		{
-			graph.addEdge( link[ 0 ], link[ 1 ] );
+			graph.addEdge( link.get( 0 ), link.get( 1 ) );
 		}
 
 		final long end = System.currentTimeMillis();

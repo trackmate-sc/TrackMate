@@ -35,9 +35,9 @@ import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 public class ContinousBranchesDecompositionTest
 {
 
-	private static final int N_TP = 20;
+	private static final int N_TP = 50;
 
-	private static final int N_SPOTS = 10;
+	private static final int N_SPOTS = 30;
 
 	private static final double WIDTH = 50;
 
@@ -46,9 +46,27 @@ public class ContinousBranchesDecompositionTest
 	private ContinousBranchesDecomposition splitter;
 
 	@Before
-	public void setUp()
+	public void setUp2()
 	{
-		final File file = new File( AppUtils.getBaseDirectory( TrackMate.class ), "samples/FailCase_02.xml" );
+		// final File file = new File( AppUtils.getBaseDirectory(
+		// TrackMate.class ), "samples/FakeTracks_Loops.xml" );
+
+		// final File file = new File( AppUtils.getBaseDirectory(
+		// TrackMate.class ), "samples/FakeTracks_GapMerge.xml" );
+
+		// final File file = new File( AppUtils.getBaseDirectory(
+		// TrackMate.class ), "samples/FakeTracks_MergeGap.xml" );
+
+		// final File file = new File( AppUtils.getBaseDirectory(
+		// TrackMate.class ), "samples/FakeTracks_SingleSplit.xml" );
+
+		// final File file = new File( AppUtils.getBaseDirectory(
+		// TrackMate.class ), "samples/FakeTracks_SplitsMerges.xml" );
+
+		// final File file = new File( AppUtils.getBaseDirectory(
+		// TrackMate.class ), "samples/FakeTracks.xml" );
+
+		final File file = new File( AppUtils.getBaseDirectory( TrackMate.class ), "samples/FailCase_01.xml" );
 		final TmXmlReader reader = new TmXmlReader( file );
 		if ( reader.isReadingOk() )
 		{
@@ -60,11 +78,11 @@ public class ContinousBranchesDecompositionTest
 		}
 	}
 
-	// @Before
-	public void setUp1() throws Exception
+	@Before
+	public void setUp() throws Exception
 	{
 		// Create spots
-		final Random ran = new Random( 1l );
+		final Random ran = new Random();
 		final SpotCollection sc = new SpotCollection();
 		for ( int t = 0; t < N_TP; t++ )
 		{
@@ -96,7 +114,7 @@ public class ContinousBranchesDecompositionTest
 		model.setTracks( graph, false );
 	}
 
-	// @Test
+	@Test
 	public final void testBehavior()
 	{
 		splitter = new ContinousBranchesDecomposition( model );
@@ -196,7 +214,7 @@ public class ContinousBranchesDecompositionTest
 		}
 
 		final Collection< List< Spot >> branches = splitter.getBranches();
-		final Collection< Spot[] > links = splitter.getLinks();
+		final Collection< List< Spot >> links = splitter.getLinks();
 
 		final Model model2 = new Model();
 		model2.beginUpdate();
@@ -211,16 +229,23 @@ public class ContinousBranchesDecompositionTest
 				{
 					final Spot spot = it.next();
 					model2.addSpotTo( spot, spot.getFeature( Spot.FRAME ).intValue() );
+
+					if ( model2.getTrackModel().containsEdge( previous, spot ) )
+					{
+						System.err.println( "Could not add the edge " + previous + "-" + spot + ": it already exists." );
+						continue;
+					}
+
 					model2.addEdge( previous, spot, -1d );
 					previous = spot;
 				}
 			}
 
 			// Links
-			for ( final Spot[] link : links )
+			for ( final List< Spot > link : links )
 			{
-				final Spot source = link[ 0 ];
-				final Spot target = link[ 1 ];
+				final Spot source = link.get( 0 );
+				final Spot target = link.get( 1 );
 				try
 				{
 					model2.addEdge( source, target, -2d );

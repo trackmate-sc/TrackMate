@@ -2,15 +2,12 @@ package fiji.plugin.trackmate.graph;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import net.imglib2.algorithm.Algorithm;
 import net.imglib2.algorithm.Benchmark;
@@ -25,25 +22,28 @@ import fiji.plugin.trackmate.TrackModel;
 public class ContinousBranchesDecomposition implements Algorithm, Benchmark
 {
 
-	private static final String BASE_ERROR_MSG = "[ContinousBranchesDecomposition]";
+	private static final String BASE_ERROR_MSG = "[ContinousBranchesDecomposition] ";
 
 	private String errorMessage;
 
 	private Collection< List< Spot >> branches;
 
-	private Collection< Spot[] > links;
+	private Collection< List< Spot > > links;
 
 	private Map< Integer, Collection< List< Spot >>> branchesPerTrack;
 
-	private Map< Integer, Collection< Spot[] >> linksPerTrack;
+	private Map< Integer, Collection< List< Spot > >> linksPerTrack;
 
 	private long processingTime;
 
 	private final TrackModel tm;
 
+	private final TimeDirectedNeighborIndex neighborIndex;
+
 	public ContinousBranchesDecomposition( final Model model )
 	{
 		this.tm = model.getTrackModel();
+		this.neighborIndex = tm.getDirectedNeighborIndex();
 	}
 
 	@Override
@@ -79,12 +79,12 @@ public class ContinousBranchesDecomposition implements Algorithm, Benchmark
 		final Set< Integer > trackIDs = tm.trackIDs( true );
 
 		branches = new ArrayList< List< Spot >>();
-		branchesPerTrack = new HashMap< Integer, Collection<List< Spot >>>();
-		links = new ArrayList<Spot[]>();
-		linksPerTrack = new HashMap< Integer, Collection<Spot[]>>();
+		branchesPerTrack = new HashMap< Integer, Collection< List< Spot >>>();
+		links = new ArrayList< List< Spot > >();
+		linksPerTrack = new HashMap< Integer, Collection< List< Spot > >>();
 		for ( final Integer trackID : trackIDs )
 		{
-			final TrackBranchDecomposition branchDecomposition = processTrack( trackID, tm );
+			final TrackBranchDecomposition branchDecomposition = processTrack( trackID, tm, neighborIndex );
 
 			branchesPerTrack.put( trackID, branchDecomposition.branches );
 			linksPerTrack.put( trackID, branchDecomposition.links );
@@ -100,7 +100,7 @@ public class ContinousBranchesDecomposition implements Algorithm, Benchmark
 
 	}
 
-	public static final TrackBranchDecomposition processTrack( final Integer trackID, final TrackModel tm )
+	public static final TrackBranchDecomposition processTrack( final Integer trackID, final TrackModel tm, final TimeDirectedNeighborIndex neighborIndex )
 	{
 
 		/*
@@ -108,48 +108,23 @@ public class ContinousBranchesDecomposition implements Algorithm, Benchmark
 		 */
 
 		final Collection< List< Spot >> branches = new ArrayList< List< Spot > >();
-		final Collection< Spot[] > links = new ArrayList< Spot[] >();
+		final Collection< List< Spot > > links = new HashSet< List< Spot > >();
 
-		/*
-		 * Sort by frame
-		 */
-
-		final Comparator< Spot > comparator = Spot.frameComparator;
-
-		/*
-		 * Identify leaves
-		 */
-
-		final List< Spot > leaves = new ArrayList< Spot >();
+		final Set< Spot > starts = new HashSet< Spot >();
 		final Set< Spot > trackSpots = tm.trackSpots( trackID );
 
-		// Add at least the first spot of the track
-		final TreeSet< Spot > sorted = new TreeSet< Spot >( comparator );
-		sorted.addAll( trackSpots );
-		leaves.add( sorted.first() );
-
-		// Add the leaf points of the graph.
+		/*
+		 * Identify leaves Add the branch nuclei of the graph, or 'leaves'. This
+		 * is not exactly leaves: we want to find the spots that have no
+		 * predecessors, regardless of how any successors they have.
+		 */
 		for ( final Spot spot : trackSpots )
 		{
-			if ( tm.edgesOf( spot ).size() == 1 )
+			if ( neighborIndex.predecessorsOf( spot ).size() == 0 )
 			{
-				if ( !leaves.contains( spot ) )
-				{
-					leaves.add( spot );
-				}
+				starts.add( spot );
 			}
 		}
-		Collections.sort( leaves, comparator );
-
-		/*
-		 * Special case: we may have to attach spot to a what we think is a
-		 * leaf in the case of very exotic branches. Namely: if we have a
-		 * gap just before a split, we want to attach the lonely split point
-		 * to one of the successor branch. Or if we have a gap just after a
-		 * fusion, we want to attach the merging point to one of the
-		 * ancestor. We store this weird mapping here.
-		 */
-		final Map< Spot, Spot > attachTo = new HashMap< Spot, Spot >();
 
 		/*
 		 * Nucleate a branch for each leaf. First pass: we do not care for gaps
@@ -161,8 +136,9 @@ public class ContinousBranchesDecomposition implements Algorithm, Benchmark
 		final Set< Spot > visited = new HashSet< Spot >();
 		do
 		{
-			final Spot start = leaves.iterator().next();
-			leaves.remove( start );
+			final Spot start = starts.iterator().next();
+			starts.remove( start );
+			visited.add( start );
 
 			/*
 			 * Initiate the branch.
@@ -171,242 +147,131 @@ public class ContinousBranchesDecomposition implements Algorithm, Benchmark
 			final List< Spot > branch = new ArrayList< Spot >();
 			// Ensures we always move forward in time.
 			final GraphIterator< Spot, DefaultWeightedEdge > it = tm.getDepthFirstIterator( start, true );
+			branch.add( it.next() ); // is start.
 
 			/*
-			 * Check if we have a spot to attach to this branch nucleus.
+			 * If our start point have several successors, we must check it
+			 * here, because we want to create start points for its other
+			 * successors as well.
 			 */
-
-			final Spot attached = attachTo.get( start );
-			if ( null != attached )
-			{
-				if ( start.diffTo( attached, Spot.FRAME ) > 0 )
-				{
-					// attached comes BEFORE
-					branch.add( attached );
-					branch.add( it.next() ); // is start;
-				}
-				else
-				{
-					// attached comes AFTER
-					branch.add( it.next() ); // is start;
-					branch.add( attached );
-				}
-			}
-			else
-			{
-				branch.add( it.next() ); // is start.
-			}
-
-			Spot previous;
-
-			/*
-			 * Special case: Is out starting point a branching point? We
-			 * must detect this now.
-			 */
-
-			final Set< Spot > startSuccessors = successorsOf( start, tm );
+			final Set< Spot > startSuccessors = neighborIndex.successorsOf( start );
 			if ( startSuccessors.size() > 1 )
 			{
-				final Spot next = it.next();
-				startSuccessors.remove( next );
-				branch.add( next ); // will belong to the main branch
-				startSuccessors.remove( next );
+				starts.addAll( startSuccessors );
 				for ( final Spot successor : startSuccessors )
 				{
-					// Will nucleate their own branch
-					if ( !leaves.contains( successor ) )
-					{
-						leaves.add( successor );
-					}
-					// Store links with successors.
-					links.add( new Spot[] { start, successor } );
+					final List< Spot > link = new ArrayList< Spot >( 2 );
+					link.add( start );
+					link.add( successor );
+					links.add( link );
 				}
-				Collections.sort( leaves, comparator );
-				previous = next;
+				branches.add( branch );
+				// Early stop.
+				continue;
 			}
-			else
-			{
-				previous = start;
-			}
+
+			Spot previous = start;
 
 			while ( it.hasNext() )
 			{
 				final Spot spot = it.next();
 
-				/*
-				 * Splits or merges.
-				 */
-				if ( tm.edgesOf( spot ).size() > 2 )
+				starts.remove( spot );
+				if ( visited.contains( spot ) )
 				{
-					// We have a fusion or a split
-					leaves.remove( previous );
-					if ( visited.contains( spot ) )
-					{
-						break;
-					}
-					visited.add( spot );
-
-					// Inspect neighbors
-					final Set< Spot > successors = successorsOf( spot, tm );
-					final Set< Spot > predecessors = predecessorsOf( spot, tm );
-
-					// Determine whether we have a fusion or something else.
-					if ( predecessors.size() > 1 && successors.size() <= 1 )
-					{
-						/*
-						 * FUSION
-						 */
-
-						if ( ( successors.size() == 1 ) && ( Math.abs( spot.diffTo( successors.iterator().next(), Spot.FRAME ) ) < 2 ) )
-						{
-							// No gap. Everything is fine, and we will
-							// process this later.
-							if ( !leaves.contains( spot ) )
-							{
-								leaves.add( spot );
-							}
-							for ( final Spot predecessor : predecessors )
-							{
-								links.add( new Spot[] { predecessor, spot } );
-							}
-						}
-						else
-						{
-							branch.add( spot );
-							if ( successors.size() == 1 )
-							{
-								final Spot next = successors.iterator().next();
-								if ( !leaves.contains( next ) )
-								{
-									leaves.add( next );
-								}
-								links.add( new Spot[] { spot, next } );
-							}
-
-							predecessors.remove( previous );
-							for ( final Spot predecessor : predecessors )
-							{
-								links.add( new Spot[] { predecessor, spot } );
-							}
-						}
-
-					}
-					else if ( predecessors.size() <= 1 && successors.size() > 1 )
-					{
-
-						/*
-						 * SPLIT
-						 */
-
-						for ( final Spot successor : successors )
-						{
-							if ( !leaves.contains( successor ) )
-							{
-								leaves.add( successor );
-							}
-						}
-
-						// Split point get to the mother branch, if they do
-						// not make a gap.
-						if ( Math.abs( spot.diffTo( previous, Spot.FRAME ) ) < 2 )
-						{
-							// No gap. Everything is fine and we attach the
-							// split point to the current branch.
-							branch.add( spot );
-						}
-						else
-						{
-							/*
-							 * A gap: we attach it on one of the successors,
-							 * but we will do it later. And we will do it
-							 * only if the elected successor does not have a
-							 * gap.
-							 */
-							boolean found = false;
-							for ( final Spot target : successors )
-							{
-								if ( target.diffTo( spot, Spot.FRAME ) < 2 )
-								{
-									attachTo.put( target, spot );
-									links.add( new Spot[] { previous, spot } );
-									successors.remove( target );
-									found = true;
-									break;
-								}
-							}
-							if ( !found )
-							{
-								/*
-								 * I could not find a successor with no
-								 * gaps. We put this fusion point on a
-								 * lonely branch.
-								 */
-								final List< Spot > smallBranch = new ArrayList< Spot >( 1 );
-								smallBranch.add( spot );
-								branches.add( smallBranch );
-							}
-
-						}
-						for ( final Spot successor : successors )
-						{
-							links.add( new Spot[] { spot, successor } );
-						}
-					}
-					else
-					{
-						for ( final Spot successor : successors )
-						{
-							if ( !leaves.contains( successor ) )
-							{
-								leaves.add( successor );
-							}
-						}
-						predecessors.remove( previous );
-						for ( final Spot predecessor : predecessors )
-						{
-							if ( !leaves.contains( predecessor ) )
-							{
-								leaves.add( predecessor );
-							}
-						}
-						// Check if we have a gap at this point.
-						if ( Math.abs( spot.diffTo( previous, Spot.FRAME ) ) < 2 )
-						{
-							// No. Life is easy.
-							branch.add( spot );
-						}
-						else
-						{
-							// Yes. Shoot. Finish this branch and memorize
-							// the link.
-							links.add( new Spot[] { previous, spot } );
-							// Attach the current spot to a future branch.
-							final Spot target = successors.iterator().next();
-							attachTo.put( target, spot );
-							successors.remove( target );
-						}
-						for ( final Spot successor : successors )
-						{
-							links.add( new Spot[] { spot, successor } );
-						}
-						for ( final Spot predecessor : predecessors )
-						{
-							links.add( new Spot[] { predecessor, spot } );
-						}
-					}
-					Collections.sort( leaves, comparator );
+					final List< Spot > link = new ArrayList< Spot >( 2 );
+					link.add( previous );
+					link.add( spot );
+					links.add( link );
 					break;
 				}
 
+				final Set< Spot > successors = new HashSet< Spot >( neighborIndex.successorsOf( spot ) );
+				final Set< Spot > predecessors = new HashSet< Spot >( neighborIndex.predecessorsOf( spot ) );
 
 				/*
-				 * Leaf
+				 * SPLIT
 				 */
-				if ( tm.edgesOf( spot ).size() == 1 )
+
+				if ( successors.size() > 1 )
+				{
+					visited.add( spot );
+					branch.add( spot );
+					for ( final Spot successor : successors )
+					{
+						final List< Spot > link = new ArrayList< Spot >( 2 );
+						link.add( spot );
+						link.add( successor );
+						links.add( link );
+
+						starts.add( successor );
+					}
+					break;
+				}
+
+				/*
+				 * MERGE
+				 */
+
+				if ( predecessors.size() > 1 )
+				{
+					visited.add( spot );
+					starts.add( spot );
+					for ( final Spot predecessor : predecessors )
+					{
+						if ( neighborIndex.successorsOf( predecessor ).size() > 1 )
+						{
+							continue;
+						}
+						final List< Spot > link = new ArrayList< Spot >( 2 );
+						link.add( predecessor );
+						link.add( spot );
+						links.add( link );
+					}
+					break;
+				}
+
+				/*
+				 * SPECIAL POINT
+				 */
+
+				if ( successors.size() > 1 && predecessors.size() > 1 )
+				{
+					visited.add( spot );
+					final List< Spot > smallBranch = new ArrayList< Spot >( 1 );
+					smallBranch.add( spot );
+
+					for ( final Spot successor : successors )
+					{
+						starts.add( successor );
+					}
+
+					for ( final Spot successor : successors )
+					{
+						final List< Spot > link = new ArrayList< Spot >( 2 );
+						link.add( spot );
+						link.add( successor );
+						links.add( link );
+					}
+					for ( final Spot predecessor : predecessors )
+					{
+						final List< Spot > link = new ArrayList< Spot >( 2 );
+						link.add( predecessor );
+						link.add( spot );
+						links.add( link );
+					}
+					break;
+				}
+
+				/*
+				 * LEAF
+				 */
+
+				if ( successors.size() == 0 )
 				{
 					// We have reached a leaf.
 					branch.add( spot );
-					leaves.remove( spot );
+					starts.remove( spot );
 					break;
 				}
 
@@ -421,31 +286,23 @@ public class ContinousBranchesDecomposition implements Algorithm, Benchmark
 			}
 
 			/*
+			 * Remove the visited leaf, now that it is done.
+			 */
+			starts.remove( start );
+
+			/*
 			 * Add the last visited spot to the visited list, so that we are
-			 * sure not to create any faulty edge in case a track finishes
-			 * with a merge point.
+			 * sure not to create any faulty edge in case a track finishes with
+			 * a merge point.
 			 */
 			visited.add( previous );
 
-			if ( branch.size() > 0 )
-			{
-				// Ignore singletons.
-				branches.add( branch );
-			}
+			/*
+			 * Add finished branch.
+			 */
+			branches.add( branch );
 		}
-		while ( !leaves.isEmpty() );
-
-		System.out.println( "At this stage, we have:" );// DEBUG
-		System.out.println( "Branches:" );// DEBUG
-		for ( final List< Spot > branch : branches )
-		{
-			System.out.println( "  " + branch );// DEBUG
-		}
-		System.out.println( "Links:" );// DEBUG
-		for ( final Spot[] link : links )
-		{
-			System.out.println( "  " + link[ 0 ] + "-" + link[ 1 ] );// DEBUG
-		}
+		while ( !starts.isEmpty() );
 
 		/*
 		 * 2nd pass: Cut along gaps.
@@ -465,7 +322,12 @@ public class ContinousBranchesDecomposition implements Algorithm, Benchmark
 				if ( spot.diffTo( previous, Spot.FRAME ) > 1 )
 				{
 					refinedBranches.add( newBranch );
-					links.add( new Spot[] { previous, spot } );
+
+					final List< Spot > link = new ArrayList< Spot >( 2 );
+					link.add( previous );
+					link.add( spot );
+					links.add( link );
+
 					newBranch = new ArrayList< Spot >();
 					newBranch.add( spot );
 					if ( it.hasNext() )
@@ -503,7 +365,7 @@ public class ContinousBranchesDecomposition implements Algorithm, Benchmark
 	 * Branches are returned as list of spot. It is ensured that the spots are
 	 * ordered in the list by increasing frame number, and that two consecutive
 	 * spot are separated by exactly one frame.
-	 * 
+	 *
 	 * @return the collection of branches.
 	 */
 	public Collection< List< Spot >> getBranches()
@@ -518,7 +380,7 @@ public class ContinousBranchesDecomposition implements Algorithm, Benchmark
 	 * Branches are returned as list of spot. It is ensured that the spots are
 	 * ordered in the list by increasing frame number, and that two consecutive
 	 * spot are separated by exactly one frame.
-	 * 
+	 *
 	 * @return a mapping of collections of branches.
 	 */
 	public Map< Integer, Collection< List< Spot >>> getBranchesPerTrack()
@@ -531,10 +393,10 @@ public class ContinousBranchesDecomposition implements Algorithm, Benchmark
 	 * linear, consecutive branches.
 	 * <p>
 	 * These links are returned as a collection of 2-elements array.
-	 * 
+	 *
 	 * @return a map.
 	 */
-	public Collection< Spot[] > getLinks()
+	public Collection< List< Spot >> getLinks()
 	{
 		return links;
 	}
@@ -544,61 +406,23 @@ public class ContinousBranchesDecomposition implements Algorithm, Benchmark
 	 * it to split it in branches.
 	 * <p>
 	 * These links are returned as 2-elements arrays..
-	 * 
+	 *
 	 * @return the mapping of track IDs to the links.
 	 */
-	public Map< Integer, Collection< Spot[] >> getLinksPerTrack()
+	public Map< Integer, Collection< List< Spot >>> getLinksPerTrack()
 	{
 		return linksPerTrack;
 	}
 
 	/*
-	 * STATIC METHODS
+	 * STATIC CLASSES
 	 */
-
-	private static final Set< Spot > successorsOf( final Spot spot, final TrackModel tm )
-	{
-		final Set< DefaultWeightedEdge > edges = tm.edgesOf( spot );
-		final Set< Spot > successors = new HashSet< Spot >( edges.size() );
-		for ( final DefaultWeightedEdge edge : edges )
-		{
-			Spot other = tm.getEdgeSource( edge );
-			if ( other.equals( spot ) )
-			{
-				other = tm.getEdgeTarget( edge );
-			}
-			if ( other.diffTo( spot, Spot.FRAME ) > 0 )
-			{
-				successors.add( other );
-			}
-		}
-		return successors;
-	}
-
-	private static final Set< Spot > predecessorsOf( final Spot spot, final TrackModel tm )
-	{
-		final Set< DefaultWeightedEdge > edges = tm.edgesOf( spot );
-		final Set< Spot > successors = new HashSet< Spot >( edges.size() );
-		for ( final DefaultWeightedEdge edge : edges )
-		{
-			Spot other = tm.getEdgeSource( edge );
-			if ( other.equals( spot ) )
-			{
-				other = tm.getEdgeTarget( edge );
-			}
-			if ( other.diffTo( spot, Spot.FRAME ) < 0 )
-			{
-				successors.add( other );
-			}
-		}
-		return successors;
-	}
 
 	public static final class TrackBranchDecomposition
 	{
 		public Collection< List< Spot >> branches;
 
-		public Collection< Spot[] > links;
+		public Collection< List< Spot >> links;
 
 	}
 
