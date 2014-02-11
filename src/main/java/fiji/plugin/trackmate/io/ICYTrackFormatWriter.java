@@ -14,7 +14,7 @@ import org.jdom2.Element;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.graph.ContinuousBranchesDecomposition;
+import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition;
 
 public class ICYTrackFormatWriter implements Algorithm, Benchmark
 {
@@ -61,7 +61,8 @@ public class ICYTrackFormatWriter implements Algorithm, Benchmark
 	@Override
 	public boolean process()
 	{
-		final ContinuousBranchesDecomposition splitter = new ContinuousBranchesDecomposition( model );
+		// ICY does not accept middle links.
+		final ConvexBranchesDecomposition splitter = new ConvexBranchesDecomposition( model, true );
 		if ( !splitter.checkInput() || !splitter.process() )
 		{
 			errorMessage = splitter.getErrorMessage();
