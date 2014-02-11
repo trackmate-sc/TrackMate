@@ -22,7 +22,7 @@ import fiji.plugin.trackmate.tracking.FastLAPTracker;
 import fiji.plugin.trackmate.tracking.FastLAPTrackerFactory;
 import fiji.plugin.trackmate.tracking.TrackerKeys;
 
-public class ContinuousBranchesDecompositionTest
+public class ConvexBranchesDecompositionTest
 {
 
 	private static final int N_TP = 10;
@@ -33,7 +33,7 @@ public class ContinuousBranchesDecompositionTest
 
 	private Model model;
 
-	private ContinuousBranchesDecomposition splitter;
+	private ConvexBranchesDecomposition splitter;
 
 	@Before
 	public void setUp() throws Exception
@@ -74,7 +74,7 @@ public class ContinuousBranchesDecompositionTest
 	@Test
 	public void testBehavior()
 	{
-		splitter = new ContinuousBranchesDecomposition( model );
+		splitter = new ConvexBranchesDecomposition( model, false );
 		if ( !splitter.checkInput() || !splitter.process() )
 		{
 			fail( splitter.getErrorMessage() );
@@ -129,7 +129,7 @@ public class ContinuousBranchesDecompositionTest
 	@Test
 	public void testReconstruction()
 	{
-		splitter = new ContinuousBranchesDecomposition( model );
+		splitter = new ConvexBranchesDecomposition( model, false );
 		if ( !splitter.checkInput() || !splitter.process() )
 		{
 			fail( splitter.getErrorMessage() );

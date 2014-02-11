@@ -21,9 +21,23 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackModel;
 
-public class ContinuousBranchesDecomposition implements Algorithm, Benchmark
+/**
+ * A class that can decompose the tracks of a {@link Model} in convex branches.
+ * <p>
+ * A convex branch is a portion of a track that contains spots that are
+ * separated by exactly one frame. Here they are returned, sorted by increasing
+ * frame number. It is ensured that the spots within a convex branch are not a
+ * splitting or a merging point. There is no gap within a convex branch.
+ * <p>
+ * This class also outputs the links that were cut in the source model to
+ * generate these branches. A flag allows to specify whether these links must be
+ * between end and starting point of a branch.
+ * 
+ * @author Jean-Yves Tinevez - 2014
+ */
+public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 {
-	private static final String BASE_ERROR_MSG = "[ContinousBranchesDecomposition] ";
+	private static final String BASE_ERROR_MSG = "[ConvexBranchesDecomposition] ";
 
 	private String errorMessage;
 
@@ -41,10 +55,39 @@ public class ContinuousBranchesDecomposition implements Algorithm, Benchmark
 
 	private final TimeDirectedNeighborIndex neighborIndex;
 
-	public ContinuousBranchesDecomposition( final Model model )
+	private final boolean forbidMiddleLinks;
+
+	/**
+	 * Creates a new track splitter.
+	 * 
+	 * @param model
+	 *            the {@link Model} from which tracks are to be split. Only
+	 *            tracks marked visible will be processed.
+	 * @param forbidMiddleLinks
+	 *            specifies whether we enforce links between branches to be
+	 *            between an end point of a branch and a start point of another
+	 *            branch. If <code>true</code>, links will only reach for these
+	 *            spots. If <code>false</code>, a link can target a spot within
+	 *            a branch, which can lead to fewer and longer branches.
+	 */
+	public ConvexBranchesDecomposition( final Model model, final boolean forbidMiddleLinks )
 	{
+		this.forbidMiddleLinks = forbidMiddleLinks;
 		this.tm = model.getTrackModel();
 		this.neighborIndex = tm.getDirectedNeighborIndex();
+	}
+
+	/**
+	 * Creates a new track splitter. Links between spots from within branches
+	 * are forbidden.
+	 * 
+	 * @param model
+	 *            the {@link Model} from which tracks are to be split. Only
+	 *            tracks marked visible will be processed.
+	 */
+	public ConvexBranchesDecomposition( final Model model )
+	{
+		this( model, true );
 	}
 
 	@Override
@@ -85,7 +128,7 @@ public class ContinuousBranchesDecomposition implements Algorithm, Benchmark
 		linksPerTrack = new HashMap< Integer, Collection< List< Spot > >>();
 		for ( final Integer trackID : trackIDs )
 		{
-			final TrackBranchDecomposition branchDecomposition = processTrack( trackID, tm, neighborIndex );
+			final TrackBranchDecomposition branchDecomposition = processTrack( trackID, tm, neighborIndex, forbidMiddleLinks );
 
 			branchesPerTrack.put( trackID, branchDecomposition.branches );
 			linksPerTrack.put( trackID, branchDecomposition.links );
@@ -101,7 +144,7 @@ public class ContinuousBranchesDecomposition implements Algorithm, Benchmark
 
 	}
 
-	public static final TrackBranchDecomposition processTrack( final Integer trackID, final TrackModel tm, final TimeDirectedNeighborIndex neighborIndex )
+	public static final TrackBranchDecomposition processTrack( final Integer trackID, final TrackModel tm, final TimeDirectedNeighborIndex neighborIndex, final boolean forbidMiddleLinks )
 	{
 		final Set< Spot > allSpots = tm.trackSpots( trackID );
 		final Set< DefaultWeightedEdge > allEdges = tm.trackEdges( trackID );
@@ -131,7 +174,7 @@ public class ContinuousBranchesDecomposition implements Algorithm, Benchmark
 				boolean found = false;
 				for ( final Spot successor : successors )
 				{
-					if ( !found && successor.diffTo( spot, Spot.FRAME ) < 2 )
+					if ( !forbidMiddleLinks && !found && successor.diffTo( spot, Spot.FRAME ) < 2 )
 					{
 						found = true;
 					}
@@ -147,7 +190,7 @@ public class ContinuousBranchesDecomposition implements Algorithm, Benchmark
 				boolean found = false;
 				for ( final Spot predecessor : predecessors )
 				{
-					if ( !found && spot.diffTo( predecessor, Spot.FRAME ) < 2 )
+					if ( !forbidMiddleLinks && !found && spot.diffTo( predecessor, Spot.FRAME ) < 2 )
 					{
 						found = true;
 					}
@@ -176,7 +219,7 @@ public class ContinuousBranchesDecomposition implements Algorithm, Benchmark
 					boolean found = false;
 					for ( final Spot successor : successors )
 					{
-						if ( !found && successor.diffTo( spot, Spot.FRAME ) < 2 )
+						if ( !forbidMiddleLinks && !found && successor.diffTo( spot, Spot.FRAME ) < 2 )
 						{
 							found = true;
 						}
@@ -206,7 +249,7 @@ public class ContinuousBranchesDecomposition implements Algorithm, Benchmark
 					boolean found = false;
 					for ( final Spot predecessor : predecessors )
 					{
-						if ( !found && spot.diffTo( predecessor, Spot.FRAME ) < 2 )
+						if ( !forbidMiddleLinks && !found && spot.diffTo( predecessor, Spot.FRAME ) < 2 )
 						{
 							found = true;
 						}
@@ -223,7 +266,7 @@ public class ContinuousBranchesDecomposition implements Algorithm, Benchmark
 				boolean found = false;
 				for ( final Spot predecessor : predecessors )
 				{
-					if ( !found && spot.diffTo( predecessor, Spot.FRAME ) < 2 )
+					if ( !forbidMiddleLinks && !found && spot.diffTo( predecessor, Spot.FRAME ) < 2 )
 					{
 						found = true;
 					}
@@ -235,7 +278,7 @@ public class ContinuousBranchesDecomposition implements Algorithm, Benchmark
 				}
 				for ( final Spot successor : successors )
 				{
-					if ( !found && successor.diffTo( spot, Spot.FRAME ) < 2 )
+					if ( !forbidMiddleLinks && !found && successor.diffTo( spot, Spot.FRAME ) < 2 )
 					{
 						found = true;
 					}
@@ -338,11 +381,16 @@ public class ContinuousBranchesDecomposition implements Algorithm, Benchmark
 
 	/**
 	 * Returns the links cut by this algorithm when splitting the model in
-	 * linear, consecutive branches.
+	 * linear, convex branches.
 	 * <p>
-	 * These links are returned as a collection of 2-elements array.
-	 *
-	 * @return a map.
+	 * These links are returned as a collection of 2-elements list. If the
+	 * instance was created with {@link #forbidMiddleLinks} sets to
+	 * <code>true</code>, it is ensured that the first element of all links is
+	 * the last spot of a branch, and the second element of this link is the
+	 * first spot of another branch. Otherwise, a link cam target a spot within
+	 * a branch.
+	 * 
+	 * @return a collection of links as a 2-elements list.
 	 */
 	public Collection< List< Spot >> getLinks()
 	{
@@ -353,8 +401,13 @@ public class ContinuousBranchesDecomposition implements Algorithm, Benchmark
 	 * Returns the mapping of each source track ID to the links that were cut in
 	 * it to split it in branches.
 	 * <p>
-	 * These links are returned as 2-elements arrays..
-	 *
+	 * These links are returned as a collection of 2-elements list. If the
+	 * instance was created with {@link #forbidMiddleLinks} sets to
+	 * <code>true</code>, it is ensured that the first element of all links is
+	 * the last spot of a branch, and the second element of this link is the
+	 * first spot of another branch. Otherwise, a link can target a spot within
+	 * a branch.
+	 * 
 	 * @return the mapping of track IDs to the links.
 	 */
 	public Map< Integer, Collection< List< Spot >>> getLinksPerTrack()
@@ -366,12 +419,23 @@ public class ContinuousBranchesDecomposition implements Algorithm, Benchmark
 	 * STATIC CLASSES
 	 */
 
+	/**
+	 * A two public fields class used to return the convex branch decomposition
+	 * of a track.
+	 */
 	public static final class TrackBranchDecomposition
 	{
+		/**
+		 * Branches are returned as list of spot. It is ensured that the spots
+		 * are ordered in the list by increasing frame number, and that two
+		 * consecutive spot are separated by exactly one frame.
+		 */
 		public Collection< List< Spot >> branches;
 
+		/**
+		 * Links, as a collection of 2-elements list.
+		 */
 		public Collection< List< Spot >> links;
-
 	}
 
 }
