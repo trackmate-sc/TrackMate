@@ -21,7 +21,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackModel;
 
-public class ContinousBranchesDecomposition implements Algorithm, Benchmark
+public class ContinuousBranchesDecomposition implements Algorithm, Benchmark
 {
 	private static final String BASE_ERROR_MSG = "[ContinousBranchesDecomposition] ";
 
@@ -41,7 +41,7 @@ public class ContinousBranchesDecomposition implements Algorithm, Benchmark
 
 	private final TimeDirectedNeighborIndex neighborIndex;
 
-	public ContinousBranchesDecomposition( final Model model )
+	public ContinuousBranchesDecomposition( final Model model )
 	{
 		this.tm = model.getTrackModel();
 		this.neighborIndex = tm.getDirectedNeighborIndex();
