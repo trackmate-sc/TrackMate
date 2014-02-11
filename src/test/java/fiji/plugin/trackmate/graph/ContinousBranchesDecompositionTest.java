@@ -1,82 +1,39 @@
 package fiji.plugin.trackmate.graph;
 
 import static org.junit.Assert.fail;
-import ij.ImageJ;
 
-import java.io.File;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 import org.junit.Before;
 import org.junit.Test;
-import org.scijava.util.AppUtils;
 
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
-import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
-import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.tracking.FastLAPTracker;
 import fiji.plugin.trackmate.tracking.FastLAPTrackerFactory;
 import fiji.plugin.trackmate.tracking.TrackerKeys;
-import fiji.plugin.trackmate.visualization.PerEdgeFeatureColorGenerator;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
-import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
 public class ContinousBranchesDecompositionTest
 {
 
-	private static final int N_TP = 50;
+	private static final int N_TP = 10;
 
-	private static final int N_SPOTS = 30;
+	private static final int N_SPOTS = 20;
 
 	private static final double WIDTH = 50;
 
 	private Model model;
 
 	private ContinousBranchesDecomposition splitter;
-
-	@Before
-	public void setUp2()
-	{
-		// final File file = new File( AppUtils.getBaseDirectory(
-		// TrackMate.class ), "samples/FakeTracks_Loops.xml" );
-
-		// final File file = new File( AppUtils.getBaseDirectory(
-		// TrackMate.class ), "samples/FakeTracks_GapMerge.xml" );
-
-		// final File file = new File( AppUtils.getBaseDirectory(
-		// TrackMate.class ), "samples/FakeTracks_MergeGap.xml" );
-
-		// final File file = new File( AppUtils.getBaseDirectory(
-		// TrackMate.class ), "samples/FakeTracks_SingleSplit.xml" );
-
-		// final File file = new File( AppUtils.getBaseDirectory(
-		// TrackMate.class ), "samples/FakeTracks_SplitsMerges.xml" );
-
-		// final File file = new File( AppUtils.getBaseDirectory(
-		// TrackMate.class ), "samples/FakeTracks.xml" );
-
-		final File file = new File( AppUtils.getBaseDirectory( TrackMate.class ), "samples/FailCase_01.xml" );
-		final TmXmlReader reader = new TmXmlReader( file );
-		if ( reader.isReadingOk() )
-		{
-			model = reader.getModel();
-		}
-		else
-		{
-			System.err.println( reader.getErrorMessage() );
-		}
-	}
 
 	@Before
 	public void setUp() throws Exception
@@ -115,7 +72,7 @@ public class ContinousBranchesDecompositionTest
 	}
 
 	@Test
-	public final void testBehavior()
+	public void testBehavior()
 	{
 		splitter = new ContinousBranchesDecomposition( model );
 		if ( !splitter.checkInput() || !splitter.process() )
@@ -125,6 +82,7 @@ public class ContinousBranchesDecompositionTest
 
 		// Inspect branches
 		final Collection< List< Spot >> branches = splitter.getBranches();
+
 		for ( final List< Spot > branch : branches )
 		{
 			if ( branch.size() == 0 )
@@ -144,6 +102,28 @@ public class ContinousBranchesDecompositionTest
 				previous = spot;
 			}
 		}
+
+		// Test unicity
+		final Set< Spot > allSpots = new HashSet< Spot >();
+		for ( final List< Spot > branch : branches )
+		{
+			allSpots.addAll( branch );
+		}
+		for ( final Spot spot : allSpots )
+		{
+			boolean foundOnce = false;
+			for ( final List< Spot > branch : branches )
+			{
+				if ( branch.contains( spot ) )
+				{
+					if ( foundOnce )
+					{
+						fail( "The spot " + spot + " belongs to at least two branches. One of them is " + branch );
+					}
+					foundOnce = true;
+				}
+			}
+		}
 	}
 
 	@Test
@@ -155,7 +135,10 @@ public class ContinousBranchesDecompositionTest
 			fail( splitter.getErrorMessage() );
 		}
 
-		final FromContinuousBranches builder = new FromContinuousBranches( splitter.getBranches(), splitter.getLinks() );
+		final Collection< List< Spot >> branches = splitter.getBranches();
+		final Collection< List< Spot >> links = splitter.getLinks();
+
+		final FromContinuousBranches builder = new FromContinuousBranches( branches, links );
 		if ( !builder.checkInput() || !builder.process() )
 		{
 			fail( builder.getErrorMessage() );
@@ -164,7 +147,14 @@ public class ContinousBranchesDecompositionTest
 		final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph = builder.getResult();
 
 		// Are all the source spots in the reconstructed graph?
-		for ( final Spot spot : model.getTrackModel().vertexSet()) {
+		final Set< Spot > allSourceSpots = new HashSet< Spot >();
+		for ( final Integer trackID : model.getTrackModel().trackIDs( true ) )
+		{
+			allSourceSpots.addAll( model.getTrackModel().trackSpots( trackID ) );
+		}
+
+		for ( final Spot spot : allSourceSpots )
+		{
 			if ( !graph.containsVertex( spot ) )
 			{
 				fail( "The reconstructed graph misses one spot that was in the original model: " + spot );
@@ -172,7 +162,13 @@ public class ContinousBranchesDecompositionTest
 		}
 
 		// Are all the source edges in the reconstructed graph?
-		for ( final DefaultWeightedEdge edge : model.getTrackModel().edgeSet() )
+		final Set< DefaultWeightedEdge > allSourceEdges = new HashSet< DefaultWeightedEdge >();
+		for ( final Integer trackId : model.getTrackModel().trackIDs( true ) )
+		{
+			allSourceEdges.addAll( model.getTrackModel().trackEdges( trackId ) );
+		}
+
+		for ( final DefaultWeightedEdge edge : allSourceEdges )
 		{
 			final Spot source = model.getTrackModel().getEdgeSource( edge );
 			final Spot target = model.getTrackModel().getEdgeTarget( edge );
@@ -194,88 +190,4 @@ public class ContinousBranchesDecompositionTest
 			}
 		}
 	}
-
-	public static void main( final String[] args ) throws Exception
-	{
-		final ContinousBranchesDecompositionTest test = new ContinousBranchesDecompositionTest();
-		test.setUp();
-
-		final SelectionModel sm = new SelectionModel( test.model );
-
-		ImageJ.main( args );
-		final HyperStackDisplayer displayer = new HyperStackDisplayer( test.model, sm );
-		displayer.render();
-
-		final ContinousBranchesDecomposition splitter = new ContinousBranchesDecomposition( test.model );
-		if ( !splitter.checkInput() || !splitter.process() )
-		{
-			System.err.println( splitter.getErrorMessage() );
-			return;
-		}
-
-		final Collection< List< Spot >> branches = splitter.getBranches();
-		final Collection< List< Spot >> links = splitter.getLinks();
-
-		final Model model2 = new Model();
-		model2.beginUpdate();
-		try
-		{
-			for ( final List< Spot > branch : branches )
-			{
-				final Iterator< Spot > it = branch.iterator();
-				Spot previous = it.next();
-				model2.addSpotTo( previous, previous.getFeature( Spot.FRAME ).intValue() );
-				while ( it.hasNext() )
-				{
-					final Spot spot = it.next();
-					model2.addSpotTo( spot, spot.getFeature( Spot.FRAME ).intValue() );
-
-					if ( model2.getTrackModel().containsEdge( previous, spot ) )
-					{
-						System.err.println( "Could not add the edge " + previous + "-" + spot + ": it already exists." );
-						continue;
-					}
-
-					model2.addEdge( previous, spot, -1d );
-					previous = spot;
-				}
-			}
-
-			// Links
-			for ( final List< Spot > link : links )
-			{
-				final Spot source = link.get( 0 );
-				final Spot target = link.get( 1 );
-				try
-				{
-					model2.addEdge( source, target, -2d );
-				}
-				catch ( final NullPointerException npe )
-				{
-					System.err.println( "Could not add the edge " + source + "-" + target + ": already exists." );// DEBUG
-				}
-			}
-		}
-		finally
-		{
-			model2.endUpdate();
-		}
-
-		final TrackIndexAnalyzer analyzer = new TrackIndexAnalyzer();
-		analyzer.process( model2.getTrackModel().trackIDs( true ), model2 );
-		final EdgeTargetAnalyzer edgeAnalyzer = new EdgeTargetAnalyzer();
-		edgeAnalyzer.process( model2.getTrackModel().edgeSet(), model2 );
-
-		final PerEdgeFeatureColorGenerator ecg = new PerEdgeFeatureColorGenerator( model2, EdgeTargetAnalyzer.EDGE_COST );
-
-		final SelectionModel sm2 = new SelectionModel( model2 );
-		final HyperStackDisplayer displayer2 = new HyperStackDisplayer( model2, sm2 );
-		displayer2.setDisplaySettings( TrackMateModelView.KEY_TRACK_COLORING, ecg );
-		displayer2.render();
-		final TrackScheme trackScheme = new TrackScheme( model2, sm2 );
-		trackScheme.setDisplaySettings( TrackMateModelView.KEY_TRACK_COLORING, ecg );
-		trackScheme.render();
-
-	}
-
 }

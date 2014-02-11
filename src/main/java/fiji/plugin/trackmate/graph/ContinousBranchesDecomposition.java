@@ -2,9 +2,10 @@ package fiji.plugin.trackmate.graph;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -12,8 +13,9 @@ import java.util.Set;
 import net.imglib2.algorithm.Algorithm;
 import net.imglib2.algorithm.Benchmark;
 
+import org.jgrapht.alg.ConnectivityInspector;
 import org.jgrapht.graph.DefaultWeightedEdge;
-import org.jgrapht.traverse.GraphIterator;
+import org.jgrapht.graph.SimpleGraph;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
@@ -21,7 +23,6 @@ import fiji.plugin.trackmate.TrackModel;
 
 public class ContinousBranchesDecomposition implements Algorithm, Benchmark
 {
-
 	private static final String BASE_ERROR_MSG = "[ContinousBranchesDecomposition] ";
 
 	private String errorMessage;
@@ -102,255 +103,202 @@ public class ContinousBranchesDecomposition implements Algorithm, Benchmark
 
 	public static final TrackBranchDecomposition processTrack( final Integer trackID, final TrackModel tm, final TimeDirectedNeighborIndex neighborIndex )
 	{
+		final Set< Spot > allSpots = tm.trackSpots( trackID );
+		final Set< DefaultWeightedEdge > allEdges = tm.trackEdges( trackID );
+		final SimpleGraph< Spot, DefaultWeightedEdge > graph = new SimpleGraph< Spot, DefaultWeightedEdge >( DefaultWeightedEdge.class );
 
-		/*
-		 * Result holders.
-		 */
-
-		final Collection< List< Spot >> branches = new ArrayList< List< Spot > >();
-		final Collection< List< Spot > > links = new HashSet< List< Spot > >();
-
-		final Set< Spot > starts = new HashSet< Spot >();
-		final Set< Spot > trackSpots = tm.trackSpots( trackID );
-
-		/*
-		 * Identify leaves Add the branch nuclei of the graph, or 'leaves'. This
-		 * is not exactly leaves: we want to find the spots that have no
-		 * predecessors, regardless of how any successors they have.
-		 */
-		for ( final Spot spot : trackSpots )
+		for ( final Spot spot : allSpots )
 		{
-			if ( neighborIndex.predecessorsOf( spot ).size() == 0 )
-			{
-				starts.add( spot );
-			}
+			graph.addVertex( spot );
+		}
+		for ( final DefaultWeightedEdge edge : allEdges )
+		{
+			graph.addEdge( tm.getEdgeSource( edge ), tm.getEdgeTarget( edge ) );
 		}
 
-		/*
-		 * Nucleate a branch for each leaf. First pass: we do not care for gaps
-		 * yet. Or just a bit: if there is a gap near fusion or fission, we try
-		 * to be sensible as where to put the lonely spot, so as to avoid having
-		 * too many branches made of one spot.
-		 */
-
-		final Set< Spot > visited = new HashSet< Spot >();
-		do
+		final Collection< List< Spot >> links = new HashSet< List< Spot > >();
+		for ( final Spot spot : allSpots )
 		{
-			final Spot start = starts.iterator().next();
-			starts.remove( start );
-			visited.add( start );
-
-			/*
-			 * Initiate the branch.
-			 */
-
-			final List< Spot > branch = new ArrayList< Spot >();
-			// Ensures we always move forward in time.
-			final GraphIterator< Spot, DefaultWeightedEdge > it = tm.getDepthFirstIterator( start, true );
-			branch.add( it.next() ); // is start.
-
-			/*
-			 * If our start point have several successors, we must check it
-			 * here, because we want to create start points for its other
-			 * successors as well.
-			 */
-			final Set< Spot > startSuccessors = neighborIndex.successorsOf( start );
-			if ( startSuccessors.size() > 1 )
+			final Set< Spot > successors = neighborIndex.successorsOf( spot );
+			final Set< Spot > predecessors = neighborIndex.predecessorsOf( spot );
+			if ( predecessors.size() <= 1 && successors.size() <= 1 )
 			{
-				starts.addAll( startSuccessors );
-				for ( final Spot successor : startSuccessors )
-				{
-					final List< Spot > link = new ArrayList< Spot >( 2 );
-					link.add( start );
-					link.add( successor );
-					links.add( link );
-				}
-				branches.add( branch );
-				// Early stop.
 				continue;
 			}
 
-			Spot previous = start;
-
-			while ( it.hasNext() )
+			if ( predecessors.size() == 0 )
 			{
-				final Spot spot = it.next();
-
-				starts.remove( spot );
-				if ( visited.contains( spot ) )
+				boolean found = false;
+				for ( final Spot successor : successors )
 				{
-					final List< Spot > link = new ArrayList< Spot >( 2 );
-					link.add( previous );
-					link.add( spot );
-					links.add( link );
-					break;
-				}
-
-				final Set< Spot > successors = new HashSet< Spot >( neighborIndex.successorsOf( spot ) );
-				final Set< Spot > predecessors = new HashSet< Spot >( neighborIndex.predecessorsOf( spot ) );
-
-				/*
-				 * SPLIT
-				 */
-
-				if ( successors.size() > 1 )
-				{
-					visited.add( spot );
-					branch.add( spot );
-					for ( final Spot successor : successors )
+					if ( !found && successor.diffTo( spot, Spot.FRAME ) < 2 )
 					{
-						final List< Spot > link = new ArrayList< Spot >( 2 );
-						link.add( spot );
-						link.add( successor );
-						links.add( link );
-
-						starts.add( successor );
-					}
-					break;
-				}
-
-				/*
-				 * MERGE
-				 */
-
-				if ( predecessors.size() > 1 )
-				{
-					visited.add( spot );
-					starts.add( spot );
-					for ( final Spot predecessor : predecessors )
-					{
-						if ( neighborIndex.successorsOf( predecessor ).size() > 1 )
-						{
-							continue;
-						}
-						final List< Spot > link = new ArrayList< Spot >( 2 );
-						link.add( predecessor );
-						link.add( spot );
-						links.add( link );
-					}
-					break;
-				}
-
-				/*
-				 * SPECIAL POINT
-				 */
-
-				if ( successors.size() > 1 && predecessors.size() > 1 )
-				{
-					visited.add( spot );
-					final List< Spot > smallBranch = new ArrayList< Spot >( 1 );
-					smallBranch.add( spot );
-
-					for ( final Spot successor : successors )
-					{
-						starts.add( successor );
-					}
-
-					for ( final Spot successor : successors )
-					{
-						final List< Spot > link = new ArrayList< Spot >( 2 );
-						link.add( spot );
-						link.add( successor );
-						links.add( link );
-					}
-					for ( final Spot predecessor : predecessors )
-					{
-						final List< Spot > link = new ArrayList< Spot >( 2 );
-						link.add( predecessor );
-						link.add( spot );
-						links.add( link );
-					}
-					break;
-				}
-
-				/*
-				 * LEAF
-				 */
-
-				if ( successors.size() == 0 )
-				{
-					// We have reached a leaf.
-					branch.add( spot );
-					starts.remove( spot );
-					break;
-				}
-
-				/*
-				 * Contiguous spot; we can add it to the current branch.
-				 */
-				if ( !visited.contains( spot ) )
-				{
-					branch.add( spot );
-				}
-				previous = spot;
-			}
-
-			/*
-			 * Remove the visited leaf, now that it is done.
-			 */
-			starts.remove( start );
-
-			/*
-			 * Add the last visited spot to the visited list, so that we are
-			 * sure not to create any faulty edge in case a track finishes with
-			 * a merge point.
-			 */
-			visited.add( previous );
-
-			/*
-			 * Add finished branch.
-			 */
-			branches.add( branch );
-		}
-		while ( !starts.isEmpty() );
-
-		/*
-		 * 2nd pass: Cut along gaps.
-		 */
-
-		final Collection< List< Spot >> refinedBranches = new ArrayList< List< Spot > >( branches.size() );
-		for ( final List< Spot > branch : branches )
-		{
-			final Iterator< Spot > it = branch.iterator();
-			Spot previous = it.next();
-			List< Spot > newBranch = new ArrayList< Spot >();
-			newBranch.add( previous );
-
-			while ( it.hasNext() )
-			{
-				final Spot spot = it.next();
-				if ( spot.diffTo( previous, Spot.FRAME ) > 1 )
-				{
-					refinedBranches.add( newBranch );
-
-					final List< Spot > link = new ArrayList< Spot >( 2 );
-					link.add( previous );
-					link.add( spot );
-					links.add( link );
-
-					newBranch = new ArrayList< Spot >();
-					newBranch.add( spot );
-					if ( it.hasNext() )
-					{
-						previous = spot;
-						continue;
+						found = true;
 					}
 					else
 					{
-						break;
+						graph.removeEdge( spot, successor );
+						links.add( makeLink( spot, successor ) );
 					}
 				}
-				newBranch.add( spot );
-				previous = spot;
 			}
-			refinedBranches.add( newBranch );
+			else if ( successors.size() == 0 )
+			{
+				boolean found = false;
+				for ( final Spot predecessor : predecessors )
+				{
+					if ( !found && spot.diffTo( predecessor, Spot.FRAME ) < 2 )
+					{
+						found = true;
+					}
+					else
+					{
+						graph.removeEdge( predecessor, spot );
+						links.add( makeLink( predecessor, spot ) );
+					}
+				}
+			}
+			else if ( predecessors.size() == 1 )
+			{
+				final Spot previous = predecessors.iterator().next();
+				if ( previous.diffTo( spot, Spot.FRAME ) < 2 )
+				{
+					for ( final Spot successor : successors )
+					{
+						graph.removeEdge( spot, successor );
+						links.add( makeLink( spot, successor ) );
+					}
+				}
+				else
+				{
+					graph.removeEdge( previous, spot );
+					links.add( makeLink( previous, spot ) );
+					boolean found = false;
+					for ( final Spot successor : successors )
+					{
+						if ( !found && successor.diffTo( spot, Spot.FRAME ) < 2 )
+						{
+							found = true;
+						}
+						else
+						{
+							graph.removeEdge( spot, successor );
+							links.add( makeLink( spot, successor ) );
+						}
+					}
+				}
+			}
+			else if ( successors.size() == 1 )
+			{
+				final Spot next = successors.iterator().next();
+				if ( spot.diffTo( next, Spot.FRAME ) < 2 )
+				{
+					for ( final Spot predecessor : predecessors )
+					{
+						graph.removeEdge( predecessor, spot );
+						links.add( makeLink( predecessor, spot ) );
+					}
+				}
+				else
+				{
+					graph.removeEdge( spot, next );
+					links.add( makeLink( spot, next ) );
+					boolean found = false;
+					for ( final Spot predecessor : predecessors )
+					{
+						if ( !found && spot.diffTo( predecessor, Spot.FRAME ) < 2 )
+						{
+							found = true;
+						}
+						else
+						{
+							graph.removeEdge( predecessor, spot );
+							links.add( makeLink( predecessor, spot ) );
+						}
+					}
+				}
+			}
+			else
+			{
+				boolean found = false;
+				for ( final Spot predecessor : predecessors )
+				{
+					if ( !found && spot.diffTo( predecessor, Spot.FRAME ) < 2 )
+					{
+						found = true;
+					}
+					else
+					{
+						graph.removeEdge( predecessor, spot );
+						links.add( makeLink( predecessor, spot ) );
+					}
+				}
+				for ( final Spot successor : successors )
+				{
+					if ( !found && successor.diffTo( spot, Spot.FRAME ) < 2 )
+					{
+						found = true;
+					}
+					else
+					{
+						graph.removeEdge( spot, successor );
+						links.add( makeLink( spot, successor ) );
+					}
+				}
+			}
+		}
+
+		/*
+		 * 2nd pass: remove gaps.
+		 */
+
+		final Set< DefaultWeightedEdge > newEdges = graph.edgeSet();
+		final Set< DefaultWeightedEdge > toRemove = new HashSet< DefaultWeightedEdge >();
+		for ( final DefaultWeightedEdge edge : newEdges )
+		{
+			final Spot source = graph.getEdgeSource( edge );
+			final Spot target = graph.getEdgeTarget( edge );
+			if ( Math.abs( source.diffTo( target, Spot.FRAME ) ) > 1 )
+			{
+				toRemove.add( edge );
+				links.add( makeLink( source, target ) );
+			}
+		}
+
+		for ( final DefaultWeightedEdge edge : toRemove )
+		{
+			graph.removeEdge( edge );
+		}
+
+		/*
+		 * Output
+		 */
+
+		final ConnectivityInspector< Spot, DefaultWeightedEdge > connectivity = new ConnectivityInspector< Spot, DefaultWeightedEdge >( graph );
+		final List< Set< Spot >> connectedSets = connectivity.connectedSets();
+		final Collection< List< Spot >> branches = new HashSet< List< Spot > >( connectedSets.size() );
+		final Comparator< Spot > comparator = Spot.frameComparator;
+		for ( final Set< Spot > set : connectedSets )
+		{
+			final List< Spot > branch = new ArrayList< Spot >( set.size() );
+			branch.addAll( set );
+			Collections.sort( branch, comparator );
+			branches.add( branch );
 		}
 
 		final TrackBranchDecomposition output = new TrackBranchDecomposition();
-		output.branches = refinedBranches;
+		output.branches = branches;
 		output.links = links;
 		return output;
 
+	}
+
+	private static final List< Spot > makeLink( final Spot spotA, final Spot spotB )
+	{
+		final List< Spot > link = new ArrayList< Spot >( 2 );
+		link.add( spotA );
+		link.add( spotB );
+		return link;
 	}
 
 	@Override
