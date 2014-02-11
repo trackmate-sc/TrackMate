@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.graph;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.util.Collection;
@@ -79,7 +80,63 @@ public class ConvexBranchesDecompositionTest
 		{
 			fail( splitter.getErrorMessage() );
 		}
+		testBranches();
+		testReconstruction();
+	}
 
+	@Test
+	public void testBehaviorForbidMiddleLinks()
+	{
+		splitter = new ConvexBranchesDecomposition( model, true );
+		if ( !splitter.checkInput() || !splitter.process() )
+		{
+			fail( splitter.getErrorMessage() );
+		}
+		testBranches();
+		testReconstruction();
+		testForbidMiddleLinks();
+	}
+
+	private void testForbidMiddleLinks()
+	{
+		final Collection< List< Spot >> branches = splitter.getBranches();
+		final Collection< List< Spot >> links = splitter.getLinks();
+
+		for ( final List< Spot > link : links )
+		{
+			final Spot spotA = link.get( 0 );
+			final Spot spotB = link.get( 1 );
+			boolean foundA = false;
+			boolean foundB = false;
+			for ( final List< Spot > branch : branches )
+			{
+				if ( branch.contains( spotA ) )
+				{
+					foundA = true;
+					final long indexA = branch.indexOf( spotA );
+					assertEquals( "Spot " + spotA + " in link " + link + " should be at the end of a branch. But it was found in " + branch, branch.size() - 1l, indexA );
+				}
+				if ( branch.contains( spotB ) )
+				{
+					foundB = true;
+					final long indexB = branch.indexOf( spotB );
+					assertEquals( "Spot " + spotB + " in link " + link + " should be at the beginning of a branch. But it was found in " + branch, 0l, indexB );
+				}
+
+			}
+			if ( !foundA )
+			{
+				fail( "Could not find " + spotA + " in any branch." );
+			}
+			if ( !foundB )
+			{
+				fail( "Could not find " + spotB + " in any branch." );
+			}
+		}
+	}
+
+	private void testBranches()
+	{
 		// Inspect branches
 		final Collection< List< Spot >> branches = splitter.getBranches();
 
@@ -126,15 +183,8 @@ public class ConvexBranchesDecompositionTest
 		}
 	}
 
-	@Test
-	public void testReconstruction()
+	private void testReconstruction()
 	{
-		splitter = new ConvexBranchesDecomposition( model, false );
-		if ( !splitter.checkInput() || !splitter.process() )
-		{
-			fail( splitter.getErrorMessage() );
-		}
-
 		final Collection< List< Spot >> branches = splitter.getBranches();
 		final Collection< List< Spot >> links = splitter.getLinks();
 
