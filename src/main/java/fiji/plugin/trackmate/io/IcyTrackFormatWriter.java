@@ -24,7 +24,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition;
 
-public class ICYTrackFormatWriter implements Algorithm, Benchmark
+public class IcyTrackFormatWriter implements Algorithm, Benchmark
 {
 
 	private static final String BASE_ERROR_MSG = "[ICYTrackFormatWriter] ";
@@ -53,7 +53,7 @@ public class ICYTrackFormatWriter implements Algorithm, Benchmark
 
 	private final double[] calibration;
 
-	public ICYTrackFormatWriter( final File file, final Model model, final double[] calibration )
+	public IcyTrackFormatWriter( final File file, final Model model, final double[] calibration )
 	{
 		this.file = file;
 		this.model = model;
@@ -119,11 +119,10 @@ public class ICYTrackFormatWriter implements Algorithm, Benchmark
 		final Map< Spot, Integer > beginnings = new HashMap< Spot, Integer >();
 		final Map< Spot, Integer > endings = new HashMap< Spot, Integer >();
 
-		int idGenerator = 0;
 		final Collection< List< Spot >> branches = splitter.getBranches();
 		for ( final List< Spot > branch : branches )
 		{
-			final int branchID = idGenerator++; // branch.hashCode();
+			final int branchID = branch.hashCode();
 
 			// build a map for later
 			beginnings.put( branch.get( 0 ), Integer.valueOf( branchID ) );
@@ -136,13 +135,15 @@ public class ICYTrackFormatWriter implements Algorithm, Benchmark
 			{
 				final double x = spot.getDoublePosition( 0 ) / calibration[ 0 ];
 				final double y = spot.getDoublePosition( 1 ) / calibration[ 1 ];
-				final double z = spot.getDoublePosition( 2 ) / calibration[ 2 ];
+				final int z = ( int ) ( spot.getDoublePosition( 2 ) / calibration[ 2 ] );
 				final int t = spot.getFeature( Spot.FRAME ).intValue();
 				final Element detection = new Element( DETECTION );
 				detection.setAttribute( "t", Integer.toString( t ) );
 				detection.setAttribute( "x", "" + x );
 				detection.setAttribute( "y", "" + y );
-				detection.setAttribute( "z", "" + z );
+				detection.setAttribute( "z", Integer.toString( z ) );
+				detection.setAttribute( "classname", "plugins.nchenouard.particleTracking.sequenceGenerator.ProfileSpotTrack" );
+				detection.setAttribute( "type", "1" );
 				track.addContent( detection );
 			}
 			trackGroup.addContent( track );
@@ -216,7 +217,7 @@ public class ICYTrackFormatWriter implements Algorithm, Benchmark
 		final double[] calibration = readCalibration( source );
 
 		final File target = new File( "/Users/tinevez/Desktop/IcyConverstion.xml" );
-		final ICYTrackFormatWriter exporter = new ICYTrackFormatWriter( target, model, calibration );
+		final IcyTrackFormatWriter exporter = new IcyTrackFormatWriter( target, model, calibration );
 		if ( !exporter.checkInput() || !exporter.process() )
 		{
 			System.out.println( exporter.getErrorMessage() );
