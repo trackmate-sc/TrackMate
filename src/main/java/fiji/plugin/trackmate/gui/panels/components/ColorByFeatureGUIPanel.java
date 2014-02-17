@@ -27,16 +27,24 @@ import org.jfree.chart.renderer.InterpolatePaintScale;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
+import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
 import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
 
 public class ColorByFeatureGUIPanel extends ActionListenablePanel
 {
+
+	/** The key for the manual painting style. */
+	public static final String MANUAL_KEY = "MANUAL";
 
 	/** The key for the default, uniform painting style. */
 	public static final String UNIFORM_KEY = "UNIFORM";
 
 	/** The name of the default, uniform painting style. */
 	public static final String UNIFORM_NAME = "Uniform color";
+
+	/** The name of the manual painting style. */
+	public static final String MANUAL_NAME = "Manual color";
 
 	/*
 	 * ENUM
@@ -165,7 +173,7 @@ public class ColorByFeatureGUIPanel extends ActionListenablePanel
 
 	private void repaintColorCanvas( final Graphics g )
 	{
-		if ( null == jComboBoxSetColorBy.getSelectedItem() || getColorGeneratorCategory().equals( Category.DEFAULT ) )
+		if ( null == jComboBoxSetColorBy.getSelectedItem() || getColorGeneratorCategory().equals( Category.DEFAULT ) || ( getColorGeneratorCategory().equals( Category.SPOTS ) && getColorFeature().equals( ManualSpotColorAnalyzerFactory.FEATURE ) ) || ( getColorGeneratorCategory().equals( Category.EDGES ) && getColorFeature().equals( ManualEdgeColorAnalyzer.FEATURE ) ) )
 		{
 			g.clearRect( 0, 0, canvasColor.getWidth(), canvasColor.getHeight() );
 			return;
@@ -308,12 +316,18 @@ public class ColorByFeatureGUIPanel extends ActionListenablePanel
 				categoryNames.put( Category.SPOTS, "Spot features:" );
 				final Collection< String > spotFeatures = model.getFeatureModel().getSpotFeatures();
 				features.put( Category.SPOTS, spotFeatures );
+				// Deal with manual coloring separately.
+				spotFeatures.remove( ManualSpotColorAnalyzerFactory.FEATURE );
+
 				featureNames.putAll( model.getFeatureModel().getSpotFeatureNames() );
 				break;
 
 			case EDGES:
 				categoryNames.put( Category.EDGES, "Edge features:" );
 				final Collection< String > edgeFeatures = model.getFeatureModel().getEdgeFeatures();
+				// Deal with manual coloring separately.
+				edgeFeatures.remove( ManualEdgeColorAnalyzer.FEATURE );
+
 				features.put( Category.EDGES, edgeFeatures );
 				featureNames.putAll( model.getFeatureModel().getEdgeFeatureNames() );
 				break;
@@ -327,10 +341,12 @@ public class ColorByFeatureGUIPanel extends ActionListenablePanel
 
 			case DEFAULT:
 				categoryNames.put( Category.DEFAULT, "Default:" );
-				final Collection< String > defaultOptions = new ArrayList< String >();
+				final Collection< String > defaultOptions = new ArrayList< String >( 1 );
 				defaultOptions.add( UNIFORM_KEY );
+				defaultOptions.add( MANUAL_KEY );
 				features.put( Category.DEFAULT, defaultOptions );
 				featureNames.put( UNIFORM_KEY, UNIFORM_NAME );
+				featureNames.put( MANUAL_KEY, MANUAL_NAME );
 				break;
 
 			default:

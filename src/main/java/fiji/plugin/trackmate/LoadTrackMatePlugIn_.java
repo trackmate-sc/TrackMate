@@ -84,16 +84,23 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 			}
 		}
 
-		if ( null == file )
-		{
-			final File folder = new File( System.getProperty( "user.dir" ) ).getParentFile().getParentFile();
-			file = new File( folder.getPath() + File.separator + "TrackMateData.xml" );
-		}
-
 		final Logger logger = Logger.IJ_LOGGER; // logPanel.getLogger();
-		final File tmpFile = IOUtils.askForFileForLoading( file, "Load a TrackMate XML file", frame, logger );
-		if ( null == tmpFile ) { return; }
-		file = tmpFile;
+		if ( null == arg0 )
+		{
+
+			if ( null == file )
+			{
+				final File folder = new File( System.getProperty( "user.dir" ) ).getParentFile().getParentFile();
+				file = new File( folder.getPath() + File.separator + "TrackMateData.xml" );
+			}
+			final File tmpFile = IOUtils.askForFileForLoading( file, "Load a TrackMate XML file", frame, logger );
+			if ( null == tmpFile ) { return; }
+			file = tmpFile;
+		}
+		else
+		{
+			file = new File( arg0 );
+		}
 
 		// Read the file content
 		TmXmlReader reader = createReader( file );
@@ -281,9 +288,9 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 	public static void main( final String[] args )
 	{
 		ImageJ.main( args );
-		SomeDialogDescriptor.file = new File( AppUtils.getBaseDirectory( TrackMate.class ), "samples/FakeTracks.xml" );
+		final File file = new File( AppUtils.getBaseDirectory( TrackMate.class ), "samples/FakeTracks_Color.xml" );
 		final LoadTrackMatePlugIn_ plugIn = new LoadTrackMatePlugIn_();
-		plugIn.run( null );
+		plugIn.run( file.getAbsolutePath() );
 	}
 
 }

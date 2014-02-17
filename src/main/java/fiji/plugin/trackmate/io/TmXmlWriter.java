@@ -456,12 +456,19 @@ public class TmXmlWriter
 					for ( final String feature : edgeDoubleFeatures )
 					{
 						final Double val = model.getFeatureModel().getEdgeFeature( edge, feature );
-						edgeElement.setAttribute( feature, val.toString() );
+						if ( null != val )
+						{
+							edgeElement.setAttribute( feature, val.toString() );
+						}
 					}
 					for ( final String feature : edgeIntFeatures )
 					{
-						final int val = model.getFeatureModel().getEdgeFeature( edge, feature ).intValue();
-						edgeElement.setAttribute( feature, "" + val );
+						final Double val = model.getFeatureModel().getEdgeFeature( edge, feature );
+						if ( null != val )
+						{
+							edgeElement.setAttribute( feature, "" + val.intValue() );
+						}
+
 					}
 
 					trackElement.addContent( edgeElement );

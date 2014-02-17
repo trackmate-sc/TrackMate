@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.visualization.trackscheme;
 
+import java.awt.Color;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
@@ -7,13 +8,20 @@ import java.util.EventObject;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.JColorChooser;
 import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
+
+import org.jgrapht.graph.DefaultWeightedEdge;
 
 import com.mxgraph.model.mxCell;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxEvent;
 import com.mxgraph.util.mxEventObject;
 import com.mxgraph.util.mxEventSource.mxIEventListener;
+
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
 
 public class TrackSchemePopupMenu extends JPopupMenu
 {
@@ -32,6 +40,8 @@ public class TrackSchemePopupMenu extends JPopupMenu
 	/** The right-click location. */
 	private final Point point;
 
+	private static Color previousColor = Color.RED;
+
 	public TrackSchemePopupMenu( final TrackScheme trackScheme, final Object cell, final Point point )
 	{
 		this.trackScheme = trackScheme;
@@ -43,6 +53,29 @@ public class TrackSchemePopupMenu extends JPopupMenu
 	/*
 	 * ACTIONS
 	 */
+
+	private void manualColorEdges( final ArrayList< mxCell > edges )
+	{
+		previousColor = JColorChooser.showDialog( trackScheme.getGUI(), "Choose Color", previousColor );
+		for ( final mxCell mxCell : edges )
+		{
+			final DefaultWeightedEdge edge = trackScheme.getGraph().getEdgeFor( mxCell );
+			final Double value = Double.valueOf( previousColor.getRGB() );
+			trackScheme.getModel().getFeatureModel().putEdgeFeature( edge, ManualEdgeColorAnalyzer.FEATURE, value );
+		}
+	}
+
+	private void manualColorVertices( final ArrayList< mxCell > vertices )
+	{
+		previousColor = JColorChooser.showDialog( trackScheme.getGUI(), "Choose Color", previousColor );
+		for ( final mxCell mxCell : vertices )
+		{
+			final Spot spot = trackScheme.getGraph().getSpotFor( mxCell );
+			final Double value = Double.valueOf( previousColor.getRGB() );
+			spot.putFeature( ManualEdgeColorAnalyzer.FEATURE, value );
+		}
+	}
+
 
 	private void selectWholeTrack( final ArrayList< mxCell > vertices, final ArrayList< mxCell > edges )
 	{
@@ -188,7 +221,6 @@ public class TrackSchemePopupMenu extends JPopupMenu
 					selectTrackUpwards( vertices, edges );
 				}
 			} );
-
 		}
 
 		if ( cell != null )
@@ -236,9 +268,85 @@ public class TrackSchemePopupMenu extends JPopupMenu
 			}
 		}
 
+		/*
+		 * Edges and spot manual coloring
+		 */
+
+		if ( edges.size() > 0 || vertices.size() > 0 )
+		{
+			addSeparator();
+		}
+
+		if ( vertices.size() > 0 )
+		{
+			final String str = "Manual color for " + ( vertices.size() == 1 ? " one spot" : vertices.size() + " spots" );
+			add( new AbstractAction( str )
+			{
+				@Override
+				public void actionPerformed( final ActionEvent e )
+				{
+					manualColorVertices( vertices );
+					SwingUtilities.invokeLater( new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							trackScheme.doTrackStyle();
+						}
+					} );
+				}
+			} );
+		}
+
+		if ( edges.size() > 0 )
+		{
+			final String str = "Manual color for " + ( edges.size() == 1 ? " one edge" : edges.size() + " edges" );
+			add( new AbstractAction( str )
+			{
+				@Override
+				public void actionPerformed( final ActionEvent e )
+				{
+					manualColorEdges( edges );
+					SwingUtilities.invokeLater( new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							trackScheme.doTrackStyle();
+						}
+					} );
+				}
+			} );
+		}
+
+
+		if ( edges.size() > 0 && vertices.size() > 0 )
+		{
+			final String str = "Manual color for " + ( vertices.size() == 1 ? " one spot and " : vertices.size() + " spots and " ) + ( edges.size() == 1 ? " one edge" : edges.size() + " edges" );
+			add( new AbstractAction( str )
+			{
+				@Override
+				public void actionPerformed( final ActionEvent e )
+				{
+					manualColorVertices( vertices );
+					manualColorEdges( edges );
+					SwingUtilities.invokeLater( new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							trackScheme.doTrackStyle();
+						}
+					} );
+				}
+			} );
+		}
+
+
 		// Remove
 		if ( selection.length > 0 )
 		{
+			addSeparator();
 			final Action removeAction = new AbstractAction( "Remove spots and links" )
 			{
 				@Override

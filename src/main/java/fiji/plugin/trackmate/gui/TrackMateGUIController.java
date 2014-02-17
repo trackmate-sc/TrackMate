@@ -78,6 +78,8 @@ import fiji.plugin.trackmate.tracking.ManualTrackerFactory;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
+import fiji.plugin.trackmate.visualization.ManualEdgeColorGenerator;
+import fiji.plugin.trackmate.visualization.ManualSpotColorGenerator;
 import fiji.plugin.trackmate.visualization.PerEdgeFeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.PerTrackFeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.SpotColorGenerator;
@@ -162,6 +164,10 @@ public class TrackMateGUIController implements ActionListener
 
 	protected FeatureColorGenerator< Spot > spotColorGenerator;
 
+	protected final ManualEdgeColorGenerator manualEdgeColorGenerator;
+
+	protected ManualSpotColorGenerator manualSpotColorGenerator;
+
 	/*
 	 * CONSTRUCTOR
 	 */
@@ -211,6 +217,8 @@ public class TrackMateGUIController implements ActionListener
 		this.spotColorGenerator = createSpotColorGenerator();
 		this.edgeColorGenerator = createEdgeColorGenerator();
 		this.trackColorGenerator = createTrackColorGenerator();
+		this.manualEdgeColorGenerator = createManualEdgeColorGenerator();
+		this.manualSpotColorGenerator = createManualSpotColorGenerator();
 
 		// 0.
 		this.guimodel = new TrackMateGUIModel();
@@ -232,6 +240,7 @@ public class TrackMateGUIController implements ActionListener
 	/*
 	 * PUBLIC METHODS
 	 */
+
 
 	/**
 	 * Creates a new {@link TrackMateGUIController} instance, set to operate on
@@ -435,6 +444,16 @@ public class TrackMateGUIController implements ActionListener
 		return generator;
 	}
 
+	protected ManualSpotColorGenerator createManualSpotColorGenerator()
+	{
+		return new ManualSpotColorGenerator();
+	}
+
+	protected ManualEdgeColorGenerator createManualEdgeColorGenerator()
+	{
+		return new ManualEdgeColorGenerator( trackmate.getModel() );
+	}
+
 	protected void createProviders()
 	{
 		spotAnalyzerProvider = new SpotAnalyzerProvider();
@@ -597,7 +616,7 @@ public class TrackMateGUIController implements ActionListener
 		/*
 		 * Finished, let's change the display settings.
 		 */
-		configureViewsDescriptor = new ConfigureViewsDescriptor( trackmate, spotColorGenerator, edgeColorGenerator, trackColorGenerator, this );
+		configureViewsDescriptor = new ConfigureViewsDescriptor( trackmate, spotColorGenerator, edgeColorGenerator, trackColorGenerator, manualSpotColorGenerator, manualEdgeColorGenerator, this );
 		configureViewsDescriptor.getComponent().addActionListener( new ActionListener()
 		{
 			@Override
