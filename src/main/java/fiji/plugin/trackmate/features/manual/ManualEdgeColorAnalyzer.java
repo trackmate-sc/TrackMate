@@ -126,7 +126,10 @@ public class ManualEdgeColorAnalyzer implements EdgeAnalyzer
 		final long start = System.currentTimeMillis();
 		for ( final DefaultWeightedEdge edge : edges )
 		{
-			model.getFeatureModel().putEdgeFeature( edge, FEATURE, DEFAULT_COLOR_VALUE );
+			if ( null == model.getFeatureModel().getEdgeFeature( edge, FEATURE ) )
+			{
+				model.getFeatureModel().putEdgeFeature( edge, FEATURE, DEFAULT_COLOR_VALUE );
+			}
 		}
 		final long end = System.currentTimeMillis();
 		processingTime = end - start;

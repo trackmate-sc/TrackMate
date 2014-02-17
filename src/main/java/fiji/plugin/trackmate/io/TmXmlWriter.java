@@ -98,6 +98,8 @@ import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
+import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
+import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
@@ -398,20 +400,16 @@ public class TmXmlWriter
 		// Prepare track features for writing: we separate ints from doubles
 		final List< String > trackIntFeatures = new ArrayList< String >();
 		trackIntFeatures.add( TrackIndexAnalyzer.TRACK_ID );
-		trackIntFeatures.add( TrackIndexAnalyzer.TRACK_INDEX ); // TODO is there
-																// a better way?
+		trackIntFeatures.add( TrackIndexAnalyzer.TRACK_INDEX );
+		// TODO is there a better way?
 		final List< String > trackDoubleFeatures = new ArrayList< String >( model.getFeatureModel().getTrackFeatures() );
 		trackDoubleFeatures.removeAll( trackIntFeatures );
 
 		// Same thing for edge features
-		final List< String > edgeIntFeatures = new ArrayList< String >();// TODO
-																			// is
-																			// there
-																			// a
-																			// better
-																			// way?
+		final List< String > edgeIntFeatures = new ArrayList< String >();
 		edgeIntFeatures.add( EdgeTargetAnalyzer.SPOT_SOURCE_ID );
 		edgeIntFeatures.add( EdgeTargetAnalyzer.SPOT_TARGET_ID );
+		edgeIntFeatures.add( ManualEdgeColorAnalyzer.FEATURE );
 		final List< String > edgeDoubleFeatures = new ArrayList< String >( model.getFeatureModel().getEdgeFeatures() );
 		edgeDoubleFeatures.removeAll( edgeIntFeatures );
 
@@ -451,23 +449,16 @@ public class TmXmlWriter
 
 				for ( final DefaultWeightedEdge edge : track )
 				{
-
 					final Element edgeElement = new Element( TRACK_EDGE_ELEMENT_KEY );
 					for ( final String feature : edgeDoubleFeatures )
 					{
 						final Double val = model.getFeatureModel().getEdgeFeature( edge, feature );
-						if ( null != val )
-						{
-							edgeElement.setAttribute( feature, val.toString() );
-						}
+						edgeElement.setAttribute( feature, val.toString() );
 					}
 					for ( final String feature : edgeIntFeatures )
 					{
 						final Double val = model.getFeatureModel().getEdgeFeature( edge, feature );
-						if ( null != val )
-						{
-							edgeElement.setAttribute( feature, "" + val.intValue() );
-						}
+						edgeElement.setAttribute( feature, "" + val.intValue() );
 
 					}
 
@@ -692,6 +683,11 @@ public class TmXmlWriter
 		attributes.add( nameAttribute );
 		Double val;
 		Attribute featureAttribute;
+
+		final List< String > spotIntFeatures = new ArrayList< String >( 1 );
+		spotIntFeatures.add( ManualSpotColorAnalyzerFactory.FEATURE );
+		// TODO Is there a better way?
+
 		for ( final String feature : spot.getFeatures().keySet() )
 		{
 			val = spot.getFeature( feature );
@@ -699,7 +695,14 @@ public class TmXmlWriter
 			{
 				continue;
 			}
-			featureAttribute = new Attribute( feature, val.toString() );
+			if ( spotIntFeatures.contains( feature ) )
+			{
+				featureAttribute = new Attribute( feature, "" + val.intValue() );
+			}
+			else
+			{
+				featureAttribute = new Attribute( feature, val.toString() );
+			}
 			attributes.add( featureAttribute );
 		}
 

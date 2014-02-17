@@ -119,7 +119,7 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		{
 			logger.error( reader.getErrorMessage() );
 			logger.error( "Aborting.\n" ); // If I cannot even open the xml
-											// file, it is not worth going on.
+			// file, it is not worth going on.
 			return;
 		}
 
@@ -127,6 +127,9 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		final String logText = reader.getLog() + '\n';
 		// Model
 		model = reader.getModel();
+
+		System.out.println( model );// DEBUG
+
 		// Settings -> empty for now.
 		settings = createSettings();
 
@@ -156,7 +159,9 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		final DetectorProvider detectorProvider = controller.getDetectorProvider();
 		final TrackerProvider trackerProvider = controller.getTrackerProvider();
 		final SpotAnalyzerProvider spotAnalyzerProvider = controller.getSpotAnalyzerProvider();
+		System.out.println( spotAnalyzerProvider.echo() );// DEBUG
 		final EdgeAnalyzerProvider edgeAnalyzerProvider = controller.getEdgeAnalyzerProvider();
+		System.out.println( edgeAnalyzerProvider.echo() );// DEBUG
 		final TrackAnalyzerProvider trackAnalyzerProvider = controller.getTrackAnalyzerProvider();
 		reader.readSettings( settings, detectorProvider, trackerProvider, spotAnalyzerProvider, edgeAnalyzerProvider, trackAnalyzerProvider );
 

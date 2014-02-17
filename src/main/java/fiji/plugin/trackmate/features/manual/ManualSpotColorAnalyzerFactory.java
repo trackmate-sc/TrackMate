@@ -26,7 +26,7 @@ public class ManualSpotColorAnalyzerFactory< T extends RealType< T > & NativeTyp
 
 	public static final String FEATURE = "MANUAL_COLOR";
 
-	static final String KEY = "MANUAL_EDGE_COLOR_ANALYZER";
+	static final String KEY = "MANUAL_SPOT_COLOR_ANALYZER";
 
 	static final List< String > FEATURES = new ArrayList< String >( 1 );
 
@@ -38,7 +38,7 @@ public class ManualSpotColorAnalyzerFactory< T extends RealType< T > & NativeTyp
 
 	static final String INFO_TEXT = "<html>A dummy analyzer for the feature that stores the color manually assigned to each spot.</html>";
 
-	static final String NAME = "Manual edge color analyzer";
+	static final String NAME = "Manual spot color analyzer";
 
 	private static final Color DEFAULT_COLOR = Color.GRAY.darker();
 
@@ -47,8 +47,8 @@ public class ManualSpotColorAnalyzerFactory< T extends RealType< T > & NativeTyp
 	static
 	{
 		FEATURES.add( FEATURE );
-		FEATURE_SHORT_NAMES.put( FEATURE, "Edge color" );
-		FEATURE_NAMES.put( FEATURE, "Manual edge color" );
+		FEATURE_SHORT_NAMES.put( FEATURE, "Spot color" );
+		FEATURE_NAMES.put( FEATURE, "Manual spot color" );
 		FEATURE_DIMENSIONS.put( FEATURE, Dimension.NONE );
 	}
 
@@ -82,7 +82,6 @@ public class ManualSpotColorAnalyzerFactory< T extends RealType< T > & NativeTyp
 		return FEATURE_DIMENSIONS;
 	}
 
-
 	@Override
 	public String getInfoText()
 	{
@@ -105,7 +104,7 @@ public class ManualSpotColorAnalyzerFactory< T extends RealType< T > & NativeTyp
 	public SpotAnalyzer< T > getAnalyzer( final Model model, final ImgPlus< T > img, final int frame, final int channel )
 	{
 		return new SpotAnalyzer< T >()
-		{
+				{
 
 			private long processingTime;
 
@@ -121,7 +120,10 @@ public class ManualSpotColorAnalyzerFactory< T extends RealType< T > & NativeTyp
 				final long start = System.currentTimeMillis();
 				for ( final Spot spot : model.getSpots().iterable( false ) )
 				{
-					spot.putFeature( FEATURE, DEFAULT_COLOR_VALUE );
+					if ( null == spot.getFeature( FEATURE ) )
+					{
+						spot.putFeature( FEATURE, DEFAULT_COLOR_VALUE );
+					}
 				}
 				final long end = System.currentTimeMillis();
 				processingTime = end - start;
@@ -139,6 +141,6 @@ public class ManualSpotColorAnalyzerFactory< T extends RealType< T > & NativeTyp
 			{
 				return processingTime;
 			}
-		};
+				};
 	}
 }

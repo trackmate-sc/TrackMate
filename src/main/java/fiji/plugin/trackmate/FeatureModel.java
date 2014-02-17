@@ -407,17 +407,23 @@ public class FeatureModel
 			{
 				val = getTrackFeature( trackID, feature );
 				if ( null == val )
+				{
 					continue;
+				}
 				values[ index++ ] = val;
 				noDataFlag = false;
 			}
 
 			if ( noDataFlag )
+			{
 				featureValues.put( feature, new double[ 0 ] ); // Empty array to
-																// signal no
-																// data
+				// signal no
+				// data
+			}
 			else
+			{
 				featureValues.put( feature, values );
+			}
 		}
 		return featureValues;
 	}

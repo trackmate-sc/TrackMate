@@ -53,7 +53,7 @@ public class TrackFeatureCalculator extends MultiThreadedBenchmarkAlgorithm {
 	public boolean process() {
 		final long start = System.currentTimeMillis();
 
-		// Clean
+		// Clean // FIXME this is where we loose the manual features....
 		model.getFeatureModel().clearTrackFeatures();
 
 		// Declare what you do.
@@ -103,7 +103,9 @@ public class TrackFeatureCalculator extends MultiThreadedBenchmarkAlgorithm {
 				analyzer.process(model.getTrackModel().trackIDs(false), model);
 			}
 			if (doLogIt)
+			{
 				logger.log("  - " + analyzer.getKey() + " in " + analyzer.getProcessingTime() + " ms.\n");
+			}
 		}
 	}
 }

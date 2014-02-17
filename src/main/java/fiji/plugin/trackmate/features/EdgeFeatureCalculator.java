@@ -56,7 +56,7 @@ public class EdgeFeatureCalculator extends MultiThreadedBenchmarkAlgorithm {
 	public boolean process() {
 		final long start = System.currentTimeMillis();
 
-		// Clean
+		// Clean // FIXME this is where we loose the manual features....
 		model.getFeatureModel().clearEdgeFeatures();
 
 		// Declare what you do.
@@ -83,6 +83,7 @@ public class EdgeFeatureCalculator extends MultiThreadedBenchmarkAlgorithm {
 	 * for the specified edges.
 	 */
 	public void computeSpotFeatures(final Collection<DefaultWeightedEdge> edges, final boolean doLogIt) {
+		// FIXME WTF is this method's name ?!?!?!?!?
 		final List<EdgeAnalyzer> spotFeatureAnalyzers = settings.getEdgeAnalyzers();
 		computeEdgeFeaturesAgent(edges, spotFeatureAnalyzers, doLogIt);
 	}
@@ -103,7 +104,9 @@ public class EdgeFeatureCalculator extends MultiThreadedBenchmarkAlgorithm {
 			analyzer.setNumThreads(numThreads);
 			analyzer.process(edges, model);
 			if (doLogIt)
+			{
 				logger.log("  - " + analyzer.getKey() + " in " + analyzer.getProcessingTime() + " ms.\n");
+			}
 		}
 	}
 

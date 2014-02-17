@@ -193,9 +193,13 @@ public class ColorByFeatureGUIPanel extends ActionListenablePanel
 		{
 			val = values[ i ];
 			if ( val > max )
+			{
 				max = val;
+			}
 			if ( val < min )
+			{
 				min = val;
+			}
 		}
 
 		final int width = canvasColor.getWidth();
@@ -314,7 +318,7 @@ public class ColorByFeatureGUIPanel extends ActionListenablePanel
 			{
 			case SPOTS:
 				categoryNames.put( Category.SPOTS, "Spot features:" );
-				final Collection< String > spotFeatures = model.getFeatureModel().getSpotFeatures();
+				final Collection< String > spotFeatures = new ArrayList< String >( model.getFeatureModel().getSpotFeatures() );
 				features.put( Category.SPOTS, spotFeatures );
 				// Deal with manual coloring separately.
 				spotFeatures.remove( ManualSpotColorAnalyzerFactory.FEATURE );
@@ -324,7 +328,7 @@ public class ColorByFeatureGUIPanel extends ActionListenablePanel
 
 			case EDGES:
 				categoryNames.put( Category.EDGES, "Edge features:" );
-				final Collection< String > edgeFeatures = model.getFeatureModel().getEdgeFeatures();
+				final Collection< String > edgeFeatures = new ArrayList< String >( model.getFeatureModel().getEdgeFeatures() );
 				// Deal with manual coloring separately.
 				edgeFeatures.remove( ManualEdgeColorAnalyzer.FEATURE );
 
