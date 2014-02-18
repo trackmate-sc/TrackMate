@@ -72,7 +72,7 @@ public class ModelFeatureUpdater implements ModelChangeListener {
 		spotFeatureCalculator.computeSpotFeatures(sc, false);
 		
 		// Update edge features
-		edgeFeatureCalculator.computeSpotFeatures(edges, false);
+		edgeFeatureCalculator.computeEdgesFeatures(edges, false);
 		
 		// Update track features
 		trackFeatureCalculator.computeTrackFeatures(event.getTrackUpdated(), false);

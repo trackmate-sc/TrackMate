@@ -89,8 +89,14 @@ public class EdgeFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 	/**
 	 * Calculates all the edge features configured in the {@link Settings}
 	 * object for the specified edges.
+	 * 
+	 * @param edges
+	 *            the edges to compute.
+	 * @param doLogIt
+	 *            if <code>true</code>, the logger of the {@link #model} will be
+	 *            notified of the calculation.
 	 */
-	public void computeSpotFeatures( final Collection< DefaultWeightedEdge > edges, final boolean doLogIt )
+	public void computeEdgesFeatures( final Collection< DefaultWeightedEdge > edges, final boolean doLogIt )
 	{
 		final List< EdgeAnalyzer > spotFeatureAnalyzers = settings.getEdgeAnalyzers();
 		computeEdgeFeaturesAgent( edges, spotFeatureAnalyzers, doLogIt );
