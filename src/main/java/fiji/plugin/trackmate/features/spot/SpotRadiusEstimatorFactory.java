@@ -38,7 +38,7 @@ public class SpotRadiusEstimatorFactory< T extends RealType< T > & NativeType< T
 
 	public static final HashMap< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 1 );
 
-	private static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 1 );
+	public static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 1 );
 
 	static
 	{

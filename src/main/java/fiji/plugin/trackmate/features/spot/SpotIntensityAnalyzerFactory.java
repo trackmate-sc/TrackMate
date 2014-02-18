@@ -53,7 +53,7 @@ public class SpotIntensityAnalyzerFactory< T extends RealType< T > & NativeType<
 
 	public static final HashMap< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 9 );
 
-	private static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 9 );
+	public static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 9 );
 	static
 	{
 		FEATURES.add( MEAN_INTENSITY );

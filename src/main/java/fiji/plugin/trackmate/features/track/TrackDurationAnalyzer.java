@@ -42,7 +42,7 @@ public class TrackDurationAnalyzer implements TrackAnalyzer, MultiThreaded
 
 	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 4 );
 
-	private static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 4 );
+	public static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 4 );
 
 	static
 	{

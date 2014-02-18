@@ -44,7 +44,7 @@ public class TrackLocationAnalyzer implements TrackAnalyzer, MultiThreaded, Benc
 
 	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 3 );
 
-	private static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 3 );
+	public static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 3 );
 
 	static
 	{

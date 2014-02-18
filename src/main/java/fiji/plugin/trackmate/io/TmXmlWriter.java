@@ -374,11 +374,7 @@ public class TmXmlWriter {
 		final Element allTracksElement = new Element(TRACK_COLLECTION_ELEMENT_KEY);
 
 		// Prepare track features for writing: we separate ints from doubles
-		final List<String> trackIntFeatures = new ArrayList<String>();
-		trackIntFeatures.add(TrackIndexAnalyzer.TRACK_ID);
-		trackIntFeatures.add(TrackIndexAnalyzer.TRACK_INDEX); // TODO is there a better way?
-		final List<String> trackDoubleFeatures = new ArrayList<String>(model.getFeatureModel().getTrackFeatures());
-		trackDoubleFeatures.removeAll(trackIntFeatures);
+		final List< String > trackFeatures = new ArrayList< String >( model.getFeatureModel().getTrackFeatures() );
 
 		// Same thing for edge features
 		final List<String> edgeIntFeatures = new ArrayList<String>();// TODO is there a better way?
@@ -394,14 +390,10 @@ public class TmXmlWriter {
 			final Element trackElement = new Element(TRACK_ELEMENT_KEY);
 			trackElement.setAttribute(TRACK_NAME_ATTRIBUTE_NAME, model.getTrackModel().name(trackID));
 
-			for (final String feature : trackDoubleFeatures) {
+			for ( final String feature : trackFeatures )
+			{
 				final Double val = model.getFeatureModel().getTrackFeature(trackID, feature);
 				trackElement.setAttribute(feature, val.toString());
-			}
-
-			for (final String feature : trackIntFeatures) {
-				final int val = model.getFeatureModel().getTrackFeature(trackID, feature).intValue();
-				trackElement.setAttribute(feature, "" + val);
 			}
 
 			// Echo edges

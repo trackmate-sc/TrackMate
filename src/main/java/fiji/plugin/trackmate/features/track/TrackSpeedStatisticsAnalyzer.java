@@ -53,7 +53,7 @@ public class TrackSpeedStatisticsAnalyzer implements TrackAnalyzer, MultiThreade
 
 	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 5 );
 
-	private static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 5 );
+	public static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 5 );
 
 	static
 	{

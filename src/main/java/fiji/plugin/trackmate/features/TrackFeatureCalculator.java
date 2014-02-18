@@ -62,7 +62,8 @@ public class TrackFeatureCalculator extends MultiThreadedBenchmarkAlgorithm {
 			final Map<String, String> featureNames = analyzer.getFeatureNames();
 			final Map<String, String> featureShortNames = analyzer.getFeatureShortNames();
 			final Map<String, Dimension> featureDimensions = analyzer.getFeatureDimensions();
-			model.getFeatureModel().declareTrackFeatures(features, featureNames, featureShortNames, featureDimensions);
+			final Map< String, Boolean > isIntFeature = analyzer.getIsIntFeature();
+			model.getFeatureModel().declareTrackFeatures( features, featureNames, featureShortNames, featureDimensions, isIntFeature );
 		}
 
 		// Do it.

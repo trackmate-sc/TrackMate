@@ -75,7 +75,8 @@ public class EdgeFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 			final Map< String, String > featureNames = analyzer.getFeatureNames();
 			final Map< String, String > featureShortNames = analyzer.getFeatureShortNames();
 			final Map< String, Dimension > featureDimensions = analyzer.getFeatureDimensions();
-			model.getFeatureModel().declareEdgeFeatures( features, featureNames, featureShortNames, featureDimensions );
+			final Map< String, Boolean > isIntFeature = analyzer.getIsIntFeature();
+			model.getFeatureModel().declareEdgeFeatures( features, featureNames, featureShortNames, featureDimensions, isIntFeature );
 		}
 
 		// Do it.
@@ -89,7 +90,7 @@ public class EdgeFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 	/**
 	 * Calculates all the edge features configured in the {@link Settings}
 	 * object for the specified edges.
-	 * 
+	 *
 	 * @param edges
 	 *            the edges to compute.
 	 * @param doLogIt

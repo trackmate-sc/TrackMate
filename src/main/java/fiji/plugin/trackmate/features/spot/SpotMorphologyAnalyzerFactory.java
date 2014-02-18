@@ -45,7 +45,7 @@ public class SpotMorphologyAnalyzerFactory< T extends RealType< T > & NativeType
 
 	public static final HashMap< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 10 );
 
-	private static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 10 );
+	public static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 10 );
 
 	static
 	{

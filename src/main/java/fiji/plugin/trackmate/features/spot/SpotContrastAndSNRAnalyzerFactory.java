@@ -48,7 +48,7 @@ public class SpotContrastAndSNRAnalyzerFactory< T extends RealType< T > & Native
 
 	public static final HashMap< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 2 );
 
-	private static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 2 );
+	public static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 2 );
 
 	static
 	{
