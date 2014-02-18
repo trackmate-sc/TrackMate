@@ -65,9 +65,6 @@ public class EdgeFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 	{
 		final long start = System.currentTimeMillis();
 
-		// Clean
-		model.getFeatureModel().clearEdgeFeatures();
-
 		// Declare what you do.
 		for ( final EdgeAnalyzer analyzer : settings.getEdgeAnalyzers() )
 		{
@@ -117,10 +114,15 @@ public class EdgeFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 
 		for ( final EdgeAnalyzer analyzer : analyzers )
 		{
+			if ( analyzer.isManualFeature() )
+			{
+				// Skip manual features.
+				continue;
+			}
 			analyzer.setNumThreads( numThreads );
 			analyzer.process( edges, model );
 			if ( doLogIt )
-				logger.log( "  - " + analyzer.getKey() + " in " + analyzer.getProcessingTime() + " ms.\n" );
+				logger.log( "  - " + analyzer.getName() + " in " + analyzer.getProcessingTime() + " ms.\n" );
 		}
 	}
 

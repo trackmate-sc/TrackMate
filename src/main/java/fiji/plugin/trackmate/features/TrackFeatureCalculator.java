@@ -62,9 +62,6 @@ public class TrackFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 	{
 		final long start = System.currentTimeMillis();
 
-		// Clean
-		model.getFeatureModel().clearTrackFeatures();
-
 		// Declare what you do.
 		for ( final TrackAnalyzer analyzer : settings.getTrackAnalyzers() )
 		{
@@ -111,6 +108,12 @@ public class TrackFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 
 		for ( final TrackAnalyzer analyzer : analyzers )
 		{
+			if ( analyzer.isManualFeature() )
+			{
+				// Skip manual analyzers
+				continue;
+			}
+
 			analyzer.setNumThreads( numThreads );
 			if ( analyzer.isLocal() )
 			{
@@ -121,7 +124,7 @@ public class TrackFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 				analyzer.process( model.getTrackModel().trackIDs( false ), model );
 			}
 			if ( doLogIt )
-				logger.log( "  - " + analyzer.getKey() + " in " + analyzer.getProcessingTime() + " ms.\n" );
+				logger.log( "  - " + analyzer.getName() + " in " + analyzer.getProcessingTime() + " ms.\n" );
 		}
 	}
 }

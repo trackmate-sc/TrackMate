@@ -197,14 +197,6 @@ public class FeatureModel
 	}
 
 	/**
-	 * Clears the edge features values.
-	 */
-	public void clearEdgeFeatures()
-	{
-		edgeFeatureValues.clear();
-	}
-
-	/**
 	 * Declares edge features, by specifying their name, short name and
 	 * dimension. An {@link IllegalArgumentException} will be thrown if any of
 	 * the map misses a feature.
@@ -295,14 +287,6 @@ public class FeatureModel
 	public Collection< String > getTrackFeatures()
 	{
 		return trackFeatures;
-	}
-
-	/**
-	 * Clears the track features values.
-	 */
-	public void clearTrackFeatures()
-	{
-		trackFeatureValues.clear();
 	}
 
 	/**
@@ -548,7 +532,7 @@ public class FeatureModel
 	/**
 	 * Returns the map that states whether the target feature is integer values
 	 * (<code>true</code>) or double valued (<code>false</code>).
-	 * 
+	 *
 	 * @return the map of isInt flag.
 	 */
 	public Map< String, Boolean > getSpotFeatureIsInt()
