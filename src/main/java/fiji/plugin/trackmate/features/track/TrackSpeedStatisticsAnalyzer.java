@@ -53,6 +53,8 @@ public class TrackSpeedStatisticsAnalyzer implements TrackAnalyzer, MultiThreade
 
 	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 5 );
 
+	private static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 5 );
+
 	static
 	{
 		FEATURES.add( TRACK_MEAN_SPEED );
@@ -86,6 +88,14 @@ public class TrackSpeedStatisticsAnalyzer implements TrackAnalyzer, MultiThreade
 		FEATURE_DIMENSIONS.put( TRACK_STD_SPEED, Dimension.VELOCITY );
 		// FEATURE_DIMENSIONS.put(TRACK_SPEED_KURTOSIS, Dimension.NONE);
 		// FEATURE_DIMENSIONS.put(TRACK_SPEED_SKEWNESS, Dimension.NONE);
+
+		IS_INT.put( TRACK_MEAN_SPEED, Boolean.FALSE );
+		IS_INT.put( TRACK_MAX_SPEED, Boolean.FALSE );
+		IS_INT.put( TRACK_MIN_SPEED, Boolean.FALSE );
+		IS_INT.put( TRACK_MEDIAN_SPEED, Boolean.FALSE );
+		IS_INT.put( TRACK_STD_SPEED, Boolean.FALSE );
+		// IS_INT.put(TRACK_SPEED_KURTOSIS, Boolean.FALSE);
+		// IS_INT.put(TRACK_SPEED_SKEWNESS, Boolean.FALSE);
 	}
 
 	private int numThreads;
@@ -281,5 +291,17 @@ public class TrackSpeedStatisticsAnalyzer implements TrackAnalyzer, MultiThreade
 	public String getName()
 	{
 		return KEY;
+	}
+
+	@Override
+	public Map< String, Boolean > getIsIntFeature()
+	{
+		return IS_INT;
+	}
+
+	@Override
+	public boolean isManualFeature()
+	{
+		return false;
 	}
 }

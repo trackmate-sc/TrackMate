@@ -44,6 +44,9 @@ public class SpotMorphologyAnalyzerFactory< T extends RealType< T > & NativeType
 	public static final HashMap< String, String > FEATURE_SHORT_NAMES = new HashMap< String, String >( 10 );
 
 	public static final HashMap< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 10 );
+
+	private static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 10 );
+
 	static
 	{
 		FEATURES.add( MORPHOLOGY );
@@ -84,6 +87,17 @@ public class SpotMorphologyAnalyzerFactory< T extends RealType< T > & NativeType
 		FEATURE_DIMENSIONS.put( featurelist_theta[ 1 ], Dimension.ANGLE );
 		FEATURE_DIMENSIONS.put( featurelist_theta[ 2 ], Dimension.ANGLE );
 
+		IS_INT.put( MORPHOLOGY, Boolean.FALSE );
+		IS_INT.put( featurelist_sa[ 0 ], Boolean.FALSE );
+		IS_INT.put( featurelist_sa[ 1 ], Boolean.FALSE );
+		IS_INT.put( featurelist_sa[ 2 ], Boolean.FALSE );
+		IS_INT.put( featurelist_phi[ 0 ], Boolean.FALSE );
+		IS_INT.put( featurelist_phi[ 1 ], Boolean.FALSE );
+		IS_INT.put( featurelist_phi[ 2 ], Boolean.FALSE );
+		IS_INT.put( featurelist_theta[ 0 ], Boolean.FALSE );
+		IS_INT.put( featurelist_theta[ 1 ], Boolean.FALSE );
+		IS_INT.put( featurelist_theta[ 2 ], Boolean.FALSE );
+
 	}
 
 	public static final String KEY = "Spot morphology";
@@ -99,6 +113,7 @@ public class SpotMorphologyAnalyzerFactory< T extends RealType< T > & NativeType
 
 	/** Scalene shape, nothing particular, a > b > c. */
 	public static final Double SCALENE = Double.valueOf( 3 );
+
 
 	/*
 	 * METHODS
@@ -159,5 +174,17 @@ public class SpotMorphologyAnalyzerFactory< T extends RealType< T > & NativeType
 	public String getName()
 	{
 		return KEY;
+	}
+
+	@Override
+	public Map< String, Boolean > getIsIntFeature()
+	{
+		return IS_INT;
+	}
+
+	@Override
+	public boolean isManualFeature()
+	{
+		return false;
 	}
 }

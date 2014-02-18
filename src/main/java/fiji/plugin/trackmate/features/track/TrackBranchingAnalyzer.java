@@ -48,6 +48,8 @@ public class TrackBranchingAnalyzer implements TrackAnalyzer, MultiThreaded
 
 	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 5 );
 
+	private static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 5 );
+
 	static
 	{
 		FEATURES.add( NUMBER_SPOTS );
@@ -73,6 +75,12 @@ public class TrackBranchingAnalyzer implements TrackAnalyzer, MultiThreaded
 		FEATURE_DIMENSIONS.put( NUMBER_SPLITS, Dimension.NONE );
 		FEATURE_DIMENSIONS.put( NUMBER_MERGES, Dimension.NONE );
 		FEATURE_DIMENSIONS.put( NUMBER_COMPLEX, Dimension.NONE );
+
+		IS_INT.put( NUMBER_SPOTS, Boolean.TRUE );
+		IS_INT.put( NUMBER_GAPS, Boolean.TRUE );
+		IS_INT.put( NUMBER_SPLITS, Boolean.TRUE );
+		IS_INT.put( NUMBER_MERGES, Boolean.TRUE );
+		IS_INT.put( NUMBER_COMPLEX, Boolean.TRUE );
 	}
 
 	private int numThreads;
@@ -265,6 +273,18 @@ public class TrackBranchingAnalyzer implements TrackAnalyzer, MultiThreaded
 	public String getName()
 	{
 		return KEY;
+	}
+
+	@Override
+	public Map< String, Boolean > getIsIntFeature()
+	{
+		return IS_INT;
+	}
+
+	@Override
+	public boolean isManualFeature()
+	{
+		return false;
 	}
 
 }
