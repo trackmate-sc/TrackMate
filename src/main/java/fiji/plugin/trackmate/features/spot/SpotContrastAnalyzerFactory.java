@@ -37,12 +37,15 @@ public class SpotContrastAnalyzerFactory< T extends RealType< T > & NativeType< 
 	private static final HashMap< String, String > FEATURE_SHORT_NAMES = new HashMap< String, String >( 1 );
 
 	private static final HashMap< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 1 );
+
+	private static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 1 );
 	static
 	{
 		FEATURES.add( KEY );
 		FEATURE_NAMES.put( KEY, "Contrast" );
 		FEATURE_SHORT_NAMES.put( KEY, "Contrast" );
 		FEATURE_DIMENSIONS.put( KEY, Dimension.NONE );
+		IS_INT.put( KEY, Boolean.FALSE );
 	}
 
 	/*
@@ -104,6 +107,18 @@ public class SpotContrastAnalyzerFactory< T extends RealType< T > & NativeType< 
 	public String getName()
 	{
 		return KEY;
+	}
+
+	@Override
+	public Map< String, Boolean > getIsIntFeature()
+	{
+		return IS_INT;
+	}
+
+	@Override
+	public boolean isManualFeature()
+	{
+		return false;
 	}
 
 }

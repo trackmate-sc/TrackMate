@@ -32,13 +32,16 @@ public class ManualEdgeColorAnalyzer implements EdgeAnalyzer
 
 	static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 1 );
 
+	static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 1 );
+
 	static final String INFO_TEXT = "<html>A dummy analyzer for the feature that stores the color manually assigned to each edge.</html>";
 
 	static final String NAME = "Manual edge color analyzer";
 
-	private static final Color DEFAULT_COLOR = Color.GRAY.darker();
+	public static final Color DEFAULT_COLOR = Color.GRAY.darker();
 
 	private static final Double DEFAULT_COLOR_VALUE = Double.valueOf( DEFAULT_COLOR.getRGB() );
+
 
 	static
 	{
@@ -46,6 +49,7 @@ public class ManualEdgeColorAnalyzer implements EdgeAnalyzer
 		FEATURE_SHORT_NAMES.put( FEATURE, "Edge color" );
 		FEATURE_NAMES.put( FEATURE, "Manual edge color" );
 		FEATURE_DIMENSIONS.put( FEATURE, Dimension.NONE );
+		IS_INT.put( FEATURE, Boolean.TRUE );
 	}
 
 	private long processingTime;
@@ -87,14 +91,18 @@ public class ManualEdgeColorAnalyzer implements EdgeAnalyzer
 	}
 
 	@Override
-	public void setNumThreads()
+	public Map< String, Boolean > getIsIntFeature()
 	{
+		return IS_INT;
 	}
 
 	@Override
+	public void setNumThreads()
+	{}
+
+	@Override
 	public void setNumThreads( final int numThreads )
-	{
-	}
+	{}
 
 	@Override
 	public int getNumThreads()
@@ -107,6 +115,7 @@ public class ManualEdgeColorAnalyzer implements EdgeAnalyzer
 	{
 		return INFO_TEXT;
 	}
+
 
 	@Override
 	public ImageIcon getIcon()
@@ -137,6 +146,12 @@ public class ManualEdgeColorAnalyzer implements EdgeAnalyzer
 
 	@Override
 	public boolean isLocal()
+	{
+		return true;
+	}
+
+	@Override
+	public boolean isManualFeature()
 	{
 		return true;
 	}

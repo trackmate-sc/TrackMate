@@ -6,15 +6,15 @@ package fiji.plugin.trackmate.io;
  * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com>  2010-2011
   */
 public class TmXmlKeys {
-	
+
 	/*
 	 * GENERIC ATTRIBUTES
 	 */
-	
-	public static final String FRAME_ATTRIBUTE_NAME 				= "frame"; 
+
+	public static final String FRAME_ATTRIBUTE_NAME 				= "frame";
 	public static final String SPOT_ID_ATTRIBUTE_NAME 				= "ID";
 	public static final String SPOT_NAME_ATTRIBUTE_NAME 			= "name";
-	
+
 	/*
 	 * ROOT ELEMENT
 	 */
@@ -26,18 +26,18 @@ public class TmXmlKeys {
 	public static final String SPATIAL_UNITS_ATTRIBUTE_NAME 		= "spatialunits";
 	public static final String TIME_UNITS_ATTRIBUTE_NAME 			= "timeunits";
 
-	
-	
+
+
 	/*
 	 * LOG
 	 */
-	
+
 	public static final String LOG_ELEMENT_KEY 						= "Log";
-	
+
 	/*
 	 * BASE SETTINGS elements
 	 */
-	
+
 	public static final String CROP_ELEMENT_KEY 				= "BasicSettings";
 	public static final String CROP_XSTART_ATTRIBUTE_NAME 		= "xstart";
 	public static final String CROP_YSTART_ATTRIBUTE_NAME 		= "ystart";
@@ -52,21 +52,21 @@ public class TmXmlKeys {
 	/*
 	 * DETECTOR SETTINGS
 	 */
-	
+
 	public static final String DETECTOR_SETTINGS_ELEMENT_KEY 			= "DetectorSettings";
 
 	/*
 	 * TRACKER SETTINGS
 	 */
-	
+
 	public static final String TRACKER_SETTINGS_ELEMENT_KEY				= "TrackerSettings";
 	public static final String TRACKER_SETTINGS_CLASS_ATTRIBUTE_NAME	= "trackersettingsclass";
 	public static final String TRACKER_ATTRIBUTE_NAME					= "trackername";
-	
+
 	/*
 	 * IMAGE element
 	 */
-	
+
 	public static final String IMAGE_ELEMENT_KEY 					= "ImageData";
 	public static final String IMAGE_FILENAME_ATTRIBUTE_NAME 		= "filename";
 	public static final String IMAGE_FOLDER_ATTRIBUTE_NAME 			= "folder";
@@ -78,37 +78,37 @@ public class TmXmlKeys {
 	public static final String IMAGE_NSLICES_ATTRIBUTE_NAME 		= "nslices";
 	public static final String IMAGE_TIME_INTERVAL_ATTRIBUTE_NAME 	= "timeinterval";
 	public static final String IMAGE_NFRAMES_ATTRIBUTE_NAME 		= "nframes";
-	
+
 	/*
 	 * ALL SPOTS element
 	 */
 
 	public static final String SPOT_COLLECTION_ELEMENT_KEY 				= "AllSpots";
 	public static final String SPOT_COLLECTION_NSPOTS_ATTRIBUTE_NAME 	= "nspots";
-	public static final String SPOT_FRAME_COLLECTION_ELEMENT_KEY 		= "SpotsInFrame"; 
-	public static final String SPOT_ELEMENT_KEY 						= "Spot"; 
+	public static final String SPOT_FRAME_COLLECTION_ELEMENT_KEY 		= "SpotsInFrame";
+	public static final String SPOT_ELEMENT_KEY 						= "Spot";
 
 	/*
 	 * INITIAL SPOT FILTER element
 	 */
-	
+
 	public static final String INITIAL_SPOT_FILTER_ELEMENT_KEY		= "InitialSpotFilter";
-	
+
 	/*
 	 * FILTERS element for SPOTS and TRACKS
 	 */
-	
+
 	public static final String SPOT_FILTER_COLLECTION_ELEMENT_KEY		= "SpotFilterCollection";
 	public static final String TRACK_FILTER_COLLECTION_ELEMENT_KEY		= "TrackFilterCollection";
 	public static final String FILTER_ELEMENT_KEY						= "Filter";
 	public static final String FILTER_FEATURE_ATTRIBUTE_NAME 			= "feature";
 	public static final String FILTER_VALUE_ATTRIBUTE_NAME 				= "value";
 	public static final String FILTER_ABOVE_ATTRIBUTE_NAME 				= "isabove";
-	
+
 	/*
 	 * TRACK elements
 	 */
-	
+
 	public static final String TRACK_COLLECTION_ELEMENT_KEY			= "AllTracks";
 	public static final String TRACK_ELEMENT_KEY 					= "Track";
 //	public static final String TRACK_ID_ATTRIBUTE_NAME 				= "trackID";
@@ -119,18 +119,18 @@ public class TmXmlKeys {
 //	public static final String TRACK_EDGE_TARGET_ATTRIBUTE_NAME	 	= "targetID";
 //	public static final String TRACK_EDGE_WEIGHT_ATTRIBUTE_NAME	 	= "weight";
 
-	
+
 	/*
 	 * TRACK FILTERED elements
 	 */
-	
+
 	public static final String FILTERED_TRACK_ELEMENT_KEY 				= "FilteredTracks";
 	public static final String TRACK_ID_ELEMENT_KEY 					= "TrackID";
-	
+
 	/*
 	 * FEATURES elements
 	 */
-	
+
 	public static final String FEATURE_DECLARATIONS_ELEMENT_KEY 		= "FeatureDeclarations";
 	public static final String SPOT_FEATURES_ELEMENT_KEY 				= "SpotFeatures";
 	public static final String EDGE_FEATURES_ELEMENT_KEY 				= "EdgeFeatures";
@@ -140,11 +140,12 @@ public class TmXmlKeys {
 	public static final String FEATURE_NAME_ATTRIBUTE					= "name";
 	public static final String FEATURE_SHORT_NAME_ATTRIBUTE				= "shortname";
 	public static final String FEATURE_DIMENSION_ATTRIBUTE				= "dimension";
-	
+	public static final String FEATURE_ISINT_ATTRIBUTE 					= "isint";
+
 	/*
 	 * SPOT< EDGE AND TRACK FEATURE ANALYZERS elements
 	 */
-	
+
 	public static final String ANALYZER_COLLECTION_ELEMENT_KEY 			= "AnalyzerCollection";
 	public static final String SPOT_ANALYSERS_ELEMENT_KEY 				= "SpotAnalyzers";
 	public static final String EDGE_ANALYSERS_ELEMENT_KEY 				= "EdgeAnalyzers";
@@ -155,7 +156,7 @@ public class TmXmlKeys {
 	/*
 	 * GUI
 	 */
-	
+
 	public static final String GUI_STATE_ELEMENT_KEY 					= "GUIState";
 	public static final String GUI_STATE_ATTRIBUTE 						= "state";
 	public static final String GUI_VIEW_ELEMENT_KEY 					= "View";
@@ -164,6 +165,6 @@ public class TmXmlKeys {
 	public static final String GUI_VIEW_ATTRIBUTE_POSITION_Y 			= "y";
 	public static final String GUI_VIEW_ATTRIBUTE_POSITION_WIDTH 		= "width";
 	public static final String GUI_VIEW_ATTRIBUTE_POSITION_HEIGHT		= "height";
-	
+
 }
 

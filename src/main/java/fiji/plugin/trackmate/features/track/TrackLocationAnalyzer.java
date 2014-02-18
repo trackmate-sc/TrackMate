@@ -36,13 +36,15 @@ public class TrackLocationAnalyzer implements TrackAnalyzer, MultiThreaded, Benc
 
 	public static final String Z_LOCATION = "TRACK_Z_LOCATION";
 
-	public static final List< String > FEATURES = new ArrayList< String >( 4 );
+	public static final List< String > FEATURES = new ArrayList< String >( 3 );
 
-	public static final Map< String, String > FEATURE_NAMES = new HashMap< String, String >( 4 );
+	public static final Map< String, String > FEATURE_NAMES = new HashMap< String, String >( 3 );
 
-	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< String, String >( 4 );
+	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< String, String >( 3 );
 
-	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 4 );
+	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 3 );
+
+	public static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 3 );
 
 	static
 	{
@@ -61,6 +63,10 @@ public class TrackLocationAnalyzer implements TrackAnalyzer, MultiThreaded, Benc
 		FEATURE_DIMENSIONS.put( X_LOCATION, Dimension.POSITION );
 		FEATURE_DIMENSIONS.put( Y_LOCATION, Dimension.POSITION );
 		FEATURE_DIMENSIONS.put( Z_LOCATION, Dimension.POSITION );
+
+		IS_INT.put( X_LOCATION, Boolean.FALSE );
+		IS_INT.put( Y_LOCATION, Boolean.FALSE );
+		IS_INT.put( Z_LOCATION, Boolean.FALSE );
 	}
 
 	private int numThreads;
@@ -207,5 +213,17 @@ public class TrackLocationAnalyzer implements TrackAnalyzer, MultiThreaded, Benc
 	public String getName()
 	{
 		return KEY;
+	}
+
+	@Override
+	public Map< String, Boolean > getIsIntFeature()
+	{
+		return IS_INT;
+	}
+
+	@Override
+	public boolean isManualFeature()
+	{
+		return false;
 	}
 }

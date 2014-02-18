@@ -22,6 +22,7 @@ public class ManualEdgeColorGenerator implements TrackColorGenerator
 	public Color color( final DefaultWeightedEdge  edge)
 	{
 		final Double val = model.getFeatureModel().getEdgeFeature( edge, ManualEdgeColorAnalyzer.FEATURE );
+		if ( null == val ) { return ManualEdgeColorAnalyzer.DEFAULT_COLOR; }
 		return new Color( val.intValue() );
 	}
 

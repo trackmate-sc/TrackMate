@@ -34,6 +34,8 @@ public class TrackIndexAnalyzer implements TrackAnalyzer
 
 	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 2 );
 
+	public static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 2 );
+
 	static
 	{
 		FEATURES.add( TRACK_INDEX );
@@ -47,6 +49,9 @@ public class TrackIndexAnalyzer implements TrackAnalyzer
 
 		FEATURE_DIMENSIONS.put( TRACK_INDEX, Dimension.NONE );
 		FEATURE_DIMENSIONS.put( TRACK_ID, Dimension.NONE );
+
+		IS_INT.put( TRACK_INDEX, Boolean.TRUE );
+		IS_INT.put( TRACK_ID, Boolean.TRUE );
 	}
 
 	private long processingTime;
@@ -151,5 +156,17 @@ public class TrackIndexAnalyzer implements TrackAnalyzer
 	public String getName()
 	{
 		return KEY;
+	}
+
+	@Override
+	public Map< String, Boolean > getIsIntFeature()
+	{
+		return IS_INT;
+	}
+
+	@Override
+	public boolean isManualFeature()
+	{
+		return false;
 	}
 }

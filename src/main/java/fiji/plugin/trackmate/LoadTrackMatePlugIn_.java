@@ -128,8 +128,6 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		// Model
 		model = reader.getModel();
 
-		System.out.println( model );// DEBUG
-
 		// Settings -> empty for now.
 		settings = createSettings();
 
@@ -159,9 +157,7 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		final DetectorProvider detectorProvider = controller.getDetectorProvider();
 		final TrackerProvider trackerProvider = controller.getTrackerProvider();
 		final SpotAnalyzerProvider spotAnalyzerProvider = controller.getSpotAnalyzerProvider();
-		System.out.println( spotAnalyzerProvider.echo() );// DEBUG
 		final EdgeAnalyzerProvider edgeAnalyzerProvider = controller.getEdgeAnalyzerProvider();
-		System.out.println( edgeAnalyzerProvider.echo() );// DEBUG
 		final TrackAnalyzerProvider trackAnalyzerProvider = controller.getTrackAnalyzerProvider();
 		reader.readSettings( settings, detectorProvider, trackerProvider, spotAnalyzerProvider, edgeAnalyzerProvider, trackAnalyzerProvider );
 
@@ -293,7 +289,7 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 	public static void main( final String[] args )
 	{
 		ImageJ.main( args );
-		final File file = new File( AppUtils.getBaseDirectory( TrackMate.class ), "samples/FakeTracks_Color.xml" );
+		final File file = new File( AppUtils.getBaseDirectory( TrackMate.class ), "samples/FakeTracks.xml" );
 		final LoadTrackMatePlugIn_ plugIn = new LoadTrackMatePlugIn_();
 		plugIn.run( file.getAbsolutePath() );
 	}

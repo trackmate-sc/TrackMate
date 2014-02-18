@@ -52,6 +52,8 @@ public class SpotIntensityAnalyzerFactory< T extends RealType< T > & NativeType<
 	public static final HashMap< String, String > FEATURE_SHORT_NAMES = new HashMap< String, String >( 9 );
 
 	public static final HashMap< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 9 );
+
+	public static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 9 );
 	static
 	{
 		FEATURES.add( MEAN_INTENSITY );
@@ -93,6 +95,16 @@ public class SpotIntensityAnalyzerFactory< T extends RealType< T > & NativeType<
 		// FEATURE_DIMENSIONS.put(VARIANCE, Dimension.INTENSITY_SQUARED);
 		// FEATURE_DIMENSIONS.put(KURTOSIS, Dimension.NONE);
 		// FEATURE_DIMENSIONS.put(SKEWNESS, Dimension.NONE);
+
+		IS_INT.put( MEAN_INTENSITY, Boolean.FALSE );
+		IS_INT.put( MEDIAN_INTENSITY, Boolean.FALSE );
+		IS_INT.put( MIN_INTENSITY, Boolean.FALSE );
+		IS_INT.put( MAX_INTENSITY, Boolean.FALSE );
+		IS_INT.put( TOTAL_INTENSITY, Boolean.FALSE );
+		IS_INT.put( STANDARD_DEVIATION, Boolean.FALSE );
+		// IS_INT.put( VARIANCE, Boolean.FALSE );
+		// IS_INT.put( KURTOSIS, Boolean.FALSE );
+		// IS_INT.put( SKEWNESS, Boolean.FALSE );
 	}
 
 	/*
@@ -154,6 +166,18 @@ public class SpotIntensityAnalyzerFactory< T extends RealType< T > & NativeType<
 	public String getName()
 	{
 		return KEY;
+	}
+
+	@Override
+	public Map< String, Boolean > getIsIntFeature()
+	{
+		return IS_INT;
+	}
+
+	@Override
+	public boolean isManualFeature()
+	{
+		return false;
 	}
 
 }

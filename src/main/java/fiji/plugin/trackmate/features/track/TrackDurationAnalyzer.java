@@ -42,6 +42,8 @@ public class TrackDurationAnalyzer implements TrackAnalyzer, MultiThreaded
 
 	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 4 );
 
+	public static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 4 );
+
 	static
 	{
 		FEATURES.add( TRACK_DURATION );
@@ -63,6 +65,11 @@ public class TrackDurationAnalyzer implements TrackAnalyzer, MultiThreaded
 		FEATURE_DIMENSIONS.put( TRACK_START, Dimension.TIME );
 		FEATURE_DIMENSIONS.put( TRACK_STOP, Dimension.TIME );
 		FEATURE_DIMENSIONS.put( TRACK_DISPLACEMENT, Dimension.LENGTH );
+
+		IS_INT.put( TRACK_DURATION, Boolean.FALSE );
+		IS_INT.put( TRACK_START, Boolean.FALSE );
+		IS_INT.put( TRACK_STOP, Boolean.FALSE );
+		IS_INT.put( TRACK_DISPLACEMENT, Boolean.FALSE );
 	}
 
 	private int numThreads;
@@ -210,5 +217,17 @@ public class TrackDurationAnalyzer implements TrackAnalyzer, MultiThreaded
 	public String getName()
 	{
 		return KEY;
+	}
+
+	@Override
+	public Map< String, Boolean > getIsIntFeature()
+	{
+		return IS_INT;
+	}
+
+	@Override
+	public boolean isManualFeature()
+	{
+		return false;
 	}
 }

@@ -4,7 +4,6 @@ import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.TrackMateModule;
 import fiji.plugin.trackmate.features.FeatureAnalyzer;
 import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
 
@@ -22,7 +21,7 @@ import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
  *
  * @author Jean-Yves Tinevez - 2012
  */
-public interface SpotAnalyzerFactory< T extends RealType< T > & NativeType< T >> extends FeatureAnalyzer, TrackMateModule
+public interface SpotAnalyzerFactory< T extends RealType< T > & NativeType< T >> extends FeatureAnalyzer
 {
 
 	/**

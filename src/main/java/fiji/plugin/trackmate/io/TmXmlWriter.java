@@ -19,6 +19,7 @@ import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_ATTRIBUTE;
 import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_DECLARATIONS_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_DIMENSION_ATTRIBUTE;
 import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_ISINT_ATTRIBUTE;
 import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_NAME_ATTRIBUTE;
 import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_SHORT_NAME_ATTRIBUTE;
 import static fiji.plugin.trackmate.io.TmXmlKeys.FILTERED_TRACK_ELEMENT_KEY;
@@ -98,8 +99,6 @@ import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
-import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
-import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
@@ -398,39 +397,31 @@ public class TmXmlWriter
 		final Element allTracksElement = new Element( TRACK_COLLECTION_ELEMENT_KEY );
 
 		// Prepare track features for writing: we separate ints from doubles
-		final List< String > trackIntFeatures = new ArrayList< String >();
-		trackIntFeatures.add( TrackIndexAnalyzer.TRACK_ID );
-		trackIntFeatures.add( TrackIndexAnalyzer.TRACK_INDEX );
-		// TODO is there a better way?
-		final List< String > trackDoubleFeatures = new ArrayList< String >( model.getFeatureModel().getTrackFeatures() );
-		trackDoubleFeatures.removeAll( trackIntFeatures );
+		final List< String > trackFeatures = new ArrayList< String >( model.getFeatureModel().getTrackFeatures() );
 
 		// Same thing for edge features
-		final List< String > edgeIntFeatures = new ArrayList< String >();
-		edgeIntFeatures.add( EdgeTargetAnalyzer.SPOT_SOURCE_ID );
-		edgeIntFeatures.add( EdgeTargetAnalyzer.SPOT_TARGET_ID );
-		edgeIntFeatures.add( ManualEdgeColorAnalyzer.FEATURE );
-		final List< String > edgeDoubleFeatures = new ArrayList< String >( model.getFeatureModel().getEdgeFeatures() );
-		edgeDoubleFeatures.removeAll( edgeIntFeatures );
+		final List< String > edgeFeatures = new ArrayList< String >( model.getFeatureModel().getEdgeFeatures() );
 
-		final Set< Integer > trackIDs = model.getTrackModel().trackIDs( false );
-		for ( final int trackID : trackIDs )
-		{
-			final Set< DefaultWeightedEdge > track = model.getTrackModel().trackEdges( trackID );
+		final Set<Integer> trackIDs = model.getTrackModel().trackIDs(false);
+		for (final int trackID : trackIDs) {
+			final Set<DefaultWeightedEdge> track = model.getTrackModel().trackEdges(trackID);
 
-			final Element trackElement = new Element( TRACK_ELEMENT_KEY );
-			trackElement.setAttribute( TRACK_NAME_ATTRIBUTE_NAME, model.getTrackModel().name( trackID ) );
+			final Element trackElement = new Element(TRACK_ELEMENT_KEY);
+			trackElement.setAttribute(TRACK_NAME_ATTRIBUTE_NAME, model.getTrackModel().name(trackID));
 
-			for ( final String feature : trackDoubleFeatures )
+			for ( final String feature : trackFeatures )
 			{
-				final Double val = model.getFeatureModel().getTrackFeature( trackID, feature );
-				trackElement.setAttribute( feature, val.toString() );
-			}
-
-			for ( final String feature : trackIntFeatures )
-			{
-				final int val = model.getFeatureModel().getTrackFeature( trackID, feature ).intValue();
-				trackElement.setAttribute( feature, "" + val );
+				final Double val = model.getFeatureModel().getTrackFeature(trackID, feature);
+				String str;
+				if ( model.getFeatureModel().getTrackFeatureIsInt().get( feature ).booleanValue() )
+				{
+					str = "" + val.intValue();
+				}
+				else
+				{
+					str = val.toString();
+				}
+				trackElement.setAttribute( feature, str );
 			}
 
 			// Echo edges
@@ -446,20 +437,27 @@ public class TmXmlWriter
 			}
 			else
 			{
-
 				for ( final DefaultWeightedEdge edge : track )
 				{
-					final Element edgeElement = new Element( TRACK_EDGE_ELEMENT_KEY );
-					for ( final String feature : edgeDoubleFeatures )
+					final Element edgeElement = new Element(TRACK_EDGE_ELEMENT_KEY);
+					for ( final String feature : edgeFeatures )
 					{
-						final Double val = model.getFeatureModel().getEdgeFeature( edge, feature );
-						edgeElement.setAttribute( feature, val.toString() );
-					}
-					for ( final String feature : edgeIntFeatures )
-					{
-						final Double val = model.getFeatureModel().getEdgeFeature( edge, feature );
-						edgeElement.setAttribute( feature, "" + val.intValue() );
-
+						final Double val = model.getFeatureModel().getEdgeFeature(edge, feature);
+						if ( null == val )
+						{
+							// Skip missing features.
+							continue;
+						}
+						String str;
+						if ( model.getFeatureModel().getEdgeFeatureIsInt().get( feature ).booleanValue() )
+						{
+							str = "" + val.intValue();
+						}
+						else
+						{
+							str = val.toString();
+						}
+						edgeElement.setAttribute( feature, str );
 					}
 
 					trackElement.addContent( edgeElement );
@@ -516,10 +514,10 @@ public class TmXmlWriter
 			final Element frameSpotsElement = new Element( SPOT_FRAME_COLLECTION_ELEMENT_KEY );
 			frameSpotsElement.setAttribute( FRAME_ATTRIBUTE_NAME, "" + frame );
 
-			for ( final Iterator< Spot > it = spots.iterator( frame, false ); it.hasNext(); )
+			for (final Iterator<Spot> it = spots.iterator(frame, false); it.hasNext();)
 			{
-				final Element spotElement = marshalSpot( it.next() );
-				frameSpotsElement.addContent( spotElement );
+				final Element spotElement = marshalSpot( it.next(), model.getFeatureModel() );
+				frameSpotsElement.addContent(spotElement);
 			}
 			spotCollectionElement.addContent( frameSpotsElement );
 		}
@@ -534,19 +532,20 @@ public class TmXmlWriter
 		final Element featuresElement = new Element( FEATURE_DECLARATIONS_ELEMENT_KEY );
 
 		// Spots
-		final Element spotFeaturesElement = new Element( SPOT_FEATURES_ELEMENT_KEY );
-		Collection< String > features = fm.getSpotFeatures();
-		Map< String, String > featureNames = fm.getSpotFeatureNames();
-		Map< String, String > featureShortNames = fm.getSpotFeatureShortNames();
-		Map< String, Dimension > featureDimensions = fm.getSpotFeatureDimensions();
-		for ( final String feature : features )
-		{
-			final Element fel = new Element( FEATURE_ELEMENT_KEY );
-			fel.setAttribute( FEATURE_ATTRIBUTE, feature );
-			fel.setAttribute( FEATURE_NAME_ATTRIBUTE, featureNames.get( feature ) );
-			fel.setAttribute( FEATURE_SHORT_NAME_ATTRIBUTE, featureShortNames.get( feature ) );
-			fel.setAttribute( FEATURE_DIMENSION_ATTRIBUTE, featureDimensions.get( feature ).name() );
-			spotFeaturesElement.addContent( fel );
+		final Element spotFeaturesElement = new Element(SPOT_FEATURES_ELEMENT_KEY);
+		Collection<String> features = fm.getSpotFeatures();
+		Map<String, String> featureNames = fm.getSpotFeatureNames();
+		Map<String, String> featureShortNames = fm.getSpotFeatureShortNames();
+		Map<String, Dimension> featureDimensions = fm.getSpotFeatureDimensions();
+		Map< String, Boolean > featureIsInt = fm.getSpotFeatureIsInt();
+		for (final String feature : features) {
+			final Element fel = new Element(FEATURE_ELEMENT_KEY);
+			fel.setAttribute(FEATURE_ATTRIBUTE, feature);
+			fel.setAttribute(FEATURE_NAME_ATTRIBUTE, featureNames.get(feature));
+			fel.setAttribute(FEATURE_SHORT_NAME_ATTRIBUTE, featureShortNames.get(feature));
+			fel.setAttribute(FEATURE_DIMENSION_ATTRIBUTE, featureDimensions.get(feature).name());
+			fel.setAttribute( FEATURE_ISINT_ATTRIBUTE, featureIsInt.get( feature ).toString() );
+			spotFeaturesElement.addContent(fel);
 		}
 		featuresElement.addContent( spotFeaturesElement );
 
@@ -556,14 +555,15 @@ public class TmXmlWriter
 		featureNames = fm.getEdgeFeatureNames();
 		featureShortNames = fm.getEdgeFeatureShortNames();
 		featureDimensions = fm.getEdgeFeatureDimensions();
-		for ( final String feature : features )
-		{
-			final Element fel = new Element( FEATURE_ELEMENT_KEY );
-			fel.setAttribute( FEATURE_ATTRIBUTE, feature );
-			fel.setAttribute( FEATURE_NAME_ATTRIBUTE, featureNames.get( feature ) );
-			fel.setAttribute( FEATURE_SHORT_NAME_ATTRIBUTE, featureShortNames.get( feature ) );
-			fel.setAttribute( FEATURE_DIMENSION_ATTRIBUTE, featureDimensions.get( feature ).name() );
-			edgeFeaturesElement.addContent( fel );
+		featureIsInt = fm.getEdgeFeatureIsInt();
+		for (final String feature : features) {
+			final Element fel = new Element(FEATURE_ELEMENT_KEY);
+			fel.setAttribute(FEATURE_ATTRIBUTE, feature);
+			fel.setAttribute(FEATURE_NAME_ATTRIBUTE, featureNames.get(feature));
+			fel.setAttribute(FEATURE_SHORT_NAME_ATTRIBUTE, featureShortNames.get(feature));
+			fel.setAttribute(FEATURE_DIMENSION_ATTRIBUTE, featureDimensions.get(feature).name());
+			fel.setAttribute( FEATURE_ISINT_ATTRIBUTE, featureIsInt.get( feature ).toString() );
+			edgeFeaturesElement.addContent(fel);
 		}
 		featuresElement.addContent( edgeFeaturesElement );
 
@@ -573,14 +573,15 @@ public class TmXmlWriter
 		featureNames = fm.getTrackFeatureNames();
 		featureShortNames = fm.getTrackFeatureShortNames();
 		featureDimensions = fm.getTrackFeatureDimensions();
-		for ( final String feature : features )
-		{
-			final Element fel = new Element( FEATURE_ELEMENT_KEY );
-			fel.setAttribute( FEATURE_ATTRIBUTE, feature );
-			fel.setAttribute( FEATURE_NAME_ATTRIBUTE, featureNames.get( feature ) );
-			fel.setAttribute( FEATURE_SHORT_NAME_ATTRIBUTE, featureShortNames.get( feature ) );
-			fel.setAttribute( FEATURE_DIMENSION_ATTRIBUTE, featureDimensions.get( feature ).name() );
-			trackFeaturesElement.addContent( fel );
+		featureIsInt = fm.getTrackFeatureIsInt();
+		for (final String feature : features) {
+			final Element fel = new Element(FEATURE_ELEMENT_KEY);
+			fel.setAttribute(FEATURE_ATTRIBUTE, feature);
+			fel.setAttribute(FEATURE_NAME_ATTRIBUTE, featureNames.get(feature));
+			fel.setAttribute(FEATURE_SHORT_NAME_ATTRIBUTE, featureShortNames.get(feature));
+			fel.setAttribute(FEATURE_DIMENSION_ATTRIBUTE, featureDimensions.get(feature).name());
+			fel.setAttribute( FEATURE_ISINT_ATTRIBUTE, featureIsInt.get( feature ).toString() );
+			trackFeaturesElement.addContent(fel);
 		}
 		featuresElement.addContent( trackFeaturesElement );
 
@@ -674,36 +675,36 @@ public class TmXmlWriter
 	 * STATIC METHODS
 	 */
 
-	private static final Element marshalSpot( final Spot spot )
+	private static final Element marshalSpot( final Spot spot, final FeatureModel fm )
 	{
-		final Collection< Attribute > attributes = new ArrayList< Attribute >();
-		final Attribute IDattribute = new Attribute( SPOT_ID_ATTRIBUTE_NAME, "" + spot.ID() );
-		attributes.add( IDattribute );
-		final Attribute nameAttribute = new Attribute( SPOT_NAME_ATTRIBUTE_NAME, spot.getName() );
-		attributes.add( nameAttribute );
+		final Collection<Attribute> attributes = new ArrayList<Attribute>();
+		final Attribute IDattribute = new Attribute(SPOT_ID_ATTRIBUTE_NAME, "" + spot.ID());
+		attributes.add(IDattribute);
+		final Attribute nameAttribute = new Attribute(SPOT_NAME_ATTRIBUTE_NAME, spot.getName());
+		attributes.add(nameAttribute);
 		Double val;
 		Attribute featureAttribute;
-
-		final List< String > spotIntFeatures = new ArrayList< String >( 1 );
-		spotIntFeatures.add( ManualSpotColorAnalyzerFactory.FEATURE );
-		// TODO Is there a better way?
 
 		for ( final String feature : spot.getFeatures().keySet() )
 		{
 			val = spot.getFeature( feature );
 			if ( null == val )
 			{
+				// Skip missing features.
 				continue;
 			}
-			if ( spotIntFeatures.contains( feature ) )
+
+			final String str;
+			if ( fm.getSpotFeatureIsInt().get( feature ).booleanValue() )
 			{
-				featureAttribute = new Attribute( feature, "" + val.intValue() );
+				str = "" + val.intValue();
 			}
 			else
 			{
-				featureAttribute = new Attribute( feature, val.toString() );
+				str = val.toString();
 			}
-			attributes.add( featureAttribute );
+			featureAttribute = new Attribute(feature, str);
+			attributes.add(featureAttribute);
 		}
 
 		final Element spotElement = new Element( SPOT_ELEMENT_KEY );

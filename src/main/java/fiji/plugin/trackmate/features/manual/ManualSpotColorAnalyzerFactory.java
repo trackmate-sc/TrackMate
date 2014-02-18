@@ -36,11 +36,13 @@ public class ManualSpotColorAnalyzerFactory< T extends RealType< T > & NativeTyp
 
 	static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 1 );
 
+	static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 1 );
+
 	static final String INFO_TEXT = "<html>A dummy analyzer for the feature that stores the color manually assigned to each spot.</html>";
 
 	static final String NAME = "Manual spot color analyzer";
 
-	private static final Color DEFAULT_COLOR = Color.GRAY.darker();
+	public static final Color DEFAULT_COLOR = Color.GRAY.darker();
 
 	private static final Double DEFAULT_COLOR_VALUE = Double.valueOf( DEFAULT_COLOR.getRGB() );
 
@@ -50,6 +52,7 @@ public class ManualSpotColorAnalyzerFactory< T extends RealType< T > & NativeTyp
 		FEATURE_SHORT_NAMES.put( FEATURE, "Spot color" );
 		FEATURE_NAMES.put( FEATURE, "Manual spot color" );
 		FEATURE_DIMENSIONS.put( FEATURE, Dimension.NONE );
+		IS_INT.put( FEATURE, Boolean.TRUE );
 	}
 
 	@Override
@@ -86,6 +89,18 @@ public class ManualSpotColorAnalyzerFactory< T extends RealType< T > & NativeTyp
 	public String getInfoText()
 	{
 		return INFO_TEXT;
+	}
+
+	@Override
+	public Map< String, Boolean > getIsIntFeature()
+	{
+		return IS_INT;
+	}
+
+	@Override
+	public boolean isManualFeature()
+	{
+		return true;
 	}
 
 	@Override
