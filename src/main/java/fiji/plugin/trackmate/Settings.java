@@ -697,7 +697,7 @@ public class Settings
 	{
 		for ( final FeatureAnalyzer analyzer : analyzers )
 		{
-			str.append( " - " + analyzer.getKey() + " provides: " );
+			str.append( " - " + analyzer.getName() + " provides: " );
 			for ( final String feature : analyzer.getFeatures() )
 			{
 				str.append( analyzer.getFeatureShortNames().get( feature ) + ", " );
@@ -708,6 +708,12 @@ public class Settings
 			if ( str.charAt( str.length() - 1 ) != '.' )
 			{
 				str.append( '.' );
+			}
+			// manual?
+			if ( analyzer.isManualFeature() )
+			{
+				str.deleteCharAt( str.length() - 1 );
+				str.append( "; is manual." );
 			}
 			str.append( '\n' );
 		}
