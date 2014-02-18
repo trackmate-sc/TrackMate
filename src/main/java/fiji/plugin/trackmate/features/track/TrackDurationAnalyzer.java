@@ -65,6 +65,11 @@ public class TrackDurationAnalyzer implements TrackAnalyzer, MultiThreaded
 		FEATURE_DIMENSIONS.put( TRACK_START, Dimension.TIME );
 		FEATURE_DIMENSIONS.put( TRACK_STOP, Dimension.TIME );
 		FEATURE_DIMENSIONS.put( TRACK_DISPLACEMENT, Dimension.LENGTH );
+
+		IS_INT.put( TRACK_DURATION, Boolean.FALSE );
+		IS_INT.put( TRACK_START, Boolean.FALSE );
+		IS_INT.put( TRACK_STOP, Boolean.FALSE );
+		IS_INT.put( TRACK_DISPLACEMENT, Boolean.FALSE );
 	}
 
 	private int numThreads;
