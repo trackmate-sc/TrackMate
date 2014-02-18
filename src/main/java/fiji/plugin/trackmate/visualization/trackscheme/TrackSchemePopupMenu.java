@@ -56,7 +56,6 @@ public class TrackSchemePopupMenu extends JPopupMenu
 
 	private void manualColorEdges( final ArrayList< mxCell > edges )
 	{
-		previousColor = JColorChooser.showDialog( trackScheme.getGUI(), "Choose Color", previousColor );
 		for ( final mxCell mxCell : edges )
 		{
 			final DefaultWeightedEdge edge = trackScheme.getGraph().getEdgeFor( mxCell );
@@ -67,7 +66,6 @@ public class TrackSchemePopupMenu extends JPopupMenu
 
 	private void manualColorVertices( final ArrayList< mxCell > vertices )
 	{
-		previousColor = JColorChooser.showDialog( trackScheme.getGUI(), "Choose Color", previousColor );
 		for ( final mxCell mxCell : vertices )
 		{
 			final Spot spot = trackScheme.getGraph().getSpotFor( mxCell );
@@ -102,9 +100,13 @@ public class TrackSchemePopupMenu extends JPopupMenu
 	{
 		Object parent;
 		if ( trackScheme.getGraph().isCellFoldable( cell, true ) )
+		{
 			parent = cell;
+		}
 		else
+		{
 			parent = trackScheme.getGraph().getModel().getParent( cell );
+		}
 		trackScheme.getGraph().foldCells( !trackScheme.getGraph().isCellCollapsed( parent ), false, new Object[] { parent } );
 	}
 
@@ -186,9 +188,13 @@ public class TrackSchemePopupMenu extends JPopupMenu
 		{
 			final mxCell cell = ( mxCell ) obj;
 			if ( cell.isVertex() )
+			{
 				vertices.add( cell );
+			}
 			else if ( cell.isEdge() )
+			{
 				edges.add( cell );
+			}
 		}
 
 		// Select whole tracks
@@ -285,6 +291,7 @@ public class TrackSchemePopupMenu extends JPopupMenu
 				@Override
 				public void actionPerformed( final ActionEvent e )
 				{
+					previousColor = JColorChooser.showDialog( trackScheme.getGUI(), "Choose Color", previousColor );
 					manualColorVertices( vertices );
 					SwingUtilities.invokeLater( new Runnable()
 					{
@@ -306,6 +313,7 @@ public class TrackSchemePopupMenu extends JPopupMenu
 				@Override
 				public void actionPerformed( final ActionEvent e )
 				{
+					previousColor = JColorChooser.showDialog( trackScheme.getGUI(), "Choose Color", previousColor );
 					manualColorEdges( edges );
 					SwingUtilities.invokeLater( new Runnable()
 					{
@@ -328,6 +336,7 @@ public class TrackSchemePopupMenu extends JPopupMenu
 				@Override
 				public void actionPerformed( final ActionEvent e )
 				{
+					previousColor = JColorChooser.showDialog( trackScheme.getGUI(), "Choose Color", previousColor );
 					manualColorVertices( vertices );
 					manualColorEdges( edges );
 					SwingUtilities.invokeLater( new Runnable()
