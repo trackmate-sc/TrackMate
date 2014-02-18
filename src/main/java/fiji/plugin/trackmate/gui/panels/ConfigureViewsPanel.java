@@ -247,8 +247,14 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 
 	public void refreshColorFeatures()
 	{
-		jPanelSpotColor.setColorFeature( spotColorGenerator.getFeature() );
-		trackColorGUI.setColorFeature( trackColorGenerator.getFeature() );
+		if ( !( displaySettings.get( KEY_SPOT_COLORING ) instanceof ManualSpotColorGenerator ) )
+		{
+			jPanelSpotColor.setColorFeature( spotColorGenerator.getFeature() );
+		}
+		if ( !( displaySettings.get( KEY_TRACK_COLORING ) instanceof ManualEdgeColorGenerator ) )
+		{
+			trackColorGUI.setColorFeature( trackColorGenerator.getFeature() );
+		}
 	}
 
 	public void setManualSpotColorGenerator( final ManualSpotColorGenerator manualSpotColorGenerator )
