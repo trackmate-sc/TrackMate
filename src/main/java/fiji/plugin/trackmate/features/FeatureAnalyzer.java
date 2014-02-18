@@ -4,13 +4,10 @@ import java.util.List;
 import java.util.Map;
 
 import fiji.plugin.trackmate.Dimension;
+import fiji.plugin.trackmate.TrackMateModule;
 
-public interface FeatureAnalyzer {
-
-	/**
-	 * Returns a unique String identifier for this factory.
-	 */
-	public String getKey();
+public interface FeatureAnalyzer extends TrackMateModule
+{
 
 	/**
 	 * Returns the list of features this analyzer can compute.
