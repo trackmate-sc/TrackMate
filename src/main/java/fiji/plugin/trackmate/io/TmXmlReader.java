@@ -756,11 +756,8 @@ public class TmXmlReader {
 
 		// The list of edge features. that we will set.
 		final FeatureModel fm = model.getFeatureModel();
-		final List<String> edgeIntFeatures = new ArrayList<String>();// TODO is there a better way?
-		edgeIntFeatures.add(EdgeTargetAnalyzer.SPOT_SOURCE_ID);
-		edgeIntFeatures.add(EdgeTargetAnalyzer.SPOT_TARGET_ID);
-		final Collection<String> edgeDoubleFeatures = fm.getEdgeFeatures();
-		edgeDoubleFeatures.removeAll(edgeIntFeatures);
+		final Collection< String > edgeFeatures = fm.getEdgeFeatures();
+		final Map< String, Boolean > edgeFeatureIsInt = fm.getEdgeFeatureIsInt();
 
 		for (final Element trackElement : trackElements) {
 
@@ -824,15 +821,19 @@ public class TmXmlReader {
 					graph.setEdgeWeight(edge, weight);
 
 					// Put edge features
-					for (final String feature : edgeDoubleFeatures) {
-						final double val = readDoubleAttribute(edgeElement, feature, logger);
+					for ( final String feature : edgeFeatures )
+					{
+						final double val;
+						if ( edgeFeatureIsInt.get( feature ).booleanValue() )
+						{
+							val = readIntAttribute( edgeElement, feature, logger );
+						}
+						else
+						{
+							val = readDoubleAttribute( edgeElement, feature, logger );
+						}
 						fm.putEdgeFeature(edge, feature, val);
 					}
-					for (final String feature : edgeIntFeatures) {
-						final double val = readIntAttribute(edgeElement, feature, logger);
-						fm.putEdgeFeature(edge, feature, val);
-					}
-
 				}
 
 				// Adds the edge to the set
