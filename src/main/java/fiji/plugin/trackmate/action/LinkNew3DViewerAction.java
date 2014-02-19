@@ -11,40 +11,43 @@ import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.visualization.threedviewer.SpotDisplayer3D;
 
-public class LinkNew3DViewerAction extends AbstractTMAction {
+public class LinkNew3DViewerAction extends AbstractTMAction
+{
 
 	private static final String NAME = "Link with new 3D viewer";
 
 	private final static String KEY = "NEW_3DVIEWER";
 
-	private static final String INFO_TEXT = "<html>" +
-			"This action opens a new 3D viewer, containing only the overlay (spot and tracks), <br> " +
-			"properly linked to the current controller." +
-			"<p>" +
-			"Useful to have synchronized 2D vs 3D views." +
-			"</html>" ;
-	public static final ImageIcon ICON = new ImageIcon(TrackMateWizard.class.getResource("images/page_white_link.png"));
-	private final TrackMateGUIController	controller;
+	private static final String INFO_TEXT = "<html>" + "This action opens a new 3D viewer, containing only the overlay (spot and tracks), <br> " + "properly linked to the current controller." + "<p>" + "Useful to have synchronized 2D vs 3D views." + "</html>";
 
-	public LinkNew3DViewerAction(final TrackMateGUIController controller) {
+	public static final ImageIcon ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/page_white_link.png" ) );
+
+	private final TrackMateGUIController controller;
+
+	public LinkNew3DViewerAction( final TrackMateGUIController controller )
+	{
 		this.controller = controller;
 	}
 
 	@Override
-	public void execute(final TrackMate trackmate) {
-		new Thread("TrackMate new 3D viewer thread") {
+	public void execute( final TrackMate trackmate )
+	{
+		new Thread( "TrackMate new 3D viewer thread" )
+		{
 			@Override
-			public void run() {
-				logger.log("Rendering 3D overlay...\n");
+			public void run()
+			{
+				logger.log( "Rendering 3D overlay...\n" );
 				final Image3DUniverse universe = new Image3DUniverse();
 				universe.show();
-				final SpotDisplayer3D newDisplayer = new SpotDisplayer3D(trackmate.getModel(), controller.getSelectionModel(), universe );
-				for (final String key : controller.getGuimodel().getDisplaySettings().keySet()) {
-					newDisplayer.setDisplaySettings(key, controller.getGuimodel().getDisplaySettings().get(key));
+				final SpotDisplayer3D newDisplayer = new SpotDisplayer3D( trackmate.getModel(), controller.getSelectionModel(), universe );
+				for ( final String key : controller.getGuimodel().getDisplaySettings().keySet() )
+				{
+					newDisplayer.setDisplaySettings( key, controller.getGuimodel().getDisplaySettings().get( key ) );
 				}
-				controller.getGuimodel().addView(newDisplayer);
+				controller.getGuimodel().addView( newDisplayer );
 				newDisplayer.render();
-				logger.log("Done.\n");
+				logger.log( "Done.\n" );
 			}
 		}.start();
 	}
