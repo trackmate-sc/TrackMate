@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.action;
 
 import ij3d.Image3DUniverse;
+import ij3d.ImageWindow3D;
 
 import javax.swing.ImageIcon;
 
@@ -39,7 +40,11 @@ public class LinkNew3DViewerAction extends AbstractTMAction
 			{
 				logger.log( "Rendering 3D overlay...\n" );
 				final Image3DUniverse universe = new Image3DUniverse();
-				universe.show();
+				final ImageWindow3D win = new ImageWindow3D( "TrackMate 3D Viewer", universe );
+				win.setIconImage( TrackMateWizard.TRACKMATE_ICON.getImage() );
+				universe.init( win );
+				win.pack();
+				win.setVisible( true );
 				final SpotDisplayer3D newDisplayer = new SpotDisplayer3D( trackmate.getModel(), controller.getSelectionModel(), universe );
 				for ( final String key : controller.getGuimodel().getDisplaySettings().keySet() )
 				{
