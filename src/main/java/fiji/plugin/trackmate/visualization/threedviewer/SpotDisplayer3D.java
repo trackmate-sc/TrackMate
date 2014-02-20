@@ -156,7 +156,19 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 					// Sphere color
 					final Color4f color = new Color4f( spotColorGenerator.color( spot ) );
 					color.w = 0;
-					spotGroupNode.add( spot, center, color );
+
+					// Do we have an empty frame?
+					if ( null == spotGroupNode )
+					{
+						spotContent = makeSpotContent();
+						universe.removeContent( SPOT_CONTENT_NAME );
+						universe.addContent( spotContent );
+					}
+					else
+					{
+						spotGroupNode.add( spot, center, color );
+					}
+
 					break;
 				}
 
@@ -232,8 +244,17 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 				case ModelChangeEvent.FLAG_EDGE_MODIFIED:
 				case ModelChangeEvent.FLAG_EDGE_REMOVED:
 				{
-					trackNode.makeMeshes();
-					updateTrackColors();
+					if ( null == trackNode )
+					{
+						trackContent = makeTrackContent();
+						universe.removeContent( TRACK_CONTENT_NAME );
+						universe.addContent( trackContent );
+					}
+					else
+					{
+						trackNode.makeMeshes();
+						updateTrackColors();
+					}
 					break;
 				}
 
