@@ -31,6 +31,10 @@ public class DummyTrackColorGenerator implements TrackColorGenerator
 	{}
 
 	@Override
+	public void activate()
+	{}
+
+	@Override
 	public void setCurrentTrackID( final Integer trackID )
 	{}
 

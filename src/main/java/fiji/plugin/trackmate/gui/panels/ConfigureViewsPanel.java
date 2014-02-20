@@ -266,7 +266,14 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 			public void actionPerformed( final ActionEvent e )
 			{
 				if ( null == spotColorGenerator ) { return; }
-				spotColorGenerator.setFeature( jPanelSpotColor.getColorFeature() );
+				if ( jPanelSpotColor.getColorGeneratorCategory().equals( Category.DEFAULT ) )
+				{
+					spotColorGenerator.setFeature( null );
+				}
+				else
+				{
+					spotColorGenerator.setFeature( jPanelSpotColor.getColorFeature() );
+				}
 				final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_SPOT_COLORING, spotColorGenerator, spotColorGenerator );
 				fireDisplaySettingsChange( event );
 			}

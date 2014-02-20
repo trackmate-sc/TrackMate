@@ -204,4 +204,10 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 		model.removeModelChangeListener( this );
 	}
 
+	@Override
+	public void activate()
+	{
+		model.addModelChangeListener( this );
+	}
+
 }

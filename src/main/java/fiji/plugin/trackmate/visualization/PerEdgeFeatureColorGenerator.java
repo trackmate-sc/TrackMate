@@ -131,4 +131,10 @@ public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackC
 		model.removeModelChangeListener( this );
 	}
 
+	@Override
+	public void activate()
+	{
+		model.addModelChangeListener( this );
+	}
+
 }

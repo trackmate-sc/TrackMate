@@ -53,21 +53,26 @@ public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelC
 	}
 
 	@Override
+	public void activate()
+	{
+		model.addModelChangeListener( this );
+	}
+
+	@Override
 	public void modelChanged( final ModelChangeEvent event )
 	{
-		if ( feature == null ) { return; // nothing to do.
-		}
+		if ( null == feature ) { return; }
 		if ( event.getEventID() == ModelChangeEvent.MODEL_MODIFIED )
 		{
 			final Set< Spot > spots = event.getSpots();
 			if ( spots.size() > 0 )
 			{
-				computeSpotColors( feature );
+				computeSpotColors();
 			}
 		}
 		else if ( event.getEventID() == ModelChangeEvent.SPOTS_COMPUTED )
 		{
-			computeSpotColors( feature );
+			computeSpotColors();
 		}
 	}
 
@@ -81,11 +86,15 @@ public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelC
 	@Override
 	public void setFeature( final String feature )
 	{
-		if ( null != feature && feature.equals( this.feature ) ) { return; }
-		this.feature = feature;
 		if ( null != feature )
 		{
-			computeSpotColors( feature );
+			if ( feature.equals( this.feature ) ) { return; }
+			this.feature = feature;
+			computeSpotColors();
+		}
+		else
+		{
+			this.feature = null;
 		}
 	}
 
@@ -93,9 +102,12 @@ public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelC
 	 * PRIVATE METHODS
 	 */
 
-	private void computeSpotColors( final String feature )
+	private void computeSpotColors()
 	{
 		spotColorMap.clear();
+
+		if ( null == feature ) { return; }
+
 		// Get min & max
 		double min = Float.POSITIVE_INFINITY;
 		double max = Float.NEGATIVE_INFINITY;
@@ -118,10 +130,7 @@ public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelC
 		{
 			val = spot.getFeature( feature );
 			final InterpolatePaintScale colorMap = InterpolatePaintScale.Jet;
-			if ( null == feature || null == val )
-				spotColorMap.put( spot, TrackMateModelView.DEFAULT_SPOT_COLOR );
-			else
-				spotColorMap.put( spot, colorMap.getPaint( ( val - min ) / ( max - min ) ) );
+			spotColorMap.put( spot, colorMap.getPaint( ( val - min ) / ( max - min ) ) );
 		}
 	}
 }
