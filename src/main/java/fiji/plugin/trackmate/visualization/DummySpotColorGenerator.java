@@ -23,6 +23,9 @@ public class DummySpotColorGenerator implements FeatureColorGenerator<Spot> {
 
 	@Override
 	public void terminate() {}
+	
+	@Override
+	public void activate() {}
 
 	@Override
 	public String getFeature() {
