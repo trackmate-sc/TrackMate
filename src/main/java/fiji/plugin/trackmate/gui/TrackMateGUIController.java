@@ -81,6 +81,7 @@ import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.PerEdgeFeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.PerTrackFeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.SpotColorGenerator;
+import fiji.plugin.trackmate.visualization.SpotColorGeneratorPerTrackFeature;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.trackscheme.SpotImageUpdater;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
@@ -162,6 +163,8 @@ public class TrackMateGUIController implements ActionListener
 
 	protected FeatureColorGenerator< Spot > spotColorGenerator;
 
+	protected FeatureColorGenerator< Spot > spotColorGeneratorPerTrackFeature;
+
 	/*
 	 * CONSTRUCTOR
 	 */
@@ -211,6 +214,7 @@ public class TrackMateGUIController implements ActionListener
 		this.spotColorGenerator = createSpotColorGenerator();
 		this.edgeColorGenerator = createEdgeColorGenerator();
 		this.trackColorGenerator = createTrackColorGenerator();
+		this.spotColorGeneratorPerTrackFeature = createSpotColorGeneratorPerTrackFeature();
 
 		// 0.
 		this.guimodel = new TrackMateGUIModel();
@@ -435,6 +439,12 @@ public class TrackMateGUIController implements ActionListener
 		return generator;
 	}
 
+	protected FeatureColorGenerator< Spot > createSpotColorGeneratorPerTrackFeature()
+	{
+		final FeatureColorGenerator< Spot > generator = new SpotColorGeneratorPerTrackFeature( trackmate.getModel(), TrackIndexAnalyzer.TRACK_INDEX );
+		return generator;
+	}
+
 	protected void createProviders()
 	{
 		spotAnalyzerProvider = new SpotAnalyzerProvider();
@@ -597,7 +607,7 @@ public class TrackMateGUIController implements ActionListener
 		/*
 		 * Finished, let's change the display settings.
 		 */
-		configureViewsDescriptor = new ConfigureViewsDescriptor( trackmate, spotColorGenerator, edgeColorGenerator, trackColorGenerator, this );
+		configureViewsDescriptor = new ConfigureViewsDescriptor( trackmate, spotColorGenerator, edgeColorGenerator, trackColorGenerator, spotColorGeneratorPerTrackFeature, this );
 		configureViewsDescriptor.getComponent().addActionListener( new ActionListener()
 		{
 			@Override

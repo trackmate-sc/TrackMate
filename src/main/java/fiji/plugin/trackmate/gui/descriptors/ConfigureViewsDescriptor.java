@@ -17,13 +17,14 @@ public class ConfigureViewsDescriptor implements WizardPanelDescriptor
 
 	private final TrackMateGUIController controller;
 
-	public ConfigureViewsDescriptor( final TrackMate trackmate, final FeatureColorGenerator< Spot > spotColorGenerator, final PerEdgeFeatureColorGenerator edgeColorGenerator, final PerTrackFeatureColorGenerator trackColorGenerator, final TrackMateGUIController controller )
+	public ConfigureViewsDescriptor( final TrackMate trackmate, final FeatureColorGenerator< Spot > spotColorGenerator, final PerEdgeFeatureColorGenerator edgeColorGenerator, final PerTrackFeatureColorGenerator trackColorGenerator, final FeatureColorGenerator< Spot > spotColorGeneratorPerTrackFeature, final TrackMateGUIController controller )
 	{
 		this.controller = controller;
 		this.panel = new ConfigureViewsPanel( trackmate.getModel() );
 		panel.setSpotColorGenerator( spotColorGenerator );
 		panel.setEdgeColorGenerator( edgeColorGenerator );
 		panel.setTrackColorGenerator( trackColorGenerator );
+		panel.setSpotColorGeneratorPerTrackFeature( spotColorGeneratorPerTrackFeature );
 	}
 
 	@Override

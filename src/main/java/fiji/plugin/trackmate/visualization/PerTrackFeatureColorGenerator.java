@@ -211,4 +211,17 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 		model.addModelChangeListener( this );
 	}
 
+	/**
+	 * Returns the color currently associated to the track with the specified
+	 * ID.
+	 * 
+	 * @param trackID
+	 *            the ID of the track.
+	 * @return a color.
+	 */
+	public Color colorOf( final Integer trackID )
+	{
+		return colorMap.get( trackID );
+	}
+
 }

@@ -122,6 +122,8 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 
 	private FeatureColorGenerator< Spot > spotColorGenerator;
 
+	private FeatureColorGenerator< Spot > spotColorGeneratorPerTrackFeature;
+
 	private JNumericTextField textFieldDrawingDepth;
 
 	private JPanel jpanelDrawingDepth;
@@ -239,6 +241,14 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 		this.spotColorGenerator = spotColorGenerator;
 	}
 
+	public void setSpotColorGeneratorPerTrackFeature( final FeatureColorGenerator< Spot > spotColorGeneratorPerTrackFeature )
+	{
+		if (null != this.spotColorGeneratorPerTrackFeature) {
+			this.spotColorGeneratorPerTrackFeature.terminate();
+		}
+		this.spotColorGeneratorPerTrackFeature = spotColorGeneratorPerTrackFeature;
+	}
+
 	public void refreshColorFeatures()
 	{
 		jPanelSpotColor.setColorFeature( spotColorGenerator.getFeature() );
@@ -259,22 +269,32 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 		{
 			jPanelSpotOptions.remove( jPanelSpotColor );
 		}
-		jPanelSpotColor = new ColorByFeatureGUIPanel( model, Arrays.asList( new Category[] { Category.SPOTS, Category.DEFAULT } ) );
+		jPanelSpotColor = new ColorByFeatureGUIPanel( model, Arrays.asList( new Category[] { Category.SPOTS, Category.DEFAULT, Category.TRACKS } ) );
 		jPanelSpotColor.addActionListener( new ActionListener()
 		{
 			@Override
 			public void actionPerformed( final ActionEvent e )
 			{
+				final FeatureColorGenerator< Spot > newValue;
+				@SuppressWarnings( "unchecked" )
+				final FeatureColorGenerator< Spot > oldValue = ( FeatureColorGenerator< Spot > ) displaySettings.get( KEY_SPOT_COLORING );
 				if ( null == spotColorGenerator ) { return; }
 				if ( jPanelSpotColor.getColorGeneratorCategory().equals( Category.DEFAULT ) )
 				{
+					newValue = spotColorGenerator;
 					spotColorGenerator.setFeature( null );
+				}
+				else if ( jPanelSpotColor.getColorGeneratorCategory().equals( Category.TRACKS ) )
+				{
+					newValue = spotColorGeneratorPerTrackFeature;
+					spotColorGeneratorPerTrackFeature.setFeature( jPanelSpotColor.getColorFeature() );
 				}
 				else
 				{
+					newValue = spotColorGenerator;
 					spotColorGenerator.setFeature( jPanelSpotColor.getColorFeature() );
 				}
-				final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_SPOT_COLORING, spotColorGenerator, spotColorGenerator );
+				final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_SPOT_COLORING, newValue, oldValue );
 				fireDisplaySettingsChange( event );
 			}
 		} );

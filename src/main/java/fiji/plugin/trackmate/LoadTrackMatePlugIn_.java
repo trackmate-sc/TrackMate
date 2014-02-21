@@ -120,6 +120,12 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 
 		// Read the file content
 		TmXmlReader reader = createReader( file );
+		if ( !reader.isReadingOk() )
+		{
+			IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION, reader.getErrorMessage() );
+			return;
+		}
+
 		final Version version = new Version( reader.getVersion() );
 		if ( version.compareTo( new Version( "2.0.0" ) ) < 0 )
 		{
@@ -305,9 +311,7 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 	{
 		ImageJ.main( args );
 		final LoadTrackMatePlugIn_ plugIn = new LoadTrackMatePlugIn_();
-		// plugIn.run( new File( AppUtils.getBaseDirectory( TrackMate.class ),
-		// "samples/FakeTracks.xml" ).getAbsolutePath() );
-		plugIn.run( null );
+		plugIn.run( "samples/FakeTracks.xml" );
 	}
 
 }
