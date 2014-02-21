@@ -88,6 +88,10 @@ public class TrackScheme extends AbstractTrackMateModelView
 	/** Do we capture thumbnails by default? */
 	static final boolean DEFAULT_THUMBNAILS_ENABLED = false;
 
+	private static final double[] ZOOM_LEVELS = new double[] { 1 / 100d, 1 / 50d, 1 / 20d, 1 / 10d, 1 / 5d, 1 / 2d, 1d, 2d, 5d, 10d, 20d };
+
+	private static final int ZOOM_INITIAL_INDEX = 6;
+
 	static final String KEY = "TRACKSCHEME";
 
 	/*
@@ -146,6 +150,9 @@ public class TrackScheme extends AbstractTrackMateModelView
 
 	/** Flag reporting whether we ran a thumbnail capture. See createThumbnails. */
 	private boolean thumbnailCaptured = false;
+
+	/** The current index in the zoom array we are at. */
+	private int currentZoomIndex = ZOOM_INITIAL_INDEX;
 
 	/*
 	 * CONSTRUCTORS
@@ -1117,17 +1124,28 @@ public class TrackScheme extends AbstractTrackMateModelView
 
 	public void zoomIn()
 	{
-		gui.graphComponent.zoomIn();
+		currentZoomIndex++;
+		if ( currentZoomIndex > ZOOM_LEVELS.length - 1 )
+		{
+			currentZoomIndex = ZOOM_LEVELS.length - 1;
+		}
+		gui.graphComponent.zoomTo( ZOOM_LEVELS[ currentZoomIndex ], true );
 	}
 
 	public void zoomOut()
 	{
-		gui.graphComponent.zoomOut();
+		currentZoomIndex--;
+		if ( currentZoomIndex < 0 )
+		{
+			currentZoomIndex = 0;
+		}
+		gui.graphComponent.zoomTo( ZOOM_LEVELS[ currentZoomIndex ], true );
 	}
 
 	public void resetZoom()
 	{
-		gui.graphComponent.zoomTo( 1.0, false );
+		currentZoomIndex = ZOOM_INITIAL_INDEX;
+		gui.graphComponent.zoomTo( ZOOM_LEVELS[ currentZoomIndex ], true );
 	}
 
 	public void doTrackStyle()
