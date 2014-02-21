@@ -21,7 +21,7 @@ public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelC
 
 	private double max;
 
-	private final InterpolatePaintScale colorMap = InterpolatePaintScale.Jet;;
+	private static final InterpolatePaintScale generator = InterpolatePaintScale.Jet;
 
 	public SpotColorGenerator( final Model model )
 	{
@@ -39,7 +39,7 @@ public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelC
 		else
 		{
 			final Double val = spot.getFeature( feature );
-			return colorMap.getPaint( ( val - min ) / ( max - min ) );
+			return generator.getPaint( ( val - min ) / ( max - min ) );
 		}
 	}
 
