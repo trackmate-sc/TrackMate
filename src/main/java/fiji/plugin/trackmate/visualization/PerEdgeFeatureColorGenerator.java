@@ -12,7 +12,7 @@ import fiji.plugin.trackmate.ModelChangeListener;
 public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackColorGenerator
 {
 
-	private static final InterpolatePaintScale colorMap = InterpolatePaintScale.Jet;
+	private static final InterpolatePaintScale generator = InterpolatePaintScale.Jet;
 
 	private final Model model;
 
@@ -51,7 +51,7 @@ public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackC
 	public Color color( final DefaultWeightedEdge edge )
 	{
 		final double val = model.getFeatureModel().getEdgeFeature( edge, feature ).doubleValue();
-		return colorMap.getPaint( ( val - min ) / ( max - min ) );
+		return generator.getPaint( ( val - min ) / ( max - min ) );
 	}
 
 	@Override

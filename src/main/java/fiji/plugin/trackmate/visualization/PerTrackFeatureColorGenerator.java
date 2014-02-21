@@ -7,6 +7,7 @@ import static fiji.plugin.trackmate.visualization.TrackMateModelView.DEFAULT_TRA
 
 import java.awt.Color;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.jfree.chart.renderer.InterpolatePaintScale;
@@ -31,7 +32,7 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 
 	private static final InterpolatePaintScale generator = InterpolatePaintScale.Jet;
 
-	private HashMap< Integer, Color > colorMap;
+	private Map< Integer, Color > colorMap;
 
 	private final Model model;
 

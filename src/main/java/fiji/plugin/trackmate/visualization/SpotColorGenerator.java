@@ -1,8 +1,6 @@
 package fiji.plugin.trackmate.visualization;
 
 import java.awt.Color;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 import org.jfree.chart.renderer.InterpolatePaintScale;
@@ -15,11 +13,15 @@ import fiji.plugin.trackmate.Spot;
 public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelChangeListener
 {
 
-	private final Map< Spot, Color > spotColorMap = new HashMap< Spot, Color >();
-
 	private final Model model;
 
 	private String feature = null;
+
+	private double min;
+
+	private double max;
+
+	private final InterpolatePaintScale colorMap = InterpolatePaintScale.Jet;;
 
 	public SpotColorGenerator( final Model model )
 	{
@@ -36,7 +38,8 @@ public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelC
 		}
 		else
 		{
-			return spotColorMap.get( spot );
+			final Double val = spot.getFeature( feature );
+			return colorMap.getPaint( ( val - min ) / ( max - min ) );
 		}
 	}
 
@@ -104,13 +107,11 @@ public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelC
 
 	private void computeSpotColors()
 	{
-		spotColorMap.clear();
-
 		if ( null == feature ) { return; }
 
 		// Get min & max
-		double min = Float.POSITIVE_INFINITY;
-		double max = Float.NEGATIVE_INFINITY;
+		min = Float.POSITIVE_INFINITY;
+		max = Float.NEGATIVE_INFINITY;
 		Double val;
 		for ( final int ikey : model.getSpots().keySet() )
 		{
@@ -120,17 +121,10 @@ public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelC
 				if ( null == val )
 					continue;
 				if ( val > max )
-					max = val;
+					max = val.doubleValue();
 				if ( val < min )
-					min = val;
+					min = val.doubleValue();
 			}
-		}
-
-		for ( final Spot spot : model.getSpots().iterable( false ) )
-		{
-			val = spot.getFeature( feature );
-			final InterpolatePaintScale colorMap = InterpolatePaintScale.Jet;
-			spotColorMap.put( spot, colorMap.getPaint( ( val - min ) / ( max - min ) ) );
 		}
 	}
 }
