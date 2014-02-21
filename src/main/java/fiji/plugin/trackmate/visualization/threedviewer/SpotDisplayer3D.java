@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -64,6 +65,8 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 
 	private HashMap< DefaultWeightedEdge, Color > previousEdgeHighlight;
 
+	private TreeMap< Integer, ContentInstant > contentAllFrames;
+
 	public SpotDisplayer3D( final Model model, final SelectionModel selectionModel, final Image3DUniverse universe )
 	{
 		super( model, selectionModel );
@@ -88,9 +91,7 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 		{
 
 		case ModelChangeEvent.SPOTS_COMPUTED:
-			spotContent = makeSpotContent();
-			universe.removeContent( SPOT_CONTENT_NAME );
-			universe.addContent( spotContent );
+			makeSpotContent();
 			break;
 
 		case ModelChangeEvent.SPOTS_FILTERED:
@@ -160,9 +161,18 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 					// Do we have an empty frame?
 					if ( null == spotGroupNode )
 					{
-						spotContent = makeSpotContent();
-						universe.removeContent( SPOT_CONTENT_NAME );
-						universe.addContent( spotContent );
+						/*
+						 * We then just give up. I dig really hard on an elegant
+						 * way to add a new ContentInstant for a missing frame,
+						 * but found no satisfying way. There is no good way to
+						 * add spots to an empty frame. The way I found is very
+						 * similar to closing the 3D viewer and re-opening it,
+						 * therefore I let the user do it.
+						 *
+						 * So because of this, the SpotDisplayer3D is only a
+						 * partial ModelListener.
+						 */
+						System.err.println( "[SpotDisplayer3D] The TrackMate 3D viewer cannot deal with adding a spot to an empty frame." );
 					}
 					else
 					{
@@ -203,24 +213,37 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 					// Sphere color
 					final Color4f color = new Color4f( spotColorGenerator.color( spot ) );
 					color.w = 0;
-					spotGroupNode.add( spot, center, color );
+					if ( null == spotGroupNode )
+					{
+						/*
+						 * We then just give up. See above.
+						 */
+						System.err.println( "[SpotDisplayer3D] The TrackMate 3D viewer cannot deal with moving a spot to an empty frame." );
+					}
+					else
+					{
+						spotGroupNode.add( spot, center, color );
+					}
 					break;
 				}
 
 				case ModelChangeEvent.FLAG_SPOT_MODIFIED:
 				{
-					spotGroupNode.remove( spot );
-					// Sphere location and radius
-					final double[] coords = new double[ 3 ];
-					TMUtils.localize( spot, coords );
-					final Double radius = spot.getFeature( Spot.RADIUS );
-					final double[] pos = new double[] { coords[ 0 ], coords[ 1 ], coords[ 2 ], radius * radiusRatio };
-					final Point4d center = new Point4d( pos );
+					if ( null != spotGroupNode )
+					{
+						spotGroupNode.remove( spot );
+						// Sphere location and radius
+						final double[] coords = new double[ 3 ];
+						TMUtils.localize( spot, coords );
+						final Double radius = spot.getFeature( Spot.RADIUS );
+						final double[] pos = new double[] { coords[ 0 ], coords[ 1 ], coords[ 2 ], radius * radiusRatio };
+						final Point4d center = new Point4d( pos );
 
-					// Sphere color
-					final Color4f color = new Color4f( spotColorGenerator.color( spot ) );
-					color.w = 0;
-					spotGroupNode.add( spot, center, color );
+						// Sphere color
+						final Color4f color = new Color4f( spotColorGenerator.color( spot ) );
+						color.w = 0;
+						spotGroupNode.add( spot, center, color );
+					}
 					break;
 				}
 
@@ -262,7 +285,6 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 				{
 					System.err.println( "[SpotDisplayer3D] Unknown edge flag ID: " + edgeFlag );
 				}
-
 				}
 			}
 			break;
@@ -377,9 +399,7 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 	{
 		if ( model.getSpots() != null )
 		{
-			spotContent = makeSpotContent();
-			universe.removeContent( SPOT_CONTENT_NAME );
-			universe.addContentLater( spotContent );
+			makeSpotContent();
 		}
 		if ( model.getTrackModel().nTracks( true ) > 0 )
 		{
@@ -406,59 +426,68 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 		return tc;
 	}
 
-	private Content makeSpotContent()
+	private void makeSpotContent()
 	{
 
 		blobs = new TreeMap< Integer, SpotGroupNode< Spot >>();
-		final TreeMap< Integer, ContentInstant > contentAllFrames = new TreeMap< Integer, ContentInstant >();
+		contentAllFrames = new TreeMap< Integer, ContentInstant >();
 		final float radiusRatio = ( Float ) displaySettings.get( KEY_SPOT_RADIUS_RATIO );
-		final Color color = ( Color ) displaySettings.get( KEY_COLOR );
 		final SpotCollection spots = model.getSpots();
+		@SuppressWarnings( "unchecked" )
+		final FeatureColorGenerator< Spot > spotColorGenerator = ( FeatureColorGenerator< Spot > ) displaySettings.get( KEY_SPOT_COLORING );
 
 		for ( final int frame : spots.keySet() )
 		{
-
 			if ( spots.getNSpots( frame, false ) == 0 )
 			{
 				continue; // Do not create content for empty frames
 			}
-
-			final HashMap< Spot, Point4d > centers = new HashMap< Spot, Point4d >( spots.getNSpots( frame, false ) );
-			final double[] coords = new double[ 3 ];
-
-			for ( final Iterator< Spot > it = spots.iterator( frame, false ); it.hasNext(); )
-			{
-				final Spot spot = it.next();
-				TMUtils.localize( spot, coords );
-				final Double radius = spot.getFeature( Spot.RADIUS );
-				final double[] pos = new double[] { coords[ 0 ], coords[ 1 ], coords[ 2 ], radius * radiusRatio };
-				centers.put( spot, new Point4d( pos ) );
-			}
-			final SpotGroupNode< Spot > blobGroup = new SpotGroupNode< Spot >( centers, new Color3f( color ) );
-			final ContentInstant contentThisFrame = new ContentInstant( "Spots_frame_" + frame );
-
-			try
-			{
-				contentThisFrame.display( blobGroup );
-			}
-			catch ( final BadTransformException bte )
-			{
-				System.err.println( "Bad content for frame " + frame + ". Generated an exception:\n" + bte.getLocalizedMessage() + "\nContent was:\n" + blobGroup.toString() );
-			}
-
-			// Set visibility:
-			if ( spots.getNSpots( frame, true ) > 0 )
-			{
-				blobGroup.setVisible( spots.iterable( frame, true ) );
-			}
-
-			contentAllFrames.put( frame, contentThisFrame );
-			blobs.put( frame, blobGroup );
+			buildFrameContent( spots, frame, radiusRatio, spotColorGenerator );
 		}
 
-		final Content blobContent = new Content( SPOT_CONTENT_NAME, contentAllFrames );
-		blobContent.showCoordinateSystem( false );
-		return blobContent;
+		spotContent = new Content( SPOT_CONTENT_NAME, contentAllFrames );
+		spotContent.showCoordinateSystem( false );
+		universe.removeContent( SPOT_CONTENT_NAME );
+		universe.addContentLater( spotContent );
+	}
+
+	private void buildFrameContent( final SpotCollection spots, final Integer frame, final float radiusRatio, final FeatureColorGenerator< Spot > spotColorGenerator )
+	{
+		final Map< Spot, Point4d > centers = new HashMap< Spot, Point4d >( spots.getNSpots( frame, false ) );
+		final Map< Spot, Color4f > colors = new HashMap< Spot, Color4f >( spots.getNSpots( frame, false ) );
+		final double[] coords = new double[ 3 ];
+
+		for ( final Iterator< Spot > it = spots.iterator( frame, false ); it.hasNext(); )
+		{
+			final Spot spot = it.next();
+			TMUtils.localize( spot, coords );
+			final Double radius = spot.getFeature( Spot.RADIUS );
+			final double[] pos = new double[] { coords[ 0 ], coords[ 1 ], coords[ 2 ], radius * radiusRatio };
+			centers.put( spot, new Point4d( pos ) );
+			final Color4f col = new Color4f( spotColorGenerator.color( spot ) );
+			col.w = 0f;
+			colors.put( spot, col );
+		}
+		final SpotGroupNode< Spot > blobGroup = new SpotGroupNode< Spot >( centers, colors );
+		final ContentInstant contentThisFrame = new ContentInstant( "Spots_frame_" + frame );
+
+		try
+		{
+			contentThisFrame.display( blobGroup );
+		}
+		catch ( final BadTransformException bte )
+		{
+			System.err.println( "Bad content for frame " + frame + ". Generated an exception:\n" + bte.getLocalizedMessage() + "\nContent was:\n" + blobGroup.toString() );
+		}
+
+		// Set visibility:
+		if ( spots.getNSpots( frame, true ) > 0 )
+		{
+			blobGroup.setVisible( spots.iterable( frame, true ) );
+		}
+
+		contentAllFrames.put( frame, contentThisFrame );
+		blobs.put( frame, blobGroup );
 	}
 
 	private void updateRadiuses()
@@ -512,7 +541,17 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 		// Restore previous display settings for previously highlighted spot
 		if ( null != previousSpotHighlight )
 			for ( final Spot spot : previousSpotHighlight )
-				blobs.get( previousFrameHighlight.get( spot ) ).setColor( spot, previousColorHighlight.get( spot ) );
+			{
+				final Integer frame = previousFrameHighlight.get( spot );
+				if ( null != frame )
+				{
+					final SpotGroupNode< Spot > spotGroupNode = blobs.get( frame );
+					if ( null != spotGroupNode )
+					{
+						spotGroupNode.setColor( spot, previousColorHighlight.get( spot ) );
+					}
+				}
+			}
 		previousSpotHighlight = new ArrayList< Spot >( spots.size() );
 		previousColorHighlight = new HashMap< Spot, Color3f >( spots.size() );
 		previousFrameHighlight = new HashMap< Spot, Integer >( spots.size() );
@@ -523,11 +562,14 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 			final int frame = spot.getFeature( Spot.FRAME ).intValue();
 			// Store current settings
 			previousSpotHighlight.add( spot );
-			previousColorHighlight.put( spot, blobs.get( frame ).getColor3f( spot ) );
-			previousFrameHighlight.put( spot, frame );
-
-			// Update target spot display
-			blobs.get( frame ).setColor( spot, highlightColor );
+			final SpotGroupNode< Spot > spotGroupNode = blobs.get( frame );
+			if ( null != spotGroupNode )
+			{
+				previousColorHighlight.put( spot, spotGroupNode.getColor3f( spot ) );
+				previousFrameHighlight.put( spot, frame );
+				// Update target spot display
+				blobs.get( frame ).setColor( spot, highlightColor );
+			}
 		}
 	}
 
