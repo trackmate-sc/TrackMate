@@ -40,6 +40,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
+import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionChangeEvent;
 import fiji.plugin.trackmate.SelectionChangeListener;
@@ -99,7 +100,9 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 		this.selectionModel = selectionModel;
 		final List< String > features = new ArrayList< String >( model.getFeatureModel().getSpotFeatures() );
 		final Map< String, String > featureNames = model.getFeatureModel().getSpotFeatureShortNames();
-		headers = TMUtils.getArrayFromMaping( features, featureNames ).toArray( new String[] {} );
+		final List< String > headerList = TMUtils.getArrayFromMaping( features, featureNames );
+		headerList.add( 0, "Track ID" );
+		headers = headerList.toArray( new String[] {} );
 
 		this.updater = new OnRequestUpdater( new Refreshable()
 		{
@@ -201,10 +204,19 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 			{
 				continue;
 			}
-			final Object[] columnData = new Object[ features.size() ];
-			for ( int i = 0; i < columnData.length; i++ )
+			final Object[] columnData = new Object[ features.size() + 1 ];
+			columnData[ 0 ] = String.format( "%d", model.getTrackModel().trackIDOf( spot ) );
+			for ( int i = 1; i < columnData.length; i++ )
 			{
-				columnData[ i ] = String.format( "%.1f", spot.getFeature( features.get( i ) ) );
+				final String feature = features.get( i - 1 );
+				if ( model.getFeatureModel().getSpotFeatureIsInt().get( feature ).booleanValue() )
+				{
+					columnData[ i ] = "" + spot.getFeature( feature ).intValue();
+				}
+				else
+				{
+					columnData[ i ] = String.format( "%.4g", spot.getFeature( feature ).doubleValue() );
+				}
 			}
 			dm.addColumn( spot.toString(), columnData );
 		}
@@ -274,26 +286,61 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 	private void exportTableToImageJ()
 	{
 		final ResultsTable table = new ResultsTable();
-		final List< String > features = new ArrayList< String >( model.getFeatureModel().getSpotFeatures() );
+		final FeatureModel fm = model.getFeatureModel();
+		final List< String > features = new ArrayList< String >( fm.getSpotFeatures() );
 
 		final int ncols = spotSelection.size();
 		final int nrows = headers.length;
 		final Spot[] spotArray = spotSelection.toArray( new Spot[] {} );
 
-		for ( int j = 0; j < nrows; j++ )
+		/*
+		 * Track ID
+		 */
+
+		table.incrementCounter();
+		table.setLabel( "TRACK_ID", 0 );
+		for ( int i = 0; i < ncols; i++ )
+		{
+			final Spot spot = spotArray[ i ];
+			final Integer trackID = model.getTrackModel().trackIDOf( spot );
+			if ( null == trackID )
+			{
+				table.addValue( spot.getName(), "None" );
+			}
+			else
+			{
+				table.addValue( spot.getName(), "" + trackID.intValue() );
+			}
+		}
+
+		/*
+		 * Other features
+		 */
+
+		for ( int j = 0; j < nrows - 1; j++ )
 		{
 			table.incrementCounter();
 			final String feature = features.get( j );
-			table.setLabel( feature, j );
+			table.setLabel( feature, j + 1 );
 			for ( int i = 0; i < ncols; i++ )
 			{
 				final Spot spot = spotArray[ i ];
-				Double val = spot.getFeature( feature );
+				final Double val = spot.getFeature( feature );
 				if ( val == null )
 				{
-					val = Double.NaN;
+					table.addValue( spot.getName(), "None" );
 				}
-				table.addValue( spot.getName(), val );
+				else
+				{
+					if ( fm.getSpotFeatureIsInt().get( feature ) )
+					{
+						table.addValue( spot.getName(), "" + val.intValue() );
+					}
+					else
+					{
+						table.addValue( spot.getName(), val.doubleValue() );
+					}
+				}
 			}
 		}
 
