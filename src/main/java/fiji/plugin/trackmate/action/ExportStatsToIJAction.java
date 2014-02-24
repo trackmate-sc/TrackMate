@@ -95,6 +95,10 @@ public class ExportStatsToIJAction extends AbstractTMAction {
 						continue;
 					}
 					final Number d = (Number) o;
+					if ( d == null )
+					{
+						System.out.println( "null value for " + edge + " at feature " + feature );// DEBUG
+					}
 					edgeTable.addValue(feature, d.doubleValue());
 				}
 

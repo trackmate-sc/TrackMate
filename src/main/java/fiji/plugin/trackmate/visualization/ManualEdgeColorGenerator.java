@@ -41,7 +41,10 @@ public class ManualEdgeColorGenerator implements TrackColorGenerator
 	{}
 
 	@Override
-	public void setCurrentTrackID( final Integer trackID )
+	public void activate()
 	{}
 
+	@Override
+	public void setCurrentTrackID( final Integer trackID )
+	{}
 }

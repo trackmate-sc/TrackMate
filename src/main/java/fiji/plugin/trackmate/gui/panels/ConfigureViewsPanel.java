@@ -128,6 +128,8 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 
 	private ManualEdgeColorGenerator manualEdgeColorGenerator;
 
+	private FeatureColorGenerator< Spot > spotColorGeneratorPerTrackFeature;
+
 	private JNumericTextField textFieldDrawingDepth;
 
 	private JPanel jpanelDrawingDepth;
@@ -245,6 +247,14 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 		this.spotColorGenerator = spotColorGenerator;
 	}
 
+	public void setSpotColorGeneratorPerTrackFeature( final FeatureColorGenerator< Spot > spotColorGeneratorPerTrackFeature )
+	{
+		if (null != this.spotColorGeneratorPerTrackFeature) {
+			this.spotColorGeneratorPerTrackFeature.terminate();
+		}
+		this.spotColorGeneratorPerTrackFeature = spotColorGeneratorPerTrackFeature;
+	}
+
 	public void refreshColorFeatures()
 	{
 		if ( !( displaySettings.get( KEY_SPOT_COLORING ) instanceof ManualSpotColorGenerator ) )
@@ -290,7 +300,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 		{
 			jPanelSpotOptions.remove( jPanelSpotColor );
 		}
-		jPanelSpotColor = new ColorByFeatureGUIPanel( model, Arrays.asList( new Category[] { Category.SPOTS, Category.DEFAULT } ) );
+		jPanelSpotColor = new ColorByFeatureGUIPanel( model, Arrays.asList( new Category[] { Category.SPOTS, Category.DEFAULT, Category.TRACKS } ) );
 		jPanelSpotColor.addActionListener( new ActionListener()
 		{
 			@Override
@@ -306,6 +316,10 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 					if ( null == spotColorGenerator ) { return; }
 					spotColorGenerator.setFeature( jPanelSpotColor.getColorFeature() );
 					newValue = spotColorGenerator;
+					break;
+				case TRACKS:
+					newValue = spotColorGeneratorPerTrackFeature;
+					spotColorGeneratorPerTrackFeature.setFeature( jPanelSpotColor.getColorFeature() );
 					break;
 				case DEFAULT:
 					newValue = manualSpotColorGenerator;

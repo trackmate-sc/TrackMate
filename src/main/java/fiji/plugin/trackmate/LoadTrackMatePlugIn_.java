@@ -13,8 +13,6 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 
-import org.scijava.util.AppUtils;
-
 import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
 import fiji.plugin.trackmate.features.edges.EdgeVelocityAnalyzer;
 import fiji.plugin.trackmate.gui.GuiUtils;
@@ -54,8 +52,16 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		super( new LogPanel() );
 	}
 
+	/**
+	 * Loads a TrackMate file in the GUI.
+	 *
+	 * @param filePath
+	 *            the path to a TrackMate XML file, to load. If
+	 *            <code>null</code> or 0-length, the user will be asked to
+	 *            browse to a TrackMate file.
+	 */
 	@Override
-	public void run( final String arg0 )
+	public void run( final String filePath )
 	{
 
 		// I can't stand the metal look. If this is a problem, contact me
@@ -85,10 +91,11 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		}
 
 		final Logger logger = Logger.IJ_LOGGER; // logPanel.getLogger();
-		if ( null == arg0 )
+
+		if ( null == filePath )
 		{
 
-			if ( null == file )
+			if ( null == file || file.length() == 0 )
 			{
 				final File folder = new File( System.getProperty( "user.dir" ) ).getParentFile().getParentFile();
 				file = new File( folder.getPath() + File.separator + "TrackMateData.xml" );
@@ -99,11 +106,27 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		}
 		else
 		{
-			file = new File( arg0 );
+			file = new File( filePath );
+			if ( !file.exists() )
+			{
+				IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION, "Could not find file with path " + filePath + "." );
+				return;
+			}
+			if ( !file.canRead() )
+			{
+				IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION, "Could not read file with path " + filePath + "." );
+				return;
+			}
 		}
 
 		// Read the file content
 		TmXmlReader reader = createReader( file );
+		if ( !reader.isReadingOk() )
+		{
+			IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION, reader.getErrorMessage() );
+			return;
+		}
+
 		final Version version = new Version( reader.getVersion() );
 		if ( version.compareTo( new Version( "2.0.0" ) ) < 0 )
 		{
@@ -289,9 +312,8 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 	public static void main( final String[] args )
 	{
 		ImageJ.main( args );
-		final File file = new File( AppUtils.getBaseDirectory( TrackMate.class ), "samples/FakeTracks.xml" );
 		final LoadTrackMatePlugIn_ plugIn = new LoadTrackMatePlugIn_();
-		plugIn.run( file.getAbsolutePath() );
+		plugIn.run( "samples/FakeTracks.xml" );
 	}
 
 }

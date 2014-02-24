@@ -1,6 +1,5 @@
 package fiji.plugin.trackmate.visualization;
 
-
 import java.awt.Color;
 
 import fiji.plugin.trackmate.Spot;
@@ -29,5 +28,9 @@ public class ManualSpotColorGenerator implements FeatureColorGenerator< Spot >
 
 	@Override
 	public void terminate()
+	{}
+
+	@Override
+	public void activate()
 	{}
 }
