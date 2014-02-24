@@ -53,16 +53,26 @@ public class ExportStatsToIJAction extends AbstractTMAction
 			{
 				spotTable.incrementCounter();
 				spotTable.addLabel( spot.getName() );
-				spotTable.addValue( "ID", spot.ID() );
-				spotTable.addValue( "TRACK_ID", trackID );
+				spotTable.addValue( "ID", "" + spot.ID() );
+				spotTable.addValue( "TRACK_ID", "" + trackID.intValue() );
 				for ( final String feature : spotFeatures )
 				{
 					final Double val = spot.getFeature( feature );
 					if ( null == val )
 					{
-						continue;
+						spotTable.addValue( feature, "None" );
 					}
-					spotTable.addValue( feature, val.doubleValue() );
+					else
+					{
+						if ( fm.getSpotFeatureIsInt().get( feature ).booleanValue() )
+						{
+							spotTable.addValue( feature, "" + val.intValue() );
+						}
+						else
+						{
+							spotTable.addValue( feature, val.doubleValue() );
+						}
+					}
 				}
 			}
 		}
@@ -95,9 +105,20 @@ public class ExportStatsToIJAction extends AbstractTMAction
 					final Number d = ( Number ) o;
 					if ( d == null )
 					{
-						System.out.println( "null value for " + edge + " at feature " + feature );// DEBUG
+						edgeTable.addValue( feature, "None" );
 					}
-					edgeTable.addValue( feature, d.doubleValue() );
+					else
+					{
+						if ( fm.getEdgeFeatureIsInt().get( feature ).booleanValue() )
+						{
+							edgeTable.addValue( feature, "" + d.intValue() );
+						}
+						else
+						{
+							edgeTable.addValue( feature, d.doubleValue() );
+						}
+
+					}
 				}
 
 			}
@@ -122,11 +143,18 @@ public class ExportStatsToIJAction extends AbstractTMAction
 				final Double val = fm.getTrackFeature( trackID, feature );
 				if ( null == val )
 				{
-					System.out.println( "Got a null feature value for feature " + feature + " on trackID " + trackID );
+					trackTable.addValue( feature, "None" );
 				}
 				else
 				{
-					trackTable.addValue( feature, val );
+					if ( fm.getTrackFeatureIsInt().get( feature ).booleanValue() )
+					{
+						trackTable.addValue( feature, "" + val.intValue() );
+					}
+					else
+					{
+						trackTable.addValue( feature, val.doubleValue() );
+					}
 				}
 			}
 		}
