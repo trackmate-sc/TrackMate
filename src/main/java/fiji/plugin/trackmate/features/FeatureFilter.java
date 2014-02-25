@@ -21,6 +21,11 @@ public class FeatureFilter
 		this.isAbove = isAbove;
 	}
 
+	public FeatureFilter( final String feature, final double value, final boolean isAbove )
+	{
+		this( feature, Double.valueOf( value ), isAbove );
+	}
+
 	@Override
 	public String toString()
 	{
