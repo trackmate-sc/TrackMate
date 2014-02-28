@@ -164,7 +164,7 @@ public class InitFilterPanel extends ActionListenablePanel
 				{
 					jLabelSelectedSpots = new JLabel();
 					jPanelFields.add( jLabelSelectedSpots );
-					jLabelSelectedSpots.setText( "Selected spots: <n1> out of <n2>" );
+					jLabelSelectedSpots.setText( "Please wait..." );
 					jLabelSelectedSpots.setBounds( 12, 12, 276, 15 );
 					jLabelSelectedSpots.setFont( FONT );
 				}
