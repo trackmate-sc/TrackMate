@@ -9,8 +9,8 @@ import org.scijava.plugin.Plugin;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.io.IcyTrackFormatWriter;
 import fiji.plugin.trackmate.io.IOUtils;
+import fiji.plugin.trackmate.io.IcyTrackFormatWriter;
 
 public class IcyTrackExporter extends AbstractTMAction
 {
@@ -86,7 +86,7 @@ public class IcyTrackExporter extends AbstractTMAction
 		}
 	}
 
-	@Plugin( type = TrackMateActionFactory.class )
+	@Plugin( type = TrackMateActionFactory.class, enabled = false )
 	public static class Factory implements TrackMateActionFactory
 	{
 
