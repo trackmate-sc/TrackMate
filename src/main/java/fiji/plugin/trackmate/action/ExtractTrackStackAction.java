@@ -135,7 +135,7 @@ public class ExtractTrackStackAction extends AbstractTMAction {
 
 		// Extract target channel
 		final ImgPlus img = TMUtils.rawWraps(settings.imp);
-		final ImgPlus<?> imgC = HyperSliceImgPlus.fixChannelAxis(img, targetChannel);
+		final ImgPlus imgC = HyperSliceImgPlus.fixChannelAxis( img, targetChannel );
 
 		// Prepare new image holder:
 		final ImageStack stack = new ImageStack(width, height);
@@ -148,7 +148,7 @@ public class ExtractTrackStackAction extends AbstractTMAction {
 			final int frame = spot.getFeature(Spot.FRAME).intValue();
 
 
-			final ImgPlus<?> imgCT = HyperSliceImgPlus.fixTimeAxis(imgC, frame);
+			final ImgPlus imgCT = HyperSliceImgPlus.fixTimeAxis( imgC, frame );
 
 			// Compute target coordinates for current spot
 			final int x = (int) (Math.round((spot.getFeature(Spot.POSITION_X)) / calibration[0]) - width/2);
