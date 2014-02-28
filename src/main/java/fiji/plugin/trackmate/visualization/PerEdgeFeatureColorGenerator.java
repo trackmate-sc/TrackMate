@@ -8,6 +8,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.ModelChangeListener;
+import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
 
 public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackColorGenerator
 {
@@ -36,7 +37,7 @@ public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackC
 	@Override
 	public void setFeature( final String feature )
 	{
-		if ( feature.equals( this.feature ) ) { return; }
+		if ( feature.equals( this.feature ) || feature.equals( ManualEdgeColorAnalyzer.FEATURE ) ) { return; }
 		this.feature = feature;
 		resetMinAndMax();
 	}
@@ -124,6 +125,7 @@ public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackC
 			}
 		}
 	}
+
 
 	@Override
 	public void terminate()

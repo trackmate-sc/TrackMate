@@ -23,6 +23,7 @@ import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_ATTRIBUTE;
 import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_DECLARATIONS_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_DIMENSION_ATTRIBUTE;
 import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_ISINT_ATTRIBUTE;
 import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_NAME_ATTRIBUTE;
 import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_SHORT_NAME_ATTRIBUTE;
 import static fiji.plugin.trackmate.io.TmXmlKeys.FILTERED_TRACK_ELEMENT_KEY;
@@ -755,11 +756,8 @@ public class TmXmlReader {
 
 		// The list of edge features. that we will set.
 		final FeatureModel fm = model.getFeatureModel();
-		final List<String> edgeIntFeatures = new ArrayList<String>();// TODO is there a better way?
-		edgeIntFeatures.add(EdgeTargetAnalyzer.SPOT_SOURCE_ID);
-		edgeIntFeatures.add(EdgeTargetAnalyzer.SPOT_TARGET_ID);
-		final Collection<String> edgeDoubleFeatures = fm.getEdgeFeatures();
-		edgeDoubleFeatures.removeAll(edgeIntFeatures);
+		final Collection< String > edgeFeatures = fm.getEdgeFeatures();
+		final Map< String, Boolean > edgeFeatureIsInt = fm.getEdgeFeatureIsInt();
 
 		for (final Element trackElement : trackElements) {
 
@@ -823,15 +821,25 @@ public class TmXmlReader {
 					graph.setEdgeWeight(edge, weight);
 
 					// Put edge features
-					for (final String feature : edgeDoubleFeatures) {
-						final double val = readDoubleAttribute(edgeElement, feature, logger);
-						fm.putEdgeFeature(edge, feature, val);
-					}
-					for (final String feature : edgeIntFeatures) {
-						final double val = readIntAttribute(edgeElement, feature, logger);
-						fm.putEdgeFeature(edge, feature, val);
-					}
+					for ( final String feature : edgeFeatures )
+					{
+						if ( null == edgeElement.getAttribute( feature ) )
+						{
+							// Skip missing values.
+							continue;
+						}
 
+						final double val;
+						if ( edgeFeatureIsInt.get( feature ).booleanValue() )
+						{
+							val = readIntAttribute( edgeElement, feature, logger );
+						}
+						else
+						{
+							val = readDoubleAttribute( edgeElement, feature, logger );
+						}
+						fm.putEdgeFeature(edge, feature, val);
+					}
 				}
 
 				// Adds the edge to the set
@@ -965,10 +973,11 @@ public class TmXmlReader {
 			final Map<String, String> featureNames = new HashMap<String, String>(children.size());
 			final Map<String, String> featureShortNames = new HashMap<String, String>(children.size());
 			final Map<String, Dimension> featureDimensions = new HashMap<String, Dimension>(children.size());
+			final Map< String, Boolean > isIntFeature = new HashMap< String, Boolean >();
 			for (final Element child : children) {
-				readSingleFeatureDeclaration(child, features, featureNames, featureShortNames, featureDimensions);
+				readSingleFeatureDeclaration( child, features, featureNames, featureShortNames, featureDimensions, isIntFeature );
 			}
-			fm.declareSpotFeatures(features, featureNames, featureShortNames, featureDimensions);
+			fm.declareSpotFeatures( features, featureNames, featureShortNames, featureDimensions, isIntFeature );
 		}
 
 		// Edges
@@ -984,10 +993,11 @@ public class TmXmlReader {
 			final Map<String, String> featureNames = new HashMap<String, String>(children.size());
 			final Map<String, String> featureShortNames = new HashMap<String, String>(children.size());
 			final Map<String, Dimension> featureDimensions = new HashMap<String, Dimension>(children.size());
+			final Map< String, Boolean > isIntFeature = new HashMap< String, Boolean >( children.size() );
 			for (final Element child : children) {
-				readSingleFeatureDeclaration(child, features, featureNames, featureShortNames, featureDimensions);
+				readSingleFeatureDeclaration( child, features, featureNames, featureShortNames, featureDimensions, isIntFeature );
 			}
-			fm.declareEdgeFeatures(features, featureNames, featureShortNames, featureDimensions);
+			fm.declareEdgeFeatures( features, featureNames, featureShortNames, featureDimensions, isIntFeature );
 		}
 
 		// Tracks
@@ -1003,10 +1013,11 @@ public class TmXmlReader {
 			final Map<String, String> featureNames = new HashMap<String, String>(children.size());
 			final Map<String, String> featureShortNames = new HashMap<String, String>(children.size());
 			final Map<String, Dimension> featureDimensions = new HashMap<String, Dimension>(children.size());
+			final Map< String, Boolean > isIntFeature = new HashMap< String, Boolean >();
 			for (final Element child : children) {
-				readSingleFeatureDeclaration(child, features, featureNames, featureShortNames, featureDimensions);
+				readSingleFeatureDeclaration( child, features, featureNames, featureShortNames, featureDimensions, isIntFeature );
 			}
-			fm.declareTrackFeatures(features, featureNames, featureShortNames, featureDimensions);
+			fm.declareTrackFeatures( features, featureNames, featureShortNames, featureDimensions, isIntFeature );
 		}
 	}
 
@@ -1125,7 +1136,8 @@ public class TmXmlReader {
 
 
 	private void readSingleFeatureDeclaration(final Element child, final Collection<String> features,
-			final Map<String, String> featureNames, final Map<String, String> featureShortNames, final Map<String, Dimension> featureDimensions) {
+ final Map< String, String > featureNames, final Map< String, String > featureShortNames, final Map< String, Dimension > featureDimensions, final Map< String, Boolean > isIntFeature )
+	{
 
 		final String feature 				= child.getAttributeValue(FEATURE_ATTRIBUTE);
 		if (null == feature) {
@@ -1151,11 +1163,22 @@ public class TmXmlReader {
 			ok = false;
 			return;
 		}
+		boolean isInt = false;
+		try
+		{
+			isInt = child.getAttribute( FEATURE_ISINT_ATTRIBUTE ).getBooleanValue();
+		}
+		catch ( final Exception e )
+		{
+			logger.error( "Could not read the isInt attribute for feature " + feature + ".\n" );
+			ok = false;
+		}
 
 		features.add(feature);
 		featureNames.put(feature, featureName);
 		featureShortNames.put(feature, featureShortName);
 		featureDimensions.put(feature, featureDimension);
+		isIntFeature.put( feature, Boolean.valueOf( isInt ) );
 	}
 
 

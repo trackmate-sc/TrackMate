@@ -91,6 +91,7 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		}
 
 		final Logger logger = Logger.IJ_LOGGER; // logPanel.getLogger();
+
 		if ( null == filePath )
 		{
 
@@ -141,7 +142,7 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		{
 			logger.error( reader.getErrorMessage() );
 			logger.error( "Aborting.\n" ); // If I cannot even open the xml
-											// file, it is not worth going on.
+			// file, it is not worth going on.
 			return;
 		}
 
@@ -149,6 +150,7 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		final String logText = reader.getLog() + '\n';
 		// Model
 		model = reader.getModel();
+
 		// Settings -> empty for now.
 		settings = createSettings();
 

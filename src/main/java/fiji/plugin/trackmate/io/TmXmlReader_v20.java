@@ -184,20 +184,20 @@ public class TmXmlReader_v20 extends TmXmlReader {
 		// Feature declaration - has to be manual declaration
 		final FeatureModel fm = model.getFeatureModel();
 
-		fm.declareEdgeFeatures(Spot.FEATURES, Spot.FEATURE_NAMES, Spot.FEATURE_SHORT_NAMES, Spot.FEATURE_DIMENSIONS);
-		fm.declareSpotFeatures(SpotIntensityAnalyzerFactory.FEATURES, SpotIntensityAnalyzerFactory.FEATURE_NAMES, SpotIntensityAnalyzerFactory.FEATURE_SHORT_NAMES, SpotIntensityAnalyzerFactory.FEATURE_DIMENSIONS);
-		fm.declareSpotFeatures(SpotContrastAndSNRAnalyzerFactory.FEATURES, SpotContrastAndSNRAnalyzerFactory.FEATURE_NAMES, SpotContrastAndSNRAnalyzerFactory.FEATURE_SHORT_NAMES, SpotContrastAndSNRAnalyzerFactory.FEATURE_DIMENSIONS);
-		fm.declareSpotFeatures(SpotRadiusEstimatorFactory.FEATURES, SpotRadiusEstimatorFactory.FEATURE_NAMES, SpotRadiusEstimatorFactory.FEATURE_SHORT_NAMES, SpotRadiusEstimatorFactory.FEATURE_DIMENSIONS);
+		fm.declareEdgeFeatures( Spot.FEATURES, Spot.FEATURE_NAMES, Spot.FEATURE_SHORT_NAMES, Spot.FEATURE_DIMENSIONS, Spot.IS_INT );
+		fm.declareSpotFeatures( SpotIntensityAnalyzerFactory.FEATURES, SpotIntensityAnalyzerFactory.FEATURE_NAMES, SpotIntensityAnalyzerFactory.FEATURE_SHORT_NAMES, SpotIntensityAnalyzerFactory.FEATURE_DIMENSIONS, SpotIntensityAnalyzerFactory.IS_INT );
+		fm.declareSpotFeatures( SpotContrastAndSNRAnalyzerFactory.FEATURES, SpotContrastAndSNRAnalyzerFactory.FEATURE_NAMES, SpotContrastAndSNRAnalyzerFactory.FEATURE_SHORT_NAMES, SpotContrastAndSNRAnalyzerFactory.FEATURE_DIMENSIONS, SpotContrastAndSNRAnalyzerFactory.IS_INT );
+		fm.declareSpotFeatures( SpotRadiusEstimatorFactory.FEATURES, SpotRadiusEstimatorFactory.FEATURE_NAMES, SpotRadiusEstimatorFactory.FEATURE_SHORT_NAMES, SpotRadiusEstimatorFactory.FEATURE_DIMENSIONS, SpotRadiusEstimatorFactory.IS_INT );
 
-		fm.declareEdgeFeatures(EdgeTargetAnalyzer.FEATURES, EdgeTargetAnalyzer.FEATURE_NAMES, EdgeTargetAnalyzer.FEATURE_SHORT_NAMES, EdgeTargetAnalyzer.FEATURE_DIMENSIONS);
-		fm.declareEdgeFeatures(EdgeVelocityAnalyzer.FEATURES, EdgeVelocityAnalyzer.FEATURE_NAMES, EdgeVelocityAnalyzer.FEATURE_SHORT_NAMES, EdgeVelocityAnalyzer.FEATURE_DIMENSIONS);
-		fm.declareEdgeFeatures(EdgeTimeLocationAnalyzer.FEATURES, EdgeTimeLocationAnalyzer.FEATURE_NAMES, EdgeTimeLocationAnalyzer.FEATURE_SHORT_NAMES, EdgeTimeLocationAnalyzer.FEATURE_DIMENSIONS);
+		fm.declareEdgeFeatures( EdgeTargetAnalyzer.FEATURES, EdgeTargetAnalyzer.FEATURE_NAMES, EdgeTargetAnalyzer.FEATURE_SHORT_NAMES, EdgeTargetAnalyzer.FEATURE_DIMENSIONS, EdgeTargetAnalyzer.IS_INT );
+		fm.declareEdgeFeatures( EdgeVelocityAnalyzer.FEATURES, EdgeVelocityAnalyzer.FEATURE_NAMES, EdgeVelocityAnalyzer.FEATURE_SHORT_NAMES, EdgeVelocityAnalyzer.FEATURE_DIMENSIONS, EdgeVelocityAnalyzer.IS_INT );
+		fm.declareEdgeFeatures( EdgeTimeLocationAnalyzer.FEATURES, EdgeTimeLocationAnalyzer.FEATURE_NAMES, EdgeTimeLocationAnalyzer.FEATURE_SHORT_NAMES, EdgeTimeLocationAnalyzer.FEATURE_DIMENSIONS, EdgeTimeLocationAnalyzer.IS_INT );
 
-		fm.declareTrackFeatures(TrackIndexAnalyzer.FEATURES, TrackIndexAnalyzer.FEATURE_NAMES, TrackIndexAnalyzer.FEATURE_SHORT_NAMES, TrackIndexAnalyzer.FEATURE_DIMENSIONS);
-		fm.declareTrackFeatures(TrackDurationAnalyzer.FEATURES, TrackDurationAnalyzer.FEATURE_NAMES, TrackDurationAnalyzer.FEATURE_SHORT_NAMES, TrackDurationAnalyzer.FEATURE_DIMENSIONS);
-		fm.declareTrackFeatures(TrackBranchingAnalyzer.FEATURES, TrackBranchingAnalyzer.FEATURE_NAMES, TrackBranchingAnalyzer.FEATURE_SHORT_NAMES, TrackBranchingAnalyzer.FEATURE_DIMENSIONS);
-		fm.declareTrackFeatures(TrackLocationAnalyzer.FEATURES, TrackLocationAnalyzer.FEATURE_NAMES, TrackLocationAnalyzer.FEATURE_SHORT_NAMES, TrackLocationAnalyzer.FEATURE_DIMENSIONS);
-		fm.declareTrackFeatures(TrackSpeedStatisticsAnalyzer.FEATURES, TrackSpeedStatisticsAnalyzer.FEATURE_NAMES, TrackSpeedStatisticsAnalyzer.FEATURE_SHORT_NAMES, TrackSpeedStatisticsAnalyzer.FEATURE_DIMENSIONS);
+		fm.declareTrackFeatures( TrackIndexAnalyzer.FEATURES, TrackIndexAnalyzer.FEATURE_NAMES, TrackIndexAnalyzer.FEATURE_SHORT_NAMES, TrackIndexAnalyzer.FEATURE_DIMENSIONS, TrackIndexAnalyzer.IS_INT );
+		fm.declareTrackFeatures( TrackDurationAnalyzer.FEATURES, TrackDurationAnalyzer.FEATURE_NAMES, TrackDurationAnalyzer.FEATURE_SHORT_NAMES, TrackDurationAnalyzer.FEATURE_DIMENSIONS, TrackDurationAnalyzer.IS_INT );
+		fm.declareTrackFeatures( TrackBranchingAnalyzer.FEATURES, TrackBranchingAnalyzer.FEATURE_NAMES, TrackBranchingAnalyzer.FEATURE_SHORT_NAMES, TrackBranchingAnalyzer.FEATURE_DIMENSIONS, TrackBranchingAnalyzer.IS_INT );
+		fm.declareTrackFeatures( TrackLocationAnalyzer.FEATURES, TrackLocationAnalyzer.FEATURE_NAMES, TrackLocationAnalyzer.FEATURE_SHORT_NAMES, TrackLocationAnalyzer.FEATURE_DIMENSIONS, TrackLocationAnalyzer.IS_INT );
+		fm.declareTrackFeatures( TrackSpeedStatisticsAnalyzer.FEATURES, TrackSpeedStatisticsAnalyzer.FEATURE_NAMES, TrackSpeedStatisticsAnalyzer.FEATURE_SHORT_NAMES, TrackSpeedStatisticsAnalyzer.FEATURE_DIMENSIONS, TrackSpeedStatisticsAnalyzer.IS_INT );
 
 		// Spots - we can find them under the root element
 		final SpotCollection spots = getAllSpots();
