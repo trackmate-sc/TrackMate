@@ -122,7 +122,9 @@ public class FilterGuiPanel extends ActionListenablePanel implements ChangeListe
 				featureNames.putAll( model.getFeatureModel().getTrackFeatureNames() );
 				break;
 			case DEFAULT:
-				features.add( ColorByFeatureGUIPanel.UNIFORM_KEY );
+				// We do not want to allow filtering on manual or default
+				// categories.
+				// features.add( ColorByFeatureGUIPanel.UNIFORM_KEY );
 				featureNames.put( ColorByFeatureGUIPanel.UNIFORM_KEY, ColorByFeatureGUIPanel.UNIFORM_NAME );
 				break;
 			default:
