@@ -96,7 +96,7 @@ public class IcyTrackFormatWriter implements Algorithm, Benchmark
 		final long start = System.currentTimeMillis();
 
 		// ICY does not accept middle links.
-		final ConvexBranchesDecomposition splitter = new ConvexBranchesDecomposition( model, true );
+		final ConvexBranchesDecomposition splitter = new ConvexBranchesDecomposition( model, true, true );
 		if ( !splitter.checkInput() || !splitter.process() )
 		{
 			errorMessage = splitter.getErrorMessage();

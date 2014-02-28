@@ -27,12 +27,13 @@ import fiji.plugin.trackmate.TrackModel;
  * A convex branch is a portion of a track that contains spots that are
  * separated by exactly one frame. Here they are returned, sorted by increasing
  * frame number. It is ensured that the spots within a convex branch are not a
- * splitting or a merging point. There is no gap within a convex branch.
+ * splitting or a merging point. If desired, gaps within a convex branch can be
+ * removed.
  * <p>
  * This class also outputs the links that were cut in the source model to
  * generate these branches. A flag allows to specify whether these links must be
  * between end and starting point of a branch.
- * 
+ *
  * @author Jean-Yves Tinevez - 2014
  */
 public class ConvexBranchesDecomposition implements Algorithm, Benchmark
@@ -57,9 +58,11 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 
 	private final boolean forbidMiddleLinks;
 
+	private final boolean forbidGaps;
+
 	/**
 	 * Creates a new track splitter.
-	 * 
+	 *
 	 * @param model
 	 *            the {@link Model} from which tracks are to be split. Only
 	 *            tracks marked visible will be processed.
@@ -70,24 +73,25 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 	 *            spots. If <code>false</code>, a link can target a spot within
 	 *            a branch, which can lead to fewer and longer branches.
 	 */
-	public ConvexBranchesDecomposition( final Model model, final boolean forbidMiddleLinks )
+	public ConvexBranchesDecomposition( final Model model, final boolean forbidMiddleLinks, final boolean forbidGaps )
 	{
 		this.forbidMiddleLinks = forbidMiddleLinks;
+		this.forbidGaps = forbidGaps;
 		this.tm = model.getTrackModel();
 		this.neighborIndex = tm.getDirectedNeighborIndex();
 	}
 
 	/**
 	 * Creates a new track splitter. Links between spots from within branches
-	 * are forbidden.
-	 * 
+	 * and gaps within convex branches are forbidden.
+	 *
 	 * @param model
 	 *            the {@link Model} from which tracks are to be split. Only
 	 *            tracks marked visible will be processed.
 	 */
 	public ConvexBranchesDecomposition( final Model model )
 	{
-		this( model, true );
+		this( model, true, true );
 	}
 
 	@Override
@@ -128,7 +132,7 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 		linksPerTrack = new HashMap< Integer, Collection< List< Spot > >>();
 		for ( final Integer trackID : trackIDs )
 		{
-			final TrackBranchDecomposition branchDecomposition = processTrack( trackID, tm, neighborIndex, forbidMiddleLinks );
+			final TrackBranchDecomposition branchDecomposition = processTrack( trackID, tm, neighborIndex, forbidMiddleLinks, forbidGaps );
 
 			branchesPerTrack.put( trackID, branchDecomposition.branches );
 			linksPerTrack.put( trackID, branchDecomposition.links );
@@ -144,7 +148,7 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 
 	}
 
-	public static final TrackBranchDecomposition processTrack( final Integer trackID, final TrackModel tm, final TimeDirectedNeighborIndex neighborIndex, final boolean forbidMiddleLinks )
+	public static final TrackBranchDecomposition processTrack( final Integer trackID, final TrackModel tm, final TimeDirectedNeighborIndex neighborIndex, final boolean forbidMiddleLinks, final boolean forbidGaps )
 	{
 		final Set< Spot > allSpots = tm.trackSpots( trackID );
 		final Set< DefaultWeightedEdge > allEdges = tm.trackEdges( trackID );
@@ -295,22 +299,25 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 		 * 2nd pass: remove gaps.
 		 */
 
-		final Set< DefaultWeightedEdge > newEdges = graph.edgeSet();
-		final Set< DefaultWeightedEdge > toRemove = new HashSet< DefaultWeightedEdge >();
-		for ( final DefaultWeightedEdge edge : newEdges )
+		if ( forbidGaps )
 		{
-			final Spot source = graph.getEdgeSource( edge );
-			final Spot target = graph.getEdgeTarget( edge );
-			if ( Math.abs( source.diffTo( target, Spot.FRAME ) ) > 1 )
+			final Set< DefaultWeightedEdge > newEdges = graph.edgeSet();
+			final Set< DefaultWeightedEdge > toRemove = new HashSet< DefaultWeightedEdge >();
+			for ( final DefaultWeightedEdge edge : newEdges )
 			{
-				toRemove.add( edge );
-				links.add( makeLink( source, target ) );
+				final Spot source = graph.getEdgeSource( edge );
+				final Spot target = graph.getEdgeTarget( edge );
+				if ( Math.abs( source.diffTo( target, Spot.FRAME ) ) > 1 )
+				{
+					toRemove.add( edge );
+					links.add( makeLink( source, target ) );
+				}
 			}
-		}
 
-		for ( final DefaultWeightedEdge edge : toRemove )
-		{
-			graph.removeEdge( edge );
+			for ( final DefaultWeightedEdge edge : toRemove )
+			{
+				graph.removeEdge( edge );
+			}
 		}
 
 		/*
@@ -389,7 +396,7 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 	 * the last spot of a branch, and the second element of this link is the
 	 * first spot of another branch. Otherwise, a link cam target a spot within
 	 * a branch.
-	 * 
+	 *
 	 * @return a collection of links as a 2-elements list.
 	 */
 	public Collection< List< Spot >> getLinks()
@@ -407,7 +414,7 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 	 * the last spot of a branch, and the second element of this link is the
 	 * first spot of another branch. Otherwise, a link can target a spot within
 	 * a branch.
-	 * 
+	 *
 	 * @return the mapping of track IDs to the links.
 	 */
 	public Map< Integer, Collection< List< Spot >>> getLinksPerTrack()

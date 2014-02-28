@@ -75,7 +75,7 @@ public class ConvexBranchesDecompositionTest
 	@Test
 	public void testBehavior()
 	{
-		splitter = new ConvexBranchesDecomposition( model, false );
+		splitter = new ConvexBranchesDecomposition( model, false, true );
 		if ( !splitter.checkInput() || !splitter.process() )
 		{
 			fail( splitter.getErrorMessage() );
@@ -87,7 +87,7 @@ public class ConvexBranchesDecompositionTest
 	@Test
 	public void testBehaviorForbidMiddleLinks()
 	{
-		splitter = new ConvexBranchesDecomposition( model, true );
+		splitter = new ConvexBranchesDecomposition( model, true, true );
 		if ( !splitter.checkInput() || !splitter.process() )
 		{
 			fail( splitter.getErrorMessage() );
