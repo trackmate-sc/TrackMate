@@ -55,6 +55,8 @@ import fiji.plugin.trackmate.visualization.ManualEdgeColorGenerator;
 import fiji.plugin.trackmate.visualization.ManualSpotColorGenerator;
 import fiji.plugin.trackmate.visualization.PerEdgeFeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.PerTrackFeatureColorGenerator;
+import fiji.plugin.trackmate.visualization.SpotColorGenerator;
+import fiji.plugin.trackmate.visualization.SpotColorGeneratorPerTrackFeature;
 import fiji.plugin.trackmate.visualization.TrackColorGenerator;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 
@@ -257,10 +259,19 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 
 	public void refreshColorFeatures()
 	{
-		if ( !( displaySettings.get( KEY_SPOT_COLORING ) instanceof ManualSpotColorGenerator ) )
+		if ( ( displaySettings.get( KEY_SPOT_COLORING ) instanceof SpotColorGenerator ) )
 		{
 			jPanelSpotColor.setColorFeature( spotColorGenerator.getFeature() );
 		}
+		else if ( ( displaySettings.get( KEY_SPOT_COLORING ) instanceof ManualSpotColorGenerator ) )
+		{
+			jPanelSpotColor.setColorFeature( ColorByFeatureGUIPanel.MANUAL_KEY );
+		}
+		else if ( ( ( displaySettings.get( KEY_SPOT_COLORING ) instanceof SpotColorGeneratorPerTrackFeature ) ) )
+		{
+			jPanelSpotColor.setColorFeature( spotColorGeneratorPerTrackFeature.getFeature() );
+		}
+
 		if ( !( displaySettings.get( KEY_TRACK_COLORING ) instanceof ManualEdgeColorGenerator ) )
 		{
 			trackColorGUI.setColorFeature( trackColorGenerator.getFeature() );
