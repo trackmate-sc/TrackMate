@@ -2,6 +2,7 @@ package fiji.plugin.trackmate;
 
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -16,12 +17,43 @@ public class TrackMatePlugIn_ implements PlugIn
 
 	protected Model model;
 
+	/**
+	 * Runs the TrackMate GUI plugin.
+	 *
+	 * @param imagePath
+	 *            a path to an image that can be read by ImageJ. If set, the
+	 *            image will be opened and TrackMate will be started set to
+	 *            operate on it. If <code>null</code> or 0-length, TrackMate
+	 *            will be set to operate on the image currently opened in
+	 *            ImageJ.
+	 */
 	@Override
-	public void run( final String arg0 )
+	public void run( final String imagePath )
 	{
-
-		final ImagePlus imp = WindowManager.getCurrentImage();
-		if ( null == imp ) { return; }
+		final ImagePlus imp;
+		if ( imagePath != null && imagePath.length() > 0 )
+		{
+			imp = new ImagePlus( imagePath );
+			if ( null == imp.getOriginalFileInfo() )
+			{
+				IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION, "Could not load image with path " + imagePath + "." );
+				return;
+			}
+		}
+		else
+		{
+			imp = WindowManager.getCurrentImage();
+			if ( null == imp )
+			{
+				IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION, "Please open an image before running TrackMate." );
+				return;
+			}
+		}
+		if ( !imp.isVisible() )
+		{
+			imp.setOpenAsHyperStack( true );
+			imp.show();
+		}
 		GuiUtils.userCheckImpDimensions( imp );
 
 		settings = createSettings( imp );
@@ -92,11 +124,7 @@ public class TrackMatePlugIn_ implements PlugIn
 	public static void main( final String[] args )
 	{
 		ImageJ.main( args );
-		// new ImagePlus( "samples/FakeTracks.tif" ).show();
-		final ImagePlus imp = new ImagePlus( "/Users/tinevez/Desktop/Data/FakeTracks2C.tif" );
-		imp.setOpenAsHyperStack( true );
-		imp.show();
-		new TrackMatePlugIn_().run( null );
+		new TrackMatePlugIn_().run( "samples/FakeTracks.tif" );
 	}
 
 }
