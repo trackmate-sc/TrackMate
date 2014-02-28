@@ -1,6 +1,5 @@
 package fiji.plugin.trackmate.features.manual;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +18,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
+import fiji.plugin.trackmate.visualization.TrackMateModelView;
 
 @Plugin( type = SpotAnalyzerFactory.class )
 public class ManualSpotColorAnalyzerFactory< T extends RealType< T > & NativeType< T >> implements SpotAnalyzerFactory< T >
@@ -42,9 +42,7 @@ public class ManualSpotColorAnalyzerFactory< T extends RealType< T > & NativeTyp
 
 	static final String NAME = "Manual spot color analyzer";
 
-	public static final Color DEFAULT_COLOR = Color.GRAY.darker();
-
-	private static final Double DEFAULT_COLOR_VALUE = Double.valueOf( DEFAULT_COLOR.getRGB() );
+	private static final Double DEFAULT_COLOR_VALUE = Double.valueOf( TrackMateModelView.DEFAULT_UNASSIGNED_FEATURE_COLOR.getRGB() );
 
 	static
 	{

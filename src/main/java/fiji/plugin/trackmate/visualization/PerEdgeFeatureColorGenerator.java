@@ -51,7 +51,13 @@ public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackC
 	@Override
 	public Color color( final DefaultWeightedEdge edge )
 	{
-		final double val = model.getFeatureModel().getEdgeFeature( edge, feature ).doubleValue();
+		final Double feat = model.getFeatureModel().getEdgeFeature( edge, feature );
+		if ( null == feat )
+		{
+			return TrackMateModelView.DEFAULT_TRACK_COLOR;
+		}
+		if ( Double.isNaN( feat.doubleValue() ) ) { return TrackMateModelView.DEFAULT_UNDEFINED_FEATURE_COLOR; }
+		final double val = feat.doubleValue();
 		return generator.getPaint( ( val - min ) / ( max - min ) );
 	}
 
@@ -111,6 +117,10 @@ public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackC
 			for ( final DefaultWeightedEdge edge : model.getTrackModel().trackEdges( trackID ) )
 			{
 				final Double feat = model.getFeatureModel().getEdgeFeature( edge, feature );
+				if ( null == feat || Double.isNaN( feat.doubleValue() ) )
+				{
+					continue;
+				}
 				final double val = feat.doubleValue();
 				if ( val < min )
 				{

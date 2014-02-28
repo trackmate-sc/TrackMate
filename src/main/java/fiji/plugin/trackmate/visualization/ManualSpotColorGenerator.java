@@ -12,7 +12,7 @@ public class ManualSpotColorGenerator implements FeatureColorGenerator< Spot >
 	public Color color( final Spot spot )
 	{
 		final Double val = spot.getFeature( ManualSpotColorAnalyzerFactory.FEATURE );
-		if ( null == val ) { return ManualSpotColorAnalyzerFactory.DEFAULT_COLOR; }
+		if ( null == val ) { return TrackMateModelView.DEFAULT_UNASSIGNED_FEATURE_COLOR; }
 		return new Color( val.intValue() );
 	}
 
