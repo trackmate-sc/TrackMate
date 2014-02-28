@@ -333,7 +333,15 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 					spotColorGeneratorPerTrackFeature.setFeature( jPanelSpotColor.getColorFeature() );
 					break;
 				case DEFAULT:
-					newValue = manualSpotColorGenerator;
+					if ( jPanelSpotColor.getColorFeature().equals( ColorByFeatureGUIPanel.UNIFORM_KEY ) )
+					{
+						spotColorGenerator.setFeature( null );
+						newValue = spotColorGenerator;
+					}
+					else
+					{
+						newValue = manualSpotColorGenerator;
+					}
 					break;
 				default:
 					throw new IllegalArgumentException( "Unknow spot color generator category: " + category );
