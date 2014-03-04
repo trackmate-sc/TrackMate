@@ -91,7 +91,7 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		}
 
 		final Logger logger = Logger.IJ_LOGGER; // logPanel.getLogger();
-		if ( null == filePath )
+		if ( null == filePath || filePath.length() == 0 )
 		{
 
 			if ( null == file || file.length() == 0 )
@@ -311,7 +311,8 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 	{
 		ImageJ.main( args );
 		final LoadTrackMatePlugIn_ plugIn = new LoadTrackMatePlugIn_();
-		plugIn.run( "samples/FakeTracks.xml" );
+		// plugIn.run( "samples/FakeTracks.xml" );
+		plugIn.run( "" );
 	}
 
 }
