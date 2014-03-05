@@ -209,13 +209,18 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 			for ( int i = 1; i < columnData.length; i++ )
 			{
 				final String feature = features.get( i - 1 );
-				if ( model.getFeatureModel().getSpotFeatureIsInt().get( feature ).booleanValue() )
+				final Double feat = spot.getFeature( feature );
+				if ( null == feat )
 				{
-					columnData[ i ] = "" + spot.getFeature( feature ).intValue();
+					columnData[ i ] = "";
+				}
+				else if ( model.getFeatureModel().getSpotFeatureIsInt().get( feature ).booleanValue() )
+				{
+					columnData[ i ] = "" + feat.intValue();
 				}
 				else
 				{
-					columnData[ i ] = String.format( "%.4g", spot.getFeature( feature ).doubleValue() );
+					columnData[ i ] = String.format( "%.4g", feat.doubleValue() );
 				}
 			}
 			dm.addColumn( spot.toString(), columnData );
