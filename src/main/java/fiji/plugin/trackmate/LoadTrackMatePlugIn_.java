@@ -149,6 +149,11 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		final String logText = reader.getLog() + '\n';
 		// Model
 		model = reader.getModel();
+		if ( !reader.isReadingOk() )
+		{
+			logger.error( "Problem reading the model:\n" + reader.getErrorMessage() );
+		}
+
 		// Settings -> empty for now.
 		settings = createSettings();
 
@@ -181,6 +186,10 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		final EdgeAnalyzerProvider edgeAnalyzerProvider = controller.getEdgeAnalyzerProvider();
 		final TrackAnalyzerProvider trackAnalyzerProvider = controller.getTrackAnalyzerProvider();
 		reader.readSettings( settings, detectorProvider, trackerProvider, spotAnalyzerProvider, edgeAnalyzerProvider, trackAnalyzerProvider );
+		if ( !reader.isReadingOk() )
+		{
+			logger.error( "Problem reading the settings:\n" + reader.getErrorMessage() );
+		}
 
 		// Hook actions
 		postRead( trackmate );
