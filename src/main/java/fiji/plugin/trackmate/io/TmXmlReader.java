@@ -597,8 +597,6 @@ public class TmXmlReader {
 	 * Update the given {@link Settings} object with the {@link SpotDetectorFactory} and settings map fields
 	 * named {@link Settings#detectorFactory}  and {@link Settings#detectorSettings} read within the XML file
 	 * this reader is initialized with.
-	 * <p>
-	 * As a side effect, this method also configure the {@link DetectorProvider}.
 	 *
 	 * @param settingsElement the Element in which the {@link Settings} parameters are stored.
 	 * @param settings  the base {@link Settings} object to update.
@@ -606,11 +604,20 @@ public class TmXmlReader {
 	 */
 	private void getDetectorSettings(final Element settingsElement, final Settings settings, final DetectorProvider provider) {
 		final Element element = settingsElement.getChild(DETECTOR_SETTINGS_ELEMENT_KEY);
+
+		if ( null == element )
+		{
+			logger.error( "Could not find the detector element in file.\n" );
+			this.ok = false;
+			return;
+		}
+
 		// Get the detector key
 		final String detectorKey = element.getAttributeValue( XML_ATTRIBUTE_DETECTOR_NAME );
 		if ( null == detectorKey )
 		{
-			logger.error( "Could not find the detector element in file.\n" );
+			logger.error( "Could not find the detector key element in file.\n" );
+			this.ok = false;
 			return;
 		}
 
@@ -651,13 +658,21 @@ public class TmXmlReader {
 	 */
 	private void getTrackerSettings(final Element settingsElement, final Settings settings, final TrackerProvider provider) {
 		final Element element = settingsElement.getChild(TRACKER_SETTINGS_ELEMENT_KEY);
+		if ( null == element )
+		{
+			logger.error( "Could not find the tracker element in file.\n" );
+			this.ok = false;
+			return;
+		}
+
 		final Map<String, Object> ds = new HashMap<String, Object>();
 
 		// Get the tracker key
 		final String trackerKey = element.getAttributeValue( XML_ATTRIBUTE_TRACKER_NAME );
 		if ( null == trackerKey )
 		{
-			logger.error( "Could not find the tracker element in file.\n" );
+			logger.error( "Could not find the tracker key element in file.\n" );
+			this.ok = false;
 			return;
 		}
 

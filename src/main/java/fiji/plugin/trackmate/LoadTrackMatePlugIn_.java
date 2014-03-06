@@ -18,6 +18,7 @@ import fiji.plugin.trackmate.features.edges.EdgeVelocityAnalyzer;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.LogPanel;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.gui.descriptors.ConfigureViewsDescriptor;
 import fiji.plugin.trackmate.gui.descriptors.SomeDialogDescriptor;
 import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.io.TmXmlReader;
@@ -195,10 +196,13 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		postRead( trackmate );
 
 		// GUI position
-		GuiUtils.positionWindow( controller.getGUI(), settings.imp.getWindow() );
+		if ( null != settings.imp )
+		{
+			GuiUtils.positionWindow( controller.getGUI(), settings.imp.getWindow() );
+		}
 
 		// GUI state
-		final String guiState = reader.getGUIState();
+		String guiState = reader.getGUIState();
 
 		// Views
 		final ViewProvider viewProvider = controller.getViewProvider();
@@ -219,6 +223,10 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 			newlogger.error( reader.getErrorMessage() );
 		}
 
+		if ( null == guiState )
+		{
+			guiState = ConfigureViewsDescriptor.KEY;
+		}
 		controller.setGUIStateString( guiState );
 
 		// Setup and render views
@@ -321,7 +329,7 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		ImageJ.main( args );
 		final LoadTrackMatePlugIn_ plugIn = new LoadTrackMatePlugIn_();
 		// plugIn.run( "samples/FakeTracks.xml" );
-		plugIn.run( "" );
+		plugIn.run( "/Users/tinevez/Desktop/Data/Mamut/parhyale/BDV130418A325_NoTempReg-mamut_JY2.xml" );
 	}
 
 }
