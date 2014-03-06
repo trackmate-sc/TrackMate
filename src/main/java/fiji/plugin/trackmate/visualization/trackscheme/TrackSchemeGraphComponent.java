@@ -30,6 +30,7 @@ import com.mxgraph.util.mxEventSource.mxIEventListener;
 import com.mxgraph.util.mxPoint;
 import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraph;
+import com.mxgraph.view.mxGraphView;
 
 import fiji.plugin.trackmate.Model;
 
@@ -419,6 +420,26 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 		final mxCell cell = (mxCell) obj;
 		trackScheme.addEdgeManually(cell);
 		evt.consume();
+	}
+
+	@Override
+	public void zoomTo( final double newScale, final boolean center )
+	{
+		final mxGraphView view = graph.getView();
+		final double scale = view.getScale();
+
+		final mxPoint translate = ( pageVisible && centerPage ) ? getPageTranslate( newScale ) : new mxPoint();
+		graph.getView().scaleAndTranslate( newScale, translate.getX(), translate.getY() );
+
+		if ( keepSelectionVisibleOnZoom && !graph.isSelectionEmpty() )
+		{
+			getGraphControl().scrollRectToVisible( view.getBoundingBox( graph.getSelectionCells() ).getRectangle() );
+		}
+		else
+		{
+			maintainScrollBar( true, newScale / scale, center );
+			maintainScrollBar( false, newScale / scale, center );
+		}
 	}
 
 }
