@@ -18,6 +18,7 @@ import fiji.plugin.trackmate.features.edges.EdgeVelocityAnalyzer;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.LogPanel;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.gui.descriptors.ConfigureViewsDescriptor;
 import fiji.plugin.trackmate.gui.descriptors.SomeDialogDescriptor;
 import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.io.TmXmlReader;
@@ -91,8 +92,7 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		}
 
 		final Logger logger = Logger.IJ_LOGGER; // logPanel.getLogger();
-
-		if ( null == filePath )
+		if ( null == filePath || filePath.length() == 0 )
 		{
 
 			if ( null == file || file.length() == 0 )
@@ -150,6 +150,10 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		final String logText = reader.getLog() + '\n';
 		// Model
 		model = reader.getModel();
+		if ( !reader.isReadingOk() )
+		{
+			logger.error( "Problem reading the model:\n" + reader.getErrorMessage() );
+		}
 
 		// Settings -> empty for now.
 		settings = createSettings();
@@ -183,15 +187,22 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		final EdgeAnalyzerProvider edgeAnalyzerProvider = controller.getEdgeAnalyzerProvider();
 		final TrackAnalyzerProvider trackAnalyzerProvider = controller.getTrackAnalyzerProvider();
 		reader.readSettings( settings, detectorProvider, trackerProvider, spotAnalyzerProvider, edgeAnalyzerProvider, trackAnalyzerProvider );
+		if ( !reader.isReadingOk() )
+		{
+			logger.error( "Problem reading the settings:\n" + reader.getErrorMessage() );
+		}
 
 		// Hook actions
 		postRead( trackmate );
 
 		// GUI position
-		GuiUtils.positionWindow( controller.getGUI(), settings.imp.getWindow() );
+		if ( null != settings.imp )
+		{
+			GuiUtils.positionWindow( controller.getGUI(), settings.imp.getWindow() );
+		}
 
 		// GUI state
-		final String guiState = reader.getGUIState();
+		String guiState = reader.getGUIState();
 
 		// Views
 		final ViewProvider viewProvider = controller.getViewProvider();
@@ -212,6 +223,10 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 			newlogger.error( reader.getErrorMessage() );
 		}
 
+		if ( null == guiState )
+		{
+			guiState = ConfigureViewsDescriptor.KEY;
+		}
 		controller.setGUIStateString( guiState );
 
 		// Setup and render views
@@ -313,7 +328,8 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 	{
 		ImageJ.main( args );
 		final LoadTrackMatePlugIn_ plugIn = new LoadTrackMatePlugIn_();
-		plugIn.run( "samples/FakeTracks.xml" );
+		// plugIn.run( "samples/FakeTracks.xml" );
+		plugIn.run( "/Users/tinevez/Desktop/Data/Mamut/parhyale/BDV130418A325_NoTempReg-mamut_JY2.xml" );
 	}
 
 }
