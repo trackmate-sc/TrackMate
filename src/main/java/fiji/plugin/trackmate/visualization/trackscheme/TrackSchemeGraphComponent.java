@@ -45,23 +45,17 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 
 	private static final Color LINE_COLOR = Color.BLACK;
 
+	private static final int MAX_DECCORATION_LEVELS = 2;
+
 	/** The width of the columns for each track, from left to right. */
 	int[] columnWidths = new int[ 0 ];
 
-	/** The name of each column. */
-	// String[] columnNames = new String[0];
 	/** The trackID for each column. */
 	Integer[] columnTrackIDs;
 
 	private final TrackScheme trackScheme;
 
-	/** If true, will paint background decorations. */
-	private boolean doPaintDecorations = TrackScheme.DEFAULT_DO_PAINT_DECORATIONS;
-
-	// /** The time unit. We need it to paint the correct row times. */
-	// private final String timeUnits = "frame";
-	// /** The frame interval. We need it to paint the correct row times. */
-	// private final double dt = 1;
+	private int paintDecorationLevel = TrackScheme.DEFAULT_PAINT_DECORATION_LEVEL;
 
 	/*
 	 * CONSTRUCTOR
@@ -95,16 +89,6 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 	public JGraphXAdapter getGraph()
 	{
 		return ( JGraphXAdapter ) super.getGraph();
-	}
-
-	public void setDoPaintDecorations( final boolean doPaintDecorations )
-	{
-		this.doPaintDecorations = doPaintDecorations;
-	}
-
-	public boolean isDoPaintDecorations()
-	{
-		return doPaintDecorations;
 	}
 
 	@Override
@@ -401,80 +385,89 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 	@Override
 	public void paintBackground( final Graphics g )
 	{
-		if ( !doPaintDecorations )
+		if ( paintDecorationLevel == 0 )
 			return;
-
-		final Graphics2D g2d = ( Graphics2D ) g;
-		final Rectangle paintBounds = g.getClipBounds();
 
 		final int width = getViewport().getView().getSize().width;
 		final int height = getViewport().getView().getSize().height;
 		final double scale = graph.getView().getScale();
 
+		final Graphics2D g2d = ( Graphics2D ) g;
+		g.setFont( FONT.deriveFont( ( float ) ( 12 * scale ) ).deriveFont( Font.BOLD ) );
+		g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
+		final Rectangle paintBounds = g.getClipBounds();
+
+
 		// Scaled sizes
 		final double xcs = TrackScheme.X_COLUMN_SIZE * scale;
 		final double ycs = TrackScheme.Y_COLUMN_SIZE * scale;
 
-		// Alternating row color
-		g.setColor( BACKGROUND_COLOR_2 );
-		double y = 0;
-		while ( y < height )
+		if ( paintDecorationLevel > 1 )
 		{
-			if ( y > paintBounds.y - ycs && y < paintBounds.y + paintBounds.height )
-				g.fillRect( 0, ( int ) y, width, ( int ) ycs );
-			y += 2d * ycs;
-		}
-
-		// Header separator
-		g.setColor( LINE_COLOR );
-		if ( ycs > paintBounds.y && ycs < paintBounds.y + paintBounds.height )
-			g.drawLine( paintBounds.x, ( int ) ycs, paintBounds.x + paintBounds.width, ( int ) ycs );
-		if ( xcs > paintBounds.x && xcs < paintBounds.x + paintBounds.width )
-			g.drawLine( ( int ) xcs, paintBounds.y, ( int ) xcs, paintBounds.y + paintBounds.height );
-
-		// Row headers
-		double x = xcs / 4d;
-		y = 3 * ycs / 2d;
-		g.setFont( FONT.deriveFont( ( float ) ( 12 * scale ) ).deriveFont( Font.BOLD ) );
-		g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
-
-		if ( xcs > paintBounds.x )
-		{
+			// Alternating row color
+			g.setColor( BACKGROUND_COLOR_2 );
+			double y = 0;
 			while ( y < height )
 			{
 				if ( y > paintBounds.y - ycs && y < paintBounds.y + paintBounds.height )
-				{
-					final int frame = ( int ) ( y / ycs - 1 );
-					// g.drawString(String.format("%.1f " + timeUnits, frame *
-					// dt), x, y);
-					g.drawString( String.format( "frame %d", frame ), ( int ) x, ( int ) Math.round( y + 12 * scale ) );
-				}
-				y += ycs;
+					g.fillRect( 0, ( int ) y, width, ( int ) ycs );
+				y += 2d * ycs;
 			}
-		}
 
-		// Column headers
-		if ( null != columnWidths )
-		{
-			x = xcs;
-			for ( int i = 0; i < columnWidths.length; i++ )
+			// Header separator
+			g.setColor( LINE_COLOR );
+			if ( ycs > paintBounds.y && ycs < paintBounds.y + paintBounds.height )
+				g.drawLine( paintBounds.x, ( int ) ycs, paintBounds.x + paintBounds.width, ( int ) ycs );
+			if ( xcs > paintBounds.x && xcs < paintBounds.x + paintBounds.width )
+				g.drawLine( ( int ) xcs, paintBounds.y, ( int ) xcs, paintBounds.y + paintBounds.height );
+
+			// Row headers
+			final double x = xcs / 4d;
+			y = 3 * ycs / 2d;
+
+			if ( xcs > paintBounds.x )
 			{
-				final int cw = columnWidths[ i ];
-				String columnName = trackScheme.getModel().getTrackModel().name( columnTrackIDs[ i ] );
-				if ( null == columnName )
+				while ( y < height )
 				{
-					columnName = "Name not set";
+					if ( y > paintBounds.y - ycs && y < paintBounds.y + paintBounds.height )
+					{
+						final int frame = ( int ) ( y / ycs - 1 );
+						// g.drawString(String.format("%.1f " + timeUnits, frame
+						// *
+						// dt), x, y);
+						g.drawString( String.format( "frame %d", frame ), ( int ) x, ( int ) Math.round( y + 12 * scale ) );
+					}
+					y += ycs;
 				}
-				g.drawString( columnName, ( int ) ( x + 20d ), ( int ) ( ycs / 2d ) );
-				g.setColor( LINE_COLOR );
-				x += cw * xcs;
-				g.drawLine( ( int ) x, 0, ( int ) x, height );
 			}
+
 		}
 
-		// Last column header
-		g.setColor( Color.decode( TrackScheme.DEFAULT_COLOR ) );
-		g.drawString( "Unlaid spots", ( int ) ( x + 20d ), ( int ) ( ycs / 2d ) );
+		if ( paintDecorationLevel > 0 )
+		{
+			double x = xcs;
+			// Column headers
+			if ( null != columnWidths )
+			{
+				for ( int i = 0; i < columnWidths.length; i++ )
+				{
+					final int cw = columnWidths[ i ];
+					String columnName = trackScheme.getModel().getTrackModel().name( columnTrackIDs[ i ] );
+					if ( null == columnName )
+					{
+						columnName = "Name not set";
+					}
+					g.drawString( columnName, ( int ) ( x + 20d ), ( int ) ( ycs / 2d ) );
+					g.setColor( LINE_COLOR );
+					x += cw * xcs;
+					g.drawLine( ( int ) x, 0, ( int ) x, height );
+				}
+			}
+			// Last column header
+			g.setColor( Color.decode( TrackScheme.DEFAULT_COLOR ) );
+			g.drawString( "Unlaid spots", ( int ) ( x + 20d ), ( int ) ( ycs / 2d ) );
+		}
+
 	}
 
 	/**
@@ -510,6 +503,15 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			maintainScrollBar( true, newScale / scale, center );
 			maintainScrollBar( false, newScale / scale, center );
 		}
+	}
+
+	public void loopPaintDecorationLevel()
+	{
+		if ( paintDecorationLevel++ >= MAX_DECCORATION_LEVELS )
+		{
+			paintDecorationLevel = 0;
+		}
+		repaint();
 	}
 
 }
