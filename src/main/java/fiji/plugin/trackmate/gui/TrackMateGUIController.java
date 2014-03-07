@@ -81,6 +81,7 @@ import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.PerEdgeFeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.PerTrackFeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.SpotColorGenerator;
+import fiji.plugin.trackmate.visualization.SpotColorGeneratorPerTrackFeature;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.trackscheme.SpotImageUpdater;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
@@ -162,6 +163,14 @@ public class TrackMateGUIController implements ActionListener
 
 	protected FeatureColorGenerator< Spot > spotColorGenerator;
 
+	protected FeatureColorGenerator< Spot > spotColorGeneratorPerTrackFeature;
+
+	/**
+	 * The listener in charge of listening to display settings changes and
+	 * forwarding them to the views registered in the {@link #guimodel}.
+	 */
+	protected DisplaySettingsListener displaySettingsListener;
+
 	/*
 	 * CONSTRUCTOR
 	 */
@@ -211,10 +220,25 @@ public class TrackMateGUIController implements ActionListener
 		this.spotColorGenerator = createSpotColorGenerator();
 		this.edgeColorGenerator = createEdgeColorGenerator();
 		this.trackColorGenerator = createTrackColorGenerator();
+		this.spotColorGeneratorPerTrackFeature = createSpotColorGeneratorPerTrackFeature();
 
 		// 0.
 		this.guimodel = new TrackMateGUIModel();
 		this.guimodel.setDisplaySettings( createDisplaySettings( trackmate.getModel() ) );
+		this.displaySettingsListener = new DisplaySettingsListener()
+		{
+			@Override
+			public void displaySettingsChanged( final DisplaySettingsEvent event )
+			{
+				guimodel.getDisplaySettings().put( event.getKey(), event.getNewValue() );
+				for ( final TrackMateModelView view : guimodel.views )
+				{
+					view.setDisplaySettings( event.getKey(), event.getNewValue() );
+					view.refresh();
+				}
+			}
+		};
+
 		// 1.
 		createSelectionModel();
 		// 2.
@@ -435,6 +459,12 @@ public class TrackMateGUIController implements ActionListener
 		return generator;
 	}
 
+	protected FeatureColorGenerator< Spot > createSpotColorGeneratorPerTrackFeature()
+	{
+		final FeatureColorGenerator< Spot > generator = new SpotColorGeneratorPerTrackFeature( trackmate.getModel(), TrackIndexAnalyzer.TRACK_INDEX );
+		return generator;
+	}
+
 	protected void createProviders()
 	{
 		spotAnalyzerProvider = new SpotAnalyzerProvider();
@@ -521,12 +551,28 @@ public class TrackMateGUIController implements ActionListener
 			{
 				if ( event == spotFilterDescriptor.getComponent().COLOR_FEATURE_CHANGED )
 				{
-					final String targetFeature = spotFilterDescriptor.getComponent().getColorFeature();
-					spotColorGenerator.setFeature( targetFeature );
-					for ( final TrackMateModelView view : guimodel.views )
+
+					final FeatureColorGenerator< Spot > newValue;
+					@SuppressWarnings( "unchecked" )
+					final FeatureColorGenerator< Spot > oldValue = ( FeatureColorGenerator< Spot > ) guimodel.getDisplaySettings().get( KEY_SPOT_COLORING );
+					if ( null == spotFilterDescriptor.getComponent() ) { return; }
+					switch ( spotFilterDescriptor.getComponent().getColorCategory() )
 					{
-						view.setDisplaySettings( TrackMateModelView.KEY_SPOT_COLORING, spotColorGenerator );
+					case DEFAULT:
+						newValue = spotColorGenerator;
+						spotColorGenerator.setFeature( null );
+						break;
+					case TRACKS:
+						newValue = spotColorGeneratorPerTrackFeature;
+						spotColorGeneratorPerTrackFeature.setFeature( spotFilterDescriptor.getComponent().getColorFeature() );
+						break;
+					default:
+						newValue = spotColorGenerator;
+						spotColorGenerator.setFeature( spotFilterDescriptor.getComponent().getColorFeature() );
+						break;
 					}
+					final DisplaySettingsEvent dsEvent = new DisplaySettingsEvent( spotFilterDescriptor.getComponent(), KEY_SPOT_COLORING, newValue, oldValue );
+					displaySettingsListener.displaySettingsChanged( dsEvent );
 				}
 			}
 		} );
@@ -597,7 +643,7 @@ public class TrackMateGUIController implements ActionListener
 		/*
 		 * Finished, let's change the display settings.
 		 */
-		configureViewsDescriptor = new ConfigureViewsDescriptor( trackmate, spotColorGenerator, edgeColorGenerator, trackColorGenerator, this );
+		configureViewsDescriptor = new ConfigureViewsDescriptor( trackmate, spotColorGenerator, edgeColorGenerator, trackColorGenerator, spotColorGeneratorPerTrackFeature, this );
 		configureViewsDescriptor.getComponent().addActionListener( new ActionListener()
 		{
 			@Override
@@ -619,19 +665,7 @@ public class TrackMateGUIController implements ActionListener
 				}
 			}
 		} );
-		configureViewsDescriptor.getComponent().addDisplaySettingsChangeListener( new DisplaySettingsListener()
-		{
-			@Override
-			public void displaySettingsChanged( final DisplaySettingsEvent event )
-			{
-				guimodel.getDisplaySettings().put( event.getKey(), event.getNewValue() );
-				for ( final TrackMateModelView view : guimodel.views )
-				{
-					view.setDisplaySettings( event.getKey(), event.getNewValue() );
-					view.refresh();
-				}
-			}
-		} );
+		configureViewsDescriptor.getComponent().addDisplaySettingsChangeListener( displaySettingsListener );
 
 		/*
 		 * Export and graph features.

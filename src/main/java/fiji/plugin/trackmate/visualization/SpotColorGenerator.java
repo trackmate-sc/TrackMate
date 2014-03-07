@@ -1,109 +1,130 @@
 package fiji.plugin.trackmate.visualization;
 
 import java.awt.Color;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 import org.jfree.chart.renderer.InterpolatePaintScale;
 
+import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.ModelChangeListener;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.Model;
 
-public class SpotColorGenerator implements FeatureColorGenerator<Spot>, ModelChangeListener {
+public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelChangeListener
+{
 
-	private final Map<Spot, Color> spotColorMap = new HashMap<Spot, Color>();
 	private final Model model;
+
 	private String feature = null;
 
-	public SpotColorGenerator(Model model) {
+	private double min;
+
+	private double max;
+
+	private static final InterpolatePaintScale generator = InterpolatePaintScale.Jet;
+
+	public SpotColorGenerator( final Model model )
+	{
 		this.model = model;
-		model.addModelChangeListener(this);
+		model.addModelChangeListener( this );
 	}
-	
+
 	@Override
-	public Color color(Spot spot) {
-		if (null == feature) {
+	public Color color( final Spot spot )
+	{
+		if ( null == feature )
+		{
 			return TrackMateModelView.DEFAULT_SPOT_COLOR;
-		} else {
-			return spotColorMap.get(spot);
+		}
+		else
+		{
+			final Double val = spot.getFeature( feature );
+			return generator.getPaint( ( val - min ) / ( max - min ) );
 		}
 	}
-	
+
 	@Override
-	public String getFeature() {
+	public String getFeature()
+	{
 		return feature;
 	}
 
 	@Override
-	public void terminate() {
-		model.removeModelChangeListener(this);
+	public void terminate()
+	{
+		model.removeModelChangeListener( this );
 	}
-	
 
 	@Override
-	public void modelChanged(ModelChangeEvent event) {
-		if (feature == null) {
-			return; // nothing to do.
+	public void activate()
+	{
+		model.addModelChangeListener( this );
+	}
+
+	@Override
+	public void modelChanged( final ModelChangeEvent event )
+	{
+		if ( null == feature ) { return; }
+		if ( event.getEventID() == ModelChangeEvent.MODEL_MODIFIED )
+		{
+			final Set< Spot > spots = event.getSpots();
+			if ( spots.size() > 0 )
+			{
+				computeSpotColors();
+			}
 		}
-		if (event.getEventID() ==  ModelChangeEvent.MODEL_MODIFIED) {
-			Set<Spot> spots = event.getSpots();
-			if (spots.size() > 0) {
-				computeSpotColors(feature);
-			} 
-		} else if (event.getEventID() == ModelChangeEvent.SPOTS_COMPUTED) {
-			computeSpotColors(feature);
+		else if ( event.getEventID() == ModelChangeEvent.SPOTS_COMPUTED )
+		{
+			computeSpotColors();
 		}
 	}
 
 	/**
-	 * Sets the feature that will be used to color spots.
-	 * <code>null</code> is accepted; it will color all the spot with the 
-	 * same default color.
-	 * @param feature the feature to color spots with.
+	 * Sets the feature that will be used to color spots. <code>null</code> is
+	 * accepted; it will color all the spot with the same default color.
+	 *
+	 * @param feature
+	 *            the feature to color spots with.
 	 */
 	@Override
-	public void setFeature(String feature) {
-		if (null != feature && feature.equals(this.feature)) {
-			return;
+	public void setFeature( final String feature )
+	{
+		if ( null != feature )
+		{
+			if ( feature.equals( this.feature ) ) { return; }
+			this.feature = feature;
+			computeSpotColors();
 		}
-		this.feature = feature;
-		if (null != feature) {
-			computeSpotColors(feature);
+		else
+		{
+			this.feature = null;
 		}
 	}
 
-	
 	/*
 	 * PRIVATE METHODS
 	 */
-	
 
-	private void computeSpotColors(final String feature) {
-		spotColorMap.clear();
+	private void computeSpotColors()
+	{
+		if ( null == feature ) { return; }
+
 		// Get min & max
-		double min = Float.POSITIVE_INFINITY;
-		double max = Float.NEGATIVE_INFINITY;
+		min = Float.POSITIVE_INFINITY;
+		max = Float.NEGATIVE_INFINITY;
 		Double val;
-		for (int ikey : model.getSpots().keySet()) {
-			for (Spot spot : model.getSpots().iterable(ikey, false)) {
-				val = spot.getFeature(feature);
-				if (null == val)
+		for ( final int ikey : model.getSpots().keySet() )
+		{
+			for ( final Spot spot : model.getSpots().iterable( ikey, false ) )
+			{
+				val = spot.getFeature( feature );
+				if ( null == val )
 					continue;
-				if (val > max) max = val;
-				if (val < min) min = val;
+				if ( val > max )
+					max = val.doubleValue();
+				if ( val < min )
+					min = val.doubleValue();
 			}
-		}
-
-		for(Spot spot : model.getSpots().iterable(false)) {
-			val = spot.getFeature(feature);
-			InterpolatePaintScale  colorMap = InterpolatePaintScale.Jet;
-			if (null == feature || null == val)
-				spotColorMap.put(spot, TrackMateModelView.DEFAULT_SPOT_COLOR);
-			else
-				spotColorMap.put(spot, colorMap .getPaint((val-min)/(max-min)) );
 		}
 	}
 }

@@ -64,7 +64,7 @@ public class TrackSchemeFrame extends JFrame  {
 		getContentPane().add(createToolBar(), BorderLayout.NORTH);
 
 		// Add the status bar
-		JPanel statusPanel = new JPanel();
+		final JPanel statusPanel = new JPanel();
 		getContentPane().add(statusPanel, BorderLayout.SOUTH);
 
 		statusPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -81,13 +81,13 @@ public class TrackSchemeFrame extends JFrame  {
 
 		this.logger = new Logger() {
 			@Override
-			public void log(String message, Color color) {
+			public void log(final String message, final Color color) {
 				statusLabel.setText(message);
 				statusLabel.setForeground(color);
 			}
-			@Override public void error(String message) { log(message, Color.RED);}
-			@Override public void setProgress(double val) { progressBar.setValue( (int) (val * 100) ); }
-			@Override public void setStatus(String status) { log(status, Logger.BLUE_COLOR); }
+			@Override public void error(final String message) { log(message, Color.RED);}
+			@Override public void setProgress(final double val) { progressBar.setValue( (int) (val * 100) ); }
+			@Override public void setStatus(final String status) { log(status, Logger.BLUE_COLOR); }
 		};
 	}
 
@@ -96,14 +96,14 @@ public class TrackSchemeFrame extends JFrame  {
 	 * PUBLIC METHODS
 	 */
 
-	public void init(JGraphXAdapter graph) {
+	public void init(final JGraphXAdapter graph) {
 		this.graph = graph;
 		// GraphComponent
 		graphComponent = createGraphComponent();
 
 		// Add the info pane
 		infoPane = new InfoPane(trackScheme.getModel(), trackScheme.getSelectionModel());
-		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, infoPane, graphComponent);
+		final JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, infoPane, graphComponent);
 		splitPane.setDividerLocation(170);
 		getContentPane().add(splitPane, BorderLayout.CENTER);
 	}
@@ -113,7 +113,7 @@ public class TrackSchemeFrame extends JFrame  {
 	 * Selection management
 	 */
 
-	public void centerViewOn(mxICell cell) {
+	public void centerViewOn(final mxICell cell) {
 		graphComponent.scrollCellToVisible(cell, true);
 	}
 
@@ -125,7 +125,7 @@ public class TrackSchemeFrame extends JFrame  {
 		final TrackSchemeGraphComponent gc = new TrackSchemeGraphComponent(graph, trackScheme);
 		gc.getVerticalScrollBar().setUnitIncrement(16);
 		gc.getHorizontalScrollBar().setUnitIncrement(16);
-		//		gc.setExportEnabled(true); // Seems to be required to have a preview when we move cells. Also give the ability to export a cell as an image clipping 
+		//		gc.setExportEnabled(true); // Seems to be required to have a preview when we move cells. Also give the ability to export a cell as an image clipping
 		gc.getConnectionHandler().setEnabled(TrackScheme.DEFAULT_LINKING_ENABLED); // By default, can be changed in the track scheme toolbar
 
 		new mxRubberband(gc);
@@ -135,22 +135,24 @@ public class TrackSchemeFrame extends JFrame  {
 		// Popup menu
 		gc.getGraphControl().addMouseListener(new MouseAdapter() {
 			@Override
-			public void mousePressed(MouseEvent e) {
-				if (e.isPopupTrigger()) 
+			public void mousePressed(final MouseEvent e) {
+				if (e.isPopupTrigger())
 					displayPopupMenu(gc.getCellAt(e.getX(), e.getY(), false), e.getPoint());
 			}
 			@Override
-			public void mouseReleased(MouseEvent e) {
-				if (e.isPopupTrigger()) 
+			public void mouseReleased(final MouseEvent e) {
+				if (e.isPopupTrigger())
 					displayPopupMenu(gc.getCellAt(e.getX(), e.getY(), false), e.getPoint());
 			}
 		});
+
+		gc.setKeepSelectionVisibleOnZoom( true );
 
 		return gc;
 	}
 
 	/**
-	 * Instantiate the toolbar of the track scheme. 
+	 * Instantiate the toolbar of the track scheme.
 	 */
 	private JToolBar createToolBar() {
 		return new TrackSchemeToolbar(trackScheme);
@@ -160,7 +162,7 @@ public class TrackSchemeFrame extends JFrame  {
 	 *  PopupMenu
 	 */
 	private void displayPopupMenu(final Object cell, final Point point) {
-		TrackSchemePopupMenu menu = new TrackSchemePopupMenu(trackScheme, cell, point);
+		final TrackSchemePopupMenu menu = new TrackSchemePopupMenu(trackScheme, cell, point);
 		menu.show(graphComponent.getViewport().getView(), (int) point.getX(), (int) point.getY());
 	}
 

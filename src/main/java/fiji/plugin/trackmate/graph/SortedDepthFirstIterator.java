@@ -1,17 +1,19 @@
 /**
- * 
+ *
  */
 package fiji.plugin.trackmate.graph;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
@@ -25,12 +27,12 @@ import org.jgrapht.util.TypeUtil;
 
 /**
  * A depth-first iterator, that - when branching - chooses the next vertex
- * according to a specified comparator. 
+ * according to a specified comparator.
  * <p>
  * I had to copy-paste whole sections of JGraphT code to make this one:
- * I could not extend the desired class, for the interesting method and field 
+ * I could not extend the desired class, for the interesting method and field
  * were private.
- * 
+ *
  * @author Jean-Yves Tinevez 2012-2013
  */
 public class SortedDepthFirstIterator<V, E> extends AbstractGraphIterator<V, E> {
@@ -67,10 +69,10 @@ public class SortedDepthFirstIterator<V, E> extends AbstractGraphIterator<V, E> 
          */
         BLACK
     }
-	
+
     //~ Instance fields --------------------------------------------------------
 
-    private Deque<Object> stack = new ArrayDeque<Object>();
+    private final Deque<Object> stack = new ArrayDeque<Object>();
     private transient TypeUtil<V> vertexTypeDecl = null;
     private final ConnectedComponentTraversalEvent ccFinishedEvent =
         new ConnectedComponentTraversalEvent(
@@ -80,8 +82,8 @@ public class SortedDepthFirstIterator<V, E> extends AbstractGraphIterator<V, E> 
         new ConnectedComponentTraversalEvent(
             this,
             ConnectedComponentTraversalEvent.CONNECTED_COMPONENT_STARTED);
-    private FlyweightEdgeEvent<V, E> reusableEdgeEvent;
-    private FlyweightVertexEvent<V> reusableVertexEvent;
+    private final FlyweightEdgeEvent<V, E> reusableEdgeEvent;
+    private final FlyweightVertexEvent<V> reusableVertexEvent;
     private Iterator<V> vertexIterator = null;
     /**
      * Stores the vertices that have been seen during iteration and (optionally)
@@ -108,7 +110,7 @@ public class SortedDepthFirstIterator<V, E> extends AbstractGraphIterator<V, E> 
      * @throws IllegalArgumentException if <code>g==null</code> or does not
      * contain <code>startVertex</code>
      */
-    public SortedDepthFirstIterator(Graph<V, E> g, V startVertex, Comparator<V> comparator)     {
+    public SortedDepthFirstIterator(final Graph<V, E> g, final V startVertex, final Comparator<V> comparator)     {
         super();
         this.comparator = comparator;
         this.graph = g;
@@ -156,7 +158,7 @@ public class SortedDepthFirstIterator<V, E> extends AbstractGraphIterator<V, E> 
 
             if (isCrossComponentTraversal()) {
                 while (vertexIterator.hasNext()) {
-                    V v = vertexIterator.next();
+                    final V v = vertexIterator.next();
 
                     if (!seen.containsKey(v)) {
                         encounterVertex(v, null);
@@ -180,9 +182,9 @@ public class SortedDepthFirstIterator<V, E> extends AbstractGraphIterator<V, E> 
      */
     @Override
     public V next()   {
-    	
-    	
-    	
+
+
+
         if (startVertex != null) {
             encounterStartVertex();
         }
@@ -195,7 +197,7 @@ public class SortedDepthFirstIterator<V, E> extends AbstractGraphIterator<V, E> 
                 }
             }
 
-            V nextVertex = provideNextVertex();
+            final V nextVertex = provideNextVertex();
             if (nListeners != 0) {
                 fireVertexTraversed(createVertexTraversalEvent(nextVertex));
             }
@@ -214,15 +216,15 @@ public class SortedDepthFirstIterator<V, E> extends AbstractGraphIterator<V, E> 
      *
      * @param vertex vertex which has been finished
      */
-    private void finishVertex(V vertex) {
+    private void finishVertex(final V vertex) {
         if (nListeners != 0) {
             fireVertexFinished(createVertexTraversalEvent(vertex));
         }
     }
 
     // -------------------------------------------------------------------------
-    
-    private static <V, E> Specifics<V, E> createGraphSpecifics(Graph<V, E> g) {
+
+    private static <V, E> Specifics<V, E> createGraphSpecifics(final Graph<V, E> g) {
         if (g instanceof DirectedGraph) {
             return new DirectedSpecifics<V, E>((DirectedGraph<V, E>) g);
         } else {
@@ -233,25 +235,26 @@ public class SortedDepthFirstIterator<V, E> extends AbstractGraphIterator<V, E> 
     /**
      * This is where we add the multiple children in proper sorted order.
      */
-    protected void addUnseenChildrenOf(V vertex) {
-    	
-    	// Retrieve target vertices, and sort them in a TreeSet
-    	TreeSet<V> sortedChildren = new TreeSet<V>(comparator);
+    protected void addUnseenChildrenOf(final V vertex) {
+
+		// Retrieve target vertices, and sort them in a list
+		final List< V > sortedChildren = new ArrayList< V >();
     	// Keep a map of matching edges so that we can retrieve them in the same order
-    	Map<V, E> localEdges = new HashMap<V, E>();
-    	
-        for (E edge : specifics.edgesOf(vertex)) {
-        	V oppositeV = Graphs.getOppositeVertex(graph, edge, vertex);
+    	final Map<V, E> localEdges = new HashMap<V, E>();
+
+        for (final E edge : specifics.edgesOf(vertex)) {
+        	final V oppositeV = Graphs.getOppositeVertex(graph, edge, vertex);
         	if (!seen.containsKey(oppositeV)) {
         		sortedChildren.add(oppositeV);
         	}
         	localEdges.put(oppositeV, edge);
         }
-        
-        Iterator<V> it = sortedChildren.descendingIterator();
+		Collections.sort( sortedChildren, Collections.reverseOrder( comparator ) );
+
+		final Iterator< V > it = sortedChildren.iterator();
         while (it.hasNext()) {
-			V child = it.next();
-			
+			final V child = it.next();
+
             if (nListeners != 0) {
                 fireEdgeTraversed(createEdgeTraversalEvent(localEdges.get(child)));
             }
@@ -264,7 +267,7 @@ public class SortedDepthFirstIterator<V, E> extends AbstractGraphIterator<V, E> 
         }
     }
 
-    protected EdgeTraversalEvent<V, E> createEdgeTraversalEvent(E edge) {
+    protected EdgeTraversalEvent<V, E> createEdgeTraversalEvent(final E edge) {
         if (isReuseEvents()) {
             reusableEdgeEvent.setEdge(edge);
 
@@ -274,7 +277,7 @@ public class SortedDepthFirstIterator<V, E> extends AbstractGraphIterator<V, E> 
         }
     }
 
-    private VertexTraversalEvent<V> createVertexTraversalEvent(V vertex) {
+    private VertexTraversalEvent<V> createVertexTraversalEvent(final V vertex) {
         if (isReuseEvents()) {
             reusableVertexEvent.setVertex(vertex);
 
@@ -288,11 +291,11 @@ public class SortedDepthFirstIterator<V, E> extends AbstractGraphIterator<V, E> 
         encounterVertex(startVertex, null);
         startVertex = null;
     }
-    
-    
-    
-  
-   
+
+
+
+
+
 
     //~ Depth-first iterator methods ----------------------------------------------------------------
 
@@ -323,7 +326,7 @@ public class SortedDepthFirstIterator<V, E> extends AbstractGraphIterator<V, E> 
     /**
      * @see CrossComponentIterator#encounterVertex(Object, Object)
      */
-    protected void encounterVertex(V vertex, E edge) {
+    protected void encounterVertex(final V vertex, final E edge) {
     	seen.put(vertex, VisitColor.WHITE);
         stack.addLast(vertex);
     }
@@ -331,8 +334,8 @@ public class SortedDepthFirstIterator<V, E> extends AbstractGraphIterator<V, E> 
     /**
      * @see CrossComponentIterator#encounterVertexAgain(Object, Object)
      */
-    protected void encounterVertexAgain(V vertex, E edge) {
-        VisitColor color = seen.get(vertex);
+    protected void encounterVertexAgain(final V vertex, final E edge) {
+        final VisitColor color = seen.get(vertex);
         if (color != VisitColor.WHITE) {
             // We've already visited this vertex; no need to mess with the
             // stack (either it's BLACK and not there at all, or it's GRAY
@@ -345,7 +348,7 @@ public class SortedDepthFirstIterator<V, E> extends AbstractGraphIterator<V, E> 
         // assumption that for typical topologies and traversals,
         // it's likely to be nearer the top of the stack than
         // the bottom of the stack.
-        boolean found = stack.removeLastOccurrence(vertex);
+        final boolean found = stack.removeLastOccurrence(vertex);
         assert (found);
         stack.addLast(vertex);
     }
@@ -356,7 +359,7 @@ public class SortedDepthFirstIterator<V, E> extends AbstractGraphIterator<V, E> 
     private V provideNextVertex() {
         V v;
         for (;;) {
-            Object o = stack.removeLast();
+            final Object o = stack.removeLast();
             if (o == SENTINEL) {
                 // This is a finish-time sentinel we previously pushed.
                 recordFinish();
@@ -377,7 +380,7 @@ public class SortedDepthFirstIterator<V, E> extends AbstractGraphIterator<V, E> 
     }
 
     private void recordFinish() {
-        V v = TypeUtil.uncheckedCast(stack.removeLast(), vertexTypeDecl);
+        final V v = TypeUtil.uncheckedCast(stack.removeLast(), vertexTypeDecl);
         seen.put(v, VisitColor.BLACK);
         finishVertex(v);
     }
@@ -415,7 +418,7 @@ public class SortedDepthFirstIterator<V, E> extends AbstractGraphIterator<V, E> 
         /**
          * @see EdgeTraversalEvent#EdgeTraversalEvent(Object, Edge)
          */
-        public FlyweightEdgeEvent(Object eventSource, localE edge) {
+        public FlyweightEdgeEvent(final Object eventSource, final localE edge) {
             super(eventSource, edge);
         }
 
@@ -424,7 +427,7 @@ public class SortedDepthFirstIterator<V, E> extends AbstractGraphIterator<V, E> 
          *
          * @param edge the edge to be set.
          */
-        protected void setEdge(localE edge) {
+        protected void setEdge(final localE edge) {
             this.edge = edge;
         }
     }
@@ -441,7 +444,7 @@ public class SortedDepthFirstIterator<V, E> extends AbstractGraphIterator<V, E> 
         /**
          * @see VertexTraversalEvent#VertexTraversalEvent(Object, Object)
          */
-        public FlyweightVertexEvent(Object eventSource, VV vertex) {
+        public FlyweightVertexEvent(final Object eventSource, final VV vertex) {
             super(eventSource, vertex);
         }
 
@@ -450,7 +453,7 @@ public class SortedDepthFirstIterator<V, E> extends AbstractGraphIterator<V, E> 
          *
          * @param vertex the vertex to be set.
          */
-        protected void setVertex(VV vertex) {
+        protected void setVertex(final VV vertex) {
             this.vertex = vertex;
         }
     }
@@ -459,21 +462,22 @@ public class SortedDepthFirstIterator<V, E> extends AbstractGraphIterator<V, E> 
      * An implementation of {@link Specifics} for a directed graph.
      */
     private static class DirectedSpecifics<VV, EE> extends Specifics<VV, EE> {
-        private DirectedGraph<VV, EE> graph;
+        private final DirectedGraph<VV, EE> graph;
 
         /**
          * Creates a new DirectedSpecifics object.
          *
          * @param g the graph for which this specifics object to be created.
          */
-        public DirectedSpecifics(DirectedGraph<VV, EE> g) {
+        public DirectedSpecifics(final DirectedGraph<VV, EE> g) {
             graph = g;
         }
 
         /**
          * @see CrossComponentIterator.Specifics#edgesOf(Object)
          */
-        public Set<? extends EE> edgesOf(VV vertex) {
+        @Override
+		public Set<? extends EE> edgesOf(final VV vertex) {
             return graph.outgoingEdgesOf(vertex);
         }
     }
@@ -483,23 +487,24 @@ public class SortedDepthFirstIterator<V, E> extends AbstractGraphIterator<V, E> 
      * is ignored.
      */
     private static class UndirectedSpecifics<VV, EE> extends Specifics<VV, EE> {
-        private Graph<VV, EE> graph;
+        private final Graph<VV, EE> graph;
 
         /**
          * Creates a new UndirectedSpecifics object.
          *
          * @param g the graph for which this specifics object to be created.
          */
-        public UndirectedSpecifics(Graph<VV, EE> g) {
+        public UndirectedSpecifics(final Graph<VV, EE> g) {
             graph = g;
         }
 
         /**
          * @see CrossComponentIterator.Specifics#edgesOf(Object)
          */
-        public Set<EE> edgesOf(VV vertex) {
+        @Override
+		public Set<EE> edgesOf(final VV vertex) {
             return graph.edgesOf(vertex);
         }
     }
-	
+
 }

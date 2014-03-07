@@ -3,7 +3,7 @@ package fiji.plugin.trackmate.visualization;
 import java.awt.Color;
 
 /**
- * Interface for color generator that can color objects based on a 
+ * Interface for color generator that can color objects based on a
  * feature identified by a String.
  * @author Jean-Yves Tinevez - 2013
  *
@@ -11,13 +11,13 @@ import java.awt.Color;
  */
 public interface FeatureColorGenerator<K> {
 
-	/** 
+	/**
 	 * Returns a color for the given object.
 	 * @param the object to color.
 	 * @return a color for this object.
 	 */
-	public abstract Color color(K obj);
-	
+	public Color color( K obj );
+
 	/**
 	 * Sets the feature to generate the color from.
 	 * @param feature  the feature.
@@ -33,9 +33,16 @@ public interface FeatureColorGenerator<K> {
 	/**
 	 * When this color generator is replaced by another one, calling this method ensures
 	 * that it gets correctly unregistered and cleaned, should it be a model listener
-	 * or have a heavy memory footprint. 
+	 * or have a heavy memory footprint.
 	 */
-	public abstract void terminate();
+	public void terminate();
+
+	/**
+	 * When this color generator is reused, calling this method ensures that it
+	 * is registered again, and will follow whatever changes subsequently
+	 * happening to the model.
+	 */
+	public void activate();
 
 
 }

@@ -74,9 +74,7 @@ public class SpotDisplayer3DFactory implements ViewFactory
 					universe.addContentLater( cimp );
 				}
 			}
-
 		}
-
 		return new SpotDisplayer3D( model, selectionModel, universe );
 	}
 

@@ -30,6 +30,7 @@ import com.mxgraph.util.mxEventSource.mxIEventListener;
 import com.mxgraph.util.mxPoint;
 import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraph;
+import com.mxgraph.view.mxGraphView;
 
 import fiji.plugin.trackmate.Model;
 
@@ -347,40 +348,40 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 
 		final int width = getViewport().getView().getSize().width;
 		final int height = getViewport().getView().getSize().height;
-		final float scale = (float) graph.getView().getScale();
+		final double scale = graph.getView().getScale();
 
 		// Scaled sizes
-		final int xcs = Math.round(TrackScheme.X_COLUMN_SIZE * scale);
-		final int ycs = Math.round(TrackScheme.Y_COLUMN_SIZE * scale);
+		final double xcs = TrackScheme.X_COLUMN_SIZE * scale;
+		final double ycs = TrackScheme.Y_COLUMN_SIZE * scale;
 
 		// Alternating row color
 		g.setColor(BACKGROUND_COLOR_2);
-		int y = 0;
+		double y = 0;
 		while (y < height) {
 			if (y > paintBounds.y - ycs && y < paintBounds.y + paintBounds.height)
-				g.fillRect(0, y, width, ycs);
-			y += 2 * ycs;
+				g.fillRect( 0, ( int ) y, width, ( int ) ycs );
+			y += 2d * ycs;
 		}
 
 		// Header separator
 		g.setColor(LINE_COLOR);
 		if (ycs > paintBounds.y && ycs < paintBounds.y + paintBounds.height)
-			g.drawLine(paintBounds.x, ycs, paintBounds.x + paintBounds.width, ycs);
+			g.drawLine( paintBounds.x, ( int ) ycs, paintBounds.x + paintBounds.width, ( int ) ycs );
 		if (xcs > paintBounds.x && xcs < paintBounds.x + paintBounds.width)
-			g.drawLine(xcs, paintBounds.y, xcs, paintBounds.y + paintBounds.height);
+			g.drawLine( ( int ) xcs, paintBounds.y, ( int ) xcs, paintBounds.y + paintBounds.height );
 
 		// Row headers
-		int x = xcs / 4;
-		y = 3 * ycs / 2;
-		g.setFont(FONT.deriveFont(12 * scale).deriveFont(Font.BOLD));
+		double x = xcs / 4d;
+		y = 3 * ycs / 2d;
+		g.setFont( FONT.deriveFont( ( float ) ( 12 * scale ) ).deriveFont( Font.BOLD ) );
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
 		if (xcs > paintBounds.x) {
 			while (y < height) {
 				if (y > paintBounds.y - ycs && y < paintBounds.y + paintBounds.height) {
-					final int frame = y / ycs - 1;
+					final int frame = ( int ) ( y / ycs - 1 );
 					//					g.drawString(String.format("%.1f " + timeUnits, frame * dt), x, y);
-					g.drawString(String.format("frame %d", frame), x, Math.round(y + 12 * scale));
+					g.drawString( String.format( "frame %d", frame ), ( int ) x, ( int ) Math.round( y + 12 * scale ) );
 				}
 				y += ycs;
 			}
@@ -395,16 +396,16 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 				if (null == columnName) {
 					columnName = "Name not set";
 				}
-				g.drawString(columnName, x + 20, ycs / 2);
+				g.drawString( columnName, ( int ) ( x + 20d ), ( int ) ( ycs / 2d ) );
 				g.setColor(LINE_COLOR);
 				x += cw * xcs;
-				g.drawLine(x, 0, x, height);
+				g.drawLine( ( int ) x, 0, ( int ) x, height );
 			}
 		}
 
 		// Last column header
 		g.setColor(Color.decode(TrackScheme.DEFAULT_COLOR));
-		g.drawString("Unlaid spots", x + 20, ycs / 2);
+		g.drawString( "Unlaid spots", ( int ) ( x + 20d ), ( int ) ( ycs / 2d ) );
 	}
 
 	/**
@@ -419,6 +420,26 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 		final mxCell cell = (mxCell) obj;
 		trackScheme.addEdgeManually(cell);
 		evt.consume();
+	}
+
+	@Override
+	public void zoomTo( final double newScale, final boolean center )
+	{
+		final mxGraphView view = graph.getView();
+		final double scale = view.getScale();
+
+		final mxPoint translate = ( pageVisible && centerPage ) ? getPageTranslate( newScale ) : new mxPoint();
+		graph.getView().scaleAndTranslate( newScale, translate.getX(), translate.getY() );
+
+		if ( keepSelectionVisibleOnZoom && !graph.isSelectionEmpty() )
+		{
+			getGraphControl().scrollRectToVisible( view.getBoundingBox( graph.getSelectionCells() ).getRectangle() );
+		}
+		else
+		{
+			maintainScrollBar( true, newScale / scale, center );
+			maintainScrollBar( false, newScale / scale, center );
+		}
 	}
 
 }
