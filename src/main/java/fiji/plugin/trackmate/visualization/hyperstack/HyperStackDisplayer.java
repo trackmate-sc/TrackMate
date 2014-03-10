@@ -170,7 +170,6 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 			imp.killRoi();
 		}
 
-		clear();
 		imp.setOpenAsHyperStack( true );
 		if ( !imp.isVisible() )
 		{
