@@ -49,7 +49,7 @@ public class TrackOverlay extends Roi
 
 	public TrackOverlay( final Model model, final ImagePlus imp, final Map< String, Object > displaySettings )
 	{
-		super( 0, 0, imp );
+		super( Integer.MIN_VALUE, Integer.MIN_VALUE, imp );
 		this.model = model;
 		this.calibration = TMUtils.getSpatialCalibration( imp );
 		this.imp = imp;
