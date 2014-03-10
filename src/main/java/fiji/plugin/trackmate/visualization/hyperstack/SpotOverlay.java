@@ -62,6 +62,7 @@ public class SpotOverlay extends Roi
 	public SpotOverlay( final Model model, final ImagePlus imp, final Map< String, Object > displaySettings )
 	{
 		super( Integer.MIN_VALUE, Integer.MIN_VALUE, imp );
+		this.setName("TrackMate - Spot Overlay");
 		this.model = model;
 		this.imp = imp;
 		this.calibration = TMUtils.getSpatialCalibration( imp );
