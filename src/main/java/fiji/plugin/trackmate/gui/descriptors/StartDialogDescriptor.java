@@ -168,7 +168,7 @@ public class StartDialogDescriptor implements WizardPanelDescriptor
 		{
 			mainView.setDisplaySettings( key, displaySettings.get( key ) );
 		}
-		mainView.render();
+//		mainView.render();
 	}
 
 	@Override
