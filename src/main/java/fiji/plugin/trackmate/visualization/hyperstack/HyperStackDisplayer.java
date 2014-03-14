@@ -128,6 +128,7 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 
 		case ModelChangeEvent.SPOTS_COMPUTED:
 			redoOverlay = true;
+			render();
 			break;
 
 		case ModelChangeEvent.TRACKS_VISIBILITY_CHANGED:
@@ -136,8 +137,9 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 			break;
 		}
 
-		if ( redoOverlay )
+		if ( redoOverlay ) {
 			refresh();
+		}
 	}
 
 	@Override
@@ -170,6 +172,7 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 			imp.killRoi();
 		}
 
+		clear();
 		imp.setOpenAsHyperStack( true );
 		if ( !imp.isVisible() )
 		{
@@ -200,7 +203,12 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 			overlay = new Overlay();
 			imp.setOverlay( overlay );
 		}
-		overlay.clear();
+		
+		// Only remove our SpotOverlay and TrackOverlay
+		overlay.remove(spotOverlay);
+		overlay.remove(trackOverlay);
+		
+		// Try not to mess with any active ROIs during the process
 		if ( initialROI != null )
 		{
 			imp.getOverlay().add( initialROI );
