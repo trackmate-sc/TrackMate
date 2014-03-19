@@ -97,8 +97,10 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 
 			if ( null == file || file.length() == 0 )
 			{
-				final File folder = new File( System.getProperty( "user.dir" ) ).getParentFile().getParentFile();
-				file = new File( folder.getPath() + File.separator + "TrackMateData.xml" );
+				final File folder = new File( System.getProperty( "user.dir" ) );
+				final File parent = folder.getParentFile();
+				final File parent2 = parent == null ? null : parent.getParentFile();
+				file = new File( parent2 != null ? parent2 : parent != null ? parent : folder, "TrackMateData.xml" );
 			}
 			final File tmpFile = IOUtils.askForFileForLoading( file, "Load a TrackMate XML file", frame, logger );
 			if ( null == tmpFile ) { return; }
