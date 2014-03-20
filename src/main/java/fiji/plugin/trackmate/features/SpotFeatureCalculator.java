@@ -72,7 +72,8 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm {
 			final Map<String, String> featureNames = factory.getFeatureNames();
 			final Map<String, String> featureShortNames = factory.getFeatureShortNames();
 			final Map<String, Dimension> featureDimensions = factory.getFeatureDimensions();
-			model.getFeatureModel().declareSpotFeatures(features, featureNames, featureShortNames, featureDimensions);
+			final Map< String, Boolean > isIntFeature = factory.getIsIntFeature();
+			model.getFeatureModel().declareSpotFeatures( features, featureNames, featureShortNames, featureDimensions, isIntFeature );
 		}
 
 		// Do it.

@@ -144,7 +144,7 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		{
 			logger.error( reader.getErrorMessage() );
 			logger.error( "Aborting.\n" ); // If I cannot even open the xml
-											// file, it is not worth going on.
+			// file, it is not worth going on.
 			return;
 		}
 

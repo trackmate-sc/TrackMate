@@ -135,6 +135,11 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 		{
 			final Double val = fm.getTrackFeature( trackID, feature );
 			values.put( trackID, val );
+
+			if ( null == val || Double.isNaN( val.doubleValue() ) )
+			{
+				continue;
+			}
 			if ( val < min )
 			{
 				min = val;
@@ -154,6 +159,10 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 			if ( null == val )
 			{
 				color = DEFAULT_TRACK_COLOR;
+			}
+			else if ( Double.isNaN( val.doubleValue() ) )
+			{
+				color = TrackMateModelView.DEFAULT_UNDEFINED_FEATURE_COLOR;
 			}
 			else
 			{
@@ -214,7 +223,7 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 	/**
 	 * Returns the color currently associated to the track with the specified
 	 * ID.
-	 * 
+	 *
 	 * @param trackID
 	 *            the ID of the track.
 	 * @return a color.

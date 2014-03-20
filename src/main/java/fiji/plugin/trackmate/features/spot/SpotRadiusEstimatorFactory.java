@@ -37,15 +37,20 @@ public class SpotRadiusEstimatorFactory< T extends RealType< T > & NativeType< T
 	public static final HashMap< String, String > FEATURE_SHORT_NAMES = new HashMap< String, String >( 1 );
 
 	public static final HashMap< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 1 );
+
+	public static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 1 );
+
 	static
 	{
 		FEATURES.add( ESTIMATED_DIAMETER );
 		FEATURE_NAMES.put( ESTIMATED_DIAMETER, "Estimated diameter" );
 		FEATURE_SHORT_NAMES.put( ESTIMATED_DIAMETER, "Diam." );
 		FEATURE_DIMENSIONS.put( ESTIMATED_DIAMETER, Dimension.LENGTH );
+		IS_INT.put( ESTIMATED_DIAMETER, Boolean.FALSE );
 	}
 
 	public static final String KEY = "Spot radius estimator";
+
 
 	/*
 	 * METHODS
@@ -105,6 +110,18 @@ public class SpotRadiusEstimatorFactory< T extends RealType< T > & NativeType< T
 	public String getName()
 	{
 		return KEY;
+	}
+
+	@Override
+	public Map< String, Boolean > getIsIntFeature()
+	{
+		return IS_INT;
+	}
+
+	@Override
+	public boolean isManualFeature()
+	{
+		return false;
 	}
 
 }

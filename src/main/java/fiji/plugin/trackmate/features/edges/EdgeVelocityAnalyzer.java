@@ -41,6 +41,8 @@ public class EdgeVelocityAnalyzer implements EdgeAnalyzer, MultiThreaded
 
 	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 2 );
 
+	public static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 2 );
+
 	static
 	{
 		FEATURES.add( VELOCITY );
@@ -54,6 +56,9 @@ public class EdgeVelocityAnalyzer implements EdgeAnalyzer, MultiThreaded
 
 		FEATURE_DIMENSIONS.put( VELOCITY, Dimension.VELOCITY );
 		FEATURE_DIMENSIONS.put( DISPLACEMENT, Dimension.LENGTH );
+
+		IS_INT.put( VELOCITY, Boolean.FALSE );
+		IS_INT.put( DISPLACEMENT, Boolean.FALSE );
 	}
 
 	private int numThreads;
@@ -191,5 +196,17 @@ public class EdgeVelocityAnalyzer implements EdgeAnalyzer, MultiThreaded
 	public String getName()
 	{
 		return KEY;
-	};
+	}
+
+	@Override
+	public Map< String, Boolean > getIsIntFeature()
+	{
+		return IS_INT;
+	}
+
+	@Override
+	public boolean isManualFeature()
+	{
+		return false;
+	}
 }

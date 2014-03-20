@@ -9,7 +9,6 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.TrackMateModule;
 import fiji.plugin.trackmate.features.FeatureAnalyzer;
 
 /**
@@ -19,7 +18,7 @@ import fiji.plugin.trackmate.features.FeatureAnalyzer;
  *
  * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com>
  */
-public interface EdgeAnalyzer extends Benchmark, FeatureAnalyzer, MultiThreaded, TrackMateModule
+public interface EdgeAnalyzer extends Benchmark, FeatureAnalyzer, MultiThreaded
 {
 
 	/**
