@@ -5,7 +5,7 @@ import java.awt.Color;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 
-public class SpotColorGeneratorPerTrackFeature implements FeatureColorGenerator< Spot >
+public class SpotColorGeneratorPerTrackFeature implements FeatureColorGenerator< Spot >, MinMaxAdjustable
 {
 
 	private final PerTrackFeatureColorGenerator trackColorGenerator;
@@ -22,9 +22,12 @@ public class SpotColorGeneratorPerTrackFeature implements FeatureColorGenerator<
 	public Color color( final Spot spot )
 	{
 		final Integer trackID = model.getTrackModel().trackIDOf( spot );
-		if (null == trackID) {
+		if ( null == trackID )
+		{
 			return TrackMateModelView.DEFAULT_SPOT_COLOR;
-		} else {
+		}
+		else
+		{
 			return trackColorGenerator.colorOf( trackID );
 		}
 	}
@@ -51,6 +54,40 @@ public class SpotColorGeneratorPerTrackFeature implements FeatureColorGenerator<
 	public void activate()
 	{
 		trackColorGenerator.activate();
+	}
+
+	/*
+	 * MINMAXADJUSTABLE
+	 */
+
+	@Override
+	public double getMin()
+	{
+		return trackColorGenerator.getMin();
+	}
+
+	@Override
+	public double getMax()
+	{
+		return trackColorGenerator.getMax();
+	}
+
+	@Override
+	public void setMinMax( final double min, final double max )
+	{
+		trackColorGenerator.setMinMax( min, max );
+	}
+
+	@Override
+	public void autoMinMax()
+	{
+		trackColorGenerator.autoMinMax();
+	}
+
+	@Override
+	public void setAutoMinMaxMode( final boolean autoMode )
+	{
+		trackColorGenerator.setAutoMinMaxMode( autoMode );
 	}
 
 }

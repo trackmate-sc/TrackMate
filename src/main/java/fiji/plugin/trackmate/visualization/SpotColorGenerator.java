@@ -10,7 +10,7 @@ import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.ModelChangeListener;
 import fiji.plugin.trackmate.Spot;
 
-public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelChangeListener
+public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelChangeListener, MinMaxAdjustable
 {
 
 	private final Model model;
@@ -20,6 +20,8 @@ public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelC
 	private double min;
 
 	private double max;
+
+	private boolean autoMode = true;
 
 	private static final InterpolatePaintScale generator = InterpolatePaintScale.Jet;
 
@@ -67,7 +69,7 @@ public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelC
 	@Override
 	public void modelChanged( final ModelChangeEvent event )
 	{
-		if ( null == feature ) { return; }
+		if ( !autoMode || null == feature ) { return; }
 		if ( event.getEventID() == ModelChangeEvent.MODEL_MODIFIED )
 		{
 			final Set< Spot > spots = event.getSpots();
@@ -128,6 +130,49 @@ public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelC
 				if ( val < min )
 					min = val.doubleValue();
 			}
+		}
+	}
+
+	/*
+	 * MINMAXADJUSTABLE
+	 */
+
+	@Override
+	public double getMin()
+	{
+		return min;
+	}
+
+	@Override
+	public double getMax()
+	{
+		return max;
+	}
+
+	@Override
+	public void setMinMax( final double min, final double max )
+	{
+		this.min = min;
+		this.max = max;
+	}
+
+	@Override
+	public void autoMinMax()
+	{
+		computeSpotColors();
+	}
+
+	@Override
+	public void setAutoMinMaxMode( final boolean autoMode )
+	{
+		this.autoMode = autoMode;
+		if ( autoMode )
+		{
+			activate();
+		}
+		else
+		{
+			terminate();
 		}
 	}
 }

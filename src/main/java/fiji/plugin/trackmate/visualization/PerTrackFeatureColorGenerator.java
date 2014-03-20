@@ -27,7 +27,7 @@ import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
  * @author Jean-Yves Tinevez
  *
  */
-public class PerTrackFeatureColorGenerator implements TrackColorGenerator, ModelChangeListener
+public class PerTrackFeatureColorGenerator implements TrackColorGenerator, ModelChangeListener, MinMaxAdjustable
 {
 
 	private static final InterpolatePaintScale generator = InterpolatePaintScale.Jet;
@@ -39,6 +39,12 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 	private String feature;
 
 	private Color color;
+
+	private double min;
+
+	private double max;
+
+	private boolean autoMode = true;
 
 	public PerTrackFeatureColorGenerator( final Model model, final String feature )
 	{
@@ -114,8 +120,19 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 		// Create value->color map
 		colorMap = new HashMap< Integer, Color >( trackIDs.size() );
 		int index = 0;
+		min = Double.POSITIVE_INFINITY;
+		max = Double.NEGATIVE_INFINITY;
 		for ( final Integer trackID : trackIDs )
 		{
+			if ( trackID > max )
+			{
+				max = trackID;
+			}
+			if ( trackID < min )
+			{
+				min = trackID;
+			}
+
 			final Color color = generator.getPaint( ( double ) index++ / ( trackIDs.size() - 1 ) );
 			colorMap.put( trackID, color );
 		}
@@ -128,8 +145,8 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 
 		// Get min & max & all values
 		final FeatureModel fm = model.getFeatureModel();
-		double min = Double.POSITIVE_INFINITY;
-		double max = Double.NEGATIVE_INFINITY;
+		min = Double.POSITIVE_INFINITY;
+		max = Double.NEGATIVE_INFINITY;
 		final HashMap< Integer, Double > values = new HashMap< Integer, Double >( trackIDs.size() );
 		for ( final Integer trackID : trackIDs )
 		{
@@ -175,6 +192,7 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 	@Override
 	public void modelChanged( final ModelChangeEvent event )
 	{
+		if ( !autoMode ) { return; }
 		if ( event.getEventID() == ModelChangeEvent.MODEL_MODIFIED )
 		{
 			final Set< DefaultWeightedEdge > edges = event.getEdges();
@@ -217,7 +235,10 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 	@Override
 	public void activate()
 	{
-		model.addModelChangeListener( this );
+		if ( !model.getModelChangeListener().contains( this ) )
+		{
+			model.addModelChangeListener( this );
+		}
 	}
 
 	/**
@@ -233,4 +254,54 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 		return colorMap.get( trackID );
 	}
 
+	/*
+	 * MINMAXADJUSTABLE
+	 */
+
+	@Override
+	public double getMin()
+	{
+		return min;
+	}
+
+	@Override
+	public double getMax()
+	{
+		return max;
+	}
+
+	@Override
+	public void setMinMax( final double min, final double max )
+	{
+		this.min = min;
+		this.max = max;
+	}
+
+	@Override
+	public void autoMinMax()
+	{
+		if ( feature.equals( TrackIndexAnalyzer.TRACK_INDEX ) )
+		{
+			refreshIndex();
+		}
+		else
+		{
+			refresh();
+		}
+	}
+
+	@Override
+	public void setAutoMinMaxMode( final boolean autoMode )
+	{
+		this.autoMode = autoMode;
+		if ( autoMode )
+		{
+			activate();
+		}
+		else
+		{
+			// No need to listen.
+			terminate();
+		}
+	}
 }

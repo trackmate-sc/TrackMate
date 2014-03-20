@@ -1,0 +1,58 @@
+package fiji.plugin.trackmate.visualization;
+
+/**
+ * Simple interface for objects whose effects depend on a minimal and maximal
+ * double value that can be adjusted manually or automatically.
+ *
+ * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> Mar 20, 2014
+ *
+ */
+public interface MinMaxAdjustable
+{
+	/**
+	 * Returns the min value currently set.
+	 *
+	 * @return the min value.
+	 */
+	public double getMin();
+
+	/**
+	 * Returns the max value currently set.
+	 *
+	 * @return the max value.
+	 */
+	public double getMax();
+
+	/**
+	 * Sets the min and max of this object.
+	 *
+	 * @param min
+	 *            the min value.
+	 * @param max
+	 *            the max value.
+	 */
+	public void setMinMax( double min, double max );
+
+	/**
+	 * Automatically computes the min & max values from this object current
+	 * content.
+	 */
+	public void autoMinMax();
+
+	/**
+	 * Sets the behavior of this object regarding the min & max calculation.
+	 * <p>
+	 * If the flag passed is <code>true</code>, then the min & max will be
+	 * recalculated by the instance everytime it is meaningful to do so, by
+	 * calling the {@link #autoMinMax()} method.
+	 * <p>
+	 * If <code>false</code>, the min & max will not be recalculated. They will
+	 * keep their current value unless {@link #setMinMax(double, double)} is
+	 * called.
+	 * 
+	 * @param autoMode
+	 *            the behavior flag.
+	 */
+	public void setAutoMinMaxMode( boolean autoMode );
+
+}

@@ -10,7 +10,7 @@ import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.ModelChangeListener;
 import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
 
-public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackColorGenerator
+public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackColorGenerator, MinMaxAdjustable
 {
 
 	private static final InterpolatePaintScale generator = InterpolatePaintScale.Jet;
@@ -27,6 +27,8 @@ public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackC
 
 	private DefaultWeightedEdge edgeMax;
 
+	private boolean autoMinMax = true;
+
 	public PerEdgeFeatureColorGenerator( final Model model, final String feature )
 	{
 		this.model = model;
@@ -39,6 +41,8 @@ public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackC
 	{
 		if ( feature.equals( this.feature ) || feature.equals( ManualEdgeColorAnalyzer.FEATURE ) ) { return; }
 		this.feature = feature;
+		// We recompute min and max whatever the mode is set, to have something
+		// meaningful.
 		resetMinAndMax();
 	}
 
@@ -66,13 +70,13 @@ public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackC
 	{} // ignored
 
 	/**
-	 * Monitor if the change induces some change in the colormap. Rescale it if
-	 * so.
+	 * If the color scaling mode is set to automatic, monitors if the change
+	 * induces some change in the colormap. Rescale it if so.
 	 */
 	@Override
 	public void modelChanged( final ModelChangeEvent event )
 	{
-		if ( event.getEventID() != ModelChangeEvent.MODEL_MODIFIED || event.getEdges().size() == 0 ) { return; }
+		if ( !autoMinMax || event.getEventID() != ModelChangeEvent.MODEL_MODIFIED || event.getEdges().size() == 0 ) { return; }
 
 		for ( final DefaultWeightedEdge edge : event.getEdges() )
 		{
@@ -146,7 +150,54 @@ public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackC
 	@Override
 	public void activate()
 	{
-		model.addModelChangeListener( this );
+		if ( !model.getModelChangeListener().contains( this ) )
+		{
+			model.addModelChangeListener( this );
+		}
+	}
+
+	/*
+	 * MINMAXADJUSTABLE
+	 */
+
+	@Override
+	public double getMin()
+	{
+		return min;
+	}
+
+	@Override
+	public double getMax()
+	{
+		return max;
+	}
+
+	@Override
+	public void setMinMax( final double min, final double max )
+	{
+		this.min = min;
+		this.max = max;
+	}
+
+	@Override
+	public void autoMinMax()
+	{
+		resetMinAndMax();
+	}
+
+	@Override
+	public void setAutoMinMaxMode( final boolean autoMode )
+	{
+		this.autoMinMax = autoMode;
+		if ( autoMode )
+		{
+			activate();
+		}
+		else
+		{
+			// No need to listen.
+			terminate();
+		}
 	}
 
 }
