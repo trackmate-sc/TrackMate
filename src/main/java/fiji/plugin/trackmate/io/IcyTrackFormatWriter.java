@@ -21,7 +21,6 @@ import org.jdom2.output.XMLOutputter;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition;
 
 public class IcyTrackFormatWriter implements Algorithm, Benchmark
@@ -95,7 +94,7 @@ public class IcyTrackFormatWriter implements Algorithm, Benchmark
 	{
 		final long start = System.currentTimeMillis();
 
-		// ICY does not accept middle links.
+		// ICY does not accept middle links nor gaps.
 		final ConvexBranchesDecomposition splitter = new ConvexBranchesDecomposition( model, true, true );
 		if ( !splitter.checkInput() || !splitter.process() )
 		{
@@ -114,7 +113,8 @@ public class IcyTrackFormatWriter implements Algorithm, Benchmark
 		 */
 
 		final Element trackGroup = new Element( TRACK_GROUP );
-		trackGroup.setAttribute( "description", TrackMate.PLUGIN_NAME_STR + "_v" + TrackMate.PLUGIN_NAME_VERSION + "_export" );
+		// trackGroup.setAttribute( "description", TrackMate.PLUGIN_NAME_STR +
+		// "_v" + TrackMate.PLUGIN_NAME_VERSION + "_export" );
 
 		final Map< Spot, Integer > beginnings = new HashMap< Spot, Integer >();
 		final Map< Spot, Integer > endings = new HashMap< Spot, Integer >();

@@ -32,8 +32,9 @@ import fiji.plugin.trackmate.TrackModel;
  * <p>
  * This class also outputs the links that were cut in the source model to
  * generate these branches. A flag allows to specify whether these links must be
- * between end and starting point of a branch.
- *
+ * between end and starting point of a branch. Another flag relax the convex
+ * constraint and allows gaps to be included in branches.
+ * 
  * @author Jean-Yves Tinevez - 2014
  */
 public class ConvexBranchesDecomposition implements Algorithm, Benchmark
@@ -72,6 +73,11 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 	 *            branch. If <code>true</code>, links will only reach for these
 	 *            spots. If <code>false</code>, a link can target a spot within
 	 *            a branch, which can lead to fewer and longer branches.
+	 * @param forbidGaps
+	 *            specifies whether we forbid gaps in tracks. If
+	 *            <code>true</code>, a track containing a gap (detections
+	 *            missing in at least 1 consecutive frames) will be split in 2
+	 *            branches. If <code>false</code>, branches may contain gaps.
 	 */
 	public ConvexBranchesDecomposition( final Model model, final boolean forbidMiddleLinks, final boolean forbidGaps )
 	{

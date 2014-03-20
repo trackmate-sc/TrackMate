@@ -86,7 +86,7 @@ public class IcyTrackExporter extends AbstractTMAction
 		}
 	}
 
-	@Plugin( type = TrackMateActionFactory.class, enabled = false )
+	@Plugin( type = TrackMateActionFactory.class, enabled = true )
 	public static class Factory implements TrackMateActionFactory
 	{
 
