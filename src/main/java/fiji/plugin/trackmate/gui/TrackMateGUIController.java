@@ -169,7 +169,7 @@ public class TrackMateGUIController implements ActionListener
 
 	protected ManualSpotColorGenerator manualSpotColorGenerator;
 
-	protected FeatureColorGenerator< Spot > spotColorGeneratorPerTrackFeature;
+	protected SpotColorGeneratorPerTrackFeature spotColorGeneratorPerTrackFeature;
 
 	/**
 	 * The listener in charge of listening to display settings changes and
@@ -478,9 +478,9 @@ public class TrackMateGUIController implements ActionListener
 		return new ManualEdgeColorGenerator( trackmate.getModel() );
 	}
 
-	protected FeatureColorGenerator< Spot > createSpotColorGeneratorPerTrackFeature()
+	protected SpotColorGeneratorPerTrackFeature createSpotColorGeneratorPerTrackFeature()
 	{
-		final FeatureColorGenerator< Spot > generator = new SpotColorGeneratorPerTrackFeature( trackmate.getModel(), TrackIndexAnalyzer.TRACK_INDEX );
+		final SpotColorGeneratorPerTrackFeature generator = new SpotColorGeneratorPerTrackFeature( trackmate.getModel(), TrackIndexAnalyzer.TRACK_INDEX );
 		return generator;
 	}
 
