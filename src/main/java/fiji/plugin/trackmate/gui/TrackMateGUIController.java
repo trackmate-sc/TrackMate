@@ -699,7 +699,7 @@ public class TrackMateGUIController implements ActionListener
 		/*
 		 * Save descriptor
 		 */
-		saveDescriptor = new SaveDescriptor( this, detectorProvider, trackerProvider );
+		saveDescriptor = new SaveDescriptor( this );
 
 		/*
 		 * Load descriptor

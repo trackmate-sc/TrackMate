@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.io;
 
+import static fiji.plugin.trackmate.detection.DetectorKeys.XML_ATTRIBUTE_DETECTOR_NAME;
 import static fiji.plugin.trackmate.io.TmXmlKeys.ANALYSER_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.ANALYSER_KEY_ATTRIBUTE;
 import static fiji.plugin.trackmate.io.TmXmlKeys.ANALYZER_COLLECTION_ELEMENT_KEY;
@@ -69,6 +70,7 @@ import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_FEATURES_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_FILTER_COLLECTION_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_ID_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_NAME_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.XML_ATTRIBUTE_TRACKER_NAME;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -207,16 +209,8 @@ public class TmXmlWriter
 	 *
 	 * @param settings
 	 *            the {@link Settings} to write.
-	 * @param detectorProvider
-	 *            the {@link DetectorProvider}, required to marshall the
-	 *            selected detector and its settings. If <code>null</code>, they
-	 *            won't be appended.
-	 * @param trackerProvider
-	 *            the {@link TrackerProvider}, required to marshall the selected
-	 *            tracker and its settings. If <code>null</code>, they won't be
-	 *            appended.
 	 */
-	public void appendSettings( final Settings settings, final DetectorProvider detectorProvider, final TrackerProvider trackerProvider )
+	public void appendSettings( final Settings settings )
 	{
 		final Element settingsElement = new Element( SETTINGS_ELEMENT_KEY );
 
@@ -226,11 +220,8 @@ public class TmXmlWriter
 		final Element cropElement = echoCropSettings( settings );
 		settingsElement.addContent( cropElement );
 
-		if ( null != detectorProvider )
-		{
-			final Element detectorElement = echoDetectorSettings( settings, detectorProvider );
-			settingsElement.addContent( detectorElement );
-		}
+		final Element detectorElement = echoDetectorSettings( settings );
+		settingsElement.addContent( detectorElement );
 
 		final Element initFilter = echoInitialSpotFilter( settings );
 		settingsElement.addContent( initFilter );
@@ -238,11 +229,8 @@ public class TmXmlWriter
 		final Element spotFiltersElement = echoSpotFilters( settings );
 		settingsElement.addContent( spotFiltersElement );
 
-		if ( null != trackerProvider )
-		{
-			final Element trackerElement = echoTrackerSettings( settings, trackerProvider );
-			settingsElement.addContent( trackerElement );
-		}
+		final Element trackerElement = echoTrackerSettings( settings );
+		settingsElement.addContent( trackerElement );
 
 		final Element trackFiltersElement = echoTrackFilters( settings );
 		settingsElement.addContent( trackFiltersElement );
@@ -313,10 +301,14 @@ public class TmXmlWriter
 		return settingsElement;
 	}
 
-	protected Element echoDetectorSettings( final Settings settings, final DetectorProvider provider )
+	protected Element echoDetectorSettings( final Settings settings )
 	{
 		final Element el = new Element( DETECTOR_SETTINGS_ELEMENT_KEY );
 
+		// Set the detector factory key NOW.
+		el.setAttribute( XML_ATTRIBUTE_DETECTOR_NAME, settings.detectorFactory.getKey() );
+
+		// Marshal the rest.
 		if ( null != settings.detectorFactory )
 		{
 			final boolean ok = settings.detectorFactory.marshall( settings.detectorSettings, el );
@@ -333,20 +325,27 @@ public class TmXmlWriter
 		return el;
 	}
 
-	protected Element echoTrackerSettings( final Settings settings, final TrackerProvider provider )
+	protected Element echoTrackerSettings( final Settings settings )
 	{
 		final Element el = new Element( TRACKER_SETTINGS_ELEMENT_KEY );
 
-		if ( null == settings.trackerFactory ) { return el; }
-		final boolean ok = settings.trackerFactory.marshall( settings.trackerSettings, el );
-		if ( !ok )
-		{
-			logger.error( settings.trackerFactory.getErrorMessage() );
-		}
-		else
-		{}
+		// Set the tracker factory key NOW.
+		el.setAttribute( XML_ATTRIBUTE_TRACKER_NAME, settings.trackerFactory.getKey() );
 
-		logger.log( "  Added tracker settings.\n" );
+		// Marshal the rest.
+		if ( null != settings.trackerFactory )
+		{
+			final boolean ok = settings.trackerFactory.marshall( settings.trackerSettings, el );
+			if ( !ok )
+			{
+				logger.error( settings.trackerFactory.getErrorMessage() );
+			}
+			else
+			{
+				logger.log( "  Added tracker settings.\n" );
+			}
+		}
+
 		return el;
 	}
 
