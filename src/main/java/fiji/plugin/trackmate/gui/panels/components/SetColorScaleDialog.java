@@ -224,8 +224,8 @@ public class SetColorScaleDialog extends JDialog implements MinMaxAdjustable
 	@Override
 	public void setFrom( final MinMaxAdjustable minMaxAdjustable )
 	{
-		setMinMax( minMaxAdjustable.getMin(), minMaxAdjustable.getMax() );
 		setAutoMinMaxMode( minMaxAdjustable.isAutoMinMaxMode() );
+		setMinMax( minMaxAdjustable.getMin(), minMaxAdjustable.getMax() );
 	}
 
 	@Override

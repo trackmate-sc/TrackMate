@@ -30,8 +30,9 @@ import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
 import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
 import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
+import fiji.plugin.trackmate.visualization.MinMaxAdjustable;
 
-public class ColorByFeatureGUIPanel extends ActionListenablePanel
+public class ColorByFeatureGUIPanel extends ActionListenablePanel implements MinMaxAdjustable
 {
 
 	/** The key for the manual painting style. */
@@ -96,6 +97,12 @@ public class ColorByFeatureGUIPanel extends ActionListenablePanel
 	protected final Model model;
 
 	private final List< Category > categories;
+
+	private double min;
+
+	private double max;
+
+	private boolean autoMode = true;
 
 	/*
 	 * CONSTRUCTOR
@@ -179,6 +186,10 @@ public class ColorByFeatureGUIPanel extends ActionListenablePanel
 			return;
 		}
 
+		/*
+		 * Compute min & max
+		 */
+
 		final double[] values = getValues( jComboBoxSetColorBy );
 
 		if ( null == values )
@@ -186,38 +197,78 @@ public class ColorByFeatureGUIPanel extends ActionListenablePanel
 			g.clearRect( 0, 0, canvasColor.getWidth(), canvasColor.getHeight() );
 			return;
 		}
-		double max = Float.NEGATIVE_INFINITY;
-		double min = Float.POSITIVE_INFINITY;
+		double dataMax = Float.NEGATIVE_INFINITY;
+		double dataMin = Float.POSITIVE_INFINITY;
 		double val;
 		for ( int i = 0; i < values.length; i++ )
 		{
 			val = values[ i ];
-			if ( val > max )
+			if ( val > dataMax )
 			{
-				max = val;
+				dataMax = val;
 			}
-			if ( val < min )
+			if ( val < dataMin )
 			{
-				min = val;
+				dataMin = val;
 			}
 		}
 
+		if ( autoMode )
+		{
+			min = dataMin;
+			max = dataMax;
+		}
+
+		/*
+		 * The color scale.
+		 */
+
+		final float alphaMin = ( float ) ( ( min - dataMin ) / ( dataMax - dataMin ) );
+		final float alphaMax = ( float ) ( ( max - dataMin ) / ( dataMax - dataMin ) );
 		final int width = canvasColor.getWidth();
 		final int height = canvasColor.getHeight();
-		float alpha;
 		for ( int i = 0; i < width; i++ )
 		{
-			alpha = ( float ) i / ( width - 1 );
-			g.setColor( colorMap.getPaint( alpha ) );
+			final float alpha = ( float ) i / ( width - 1 );
+			final float beta = ( alpha - alphaMin ) / ( alphaMax - alphaMin );
+
+			g.setColor( colorMap.getPaint( beta ) );
 			g.drawLine( i, 0, i, height );
 		}
+
+		/*
+		 * Print values as text.
+		 */
+
 		g.setColor( Color.WHITE );
 		g.setFont( SMALL_FONT.deriveFont( Font.BOLD ) );
 		final FontMetrics fm = g.getFontMetrics();
+
+		final String dataMinStr = String.format( "%.1f", dataMin );
+		final String dataMaxStr = String.format( "%.1f", dataMax );
 		final String minStr = String.format( "%.1f", min );
 		final String maxStr = String.format( "%.1f", max );
-		g.drawString( minStr, 1, height / 2 + fm.getHeight() / 2 );
-		g.drawString( maxStr, width - fm.stringWidth( maxStr ) - 1, height / 2 + fm.getHeight() / 2 );
+
+		final int dataMinStrWidth = fm.stringWidth( dataMinStr );
+		final int dataMaxStrWidth = fm.stringWidth( dataMaxStr );
+		final int minStrWidth = fm.stringWidth( minStr );
+		final int maxStrWidth = fm.stringWidth( maxStr );
+
+		g.drawString( dataMinStr, 1, height / 2 + fm.getHeight() / 2 );
+		g.drawString( dataMaxStr, width - dataMaxStrWidth - 1, height / 2 + fm.getHeight() / 2 );
+
+		final int iMin = ( int ) ( ( width - 1 ) * ( min - dataMin ) / ( dataMax - dataMin ) );
+		final int iMax = ( int ) ( ( width - 1 ) * ( max - dataMin ) / ( dataMax - dataMin ) );
+
+		if ( ( iMin - minStrWidth ) > dataMinStrWidth + 2 && iMin < ( width - dataMaxStrWidth - 2 ) )
+		{
+			g.drawString( minStr, iMin - minStrWidth, height / 2 );
+		}
+		if ( ( iMax + maxStrWidth ) < ( width - dataMaxStrWidth - 2 ) && iMax > dataMinStrWidth + 2 )
+		{
+			g.drawString( maxStr, iMax, height / 2 );
+		}
+
 	}
 
 	private void initGUI()
@@ -252,8 +303,38 @@ public class ColorByFeatureGUIPanel extends ActionListenablePanel
 					@Override
 					public void actionPerformed( final ActionEvent e )
 					{
-						colorByFeatureChanged();
-						canvasColor.repaint();
+						new Thread( "ColorByFeatureGUIPanel color scale recalc Thread" )
+						{
+							@Override
+							public void run()
+							{
+								if ( !autoMode && !jComboBoxSetColorBy.getSelectedCategory().equals( Category.DEFAULT ) )
+								{
+									// Enforce recalculation of min & max when
+									// we change feature.
+									max = Float.NEGATIVE_INFINITY;
+									min = Float.POSITIVE_INFINITY;
+									final double[] values = getValues( jComboBoxSetColorBy );
+									if ( null != values )
+									{
+										for ( int i = 0; i < values.length; i++ )
+										{
+											final double val = values[ i ];
+											if ( val > max )
+											{
+												max = val;
+											}
+											if ( val < min )
+											{
+												min = val;
+											}
+										}
+									}
+								}
+								colorByFeatureChanged();
+								canvasColor.repaint();
+							}
+						}.start();
 					}
 				} );
 			}
@@ -394,4 +475,50 @@ public class ColorByFeatureGUIPanel extends ActionListenablePanel
 		return values;
 	}
 
+	@Override
+	public double getMin()
+	{
+		return min;
+	}
+
+	@Override
+	public double getMax()
+	{
+		return max;
+	}
+
+	@Override
+	public void setMinMax( final double min, final double max )
+	{
+		this.min = min;
+		this.max = max;
+	}
+
+	@Override
+	public void autoMinMax()
+	{
+		canvasColor.repaint();
+	}
+
+	@Override
+	public void setAutoMinMaxMode( final boolean autoMode )
+	{
+		this.autoMode = autoMode;
+	}
+
+	@Override
+	public boolean isAutoMinMaxMode()
+	{
+		return autoMode;
+	}
+
+	@Override
+	public void setFrom( final MinMaxAdjustable minMaxAdjustable )
+	{
+		setAutoMinMaxMode( minMaxAdjustable.isAutoMinMaxMode() );
+		if ( !minMaxAdjustable.isAutoMinMaxMode() )
+		{
+			setMinMax( minMaxAdjustable.getMin(), minMaxAdjustable.getMax() );
+		}
+	}
 }

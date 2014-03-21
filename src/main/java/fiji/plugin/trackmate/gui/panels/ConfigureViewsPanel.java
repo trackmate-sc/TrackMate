@@ -347,6 +347,8 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 					{
 						colorGenerator.autoMinMax();
 					}
+					jPanelSpotColor.setFrom( dialog );
+					jPanelSpotColor.autoMinMax();
 				}
 
 			}
@@ -392,6 +394,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 				fireDisplaySettingsChange( event );
 			}
 		} );
+		jPanelSpotColor.autoMinMax();
 		jPanelSpotOptions.add( jPanelSpotColor );
 
 		/*
