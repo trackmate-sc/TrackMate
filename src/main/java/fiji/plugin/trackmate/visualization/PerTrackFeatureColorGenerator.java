@@ -69,25 +69,9 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 	@Override
 	public void setFeature( final String feature )
 	{
-		// Special case: if null, then all tracks should be green
-		if ( null == feature )
-		{
-			this.feature = null;
-			refreshNull();
-			return;
-		}
-
 		this.feature = feature;
-		// A hack if we are asked for track index, which is the default and
-		// should never get caught to be null
-		if ( feature.equals( TrackIndexAnalyzer.TRACK_INDEX ) )
-		{
-			refreshIndex();
-		}
-		else
-		{
-			refresh();
-		}
+		autoMinMax();
+		refreshColorMap();
 	}
 
 	@Override
@@ -96,98 +80,7 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 		return feature;
 	}
 
-	private synchronized void refreshNull()
-	{
-		final TrackModel trackModel = model.getTrackModel();
-		final Set< Integer > trackIDs = trackModel.trackIDs( true );
 
-		// Create value->color map
-		colorMap = new HashMap< Integer, Color >( trackIDs.size() );
-		for ( final Integer trackID : trackIDs )
-		{
-			colorMap.put( trackID, DEFAULT_TRACK_COLOR );
-		}
-	}
-
-	/**
-	 * A shortcut for the track index feature
-	 */
-	private synchronized void refreshIndex()
-	{
-		final TrackModel trackModel = model.getTrackModel();
-		final Set< Integer > trackIDs = trackModel.trackIDs( true );
-
-		// Create value->color map
-		colorMap = new HashMap< Integer, Color >( trackIDs.size() );
-		int index = 0;
-		min = Double.POSITIVE_INFINITY;
-		max = Double.NEGATIVE_INFINITY;
-		for ( final Integer trackID : trackIDs )
-		{
-			if ( trackID > max )
-			{
-				max = trackID;
-			}
-			if ( trackID < min )
-			{
-				min = trackID;
-			}
-
-			final Color color = generator.getPaint( ( double ) index++ / ( trackIDs.size() - 1 ) );
-			colorMap.put( trackID, color );
-		}
-	}
-
-	private synchronized void refresh()
-	{
-		final TrackModel trackModel = model.getTrackModel();
-		final Set< Integer > trackIDs = trackModel.trackIDs( true );
-
-		// Get min & max & all values
-		final FeatureModel fm = model.getFeatureModel();
-		min = Double.POSITIVE_INFINITY;
-		max = Double.NEGATIVE_INFINITY;
-		final HashMap< Integer, Double > values = new HashMap< Integer, Double >( trackIDs.size() );
-		for ( final Integer trackID : trackIDs )
-		{
-			final Double val = fm.getTrackFeature( trackID, feature );
-			values.put( trackID, val );
-
-			if ( null == val || Double.isNaN( val.doubleValue() ) )
-			{
-				continue;
-			}
-			if ( val < min )
-			{
-				min = val;
-			}
-			if ( val > max )
-			{
-				max = val;
-			}
-		}
-
-		// Create value->color map
-		colorMap = new HashMap< Integer, Color >( trackIDs.size() );
-		for ( final Integer trackID : values.keySet() )
-		{
-			final Double val = values.get( trackID );
-			Color color;
-			if ( null == val )
-			{
-				color = DEFAULT_TRACK_COLOR;
-			}
-			else if ( Double.isNaN( val.doubleValue() ) )
-			{
-				color = TrackMateModelView.DEFAULT_UNDEFINED_FEATURE_COLOR;
-			}
-			else
-			{
-				color = generator.getPaint( ( val - min ) / ( max - min ) );
-			}
-			colorMap.put( trackID, color );
-		}
-	}
 
 	@Override
 	public void modelChanged( final ModelChangeEvent event )
@@ -198,18 +91,65 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 			final Set< DefaultWeightedEdge > edges = event.getEdges();
 			if ( edges.size() > 0 )
 			{
-				if ( null == feature )
+				refreshColorMap();
+			}
+		}
+	}
+
+	private void refreshColorMap()
+	{
+		final TrackModel trackModel = model.getTrackModel();
+		final Set< Integer > trackIDs = trackModel.trackIDs( true );
+
+		if ( null == feature )
+		{
+
+			// Create value->color map
+			colorMap = new HashMap< Integer, Color >( trackIDs.size() );
+			for ( final Integer trackID : trackIDs )
+			{
+				colorMap.put( trackID, DEFAULT_TRACK_COLOR );
+			}
+		}
+		else if ( feature.equals( TrackIndexAnalyzer.TRACK_INDEX ) )
+		{
+			// Create value->color map
+			colorMap = new HashMap< Integer, Color >( trackIDs.size() );
+			int index = 0;
+			for ( final Integer trackID : trackIDs )
+			{
+				final Color color = generator.getPaint( ( double ) index++ / ( trackIDs.size() - 1 ) );
+				colorMap.put( trackID, color );
+			}
+		}
+		else
+		{
+			// Get min & max & all values
+			if ( autoMode )
+			{
+				autoMinMax();
+			}
+
+			// Create value->color map
+			final FeatureModel fm = model.getFeatureModel();
+			colorMap = new HashMap< Integer, Color >( trackIDs.size() );
+			for ( final Integer trackID : trackIDs )
+			{
+				final Double val = fm.getTrackFeature( trackID, feature );
+				Color color;
+				if ( null == val )
 				{
-					refreshNull();
+					color = DEFAULT_TRACK_COLOR;
 				}
-				else if ( feature.equals( TrackIndexAnalyzer.TRACK_INDEX ) )
+				else if ( Double.isNaN( val.doubleValue() ) )
 				{
-					refreshIndex();
+					color = TrackMateModelView.DEFAULT_UNDEFINED_FEATURE_COLOR;
 				}
 				else
 				{
-					refresh();
+					color = generator.getPaint( ( val - min ) / ( max - min ) );
 				}
+				colorMap.put( trackID, color );
 			}
 		}
 	}
@@ -254,6 +194,7 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 		return colorMap.get( trackID );
 	}
 
+
 	/*
 	 * MINMAXADJUSTABLE
 	 */
@@ -280,13 +221,27 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 	@Override
 	public void autoMinMax()
 	{
-		if ( feature.equals( TrackIndexAnalyzer.TRACK_INDEX ) )
+		final TrackModel trackModel = model.getTrackModel();
+		final Set< Integer > trackIDs = trackModel.trackIDs( true );
+		final FeatureModel fm = model.getFeatureModel();
+
+		min = Double.POSITIVE_INFINITY;
+		max = Double.NEGATIVE_INFINITY;
+		for ( final Integer trackID : trackIDs )
 		{
-			refreshIndex();
-		}
-		else
-		{
-			refresh();
+			final Double val = fm.getTrackFeature( trackID, feature );
+			if ( null == val || Double.isNaN( val.doubleValue() ) )
+			{
+				continue;
+			}
+			if ( val < min )
+			{
+				min = val;
+			}
+			if ( val > max )
+			{
+				max = val;
+			}
 		}
 	}
 
@@ -319,6 +274,11 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 		{
 			setMinMax( minMaxAdjustable.getMin(), minMaxAdjustable.getMax() );
 		}
+		else
+		{
+			autoMinMax();
+		}
+		refreshColorMap();
 	}
 }
 

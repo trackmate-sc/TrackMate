@@ -244,10 +244,42 @@ public class ColorByFeatureGUIPanel extends ActionListenablePanel implements Min
 		g.setFont( SMALL_FONT.deriveFont( Font.BOLD ) );
 		final FontMetrics fm = g.getFontMetrics();
 
-		final String dataMinStr = String.format( "%.1f", dataMin );
-		final String dataMaxStr = String.format( "%.1f", dataMax );
-		final String minStr = String.format( "%.1f", min );
-		final String maxStr = String.format( "%.1f", max );
+		final Category category = jComboBoxSetColorBy.getSelectedCategory();
+		final String feature = jComboBoxSetColorBy.getSelectedItem();
+		boolean isInt;
+		switch ( category )
+		{
+		case TRACKS:
+			isInt = model.getFeatureModel().getTrackFeatureIsInt().get( feature );
+			break;
+		case EDGES:
+			isInt = model.getFeatureModel().getEdgeFeatureIsInt().get( feature );
+			break;
+		case SPOTS:
+			isInt = model.getFeatureModel().getSpotFeatureIsInt().get( feature );
+			break;
+		default:
+			isInt = false;
+		}
+
+		final String dataMinStr;
+		final String dataMaxStr;
+		final String minStr;
+		final String maxStr;
+		if ( isInt )
+		{
+			dataMinStr = String.format( "%d", ( int ) dataMin );
+			dataMaxStr = String.format( "%d", ( int ) dataMax );
+			minStr = String.format( "%d", ( int ) min );
+			maxStr = String.format( "%d", ( int ) max );
+		}
+		else
+		{
+			dataMinStr = String.format( "%.1f", dataMin );
+			dataMaxStr = String.format( "%.1f", dataMax );
+			minStr = String.format( "%.1f", min );
+			maxStr = String.format( "%.1f", max );
+		}
 
 		final int dataMinStrWidth = fm.stringWidth( dataMinStr );
 		final int dataMaxStrWidth = fm.stringWidth( dataMaxStr );

@@ -45,6 +45,8 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 
+import org.jgrapht.graph.DefaultWeightedEdge;
+
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.gui.DisplaySettingsEvent;
@@ -352,7 +354,6 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 				}
 
 			}
-
 		} );
 
 		jPanelSpotColor.addActionListener( new ActionListener()
@@ -408,6 +409,46 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 
 		trackColorGUI = new ColorByFeatureGUIPanel( model, Arrays.asList( new Category[] { Category.TRACKS, Category.EDGES, Category.DEFAULT } ) );
 		// trackColorGUI.setPreferredSize(new java.awt.Dimension(265, 45));
+
+		trackColorGUI.addMouseListener( new MouseAdapter()
+		{
+			@Override
+			public void mouseClicked( final MouseEvent e )
+			{
+				if ( e.getClickCount() == 2 )
+				{
+					final FeatureColorGenerator< DefaultWeightedEdge > colorGenerator;
+					final String str;
+					final Category category = trackColorGUI.getColorGeneratorCategory();
+					switch ( category )
+					{
+					case TRACKS:
+						colorGenerator = trackColorGenerator;
+						str = "tracks";
+						break;
+
+					default:
+						colorGenerator = edgeColorGenerator;
+						str = "edges";
+						break;
+					}
+
+					final JFrame topFrame = ( JFrame ) SwingUtilities.getWindowAncestor( ConfigureViewsPanel.this );
+					final SetColorScaleDialog dialog = new SetColorScaleDialog( topFrame, "Set color scale for " + str, colorGenerator );
+					dialog.setVisible( true );
+					if ( !dialog.hasUserPressedOK() ) { return; }
+
+					if ( dialog.isAutoMinMaxMode() )
+					{
+						colorGenerator.autoMinMax();
+					}
+					trackColorGUI.setFrom( dialog );
+					trackColorGUI.autoMinMax();
+				}
+
+			}
+		} );
+
 		trackColorGUI.addActionListener( new ActionListener()
 		{
 			@Override
