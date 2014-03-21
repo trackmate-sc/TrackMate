@@ -9,8 +9,6 @@ import fiji.plugin.trackmate.visualization.ManualEdgeColorGenerator;
 import fiji.plugin.trackmate.visualization.ManualSpotColorGenerator;
 import fiji.plugin.trackmate.visualization.PerEdgeFeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.PerTrackFeatureColorGenerator;
-import fiji.plugin.trackmate.visualization.SpotColorGenerator;
-import fiji.plugin.trackmate.visualization.SpotColorGeneratorPerTrackFeature;
 
 public class ConfigureViewsDescriptor implements WizardPanelDescriptor
 {
@@ -21,11 +19,11 @@ public class ConfigureViewsDescriptor implements WizardPanelDescriptor
 
 	private final TrackMateGUIController controller;
 
-	public ConfigureViewsDescriptor( final TrackMate trackmate, final FeatureColorGenerator< Spot > spotColorGenerator, final PerEdgeFeatureColorGenerator edgeColorGenerator, final PerTrackFeatureColorGenerator trackColorGenerator, final SpotColorGeneratorPerTrackFeature spotColorGeneratorPerTrackFeature, final ManualSpotColorGenerator manualSpotColorGenerator, final ManualEdgeColorGenerator manualEdgeColorGenerator, final TrackMateGUIController controller )
+	public ConfigureViewsDescriptor( final TrackMate trackmate, final FeatureColorGenerator< Spot > spotColorGenerator, final PerEdgeFeatureColorGenerator edgeColorGenerator, final PerTrackFeatureColorGenerator trackColorGenerator, final FeatureColorGenerator< Spot > spotColorGeneratorPerTrackFeature, final ManualSpotColorGenerator manualSpotColorGenerator, final ManualEdgeColorGenerator manualEdgeColorGenerator, final TrackMateGUIController controller )
 	{
 		this.controller = controller;
 		this.panel = new ConfigureViewsPanel( trackmate.getModel() );
-		panel.setSpotColorGenerator( ( SpotColorGenerator ) spotColorGenerator );
+		panel.setSpotColorGenerator( spotColorGenerator );
 		panel.setEdgeColorGenerator( edgeColorGenerator );
 		panel.setTrackColorGenerator( trackColorGenerator );
 		panel.setManualSpotColorGenerator( manualSpotColorGenerator );
