@@ -5,7 +5,7 @@ import java.awt.Color;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 
-public class SpotColorGeneratorPerTrackFeature implements FeatureColorGenerator< Spot >, MinMaxAdjustable
+public class SpotColorGeneratorPerTrackFeature implements FeatureColorGenerator< Spot >
 {
 
 	private final PerTrackFeatureColorGenerator trackColorGenerator;

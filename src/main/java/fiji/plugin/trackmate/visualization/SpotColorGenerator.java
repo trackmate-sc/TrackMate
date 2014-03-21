@@ -10,7 +10,7 @@ import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.ModelChangeListener;
 import fiji.plugin.trackmate.Spot;
 
-public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelChangeListener, MinMaxAdjustable
+public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelChangeListener
 {
 
 	private final Model model;

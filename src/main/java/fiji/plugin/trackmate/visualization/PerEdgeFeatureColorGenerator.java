@@ -10,7 +10,7 @@ import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.ModelChangeListener;
 import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
 
-public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackColorGenerator, MinMaxAdjustable
+public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackColorGenerator
 {
 
 	private static final InterpolatePaintScale generator = InterpolatePaintScale.Jet;

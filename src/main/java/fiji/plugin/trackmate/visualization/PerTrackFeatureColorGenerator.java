@@ -27,7 +27,7 @@ import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
  * @author Jean-Yves Tinevez
  *
  */
-public class PerTrackFeatureColorGenerator implements TrackColorGenerator, ModelChangeListener, MinMaxAdjustable
+public class PerTrackFeatureColorGenerator implements TrackColorGenerator, ModelChangeListener
 {
 
 	private static final InterpolatePaintScale generator = InterpolatePaintScale.Jet;
