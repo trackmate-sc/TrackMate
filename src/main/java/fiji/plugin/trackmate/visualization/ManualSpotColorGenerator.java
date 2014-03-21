@@ -33,4 +33,39 @@ public class ManualSpotColorGenerator implements FeatureColorGenerator< Spot >
 	@Override
 	public void activate()
 	{}
+
+	@Override
+	public double getMin()
+	{
+		return Double.NaN;
+	}
+
+	@Override
+	public double getMax()
+	{
+		return Double.NaN;
+	}
+
+	@Override
+	public void setMinMax( final double min, final double max )
+	{}
+
+	@Override
+	public void autoMinMax()
+	{}
+
+	@Override
+	public void setAutoMinMaxMode( final boolean autoMode )
+	{}
+
+	@Override
+	public boolean isAutoMinMaxMode()
+	{
+		return false;
+	}
+
+	@Override
+	public void setFrom( final MinMaxAdjustable minMaxAdjustable )
+	{}
 }
+
