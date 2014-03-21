@@ -82,7 +82,7 @@ public class JNumericTextField extends JTextField {
 	}
 
 	public JNumericTextField(final double value) {
-		this( "" + value );
+		this( String.format( "%.3f", value ) );
 	}
 
 	public double getValue() {
@@ -101,7 +101,7 @@ public class JNumericTextField extends JTextField {
 			oldValue = value;
 		} catch (final NumberFormatException nfe) {
 			value = oldValue;
-			setText( "" + value );
+			setText( String.format( "%.3f", value ) );
 		}
 
 	}
