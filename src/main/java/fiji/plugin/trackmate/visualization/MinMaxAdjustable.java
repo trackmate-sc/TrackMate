@@ -49,10 +49,27 @@ public interface MinMaxAdjustable
 	 * If <code>false</code>, the min & max will not be recalculated. They will
 	 * keep their current value unless {@link #setMinMax(double, double)} is
 	 * called.
-	 * 
+	 *
 	 * @param autoMode
 	 *            the behavior flag.
 	 */
 	public void setAutoMinMaxMode( boolean autoMode );
+
+	/**
+	 * Returns whether the automatic scaling mode is activated or not for this
+	 * object.
+	 *
+	 * @return <code>true</code> if the automatic scaling mode is on.
+	 */
+	public boolean isAutoMinMaxMode();
+
+	/**
+	 * Copies the min, max and auto fields from the specified
+	 * {@link MinMaxAdjustable} to this object.
+	 * <p>
+	 * Not that if {@link #isAutoMinMaxMode()} is set to <code>true</code>, the
+	 * min and max value will <b>not</b> be copied over.
+	 */
+	public void setFrom( MinMaxAdjustable minMaxAdjustable );
 
 }

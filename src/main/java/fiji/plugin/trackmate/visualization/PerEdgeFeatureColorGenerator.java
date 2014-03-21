@@ -200,4 +200,19 @@ public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackC
 		}
 	}
 
+	@Override
+	public boolean isAutoMinMaxMode()
+	{
+		return autoMinMax;
+	}
+
+	@Override
+	public void setFrom( final MinMaxAdjustable minMaxAdjustable )
+	{
+		setAutoMinMaxMode( minMaxAdjustable.isAutoMinMaxMode() );
+		if ( !minMaxAdjustable.isAutoMinMaxMode() )
+		{
+			setMinMax( minMaxAdjustable.getMin(), minMaxAdjustable.getMax() );
+		}
+	}
 }

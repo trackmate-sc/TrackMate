@@ -90,4 +90,19 @@ public class SpotColorGeneratorPerTrackFeature implements FeatureColorGenerator<
 		trackColorGenerator.setAutoMinMaxMode( autoMode );
 	}
 
+	@Override
+	public boolean isAutoMinMaxMode()
+	{
+		return trackColorGenerator.isAutoMinMaxMode();
+	}
+
+	@Override
+	public void setFrom( final MinMaxAdjustable minMaxAdjustable )
+	{
+		setAutoMinMaxMode( minMaxAdjustable.isAutoMinMaxMode() );
+		if ( !minMaxAdjustable.isAutoMinMaxMode() )
+		{
+			setMinMax( minMaxAdjustable.getMin(), minMaxAdjustable.getMax() );
+		}
+	}
 }

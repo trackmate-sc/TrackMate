@@ -304,4 +304,21 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 			terminate();
 		}
 	}
+
+	@Override
+	public boolean isAutoMinMaxMode()
+	{
+		return autoMode;
+	}
+
+	@Override
+	public void setFrom( final MinMaxAdjustable minMaxAdjustable )
+	{
+		setAutoMinMaxMode( minMaxAdjustable.isAutoMinMaxMode() );
+		if ( !minMaxAdjustable.isAutoMinMaxMode() )
+		{
+			setMinMax( minMaxAdjustable.getMin(), minMaxAdjustable.getMax() );
+		}
+	}
 }
+

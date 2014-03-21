@@ -63,4 +63,14 @@ public class DummySpotColorGenerator implements FeatureColorGenerator< Spot >
 	public void setAutoMinMaxMode( final boolean autoMode )
 	{}
 
+	@Override
+	public boolean isAutoMinMaxMode()
+	{
+		return false;
+	}
+
+	@Override
+	public void setFrom( final MinMaxAdjustable minMaxAdjustable )
+	{}
+
 }
