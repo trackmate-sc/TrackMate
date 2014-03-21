@@ -22,6 +22,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -35,10 +37,12 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 
 import fiji.plugin.trackmate.Model;
@@ -49,6 +53,7 @@ import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.panels.components.ColorByFeatureGUIPanel;
 import fiji.plugin.trackmate.gui.panels.components.ColorByFeatureGUIPanel.Category;
 import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
+import fiji.plugin.trackmate.gui.panels.components.SetColorScaleDialog;
 import fiji.plugin.trackmate.visualization.AbstractTrackMateModelView;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.ManualEdgeColorGenerator;
@@ -312,6 +317,42 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 			jPanelSpotOptions.remove( jPanelSpotColor );
 		}
 		jPanelSpotColor = new ColorByFeatureGUIPanel( model, Arrays.asList( new Category[] { Category.SPOTS, Category.DEFAULT, Category.TRACKS } ) );
+
+		jPanelSpotColor.addMouseListener( new MouseAdapter()
+		{
+			@Override
+			public void mouseClicked( final MouseEvent e )
+			{
+				if ( e.getClickCount() == 2 )
+				{
+					final FeatureColorGenerator< Spot > colorGenerator;
+					final Category category = jPanelSpotColor.getColorGeneratorCategory();
+					switch ( category )
+					{
+					case TRACKS:
+						colorGenerator = spotColorGeneratorPerTrackFeature;
+						break;
+
+					default:
+						colorGenerator = spotColorGenerator;
+						break;
+					}
+
+					final JFrame topFrame = ( JFrame ) SwingUtilities.getWindowAncestor( ConfigureViewsPanel.this );
+					final SetColorScaleDialog dialog = new SetColorScaleDialog( topFrame, "Set color scale for spots", colorGenerator );
+					dialog.setVisible( true );
+					if ( !dialog.hasUserPressedOK() ) { return; }
+
+					if ( dialog.isAutoMinMaxMode() )
+					{
+						colorGenerator.autoMinMax();
+					}
+				}
+
+			}
+
+		} );
+
 		jPanelSpotColor.addActionListener( new ActionListener()
 		{
 			@Override
