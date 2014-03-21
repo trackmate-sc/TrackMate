@@ -351,6 +351,9 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 					}
 					jPanelSpotColor.setFrom( dialog );
 					jPanelSpotColor.autoMinMax();
+
+					final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_SPOT_COLORING, colorGenerator, colorGenerator );
+					fireDisplaySettingsChange( event );
 				}
 
 			}
@@ -444,6 +447,8 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 					}
 					trackColorGUI.setFrom( dialog );
 					trackColorGUI.autoMinMax();
+					final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_TRACK_COLORING, colorGenerator, colorGenerator );
+					fireDisplaySettingsChange( event );
 				}
 
 			}
