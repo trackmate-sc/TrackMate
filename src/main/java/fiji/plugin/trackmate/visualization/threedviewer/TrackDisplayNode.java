@@ -425,7 +425,7 @@ public class TrackDisplayNode extends ContentNode implements TimelapseListener {
 
 				// Keep refs
 				edgeIndices.get(trackID).put(edge, edgeIndex-2);
-				final int frame = source.getFeature(Spot.FRAME).intValue();
+				final int frame = source.getFeature(TrackmateConstants.FRAME).intValue();
 				frameIndices.get(frame).get(trackID).add(edgeIndex-2);
 
 			} // Finished building this track's line
