@@ -20,11 +20,13 @@ import net.imglib2.meta.view.HyperSliceImgPlus;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.scijava.plugin.Plugin;
 
+import fiji.plugin.trackmate.FeatureHolderUtils;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.TrackmateConstants;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.util.TMUtils;
@@ -84,7 +86,7 @@ public class ExtractTrackStackAction extends AbstractTMAction {
 		final Iterator<Spot> it = selection.iterator();
 		tmp1 = it.next();
 		tmp2 = it.next();
-		if (tmp1.getFeature(Spot.POSITION_T) > tmp2.getFeature(Spot.POSITION_T)) {
+		if (tmp1.getFeature(TrackmateConstants.POSITION_T) > tmp2.getFeature(TrackmateConstants.POSITION_T)) {
 			end = tmp1;
 			start = tmp2;
 		} else {
@@ -105,7 +107,7 @@ public class ExtractTrackStackAction extends AbstractTMAction {
 		path.add(start);
 		Spot previous = start;
 		Spot current;
-		double radius = Math.abs(start.getFeature(Spot.RADIUS));
+		double radius = Math.abs(start.getFeature(TrackmateConstants.RADIUS));
 		for (final DefaultWeightedEdge edge : edges) {
 
 			current = model.getTrackModel().getEdgeSource(edge);
@@ -113,7 +115,7 @@ public class ExtractTrackStackAction extends AbstractTMAction {
 				current = model.getTrackModel().getEdgeTarget(edge); // We have to check both in case of bad oriented edges
 			}
 			path.add(current);
-			final double ct = Math.abs(current.getFeature(Spot.RADIUS));
+			final double ct = Math.abs(current.getFeature(TrackmateConstants.RADIUS));
 			if (ct > radius) {
 				radius = ct;
 			}
@@ -122,7 +124,7 @@ public class ExtractTrackStackAction extends AbstractTMAction {
 		path.add(end);
 
 		// Sort spot by ascending frame number
-		final TreeSet<Spot> sortedSpots = new TreeSet<Spot>(Spot.timeComparator);
+		final TreeSet<Spot> sortedSpots = new TreeSet<Spot>(FeatureHolderUtils.featureComparator(TrackmateConstants.POSITION_T));
 		sortedSpots.addAll(path);
 		nspots = sortedSpots.size();
 
@@ -145,17 +147,17 @@ public class ExtractTrackStackAction extends AbstractTMAction {
 		for (final Spot spot : sortedSpots) {
 
 			// Extract image for current frame
-			final int frame = spot.getFeature(Spot.FRAME).intValue();
+			final int frame = spot.getFeature(TrackmateConstants.FRAME).intValue();
 
 
 			final ImgPlus imgCT = HyperSliceImgPlus.fixTimeAxis( imgC, frame );
 
 			// Compute target coordinates for current spot
-			final int x = (int) (Math.round((spot.getFeature(Spot.POSITION_X)) / calibration[0]) - width/2);
-			final int y = (int) (Math.round((spot.getFeature(Spot.POSITION_Y)) / calibration[1]) - height/2);
+			final int x = (int) (Math.round((spot.getFeature(TrackmateConstants.POSITION_X)) / calibration[0]) - width/2);
+			final int y = (int) (Math.round((spot.getFeature(TrackmateConstants.POSITION_Y)) / calibration[1]) - height/2);
 			long slice = 0;
 			if (imgCT.numDimensions() > 2) {
-				slice = Math.round(spot.getFeature(Spot.POSITION_Z) / calibration[2]);
+				slice = Math.round(spot.getFeature(TrackmateConstants.POSITION_Z) / calibration[2]);
 				if (slice < 0) {
 					slice = 0;
 				}

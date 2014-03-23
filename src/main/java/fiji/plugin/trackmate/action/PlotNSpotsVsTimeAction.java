@@ -15,10 +15,10 @@ import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.TrackmateConstants;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.tracking.spot.SpotCollection;
 import fiji.plugin.trackmate.util.ExportableChartPanel;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackSchemeFrame;
 
@@ -44,9 +44,9 @@ public class PlotNSpotsVsTimeAction extends AbstractTMAction {
 		final double[][] data = new double[2][nFrames];
 		int index = 0;
 		for (final int frame : spots.keySet()) {
-			data[1][index] = spots.getNSpots(frame, true);
+			data[1][index] = spots.getNObjects(frame, true);
 			if (data[1][index] > 0) {
-				data[0][index] = spots.iterator(frame, false).next().getFeature(Spot.POSITION_T);
+				data[0][index] = spots.iterator(frame, false).next().getFeature(TrackmateConstants.POSITION_T);
 			} else {
 				data[0][index] = frame * settings.dt;
 			}

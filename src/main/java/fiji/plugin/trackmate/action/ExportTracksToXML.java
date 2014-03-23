@@ -15,11 +15,13 @@ import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import org.scijava.plugin.Plugin;
 
+import fiji.plugin.trackmate.FeatureHolderUtils;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.TrackmateConstants;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.io.IOUtils;
@@ -151,14 +153,14 @@ public class ExportTracksToXML extends AbstractTMAction {
 			trackElement.setAttribute(NSPOTS_ATT, ""+track.size());
 
 			// Sort them by time
-			final TreeSet<Spot> sortedTrack = new TreeSet<Spot>(Spot.timeComparator);
+			final TreeSet<Spot> sortedTrack = new TreeSet<Spot>(FeatureHolderUtils.featureComparator(TrackmateConstants.POSITION_T));
 			sortedTrack.addAll(track);
 
 			for (final Spot spot : sortedTrack) {
-				final int frame = spot.getFeature(Spot.FRAME).intValue();
-				final double x = spot.getFeature(Spot.POSITION_X);
-				final double y = spot.getFeature(Spot.POSITION_Y);
-				final double z = spot.getFeature(Spot.POSITION_Z);
+				final int frame = spot.getFeature(TrackmateConstants.FRAME).intValue();
+				final double x = spot.getFeature(TrackmateConstants.POSITION_X);
+				final double y = spot.getFeature(TrackmateConstants.POSITION_Y);
+				final double z = spot.getFeature(TrackmateConstants.POSITION_Z);
 
 				final Element spotElement = new Element(SPOT_KEY);
 				spotElement.setAttribute(T_ATT, ""+frame);

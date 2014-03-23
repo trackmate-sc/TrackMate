@@ -15,13 +15,16 @@ import net.imglib2.multithreading.SimpleMultiThreading;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
+import fiji.plugin.trackmate.FeatureHolderUtils;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackmateConstants;
 import fiji.plugin.trackmate.detection.LogDetector;
 import fiji.plugin.trackmate.detection.SpotDetector;
-import fiji.plugin.trackmate.tracking.SpotTracker;
+import fiji.plugin.trackmate.tracking.TrackableObjectUtils;
+import fiji.plugin.trackmate.tracking.spot.SpotTracker;
 
 /**
  * A class made to perform semi-automated tracking of spots in TrackMate &
@@ -180,9 +183,9 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 			 */
 
 			// We want to segment in the next frame.
-			final int frame = spot.getFeature( Spot.FRAME ).intValue() + 1;
-			final double radius = spot.getFeature( Spot.RADIUS );
-			final double quality = spot.getFeature( Spot.QUALITY );
+			final int frame = spot.getFeature( TrackmateConstants.FRAME ).intValue() + 1;
+			final double radius = spot.getFeature( TrackmateConstants.RADIUS );
+			final double quality = spot.getFeature( TrackmateConstants.QUALITY );
 
 			/*
 			 * Get neighborhood
@@ -224,7 +227,7 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 			 * Translate spots
 			 */
 
-			final String[] features = new String[] { Spot.POSITION_X, Spot.POSITION_Y, Spot.POSITION_Z };
+			final String[] features = new String[] { TrackmateConstants.POSITION_X, TrackmateConstants.POSITION_Y, TrackmateConstants.POSITION_Z };
 			for ( final Spot ds : detectedSpots )
 			{
 				final double[] coords = new double[ 3 ];
@@ -238,7 +241,7 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 			}
 
 			// Sort then by ascending quality
-			final TreeSet< Spot > sortedSpots = new TreeSet< Spot >( Spot.featureComparator( Spot.QUALITY ) );
+			final TreeSet< Spot > sortedSpots = new TreeSet< Spot >( FeatureHolderUtils.featureComparator( TrackmateConstants.QUALITY ) );
 			sortedSpots.addAll( detectedSpots );
 
 			boolean found = false;
@@ -246,7 +249,7 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 			for ( final Iterator< Spot > iterator = sortedSpots.descendingIterator(); iterator.hasNext(); )
 			{
 				final Spot candidate = iterator.next();
-				if ( candidate.squareDistanceTo( spot ) < distanceTolerance * distanceTolerance * radius * radius )
+				if ( TrackableObjectUtils.squareDistanceTo( candidate, spot ) < distanceTolerance * distanceTolerance * radius * radius )
 				{
 					found = true;
 					target = candidate;
@@ -271,14 +274,14 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 			 */
 
 			// spot
-			target.putFeature( Spot.RADIUS, radius );
-			target.putFeature( Spot.POSITION_T, Double.valueOf( frame ) );
+			target.putFeature( TrackmateConstants.RADIUS, radius );
+			target.putFeature( TrackmateConstants.POSITION_T, Double.valueOf( frame ) );
 
 			model.beginUpdate();
 			try
 			{
 				model.addSpotTo( target, frame );
-				model.addEdge( spot, target, spot.squareDistanceTo( target ) );
+				model.addEdge( spot, target, TrackableObjectUtils.squareDistanceTo( spot,  target ) );
 			}
 			finally
 			{
