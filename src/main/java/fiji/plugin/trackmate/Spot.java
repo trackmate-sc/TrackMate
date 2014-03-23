@@ -271,7 +271,7 @@ public class Spot extends AbstractTrackableObject implements FeatureHolder {
 
 	@Override
 	public double getDoublePosition(final int d) {
-		assert (d > 0 && d < n);
+		assert (d >= 0 && d < n);
 		return getFeature(TrackmateConstants.POSITION_FEATURES[d]);
 	}
 
