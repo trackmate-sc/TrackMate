@@ -28,6 +28,7 @@ import javax.swing.SwingUtilities;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 
+import fiji.plugin.trackmate.FeatureHolderUtils;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
@@ -203,7 +204,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 		final Spot clickLocation = makeSpot( imp, displayer, getImageCanvas( e ), e.getPoint() );
 		final int frame = displayer.imp.getFrame() - 1;
 		final Model model = displayer.getModel();
-		Spot target = model.getSpots().getSpotAt( clickLocation, frame, true );
+		Spot target = model.getSpots().getObjectAt( clickLocation, frame, true );
 		Spot editedSpot = editedSpots.get( imp );
 
 		final SelectionModel selectionModel = displayer.getSelectionModel();
@@ -611,7 +612,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 						if ( spotSelection.size() == 1 )
 						{
 							final Spot source = spotSelection.iterator().next();
-							if ( newSpot.diffTo( source, TrackmateConstants.FRAME ) > 0 )
+							if ( FeatureHolderUtils.diffTo( newSpot,  source, TrackmateConstants.FRAME ) > 0 )
 							{
 								model.beginUpdate();
 								try
@@ -650,7 +651,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 
 				final int frame = displayer.imp.getFrame() - 1;
 				final Spot clickLocation = makeSpot( imp, displayer, canvas, null );
-				final Spot target = model.getSpots().getSpotAt( clickLocation, frame, true );
+				final Spot target = model.getSpots().getObjectAt( clickLocation, frame, true );
 				if ( null == target )
 				{
 					e.consume(); // Consume it anyway, so that we are not
@@ -688,7 +689,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 			{
 				final int frame = displayer.imp.getFrame() - 1;
 				final Spot clickLocation = makeSpot( imp, displayer, canvas, null );
-				quickEditedSpot = model.getSpots().getSpotAt( clickLocation, frame, true );
+				quickEditedSpot = model.getSpots().getObjectAt( clickLocation, frame, true );
 				if ( null == quickEditedSpot ) { return; // un-consumed event
 				}
 			}
@@ -708,7 +709,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 
 				final int frame = displayer.imp.getFrame() - 1;
 				final Spot clickLocation = makeSpot( imp, displayer, canvas, null );
-				final Spot target = model.getSpots().getSpotAt( clickLocation, frame, true );
+				final Spot target = model.getSpots().getObjectAt( clickLocation, frame, true );
 				if ( null == target ) { return; }
 
 				int factor;
