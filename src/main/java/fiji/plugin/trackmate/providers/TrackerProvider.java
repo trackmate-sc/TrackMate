@@ -1,14 +1,14 @@
 package fiji.plugin.trackmate.providers;
 
-import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
+import fiji.plugin.trackmate.tracking.factories.TrackerFactory;
 
-public class TrackerProvider extends AbstractProvider< SpotTrackerFactory >
+public class TrackerProvider extends AbstractProvider< TrackerFactory >
 {
 
 
 	public TrackerProvider()
 	{
-		super( SpotTrackerFactory.class );
+		super( TrackerFactory.class );
 	}
 
 	public static void main( final String[] args )
