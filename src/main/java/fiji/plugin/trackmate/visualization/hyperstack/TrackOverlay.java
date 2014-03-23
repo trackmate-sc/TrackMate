@@ -2,6 +2,7 @@ package fiji.plugin.trackmate.visualization.hyperstack;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackmateConstants;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.TrackColorGenerator;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
@@ -152,8 +153,8 @@ public class TrackOverlay extends Roi
 					source = model.getTrackModel().getEdgeSource( edge );
 					target = model.getTrackModel().getEdgeTarget( edge );
 
-					final double zs = source.getFeature( Spot.POSITION_Z ).doubleValue();
-					final double zt = target.getFeature( Spot.POSITION_Z ).doubleValue();
+					final double zs = source.getFeature( TrackmateConstants.POSITION_Z ).doubleValue();
+					final double zt = target.getFeature( TrackmateConstants.POSITION_Z ).doubleValue();
 					if ( doLimitDrawingDepth && Math.abs( zs - zslice ) > drawingDepth && Math.abs( zt - zslice ) > drawingDepth )
 						continue;
 
@@ -185,14 +186,14 @@ public class TrackOverlay extends Roi
 						continue;
 
 					source = model.getTrackModel().getEdgeSource( edge );
-					final int sourceFrame = source.getFeature( Spot.FRAME ).intValue();
+					final int sourceFrame = source.getFeature( TrackmateConstants.FRAME ).intValue();
 					if ( sourceFrame < minT || sourceFrame >= maxT )
 						continue;
 
 					target = model.getTrackModel().getEdgeTarget( edge );
 
-					final double zs = source.getFeature( Spot.POSITION_Z ).doubleValue();
-					final double zt = target.getFeature( Spot.POSITION_Z ).doubleValue();
+					final double zs = source.getFeature( TrackmateConstants.POSITION_Z ).doubleValue();
+					final double zt = target.getFeature( TrackmateConstants.POSITION_Z ).doubleValue();
 					if ( doLimitDrawingDepth && Math.abs( zs - zslice ) > drawingDepth && Math.abs( zt - zslice ) > drawingDepth )
 						continue;
 
@@ -224,7 +225,7 @@ public class TrackOverlay extends Roi
 						continue;
 
 					source = model.getTrackModel().getEdgeSource( edge );
-					final int sourceFrame = source.getFeature( Spot.FRAME ).intValue();
+					final int sourceFrame = source.getFeature( TrackmateConstants.FRAME ).intValue();
 					if ( sourceFrame < minT || sourceFrame >= maxT )
 						continue;
 
@@ -255,10 +256,10 @@ public class TrackOverlay extends Roi
 	protected void drawEdge( final Graphics2D g2d, final Spot source, final Spot target, final int xcorner, final int ycorner, final double magnification, final float transparency )
 	{
 		// Find x & y in physical coordinates
-		final double x0i = source.getFeature( Spot.POSITION_X );
-		final double y0i = source.getFeature( Spot.POSITION_Y );
-		final double x1i = target.getFeature( Spot.POSITION_X );
-		final double y1i = target.getFeature( Spot.POSITION_Y );
+		final double x0i = source.getFeature( TrackmateConstants.POSITION_X );
+		final double y0i = source.getFeature( TrackmateConstants.POSITION_Y );
+		final double x1i = target.getFeature( TrackmateConstants.POSITION_X );
+		final double y1i = target.getFeature( TrackmateConstants.POSITION_Y );
 		// In pixel units
 		final double x0p = x0i / calibration[ 0 ] + 0.5f;
 		final double y0p = y0i / calibration[ 1 ] + 0.5f;
@@ -283,10 +284,10 @@ public class TrackOverlay extends Roi
 	protected void drawEdge( final Graphics2D g2d, final Spot source, final Spot target, final int xcorner, final int ycorner, final double magnification )
 	{
 		// Find x & y in physical coordinates
-		final double x0i = source.getFeature( Spot.POSITION_X );
-		final double y0i = source.getFeature( Spot.POSITION_Y );
-		final double x1i = target.getFeature( Spot.POSITION_X );
-		final double y1i = target.getFeature( Spot.POSITION_Y );
+		final double x0i = source.getFeature( TrackmateConstants.POSITION_X );
+		final double y0i = source.getFeature( TrackmateConstants.POSITION_Y );
+		final double x1i = target.getFeature( TrackmateConstants.POSITION_X );
+		final double y1i = target.getFeature( TrackmateConstants.POSITION_Y );
 		// In pixel units
 		final double x0p = x0i / calibration[ 0 ] + 0.5f;
 		final double y0p = y0i / calibration[ 1 ] + 0.5f;
