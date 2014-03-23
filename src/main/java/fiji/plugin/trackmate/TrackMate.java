@@ -22,7 +22,9 @@ import fiji.plugin.trackmate.features.EdgeFeatureCalculator;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.SpotFeatureCalculator;
 import fiji.plugin.trackmate.features.TrackFeatureCalculator;
-import fiji.plugin.trackmate.tracking.SpotTracker;
+import fiji.plugin.trackmate.tracking.spot.DefaultSpotCollection;
+import fiji.plugin.trackmate.tracking.spot.SpotCollection;
+import fiji.plugin.trackmate.tracking.spot.SpotTracker;
 import fiji.plugin.trackmate.util.TMUtils;
 
 /**
@@ -117,7 +119,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 			prunedSpots = new ArrayList< Spot >();
 			for ( final Spot spot : spotsThisFrame )
 			{
-				if ( settings.polygon.contains( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ], spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) )
+				if ( settings.polygon.contains( spot.getFeature( TrackmateConstants.POSITION_X ) / calibration[ 0 ], spot.getFeature( TrackmateConstants.POSITION_Y ) / calibration[ 1 ] ) )
 					prunedSpots.add( spot );
 			}
 		}
@@ -369,7 +371,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 
 		final int numFrames = settings.tend - settings.tstart + 1;
 		// Final results holder, for all frames
-		final SpotCollection spots = new SpotCollection();
+		final DefaultSpotCollection spots = new DefaultSpotCollection();
 		spots.setNumThreads( numThreads );
 		// To report progress
 		final AtomicInteger spotFound = new AtomicInteger( 0 );
@@ -440,7 +442,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 									prunedSpots = new ArrayList< Spot >();
 									for ( final Spot spot : spotsThisFrame )
 									{
-										if ( settings.polygon.contains( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ], spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) )
+										if ( settings.polygon.contains( spot.getFeature( TrackmateConstants.POSITION_X ) / calibration[ 0 ], spot.getFeature( TrackmateConstants.POSITION_Y ) / calibration[ 1 ] ) )
 											prunedSpots.add( spot );
 									}
 								}
@@ -453,7 +455,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 								{
 									// FRAME will be set upon adding to
 									// SpotCollection.
-									spot.putFeature( Spot.POSITION_T, frame * settings.dt );
+									spot.putFeature( TrackmateConstants.POSITION_T, frame * settings.dt );
 								}
 								// Store final results for this frame
 								spots.put( frame, prunedSpots );
@@ -561,12 +563,12 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 		logger.log( "Starting initial filtering process.\n" );
 
 		final Double initialSpotFilterValue = settings.initialSpotFilterValue;
-		final FeatureFilter featureFilter = new FeatureFilter( Spot.QUALITY, initialSpotFilterValue, true );
+		final FeatureFilter featureFilter = new FeatureFilter( TrackmateConstants.QUALITY, initialSpotFilterValue, true );
 
 		SpotCollection spots = model.getSpots();
 		spots.filter( featureFilter );
 
-		spots = spots.crop();
+		spots = (SpotCollection) spots.crop();
 
 		model.setSpots( spots, true ); // Forget about the previous one
 		return true;
