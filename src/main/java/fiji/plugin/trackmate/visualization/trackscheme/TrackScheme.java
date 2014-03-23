@@ -43,6 +43,7 @@ import fiji.plugin.trackmate.SelectionChangeEvent;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.tracking.TrackableObjectUtils;
 import fiji.plugin.trackmate.visualization.AbstractTrackMateModelView;
 import fiji.plugin.trackmate.visualization.TrackColorGenerator;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
@@ -403,7 +404,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 					System.out.println( "[TrackScheme] #addEdgeManually: adding edge between source " + source + " at frame " + source.getFeature( TrackmateConstants.FRAME ).intValue() + " and target " + target + " at frame " + target.getFeature( TrackmateConstants.FRAME ).intValue() );
 				}
 
-				if ( TrackmateConstants.frameComparator.compare( source, target ) == 0 )
+				if ( TrackableObjectUtils.frameComparator().compare( source, target ) == 0 )
 				{
 					// Prevent adding edges between spots that belong to the
 					// same frame
@@ -421,7 +422,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 
 					// Put them right in order: since we use a oriented graph,
 					// we want the source spot to precede in time.
-					if ( TrackmateConstants.frameComparator.compare( source, target ) > 0 )
+					if ( TrackableObjectUtils.frameComparator().compare( source, target ) > 0 )
 					{
 
 						if ( DEBUG )
@@ -1198,7 +1199,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 		final HashMap< Integer, HashSet< Spot >> spotPerFrame = new HashMap< Integer, HashSet< Spot >>( frames.size() );
 		for ( final Integer frame : frames )
 		{
-			spotPerFrame.put( frame, new HashSet< Spot >( model.getSpots().getNSpots( frame, true ) ) ); // max
+			spotPerFrame.put( frame, new HashSet< Spot >( model.getSpots().getNObjects( frame, true ) ) ); // max
 																											// size
 		}
 		for ( final Integer trackID : model.getTrackModel().trackIDs( true ) )
