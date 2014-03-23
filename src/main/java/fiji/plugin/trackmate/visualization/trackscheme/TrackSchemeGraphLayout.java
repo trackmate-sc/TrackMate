@@ -23,6 +23,7 @@ import com.mxgraph.model.mxICell;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackmateConstants;
 import fiji.plugin.trackmate.graph.GraphUtils;
 import fiji.plugin.trackmate.graph.SortedDepthFirstIterator;
 import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
@@ -137,7 +138,7 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark {
 				 * to deal with such a case, we revert to the old, slow scheme.
 				 */
 
-				boolean isTree = GraphUtils.isTree(track, neighborCache);
+				boolean isTree = GraphUtils.<Spot>isTree(track, neighborCache);
 
 				if (isTree) {
 
@@ -160,7 +161,7 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark {
 						lonelyCells.remove(cell);
 
 						// Determine in what row to put the spot
-						int frame = spot.getFeature(Spot.FRAME).intValue();
+						int frame = spot.getFeature(TrackmateConstants.FRAME).intValue();
 
 						// Cell size, position and style
 						int cellPos = columns[frame] + cumulativeBranchWidth.get(spot)/2;
@@ -203,7 +204,7 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark {
 						lonelyCells.remove(cell);
 
 						// Determine in what column to put the spot
-						int frame = spot.getFeature(Spot.FRAME).intValue();
+						int frame = spot.getFeature(TrackmateConstants.FRAME).intValue();
 
 						int freeColumn = columns[frame] + 1;
 
@@ -279,7 +280,7 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark {
 			// Deal with lonely cells
 			for (mxCell cell : lonelyCells) {
 				Spot spot = graph.getSpotFor(cell);
-				int frame = spot.getFeature(Spot.FRAME).intValue();
+				int frame = spot.getFeature(TrackmateConstants.FRAME).intValue();
 				setCellGeometry(cell, frame, ++columns[frame]);
 			}
 

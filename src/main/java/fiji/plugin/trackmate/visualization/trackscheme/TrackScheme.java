@@ -42,6 +42,7 @@ import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.SelectionChangeEvent;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackmateConstants;
 import fiji.plugin.trackmate.visualization.AbstractTrackMateModelView;
 import fiji.plugin.trackmate.visualization.TrackColorGenerator;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
@@ -285,7 +286,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 				// launched. So we create one on the fly now.
 				final int row = getUnlaidSpotColumn();
 				cell = insertSpotInGraph( spot, row );
-				final int frame = spot.getFeature( Spot.FRAME ).intValue();
+				final int frame = spot.getFeature( TrackmateConstants.FRAME ).intValue();
 				rowLengths.put( frame, row + 1 );
 			}
 
@@ -321,7 +322,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 		// Instantiate JGraphX cell
 		cellAdded = graph.addJGraphTVertex( spot );
 		// Position it
-		final int row = spot.getFeature( Spot.FRAME ).intValue() + 1;
+		final int row = spot.getFeature( TrackmateConstants.FRAME ).intValue() + 1;
 		final double x = ( targetColumn - 1 ) * X_COLUMN_SIZE - DEFAULT_CELL_WIDTH / 2;
 		final double y = ( 0.5 + row ) * Y_COLUMN_SIZE - DEFAULT_CELL_HEIGHT / 2;
 		final mxGeometry geometry = new mxGeometry( x, y, DEFAULT_CELL_WIDTH, DEFAULT_CELL_HEIGHT );
@@ -355,7 +356,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 			final Set< Spot > trackSpots = model.getTrackModel().trackSpots( trackIndex );
 			for ( final Spot trackSpot : trackSpots )
 			{
-				final int frame = trackSpot.getFeature( Spot.FRAME ).intValue();
+				final int frame = trackSpot.getFeature( TrackmateConstants.FRAME ).intValue();
 				final int column = Math.max( targetColumn, getNextFreeColumn( frame ) );
 				insertSpotInGraph( trackSpot, column );
 				rowLengths.put( frame, column );
@@ -399,10 +400,10 @@ public class TrackScheme extends AbstractTrackMateModelView
 				if ( DEBUG )
 				{
 					System.out.println( "[TrackScheme] #addEdgeManually: edge is between 2 spots belonging to the same frame. Removing it." );
-					System.out.println( "[TrackScheme] #addEdgeManually: adding edge between source " + source + " at frame " + source.getFeature( Spot.FRAME ).intValue() + " and target " + target + " at frame " + target.getFeature( Spot.FRAME ).intValue() );
+					System.out.println( "[TrackScheme] #addEdgeManually: adding edge between source " + source + " at frame " + source.getFeature( TrackmateConstants.FRAME ).intValue() + " and target " + target + " at frame " + target.getFeature( TrackmateConstants.FRAME ).intValue() );
 				}
 
-				if ( Spot.frameComparator.compare( source, target ) == 0 )
+				if ( TrackmateConstants.frameComparator.compare( source, target ) == 0 )
 				{
 					// Prevent adding edges between spots that belong to the
 					// same frame
@@ -420,7 +421,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 
 					// Put them right in order: since we use a oriented graph,
 					// we want the source spot to precede in time.
-					if ( Spot.frameComparator.compare( source, target ) > 0 )
+					if ( TrackmateConstants.frameComparator.compare( source, target ) > 0 )
 					{
 
 						if ( DEBUG )
@@ -585,7 +586,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 					if ( event.getSpotFlag( spot ) == ModelChangeEvent.FLAG_SPOT_ADDED )
 					{
 
-						final int frame = spot.getFeature( Spot.FRAME ).intValue();
+						final int frame = spot.getFeature( TrackmateConstants.FRAME ).intValue();
 						// Put in the graph
 						final int column = Math.max( targetColumn, getNextFreeColumn( frame ) );
 						final mxICell newCell = insertSpotInGraph( spot, column ); // move
@@ -652,7 +653,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 								final mxCell sourceCell = graph.getCellFor( source );
 								if ( sourceCell == null )
 								{
-									final int frame = source.getFeature( Spot.FRAME ).intValue();
+									final int frame = source.getFeature( TrackmateConstants.FRAME ).intValue();
 									// Put in the graph
 									final int targetColumn = getUnlaidSpotColumn();
 									final int column = Math.max( targetColumn, getNextFreeColumn( frame ) );
@@ -668,7 +669,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 								final mxCell targetCell = graph.getCellFor( target );
 								if ( targetCell == null )
 								{
-									final int frame = target.getFeature( Spot.FRAME ).intValue();
+									final int frame = target.getFeature( TrackmateConstants.FRAME ).intValue();
 									// Put in the graph
 									final int targetColumn = getUnlaidSpotColumn();
 									final int column = Math.max( targetColumn, getNextFreeColumn( frame ) );
@@ -1204,7 +1205,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 		{
 			for ( final Spot spot : model.getTrackModel().trackSpots( trackID ) )
 			{
-				final int frame = spot.getFeature( Spot.FRAME ).intValue();
+				final int frame = spot.getFeature( TrackmateConstants.FRAME ).intValue();
 				spotPerFrame.get( frame ).add( spot );
 			}
 		}
@@ -1302,7 +1303,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 		final TreeMap< Integer, Spot > spotsInTime = new TreeMap< Integer, Spot >();
 		for ( final Spot spot : selectionModel.getSpotSelection() )
 		{
-			spotsInTime.put( spot.getFeature( Spot.FRAME ).intValue(), spot );
+			spotsInTime.put( spot.getFeature( TrackmateConstants.FRAME ).intValue(), spot );
 		}
 
 		// Find adequate column
@@ -1346,7 +1347,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 				mxICell previousCell = graph.getCellFor( previousSpot );
 				if ( null == previousCell )
 				{
-					final int frame = previousSpot.getFeature( Spot.FRAME ).intValue();
+					final int frame = previousSpot.getFeature( TrackmateConstants.FRAME ).intValue();
 					final int column = Math.max( targetColumn, getNextFreeColumn( frame ) );
 					rowLengths.put( frame, column );
 					previousCell = insertSpotInGraph( previousSpot, column );

@@ -19,7 +19,7 @@ import com.mxgraph.util.mxEventObject;
 import com.mxgraph.util.mxEventSource.mxIEventListener;
 import com.mxgraph.view.mxGraph;
 
-import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackmateConstants;
 
 public class TrackSchemeActions {
 
@@ -130,7 +130,7 @@ public class TrackSchemeActions {
 				if (!vertices.isEmpty()) {
 					int minFrame = Integer.MAX_VALUE;
 					for (final mxCell mxCell : vertices) {
-						final int frame = graph.getSpotFor(mxCell).getFeature(Spot.FRAME).intValue();
+						final int frame = graph.getSpotFor(mxCell).getFeature(TrackmateConstants.FRAME).intValue();
 						if (frame < minFrame) {
 							minFrame = frame;
 							cell = mxCell;
@@ -142,7 +142,7 @@ public class TrackSchemeActions {
 						int minFrame = Integer.MAX_VALUE;
 						for (final mxCell mxCell : edges) {
 							final mxICell target = mxCell.getTarget();
-							final int frame = graph.getSpotFor(target).getFeature(Spot.FRAME).intValue();
+							final int frame = graph.getSpotFor(target).getFeature(TrackmateConstants.FRAME).intValue();
 							if (frame < minFrame) {
 								minFrame = frame;
 								cell = mxCell;
@@ -184,7 +184,7 @@ public class TrackSchemeActions {
 				if (!vertices.isEmpty()) {
 					int maxFrame = Integer.MIN_VALUE;
 					for (final mxCell mxCell : vertices) {
-						final int frame = graph.getSpotFor(mxCell).getFeature(Spot.FRAME).intValue();
+						final int frame = graph.getSpotFor(mxCell).getFeature(TrackmateConstants.FRAME).intValue();
 						if (frame > maxFrame) {
 							maxFrame = frame;
 							cell = mxCell;
@@ -196,7 +196,7 @@ public class TrackSchemeActions {
 						int maxFrame = Integer.MIN_VALUE;
 						for (final mxCell mxCell : edges) {
 							final mxICell target = mxCell.getTarget();
-							final int frame = graph.getSpotFor(target).getFeature(Spot.FRAME).intValue();
+							final int frame = graph.getSpotFor(target).getFeature(TrackmateConstants.FRAME).intValue();
 							if (frame > maxFrame) {
 								maxFrame = frame;
 								cell = mxCell;
