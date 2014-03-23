@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tracking.kdtree;
+package fiji.plugin.trackmate.tracking.trackers;
 
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
@@ -20,30 +20,30 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
 import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.tracking.TrackableObject;
+import fiji.plugin.trackmate.tracking.TrackableObjectCollection;
+import fiji.plugin.trackmate.tracking.kdtree.FlagNode;
+import fiji.plugin.trackmate.tracking.kdtree.NearestNeighborFlagSearchOnKDTree;
 
-public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm	implements SpotTracker {
+public class NearestNeighborTracker<T extends TrackableObject> extends MultiThreadedBenchmarkAlgorithm	implements Tracker<T> {
 
 	/*
 	 * FIELDS
 	 */
 
-	protected final SpotCollection spots;
+	protected final TrackableObjectCollection<T> spots;
 
 	protected final Map< String, Object > settings;
 
 	protected Logger logger = Logger.VOID_LOGGER;
 
-	protected SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph;
+	protected SimpleWeightedGraph< T, DefaultWeightedEdge > graph;
 
 	/*
 	 * CONSTRUCTOR
 	 */
 
-	public NearestNeighborTracker( final SpotCollection spots, final Map< String, Object > settings )
+	public NearestNeighborTracker( final TrackableObjectCollection<T> spots, final Map< String, Object > settings )
 	{
 		this.spots = spots;
 		this.settings = settings;
@@ -91,37 +91,37 @@ public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm	impl
 						final int sourceFrame = i;
 						final int targetFrame = frames.higher(i);
 
-						final int nTargetSpots = spots.getNSpots(targetFrame, true);
+						final int nTargetSpots = spots.getNObjects(targetFrame, true);
 						if (nTargetSpots < 1) {
 							continue;
 						}
 
 						final List<RealPoint> targetCoords = new ArrayList<RealPoint>(nTargetSpots);
-						final List<FlagNode<Spot>> targetNodes = new ArrayList<FlagNode<Spot>>(nTargetSpots);
-						final Iterator<Spot> targetIt = spots.iterator(targetFrame, true);
+						final List<FlagNode<T>> targetNodes = new ArrayList<FlagNode<T>>(nTargetSpots);
+						final Iterator<T> targetIt = spots.iterator(targetFrame, true);
 						while (targetIt.hasNext()) {
 							final double[] coords = new double[3];
-							final Spot spot = targetIt.next();
-							TMUtils.localize(spot, coords);
+							final T spot = targetIt.next();
+							spot.localize(coords);
 							targetCoords.add(new RealPoint(coords));
-							targetNodes.add(new FlagNode<Spot>(spot));
+							targetNodes.add(new FlagNode<T>(spot));
 						}
 
 
-						final KDTree<FlagNode<Spot>> tree = new KDTree<FlagNode<Spot>>(targetNodes, targetCoords);
-						final NearestNeighborFlagSearchOnKDTree<Spot> search = new NearestNeighborFlagSearchOnKDTree<Spot>(tree);
+						final KDTree<FlagNode<T>> tree = new KDTree<FlagNode<T>>(targetNodes, targetCoords);
+						final NearestNeighborFlagSearchOnKDTree<T> search = new NearestNeighborFlagSearchOnKDTree<T>(tree);
 
 						// For each spot in the source frame, find its nearest neighbor in the target frame
-						final Iterator<Spot> sourceIt = spots.iterator(sourceFrame, true);
+						final Iterator<T> sourceIt = spots.iterator(sourceFrame, true);
 						while (sourceIt.hasNext()) {
-							final Spot source = sourceIt.next();
+							final T source = sourceIt.next();
 							final double[] coords = new double[3];
-							TMUtils.localize(source, coords);
+							source.localize(coords);
 							final RealPoint sourceCoords = new RealPoint(coords);
 							search.search(sourceCoords);
 
 							final double squareDist = search.getSquareDistance();
-							final FlagNode<Spot> targetNode = search.getSampler().get();
+							final FlagNode<T> targetNode = search.getSampler().get();
 
 							if (squareDist > maxDistSquare) {
 								// The closest we could find is too far. We skip this source spot and do not create a link
@@ -161,13 +161,13 @@ public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm	impl
 	}
 
 	@Override
-	public SimpleWeightedGraph<Spot, DefaultWeightedEdge> getResult() {
+	public SimpleWeightedGraph<T, DefaultWeightedEdge> getResult() {
 		return graph;
 	}
 
 	public void reset() {
-		graph = new SimpleWeightedGraph<Spot, DefaultWeightedEdge>(DefaultWeightedEdge.class);
-		final Iterator<Spot> it = spots.iterator(true);
+		graph = new SimpleWeightedGraph<T, DefaultWeightedEdge>(DefaultWeightedEdge.class);
+		final Iterator<T> it = spots.iterator(true);
 		while (it.hasNext()) {
 			graph.addVertex(it.next());
 		}
