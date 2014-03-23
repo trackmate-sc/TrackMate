@@ -42,7 +42,7 @@ import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.panels.tracker.LAPTrackerSettingsPanel;
 import fiji.plugin.trackmate.tracking.LAPTracker;
 import fiji.plugin.trackmate.tracking.LAPUtils;
-import fiji.plugin.trackmate.tracking.spot.DefaultSpotCollection;
+import fiji.plugin.trackmate.tracking.spot.SpotCollection;
 import fiji.plugin.trackmate.tracking.spot.SpotCostCalculator;
 import fiji.plugin.trackmate.tracking.trackers.Tracker;
 
@@ -82,7 +82,7 @@ public class LAPTrackerFactory implements TrackerFactory {
 	}
 
 	@Override
-	public Tracker<Spot> create(final DefaultSpotCollection spots,
+	public Tracker<Spot> create(final SpotCollection spots,
 			final Map<String, Object> settings) {
 		return new LAPTracker<Spot>(new SpotCostCalculator(), spots, settings);
 	}

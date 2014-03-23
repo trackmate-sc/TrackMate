@@ -11,7 +11,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.tracking.DumbTracker;
-import fiji.plugin.trackmate.tracking.spot.DefaultSpotCollection;
+import fiji.plugin.trackmate.tracking.spot.SpotCollection;
 import fiji.plugin.trackmate.tracking.trackers.Tracker;
 
 @Plugin(type = SpotTrackerFactory.class, visible = false)
@@ -41,7 +41,7 @@ public class DumbTrackerFactory implements TrackerFactory {
 	}
 
 	@Override
-	public Tracker<Spot> create(final DefaultSpotCollection spots,
+	public Tracker<Spot> create(final SpotCollection spots,
 			final Map<String, Object> settings) {
 		return new DumbTracker(spots);
 	}

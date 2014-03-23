@@ -6,7 +6,7 @@ import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.tracking.FastLAPTracker;
-import fiji.plugin.trackmate.tracking.spot.DefaultSpotCollection;
+import fiji.plugin.trackmate.tracking.spot.SpotCollection;
 import fiji.plugin.trackmate.tracking.spot.SpotCostCalculator;
 import fiji.plugin.trackmate.tracking.trackers.Tracker;
 
@@ -51,7 +51,7 @@ public class FastLAPTrackerFactory extends
 	}
 
 	@Override
-	public Tracker<Spot> create(final DefaultSpotCollection spots,
+	public Tracker<Spot> create(final SpotCollection spots,
 			final Map<String, Object> settings) {
 		return new FastLAPTracker<Spot>(new SpotCostCalculator(), spots, settings);
 	}

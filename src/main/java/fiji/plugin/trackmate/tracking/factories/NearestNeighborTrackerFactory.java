@@ -17,7 +17,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.panels.tracker.NearestNeighborTrackerSettingsPanel;
-import fiji.plugin.trackmate.tracking.spot.DefaultSpotCollection;
+import fiji.plugin.trackmate.tracking.spot.SpotCollection;
 import fiji.plugin.trackmate.tracking.trackers.NearestNeighborTracker;
 import fiji.plugin.trackmate.tracking.trackers.Tracker;
 
@@ -65,7 +65,7 @@ public class NearestNeighborTrackerFactory implements TrackerFactory {
 	}
 
 	@Override
-	public Tracker<Spot> create(final DefaultSpotCollection spots,
+	public Tracker<Spot> create(final SpotCollection spots,
 			final Map<String, Object> settings) {
 		return new NearestNeighborTracker<Spot>(spots, settings);
 	}
