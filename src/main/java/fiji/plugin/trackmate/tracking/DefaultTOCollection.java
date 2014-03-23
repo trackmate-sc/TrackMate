@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedMap;
@@ -860,45 +859,4 @@ public class DefaultTOCollection<T extends TrackableObject>
 		}
 	};
 
-	/*
-	 * STATIC METHODS
-	 */
-
-	/**
-	 * Creates a new {@link SpotCollection} containing only the specified spots.
-	 * Their frame origin is retrieved from their {@link Spot#FRAME} feature, so
-	 * it must be set properly for all spots. All the spots of the new
-	 * collection have the same visibility that the one they carry.
-	 * 
-	 * @param spots
-	 *            the spot collection to build from.
-	 * @return a new {@link SpotCollection} instance.
-	 */
-	public DefaultTOCollection(final Iterable<T> objects) {
-		final DefaultTOCollection<T> sc = new DefaultTOCollection<T>();
-		for (final T obj : objects) {
-			final int frame = obj.frame();
-			Set<T> fc = sc.content.get(frame);
-			if (null == fc) {
-				fc = new HashSet<T>();
-				sc.content.put(frame, fc);
-			}
-			fc.add(obj);
-		}
-	}
-
-	/**
-	 * Creates a new {@link SpotCollection} from a copy of the specified map of
-	 * sets. The spots added this way are completely untouched. In particular,
-	 * their {@link #VISIBLITY} feature is left untouched, which makes this
-	 * method suitable to de-serialize a {@link SpotCollection}.
-	 * 
-	 * @param source
-	 *            the map to buidl the spot collection from.
-	 * @return a new SpotCollection.
-	 */
-	public DefaultTOCollection(final Map<Integer, Set<T>> source) {
-		final DefaultTOCollection<T> sc = new DefaultTOCollection<T>();
-		sc.content = new ConcurrentSkipListMap<Integer, Set<T>>(source);
-	}
 }
