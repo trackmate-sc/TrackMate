@@ -21,9 +21,9 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.providers.TrackerProvider;
-import fiji.plugin.trackmate.tracking.LAPTracker;
 import fiji.plugin.trackmate.tracking.LAPUtils;
 import fiji.plugin.trackmate.tracking.spot.SpotCostCalculator;
+import fiji.plugin.trackmate.tracking.trackers.LAPTracker;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 

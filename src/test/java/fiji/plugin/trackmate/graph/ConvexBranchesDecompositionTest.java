@@ -20,11 +20,11 @@ import fiji.plugin.trackmate.FeatureHolderUtils;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackmateConstants;
-import fiji.plugin.trackmate.tracking.FastLAPTracker;
 import fiji.plugin.trackmate.tracking.TrackerKeys;
 import fiji.plugin.trackmate.tracking.factories.FastLAPTrackerFactory;
 import fiji.plugin.trackmate.tracking.spot.DefaultSpotCollection;
 import fiji.plugin.trackmate.tracking.spot.SpotCostCalculator;
+import fiji.plugin.trackmate.tracking.trackers.FastLAPTracker;
 
 public class ConvexBranchesDecompositionTest
 {

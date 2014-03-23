@@ -9,9 +9,9 @@ import java.util.Map;
 
 import Jama.Matrix;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.tracking.LAPTracker;
 import fiji.plugin.trackmate.tracking.LAPUtils;
 import fiji.plugin.trackmate.tracking.TrackableObject;
+import fiji.plugin.trackmate.tracking.trackers.LAPTracker;
 
 /**
  * <p>

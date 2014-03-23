@@ -7,7 +7,7 @@ import java.util.Map;
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
 import net.imglib2.algorithm.OutputAlgorithm;
 import Jama.Matrix;
-import fiji.plugin.trackmate.tracking.LAPTracker;
+import fiji.plugin.trackmate.tracking.trackers.LAPTracker;
 
 /**
  * Contains the mutually shared fields and private functions used by the two 

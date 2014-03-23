@@ -16,9 +16,9 @@ import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
 import net.imglib2.algorithm.OutputAlgorithm;
 import Jama.Matrix;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.tracking.LAPTracker;
 import fiji.plugin.trackmate.tracking.LAPUtils;
 import fiji.plugin.trackmate.tracking.TrackableObject;
+import fiji.plugin.trackmate.tracking.trackers.LAPTracker;
 
 /**
  * <p>Gap closing cost function used with {@link LAPTracker}.
