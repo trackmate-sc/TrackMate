@@ -760,12 +760,12 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 				{
 
 					final SpotCollection spots = model.getSpots();
-					if ( spots.getNSpots( currentFrame - 1, true ) == 0 )
+					if ( spots.getNObjects( currentFrame - 1, true ) == 0 )
 					{
 						e.consume();
 						break;
 					}
-					final HashSet< Spot > copiedSpots = new HashSet< Spot >( spots.getNSpots( currentFrame - 1, true ) );
+					final HashSet< Spot > copiedSpots = new HashSet< Spot >( spots.getNObjects( currentFrame - 1, true ) );
 					final HashSet< String > featuresKey = new HashSet< String >( spots.iterator( currentFrame - 1, true ).next().getFeatures().keySet() );
 					featuresKey.remove( TrackmateConstants.POSITION_T ); // Deal with time
 															// separately
