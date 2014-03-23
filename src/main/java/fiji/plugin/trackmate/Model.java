@@ -43,7 +43,7 @@ public class Model
 
 	// TRACKS
 
-	private final TrackModel trackModel;
+	private final TrackModel<Spot> trackModel;
 
 	// SPOTS
 
@@ -125,9 +125,9 @@ public class Model
 	 *
 	 * @return a new instance of {@link TrackModel}.
 	 */
-	protected TrackModel createTrackModel()
+	protected TrackModel<Spot> createTrackModel()
 	{
-		return new TrackModel();
+		return new TrackModel<Spot>();
 	}
 
 	/**
@@ -304,7 +304,7 @@ public class Model
 	/**
 	 * Returns the {@link TrackModel} that manages the tracks for this model.
 	 */
-	public TrackModel getTrackModel()
+	public TrackModel<Spot> getTrackModel()
 	{
 		return trackModel;
 	}
