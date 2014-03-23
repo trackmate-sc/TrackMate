@@ -473,7 +473,7 @@ public class TrackDisplayNode extends ContentNode implements TimelapseListener {
 			y += spot.getFeature(TrackmateConstants.POSITION_Y);
 			z += spot.getFeature(TrackmateConstants.POSITION_Z);
 		}
-		final int nspot = model.getSpots().getNSpots(true);
+		final int nspot = model.getSpots().getNObjects(true);
 		x /= nspot;
 		y /= nspot;
 		z /= nspot;
