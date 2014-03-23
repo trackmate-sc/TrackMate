@@ -40,10 +40,10 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.panels.tracker.LAPTrackerSettingsPanel;
+import fiji.plugin.trackmate.tracking.LAPTracker;
 import fiji.plugin.trackmate.tracking.LAPUtils;
 import fiji.plugin.trackmate.tracking.spot.DefaultSpotCollection;
 import fiji.plugin.trackmate.tracking.spot.SpotCostCalculator;
-import fiji.plugin.trackmate.tracking.trackers.LAPTracker;
 import fiji.plugin.trackmate.tracking.trackers.Tracker;
 
 @Plugin(type = TrackerFactory.class, visible = false)

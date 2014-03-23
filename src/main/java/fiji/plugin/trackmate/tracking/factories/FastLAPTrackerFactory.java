@@ -5,9 +5,9 @@ import java.util.Map;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.tracking.FastLAPTracker;
 import fiji.plugin.trackmate.tracking.spot.DefaultSpotCollection;
 import fiji.plugin.trackmate.tracking.spot.SpotCostCalculator;
-import fiji.plugin.trackmate.tracking.trackers.FastLAPTracker;
 import fiji.plugin.trackmate.tracking.trackers.Tracker;
 
 @Plugin(type = TrackerFactory.class)

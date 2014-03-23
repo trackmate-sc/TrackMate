@@ -10,8 +10,8 @@ import org.scijava.plugin.Plugin;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
+import fiji.plugin.trackmate.tracking.DumbTracker;
 import fiji.plugin.trackmate.tracking.spot.DefaultSpotCollection;
-import fiji.plugin.trackmate.tracking.trackers.DumbTracker;
 import fiji.plugin.trackmate.tracking.trackers.Tracker;
 
 @Plugin(type = SpotTrackerFactory.class, visible = false)

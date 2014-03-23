@@ -17,8 +17,8 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.panels.tracker.NearestNeighborTrackerSettingsPanel;
-import fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTracker;
 import fiji.plugin.trackmate.tracking.spot.DefaultSpotCollection;
+import fiji.plugin.trackmate.tracking.trackers.NearestNeighborTracker;
 import fiji.plugin.trackmate.tracking.trackers.Tracker;
 
 @Plugin(type = SpotTrackerFactory.class)
