@@ -17,6 +17,7 @@ import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.ModelChangeListener;
+import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 
@@ -98,7 +99,7 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 
 	private void refreshColorMap()
 	{
-		final TrackModel trackModel = model.getTrackModel();
+		final TrackModel<Spot> trackModel = model.getTrackModel();
 		final Set< Integer > trackIDs = trackModel.trackIDs( true );
 
 		if ( null == feature )
@@ -221,7 +222,7 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 	@Override
 	public void autoMinMax()
 	{
-		final TrackModel trackModel = model.getTrackModel();
+		final TrackModel<Spot> trackModel = model.getTrackModel();
 		final Set< Integer > trackIDs = trackModel.trackIDs( true );
 		final FeatureModel fm = model.getFeatureModel();
 
