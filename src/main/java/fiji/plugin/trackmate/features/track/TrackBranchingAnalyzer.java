@@ -175,6 +175,14 @@ public class TrackBranchingAnalyzer implements TrackAnalyzer, MultiThreaded
 						}
 
 						int ngaps = 0;
+						for (final DefaultWeightedEdge edge : model
+								.getTrackModel().trackEdges(trackID)) {
+							final Spot source = model.getTrackModel()
+									.getEdgeSource(edge);
+							final Spot target = model.getTrackModel()
+									.getEdgeTarget(edge);
+							if (Math.abs(TrackableObjectUtils.frameDiff(target,
+									source)) > 1) {
 						for ( final DefaultWeightedEdge edge : model.getTrackModel().trackEdges( trackID ) )
 						{
 							final Spot source = model.getTrackModel().getEdgeSource( edge );
