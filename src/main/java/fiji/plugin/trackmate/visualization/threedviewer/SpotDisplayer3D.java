@@ -439,7 +439,7 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 
 		for ( final int frame : spots.keySet() )
 		{
-			if ( spots.getNSpots( frame, false ) == 0 )
+			if ( spots.getNObjects( frame, false ) == 0 )
 			{
 				continue; // Do not create content for empty frames
 			}
@@ -454,8 +454,8 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 
 	private void buildFrameContent( final SpotCollection spots, final Integer frame, final float radiusRatio, final FeatureColorGenerator< Spot > spotColorGenerator )
 	{
-		final Map< Spot, Point4d > centers = new HashMap< Spot, Point4d >( spots.getNSpots( frame, false ) );
-		final Map< Spot, Color4f > colors = new HashMap< Spot, Color4f >( spots.getNSpots( frame, false ) );
+		final Map< Spot, Point4d > centers = new HashMap< Spot, Point4d >( spots.getNObjects( frame, false ) );
+		final Map< Spot, Color4f > colors = new HashMap< Spot, Color4f >( spots.getNObjects( frame, false ) );
 		final double[] coords = new double[ 3 ];
 
 		for ( final Iterator< Spot > it = spots.iterator( frame, false ); it.hasNext(); )
@@ -482,7 +482,7 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 		}
 
 		// Set visibility:
-		if ( spots.getNSpots( frame, true ) > 0 )
+		if ( spots.getNObjects( frame, true ) > 0 )
 		{
 			blobGroup.setVisible( spots.iterable( frame, true ) );
 		}
