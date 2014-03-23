@@ -545,7 +545,7 @@ public class Model
 	 */
 	public synchronized Spot removeSpot( final Spot spotToRemove )
 	{
-		final int fromFrame = spotToRemove.getFeature( Spot.FRAME ).intValue();
+		final int fromFrame = spotToRemove.getFeature( TrackmateConstants.FRAME ).intValue();
 		if ( spots.remove( spotToRemove, fromFrame ) )
 		{
 			spotsRemoved.add( spotToRemove ); // TRANSACTION
