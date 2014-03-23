@@ -8,7 +8,6 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.tracking.TrackableObject;
 
 /**
  * This interface should be used when creating algorithms for linking objects across
