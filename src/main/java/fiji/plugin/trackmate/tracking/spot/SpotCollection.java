@@ -3,6 +3,7 @@ package fiji.plugin.trackmate.tracking.spot;
 import java.util.Collection;
 import java.util.Map;
 
+import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.tracking.TrackableObjectCollection;
 
