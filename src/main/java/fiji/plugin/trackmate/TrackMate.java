@@ -24,7 +24,7 @@ import fiji.plugin.trackmate.features.SpotFeatureCalculator;
 import fiji.plugin.trackmate.features.TrackFeatureCalculator;
 import fiji.plugin.trackmate.tracking.spot.DefaultSpotCollection;
 import fiji.plugin.trackmate.tracking.spot.SpotCollection;
-import fiji.plugin.trackmate.tracking.spot.SpotTracker;
+import fiji.plugin.trackmate.tracking.trackers.Tracker;
 import fiji.plugin.trackmate.util.TMUtils;
 
 /**
@@ -251,7 +251,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 	{
 		final Logger logger = model.getLogger();
 		logger.log( "Starting tracking process.\n" );
-		final SpotTracker tracker = settings.trackerFactory.create( model.getSpots(), settings.trackerSettings );
+		final Tracker<Spot> tracker = settings.trackerFactory.create( model.getSpots(), settings.trackerSettings );
 		tracker.setLogger( logger );
 		if ( tracker.checkInput() && tracker.process() )
 		{
