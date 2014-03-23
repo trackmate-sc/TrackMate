@@ -15,7 +15,7 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.io.TmXmlReader;
-import fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTracker;
+import fiji.plugin.trackmate.tracking.trackers.NearestNeighborTracker;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 
