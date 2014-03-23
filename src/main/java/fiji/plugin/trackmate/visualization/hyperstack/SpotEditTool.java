@@ -35,6 +35,7 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackmateConstants;
 import fiji.plugin.trackmate.detection.semiauto.SemiAutoTracker;
+import fiji.plugin.trackmate.tracking.TrackableObjectUtils;
 import fiji.plugin.trackmate.tracking.spot.SpotCollection;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.tool.AbstractTool;
@@ -273,7 +274,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 						radius = FALL_BACK_RADIUS;
 					}
 				}
-				if ( null == target || target.squareDistanceTo( clickLocation ) > radius * radius )
+				if ( null == target || TrackableObjectUtils.squareDistanceTo( target, clickLocation ) > radius * radius )
 				{
 					// Create a new spot if not inside one
 					target = clickLocation;
@@ -347,7 +348,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 					if ( spotSelection.size() == 1 )
 					{
 						final Spot source = spotSelection.iterator().next();
-						if ( editedSpot.diffTo( source, TrackmateConstants.FRAME ) > 0 )
+						if ( FeatureHolderUtils.diffTo( editedSpot, source, TrackmateConstants.FRAME ) > 0 )
 						{
 							model.beginUpdate();
 							try
