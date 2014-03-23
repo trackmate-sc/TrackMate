@@ -3,6 +3,7 @@ package fiji.plugin.trackmate.interactivetests;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackmateConstants;
 import fiji.plugin.trackmate.detection.LogDetector;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.SpotColorGenerator;
@@ -118,7 +119,7 @@ public class DetectorTestDrive
 		}
 
 		final SpotColorGenerator colorer = new SpotColorGenerator( model );
-		colorer.setFeature( Spot.QUALITY );
+		colorer.setFeature( TrackmateConstants.QUALITY );
 		viewer.setDisplaySettings( TrackMateModelView.KEY_SPOT_COLORING, colorer );
 		viewer.refresh();
 

@@ -16,9 +16,11 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.TrackmateConstants;
 import fiji.plugin.trackmate.features.SpotFeatureGrapher;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.io.TmXmlReader;
+import fiji.plugin.trackmate.tracking.spot.DefaultSpotCollection;
 import fiji.plugin.trackmate.tracking.spot.SpotCollection;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
@@ -34,14 +36,14 @@ public class SpotFeatureGrapher_TestDrive
 		final Model model = reader.getModel();
 
 		final HashSet< String > Y = new HashSet< String >( 1 );
-		Y.add( Spot.POSITION_T );
-		final List< Spot > spots = new ArrayList< Spot >( model.getSpots().getNSpots( true ) );
+		Y.add( TrackmateConstants.POSITION_T );
+		final List< Spot > spots = new ArrayList< Spot >( model.getSpots().getNObjects( true ) );
 		for ( final Iterator< Spot > it = model.getSpots().iterator( true ); it.hasNext(); )
 		{
 			spots.add( it.next() );
 		}
 
-		final SpotFeatureGrapher grapher = new SpotFeatureGrapher( Spot.POSITION_X, Y, spots, model );
+		final SpotFeatureGrapher grapher = new SpotFeatureGrapher( TrackmateConstants.POSITION_X, Y, spots, model );
 		grapher.render();
 
 		final TrackIndexAnalyzer analyzer = new TrackIndexAnalyzer();
@@ -61,21 +63,21 @@ public class SpotFeatureGrapher_TestDrive
 
 		final int N_SPOTS = 50;
 		final List< Spot > spots = new ArrayList< Spot >( N_SPOTS );
-		final SpotCollection sc = new SpotCollection();
+		final SpotCollection sc = new DefaultSpotCollection();
 		for ( int i = 0; i < N_SPOTS; i++ )
 		{
 			final double x = 100d + 100 * i / 100. * Math.cos( i / 100. * 5 * 2 * Math.PI );
 			final double y = 100d + 100 * i / 100. * Math.sin( i / 100. * 5 * 2 * Math.PI );
 			final double z = 0d;
 			final Spot spot = new Spot( x, y, z, 2d, -1d );
-			spot.putFeature( Spot.POSITION_T, Double.valueOf( i ) );
+			spot.putFeature( TrackmateConstants.POSITION_T, Double.valueOf( i ) );
 
 			spots.add( spot );
 
 			final List< Spot > ts = new ArrayList< Spot >( 1 );
 			ts.add( spot );
 			sc.put( i, ts );
-			spot.putFeature( SpotCollection.VISIBLITY, SpotCollection.ONE );
+			spot.putFeature( TrackmateConstants.VISIBILITY, TrackmateConstants.ONE );
 		}
 
 		final Model model = new Model();

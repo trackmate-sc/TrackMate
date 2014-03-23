@@ -16,12 +16,15 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 import org.junit.Before;
 import org.junit.Test;
 
+import fiji.plugin.trackmate.FeatureHolderUtils;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackmateConstants;
 import fiji.plugin.trackmate.tracking.FastLAPTracker;
 import fiji.plugin.trackmate.tracking.TrackerKeys;
 import fiji.plugin.trackmate.tracking.factories.FastLAPTrackerFactory;
-import fiji.plugin.trackmate.tracking.spot.SpotCollection;
+import fiji.plugin.trackmate.tracking.spot.DefaultSpotCollection;
+import fiji.plugin.trackmate.tracking.spot.SpotCostCalculator;
 
 public class ConvexBranchesDecompositionTest
 {
@@ -34,14 +37,14 @@ public class ConvexBranchesDecompositionTest
 
 	private Model model;
 
-	private ConvexBranchesDecomposition splitter;
+	private ConvexBranchesDecomposition<Spot> splitter;
 
 	@Before
 	public void setUp() throws Exception
 	{
 		// Create spots
 		final Random ran = new Random();
-		final SpotCollection sc = new SpotCollection();
+		final DefaultSpotCollection sc = new DefaultSpotCollection();
 		for ( int t = 0; t < N_TP; t++ )
 		{
 			for ( int i = 0; i < N_SPOTS; i++ )
@@ -62,7 +65,7 @@ public class ConvexBranchesDecompositionTest
 		settings.put( TrackerKeys.KEY_ALLOW_TRACK_MERGING, true );
 		settings.put( TrackerKeys.KEY_ALLOW_TRACK_SPLITTING, true );
 
-		final FastLAPTracker tracker = new FastLAPTracker( sc, settings );
+		final FastLAPTracker<Spot> tracker = new FastLAPTracker<Spot>(new SpotCostCalculator(), sc, settings );
 		if ( !tracker.checkInput() || !tracker.process() )
 		{
 			fail( tracker.getErrorMessage() );
@@ -75,7 +78,7 @@ public class ConvexBranchesDecompositionTest
 	@Test
 	public void testBehavior()
 	{
-		splitter = new ConvexBranchesDecomposition( model, false, true );
+		splitter = new ConvexBranchesDecomposition<Spot>( model.getTrackModel(), false, true );
 		if ( !splitter.checkInput() || !splitter.process() )
 		{
 			fail( splitter.getErrorMessage() );
@@ -87,7 +90,7 @@ public class ConvexBranchesDecompositionTest
 	@Test
 	public void testBehaviorForbidMiddleLinks()
 	{
-		splitter = new ConvexBranchesDecomposition( model, true, true );
+		splitter = new ConvexBranchesDecomposition<Spot>( model.getTrackModel(), true, true );
 		if ( !splitter.checkInput() || !splitter.process() )
 		{
 			fail( splitter.getErrorMessage() );
@@ -152,7 +155,7 @@ public class ConvexBranchesDecompositionTest
 			while ( it.hasNext() )
 			{
 				final Spot spot = it.next();
-				if ( spot.diffTo( previous, Spot.FRAME ) != 1d )
+				if ( FeatureHolderUtils.diffTo( spot, previous, TrackmateConstants.FRAME ) != 1d )
 				{
 					fail( "Spots " + spot + " and " + previous + " are not separated by exactly one frame." );
 				}

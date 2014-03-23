@@ -15,6 +15,7 @@ import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.util.Util;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackmateConstants;
 import fiji.plugin.trackmate.detection.DownsampleLogDetector;
 import fiji.plugin.trackmate.detection.LogDetector;
 import fiji.plugin.trackmate.util.SpotNeighborhood;
@@ -64,7 +65,7 @@ public class LogDetectorTestDrive
 		for ( int i = 0; i < N_BLOBS; i++ )
 		{
 			final Spot tmpSpot = new Spot( centers.get( i )[ 0 ], centers.get( i )[ 1 ], centers.get( i )[ 2 ], radiuses[ i ], -1d );
-			tmpSpot.putFeature( Spot.RADIUS, radiuses[ i ] );
+			tmpSpot.putFeature( TrackmateConstants.RADIUS, radiuses[ i ] );
 			final SpotNeighborhood< UnsignedByteType > sphere = new SpotNeighborhood< UnsignedByteType >( tmpSpot, img );
 			for ( final UnsignedByteType pixel : sphere )
 			{
@@ -100,7 +101,7 @@ public class LogDetectorTestDrive
 		final ArrayList< Spot > spot_list = new ArrayList< Spot >( spots );
 		Spot best_spot = null;
 		final double[] coords = new double[ 3 ];
-		final String[] posFeats = Spot.POSITION_FEATURES;
+		final String[] posFeats = TrackmateConstants.POSITION_FEATURES;
 
 		while ( !spot_list.isEmpty() && !centers.isEmpty() )
 		{

@@ -18,8 +18,11 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 import org.junit.Test;
 
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackmateConstants;
 import fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory;
+import fiji.plugin.trackmate.tracking.spot.DefaultSpotCollection;
 import fiji.plugin.trackmate.tracking.spot.SpotCollection;
+import fiji.plugin.trackmate.tracking.spot.SpotCostCalculator;
 
 public class LAPTrackerTest
 {
@@ -37,7 +40,7 @@ public class LAPTrackerTest
 		// later testing
 		final List< Spot > group1 = new ArrayList< Spot >( nFrames );
 		final List< Spot > group2 = new ArrayList< Spot >( nFrames );
-		final SpotCollection spotCollection = new SpotCollection();
+		final SpotCollection spotCollection = new DefaultSpotCollection();
 		for ( int i = 0; i < nFrames; i++ )
 		{
 			final double[] coords1 = new double[] { 1d, 1d * i, 0 };
@@ -45,8 +48,8 @@ public class LAPTrackerTest
 
 			final Spot spot1 = new Spot( coords1[ 0 ], coords1[ 1 ], coords1[ 2 ], 1d, -1d );
 			final Spot spot2 = new Spot( coords2[ 0 ], coords2[ 1 ], coords2[ 2 ], 1d, -1d );
-			spot1.putFeature( Spot.POSITION_T, Double.valueOf( i ) );
-			spot2.putFeature( Spot.POSITION_T, Double.valueOf( i ) );
+			spot1.putFeature( TrackmateConstants.POSITION_T, Double.valueOf( i ) );
+			spot2.putFeature( TrackmateConstants.POSITION_T, Double.valueOf( i ) );
 			spot1.setName( "G1T" + i );
 			spot2.setName( "G2T" + i );
 
@@ -72,7 +75,7 @@ public class LAPTrackerTest
 		trackerSettings.put( KEY_ALLOW_GAP_CLOSING, false );
 
 		// Instantiate tracker
-		final LAPTracker tracker = new LAPTracker( spotCollection, trackerSettings );
+		final LAPTracker<Spot> tracker = new LAPTracker<Spot>( new SpotCostCalculator(), spotCollection, trackerSettings );
 
 		// Check process
 		if ( !tracker.checkInput() || !tracker.process() )
@@ -99,7 +102,7 @@ public class LAPTrackerTest
 		// later testing
 		final List< Spot > group1 = new ArrayList< Spot >( nFrames );
 		final List< Spot > group2 = new ArrayList< Spot >( nFrames );
-		final SpotCollection spotCollection = new SpotCollection();
+		final SpotCollection spotCollection = new DefaultSpotCollection();
 		for ( int i = 0; i < nFrames; i++ )
 		{
 			final double[] coords1 = new double[] { ( i % 2 ), 1d * i, 0 };
@@ -107,8 +110,8 @@ public class LAPTrackerTest
 
 			final Spot spot1 = new Spot( coords1[ 0 ], coords1[ 1 ], coords1[ 2 ], 1d, -1d );
 			final Spot spot2 = new Spot( coords2[ 0 ], coords2[ 1 ], coords2[ 2 ], 1d, -1d );
-			spot1.putFeature( Spot.POSITION_T, Double.valueOf( i ) );
-			spot2.putFeature( Spot.POSITION_T, Double.valueOf( i ) );
+			spot1.putFeature( TrackmateConstants.POSITION_T, Double.valueOf( i ) );
+			spot2.putFeature( TrackmateConstants.POSITION_T, Double.valueOf( i ) );
 			spot1.setName( "G1T" + i );
 			spot2.setName( "G2T" + i );
 			// For this test, we need to put a different feature for each track
@@ -143,7 +146,7 @@ public class LAPTrackerTest
 		}
 
 		// Instantiate tracker
-		final LAPTracker tracker = new LAPTracker( spotCollection, trackerSettings );
+		final LAPTracker<Spot> tracker = new LAPTracker<Spot>( new SpotCostCalculator(), spotCollection, trackerSettings );
 
 		// Check process
 		if ( !tracker.checkInput() || !tracker.process() )

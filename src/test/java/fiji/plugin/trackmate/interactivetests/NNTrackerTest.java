@@ -13,6 +13,7 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.tracking.trackers.NearestNeighborTracker;
@@ -46,7 +47,7 @@ public class NNTrackerTest {
 		final long start = System.currentTimeMillis();
 		final Map<String, Object> settings = new HashMap<String, Object>();
 		settings.put(KEY_LINKING_MAX_DISTANCE, 15d);
-		final NearestNeighborTracker tracker = new NearestNeighborTracker( model.getSpots(), settings );
+		final NearestNeighborTracker<Spot> tracker = new NearestNeighborTracker<Spot>( model.getSpots(), settings );
 		tracker.setLogger(Logger.DEFAULT_LOGGER);
 
 		if (!tracker.checkInput())

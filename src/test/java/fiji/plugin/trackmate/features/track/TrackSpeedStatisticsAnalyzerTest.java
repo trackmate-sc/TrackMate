@@ -17,6 +17,8 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.ModelChangeListener;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.tracking.TrackableObjectUtils;
 
 public class TrackSpeedStatisticsAnalyzerTest
 {
@@ -53,7 +55,7 @@ public class TrackSpeedStatisticsAnalyzerTest
 				{
 					// We use deterministic locations
 					final Spot spot = new Spot( j * i, i, i, 1d, -1d );
-					spot.putFeature( Spot.POSITION_T, Double.valueOf( j ) );
+					spot.putFeature( TrackmateConstants.POSITION_T, Double.valueOf( j ) );
 					model.addSpotTo( spot, j );
 					track.add( spot );
 					if ( null != previous )
@@ -109,7 +111,7 @@ public class TrackSpeedStatisticsAnalyzerTest
 			{
 				// We use deterministic locations
 				final Spot spot = new Spot( j * j, 0d, 0d, 1d, -1d );
-				spot.putFeature( Spot.POSITION_T, Double.valueOf( j ) );
+				spot.putFeature( TrackmateConstants.POSITION_T, Double.valueOf( j ) );
 				model2.addSpotTo( spot, j );
 				track.add( spot );
 				if ( null != previous )
@@ -179,9 +181,9 @@ public class TrackSpeedStatisticsAnalyzerTest
 		try
 		{
 			final Spot spot1 = model.addSpotTo( new Spot( 0d, 0d, 0d, 1d, -1d ), 0 );
-			spot1.putFeature( Spot.POSITION_T, 0d );
+			spot1.putFeature( TrackmateConstants.POSITION_T, 0d );
 			final Spot spot2 = model.addSpotTo( new Spot( 0d, 0d, 0d, 1d, -1d ), 1 );
-			spot2.putFeature( Spot.POSITION_T, 1d );
+			spot2.putFeature( TrackmateConstants.POSITION_T, 1d );
 			model.addEdge( spot1, spot2, 1 );
 
 		}
@@ -232,7 +234,7 @@ public class TrackSpeedStatisticsAnalyzerTest
 		// New change: remove the first spot on the first track - the new track
 		// emerging should be re-analyzed
 		final Integer firstKey = oldKeys.iterator().next();
-		final TreeSet< Spot > sortedTrack = new TreeSet< Spot >( Spot.frameComparator );
+		final TreeSet< Spot > sortedTrack = new TreeSet< Spot >( TrackableObjectUtils.frameComparator() );
 		sortedTrack.addAll( model.getTrackModel().trackSpots( firstKey ) );
 		final Iterator< Spot > it = sortedTrack.iterator();
 		final Spot firstSpot = it.next();
@@ -290,7 +292,7 @@ public class TrackSpeedStatisticsAnalyzerTest
 		// New change: we displace the last spot of first track, making the edge
 		// faster
 		final Integer firstKey = oldKeys.iterator().next();
-		final TreeSet< Spot > sortedTrack = new TreeSet< Spot >( Spot.frameComparator );
+		final TreeSet< Spot > sortedTrack = new TreeSet< Spot >( TrackableObjectUtils.frameComparator() );
 		sortedTrack.addAll( model.getTrackModel().trackSpots( firstKey ) );
 		final Iterator< Spot > it = sortedTrack.descendingIterator();
 		final Spot lastSpot = it.next();
@@ -299,7 +301,7 @@ public class TrackSpeedStatisticsAnalyzerTest
 		model.beginUpdate();
 		try
 		{
-			lastSpot.putFeature( Spot.POSITION_X, 2 * lastSpot.getFeature( Spot.POSITION_X ) );
+			lastSpot.putFeature( TrackmateConstants.POSITION_X, 2 * lastSpot.getFeature( TrackmateConstants.POSITION_X ) );
 			model.updateFeatures( lastSpot );
 		}
 		finally
@@ -319,7 +321,7 @@ public class TrackSpeedStatisticsAnalyzerTest
 		// Track must be faster now
 		assertTrue( expectedVmean.get( firstKey ).doubleValue() < model.getFeatureModel().getTrackFeature( newKey, TrackSpeedStatisticsAnalyzer.TRACK_MEAN_SPEED ).doubleValue() );
 		// max speed is the one on this edge
-		final double maxSpeed = lastSpot.getFeature( Spot.POSITION_X ).doubleValue() - penultimateSpot.getFeature( Spot.POSITION_X ).doubleValue();
+		final double maxSpeed = lastSpot.getFeature( TrackmateConstants.POSITION_X ).doubleValue() - penultimateSpot.getFeature( TrackmateConstants.POSITION_X ).doubleValue();
 		assertEquals( maxSpeed, model.getFeatureModel().getTrackFeature( newKey, TrackSpeedStatisticsAnalyzer.TRACK_MAX_SPEED ).doubleValue(), Double.MIN_VALUE );
 	}
 

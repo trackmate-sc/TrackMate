@@ -22,7 +22,7 @@ public class TrackModelTest
 	@Test
 	public void testBuildingTracks()
 	{
-		final TrackModel model = new TrackModel();
+		final TrackModel<Spot> model = new TrackModel<Spot>();
 		for ( int i = 0; i < N_TRACKS; i++ )
 		{
 			Spot previous = null;
@@ -53,7 +53,7 @@ public class TrackModelTest
 	public void testConnectingTracks()
 	{
 		// Build segments
-		final TrackModel model = new TrackModel();
+		final TrackModel<Spot> model = new TrackModel<Spot>();
 		final List< Spot > trackEnds = new ArrayList< Spot >();
 		final List< Spot > trackStarts = new ArrayList< Spot >();
 		for ( int i = 0; i < N_TRACKS; i++ )
@@ -97,7 +97,7 @@ public class TrackModelTest
 	public void testBreakingTracksBySpots()
 	{
 		// Build 1 long track
-		final TrackModel model = new TrackModel();
+		final TrackModel<Spot> model = new TrackModel<Spot>();
 		final List< Spot > trackBreaks = new ArrayList< Spot >();
 		Spot previous = null;
 		for ( int i = 0; i < N_TRACKS; i++ )
@@ -135,7 +135,7 @@ public class TrackModelTest
 	public void testBreakingTracksByEdges()
 	{
 		// Build 1 long track
-		final TrackModel model = new TrackModel();
+		final TrackModel<Spot> model = new TrackModel<Spot>();
 		final List< DefaultWeightedEdge > trackBreaks = new ArrayList< DefaultWeightedEdge >();
 		Spot previous = new Spot( 0d, 0d, 0d, 1d, -1d );
 		model.addSpot( previous );
@@ -171,7 +171,7 @@ public class TrackModelTest
 	@Test
 	public void testVisibility()
 	{
-		final TrackModel model = new TrackModel();
+		final TrackModel<Spot> model = new TrackModel<Spot>();
 		for ( int i = 0; i < N_TRACKS; i++ )
 		{
 			Spot previous = null;
@@ -218,7 +218,7 @@ public class TrackModelTest
 	@Test
 	public void testVisibilityMerge()
 	{
-		final TrackModel model = new TrackModel();
+		final TrackModel<Spot> model = new TrackModel<Spot>();
 		for ( int i = 0; i < 2; i++ )
 		{
 			Spot previous = null;

@@ -11,6 +11,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.graph.GraphUtils;
 import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
+import fiji.plugin.trackmate.tracking.TrackableObjectUtils;
 
 public class Graph_Test
 {
@@ -29,8 +30,8 @@ public class Graph_Test
 
 	private static void pickLeavesOfOneTrack( final Model model )
 	{
-		final TimeDirectedNeighborIndex cache = model.getTrackModel().getDirectedNeighborIndex();
-		final TreeSet< Spot > spots = new TreeSet< Spot >( Spot.frameComparator );
+		final TimeDirectedNeighborIndex<Spot> cache = model.getTrackModel().getDirectedNeighborIndex();
+		final TreeSet< Spot > spots = new TreeSet< Spot >( TrackableObjectUtils.frameComparator() );
 		spots.addAll( model.getTrackModel().vertexSet() );
 		final Spot first = spots.first();
 		final GraphIterator< Spot, DefaultWeightedEdge > iterator = model.getTrackModel().getDepthFirstIterator( first, true );
@@ -60,7 +61,7 @@ public class Graph_Test
 
 	private static void countOverallLeaves( final Model model )
 	{
-		final TimeDirectedNeighborIndex cache = model.getTrackModel().getDirectedNeighborIndex();
+		final TimeDirectedNeighborIndex<Spot> cache = model.getTrackModel().getDirectedNeighborIndex();
 		int nleaves = 0;
 		final Set< Spot > spots = model.getTrackModel().vertexSet();
 		for ( final Spot spot : spots )
