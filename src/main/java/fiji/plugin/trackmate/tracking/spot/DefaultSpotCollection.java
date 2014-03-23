@@ -348,7 +348,8 @@ public class DefaultSpotCollection extends DefaultTOCollection<Spot> implements
 	public static SpotCollection fromCollection(final Iterable<Spot> spots) {
 		final DefaultSpotCollection sc = new DefaultSpotCollection();
 		for (final Spot spot : spots) {
-			final int frame = spot.getFeature(TrackmateConstants.FRAME).intValue();
+			final int frame = spot.getFeature(TrackmateConstants.FRAME)
+					.intValue();
 			Set<Spot> fc = sc.content.get(frame);
 			if (null == fc) {
 				fc = new HashSet<Spot>();
