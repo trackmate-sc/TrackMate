@@ -56,7 +56,8 @@ public class DefaultSpotCollection extends DefaultTOCollection<Spot> implements
 				@Override
 				public void run() {
 					final Set<Spot> fc = content.get(frame);
-					final Set<Spot> nfc = new HashSet<Spot>(getNObjects(frame, true));
+					final Set<Spot> nfc = new HashSet<Spot>(getNObjects(frame,
+							true));
 
 					for (final Spot object : fc) {
 						if (object.isVisible()) {
