@@ -318,6 +318,16 @@ public class DefaultSpotCollection extends DefaultTOCollection<Spot> implements
 		return values;
 	}
 
+	/**
+	 * Creates a new {@link SpotCollection} containing only the specified spots.
+	 * Their frame origin is retrieved from their {@link Spot#FRAME} feature, so
+	 * it must be set properly for all spots. All the spots of the new
+	 * collection have the same visibility that the one they carry.
+	 * 
+	 * @param spots
+	 *            the spot collection to build from.
+	 * @return a new {@link SpotCollection} instance.
+	 */
 	public static SpotCollection fromCollection(final Iterable<Spot> spots) {
 		final DefaultSpotCollection sc = new DefaultSpotCollection();
 		for (final Spot spot : spots) {
@@ -333,6 +343,16 @@ public class DefaultSpotCollection extends DefaultTOCollection<Spot> implements
 		return sc;
 	}
 
+	/**
+	 * Creates a new {@link SpotCollection} from a copy of the specified map of
+	 * sets. The spots added this way are completely untouched. In particular,
+	 * their {@link #VISIBLITY} feature is left untouched, which makes this
+	 * method suitable to de-serialize a {@link SpotCollection}.
+	 * 
+	 * @param source
+	 *            the map to buidl the spot collection from.
+	 * @return a new SpotCollection.
+	 */
 	public static SpotCollection fromMap(final Map<Integer, Set<Spot>> source) {
 		final DefaultSpotCollection sc = new DefaultSpotCollection();
 		sc.content = new ConcurrentSkipListMap<Integer, Set<Spot>>(source);
