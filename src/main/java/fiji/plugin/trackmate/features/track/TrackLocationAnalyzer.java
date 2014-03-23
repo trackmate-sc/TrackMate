@@ -20,6 +20,7 @@ import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackmateConstants;
 
 @Plugin( type = TrackAnalyzer.class )
 public class TrackLocationAnalyzer implements TrackAnalyzer, MultiThreaded, Benchmark
@@ -117,9 +118,9 @@ public class TrackLocationAnalyzer implements TrackAnalyzer, MultiThreaded, Benc
 
 						for ( final Spot spot : track )
 						{
-							x += spot.getFeature( Spot.POSITION_X );
-							y += spot.getFeature( Spot.POSITION_Y );
-							z += spot.getFeature( Spot.POSITION_Z );
+							x += spot.getFeature( TrackmateConstants.POSITION_X );
+							y += spot.getFeature( TrackmateConstants.POSITION_Y );
+							z += spot.getFeature( TrackmateConstants.POSITION_Z );
 						}
 						final int nspots = track.size();
 						x /= nspots;

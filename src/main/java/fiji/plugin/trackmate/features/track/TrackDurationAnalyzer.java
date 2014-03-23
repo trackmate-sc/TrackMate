@@ -19,6 +19,8 @@ import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.tracking.TrackableObjectUtils;
 
 @Plugin( type = TrackAnalyzer.class )
 public class TrackDurationAnalyzer implements TrackAnalyzer, MultiThreaded
@@ -117,7 +119,7 @@ public class TrackDurationAnalyzer implements TrackAnalyzer, MultiThreaded
 						Spot endSpot = null;
 						for ( final Spot spot : track )
 						{
-							t = spot.getFeature( Spot.POSITION_T );
+							t = spot.getFeature( TrackmateConstants.POSITION_T );
 							if ( t < minT )
 							{
 								minT = t;
@@ -133,7 +135,7 @@ public class TrackDurationAnalyzer implements TrackAnalyzer, MultiThreaded
 						fm.putTrackFeature( trackID, TRACK_DURATION, ( maxT - minT ) );
 						fm.putTrackFeature( trackID, TRACK_START, minT );
 						fm.putTrackFeature( trackID, TRACK_STOP, maxT );
-						fm.putTrackFeature( trackID, TRACK_DISPLACEMENT, Math.sqrt( startSpot.squareDistanceTo( endSpot ) ) );
+						fm.putTrackFeature( trackID, TRACK_DISPLACEMENT, Math.sqrt( TrackableObjectUtils.squareDistanceTo( startSpot, endSpot ) ) );
 
 					}
 				}

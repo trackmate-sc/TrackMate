@@ -18,8 +18,10 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Dimension;
+import fiji.plugin.trackmate.FeatureHolderUtils;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackmateConstants;
 
 @Plugin( type = TrackAnalyzer.class )
 public class TrackBranchingAnalyzer implements TrackAnalyzer, MultiThreaded
@@ -141,7 +143,7 @@ public class TrackBranchingAnalyzer implements TrackAnalyzer, MultiThreaded
 							int later = 0;
 							for ( final Spot neighbor : neighbors )
 							{
-								if ( spot.diffTo( neighbor, Spot.FRAME ) > 0 )
+								if ( FeatureHolderUtils.diffTo(spot, neighbor, TrackmateConstants.FRAME ) > 0 )
 								{
 									earlier++; // neighbor is before in time
 								}
@@ -177,7 +179,7 @@ public class TrackBranchingAnalyzer implements TrackAnalyzer, MultiThreaded
 						{
 							final Spot source = model.getTrackModel().getEdgeSource( edge );
 							final Spot target = model.getTrackModel().getEdgeTarget( edge );
-							if ( Math.abs( target.diffTo( source, Spot.FRAME ) ) > 1 )
+							if ( Math.abs( FeatureHolderUtils.diffTo(target, source, TrackmateConstants.FRAME ) ) > 1 )
 							{
 								ngaps++;
 							}

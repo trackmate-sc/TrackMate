@@ -15,9 +15,9 @@ import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
+import fiji.plugin.trackmate.tracking.spot.SpotCollection;
 import fiji.plugin.trackmate.util.TMUtils;
 
 /**
@@ -159,7 +159,7 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm {
 				}
 			};
 		}
-		logger.setStatus("Calculating " + toCompute.getNSpots(false) + " spots features...");
+		logger.setStatus("Calculating " + toCompute.getNObjects(false) + " spots features...");
 		logger.setProgress(0);
 
 		SimpleMultiThreading.startAndJoin(threads);

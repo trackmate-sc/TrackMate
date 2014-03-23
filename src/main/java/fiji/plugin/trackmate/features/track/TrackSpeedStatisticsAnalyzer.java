@@ -19,9 +19,12 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Dimension;
+import fiji.plugin.trackmate.FeatureHolderUtils;
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.tracking.TrackableObjectUtils;
 
 @Plugin( type = TrackAnalyzer.class )
 public class TrackSpeedStatisticsAnalyzer implements TrackAnalyzer, MultiThreaded, Benchmark
@@ -162,8 +165,8 @@ public class TrackSpeedStatisticsAnalyzer implements TrackAnalyzer, MultiThreade
 							final Spot target = model.getTrackModel().getEdgeTarget( edge );
 
 							// Edge velocity
-							final Double d2 = source.squareDistanceTo( target );
-							final Double dt = source.diffTo( target, Spot.POSITION_T );
+							final Double d2 = TrackableObjectUtils.squareDistanceTo(source,  target );
+							final Double dt = FeatureHolderUtils.diffTo(source, target, TrackmateConstants.POSITION_T );
 							if ( d2 == null || dt == null )
 								continue;
 							val = Math.sqrt( d2 ) / Math.abs( dt );

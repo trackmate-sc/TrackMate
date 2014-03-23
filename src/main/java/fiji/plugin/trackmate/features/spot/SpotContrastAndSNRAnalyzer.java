@@ -8,6 +8,7 @@ import java.util.Iterator;
 import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.RealType;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackmateConstants;
 import fiji.plugin.trackmate.util.SpotNeighborhood;
 import fiji.plugin.trackmate.util.SpotNeighborhoodCursor;
 
@@ -65,7 +66,7 @@ public class SpotContrastAndSNRAnalyzer< T extends RealType< T >> extends Indepe
 
 		SpotNeighborhood< T > neighborhood = new SpotNeighborhood< T >( spot, img );
 
-		final double radius = spot.getFeature( Spot.RADIUS );
+		final double radius = spot.getFeature( TrackmateConstants.RADIUS );
 		double radius2 = radius * radius;
 		int n_out = 0; // inner number of pixels
 		double dist2;

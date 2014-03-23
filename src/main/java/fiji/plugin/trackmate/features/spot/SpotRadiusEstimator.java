@@ -7,6 +7,7 @@ import java.util.Iterator;
 import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.RealType;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackmateConstants;
 import fiji.plugin.trackmate.util.SpotNeighborhood;
 import fiji.plugin.trackmate.util.SpotNeighborhoodCursor;
 
@@ -43,7 +44,7 @@ public class SpotRadiusEstimator< T extends RealType< T >> extends IndependentSp
 	{
 
 		// Get diameter array and radius squared
-		final double radius = spot.getFeature( Spot.RADIUS );
+		final double radius = spot.getFeature( TrackmateConstants.RADIUS );
 		final double[] diameters = prepareDiameters( radius * 2, nDiameters );
 		final double[] r2 = new double[ nDiameters ];
 		for ( int i = 0; i < r2.length; i++ )
@@ -57,7 +58,7 @@ public class SpotRadiusEstimator< T extends RealType< T >> extends IndependentSp
 
 		// A tmp spot we will use to iterate around the real spot
 		final Spot tmpSpot = new Spot( spot );
-		tmpSpot.putFeature( Spot.RADIUS, diameters[ nDiameters - 1 ] / 2 );
+		tmpSpot.putFeature( TrackmateConstants.RADIUS, diameters[ nDiameters - 1 ] / 2 );
 
 		final SpotNeighborhood< T > neighborhood = new SpotNeighborhood< T >( tmpSpot, img );
 		final SpotNeighborhoodCursor< T > cursor = neighborhood.cursor();
