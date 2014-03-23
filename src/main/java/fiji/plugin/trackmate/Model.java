@@ -9,6 +9,8 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
 import fiji.plugin.trackmate.features.FeatureFilter;
+import fiji.plugin.trackmate.tracking.spot.DefaultSpotCollection;
+import fiji.plugin.trackmate.tracking.spot.SpotCollection;
 
 /**
  * <h1>The model for the data managed by TrackMate trackmate.</h1>
@@ -46,7 +48,7 @@ public class Model
 	// SPOTS
 
 	/** The spots managed by this model. */
-	protected SpotCollection spots = new SpotCollection();
+	protected SpotCollection spots = new DefaultSpotCollection();
 
 	// TRANSACTION MODEL
 
@@ -157,15 +159,15 @@ public class Model
 		}
 		else
 		{
-			str.append( "Contains " + spots.getNSpots( false ) + " spots in total.\n" );
+			str.append( "Contains " + spots.getNObjects( false ) + " spots in total.\n" );
 		}
-		if ( spots.getNSpots( true ) == 0 )
+		if ( spots.getNObjects( true ) == 0 )
 		{
 			str.append( "No filtered spots.\n" );
 		}
 		else
 		{
-			str.append( "Contains " + spots.getNSpots( true ) + " filtered spots.\n" );
+			str.append( "Contains " + spots.getNObjects( true ) + " filtered spots.\n" );
 		}
 
 		str.append( '\n' );
