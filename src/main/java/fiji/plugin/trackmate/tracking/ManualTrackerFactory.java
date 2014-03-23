@@ -7,8 +7,9 @@ import javax.swing.ImageIcon;
 import org.jdom2.Element;
 
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
+import fiji.plugin.trackmate.tracking.spot.SpotCollection;
+import fiji.plugin.trackmate.tracking.spot.SpotTracker;
 
 public class ManualTrackerFactory implements SpotTrackerFactory
 {

@@ -4,7 +4,8 @@ import java.util.Map;
 
 import org.scijava.plugin.Plugin;
 
-import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.tracking.spot.SpotCollection;
+import fiji.plugin.trackmate.tracking.spot.SpotTracker;
 
 @Plugin( type = SpotTrackerFactory.class )
 public class FastLAPTrackerFactory extends LAPTrackerFactory

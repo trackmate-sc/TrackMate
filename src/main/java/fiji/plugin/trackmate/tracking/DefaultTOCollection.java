@@ -17,8 +17,8 @@ import java.util.concurrent.TimeUnit;
 
 import net.imglib2.algorithm.MultiThreaded;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.features.FeatureFilter;
+import fiji.plugin.trackmate.tracking.spot.SpotCollection;
 
 /**
  * A utility class that wrap the {@link SortedMap} we use to store the spots

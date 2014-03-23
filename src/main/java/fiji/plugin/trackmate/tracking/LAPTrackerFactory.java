@@ -37,9 +37,10 @@ import org.jdom2.Element;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.panels.tracker.LAPTrackerSettingsPanel;
+import fiji.plugin.trackmate.tracking.spot.SpotCollection;
+import fiji.plugin.trackmate.tracking.spot.SpotTracker;
 
 @Plugin( type = SpotTrackerFactory.class, visible = false )
 public class LAPTrackerFactory implements SpotTrackerFactory
