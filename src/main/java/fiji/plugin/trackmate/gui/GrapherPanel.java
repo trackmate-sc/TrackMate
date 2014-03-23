@@ -17,6 +17,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.TrackmateConstants;
 import fiji.plugin.trackmate.features.EdgeFeatureGrapher;
 import fiji.plugin.trackmate.features.SpotFeatureGrapher;
 import fiji.plugin.trackmate.features.TrackFeatureGrapher;
@@ -74,7 +75,7 @@ public class GrapherPanel extends ActionListenablePanel {
 		panelSpot.removeAll();
 		final Collection<String> spotFeatures = trackmate.getModel().getFeatureModel().getSpotFeatures();
 		final Map<String, String> spotFeatureNames = trackmate.getModel().getFeatureModel().getSpotFeatureNames();
-		spotFeatureSelectionPanel = new FeaturePlotSelectionPanel(Spot.POSITION_T, spotFeatures, spotFeatureNames);
+		spotFeatureSelectionPanel = new FeaturePlotSelectionPanel(TrackmateConstants.POSITION_T, spotFeatures, spotFeatureNames);
 		panelSpot.add(spotFeatureSelectionPanel);
 		spotFeatureSelectionPanel.addActionListener(new ActionListener() {
 			@Override
@@ -135,7 +136,7 @@ public class GrapherPanel extends ActionListenablePanel {
 		final String xFeature = spotFeatureSelectionPanel.getXKey();
 		final Set<String> yFeatures = spotFeatureSelectionPanel.getYKeys();
 		// Collect only the spots that are in tracks
-		final List<Spot> spots = new ArrayList<Spot>(trackmate.getModel().getSpots().getNSpots(true));
+		final List<Spot> spots = new ArrayList<Spot>(trackmate.getModel().getSpots().getNObjects(true));
 		for(final Integer trackID : trackmate.getModel().getTrackModel().trackIDs(false)) {
 			spots.addAll(trackmate.getModel().getTrackModel().trackSpots(trackID));
 		}
