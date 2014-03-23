@@ -106,7 +106,6 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
@@ -120,8 +119,10 @@ import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.providers.ViewProvider;
-import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
+import fiji.plugin.trackmate.tracking.factories.TrackerFactory;
+import fiji.plugin.trackmate.tracking.spot.DefaultSpotCollection;
+import fiji.plugin.trackmate.tracking.spot.SpotCollection;
+import fiji.plugin.trackmate.tracking.spot.SpotTracker;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewFactory;
 
@@ -677,7 +678,7 @@ public class TmXmlReader {
 			return;
 		}
 
-		final SpotTrackerFactory factory = provider.getFactory( trackerKey );
+		final TrackerFactory factory = provider.getFactory( trackerKey );
 		if ( null == factory )
 		{
 			logger.error( "The tracker identified by the key " + trackerKey + " is unknown to TrackMate.\n" );
@@ -748,7 +749,7 @@ public class TmXmlReader {
 			}
 			content.put(currentFrame, spotSet);
 		}
-		final SpotCollection allSpots = SpotCollection.fromMap(content);
+		final SpotCollection allSpots = DefaultSpotCollection.fromMap(content);
 		return allSpots;
 	}
 

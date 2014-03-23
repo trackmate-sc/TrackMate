@@ -97,7 +97,7 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.TrackmateConstants;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
@@ -107,6 +107,7 @@ import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.TrackMateGUIModel;
 import fiji.plugin.trackmate.providers.DetectorProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
+import fiji.plugin.trackmate.tracking.spot.SpotCollection;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 
 public class TmXmlWriter
@@ -505,7 +506,7 @@ public class TmXmlWriter
 
 		final Element spotCollectionElement = new Element( SPOT_COLLECTION_ELEMENT_KEY );
 		// Store total number of spots
-		spotCollectionElement.setAttribute( SPOT_COLLECTION_NSPOTS_ATTRIBUTE_NAME, "" + spots.getNSpots( false ) );
+		spotCollectionElement.setAttribute( SPOT_COLLECTION_NSPOTS_ATTRIBUTE_NAME, "" + spots.getNObjects( false ) );
 
 		for ( final int frame : spots.keySet() )
 		{
@@ -520,7 +521,7 @@ public class TmXmlWriter
 			}
 			spotCollectionElement.addContent( frameSpotsElement );
 		}
-		logger.log( "  Added " + spots.getNSpots( false ) + " spots.\n" );
+		logger.log( "  Added " + spots.getNObjects( false ) + " spots.\n" );
 		return spotCollectionElement;
 	}
 
@@ -591,7 +592,7 @@ public class TmXmlWriter
 	protected Element echoInitialSpotFilter( final Settings settings )
 	{
 		final Element itElement = new Element( INITIAL_SPOT_FILTER_ELEMENT_KEY );
-		itElement.setAttribute( FILTER_FEATURE_ATTRIBUTE_NAME, Spot.QUALITY );
+		itElement.setAttribute( FILTER_FEATURE_ATTRIBUTE_NAME, TrackmateConstants.QUALITY );
 		itElement.setAttribute( FILTER_VALUE_ATTRIBUTE_NAME, "" + settings.initialSpotFilterValue );
 		itElement.setAttribute( FILTER_ABOVE_ATTRIBUTE_NAME, "" + true );
 		logger.log( "  Added initial spot filter.\n" );
