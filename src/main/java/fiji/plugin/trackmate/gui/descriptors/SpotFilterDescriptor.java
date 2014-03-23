@@ -101,7 +101,7 @@ public class SpotFilterDescriptor implements WizardPanelDescriptor
 		trackmate.getSettings().setSpotFilters( featureFilters );
 		trackmate.execSpotFiltering( false );
 
-		final int ntotal = model.getSpots().getNSpots( false );
+		final int ntotal = model.getSpots().getNObjects( false );
 		if ( featureFilters == null || featureFilters.isEmpty() )
 		{
 			logger.log( "No feature threshold set, kept the " + ntotal + " spots.\n" );
@@ -119,7 +119,7 @@ public class SpotFilterDescriptor implements WizardPanelDescriptor
 				str += '\n';
 				logger.log( str );
 			}
-			final int nselected = model.getSpots().getNSpots( true );
+			final int nselected = model.getSpots().getNObjects( true );
 			logger.log( "Kept " + nselected + " spots out of " + ntotal + ".\n" );
 		}
 	}
