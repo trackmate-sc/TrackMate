@@ -102,7 +102,7 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 				for ( final Iterator< Spot > it = model.getSpots().iterator( frame, false ); it.hasNext(); )
 				{
 					final Spot spot = it.next();
-					final boolean visible = spot.getFeature( SpotCollection.VISIBLITY ).compareTo( SpotCollection.ZERO ) > 0;
+					final boolean visible = spot.getFeature( TrackmateConstants.VISIBILITY ).compareTo( TrackmateConstants.ZERO ) > 0;
 					frameBlobs.setVisible( spot, visible );
 				}
 			}
