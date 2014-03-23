@@ -3,7 +3,7 @@ package fiji.plugin.trackmate.visualization.hyperstack;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_SPOT_COLORING;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.tracking.spot.SpotCollection;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
@@ -81,7 +81,7 @@ public class SpotOverlay extends Roi
 		final SpotCollection spots = model.getSpots();
 
 		final boolean spotVisible = ( Boolean ) displaySettings.get( TrackMateModelView.KEY_SPOTS_VISIBLE );
-		if ( !spotVisible || spots.getNSpots( true ) == 0 ) {
+		if ( !spotVisible || spots.getNObjects( true ) == 0 ) {
 			return;
 		}
 
