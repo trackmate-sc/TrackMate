@@ -29,7 +29,7 @@ import fiji.plugin.trackmate.tracking.TrackableObject;
  * is not allowed. This must be enforced by implementations.
  * </ul>
  */
-public interface SpotTracker extends OutputAlgorithm< SimpleWeightedGraph< TrackableObject, DefaultWeightedEdge >>
+public interface SpotTracker extends OutputAlgorithm< SimpleWeightedGraph< Spot, DefaultWeightedEdge >>
 {
 	/**
 	 * Sets the {@link Logger} instance that will receive messages from this
