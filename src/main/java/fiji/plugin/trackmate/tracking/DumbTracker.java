@@ -13,8 +13,6 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackmateConstants;
-import fiji.plugin.trackmate.tracking.TrackableObjectCollection;
-import fiji.plugin.trackmate.tracking.TrackableObjectUtils;
 import fiji.plugin.trackmate.tracking.trackers.Tracker;
 
 public class DumbTracker implements Tracker<Spot> {

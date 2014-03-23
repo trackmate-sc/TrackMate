@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentMap;
 import net.imglib2.RealLocalizable;
 import net.imglib2.util.Util;
 import fiji.plugin.trackmate.tracking.AbstractTrackableObject;
+import fiji.plugin.trackmate.tracking.spot.SpotCollection;
 
 /**
  * A {@link RealLocalizable} implementation, used in TrackMate to represent a

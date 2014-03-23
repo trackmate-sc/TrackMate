@@ -9,6 +9,7 @@ import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.RealType;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.features.FeatureAnalyzer;
 import fiji.plugin.trackmate.util.SpotNeighborhood;
 import fiji.plugin.trackmate.util.SpotNeighborhoodCursor;
 

@@ -18,6 +18,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import fiji.plugin.trackmate.features.FeatureFilter;
+import fiji.plugin.trackmate.tracking.spot.SpotCollection;
 
 public class SpotCollectionTest
 {

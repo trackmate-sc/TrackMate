@@ -18,10 +18,10 @@ import org.junit.Test;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.tracking.FastLAPTracker;
-import fiji.plugin.trackmate.tracking.FastLAPTrackerFactory;
 import fiji.plugin.trackmate.tracking.TrackerKeys;
+import fiji.plugin.trackmate.tracking.factories.FastLAPTrackerFactory;
+import fiji.plugin.trackmate.tracking.spot.SpotCollection;
 
 public class ConvexBranchesDecompositionTest
 {

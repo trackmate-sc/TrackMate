@@ -1,6 +1,8 @@
 package fiji.plugin.trackmate.tracking.hungarian;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * An implementation of the classic Hungarian algorithm for the assignment problem.

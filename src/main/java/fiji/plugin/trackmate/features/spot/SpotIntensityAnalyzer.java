@@ -15,8 +15,6 @@ import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Util;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.util.SpotNeighborhood;
-//import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.SKEWNESS;
-//import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.VARIANCE;
 
 public class SpotIntensityAnalyzer< T extends RealType< T >> extends IndependentSpotFeatureAnalyzer< T >
 {
