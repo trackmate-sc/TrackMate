@@ -1,6 +1,5 @@
 package fiji.plugin.trackmate.tracking;
 
-
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.imglib2.AbstractRealLocalizable;
@@ -15,7 +14,9 @@ public abstract class AbstractTrackableObject extends AbstractRealLocalizable
 
 	protected final int id;
 
-	private final int frame;
+	private int frame;
+
+	private boolean isVisible;
 
 	public AbstractTrackableObject(final double[] position, final int id,
 			final int frame) {
@@ -36,6 +37,7 @@ public abstract class AbstractTrackableObject extends AbstractRealLocalizable
 		super(position);
 		this.id = id;
 		this.frame = frame;
+		this.isVisible = true;
 
 		synchronized (IDcounter) {
 			if (IDcounter.get() < id) {
@@ -104,4 +106,18 @@ public abstract class AbstractTrackableObject extends AbstractRealLocalizable
 		return frame;
 	}
 
+	@Override
+	public void setFrame(int frame) {
+		this.frame = frame;
+	}
+
+	@Override
+	public void setVisible(boolean visibility) {
+		this.isVisible = visibility;
+	}
+
+	@Override
+	public boolean isVisible() {
+		return isVisible;
+	}
 }
