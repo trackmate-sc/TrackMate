@@ -9,6 +9,7 @@ import org.scijava.plugin.Plugin;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.io.IcyTrackFormatWriter;
 
@@ -21,7 +22,7 @@ public class IcyTrackExporter extends AbstractTMAction
 
 	private static final String KEY = "ICY_EXPORTER";
 
-	private static final ImageIcon ICON = null;
+	private static final ImageIcon ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/icy16.png" ) );
 
 	private final TrackMateGUIController controller;
 
