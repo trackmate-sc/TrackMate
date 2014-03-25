@@ -8,7 +8,7 @@ import net.imglib2.meta.ImgPlus;
 import net.imglib2.meta.view.HyperSliceImgPlus;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.util.TMUtils;
 
 public class SpotImageUpdater {
@@ -31,7 +31,7 @@ public class SpotImageUpdater {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public String getImageString(final Spot spot) {
 
-		Integer frame = spot.getFeature(TrackmateConstants.FRAME).intValue();
+		Integer frame = spot.getFeature(TrackMateConstants.FRAME).intValue();
 		if (null == frame)
 			return "";
 		if (frame == previousFrame) {

@@ -17,7 +17,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.ModelChangeListener;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.tracking.TrackableObjectUtils;
 
 public class TrackSpeedStatisticsAnalyzerTest
@@ -55,7 +55,7 @@ public class TrackSpeedStatisticsAnalyzerTest
 				{
 					// We use deterministic locations
 					final Spot spot = new Spot( j * i, i, i, 1d, -1d );
-					spot.putFeature( TrackmateConstants.POSITION_T, Double.valueOf( j ) );
+					spot.putFeature( TrackMateConstants.POSITION_T, Double.valueOf( j ) );
 					model.addSpotTo( spot, j );
 					track.add( spot );
 					if ( null != previous )
@@ -111,7 +111,7 @@ public class TrackSpeedStatisticsAnalyzerTest
 			{
 				// We use deterministic locations
 				final Spot spot = new Spot( j * j, 0d, 0d, 1d, -1d );
-				spot.putFeature( TrackmateConstants.POSITION_T, Double.valueOf( j ) );
+				spot.putFeature( TrackMateConstants.POSITION_T, Double.valueOf( j ) );
 				model2.addSpotTo( spot, j );
 				track.add( spot );
 				if ( null != previous )
@@ -181,9 +181,9 @@ public class TrackSpeedStatisticsAnalyzerTest
 		try
 		{
 			final Spot spot1 = model.addSpotTo( new Spot( 0d, 0d, 0d, 1d, -1d ), 0 );
-			spot1.putFeature( TrackmateConstants.POSITION_T, 0d );
+			spot1.putFeature( TrackMateConstants.POSITION_T, 0d );
 			final Spot spot2 = model.addSpotTo( new Spot( 0d, 0d, 0d, 1d, -1d ), 1 );
-			spot2.putFeature( TrackmateConstants.POSITION_T, 1d );
+			spot2.putFeature( TrackMateConstants.POSITION_T, 1d );
 			model.addEdge( spot1, spot2, 1 );
 
 		}
@@ -301,7 +301,7 @@ public class TrackSpeedStatisticsAnalyzerTest
 		model.beginUpdate();
 		try
 		{
-			lastSpot.putFeature( TrackmateConstants.POSITION_X, 2 * lastSpot.getFeature( TrackmateConstants.POSITION_X ) );
+			lastSpot.putFeature( TrackMateConstants.POSITION_X, 2 * lastSpot.getFeature( TrackMateConstants.POSITION_X ) );
 			model.updateFeatures( lastSpot );
 		}
 		finally
@@ -321,7 +321,7 @@ public class TrackSpeedStatisticsAnalyzerTest
 		// Track must be faster now
 		assertTrue( expectedVmean.get( firstKey ).doubleValue() < model.getFeatureModel().getTrackFeature( newKey, TrackSpeedStatisticsAnalyzer.TRACK_MEAN_SPEED ).doubleValue() );
 		// max speed is the one on this edge
-		final double maxSpeed = lastSpot.getFeature( TrackmateConstants.POSITION_X ).doubleValue() - penultimateSpot.getFeature( TrackmateConstants.POSITION_X ).doubleValue();
+		final double maxSpeed = lastSpot.getFeature( TrackMateConstants.POSITION_X ).doubleValue() - penultimateSpot.getFeature( TrackMateConstants.POSITION_X ).doubleValue();
 		assertEquals( maxSpeed, model.getFeatureModel().getTrackFeature( newKey, TrackSpeedStatisticsAnalyzer.TRACK_MAX_SPEED ).doubleValue(), Double.MIN_VALUE );
 	}
 

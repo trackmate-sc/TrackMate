@@ -19,7 +19,7 @@ import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.TrackMateConstants;
 
 @Plugin( type = EdgeAnalyzer.class )
 public class EdgeTimeLocationAnalyzer implements EdgeAnalyzer, MultiThreaded
@@ -120,10 +120,10 @@ public class EdgeTimeLocationAnalyzer implements EdgeAnalyzer, MultiThreaded
 						final Spot source = model.getTrackModel().getEdgeSource( edge );
 						final Spot target = model.getTrackModel().getEdgeTarget( edge );
 
-						final double x = 0.5 * ( source.getFeature( TrackmateConstants.POSITION_X ) + target.getFeature( TrackmateConstants.POSITION_X ) );
-						final double y = 0.5 * ( source.getFeature( TrackmateConstants.POSITION_Y ) + target.getFeature( TrackmateConstants.POSITION_Y ) );
-						final double z = 0.5 * ( source.getFeature( TrackmateConstants.POSITION_Z ) + target.getFeature( TrackmateConstants.POSITION_Z ) );
-						final double t = 0.5 * ( source.getFeature( TrackmateConstants.POSITION_T ) + target.getFeature( TrackmateConstants.POSITION_T ) );
+						final double x = 0.5 * ( source.getFeature( TrackMateConstants.POSITION_X ) + target.getFeature( TrackMateConstants.POSITION_X ) );
+						final double y = 0.5 * ( source.getFeature( TrackMateConstants.POSITION_Y ) + target.getFeature( TrackMateConstants.POSITION_Y ) );
+						final double z = 0.5 * ( source.getFeature( TrackMateConstants.POSITION_Z ) + target.getFeature( TrackMateConstants.POSITION_Z ) );
+						final double t = 0.5 * ( source.getFeature( TrackMateConstants.POSITION_T ) + target.getFeature( TrackMateConstants.POSITION_T ) );
 
 						featureModel.putEdgeFeature( edge, TIME, t );
 						featureModel.putEdgeFeature( edge, X_LOCATION, x );

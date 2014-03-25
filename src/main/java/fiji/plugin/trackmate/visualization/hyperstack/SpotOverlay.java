@@ -3,7 +3,7 @@ package fiji.plugin.trackmate.visualization.hyperstack;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_SPOT_COLORING;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.tracking.spot.SpotCollection;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
@@ -122,7 +122,7 @@ public class SpotOverlay extends Roi
 			final Color color = colorGenerator.color( spot );
 			g2d.setColor( color );
 
-			final double z = spot.getFeature( TrackmateConstants.POSITION_Z ).doubleValue();
+			final double z = spot.getFeature( TrackMateConstants.POSITION_Z ).doubleValue();
 			if ( doLimitDrawingDepth && Math.abs( z - zslice ) > drawingDepth )
 			{
 				continue;
@@ -142,7 +142,7 @@ public class SpotOverlay extends Roi
 				{
 					continue;
 				}
-				final int sFrame = spot.getFeature( TrackmateConstants.FRAME ).intValue();
+				final int sFrame = spot.getFeature( TrackMateConstants.FRAME ).intValue();
 				if ( DEBUG )
 				{
 					System.out.println( "[SpotOverlay] For spot " + spot + " in selection, found frame " + sFrame );
@@ -164,9 +164,9 @@ public class SpotOverlay extends Roi
 		{
 			g2d.setColor( TrackMateModelView.DEFAULT_HIGHLIGHT_COLOR );
 			g2d.setStroke( new BasicStroke( 1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1.0f, new float[] { 5f, 5f }, 0 ) );
-			final double x = editingSpot.getFeature( TrackmateConstants.POSITION_X );
-			final double y = editingSpot.getFeature( TrackmateConstants.POSITION_Y );
-			final double radius = editingSpot.getFeature( TrackmateConstants.RADIUS ) / calibration[ 0 ] * mag;
+			final double x = editingSpot.getFeature( TrackMateConstants.POSITION_X );
+			final double y = editingSpot.getFeature( TrackMateConstants.POSITION_Y );
+			final double radius = editingSpot.getFeature( TrackMateConstants.RADIUS ) / calibration[ 0 ] * mag;
 			// In pixel units
 			final double xp = x / calibration[ 0 ] + 0.5d;
 			final double yp = y / calibration[ 1 ] + 0.5d;
@@ -196,12 +196,12 @@ public class SpotOverlay extends Roi
 
 	protected void drawSpot( final Graphics2D g2d, final Spot spot, final double zslice, final int xcorner, final int ycorner, final double magnification )
 	{
-		final double x = spot.getFeature( TrackmateConstants.POSITION_X );
-		final double y = spot.getFeature( TrackmateConstants.POSITION_Y );
-		final double z = spot.getFeature( TrackmateConstants.POSITION_Z );
+		final double x = spot.getFeature( TrackMateConstants.POSITION_X );
+		final double y = spot.getFeature( TrackMateConstants.POSITION_Y );
+		final double z = spot.getFeature( TrackMateConstants.POSITION_Z );
 		final double dz2 = ( z - zslice ) * ( z - zslice );
 		final double radiusRatio = ( Float ) displaySettings.get( TrackMateModelView.KEY_SPOT_RADIUS_RATIO );
-		final double radius = spot.getFeature( TrackmateConstants.RADIUS ) * radiusRatio;
+		final double radius = spot.getFeature( TrackMateConstants.RADIUS ) * radiusRatio;
 		// In pixel units
 		final double xp = x / calibration[ 0 ] + 0.5f;
 		final double yp = y / calibration[ 1 ] + 0.5f; // so that spot centers

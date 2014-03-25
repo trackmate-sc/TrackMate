@@ -55,11 +55,11 @@ public class Spot extends AbstractTrackableObject implements FeatureHolder {
 		super(new double[] { x, y, z }, name, -1);
 		this.features = new ConcurrentHashMap<String, Double>();
 
-		putFeature(TrackmateConstants.POSITION_X, Double.valueOf(x));
-		putFeature(TrackmateConstants.POSITION_Y, Double.valueOf(y));
-		putFeature(TrackmateConstants.POSITION_Z, Double.valueOf(z));
-		putFeature(TrackmateConstants.RADIUS, Double.valueOf(radius));
-		putFeature(TrackmateConstants.QUALITY, Double.valueOf(quality));
+		putFeature(TrackMateConstants.POSITION_X, Double.valueOf(x));
+		putFeature(TrackMateConstants.POSITION_Y, Double.valueOf(y));
+		putFeature(TrackMateConstants.POSITION_Z, Double.valueOf(z));
+		putFeature(TrackMateConstants.RADIUS, Double.valueOf(radius));
+		putFeature(TrackMateConstants.QUALITY, Double.valueOf(quality));
 
 	}
 
@@ -128,8 +128,8 @@ public class Spot extends AbstractTrackableObject implements FeatureHolder {
 	 *            the spot to read from.
 	 */
 	public Spot(final Spot spot) {
-		this(spot, spot.getFeature(TrackmateConstants.RADIUS), spot
-				.getFeature(TrackmateConstants.QUALITY), spot.getName());
+		this(spot, spot.getFeature(TrackMateConstants.RADIUS), spot
+				.getFeature(TrackMateConstants.QUALITY), spot.getName());
 	}
 
 	/**
@@ -198,7 +198,7 @@ public class Spot extends AbstractTrackableObject implements FeatureHolder {
 			s.append("Spot: " + name + "\n");
 
 		// Frame
-		s.append("Time: " + getFeature(TrackmateConstants.FRAME) + '\n');
+		s.append("Time: " + getFeature(TrackMateConstants.FRAME) + '\n');
 
 		// Coordinates
 		final double[] coordinates = new double[3];
@@ -226,28 +226,28 @@ public class Spot extends AbstractTrackableObject implements FeatureHolder {
 
 	@Override
 	public int frame() {
-		return getFeature(TrackmateConstants.FRAME).intValue();
+		return getFeature(TrackMateConstants.FRAME).intValue();
 	}
 
 	@Override
 	public void setFrame(int frame) {
-		features.put(TrackmateConstants.FRAME, (double) frame);
+		features.put(TrackMateConstants.FRAME, (double) frame);
 	}
 
 	@Override
 	public void setVisible(boolean visibility) {
-		features.put(TrackmateConstants.VISIBILITY,
-				visibility ? TrackmateConstants.ONE : TrackmateConstants.ZERO);
+		features.put(TrackMateConstants.VISIBILITY,
+				visibility ? TrackMateConstants.ONE : TrackMateConstants.ZERO);
 	}
 
 	@Override
 	public boolean isVisible() {
-		return features.get(TrackmateConstants.VISIBILITY).intValue() == 1;
+		return features.get(TrackMateConstants.VISIBILITY).intValue() == 1;
 	}
 
 	@Override
 	public double radius() {
-		return features.get(TrackmateConstants.RADIUS).doubleValue();
+		return features.get(TrackMateConstants.RADIUS).doubleValue();
 	}
 
 	@Override
@@ -272,7 +272,7 @@ public class Spot extends AbstractTrackableObject implements FeatureHolder {
 	@Override
 	public double getDoublePosition(final int d) {
 		assert (d >= 0 && d < n);
-		return getFeature(TrackmateConstants.POSITION_FEATURES[d]);
+		return getFeature(TrackMateConstants.POSITION_FEATURES[d]);
 	}
 
 }

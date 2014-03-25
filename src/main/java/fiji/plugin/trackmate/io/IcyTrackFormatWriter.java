@@ -21,7 +21,7 @@ import org.jdom2.output.XMLOutputter;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition;
 
 public class IcyTrackFormatWriter implements Algorithm, Benchmark
@@ -137,7 +137,7 @@ public class IcyTrackFormatWriter implements Algorithm, Benchmark
 				final double x = spot.getDoublePosition( 0 ) / calibration[ 0 ];
 				final double y = spot.getDoublePosition( 1 ) / calibration[ 1 ];
 				final int z = ( int ) ( spot.getDoublePosition( 2 ) / calibration[ 2 ] );
-				final int t = spot.getFeature( TrackmateConstants.FRAME ).intValue();
+				final int t = spot.getFeature( TrackMateConstants.FRAME ).intValue();
 				final Element detection = new Element( DETECTION );
 				detection.setAttribute( "t", Integer.toString( t ) );
 				detection.setAttribute( "x", "" + x );

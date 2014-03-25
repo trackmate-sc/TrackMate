@@ -3,7 +3,7 @@ package fiji.plugin.trackmate.interactivetests;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzer;
 import fiji.plugin.trackmate.gui.panels.components.ColorByFeatureGUIPanel.Category;
@@ -105,7 +105,7 @@ public class SpotDisplayer3DTestDrive
 		for ( int i = 0; i < N_BLOBS; i++ )
 		{
 			spot = new Spot( centers.get( i )[ 0 ], centers.get( i )[ 1 ], centers.get( i )[ 2 ], RADIUS, -1d, "Spot " + i );
-			spot.putFeature( TrackmateConstants.POSITION_T, Double.valueOf( 0 ) );
+			spot.putFeature( TrackMateConstants.POSITION_T, Double.valueOf( 0 ) );
 			spots.add( spot );
 		}
 
@@ -174,7 +174,7 @@ public class SpotDisplayer3DTestDrive
 		frame.setVisible( true );
 
 		// Add a panel
-		gui.addFilterPanel( TrackmateConstants.POSITION_Z );
+		gui.addFilterPanel( TrackMateConstants.POSITION_Z );
 
 	}
 

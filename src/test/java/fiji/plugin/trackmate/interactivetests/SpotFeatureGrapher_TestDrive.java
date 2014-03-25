@@ -16,7 +16,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.features.SpotFeatureGrapher;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.io.TmXmlReader;
@@ -36,14 +36,14 @@ public class SpotFeatureGrapher_TestDrive
 		final Model model = reader.getModel();
 
 		final HashSet< String > Y = new HashSet< String >( 1 );
-		Y.add( TrackmateConstants.POSITION_T );
+		Y.add( TrackMateConstants.POSITION_T );
 		final List< Spot > spots = new ArrayList< Spot >( model.getSpots().getNObjects( true ) );
 		for ( final Iterator< Spot > it = model.getSpots().iterator( true ); it.hasNext(); )
 		{
 			spots.add( it.next() );
 		}
 
-		final SpotFeatureGrapher grapher = new SpotFeatureGrapher( TrackmateConstants.POSITION_X, Y, spots, model );
+		final SpotFeatureGrapher grapher = new SpotFeatureGrapher( TrackMateConstants.POSITION_X, Y, spots, model );
 		grapher.render();
 
 		final TrackIndexAnalyzer analyzer = new TrackIndexAnalyzer();
@@ -70,14 +70,14 @@ public class SpotFeatureGrapher_TestDrive
 			final double y = 100d + 100 * i / 100. * Math.sin( i / 100. * 5 * 2 * Math.PI );
 			final double z = 0d;
 			final Spot spot = new Spot( x, y, z, 2d, -1d );
-			spot.putFeature( TrackmateConstants.POSITION_T, Double.valueOf( i ) );
+			spot.putFeature( TrackMateConstants.POSITION_T, Double.valueOf( i ) );
 
 			spots.add( spot );
 
 			final List< Spot > ts = new ArrayList< Spot >( 1 );
 			ts.add( spot );
 			sc.put( i, ts );
-			spot.putFeature( TrackmateConstants.VISIBILITY, TrackmateConstants.ONE );
+			spot.putFeature( TrackMateConstants.VISIBILITY, TrackMateConstants.ONE );
 		}
 
 		final Model model = new Model();

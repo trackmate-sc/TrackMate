@@ -18,7 +18,7 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 import org.junit.Test;
 
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory;
 import fiji.plugin.trackmate.tracking.spot.DefaultSpotCollection;
 import fiji.plugin.trackmate.tracking.spot.SpotCollection;
@@ -49,8 +49,8 @@ public class LAPTrackerTest
 
 			final Spot spot1 = new Spot( coords1[ 0 ], coords1[ 1 ], coords1[ 2 ], 1d, -1d );
 			final Spot spot2 = new Spot( coords2[ 0 ], coords2[ 1 ], coords2[ 2 ], 1d, -1d );
-			spot1.putFeature( TrackmateConstants.POSITION_T, Double.valueOf( i ) );
-			spot2.putFeature( TrackmateConstants.POSITION_T, Double.valueOf( i ) );
+			spot1.putFeature( TrackMateConstants.POSITION_T, Double.valueOf( i ) );
+			spot2.putFeature( TrackMateConstants.POSITION_T, Double.valueOf( i ) );
 			spot1.setName( "G1T" + i );
 			spot2.setName( "G2T" + i );
 
@@ -111,8 +111,8 @@ public class LAPTrackerTest
 
 			final Spot spot1 = new Spot( coords1[ 0 ], coords1[ 1 ], coords1[ 2 ], 1d, -1d );
 			final Spot spot2 = new Spot( coords2[ 0 ], coords2[ 1 ], coords2[ 2 ], 1d, -1d );
-			spot1.putFeature( TrackmateConstants.POSITION_T, Double.valueOf( i ) );
-			spot2.putFeature( TrackmateConstants.POSITION_T, Double.valueOf( i ) );
+			spot1.putFeature( TrackMateConstants.POSITION_T, Double.valueOf( i ) );
+			spot2.putFeature( TrackMateConstants.POSITION_T, Double.valueOf( i ) );
 			spot1.setName( "G1T" + i );
 			spot2.setName( "G2T" + i );
 			// For this test, we need to put a different feature for each track

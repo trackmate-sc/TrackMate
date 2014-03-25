@@ -20,7 +20,7 @@ import fiji.plugin.trackmate.FeatureHolderUtils;
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.TrackMateConstants;
 
 @Plugin( type = EdgeAnalyzer.class )
 public class EdgeVelocityAnalyzer implements EdgeAnalyzer, MultiThreaded
@@ -106,10 +106,10 @@ public class EdgeVelocityAnalyzer implements EdgeAnalyzer, MultiThreaded
 						final Spot source = model.getTrackModel().getEdgeSource( edge );
 						final Spot target = model.getTrackModel().getEdgeTarget( edge );
 
-						final double dx = FeatureHolderUtils.diffTo(target, source, TrackmateConstants.POSITION_X );
-						final double dy = FeatureHolderUtils.diffTo(target, source, TrackmateConstants.POSITION_Y );
-						final double dz = FeatureHolderUtils.diffTo(target, source, TrackmateConstants.POSITION_Z );
-						final double dt = FeatureHolderUtils.diffTo(target, source, TrackmateConstants.POSITION_T );
+						final double dx = FeatureHolderUtils.diffTo(target, source, TrackMateConstants.POSITION_X );
+						final double dy = FeatureHolderUtils.diffTo(target, source, TrackMateConstants.POSITION_Y );
+						final double dz = FeatureHolderUtils.diffTo(target, source, TrackMateConstants.POSITION_Z );
+						final double dt = FeatureHolderUtils.diffTo(target, source, TrackMateConstants.POSITION_T );
 						final double D = Math.sqrt( dx * dx + dy * dy + dz * dz );
 						final double V = D / Math.abs( dt );
 

@@ -17,7 +17,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.features.EdgeFeatureGrapher;
 import fiji.plugin.trackmate.features.SpotFeatureGrapher;
 import fiji.plugin.trackmate.features.TrackFeatureGrapher;
@@ -75,7 +75,7 @@ public class GrapherPanel extends ActionListenablePanel {
 		panelSpot.removeAll();
 		final Collection<String> spotFeatures = trackmate.getModel().getFeatureModel().getSpotFeatures();
 		final Map<String, String> spotFeatureNames = trackmate.getModel().getFeatureModel().getSpotFeatureNames();
-		spotFeatureSelectionPanel = new FeaturePlotSelectionPanel(TrackmateConstants.POSITION_T, spotFeatures, spotFeatureNames);
+		spotFeatureSelectionPanel = new FeaturePlotSelectionPanel(TrackMateConstants.POSITION_T, spotFeatures, spotFeatureNames);
 		panelSpot.add(spotFeatureSelectionPanel);
 		spotFeatureSelectionPanel.addActionListener(new ActionListener() {
 			@Override

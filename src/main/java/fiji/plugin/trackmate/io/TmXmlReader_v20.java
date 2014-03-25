@@ -73,7 +73,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
@@ -186,7 +186,7 @@ public class TmXmlReader_v20 extends TmXmlReader {
 		// Feature declaration - has to be manual declaration
 		final FeatureModel fm = model.getFeatureModel();
 
-		fm.declareEdgeFeatures( TrackmateConstants.FEATURES, TrackmateConstants.FEATURE_NAMES, TrackmateConstants.FEATURE_SHORT_NAMES, TrackmateConstants.FEATURE_DIMENSIONS, TrackmateConstants.IS_INT );
+		fm.declareEdgeFeatures( TrackMateConstants.FEATURES, TrackMateConstants.FEATURE_NAMES, TrackMateConstants.FEATURE_SHORT_NAMES, TrackMateConstants.FEATURE_DIMENSIONS, TrackMateConstants.IS_INT );
 		fm.declareSpotFeatures( SpotIntensityAnalyzerFactory.FEATURES, SpotIntensityAnalyzerFactory.FEATURE_NAMES, SpotIntensityAnalyzerFactory.FEATURE_SHORT_NAMES, SpotIntensityAnalyzerFactory.FEATURE_DIMENSIONS, SpotIntensityAnalyzerFactory.IS_INT );
 		fm.declareSpotFeatures( SpotContrastAndSNRAnalyzerFactory.FEATURES, SpotContrastAndSNRAnalyzerFactory.FEATURE_NAMES, SpotContrastAndSNRAnalyzerFactory.FEATURE_SHORT_NAMES, SpotContrastAndSNRAnalyzerFactory.FEATURE_DIMENSIONS, SpotContrastAndSNRAnalyzerFactory.IS_INT );
 		fm.declareSpotFeatures( SpotRadiusEstimatorFactory.FEATURES, SpotRadiusEstimatorFactory.FEATURE_NAMES, SpotRadiusEstimatorFactory.FEATURE_SHORT_NAMES, SpotRadiusEstimatorFactory.FEATURE_DIMENSIONS, SpotRadiusEstimatorFactory.IS_INT );
@@ -644,7 +644,7 @@ public class TmXmlReader_v20 extends TmXmlReader {
 				// Find corresponding spot in cache
 				final int ID = readIntAttribute(spotEl, SPOT_ID_ATTRIBUTE_NAME, logger);
 				final Spot spot = cache.get(ID);
-				spot.putFeature(TrackmateConstants.VISIBILITY, TrackmateConstants.ONE);
+				spot.putFeature(TrackMateConstants.VISIBILITY, TrackMateConstants.ONE);
 			}
 		}
 	}

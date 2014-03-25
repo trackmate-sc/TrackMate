@@ -9,7 +9,7 @@ import org.scijava.plugin.Plugin;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.features.spot.SpotRadiusEstimatorFactory;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
@@ -42,7 +42,7 @@ public class RadiusToEstimatedAction extends AbstractTMAction {
 				if (null == diameter || diameter == 0) {
 					invalid++;
 				} else {
-					spot.putFeature(TrackmateConstants.RADIUS, diameter/2);
+					spot.putFeature(TrackMateConstants.RADIUS, diameter/2);
 					model.updateFeatures(spot);
 					valid++;
 				}

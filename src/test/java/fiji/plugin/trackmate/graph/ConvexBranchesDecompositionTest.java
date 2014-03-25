@@ -19,7 +19,7 @@ import org.junit.Test;
 import fiji.plugin.trackmate.FeatureHolderUtils;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.tracking.TrackerKeys;
 import fiji.plugin.trackmate.tracking.factories.FastLAPTrackerFactory;
 import fiji.plugin.trackmate.tracking.spot.DefaultSpotCollection;
@@ -155,7 +155,7 @@ public class ConvexBranchesDecompositionTest
 			while ( it.hasNext() )
 			{
 				final Spot spot = it.next();
-				if ( FeatureHolderUtils.diffTo( spot, previous, TrackmateConstants.FRAME ) != 1d )
+				if ( FeatureHolderUtils.diffTo( spot, previous, TrackMateConstants.FRAME ) != 1d )
 				{
 					fail( "Spots " + spot + " and " + previous + " are not separated by exactly one frame." );
 				}

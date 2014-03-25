@@ -25,7 +25,7 @@ import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.SelectionChangeEvent;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.tracking.spot.SpotCollection;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.AbstractTrackMateModelView;
@@ -102,7 +102,7 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 				for ( final Iterator< Spot > it = model.getSpots().iterator( frame, false ); it.hasNext(); )
 				{
 					final Spot spot = it.next();
-					final boolean visible = spot.getFeature( TrackmateConstants.VISIBILITY ).compareTo( TrackmateConstants.ZERO ) > 0;
+					final boolean visible = spot.getFeature( TrackMateConstants.VISIBILITY ).compareTo( TrackMateConstants.ZERO ) > 0;
 					frameBlobs.setVisible( spot, visible );
 				}
 			}
@@ -136,7 +136,7 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 			for ( final Spot spot : spotsModified )
 			{
 				final int spotFlag = event.getSpotFlag( spot );
-				final int frame = spot.getFeature( TrackmateConstants.FRAME ).intValue();
+				final int frame = spot.getFeature( TrackMateConstants.FRAME ).intValue();
 				final SpotGroupNode< Spot > spotGroupNode = blobs.get( frame );
 
 				switch ( spotFlag )
@@ -151,7 +151,7 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 					// Sphere location and radius
 					final double[] coords = new double[ 3 ];
 					TMUtils.localize( spot, coords );
-					final Double radius = spot.getFeature( TrackmateConstants.RADIUS );
+					final Double radius = spot.getFeature( TrackMateConstants.RADIUS );
 					final double[] pos = new double[] { coords[ 0 ], coords[ 1 ], coords[ 2 ], radius * radiusRatio };
 					final Point4d center = new Point4d( pos );
 
@@ -207,7 +207,7 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 					// Sphere location and radius
 					final double[] coords = new double[ 3 ];
 					TMUtils.localize( spot, coords );
-					final Double radius = spot.getFeature( TrackmateConstants.RADIUS );
+					final Double radius = spot.getFeature( TrackMateConstants.RADIUS );
 					final double[] pos = new double[] { coords[ 0 ], coords[ 1 ], coords[ 2 ], radius * radiusRatio };
 					final Point4d center = new Point4d( pos );
 
@@ -236,7 +236,7 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 						// Sphere location and radius
 						final double[] coords = new double[ 3 ];
 						TMUtils.localize( spot, coords );
-						final Double radius = spot.getFeature( TrackmateConstants.RADIUS );
+						final Double radius = spot.getFeature( TrackMateConstants.RADIUS );
 						final double[] pos = new double[] { coords[ 0 ], coords[ 1 ], coords[ 2 ], radius * radiusRatio };
 						final Point4d center = new Point4d( pos );
 
@@ -311,7 +311,7 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 	@Override
 	public void centerViewOn( final Spot spot )
 	{
-		final int frame = spot.getFeature( TrackmateConstants.FRAME ).intValue();
+		final int frame = spot.getFeature( TrackMateConstants.FRAME ).intValue();
 		universe.showTimepoint( frame );
 	}
 
@@ -462,7 +462,7 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 		{
 			final Spot spot = it.next();
 			TMUtils.localize( spot, coords );
-			final Double radius = spot.getFeature( TrackmateConstants.RADIUS );
+			final Double radius = spot.getFeature( TrackMateConstants.RADIUS );
 			final double[] pos = new double[] { coords[ 0 ], coords[ 1 ], coords[ 2 ], radius * radiusRatio };
 			centers.put( spot, new Point4d( pos ) );
 			final Color4f col = new Color4f( spotColorGenerator.color( spot ) );
@@ -501,7 +501,7 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 			for ( final Iterator< Spot > iterator = model.getSpots().iterator( frame, false ); iterator.hasNext(); )
 			{
 				final Spot spot = iterator.next();
-				spotGroup.setRadius( spot, radiusRatio * spot.getFeature( TrackmateConstants.RADIUS ) );
+				spotGroup.setRadius( spot, radiusRatio * spot.getFeature( TrackMateConstants.RADIUS ) );
 			}
 		}
 	}
@@ -560,7 +560,7 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 		final Color3f highlightColor = new Color3f( ( Color ) displaySettings.get( KEY_HIGHLIGHT_COLOR ) );
 		for ( final Spot spot : spots )
 		{
-			final int frame = spot.getFeature( TrackmateConstants.FRAME ).intValue();
+			final int frame = spot.getFeature( TrackMateConstants.FRAME ).intValue();
 			// Store current settings
 			previousSpotHighlight.add( spot );
 			final SpotGroupNode< Spot > spotGroupNode = blobs.get( frame );

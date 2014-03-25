@@ -2,7 +2,7 @@ package fiji.plugin.trackmate.visualization;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.TrackMateConstants;
 import ij.ImagePlus;
 import net.imglib2.FinalInterval;
 import net.imglib2.img.display.imagej.ImageJFunctions;
@@ -49,11 +49,11 @@ public class ViewUtils {
 		int nframes = 0;
 
 		for (final Spot spot : model.getSpots().iterable(true)) {
-			final double r = spot.getFeature(TrackmateConstants.RADIUS);
-			final double x = Math.ceil(r + spot.getFeature(TrackmateConstants.POSITION_X));
-			final double y = Math.ceil(r + spot.getFeature(TrackmateConstants.POSITION_Y));
-			final double z = Math.ceil(spot.getFeature(TrackmateConstants.POSITION_Z));
-			final int t = spot.getFeature(TrackmateConstants.FRAME).intValue();
+			final double r = spot.getFeature(TrackMateConstants.RADIUS);
+			final double x = Math.ceil(r + spot.getFeature(TrackMateConstants.POSITION_X));
+			final double y = Math.ceil(r + spot.getFeature(TrackMateConstants.POSITION_Y));
+			final double z = Math.ceil(spot.getFeature(TrackMateConstants.POSITION_Z));
+			final int t = spot.getFeature(TrackMateConstants.FRAME).intValue();
 
 			if (x > maxX) {
 				maxX = x;

@@ -47,7 +47,7 @@ import fiji.plugin.trackmate.SelectionChangeListener;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.features.SpotFeatureGrapher;
 import fiji.plugin.trackmate.tracking.TrackableObjectUtils;
 import fiji.plugin.trackmate.util.OnRequestUpdater;
@@ -412,7 +412,7 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 
 		final List< String > features = new ArrayList< String >( model.getFeatureModel().getSpotFeatures() );
 		final Map< String, String > featureNames = model.getFeatureModel().getSpotFeatureShortNames();
-		featureSelectionPanel = new FeaturePlotSelectionPanel( TrackmateConstants.POSITION_T, features, featureNames );
+		featureSelectionPanel = new FeaturePlotSelectionPanel( TrackMateConstants.POSITION_T, features, featureNames );
 
 		setLayout( new BorderLayout() );
 		add( scrollTable, BorderLayout.CENTER );

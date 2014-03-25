@@ -16,7 +16,7 @@ import javax.swing.SpringLayout;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.util.OnRequestUpdater;
 import fiji.plugin.trackmate.util.OnRequestUpdater.Refreshable;
@@ -76,12 +76,12 @@ public class InitFilterPanel extends ActionListenablePanel
 		}
 
 		final ArrayList< String > keys = new ArrayList< String >( 1 );
-		keys.add( TrackmateConstants.QUALITY );
+		keys.add( TrackMateConstants.QUALITY );
 		final HashMap< String, String > keyNames = new HashMap< String, String >( 1 );
-		keyNames.put( TrackmateConstants.QUALITY, TrackmateConstants.FEATURE_NAMES.get( TrackmateConstants.QUALITY ) );
+		keyNames.put( TrackMateConstants.QUALITY, TrackMateConstants.FEATURE_NAMES.get( TrackMateConstants.QUALITY ) );
 
 		final Map< String, double[] > features = new HashMap< String, double[] >( 1 );
-		features.put( TrackmateConstants.QUALITY, values );
+		features.put( TrackMateConstants.QUALITY, values );
 
 		jPanelThreshold = new FilterPanel( features, keys, keyNames );
 		jPanelThreshold.jComboBoxFeature.setEnabled( false );

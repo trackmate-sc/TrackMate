@@ -35,7 +35,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
@@ -202,7 +202,7 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel {
 				model.getSpots().put(frame, spotsToCopy);
 				// Make them visible
 				for (Spot spot : spotsToCopy) {
-					spot.putFeature(TrackmateConstants.VISIBILITY, TrackmateConstants.ONE);
+					spot.putFeature(TrackMateConstants.VISIBILITY, TrackMateConstants.ONE);
 				}
 				// Generate event for listener to reflect changes.
 				model.setSpots(model.getSpots(), true);

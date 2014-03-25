@@ -2,7 +2,7 @@ package fiji.plugin.trackmate.visualization.threedviewer;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import ij3d.ContentNode;
@@ -425,7 +425,7 @@ public class TrackDisplayNode extends ContentNode implements TimelapseListener {
 
 				// Keep refs
 				edgeIndices.get(trackID).put(edge, edgeIndex-2);
-				final int frame = source.getFeature(TrackmateConstants.FRAME).intValue();
+				final int frame = source.getFeature(TrackMateConstants.FRAME).intValue();
 				frameIndices.get(frame).get(trackID).add(edgeIndex-2);
 
 			} // Finished building this track's line
@@ -469,9 +469,9 @@ public class TrackDisplayNode extends ContentNode implements TimelapseListener {
 		double x = 0, y = 0, z = 0;
 		for (final Iterator<Spot> it = model.getSpots().iterator(true); it.hasNext();) {
 			final Spot spot = it.next();
-			x += spot.getFeature(TrackmateConstants.POSITION_X);
-			y += spot.getFeature(TrackmateConstants.POSITION_Y);
-			z += spot.getFeature(TrackmateConstants.POSITION_Z);
+			x += spot.getFeature(TrackMateConstants.POSITION_X);
+			y += spot.getFeature(TrackMateConstants.POSITION_Y);
+			z += spot.getFeature(TrackMateConstants.POSITION_Z);
 		}
 		final int nspot = model.getSpots().getNObjects(true);
 		x /= nspot;
@@ -490,13 +490,13 @@ public class TrackDisplayNode extends ContentNode implements TimelapseListener {
 		double radius;
 		for (final Iterator<Spot> it = model.getSpots().iterator(true); it.hasNext();) {
 			final Spot spot = it.next();
-			radius = spot.getFeature(TrackmateConstants.RADIUS);
-			if (xmax < spot.getFeature(TrackmateConstants.POSITION_X) + radius)
-				xmax = spot.getFeature(TrackmateConstants.POSITION_X) + radius;
-			if (ymax < spot.getFeature(TrackmateConstants.POSITION_Y) + radius)
-				ymax = spot.getFeature(TrackmateConstants.POSITION_Y) + radius;
-			if (zmax < spot.getFeature(TrackmateConstants.POSITION_Z) + radius)
-				zmax = spot.getFeature(TrackmateConstants.POSITION_Z) + radius;
+			radius = spot.getFeature(TrackMateConstants.RADIUS);
+			if (xmax < spot.getFeature(TrackMateConstants.POSITION_X) + radius)
+				xmax = spot.getFeature(TrackMateConstants.POSITION_X) + radius;
+			if (ymax < spot.getFeature(TrackMateConstants.POSITION_Y) + radius)
+				ymax = spot.getFeature(TrackMateConstants.POSITION_Y) + radius;
+			if (zmax < spot.getFeature(TrackMateConstants.POSITION_Z) + radius)
+				zmax = spot.getFeature(TrackMateConstants.POSITION_Z) + radius;
 		}
 		max.x = xmax;
 		max.y = ymax;
@@ -512,13 +512,13 @@ public class TrackDisplayNode extends ContentNode implements TimelapseListener {
 		double radius;
 		for (final Iterator<Spot> it = model.getSpots().iterator(true); it.hasNext();) {
 			final Spot spot = it.next();
-			radius = spot.getFeature(TrackmateConstants.RADIUS);
-			if (xmin > spot.getFeature(TrackmateConstants.POSITION_X) - radius)
-				xmin = spot.getFeature(TrackmateConstants.POSITION_X) - radius;
-			if (ymin > spot.getFeature(TrackmateConstants.POSITION_Y) - radius)
-				ymin = spot.getFeature(TrackmateConstants.POSITION_Y) - radius;
-			if (zmin > spot.getFeature(TrackmateConstants.POSITION_Z) - radius)
-				zmin = spot.getFeature(TrackmateConstants.POSITION_Z) - radius;
+			radius = spot.getFeature(TrackMateConstants.RADIUS);
+			if (xmin > spot.getFeature(TrackMateConstants.POSITION_X) - radius)
+				xmin = spot.getFeature(TrackMateConstants.POSITION_X) - radius;
+			if (ymin > spot.getFeature(TrackMateConstants.POSITION_Y) - radius)
+				ymin = spot.getFeature(TrackMateConstants.POSITION_Y) - radius;
+			if (zmin > spot.getFeature(TrackMateConstants.POSITION_Z) - radius)
+				zmin = spot.getFeature(TrackMateConstants.POSITION_Z) - radius;
 		}
 		min.x = xmin;
 		min.y = ymin;

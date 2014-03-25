@@ -97,7 +97,7 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
@@ -592,7 +592,7 @@ public class TmXmlWriter
 	protected Element echoInitialSpotFilter( final Settings settings )
 	{
 		final Element itElement = new Element( INITIAL_SPOT_FILTER_ELEMENT_KEY );
-		itElement.setAttribute( FILTER_FEATURE_ATTRIBUTE_NAME, TrackmateConstants.QUALITY );
+		itElement.setAttribute( FILTER_FEATURE_ATTRIBUTE_NAME, TrackMateConstants.QUALITY );
 		itElement.setAttribute( FILTER_VALUE_ATTRIBUTE_NAME, "" + settings.initialSpotFilterValue );
 		itElement.setAttribute( FILTER_ABOVE_ATTRIBUTE_NAME, "" + true );
 		logger.log( "  Added initial spot filter.\n" );

@@ -110,7 +110,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.detection.DogDetectorFactory;
 import fiji.plugin.trackmate.detection.DownsampleLogDetectorFactory;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
@@ -285,7 +285,7 @@ public class TmXmlReader_v12 extends TmXmlReader {
 		if (null != filteredIDs) {
 			for (final Integer frame : filteredIDs.keySet()) {
 				for (final Integer ID : filteredIDs.get(frame)) {
-					cache.get(ID).putFeature(TrackmateConstants.VISIBILITY, TrackmateConstants.ONE);
+					cache.get(ID).putFeature(TrackMateConstants.VISIBILITY, TrackMateConstants.ONE);
 				}
 			}
 		}
@@ -318,7 +318,7 @@ public class TmXmlReader_v12 extends TmXmlReader {
 	 */
 	private void declareDefaultFeatures(final FeatureModel fm) {
 		// Spots:
-		fm.declareSpotFeatures( TrackmateConstants.FEATURES, TrackmateConstants.FEATURE_NAMES, TrackmateConstants.FEATURE_SHORT_NAMES, TrackmateConstants.FEATURE_DIMENSIONS, TrackmateConstants.IS_INT );
+		fm.declareSpotFeatures( TrackMateConstants.FEATURES, TrackMateConstants.FEATURE_NAMES, TrackMateConstants.FEATURE_SHORT_NAMES, TrackMateConstants.FEATURE_DIMENSIONS, TrackMateConstants.IS_INT );
 		fm.declareSpotFeatures(SpotContrastAndSNRAnalyzerFactory.FEATURES, SpotContrastAndSNRAnalyzerFactory.FEATURE_NAMES,
  SpotContrastAndSNRAnalyzerFactory.FEATURE_SHORT_NAMES, SpotContrastAndSNRAnalyzerFactory.FEATURE_DIMENSIONS, SpotContrastAndSNRAnalyzerFactory.IS_INT );
 		fm.declareSpotFeatures(SpotMorphologyAnalyzerFactory.FEATURES, SpotMorphologyAnalyzerFactory.FEATURE_NAMES,

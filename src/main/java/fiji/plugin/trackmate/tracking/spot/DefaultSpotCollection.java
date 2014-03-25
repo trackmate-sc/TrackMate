@@ -12,7 +12,7 @@ import java.util.concurrent.Executors;
 
 import net.imglib2.algorithm.MultiThreaded;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.tracking.DefaultTOCollection;
 
@@ -331,7 +331,7 @@ public class DefaultSpotCollection extends DefaultTOCollection<Spot> implements
 	public static SpotCollection fromCollection(final Iterable<Spot> spots) {
 		final DefaultSpotCollection sc = new DefaultSpotCollection();
 		for (final Spot spot : spots) {
-			final int frame = spot.getFeature(TrackmateConstants.FRAME)
+			final int frame = spot.getFeature(TrackMateConstants.FRAME)
 					.intValue();
 			Set<Spot> fc = sc.content.get(frame);
 			if (null == fc) {

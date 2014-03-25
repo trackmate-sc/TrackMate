@@ -5,7 +5,7 @@ import javax.swing.Icon;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.panels.InitFilterPanel;
@@ -61,7 +61,7 @@ public class InitFilterDescriptor implements WizardPanelDescriptor
 				int index = 0;
 				for ( final Spot spot : spots.iterable( false ) )
 				{
-					values[ index++ ] = spot.getFeature( TrackmateConstants.QUALITY );
+					values[ index++ ] = spot.getFeature( TrackMateConstants.QUALITY );
 				}
 				component.setValues( values );
 

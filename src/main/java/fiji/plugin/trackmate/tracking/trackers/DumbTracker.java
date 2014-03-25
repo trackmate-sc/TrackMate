@@ -12,7 +12,7 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.tracking.TrackableObjectCollection;
 import fiji.plugin.trackmate.tracking.TrackableObjectUtils;
 
@@ -266,7 +266,7 @@ public class DumbTracker implements Tracker<Spot> {
 			if (nstats < STATS_THRESHOLD
 					|| dist < mean + STD_FACTOR * std
 					|| dist < RADIUS_FACTOR
-							* source.getFeature(TrackmateConstants.RADIUS)) {
+							* source.getFeature(TrackMateConstants.RADIUS)) {
 
 				/*
 				 * Ok, then create a link in the graph.

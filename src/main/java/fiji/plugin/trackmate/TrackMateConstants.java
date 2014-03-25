@@ -12,7 +12,7 @@ import java.util.Map;
  *
  * @author Christian Dietz (University of Konstanz)
  */
-public final class TrackmateConstants {
+public final class TrackMateConstants {
 
 	/** numeric constants */
 	public static Double ZERO = Double.valueOf( 0d );

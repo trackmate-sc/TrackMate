@@ -14,7 +14,7 @@ import net.imglib2.meta.ImgPlus;
 import net.imglib2.outofbounds.OutOfBoundsMirrorExpWindowingFactory;
 import net.imglib2.type.numeric.RealType;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.TrackMateConstants;
 
 public class SpotNeighborhood<T extends RealType<T>> implements Neighborhood<T> {
 
@@ -35,12 +35,12 @@ public class SpotNeighborhood<T extends RealType<T>> implements Neighborhood<T> 
 		// Center
 		this.center = new long[img.numDimensions()];
 		for (int d = 0; d < center.length; d++) {
-			center[d] = Math.round( spot.getFeature(TrackmateConstants.POSITION_FEATURES[d]).doubleValue() / calibration[d]);
+			center[d] = Math.round( spot.getFeature(TrackMateConstants.POSITION_FEATURES[d]).doubleValue() / calibration[d]);
 		}
 		// Span
 		final long[] span = new long[img.numDimensions()];
 		for (int d = 0; d < span.length; d++) {
-			span[d] = Math.round(spot.getFeature(TrackmateConstants.RADIUS) / calibration[d]);
+			span[d] = Math.round(spot.getFeature(TrackMateConstants.RADIUS) / calibration[d]);
 		}
 		// Neighborhood
 		OutOfBoundsMirrorExpWindowingFactory<T, RandomAccessibleInterval<T>> oob =

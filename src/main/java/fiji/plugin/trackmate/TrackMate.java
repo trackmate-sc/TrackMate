@@ -119,7 +119,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 			prunedSpots = new ArrayList< Spot >();
 			for ( final Spot spot : spotsThisFrame )
 			{
-				if ( settings.polygon.contains( spot.getFeature( TrackmateConstants.POSITION_X ) / calibration[ 0 ], spot.getFeature( TrackmateConstants.POSITION_Y ) / calibration[ 1 ] ) )
+				if ( settings.polygon.contains( spot.getFeature( TrackMateConstants.POSITION_X ) / calibration[ 0 ], spot.getFeature( TrackMateConstants.POSITION_Y ) / calibration[ 1 ] ) )
 					prunedSpots.add( spot );
 			}
 		}
@@ -442,7 +442,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 									prunedSpots = new ArrayList< Spot >();
 									for ( final Spot spot : spotsThisFrame )
 									{
-										if ( settings.polygon.contains( spot.getFeature( TrackmateConstants.POSITION_X ) / calibration[ 0 ], spot.getFeature( TrackmateConstants.POSITION_Y ) / calibration[ 1 ] ) )
+										if ( settings.polygon.contains( spot.getFeature( TrackMateConstants.POSITION_X ) / calibration[ 0 ], spot.getFeature( TrackMateConstants.POSITION_Y ) / calibration[ 1 ] ) )
 											prunedSpots.add( spot );
 									}
 								}
@@ -455,7 +455,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 								{
 									// FRAME will be set upon adding to
 									// SpotCollection.
-									spot.putFeature( TrackmateConstants.POSITION_T, frame * settings.dt );
+									spot.putFeature( TrackMateConstants.POSITION_T, frame * settings.dt );
 								}
 								// Store final results for this frame
 								spots.put( frame, prunedSpots );
@@ -563,7 +563,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 		logger.log( "Starting initial filtering process.\n" );
 
 		final Double initialSpotFilterValue = settings.initialSpotFilterValue;
-		final FeatureFilter featureFilter = new FeatureFilter( TrackmateConstants.QUALITY, initialSpotFilterValue, true );
+		final FeatureFilter featureFilter = new FeatureFilter( TrackMateConstants.QUALITY, initialSpotFilterValue, true );
 
 		SpotCollection spots = model.getSpots();
 		spots.filter( featureFilter );

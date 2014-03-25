@@ -20,7 +20,7 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackmateConstants;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.detection.LogDetector;
 import fiji.plugin.trackmate.detection.SpotDetector;
 import fiji.plugin.trackmate.tracking.TrackableObjectUtils;
@@ -183,9 +183,9 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 			 */
 
 			// We want to segment in the next frame.
-			final int frame = spot.getFeature( TrackmateConstants.FRAME ).intValue() + 1;
-			final double radius = spot.getFeature( TrackmateConstants.RADIUS );
-			final double quality = spot.getFeature( TrackmateConstants.QUALITY );
+			final int frame = spot.getFeature( TrackMateConstants.FRAME ).intValue() + 1;
+			final double radius = spot.getFeature( TrackMateConstants.RADIUS );
+			final double quality = spot.getFeature( TrackMateConstants.QUALITY );
 
 			/*
 			 * Get neighborhood
@@ -227,7 +227,7 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 			 * Translate spots
 			 */
 
-			final String[] features = new String[] { TrackmateConstants.POSITION_X, TrackmateConstants.POSITION_Y, TrackmateConstants.POSITION_Z };
+			final String[] features = new String[] { TrackMateConstants.POSITION_X, TrackMateConstants.POSITION_Y, TrackMateConstants.POSITION_Z };
 			for ( final Spot ds : detectedSpots )
 			{
 				final double[] coords = new double[ 3 ];
@@ -241,7 +241,7 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 			}
 
 			// Sort then by ascending quality
-			final TreeSet< Spot > sortedSpots = new TreeSet< Spot >( FeatureHolderUtils.featureComparator( TrackmateConstants.QUALITY ) );
+			final TreeSet< Spot > sortedSpots = new TreeSet< Spot >( FeatureHolderUtils.featureComparator( TrackMateConstants.QUALITY ) );
 			sortedSpots.addAll( detectedSpots );
 
 			boolean found = false;
@@ -274,8 +274,8 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 			 */
 
 			// spot
-			target.putFeature( TrackmateConstants.RADIUS, radius );
-			target.putFeature( TrackmateConstants.POSITION_T, Double.valueOf( frame ) );
+			target.putFeature( TrackMateConstants.RADIUS, radius );
+			target.putFeature( TrackMateConstants.POSITION_T, Double.valueOf( frame ) );
 
 			model.beginUpdate();
 			try
