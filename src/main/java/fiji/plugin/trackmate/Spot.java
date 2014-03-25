@@ -133,16 +133,17 @@ public class Spot extends AbstractTrackableObject implements FeatureHolder
 	}
 
 	/**
-	 * Blank constructor meant to be used when loading a spot collection from a
-	 * file. <b>Will</b> mess with the {@link #IDcounter} field, so this
-	 * constructor <u>should not be used for normal spot creation</u>.
+	 * Blank constructor that just sets the ID of the spot, and leaves all other
+	 * fields uninitialized.
+	 * <p>
+	 * This constructor will mess with the IDs of the spots and is meant to be
+	 * used <b>only</b> when loading objects from XML.
 	 *
 	 * @param ID
-	 *            the spot ID to set
 	 */
 	public Spot( final int ID )
 	{
-		super( new double[ 3 ], ID );
+		super( ID, 3 );
 		this.features = new ConcurrentHashMap< String, Double >();
 	}
 

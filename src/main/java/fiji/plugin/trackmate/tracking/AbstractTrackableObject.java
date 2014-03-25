@@ -18,36 +18,17 @@ public abstract class AbstractTrackableObject extends AbstractRealLocalizable im
 
 	private boolean isVisible;
 
-	public AbstractTrackableObject( final double[] position, final int id, final int frame )
-	{
-		this( position, null, id, frame );
-	}
-
 	public AbstractTrackableObject( final double[] position, final int frame )
 	{
-		this( position, null, IDcounter.incrementAndGet(), frame );
+		this( position, null, frame );
 	}
 
 	public AbstractTrackableObject( final double[] position, final String name, final int frame )
 	{
-		this( position, name, IDcounter.incrementAndGet(), frame );
-	}
-
-	public AbstractTrackableObject( final double[] position, final String name, final int id, final int frame )
-	{
 		super( position );
-		this.id = id;
+		this.id = IDcounter.incrementAndGet();
 		this.frame = frame;
 		this.isVisible = true;
-
-		synchronized ( IDcounter )
-		{
-			if ( IDcounter.get() < id )
-			{
-				IDcounter.set( id );
-			}
-		}
-
 		if ( name == null )
 		{
 			this.name = "ID" + id;
@@ -56,7 +37,34 @@ public abstract class AbstractTrackableObject extends AbstractRealLocalizable im
 		{
 			this.name = name;
 		}
+	}
 
+	/**
+	 * A blank, protected constructor that only sets the dimensionality of this
+	 * {@link AbstractTrackableObject} and its ID. All other fields are left
+	 * uninitialized.
+	 * <p>
+	 * It is meant to be used when loading from XML, ensuring the loaded object
+	 * has the desired ID. It also ensures that the next
+	 * {@link AbstractTrackableObject}s created via other constructors will have
+	 * a different ID that all other IDs created with this constructor.
+	 * 
+	 * @param id
+	 *            the desired ID.
+	 * @param n
+	 *            the dimensionality of the {@link TrackableObject}.
+	 */
+	protected AbstractTrackableObject( final int id, final int n )
+	{
+		super( n );
+		this.id = id;
+		synchronized ( IDcounter )
+		{
+			if ( IDcounter.get() < id )
+			{
+				IDcounter.set( id );
+			}
+		}
 	}
 
 	/**

@@ -331,10 +331,7 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		ImageJ.main( args );
 		final LoadTrackMatePlugIn_ plugIn = new LoadTrackMatePlugIn_();
 		// plugIn.run( "samples/FakeTracks.xml" );
-		plugIn.run( "" );
-		// plugIn.run(
-		// "/Users/tinevez/Desktop/Data/Mamut/parhyale/BDV130418A325_NoTempReg-mamut_JY2.xml"
-		// );
+		plugIn.run( "/Users/tinevez/Desktop/Data/Mamut/parhyale/BDV130418A325_NoTempReg-mamut_JY2.xml" );
 	}
 
 }

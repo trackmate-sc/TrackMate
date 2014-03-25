@@ -851,6 +851,9 @@ public class TmXmlReader
 			}
 			content.put( currentFrame, spotSet );
 		}
+
+		System.out.println( cache );// DEBUG
+
 		final SpotCollection allSpots = DefaultSpotCollection.fromMap( content );
 		return allSpots;
 	}
