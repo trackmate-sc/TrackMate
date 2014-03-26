@@ -1,63 +1,70 @@
 package fiji.plugin.trackmate;
 
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
 
 /**
  * Utility class for constants of {@link FeatureHolder}s
  *
  * @author Christian Dietz (University of Konstanz)
  */
-public final class TrackMateConstants {
+public final class TrackMateConstants
+{
 
-	/** numeric constants */
+	/**
+	 * Numeric {@link Double} constant used to represent <code>false</code>
+	 * boolean value in numerical features.
+	 */
 	public static Double ZERO = Double.valueOf( 0d );
 
+	/**
+	 * Numeric {@link Double} constant used to represent <code>true</code>
+	 * boolean value in numerical features.
+	 */
 	public static Double ONE = Double.valueOf( 1d );
 
-
-	/** The name of the frame feature. */
+	/** The key for the frame feature. */
 	public static final String FRAME = "FRAME";
 
-	/** The name of the frame feature. */
+	/** The key for the radius feature. */
 	public static final String RADIUS = "RADIUS";
 
-	/** The name of the frame feature. */
+	/** The key for the quality feature. */
 	public static final String QUALITY = "QUALITY";
 
-	/** The name of the frame feature. */
+	/** The key for the visibility feature. */
 	public static final String VISIBILITY = "VISIBILITY";
 
-	/** The name of the time feature. */
+	/** The key for the time feature. */
 	public static final String POSITION_T = "POSITION_T";
 
+	/** The key for the X coordinate of the position features. */
 	public static final String POSITION_X = "POSITION_X";
 
+	/** The key for the Y coordinate of the position features. */
 	public static final String POSITION_Y = "POSITION_Y";
 
+	/** The key for the Z coordinate of the position features. */
 	public static final String POSITION_Z = "POSITION_Z";
 
 	/** The position features. */
-	public final static String[] POSITION_FEATURES = new String[] { POSITION_X,
-			POSITION_Y, POSITION_Z };
+	public final static String[] POSITION_FEATURES = new String[] { POSITION_X, POSITION_Y, POSITION_Z };
 
+	/** The 8 privileged spot feature names. */
+	public static Map< String, String > FEATURE_NAMES = new HashMap< String, String >( 8 );
 
-	/** The 7 privileged spot feature names. */
-	public static Map< String, String > FEATURE_NAMES = new HashMap<String, String>();
+	/** The 8 privileged spot feature short names. */
+	public static Map< String, String > FEATURE_SHORT_NAMES = new HashMap< String, String >( 8 );
 
-	/** The 7 privileged spot feature short names. */
-	public static Map< String, String > FEATURE_SHORT_NAMES = new HashMap<String, String>();
+	public static Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 8 );
 
-	public static Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap<String, Dimension>();
+	/** The 8 privileged spot features. */
+	public final static Collection< String > FEATURES = new ArrayList< String >( 8 );
 
-	public final static Collection< String > FEATURES = new ArrayList< String >( 7 );
-
-	/** The 7 privileged spot feature isInt flags. */
-	public final static Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 7 );
+	/** The 8 privileged spot feature isInt flags. */
+	public final static Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 8 );
 
 	static
 	{
