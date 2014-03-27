@@ -836,7 +836,7 @@ public class TmXmlReader
 
 		// Load collection and build cache
 		int currentFrame = 0;
-		final Map< Integer, Set< Spot >> content = new HashMap< Integer, Set< Spot >>( frameContent.size() );
+		final Map< Integer, Collection< Spot >> content = new HashMap< Integer, Collection< Spot >>( frameContent.size() );
 		for ( final Element currentFrameContent : frameContent )
 		{
 

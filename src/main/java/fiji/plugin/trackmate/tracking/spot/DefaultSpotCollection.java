@@ -26,9 +26,9 @@ import fiji.plugin.trackmate.tracking.DefaultTOCollection;
  * This class is {@link MultiThreaded}. There are a few processes that can
  * benefit from multithreaded computation ({@link #filter(Collection)},
  * {@link #filter(FeatureFilter)}
- * 
+ *
  * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> - Feb 2011 - 2013
- * 
+ *
  */
 public class DefaultSpotCollection extends DefaultTOCollection<Spot> implements
 		SpotCollection {
@@ -40,7 +40,7 @@ public class DefaultSpotCollection extends DefaultTOCollection<Spot> implements
 	/**
 	 * Returns a new {@link SpotCollection}, made of only the spots marked as
 	 * visible. All the spots will then be marked as not-visible.
-	 * 
+	 *
 	 * @return a new spot collection, made of only the spots marked as visible.
 	 */
 	@Override
@@ -56,7 +56,7 @@ public class DefaultSpotCollection extends DefaultTOCollection<Spot> implements
 			final Runnable command = new Runnable() {
 				@Override
 				public void run() {
-					final Set<Spot> fc = content.get(frame);
+					final Collection< Spot > fc = content.get( frame );
 					final Set<Spot> nfc = new HashSet<Spot>(getNObjects(frame,
 							true));
 
@@ -104,7 +104,7 @@ public class DefaultSpotCollection extends DefaultTOCollection<Spot> implements
 	 * Filters out the content of this collection using the specified
 	 * {@link FeatureFilter}. Spots that are filtered out are marked as
 	 * invisible, and visible otherwise.
-	 * 
+	 *
 	 * @param featurefilter
 	 *            the filter to use.
 	 */
@@ -123,7 +123,7 @@ public class DefaultSpotCollection extends DefaultTOCollection<Spot> implements
 
 					Double val, tval;
 
-					final Set<Spot> objects = content.get(frame);
+					final Collection< Spot > objects = content.get( frame );
 					tval = featurefilter.value;
 
 					if (featurefilter.isAbove) {
@@ -172,7 +172,7 @@ public class DefaultSpotCollection extends DefaultTOCollection<Spot> implements
 	 * {@link FeatureFilter} collection. Spots that are filtered out are marked
 	 * as invisible, and visible otherwise. To be marked as visible, a spot must
 	 * pass <b>all</b> of the specified filters (AND chaining).
-	 * 
+	 *
 	 * @param filters
 	 *            the filter collection to use.
 	 */
@@ -187,7 +187,7 @@ public class DefaultSpotCollection extends DefaultTOCollection<Spot> implements
 			final Runnable command = new Runnable() {
 				@Override
 				public void run() {
-					final Set<Spot> objects = content.get(frame);
+					final Collection< Spot > objects = content.get( frame );
 
 					Double val, tval;
 					boolean isAbove, shouldNotBeVisible;
@@ -238,7 +238,7 @@ public class DefaultSpotCollection extends DefaultTOCollection<Spot> implements
 	 * Builds and returns a new map of feature values for this spot collection.
 	 * Each feature maps a double array, with 1 element per {@link Spot}, all
 	 * pooled together.
-	 * 
+	 *
 	 * @param features
 	 *            the features to collect
 	 * @param visibleOnly
@@ -290,7 +290,7 @@ public class DefaultSpotCollection extends DefaultTOCollection<Spot> implements
 	 * <code>null</code>) or if the value is {@link Double#NaN}, they are
 	 * skipped. The returned array might be therefore of smaller size than the
 	 * number of spots interrogated.
-	 * 
+	 *
 	 * @param feature
 	 *            the feature to collect.
 	 * @param visibleOnly
@@ -323,7 +323,7 @@ public class DefaultSpotCollection extends DefaultTOCollection<Spot> implements
 	 * Their frame origin is retrieved from their {@link Spot#FRAME} feature, so
 	 * it must be set properly for all spots. All the spots of the new
 	 * collection have the same visibility that the one they carry.
-	 * 
+	 *
 	 * @param spots
 	 *            the spot collection to build from.
 	 * @return a new {@link SpotCollection} instance.
@@ -333,7 +333,7 @@ public class DefaultSpotCollection extends DefaultTOCollection<Spot> implements
 		for (final Spot spot : spots) {
 			final int frame = spot.getFeature(TrackMateConstants.FRAME)
 					.intValue();
-			Set<Spot> fc = sc.content.get(frame);
+			Collection< Spot > fc = sc.content.get( frame );
 			if (null == fc) {
 				fc = new HashSet<Spot>();
 				sc.content.put(frame, fc);
@@ -348,14 +348,15 @@ public class DefaultSpotCollection extends DefaultTOCollection<Spot> implements
 	 * sets. The spots added this way are completely untouched. In particular,
 	 * their {@link #VISIBLITY} feature is left untouched, which makes this
 	 * method suitable to de-serialize a {@link SpotCollection}.
-	 * 
+	 *
 	 * @param source
 	 *            the map to buidl the spot collection from.
 	 * @return a new SpotCollection.
 	 */
-	public static SpotCollection fromMap(final Map<Integer, Set<Spot>> source) {
+	public static SpotCollection fromMap( final Map< Integer, Collection< Spot >> source )
+	{
 		final DefaultSpotCollection sc = new DefaultSpotCollection();
-		sc.content = new ConcurrentSkipListMap<Integer, Set<Spot>>(source);
+		sc.content = new ConcurrentSkipListMap< Integer, Collection< Spot >>( source );
 		return sc;
 	}
 }

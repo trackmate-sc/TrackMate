@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.SortedMap;
 
 /**
  * Interface for classes that manage a large collection of
@@ -17,7 +18,7 @@ import java.util.NavigableSet;
  *            the class of the objects stored in this collection. Must implement
  *            {@link TrackableObject}.
  */
-public interface TrackableObjectCollection< T extends TrackableObject >
+public interface TrackableObjectCollection< T extends TrackableObject > extends SortedMap< Integer, Collection< T > >
 {
 
 	/*
@@ -37,8 +38,12 @@ public interface TrackableObjectCollection< T extends TrackableObject >
 
 	/**
 	 * Adds the specified object to this collection, at the temporal frame
-	 * specified. By calling this method, the specified object has its frame
-	 * field modified to be the one specified.
+	 * specified.
+	 * <p>
+	 * If the frame does not exist yet in the collection, it is created and
+	 * added to the keys of this collection. By calling this method, the
+	 * specified object has its frame field updated with the specified frame
+	 * value.
 	 *
 	 * @param obj
 	 *            the object to store.
@@ -190,16 +195,62 @@ public interface TrackableObjectCollection< T extends TrackableObject >
 	 * SORTEDMAP
 	 */
 
-	public void put( int frame, Collection< T > spots );
+	/**
+	 * Replaces the content of this collection at the specified frame by the
+	 * specified object collection.
+	 * 
+	 * @param frame
+	 *            the frame to store the objects at.
+	 * @param objs
+	 *            the collection of objects to put at the specified frame.
+	 * @return the previous collection associated with this frame, or
+	 *         <code>null</code> if there was no objects for frame. (A
+	 *         <code>null</code> return can also indicate that the map
+	 *         previously associated <code>null</code> with frame, if the
+	 *         implementation supports <code>null</code> values.)
+	 */
+	@Override
+	public Collection< T > put( Integer frame, Collection< T > objs );
 
+	/**
+	 * Returns the first frame for which this collection stores at least one
+	 * object.
+	 *
+	 * @return the first frame with non-<code>null</code> content.
+	 */
+	@Override
 	public Integer firstKey();
 
+	/**
+	 * Returns the last frame for which this collection stores at least one
+	 * object.
+	 *
+	 * @return the last frame with non-<code>null</code> content.
+	 */
+	@Override
 	public Integer lastKey();
 
+	/**
+	 * Returns the a {@link NavigableSet} of the frames for which this
+	 * collection has a non-<code>null</code> content.
+	 *
+	 * @return a {@link NavigableSet}.
+	 */
+	@Override
 	public NavigableSet< Integer > keySet();
 
+	/**
+	 * Removes any content from this collection.
+	 */
+	@Override
 	public void clear();
 
+	/**
+	 * Returns a new collection built by including only the spots marked as
+	 * visible.
+	 *
+	 * @return a new {@link TrackableObjectCollection}
+	 */
 	public TrackableObjectCollection< T > crop();
 
 }

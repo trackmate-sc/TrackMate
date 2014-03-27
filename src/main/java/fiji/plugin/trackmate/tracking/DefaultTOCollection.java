@@ -2,9 +2,11 @@ package fiji.plugin.trackmate.tracking;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedMap;
@@ -15,30 +17,27 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import net.imglib2.algorithm.MultiThreaded;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.tracking.spot.SpotCollection;
 
+
 /**
- * A utility class that wrap the {@link SortedMap} we use to store
- * {@link TrackableObject}s contained in each frame with a few utility methods.
+ * A default implementation of {@link TrackableObjectCollection}.
  * <p>
- * Internally we rely on ConcurrentSkipListMap to allow concurrent access
- * without clashes.
- * <p>
- * This class is {@link MultiThreaded}. There are a few processes that can
- * benefit from multithreaded computation ({@link #filter(Collection)},
- * {@link #filter(FeatureFilter)}
+ * This implementations wraps a {@link ConcurrentSkipListMap}, and is therefore
+ * suited for multi-threading applications. It also extends
+ * {@link MultiThreaded}, so that one can specify the number of threads to use
+ * for some methods (namely {@link #crop()}, {@link #setVisible(boolean)}).
  *
- * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> - Feb 2011 - 2014
- *
+ * @param <T>
+ *            the class of the objects stored in this collection. Must implement
+ *            {@link TrackableObject}.
  */
 public class DefaultTOCollection< T extends TrackableObject > implements MultiThreaded, TrackableObjectCollection< T >
 {
 
 	/**
-	 * Time units for filtering and cropping operation timeouts. Filtering
-	 * should not take more than 1 minute.
+	 * Time units for filtering and visibility operation timeouts. They should
+	 * not take more than 10 minute.
 	 */
 	protected static final TimeUnit TIME_OUT_UNITS = TimeUnit.MINUTES;
 
@@ -46,10 +45,10 @@ public class DefaultTOCollection< T extends TrackableObject > implements MultiTh
 	 * Time for filtering and cropping operation timeouts. Filtering should not
 	 * take more than 1 minute.
 	 */
-	protected static final long TIME_OUT_DELAY = 1;
+	protected static final long TIME_OUT_DELAY = 10;
 
-	/** The frame by frame list of {@link TrackableObject}s this object wrap. */
-	protected ConcurrentSkipListMap< Integer, Set< T >> content = new ConcurrentSkipListMap< Integer, Set< T >>();
+	/** The frame by frame list of {@link TrackableObject}s this object wraps. */
+	protected ConcurrentSkipListMap< Integer, Collection< T >> content = new ConcurrentSkipListMap< Integer, Collection< T >>();
 
 	protected int numThreads;
 
@@ -69,16 +68,6 @@ public class DefaultTOCollection< T extends TrackableObject > implements MultiTh
 	 * METHODS
 	 */
 
-	/**
-	 * Retrieves and returns the {@link Spot} object in this collection with the
-	 * specified ID. Returns <code>null</code> if the spot cannot be found. All
-	 * spots, visible or not, are searched for.
-	 *
-	 * @param ID
-	 *            the ID to look for.
-	 * @return the spot with the specified ID or <code>null</code> if this spot
-	 *         does not exist or does not belong to this collection.
-	 */
 	@Override
 	public T search( final int ID )
 	{
@@ -106,18 +95,10 @@ public class DefaultTOCollection< T extends TrackableObject > implements MultiTh
 		return str;
 	}
 
-	/**
-	 * Adds the given spot to this collection, at the specified frame, and mark
-	 * it as visible.
-	 * <p>
-	 * If the frame does not exist yet in the collection, it is created and
-	 * added. Upon adding, the added spot has its feature {@link Spot#FRAME}
-	 * updated with the passed frame value.
-	 */
 	@Override
 	public void add( final T object, final Integer frame )
 	{
-		Set< T > objects = content.get( frame );
+		Collection< T > objects = content.get( frame );
 		if ( null == objects )
 		{
 			objects = new HashSet< T >();
@@ -128,27 +109,15 @@ public class DefaultTOCollection< T extends TrackableObject > implements MultiTh
 		object.setVisible( true );
 	}
 
-	/**
-	 * Removes the given spot from this collection, at the specified frame.
-	 * <p>
-	 * If the spot frame collection does not exist yet, nothing is done and
-	 * <code>false</code> is returned. If the spot cannot be found in the frame
-	 * content, nothing is done and <code>false</code> is returned.
-	 */
+
 	@Override
 	public boolean remove( final T object, final Integer frame )
 	{
-		final Set< T > objects = content.get( frame );
+		final Collection< T > objects = content.get( frame );
 		if ( null == objects ) { return false; }
 		return objects.remove( object );
 	}
 
-	/**
-	 * Marks all the content of this collection as visible or invisible,
-	 *
-	 * @param visible
-	 *            if true, all spots will be marked as visible.
-	 */
 	@Override
 	public void setVisible( final boolean visible )
 	{
@@ -164,7 +133,7 @@ public class DefaultTOCollection< T extends TrackableObject > implements MultiTh
 				public void run()
 				{
 
-					final Set< T > objects = content.get( frame );
+					final Collection< T > objects = content.get( frame );
 					for ( final T object : objects )
 					{
 						object.setVisible( visible );
@@ -190,25 +159,10 @@ public class DefaultTOCollection< T extends TrackableObject > implements MultiTh
 		}
 	}
 
-	/**
-	 * Returns the closest {@link Spot} to the given location (encoded as a
-	 * Spot), contained in the frame <code>frame</code>. If the frame has no
-	 * spot, return <code>null</code>.
-	 *
-	 * @param location
-	 *            the location to search for.
-	 * @param frame
-	 *            the frame to inspect.
-	 * @param visibleSpotsOnly
-	 *            if true, will only search though visible spots. If false, will
-	 *            search through all spots.
-	 * @return the closest spot to the specified location, member of this
-	 *         collection.
-	 */
 	@Override
 	public final T getClosestObject( final T location, final int frame, final boolean visibleObjectsOnly )
 	{
-		final Set< T > objects = content.get( frame );
+		final Collection< T > objects = content.get( frame );
 		if ( null == objects )
 			return null;
 		double d2;
@@ -233,27 +187,11 @@ public class DefaultTOCollection< T extends TrackableObject > implements MultiTh
 		return target;
 	}
 
-	/**
-	 * Returns the {@link Spot} at the given location (encoded as a Spot),
-	 * contained in the frame <code>frame</code>. A spot is returned <b>only</b>
-	 * if there exists a spot such that the given location is within the spot
-	 * radius. Otherwise <code>null</code> is returned.
-	 *
-	 * @param location
-	 *            the location to search for.
-	 * @param frame
-	 *            the frame to inspect.
-	 * @param visibleSpotsOnly
-	 *            if true, will only search though visible spots. If false, will
-	 *            search through all spots.
-	 * @return the closest spot such that the specified location is within its
-	 *         radius, member of this collection, or <code>null</code> is such a
-	 *         spots cannot be found.
-	 */
+
 	@Override
 	public final T getObjectAt( final T location, final int frame, final boolean visibleObjectsOnly )
 	{
-		final Set< T > objects = content.get( frame );
+		final Collection< T > objects = content.get( frame );
 		if ( null == objects || objects.isEmpty() ) { return null; }
 
 		final TreeMap< Double, T > distanceToObject = new TreeMap< Double, T >();
@@ -282,29 +220,11 @@ public class DefaultTOCollection< T extends TrackableObject > implements MultiTh
 		}
 	}
 
-	/**
-	 * Returns the <code>n</code> closest {@link Spot} to the given location
-	 * (encoded as a Spot), contained in the frame <code>frame</code>. If the
-	 * number of spots in the frame is exhausted, a shorter list is returned.
-	 * <p>
-	 * The list is ordered by increasing distance to the given location.
-	 *
-	 * @param location
-	 *            the location to search for.
-	 * @param frame
-	 *            the frame to inspect.
-	 * @param n
-	 *            the number of spots to search for.
-	 * @param visibleSpotsOnly
-	 *            if true, will only search though visible spots. If false, will
-	 *            search through all spots.
-	 * @return a new list, with of at most <code>n</code> spots, ordered by
-	 *         increasing distance from the specified location.
-	 */
+
 	@Override
 	public final List< T > getNClosestObjects( final T location, final int frame, int n, final boolean visibleObjectsOnly )
 	{
-		final Set< T > objects = content.get( frame );
+		final Collection< T > objects = content.get( frame );
 		final TreeMap< Double, T > distanceToObject = new TreeMap< Double, T >();
 
 		double d2;
@@ -330,14 +250,6 @@ public class DefaultTOCollection< T extends TrackableObject > implements MultiTh
 		return selectedSpots;
 	}
 
-	/**
-	 * Returns the total number of spots in this collection, over all frames.
-	 *
-	 * @param visibleSpotsOnly
-	 *            if true, will only count visible spots. If false count all
-	 *            spots.
-	 * @return the total number of spots in this collection.
-	 */
 	@Override
 	public final int getNObjects( final boolean visibleObjectsOnly )
 	{
@@ -356,20 +268,13 @@ public class DefaultTOCollection< T extends TrackableObject > implements MultiTh
 		else
 		{
 
-			for ( final Set< T > objects : content.values() )
+			for ( final Collection< T > objects : content.values() )
 				nobjects += objects.size();
 		}
 		return nobjects;
 	}
 
-	/**
-	 * Returns the number of spots at the given frame.
-	 *
-	 * @param visibleSpotsOnly
-	 *            if true, will only count visible spots. If false count all
-	 *            spots.
-	 * @return the number of spots at the given frame.
-	 */
+
 	@Override
 	public int getNObjects( final int frame, final boolean visibleObjectsOnly )
 	{
@@ -388,7 +293,7 @@ public class DefaultTOCollection< T extends TrackableObject > implements MultiTh
 		else
 		{
 
-			final Set< T > objects = content.get( frame );
+			final Collection< T > objects = content.get( frame );
 			if ( null == objects )
 				return 0;
 			else
@@ -396,23 +301,6 @@ public class DefaultTOCollection< T extends TrackableObject > implements MultiTh
 		}
 	}
 
-	/*
-	 * FEATURES
-	 */
-
-	/*
-	 * ITERABLE & co
-	 */
-
-	/**
-	 * Return an iterator that iterates over all the spots contained in this
-	 * collection.
-	 *
-	 * @param visibleSpotsOnly
-	 *            if true, the returned iterator will only iterate through
-	 *            visible spots. If false, it will iterate over all spots.
-	 * @return an iterator that iterates over this collection.
-	 */
 	@Override
 	public Iterator< T > iterator( final boolean visibleObjectsOnly )
 	{
@@ -426,21 +314,11 @@ public class DefaultTOCollection< T extends TrackableObject > implements MultiTh
 		}
 	}
 
-	/**
-	 * Return an iterator that iterates over the spots in the specified frame.
-	 *
-	 * @param visibleSpotsOnly
-	 *            if true, the returned iterator will only iterate through
-	 *            visible spots. If false, it will iterate over all spots.
-	 * @param frame
-	 *            the frame to iterate over.
-	 * @return an iterator that iterates over the content of a frame of this
-	 *         collection.
-	 */
+
 	@Override
 	public Iterator< T > iterator( final Integer frame, final boolean visibleObjectsOnly )
 	{
-		final Set< T > frameContent = content.get( frame );
+		final Collection< T > frameContent = content.get( frame );
 		if ( null == frameContent ) { return EMPTY_ITERATOR; }
 		if ( visibleObjectsOnly )
 		{
@@ -452,35 +330,14 @@ public class DefaultTOCollection< T extends TrackableObject > implements MultiTh
 		}
 	}
 
-	/**
-	 * A convenience methods that returns an {@link Iterable} wrapper for this
-	 * collection as a whole.
-	 *
-	 * @param visibleSpotsOnly
-	 *            if true, the iterable will contains only visible spots.
-	 *            Otherwise, it will contain all the spots.
-	 * @return an iterable view of this spot collection.
-	 */
+
 	@Override
 	public Iterable< T > iterable( final boolean visibleSpotsOnly )
 	{
 		return new WholeCollectionIterable( visibleSpotsOnly );
 	}
 
-	/**
-	 * A convenience methods that returns an {@link Iterable} wrapper for a
-	 * specific frame of this spot collection. The iterable is backed-up by the
-	 * actual collection content, so modifying it can have unexpected results.
-	 *
-	 * @param visibleSpotsOnly
-	 *            if true, the iterable will contains only visible spots of the
-	 *            specified frame. Otherwise, it will contain all the spots of
-	 *            the specified frame.
-	 * @param frame
-	 *            the frame of the content the returned iterable will wrap.
-	 * @return an iterable view of the content of a single frame of this spot
-	 *         collection.
-	 */
+
 	@Override
 	public Iterable< T > iterable( final int frame, final boolean visibleObjectsOnly )
 	{
@@ -498,19 +355,9 @@ public class DefaultTOCollection< T extends TrackableObject > implements MultiTh
 	 * SORTEDMAP
 	 */
 
-	/**
-	 * Stores the specified spots as the content of the specified frame. The
-	 * added spots are all marked as not visible. Their {@link Spot#FRAME} is
-	 * updated to be the specified frame.
-	 *
-	 * @param frame
-	 *            the frame to store these spots at. The specified spots replace
-	 *            the previous content of this frame, if any.
-	 * @param spots
-	 *            the spots to store.
-	 */
+
 	@Override
-	public void put( final int frame, final Collection< T > objects )
+	public Collection< T > put( final Integer frame, final Collection< T > objects )
 	{
 		final Set< T > value = new HashSet< T >( objects );
 		for ( final T object : value )
@@ -518,14 +365,9 @@ public class DefaultTOCollection< T extends TrackableObject > implements MultiTh
 			object.setFrame( frame );
 			object.setVisible( false );
 		}
-		content.put( frame, value );
+		return content.put( frame, value );
 	}
 
-	/**
-	 * Returns the first (lowest) frame currently in this collection.
-	 *
-	 * @return the first (lowest) frame currently in this collection.
-	 */
 	@Override
 	public Integer firstKey()
 	{
@@ -533,11 +375,6 @@ public class DefaultTOCollection< T extends TrackableObject > implements MultiTh
 		return content.firstKey();
 	}
 
-	/**
-	 * Returns the last (highest) frame currently in this collection.
-	 *
-	 * @return the last (highest) frame currently in this collection.
-	 */
 	@Override
 	public Integer lastKey()
 	{
@@ -545,32 +382,12 @@ public class DefaultTOCollection< T extends TrackableObject > implements MultiTh
 		return content.lastKey();
 	}
 
-	/**
-	 * Returns a NavigableSet view of the frames contained in this collection.
-	 * The set's iterator returns the keys in ascending order. The set is backed
-	 * by the map, so changes to the map are reflected in the set, and
-	 * vice-versa. The set supports element removal, which removes the
-	 * corresponding mapping from the map, via the Iterator.remove, Set.remove,
-	 * removeAll, retainAll, and clear operations. It does not support the add
-	 * or addAll operations.
-	 * <p>
-	 * The view's iterator is a "weakly consistent" iterator that will never
-	 * throw ConcurrentModificationException, and guarantees to traverse
-	 * elements as they existed upon construction of the iterator, and may (but
-	 * is not guaranteed to) reflect any modifications subsequent to
-	 * construction.
-	 *
-	 * @return a navigable set view of the frames in this collection.
-	 */
 	@Override
 	public NavigableSet< Integer > keySet()
 	{
 		return content.keySet();
 	}
 
-	/**
-	 * Removes all the content from this collection.
-	 */
 	@Override
 	public void clear()
 	{
@@ -622,7 +439,7 @@ public class DefaultTOCollection< T extends TrackableObject > implements MultiTh
 				hasNext = false;
 				return;
 			}
-			final Set< T > currentFrameContent = content.get( frameIterator.next() );
+			final Collection< T > currentFrameContent = content.get( frameIterator.next() );
 			contentIterator = currentFrameContent.iterator();
 			iterate();
 		}
@@ -688,7 +505,7 @@ public class DefaultTOCollection< T extends TrackableObject > implements MultiTh
 
 		private T next = null;
 
-		private Set< T > currentFrameContent;
+		private Collection< T > currentFrameContent;
 
 		public VisibleObjectsIterator()
 		{
@@ -769,7 +586,7 @@ public class DefaultTOCollection< T extends TrackableObject > implements MultiTh
 
 		private final Iterator< T > contentIterator;
 
-		public VisibleObjectsFrameIterator( final Set< T > frameContent )
+		public VisibleObjectsFrameIterator( final Collection< T > frameContent )
 		{
 			if ( null == frameContent )
 			{
@@ -847,7 +664,7 @@ public class DefaultTOCollection< T extends TrackableObject > implements MultiTh
 				@Override
 				public void run()
 				{
-					final Set< T > fc = content.get( frame );
+					final Collection< T > fc = content.get( frame );
 					final Set< T > nfc = new HashSet< T >( getNObjects( frame, true ) );
 
 					for ( final T object : fc )
@@ -880,6 +697,88 @@ public class DefaultTOCollection< T extends TrackableObject > implements MultiTh
 		return ns;
 	}
 
+	@Override
+	public Comparator< ? super Integer > comparator()
+	{
+		return content.comparator();
+	}
+
+	@Override
+	public Set< Entry< Integer, Collection< T >>> entrySet()
+	{
+		return content.entrySet();
+	}
+
+	@Override
+	public SortedMap< Integer, Collection< T >> headMap( final Integer toFrame )
+	{
+		return content.headMap( toFrame );
+	}
+
+	@Override
+	public SortedMap< Integer, Collection< T >> subMap( final Integer fromFrame, final Integer toFrame )
+	{
+		return content.subMap( fromFrame, toFrame );
+	}
+
+	@Override
+	public SortedMap< Integer, Collection< T >> tailMap( final Integer fromFrame )
+	{
+		return content.tailMap( fromFrame );
+	}
+
+	@Override
+	public Collection< Collection< T >> values()
+	{
+		return content.values();
+	}
+
+	@Override
+	public boolean containsKey( final Object frame )
+	{
+		return content.containsKey( frame );
+	}
+
+	@Override
+	public boolean containsValue( final Object value )
+	{
+		return content.containsValue( value );
+	}
+
+	@Override
+	public Collection< T > get( final Object frame )
+	{
+		return content.get( frame );
+	}
+
+	@Override
+	public boolean isEmpty()
+	{
+		return content.isEmpty();
+	}
+
+	@Override
+	public void putAll( final Map< ? extends Integer, ? extends Collection< T >> map )
+	{
+		content.putAll( map );
+	}
+
+	@Override
+	public Collection< T > remove( final Object frame )
+	{
+		return content.remove( frame );
+	}
+
+	@Override
+	public int size()
+	{
+		return content.size();
+	}
+
+	/*
+	 * INNER CLASSES
+	 */
+
 	/**
 	 * A convenience wrapper that implements {@link Iterable} for this spot
 	 * collection.
@@ -908,10 +807,6 @@ public class DefaultTOCollection< T extends TrackableObject > implements MultiTh
 		}
 	}
 
-	/**
-	 * A convenience wrapper that implements {@link Iterable} for this spot
-	 * collection.
-	 */
 	private final class FrameVisibleIterable implements Iterable< T >
 	{
 
@@ -948,5 +843,4 @@ public class DefaultTOCollection< T extends TrackableObject > implements MultiTh
 		public void remove()
 		{}
 	};
-
 }
