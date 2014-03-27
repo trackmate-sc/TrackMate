@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.tracking.spot.SpotTracker;
 
 public class TrackerKeys {
 

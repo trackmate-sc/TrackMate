@@ -19,7 +19,7 @@ import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
-import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
+import fiji.plugin.trackmate.tracking.factories.TrackerFactory;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 
 /**
@@ -99,7 +99,7 @@ public class Settings
 	public SpotDetectorFactory< ? > detectorFactory;
 
 	/** The the tracker to use. */
-	public SpotTrackerFactory trackerFactory;
+	public TrackerFactory trackerFactory;
 
 	public Map< String, Object > detectorSettings = new HashMap< String, Object >();
 

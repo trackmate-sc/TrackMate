@@ -7,8 +7,9 @@ import java.util.Random;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.tracking.dumb.DumbTracker;
+import fiji.plugin.trackmate.tracking.spot.DefaultSpotCollection;
+import fiji.plugin.trackmate.tracking.spot.SpotCollection;
+import fiji.plugin.trackmate.tracking.trackers.DumbTracker;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
@@ -21,7 +22,7 @@ public class DumbTracker_TestDrive
 		final double ranAmpl = 0.1;
 
 		final Random ran = new Random( 5l );
-		final SpotCollection spots = new SpotCollection();
+		final SpotCollection spots = new DefaultSpotCollection();
 
 		for ( int i = 0; i < 10; i++ )
 		{

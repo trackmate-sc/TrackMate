@@ -4,11 +4,12 @@ import javax.swing.Icon;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.panels.InitFilterPanel;
+import fiji.plugin.trackmate.tracking.spot.SpotCollection;
 
 public class InitFilterDescriptor implements WizardPanelDescriptor
 {
@@ -56,11 +57,11 @@ public class InitFilterDescriptor implements WizardPanelDescriptor
 				final long start = System.currentTimeMillis();
 				final SpotCollection spots = trackmate.getModel().getSpots();
 
-				final double[] values = new double[ spots.getNSpots( false ) ];
+				final double[] values = new double[ spots.getNObjects( false ) ];
 				int index = 0;
 				for ( final Spot spot : spots.iterable( false ) )
 				{
-					values[ index++ ] = spot.getFeature( Spot.QUALITY );
+					values[ index++ ] = spot.getFeature( TrackMateConstants.QUALITY );
 				}
 				component.setValues( values );
 

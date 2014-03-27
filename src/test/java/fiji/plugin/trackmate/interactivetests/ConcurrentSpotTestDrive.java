@@ -8,10 +8,10 @@ import java.util.Iterator;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.providers.DetectorProvider;
+import fiji.plugin.trackmate.tracking.spot.SpotCollection;
 
 public class ConcurrentSpotTestDrive {
 

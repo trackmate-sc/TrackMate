@@ -17,6 +17,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.ModelChangeListener;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer;
 
 public class EdgeTimeAndLocationAnalyzerTest
@@ -56,15 +57,15 @@ public class EdgeTimeAndLocationAnalyzerTest
 				for ( int j = 0; j <= DEPTH; j++ )
 				{
 					final Spot spot = new Spot( i + j, i + j, i + j, 1d, -1d );
-					spot.putFeature( Spot.POSITION_T, Double.valueOf( j ) );
+					spot.putFeature( TrackMateConstants.POSITION_T, Double.valueOf( j ) );
 					model.addSpotTo( spot, j );
 					if ( null != previous )
 					{
 						final DefaultWeightedEdge edge = model.addEdge( previous, spot, j );
-						final double xcurrent = spot.getFeature( Spot.POSITION_X ).doubleValue();
-						final double xprevious = previous.getFeature( Spot.POSITION_X ).doubleValue();
+						final double xcurrent = spot.getFeature( TrackMateConstants.POSITION_X ).doubleValue();
+						final double xprevious = previous.getFeature( TrackMateConstants.POSITION_X ).doubleValue();
 						edgePos.put( edge, 0.5 * ( xcurrent + xprevious ) );
-						edgeTime.put( edge, 0.5 * ( spot.getFeature( Spot.POSITION_T ) + previous.getFeature( Spot.POSITION_T ) ) );
+						edgeTime.put( edge, 0.5 * ( spot.getFeature( TrackMateConstants.POSITION_T ) + previous.getFeature( TrackMateConstants.POSITION_T ) ) );
 
 					}
 					previous = spot;
@@ -161,7 +162,7 @@ public class EdgeTimeAndLocationAnalyzerTest
 		model.beginUpdate();
 		try
 		{
-			aspot.putFeature( Spot.POSITION_X, -1000d );
+			aspot.putFeature( TrackMateConstants.POSITION_X, -1000d );
 			model.updateFeatures( aspot );
 		}
 		finally

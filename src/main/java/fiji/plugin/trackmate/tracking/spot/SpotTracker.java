@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tracking;
+package fiji.plugin.trackmate.tracking.spot;
 
 import net.imglib2.algorithm.OutputAlgorithm;
 

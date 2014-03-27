@@ -84,7 +84,7 @@ public class FeatureModel
 	{
 		this.model = model;
 		// Adds the base spot features
-		declareSpotFeatures( Spot.FEATURES, Spot.FEATURE_NAMES, Spot.FEATURE_SHORT_NAMES, Spot.FEATURE_DIMENSIONS, Spot.IS_INT );
+		declareSpotFeatures( TrackMateConstants.FEATURES, TrackMateConstants.FEATURE_NAMES, TrackMateConstants.FEATURE_SHORT_NAMES, TrackMateConstants.FEATURE_DIMENSIONS, TrackMateConstants.IS_INT );
 	}
 
 	/*

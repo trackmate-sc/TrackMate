@@ -15,6 +15,8 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.ModelChangeListener;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackMateConstants;
+import fiji.plugin.trackmate.tracking.TrackableObjectUtils;
 
 public class TrackBranchingAnalyzerTest
 {
@@ -244,7 +246,7 @@ public class TrackBranchingAnalyzerTest
 		final Integer firstKey = oldKeys.iterator().next();
 		final Spot firstSpot = model.getTrackModel().trackSpots( firstKey ).iterator().next();
 		Spot newSpot = null;
-		final int firstFrame = firstSpot.getFeature( Spot.FRAME ).intValue();
+		final int firstFrame = firstSpot.getFeature( TrackMateConstants.FRAME ).intValue();
 		model.beginUpdate();
 		try
 		{
@@ -313,7 +315,7 @@ public class TrackBranchingAnalyzerTest
 		}
 
 		// Get the last spot in time
-		final TreeSet< Spot > track = new TreeSet< Spot >( Spot.frameComparator );
+		final TreeSet< Spot > track = new TreeSet< Spot >( TrackableObjectUtils.frameComparator() );
 		track.addAll( model.getTrackModel().trackSpots( splittingTrackID ) );
 		final Spot lastSpot = track.last();
 
@@ -322,7 +324,7 @@ public class TrackBranchingAnalyzerTest
 		model.beginUpdate();
 		try
 		{
-			model.moveSpotFrom( lastSpot, lastSpot.getFeature( Spot.FRAME ).intValue(), 0 );
+			model.moveSpotFrom( lastSpot, lastSpot.getFeature( TrackMateConstants.FRAME ).intValue(), 0 );
 		}
 		finally
 		{

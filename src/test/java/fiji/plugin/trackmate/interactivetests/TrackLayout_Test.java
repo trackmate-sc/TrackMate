@@ -1,7 +1,7 @@
 package fiji.plugin.trackmate.interactivetests;
 
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
 public class TrackLayout_Test {

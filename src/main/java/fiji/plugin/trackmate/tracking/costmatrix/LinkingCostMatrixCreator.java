@@ -11,7 +11,8 @@ import java.util.List;
 import java.util.Map;
 
 import Jama.Matrix;
-import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.tracking.TrackableObject;
+import fiji.plugin.trackmate.tracking.costfunction.CostCalculator;
 import fiji.plugin.trackmate.tracking.costfunction.LinkingCostFunction;
 
 /**
@@ -28,26 +29,30 @@ import fiji.plugin.trackmate.tracking.costfunction.LinkingCostFunction;
  * @author Nicholas Perry
  *
  */
-public class LinkingCostMatrixCreator extends LAPTrackerCostMatrixCreator {
+public class LinkingCostMatrixCreator<T extends TrackableObject> extends LAPTrackerCostMatrixCreator {
 
 	/** The Spots belonging to time frame t. */
-	protected final List<Spot> t0;
+	protected final List<T> t0;
 	/** The Spots belonging to time frame t+1. */
-	protected final List<Spot> t1;
+	protected final List<T> t1;
 	/** The total number of Spots in time frames t and t+1. */
 	protected int numSpots;
+	
+	/** CostCalculator used to compute cost-matrix **/
+	protected CostCalculator<T> costCalculator;
 
 	/*
 	 * CONSTRUCTOR
 	 */
 
 
-	public LinkingCostMatrixCreator(final List<Spot> t0, final List<Spot> t1, final Map<String, Object> settings) {
+	public LinkingCostMatrixCreator(final CostCalculator<T> costCalculator, final List<T> t0, final List<T> t1, final Map<String, Object> settings) {
 		super(settings);
 		this.t0 = t0;
 		this.t1 = t1;
 		this.numSpots = t0.size() + t1.size();
 		this.costs = new Matrix(numSpots, numSpots);
+		this.costCalculator = costCalculator;
 	}
 
 	/*
@@ -57,7 +62,7 @@ public class LinkingCostMatrixCreator extends LAPTrackerCostMatrixCreator {
 	@Override
 	public boolean checkInput() {
 		boolean ok = true;
-		StringBuilder errorHolder = new StringBuilder();
+		final StringBuilder errorHolder = new StringBuilder();
 		ok = ok & checkParameter(settings, KEY_LINKING_MAX_DISTANCE, Double.class, errorHolder);
 		ok = ok & checkParameter(settings, KEY_LINKING_FEATURE_PENALTIES, Map.class, errorHolder);
 		ok = ok & checkParameter(settings, KEY_BLOCKING_VALUE, Double.class, errorHolder);
@@ -73,7 +78,7 @@ public class LinkingCostMatrixCreator extends LAPTrackerCostMatrixCreator {
 	@Override
 	public boolean process() {
 		
-		long start = System.currentTimeMillis();
+		final long start = System.currentTimeMillis();
 
 		// Deal with special cases:
 
@@ -105,12 +110,12 @@ public class LinkingCostMatrixCreator extends LAPTrackerCostMatrixCreator {
 
 
 		// 1 - Fill in quadrants
-		Matrix topLeft = getLinkingCostSubMatrix();
+		final Matrix topLeft = getLinkingCostSubMatrix();
 		final double alternativeObjectLinkingCostFactor = (Double) settings.get(KEY_ALTERNATIVE_LINKING_COST_FACTOR);
 		final double cutoff = alternativeObjectLinkingCostFactor  * getMaxScore(topLeft);
-		Matrix topRight = getAlternativeScores(t0.size(), cutoff);
-		Matrix bottomLeft = getAlternativeScores(t1.size(), cutoff);
-		Matrix bottomRight = getLowerRight(topLeft, cutoff);
+		final Matrix topRight = getAlternativeScores(t0.size(), cutoff);
+		final Matrix bottomLeft = getAlternativeScores(t1.size(), cutoff);
+		final Matrix bottomRight = getLowerRight(topLeft, cutoff);
 
 		// 2 - Fill in complete cost matrix by quadrant
 		costs.setMatrix(0, t0.size() - 1, 0, t1.size() - 1, topLeft);
@@ -120,7 +125,7 @@ public class LinkingCostMatrixCreator extends LAPTrackerCostMatrixCreator {
 
 		//printMatrix(costs, "linking costs");
 
-		long end = System.currentTimeMillis();
+		final long end = System.currentTimeMillis();
 		processingTime = end - start;
 		return true;
 	}
@@ -128,7 +133,7 @@ public class LinkingCostMatrixCreator extends LAPTrackerCostMatrixCreator {
 	/**
 	 * Gets the max score in a matrix m.
 	 */
-	private double getMaxScore(Matrix m) {
+	private double getMaxScore(final Matrix m) {
 		final double blockingValue = (Double) settings.get(KEY_BLOCKING_VALUE);
 		double max = Double.NEGATIVE_INFINITY;
 
@@ -146,7 +151,7 @@ public class LinkingCostMatrixCreator extends LAPTrackerCostMatrixCreator {
 	 * Creates a sub-matrix which holds the linking scores between objects, and returns it.
 	 */
 	private Matrix getLinkingCostSubMatrix() {
-		LinkingCostFunction linkingCosts = new LinkingCostFunction(settings);
+		final LinkingCostFunction<T> linkingCosts = new LinkingCostFunction<T>(costCalculator, settings);
 		return linkingCosts.getCostFunction(t0, t1);
 	}
 }

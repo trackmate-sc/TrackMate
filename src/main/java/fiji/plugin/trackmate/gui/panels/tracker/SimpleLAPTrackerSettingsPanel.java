@@ -40,7 +40,7 @@ import javax.swing.SwingConstants;
 
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
-import fiji.plugin.trackmate.tracking.LAPTracker;
+import fiji.plugin.trackmate.tracking.trackers.LAPTracker;
 
 /**
  * A simplified configuration panel for the {@link LAPTracker}.

@@ -25,6 +25,7 @@ import net.imglib2.util.Util;
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.TrackMateConstants;
 
 /**
  * List of static utilities for the {@link TrackMate} trackmate
@@ -190,7 +191,7 @@ public class TMUtils {
 	 */
 	public static void translateSpots(final Collection<Spot> spots, final double dx, final double dy, final double dz) {
 		final double[] dval = new double[] { dx, dy, dz };
-		final String[] features = new String[] { Spot.POSITION_X, Spot.POSITION_Y, Spot.POSITION_Z };
+		final String[] features = new String[] { TrackMateConstants.POSITION_X, TrackMateConstants.POSITION_Y, TrackMateConstants.POSITION_Z };
 		Double val;
 		for (final Spot spot : spots) {
 			for (int i = 0; i < features.length; i++) {
@@ -325,9 +326,9 @@ public class TMUtils {
 	 * elements of the specified double array.
 	 */
 	public static final void localize(final Spot spot, final double[] coords) {
-		coords[0] = spot.getFeature(Spot.POSITION_X).doubleValue();
-		coords[1] = spot.getFeature(Spot.POSITION_Y).doubleValue();
-		coords[2] = spot.getFeature(Spot.POSITION_Z).doubleValue();
+		coords[0] = spot.getFeature(TrackMateConstants.POSITION_X).doubleValue();
+		coords[1] = spot.getFeature(TrackMateConstants.POSITION_Y).doubleValue();
+		coords[2] = spot.getFeature(TrackMateConstants.POSITION_Z).doubleValue();
 	}
 
 	/**

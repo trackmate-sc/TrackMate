@@ -2,12 +2,14 @@ package fiji.plugin.trackmate.interactivetests;
 
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzer;
 import fiji.plugin.trackmate.gui.panels.components.ColorByFeatureGUIPanel.Category;
 import fiji.plugin.trackmate.gui.panels.components.FilterGuiPanel;
+import fiji.plugin.trackmate.tracking.spot.DefaultSpotCollection;
+import fiji.plugin.trackmate.tracking.spot.SpotCollection;
 import fiji.plugin.trackmate.util.SpotNeighborhood;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
@@ -103,7 +105,7 @@ public class SpotDisplayer3DTestDrive
 		for ( int i = 0; i < N_BLOBS; i++ )
 		{
 			spot = new Spot( centers.get( i )[ 0 ], centers.get( i )[ 1 ], centers.get( i )[ 2 ], RADIUS, -1d, "Spot " + i );
-			spot.putFeature( Spot.POSITION_T, Double.valueOf( 0 ) );
+			spot.putFeature( TrackMateConstants.POSITION_T, Double.valueOf( 0 ) );
 			spots.add( spot );
 		}
 
@@ -114,7 +116,7 @@ public class SpotDisplayer3DTestDrive
 			System.out.println( s );
 
 		// Launch renderer
-		final SpotCollection allSpots = new SpotCollection();
+		final SpotCollection allSpots = new DefaultSpotCollection();
 		allSpots.put( 0, spots );
 		final TrackMate trackmate = new TrackMate();
 		trackmate.getModel().setSpots( allSpots, false );
@@ -172,7 +174,7 @@ public class SpotDisplayer3DTestDrive
 		frame.setVisible( true );
 
 		// Add a panel
-		gui.addFilterPanel( Spot.POSITION_Z );
+		gui.addFilterPanel( TrackMateConstants.POSITION_Z );
 
 	}
 

@@ -47,7 +47,9 @@ import fiji.plugin.trackmate.SelectionChangeListener;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.features.SpotFeatureGrapher;
+import fiji.plugin.trackmate.tracking.TrackableObjectUtils;
 import fiji.plugin.trackmate.util.OnRequestUpdater;
 import fiji.plugin.trackmate.util.OnRequestUpdater.Refreshable;
 import fiji.plugin.trackmate.util.TMUtils;
@@ -185,7 +187,7 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 		 * which is likely to happen.
 		 */
 		final List< Spot > sortedSpots = new ArrayList< Spot >( spotSelection );
-		Collections.sort( sortedSpots, Spot.frameComparator );
+		Collections.sort( sortedSpots, TrackableObjectUtils.frameComparator() );
 
 		@SuppressWarnings( "serial" )
 		final DefaultTableModel dm = new DefaultTableModel()
@@ -410,7 +412,7 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 
 		final List< String > features = new ArrayList< String >( model.getFeatureModel().getSpotFeatures() );
 		final Map< String, String > featureNames = model.getFeatureModel().getSpotFeatureShortNames();
-		featureSelectionPanel = new FeaturePlotSelectionPanel( Spot.POSITION_T, features, featureNames );
+		featureSelectionPanel = new FeaturePlotSelectionPanel( TrackMateConstants.POSITION_T, features, featureNames );
 
 		setLayout( new BorderLayout() );
 		add( scrollTable, BorderLayout.CENTER );

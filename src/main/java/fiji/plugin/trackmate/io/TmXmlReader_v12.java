@@ -110,7 +110,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.detection.DogDetectorFactory;
 import fiji.plugin.trackmate.detection.DownsampleLogDetectorFactory;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
@@ -131,11 +131,13 @@ import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.providers.ViewProvider;
-import fiji.plugin.trackmate.tracking.FastLAPTrackerFactory;
-import fiji.plugin.trackmate.tracking.SimpleFastLAPTrackerFactory;
-import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
-import fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTrackerFactory;
+import fiji.plugin.trackmate.tracking.factories.FastLAPTrackerFactory;
+import fiji.plugin.trackmate.tracking.factories.NearestNeighborTrackerFactory;
+import fiji.plugin.trackmate.tracking.factories.SimpleFastLAPTrackerFactory;
+import fiji.plugin.trackmate.tracking.factories.TrackerFactory;
+import fiji.plugin.trackmate.tracking.spot.DefaultSpotCollection;
+import fiji.plugin.trackmate.tracking.spot.SpotCollection;
+import fiji.plugin.trackmate.tracking.spot.SpotTracker;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 
@@ -283,7 +285,7 @@ public class TmXmlReader_v12 extends TmXmlReader {
 		if (null != filteredIDs) {
 			for (final Integer frame : filteredIDs.keySet()) {
 				for (final Integer ID : filteredIDs.get(frame)) {
-					cache.get(ID).putFeature(SpotCollection.VISIBLITY, SpotCollection.ONE);
+					cache.get(ID).putFeature(TrackMateConstants.VISIBILITY, TrackMateConstants.ONE);
 				}
 			}
 		}
@@ -316,7 +318,7 @@ public class TmXmlReader_v12 extends TmXmlReader {
 	 */
 	private void declareDefaultFeatures(final FeatureModel fm) {
 		// Spots:
-		fm.declareSpotFeatures( Spot.FEATURES, Spot.FEATURE_NAMES, Spot.FEATURE_SHORT_NAMES, Spot.FEATURE_DIMENSIONS, Spot.IS_INT );
+		fm.declareSpotFeatures( TrackMateConstants.FEATURES, TrackMateConstants.FEATURE_NAMES, TrackMateConstants.FEATURE_SHORT_NAMES, TrackMateConstants.FEATURE_DIMENSIONS, TrackMateConstants.IS_INT );
 		fm.declareSpotFeatures(SpotContrastAndSNRAnalyzerFactory.FEATURES, SpotContrastAndSNRAnalyzerFactory.FEATURE_NAMES,
  SpotContrastAndSNRAnalyzerFactory.FEATURE_SHORT_NAMES, SpotContrastAndSNRAnalyzerFactory.FEATURE_DIMENSIONS, SpotContrastAndSNRAnalyzerFactory.IS_INT );
 		fm.declareSpotFeatures(SpotMorphologyAnalyzerFactory.FEATURES, SpotMorphologyAnalyzerFactory.FEATURE_NAMES,
@@ -811,7 +813,7 @@ public class TmXmlReader_v12 extends TmXmlReader {
 				trackerKey = SimpleFastLAPTrackerFactory.TRACKER_KEY;
 			}
 		}
-		SpotTrackerFactory factory = provider.getFactory( trackerKey );
+		TrackerFactory factory = provider.getFactory( trackerKey );
 		if ( null == factory )
 		{
 			logger.error( "\nUnknown tracker: " + trackerClassName + ".\n" );
@@ -965,7 +967,7 @@ public class TmXmlReader_v12 extends TmXmlReader {
 
 		int currentFrame = 0;
 		ArrayList<Spot> spotList;
-		final SpotCollection allSpots = new SpotCollection();
+		final SpotCollection allSpots = new DefaultSpotCollection();
 
 		for (final Element currentFrameContent : frameContent) {
 

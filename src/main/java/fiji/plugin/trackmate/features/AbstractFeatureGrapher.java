@@ -21,8 +21,8 @@ import javax.swing.JScrollPane;
 import org.jfree.chart.renderer.InterpolatePaintScale;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
-import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.util.ExportableChartPanel;
 
@@ -131,7 +131,7 @@ public abstract class AbstractFeatureGrapher {
 	protected final List<DefaultWeightedEdge> getInsideEdges(final Collection<Spot> spots) {
 		int nspots = spots.size();
 		ArrayList<DefaultWeightedEdge> edges = new ArrayList<DefaultWeightedEdge>(nspots);
-		TrackModel trackModel = model.getTrackModel();
+		TrackModel<Spot> trackModel = model.getTrackModel();
 		for (DefaultWeightedEdge edge : trackModel.edgeSet()) {
 			Spot source = trackModel.getEdgeSource(edge);
 			Spot target = trackModel.getEdgeTarget(edge);

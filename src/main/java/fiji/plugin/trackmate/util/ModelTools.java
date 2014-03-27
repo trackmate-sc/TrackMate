@@ -12,8 +12,9 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTracker;
+import fiji.plugin.trackmate.tracking.spot.DefaultSpotCollection;
+import fiji.plugin.trackmate.tracking.spot.SpotCollection;
+import fiji.plugin.trackmate.tracking.trackers.NearestNeighborTracker;
 
 /**
  * A collection of static utilities made to ease the manipulation of a
@@ -73,10 +74,10 @@ public class ModelTools {
 		 * Configure tracker
 		 */
 
-		final SpotCollection spots = SpotCollection.fromCollection(selectionModel.getSpotSelection());
+		final SpotCollection spots = DefaultSpotCollection.fromCollection(selectionModel.getSpotSelection());
 		final Map<String, Object> settings = new HashMap<String, Object>(1);
 		settings.put(KEY_LINKING_MAX_DISTANCE, Double.POSITIVE_INFINITY);
-		final NearestNeighborTracker tracker = new NearestNeighborTracker( spots, settings );
+		final NearestNeighborTracker<Spot> tracker = new NearestNeighborTracker<Spot>( spots, settings );
 		tracker.setNumThreads( 1 );
 
 		/*

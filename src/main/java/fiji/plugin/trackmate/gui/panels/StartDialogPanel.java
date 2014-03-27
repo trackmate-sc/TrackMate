@@ -14,8 +14,8 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 
-import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
 
 public class StartDialogPanel extends ActionListenablePanel {

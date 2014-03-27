@@ -54,8 +54,6 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
-import fiji.plugin.trackmate.Spot;
-
 public class LAPUtils {
 
 	private static final Border RED_BORDER = new LineBorder(Color.RED);
@@ -117,20 +115,20 @@ public class LAPUtils {
 		final Map<String, Object> settings = new HashMap<String, Object>();
 		// Linking
 		settings.put(KEY_LINKING_MAX_DISTANCE, DEFAULT_LINKING_MAX_DISTANCE);
-		settings.put(KEY_LINKING_FEATURE_PENALTIES, DEFAULT_LINKING_FEATURE_PENALTIES);
+		settings.put(KEY_LINKING_FEATURE_PENALTIES, new HashMap<Object, Object>(DEFAULT_LINKING_FEATURE_PENALTIES));
 		// Gap closing
 		settings.put(KEY_ALLOW_GAP_CLOSING, DEFAULT_ALLOW_GAP_CLOSING);
 		settings.put(KEY_GAP_CLOSING_MAX_FRAME_GAP, DEFAULT_GAP_CLOSING_MAX_FRAME_GAP);
 		settings.put(KEY_GAP_CLOSING_MAX_DISTANCE, DEFAULT_GAP_CLOSING_MAX_DISTANCE);
-		settings.put(KEY_GAP_CLOSING_FEATURE_PENALTIES, DEFAULT_GAP_CLOSING_FEATURE_PENALTIES);
+		settings.put(KEY_GAP_CLOSING_FEATURE_PENALTIES, new HashMap<Object, Object>(DEFAULT_GAP_CLOSING_FEATURE_PENALTIES));
 		// Track splitting
 		settings.put(KEY_ALLOW_TRACK_SPLITTING, DEFAULT_ALLOW_TRACK_SPLITTING);
 		settings.put(KEY_SPLITTING_MAX_DISTANCE, DEFAULT_SPLITTING_MAX_DISTANCE);
-		settings.put(KEY_SPLITTING_FEATURE_PENALTIES, DEFAULT_SPLITTING_FEATURE_PENALTIES);
+		settings.put(KEY_SPLITTING_FEATURE_PENALTIES, new HashMap<Object, Object>(DEFAULT_SPLITTING_FEATURE_PENALTIES));
 		// Track merging
 		settings.put(KEY_ALLOW_TRACK_MERGING, DEFAULT_ALLOW_TRACK_MERGING);
 		settings.put(KEY_MERGING_MAX_DISTANCE, DEFAULT_MERGING_MAX_DISTANCE);
-		settings.put(KEY_MERGING_FEATURE_PENALTIES, DEFAULT_MERGING_FEATURE_PENALTIES);
+		settings.put(KEY_MERGING_FEATURE_PENALTIES, new HashMap<Object, Object>(DEFAULT_MERGING_FEATURE_PENALTIES));
 		// Others
 		settings.put(KEY_BLOCKING_VALUE, DEFAULT_BLOCKING_VALUE);
 		settings.put(KEY_ALTERNATIVE_LINKING_COST_FACTOR, DEFAULT_ALTERNATIVE_LINKING_COST_FACTOR);
@@ -153,54 +151,6 @@ public class LAPUtils {
 		return str;
 
 	}
-
-	/**
-	 * Compute the cost to link two spots, in the default way for the TrackMate trackmate.
-	 * <p>
-	 * This cost is calculated as follow:
-	 * <ul>
-	 * 	<li> The distance between the two spots <code>D</code> is calculated
-	 * 	<li> If the spots are separated by more than the distance cutoff, the cost is
-	 * set to be the blocking value. If not,
-	 * 	<li> For each feature in the map, a penalty <code>p</code> is calculated as
-	 * <code>p = 3 × α × |f1-f2| / (f1+f2)</code>, where <code>α</code> is the factor
-	 * associated to the feature in the map. This expression is such that:
-	 * 	<ul>
-	 * 	<li> there is no penalty if the 2 feature values <code>f1</code> and <code>f2</code>
-	 * are the same;
-	 * 	<li> that, with a factor of 1, the penalty if 1 is one value is the double of the other;
-	 * 	<li>the penalty is 2 if one is 5 times the other one.
-	 * 	</ul>
-	 * 	<li> All penalties are summed, to form <code>P = (1 + ∑ p )</code>
-	 *  <li> The cost is set to the square of the product: <code>C = ( D × P )²</code>
-	 * </ul>
-	 * For instance: if 2 spots differ by twice the value in a feature which is
-	 * in the penalty map with a factor of 1, they will <i>look</i> as if they were
-	 * twice as far.
-	 */
-	public static final double computeLinkingCostFor(final Spot s0, final Spot s1,
-			final double distanceCutOff, final double blockingValue, final Map<String, Double> featurePenalties) {
-		final double d2 = s0.squareDistanceTo(s1);
-
-		// Distance threshold
-		if (d2 > distanceCutOff * distanceCutOff) {
-			return blockingValue;
-		}
-
-		double penalty = 1;
-		for (final String feature : featurePenalties.keySet()) {
-			final double ndiff = s0.normalizeDiffTo(s1, feature);
-			if (Double.isNaN(ndiff))
-				continue;
-			final double factor = featurePenalties.get(feature);
-			penalty += factor * 1.5 * ndiff;
-		}
-
-		// Set score
-		return d2 * penalty * penalty;
-	}
-
-
 
 	/**
 	 * @return true if the settings map can be used with the LAP trackers. We do not check that all the spot features

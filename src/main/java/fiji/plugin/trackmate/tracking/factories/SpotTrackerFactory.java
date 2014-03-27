@@ -1,13 +1,19 @@
-package fiji.plugin.trackmate.tracking;
+package fiji.plugin.trackmate.tracking.factories;
+
 
 import java.util.Map;
 
 import org.jdom2.Element;
 
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMateModule;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
+import fiji.plugin.trackmate.tracking.TrackableObject;
+import fiji.plugin.trackmate.tracking.TrackableObjectCollection;
+import fiji.plugin.trackmate.tracking.TrackerKeys;
+import fiji.plugin.trackmate.tracking.spot.SpotCollection;
+import fiji.plugin.trackmate.tracking.spot.SpotTracker;
+import fiji.plugin.trackmate.tracking.trackers.Tracker;
 
 public interface SpotTrackerFactory extends TrackMateModule
 {
@@ -22,7 +28,7 @@ public interface SpotTrackerFactory extends TrackMateModule
 	 *            the settings map configuring the tracker.
 	 * @return a new {@link SpotTracker} instance.
 	 */
-	public SpotTracker create( final SpotCollection spots, final Map< String, Object > settings );
+	public <T extends TrackableObject> Tracker<T> create( final TrackableObjectCollection<T> spots, final Map< String, Object > settings );
 
 	/**
 	 * Returns a new GUI panel able to configure the settings suitable for the
@@ -31,7 +37,7 @@ public interface SpotTrackerFactory extends TrackMateModule
 	 * @param model the model used to
 	 * @return
 	 */
-	public ConfigurationPanel getTrackerConfigurationPanel( final Model model );
+	public <T extends TrackableObject> ConfigurationPanel getTrackerConfigurationPanel( final Model model );
 
 	/**
 	 * Marshalls a settings map to a JDom element, ready for saving to XML. The

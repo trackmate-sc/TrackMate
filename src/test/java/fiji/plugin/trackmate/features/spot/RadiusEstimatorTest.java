@@ -17,7 +17,7 @@ import org.junit.Test;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.util.SpotNeighborhood;
 
-public class RadiusEstimatorTest< T extends NativeType< T > & RealType< T >>
+public class RadiusEstimatorTest
 {
 
 	/** We want to retrieve real radius with a tolerance of: */
@@ -117,6 +117,6 @@ public class RadiusEstimatorTest< T extends NativeType< T > & RealType< T >>
 	public static < T extends NativeType< T > & RealType< T >> void main( final String[] args )
 	{
 		ImageJ.main( args );
-		new RadiusEstimatorTest< T >().exampleEstimation();
+		new RadiusEstimatorTest().exampleEstimation();
 	}
 }

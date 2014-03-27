@@ -15,6 +15,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.ModelChangeListener;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.features.edges.EdgeVelocityAnalyzer;
 
 public class EdgeVelocityAnalyzerTest
@@ -43,7 +44,7 @@ public class EdgeVelocityAnalyzerTest
 		model = new Model();
 		model.beginUpdate();
 
-		final String[] posFeats = Spot.POSITION_FEATURES;
+		final String[] posFeats = TrackMateConstants.POSITION_FEATURES;
 
 		try
 		{
@@ -59,7 +60,7 @@ public class EdgeVelocityAnalyzerTest
 					spot.putFeature( posFeats[ i % 3 ], Double.valueOf( i + j ) ); // rotate
 																					// displacement
 																					// dimension
-					spot.putFeature( Spot.POSITION_T, Double.valueOf( 2 * j ) );
+					spot.putFeature( TrackMateConstants.POSITION_T, Double.valueOf( 2 * j ) );
 					model.addSpotTo( spot, j );
 					if ( null != previous )
 					{
@@ -147,7 +148,7 @@ public class EdgeVelocityAnalyzerTest
 		model.beginUpdate();
 		try
 		{
-			aspot.putFeature( Spot.POSITION_X, -1000d );
+			aspot.putFeature( TrackMateConstants.POSITION_X, -1000d );
 			model.updateFeatures( aspot );
 		}
 		finally

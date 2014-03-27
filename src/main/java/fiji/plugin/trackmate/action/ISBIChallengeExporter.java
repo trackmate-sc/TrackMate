@@ -18,11 +18,13 @@ import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import org.scijava.plugin.Plugin;
 
+import fiji.plugin.trackmate.FeatureHolderUtils;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.io.IOUtils;
@@ -135,14 +137,14 @@ public class ISBIChallengeExporter extends AbstractTMAction {
 			final int trackindex = visibleTracks[i];
 			final Set<Spot> track = model.getTrackModel().trackSpots(trackindex);
 			// Sort them by time
-			final TreeSet<Spot> sortedTrack = new TreeSet<Spot>(Spot.timeComparator);
+			final TreeSet<Spot> sortedTrack = new TreeSet<Spot>(FeatureHolderUtils.featureComparator(TrackMateConstants.POSITION_T));
 			sortedTrack.addAll(track);
 
 			for (final Spot spot : sortedTrack) {
-				final int t = spot.getFeature(Spot.FRAME).intValue();
-				final double x = spot.getFeature(Spot.POSITION_X);
-				final double y = spot.getFeature(Spot.POSITION_Y);
-				final double z = spot.getFeature(Spot.POSITION_Z);
+				final int t = spot.getFeature(TrackMateConstants.FRAME).intValue();
+				final double x = spot.getFeature(TrackMateConstants.POSITION_X);
+				final double y = spot.getFeature(TrackMateConstants.POSITION_Y);
+				final double z = spot.getFeature(TrackMateConstants.POSITION_Z);
 
 				final Element spotElement = new Element(SPOT_KEY);
 				spotElement.setAttribute(T_ATT, ""+t);

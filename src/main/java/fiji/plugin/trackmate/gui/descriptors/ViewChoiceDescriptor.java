@@ -79,9 +79,9 @@ public class ViewChoiceDescriptor implements WizardPanelDescriptor
 				final Logger logger = model.getLogger();
 				final String str = "Initial thresholding with a quality threshold above " + String.format( "%.1f", trackmate.getSettings().initialSpotFilterValue ) + " ...\n";
 				logger.log( str, Logger.BLUE_COLOR );
-				final int ntotal = model.getSpots().getNSpots( false );
+				final int ntotal = model.getSpots().getNObjects( false );
 				trackmate.execInitialSpotFiltering();
-				final int nselected = model.getSpots().getNSpots( false );
+				final int nselected = model.getSpots().getNObjects( false );
 				logger.log( String.format( "Retained %d spots out of %d.\n", nselected, ntotal ) );
 
 				/*

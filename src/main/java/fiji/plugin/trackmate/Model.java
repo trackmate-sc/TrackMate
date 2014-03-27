@@ -9,6 +9,8 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
 import fiji.plugin.trackmate.features.FeatureFilter;
+import fiji.plugin.trackmate.tracking.spot.DefaultSpotCollection;
+import fiji.plugin.trackmate.tracking.spot.SpotCollection;
 
 /**
  * <h1>The model for the data managed by TrackMate trackmate.</h1>
@@ -41,12 +43,12 @@ public class Model
 
 	// TRACKS
 
-	private final TrackModel trackModel;
+	private final TrackModel<Spot> trackModel;
 
 	// SPOTS
 
 	/** The spots managed by this model. */
-	protected SpotCollection spots = new SpotCollection();
+	protected SpotCollection spots = new DefaultSpotCollection();
 
 	// TRANSACTION MODEL
 
@@ -123,9 +125,9 @@ public class Model
 	 *
 	 * @return a new instance of {@link TrackModel}.
 	 */
-	protected TrackModel createTrackModel()
+	protected TrackModel<Spot> createTrackModel()
 	{
-		return new TrackModel();
+		return new TrackModel<Spot>();
 	}
 
 	/**
@@ -157,15 +159,15 @@ public class Model
 		}
 		else
 		{
-			str.append( "Contains " + spots.getNSpots( false ) + " spots in total.\n" );
+			str.append( "Contains " + spots.getNObjects( false ) + " spots in total.\n" );
 		}
-		if ( spots.getNSpots( true ) == 0 )
+		if ( spots.getNObjects( true ) == 0 )
 		{
 			str.append( "No filtered spots.\n" );
 		}
 		else
 		{
-			str.append( "Contains " + spots.getNSpots( true ) + " filtered spots.\n" );
+			str.append( "Contains " + spots.getNObjects( true ) + " filtered spots.\n" );
 		}
 
 		str.append( '\n' );
@@ -302,7 +304,7 @@ public class Model
 	/**
 	 * Returns the {@link TrackModel} that manages the tracks for this model.
 	 */
-	public TrackModel getTrackModel()
+	public TrackModel<Spot> getTrackModel()
 	{
 		return trackModel;
 	}
@@ -545,7 +547,7 @@ public class Model
 	 */
 	public synchronized Spot removeSpot( final Spot spotToRemove )
 	{
-		final int fromFrame = spotToRemove.getFeature( Spot.FRAME ).intValue();
+		final int fromFrame = spotToRemove.getFeature( TrackMateConstants.FRAME ).intValue();
 		if ( spots.remove( spotToRemove, fromFrame ) )
 		{
 			spotsRemoved.add( spotToRemove ); // TRANSACTION

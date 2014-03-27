@@ -28,12 +28,15 @@ import javax.swing.SwingUtilities;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 
+import fiji.plugin.trackmate.FeatureHolderUtils;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.detection.semiauto.SemiAutoTracker;
+import fiji.plugin.trackmate.tracking.TrackableObjectUtils;
+import fiji.plugin.trackmate.tracking.spot.SpotCollection;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.tool.AbstractTool;
 import fiji.tool.ToolWithOptions;
@@ -202,7 +205,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 		final Spot clickLocation = makeSpot( imp, displayer, getImageCanvas( e ), e.getPoint() );
 		final int frame = displayer.imp.getFrame() - 1;
 		final Model model = displayer.getModel();
-		Spot target = model.getSpots().getSpotAt( clickLocation, frame, true );
+		Spot target = model.getSpots().getObjectAt( clickLocation, frame, true );
 		Spot editedSpot = editedSpots.get( imp );
 
 		final SelectionModel selectionModel = displayer.getSelectionModel();
@@ -259,9 +262,9 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 			{
 				// No spot is currently edited, we pick one to edit
 				Double radius;
-				if ( null != target && null != target.getFeature( Spot.RADIUS ) )
+				if ( null != target && null != target.getFeature( TrackMateConstants.RADIUS ) )
 				{
-					radius = target.getFeature( Spot.RADIUS );
+					radius = target.getFeature( TrackMateConstants.RADIUS );
 				}
 				else
 				{
@@ -271,7 +274,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 						radius = FALL_BACK_RADIUS;
 					}
 				}
-				if ( null == target || target.squareDistanceTo( clickLocation ) > radius * radius )
+				if ( null == target || TrackableObjectUtils.squareDistanceTo( target, clickLocation ) > radius * radius )
 				{
 					// Create a new spot if not inside one
 					target = clickLocation;
@@ -279,7 +282,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 					{
 						previousRadius = radius;
 					}
-					target.putFeature( Spot.RADIUS, previousRadius );
+					target.putFeature( TrackMateConstants.RADIUS, previousRadius );
 				}
 				editedSpot = target;
 				displayer.spotOverlay.editingSpot = editedSpot;
@@ -301,13 +304,13 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 				// listen to slice change
 				final double calibration[] = TMUtils.getSpatialCalibration( imp );
 				final double zslice = ( displayer.imp.getSlice() - 1 ) * calibration[ 2 ];
-				editedSpot.putFeature( Spot.POSITION_Z, zslice );
-				final Double initFrame = editedSpot.getFeature( Spot.FRAME );
+				editedSpot.putFeature( TrackMateConstants.POSITION_Z, zslice );
+				final Double initFrame = editedSpot.getFeature( TrackMateConstants.FRAME );
 				// Move it in Z
 				final double z = ( displayer.imp.getSlice() - 1 ) * calibration[ 2 ];
-				editedSpot.putFeature( Spot.POSITION_Z, z );
-				editedSpot.putFeature( Spot.POSITION_T, frame * imp.getCalibration().frameInterval );
-				editedSpot.putFeature( Spot.FRAME, Double.valueOf( frame ) );
+				editedSpot.putFeature( TrackMateConstants.POSITION_Z, z );
+				editedSpot.putFeature( TrackMateConstants.POSITION_T, frame * imp.getCalibration().frameInterval );
+				editedSpot.putFeature( TrackMateConstants.FRAME, Double.valueOf( frame ) );
 
 				model.beginUpdate();
 				try
@@ -345,7 +348,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 					if ( spotSelection.size() == 1 )
 					{
 						final Spot source = spotSelection.iterator().next();
-						if ( editedSpot.diffTo( source, Spot.FRAME ) > 0 )
+						if ( FeatureHolderUtils.diffTo( editedSpot, source, TrackMateConstants.FRAME ) > 0 )
 						{
 							model.beginUpdate();
 							try
@@ -366,7 +369,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 				selectionModel.addSpotToSelection( editedSpot );
 
 				// Forget edited spot, but remember its radius
-				previousRadius = editedSpot.getFeature( Spot.RADIUS );
+				previousRadius = editedSpot.getFeature( TrackMateConstants.RADIUS );
 				editedSpot = null;
 				displayer.spotOverlay.editingSpot = null;
 			}
@@ -409,9 +412,9 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 		final double x = ( -0.5 + canvas.offScreenXD( mouseLocation.x ) ) * calibration[ 0 ];
 		final double y = ( -0.5 + canvas.offScreenYD( mouseLocation.y ) ) * calibration[ 1 ];
 		final double z = ( imp.getSlice() - 1 ) * calibration[ 2 ];
-		editedSpot.putFeature( Spot.POSITION_X, x );
-		editedSpot.putFeature( Spot.POSITION_Y, y );
-		editedSpot.putFeature( Spot.POSITION_Z, z );
+		editedSpot.putFeature( TrackMateConstants.POSITION_X, x );
+		editedSpot.putFeature( TrackMateConstants.POSITION_Y, y );
+		editedSpot.putFeature( TrackMateConstants.POSITION_Z, z );
 		displayer.imp.updateAndDraw();
 		updateStatusBar( editedSpot, imp.getCalibration().getUnits() );
 	}
@@ -436,9 +439,9 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 		final double y = ( -0.5 + canvas.offScreenYD( mouseLocation.y ) ) * calibration[ 1 ];
 		final double z = ( imp.getSlice() - 1 ) * calibration[ 2 ];
 
-		quickEditedSpot.putFeature( Spot.POSITION_X, x );
-		quickEditedSpot.putFeature( Spot.POSITION_Y, y );
-		quickEditedSpot.putFeature( Spot.POSITION_Z, z );
+		quickEditedSpot.putFeature( TrackMateConstants.POSITION_X, x );
+		quickEditedSpot.putFeature( TrackMateConstants.POSITION_Y, y );
+		quickEditedSpot.putFeature( TrackMateConstants.POSITION_Z, z );
 		displayer.imp.updateAndDraw();
 
 	}
@@ -457,7 +460,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 		final Spot editedSpot = editedSpots.get( imp );
 		if ( null == editedSpot || !e.isAltDown() )
 			return;
-		double radius = editedSpot.getFeature( Spot.RADIUS );
+		double radius = editedSpot.getFeature( TrackMateConstants.RADIUS );
 		final double dx = imp.getCalibration().pixelWidth;
 		if ( e.isShiftDown() )
 		{
@@ -469,7 +472,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 		}
 		if ( radius < dx ) { return; }
 
-		editedSpot.putFeature( Spot.RADIUS, radius );
+		editedSpot.putFeature( TrackMateConstants.RADIUS, radius );
 		displayer.imp.updateAndDraw();
 		e.consume();
 		updateStatusBar( editedSpot, imp.getCalibration().getUnits() );
@@ -584,10 +587,10 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 					final Spot newSpot = makeSpot( imp, displayer, canvas, null );
 					final double dt = imp.getCalibration().frameInterval;
 					final int frame = displayer.imp.getFrame() - 1;
-					newSpot.putFeature( Spot.POSITION_T, frame * dt );
-					newSpot.putFeature( Spot.FRAME, Double.valueOf( frame ) );
-					newSpot.putFeature( Spot.RADIUS, radius );
-					newSpot.putFeature( Spot.QUALITY, -1d );
+					newSpot.putFeature( TrackMateConstants.POSITION_T, frame * dt );
+					newSpot.putFeature( TrackMateConstants.FRAME, Double.valueOf( frame ) );
+					newSpot.putFeature( TrackMateConstants.RADIUS, radius );
+					newSpot.putFeature( TrackMateConstants.QUALITY, -1d );
 
 					model.beginUpdate();
 					try
@@ -610,7 +613,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 						if ( spotSelection.size() == 1 )
 						{
 							final Spot source = spotSelection.iterator().next();
-							if ( newSpot.diffTo( source, Spot.FRAME ) > 0 )
+							if ( FeatureHolderUtils.diffTo( newSpot,  source, TrackMateConstants.FRAME ) > 0 )
 							{
 								model.beginUpdate();
 								try
@@ -649,7 +652,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 
 				final int frame = displayer.imp.getFrame() - 1;
 				final Spot clickLocation = makeSpot( imp, displayer, canvas, null );
-				final Spot target = model.getSpots().getSpotAt( clickLocation, frame, true );
+				final Spot target = model.getSpots().getObjectAt( clickLocation, frame, true );
 				if ( null == target )
 				{
 					e.consume(); // Consume it anyway, so that we are not
@@ -687,7 +690,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 			{
 				final int frame = displayer.imp.getFrame() - 1;
 				final Spot clickLocation = makeSpot( imp, displayer, canvas, null );
-				quickEditedSpot = model.getSpots().getSpotAt( clickLocation, frame, true );
+				quickEditedSpot = model.getSpots().getObjectAt( clickLocation, frame, true );
 				if ( null == quickEditedSpot ) { return; // un-consumed event
 				}
 			}
@@ -707,7 +710,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 
 				final int frame = displayer.imp.getFrame() - 1;
 				final Spot clickLocation = makeSpot( imp, displayer, canvas, null );
-				final Spot target = model.getSpots().getSpotAt( clickLocation, frame, true );
+				final Spot target = model.getSpots().getObjectAt( clickLocation, frame, true );
 				if ( null == target ) { return; }
 
 				int factor;
@@ -719,7 +722,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 				{
 					factor = 1;
 				}
-				double radius = target.getFeature( Spot.RADIUS );
+				double radius = target.getFeature( TrackMateConstants.RADIUS );
 				final double dx = imp.getCalibration().pixelWidth;
 				if ( e.isShiftDown() )
 				{
@@ -731,7 +734,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 				}
 				if ( radius <= dx ) { return; }
 
-				target.putFeature( Spot.RADIUS, radius );
+				target.putFeature( TrackMateConstants.RADIUS, radius );
 				model.beginUpdate();
 				try
 				{
@@ -759,14 +762,14 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 				{
 
 					final SpotCollection spots = model.getSpots();
-					if ( spots.getNSpots( currentFrame - 1, true ) == 0 )
+					if ( spots.getNObjects( currentFrame - 1, true ) == 0 )
 					{
 						e.consume();
 						break;
 					}
-					final HashSet< Spot > copiedSpots = new HashSet< Spot >( spots.getNSpots( currentFrame - 1, true ) );
+					final HashSet< Spot > copiedSpots = new HashSet< Spot >( spots.getNObjects( currentFrame - 1, true ) );
 					final HashSet< String > featuresKey = new HashSet< String >( spots.iterator( currentFrame - 1, true ).next().getFeatures().keySet() );
-					featuresKey.remove( Spot.POSITION_T ); // Deal with time
+					featuresKey.remove( TrackMateConstants.POSITION_T ); // Deal with time
 															// separately
 					double dt = imp.getCalibration().frameInterval;
 					if ( dt == 0 )
@@ -789,7 +792,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 							}
 							newSpot.putFeature( key, val );
 						}
-						newSpot.putFeature( Spot.POSITION_T, spot.getFeature( Spot.POSITION_T ) + dt );
+						newSpot.putFeature( TrackMateConstants.POSITION_T, spot.getFeature( TrackMateConstants.POSITION_T ) + dt );
 						copiedSpots.add( newSpot );
 					}
 
@@ -865,8 +868,8 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 						/*
 						 * Create a new link
 						 */
-						final int ts = source.getFeature( Spot.FRAME ).intValue();
-						final int tt = target.getFeature( Spot.FRAME ).intValue();
+						final int ts = source.getFeature( TrackMateConstants.FRAME ).intValue();
+						final int tt = target.getFeature( TrackMateConstants.FRAME ).intValue();
 
 						if ( tt != ts )
 						{
@@ -988,11 +991,11 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 		String statusString = "";
 		if ( null == spot.getName() || spot.getName().equals( "" ) )
 		{
-			statusString = String.format( "Spot ID%d, x = %.1f, y = %.1f, z = %.1f, r = %.1f %s", spot.ID(), spot.getFeature( Spot.POSITION_X ), spot.getFeature( Spot.POSITION_Y ), spot.getFeature( Spot.POSITION_Z ), spot.getFeature( Spot.RADIUS ), units );
+			statusString = String.format( "Spot ID%d, x = %.1f, y = %.1f, z = %.1f, r = %.1f %s", spot.ID(), spot.getFeature( TrackMateConstants.POSITION_X ), spot.getFeature( TrackMateConstants.POSITION_Y ), spot.getFeature( TrackMateConstants.POSITION_Z ), spot.getFeature( TrackMateConstants.RADIUS ), units );
 		}
 		else
 		{
-			statusString = String.format( "Spot %s, x = %.1f, y = %.1f, z = %.1f, r = %.1f %s", spot.getName(), spot.getFeature( Spot.POSITION_X ), spot.getFeature( Spot.POSITION_Y ), spot.getFeature( Spot.POSITION_Z ), spot.getFeature( Spot.RADIUS ), units );
+			statusString = String.format( "Spot %s, x = %.1f, y = %.1f, z = %.1f, r = %.1f %s", spot.getName(), spot.getFeature( TrackMateConstants.POSITION_X ), spot.getFeature( TrackMateConstants.POSITION_Y ), spot.getFeature( TrackMateConstants.POSITION_Z ), spot.getFeature( TrackMateConstants.RADIUS ), units );
 		}
 		IJ.showStatus( statusString );
 	}

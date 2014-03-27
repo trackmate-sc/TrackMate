@@ -10,14 +10,14 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import mpicbg.imglib.multithreading.SimpleMultiThreading;
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
 import net.imglib2.algorithm.OutputAlgorithm;
-
-import mpicbg.imglib.multithreading.SimpleMultiThreading;
 import Jama.Matrix;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.tracking.LAPTracker;
 import fiji.plugin.trackmate.tracking.LAPUtils;
+import fiji.plugin.trackmate.tracking.TrackableObject;
+import fiji.plugin.trackmate.tracking.trackers.LAPTracker;
 
 /**
  * <p>Merging cost function used with {@link LAPTracker}.
@@ -38,7 +38,7 @@ import fiji.plugin.trackmate.tracking.LAPUtils;
  * @author Jean-Yves Tinevez
  *
  */
-public class MergingCostFunction extends MultiThreadedBenchmarkAlgorithm implements OutputAlgorithm<Matrix> {
+public class MergingCostFunction<T extends TrackableObject> extends MultiThreadedBenchmarkAlgorithm implements OutputAlgorithm<Matrix> {
 
 	/** If false, gap closing will be prohibited. */
 	private final boolean allowed;
@@ -48,18 +48,20 @@ public class MergingCostFunction extends MultiThreadedBenchmarkAlgorithm impleme
 	protected final double blockingValue;
 	/** Thresholds for the feature ratios. */
 	protected final Map<String, Double> featurePenalties;
-	protected final List<SortedSet<Spot>> trackSegments;
-	protected final List<Spot> middlePoints;
+	protected final List<SortedSet<T>> trackSegments;
+	protected final List<T> middlePoints;
 	protected Matrix m;
+	private CostCalculator<T> costCalculator;
 
 	@SuppressWarnings("unchecked")
-	public MergingCostFunction(Map<String, Object> settings, List<SortedSet<Spot>> trackSegments, List<Spot> middlePoints) {
+	public MergingCostFunction(final CostCalculator<T> costCalculator, final Map<String, Object> settings, final List<SortedSet<T>> trackSegments, final List<T> middlePoints) {
 		this.maxDist 			= (Double) settings.get(KEY_MERGING_MAX_DISTANCE);
 		this.blockingValue		= (Double) settings.get(KEY_BLOCKING_VALUE);
 		this.featurePenalties	= (Map<String, Double>) settings.get(KEY_MERGING_FEATURE_PENALTIES);
 		this.allowed 			= (Boolean) settings.get(KEY_ALLOW_TRACK_MERGING);
 		this.trackSegments 		= trackSegments;
 		this.middlePoints		= middlePoints;
+		this.costCalculator = costCalculator;
 	}
 
 	/*
@@ -68,7 +70,7 @@ public class MergingCostFunction extends MultiThreadedBenchmarkAlgorithm impleme
 
 	@Override
 	public boolean process() {
-		long start = System.currentTimeMillis();
+		final long start = System.currentTimeMillis();
 		// If we are not allow to catch merging events, simply fill the matrix with blocking values.
 		if (!allowed) {
 			m = new Matrix(trackSegments.size(), 0, blockingValue);
@@ -85,17 +87,18 @@ public class MergingCostFunction extends MultiThreadedBenchmarkAlgorithm impleme
 
 				threads[ithread] = new Thread("LAPTracker merging cost thread "+(1+ithread)+"/"+threads.length) {  
 
+					@Override
 					public void run() {
 
 						for (int i = ai.getAndIncrement(); i < trackSegments.size(); i = ai.getAndIncrement()) {
-							Spot end = trackSegments.get(i).last();
+							final T end = trackSegments.get(i).last();
 
 							for (int j = 0; j < middlePoints.size(); j++) {
-								Spot middle = middlePoints.get(j);
+								final T middle = middlePoints.get(j);
 
 								// Frame threshold - middle Spot must be one frame ahead of the end Spot
-								int endFrame = end.getFeature(Spot.FRAME).intValue();
-								int middleFrame = middle.getFeature(Spot.FRAME).intValue();
+								final int endFrame = end.frame();
+								final int middleFrame = middle.frame();
 								// We only merge from one frame to the next one, no more
 								if (middleFrame - endFrame != 1) {
 									m.set(i, j, blockingValue);
@@ -103,7 +106,7 @@ public class MergingCostFunction extends MultiThreadedBenchmarkAlgorithm impleme
 								}
 
 								// Initial cost
-								double cost = LAPUtils.computeLinkingCostFor(end, middle, maxDist, blockingValue, featurePenalties);
+								final double cost = costCalculator.computeLinkingCostFor(end, middle, maxDist, blockingValue, featurePenalties);
 								m.set(i, j, cost);
 							}
 						}
@@ -114,7 +117,7 @@ public class MergingCostFunction extends MultiThreadedBenchmarkAlgorithm impleme
 			SimpleMultiThreading.startAndJoin(threads);
 		}
 		
-		long end = System.currentTimeMillis();
+		final long end = System.currentTimeMillis();
 		processingTime = end - start;
 		return true;
 	}

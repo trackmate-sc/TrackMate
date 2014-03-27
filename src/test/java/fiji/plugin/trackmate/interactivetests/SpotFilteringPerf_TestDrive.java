@@ -6,8 +6,8 @@ import org.scijava.util.AppUtils;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
@@ -37,23 +37,23 @@ public class SpotFilteringPerf_TestDrive {
 				settings.getSpotFilters().clear();
 
 				final long start = System.currentTimeMillis();
-				final int nspots0 = model.getSpots().getNSpots(true);
+				final int nspots0 = model.getSpots().getNObjects(true);
 				trackmate.execSpotFiltering(true);
 				final long end = System.currentTimeMillis();
-				final int nspots1 = model.getSpots().getNSpots(true);
+				final int nspots1 = model.getSpots().getNObjects(true);
 
 				System.out.println("Moved from " + nspots0 + " spots to " + nspots1 + " in " + (end-start) + " ms.");
 			}
 
 			{
 				// add filter
-				settings.getSpotFilters().add(new FeatureFilter(Spot.QUALITY, 60d, true));
+				settings.getSpotFilters().add(new FeatureFilter(TrackMateConstants.QUALITY, 60d, true));
 
 				final long start = System.currentTimeMillis();
-				final int nspots0 = model.getSpots().getNSpots(true);
+				final int nspots0 = model.getSpots().getNObjects(true);
 				trackmate.execSpotFiltering(true);
 				final long end = System.currentTimeMillis();
-				final int nspots1 = model.getSpots().getNSpots(true);
+				final int nspots1 = model.getSpots().getNObjects(true);
 
 				System.out.println("Moved from " + nspots0 + " spots to " + nspots1 + " in " + (end-start) + " ms.");
 			}

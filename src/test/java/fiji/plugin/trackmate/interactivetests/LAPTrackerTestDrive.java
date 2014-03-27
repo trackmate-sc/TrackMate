@@ -17,11 +17,13 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.providers.TrackerProvider;
-import fiji.plugin.trackmate.tracking.LAPTracker;
 import fiji.plugin.trackmate.tracking.LAPUtils;
+import fiji.plugin.trackmate.tracking.spot.SpotCostCalculator;
+import fiji.plugin.trackmate.tracking.trackers.LAPTracker;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 
@@ -61,7 +63,7 @@ public class LAPTrackerTestDrive {
 
 		// 2 - Track the test spots
 		final long start = System.currentTimeMillis();
-		final LAPTracker lap = new LAPTracker( model.getSpots(), ts );
+		final LAPTracker<Spot> lap = new LAPTracker<Spot>( new SpotCostCalculator(), model.getSpots(), ts );
 		lap.setLogger(Logger.DEFAULT_LOGGER);
 
 		if (!lap.checkInput())

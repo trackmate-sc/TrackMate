@@ -10,10 +10,11 @@ import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
+import fiji.plugin.trackmate.tracking.spot.SpotCollection;
 
 public class ResetRadiusAction extends AbstractTMAction {
 
@@ -44,7 +45,7 @@ public class ResetRadiusAction extends AbstractTMAction {
 		try {
 		for (final Iterator<Spot> iterator = spots.iterator(true); iterator.hasNext();) {
 			final Spot spot = iterator.next();
-			spot.putFeature(Spot.RADIUS, radius);
+			spot.putFeature(TrackMateConstants.RADIUS, radius);
 			model.updateFeatures(spot);
 		}
 		} finally {

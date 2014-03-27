@@ -73,7 +73,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.TrackMateConstants;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
@@ -97,8 +97,10 @@ import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.providers.ViewProvider;
-import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
+import fiji.plugin.trackmate.tracking.factories.TrackerFactory;
+import fiji.plugin.trackmate.tracking.spot.DefaultSpotCollection;
+import fiji.plugin.trackmate.tracking.spot.SpotCollection;
+import fiji.plugin.trackmate.tracking.spot.SpotTracker;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 
@@ -184,7 +186,7 @@ public class TmXmlReader_v20 extends TmXmlReader {
 		// Feature declaration - has to be manual declaration
 		final FeatureModel fm = model.getFeatureModel();
 
-		fm.declareEdgeFeatures( Spot.FEATURES, Spot.FEATURE_NAMES, Spot.FEATURE_SHORT_NAMES, Spot.FEATURE_DIMENSIONS, Spot.IS_INT );
+		fm.declareEdgeFeatures( TrackMateConstants.FEATURES, TrackMateConstants.FEATURE_NAMES, TrackMateConstants.FEATURE_SHORT_NAMES, TrackMateConstants.FEATURE_DIMENSIONS, TrackMateConstants.IS_INT );
 		fm.declareSpotFeatures( SpotIntensityAnalyzerFactory.FEATURES, SpotIntensityAnalyzerFactory.FEATURE_NAMES, SpotIntensityAnalyzerFactory.FEATURE_SHORT_NAMES, SpotIntensityAnalyzerFactory.FEATURE_DIMENSIONS, SpotIntensityAnalyzerFactory.IS_INT );
 		fm.declareSpotFeatures( SpotContrastAndSNRAnalyzerFactory.FEATURES, SpotContrastAndSNRAnalyzerFactory.FEATURE_NAMES, SpotContrastAndSNRAnalyzerFactory.FEATURE_SHORT_NAMES, SpotContrastAndSNRAnalyzerFactory.FEATURE_DIMENSIONS, SpotContrastAndSNRAnalyzerFactory.IS_INT );
 		fm.declareSpotFeatures( SpotRadiusEstimatorFactory.FEATURES, SpotRadiusEstimatorFactory.FEATURE_NAMES, SpotRadiusEstimatorFactory.FEATURE_SHORT_NAMES, SpotRadiusEstimatorFactory.FEATURE_DIMENSIONS, SpotRadiusEstimatorFactory.IS_INT );
@@ -535,7 +537,7 @@ public class TmXmlReader_v20 extends TmXmlReader {
 			return;
 		}
 
-		final SpotTrackerFactory factory = provider.getFactory( trackerKey );
+		final TrackerFactory factory = provider.getFactory( trackerKey );
 		if ( null == factory )
 		{
 			logger.error( "The tracker identified by the key " + trackerKey + " is unknown to TrackMate.\n" );
@@ -601,7 +603,7 @@ public class TmXmlReader_v20 extends TmXmlReader {
 		// Load collection and build cache
 		int currentFrame = 0;
 		ArrayList<Spot> spotList;
-		final SpotCollection allSpots = new SpotCollection();
+		final SpotCollection allSpots = new DefaultSpotCollection();
 
 		for (final Element currentFrameContent : frameContent) {
 
@@ -642,7 +644,7 @@ public class TmXmlReader_v20 extends TmXmlReader {
 				// Find corresponding spot in cache
 				final int ID = readIntAttribute(spotEl, SPOT_ID_ATTRIBUTE_NAME, logger);
 				final Spot spot = cache.get(ID);
-				spot.putFeature(SpotCollection.VISIBLITY, SpotCollection.ONE);
+				spot.putFeature(TrackMateConstants.VISIBILITY, TrackMateConstants.ONE);
 			}
 		}
 	}

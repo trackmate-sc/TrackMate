@@ -2,9 +2,8 @@ package fiji.plugin.trackmate.tracking.costfunction;
 
 import java.util.List;
 
-import fiji.plugin.trackmate.Spot;
-
 import Jama.Matrix;
+import fiji.plugin.trackmate.tracking.TrackableObject;
 
 /**
  * Interface for cost function classes, which take a {@link Matrix} and
@@ -13,7 +12,7 @@ import Jama.Matrix;
  * @author Nicholas Perry
  *
  */
-public interface CostFunctions {
+public interface CostFunctions<T extends TrackableObject> {
 
 	/** 
 	 * Return a cost matrix using the information given at construction for
@@ -22,6 +21,6 @@ public interface CostFunctions {
 	 * We need to use a list, for the matrix index will reflect the spot position
 	 * in the lists.
 	 */
-	public Matrix getCostFunction(final List<Spot> t0, final List<Spot> t1);
+	public Matrix getCostFunction(final List<T> t0, final List<T> t1);
 	
 }
