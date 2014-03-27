@@ -82,6 +82,7 @@ public class NearestNeighborTrackerFactory implements SpotTrackerFactory
 	@Override
 	public boolean unmarshall( final Element element, final Map< String, Object > settings )
 	{
+		settings.clear();
 		final StringBuilder errorHolder = new StringBuilder();
 		final boolean ok = readDoubleAttribute( element, settings, KEY_LINKING_MAX_DISTANCE, errorHolder );
 		if ( !ok )

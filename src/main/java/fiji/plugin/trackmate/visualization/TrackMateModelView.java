@@ -178,6 +178,20 @@ public interface TrackMateModelView
 	public static final Color DEFAULT_TRACK_COLOR = new Color( 250, 250, 0 );
 
 	/**
+	 * The color to use to paint objects for which a feature is undefined.
+	 * <i>E.g.</i> the numerical feature for this object calculated
+	 * automatically, but its returned value is {@link Double#NaN}.
+	 */
+	public static final Color DEFAULT_UNDEFINED_FEATURE_COLOR = Color.BLACK;
+
+	/**
+	 * The color to use to paint objects with a manual feature that has not been
+	 * assigned yet. <i>E.g</i> the coloring uses a manual feature, but this
+	 * object did not receive a value yet.
+	 */
+	public static final Color DEFAULT_UNASSIGNED_FEATURE_COLOR = Color.GRAY.darker();
+
+	/**
 	 * The default color for highlighting.
 	 */
 	public static final Color DEFAULT_HIGHLIGHT_COLOR = new Color( 0, 1f, 0 );

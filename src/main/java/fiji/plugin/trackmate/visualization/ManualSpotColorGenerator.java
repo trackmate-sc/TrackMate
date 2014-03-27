@@ -1,29 +1,30 @@
 package fiji.plugin.trackmate.visualization;
 
-import static fiji.plugin.trackmate.visualization.TrackMateModelView.DEFAULT_SPOT_COLOR;
-
 import java.awt.Color;
 
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
 import fiji.plugin.trackmate.gui.panels.components.ColorByFeatureGUIPanel;
 
-/**
- * A dummy spot color generator that always return the default color.
- *
- * @author Jean-Yves Tinevez - 2013
- */
-public class DummySpotColorGenerator implements FeatureColorGenerator< Spot >
+public class ManualSpotColorGenerator implements FeatureColorGenerator< Spot >
 {
-
 	@Override
-	public Color color( final Spot obj )
+	public Color color( final Spot spot )
 	{
-		return DEFAULT_SPOT_COLOR;
+		final Double val = spot.getFeature( ManualSpotColorAnalyzerFactory.FEATURE );
+		if ( null == val ) { return TrackMateModelView.DEFAULT_UNASSIGNED_FEATURE_COLOR; }
+		return new Color( val.intValue() );
 	}
 
 	@Override
 	public void setFeature( final String feature )
 	{}
+
+	@Override
+	public String getFeature()
+	{
+		return ColorByFeatureGUIPanel.MANUAL_KEY;
+	}
 
 	@Override
 	public void terminate()
@@ -32,12 +33,6 @@ public class DummySpotColorGenerator implements FeatureColorGenerator< Spot >
 	@Override
 	public void activate()
 	{}
-
-	@Override
-	public String getFeature()
-	{
-		return ColorByFeatureGUIPanel.UNIFORM_KEY;
-	}
 
 	@Override
 	public double getMin()
@@ -72,5 +67,5 @@ public class DummySpotColorGenerator implements FeatureColorGenerator< Spot >
 	@Override
 	public void setFrom( final MinMaxAdjustable minMaxAdjustable )
 	{}
-
 }
+

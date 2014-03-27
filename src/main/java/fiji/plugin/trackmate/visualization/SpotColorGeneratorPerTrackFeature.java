@@ -22,9 +22,12 @@ public class SpotColorGeneratorPerTrackFeature implements FeatureColorGenerator<
 	public Color color( final Spot spot )
 	{
 		final Integer trackID = model.getTrackModel().trackIDOf( spot );
-		if (null == trackID) {
+		if ( null == trackID )
+		{
 			return TrackMateModelView.DEFAULT_SPOT_COLOR;
-		} else {
+		}
+		else
+		{
 			return trackColorGenerator.colorOf( trackID );
 		}
 	}
@@ -53,4 +56,53 @@ public class SpotColorGeneratorPerTrackFeature implements FeatureColorGenerator<
 		trackColorGenerator.activate();
 	}
 
+	/*
+	 * MINMAXADJUSTABLE
+	 */
+
+	@Override
+	public double getMin()
+	{
+		return trackColorGenerator.getMin();
+	}
+
+	@Override
+	public double getMax()
+	{
+		return trackColorGenerator.getMax();
+	}
+
+	@Override
+	public void setMinMax( final double min, final double max )
+	{
+		trackColorGenerator.setMinMax( min, max );
+	}
+
+	@Override
+	public void autoMinMax()
+	{
+		trackColorGenerator.autoMinMax();
+	}
+
+	@Override
+	public void setAutoMinMaxMode( final boolean autoMode )
+	{
+		trackColorGenerator.setAutoMinMaxMode( autoMode );
+	}
+
+	@Override
+	public boolean isAutoMinMaxMode()
+	{
+		return trackColorGenerator.isAutoMinMaxMode();
+	}
+
+	@Override
+	public void setFrom( final MinMaxAdjustable minMaxAdjustable )
+	{
+		setAutoMinMaxMode( minMaxAdjustable.isAutoMinMaxMode() );
+		if ( !minMaxAdjustable.isAutoMinMaxMode() )
+		{
+			setMinMax( minMaxAdjustable.getMin(), minMaxAdjustable.getMax() );
+		}
+	}
 }

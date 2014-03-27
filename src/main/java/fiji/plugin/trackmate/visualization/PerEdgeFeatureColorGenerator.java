@@ -8,6 +8,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.ModelChangeListener;
+import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
 
 public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackColorGenerator
 {
@@ -26,6 +27,8 @@ public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackC
 
 	private DefaultWeightedEdge edgeMax;
 
+	private boolean autoMinMax = true;
+
 	public PerEdgeFeatureColorGenerator( final Model model, final String feature )
 	{
 		this.model = model;
@@ -36,8 +39,10 @@ public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackC
 	@Override
 	public void setFeature( final String feature )
 	{
-		if ( feature.equals( this.feature ) ) { return; }
+		if ( feature.equals( this.feature ) || feature.equals( ManualEdgeColorAnalyzer.FEATURE ) ) { return; }
 		this.feature = feature;
+		// We recompute min and max whatever the mode is set, to have something
+		// meaningful.
 		resetMinAndMax();
 	}
 
@@ -50,7 +55,13 @@ public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackC
 	@Override
 	public Color color( final DefaultWeightedEdge edge )
 	{
-		final double val = model.getFeatureModel().getEdgeFeature( edge, feature ).doubleValue();
+		final Double feat = model.getFeatureModel().getEdgeFeature( edge, feature );
+		if ( null == feat )
+		{
+			return TrackMateModelView.DEFAULT_TRACK_COLOR;
+		}
+		if ( Double.isNaN( feat.doubleValue() ) ) { return TrackMateModelView.DEFAULT_UNDEFINED_FEATURE_COLOR; }
+		final double val = feat.doubleValue();
 		return generator.getPaint( ( val - min ) / ( max - min ) );
 	}
 
@@ -59,13 +70,13 @@ public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackC
 	{} // ignored
 
 	/**
-	 * Monitor if the change induces some change in the colormap. Rescale it if
-	 * so.
+	 * If the color scaling mode is set to automatic, monitors if the change
+	 * induces some change in the colormap. Rescale it if so.
 	 */
 	@Override
 	public void modelChanged( final ModelChangeEvent event )
 	{
-		if ( event.getEventID() != ModelChangeEvent.MODEL_MODIFIED || event.getEdges().size() == 0 ) { return; }
+		if ( !autoMinMax || event.getEventID() != ModelChangeEvent.MODEL_MODIFIED || event.getEdges().size() == 0 ) { return; }
 
 		for ( final DefaultWeightedEdge edge : event.getEdges() )
 		{
@@ -110,6 +121,10 @@ public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackC
 			for ( final DefaultWeightedEdge edge : model.getTrackModel().trackEdges( trackID ) )
 			{
 				final Double feat = model.getFeatureModel().getEdgeFeature( edge, feature );
+				if ( null == feat || Double.isNaN( feat.doubleValue() ) )
+				{
+					continue;
+				}
 				final double val = feat.doubleValue();
 				if ( val < min )
 				{
@@ -125,6 +140,7 @@ public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackC
 		}
 	}
 
+
 	@Override
 	public void terminate()
 	{
@@ -134,7 +150,69 @@ public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackC
 	@Override
 	public void activate()
 	{
-		model.addModelChangeListener( this );
+		if ( !model.getModelChangeListener().contains( this ) )
+		{
+			model.addModelChangeListener( this );
+		}
 	}
 
+	/*
+	 * MINMAXADJUSTABLE
+	 */
+
+	@Override
+	public double getMin()
+	{
+		return min;
+	}
+
+	@Override
+	public double getMax()
+	{
+		return max;
+	}
+
+	@Override
+	public void setMinMax( final double min, final double max )
+	{
+		this.min = min;
+		this.max = max;
+	}
+
+	@Override
+	public void autoMinMax()
+	{
+		resetMinAndMax();
+	}
+
+	@Override
+	public void setAutoMinMaxMode( final boolean autoMode )
+	{
+		this.autoMinMax = autoMode;
+		if ( autoMode )
+		{
+			activate();
+		}
+		else
+		{
+			// No need to listen.
+			terminate();
+		}
+	}
+
+	@Override
+	public boolean isAutoMinMaxMode()
+	{
+		return autoMinMax;
+	}
+
+	@Override
+	public void setFrom( final MinMaxAdjustable minMaxAdjustable )
+	{
+		setAutoMinMaxMode( minMaxAdjustable.isAutoMinMaxMode() );
+		if ( !minMaxAdjustable.isAutoMinMaxMode() )
+		{
+			setMinMax( minMaxAdjustable.getMin(), minMaxAdjustable.getMax() );
+		}
+	}
 }

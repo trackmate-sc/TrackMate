@@ -175,6 +175,7 @@ public class TmXmlReader_v12 extends TmXmlReader {
 	private static final HashMap<String, String> 	F_FEATURE_NAMES = new HashMap<String, String>(9);
 	private static final HashMap<String, String> 	F_FEATURE_SHORT_NAMES = new HashMap<String, String>(9);
 	private static final HashMap<String, Dimension> F_FEATURE_DIMENSIONS = new HashMap<String, Dimension>(9);
+	private static final HashMap<String, Boolean> 	F_ISINT = new HashMap<String, Boolean>(9);
 
 	private static final String	VARIANCE = "VARIANCE";
 	private static final String	KURTOSIS = "KURTOSIS";
@@ -192,6 +193,9 @@ public class TmXmlReader_v12 extends TmXmlReader {
 		F_FEATURE_DIMENSIONS.put(VARIANCE, Dimension.INTENSITY_SQUARED);
 		F_FEATURE_DIMENSIONS.put(KURTOSIS, Dimension.NONE);
 		F_FEATURE_DIMENSIONS.put(SKEWNESS, Dimension.NONE);
+		F_ISINT.put( VARIANCE, Boolean.FALSE );
+		F_ISINT.put( KURTOSIS, Boolean.FALSE );
+		F_ISINT.put( SKEWNESS, Boolean.FALSE );
 	}
 
 
@@ -312,21 +316,21 @@ public class TmXmlReader_v12 extends TmXmlReader {
 	 */
 	private void declareDefaultFeatures(final FeatureModel fm) {
 		// Spots:
-		fm.declareSpotFeatures(Spot.FEATURES, Spot.FEATURE_NAMES, Spot.FEATURE_SHORT_NAMES, Spot.FEATURE_DIMENSIONS);
+		fm.declareSpotFeatures( Spot.FEATURES, Spot.FEATURE_NAMES, Spot.FEATURE_SHORT_NAMES, Spot.FEATURE_DIMENSIONS, Spot.IS_INT );
 		fm.declareSpotFeatures(SpotContrastAndSNRAnalyzerFactory.FEATURES, SpotContrastAndSNRAnalyzerFactory.FEATURE_NAMES,
-				SpotContrastAndSNRAnalyzerFactory.FEATURE_SHORT_NAMES, SpotContrastAndSNRAnalyzerFactory.FEATURE_DIMENSIONS);
+ SpotContrastAndSNRAnalyzerFactory.FEATURE_SHORT_NAMES, SpotContrastAndSNRAnalyzerFactory.FEATURE_DIMENSIONS, SpotContrastAndSNRAnalyzerFactory.IS_INT );
 		fm.declareSpotFeatures(SpotMorphologyAnalyzerFactory.FEATURES, SpotMorphologyAnalyzerFactory.FEATURE_NAMES,
-				SpotMorphologyAnalyzerFactory.FEATURE_SHORT_NAMES, SpotMorphologyAnalyzerFactory.FEATURE_DIMENSIONS);
+ SpotMorphologyAnalyzerFactory.FEATURE_SHORT_NAMES, SpotMorphologyAnalyzerFactory.FEATURE_DIMENSIONS, SpotMorphologyAnalyzerFactory.IS_INT );
 
 		fm.declareSpotFeatures(SpotIntensityAnalyzerFactory.FEATURES, SpotIntensityAnalyzerFactory.FEATURE_NAMES,
-				SpotIntensityAnalyzerFactory.FEATURE_SHORT_NAMES, SpotIntensityAnalyzerFactory.FEATURE_DIMENSIONS);
-		fm.declareSpotFeatures(F_FEATURES, F_FEATURE_NAMES, F_FEATURE_SHORT_NAMES, F_FEATURE_DIMENSIONS);
+ SpotIntensityAnalyzerFactory.FEATURE_SHORT_NAMES, SpotIntensityAnalyzerFactory.FEATURE_DIMENSIONS, SpotIntensityAnalyzerFactory.IS_INT );
+		fm.declareSpotFeatures( F_FEATURES, F_FEATURE_NAMES, F_FEATURE_SHORT_NAMES, F_FEATURE_DIMENSIONS, F_ISINT );
 
 		// Edges: no edge features in v1.2
 
 		// Tracks:
 		fm.declareTrackFeatures(TrackDurationAnalyzer.FEATURES, TrackDurationAnalyzer.FEATURE_NAMES,
-				TrackDurationAnalyzer.FEATURE_SHORT_NAMES, TrackDurationAnalyzer.FEATURE_DIMENSIONS);
+ TrackDurationAnalyzer.FEATURE_SHORT_NAMES, TrackDurationAnalyzer.FEATURE_DIMENSIONS, TrackDurationAnalyzer.IS_INT );
 	}
 
 	/**

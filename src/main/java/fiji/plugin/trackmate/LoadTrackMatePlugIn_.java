@@ -144,7 +144,7 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		{
 			logger.error( reader.getErrorMessage() );
 			logger.error( "Aborting.\n" ); // If I cannot even open the xml
-											// file, it is not worth going on.
+			// file, it is not worth going on.
 			return;
 		}
 
@@ -330,8 +330,10 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 	{
 		ImageJ.main( args );
 		final LoadTrackMatePlugIn_ plugIn = new LoadTrackMatePlugIn_();
-		// plugIn.run( "samples/FakeTracks.xml" );
-		plugIn.run( "/Users/tinevez/Desktop/Data/Mamut/parhyale/BDV130418A325_NoTempReg-mamut_JY2.xml" );
+		plugIn.run( "samples/FakeTracks.xml" );
+		// plugIn.run(
+		// "/Users/tinevez/Desktop/Data/Mamut/parhyale/BDV130418A325_NoTempReg-mamut_JY2.xml"
+		// );
 	}
 
 }

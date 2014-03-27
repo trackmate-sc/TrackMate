@@ -47,6 +47,9 @@ public class SpotContrastAndSNRAnalyzerFactory< T extends RealType< T > & Native
 	public static final HashMap< String, String > FEATURE_SHORT_NAMES = new HashMap< String, String >( 2 );
 
 	public static final HashMap< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 2 );
+
+	public static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 2 );
+
 	static
 	{
 		FEATURES.add( CONTRAST );
@@ -57,9 +60,12 @@ public class SpotContrastAndSNRAnalyzerFactory< T extends RealType< T > & Native
 		FEATURE_SHORT_NAMES.put( SNR, "SNR" );
 		FEATURE_DIMENSIONS.put( CONTRAST, Dimension.NONE );
 		FEATURE_DIMENSIONS.put( SNR, Dimension.NONE );
+		IS_INT.put( CONTRAST, Boolean.FALSE );
+		IS_INT.put( SNR, Boolean.FALSE );
 	}
 
 	public static final String KEY = "Spot contrast and SNR";
+
 
 	/*
 	 * METHODS
@@ -122,4 +128,15 @@ public class SpotContrastAndSNRAnalyzerFactory< T extends RealType< T > & Native
 		return KEY;
 	}
 
+	@Override
+	public Map< String, Boolean > getIsIntFeature()
+	{
+		return IS_INT;
+	}
+
+	@Override
+	public boolean isManualFeature()
+	{
+		return false;
+	}
 }

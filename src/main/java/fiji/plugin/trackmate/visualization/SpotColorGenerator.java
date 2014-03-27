@@ -21,6 +21,8 @@ public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelC
 
 	private double max;
 
+	private boolean autoMode = true;
+
 	private static final InterpolatePaintScale generator = InterpolatePaintScale.Jet;
 
 	public SpotColorGenerator( final Model model )
@@ -38,7 +40,10 @@ public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelC
 		}
 		else
 		{
-			final Double val = spot.getFeature( feature );
+			final Double feat = spot.getFeature( feature );
+			if ( null == feat ) { return TrackMateModelView.DEFAULT_UNASSIGNED_FEATURE_COLOR; }
+			final double val = feat.doubleValue();
+			if ( Double.isNaN( val ) ) { return TrackMateModelView.DEFAULT_UNDEFINED_FEATURE_COLOR; }
 			return generator.getPaint( ( val - min ) / ( max - min ) );
 		}
 	}
@@ -64,7 +69,7 @@ public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelC
 	@Override
 	public void modelChanged( final ModelChangeEvent event )
 	{
-		if ( null == feature ) { return; }
+		if ( !autoMode || null == feature ) { return; }
 		if ( event.getEventID() == ModelChangeEvent.MODEL_MODIFIED )
 		{
 			final Set< Spot > spots = event.getSpots();
@@ -118,13 +123,72 @@ public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelC
 			for ( final Spot spot : model.getSpots().iterable( ikey, false ) )
 			{
 				val = spot.getFeature( feature );
-				if ( null == val )
+				if ( null == val || Double.isNaN( val.doubleValue() ) )
 					continue;
 				if ( val > max )
 					max = val.doubleValue();
 				if ( val < min )
 					min = val.doubleValue();
 			}
+		}
+	}
+
+	/*
+	 * MINMAXADJUSTABLE
+	 */
+
+	@Override
+	public double getMin()
+	{
+		return min;
+	}
+
+	@Override
+	public double getMax()
+	{
+		return max;
+	}
+
+	@Override
+	public void setMinMax( final double min, final double max )
+	{
+		this.min = min;
+		this.max = max;
+	}
+
+	@Override
+	public void autoMinMax()
+	{
+		computeSpotColors();
+	}
+
+	@Override
+	public void setAutoMinMaxMode( final boolean autoMode )
+	{
+		this.autoMode = autoMode;
+		if ( autoMode )
+		{
+			activate();
+		}
+		else
+		{
+			terminate();
+		}
+	}
+
+	@Override
+	public boolean isAutoMinMaxMode()
+	{
+		return autoMode;
+	}
+
+	@Override
+	public void setFrom( final MinMaxAdjustable minMaxAdjustable )
+	{
+		setAutoMinMaxMode( minMaxAdjustable.isAutoMinMaxMode() );
+		if ( !minMaxAdjustable.isAutoMinMaxMode() )
+		{
+			setMinMax( minMaxAdjustable.getMin(), minMaxAdjustable.getMax() );
 		}
 	}
 }
