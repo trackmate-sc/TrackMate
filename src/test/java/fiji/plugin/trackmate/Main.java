@@ -4,6 +4,6 @@ import fiji.Debug;
 
 public class Main {
 	public static void main(String...args) {
-		Debug.runFilter("../../samples/_malaria_parasites.tif", "TrackMate", null);
+		Debug.runFilter("../../samples/FakeTracks.tif", "TrackMate", null);
 	}
 }
