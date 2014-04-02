@@ -256,7 +256,7 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 		{
 			table.setDefaultRenderer( table.getColumnClass( i ), renderer );
 			// Set width auto
-			table.getColumnModel().getColumn( i ).setMinWidth( fm.stringWidth( dm.getColumnName( i ) ) );
+			table.getColumnModel().getColumn( i ).setMinWidth( ( int ) ( 1.4d * fm.stringWidth( dm.getColumnName( i ) ) ) );
 		}
 		for ( final Component c : scrollTable.getColumnHeader().getComponents() )
 		{
