@@ -42,6 +42,7 @@ import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
 import fiji.plugin.trackmate.util.JLabelLogger;
+import fiji.util.NumberParser;
 
 /**
  * Configuration panel for spot detectors based on LoG detector. 
@@ -123,8 +124,8 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel {
 	public Map<String, Object> getSettings() {
 		HashMap<String, Object> settings = new HashMap<String, Object>(5);
 		int targetChannel = sliderChannel.getValue();
-		double expectedRadius = Double.parseDouble(jTextFieldBlobDiameter.getText())/2;
-		double threshold = Double.parseDouble(jTextFieldThreshold.getText());
+		double expectedRadius = NumberParser.parseDouble(jTextFieldBlobDiameter.getText())/2;
+		double threshold = NumberParser.parseDouble(jTextFieldThreshold.getText());
 		boolean useMedianFilter = jCheckBoxMedianFilter.isSelected();
 		boolean doSubPixelLocalization = jCheckSubPixel.isSelected();
 		settings.put(KEY_TARGET_CHANNEL, targetChannel);

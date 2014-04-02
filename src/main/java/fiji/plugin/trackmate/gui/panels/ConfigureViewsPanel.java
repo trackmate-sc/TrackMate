@@ -66,6 +66,7 @@ import fiji.plugin.trackmate.visualization.SpotColorGenerator;
 import fiji.plugin.trackmate.visualization.SpotColorGeneratorPerTrackFeature;
 import fiji.plugin.trackmate.visualization.TrackColorGenerator;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
+import fiji.util.NumberParser;
 
 /**
  * A configuration panel used to tune the aspect of spots and tracks in multiple
@@ -595,7 +596,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 							Integer depth;
 							if ( jCheckBoxLimitDepth.isSelected() )
 							{
-								depth = Integer.parseInt( jTextFieldFrameDepth.getText() );
+								depth = NumberParser.parseInteger( jTextFieldFrameDepth.getText() );
 							}
 							else
 							{
@@ -632,7 +633,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 							final Integer oldValue = ( Integer ) displaySettings.get( KEY_TRACK_DISPLAY_DEPTH );
 							try
 							{
-								final Integer depth = Integer.parseInt( jTextFieldFrameDepth.getText() );
+								final Integer depth = NumberParser.parseInteger( jTextFieldFrameDepth.getText() );
 								displaySettings.put( KEY_TRACK_DISPLAY_DEPTH, depth );
 
 								final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_TRACK_DISPLAY_DEPTH, depth, oldValue );

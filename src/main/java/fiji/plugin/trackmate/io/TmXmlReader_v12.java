@@ -138,6 +138,7 @@ import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTrackerFactory;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
+import fiji.util.NumberParser;
 
 /**
  * A compatibility xml loader than can load TrackMate xml file saved for version
@@ -1100,7 +1101,7 @@ public class TmXmlReader_v12 extends TmXmlReader {
 			return false;
 		}
 		try {
-			final double val = Double.parseDouble(str);
+			final double val = NumberParser.parseDouble(str);
 			settings.put(mapKey, val);
 		} catch (final NumberFormatException nfe) {
 			errorMessage = "Could not read "+attName+" attribute as a double value. Got "+str+".";
@@ -1116,7 +1117,7 @@ public class TmXmlReader_v12 extends TmXmlReader {
 			return false;
 		}
 		try {
-			final int val = Integer.parseInt(str);
+			final int val = NumberParser.parseInteger(str);
 			settings.put(mapKey, val);
 		} catch (final NumberFormatException nfe) {
 			errorMessage = "Could not read "+attName+" attribute as an integer value. Got "+str+".";
