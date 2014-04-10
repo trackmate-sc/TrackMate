@@ -129,7 +129,7 @@ public class TrackSpeedStatisticsAnalyzer implements TrackAnalyzer, MultiThreade
 		final Thread[] threads = SimpleMultiThreading.newThreads( numThreads );
 		for ( int i = 0; i < threads.length; i++ )
 		{
-			threads[ i ] = new Thread( "TrackLocationAnalyzer thread " + i )
+			threads[ i ] = new Thread( "TrackSpeedStatisticsAnalyzer thread " + i )
 			{
 
 				@Override

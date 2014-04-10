@@ -99,7 +99,7 @@ public class TrackDurationAnalyzer implements TrackAnalyzer, MultiThreaded
 		final Thread[] threads = SimpleMultiThreading.newThreads( numThreads );
 		for ( int i = 0; i < threads.length; i++ )
 		{
-			threads[ i ] = new Thread( "TrackLocationAnalyzer thread " + i )
+			threads[ i ] = new Thread( "TrackDurationAnalyzer thread " + i )
 			{
 				@Override
 				public void run()
