@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.gui.panels;
 
+import fiji.util.NumberParser;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -597,7 +599,7 @@ public class FilterPanel extends javax.swing.JPanel
 				// Convert to double and pass it to threshold value
 				try
 				{
-					final double typedThreshold = Double.parseDouble( strNumber );
+					final double typedThreshold = NumberParser.parseDouble( strNumber );
 					threshold = typedThreshold;
 					redrawThresholdMarker();
 				}

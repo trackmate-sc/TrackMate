@@ -2,6 +2,7 @@ package fiji.plugin.trackmate.gui.panels.components;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.TEXTFIELD_DIMENSION;
+import fiji.util.NumberParser;
 
 import java.util.List;
 import java.util.Map;
@@ -46,7 +47,7 @@ public class JPanelFeaturePenalty extends javax.swing.JPanel {
 	}
 
 	public double getPenaltyWeight() {
-		return Double.parseDouble(jTextFieldFeatureWeight.getText());
+		return NumberParser.parseDouble(jTextFieldFeatureWeight.getText());
 	}
 
 	@Override
