@@ -1,7 +1,5 @@
 package fiji.plugin.trackmate.providers;
 
-import fiji.util.NumberParser;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
