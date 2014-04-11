@@ -30,14 +30,14 @@ import fiji.plugin.trackmate.util.TMUtils;
  * The TrackMate_ class runs on the currently active time-lapse image (2D or 3D)
  * and both identifies and tracks bright spots over time.
  * </p>
- * 
+ *
  * <p>
  * <b>Required input:</b> A 2D or 3D time-lapse image with bright blobs.
  * </p>
- * 
+ *
  * @author Nicholas Perry, Jean-Yves Tinevez, Johannes Schindelin - Institut
  *         Pasteur - July 2010 - 2011 - 2012 - 2013 - 2014
- * 
+ *
  */
 public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 {
@@ -354,8 +354,8 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 					continue;
 				}
 				nindex++;
-				intervalMin[ nindex ] = min[ d ];
-				intervalMax[ nindex ] = max[ d ];
+				intervalMin[ nindex ] = Math.max( 0l, min[ d ] );
+				intervalMax[ nindex ] = Math.min( img.max( d ), max[ d ] );
 			}
 		}
 		else
