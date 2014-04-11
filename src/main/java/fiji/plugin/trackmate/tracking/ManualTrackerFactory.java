@@ -5,11 +5,13 @@ import java.util.Map;
 import javax.swing.ImageIcon;
 
 import org.jdom2.Element;
+import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 
+@Plugin( type = SpotTrackerFactory.class )
 public class ManualTrackerFactory implements SpotTrackerFactory
 {
 	public static final String TRACKER_KEY = "MANUAL_TRACKER";
