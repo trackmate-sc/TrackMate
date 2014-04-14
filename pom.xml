@@ -203,6 +203,11 @@
 		</contributor>
 	</contributors>
 
+	<ciManagement>
+		<system>Jenkins</system>
+		<url>http://jenkins.imagej.net/job/TrackMate/</url>
+	</ciManagement>
+
 	<scm>
 		<connection>scm:git:git://github.com/fiji/TrackMate</connection>
 		<developerConnection>scm:git:git@github.com:fiji/TrackMate</developerConnection>
