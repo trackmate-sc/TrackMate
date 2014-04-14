@@ -44,6 +44,12 @@ public class ImagePlusChooser extends javax.swing.JFrame
 
 	private final ArrayList< ActionListener > listeners = new ArrayList< ActionListener >();
 
+	private final String windowTitle;
+
+	private final String extraOption;
+
+	private final String message;
+
 	/**
 	 * Auto-generated main method to display this JFrame
 	 */
@@ -54,7 +60,15 @@ public class ImagePlusChooser extends javax.swing.JFrame
 			@Override
 			public void run()
 			{
-				final ImagePlusChooser inst = new ImagePlusChooser();
+				final ImagePlusChooser inst = new ImagePlusChooser( "A false choice.", "Pick anything.", "anything" );
+				inst.addActionListener( new ActionListener()
+				{
+					@Override
+					public void actionPerformed( final ActionEvent event )
+					{
+						System.out.println( event );
+					}
+				} );
 				inst.setLocationRelativeTo( null );
 				inst.setVisible( true );
 			}
@@ -65,9 +79,12 @@ public class ImagePlusChooser extends javax.swing.JFrame
 	 * CONSTRUCTOR
 	 */
 
-	public ImagePlusChooser()
+	public ImagePlusChooser( final String windowTitle, final String message, final String extraOption )
 	{
 		super();
+		this.windowTitle = windowTitle;
+		this.message = message;
+		this.extraOption = extraOption;
 		initGUI();
 		addWindowListener( new WindowListener()
 		{
@@ -150,7 +167,7 @@ public class ImagePlusChooser extends javax.swing.JFrame
 		String[] image_names = null;
 		if ( null == IDs )
 		{
-			image_names = new String[] { "New 3D viewer" };
+			image_names = new String[] { extraOption };
 			images = new ArrayList< ImagePlus >();
 			return image_names;
 		}
@@ -163,13 +180,13 @@ public class ImagePlusChooser extends javax.swing.JFrame
 		}
 		if ( images.size() < 1 )
 		{
-			image_names = new String[] { "New 3D viewer" };
+			image_names = new String[] { extraOption };
 		}
 		else
 		{
 			image_names = new String[ images.size() + 1 ];
 		}
-		image_names[ 0 ] = "New 3D viewer";
+		image_names[ 0 ] = extraOption;
 		for ( int i = 0; i < images.size(); i++ )
 		{
 			image_names[ i + 1 ] = images.get( i ).getTitle();
@@ -190,7 +207,7 @@ public class ImagePlusChooser extends javax.swing.JFrame
 					jLabelSelect = new JLabel();
 					jPanelMain.add( jLabelSelect );
 					jLabelSelect.setFont( FONT );
-					jLabelSelect.setText( "Copy overlay to:" );
+					jLabelSelect.setText( message );
 					jLabelSelect.setBounds( 12, 10, 258, 15 );
 				}
 				{
@@ -234,7 +251,7 @@ public class ImagePlusChooser extends javax.swing.JFrame
 			}
 			pack();
 			this.setSize( 280, 130 );
-			this.setTitle( "Copy overlay" );
+			this.setTitle( windowTitle );
 			this.setResizable( false );
 		}
 		catch ( final Exception e )

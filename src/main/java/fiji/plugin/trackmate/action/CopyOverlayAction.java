@@ -37,7 +37,7 @@ public class CopyOverlayAction extends AbstractTMAction {
 
 	@Override
 	public void execute(final TrackMate trackmate) {
-		final ImagePlusChooser impChooser = new ImagePlusChooser();
+		final ImagePlusChooser impChooser = new ImagePlusChooser( "Copy overlay", "Copy overlay to:", "New 3D viewer" );
 		impChooser.setLocationRelativeTo(null);
 		impChooser.setVisible(true);
 		final ActionListener copyOverlayListener = new ActionListener() {
