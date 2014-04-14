@@ -132,7 +132,7 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		{
 			logger.log( "Detecting an ICY track XML file. Loading...\n" );
 			final LoadICYTrackPlugIn_ loadICY = new LoadICYTrackPlugIn_();
-			loadICY.run( filePath );
+			loadICY.run( file.getAbsolutePath() );
 			return;
 		}
 
