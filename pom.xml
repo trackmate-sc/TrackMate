@@ -19,6 +19,7 @@
 	<properties>
 		<!-- Prevent the plugin from being copied to ./plugins/ by default -->
 		<imagej.app.directory>../fiji/</imagej.app.directory>
+		<imglib2.version>2.0.0-beta-26</imglib2.version>
 	</properties>
 
 	<dependencies>
