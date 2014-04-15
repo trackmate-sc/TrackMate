@@ -18,7 +18,6 @@ import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewUtils;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
-import ij.ImageJ;
 import ij.ImagePlus;
 import ij.plugin.PlugIn;
 
@@ -31,11 +30,6 @@ import javax.swing.JFrame;
 
 public class LoadICYTrackPlugIn_ extends LoadTrackMatePlugIn_ implements PlugIn
 {
-
-	public LoadICYTrackPlugIn_()
-	{
-		super();
-	}
 
 	private static final String KEY = "ICY_LOADER";
 	private JFrame frame;
@@ -239,19 +233,4 @@ public class LoadICYTrackPlugIn_ extends LoadTrackMatePlugIn_ implements PlugIn
 	{
 		return KEY;
 	}
-
-	/*
-	 * MAIN METHOD
-	 */
-
-	/**
-	 * @param args
-	 */
-	public static void main( final String[] args )
-	{
-		ImageJ.main( args );
-		final LoadTrackMatePlugIn_ plugIn = new LoadTrackMatePlugIn_();
-		plugIn.run( "/Users/tinevez/Desktop/Data/FakeTracks_icy.xml" );
-	}
-
 }
