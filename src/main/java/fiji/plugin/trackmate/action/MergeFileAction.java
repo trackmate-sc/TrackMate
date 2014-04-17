@@ -147,8 +147,7 @@ public class MergeFileAction extends AbstractTMAction {
 
 	}
 
-	// Not visible yet, one day maybe. // TODO more tests
-	@Plugin( type = TrackMateActionFactory.class, visible = false )
+	@Plugin( type = TrackMateActionFactory.class, visible = true )
 	public static class Factory implements TrackMateActionFactory
 	{
 
