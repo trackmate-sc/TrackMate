@@ -134,9 +134,20 @@ public class TmXmlWriter
 	 */
 	public TmXmlWriter( final File file )
 	{
+		this( file, new Logger.StringBuilderLogger() );
+	}
+
+	/**
+	 * Creates a new XML file writer for TrackMate.
+	 *
+	 * @param file
+	 *            the xml file to write to, will be overwritten.
+	 */
+	public TmXmlWriter( final File file, final Logger logger )
+	{
 		this.root = new Element( ROOT_ELEMENT_KEY );
 		root.setAttribute( PLUGIN_VERSION_ATTRIBUTE_NAME, fiji.plugin.trackmate.TrackMate.PLUGIN_NAME_VERSION );
-		this.logger = new Logger.StringBuilderLogger();
+		this.logger = logger;
 		this.file = file;
 	}
 
@@ -584,7 +595,7 @@ public class TmXmlWriter
 		}
 		featuresElement.addContent( trackFeaturesElement );
 
-		logger.log( "  Added spot, edge and track feature declarations." );
+		logger.log( "  Added spot, edge and track feature declarations.\n" );
 		return featuresElement;
 	}
 

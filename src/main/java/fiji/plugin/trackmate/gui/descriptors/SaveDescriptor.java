@@ -63,7 +63,7 @@ public class SaveDescriptor extends SomeDialogDescriptor
 		 * Write model, settings and GUI state
 		 */
 
-		final TmXmlWriter writer = new TmXmlWriter( file );
+		final TmXmlWriter writer = new TmXmlWriter( file, logger );
 
 		writer.appendLog( logPanel.getTextContent() );
 		writer.appendModel( trackmate.getModel() );
