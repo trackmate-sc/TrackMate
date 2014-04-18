@@ -992,6 +992,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 				model.removeModelChangeListener( TrackScheme.this );
 			}
 		} );
+		gui.setLocationByPlatform( true );
 		gui.setVisible( true );
 	}
 
