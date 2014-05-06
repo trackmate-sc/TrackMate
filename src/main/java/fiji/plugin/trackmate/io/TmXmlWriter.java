@@ -316,6 +316,8 @@ public class TmXmlWriter
 	{
 		final Element el = new Element( DETECTOR_SETTINGS_ELEMENT_KEY );
 
+		if ( null == settings.detectorFactory ) { return el; }
+		
 		// Set the detector factory key NOW.
 		el.setAttribute( XML_ATTRIBUTE_DETECTOR_NAME, settings.detectorFactory.getKey() );
 
@@ -340,6 +342,8 @@ public class TmXmlWriter
 	{
 		final Element el = new Element( TRACKER_SETTINGS_ELEMENT_KEY );
 
+		if ( null == settings.trackerFactory ) { return el; }
+		
 		// Set the tracker factory key NOW.
 		el.setAttribute( XML_ATTRIBUTE_TRACKER_NAME, settings.trackerFactory.getKey() );
 
