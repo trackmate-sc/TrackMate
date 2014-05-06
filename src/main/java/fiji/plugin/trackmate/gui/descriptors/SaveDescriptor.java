@@ -35,13 +35,22 @@ public class SaveDescriptor extends SomeDialogDescriptor
 		if ( null == file )
 		{
 			File folder;
-			if ( null != trackmate.getSettings().imp &&  null != trackmate.getSettings().imp.getOriginalFileInfo() )
+			if ( null != trackmate.getSettings().imp && null != trackmate.getSettings().imp.getOriginalFileInfo() && null != trackmate.getSettings().imp.getOriginalFileInfo().directory )
 			{
 				folder = new File( trackmate.getSettings().imp.getOriginalFileInfo().directory );
+				// Update the settings field with the image file location now,
+				// because it's valid.
+				trackmate.getSettings().imageFolder = trackmate.getSettings().imp.getOriginalFileInfo().directory;
 			}
 			else
 			{
 				folder = new File( System.getProperty( "user.dir" ) );
+				// Warn the user that the file cannot be reloaded properly
+				// because the source image does not match a file.
+				logger.error( "Warning: The source image does not match a file on the system."
+						+ "TrackMate won't be able to reload it when opening this XML file.\n"
+						+ "To fix this, save the source image to a TIF file before saving the TrackMate session.\n");
+				trackmate.getSettings().imageFolder = "";
 			}
 			try
 			{
