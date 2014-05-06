@@ -34,9 +34,15 @@ public class SaveDescriptor extends SomeDialogDescriptor
 		logger.log( "Saving data...\n", Logger.BLUE_COLOR );
 		if ( null == file )
 		{
-			// File folder = new
-			// File(System.getProperty("user.dir")).getParentFile().getParentFile();
-			final File folder = new File( trackmate.getSettings().imp.getOriginalFileInfo().directory );
+			File folder;
+			if ( null != trackmate.getSettings().imp &&  null != trackmate.getSettings().imp.getOriginalFileInfo() )
+			{
+				folder = new File( trackmate.getSettings().imp.getOriginalFileInfo().directory );
+			}
+			else
+			{
+				folder = new File( System.getProperty( "user.dir" ) );
+			}
 			try
 			{
 				file = new File( folder.getPath() + File.separator + trackmate.getSettings().imp.getShortTitle() + ".xml" );
