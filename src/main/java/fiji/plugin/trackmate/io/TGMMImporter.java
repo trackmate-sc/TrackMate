@@ -1,7 +1,5 @@
 package fiji.plugin.trackmate.io;
 
-import ij.ImageJ;
-
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -14,6 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.imglib2.algorithm.OutputAlgorithm;
+import net.imglib2.realtransform.AffineTransform3D;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -23,10 +22,8 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 
 public class TGMMImporter implements OutputAlgorithm< Model >
 {
@@ -66,19 +63,22 @@ public class TGMMImporter implements OutputAlgorithm< Model >
 
 	private Model model;
 
+	private final List< AffineTransform3D > transforms;
+
 	/*
 	 * CONSTRUCTORS
 	 */
 
-	public TGMMImporter( final File file, final Pattern framePattern )
+	public TGMMImporter( final File file, final List< AffineTransform3D > transforms, final Pattern framePatternms )
 	{
 		this.file = file;
-		this.framePattern = framePattern;
+		this.framePattern = framePatternms;
+		this.transforms = transforms;
 	}
 
-	public TGMMImporter( final File file )
+	public TGMMImporter( final File file, final List< AffineTransform3D > transforms )
 	{
-		this( file, Pattern.compile( ".+_frame(\\d+)\\.xml" ) );
+		this( file, transforms, Pattern.compile( ".+_frame(\\d+)\\.xml" ) );
 	}
 
 	/*
@@ -117,6 +117,8 @@ public class TGMMImporter implements OutputAlgorithm< Model >
 	{
 
 		model = new Model();
+		final double[] targetCoordsHolder = new double[ 3 ];
+		final double[] sourceCoordsHolder = new double[ 3 ];
 
 		/*
 		 * Grab all the XML files
@@ -165,9 +167,10 @@ public class TGMMImporter implements OutputAlgorithm< Model >
 		Map< Integer, Spot > previousSpotID = null;
 		Map< Integer, Spot > currentSpotID;
 
-		for ( int i = 0; i < frames.length; i++ )
+		for ( int t = 0; t < frames.length; t++ )
 		{
-			final File xmlFile = xmlFiles[ i ];
+			final AffineTransform3D transform = transforms.get( t );
+			final File xmlFile = xmlFiles[ t ];
 			Element root;
 			try
 			{
@@ -264,18 +267,35 @@ public class TGMMImporter implements OutputAlgorithm< Model >
 					 * Build position
 					 */
 
-					final double ix = Double.parseDouble( pixelPosStrs[ 0 ] );
-					final double iy = Double.parseDouble( pixelPosStrs[ 1 ] );
-					final double iz = Double.parseDouble( pixelPosStrs[ 2 ] );
-
 					final double sx = Double.parseDouble( scaleStrs[ 0 ] );
 					final double sy = Double.parseDouble( scaleStrs[ 1 ] );
 					final double sz = Double.parseDouble( scaleStrs[ 2 ] );
 					final double[] scales = new double[] { sx, sy, sz };
 
-					final double x = ix * sx;
-					final double y = iy * sy;
-					final double z = iz * sz;
+					{
+						final double ix = Double.parseDouble( pixelPosStrs[ 0 ] );
+						final double iy = Double.parseDouble( pixelPosStrs[ 1 ] );
+						final double iz = Double.parseDouble( pixelPosStrs[ 2 ] );
+
+						final double x = ix * sx;
+						final double y = iy * sy;
+						final double z = iz * sz;
+
+						/*
+						 * Map it back to global coordinate system. FIXME:
+						 * should we scale radius and axes too?
+						 */
+
+						sourceCoordsHolder[ 0 ] = x;
+						sourceCoordsHolder[ 1 ] = y;
+						sourceCoordsHolder[ 2 ] = z;
+					}
+
+					transform.apply( sourceCoordsHolder, targetCoordsHolder );
+
+					final double mx = targetCoordsHolder[ 0 ];
+					final double my = targetCoordsHolder[ 1 ];
+					final double mz = targetCoordsHolder[ 2 ];
 
 					/*
 					 * ID and parent and lineage and score.
@@ -328,7 +348,7 @@ public class TGMMImporter implements OutputAlgorithm< Model >
 					 * Make a spot and add it to this frame collection.
 					 */
 					
-					final Spot spot = new Spot( x, y, z, radius, score, lineage + " (" + id + ")" );
+					final Spot spot = new Spot( mx, my, mz, radius, score, lineage + " (" + id + ")" );
 					spots.add( spot );
 					currentSpotID.put( Integer.valueOf( id ), spot );
 
@@ -338,7 +358,7 @@ public class TGMMImporter implements OutputAlgorithm< Model >
 						final Spot source = previousSpotID.get( Integer.valueOf( parent ) );
 						if ( null == source )
 						{
-							System.out.println( BASE_ERROR_MSG + "The parent of the current spot (frame " + frames[ i ] + ", id = " + id + " could not be found (was expected in frame " + ( frames[ i ] - 1 ) + " with id = " + parent + ".\n" );
+							System.out.println( BASE_ERROR_MSG + "The parent of the current spot (frame " + frames[ t ] + ", id = " + id + " could not be found (was expected in frame " + ( frames[ t ] - 1 ) + " with id = " + parent + ".\n" );
 							continue;
 						}
 						final DefaultWeightedEdge edge = graph.addEdge( source, spot );
@@ -362,7 +382,7 @@ public class TGMMImporter implements OutputAlgorithm< Model >
 			 * Finished inspecting a frame. Store it in the spot collection.
 			 */
 
-			sc.put( frames[ i ], spots );
+			sc.put( frames[ t ], spots );
 			previousSpotID = currentSpotID;
 
 		}
@@ -384,29 +404,6 @@ public class TGMMImporter implements OutputAlgorithm< Model >
 	public Model getResult()
 	{
 		return model;
-	}
-
-	/*
-	 * MAIN METHOD
-	 */
-
-	public static void main( final String[] args )
-	{
-		final File file = new File( "/Users/tinevez/Development/Fernando/extract" );
-		final TGMMImporter importer = new TGMMImporter( file );
-		if ( !importer.checkInput() || !importer.process() )
-		{
-			System.out.println( importer.getErrorMessage() );
-			return;
-		}
-
-		final Model model = importer.getResult();
-
-		System.out.println( model.getSpots() );
-
-		ImageJ.main( args );
-		final HyperStackDisplayer view = new HyperStackDisplayer( model, new SelectionModel( model ) );
-		view.render();
 	}
 
 }
