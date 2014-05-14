@@ -199,7 +199,7 @@ public class SpotOverlay extends Roi
 		final double y = spot.getFeature( Spot.POSITION_Y );
 		final double z = spot.getFeature( Spot.POSITION_Z );
 		final double dz2 = ( z - zslice ) * ( z - zslice );
-		final double radiusRatio = ( Float ) displaySettings.get( TrackMateModelView.KEY_SPOT_RADIUS_RATIO );
+		final double radiusRatio = ( Double ) displaySettings.get( TrackMateModelView.KEY_SPOT_RADIUS_RATIO );
 		final double radius = spot.getFeature( Spot.RADIUS ) * radiusRatio;
 		// In pixel units
 		final double xp = x / calibration[ 0 ] + 0.5f;
