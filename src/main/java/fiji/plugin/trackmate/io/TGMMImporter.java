@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.imglib2.algorithm.Benchmark;
 import net.imglib2.algorithm.OutputAlgorithm;
 import net.imglib2.realtransform.AffineTransform3D;
 
@@ -21,11 +22,12 @@ import org.jdom2.input.SAXBuilder;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
+import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 
-public class TGMMImporter implements OutputAlgorithm< Model >
+public class TGMMImporter implements OutputAlgorithm< Model >, Benchmark
 {
 
 	private static final FilenameFilter xmlFilter = new FilenameFilter()
@@ -55,6 +57,8 @@ public class TGMMImporter implements OutputAlgorithm< Model >
 
 	private static final String XML_PARENT = "parent";
 
+	private static final Pattern DEFAULT_PATTERN = Pattern.compile( ".+_frame(\\d+)\\.xml" );
+
 	private final File file;
 
 	private String errorMessage;
@@ -65,25 +69,41 @@ public class TGMMImporter implements OutputAlgorithm< Model >
 
 	private final List< AffineTransform3D > transforms;
 
+	private final Logger logger;
+
+	private long processingTime;
+
 	/*
 	 * CONSTRUCTORS
 	 */
 
-	public TGMMImporter( final File file, final List< AffineTransform3D > transforms, final Pattern framePatternms )
+	public TGMMImporter( final File file, final List< AffineTransform3D > transforms, final Pattern framePattern, final Logger logger )
 	{
 		this.file = file;
-		this.framePattern = framePatternms;
+		this.framePattern = framePattern;
 		this.transforms = transforms;
+		this.logger = logger;
+	}
+
+	public TGMMImporter( final File file, final List< AffineTransform3D > transforms, final Pattern framePattern )
+	{
+		this( file, transforms, framePattern, Logger.VOID_LOGGER );
 	}
 
 	public TGMMImporter( final File file, final List< AffineTransform3D > transforms )
 	{
-		this( file, transforms, Pattern.compile( ".+_frame(\\d+)\\.xml" ) );
+		this( file, transforms, DEFAULT_PATTERN );
+	}
+
+	public TGMMImporter( final File file, final List< AffineTransform3D > transforms, final Logger logger )
+	{
+		this( file, transforms, DEFAULT_PATTERN, logger );
 	}
 
 	/*
 	 * METHODS
 	 */
+
 
 	@Override
 	public boolean checkInput()
@@ -115,6 +135,7 @@ public class TGMMImporter implements OutputAlgorithm< Model >
 	@Override
 	public boolean process()
 	{
+		final long start = System.currentTimeMillis();
 
 		model = new Model();
 		final double[] targetCoordsHolder = new double[ 3 ];
@@ -131,8 +152,10 @@ public class TGMMImporter implements OutputAlgorithm< Model >
 		 * so we have to rely on a specific pattern to get it. Note that it is
 		 * not robust at all.
 		 */
-		
+		logger.setProgress( 0d );
+		logger.setStatus( "Importing TGMM files." );
 		final int[] frames = new int[ xmlFiles.length ];
+		logger.log( "Importing " + frames.length + " TGMM files.\n" );
 		for ( int i = 0; i < frames.length; i++ )
 		{
 			final String name = xmlFiles[ i ].getName();
@@ -169,6 +192,8 @@ public class TGMMImporter implements OutputAlgorithm< Model >
 
 		for ( int t = 0; t < frames.length; t++ )
 		{
+			logger.log( "Processing frame " + frames[ t ] + ". " );
+			// FIXME check if t is really the right index
 			final AffineTransform3D transform = transforms.get( t );
 			final File xmlFile = xmlFiles[ t ];
 			Element root;
@@ -219,7 +244,7 @@ public class TGMMImporter implements OutputAlgorithm< Model >
 					return false;
 				}
 				final String[] scaleStrs = scaleStr.split( " " );
-				
+
 				final String idStr = detectionEl.getAttributeValue( XML_ID );
 				if ( null == idStr )
 				{
@@ -277,9 +302,13 @@ public class TGMMImporter implements OutputAlgorithm< Model >
 						final double iy = Double.parseDouble( pixelPosStrs[ 1 ] );
 						final double iz = Double.parseDouble( pixelPosStrs[ 2 ] );
 
-						final double x = ix * sx;
-						final double y = iy * sy;
-						final double z = iz * sz;
+						// final double x = ix * sx;
+						// final double y = iy * sy;
+						// final double z = iz * sz;
+
+						final double x = ix;
+						final double y = iy;
+						final double z = iz;
 
 						/*
 						 * Map it back to global coordinate system. FIXME:
@@ -335,19 +364,19 @@ public class TGMMImporter implements OutputAlgorithm< Model >
 					// scaledEigVecs[k][l] = scales[l] * eigVectors.get( l, k );
 					// }
 					// }
-					
+
 					/*
 					 * Build a mean radius
 					 */
-					
+
 					// FIXME
 					final double radius = 5; // Util.computeAverage(
 												// scaledEigVals );
-					
+
 					/*
 					 * Make a spot and add it to this frame collection.
 					 */
-					
+
 					final Spot spot = new Spot( mx, my, mz, radius, score, lineage + " (" + id + ")" );
 					spots.add( spot );
 					currentSpotID.put( Integer.valueOf( id ), spot );
@@ -384,13 +413,20 @@ public class TGMMImporter implements OutputAlgorithm< Model >
 
 			sc.put( frames[ t ], spots );
 			previousSpotID = currentSpotID;
-
+			logger.log( "Found " + spots.size() + " spots.\n" );
+			logger.setProgress( ( double ) t / frames.length );
 		}
 
 		sc.setVisible( true );
-
 		model.setSpots( sc, false );
 		model.setTracks( graph, false );
+
+		final long end = System.currentTimeMillis();
+		processingTime = end - start;
+		logger.setProgress( 0d );
+		logger.log( String.format( "Imported finished in %.1f s.\n", ( processingTime / 1000d ) ) );
+		logger.setStatus( "" );
+
 		return true;
 	}
 
@@ -404,6 +440,12 @@ public class TGMMImporter implements OutputAlgorithm< Model >
 	public Model getResult()
 	{
 		return model;
+	}
+
+	@Override
+	public long getProcessingTime()
+	{
+		return processingTime;
 	}
 
 }
