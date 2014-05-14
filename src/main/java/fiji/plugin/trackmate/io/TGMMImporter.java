@@ -193,8 +193,7 @@ public class TGMMImporter implements OutputAlgorithm< Model >, Benchmark
 		for ( int t = 0; t < frames.length; t++ )
 		{
 			logger.log( "Processing frame " + frames[ t ] + ". " );
-			// FIXME check if t is really the right index
-			final AffineTransform3D transform = transforms.get( t );
+			final AffineTransform3D transform = transforms.get( frames[ t ] );
 			final File xmlFile = xmlFiles[ t ];
 			Element root;
 			try
