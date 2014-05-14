@@ -128,7 +128,7 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 			// Useful fields.
 			@SuppressWarnings( "unchecked" )
 			final FeatureColorGenerator< Spot > spotColorGenerator = ( FeatureColorGenerator< Spot > ) displaySettings.get( KEY_SPOT_COLORING );
-			final float radiusRatio = ( Float ) displaySettings.get( KEY_SPOT_RADIUS_RATIO );
+			final double radiusRatio = ( Double ) displaySettings.get( KEY_SPOT_RADIUS_RATIO );
 
 			// Iterate each spot of the event.
 			final Set< Spot > spotsModified = event.getSpots();
@@ -431,7 +431,7 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 
 		blobs = new TreeMap< Integer, SpotGroupNode< Spot >>();
 		contentAllFrames = new TreeMap< Integer, ContentInstant >();
-		final float radiusRatio = ( Float ) displaySettings.get( KEY_SPOT_RADIUS_RATIO );
+		final double radiusRatio = ( Double ) displaySettings.get( KEY_SPOT_RADIUS_RATIO );
 		final SpotCollection spots = model.getSpots();
 		@SuppressWarnings( "unchecked" )
 		final FeatureColorGenerator< Spot > spotColorGenerator = ( FeatureColorGenerator< Spot > ) displaySettings.get( KEY_SPOT_COLORING );
@@ -451,7 +451,7 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 		universe.addContentLater( spotContent );
 	}
 
-	private void buildFrameContent( final SpotCollection spots, final Integer frame, final float radiusRatio, final FeatureColorGenerator< Spot > spotColorGenerator )
+	private void buildFrameContent( final SpotCollection spots, final Integer frame, final double radiusRatio, final FeatureColorGenerator< Spot > spotColorGenerator )
 	{
 		final Map< Spot, Point4d > centers = new HashMap< Spot, Point4d >( spots.getNSpots( frame, false ) );
 		final Map< Spot, Color4f > colors = new HashMap< Spot, Color4f >( spots.getNSpots( frame, false ) );
@@ -492,7 +492,7 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 
 	private void updateRadiuses()
 	{
-		final float radiusRatio = ( Float ) displaySettings.get( KEY_SPOT_RADIUS_RATIO );
+		final double radiusRatio = ( Double ) displaySettings.get( KEY_SPOT_RADIUS_RATIO );
 
 		for ( final int frame : blobs.keySet() )
 		{
