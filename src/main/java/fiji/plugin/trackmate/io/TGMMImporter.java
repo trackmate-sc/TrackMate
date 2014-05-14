@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import net.imglib2.algorithm.Benchmark;
 import net.imglib2.algorithm.OutputAlgorithm;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.util.Util;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -22,6 +23,8 @@ import org.jdom2.input.SAXBuilder;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
+import Jama.EigenvalueDecomposition;
+import Jama.Matrix;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
@@ -44,8 +47,6 @@ public class TGMMImporter implements OutputAlgorithm< Model >, Benchmark
 	private static final String XML_DETECTION_NAME = "GaussianMixtureModel";
 
 	private static final String XML_CENTROID = "m";
-
-	private static final String XML_SCALE = "scale";
 
 	private static final String XML_ID = "id";
 
@@ -236,14 +237,6 @@ public class TGMMImporter implements OutputAlgorithm< Model >, Benchmark
 				}
 				final String[] pixelPosStrs = pixelPosStr.split( " " );
 
-				final String scaleStr = detectionEl.getAttributeValue( XML_SCALE );
-				if ( null == scaleStr )
-				{
-					errorMessage = BASE_ERROR_MSG + "Element " + detectionEl + " in file " + xmlFile + " misses the scale attribute (" + XML_SCALE + ").\n";
-					return false;
-				}
-				final String[] scaleStrs = scaleStr.split( " " );
-
 				final String idStr = detectionEl.getAttributeValue( XML_ID );
 				if ( null == idStr )
 				{
@@ -291,27 +284,13 @@ public class TGMMImporter implements OutputAlgorithm< Model >, Benchmark
 					 * Build position
 					 */
 
-					final double sx = Double.parseDouble( scaleStrs[ 0 ] );
-					final double sy = Double.parseDouble( scaleStrs[ 1 ] );
-					final double sz = Double.parseDouble( scaleStrs[ 2 ] );
-					final double[] scales = new double[] { sx, sy, sz };
-
 					{
-						final double ix = Double.parseDouble( pixelPosStrs[ 0 ] );
-						final double iy = Double.parseDouble( pixelPosStrs[ 1 ] );
-						final double iz = Double.parseDouble( pixelPosStrs[ 2 ] );
-
-						// final double x = ix * sx;
-						// final double y = iy * sy;
-						// final double z = iz * sz;
-
-						final double x = ix;
-						final double y = iy;
-						final double z = iz;
+						final double x = Double.parseDouble( pixelPosStrs[ 0 ] );
+						final double y = Double.parseDouble( pixelPosStrs[ 1 ] );
+						final double z = Double.parseDouble( pixelPosStrs[ 2 ] );
 
 						/*
-						 * Map it back to global coordinate system. FIXME:
-						 * should we scale radius and axes too?
+						 * Map it back to global coordinate system.
 						 */
 
 						sourceCoordsHolder[ 0 ] = x;
@@ -338,39 +317,38 @@ public class TGMMImporter implements OutputAlgorithm< Model >, Benchmark
 					 * Shape and radius
 					 */
 
-					// final double[] vals = new double[ 9 ];
-					// for ( int j = 0; j < vals.length; j++ )
-					// {
-					// vals[ j ] = Double.parseDouble( precMatStrs[ j ] );
-					// }
-					// final Matrix precMat = new Matrix( vals, 3 );
-					// final Matrix covMat = precMat.inverse();
-					// final EigenvalueDecomposition eig = covMat.eig();
-					// final double[] eigVals = eig.getRealEigenvalues();
-					// final Matrix eigVectors = eig.getV();
-					//
-					// /*
-					// * Scale shape properly
-					// */
-					//
-					// final double[] scaledEigVals = new double[3];
-					// final double[][] scaledEigVecs = new double[3][3];
-					// for ( int k = 0; k < scaledEigVals.length; k++ )
-					// {
-					// scaledEigVals[k] = scales[k] * eigVals[k];
-					// for ( int l = 0; l < 3; l++ )
-					// {
-					// scaledEigVecs[k][l] = scales[l] * eigVectors.get( l, k );
-					// }
-					// }
+					final double[] vals = new double[ 9 ];
+					for ( int j = 0; j < vals.length; j++ )
+					{
+						vals[ j ] = Double.parseDouble( precMatStrs[ j ] );
+					}
+					final Matrix precMat = new Matrix( vals, 3 );
+					final Matrix covMat = precMat.inverse();
+					final EigenvalueDecomposition eig = covMat.eig();
+					final double[] eigVals = eig.getRealEigenvalues();
+					final Matrix eigVectors = eig.getV();
+
+					/*
+					 * Scale shape properly
+					 */
+
+					final double[] ellipseLength = new double[ 3 ];
+					final double[][] eigVecs = new double[ 3 ][ 3 ];
+					for ( int k = 0; k < eigVals.length; k++ )
+					{
+						ellipseLength[ k ] = Math.sqrt( eigVals[ k ] );
+						for ( int l = 0; l < 3; l++ )
+						{
+							eigVecs[ k ][ l ] = eigVectors.get( l, k );
+						}
+					}
 
 					/*
 					 * Build a mean radius
 					 */
 
-					// FIXME
-					final double radius = 5; // Util.computeAverage(
-												// scaledEigVals );
+					// FIXME: fudge factor here
+					final double radius = Util.computeMax( ellipseLength ) / 10d;
 
 					/*
 					 * Make a spot and add it to this frame collection.
