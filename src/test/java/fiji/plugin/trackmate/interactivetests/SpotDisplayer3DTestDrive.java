@@ -156,7 +156,7 @@ public class SpotDisplayer3DTestDrive
 							final FeatureColorGenerator< Spot > spotColorGenerator = ( FeatureColorGenerator< Spot > ) displayer.getDisplaySettings( TrackMateModelView.KEY_SPOT_COLORING );
 							spotColorGenerator.setFeature( feature );
 							displayer.setDisplaySettings( TrackMateModelView.KEY_SPOT_COLORING, spotColorGenerator );
-							displayer.setDisplaySettings( TrackMateModelView.KEY_SPOT_RADIUS_RATIO, RAN.nextFloat() + 1 );
+							displayer.setDisplaySettings( TrackMateModelView.KEY_SPOT_RADIUS_RATIO, RAN.nextDouble() + 1 );
 							displayer.refresh();
 						};
 					}.start();
