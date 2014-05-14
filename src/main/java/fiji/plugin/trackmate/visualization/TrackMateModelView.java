@@ -71,8 +71,8 @@ public interface TrackMateModelView
 
 	/**
 	 * Defines the key for the spot radius ratio. Value should be a positive
-	 * float number. Spots will be rendered with a radius equals to their actual
-	 * radius multiplied by this ratio.
+	 * {@link Double} object. Spots will be rendered with a radius equals to
+	 * their actual radius multiplied by this ratio.
 	 */
 	public static final String KEY_SPOT_RADIUS_RATIO = "SpotRadiusRatio";
 
