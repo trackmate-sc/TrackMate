@@ -9,7 +9,8 @@ import java.awt.Color;
  *
  * @param <K> the type of object to color.
  */
-public interface FeatureColorGenerator<K> {
+public interface FeatureColorGenerator< K > extends MinMaxAdjustable
+{
 
 	/**
 	 * Returns a color for the given object.

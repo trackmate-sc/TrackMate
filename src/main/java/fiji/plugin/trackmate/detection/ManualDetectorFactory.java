@@ -2,7 +2,6 @@ package fiji.plugin.trackmate.detection;
 
 import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_RADIUS;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
-import static fiji.plugin.trackmate.detection.DetectorKeys.XML_ATTRIBUTE_DETECTOR_NAME;
 import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.writeRadius;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
@@ -93,7 +92,6 @@ public class ManualDetectorFactory< T extends RealType< T > & NativeType< T >> i
 	@Override
 	public boolean marshall( final Map< String, Object > settings, final Element element )
 	{
-		element.setAttribute( XML_ATTRIBUTE_DETECTOR_NAME, DETECTOR_KEY );
 		final StringBuilder errorHolder = new StringBuilder();
 		final boolean ok = writeRadius( settings, element, errorHolder );
 		if ( !ok )
@@ -107,14 +105,6 @@ public class ManualDetectorFactory< T extends RealType< T > & NativeType< T >> i
 	public boolean unmarshall( final Element element, final Map< String, Object > settings )
 	{
 		settings.clear();
-
-		final String detectorKey = element.getAttributeValue( XML_ATTRIBUTE_DETECTOR_NAME );
-		if ( null == detectorKey )
-		{
-			errorMessage = "Detector element not found.\n";
-			return false;
-		}
-
 		final StringBuilder errorHolder = new StringBuilder();
 		final boolean ok = readDoubleAttribute( element, settings, KEY_RADIUS, errorHolder );
 		if ( !ok )

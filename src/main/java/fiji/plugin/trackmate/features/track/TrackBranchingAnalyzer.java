@@ -32,6 +32,8 @@ public class TrackBranchingAnalyzer implements TrackAnalyzer, MultiThreaded
 
 	public static final String NUMBER_GAPS = "NUMBER_GAPS";
 
+	public static final String LONGEST_GAP = "LONGEST_GAP";
+
 	public static final String NUMBER_SPLITS = "NUMBER_SPLITS";
 
 	public static final String NUMBER_MERGES = "NUMBER_MERGES";
@@ -48,31 +50,44 @@ public class TrackBranchingAnalyzer implements TrackAnalyzer, MultiThreaded
 
 	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 5 );
 
+	public static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 5 );
+
 	static
 	{
 		FEATURES.add( NUMBER_SPOTS );
 		FEATURES.add( NUMBER_GAPS );
+		FEATURES.add( LONGEST_GAP );
 		FEATURES.add( NUMBER_SPLITS );
 		FEATURES.add( NUMBER_MERGES );
 		FEATURES.add( NUMBER_COMPLEX );
 
 		FEATURE_NAMES.put( NUMBER_SPOTS, "Number of spots in track" );
 		FEATURE_NAMES.put( NUMBER_GAPS, "Number of gaps" );
+		FEATURE_NAMES.put( LONGEST_GAP, "Longest gap" );
 		FEATURE_NAMES.put( NUMBER_SPLITS, "Number of split events" );
 		FEATURE_NAMES.put( NUMBER_MERGES, "Number of merge events" );
 		FEATURE_NAMES.put( NUMBER_COMPLEX, "Complex points" );
 
 		FEATURE_SHORT_NAMES.put( NUMBER_SPOTS, "N spots" );
 		FEATURE_SHORT_NAMES.put( NUMBER_GAPS, "Gaps" );
+		FEATURE_SHORT_NAMES.put( LONGEST_GAP, "Longest gap" );
 		FEATURE_SHORT_NAMES.put( NUMBER_SPLITS, "Splits" );
 		FEATURE_SHORT_NAMES.put( NUMBER_MERGES, "Merges" );
 		FEATURE_SHORT_NAMES.put( NUMBER_COMPLEX, "Complex" );
 
 		FEATURE_DIMENSIONS.put( NUMBER_SPOTS, Dimension.NONE );
 		FEATURE_DIMENSIONS.put( NUMBER_GAPS, Dimension.NONE );
+		FEATURE_DIMENSIONS.put( LONGEST_GAP, Dimension.NONE );
 		FEATURE_DIMENSIONS.put( NUMBER_SPLITS, Dimension.NONE );
 		FEATURE_DIMENSIONS.put( NUMBER_MERGES, Dimension.NONE );
 		FEATURE_DIMENSIONS.put( NUMBER_COMPLEX, Dimension.NONE );
+
+		IS_INT.put( NUMBER_SPOTS, Boolean.TRUE );
+		IS_INT.put( NUMBER_GAPS, Boolean.TRUE );
+		IS_INT.put( LONGEST_GAP, Boolean.TRUE );
+		IS_INT.put( NUMBER_SPLITS, Boolean.TRUE );
+		IS_INT.put( NUMBER_MERGES, Boolean.TRUE );
+		IS_INT.put( NUMBER_COMPLEX, Boolean.TRUE );
 	}
 
 	private int numThreads;
@@ -164,19 +179,25 @@ public class TrackBranchingAnalyzer implements TrackAnalyzer, MultiThreaded
 							}
 						}
 
-						int ngaps = 0;
+						int ngaps = 0, longestgap = 0;
 						for ( final DefaultWeightedEdge edge : model.getTrackModel().trackEdges( trackID ) )
 						{
 							final Spot source = model.getTrackModel().getEdgeSource( edge );
 							final Spot target = model.getTrackModel().getEdgeTarget( edge );
-							if ( Math.abs( target.diffTo( source, Spot.FRAME ) ) > 1 )
+							int gaplength = (int)Math.abs( target.diffTo( source, Spot.FRAME ) ) - 1;
+							if ( gaplength > 0 )
 							{
 								ngaps++;
+								if ( longestgap < gaplength )
+								{
+									longestgap = gaplength;
+								}
 							}
 						}
 
 						// Put feature data
 						model.getFeatureModel().putTrackFeature( trackID, NUMBER_GAPS, Double.valueOf( ngaps ) );
+						model.getFeatureModel().putTrackFeature( trackID, LONGEST_GAP, Double.valueOf( longestgap ) );
 						model.getFeatureModel().putTrackFeature( trackID, NUMBER_SPLITS, Double.valueOf( nsplits ) );
 						model.getFeatureModel().putTrackFeature( trackID, NUMBER_MERGES, Double.valueOf( nmerges ) );
 						model.getFeatureModel().putTrackFeature( trackID, NUMBER_COMPLEX, Double.valueOf( ncomplex ) );
@@ -265,6 +286,18 @@ public class TrackBranchingAnalyzer implements TrackAnalyzer, MultiThreaded
 	public String getName()
 	{
 		return KEY;
+	}
+
+	@Override
+	public Map< String, Boolean > getIsIntFeature()
+	{
+		return IS_INT;
+	}
+
+	@Override
+	public boolean isManualFeature()
+	{
+		return false;
 	}
 
 }

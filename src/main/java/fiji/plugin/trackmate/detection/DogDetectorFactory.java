@@ -5,17 +5,12 @@ import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DO_SUBPIXEL_LOCAL
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
-import static fiji.plugin.trackmate.detection.DetectorKeys.XML_ATTRIBUTE_DETECTOR_NAME;
-
-import java.util.Map;
-
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.view.Views;
 
-import org.jdom2.Element;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
@@ -103,15 +98,6 @@ public class DogDetectorFactory< T extends RealType< T > & NativeType< T >> exte
 	public ConfigurationPanel getDetectorConfigurationPanel( final Settings settings, final Model model )
 	{
 		return new DogDetectorConfigurationPanel( settings.imp, DogDetectorFactory.INFO_TEXT, DogDetectorFactory.NAME, model );
-	}
-
-	@Override
-	public boolean marshall( final Map< String, Object > settings, final Element element )
-	{
-		final boolean ok = super.marshall( settings, element );
-		// Just change the detector key.
-		element.setAttribute( XML_ATTRIBUTE_DETECTOR_NAME, DETECTOR_KEY );
-		return ok;
 	}
 
 }

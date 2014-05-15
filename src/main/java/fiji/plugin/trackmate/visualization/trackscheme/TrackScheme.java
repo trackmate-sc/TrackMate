@@ -80,7 +80,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 	static final boolean DEFAULT_DO_DISPLAY_COSTS_ON_EDGES = false;
 
 	/** Do we display the background decorations by default? */
-	static final boolean DEFAULT_DO_PAINT_DECORATIONS = true;
+	static final int DEFAULT_PAINT_DECORATION_LEVEL = 2;
 
 	/** Do we toggle linking mode by default? */
 	static final boolean DEFAULT_LINKING_ENABLED = false;
@@ -992,6 +992,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 				model.removeModelChangeListener( TrackScheme.this );
 			}
 		} );
+		gui.setLocationByPlatform( true );
 		gui.setVisible( true );
 	}
 
@@ -1284,12 +1285,10 @@ public class TrackScheme extends AbstractTrackMateModelView
 		imp.show();
 	}
 
-	public boolean toggleDisplayDecoration()
+	public void toggleDisplayDecoration()
 	{
-		final boolean enabled = gui.graphComponent.isDoPaintDecorations();
-		gui.graphComponent.setDoPaintDecorations( !enabled );
+		gui.graphComponent.loopPaintDecorationLevel();
 		gui.graphComponent.repaint();
-		return !enabled;
 	}
 
 	/**

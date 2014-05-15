@@ -41,6 +41,7 @@ import javax.swing.SwingConstants;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
 import fiji.plugin.trackmate.tracking.LAPTracker;
+import fiji.util.NumberParser;
 
 /**
  * A simplified configuration panel for the {@link LAPTracker}.
@@ -105,9 +106,9 @@ public class SimpleLAPTrackerSettingsPanel extends ConfigurationPanel {
 		settings.put(KEY_ALTERNATIVE_LINKING_COST_FACTOR, DEFAULT_ALTERNATIVE_LINKING_COST_FACTOR);
 		settings.put(KEY_CUTOFF_PERCENTILE, DEFAULT_CUTOFF_PERCENTILE);
 		// Panel ones
-		settings.put(KEY_LINKING_MAX_DISTANCE, Double.parseDouble(jTextFieldLinkingDistance.getText()));
-		settings.put(KEY_GAP_CLOSING_MAX_DISTANCE, Double.parseDouble(jTextFieldGapClosingDistanceCutoff.getText()));
-		settings.put(KEY_GAP_CLOSING_MAX_FRAME_GAP, Integer.parseInt(jTextFieldGapClosingTimeCutoff.getText()));
+		settings.put(KEY_LINKING_MAX_DISTANCE, NumberParser.parseDouble(jTextFieldLinkingDistance.getText()));
+		settings.put(KEY_GAP_CLOSING_MAX_DISTANCE, NumberParser.parseDouble(jTextFieldGapClosingDistanceCutoff.getText()));
+		settings.put(KEY_GAP_CLOSING_MAX_FRAME_GAP, NumberParser.parseInteger(jTextFieldGapClosingTimeCutoff.getText()));
 		// Hop!
 		return settings;
 	}

@@ -3,6 +3,7 @@
  */
 package fiji.plugin.trackmate.action;
 
+import java.awt.Frame;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Set;
@@ -39,15 +40,17 @@ public class MergeFileAction extends AbstractTMAction {
 			+ "and want to merge their work in a single file."
 			+ "<p>"
 			+ "Only the spots belonging to visible tracks are imported <br>"
-			+ "from the taret file, which makes this action non-entirely <br>"
+			+ "from the target file, which makes this action non-entirely <br>"
 			+ "symmetrical.  Numerical features are re-calculated using <br>"
 			+ "the current settings. There is no check that the imported <br>"
 			+ "data was generated on the raw source."
 			+ "</html>";
-	private final TrackMateGUIController	controller;
 
-	public MergeFileAction(final TrackMateGUIController controller) {
-		this.controller = controller;
+	private final Frame parent;
+
+	public MergeFileAction( final Frame parent )
+	{
+		this.parent = parent;
 	}
 
 	@Override
@@ -59,7 +62,7 @@ public class MergeFileAction extends AbstractTMAction {
 			file = new File(folder.getPath() + File.separator + "TrackMateData.xml");
 		}
 
-		final File tmpFile = IOUtils.askForFileForLoading(file, "Merge a TrackMate XML file", controller.getGUI(), logger);
+		final File tmpFile = IOUtils.askForFileForLoading( file, "Merge a TrackMate XML file", parent, logger );
 		if (null == tmpFile) {
 			return;
 		}
@@ -147,8 +150,7 @@ public class MergeFileAction extends AbstractTMAction {
 
 	}
 
-	// Not visible yet, one day maybe. // TODO more tests
-	@Plugin( type = TrackMateActionFactory.class, visible = false )
+	@Plugin( type = TrackMateActionFactory.class, visible = true )
 	public static class Factory implements TrackMateActionFactory
 	{
 
@@ -179,7 +181,7 @@ public class MergeFileAction extends AbstractTMAction {
 		@Override
 		public TrackMateAction create( final TrackMateGUIController controller )
 		{
-			return new MergeFileAction( controller );
+			return new MergeFileAction( controller.getGUI() );
 		}
 	}
 }

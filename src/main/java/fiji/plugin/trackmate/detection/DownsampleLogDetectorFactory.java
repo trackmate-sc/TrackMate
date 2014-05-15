@@ -8,7 +8,6 @@ import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DOWNSAMPLE_FACTOR
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
-import static fiji.plugin.trackmate.detection.DetectorKeys.XML_ATTRIBUTE_DETECTOR_NAME;
 import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.readIntegerAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.writeDownsamplingFactor;
@@ -162,7 +161,6 @@ public class DownsampleLogDetectorFactory< T extends RealType< T > & NativeType<
 	@Override
 	public boolean marshall( final Map< String, Object > settings, final Element element )
 	{
-		element.setAttribute( XML_ATTRIBUTE_DETECTOR_NAME, DETECTOR_KEY );
 		final StringBuilder errorHolder = new StringBuilder();
 		final boolean ok = writeTargetChannel( settings, element, errorHolder ) && writeRadius( settings, element, errorHolder ) && writeThreshold( settings, element, errorHolder ) && writeDownsamplingFactor( settings, element, errorHolder );
 		if ( !ok )
@@ -176,14 +174,6 @@ public class DownsampleLogDetectorFactory< T extends RealType< T > & NativeType<
 	public boolean unmarshall( final Element element, final Map< String, Object > settings )
 	{
 		settings.clear();
-
-		final String detectorKey = element.getAttributeValue( XML_ATTRIBUTE_DETECTOR_NAME );
-		if ( null == detectorKey )
-		{
-			errorMessage = "Detector element not found.\n";
-			return false;
-		}
-
 		final StringBuilder errorHolder = new StringBuilder();
 		boolean ok = true;
 		ok = ok & readDoubleAttribute( element, settings, KEY_RADIUS, errorHolder );

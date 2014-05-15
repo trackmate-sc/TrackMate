@@ -78,6 +78,8 @@ import fiji.plugin.trackmate.tracking.ManualTrackerFactory;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
+import fiji.plugin.trackmate.visualization.ManualEdgeColorGenerator;
+import fiji.plugin.trackmate.visualization.ManualSpotColorGenerator;
 import fiji.plugin.trackmate.visualization.PerEdgeFeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.PerTrackFeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.SpotColorGenerator;
@@ -163,6 +165,10 @@ public class TrackMateGUIController implements ActionListener
 
 	protected FeatureColorGenerator< Spot > spotColorGenerator;
 
+	protected ManualEdgeColorGenerator manualEdgeColorGenerator;
+
+	protected ManualSpotColorGenerator manualSpotColorGenerator;
+
 	protected FeatureColorGenerator< Spot > spotColorGeneratorPerTrackFeature;
 
 	/**
@@ -220,6 +226,8 @@ public class TrackMateGUIController implements ActionListener
 		this.spotColorGenerator = createSpotColorGenerator();
 		this.edgeColorGenerator = createEdgeColorGenerator();
 		this.trackColorGenerator = createTrackColorGenerator();
+		this.manualEdgeColorGenerator = createManualEdgeColorGenerator();
+		this.manualSpotColorGenerator = createManualSpotColorGenerator();
 		this.spotColorGeneratorPerTrackFeature = createSpotColorGeneratorPerTrackFeature();
 
 		// 0.
@@ -256,6 +264,7 @@ public class TrackMateGUIController implements ActionListener
 	/*
 	 * PUBLIC METHODS
 	 */
+
 
 	/**
 	 * Creates a new {@link TrackMateGUIController} instance, set to operate on
@@ -459,6 +468,16 @@ public class TrackMateGUIController implements ActionListener
 		return generator;
 	}
 
+	protected ManualSpotColorGenerator createManualSpotColorGenerator()
+	{
+		return new ManualSpotColorGenerator();
+	}
+
+	protected ManualEdgeColorGenerator createManualEdgeColorGenerator()
+	{
+		return new ManualEdgeColorGenerator( trackmate.getModel() );
+	}
+
 	protected FeatureColorGenerator< Spot > createSpotColorGeneratorPerTrackFeature()
 	{
 		final FeatureColorGenerator< Spot > generator = new SpotColorGeneratorPerTrackFeature( trackmate.getModel(), TrackIndexAnalyzer.TRACK_INDEX );
@@ -643,7 +662,7 @@ public class TrackMateGUIController implements ActionListener
 		/*
 		 * Finished, let's change the display settings.
 		 */
-		configureViewsDescriptor = new ConfigureViewsDescriptor( trackmate, spotColorGenerator, edgeColorGenerator, trackColorGenerator, spotColorGeneratorPerTrackFeature, this );
+		configureViewsDescriptor = new ConfigureViewsDescriptor( trackmate, spotColorGenerator, edgeColorGenerator, trackColorGenerator, spotColorGeneratorPerTrackFeature, manualSpotColorGenerator, manualEdgeColorGenerator, this );
 		configureViewsDescriptor.getComponent().addActionListener( new ActionListener()
 		{
 			@Override
@@ -680,7 +699,7 @@ public class TrackMateGUIController implements ActionListener
 		/*
 		 * Save descriptor
 		 */
-		saveDescriptor = new SaveDescriptor( this, detectorProvider, trackerProvider );
+		saveDescriptor = new SaveDescriptor( this );
 
 		/*
 		 * Load descriptor

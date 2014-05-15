@@ -35,13 +35,15 @@ public class EdgeTargetAnalyzer implements EdgeAnalyzer, MultiThreaded
 
 	public static final String EDGE_COST = "LINK_COST";
 
-	public static final List< String > FEATURES = new ArrayList< String >( 4 );
+	public static final List< String > FEATURES = new ArrayList< String >( 3 );
 
-	public static final Map< String, String > FEATURE_NAMES = new HashMap< String, String >( 4 );
+	public static final Map< String, String > FEATURE_NAMES = new HashMap< String, String >( 3 );
 
-	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< String, String >( 4 );
+	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< String, String >( 3 );
 
-	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 4 );
+	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 3 );
+
+	public static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 3 );
 
 	static
 	{
@@ -60,6 +62,11 @@ public class EdgeTargetAnalyzer implements EdgeAnalyzer, MultiThreaded
 		FEATURE_DIMENSIONS.put( SPOT_SOURCE_ID, Dimension.NONE );
 		FEATURE_DIMENSIONS.put( SPOT_TARGET_ID, Dimension.NONE );
 		FEATURE_DIMENSIONS.put( EDGE_COST, Dimension.NONE );
+
+		IS_INT.put( SPOT_SOURCE_ID, Boolean.TRUE );
+		IS_INT.put( SPOT_TARGET_ID, Boolean.TRUE );
+		IS_INT.put( EDGE_COST, Boolean.FALSE );
+
 	}
 
 	private int numThreads;
@@ -192,5 +199,17 @@ public class EdgeTargetAnalyzer implements EdgeAnalyzer, MultiThreaded
 	public String getName()
 	{
 		return KEY;
-	};
+	}
+
+	@Override
+	public Map< String, Boolean > getIsIntFeature()
+	{
+		return IS_INT;
+	}
+
+	@Override
+	public boolean isManualFeature()
+	{
+		return false;
+	}
 }

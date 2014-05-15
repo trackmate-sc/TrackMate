@@ -610,7 +610,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 						if ( spotSelection.size() == 1 )
 						{
 							final Spot source = spotSelection.iterator().next();
-							if ( newSpot.diffTo( source, Spot.FRAME ) > 0 )
+							if ( newSpot.diffTo( source, Spot.FRAME ) != 0 )
 							{
 								model.beginUpdate();
 								try
