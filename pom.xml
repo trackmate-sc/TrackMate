@@ -26,9 +26,8 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>${scijava-common.groupId}</groupId>
+			<groupId>org.scijava</groupId>
 			<artifactId>scijava-common</artifactId>
-			<version>${scijava-common.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>sc.fiji</groupId>
