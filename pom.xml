@@ -69,7 +69,6 @@
 		<dependency>
 			<groupId>org.jfree</groupId>
 			<artifactId>jfreechart</artifactId>
-			<version>${jfreechart.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.jgrapht</groupId>
@@ -119,7 +118,6 @@
 		<dependency>
 			<groupId>net.imglib2</groupId>
 			<artifactId>imglib2-ij</artifactId>
-			<version>${imglib2-ij.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.imglib2</groupId>
