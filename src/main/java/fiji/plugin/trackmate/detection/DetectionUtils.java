@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.detection;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -191,10 +192,12 @@ public class DetectionUtils
 //		TODO: The "numThreads"-version of LocalExtrema.findLocalExtrema should really exist in imglib. After it does, replace the following lines by
 //		final ArrayList< Point > peaks = LocalExtrema.findLocalExtrema( dogWithBorder, localNeighborhoodCheck, numThreads );
 		final ExecutorService service = Executors.newFixedThreadPool( numThreads );
-		final ArrayList< Point > peaks = LocalExtrema.findLocalExtrema( dogWithBorder, localNeighborhoodCheck, service );
+		final List< Point > peaks = LocalExtrema.findLocalExtrema( dogWithBorder, localNeighborhoodCheck, service );
 		service.shutdown();
 
-		final ArrayList< Spot > spots;
+		if ( peaks.isEmpty() ) { return Collections.emptyList(); }
+
+		final List< Spot > spots;
 		if ( doSubPixelLocalization )
 		{
 
