@@ -561,7 +561,6 @@ public class TrackScheme extends AbstractTrackMateModelView
 	@Override
 	public void modelChanged( final ModelChangeEvent event )
 	{
-
 		// Only catch model changes
 		if ( event.getEventID() != ModelChangeEvent.MODEL_MODIFIED )
 			return;
@@ -634,7 +633,12 @@ public class TrackScheme extends AbstractTrackMateModelView
 				if ( event.getEdges().size() > 0 )
 				{
 
+					/*
+					 * Here we keep track of the spot and edge cells which style
+					 * we need to update.
+					 */
 					final Map< Integer, Set< mxCell >> edgesToUpdate = new HashMap< Integer, Set< mxCell >>();
+					final Collection< mxCell > spotsWithStyleToUpdate = new HashSet< mxCell >();
 
 					for ( final DefaultWeightedEdge edge : event.getEdges() )
 					{
@@ -647,42 +651,63 @@ public class TrackScheme extends AbstractTrackMateModelView
 							{
 
 								// Make sure target & source cells exist
-
 								final Spot source = model.getTrackModel().getEdgeSource( edge );
 								final mxCell sourceCell = graph.getCellFor( source );
-								if ( sourceCell == null )
-								{
-									final int frame = source.getFeature( Spot.FRAME ).intValue();
-									// Put in the graph
-									final int targetColumn = getUnlaidSpotColumn();
-									final int column = Math.max( targetColumn, getNextFreeColumn( frame ) );
-									insertSpotInGraph( source, column ); // move
-																			// in
-																			// right+1
-																			// free
-																			// column
-									rowLengths.put( frame, column );
-								}
-
 								final Spot target = model.getTrackModel().getEdgeTarget( edge );
 								final mxCell targetCell = graph.getCellFor( target );
-								if ( targetCell == null )
+
+								if ( sourceCell == null || targetCell == null )
 								{
-									final int frame = target.getFeature( Spot.FRAME ).intValue();
-									// Put in the graph
-									final int targetColumn = getUnlaidSpotColumn();
-									final int column = Math.max( targetColumn, getNextFreeColumn( frame ) );
-									insertSpotInGraph( target, column ); // move
-																			// in
-																			// right+1
-																			// free
-																			// column
-									rowLengths.put( frame, column );
+									/*
+									 * Is this missing cell missing because it
+									 * belongs to an invisible track? We then
+									 * have to import all the spot and edges.
+									 */
+									final Integer trackID = model.getTrackModel().trackIDOf( edge );
+									final Set< Spot > trackSpots = model.getTrackModel().trackSpots( trackID );
+									for ( final Spot trackSpot : trackSpots )
+									{
+										final mxCell spotCell = graph.getCellFor( trackSpot );
+										if ( spotCell == null )
+										{
+											final int frame = trackSpot.getFeature( Spot.FRAME ).intValue();
+											// Put in the graph
+											final int targetColumn = getUnlaidSpotColumn();
+											final int column = Math.max( targetColumn, getNextFreeColumn( frame ) );
+											// move in right+1 free column
+											final mxCell spotCellAdded = ( mxCell ) insertSpotInGraph( trackSpot, column );
+											rowLengths.put( frame, column );
+											spotsWithStyleToUpdate.add( spotCellAdded );
+										}
+									}
+
+									final Set< DefaultWeightedEdge > trackEdges = model.getTrackModel().trackEdges( trackID );
+									// Keep track of edges which style must be
+									// updated.
+									Set< mxCell > edgeSet = edgesToUpdate.get( trackID );
+									if ( edgeSet == null )
+									{
+										edgeSet = new HashSet< mxCell >();
+										edgesToUpdate.put( trackID, edgeSet );
+									}
+
+									// Loop over edges. Those who do not have a
+									// cell get a cell.
+									for ( final DefaultWeightedEdge trackEdge : trackEdges )
+									{
+										mxCell edgeCellToAdd = graph.getCellFor( trackEdge );
+										if ( null == edgeCellToAdd )
+										{
+											edgeCellToAdd = graph.addJGraphTEdge( trackEdge );
+											graph.getModel().add( graph.getDefaultParent(), edgeCellToAdd, 0 );
+											edgeSet.add( edgeCellToAdd );
+										}
+									}
+
 								}
 
 								// And finally create the edge cell
 								edgeCell = graph.addJGraphTEdge( edge );
-
 							}
 
 							graph.getModel().add( graph.getDefaultParent(), edgeCell, 0 );
@@ -690,7 +715,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 							// Add it to the map of cells to recolor
 							final Integer trackID = model.getTrackModel().trackIDOf( edge );
 							Set< mxCell > edgeSet = edgesToUpdate.get( trackID );
-							if ( edgesToUpdate.get( trackID ) == null )
+							if ( edgeSet == null )
 							{
 								edgeSet = new HashSet< mxCell >();
 								edgesToUpdate.put( trackID, edgeSet );
@@ -720,6 +745,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 					}
 
 					stylist.execute( edgesToUpdate );
+					stylist.updateVertexStyle( spotsWithStyleToUpdate );
 					SwingUtilities.invokeLater( new Runnable()
 					{
 						@Override
