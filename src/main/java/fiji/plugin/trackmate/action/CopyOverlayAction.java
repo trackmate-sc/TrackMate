@@ -21,10 +21,13 @@ import ij3d.Image3DUniverse;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 
 import org.scijava.plugin.Plugin;
@@ -49,6 +52,8 @@ import fiji.plugin.trackmate.visualization.SpotColorGeneratorPerTrackFeature;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import fiji.plugin.trackmate.visualization.threedviewer.SpotDisplayer3D;
+import fiji.plugin.trackmate.visualization.trackscheme.SpotImageUpdater;
+import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
 public class CopyOverlayAction extends AbstractTMAction
 {
@@ -61,9 +66,30 @@ public class CopyOverlayAction extends AbstractTMAction
 
 	public static final String INFO_TEXT = "<html>" + "This action copies the overlay (spots and tracks) to a new existing ImageJ window <br> " + "or to a new 3D viewer window. This can be useful to have the tracks and spots <br> " + "displayed on a modified image. " + "<p>" + "The new view will be independent, and will have its own control panel.<br> " + "</html>";
 
+	/**
+	 * The {@link ConfigureViewsPanel} created as a new GUI.
+	 */
+	private ConfigureViewsPanel panel;
+
+	/**
+	 * The new GUI model storing views and display settings.
+	 */
+	private TrackMateGUIModel guimodel;
+
+	/**
+	 * The new selection model for the GUI.
+	 */
+	private SelectionModel selectionModel;
+
+	/**
+	 * The <b>common</b> TrackMate instance given by the mother GUI.
+	 */
+	private TrackMate trackmate;
+
 	@Override
 	public void execute( final TrackMate trackmate )
 	{
+		this.trackmate = trackmate;
 		final ImagePlusChooser impChooser = new ImagePlusChooser( "Copy overlay", "Copy overlay to:", "New 3D viewer" );
 		impChooser.setLocationRelativeTo( null );
 		impChooser.setVisible( true );
@@ -76,10 +102,13 @@ public class CopyOverlayAction extends AbstractTMAction
 				{
 					new Thread( "TrackMate copying thread" )
 					{
+
+
+
 						@Override
 						public void run()
 						{
-							final SelectionModel selectionModel = new SelectionModel( trackmate.getModel() );
+							selectionModel = new SelectionModel( trackmate.getModel() );
 							// Instantiate displayer
 							final ImagePlus dest = impChooser.getSelectedImagePlus();
 							impChooser.setVisible( false );
@@ -100,12 +129,13 @@ public class CopyOverlayAction extends AbstractTMAction
 							}
 							newDisplayer.render();
 
-							final ConfigureViewsPanel newDisplayerPanel = new ConfigureViewsPanel( trackmate.getModel() );
+							panel = new ConfigureViewsPanel( trackmate.getModel() );
 
 							/*
 							 * Deal with display settings listener.
 							 */
-							final TrackMateGUIModel guimodel = new TrackMateGUIModel();
+
+							guimodel = new TrackMateGUIModel();
 							final SpotColorGenerator spotColorGenerator = new SpotColorGenerator( trackmate.getModel() );
 							final PerTrackFeatureColorGenerator trackColorGenerator = new PerTrackFeatureColorGenerator( trackmate.getModel(), TrackIndexAnalyzer.TRACK_INDEX );
 							final PerEdgeFeatureColorGenerator edgeColorGenerator = new PerEdgeFeatureColorGenerator( trackmate.getModel(), EdgeVelocityAnalyzer.VELOCITY );
@@ -113,12 +143,12 @@ public class CopyOverlayAction extends AbstractTMAction
 							final ManualSpotColorGenerator manualSpotColorGenerator = new ManualSpotColorGenerator();
 							final SpotColorGeneratorPerTrackFeature spotColorGeneratorPerTrackFeature = new SpotColorGeneratorPerTrackFeature( trackmate.getModel(), TrackIndexAnalyzer.TRACK_INDEX );
 
-							newDisplayerPanel.setSpotColorGenerator( spotColorGenerator );
-							newDisplayerPanel.setSpotColorGeneratorPerTrackFeature( spotColorGeneratorPerTrackFeature );
-							newDisplayerPanel.setEdgeColorGenerator( edgeColorGenerator );
-							newDisplayerPanel.setTrackColorGenerator( trackColorGenerator );
-							newDisplayerPanel.setManualEdgeColorGenerator( manualEdgeColorGenerator );
-							newDisplayerPanel.setManualSpotColorGenerator( manualSpotColorGenerator );
+							panel.setSpotColorGenerator( spotColorGenerator );
+							panel.setSpotColorGeneratorPerTrackFeature( spotColorGeneratorPerTrackFeature );
+							panel.setEdgeColorGenerator( edgeColorGenerator );
+							panel.setTrackColorGenerator( trackColorGenerator );
+							panel.setManualEdgeColorGenerator( manualEdgeColorGenerator );
+							panel.setManualSpotColorGenerator( manualSpotColorGenerator );
 
 							final Map< String, Object > displaySettings = new HashMap< String, Object >();
 							displaySettings.put( KEY_COLOR, DEFAULT_SPOT_COLOR );
@@ -148,11 +178,41 @@ public class CopyOverlayAction extends AbstractTMAction
 									}
 								}
 							};
-							newDisplayerPanel.addDisplaySettingsChangeListener( displaySettingsListener );
-							newDisplayerPanel.refreshGUI();
+							panel.addDisplaySettingsChangeListener( displaySettingsListener );
+							panel.refreshGUI();
+
+							/*
+							 * Deal with TrackScheme and analysis buttons.
+							 */
+
+							panel.addActionListener( new ActionListener()
+							{
+								@Override
+								public void actionPerformed( final ActionEvent event )
+								{
+									if ( event == panel.TRACK_SCHEME_BUTTON_PRESSED )
+									{
+										launchTrackScheme();
+
+									}
+									else if ( event == panel.DO_ANALYSIS_BUTTON_PRESSED )
+									{
+										launchDoAnalysis();
+
+									}
+									else
+									{
+										System.out.println( "[CopyOverlayAction] Caught unknown event: " + event );
+									}
+								}
+							} );
+
+							/*
+							 * Render it.
+							 */
 
 							final JFrame newFrame = new JFrame();
-							newFrame.getContentPane().add( newDisplayerPanel );
+							newFrame.getContentPane().add( panel );
 							newFrame.pack();
 							newFrame.setTitle( title );
 							newFrame.setSize( 300, 470 );
@@ -171,6 +231,61 @@ public class CopyOverlayAction extends AbstractTMAction
 			}
 		};
 		impChooser.addActionListener( copyOverlayListener );
+	}
+
+	private void launchTrackScheme()
+	{
+		final JButton button = panel.getTrackSchemeButton();
+		button.setEnabled( false );
+		new Thread( "Launching TrackScheme thread" )
+		{
+			@Override
+			public void run()
+			{
+				final TrackScheme trackscheme = new TrackScheme( trackmate.getModel(), selectionModel );
+				final SpotImageUpdater thumbnailUpdater = new SpotImageUpdater( trackmate.getSettings() );
+				trackscheme.setSpotImageUpdater( thumbnailUpdater );
+				for ( final String settingKey : guimodel.getDisplaySettings().keySet() )
+				{
+					trackscheme.setDisplaySettings( settingKey, guimodel.getDisplaySettings().get( settingKey ) );
+				}
+				trackscheme.render();
+				guimodel.addView( trackscheme );
+				// De-register
+				trackscheme.getGUI().addWindowListener( new WindowAdapter()
+				{
+					@Override
+					public void windowClosing( final WindowEvent e )
+					{
+						guimodel.removeView( trackscheme );
+					}
+				} );
+
+				button.setEnabled( true );
+			};
+		}.start();
+	}
+
+	private void launchDoAnalysis()
+	{
+		final JButton button = panel.getDoAnalysisButton();
+		button.setEnabled( false );
+		new Thread( "TrackMate export analysis to IJ thread." )
+		{
+			@Override
+			public void run()
+			{
+				try
+				{
+					final ExportStatsToIJAction action = new ExportStatsToIJAction();
+					action.execute( trackmate );
+				}
+				finally
+				{
+					button.setEnabled( true );
+				}
+			};
+		}.start();
 	}
 
 	@Plugin( type = TrackMateActionFactory.class )
