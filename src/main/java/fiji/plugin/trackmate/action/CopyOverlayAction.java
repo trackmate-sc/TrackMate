@@ -17,7 +17,6 @@ import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_C
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_DISPLAY_DEPTH;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_DISPLAY_MODE;
 import ij.ImagePlus;
-import ij3d.Image3DUniverse;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -51,7 +50,7 @@ import fiji.plugin.trackmate.visualization.SpotColorGenerator;
 import fiji.plugin.trackmate.visualization.SpotColorGeneratorPerTrackFeature;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
-import fiji.plugin.trackmate.visualization.threedviewer.SpotDisplayer3D;
+import fiji.plugin.trackmate.visualization.threedviewer.SpotDisplayer3DFactory;
 import fiji.plugin.trackmate.visualization.trackscheme.SpotImageUpdater;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
@@ -117,8 +116,7 @@ public class CopyOverlayAction extends AbstractTMAction
 							if ( null == dest )
 							{
 								logger.log( "Copying data and overlay to new 3D viewer\n" );
-								final Image3DUniverse universe = new Image3DUniverse();
-								newDisplayer = new SpotDisplayer3D( trackmate.getModel(), selectionModel, universe );
+								newDisplayer = new SpotDisplayer3DFactory().create( trackmate.getModel(), trackmate.getSettings(), selectionModel );
 								title = "3D viewer overlay";
 							}
 							else
