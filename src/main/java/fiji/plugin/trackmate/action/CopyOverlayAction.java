@@ -1,10 +1,28 @@
 package fiji.plugin.trackmate.action;
 
+import static fiji.plugin.trackmate.visualization.TrackMateModelView.DEFAULT_COLOR_MAP;
+import static fiji.plugin.trackmate.visualization.TrackMateModelView.DEFAULT_HIGHLIGHT_COLOR;
+import static fiji.plugin.trackmate.visualization.TrackMateModelView.DEFAULT_SPOT_COLOR;
+import static fiji.plugin.trackmate.visualization.TrackMateModelView.DEFAULT_TRACK_DISPLAY_DEPTH;
+import static fiji.plugin.trackmate.visualization.TrackMateModelView.DEFAULT_TRACK_DISPLAY_MODE;
+import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_COLOR;
+import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_COLORMAP;
+import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_DISPLAY_SPOT_NAMES;
+import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_HIGHLIGHT_COLOR;
+import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_SPOTS_VISIBLE;
+import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_SPOT_COLORING;
+import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_SPOT_RADIUS_RATIO;
+import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACKS_VISIBLE;
+import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_COLORING;
+import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_DISPLAY_DEPTH;
+import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_DISPLAY_MODE;
 import ij.ImagePlus;
 import ij3d.Image3DUniverse;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -13,10 +31,21 @@ import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.features.edges.EdgeVelocityAnalyzer;
+import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
+import fiji.plugin.trackmate.gui.DisplaySettingsEvent;
+import fiji.plugin.trackmate.gui.DisplaySettingsListener;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.gui.TrackMateGUIModel;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.panels.ConfigureViewsPanel;
 import fiji.plugin.trackmate.gui.panels.components.ImagePlusChooser;
+import fiji.plugin.trackmate.visualization.ManualEdgeColorGenerator;
+import fiji.plugin.trackmate.visualization.ManualSpotColorGenerator;
+import fiji.plugin.trackmate.visualization.PerEdgeFeatureColorGenerator;
+import fiji.plugin.trackmate.visualization.PerTrackFeatureColorGenerator;
+import fiji.plugin.trackmate.visualization.SpotColorGenerator;
+import fiji.plugin.trackmate.visualization.SpotColorGeneratorPerTrackFeature;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import fiji.plugin.trackmate.visualization.threedviewer.SpotDisplayer3D;
@@ -72,6 +101,56 @@ public class CopyOverlayAction extends AbstractTMAction
 							newDisplayer.render();
 
 							final ConfigureViewsPanel newDisplayerPanel = new ConfigureViewsPanel( trackmate.getModel() );
+
+							/*
+							 * Deal with display settings listener.
+							 */
+							final TrackMateGUIModel guimodel = new TrackMateGUIModel();
+							final SpotColorGenerator spotColorGenerator = new SpotColorGenerator( trackmate.getModel() );
+							final PerTrackFeatureColorGenerator trackColorGenerator = new PerTrackFeatureColorGenerator( trackmate.getModel(), TrackIndexAnalyzer.TRACK_INDEX );
+							final PerEdgeFeatureColorGenerator edgeColorGenerator = new PerEdgeFeatureColorGenerator( trackmate.getModel(), EdgeVelocityAnalyzer.VELOCITY );
+							final ManualEdgeColorGenerator manualEdgeColorGenerator = new ManualEdgeColorGenerator( trackmate.getModel() );
+							final ManualSpotColorGenerator manualSpotColorGenerator = new ManualSpotColorGenerator();
+							final SpotColorGeneratorPerTrackFeature spotColorGeneratorPerTrackFeature = new SpotColorGeneratorPerTrackFeature( trackmate.getModel(), TrackIndexAnalyzer.TRACK_INDEX );
+
+							newDisplayerPanel.setSpotColorGenerator( spotColorGenerator );
+							newDisplayerPanel.setSpotColorGeneratorPerTrackFeature( spotColorGeneratorPerTrackFeature );
+							newDisplayerPanel.setEdgeColorGenerator( edgeColorGenerator );
+							newDisplayerPanel.setTrackColorGenerator( trackColorGenerator );
+							newDisplayerPanel.setManualEdgeColorGenerator( manualEdgeColorGenerator );
+							newDisplayerPanel.setManualSpotColorGenerator( manualSpotColorGenerator );
+
+							final Map< String, Object > displaySettings = new HashMap< String, Object >();
+							displaySettings.put( KEY_COLOR, DEFAULT_SPOT_COLOR );
+							displaySettings.put( KEY_HIGHLIGHT_COLOR, DEFAULT_HIGHLIGHT_COLOR );
+							displaySettings.put( KEY_SPOTS_VISIBLE, true );
+							displaySettings.put( KEY_DISPLAY_SPOT_NAMES, false );
+							displaySettings.put( KEY_SPOT_COLORING, spotColorGenerator );
+							displaySettings.put( KEY_SPOT_RADIUS_RATIO, 1.0d );
+							displaySettings.put( KEY_TRACKS_VISIBLE, true );
+							displaySettings.put( KEY_TRACK_DISPLAY_MODE, DEFAULT_TRACK_DISPLAY_MODE );
+							displaySettings.put( KEY_TRACK_DISPLAY_DEPTH, DEFAULT_TRACK_DISPLAY_DEPTH );
+							displaySettings.put( KEY_TRACK_COLORING, trackColorGenerator );
+							displaySettings.put( KEY_COLORMAP, DEFAULT_COLOR_MAP );
+							guimodel.setDisplaySettings( displaySettings );
+
+							guimodel.addView( newDisplayer );
+							final DisplaySettingsListener displaySettingsListener = new DisplaySettingsListener()
+							{
+								@Override
+								public void displaySettingsChanged( final DisplaySettingsEvent event )
+								{
+									guimodel.getDisplaySettings().put( event.getKey(), event.getNewValue() );
+									for ( final TrackMateModelView view : guimodel.getViews() )
+									{
+										view.setDisplaySettings( event.getKey(), event.getNewValue() );
+										view.refresh();
+									}
+								}
+							};
+							newDisplayerPanel.addDisplaySettingsChangeListener( displaySettingsListener );
+							newDisplayerPanel.refreshGUI();
+
 							final JFrame newFrame = new JFrame();
 							newFrame.getContentPane().add( newDisplayerPanel );
 							newFrame.pack();
