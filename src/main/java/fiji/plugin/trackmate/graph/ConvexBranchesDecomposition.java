@@ -14,7 +14,9 @@ import net.imglib2.algorithm.Algorithm;
 import net.imglib2.algorithm.Benchmark;
 
 import org.jgrapht.alg.ConnectivityInspector;
+import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.graph.SimpleGraph;
 
 import fiji.plugin.trackmate.Model;
@@ -24,17 +26,123 @@ import fiji.plugin.trackmate.TrackModel;
 /**
  * A class that can decompose the tracks of a {@link Model} in convex branches.
  * <p>
- * A convex branch is a portion of a track that contains spots that are
- * separated by exactly one frame. Here they are returned, sorted by increasing
- * frame number. It is ensured that the spots within a convex branch are not a
- * splitting or a merging point. If desired, gaps within a convex branch can be
- * removed.
+ * A convex branch is a portion of a track for which all spots - but the first
+ * and last one - have exactly one predecessor and one successor (in time). The
+ * first and last spots of a branch may have 0 or 1 or more predecessors or
+ * successors respectively, depending on they are the start or the end of a
+ * track, or a fusion or merging point, or a gap (see below).
  * <p>
- * This class also outputs the links that were cut in the source model to
- * generate these branches. A flag allows to specify whether these links must be
- * between end and starting point of a branch. Another flag relax the convex
- * constraint and allows gaps to be included in branches.
- * 
+ * Schematically, if a track is arranged as follow:
+ *
+ * <pre>
+ * A
+ * |
+ * B--+
+ * |  |
+ * C  I
+ * |  |
+ * D  J
+ * |  |
+ * E  K
+ * |  |
+ * F  L
+ * |  |
+ * G--+
+ * |
+ * H
+ * </pre>
+ *
+ * then
+ *
+ * <pre>
+ * A - B,
+ * C - D - E - F,
+ * I - J - K - L,
+ * G - H
+ * </pre>
+ *
+ * are convex branches. This class generates the decomposition of a track in
+ * these branches.
+ * <p>
+ * In the example above, note that another acceptable decomposition could be:
+ *
+ * <pre>
+ * A,
+ * B - C - D - E - F - G,
+ * I - J - K - L,
+ * H
+ * </pre>
+ *
+ * depending on to what branch you choose to attach splitting or merging points.
+ * This class attaches split points to the end of the early branch, and merge
+ * points to the beginning of the late branch. So that for our example above,
+ * the output is indeed:
+ *
+ * <pre>
+ * A - B,
+ * C - D - E - F,
+ * I - J - K - L,
+ * G - H
+ * </pre>
+ * <p>
+ * The behavior of this algorithm can be tuned using two boolean flags. The
+ * first one specifies whether we can violate the convex branch contract and
+ * have branches that contain a spot with more than one predecessor and one
+ * successor. For instance, if a track is as follow:
+ *
+ * <pre>
+ * A
+ * |
+ * B
+ * |
+ * C--+
+ * |  |
+ * D  F
+ * |  |
+ * E  G
+ * </pre>
+ *
+ * the default output would be:
+ *
+ * <pre>
+ * A - B - C,
+ * D - E,
+ * F - G
+ * </pre>
+ *
+ * Setting the <code>forbidMiddleLinks</code> flag to <code>false</code> would
+ * give instead:
+ *
+ * <pre>
+ * A - B - C - D - E,
+ * F - G
+ * </pre>
+ *
+ * which yields fewer and longer branches.
+ * <p>
+ * Some branches may have gaps in them, that is two spots separated by more than
+ * one frame. By default this does not lead to cutting the branch in two. If you
+ * want to force branches to contain spots that are separated by exactly only
+ * one frame, set the <code>forbidGaps</code> flag to <code>true</code>. In that
+ * case, a track arranged as following (<code>ø</code> is a missing detection in
+ * a frame, or a gap):
+ *
+ * <pre>
+ * A - B - C - ø - D - E - F
+ * </pre>
+ *
+ * will be split in two branches.
+ *
+ * <pre>
+ * A - B - C,
+ * D - E - F
+ * </pre>
+ * <p>
+ * It is ensured that each spot in the model is present in exactly one branch of
+ * the decomposition. Only spots belonging to visible tracks are taken into
+ * account. This class also outputs the links that were cut in the source model
+ * to generate these branches.
+ *
  * @author Jean-Yves Tinevez - 2014
  */
 public class ConvexBranchesDecomposition implements Algorithm, Benchmark
@@ -154,6 +262,30 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 
 	}
 
+	/**
+	 * A static utility that generates the convex branch decomposition of a
+	 * specific track in a model.
+	 *
+	 * @param trackID
+	 *            the ID of the track to decompose.
+	 * @param tm
+	 *            the {@link TrackModel} in which the track is stored.
+	 * @param neighborIndex
+	 *            a {@link TimeDirectedNeighborIndex} needed to quickly retrieve
+	 *            neighbors in the mother graph.
+	 * @param forbidMiddleLinks
+	 *            if <code>true</code>, the decomposition will include branches
+	 *            where only the first and last spots may have more than one
+	 *            predecessor and one successor respectively. If
+	 *            <code>false</code>, some spots inside a branch may be a fusion
+	 *            or splitting point. This leads to fewer and longer branches.
+	 * @param forbidGaps
+	 *            if <code>true</code>, two neighbor spots in a branch will be
+	 *            separated by exactly one frame. If <code>false</code>,
+	 *            branches will include gaps.
+	 * @return a new {@link TrackBranchDecomposition}.
+	 * @see ConvexBranchesDecomposition
+	 */
 	public static final TrackBranchDecomposition processTrack( final Integer trackID, final TrackModel tm, final TimeDirectedNeighborIndex neighborIndex, final boolean forbidMiddleLinks, final boolean forbidGaps )
 	{
 		final Set< Spot > allSpots = tm.trackSpots( trackID );
@@ -347,6 +479,48 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 		output.links = links;
 		return output;
 
+	}
+
+	/**
+	 * Builds a directed graph made of a convex branch decomposition.
+	 * <p>
+	 * In the graph, the vertices are made of the branches of the decomposition,
+	 * and the edges are the links between each branch.
+	 * 
+	 * @param branchDecomposition
+	 *            the convex branch decomposition to transform.
+	 * @return a new simple directed graph. The direction of the edges in the
+	 *         graph are taken as the end of a branch is the source, and the
+	 *         beginning of a branch as the target, following time.
+	 */
+	public static final SimpleDirectedGraph< List< Spot >, DefaultEdge > buildBranchGraph( final TrackBranchDecomposition branchDecomposition )
+	{
+		final SimpleDirectedGraph< List< Spot >, DefaultEdge > branchGraph = new SimpleDirectedGraph< List< Spot >, DefaultEdge >( DefaultEdge.class );
+
+		final Collection< List< Spot >> branches = branchDecomposition.branches;
+		final Collection< List< Spot >> links = branchDecomposition.links;
+
+		// Map of the first spot of each branch.
+		final Map< Spot, List< Spot > > firstSpots = new HashMap< Spot, List< Spot > >( branches.size() );
+		// Map of the last spot of each branch.
+		final Map< Spot, List< Spot > > lastSpots = new HashMap< Spot, List< Spot > >( branches.size() );
+		for ( final List< Spot > branch : branches )
+		{
+			firstSpots.put( branch.get( 0 ), branch );
+			lastSpots.put( branch.get( branch.size() - 1 ), branch );
+			branchGraph.addVertex( branch );
+		}
+
+		for ( final List< Spot > link : links )
+		{
+			final Spot source = link.get( 0 );
+			final Spot target = link.get( 1 );
+			final List< Spot > targetBranch = firstSpots.get( target );
+			final List< Spot > sourceBranch = lastSpots.get( source );
+			branchGraph.addEdge( sourceBranch, targetBranch );
+		}
+
+		return branchGraph;
 	}
 
 	private static final List< Spot > makeLink( final Spot spotA, final Spot spotB )
