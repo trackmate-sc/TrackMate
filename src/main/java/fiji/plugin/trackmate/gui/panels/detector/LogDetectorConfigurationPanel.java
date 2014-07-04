@@ -414,7 +414,7 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 				layout.putConstraint( SpringLayout.WEST, jButtonRefresh, 11, SpringLayout.WEST, this );
 				layout.putConstraint( SpringLayout.SOUTH, jButtonRefresh, 395, SpringLayout.NORTH, this );
 				layout.putConstraint( SpringLayout.EAST, jButtonRefresh, 131, SpringLayout.WEST, this );
-				this.add( jButtonRefresh );
+				// this.add( jButtonRefresh );
 				jButtonRefresh.setToolTipText( TOOLTIP_REFRESH );
 				jButtonRefresh.setFont( SMALL_FONT );
 				jButtonRefresh.addActionListener( new ActionListener()
