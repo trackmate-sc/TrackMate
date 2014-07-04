@@ -28,11 +28,11 @@ import fiji.plugin.trackmate.gui.panels.components.FeaturePlotSelectionPanel;
 public class GrapherPanel extends ActionListenablePanel
 {
 
-	private static final ImageIcon SPOT_ICON = new ImageIcon( GrapherPanel.class.getResource( "images/SpotIcon_small.png" ) );
+	private static final ImageIcon SPOT_ICON = new ImageIcon( GrapherPanel.class.getResource( "images/Icon1_print_transparency.png" ) );
 
-	private static final ImageIcon EDGE_ICON = new ImageIcon( GrapherPanel.class.getResource( "images/EdgeIcon_small.png" ) );
+	private static final ImageIcon EDGE_ICON = new ImageIcon( GrapherPanel.class.getResource( "images/Icon2_print_transparency.png" ) );
 
-	private static final ImageIcon TRACK_ICON = new ImageIcon( GrapherPanel.class.getResource( "images/TrackIcon_small.png" ) );
+	private static final ImageIcon TRACK_ICON = new ImageIcon( GrapherPanel.class.getResource( "images/Icon3b_print_transparency.png" ) );
 
 	private static final long serialVersionUID = 1L;
 

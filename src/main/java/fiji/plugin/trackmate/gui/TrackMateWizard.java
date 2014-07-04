@@ -58,7 +58,7 @@ public class TrackMateWizard extends JFrame implements ActionListener
 
 	public static final String RESUME_TEXT = "Resume";
 
-	public static final ImageIcon TRACKMATE_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/TrackIcon_small.png" ) );
+	public static final ImageIcon TRACKMATE_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/Logo50x50-color-nofont-72p.png" ) );
 
 	/*
 	 * PRIVATE CONSTANTS
