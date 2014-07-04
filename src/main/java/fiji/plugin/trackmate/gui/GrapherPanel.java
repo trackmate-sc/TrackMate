@@ -25,142 +25,169 @@ import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
 import fiji.plugin.trackmate.gui.panels.components.FeaturePlotSelectionPanel;
 
-public class GrapherPanel extends ActionListenablePanel {
+public class GrapherPanel extends ActionListenablePanel
+{
 
-	private static final ImageIcon SPOT_ICON 		= new ImageIcon(GrapherPanel.class.getResource("images/SpotIcon_small.png"));
-	private static final ImageIcon EDGE_ICON 		= new ImageIcon(GrapherPanel.class.getResource("images/EdgeIcon_small.png"));
-	private static final ImageIcon TRACK_ICON 		= new ImageIcon(GrapherPanel.class.getResource("images/TrackIcon_small.png"));
+	private static final ImageIcon SPOT_ICON = new ImageIcon( GrapherPanel.class.getResource( "images/SpotIcon_small.png" ) );
+
+	private static final ImageIcon EDGE_ICON = new ImageIcon( GrapherPanel.class.getResource( "images/EdgeIcon_small.png" ) );
+
+	private static final ImageIcon TRACK_ICON = new ImageIcon( GrapherPanel.class.getResource( "images/TrackIcon_small.png" ) );
 
 	private static final long serialVersionUID = 1L;
 
 	private final TrackMate trackmate;
+
 	private final JPanel panelSpot;
+
 	private final JPanel panelEdges;
+
 	private final JPanel panelTracks;
+
 	private FeaturePlotSelectionPanel spotFeatureSelectionPanel;
+
 	private FeaturePlotSelectionPanel edgeFeatureSelectionPanel;
+
 	private FeaturePlotSelectionPanel trackFeatureSelectionPanel;
 
 	/*
 	 * CONSTRUCTOR
 	 */
 
-	public GrapherPanel(final TrackMate trackmate) {
+	public GrapherPanel( final TrackMate trackmate )
+	{
 		this.trackmate = trackmate;
 
-		setLayout(new BorderLayout(0, 0));
+		setLayout( new BorderLayout( 0, 0 ) );
 
-		final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		add(tabbedPane, BorderLayout.CENTER);
+		final JTabbedPane tabbedPane = new JTabbedPane( JTabbedPane.TOP );
+		add( tabbedPane, BorderLayout.CENTER );
 
 		panelSpot = new JPanel();
-		tabbedPane.addTab("Spots", SPOT_ICON, panelSpot, null);
-		panelSpot.setLayout(new BorderLayout(0, 0));
+		tabbedPane.addTab( "Spots", SPOT_ICON, panelSpot, null );
+		panelSpot.setLayout( new BorderLayout( 0, 0 ) );
 
 		panelEdges = new JPanel();
-		tabbedPane.addTab("Links", EDGE_ICON, panelEdges, null);
-		panelEdges.setLayout(new BorderLayout(0, 0));
+		tabbedPane.addTab( "Links", EDGE_ICON, panelEdges, null );
+		panelEdges.setLayout( new BorderLayout( 0, 0 ) );
 
 		panelTracks = new JPanel();
-		tabbedPane.addTab("Tracks", TRACK_ICON, panelTracks, null);
-		panelTracks.setLayout(new BorderLayout(0, 0));
+		tabbedPane.addTab( "Tracks", TRACK_ICON, panelTracks, null );
+		panelTracks.setLayout( new BorderLayout( 0, 0 ) );
 
 		refresh();
 	}
 
-	public void refresh() {
-
+	public void refresh()
+	{
 		// regen spot features
 		panelSpot.removeAll();
-		final Collection<String> spotFeatures = trackmate.getModel().getFeatureModel().getSpotFeatures();
-		final Map<String, String> spotFeatureNames = trackmate.getModel().getFeatureModel().getSpotFeatureNames();
-		spotFeatureSelectionPanel = new FeaturePlotSelectionPanel(Spot.POSITION_T, spotFeatures, spotFeatureNames);
-		panelSpot.add(spotFeatureSelectionPanel);
-		spotFeatureSelectionPanel.addActionListener(new ActionListener() {
+		final Collection< String > spotFeatures = trackmate.getModel().getFeatureModel().getSpotFeatures();
+		final Map< String, String > spotFeatureNames = trackmate.getModel().getFeatureModel().getSpotFeatureNames();
+		spotFeatureSelectionPanel = new FeaturePlotSelectionPanel( Spot.POSITION_T, spotFeatures, spotFeatureNames );
+		panelSpot.add( spotFeatureSelectionPanel );
+		spotFeatureSelectionPanel.addActionListener( new ActionListener()
+		{
 			@Override
-			public void actionPerformed(final ActionEvent arg0) {
-				spotFeatureSelectionPanel.setEnabled(false);
-				new Thread("TrackMate plot spot features thread") {
+			public void actionPerformed( final ActionEvent arg0 )
+			{
+				spotFeatureSelectionPanel.setEnabled( false );
+				new Thread( "TrackMate plot spot features thread" )
+				{
 					@Override
-					public void run() {
+					public void run()
+					{
 						plotSpotFeatures();
-						spotFeatureSelectionPanel.setEnabled(true);
+						spotFeatureSelectionPanel.setEnabled( true );
 					}
 				}.start();
 			}
-		});
+		} );
 
 		// regen edge features
 		panelEdges.removeAll();
-		final Collection<String> edgeFeatures = trackmate.getModel().getFeatureModel().getEdgeFeatures();
-		final Map<String, String> edgeFeatureNames = trackmate.getModel().getFeatureModel().getEdgeFeatureNames();
-		edgeFeatureSelectionPanel = new FeaturePlotSelectionPanel(EdgeTimeLocationAnalyzer.TIME, edgeFeatures, edgeFeatureNames);
-		panelEdges.add(edgeFeatureSelectionPanel);
-		edgeFeatureSelectionPanel.addActionListener(new ActionListener() {
+		final Collection< String > edgeFeatures = trackmate.getModel().getFeatureModel().getEdgeFeatures();
+		final Map< String, String > edgeFeatureNames = trackmate.getModel().getFeatureModel().getEdgeFeatureNames();
+		edgeFeatureSelectionPanel = new FeaturePlotSelectionPanel( EdgeTimeLocationAnalyzer.TIME, edgeFeatures, edgeFeatureNames );
+		panelEdges.add( edgeFeatureSelectionPanel );
+		edgeFeatureSelectionPanel.addActionListener( new ActionListener()
+		{
 			@Override
-			public void actionPerformed(final ActionEvent arg0) {
-				edgeFeatureSelectionPanel.setEnabled(false);
-				new Thread("TrackMate plot edge features thread") {
+			public void actionPerformed( final ActionEvent arg0 )
+			{
+				edgeFeatureSelectionPanel.setEnabled( false );
+				new Thread( "TrackMate plot edge features thread" )
+				{
 					@Override
-					public void run() {
+					public void run()
+					{
 						plotEdgeFeatures();
-						edgeFeatureSelectionPanel.setEnabled(true);
+						edgeFeatureSelectionPanel.setEnabled( true );
 					}
 				}.start();
 			}
-		});
+		} );
 
 		// regen trak features
 		panelTracks.removeAll();
-		final Collection<String> trackFeatures = trackmate.getModel().getFeatureModel().getTrackFeatures();
-		final Map<String, String> trackFeatureNames = trackmate.getModel().getFeatureModel().getTrackFeatureNames();
-		trackFeatureSelectionPanel = new FeaturePlotSelectionPanel(TrackIndexAnalyzer.TRACK_INDEX, trackFeatures, trackFeatureNames);
-		panelTracks.add(trackFeatureSelectionPanel);
-		trackFeatureSelectionPanel.addActionListener(new ActionListener() {
+		final Collection< String > trackFeatures = trackmate.getModel().getFeatureModel().getTrackFeatures();
+		final Map< String, String > trackFeatureNames = trackmate.getModel().getFeatureModel().getTrackFeatureNames();
+		trackFeatureSelectionPanel = new FeaturePlotSelectionPanel( TrackIndexAnalyzer.TRACK_INDEX, trackFeatures, trackFeatureNames );
+		panelTracks.add( trackFeatureSelectionPanel );
+		trackFeatureSelectionPanel.addActionListener( new ActionListener()
+		{
 			@Override
-			public void actionPerformed(final ActionEvent arg0) {
-				trackFeatureSelectionPanel.setEnabled(false);
-				new Thread("TrackMate plot track features thread") {
+			public void actionPerformed( final ActionEvent arg0 )
+			{
+				trackFeatureSelectionPanel.setEnabled( false );
+				new Thread( "TrackMate plot track features thread" )
+				{
 					@Override
-					public void run() {
+					public void run()
+					{
 						plotTrackFeatures();
-						trackFeatureSelectionPanel.setEnabled(true);
+						trackFeatureSelectionPanel.setEnabled( true );
 					}
 				}.start();
 			}
-		});
+		} );
 	}
 
-	private void plotSpotFeatures() {
+	private void plotSpotFeatures()
+	{
 		final String xFeature = spotFeatureSelectionPanel.getXKey();
-		final Set<String> yFeatures = spotFeatureSelectionPanel.getYKeys();
+		final Set< String > yFeatures = spotFeatureSelectionPanel.getYKeys();
 		// Collect only the spots that are in tracks
-		final List<Spot> spots = new ArrayList<Spot>(trackmate.getModel().getSpots().getNSpots(true));
-		for(final Integer trackID : trackmate.getModel().getTrackModel().trackIDs(false)) {
-			spots.addAll(trackmate.getModel().getTrackModel().trackSpots(trackID));
+		final List< Spot > spots = new ArrayList< Spot >( trackmate.getModel().getSpots().getNSpots( true ) );
+		for ( final Integer trackID : trackmate.getModel().getTrackModel().trackIDs( false ) )
+		{
+			spots.addAll( trackmate.getModel().getTrackModel().trackSpots( trackID ) );
 		}
-		final SpotFeatureGrapher grapher = new SpotFeatureGrapher(xFeature, yFeatures, spots, trackmate.getModel());
+		final SpotFeatureGrapher grapher = new SpotFeatureGrapher( xFeature, yFeatures, spots, trackmate.getModel() );
 		grapher.render();
 	}
 
-	private void plotEdgeFeatures() {
+	private void plotEdgeFeatures()
+	{
 		// Collect edges in filtered tracks
-		final List<DefaultWeightedEdge> edges = new ArrayList<DefaultWeightedEdge>();
-		for (final Integer trackID : trackmate.getModel().getTrackModel().trackIDs(true)) {
-			edges.addAll(trackmate.getModel().getTrackModel().trackEdges(trackID));
+		final List< DefaultWeightedEdge > edges = new ArrayList< DefaultWeightedEdge >();
+		for ( final Integer trackID : trackmate.getModel().getTrackModel().trackIDs( true ) )
+		{
+			edges.addAll( trackmate.getModel().getTrackModel().trackEdges( trackID ) );
 		}
 		// Prepare grapher
 		final String xFeature = edgeFeatureSelectionPanel.getXKey();
-		final Set<String> yFeatures = edgeFeatureSelectionPanel.getYKeys();
-		final EdgeFeatureGrapher grapher = new EdgeFeatureGrapher(xFeature, yFeatures, edges , trackmate.getModel());
+		final Set< String > yFeatures = edgeFeatureSelectionPanel.getYKeys();
+		final EdgeFeatureGrapher grapher = new EdgeFeatureGrapher( xFeature, yFeatures, edges, trackmate.getModel() );
 		grapher.render();
 	}
 
-	private void plotTrackFeatures() {
+	private void plotTrackFeatures()
+	{
 		// Prepare grapher
 		final String xFeature = trackFeatureSelectionPanel.getXKey();
-		final Set<String> yFeatures = trackFeatureSelectionPanel.getYKeys();
-		final TrackFeatureGrapher grapher = new TrackFeatureGrapher(xFeature, yFeatures, trackmate.getModel());
+		final Set< String > yFeatures = trackFeatureSelectionPanel.getYKeys();
+		final TrackFeatureGrapher grapher = new TrackFeatureGrapher( xFeature, yFeatures, trackmate.getModel() );
 		grapher.render();
 	}
 
