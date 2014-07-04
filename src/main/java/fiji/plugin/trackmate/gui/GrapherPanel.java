@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -34,6 +35,27 @@ public class GrapherPanel extends ActionListenablePanel
 
 	private static final ImageIcon TRACK_ICON = new ImageIcon( GrapherPanel.class.getResource( "images/Icon3b_print_transparency.png" ) );
 
+	public static final ImageIcon SPOT_ICON_64x64;
+
+	public static final ImageIcon EDGE_ICON_64x64;
+
+	public static final ImageIcon TRACK_ICON_64x64;
+
+	static
+	{
+		final Image image1 = SPOT_ICON.getImage();
+		final Image newimg1 = image1.getScaledInstance( 32, 32, java.awt.Image.SCALE_SMOOTH );
+		SPOT_ICON_64x64 = new ImageIcon( newimg1 );
+
+		final Image image2 = EDGE_ICON.getImage();
+		final Image newimg2 = image2.getScaledInstance( 32, 32, java.awt.Image.SCALE_SMOOTH );
+		EDGE_ICON_64x64 = new ImageIcon( newimg2 );
+
+		final Image image3 = TRACK_ICON.getImage();
+		final Image newimg3 = image3.getScaledInstance( 32, 32, java.awt.Image.SCALE_SMOOTH );
+		TRACK_ICON_64x64 = new ImageIcon( newimg3 );
+	}
+
 	private static final long serialVersionUID = 1L;
 
 	private final TrackMate trackmate;
@@ -64,15 +86,15 @@ public class GrapherPanel extends ActionListenablePanel
 		add( tabbedPane, BorderLayout.CENTER );
 
 		panelSpot = new JPanel();
-		tabbedPane.addTab( "Spots", SPOT_ICON, panelSpot, null );
+		tabbedPane.addTab( "Spots", SPOT_ICON_64x64, panelSpot, null );
 		panelSpot.setLayout( new BorderLayout( 0, 0 ) );
 
 		panelEdges = new JPanel();
-		tabbedPane.addTab( "Links", EDGE_ICON, panelEdges, null );
+		tabbedPane.addTab( "Links", EDGE_ICON_64x64, panelEdges, null );
 		panelEdges.setLayout( new BorderLayout( 0, 0 ) );
 
 		panelTracks = new JPanel();
-		tabbedPane.addTab( "Tracks", TRACK_ICON, panelTracks, null );
+		tabbedPane.addTab( "Tracks", TRACK_ICON_64x64, panelTracks, null );
 		panelTracks.setLayout( new BorderLayout( 0, 0 ) );
 
 		refresh();
