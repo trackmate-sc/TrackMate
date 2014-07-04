@@ -63,13 +63,13 @@ public class TrackSpotFeatureAnalyzer implements TrackAnalyzer, MultiThreaded, B
 		FEATURE_NAMES.put( TRACK_MAX_QUALITY, "Maximal quality" );
 		FEATURE_NAMES.put( TRACK_MIN_QUALITY, "Minimal quality" );
 		FEATURE_NAMES.put( TRACK_MEDIAN_QUALITY, "Median quality" );
-		FEATURE_NAMES.put( TRACK_STD_QUALITY, "quality standard deviation" );
+		FEATURE_NAMES.put( TRACK_STD_QUALITY, "Quality standard deviation" );
 
-		FEATURE_SHORT_NAMES.put( TRACK_MEAN_QUALITY, "Mean V" );
-		FEATURE_SHORT_NAMES.put( TRACK_MAX_QUALITY, "Max V" );
-		FEATURE_SHORT_NAMES.put( TRACK_MIN_QUALITY, "Min V" );
-		FEATURE_SHORT_NAMES.put( TRACK_MEDIAN_QUALITY, "Median V" );
-		FEATURE_SHORT_NAMES.put( TRACK_STD_QUALITY, "V std" );
+		FEATURE_SHORT_NAMES.put( TRACK_MEAN_QUALITY, "Mean Q" );
+		FEATURE_SHORT_NAMES.put( TRACK_MAX_QUALITY, "Max Q" );
+		FEATURE_SHORT_NAMES.put( TRACK_MIN_QUALITY, "Min Q" );
+		FEATURE_SHORT_NAMES.put( TRACK_MEDIAN_QUALITY, "Median Q" );
+		FEATURE_SHORT_NAMES.put( TRACK_STD_QUALITY, "Q std" );
 
 		FEATURE_DIMENSIONS.put( TRACK_MEAN_QUALITY, Dimension.QUALITY );
 		FEATURE_DIMENSIONS.put( TRACK_MAX_QUALITY, Dimension.QUALITY );
@@ -132,11 +132,11 @@ public class TrackSpotFeatureAnalyzer implements TrackAnalyzer, MultiThreaded, B
 
 						// Others
 						final double[] qualities = new double[ track.size() ];
-						int n = 0;
+						final int n = 0;
 
 						for ( final Spot spot : track )
 						{
-							double val = spot.getFeature( Spot.QUALITY );
+							final double val = spot.getFeature( Spot.QUALITY );
 
 							// For median, min and max
 							qualities[ n ] = val;
@@ -150,7 +150,7 @@ public class TrackSpotFeatureAnalyzer implements TrackAnalyzer, MultiThreaded, B
 						final double min = qualities[ 0 ];
 						final double max = qualities[ track.size() - 1 ];
 						mean = sum / track.size();
-						double mean2 = sum2 / track.size();
+						final double mean2 = sum2 / track.size();
 						final double variance = mean * mean - mean2;
 
 						fm.putTrackFeature( trackID, TRACK_MEDIAN_QUALITY, median );

@@ -722,8 +722,8 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 						@Override
 						public void actionPerformed( final ActionEvent e )
 						{
-							final Float oldValue = ( Float ) displaySettings.get( KEY_SPOT_RADIUS_RATIO );
-							final Float newValue = ( float ) jTextFieldSpotRadius.getValue();
+							final Double oldValue = ( Double ) displaySettings.get( KEY_SPOT_RADIUS_RATIO );
+							final Double newValue = ( double ) jTextFieldSpotRadius.getValue();
 							displaySettings.put( KEY_SPOT_RADIUS_RATIO, newValue );
 
 							final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_SPOT_RADIUS_RATIO, newValue, oldValue );
@@ -735,8 +735,8 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 						@Override
 						public void focusLost( final FocusEvent e )
 						{
-							final Float oldValue = ( Float ) displaySettings.get( KEY_SPOT_RADIUS_RATIO );
-							final Float newValue = ( float ) jTextFieldSpotRadius.getValue();
+							final Double oldValue = ( Double ) displaySettings.get( KEY_SPOT_RADIUS_RATIO );
+							final Double newValue = ( double ) jTextFieldSpotRadius.getValue();
 							displaySettings.put( KEY_SPOT_RADIUS_RATIO, newValue );
 
 							final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_SPOT_RADIUS_RATIO, newValue, oldValue );

@@ -959,7 +959,7 @@ public class TrackMateGUIController implements ActionListener
 		displaySettings.put( KEY_SPOTS_VISIBLE, true );
 		displaySettings.put( KEY_DISPLAY_SPOT_NAMES, false );
 		displaySettings.put( KEY_SPOT_COLORING, spotColorGenerator );
-		displaySettings.put( KEY_SPOT_RADIUS_RATIO, 1.0f );
+		displaySettings.put( KEY_SPOT_RADIUS_RATIO, 1.0d );
 		displaySettings.put( KEY_TRACKS_VISIBLE, true );
 		displaySettings.put( KEY_TRACK_DISPLAY_MODE, DEFAULT_TRACK_DISPLAY_MODE );
 		displaySettings.put( KEY_TRACK_DISPLAY_DEPTH, DEFAULT_TRACK_DISPLAY_DEPTH );

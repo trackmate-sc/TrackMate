@@ -5,6 +5,7 @@ import ij.ImageJ;
 import ij.plugin.PlugIn;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 
@@ -12,6 +13,11 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
+
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.input.SAXBuilder;
 
 import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
 import fiji.plugin.trackmate.features.edges.EdgeVelocityAnalyzer;
@@ -42,9 +48,9 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 
 	private JFrame frame;
 
-	private Model model;
+	protected Model model;
 
-	private Settings settings;
+	protected Settings settings;
 
 	private static final String KEY = "LoadPlugin";
 
@@ -121,6 +127,15 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 			}
 		}
 
+		// Check if we have an ICY track XML file.
+		if ( checkIsICY( file ) )
+		{
+			logger.log( "Detecting an ICY track XML file. Loading...\n" );
+			final LoadICYTrackPlugIn_ loadICY = new LoadICYTrackPlugIn_();
+			loadICY.run( file.getAbsolutePath() );
+			return;
+		}
+
 		// Read the file content
 		TmXmlReader reader = createReader( file );
 		if ( !reader.isReadingOk() )
@@ -169,7 +184,6 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		{
 			settings.addEdgeAnalyzer( new EdgeTargetAnalyzer() );
 			settings.addEdgeAnalyzer( new EdgeVelocityAnalyzer() );
-			trackmate.computeEdgeFeatures( true );
 			model.setLogger( Logger.IJ_LOGGER );
 			trackmate.computeEdgeFeatures( true );
 		}
@@ -239,9 +253,9 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		final Map< String, Object > displaySettings = controller.getGuimodel().getDisplaySettings();
 		for ( final TrackMateModelView view : views )
 		{
+			controller.getGuimodel().addView( view );
 			for ( final String key : displaySettings.keySet() )
 			{
-				controller.getGuimodel().addView( view );
 				view.setDisplaySettings( key, displaySettings.get( key ) );
 			}
 			view.render();
@@ -250,6 +264,34 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		// Text
 		controller.getGUI().getLogPanel().setTextContent( logText );
 		model.getLogger().log( "File loaded on " + TMUtils.getCurrentTimeString() + '\n', Logger.BLUE_COLOR );
+	}
+
+	/**
+	 * Returns <code>true</code> is the specified file is an ICY track XML file.
+	 *
+	 * @param file
+	 *            the file to inspect.
+	 * @return <code>true</code> if it is an ICY track XML file.
+	 */
+	protected boolean checkIsICY( final File file )
+	{
+		final SAXBuilder sb = new SAXBuilder();
+		Element r = null;
+		try
+		{
+			final Document document = sb.build( file );
+			r = document.getRootElement();
+		}
+		catch ( final JDOMException e )
+		{
+			return false;
+		}
+		catch ( final IOException e )
+		{
+			return false;
+		}
+		if ( !r.getName().equals( "root" ) || r.getChild( "trackfile" ) == null ) { return false; }
+		return true;
 	}
 
 	@Override

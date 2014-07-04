@@ -172,7 +172,7 @@ public class SpotOverlay extends Roi
 			// Scale to image zoom
 			final double xs = ( xp - xcorner ) * mag;
 			final double ys = ( yp - ycorner ) * mag;
-			final double radiusRatio = ( Float ) displaySettings.get( TrackMateModelView.KEY_SPOT_RADIUS_RATIO );
+			final double radiusRatio = ( Double ) displaySettings.get( TrackMateModelView.KEY_SPOT_RADIUS_RATIO );
 			g2d.drawOval( ( int ) Math.round( xs - radius * radiusRatio ), ( int ) Math.round( ys - radius * radiusRatio ), ( int ) Math.round( 2 * radius * radiusRatio ), ( int ) Math.round( 2 * radius * radiusRatio ) );
 		}
 
@@ -199,7 +199,7 @@ public class SpotOverlay extends Roi
 		final double y = spot.getFeature( Spot.POSITION_Y );
 		final double z = spot.getFeature( Spot.POSITION_Z );
 		final double dz2 = ( z - zslice ) * ( z - zslice );
-		final double radiusRatio = ( Float ) displaySettings.get( TrackMateModelView.KEY_SPOT_RADIUS_RATIO );
+		final double radiusRatio = ( Double ) displaySettings.get( TrackMateModelView.KEY_SPOT_RADIUS_RATIO );
 		final double radius = spot.getFeature( Spot.RADIUS ) * radiusRatio;
 		// In pixel units
 		final double xp = x / calibration[ 0 ] + 0.5f;
