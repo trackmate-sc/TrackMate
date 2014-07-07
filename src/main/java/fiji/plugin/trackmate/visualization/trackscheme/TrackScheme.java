@@ -5,6 +5,7 @@ import ij.ImagePlus;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -66,7 +67,16 @@ public class TrackScheme extends AbstractTrackMateModelView
 
 	static final int DEFAULT_CELL_HEIGHT = 40;
 
-	public static final ImageIcon TRACK_SCHEME_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/track_scheme.png" ) );
+	public static final ImageIcon TRACK_SCHEME_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/Icon3a_print_transparency.png" ) );
+
+	public static final ImageIcon TRACK_SCHEME_ICON_16x16;
+
+	static
+	{
+		final Image image = TRACK_SCHEME_ICON.getImage();
+		final Image newimg = image.getScaledInstance( 16, 16, java.awt.Image.SCALE_SMOOTH );
+		TRACK_SCHEME_ICON_16x16 = new ImageIcon( newimg ); // transform it back
+	}
 
 	public static final String DEFAULT_COLOR = "#FF00FF";
 
