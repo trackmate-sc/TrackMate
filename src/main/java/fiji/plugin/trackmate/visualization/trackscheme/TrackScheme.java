@@ -597,11 +597,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 						final int frame = spot.getFeature( Spot.FRAME ).intValue();
 						// Put in the graph
 						final int column = Math.max( targetColumn, getNextFreeColumn( frame ) );
-						final mxICell newCell = insertSpotInGraph( spot, column ); // move
-																					// in
-																					// right+1
-																					// free
-																					// column
+						final mxICell newCell = insertSpotInGraph( spot, column );
 						rowLengths.put( frame, column );
 						spotsWithStyleToUpdate.add( ( mxCell ) newCell );
 

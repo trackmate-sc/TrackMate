@@ -18,6 +18,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
 
 import com.mxgraph.model.mxICell;
+import com.mxgraph.swing.mxGraphOutline;
 import com.mxgraph.swing.handler.mxRubberband;
 
 import fiji.plugin.trackmate.Logger;
@@ -103,9 +104,16 @@ public class TrackSchemeFrame extends JFrame  {
 
 		// Add the info pane
 		infoPane = new InfoPane(trackScheme.getModel(), trackScheme.getSelectionModel());
-		final JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, infoPane, graphComponent);
+
+		// Add the graph outline
+		final mxGraphOutline graphOutline = new mxGraphOutline( graphComponent );
+
+		final JSplitPane inner = new JSplitPane( JSplitPane.VERTICAL_SPLIT, infoPane, graphOutline );
+
+		final JSplitPane splitPane = new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, inner, graphComponent );
 		splitPane.setDividerLocation(170);
 		getContentPane().add(splitPane, BorderLayout.CENTER);
+
 	}
 
 

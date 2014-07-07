@@ -5,27 +5,37 @@ import static fiji.plugin.trackmate.visualization.trackscheme.TrackScheme.DEFAUL
 import static fiji.plugin.trackmate.visualization.trackscheme.TrackScheme.X_COLUMN_SIZE;
 import static fiji.plugin.trackmate.visualization.trackscheme.TrackScheme.Y_COLUMN_SIZE;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
 import net.imglib2.algorithm.Benchmark;
 
+import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultWeightedEdge;
-import org.jgrapht.traverse.GraphIterator;
+import org.jgrapht.graph.SimpleDirectedGraph;
+import org.jgrapht.traverse.DepthFirstIterator;
 
 import com.mxgraph.layout.mxGraphLayout;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxICell;
 
+import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition;
+import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition.TrackBranchDecomposition;
 import fiji.plugin.trackmate.graph.GraphUtils;
 import fiji.plugin.trackmate.graph.SortedDepthFirstIterator;
 import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
+import fiji.plugin.trackmate.io.TmXmlReader;
+import fiji.plugin.trackmate.visualization.TrackMateModelView;
 
 /**
  * This {@link mxGraphLayout} arranges cells on a graph in lanes corresponding
@@ -200,75 +210,54 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 				{
 
 					/*
-					 * Old layout for merging tracks
+					 * Layout in branches for merging tracks
 					 */
 
-					// Init track variables
-					Spot previousSpot = null;
-					int currentColumn = columns[ 0 ];
-					boolean previousDirectionDescending = true;
+					final TrackBranchDecomposition branchDecomposition = ConvexBranchesDecomposition.processTrack( trackID, model.getTrackModel(), neighborCache, false, false );
+					final SimpleDirectedGraph< List< Spot >, DefaultEdge > branchGraph = ConvexBranchesDecomposition.buildBranchGraph( branchDecomposition );
+					final DepthFirstIterator< List< Spot >, DefaultEdge > depthFirstIterator = new DepthFirstIterator< List< Spot >, DefaultEdge >( branchGraph );
 
-					// First loop: Loop over spots
-					final GraphIterator< Spot, DefaultWeightedEdge > iterator = model.getTrackModel().getDepthFirstIterator( first, false );
-					while ( iterator.hasNext() )
+					while ( depthFirstIterator.hasNext() )
 					{
+						final List< Spot > branch = depthFirstIterator.next();
 
-						final Spot spot = iterator.next();
+						final int firstFrame = branch.get( 0 ).getFeature( Spot.FRAME ).intValue();
+						final int lastFrame = branch.get( branch.size() - 1 ).getFeature( Spot.FRAME ).intValue();
 
-						// Get corresponding JGraphX cell, add it if it does not
-						// exist in the JGraphX yet
-						final mxICell cell = graph.getCellFor( spot );
-
-						// This is cell is in a track, remove it from the list
-						// of lonely cells
-						lonelyCells.remove( cell );
-
-						// Determine in what column to put the spot
-						final int frame = spot.getFeature( Spot.FRAME ).intValue();
-
-						final int freeColumn = columns[ frame ] + 1;
-
-						int targetColumn;
-						boolean currentDirectionDescending = previousDirectionDescending;
-						if ( previousSpot != null )
-							currentDirectionDescending = Spot.frameComparator.compare( spot, previousSpot ) > 0;
-
-						if ( previousSpot != null && !( model.getTrackModel().containsEdge( previousSpot, spot ) || model.getTrackModel().containsEdge( spot, previousSpot ) ) )
-						{ // direction does not matter
-							// If we have no direct edge with the previous spot,
-							// we add 1 to the current column
-							currentColumn = currentColumn + 1;
-							targetColumn = Math.max( freeColumn, currentColumn );
-							currentColumn = targetColumn;
-
-						}
-						else if ( previousSpot != null && previousDirectionDescending != currentDirectionDescending )
+						// Determine target column.
+						int targetColumn = columns[ firstFrame ];
+						for ( final Spot spot : branch )
 						{
-							// If we changed direction...
-							currentColumn = currentColumn + 1;
-							targetColumn = Math.max( freeColumn, currentColumn );
-							currentColumn = targetColumn;
+							final int sFrame = spot.getFeature( Spot.FRAME ).intValue();
+							if ( columns[ sFrame ] > targetColumn )
+							{
+								targetColumn = columns[ sFrame ];
+							}
 						}
-						else
+
+						// Place spots.
+						for ( final Spot spot : branch )
 						{
-							// Nothing special
-							targetColumn = currentColumn;
+							// Get corresponding JGraphX cell, add it if it does
+							// not exist in the JGraphX yet
+							final mxICell cell = graph.getCellFor( spot );
+
+							// This is cell is in a track, remove it from the
+							// list of lonely cells
+							lonelyCells.remove( cell );
+
+							// Determine in what row to put the spot
+							final int frame = spot.getFeature( Spot.FRAME ).intValue();
+
+							// Cell position
+							setCellGeometry( cell, frame, targetColumn );
 						}
 
-						previousDirectionDescending = currentDirectionDescending;
-						previousSpot = spot;
-
-						// Keep track of column filling
-						columns[ frame ] = targetColumn;
-
-						// Cell position
-						setCellGeometry( cell, frame, targetColumn );
-
-					}
-
-					for ( int j = 0; j < columns.length; j++ )
-					{
-						columns[ j ]++;
+						// Update column index.
+						for ( int frame = firstFrame; frame <= lastFrame; frame++ )
+						{
+							columns[ frame ] = targetColumn + 1;
+						}
 					}
 				}
 
@@ -359,5 +348,30 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 	public long getProcessingTime()
 	{
 		return processingTime;
+	}
+
+	public static void main( final String[] args )
+	{
+		final File file = new File( "/Users/tinevez/Desktop/Data/FakeTracksBranch.xml" );
+		final TmXmlReader reader = new TmXmlReader( file );
+		final Logger logger = Logger.DEFAULT_LOGGER;
+		if ( !reader.isReadingOk() )
+		{
+			logger.error( reader.getErrorMessage() );
+			logger.error( "Aborting.\n" ); // If I cannot even open the xml
+			// file, it is not worth going on.
+			return;
+		}
+
+		// Model
+		final Model model = reader.getModel();
+		if ( !reader.isReadingOk() )
+		{
+			logger.error( "Problem reading the model:\n" + reader.getErrorMessage() );
+		}
+
+		// TrackScheme
+		final TrackMateModelView view = new TrackSchemeFactory().create( model, null, new SelectionModel( model ) );
+		view.render();
 	}
 }
