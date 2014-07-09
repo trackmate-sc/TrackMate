@@ -5,61 +5,77 @@ import static fiji.plugin.trackmate.visualization.trackscheme.TrackScheme.DEFAUL
 import static fiji.plugin.trackmate.visualization.trackscheme.TrackScheme.X_COLUMN_SIZE;
 import static fiji.plugin.trackmate.visualization.trackscheme.TrackScheme.Y_COLUMN_SIZE;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
 import net.imglib2.algorithm.Benchmark;
 
+import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultWeightedEdge;
-import org.jgrapht.traverse.GraphIterator;
+import org.jgrapht.graph.SimpleDirectedGraph;
+import org.jgrapht.traverse.DepthFirstIterator;
 
 import com.mxgraph.layout.mxGraphLayout;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxICell;
 
+import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition;
+import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition.TrackBranchDecomposition;
 import fiji.plugin.trackmate.graph.GraphUtils;
 import fiji.plugin.trackmate.graph.SortedDepthFirstIterator;
 import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
+import fiji.plugin.trackmate.io.TmXmlReader;
+import fiji.plugin.trackmate.visualization.TrackMateModelView;
 
 /**
- * This {@link mxGraphLayout} arranges cells on a graph in lanes corresponding to tracks. 
- * It also sets the style of each cell so that they have a coloring depending on the lane
- * they belong to.
- * Each lane's width and color is available to other classes for further exploitation.
- * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> - Mar 2011 - 2012
+ * This {@link mxGraphLayout} arranges cells on a graph in lanes corresponding
+ * to tracks. It also sets the style of each cell so that they have a coloring
+ * depending on the lane they belong to. Each lane's width and color is
+ * available to other classes for further exploitation.
+ *
+ * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> - Mar 2011 - 2012 -
+ *         2014
  *
  */
-public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark {
+public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
+{
 
 	private static final int START_COLUMN = 2;
 
 	/** The target model to draw spot from. */
 	private final Model model;
+
 	private final JGraphXAdapter graph;
+
 	private final TrackSchemeGraphComponent component;
+
 	/**
-	 * Hold the current row length for each frame.
-	 * That is, for frame <code>i</code>, the number of cells on the row
-	 * corresponding to frame <code>i</code> is <code>rowLength.get(i)</code>.
-	 * This field is regenerated after each call to {@link #execute(Object)}.
+	 * Hold the current row length for each frame. That is, for frame
+	 * <code>i</code>, the number of cells on the row corresponding to frame
+	 * <code>i</code> is <code>rowLength.get(i)</code>. This field is
+	 * regenerated after each call to {@link #execute(Object)}.
 	 */
-	private Map<Integer, Integer> rowLengths;
+	private Map< Integer, Integer > rowLengths;
+
 	private long processingTime;
-
-
 
 	/*
 	 * CONSTRUCTOR
 	 */
 
-	public TrackSchemeGraphLayout(final JGraphXAdapter graph, final Model model, final TrackSchemeGraphComponent component) {
-		super(graph);
+	public TrackSchemeGraphLayout( final JGraphXAdapter graph, final Model model, final TrackSchemeGraphComponent component )
+	{
+		super( graph );
 		this.graph = graph;
 		this.model = model;
 		this.component = component;
@@ -70,256 +86,292 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark {
 	 */
 
 	@Override
-	public void execute(Object parent) {
+	public void execute( final Object parent )
+	{
 
-		long start = System.currentTimeMillis();
+		final long start = System.currentTimeMillis();
 
 		/*
-		 * To be able to deal with lonely cells later (i.e. cells that are not part of a track),
-		 * we retrieve the list of all cells.
+		 * To be able to deal with lonely cells later (i.e. cells that are not
+		 * part of a track), we retrieve the list of all cells.
 		 */
-		Object[] objs = graph.getChildVertices(graph.getDefaultParent());
-		final ArrayList<mxCell> lonelyCells = new ArrayList<mxCell>(objs.length);
-		for (Object obj : objs) {
-			lonelyCells.add((mxCell) obj);
+		final Object[] objs = graph.getChildVertices( graph.getDefaultParent() );
+		final ArrayList< mxCell > lonelyCells = new ArrayList< mxCell >( objs.length );
+		for ( final Object obj : objs )
+		{
+			lonelyCells.add( ( mxCell ) obj );
 		}
 
 		/*
-		 *  Get a neighbor cache
+		 * Get a neighbor cache
 		 */
-		TimeDirectedNeighborIndex neighborCache = model.getTrackModel().getDirectedNeighborIndex();
+		final TimeDirectedNeighborIndex neighborCache = model.getTrackModel().getDirectedNeighborIndex();
 
 		/*
 		 * Compute column width from recursive cumsum
 		 */
-		Map<Spot, Integer> cumulativeBranchWidth = GraphUtils.cumulativeBranchWidth(model.getTrackModel());
+		final Map< Spot, Integer > cumulativeBranchWidth = GraphUtils.cumulativeBranchWidth( model.getTrackModel() );
 
-		/* 
+		/*
 		 * How many rows do we have to parse?
 		 */
-		int maxFrame = model.getSpots().lastKey();
+		final int maxFrame = model.getSpots().lastKey();
 
 		graph.getModel().beginUpdate();
-		try {
+		try
+		{
 
 			/*
 			 * Pass n tracks info on component
 			 */
-			final int ntracks = model.getTrackModel().nTracks(true);
-			component.columnWidths = new int[ntracks];
-			component.columnTrackIDs = new Integer[ntracks];
+			final int ntracks = model.getTrackModel().nTracks( true );
+			component.columnWidths = new int[ ntracks ];
+			component.columnTrackIDs = new Integer[ ntracks ];
 
 			/*
 			 * Initialize the column occupancy array
 			 */
-			final int[] columns = new int[maxFrame+1];
-			for (int i = 0; i < columns.length; i++) {
-				columns[i] = START_COLUMN;
+			final int[] columns = new int[ maxFrame + 1 ];
+			for ( int i = 0; i < columns.length; i++ )
+			{
+				columns[ i ] = START_COLUMN;
 			}
 
 			int trackIndex = 0;
-			for (Integer trackID : model.getTrackModel().trackIDs(true)) { // will be sorted by track name
+			for ( final Integer trackID : model.getTrackModel().trackIDs( true ) )
+			{ // will be sorted by track name
 
 				// Get Tracks
-				final Set<Spot> track = model.getTrackModel().trackSpots(trackID);
+				final Set< Spot > track = model.getTrackModel().trackSpots( trackID );
 
 				// Pass name & trackID to component
-				component.columnTrackIDs[trackIndex] = trackID;
+				component.columnTrackIDs[ trackIndex ] = trackID;
 
 				// Get first spot
-				TreeSet<Spot> sortedTrack = new TreeSet<Spot>(Spot.frameComparator);
-				sortedTrack.addAll(track);
-				Spot first = sortedTrack.first();
+				final TreeSet< Spot > sortedTrack = new TreeSet< Spot >( Spot.frameComparator );
+				sortedTrack.addAll( track );
+				final Spot first = sortedTrack.first();
 
 				/*
-				 * A special case: our quick layout below fails for graph that are not trees. That
-				 * is: if a track has at least a spot that has more than one predecessor. If we have 
-				 * to deal with such a case, we revert to the old, slow scheme.
+				 * A special case: our quick layout below fails for graph that
+				 * are not trees. That is: if a track has at least a spot that
+				 * has more than one predecessor. If we have to deal with such a
+				 * case, we revert to the old, slow scheme.
 				 */
 
-				boolean isTree = GraphUtils.isTree(track, neighborCache);
+				final boolean isTree = GraphUtils.isTree( track, neighborCache );
 
-				if (isTree) {
+				if ( isTree )
+				{
 
 					/*
-					 * Quick layout for a tree-like track 
+					 * Quick layout for a tree-like track
 					 */
 
-
 					// First loop: Loop over spots in good order
-					SortedDepthFirstIterator<Spot,DefaultWeightedEdge> iterator = model.getTrackModel().getSortedDepthFirstIterator(first, Spot.nameComparator, false);
+					final SortedDepthFirstIterator< Spot, DefaultWeightedEdge > iterator = model.getTrackModel().getSortedDepthFirstIterator( first, Spot.nameComparator, false );
 
-					while(iterator.hasNext()) {
+					while ( iterator.hasNext() )
+					{
 
-						Spot spot = iterator.next();
+						final Spot spot = iterator.next();
 
-						// Get corresponding JGraphX cell, add it if it does not exist in the JGraphX yet
-						mxICell cell = graph.getCellFor(spot);
+						// Get corresponding JGraphX cell, add it if it does not
+						// exist in the JGraphX yet
+						final mxICell cell = graph.getCellFor( spot );
 
-						// This is cell is in a track, remove it from the list of lonely cells
-						lonelyCells.remove(cell);
+						// This is cell is in a track, remove it from the list
+						// of lonely cells
+						lonelyCells.remove( cell );
 
 						// Determine in what row to put the spot
-						int frame = spot.getFeature(Spot.FRAME).intValue();
+						final int frame = spot.getFeature( Spot.FRAME ).intValue();
 
 						// Cell size, position and style
-						int cellPos = columns[frame] + cumulativeBranchWidth.get(spot)/2;
-						setCellGeometry(cell, frame, cellPos);
-						columns[frame] += cumulativeBranchWidth.get(spot);
+						final int cellPos = columns[ frame ] + cumulativeBranchWidth.get( spot ) / 2;
+						setCellGeometry( cell, frame, cellPos );
+						columns[ frame ] += cumulativeBranchWidth.get( spot );
 
-						// If it is a leaf, we fill the remaining row below and above
-						if (neighborCache.successorsOf(spot).size() == 0) {
-							int target = columns[frame];
-							for (int i = 0; i <= maxFrame; i++) {
-								columns[i] = target;
+						// If it is a leaf, we fill the remaining row below and
+						// above
+						if ( neighborCache.successorsOf( spot ).size() == 0 )
+						{
+							final int target = columns[ frame ];
+							for ( int i = 0; i <= maxFrame; i++ )
+							{
+								columns[ i ] = target;
 							}
 						}
 
 					}
 
-
-
-				} else {
+				}
+				else
+				{
 
 					/*
-					 * Old layout for merging tracks
+					 * Layout in branches for merging tracks
 					 */
 
-					// Init track variables
-					Spot previousSpot = null;
-					int currentColumn = columns[0];
-					boolean previousDirectionDescending = true;
+					final TrackBranchDecomposition branchDecomposition = ConvexBranchesDecomposition.processTrack( trackID, model.getTrackModel(), neighborCache, false, false );
+					final SimpleDirectedGraph< List< Spot >, DefaultEdge > branchGraph = ConvexBranchesDecomposition.buildBranchGraph( branchDecomposition );
+					final DepthFirstIterator< List< Spot >, DefaultEdge > depthFirstIterator = new DepthFirstIterator< List< Spot >, DefaultEdge >( branchGraph );
 
-					// First loop: Loop over spots 
-					GraphIterator<Spot, DefaultWeightedEdge> iterator = model.getTrackModel().getDepthFirstIterator(first, false);
-					while(iterator.hasNext()) {
+					while ( depthFirstIterator.hasNext() )
+					{
+						final List< Spot > branch = depthFirstIterator.next();
 
-						Spot spot = iterator.next();
+						final int firstFrame = branch.get( 0 ).getFeature( Spot.FRAME ).intValue();
+						final int lastFrame = branch.get( branch.size() - 1 ).getFeature( Spot.FRAME ).intValue();
 
-						// Get corresponding JGraphX cell, add it if it does not exist in the JGraphX yet
-						mxICell cell = graph.getCellFor(spot);
-
-						// This is cell is in a track, remove it from the list of lonely cells
-						lonelyCells.remove(cell);
-
-						// Determine in what column to put the spot
-						int frame = spot.getFeature(Spot.FRAME).intValue();
-
-						int freeColumn = columns[frame] + 1;
-
-						int targetColumn;
-						boolean currentDirectionDescending = previousDirectionDescending;
-						if (previousSpot != null) currentDirectionDescending = Spot.frameComparator.compare(spot, previousSpot) > 0;
-
-						if (previousSpot != null && ! (model.getTrackModel().containsEdge(previousSpot, spot) 
-								|| model.getTrackModel().containsEdge(spot, previousSpot) ) ) { // direction does not matter
-							// If we have no direct edge with the previous spot, we add 1 to the current column
-							currentColumn = currentColumn + 1;
-							targetColumn = Math.max(freeColumn, currentColumn);
-							currentColumn = targetColumn;
-
-						} else if (previousSpot != null && previousDirectionDescending != currentDirectionDescending) {
-							// If we changed direction...
-							currentColumn = currentColumn + 1;
-							targetColumn = Math.max(freeColumn, currentColumn);
-							currentColumn = targetColumn;
-
-						} else {
-							// Nothing special
-							targetColumn = currentColumn;
+						// Determine target column.
+						int targetColumn = columns[ firstFrame ];
+						for ( final Spot spot : branch )
+						{
+							final int sFrame = spot.getFeature( Spot.FRAME ).intValue();
+							if ( columns[ sFrame ] > targetColumn )
+							{
+								targetColumn = columns[ sFrame ];
+							}
 						}
 
-						previousDirectionDescending = currentDirectionDescending;
-						previousSpot = spot;
+						// Place spots.
+						for ( final Spot spot : branch )
+						{
+							// Get corresponding JGraphX cell, add it if it does
+							// not exist in the JGraphX yet
+							final mxICell cell = graph.getCellFor( spot );
 
+							// This is cell is in a track, remove it from the
+							// list of lonely cells
+							lonelyCells.remove( cell );
 
-						// Keep track of column filling
-						columns[frame] = targetColumn;
+							// Determine in what row to put the spot
+							final int frame = spot.getFeature( Spot.FRAME ).intValue();
 
-						// Cell position
-						setCellGeometry(cell, frame, targetColumn);
+							// Cell position
+							setCellGeometry( cell, frame, targetColumn );
+						}
 
-					}
-
-					for (int j = 0; j < columns.length; j++) {
-						columns[j]++;
+						// Update column index.
+						for ( int frame = firstFrame; frame <= lastFrame; frame++ )
+						{
+							columns[ frame ] = targetColumn + 1;
+						}
 					}
 				}
 
-				// When done with a track, move all columns to the next free column
+				// When done with a track, move all columns to the next free
+				// column
 				int maxCol = 0;
-				for (int j = 0; j < columns.length; j++) {
-					if (columns[j] > maxCol) {
-						maxCol = columns[j];
+				for ( int j = 0; j < columns.length; j++ )
+				{
+					if ( columns[ j ] > maxCol )
+					{
+						maxCol = columns[ j ];
 					}
 				}
-				for (int i = 0; i < columns.length; i++) {
-					columns[i] = maxCol + 1;
+				for ( int i = 0; i < columns.length; i++ )
+				{
+					columns[ i ] = maxCol + 1;
 				}
 
 				// Store column widths for the panel background
 				int sumWidth = START_COLUMN - 1;
-				for (int i = 0; i < trackIndex; i++) {
-					sumWidth += component.columnWidths[i];
+				for ( int i = 0; i < trackIndex; i++ )
+				{
+					sumWidth += component.columnWidths[ i ];
 				}
-				component.columnWidths[trackIndex] = maxCol - sumWidth;
-
+				component.columnWidths[ trackIndex ] = maxCol - sumWidth;
 
 				trackIndex++;
-			}  // loop over tracks
-
+			} // loop over tracks
 
 			// Ensure we do not start at 0 for the first column of lonely cells
-			for (int i = 0; i < columns.length; i++) {
-				if (columns[i] < 1) {
-					columns[i] = 1;
+			for ( int i = 0; i < columns.length; i++ )
+			{
+				if ( columns[ i ] < 1 )
+				{
+					columns[ i ] = 1;
 				}
 			}
 
 			// Deal with lonely cells
-			for (mxCell cell : lonelyCells) {
-				Spot spot = graph.getSpotFor(cell);
-				int frame = spot.getFeature(Spot.FRAME).intValue();
-				setCellGeometry(cell, frame, ++columns[frame]);
+			for ( final mxCell cell : lonelyCells )
+			{
+				final Spot spot = graph.getSpotFor( cell );
+				final int frame = spot.getFeature( Spot.FRAME ).intValue();
+				setCellGeometry( cell, frame, ++columns[ frame ] );
 			}
 
 			// Before we leave, we regenerate the row length, for our brothers
-			rowLengths = new HashMap<Integer, Integer>(columns.length);
-			for (int i = 0; i < columns.length; i++) {
-				rowLengths.put(i, columns[i]+1); // we add 1 so that we do not report the track lane limit
+			rowLengths = new HashMap< Integer, Integer >( columns.length );
+			for ( int i = 0; i < columns.length; i++ )
+			{
+				rowLengths.put( i, columns[ i ] + 1 ); // we add 1 so that we do
+														// not report the track
+														// lane limit
 			}
 
-		} finally {
+		}
+		finally
+		{
 			graph.getModel().endUpdate();
 		}
 
-		long end = System.currentTimeMillis();
+		final long end = System.currentTimeMillis();
 		processingTime = end - start;
 	}
 
+	private final void setCellGeometry( final mxICell cell, final int row, final int targetColumn )
+	{
 
-	private final void setCellGeometry(final mxICell cell, final int row, final int targetColumn) {
-
-		double x = (targetColumn) * X_COLUMN_SIZE - DEFAULT_CELL_WIDTH/2;
-		double y = (0.5 + row  + 1) * Y_COLUMN_SIZE - DEFAULT_CELL_HEIGHT/2;
-		mxGeometry geometry = cell.getGeometry();
-		geometry.setX(x);
-		geometry.setY(y);	
+		final double x = ( targetColumn ) * X_COLUMN_SIZE - DEFAULT_CELL_WIDTH / 2;
+		final double y = ( 0.5 + row + 1 ) * Y_COLUMN_SIZE - DEFAULT_CELL_HEIGHT / 2;
+		final mxGeometry geometry = cell.getGeometry();
+		geometry.setX( x );
+		geometry.setY( y );
 	}
 
 	/**
-	 * @return  the current row length for each frame.
-	 * That is, for frame <code>i</code>, the number of cells on the row
-	 * corresponding to frame <code>i</code> is <code>rowLength.get(i)</code>.
-	 * This field is regenerated after each call to {@link #execute(Object)}.
+	 * @return the current row length for each frame. That is, for frame
+	 *         <code>i</code>, the number of cells on the row corresponding to
+	 *         frame <code>i</code> is <code>rowLength.get(i)</code>. This field
+	 *         is regenerated after each call to {@link #execute(Object)}.
 	 */
-	public Map<Integer, Integer> getRowLengths() {
+	public Map< Integer, Integer > getRowLengths()
+	{
 		return rowLengths;
 	}
 
-
 	@Override
-	public long getProcessingTime() {
+	public long getProcessingTime()
+	{
 		return processingTime;
+	}
+
+	public static void main( final String[] args )
+	{
+		final File file = new File( "/Users/tinevez/Desktop/Data/FakeTracksBranch.xml" );
+		final TmXmlReader reader = new TmXmlReader( file );
+		final Logger logger = Logger.DEFAULT_LOGGER;
+		if ( !reader.isReadingOk() )
+		{
+			logger.error( reader.getErrorMessage() );
+			logger.error( "Aborting.\n" ); // If I cannot even open the xml
+			// file, it is not worth going on.
+			return;
+		}
+
+		// Model
+		final Model model = reader.getModel();
+		if ( !reader.isReadingOk() )
+		{
+			logger.error( "Problem reading the model:\n" + reader.getErrorMessage() );
+		}
+
+		// TrackScheme
+		final TrackMateModelView view = new TrackSchemeFactory().create( model, null, new SelectionModel( model ) );
+		view.render();
 	}
 }

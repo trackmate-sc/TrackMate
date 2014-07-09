@@ -1,9 +1,11 @@
 package fiji.plugin.trackmate.gui.descriptors;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.detection.ManualDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
@@ -28,8 +30,14 @@ public class DetectorChoiceDescriptor implements WizardPanelDescriptor
 		this.trackmate = trackmate;
 		this.detectorProvider = detectorProvider;
 		this.controller = controller;
-		final List< String > detectorNames = detectorProvider.getNames();
-		final List< String > infoTexts = detectorProvider.getInfoTexts();
+		final List< String > visibleKeys = detectorProvider.getVisibleKeys();
+		final List< String > detectorNames = new ArrayList< String >( visibleKeys.size() );
+		final List< String > infoTexts = new ArrayList< String >( visibleKeys.size() );
+		for ( final String key : visibleKeys )
+		{
+			detectorNames.add( detectorProvider.getFactory( key ).getName() );
+			infoTexts.add( detectorProvider.getFactory( key ).getInfoText() );
+		}
 		this.component = new ListChooserPanel( detectorNames, infoTexts, "detector" );
 		setCurrentChoiceFromPlugin();
 	}
@@ -59,7 +67,7 @@ public class DetectorChoiceDescriptor implements WizardPanelDescriptor
 		}
 		else
 		{
-			key = detectorProvider.getCurrentKey(); // back to default
+			key = LogDetectorFactory.DETECTOR_KEY; // back to default
 		}
 		final int index = detectorProvider.getKeys().indexOf( key );
 		if ( index < 0 )
@@ -83,24 +91,25 @@ public class DetectorChoiceDescriptor implements WizardPanelDescriptor
 
 		// Configure the detector provider with choice made in panel
 		final int index = component.getChoice();
-		final String key = detectorProvider.getKeys().get( index );
-		final boolean ok = detectorProvider.select( key );
-		if ( !ok )
-		{
-			trackmate.getModel().getLogger().error( detectorProvider.getErrorMessage() );
-		}
+		final String key = detectorProvider.getVisibleKeys().get( index );
 
 		// Configure trackmate settings with selected detector
-		final SpotDetectorFactory< ? > factory = detectorProvider.getDetectorFactory();
+		final SpotDetectorFactory< ? > factory = detectorProvider.getFactory( key );
+
+		if ( null == factory )
+		{
+			trackmate.getModel().getLogger().error( "[DetectorChoiceDescriptor] Cannot find detector named " + key + " in current trackmate." );
+			return;
+		}
+
 		trackmate.getSettings().detectorFactory = factory;
 
 		// Compare current settings with default ones, and substitute default
-		// ones
-		// only if the old ones are absent or not compatible with it.
+		// ones only if the old ones are absent or not compatible with it.
 		final Map< String, Object > currentSettings = trackmate.getSettings().detectorSettings;
-		if ( !detectorProvider.checkSettingsValidity( currentSettings ) )
+		if ( !factory.checkSettings( currentSettings ) )
 		{
-			final Map< String, Object > defaultSettings = detectorProvider.getDefaultSettings();
+			final Map< String, Object > defaultSettings = factory.getDefaultSettings();
 			trackmate.getSettings().detectorSettings = defaultSettings;
 		}
 

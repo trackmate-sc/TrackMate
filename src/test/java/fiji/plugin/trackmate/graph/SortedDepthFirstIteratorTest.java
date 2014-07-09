@@ -67,8 +67,8 @@ public class SortedDepthFirstIteratorTest
 			for ( int i = 0; i < names.length; i++ )
 			{
 
-				names[ i ] = randomString( 5 );
-				final Spot spotChild = new Spot( 0d, 0d, 0d,  1d, -1d,names[ i ] );
+				names[ i ] = "A"; // randomString( 5 );
+				final Spot spotChild = new Spot( 0d, 0d, 0d, 1d, -1d, names[ i ] );
 				model.addSpotTo( spotChild, 1 );
 				model.addEdge( root, spotChild, -1 );
 				spots[ 0 ][ i ] = spotChild;

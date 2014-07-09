@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 
@@ -18,7 +17,6 @@ import fiji.plugin.trackmate.tracking.SpotTracker;
 
 public class DumbTracker implements SpotTracker {
 
-	public static final String KEY = "DUMB_TRACKER";
 	private static final String BASE_ERROR_MESSAGE = "[DumbTracker] ";
 	/**
 	 * How many times the std of previously created link distances
@@ -36,7 +34,7 @@ public class DumbTracker implements SpotTracker {
 	 */
 	private static final double RADIUS_FACTOR = 1d;
 
-	private SpotCollection spots;
+	private final SpotCollection spots;
 	private SimpleWeightedGraph<Spot, DefaultWeightedEdge> graph;
 	private String errorMessage;
 	private double mean;
@@ -44,7 +42,9 @@ public class DumbTracker implements SpotTracker {
 	private int nstats;
 	private double M2;
 
-	public DumbTracker() {
+	public DumbTracker( final SpotCollection spots )
+	{
+		this.spots = spots;
 	}
 
 	@Override
@@ -303,17 +303,6 @@ public class DumbTracker implements SpotTracker {
 	public String getErrorMessage() {
 		return errorMessage;
 	}
-
-	@Override
-	public String getKey() {
-		return KEY;
-	}
-
-	@Override
-	public void setTarget(final SpotCollection spots, final Map<String, Object> settings) {
-		this.spots = spots;
-	}
-
 
 	/*
 	 * STATIC METHODS

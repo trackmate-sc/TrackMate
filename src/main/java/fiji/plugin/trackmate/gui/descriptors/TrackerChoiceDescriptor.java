@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.gui.descriptors;
 
 import java.awt.Component;
+import java.util.ArrayList;
 import java.util.List;
 
 import fiji.plugin.trackmate.Logger;
@@ -8,8 +9,9 @@ import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.panels.ListChooserPanel;
 import fiji.plugin.trackmate.providers.TrackerProvider;
-import fiji.plugin.trackmate.tracking.ManualTracker;
-import fiji.plugin.trackmate.tracking.SpotTracker;
+import fiji.plugin.trackmate.tracking.ManualTrackerFactory;
+import fiji.plugin.trackmate.tracking.SimpleFastLAPTrackerFactory;
+import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 
 public class TrackerChoiceDescriptor implements WizardPanelDescriptor
 {
@@ -27,10 +29,16 @@ public class TrackerChoiceDescriptor implements WizardPanelDescriptor
 	public TrackerChoiceDescriptor( final TrackerProvider trackerProvider, final TrackMate trackmate, final TrackMateGUIController controller )
 	{
 		this.trackmate = trackmate;
-		this.trackerProvider = trackerProvider;
 		this.controller = controller;
-		final List< String > trackerNames = trackerProvider.getNames();
-		final List< String > infoTexts = trackerProvider.getInfoTexts();
+		this.trackerProvider = trackerProvider;
+		final List< String > keys = trackerProvider.getVisibleKeys();
+		final List< String > trackerNames = new ArrayList< String >( keys.size() );
+		final List< String > infoTexts = new ArrayList< String >( keys.size() );
+		for ( final String key : keys )
+		{
+			trackerNames.add( trackerProvider.getFactory( key ).getName() );
+			infoTexts.add( trackerProvider.getFactory( key ).getInfoText() );
+		}
 		this.component = new ListChooserPanel( trackerNames, infoTexts, "tracker" );
 		setCurrentChoiceFromPlugin();
 	}
@@ -63,20 +71,20 @@ public class TrackerChoiceDescriptor implements WizardPanelDescriptor
 
 		// Configure the detector provider with choice made in panel
 		final int index = component.getChoice();
-		final String key = trackerProvider.getKeys().get( index );
-		final boolean ok = trackerProvider.select( key );
+		final String key = trackerProvider.getVisibleKeys().get( index );
+		final SpotTrackerFactory trackerFactory = trackerProvider.getFactory( key );
 
 		// Check
-		if ( !ok )
+		if ( trackerFactory == null )
 		{
 			final Logger logger = trackmate.getModel().getLogger();
-			logger.error( "Choice panel returned a tracker unkown to this trackmate:.\n" + trackerProvider.getErrorMessage() + "Using default " + trackerProvider.getCurrentKey() );
+			logger.error( "Choice panel returned a tracker unkown to this trackmate: " + key + "\n" );
+			return;
 		}
 
-		final SpotTracker tracker = trackerProvider.getTracker();
-		trackmate.getSettings().tracker = tracker;
+		trackmate.getSettings().trackerFactory = trackerFactory;
 
-		if ( tracker.getKey().equals( ManualTracker.TRACKER_KEY ) )
+		if ( trackerFactory.getKey().equals( ManualTrackerFactory.TRACKER_KEY ) )
 		{
 			/*
 			 * Compute track and edge features now to ensure they will be
@@ -112,25 +120,26 @@ public class TrackerChoiceDescriptor implements WizardPanelDescriptor
 		 * changes a parameter tuning cause.
 		 */
 		trackmate.getModel().clearTracks( true );
+		controller.getSelectionModel().clearEdgeSelection();
 	}
 
 	private void setCurrentChoiceFromPlugin()
 	{
 
 		String key;
-		if ( null != trackmate.getSettings().tracker )
+		if ( null != trackmate.getSettings().trackerFactory )
 		{
-			key = trackmate.getSettings().tracker.getKey();
+			key = trackmate.getSettings().trackerFactory.getKey();
 		}
 		else
 		{
-			key = trackerProvider.getCurrentKey(); // back to default
+			key = SimpleFastLAPTrackerFactory.TRACKER_KEY;
 		}
-		final int index = trackerProvider.getKeys().indexOf( key );
+		final int index = trackerProvider.getVisibleKeys().indexOf( key );
 
 		if ( index < 0 )
 		{
-			trackmate.getModel().getLogger().error( "[TrackerChoiceDescriptor] Cannot find tracker named " + key + " in current trackmate." );
+			trackmate.getModel().getLogger().error( "[TrackerChoiceDescriptor] Cannot find tracker named " + key + " in Trackmate." );
 			return;
 		}
 		component.setChoice( index );

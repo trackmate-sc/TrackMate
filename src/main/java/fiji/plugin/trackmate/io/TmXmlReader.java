@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.io;
 
+import static fiji.plugin.trackmate.detection.DetectorKeys.XML_ATTRIBUTE_DETECTOR_NAME;
 import static fiji.plugin.trackmate.io.IOUtils.readBooleanAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.readIntAttribute;
@@ -22,6 +23,7 @@ import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_ATTRIBUTE;
 import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_DECLARATIONS_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_DIMENSION_ATTRIBUTE;
 import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_ISINT_ATTRIBUTE;
 import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_NAME_ATTRIBUTE;
 import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_SHORT_NAME_ATTRIBUTE;
 import static fiji.plugin.trackmate.io.TmXmlKeys.FILTERED_TRACK_ELEMENT_KEY;
@@ -70,6 +72,7 @@ import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_FEATURES_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_FILTER_COLLECTION_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_ID_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_NAME_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.XML_ATTRIBUTE_TRACKER_NAME;
 import ij.IJ;
 import ij.ImagePlus;
 
@@ -118,7 +121,9 @@ import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.providers.ViewProvider;
 import fiji.plugin.trackmate.tracking.SpotTracker;
+import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
+import fiji.plugin.trackmate.visualization.ViewFactory;
 
 
 public class TmXmlReader {
@@ -238,7 +243,8 @@ public class TmXmlReader {
 					logger.error("Could not find view key attribute for element " + child +".\n");
 					ok = false;
 				} else {
-					final TrackMateModelView view = provider.getView(viewKey, model, settings, selectionModel);
+					final ViewFactory factory = provider.getFactory( viewKey );
+					final TrackMateModelView view = factory.create( model, settings, selectionModel );
 					if (null == view) {
 						logger.error("Unknown view for key " + viewKey +".\n");
 						ok = false;
@@ -267,7 +273,7 @@ public class TmXmlReader {
 		if (null == modelElement) {
 			return null;
 		}
-		final Model model = new Model();
+		final Model model = createModel();
 
 		// Physical units
 		final String spaceUnits = modelElement.getAttributeValue(SPATIAL_UNITS_ATTRIBUTE_NAME);
@@ -307,6 +313,17 @@ public class TmXmlReader {
 		return model;
 	}
 
+	/**
+	 * Hook for subclassers:<br>
+	 * Creates the instance of {@link Model} that will be built upon loading
+	 * with this reader.
+	 *
+	 * @return a new {@link Model} instance.
+	 */
+	protected Model createModel()
+	{
+		return new Model();
+	}
 
 	/**
 	 * Reads the settings element of the file, and sets the fields of the specified
@@ -581,8 +598,6 @@ public class TmXmlReader {
 	 * Update the given {@link Settings} object with the {@link SpotDetectorFactory} and settings map fields
 	 * named {@link Settings#detectorFactory}  and {@link Settings#detectorSettings} read within the XML file
 	 * this reader is initialized with.
-	 * <p>
-	 * As a side effect, this method also configure the {@link DetectorProvider}.
 	 *
 	 * @param settingsElement the Element in which the {@link Settings} parameters are stored.
 	 * @param settings  the base {@link Settings} object to update.
@@ -590,18 +605,42 @@ public class TmXmlReader {
 	 */
 	private void getDetectorSettings(final Element settingsElement, final Settings settings, final DetectorProvider provider) {
 		final Element element = settingsElement.getChild(DETECTOR_SETTINGS_ELEMENT_KEY);
-		final Map<String, Object> ds = new HashMap<String, Object>();
-		// All the hard work is delegated to the provider.
-		final boolean ok = provider.unmarshall(element, ds);
+
+		if ( null == element )
+		{
+			logger.error( "Could not find the detector element in file.\n" );
+			this.ok = false;
+			return;
+		}
+
+		// Get the detector key
+		final String detectorKey = element.getAttributeValue( XML_ATTRIBUTE_DETECTOR_NAME );
+		if ( null == detectorKey )
+		{
+			logger.error( "Could not find the detector key element in file.\n" );
+			this.ok = false;
+			return;
+		}
+
+		final SpotDetectorFactory< ? > factory = provider.getFactory( detectorKey );
+		if ( null == factory )
+		{
+			logger.error( "The detector identified by the key " + detectorKey + " is unknown to TrackMate.\n" );
+			this.ok = false;
+			return;
+		}
+
+		final Map< String, Object > ds = new HashMap< String, Object >();
+		ok = factory.unmarshall( element, ds );
 
 		if (!ok) {
-			logger.error(provider.getErrorMessage());
+			logger.error( factory.getErrorMessage() );
 			this.ok = false;
 			return;
 		}
 
 		settings.detectorSettings = ds;
-		settings.detectorFactory = provider.getDetectorFactory();
+		settings.detectorFactory = factory;
 	}
 
 	/**
@@ -620,18 +659,43 @@ public class TmXmlReader {
 	 */
 	private void getTrackerSettings(final Element settingsElement, final Settings settings, final TrackerProvider provider) {
 		final Element element = settingsElement.getChild(TRACKER_SETTINGS_ELEMENT_KEY);
+		if ( null == element )
+		{
+			logger.error( "Could not find the tracker element in file.\n" );
+			this.ok = false;
+			return;
+		}
+
 		final Map<String, Object> ds = new HashMap<String, Object>();
-		// All the hard work is delegated to the provider.
-		final boolean ok = provider.unmarshall(element, ds);
+
+		// Get the tracker key
+		final String trackerKey = element.getAttributeValue( XML_ATTRIBUTE_TRACKER_NAME );
+		if ( null == trackerKey )
+		{
+			logger.error( "Could not find the tracker key element in file.\n" );
+			this.ok = false;
+			return;
+		}
+
+		final SpotTrackerFactory factory = provider.getFactory( trackerKey );
+		if ( null == factory )
+		{
+			logger.error( "The tracker identified by the key " + trackerKey + " is unknown to TrackMate.\n" );
+			this.ok = false;
+			return;
+		}
+
+		// All the hard work is delegated to the factory.
+		final boolean ok = factory.unmarshall( element, ds );
 
 		if (!ok) {
-			logger.error(provider.getErrorMessage());
+			logger.error( factory.getErrorMessage() );
 			this.ok = false;
 			return;
 		}
 
 		settings.trackerSettings = ds;
-		settings.tracker = provider.getTracker();
+		settings.trackerFactory = factory;
 	}
 
 	/**
@@ -707,11 +771,8 @@ public class TmXmlReader {
 
 		// The list of edge features. that we will set.
 		final FeatureModel fm = model.getFeatureModel();
-		final List<String> edgeIntFeatures = new ArrayList<String>();// TODO is there a better way?
-		edgeIntFeatures.add(EdgeTargetAnalyzer.SPOT_SOURCE_ID);
-		edgeIntFeatures.add(EdgeTargetAnalyzer.SPOT_TARGET_ID);
-		final Collection<String> edgeDoubleFeatures = fm.getEdgeFeatures();
-		edgeDoubleFeatures.removeAll(edgeIntFeatures);
+		final Collection< String > edgeFeatures = fm.getEdgeFeatures();
+		final Map< String, Boolean > edgeFeatureIsInt = fm.getEdgeFeatureIsInt();
 
 		for (final Element trackElement : trackElements) {
 
@@ -775,15 +836,25 @@ public class TmXmlReader {
 					graph.setEdgeWeight(edge, weight);
 
 					// Put edge features
-					for (final String feature : edgeDoubleFeatures) {
-						final double val = readDoubleAttribute(edgeElement, feature, logger);
-						fm.putEdgeFeature(edge, feature, val);
-					}
-					for (final String feature : edgeIntFeatures) {
-						final double val = readIntAttribute(edgeElement, feature, logger);
-						fm.putEdgeFeature(edge, feature, val);
-					}
+					for ( final String feature : edgeFeatures )
+					{
+						if ( null == edgeElement.getAttribute( feature ) )
+						{
+							// Skip missing values.
+							continue;
+						}
 
+						final double val;
+						if ( edgeFeatureIsInt.get( feature ).booleanValue() )
+						{
+							val = readIntAttribute( edgeElement, feature, logger );
+						}
+						else
+						{
+							val = readDoubleAttribute( edgeElement, feature, logger );
+						}
+						fm.putEdgeFeature(edge, feature, val);
+					}
 				}
 
 				// Adds the edge to the set
@@ -879,7 +950,9 @@ public class TmXmlReader {
 
 		String name = spotEl.getAttributeValue(SPOT_NAME_ATTRIBUTE_NAME);
 		if (null == name || name.equals(""))
+		{
 			name = "ID"+ID;
+		}
 		spot.setName(name);
 		atts.remove(SPOT_NAME_ATTRIBUTE_NAME);
 
@@ -915,10 +988,11 @@ public class TmXmlReader {
 			final Map<String, String> featureNames = new HashMap<String, String>(children.size());
 			final Map<String, String> featureShortNames = new HashMap<String, String>(children.size());
 			final Map<String, Dimension> featureDimensions = new HashMap<String, Dimension>(children.size());
+			final Map< String, Boolean > isIntFeature = new HashMap< String, Boolean >();
 			for (final Element child : children) {
-				readSingleFeatureDeclaration(child, features, featureNames, featureShortNames, featureDimensions);
+				readSingleFeatureDeclaration( child, features, featureNames, featureShortNames, featureDimensions, isIntFeature );
 			}
-			fm.declareSpotFeatures(features, featureNames, featureShortNames, featureDimensions);
+			fm.declareSpotFeatures( features, featureNames, featureShortNames, featureDimensions, isIntFeature );
 		}
 
 		// Edges
@@ -934,10 +1008,11 @@ public class TmXmlReader {
 			final Map<String, String> featureNames = new HashMap<String, String>(children.size());
 			final Map<String, String> featureShortNames = new HashMap<String, String>(children.size());
 			final Map<String, Dimension> featureDimensions = new HashMap<String, Dimension>(children.size());
+			final Map< String, Boolean > isIntFeature = new HashMap< String, Boolean >( children.size() );
 			for (final Element child : children) {
-				readSingleFeatureDeclaration(child, features, featureNames, featureShortNames, featureDimensions);
+				readSingleFeatureDeclaration( child, features, featureNames, featureShortNames, featureDimensions, isIntFeature );
 			}
-			fm.declareEdgeFeatures(features, featureNames, featureShortNames, featureDimensions);
+			fm.declareEdgeFeatures( features, featureNames, featureShortNames, featureDimensions, isIntFeature );
 		}
 
 		// Tracks
@@ -953,10 +1028,11 @@ public class TmXmlReader {
 			final Map<String, String> featureNames = new HashMap<String, String>(children.size());
 			final Map<String, String> featureShortNames = new HashMap<String, String>(children.size());
 			final Map<String, Dimension> featureDimensions = new HashMap<String, Dimension>(children.size());
+			final Map< String, Boolean > isIntFeature = new HashMap< String, Boolean >();
 			for (final Element child : children) {
-				readSingleFeatureDeclaration(child, features, featureNames, featureShortNames, featureDimensions);
+				readSingleFeatureDeclaration( child, features, featureNames, featureShortNames, featureDimensions, isIntFeature );
 			}
-			fm.declareTrackFeatures(features, featureNames, featureShortNames, featureDimensions);
+			fm.declareTrackFeatures( features, featureNames, featureShortNames, featureDimensions, isIntFeature );
 		}
 	}
 
@@ -996,7 +1072,7 @@ public class TmXmlReader {
 							continue;
 						}
 
-						final SpotAnalyzerFactory<?> spotAnalyzer = spotAnalyzerProvider.getFeatureAnalyzer(key);
+						final SpotAnalyzerFactory< ? > spotAnalyzer = spotAnalyzerProvider.getFactory( key );
 						if (null == spotAnalyzer) {
 							logger.error("Unknown spot analyzer key: " + key + ".\n");
 							ok = false;
@@ -1031,7 +1107,7 @@ public class TmXmlReader {
 						continue;
 					}
 
-					final EdgeAnalyzer edgeAnalyzer = edgeAnalyzerProvider.getFeatureAnalyzer(key);
+					final EdgeAnalyzer edgeAnalyzer = edgeAnalyzerProvider.getFactory( key );
 					if (null == edgeAnalyzer) {
 						logger.error("Unknown edge analyzer key: " + key + ".\n");
 						ok = false;
@@ -1061,7 +1137,7 @@ public class TmXmlReader {
 						continue;
 					}
 
-					final TrackAnalyzer trackAnalyzer = trackAnalyzerProvider.getFeatureAnalyzer(key);
+					final TrackAnalyzer trackAnalyzer = trackAnalyzerProvider.getFactory( key );
 					if (null == trackAnalyzer) {
 						logger.error("Unknown track analyzer key: " + key + ".\n");
 						ok = false;
@@ -1075,7 +1151,8 @@ public class TmXmlReader {
 
 
 	private void readSingleFeatureDeclaration(final Element child, final Collection<String> features,
-			final Map<String, String> featureNames, final Map<String, String> featureShortNames, final Map<String, Dimension> featureDimensions) {
+ final Map< String, String > featureNames, final Map< String, String > featureShortNames, final Map< String, Dimension > featureDimensions, final Map< String, Boolean > isIntFeature )
+	{
 
 		final String feature 				= child.getAttributeValue(FEATURE_ATTRIBUTE);
 		if (null == feature) {
@@ -1101,11 +1178,22 @@ public class TmXmlReader {
 			ok = false;
 			return;
 		}
+		boolean isInt = false;
+		try
+		{
+			isInt = child.getAttribute( FEATURE_ISINT_ATTRIBUTE ).getBooleanValue();
+		}
+		catch ( final Exception e )
+		{
+			logger.error( "Could not read the isInt attribute for feature " + feature + ".\n" );
+			ok = false;
+		}
 
 		features.add(feature);
 		featureNames.put(feature, featureName);
 		featureShortNames.put(feature, featureShortName);
 		featureDimensions.put(feature, featureDimension);
+		isIntFeature.put( feature, Boolean.valueOf( isInt ) );
 	}
 
 

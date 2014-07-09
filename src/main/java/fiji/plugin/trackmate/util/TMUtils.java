@@ -488,6 +488,9 @@ public class TMUtils {
 		case VELOCITY:
 			units = spaceUnits + "/" + timeUnits;
 			break;
+		case RATE:
+			units = "/" + timeUnits;
+			break;
 		default:
 			break;
 		case STRING:

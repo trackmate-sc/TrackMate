@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.visualization;
 
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.DEFAULT_TRACK_COLOR;
+
 import java.awt.Color;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -9,27 +10,72 @@ import fiji.plugin.trackmate.gui.panels.components.ColorByFeatureGUIPanel;
 
 /**
  * A dummy track color generator that always return the default color.
+ *
  * @author Jean-Yves Tinevez - 2013
  */
-public class DummyTrackColorGenerator implements TrackColorGenerator {
+public class DummyTrackColorGenerator implements TrackColorGenerator
+{
 
 	@Override
-	public Color color(DefaultWeightedEdge obj) {
+	public Color color( final DefaultWeightedEdge obj )
+	{
 		return DEFAULT_TRACK_COLOR;
 	}
 
 	@Override
-	public void setFeature(String feature) {}
+	public void setFeature( final String feature )
+	{}
 
 	@Override
-	public void terminate() {}
+	public void terminate()
+	{}
 
 	@Override
-	public void setCurrentTrackID(Integer trackID) {}
+	public void activate()
+	{}
 
 	@Override
-	public String getFeature() {
+	public void setCurrentTrackID( final Integer trackID )
+	{}
+
+	@Override
+	public String getFeature()
+	{
 		return ColorByFeatureGUIPanel.UNIFORM_KEY;
 	}
+
+	@Override
+	public double getMin()
+	{
+		return Double.NaN;
+	}
+
+	@Override
+	public double getMax()
+	{
+		return Double.NaN;
+	}
+
+	@Override
+	public void setMinMax( final double min, final double max )
+	{}
+
+	@Override
+	public void autoMinMax()
+	{}
+
+	@Override
+	public void setAutoMinMaxMode( final boolean autoMode )
+	{}
+
+	@Override
+	public boolean isAutoMinMaxMode()
+	{
+		return false;
+	}
+
+	@Override
+	public void setFrom( final MinMaxAdjustable minMaxAdjustable )
+	{}
 
 }

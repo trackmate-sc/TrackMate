@@ -605,6 +605,11 @@ public class SpotCollection implements MultiThreaded
 
 	/**
 	 * Returns the feature values of this Spot collection as a new double array.
+	 * <p>
+	 * If some spots do not have the interrogated feature set (stored value is
+	 * <code>null</code>) or if the value is {@link Double#NaN}, they are
+	 * skipped. The returned array might be therefore of smaller size than the
+	 * number of spots interrogated.
 	 *
 	 * @param feature
 	 *            the feature to collect.
@@ -619,7 +624,17 @@ public class SpotCollection implements MultiThreaded
 		int index = 0;
 		for ( final Spot spot : iterable( visibleOnly ) )
 		{
-			values[ index ] = spot.getFeature( feature );
+			final Double feat = spot.getFeature( feature );
+			if ( null == feat )
+			{
+				continue;
+			}
+			final double val = feat.doubleValue();
+			if ( Double.isNaN( val ) )
+			{
+				continue;
+			}
+			values[ index ] = val;
 			index++;
 		}
 		return values;

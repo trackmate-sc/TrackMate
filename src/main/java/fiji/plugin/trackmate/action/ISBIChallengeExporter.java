@@ -16,6 +16,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
+import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
@@ -30,6 +31,8 @@ public class ISBIChallengeExporter extends AbstractTMAction {
 
 	public static final ImageIcon ICON = new ImageIcon(TrackMateWizard.class.getResource("images/ISBIlogo.png"));
 	public static final String NAME = "Export to ISBI challenge format";
+
+	public static final String KEY = "EXPORT_TO_ISBI_CHALLENGE_FORMAT";
 	public static final String INFO_TEXT = "<html>" +
 				"Export the current model content to a XML file following the " +
 				"ISBI 2012 particle tracking challenge format, as specified on " +
@@ -47,7 +50,6 @@ public class ISBIChallengeExporter extends AbstractTMAction {
 
 	public ISBIChallengeExporter(final TrackMateGUIController controller) {
 		this.controller = controller;
-		this.icon = ICON;
 	}
 
 
@@ -95,17 +97,6 @@ public class ISBIChallengeExporter extends AbstractTMAction {
 			logger.error("Trouble writing to "+file+":\n" + e.getMessage());
 		}
 		logger.log("Done.\n");
-	}
-
-
-	@Override
-	public String getInfoText() {
-		return INFO_TEXT;
-	}
-
-	@Override
-	public String toString() {
-		return NAME;
 	}
 
 	private static final Element marshall(final Model model, final Settings settings) {
@@ -188,4 +179,39 @@ public class ISBIChallengeExporter extends AbstractTMAction {
 	private static final String Z_ATT = "z";
 	private static final String T_ATT = "t";
 
+	@Plugin( type = TrackMateActionFactory.class, visible = false )
+	public static class Factory implements TrackMateActionFactory
+	{
+
+		@Override
+		public String getInfoText()
+		{
+			return INFO_TEXT;
+		}
+
+		@Override
+		public String getName()
+		{
+			return NAME;
+		}
+
+		@Override
+		public String getKey()
+		{
+			return KEY;
+		}
+
+		@Override
+		public ImageIcon getIcon()
+		{
+			return ICON;
+		}
+
+		@Override
+		public TrackMateAction create( final TrackMateGUIController controller )
+		{
+			return new ISBIChallengeExporter( controller );
+		}
+
+	}
 }

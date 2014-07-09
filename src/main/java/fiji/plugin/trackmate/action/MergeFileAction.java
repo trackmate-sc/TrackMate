@@ -3,6 +3,7 @@
  */
 package fiji.plugin.trackmate.action;
 
+import java.awt.Frame;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Set;
@@ -10,6 +11,7 @@ import java.util.Set;
 import javax.swing.ImageIcon;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
+import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
@@ -24,14 +26,12 @@ import fiji.plugin.trackmate.io.TmXmlReader_v12;
 import fiji.plugin.trackmate.io.TmXmlReader_v20;
 import fiji.plugin.trackmate.util.Version;
 
-/**
- * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> Aug 13, 2013
- *
- */
 public class MergeFileAction extends AbstractTMAction {
 
 	public static final ImageIcon ICON = new ImageIcon(TrackMateWizard.class.getResource("images/arrow_merge.png"));
 	public static final String NAME = "Merge a TrackMate file";
+
+	public static final String KEY = "MERGE_OTHER_FILE";
 
 	public static final String INFO_TEXT = "<html>"
 			+ "Merge the current model with the data from another <br>"
@@ -40,16 +40,17 @@ public class MergeFileAction extends AbstractTMAction {
 			+ "and want to merge their work in a single file."
 			+ "<p>"
 			+ "Only the spots belonging to visible tracks are imported <br>"
-			+ "from the taret file, which makes this action non-entirely <br>"
+			+ "from the target file, which makes this action non-entirely <br>"
 			+ "symmetrical.  Numerical features are re-calculated using <br>"
 			+ "the current settings. There is no check that the imported <br>"
 			+ "data was generated on the raw source."
 			+ "</html>";
-	private final TrackMateGUIController	controller;
 
-	public MergeFileAction(final TrackMateGUIController controller) {
-		this.controller = controller;
-		this.icon = ICON;
+	private final Frame parent;
+
+	public MergeFileAction( final Frame parent )
+	{
+		this.parent = parent;
 	}
 
 	@Override
@@ -61,7 +62,7 @@ public class MergeFileAction extends AbstractTMAction {
 			file = new File(folder.getPath() + File.separator + "TrackMateData.xml");
 		}
 
-		final File tmpFile = IOUtils.askForFileForLoading(file, "Merge a TrackMate XML file", controller.getGUI(), logger);
+		final File tmpFile = IOUtils.askForFileForLoading( file, "Merge a TrackMate XML file", parent, logger );
 		if (null == tmpFile) {
 			return;
 		}
@@ -149,13 +150,38 @@ public class MergeFileAction extends AbstractTMAction {
 
 	}
 
-	@Override
-	public String getInfoText() {
-		return INFO_TEXT;
-	}
+	@Plugin( type = TrackMateActionFactory.class, visible = true )
+	public static class Factory implements TrackMateActionFactory
+	{
 
-	@Override
-	public String toString() {
-		return NAME;
+		@Override
+		public String getInfoText()
+		{
+			return INFO_TEXT;
+		}
+
+		@Override
+		public String getName()
+		{
+			return NAME;
+		}
+
+		@Override
+		public String getKey()
+		{
+			return KEY;
+		}
+
+		@Override
+		public ImageIcon getIcon()
+		{
+			return ICON;
+		}
+
+		@Override
+		public TrackMateAction create( final TrackMateGUIController controller )
+		{
+			return new MergeFileAction( controller.getGUI() );
+		}
 	}
 }

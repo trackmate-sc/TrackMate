@@ -74,13 +74,16 @@ import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.providers.ViewProvider;
-import fiji.plugin.trackmate.tracking.ManualTracker;
+import fiji.plugin.trackmate.tracking.ManualTrackerFactory;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
+import fiji.plugin.trackmate.visualization.ManualEdgeColorGenerator;
+import fiji.plugin.trackmate.visualization.ManualSpotColorGenerator;
 import fiji.plugin.trackmate.visualization.PerEdgeFeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.PerTrackFeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.SpotColorGenerator;
+import fiji.plugin.trackmate.visualization.SpotColorGeneratorPerTrackFeature;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.trackscheme.SpotImageUpdater;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
@@ -162,6 +165,18 @@ public class TrackMateGUIController implements ActionListener
 
 	protected FeatureColorGenerator< Spot > spotColorGenerator;
 
+	protected ManualEdgeColorGenerator manualEdgeColorGenerator;
+
+	protected ManualSpotColorGenerator manualSpotColorGenerator;
+
+	protected FeatureColorGenerator< Spot > spotColorGeneratorPerTrackFeature;
+
+	/**
+	 * The listener in charge of listening to display settings changes and
+	 * forwarding them to the views registered in the {@link #guimodel}.
+	 */
+	protected DisplaySettingsListener displaySettingsListener;
+
 	/*
 	 * CONSTRUCTOR
 	 */
@@ -211,10 +226,27 @@ public class TrackMateGUIController implements ActionListener
 		this.spotColorGenerator = createSpotColorGenerator();
 		this.edgeColorGenerator = createEdgeColorGenerator();
 		this.trackColorGenerator = createTrackColorGenerator();
+		this.manualEdgeColorGenerator = createManualEdgeColorGenerator();
+		this.manualSpotColorGenerator = createManualSpotColorGenerator();
+		this.spotColorGeneratorPerTrackFeature = createSpotColorGeneratorPerTrackFeature();
 
 		// 0.
 		this.guimodel = new TrackMateGUIModel();
 		this.guimodel.setDisplaySettings( createDisplaySettings( trackmate.getModel() ) );
+		this.displaySettingsListener = new DisplaySettingsListener()
+		{
+			@Override
+			public void displaySettingsChanged( final DisplaySettingsEvent event )
+			{
+				guimodel.getDisplaySettings().put( event.getKey(), event.getNewValue() );
+				for ( final TrackMateModelView view : guimodel.views )
+				{
+					view.setDisplaySettings( event.getKey(), event.getNewValue() );
+					view.refresh();
+				}
+			}
+		};
+
 		// 1.
 		createSelectionModel();
 		// 2.
@@ -232,6 +264,7 @@ public class TrackMateGUIController implements ActionListener
 	/*
 	 * PUBLIC METHODS
 	 */
+
 
 	/**
 	 * Creates a new {@link TrackMateGUIController} instance, set to operate on
@@ -435,6 +468,22 @@ public class TrackMateGUIController implements ActionListener
 		return generator;
 	}
 
+	protected ManualSpotColorGenerator createManualSpotColorGenerator()
+	{
+		return new ManualSpotColorGenerator();
+	}
+
+	protected ManualEdgeColorGenerator createManualEdgeColorGenerator()
+	{
+		return new ManualEdgeColorGenerator( trackmate.getModel() );
+	}
+
+	protected FeatureColorGenerator< Spot > createSpotColorGeneratorPerTrackFeature()
+	{
+		final FeatureColorGenerator< Spot > generator = new SpotColorGeneratorPerTrackFeature( trackmate.getModel(), TrackIndexAnalyzer.TRACK_INDEX );
+		return generator;
+	}
+
 	protected void createProviders()
 	{
 		spotAnalyzerProvider = new SpotAnalyzerProvider();
@@ -490,7 +539,7 @@ public class TrackMateGUIController implements ActionListener
 		/*
 		 * Configure chosen detector
 		 */
-		detectorConfigurationDescriptor = new DetectorConfigurationDescriptor( detectorProvider, trackmate, this );
+		detectorConfigurationDescriptor = new DetectorConfigurationDescriptor( trackmate, this );
 
 		/*
 		 * Execute and report detection progress
@@ -521,12 +570,28 @@ public class TrackMateGUIController implements ActionListener
 			{
 				if ( event == spotFilterDescriptor.getComponent().COLOR_FEATURE_CHANGED )
 				{
-					final String targetFeature = spotFilterDescriptor.getComponent().getColorFeature();
-					spotColorGenerator.setFeature( targetFeature );
-					for ( final TrackMateModelView view : guimodel.views )
+
+					final FeatureColorGenerator< Spot > newValue;
+					@SuppressWarnings( "unchecked" )
+					final FeatureColorGenerator< Spot > oldValue = ( FeatureColorGenerator< Spot > ) guimodel.getDisplaySettings().get( KEY_SPOT_COLORING );
+					if ( null == spotFilterDescriptor.getComponent() ) { return; }
+					switch ( spotFilterDescriptor.getComponent().getColorCategory() )
 					{
-						view.setDisplaySettings( TrackMateModelView.KEY_SPOT_COLORING, spotColorGenerator );
+					case DEFAULT:
+						newValue = spotColorGenerator;
+						spotColorGenerator.setFeature( null );
+						break;
+					case TRACKS:
+						newValue = spotColorGeneratorPerTrackFeature;
+						spotColorGeneratorPerTrackFeature.setFeature( spotFilterDescriptor.getComponent().getColorFeature() );
+						break;
+					default:
+						newValue = spotColorGenerator;
+						spotColorGenerator.setFeature( spotFilterDescriptor.getComponent().getColorFeature() );
+						break;
 					}
+					final DisplaySettingsEvent dsEvent = new DisplaySettingsEvent( spotFilterDescriptor.getComponent(), KEY_SPOT_COLORING, newValue, oldValue );
+					displaySettingsListener.displaySettingsChanged( dsEvent );
 				}
 			}
 		} );
@@ -597,7 +662,7 @@ public class TrackMateGUIController implements ActionListener
 		/*
 		 * Finished, let's change the display settings.
 		 */
-		configureViewsDescriptor = new ConfigureViewsDescriptor( trackmate, spotColorGenerator, edgeColorGenerator, trackColorGenerator, this );
+		configureViewsDescriptor = new ConfigureViewsDescriptor( trackmate, spotColorGenerator, edgeColorGenerator, trackColorGenerator, spotColorGeneratorPerTrackFeature, manualSpotColorGenerator, manualEdgeColorGenerator, this );
 		configureViewsDescriptor.getComponent().addActionListener( new ActionListener()
 		{
 			@Override
@@ -619,19 +684,7 @@ public class TrackMateGUIController implements ActionListener
 				}
 			}
 		} );
-		configureViewsDescriptor.getComponent().addDisplaySettingsChangeListener( new DisplaySettingsListener()
-		{
-			@Override
-			public void displaySettingsChanged( final DisplaySettingsEvent event )
-			{
-				guimodel.getDisplaySettings().put( event.getKey(), event.getNewValue() );
-				for ( final TrackMateModelView view : guimodel.views )
-				{
-					view.setDisplaySettings( event.getKey(), event.getNewValue() );
-					view.refresh();
-				}
-			}
-		} );
+		configureViewsDescriptor.getComponent().addDisplaySettingsChangeListener( displaySettingsListener );
 
 		/*
 		 * Export and graph features.
@@ -646,7 +699,7 @@ public class TrackMateGUIController implements ActionListener
 		/*
 		 * Save descriptor
 		 */
-		saveDescriptor = new SaveDescriptor( this, detectorProvider, trackerProvider );
+		saveDescriptor = new SaveDescriptor( this );
 
 		/*
 		 * Load descriptor
@@ -730,7 +783,7 @@ public class TrackMateGUIController implements ActionListener
 		}
 		else if ( currentDescriptor == trackerChoiceDescriptor )
 		{
-			if ( null == trackmate.getSettings().tracker || trackmate.getSettings().tracker.getKey().equals( ManualTracker.TRACKER_KEY ) )
+			if ( null == trackmate.getSettings().trackerFactory || trackmate.getSettings().trackerFactory.getKey().equals( ManualTrackerFactory.TRACKER_KEY ) )
 			{
 				return trackFilterDescriptor;
 			}
@@ -801,7 +854,7 @@ public class TrackMateGUIController implements ActionListener
 		}
 		else if ( currentDescriptor == initFilterDescriptor )
 		{
-			return detectionDescriptor;
+			return detectorConfigurationDescriptor;
 
 		}
 		else if ( currentDescriptor == viewChoiceDescriptor )
@@ -831,7 +884,7 @@ public class TrackMateGUIController implements ActionListener
 		}
 		else if ( currentDescriptor == trackFilterDescriptor )
 		{
-			if ( null == trackmate.getSettings().tracker || trackmate.getSettings().tracker.getKey().equals( ManualTracker.TRACKER_KEY ) )
+			if ( null == trackmate.getSettings().trackerFactory || trackmate.getSettings().trackerFactory.getKey().equals( ManualTrackerFactory.TRACKER_KEY ) )
 			{
 				return trackerChoiceDescriptor;
 			}
@@ -906,7 +959,7 @@ public class TrackMateGUIController implements ActionListener
 		displaySettings.put( KEY_SPOTS_VISIBLE, true );
 		displaySettings.put( KEY_DISPLAY_SPOT_NAMES, false );
 		displaySettings.put( KEY_SPOT_COLORING, spotColorGenerator );
-		displaySettings.put( KEY_SPOT_RADIUS_RATIO, 1.0f );
+		displaySettings.put( KEY_SPOT_RADIUS_RATIO, 1.0d );
 		displaySettings.put( KEY_TRACKS_VISIBLE, true );
 		displaySettings.put( KEY_TRACK_DISPLAY_MODE, DEFAULT_TRACK_DISPLAY_MODE );
 		displaySettings.put( KEY_TRACK_DISPLAY_DEPTH, DEFAULT_TRACK_DISPLAY_DEPTH );
@@ -1034,7 +1087,6 @@ public class TrackMateGUIController implements ActionListener
 
 		// Show the panel in the dialog, and execute action after display
 		panelDescriptor.displayingPanel();
-
 	}
 
 	private void previous()

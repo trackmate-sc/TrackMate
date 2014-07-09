@@ -6,7 +6,7 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.LogPanel;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.providers.TrackerProvider;
+import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 
 public class TrackingDescriptor implements WizardPanelDescriptor
 {
@@ -40,10 +40,10 @@ public class TrackingDescriptor implements WizardPanelDescriptor
 	public void displayingPanel()
 	{
 		final Logger logger = trackmate.getModel().getLogger();
-		final TrackerProvider trackerProvider = controller.getTrackerProvider();
-		logger.log( "Starting tracking using " + trackmate.getSettings().tracker + "\n", Logger.BLUE_COLOR );
+		final SpotTrackerFactory trackerFactory = trackmate.getSettings().trackerFactory;
+		logger.log( "Starting tracking using " + trackerFactory.getName() + "\n", Logger.BLUE_COLOR );
 		logger.log( "with settings:\n" );
-		logger.log( trackerProvider.toString( trackmate.getSettings().trackerSettings ) );
+		logger.log( trackerFactory.toString( trackmate.getSettings().trackerSettings ) );
 		controller.disableButtonsAndStoreState();
 
 		new Thread( "TrackMate tracking thread" )

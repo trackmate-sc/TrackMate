@@ -7,11 +7,12 @@ import fiji.plugin.trackmate.Spot;
 /**
  * Interface for a class that can compute feature on a collection of spots.
  * <p>
- * The spot collection to operate on is given at construction by the {@link SpotAnalyzerFactory}
- * that instantiated and configured this instance. Calling the {@link #process()} method 
- * result in updating the feature map of each spot directly, calling {@link Spot#putFeature(String, double)}.
+ * The spot collection to operate on is given at construction by the
+ * {@link SpotAnalyzerFactory} that instantiated and configured this instance.
+ * Calling the {@link #process()} method result in updating the feature map of
+ * each spot directly, calling {@link Spot#putFeature(String, double)}.
  */
-public interface SpotAnalyzer<T> extends Algorithm, Benchmark {
+public interface SpotAnalyzer< T > extends Algorithm, Benchmark
+{
 
-	
 }

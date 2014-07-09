@@ -1,9 +1,13 @@
 package fiji.plugin.trackmate.detection;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import net.imglib2.Cursor;
+import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.Point;
 import net.imglib2.RandomAccess;
@@ -132,15 +136,46 @@ public class DetectionUtils
 	}
 
 	/**
+	 * Returns a new {@link Interval}, built by squeezing out singleton
+	 * dimensions from the specified interval.
+	 *
+	 * @param interval
+	 *            the interval to squeeze.
+	 * @return a new interval.
+	 */
+	public static final Interval squeeze( final Interval interval )
+	{
+		int nNonSingletonDimensions = 0;
+		for ( int d = 0; d < interval.numDimensions(); d++ )
+		{
+			if ( interval.dimension( d ) > 1 )
+			{
+				nNonSingletonDimensions++;
+			}
+		}
+
+		final long[] min = new long[ nNonSingletonDimensions ];
+		final long[] max = new long[ nNonSingletonDimensions ];
+		int index = 0;
+		for ( int d = 0; d < interval.numDimensions(); d++ )
+		{
+			if ( interval.dimension( d ) > 1 )
+			{
+				min[ index ] = interval.min( d );
+				max[ index ] = interval.max( d );
+				index++;
+			}
+		}
+		return new FinalInterval( min, max );
+	}
+
+	/**
 	 * Apply a simple 3x3 median filter to the target image.
 	 */
 	public static final < R extends RealType< R > & NativeType< R >> Img< R > applyMedianFilter( final RandomAccessibleInterval< R > image )
 	{
 		final MedianFilter< R > medFilt = new MedianFilter< R >( image, 1 );
-		if ( !medFilt.checkInput() || !medFilt.process() )
-		{
-			return null;
-		}
+		if ( !medFilt.checkInput() || !medFilt.process() ) { return null; }
 		return medFilt.getResult();
 	}
 
@@ -153,10 +188,16 @@ public class DetectionUtils
 		final FloatType val = new FloatType();
 		val.setReal( threshold );
 		final LocalNeighborhoodCheck< Point, FloatType > localNeighborhoodCheck = new LocalExtrema.MaximumCheck< FloatType >( val );
-		final IntervalView< FloatType > dogWithBorder = Views.interval( Views.extendMirrorSingle(  source ), Intervals.expand( source, 1 ) );
-		final ArrayList< Point > peaks = LocalExtrema.findLocalExtrema( dogWithBorder, localNeighborhoodCheck, numThreads );
+		final IntervalView< FloatType > dogWithBorder = Views.interval( Views.extendMirrorSingle( source ), Intervals.expand( source, 1 ) );
+//		TODO: The "numThreads"-version of LocalExtrema.findLocalExtrema should really exist in imglib. After it does, replace the following lines by
+//		final ArrayList< Point > peaks = LocalExtrema.findLocalExtrema( dogWithBorder, localNeighborhoodCheck, numThreads );
+		final ExecutorService service = Executors.newFixedThreadPool( numThreads );
+		final List< Point > peaks = LocalExtrema.findLocalExtrema( dogWithBorder, localNeighborhoodCheck, service );
+		service.shutdown();
 
-		final ArrayList< Spot > spots;
+		if ( peaks.isEmpty() ) { return Collections.emptyList(); }
+
+		final List< Spot > spots;
 		if ( doSubPixelLocalization )
 		{
 

@@ -1,7 +1,8 @@
 package fiji.plugin.trackmate.gui.descriptors;
 
+import javax.swing.Icon;
+
 import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
@@ -36,52 +37,56 @@ public class InitFilterDescriptor implements WizardPanelDescriptor
 	@Override
 	public void aboutToDisplayPanel()
 	{
-
-		final SpotCollection spots = trackmate.getModel().getSpots();
-
-		final double[] values = new double[ spots.getNSpots( false ) ];
-		int index = 0;
-		for ( final Spot spot : spots.iterable( false ) )
-		{
-			values[ index++ ] = spot.getFeature( Spot.QUALITY );
-		}
-		component.setValues( values );
-
-		final Double initialFilterValue = trackmate.getSettings().initialSpotFilterValue;
-		component.setInitialFilterValue( initialFilterValue );
-	}
+}
 
 	@Override
 	public void displayingPanel()
 	{
-		controller.getGUI().setNextButtonEnabled( true );
+		new Thread( "TrackMate quality histogram calculation thread." )
+		{
+			@Override
+			public void run()
+			{
+				final String oldText = controller.getGUI().getNextButton().getText();
+				final Icon oldIcon = controller.getGUI().getNextButton().getIcon();
+				controller.getGUI().getNextButton().setIcon( null );
+				controller.getGUI().getNextButton().setText( "Please wait..." );
+
+				trackmate.getModel().getLogger().log( "Computing spot quality histogram...\n", Logger.BLUE_COLOR );
+				final long start = System.currentTimeMillis();
+				final SpotCollection spots = trackmate.getModel().getSpots();
+
+				final double[] values = new double[ spots.getNSpots( false ) ];
+				int index = 0;
+				for ( final Spot spot : spots.iterable( false ) )
+				{
+					values[ index++ ] = spot.getFeature( Spot.QUALITY );
+				}
+				component.setValues( values );
+
+				final Double initialFilterValue = trackmate.getSettings().initialSpotFilterValue;
+				component.setInitialFilterValue( initialFilterValue );
+				final long end = System.currentTimeMillis();
+				trackmate.getModel().getLogger().log( String.format( "Histogram calculated in %.1f s.\n", ( end - start ) / 1e3f ), Logger.BLUE_COLOR );
+
+				controller.getGUI().getNextButton().setText( oldText );
+				controller.getGUI().getNextButton().setIcon( oldIcon );
+				controller.getGUI().setNextButtonEnabled( true );
+
+			}
+		}.start();
 	}
 
 	@Override
 	public void aboutToHidePanel()
 	{
 
-		final Model model = trackmate.getModel();
-		final Logger logger = model.getLogger();
 		final FeatureFilter initialThreshold = component.getFeatureThreshold();
-		final String str = "Initial thresholding with a quality threshold above " + String.format( "%.1f", initialThreshold.value ) + " ...\n";
-		logger.log( str, Logger.BLUE_COLOR );
-		final int ntotal = model.getSpots().getNSpots( false );
 		trackmate.getSettings().initialSpotFilterValue = initialThreshold.value;
-		trackmate.execInitialSpotFiltering();
-		final int nselected = model.getSpots().getNSpots( false );
-		logger.log( String.format( "Retained %d spots out of %d.\n", nselected, ntotal ) );
 
 		/*
-		 * We have some spots so we need to compute spot features will we render
-		 * them.
+		 * We will do the filtering in the next panel.
 		 */
-		logger.log( "Calculating spot features...\n", Logger.BLUE_COLOR );
-		// Calculate features
-		final long start = System.currentTimeMillis();
-		trackmate.computeSpotFeatures( true );
-		final long end = System.currentTimeMillis();
-		logger.log( String.format( "Calculating features done in %.1f s.\n", ( end - start ) / 1e3f ), Logger.BLUE_COLOR );
 	}
 
 	@Override

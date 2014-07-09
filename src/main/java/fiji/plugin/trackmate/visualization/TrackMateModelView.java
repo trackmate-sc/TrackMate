@@ -5,11 +5,10 @@ import java.util.Map;
 
 import org.jfree.chart.renderer.InterpolatePaintScale;
 
-import fiji.plugin.trackmate.InfoTextable;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 
-public interface TrackMateModelView extends InfoTextable
+public interface TrackMateModelView
 {
 
 	/*
@@ -72,8 +71,8 @@ public interface TrackMateModelView extends InfoTextable
 
 	/**
 	 * Defines the key for the spot radius ratio. Value should be a positive
-	 * float number. Spots will be rendered with a radius equals to their actual
-	 * radius multiplied by this ratio.
+	 * {@link Double} object. Spots will be rendered with a radius equals to
+	 * their actual radius multiplied by this ratio.
 	 */
 	public static final String KEY_SPOT_RADIUS_RATIO = "SpotRadiusRatio";
 
@@ -179,6 +178,20 @@ public interface TrackMateModelView extends InfoTextable
 	public static final Color DEFAULT_TRACK_COLOR = new Color( 250, 250, 0 );
 
 	/**
+	 * The color to use to paint objects for which a feature is undefined.
+	 * <i>E.g.</i> the numerical feature for this object calculated
+	 * automatically, but its returned value is {@link Double#NaN}.
+	 */
+	public static final Color DEFAULT_UNDEFINED_FEATURE_COLOR = Color.BLACK;
+
+	/**
+	 * The color to use to paint objects with a manual feature that has not been
+	 * assigned yet. <i>E.g</i> the coloring uses a manual feature, but this
+	 * object did not receive a value yet.
+	 */
+	public static final Color DEFAULT_UNASSIGNED_FEATURE_COLOR = Color.GRAY.darker();
+
+	/**
 	 * The default color for highlighting.
 	 */
 	public static final Color DEFAULT_HIGHLIGHT_COLOR = new Color( 0, 1f, 0 );
@@ -265,7 +278,14 @@ public interface TrackMateModelView extends InfoTextable
 	public Model getModel();
 
 	/**
-	 * Returns a unique identifier that identifies this view.
+	 * Returns the unique key that identifies this view.
+	 * <p>
+	 * Careful: this key <b>must</b> be the same that for the
+	 * {@link ViewFactory} that can instantiates this view. This is to
+	 * facilitate saving/loading.
+	 *
+	 * @return the key, as a String.
 	 */
 	public String getKey();
+
 }

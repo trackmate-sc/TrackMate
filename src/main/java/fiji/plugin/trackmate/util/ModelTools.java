@@ -74,11 +74,10 @@ public class ModelTools {
 		 */
 
 		final SpotCollection spots = SpotCollection.fromCollection(selectionModel.getSpotSelection());
-		final NearestNeighborTracker tracker = new NearestNeighborTracker();
-		tracker.setNumThreads(1);
 		final Map<String, Object> settings = new HashMap<String, Object>(1);
 		settings.put(KEY_LINKING_MAX_DISTANCE, Double.POSITIVE_INFINITY);
-		tracker.setTarget(spots, settings);
+		final NearestNeighborTracker tracker = new NearestNeighborTracker( spots, settings );
+		tracker.setNumThreads( 1 );
 
 		/*
 		 * Execute tracking

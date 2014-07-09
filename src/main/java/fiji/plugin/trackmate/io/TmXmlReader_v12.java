@@ -115,6 +115,7 @@ import fiji.plugin.trackmate.detection.DogDetectorFactory;
 import fiji.plugin.trackmate.detection.DownsampleLogDetectorFactory;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.detection.ManualDetectorFactory;
+import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
@@ -130,12 +131,14 @@ import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.providers.ViewProvider;
-import fiji.plugin.trackmate.tracking.FastLAPTracker;
-import fiji.plugin.trackmate.tracking.SimpleFastLAPTracker;
+import fiji.plugin.trackmate.tracking.FastLAPTrackerFactory;
+import fiji.plugin.trackmate.tracking.SimpleFastLAPTrackerFactory;
 import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTracker;
+import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
+import fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTrackerFactory;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
+import fiji.util.NumberParser;
 
 /**
  * A compatibility xml loader than can load TrackMate xml file saved for version
@@ -173,6 +176,7 @@ public class TmXmlReader_v12 extends TmXmlReader {
 	private static final HashMap<String, String> 	F_FEATURE_NAMES = new HashMap<String, String>(9);
 	private static final HashMap<String, String> 	F_FEATURE_SHORT_NAMES = new HashMap<String, String>(9);
 	private static final HashMap<String, Dimension> F_FEATURE_DIMENSIONS = new HashMap<String, Dimension>(9);
+	private static final HashMap<String, Boolean> 	F_ISINT = new HashMap<String, Boolean>(9);
 
 	private static final String	VARIANCE = "VARIANCE";
 	private static final String	KURTOSIS = "KURTOSIS";
@@ -190,6 +194,9 @@ public class TmXmlReader_v12 extends TmXmlReader {
 		F_FEATURE_DIMENSIONS.put(VARIANCE, Dimension.INTENSITY_SQUARED);
 		F_FEATURE_DIMENSIONS.put(KURTOSIS, Dimension.NONE);
 		F_FEATURE_DIMENSIONS.put(SKEWNESS, Dimension.NONE);
+		F_ISINT.put( VARIANCE, Boolean.FALSE );
+		F_ISINT.put( KURTOSIS, Boolean.FALSE );
+		F_ISINT.put( SKEWNESS, Boolean.FALSE );
 	}
 
 
@@ -234,23 +241,23 @@ public class TmXmlReader_v12 extends TmXmlReader {
 		// Feature analyzers. By default, we add them all.
 
 		settings.clearSpotAnalyzerFactories();
-		final List<String> spotAnalyzerKeys = spotAnalyzerProvider.getAvailableFeatureAnalyzers();
+		final List< String > spotAnalyzerKeys = spotAnalyzerProvider.getKeys();
 		for (final String key : spotAnalyzerKeys) {
-			final SpotAnalyzerFactory<?> spotFeatureAnalyzer = spotAnalyzerProvider.getFeatureAnalyzer(key);
+			final SpotAnalyzerFactory< ? > spotFeatureAnalyzer = spotAnalyzerProvider.getFactory( key );
 			settings.addSpotAnalyzerFactory(spotFeatureAnalyzer);
 		}
 
 		settings.clearEdgeAnalyzers();
-		final List<String> edgeAnalyzerKeys = edgeAnalyzerProvider.getAvailableFeatureAnalyzers();
+		final List< String > edgeAnalyzerKeys = edgeAnalyzerProvider.getKeys();
 		for (final String key : edgeAnalyzerKeys) {
-			final EdgeAnalyzer edgeAnalyzer = edgeAnalyzerProvider.getFeatureAnalyzer(key);
+			final EdgeAnalyzer edgeAnalyzer = edgeAnalyzerProvider.getFactory( key );
 			settings.addEdgeAnalyzer(edgeAnalyzer);
 		}
 
 		settings.clearTrackAnalyzers();
-		final List<String> trackAnalyzerKeys = trackAnalyzerProvider.getAvailableFeatureAnalyzers();
+		final List< String > trackAnalyzerKeys = trackAnalyzerProvider.getKeys();
 		for (final String key : trackAnalyzerKeys) {
-			final TrackAnalyzer trackAnalyzer = trackAnalyzerProvider.getFeatureAnalyzer(key);
+			final TrackAnalyzer trackAnalyzer = trackAnalyzerProvider.getFactory( key );
 			settings.addTrackAnalyzer(trackAnalyzer);
 		}
 	}
@@ -263,7 +270,7 @@ public class TmXmlReader_v12 extends TmXmlReader {
 	@Override
 	public Collection<TrackMateModelView> getViews(final ViewProvider provider, final Model model, final Settings settings, final SelectionModel selectionModel) {
 		final Collection<TrackMateModelView> views = new ArrayList<TrackMateModelView>(1);
-		views.add(provider.getView(HyperStackDisplayer.NAME, model, settings, selectionModel));
+		views.add( provider.getFactory( HyperStackDisplayer.KEY ).create( model, settings, selectionModel ) );
 		return views ;
 	}
 
@@ -310,21 +317,21 @@ public class TmXmlReader_v12 extends TmXmlReader {
 	 */
 	private void declareDefaultFeatures(final FeatureModel fm) {
 		// Spots:
-		fm.declareSpotFeatures(Spot.FEATURES, Spot.FEATURE_NAMES, Spot.FEATURE_SHORT_NAMES, Spot.FEATURE_DIMENSIONS);
+		fm.declareSpotFeatures( Spot.FEATURES, Spot.FEATURE_NAMES, Spot.FEATURE_SHORT_NAMES, Spot.FEATURE_DIMENSIONS, Spot.IS_INT );
 		fm.declareSpotFeatures(SpotContrastAndSNRAnalyzerFactory.FEATURES, SpotContrastAndSNRAnalyzerFactory.FEATURE_NAMES,
-				SpotContrastAndSNRAnalyzerFactory.FEATURE_SHORT_NAMES, SpotContrastAndSNRAnalyzerFactory.FEATURE_DIMENSIONS);
+ SpotContrastAndSNRAnalyzerFactory.FEATURE_SHORT_NAMES, SpotContrastAndSNRAnalyzerFactory.FEATURE_DIMENSIONS, SpotContrastAndSNRAnalyzerFactory.IS_INT );
 		fm.declareSpotFeatures(SpotMorphologyAnalyzerFactory.FEATURES, SpotMorphologyAnalyzerFactory.FEATURE_NAMES,
-				SpotMorphologyAnalyzerFactory.FEATURE_SHORT_NAMES, SpotMorphologyAnalyzerFactory.FEATURE_DIMENSIONS);
+ SpotMorphologyAnalyzerFactory.FEATURE_SHORT_NAMES, SpotMorphologyAnalyzerFactory.FEATURE_DIMENSIONS, SpotMorphologyAnalyzerFactory.IS_INT );
 
 		fm.declareSpotFeatures(SpotIntensityAnalyzerFactory.FEATURES, SpotIntensityAnalyzerFactory.FEATURE_NAMES,
-				SpotIntensityAnalyzerFactory.FEATURE_SHORT_NAMES, SpotIntensityAnalyzerFactory.FEATURE_DIMENSIONS);
-		fm.declareSpotFeatures(F_FEATURES, F_FEATURE_NAMES, F_FEATURE_SHORT_NAMES, F_FEATURE_DIMENSIONS);
+ SpotIntensityAnalyzerFactory.FEATURE_SHORT_NAMES, SpotIntensityAnalyzerFactory.FEATURE_DIMENSIONS, SpotIntensityAnalyzerFactory.IS_INT );
+		fm.declareSpotFeatures( F_FEATURES, F_FEATURE_NAMES, F_FEATURE_SHORT_NAMES, F_FEATURE_DIMENSIONS, F_ISINT );
 
 		// Edges: no edge features in v1.2
 
 		// Tracks:
 		fm.declareTrackFeatures(TrackDurationAnalyzer.FEATURES, TrackDurationAnalyzer.FEATURE_NAMES,
-				TrackDurationAnalyzer.FEATURE_SHORT_NAMES, TrackDurationAnalyzer.FEATURE_DIMENSIONS);
+ TrackDurationAnalyzer.FEATURE_SHORT_NAMES, TrackDurationAnalyzer.FEATURE_DIMENSIONS, TrackDurationAnalyzer.IS_INT );
 	}
 
 	/**
@@ -336,11 +343,14 @@ public class TmXmlReader_v12 extends TmXmlReader {
 	private void readTracks(final Model model) {
 
 		final Element allTracksElement = root.getChild(TRACK_COLLECTION_ELEMENT_KEY_v12);
-		if (null == allTracksElement)
+		if (null == allTracksElement) {
 			return;
+		}
 
 		if (null == cache)
+		{
 			getAllSpots(); // build the cache if it's not there
+		}
 
 		final SimpleWeightedGraph<Spot, DefaultWeightedEdge> graph = new SimpleWeightedGraph<Spot, DefaultWeightedEdge>(DefaultWeightedEdge.class);
 
@@ -458,8 +468,9 @@ public class TmXmlReader_v12 extends TmXmlReader {
 	private List<FeatureFilter> getTrackFeatureFilters() {
 		final List<FeatureFilter> featureThresholds = new ArrayList<FeatureFilter>();
 		final Element ftCollectionEl = root.getChild(TRACK_FILTER_COLLECTION_ELEMENT_KEY);
-		if (null == ftCollectionEl)
+		if (null == ftCollectionEl) {
 			return null;
+		}
 		final List<Element> ftEls = ftCollectionEl.getChildren(FILTER_ELEMENT_KEY);
 		for (final Element ftEl : ftEls) {
 			final String feature 	= ftEl.getAttributeValue(FILTER_FEATURE_ATTRIBUTE_NAME);
@@ -477,8 +488,9 @@ public class TmXmlReader_v12 extends TmXmlReader {
 	 */
 	private FeatureFilter getInitialFilter()  {
 		final Element itEl = root.getChild(INITIAL_SPOT_FILTER_ELEMENT_KEY_v12);
-		if (null == itEl)
+		if (null == itEl) {
 			return null;
+		}
 		final String feature  = itEl.getAttributeValue(FILTER_FEATURE_ATTRIBUTE_NAME_v12);
 		final double value     = readFloatAttribute(itEl, FILTER_VALUE_ATTRIBUTE_NAME_v12, logger);
 		final boolean isAbove = readBooleanAttribute(itEl, FILTER_ABOVE_ATTRIBUTE_NAME_v12, logger);
@@ -494,8 +506,9 @@ public class TmXmlReader_v12 extends TmXmlReader {
 	private List<FeatureFilter> getSpotFeatureFilters() {
 		final List<FeatureFilter> featureThresholds = new ArrayList<FeatureFilter>();
 		final Element ftCollectionEl = root.getChild(SPOT_FILTER_COLLECTION_ELEMENT_KEY_v12);
-		if (null == ftCollectionEl)
+		if (null == ftCollectionEl) {
 			return null;
+		}
 		final List<Element> ftEls = ftCollectionEl.getChildren(FILTER_ELEMENT_KEY_v12);
 		for (final Element ftEl : ftEls) {
 			final String feature  = ftEl.getAttributeValue(FILTER_FEATURE_ATTRIBUTE_NAME_v12);
@@ -515,8 +528,9 @@ public class TmXmlReader_v12 extends TmXmlReader {
 		final HashMap<Integer, Map<String, Double>> featureMap = new HashMap<Integer, Map<String, Double>>();
 
 		final Element allTracksElement = root.getChild(TRACK_COLLECTION_ELEMENT_KEY_v12);
-		if (null == allTracksElement)
+		if (null == allTracksElement) {
 			return null;
+		}
 
 		// Load tracks
 		final List<Element> trackElements = allTracksElement.getChildren(TRACK_ELEMENT_KEY_v12);
@@ -635,12 +649,15 @@ public class TmXmlReader_v12 extends TmXmlReader {
 				segmenterKey = LogDetectorFactory.DETECTOR_KEY;
 			}
 		}
-		boolean ok = provider.select(segmenterKey);
-		if (!ok) {
-			logger.error(provider.getErrorMessage());
-			logger.error("Substituting default detector.\n");
+
+		final SpotDetectorFactory< ? > factory = provider.getFactory( segmenterKey );
+		if ( null == factory )
+		{
+			logger.error( "The detector identified by the key " + segmenterKey + " is unknown to TrackMate.\n" );
+			ok = false;
+			return;
 		}
-		settings.detectorFactory = provider.getDetectorFactory();
+		settings.detectorFactory = factory;
 
 		// Deal with segmenter settings
 		Map<String, Object> ds = new HashMap<String, Object>();
@@ -651,7 +668,7 @@ public class TmXmlReader_v12 extends TmXmlReader {
 
 			logger.error("\nSegmenter settings class is not present.\n");
 			logger.error("Substituting default settings values.\n");
-			ds = provider.getDefaultSettings();
+			ds = settings.detectorFactory.getDefaultSettings();
 
 		} else {
 
@@ -662,13 +679,13 @@ public class TmXmlReader_v12 extends TmXmlReader {
 
 					// The saved class matched, we can update the settings created above with the file content
 					ok = readDouble(element, "expectedradius", ds, KEY_RADIUS)
-					&& readDouble(element, "threshold", ds, KEY_THRESHOLD)
-					&& readBoolean(element, "doSubPixelLocalization",  ds, KEY_DO_SUBPIXEL_LOCALIZATION)
-					&& readBoolean(element, "usemedianfilter", ds, KEY_DO_MEDIAN_FILTERING);
+							&& readDouble(element, "threshold", ds, KEY_THRESHOLD)
+							&& readBoolean(element, "doSubPixelLocalization",  ds, KEY_DO_SUBPIXEL_LOCALIZATION)
+							&& readBoolean(element, "usemedianfilter", ds, KEY_DO_MEDIAN_FILTERING);
 					if (!ok) {
 						logger.error(errorMessage);
 						logger.error("substituting default settings values.\n");
-						ds = provider.getDefaultSettings();
+						ds = settings.detectorFactory.getDefaultSettings();
 					}
 
 				} else {
@@ -679,7 +696,7 @@ public class TmXmlReader_v12 extends TmXmlReader {
 					logger.error("\nDetector settings class ("+segmenterSettingsClassName+") does not match detector requirements (" +
 							ds.getClass().getName()+"),\n");
 					logger.error("substituting default values.\n");
-					ds = provider.getDefaultSettings();
+					ds = settings.detectorFactory.getDefaultSettings();
 				}
 
 			} else if (segmenterSettingsClassName.equals("fiji.plugin.trackmate.segmentation.DownSampleLogSegmenterSettings"))  {
@@ -689,12 +706,12 @@ public class TmXmlReader_v12 extends TmXmlReader {
 
 					// The saved class matched, we can updated the settings created above with the file content
 					ok = readDouble(element, "expectedradius", ds, KEY_RADIUS)
-					&& readDouble(element, "threshold", ds, KEY_THRESHOLD)
-					&& readInteger(element, "downsamplingfactor", ds, KEY_DOWNSAMPLE_FACTOR);
+							&& readDouble(element, "threshold", ds, KEY_THRESHOLD)
+							&& readInteger(element, "downsamplingfactor", ds, KEY_DOWNSAMPLE_FACTOR);
 					if (!ok) {
 						logger.error(errorMessage);
 						logger.error("substituting default settings values.\n");
-						ds = provider.getDefaultSettings();
+						ds = settings.detectorFactory.getDefaultSettings();
 					}
 
 
@@ -706,7 +723,7 @@ public class TmXmlReader_v12 extends TmXmlReader {
 					logger.error("\nDetector settings class ("+segmenterSettingsClassName+") does not match detector requirements (" +
 							ds.getClass().getName()+"),\n");
 					logger.error("substituting default values.\n");
-					ds = provider.getDefaultSettings();
+					ds = settings.detectorFactory.getDefaultSettings();
 				}
 
 			} else if (segmenterSettingsClassName.equals("fiji.plugin.trackmate.segmentation.BasicSegmenterSettings"))  {
@@ -719,7 +736,7 @@ public class TmXmlReader_v12 extends TmXmlReader {
 					if (!ok) {
 						logger.error(errorMessage);
 						logger.error("substituting default settings values.\n");
-						ds = provider.getDefaultSettings();
+						ds = settings.detectorFactory.getDefaultSettings();
 					}
 
 				} else {
@@ -730,14 +747,14 @@ public class TmXmlReader_v12 extends TmXmlReader {
 					logger.error("\nDetector settings class ("+segmenterSettingsClassName+") does not match tracker requirements (" +
 							ds.getClass().getName()+"),\n");
 					logger.error("substituting default values.\n");
-					ds = provider.getDefaultSettings();
+					ds = settings.detectorFactory.getDefaultSettings();
 				}
 
 			} else {
 
 				logger.error("\nDetector settings class ("+segmenterSettingsClassName+") is unknown,\n");
 				logger.error("substituting default one.\n");
-				ds = provider.getDefaultSettings();
+				ds = settings.detectorFactory.getDefaultSettings();
 
 			}
 		}
@@ -770,33 +787,39 @@ public class TmXmlReader_v12 extends TmXmlReader {
 		if (null == trackerClassName) {
 			logger.error("\nTracker class is not present.\n");
 			logger.error("Substituting default.\n");
-			trackerKey = SimpleFastLAPTracker.TRACKER_KEY;
+			trackerKey = SimpleFastLAPTrackerFactory.TRACKER_KEY;
 
 		} else {
 
-			if (trackerClassName.equals("fiji.plugin.trackmate.tracking.SimpleFastLAPTracker") ||
-					trackerClassName.equals("fiji.plugin.trackmate.tracking.SimpleLAPTracker")) {
-				trackerKey = SimpleFastLAPTracker.TRACKER_KEY; // convert to simple fast version
-
-			} else if (trackerClassName.equals("fiji.plugin.trackmate.tracking.FastLAPTracker") ||
-					trackerClassName.equals("fiji.plugin.trackmate.tracking.LAPTracker")) {
-				trackerKey = FastLAPTracker.TRACKER_KEY; // convert to fast version
-
-			} else if (trackerClassName.equals("fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTracker")) {
-				trackerKey = NearestNeighborTracker.TRACKER_KEY;
-
-			} else {
-				logger.error("\nUnknown tracker: "+trackerClassName+".\n");
-				logger.error("Substituting default.\n");
-				trackerKey = SimpleFastLAPTracker.TRACKER_KEY;
+			if ( trackerClassName.equals( "fiji.plugin.trackmate.tracking.SimpleFastLAPTracker" ) || trackerClassName.equals( "fiji.plugin.trackmate.tracking.SimpleLAPTracker" ) )
+			{
+				// convert to simple fast version
+				trackerKey = SimpleFastLAPTrackerFactory.TRACKER_KEY;
+			}
+			else if ( trackerClassName.equals( "fiji.plugin.trackmate.tracking.FastLAPTracker" ) || trackerClassName.equals( "fiji.plugin.trackmate.tracking.LAPTracker" ) )
+			{
+				// convert to fast version
+				trackerKey = FastLAPTrackerFactory.TRACKER_KEY;
+			}
+			else if ( trackerClassName.equals( "fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTracker" ) )
+			{
+				trackerKey = NearestNeighborTrackerFactory.TRACKER_KEY;
+			}
+			else
+			{
+				logger.error( "\nUnknown tracker: " + trackerClassName + ".\n" );
+				logger.error( "Substituting default.\n" );
+				trackerKey = SimpleFastLAPTrackerFactory.TRACKER_KEY;
 			}
 		}
-		final boolean ok = provider.select(trackerKey);
-		if (!ok) {
-			logger.error(provider.getErrorMessage());
+		SpotTrackerFactory factory = provider.getFactory( trackerKey );
+		if ( null == factory )
+		{
+			logger.error( "\nUnknown tracker: " + trackerClassName + ".\n" );
 			logger.error("Substituting default tracker.\n");
+			factory = new SimpleFastLAPTrackerFactory();
 		}
-		settings.tracker = provider.getTracker();
+		settings.trackerFactory = factory;
 
 		// Deal with tracker settings
 		{
@@ -808,15 +831,15 @@ public class TmXmlReader_v12 extends TmXmlReader {
 
 				logger.error("\nTracker settings class is not present.\n");
 				logger.error("Substituting default one.\n");
-				ts = provider.getDefaultSettings();
+				ts = factory.getDefaultSettings();
 
 			} else {
 
 				// All LAP trackers
 				if (trackerSettingsClassName.equals("fiji.plugin.trackmate.tracking.LAPTrackerSettings"))  {
 
-					if (trackerKey.equals(SimpleFastLAPTracker.TRACKER_KEY)
-							|| trackerKey.equals(FastLAPTracker.TRACKER_KEY)) {
+					if ( trackerKey.equals( SimpleFastLAPTrackerFactory.TRACKER_KEY ) || trackerKey.equals( FastLAPTrackerFactory.TRACKER_KEY ) )
+					{
 
 						/*
 						 *  Read
@@ -890,7 +913,8 @@ public class TmXmlReader_v12 extends TmXmlReader {
 
 				} else if (trackerSettingsClassName.equals("fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTrackerSettings"))  {
 
-					if (trackerKey.equals(NearestNeighborTracker.TRACKER_KEY)) {
+					if ( trackerKey.equals( NearestNeighborTrackerFactory.TRACKER_KEY ) )
+					{
 
 						// The saved class matched, we can updated the settings created above with the file content
 						final double maxDist = readDoubleAttribute(element, MAX_LINKING_DISTANCE_ATTRIBUTE, Logger.VOID_LOGGER);
@@ -924,8 +948,9 @@ public class TmXmlReader_v12 extends TmXmlReader {
 	 */
 	private SpotCollection getAllSpots() {
 		final Element spotCollection = root.getChild(SPOT_COLLECTION_ELEMENT_KEY_v12);
-		if (null == spotCollection)
+		if (null == spotCollection) {
 			return null;
+		}
 
 		// Retrieve children elements for each frame
 		final List<Element> frameContent = spotCollection.getChildren(SPOT_FRAME_COLLECTION_ELEMENT_KEY_v12);
@@ -972,8 +997,9 @@ public class TmXmlReader_v12 extends TmXmlReader {
 	 */
 	private Map<Integer, Set<Integer>>  getFilteredSpotsIDs()  {
 		final Element selectedSpotCollection = root.getChild(FILTERED_SPOT_ELEMENT_KEY_v12);
-		if (null == selectedSpotCollection)
+		if (null == selectedSpotCollection) {
 			return null;
+		}
 
 		final List<Element> frameContent = selectedSpotCollection.getChildren(FILTERED_SPOT_COLLECTION_ELEMENT_KEY_v12);
 		final Map<Integer, Set<Integer>> visibleIDs = new HashMap<Integer, Set<Integer>>(frameContent.size());
@@ -1000,8 +1026,9 @@ public class TmXmlReader_v12 extends TmXmlReader {
 	 */
 	private Set<Integer> readFilteredTrackIDs() {
 		final Element filteredTracksElement = root.getChild(FILTERED_TRACK_ELEMENT_KEY_v12);
-		if (null == filteredTracksElement)
+		if (null == filteredTracksElement) {
 			return null;
+		}
 
 		// Work because the track splitting from the graph is deterministic
 		final List<Element> elements = filteredTracksElement.getChildren(TRACK_ID_ELEMENT_KEY_v12);
@@ -1017,14 +1044,18 @@ public class TmXmlReader_v12 extends TmXmlReader {
 
 	private ImagePlus getImage()  {
 		final Element imageInfoElement = root.getChild(IMAGE_ELEMENT_KEY_v12);
-		if (null == imageInfoElement)
+		if (null == imageInfoElement) {
 			return null;
+		}
 		final String filename = imageInfoElement.getAttributeValue(IMAGE_FILENAME_v12_ATTRIBUTE_NAME_v12);
 		String folder   = imageInfoElement.getAttributeValue(IMAGE_FOLDER_ATTRIBUTE_NAME_v12);
-		if (null == filename || filename.isEmpty())
+		if (null == filename || filename.isEmpty()) {
 			return null;
+		}
 		if (null == folder || folder.isEmpty())
+		{
 			folder = file.getParent(); // it is a relative path, then
+		}
 		File imageFile = new File(folder, filename);
 		if (!imageFile.exists() || !imageFile.canRead()) {
 			// Could not find it to the absolute path. Then we look for the same path of the xml file
@@ -1047,7 +1078,9 @@ public class TmXmlReader_v12 extends TmXmlReader {
 
 		String name = spotEl.getAttributeValue(SPOT_NAME_v12_ATTRIBUTE_NAME_v12);
 		if (null == name || name.equals(""))
+		{
 			name = "ID"+ID;
+		}
 		spot.setName(name);
 		atts.remove(SPOT_NAME_v12_ATTRIBUTE_NAME_v12);
 
@@ -1068,7 +1101,7 @@ public class TmXmlReader_v12 extends TmXmlReader {
 			return false;
 		}
 		try {
-			final double val = Double.parseDouble(str);
+			final double val = NumberParser.parseDouble(str);
 			settings.put(mapKey, val);
 		} catch (final NumberFormatException nfe) {
 			errorMessage = "Could not read "+attName+" attribute as a double value. Got "+str+".";
@@ -1084,7 +1117,7 @@ public class TmXmlReader_v12 extends TmXmlReader {
 			return false;
 		}
 		try {
-			final int val = Integer.parseInt(str);
+			final int val = NumberParser.parseInteger(str);
 			settings.put(mapKey, val);
 		} catch (final NumberFormatException nfe) {
 			errorMessage = "Could not read "+attName+" attribute as an integer value. Got "+str+".";

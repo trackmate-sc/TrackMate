@@ -35,8 +35,8 @@ import fiji.plugin.trackmate.util.TMUtils;
  * <b>Required input:</b> A 2D or 3D time-lapse image with bright blobs.
  * </p>
  *
- * @author Nicholas Perry, Jean-Yves Tinevez - Institut Pasteur - July 2010 -
- *         2011 - 2012 - 2013
+ * @author Nicholas Perry, Jean-Yves Tinevez, Johannes Schindelin - Institut
+ *         Pasteur - July 2010 - 2011 - 2012 - 2013 - 2014
  *
  */
 public class TrackMate implements Benchmark, MultiThreaded, Algorithm
@@ -44,7 +44,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 
 	public static final String PLUGIN_NAME_STR = "TrackMate";
 
-	public static final String PLUGIN_NAME_VERSION = "2.2.0-SNAPSHOT";
+	public static final String PLUGIN_NAME_VERSION = "2.4.1-SNAPSHOT";
 
 	/**
 	 * The model this trackmate will shape.
@@ -249,9 +249,8 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 	{
 		final Logger logger = model.getLogger();
 		logger.log( "Starting tracking process.\n" );
-		final SpotTracker tracker = settings.tracker;
+		final SpotTracker tracker = settings.trackerFactory.create( model.getSpots(), settings.trackerSettings );
 		tracker.setLogger( logger );
-		tracker.setTarget( model.getSpots(), settings.trackerSettings );
 		if ( tracker.checkInput() && tracker.process() )
 		{
 			model.setTracks( tracker.getResult(), true );
@@ -355,8 +354,8 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 					continue;
 				}
 				nindex++;
-				intervalMin[ nindex ] = min[ d ];
-				intervalMax[ nindex ] = max[ d ];
+				intervalMin[ nindex ] = Math.max( 0l, min[ d ] );
+				intervalMax[ nindex ] = Math.min( img.max( d ), max[ d ] );
 			}
 		}
 		else
@@ -378,7 +377,16 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 		// To translate spots, later
 		final double[] calibration = TMUtils.getSpatialCalibration( settings.imp );
 
-		final Thread[] threads = SimpleMultiThreading.newThreads( numThreads );
+		/*
+		 * Fine tune multi-threading: If we have 10 threads and 15 frames to
+		 * process, we process 10 frames at once, and allocate 1 thread per
+		 * frame. But if we have 10 threads and 2 frames, we process the 2
+		 * frames at once, and allocate 5 threads per frame if we can.
+		 */
+		final int nSimultaneousFrames = Math.min( numThreads, numFrames );
+		final int threadsPerFrame = Math.max( 1, numThreads / nSimultaneousFrames );
+
+		final Thread[] threads = SimpleMultiThreading.newThreads( nSimultaneousFrames );
 		final AtomicBoolean ok = new AtomicBoolean( true );
 
 		// Prepare the thread array
@@ -412,6 +420,11 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 						{
 							// Yield detector for target frame
 							final SpotDetector< ? > detector = factory.getDetector( interval, frame );
+							if ( detector instanceof MultiThreaded )
+							{
+								final MultiThreaded md = ( MultiThreaded ) detector;
+								md.setNumThreads( threadsPerFrame );
+							}
 
 							if ( wasInterrupted() )
 								return;

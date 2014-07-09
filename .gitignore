@@ -6,5 +6,8 @@
 /.project
 /.settings/
 
+## vim ##
+*.swp
+
 ## Interactive tests ##
 /samples/

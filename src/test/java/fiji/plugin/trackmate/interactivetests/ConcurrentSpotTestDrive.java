@@ -38,9 +38,8 @@ public class ConcurrentSpotTestDrive {
 		final Settings settings = new Settings();
 		settings.setFrom(imp);
 		final DetectorProvider provider = new DetectorProvider();
-		provider.select(LogDetectorFactory.DETECTOR_KEY);
-		settings.detectorFactory = provider.getDetectorFactory();
-		settings.detectorSettings = provider.getDefaultSettings();
+		settings.detectorFactory = provider.getFactory( LogDetectorFactory.DETECTOR_KEY );
+		settings.detectorSettings = settings.detectorFactory.getDefaultSettings();
 
 		// Execute detection
 		final TrackMate trackmate = new TrackMate(model, settings);

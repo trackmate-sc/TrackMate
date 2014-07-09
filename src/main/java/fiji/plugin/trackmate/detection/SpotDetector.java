@@ -17,9 +17,9 @@ import fiji.plugin.trackmate.TrackMate;
  * Indeed, the {@link TrackMate} trackmate generates one instance of the
  * concrete implementation per thread, to process multiple frames
  * simultaneously.
- *
+ * 
  * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> 2010 - 2012
- *
+ * 
  */
 public interface SpotDetector< T extends RealType< T > & NativeType< T >> extends OutputAlgorithm< List< Spot >>, Benchmark
 {

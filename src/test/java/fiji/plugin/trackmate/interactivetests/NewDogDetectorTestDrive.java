@@ -51,7 +51,11 @@ public class NewDogDetectorTestDrive {
 
 		final double[] sigma1 = new double[] { 3, 6, 3 };
 		final double[] sigma2 = new double[] { 3.1, 6.2, 3.1 };
-		DifferenceOfGaussian.DoG( sigma1, sigma2, Views.extendZero( img ), dog, 1 );
+//		TODO: The "numThreads"-version of DifferenceOfGaussian.DoG should really exist in imglib. After it does, replace the following lines by
+//		DifferenceOfGaussian.DoG( sigma1, sigma2, Views.extendZero( img ), dog, 1 );
+		final ExecutorService service = Executors.newFixedThreadPool( 1 );
+		DifferenceOfGaussian.DoG( sigma1, sigma2, Views.extendZero( img ), dog, service );
+		service.shutdown();
 
 		ImageJ.main( args );
 		ImageJFunctions.show( dog );
@@ -139,7 +143,11 @@ public class NewDogDetectorTestDrive {
 					val.setReal(minPeakValue * (sigma2 / sigma1 - 1.0));
 					final IntervalView<FloatType> dogWithBorder = Views.interval(Views.extendZero(dog), Intervals.expand(dog, 1));
 					final LocalNeighborhoodCheck<Point, FloatType> localNeighborhoodCheck = new LocalExtrema.MaximumCheck<FloatType>(val);
-					final ArrayList<Point> peaks = LocalExtrema.findLocalExtrema(dogWithBorder, localNeighborhoodCheck, nSplits);
+//					TODO: The "numThreads"-version of LocalExtrema.findLocalExtrema should really exist in imglib. After it does, replace the following lines by
+//					final ArrayList<Point> peaks = LocalExtrema.findLocalExtrema(dogWithBorder, localNeighborhoodCheck, nSplits);
+					final ExecutorService service = Executors.newFixedThreadPool(nSplits);
+					final ArrayList<Point> peaks = LocalExtrema.findLocalExtrema(dogWithBorder, localNeighborhoodCheck, service);
+					service.shutdown();
 					final long t2 = System.currentTimeMillis();
 					//					System.out.println(ft + ": Maxima found in " + (t2 - t1) + " ms. " + peaks.size() + " maxima found.");
 
@@ -223,7 +231,11 @@ public class NewDogDetectorTestDrive {
 					val.setReal(minPeakValue * (sigma2 / sigma1 - 1.0));
 					final IntervalView<FloatType> dogWithBorder = Views.interval(Views.extendZero(dog), Intervals.expand(dog, 1));
 					final LocalNeighborhoodCheck<Point, FloatType> localNeighborhoodCheck = new LocalExtrema.MaximumCheck<FloatType>(val);
-					final ArrayList<Point> peaks = LocalExtrema.findLocalExtrema(dogWithBorder, localNeighborhoodCheck, 1);
+//					TODO: The "numThreads"-version of LocalExtrema.findLocalExtrema should really exist in imglib. After it does, replace the following lines by
+//					final ArrayList<Point> peaks = LocalExtrema.findLocalExtrema(dogWithBorder, localNeighborhoodCheck, 1);
+					final ExecutorService service = Executors.newFixedThreadPool(1);
+					final ArrayList<Point> peaks = LocalExtrema.findLocalExtrema(dogWithBorder, localNeighborhoodCheck, service);
+					service.shutdown();
 					final long t2 = System.currentTimeMillis();
 					//					System.out.println(ft + ": Maxima found in " + (t2 - t1) + " ms. " + peaks.size() + " maxima found.");
 

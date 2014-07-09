@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate;
 
+import static fiji.plugin.trackmate.SpotCollection.VISIBLITY;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -369,7 +371,7 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable
 
 	/**
 	 * Returns the square distance from this spot to the specified spot.
-	 * 
+	 *
 	 * @param s
 	 *            the spot to compute the square distance to.
 	 * @return the square distance as a <code>double</code>.
@@ -437,6 +439,9 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable
 	/** The 7 privileged spot feature dimensions. */
 	public final static Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 7 );
 
+	/** The 7 privileged spot feature isInt flags. */
+	public final static Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 7 );
+
 	static
 	{
 		FEATURES.add( QUALITY );
@@ -446,6 +451,7 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable
 		FEATURES.add( POSITION_T );
 		FEATURES.add( FRAME );
 		FEATURES.add( RADIUS );
+		FEATURES.add( SpotCollection.VISIBLITY );
 
 		FEATURE_NAMES.put( POSITION_X, "X" );
 		FEATURE_NAMES.put( POSITION_Y, "Y" );
@@ -454,6 +460,7 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable
 		FEATURE_NAMES.put( FRAME, "Frame" );
 		FEATURE_NAMES.put( RADIUS, "Radius" );
 		FEATURE_NAMES.put( QUALITY, "Quality" );
+		FEATURE_NAMES.put( VISIBLITY, "Visibility" );
 
 		FEATURE_SHORT_NAMES.put( POSITION_X, "X" );
 		FEATURE_SHORT_NAMES.put( POSITION_Y, "Y" );
@@ -462,6 +469,7 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable
 		FEATURE_SHORT_NAMES.put( FRAME, "Frame" );
 		FEATURE_SHORT_NAMES.put( RADIUS, "R" );
 		FEATURE_SHORT_NAMES.put( QUALITY, "Quality" );
+		FEATURE_SHORT_NAMES.put( VISIBLITY, "Visibility" );
 
 		FEATURE_DIMENSIONS.put( POSITION_X, Dimension.POSITION );
 		FEATURE_DIMENSIONS.put( POSITION_Y, Dimension.POSITION );
@@ -470,6 +478,16 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable
 		FEATURE_DIMENSIONS.put( FRAME, Dimension.NONE );
 		FEATURE_DIMENSIONS.put( RADIUS, Dimension.LENGTH );
 		FEATURE_DIMENSIONS.put( QUALITY, Dimension.QUALITY );
+		FEATURE_DIMENSIONS.put( VISIBLITY, Dimension.NONE );
+
+		IS_INT.put( POSITION_X, Boolean.FALSE );
+		IS_INT.put( POSITION_Y, Boolean.FALSE );
+		IS_INT.put( POSITION_Z, Boolean.FALSE );
+		IS_INT.put( POSITION_T, Boolean.FALSE );
+		IS_INT.put( FRAME, Boolean.TRUE );
+		IS_INT.put( RADIUS, Boolean.FALSE );
+		IS_INT.put( QUALITY, Boolean.FALSE );
+		IS_INT.put( VISIBLITY, Boolean.TRUE );
 	}
 
 	@Override

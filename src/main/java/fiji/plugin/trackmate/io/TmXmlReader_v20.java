@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.io;
 
+import static fiji.plugin.trackmate.detection.DetectorKeys.XML_ATTRIBUTE_DETECTOR_NAME;
 import static fiji.plugin.trackmate.io.IOUtils.readBooleanAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.readIntAttribute;
@@ -49,6 +50,7 @@ import static fiji.plugin.trackmate.io.TmXmlKeys_v20.SPOT_ID_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys_v20.SPOT_NAME_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.io.TmXmlKeys_v20.TRACKER_SETTINGS_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys_v20.TRACK_FILTER_COLLECTION_ELEMENT_KEY;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.XML_ATTRIBUTE_TRACKER_NAME;
 import ij.IJ;
 import ij.ImagePlus;
 
@@ -96,6 +98,7 @@ import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.providers.ViewProvider;
 import fiji.plugin.trackmate.tracking.SpotTracker;
+import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 
@@ -135,7 +138,7 @@ public class TmXmlReader_v20 extends TmXmlReader {
 	@Override
 	public Collection<TrackMateModelView> getViews(final ViewProvider provider, final Model model, final Settings settings, final SelectionModel selectionModel) {
 		final Collection<TrackMateModelView> views = new ArrayList<TrackMateModelView>(1);
-		final TrackMateModelView view = provider.getView(HyperStackDisplayer.NAME, model, settings, selectionModel);
+		final TrackMateModelView view = provider.getFactory( HyperStackDisplayer.KEY ).create( model, settings, selectionModel );
 		views.add(view);
 		return views;
 	}
@@ -181,20 +184,20 @@ public class TmXmlReader_v20 extends TmXmlReader {
 		// Feature declaration - has to be manual declaration
 		final FeatureModel fm = model.getFeatureModel();
 
-		fm.declareEdgeFeatures(Spot.FEATURES, Spot.FEATURE_NAMES, Spot.FEATURE_SHORT_NAMES, Spot.FEATURE_DIMENSIONS);
-		fm.declareSpotFeatures(SpotIntensityAnalyzerFactory.FEATURES, SpotIntensityAnalyzerFactory.FEATURE_NAMES, SpotIntensityAnalyzerFactory.FEATURE_SHORT_NAMES, SpotIntensityAnalyzerFactory.FEATURE_DIMENSIONS);
-		fm.declareSpotFeatures(SpotContrastAndSNRAnalyzerFactory.FEATURES, SpotContrastAndSNRAnalyzerFactory.FEATURE_NAMES, SpotContrastAndSNRAnalyzerFactory.FEATURE_SHORT_NAMES, SpotContrastAndSNRAnalyzerFactory.FEATURE_DIMENSIONS);
-		fm.declareSpotFeatures(SpotRadiusEstimatorFactory.FEATURES, SpotRadiusEstimatorFactory.FEATURE_NAMES, SpotRadiusEstimatorFactory.FEATURE_SHORT_NAMES, SpotRadiusEstimatorFactory.FEATURE_DIMENSIONS);
+		fm.declareEdgeFeatures( Spot.FEATURES, Spot.FEATURE_NAMES, Spot.FEATURE_SHORT_NAMES, Spot.FEATURE_DIMENSIONS, Spot.IS_INT );
+		fm.declareSpotFeatures( SpotIntensityAnalyzerFactory.FEATURES, SpotIntensityAnalyzerFactory.FEATURE_NAMES, SpotIntensityAnalyzerFactory.FEATURE_SHORT_NAMES, SpotIntensityAnalyzerFactory.FEATURE_DIMENSIONS, SpotIntensityAnalyzerFactory.IS_INT );
+		fm.declareSpotFeatures( SpotContrastAndSNRAnalyzerFactory.FEATURES, SpotContrastAndSNRAnalyzerFactory.FEATURE_NAMES, SpotContrastAndSNRAnalyzerFactory.FEATURE_SHORT_NAMES, SpotContrastAndSNRAnalyzerFactory.FEATURE_DIMENSIONS, SpotContrastAndSNRAnalyzerFactory.IS_INT );
+		fm.declareSpotFeatures( SpotRadiusEstimatorFactory.FEATURES, SpotRadiusEstimatorFactory.FEATURE_NAMES, SpotRadiusEstimatorFactory.FEATURE_SHORT_NAMES, SpotRadiusEstimatorFactory.FEATURE_DIMENSIONS, SpotRadiusEstimatorFactory.IS_INT );
 
-		fm.declareEdgeFeatures(EdgeTargetAnalyzer.FEATURES, EdgeTargetAnalyzer.FEATURE_NAMES, EdgeTargetAnalyzer.FEATURE_SHORT_NAMES, EdgeTargetAnalyzer.FEATURE_DIMENSIONS);
-		fm.declareEdgeFeatures(EdgeVelocityAnalyzer.FEATURES, EdgeVelocityAnalyzer.FEATURE_NAMES, EdgeVelocityAnalyzer.FEATURE_SHORT_NAMES, EdgeVelocityAnalyzer.FEATURE_DIMENSIONS);
-		fm.declareEdgeFeatures(EdgeTimeLocationAnalyzer.FEATURES, EdgeTimeLocationAnalyzer.FEATURE_NAMES, EdgeTimeLocationAnalyzer.FEATURE_SHORT_NAMES, EdgeTimeLocationAnalyzer.FEATURE_DIMENSIONS);
+		fm.declareEdgeFeatures( EdgeTargetAnalyzer.FEATURES, EdgeTargetAnalyzer.FEATURE_NAMES, EdgeTargetAnalyzer.FEATURE_SHORT_NAMES, EdgeTargetAnalyzer.FEATURE_DIMENSIONS, EdgeTargetAnalyzer.IS_INT );
+		fm.declareEdgeFeatures( EdgeVelocityAnalyzer.FEATURES, EdgeVelocityAnalyzer.FEATURE_NAMES, EdgeVelocityAnalyzer.FEATURE_SHORT_NAMES, EdgeVelocityAnalyzer.FEATURE_DIMENSIONS, EdgeVelocityAnalyzer.IS_INT );
+		fm.declareEdgeFeatures( EdgeTimeLocationAnalyzer.FEATURES, EdgeTimeLocationAnalyzer.FEATURE_NAMES, EdgeTimeLocationAnalyzer.FEATURE_SHORT_NAMES, EdgeTimeLocationAnalyzer.FEATURE_DIMENSIONS, EdgeTimeLocationAnalyzer.IS_INT );
 
-		fm.declareTrackFeatures(TrackIndexAnalyzer.FEATURES, TrackIndexAnalyzer.FEATURE_NAMES, TrackIndexAnalyzer.FEATURE_SHORT_NAMES, TrackIndexAnalyzer.FEATURE_DIMENSIONS);
-		fm.declareTrackFeatures(TrackDurationAnalyzer.FEATURES, TrackDurationAnalyzer.FEATURE_NAMES, TrackDurationAnalyzer.FEATURE_SHORT_NAMES, TrackDurationAnalyzer.FEATURE_DIMENSIONS);
-		fm.declareTrackFeatures(TrackBranchingAnalyzer.FEATURES, TrackBranchingAnalyzer.FEATURE_NAMES, TrackBranchingAnalyzer.FEATURE_SHORT_NAMES, TrackBranchingAnalyzer.FEATURE_DIMENSIONS);
-		fm.declareTrackFeatures(TrackLocationAnalyzer.FEATURES, TrackLocationAnalyzer.FEATURE_NAMES, TrackLocationAnalyzer.FEATURE_SHORT_NAMES, TrackLocationAnalyzer.FEATURE_DIMENSIONS);
-		fm.declareTrackFeatures(TrackSpeedStatisticsAnalyzer.FEATURES, TrackSpeedStatisticsAnalyzer.FEATURE_NAMES, TrackSpeedStatisticsAnalyzer.FEATURE_SHORT_NAMES, TrackSpeedStatisticsAnalyzer.FEATURE_DIMENSIONS);
+		fm.declareTrackFeatures( TrackIndexAnalyzer.FEATURES, TrackIndexAnalyzer.FEATURE_NAMES, TrackIndexAnalyzer.FEATURE_SHORT_NAMES, TrackIndexAnalyzer.FEATURE_DIMENSIONS, TrackIndexAnalyzer.IS_INT );
+		fm.declareTrackFeatures( TrackDurationAnalyzer.FEATURES, TrackDurationAnalyzer.FEATURE_NAMES, TrackDurationAnalyzer.FEATURE_SHORT_NAMES, TrackDurationAnalyzer.FEATURE_DIMENSIONS, TrackDurationAnalyzer.IS_INT );
+		fm.declareTrackFeatures( TrackBranchingAnalyzer.FEATURES, TrackBranchingAnalyzer.FEATURE_NAMES, TrackBranchingAnalyzer.FEATURE_SHORT_NAMES, TrackBranchingAnalyzer.FEATURE_DIMENSIONS, TrackBranchingAnalyzer.IS_INT );
+		fm.declareTrackFeatures( TrackLocationAnalyzer.FEATURES, TrackLocationAnalyzer.FEATURE_NAMES, TrackLocationAnalyzer.FEATURE_SHORT_NAMES, TrackLocationAnalyzer.FEATURE_DIMENSIONS, TrackLocationAnalyzer.IS_INT );
+		fm.declareTrackFeatures( TrackSpeedStatisticsAnalyzer.FEATURES, TrackSpeedStatisticsAnalyzer.FEATURE_NAMES, TrackSpeedStatisticsAnalyzer.FEATURE_SHORT_NAMES, TrackSpeedStatisticsAnalyzer.FEATURE_DIMENSIONS, TrackSpeedStatisticsAnalyzer.IS_INT );
 
 		// Spots - we can find them under the root element
 		final SpotCollection spots = getAllSpots();
@@ -238,23 +241,23 @@ public class TmXmlReader_v20 extends TmXmlReader {
 
 		// Analyzers - we add them all
 		settings.clearSpotAnalyzerFactories();
-		final List<String> spotAnalyzerKeys = spotAnalyzerProvider.getAvailableFeatureAnalyzers();
+		final List< String > spotAnalyzerKeys = spotAnalyzerProvider.getKeys();
 		for (final String key : spotAnalyzerKeys) {
-			final SpotAnalyzerFactory<?> spotFeatureAnalyzer = spotAnalyzerProvider.getFeatureAnalyzer(key);
+			final SpotAnalyzerFactory<?> spotFeatureAnalyzer = spotAnalyzerProvider.getFactory(key);
 			settings.addSpotAnalyzerFactory(spotFeatureAnalyzer);
 		}
 
 		settings.clearEdgeAnalyzers();
-		final List<String> edgeAnalyzerKeys = edgeAnalyzerProvider.getAvailableFeatureAnalyzers();
+		final List<String> edgeAnalyzerKeys = edgeAnalyzerProvider.getKeys();
 		for (final String key : edgeAnalyzerKeys) {
-			final EdgeAnalyzer edgeAnalyzer = edgeAnalyzerProvider.getFeatureAnalyzer(key);
+			final EdgeAnalyzer edgeAnalyzer = edgeAnalyzerProvider.getFactory(key);
 			settings.addEdgeAnalyzer(edgeAnalyzer);
 		}
 
 		settings.clearTrackAnalyzers();
-		final List<String> trackAnalyzerKeys = trackAnalyzerProvider.getAvailableFeatureAnalyzers();
+		final List<String> trackAnalyzerKeys = trackAnalyzerProvider.getKeys();
 		for (final String key : trackAnalyzerKeys) {
-			final TrackAnalyzer trackAnalyzer = trackAnalyzerProvider.getFeatureAnalyzer(key);
+			final TrackAnalyzer trackAnalyzer = trackAnalyzerProvider.getFactory(key);
 			settings.addTrackAnalyzer(trackAnalyzer);
 		}
 
@@ -330,13 +333,18 @@ public class TmXmlReader_v20 extends TmXmlReader {
 	private ImagePlus getImage() {
 		final Element imageInfoElement = root.getChild(IMAGE_ELEMENT_KEY);
 		if (null == imageInfoElement)
+		{
 			return null; // value will still be null
+		}
 		final String filename = imageInfoElement.getAttributeValue(IMAGE_FILENAME_ATTRIBUTE_NAME);
 		String folder = imageInfoElement.getAttributeValue(IMAGE_FOLDER_ATTRIBUTE_NAME);
-		if (null == filename || filename.isEmpty())
+		if (null == filename || filename.isEmpty()) {
 			return null;
+		}
 		if (null == folder || folder.isEmpty())
+		{
 			folder = file.getParent(); // it is a relative path, then
+		}
 		File imageFile = new File(folder, filename);
 		if (!imageFile.exists() || !imageFile.canRead()) {
 			// Could not find it to the absolute path. Then we look for the same path of the xml file
@@ -357,8 +365,9 @@ public class TmXmlReader_v20 extends TmXmlReader {
 	private FeatureFilter getInitialFilter() {
 
 		final Element itEl = root.getChild(INITIAL_SPOT_FILTER_ELEMENT_KEY);
-		if (null == itEl)
+		if (null == itEl) {
 			return null;
+		}
 		final String feature = itEl.getAttributeValue(FILTER_FEATURE_ATTRIBUTE_NAME);
 		final Double value = readDoubleAttribute(itEl, FILTER_VALUE_ATTRIBUTE_NAME, logger);
 		final boolean isAbove = readBooleanAttribute(itEl, FILTER_ABOVE_ATTRIBUTE_NAME, logger);
@@ -375,8 +384,9 @@ public class TmXmlReader_v20 extends TmXmlReader {
 
 		final List<FeatureFilter> featureThresholds = new ArrayList<FeatureFilter>();
 		final Element ftCollectionEl = root.getChild(SPOT_FILTER_COLLECTION_ELEMENT_KEY);
-		if (null == ftCollectionEl)
+		if (null == ftCollectionEl) {
 			return null;
+		}
 		final List<Element> ftEls = ftCollectionEl.getChildren(FILTER_ELEMENT_KEY);
 		for (final Element ftEl : ftEls) {
 			final String feature = ftEl.getAttributeValue(FILTER_FEATURE_ATTRIBUTE_NAME);
@@ -396,8 +406,9 @@ public class TmXmlReader_v20 extends TmXmlReader {
 	private List<FeatureFilter> getTrackFeatureFilters() {
 		final List<FeatureFilter> featureThresholds = new ArrayList<FeatureFilter>();
 		final Element ftCollectionEl = root.getChild(TRACK_FILTER_COLLECTION_ELEMENT_KEY);
-		if (null == ftCollectionEl)
+		if (null == ftCollectionEl) {
 			return null;
+		}
 		final List<Element> ftEls = ftCollectionEl.getChildren(FILTER_ELEMENT_KEY);
 		for (final Element ftEl : ftEls) {
 			final String feature = ftEl.getAttributeValue(FILTER_FEATURE_ATTRIBUTE_NAME);
@@ -464,17 +475,32 @@ public class TmXmlReader_v20 extends TmXmlReader {
 			return;
 		}
 
-		final Map<String, Object> ds = new HashMap<String, Object>();
-		// All the hard work is delegated to the provider.
-		final boolean ok = provider.unmarshall(element, ds);
+		// Get the detector key
+		final String detectorKey = element.getAttributeValue( XML_ATTRIBUTE_DETECTOR_NAME );
+		if ( null == detectorKey )
+		{
+			logger.error( "Could not find the detector element in file.\n" );
+			return;
+		}
+
+		final SpotDetectorFactory< ? > factory = provider.getFactory( detectorKey );
+		if (null == factory) {
+			logger.error( "The detector identified by the key " + detectorKey + " is unknown to TrackMate.\n" );
+			ok = false;
+			return;
+		}
+
+		final Map< String, Object > ds = new HashMap< String, Object >();
+		ok = factory.unmarshall( element, ds );
 
 		if (!ok) {
-			logger.error(provider.getErrorMessage());
+			logger.error( factory.getErrorMessage() );
+			this.ok = false;
 			return;
 		}
 
 		settings.detectorSettings = ds;
-		settings.detectorFactory = provider.getDetectorFactory();
+		settings.detectorFactory = factory;
 	}
 
 	/**
@@ -501,18 +527,36 @@ public class TmXmlReader_v20 extends TmXmlReader {
 			return;
 		}
 
+		// Get the tracker key
+		final String trackerKey = element.getAttributeValue( XML_ATTRIBUTE_TRACKER_NAME );
+		if ( null == trackerKey )
+		{
+			logger.error( "Could not find the tracker element in file.\n" );
+			return;
+		}
+
+		final SpotTrackerFactory factory = provider.getFactory( trackerKey );
+		if ( null == factory )
+		{
+			logger.error( "The tracker identified by the key " + trackerKey + " is unknown to TrackMate.\n" );
+			this.ok = false;
+			return;
+		}
+
+		// All the hard work is delegated to the factory.
 		final Map<String, Object> ds = new HashMap<String, Object>();
-		// All the hard work is delegated to the provider.
-		final boolean ok = provider.unmarshall(element, ds);
+		final boolean ok = factory.unmarshall( element, ds );
 
 		if (!ok) {
-			logger.error(provider.getErrorMessage());
+			logger.error( factory.getErrorMessage() );
+			this.ok = false;
 			return;
 		}
 
 		settings.trackerSettings = ds;
-		settings.tracker = provider.getTracker();
+		settings.trackerFactory = factory;
 	}
+
 
 	/**
 	 * Read the list of all spots stored in this file.
@@ -535,8 +579,9 @@ public class TmXmlReader_v20 extends TmXmlReader {
 	private SpotCollection getAllSpots() {
 		// Root element for collection
 		final Element spotCollection = root.getChild(SPOT_COLLECTION_ELEMENT_KEY);
-		if (null == spotCollection)
+		if (null == spotCollection) {
 			return null;
+		}
 
 		// Retrieve children elements for each frame
 		final List<Element> frameContent = spotCollection.getChildren(SPOT_FRAME_COLLECTION_ELEMENT_KEY);
@@ -579,11 +624,14 @@ public class TmXmlReader_v20 extends TmXmlReader {
 	 */
 	private void setSpotsVisibility() {
 		final Element selectedSpotCollection = root.getChild(FILTERED_SPOT_ELEMENT_KEY);
-		if (null == selectedSpotCollection)
+		if (null == selectedSpotCollection) {
 			return;
+		}
 
 		if (null == cache)
+		{
 			getAllSpots(); // build it if it's not here
+		}
 
 		final List<Element> frameContent = selectedSpotCollection.getChildren(FILTERED_SPOT_COLLECTION_ELEMENT_KEY);
 
@@ -608,7 +656,9 @@ public class TmXmlReader_v20 extends TmXmlReader {
 
 		String name = spotEl.getAttributeValue(SPOT_NAME_ATTRIBUTE_NAME);
 		if (null == name || name.equals(""))
+		{
 			name = "ID" + ID;
+		}
 		spot.setName(name);
 		atts.remove(SPOT_NAME_ATTRIBUTE_NAME);
 
