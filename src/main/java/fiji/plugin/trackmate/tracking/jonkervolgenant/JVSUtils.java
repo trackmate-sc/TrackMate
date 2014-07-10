@@ -149,4 +149,41 @@ public class JVSUtils
 		return str.toString();
 	}
 
+	public static long elegantPair( final int x, final int y )
+	{
+		final long lx = x;
+		final long ly = y;
+		if ( lx >= ly )
+		{
+			return lx * lx + lx + ly;
+		}
+		else
+		{
+			return ly * ly + lx;
+		}
+	}
+
+	public static final int[] elegantReverse( final long z )
+	{
+		final int[] pair = new int[ 2 ];
+		final double preciseZ = Math.sqrt( z );
+		long floor = ( long ) Math.floor( preciseZ );
+		if ( floor * floor > z )
+		{
+			floor--;
+		}
+		final long t = z - floor * floor;
+		if ( t < floor )
+		{
+			pair[ 0 ] = ( int ) t;
+			pair[ 1 ] = ( int ) floor;
+		}
+		else
+		{
+			pair[ 0 ] = ( int ) floor;
+			pair[ 1 ] = ( int ) t - ( int ) floor;
+		}
+		return pair;
+	}
+
 }
