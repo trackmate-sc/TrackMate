@@ -302,6 +302,16 @@ public class LAPSparseStructure< K, L >
 		return val;
 	}
 
+	public int getNRows()
+	{
+		return nRows;
+	}
+
+	public int getNCols()
+	{
+		return nCols;
+	}
+
 	@Override
 	public String toString()
 	{
