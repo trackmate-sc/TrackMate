@@ -149,8 +149,20 @@ public class JVSUtils
 		return str.toString();
 	}
 
-	public static long elegantPair( final int x, final int y )
+	/**
+	 * Returns the elegant pairing of Matthew Szudzik. Uniquely associates a
+	 * <code>long</code> integer to two <code>int</code> non-negative integers.
+	 * 
+	 * @param x
+	 *            the first integer. Must be non-negative.
+	 * @param y
+	 *            the second integer. Must be non-negative.
+	 * @return a <code>long</code> uniquely associated to the two integers.
+	 * @see http://szudzik.com/ElegantPairing.pdf
+	 */
+	public static final long szudzikPair( final int x, final int y )
 	{
+		assert x >= 0 && y >= 0;
 		final long lx = x;
 		final long ly = y;
 		if ( lx >= ly )
@@ -163,7 +175,17 @@ public class JVSUtils
 		}
 	}
 
-	public static final int[] elegantReverse( final long z )
+	/**
+	 * Retrieves the two <code>int</code> integers associated to the specified
+	 * <code>long</code>, following the elegant pairing of Matthew Szudzik.
+	 * 
+	 * @param z
+	 *            the <code>long</code> paired integer.
+	 * @return a <code>int</code> array of 2 elements containing the paired
+	 *         integers.
+	 * @see http://szudzik.com/ElegantPairing.pdf
+	 */
+	public static final int[] szudzikUnpair( final long z )
 	{
 		final int[] pair = new int[ 2 ];
 		final double preciseZ = Math.sqrt( z );
@@ -185,5 +207,6 @@ public class JVSUtils
 		}
 		return pair;
 	}
+
 
 }
