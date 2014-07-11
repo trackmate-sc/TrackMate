@@ -22,7 +22,11 @@ public class JonkerVolgenantAlgorithmSparse< K, L >
 	public int[][] computeAssignments( final List< K > sources, final List< L > targets, final List< Double > costs )
 	{
 		final LAPSparseStructure< K, L > CM = new LAPSparseStructure< K, L >( sources, targets, costs );
+		return computeAssignments( CM );
+	}
 
+	public int[][] computeAssignments( final LAPSparseStructure< K, L > CM )
+	{
 		final int nRows = CM.getNRows();
 		final int nCols = CM.getNCols();
 		final double[] v = new double[ nCols ];
@@ -286,13 +290,23 @@ public class JonkerVolgenantAlgorithmSparse< K, L >
 
 	public static void main( final String[] args )
 	{
-		final List< String > sources = Arrays.asList( new String[] { "John", "Paul", "Ringo", "George", "Paul", "Paul", "John", "Ringo", "George" } );
-		final List< String > targets = Arrays.asList( new String[] { "Guitar", "Bass", "Drums", "Guitar", "Keyboard", "Voice", "Voice", "Voice", "Voice" } );
-		final List< Double > costs = Arrays.asList( new Double[] { 1.0, 1.0, 1.0, 1.0, 2.0, 2.0, 1.5, 3.0, 4.0 } );
+		// final List< String > sources = Arrays.asList( new String[] { "John",
+		// "Paul", "Ringo", "George", "Paul", "Paul", "John", "Ringo", "George"
+		// } );
+		// final List< String > targets = Arrays.asList( new String[] {
+		// "Guitar", "Bass", "Drums", "Guitar", "Keyboard", "Voice", "Voice",
+		// "Voice", "Voice" } );
+		// final List< Double > costs = Arrays.asList( new Double[] { 1.0, 1.0,
+		// 1.0, 1.0, 2.0, 2.0, 1.5, 3.0, 4.0 } );
+
+		final List< String > sources = Arrays.asList( new String[] { "John", "John", "Paul", "Paul", "Paul", "Paul", "George", "George", "Ringo", "Ringo" } );
+		final List< String > targets = Arrays.asList( new String[] { "Guitar", "Voice", "Piano", "Guitar", "Bass", "Voice", "Voice", "Guitar", "Drums", "Voice" } );
+		final List< Double > costs = Arrays.asList( new Double[] { 5d, 4d, 3d, 4d, 4d, 3d, 4d, 2d, 3d, 5d } );
+
 		final LAPSparseStructure< String, String > sparse = new LAPSparseStructure< String, String >( sources, targets, costs );
 		System.out.println( sparse );
 
-		final JonkerVolgenantAlgorithmSparse algo = new JonkerVolgenantAlgorithmSparse< String, String >();
+		final JonkerVolgenantAlgorithmSparse< String, String > algo = new JonkerVolgenantAlgorithmSparse< String, String >();
 		final int[][] result = algo.computeAssignments( sources, targets, costs );
 		for ( final int[] is : result )
 		{
