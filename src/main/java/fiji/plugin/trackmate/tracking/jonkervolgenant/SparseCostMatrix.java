@@ -2,7 +2,7 @@ package fiji.plugin.trackmate.tracking.jonkervolgenant;
 
 import java.util.Arrays;
 
-public class SparseMatrix
+public class SparseCostMatrix
 {
 
 	final int[] sources;
@@ -26,7 +26,7 @@ public class SparseMatrix
 	 * @param targets
 	 * @param costs
 	 */
-	public SparseMatrix( final int[] sources, final int[] targets, final double[] costs )
+	public SparseCostMatrix( final int[] sources, final int[] targets, final double[] costs )
 	{
 		this.sources = sources;
 		this.targets = targets;
@@ -171,7 +171,7 @@ public class SparseMatrix
 		final int[] i = new int[] { 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4, 4, 5, 5, 5, 5, 4, 4 };
 		final int[] j = new int[] { 0, 1, 2, 3, 4, 5, 0, 2, 3, 4, 0, 1, 2, 3, 0, 1, 2, 0, 1, 0, 2, 3, 5, 4, 5 };
 		final double[] c = new double[] { 20.1, 19.2, 18.3, 17.4, 16.5, 15.6, 14.1, 12.8, 11.9, 10.7, 9.2, 8.3, 7.4, 6.5, 5.8, 4.7, 3.6, 2.9, 1.1, 10.2, 1.3, 2.4, 10.2, 6.5, 7.2 };
-		final SparseMatrix sm = new SparseMatrix( i, j, c );
+		final SparseCostMatrix sm = new SparseCostMatrix( i, j, c );
 
 		System.out.println( sm.toString() );
 		System.out.println();

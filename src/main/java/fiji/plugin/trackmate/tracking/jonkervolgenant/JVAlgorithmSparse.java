@@ -1,10 +1,6 @@
 package fiji.plugin.trackmate.tracking.jonkervolgenant;
 
-import java.util.Arrays;
-import java.util.List;
-
 import net.imglib2.util.Util;
-
 
 /**
  * Implements the LAPJV algorithm.
@@ -17,18 +13,12 @@ import net.imglib2.util.Util;
  * @author Johannes Schindelin
  */
 
-public class JonkerVolgenantAlgorithmSparse< K, L >
+public class JVAlgorithmSparse
 {
-	public int[][] computeAssignments( final List< K > sources, final List< L > targets, final List< Double > costs )
+	public int[][] computeAssignments( final SparseCostMatrix cm )
 	{
-		final LAPSparseStructure< K, L > CM = new LAPSparseStructure< K, L >( sources, targets, costs );
-		return computeAssignments( CM );
-	}
-
-	public int[][] computeAssignments( final LAPSparseStructure< K, L > CM )
-	{
-		final int nRows = CM.getNRows();
-		final int nCols = CM.getNCols();
+		final int nCols = cm.nCols;
+		final int nRows = cm.nRows;
 		final double[] v = new double[ nCols ];
 
 		// x and y contain the row/column indexes *plus 1* so that
@@ -42,21 +32,24 @@ public class JonkerVolgenantAlgorithmSparse< K, L >
 		// step 1: column reduction
 		for ( int j = nCols - 1; j >= 0; j-- )
 		{
+			final int[] currentCol = cm.cols[ j ];
+
 			col[ j ] = j;
-			double h = CM.get( 0, j );
-			int i1 = 0;
-			for ( int i = 1; i < nRows; i++ )
+			double h = cm.costs[ currentCol[ 0 ] ];
+			int i1 = cm.sources[ currentCol[ 0 ] ];
+			for ( int kc = 1; kc < currentCol.length; kc++ )
 			{
-				final double c = CM.get( i, j );
-				if ( c < h )
+				final double currentCost = cm.costs[ currentCol[ kc ] ];
+				if ( currentCost < h )
 				{
-					h = c;
-					i1 = i;
+					h = currentCost;
+					i1 = cm.sources[ currentCol[ kc ] ]; // i1 is row
 				}
 			}
 			v[ j ] = h;
 			if ( x[ i1 ] == 0 )
 			{
+				// That row is free! Yeah!
 				x[ i1 ] = j + 1;
 				y[ j ] = i1 + 1;
 			}
@@ -91,11 +84,15 @@ public class JonkerVolgenantAlgorithmSparse< K, L >
 				// reduction transfer from assigned row
 				final int j1 = x[ i ] - 1;
 				double min = Double.MAX_VALUE;
-				for ( int j = 0; j < nCols; j++ )
+
+				final int[] row = cm.rows[ i ];
+
+				for ( final int kr : row )
 				{
+					final int j = cm.targets[ kr ]; // j is col
 					if ( j != j1 )
 					{
-						final double c = CM.get( i, j );
+						final double c = cm.costs[ kr ];
 						if ( c - v[ j ] < min )
 						{
 							min = c - v[ j ];
@@ -127,12 +124,16 @@ public class JonkerVolgenantAlgorithmSparse< K, L >
 			while ( k < f0 )
 			{
 				final int i = free[ k++ ];
-				double v0 = CM.get( i, 0 ) - v[ 0 ];
+				final int[] row = cm.rows[ i ];
+				final int kc0 = row[ 0 ];
+				final int firstCol = cm.targets[ kc0 ];
+				double v0 = cm.costs[ kc0 ] - v[ firstCol ];
 				int j0 = 0, j1 = -1;
 				double vj = Double.MAX_VALUE;
-				for ( int j = 1; j < nCols; j++ )
+				for ( int kj = 1; kj < row.length; kj++ )
 				{
-					final double h = CM.get( i, j ) - v[ j ];
+					final int j = cm.targets[ row[ kj ] ]; // j is col
+					final double h = cm.costs[ row[ kj ] ] - v[ j ];
 					if ( h < vj )
 					{
 						if ( h > v0 )
@@ -187,9 +188,11 @@ public class JonkerVolgenantAlgorithmSparse< K, L >
 			final int i1 = free[ f ];
 			int low = 0, up = 0;
 			// initialize d- and pred-array
-			for ( int j = 0; j < nCols; j++ )
+			final int[] rowi1 = cm.rows[ i1 ];
+			for ( final int ki : rowi1 )
 			{
-				d[ j ] = CM.get( i1, j ) - v[ j ];
+				final int j = cm.targets[ ki ];
+				d[ j ] = cm.costs[ ki ] - v[ j ];
 				pred[ j ] = i1;
 			}
 			int last, i, j = -1;
@@ -231,11 +234,45 @@ public class JonkerVolgenantAlgorithmSparse< K, L >
 				{
 					final int j1 = col[ low++ ];
 					i = y[ j1 ] - 1;
-					final double u1 = CM.get( i, j1 ) - v[ j1 ] - min;
+
+					// Manually search :( for the linear index or row i, col j1
+					final int[] colj1 = cm.cols[ j1 ];
+					int l = -1;
+					for ( int k2 = 0; k2 < colj1.length; k2++ )
+					{
+						if ( cm.sources[ colj1[ k2 ] ] == i )
+						{
+							l = k2;
+							break;
+						}
+					}
+					if ( l < 0 )
+					{
+						continue;
+					}
+
+					final double u1 = cm.costs[ l ] - v[ j1 ] - min;
 					for ( int k = up; k < nCols; k++ )
 					{
 						j = col[ k ];
-						final double h = CM.get( i, j ) - v[ j ] - u1;
+						// Manually search :( for the linear index or row i, col
+						// j
+						final int[] currentCol = cm.cols[ j ];
+						int l2 = -1;
+						for ( int k2 = 0; k2 < colj1.length; k2++ )
+						{
+							if ( cm.sources[ currentCol[ k2 ] ] == i )
+							{
+								l2 = k2;
+								break;
+							}
+						}
+						if ( l2 < 0 )
+						{
+							continue;
+						}
+
+						final double h = cm.costs[ l2 ] - v[ j ] - u1;
 						if ( h < d[ j ] )
 						{
 							d[ j ] = h;
@@ -284,30 +321,18 @@ public class JonkerVolgenantAlgorithmSparse< K, L >
 		return solution;
 	}
 
-	/*
-	 * MAIN METHOD
-	 */
 
 	public static void main( final String[] args )
 	{
-		// final List< String > sources = Arrays.asList( new String[] { "John",
-		// "Paul", "Ringo", "George", "Paul", "Paul", "John", "Ringo", "George"
-		// } );
-		// final List< String > targets = Arrays.asList( new String[] {
-		// "Guitar", "Bass", "Drums", "Guitar", "Keyboard", "Voice", "Voice",
-		// "Voice", "Voice" } );
-		// final List< Double > costs = Arrays.asList( new Double[] { 1.0, 1.0,
-		// 1.0, 1.0, 2.0, 2.0, 1.5, 3.0, 4.0 } );
+		final int[] i = new int[] { 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4, 4, 5, 5, 5, 5, 4, 4 };
+		final int[] j = new int[] { 0, 1, 2, 3, 4, 5, 0, 2, 3, 4, 0, 1, 2, 3, 0, 1, 2, 0, 1, 0, 2, 3, 5, 4, 5 };
+		final double[] c = new double[] { 20.1, 19.2, 18.3, 17.4, 16.5, 15.6, 14.1, 12.8, 11.9, 10.7, 9.2, 8.3, 7.4, 6.5, 5.8, 4.7, 3.6, 2.9, 1.1, 10.2, 1.3, 2.4, 10.2, 6.5, 7.2 };
+		final SparseCostMatrix sm = new SparseCostMatrix( i, j, c );
 
-		final List< String > sources = Arrays.asList( new String[] { "John", "John", "Paul", "Paul", "Paul", "Paul", "George", "George", "Ringo", "Ringo" } );
-		final List< String > targets = Arrays.asList( new String[] { "Guitar", "Voice", "Piano", "Guitar", "Bass", "Voice", "Voice", "Guitar", "Drums", "Voice" } );
-		final List< Double > costs = Arrays.asList( new Double[] { 5d, 4d, 3d, 4d, 4d, 3d, 4d, 2d, 3d, 5d } );
+		System.out.println( sm.toString() );
 
-		final LAPSparseStructure< String, String > sparse = new LAPSparseStructure< String, String >( sources, targets, costs );
-		System.out.println( sparse );
-
-		final JonkerVolgenantAlgorithmSparse< String, String > algo = new JonkerVolgenantAlgorithmSparse< String, String >();
-		final int[][] result = algo.computeAssignments( sources, targets, costs );
+		final JVAlgorithmSparse algo = new JVAlgorithmSparse();
+		final int[][] result = algo.computeAssignments( sm );
 		for ( final int[] is : result )
 		{
 			System.out.println( Util.printCoordinates( is ) );

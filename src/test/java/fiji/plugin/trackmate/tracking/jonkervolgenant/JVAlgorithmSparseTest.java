@@ -3,22 +3,14 @@ package fiji.plugin.trackmate.tracking.jonkervolgenant;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.Test;
 
 import fiji.plugin.trackmate.tracking.hungarian.JonkerVolgenantAlgorithm;
 
-public class JonkerVolgenantAlgorithmSparseTest
+public class JVAlgorithmSparseTest
 {
 
 	private int seed;
-
-	private static final String randomString()
-	{
-		return Long.toHexString( Double.doubleToLongBits( Math.random() ) );
-	}
 
 	private int pseudoRandom()
 	{
@@ -44,44 +36,37 @@ public class JonkerVolgenantAlgorithmSparseTest
 		return m;
 	}
 
-	private LAPSparseStructure< String, String > generateSparseMatrix( final double[][] weights )
+	private SparseCostMatrix generateSparseMatrix( final double[][] weights )
 	{
 		final int n = weights.length;
-		final List< String > rows = new ArrayList< String >( n );
-		final List< String > cols = new ArrayList< String >( n );
-		for ( int i = 0; i < n; i++ )
-		{
-			rows.add( randomString() );
-			cols.add( randomString() );
-		}
+		final int[] sources = new int[ n * n ];
+		final int[] targets = new int[ n * n ];
+		final double[] costs = new double[ n * n ];
 
-		final List< String > sources = new ArrayList< String >( n * n );
-		final List< String > targets = new ArrayList< String >( n * n );
-		final List< Double > costs = new ArrayList< Double >( n * n );
+		int index = 0;
 		for ( int i = 0; i < n; i++ )
 		{
-			final String row = rows.get( i );
 			for ( int j = 0; j < n; j++ )
 			{
-				final String col = cols.get( j );
-				sources.add( row );
-				targets.add( col );
-				costs.add( weights[ i ][ j ] );
+				sources[ index ] = i;
+				targets[ index ] = j;
+				costs[ index ] = weights[ i ][ j ];
+				index++;
 			}
 		}
-		return new LAPSparseStructure< String, String >( sources, targets, costs );
+		return new SparseCostMatrix( sources, targets, costs );
 	}
 
 	@Test
 	public void speedTest()
 	{
-		final JonkerVolgenantAlgorithmSparse< String, String > jvs = new JonkerVolgenantAlgorithmSparse< String, String >();
+		final JVAlgorithmSparse jvs = new JVAlgorithmSparse();
 		final JonkerVolgenantAlgorithm jonkerVolgenant = new JonkerVolgenantAlgorithm();
 		seed = 17;
 		final int nRepeats = 100;
 		final int matrixSize = 100;
 		final double[][] weights = generateMatrix( matrixSize );
-		final LAPSparseStructure< String, String > sparse = generateSparseMatrix( weights );
+		final SparseCostMatrix sparse = generateSparseMatrix( weights );
 		final long start1 = System.currentTimeMillis();
 		for ( int i = 0; i < nRepeats; i++ )
 		{
@@ -101,7 +86,8 @@ public class JonkerVolgenantAlgorithmSparseTest
 	@Test
 	public final void testSparseIsNonSparse()
 	{
-		final int n = 9;
+		final int n = 10;
+		seed = 17;
 		final double[][] weights = generateMatrix( n );
 
 		// Non sparse
@@ -109,22 +95,22 @@ public class JonkerVolgenantAlgorithmSparseTest
 		final int[][] jonkerVolgenantResult = jonkerVolgenant.computeAssignments( weights );
 
 		// Sparse with non-sparse entries
-		final JonkerVolgenantAlgorithmSparse< String, String > jvs = new JonkerVolgenantAlgorithmSparse< String, String >();
-		final LAPSparseStructure< String, String > CM = generateSparseMatrix( weights );
+		final JVAlgorithmSparse jvs = new JVAlgorithmSparse();
+		final SparseCostMatrix CM = generateSparseMatrix( weights );
 		final int[][] jvSparseResult = jvs.computeAssignments( CM );
 
 		// Compare
 		assertEquals( jvSparseResult.length, jonkerVolgenantResult.length );
 
-		double munkresKuhnCost = 0, jonkerVolgenantCost = 0;
+		double jvsSparse = 0, jonkerVolgenantCost = 0;
 		for ( int i = 0; i < jvSparseResult.length; i++ )
 		{
-			munkresKuhnCost += weights[ jvSparseResult[ i ][ 0 ] ][ jvSparseResult[ i ][ 1 ] ];
+			jvsSparse += weights[ jvSparseResult[ i ][ 0 ] ][ jvSparseResult[ i ][ 1 ] ];
 		}
 		for ( int i = 0; i < jonkerVolgenantResult.length; i++ )
 		{
 			jonkerVolgenantCost += weights[ jonkerVolgenantResult[ i ][ 0 ] ][ jonkerVolgenantResult[ i ][ 1 ] ];
 		}
-		assertEquals( munkresKuhnCost, jonkerVolgenantCost, 1e-5 );
+		assertEquals( jonkerVolgenantCost, jvsSparse, 1e-5 );
 	}
 }
