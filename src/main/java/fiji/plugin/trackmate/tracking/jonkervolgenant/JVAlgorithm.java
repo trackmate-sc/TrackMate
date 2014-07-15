@@ -1,8 +1,7 @@
 package fiji.plugin.trackmate.tracking.jonkervolgenant;
 
-import java.util.Arrays;
-
 import net.imglib2.util.Util;
+import fiji.plugin.trackmate.tracking.hungarian.AssignmentAlgorithm;
 
 /**
  * Implements the LAPJV algorithm.
@@ -15,43 +14,39 @@ import net.imglib2.util.Util;
  * @author Johannes Schindelin
  */
 
-public class JVAlgorithmSparse
+public class JVAlgorithm implements AssignmentAlgorithm
 {
-	public int[][] computeAssignments( final SparseCostMatrix cm )
+	@Override
+	public int[][] computeAssignments( final double[][] costMatrix )
 	{
-		final int nCols = cm.nCols;
-		final int nRows = cm.nRows;
-		final double[] v = new double[ nCols ];
+		final int n = costMatrix.length;
+		final double[] v = new double[ n ];
 
 		// x and y contain the row/column indexes *plus 1* so that
 		// x[column] == 0 means it is unassigned
-		final int[] x = new int[ nRows ];
-		final int[] y = new int[ nCols ];
+		final int[] x = new int[ n ];
+		final int[] y = new int[ n ];
 
-		final int[] col = new int[ nCols ];
+		final int[] col = new int[ n ];
 
 		// initialization
 		// step 1: column reduction
-		for ( int j = nCols - 1; j >= 0; j-- )
+		for ( int j = n - 1; j >= 0; j-- )
 		{
-			final int[] currentCol = cm.cols[ j ];
-
 			col[ j ] = j;
-			double h = cm.costs[ currentCol[ 0 ] ];
-			int i1 = cm.sources[ currentCol[ 0 ] ];
-			for ( int kc = 1; kc < currentCol.length; kc++ )
+			double h = costMatrix[ 0 ][ j ];
+			int i1 = 0;
+			for ( int i = 1; i < n; i++ )
 			{
-				final double currentCost = cm.costs[ currentCol[ kc ] ];
-				if ( currentCost < h )
+				if ( costMatrix[ i ][ j ] < h )
 				{
-					h = currentCost;
-					i1 = cm.sources[ currentCol[ kc ] ]; // i1 is row
+					h = costMatrix[ i ][ j ];
+					i1 = i;
 				}
 			}
 			v[ j ] = h;
 			if ( x[ i1 ] == 0 )
 			{
-				// That row is free! Yeah!
 				x[ i1 ] = j + 1;
 				y[ j ] = i1 + 1;
 			}
@@ -67,8 +62,8 @@ public class JVAlgorithmSparse
 
 		// step 2: reduction transfer
 		int f = 0;
-		final int[] free = new int[ nRows ];
-		for ( int i = 0; i < nRows; i++ )
+		final int[] free = new int[ n ];
+		for ( int i = 0; i < n; i++ )
 		{
 			if ( x[ i ] == 0 )
 			{
@@ -86,18 +81,13 @@ public class JVAlgorithmSparse
 				// reduction transfer from assigned row
 				final int j1 = x[ i ] - 1;
 				double min = Double.MAX_VALUE;
-
-				final int[] row = cm.rows[ i ];
-
-				for ( final int kr : row )
+				for ( int j = 0; j < n; j++ )
 				{
-					final int j = cm.targets[ kr ]; // j is col
 					if ( j != j1 )
 					{
-						final double c = cm.costs[ kr ];
-						if ( c - v[ j ] < min )
+						if ( costMatrix[ i ][ j ] - v[ j ] < min )
 						{
-							min = c - v[ j ];
+							min = costMatrix[ i ][ j ] - v[ j ];
 						}
 					}
 				}
@@ -107,8 +97,8 @@ public class JVAlgorithmSparse
 
 		if ( f == 0 )
 		{
-			final int[][] solution = new int[ nRows ][ 2 ];
-			for ( int i = 0; i < nRows; i++ )
+			final int[][] solution = new int[ n ][ 2 ];
+			for ( int i = 0; i < n; i++ )
 			{
 				solution[ i ][ 0 ] = i;
 				solution[ i ][ 1 ] = x[ i ] - 1;
@@ -126,16 +116,12 @@ public class JVAlgorithmSparse
 			while ( k < f0 )
 			{
 				final int i = free[ k++ ];
-				final int[] row = cm.rows[ i ];
-				final int kc0 = row[ 0 ];
-				final int firstCol = cm.targets[ kc0 ];
-				double v0 = cm.costs[ kc0 ] - v[ firstCol ];
+				double v0 = costMatrix[ i ][ 0 ] - v[ 0 ];
 				int j0 = 0, j1 = -1;
 				double vj = Double.MAX_VALUE;
-				for ( int kj = 1; kj < row.length; kj++ )
+				for ( int j = 1; j < n; j++ )
 				{
-					final int j = cm.targets[ row[ kj ] ]; // j is col
-					final double h = cm.costs[ row[ kj ] ] - v[ j ];
+					final double h = costMatrix[ i ][ j ] - v[ j ];
 					if ( h < vj )
 					{
 						if ( h > v0 )
@@ -183,21 +169,17 @@ public class JVAlgorithmSparse
 
 		// augmentation
 		final int f0 = f;
-		final double[] d = new double[ nCols ];
-		final int[] pred = new int[ nCols ];
+		final double[] d = new double[ n ];
+		final int[] pred = new int[ n ];
 		for ( f = 0; f < f0; f++ )
 		{
 			final int i1 = free[ f ];
 			int low = 0, up = 0;
 			// initialize d- and pred-array
-			Arrays.fill( pred, i1 );
-			Arrays.fill( d, Double.MAX_VALUE );
-			final int[] rowi1 = cm.rows[ i1 ];
-			for ( final int ki : rowi1 )
+			for ( int j = 0; j < n; j++ )
 			{
-				final int j = cm.targets[ ki ];
-				d[ j ] = cm.costs[ ki ] - v[ j ];
-//				pred[ j ] = i1;
+				d[ j ] = costMatrix[ i1 ][ j ] - v[ j ];
+				pred[ j ] = i1;
 			}
 
 			System.out.println( "For i1=" + i1 + ", d=" + Util.printCoordinates( d ) + ", pred=" + Util.printCoordinates( pred ) ); // DEBUG
@@ -212,7 +194,7 @@ public class JVAlgorithmSparse
 				{
 					last = low;
 					min = d[ col[ up++ ] ];
-					for ( int k = up; k < nCols; k++ )
+					for ( int k = up; k < n; k++ )
 					{
 						j = col[ k ];
 						final double h = d[ j ];
@@ -241,47 +223,12 @@ public class JVAlgorithmSparse
 				{
 					final int j1 = col[ low++ ];
 					i = y[ j1 ] - 1;
-
-					// Manually search :( for the linear index or row i, col j1
-					final int[] colj1 = cm.cols[ j1 ];
-					int l = -1;
-					for ( int k2 = 0; k2 < colj1.length; k2++ )
-					{
-						if ( cm.sources[ colj1[ k2 ] ] == i )
-						{
-							l = colj1[ k2 ];
-							break;
-						}
-					}
-					if ( l < 0 )
-					{
-						continue;
-					}
-
-					final double u1 = cm.costs[ l ] - v[ j1 ] - min;
-					for ( int k = up; k < nCols; k++ )
+					final double u1 = costMatrix[ i ][ j1 ] - v[ j1 ] - min;
+					for ( int k = up; k < n; k++ )
 					{
 						j = col[ k ];
-						// Manually search :( for the linear index or row i, col
-						// j
-						final int[] currentCol = cm.cols[ j ];
-						int l2 = -1;
-						for ( int k2 = 0; k2 < colj1.length; k2++ )
-						{
-							if ( cm.sources[ currentCol[ k2 ] ] == i )
-							{
-								l2 = currentCol[ k2 ];
-								break;
-							}
-						}
-						if ( l2 < 0 )
-						{
-							continue;
-						}
+						final double h = costMatrix[ i ][ j ] - v[ j ] - u1;
 
-						final double h = cm.costs[ l2 ] - v[ j ] - u1;
-
-//						System.out.println( "For linear index l=" + l2 + ", found r=" + cm.sources[ l2 ] + ", c=" + cm.targets[ l2 ] );// DEBUG
 						System.out.println( "i=" + i + ", j=" + j + " -> h=" + h ); // DEBUG
 
 						if ( h < d[ j ] )
@@ -323,10 +270,11 @@ public class JVAlgorithmSparse
 			while ( i1 != i );
 
 			System.out.println( JVSUtils.printResults( "Augmentation " + f, x, y, new double[ 0 ], v ) ); // DEBUG
+
 		}
 
-		final int[][] solution = new int[ nRows ][ 2 ];
-		for ( int i = 0; i < nRows; i++ )
+		final int[][] solution = new int[ n ][ 2 ];
+		for ( int i = 0; i < n; i++ )
 		{
 			solution[ i ][ 0 ] = i;
 			solution[ i ][ 1 ] = x[ i ] - 1;
@@ -335,24 +283,5 @@ public class JVAlgorithmSparse
 		System.out.println( "\n\nSolution found:" );
 		System.out.println( JVSUtils.resultToString( solution ) );
 		return solution;
-	}
-
-
-	public static void main( final String[] args )
-	{
-		final int[] i = new int[] { 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4, 4, 5, 5, 5, 5, 4, 4 };
-		final int[] j = new int[] { 0, 1, 2, 3, 4, 5, 0, 2, 3, 4, 0, 1, 2, 3, 0, 1, 2, 0, 1, 0, 2, 3, 5, 4, 5 };
-		final double[] c = new double[] { 20.1, 19.2, 18.3, 17.4, 16.5, 15.6, 14.1, 12.8, 11.9, 10.7, 9.2, 8.3, 7.4, 6.5, 5.8, 4.7, 3.6, 2.9, 1.1, 10.2, 1.3, 2.4, 10.2, 6.5, 7.2 };
-		final SparseCostMatrix sm = new SparseCostMatrix( i, j, c );
-
-		System.out.println( sm.toString() );
-
-		final JVAlgorithmSparse algo = new JVAlgorithmSparse();
-		final int[][] result = algo.computeAssignments( sm );
-		for ( final int[] is : result )
-		{
-			System.out.println( Util.printCoordinates( is ) );
-		}
-
 	}
 }

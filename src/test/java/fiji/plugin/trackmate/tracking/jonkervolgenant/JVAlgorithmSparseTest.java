@@ -5,8 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import fiji.plugin.trackmate.tracking.hungarian.JonkerVolgenantAlgorithm;
-
 public class JVAlgorithmSparseTest
 {
 
@@ -57,11 +55,10 @@ public class JVAlgorithmSparseTest
 		return new SparseCostMatrix( sources, targets, costs );
 	}
 
-	@Test
 	public void speedTest()
 	{
 		final JVAlgorithmSparse jvs = new JVAlgorithmSparse();
-		final JonkerVolgenantAlgorithm jonkerVolgenant = new JonkerVolgenantAlgorithm();
+		final JVAlgorithm jonkerVolgenant = new JVAlgorithm();
 		seed = 17;
 		final int nRepeats = 100;
 		final int matrixSize = 100;
@@ -89,27 +86,31 @@ public class JVAlgorithmSparseTest
 		final int n = 10;
 		seed = 17;
 		final double[][] weights = generateMatrix( n );
+		final SparseCostMatrix CM = generateSparseMatrix( weights );
+
+		System.out.println( CM.toString() ); // DEBUG
 
 		// Non sparse
-		final JonkerVolgenantAlgorithm jonkerVolgenant = new JonkerVolgenantAlgorithm();
-		final int[][] jonkerVolgenantResult = jonkerVolgenant.computeAssignments( weights );
+		System.out.println( "\n\n------------\nNON SPARSE\n--------------\n\n" );
+		final JVAlgorithm jonkerVolgenant = new JVAlgorithm();
+		final int[][] jvResult = jonkerVolgenant.computeAssignments( weights );
 
 		// Sparse with non-sparse entries
+		System.out.println( "\n\n-------\nSPARSE\n-------\n\n" );
 		final JVAlgorithmSparse jvs = new JVAlgorithmSparse();
-		final SparseCostMatrix CM = generateSparseMatrix( weights );
 		final int[][] jvSparseResult = jvs.computeAssignments( CM );
 
 		// Compare
-		assertEquals( jvSparseResult.length, jonkerVolgenantResult.length );
+		assertEquals( jvSparseResult.length, jvResult.length );
 
 		double jvsSparse = 0, jonkerVolgenantCost = 0;
 		for ( int i = 0; i < jvSparseResult.length; i++ )
 		{
 			jvsSparse += weights[ jvSparseResult[ i ][ 0 ] ][ jvSparseResult[ i ][ 1 ] ];
 		}
-		for ( int i = 0; i < jonkerVolgenantResult.length; i++ )
+		for ( int i = 0; i < jvResult.length; i++ )
 		{
-			jonkerVolgenantCost += weights[ jonkerVolgenantResult[ i ][ 0 ] ][ jonkerVolgenantResult[ i ][ 1 ] ];
+			jonkerVolgenantCost += weights[ jvResult[ i ][ 0 ] ][ jvResult[ i ][ 1 ] ];
 		}
 		assertEquals( jonkerVolgenantCost, jvsSparse, 1e-5 );
 	}

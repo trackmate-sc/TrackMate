@@ -109,43 +109,40 @@ public class JVSUtils
 	public final static String resultToString( final int[][] result )
 	{
 		final StringBuilder str = new StringBuilder();
-		final int[] iUnique = result[ 0 ];
-		final int[] x = result[ 1 ];
-		final int[] jUnique = result[ 2 ];
-		final int[] y = result[ 3 ];
 
 		str.append( "SOURCE\t→\tTARGET\n" );
-		for ( int k = 0; k < x.length; k++ )
+		for ( int k = 0; k < result.length; k++ )
 		{
-			String targetStr;
-			if ( x[ k ] >= jUnique.length )
-			{
-				targetStr = "unsgnd";
-			}
-			else
-			{
-				targetStr = "" + jUnique[ x[ k ] ];
-			}
-			final int source = iUnique[ k ];
-			str.append( "" + source + "\t→\t" + targetStr + "\n" );
+			str.append( "" + result[ k ][ 0 ] + "\t→\t" + result[ k ][ 1 ] + "\n" );
 		}
+		return str.toString();
+	}
 
-		str.append( "SOURCE\t←\tTARGET\n" );
-		for ( int l = 0; l < y.length; l++ )
+	public static final String printResults( final String header, final int[] x, final int[] y, final double[] u, final double[] v )
+	{
+		final StringBuilder str = new StringBuilder();
+		str.append( "\n\n_______________________________________________________\n" );
+		str.append( '\t' + header + '\n' );
+		str.append( "\tx[]:\n" );
+		for ( int i = 0; i < x.length; i++ )
 		{
-			String sourceStr;
-			if ( y[ l ] >= iUnique.length )
-			{
-				sourceStr = "unsgnd";
-			}
-			else
-			{
-				sourceStr = "" + iUnique[ y[ l ] ];
-			}
-			final int target = jUnique[ l ];
-			str.append( sourceStr + "\t←\t" + target + "\n" );
+			str.append( "\t\t" + i + ":\t" + x[ i ] + '\n' );
 		}
-
+		str.append( "\ty[]:\n" );
+		for ( int i = 0; i < y.length; i++ )
+		{
+			str.append( "\t\t" + i + ":\t" + y[ i ] + '\n' );
+		}
+		str.append( "\tu[]:\n" );
+		for ( int i = 0; i < u.length; i++ )
+		{
+			str.append( "\t\t" + i + ":\t" + u[ i ] + '\n' );
+		}
+		str.append( "\tv[]:\n" );
+		for ( int i = 0; i < v.length; i++ )
+		{
+			str.append( "\t\t" + i + ":\t" + v[ i ] + '\n' );
+		}
 		return str.toString();
 	}
 
