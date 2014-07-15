@@ -101,8 +101,14 @@ public class Settings
 	/** The the tracker to use. */
 	public SpotTrackerFactory trackerFactory;
 
+	/** Settings map for {@link SpotDetector}.  
+	 *  @see DetectorKeys for parameters and defaults.  
+	 */
 	public Map< String, Object > detectorSettings = new HashMap< String, Object >();
 
+	/** Settings map for {@link SpotTracker}.
+	 *  @see TrackerKeys for parameters and defaults.
+	 */
 	public Map< String, Object > trackerSettings = new HashMap< String, Object >();
 
 	// Filters
