@@ -5,6 +5,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import fiji.plugin.trackmate.tracking.hungarian.JonkerVolgenantAlgorithm;
+
 public class JVAlgorithmSparseTest
 {
 
@@ -55,10 +57,11 @@ public class JVAlgorithmSparseTest
 		return new SparseCostMatrix( sources, targets, costs );
 	}
 
+	@Test
 	public void speedTest()
 	{
 		final JVAlgorithmSparse jvs = new JVAlgorithmSparse();
-		final JVAlgorithm jonkerVolgenant = new JVAlgorithm();
+		final JonkerVolgenantAlgorithm jonkerVolgenant = new JonkerVolgenantAlgorithm();
 		seed = 17;
 		final int nRepeats = 100;
 		final int matrixSize = 100;
@@ -83,20 +86,16 @@ public class JVAlgorithmSparseTest
 	@Test
 	public final void testSparseIsNonSparse()
 	{
-		final int n = 10;
-		seed = 17;
+		final int n = 100;
+		seed = 1017;
 		final double[][] weights = generateMatrix( n );
 		final SparseCostMatrix CM = generateSparseMatrix( weights );
 
-		System.out.println( CM.toString() ); // DEBUG
-
 		// Non sparse
-		System.out.println( "\n\n------------\nNON SPARSE\n--------------\n\n" );
-		final JVAlgorithm jonkerVolgenant = new JVAlgorithm();
+		final JonkerVolgenantAlgorithm jonkerVolgenant = new JonkerVolgenantAlgorithm();
 		final int[][] jvResult = jonkerVolgenant.computeAssignments( weights );
 
 		// Sparse with non-sparse entries
-		System.out.println( "\n\n-------\nSPARSE\n-------\n\n" );
 		final JVAlgorithmSparse jvs = new JVAlgorithmSparse();
 		final int[][] jvSparseResult = jvs.computeAssignments( CM );
 

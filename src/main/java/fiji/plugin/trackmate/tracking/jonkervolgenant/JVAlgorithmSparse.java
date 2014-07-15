@@ -200,8 +200,6 @@ public class JVAlgorithmSparse
 //				pred[ j ] = i1;
 			}
 
-			System.out.println( "For i1=" + i1 + ", d=" + Util.printCoordinates( d ) + ", pred=" + Util.printCoordinates( pred ) ); // DEBUG
-
 			int last, i, j = -1;
 			double min;
 			LOOP: do
@@ -281,9 +279,6 @@ public class JVAlgorithmSparse
 
 						final double h = cm.costs[ l2 ] - v[ j ] - u1;
 
-//						System.out.println( "For linear index l=" + l2 + ", found r=" + cm.sources[ l2 ] + ", c=" + cm.targets[ l2 ] );// DEBUG
-						System.out.println( "i=" + i + ", j=" + j + " -> h=" + h ); // DEBUG
-
 						if ( h < d[ j ] )
 						{
 							d[ j ] = h;
@@ -321,8 +316,6 @@ public class JVAlgorithmSparse
 				x[ i ] = k + 1;
 			}
 			while ( i1 != i );
-
-			System.out.println( JVSUtils.printResults( "Augmentation " + f, x, y, new double[ 0 ], v ) ); // DEBUG
 		}
 
 		final int[][] solution = new int[ nRows ][ 2 ];
@@ -331,9 +324,6 @@ public class JVAlgorithmSparse
 			solution[ i ][ 0 ] = i;
 			solution[ i ][ 1 ] = x[ i ] - 1;
 		}
-
-		System.out.println( "\n\nSolution found:" );
-		System.out.println( JVSUtils.resultToString( solution ) );
 		return solution;
 	}
 
