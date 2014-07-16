@@ -5,9 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import fiji.plugin.trackmate.tracking.hungarian.JonkerVolgenantAlgorithm;
-
-public class JVAlgorithmSparseTest
+public class JonkerVolgenantSparseAlgorithmTest
 {
 
 	private int seed;
@@ -36,41 +34,42 @@ public class JVAlgorithmSparseTest
 		return m;
 	}
 
-	private SparseCostMatrix generateSparseMatrix( final double[][] weights )
+	private CRSMatrix generateSparseMatrix( final double[][] weights )
 	{
 		final int n = weights.length;
-		final int[] sources = new int[ n * n ];
-		final int[] targets = new int[ n * n ];
-		final double[] costs = new double[ n * n ];
+		final int[] number = new int[ n ];
+		final int[] kk = new int[ n * n ];
+		final double[] cc = new double[ n * n ];
 
 		int index = 0;
 		for ( int i = 0; i < n; i++ )
 		{
+			number[ i ] = n;
 			for ( int j = 0; j < n; j++ )
 			{
-				sources[ index ] = i;
-				targets[ index ] = j;
-				costs[ index ] = weights[ i ][ j ];
+				kk[ index ] = j;
+				cc[ index ] = weights[ i ][ j ];
 				index++;
 			}
 		}
-		return new SparseCostMatrix( sources, targets, costs );
+		return new CRSMatrix( cc, kk, number );
 	}
 
-	@Test
+//	@Test
 	public void speedTest()
 	{
-		final JVAlgorithmSparse jvs = new JVAlgorithmSparse();
+		JonkerVolgenantSparseAlgorithm jvs;
 		final JonkerVolgenantAlgorithm jonkerVolgenant = new JonkerVolgenantAlgorithm();
 		seed = 17;
-		final int nRepeats = 100;
-		final int matrixSize = 100;
+		final int nRepeats = 1;
+		final int matrixSize = 10;
 		final double[][] weights = generateMatrix( matrixSize );
-		final SparseCostMatrix sparse = generateSparseMatrix( weights );
+		final CRSMatrix sparse = generateSparseMatrix( weights );
 		final long start1 = System.currentTimeMillis();
 		for ( int i = 0; i < nRepeats; i++ )
 		{
-			jvs.computeAssignments( sparse );
+			jvs = new JonkerVolgenantSparseAlgorithm( sparse );
+			jvs.process();
 		}
 		final long end1 = System.currentTimeMillis();
 		final long start2 = System.currentTimeMillis();
@@ -86,18 +85,42 @@ public class JVAlgorithmSparseTest
 	@Test
 	public final void testSparseIsNonSparse()
 	{
-		final int n = 100;
-		seed = 1017;
+		final int n = 13;
+		seed = 17;
 		final double[][] weights = generateMatrix( n );
-		final SparseCostMatrix CM = generateSparseMatrix( weights );
+
+		System.out.println( "COSTS:" );// DEBUG
+		for ( final double[] ds2 : weights )
+		{
+			for ( final double d : ds2 )
+			{
+				System.out.print( String.format( "% 12.3g", d ) );
+			}
+			System.out.println();
+		}
+
+		final CRSMatrix CM = generateSparseMatrix( weights );
 
 		// Non sparse
+		System.out.println( "\n\nNON-SPARSE" );// DEBUG
 		final JonkerVolgenantAlgorithm jonkerVolgenant = new JonkerVolgenantAlgorithm();
 		final int[][] jvResult = jonkerVolgenant.computeAssignments( weights );
+		System.out.println( "Solution:" );
+		for ( int i = 0; i < jvResult.length; i++ )
+		{
+			System.out.println( "\t" + jvResult[ i ][ 0 ] + "\t->\t" + jvResult[ i ][ 1 ] );
+		}
 
 		// Sparse with non-sparse entries
-		final JVAlgorithmSparse jvs = new JVAlgorithmSparse();
-		final int[][] jvSparseResult = jvs.computeAssignments( CM );
+		System.out.println( "\n\nSPARSE" );// DEBUG
+		final JonkerVolgenantSparseAlgorithm jvs = new JonkerVolgenantSparseAlgorithm( CM );
+		jvs.process();
+		final int[] jvSparseResult = jvs.getResult();
+		System.out.println( "Solution:" );
+		for ( int i = 0; i < jvSparseResult.length; i++ )
+		{
+			System.out.println( "\t" + i + "\t->\t" + jvSparseResult[ i ] );
+		}
 
 		// Compare
 		assertEquals( jvSparseResult.length, jvResult.length );
@@ -105,7 +128,7 @@ public class JVAlgorithmSparseTest
 		double jvsSparse = 0, jonkerVolgenantCost = 0;
 		for ( int i = 0; i < jvSparseResult.length; i++ )
 		{
-			jvsSparse += weights[ jvSparseResult[ i ][ 0 ] ][ jvSparseResult[ i ][ 1 ] ];
+			jvsSparse += weights[ i ][ jvSparseResult[ i ] ];
 		}
 		for ( int i = 0; i < jvResult.length; i++ )
 		{
