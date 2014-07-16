@@ -3,6 +3,8 @@ package fiji.plugin.trackmate.tracking.jonkervolgenant;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Random;
+
 import org.junit.Test;
 
 public class JonkerVolgenantSparseAlgorithmTest
@@ -55,14 +57,14 @@ public class JonkerVolgenantSparseAlgorithmTest
 		return new CRSMatrix( cc, kk, number );
 	}
 
-//	@Test
+	@Test
 	public void speedTest()
 	{
 		JonkerVolgenantSparseAlgorithm jvs;
 		final JonkerVolgenantAlgorithm jonkerVolgenant = new JonkerVolgenantAlgorithm();
-		seed = 17;
-		final int nRepeats = 1;
-		final int matrixSize = 10;
+		seed = new Random().nextInt();
+		final int nRepeats = 10;
+		final int matrixSize = 400;
 		final double[][] weights = generateMatrix( matrixSize );
 		final CRSMatrix sparse = generateSparseMatrix( weights );
 		final long start1 = System.currentTimeMillis();
@@ -85,42 +87,20 @@ public class JonkerVolgenantSparseAlgorithmTest
 	@Test
 	public final void testSparseIsNonSparse()
 	{
-		final int n = 13;
-		seed = 17;
+		final int n = 50;
+		seed = new Random().nextInt();
 		final double[][] weights = generateMatrix( n );
-
-		System.out.println( "COSTS:" );// DEBUG
-		for ( final double[] ds2 : weights )
-		{
-			for ( final double d : ds2 )
-			{
-				System.out.print( String.format( "% 12.3g", d ) );
-			}
-			System.out.println();
-		}
 
 		final CRSMatrix CM = generateSparseMatrix( weights );
 
 		// Non sparse
-		System.out.println( "\n\nNON-SPARSE" );// DEBUG
 		final JonkerVolgenantAlgorithm jonkerVolgenant = new JonkerVolgenantAlgorithm();
 		final int[][] jvResult = jonkerVolgenant.computeAssignments( weights );
-		System.out.println( "Solution:" );
-		for ( int i = 0; i < jvResult.length; i++ )
-		{
-			System.out.println( "\t" + jvResult[ i ][ 0 ] + "\t->\t" + jvResult[ i ][ 1 ] );
-		}
 
 		// Sparse with non-sparse entries
-		System.out.println( "\n\nSPARSE" );// DEBUG
 		final JonkerVolgenantSparseAlgorithm jvs = new JonkerVolgenantSparseAlgorithm( CM );
 		jvs.process();
 		final int[] jvSparseResult = jvs.getResult();
-		System.out.println( "Solution:" );
-		for ( int i = 0; i < jvSparseResult.length; i++ )
-		{
-			System.out.println( "\t" + i + "\t->\t" + jvSparseResult[ i ] );
-		}
 
 		// Compare
 		assertEquals( jvSparseResult.length, jvResult.length );

@@ -105,12 +105,6 @@ public class JonkerVolgenantAlgorithm implements AssignmentAlgorithm
 			return solution;
 		}
 
-		System.out.println( "After reduction transfer" );// DEBUG
-		for ( int i = 0; i < x.length; i++ )
-		{
-			System.out.println( "\t" + i + "\t->\t" + ( x[ i ] - 1 ) ); // DEBUG
-		}
-
 		// improve initial solution
 		// augmenting row reduction
 		for ( int count = 0; count < 2; count++ )
@@ -170,12 +164,6 @@ public class JonkerVolgenantAlgorithm implements AssignmentAlgorithm
 				x[ i ] = j0 + 1;
 				y[ j0 ] = i + 1;
 			}
-		}
-
-		System.out.println( "After augmenting row reduction" );// DEBUG
-		for ( int i = 0; i < x.length; i++ )
-		{
-			System.out.println( "\t" + i + "\t->\t" + ( x[ i ] - 1 ) ); // DEBUG
 		}
 
 		// augmentation
@@ -273,12 +261,6 @@ public class JonkerVolgenantAlgorithm implements AssignmentAlgorithm
 				x[ i ] = k + 1;
 			}
 			while ( i1 != i );
-
-			System.out.println( "Augmenting " + f );// DEBUG
-			for ( int iii = 0; iii < x.length; iii++ )
-			{
-				System.out.println( "\t" + iii + "\t->\t" + ( x[ iii ] - 1 ) ); // DEBUG
-			}
 		}
 
 		final int[][] solution = new int[ n ][ 2 ];
