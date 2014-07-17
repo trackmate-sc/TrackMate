@@ -118,7 +118,39 @@ public class JVSUtils
 		return str.toString();
 	}
 
-	public static final String printResults( final String header, final int[] x, final int[] y, final double[] u, final double[] v )
+	public final static String resultToString( final int[] result )
+	{
+		final StringBuilder str = new StringBuilder();
+
+		str.append( "SOURCE\t→\tTARGET\n" );
+		for ( int k = 0; k < result.length; k++ )
+		{
+			str.append( "" + k + "\t→\t" + result[ k ] + "\n" );
+		}
+		return str.toString();
+	}
+
+	public final static String resultToString( final int[][] nsResult, final int[] sResult )
+	{
+		final StringBuilder str = new StringBuilder();
+
+		str.append( "SOURCE\t→\tTARGET_NS vs\tTARGET_S\n" );
+		for ( int k = 0; k < sResult.length; k++ )
+		{
+			final int ns = nsResult[ k ][ 1 ];
+			final int s = sResult[ k ];
+			str.append( "" + k + "\t→\t" + ns + "\tvs\t" + s );
+			if ( ns == s )
+			{
+				str.append( '\n' );
+			}
+			else
+				str.append( "\tBAD!\n" );
+		}
+		return str.toString();
+	}
+
+	public static final String intermediateResults( final String header, final int[] x, final int[] y, final double[] v )
 	{
 		final StringBuilder str = new StringBuilder();
 		str.append( "\n\n_______________________________________________________\n" );
@@ -126,22 +158,12 @@ public class JVSUtils
 		str.append( "\tx[]:\n" );
 		for ( int i = 0; i < x.length; i++ )
 		{
-			str.append( "\t\t" + i + ":\t" + x[ i ] + '\n' );
+			str.append( "\t\t" + i + ":\t" + ( x[ i ] - 1 ) + '\n' );
 		}
-		str.append( "\ty[]:\n" );
+		str.append( "\ty[] & v[]:\n" );
 		for ( int i = 0; i < y.length; i++ )
 		{
-			str.append( "\t\t" + i + ":\t" + y[ i ] + '\n' );
-		}
-		str.append( "\tu[]:\n" );
-		for ( int i = 0; i < u.length; i++ )
-		{
-			str.append( "\t\t" + i + ":\t" + u[ i ] + '\n' );
-		}
-		str.append( "\tv[]:\n" );
-		for ( int i = 0; i < v.length; i++ )
-		{
-			str.append( "\t\t" + i + ":\t" + v[ i ] + '\n' );
+			str.append( "\t\t" + i + ":\t" + ( y[ i ] - 1 ) + '\t' + v[ i ] + '\n' );
 		}
 		return str.toString();
 	}
@@ -203,6 +225,18 @@ public class JVSUtils
 			pair[ 1 ] = ( int ) t - ( int ) floor;
 		}
 		return pair;
+	}
+
+	public static final double totalAssignmentCost( final double[][] fullMatrix, final int[][] nsRes )
+	{
+		double sum = 0;
+		for ( int i = 0; i < nsRes.length; i++ )
+		{
+			final int r = nsRes[ i ][ 0 ];
+			final int c = nsRes[i][1];
+			sum += fullMatrix[r][c]; 
+		}
+		return sum;
 	}
 
 
