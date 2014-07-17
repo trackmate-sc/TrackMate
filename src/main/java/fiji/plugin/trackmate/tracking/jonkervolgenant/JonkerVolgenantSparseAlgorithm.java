@@ -18,9 +18,9 @@ public class JonkerVolgenantSparseAlgorithm implements OutputAlgorithm< int[] >,
 
 	private long processingTime;
 
-	private final CRSMatrix cm;
+	private final SparseCostMatrix cm;
 
-	public JonkerVolgenantSparseAlgorithm( final CRSMatrix cm )
+	public JonkerVolgenantSparseAlgorithm( final SparseCostMatrix cm )
 	{
 		this.cm = cm;
 		this.x = new int[ cm.nRows ];
@@ -39,6 +39,10 @@ public class JonkerVolgenantSparseAlgorithm implements OutputAlgorithm< int[] >,
 		{
 			col[ j ] = j;
 		}
+
+		/*
+		 * Column reduction
+		 */
 
 		Arrays.fill( v, Double.MAX_VALUE );
 		for ( int i = 0; i < cm.nRows; i++ )
@@ -70,6 +74,8 @@ public class JonkerVolgenantSparseAlgorithm implements OutputAlgorithm< int[] >,
 				y[ j ] = 0;
 			}
 		}
+
+//		System.out.println( JVSUtils.intermediateResults( "SPARSE - After column reduction:", x, y, v ) );// DEBUG
 
 		int f = 0;
 		final int[] free = new int[ cm.nRows ];
@@ -111,6 +117,9 @@ public class JonkerVolgenantSparseAlgorithm implements OutputAlgorithm< int[] >,
  return;
 		}
 
+//		System.out.println( JVSUtils.intermediateResults( "SPARSE - After reduction transfer:", x, y, v ) );// DEBUG
+//		System.out.println( "Free: " + Util.printCoordinates( free ) );// DEBUG
+
 		// improve initial solution
 		// augmenting row reduction
 		for ( int count = 0; count < 2; count++ )
@@ -121,10 +130,12 @@ public class JonkerVolgenantSparseAlgorithm implements OutputAlgorithm< int[] >,
 			while ( k < f0 )
 			{
 				final int i = free[ k++ ];
-				double v0 = cm.cc[ cm.start[ i ] ] - v[ 0 ];
+//				double v0 = cm.cc[ cm.start[ i ] ] - v[ 0 ];
+				double v0 = Double.MAX_VALUE;
 				int j0 = 0, j1 = -1;
 				double vj = Double.MAX_VALUE;
-				for ( int kj = cm.start[ i ] + 1; kj < cm.start[ i ] + cm.number[ i ]; kj++ )
+//				for ( int kj = cm.start[ i ] + 1; kj < cm.start[ i ] + cm.number[ i ]; kj++ )
+				for ( int kj = cm.start[ i ]; kj < cm.start[ i ] + cm.number[ i ]; kj++ )
 				{
 					final int j = cm.kk[ kj ];
 					final double h = cm.cc[ kj ] - v[ j ];
@@ -171,6 +182,9 @@ public class JonkerVolgenantSparseAlgorithm implements OutputAlgorithm< int[] >,
 				x[ i ] = j0 + 1;
 				y[ j0 ] = i + 1;
 			}
+
+//			System.out.println( JVSUtils.intermediateResults( "SPARSE - After augmenting row reduction " + count + ":\t", x, y, v ) );// DEBUG
+
 		}
 
 		// augmentation
@@ -346,7 +360,7 @@ public class JonkerVolgenantSparseAlgorithm implements OutputAlgorithm< int[] >,
 		final int[] kk = new int[] { 0, 1, 2, 3, 4, 5, 0, 2, 3, 4, 0, 1, 2, 3, 0, 1, 2, 0, 1, 0, 2, 3, 5 };
 		final double[] cc = new double[] { 20.1, 19.2, 18.3, 17.4, 16.5, 15.6, 14.1, 12.8, 11.9, 10.7, 9.2, 8.3, 7.4, 6.5, 5.8, 4.7, 3.6, 2.9, 1.1, 10.2, 1.3, 2.4, 10.2 };
 		final int[] number = new int[] { 6, 4, 4, 3, 2, 4 };
-		final CRSMatrix cm = new CRSMatrix( cc, kk, number );
+		final SparseCostMatrix cm = new SparseCostMatrix( cc, kk, number, 6 );
 		System.out.println( cm.toString() );
 
 		final JonkerVolgenantSparseAlgorithm algo = new JonkerVolgenantSparseAlgorithm( cm );
