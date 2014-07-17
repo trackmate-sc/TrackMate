@@ -59,6 +59,8 @@ public class JonkerVolgenantAlgorithm implements AssignmentAlgorithm
 			}
 		}
 
+//		System.out.println( JVSUtils.intermediateResults( "NON SPARSE - After column reduction:", x, y, v ) );// DEBUG
+
 		// step 2: reduction transfer
 		int f = 0;
 		final int[] free = new int[ n ];
@@ -104,6 +106,9 @@ public class JonkerVolgenantAlgorithm implements AssignmentAlgorithm
 			}
 			return solution;
 		}
+
+//		System.out.println( JVSUtils.intermediateResults( "NON SPARSE - After reduction transfer:", x, y, v ) );// DEBUG
+//		System.out.println( "Free: " + Util.printCoordinates( free ) );// DEBUG
 
 		// improve initial solution
 		// augmenting row reduction
@@ -164,6 +169,7 @@ public class JonkerVolgenantAlgorithm implements AssignmentAlgorithm
 				x[ i ] = j0 + 1;
 				y[ j0 ] = i + 1;
 			}
+//			System.out.println( JVSUtils.intermediateResults( "NON-SPARSE - After augmenting row reduction " + count + ":\t", x, y, v ) );// DEBUG
 		}
 
 		// augmentation
@@ -281,7 +287,7 @@ public class JonkerVolgenantAlgorithm implements AssignmentAlgorithm
 		final int[] kk = new int[] { 0, 1, 2, 3, 4, 5, 0, 2, 3, 4, 0, 1, 2, 3, 0, 1, 2, 0, 1, 0, 2, 3, 5 };
 		final double[] cc = new double[] { 20.1, 19.2, 18.3, 17.4, 16.5, 15.6, 14.1, 12.8, 11.9, 10.7, 9.2, 8.3, 7.4, 6.5, 5.8, 4.7, 3.6, 2.9, 1.1, 10.2, 1.3, 2.4, 10.2 };
 		final int[] number = new int[] { 6, 4, 4, 3, 2, 4 };
-		final CRSMatrix cm = new CRSMatrix( cc, kk, number );
+		final SparseCostMatrix cm = new SparseCostMatrix( cc, kk, number, 6 );
 		System.out.println( cm.toString() );
 
 		final JonkerVolgenantAlgorithm algo = new JonkerVolgenantAlgorithm();
