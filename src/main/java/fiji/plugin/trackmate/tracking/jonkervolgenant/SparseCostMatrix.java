@@ -97,11 +97,12 @@ public class SparseCostMatrix
 	 *             the column array is not sorted row by row, of if one row has
 	 *             0 non-infinite costs.
 	 */
-	public SparseCostMatrix( final double[] cc, final int[] kk, final int[] number )
+	public SparseCostMatrix( final double[] cc, final int[] kk, final int[] number, final int nCols )
 	{
 		this.cc = cc;
 		this.kk = kk;
 		this.number = number;
+		this.nCols = nCols;
 
 		// Check sizes
 		if (cc.length != kk.length) {
@@ -111,30 +112,33 @@ public class SparseCostMatrix
 		this.cardinality = cc.length;
 		this.nRows = number.length;
 		// loop on each row
-		int maxCol = -1;
 		this.start = new int[ nRows ];
 		start[ 0 ] = 0;
 		for ( int i = 1; i < nRows; i++ )
 		{
-			if ( number[ i ] == 0 ) { throw new IllegalArgumentException( "All the rows must have at least one one cost. Row " + i + " have none." ); }
+			if ( number[ i ] == 0 ) { throw new IllegalArgumentException( "All the rows must have at least one cost. Row " + i + " have none." ); }
 			start[ i ] = start[ i - 1 ] + number[ i - 1 ];
 		}
+
+		final int[] colHistogram = new int[ nCols ];
 		for ( int i = 0; i < nRows; i++ )
 		{
 			// Iterate through each column
 			int previousK = -1;
-			for ( int j = start[ i ]; j < number[ i ]; j++ )
+			for ( int j = start[ i ]; j < start[ i ] + number[ i ]; j++ )
 			{
 				final int k = kk[ j ];
-				if ( k < previousK ) { throw new IllegalArgumentException( "The column indices array must be sorted within each row. The column elements at line " + i + " are not properly sorted." ); }
+				colHistogram[ k ]++;
+				if ( k <= previousK ) { throw new IllegalArgumentException( "The column indices array must be sorted within each row. The column elements at line " + i + " are not properly sorted." ); }
 				previousK = k;
-				if ( k > maxCol )
-				{
-					maxCol = k;
-				}
 			}
 		}
-		this.nCols = maxCol + 1;
+
+		// Check that each column have at least one assignment
+		for ( int j = 0; j < colHistogram.length; j++ )
+		{
+			if ( colHistogram[ j ] == 0 ) { throw new IllegalArgumentException( "All the columns must have at least one cost. The column " + j + " has none." ); }
+		}
 	}
 
 	@Override
@@ -233,7 +237,7 @@ public class SparseCostMatrix
 		final int[] kk = new int[] { 0, 1, 2, 3, 4, 5, 0, 2, 3, 4, 0, 1, 2, 3, 0, 1, 2, 0, 1, 0, 2, 3, 5 };
 		final double[] cc = new double[] { 20.1, 19.2, 18.3, 17.4, 16.5, 15.6, 14.1, 12.8, 11.9, 10.7, 9.2, 8.3, 7.4, 6.5, 5.8, 4.7, 3.6, 2.9, 1.1, 10.2, 1.3, 2.4, 10.2 };
 		final int[] number = new int[] { 6, 4, 4, 3, 2, 4 };
-		final SparseCostMatrix cm = new SparseCostMatrix( cc, kk, number );
+		final SparseCostMatrix cm = new SparseCostMatrix( cc, kk, number, 6 );
 		System.out.println( cm.toString() );
 
 		final double[][] ds = cm.toFullMatrix();
