@@ -7,6 +7,8 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import fiji.plugin.trackmate.tracking.hungarian.JonkerVolgenantAlgorithm;
+
 public class JonkerVolgenantSparseAlgorithmTest
 {
 

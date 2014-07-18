@@ -5,6 +5,8 @@ import static org.junit.Assert.assertEquals;
 import java.util.Arrays;
 import java.util.Random;
 
+import fiji.plugin.trackmate.tracking.hungarian.JonkerVolgenantAlgorithm;
+
 public class JonkerVolgenantSparseAlgorithmBenchmark
 {
 
@@ -47,7 +49,6 @@ public class JonkerVolgenantSparseAlgorithmBenchmark
 	private int[] generateIntLinSpaced( final int start, final int end, final int n )
 	{
 		final int[] result = new int[ n ];
-		final int index = 1;
 		final double inc = ( ( double ) end - start ) / ( n );
 
 		for ( int i = 0; i < result.length; i++ )
