@@ -1,10 +1,11 @@
 package fiji.plugin.trackmate.tracking.jonkervolgenant;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Random;
+
+import org.junit.Test;
 
 public class JonkerVolgenantSparseAlgorithmTest
 {
@@ -94,34 +95,7 @@ public class JonkerVolgenantSparseAlgorithmTest
 		return Arrays.copyOf( result, ++j );
 	}
 
-//	@Test
-	public void speedTest()
-	{
-		JonkerVolgenantSparseAlgorithm jvs;
-		final JonkerVolgenantAlgorithm jonkerVolgenant = new JonkerVolgenantAlgorithm();
-		seed = new Random().nextInt();
-		final int nRepeats = 10;
-		final int matrixSize = 400;
-		final double[][] weights = generateMatrix( matrixSize );
-		final SparseCostMatrix sparse = generateSparseMatrix( weights );
-		final long start1 = System.currentTimeMillis();
-		for ( int i = 0; i < nRepeats; i++ )
-		{
-			jvs = new JonkerVolgenantSparseAlgorithm( sparse );
-			jvs.process();
-		}
-		final long end1 = System.currentTimeMillis();
-		final long start2 = System.currentTimeMillis();
-		for ( int i = 0; i < nRepeats; i++ )
-		{
-			jonkerVolgenant.computeAssignments( weights );
-		}
-		final long end2 = System.currentTimeMillis();
-		System.err.println( "Jonker-Volgenant sparse: " + ( end1 - start1 ) + "ms, Jonker-Volgenant non-sparse: " + ( end2 - start2 ) + "ms" );
-		assertTrue( end1 - start1 > end2 - start2 );
-	}
-
-//	@Test
+	@Test
 	public final void testSparseIsNonSparse()
 	{
 		final int n = 50;
@@ -154,18 +128,14 @@ public class JonkerVolgenantSparseAlgorithmTest
 		assertEquals( jonkerVolgenantCost, jvsSparse, 1e-5 );
 	}
 
-//	@Test
-	public final void timeSparse()
+	@Test
+	public final void testVayringDensity()
 	{
-		final int nRepeats = 10;
-		final int size = 500;
-		final Random ran = new Random( 0l );
+		final int size = 100;
+		final Random ran = new Random();
 		seed = ran.nextInt();
 
-		final int[] cardinalities = generateIntLogSpaced( 4 * size, size * size, 100 );
-
-		System.out.println( "" + size + " x " + size + " cost matrix, " + nRepeats + " repetitions." );
-		System.out.println( "Cardinality\tTimeNotSparse(ms)\tTimeSparse(ms)\tFactor" );
+		final int[] cardinalities = generateIntLogSpaced( 4 * size, size * size, 10 );
 
 		for ( int ci = 0; ci < cardinalities.length; ci++ )
 		{
@@ -202,57 +172,24 @@ public class JonkerVolgenantSparseAlgorithmTest
 			final double[] cc2 = Arrays.copyOf( cc, index );
 
 			final SparseCostMatrix cm = new SparseCostMatrix( cc2, kk2, number, size );
-			System.out.print( "" + cm.cardinality );
 
 			// NON-SPARSE
 			final double[][] fullMatrix = cm.toFullMatrix();
-			long start = System.currentTimeMillis();
 			int[][] nsRes = new int[ 0 ][];
-			for ( int i = 0; i < nRepeats; i++ )
-			{
-				final JonkerVolgenantAlgorithm nonSparseAlgo = new JonkerVolgenantAlgorithm();
-				nsRes = nonSparseAlgo.computeAssignments( fullMatrix );
-			}
-			long end = System.currentTimeMillis();
-			final long dt1 = end - start;
-			System.out.print( "\t\t" + dt1 );
+			final JonkerVolgenantAlgorithm nonSparseAlgo = new JonkerVolgenantAlgorithm();
+			nsRes = nonSparseAlgo.computeAssignments( fullMatrix );
 
 			// SPARSE
-			start = System.currentTimeMillis();
 			int[] sRes = new int[ 0 ];
-			for ( int i = 0; i < nRepeats; i++ )
-			{
-				final JonkerVolgenantSparseAlgorithm sparseAlgo = new JonkerVolgenantSparseAlgorithm( cm );
-				sparseAlgo.process();
-				sRes = sparseAlgo.getResult();
-			}
-			end = System.currentTimeMillis();
-			final long dt2 = end - start;
-
-			System.out.print( "\t\t\t" + dt2 );
-			System.out.print( String.format( "\t\t%.2f\n", ( double ) dt2 / dt1 ) );
+			final JonkerVolgenantSparseAlgorithm sparseAlgo = new JonkerVolgenantSparseAlgorithm( cm );
+			sparseAlgo.process();
+			sRes = sparseAlgo.getResult();
 
 			// TEST
 			for ( int i = 0; i < sRes.length; i++ )
 			{
 				assertEquals( nsRes[ i ][ 1 ], sRes[ i ] );
 			}
-
-			/*
-			 * System.out.println( "\n" + cm ); System.out.println( "CM layout:"
-			 * ); System.out.print( "cc:\t" ); for ( final double c : cm.cc ) {
-			 * System.out.print( String.format( "% 5.0f", c ) ); }
-			 * System.out.println(); System.out.print( "kk:\t" ); for ( final
-			 * int k : cm.kk ) { System.out.print( String.format( "% 5d", k ) );
-			 * } System.out.println(); System.out.println( "nbr:\t" +
-			 * Util.printCoordinates( cm.number ) ); System.out.println(
-			 * "strt:\t" + Util.printCoordinates( cm.start ) );
-			 * System.out.println( "\nAssignments:" ); System.out.println(
-			 * JVSUtils.resultToString( nsRes, sRes ) ); System.out.println(
-			 * "Total cost non-sparse = " + JVSUtils.totalAssignmentCost(
-			 * fullMatrix, nsRes ) ); System.out.println( "Total cost sparse = "
-			 * + cm.totalAssignmentCost( sRes ) ); break;
-			 */
 		}
 
 	}
