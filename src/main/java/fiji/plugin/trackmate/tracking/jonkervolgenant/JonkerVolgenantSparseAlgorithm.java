@@ -4,15 +4,45 @@ import java.util.Arrays;
 
 import net.imglib2.algorithm.Benchmark;
 import net.imglib2.algorithm.OutputAlgorithm;
+import fiji.plugin.trackmate.tracking.hungarian.JonkerVolgenantAlgorithm;
 
+/**
+ * Implements the Jonker-Volgenant algorithm for linear assignment problems,
+ * tailored for sparse cost matrices.
+ * <p>
+ * We rely on the {@link SparseCostMatrix} class to represent these costs. The
+ * implementation itself is an unlikely mix between:
+ * <ul>
+ * <li>my (JYT) limited understanding of the original Volgemant paper (
+ * <code>Volgenant. Linear and semi-assignment problems:
+ * A core oriented approach. Computers & Operations Research (1996) vol. 23 (10)
+ * pp. 917-932</code>);</li>
+ * <li>my limited understanding of Lee Kamensky python implementation of the
+ * same algorithm in python using numpy for the CellProfilter project (
+ * {@link https://
+ * github.com/CellProfiler/CellProfiler/blob/master/cellprofiler/cpmath/lapjv.
+ * py});</li>
+ * <li>Johannes java implementation of the algorithm for non-sparse matrices (
+ * {@link JonkerVolgenantAlgorithm}).</li>
+ * </ul>
+ * <p>
+ * Computation time performance degrades significantly compared to the
+ * non-sparse version. Benchmarks show that when increasing the density from
+ * 0.1% to 70%, the computation time increased by a factor ranging from 1.5 to 7
+ * compared to the non-sparse version. For a given density, the comparison
+ * depends very weakly on the matrix size.
+ * 
+ * 
+ * @author Jean-Yves Tinevez - 2014
+ * @author Johannes Schindelin
+ * @see http://www.sciencedirect.com/science/article/pii/030505489600010X#
+ * @see JonkerVolgenantAlgorithm
+ * 
+ */
 public class JonkerVolgenantSparseAlgorithm implements OutputAlgorithm< int[] >, Benchmark
 {
 
-	private final int[] x;
-
-	private final int[] y;
-
-	private final double[] v;
+	private int[] output;
 
 	private String errorMessage;
 
@@ -20,20 +50,27 @@ public class JonkerVolgenantSparseAlgorithm implements OutputAlgorithm< int[] >,
 
 	private final SparseCostMatrix cm;
 
+	/**
+	 * Instantiates a new Jonker-Volgenant algorithm for the specified sparse
+	 * cost matrix.
+	 * 
+	 * @param cm
+	 *            the cost matrix of the linear assignment problem to solve.
+	 */
 	public JonkerVolgenantSparseAlgorithm( final SparseCostMatrix cm )
 	{
 		this.cm = cm;
-		this.x = new int[ cm.nRows ];
-		this.y = new int[ cm.nCols ];
-		this.v = new double[ cm.nCols ];
 	}
 
-	/*
-	 * CORE METHODS
-	 */
-
-	private void exec()
+	@Override
+	public boolean process()
 	{
+		final long start = System.currentTimeMillis();
+
+		final int[] x = new int[ cm.nRows ];
+		final int[] y = new int[ cm.nCols ];
+		final double[] v = new double[ cm.nCols ];
+
 		final int[] col = new int[ cm.nCols ];
 		for ( int j = 0; j < col.length; j++ )
 		{
@@ -75,7 +112,9 @@ public class JonkerVolgenantSparseAlgorithm implements OutputAlgorithm< int[] >,
 			}
 		}
 
-//		System.out.println( JVSUtils.intermediateResults( "SPARSE - After column reduction:", x, y, v ) );// DEBUG
+		/*
+		 * Reduction transfer.
+		 */
 
 		int f = 0;
 		final int[] free = new int[ cm.nRows ];
@@ -112,16 +151,12 @@ public class JonkerVolgenantSparseAlgorithm implements OutputAlgorithm< int[] >,
 			}
 		}
 
-		if ( f == 0 )
-		{
- return;
-		}
+		if ( f == 0 ) { return true; }
 
-//		System.out.println( JVSUtils.intermediateResults( "SPARSE - After reduction transfer:", x, y, v ) );// DEBUG
-//		System.out.println( "Free: " + Util.printCoordinates( free ) );// DEBUG
+		/*
+		 * Augmenting row reduction.
+		 */
 
-		// improve initial solution
-		// augmenting row reduction
 		for ( int count = 0; count < 2; count++ )
 		{
 			int k = 0;
@@ -130,11 +165,9 @@ public class JonkerVolgenantSparseAlgorithm implements OutputAlgorithm< int[] >,
 			while ( k < f0 )
 			{
 				final int i = free[ k++ ];
-//				double v0 = cm.cc[ cm.start[ i ] ] - v[ 0 ];
 				double v0 = Double.MAX_VALUE;
 				int j0 = 0, j1 = -1;
 				double vj = Double.MAX_VALUE;
-//				for ( int kj = cm.start[ i ] + 1; kj < cm.start[ i ] + cm.number[ i ]; kj++ )
 				for ( int kj = cm.start[ i ]; kj < cm.start[ i ] + cm.number[ i ]; kj++ )
 				{
 					final int j = cm.kk[ kj ];
@@ -182,12 +215,12 @@ public class JonkerVolgenantSparseAlgorithm implements OutputAlgorithm< int[] >,
 				x[ i ] = j0 + 1;
 				y[ j0 ] = i + 1;
 			}
-
-//			System.out.println( JVSUtils.intermediateResults( "SPARSE - After augmenting row reduction " + count + ":\t", x, y, v ) );// DEBUG
-
 		}
 
-		// augmentation
+		/*
+		 * Augmentation.
+		 */
+
 		final int f0 = f;
 		final double[] d = new double[ cm.nCols ];
 		final int[] pred = new int[ cm.nCols ];
@@ -299,6 +332,20 @@ public class JonkerVolgenantSparseAlgorithm implements OutputAlgorithm< int[] >,
 			}
 			while ( i1 != i );
 		}
+
+		/*
+		 * Terminate and prepare outputs.
+		 */
+
+		this.output = new int[ x.length ];
+		for ( int i = 0; i < x.length; i++ )
+		{
+			output[ i ] = x[ i ] - 1;
+		}
+
+		final long end = System.currentTimeMillis();
+		processingTime = end - start;
+		return true;
 	}
 
 	/*
@@ -308,28 +355,6 @@ public class JonkerVolgenantSparseAlgorithm implements OutputAlgorithm< int[] >,
 	@Override
 	public boolean checkInput()
 	{
-		return true;
-	}
-
-	@Override
-	public boolean process()
-	{
-		final long start = System.currentTimeMillis();
-
-		exec();
-
-		// Dec
-		for ( int i = 0; i < x.length; i++ )
-		{
-			x[ i ]--;
-		}
-		for ( int j = 0; j < y.length; j++ )
-		{
-			y[ j ]--;
-		}
-
-		final long end = System.currentTimeMillis();
-		processingTime = end - start;
 		return true;
 	}
 
@@ -345,40 +370,16 @@ public class JonkerVolgenantSparseAlgorithm implements OutputAlgorithm< int[] >,
 		return processingTime;
 	}
 
+	/**
+	 * Returns JVS results as row assignments. The row <code>i</code> is
+	 * associated to the column <code>x[i]</code> in the cost matrix.
+	 * 
+	 * @return the row assignments as an <code>int[]</code> array. This array is
+	 *         re-instantiated upon calling {@link #process()}.
+	 */
 	@Override
 	public int[] getResult()
 	{
-		return x;
+		return output;
 	}
-
-	/*
-	 * MAIN METHOD
-	 */
-
-	public static void main( final String[] args )
-	{
-		final int[] kk = new int[] { 0, 1, 2, 3, 4, 5, 0, 2, 3, 4, 0, 1, 2, 3, 0, 1, 2, 0, 1, 0, 2, 3, 5 };
-		final double[] cc = new double[] { 20.1, 19.2, 18.3, 17.4, 16.5, 15.6, 14.1, 12.8, 11.9, 10.7, 9.2, 8.3, 7.4, 6.5, 5.8, 4.7, 3.6, 2.9, 1.1, 10.2, 1.3, 2.4, 10.2 };
-		final int[] number = new int[] { 6, 4, 4, 3, 2, 4 };
-		final SparseCostMatrix cm = new SparseCostMatrix( cc, kk, number, 6 );
-		System.out.println( cm.toString() );
-
-		final JonkerVolgenantSparseAlgorithm algo = new JonkerVolgenantSparseAlgorithm( cm );
-		if ( !algo.checkInput() || !algo.process() )
-		{
-			System.out.println( algo.getErrorMessage() );
-		}
-		else
-		{
-			final int[] x = algo.getResult();
-			System.out.println( "Solution:" );
-			for ( int i = 0; i < x.length; i++ )
-			{
-				System.out.println( "\t" + i + "\t->\t" + x[ i ] );
-			}
-		}
-
-
-	}
-
 }
