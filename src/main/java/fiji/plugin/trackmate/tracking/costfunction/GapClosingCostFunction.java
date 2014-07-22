@@ -13,8 +13,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
 import net.imglib2.algorithm.OutputAlgorithm;
+import net.imglib2.multithreading.SimpleMultiThreading;
 
-import mpicbg.imglib.multithreading.SimpleMultiThreading;
 import Jama.Matrix;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.tracking.LAPTracker;
