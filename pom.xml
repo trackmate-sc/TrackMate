@@ -32,7 +32,7 @@
 			<artifactId>fiji-compat</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>${jama.groupId}</groupId>
+			<groupId>gov.nist.math</groupId>
 			<artifactId>jama</artifactId>
 		</dependency>
 		<dependency>
