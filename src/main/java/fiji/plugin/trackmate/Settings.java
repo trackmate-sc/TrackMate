@@ -215,7 +215,7 @@ public class Settings
 		{
 			final Rectangle boundingRect = roi.getBounds();
 			this.xstart = boundingRect.x;
-			this.xend = boundingRect.width;
+			this.xend = boundingRect.width + boundingRect.x;
 			this.ystart = boundingRect.y;
 			this.yend = boundingRect.height + boundingRect.y;
 			this.polygon = roi.getPolygon();
