@@ -101,8 +101,14 @@ public class Settings
 	/** The the tracker to use. */
 	public SpotTrackerFactory trackerFactory;
 
+	/** Settings map for {@link SpotDetector}.  
+	 *  @see DetectorKeys for parameters and defaults.  
+	 */
 	public Map< String, Object > detectorSettings = new HashMap< String, Object >();
 
+	/** Settings map for {@link SpotTracker}.
+	 *  @see TrackerKeys for parameters and defaults.
+	 */
 	public Map< String, Object > trackerSettings = new HashMap< String, Object >();
 
 	// Filters
@@ -209,7 +215,7 @@ public class Settings
 		{
 			final Rectangle boundingRect = roi.getBounds();
 			this.xstart = boundingRect.x;
-			this.xend = boundingRect.width;
+			this.xend = boundingRect.width + boundingRect.x;
 			this.ystart = boundingRect.y;
 			this.yend = boundingRect.height + boundingRect.y;
 			this.polygon = roi.getPolygon();
