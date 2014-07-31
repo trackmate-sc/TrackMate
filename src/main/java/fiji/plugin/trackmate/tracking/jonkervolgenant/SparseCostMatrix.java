@@ -128,6 +128,7 @@ public class SparseCostMatrix
 			for ( int j = start[ i ]; j < start[ i ] + number[ i ]; j++ )
 			{
 				final int k = kk[ j ];
+				if ( k >= nCols ) { throw new IllegalArgumentException( "At line " + i + ", the column indices array contains a column index (" + k + ") that is larger than or equal to the declared number of column (" + nCols + ")." ); }
 				colHistogram[ k ]++;
 				if ( k <= previousK ) { throw new IllegalArgumentException( "The column indices array must be sorted within each row. The column elements at line " + i + " are not properly sorted." ); }
 				previousK = k;
