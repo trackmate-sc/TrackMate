@@ -5,13 +5,24 @@ import java.util.Arrays;
 import java.util.List;
 
 import net.imglib2.algorithm.BenchmarkAlgorithm;
-import net.imglib2.util.Util;
+import net.imglib2.algorithm.OutputAlgorithm;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.tracking.jonkervolgenant.JonkerVolgenantSparseAlgorithm;
 import fiji.plugin.trackmate.tracking.jonkervolgenant.SparseCostMatrix;
 import fiji.plugin.trackmate.tracking.sparselap.DefaultCostFunction;
 
-class SparseLinker< K > extends BenchmarkAlgorithm
+/**
+ * Links two lists of objects based on the frame-to-frame linking of the LAP
+ * framework described in Jaqaman <i>et al.</i>, Nature Methods, <b>2008</b>.
+ * <p>
+ * 
+ * 
+ * @author Jean-Yves Tinevez - 2014
+ * 
+ * @param <K>
+ *            the type of the objects to link.
+ */
+class SparseJaqamanLinker< K > extends BenchmarkAlgorithm implements OutputAlgorithm< int[] >
 {
 
 	private final List< K > sources;
@@ -24,13 +35,62 @@ class SparseLinker< K > extends BenchmarkAlgorithm
 
 	private final double alternativeCostFactor;
 
-	public SparseLinker( final List< K > sources, final List< K > targets, final CostFunction< K > costFunction, final double costThreshold, final double alternativeCostFactor )
+	private int[] assignments;
+
+	private double[] costs;
+
+	/**
+	 * Creates a new linker for the two specified object lists.
+	 * 
+	 * @param sources
+	 *            the source objects.
+	 * @param targets
+	 *            the target objects.
+	 * @param costFunction
+	 *            a {@link CostFunction} that can compute a cost to link any
+	 *            source to any target.
+	 * @param costThreshold
+	 *            the cost threshold above which linking will be forbidden.
+	 * @param alternativeCostFactor
+	 *            the Jaqaman et al. 2008 alternative cost factor, required to
+	 *            build the cost for a link <b>not to happen</b>.
+	 * @see {Jaqaman <i>et al.</i>, Nature Methods, <b>2008</b>, Figure 1b.}
+	 */
+	public SparseJaqamanLinker( final List< K > sources, final List< K > targets, final CostFunction< K > costFunction, final double costThreshold, final double alternativeCostFactor )
 	{
 		this.sources = sources;
 		this.targets = targets;
 		this.costFunction = costFunction;
 		this.costThreshold = costThreshold;
 		this.alternativeCostFactor = alternativeCostFactor;
+	}
+
+	/**
+	 * Returns the resulting assignments from this algorithm. This
+	 * <code>int[]</code> array is such that the source object at index
+	 * <code>i</code> is linked to target at index
+	 * <code>j = assignment[i]</code>. If <code>j</code> exceeds or is equal to
+	 * the number of targets, it means that no link is to be built for source
+	 * <code>i</code>.
+	 * 
+	 * @return the assignment array.
+	 * @see #getAssignmentCosts()
+	 */
+	@Override
+	public int[] getResult()
+	{
+		return assignments;
+	}
+
+	/**
+	 * Returns the cost array associated to the assignment result.
+	 * 
+	 * @return the assignment costs.
+	 * @see #getResult()
+	 */
+	public double[] getAssignmentCosts()
+	{
+		return costs;
 	}
 
 	@Override
@@ -118,7 +178,7 @@ class SparseLinker< K > extends BenchmarkAlgorithm
 		/*
 		 * 3. Bottom-right quadrant & Bottom-left quadrant.
 		 * 
-		 * Bottom-left qudrant is not hard: This is the same than for the
+		 * Bottom-left quadrant is not hard: This is the same than for the
 		 * top-right quadrant. It is again a diagonal matrix.
 		 * 
 		 * Bottom-right quadrant is harder. The SUPPINFO of Jaqaman et al. 2008
@@ -189,12 +249,7 @@ class SparseLinker< K > extends BenchmarkAlgorithm
 			index += size;
 		}
 
-		System.out.println( Util.printCoordinates( kk ) );// DEBUG
-		System.out.println( Util.printCoordinates( number ) );// DEBUG
-
 		final SparseCostMatrix scm = new SparseCostMatrix( cc, kk, number, n + m );
-		System.out.println( scm );// DEBUG
-
 		final JonkerVolgenantSparseAlgorithm solver = new JonkerVolgenantSparseAlgorithm( scm );
 		if ( !solver.checkInput() || !solver.process() )
 		{
@@ -202,18 +257,14 @@ class SparseLinker< K > extends BenchmarkAlgorithm
 			return false;
 		}
 
-		final int[] assignments = solver.getResult();
-		for ( int i = 0; i < n; i++ )
+		assignments = solver.getResult();
+		
+		// Store related costs;
+		costs = new double[ assignments.length];
+		for ( int i = 0; i < assignments.length; i++ )
 		{
-			final int targetID = assignments[ i ];
-			if ( targetID < m )
-			{
-				System.out.println( "" + sources.get( i ) + "\t->\t" + targets.get( targetID ) );
-			}
-			else
-			{
-				System.out.println( "" + sources.get( i ) + "\t->\tNOPE" ); // DEBUG
-			}
+			final int j = assignments[i];
+			costs[ i ] = scm.get( i, j, Double.POSITIVE_INFINITY );
 		}
 
 		final long end = System.currentTimeMillis();
@@ -222,6 +273,10 @@ class SparseLinker< K > extends BenchmarkAlgorithm
 		return true;
 	}
 	
+	/*
+	 * MAIN METHOD
+	 */
+
 	public static void main( final String[] args )
 	{
 		final Spot s1 = new Spot( 0, 1, 0, 1, -1, "s1" );
@@ -240,7 +295,7 @@ class SparseLinker< K > extends BenchmarkAlgorithm
 		final CostFunction< Spot > costFunction = new DefaultCostFunction();
 		final double costThreshold = 4d;
 		final double alternativeCostFactor = 1.05;
-		final SparseLinker< Spot > linker = new SparseLinker< Spot >( sources, targets, costFunction, costThreshold, alternativeCostFactor );
+		final SparseJaqamanLinker< Spot > linker = new SparseJaqamanLinker< Spot >( sources, targets, costFunction, costThreshold, alternativeCostFactor );
 
 		if ( !linker.checkInput() || !linker.process() )
 		{
@@ -248,9 +303,22 @@ class SparseLinker< K > extends BenchmarkAlgorithm
 		}
 		else
 		{
+			final int[] assignments = linker.getResult();
+			final double[] costs = linker.getAssignmentCosts();
+			for ( int i = 0; i < sources.size(); i++ )
+			{
+				final int targetID = assignments[ i ];
+				if ( targetID < targets.size() )
+				{
+					System.out.println( "" + sources.get( i ) + "\t->\t" + targets.get( targetID ) + " \tcost = " + costs[ i ] );
+				}
+				else
+				{
+					System.out.println( "" + sources.get( i ) + "\t->\tNOPE\tcost = " + costs[ i ] );
+				}
+			}
+
 			System.out.println( "Done in " + linker.getProcessingTime() + " ms." );
 		}
-
 	}
-	
 }
