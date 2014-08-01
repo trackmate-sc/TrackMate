@@ -22,7 +22,7 @@ import fiji.plugin.trackmate.tracking.sparselap.DefaultCostFunction;
  * @param <K>
  *            the type of the objects to link.
  */
-class SparseJaqamanLinker< K > extends BenchmarkAlgorithm implements OutputAlgorithm< int[] >
+public class SparseJaqamanLinker< K > extends BenchmarkAlgorithm implements OutputAlgorithm< int[] >
 {
 
 	private final List< K > sources;

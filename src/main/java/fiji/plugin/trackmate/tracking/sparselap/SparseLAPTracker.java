@@ -101,6 +101,18 @@ public class SparseLAPTracker extends MultiThreadedBenchmarkAlgorithm implements
 		 */
 
 		final long start = System.currentTimeMillis();
+		
+		final SparseLAPFrameToFrameTracker frameToFrameLinker = new SparseLAPFrameToFrameTracker( spots, settings );
+		frameToFrameLinker.setNumThreads( numThreads );
+		frameToFrameLinker.setLogger( logger );
+
+		if ( !frameToFrameLinker.checkInput() || !frameToFrameLinker.process() )
+		{
+			errorMessage = frameToFrameLinker.getErrorMessage();
+			return false;
+		}
+
+		graph = frameToFrameLinker.getResult();
 
 		final long end = System.currentTimeMillis();
 		processingTime = end - start;
