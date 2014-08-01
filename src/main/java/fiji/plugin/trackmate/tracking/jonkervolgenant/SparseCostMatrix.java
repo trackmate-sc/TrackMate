@@ -232,6 +232,188 @@ public class SparseCostMatrix
 
 		return cm;
 	}
+	
+	/**
+	 * Returns the value stored by this matrix at the specified row and column.
+	 * If a value is not present in the sparse matrix, the specified missing
+	 * value is returned.
+	 * 
+	 * @param i
+	 *            the row.
+	 * @param j
+	 *            the column.
+	 * @param missingValue
+	 *            what to return if the sparse matrix does not store a value at
+	 *            the specified row and column.
+	 * @return the value.
+	 */
+	public final double get( final int i, final int j, final double missingValue )
+	{
+		final int k = Arrays.binarySearch( kk, start[ i ], start[ i ] + number[ i ], j );
+		if ( k < 0 )
+		{
+			return missingValue;
+		}
+		else
+		{
+			return cc[ k ];
+		}
+
+	}
+
+	/**
+	 * Returns the vertical concatenation of this matrix with the specified one.
+	 * So that if this matrix is A and the specified matrix is B, you get
+	 * 
+	 * <pre>
+	 * -----
+	 * | A |
+	 * | B |
+	 * -----
+	 * </pre>
+	 * 
+	 * @param B
+	 *            the matrix to concatenate this matrix with
+	 * @return a new sparse matrix.
+	 * @throws IllegalArgumentException
+	 *             if B does not have the same number of columns as this matrix.
+	 */
+	public final SparseCostMatrix vcat( final SparseCostMatrix B )
+	{
+		if ( nCols != B.nCols ) { throw new IllegalArgumentException( "Matrices A & B do not have the same number of columns. Found " + nCols + " and " + B.nCols + " respectively." ); }
+
+		final double[] cc2 = new double[ cardinality + B.cardinality ];
+		final int[] kk2 = new int[ cardinality + B.cardinality ];
+		final int[] number2 = new int[ nRows + B.nRows ];
+
+		// Append A
+		System.arraycopy( kk, 0, kk2, 0, cardinality );
+		System.arraycopy( cc, 0, cc2, 0, cardinality );
+		System.arraycopy( number, 0, number2, 0, nRows );
+
+		// Append B
+		System.arraycopy( B.kk, 0, kk2, cardinality, B.cardinality );
+		System.arraycopy( B.cc, 0, cc2, cardinality, B.cardinality );
+		System.arraycopy( B.number, 0, number2, nRows, B.nRows );
+
+		return new SparseCostMatrix( cc2, kk2, number2, nCols );
+	}
+
+	/**
+	 * Returns the horizontal concatenation of this matrix with the specified
+	 * one. So that if this matrix is A and the specified matrix is B, you get
+	 * 
+	 * <pre>
+	 * -------
+	 * | A B |
+	 * -------
+	 * </pre>
+	 * 
+	 * @param B
+	 *            the matrix to concatenate this matrix with
+	 * @return a new sparse matrix.
+	 * @throws IllegalArgumentException
+	 *             if B does not have the same number of rows as this matrix.
+	 */
+	public final SparseCostMatrix hcat( final SparseCostMatrix B )
+	{
+		if ( nRows != B.nRows ) { throw new IllegalArgumentException( "Matrices A & B do not have the same number of rows. Found " + nRows + " and " + B.nRows + " respectively." ); }
+
+		final double[] cc2 = new double[ cardinality + B.cardinality ];
+		final int[] kk2 = new int[ cardinality + B.cardinality ];
+		final int[] number2 = new int[ nRows ];
+
+		// Append line by line
+		int Aindex = 0;
+		int Bindex = 0;
+		int Cindex = 0;
+		for ( int i = 0; i < nRows; i++ )
+		{
+			// A
+			System.arraycopy( cc, Aindex, cc2, Cindex, number[ i ] );
+			System.arraycopy( kk, Aindex, kk2, Cindex, number[ i ] );
+			Aindex += number[ i ];
+			Cindex += number[ i ];
+
+			// B
+			System.arraycopy( B.cc, Bindex, cc2, Cindex, B.number[ i ] );
+			// For the columns, we need to increment them by A.nCols
+			for ( int j = 0; j < B.number[ i ]; j++ )
+			{
+				kk2[ Cindex + j ] = B.kk[ Bindex + j ] + nCols;
+			}
+			Bindex += B.number[ i ];
+			Cindex += B.number[ i ];
+
+			// number
+			number2[ i ] = number[ i ] + B.number[ i ];
+		}
+
+		return new SparseCostMatrix( cc2, kk2, number2, nCols + B.nCols );
+	}
+
+	/**
+	 * Returns the transpose of this matrix.
+	 * 
+	 * @return a new sparse matrix.
+	 */
+	public final SparseCostMatrix transpose()
+	{
+		// Build column histogram, which will give the transposed number
+		final int[] number2 = new int[ nCols ];
+		for ( final int j : kk )
+		{
+			number2[ j ]++;
+		}
+
+		// Prepare column & cost storage.
+		final int[][] cols = new int[ nCols ][];
+		final double[][] costs = new double[ nCols ][];
+		for ( int j = 0; j < cols.length; j++ )
+		{
+			cols[ j ] = new int[ number2[ j ] ];
+			costs[ j ] = new double[ number2[ j ] ];
+		}
+
+		// Parse source column array and store at what line they happen. Add to
+		// cost arrays.
+		int currentLine = 0;
+		int previousJ = -1;
+		final int[] colIndex = new int[ nCols ];
+		for ( int k = 0; k < cardinality; k++ )
+		{
+			final int j = kk[ k ];
+			final double c = cc[ k ];
+			
+			if ( j <= previousJ )
+			{
+				currentLine++;
+			}
+			previousJ = j;
+
+			cols[ j ][ colIndex[ j ] ] = currentLine;
+			costs[ j ][ colIndex[ j ] ] = c;
+
+			colIndex[ j ]++;
+		}
+
+		// Concatenate
+		final double[] cc2 = new double[ cardinality ];
+		final int[] kk2 = new int[ cardinality ];
+		int index = 0;
+		for ( int i = 0; i < cols.length; i++ )
+		{
+			System.arraycopy( cols[ i ], 0, kk2, index, number2[ i ] );
+			System.arraycopy( costs[ i ], 0, cc2, index, number2[ i ] );
+			index += number2[ i ];
+		}
+
+		return new SparseCostMatrix( cc2, kk2, number2, nRows );
+	}
+
+	/*
+	 * MAIN METHOD
+	 */
 
 	public static void main( final String[] args )
 	{
