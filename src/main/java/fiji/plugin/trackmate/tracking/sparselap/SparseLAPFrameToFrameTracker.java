@@ -144,6 +144,9 @@ class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorithm imple
 		final double costThreshold = maxDist * maxDist;
 		final double alternativeCostFactor = ( Double ) settings.get( KEY_ALTERNATIVE_LINKING_COST_FACTOR );
 
+		// Instantiate graph
+		graph = new SimpleWeightedGraph< Spot, DefaultWeightedEdge >( DefaultWeightedEdge.class );
+
 		// Prepare threads
 		final Thread[] threads = SimpleMultiThreading.newThreads( numThreads );
 
@@ -206,7 +209,7 @@ class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorithm imple
 							for ( int s = 0; s < assignment.length; s++ )
 							{
 								final int t = assignment[ s ];
-								if ( t < targets.size() )
+								if ( t < targets.size() && s < sources.size() )
 								{
 									final Spot source = sources.get( s );
 									final Spot target = targets.get( t );
