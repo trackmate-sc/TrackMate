@@ -52,10 +52,17 @@ public class TrackingDescriptor implements WizardPanelDescriptor
 			public void run()
 			{
 				final long start = System.currentTimeMillis();
-				trackmate.execTracking();
+				final boolean trackingOK = trackmate.execTracking();
 				final long end = System.currentTimeMillis();
-				logger.log( "Found " + trackmate.getModel().getTrackModel().nTracks( false ) + " tracks.\n" );
-				logger.log( String.format( "Tracking done in %.1f s.\n", ( end - start ) / 1e3f ), Logger.BLUE_COLOR );
+				if ( trackingOK )
+				{
+					logger.log( "Found " + trackmate.getModel().getTrackModel().nTracks( false ) + " tracks.\n" );
+					logger.log( String.format( "Tracking done in %.1f s.\n", ( end - start ) / 1e3f ), Logger.BLUE_COLOR );
+				}
+				else
+				{
+					logger.error( trackmate.getErrorMessage() + '\n' );
+				}
 				SwingUtilities.invokeLater( new Runnable()
 				{
 					@Override
