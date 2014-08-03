@@ -22,7 +22,7 @@ import fiji.plugin.trackmate.tracking.sparselap.DefaultCostFunction;
  * @param <K>
  *            the type of the objects to link.
  */
-public class SparseJaqamanLinker< K > extends BenchmarkAlgorithm implements OutputAlgorithm< int[] >
+public class SparseJaqamanLinker< K > extends BenchmarkAlgorithm implements OutputAlgorithm< int[][] >
 {
 
 	private final List< K > sources;
@@ -35,7 +35,7 @@ public class SparseJaqamanLinker< K > extends BenchmarkAlgorithm implements Outp
 
 	private final double alternativeCostFactor;
 
-	private int[] assignments;
+	private int[][] assignments;
 
 	private double[] costs;
 
@@ -67,17 +67,15 @@ public class SparseJaqamanLinker< K > extends BenchmarkAlgorithm implements Outp
 
 	/**
 	 * Returns the resulting assignments from this algorithm. This
-	 * <code>int[]</code> array is such that the source object at index
-	 * <code>i</code> is linked to target at index
-	 * <code>j = assignment[i]</code>. If <code>j</code> exceeds or is equal to
-	 * the number of targets, it means that no link is to be built for source
-	 * <code>i</code>.
+	 * <code>int[][]</code> array is such that the source object at index
+	 * <code>int[i][0]</code> is linked to target at index
+	 * <code>j = assignment[i][1]</code>.
 	 * 
 	 * @return the assignment array.
 	 * @see #getAssignmentCosts()
 	 */
 	@Override
-	public int[] getResult()
+	public int[][] getResult()
 	{
 		return assignments;
 	}
@@ -111,13 +109,16 @@ public class SparseJaqamanLinker< K > extends BenchmarkAlgorithm implements Outp
 		 * target. The top-left quadrant of the matrix cost will be a cost
 		 * matrix with n lines and m columns.
 		 */
-		final int n = sources.size();
+		int n = sources.size();
 		final int m = targets.size();
 
 		final List< double[] > costsPerLine = new ArrayList< double[] >( n + m );
 		final List< int[] > columnsPerLine = new ArrayList< int[] >( n + m );
 
 		double maxCost = Double.NEGATIVE_INFINITY;
+
+		int[] acceptedSources = new int[ sources.size() ];
+		int acceptedSourcesIndex = 0;
 
 		for ( int i = 0; i < n; i++ )
 		{
@@ -127,6 +128,7 @@ public class SparseJaqamanLinker< K > extends BenchmarkAlgorithm implements Outp
 
 			// Line i: cost to link source nbr i to any target j.
 			final K source = sources.get( i );
+			boolean hasCost = false;
 			for ( int j = 0; j < m; j++ )
 			{
 				final K target = targets.get( j );
@@ -135,6 +137,7 @@ public class SparseJaqamanLinker< K > extends BenchmarkAlgorithm implements Outp
 				{
 					// Accept cost, create an entry in the sparse matrix and
 					// compute max
+					hasCost = true;
 					if ( maxCost < cost )
 					{
 						maxCost = cost;
@@ -142,10 +145,21 @@ public class SparseJaqamanLinker< K > extends BenchmarkAlgorithm implements Outp
 
 					lineCost[ index ] = cost;
 					targetCols[ index ] = j; // therefore the array will be
-												// sorted
+					// sorted
 					index++;
 				}
 			}
+
+			/*
+			 * If the source does not have any non-infinite cost, then do not
+			 * include it in the sparse matrix.
+			 */
+			if ( !hasCost )
+			{
+				continue;
+			}
+
+			acceptedSources[ acceptedSourcesIndex++ ] = i;
 
 			/*
 			 * We finished scanning this line for the top-left quadrant. But the
@@ -156,13 +170,17 @@ public class SparseJaqamanLinker< K > extends BenchmarkAlgorithm implements Outp
 			costsPerLine.add( Arrays.copyOf( lineCost, index ) );
 			columnsPerLine.add( Arrays.copyOf( targetCols, index ) );
 		}
-		
+		// Trim the accepted sources index.
+		acceptedSources = Arrays.copyOf( acceptedSources, acceptedSourcesIndex );
+		n = acceptedSources.length;
+
 		/*
 		 * 2. Top-right quadrant.
 		 * 
 		 * At this stage we know what is the max cost. So we can generate the
 		 * alternate costs.
 		 */
+
 
 		final double alternativeCost = maxCost * alternativeCostFactor;
 		for ( int i = 0; i < n; i++ )
@@ -257,22 +275,43 @@ public class SparseJaqamanLinker< K > extends BenchmarkAlgorithm implements Outp
 			return false;
 		}
 
-		assignments = solver.getResult();
-		
+		final int[] trimmedAssignments = solver.getResult();
+
 		// Store related costs;
-		costs = new double[ assignments.length];
-		for ( int i = 0; i < assignments.length; i++ )
+		final double[] trimmedCosts = new double[ trimmedAssignments.length ];
+		for ( int i = 0; i < trimmedAssignments.length; i++ )
 		{
-			final int j = assignments[i];
-			costs[ i ] = scm.get( i, j, Double.POSITIVE_INFINITY );
+			final int j = trimmedAssignments[ i ];
+			trimmedCosts[ i ] = scm.get( i, j, Double.POSITIVE_INFINITY );
 		}
+
+		// Put indexes back from trimmed list of sources.
+		assignments = new int[ sources.size() ][];
+		costs = new double[ sources.size() ];
+		int assgntIndex = 0;
+		for ( int i = 0; i < acceptedSources.length; i++ )
+		{
+			final int originalSource = acceptedSources[ i ];
+			final int target = trimmedAssignments[ i ];
+			if ( originalSource < n && target < targets.size() )
+			{
+				assignments[ assgntIndex ] = new int[ 2 ];
+				assignments[ assgntIndex ][ 0 ] = originalSource;
+				assignments[ assgntIndex ][ 1 ] = target;
+				costs[ assgntIndex ] = trimmedCosts[ i ];
+				assgntIndex++;
+			}
+		}
+
+		assignments = Arrays.copyOf( assignments, assgntIndex );
+		costs = Arrays.copyOf( costs, assgntIndex );
 
 		final long end = System.currentTimeMillis();
 		processingTime = end - start;
 
 		return true;
 	}
-	
+
 	/*
 	 * MAIN METHOD
 	 */
@@ -283,17 +322,17 @@ public class SparseJaqamanLinker< K > extends BenchmarkAlgorithm implements Outp
 		final Spot s2 = new Spot( 0, 2, 0, 1, -1, "s2" );
 		final Spot s3 = new Spot( 0, 3, 0, 1, -1, "s3" );
 
-		final Spot t1 = new Spot( 1, 0.2, 0, 0.5, -1, "t1" );
-		final Spot t2 = new Spot( 1, 1.2, 0, 0.5, -1, "t2" );
-		final Spot t3 = new Spot( 1, 2.2, 0, 0.5, -1, "t3" );
-		final Spot t4 = new Spot( 1, 3.2, 0, 0.5, -1, "t4" );
-		final Spot t5 = new Spot( 1, 4.2, 0, 0.5, -1, "t5" );
+		final Spot t1 = new Spot( 1, 0.1, 0, 0.5, -1, "t1" );
+		final Spot t2 = new Spot( 1, 1.1, 0, 0.5, -1, "t2" );
+		final Spot t3 = new Spot( 1, 2.1, 0, 0.5, -1, "t3" );
+		final Spot t4 = new Spot( 1, 3.1, 0, 0.5, -1, "t4" );
+		final Spot t5 = new Spot( 1, 4.1, 0, 0.5, -1, "t5" );
 
 		final List< Spot > targets = Arrays.asList( new Spot[] { s1, s2, s3 } );
 		final List< Spot > sources = Arrays.asList( new Spot[] { t1, t2, t3, t4, t5 } );
 
 		final CostFunction< Spot > costFunction = new DefaultCostFunction();
-		final double costThreshold = 4d;
+		final double costThreshold = 2d;
 		final double alternativeCostFactor = 1.05;
 		final SparseJaqamanLinker< Spot > linker = new SparseJaqamanLinker< Spot >( sources, targets, costFunction, costThreshold, alternativeCostFactor );
 
@@ -303,18 +342,19 @@ public class SparseJaqamanLinker< K > extends BenchmarkAlgorithm implements Outp
 		}
 		else
 		{
-			final int[] assignments = linker.getResult();
+			final int[][] assignments = linker.getResult();
 			final double[] costs = linker.getAssignmentCosts();
-			for ( int i = 0; i < sources.size(); i++ )
+			for ( int i = 0; i < assignments.length; i++ )
 			{
-				final int targetID = assignments[ i ];
+				final int sourceID = assignments[ i ][ 0 ];
+				final int targetID = assignments[ i ][ 1 ];
 				if ( targetID < targets.size() )
 				{
-					System.out.println( "" + sources.get( i ) + "\t->\t" + targets.get( targetID ) + " \tcost = " + costs[ i ] );
+					System.out.println( "" + sources.get( sourceID ) + "\t->\t" + targets.get( targetID ) + " \tcost = " + costs[ i ] );
 				}
 				else
 				{
-					System.out.println( "" + sources.get( i ) + "\t->\tNOPE\tcost = " + costs[ i ] );
+					System.out.println( "" + sources.get( sourceID ) + "\t->\tNOPE\tcost = " + costs[ i ] );
 				}
 			}
 

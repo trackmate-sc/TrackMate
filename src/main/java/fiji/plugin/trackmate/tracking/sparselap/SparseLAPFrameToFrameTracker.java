@@ -205,20 +205,18 @@ class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorithm imple
 						synchronized ( graph )
 						{
 							final double[] costs = linker.getAssignmentCosts();
-							final int[] assignment = linker.getResult();
-							for ( int s = 0; s < assignment.length; s++ )
+							final int[][] assignment = linker.getResult();
+							for ( int ia = 0; ia < assignment.length; ia++ )
 							{
-								final int t = assignment[ s ];
-								if ( t < targets.size() && s < sources.size() )
-								{
-									final Spot source = sources.get( s );
-									final Spot target = targets.get( t );
-									graph.addVertex( source );
-									graph.addVertex( target );
-									final double cost = costs[ s ];
-									final DefaultWeightedEdge edge = graph.addEdge( source, target );
-									graph.setEdgeWeight( edge, cost );
-								}
+								final int s = assignment[ ia ][ 0 ];
+								final int t = assignment[ ia ][ 1 ];
+								final double cost = costs[ ia ];
+								final Spot source = sources.get( s );
+								final Spot target = targets.get( t );
+								graph.addVertex( source );
+								graph.addVertex( target );
+								final DefaultWeightedEdge edge = graph.addEdge( source, target );
+								graph.setEdgeWeight( edge, cost );
 							}
 						}
 
