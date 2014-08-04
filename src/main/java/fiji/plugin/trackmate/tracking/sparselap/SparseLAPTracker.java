@@ -108,6 +108,10 @@ public class SparseLAPTracker extends MultiThreadedBenchmarkAlgorithm implements
 
 		final long start = System.currentTimeMillis();
 
+		/*
+		 * 1. Frame to frame linking.
+		 */
+
 		// Prepare settings object
 		final Map< String, Object > ftfSettings = new HashMap< String, Object >();
 		ftfSettings.put( KEY_LINKING_MAX_DISTANCE, settings.get( KEY_LINKING_MAX_DISTANCE ) );
@@ -126,6 +130,11 @@ public class SparseLAPTracker extends MultiThreadedBenchmarkAlgorithm implements
 		}
 
 		graph = frameToFrameLinker.getResult();
+
+		/*
+		 * 2. Gap-closing, merging and splitting.
+		 */
+
 
 		final long end = System.currentTimeMillis();
 		processingTime = end - start;
