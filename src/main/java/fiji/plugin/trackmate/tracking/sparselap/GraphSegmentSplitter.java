@@ -6,9 +6,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
+import org.jgrapht.UndirectedGraph;
 import org.jgrapht.alg.ConnectivityInspector;
 import org.jgrapht.graph.DefaultWeightedEdge;
-import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 
 import fiji.plugin.trackmate.Spot;
 
@@ -20,7 +20,7 @@ public class GraphSegmentSplitter
 
 	private final List< List< Spot >> segmentMiddles;
 
-	public GraphSegmentSplitter( final SimpleDirectedWeightedGraph< Spot, DefaultWeightedEdge > graph )
+	public GraphSegmentSplitter( final UndirectedGraph< Spot, DefaultWeightedEdge > graph )
 	{
 		final ConnectivityInspector< Spot, DefaultWeightedEdge > connectivity = new ConnectivityInspector< Spot, DefaultWeightedEdge >( graph );
 		final List< Set< Spot >> connectedSets = connectivity.connectedSets();
