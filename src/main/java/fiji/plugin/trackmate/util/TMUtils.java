@@ -158,7 +158,7 @@ public class TMUtils {
 	public static final boolean checkParameter(final Map<String, Object> map, final String key, final Class<?> expectedClass, final StringBuilder errorHolder) {
 		final Object obj = map.get(key);
 		if (null == obj) {
-			errorHolder.append("Parameter " + key + " could not be found in settings map.\n");
+			errorHolder.append( "Parameter " + key + " could not be found in settings map, or is null.\n" );
 			return false;
 		}
 		if (!expectedClass.isInstance(obj)) {
@@ -196,7 +196,9 @@ public class TMUtils {
 			for (int i = 0; i < features.length; i++) {
 				val = spot.getFeature(features[i]);
 				if (null != val)
+				{
 					spot.putFeature(features[i], val + dval[i]);
+				}
 			}
 		}
 	}
@@ -259,7 +261,9 @@ public class TMUtils {
 		calibration[0] = imp.getCalibration().pixelWidth;
 		calibration[1] = imp.getCalibration().pixelHeight;
 		if (imp.getNSlices() > 1)
+		{
 			calibration[2] = imp.getCalibration().pixelDepth;
+		}
 		return calibration;
 	}
 
@@ -313,9 +317,13 @@ public class TMUtils {
 		for (int i = 0; i < data.length; i++) {
 			value = data[i];
 			if (value < min)
+			{
 				min = value;
+			}
 			if (value > max)
+			{
 				max = value;
+			}
 		}
 		return new double[] { (max - min), min, max };
 	}
@@ -345,9 +353,13 @@ public class TMUtils {
 		final double[] range = getRange(values);
 		int nBin = (int) (range[0] / binWidth + 1);
 		if (nBin > maxBinNumber)
+		{
 			nBin = maxBinNumber;
+		}
 		else if (nBin < minBinNumber)
+		{
 			nBin = minBinNumber;
+		}
 		return nBin;
 	}
 
@@ -373,10 +385,12 @@ public class TMUtils {
 		int index;
 
 		if (nBins > 0)
+		{
 			for (int i = 0; i < data.length; i++) {
 				index = Math.min((int) Math.floor((data[i] - range[1]) / binWidth), nBins - 1);
 				hist[index]++;
 			}
+		}
 		return hist;
 	}
 
@@ -420,7 +434,9 @@ public class TMUtils {
 
 		double sum = 0;
 		for (int t = 0; t < hist.length; t++)
+		{
 			sum += t * hist[t];
+		}
 
 		double sumB = 0;
 		int wB = 0;
@@ -432,11 +448,15 @@ public class TMUtils {
 		for (int t = 0; t < hist.length; t++) {
 			wB += hist[t]; // Weight Background
 			if (wB == 0)
+			{
 				continue;
+			}
 
 			wF = total - wB; // Weight Foreground
 			if (wF == 0)
+			{
 				break;
+			}
 
 			sumB += (t * hist[t]);
 
