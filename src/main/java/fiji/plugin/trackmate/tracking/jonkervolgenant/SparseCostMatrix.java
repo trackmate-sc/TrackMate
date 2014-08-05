@@ -414,6 +414,19 @@ public class SparseCostMatrix
 		return new SparseCostMatrix( cc2, kk2, number2, nRows );
 	}
 
+	/**
+	 * Replace all the non-infinite values of this matrix by the specified
+	 * value.
+	 * 
+	 * @param value
+	 *            the value to write in this matrix.
+	 */
+	public void fillWith( final double value )
+	{
+		Arrays.fill( cc, value );
+
+	}
+
 	/*
 	 * MAIN METHOD
 	 */
@@ -437,5 +450,6 @@ public class SparseCostMatrix
 		}
 
 	}
+
 
 }
