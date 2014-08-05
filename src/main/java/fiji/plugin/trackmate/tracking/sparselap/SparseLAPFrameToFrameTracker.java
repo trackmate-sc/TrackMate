@@ -105,7 +105,7 @@ class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorithm imple
 		final StringBuilder errorHolder = new StringBuilder();
 		if ( !checkSettingsValidity( settings, errorHolder ) )
 		{
-			errorMessage = errorHolder.toString();
+			errorMessage = BASE_ERROR_MESSAGE + errorHolder.toString();
 			return false;
 		}
 
