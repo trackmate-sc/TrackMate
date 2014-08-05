@@ -1,23 +1,38 @@
 package fiji.plugin.trackmate.tracking.sparselap;
 
 import static fiji.plugin.trackmate.tracking.LAPUtils.checkFeatureMap;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_ALLOW_GAP_CLOSING;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_ALLOW_TRACK_MERGING;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_ALLOW_TRACK_SPLITTING;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_ALTERNATIVE_LINKING_COST_FACTOR;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_CUTOFF_PERCENTILE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_GAP_CLOSING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_GAP_CLOSING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_GAP_CLOSING_MAX_FRAME_GAP;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_MERGING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_MERGING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_SPLITTING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_SPLITTING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_GAP_CLOSING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_MERGING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_SPLITTING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALTERNATIVE_LINKING_COST_FACTOR;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_BLOCKING_VALUE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_CUTOFF_PERCENTILE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_FRAME_GAP;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
+import ij.ImageJ;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,10 +42,17 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
 import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.io.TmXmlReader;
+import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.tracking.jonkervolgenant.JVSUtils;
-import fiji.plugin.trackmate.tracking.sparselap.linker.CostFunction;
+import fiji.plugin.trackmate.tracking.jonkervolgenant.SparseCostMatrix;
+import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
+import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
 public class SparseLAPSegmentTracker implements SpotTracker, Benchmark
 {
@@ -110,79 +132,26 @@ public class SparseLAPSegmentTracker implements SpotTracker, Benchmark
 		final List< Spot > segmentStarts = segmentSplitter.getSegmentStarts();
 		final List< List< Spot >> segmentMiddles = segmentSplitter.getSegmentMiddles();
 
-		final Map< String, Double > gcFeaturePenalties = ( Map< String, Double > ) settings.get( KEY_GAP_CLOSING_FEATURE_PENALTIES );
-		final CostFunction< Spot > gcCostFunction = getCostFunctionFor( gcFeaturePenalties );
-
-		final Map< String, Double > tmFeaturePenalties = ( Map< String, Double > ) settings.get( KEY_MERGING_FEATURE_PENALTIES );
-		final CostFunction< Spot > tmCostFunction = getCostFunctionFor( tmFeaturePenalties );
-
-		final Map< String, Double > tsFeaturePenalties = ( Map< String, Double > ) settings.get( KEY_SPLITTING_FEATURE_PENALTIES );
-		final CostFunction< Spot > tsCostFunction = getCostFunctionFor( tsFeaturePenalties );
-
 		if ( !doTrackMerging && !doTrackSplitting )
 		{
 			// Gap-closing only
-			final int maxFrameInterval = ( Integer ) settings.get( KEY_GAP_CLOSING_MAX_FRAME_GAP );
-			final double maxDistance = ( Double ) settings.get( KEY_GAP_CLOSING_MAX_DISTANCE );
-			final double costThreshold = maxDistance * maxDistance;
 
-			// Array that stores whether a source, resp. a target, takes place
-			// in at least one possible assignment.
-			final boolean[] sourceHasCostArray = new boolean[ segmentEnds.size() ];
-			final boolean[] targetHasCostArray = new boolean[ segmentStarts.size() ];
+			final Map< String, Object > sgc = new HashMap< String, Object >();
+			sgc.put( KEY_GAP_CLOSING_MAX_FRAME_GAP, settings.get( KEY_GAP_CLOSING_MAX_FRAME_GAP ) );
+			sgc.put( KEY_GAP_CLOSING_MAX_DISTANCE, settings.get( KEY_GAP_CLOSING_MAX_DISTANCE ) );
+			sgc.put( KEY_GAP_CLOSING_FEATURE_PENALTIES, settings.get( KEY_GAP_CLOSING_FEATURE_PENALTIES ) );
+			sgc.put( KEY_ALTERNATIVE_LINKING_COST_FACTOR, settings.get( KEY_ALTERNATIVE_LINKING_COST_FACTOR ) );
+			sgc.put( KEY_CUTOFF_PERCENTILE, settings.get( KEY_CUTOFF_PERCENTILE ) );
 
-			// Storage for the possible assignment row and column. We store them
-			// using Sudzik elegant pairing.
-			final List< Long > keys = new ArrayList< Long >();
-			// Corresponding costs.
-			final List< Double > keyCosts = new ArrayList< Double >();
-
-			// Loop over all sources and all targets, and find max cost.
-			double maxCost = Double.NEGATIVE_INFINITY;
-			for ( int i = 0; i < segmentEnds.size(); i++ )
+			final GapClosingCostMatrixCreator costMatrixCreator = new GapClosingCostMatrixCreator( segmentEnds, segmentStarts, sgc );
+			if ( !costMatrixCreator.checkInput() || !costMatrixCreator.process() )
 			{
-				final Spot source = segmentEnds.get( i );
-				for ( int j = 0; j < segmentStarts.size(); j++ )
-				{
-					if ( i == j )
-					{
-						// Cannot link to yourself.
-						continue;
-					}
-
-					final Spot target = segmentStarts.get( j );
-
-					// Check frame interval.
-					final int tdiff = ( int ) target.diffTo( source, Spot.FRAME );
-					if ( tdiff > maxFrameInterval || tdiff < 1 )
-					{
-						continue;
-					}
-
-					// Check max distance
-					final double cost = gcCostFunction.linkingCost( source, target );
-					if ( cost > costThreshold )
-					{
-						continue;
-					}
-
-					if ( cost > maxCost )
-					{
-						maxCost = cost;
-					}
-
-					targetHasCostArray[ j ] = true;
-					sourceHasCostArray[ i ] = true;
-
-					final Long key = Long.valueOf( JVSUtils.szudzikPair( i, j ) );
-					// They will be ordered column by column then line by line
-					// in the list.
-					keys.add( key );
-					keyCosts.add( Double.valueOf( cost ) );
-				}
+				errorMessage = costMatrixCreator.getErrorMessage();
+				return false;
 			}
+			final SparseCostMatrix scm = costMatrixCreator.getResult();
+			System.out.println( scm );// DEBUG
 
-			System.out.println( "Found " + keys.size() + " possible assignments, over " + segmentEnds.size() + " x " + segmentStarts.size() + " combinations." );// DEBUG
 		}
 
 		final long end = System.currentTimeMillis();
@@ -190,19 +159,6 @@ public class SparseLAPSegmentTracker implements SpotTracker, Benchmark
 		return true;
 	}
 
-	protected CostFunction< Spot > getCostFunctionFor( final Map< String, Double > featurePenalties )
-	{
-		final CostFunction< Spot > costFunction;
-		if ( null == featurePenalties || featurePenalties.isEmpty() )
-		{
-			costFunction = new DefaultCostFunction();
-		}
-		else
-		{
-			costFunction = new FeaturePenaltyCostFunction( featurePenalties );
-		}
-		return costFunction;
-	}
 
 	@Override
 	public String getErrorMessage()
@@ -245,8 +201,8 @@ public class SparseLAPSegmentTracker implements SpotTracker, Benchmark
 		ok = ok & checkParameter( settings, KEY_MERGING_MAX_DISTANCE, Double.class, str );
 		ok = ok & checkFeatureMap( settings, KEY_MERGING_FEATURE_PENALTIES, str );
 		// Others
-		ok = ok & checkParameter( settings, KEY_CUTOFF_PERCENTILE, Double.class, str );
 		ok = ok & checkParameter( settings, KEY_ALTERNATIVE_LINKING_COST_FACTOR, Double.class, str );
+		ok = ok & checkParameter( settings, KEY_CUTOFF_PERCENTILE, Double.class, str );
 
 		// Check keys
 		final List< String > mandatoryKeys = new ArrayList< String >();
@@ -259,7 +215,6 @@ public class SparseLAPSegmentTracker implements SpotTracker, Benchmark
 		mandatoryKeys.add( KEY_MERGING_MAX_DISTANCE );
 		mandatoryKeys.add( KEY_ALTERNATIVE_LINKING_COST_FACTOR );
 		mandatoryKeys.add( KEY_CUTOFF_PERCENTILE );
-		mandatoryKeys.add( KEY_BLOCKING_VALUE );
 		final List< String > optionalKeys = new ArrayList< String >();
 		optionalKeys.add( KEY_GAP_CLOSING_FEATURE_PENALTIES );
 		optionalKeys.add( KEY_SPLITTING_FEATURE_PENALTIES );
@@ -269,5 +224,63 @@ public class SparseLAPSegmentTracker implements SpotTracker, Benchmark
 		return ok;
 	}
 
+	public static void main( final String[] args )
+	{
+		final File file = new File( "samples/FakeTracks.xml" );
+		final TmXmlReader reader = new TmXmlReader( file );
+		final Model model = reader.getModel();
+		final SpotCollection spots = model.getSpots();
+		System.out.println( spots );
+
+		final Settings settings0 = new Settings();
+		reader.readSettings( settings0, null, new TrackerProvider(), null, null, null );
+
+		final Map< String, Object > settings1 = new HashMap< String, Object >();
+		settings1.put( KEY_LINKING_MAX_DISTANCE, settings0.trackerSettings.get( KEY_LINKING_MAX_DISTANCE ) );
+		settings1.put( KEY_ALTERNATIVE_LINKING_COST_FACTOR, settings0.trackerSettings.get( KEY_ALTERNATIVE_LINKING_COST_FACTOR ) );
+		final SparseLAPFrameToFrameTracker ftfTracker = new SparseLAPFrameToFrameTracker( spots, settings1 );
+		if ( !ftfTracker.checkInput() || !ftfTracker.process() )
+		{
+			System.err.println( ftfTracker.getErrorMessage() );
+			return;
+		}
+
+		final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph = ftfTracker.getResult();
+		final Map< String, Object > settings2 = new HashMap< String, Object >();
+
+		// Gap closing
+		settings2.put( KEY_ALLOW_GAP_CLOSING, DEFAULT_ALLOW_GAP_CLOSING );
+		settings2.put( KEY_GAP_CLOSING_MAX_FRAME_GAP, DEFAULT_GAP_CLOSING_MAX_FRAME_GAP );
+		settings2.put( KEY_GAP_CLOSING_MAX_DISTANCE, DEFAULT_GAP_CLOSING_MAX_DISTANCE );
+		settings2.put( KEY_GAP_CLOSING_FEATURE_PENALTIES, new HashMap< String, Double >( DEFAULT_GAP_CLOSING_FEATURE_PENALTIES ) );
+		// Track splitting
+		settings2.put( KEY_ALLOW_TRACK_SPLITTING, DEFAULT_ALLOW_TRACK_SPLITTING );
+		settings2.put( KEY_SPLITTING_MAX_DISTANCE, DEFAULT_SPLITTING_MAX_DISTANCE );
+		settings2.put( KEY_SPLITTING_FEATURE_PENALTIES, new HashMap< String, Double >( DEFAULT_SPLITTING_FEATURE_PENALTIES ) );
+		// Track merging
+		settings2.put( KEY_ALLOW_TRACK_MERGING, DEFAULT_ALLOW_TRACK_MERGING );
+		settings2.put( KEY_MERGING_MAX_DISTANCE, DEFAULT_MERGING_MAX_DISTANCE );
+		settings2.put( KEY_MERGING_FEATURE_PENALTIES, new HashMap< String, Double >( DEFAULT_MERGING_FEATURE_PENALTIES ) );
+		// Others
+		settings2.put( KEY_ALTERNATIVE_LINKING_COST_FACTOR, DEFAULT_ALTERNATIVE_LINKING_COST_FACTOR );
+		settings2.put( KEY_CUTOFF_PERCENTILE, DEFAULT_CUTOFF_PERCENTILE );
+
+		final SparseLAPSegmentTracker stsTracker = new SparseLAPSegmentTracker( graph, settings2 );
+		if ( !stsTracker.checkInput() || !stsTracker.process() )
+		{
+			System.err.println( stsTracker.getErrorMessage() );
+			return;
+		}
+
+		model.setTracks( graph, true );
+
+		ImageJ.main( args );
+		final SelectionModel sm = new SelectionModel( model );
+		final HyperStackDisplayer view = new HyperStackDisplayer( model, sm );
+		view.render();
+		final TrackScheme trackScheme = new TrackScheme( model, sm );
+		trackScheme.render();
+
+	}
 
 }
