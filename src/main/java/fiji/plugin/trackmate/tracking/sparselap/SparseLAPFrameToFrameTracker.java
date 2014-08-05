@@ -2,7 +2,6 @@ package fiji.plugin.trackmate.tracking.sparselap;
 
 import static fiji.plugin.trackmate.tracking.LAPUtils.checkFeatureMap;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALTERNATIVE_LINKING_COST_FACTOR;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_CUTOFF_PERCENTILE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
@@ -34,7 +33,7 @@ class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorithm imple
 
 	private SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph;
 
-	private Logger logger;
+	private Logger logger = Logger.VOID_LOGGER;
 
 	private final SpotCollection spots;
 
@@ -257,19 +256,16 @@ class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorithm imple
 		ok = ok & checkParameter( settings, KEY_LINKING_MAX_DISTANCE, Double.class, str );
 		ok = ok & checkFeatureMap( settings, KEY_LINKING_FEATURE_PENALTIES, str );
 		// Others
-		ok = ok & checkParameter( settings, KEY_CUTOFF_PERCENTILE, Double.class, str );
 		ok = ok & checkParameter( settings, KEY_ALTERNATIVE_LINKING_COST_FACTOR, Double.class, str );
 
 		// Check keys
 		final List< String > mandatoryKeys = new ArrayList< String >();
 		mandatoryKeys.add( KEY_LINKING_MAX_DISTANCE );
 		mandatoryKeys.add( KEY_ALTERNATIVE_LINKING_COST_FACTOR );
-		mandatoryKeys.add( KEY_CUTOFF_PERCENTILE );
 		final List< String > optionalKeys = new ArrayList< String >();
 		optionalKeys.add( KEY_LINKING_FEATURE_PENALTIES );
 		ok = ok & checkMapKeys( settings, mandatoryKeys, optionalKeys, str );
 
 		return ok;
 	}
-
 }
