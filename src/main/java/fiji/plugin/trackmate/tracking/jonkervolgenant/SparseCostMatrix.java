@@ -379,16 +379,20 @@ public class SparseCostMatrix
 		// cost arrays.
 		int currentLine = 0;
 		int previousJ = -1;
+		int walked = 0;
 		final int[] colIndex = new int[ nCols ];
 		for ( int k = 0; k < cardinality; k++ )
 		{
 			final int j = kk[ k ];
 			final double c = cc[ k ];
 			
-			if ( j <= previousJ )
+			// Determine whether we changed line.
+			if ( j <= previousJ || walked >= number[ currentLine ] )
 			{
 				currentLine++;
+				walked = 0;
 			}
+			walked++;
 			previousJ = j;
 
 			cols[ j ][ colIndex[ j ] ] = currentLine;
@@ -407,7 +411,6 @@ public class SparseCostMatrix
 			System.arraycopy( costs[ i ], 0, cc2, index, number2[ i ] );
 			index += number2[ i ];
 		}
-
 		return new SparseCostMatrix( cc2, kk2, number2, nRows );
 	}
 
