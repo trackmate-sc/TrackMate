@@ -293,7 +293,7 @@ public class SparseJaqamanLinker< K > extends BenchmarkAlgorithm implements Outp
 		{
 			final int originalSource = acceptedSources[ i ];
 			final int target = trimmedAssignments[ i ];
-			if ( originalSource < n && target < targets.size() )
+			if ( originalSource < sources.size() && target < targets.size() )
 			{
 				assignments[ assgntIndex ] = new int[ 2 ];
 				assignments[ assgntIndex ][ 0 ] = originalSource;
