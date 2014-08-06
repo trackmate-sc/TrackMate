@@ -48,6 +48,8 @@ import fiji.plugin.trackmate.tracking.sparselap.linker.CostFunction;
 public class JaqamanSegmentCostMatrixCreator implements Benchmark, OutputAlgorithm< SparseCostMatrix >
 {
 
+
+
 	private static final String BASE_ERROR_MESSAGE = "[JaqamanSegmentCostMatrixCreator] ";
 
 	private final List< Spot > segmentEnds;
@@ -127,27 +129,30 @@ public class JaqamanSegmentCostMatrixCreator implements Benchmark, OutputAlgorit
 		final CostFunction< Spot > mCostFunction = getCostFunctionFor( mFeaturePenalties );
 		final double mMaxDistance = ( Double ) settings.get( KEY_MERGING_MAX_DISTANCE );
 		final double mCostThreshold = mMaxDistance * mMaxDistance;
+		final boolean allowMerging = ( Boolean ) settings.get( KEY_ALLOW_TRACK_MERGING );
+
+		// Splitting
+		final boolean allowSplitting = ( Boolean ) settings.get( KEY_ALLOW_TRACK_SPLITTING );
 
 		/*
 		 * Generate all middle points list. We have to sort it by the same order
 		 * we will sort the unique list of targets, otherwise the SCM will
 		 * complains it does not receive columns in the right order.
 		 */
-		final List< Spot > allMiddles = new ArrayList< Spot >();
-		for ( final List< Spot > segment : segmentMiddles )
+		final List< Spot > allMiddles;
+		if ( allowMerging || allowSplitting )
 		{
-			allMiddles.addAll( segment );
-		}
-
-		final Comparator< Spot > idComparator = new Comparator< Spot >()
-		{
-			@Override
-			public int compare( final Spot o1, final Spot o2 )
+			allMiddles = new ArrayList< Spot >();
+			for ( final List< Spot > segment : segmentMiddles )
 			{
-				return o1.ID() - o2.ID();
+				allMiddles.addAll( segment );
 			}
-		};
-		Collections.sort( allMiddles, idComparator );
+			Collections.sort( allMiddles, idComparator );
+		}
+		else
+		{
+			allMiddles = Collections.emptyList();
+		}
 
 		/*
 		 * Sources and targets. We need to ensure they will be sorted by
@@ -160,6 +165,9 @@ public class JaqamanSegmentCostMatrixCreator implements Benchmark, OutputAlgorit
 		final HashSet< Spot > targetsM = new HashSet< Spot >();
 		// But we still need to have a linear list with all targets
 		final ArrayList< Spot > targets = new ArrayList< Spot >();
+		// The same for segment ends and starts
+		Collections.sort( segmentEnds, idComparator );
+		Collections.sort( segmentStarts, idComparator );
 
 		// Corresponding costs.
 		final ResizableDoubleArray linkCosts = new ResizableDoubleArray();
@@ -203,6 +211,7 @@ public class JaqamanSegmentCostMatrixCreator implements Benchmark, OutputAlgorit
 			/*
 			 * Iterate over middle points - MERGING.
 			 */
+
 			for ( int j = 0; j < allMiddles.size(); j++ )
 			{
 				final Spot target = allMiddles.get( j );
@@ -232,7 +241,7 @@ public class JaqamanSegmentCostMatrixCreator implements Benchmark, OutputAlgorit
 		 * uniqueSources must be sorted according to the order in the original
 		 * list. Fortunately, duplicate elements are neighbors in the list.
 		 */
-		uniqueSources = new ArrayList< Spot >( );
+		uniqueSources = new ArrayList< Spot >();
 		Spot previousSpot = sources.get( 0 );
 		uniqueSources.add( previousSpot );
 		for ( int ii = 1; ii < sources.size(); ii++ )
@@ -244,7 +253,7 @@ public class JaqamanSegmentCostMatrixCreator implements Benchmark, OutputAlgorit
 				uniqueSources.add( spot );
 			}
 		}
-		
+
 		/*
 		 * uniqueTargets must be sorted by the same comparator that was used to
 		 * sort the mother list. Otherwise we will generate column index not
@@ -446,7 +455,7 @@ public class JaqamanSegmentCostMatrixCreator implements Benchmark, OutputAlgorit
 		settings2.remove( KEY_LINKING_FEATURE_PENALTIES );
 		settings2.remove( KEY_BLOCKING_VALUE );
 		settings2.remove( KEY_LINKING_MAX_DISTANCE );
-		settings2.put( KEY_ALLOW_TRACK_MERGING, true );
+		settings2.put( KEY_ALLOW_TRACK_MERGING, false );
 
 		final GraphSegmentSplitter segmentSplitter = new GraphSegmentSplitter( graph );
 		final List< Spot > segmentEnds = segmentSplitter.getSegmentEnds();
@@ -464,12 +473,20 @@ public class JaqamanSegmentCostMatrixCreator implements Benchmark, OutputAlgorit
 		System.out.println( "Sources: " + costMatrixCreator.getSourceIndex() );
 		System.out.println( "Targets: " + costMatrixCreator.getTargetIndex() );
 
-//		final SelectionModel sm = new SelectionModel( model );
-//		final TrackScheme trackScheme = new TrackScheme( model, sm );
-//		trackScheme.render();
-//		ImageJ.main( args );
-//		final HyperStackDisplayer view = new HyperStackDisplayer( model, sm );
-//		view.render();
+		//		final SelectionModel sm = new SelectionModel( model );
+		//		final TrackScheme trackScheme = new TrackScheme( model, sm );
+		//		trackScheme.render();
+		//		ImageJ.main( args );
+		//		final HyperStackDisplayer view = new HyperStackDisplayer( model, sm );
+		//		view.render();
 	}
 
+	private static final Comparator< Spot > idComparator = new Comparator< Spot >()
+			{
+		@Override
+		public int compare( final Spot o1, final Spot o2 )
+		{
+			return o1.ID() - o2.ID();
+		}
+			};
 }
