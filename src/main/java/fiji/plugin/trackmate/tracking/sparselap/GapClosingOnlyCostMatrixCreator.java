@@ -22,10 +22,16 @@ import fiji.plugin.trackmate.tracking.jonkervolgenant.JVSUtils;
 import fiji.plugin.trackmate.tracking.jonkervolgenant.SparseCostMatrix;
 import fiji.plugin.trackmate.tracking.sparselap.linker.CostFunction;
 
-public class GapClosingCostMatrixCreator implements Benchmark, OutputAlgorithm< SparseCostMatrix >
+/**
+ * A cost matrix creator that deals with the case where only gap-closing events
+ * are allowed.
+ * 
+ * @author Jean-Yves Tinevez
+ */
+public class GapClosingOnlyCostMatrixCreator implements Benchmark, OutputAlgorithm< SparseCostMatrix >
 {
 
-	private static final String BASE_ERROR_MESSAGE = "[GapClosingCostMatrixCreator] ";
+	private static final String BASE_ERROR_MESSAGE = "[GapClosingOnlyCostMatrixCreator] ";
 
 	private String errorMessage;
 
@@ -43,7 +49,7 @@ public class GapClosingCostMatrixCreator implements Benchmark, OutputAlgorithm< 
 
 	private int[] uniqueTargets;
 
-	public GapClosingCostMatrixCreator( final List< Spot > segmentEnds, final List< Spot > segmentStarts, final Map< String, Object > settings )
+	public GapClosingOnlyCostMatrixCreator( final List< Spot > segmentEnds, final List< Spot > segmentStarts, final Map< String, Object > settings )
 	{
 		this.segmentEnds = segmentEnds;
 		this.segmentStarts = segmentStarts;
