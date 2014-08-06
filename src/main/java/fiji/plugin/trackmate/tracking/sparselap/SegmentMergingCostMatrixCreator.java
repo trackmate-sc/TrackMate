@@ -9,7 +9,6 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_FEATURE_PEN
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
-import ij.ImageJ;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -27,17 +26,13 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.providers.TrackerProvider;
-import fiji.plugin.trackmate.tracking.jonkervolgenant.JVSUtils;
 import fiji.plugin.trackmate.tracking.jonkervolgenant.SparseCostMatrix;
 import fiji.plugin.trackmate.tracking.sparselap.linker.CostFunction;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
-import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
 public class SegmentMergingCostMatrixCreator implements Benchmark, OutputAlgorithm< SparseCostMatrix >
 {
@@ -56,7 +51,7 @@ public class SegmentMergingCostMatrixCreator implements Benchmark, OutputAlgorit
 
 	private long processingTime;
 
-	private ArrayList< Spot > uniqueSourcesAsList;
+	private ArrayList< Spot > uniqueSources;
 
 	private ArrayList< Spot > uniqueTargets;
 
@@ -106,15 +101,31 @@ public class SegmentMergingCostMatrixCreator implements Benchmark, OutputAlgorit
 		final double maxDistance = ( Double ) settings.get( KEY_MERGING_MAX_DISTANCE );
 		final double costThreshold = maxDistance * maxDistance;
 
-		/*
-		 * Top-left quadrant
-		 */
+		// Generate all midlle points list. We have to sort it by the same order
+		// we will sort the unique list of targets, otherwise the SCM will
+		// complains it does not receive columns in the right order.
+
+		final List< Spot > allMiddles = new ArrayList< Spot >();
+		for ( final List< Spot > segment : segmentMiddles )
+		{
+			allMiddles.addAll( segment );
+		}
+
+		final Comparator< Spot > idComparator = new Comparator< Spot >()
+		{
+			@Override
+			public int compare( final Spot o1, final Spot o2 )
+			{
+				return o1.ID() - o2.ID();
+			}
+		};
+		Collections.sort( allMiddles, idComparator );
 
 		// Sources and targets. They are sorted by increasing column
 		// then
 		// increasing line (scanning row by row).
-		final ResizableIntArray sourceIndexes = new ResizableIntArray();
-		final ArrayList< Spot > targetIndexes = new ArrayList< Spot >();
+		final ArrayList< Spot > sources = new ArrayList< Spot >();
+		final ArrayList< Spot > targets = new ArrayList< Spot >();
 		// Corresponding costs.
 		final ResizableDoubleArray linkCosts = new ResizableDoubleArray();
 
@@ -123,106 +134,95 @@ public class SegmentMergingCostMatrixCreator implements Benchmark, OutputAlgorit
 		{
 			final Spot source = segmentEnds.get( i );
 
-			for ( int j = 0; j < segmentMiddles.size(); j++ )
+			// Iterate over targets.
+			for ( int j = 0; j < allMiddles.size(); j++ )
 			{
-				if ( i == j )
+				final Spot target = allMiddles.get( j );
+
+				// Check frame interval, must be 1.
+				final int tdiff = ( int ) target.diffTo( source, Spot.FRAME );
+				if ( tdiff != 1 )
 				{
-					// Cannot link to yourself.
 					continue;
 				}
 
-				final List< Spot > trackMiddle = segmentMiddles.get( j );
-
-				for ( int k = 0; k < trackMiddle.size(); k++ )
+				// Check max distance
+				final double cost = costFunction.linkingCost( source, target );
+				if ( cost > costThreshold )
 				{
-
-					final Spot target = trackMiddle.get( k );
-
-					// Check frame interval, must be 1.
-					final int tdiff = ( int ) target.diffTo( source, Spot.FRAME );
-					if ( tdiff != 1 )
-					{
-						continue;
-					}
-
-					// Check max distance
-					final double cost = costFunction.linkingCost( source, target );
-					if ( cost > costThreshold )
-					{
-						continue;
-					}
-
-					sourceIndexes.add( i );
-					targetIndexes.add( target );
-					linkCosts.add( cost );
+					continue;
 				}
+
+				sources.add( source );
+				targets.add( target );
+				linkCosts.add( cost );
 			}
 		}
 
-		sourceIndexes.trimToSize();
-		targetIndexes.trimToSize();
-		linkCosts.trimToSize();
-
-		final int[] uniqueSources = JVSUtils.unique( sourceIndexes.data );
-		uniqueSourcesAsList = new ArrayList< Spot >( uniqueSources.length );
-		for ( int i = 0; i < uniqueSources.length; i++ )
+		// uniqueSources must be sorted according to the order in the original
+		// list. Fortunately, duplicate elements are neighbors in the list.
+		uniqueSources = new ArrayList< Spot >( );
+		Spot previousSpot = sources.get( 0 );
+		uniqueSources.add( previousSpot );
+		for ( int ii = 1; ii < sources.size(); ii++ )
 		{
-			uniqueSourcesAsList.add( segmentEnds.get( i ) );
-		}
-		uniqueTargets = new ArrayList< Spot >( new HashSet< Spot >( targetIndexes ) );
-		final Comparator< Spot > idComparator = new Comparator< Spot >()
-				{
-			@Override
-			public int compare( final Spot o1, final Spot o2 )
+			final Spot spot = sources.get( ii );
+			if ( spot != previousSpot )
 			{
-				return o1.ID() - o2.ID();
+				previousSpot = spot;
+				uniqueSources.add( spot );
 			}
-				};
-				Collections.sort( uniqueTargets, idComparator );
+		}
+		
+		// uniqueTargets must be sorted by the same comparator that was used to
+		// sort the mother list. Otherwise we will generate column index not
+		// strictly in increasing number and the SCM will complain.
+		uniqueTargets = new ArrayList< Spot >( new HashSet< Spot >( targets ) );
+		Collections.sort( uniqueTargets, idComparator );
 
-				// Build the cost matrix
-				final int nCols = uniqueTargets.size();
-				final int nRows = uniqueSources.length;
-				final double[] cc = new double[ sourceIndexes.size ];
-				final int[] kk = new int[ sourceIndexes.size ];
-				final int[] number = new int[ nRows ];
+		// Build the cost matrix
+		final int nCols = uniqueTargets.size();
+		final int nRows = uniqueSources.size();
+		final double[] cc = new double[ sources.size() ];
+		final int[] kk = new int[ sources.size() ];
+		final int[] number = new int[ nRows ];
 
-				int psi = sourceIndexes.data[ 0 ];
-				int rowIndex = 0;
-				int index = -1;
-				int rowCount = -1;
-				for ( int i = 0; i < sourceIndexes.size; i++ )
-				{
-					index++;
-					rowCount++;
-					final int si = sourceIndexes.data[ i ];
-					if ( si != psi )
-					{
-						// new source
-						psi = si;
-						// Store the number of element in the line
-						number[ rowIndex ] = rowCount;
-						// Increment row index, global index and reset row count;
-						rowIndex++;
-						rowCount = 0;
-						// You are now on a new line.
-					}
-
-					cc[ index ] = linkCosts.data[ i ];
-					final Spot target = targetIndexes.get( i );
-					final int sp = Collections.binarySearch( uniqueTargets, target, idComparator );
-					kk[ index ] = sp;
-				}
-				// Terminate the last row
+		Spot previousSource = sources.get( 0 );
+		int rowIndex = 0;
+		int index = -1;
+		int rowCount = -1;
+		for ( int i = 0; i < sources.size(); i++ )
+		{
+			index++;
+			rowCount++;
+			final Spot source = sources.get( i );
+			if ( source != previousSource )
+			{
+				// new source
+				previousSource = source;
 				// Store the number of element in the line
-				rowCount++;
 				number[ rowIndex ] = rowCount;
+				// Increment row index, global index and reset row count;
+				rowIndex++;
+				rowCount = 0;
+				// You are now on a new line.
+			}
 
-				scm = new SparseCostMatrix( cc, kk, number, nCols );
+			cc[ index ] = linkCosts.data[ i ];
+			final Spot target = targets.get( i );
+			final int sp = Collections.binarySearch( uniqueTargets, target, idComparator );
+			kk[ index ] = sp;
+		}
+		// Terminate the last row
+		// Store the number of element in the line
+		rowCount++;
+		number[ rowIndex ] = rowCount;
 
-				final long end = System.currentTimeMillis();
-				processingTime = end - start;
-				return true;
+		scm = new SparseCostMatrix( cc, kk, number, nCols );
+
+		final long end = System.currentTimeMillis();
+		processingTime = end - start;
+		return true;
 	}
 
 	protected CostFunction< Spot > getCostFunctionFor( final Map< String, Double > featurePenalties )
@@ -256,7 +256,7 @@ public class SegmentMergingCostMatrixCreator implements Benchmark, OutputAlgorit
 	 */
 	public List< Spot > getSourceIndex()
 	{
-		return uniqueSourcesAsList;
+		return uniqueSources;
 	}
 
 	/**
@@ -308,7 +308,6 @@ public class SegmentMergingCostMatrixCreator implements Benchmark, OutputAlgorit
 		final TmXmlReader reader = new TmXmlReader( file );
 		final Model model = reader.getModel();
 		final SpotCollection spots = model.getSpots();
-		System.out.println( spots );
 
 		final Settings settings0 = new Settings();
 		reader.readSettings( settings0, null, new TrackerProvider(), null, null, null );
@@ -346,12 +345,12 @@ public class SegmentMergingCostMatrixCreator implements Benchmark, OutputAlgorit
 		System.out.println( "Sources: " + costMatrixCreator.getSourceIndex() );
 		System.out.println( "Targets: " + costMatrixCreator.getTargetIndex() );
 
-		final SelectionModel sm = new SelectionModel( model );
-		final TrackScheme trackScheme = new TrackScheme( model, sm );
-		trackScheme.render();
-		ImageJ.main( args );
-		final HyperStackDisplayer view = new HyperStackDisplayer( model, sm );
-		view.render();
+//		final SelectionModel sm = new SelectionModel( model );
+//		final TrackScheme trackScheme = new TrackScheme( model, sm );
+//		trackScheme.render();
+//		ImageJ.main( args );
+//		final HyperStackDisplayer view = new HyperStackDisplayer( model, sm );
+//		view.render();
 	}
 
 }
