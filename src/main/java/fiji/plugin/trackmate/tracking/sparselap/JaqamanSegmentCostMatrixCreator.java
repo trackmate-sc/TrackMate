@@ -32,6 +32,7 @@ import net.imglib2.algorithm.Benchmark;
 import net.imglib2.algorithm.OutputAlgorithm;
 import net.imglib2.util.Util;
 
+import org.jgrapht.UndirectedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
@@ -45,16 +46,28 @@ import fiji.plugin.trackmate.tracking.LAPUtils;
 import fiji.plugin.trackmate.tracking.jonkervolgenant.SparseCostMatrix;
 import fiji.plugin.trackmate.tracking.sparselap.linker.CostFunction;
 
+/**
+ * This class generates the top-left quadrant of the LAP segment linking cost
+ * matrix, following <code>Jaqaman et al., 2008 Nature Methods</code>. It can
+ * also computes the alternative cost value, to use to complete this quadrant
+ * with the 3 others in the final LAP cost matrix.
+ * <p>
+ * Warning: we changed and simplified some things compared to the original paper
+ * and the MATLAB implementation by Khulud Jaqaman:
+ * <ul>
+ * <li>There is only one alternative cost for all segment linking, and it
+ * calculated as <code>alternativeCostFactor x 90% percentile</code> of all the
+ * non-infinite costs.
+ * <li>Costs are based on square distance +/- feature penalties.
+ * </ul>
+ * 
+ * @author Jean-Yves Tinevez - 2014
+ * 
+ */
 public class JaqamanSegmentCostMatrixCreator implements Benchmark, OutputAlgorithm< SparseCostMatrix >
 {
 
-
-
 	private static final String BASE_ERROR_MESSAGE = "[JaqamanSegmentCostMatrixCreator] ";
-
-	private final List< Spot > segmentEnds;
-
-	private final List< List< Spot >> segmentMiddles;
 
 	private final Map< String, Object > settings;
 
@@ -68,29 +81,24 @@ public class JaqamanSegmentCostMatrixCreator implements Benchmark, OutputAlgorit
 
 	private ArrayList< Spot > uniqueTargets;
 
-	private final List< Spot > segmentStarts;
+	private final UndirectedGraph< Spot, DefaultWeightedEdge > graph;
 
-	public JaqamanSegmentCostMatrixCreator( final List< Spot > segmentEnds, final List< Spot > segmentStarts, final List< List< Spot >> segmentMiddles, final Map< String, Object > settings )
+	private double alternativeCost = -1;
+
+	/**
+	 * Instantiates a cost matrix creator for the top-left quadrant of the
+	 * segment linking cost matrix.
+	 * 
+	 */
+	public JaqamanSegmentCostMatrixCreator( final UndirectedGraph< Spot, DefaultWeightedEdge > graph, final Map< String, Object > settings )
 	{
-		this.segmentEnds = segmentEnds;
-		this.segmentStarts = segmentStarts;
-		this.segmentMiddles = segmentMiddles;
+		this.graph = graph;
 		this.settings = settings;
 	}
 
 	@Override
 	public boolean checkInput()
 	{
-		if ( segmentEnds.isEmpty() )
-		{
-			errorMessage = BASE_ERROR_MESSAGE + "Segment ends list is empty.";
-			return false;
-		}
-		if ( segmentMiddles.isEmpty() )
-		{
-			errorMessage = BASE_ERROR_MESSAGE + "Segment middles list is empty.";
-			return false;
-		}
 		final StringBuilder str = new StringBuilder();
 		if ( !checkSettingsValidity( settings, str ) )
 		{
@@ -122,6 +130,7 @@ public class JaqamanSegmentCostMatrixCreator implements Benchmark, OutputAlgorit
 		final int maxFrameInterval = ( Integer ) settings.get( KEY_GAP_CLOSING_MAX_FRAME_GAP );
 		final double gcMaxDistance = ( Double ) settings.get( KEY_GAP_CLOSING_MAX_DISTANCE );
 		final double gcCostThreshold = gcMaxDistance * gcMaxDistance;
+		final boolean allowGapClosing = ( Boolean ) settings.get( KEY_ALLOW_GAP_CLOSING );
 
 		// Merging
 		@SuppressWarnings( "unchecked" )
@@ -132,7 +141,22 @@ public class JaqamanSegmentCostMatrixCreator implements Benchmark, OutputAlgorit
 		final boolean allowMerging = ( Boolean ) settings.get( KEY_ALLOW_TRACK_MERGING );
 
 		// Splitting
+		@SuppressWarnings( "unchecked" )
+		final Map< String, Double > sFeaturePenalties = ( Map< String, Double > ) settings.get( KEY_SPLITTING_FEATURE_PENALTIES );
+		final CostFunction< Spot > sCostFunction = getCostFunctionFor( sFeaturePenalties );
 		final boolean allowSplitting = ( Boolean ) settings.get( KEY_ALLOW_TRACK_SPLITTING );
+		final double sMaxDistance = ( Double ) settings.get( KEY_SPLITTING_MAX_DISTANCE );
+		final double sCostThreshold = sMaxDistance * sMaxDistance;
+
+		/*
+		 * Find segment ends, starts and middle points.
+		 */
+
+		final boolean mergingOrSplitting = allowMerging || allowSplitting;
+
+		final GraphSegmentSplitter segmentSplitter = new GraphSegmentSplitter( graph, mergingOrSplitting );
+		final List< Spot > segmentEnds = segmentSplitter.getSegmentEnds();
+		final List< Spot > segmentStarts = segmentSplitter.getSegmentStarts();
 
 		/*
 		 * Generate all middle points list. We have to sort it by the same order
@@ -140,8 +164,9 @@ public class JaqamanSegmentCostMatrixCreator implements Benchmark, OutputAlgorit
 		 * complains it does not receive columns in the right order.
 		 */
 		final List< Spot > allMiddles;
-		if ( allowMerging || allowSplitting )
+		if ( mergingOrSplitting )
 		{
+			final List< List< Spot >> segmentMiddles = segmentSplitter.getSegmentMiddles();
 			allMiddles = new ArrayList< Spot >();
 			for ( final List< Spot > segment : segmentMiddles )
 			{
@@ -184,34 +209,41 @@ public class JaqamanSegmentCostMatrixCreator implements Benchmark, OutputAlgorit
 			 * Iterate over segment starts - GAP-CLOSING.
 			 */
 
-			for ( int j = 0; j < segmentStarts.size(); j++ )
+			if ( allowGapClosing )
 			{
-				final Spot target = segmentStarts.get( j );
-
-				// Check frame interval, must be within user specification.
-				final int tdiff = ( int ) target.diffTo( source, Spot.FRAME );
-				if ( tdiff < 1 || tdiff > maxFrameInterval )
+				for ( int j = 0; j < segmentStarts.size(); j++ )
 				{
-					continue;
-				}
+					final Spot target = segmentStarts.get( j );
 
-				// Check max distance
-				final double cost = gcCostFunction.linkingCost( source, target );
-				if ( cost > gcCostThreshold )
-				{
-					continue;
-				}
+					// Check frame interval, must be within user specification.
+					final int tdiff = ( int ) target.diffTo( source, Spot.FRAME );
+					if ( tdiff < 1 || tdiff > maxFrameInterval )
+					{
+						continue;
+					}
 
-				sources.add( source );
-				targetsGC.add( target );
-				targets.add( target );
-				linkCosts.add( cost );
+					// Check max distance
+					final double cost = gcCostFunction.linkingCost( source, target );
+					if ( cost > gcCostThreshold )
+					{
+						continue;
+					}
+
+					sources.add( source );
+					targetsGC.add( target );
+					targets.add( target );
+					linkCosts.add( cost );
+				}
 			}
 
 			/*
 			 * Iterate over middle points - MERGING.
 			 */
 
+			if ( !allowMerging )
+			{
+				continue;
+			}
 			for ( int j = 0; j < allMiddles.size(); j++ )
 			{
 				final Spot target = allMiddles.get( j );
@@ -236,6 +268,54 @@ public class JaqamanSegmentCostMatrixCreator implements Benchmark, OutputAlgorit
 				linkCosts.add( cost );
 			}
 		}
+
+		/*
+		 * Iterate over middle points targeting segment starts - SPLITTING
+		 */
+		if ( allowSplitting )
+		{
+
+			for ( int i = 0; i < allMiddles.size(); i++ )
+			{
+				final Spot source = allMiddles.get( i );
+
+				for ( int j = 0; j < segmentStarts.size(); j++ )
+				{
+					final Spot target = segmentStarts.get( j );
+
+					// Check frame interval, must be 1.
+					final int tdiff = ( int ) target.diffTo( source, Spot.FRAME );
+					if ( tdiff != 1 )
+					{
+						continue;
+					}
+
+					// Check max distance
+					final double cost = sCostFunction.linkingCost( source, target );
+					if ( cost > sCostThreshold )
+					{
+						continue;
+					}
+
+					sources.add( source );
+					targets.add( target );
+					targetsGC.add( target );
+					linkCosts.add( cost );
+
+				}
+			}
+		}
+
+		/*
+		 * Compute the alternative cost from the cost array
+		 */
+
+		linkCosts.trimToSize();
+		this.alternativeCost = computeAlternativeCost( linkCosts.data );
+
+		/*
+		 * Build a sparse cost matrix from this.
+		 */
 
 		/*
 		 * uniqueSources must be sorted according to the order in the original
@@ -309,22 +389,21 @@ public class JaqamanSegmentCostMatrixCreator implements Benchmark, OutputAlgorit
 		rowCount++;
 		number[ rowIndex ] = rowCount;
 
-		System.out.println( "Sources: " + uniqueSources );// DEBUG
-		System.out.println( "Targets: " + uniqueTargets );// DEBUG
-		System.out.println( "Targets GC: " + uniqueTargetsGC );// DEBUG
-		System.out.println( "Targets M: " + uniqueTargetsM );// DEBUG
-
-		System.out.println();// DEBUG
-		System.out.println( "cc: " + Util.printCoordinates( cc ) );// DEBUG
-		System.out.println( "kk: " + Util.printCoordinates( kk ) );// DEBUG
+		System.out.println( "KK: " + Util.printCoordinates( kk ) );// DEBUG
 		System.out.println( "number: " + Util.printCoordinates( number ) );// DEBUG
-		System.out.println();// DEBUG
-
 		scm = new SparseCostMatrix( cc, kk, number, nCols );
 
 		final long end = System.currentTimeMillis();
 		processingTime = end - start;
 		return true;
+	}
+
+	protected double computeAlternativeCost( final double[] data )
+	{
+		// Link Nick Perry original non sparse LAP framework.
+		final double altCostFact = ( Double ) settings.get( KEY_ALTERNATIVE_LINKING_COST_FACTOR );
+		final double percentileCutOff = ( Double ) settings.get( KEY_CUTOFF_PERCENTILE );
+		return altCostFact * Util.computePercentile( data, percentileCutOff );
 	}
 
 	protected CostFunction< Spot > getCostFunctionFor( final Map< String, Double > featurePenalties )
@@ -348,31 +427,42 @@ public class JaqamanSegmentCostMatrixCreator implements Benchmark, OutputAlgorit
 	}
 
 	/**
-	 * Returns the index of the specified source in the generated cost matrix.
+	 * Returns the list of sources in the generated cost matrix.
 	 * 
 	 * @return the list of Spot, such that <code>sourceIndex.get( i )</code> is
-	 *         the index in the specified segment ends list of the row
-	 *         <code>i</code> in the generated cost matrix.
-	 * @see #getTargetIndex()
+	 *         the spot corresponding to the row <code>i</code> in the generated
+	 *         cost matrix.
+	 * @see #getTargetList()
 	 * @see #getResult()
 	 */
-	public List< Spot > getSourceIndex()
+	public List< Spot > getSourceList()
 	{
 		return uniqueSources;
 	}
 
 	/**
-	 * Returns the index of the specified target in the generated cost matrix.
+	 * Returns the list of targets in the generated cost matrix.
 	 * 
 	 * @return the list of Spot, such that <code>targetIndex.get( j )</code> is
-	 *         the index in the specified segment starts list of the column
-	 *         <code>j</code> in the generated cost matrix.
-	 * @see #getSourceIndex()
+	 *         the spot corresponding to the column <code>j</code> in the
+	 *         generated cost matrix.
+	 * @see #getSourceList()
 	 * @see #getResult()
 	 */
-	public List< Spot > getTargetIndex()
+	public List< Spot > getTargetList()
 	{
 		return uniqueTargets;
+	}
+
+	/**
+	 * Returns the alternative cost derived from all the costs calculated when
+	 * creating the cost matrix.
+	 * 
+	 * @return the alternative cost.
+	 */
+	public double getAlternativeCost()
+	{
+		return alternativeCost;
 	}
 
 	@Override
@@ -455,23 +545,21 @@ public class JaqamanSegmentCostMatrixCreator implements Benchmark, OutputAlgorit
 		settings2.remove( KEY_LINKING_FEATURE_PENALTIES );
 		settings2.remove( KEY_BLOCKING_VALUE );
 		settings2.remove( KEY_LINKING_MAX_DISTANCE );
-		settings2.put( KEY_ALLOW_TRACK_MERGING, false );
 
-		final GraphSegmentSplitter segmentSplitter = new GraphSegmentSplitter( graph );
-		final List< Spot > segmentEnds = segmentSplitter.getSegmentEnds();
-		final List< Spot > segmentStarts = segmentSplitter.getSegmentStarts();
-		final List< List< Spot >> segmentMiddles = segmentSplitter.getSegmentMiddles();
+		settings2.put( KEY_ALLOW_GAP_CLOSING, false );
+		settings2.put( KEY_ALLOW_TRACK_MERGING, true );
+		settings2.put( KEY_ALLOW_TRACK_SPLITTING, true );
 
-		final JaqamanSegmentCostMatrixCreator costMatrixCreator = new JaqamanSegmentCostMatrixCreator( segmentEnds, segmentStarts, segmentMiddles, settings2 );
+
+		final JaqamanSegmentCostMatrixCreator costMatrixCreator = new JaqamanSegmentCostMatrixCreator( graph, settings2 );
 		if ( !costMatrixCreator.checkInput() || !costMatrixCreator.process() )
 		{
 			System.err.println( costMatrixCreator.getErrorMessage() );
 			return;
 		}
 
-		System.out.println( costMatrixCreator.getResult() );
-		System.out.println( "Sources: " + costMatrixCreator.getSourceIndex() );
-		System.out.println( "Targets: " + costMatrixCreator.getTargetIndex() );
+		System.out.println( costMatrixCreator.getResult().toString( costMatrixCreator.getSourceList(), costMatrixCreator.getTargetList() ) );
+		System.out.println( "Generated in " + costMatrixCreator.getProcessingTime() + " ms." );
 
 		//		final SelectionModel sm = new SelectionModel( model );
 		//		final TrackScheme trackScheme = new TrackScheme( model, sm );

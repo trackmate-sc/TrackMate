@@ -1,6 +1,8 @@
 package fiji.plugin.trackmate.tracking.jonkervolgenant;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A class to represent a sparse cost matrix.
@@ -145,29 +147,107 @@ public class SparseCostMatrix
 	@Override
 	public String toString()
 	{
+		return toString( Collections.EMPTY_LIST, Collections.EMPTY_LIST );
+	}
+
+	public String toString( final List< ? > rows, final List< ? > columns )
+	{
+		final String[] colNames = new String[ nCols ];
+		// default names
+		for ( int j = 0; j < colNames.length; j++ )
+		{
+			colNames[ j ] = "" + j;
+		}
+		final String[] rowNames = new String[ nRows ];
+		for ( int i = 0; i < rowNames.length; i++ )
+		{
+			rowNames[ i ] = "" + i;
+		}
+
+		for ( int j = 0; j < columns.size(); j++ )
+		{
+			final Object col = columns.get( j );
+			if ( null != col )
+			{
+				final String str = col.toString();
+				colNames[ j ] = str;
+			}
+		}
+
+		int colWidth = -1;
+		for ( final String str : colNames )
+		{
+			if ( str.length() > colWidth )
+			{
+				colWidth = str.length();
+			}
+
+		}
+		colWidth = colWidth + 1;
+		colWidth = Math.max( colWidth, 7 );
+
+		for ( int i = 0; i < rows.size(); i++ )
+		{
+			final Object row = rows.get( i );
+			if ( null != row )
+			{
+				final String str = row.toString();
+				rowNames[ i ] = str;
+			}
+		}
+
+		int rowWidth = -1;
+		for ( final String str : rowNames )
+		{
+			if ( str.length() > rowWidth )
+			{
+				rowWidth = str.length();
+			}
+
+		}
+		rowWidth = rowWidth + 1;
+		rowWidth = Math.max( 7, rowWidth );
+
 		final StringBuilder str = new StringBuilder();
 		str.append( super.toString() + '\n' );
 		str.append( "  " + nRows + " × " + nCols + " matrix with " + cardinality + " non-null elements.\n" );
 
-		str.append( "      |" );
+		for ( int i = 0; i < rowWidth; i++ )
+		{
+			str.append( ' ' );
+		}
+		str.append( '|' );
 		for ( int c = 0; c < nCols; c++ )
 		{
-			str.append( String.format( "%7d", c ) );
+			for ( int i = 0; i < ( colWidth - colNames[ c ].length() ); i++ )
+			{
+				str.append( ' ' );
+			}
+			str.append( colNames[ c ] );
 		}
 		str.append( '\n' );
 
-		str.append( "______|" );
-		final char[] line = new char[ 7 * nCols ];
+		for ( int i = 0; i < rowWidth; i++ )
+		{
+			str.append( '_' );
+		}
+		str.append( '|' );
+		final char[] line = new char[ colWidth * nCols ];
 		Arrays.fill( line, '_' );
 		str.append( line );
 		str.append( '\n' );
 
 		for ( int r = 0; r < nRows; r++ )
 		{
-			str.append( String.format( "%5d |", r ) );
+			str.append( rowNames[ r ] );
+			for ( int i = 0; i < rowWidth - rowNames[ r ].length(); i++ )
+			{
+				str.append( ' ' );
+			}
+			str.append( '|' );
 
 			final StringBuilder rowStr = new StringBuilder();
-			final char[] spaces = new char[ 7 * nCols ];
+			final char[] spaces = new char[ colWidth * nCols ];
 			Arrays.fill( spaces, ' ' );
 			rowStr.append( spaces );
 
@@ -175,7 +255,7 @@ public class SparseCostMatrix
 			{
 				final int col = kk[ k ];
 				final double cost = cc[ k ];
-				rowStr.replace( col * 7, ( col + 1 ) * 7, String.format( "% 7.1f", cost ) );
+				rowStr.replace( col * colWidth, ( col + 1 ) * colWidth, String.format( "% " + colWidth + ".1f", cost ) );
 			}
 			rowStr.append( '\n' );
 			str.append( rowStr.toString() );
@@ -259,6 +339,16 @@ public class SparseCostMatrix
 			return cc[ k ];
 		}
 
+	}
+
+	public int getNCols()
+	{
+		return nCols;
+	}
+
+	public int getNRows()
+	{
+		return nRows;
 	}
 
 	/**
