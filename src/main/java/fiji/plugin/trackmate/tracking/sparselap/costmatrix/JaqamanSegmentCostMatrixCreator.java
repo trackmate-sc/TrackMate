@@ -22,9 +22,7 @@ import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -78,9 +76,9 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 
 	private long processingTime;
 
-	private ArrayList< Spot > uniqueSources;
+	private List< Spot > uniqueSources;
 
-	private ArrayList< Spot > uniqueTargets;
+	private List< Spot > uniqueTargets;
 
 	private final UndirectedGraph< Spot, DefaultWeightedEdge > graph;
 
@@ -173,7 +171,6 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 			{
 				allMiddles.addAll( segment );
 			}
-			Collections.sort( allMiddles, idComparator );
 		}
 		else
 		{
@@ -181,20 +178,10 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 		}
 
 		/*
-		 * Sources and targets. We need to ensure they will be sorted by
-		 * increasing column then increasing row, so we need to maintain two
-		 * lists of targets. We will merge them after having sorted them
-		 * separately.
+		 * Sources and targets.
 		 */
 		final ArrayList< Spot > sources = new ArrayList< Spot >();
-		final HashSet< Spot > targetsGC = new HashSet< Spot >();
-		final HashSet< Spot > targetsM = new HashSet< Spot >();
-		// But we still need to have a linear list with all targets
 		final ArrayList< Spot > targets = new ArrayList< Spot >();
-		// The same for segment ends and starts
-		Collections.sort( segmentEnds, idComparator );
-		Collections.sort( segmentStarts, idComparator );
-
 		// Corresponding costs.
 		final ResizableDoubleArray linkCosts = new ResizableDoubleArray();
 
@@ -231,7 +218,6 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 					}
 
 					sources.add( source );
-					targetsGC.add( target );
 					targets.add( target );
 					linkCosts.add( cost );
 				}
@@ -264,7 +250,6 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 				}
 
 				sources.add( source );
-				targetsM.add( target );
 				targets.add( target );
 				linkCosts.add( cost );
 			}
@@ -300,7 +285,6 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 
 					sources.add( source );
 					targets.add( target );
-					targetsGC.add( target );
 					linkCosts.add( cost );
 
 				}
@@ -312,85 +296,22 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 		 */
 
 		linkCosts.trimToSize();
-		this.alternativeCost = gcCostFunction.aternativeCost( linkCosts.data );
+		alternativeCost = gcCostFunction.aternativeCost( linkCosts.data );
 
 		/*
 		 * Build a sparse cost matrix from this.
 		 */
 
-		/*
-		 * uniqueSources must be sorted according to the order in the original
-		 * list. Fortunately, duplicate elements are neighbors in the list.
-		 */
-		uniqueSources = new ArrayList< Spot >();
-		Spot previousSpot = sources.get( 0 );
-		uniqueSources.add( previousSpot );
-		for ( int ii = 1; ii < sources.size(); ii++ )
+		final DefaultCostMatrixCreator< Spot, Spot > creator = new DefaultCostMatrixCreator< Spot, Spot >( sources, targets, linkCosts.data, alternativeCost );
+		if ( !creator.checkInput() || !creator.process() )
 		{
-			final Spot spot = sources.get( ii );
-			if ( spot != previousSpot )
-			{
-				previousSpot = spot;
-				uniqueSources.add( spot );
-			}
+			errorMessage = creator.getErrorMessage();
+			return false;
 		}
 
-		/*
-		 * uniqueTargets must be sorted by the same comparator that was used to
-		 * sort the mother list. Otherwise we will generate column index not
-		 * strictly in increasing number and the SCM will complain.
-		 */
-		final ArrayList< Spot > uniqueTargetsGC = new ArrayList< Spot >( targetsGC );
-		Collections.sort( uniqueTargetsGC, idComparator );
-		final ArrayList< Spot > uniqueTargetsM = new ArrayList< Spot >( targetsM );
-		Collections.sort( uniqueTargetsM, idComparator );
-		uniqueTargets = new ArrayList< Spot >();
-		uniqueTargets.addAll( uniqueTargetsGC );
-		uniqueTargets.addAll( uniqueTargetsM );
-
-		// Build the cost matrix
-		final int nCols = uniqueTargets.size();
-		final int nRows = uniqueSources.size();
-		final double[] cc = new double[ sources.size() ];
-		final int[] kk = new int[ sources.size() ];
-		final int[] number = new int[ nRows ];
-
-		Spot previousSource = sources.get( 0 );
-		int rowIndex = 0;
-		int index = -1;
-		int rowCount = -1;
-		for ( int i = 0; i < sources.size(); i++ )
-		{
-			index++;
-			rowCount++;
-			final Spot source = sources.get( i );
-			if ( source != previousSource )
-			{
-				// new source
-				previousSource = source;
-				// Store the number of element in the line
-				number[ rowIndex ] = rowCount;
-				// Increment row index, global index and reset row count;
-				rowIndex++;
-				rowCount = 0;
-				// You are now on a new line.
-			}
-
-			cc[ index ] = linkCosts.data[ i ];
-			final Spot target = targets.get( i );
-			int sp = Collections.binarySearch( uniqueTargetsGC, target, idComparator );
-			if ( sp < 0 )
-			{
-				sp = Collections.binarySearch( uniqueTargetsM, target, idComparator ) + uniqueTargetsGC.size();
-			}
-			kk[ index ] = sp;
-		}
-		// Terminate the last row
-		// Store the number of element in the line
-		rowCount++;
-		number[ rowIndex ] = rowCount;
-
-		scm = new SparseCostMatrix( cc, kk, number, nCols );
+		scm = creator.getResult();
+		uniqueSources = creator.getSourceList();
+		uniqueTargets = creator.getTargetList();
 
 		final long end = System.currentTimeMillis();
 		processingTime = end - start;
@@ -456,6 +377,7 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 	 * 
 	 * @return the alternative cost.
 	 */
+	@Override
 	public double getAlternativeCost()
 	{
 		return alternativeCost;
@@ -565,12 +487,4 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 		//		view.render();
 	}
 
-	private static final Comparator< Spot > idComparator = new Comparator< Spot >()
-			{
-		@Override
-		public int compare( final Spot o1, final Spot o2 )
-		{
-			return o1.ID() - o2.ID();
-		}
-			};
 }
