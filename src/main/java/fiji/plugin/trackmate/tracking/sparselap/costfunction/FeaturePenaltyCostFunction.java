@@ -1,9 +1,8 @@
-package fiji.plugin.trackmate.tracking.sparselap;
+package fiji.plugin.trackmate.tracking.sparselap.costfunction;
 
 import java.util.Map;
 
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.tracking.sparselap.linker.CostFunction;
 
 /**
  * A cost function that tempers a square distance cost by difference in feature
@@ -32,13 +31,14 @@ import fiji.plugin.trackmate.tracking.sparselap.linker.CostFunction;
  * @author Jean-Yves Tinevez - 2014
  * 
  */
-public class FeaturePenaltyCostFunction implements CostFunction< Spot >
+public class FeaturePenaltyCostFunction extends SquareDistCostFunction
 {
 
 	private final Map< String, Double > featurePenalties;
 
-	public FeaturePenaltyCostFunction( final Map< String, Double > featurePenalties )
+	public FeaturePenaltyCostFunction( final Map< String, Double > featurePenalties, final double alternativeCostFactor )
 	{
+		super(alternativeCostFactor);
 		this.featurePenalties = featurePenalties;
 	}
 
@@ -59,5 +59,4 @@ public class FeaturePenaltyCostFunction implements CostFunction< Spot >
 
 		return d2 * penalty * penalty;
 	}
-
 }

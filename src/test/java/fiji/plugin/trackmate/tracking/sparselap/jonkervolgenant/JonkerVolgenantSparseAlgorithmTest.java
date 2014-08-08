@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tracking.jonkervolgenant;
+package fiji.plugin.trackmate.tracking.sparselap.jonkervolgenant;
 
 import static org.junit.Assert.assertEquals;
 
@@ -8,6 +8,8 @@ import java.util.Random;
 import org.junit.Test;
 
 import fiji.plugin.trackmate.tracking.hungarian.JonkerVolgenantAlgorithm;
+import fiji.plugin.trackmate.tracking.sparselap.jonkervolgenant.JonkerVolgenantSparseAlgorithm;
+import fiji.plugin.trackmate.tracking.sparselap.jonkervolgenant.SparseCostMatrix;
 
 public class JonkerVolgenantSparseAlgorithmTest
 {

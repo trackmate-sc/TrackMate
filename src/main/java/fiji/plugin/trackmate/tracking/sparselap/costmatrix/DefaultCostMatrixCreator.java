@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tracking.jonkervolgenant;
+package fiji.plugin.trackmate.tracking.sparselap.costmatrix;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,48 +8,83 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
+import fiji.plugin.trackmate.tracking.sparselap.jonkervolgenant.SparseCostMatrix;
+import fiji.plugin.trackmate.tracking.sparselap.linker.JaqamanLinker;
+
 /**
- * A utility class that creates a {@link SparseCostMatrix} from a list of row,
- * column, and cost values.
+ * A {@link CostMatrixCreator} that build a cost matrix from 3 lists containing
+ * the sources, the targets and the associated costs.
  * 
  * @author Jean-Yves Tinevez - 2014
  * 
  * @param <K>
  */
-public class SparseCostMatrixCreator< K extends Comparable< K >, J extends Comparable< J > >
+public class DefaultCostMatrixCreator< K extends Comparable< K >, J extends Comparable< J > > implements CostMatrixCreator< K, J >
 {
 
-	private final SparseCostMatrix scm;
+	private static final String BASE_ERROR_MESSAGE = "[DefaultCostMatrixCreator] ";
 
-	private final ArrayList< K > uniqueRows;
+	private SparseCostMatrix scm;
 
-	private final ArrayList< J > uniqueCols;
+	private ArrayList< K > uniqueRows;
 
-	/**
-	 * Processes a list of possible assignments and generates a new
-	 * {@link SparseCostMatrix} representing the LAP.
-	 * 
-	 * @param rows
-	 *            the rows of the possible assignment in the cost matrix.
-	 * @param cols
-	 *            the columns of the possible assignment in the cost matrix.
-	 * @param costs
-	 *            the costs.
-	 * @throws IllegalArgumentException
-	 *             if:
-	 *             <ul>
-	 *             <li>the row list is null or empty.
-	 *             <li>the row list, column list and cost array do not have all
-	 *             the same size.
-	 *             <li>there are duplicates assignment (same row and column).
-	 *             </ul>
-	 */
-	public SparseCostMatrixCreator( final List< K > rows, final List< J > cols, final double[] costs )
+	private ArrayList< J > uniqueCols;
+
+	private long processingTime;
+
+	private String errorMessage;
+
+	private final double alternativeCost;
+
+	private final List< K > rows;
+
+	private final List< J > cols;
+
+	private final double[] costs;
+
+	public DefaultCostMatrixCreator( final List< K > rows, final List< J > cols, final double[] costs, final double alternativeCost )
 	{
-		if ( rows == null || rows.isEmpty() ) { throw new IllegalArgumentException( "The row list is null or empty." ); }
-		if ( rows.size() != cols.size() ) { throw new IllegalArgumentException( "Row and column lists do not have the same number of elements. Found " + rows.size() + " and " + cols.size() + "." ); }
-		if ( rows.size() != costs.length ) { throw new IllegalArgumentException( "Row list and cost array do not have the same number of elements. Found " + rows.size() + " and " + costs.length + "." ); }
+		this.rows = rows;
+		this.cols = cols;
+		this.costs = costs;
+		this.alternativeCost = alternativeCost;
+	}
 
+	@Override
+	public long getProcessingTime()
+	{
+		return processingTime;
+	}
+
+	@Override
+	public SparseCostMatrix getResult()
+	{
+		return scm;
+	}
+
+	@Override
+	public boolean checkInput()
+	{
+		if ( rows == null || rows.isEmpty() )
+		{
+			errorMessage = BASE_ERROR_MESSAGE + "The row list is null or empty.";
+			return false;
+		}
+		if ( rows.size() != cols.size() ) { 
+			errorMessage = BASE_ERROR_MESSAGE +"Row and column lists do not have the same number of elements. Found " + rows.size() + " and " + cols.size() + "." ;
+			return false;
+		}
+		if ( rows.size() != costs.length )
+		{
+			errorMessage = BASE_ERROR_MESSAGE + "Row list and cost array do not have the same number of elements. Found " + rows.size() + " and " + costs.length + ".";
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public boolean process()
+	{
 		uniqueRows = new ArrayList< K >( new HashSet< K >( rows ) );
 		Collections.sort( uniqueRows );
 		uniqueCols = new ArrayList< J >( new HashSet< J >( cols ) );
@@ -71,7 +106,11 @@ public class SparseCostMatrixCreator< K extends Comparable< K >, J extends Compa
 		for ( int i = 1; i < assignments.size(); i++ )
 		{
 			final Assignment assgn = assignments.get( i );
-			if ( assgn.equals( previousAssgn ) ) { throw new IllegalArgumentException( "Found duplicate assignment at index: " + assgn + "." ); }
+			if ( assgn.equals( previousAssgn ) )
+			{
+				errorMessage = BASE_ERROR_MESSAGE + "Found duplicate assignment at index: " + assgn + ".";
+				return false;
+			}
 			previousAssgn = assgn;
 		}
 
@@ -104,45 +143,35 @@ public class SparseCostMatrixCreator< K extends Comparable< K >, J extends Compa
 		number[ currentRow ] = nOfEl + 1;
 
 		scm = new SparseCostMatrix( cc, kk, number, nCols );
+		return true;
 	}
-	
-	/**
-	 * The objects as they appear in the rows of the sparse cost matrix.
-	 * 
-	 * @return a new List.
-	 * @see #getCostMatrix()
-	 * @see #getMatrixCols()
-	 */
-	public List< K > getMatrixRows()
+
+	@Override
+	public String getErrorMessage()
+	{
+		return errorMessage;
+	}
+
+	@Override
+	public List< K > getSourceList()
 	{
 		return uniqueRows;
 	}
 
-	/**
-	 * The objects as they appear in the columns of the sparse cost matrix.
-	 * 
-	 * @return a new List.
-	 * @see #getCostMatrix()
-	 * @see #getMatrixRows()
-	 */
-	public List< J > getMatrixCols()
+	@Override
+	public List< J > getTargetList()
 	{
 		return uniqueCols;
 	}
-	
-	/**
-	 * Returns the generate {@link SparseCostMatrix}.
-	 * 
-	 * @return a new sparse cost matrix.
-	 * @see #getMatrixRows()
-	 * @see #getMatrixCols()
-	 */
-	public SparseCostMatrix getCostMatrix()
+
+	@Override
+	public double getAlternativeCost()
 	{
-		return scm;
+		return alternativeCost;
 	}
 
-	private final static class Assignment implements Comparable< Assignment >
+
+	public final static class Assignment implements Comparable< Assignment >
 	{
 		private final int r;
 
@@ -150,7 +179,7 @@ public class SparseCostMatrixCreator< K extends Comparable< K >, J extends Compa
 
 		private final double cost;
 
-		private Assignment( final int r, final int c, final double cost )
+		public Assignment( final int r, final int c, final double cost )
 		{
 			this.r = r;
 			this.c = c;
@@ -223,13 +252,9 @@ public class SparseCostMatrixCreator< K extends Comparable< K >, J extends Compa
 			costs[ i ] = next.cost;
 		}
 
-		final SparseCostMatrixCreator< String, String > creator = new SparseCostMatrixCreator< String, String >( rows, cols, costs );
-		final SparseCostMatrix costMatrix = creator.getCostMatrix();
-		final List< String > matrixCols = creator.getMatrixCols();
-		final List< String > matrixRows = creator.getMatrixRows();
-		System.out.println( costMatrix.toString( matrixRows, matrixCols ) );
+		final DefaultCostMatrixCreator< String, String > creator = new DefaultCostMatrixCreator< String, String >( rows, cols, costs, 80 );
 
-		final JonkerVolgenantSparseAlgorithm solver = new JonkerVolgenantSparseAlgorithm( costMatrix );
+		final JaqamanLinker< String, String > solver = new JaqamanLinker< String, String >( creator );
 		if ( !solver.checkInput() || !solver.process() )
 		{
 			System.err.println( solver.getErrorMessage() );
@@ -237,7 +262,7 @@ public class SparseCostMatrixCreator< K extends Comparable< K >, J extends Compa
 		}
 
 		solver.getResult();
-		System.out.println( solver.resultToString( matrixRows, matrixCols ) );
+		System.out.println( solver.resultToString() );
 	}
 
 }

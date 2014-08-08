@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tracking.jonkervolgenant;
+package fiji.plugin.trackmate.tracking.sparselap.jonkervolgenant;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -339,7 +339,16 @@ public class SparseCostMatrix
 		{
 			return cc[ k ];
 		}
+	}
 
+	/**
+	 * Exposes the array of all the non-infinite costs.
+	 * 
+	 * @return the costs.
+	 */
+	public double[] getCosts()
+	{
+		return cc;
 	}
 
 	public int getNCols()

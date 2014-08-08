@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tracking.sparselap;
+package fiji.plugin.trackmate.tracking.sparselap.costmatrix;
 
 import static fiji.plugin.trackmate.tracking.LAPUtils.checkFeatureMap;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_GAP_CLOSING;
@@ -28,10 +28,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import net.imglib2.algorithm.Benchmark;
-import net.imglib2.algorithm.OutputAlgorithm;
-import net.imglib2.util.Util;
-
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
@@ -43,8 +39,13 @@ import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.tracking.LAPUtils;
-import fiji.plugin.trackmate.tracking.jonkervolgenant.SparseCostMatrix;
-import fiji.plugin.trackmate.tracking.sparselap.linker.CostFunction;
+import fiji.plugin.trackmate.tracking.sparselap.GraphSegmentSplitter;
+import fiji.plugin.trackmate.tracking.sparselap.ResizableDoubleArray;
+import fiji.plugin.trackmate.tracking.sparselap.SparseLAPFrameToFrameTracker;
+import fiji.plugin.trackmate.tracking.sparselap.costfunction.CostFunction;
+import fiji.plugin.trackmate.tracking.sparselap.costfunction.FeaturePenaltyCostFunctionPercentile;
+import fiji.plugin.trackmate.tracking.sparselap.costfunction.SquareDistCostFunctionPercentile;
+import fiji.plugin.trackmate.tracking.sparselap.jonkervolgenant.SparseCostMatrix;
 
 /**
  * This class generates the top-left quadrant of the LAP segment linking cost
@@ -64,7 +65,7 @@ import fiji.plugin.trackmate.tracking.sparselap.linker.CostFunction;
  * @author Jean-Yves Tinevez - 2014
  * 
  */
-public class JaqamanSegmentCostMatrixCreator implements Benchmark, OutputAlgorithm< SparseCostMatrix >
+public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot, Spot >
 {
 
 	private static final String BASE_ERROR_MESSAGE = "[JaqamanSegmentCostMatrixCreator] ";
@@ -126,7 +127,7 @@ public class JaqamanSegmentCostMatrixCreator implements Benchmark, OutputAlgorit
 		// Gap closing.
 		@SuppressWarnings( "unchecked" )
 		final Map< String, Double > gcFeaturePenalties = ( Map< String, Double > ) settings.get( KEY_GAP_CLOSING_FEATURE_PENALTIES );
-		final CostFunction< Spot > gcCostFunction = getCostFunctionFor( gcFeaturePenalties );
+		final CostFunction< Spot, Spot > gcCostFunction = getCostFunctionFor( gcFeaturePenalties );
 		final int maxFrameInterval = ( Integer ) settings.get( KEY_GAP_CLOSING_MAX_FRAME_GAP );
 		final double gcMaxDistance = ( Double ) settings.get( KEY_GAP_CLOSING_MAX_DISTANCE );
 		final double gcCostThreshold = gcMaxDistance * gcMaxDistance;
@@ -135,7 +136,7 @@ public class JaqamanSegmentCostMatrixCreator implements Benchmark, OutputAlgorit
 		// Merging
 		@SuppressWarnings( "unchecked" )
 		final Map< String, Double > mFeaturePenalties = ( Map< String, Double > ) settings.get( KEY_MERGING_FEATURE_PENALTIES );
-		final CostFunction< Spot > mCostFunction = getCostFunctionFor( mFeaturePenalties );
+		final CostFunction< Spot, Spot > mCostFunction = getCostFunctionFor( mFeaturePenalties );
 		final double mMaxDistance = ( Double ) settings.get( KEY_MERGING_MAX_DISTANCE );
 		final double mCostThreshold = mMaxDistance * mMaxDistance;
 		final boolean allowMerging = ( Boolean ) settings.get( KEY_ALLOW_TRACK_MERGING );
@@ -143,7 +144,7 @@ public class JaqamanSegmentCostMatrixCreator implements Benchmark, OutputAlgorit
 		// Splitting
 		@SuppressWarnings( "unchecked" )
 		final Map< String, Double > sFeaturePenalties = ( Map< String, Double > ) settings.get( KEY_SPLITTING_FEATURE_PENALTIES );
-		final CostFunction< Spot > sCostFunction = getCostFunctionFor( sFeaturePenalties );
+		final CostFunction< Spot, Spot > sCostFunction = getCostFunctionFor( sFeaturePenalties );
 		final boolean allowSplitting = ( Boolean ) settings.get( KEY_ALLOW_TRACK_SPLITTING );
 		final double sMaxDistance = ( Double ) settings.get( KEY_SPLITTING_MAX_DISTANCE );
 		final double sCostThreshold = sMaxDistance * sMaxDistance;
@@ -311,7 +312,7 @@ public class JaqamanSegmentCostMatrixCreator implements Benchmark, OutputAlgorit
 		 */
 
 		linkCosts.trimToSize();
-		this.alternativeCost = computeAlternativeCost( linkCosts.data );
+		this.alternativeCost = gcCostFunction.aternativeCost( linkCosts.data );
 
 		/*
 		 * Build a sparse cost matrix from this.
@@ -396,24 +397,19 @@ public class JaqamanSegmentCostMatrixCreator implements Benchmark, OutputAlgorit
 		return true;
 	}
 
-	protected double computeAlternativeCost( final double[] data )
+	protected CostFunction< Spot, Spot > getCostFunctionFor( final Map< String, Double > featurePenalties )
 	{
 		// Link Nick Perry original non sparse LAP framework.
 		final double altCostFact = ( Double ) settings.get( KEY_ALTERNATIVE_LINKING_COST_FACTOR );
 		final double percentileCutOff = ( Double ) settings.get( KEY_CUTOFF_PERCENTILE );
-		return altCostFact * Util.computePercentile( data, percentileCutOff );
-	}
-
-	protected CostFunction< Spot > getCostFunctionFor( final Map< String, Double > featurePenalties )
-	{
-		final CostFunction< Spot > costFunction;
+		final CostFunction< Spot, Spot > costFunction;
 		if ( null == featurePenalties || featurePenalties.isEmpty() )
 		{
-			costFunction = new DefaultCostFunction();
+			costFunction = new SquareDistCostFunctionPercentile( altCostFact, percentileCutOff );
 		}
 		else
 		{
-			costFunction = new FeaturePenaltyCostFunction( featurePenalties );
+			costFunction = new FeaturePenaltyCostFunctionPercentile( featurePenalties, altCostFact, percentileCutOff );
 		}
 		return costFunction;
 	}
@@ -427,12 +423,13 @@ public class JaqamanSegmentCostMatrixCreator implements Benchmark, OutputAlgorit
 	/**
 	 * Returns the list of sources in the generated cost matrix.
 	 * 
-	 * @return the list of Spot, such that <code>sourceIndex.get( i )</code> is
+	 * @return the list of Spot, such that <code>sourceList.get( i )</code> is
 	 *         the spot corresponding to the row <code>i</code> in the generated
 	 *         cost matrix.
 	 * @see #getTargetList()
 	 * @see #getResult()
 	 */
+	@Override
 	public List< Spot > getSourceList()
 	{
 		return uniqueSources;
@@ -441,12 +438,13 @@ public class JaqamanSegmentCostMatrixCreator implements Benchmark, OutputAlgorit
 	/**
 	 * Returns the list of targets in the generated cost matrix.
 	 * 
-	 * @return the list of Spot, such that <code>targetIndex.get( j )</code> is
+	 * @return the list of Spot, such that <code>targetList.get( j )</code> is
 	 *         the spot corresponding to the column <code>j</code> in the
 	 *         generated cost matrix.
 	 * @see #getSourceList()
 	 * @see #getResult()
 	 */
+	@Override
 	public List< Spot > getTargetList()
 	{
 		return uniqueTargets;

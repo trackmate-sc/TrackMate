@@ -1,8 +1,10 @@
-package fiji.plugin.trackmate.tracking.jonkervolgenant;
+package fiji.plugin.trackmate.tracking.sparselap.jonkervolgenant;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+
+import fiji.plugin.trackmate.tracking.sparselap.jonkervolgenant.SparseCostMatrix;
 
 public class SparseCostMatrixTest
 {

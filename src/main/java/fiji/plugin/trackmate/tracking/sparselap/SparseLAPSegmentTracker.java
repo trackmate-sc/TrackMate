@@ -9,7 +9,6 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_DIS
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_FRAME_GAP;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
 
-import java.util.List;
 import java.util.Map;
 
 import net.imglib2.algorithm.Benchmark;
@@ -20,9 +19,8 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.tracking.jonkervolgenant.JonkerVolgenantSparseAlgorithm;
-import fiji.plugin.trackmate.tracking.jonkervolgenant.SparseCostMatrix;
-import fiji.plugin.trackmate.tracking.sparselap.linker.JaqamanNoLinkingComplementor;
+import fiji.plugin.trackmate.tracking.sparselap.costmatrix.JaqamanSegmentCostMatrixCreator;
+import fiji.plugin.trackmate.tracking.sparselap.linker.JaqamanLinker;
 
 /**
  * This class tracks deals with the second step of tracking according to the LAP
@@ -123,47 +121,14 @@ public class SparseLAPSegmentTracker implements SpotTracker, Benchmark
 
 		logger.setProgress( 0d );
 		logger.setStatus( "Creating the segment linking cost matrix..." );
-		final JaqamanSegmentCostMatrixCreator cmCreator = new JaqamanSegmentCostMatrixCreator( graph, settings );
-		if ( !cmCreator.checkInput() || !cmCreator.process() )
+		final JaqamanSegmentCostMatrixCreator costMatrixCreator = new JaqamanSegmentCostMatrixCreator( graph, settings );
+		final JaqamanLinker< Spot, Spot > linker = new JaqamanLinker< Spot, Spot >( costMatrixCreator );
+		if ( !linker.checkInput() || !linker.process() )
 		{
-			errorMessage = cmCreator.getErrorMessage();
+			errorMessage = linker.getErrorMessage();
 			return false;
 		}
 
-		final SparseCostMatrix topLeft = cmCreator.getResult();
-		final double alternativeCost = cmCreator.getAlternativeCost();
-		final List< Spot > sourceList = cmCreator.getSourceList();
-		final List< Spot > targetList = cmCreator.getTargetList();
-
-		/*
-		 * No linking costs.
-		 */
-
-		logger.setProgress( 0.4d );
-		logger.setStatus( "Completing the cost matrix..." );
-		final JaqamanNoLinkingComplementor cmCompl = new JaqamanNoLinkingComplementor( topLeft, alternativeCost );
-		if ( !cmCompl.checkInput() || !cmCompl.process() )
-		{
-			errorMessage = cmCompl.getErrorMessage();
-			return false;
-		}
-
-		final SparseCostMatrix cm = cmCompl.getResult();
-
-		/*
-		 * Solving the cost matrix.
-		 */
-
-		logger.setProgress( 0.5d );
-		logger.setStatus( "Solving the segment assignment problem..." );
-		final JonkerVolgenantSparseAlgorithm solver = new JonkerVolgenantSparseAlgorithm( cm );
-		if ( !solver.checkInput() || !solver.process() )
-		{
-			errorMessage = solver.getErrorMessage();
-			return false;
-		}
-
-		final int[] assignments = solver.getResult();
 
 		/*
 		 * Create links in graph.
@@ -171,17 +136,17 @@ public class SparseLAPSegmentTracker implements SpotTracker, Benchmark
 
 		logger.setProgress( 0.9d );
 		logger.setStatus( "Creating links..." );
-		for ( int i = 0; i < assignments.length; i++ )
+
+		final Map< Spot, Spot > assignment = linker.getResult();
+		final Map< Spot, Double > costs = linker.getAssignmentCosts();
+
+		for ( final Spot source : assignment.keySet() )
 		{
-			final int j = assignments[ i ];
-			if ( i < sourceList.size() && j < targetList.size() )
-			{
-				final Spot source = sourceList.get( i );
-				final Spot target = targetList.get( j );
-				final DefaultWeightedEdge edge = graph.addEdge( source, target );
-				final double cost = cm.get( i, j, Double.POSITIVE_INFINITY );
-				graph.setEdgeWeight( edge, cost );
-			}
+			final Spot target = assignment.get( source );
+			final DefaultWeightedEdge edge = graph.addEdge( source, target );
+
+			final double cost = costs.get( source );
+			graph.setEdgeWeight( edge, cost );
 		}
 
 		logger.setProgress( 1d );

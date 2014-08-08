@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tracking.jonkervolgenant;
+package fiji.plugin.trackmate.tracking.sparselap.jonkervolgenant;
 
 import java.util.Arrays;
 

@@ -24,10 +24,13 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.tracking.sparselap.linker.CostFunction;
+import fiji.plugin.trackmate.tracking.sparselap.costfunction.CostFunction;
+import fiji.plugin.trackmate.tracking.sparselap.costfunction.FeaturePenaltyCostFunction;
+import fiji.plugin.trackmate.tracking.sparselap.costfunction.SquareDistCostFunction;
+import fiji.plugin.trackmate.tracking.sparselap.costmatrix.JaqamanLinkingCostMatrixCreator;
 import fiji.plugin.trackmate.tracking.sparselap.linker.JaqamanLinker;
 
-class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorithm implements SpotTracker
+public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorithm implements SpotTracker
 {
 	private final static String BASE_ERROR_MESSAGE = "[SparseLAPFrameToFrameTracker] ";
 
@@ -43,7 +46,7 @@ class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorithm imple
 	 * CONSTRUCTOR
 	 */
 
-	SparseLAPFrameToFrameTracker( final SpotCollection spots, final Map< String, Object > settings )
+	public SparseLAPFrameToFrameTracker( final SpotCollection spots, final Map< String, Object > settings )
 	{
 		this.spots = spots;
 		this.settings = settings;
@@ -130,18 +133,18 @@ class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorithm imple
 		// Prepare cost function
 		@SuppressWarnings( "unchecked" )
 		final Map< String, Double > featurePenalties = ( Map< String, Double > ) settings.get( KEY_LINKING_FEATURE_PENALTIES );
-		final CostFunction< Spot > costFunction;
+		final double alternativeCostFactor = ( Double ) settings.get( KEY_ALTERNATIVE_LINKING_COST_FACTOR );
+		final CostFunction< Spot, Spot > costFunction;
 		if ( null == featurePenalties || featurePenalties.isEmpty() )
 		{
-			costFunction = new DefaultCostFunction();
+			costFunction = new SquareDistCostFunction( alternativeCostFactor );
 		}
 		else
 		{
-			costFunction = new FeaturePenaltyCostFunction( featurePenalties );
+			costFunction = new FeaturePenaltyCostFunction( featurePenalties, alternativeCostFactor );
 		}
 		final Double maxDist = ( Double ) settings.get( KEY_LINKING_MAX_DISTANCE );
 		final double costThreshold = maxDist * maxDist;
-		final double alternativeCostFactor = ( Double ) settings.get( KEY_ALTERNATIVE_LINKING_COST_FACTOR );
 
 		// Instantiate graph
 		graph = new SimpleWeightedGraph< Spot, DefaultWeightedEdge >( DefaultWeightedEdge.class );
@@ -189,7 +192,8 @@ class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorithm imple
 						 * Run the linker.
 						 */
 
-						final JaqamanLinker< Spot > linker = new JaqamanLinker< Spot >( sources, targets, costFunction, costThreshold, alternativeCostFactor );
+						final JaqamanLinkingCostMatrixCreator< Spot, Spot > creator = new JaqamanLinkingCostMatrixCreator< Spot, Spot >( sources, targets, costFunction, costThreshold );
+						final JaqamanLinker< Spot, Spot > linker = new JaqamanLinker< Spot, Spot >( creator );
 						if ( !linker.checkInput() || !linker.process() )
 						{
 							errorMessage = linker.getErrorMessage();
@@ -203,15 +207,12 @@ class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorithm imple
 
 						synchronized ( graph )
 						{
-							final double[] costs = linker.getAssignmentCosts();
-							final int[][] assignment = linker.getResult();
-							for ( int ia = 0; ia < assignment.length; ia++ )
+							final Map< Spot, Double > costs = linker.getAssignmentCosts();
+							final Map< Spot, Spot > assignment = linker.getResult();
+							for ( final Spot source : assignment.keySet() )
 							{
-								final int s = assignment[ ia ][ 0 ];
-								final int t = assignment[ ia ][ 1 ];
-								final double cost = costs[ ia ];
-								final Spot source = sources.get( s );
-								final Spot target = targets.get( t );
+								final double cost = costs.get( source );
+								final Spot target = assignment.get( source );
 								graph.addVertex( source );
 								graph.addVertex( target );
 								final DefaultWeightedEdge edge = graph.addEdge( source, target );

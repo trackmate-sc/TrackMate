@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import net.imglib2.algorithm.Benchmark;
 import net.imglib2.algorithm.OutputAlgorithm;
-import fiji.plugin.trackmate.tracking.jonkervolgenant.SparseCostMatrix;
+import fiji.plugin.trackmate.tracking.sparselap.jonkervolgenant.SparseCostMatrix;
 
 /**
  * This algorithm <b>complements</b> the top-left quadrant of a cost matrix with
