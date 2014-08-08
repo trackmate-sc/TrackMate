@@ -33,7 +33,7 @@ import fiji.plugin.trackmate.TrackModel;
  * track, or a fusion or merging point, or a gap (see below).
  * <p>
  * Schematically, if a track is arranged as follow:
- *
+ * 
  * <pre>
  * A
  * |
@@ -51,33 +51,33 @@ import fiji.plugin.trackmate.TrackModel;
  * |
  * H
  * </pre>
- *
+ * 
  * then
- *
+ * 
  * <pre>
  * A - B,
  * C - D - E - F,
  * I - J - K - L,
  * G - H
  * </pre>
- *
+ * 
  * are convex branches. This class generates the decomposition of a track in
  * these branches.
  * <p>
  * In the example above, note that another acceptable decomposition could be:
- *
+ * 
  * <pre>
  * A,
  * B - C - D - E - F - G,
  * I - J - K - L,
  * H
  * </pre>
- *
+ * 
  * depending on to what branch you choose to attach splitting or merging points.
  * This class attaches split points to the end of the early branch, and merge
  * points to the beginning of the late branch. So that for our example above,
  * the output is indeed:
- *
+ * 
  * <pre>
  * A - B,
  * C - D - E - F,
@@ -89,7 +89,7 @@ import fiji.plugin.trackmate.TrackModel;
  * first one specifies whether we can violate the convex branch contract and
  * have branches that contain a spot with more than one predecessor and one
  * successor. For instance, if a track is as follow:
- *
+ * 
  * <pre>
  * A
  * |
@@ -101,23 +101,23 @@ import fiji.plugin.trackmate.TrackModel;
  * |  |
  * E  G
  * </pre>
- *
+ * 
  * the default output would be:
- *
+ * 
  * <pre>
  * A - B - C,
  * D - E,
  * F - G
  * </pre>
- *
+ * 
  * Setting the <code>forbidMiddleLinks</code> flag to <code>false</code> would
  * give instead:
- *
+ * 
  * <pre>
  * A - B - C - D - E,
  * F - G
  * </pre>
- *
+ * 
  * which yields fewer and longer branches.
  * <p>
  * Some branches may have gaps in them, that is two spots separated by more than
@@ -126,13 +126,13 @@ import fiji.plugin.trackmate.TrackModel;
  * one frame, set the <code>forbidGaps</code> flag to <code>true</code>. In that
  * case, a track arranged as following (<code>ø</code> is a missing detection in
  * a frame, or a gap):
- *
+ * 
  * <pre>
  * A - B - C - ø - D - E - F
  * </pre>
- *
+ * 
  * will be split in two branches.
- *
+ * 
  * <pre>
  * A - B - C,
  * D - E - F
@@ -142,7 +142,7 @@ import fiji.plugin.trackmate.TrackModel;
  * the decomposition. Only spots belonging to visible tracks are taken into
  * account. This class also outputs the links that were cut in the source model
  * to generate these branches.
- *
+ * 
  * @author Jean-Yves Tinevez - 2014
  */
 public class ConvexBranchesDecomposition implements Algorithm, Benchmark
@@ -405,6 +405,10 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 			}
 			else
 			{
+				/*
+				 * Complex point: we have more than 2 successor and more than 2
+				 * predecessors.
+				 */
 				boolean found = false;
 				for ( final Spot predecessor : predecessors )
 				{
@@ -417,6 +421,12 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 						graph.removeEdge( predecessor, spot );
 						links.add( makeLink( predecessor, spot ) );
 					}
+				}
+				if ( !forbidMiddleLinks )
+				{
+					// Possibly extend the branch requires resetting this to
+					// false, so that we do not destroy on outgoing link.
+					found = false;
 				}
 				for ( final Spot successor : successors )
 				{
@@ -515,8 +525,39 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 		{
 			final Spot source = link.get( 0 );
 			final Spot target = link.get( 1 );
-			final List< Spot > targetBranch = firstSpots.get( target );
-			final List< Spot > sourceBranch = lastSpots.get( source );
+
+			List< Spot > targetBranch = firstSpots.get( target );
+			if ( targetBranch == null )
+			{
+				/*
+				 * We could not find this link's target in the map of first
+				 * spots. Most likely this means that the link targets a middle
+				 * spot, because the branch decomposition authorized it. So we
+				 * have to find it...
+				 */
+				for ( final List< Spot > branch : branches )
+				{
+					if ( branch.contains( target ) )
+					{
+						targetBranch = branch;
+						break;
+					}
+				}
+			}
+
+			List< Spot > sourceBranch = lastSpots.get( source );
+			if ( sourceBranch == null )
+			{
+				for ( final List< Spot > branch : branches )
+				{
+					if ( branch.contains( source ) )
+					{
+						sourceBranch = branch;
+						break;
+					}
+				}
+			}
+
 			branchGraph.addEdge( sourceBranch, targetBranch );
 		}
 
@@ -623,6 +664,25 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 		 * Links, as a collection of 2-elements list.
 		 */
 		public Collection< List< Spot >> links;
-	}
 
+		@Override
+		public String toString()
+		{
+			final StringBuilder str = new StringBuilder();
+			str.append( super.toString() + ";\n" );
+			str.append( "  Branches:\n" );
+			int index = 0;
+			for ( final List< Spot > branch : branches )
+			{
+				str.append( String.format( "    % 4d:\t" + branch + '\n', index++ ) );
+			}
+			str.append( "  Links:\n" );
+			index = 0;
+			for ( final List< Spot > link : links )
+			{
+				str.append( String.format( "    % 4d:\t" + link.get( 0 ) + "\t→\t" + link.get( 1 ) + '\n', index++ ) );
+			}
+			return str.toString();
+		}
+	}
 }
