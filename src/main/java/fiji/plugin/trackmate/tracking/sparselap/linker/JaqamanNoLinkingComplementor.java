@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tracking.sparselap;
+package fiji.plugin.trackmate.tracking.sparselap.linker;
 
 import java.util.Arrays;
 

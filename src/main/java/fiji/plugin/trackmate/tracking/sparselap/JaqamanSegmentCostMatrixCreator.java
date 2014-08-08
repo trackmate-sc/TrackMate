@@ -389,8 +389,6 @@ public class JaqamanSegmentCostMatrixCreator implements Benchmark, OutputAlgorit
 		rowCount++;
 		number[ rowIndex ] = rowCount;
 
-		System.out.println( "KK: " + Util.printCoordinates( kk ) );// DEBUG
-		System.out.println( "number: " + Util.printCoordinates( number ) );// DEBUG
 		scm = new SparseCostMatrix( cc, kk, number, nCols );
 
 		final long end = System.currentTimeMillis();

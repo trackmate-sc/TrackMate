@@ -1,9 +1,30 @@
 package fiji.plugin.trackmate.tracking.sparselap;
 
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_ALTERNATIVE_LINKING_COST_FACTOR;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_CUTOFF_PERCENTILE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_GAP_CLOSING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_GAP_CLOSING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_GAP_CLOSING_MAX_FRAME_GAP;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_MERGING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_MERGING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_SPLITTING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_SPLITTING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_GAP_CLOSING;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_MERGING;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_SPLITTING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALTERNATIVE_LINKING_COST_FACTOR;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_CUTOFF_PERCENTILE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_FRAME_GAP;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_MAX_DISTANCE;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,10 +34,17 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
 import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.io.TmXmlReader;
+import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.tracking.LAPUtils;
 import fiji.plugin.trackmate.tracking.SpotTracker;
+import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
+import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
 public class SparseLAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotTracker
 {
@@ -24,7 +52,7 @@ public class SparseLAPTracker extends MultiThreadedBenchmarkAlgorithm implements
 
 	private SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph;
 
-	private Logger logger;
+	private Logger logger = Logger.VOID_LOGGER;
 
 	private final SpotCollection spots;
 
@@ -133,6 +161,34 @@ public class SparseLAPTracker extends MultiThreadedBenchmarkAlgorithm implements
 		 * 2. Gap-closing, merging and splitting.
 		 */
 
+		// Prepare settings object
+		final Map< String, Object > slSettings = new HashMap< String, Object >();
+
+		slSettings.put( KEY_ALLOW_GAP_CLOSING, settings.get( KEY_ALLOW_GAP_CLOSING ) );
+		slSettings.put( KEY_GAP_CLOSING_FEATURE_PENALTIES, settings.get( KEY_GAP_CLOSING_FEATURE_PENALTIES ) );
+		slSettings.put( KEY_GAP_CLOSING_MAX_DISTANCE, settings.get( KEY_GAP_CLOSING_MAX_DISTANCE ) );
+		slSettings.put( KEY_GAP_CLOSING_MAX_FRAME_GAP, settings.get( KEY_GAP_CLOSING_MAX_FRAME_GAP ) );
+
+		slSettings.put( KEY_ALLOW_TRACK_SPLITTING, settings.get( KEY_ALLOW_TRACK_SPLITTING ) );
+		slSettings.put( KEY_SPLITTING_FEATURE_PENALTIES, settings.get( KEY_SPLITTING_FEATURE_PENALTIES ) );
+		slSettings.put( KEY_SPLITTING_MAX_DISTANCE, settings.get( KEY_SPLITTING_MAX_DISTANCE ) );
+
+		slSettings.put( KEY_ALLOW_TRACK_MERGING, settings.get( KEY_ALLOW_TRACK_MERGING ) );
+		slSettings.put( KEY_MERGING_FEATURE_PENALTIES, settings.get( KEY_MERGING_FEATURE_PENALTIES ) );
+		slSettings.put( KEY_MERGING_MAX_DISTANCE, settings.get( KEY_MERGING_MAX_DISTANCE ) );
+
+		slSettings.put( KEY_ALTERNATIVE_LINKING_COST_FACTOR, settings.get( KEY_ALTERNATIVE_LINKING_COST_FACTOR ) );
+		slSettings.put( KEY_CUTOFF_PERCENTILE, settings.get( KEY_CUTOFF_PERCENTILE ) );
+
+		// Solve.
+		final SparseLAPSegmentTracker segmentLinker = new SparseLAPSegmentTracker( graph, slSettings );
+		segmentLinker.setLogger( logger );
+
+		if ( !segmentLinker.checkInput() || !segmentLinker.process() )
+		{
+			errorMessage = segmentLinker.getErrorMessage();
+			return false;
+		}
 
 		final long end = System.currentTimeMillis();
 		processingTime = end - start;
@@ -145,6 +201,53 @@ public class SparseLAPTracker extends MultiThreadedBenchmarkAlgorithm implements
 	public void setLogger( final Logger logger )
 	{
 		this.logger = logger;
+	}
+
+	public static void main( final String[] args )
+	{
+		final File file = new File( "samples/FakeTracks.xml" );
+		final TmXmlReader reader = new TmXmlReader( file );
+		final Model model = reader.getModel();
+
+		final Settings settings0 = new Settings();
+		reader.readSettings( settings0, null, new TrackerProvider(), null, null, null );
+
+
+		// Gap closing
+		final Map< String, Object > settings = settings0.trackerSettings;
+		settings.put( KEY_ALLOW_GAP_CLOSING, true );
+		settings.put( KEY_GAP_CLOSING_MAX_FRAME_GAP, DEFAULT_GAP_CLOSING_MAX_FRAME_GAP );
+		settings.put( KEY_GAP_CLOSING_MAX_DISTANCE, DEFAULT_GAP_CLOSING_MAX_DISTANCE );
+		settings.put( KEY_GAP_CLOSING_FEATURE_PENALTIES, new HashMap< String, Double >( DEFAULT_GAP_CLOSING_FEATURE_PENALTIES ) );
+		// Track splitting
+		settings.put( KEY_ALLOW_TRACK_SPLITTING, true );
+		settings.put( KEY_SPLITTING_MAX_DISTANCE, DEFAULT_SPLITTING_MAX_DISTANCE );
+		settings.put( KEY_SPLITTING_FEATURE_PENALTIES, new HashMap< String, Double >( DEFAULT_SPLITTING_FEATURE_PENALTIES ) );
+		// Track merging
+		settings.put( KEY_ALLOW_TRACK_MERGING, true );
+		settings.put( KEY_MERGING_MAX_DISTANCE, DEFAULT_MERGING_MAX_DISTANCE );
+		settings.put( KEY_MERGING_FEATURE_PENALTIES, new HashMap< String, Double >( DEFAULT_MERGING_FEATURE_PENALTIES ) );
+		// Others
+		settings.put( KEY_ALTERNATIVE_LINKING_COST_FACTOR, DEFAULT_ALTERNATIVE_LINKING_COST_FACTOR );
+		settings.put( KEY_CUTOFF_PERCENTILE, DEFAULT_CUTOFF_PERCENTILE );
+
+		final SparseLAPTracker tracker = new SparseLAPTracker( model.getSpots(), settings );
+		tracker.setLogger( Logger.DEFAULT_LOGGER );
+		if ( !tracker.checkInput() || !tracker.process() )
+		{
+			System.err.println( tracker.getErrorMessage() );
+			return;
+		}
+
+		model.setTracks( tracker.graph, true );
+
+		ij.ImageJ.main( args );
+		final SelectionModel sm = new SelectionModel( model );
+		final HyperStackDisplayer view = new HyperStackDisplayer( model, sm );
+		view.render();
+		final TrackScheme trackScheme = new TrackScheme( model, sm );
+		trackScheme.render();
+
 	}
 
 }

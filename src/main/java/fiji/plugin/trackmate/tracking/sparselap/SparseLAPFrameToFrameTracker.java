@@ -25,7 +25,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.tracking.sparselap.linker.CostFunction;
-import fiji.plugin.trackmate.tracking.sparselap.linker.SparseJaqamanLinker;
+import fiji.plugin.trackmate.tracking.sparselap.linker.JaqamanLinker;
 
 class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorithm implements SpotTracker
 {
@@ -189,7 +189,7 @@ class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorithm imple
 						 * Run the linker.
 						 */
 
-						final SparseJaqamanLinker< Spot > linker = new SparseJaqamanLinker< Spot >( sources, targets, costFunction, costThreshold, alternativeCostFactor );
+						final JaqamanLinker< Spot > linker = new JaqamanLinker< Spot >( sources, targets, costFunction, costThreshold, alternativeCostFactor );
 						if ( !linker.checkInput() || !linker.process() )
 						{
 							errorMessage = linker.getErrorMessage();
@@ -219,14 +219,14 @@ class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorithm imple
 							}
 						}
 
-						logger.setProgress( 0.5f * progress.incrementAndGet() / framePairs.size() );
+						logger.setProgress( progress.incrementAndGet() / framePairs.size() );
 
 					}
 				}
 			};
 		}
 
-		logger.setStatus( "Solving for track segments..." );
+		logger.setStatus( "Frame to frame linking..." );
 		SimpleMultiThreading.startAndJoin( threads );
 		logger.setProgress( 0.5f );
 		logger.setStatus( "" );

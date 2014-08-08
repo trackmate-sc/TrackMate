@@ -210,7 +210,8 @@ public class SparseCostMatrix
 
 		final StringBuilder str = new StringBuilder();
 		str.append( super.toString() + '\n' );
-		str.append( "  " + nRows + " × " + nCols + " matrix with " + cardinality + " non-null elements.\n" );
+		str.append( "  " + nRows + " × " + nCols + " matrix with " + cardinality + " non-null elements. " );
+		str.append( String.format( "Density = %.2f%%.\n", ( double ) cardinality / ( nRows * nCols ) * 100d ) );
 
 		for ( int i = 0; i < rowWidth; i++ )
 		{

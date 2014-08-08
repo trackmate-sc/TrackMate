@@ -22,7 +22,7 @@ import fiji.plugin.trackmate.tracking.sparselap.DefaultCostFunction;
  * @param <K>
  *            the type of the objects to link.
  */
-public class SparseJaqamanLinker< K > extends BenchmarkAlgorithm implements OutputAlgorithm< int[][] >
+public class JaqamanLinker< K > extends BenchmarkAlgorithm implements OutputAlgorithm< int[][] >
 {
 
 	private final List< K > sources;
@@ -56,7 +56,7 @@ public class SparseJaqamanLinker< K > extends BenchmarkAlgorithm implements Outp
 	 *            build the cost for a link <b>not to happen</b>.
 	 * @see {Jaqaman <i>et al.</i>, Nature Methods, <b>2008</b>, Figure 1b.}
 	 */
-	public SparseJaqamanLinker( final List< K > sources, final List< K > targets, final CostFunction< K > costFunction, final double costThreshold, final double alternativeCostFactor )
+	public JaqamanLinker( final List< K > sources, final List< K > targets, final CostFunction< K > costFunction, final double costThreshold, final double alternativeCostFactor )
 	{
 		this.sources = sources;
 		this.targets = targets;
@@ -334,7 +334,7 @@ public class SparseJaqamanLinker< K > extends BenchmarkAlgorithm implements Outp
 		final CostFunction< Spot > costFunction = new DefaultCostFunction();
 		final double costThreshold = 2d;
 		final double alternativeCostFactor = 1.05;
-		final SparseJaqamanLinker< Spot > linker = new SparseJaqamanLinker< Spot >( sources, targets, costFunction, costThreshold, alternativeCostFactor );
+		final JaqamanLinker< Spot > linker = new JaqamanLinker< Spot >( sources, targets, costFunction, costThreshold, alternativeCostFactor );
 
 		if ( !linker.checkInput() || !linker.process() )
 		{
