@@ -515,7 +515,6 @@ public class SparseCostMatrix
 	public void fillWith( final double value )
 	{
 		Arrays.fill( cc, value );
-
 	}
 
 	/*

@@ -1,6 +1,10 @@
 package fiji.plugin.trackmate.tracking.jonkervolgenant;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import net.imglib2.algorithm.Benchmark;
 import net.imglib2.algorithm.OutputAlgorithm;
@@ -41,6 +45,8 @@ import fiji.plugin.trackmate.tracking.hungarian.JonkerVolgenantAlgorithm;
  */
 public class JonkerVolgenantSparseAlgorithm implements OutputAlgorithm< int[] >, Benchmark
 {
+
+	private static final String BASE_ERROR_MESSAGE = "[JonkerVolgenantSparseAlgorithm] ";
 
 	private int[] output;
 
@@ -355,6 +361,11 @@ public class JonkerVolgenantSparseAlgorithm implements OutputAlgorithm< int[] >,
 	@Override
 	public boolean checkInput()
 	{
+		if ( cm.nRows > cm.nCols )
+		{
+			errorMessage = BASE_ERROR_MESSAGE + "This solver converges only if the cost matrix has more rows than column. Found " + cm.nRows + " rows and " + cm.nCols + " columns.";
+			return false;
+		}
 		return true;
 	}
 
@@ -381,5 +392,131 @@ public class JonkerVolgenantSparseAlgorithm implements OutputAlgorithm< int[] >,
 	public int[] getResult()
 	{
 		return output;
+	}
+
+	public String resultToString()
+	{
+		return resultToString( Collections.emptyList(), Collections.emptyList() );
+	}
+
+	public String resultToString( final List< ? > rows, final List< ? > cols )
+	{
+		if ( null == output ) { return "Not solved yet. Process the algorithm prior to calling this method."; }
+
+		final String[] colNames = new String[ cm.nCols ];
+		// default names
+		for ( int j = 0; j < colNames.length; j++ )
+		{
+			colNames[ j ] = "" + j;
+		}
+		final String[] rowNames = new String[ cm.nRows ];
+		for ( int i = 0; i < rowNames.length; i++ )
+		{
+			rowNames[ i ] = "" + i;
+		}
+
+		for ( int j = 0; j < cols.size(); j++ )
+		{
+			final Object col = cols.get( j );
+			if ( null != col )
+			{
+				final String str = col.toString();
+				colNames[ j ] = str;
+			}
+		}
+
+		int colWidth = -1;
+		for ( final String str : colNames )
+		{
+			if ( str.length() > colWidth )
+			{
+				colWidth = str.length();
+			}
+
+		}
+		colWidth = colWidth + 1;
+		colWidth = Math.max( colWidth, 7 );
+
+		final Set< String > unassignedColNames = new HashSet< String >( Arrays.asList( colNames ) );
+
+		for ( int i = 0; i < rows.size(); i++ )
+		{
+			final Object row = rows.get( i );
+			if ( null != row )
+			{
+				final String str = row.toString();
+				rowNames[ i ] = str;
+			}
+		}
+
+		int rowWidth = -1;
+		for ( final String str : rowNames )
+		{
+			if ( str.length() > rowWidth )
+			{
+				rowWidth = str.length();
+			}
+
+		}
+		rowWidth = rowWidth + 1;
+		rowWidth = Math.max( 7, rowWidth );
+
+		final StringBuilder str = new StringBuilder();
+		final double totalCost = cm.totalAssignmentCost( output );
+		final int digits = ( int ) ( Math.log10( totalCost ) + 2 );
+
+		str.append( String.format( "Optimal assignment with total cost = %" + digits + ".1f:\n", totalCost ) );
+		for ( int i = 0; i < output.length; i++ )
+		{
+			final int j = output[ i ];
+			final double cost = cm.get( i, j, Double.POSITIVE_INFINITY );
+
+			{
+				for ( int k = 0; k < ( rowWidth - rowNames[ i ].length() ); k++ )
+				{
+					str.append( ' ' );
+				}
+				str.append( rowNames[ i ] );
+			}
+			str.append( " → " );
+			{
+				str.append( colNames[ j ] );
+				unassignedColNames.remove( colNames[ j ] );
+				for ( int k = 0; k < ( colWidth - colNames[ j ].length() ); k++ )
+				{
+					str.append( ' ' );
+				}
+			}
+			str.append( String.format( " cost = %" + digits + ".1f\n", cost ) );
+		}
+		if ( cm.nCols > cm.nRows )
+		{
+			str.append( "Unassigned columns:\n" );
+			for ( final String ucn : unassignedColNames )
+			{
+				{
+					for ( int k = 0; k < rowWidth / 2; k++ )
+					{
+						str.append( ' ' );
+					}
+					str.append( 'ø' );
+					for ( int k = 0; k < rowWidth - rowWidth / 2 - 1; k++ )
+					{
+						str.append( ' ' );
+					}
+				}
+				str.append( " → " );
+				{
+					str.append( ucn );
+					for ( int k = 0; k < ( colWidth - ucn.length() ); k++ )
+					{
+						str.append( ' ' );
+					}
+				}
+				str.append( '\n' );
+			}
+		}
+
+		return str.toString();
 	}
 }
