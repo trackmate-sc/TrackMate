@@ -133,18 +133,18 @@ public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorith
 		// Prepare cost function
 		@SuppressWarnings( "unchecked" )
 		final Map< String, Double > featurePenalties = ( Map< String, Double > ) settings.get( KEY_LINKING_FEATURE_PENALTIES );
-		final double alternativeCostFactor = ( Double ) settings.get( KEY_ALTERNATIVE_LINKING_COST_FACTOR );
 		final CostFunction< Spot, Spot > costFunction;
 		if ( null == featurePenalties || featurePenalties.isEmpty() )
 		{
-			costFunction = new SquareDistCostFunction( alternativeCostFactor );
+			costFunction = new SquareDistCostFunction();
 		}
 		else
 		{
-			costFunction = new FeaturePenaltyCostFunction( featurePenalties, alternativeCostFactor );
+			costFunction = new FeaturePenaltyCostFunction( featurePenalties );
 		}
 		final Double maxDist = ( Double ) settings.get( KEY_LINKING_MAX_DISTANCE );
 		final double costThreshold = maxDist * maxDist;
+		final double alternativeCostFactor = ( Double ) settings.get( KEY_ALTERNATIVE_LINKING_COST_FACTOR );
 
 		// Instantiate graph
 		graph = new SimpleWeightedGraph< Spot, DefaultWeightedEdge >( DefaultWeightedEdge.class );
@@ -192,7 +192,7 @@ public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorith
 						 * Run the linker.
 						 */
 
-						final JaqamanLinkingCostMatrixCreator< Spot, Spot > creator = new JaqamanLinkingCostMatrixCreator< Spot, Spot >( sources, targets, costFunction, costThreshold );
+						final JaqamanLinkingCostMatrixCreator< Spot, Spot > creator = new JaqamanLinkingCostMatrixCreator< Spot, Spot >( sources, targets, costFunction, costThreshold, alternativeCostFactor, 1d );
 						final JaqamanLinker< Spot, Spot > linker = new JaqamanLinker< Spot, Spot >( creator );
 						if ( !linker.checkInput() || !linker.process() )
 						{

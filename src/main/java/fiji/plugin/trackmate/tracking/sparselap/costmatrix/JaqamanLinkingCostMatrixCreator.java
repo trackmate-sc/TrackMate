@@ -42,12 +42,18 @@ public class JaqamanLinkingCostMatrixCreator< K extends Comparable< K >, J exten
 
 	private double alternativeCost;
 
-	public JaqamanLinkingCostMatrixCreator( final Iterable< K > sources, final Iterable< J > targets, final CostFunction< K, J > costFunction, final double costThreshold )
+	private final double alternativeCostFactor;
+
+	private final double percentile;
+
+	public JaqamanLinkingCostMatrixCreator( final Iterable< K > sources, final Iterable< J > targets, final CostFunction< K, J > costFunction, final double costThreshold, final double alternativeCostFactor, final double percentile )
 	{
 		this.sources = sources;
 		this.targets = targets;
 		this.costFunction = costFunction;
 		this.costThreshold = costThreshold;
+		this.alternativeCostFactor = alternativeCostFactor;
+		this.percentile = percentile;
 	}
 
 	@Override
@@ -91,8 +97,7 @@ public class JaqamanLinkingCostMatrixCreator< K extends Comparable< K >, J exten
 		}
 		costs.trimToSize();
 
-		alternativeCost = costFunction.aternativeCost( costs.data );
-		final DefaultCostMatrixCreator< K, J > cmCreator = new DefaultCostMatrixCreator< K, J >( accSources, accTargets, costs.data, alternativeCost );
+		final DefaultCostMatrixCreator< K, J > cmCreator = new DefaultCostMatrixCreator< K, J >( accSources, accTargets, costs.data, alternativeCostFactor, percentile );
 		if ( !cmCreator.checkInput() || !cmCreator.process() )
 		{
 			errorMessage = cmCreator.getErrorMessage();
@@ -102,6 +107,7 @@ public class JaqamanLinkingCostMatrixCreator< K extends Comparable< K >, J exten
 		scm = cmCreator.getResult();
 		sourceList = cmCreator.getSourceList();
 		targetList = cmCreator.getTargetList();
+		alternativeCost = cmCreator.computeAlternativeCosts();
 
 		final long end = System.currentTimeMillis();
 		processingTime = end - start;
@@ -120,30 +126,12 @@ public class JaqamanLinkingCostMatrixCreator< K extends Comparable< K >, J exten
 		return scm;
 	}
 
-	/**
-	 * Returns the list of sources in the generated cost matrix.
-	 * 
-	 * @return the list of object, such that <code>sourceList.get( i )</code> is
-	 *         the source corresponding to the row <code>i</code> in the
-	 *         generated cost matrix.
-	 * @see #getTargetList()
-	 * @see #getResult()
-	 */
 	@Override
 	public List< K > getSourceList()
 	{
 		return sourceList;
 	}
 
-	/**
-	 * Returns the list of targets in the generated cost matrix.
-	 * 
-	 * @return the list of objects, such that <code>targetList.get( j )</code>
-	 *         is the target corresponding to the column <code>j</code> in the
-	 *         generated cost matrix.
-	 * @see #getSourceList()
-	 * @see #getResult()
-	 */
 	@Override
 	public List< J > getTargetList()
 	{
@@ -157,7 +145,13 @@ public class JaqamanLinkingCostMatrixCreator< K extends Comparable< K >, J exten
 	}
 
 	@Override
-	public double getAlternativeCost()
+	public double getAlternativeCostForSource( final K source )
+	{
+		return alternativeCost;
+	}
+
+	@Override
+	public double getAlternativeCostForTarget( final J target )
 	{
 		return alternativeCost;
 	}

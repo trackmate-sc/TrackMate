@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.tracking.sparselap.linker;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.Map;
 
 import net.imglib2.algorithm.BenchmarkAlgorithm;
 import net.imglib2.algorithm.OutputAlgorithm;
+import net.imglib2.util.Util;
 import fiji.plugin.trackmate.tracking.sparselap.costfunction.CostFunction;
 import fiji.plugin.trackmate.tracking.sparselap.costmatrix.CostMatrixCreator;
 import fiji.plugin.trackmate.tracking.sparselap.jonkervolgenant.JonkerVolgenantSparseAlgorithm;
@@ -103,27 +105,64 @@ public class JaqamanLinker< K extends Comparable< K >, J extends Comparable< J >
 			return false;
 		}
 
-		final SparseCostMatrix cm = costMatrixCreator.getResult();
+		final SparseCostMatrix tl = costMatrixCreator.getResult();
 		final List< K > matrixRows = costMatrixCreator.getSourceList();
 		final List< J > matrixCols = costMatrixCreator.getTargetList();
-		final double alternativeCost = costMatrixCreator.getAlternativeCost();
 
 		/*
 		 * Complement the cost matrix with alternative no linking cost matrix.
 		 */
 
-		final JaqamanNoLinkingComplementor cmCompl = new JaqamanNoLinkingComplementor( cm, alternativeCost );
-		if ( !cmCompl.checkInput() || !cmCompl.process() )
+		final int nCols = tl.getNCols();
+		final int nRows = tl.getNRows();
+
+		/*
+		 * Top right
+		 */
+
+		final double[] cctr = new double[ nRows ];
+		final int[] kktr = new int[ nRows ];
+		for ( int i = 0; i < nRows; i++ )
 		{
-			errorMessage = cmCompl.getErrorMessage();
-			return false;
+			kktr[ i ] = i;
+			cctr[ i ] = costMatrixCreator.getAlternativeCostForSource( matrixRows.get( i ) );
 		}
-		final SparseCostMatrix full = cmCompl.getResult();
+		final int[] numbertr = new int[ nRows ];
+		Arrays.fill( numbertr, 1 );
+		final SparseCostMatrix tr = new SparseCostMatrix( cctr, kktr, numbertr, nRows );
+
+		/*
+		 * Bottom left
+		 */
+		final double[] ccbl = new double[ nCols ];
+		final int[] kkbl = new int[ nCols ];
+		for ( int i = 0; i < kkbl.length; i++ )
+		{
+			kkbl[ i ] = i;
+			ccbl[ i ] = costMatrixCreator.getAlternativeCostForTarget( matrixCols.get( i ) );
+		}
+		final int[] numberbl = new int[ nCols ];
+		Arrays.fill( numberbl, 1 );
+		final SparseCostMatrix bl = new SparseCostMatrix( ccbl, kkbl, numberbl, nCols );
+
+		/*
+		 * Bottom right.
+		 * 
+		 * Alt. cost is the overall min of alternative costs. This deviate or
+		 * extend a bit the u-track code.
+		 */
+		final double minCost = Math.min( Util.computeMin( ccbl ), Util.computeMin( cctr ) );
+		final SparseCostMatrix br = tl.transpose();
+		br.fillWith( minCost );
+
+		/*
+		 * Stitch them together
+		 */
+		final SparseCostMatrix full = ( tl.hcat( tr ) ).vcat( bl.hcat( br ) );
 
 		/*
 		 * Solve the full cost matrix.
 		 */
-
 		final JonkerVolgenantSparseAlgorithm solver = new JonkerVolgenantSparseAlgorithm( full );
 		if ( !solver.checkInput() || !solver.process() )
 		{
@@ -207,18 +246,18 @@ public class JaqamanLinker< K extends Comparable< K >, J extends Comparable< J >
 
 		if ( !unassignedSources.isEmpty() )
 		{
-		str.append( "Found " + unassignedSources.size() + " unassigned sources:\n" );
-		for ( final K us : unassignedSources )
-		{
+			str.append( "Found " + unassignedSources.size() + " unassigned sources:\n" );
+			for ( final K us : unassignedSources )
+			{
 				str.append( String.format( "%1$-" + sw + "s → %2$" + tw + "s\n", us.toString(), 'ø' ) );
 			}
 		}
 
 		if ( !unassignedTargets.isEmpty() )
 		{
-		str.append( "Found " + unassignedTargets.size() + " unassigned targets:\n" );
-		for ( final J ut : unassignedTargets )
-		{
+			str.append( "Found " + unassignedTargets.size() + " unassigned targets:\n" );
+			for ( final J ut : unassignedTargets )
+			{
 				str.append( String.format( "%1$-" + sw + "s → %2$" + tw + "s\n", 'ø', ut.toString() ) );
 			}
 		}

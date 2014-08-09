@@ -41,8 +41,8 @@ import fiji.plugin.trackmate.tracking.sparselap.GraphSegmentSplitter;
 import fiji.plugin.trackmate.tracking.sparselap.ResizableDoubleArray;
 import fiji.plugin.trackmate.tracking.sparselap.SparseLAPFrameToFrameTracker;
 import fiji.plugin.trackmate.tracking.sparselap.costfunction.CostFunction;
-import fiji.plugin.trackmate.tracking.sparselap.costfunction.FeaturePenaltyCostFunctionPercentile;
-import fiji.plugin.trackmate.tracking.sparselap.costfunction.SquareDistCostFunctionPercentile;
+import fiji.plugin.trackmate.tracking.sparselap.costfunction.FeaturePenaltyCostFunction;
+import fiji.plugin.trackmate.tracking.sparselap.costfunction.SquareDistCostFunction;
 import fiji.plugin.trackmate.tracking.sparselap.jonkervolgenant.SparseCostMatrix;
 
 /**
@@ -82,7 +82,7 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 
 	private final UndirectedGraph< Spot, DefaultWeightedEdge > graph;
 
-	private double alternativeCost = -1;
+	private final double alternativeCost = -1;
 
 	/**
 	 * Instantiates a cost matrix creator for the top-left quadrant of the
@@ -146,6 +146,10 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 		final boolean allowSplitting = ( Boolean ) settings.get( KEY_ALLOW_TRACK_SPLITTING );
 		final double sMaxDistance = ( Double ) settings.get( KEY_SPLITTING_MAX_DISTANCE );
 		final double sCostThreshold = sMaxDistance * sMaxDistance;
+
+		// Alternative cost
+		final double alternativeCostFactor = ( Double ) settings.get( KEY_ALTERNATIVE_LINKING_COST_FACTOR );
+		final double percentile = ( Double ) settings.get( KEY_CUTOFF_PERCENTILE );
 
 		/*
 		 * Find segment ends, starts and middle points.
@@ -296,13 +300,12 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 		 */
 
 		linkCosts.trimToSize();
-		alternativeCost = gcCostFunction.aternativeCost( linkCosts.data );
 
 		/*
 		 * Build a sparse cost matrix from this.
 		 */
 
-		final DefaultCostMatrixCreator< Spot, Spot > creator = new DefaultCostMatrixCreator< Spot, Spot >( sources, targets, linkCosts.data, alternativeCost );
+		final DefaultCostMatrixCreator< Spot, Spot > creator = new DefaultCostMatrixCreator< Spot, Spot >( sources, targets, linkCosts.data, alternativeCostFactor, percentile );
 		if ( !creator.checkInput() || !creator.process() )
 		{
 			errorMessage = creator.getErrorMessage();
@@ -321,16 +324,14 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 	protected CostFunction< Spot, Spot > getCostFunctionFor( final Map< String, Double > featurePenalties )
 	{
 		// Link Nick Perry original non sparse LAP framework.
-		final double altCostFact = ( Double ) settings.get( KEY_ALTERNATIVE_LINKING_COST_FACTOR );
-		final double percentileCutOff = ( Double ) settings.get( KEY_CUTOFF_PERCENTILE );
 		final CostFunction< Spot, Spot > costFunction;
 		if ( null == featurePenalties || featurePenalties.isEmpty() )
 		{
-			costFunction = new SquareDistCostFunctionPercentile( altCostFact, percentileCutOff );
+			costFunction = new SquareDistCostFunction();
 		}
 		else
 		{
-			costFunction = new FeaturePenaltyCostFunctionPercentile( featurePenalties, altCostFact, percentileCutOff );
+			costFunction = new FeaturePenaltyCostFunction( featurePenalties );
 		}
 		return costFunction;
 	}
@@ -341,44 +342,26 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 		return scm;
 	}
 
-	/**
-	 * Returns the list of sources in the generated cost matrix.
-	 * 
-	 * @return the list of Spot, such that <code>sourceList.get( i )</code> is
-	 *         the spot corresponding to the row <code>i</code> in the generated
-	 *         cost matrix.
-	 * @see #getTargetList()
-	 * @see #getResult()
-	 */
 	@Override
 	public List< Spot > getSourceList()
 	{
 		return uniqueSources;
 	}
 
-	/**
-	 * Returns the list of targets in the generated cost matrix.
-	 * 
-	 * @return the list of Spot, such that <code>targetList.get( j )</code> is
-	 *         the spot corresponding to the column <code>j</code> in the
-	 *         generated cost matrix.
-	 * @see #getSourceList()
-	 * @see #getResult()
-	 */
 	@Override
 	public List< Spot > getTargetList()
 	{
 		return uniqueTargets;
 	}
 
-	/**
-	 * Returns the alternative cost derived from all the costs calculated when
-	 * creating the cost matrix.
-	 * 
-	 * @return the alternative cost.
-	 */
 	@Override
-	public double getAlternativeCost()
+	public double getAlternativeCostForSource( final Spot source )
+	{
+		return alternativeCost;
+	}
+
+	@Override
+	public double getAlternativeCostForTarget( final Spot target )
 	{
 		return alternativeCost;
 	}
@@ -486,5 +469,4 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 		//		final HyperStackDisplayer view = new HyperStackDisplayer( model, sm );
 		//		view.render();
 	}
-
 }

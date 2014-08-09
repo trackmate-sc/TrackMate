@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
+import net.imglib2.util.Util;
 import fiji.plugin.trackmate.tracking.sparselap.jonkervolgenant.SparseCostMatrix;
 import fiji.plugin.trackmate.tracking.sparselap.linker.JaqamanLinker;
 
@@ -34,7 +35,7 @@ public class DefaultCostMatrixCreator< K extends Comparable< K >, J extends Comp
 
 	private String errorMessage;
 
-	private final double alternativeCost;
+	private double alternativeCost;
 
 	private final List< K > rows;
 
@@ -42,12 +43,17 @@ public class DefaultCostMatrixCreator< K extends Comparable< K >, J extends Comp
 
 	private final double[] costs;
 
-	public DefaultCostMatrixCreator( final List< K > rows, final List< J > cols, final double[] costs, final double alternativeCost )
+	private final double alternativeCostFactor;
+
+	private final double percentile;
+
+	public DefaultCostMatrixCreator( final List< K > rows, final List< J > cols, final double[] costs, final double alternativeCostFactor, final double percentile )
 	{
 		this.rows = rows;
 		this.cols = cols;
 		this.costs = costs;
-		this.alternativeCost = alternativeCost;
+		this.alternativeCostFactor = alternativeCostFactor;
+		this.percentile = percentile;
 	}
 
 	@Override
@@ -70,13 +76,23 @@ public class DefaultCostMatrixCreator< K extends Comparable< K >, J extends Comp
 			errorMessage = BASE_ERROR_MESSAGE + "The row list is null or empty.";
 			return false;
 		}
-		if ( rows.size() != cols.size() ) { 
+		if ( rows.size() != cols.size() ) {
 			errorMessage = BASE_ERROR_MESSAGE +"Row and column lists do not have the same number of elements. Found " + rows.size() + " and " + cols.size() + "." ;
 			return false;
 		}
 		if ( rows.size() != costs.length )
 		{
 			errorMessage = BASE_ERROR_MESSAGE + "Row list and cost array do not have the same number of elements. Found " + rows.size() + " and " + costs.length + ".";
+			return false;
+		}
+		if ( alternativeCostFactor <= 0 )
+		{
+			errorMessage = BASE_ERROR_MESSAGE + "The alternative cost factor must be greater than 0. Was: " + alternativeCostFactor + ".";
+			return false;
+		}
+		if ( percentile < 0 || percentile > 1 )
+		{
+			errorMessage = BASE_ERROR_MESSAGE + "The percentile must no be smaller than 0 or greater than 1. Was: " + percentile;
 			return false;
 		}
 		return true;
@@ -89,7 +105,7 @@ public class DefaultCostMatrixCreator< K extends Comparable< K >, J extends Comp
 		Collections.sort( uniqueRows );
 		uniqueCols = new ArrayList< J >( new HashSet< J >( cols ) );
 		Collections.sort( uniqueCols );
-		
+
 		final List< Assignment > assignments = new ArrayList< Assignment >( costs.length );
 		for ( int i = 0; i < costs.length; i++ )
 		{
@@ -143,7 +159,16 @@ public class DefaultCostMatrixCreator< K extends Comparable< K >, J extends Comp
 		number[ currentRow ] = nOfEl + 1;
 
 		scm = new SparseCostMatrix( cc, kk, number, nCols );
+
+		alternativeCost = computeAlternativeCosts();
+
 		return true;
+	}
+
+	protected double computeAlternativeCosts()
+	{
+		if ( percentile == 1 ) { return alternativeCostFactor * Util.computeMax( costs ); }
+		return alternativeCostFactor * Util.computePercentile( costs, percentile );
 	}
 
 	@Override
@@ -164,12 +189,18 @@ public class DefaultCostMatrixCreator< K extends Comparable< K >, J extends Comp
 		return uniqueCols;
 	}
 
+
 	@Override
-	public double getAlternativeCost()
+	public double getAlternativeCostForSource( final K source )
 	{
 		return alternativeCost;
 	}
 
+	@Override
+	public double getAlternativeCostForTarget( final J target )
+	{
+		return alternativeCost;
+	}
 
 	public final static class Assignment implements Comparable< Assignment >
 	{
@@ -252,7 +283,7 @@ public class DefaultCostMatrixCreator< K extends Comparable< K >, J extends Comp
 			costs[ i ] = next.cost;
 		}
 
-		final DefaultCostMatrixCreator< String, String > creator = new DefaultCostMatrixCreator< String, String >( rows, cols, costs, 80 );
+		final DefaultCostMatrixCreator< String, String > creator = new DefaultCostMatrixCreator< String, String >( rows, cols, costs, 1.09, 0.5 );
 
 		final JaqamanLinker< String, String > solver = new JaqamanLinker< String, String >( creator );
 		if ( !solver.checkInput() || !solver.process() )
@@ -264,5 +295,4 @@ public class DefaultCostMatrixCreator< K extends Comparable< K >, J extends Comp
 		solver.getResult();
 		System.out.println( solver.resultToString() );
 	}
-
 }

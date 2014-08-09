@@ -31,14 +31,13 @@ import fiji.plugin.trackmate.Spot;
  * @author Jean-Yves Tinevez - 2014
  * 
  */
-public class FeaturePenaltyCostFunction extends SquareDistCostFunction
+public class FeaturePenaltyCostFunction implements CostFunction< Spot, Spot >
 {
 
 	private final Map< String, Double > featurePenalties;
 
-	public FeaturePenaltyCostFunction( final Map< String, Double > featurePenalties, final double alternativeCostFactor )
+	public FeaturePenaltyCostFunction( final Map< String, Double > featurePenalties )
 	{
-		super(alternativeCostFactor);
 		this.featurePenalties = featurePenalties;
 	}
 
@@ -52,7 +51,9 @@ public class FeaturePenaltyCostFunction extends SquareDistCostFunction
 		{
 			final double ndiff = source.normalizeDiffTo( target, feature );
 			if ( Double.isNaN( ndiff ) )
+			{
 				continue;
+			}
 			final double factor = featurePenalties.get( feature );
 			penalty += factor * 1.5 * ndiff;
 		}

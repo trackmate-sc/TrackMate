@@ -2,8 +2,7 @@ package fiji.plugin.trackmate.tracking.sparselap.costfunction;
 
 /**
  * Interface representing a function that can calculate the cost to link a
- * source object to a target object, and an alternative no-linking cost from an
- * array of costs.
+ * source object to a target object.
  * 
  * @author Jean-Yves Tinevez - 2014
  * 
@@ -25,14 +24,5 @@ public interface CostFunction< K, J >
 	 * @return the cost as a double.
 	 */
 	public double linkingCost( K source, J target );
-
-	/**
-	 * Calculates the alternative linking cost from all the specified costs.
-	 * 
-	 * @param allCosts
-	 *            the costs.
-	 * @return the alternative no-linking cost.
-	 */
-	public double aternativeCost( double[] allCosts );
 
 }

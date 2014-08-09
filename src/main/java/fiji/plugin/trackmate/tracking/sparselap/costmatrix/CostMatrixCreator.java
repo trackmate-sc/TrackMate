@@ -39,10 +39,25 @@ public interface CostMatrixCreator< K extends Comparable< K >, J extends Compara
 	public List< J > getTargetList();
 
 	/**
-	 * Returns the value of the alternative cost for no-linking calculated when
-	 * creating the cost matrix.
+	 * Returns the value of the no-linking alternative cost for the specified
+	 * source.
 	 * 
+	 * @param source
+	 *            the source object.
+	 * @return the alternative cost. Belongs to the list returned by
+	 *         {@link #getSourceList()}.
+	 */
+	public double getAlternativeCostForSource( K source );
+
+	/**
+	 * Returns the value of the no-linking alternative cost for the specified
+	 * target.
+	 * 
+	 * @param target
+	 *            the target object. Belongs to the list returned by
+	 *            {@link #getTargetList()}.
 	 * @return the alternative cost.
 	 */
-	public double getAlternativeCost();
+	public double getAlternativeCostForTarget( J target );
+
 }
