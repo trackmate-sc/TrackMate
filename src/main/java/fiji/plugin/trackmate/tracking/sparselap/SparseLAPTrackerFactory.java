@@ -7,19 +7,19 @@ import javax.swing.ImageIcon;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.tracking.SimpleLAPTrackerFactory;
+import fiji.plugin.trackmate.tracking.LAPTrackerFactory;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 
 @Plugin( type = SpotTrackerFactory.class )
-public class SparseLAPTrackerFactory extends SimpleLAPTrackerFactory
+public class SparseLAPTrackerFactory extends LAPTrackerFactory
 {
 
 	public static final String TRACKER_KEY = "SPARSE_LAP_TRACKER";
 
 	public static final String NAME = "Sparse LAP Tracker";
 
-	public static final String INFO_TEXT = "<html>" + "This is the SPARSE version of the LAP tracker.</html>";
+	public static final String INFO_TEXT = "<html>" + "This tracker is quasi-identical to the LAP tracker, " + "but is <u>optimized for memory usage</u>. " + "<p>" + "It benefits from the sparse structure of the cost matrices used in the <i>Jaqaman et al., 2008</i> framework, " + "and exploits it through dedicated algorithms. Use this tracker if you have a very large number of " + "spots to track, and if RAM is limited.</html>";
 
 	@Override
 	public String getInfoText()

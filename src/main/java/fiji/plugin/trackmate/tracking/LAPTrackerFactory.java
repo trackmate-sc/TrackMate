@@ -89,7 +89,7 @@ public class LAPTrackerFactory implements SpotTrackerFactory
 		final String spaceUnits = model.getSpaceUnits();
 		final Collection< String > features = model.getFeatureModel().getSpotFeatures();
 		final Map< String, String > featureNames = model.getFeatureModel().getSpotFeatureNames();
-		return new LAPTrackerSettingsPanel( NAME, spaceUnits, features, featureNames );
+		return new LAPTrackerSettingsPanel( getName(), spaceUnits, features, featureNames );
 	}
 
 	@Override

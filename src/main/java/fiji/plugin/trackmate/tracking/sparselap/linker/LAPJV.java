@@ -368,9 +368,9 @@ public class LAPJV implements OutputAlgorithm< int[] >, Benchmark
 			return false;
 		}
 		final double minCost = Util.computeMin( cm.cc );
-		if ( minCost <= 0 )
+		if ( minCost < 0 )
 		{
-			errorMessage = BASE_ERROR_MESSAGE + "This solver only accept strictly positive costs. Found " + minCost + ".";
+			errorMessage = BASE_ERROR_MESSAGE + "This solver only accept positive costs. Found " + minCost + ".";
 			return false;
 		}
 		return true;
