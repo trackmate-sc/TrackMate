@@ -8,6 +8,7 @@ import java.util.Set;
 
 import net.imglib2.algorithm.Benchmark;
 import net.imglib2.algorithm.OutputAlgorithm;
+import net.imglib2.util.Util;
 import fiji.plugin.trackmate.tracking.hungarian.JonkerVolgenantAlgorithm;
 
 /**
@@ -364,6 +365,12 @@ public class JonkerVolgenantSparseAlgorithm implements OutputAlgorithm< int[] >,
 		if ( cm.nRows > cm.nCols )
 		{
 			errorMessage = BASE_ERROR_MESSAGE + "This solver converges only if the cost matrix has more rows than column. Found " + cm.nRows + " rows and " + cm.nCols + " columns.";
+			return false;
+		}
+		final double minCost = Util.computeMin( cm.cc );
+		if ( minCost <= 0 )
+		{
+			errorMessage = BASE_ERROR_MESSAGE + "This solver only accept strictly positive costs. Found " + minCost + ".";
 			return false;
 		}
 		return true;

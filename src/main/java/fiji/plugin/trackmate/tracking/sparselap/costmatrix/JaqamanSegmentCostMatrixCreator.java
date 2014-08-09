@@ -82,7 +82,7 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 
 	private final UndirectedGraph< Spot, DefaultWeightedEdge > graph;
 
-	private final double alternativeCost = -1;
+	private double alternativeCost = -1;
 
 	/**
 	 * Instantiates a cost matrix creator for the top-left quadrant of the
@@ -296,21 +296,20 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 		}
 
 		/*
-		 * Compute the alternative cost from the cost array
-		 */
-
-		linkCosts.trimToSize();
-
-		/*
 		 * Build a sparse cost matrix from this.
 		 */
 
+		linkCosts.trimToSize();
 		final DefaultCostMatrixCreator< Spot, Spot > creator = new DefaultCostMatrixCreator< Spot, Spot >( sources, targets, linkCosts.data, alternativeCostFactor, percentile );
 		if ( !creator.checkInput() || !creator.process() )
 		{
 			errorMessage = creator.getErrorMessage();
 			return false;
 		}
+		/*
+		 * Compute the alternative cost from the cost array
+		 */
+		alternativeCost = creator.computeAlternativeCosts();
 
 		scm = creator.getResult();
 		uniqueSources = creator.getSourceList();
