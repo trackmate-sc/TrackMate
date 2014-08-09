@@ -45,7 +45,7 @@ import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
 public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 {
 
-	private static final int START_COLUMN = 2;
+	private static final int START_COLUMN = 1;
 
 	/** The target model to draw spot from. */
 	private final Model model;
@@ -129,7 +129,7 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 			final int[] columns = new int[ maxFrame + 1 ];
 			for ( int i = 0; i < columns.length; i++ )
 			{
-				columns[ i ] = START_COLUMN - 1;
+				columns[ i ] = START_COLUMN;
 			}
 
 			int trackIndex = 0;
@@ -272,7 +272,7 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 				}
 
 				// Store column widths for the panel background
-				int sumWidth = START_COLUMN - 1;
+				int sumWidth = START_COLUMN;
 				for ( int i = 0; i < trackIndex; i++ )
 				{
 					sumWidth += component.columnWidths[ i ];
@@ -282,21 +282,12 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 				trackIndex++;
 			} // loop over tracks
 
-			// Ensure we do not start at 0 for the first column of lonely cells
-			for ( int i = 0; i < columns.length; i++ )
-			{
-				if ( columns[ i ] < 1 )
-				{
-					columns[ i ] = 1;
-				}
-			}
-
 			// Deal with lonely cells
 			for ( final mxCell cell : lonelyCells )
 			{
 				final Spot spot = graph.getSpotFor( cell );
 				final int frame = spot.getFeature( Spot.FRAME ).intValue();
-				setCellGeometry( cell, frame, ++columns[ frame ] );
+				setCellGeometry( cell, frame, columns[ frame ]++ );
 			}
 
 			// Before we leave, we regenerate the row length, for our brothers
@@ -320,7 +311,7 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 	{
 
 		final double x = ( targetColumn ) * X_COLUMN_SIZE - DEFAULT_CELL_WIDTH / 2;
-		final double y = ( 0.5 + row + 1 ) * Y_COLUMN_SIZE - DEFAULT_CELL_HEIGHT / 2;
+		final double y = ( 0.5 + row ) * Y_COLUMN_SIZE - DEFAULT_CELL_HEIGHT / 2;
 		final mxGeometry geometry = cell.getGeometry();
 		geometry.setX( x );
 		geometry.setY( y );
