@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tracking.sparselap.jonkervolgenant;
+package fiji.plugin.trackmate.tracking.sparselap.linker;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -44,7 +44,7 @@ import fiji.plugin.trackmate.tracking.hungarian.JonkerVolgenantAlgorithm;
  * @see JonkerVolgenantAlgorithm
  * 
  */
-public class JonkerVolgenantSparseAlgorithm implements OutputAlgorithm< int[] >, Benchmark
+public class LAPJV implements OutputAlgorithm< int[] >, Benchmark
 {
 
 	private static final String BASE_ERROR_MESSAGE = "[JonkerVolgenantSparseAlgorithm] ";
@@ -64,7 +64,7 @@ public class JonkerVolgenantSparseAlgorithm implements OutputAlgorithm< int[] >,
 	 * @param cm
 	 *            the cost matrix of the linear assignment problem to solve.
 	 */
-	public JonkerVolgenantSparseAlgorithm( final SparseCostMatrix cm )
+	public LAPJV( final SparseCostMatrix cm )
 	{
 		this.cm = cm;
 	}

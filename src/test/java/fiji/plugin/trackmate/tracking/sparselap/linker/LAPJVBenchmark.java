@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tracking.sparselap.jonkervolgenant;
+package fiji.plugin.trackmate.tracking.sparselap.linker;
 
 import static org.junit.Assert.assertEquals;
 
@@ -6,10 +6,10 @@ import java.util.Arrays;
 import java.util.Random;
 
 import fiji.plugin.trackmate.tracking.hungarian.JonkerVolgenantAlgorithm;
-import fiji.plugin.trackmate.tracking.sparselap.jonkervolgenant.JonkerVolgenantSparseAlgorithm;
-import fiji.plugin.trackmate.tracking.sparselap.jonkervolgenant.SparseCostMatrix;
+import fiji.plugin.trackmate.tracking.sparselap.linker.LAPJV;
+import fiji.plugin.trackmate.tracking.sparselap.linker.SparseCostMatrix;
 
-public class JonkerVolgenantSparseAlgorithmBenchmark
+public class LAPJVBenchmark
 {
 
 	private int seed;
@@ -142,7 +142,7 @@ public class JonkerVolgenantSparseAlgorithmBenchmark
 			int[] sRes = new int[ 0 ];
 			for ( int i = 0; i < nRepeats; i++ )
 			{
-				final JonkerVolgenantSparseAlgorithm sparseAlgo = new JonkerVolgenantSparseAlgorithm( cm );
+				final LAPJV sparseAlgo = new LAPJV( cm );
 				sparseAlgo.process();
 				sRes = sparseAlgo.getResult();
 			}
@@ -226,7 +226,7 @@ public class JonkerVolgenantSparseAlgorithmBenchmark
 			int[] sRes = new int[ 0 ];
 			for ( int i = 0; i < nRepeats; i++ )
 			{
-				final JonkerVolgenantSparseAlgorithm sparseAlgo = new JonkerVolgenantSparseAlgorithm( cm );
+				final LAPJV sparseAlgo = new LAPJV( cm );
 				sparseAlgo.process();
 				sRes = sparseAlgo.getResult();
 			}
@@ -247,7 +247,7 @@ public class JonkerVolgenantSparseAlgorithmBenchmark
 
 	public static void main( final String[] args )
 	{
-		final JonkerVolgenantSparseAlgorithmBenchmark benchmark = new JonkerVolgenantSparseAlgorithmBenchmark();
+		final LAPJVBenchmark benchmark = new LAPJVBenchmark();
 
 		System.out.println( "---------------" );
 		System.out.println( "Varying density" );

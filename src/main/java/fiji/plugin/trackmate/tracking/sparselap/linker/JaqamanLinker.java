@@ -11,8 +11,6 @@ import net.imglib2.algorithm.OutputAlgorithm;
 import net.imglib2.util.Util;
 import fiji.plugin.trackmate.tracking.sparselap.costfunction.CostFunction;
 import fiji.plugin.trackmate.tracking.sparselap.costmatrix.CostMatrixCreator;
-import fiji.plugin.trackmate.tracking.sparselap.jonkervolgenant.JonkerVolgenantSparseAlgorithm;
-import fiji.plugin.trackmate.tracking.sparselap.jonkervolgenant.SparseCostMatrix;
 
 /**
  * Links two lists of objects based on the LAP framework described in Jaqaman
@@ -163,7 +161,7 @@ public class JaqamanLinker< K extends Comparable< K >, J extends Comparable< J >
 		/*
 		 * Solve the full cost matrix.
 		 */
-		final JonkerVolgenantSparseAlgorithm solver = new JonkerVolgenantSparseAlgorithm( full );
+		final LAPJV solver = new LAPJV( full );
 		if ( !solver.checkInput() || !solver.process() )
 		{
 			errorMessage = solver.getErrorMessage();

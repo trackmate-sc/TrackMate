@@ -1,16 +1,12 @@
 package fiji.plugin.trackmate.tracking.sparselap.costmatrix;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
 
 import net.imglib2.util.Util;
-import fiji.plugin.trackmate.tracking.sparselap.jonkervolgenant.SparseCostMatrix;
-import fiji.plugin.trackmate.tracking.sparselap.linker.JaqamanLinker;
+import fiji.plugin.trackmate.tracking.sparselap.linker.SparseCostMatrix;
 
 /**
  * A {@link CostMatrixCreator} that build a cost matrix from 3 lists containing
@@ -249,50 +245,20 @@ public class DefaultCostMatrixCreator< K extends Comparable< K >, J extends Comp
 		{
 			return "Assignment r = " + r + ", c = " + c + ", cost = " + cost;
 		}
-	}
 
-	public static void main( final String[] args )
-	{
-		final List< String > names = Arrays.asList( new String[] { "Florian", "Jean-Yves", "Spencer", "Pascal", "Audrey", "Nathalie", "Anne" } );
-		final List< String > activities = Arrays.asList( new String[] { "MEMI-OP", "Leading", "Confocals", "Spinning-disks", "Image analysis", "HCA", "Biphoton", "Administration", "Grant writing" } );
-
-		final int nAssgn = 30;
-
-		final long seed = new Random().nextLong();
-		final Random ran = new Random(seed );
-		System.out.println( "Random seed used: " + seed );
-		// Ensure we do not have duplicate assignments.
-		final HashSet< Assignment > assgns = new HashSet< Assignment >();
-		for ( int i = 0; i < nAssgn; i++ )
+		public int getC()
 		{
-			final int row = ran.nextInt( names.size() );
-			final int col = ran.nextInt( activities.size() );
-			final double cost = ran.nextInt( 100 );
-			assgns.add( new Assignment( row, col, cost ) );
+			return c;
 		}
 
-		final List< String > rows = new ArrayList< String >( assgns.size() );
-		final List< String > cols = new ArrayList< String >( assgns.size() );
-		final double[] costs = new double[ assgns.size() ];
-		final Iterator< Assignment > it = assgns.iterator();
-		for ( int i = 0; i < assgns.size(); i++ )
+		public int getR()
 		{
-			final Assignment next = it.next();
-			rows.add( names.get( next.r ) );
-			cols.add( activities.get( next.c ) );
-			costs[ i ] = next.cost;
+			return r;
 		}
 
-		final DefaultCostMatrixCreator< String, String > creator = new DefaultCostMatrixCreator< String, String >( rows, cols, costs, 1.09, 0.5 );
-
-		final JaqamanLinker< String, String > solver = new JaqamanLinker< String, String >( creator );
-		if ( !solver.checkInput() || !solver.process() )
+		public double getCost()
 		{
-			System.err.println( solver.getErrorMessage() );
-			return;
+			return cost;
 		}
-
-		solver.getResult();
-		System.out.println( solver.resultToString() );
 	}
 }

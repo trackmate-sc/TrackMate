@@ -4,7 +4,7 @@ import java.util.List;
 
 import net.imglib2.algorithm.Benchmark;
 import net.imglib2.algorithm.OutputAlgorithm;
-import fiji.plugin.trackmate.tracking.sparselap.jonkervolgenant.SparseCostMatrix;
+import fiji.plugin.trackmate.tracking.sparselap.linker.SparseCostMatrix;
 
 /**
  * Interface for function that can generate a {@link SparseCostMatrix} from

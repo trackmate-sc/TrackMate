@@ -5,13 +5,10 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_GAP_CLOSING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_MERGING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_SPLITTING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALTERNATIVE_LINKING_COST_FACTOR;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_BLOCKING_VALUE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_CUTOFF_PERCENTILE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_FRAME_GAP;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_FEATURE_PENALTIES;
@@ -19,31 +16,19 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_MAX_DISTA
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
-import org.jgrapht.graph.SimpleWeightedGraph;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.io.TmXmlReader;
-import fiji.plugin.trackmate.providers.TrackerProvider;
-import fiji.plugin.trackmate.tracking.LAPUtils;
-import fiji.plugin.trackmate.tracking.sparselap.GraphSegmentSplitter;
-import fiji.plugin.trackmate.tracking.sparselap.ResizableDoubleArray;
-import fiji.plugin.trackmate.tracking.sparselap.SparseLAPFrameToFrameTracker;
 import fiji.plugin.trackmate.tracking.sparselap.costfunction.CostFunction;
 import fiji.plugin.trackmate.tracking.sparselap.costfunction.FeaturePenaltyCostFunction;
 import fiji.plugin.trackmate.tracking.sparselap.costfunction.SquareDistCostFunction;
-import fiji.plugin.trackmate.tracking.sparselap.jonkervolgenant.SparseCostMatrix;
+import fiji.plugin.trackmate.tracking.sparselap.linker.SparseCostMatrix;
 
 /**
  * This class generates the top-left quadrant of the LAP segment linking cost
@@ -101,7 +86,7 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 		final StringBuilder str = new StringBuilder();
 		if ( !checkSettingsValidity( settings, str ) )
 		{
-			errorMessage = BASE_ERROR_MESSAGE + str.toString();
+			errorMessage = BASE_ERROR_MESSAGE + "Incorrect settings map:\n" + str.toString();
 			return false;
 		}
 		return true;
@@ -415,57 +400,5 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 		ok = ok & checkMapKeys( settings, mandatoryKeys, optionalKeys, str );
 
 		return ok;
-	}
-
-	public static void main( final String[] args )
-	{
-		final File file = new File( "samples/FakeTracks.xml" );
-		final TmXmlReader reader = new TmXmlReader( file );
-		final Model model = reader.getModel();
-		final SpotCollection spots = model.getSpots();
-
-		final Settings settings0 = new Settings();
-		reader.readSettings( settings0, null, new TrackerProvider(), null, null, null );
-
-		final Map< String, Object > settings1 = new HashMap< String, Object >();
-		settings1.put( KEY_LINKING_MAX_DISTANCE, 15d );
-		settings1.put( KEY_ALTERNATIVE_LINKING_COST_FACTOR, 1.05 );
-		final SparseLAPFrameToFrameTracker ftfTracker = new SparseLAPFrameToFrameTracker( spots, settings1 );
-		if ( !ftfTracker.checkInput() || !ftfTracker.process() )
-		{
-			System.err.println( ftfTracker.getErrorMessage() );
-			return;
-		}
-
-		final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph = ftfTracker.getResult();
-		model.setTracks( graph, true );
-
-		// Track merging
-		final Map< String, Object > settings2 = LAPUtils.getDefaultLAPSettingsMap();
-		settings2.remove( KEY_LINKING_FEATURE_PENALTIES );
-		settings2.remove( KEY_BLOCKING_VALUE );
-		settings2.remove( KEY_LINKING_MAX_DISTANCE );
-
-		settings2.put( KEY_ALLOW_GAP_CLOSING, false );
-		settings2.put( KEY_ALLOW_TRACK_MERGING, true );
-		settings2.put( KEY_ALLOW_TRACK_SPLITTING, true );
-
-
-		final JaqamanSegmentCostMatrixCreator costMatrixCreator = new JaqamanSegmentCostMatrixCreator( graph, settings2 );
-		if ( !costMatrixCreator.checkInput() || !costMatrixCreator.process() )
-		{
-			System.err.println( costMatrixCreator.getErrorMessage() );
-			return;
-		}
-
-		System.out.println( costMatrixCreator.getResult().toString( costMatrixCreator.getSourceList(), costMatrixCreator.getTargetList() ) );
-		System.out.println( "Generated in " + costMatrixCreator.getProcessingTime() + " ms." );
-
-		//		final SelectionModel sm = new SelectionModel( model );
-		//		final TrackScheme trackScheme = new TrackScheme( model, sm );
-		//		trackScheme.render();
-		//		ImageJ.main( args );
-		//		final HyperStackDisplayer view = new HyperStackDisplayer( model, sm );
-		//		view.render();
 	}
 }

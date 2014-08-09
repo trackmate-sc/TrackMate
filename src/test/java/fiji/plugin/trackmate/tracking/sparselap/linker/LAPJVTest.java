@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tracking.sparselap.jonkervolgenant;
+package fiji.plugin.trackmate.tracking.sparselap.linker;
 
 import static org.junit.Assert.assertEquals;
 
@@ -8,10 +8,10 @@ import java.util.Random;
 import org.junit.Test;
 
 import fiji.plugin.trackmate.tracking.hungarian.JonkerVolgenantAlgorithm;
-import fiji.plugin.trackmate.tracking.sparselap.jonkervolgenant.JonkerVolgenantSparseAlgorithm;
-import fiji.plugin.trackmate.tracking.sparselap.jonkervolgenant.SparseCostMatrix;
+import fiji.plugin.trackmate.tracking.sparselap.linker.LAPJV;
+import fiji.plugin.trackmate.tracking.sparselap.linker.SparseCostMatrix;
 
-public class JonkerVolgenantSparseAlgorithmTest
+public class LAPJVTest
 {
 
 	private int seed;
@@ -113,7 +113,7 @@ public class JonkerVolgenantSparseAlgorithmTest
 		final int[][] jvResult = jonkerVolgenant.computeAssignments( weights );
 
 		// Sparse with non-sparse entries
-		final JonkerVolgenantSparseAlgorithm jvs = new JonkerVolgenantSparseAlgorithm( CM );
+		final LAPJV jvs = new LAPJV( CM );
 		jvs.process();
 		final int[] jvSparseResult = jvs.getResult();
 
@@ -185,7 +185,7 @@ public class JonkerVolgenantSparseAlgorithmTest
 
 			// SPARSE
 			int[] sRes = new int[ 0 ];
-			final JonkerVolgenantSparseAlgorithm sparseAlgo = new JonkerVolgenantSparseAlgorithm( cm );
+			final LAPJV sparseAlgo = new LAPJV( cm );
 			sparseAlgo.process();
 			sRes = sparseAlgo.getResult();
 

@@ -3,9 +3,8 @@ package fiji.plugin.trackmate.tracking.sparselap.costmatrix;
 import java.util.ArrayList;
 import java.util.List;
 
-import fiji.plugin.trackmate.tracking.sparselap.ResizableDoubleArray;
 import fiji.plugin.trackmate.tracking.sparselap.costfunction.CostFunction;
-import fiji.plugin.trackmate.tracking.sparselap.jonkervolgenant.SparseCostMatrix;
+import fiji.plugin.trackmate.tracking.sparselap.linker.SparseCostMatrix;
 
 /**
  * A {@link CostMatrixCreator} that can generate a cost matrix from a list of

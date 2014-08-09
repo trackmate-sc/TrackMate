@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tracking.sparselap;
+package fiji.plugin.trackmate.tracking.sparselap.costmatrix;
 
 import java.util.Arrays;
 
@@ -43,11 +43,6 @@ public class ResizableDoubleArray
 	 * METHODS
 	 */
 
-
-	/**
-	 * Trims the capacity of this IDSet instance to be the data array current
-	 * length.
-	 */
 	public void trimToSize()
 	{
 		final int oldCapacity = data.length;
