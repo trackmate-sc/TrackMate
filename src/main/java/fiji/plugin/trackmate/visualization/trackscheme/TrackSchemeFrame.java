@@ -1,12 +1,18 @@
 package fiji.plugin.trackmate.visualization.trackscheme;
 
+import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -155,6 +161,82 @@ public class TrackSchemeFrame extends JFrame
 		final TrackSchemeGraphComponent gc = new TrackSchemeGraphComponent( graph, trackScheme );
 		gc.getVerticalScrollBar().setUnitIncrement( 16 );
 		gc.getHorizontalScrollBar().setUnitIncrement( 16 );
+
+		final JPanel rowheader = new JPanel()
+		{
+			@Override
+			public void paintComponent( final Graphics g )
+			{
+
+				final Graphics2D g2d = ( Graphics2D ) g;
+				final double scale = graph.getView().getScale();
+
+				final float fontScale = ( float ) ( 12 * Math.min( 1d, scale ) );
+				g.setFont( FONT.deriveFont( fontScale ).deriveFont( Font.BOLD ) );
+				g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
+				final Rectangle paintBounds = g.getClipBounds();
+
+				final int height = gc.getViewport().getView().getSize().height;
+
+				// Scaled sizes
+				final double xcs = TrackScheme.X_COLUMN_SIZE * Math.min( 1d, scale );
+				final double ycs = TrackScheme.Y_COLUMN_SIZE * scale;
+
+				// Alternating row color
+				g.setColor( TrackSchemeGraphComponent.BACKGROUND_COLOR_1 );
+				g.fillRect( paintBounds.x, paintBounds.y, paintBounds.width, paintBounds.height );
+
+				g.setColor( TrackSchemeGraphComponent.BACKGROUND_COLOR_2 );
+				double y = 0;
+				while ( y < height )
+				{
+					if ( y > paintBounds.y - ycs && y < paintBounds.y + paintBounds.height )
+					{
+						g.fillRect( 0, ( int ) y, ( int ) xcs, ( int ) ycs );
+					}
+					y += 2d * ycs;
+				}
+
+				// Header separator
+				g.setColor( TrackSchemeGraphComponent.LINE_COLOR );
+				if ( ycs > paintBounds.y && ycs < paintBounds.y + paintBounds.height )
+				{
+					g.drawLine( paintBounds.x, ( int ) ycs, paintBounds.x + paintBounds.width, ( int ) ycs );
+				}
+				if ( xcs > paintBounds.x && xcs < paintBounds.x + paintBounds.width )
+				{
+					g.drawLine( ( int ) xcs, paintBounds.y, ( int ) xcs, paintBounds.y + paintBounds.height );
+				}
+
+				// Row headers
+				final double x = xcs / 4d;
+				y = 3 * ycs / 2d;
+
+				if ( xcs > paintBounds.x )
+				{
+					while ( y < height )
+					{
+						if ( y > paintBounds.y - ycs && y < paintBounds.y + paintBounds.height )
+						{
+							final int frame = ( int ) ( y / ycs - 1 );
+							g.drawString( String.format( "frame %d", frame ), ( int ) x, ( int ) Math.round( y + 12 * scale ) );
+						}
+						y += ycs;
+					}
+				}
+			}
+
+			@Override
+			public Dimension getPreferredSize()
+			{
+
+				final double scale = Math.min( 1, graph.getView().getScale() );
+				final double xcs = TrackScheme.X_COLUMN_SIZE * scale + 1;
+				return new Dimension( ( int ) xcs, ( int ) gc.getViewport().getPreferredSize().getHeight() );
+			}
+		};
+		gc.setRowHeaderView( rowheader );
+
 		/*
 		 * gc.setExportEnabled(true); Seems to be required to have a preview
 		 * when we move cells. Also give the ability to export a cell as an

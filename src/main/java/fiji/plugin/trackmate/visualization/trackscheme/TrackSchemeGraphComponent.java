@@ -37,13 +37,13 @@ import fiji.plugin.trackmate.Model;
 public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEventListener
 {
 
+	public static final Color BACKGROUND_COLOR_1 = Color.GRAY;
+
+	public static final Color BACKGROUND_COLOR_2 = Color.LIGHT_GRAY;
+
+	public static final Color LINE_COLOR = Color.BLACK;
+
 	private static final long serialVersionUID = -1L;
-
-	private static final Color BACKGROUND_COLOR_1 = Color.GRAY;
-
-	private static final Color BACKGROUND_COLOR_2 = Color.LIGHT_GRAY;
-
-	private static final Color LINE_COLOR = Color.BLACK;
 
 	private static final int MAX_DECCORATION_LEVELS = 2;
 
@@ -214,10 +214,10 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 								if ( tmp == null && e.getButton() == MouseEvent.BUTTON1 )
 								{
 									graph.clearSelection(); // JYT I did this to
-															// keep selection
-															// even if we
-															// right-click
-															// elsewhere
+									// keep selection
+									// even if we
+									// right-click
+									// elsewhere
 								}
 								else if ( graph.isSwimlane( tmp ) && graphComponent.getCanvas().hitSwimlaneContent( graphComponent, graph.getView().getState( tmp ), e.getX(), e.getY() ) )
 								{
@@ -385,8 +385,9 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 	@Override
 	public void paintBackground( final Graphics g )
 	{
-		if ( paintDecorationLevel == 0 )
+		if ( paintDecorationLevel == 0 ) {
 			return;
+		}
 
 		final int width = getViewport().getView().getSize().width;
 		final int height = getViewport().getView().getSize().height;
@@ -410,37 +411,11 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			while ( y < height )
 			{
 				if ( y > paintBounds.y - ycs && y < paintBounds.y + paintBounds.height )
+				{
 					g.fillRect( 0, ( int ) y, width, ( int ) ycs );
+				}
 				y += 2d * ycs;
 			}
-
-			// Header separator
-			g.setColor( LINE_COLOR );
-			if ( ycs > paintBounds.y && ycs < paintBounds.y + paintBounds.height )
-				g.drawLine( paintBounds.x, ( int ) ycs, paintBounds.x + paintBounds.width, ( int ) ycs );
-			if ( xcs > paintBounds.x && xcs < paintBounds.x + paintBounds.width )
-				g.drawLine( ( int ) xcs, paintBounds.y, ( int ) xcs, paintBounds.y + paintBounds.height );
-
-			// Row headers
-			final double x = xcs / 4d;
-			y = 3 * ycs / 2d;
-
-			if ( xcs > paintBounds.x )
-			{
-				while ( y < height )
-				{
-					if ( y > paintBounds.y - ycs && y < paintBounds.y + paintBounds.height )
-					{
-						final int frame = ( int ) ( y / ycs - 1 );
-						// g.drawString(String.format("%.1f " + timeUnits, frame
-						// *
-						// dt), x, y);
-						g.drawString( String.format( "frame %d", frame ), ( int ) x, ( int ) Math.round( y + 12 * scale ) );
-					}
-					y += ycs;
-				}
-			}
-
 		}
 
 		if ( paintDecorationLevel > 0 )

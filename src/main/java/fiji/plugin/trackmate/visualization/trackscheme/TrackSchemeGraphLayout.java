@@ -309,8 +309,8 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 			for ( int i = 0; i < columns.length; i++ )
 			{
 				rowLengths.put( i, columns[ i ] + 1 ); // we add 1 so that we do
-														// not report the track
-														// lane limit
+				// not report the track
+				// lane limit
 			}
 
 		}
