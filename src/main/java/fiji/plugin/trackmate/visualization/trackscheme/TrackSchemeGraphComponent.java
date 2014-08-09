@@ -3,6 +3,7 @@ package fiji.plugin.trackmate.visualization.trackscheme;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -15,6 +16,7 @@ import java.util.EventObject;
 import java.util.Map;
 
 import javax.swing.BorderFactory;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
@@ -78,6 +80,8 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 		// Replace default painter for edge label so that we can draw labels
 		// parallel to edges.
 		mxGraphics2DCanvas.putTextShape( mxGraphics2DCanvas.TEXT_SHAPE_DEFAULT, new mxSideTextShape() );
+
+		setRowHeaderView( new RowHeader() );
 
 	}
 
@@ -487,6 +491,86 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			paintDecorationLevel = 0;
 		}
 		repaint();
+	}
+
+	/*
+	 * INNER CLASSES
+	 */
+
+	private class RowHeader extends JPanel
+	{
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public void paintComponent( final Graphics g )
+		{
+
+			final Graphics2D g2d = ( Graphics2D ) g;
+			final double scale = graph.getView().getScale();
+
+			final float fontScale = ( float ) ( 12 * Math.min( 1d, scale ) );
+			g.setFont( FONT.deriveFont( fontScale ).deriveFont( Font.BOLD ) );
+			g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
+			final Rectangle paintBounds = g.getClipBounds();
+
+			final int height = viewport.getView().getSize().height;
+
+			// Scaled sizes
+			final double xcs = TrackScheme.X_COLUMN_SIZE * Math.min( 1d, scale );
+			final double ycs = TrackScheme.Y_COLUMN_SIZE * scale;
+
+			// Alternating row color
+			g.setColor( BACKGROUND_COLOR_1 );
+			g.fillRect( paintBounds.x, paintBounds.y, paintBounds.width, paintBounds.height );
+
+			g.setColor( BACKGROUND_COLOR_2 );
+			double y = 0;
+			while ( y < height )
+			{
+				if ( y > paintBounds.y - ycs && y < paintBounds.y + paintBounds.height )
+				{
+					g.fillRect( 0, ( int ) y, ( int ) xcs, ( int ) ycs );
+				}
+				y += 2d * ycs;
+			}
+
+			// Header separator
+			g.setColor( TrackSchemeGraphComponent.LINE_COLOR );
+			if ( ycs > paintBounds.y && ycs < paintBounds.y + paintBounds.height )
+			{
+				g.drawLine( paintBounds.x, ( int ) ycs, paintBounds.x + paintBounds.width, ( int ) ycs );
+			}
+			if ( xcs > paintBounds.x && xcs < paintBounds.x + paintBounds.width )
+			{
+				g.drawLine( ( int ) xcs, paintBounds.y, ( int ) xcs, paintBounds.y + paintBounds.height );
+			}
+
+			// Row headers
+			final double x = xcs / 4d;
+			y = 3 * ycs / 2d;
+
+			if ( xcs > paintBounds.x )
+			{
+				while ( y < height )
+				{
+					if ( y > paintBounds.y - ycs && y < paintBounds.y + paintBounds.height )
+					{
+						final int frame = ( int ) ( y / ycs - 1 );
+						g.drawString( String.format( "frame %d", frame ), ( int ) x, ( int ) Math.round( y + 12 * scale ) );
+					}
+					y += ycs;
+				}
+			}
+		}
+
+		@Override
+		public Dimension getPreferredSize()
+		{
+			final double scale = Math.min( 1, graph.getView().getScale() );
+			final double xcs = TrackScheme.X_COLUMN_SIZE * scale + 1;
+			return new Dimension( ( int ) xcs, ( int ) viewport.getPreferredSize().getHeight() );
+		}
+
 	}
 
 }

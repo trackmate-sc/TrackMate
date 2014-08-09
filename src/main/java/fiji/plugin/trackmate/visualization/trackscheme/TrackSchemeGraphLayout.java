@@ -5,7 +5,6 @@ import static fiji.plugin.trackmate.visualization.trackscheme.TrackScheme.DEFAUL
 import static fiji.plugin.trackmate.visualization.trackscheme.TrackScheme.X_COLUMN_SIZE;
 import static fiji.plugin.trackmate.visualization.trackscheme.TrackScheme.Y_COLUMN_SIZE;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,17 +24,13 @@ import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxICell;
 
-import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition;
 import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition.TrackBranchDecomposition;
 import fiji.plugin.trackmate.graph.GraphUtils;
 import fiji.plugin.trackmate.graph.SortedDepthFirstIterator;
 import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
-import fiji.plugin.trackmate.io.TmXmlReader;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
 
 /**
  * This {@link mxGraphLayout} arranges cells on a graph in lanes corresponding
@@ -134,7 +129,7 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 			final int[] columns = new int[ maxFrame + 1 ];
 			for ( int i = 0; i < columns.length; i++ )
 			{
-				columns[ i ] = START_COLUMN;
+				columns[ i ] = START_COLUMN - 1;
 			}
 
 			int trackIndex = 0;
@@ -308,9 +303,7 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 			rowLengths = new HashMap< Integer, Integer >( columns.length );
 			for ( int i = 0; i < columns.length; i++ )
 			{
-				rowLengths.put( i, columns[ i ] + 1 ); // we add 1 so that we do
-				// not report the track
-				// lane limit
+				rowLengths.put( i, columns[ i ] );
 			}
 
 		}
@@ -348,30 +341,5 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 	public long getProcessingTime()
 	{
 		return processingTime;
-	}
-
-	public static void main( final String[] args )
-	{
-		final File file = new File( "/Users/tinevez/Desktop/Data/FakeTracksBranch.xml" );
-		final TmXmlReader reader = new TmXmlReader( file );
-		final Logger logger = Logger.DEFAULT_LOGGER;
-		if ( !reader.isReadingOk() )
-		{
-			logger.error( reader.getErrorMessage() );
-			logger.error( "Aborting.\n" ); // If I cannot even open the xml
-			// file, it is not worth going on.
-			return;
-		}
-
-		// Model
-		final Model model = reader.getModel();
-		if ( !reader.isReadingOk() )
-		{
-			logger.error( "Problem reading the model:\n" + reader.getErrorMessage() );
-		}
-
-		// TrackScheme
-		final TrackMateModelView view = new TrackSchemeFactory().create( model, null, new SelectionModel( model ) );
-		view.render();
 	}
 }
