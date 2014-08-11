@@ -113,7 +113,10 @@ public class SparseCostMatrix
 		this.nRows = number.length;
 		// loop on each row
 		this.start = new int[ nRows ];
-		start[ 0 ] = 0;
+		if ( nRows > 0 )
+		{
+			start[ 0 ] = 0;
+		}
 		for ( int i = 1; i < nRows; i++ )
 		{
 			if ( number[ i ] == 0 ) { throw new IllegalArgumentException( "All the rows must have at least one cost. Row " + i + " have none." ); }

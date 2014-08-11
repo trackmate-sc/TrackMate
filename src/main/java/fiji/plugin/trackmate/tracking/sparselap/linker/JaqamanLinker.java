@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.tracking.sparselap.linker;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -117,6 +118,15 @@ public class JaqamanLinker< K extends Comparable< K >, J extends Comparable< J >
 		final SparseCostMatrix tl = costMatrixCreator.getResult();
 		final List< K > matrixRows = costMatrixCreator.getSourceList();
 		final List< J > matrixCols = costMatrixCreator.getTargetList();
+
+		if ( matrixCols.isEmpty() || matrixRows.isEmpty() )
+		{
+			assignments = Collections.emptyMap();
+			costs = Collections.emptyMap();
+			final long end = System.currentTimeMillis();
+			processingTime = end - start;
+			return true;
+		}
 
 		/*
 		 * Complement the cost matrix with alternative no linking cost matrix.

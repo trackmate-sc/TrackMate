@@ -175,7 +175,7 @@ public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorith
 						final int frame1 = framePairs.get( i )[ 1 ];
 
 						// Get spots - we have to create a list from each
-						// content
+						// content.
 						final List< Spot > sources = new ArrayList< Spot >( spots.getNSpots( frame0, true ) );
 						for ( final Iterator< Spot > iterator = spots.iterator( frame0, true ); iterator.hasNext(); )
 						{
@@ -188,6 +188,11 @@ public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorith
 							targets.add( iterator.next() );
 						}
 
+						if ( sources.isEmpty() || targets.isEmpty() )
+						{
+							continue;
+						}
+
 						/*
 						 * Run the linker.
 						 */
@@ -196,7 +201,7 @@ public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorith
 						final JaqamanLinker< Spot, Spot > linker = new JaqamanLinker< Spot, Spot >( creator );
 						if ( !linker.checkInput() || !linker.process() )
 						{
-							errorMessage = linker.getErrorMessage();
+							errorMessage = "At frame " + frame0 + " to " + frame1 + ": " + linker.getErrorMessage();
 							ok.set( false );
 							return;
 						}

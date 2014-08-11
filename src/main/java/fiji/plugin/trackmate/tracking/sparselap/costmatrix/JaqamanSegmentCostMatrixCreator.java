@@ -20,6 +20,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import net.imglib2.algorithm.MultiThreaded;
 
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -48,7 +53,7 @@ import fiji.plugin.trackmate.tracking.sparselap.linker.SparseCostMatrix;
  * @author Jean-Yves Tinevez - 2014
  * 
  */
-public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot, Spot >
+public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot, Spot >, MultiThreaded
 {
 
 	private static final String BASE_ERROR_MESSAGE = "[JaqamanSegmentCostMatrixCreator] ";
@@ -69,6 +74,8 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 
 	private double alternativeCost = -1;
 
+	private int numThreads;
+
 	/**
 	 * Instantiates a cost matrix creator for the top-left quadrant of the
 	 * segment linking cost matrix.
@@ -78,6 +85,7 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 	{
 		this.graph = graph;
 		this.settings = settings;
+		setNumThreads();
 	}
 
 	@Override
@@ -136,6 +144,15 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 		final double alternativeCostFactor = ( Double ) settings.get( KEY_ALTERNATIVE_LINKING_COST_FACTOR );
 		final double percentile = ( Double ) settings.get( KEY_CUTOFF_PERCENTILE );
 
+		// Do we have to work?
+		if ( !allowGapClosing && !allowSplitting && !allowMerging )
+		{
+			uniqueSources = Collections.emptyList();
+			uniqueTargets = Collections.emptyList();
+			scm = new SparseCostMatrix( new double[ 0 ], new int[ 0 ], new int[ 0 ], 0 );
+			return true;
+		}
+
 		/*
 		 * Find segment ends, starts and middle points.
 		 */
@@ -166,6 +183,8 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 			allMiddles = Collections.emptyList();
 		}
 
+		final Object lock = new Object();
+
 		/*
 		 * Sources and targets.
 		 */
@@ -178,70 +197,93 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 		 * A. We iterate over all segment ends, targeting 1st the segment starts
 		 * (gap-closing) then the segment middles (merging).
 		 */
-		for ( int i = 0; i < segmentEnds.size(); i++ )
+
+		final ExecutorService executorGCM = Executors.newFixedThreadPool( numThreads );
+		for ( final Spot source : segmentEnds )
 		{
-			final Spot source = segmentEnds.get( i );
-
-			/*
-			 * Iterate over segment starts - GAP-CLOSING.
-			 */
-
-			if ( allowGapClosing )
+			executorGCM.submit( new Runnable()
 			{
-				for ( int j = 0; j < segmentStarts.size(); j++ )
+				@Override
+				public void run()
 				{
-					final Spot target = segmentStarts.get( j );
+					final int sourceFrame = source.getFeature( Spot.FRAME ).intValue();
 
-					// Check frame interval, must be within user specification.
-					final int tdiff = ( int ) target.diffTo( source, Spot.FRAME );
-					if ( tdiff < 1 || tdiff > maxFrameInterval )
+					/*
+					 * Iterate over segment starts - GAP-CLOSING.
+					 */
+
+					if ( allowGapClosing )
 					{
-						continue;
+						for ( final Spot target : segmentStarts )
+						{
+							// Check frame interval, must be within user
+							// specification.
+							final int targetFrame = target.getFeature( Spot.FRAME ).intValue();
+							final int tdiff = targetFrame - sourceFrame;
+							if ( tdiff < 1 || tdiff > maxFrameInterval )
+							{
+								continue;
+							}
+
+							// Check max distance
+							final double cost = gcCostFunction.linkingCost( source, target );
+							if ( cost > gcCostThreshold )
+							{
+								continue;
+							}
+
+							synchronized ( lock )
+							{
+								sources.add( source );
+								targets.add( target );
+								linkCosts.add( cost );
+							}
+						}
 					}
 
-					// Check max distance
-					final double cost = gcCostFunction.linkingCost( source, target );
-					if ( cost > gcCostThreshold )
+					/*
+					 * Iterate over middle points - MERGING.
+					 */
+
+					if ( allowMerging )
 					{
-						continue;
+						for ( final Spot target : allMiddles )
+						{
+							// Check frame interval, must be 1.
+							final int targetFrame = target.getFeature( Spot.FRAME ).intValue();
+							final int tdiff = targetFrame - sourceFrame;
+							if ( tdiff != 1 )
+							{
+								continue;
+							}
+
+							// Check max distance
+							final double cost = mCostFunction.linkingCost( source, target );
+							if ( cost > mCostThreshold )
+							{
+								continue;
+							}
+
+							synchronized ( lock )
+							{
+								sources.add( source );
+								targets.add( target );
+								linkCosts.add( cost );
+							}
+						}
 					}
-
-					sources.add( source );
-					targets.add( target );
-					linkCosts.add( cost );
 				}
-			}
-
-			/*
-			 * Iterate over middle points - MERGING.
-			 */
-
-			if ( !allowMerging )
-			{
-				continue;
-			}
-			for ( int j = 0; j < allMiddles.size(); j++ )
-			{
-				final Spot target = allMiddles.get( j );
-
-				// Check frame interval, must be 1.
-				final int tdiff = ( int ) target.diffTo( source, Spot.FRAME );
-				if ( tdiff != 1 )
-				{
-					continue;
-				}
-
-				// Check max distance
-				final double cost = mCostFunction.linkingCost( source, target );
-				if ( cost > mCostThreshold )
-				{
-					continue;
-				}
-
-				sources.add( source );
-				targets.add( target );
-				linkCosts.add( cost );
-			}
+			} );
+		}
+		executorGCM.shutdown();
+		try
+		{
+			executorGCM.awaitTermination( 1, TimeUnit.DAYS );
+		}
+		catch ( final InterruptedException e )
+		{
+			errorMessage = BASE_ERROR_MESSAGE + e.getMessage();
+			return false;
 		}
 
 		/*
@@ -249,34 +291,51 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 		 */
 		if ( allowSplitting )
 		{
-
-			for ( int i = 0; i < allMiddles.size(); i++ )
+			final ExecutorService executorS = Executors.newFixedThreadPool( numThreads );
+			for ( final Spot source : allMiddles )
 			{
-				final Spot source = allMiddles.get( i );
-
-				for ( int j = 0; j < segmentStarts.size(); j++ )
+				executorS.submit( new Runnable()
 				{
-					final Spot target = segmentStarts.get( j );
-
-					// Check frame interval, must be 1.
-					final int tdiff = ( int ) target.diffTo( source, Spot.FRAME );
-					if ( tdiff != 1 )
+					@Override
+					public void run()
 					{
-						continue;
+						final int sourceFrame = source.getFeature( Spot.FRAME ).intValue();
+						for ( final Spot target : segmentStarts )
+						{
+							// Check frame interval, must be 1.
+							final int targetFrame = target.getFeature( Spot.FRAME ).intValue();
+							final int tdiff = targetFrame - sourceFrame;
+
+							if ( tdiff != 1 )
+							{
+								continue;
+							}
+
+							// Check max distance
+							final double cost = sCostFunction.linkingCost( source, target );
+							if ( cost > sCostThreshold )
+							{
+								continue;
+							}
+							synchronized ( lock )
+							{
+								sources.add( source );
+								targets.add( target );
+								linkCosts.add( cost );
+							}
+						}
 					}
-
-					// Check max distance
-					final double cost = sCostFunction.linkingCost( source, target );
-					if ( cost > sCostThreshold )
-					{
-						continue;
-					}
-
-					sources.add( source );
-					targets.add( target );
-					linkCosts.add( cost );
-
 				}
+						);
+			}
+			executorS.shutdown();
+			try
+			{
+				executorS.awaitTermination( 1, TimeUnit.DAYS );
+			}
+			catch ( final InterruptedException e )
+			{
+				errorMessage = BASE_ERROR_MESSAGE + e.getMessage();
 			}
 		}
 
@@ -401,4 +460,23 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 
 		return ok;
 	}
+
+	@Override
+	public void setNumThreads()
+	{
+		this.numThreads = Runtime.getRuntime().availableProcessors();
+	}
+
+	@Override
+	public void setNumThreads( final int numThreads )
+	{
+		this.numThreads = numThreads;
+	}
+
+	@Override
+	public int getNumThreads()
+	{
+		return numThreads;
+	}
+
 }

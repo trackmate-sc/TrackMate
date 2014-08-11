@@ -70,10 +70,13 @@ public class SparseLAPSegmentTracker implements SpotTracker, Benchmark
 
 	private long processingTime;
 
+	private int numThreads;
+
 	public SparseLAPSegmentTracker( final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph, final Map< String, Object > settings )
 	{
 		this.graph = graph;
 		this.settings = settings;
+		setNumThreads();
 	}
 
 	@Override
@@ -200,5 +203,23 @@ public class SparseLAPSegmentTracker implements SpotTracker, Benchmark
 		// Merging
 		ok = ok & checkParameter( settings, KEY_ALLOW_TRACK_MERGING, Boolean.class, str );
 		return ok;
+	}
+
+	@Override
+	public void setNumThreads()
+	{
+		this.numThreads = Runtime.getRuntime().availableProcessors();
+	}
+
+	@Override
+	public void setNumThreads( final int numThreads )
+	{
+		this.numThreads = numThreads;
+	}
+
+	@Override
+	public int getNumThreads()
+	{
+		return numThreads;
 	}
 }
