@@ -229,7 +229,7 @@ public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorith
 
 		logger.setStatus( "Frame to frame linking..." );
 		SimpleMultiThreading.startAndJoin( threads );
-		logger.setProgress( 0.5f );
+		logger.setProgress( 1d );
 		logger.setStatus( "" );
 
 		final long end = System.currentTimeMillis();

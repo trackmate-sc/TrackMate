@@ -9,6 +9,7 @@ import java.util.Map;
 import net.imglib2.algorithm.BenchmarkAlgorithm;
 import net.imglib2.algorithm.OutputAlgorithm;
 import net.imglib2.util.Util;
+import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.tracking.sparselap.costfunction.CostFunction;
 import fiji.plugin.trackmate.tracking.sparselap.costmatrix.CostMatrixCreator;
 
@@ -31,6 +32,8 @@ public class JaqamanLinker< K extends Comparable< K >, J extends Comparable< J >
 
 	private final CostMatrixCreator< K, J > costMatrixCreator;
 
+	private final Logger logger;
+
 	/**
 	 * Creates a new linker for the two specified object lists.
 	 * 
@@ -48,9 +51,15 @@ public class JaqamanLinker< K extends Comparable< K >, J extends Comparable< J >
 	 *            build the cost for a link <b>not to happen</b>.
 	 * @see {Jaqaman <i>et al.</i>, Nature Methods, <b>2008</b>, Figure 1b.}
 	 */
-	public JaqamanLinker( final CostMatrixCreator< K, J > costMatrixCreator )
+	public JaqamanLinker( final CostMatrixCreator< K, J > costMatrixCreator, final Logger logger )
 	{
 		this.costMatrixCreator = costMatrixCreator;
+		this.logger = logger;
+	}
+
+	public JaqamanLinker( final CostMatrixCreator< K, J > costMatrixCreator )
+	{
+		this( costMatrixCreator, Logger.VOID_LOGGER );
 	}
 
 	/**
@@ -97,11 +106,13 @@ public class JaqamanLinker< K extends Comparable< K >, J extends Comparable< J >
 		 * Generate the cost matrix
 		 */
 
+		logger.setStatus( "Creating the main cost matrix..." );
 		if ( !costMatrixCreator.checkInput() || !costMatrixCreator.process() )
 		{
 			errorMessage = costMatrixCreator.getErrorMessage();
 			return false;
 		}
+		logger.setProgress( 0.5 );
 
 		final SparseCostMatrix tl = costMatrixCreator.getResult();
 		final List< K > matrixRows = costMatrixCreator.getSourceList();
@@ -110,6 +121,8 @@ public class JaqamanLinker< K extends Comparable< K >, J extends Comparable< J >
 		/*
 		 * Complement the cost matrix with alternative no linking cost matrix.
 		 */
+
+		logger.setStatus( "Completing the cost matrix..." );
 
 		final int nCols = tl.getNCols();
 		final int nRows = tl.getNRows();
@@ -157,10 +170,12 @@ public class JaqamanLinker< K extends Comparable< K >, J extends Comparable< J >
 		 * Stitch them together
 		 */
 		final SparseCostMatrix full = ( tl.hcat( tr ) ).vcat( bl.hcat( br ) );
+		logger.setProgress( 0.6 );
 
 		/*
 		 * Solve the full cost matrix.
 		 */
+		logger.setStatus( "Solving the cost matrix..." );
 		final LAPJV solver = new LAPJV( full );
 		if ( !solver.checkInput() || !solver.process() )
 		{
@@ -185,6 +200,8 @@ public class JaqamanLinker< K extends Comparable< K >, J extends Comparable< J >
 			}
 		}
 
+		logger.setProgress( 1 );
+		logger.setStatus( "" );
 		final long end = System.currentTimeMillis();
 		processingTime = end - start;
 

@@ -30,6 +30,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
 import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.Logger.SlaveLogger;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.tracking.SpotTracker;
@@ -127,6 +128,7 @@ public class SparseLAPTracker extends MultiThreadedBenchmarkAlgorithm implements
 		 * 1. Frame to frame linking.
 		 */
 
+
 		// Prepare settings object
 		final Map< String, Object > ftfSettings = new HashMap< String, Object >();
 		ftfSettings.put( KEY_LINKING_MAX_DISTANCE, settings.get( KEY_LINKING_MAX_DISTANCE ) );
@@ -135,7 +137,8 @@ public class SparseLAPTracker extends MultiThreadedBenchmarkAlgorithm implements
 
 		final SparseLAPFrameToFrameTracker frameToFrameLinker = new SparseLAPFrameToFrameTracker( spots, ftfSettings );
 		frameToFrameLinker.setNumThreads( numThreads );
-		frameToFrameLinker.setLogger( logger );
+		final SlaveLogger ftfLogger = new SlaveLogger( logger, 0, 0.5 );
+		frameToFrameLinker.setLogger( ftfLogger );
 
 		if ( !frameToFrameLinker.checkInput() || !frameToFrameLinker.process() )
 		{
@@ -170,7 +173,8 @@ public class SparseLAPTracker extends MultiThreadedBenchmarkAlgorithm implements
 
 		// Solve.
 		final SparseLAPSegmentTracker segmentLinker = new SparseLAPSegmentTracker( graph, slSettings );
-		segmentLinker.setLogger( logger );
+		final SlaveLogger slLogger = new SlaveLogger( logger, 0.5, 0.5 );
+		segmentLinker.setLogger( slLogger );
 
 		if ( !segmentLinker.checkInput() || !segmentLinker.process() )
 		{
@@ -178,6 +182,8 @@ public class SparseLAPTracker extends MultiThreadedBenchmarkAlgorithm implements
 			return false;
 		}
 
+		logger.setStatus( "" );
+		logger.setProgress( 1d );
 		final long end = System.currentTimeMillis();
 		processingTime = end - start;
 
