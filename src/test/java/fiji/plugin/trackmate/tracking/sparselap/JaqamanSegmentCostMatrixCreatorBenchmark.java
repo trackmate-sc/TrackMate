@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
@@ -35,6 +36,7 @@ import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.providers.TrackerProvider;
+import fiji.plugin.trackmate.tracking.FastLAPTrackerFactory;
 import fiji.plugin.trackmate.tracking.LAPUtils;
 import fiji.plugin.trackmate.tracking.sparselap.costmatrix.JaqamanSegmentCostMatrixCreator;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
@@ -46,7 +48,7 @@ public class JaqamanSegmentCostMatrixCreatorBenchmark
 	{
 //		benchmark();
 //		baseTest();
-		benchmarkMemory();
+		testSimil();
 	}
 
 	public static final void benchmarkMemory()
@@ -93,6 +95,90 @@ public class JaqamanSegmentCostMatrixCreatorBenchmark
 		}
 		final long end = System.currentTimeMillis();
 		System.out.println( "Done in " + ( end - start ) + " ms." );
+	}
+
+	public static final void testSimil()
+	{
+		ImageJ.main( null );
+		final File file = new File( "samples/VESICLE.xml" );
+		final TmXmlReader reader = new TmXmlReader( file );
+		final Model model = reader.getModel();
+		final SpotCollection spots = model.getSpots();
+
+
+		final Settings settings = new Settings();
+		final Map< String, Object > ts = LAPUtils.getDefaultLAPSettingsMap();
+		ts.put( KEY_ALLOW_TRACK_SPLITTING, true );
+		ts.put( KEY_ALLOW_TRACK_MERGING, false );
+		settings.trackerSettings = ts;
+
+
+		/*
+		 * SPARSE
+		 */
+
+		final Model m1 = new Model();
+		m1.setSpots( spots, false );
+		settings.trackerFactory = new SparseLAPTrackerFactory();
+		final long start = System.currentTimeMillis();
+		final TrackMate trackmate1 = new TrackMate( m1, settings );
+		final boolean ok = trackmate1.execTracking();
+		if ( !ok )
+		{
+			System.err.println( trackmate1.getErrorMessage() );
+		}
+		final long end = System.currentTimeMillis();
+		System.out.println( "Done in " + ( end - start ) + " ms." );
+
+		/*
+		 * NON-SPARSE
+		 */
+		
+		final Model m2 = new Model();
+		m2.setSpots( spots, false );
+
+		settings.trackerFactory = new FastLAPTrackerFactory();
+		final long start2 = System.currentTimeMillis();
+		final TrackMate trackmate2 = new TrackMate( m2, settings );
+		final boolean ok2 = trackmate2.execTracking();
+		if ( !ok2 )
+		{
+			System.err.println( trackmate2.getErrorMessage() );
+		}
+		final long end2 = System.currentTimeMillis();
+		System.out.println( "Done in " + ( end2 - start2 ) + " ms." );
+
+
+		/*
+		 * TEST
+		 */
+
+		int good = 0;
+		int bad = 0;
+		for ( final Spot spot : spots.iterable( true ) )
+		{
+			final Set< DefaultWeightedEdge > edges = m1.getTrackModel().edgesOf( spot );
+			for ( final DefaultWeightedEdge edge : edges )
+			{
+				Spot s1 = m1.getTrackModel().getEdgeSource( edge );
+				if ( s1 == spot )
+				{
+					s1 = m1.getTrackModel().getEdgeTarget( edge );
+				}
+
+				if ( !m2.getTrackModel().containsEdge( spot, s1 ) )
+				{
+					System.out.println( "Could not find edge " + edge + " in 2nd model." );
+					bad++;
+				}
+				else
+				{
+					good++;
+				}
+			}
+		}
+		System.out.println( String.format( "Found %d edges in the second model over the %d edges of the 1st model.", good, ( good + bad ) ) );// DEBUG
+
 	}
 
 	public static final void baseTest()
