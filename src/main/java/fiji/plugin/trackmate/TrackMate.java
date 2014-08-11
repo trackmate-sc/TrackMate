@@ -250,6 +250,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 		final Logger logger = model.getLogger();
 		logger.log( "Starting tracking process.\n" );
 		final SpotTracker tracker = settings.trackerFactory.create( model.getSpots(), settings.trackerSettings );
+		tracker.setNumThreads( numThreads );
 		tracker.setLogger( logger );
 		if ( tracker.checkInput() && tracker.process() )
 		{
