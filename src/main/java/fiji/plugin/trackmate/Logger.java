@@ -228,4 +228,69 @@ public abstract class Logger extends PrintWriter
 		}
 
 	};
+
+	/**
+	 * A logger that wraps a master logger and uses it to echo any received
+	 * message. This class is used to report progress of a sub-process. If it is
+	 * sent to a subprocess, the master logger can show a progress in a range
+	 * and from a starting point that can be specified.
+	 * 
+	 * @author Jean-Yves Tinevez - 2014
+	 * 
+	 */
+	public static class SlaveLogger extends Logger
+	{
+
+		private final Logger master;
+
+		private final double progressStart;
+
+		private final double progressRange;
+
+		/**
+		 * Create a new slave logger that will report progress to its master in
+		 * the following way: If a sub-process reports a progress of
+		 * <code>val</code>, then the master logger will receive the progress
+		 * value <code>progressStart + progressRange * val</code>.
+		 * 
+		 * @param master
+		 *            the master {@link Logger}.
+		 * @param progressStart
+		 *            the progress to start with.
+		 * @param progressRange
+		 *            the progress range to report.
+		 */
+		public SlaveLogger( final Logger master, final double progressStart, final double progressRange )
+		{
+			this.master = master;
+			this.progressStart = progressStart;
+			this.progressRange = progressRange;
+		}
+
+		@Override
+		public void log( final String message, final Color color )
+		{
+			master.log( message, color );
+		}
+
+		@Override
+		public void error( final String message )
+		{
+			master.error( message );
+		}
+
+		@Override
+		public void setProgress( final double val )
+		{
+			master.setProgress( progressStart + progressRange * val );
+		}
+
+		@Override
+		public void setStatus( final String status )
+		{
+			master.setStatus( status );
+		}
+
+	}
+
 }
