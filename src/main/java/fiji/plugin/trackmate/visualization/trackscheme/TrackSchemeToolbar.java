@@ -16,6 +16,8 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JToolBar;
 
+import fiji.plugin.trackmate.visualization.trackscheme.utils.SearchBar;
+
 public class TrackSchemeToolbar extends JToolBar
 {
 
@@ -318,6 +320,9 @@ public class TrackSchemeToolbar extends JToolBar
 		// add(toggleDisplayCostsButton);
 		// Display background decorations
 		add( loopDisplayDecorationsButton );
+		// Separator
+		addSeparator();
+		add( new SearchBar( trackScheme.getModel(), trackScheme ) );
 		add( Box.createHorizontalGlue() );
 
 		final Dimension dim = new Dimension( 100, 30 );
