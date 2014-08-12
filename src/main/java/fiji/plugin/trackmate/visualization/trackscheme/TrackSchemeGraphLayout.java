@@ -5,7 +5,6 @@ import static fiji.plugin.trackmate.visualization.trackscheme.TrackScheme.DEFAUL
 import static fiji.plugin.trackmate.visualization.trackscheme.TrackScheme.X_COLUMN_SIZE;
 import static fiji.plugin.trackmate.visualization.trackscheme.TrackScheme.Y_COLUMN_SIZE;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,17 +24,13 @@ import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxICell;
 
-import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition;
 import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition.TrackBranchDecomposition;
 import fiji.plugin.trackmate.graph.GraphUtils;
 import fiji.plugin.trackmate.graph.SortedDepthFirstIterator;
 import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
-import fiji.plugin.trackmate.io.TmXmlReader;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
 
 /**
  * This {@link mxGraphLayout} arranges cells on a graph in lanes corresponding
@@ -50,7 +45,7 @@ import fiji.plugin.trackmate.visualization.TrackMateModelView;
 public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 {
 
-	private static final int START_COLUMN = 2;
+	private static final int START_COLUMN = 1;
 
 	/** The target model to draw spot from. */
 	private final Model model;
@@ -277,7 +272,7 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 				}
 
 				// Store column widths for the panel background
-				int sumWidth = START_COLUMN - 1;
+				int sumWidth = START_COLUMN;
 				for ( int i = 0; i < trackIndex; i++ )
 				{
 					sumWidth += component.columnWidths[ i ];
@@ -287,30 +282,19 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 				trackIndex++;
 			} // loop over tracks
 
-			// Ensure we do not start at 0 for the first column of lonely cells
-			for ( int i = 0; i < columns.length; i++ )
-			{
-				if ( columns[ i ] < 1 )
-				{
-					columns[ i ] = 1;
-				}
-			}
-
 			// Deal with lonely cells
 			for ( final mxCell cell : lonelyCells )
 			{
 				final Spot spot = graph.getSpotFor( cell );
 				final int frame = spot.getFeature( Spot.FRAME ).intValue();
-				setCellGeometry( cell, frame, ++columns[ frame ] );
+				setCellGeometry( cell, frame, columns[ frame ]++ );
 			}
 
 			// Before we leave, we regenerate the row length, for our brothers
 			rowLengths = new HashMap< Integer, Integer >( columns.length );
 			for ( int i = 0; i < columns.length; i++ )
 			{
-				rowLengths.put( i, columns[ i ] + 1 ); // we add 1 so that we do
-														// not report the track
-														// lane limit
+				rowLengths.put( i, columns[ i ] );
 			}
 
 		}
@@ -327,7 +311,7 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 	{
 
 		final double x = ( targetColumn ) * X_COLUMN_SIZE - DEFAULT_CELL_WIDTH / 2;
-		final double y = ( 0.5 + row + 1 ) * Y_COLUMN_SIZE - DEFAULT_CELL_HEIGHT / 2;
+		final double y = ( 0.5 + row ) * Y_COLUMN_SIZE - DEFAULT_CELL_HEIGHT / 2;
 		final mxGeometry geometry = cell.getGeometry();
 		geometry.setX( x );
 		geometry.setY( y );
@@ -348,30 +332,5 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 	public long getProcessingTime()
 	{
 		return processingTime;
-	}
-
-	public static void main( final String[] args )
-	{
-		final File file = new File( "/Users/tinevez/Desktop/Data/FakeTracksBranch.xml" );
-		final TmXmlReader reader = new TmXmlReader( file );
-		final Logger logger = Logger.DEFAULT_LOGGER;
-		if ( !reader.isReadingOk() )
-		{
-			logger.error( reader.getErrorMessage() );
-			logger.error( "Aborting.\n" ); // If I cannot even open the xml
-			// file, it is not worth going on.
-			return;
-		}
-
-		// Model
-		final Model model = reader.getModel();
-		if ( !reader.isReadingOk() )
-		{
-			logger.error( "Problem reading the model:\n" + reader.getErrorMessage() );
-		}
-
-		// TrackScheme
-		final TrackMateModelView view = new TrackSchemeFactory().create( model, null, new SelectionModel( model ) );
-		view.render();
 	}
 }

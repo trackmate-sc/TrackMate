@@ -13,21 +13,21 @@ import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
 public class TrackSchemeTestDrive {
-	
-	public static void main(String[] args) throws JDOMException, IOException {
-	
-		File file = new File(AppUtils.getBaseDirectory(TrackMate.class), "samples/RECEPTOR.xml");
-		
-		TmXmlReader reader = new TmXmlReader(file);
-		Model model = reader.getModel();
-		
+
+	public static void main(final String[] args) throws JDOMException, IOException {
+
+		final File file = new File( AppUtils.getBaseDirectory( TrackMate.class ), "samples/FakeTracks.xml" );
+
+		final TmXmlReader reader = new TmXmlReader(file);
+		final Model model = reader.getModel();
+
 		System.out.println("From the XML file:");
 		System.out.println("Found "+model.getTrackModel().nTracks(false)+" tracks in total.");
 		System.out.println();
-		
+
 		// Instantiate displayer
-		SelectionModel sm = new SelectionModel(model);
-		TrackScheme trackscheme = new TrackScheme(model, sm);
+		final SelectionModel sm = new SelectionModel(model);
+		final TrackScheme trackscheme = new TrackScheme(model, sm);
 		trackscheme.render();
 		trackscheme.refresh();
 	}
