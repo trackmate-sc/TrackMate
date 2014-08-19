@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import net.imglib2.algorithm.Benchmark;
 import net.imglib2.algorithm.OutputAlgorithm;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.util.LinAlgHelpers;
 import net.imglib2.util.Util;
 
 import org.jdom2.Document;
@@ -51,6 +52,8 @@ public class TGMMImporter implements OutputAlgorithm< Model >, Benchmark
 	private static final String XML_ID = "id";
 
 	private static final String XML_SCORE = "splitScore";
+
+	private static final String XML_NU = "nu";
 
 	private static final String XML_PRECISION_MATRIX = "W";
 
@@ -265,6 +268,13 @@ public class TGMMImporter implements OutputAlgorithm< Model >, Benchmark
 					return false;
 				}
 
+				final String nuStr = detectionEl.getAttributeValue( XML_NU );
+				if ( null == nuStr )
+				{
+					errorMessage = BASE_ERROR_MSG + "Element " + detectionEl + " in file " + xmlFile + " misses the nu attribute (" + XML_NU + ").\n";
+					return false;
+				}
+
 				final String precMatStr = detectionEl.getAttributeValue( XML_PRECISION_MATRIX );
 				if ( null == precMatStr )
 				{
@@ -317,38 +327,39 @@ public class TGMMImporter implements OutputAlgorithm< Model >, Benchmark
 					 * Shape and radius
 					 */
 
+					final double nu = Double.parseDouble( nuStr );
 					final double[] vals = new double[ 9 ];
 					for ( int j = 0; j < vals.length; j++ )
 					{
-						vals[ j ] = Double.parseDouble( precMatStrs[ j ] );
+						vals[ j ] = nu * Double.parseDouble( precMatStrs[ j ] );
 					}
 					final Matrix precMat = new Matrix( vals, 3 );
 					final Matrix covMat = precMat.inverse();
-					final EigenvalueDecomposition eig = covMat.eig();
-					final double[] eigVals = eig.getRealEigenvalues();
-					final Matrix eigVectors = eig.getV();
 
 					/*
 					 * Scale shape properly
 					 */
 
-					final double[] ellipseLength = new double[ 3 ];
-					final double[][] eigVecs = new double[ 3 ][ 3 ];
-					for ( int k = 0; k < eigVals.length; k++ )
-					{
-						ellipseLength[ k ] = Math.sqrt( eigVals[ k ] );
-						for ( int l = 0; l < 3; l++ )
-						{
-							eigVecs[ k ][ l ] = eigVectors.get( l, k );
-						}
-					}
+					final double[][] S = covMat.getArray();
+					final double[][] T = new double[ 3 ][ 3 ];
+					for ( int r = 0; r < 3; ++r )
+						for ( int c = 0; c < 3; ++c )
+							T[ r ][ c ] = transform.get( r, c );
+					final double[][] TS = new double[ 3 ][ 3 ];
+					LinAlgHelpers.mult( T, S, TS );
+					LinAlgHelpers.multABT( TS, T, S );
+					// note that by writing to S we write the internal array of covMat.
 
 					/*
 					 * Build a mean radius
 					 */
 
-					// FIXME: fudge factor here
-					final double radius = Util.computeMax( ellipseLength ) / 10d;
+					final double nSigmas = 2; // ellipsoid is at nSigmas std devs of the Gaussian
+					final EigenvalueDecomposition eig = covMat.eig();
+					final double[] radii = eig.getRealEigenvalues();
+					for ( int i = 0; i < radii.length; ++i )
+						radii[ i ] = Math.sqrt( radii[ i ] );
+					final double radius = nSigmas * Util.computeAverage( radii );
 
 					/*
 					 * Make a spot and add it to this frame collection.
