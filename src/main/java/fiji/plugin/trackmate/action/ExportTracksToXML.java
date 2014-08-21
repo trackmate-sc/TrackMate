@@ -107,7 +107,8 @@ public class ExportTracksToXML extends AbstractTMAction {
 		File file;
 		try {
 			String filename = trackmate.getSettings().imageFileName;
-			filename = filename.substring(0, filename.indexOf("."));
+			final int dot = filename.indexOf(".");
+			filename = dot < 0 ? filename : filename.substring(0, dot);
 			file = new File(folder.getPath() + File.separator + filename +"_Tracks.xml");
 		} catch (final NullPointerException npe) {
 			file = new File(folder.getPath() + File.separator + "Tracks.xml");
