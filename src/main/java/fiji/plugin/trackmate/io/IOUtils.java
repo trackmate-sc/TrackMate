@@ -163,6 +163,74 @@ public class IOUtils {
 	}
 
 
+	/**
+	 * Prompts the user for a target folder.
+	 * 
+	 * @param file
+	 *            a default file, will be used to display a default choice in
+	 *            the file chooser.
+	 * @param title
+	 *            the title to display on the file chooser window
+	 * @param parent
+	 *            the {@link Frame} to lock on this dialog.
+	 * @param logger
+	 *            a {@link Logger} to report what is happening.
+	 * @return the selected file, or <code>null</code> if the user pressed the
+	 *         "cancel" button.
+	 */
+	public static File askForFolder( File file, final String title, final Frame parent, final Logger logger )
+	{
+
+		if ( IJ.isMacintosh() )
+		{
+			// use the native file dialog on the mac
+			System.setProperty( "apple.awt.fileDialogForDirectories", "true" );
+			final FileDialog dialog = new FileDialog( parent, title, FileDialog.LOAD );
+			dialog.setIconImage( TRACKMATE_ICON.getImage() );
+			dialog.setDirectory( file.getParent() );
+			dialog.setFile( file.getName() );
+			dialog.setVisible( true );
+			final String selectedFile = dialog.getFile();
+			System.setProperty( "apple.awt.fileDialogForDirectories", "false" );
+
+			if ( null == selectedFile )
+			{
+				logger.log( "Load data aborted.\n" );
+				return null;
+			}
+			file = new File( dialog.getDirectory(), dialog.getFile() );
+		}
+		else
+		{
+			final JFileChooser fileChooser = new JFileChooser( file.getParent() )
+			{
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				protected JDialog createDialog( final Component parent ) throws HeadlessException
+				{
+					final JDialog dialog = super.createDialog( parent );
+					dialog.setIconImage( TRACKMATE_ICON.getImage() );
+					return dialog;
+				}
+			};
+			fileChooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY );
+			fileChooser.setName( title );
+			fileChooser.setSelectedFile( file );
+
+			final int returnVal = fileChooser.showOpenDialog( parent );
+			if ( returnVal == JFileChooser.APPROVE_OPTION )
+			{
+				file = fileChooser.getSelectedFile();
+			}
+			else
+			{
+				logger.log( "Load data aborted.\n" );
+				return null;
+			}
+		}
+		return file;
+	}
 
 
 	/**
