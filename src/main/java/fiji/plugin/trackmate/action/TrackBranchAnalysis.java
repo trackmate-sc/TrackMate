@@ -3,13 +3,16 @@ package fiji.plugin.trackmate.action;
 import ij.IJ;
 
 import java.io.File;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.swing.ImageIcon;
 
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.SimpleDirectedGraph;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Logger;
@@ -18,6 +21,7 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition;
+import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition.TrackBranchDecomposition;
 import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.io.TmXmlReader;
@@ -46,64 +50,107 @@ public class TrackBranchAnalysis extends AbstractTMAction
 			return;
 		}
 
-		final ConvexBranchesDecomposition splitter = new ConvexBranchesDecomposition( model, true, false );
-		if ( !splitter.checkInput() || !splitter.process() )
-		{
-			logger.error( splitter.getErrorMessage() );
-			return;
-		}
-
 		final TimeDirectedNeighborIndex neighborIndex = model.getTrackModel().getDirectedNeighborIndex();
-
-		final Collection< List< Spot >> branches = splitter.getBranches();
-		logger.log( "Found " + branches.size() + " branches in " + model.getTrackModel().nTracks( true ) + " tracks.\n" );
 
 		final Set< Spot > visited = new HashSet< Spot >();
 
-		for ( final List< Spot > branch : branches )
+		for ( final Integer trackID : model.getTrackModel().unsortedTrackIDs( true ) )
 		{
-			if ( branch.size() < 2 )
+			final TrackBranchDecomposition branchDecomposition = ConvexBranchesDecomposition.processTrack( trackID, model.getTrackModel(), neighborIndex, true, false );
+			final SimpleDirectedGraph< List< Spot >, DefaultEdge > branchGraph = ConvexBranchesDecomposition.buildBranchGraph( branchDecomposition );
+
+			final Map< Branch, Set< List< Spot >> > successorMap = new HashMap< Branch, Set< List< Spot >> >();
+			final Map< Branch, Set< List< Spot >> > predecessorMap = new HashMap< Branch, Set< List< Spot >> >();
+			final Map<List<Spot>, Branch> branchMap = new HashMap< List<Spot>, Branch >();
+
+			for ( final List< Spot > branch : branchGraph.vertexSet() )
 			{
-				logger.log( "Branch " + branch + " is too small. Skipping.\n" );
-				continue;
+				final Branch br = new Branch();
+				branchMap.put( branch, br );
+
+				// First and last spot.
+				br.first = branch.get( 0 );
+				br.last = branch.get( branch.size() - 1 );
+
+				// Predecessors
+				final Set< DefaultEdge > incomingEdges = branchGraph.incomingEdgesOf( branch );
+				final Set< List< Spot >> predecessors = new HashSet< List< Spot > >( incomingEdges.size() );
+				for ( final DefaultEdge edge : incomingEdges )
+				{
+					final List< Spot > predecessorBranch = branchGraph.getEdgeSource( edge );
+					predecessors.add( predecessorBranch );
+				}
+
+				// Successors
+				final Set< DefaultEdge > outgoingEdges = branchGraph.outgoingEdgesOf( branch );
+				final Set< List< Spot >> successors = new HashSet< List< Spot > >( outgoingEdges.size() );
+				for ( final DefaultEdge edge : outgoingEdges )
+				{
+					final List< Spot > successorBranch = branchGraph.getEdgeTarget( edge );
+					successors.add( successorBranch );
+				}
+
+				successorMap.put( br, successors );
+				predecessorMap.put( br, predecessors );
+			}
+			
+			for ( final Branch br : successorMap.keySet() )
+			{
+				final Set< List< Spot >> succs = successorMap.get( br );
+				final Set<Branch> succBrs = new HashSet< Branch >(succs.size());
+				for ( final List<Spot> branch : succs )
+				{
+					final Branch succBr = branchMap.get( branch );
+					succBrs.add( succBr );
+				}
+				br.successors = succBrs;
+				
+				final Set< List< Spot >> preds = predecessorMap.get( br );
+				final Set<Branch> predBrs = new HashSet< Branch >(preds.size());
+				for ( final List<Spot> branch : preds )
+				{
+					final Branch predBr = branchMap.get( branch );
+					predBrs.add( predBr );
+				}
+				br.predecessors = predBrs;
+			}
+				
+
+				String branchName = "" + first.getName() + "-" + last.getName();
+
+				if ( neighborIndex.predecessorsOf( first ).size() < 1 )
+				{
+					logger.log( "Branch " + branchName + " starting point is not defined. Skipping.\n" );
+					continue;
+				}
+
+				final Set< Spot > nextOnes = neighborIndex.successorsOf( last );
+				final int nSucc = nextOnes.size();
+				if ( nSucc < 1 )
+				{
+					logger.log( "Branch " + branchName + " end point is not defined. Skipping.\n" );
+					continue;
+				}
+
+				final Spot nextOne = nextOnes.iterator().next();
+				if ( visited.contains( nextOne ) )
+				{
+					continue;
+				}
+				visited.add( nextOne );
+				if ( nSucc == 1 )
+				{
+					// It is a fusion - change the branch name
+					final Spot previous = neighborIndex.predecessorsOf( first ).iterator().next();
+					branchName = "" + previous.getName() + "-" + nextOne.getName();
+				}
+
+				final int nPred = neighborIndex.predecessorsOf( nextOne ).size();
+				final DivisionType type = DivisionType.getType( nSucc, nPred );
+				final int dt = ( int ) last.diffTo( first, Spot.FRAME );
+				logger.log( "Branch " + branchName + ", " + type.getName() + ", dt = " + dt + " frames.\n" );
 			}
 
-			final Spot first = branch.get( 0 );
-			final Spot last = branch.get( branch.size() - 1 );
-			String branchName = "" + first.getName() + "-" + last.getName();
-
-			if ( neighborIndex.predecessorsOf( first ).size() < 1 )
-			{
-				logger.log( "Branch " + branchName + " starting point is not defined. Skipping.\n" );
-				continue;
-			}
-
-			final Set< Spot > nextOnes = neighborIndex.successorsOf( last );
-			final int nSucc = nextOnes.size();
-			if ( nSucc < 1 )
-			{
-				logger.log( "Branch " + branchName + " end point is not defined. Skipping.\n" );
-				continue;
-			}
-
-
-			final Spot nextOne = nextOnes.iterator().next();
-			if ( visited.contains( nextOne ) )
-			{
-				continue;
-			}
-			visited.add( nextOne );
-			if ( nSucc == 1 )
-			{
-				// It is a fusion - change the branch name
-				final Spot previous = neighborIndex.predecessorsOf( first ).iterator().next();
-				branchName = "" + previous.getName() + "-" + nextOne.getName();
-			}
-
-			final int nPred = neighborIndex.predecessorsOf( nextOne ).size();
-			final DivisionType type = DivisionType.getType( nSucc, nPred );
-			final int dt = ( int ) last.diffTo( first, Spot.FRAME );
-			logger.log( "Branch " + branchName + ", " + type.getName() + ", dt = " + dt + " frames.\n" );
 		}
 		logger.log( "Done.\n" );
 
@@ -112,6 +159,22 @@ public class TrackBranchAnalysis extends AbstractTMAction
 	/*
 	 * STATIC CLASSES AND ENUMS
 	 */
+
+	/**
+	 * A class to describe a branch.
+	 */
+	class Branch
+	{
+		Spot first;
+
+		Spot last;
+
+		double dt;
+
+		 Set< Branch > predecessors;
+
+		 Set< Branch > successors;
+	}
 
 	public static enum DivisionType
 	{
@@ -205,7 +268,7 @@ public class TrackBranchAnalysis extends AbstractTMAction
 
 	public static void main( final String[] args )
 	{
-		final File file = new File( "/Users/tinevez/Desktop/Video_C03-1-fullHD.xml" );
+		final File file = new File( "/Users/tinevez/Desktop/Data/Milan/Video_C03-1-fullHD.xml" );
 		final TmXmlReader reader = new TmXmlReader( file );
 		if ( !reader.isReadingOk() )
 		{
