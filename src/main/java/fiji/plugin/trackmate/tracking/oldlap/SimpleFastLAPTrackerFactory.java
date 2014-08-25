@@ -1,10 +1,11 @@
-package fiji.plugin.trackmate.tracking;
+package fiji.plugin.trackmate.tracking.oldlap;
 
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.panels.tracker.SimpleLAPTrackerSettingsPanel;
+import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 
 @Plugin( type = SpotTrackerFactory.class )
 public class SimpleFastLAPTrackerFactory extends FastLAPTrackerFactory

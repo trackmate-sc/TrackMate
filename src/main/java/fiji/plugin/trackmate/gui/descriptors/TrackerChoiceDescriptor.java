@@ -10,8 +10,8 @@ import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.panels.ListChooserPanel;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.tracking.ManualTrackerFactory;
-import fiji.plugin.trackmate.tracking.SimpleFastLAPTrackerFactory;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
+import fiji.plugin.trackmate.tracking.oldlap.SimpleFastLAPTrackerFactory;
 
 public class TrackerChoiceDescriptor implements WizardPanelDescriptor
 {

@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tracking;
+package fiji.plugin.trackmate.tracking.oldlap;
 
 import java.util.Map;
 

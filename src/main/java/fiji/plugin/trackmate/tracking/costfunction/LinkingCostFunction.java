@@ -9,8 +9,8 @@ import java.util.Map;
 
 import Jama.Matrix;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.tracking.LAPTracker;
 import fiji.plugin.trackmate.tracking.LAPUtils;
+import fiji.plugin.trackmate.tracking.oldlap.LAPTracker;
 
 /**
  * <p>Linking cost function used with {@link LAPTracker}.

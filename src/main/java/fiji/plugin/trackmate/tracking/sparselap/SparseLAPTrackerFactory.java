@@ -7,9 +7,9 @@ import javax.swing.ImageIcon;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.tracking.LAPTrackerFactory;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
+import fiji.plugin.trackmate.tracking.oldlap.LAPTrackerFactory;
 
 @Plugin( type = SpotTrackerFactory.class )
 public class SparseLAPTrackerFactory extends LAPTrackerFactory

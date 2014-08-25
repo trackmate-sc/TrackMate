@@ -20,6 +20,7 @@ import org.junit.Test;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory;
+import fiji.plugin.trackmate.tracking.oldlap.LAPTracker;
 
 public class LAPTrackerTest
 {

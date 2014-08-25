@@ -1,10 +1,12 @@
-package fiji.plugin.trackmate.tracking;
+package fiji.plugin.trackmate.tracking.oldlap;
 
 import java.util.Map;
 
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.tracking.SpotTracker;
+import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 
 @Plugin( type = SpotTrackerFactory.class )
 public class FastLAPTrackerFactory extends LAPTrackerFactory

@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tracking;
+package fiji.plugin.trackmate.tracking.oldlap;
 
 import static fiji.plugin.trackmate.io.IOUtils.marshallMap;
 import static fiji.plugin.trackmate.io.IOUtils.readBooleanAttribute;
@@ -40,6 +40,9 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.panels.tracker.LAPTrackerSettingsPanel;
+import fiji.plugin.trackmate.tracking.LAPUtils;
+import fiji.plugin.trackmate.tracking.SpotTracker;
+import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 
 @Plugin( type = SpotTrackerFactory.class, visible = false )
 public class LAPTrackerFactory implements SpotTrackerFactory
