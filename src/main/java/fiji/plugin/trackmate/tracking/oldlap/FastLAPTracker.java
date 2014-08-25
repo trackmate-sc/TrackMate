@@ -3,8 +3,8 @@ package fiji.plugin.trackmate.tracking.oldlap;
 import java.util.Map;
 
 import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.tracking.hungarian.AssignmentAlgorithm;
-import fiji.plugin.trackmate.tracking.hungarian.JonkerVolgenantAlgorithm;
+import fiji.plugin.trackmate.tracking.oldlap.hungarian.AssignmentAlgorithm;
+import fiji.plugin.trackmate.tracking.oldlap.hungarian.JonkerVolgenantAlgorithm;
 
 public class FastLAPTracker extends LAPTracker {
 

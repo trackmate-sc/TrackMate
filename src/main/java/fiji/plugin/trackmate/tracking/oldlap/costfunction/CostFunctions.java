@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tracking.costfunction;
+package fiji.plugin.trackmate.tracking.oldlap.costfunction;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tracking;
+package fiji.plugin.trackmate.tracking.oldlap;
 
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_GAP_CLOSING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
@@ -20,6 +20,7 @@ import org.junit.Test;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory;
+import fiji.plugin.trackmate.tracking.LAPUtils;
 import fiji.plugin.trackmate.tracking.oldlap.LAPTracker;
 
 public class LAPTrackerTest

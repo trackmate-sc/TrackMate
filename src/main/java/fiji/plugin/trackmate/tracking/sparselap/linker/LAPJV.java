@@ -9,7 +9,6 @@ import java.util.Set;
 import net.imglib2.algorithm.Benchmark;
 import net.imglib2.algorithm.OutputAlgorithm;
 import net.imglib2.util.Util;
-import fiji.plugin.trackmate.tracking.hungarian.JonkerVolgenantAlgorithm;
 
 /**
  * Implements the Jonker-Volgenant algorithm for linear assignment problems,
@@ -27,8 +26,7 @@ import fiji.plugin.trackmate.tracking.hungarian.JonkerVolgenantAlgorithm;
  * {@link https://
  * github.com/CellProfiler/CellProfiler/blob/master/cellprofiler/cpmath/lapjv.
  * py});</li>
- * <li>Johannes java implementation of the algorithm for non-sparse matrices (
- * {@link JonkerVolgenantAlgorithm}).</li>
+ * <li>Johannes java implementation of the algorithm for non-sparse matrices.</li>
  * </ul>
  * <p>
  * Computation time performance degrades significantly compared to the
@@ -41,8 +39,6 @@ import fiji.plugin.trackmate.tracking.hungarian.JonkerVolgenantAlgorithm;
  * @author Jean-Yves Tinevez - 2014
  * @author Johannes Schindelin
  * @see http://www.sciencedirect.com/science/article/pii/030505489600010X#
- * @see JonkerVolgenantAlgorithm
- * 
  */
 public class LAPJV implements OutputAlgorithm< int[] >, Benchmark
 {

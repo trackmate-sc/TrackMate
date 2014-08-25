@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tracking.costmatrix;
+package fiji.plugin.trackmate.tracking.oldlap.costmatrix;
 
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALTERNATIVE_LINKING_COST_FACTOR;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_BLOCKING_VALUE;
@@ -12,7 +12,7 @@ import java.util.Map;
 
 import Jama.Matrix;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.tracking.costfunction.LinkingCostFunction;
+import fiji.plugin.trackmate.tracking.oldlap.costfunction.LinkingCostFunction;
 
 /**
  * <p>Creates the cost matrix described in Figure 1b in the paper.

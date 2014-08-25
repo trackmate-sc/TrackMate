@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tracking.hungarian;
+package fiji.plugin.trackmate.tracking.oldlap.hungarian;
 
 /**
  * Implements the LAPJV algorithm.

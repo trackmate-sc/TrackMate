@@ -1,10 +1,12 @@
-package fiji.plugin.trackmate.tracking.hungarian;
+package fiji.plugin.trackmate.tracking.oldlap.hungarian;
 
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 
 import org.junit.Test;
+
+import fiji.plugin.trackmate.tracking.oldlap.hungarian.MunkresKuhnAlgorithm;
 
 public class MunkresKuhnTest
 {

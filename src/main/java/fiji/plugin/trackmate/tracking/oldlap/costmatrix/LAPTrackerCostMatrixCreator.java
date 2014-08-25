@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tracking.costmatrix;
+package fiji.plugin.trackmate.tracking.oldlap.costmatrix;
 
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_BLOCKING_VALUE;
 

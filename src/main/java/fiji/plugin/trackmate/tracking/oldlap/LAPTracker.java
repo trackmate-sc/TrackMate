@@ -26,11 +26,11 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.tracking.LAPUtils;
 import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.tracking.costmatrix.LinkingCostMatrixCreator;
-import fiji.plugin.trackmate.tracking.costmatrix.TrackSegmentCostMatrixCreator;
-import fiji.plugin.trackmate.tracking.hungarian.AssignmentAlgorithm;
-import fiji.plugin.trackmate.tracking.hungarian.AssignmentProblem;
-import fiji.plugin.trackmate.tracking.hungarian.HungarianAlgorithm;
+import fiji.plugin.trackmate.tracking.oldlap.costmatrix.LinkingCostMatrixCreator;
+import fiji.plugin.trackmate.tracking.oldlap.costmatrix.TrackSegmentCostMatrixCreator;
+import fiji.plugin.trackmate.tracking.oldlap.hungarian.AssignmentAlgorithm;
+import fiji.plugin.trackmate.tracking.oldlap.hungarian.AssignmentProblem;
+import fiji.plugin.trackmate.tracking.oldlap.hungarian.HungarianAlgorithm;
 
 /**
  *

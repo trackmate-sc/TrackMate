@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tracking.hungarian;
+package fiji.plugin.trackmate.tracking.oldlap.hungarian;
 
 /** This implements optimal matching between two sets given a weight matrix
  * (where the goal is to minimize the cumulative weight of the matches).

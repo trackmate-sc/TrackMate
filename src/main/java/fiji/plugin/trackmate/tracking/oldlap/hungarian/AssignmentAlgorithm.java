@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tracking.hungarian;
+package fiji.plugin.trackmate.tracking.oldlap.hungarian;
 
 /**
  * Just in case I want to try more than one implementation of the assignment algorithm.

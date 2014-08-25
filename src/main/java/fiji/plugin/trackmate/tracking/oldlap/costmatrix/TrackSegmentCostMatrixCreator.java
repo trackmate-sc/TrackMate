@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tracking.costmatrix;
+package fiji.plugin.trackmate.tracking.oldlap.costmatrix;
 
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_MERGING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_SPLITTING;
@@ -15,9 +15,9 @@ import Jama.Matrix;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.tracking.LAPUtils;
-import fiji.plugin.trackmate.tracking.costfunction.GapClosingCostFunction;
-import fiji.plugin.trackmate.tracking.costfunction.MergingCostFunction;
-import fiji.plugin.trackmate.tracking.costfunction.SplittingCostFunction;
+import fiji.plugin.trackmate.tracking.oldlap.costfunction.GapClosingCostFunction;
+import fiji.plugin.trackmate.tracking.oldlap.costfunction.MergingCostFunction;
+import fiji.plugin.trackmate.tracking.oldlap.costfunction.SplittingCostFunction;
 import fiji.plugin.trackmate.util.TMUtils;
 
 /**

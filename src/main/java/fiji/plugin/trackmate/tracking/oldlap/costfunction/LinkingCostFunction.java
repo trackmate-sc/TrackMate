@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tracking.costfunction;
+package fiji.plugin.trackmate.tracking.oldlap.costfunction;
 
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_BLOCKING_VALUE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;

@@ -1,9 +1,12 @@
-package fiji.plugin.trackmate.tracking.hungarian;
+package fiji.plugin.trackmate.tracking.oldlap.hungarian;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+
+import fiji.plugin.trackmate.tracking.oldlap.hungarian.JonkerVolgenantAlgorithm;
+import fiji.plugin.trackmate.tracking.oldlap.hungarian.MunkresKuhnAlgorithm;
 
 public class JonkerVolgenantTest
 {
