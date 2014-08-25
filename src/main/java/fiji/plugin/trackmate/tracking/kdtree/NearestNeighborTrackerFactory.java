@@ -20,7 +20,7 @@ import fiji.plugin.trackmate.gui.panels.tracker.NearestNeighborTrackerSettingsPa
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 
-@Plugin( type = SpotTrackerFactory.class )
+@Plugin( type = SpotTrackerFactory.class, priority = 1d )
 public class NearestNeighborTrackerFactory implements SpotTrackerFactory
 {
 	public static final String TRACKER_KEY = "NEAREST_NEIGHBOR_TRACKER";

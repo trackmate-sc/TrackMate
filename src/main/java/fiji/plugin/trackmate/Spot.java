@@ -34,7 +34,7 @@ import fiji.plugin.trackmate.util.AlphanumComparator;
  * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> 2010, 2013
  *
  */
-public class Spot extends AbstractEuclideanSpace implements RealLocalizable
+public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Comparable< Spot >
 {
 
 	/*
@@ -188,6 +188,12 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable
 	public int hashCode()
 	{
 		return ID;
+	}
+
+	@Override
+	public int compareTo( final Spot o )
+	{
+		return ID - o.ID;
 	}
 
 	@Override
@@ -570,5 +576,4 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable
 			return comparator.compare( o1.getName(), o2.getName() );
 		}
 	};
-
 }

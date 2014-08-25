@@ -44,7 +44,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 
 	public static final String PLUGIN_NAME_STR = "TrackMate";
 
-	public static final String PLUGIN_NAME_VERSION = "2.3.1-SNAPSHOT";
+	public static final String PLUGIN_NAME_VERSION = "2.5.0-SNAPSHOT";
 
 	/**
 	 * The model this trackmate will shape.
@@ -250,6 +250,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 		final Logger logger = model.getLogger();
 		logger.log( "Starting tracking process.\n" );
 		final SpotTracker tracker = settings.trackerFactory.create( model.getSpots(), settings.trackerSettings );
+		tracker.setNumThreads( numThreads );
 		tracker.setLogger( logger );
 		if ( tracker.checkInput() && tracker.process() )
 		{

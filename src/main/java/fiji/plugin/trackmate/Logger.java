@@ -8,178 +8,289 @@ import java.io.PrintWriter;
 import java.io.Writer;
 
 /**
- * This class is used to log messages occurring during trackmate execution. 
+ * This class is used to log messages occurring during TrackMate execution.
  */
-public abstract class Logger extends PrintWriter {
-	
-	public Logger() {
+public abstract class Logger extends PrintWriter
+{
+
+	public Logger()
+	{
 		// Call super with a dummy writer
-		super(new Writer() {
+		super( new Writer()
+		{
 			@Override
-			public void write(char[] cbuf, int off, int len) throws IOException {}			
+			public void write( final char[] cbuf, final int off, final int len ) throws IOException
+			{}
+
 			@Override
-			public void flush() throws IOException {}			
+			public void flush() throws IOException
+			{}
+
 			@Override
-			public void close() throws IOException {}
-		});
+			public void close() throws IOException
+			{}
+		} );
 		// Replace by a useful writer
-		this.out = new Writer() {
+		this.out = new Writer()
+		{
 			@Override
-			public void close() throws IOException {}
+			public void close() throws IOException
+			{}
+
 			@Override
-			public void flush() throws IOException {}
+			public void flush() throws IOException
+			{}
+
 			@Override
-			public void write(char[] cbuf, int off, int len) throws IOException {
-				String str = ""; 
-				for (int i = off; i < len; i++)
-					str += cbuf[i];
-				log(str);
-			}			
+			public void write( final char[] cbuf, final int off, final int len ) throws IOException
+			{
+				String str = "";
+				for ( int i = off; i < len; i++ )
+					str += cbuf[ i ];
+				log( str );
+			}
 		};
 	}
 
 	public static final Color NORMAL_COLOR = Color.BLACK;
-	public static final Color ERROR_COLOR = new Color(0.8f, 0, 0);
-	public static final Color GREEN_COLOR = new Color(0, 0.6f, 0);
-	public static final Color BLUE_COLOR = new Color(0, 0, 0.7f);
-	
+
+	public static final Color ERROR_COLOR = new Color( 0.8f, 0, 0 );
+
+	public static final Color GREEN_COLOR = new Color( 0, 0.6f, 0 );
+
+	public static final Color BLUE_COLOR = new Color( 0, 0, 0.7f );
+
 	/**
 	 * Append the message to the logger, with the specified color.
 	 */
-	public abstract void log(String message, Color color);
-	
+	public abstract void log( String message, Color color );
+
 	/**
 	 * Send the message to the error channel of this logger.
 	 */
-	public abstract void error(String message);
-	
+	public abstract void error( String message );
+
 	/**
 	 * Append the message to the logger with default black color.
 	 */
-	public void log(String message)  { log(message, NORMAL_COLOR);	}
-	
+	public void log( final String message )
+	{
+		log( message, NORMAL_COLOR );
+	}
+
 	/**
-	 * Set the progress value of the process logged by this logger. 
-	 * Values should be between 0 and 1, 1 meaning the process if finished.
+	 * Set the progress value of the process logged by this logger. Values
+	 * should be between 0 and 1, 1 meaning the process if finished.
 	 */
-	public abstract void setProgress(double val);
-	
+	public abstract void setProgress( double val );
+
 	/**
 	 * Set the status to be displayed by this logger.
 	 */
-	public abstract void setStatus(String status);
-	
-	
+	public abstract void setStatus( String status );
+
 	/**
 	 * This logger discard any message.
 	 */
-	public static final Logger VOID_LOGGER = new Logger() {
-		
+	public static final Logger VOID_LOGGER = new Logger()
+	{
+
 		@Override
-		public void setStatus(String status) { }
+		public void setStatus( final String status )
+		{}
+
 		@Override
-		public void setProgress(double val) { }
+		public void setProgress( final double val )
+		{}
+
 		@Override
-		public void log(String message, Color color) { }		
+		public void log( final String message, final Color color )
+		{}
+
 		@Override
-		public void error(String message) { }
+		public void error( final String message )
+		{}
 	};
-	
+
 	/**
-	 * This {@link Logger} simply outputs to the standard output and standard error.
-	 * The {@link #setProgress(float)} method is ignored, the {@link #setStatus(String)} is 
-	 * sent to the console.
+	 * This {@link Logger} simply outputs to the standard output and standard
+	 * error. The {@link #setProgress(float)} method is ignored, the
+	 * {@link #setStatus(String)} is sent to the console.
 	 */
-	public static Logger DEFAULT_LOGGER = new Logger() {
+	public static Logger DEFAULT_LOGGER = new Logger()
+	{
 
 		@Override
-		public void log(String message, Color color) {
-			System.out.print(message);
+		public void log( final String message, final Color color )
+		{
+			System.out.print( message );
 		}
+
 		@Override
-		public void error(String message) {
-			System.err.print(message);
+		public void error( final String message )
+		{
+			System.err.print( message );
 		}
+
 		@Override
-		public void setProgress(double val) {}
-		
+		public void setProgress( final double val )
+		{}
+
 		@Override
-		public void setStatus(String status) {
-			System.out.println(status);
+		public void setStatus( final String status )
+		{
+			System.out.println( status );
 		}
 	};
-	
+
 	/**
-	 * This {@link Logger} outputs to the ImageJ log window, and to the ImageJ toolbar
-	 * to report progress. Colors are ignored.
+	 * This {@link Logger} outputs to the ImageJ log window, and to the ImageJ
+	 * toolbar to report progress. Colors are ignored.
 	 */
-	public static Logger IJ_LOGGER = new Logger() {
+	public static Logger IJ_LOGGER = new Logger()
+	{
 
 		@Override
-		public void log(String message, Color color) {
-			IJ.log(message);
+		public void log( final String message, final Color color )
+		{
+			IJ.log( message );
 		}
 
 		@Override
-		public void error(String message) {
-			IJ.log(message);
+		public void error( final String message )
+		{
+			IJ.log( message );
 		}
 
 		@Override
-		public void setProgress(double val) {
-			IJ.showProgress(val);
+		public void setProgress( final double val )
+		{
+			IJ.showProgress( val );
 		}
 
 		@Override
-		public void setStatus(String status) {
-			IJ.showStatus(status);
+		public void setStatus( final String status )
+		{
+			IJ.showStatus( status );
 		}
-		
+
 	};
-	
+
 	/**
 	 * This {@link Logger} outputs to a StringBuilder given at construction.
 	 * Report progress and colors are ignored.
 	 */
-	public static class StringBuilderLogger extends Logger {
-		
+	public static class StringBuilderLogger extends Logger
+	{
+
 		private final StringBuilder sb;
 
-		public StringBuilderLogger(final StringBuilder sb) {
+		public StringBuilderLogger( final StringBuilder sb )
+		{
 			this.sb = sb;
 		}
 
-		public StringBuilderLogger() {
-			this(new StringBuilder());
+		public StringBuilderLogger()
+		{
+			this( new StringBuilder() );
 		}
-		
+
 		/*
 		 * METHODS
 		 */
-		
+
 		@Override
-		public void log(String message, Color color) {
-			sb.append(message);
+		public void log( final String message, final Color color )
+		{
+			sb.append( message );
 		}
 
 		@Override
-		public void error(String message) {
-			sb.append(message);
+		public void error( final String message )
+		{
+			sb.append( message );
 		}
 
 		@Override
-		public void setProgress(double val) { }
+		public void setProgress( final double val )
+		{}
 
 		@Override
-		public void setStatus(String status) {
-			sb.append(status);
+		public void setStatus( final String status )
+		{
+			sb.append( status );
 		}
-		
+
 		@Override
-		public String toString() {
+		public String toString()
+		{
 			return sb.toString();
 		}
-		
+
 	};
-	
+
+	/**
+	 * A logger that wraps a master logger and uses it to echo any received
+	 * message. This class is used to report progress of a sub-process. If it is
+	 * sent to a subprocess, the master logger can show a progress in a range
+	 * and from a starting point that can be specified.
+	 * 
+	 * @author Jean-Yves Tinevez - 2014
+	 * 
+	 */
+	public static class SlaveLogger extends Logger
+	{
+
+		private final Logger master;
+
+		private final double progressStart;
+
+		private final double progressRange;
+
+		/**
+		 * Create a new slave logger that will report progress to its master in
+		 * the following way: If a sub-process reports a progress of
+		 * <code>val</code>, then the master logger will receive the progress
+		 * value <code>progressStart + progressRange * val</code>.
+		 * 
+		 * @param master
+		 *            the master {@link Logger}.
+		 * @param progressStart
+		 *            the progress to start with.
+		 * @param progressRange
+		 *            the progress range to report.
+		 */
+		public SlaveLogger( final Logger master, final double progressStart, final double progressRange )
+		{
+			this.master = master;
+			this.progressStart = progressStart;
+			this.progressRange = progressRange;
+		}
+
+		@Override
+		public void log( final String message, final Color color )
+		{
+			master.log( message, color );
+		}
+
+		@Override
+		public void error( final String message )
+		{
+			master.error( message );
+		}
+
+		@Override
+		public void setProgress( final double val )
+		{
+			master.setProgress( progressStart + progressRange * val );
+		}
+
+		@Override
+		public void setStatus( final String status )
+		{
+			master.setStatus( status );
+		}
+
+	}
+
 }
