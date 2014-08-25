@@ -11,7 +11,7 @@ import fiji.plugin.trackmate.gui.panels.ListChooserPanel;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.tracking.ManualTrackerFactory;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
-import fiji.plugin.trackmate.tracking.oldlap.SimpleFastLAPTrackerFactory;
+import fiji.plugin.trackmate.tracking.sparselap.SimpleSparseLAPTrackerFactory;
 
 public class TrackerChoiceDescriptor implements WizardPanelDescriptor
 {
@@ -133,7 +133,7 @@ public class TrackerChoiceDescriptor implements WizardPanelDescriptor
 		}
 		else
 		{
-			key = SimpleFastLAPTrackerFactory.TRACKER_KEY;
+			key = SimpleSparseLAPTrackerFactory.TRACKER_KEY;
 		}
 		final int index = trackerProvider.getVisibleKeys().indexOf( key );
 
