@@ -1,3 +1,6 @@
+![alt tag](http://fiji.sc/images/0/0c/TrackMate-Logo85x50-color-300p.png)
+
+
 TrackMate
 =========
 

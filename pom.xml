@@ -13,13 +13,13 @@
 	</parent>
 
 	<artifactId>TrackMate_</artifactId>
-	<version>2.3.0-SNAPSHOT</version>
+	<version>2.5.0-SNAPSHOT</version>
 	<name>plugins/TrackMate_.jar</name>
 	<description></description>
 
 	<properties>
-		<!-- Prevent the plugin from being copied to ./plugins/ by default -->
-		<imagej.app.directory>../fiji/</imagej.app.directory>
+		<!-- Target Fiji dir for clean upload. -->
+		<imagej.app.directory>../Fiji.app/</imagej.app.directory>
 	</properties>
 
 	<dependencies>
@@ -122,6 +122,10 @@
 		<dependency>
 			<groupId>net.imglib2</groupId>
 			<artifactId>imglib2-realtransform</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.scif</groupId>
+			<artifactId>scifio</artifactId>
 		</dependency>
 	</dependencies>
 
