@@ -17,6 +17,7 @@ import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
@@ -25,6 +26,7 @@ import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition.TrackBranchDecomp
 import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.io.TmXmlReader;
+import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
 public class TrackBranchAnalysis extends AbstractTMAction
 {
@@ -51,8 +53,6 @@ public class TrackBranchAnalysis extends AbstractTMAction
 		}
 
 		final TimeDirectedNeighborIndex neighborIndex = model.getTrackModel().getDirectedNeighborIndex();
-
-		final Set< Spot > visited = new HashSet< Spot >();
 
 		for ( final Integer trackID : model.getTrackModel().unsortedTrackIDs( true ) )
 		{
@@ -113,43 +113,10 @@ public class TrackBranchAnalysis extends AbstractTMAction
 					predBrs.add( predBr );
 				}
 				br.predecessors = predBrs;
+
+				System.out.println( br );// DEBUG
 			}
 				
-
-				String branchName = "" + first.getName() + "-" + last.getName();
-
-				if ( neighborIndex.predecessorsOf( first ).size() < 1 )
-				{
-					logger.log( "Branch " + branchName + " starting point is not defined. Skipping.\n" );
-					continue;
-				}
-
-				final Set< Spot > nextOnes = neighborIndex.successorsOf( last );
-				final int nSucc = nextOnes.size();
-				if ( nSucc < 1 )
-				{
-					logger.log( "Branch " + branchName + " end point is not defined. Skipping.\n" );
-					continue;
-				}
-
-				final Spot nextOne = nextOnes.iterator().next();
-				if ( visited.contains( nextOne ) )
-				{
-					continue;
-				}
-				visited.add( nextOne );
-				if ( nSucc == 1 )
-				{
-					// It is a fusion - change the branch name
-					final Spot previous = neighborIndex.predecessorsOf( first ).iterator().next();
-					branchName = "" + previous.getName() + "-" + nextOne.getName();
-				}
-
-				final int nPred = neighborIndex.predecessorsOf( nextOne ).size();
-				final DivisionType type = DivisionType.getType( nSucc, nPred );
-				final int dt = ( int ) last.diffTo( first, Spot.FRAME );
-				logger.log( "Branch " + branchName + ", " + type.getName() + ", dt = " + dt + " frames.\n" );
-			}
 
 		}
 		logger.log( "Done.\n" );
@@ -169,11 +136,24 @@ public class TrackBranchAnalysis extends AbstractTMAction
 
 		Spot last;
 
-		double dt;
-
 		 Set< Branch > predecessors;
 
 		 Set< Branch > successors;
+
+		@Override
+		public String toString()
+		{
+			final StringBuilder str = new StringBuilder();
+			str.append( "Branch " + first + " → " + last + ". Δt = " + dt() + "\n" );
+			str.append( " - " + predecessors.size() + " predecessors.\n" );
+			str.append( " - " + successors.size() + " successors." );
+			return str.toString();
+		}
+
+		int dt()
+		{
+			return ( int ) last.diffTo( first, Spot.FRAME );
+		}
 	}
 
 	public static enum DivisionType
@@ -286,6 +266,9 @@ public class TrackBranchAnalysis extends AbstractTMAction
 		final TrackBranchAnalysis analyzer = new TrackBranchAnalysis();
 		analyzer.setLogger( Logger.IJ_LOGGER );
 		analyzer.execute( trackmate );
+
+		final TrackScheme trackScheme = new TrackScheme( model, new SelectionModel( model ) );
+		trackScheme.render();
 	}
 
 }
