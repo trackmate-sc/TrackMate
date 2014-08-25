@@ -118,9 +118,16 @@ public class SearchBar extends JTextField
 		public SearchAction()
 		{
 			trackIterator = model.getTrackModel().trackIDs( true ).iterator();
-			final Integer currentTrackID = trackIterator.next();
-			final Spot trackStart = firstSpotOf( currentTrackID );
-			iterator = model.getTrackModel().getSortedDepthFirstIterator( trackStart, Spot.nameComparator, false );
+			if ( trackIterator.hasNext() )
+			{
+				final Integer currentTrackID = trackIterator.next();
+				final Spot trackStart = firstSpotOf( currentTrackID );
+				iterator = model.getTrackModel().getSortedDepthFirstIterator( trackStart, Spot.nameComparator, false );
+			}
+			else
+			{
+				iterator = Collections.EMPTY_LIST.iterator();
+			}
 		}
 
 		@Override
