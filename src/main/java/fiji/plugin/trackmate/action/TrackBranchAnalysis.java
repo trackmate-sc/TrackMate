@@ -1,8 +1,15 @@
 package fiji.plugin.trackmate.action;
 
-import ij.IJ;
+import ij.WindowManager;
+import ij.measure.ResultsTable;
+import ij.text.TextPanel;
+import ij.text.TextWindow;
 
-import java.io.File;
+import java.awt.Image;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,33 +19,47 @@ import java.util.Set;
 import javax.swing.ImageIcon;
 
 import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.scijava.plugin.Plugin;
 
-import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition;
 import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition.TrackBranchDecomposition;
 import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.io.TmXmlReader;
-import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
+import fiji.plugin.trackmate.gui.TrackMateWizard;
 
 public class TrackBranchAnalysis extends AbstractTMAction
 {
 
-	private static final String INFO_TEXT = "<html>This action splits each track in branches and run analysis on each branch.</html>";
+	private static final String INFO_TEXT = "<html>This action analyzes each branch of all tracks, and outputs in an ImageJ results table the number of its predecessors, of successors, and its duration."
+			+ "<p>"
+			+ "The results table is in sync with the selection. Clicking on a line will select the target branch.</html>";
 
 	private static final String KEY = "TRACK_BRANCH_ANALYSIS";
 
-	private static final String NAME = "Branches analysis";
+	private static final String NAME = "Branch hierarchy analysis";
 
-	private static final ImageIcon ICON = null;
+	private static final ImageIcon ICON;
+	static
+	{
+		final Image image = new ImageIcon( TrackMateWizard.class.getResource( "images/Icons4_print_transparency.png" ) ).getImage();
+		final Image newimg = image.getScaledInstance( 16, 16, java.awt.Image.SCALE_SMOOTH );
+		ICON = new ImageIcon( newimg );
+	}
 
+	private static final String TABLE_NAME = "Branch analysis";
+
+	private final SelectionModel selectionModel;
+
+	public TrackBranchAnalysis( final SelectionModel selectionModel )
+	{
+		this.selectionModel = selectionModel;
+	}
 
 	@Override
 	public void execute( final TrackMate trackmate )
@@ -54,6 +75,7 @@ public class TrackBranchAnalysis extends AbstractTMAction
 
 		final TimeDirectedNeighborIndex neighborIndex = model.getTrackModel().getDirectedNeighborIndex();
 
+		final List< Branch > brs = new ArrayList< Branch >();
 		for ( final Integer trackID : model.getTrackModel().unsortedTrackIDs( true ) )
 		{
 			final TrackBranchDecomposition branchDecomposition = ConvexBranchesDecomposition.processTrack( trackID, model.getTrackModel(), neighborIndex, true, false );
@@ -113,13 +135,55 @@ public class TrackBranchAnalysis extends AbstractTMAction
 					predBrs.add( predBr );
 				}
 				br.predecessors = predBrs;
-
-				System.out.println( br );// DEBUG
 			}
-				
 
+			brs.addAll( successorMap.keySet() );
 		}
+
+		Collections.sort( brs );
+		final ResultsTable table = new ResultsTable();
+		for ( final Branch br : brs )
+		{
+			table.incrementCounter();
+			table.addLabel( br.toString() );
+			table.addValue( "N predecessors", br.predecessors.size() );
+			table.addValue( "N successors", br.successors.size() );
+			table.addValue( "dt (frames)", br.dt() );
+			table.addValue( "First", br.first.getName() );
+			table.addValue( "Last", br.last.getName() );
+		}
+		table.setPrecision( 0 ); // Everything is int
+		table.show( TABLE_NAME );
 		logger.log( "Done.\n" );
+
+		// Hack to make the results table in sync with selection model.
+		if ( null != selectionModel )
+		{
+			final TextWindow window = ( TextWindow ) WindowManager.getWindow( TABLE_NAME );
+			final TextPanel textPanel = window.getTextPanel();
+			textPanel.addMouseListener( new MouseAdapter()
+			{
+				@Override
+				public void mouseClicked( final MouseEvent e )
+				{
+					final int line = textPanel.getSelectionStart();
+					if ( line < 0 ) { return; }
+					final Branch br = brs.get( line );
+					final List< DefaultWeightedEdge > edges = model.getTrackModel().dijkstraShortestPath( br.first, br.last );
+					final Set< Spot > spots = new HashSet< Spot >();
+					for ( final DefaultWeightedEdge edge : edges )
+					{
+						spots.add( model.getTrackModel().getEdgeSource( edge ) );
+						spots.add( model.getTrackModel().getEdgeTarget( edge ) );
+					}
+					selectionModel.clearSelection();
+					selectionModel.addEdgeToSelection( edges );
+					selectionModel.addSpotToSelection( spots );
+				};
+
+			} );
+		}
+
 
 	}
 
@@ -130,7 +194,7 @@ public class TrackBranchAnalysis extends AbstractTMAction
 	/**
 	 * A class to describe a branch.
 	 */
-	class Branch
+	class Branch implements Comparable< Branch >
 	{
 		Spot first;
 
@@ -143,67 +207,29 @@ public class TrackBranchAnalysis extends AbstractTMAction
 		@Override
 		public String toString()
 		{
-			final StringBuilder str = new StringBuilder();
-			str.append( "Branch " + first + " → " + last + ". Δt = " + dt() + "\n" );
-			str.append( " - " + predecessors.size() + " predecessors.\n" );
-			str.append( " - " + successors.size() + " successors." );
-			return str.toString();
+			return first + " → " + last;
 		}
 
 		int dt()
 		{
 			return ( int ) last.diffTo( first, Spot.FRAME );
 		}
+
+		/**
+		 * Sort by predecessors number, then successors number, then
+		 * alphabetically by first spot name.
+		 */
+		@Override
+		public int compareTo( final Branch o )
+		{
+			if ( predecessors.size() != o.predecessors.size() ) { return predecessors.size() - o.predecessors.size(); }
+			if ( successors.size() != o.successors.size() ) { return successors.size() - o.successors.size(); }
+			if ( first.getName().compareTo( o.first.getName() ) != 0 ) { return first.getName().compareTo( o.first.getName() ); }
+			return last.getName().compareTo( o.last.getName() );
+		}
 	}
 
-	public static enum DivisionType
-	{
 
-		BIPOLAR_DIVISION( "Bipolar division" ), TRIPOLAR_DIVISION( "Tripolar division" ), TETRAPOLAR_DIVISION( "Tetrapolar division" ), FUSION( "Fusion" ), OTHER( "Other cases" );
-
-		private final String name;
-
-		DivisionType(final String name)
-		{
-			this.name = name;
-		}
-
-		public String getName()
-		{
-			return name;
-		}
-
-		public static DivisionType getType( final int nSucc, final int nPred )
-		{
-			if ( nPred < 2 )
-			{
-				switch ( nSucc )
-				{
-				case 2:
-					return BIPOLAR_DIVISION;
-				case 3:
-					return TRIPOLAR_DIVISION;
-				case 4:
-					return TETRAPOLAR_DIVISION;
-				default:
-					return OTHER;
-				}
-			}
-			else
-			{
-				if ( nSucc == 1 )
-				{
-					return FUSION;
-				}
-				else
-				{
-					return OTHER;
-				}
-			}
-		}
-
-
-	}
 
 	@Plugin( type = TrackMateActionFactory.class, enabled = true )
 	public static class Factory implements TrackMateActionFactory
@@ -232,7 +258,7 @@ public class TrackBranchAnalysis extends AbstractTMAction
 		@Override
 		public TrackMateAction create( final TrackMateGUIController controller )
 		{
-			return new TrackBranchAnalysis();
+			return new TrackBranchAnalysis( controller.getSelectionModel() );
 		}
 
 		@Override
@@ -241,34 +267,4 @@ public class TrackBranchAnalysis extends AbstractTMAction
 			return ICON;
 		}
 	}
-
-	/*
-	 * MAIN METHOD
-	 */
-
-	public static void main( final String[] args )
-	{
-		final File file = new File( "/Users/tinevez/Desktop/Data/Milan/Video_C03-1-fullHD.xml" );
-		final TmXmlReader reader = new TmXmlReader( file );
-		if ( !reader.isReadingOk() )
-		{
-			IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION, reader.getErrorMessage() );
-			return;
-		}
-		final Model model = reader.getModel();
-		if ( !reader.isReadingOk() )
-		{
-			IJ.error( "Problem reading the model:\n" + reader.getErrorMessage() );
-		}
-
-		final TrackMate trackmate = new TrackMate( model, new Settings() );
-
-		final TrackBranchAnalysis analyzer = new TrackBranchAnalysis();
-		analyzer.setLogger( Logger.IJ_LOGGER );
-		analyzer.execute( trackmate );
-
-		final TrackScheme trackScheme = new TrackScheme( model, new SelectionModel( model ) );
-		trackScheme.render();
-	}
-
 }
