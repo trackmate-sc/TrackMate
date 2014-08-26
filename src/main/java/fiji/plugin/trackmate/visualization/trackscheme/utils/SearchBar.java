@@ -98,14 +98,14 @@ public class SearchBar extends JTextField
 	{
 		setFont( NORMAL_FONT );
 		setFont( getFont().deriveFont( Font.PLAIN ) );
-		setText( null );
+//		setText( null );
 	}
 
 	private void searchBoxFocusLost( final java.awt.event.FocusEvent evt )
 	{
 		setFont( NORMAL_FONT );
 		setFont( getFont().deriveFont( Font.ITALIC ) );
-		setText( "Search" );
+//		setText( "Search" );
 	}
 
 	private class SearchAction implements PropertyChangeListener, Iterator< Spot >
