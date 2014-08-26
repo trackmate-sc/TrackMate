@@ -58,6 +58,7 @@ import fiji.plugin.trackmate.gui.descriptors.InitFilterDescriptor;
 import fiji.plugin.trackmate.gui.descriptors.LoadDescriptor;
 import fiji.plugin.trackmate.gui.descriptors.LogPanelDescriptor;
 import fiji.plugin.trackmate.gui.descriptors.SaveDescriptor;
+import fiji.plugin.trackmate.gui.descriptors.SomeDialogDescriptor;
 import fiji.plugin.trackmate.gui.descriptors.SpotFilterDescriptor;
 import fiji.plugin.trackmate.gui.descriptors.StartDialogDescriptor;
 import fiji.plugin.trackmate.gui.descriptors.TrackFilterDescriptor;
@@ -512,7 +513,16 @@ public class TrackMateGUIController implements ActionListener
 		/*
 		 * Start panel
 		 */
-		startDialoDescriptor = new StartDialogDescriptor( this );
+		startDialoDescriptor = new StartDialogDescriptor( this )
+		{
+			@Override
+			public void aboutToHidePanel()
+			{
+				super.aboutToHidePanel();
+				// Reset the default save location.
+				SomeDialogDescriptor.file = null;
+			}
+		};
 		// Listen if the selected imp is valid and toggle next button
 		// accordingly.
 		startDialoDescriptor.addActionListener( new ActionListener()
@@ -522,6 +532,7 @@ public class TrackMateGUIController implements ActionListener
 			{
 				if ( startDialoDescriptor.isImpValid() )
 				{
+					// Ensure we reset default save location
 					gui.setNextButtonEnabled( true );
 				}
 				else
