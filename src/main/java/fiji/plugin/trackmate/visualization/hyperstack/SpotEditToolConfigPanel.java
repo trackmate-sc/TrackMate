@@ -7,6 +7,7 @@ import ij.ImagePlus;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -40,7 +41,13 @@ public class SpotEditToolConfigPanel extends JFrame
 {
 	private static final long serialVersionUID = 1L;
 
-	private final static ImageIcon ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/TrackIcon_small.png" ) );
+	private final static ImageIcon ICON;
+	static
+	{
+		final Image image = new ImageIcon( TrackMateWizard.class.getResource( "images/Icon3b_print_transparency.png" ) ).getImage();
+		final Image newimg = image.getScaledInstance( 32, 32, java.awt.Image.SCALE_SMOOTH );
+		ICON = new ImageIcon( newimg );
+	}
 
 	private final static ImageIcon SELECT_TRACK_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/arrow_updown.png" ) );
 
@@ -48,11 +55,22 @@ public class SpotEditToolConfigPanel extends JFrame
 
 	private final static ImageIcon SELECT_TRACK_ICON_DOWNWARDS = new ImageIcon( TrackMateWizard.class.getResource( "images/arrow_down.png" ) );
 
-	private final static ImageIcon SEMIAUTO_TRACKING_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/SpotIcon_supersmall.png" ) );
-
+	private final static ImageIcon SEMIAUTO_TRACKING_ICON;
+	static
+	{
+		final Image image = new ImageIcon( TrackMateWizard.class.getResource( "images/Icon1_print_transparency.png" ) ).getImage();
+		final Image newimg = image.getScaledInstance( 32, 32, java.awt.Image.SCALE_SMOOTH );
+		SEMIAUTO_TRACKING_ICON = new ImageIcon( newimg );
+	}
+	
 	@SuppressWarnings( "unused" )
-	private final static ImageIcon LINK_SPOTS_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/EdgeIcon_supersmall.png" ) );
-
+	private final static ImageIcon LINK_SPOTS_ICON;
+	static
+	{
+		final Image image = new ImageIcon( TrackMateWizard.class.getResource( "images/Icon2_print_transparency.png" ) ).getImage();
+		final Image newimg = image.getScaledInstance( 32, 32, java.awt.Image.SCALE_SMOOTH );
+		LINK_SPOTS_ICON = new ImageIcon( newimg );
+	}
 	private final Logger logger;
 
 	private final JNumericTextField jNFQualityThreshold;
