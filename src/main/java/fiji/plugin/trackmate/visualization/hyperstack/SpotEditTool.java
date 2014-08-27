@@ -49,7 +49,22 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 
 	private static final String TOOL_NAME = "Spot edit tool";
 
-	private static final String TOOL_ICON = "CdffL10e0" + "CafdD01C67aD11C6aaD21C6fbL31e1CbfeDf1" + "CaedD02C64aD12C35aD22C5fbD32C6fbL42e2CbfdDf2" + "CafdD03C5eaD13C4bbD23C38bD33C5daD43C6fbL53e3CbfdDf3" + "CafdD04C6fbL1424C48aD34C42aD44C5caD54C6fbL64e4CbfdDf4" + "CafdD05C6fbL1525C5caD35C35aD45C4bbD55C6fbL65e5CbfdDf5" + "CafdD06C6fbL1636C5dbD46C38bD56C6fbL66e6CbfdDf6" + "CafdD07C6fbL1747C38bD57C49aD67C6fbL77e7CbfdDf7" + "CafdD08C6fbL1848C58aD58C31aD68C5baD78C6fbL88e8CbfdDf8" + "CafdD09C6fbL1949C4abD59C37bD69C38bD79C4bbD89C5eaD99C6fbLa9e9CbfdDf9" + "CafdD0aC6fbL1a4aC39bD5aC5ebL6a7aC44aD8aC43aD9aC39bDaaC46aDbaC55aDcaC6fbLdaeaCbfdDfa" + "CafdD0bC6fbL1b3bC58aD4bC36aD5bC6fbL6b7bC5aaD8bC59aD9bC5dbDabC47aDbbC34aDcbC5cbDdbC6fbDebCbfdDfb" + "CafdD0cC6fbL1c2cC5cbD3cC33aD4cC55aD5cC6fbL6cbcC5dbDccC38bDdcC5ebDecCbfdDfc" + "CafdD0dC58aD1dC47aD2dC38bD3dC5cbD4dC6eaD5dC6fbL6dcdC49aDddC43aDedCbddDfd" + "CafdD0eC64aD1eC45aD2eC5fbD3eC6fbL4eceC5baDdeC65aDeeCbddDfe" + "CeffD0fCbedD1fCbeeD2fCcfeL3fdfCbfeDefCeffDff";
+	private static final String TOOL_ICON = "CeacD70Cd8bD80"
+			+ "D71Cc69D81CfefD91"
+			+ "CdbcD72Cb9bD82"
+			+ "Cd9bD73Cc8aD83CfefD93"
+			+ "CdddD54CbaaD64Cb69D74Cb59D84Cb9aD94CdddDa4"
+			+ "CfefD25Cd9bD35Cb8aD45CaaaD55CcccD65CfdeL7585CdccD95CaaaDa5Cb8aDb5Cd7aDc5CfceDd5"
+			+ "CfeeD26Cc69D36Cc8aD46CdacDb6Cb59Dc6CecdDd6"
+			+ "Cb9aD37CdcdD47CeeeDb7Ca89Dc7"
+			+ "CfefD28Cc7aD38Cd9cD48CecdDb8Cb79Dc8CfdeDd8"
+			+ "CcabD29Cb59D39Cb69D49CedeD59CeacDb9Cc59Dc9CebdDd9"
+			+ "CfdeD0aCc7aD1aCb8aD2aCedeD3aCcbcD4aCb7aD5aCe9cD6aCeeeDbaCa89DcaCfefDda"
+			+ "CebdD0bCc59D1bCebdD2bCfefD4bCc7aL5b6bCeceDbbCb79DcbCfdeDdb"
+			+ "CfeeD0cCa89D1cCfefD2cCcabL5c6cCc9bDbcCc59DccCdabDdc"
+			+ "CedeD0dCb79D1dCedeD2dCc9bL5d6dCecdD9dCc8aDadCb9aDbdCdbcDcdCb8aDddCd8bDedCfceDfd"
+			+ "CebdD0eCc59D1eCebdD2eCfeeD4eCc7aD5eCc6aD6eCfeeD7eCd9bD9eCc59DaeCfdeDbeCebdDdeCc59DeeCeacDfe"
+			+ "CfefD0fCdbcD1fCdddD4fCdcdL5f6fCdddD7fCfdeD9fCdbdDafCebdDefCfefDff";
 
 	/**
 	 * Fall back default radius when the settings does not give a default radius
