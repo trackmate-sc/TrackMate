@@ -4,7 +4,6 @@ import ij.ImagePlus;
 
 import java.io.File;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.NavigableSet;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -34,18 +33,21 @@ public class KalmanTracker implements SpotTracker
 
 	private final SpotCollection spots;
 
-	private final Map< String, Object > settings;
-
 	private Model model;
+
+	private final double maxSearchRadius;
+
+	private final int maxFrameGap;
 
 	/*
 	 * CONSTRUCTOR
 	 */
 
-	public KalmanTracker( final SpotCollection spots, final Map< String, Object > settings )
+	public KalmanTracker( final SpotCollection spots, final double maxSearchRadius, final int maxFrameGap )
 	{
 		this.spots = spots;
-		this.settings = settings;
+		this.maxSearchRadius = maxSearchRadius;
+		this.maxFrameGap = maxFrameGap;
 	}
 
 	/*
@@ -81,90 +83,53 @@ public class KalmanTracker implements SpotTracker
 		final int secondFrame = frameIterator.next();
 		final Spot secondSpot = spots.getClosestSpot( firstSpot, secondFrame, true );
 
-		final double[] xp = new double[] {
-				firstSpot.getDoublePosition( 0 ),
-				firstSpot.getDoublePosition( 1 ),
-				firstSpot.getDoublePosition( 2 ),
-				secondSpot.diffTo( firstSpot, Spot.POSITION_X ),
-				secondSpot.diffTo( firstSpot, Spot.POSITION_Y ),
-				secondSpot.diffTo( firstSpot, Spot.POSITION_Z ) };
-		final Matrix XP = new Matrix( xp, 6 );
+		final Matrix XP = estimateInitialState( firstSpot, secondSpot );
+		final LinearMotionKalmanTracker kt = new LinearMotionKalmanTracker( XP );
 
-		System.out.println( "Initial state:" );// DEBUG
-		XP.print( 7, 1 );
-
-		final double[] xm = new double[] {
-				secondSpot.getDoublePosition( 0 ),
-				secondSpot.getDoublePosition( 1 ),
-				secondSpot.getDoublePosition( 2 ),
-		};
-		final Matrix XM = new Matrix( xm, 3 );
-
-		final Matrix A = Matrix.identity( 6, 6 );
-		final double dt = secondFrame - firstFrame;
-		for ( int i = 0; i < 3; i++ )
-		{
-			A.set( i, 3 + i, dt );
-		}
-		System.out.println( "Evolution matrix:" );// DEBUG
-		A.print( 7, 1 );
-
-		final Matrix H = Matrix.identity( 3, 6 );
-
-		Matrix P = Matrix.identity( 6, 6 ).times( 100d );
-		final Matrix Q = Matrix.identity( 6, 6 ).times( 1e-2 );
-		final Matrix R = Matrix.identity( 3, 3 ).times( 1e-2 );
-
-		P = A.times( P.times( A.transpose() ) ).plus( Q );
-		Matrix TEMP = H.times( P.times( H.transpose() ) ).plus( R );
-		Matrix K = P.times( H.transpose() ).times( TEMP.inverse() );
-
-		Matrix X = XP;
 		Spot previousSpot = firstSpot;
 		graph.addVertex( previousSpot );
 		final Spot location = new Spot( previousSpot );
 
 		model.beginUpdate(); // DEBUG
-		for ( int frame = secondFrame; frame < keySet.last(); frame++ )
+		for ( int frame = firstFrame; frame < keySet.last(); frame++ )
 		{
 			// Predict
-			X = A.times( X );
-
-			System.out.println( "Prediction at frame " + frame );// DEBUG
-			X.print( 7, 1 );
+			final Matrix X = kt.predict();
 
 			// Measure: the closest spot from prediction.
-			location.putFeature( Spot.POSITION_X, X.get( 0, 0 ) );
-			location.putFeature( Spot.POSITION_Y, X.get( 1, 0 ) );
-			location.putFeature( Spot.POSITION_Z, X.get( 2, 0 ) );
-
+			setSpotFromMatrix( location, X );
 			final Spot measurement = spots.getClosestSpot( location, frame + 1, true );
-			XM.set( 0, 0, measurement.getDoublePosition( 0 ) );
-			XM.set( 1, 0, measurement.getDoublePosition( 1 ) );
-			XM.set( 2, 0, measurement.getDoublePosition( 2 ) );
 
-			// Just for fun, we add it to the model.
-			final Spot sm = new Spot( location );
-			sm.putFeature( Spot.QUALITY, -1d );
-			model.addSpotTo( sm, frame + 1 );
+			// Close enough?
+			if ( measurement.squareDistanceTo( previousSpot ) > maxSearchRadius * maxSearchRadius )
+			{
+				// No, so we say we have an occlusion. No measurement.
+				kt.update( null );
+			}
+			else
+			{
+				final Matrix Xm = toMeasurement( measurement );
+				// Just for fun, we add it to the model. // DEBUG
+				final Spot sm = new Spot( location );
+				sm.putFeature( Spot.QUALITY, -1d );
+				model.addSpotTo( sm, frame + 1 );
 
-			System.out.println( "Measurement :" );// DEBUG
-			XM.print( 7, 1 );
+				// Update graph
+				graph.addVertex( measurement );
+				graph.addEdge( previousSpot, measurement );
 
-			graph.addVertex( measurement );
-			graph.addEdge( previousSpot, measurement );
+				// Update state
+				kt.update( Xm );
+				// Loop
+				previousSpot = measurement;
+			}
 
-			// Update state
-			P = A.times( P.times( A.transpose() ) ).plus( Q );
-			TEMP = H.times( P.times( H.transpose() ) ).plus( R );
-			K = P.times( H.transpose() ).times( TEMP.inverse() );
-
-			X = X.plus( K.times( XM.minus( H.times( X ) ) ) );
-
-			// Loop
-			previousSpot = measurement;
+			if ( kt.getnOcclusion() > maxFrameGap )
+			{
+				break;
+			}
 		}
-		model.endUpdate();
+		model.endUpdate(); // DEBUG
 		return true;
 	}
 
@@ -194,6 +159,28 @@ public class KalmanTracker implements SpotTracker
 		this.logger = logger;
 	}
 
+	private static final Matrix toMeasurement( final Spot spot )
+	{
+		final double[] d = new double[] {
+				spot.getDoublePosition( 0 ), spot.getDoublePosition( 1 ), spot.getDoublePosition( 2 )
+		};
+		return new Matrix( d, 3 );
+	}
+
+	private static final void setSpotFromMatrix( final Spot spot, final Matrix X )
+	{
+		spot.putFeature( Spot.POSITION_X, X.get( 0, 0 ) );
+		spot.putFeature( Spot.POSITION_Y, X.get( 1, 0 ) );
+		spot.putFeature( Spot.POSITION_Z, X.get( 2, 0 ) );
+	}
+
+	private static final Matrix estimateInitialState( final Spot first, final Spot second )
+	{
+		final double[] xp = new double[] { first.getDoublePosition( 0 ), first.getDoublePosition( 1 ), first.getDoublePosition( 2 ), second.diffTo( first, Spot.POSITION_X ), second.diffTo( first, Spot.POSITION_Y ), second.diffTo( first, Spot.POSITION_Z ) };
+		final Matrix XP = new Matrix( xp, 6 );
+		return XP;
+	}
+
 	/*
 	 * MAIN METHODS
 	 */
@@ -214,7 +201,7 @@ public class KalmanTracker implements SpotTracker
 		final Settings settings = new Settings();
 		reader.readSettings( settings, null, null, null, null, null );
 
-		final KalmanTracker tracker = new KalmanTracker( spots, null );
+		final KalmanTracker tracker = new KalmanTracker( spots, 15, 2 );
 
 		tracker.model = model; // DEBUG
 
@@ -235,4 +222,5 @@ public class KalmanTracker implements SpotTracker
 		view.setDisplaySettings( TrackMateModelView.KEY_SPOT_COLORING, scg );
 		view.render();
 	}
+
 }
