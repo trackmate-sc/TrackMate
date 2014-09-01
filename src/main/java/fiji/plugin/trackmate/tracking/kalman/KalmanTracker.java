@@ -49,13 +49,15 @@ public class KalmanTracker implements SpotTracker
 
 	private final SpotCollection spots;
 
-	private Model model;
-
 	private final double maxSearchRadius;
 
 	private final int maxFrameGap;
 
 	private final double initialSearchRadius;
+
+	private final boolean savePredictions = true; // DEBUG
+
+	private SpotCollection predictionsCollection;
 
 	/*
 	 * CONSTRUCTOR
@@ -88,7 +90,12 @@ public class KalmanTracker implements SpotTracker
 	@Override
 	public boolean process()
 	{
+		/*
+		 * Outputs
+		 */
+
 		graph = new SimpleWeightedGraph< Spot, DefaultWeightedEdge >( DefaultWeightedEdge.class );
+		predictionsCollection = new SpotCollection();
 
 		/*
 		 * Constants.
@@ -125,11 +132,8 @@ public class KalmanTracker implements SpotTracker
 		/*
 		 * Then loop over time, starting from second frame.
 		 */
-		model.beginUpdate(); // DEBUG
 		for ( int frame = secondFrame; frame < keySet.last(); frame++ )
 		{
-			System.out.println( frame );// DEBUG
-
 			// Use the spot in the next frame has measurements.
 			final List< Spot > measurements = generateSpotList( spots, frame );
 
@@ -141,9 +145,14 @@ public class KalmanTracker implements SpotTracker
 				final Matrix X = kf.predict();
 				predictionMap.put( new ComparableMatrix( X.getArray() ), kf );
 
-				// DEBUG. we add predictions to the model
-				final Spot pred = toSpot( X );
-				model.addSpotTo( pred, frame );
+				if ( savePredictions )
+				{
+					final Spot pred = toSpot( X );
+					final Spot s = kalmanFiltersMap.get( kf );
+					pred.setName( "Pred_" + s.getName() );
+					pred.putFeature( Spot.RADIUS, s.getFeature( Spot.RADIUS ) );
+					predictionsCollection.add( pred, frame );
+				}
 			}
 			final List< ComparableMatrix > predictions = new ArrayList< ComparableMatrix >( predictionMap.keySet() );
 
@@ -177,11 +186,11 @@ public class KalmanTracker implements SpotTracker
 					// Create links for found match.
 					final Spot source = kalmanFiltersMap.get( kf );
 					final Spot target = agnts.get( cm );
-					final double cost = costs.get( cm );
 
 					graph.addVertex( source );
 					graph.addVertex( target );
 					final DefaultWeightedEdge edge = graph.addEdge( source, target );
+					final double cost = costs.get( cm );
 					graph.setEdgeWeight( edge, cost );
 
 					// Update Kalman filter
@@ -262,7 +271,11 @@ public class KalmanTracker implements SpotTracker
 				}
 			}
 		}
-		model.endUpdate(); // DEBUG
+
+		if ( savePredictions )
+		{
+			predictionsCollection.setVisible( true );
+		}
 		return true;
 	}
 
@@ -270,6 +283,11 @@ public class KalmanTracker implements SpotTracker
 	public String getErrorMessage()
 	{
 		return errorMessage;
+	}
+
+	public SpotCollection getPredictions()
+	{
+		return predictionsCollection;
 	}
 
 	@Override
@@ -345,9 +363,6 @@ public class KalmanTracker implements SpotTracker
 		reader.readSettings( settings, null, null, null, null, null );
 
 		final KalmanTracker tracker = new KalmanTracker( spots, 15d, 2, 15d );
-
-		tracker.model = model; // DEBUG
-
 		if (!tracker.checkInput() || !tracker.process()	) {
 			System.out.println(tracker.getErrorMessage());
 			return;
@@ -389,7 +404,6 @@ public class KalmanTracker implements SpotTracker
 			}
 			return 0;
 		}
-
 	}
 
 	/**
@@ -405,7 +419,8 @@ public class KalmanTracker implements SpotTracker
 			final double dx = state.get( 0, 0 ) - spot.getDoublePosition( 0 );
 			final double dy = state.get( 1, 0 ) - spot.getDoublePosition( 1 );
 			final double dz = state.get( 2, 0 ) - spot.getDoublePosition( 2 );
-			return dx * dx + dy * dy + dz * dz;
+			return dx * dx + dy * dy + dz * dz + Double.MIN_NORMAL;
+			// So that it's never 0
 		}
 			};
 
