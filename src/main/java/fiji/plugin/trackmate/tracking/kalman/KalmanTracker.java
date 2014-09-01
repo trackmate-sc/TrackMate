@@ -90,6 +90,18 @@ public class KalmanTracker implements SpotTracker
 	{
 		graph = new SimpleWeightedGraph< Spot, DefaultWeightedEdge >( DefaultWeightedEdge.class );
 
+		/*
+		 * Constants.
+		 */
+
+		// Max KF search cost.
+		final double maxCost = maxSearchRadius * maxSearchRadius;
+		// Cost function to nucleate KFs.
+		final CostFunction< Spot, Spot > nucleatingCostFunction = new SquareDistCostFunction();
+		// Max cost to nucleate KFs.
+		final double maxInitialCost = initialSearchRadius * initialSearchRadius;
+
+		// Find first and second non-empty frames.
 		final NavigableSet< Integer > keySet = spots.keySet();
 		final Iterator< Integer > frameIterator = keySet.iterator();
 		final int firstFrame = frameIterator.next();
@@ -97,59 +109,24 @@ public class KalmanTracker implements SpotTracker
 		final int secondFrame = frameIterator.next();
 
 		/*
-		 * Initialize. Find first links just based on square distance.
+		 * Initialize. Find first links just based on square distance. We do
+		 * this via the orphan spots lists.
 		 */
 
-		final List< Spot > sources = generateSpotList( spots, firstFrame );
-		final List< Spot > targets = generateSpotList( spots, secondFrame );
-
-		final CostFunction< Spot, Spot > costFunction = new SquareDistCostFunction();
-		final double maxInitialCost = initialSearchRadius * initialSearchRadius;
-		final JaqamanLinkingCostMatrixCreator< Spot, Spot > creator = new JaqamanLinkingCostMatrixCreator< Spot, Spot >( sources, targets, costFunction, maxInitialCost, ALTERNATIVE_COST_FACTOR, PERCENTILE );
-		final JaqamanLinker< Spot, Spot > initialLinker = new JaqamanLinker< Spot, Spot >( creator );
-		if ( !initialLinker.checkInput() || !initialLinker.process() )
-		{
-			errorMessage = BASE_ERROR_MSG + "Error linking spots from frame " + firstFrame + " to frame " + secondFrame + ": " + initialLinker.getErrorMessage();
-			return false;
-		}
-		final Map< Spot, Spot > assignments = initialLinker.getResult();
-
-		/*
-		 * Build a Kalman tracker fear each of them, keeping track of the spot
-		 * to use for a link we might find.
-		 * 
-		 * We also look for orphan spots in the second frame, that did not find
-		 * a link to create. We will have to nucleate a tracker for them.
-		 */
-
-		// Spots in the target frame that are not part of a new link (no
+		// Spots in the current frame that are not part of a new link (no
 		// parent).
-		Collection< Spot > orphanSpots = new HashSet< Spot >( targets );
+		Collection< Spot > orphanSpots = generateSpotList( spots, secondFrame );
+		// Spots in the PREVIOUS frame that were not part of a link.
+		Collection< Spot > previousOrphanSpots = generateSpotList( spots, firstFrame );
 
-		final Map<LinearMotionKalmanTracker, Spot> kalmanFiltersMap = new HashMap< LinearMotionKalmanTracker, Spot >( assignments.size() );
-		final double maxCost = maxSearchRadius * maxSearchRadius;
-		for ( final Spot firstSpot : assignments.keySet() )
-		{
-			final Spot secondSpot = assignments.get( firstSpot );
-
-			// Remove from orphan collection.
-			orphanSpots.remove( secondSpot );
-
-			// Derive initial state and create Kalam filter.
-			final Matrix XP = estimateInitialState( firstSpot, secondSpot );
-			final LinearMotionKalmanTracker kt = new LinearMotionKalmanTracker( XP );
-
-			// Store filter and source
-			kalmanFiltersMap.put( kt, secondSpot );
-		}
+		// The master map that contains the currently active KFs.
+		final Map< LinearMotionKalmanTracker, Spot > kalmanFiltersMap = new HashMap< LinearMotionKalmanTracker, Spot >( orphanSpots.size() );
 
 		/*
-		 * Then loop over time, starting from third frame.
+		 * Then loop over time, starting from second frame.
 		 */
-
-		// The KF for which we could not find a measurement in the target frame.
 		model.beginUpdate(); // DEBUG
-		for ( int frame = secondFrame + 1; frame < keySet.last(); frame++ )
+		for ( int frame = secondFrame; frame < keySet.last(); frame++ )
 		{
 			System.out.println( frame );// DEBUG
 
@@ -167,61 +144,109 @@ public class KalmanTracker implements SpotTracker
 				// DEBUG. we add predictions to the model
 				final Spot pred = toSpot( X );
 				model.addSpotTo( pred, frame );
-				System.out.println( pred );// DEBUG
 			}
+			final List< ComparableMatrix > predictions = new ArrayList< ComparableMatrix >( predictionMap.keySet() );
+
+			// The KF for which we could not find a measurement in the target
+			// frame. Is updated later.
+			final Collection< LinearMotionKalmanTracker > childlessKFs = new HashSet< LinearMotionKalmanTracker >( kalmanFiltersMap.keySet() );
 
 			// Find the global (in space) optimum for associating a prediction
 			// to a measurement.
-			final List< ComparableMatrix > predictions = new ArrayList< ComparableMatrix >( predictionMap.keySet() );
 
-			final JaqamanLinkingCostMatrixCreator< ComparableMatrix, Spot > crm = new JaqamanLinkingCostMatrixCreator< ComparableMatrix, Spot >( predictions, measurements, CF, maxCost, ALTERNATIVE_COST_FACTOR, PERCENTILE );
-			final JaqamanLinker< ComparableMatrix, Spot > linker = new JaqamanLinker< ComparableMatrix, Spot >( crm );
-			if ( !linker.checkInput() || !linker.process() )
+			if ( !predictions.isEmpty() && !measurements.isEmpty() )
 			{
-				errorMessage = BASE_ERROR_MSG + "Error linking candidates in frame " + frame + ": " + linker.getErrorMessage();
-				return false;
+				// Only link measurements to predictions if we have predictions.
+
+				final JaqamanLinkingCostMatrixCreator< ComparableMatrix, Spot > crm = new JaqamanLinkingCostMatrixCreator< ComparableMatrix, Spot >( predictions, measurements, CF, maxCost, ALTERNATIVE_COST_FACTOR, PERCENTILE );
+				final JaqamanLinker< ComparableMatrix, Spot > linker = new JaqamanLinker< ComparableMatrix, Spot >( crm );
+				if ( !linker.checkInput() || !linker.process() )
+				{
+					errorMessage = BASE_ERROR_MSG + "Error linking candidates in frame " + frame + ": " + linker.getErrorMessage();
+					return false;
+				}
+				final Map< ComparableMatrix, Spot > agnts = linker.getResult();
+				final Map< ComparableMatrix, Double > costs = linker.getAssignmentCosts();
+
+				// Deal with found links.
+				orphanSpots = new HashSet< Spot >( measurements );
+				for ( final ComparableMatrix cm : agnts.keySet() )
+				{
+					final LinearMotionKalmanTracker kf = predictionMap.get( cm );
+
+					// Create links for found match.
+					final Spot source = kalmanFiltersMap.get( kf );
+					final Spot target = agnts.get( cm );
+					final double cost = costs.get( cm );
+
+					graph.addVertex( source );
+					graph.addVertex( target );
+					final DefaultWeightedEdge edge = graph.addEdge( source, target );
+					graph.setEdgeWeight( edge, cost );
+
+					// Update Kalman filter
+					kf.update( toMeasurement( target ) );
+
+					// Update Kalman track spot
+					kalmanFiltersMap.put( kf, target );
+
+					// Remove from orphan set
+					orphanSpots.remove( target );
+
+					// Remove from childless KF set
+					childlessKFs.remove( kf );
+				}
 			}
-			final Map< ComparableMatrix, Spot > agnts = linker.getResult();
-			final Map< ComparableMatrix, Double > costs = linker.getAssignmentCosts();
 
-			// Deal with found links.
-			final Collection< LinearMotionKalmanTracker > childlessKFs = new HashSet< LinearMotionKalmanTracker >( kalmanFiltersMap.keySet() );
-			orphanSpots = new HashSet< Spot >( targets );
-			for ( final ComparableMatrix cm : agnts.keySet() )
-			{
-				final LinearMotionKalmanTracker kf = predictionMap.get( cm );
-
-				// Create links for found match.
-				final Spot source = kalmanFiltersMap.get( kf );
-				final Spot target = agnts.get( cm );
-				final double cost = costs.get( cm );
-
-				graph.addVertex( source );
-				graph.addVertex( target );
-				final DefaultWeightedEdge edge = graph.addEdge( source, target );
-				graph.setEdgeWeight( edge, cost );
-
-				// Update Kalman filter
-				kf.update( toMeasurement( target ) );
-
-				// Update Kalman track spot
-				kalmanFiltersMap.put( kf, target );
-
-				// Remove from orphan set
-				orphanSpots.remove( target );
-
-				// Remove from childless KF set
-				childlessKFs.remove( kf );
-			}
-
-			// Deal with orphans.
-			for ( final Spot orphan : orphanSpots )
+			/*
+			 * Deal with orphans from the previous frame. (We deal with orphans
+			 * from previous frame only now because we want to link in priority
+			 * target spots to predictions. Nucleating new KF from nearest
+			 * neighbor only comes second.
+			 */
+			if ( !previousOrphanSpots.isEmpty() )
 			{
 				/*
-				 * TODO. We need to deal with these in the next frame. Find them
-				 * closest neighbor and nucleate new KF for them.
+				 * We now deal with orphans of the previous frame. We try to
+				 * find them a target from the list of spots that are not
+				 * already part of a link created via KF. That is: the orphan
+				 * spots of this frame.
 				 */
+
+				final JaqamanLinkingCostMatrixCreator< Spot, Spot > ic = new JaqamanLinkingCostMatrixCreator< Spot, Spot >( previousOrphanSpots, orphanSpots, nucleatingCostFunction, maxInitialCost, ALTERNATIVE_COST_FACTOR, PERCENTILE );
+				final JaqamanLinker< Spot, Spot > newLinker = new JaqamanLinker< Spot, Spot >( ic );
+				if ( !newLinker.checkInput() || !newLinker.process() )
+				{
+					errorMessage = BASE_ERROR_MSG + "Error linking spots from frame " + ( frame - 1 ) + " to frame " + frame + ": " + newLinker.getErrorMessage();
+					return false;
+				}
+				final Map< Spot, Spot > newAssignments = newLinker.getResult();
+				final Map< Spot, Double > assignmentCosts = newLinker.getAssignmentCosts();
+
+				// Build links and new KFs from these links.
+				for ( final Spot source : newAssignments.keySet() )
+				{
+					final Spot target = newAssignments.get( source );
+
+					// Remove from orphan collection.
+					orphanSpots.remove( target );
+
+					// Derive initial state and create Kalman filter.
+					final Matrix XP = estimateInitialState( source, target );
+					final LinearMotionKalmanTracker kt = new LinearMotionKalmanTracker( XP );
+
+					// Store filter and source
+					kalmanFiltersMap.put( kt, target );
+
+					// Add edge to the graph.
+					graph.addVertex( source );
+					graph.addVertex( target );
+					final DefaultWeightedEdge edge = graph.addEdge( source, target );
+					final double cost = assignmentCosts.get( source );
+					graph.setEdgeWeight( edge, cost );
+				}
 			}
+			previousOrphanSpots = orphanSpots;
 
 			// Deal with childless KFs.
 			for ( final LinearMotionKalmanTracker kf : childlessKFs )
@@ -283,7 +308,8 @@ public class KalmanTracker implements SpotTracker
 
 	private static final Matrix estimateInitialState( final Spot first, final Spot second )
 	{
-		final double[] xp = new double[] { first.getDoublePosition( 0 ), first.getDoublePosition( 1 ), first.getDoublePosition( 2 ), second.diffTo( first, Spot.POSITION_X ), second.diffTo( first, Spot.POSITION_Y ), second.diffTo( first, Spot.POSITION_Z ) };
+		final double[] xp = new double[] { second.getDoublePosition( 0 ), second.getDoublePosition( 1 ), second.getDoublePosition( 2 ),
+				second.diffTo( first, Spot.POSITION_X ), second.diffTo( first, Spot.POSITION_Y ), second.diffTo( first, Spot.POSITION_Z ) };
 		final Matrix XP = new Matrix( xp, 6 );
 		return XP;
 	}
@@ -318,7 +344,7 @@ public class KalmanTracker implements SpotTracker
 		final Settings settings = new Settings();
 		reader.readSettings( settings, null, null, null, null, null );
 
-		final KalmanTracker tracker = new KalmanTracker( spots, 5d, 2, 15d );
+		final KalmanTracker tracker = new KalmanTracker( spots, 15d, 2, 15d );
 
 		tracker.model = model; // DEBUG
 
@@ -342,6 +368,8 @@ public class KalmanTracker implements SpotTracker
 
 	private static final class ComparableMatrix extends Matrix implements Comparable< ComparableMatrix >
 	{
+		private static final long serialVersionUID = 1L;
+
 		public ComparableMatrix( final double[][] A )
 		{
 			super( A );
@@ -353,10 +381,11 @@ public class KalmanTracker implements SpotTracker
 		@Override
 		public int compareTo( final ComparableMatrix o )
 		{
-			final int i = 0;
+			int i = 0;
 			while ( i < getRowDimension() )
 			{
 				if ( get( i, 0 ) != o.get( i, 0 ) ) { return ( int ) Math.signum( get( i, 0 ) - o.get( i, 0 ) ); }
+				i++;
 			}
 			return 0;
 		}
