@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tracking.oldlap;
+package fiji.plugin.trackmate.tracking.kalman;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
