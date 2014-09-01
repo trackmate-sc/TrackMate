@@ -132,7 +132,7 @@ public class KalmanTracker implements SpotTracker
 		/*
 		 * Then loop over time, starting from second frame.
 		 */
-		for ( int frame = secondFrame; frame < keySet.last(); frame++ )
+		for ( int frame = secondFrame; frame <= keySet.last(); frame++ )
 		{
 			// Use the spot in the next frame has measurements.
 			final List< Spot > measurements = generateSpotList( spots, frame );
