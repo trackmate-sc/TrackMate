@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.tracking.sparselap.costmatrix;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import fiji.plugin.trackmate.tracking.sparselap.costfunction.CostFunction;
@@ -96,17 +97,28 @@ public class JaqamanLinkingCostMatrixCreator< K extends Comparable< K >, J exten
 		}
 		costs.trimToSize();
 
-		final DefaultCostMatrixCreator< K, J > cmCreator = new DefaultCostMatrixCreator< K, J >( accSources, accTargets, costs.data, alternativeCostFactor, percentile );
-		if ( !cmCreator.checkInput() || !cmCreator.process() )
+		if ( accSources.size() > 0 )
 		{
-			errorMessage = cmCreator.getErrorMessage();
-			return false;
-		}
+			final DefaultCostMatrixCreator< K, J > cmCreator = new DefaultCostMatrixCreator< K, J >( accSources, accTargets, costs.data, alternativeCostFactor, percentile );
+			if ( !cmCreator.checkInput() || !cmCreator.process() )
+			{
+				errorMessage = cmCreator.getErrorMessage();
+				return false;
+			}
 
-		scm = cmCreator.getResult();
-		sourceList = cmCreator.getSourceList();
-		targetList = cmCreator.getTargetList();
-		alternativeCost = cmCreator.computeAlternativeCosts();
+			scm = cmCreator.getResult();
+			sourceList = cmCreator.getSourceList();
+			targetList = cmCreator.getTargetList();
+			alternativeCost = cmCreator.computeAlternativeCosts();
+		}
+		else
+		{
+			// No suitable candidates found.
+			scm = new SparseCostMatrix( new double[] {}, new int[] {}, new int[] { 0 }, 0 );
+			sourceList = Collections.emptyList();
+			targetList = Collections.emptyList();
+			alternativeCost = Double.NaN;
+		}
 
 		final long end = System.currentTimeMillis();
 		processingTime = end - start;
