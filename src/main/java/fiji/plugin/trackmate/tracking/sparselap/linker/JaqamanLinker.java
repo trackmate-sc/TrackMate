@@ -245,7 +245,7 @@ public class JaqamanLinker< K extends Comparable< K >, J extends Comparable< J >
 		}
 		tw = tw + 1;
 
-		int cw = -1;
+		int cw = 0;
 		for ( final K source : assignments.keySet() )
 		{
 			final double cost = costs.get( source ).doubleValue();
