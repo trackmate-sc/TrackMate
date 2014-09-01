@@ -63,7 +63,7 @@ public class LinearMotionKalmanTracker
 		{
 			final Matrix TEMP = H.times( P.times( H.transpose() ) ).plus( R );
 			final Matrix K = P.times( H.transpose() ).times( TEMP.inverse() );
-			X = X.plus( K.times( Xm.minus( H.times( X ) ) ) );
+			X = Xp.plus( K.times( Xm.minus( H.times( Xp ) ) ) );
 		}
 	}
 
