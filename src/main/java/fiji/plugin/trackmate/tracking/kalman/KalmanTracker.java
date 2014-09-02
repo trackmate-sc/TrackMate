@@ -1,8 +1,5 @@
 package fiji.plugin.trackmate.tracking.kalman;
 
-import ij.ImagePlus;
-
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,27 +9,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 
+import net.imglib2.RealPoint;
+import net.imglib2.algorithm.Benchmark;
+
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
-import Jama.Matrix;
 import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.tracking.sparselap.costfunction.CostFunction;
 import fiji.plugin.trackmate.tracking.sparselap.costfunction.SquareDistCostFunction;
 import fiji.plugin.trackmate.tracking.sparselap.costmatrix.JaqamanLinkingCostMatrixCreator;
 import fiji.plugin.trackmate.tracking.sparselap.linker.JaqamanLinker;
-import fiji.plugin.trackmate.visualization.SpotColorGenerator;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 
-public class KalmanTracker implements SpotTracker
+public class KalmanTracker implements SpotTracker, Benchmark
 {
 
 	private static final double ALTERNATIVE_COST_FACTOR = 1.05d;
@@ -55,14 +47,23 @@ public class KalmanTracker implements SpotTracker
 
 	private final double initialSearchRadius;
 
-	private final boolean savePredictions = true; // DEBUG
+	private boolean savePredictions = false;
 
 	private SpotCollection predictionsCollection;
+
+	private long processingTime;
 
 	/*
 	 * CONSTRUCTOR
 	 */
 
+	/**
+	 * @param spots
+	 *            the spots to track.
+	 * @param maxSearchRadius
+	 * @param maxFrameGap
+	 * @param initialSearchRadius
+	 */
 	public KalmanTracker( final SpotCollection spots, final double maxSearchRadius, final int maxFrameGap, final double initialSearchRadius )
 	{
 		this.spots = spots;
@@ -90,6 +91,8 @@ public class KalmanTracker implements SpotTracker
 	@Override
 	public boolean process()
 	{
+		final long start = System.currentTimeMillis();
+
 		/*
 		 * Outputs
 		 */
@@ -126,39 +129,78 @@ public class KalmanTracker implements SpotTracker
 		// Spots in the PREVIOUS frame that were not part of a link.
 		Collection< Spot > previousOrphanSpots = generateSpotList( spots, firstFrame );
 
+		/*
+		 * Estimate Kalman filter variances.
+		 * 
+		 * The search radius is used to derive an estimate of the noise that
+		 * affects position and velocity. The two are linked: if we need a large
+		 * search radius, then the fluoctuations over predicted states are
+		 * large.
+		 */
+		final double positionProcessStd = maxSearchRadius / 3d;
+		final double velocityProcessStd = maxSearchRadius / 3d;
+		/*
+		 * We assume the detector did a good job and that positions measured are
+		 * accurate up to a fraction of the spot radius
+		 */
+
+		double meanSpotRadius = 0d;
+		for ( final Spot spot : orphanSpots )
+		{
+			meanSpotRadius += spot.getFeature( Spot.RADIUS ).doubleValue();
+		}
+		meanSpotRadius /= orphanSpots.size();
+		final double positionMeasurementStd = meanSpotRadius / 10d;
+
+		/*
+		 * Log parameters.
+		 */
+		
+		logger.log( "Kalman tracker with parameters:\n"
+				+ " - init. search radius: " + initialSearchRadius + "\n"
+				+ " - max search radius: " + maxSearchRadius + "\n"
+				+ "  Covariance parameters determined:\n"
+				+ " - position process noise std: " + positionProcessStd + "\n"
+				+ " - velocity process noise std: " + velocityProcessStd + "\n"
+				+ " - position measurement noise std: " + positionMeasurementStd );
+
 		// The master map that contains the currently active KFs.
-		final Map< LinearMotionKalmanTracker, Spot > kalmanFiltersMap = new HashMap< LinearMotionKalmanTracker, Spot >( orphanSpots.size() );
+		final Map< CVMKalmanFilter, Spot > kalmanFiltersMap = new HashMap< CVMKalmanFilter, Spot >( orphanSpots.size() );
 
 		/*
 		 * Then loop over time, starting from second frame.
 		 */
+		int p = 1;
 		for ( int frame = secondFrame; frame <= keySet.last(); frame++ )
 		{
+			p++;
+
 			// Use the spot in the next frame has measurements.
 			final List< Spot > measurements = generateSpotList( spots, frame );
 
 			// Predict for all Kalman filters, and use it to generate linking
 			// candidates.
-			final Map< ComparableMatrix, LinearMotionKalmanTracker > predictionMap = new HashMap< KalmanTracker.ComparableMatrix, LinearMotionKalmanTracker >( kalmanFiltersMap.size() );
-			for ( final LinearMotionKalmanTracker kf : kalmanFiltersMap.keySet() )
+			final Map< ComparableRealPoint, CVMKalmanFilter > predictionMap = new HashMap< ComparableRealPoint, CVMKalmanFilter >( kalmanFiltersMap.size() );
+			for ( final CVMKalmanFilter kf : kalmanFiltersMap.keySet() )
 			{
-				final Matrix X = kf.predict();
-				predictionMap.put( new ComparableMatrix( X.getArray() ), kf );
+				final double[] X = kf.predict();
+				final ComparableRealPoint point = new ComparableRealPoint( X );
+				predictionMap.put( new ComparableRealPoint( X ), kf );
 
 				if ( savePredictions )
 				{
-					final Spot pred = toSpot( X );
+					final Spot pred = toSpot( point );
 					final Spot s = kalmanFiltersMap.get( kf );
 					pred.setName( "Pred_" + s.getName() );
 					pred.putFeature( Spot.RADIUS, s.getFeature( Spot.RADIUS ) );
 					predictionsCollection.add( pred, frame );
 				}
 			}
-			final List< ComparableMatrix > predictions = new ArrayList< ComparableMatrix >( predictionMap.keySet() );
+			final List< ComparableRealPoint > predictions = new ArrayList< ComparableRealPoint >( predictionMap.keySet() );
 
 			// The KF for which we could not find a measurement in the target
 			// frame. Is updated later.
-			final Collection< LinearMotionKalmanTracker > childlessKFs = new HashSet< LinearMotionKalmanTracker >( kalmanFiltersMap.keySet() );
+			final Collection< CVMKalmanFilter > childlessKFs = new HashSet< CVMKalmanFilter >( kalmanFiltersMap.keySet() );
 
 			// Find the global (in space) optimum for associating a prediction
 			// to a measurement.
@@ -167,21 +209,21 @@ public class KalmanTracker implements SpotTracker
 			{
 				// Only link measurements to predictions if we have predictions.
 
-				final JaqamanLinkingCostMatrixCreator< ComparableMatrix, Spot > crm = new JaqamanLinkingCostMatrixCreator< ComparableMatrix, Spot >( predictions, measurements, CF, maxCost, ALTERNATIVE_COST_FACTOR, PERCENTILE );
-				final JaqamanLinker< ComparableMatrix, Spot > linker = new JaqamanLinker< ComparableMatrix, Spot >( crm );
+				final JaqamanLinkingCostMatrixCreator< ComparableRealPoint, Spot > crm = new JaqamanLinkingCostMatrixCreator< ComparableRealPoint, Spot >( predictions, measurements, CF, maxCost, ALTERNATIVE_COST_FACTOR, PERCENTILE );
+				final JaqamanLinker< ComparableRealPoint, Spot > linker = new JaqamanLinker< ComparableRealPoint, Spot >( crm );
 				if ( !linker.checkInput() || !linker.process() )
 				{
 					errorMessage = BASE_ERROR_MSG + "Error linking candidates in frame " + frame + ": " + linker.getErrorMessage();
 					return false;
 				}
-				final Map< ComparableMatrix, Spot > agnts = linker.getResult();
-				final Map< ComparableMatrix, Double > costs = linker.getAssignmentCosts();
+				final Map< ComparableRealPoint, Spot > agnts = linker.getResult();
+				final Map< ComparableRealPoint, Double > costs = linker.getAssignmentCosts();
 
 				// Deal with found links.
 				orphanSpots = new HashSet< Spot >( measurements );
-				for ( final ComparableMatrix cm : agnts.keySet() )
+				for ( final ComparableRealPoint cm : agnts.keySet() )
 				{
-					final LinearMotionKalmanTracker kf = predictionMap.get( cm );
+					final CVMKalmanFilter kf = predictionMap.get( cm );
 
 					// Create links for found match.
 					final Spot source = kalmanFiltersMap.get( kf );
@@ -241,8 +283,9 @@ public class KalmanTracker implements SpotTracker
 					orphanSpots.remove( target );
 
 					// Derive initial state and create Kalman filter.
-					final Matrix XP = estimateInitialState( source, target );
-					final LinearMotionKalmanTracker kt = new LinearMotionKalmanTracker( XP );
+					final double[] XP = estimateInitialState( source, target );
+					final CVMKalmanFilter kt = new CVMKalmanFilter( XP, Double.MIN_NORMAL, positionProcessStd, velocityProcessStd, positionMeasurementStd );
+					// We trust the initial state a lot.
 
 					// Store filter and source
 					kalmanFiltersMap.put( kt, target );
@@ -258,7 +301,7 @@ public class KalmanTracker implements SpotTracker
 			previousOrphanSpots = orphanSpots;
 
 			// Deal with childless KFs.
-			for ( final LinearMotionKalmanTracker kf : childlessKFs )
+			for ( final CVMKalmanFilter kf : childlessKFs )
 			{
 				// Echo we missed a measurement
 				kf.update( null );
@@ -270,12 +313,19 @@ public class KalmanTracker implements SpotTracker
 					kalmanFiltersMap.remove( kf );
 				}
 			}
+
+			final double progress = ( double ) p / keySet.size();
+			logger.setProgress( progress );
 		}
 
 		if ( savePredictions )
 		{
 			predictionsCollection.setVisible( true );
 		}
+
+		final long end = System.currentTimeMillis();
+		processingTime = end - start;
+
 		return true;
 	}
 
@@ -285,9 +335,27 @@ public class KalmanTracker implements SpotTracker
 		return errorMessage;
 	}
 
+	/**
+	 * Returns the saved predicted state as a {@link SpotCollection}.
+	 * 
+	 * @return the predicted states.
+	 * @see #setSavePredictions(boolean)
+	 */
 	public SpotCollection getPredictions()
 	{
 		return predictionsCollection;
+	}
+
+	/**
+	 * Sets whether the tracker saves the predicted states.
+	 * 
+	 * @param doSave
+	 *            if <code>true</code>, the predicted states will be saved.
+	 * @see #getPredictions()
+	 */
+	public void setSavePredictions( final boolean doSave )
+	{
+		this.savePredictions = doSave;
 	}
 
 	@Override
@@ -305,31 +373,37 @@ public class KalmanTracker implements SpotTracker
 	}
 
 	@Override
+	public long getProcessingTime()
+	{
+		return processingTime;
+	}
+
+
+	@Override
 	public void setLogger( final Logger logger )
 	{
 		this.logger = logger;
 	}
 
-	private static final Matrix toMeasurement( final Spot spot )
+	private static final double[] toMeasurement( final Spot spot )
 	{
 		final double[] d = new double[] {
 				spot.getDoublePosition( 0 ), spot.getDoublePosition( 1 ), spot.getDoublePosition( 2 )
 		};
-		return new Matrix( d, 3 );
+		return d;
 	}
 
-	private static final Spot toSpot( final Matrix X )
+	private static final Spot toSpot( final ComparableRealPoint X )
 	{
-		final Spot spot = new Spot( X.get( 0, 0 ), X.get( 1, 0 ), X.get( 2, 0 ), 2d, -1d );
+		final Spot spot = new Spot( X, 2d, -1d );
 		return spot;
 	}
 
-	private static final Matrix estimateInitialState( final Spot first, final Spot second )
+	private static final double[] estimateInitialState( final Spot first, final Spot second )
 	{
 		final double[] xp = new double[] { second.getDoublePosition( 0 ), second.getDoublePosition( 1 ), second.getDoublePosition( 2 ),
 				second.diffTo( first, Spot.POSITION_X ), second.diffTo( first, Spot.POSITION_Y ), second.diffTo( first, Spot.POSITION_Z ) };
-		final Matrix XP = new Matrix( xp, 6 );
-		return XP;
+		return xp;
 	}
 
 	private static final List< Spot > generateSpotList( final SpotCollection spots, final int frame )
@@ -342,64 +416,24 @@ public class KalmanTracker implements SpotTracker
 		return list;
 	}
 
-	/*
-	 * MAIN METHODS
-	 */
-
-	public static void main( final String[] args )
+	private static final class ComparableRealPoint extends RealPoint implements Comparable< ComparableRealPoint >
 	{
-		final File file = new File( "samples/FakeTracks.xml" );
-		final TmXmlReader reader = new TmXmlReader( file );
-		if ( !reader.isReadingOk() )
+		public ComparableRealPoint( final double[] A )
 		{
-			System.out.println( reader.getErrorMessage() );
-			return;
-		}
-
-		final Model model = reader.getModel();
-		final SpotCollection spots = model.getSpots();
-
-		final Settings settings = new Settings();
-		reader.readSettings( settings, null, null, null, null, null );
-
-		final KalmanTracker tracker = new KalmanTracker( spots, 15d, 2, 15d );
-		if (!tracker.checkInput() || !tracker.process()	) {
-			System.out.println(tracker.getErrorMessage());
-			return;
-		}
-
-		final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph= tracker.getResult();
-		model.setTracks( graph, false );
-
-		ij.ImageJ.main( args );
-		final SelectionModel selectionModel = new SelectionModel( model );
-		final ImagePlus imp = settings.imp;
-		final HyperStackDisplayer view = new HyperStackDisplayer( model, selectionModel, imp );
-		final SpotColorGenerator scg = new SpotColorGenerator( model );
-		scg.setFeature( Spot.QUALITY );
-		view.setDisplaySettings( TrackMateModelView.KEY_SPOT_COLORING, scg );
-		view.render();
-	}
-
-	private static final class ComparableMatrix extends Matrix implements Comparable< ComparableMatrix >
-	{
-		private static final long serialVersionUID = 1L;
-
-		public ComparableMatrix( final double[][] A )
-		{
-			super( A );
+			// Wrap array.
+			super( A, false );
 		}
 
 		/**
 		 * Sort based on X, Y, Z
 		 */
 		@Override
-		public int compareTo( final ComparableMatrix o )
+		public int compareTo( final ComparableRealPoint o )
 		{
 			int i = 0;
-			while ( i < getRowDimension() )
+			while ( i < n )
 			{
-				if ( get( i, 0 ) != o.get( i, 0 ) ) { return ( int ) Math.signum( get( i, 0 ) - o.get( i, 0 ) ); }
+				if ( getDoublePosition( i ) != o.getDoublePosition( i ) ) { return ( int ) Math.signum( getDoublePosition( i ) - o.getDoublePosition( i ) ); }
 				i++;
 			}
 			return 0;
@@ -410,18 +444,19 @@ public class KalmanTracker implements SpotTracker
 	 * Cost function that returns the square distance between a KF state and a
 	 * spots.
 	 */
-	private static final CostFunction< ComparableMatrix, Spot > CF = new CostFunction< ComparableMatrix, Spot >()
-			{
+	private static final CostFunction< ComparableRealPoint, Spot > CF = new CostFunction< ComparableRealPoint, Spot >()
+	{
 
 		@Override
-		public double linkingCost( final ComparableMatrix state, final Spot spot )
+		public double linkingCost( final ComparableRealPoint state, final Spot spot )
 		{
-			final double dx = state.get( 0, 0 ) - spot.getDoublePosition( 0 );
-			final double dy = state.get( 1, 0 ) - spot.getDoublePosition( 1 );
-			final double dz = state.get( 2, 0 ) - spot.getDoublePosition( 2 );
+			final double dx = state.getDoublePosition( 0 ) - spot.getDoublePosition( 0 );
+			final double dy = state.getDoublePosition( 1 ) - spot.getDoublePosition( 1 );
+			final double dz = state.getDoublePosition( 2 ) - spot.getDoublePosition( 2 );
 			return dx * dx + dy * dy + dz * dz + Double.MIN_NORMAL;
 			// So that it's never 0
 		}
-			};
+	};
+
 
 }
