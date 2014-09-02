@@ -155,7 +155,7 @@ public class KalmanTracker implements SpotTracker, Benchmark
 		/*
 		 * Log parameters.
 		 */
-		
+
 		logger.log( "Kalman tracker with parameters:\n"
 				+ " - init. search radius: " + initialSearchRadius + "\n"
 				+ " - max search radius: " + maxSearchRadius + "\n"
@@ -308,7 +308,7 @@ public class KalmanTracker implements SpotTracker, Benchmark
 
 				// We can bridge a limited number of gaps. If too much, we die.
 				// If not, we will use predicted state next time.
-				if ( kf.getnOcclusion() > maxFrameGap )
+				if ( kf.getNOcclusion() > maxFrameGap )
 				{
 					kalmanFiltersMap.remove( kf );
 				}
@@ -445,7 +445,7 @@ public class KalmanTracker implements SpotTracker, Benchmark
 	 * spots.
 	 */
 	private static final CostFunction< ComparableRealPoint, Spot > CF = new CostFunction< ComparableRealPoint, Spot >()
-	{
+			{
 
 		@Override
 		public double linkingCost( final ComparableRealPoint state, final Spot spot )
@@ -456,7 +456,7 @@ public class KalmanTracker implements SpotTracker, Benchmark
 			return dx * dx + dy * dy + dz * dz + Double.MIN_NORMAL;
 			// So that it's never 0
 		}
-	};
+			};
 
 
 }

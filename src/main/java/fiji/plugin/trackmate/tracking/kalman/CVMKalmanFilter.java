@@ -156,10 +156,29 @@ public class CVMKalmanFilter
 		}
 	}
 
-	public Matrix getP()
+	/**
+	 * Return the root mean square error on position estimated through the state
+	 * covariance matrix.
+	 * 
+	 * @return the estimated error on position.
+	 */
+	public double getPositionError()
 	{
-		return P;
+		return Math.sqrt( ( P.get( 0, 0 ) + P.get( 1, 1 ) + P.get( 2, 2 ) ) / 3d );
 	}
+
+	/**
+	 * Return the root mean square error on velocity estimated through the state
+	 * covariance matrix.
+	 * 
+	 * @return the estimated error on velocity, in <code>length/frame</code>
+	 *         units.
+	 */
+	public double getVelocityError()
+	{
+		return Math.sqrt( ( P.get( 3, 3 ) + P.get( 4, 4 ) + P.get( 5, 5 ) ) / 3d );
+	}
+
 
 	/**
 	 * Returns the number of occlusion events that occurred since the
@@ -167,7 +186,7 @@ public class CVMKalmanFilter
 	 * 
 	 * @return the number of occlusions.
 	 */
-	public int getnOcclusion()
+	public int getNOcclusion()
 	{
 		return nOcclusion;
 	}
