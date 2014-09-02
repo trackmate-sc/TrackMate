@@ -149,7 +149,10 @@ public class CVMKalmanFilter
 			final Matrix XM = new Matrix( Xm, 3 );
 			final Matrix TEMP = H.times( P.times( H.transpose() ) ).plus( R );
 			final Matrix K = P.times( H.transpose() ).times( TEMP.inverse() );
+			// State
 			X = Xp.plus( K.times( XM.minus( H.times( Xp ) ) ) );
+			// Covariance
+			P = ( Matrix.identity( 6, 6 ).minus( K.times( H ) ) ).times( P );
 		}
 	}
 
