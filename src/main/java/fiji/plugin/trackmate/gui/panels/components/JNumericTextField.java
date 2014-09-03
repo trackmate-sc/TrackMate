@@ -25,6 +25,8 @@ public class JNumericTextField extends JTextField
 	private static final Border BORDER_FOCUSED = new LineBorder( new Color( 252, 117, 0 ), 1, true );
 
 	private static final Border BORDER_UNFOCUSED = new LineBorder( new Color( 150, 150, 150 ), 1, true );
+	
+	private static final String DEFAULT_FORMAT = "%.3f";
 
 	private final ActionListener al = new ActionListener()
 	{
@@ -39,6 +41,8 @@ public class JNumericTextField extends JTextField
 	private double value = 0;
 
 	private double oldValue = 0;
+
+	private String format = DEFAULT_FORMAT;
 
 	/*
 	 * CONSTRUCTORS
@@ -101,7 +105,7 @@ public class JNumericTextField extends JTextField
 
 	public JNumericTextField( final double value )
 	{
-		this( String.format( "%.3f", value ) );
+		this( String.format( DEFAULT_FORMAT, value ) );
 	}
 
 	public double getValue()
@@ -114,6 +118,17 @@ public class JNumericTextField extends JTextField
 	 * METHODS
 	 */
 
+	public String getFormat()
+	{
+		return format;
+	}
+
+	public void setFormat( final String format )
+	{
+		this.format = format;
+		checkInput();
+	}
+
 	private void checkInput()
 	{
 		final String str = getText();
@@ -121,11 +136,12 @@ public class JNumericTextField extends JTextField
 		{
 			value = NumberParser.parseDouble( str );
 			oldValue = value;
+			setText( String.format( format, value ) );
 		}
 		catch ( final NumberFormatException nfe )
 		{
 			value = oldValue;
-			setText( String.format( "%.3f", value ) );
+			setText( String.format( format, value ) );
 		}
 
 	}
