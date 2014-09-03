@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.tracking.kalman;
 
+import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
@@ -36,7 +37,7 @@ public class KalmanTrackerInteractiveTest3
 		final int maxFrameGap = 2;
 		final double initialSearchRadius = 2 * WIDTH / ( NFRAMES );
 		final KalmanTracker tracker = new KalmanTracker( spots, maxSearchRadius, maxFrameGap, initialSearchRadius );
-
+		tracker.setLogger( Logger.DEFAULT_LOGGER );
 		if ( !tracker.checkInput() || !tracker.process() )
 		{
 			System.err.println( tracker.getErrorMessage() );
