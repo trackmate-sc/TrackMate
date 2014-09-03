@@ -152,18 +152,6 @@ public class KalmanTracker implements SpotTracker, Benchmark
 		meanSpotRadius /= orphanSpots.size();
 		final double positionMeasurementStd = meanSpotRadius / 10d;
 
-		/*
-		 * Log parameters.
-		 */
-
-		logger.log( "Kalman tracker with parameters:\n"
-				+ " - init. search radius: " + initialSearchRadius + "\n"
-				+ " - max search radius: " + maxSearchRadius + "\n"
-				+ "  Covariance parameters determined:\n"
-				+ " - position process noise std: " + positionProcessStd + "\n"
-				+ " - velocity process noise std: " + velocityProcessStd + "\n"
-				+ " - position measurement noise std: " + positionMeasurementStd );
-
 		// The master map that contains the currently active KFs.
 		final Map< CVMKalmanFilter, Spot > kalmanFiltersMap = new HashMap< CVMKalmanFilter, Spot >( orphanSpots.size() );
 
