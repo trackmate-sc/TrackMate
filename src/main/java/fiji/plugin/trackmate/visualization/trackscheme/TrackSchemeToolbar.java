@@ -252,6 +252,7 @@ public class TrackSchemeToolbar extends JToolBar
 		{
 			final Set< String > styleNames = new HashSet< String >( TrackSchemeStylist.VERTEX_STYLES.keySet() );
 			selectStyleBox = new JComboBox( styleNames.toArray() );
+			selectStyleBox.setMinimumSize( new Dimension( 80, 20 ) );
 			selectStyleBox.setSelectedItem( TrackSchemeStylist.DEFAULT_STYLE_NAME );
 			selectStyleBox.setMaximumSize( new Dimension( 200, 30 ) );
 			selectStyleBox.setFont( FONT );
