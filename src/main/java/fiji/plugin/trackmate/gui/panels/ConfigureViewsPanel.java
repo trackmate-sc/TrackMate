@@ -32,6 +32,8 @@ import java.util.Map;
 
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -41,6 +43,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
@@ -146,6 +149,10 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 
 	private JLabel lblDrawingDepthUnits;
 
+	private JLabel jLabelSpotRadius;
+
+	protected JPanel jPanelButtons;
+
 	/*
 	 * CONSTRUCTOR
 	 */
@@ -155,6 +162,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 		this.model = model;
 		initGUI();
 		refreshGUI();
+		resizeButtons();
 	}
 
 	/*
@@ -400,7 +408,41 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 			}
 		} );
 		jPanelSpotColor.autoMinMax();
-		jPanelSpotOptions.add( jPanelSpotColor );
+		final GroupLayout gl_jPanelSpotOptions = new GroupLayout( jPanelSpotOptions );
+		gl_jPanelSpotOptions.setHorizontalGroup(
+				gl_jPanelSpotOptions.createParallelGroup( Alignment.LEADING )
+						.addGroup( gl_jPanelSpotOptions.createSequentialGroup()
+								.addGap( 5 )
+								.addGroup( gl_jPanelSpotOptions.createParallelGroup( Alignment.LEADING )
+										.addGroup( gl_jPanelSpotOptions.createSequentialGroup()
+												.addComponent( jCheckBoxDisplayNames, GroupLayout.DEFAULT_SIZE, 267, Short.MAX_VALUE )
+												.addContainerGap() )
+										.addGroup( gl_jPanelSpotOptions.createSequentialGroup()
+												.addComponent( jLabelSpotRadius, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE )
+												.addGap( 5 )
+												.addComponent( jTextFieldSpotRadius, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE )
+												.addGap( 114 ) ) ) )
+						.addGroup( gl_jPanelSpotOptions.createSequentialGroup()
+								.addContainerGap()
+								.addComponent( jPanelSpotColor, GroupLayout.DEFAULT_SIZE, 266, Short.MAX_VALUE )
+								.addContainerGap() )
+				);
+		gl_jPanelSpotOptions.setVerticalGroup(
+				gl_jPanelSpotOptions.createParallelGroup( Alignment.LEADING )
+						.addGroup( gl_jPanelSpotOptions.createSequentialGroup()
+								.addGap( 5 )
+								.addGroup( gl_jPanelSpotOptions.createParallelGroup( Alignment.LEADING )
+										.addGroup( gl_jPanelSpotOptions.createSequentialGroup()
+												.addGap( 3 )
+												.addComponent( jLabelSpotRadius ) )
+										.addComponent( jTextFieldSpotRadius, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE ) )
+								.addGap( 5 )
+								.addComponent( jCheckBoxDisplayNames )
+								.addPreferredGap( ComponentPlacement.RELATED )
+								.addComponent( jPanelSpotColor, GroupLayout.PREFERRED_SIZE, 49, Short.MAX_VALUE )
+								.addContainerGap() )
+				);
+		jPanelSpotOptions.setLayout( gl_jPanelSpotOptions );
 
 		/*
 		 * Track coloring
@@ -493,7 +535,48 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 				fireDisplaySettingsChange( event );
 			}
 		} );
-		jPanelTrackOptions.add( trackColorGUI );
+		final GroupLayout gl_jPanelTrackOptions = new GroupLayout( jPanelTrackOptions );
+		gl_jPanelTrackOptions.setHorizontalGroup(
+				gl_jPanelTrackOptions.createParallelGroup( Alignment.LEADING )
+						.addGroup( gl_jPanelTrackOptions.createSequentialGroup()
+								.addGap( 5 )
+								.addGroup( gl_jPanelTrackOptions.createParallelGroup( Alignment.TRAILING )
+										.addComponent( jComboBoxDisplayMode, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE )
+										.addGroup( gl_jPanelTrackOptions.createSequentialGroup()
+												.addComponent( jCheckBoxLimitDepth, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE )
+												.addGap( 6 ) )
+										.addGroup( gl_jPanelTrackOptions.createSequentialGroup()
+												.addComponent( jLabelFrameDepth, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE )
+												.addGap( 5 )
+												.addComponent( jTextFieldFrameDepth, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE )
+												.addGap( 123 ) )
+										.addComponent( jLabelTrackDisplayMode, GroupLayout.DEFAULT_SIZE, 265, Short.MAX_VALUE ) )
+								.addGap( 8 ) )
+						.addGroup( gl_jPanelTrackOptions.createSequentialGroup()
+								.addContainerGap()
+								.addComponent( trackColorGUI, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE )
+								.addContainerGap() )
+				);
+		gl_jPanelTrackOptions.setVerticalGroup(
+				gl_jPanelTrackOptions.createParallelGroup( Alignment.LEADING )
+						.addGroup( gl_jPanelTrackOptions.createSequentialGroup()
+								.addGap( 5 )
+								.addComponent( jLabelTrackDisplayMode, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE )
+								.addGap( 5 )
+								.addComponent( jComboBoxDisplayMode, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE )
+								.addGap( 5 )
+								.addComponent( jCheckBoxLimitDepth, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE )
+								.addGap( 5 )
+								.addGroup( gl_jPanelTrackOptions.createParallelGroup( Alignment.LEADING )
+										.addGroup( gl_jPanelTrackOptions.createSequentialGroup()
+												.addGap( 3 )
+												.addComponent( jLabelFrameDepth, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE ) )
+										.addComponent( jTextFieldFrameDepth, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE ) )
+								.addPreferredGap( ComponentPlacement.RELATED )
+								.addComponent( trackColorGUI, GroupLayout.PREFERRED_SIZE, 43, Short.MAX_VALUE )
+								.addGap( 9 ) )
+				);
+		jPanelTrackOptions.setLayout( gl_jPanelTrackOptions );
 
 		if ( spotColorGenerator != null )
 		{
@@ -528,9 +611,8 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 	{
 		try
 		{
-			this.setPreferredSize( new Dimension( 300, 469 ) );
+			this.setPreferredSize( new Dimension( 300, 521 ) );
 			this.setSize( 300, 500 );
-			this.setLayout( null );
 			{
 				jPanelTrackOptions = new JPanel()
 				{
@@ -543,15 +625,9 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 							c.setEnabled( enabled );
 					};
 				};
-				final FlowLayout jPanelTrackOptionsLayout = new FlowLayout();
-				jPanelTrackOptionsLayout.setAlignment( FlowLayout.LEFT );
-				jPanelTrackOptions.setLayout( jPanelTrackOptionsLayout );
-				this.add( jPanelTrackOptions );
-				jPanelTrackOptions.setBounds( 10, 193, 280, 160 );
 				jPanelTrackOptions.setBorder( new LineBorder( new java.awt.Color( 192, 192, 192 ), 1, true ) );
 				{
 					jLabelTrackDisplayMode = new JLabel();
-					jPanelTrackOptions.add( jLabelTrackDisplayMode );
 					jLabelTrackDisplayMode.setText( "  Track display mode:" );
 					jLabelTrackDisplayMode.setBounds( 10, 163, 268, 15 );
 					jLabelTrackDisplayMode.setFont( FONT );
@@ -561,7 +637,6 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 					final String[] keyNames = TrackMateModelView.TRACK_DISPLAY_MODE_DESCRIPTION;
 					final ComboBoxModel jComboBoxDisplayModeModel = new DefaultComboBoxModel( keyNames );
 					jComboBoxDisplayMode = new JComboBox();
-					jPanelTrackOptions.add( jComboBoxDisplayMode );
 					jComboBoxDisplayMode.setModel( jComboBoxDisplayModeModel );
 					jComboBoxDisplayMode.setSelectedIndex( 0 );
 					jComboBoxDisplayMode.setFont( SMALL_FONT );
@@ -582,7 +657,6 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 				}
 				{
 					jCheckBoxLimitDepth = new JCheckBox();
-					jPanelTrackOptions.add( jCheckBoxLimitDepth );
 					jCheckBoxLimitDepth.setText( "Limit frame depth" );
 					jCheckBoxLimitDepth.setBounds( 6, 216, 272, 23 );
 					jCheckBoxLimitDepth.setFont( FONT );
@@ -612,7 +686,6 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 				}
 				{
 					jLabelFrameDepth = new JLabel();
-					jPanelTrackOptions.add( jLabelFrameDepth );
 					jLabelFrameDepth.setText( "  Frame depth:" );
 					jLabelFrameDepth.setFont( SMALL_FONT );
 					jLabelFrameDepth.setPreferredSize( new java.awt.Dimension( 103, 14 ) );
@@ -621,7 +694,6 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 					displaySettings.put( KEY_TRACK_DISPLAY_DEPTH, Integer.valueOf( TrackMateModelView.DEFAULT_TRACK_DISPLAY_DEPTH ) );
 
 					jTextFieldFrameDepth = new JTextField();
-					jPanelTrackOptions.add( jTextFieldFrameDepth );
 					jTextFieldFrameDepth.setFont( SMALL_FONT );
 					jTextFieldFrameDepth.setText( "" + TrackMateModelView.DEFAULT_TRACK_DISPLAY_DEPTH );
 					jTextFieldFrameDepth.setPreferredSize( new java.awt.Dimension( 34, 20 ) );
@@ -649,10 +721,8 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 			}
 			{
 				jCheckBoxDisplayTracks = new JCheckBox();
-				this.add( jCheckBoxDisplayTracks );
 				jCheckBoxDisplayTracks.setText( "Display tracks" );
 				jCheckBoxDisplayTracks.setFont( FONT );
-				jCheckBoxDisplayTracks.setBounds( 10, 169, 233, 23 );
 				jCheckBoxDisplayTracks.setSelected( true );
 				jCheckBoxDisplayTracks.addActionListener( new ActionListener()
 				{
@@ -670,10 +740,8 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 			}
 			{
 				jCheckBoxDisplaySpots = new JCheckBox();
-				this.add( jCheckBoxDisplaySpots );
 				jCheckBoxDisplaySpots.setText( "Display spots" );
 				jCheckBoxDisplaySpots.setFont( FONT );
-				jCheckBoxDisplaySpots.setBounds( 10, 30, 280, 23 );
 				jCheckBoxDisplaySpots.setSelected( true );
 				jCheckBoxDisplaySpots.addActionListener( new ActionListener()
 				{
@@ -701,22 +769,16 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 							c.setEnabled( enabled );
 					};
 				};
-				final FlowLayout jPanelSpotOptionsLayout = new FlowLayout();
-				jPanelSpotOptionsLayout.setAlignment( FlowLayout.LEFT );
-				jPanelSpotOptions.setLayout( jPanelSpotOptionsLayout );
-				this.add( jPanelSpotOptions );
-				jPanelSpotOptions.setBounds( 10, 55, 280, 110 );
 				jPanelSpotOptions.setBorder( new LineBorder( new java.awt.Color( 192, 192, 192 ), 1, true ) );
 				{
-					final JLabel jLabelSpotRadius = new JLabel();
+					jLabelSpotRadius = new JLabel();
 					jLabelSpotRadius.setText( "  Spot display radius ratio:" );
 					jLabelSpotRadius.setFont( SMALL_FONT );
-					jPanelSpotOptions.add( jLabelSpotRadius );
 
 					jTextFieldSpotRadius = new JNumericTextField( "1" );
+					jTextFieldSpotRadius.setHorizontalAlignment( SwingConstants.CENTER );
 					jTextFieldSpotRadius.setPreferredSize( new java.awt.Dimension( 34, 20 ) );
 					jTextFieldSpotRadius.setFont( SMALL_FONT );
-					jPanelSpotOptions.add( jTextFieldSpotRadius );
 					jTextFieldSpotRadius.addActionListener( new ActionListener()
 					{
 						@Override
@@ -753,7 +815,6 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 					jCheckBoxDisplayNames.setText( "Display spot names" );
 					jCheckBoxDisplayNames.setFont( SMALL_FONT );
 					jCheckBoxDisplayNames.setSelected( false );
-					jPanelSpotOptions.add( jCheckBoxDisplayNames );
 					jCheckBoxDisplayNames.addActionListener( new ActionListener()
 					{
 						@Override
@@ -787,8 +848,6 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 				};
 				final FlowLayout flowLayout = ( FlowLayout ) jpanelDrawingDepth.getLayout();
 				flowLayout.setAlignment( FlowLayout.LEFT );
-				jpanelDrawingDepth.setBounds( 10, 365, 280, 34 );
-				add( jpanelDrawingDepth );
 				jpanelDrawingDepth.setBorder( new LineBorder( new java.awt.Color( 192, 192, 192 ), 1, true ) );
 
 				final JCheckBox chckbxDrawingDepth = new JCheckBox( "Limit drawing depth" );
@@ -859,17 +918,33 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 				jLabelDisplayOptions = new JLabel();
 				jLabelDisplayOptions.setText( "Display options" );
 				jLabelDisplayOptions.setFont( BIG_FONT );
-				jLabelDisplayOptions.setBounds( 14, 6, 280, 20 );
 				jLabelDisplayOptions.setHorizontalAlignment( SwingConstants.LEFT );
-				this.add( jLabelDisplayOptions );
 			}
+
+			jPanelButtons = new JPanel();
+			jPanelButtons.setLayout( new WrapLayout() );
 			{
 				jButtonShowTrackScheme = new JButton();
+				jPanelButtons.add( jButtonShowTrackScheme );
 				jButtonShowTrackScheme.setText( "Track scheme" );
 				jButtonShowTrackScheme.setIcon( TRACK_SCHEME_ICON_16x16 );
 				jButtonShowTrackScheme.setFont( FONT );
 				jButtonShowTrackScheme.setToolTipText( TRACKSCHEME_BUTTON_TOOLTIP );
-				jButtonShowTrackScheme.setBounds( 10, 411, 120, 30 );
+				{
+					jButtonDoAnalysis = new JButton( "Analysis" );
+					jPanelButtons.add( jButtonDoAnalysis );
+					jButtonDoAnalysis.setFont( FONT );
+					jButtonDoAnalysis.setIcon( DO_ANALYSIS_ICON );
+					jButtonDoAnalysis.setToolTipText( ANALYSIS_BUTTON_TOOLTIP );
+					jButtonDoAnalysis.addActionListener( new ActionListener()
+					{
+						@Override
+						public void actionPerformed( final ActionEvent arg0 )
+						{
+							fireAction( DO_ANALYSIS_BUTTON_PRESSED );
+						}
+					} );
+				}
 				jButtonShowTrackScheme.addActionListener( new ActionListener()
 				{
 					@Override
@@ -878,29 +953,88 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 						fireAction( TRACK_SCHEME_BUTTON_PRESSED );
 					}
 				} );
-				this.add( jButtonShowTrackScheme );
 			}
-			{
-				jButtonDoAnalysis = new JButton( "Analysis" );
-				jButtonDoAnalysis.setFont( FONT );
-				jButtonDoAnalysis.setIcon( DO_ANALYSIS_ICON );
-				jButtonDoAnalysis.setToolTipText( ANALYSIS_BUTTON_TOOLTIP );
-				jButtonDoAnalysis.setBounds( 145, 411, 120, 30 );
-				jButtonDoAnalysis.addActionListener( new ActionListener()
-				{
-					@Override
-					public void actionPerformed( final ActionEvent arg0 )
-					{
-						fireAction( DO_ANALYSIS_BUTTON_PRESSED );
-					}
-				} );
-				this.add( jButtonDoAnalysis );
-			}
+
+			final GroupLayout groupLayout = new GroupLayout( this );
+			groupLayout.setHorizontalGroup(
+					groupLayout.createParallelGroup( Alignment.TRAILING )
+							.addGroup( groupLayout.createSequentialGroup()
+									.addGap( 14 )
+									.addComponent( jLabelDisplayOptions, GroupLayout.DEFAULT_SIZE, 280, Short.MAX_VALUE )
+									.addGap( 6 ) )
+							.addGroup( groupLayout.createSequentialGroup()
+									.addGap( 10 )
+									.addComponent( jCheckBoxDisplaySpots, GroupLayout.DEFAULT_SIZE, 280, Short.MAX_VALUE )
+									.addGap( 10 ) )
+							.addGroup( groupLayout.createSequentialGroup()
+									.addGap( 10 )
+									.addComponent( jPanelSpotOptions, GroupLayout.PREFERRED_SIZE, 280, Short.MAX_VALUE )
+									.addGap( 10 ) )
+							.addGroup( groupLayout.createSequentialGroup()
+									.addGap( 10 )
+									.addComponent( jCheckBoxDisplayTracks, GroupLayout.DEFAULT_SIZE, 284, Short.MAX_VALUE )
+									.addContainerGap() )
+							.addGroup( groupLayout.createSequentialGroup()
+									.addGap( 10 )
+									.addComponent( jPanelTrackOptions, GroupLayout.PREFERRED_SIZE, 280, Short.MAX_VALUE )
+									.addGap( 10 ) )
+							.addGroup( groupLayout.createSequentialGroup()
+									.addGap( 10 )
+									.addGroup( groupLayout.createParallelGroup( Alignment.TRAILING )
+											.addComponent( jPanelButtons, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 280, Short.MAX_VALUE )
+											.addComponent( jpanelDrawingDepth, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 280, Short.MAX_VALUE ) )
+									.addGap( 10 ) )
+					);
+			groupLayout.setVerticalGroup(
+					groupLayout.createParallelGroup( Alignment.LEADING )
+							.addGroup( groupLayout.createSequentialGroup()
+									.addGap( 6 )
+									.addComponent( jLabelDisplayOptions, GroupLayout.PREFERRED_SIZE, 20, GroupLayout.PREFERRED_SIZE )
+									.addGap( 4 )
+									.addComponent( jCheckBoxDisplaySpots )
+									.addGap( 2 )
+									.addComponent( jPanelSpotOptions, GroupLayout.PREFERRED_SIZE, 118, GroupLayout.PREFERRED_SIZE )
+									.addGap( 4 )
+									.addComponent( jCheckBoxDisplayTracks )
+									.addGap( 1 )
+									.addComponent( jPanelTrackOptions, GroupLayout.PREFERRED_SIZE, 170, GroupLayout.PREFERRED_SIZE )
+									.addPreferredGap( ComponentPlacement.UNRELATED )
+									.addComponent( jpanelDrawingDepth, GroupLayout.PREFERRED_SIZE, 34, GroupLayout.PREFERRED_SIZE )
+									.addPreferredGap( ComponentPlacement.RELATED )
+									.addComponent( jPanelButtons, GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE )
+									.addContainerGap() )
+					);
+
+			setLayout( groupLayout );
 
 		}
 		catch ( final Exception e )
 		{
 			e.printStackTrace();
+		}
+	}
+
+	protected void resizeButtons()
+	{
+		final Component[] buttons = jPanelButtons.getComponents();
+		int maxWidth = -1;
+		int maxHeight = -1;
+		for ( final Component button : buttons )
+		{
+			final Dimension btd = button.getPreferredSize();
+			if ( btd.width > maxWidth )
+			{
+				maxWidth = btd.width;
+			}
+			if ( btd.height > maxHeight )
+			{
+				maxHeight = btd.height;
+			}
+		}
+		final Dimension size = new Dimension( maxWidth, maxHeight );
+		for ( final Component button : buttons )
+		{
+			button.setPreferredSize( size );
 		}
 	}
 }

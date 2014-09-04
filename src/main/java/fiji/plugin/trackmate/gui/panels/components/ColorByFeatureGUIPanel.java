@@ -3,8 +3,8 @@ package fiji.plugin.trackmate.gui.panels.components;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
 
 import java.awt.BorderLayout;
-import java.awt.Canvas;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -20,6 +20,7 @@ import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -86,11 +87,7 @@ public class ColorByFeatureGUIPanel extends ActionListenablePanel implements Min
 
 	private CategoryJComboBox< Category, String > jComboBoxSetColorBy;
 
-	private JPanel jPanelByFeature;
-
-	private Canvas canvasColor;
-
-	private JPanel jPanelColor;
+	private JComponent canvasColor;
 
 	protected InterpolatePaintScale colorMap = InterpolatePaintScale.Jet;
 
@@ -309,12 +306,11 @@ public class ColorByFeatureGUIPanel extends ActionListenablePanel implements Min
 		{
 			final BorderLayout layout = new BorderLayout();
 			setLayout( layout );
-			this.setPreferredSize( new java.awt.Dimension( 270, 45 ) );
+			this.setPreferredSize( new Dimension( 270, 45 ) );
 
-			jPanelByFeature = new JPanel();
+			final JPanel jPanelByFeature = new JPanel();
 			final BoxLayout jPanelByFeatureLayout = new BoxLayout( jPanelByFeature, javax.swing.BoxLayout.X_AXIS );
 			jPanelByFeature.setLayout( jPanelByFeatureLayout );
-			add( jPanelByFeature, BorderLayout.CENTER );
 			jPanelByFeature.setPreferredSize( new java.awt.Dimension( 270, 25 ) );
 			jPanelByFeature.setMaximumSize( new java.awt.Dimension( 32767, 25 ) );
 			jPanelByFeature.setSize( 270, 25 );
@@ -370,15 +366,16 @@ public class ColorByFeatureGUIPanel extends ActionListenablePanel implements Min
 					}
 				} );
 			}
+			add( jPanelByFeature, BorderLayout.CENTER );
 		}
 		{
-			jPanelColor = new JPanel();
+			final JPanel jPanelColor = new JPanel();
 			final BorderLayout jPanelColorLayout = new BorderLayout();
 			add( jPanelColor, BorderLayout.SOUTH );
-			jPanelColor.setLayout( jPanelColorLayout );
 			jPanelColor.setPreferredSize( new java.awt.Dimension( 10, 20 ) );
+			jPanelColor.setLayout( jPanelColorLayout );
 			{
-				canvasColor = new Canvas()
+				canvasColor = new JComponent()
 				{
 					private static final long serialVersionUID = -2174317490066575040L;
 
@@ -389,7 +386,6 @@ public class ColorByFeatureGUIPanel extends ActionListenablePanel implements Min
 					}
 				};
 				jPanelColor.add( canvasColor, BorderLayout.CENTER );
-				canvasColor.setPreferredSize( new java.awt.Dimension( 270, 20 ) );
 				canvasColor.addMouseListener( new MouseAdapter()
 				{
 					@Override

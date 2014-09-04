@@ -28,215 +28,265 @@ import javax.swing.ListCellRenderer;
 import com.itextpdf.text.Font;
 
 /**
- * A JcomboBox that displays categories, and return the category the selected item belong to. 
- * @author Jean-Yves Tinevez, adapted from http://java-swing-tips.blogspot.fr/2010/03/non-selectable-jcombobox-items.html
- *
- * @param <K> the type of the category objects
- * @param <V> the type of the items 
+ * A JcomboBox that displays categories, and return the category the selected
+ * item belong to.
+ * 
+ * @author Jean-Yves Tinevez, adapted from
+ *         http://java-swing-tips.blogspot.fr/2010
+ *         /03/non-selectable-jcombobox-items.html
+ * 
+ * @param <K>
+ *            the type of the category objects
+ * @param <V>
+ *            the type of the items
  */
-public class CategoryJComboBox<K, V> extends JComboBox {
+public class CategoryJComboBox< K, V > extends JComboBox
+{
 
 	private static final long serialVersionUID = 1L;
-	protected static final String INDENT = "  ";
-	/** Indices of items that should be displayed as a category name.  */
-	private final HashSet<Integer> categoryIndexSet = new HashSet<Integer>();
-	private boolean isCategoryIndex = false;
-	private final Map<V, String> itemNames;
-	private final HashMap<V, K> invertMap;
-	private final Map<K, String> categoryNames;
 
+	protected static final String INDENT = "  ";
+
+	/** Indices of items that should be displayed as a category name. */
+	private final HashSet< Integer > categoryIndexSet = new HashSet< Integer >();
+
+	private boolean isCategoryIndex = false;
+
+	private final Map< V, String > itemNames;
+
+	private final HashMap< V, K > invertMap;
+
+	private final Map< K, String > categoryNames;
 
 	/*
 	 * CONSTRUCTOR
 	 */
 
-	public CategoryJComboBox(Map<K, Collection<V>> items, Map<V, String> itemNames, Map<K, String> categoryNames) {
+	public CategoryJComboBox( final Map< K, Collection< V >> items, final Map< V, String > itemNames, final Map< K, String > categoryNames )
+	{
 		super();
-		this.invertMap = new HashMap<V, K>();
+		this.invertMap = new HashMap< V, K >();
 		this.itemNames = itemNames;
 		this.categoryNames = categoryNames;
 		init();
-		
-		// Feed the combo box
-		for (K category : items.keySet()) {
-			addItem(category, true);
 
-			Collection<V> categoryItems = items.get(category);
-			for (V item : categoryItems) {
-				addItem(item, false);
-				invertMap.put(item, category);
+		// Feed the combo box
+		for ( final K category : items.keySet() )
+		{
+			addItem( category, true );
+
+			final Collection< V > categoryItems = items.get( category );
+			for ( final V item : categoryItems )
+			{
+				addItem( item, false );
+				invertMap.put( item, category );
 			}
 		}
-		setSelectedIndex(1);
+		if ( null != items && items.size() > 0 )
+		{
+			setSelectedIndex( 1 );
+		}
 	}
-
-
 
 	/*
 	 * METHODS
 	 */
-	
-	public K getSelectedCategory() {
-		Object obj = getSelectedItem();
-		return invertMap.get(obj);
+
+	public K getSelectedCategory()
+	{
+		final Object obj = getSelectedItem();
+		return invertMap.get( obj );
 	}
 
-	public void setDisableIndex(HashSet < Integer > set) {
+	public void setDisableIndex( final HashSet< Integer > set )
+	{
 		categoryIndexSet.clear();
-		for(Integer i:set) {
-			categoryIndexSet.add(i);
+		for ( final Integer i : set )
+		{
+			categoryIndexSet.add( i );
 		}
 	}
 
 	@Override
-	public void setPopupVisible(boolean v) {
-		if(!v && isCategoryIndex) {
+	public void setPopupVisible( final boolean v )
+	{
+		if ( !v && isCategoryIndex )
+		{
 			isCategoryIndex = false;
-		}else{
-			super.setPopupVisible(v);
+		}
+		else
+		{
+			super.setPopupVisible( v );
 		}
 	}
-	
-	@SuppressWarnings("unchecked")
+
+	@SuppressWarnings( "unchecked" )
 	@Override
-	public V getSelectedItem() {
-		return (V) super.getSelectedItem();
+	public V getSelectedItem()
+	{
+		return ( V ) super.getSelectedItem();
 	}
 
 	@Override
-	public void setSelectedIndex(int index) {
-		if(categoryIndexSet.contains(index)) {
+	public void setSelectedIndex( final int index )
+	{
+		if ( categoryIndexSet.contains( index ) )
+		{
 			isCategoryIndex = true;
-		} else {
-			super.setSelectedIndex(index);
+		}
+		else
+		{
+			super.setSelectedIndex( index );
 		}
 	}
-
 
 	/*
 	 * PRIVATE METHODS
 	 */
 
-	private void addItem(Object anObject, boolean isCategoryName) {
-		super.addItem(anObject);
-		if (isCategoryName) {
-			categoryIndexSet.add(getItemCount() - 1);
+	private void addItem( final Object anObject, final boolean isCategoryName )
+	{
+		super.addItem( anObject );
+		if ( isCategoryName )
+		{
+			categoryIndexSet.add( getItemCount() - 1 );
 		}
 	}
 
-
 	/**
-	 * Called at instantiation: prepare the {@link JComboBox} with correct listeners
-	 * and logic for categories.
+	 * Called at instantiation: prepare the {@link JComboBox} with correct
+	 * listeners and logic for categories.
 	 */
-	private void init() {
-		setFont(SMALL_FONT);
+	private void init()
+	{
+		setFont( SMALL_FONT );
 		final ListCellRenderer r = getRenderer();
-		setRenderer(new ListCellRenderer() {
-			public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+		setRenderer( new ListCellRenderer()
+		{
+			@Override
+			public Component getListCellRendererComponent( final JList list, final Object value, final int index, final boolean isSelected, final boolean cellHasFocus )
+			{
 				JLabel c;
-				if (categoryIndexSet.contains(index)) {
-					c = (JLabel) r.getListCellRendererComponent(list,value,index,false,false);
-					c.setEnabled(false);
-					c.setFont(SMALL_FONT.deriveFont(Font.BOLD));
-					c.setText(categoryNames.get(value));
-				} else {
-					c = (JLabel) r.getListCellRendererComponent(list,value,index,isSelected,cellHasFocus);
-					c.setEnabled(true);
-					c.setFont(SMALL_FONT);
-					c.setText(INDENT + itemNames.get(value));
+				if ( categoryIndexSet.contains( index ) )
+				{
+					c = ( JLabel ) r.getListCellRendererComponent( list, value, index, false, false );
+					c.setEnabled( false );
+					c.setFont( SMALL_FONT.deriveFont( Font.BOLD ) );
+					c.setText( categoryNames.get( value ) );
+				}
+				else
+				{
+					c = ( JLabel ) r.getListCellRendererComponent( list, value, index, isSelected, cellHasFocus );
+					c.setEnabled( true );
+					c.setFont( SMALL_FONT );
+					c.setText( INDENT + itemNames.get( value ) );
 				}
 				return c;
 			}
-		});
+		} );
 
-		Action up = new AbstractAction() {
+		final Action up = new AbstractAction()
+		{
 			private static final long serialVersionUID = 1L;
 
-			public void actionPerformed(ActionEvent e) {
-				int si = getSelectedIndex();
-				for(int i = si-1;i >= 0;i--) {
-					if(!categoryIndexSet.contains(i)) {
-						setSelectedIndex(i);
+			@Override
+			public void actionPerformed( final ActionEvent e )
+			{
+				final int si = getSelectedIndex();
+				for ( int i = si - 1; i >= 0; i-- )
+				{
+					if ( !categoryIndexSet.contains( i ) )
+					{
+						setSelectedIndex( i );
 						break;
 					}
 				}
 			}
 		};
-		Action down = new AbstractAction() {
+		final Action down = new AbstractAction()
+		{
 			private static final long serialVersionUID = 1L;
 
-			public void actionPerformed(ActionEvent e) {
-				int si = getSelectedIndex();
-				for(int i = si+1;i < getModel().getSize();i++) {
-					if(!categoryIndexSet.contains(i)) {
-						setSelectedIndex(i);
+			@Override
+			public void actionPerformed( final ActionEvent e )
+			{
+				final int si = getSelectedIndex();
+				for ( int i = si + 1; i < getModel().getSize(); i++ )
+				{
+					if ( !categoryIndexSet.contains( i ) )
+					{
+						setSelectedIndex( i );
 						break;
 					}
 				}
 			}
 		};
 
-		ActionMap am = getActionMap();
-		am.put("selectPrevious", up);
-		am.put("selectNext", down);
-		InputMap im = getInputMap();
-		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0),      "selectPrevious");
-		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_UP, 0),   "selectPrevious");
-		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0),    "selectNext");
-		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_DOWN, 0), "selectNext");
+		final ActionMap am = getActionMap();
+		am.put( "selectPrevious", up );
+		am.put( "selectNext", down );
+		final InputMap im = getInputMap();
+		im.put( KeyStroke.getKeyStroke( KeyEvent.VK_UP, 0 ), "selectPrevious" );
+		im.put( KeyStroke.getKeyStroke( KeyEvent.VK_KP_UP, 0 ), "selectPrevious" );
+		im.put( KeyStroke.getKeyStroke( KeyEvent.VK_DOWN, 0 ), "selectNext" );
+		im.put( KeyStroke.getKeyStroke( KeyEvent.VK_KP_DOWN, 0 ), "selectNext" );
 	}
-	
-	
+
 	/**
 	 * Demo
 	 */
-	public static void main(String[] args) {
+	public static void main( final String[] args )
+	{
 		//
-		List<String> fruits = new ArrayList<String>(5);
-		fruits.add("Apple");
-		fruits.add("Pear");
-		fruits.add("Orange");
-		fruits.add("Strawberry");
+		final List< String > fruits = new ArrayList< String >( 5 );
+		fruits.add( "Apple" );
+		fruits.add( "Pear" );
+		fruits.add( "Orange" );
+		fruits.add( "Strawberry" );
 		//
-		List<String> cars = new ArrayList<String>(3);
-		cars.add("Peugeot");
-		cars.add("Ferrari");
-		cars.add("Ford");
+		final List< String > cars = new ArrayList< String >( 3 );
+		cars.add( "Peugeot" );
+		cars.add( "Ferrari" );
+		cars.add( "Ford" );
 		//
-		List<String> computers = new ArrayList<String>(2);
-		computers.add("PC");
-		computers.add("Mac");
+		final List< String > computers = new ArrayList< String >( 2 );
+		computers.add( "PC" );
+		computers.add( "Mac" );
 		//
-		LinkedHashMap<String, Collection<String>> items = new LinkedHashMap<String, Collection<String>>(3);
-		items.put("Fruits", fruits);
-		items.put("Cars", cars);
-		items.put("Computers", computers);
+		final LinkedHashMap< String, Collection< String >> items = new LinkedHashMap< String, Collection< String >>( 3 );
+		items.put( "Fruits", fruits );
+		items.put( "Cars", cars );
+		items.put( "Computers", computers );
 		//
-		Map<String, String> itemNames = new HashMap<String, String>();
-		for (String key : items.keySet()) {
-			for (String string : items.get(key)) {
-				itemNames.put(string, string);
+		final Map< String, String > itemNames = new HashMap< String, String >();
+		for ( final String key : items.keySet() )
+		{
+			for ( final String string : items.get( key ) )
+			{
+				itemNames.put( string, string );
 			}
 		}
-		// 
-		Map<String, String> categoryNames = new HashMap<String, String>();
-		for (String key : items.keySet()) {
-			categoryNames.put(key, key);
+		//
+		final Map< String, String > categoryNames = new HashMap< String, String >();
+		for ( final String key : items.keySet() )
+		{
+			categoryNames.put( key, key );
 		}
 		// Ouf!
-		
-		final CategoryJComboBox<String, String> cb = new CategoryJComboBox<String, String>(items, itemNames, categoryNames);
-		cb.addActionListener(new ActionListener() {
+
+		final CategoryJComboBox< String, String > cb = new CategoryJComboBox< String, String >( items, itemNames, categoryNames );
+		cb.addActionListener( new ActionListener()
+		{
 			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				System.out.println("Selected " + cb.getSelectedItem() + " in category " + cb.getSelectedCategory());
+			public void actionPerformed( final ActionEvent arg0 )
+			{
+				System.out.println( "Selected " + cb.getSelectedItem() + " in category " + cb.getSelectedCategory() );
 			}
-		});
-		
-		JFrame frame = new JFrame();
-		frame.getContentPane().add(cb);
-		frame.setVisible(true);
-		
+		} );
+
+		final JFrame frame = new JFrame();
+		frame.getContentPane().add( cb );
+		frame.setVisible( true );
+
 	}
 }
