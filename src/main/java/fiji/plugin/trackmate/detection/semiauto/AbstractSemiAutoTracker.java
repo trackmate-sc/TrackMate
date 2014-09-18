@@ -261,6 +261,12 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 			}
 
 			/*
+			 * Default POSITION_T features. Concrete implementations MUST fix
+			 * this so that this feature represent a physical time.
+			 */
+			target.putFeature( Spot.POSITION_T, Double.valueOf( frame ) );
+
+			/*
 			 * Expose new spot
 			 */
 
@@ -272,7 +278,6 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 
 			// spot
 			target.putFeature( Spot.RADIUS, radius );
-			target.putFeature( Spot.POSITION_T, Double.valueOf( frame ) );
 
 			model.beginUpdate();
 			try

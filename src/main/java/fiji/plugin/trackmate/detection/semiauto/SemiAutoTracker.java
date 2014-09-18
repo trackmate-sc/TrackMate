@@ -19,11 +19,22 @@ public class SemiAutoTracker< T extends RealType< T > & NativeType< T >> extends
 
 	protected final ImgPlus< T > img;
 
+	private final double dt;
+
 	@SuppressWarnings( "unchecked" )
 	public SemiAutoTracker( final Model model, final SelectionModel selectionModel, final ImagePlus imp, final Logger logger )
 	{
 		super( model, selectionModel, logger );
 		this.img = TMUtils.rawWraps( imp );
+		final double ldt = imp.getCalibration().frameInterval;
+		if ( ldt == 0 )
+		{
+			dt = 1d;
+		}
+		else
+		{
+			dt = ldt;
+		}
 	}
 
 	@Override
@@ -133,6 +144,9 @@ public class SemiAutoTracker< T extends RealType< T > & NativeType< T >> extends
 
 	@Override
 	protected void exposeSpot( final Spot newSpot, final Spot previousSpot )
-	{}
+	{
+		final int frame = previousSpot.getFeature( Spot.FRAME ).intValue() + 1;
+		newSpot.putFeature( Spot.POSITION_T, frame * dt );
+	}
 
 }
