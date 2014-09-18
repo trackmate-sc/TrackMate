@@ -108,15 +108,20 @@ public class JNumericTextField extends JTextField
 		this( String.format( DEFAULT_FORMAT, value ) );
 	}
 
+	/*
+	 * METHODS
+	 */
+
 	public double getValue()
 	{
 		checkInput();
 		return value;
 	}
 
-	/*
-	 * METHODS
-	 */
+	public void setValue( final double value )
+	{
+		setText( String.format( format, value ) );
+	}
 
 	public String getFormat()
 	{

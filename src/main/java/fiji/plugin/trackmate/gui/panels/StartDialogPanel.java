@@ -3,7 +3,6 @@ package fiji.plugin.trackmate.gui.panels;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.BIG_FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.TEXTFIELD_DIMENSION;
-import fiji.util.NumberParser;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.Roi;
@@ -15,9 +14,10 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 
-import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
+import fiji.util.NumberParser;
 
 public class StartDialogPanel extends ActionListenablePanel {
 
@@ -89,7 +89,7 @@ public class StartDialogPanel extends ActionListenablePanel {
 	 * Update the specified settings object, with the parameters set in this panel.	
 	 * @param settings  the Settings to update. Cannot be <code>null</code>.
 	 */
-	public void updateTo(Model model, Settings settings) {
+	public void updateTo(final Model model, final Settings settings) {
 		settings.imp = imp;
 		// Crop cube
 		settings.tstart = NumberParser.parseInteger(jTextFieldTStart.getText());
@@ -112,7 +112,7 @@ public class StartDialogPanel extends ActionListenablePanel {
 		// Units
 		model.setPhysicalUnits(jLabelUnits1.getText(), jLabelUnits4.getText());
 		// Roi
-		Roi roi = imp.getRoi();
+		final Roi roi = imp.getRoi();
 		if (null != roi) {
 			settings.polygon = roi.getPolygon();
 		}
@@ -131,7 +131,7 @@ public class StartDialogPanel extends ActionListenablePanel {
 	/**
 	 * Fill the text fields with the parameters grabbed in the {@link Settings} argument.
 	 */
-	public void echoSettings(Model model, Settings settings) {
+	public void echoSettings(final Model model, final Settings settings) {
 		jLabelImageName.setText(settings.imp.getTitle());
 		jTextFieldPixelWidth.setText(""+settings.dx);
 		jTextFieldPixelHeight.setText(""+settings.dy);
@@ -155,7 +155,7 @@ public class StartDialogPanel extends ActionListenablePanel {
 	/**
 	 * Fill the text fields with parameters grabbed from specified ImagePlus. 
 	 */
-	public void getFrom(ImagePlus imp) {
+	public void getFrom(final ImagePlus imp) {
 		
 		this.imp = imp;
 		
@@ -173,14 +173,17 @@ public class StartDialogPanel extends ActionListenablePanel {
 		}
 
 		jLabelImageName.setText("Target: "+imp.getShortTitle());
-		jTextFieldPixelWidth.setText(String.format("%g", imp.getCalibration().pixelWidth));
-		jTextFieldPixelHeight.setText(String.format("%g", imp.getCalibration().pixelHeight));
-		jTextFieldVoxelDepth.setText(String.format("%g", imp.getCalibration().pixelDepth));
+		jTextFieldPixelWidth.setValue( imp.getCalibration().pixelWidth );
+		jTextFieldPixelHeight.setValue( imp.getCalibration().pixelHeight );
+		jTextFieldVoxelDepth.setValue( imp.getCalibration().pixelDepth );
+//		jTextFieldPixelWidth.setText(String.format("%g", imp.getCalibration().pixelWidth));
+//		jTextFieldPixelHeight.setText(String.format("%g", imp.getCalibration().pixelHeight));
+//		jTextFieldVoxelDepth.setText(String.format("%g", imp.getCalibration().pixelDepth));
 		if (imp.getCalibration().frameInterval == 0) {
-			jTextFieldTimeInterval.setText("1");
+			jTextFieldTimeInterval.setValue( 1 );
 			jLabelUnits4.setText("frame");
 		} else {
-			jTextFieldTimeInterval.setText(String.format("%g", imp.getCalibration().frameInterval));
+			jTextFieldTimeInterval.setValue( imp.getCalibration().frameInterval );
 			jLabelUnits4.setText(imp.getCalibration().getTimeUnit());
 		}
 		jLabelUnits1.setText(imp.getCalibration().getXUnit());
@@ -189,7 +192,7 @@ public class StartDialogPanel extends ActionListenablePanel {
 		Roi roi = imp.getRoi();
 		if (null == roi)
 			roi = new Roi(0,0,imp.getWidth(),imp.getHeight());
-		Rectangle boundingRect = roi.getBounds();
+		final Rectangle boundingRect = roi.getBounds();
 		jTextFieldXStart.setText(""+(boundingRect.x)); 
 		jTextFieldYStart.setText(""+(boundingRect.y));
 		jTextFieldXEnd.setText(""+(boundingRect.width+boundingRect.x-1));
@@ -431,14 +434,15 @@ public class StartDialogPanel extends ActionListenablePanel {
 				jButtonRefresh.setFont(SMALL_FONT);
 
 				jButtonRefresh.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
+					@Override
+					public void actionPerformed(final ActionEvent e) {
 						imp = WindowManager.getCurrentImage();
 						getFrom(imp);
 						fireAction(IMAGEPLUS_REFRESHED);
 					}
 				});
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 	}
