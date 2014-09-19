@@ -1,8 +1,10 @@
 package fiji.plugin.trackmate;
 
 import fiji.SampleImageLoader;
+import fiji.plugin.trackmate.detection.ManualDetectorFactory;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.ManualTrackingGUIController;
+import fiji.plugin.trackmate.tracking.ManualTrackerFactory;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
 import ij.ImageJ;
@@ -87,7 +89,20 @@ public class ManualTrackingPlugIn_ extends TrackMatePlugIn_ implements PlugIn
 		}
 		view.render();
 		controller.getGuimodel().addView( view );
+	}
 
+	@SuppressWarnings( "rawtypes" )
+	@Override
+	protected Settings createSettings( final ImagePlus imp )
+	{
+		final Settings settings = super.createSettings( imp );
+		// Manual detection
+		settings.detectorFactory = new ManualDetectorFactory();
+		settings.detectorSettings = settings.detectorFactory.getDefaultSettings();
+		// Manual tracker
+		settings.trackerFactory = new ManualTrackerFactory();
+		settings.trackerSettings = settings.trackerFactory.getDefaultSettings();
+		return settings;
 	}
 
 	/*
