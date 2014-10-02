@@ -243,7 +243,7 @@ public class KalmanTracker implements SpotTracker, Benchmark
 			 * target spots to predictions. Nucleating new KF from nearest
 			 * neighbor only comes second.
 			 */
-			if ( !previousOrphanSpots.isEmpty() )
+			if ( !previousOrphanSpots.isEmpty() && !orphanSpots.isEmpty() )
 			{
 				/*
 				 * We now deal with orphans of the previous frame. We try to
