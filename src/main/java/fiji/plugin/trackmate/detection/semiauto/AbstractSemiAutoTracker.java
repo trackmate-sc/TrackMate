@@ -1,10 +1,10 @@
 package fiji.plugin.trackmate.detection.semiauto;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import net.imglib2.Interval;
@@ -238,12 +238,12 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 			}
 
 			// Sort then by ascending quality
-			final TreeSet< Spot > sortedSpots = new TreeSet< Spot >( Spot.featureComparator( Spot.QUALITY ) );
-			sortedSpots.addAll( detectedSpots );
+			Collections.sort( detectedSpots, Spot.featureComparator( Spot.QUALITY ) );
+			Collections.reverse( detectedSpots );
 
 			boolean found = false;
 			Spot target = null;
-			for ( final Iterator< Spot > iterator = sortedSpots.descendingIterator(); iterator.hasNext(); )
+			for ( final Iterator< Spot > iterator = detectedSpots.iterator(); iterator.hasNext(); )
 			{
 				final Spot candidate = iterator.next();
 				if ( candidate.squareDistanceTo( spot ) < distanceTolerance * distanceTolerance * radius * radius )
@@ -261,6 +261,12 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 			}
 
 			/*
+			 * Default POSITION_T features. Concrete implementations MUST fix
+			 * this so that this feature represent a physical time.
+			 */
+			target.putFeature( Spot.POSITION_T, Double.valueOf( frame ) );
+
+			/*
 			 * Expose new spot
 			 */
 
@@ -272,7 +278,6 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 
 			// spot
 			target.putFeature( Spot.RADIUS, radius );
-			target.putFeature( Spot.POSITION_T, Double.valueOf( frame ) );
 
 			model.beginUpdate();
 			try

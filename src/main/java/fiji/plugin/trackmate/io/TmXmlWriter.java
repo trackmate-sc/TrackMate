@@ -164,10 +164,22 @@ public class TmXmlWriter
 	 */
 	public void writeToFile() throws FileNotFoundException, IOException
 	{
-		logger.log( "  Writing to file.\n" );
-		final Document document = new Document( root );
-		final XMLOutputter outputter = new XMLOutputter( Format.getPrettyFormat() );
-		outputter.output( document, new FileOutputStream( file ) );
+		FileOutputStream fos = null;
+		try
+		{
+			logger.log( "  Writing to file.\n" );
+			fos = new FileOutputStream( file );
+			final Document document = new Document( root );
+			final XMLOutputter outputter = new XMLOutputter( Format.getPrettyFormat() );
+			outputter.output( document, fos );
+		}
+		finally
+		{
+			if ( null != fos )
+			{
+				fos.close();
+			}
+		}
 	}
 
 	@Override

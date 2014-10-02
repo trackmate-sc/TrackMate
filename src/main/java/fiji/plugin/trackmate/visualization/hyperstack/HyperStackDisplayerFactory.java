@@ -23,7 +23,15 @@ public class HyperStackDisplayerFactory implements ViewFactory
 	@Override
 	public TrackMateModelView create( final Model model, final Settings settings, final SelectionModel selectionModel )
 	{
-		final ImagePlus imp = settings.imp;
+		final ImagePlus imp;
+		if ( settings == null )
+		{
+			imp = null;
+		}
+		else
+		{
+			imp = settings.imp;
+		}
 		return new HyperStackDisplayer( model, selectionModel, imp );
 	}
 

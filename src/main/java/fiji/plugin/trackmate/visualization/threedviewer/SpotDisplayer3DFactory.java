@@ -41,9 +41,9 @@ public class SpotDisplayer3DFactory implements ViewFactory
 		win.pack();
 		win.setVisible( true );
 
-		final ImagePlus imp = settings.imp;
-		if ( null != imp )
+		if ( null != settings && null != settings.imp )
 		{
+			final ImagePlus imp = settings.imp;
 
 			if ( imp.getType() == ImagePlus.GRAY8 || imp.getType() == ImagePlus.COLOR_256 || imp.getType() == ImagePlus.COLOR_RGB )
 			{
