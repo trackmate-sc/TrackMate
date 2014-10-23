@@ -51,6 +51,10 @@ public class TrackerConfigurationDescriptor implements WizardPanelDescriptor
 	@Override
 	public ConfigurationPanel getComponent()
 	{
+		if ( null == configPanel )
+		{
+			updateComponent();
+		}
 		return configPanel;
 	}
 
