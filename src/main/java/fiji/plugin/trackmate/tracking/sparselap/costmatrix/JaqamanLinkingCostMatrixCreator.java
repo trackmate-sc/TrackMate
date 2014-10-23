@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.tracking.sparselap.costmatrix;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import fiji.plugin.trackmate.tracking.sparselap.costfunction.CostFunction;
@@ -96,17 +97,36 @@ public class JaqamanLinkingCostMatrixCreator< K extends Comparable< K >, J exten
 		}
 		costs.trimToSize();
 
-		final DefaultCostMatrixCreator< K, J > cmCreator = new DefaultCostMatrixCreator< K, J >( accSources, accTargets, costs.data, alternativeCostFactor, percentile );
-		if ( !cmCreator.checkInput() || !cmCreator.process() )
-		{
-			errorMessage = cmCreator.getErrorMessage();
-			return false;
-		}
+		/*
+		 * Check if accepted source or target lists are empty and deal with it.
+		 */
 
-		scm = cmCreator.getResult();
-		sourceList = cmCreator.getSourceList();
-		targetList = cmCreator.getTargetList();
-		alternativeCost = cmCreator.computeAlternativeCosts();
+		if ( accSources.isEmpty() || accTargets.isEmpty() )
+		{
+
+			sourceList = Collections.emptyList();
+			targetList = Collections.emptyList();
+			alternativeCost = Double.NaN;
+			scm = null;
+			/*
+			 * CAREFUL! We return null if no acceptable links are found.
+			 */
+		}
+		else
+		{
+
+			final DefaultCostMatrixCreator< K, J > cmCreator = new DefaultCostMatrixCreator< K, J >( accSources, accTargets, costs.data, alternativeCostFactor, percentile );
+			if ( !cmCreator.checkInput() || !cmCreator.process() )
+			{
+				errorMessage = cmCreator.getErrorMessage();
+				return false;
+			}
+
+			scm = cmCreator.getResult();
+			sourceList = cmCreator.getSourceList();
+			targetList = cmCreator.getTargetList();
+			alternativeCost = cmCreator.computeAlternativeCosts();
+		}
 
 		final long end = System.currentTimeMillis();
 		processingTime = end - start;
@@ -119,6 +139,15 @@ public class JaqamanLinkingCostMatrixCreator< K extends Comparable< K >, J exten
 		return errorMessage;
 	}
 
+	/**
+	 * Returns the cost matrix generated.
+	 * <p>
+	 * Careful, it can be <code>null</code> if not acceptable costs have been
+	 * found for the specified configuration. In that case, the lists returned
+	 * by {@link #getSourceList()} and {@link #getTargetList()} are empty.
+	 * 
+	 * @return a new {@link SparseCostMatrix} or <code>null</code>.
+	 */
 	@Override
 	public SparseCostMatrix getResult()
 	{
