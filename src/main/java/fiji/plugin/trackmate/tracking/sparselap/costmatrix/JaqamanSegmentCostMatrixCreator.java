@@ -338,26 +338,41 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 				errorMessage = BASE_ERROR_MESSAGE + e.getMessage();
 			}
 		}
-
-		/*
-		 * Build a sparse cost matrix from this.
-		 */
-
 		linkCosts.trimToSize();
-		final DefaultCostMatrixCreator< Spot, Spot > creator = new DefaultCostMatrixCreator< Spot, Spot >( sources, targets, linkCosts.data, alternativeCostFactor, percentile );
-		if ( !creator.checkInput() || !creator.process() )
-		{
-			errorMessage = creator.getErrorMessage();
-			return false;
-		}
-		/*
-		 * Compute the alternative cost from the cost array
-		 */
-		alternativeCost = creator.computeAlternativeCosts();
 
-		scm = creator.getResult();
-		uniqueSources = creator.getSourceList();
-		uniqueTargets = creator.getTargetList();
+		/*
+		 * Build a sparse cost matrix from this. If the accepted costs are not
+		 * empty.
+		 */
+
+		if ( sources.isEmpty() || targets.isEmpty() )
+		{
+			uniqueSources = Collections.emptyList();
+			uniqueTargets = Collections.emptyList();
+			alternativeCost = Double.NaN;
+			scm = null;
+			/*
+			 * CAREFUL! We return null if no acceptable links are found.
+			 */
+		}
+		else
+		{
+
+			final DefaultCostMatrixCreator< Spot, Spot > creator = new DefaultCostMatrixCreator< Spot, Spot >( sources, targets, linkCosts.data, alternativeCostFactor, percentile );
+			if ( !creator.checkInput() || !creator.process() )
+			{
+				errorMessage = "Linking track segments: " + creator.getErrorMessage();
+				return false;
+			}
+			/*
+			 * Compute the alternative cost from the cost array
+			 */
+			alternativeCost = creator.computeAlternativeCosts();
+
+			scm = creator.getResult();
+			uniqueSources = creator.getSourceList();
+			uniqueTargets = creator.getTargetList();
+		}
 
 		final long end = System.currentTimeMillis();
 		processingTime = end - start;
