@@ -438,6 +438,11 @@ public class TmXmlWriter
 			for ( final String feature : trackFeatures )
 			{
 				final Double val = model.getFeatureModel().getTrackFeature(trackID, feature);
+				if ( null == val )
+				{
+					// Skip missing features.
+					continue;
+				}
 				String str;
 				if ( model.getFeatureModel().getTrackFeatureIsInt().get( feature ).booleanValue() )
 				{
