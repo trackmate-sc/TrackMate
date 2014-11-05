@@ -42,7 +42,7 @@ public class MedianFilter< T extends RealType< T > & NativeType< T >> extends Be
 	{
 		final long start = System.currentTimeMillis();
 
-		final T type = Util.getTypeFromRandomAccess( source );
+		final T type = source.randomAccess().get();
 		final ImgFactory< T > factory = Util.getArrayOrCellImgFactory( source, type );
 		this.output = factory.create( source, type );
 		final float[] values = new float[ 9 ];

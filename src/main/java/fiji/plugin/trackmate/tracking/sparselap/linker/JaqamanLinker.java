@@ -173,7 +173,7 @@ public class JaqamanLinker< K extends Comparable< K >, J extends Comparable< J >
 		 * Alt. cost is the overall min of alternative costs. This deviate or
 		 * extend a bit the u-track code.
 		 */
-		final double minCost = Math.min( Util.computeMin( ccbl ), Util.computeMin( cctr ) );
+		final double minCost = Math.min( Util.min( ccbl ), Util.min( cctr ) );
 		final SparseCostMatrix br = tl.transpose();
 		br.fillWith( minCost );
 

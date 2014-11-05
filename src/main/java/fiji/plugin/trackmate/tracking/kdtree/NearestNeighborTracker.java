@@ -16,9 +16,9 @@ import java.util.Map;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import net.imglib2.KDTree;
 import net.imglib2.RealPoint;
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
-import net.imglib2.collection.KDTree;
 import net.imglib2.multithreading.SimpleMultiThreading;
 
 import org.jgrapht.graph.DefaultWeightedEdge;

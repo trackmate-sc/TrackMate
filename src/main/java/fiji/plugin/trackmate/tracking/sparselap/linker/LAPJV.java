@@ -363,7 +363,7 @@ public class LAPJV implements OutputAlgorithm< int[] >, Benchmark
 			errorMessage = BASE_ERROR_MESSAGE + "This solver converges only if the cost matrix has more rows than column. Found " + cm.nRows + " rows and " + cm.nCols + " columns.";
 			return false;
 		}
-		final double minCost = Util.computeMin( cm.cc );
+		final double minCost = Util.min( cm.cc );
 		if ( minCost < 0 )
 		{
 			errorMessage = BASE_ERROR_MESSAGE + "This solver only accept positive costs. Found " + minCost + ".";

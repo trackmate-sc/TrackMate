@@ -3,7 +3,6 @@ package fiji.plugin.trackmate.util;
 import fiji.plugin.trackmate.Spot;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
-import net.imglib2.IterableRealInterval;
 import net.imglib2.Positionable;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealPositionable;
@@ -82,12 +81,6 @@ public class SpotNeighborhood<T extends RealType<T>> implements Neighborhood<T> 
 	@Override
 	public Object iterationOrder() {
 		return neighborhood.iterationOrder();
-	}
-
-	@Override
-	@Deprecated
-	public boolean equalIterationOrder(IterableRealInterval<?> f) {
-		return neighborhood.equalIterationOrder(f);
 	}
 
 	@Override

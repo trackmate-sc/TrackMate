@@ -359,7 +359,7 @@ public class TGMMImporter implements OutputAlgorithm< Model >, Benchmark
 					final double[] radii = eig.getRealEigenvalues();
 					for ( int i = 0; i < radii.length; ++i )
 						radii[ i ] = Math.sqrt( radii[ i ] );
-					final double radius = nSigmas * Util.computeAverage( radii );
+					final double radius = nSigmas * Util.average( radii );
 
 					/*
 					 * Make a spot and add it to this frame collection.

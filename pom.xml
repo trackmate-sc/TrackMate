@@ -8,12 +8,12 @@
 	<parent>
 		<groupId>sc.fiji</groupId>
 		<artifactId>pom-fiji</artifactId>
-		<version>2.0.0-beta-0</version>
+		<version>5.0</version>
 		<relativePath />
 	</parent>
 
 	<artifactId>TrackMate_</artifactId>
-	<version>2.5.5-SNAPSHOT</version>
+	<version>2.6.0-SNAPSHOT</version>
 	<name>plugins/TrackMate_.jar</name>
 	<description></description>
 
@@ -23,37 +23,86 @@
 	</properties>
 
 	<dependencies>
+		<!-- Fiji dependencies -->
 		<dependency>
-			<groupId>org.scijava</groupId>
-			<artifactId>scijava-common</artifactId>
+			<groupId>sc.fiji</groupId>
+			<artifactId>3D_Viewer</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>fiji-compat</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>gov.nist.math</groupId>
-			<artifactId>jama</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>batik</groupId>
-			<artifactId>batik</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>fiji-lib</artifactId>
 		</dependency>
+
+		<!-- ImageJ dependencies -->
 		<dependency>
 			<groupId>net.imagej</groupId>
 			<artifactId>ij</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.imagej</groupId>
+			<artifactId>imagej-common</artifactId>
+		</dependency>
+
+		<!-- ImgLib2 dependencies -->
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2-algorithm</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2-algorithm-gpl</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2-ij</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2-realtransform</artifactId>
+		</dependency>
+
+		<!-- SCIFIO dependencies -->
+		<dependency>
+			<groupId>io.scif</groupId>
+			<artifactId>scifio</artifactId>
+		</dependency>
+
+		<!-- SciJava dependencies -->
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>scijava-common</artifactId>
+		</dependency>
+
+		<!-- OME dependencies -->
+		<dependency>
+			<groupId>ome</groupId>
+			<artifactId>ome-xml</artifactId>
+		</dependency>
+
+		<!-- Third party dependencies -->
+		<dependency>
+			<groupId>batik</groupId>
+			<artifactId>batik</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.itextpdf</groupId>
 			<artifactId>itextpdf</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.jfree</groupId>
-			<artifactId>jcommon</artifactId>
+			<groupId>gov.nist.math</groupId>
+			<artifactId>jama</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.jgrapht</groupId>
+			<artifactId>jgrapht</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.jdom</groupId>
@@ -61,16 +110,17 @@
 		</dependency>
 		<dependency>
 			<groupId>org.jfree</groupId>
-			<artifactId>jfreechart</artifactId>
+			<artifactId>jcommon</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.jgrapht</groupId>
-			<artifactId>jgrapht</artifactId>
+			<groupId>org.jfree</groupId>
+			<artifactId>jfreechart</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.tinyjee.jgraphx</groupId>
 			<artifactId>jgraphx</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>java3d</groupId>
 			<artifactId>j3d-core</artifactId>
@@ -86,42 +136,11 @@
 			<artifactId>vecmath</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>sc.fiji</groupId>
-			<artifactId>3D_Viewer</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.imglib2</groupId>
-			<artifactId>imglib2</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.imglib2</groupId>
-			<artifactId>imglib2-algorithms</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.imglib2</groupId>
-			<artifactId>imglib2-algorithms-gpl</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.imglib2</groupId>
-			<artifactId>imglib2-ij</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.imglib2</groupId>
-			<artifactId>imglib2-meta</artifactId>
-		</dependency>
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>net.imglib2</groupId>
-			<artifactId>imglib2-realtransform</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.scif</groupId>
-			<artifactId>scifio</artifactId>
 		</dependency>
 	</dependencies>
 

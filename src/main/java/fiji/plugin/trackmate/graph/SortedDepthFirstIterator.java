@@ -416,7 +416,7 @@ public class SortedDepthFirstIterator<V, E> extends AbstractGraphIterator<V, E> 
         private static final long serialVersionUID = 4051327833765000755L;
 
         /**
-         * @see EdgeTraversalEvent#EdgeTraversalEvent(Object, Edge)
+         * @see EdgeTraversalEvent#EdgeTraversalEvent(Object, Object)
          */
         public FlyweightEdgeEvent(final Object eventSource, final localE edge) {
             super(eventSource, edge);

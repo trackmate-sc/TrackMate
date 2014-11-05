@@ -4,6 +4,7 @@ import fiji.plugin.trackmate.Spot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
@@ -129,8 +130,8 @@ public class LogDetector< T extends RealType< T > & NativeType< T >> implements 
 		}
 		final Img< FloatType > kernel = DetectionUtils.createLoGKernel( radius, ndims, calibration );
 		final FFTConvolution< FloatType > fftconv = new FFTConvolution< FloatType >( floatImg, kernel );
-		fftconv.setNumThreads( numThreads );
-		fftconv.run();
+		fftconv.setExecutorService(Executors.newFixedThreadPool( numThreads ));
+		fftconv.convolve();
 
 		final long[] minopposite = new long[ interval.numDimensions() ];
 		interval.min( minopposite );

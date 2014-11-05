@@ -127,7 +127,7 @@ public class DownsampleLogDetector< T extends RealType< T > & NativeType< T >> i
 
 		// 1. Downsample the image
 
-		final T type = Util.getTypeFromRandomAccess( img );
+		final T type = img.randomAccess().get();
 		final Img< T > downsampled = Util.getArrayOrCellImgFactory( interval, type ).create( dimensions, type );
 
 		final Cursor< T > dwnCursor = downsampled.localizingCursor();

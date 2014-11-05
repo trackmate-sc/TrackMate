@@ -4,10 +4,12 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import ij.ImagePlus;
 import net.imglib2.FinalInterval;
+import net.imglib2.Interval;
+import net.imglib2.RandomAccessible;
+import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.sampler.special.ConstantRandomAccessible;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
-import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 
 /**
@@ -23,12 +25,13 @@ public class ViewUtils {
 
 	private ViewUtils() {}
 
-	public static final ImagePlus makeEmpytImagePlus(final int width, final int height, final int nslices, final int nframes, final double[] calibration) {
-
-		final FinalInterval interval = new FinalInterval(new long[] { width, height, nslices, nframes });
-
-		final ConstantRandomAccessible<UnsignedByteType> ra = new ConstantRandomAccessible<UnsignedByteType>(new UnsignedByteType(0), 4);
-		final IntervalView<UnsignedByteType> view = Views.interval(ra, interval);
+	public static final ImagePlus makeEmptyImagePlus(final int width, final int height, final int nslices, final int nframes, final double[] calibration) {
+		final RandomAccessible<UnsignedByteType> randomAccessible =
+			Views.extendBorder(ArrayImgs.unsignedBytes(1));
+		final Interval interval =
+			new FinalInterval(width, height, nslices, nframes);
+		final RandomAccessibleInterval<UnsignedByteType> view =
+			Views.interval(randomAccessible, interval);
 
 		final ImagePlus imp = ImageJFunctions.wrap(view, "blank");
 		imp.getCalibration().pixelWidth = calibration[0];
@@ -83,7 +86,7 @@ public class ViewUtils {
 		}
 		final double[] calibration = new double[] { calxy, calxy, calZ };
 
-		final ImagePlus imp = makeEmpytImagePlus(width, height, nslices, nframes + 1, calibration);
+		final ImagePlus imp = makeEmptyImagePlus(width, height, nslices, nframes + 1, calibration);
 		imp.getCalibration().setUnit(model.getSpaceUnits());
 		imp.getCalibration().setTimeUnit(model.getTimeUnits());
 		return imp;
