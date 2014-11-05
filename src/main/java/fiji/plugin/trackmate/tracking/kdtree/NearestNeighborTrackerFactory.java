@@ -4,6 +4,12 @@ import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.writeAttribute;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.gui.ConfigurationPanel;
+import fiji.plugin.trackmate.gui.panels.tracker.NearestNeighborTrackerSettingsPanel;
+import fiji.plugin.trackmate.tracking.SpotTracker;
+import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,13 +18,6 @@ import javax.swing.ImageIcon;
 
 import org.jdom2.Element;
 import org.scijava.plugin.Plugin;
-
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.gui.ConfigurationPanel;
-import fiji.plugin.trackmate.gui.panels.tracker.NearestNeighborTrackerSettingsPanel;
-import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 
 @Plugin( type = SpotTrackerFactory.class, priority = 1d )
 public class NearestNeighborTrackerFactory implements SpotTrackerFactory

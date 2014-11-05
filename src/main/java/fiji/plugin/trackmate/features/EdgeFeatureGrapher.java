@@ -2,6 +2,14 @@ package fiji.plugin.trackmate.features;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
+import fiji.plugin.trackmate.Dimension;
+import fiji.plugin.trackmate.FeatureModel;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.util.ExportableChartPanel;
+import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.util.XYEdgeRenderer;
+import fiji.plugin.trackmate.util.XYEdgeSeries;
+import fiji.plugin.trackmate.util.XYEdgeSeriesCollection;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -17,15 +25,6 @@ import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jgrapht.graph.DefaultWeightedEdge;
-
-import fiji.plugin.trackmate.Dimension;
-import fiji.plugin.trackmate.FeatureModel;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.util.ExportableChartPanel;
-import fiji.plugin.trackmate.util.TMUtils;
-import fiji.plugin.trackmate.util.XYEdgeRenderer;
-import fiji.plugin.trackmate.util.XYEdgeSeries;
-import fiji.plugin.trackmate.util.XYEdgeSeriesCollection;
 
 public class EdgeFeatureGrapher extends AbstractFeatureGrapher {
 

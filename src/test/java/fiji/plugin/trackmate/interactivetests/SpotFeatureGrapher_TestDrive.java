@@ -1,5 +1,15 @@
 package fiji.plugin.trackmate.interactivetests;
 
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.features.SpotFeatureGrapher;
+import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
+import fiji.plugin.trackmate.io.TmXmlReader;
+import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,16 +21,6 @@ import org.jdom2.JDOMException;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 import org.scijava.util.AppUtils;
-
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.features.SpotFeatureGrapher;
-import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
-import fiji.plugin.trackmate.io.TmXmlReader;
-import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
 public class SpotFeatureGrapher_TestDrive
 {

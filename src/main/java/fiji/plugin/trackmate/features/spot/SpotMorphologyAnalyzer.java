@@ -8,6 +8,11 @@ import static fiji.plugin.trackmate.features.spot.SpotMorphologyAnalyzerFactory.
 import static fiji.plugin.trackmate.features.spot.SpotMorphologyAnalyzerFactory.featurelist_phi;
 import static fiji.plugin.trackmate.features.spot.SpotMorphologyAnalyzerFactory.featurelist_sa;
 import static fiji.plugin.trackmate.features.spot.SpotMorphologyAnalyzerFactory.featurelist_theta;
+import Jama.EigenvalueDecomposition;
+import Jama.Matrix;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.util.SpotNeighborhood;
+import fiji.plugin.trackmate.util.SpotNeighborhoodCursor;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -21,11 +26,6 @@ import net.imglib2.meta.ImgPlus;
 import net.imglib2.meta.axis.DefaultLinearAxis;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
-import Jama.EigenvalueDecomposition;
-import Jama.Matrix;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.util.SpotNeighborhood;
-import fiji.plugin.trackmate.util.SpotNeighborhoodCursor;
 
 /**
  * This {@link SpotAnalyzer} computes morphology features for the given spots.

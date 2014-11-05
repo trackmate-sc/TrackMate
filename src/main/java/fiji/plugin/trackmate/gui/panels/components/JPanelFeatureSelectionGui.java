@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.gui.panels.components;
 
+import fiji.plugin.trackmate.gui.TrackMateGUIController;
+
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -15,8 +17,6 @@ import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
-
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
 
 public class JPanelFeatureSelectionGui extends javax.swing.JPanel {
 

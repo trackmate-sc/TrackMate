@@ -1,8 +1,8 @@
 package fiji.plugin.trackmate.gui;
 
-import java.util.EventObject;
-
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
+
+import java.util.EventObject;
 
 /**
  * An event object fired when the user changes one of the display settings through

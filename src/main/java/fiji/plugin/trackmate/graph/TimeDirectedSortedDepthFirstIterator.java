@@ -3,6 +3,8 @@
  */
 package fiji.plugin.trackmate.graph;
 
+import fiji.plugin.trackmate.Spot;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -14,8 +16,6 @@ import java.util.Map;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultWeightedEdge;
-
-import fiji.plugin.trackmate.Spot;
 
 public class TimeDirectedSortedDepthFirstIterator extends SortedDepthFirstIterator<Spot, DefaultWeightedEdge> {
 

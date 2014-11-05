@@ -2,6 +2,8 @@ package fiji.plugin.trackmate.gui.panels.components;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
 
+import com.itextpdf.text.Font;
+
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -24,8 +26,6 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.KeyStroke;
 import javax.swing.ListCellRenderer;
-
-import com.itextpdf.text.Font;
 
 /**
  * A JcomboBox that displays categories, and return the category the selected

@@ -1,14 +1,14 @@
 package fiji.plugin.trackmate.visualization;
 
-import java.awt.Color;
-
-import org.jfree.chart.renderer.InterpolatePaintScale;
-import org.jgrapht.graph.DefaultWeightedEdge;
-
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.ModelChangeListener;
 import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
+
+import java.awt.Color;
+
+import org.jfree.chart.renderer.InterpolatePaintScale;
+import org.jgrapht.graph.DefaultWeightedEdge;
 
 public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackColorGenerator
 {

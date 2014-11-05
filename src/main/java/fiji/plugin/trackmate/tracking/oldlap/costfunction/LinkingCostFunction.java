@@ -3,14 +3,13 @@ package fiji.plugin.trackmate.tracking.oldlap.costfunction;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_BLOCKING_VALUE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
-
-import java.util.List;
-import java.util.Map;
-
 import Jama.Matrix;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.tracking.LAPUtils;
 import fiji.plugin.trackmate.tracking.oldlap.LAPTracker;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>Linking cost function used with {@link LAPTracker}.

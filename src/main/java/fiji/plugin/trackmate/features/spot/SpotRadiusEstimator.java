@@ -1,14 +1,14 @@
 package fiji.plugin.trackmate.features.spot;
 
 import static fiji.plugin.trackmate.features.spot.SpotRadiusEstimatorFactory.ESTIMATED_DIAMETER;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.util.SpotNeighborhood;
+import fiji.plugin.trackmate.util.SpotNeighborhoodCursor;
 
 import java.util.Iterator;
 
 import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.RealType;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.util.SpotNeighborhood;
-import fiji.plugin.trackmate.util.SpotNeighborhoodCursor;
 
 public class SpotRadiusEstimator< T extends RealType< T >> extends IndependentSpotFeatureAnalyzer< T >
 {

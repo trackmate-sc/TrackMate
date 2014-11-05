@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.providers;
 
+import fiji.plugin.trackmate.TrackMateModule;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -12,8 +14,6 @@ import org.scijava.InstantiableException;
 import org.scijava.log.LogService;
 import org.scijava.plugin.PluginInfo;
 import org.scijava.plugin.PluginService;
-
-import fiji.plugin.trackmate.TrackMateModule;
 
 public abstract class AbstractProvider< K extends TrackMateModule >
 {

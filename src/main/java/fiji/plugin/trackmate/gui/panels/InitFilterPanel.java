@@ -2,6 +2,10 @@ package fiji.plugin.trackmate.gui.panels;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.BIG_FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.features.FeatureFilter;
+import fiji.plugin.trackmate.util.OnRequestUpdater;
+import fiji.plugin.trackmate.util.OnRequestUpdater.Refreshable;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -15,11 +19,6 @@ import javax.swing.JPanel;
 import javax.swing.SpringLayout;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.features.FeatureFilter;
-import fiji.plugin.trackmate.util.OnRequestUpdater;
-import fiji.plugin.trackmate.util.OnRequestUpdater.Refreshable;
 
 public class InitFilterPanel extends ActionListenablePanel
 {

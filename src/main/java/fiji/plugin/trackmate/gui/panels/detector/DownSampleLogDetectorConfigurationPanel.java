@@ -5,6 +5,10 @@ import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.detection.DownsampleLogDetectorFactory;
+import fiji.plugin.trackmate.detection.SpotDetectorFactory;
+import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
 import fiji.util.NumberParser;
 import ij.ImagePlus;
 
@@ -14,11 +18,6 @@ import java.util.Map;
 import javax.swing.JLabel;
 import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
-
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.detection.DownsampleLogDetectorFactory;
-import fiji.plugin.trackmate.detection.SpotDetectorFactory;
-import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
 
 public class DownSampleLogDetectorConfigurationPanel extends LogDetectorConfigurationPanel {
 

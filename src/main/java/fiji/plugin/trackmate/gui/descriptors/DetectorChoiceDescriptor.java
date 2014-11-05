@@ -1,9 +1,5 @@
 package fiji.plugin.trackmate.gui.descriptors;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.detection.ManualDetectorFactory;
@@ -11,6 +7,10 @@ import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.panels.ListChooserPanel;
 import fiji.plugin.trackmate.providers.DetectorProvider;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class DetectorChoiceDescriptor implements WizardPanelDescriptor
 {

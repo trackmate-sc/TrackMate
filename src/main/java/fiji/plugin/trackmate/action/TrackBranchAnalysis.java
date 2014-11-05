@@ -1,5 +1,14 @@
 package fiji.plugin.trackmate.action;
 
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition;
+import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition.TrackBranchDecomposition;
+import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
+import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.gui.TrackMateWizard;
 import ij.WindowManager;
 import ij.measure.ResultsTable;
 import ij.text.TextPanel;
@@ -22,16 +31,6 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.scijava.plugin.Plugin;
-
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition;
-import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition.TrackBranchDecomposition;
-import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
 
 public class TrackBranchAnalysis extends AbstractTMAction
 {

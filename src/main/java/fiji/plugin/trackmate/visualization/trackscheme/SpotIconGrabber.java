@@ -1,5 +1,9 @@
 package fiji.plugin.trackmate.visualization.trackscheme;
 
+import com.mxgraph.util.mxBase64;
+
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.util.TMUtils;
 import ij.ImagePlus;
 import ij.process.ImageProcessor;
 
@@ -16,11 +20,6 @@ import net.imglib2.meta.ImgPlus;
 import net.imglib2.outofbounds.OutOfBoundsConstantValueFactory;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.view.Views;
-
-import com.mxgraph.util.mxBase64;
-
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.util.TMUtils;
 
 /**
  * This class is used to take a snapshot of a {@link Spot} object (or collection) from 

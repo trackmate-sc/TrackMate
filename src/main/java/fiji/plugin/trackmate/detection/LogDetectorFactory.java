@@ -20,6 +20,11 @@ import static fiji.plugin.trackmate.io.IOUtils.writeTargetChannel;
 import static fiji.plugin.trackmate.io.IOUtils.writeThreshold;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.gui.ConfigurationPanel;
+import fiji.plugin.trackmate.gui.panels.detector.LogDetectorConfigurationPanel;
+import fiji.plugin.trackmate.util.TMUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,12 +42,6 @@ import net.imglib2.view.Views;
 
 import org.jdom2.Element;
 import org.scijava.plugin.Plugin;
-
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.gui.ConfigurationPanel;
-import fiji.plugin.trackmate.gui.panels.detector.LogDetectorConfigurationPanel;
-import fiji.plugin.trackmate.util.TMUtils;
 
 @Plugin( type = SpotDetectorFactory.class )
 public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> implements SpotDetectorFactory< T >

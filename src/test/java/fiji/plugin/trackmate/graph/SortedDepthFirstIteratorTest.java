@@ -1,6 +1,8 @@
 package fiji.plugin.trackmate.graph;
 
 import static org.junit.Assert.assertArrayEquals;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Spot;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -9,9 +11,6 @@ import java.util.Random;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Spot;
 
 public class SortedDepthFirstIteratorTest
 {

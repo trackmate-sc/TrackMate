@@ -1,16 +1,16 @@
 package fiji.plugin.trackmate.interactivetests;
 
-import java.io.File;
-import java.io.IOException;
-
-import org.jdom2.JDOMException;
-import org.scijava.util.AppUtils;
-
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
+
+import java.io.File;
+import java.io.IOException;
+
+import org.jdom2.JDOMException;
+import org.scijava.util.AppUtils;
 
 public class TrackSchemeTestDrive {
 

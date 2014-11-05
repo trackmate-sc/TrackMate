@@ -1,8 +1,8 @@
 package fiji.plugin.trackmate.visualization;
 
-import org.jgrapht.graph.DefaultWeightedEdge;
-
 import fiji.plugin.trackmate.Spot;
+
+import org.jgrapht.graph.DefaultWeightedEdge;
 
 /**
  * Interface for functions that can generate track colors, <b>with a 

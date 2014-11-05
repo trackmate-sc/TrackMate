@@ -1,5 +1,11 @@
 package fiji.plugin.trackmate.visualization.threedviewer;
 
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.gui.TrackMateWizard;
+import fiji.plugin.trackmate.visualization.TrackMateModelView;
+import fiji.plugin.trackmate.visualization.ViewFactory;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.process.ImageConverter;
@@ -15,13 +21,6 @@ import javax.swing.ImageIcon;
 import javax.vecmath.Color3f;
 
 import org.scijava.plugin.Plugin;
-
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
-import fiji.plugin.trackmate.visualization.ViewFactory;
 
 @Plugin( type = ViewFactory.class, priority = 1d )
 public class SpotDisplayer3DFactory implements ViewFactory

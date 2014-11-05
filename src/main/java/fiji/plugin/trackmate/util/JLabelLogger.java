@@ -1,11 +1,11 @@
 package fiji.plugin.trackmate.util;
 
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.gui.TrackMateWizard;
+
 import java.awt.Color;
 
 import javax.swing.JLabel;
-
-import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
 
 public class JLabelLogger extends JLabel {
 	

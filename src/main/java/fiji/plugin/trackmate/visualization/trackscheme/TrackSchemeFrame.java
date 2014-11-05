@@ -2,6 +2,13 @@ package fiji.plugin.trackmate.visualization.trackscheme;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
 
+import com.mxgraph.model.mxICell;
+import com.mxgraph.swing.mxGraphOutline;
+import com.mxgraph.swing.handler.mxRubberband;
+
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.util.TrackNavigator;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -16,13 +23,6 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
-
-import com.mxgraph.model.mxICell;
-import com.mxgraph.swing.mxGraphOutline;
-import com.mxgraph.swing.handler.mxRubberband;
-
-import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.util.TrackNavigator;
 
 public class TrackSchemeFrame extends JFrame
 {

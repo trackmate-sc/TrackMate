@@ -1,13 +1,13 @@
 package fiji.plugin.trackmate.gui.panels.tracker;
 
+import fiji.plugin.trackmate.gui.ConfigurationPanel;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.util.Collection;
 import java.util.Map;
 
 import javax.swing.JScrollPane;
-
-import fiji.plugin.trackmate.gui.ConfigurationPanel;
 
 
 public class LAPTrackerSettingsPanel extends ConfigurationPanel {

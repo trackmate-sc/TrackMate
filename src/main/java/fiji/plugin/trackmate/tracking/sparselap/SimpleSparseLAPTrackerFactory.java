@@ -1,11 +1,11 @@
 package fiji.plugin.trackmate.tracking.sparselap;
 
-import org.scijava.plugin.Plugin;
-
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.panels.tracker.SimpleLAPTrackerSettingsPanel;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
+
+import org.scijava.plugin.Plugin;
 
 @Plugin( type = SpotTrackerFactory.class )
 public class SimpleSparseLAPTrackerFactory extends SparseLAPTrackerFactory

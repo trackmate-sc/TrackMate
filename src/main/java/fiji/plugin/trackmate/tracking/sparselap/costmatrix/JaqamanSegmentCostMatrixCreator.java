@@ -15,6 +15,11 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_FEATURE_P
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.tracking.sparselap.costfunction.CostFunction;
+import fiji.plugin.trackmate.tracking.sparselap.costfunction.FeaturePenaltyCostFunction;
+import fiji.plugin.trackmate.tracking.sparselap.costfunction.SquareDistCostFunction;
+import fiji.plugin.trackmate.tracking.sparselap.linker.SparseCostMatrix;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,12 +33,6 @@ import net.imglib2.algorithm.MultiThreaded;
 
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
-
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.tracking.sparselap.costfunction.CostFunction;
-import fiji.plugin.trackmate.tracking.sparselap.costfunction.FeaturePenaltyCostFunction;
-import fiji.plugin.trackmate.tracking.sparselap.costfunction.SquareDistCostFunction;
-import fiji.plugin.trackmate.tracking.sparselap.linker.SparseCostMatrix;
 
 /**
  * This class generates the top-left quadrant of the LAP segment linking cost

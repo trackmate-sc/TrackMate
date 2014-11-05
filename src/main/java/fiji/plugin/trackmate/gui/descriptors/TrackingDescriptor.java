@@ -1,12 +1,12 @@
 package fiji.plugin.trackmate.gui.descriptors;
 
-import javax.swing.SwingUtilities;
-
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.LogPanel;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
+
+import javax.swing.SwingUtilities;
 
 public class TrackingDescriptor implements WizardPanelDescriptor
 {

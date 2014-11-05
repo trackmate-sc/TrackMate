@@ -1,6 +1,14 @@
 package fiji.plugin.trackmate.features;
 
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
+import fiji.plugin.trackmate.Dimension;
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.features.spot.SpotAnalyzer;
+import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
+import fiji.plugin.trackmate.util.TMUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,14 +19,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
 import net.imglib2.meta.ImgPlus;
 import net.imglib2.multithreading.SimpleMultiThreading;
-import fiji.plugin.trackmate.Dimension;
-import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.features.spot.SpotAnalyzer;
-import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
-import fiji.plugin.trackmate.util.TMUtils;
 
 /**
  * A class dedicated to centralizing the calculation of the numerical features

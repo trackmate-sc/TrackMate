@@ -1,11 +1,11 @@
 package fiji.plugin.trackmate.gui;
 
+import fiji.plugin.trackmate.gui.descriptors.WizardPanelDescriptor;
+import fiji.plugin.trackmate.visualization.TrackMateModelView;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
-
-import fiji.plugin.trackmate.gui.descriptors.WizardPanelDescriptor;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
 
 public class TrackMateGUIModel {
 

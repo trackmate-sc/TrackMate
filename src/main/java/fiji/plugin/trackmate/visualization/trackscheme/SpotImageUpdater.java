@@ -1,14 +1,14 @@
 package fiji.plugin.trackmate.visualization.trackscheme;
 
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.util.TMUtils;
 
 import java.util.Map;
 
 import net.imglib2.meta.ImgPlus;
 import net.imglib2.meta.view.HyperSliceImgPlus;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.util.TMUtils;
 
 public class SpotImageUpdater {
 	

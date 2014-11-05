@@ -1,6 +1,11 @@
 package fiji.plugin.trackmate.util;
 
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTracker;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,12 +13,6 @@ import java.util.Map;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
-
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTracker;
 
 /**
  * A collection of static utilities made to ease the manipulation of a

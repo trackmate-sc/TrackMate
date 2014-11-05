@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.detection;
 
+import fiji.plugin.trackmate.Spot;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +13,6 @@ import net.imglib2.img.Img;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Util;
-import fiji.plugin.trackmate.Spot;
 
 public class DownsampleLogDetector< T extends RealType< T > & NativeType< T >> implements SpotDetector< T >
 {

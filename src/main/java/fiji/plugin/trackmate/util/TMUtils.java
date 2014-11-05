@@ -1,5 +1,8 @@
 package fiji.plugin.trackmate.util;
 
+import fiji.plugin.trackmate.Dimension;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackMate;
 import ij.ImagePlus;
 
 import java.text.SimpleDateFormat;
@@ -22,9 +25,6 @@ import net.imglib2.meta.ImgPlus;
 import net.imglib2.meta.ImgPlusMetadata;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.util.Util;
-import fiji.plugin.trackmate.Dimension;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackMate;
 
 /**
  * List of static utilities for the {@link TrackMate} trackmate

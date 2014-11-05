@@ -1,15 +1,15 @@
 package fiji.plugin.trackmate.features;
 
-import java.util.ArrayList;
-
-import org.jgrapht.graph.DefaultWeightedEdge;
-
+import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.ModelChangeListener;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.Model;
+
+import java.util.ArrayList;
+
+import org.jgrapht.graph.DefaultWeightedEdge;
 
 /**
  * A utility class that listens to the change occurring in a model, and updates

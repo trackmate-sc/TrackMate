@@ -2,6 +2,7 @@ package fiji.plugin.trackmate.gui.panels.components;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.TEXTFIELD_DIMENSION;
+import fiji.plugin.trackmate.util.TMUtils;
 import fiji.util.NumberParser;
 
 import java.util.List;
@@ -10,8 +11,6 @@ import java.util.Map;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
-
-import fiji.plugin.trackmate.util.TMUtils;
 
 public class JPanelFeaturePenalty extends javax.swing.JPanel {
 

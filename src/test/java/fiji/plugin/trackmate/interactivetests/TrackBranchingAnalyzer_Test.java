@@ -1,12 +1,12 @@
 package fiji.plugin.trackmate.interactivetests;
 
-import java.io.File;
-
-import org.scijava.util.AppUtils;
-
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.track.TrackBranchingAnalyzer;
 import fiji.plugin.trackmate.io.TmXmlReader;
+
+import java.io.File;
+
+import org.scijava.util.AppUtils;
 
 public class TrackBranchingAnalyzer_Test {
 

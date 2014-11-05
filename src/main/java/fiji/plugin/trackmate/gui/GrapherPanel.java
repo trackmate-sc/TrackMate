@@ -1,5 +1,15 @@
 package fiji.plugin.trackmate.gui;
 
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.features.EdgeFeatureGrapher;
+import fiji.plugin.trackmate.features.SpotFeatureGrapher;
+import fiji.plugin.trackmate.features.TrackFeatureGrapher;
+import fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer;
+import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
+import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
+import fiji.plugin.trackmate.gui.panels.components.FeaturePlotSelectionPanel;
+
 import java.awt.BorderLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -15,16 +25,6 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
-
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.features.EdgeFeatureGrapher;
-import fiji.plugin.trackmate.features.SpotFeatureGrapher;
-import fiji.plugin.trackmate.features.TrackFeatureGrapher;
-import fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer;
-import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
-import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
-import fiji.plugin.trackmate.gui.panels.components.FeaturePlotSelectionPanel;
 
 public class GrapherPanel extends ActionListenablePanel
 {

@@ -1,17 +1,17 @@
 package fiji.plugin.trackmate.action;
 
-import java.io.File;
-
-import javax.swing.ImageIcon;
-
-import org.scijava.plugin.Plugin;
-
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.io.IcyTrackFormatWriter;
+
+import java.io.File;
+
+import javax.swing.ImageIcon;
+
+import org.scijava.plugin.Plugin;
 
 public class IcyTrackExporter extends AbstractTMAction
 {

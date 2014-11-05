@@ -5,12 +5,6 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_SPLITTI
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALTERNATIVE_LINKING_COST_FACTOR;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_BLOCKING_VALUE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_CUTOFF_PERCENTILE;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedSet;
-
 import Jama.Matrix;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
@@ -19,6 +13,11 @@ import fiji.plugin.trackmate.tracking.oldlap.costfunction.GapClosingCostFunction
 import fiji.plugin.trackmate.tracking.oldlap.costfunction.MergingCostFunction;
 import fiji.plugin.trackmate.tracking.oldlap.costfunction.SplittingCostFunction;
 import fiji.plugin.trackmate.util.TMUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
 
 /**
  * <p>Creates the cost matrix <b><u>roughly</u></b> described in Figure 1c in the paper:

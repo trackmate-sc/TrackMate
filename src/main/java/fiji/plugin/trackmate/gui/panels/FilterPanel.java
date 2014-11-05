@@ -1,5 +1,9 @@
 package fiji.plugin.trackmate.gui.panels;
 
+import fiji.plugin.trackmate.features.spot.SpotContrastAndSNRAnalyzerFactory;
+import fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory;
+import fiji.plugin.trackmate.features.spot.SpotMorphologyAnalyzerFactory;
+import fiji.plugin.trackmate.util.TMUtils;
 import fiji.util.NumberParser;
 
 import java.awt.BasicStroke;
@@ -53,11 +57,6 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.data.statistics.LogHistogramDataset;
-
-import fiji.plugin.trackmate.features.spot.SpotContrastAndSNRAnalyzerFactory;
-import fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory;
-import fiji.plugin.trackmate.features.spot.SpotMorphologyAnalyzerFactory;
-import fiji.plugin.trackmate.util.TMUtils;
 
 public class FilterPanel extends javax.swing.JPanel
 {

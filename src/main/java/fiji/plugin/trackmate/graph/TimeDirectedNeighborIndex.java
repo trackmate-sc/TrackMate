@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.graph;
 
+import fiji.plugin.trackmate.Spot;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -18,8 +20,6 @@ import org.jgrapht.event.GraphVertexChangeEvent;
 import org.jgrapht.event.VertexSetListener;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.util.ModifiableInteger;
-
-import fiji.plugin.trackmate.Spot;
 
 public class TimeDirectedNeighborIndex extends NeighborIndex<Spot, DefaultWeightedEdge>{
 

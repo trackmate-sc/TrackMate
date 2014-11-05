@@ -1,5 +1,13 @@
 package fiji.plugin.trackmate.detection.semiauto;
 
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.detection.LogDetector;
+import fiji.plugin.trackmate.detection.SpotDetector;
+import fiji.plugin.trackmate.tracking.SpotTracker;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -15,13 +23,6 @@ import net.imglib2.multithreading.SimpleMultiThreading;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
-import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.detection.LogDetector;
-import fiji.plugin.trackmate.detection.SpotDetector;
-import fiji.plugin.trackmate.tracking.SpotTracker;
 
 /**
  * A class made to perform semi-automated tracking of spots in TrackMate &

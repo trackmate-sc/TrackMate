@@ -14,6 +14,26 @@ import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_C
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_DISPLAY_DEPTH;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_DISPLAY_MODE;
 import static fiji.plugin.trackmate.visualization.trackscheme.TrackScheme.TRACK_SCHEME_ICON_16x16;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.gui.DisplaySettingsEvent;
+import fiji.plugin.trackmate.gui.DisplaySettingsListener;
+import fiji.plugin.trackmate.gui.TrackMateWizard;
+import fiji.plugin.trackmate.gui.panels.components.ColorByFeatureGUIPanel;
+import fiji.plugin.trackmate.gui.panels.components.ColorByFeatureGUIPanel.Category;
+import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
+import fiji.plugin.trackmate.gui.panels.components.SetColorScaleDialog;
+import fiji.plugin.trackmate.visualization.AbstractTrackMateModelView;
+import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
+import fiji.plugin.trackmate.visualization.ManualEdgeColorGenerator;
+import fiji.plugin.trackmate.visualization.ManualSpotColorGenerator;
+import fiji.plugin.trackmate.visualization.PerEdgeFeatureColorGenerator;
+import fiji.plugin.trackmate.visualization.PerTrackFeatureColorGenerator;
+import fiji.plugin.trackmate.visualization.SpotColorGenerator;
+import fiji.plugin.trackmate.visualization.SpotColorGeneratorPerTrackFeature;
+import fiji.plugin.trackmate.visualization.TrackColorGenerator;
+import fiji.plugin.trackmate.visualization.TrackMateModelView;
+import fiji.util.NumberParser;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -49,27 +69,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
-
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.gui.DisplaySettingsEvent;
-import fiji.plugin.trackmate.gui.DisplaySettingsListener;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
-import fiji.plugin.trackmate.gui.panels.components.ColorByFeatureGUIPanel;
-import fiji.plugin.trackmate.gui.panels.components.ColorByFeatureGUIPanel.Category;
-import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
-import fiji.plugin.trackmate.gui.panels.components.SetColorScaleDialog;
-import fiji.plugin.trackmate.visualization.AbstractTrackMateModelView;
-import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
-import fiji.plugin.trackmate.visualization.ManualEdgeColorGenerator;
-import fiji.plugin.trackmate.visualization.ManualSpotColorGenerator;
-import fiji.plugin.trackmate.visualization.PerEdgeFeatureColorGenerator;
-import fiji.plugin.trackmate.visualization.PerTrackFeatureColorGenerator;
-import fiji.plugin.trackmate.visualization.SpotColorGenerator;
-import fiji.plugin.trackmate.visualization.SpotColorGeneratorPerTrackFeature;
-import fiji.plugin.trackmate.visualization.TrackColorGenerator;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
-import fiji.util.NumberParser;
 
 /**
  * A configuration panel used to tune the aspect of spots and tracks in multiple

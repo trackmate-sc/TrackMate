@@ -1,15 +1,16 @@
 package fiji.plugin.trackmate.features;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
 
 /**
  * A class dedicated to centralizing the calculation of the numerical features

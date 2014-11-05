@@ -1,15 +1,15 @@
 package fiji.plugin.trackmate.util;
 
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
+
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
-
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
 
 public class TrackNavigator {
 

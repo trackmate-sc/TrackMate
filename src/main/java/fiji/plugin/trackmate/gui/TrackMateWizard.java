@@ -1,5 +1,9 @@
 package fiji.plugin.trackmate.gui;
 
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.gui.descriptors.WizardPanelDescriptor;
+import fiji.plugin.trackmate.visualization.TrackMateModelView;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -16,10 +20,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
-
-import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.gui.descriptors.WizardPanelDescriptor;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
 
 /**
  * A GUI for TrackMate, strongly inspired from the spots detection GUI of the

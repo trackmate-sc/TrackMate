@@ -1,12 +1,13 @@
 package fiji.plugin.trackmate.tracking.sparselap.costmatrix;
 
+import fiji.plugin.trackmate.tracking.sparselap.linker.SparseCostMatrix;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
 import net.imglib2.util.Util;
-import fiji.plugin.trackmate.tracking.sparselap.linker.SparseCostMatrix;
 
 /**
  * A {@link CostMatrixCreator} that build a cost matrix from 3 lists containing

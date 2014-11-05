@@ -2,6 +2,12 @@ package fiji.plugin.trackmate.gui.panels.components;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 
+import com.itextpdf.text.Font;
+
+import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
+import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
+
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -25,12 +31,6 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-
-import com.itextpdf.text.Font;
-
-import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
-import fiji.plugin.trackmate.util.TMUtils;
-import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
 /**
  * A simple Panel to allow the selection of a X key amongst an enum, and of multiple Y keys

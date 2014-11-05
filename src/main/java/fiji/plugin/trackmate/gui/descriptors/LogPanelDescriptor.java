@@ -1,8 +1,8 @@
 package fiji.plugin.trackmate.gui.descriptors;
 
-import java.awt.Component;
-
 import fiji.plugin.trackmate.gui.LogPanel;
+
+import java.awt.Component;
 
 public class LogPanelDescriptor implements WizardPanelDescriptor
 {

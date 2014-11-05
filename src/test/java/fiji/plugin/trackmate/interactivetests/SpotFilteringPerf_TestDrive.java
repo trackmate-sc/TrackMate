@@ -1,9 +1,5 @@
 package fiji.plugin.trackmate.interactivetests;
 
-import java.io.File;
-
-import org.scijava.util.AppUtils;
-
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
@@ -13,6 +9,10 @@ import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
 import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
+
+import java.io.File;
+
+import org.scijava.util.AppUtils;
 
 public class SpotFilteringPerf_TestDrive {
 

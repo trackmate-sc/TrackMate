@@ -1,5 +1,8 @@
 package fiji.plugin.trackmate.action;
 
+import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.visualization.trackscheme.TrackSchemeFrame;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -16,10 +19,6 @@ import java.awt.Robot;
 import javax.swing.ImageIcon;
 
 import org.scijava.plugin.Plugin;
-
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.visualization.trackscheme.TrackSchemeFrame;
 
 public class CaptureOverlayAction extends AbstractTMAction {
 

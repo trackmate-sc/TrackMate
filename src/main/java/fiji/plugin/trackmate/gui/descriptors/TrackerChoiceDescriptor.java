@@ -1,9 +1,5 @@
 package fiji.plugin.trackmate.gui.descriptors;
 
-import java.awt.Component;
-import java.util.ArrayList;
-import java.util.List;
-
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
@@ -12,6 +8,10 @@ import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.tracking.ManualTrackerFactory;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import fiji.plugin.trackmate.tracking.sparselap.SimpleSparseLAPTrackerFactory;
+
+import java.awt.Component;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TrackerChoiceDescriptor implements WizardPanelDescriptor
 {

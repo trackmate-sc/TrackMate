@@ -1,14 +1,13 @@
 package fiji.plugin.trackmate.tracking;
 
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Spot;
 import net.imglib2.algorithm.MultiThreaded;
 import net.imglib2.algorithm.OutputAlgorithm;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
-
-import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Spot;
 
 /**
  * This interface should be used when creating algorithms for linking objects

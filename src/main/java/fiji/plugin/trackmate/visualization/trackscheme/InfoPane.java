@@ -2,6 +2,17 @@ package fiji.plugin.trackmate.visualization.trackscheme;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
+import fiji.plugin.trackmate.FeatureModel;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionChangeEvent;
+import fiji.plugin.trackmate.SelectionChangeListener;
+import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.features.SpotFeatureGrapher;
+import fiji.plugin.trackmate.util.OnRequestUpdater;
+import fiji.plugin.trackmate.util.OnRequestUpdater.Refreshable;
+import fiji.plugin.trackmate.util.TMUtils;
 import ij.measure.ResultsTable;
 
 import java.awt.BorderLayout;
@@ -39,18 +50,6 @@ import javax.swing.event.AncestorListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
-
-import fiji.plugin.trackmate.FeatureModel;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionChangeEvent;
-import fiji.plugin.trackmate.SelectionChangeListener;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.features.SpotFeatureGrapher;
-import fiji.plugin.trackmate.util.OnRequestUpdater;
-import fiji.plugin.trackmate.util.OnRequestUpdater.Refreshable;
-import fiji.plugin.trackmate.util.TMUtils;
 
 public class InfoPane extends JPanel implements SelectionChangeListener
 {

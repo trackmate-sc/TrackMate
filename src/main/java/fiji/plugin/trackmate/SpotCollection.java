@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate;
 
+import fiji.plugin.trackmate.features.FeatureFilter;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -17,7 +19,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import net.imglib2.algorithm.MultiThreaded;
-import fiji.plugin.trackmate.features.FeatureFilter;
 
 /**
  * A utility class that wrap the {@link SortedMap} we use to store the spots

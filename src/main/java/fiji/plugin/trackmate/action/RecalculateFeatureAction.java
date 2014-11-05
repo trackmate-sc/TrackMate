@@ -1,14 +1,14 @@
 package fiji.plugin.trackmate.action;
 
-import javax.swing.ImageIcon;
-
-import org.scijava.plugin.Plugin;
-
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
+
+import javax.swing.ImageIcon;
+
+import org.scijava.plugin.Plugin;
 
 public class RecalculateFeatureAction extends AbstractTMAction {
 

@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.detection;
 
+import fiji.plugin.trackmate.Spot;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +17,6 @@ import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Util;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
-import fiji.plugin.trackmate.Spot;
 
 public class LogDetector< T extends RealType< T > & NativeType< T >> implements SpotDetector< T >, MultiThreaded
 {

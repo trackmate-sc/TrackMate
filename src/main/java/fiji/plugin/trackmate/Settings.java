@@ -1,5 +1,18 @@
 package fiji.plugin.trackmate;
 
+import fiji.plugin.trackmate.detection.DetectorKeys;
+import fiji.plugin.trackmate.detection.SpotDetector;
+import fiji.plugin.trackmate.detection.SpotDetectorFactory;
+import fiji.plugin.trackmate.features.FeatureAnalyzer;
+import fiji.plugin.trackmate.features.FeatureFilter;
+import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
+import fiji.plugin.trackmate.features.spot.SpotAnalyzer;
+import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
+import fiji.plugin.trackmate.features.track.TrackAnalyzer;
+import fiji.plugin.trackmate.tracking.SpotTracker;
+import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
+import fiji.plugin.trackmate.tracking.TrackerKeys;
+import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.io.FileInfo;
@@ -10,17 +23,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import fiji.plugin.trackmate.detection.SpotDetector;
-import fiji.plugin.trackmate.detection.SpotDetectorFactory;
-import fiji.plugin.trackmate.features.FeatureAnalyzer;
-import fiji.plugin.trackmate.features.FeatureFilter;
-import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
-import fiji.plugin.trackmate.features.spot.SpotAnalyzer;
-import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
-import fiji.plugin.trackmate.features.track.TrackAnalyzer;
-import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
 
 /**
  * This class is used to store user settings for the {@link TrackMate}

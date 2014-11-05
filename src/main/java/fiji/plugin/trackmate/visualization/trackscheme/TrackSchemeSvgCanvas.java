@@ -1,14 +1,14 @@
 package fiji.plugin.trackmate.visualization.trackscheme;
 
-import java.util.Map;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
 import com.mxgraph.canvas.mxSvgCanvas;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxRectangle;
 import com.mxgraph.util.mxUtils;
+
+import java.util.Map;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public class TrackSchemeSvgCanvas extends mxSvgCanvas {
 

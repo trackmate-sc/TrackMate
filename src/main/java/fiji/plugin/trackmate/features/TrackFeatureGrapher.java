@@ -2,6 +2,11 @@ package fiji.plugin.trackmate.features;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
+import fiji.plugin.trackmate.Dimension;
+import fiji.plugin.trackmate.FeatureModel;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.util.ExportableChartPanel;
+import fiji.plugin.trackmate.util.TMUtils;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -16,12 +21,6 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
-
-import fiji.plugin.trackmate.Dimension;
-import fiji.plugin.trackmate.FeatureModel;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.util.ExportableChartPanel;
-import fiji.plugin.trackmate.util.TMUtils;
 
 public class TrackFeatureGrapher extends AbstractFeatureGrapher {
 

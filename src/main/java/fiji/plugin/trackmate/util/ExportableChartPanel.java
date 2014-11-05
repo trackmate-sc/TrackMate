@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.util;
 
+import com.itextpdf.text.DocumentException;
+
 import ij.IJ;
 import ij.measure.ResultsTable;
 
@@ -22,8 +24,6 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.ExtensionFileFilter;
-
-import com.itextpdf.text.DocumentException;
 
 public class ExportableChartPanel extends ChartPanel {
 

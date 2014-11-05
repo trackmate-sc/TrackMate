@@ -1,5 +1,14 @@
 package fiji.plugin.trackmate.visualization.trackscheme;
 
+import com.mxgraph.model.mxCell;
+import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.util.mxEvent;
+import com.mxgraph.util.mxEventObject;
+import com.mxgraph.util.mxEventSource.mxIEventListener;
+
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
+
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -13,15 +22,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
-
-import com.mxgraph.model.mxCell;
-import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.util.mxEvent;
-import com.mxgraph.util.mxEventObject;
-import com.mxgraph.util.mxEventSource.mxIEventListener;
-
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
 
 public class TrackSchemePopupMenu extends JPopupMenu
 {

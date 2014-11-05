@@ -1,7 +1,5 @@
 package fiji.plugin.trackmate.interactivetests;
 
-import java.io.File;
-
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.io.TmXmlReader;
@@ -11,6 +9,8 @@ import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
 import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
+
+import java.io.File;
 
 public class TmXmlReaderV12_TestDrive {
 

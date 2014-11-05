@@ -7,16 +7,16 @@ import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.M
 import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.MIN_INTENSITY;
 import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.STANDARD_DEVIATION;
 import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.TOTAL_INTENSITY;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.util.SpotNeighborhood;
+//import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.SKEWNESS;
+//import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.VARIANCE;
 
 import java.util.Iterator;
 
 import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Util;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.util.SpotNeighborhood;
-//import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.SKEWNESS;
-//import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.VARIANCE;
 
 public class SpotIntensityAnalyzer< T extends RealType< T >> extends IndependentSpotFeatureAnalyzer< T >
 {

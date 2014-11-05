@@ -1,19 +1,18 @@
 package fiji.plugin.trackmate.action;
 
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
-
-import java.util.Iterator;
-
-import javax.swing.ImageIcon;
-
-import org.scijava.plugin.Plugin;
-
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
+
+import java.util.Iterator;
+
+import javax.swing.ImageIcon;
+
+import org.scijava.plugin.Plugin;
 
 public class ResetRadiusAction extends AbstractTMAction {
 

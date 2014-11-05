@@ -1,15 +1,12 @@
 package fiji.plugin.trackmate.tracking.sparselap.linker;
 
 import static org.junit.Assert.assertEquals;
+import fiji.plugin.trackmate.tracking.oldlap.hungarian.JonkerVolgenantAlgorithm;
 
 import java.util.Arrays;
 import java.util.Random;
 
 import org.junit.Test;
-
-import fiji.plugin.trackmate.tracking.oldlap.hungarian.JonkerVolgenantAlgorithm;
-import fiji.plugin.trackmate.tracking.sparselap.linker.LAPJV;
-import fiji.plugin.trackmate.tracking.sparselap.linker.SparseCostMatrix;
 
 public class LAPJVTest
 {

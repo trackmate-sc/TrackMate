@@ -2,6 +2,13 @@ package fiji.plugin.trackmate.gui.panels.components;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.BIG_FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.features.FeatureFilter;
+import fiji.plugin.trackmate.gui.TrackMateWizard;
+import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
+import fiji.plugin.trackmate.gui.panels.FilterPanel;
+import fiji.plugin.trackmate.gui.panels.components.ColorByFeatureGUIPanel.Category;
+import fiji.plugin.trackmate.util.OnRequestUpdater;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -25,14 +32,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.features.FeatureFilter;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
-import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
-import fiji.plugin.trackmate.gui.panels.FilterPanel;
-import fiji.plugin.trackmate.gui.panels.components.ColorByFeatureGUIPanel.Category;
-import fiji.plugin.trackmate.util.OnRequestUpdater;
 
 public class FilterGuiPanel extends ActionListenablePanel implements ChangeListener
 {

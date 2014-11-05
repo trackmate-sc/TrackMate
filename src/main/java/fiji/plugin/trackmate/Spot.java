@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate;
 
 import static fiji.plugin.trackmate.SpotCollection.VISIBLITY;
+import fiji.plugin.trackmate.util.AlphanumComparator;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,7 +14,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import net.imglib2.AbstractEuclideanSpace;
 import net.imglib2.RealLocalizable;
 import net.imglib2.util.Util;
-import fiji.plugin.trackmate.util.AlphanumComparator;
 
 /**
  * A {@link RealLocalizable} implementation, used in TrackMate to represent a

@@ -1,16 +1,16 @@
 package fiji.plugin.trackmate.interactivetests;
 
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.graph.GraphUtils;
+import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
+
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.traverse.GraphIterator;
-
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.graph.GraphUtils;
-import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
 
 public class Graph_Test
 {

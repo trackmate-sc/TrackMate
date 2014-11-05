@@ -1,6 +1,14 @@
 package fiji.plugin.trackmate;
 
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
+import fiji.plugin.trackmate.detection.SpotDetector;
+import fiji.plugin.trackmate.detection.SpotDetectorFactory;
+import fiji.plugin.trackmate.features.EdgeFeatureCalculator;
+import fiji.plugin.trackmate.features.FeatureFilter;
+import fiji.plugin.trackmate.features.SpotFeatureCalculator;
+import fiji.plugin.trackmate.features.TrackFeatureCalculator;
+import fiji.plugin.trackmate.tracking.SpotTracker;
+import fiji.plugin.trackmate.util.TMUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,15 +23,6 @@ import net.imglib2.meta.ImgPlus;
 import net.imglib2.multithreading.SimpleMultiThreading;
 
 import org.jgrapht.graph.SimpleWeightedGraph;
-
-import fiji.plugin.trackmate.detection.SpotDetector;
-import fiji.plugin.trackmate.detection.SpotDetectorFactory;
-import fiji.plugin.trackmate.features.EdgeFeatureCalculator;
-import fiji.plugin.trackmate.features.FeatureFilter;
-import fiji.plugin.trackmate.features.SpotFeatureCalculator;
-import fiji.plugin.trackmate.features.TrackFeatureCalculator;
-import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.util.TMUtils;
 
 /**
  * <p>

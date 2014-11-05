@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate;
 
+import fiji.plugin.trackmate.features.FeatureFilter;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -7,8 +9,6 @@ import java.util.Set;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
-
-import fiji.plugin.trackmate.features.FeatureFilter;
 
 /**
  * <h1>The model for the data managed by TrackMate trackmate.</h1>

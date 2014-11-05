@@ -1,5 +1,8 @@
 package fiji.plugin.trackmate.detection;
 
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.detection.util.MedianFilter;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,8 +33,6 @@ import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.detection.util.MedianFilter;
 
 public class DetectionUtils
 {

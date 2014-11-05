@@ -1,13 +1,13 @@
 package fiji.plugin.trackmate.gui;
 
-import java.util.List;
-
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.gui.descriptors.WizardPanelDescriptor;
+
+import java.util.List;
 
 public class ManualTrackingGUIController extends TrackMateGUIController {
 

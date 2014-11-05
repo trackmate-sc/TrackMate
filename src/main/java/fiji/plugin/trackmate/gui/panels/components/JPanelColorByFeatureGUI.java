@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.gui.panels.components;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
+import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
 
 import java.awt.BorderLayout;
 import java.awt.Canvas;
@@ -22,8 +23,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.jfree.chart.renderer.InterpolatePaintScale;
-
-import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
 
 public class JPanelColorByFeatureGUI extends ActionListenablePanel {
 

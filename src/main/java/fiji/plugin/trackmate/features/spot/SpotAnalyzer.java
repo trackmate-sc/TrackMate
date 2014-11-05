@@ -1,8 +1,8 @@
 package fiji.plugin.trackmate.features.spot;
 
+import fiji.plugin.trackmate.Spot;
 import net.imglib2.algorithm.Algorithm;
 import net.imglib2.algorithm.Benchmark;
-import fiji.plugin.trackmate.Spot;
 
 /**
  * Interface for a class that can compute feature on a collection of spots.
