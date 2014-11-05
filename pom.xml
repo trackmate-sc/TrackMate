@@ -85,6 +85,25 @@
 		<dependency>
 			<groupId>ome</groupId>
 			<artifactId>ome-xml</artifactId>
+			<exclusions>
+				<!-- NB: avoid enforcer clashes -->
+				<exclusion>
+					<groupId>joda-time</groupId>
+					<artifactId>joda-time</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>xalan</groupId>
+					<artifactId>serializer</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>xalan</groupId>
+					<artifactId>xalan</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>xml-apis</groupId>
+					<artifactId>xml-apis</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- Third party dependencies -->
@@ -115,6 +134,13 @@
 		<dependency>
 			<groupId>org.jfree</groupId>
 			<artifactId>jfreechart</artifactId>
+			<exclusions>
+				<!-- NB: avoid clash with batik -->
+				<exclusion>
+					<groupId>xml-apis</groupId>
+					<artifactId>xml-apis</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.tinyjee.jgraphx</groupId>
@@ -218,5 +244,64 @@
 			<url>http://maven.imagej.net/content/groups/public</url>
 		</repository>
 	</repositories>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<configuration>
+					<rules>
+						<banDuplicateClasses>
+							<dependencies>
+								<dependency>
+									<artifactId>imglib2-algorithm</artifactId>
+									<ignoreClasses>
+										<ignoreClass>net/imglib2/algorithm/region/localneighborhood/*</ignoreClass>
+									</ignoreClasses>
+								</dependency>
+								<dependency>
+									<artifactId>VIB-lib</artifactId>
+									<ignoreClasses>
+										<ignoreClass>javax/media/j3d/*</ignoreClass>
+									</ignoreClasses>
+								</dependency>
+								<dependency>
+									<artifactId>slf4j-log4j12</artifactId>
+									<ignoreClasses>
+										<ignoreClass>org/slf4j/impl/*</ignoreClass>
+									</ignoreClasses>
+								</dependency>
+								<dependency>
+									<artifactId>slf4j-api</artifactId>
+									<ignoreClasses>
+										<ignoreClass>org/slf4j/*</ignoreClass>
+									</ignoreClasses>
+								</dependency>
+								<dependency>
+									<artifactId>jcodings</artifactId>
+									<ignoreClasses>
+										<ignoreClass>org/jcodings/*</ignoreClass>
+									</ignoreClasses>
+								</dependency>
+								<dependency>
+									<artifactId>jnr-constants</artifactId>
+									<ignoreClasses>
+										<ignoreClass>com/kenai/constantine/*</ignoreClass>
+										<ignoreClass>jnr/constants/*</ignoreClass>
+									</ignoreClasses>
+								</dependency>
+								<dependency>
+									<artifactId>jnr-ffi</artifactId>
+									<ignoreClasses>
+										<ignoreClass>jnr/ffi/*</ignoreClass>
+									</ignoreClasses>
+								</dependency>
+							</dependencies>
+						</banDuplicateClasses>
+					</rules>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>
