@@ -22,7 +22,7 @@ public class ManualEdgeColorAnalyzer implements EdgeAnalyzer
 
 	public static final String FEATURE = "MANUAL_COLOR";
 
-	static final String KEY = "MANUAL_EDGE_COLOR_ANALYZER";
+	public static final String KEY = "MANUAL_EDGE_COLOR_ANALYZER";
 
 	static final List< String > FEATURES = new ArrayList< String >( 1 );
 
