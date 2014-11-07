@@ -26,12 +26,9 @@ public class ViewUtils {
 	private ViewUtils() {}
 
 	public static final ImagePlus makeEmptyImagePlus(final int width, final int height, final int nslices, final int nframes, final double[] calibration) {
-		final RandomAccessible<UnsignedByteType> randomAccessible =
-			Views.extendBorder(ArrayImgs.unsignedBytes(1));
-		final Interval interval =
-			new FinalInterval(width, height, nslices, nframes);
-		final RandomAccessibleInterval<UnsignedByteType> view =
-			Views.interval(randomAccessible, interval);
+		final RandomAccessible< UnsignedByteType > randomAccessible = Views.extendBorder( ArrayImgs.unsignedBytes( new long[] { 1, 1, 1, 1 } ) );
+		final Interval interval = new FinalInterval( width, height, nslices, nframes );
+		final RandomAccessibleInterval< UnsignedByteType > view = Views.interval( randomAccessible, interval );
 
 		final ImagePlus imp = ImageJFunctions.wrap(view, "blank");
 		imp.getCalibration().pixelWidth = calibration[0];
