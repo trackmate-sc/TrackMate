@@ -1,20 +1,25 @@
 package fiji.plugin.trackmate.action;
 
-import fiji.plugin.trackmate.FeatureModel;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
 import ij.measure.ResultsTable;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import javax.swing.ImageIcon;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.scijava.plugin.Plugin;
+
+import fiji.plugin.trackmate.FeatureModel;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.gui.TrackMateWizard;
+import fiji.plugin.trackmate.util.ModelTools;
 
 public class ExportStatsToIJAction extends AbstractTMAction
 {
@@ -48,7 +53,11 @@ public class ExportStatsToIJAction extends AbstractTMAction
 		for ( final Integer trackID : trackIDs )
 		{
 			final Set< Spot > track = model.getTrackModel().trackSpots( trackID );
-			for ( final Spot spot : track )
+			// Sort by frame
+			final List< Spot > sortedTrack = new ArrayList< Spot >( track );
+			Collections.sort( sortedTrack, Spot.frameComparator );
+
+			for ( final Spot spot : sortedTrack )
 			{
 				spotTable.incrementCounter();
 				spotTable.addLabel( spot.getName() );
@@ -90,10 +99,15 @@ public class ExportStatsToIJAction extends AbstractTMAction
 		{
 
 			final Set< DefaultWeightedEdge > track = model.getTrackModel().trackEdges( trackID );
-			for ( final DefaultWeightedEdge edge : track )
+			// Sort them by frame
+			final List< DefaultWeightedEdge > sortedTrack = new ArrayList< DefaultWeightedEdge >( track );
+			Collections.sort( sortedTrack, ModelTools.edgeTimeComparator( fm ) );
+
+			for ( final DefaultWeightedEdge edge : sortedTrack )
 			{
 				edgeTable.incrementCounter();
 				edgeTable.addLabel( edge.toString() );
+				edgeTable.addValue( "TRACK_ID", "" + trackID.intValue() );
 				for ( final String feature : edgeFeatures )
 				{
 					final Object o = fm.getEdgeFeature( edge, feature );
@@ -199,6 +213,6 @@ public class ExportStatsToIJAction extends AbstractTMAction
 		{
 			return NAME;
 		}
-
 	}
+
 }
