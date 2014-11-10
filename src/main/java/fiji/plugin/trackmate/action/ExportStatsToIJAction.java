@@ -17,6 +17,7 @@ import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.util.ModelTools;
@@ -101,7 +102,7 @@ public class ExportStatsToIJAction extends AbstractTMAction
 			final Set< DefaultWeightedEdge > track = model.getTrackModel().trackEdges( trackID );
 			// Sort them by frame
 			final List< DefaultWeightedEdge > sortedTrack = new ArrayList< DefaultWeightedEdge >( track );
-			Collections.sort( sortedTrack, ModelTools.edgeTimeComparator( fm ) );
+			Collections.sort( sortedTrack, ModelTools.featureEdgeComparator( EdgeTimeLocationAnalyzer.TIME, fm ) );
 
 			for ( final DefaultWeightedEdge edge : sortedTrack )
 			{

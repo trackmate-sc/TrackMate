@@ -15,7 +15,6 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer;
 import fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTracker;
 
 /**
@@ -27,24 +26,6 @@ import fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTracker;
  */
 public class ModelTools
 {
-
-	/**
-	 * Returns a comparator that will sort edges according to their time
-	 * feature.
-	 * <p>
-	 * The specified feature model must contain the
-	 * <code>EdgeTimeLocationAnalyzer.TIME</code> feature for all sorted edges,
-	 * otherwise a {@link NullPointerException} will be thrown.
-	 * 
-	 * @param fm
-	 *            the {@link FeatureModel} to base this comparator on.
-	 * @return a new {@link Comparator< DefaultWeightedEdge >}.
-	 */
-	public static final Comparator< DefaultWeightedEdge > edgeTimeComparator( final FeatureModel fm )
-	{
-		return new EdgeTimeComparator( fm );
-	}
-
 	private ModelTools()
 	{}
 
@@ -142,26 +123,62 @@ public class ModelTools
 		}
 	}
 
-	private static final class EdgeTimeComparator implements Comparator< DefaultWeightedEdge >
+	/**
+	 * A comparator used to sort edges by ascending feature values.
+	 * 
+	 * @param feature
+	 *            the feature to use for comparison. It is the caller
+	 *            responsibility to ensure that all edges have the target
+	 *            feature declared in the specified {@link FeatureModel}.
+	 * @param fm
+	 *            the {@link FeatureModel} to read feature values from.
+	 * @return a new {@link Comparator}.
+	 */
+	public final static Comparator< DefaultWeightedEdge > featureEdgeComparator( final String feature, final FeatureModel fm )
 	{
-		private final FeatureModel fm;
-
-		public EdgeTimeComparator( final FeatureModel fm )
+		final Comparator< DefaultWeightedEdge > comparator = new Comparator< DefaultWeightedEdge >()
 		{
-			this.fm = fm;
-		}
+			@Override
+			public int compare( final DefaultWeightedEdge e1, final DefaultWeightedEdge e2 )
+			{
+				final double t1 = fm.getEdgeFeature( e1, feature ).doubleValue();
+				final double t2 = fm.getEdgeFeature( e2, feature ).doubleValue();
 
-		@Override
-		public int compare( final DefaultWeightedEdge e1, final DefaultWeightedEdge e2 )
+				if ( t1 < t2 ) { return -1; }
+				if ( t1 > t2 ) { return 1; }
+				return 0;
+			}
+		};
+		return comparator;
+	}
+
+	/**
+	 * A comparator used to sort tracks by ascending feature values.
+	 * 
+	 * @param feature
+	 *            the feature to use for comparison. It is the caller
+	 *            responsibility to ensure that all tracks have the target
+	 *            feature declared in the specified {@link FeatureModel}.
+	 * @param fm
+	 *            the {@link FeatureModel} to read feature values from.
+	 * @return a new {@link Comparator}.
+	 */
+	public final static Comparator< Integer > featureTrackComparator( final String feature, final FeatureModel fm )
+	{
+		final Comparator< Integer > comparator = new Comparator< Integer >()
 		{
-			final double t1 = fm.getEdgeFeature( e1, EdgeTimeLocationAnalyzer.TIME ).doubleValue();
-			final double t2 = fm.getEdgeFeature( e2, EdgeTimeLocationAnalyzer.TIME ).doubleValue();
+			@Override
+			public int compare( final Integer e1, final Integer e2 )
+			{
+				final double t1 = fm.getTrackFeature( e1, feature ).doubleValue();
+				final double t2 = fm.getTrackFeature( e2, feature ).doubleValue();
 
-			if ( t1 < t2 ) { return -1; }
-			if ( t1 > t2 ) { return 1; }
-			return 0;
-		}
-
+				if ( t1 < t2 ) { return -1; }
+				if ( t1 > t2 ) { return 1; }
+				return 0;
+			}
+		};
+		return comparator;
 	}
 
 }
