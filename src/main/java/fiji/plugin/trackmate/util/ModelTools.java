@@ -3,16 +3,19 @@ package fiji.plugin.trackmate.util;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
+import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer;
 import fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTracker;
 
 /**
@@ -24,6 +27,23 @@ import fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTracker;
  */
 public class ModelTools
 {
+
+	/**
+	 * Returns a comparator that will sort edges according to their time
+	 * feature.
+	 * <p>
+	 * The specified feature model must contain the
+	 * <code>EdgeTimeLocationAnalyzer.TIME</code> feature for all sorted edges,
+	 * otherwise a {@link NullPointerException} will be thrown.
+	 * 
+	 * @param fm
+	 *            the {@link FeatureModel} to base this comparator on.
+	 * @return a new {@link Comparator< DefaultWeightedEdge >}.
+	 */
+	public static final Comparator< DefaultWeightedEdge > edgeTimeComparator( final FeatureModel fm )
+	{
+		return new EdgeTimeComparator( fm );
+	}
 
 	private ModelTools()
 	{}
@@ -120,6 +140,28 @@ public class ModelTools
 		{
 			model.endUpdate();
 		}
+	}
+
+	private static final class EdgeTimeComparator implements Comparator< DefaultWeightedEdge >
+	{
+		private final FeatureModel fm;
+
+		public EdgeTimeComparator( final FeatureModel fm )
+		{
+			this.fm = fm;
+		}
+
+		@Override
+		public int compare( final DefaultWeightedEdge e1, final DefaultWeightedEdge e2 )
+		{
+			final double t1 = fm.getEdgeFeature( e1, EdgeTimeLocationAnalyzer.TIME ).doubleValue();
+			final double t2 = fm.getEdgeFeature( e2, EdgeTimeLocationAnalyzer.TIME ).doubleValue();
+
+			if ( t1 < t2 ) { return -1; }
+			if ( t1 > t2 ) { return 1; }
+			return 0;
+		}
+
 	}
 
 }
