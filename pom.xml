@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>sc.fiji</groupId>
 		<artifactId>pom-fiji</artifactId>
-		<version>5.1</version>
+		<version>6.1.0</version>
 		<relativePath />
 	</parent>
 
@@ -250,12 +250,6 @@
 					<rules>
 						<banDuplicateClasses>
 							<dependencies>
-								<dependency>
-									<artifactId>imglib2-algorithm</artifactId>
-									<ignoreClasses>
-										<ignoreClass>net/imglib2/algorithm/region/localneighborhood/*</ignoreClass>
-									</ignoreClasses>
-								</dependency>
 								<dependency>
 									<artifactId>VIB-lib</artifactId>
 									<ignoreClasses>
