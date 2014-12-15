@@ -365,7 +365,6 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 			intervalMax = max;
 		}
 		final FinalInterval interval = new FinalInterval( intervalMin, intervalMax );
-
 		factory.setTarget( img, settings.detectorSettings );
 
 		final int numFrames = settings.tend - settings.tstart + 1;

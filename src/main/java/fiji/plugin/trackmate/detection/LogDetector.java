@@ -1,7 +1,5 @@
 package fiji.plugin.trackmate.detection;
 
-import fiji.plugin.trackmate.Spot;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -18,6 +16,7 @@ import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Util;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
+import fiji.plugin.trackmate.Spot;
 
 public class LogDetector< T extends RealType< T > & NativeType< T >> implements SpotDetector< T >, MultiThreaded
 {
@@ -84,9 +83,9 @@ public class LogDetector< T extends RealType< T > & NativeType< T >> implements 
 			errorMessage = baseErrorMessage + "Image is null.";
 			return false;
 		}
-		if ( !( img.numDimensions() == 2 || img.numDimensions() == 3 ) )
+		if ( img.numDimensions() > 3 )
 		{
-			errorMessage = baseErrorMessage + "Image must be 2D or 3D, got " + img.numDimensions() + "D.";
+			errorMessage = baseErrorMessage + "Image must be 1D, 2D or 3D, got " + img.numDimensions() + "D.";
 			return false;
 		}
 		return true;

@@ -20,11 +20,6 @@ import static fiji.plugin.trackmate.io.IOUtils.writeTargetChannel;
 import static fiji.plugin.trackmate.io.IOUtils.writeThreshold;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.gui.ConfigurationPanel;
-import fiji.plugin.trackmate.gui.panels.detector.LogDetectorConfigurationPanel;
-import fiji.plugin.trackmate.util.TMUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,6 +37,12 @@ import net.imglib2.view.Views;
 
 import org.jdom2.Element;
 import org.scijava.plugin.Plugin;
+
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.gui.ConfigurationPanel;
+import fiji.plugin.trackmate.gui.panels.detector.LogDetectorConfigurationPanel;
+import fiji.plugin.trackmate.util.TMUtils;
 
 @Plugin( type = SpotDetectorFactory.class )
 public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> implements SpotDetectorFactory< T >
@@ -91,7 +92,6 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 		final boolean doMedian = ( Boolean ) settings.get( KEY_DO_MEDIAN_FILTERING );
 		final boolean doSubpixel = ( Boolean ) settings.get( KEY_DO_SUBPIXEL_LOCALIZATION );
 		final double[] calibration = TMUtils.getSpatialCalibration( img );
-
 		RandomAccessible< T > imFrame;
 		final int cDim = TMUtils.findCAxisIndex( img );
 		if ( cDim < 0 )
@@ -114,6 +114,17 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 			}
 			imFrame = Views.hyperSlice( imFrame, timeDim, frame );
 		}
+
+		// In case we have a 1D image.
+		if ( img.dimension( 0 ) < 2 )
+		{
+			imFrame = Views.hyperSlice( imFrame, 0, 0 );
+		}
+		if ( img.dimension( 1 ) < 2 )
+		{
+			imFrame = Views.hyperSlice( imFrame, 1, 0 );
+		}
+
 		final LogDetector< T > detector = new LogDetector< T >( imFrame, interval, calibration, radius, threshold, doSubpixel, doMedian );
 		detector.setNumThreads( 1 ); // in TrackMate context, we use 1 thread
 		// per detector but multiple detectors

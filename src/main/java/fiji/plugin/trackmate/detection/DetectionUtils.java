@@ -1,8 +1,5 @@
 package fiji.plugin.trackmate.detection;
 
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.detection.util.MedianFilter;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,6 +30,8 @@ import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.detection.util.MedianFilter;
 
 public class DetectionUtils
 {
@@ -147,7 +146,7 @@ public class DetectionUtils
 	public static final Interval squeeze( final Interval interval )
 	{
 		int nNonSingletonDimensions = 0;
-		for ( int d = 0; d < interval.numDimensions(); d++ )
+		for ( int d = nNonSingletonDimensions; d < interval.numDimensions(); d++ )
 		{
 			if ( interval.dimension( d ) > 1 )
 			{
@@ -221,7 +220,16 @@ public class DetectionUtils
 				ra.setPosition( refinedPeak.getOriginalPeak() );
 				final double quality = ra.get().getRealDouble();
 				final double x = refinedPeak.getDoublePosition( 0 ) * calibration[ 0 ];
-				final double y = refinedPeak.getDoublePosition( 1 ) * calibration[ 1 ];
+				final double y;
+				if ( refinedPeak.numDimensions() < 2 )
+				{ // FIXME will cause problems for images made of only 1 column.
+					y = 0;
+				}
+				else
+				{
+					y = refinedPeak.getDoublePosition( 1 ) * calibration[ 1 ];
+				}
+
 				final double z;
 				if ( refinedPeak.numDimensions() < 3 )
 				{
