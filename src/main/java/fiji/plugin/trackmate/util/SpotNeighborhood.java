@@ -9,6 +9,7 @@ import net.imglib2.algorithm.region.localneighborhood.AbstractNeighborhood;
 import net.imglib2.algorithm.region.localneighborhood.EllipseNeighborhood;
 import net.imglib2.algorithm.region.localneighborhood.EllipsoidNeighborhood;
 import net.imglib2.algorithm.region.localneighborhood.Neighborhood;
+import net.imglib2.algorithm.region.localneighborhood.RectangleNeighborhoodGPL;
 import net.imglib2.meta.ImgPlus;
 import net.imglib2.outofbounds.OutOfBoundsMirrorExpWindowingFactory;
 import net.imglib2.type.numeric.RealType;
@@ -46,9 +47,31 @@ public class SpotNeighborhood< T extends RealType< T >> implements Neighborhood<
 		{
 			span[ d ] = Math.round( spot.getFeature( Spot.RADIUS ) / calibration[ d ] );
 		}
+
 		// Neighborhood
+
+		/*
+		 * We have to detect here whether we were given a 1D image. Trouble is,
+		 * since it is an ImgPlus, it will always be of fim at least 2. So we
+		 * have to test pedantically.
+		 */
+
 		final OutOfBoundsMirrorExpWindowingFactory< T, RandomAccessibleInterval< T >> oob = new OutOfBoundsMirrorExpWindowingFactory< T, RandomAccessibleInterval< T >>();
-		if ( img.numDimensions() == 2 )
+		if ( img.numDimensions() == 2 && img.dimension( 0 ) < 2 || img.dimension( 1 ) < 2 )
+		{
+			if ( img.dimension( 0 ) < 2 )
+			{
+				span[ 0 ] = 0;
+			}
+			else
+			{
+				span[ 1 ] = 0;
+			}
+			this.neighborhood = new RectangleNeighborhoodGPL< T >( img, oob );
+			neighborhood.setPosition( center );
+			neighborhood.setSpan( span );
+		}
+		else if ( img.numDimensions() == 2 )
 		{
 			this.neighborhood = new EllipseNeighborhood< T >( img, center, span, oob );
 		}
@@ -58,7 +81,7 @@ public class SpotNeighborhood< T extends RealType< T >> implements Neighborhood<
 		}
 		else
 		{
-			throw new IllegalArgumentException( "Source input must be 2D or 3D, got nDims = " + img.numDimensions() );
+			throw new IllegalArgumentException( "Source input must be 1D, 2D or 3D, got nDims = " + img.numDimensions() );
 		}
 
 	}

@@ -7,21 +7,21 @@ import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.M
 import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.MIN_INTENSITY;
 import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.STANDARD_DEVIATION;
 import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.TOTAL_INTENSITY;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.util.SpotNeighborhood;
-//import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.SKEWNESS;
-//import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.VARIANCE;
 
 import java.util.Iterator;
 
 import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Util;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.util.SpotNeighborhood;
+//import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.SKEWNESS;
+//import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.VARIANCE;
 
 public class SpotIntensityAnalyzer< T extends RealType< T >> extends IndependentSpotFeatureAnalyzer< T >
 {
 
-	public SpotIntensityAnalyzer( ImgPlus< T > img, Iterator< Spot > spots )
+	public SpotIntensityAnalyzer( final ImgPlus< T > img, final Iterator< Spot > spots )
 	{
 		super( img, spots );
 	}
@@ -36,11 +36,11 @@ public class SpotIntensityAnalyzer< T extends RealType< T >> extends Independent
 	 * ://en.wikipedia.org/wiki/Algorithms_for_calculating_variance}.
 	 */
 	@Override
-	public final void process( Spot spot )
+	public final void process( final Spot spot )
 	{
 
 		// Prepare neighborhood
-		SpotNeighborhood< T > neighborhood = new SpotNeighborhood< T >( spot, img );
+		final SpotNeighborhood< T > neighborhood = new SpotNeighborhood< T >( spot, img );
 		final int npixels = ( int ) neighborhood.size();
 
 		// For variance, kurtosis and skewness
@@ -58,11 +58,10 @@ public class SpotIntensityAnalyzer< T extends RealType< T >> extends Independent
 		double val;
 		final double[] pixel_values = new double[ npixels ];
 		int n = 0;
-
-		for ( T pixel : neighborhood )
+		for ( final T pixel : neighborhood )
 		{
-
 			val = pixel.getRealDouble();
+
 			// For median, min and max
 			pixel_values[ n ] = val;
 			// For variance and mean
@@ -82,11 +81,11 @@ public class SpotIntensityAnalyzer< T extends RealType< T >> extends Independent
 		}
 
 		Util.quicksort( pixel_values, 0, npixels - 1 );
-		double median = pixel_values[ npixels / 2 ];
-		double min = pixel_values[ 0 ];
-		double max = pixel_values[ npixels - 1 ];
+		final double median = pixel_values[ npixels / 2 ];
+		final double min = pixel_values[ 0 ];
+		final double max = pixel_values[ npixels - 1 ];
 		mean = sum / npixels;
-		double variance = M2 / ( npixels - 1 );
+		final double variance = M2 / ( npixels - 1 );
 		// double kurtosis = (n*M4) / (M2*M2) - 3;
 		// double skewness = Math.sqrt(n) * M3 / Math.pow(M2, 3/2.0);
 
