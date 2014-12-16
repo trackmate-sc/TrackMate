@@ -1,8 +1,5 @@
 package fiji.plugin.trackmate.detection;
 
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.detection.util.MedianFilter;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,6 +30,8 @@ import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.detection.util.MedianFilter;
 
 public class DetectionUtils
 {
@@ -42,11 +41,11 @@ public class DetectionUtils
 	 * radius specified <b>using calibrated units</b>. The specified calibration
 	 * is used to determine the dimensionality of the kernel and to map it on a
 	 * pixel grid.
-	 *
+	 * 
 	 * @param radius
 	 *            the blob radius (in image unit).
 	 * @param nDims
-	 *            the dimensionality of the desired kernel. Must be 2 or 3.
+	 *            the dimensionality of the desired kernel. Must be 1, 2 or 3.
 	 * @param calibration
 	 *            the pixel sizes, specified as <code>double[]</code> array.
 	 * @return a new image containing the LoG kernel.
@@ -132,7 +131,6 @@ public class DetectionUtils
 			in.setPosition( out );
 			c.convert( in.get(), out.get() );
 		}
-
 		return output;
 	}
 
@@ -147,7 +145,7 @@ public class DetectionUtils
 	public static final Interval squeeze( final Interval interval )
 	{
 		int nNonSingletonDimensions = 0;
-		for ( int d = 0; d < interval.numDimensions(); d++ )
+		for ( int d = nNonSingletonDimensions; d < interval.numDimensions(); d++ )
 		{
 			if ( interval.dimension( d ) > 1 )
 			{
@@ -190,8 +188,8 @@ public class DetectionUtils
 		val.setReal( threshold );
 		final LocalNeighborhoodCheck< Point, FloatType > localNeighborhoodCheck = new LocalExtrema.MaximumCheck< FloatType >( val );
 		final IntervalView< FloatType > dogWithBorder = Views.interval( Views.extendMirrorSingle( source ), Intervals.expand( source, 1 ) );
-//		TODO: The "numThreads"-version of LocalExtrema.findLocalExtrema should really exist in imglib. After it does, replace the following lines by
-//		final ArrayList< Point > peaks = LocalExtrema.findLocalExtrema( dogWithBorder, localNeighborhoodCheck, numThreads );
+		//		TODO: The "numThreads"-version of LocalExtrema.findLocalExtrema should really exist in imglib. After it does, replace the following lines by
+		//		final ArrayList< Point > peaks = LocalExtrema.findLocalExtrema( dogWithBorder, localNeighborhoodCheck, numThreads );
 		final ExecutorService service = Executors.newFixedThreadPool( numThreads );
 		final List< Point > peaks = LocalExtrema.findLocalExtrema( dogWithBorder, localNeighborhoodCheck, service );
 		service.shutdown();
@@ -216,49 +214,99 @@ public class DetectionUtils
 
 			spots = new ArrayList< Spot >( refined.size() );
 			final RandomAccess< FloatType > ra = source.randomAccess();
-			for ( final RefinedPeak< Point > refinedPeak : refined )
-			{
-				ra.setPosition( refinedPeak.getOriginalPeak() );
-				final double quality = ra.get().getRealDouble();
-				final double x = refinedPeak.getDoublePosition( 0 ) * calibration[ 0 ];
-				final double y = refinedPeak.getDoublePosition( 1 ) * calibration[ 1 ];
-				final double z;
-				if ( refinedPeak.numDimensions() < 3 )
-				{
-					z = 0;
-				}
-				else
-				{
-					z = refinedPeak.getDoublePosition( 2 ) * calibration[ 2 ];
-				}
-				final Spot spot = new Spot( x, y, z, radius, quality );
-				spots.add( spot );
-			}
 
+			/*
+			 * Deal with different dimensionality manually. Profound comment:
+			 * this is the proof that this part of the code is sloppy. ImgLib2
+			 * is supposed to be dimension-generic. I just did not use properly
+			 * here.
+			 */
+
+			if ( source.numDimensions() > 2 )
+			{ // 3D
+				for ( final RefinedPeak< Point > refinedPeak : refined )
+				{
+					ra.setPosition( refinedPeak.getOriginalPeak() );
+					final double quality = ra.get().getRealDouble();
+					final double x = refinedPeak.getDoublePosition( 0 ) * calibration[ 0 ];
+					final double y = refinedPeak.getDoublePosition( 1 ) * calibration[ 1 ];
+					final double z = refinedPeak.getDoublePosition( 2 ) * calibration[ 2 ];
+					final Spot spot = new Spot( x, y, z, radius, quality );
+					spots.add( spot );
+				}
+			}
+			else if ( source.numDimensions() > 1 )
+			{ // 2D
+				final double z = 0;
+				for ( final RefinedPeak< Point > refinedPeak : refined )
+				{
+					ra.setPosition( refinedPeak.getOriginalPeak() );
+					final double quality = ra.get().getRealDouble();
+					final double x = refinedPeak.getDoublePosition( 0 ) * calibration[ 0 ];
+					final double y = refinedPeak.getDoublePosition( 1 ) * calibration[ 1 ];
+					final Spot spot = new Spot( x, y, z, radius, quality );
+					spots.add( spot );
+				}
+			}
+			else
+			{ // 1D
+				final double z = 0;
+				final double y = 0;
+				for ( final RefinedPeak< Point > refinedPeak : refined )
+				{
+					ra.setPosition( refinedPeak.getOriginalPeak() );
+					final double quality = ra.get().getRealDouble();
+					final double x = refinedPeak.getDoublePosition( 0 ) * calibration[ 0 ];
+					final Spot spot = new Spot( x, y, z, radius, quality );
+					spots.add( spot );
+				}
+
+			}
 		}
 		else
 		{
 			spots = new ArrayList< Spot >( peaks.size() );
 			final RandomAccess< FloatType > ra = source.randomAccess();
-			for ( final Point peak : peaks )
-			{
-				ra.setPosition( peak );
-				final double quality = ra.get().getRealDouble();
-				final double x = peak.getDoublePosition( 0 ) * calibration[ 0 ];
-				final double y = peak.getDoublePosition( 1 ) * calibration[ 1 ];
-				final double z;
-				if ( peak.numDimensions() < 3 )
+			if ( source.numDimensions() > 2 )
+			{ // 3D
+				for ( final Point peak : peaks )
 				{
-					z = 0;
+					ra.setPosition( peak );
+					final double quality = ra.get().getRealDouble();
+					final double x = peak.getDoublePosition( 0 ) * calibration[ 0 ];
+					final double y = peak.getDoublePosition( 1 ) * calibration[ 1 ];
+					final double z = peak.getDoublePosition( 2 ) * calibration[ 2 ];
+					final Spot spot = new Spot( x, y, z, radius, quality );
+					spots.add( spot );
 				}
-				else
-				{
-					z = peak.getDoublePosition( 2 ) * calibration[ 2 ];
-				}
-				final Spot spot = new Spot( x, y, z, radius, quality );
-				spots.add( spot );
 			}
+			else if ( source.numDimensions() > 1 )
+			{ // 2D
+				final double z = 0;
+				for ( final Point peak : peaks )
+				{
+					ra.setPosition( peak );
+					final double quality = ra.get().getRealDouble();
+					final double x = peak.getDoublePosition( 0 ) * calibration[ 0 ];
+					final double y = peak.getDoublePosition( 1 ) * calibration[ 1 ];
+					final Spot spot = new Spot( x, y, z, radius, quality );
+					spots.add( spot );
+				}
+			}
+			else
+			{ // 1D
+				final double z = 0;
+				final double y = 0;
+				for ( final Point peak : peaks )
+				{
+					ra.setPosition( peak );
+					final double quality = ra.get().getRealDouble();
+					final double x = peak.getDoublePosition( 0 ) * calibration[ 0 ];
+					final Spot spot = new Spot( x, y, z, radius, quality );
+					spots.add( spot );
+				}
 
+			}
 		}
 
 		return spots;

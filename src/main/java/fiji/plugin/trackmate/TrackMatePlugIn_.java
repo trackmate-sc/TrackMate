@@ -132,7 +132,7 @@ public class TrackMatePlugIn_ implements PlugIn
 	public static void main( final String[] args )
 	{
 		ImageJ.main( args );
-		new TrackMatePlugIn_().run( "samples/FakeTracks.tif" );
+		new TrackMatePlugIn_().run( "samples/SUM_FakeTracks.tif" );
 	}
 
 }

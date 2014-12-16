@@ -5,11 +5,6 @@ import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DO_SUBPIXEL_LOCAL
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.gui.ConfigurationPanel;
-import fiji.plugin.trackmate.gui.panels.detector.DogDetectorConfigurationPanel;
-import fiji.plugin.trackmate.util.TMUtils;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.type.NativeType;
@@ -17,6 +12,12 @@ import net.imglib2.type.numeric.RealType;
 import net.imglib2.view.Views;
 
 import org.scijava.plugin.Plugin;
+
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.gui.ConfigurationPanel;
+import fiji.plugin.trackmate.gui.panels.detector.DogDetectorConfigurationPanel;
+import fiji.plugin.trackmate.util.TMUtils;
 
 @Plugin( type = SpotDetectorFactory.class )
 public class DogDetectorFactory< T extends RealType< T > & NativeType< T >> extends LogDetectorFactory< T >
@@ -70,6 +71,19 @@ public class DogDetectorFactory< T extends RealType< T > & NativeType< T >> exte
 			}
 			imFrame = Views.hyperSlice( imFrame, timeDim, frame );
 		}
+
+		// In case we have a 1D image.
+		if ( img.dimension( 0 ) < 2 )
+		{ // Single column image, will be rotated internally.
+			calibration[ 0 ] = calibration[ 1 ]; // It gets NaN otherwise
+			calibration[ 1 ] = 1;
+			imFrame = Views.hyperSlice( imFrame, 0, 0 );
+		}
+		if ( img.dimension( 1 ) < 2 )
+		{ // Single line image
+			imFrame = Views.hyperSlice( imFrame, 1, 0 );
+		}
+
 		final DogDetector< T > detector = new DogDetector< T >( imFrame, interval, calibration, radius, threshold, doSubpixel, doMedian );
 		detector.setNumThreads( 1 );
 		return detector;

@@ -16,11 +16,6 @@ import static fiji.plugin.trackmate.io.IOUtils.writeTargetChannel;
 import static fiji.plugin.trackmate.io.IOUtils.writeThreshold;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.gui.ConfigurationPanel;
-import fiji.plugin.trackmate.gui.panels.detector.DownSampleLogDetectorConfigurationPanel;
-import fiji.plugin.trackmate.util.TMUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,6 +31,12 @@ import net.imglib2.view.Views;
 
 import org.jdom2.Element;
 import org.scijava.plugin.Plugin;
+
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.gui.ConfigurationPanel;
+import fiji.plugin.trackmate.gui.panels.detector.DownSampleLogDetectorConfigurationPanel;
+import fiji.plugin.trackmate.util.TMUtils;
 
 @Plugin( type = SpotDetectorFactory.class )
 public class DownsampleLogDetectorFactory< T extends RealType< T > & NativeType< T >> extends LogDetectorFactory< T >
@@ -88,6 +89,19 @@ public class DownsampleLogDetectorFactory< T extends RealType< T > & NativeType<
 			}
 			imFrame = Views.hyperSlice( imFrame, timeDim, frame );
 		}
+
+		// In case we have a 1D image.
+		if ( img.dimension( 0 ) < 2 )
+		{ // Single column image, will be rotated internally.
+			calibration[ 0 ] = calibration[ 1 ]; // It gets NaN otherwise
+			calibration[ 1 ] = 1;
+			imFrame = Views.hyperSlice( imFrame, 0, 0 );
+		}
+		if ( img.dimension( 1 ) < 2 )
+		{ // Single line image
+			imFrame = Views.hyperSlice( imFrame, 1, 0 );
+		}
+
 		final DownsampleLogDetector< T > detector = new DownsampleLogDetector< T >( imFrame, interval, calibration, radius, threshold, downsamplingFactor );
 		return detector;
 	}

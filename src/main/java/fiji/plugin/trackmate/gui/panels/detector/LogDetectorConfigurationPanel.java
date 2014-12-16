@@ -8,19 +8,6 @@ import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.BIG_FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
-import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.detection.LogDetectorFactory;
-import fiji.plugin.trackmate.detection.SpotDetectorFactory;
-import fiji.plugin.trackmate.gui.ConfigurationPanel;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
-import fiji.plugin.trackmate.util.JLabelLogger;
-import fiji.util.NumberParser;
 import ij.ImagePlus;
 import ij.measure.Calibration;
 
@@ -42,6 +29,20 @@ import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.detection.LogDetectorFactory;
+import fiji.plugin.trackmate.detection.SpotDetectorFactory;
+import fiji.plugin.trackmate.gui.ConfigurationPanel;
+import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
+import fiji.plugin.trackmate.util.JLabelLogger;
+import fiji.util.NumberParser;
 
 /**
  * Configuration panel for spot detectors based on LoG detector.
@@ -163,19 +164,23 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 	public void setSettings( final Map< String, Object > settings )
 	{
 		sliderChannel.setValue( ( Integer ) settings.get( KEY_TARGET_CHANNEL ) );
-		double diameter = ( Double ) settings.get( KEY_RADIUS );
+		double radius = ( Double ) settings.get( KEY_RADIUS );
 		if ( imp != null )
 		{
 			final Calibration calibration = imp.getCalibration();
+			// Not too large
 			final double maxWidth = imp.getWidth() * 0.5 * ( calibration == null ? 1 : calibration.pixelWidth );
 			final double maxHeight = imp.getHeight() * 0.5 * ( calibration == null ? 1 : calibration.pixelHeight );
 			final double max = maxWidth < maxHeight ? maxWidth : maxHeight;
-			if ( diameter > max )
+			if ( radius > max )
 			{
-				diameter *= max * 4 / ( imp.getWidth() + imp.getHeight() );
+				radius *= max * 4 / ( imp.getWidth() + imp.getHeight() );
 			}
+			// Not too small
+			final double pw = calibration == null ? 1 : calibration.pixelWidth;
+			radius = Math.max( radius / pw, 1.5 ) * pw;
 		}
-		jTextFieldBlobDiameter.setText( "" + ( 2 * diameter ) );
+		jTextFieldBlobDiameter.setText( "" + ( 2 * radius ) );
 		jCheckBoxMedianFilter.setSelected( ( Boolean ) settings.get( KEY_DO_MEDIAN_FILTERING ) );
 		jTextFieldThreshold.setText( "" + settings.get( KEY_THRESHOLD ) );
 		jCheckSubPixel.setSelected( ( Boolean ) settings.get( KEY_DO_SUBPIXEL_LOCALIZATION ) );
@@ -222,7 +227,12 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 				final TrackMate trackmate = new TrackMate( settings );
 				trackmate.getModel().setLogger( localLogger );
 
-				trackmate.execDetection();
+				final boolean detectionOk = trackmate.execDetection();
+				if ( !detectionOk )
+				{
+					localLogger.error( trackmate.getErrorMessage() );
+					return;
+				}
 				localLogger.log( "Found " + trackmate.getModel().getSpots().getNSpots( false ) + " spots." );
 
 				// Wrap new spots in a list.
