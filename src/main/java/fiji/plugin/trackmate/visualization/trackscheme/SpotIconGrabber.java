@@ -53,8 +53,8 @@ public class SpotIconGrabber< T extends RealType< T >>
 																// REQUIRED!
 		final long x = Math.round( ( spot.getFeature( Spot.POSITION_X ) - radius ) / calibration[ 0 ] );
 		final long y = Math.round( ( spot.getFeature( Spot.POSITION_Y ) - radius ) / calibration[ 1 ] );
-		final long width = Math.round( 2 * radius / calibration[ 0 ] );
-		final long height = Math.round( 2 * radius / calibration[ 1 ] );
+		final long width = Math.max( 1, Math.round( 2 * radius / calibration[ 0 ] ) );
+		final long height = Math.max( 1, Math.round( 2 * radius / calibration[ 1 ] ) );
 
 		// Copy cropped view
 		long slice = 0;
