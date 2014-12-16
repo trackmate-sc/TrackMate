@@ -99,13 +99,21 @@ public class DownsampleLogDetector< T extends RealType< T > & NativeType< T >> i
 
 		if ( img.numDimensions() < 2 )
 		{
-			dimensions[ 0 ] = interval.dimension( 0 ) / downsamplingFactor;
-			dsarr[ 0 ] = downsamplingFactor;
-			dwnCalibration[ 0 ] = calibration[ 0 ] * downsamplingFactor;
+			if ( interval.dimension( 0 ) > 1 )
+			{
+				dimensions[ 0 ] = interval.dimension( 0 ) / downsamplingFactor;
+				dsarr[ 0 ] = downsamplingFactor;
+				dwnCalibration[ 0 ] = calibration[ 0 ] * downsamplingFactor;
+			}
+			else
+			{ // column image as source
+				dimensions[ 0 ] = interval.dimension( 1 ) / downsamplingFactor;
+				dsarr[ 0 ] = downsamplingFactor;
+				dwnCalibration[ 0 ] = calibration[ 1 ] * downsamplingFactor;
+			}
 		}
 		else
 		{
-
 			for ( int i = 0; i < 2; i++ )
 			{
 				dimensions[ i ] = interval.dimension( i ) / downsamplingFactor;

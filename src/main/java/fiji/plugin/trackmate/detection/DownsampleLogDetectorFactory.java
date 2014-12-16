@@ -92,11 +92,13 @@ public class DownsampleLogDetectorFactory< T extends RealType< T > & NativeType<
 
 		// In case we have a 1D image.
 		if ( img.dimension( 0 ) < 2 )
-		{
+		{ // Single column image, will be rotated internally.
+			calibration[ 0 ] = calibration[ 1 ]; // It gets NaN otherwise
+			calibration[ 1 ] = 1;
 			imFrame = Views.hyperSlice( imFrame, 0, 0 );
 		}
 		if ( img.dimension( 1 ) < 2 )
-		{
+		{ // Single line image
 			imFrame = Views.hyperSlice( imFrame, 1, 0 );
 		}
 
