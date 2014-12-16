@@ -117,17 +117,18 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 
 		// In case we have a 1D image.
 		if ( img.dimension( 0 ) < 2 )
-		{
+		{ // Single column image, will be rotated internally.
+			calibration[ 0 ] = calibration[ 1 ]; // It gets NaN otherwise
+			calibration[ 1 ] = 1;
 			imFrame = Views.hyperSlice( imFrame, 0, 0 );
 		}
 		if ( img.dimension( 1 ) < 2 )
-		{
+		{ // Single line image
 			imFrame = Views.hyperSlice( imFrame, 1, 0 );
 		}
 
 		final LogDetector< T > detector = new LogDetector< T >( imFrame, interval, calibration, radius, threshold, doSubpixel, doMedian );
-		detector.setNumThreads( 1 ); // in TrackMate context, we use 1 thread
-		// per detector but multiple detectors
+		detector.setNumThreads( 1 );
 		return detector;
 	}
 

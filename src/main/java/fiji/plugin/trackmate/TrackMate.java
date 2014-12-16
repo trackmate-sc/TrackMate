@@ -434,6 +434,22 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 							{
 								// On success, get results.
 								final List< Spot > spotsThisFrame = detector.getResult();
+
+								/*
+								 * Special case: if we have a single column
+								 * image, then the detectors internally dealt
+								 * with a single line image. We need to permute
+								 * back the X & Y coordinates if it's the case.
+								 */
+								if ( img.dimension( 0 ) < 2 && zindex < 0 )
+								{
+									for ( final Spot spot : spotsThisFrame )
+									{
+										spot.putFeature( Spot.POSITION_Y, spot.getDoublePosition( 0 ) );
+										spot.putFeature( Spot.POSITION_X, 0d );
+									}
+								}
+
 								List< Spot > prunedSpots;
 								if ( null != settings.polygon )
 								{
