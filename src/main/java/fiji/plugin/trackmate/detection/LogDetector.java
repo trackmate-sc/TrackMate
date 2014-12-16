@@ -127,6 +127,7 @@ public class LogDetector< T extends RealType< T > & NativeType< T >> implements 
 				ndims--;
 			}
 		}
+
 		final Img< FloatType > kernel = DetectionUtils.createLoGKernel( radius, ndims, calibration );
 		final FFTConvolution< FloatType > fftconv = new FFTConvolution< FloatType >( floatImg, kernel );
 		fftconv.setExecutorService(Executors.newFixedThreadPool( numThreads ));

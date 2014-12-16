@@ -41,11 +41,11 @@ public class DetectionUtils
 	 * radius specified <b>using calibrated units</b>. The specified calibration
 	 * is used to determine the dimensionality of the kernel and to map it on a
 	 * pixel grid.
-	 *
+	 * 
 	 * @param radius
 	 *            the blob radius (in image unit).
 	 * @param nDims
-	 *            the dimensionality of the desired kernel. Must be 2 or 3.
+	 *            the dimensionality of the desired kernel. Must be 1, 2 or 3.
 	 * @param calibration
 	 *            the pixel sizes, specified as <code>double[]</code> array.
 	 * @return a new image containing the LoG kernel.
@@ -131,7 +131,6 @@ public class DetectionUtils
 			in.setPosition( out );
 			c.convert( in.get(), out.get() );
 		}
-
 		return output;
 	}
 
