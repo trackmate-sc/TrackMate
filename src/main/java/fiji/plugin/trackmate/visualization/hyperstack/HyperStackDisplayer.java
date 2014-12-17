@@ -1,5 +1,13 @@
 package fiji.plugin.trackmate.visualization.hyperstack;
 
+import ij.ImagePlus;
+import ij.gui.Overlay;
+import ij.gui.Roi;
+
+import java.util.Set;
+
+import org.jgrapht.graph.DefaultWeightedEdge;
+
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.SelectionChangeEvent;
@@ -9,13 +17,6 @@ import fiji.plugin.trackmate.visualization.AbstractTrackMateModelView;
 import fiji.plugin.trackmate.visualization.TrackColorGenerator;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewUtils;
-import ij.ImagePlus;
-import ij.gui.Overlay;
-import ij.gui.Roi;
-
-import java.util.Set;
-
-import org.jgrapht.graph.DefaultWeightedEdge;
 
 public class HyperStackDisplayer extends AbstractTrackMateModelView
 {
@@ -226,10 +227,8 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 	{
 		editTool = SpotEditTool.getInstance();
 		if ( !SpotEditTool.isLaunched() )
-			editTool.run( "" );
-		else
 		{
-			editTool.imageOpened( imp );
+			editTool.run( "" );
 		}
 		editTool.register( imp, this );
 	}
