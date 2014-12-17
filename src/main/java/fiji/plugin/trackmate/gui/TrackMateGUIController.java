@@ -16,6 +16,24 @@ import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACKS_
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_COLORING;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_DISPLAY_DEPTH;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_DISPLAY_MODE;
+import ij.IJ;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.swing.JButton;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionChangeListener;
@@ -71,22 +89,6 @@ import fiji.plugin.trackmate.visualization.SpotColorGeneratorPerTrackFeature;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.trackscheme.SpotImageUpdater;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
-import ij.IJ;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.swing.JButton;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 public class TrackMateGUIController implements ActionListener
 {
@@ -1159,11 +1161,18 @@ public class TrackMateGUIController implements ActionListener
 		guimodel.saveButtonState = gui.jButtonSave.isEnabled();
 		guimodel.previousButtonState = gui.jButtonPrevious.isEnabled();
 		guimodel.nextButtonState = gui.jButtonNext.isEnabled();
-		gui.setLoadButtonEnabled( false );
-		gui.setSaveButtonEnabled( false );
-		gui.setPreviousButtonEnabled( false );
-		gui.setNextButtonEnabled( false );
-		gui.setLogButtonEnabled( false );
+		SwingUtilities.invokeLater( new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				gui.jButtonLoad.setEnabled( false );
+				gui.jButtonNext.setEnabled( false );
+				gui.jButtonPrevious.setEnabled( false );
+				gui.jButtonSave.setEnabled( false );
+				gui.jButtonLog.setEnabled( false );
+			}
+		} );
 	}
 
 	/**
