@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>sc.fiji</groupId>
 		<artifactId>pom-fiji</artifactId>
-		<version>6.1.1</version>
+		<version>6.1.3</version>
 		<relativePath />
 	</parent>
 
@@ -241,58 +241,5 @@
 			<url>http://maven.imagej.net/content/groups/public</url>
 		</repository>
 	</repositories>
-
-	<build>
-		<plugins>
-			<plugin>
-				<artifactId>maven-enforcer-plugin</artifactId>
-				<configuration>
-					<rules>
-						<banDuplicateClasses>
-							<dependencies>
-								<dependency>
-									<artifactId>VIB-lib</artifactId>
-									<ignoreClasses>
-										<ignoreClass>javax/media/j3d/*</ignoreClass>
-									</ignoreClasses>
-								</dependency>
-								<dependency>
-									<artifactId>slf4j-log4j12</artifactId>
-									<ignoreClasses>
-										<ignoreClass>org/slf4j/impl/*</ignoreClass>
-									</ignoreClasses>
-								</dependency>
-								<dependency>
-									<artifactId>slf4j-api</artifactId>
-									<ignoreClasses>
-										<ignoreClass>org/slf4j/*</ignoreClass>
-									</ignoreClasses>
-								</dependency>
-								<dependency>
-									<artifactId>jcodings</artifactId>
-									<ignoreClasses>
-										<ignoreClass>org/jcodings/*</ignoreClass>
-									</ignoreClasses>
-								</dependency>
-								<dependency>
-									<artifactId>jnr-constants</artifactId>
-									<ignoreClasses>
-										<ignoreClass>com/kenai/constantine/*</ignoreClass>
-										<ignoreClass>jnr/constants/*</ignoreClass>
-									</ignoreClasses>
-								</dependency>
-								<dependency>
-									<artifactId>jnr-ffi</artifactId>
-									<ignoreClasses>
-										<ignoreClass>jnr/ffi/*</ignoreClass>
-									</ignoreClasses>
-								</dependency>
-							</dependencies>
-						</banDuplicateClasses>
-					</rules>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
 
 </project>
