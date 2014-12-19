@@ -2,13 +2,6 @@ package fiji.plugin.trackmate.visualization.trackscheme;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
 
-import com.mxgraph.model.mxICell;
-import com.mxgraph.swing.mxGraphOutline;
-import com.mxgraph.swing.handler.mxRubberband;
-
-import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.util.TrackNavigator;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -23,6 +16,14 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
+
+import com.mxgraph.model.mxICell;
+import com.mxgraph.swing.mxGraphOutline;
+import com.mxgraph.swing.handler.mxRubberband;
+
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.util.TrackNavigator;
 
 public class TrackSchemeFrame extends JFrame
 {
@@ -89,8 +90,15 @@ public class TrackSchemeFrame extends JFrame
 			@Override
 			public void log( final String message, final Color color )
 			{
-				statusLabel.setText( message );
-				statusLabel.setForeground( color );
+				SwingUtilities.invokeLater( new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						statusLabel.setText( message );
+						statusLabel.setForeground( color );
+					}
+				} );
 			}
 
 			@Override
@@ -102,7 +110,14 @@ public class TrackSchemeFrame extends JFrame
 			@Override
 			public void setProgress( final double val )
 			{
-				progressBar.setValue( ( int ) ( val * 100 ) );
+				SwingUtilities.invokeLater( new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						progressBar.setValue( ( int ) ( val * 100 ) );
+					}
+				} );
 			}
 
 			@Override
