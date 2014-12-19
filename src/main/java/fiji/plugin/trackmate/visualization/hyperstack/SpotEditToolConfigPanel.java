@@ -181,7 +181,7 @@ public class SpotEditToolConfigPanel extends JFrame
 		lblNFrames.setFont( SMALL_FONT );
 		panelSemiAutoParams.add( lblNFrames );
 
-		jNFNFrames = new JNumericTextField( parent.params.nFrames );
+		jNFNFrames = new JNumericTextField( ( double ) parent.params.nFrames );
 		jNFNFrames.setFormat( "%.0f" );
 		jNFNFrames.setBounds( 137, 104, 49, 18 );
 		jNFNFrames.setHorizontalAlignment( SwingConstants.CENTER );
