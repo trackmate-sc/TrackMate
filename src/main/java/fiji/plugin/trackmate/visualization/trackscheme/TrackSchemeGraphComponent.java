@@ -2,6 +2,27 @@ package fiji.plugin.trackmate.visualization.trackscheme;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.EventObject;
+import java.util.Map;
+
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
+
 import com.mxgraph.canvas.mxGraphics2DCanvas;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.swing.mxGraphComponent;
@@ -17,26 +38,6 @@ import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxGraphView;
 
 import fiji.plugin.trackmate.Model;
-
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.EventObject;
-import java.util.Map;
-
-import javax.swing.BorderFactory;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.ScrollPaneConstants;
 
 public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEventListener
 {
@@ -455,6 +456,7 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 		{
 			setOpaque( true );
 			setBackground( BACKGROUND_COLOR_1 );
+			setToolTipText( "Column header tool tip" );;
 			addMouseListener( new MouseAdapter()
 			{
 				@Override
@@ -536,6 +538,37 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 		}
 
 		@Override
+		public String getToolTipText( final MouseEvent event )
+		{
+			final Point point = event.getPoint();
+			final double scale = graph.getView().getScale();
+			final double xcs = TrackScheme.X_COLUMN_SIZE * scale;
+			double x = xcs;
+			// Column headers
+			if ( null != columnWidths )
+			{
+				int index = 0;
+				while ( x < point.x )
+				{
+					if ( index >= columnTrackIDs.length ) { return "Unlaid spots"; }
+					final int cw = columnWidths[ index++ ];
+					x += cw * xcs;
+				}
+				if ( index == 0 )
+				{
+					index = 1;
+				}
+				String columnName = trackScheme.getModel().getTrackModel().name( columnTrackIDs[ index - 1 ] );
+				if ( null == columnName )
+				{
+					columnName = "Name not set";
+				}
+				return columnName;
+			}
+			return "";
+		}
+
+		@Override
 		public void paint( final Graphics g )
 		{
 			final Graphics2D g2d = ( Graphics2D ) g;
@@ -547,7 +580,6 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			final Rectangle paintBounds = g.getClipBounds();
 			g.setColor( BACKGROUND_COLOR_1 );
 			g.fillRect( paintBounds.x, paintBounds.y, paintBounds.x + paintBounds.width, paintBounds.height );
-
 
 			// Scaled sizes
 			final double xcs = TrackScheme.X_COLUMN_SIZE * scale;
@@ -607,6 +639,16 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 		{
 			setOpaque( true );
 			setBackground( BACKGROUND_COLOR_1 );
+			setToolTipText( "Row header tooltip" );
+		}
+
+		@Override
+		public String getToolTipText( final MouseEvent event )
+		{
+			final Point point = event.getPoint();
+			final double scale = graph.getView().getScale();
+			final int frame = ( int ) ( point.y / ( TrackScheme.Y_COLUMN_SIZE * scale ) );
+			return "frame " + frame;
 		}
 
 		@Override
