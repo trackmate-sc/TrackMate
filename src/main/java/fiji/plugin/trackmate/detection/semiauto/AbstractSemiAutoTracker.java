@@ -1,13 +1,5 @@
 package fiji.plugin.trackmate.detection.semiauto;
 
-import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.detection.LogDetector;
-import fiji.plugin.trackmate.detection.SpotDetector;
-import fiji.plugin.trackmate.tracking.SpotTracker;
-
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -23,6 +15,13 @@ import net.imglib2.multithreading.SimpleMultiThreading;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.detection.LogDetector;
+import fiji.plugin.trackmate.detection.SpotDetector;
+import fiji.plugin.trackmate.tracking.SpotTracker;
 
 /**
  * A class made to perform semi-automated tracking of spots in TrackMate &
@@ -84,6 +83,8 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 	 */
 	protected double qualityThreshold = QUALITY_THRESHOLD;
 
+	private int nFrames;
+
 	/*
 	 * CONSTRUCTOR
 	 */
@@ -101,18 +102,22 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 
 	/**
 	 * Configures this semi-automatic tracker.
-	 *
+	 * 
 	 * @param qualityThreshold
 	 *            the fraction of the initial quality above which we keep new
 	 *            spots. The highest, the more intolerant.
 	 * @param distanceTolerance
 	 *            how close must be the new spot found to be accepted, in radius
 	 *            units.
+	 * @param nFrames
+	 *            how many frames at most we track. Set it to 0 or negative to
+	 *            go as far as possible.
 	 */
-	public void setParameters( final double qualityThreshold, final double distanceTolerance )
+	public void setParameters( final double qualityThreshold, final double distanceTolerance, final int nFrames )
 	{
 		this.qualityThreshold = qualityThreshold;
 		this.distanceTolerance = distanceTolerance;
+		this.nFrames = nFrames;
 	}
 
 	@Override
@@ -172,10 +177,13 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 		 * Initial spot
 		 */
 		Spot spot = initialSpot;
+		int nSpotProcessed = 0;
 
-		while ( true )
+		while ( nFrames < 1 || nSpotProcessed < nFrames )
 		{
 
+			nSpotProcessed++;
+			
 			/*
 			 * Extract spot & features
 			 */
@@ -296,7 +304,11 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 			 */
 
 			spot = target;
+		}
 
+		if ( nSpotProcessed > 0 )
+		{
+			logger.log( "Finished semi-auto tracking after processing " + nSpotProcessed + " spots from " + initialSpot + " to " + spot + ".\n" );
 		}
 	}
 
