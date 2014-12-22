@@ -2,17 +2,6 @@ package fiji.plugin.trackmate.visualization.trackscheme;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
-import fiji.plugin.trackmate.FeatureModel;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionChangeEvent;
-import fiji.plugin.trackmate.SelectionChangeListener;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.features.SpotFeatureGrapher;
-import fiji.plugin.trackmate.util.OnRequestUpdater;
-import fiji.plugin.trackmate.util.OnRequestUpdater.Refreshable;
-import fiji.plugin.trackmate.util.TMUtils;
 import ij.measure.ResultsTable;
 
 import java.awt.BorderLayout;
@@ -40,6 +29,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
@@ -50,6 +40,18 @@ import javax.swing.event.AncestorListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
+
+import fiji.plugin.trackmate.FeatureModel;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionChangeEvent;
+import fiji.plugin.trackmate.SelectionChangeListener;
+import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.features.SpotFeatureGrapher;
+import fiji.plugin.trackmate.util.OnRequestUpdater;
+import fiji.plugin.trackmate.util.OnRequestUpdater.Refreshable;
+import fiji.plugin.trackmate.util.TMUtils;
 
 public class InfoPane extends JPanel implements SelectionChangeListener
 {
@@ -168,7 +170,12 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 			return;
 		if ( spots.size() == 0 )
 		{
-			scrollTable.setVisible( false );
+			// Clear display of the table, but not the table.
+			final DefaultTableModel tableModel = ( DefaultTableModel ) table.getModel();
+			tableModel.setRowCount( 0 );
+			tableModel.setColumnIdentifiers( new String[] { "ø" } );
+			tableModel.setColumnCount( 1 );
+			table.getColumnModel().getColumn( 0 ).setPreferredWidth( 10 );
 			return;
 		}
 
@@ -378,6 +385,12 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 		table.getTableHeader().setOpaque( false );
 		table.setSelectionForeground( Color.YELLOW.darker().darker() );
 		table.setGridColor( TrackScheme.GRID_COLOR );
+		// Init with default content
+		final DefaultTableModel tableModel = ( DefaultTableModel ) table.getModel();
+		tableModel.setColumnIdentifiers( new String[] { "ø" } );
+		tableModel.setColumnCount( 1 );
+		table.getColumnModel().getColumn( 0 ).setPreferredWidth( 10 );
+		// Listener for popup menu
 		table.addMouseListener( new MouseAdapter()
 		{
 			@Override
@@ -405,15 +418,17 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 		scrollTable.getRowHeader().setOpaque( false );
 		scrollTable.setOpaque( false );
 		scrollTable.getViewport().setOpaque( false );
-		scrollTable.setVisible( false ); // for now
 
 		final List< String > features = new ArrayList< String >( model.getFeatureModel().getSpotFeatures() );
 		final Map< String, String > featureNames = model.getFeatureModel().getSpotFeatureShortNames();
 		featureSelectionPanel = new FeaturePlotSelectionPanel( Spot.POSITION_T, features, featureNames );
 
+		final JSplitPane inner = new JSplitPane( JSplitPane.VERTICAL_SPLIT, scrollTable, featureSelectionPanel );
+		inner.setDividerLocation( 200 );
+		inner.setResizeWeight( 1.0d );
+		inner.setBorder( null );
 		setLayout( new BorderLayout() );
-		add( scrollTable, BorderLayout.CENTER );
-		add( featureSelectionPanel, BorderLayout.SOUTH );
+		add( inner, BorderLayout.CENTER );
 
 		// Add listener for plot events
 		featureSelectionPanel.addActionListener( new ActionListener()

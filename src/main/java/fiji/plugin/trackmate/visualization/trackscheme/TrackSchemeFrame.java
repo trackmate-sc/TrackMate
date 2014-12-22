@@ -144,7 +144,8 @@ public class TrackSchemeFrame extends JFrame
 		// Add the graph outline
 		final mxGraphOutline graphOutline = new mxGraphOutline( graphComponent );
 
-		final JSplitPane inner = new JSplitPane( JSplitPane.VERTICAL_SPLIT, infoPane, graphOutline );
+		final JSplitPane inner = new JSplitPane( JSplitPane.VERTICAL_SPLIT, graphOutline, infoPane );
+		inner.setDividerLocation( 120 );
 
 		final JSplitPane splitPane = new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, inner, graphComponent );
 		splitPane.setDividerLocation( 170 );
