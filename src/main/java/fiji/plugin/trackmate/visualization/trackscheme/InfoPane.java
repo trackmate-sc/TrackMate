@@ -150,14 +150,14 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 	public void selectionChanged( final SelectionChangeEvent event )
 	{
 		// Echo changed in a different thread for performance
-		new Thread( "TrackScheme info pane thread" )
+		SwingUtilities.invokeLater( new Runnable()
 		{
 			@Override
 			public void run()
 			{
 				highlightSpots( selectionModel.getSpotSelection() );
 			}
-		}.start();
+		} );
 	}
 
 	/**
@@ -168,6 +168,7 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 	{
 		if ( !doHighlightSelection )
 			return;
+		spotSelection = spots;
 		if ( spots.size() == 0 )
 		{
 			// Clear display of the table, but not the table.
@@ -180,7 +181,6 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 		}
 
 		// Copy and sort selection by frame
-		spotSelection = spots;
 		updater.doUpdate();
 	}
 
