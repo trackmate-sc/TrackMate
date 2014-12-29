@@ -29,6 +29,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
@@ -149,14 +150,14 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 	public void selectionChanged( final SelectionChangeEvent event )
 	{
 		// Echo changed in a different thread for performance
-		new Thread( "TrackScheme info pane thread" )
+		SwingUtilities.invokeLater( new Runnable()
 		{
 			@Override
 			public void run()
 			{
 				highlightSpots( selectionModel.getSpotSelection() );
 			}
-		}.start();
+		} );
 	}
 
 	/**
@@ -167,14 +168,19 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 	{
 		if ( !doHighlightSelection )
 			return;
+		spotSelection = spots;
 		if ( spots.size() == 0 )
 		{
-			scrollTable.setVisible( false );
+			// Clear display of the table, but not the table.
+			final DefaultTableModel tableModel = ( DefaultTableModel ) table.getModel();
+			tableModel.setRowCount( 0 );
+			tableModel.setColumnIdentifiers( new String[] { "ø" } );
+			tableModel.setColumnCount( 1 );
+			table.getColumnModel().getColumn( 0 ).setPreferredWidth( 10 );
 			return;
 		}
 
 		// Copy and sort selection by frame
-		spotSelection = spots;
 		updater.doUpdate();
 	}
 
@@ -379,6 +385,12 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 		table.getTableHeader().setOpaque( false );
 		table.setSelectionForeground( Color.YELLOW.darker().darker() );
 		table.setGridColor( TrackScheme.GRID_COLOR );
+		// Init with default content
+		final DefaultTableModel tableModel = ( DefaultTableModel ) table.getModel();
+		tableModel.setColumnIdentifiers( new String[] { "ø" } );
+		tableModel.setColumnCount( 1 );
+		table.getColumnModel().getColumn( 0 ).setPreferredWidth( 10 );
+		// Listener for popup menu
 		table.addMouseListener( new MouseAdapter()
 		{
 			@Override
@@ -406,15 +418,17 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 		scrollTable.getRowHeader().setOpaque( false );
 		scrollTable.setOpaque( false );
 		scrollTable.getViewport().setOpaque( false );
-		scrollTable.setVisible( false ); // for now
 
 		final List< String > features = new ArrayList< String >( model.getFeatureModel().getSpotFeatures() );
 		final Map< String, String > featureNames = model.getFeatureModel().getSpotFeatureShortNames();
 		featureSelectionPanel = new FeaturePlotSelectionPanel( Spot.POSITION_T, features, featureNames );
 
+		final JSplitPane inner = new JSplitPane( JSplitPane.VERTICAL_SPLIT, scrollTable, featureSelectionPanel );
+		inner.setDividerLocation( 200 );
+		inner.setResizeWeight( 1.0d );
+		inner.setBorder( null );
 		setLayout( new BorderLayout() );
-		add( scrollTable, BorderLayout.CENTER );
-		add( featureSelectionPanel, BorderLayout.SOUTH );
+		add( inner, BorderLayout.CENTER );
 
 		// Add listener for plot events
 		featureSelectionPanel.addActionListener( new ActionListener()

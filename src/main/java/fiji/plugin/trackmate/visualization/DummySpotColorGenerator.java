@@ -1,11 +1,10 @@
 package fiji.plugin.trackmate.visualization;
 
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.DEFAULT_SPOT_COLOR;
-
-import java.awt.Color;
-
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.gui.panels.components.ColorByFeatureGUIPanel;
+
+import java.awt.Color;
 
 /**
  * A dummy spot color generator that always return the default color.

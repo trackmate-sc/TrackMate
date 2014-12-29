@@ -8,6 +8,12 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_FEATURE
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_FRAME_GAP;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.Logger.SlaveLogger;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.tracking.SpotTracker;
+import fiji.plugin.trackmate.tracking.sparselap.costmatrix.JaqamanSegmentCostMatrixCreator;
+import fiji.plugin.trackmate.tracking.sparselap.linker.JaqamanLinker;
 
 import java.util.Map;
 
@@ -15,13 +21,6 @@ import net.imglib2.algorithm.Benchmark;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
-
-import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.Logger.SlaveLogger;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.tracking.sparselap.costmatrix.JaqamanSegmentCostMatrixCreator;
-import fiji.plugin.trackmate.tracking.sparselap.linker.JaqamanLinker;
 
 /**
  * This class tracks deals with the second step of tracking according to the LAP

@@ -3,11 +3,6 @@ package fiji.plugin.trackmate;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_FRAME_GAP;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
-
-import java.io.File;
-import java.io.FilenameFilter;
-import java.util.Map;
-
 import fiji.plugin.trackmate.action.ISBIChallengeExporter;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.providers.DetectorProvider;
@@ -17,6 +12,10 @@ import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import fiji.plugin.trackmate.tracking.sparselap.SimpleSparseLAPTrackerFactory;
+
+import java.io.File;
+import java.io.FilenameFilter;
+import java.util.Map;
 
 
 public class TrackMateBatch

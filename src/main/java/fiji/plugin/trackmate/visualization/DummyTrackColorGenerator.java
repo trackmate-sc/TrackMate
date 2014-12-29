@@ -1,12 +1,11 @@
 package fiji.plugin.trackmate.visualization;
 
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.DEFAULT_TRACK_COLOR;
+import fiji.plugin.trackmate.gui.panels.components.ColorByFeatureGUIPanel;
 
 import java.awt.Color;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
-
-import fiji.plugin.trackmate.gui.panels.components.ColorByFeatureGUIPanel;
 
 /**
  * A dummy track color generator that always return the default color.

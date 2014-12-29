@@ -77,7 +77,10 @@ public class SpotEditToolConfigPanel extends JFrame
 
 	private final JNumericTextField jNFDistanceTolerance;
 
+	private final JNumericTextField jNFNFrames;
+
 	private final SpotEditTool parent;
+
 
 	public SpotEditToolConfigPanel( final SpotEditTool parent )
 	{
@@ -129,7 +132,7 @@ public class SpotEditToolConfigPanel extends JFrame
 
 		final JPanel panelSemiAutoParams = new JPanel();
 		panelSemiAutoParams.setBorder( new LineBorder( new Color( 252, 117, 0 ), 1, false ) );
-		panelSemiAutoParams.setBounds( 6, 51, 192, 108 );
+		panelSemiAutoParams.setBounds( 6, 51, 192, 142 );
 		mainPanel.add( panelSemiAutoParams );
 		panelSemiAutoParams.setLayout( null );
 
@@ -172,6 +175,21 @@ public class SpotEditToolConfigPanel extends JFrame
 		jNFDistanceTolerance.addFocusListener( fl );
 		panelSemiAutoParams.add( jNFDistanceTolerance );
 
+		final JLabel lblNFrames = new JLabel( "Max nFrames" );
+		lblNFrames.setToolTipText( "<html>How many frames to process at max. <br/>Make it 0 or negative for no limit.</html>" );
+		lblNFrames.setBounds( 6, 104, 119, 16 );
+		lblNFrames.setFont( SMALL_FONT );
+		panelSemiAutoParams.add( lblNFrames );
+
+		jNFNFrames = new JNumericTextField( ( double ) parent.params.nFrames );
+		jNFNFrames.setFormat( "%.0f" );
+		jNFNFrames.setBounds( 137, 104, 49, 18 );
+		jNFNFrames.setHorizontalAlignment( SwingConstants.CENTER );
+		jNFNFrames.setFont( SMALL_FONT );
+		jNFNFrames.addActionListener( al );
+		jNFNFrames.addFocusListener( fl );
+		panelSemiAutoParams.add( jNFNFrames );
+
 		final JButton buttonSemiAutoTracking = new JButton( SEMIAUTO_TRACKING_ICON );
 		buttonSemiAutoTracking.setBounds( 6, 31, 33, 23 );
 		panelSemiAutoParams.add( buttonSemiAutoTracking );
@@ -190,10 +208,11 @@ public class SpotEditToolConfigPanel extends JFrame
 		labelSemiAutoTracking.setBounds( 49, 31, 137, 23 );
 		panelSemiAutoParams.add( labelSemiAutoTracking );
 
+
 		final JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setHorizontalScrollBarPolicy( ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER );
 		scrollPane.setVerticalScrollBarPolicy( ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS );
-		scrollPane.setBounds( 210, 51, 264, 237 );
+		scrollPane.setBounds( 210, 51, 264, 271 );
 		mainPanel.add( scrollPane );
 
 		final JTextPane textPane = new JTextPane();
@@ -203,7 +222,7 @@ public class SpotEditToolConfigPanel extends JFrame
 		scrollPane.setViewportView( textPane );
 
 		final JPanel panelButtons = new JPanel();
-		panelButtons.setBounds( 6, 171, 192, 117 );
+		panelButtons.setBounds( 6, 205, 192, 117 );
 		panelButtons.setBorder( new LineBorder( new Color( 252, 117, 0 ), 1, false ) );
 		mainPanel.add( panelButtons );
 		panelButtons.setLayout( null );
@@ -311,7 +330,7 @@ public class SpotEditToolConfigPanel extends JFrame
 			{}
 		};
 
-		setSize( 480, 318 );
+		setSize( 480, 350 );
 		setDefaultCloseOperation( JFrame.HIDE_ON_CLOSE );
 		setVisible( true );
 	}
@@ -366,6 +385,7 @@ public class SpotEditToolConfigPanel extends JFrame
 	{
 		parent.params.distanceTolerance = jNFDistanceTolerance.getValue();
 		parent.params.qualityThreshold = jNFQualityThreshold.getValue();
+		parent.params.nFrames = ( int ) jNFNFrames.getValue();
 	}
 
 	private void semiAutoTracking()
@@ -380,5 +400,4 @@ public class SpotEditToolConfigPanel extends JFrame
 		final SelectionModel selectionModel = displayer.getSelectionModel();
 		parent.semiAutoTracking( model, selectionModel, imp );
 	}
-
 }

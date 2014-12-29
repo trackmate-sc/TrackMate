@@ -16,6 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 
 import com.mxgraph.model.mxICell;
 import com.mxgraph.swing.mxGraphOutline;
@@ -89,8 +90,15 @@ public class TrackSchemeFrame extends JFrame
 			@Override
 			public void log( final String message, final Color color )
 			{
-				statusLabel.setText( message );
-				statusLabel.setForeground( color );
+				SwingUtilities.invokeLater( new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						statusLabel.setText( message );
+						statusLabel.setForeground( color );
+					}
+				} );
 			}
 
 			@Override
@@ -102,7 +110,14 @@ public class TrackSchemeFrame extends JFrame
 			@Override
 			public void setProgress( final double val )
 			{
-				progressBar.setValue( ( int ) ( val * 100 ) );
+				SwingUtilities.invokeLater( new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						progressBar.setValue( ( int ) ( val * 100 ) );
+					}
+				} );
 			}
 
 			@Override
@@ -129,7 +144,8 @@ public class TrackSchemeFrame extends JFrame
 		// Add the graph outline
 		final mxGraphOutline graphOutline = new mxGraphOutline( graphComponent );
 
-		final JSplitPane inner = new JSplitPane( JSplitPane.VERTICAL_SPLIT, infoPane, graphOutline );
+		final JSplitPane inner = new JSplitPane( JSplitPane.VERTICAL_SPLIT, graphOutline, infoPane );
+		inner.setDividerLocation( 120 );
 
 		final JSplitPane splitPane = new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, inner, graphComponent );
 		splitPane.setDividerLocation( 170 );

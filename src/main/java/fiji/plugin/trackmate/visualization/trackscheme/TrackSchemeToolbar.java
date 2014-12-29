@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.visualization.trackscheme;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
+import fiji.plugin.trackmate.visualization.trackscheme.utils.SearchBar;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -15,8 +16,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JToolBar;
-
-import fiji.plugin.trackmate.visualization.trackscheme.utils.SearchBar;
 
 public class TrackSchemeToolbar extends JToolBar
 {

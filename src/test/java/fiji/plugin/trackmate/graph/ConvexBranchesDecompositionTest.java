@@ -2,6 +2,12 @@ package fiji.plugin.trackmate.graph;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.tracking.TrackerKeys;
+import fiji.plugin.trackmate.tracking.oldlap.FastLAPTracker;
+import fiji.plugin.trackmate.tracking.oldlap.FastLAPTrackerFactory;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -15,13 +21,6 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 import org.junit.Before;
 import org.junit.Test;
-
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.tracking.TrackerKeys;
-import fiji.plugin.trackmate.tracking.oldlap.FastLAPTracker;
-import fiji.plugin.trackmate.tracking.oldlap.FastLAPTrackerFactory;
 
 public class ConvexBranchesDecompositionTest
 {

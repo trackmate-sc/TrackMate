@@ -2,15 +2,14 @@ package fiji.plugin.trackmate.detection.util;
 
 import java.util.Iterator;
 
-import net.imglib2.ExtendedRandomAccessibleInterval;
 import net.imglib2.IterableInterval;
-import net.imglib2.IterableRealInterval;
 import net.imglib2.Localizable;
 import net.imglib2.Positionable;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealPositionable;
 import net.imglib2.outofbounds.OutOfBoundsFactory;
+import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.Views;
 
 public class SquareNeighborhood3x3 <T> implements Positionable, IterableInterval<T> {
@@ -125,12 +124,6 @@ public class SquareNeighborhood3x3 <T> implements Positionable, IterableInterval
 	@Override
 	public Object iterationOrder() {
 		return this;
-	}
-
-	@Override
-	@Deprecated
-	public boolean equalIterationOrder(IterableRealInterval<?> f) {
-		return (f instanceof SquareNeighborhood3x3);
 	}
 
 	@Override

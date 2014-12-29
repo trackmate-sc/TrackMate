@@ -1,16 +1,15 @@
 package fiji.plugin.trackmate.visualization.hyperstack;
 
-import ij.ImagePlus;
-
-import javax.swing.ImageIcon;
-
-import org.scijava.plugin.Plugin;
-
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewFactory;
+import ij.ImagePlus;
+
+import javax.swing.ImageIcon;
+
+import org.scijava.plugin.Plugin;
 
 @Plugin( type = ViewFactory.class )
 public class HyperStackDisplayerFactory implements ViewFactory

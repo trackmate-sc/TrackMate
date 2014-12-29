@@ -1,14 +1,14 @@
 package fiji.plugin.trackmate.visualization.trackscheme;
 
-import javax.swing.ImageIcon;
-
-import org.scijava.plugin.Plugin;
-
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewFactory;
+
+import javax.swing.ImageIcon;
+
+import org.scijava.plugin.Plugin;
 
 /*
  * We annotate the TrackScheme factory to be NOT visible,

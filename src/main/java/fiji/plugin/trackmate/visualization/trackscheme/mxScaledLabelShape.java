@@ -1,13 +1,13 @@
 package fiji.plugin.trackmate.visualization.trackscheme;
 
-import java.awt.Image;
-import java.awt.Rectangle;
-
 import com.mxgraph.canvas.mxGraphics2DCanvas;
 import com.mxgraph.shape.mxRectangleShape;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxCellState;
+
+import java.awt.Image;
+import java.awt.Rectangle;
 
 /**
  * This is a shape that is made to display a cell in a way that suits for our 

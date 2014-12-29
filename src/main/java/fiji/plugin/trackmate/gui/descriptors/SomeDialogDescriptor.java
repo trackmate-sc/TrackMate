@@ -1,9 +1,9 @@
 package fiji.plugin.trackmate.gui.descriptors;
 
+import fiji.plugin.trackmate.gui.LogPanel;
+
 import java.awt.Component;
 import java.io.File;
-
-import fiji.plugin.trackmate.gui.LogPanel;
 
 /**
  * An abstract class made for describing panels that generate a dialog, like

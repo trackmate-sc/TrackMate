@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.interactivetests;
 
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.visualization.threedviewer.SpotGroupNode;
 import ij3d.Content;
 import ij3d.ContentInstant;
 import ij3d.Image3DUniverse;
@@ -11,9 +13,6 @@ import java.util.TreeMap;
 
 import javax.vecmath.Color4f;
 import javax.vecmath.Point4d;
-
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.visualization.threedviewer.SpotGroupNode;
 
 public class SpotGroupNodeTestDrive
 {

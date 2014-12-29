@@ -3,18 +3,18 @@
  */
 package fiji.plugin.trackmate.action;
 
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.gui.TrackMateWizard;
+
 import java.util.Iterator;
 import java.util.Set;
 
 import javax.swing.ImageIcon;
 
 import org.scijava.plugin.Plugin;
-
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
 
 public class ResetSpotTimeFeatureAction extends AbstractTMAction {
 

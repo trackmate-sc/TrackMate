@@ -1,5 +1,15 @@
 package fiji.plugin.trackmate.visualization.trackscheme;
 
+import com.mxgraph.model.mxCell;
+import com.mxgraph.model.mxICell;
+import com.mxgraph.swing.util.mxGraphActions;
+import com.mxgraph.util.mxEvent;
+import com.mxgraph.util.mxEventObject;
+import com.mxgraph.util.mxEventSource.mxIEventListener;
+import com.mxgraph.view.mxGraph;
+
+import fiji.plugin.trackmate.Spot;
+
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Point2D;
@@ -10,16 +20,6 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-
-import com.mxgraph.model.mxCell;
-import com.mxgraph.model.mxICell;
-import com.mxgraph.swing.util.mxGraphActions;
-import com.mxgraph.util.mxEvent;
-import com.mxgraph.util.mxEventObject;
-import com.mxgraph.util.mxEventSource.mxIEventListener;
-import com.mxgraph.view.mxGraph;
-
-import fiji.plugin.trackmate.Spot;
 
 public class TrackSchemeActions {
 

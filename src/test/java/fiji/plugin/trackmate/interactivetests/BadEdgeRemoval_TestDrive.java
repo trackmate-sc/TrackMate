@@ -1,14 +1,5 @@
 package fiji.plugin.trackmate.interactivetests;
 
-import ij.ImagePlus;
-
-import java.io.File;
-import java.io.IOException;
-
-import org.jdom2.JDOMException;
-import org.jgrapht.graph.DefaultWeightedEdge;
-import org.scijava.util.AppUtils;
-
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
@@ -23,6 +14,14 @@ import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
+import ij.ImagePlus;
+
+import java.io.File;
+import java.io.IOException;
+
+import org.jdom2.JDOMException;
+import org.jgrapht.graph.DefaultWeightedEdge;
+import org.scijava.util.AppUtils;
 
 public class BadEdgeRemoval_TestDrive {
 

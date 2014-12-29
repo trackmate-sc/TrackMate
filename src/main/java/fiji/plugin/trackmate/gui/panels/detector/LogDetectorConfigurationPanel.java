@@ -164,19 +164,23 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 	public void setSettings( final Map< String, Object > settings )
 	{
 		sliderChannel.setValue( ( Integer ) settings.get( KEY_TARGET_CHANNEL ) );
-		double diameter = ( Double ) settings.get( KEY_RADIUS );
+		double radius = ( Double ) settings.get( KEY_RADIUS );
 		if ( imp != null )
 		{
 			final Calibration calibration = imp.getCalibration();
+			// Not too large
 			final double maxWidth = imp.getWidth() * 0.5 * ( calibration == null ? 1 : calibration.pixelWidth );
 			final double maxHeight = imp.getHeight() * 0.5 * ( calibration == null ? 1 : calibration.pixelHeight );
 			final double max = maxWidth < maxHeight ? maxWidth : maxHeight;
-			if ( diameter > max )
+			if ( radius > max )
 			{
-				diameter *= max * 4 / ( imp.getWidth() + imp.getHeight() );
+				radius *= max * 4 / ( imp.getWidth() + imp.getHeight() );
 			}
+			// Not too small
+			final double pw = calibration == null ? 1 : calibration.pixelWidth;
+			radius = Math.max( radius / pw, 1.5 ) * pw;
 		}
-		jTextFieldBlobDiameter.setText( "" + ( 2 * diameter ) );
+		jTextFieldBlobDiameter.setText( "" + ( 2 * radius ) );
 		jCheckBoxMedianFilter.setSelected( ( Boolean ) settings.get( KEY_DO_MEDIAN_FILTERING ) );
 		jTextFieldThreshold.setText( "" + settings.get( KEY_THRESHOLD ) );
 		jCheckSubPixel.setSelected( ( Boolean ) settings.get( KEY_DO_SUBPIXEL_LOCALIZATION ) );
@@ -223,7 +227,12 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 				final TrackMate trackmate = new TrackMate( settings );
 				trackmate.getModel().setLogger( localLogger );
 
-				trackmate.execDetection();
+				final boolean detectionOk = trackmate.execDetection();
+				if ( !detectionOk )
+				{
+					localLogger.error( trackmate.getErrorMessage() );
+					return;
+				}
 				localLogger.log( "Found " + trackmate.getModel().getSpots().getNSpots( false ) + " spots." );
 
 				// Wrap new spots in a list.

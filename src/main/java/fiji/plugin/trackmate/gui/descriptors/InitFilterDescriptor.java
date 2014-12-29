@@ -1,7 +1,5 @@
 package fiji.plugin.trackmate.gui.descriptors;
 
-import javax.swing.Icon;
-
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
@@ -9,6 +7,8 @@ import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.panels.InitFilterPanel;
+
+import javax.swing.Icon;
 
 public class InitFilterDescriptor implements WizardPanelDescriptor
 {

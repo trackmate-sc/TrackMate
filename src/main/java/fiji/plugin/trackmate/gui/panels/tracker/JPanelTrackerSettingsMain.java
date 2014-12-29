@@ -16,6 +16,10 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_FEATURE_PEN
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_MAX_DISTANCE;
+import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
+import fiji.plugin.trackmate.gui.panels.components.JPanelFeatureSelectionGui;
+import fiji.plugin.trackmate.tracking.LAPUtils;
+import fiji.util.NumberParser;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -33,11 +37,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
-
-import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
-import fiji.plugin.trackmate.gui.panels.components.JPanelFeatureSelectionGui;
-import fiji.plugin.trackmate.tracking.LAPUtils;
-import fiji.util.NumberParser;
 
 public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 

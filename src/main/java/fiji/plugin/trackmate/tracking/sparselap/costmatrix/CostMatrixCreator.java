@@ -1,10 +1,11 @@
 package fiji.plugin.trackmate.tracking.sparselap.costmatrix;
 
+import fiji.plugin.trackmate.tracking.sparselap.linker.SparseCostMatrix;
+
 import java.util.List;
 
 import net.imglib2.algorithm.Benchmark;
 import net.imglib2.algorithm.OutputAlgorithm;
-import fiji.plugin.trackmate.tracking.sparselap.linker.SparseCostMatrix;
 
 /**
  * Interface for function that can generate a {@link SparseCostMatrix} from

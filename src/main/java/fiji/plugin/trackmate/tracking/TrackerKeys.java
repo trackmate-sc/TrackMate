@@ -1,9 +1,9 @@
 package fiji.plugin.trackmate.tracking;
 
+import fiji.plugin.trackmate.Spot;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import fiji.plugin.trackmate.Spot;
 
 public class TrackerKeys {
 

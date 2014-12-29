@@ -7,6 +7,8 @@ import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.TRACKMATE_ICON;
+import fiji.plugin.trackmate.Logger;
+import fiji.util.NumberParser;
 import ij.IJ;
 
 import java.awt.Component;
@@ -25,9 +27,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.jdom2.Attribute;
 import org.jdom2.DataConversionException;
 import org.jdom2.Element;
-
-import fiji.plugin.trackmate.Logger;
-import fiji.util.NumberParser;
 
 /**
  * A collection of static utilities for the input/output of xml files.

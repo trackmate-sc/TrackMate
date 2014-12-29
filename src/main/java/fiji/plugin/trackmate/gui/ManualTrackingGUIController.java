@@ -9,32 +9,39 @@ import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.gui.descriptors.WizardPanelDescriptor;
 
-public class ManualTrackingGUIController extends TrackMateGUIController {
+public class ManualTrackingGUIController extends TrackMateGUIController
+{
 
-	public ManualTrackingGUIController(final TrackMate trackmate) {
-		super(trackmate);
+	public ManualTrackingGUIController( final TrackMate trackmate )
+	{
+		super( trackmate );
 	}
 
 	@Override
-	protected WizardPanelDescriptor getFirstDescriptor() {
+	protected WizardPanelDescriptor getFirstDescriptor()
+	{
 		return configureViewsDescriptor;
 	}
 
-
 	@Override
-	protected WizardPanelDescriptor previousDescriptor(final WizardPanelDescriptor currentDescriptor) {
-		if (currentDescriptor == configureViewsDescriptor) {
+	protected WizardPanelDescriptor previousDescriptor( final WizardPanelDescriptor currentDescriptor )
+	{
+		if ( currentDescriptor == configureViewsDescriptor )
+		{
 			return null;
-		} else {
-			return super.previousDescriptor(currentDescriptor);
+		}
+		else
+		{
+			return super.previousDescriptor( currentDescriptor );
 		}
 	}
 
 	@Override
-	protected void createProviders() {
+	protected void createProviders()
+	{
 		super.createProviders();
 
-		trackmate.getModel().setLogger(logger);
+		trackmate.getModel().setLogger( logger );
 
 		/*
 		 * Immediately declare feature analyzers to settings object
@@ -44,34 +51,37 @@ public class ManualTrackingGUIController extends TrackMateGUIController {
 
 		settings.clearSpotAnalyzerFactories();
 		final List< String > spotAnalyzerKeys = spotAnalyzerProvider.getKeys();
-		for (final String key : spotAnalyzerKeys) {
+		for ( final String key : spotAnalyzerKeys )
+		{
 			final SpotAnalyzerFactory< ? > spotFeatureAnalyzer = spotAnalyzerProvider.getFactory( key );
-			settings.addSpotAnalyzerFactory(spotFeatureAnalyzer);
+			settings.addSpotAnalyzerFactory( spotFeatureAnalyzer );
 		}
 
 		settings.clearEdgeAnalyzers();
 		final List< String > edgeAnalyzerKeys = edgeAnalyzerProvider.getKeys();
-		for (final String key : edgeAnalyzerKeys) {
+		for ( final String key : edgeAnalyzerKeys )
+		{
 			final EdgeAnalyzer edgeAnalyzer = edgeAnalyzerProvider.getFactory( key );
-			settings.addEdgeAnalyzer(edgeAnalyzer);
+			settings.addEdgeAnalyzer( edgeAnalyzer );
 		}
 
 		settings.clearTrackAnalyzers();
 		final List< String > trackAnalyzerKeys = trackAnalyzerProvider.getKeys();
-		for (final String key : trackAnalyzerKeys) {
+		for ( final String key : trackAnalyzerKeys )
+		{
 			final TrackAnalyzer trackAnalyzer = trackAnalyzerProvider.getFactory( key );
-			settings.addTrackAnalyzer(trackAnalyzer);
+			settings.addTrackAnalyzer( trackAnalyzer );
 		}
 
-		trackmate.getModel().getLogger().log(settings.toStringFeatureAnalyzersInfo());
+		trackmate.getModel().getLogger().log( settings.toStringFeatureAnalyzersInfo() );
 
 		/*
 		 * Immediately declare features to model.
 		 */
 
-		trackmate.computeSpotFeatures(false);
-		trackmate.computeEdgeFeatures(false);
-		trackmate.computeTrackFeatures(false);
+		trackmate.computeSpotFeatures( false );
+		trackmate.computeEdgeFeatures( false );
+		trackmate.computeTrackFeatures( false );
 	}
 
 }

@@ -1,16 +1,15 @@
 package fiji.plugin.trackmate.action;
 
+import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.gui.TrackMateWizard;
+import fiji.plugin.trackmate.visualization.threedviewer.SpotDisplayer3D;
 import ij3d.Image3DUniverse;
 import ij3d.ImageWindow3D;
 
 import javax.swing.ImageIcon;
 
 import org.scijava.plugin.Plugin;
-
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
-import fiji.plugin.trackmate.visualization.threedviewer.SpotDisplayer3D;
 
 public class LinkNew3DViewerAction extends AbstractTMAction
 {

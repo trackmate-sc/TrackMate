@@ -24,7 +24,7 @@ import fiji.plugin.trackmate.visualization.TrackMateModelView;
 /**
  * A GUI for TrackMate, strongly inspired from the spots detection GUI of the
  * Imaris® software from <a href="http://www.bitplane.com/">Bitplane</a>.
- *
+ * 
  * @author Jean-Yves Tinevez <tinevez@pasteur.fr> - September 2010 - 2014
  */
 public class TrackMateWizard extends JFrame implements ActionListener
@@ -216,6 +216,7 @@ public class TrackMateWizard extends JFrame implements ActionListener
 
 	public void setNextButtonEnabled( final boolean b )
 	{
+		controller.guimodel.nextButtonState = b;
 		SwingUtilities.invokeLater( new Runnable()
 		{
 			@Override
@@ -236,6 +237,7 @@ public class TrackMateWizard extends JFrame implements ActionListener
 
 	public void setLogButtonEnabled( final boolean b )
 	{
+		controller.guimodel.loadButtonState = b;
 		SwingUtilities.invokeLater( new Runnable()
 		{
 			@Override
@@ -248,6 +250,7 @@ public class TrackMateWizard extends JFrame implements ActionListener
 
 	public void setPreviousButtonEnabled( final boolean b )
 	{
+		controller.guimodel.previousButtonState = b;
 		SwingUtilities.invokeLater( new Runnable()
 		{
 			@Override
@@ -260,6 +263,7 @@ public class TrackMateWizard extends JFrame implements ActionListener
 
 	public void setSaveButtonEnabled( final boolean b )
 	{
+		controller.guimodel.saveButtonState = b;
 		SwingUtilities.invokeLater( new Runnable()
 		{
 			@Override
@@ -272,6 +276,7 @@ public class TrackMateWizard extends JFrame implements ActionListener
 
 	public void setLoadButtonEnabled( final boolean b )
 	{
+		controller.guimodel.loadButtonState = b;
 		SwingUtilities.invokeLater( new Runnable()
 		{
 			@Override

@@ -1,11 +1,5 @@
 package fiji.plugin.trackmate.gui.descriptors;
 
-import java.awt.Component;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.Icon;
-
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
@@ -17,6 +11,12 @@ import fiji.plugin.trackmate.providers.ViewProvider;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewFactory;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
+
+import java.awt.Component;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.Icon;
 
 public class ViewChoiceDescriptor implements WizardPanelDescriptor
 {

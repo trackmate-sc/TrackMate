@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.graph;
 
+import fiji.plugin.trackmate.Spot;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -9,8 +11,6 @@ import net.imglib2.algorithm.OutputAlgorithm;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
-
-import fiji.plugin.trackmate.Spot;
 
 public class FromContinuousBranches implements OutputAlgorithm< SimpleWeightedGraph< Spot, DefaultWeightedEdge > >, Benchmark
 {

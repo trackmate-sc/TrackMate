@@ -1,15 +1,15 @@
 package fiji.plugin.trackmate.tracking.sparselap;
 
+import fiji.plugin.trackmate.tracking.sparselap.costmatrix.DefaultCostMatrixCreator;
+import fiji.plugin.trackmate.tracking.sparselap.costmatrix.DefaultCostMatrixCreator.Assignment;
+import fiji.plugin.trackmate.tracking.sparselap.linker.JaqamanLinker;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-
-import fiji.plugin.trackmate.tracking.sparselap.costmatrix.DefaultCostMatrixCreator;
-import fiji.plugin.trackmate.tracking.sparselap.costmatrix.DefaultCostMatrixCreator.Assignment;
-import fiji.plugin.trackmate.tracking.sparselap.linker.JaqamanLinker;
 
 public class DefaultCostMatrixCreatorExample
 {

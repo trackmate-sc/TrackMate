@@ -4,6 +4,16 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_GAP_CLOSING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_MERGING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_SPLITTING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_BLOCKING_VALUE;
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.tracking.LAPUtils;
+import fiji.plugin.trackmate.tracking.SpotTracker;
+import fiji.plugin.trackmate.tracking.oldlap.costmatrix.LinkingCostMatrixCreator;
+import fiji.plugin.trackmate.tracking.oldlap.costmatrix.TrackSegmentCostMatrixCreator;
+import fiji.plugin.trackmate.tracking.oldlap.hungarian.AssignmentAlgorithm;
+import fiji.plugin.trackmate.tracking.oldlap.hungarian.AssignmentProblem;
+import fiji.plugin.trackmate.tracking.oldlap.hungarian.HungarianAlgorithm;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -20,17 +30,6 @@ import net.imglib2.multithreading.SimpleMultiThreading;
 import org.jgrapht.alg.ConnectivityInspector;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
-
-import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.tracking.LAPUtils;
-import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.tracking.oldlap.costmatrix.LinkingCostMatrixCreator;
-import fiji.plugin.trackmate.tracking.oldlap.costmatrix.TrackSegmentCostMatrixCreator;
-import fiji.plugin.trackmate.tracking.oldlap.hungarian.AssignmentAlgorithm;
-import fiji.plugin.trackmate.tracking.oldlap.hungarian.AssignmentProblem;
-import fiji.plugin.trackmate.tracking.oldlap.hungarian.HungarianAlgorithm;
 
 /**
  *

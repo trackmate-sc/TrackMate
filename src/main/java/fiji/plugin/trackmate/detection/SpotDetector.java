@@ -1,13 +1,14 @@
 package fiji.plugin.trackmate.detection;
 
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackMate;
+
 import java.util.List;
 
 import net.imglib2.algorithm.Benchmark;
 import net.imglib2.algorithm.OutputAlgorithm;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackMate;
 
 /**
  * Interface for Spot detector classes, that are able to segment spots of a

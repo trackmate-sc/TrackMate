@@ -1,9 +1,5 @@
 package fiji.plugin.trackmate;
 
-import javax.swing.ImageIcon;
-
-import org.scijava.plugin.SciJavaPlugin;
-
 import fiji.plugin.trackmate.action.TrackMateActionFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
@@ -11,6 +7,10 @@ import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.visualization.ViewFactory;
+
+import javax.swing.ImageIcon;
+
+import org.scijava.plugin.SciJavaPlugin;
 
 /**
  * Interface for TrackMate modules.

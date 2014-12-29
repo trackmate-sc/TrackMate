@@ -5,9 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import fiji.plugin.trackmate.tracking.oldlap.hungarian.JonkerVolgenantAlgorithm;
-import fiji.plugin.trackmate.tracking.oldlap.hungarian.MunkresKuhnAlgorithm;
-
 public class JonkerVolgenantTest
 {
 

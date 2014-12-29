@@ -71,6 +71,19 @@ public class DogDetectorFactory< T extends RealType< T > & NativeType< T >> exte
 			}
 			imFrame = Views.hyperSlice( imFrame, timeDim, frame );
 		}
+
+		// In case we have a 1D image.
+		if ( img.dimension( 0 ) < 2 )
+		{ // Single column image, will be rotated internally.
+			calibration[ 0 ] = calibration[ 1 ]; // It gets NaN otherwise
+			calibration[ 1 ] = 1;
+			imFrame = Views.hyperSlice( imFrame, 0, 0 );
+		}
+		if ( img.dimension( 1 ) < 2 )
+		{ // Single line image
+			imFrame = Views.hyperSlice( imFrame, 1, 0 );
+		}
+
 		final DogDetector< T > detector = new DogDetector< T >( imFrame, interval, calibration, radius, threshold, doSubpixel, doMedian );
 		detector.setNumThreads( 1 );
 		return detector;

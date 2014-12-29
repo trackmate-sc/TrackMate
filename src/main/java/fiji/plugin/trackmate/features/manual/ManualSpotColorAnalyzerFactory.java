@@ -1,5 +1,12 @@
 package fiji.plugin.trackmate.features.manual;
 
+import fiji.plugin.trackmate.Dimension;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.features.spot.SpotAnalyzer;
+import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
+import fiji.plugin.trackmate.visualization.TrackMateModelView;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,20 +20,13 @@ import net.imglib2.type.numeric.RealType;
 
 import org.scijava.plugin.Plugin;
 
-import fiji.plugin.trackmate.Dimension;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.features.spot.SpotAnalyzer;
-import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
-
 @Plugin( type = SpotAnalyzerFactory.class )
 public class ManualSpotColorAnalyzerFactory< T extends RealType< T > & NativeType< T >> implements SpotAnalyzerFactory< T >
 {
 
 	public static final String FEATURE = "MANUAL_COLOR";
 
-	static final String KEY = "MANUAL_SPOT_COLOR_ANALYZER";
+	public static final String KEY = "MANUAL_SPOT_COLOR_ANALYZER";
 
 	static final List< String > FEATURES = new ArrayList< String >( 1 );
 

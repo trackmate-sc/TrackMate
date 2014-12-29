@@ -1,5 +1,11 @@
 package fiji.plugin.trackmate.features;
 
+import fiji.plugin.trackmate.Dimension;
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -7,12 +13,6 @@ import java.util.Map;
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
-
-import fiji.plugin.trackmate.Dimension;
-import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 
 /**
  * A class dedicated to centralizing the calculation of the numerical features

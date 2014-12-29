@@ -3,6 +3,10 @@ package fiji.plugin.trackmate.gui.panels;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.BIG_FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.TEXTFIELD_DIMENSION;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
+import fiji.util.NumberParser;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.Roi;
@@ -16,11 +20,6 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
-
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
-import fiji.util.NumberParser;
 
 public class StartDialogPanel extends ActionListenablePanel {
 

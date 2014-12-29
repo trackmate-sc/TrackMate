@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.tracking.sparselap.costmatrix;
 
+import fiji.plugin.trackmate.Spot;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -9,8 +11,6 @@ import java.util.Set;
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.alg.ConnectivityInspector;
 import org.jgrapht.graph.DefaultWeightedEdge;
-
-import fiji.plugin.trackmate.Spot;
 
 public class GraphSegmentSplitter
 {

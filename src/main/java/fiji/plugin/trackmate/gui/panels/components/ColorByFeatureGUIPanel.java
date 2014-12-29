@@ -1,6 +1,12 @@
 package fiji.plugin.trackmate.gui.panels.components;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
+import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
+import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
+import fiji.plugin.trackmate.visualization.MinMaxAdjustable;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -25,13 +31,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.jfree.chart.renderer.InterpolatePaintScale;
-
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
-import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
-import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
-import fiji.plugin.trackmate.visualization.MinMaxAdjustable;
 
 public class ColorByFeatureGUIPanel extends ActionListenablePanel implements MinMaxAdjustable
 {

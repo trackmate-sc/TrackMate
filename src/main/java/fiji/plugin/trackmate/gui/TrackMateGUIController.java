@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JButton;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ChangeEvent;
@@ -1160,11 +1161,18 @@ public class TrackMateGUIController implements ActionListener
 		guimodel.saveButtonState = gui.jButtonSave.isEnabled();
 		guimodel.previousButtonState = gui.jButtonPrevious.isEnabled();
 		guimodel.nextButtonState = gui.jButtonNext.isEnabled();
-		gui.setLoadButtonEnabled( false );
-		gui.setSaveButtonEnabled( false );
-		gui.setPreviousButtonEnabled( false );
-		gui.setNextButtonEnabled( false );
-		gui.setLogButtonEnabled( false );
+		SwingUtilities.invokeLater( new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				gui.jButtonLoad.setEnabled( false );
+				gui.jButtonNext.setEnabled( false );
+				gui.jButtonPrevious.setEnabled( false );
+				gui.jButtonSave.setEnabled( false );
+				gui.jButtonLog.setEnabled( false );
+			}
+		} );
 	}
 
 	/**

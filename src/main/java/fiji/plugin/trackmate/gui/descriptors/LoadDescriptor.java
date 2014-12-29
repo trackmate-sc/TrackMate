@@ -1,9 +1,5 @@
 package fiji.plugin.trackmate.gui.descriptors;
 
-import java.io.File;
-import java.util.Collection;
-import java.util.Map;
-
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
@@ -26,6 +22,10 @@ import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import fiji.plugin.trackmate.visualization.trackscheme.SpotImageUpdater;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
+
+import java.io.File;
+import java.util.Collection;
+import java.util.Map;
 
 public class LoadDescriptor extends SomeDialogDescriptor
 {

@@ -2,6 +2,7 @@ package fiji.plugin.trackmate.gui.panels.components;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.BIG_FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
+import fiji.plugin.trackmate.visualization.MinMaxAdjustable;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -17,8 +18,6 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
-
-import fiji.plugin.trackmate.visualization.MinMaxAdjustable;
 
 public class SetColorScaleDialog extends JDialog implements MinMaxAdjustable
 {

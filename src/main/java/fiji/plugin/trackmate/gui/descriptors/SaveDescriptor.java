@@ -1,14 +1,14 @@
 package fiji.plugin.trackmate.gui.descriptors;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.io.TmXmlWriter;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class SaveDescriptor extends SomeDialogDescriptor
 {

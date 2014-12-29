@@ -1,15 +1,15 @@
 package fiji.plugin.trackmate.tracking;
 
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.gui.ConfigurationPanel;
+
 import java.util.Map;
 
 import javax.swing.ImageIcon;
 
 import org.jdom2.Element;
 import org.scijava.plugin.Plugin;
-
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.gui.ConfigurationPanel;
 
 @Plugin( type = SpotTrackerFactory.class, priority = -1d )
 public class ManualTrackerFactory implements SpotTrackerFactory

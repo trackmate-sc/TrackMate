@@ -1,10 +1,9 @@
 package fiji.plugin.trackmate.tracking.oldlap.costfunction;
 
-import java.util.List;
-
+import Jama.Matrix;
 import fiji.plugin.trackmate.Spot;
 
-import Jama.Matrix;
+import java.util.List;
 
 /**
  * Interface for cost function classes, which take a {@link Matrix} and

@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.gui.panels.components;
 
+import fiji.util.NumberParser;
+
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,8 +12,6 @@ import javax.swing.JTextField;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.text.Document;
-
-import fiji.util.NumberParser;
 
 public class JNumericTextField extends JTextField
 {

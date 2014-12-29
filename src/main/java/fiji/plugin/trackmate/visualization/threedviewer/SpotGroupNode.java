@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.visualization.threedviewer;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
+import customnode.CustomTriangleMesh;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import ij3d.ContentNode;
 
@@ -28,8 +29,6 @@ import javax.vecmath.Point3f;
 import javax.vecmath.Point4d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
-
-import customnode.CustomTriangleMesh;
 
 public class SpotGroupNode<K> extends ContentNode {
 

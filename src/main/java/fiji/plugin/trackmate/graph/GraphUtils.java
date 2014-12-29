@@ -1,5 +1,8 @@
 package fiji.plugin.trackmate.graph;
 
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackModel;
+
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -14,9 +17,6 @@ import org.jgrapht.VertexFactory;
 import org.jgrapht.alg.DirectedNeighborIndex;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
-
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackModel;
 
 public class GraphUtils {
 

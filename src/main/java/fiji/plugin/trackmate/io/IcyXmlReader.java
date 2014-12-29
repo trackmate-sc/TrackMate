@@ -1,5 +1,10 @@
 package fiji.plugin.trackmate.io;
 
+import fiji.plugin.trackmate.Logger.StringBuilderLogger;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotCollection;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -13,11 +18,6 @@ import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
-
-import fiji.plugin.trackmate.Logger.StringBuilderLogger;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
 
 /**
  * A reader for the XML files generated in the TrackManager of the ICY software

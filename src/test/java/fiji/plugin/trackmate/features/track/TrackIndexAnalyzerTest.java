@@ -5,6 +5,10 @@ package fiji.plugin.trackmate.features.track;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.ModelChangeEvent;
+import fiji.plugin.trackmate.ModelChangeListener;
+import fiji.plugin.trackmate.Spot;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,11 +17,6 @@ import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.ModelChangeEvent;
-import fiji.plugin.trackmate.ModelChangeListener;
-import fiji.plugin.trackmate.Spot;
 
 /**
  * @author Jean-Yves Tinevez

@@ -1,5 +1,10 @@
 package fiji.plugin.trackmate.visualization.trackscheme;
 
+import com.mxgraph.swing.handler.mxKeyboardHandler;
+import com.mxgraph.swing.util.mxGraphActions;
+
+import fiji.plugin.trackmate.util.TrackNavigator;
+
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
@@ -8,11 +13,6 @@ import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
-
-import com.mxgraph.swing.handler.mxKeyboardHandler;
-import com.mxgraph.swing.util.mxGraphActions;
-
-import fiji.plugin.trackmate.util.TrackNavigator;
 
 public class TrackSchemeKeyboardHandler extends mxKeyboardHandler {
 

@@ -1,5 +1,13 @@
 package fiji.plugin.trackmate.visualization.trackscheme;
 
+import com.mxgraph.model.mxCell;
+import com.mxgraph.model.mxGeometry;
+import com.mxgraph.model.mxICell;
+import com.mxgraph.view.mxGraph;
+
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Spot;
+
 import java.util.HashMap;
 import java.util.Set;
 
@@ -7,14 +15,6 @@ import org.jgrapht.event.GraphEdgeChangeEvent;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.event.GraphVertexChangeEvent;
 import org.jgrapht.graph.DefaultWeightedEdge;
-
-import com.mxgraph.model.mxCell;
-import com.mxgraph.model.mxGeometry;
-import com.mxgraph.model.mxICell;
-import com.mxgraph.view.mxGraph;
-
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.Model;
 
 public class JGraphXAdapter extends mxGraph implements GraphListener<Spot, DefaultWeightedEdge> {
 

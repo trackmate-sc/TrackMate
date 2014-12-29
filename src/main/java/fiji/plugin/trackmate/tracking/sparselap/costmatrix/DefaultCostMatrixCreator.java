@@ -1,12 +1,13 @@
 package fiji.plugin.trackmate.tracking.sparselap.costmatrix;
 
+import fiji.plugin.trackmate.tracking.sparselap.linker.SparseCostMatrix;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
 import net.imglib2.util.Util;
-import fiji.plugin.trackmate.tracking.sparselap.linker.SparseCostMatrix;
 
 /**
  * A {@link CostMatrixCreator} that build a cost matrix from 3 lists containing
@@ -163,8 +164,8 @@ public class DefaultCostMatrixCreator< K extends Comparable< K >, J extends Comp
 
 	protected double computeAlternativeCosts()
 	{
-		if ( percentile == 1 ) { return alternativeCostFactor * Util.computeMax( costs ); }
-		return alternativeCostFactor * Util.computePercentile( costs, percentile );
+		if ( percentile == 1 ) { return alternativeCostFactor * Util.max( costs ); }
+		return alternativeCostFactor * Util.percentile( costs, percentile );
 	}
 
 	@Override

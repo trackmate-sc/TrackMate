@@ -3,16 +3,6 @@
  */
 package fiji.plugin.trackmate.action;
 
-import java.awt.Frame;
-import java.io.File;
-import java.util.HashMap;
-import java.util.Set;
-
-import javax.swing.ImageIcon;
-
-import org.jgrapht.graph.DefaultWeightedEdge;
-import org.scijava.plugin.Plugin;
-
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
@@ -25,6 +15,16 @@ import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.io.TmXmlReader_v12;
 import fiji.plugin.trackmate.io.TmXmlReader_v20;
 import fiji.plugin.trackmate.util.Version;
+
+import java.awt.Frame;
+import java.io.File;
+import java.util.HashMap;
+import java.util.Set;
+
+import javax.swing.ImageIcon;
+
+import org.jgrapht.graph.DefaultWeightedEdge;
+import org.scijava.plugin.Plugin;
 
 public class MergeFileAction extends AbstractTMAction {
 

@@ -2,12 +2,12 @@ package fiji.plugin.trackmate.detection.util;
 
 import java.util.NoSuchElementException;
 
-import net.imglib2.Bounded;
 import net.imglib2.Cursor;
-import net.imglib2.ExtendedRandomAccessibleInterval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.Sampler;
+import net.imglib2.outofbounds.Bounded;
 import net.imglib2.outofbounds.OutOfBounds;
+import net.imglib2.view.ExtendedRandomAccessibleInterval;
 
 public class SquareNeighborhoodCursor3x3<T> implements Cursor<T>, Bounded {
 

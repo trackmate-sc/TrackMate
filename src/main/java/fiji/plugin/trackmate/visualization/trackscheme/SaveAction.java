@@ -1,5 +1,24 @@
 package fiji.plugin.trackmate.visualization.trackscheme;
 
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.mxgraph.canvas.mxICanvas;
+import com.mxgraph.canvas.mxSvgCanvas;
+import com.mxgraph.io.mxCodec;
+import com.mxgraph.io.mxGdCodec;
+import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.util.mxCellRenderer;
+import com.mxgraph.util.mxCellRenderer.CanvasFactory;
+import com.mxgraph.util.mxDomUtils;
+import com.mxgraph.util.mxUtils;
+import com.mxgraph.util.mxXmlUtils;
+import com.mxgraph.util.png.mxPngEncodeParam;
+import com.mxgraph.util.png.mxPngImageEncoder;
+import com.mxgraph.view.mxGraph;
+
+import fiji.plugin.trackmate.util.DefaultFileFilter;
+
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -19,25 +38,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
-
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.pdf.PdfContentByte;
-import com.itextpdf.text.pdf.PdfWriter;
-import com.mxgraph.canvas.mxICanvas;
-import com.mxgraph.canvas.mxSvgCanvas;
-import com.mxgraph.io.mxCodec;
-import com.mxgraph.io.mxGdCodec;
-import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.util.mxCellRenderer;
-import com.mxgraph.util.mxCellRenderer.CanvasFactory;
-import com.mxgraph.util.mxDomUtils;
-import com.mxgraph.util.mxUtils;
-import com.mxgraph.util.mxXmlUtils;
-import com.mxgraph.util.png.mxPngEncodeParam;
-import com.mxgraph.util.png.mxPngImageEncoder;
-import com.mxgraph.view.mxGraph;
-
-import fiji.plugin.trackmate.util.DefaultFileFilter;
 
 public class SaveAction extends AbstractAction {
 

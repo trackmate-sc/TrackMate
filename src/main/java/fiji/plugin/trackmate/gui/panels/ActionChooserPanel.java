@@ -1,6 +1,13 @@
 package fiji.plugin.trackmate.gui.panels;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.action.TrackMateAction;
+import fiji.plugin.trackmate.gui.LogPanel;
+import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.gui.TrackMateWizard;
+import fiji.plugin.trackmate.providers.ActionProvider;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -17,14 +24,6 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.SpringLayout;
-
-import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.action.TrackMateAction;
-import fiji.plugin.trackmate.gui.LogPanel;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
-import fiji.plugin.trackmate.providers.ActionProvider;
 
 public class ActionChooserPanel {
 

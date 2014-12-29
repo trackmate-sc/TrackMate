@@ -227,10 +227,8 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 	{
 		editTool = SpotEditTool.getInstance();
 		if ( !SpotEditTool.isLaunched() )
-			editTool.run( "" );
-		else
 		{
-			editTool.imageOpened( imp );
+			editTool.run( "" );
 		}
 		editTool.register( imp, this );
 	}

@@ -36,11 +36,7 @@ public class DownsampleLogDetector< T extends RealType< T > & NativeType< T >> i
 	protected String errorMessage;
 
 	/** The list of {@link Spot} that will be populated by this detector. */
-	protected List< Spot > spots = new ArrayList< Spot >(); // because this
-															// implementation is
-															// fast to add
-															// elements at the
-															// end of the list
+	protected List< Spot > spots = new ArrayList< Spot >();
 
 	/** The processing time in ms. */
 	protected long processingTime;
@@ -76,9 +72,9 @@ public class DownsampleLogDetector< T extends RealType< T > & NativeType< T >> i
 			errorMessage = baseErrorMessage + "Image is null.";
 			return false;
 		}
-		if ( !( img.numDimensions() == 2 || img.numDimensions() == 3 ) )
+		if ( img.numDimensions() > 3 )
 		{
-			errorMessage = baseErrorMessage + "Image must be 2D or 3D, got " + img.numDimensions() + "D.";
+			errorMessage = baseErrorMessage + "Image must be 1D, 2D or 3D, got " + img.numDimensions() + "D.";
 			return false;
 		}
 		if ( downsamplingFactor < 1 )
@@ -100,24 +96,39 @@ public class DownsampleLogDetector< T extends RealType< T > & NativeType< T >> i
 		final long[] dimensions = new long[ img.numDimensions() ];
 		final int[] dsarr = new int[ img.numDimensions() ];
 		final double[] dwnCalibration = new double[ img.numDimensions() ];
-		for ( int i = 0; i < 2; i++ )
+
+		if ( img.numDimensions() < 2 )
 		{
-			dimensions[ i ] = interval.dimension( i ) / downsamplingFactor;
-			dsarr[ i ] = downsamplingFactor;
-			dwnCalibration[ i ] = calibration[ i ] * downsamplingFactor;
+			if ( interval.dimension( 0 ) > 1 )
+			{
+				dimensions[ 0 ] = interval.dimension( 0 ) / downsamplingFactor;
+				dsarr[ 0 ] = downsamplingFactor;
+				dwnCalibration[ 0 ] = calibration[ 0 ] * downsamplingFactor;
+			}
+			else
+			{ // column image as source
+				dimensions[ 0 ] = interval.dimension( 1 ) / downsamplingFactor;
+				dsarr[ 0 ] = downsamplingFactor;
+				dwnCalibration[ 0 ] = calibration[ 1 ] * downsamplingFactor;
+			}
 		}
+		else
+		{
+			for ( int i = 0; i < 2; i++ )
+			{
+				dimensions[ i ] = interval.dimension( i ) / downsamplingFactor;
+				dsarr[ i ] = downsamplingFactor;
+				dwnCalibration[ i ] = calibration[ i ] * downsamplingFactor;
+			}
+		}
+
 		if ( img.numDimensions() > 2 )
 		{
 			// 3D
-			final double zratio = calibration[ 2 ] / calibration[ 0 ]; // Z
-																		// spacing
-																		// is
-																		// how
-																		// much
-																		// bigger
-			int zdownsampling = ( int ) ( downsamplingFactor / zratio ); // temper
-																			// z
-																			// downsampling
+			final double zratio = calibration[ 2 ] / calibration[ 0 ];
+			// Z spacing is how much bigger
+			int zdownsampling = ( int ) ( downsamplingFactor / zratio );
+			// temper z downsampling
 			zdownsampling = Math.max( 1, zdownsampling ); // but at least 1
 			dimensions[ 2 ] = interval.dimension( 2 ) / zdownsampling;
 			dsarr[ 2 ] = zdownsampling;
@@ -126,7 +137,7 @@ public class DownsampleLogDetector< T extends RealType< T > & NativeType< T >> i
 
 		// 1. Downsample the image
 
-		final T type = Util.getTypeFromRandomAccess( img );
+		final T type = img.randomAccess().get();
 		final Img< T > downsampled = Util.getArrayOrCellImgFactory( interval, type ).create( dimensions, type );
 
 		final Cursor< T > dwnCursor = downsampled.localizingCursor();

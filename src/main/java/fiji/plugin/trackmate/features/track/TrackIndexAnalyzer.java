@@ -1,5 +1,9 @@
 package fiji.plugin.trackmate.features.track;
 
+import fiji.plugin.trackmate.Dimension;
+import fiji.plugin.trackmate.FeatureModel;
+import fiji.plugin.trackmate.Model;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -9,10 +13,6 @@ import java.util.Map;
 import javax.swing.ImageIcon;
 
 import org.scijava.plugin.Plugin;
-
-import fiji.plugin.trackmate.Dimension;
-import fiji.plugin.trackmate.FeatureModel;
-import fiji.plugin.trackmate.Model;
 
 @Plugin( type = TrackAnalyzer.class )
 public class TrackIndexAnalyzer implements TrackAnalyzer

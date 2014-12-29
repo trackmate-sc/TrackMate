@@ -1,5 +1,10 @@
 package fiji.plugin.trackmate.features.track;
 
+import fiji.plugin.trackmate.Dimension;
+import fiji.plugin.trackmate.FeatureModel;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Spot;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -10,26 +15,21 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 import javax.swing.ImageIcon;
 
-import net.imglib2.util.Util;
 import net.imglib2.algorithm.Benchmark;
 import net.imglib2.algorithm.MultiThreaded;
 import net.imglib2.multithreading.SimpleMultiThreading;
+import net.imglib2.util.Util;
 
 import org.scijava.plugin.Plugin;
 
-import fiji.plugin.trackmate.Dimension;
-import fiji.plugin.trackmate.FeatureModel;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Spot;
-
 @Plugin( type = TrackAnalyzer.class )
-public class TrackSpotFeatureAnalyzer implements TrackAnalyzer, MultiThreaded, Benchmark
+public class TrackSpotQualityFeatureAnalyzer implements TrackAnalyzer, MultiThreaded, Benchmark
 {
 
 	/*
 	 * CONSTANTS
 	 */
-	public static final String KEY = "SpotFeature";
+	public static final String KEY = "TRACK_SPOT_QUALITY";
 
 	public static final String TRACK_MEAN_QUALITY = "TRACK_MEAN_QUALITY";
 
@@ -88,7 +88,7 @@ public class TrackSpotFeatureAnalyzer implements TrackAnalyzer, MultiThreaded, B
 
 	private long processingTime;
 
-	public TrackSpotFeatureAnalyzer()
+	public TrackSpotQualityFeatureAnalyzer()
 	{
 		setNumThreads();
 	}
@@ -128,18 +128,17 @@ public class TrackSpotFeatureAnalyzer implements TrackAnalyzer, MultiThreaded, B
 						final Set< Spot > track = model.getTrackModel().trackSpots( trackID );
 
 						double sum = 0, sum2 = 0;
-						double mean = 0;
 
 						// Others
 						final double[] qualities = new double[ track.size() ];
-						final int n = 0;
+						int n = 0;
 
 						for ( final Spot spot : track )
 						{
 							final double val = spot.getFeature( Spot.QUALITY );
 
 							// For median, min and max
-							qualities[ n ] = val;
+							qualities[ n++ ] = val;
 							// For variance and mean
 							sum += val;
 							sum2 += val * val;
@@ -149,9 +148,9 @@ public class TrackSpotFeatureAnalyzer implements TrackAnalyzer, MultiThreaded, B
 						final double median = qualities[ track.size() / 2 ];
 						final double min = qualities[ 0 ];
 						final double max = qualities[ track.size() - 1 ];
-						mean = sum / track.size();
+						final double mean = sum / track.size();
 						final double mean2 = sum2 / track.size();
-						final double variance = mean * mean - mean2;
+						final double variance = mean2 - mean * mean;
 
 						fm.putTrackFeature( trackID, TRACK_MEDIAN_QUALITY, median );
 						fm.putTrackFeature( trackID, TRACK_MIN_QUALITY, min );

@@ -1,8 +1,8 @@
 package fiji.plugin.trackmate.tracking.sparselap.costfunction;
 
-import java.util.Map;
-
 import fiji.plugin.trackmate.Spot;
+
+import java.util.Map;
 
 /**
  * A cost function that tempers a square distance cost by difference in feature

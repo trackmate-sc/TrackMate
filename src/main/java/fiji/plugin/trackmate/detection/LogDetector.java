@@ -2,6 +2,7 @@ package fiji.plugin.trackmate.detection;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
@@ -82,9 +83,9 @@ public class LogDetector< T extends RealType< T > & NativeType< T >> implements 
 			errorMessage = baseErrorMessage + "Image is null.";
 			return false;
 		}
-		if ( !( img.numDimensions() == 2 || img.numDimensions() == 3 ) )
+		if ( img.numDimensions() > 3 )
 		{
-			errorMessage = baseErrorMessage + "Image must be 2D or 3D, got " + img.numDimensions() + "D.";
+			errorMessage = baseErrorMessage + "Image must be 1D, 2D or 3D, got " + img.numDimensions() + "D.";
 			return false;
 		}
 		return true;
@@ -126,10 +127,11 @@ public class LogDetector< T extends RealType< T > & NativeType< T >> implements 
 				ndims--;
 			}
 		}
+
 		final Img< FloatType > kernel = DetectionUtils.createLoGKernel( radius, ndims, calibration );
 		final FFTConvolution< FloatType > fftconv = new FFTConvolution< FloatType >( floatImg, kernel );
-		fftconv.setNumThreads( numThreads );
-		fftconv.run();
+		fftconv.setExecutorService(Executors.newFixedThreadPool( numThreads ));
+		fftconv.convolve();
 
 		final long[] minopposite = new long[ interval.numDimensions() ];
 		interval.min( minopposite );

@@ -1,14 +1,6 @@
 package fiji.plugin.trackmate.interactivetests;
 
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
-import ij.ImagePlus;
-
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.scijava.util.AppUtils;
-
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
@@ -18,6 +10,13 @@ import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTracker;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
+import ij.ImagePlus;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.scijava.util.AppUtils;
 
 public class NNTrackerTest {
 

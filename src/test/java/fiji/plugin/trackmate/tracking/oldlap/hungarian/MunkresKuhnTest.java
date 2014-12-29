@@ -6,8 +6,6 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-import fiji.plugin.trackmate.tracking.oldlap.hungarian.MunkresKuhnAlgorithm;
-
 public class MunkresKuhnTest
 {
 	boolean randomize = false; // makes things irreproducible...

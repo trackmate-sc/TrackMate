@@ -1016,7 +1016,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	{
 		@SuppressWarnings( "rawtypes" )
 		final SemiAutoTracker autotracker = new SemiAutoTracker( model, selectionModel, imp, logger );
-		autotracker.setParameters( params.qualityThreshold, params.distanceTolerance );
+		autotracker.setParameters( params.qualityThreshold, params.distanceTolerance, params.nFrames );
 		autotracker.setNumThreads( 4 );
 		new Thread( "TrackMate semi-automated tracking thread" )
 		{
@@ -1058,6 +1058,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 
 	static class SpotEditToolParams
 	{
+
 		/*
 		 * Semi-auto tracking parameters
 		 */
@@ -1072,10 +1073,15 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 		 */
 		double distanceTolerance = 2d;
 
+		/**
+		 * We process at most nFrames. Make it 0 or negative to have no bounds.
+		 */
+		int nFrames = 10;
+
 		@Override
 		public String toString()
 		{
-			return super.toString() + ": " + "QualityThreshold = " + qualityThreshold + ", DistanceTolerance = " + distanceTolerance;
+			return super.toString() + ": " + "QualityThreshold = " + qualityThreshold + ", DistanceTolerance = " + distanceTolerance + ", nFrames = " + nFrames;
 		}
 	}
 

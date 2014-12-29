@@ -1,14 +1,14 @@
 package fiji.plugin.trackmate.visualization;
 
-import java.awt.Color;
-import java.util.Set;
-
-import org.jfree.chart.renderer.InterpolatePaintScale;
-
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.ModelChangeListener;
 import fiji.plugin.trackmate.Spot;
+
+import java.awt.Color;
+import java.util.Set;
+
+import org.jfree.chart.renderer.InterpolatePaintScale;
 
 public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelChangeListener
 {

@@ -97,8 +97,24 @@ public class JaqamanLinkingCostMatrixCreator< K extends Comparable< K >, J exten
 		}
 		costs.trimToSize();
 
-		if ( accSources.size() > 0 )
+		/*
+		 * Check if accepted source or target lists are empty and deal with it.
+		 */
+
+		if ( accSources.isEmpty() || accTargets.isEmpty() )
 		{
+
+			sourceList = Collections.emptyList();
+			targetList = Collections.emptyList();
+			alternativeCost = Double.NaN;
+			scm = null;
+			/*
+			 * CAREFUL! We return null if no acceptable links are found.
+			 */
+		}
+		else
+		{
+
 			final DefaultCostMatrixCreator< K, J > cmCreator = new DefaultCostMatrixCreator< K, J >( accSources, accTargets, costs.data, alternativeCostFactor, percentile );
 			if ( !cmCreator.checkInput() || !cmCreator.process() )
 			{
@@ -111,14 +127,7 @@ public class JaqamanLinkingCostMatrixCreator< K extends Comparable< K >, J exten
 			targetList = cmCreator.getTargetList();
 			alternativeCost = cmCreator.computeAlternativeCosts();
 		}
-		else
-		{
-			// No suitable candidates found.
-			scm = new SparseCostMatrix( new double[] {}, new int[] {}, new int[] { 0 }, 0 );
-			sourceList = Collections.emptyList();
-			targetList = Collections.emptyList();
-			alternativeCost = Double.NaN;
-		}
+
 
 		final long end = System.currentTimeMillis();
 		processingTime = end - start;
@@ -131,6 +140,15 @@ public class JaqamanLinkingCostMatrixCreator< K extends Comparable< K >, J exten
 		return errorMessage;
 	}
 
+	/**
+	 * Returns the cost matrix generated.
+	 * <p>
+	 * Careful, it can be <code>null</code> if not acceptable costs have been
+	 * found for the specified configuration. In that case, the lists returned
+	 * by {@link #getSourceList()} and {@link #getTargetList()} are empty.
+	 * 
+	 * @return a new {@link SparseCostMatrix} or <code>null</code>.
+	 */
 	@Override
 	public SparseCostMatrix getResult()
 	{
