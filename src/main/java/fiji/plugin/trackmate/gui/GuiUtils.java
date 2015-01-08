@@ -72,10 +72,8 @@ public class GuiUtils
 			case JOptionPane.YES_OPTION:
 				imp.setDimensions( dims[ 2 ], dims[ 4 ], dims[ 3 ] );
 				final Calibration calibration = imp.getCalibration();
-				if ( calibration.frameInterval == 0 )
-				{
-					calibration.frameInterval = 1;
-				}
+				calibration.frameInterval = 1;
+				calibration.setTimeUnit( "frame" );
 				break;
 			case JOptionPane.CANCEL_OPTION:
 				return;
