@@ -1,25 +1,24 @@
 package fiji.plugin.trackmate.interactivetests;
 
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.detection.DownsampleLogDetector;
-import fiji.plugin.trackmate.detection.LogDetector;
-import fiji.plugin.trackmate.util.SpotNeighborhood;
-import fiji.plugin.trackmate.util.TMUtils;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Random;
 
 import javax.vecmath.Point3d;
 
+import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.meta.Axes;
-import net.imglib2.meta.AxisType;
-import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.util.Util;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.detection.DownsampleLogDetector;
+import fiji.plugin.trackmate.detection.LogDetector;
+import fiji.plugin.trackmate.util.SpotNeighborhood;
+import fiji.plugin.trackmate.util.TMUtils;
 
 /**
  * Test class for {@link DownsampleLogDetector}

@@ -1,11 +1,11 @@
 package fiji.plugin.trackmate.features.spot;
 
+import net.imagej.ImgPlus;
+import net.imglib2.type.NativeType;
+import net.imglib2.type.numeric.RealType;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.features.FeatureAnalyzer;
 import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
-import net.imglib2.meta.ImgPlus;
-import net.imglib2.type.NativeType;
-import net.imglib2.type.numeric.RealType;
 
 /**
  * Interface for factories that can generate a {@link SpotAnalyzer} configured
