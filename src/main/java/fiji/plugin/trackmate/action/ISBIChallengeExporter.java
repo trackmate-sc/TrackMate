@@ -1,14 +1,5 @@
 package fiji.plugin.trackmate.action;
 
-import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
-import fiji.plugin.trackmate.io.IOUtils;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -26,6 +17,15 @@ import org.jdom2.Element;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import org.scijava.plugin.Plugin;
+
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.gui.TrackMateWizard;
+import fiji.plugin.trackmate.io.IOUtils;
 
 public class ISBIChallengeExporter extends AbstractTMAction {
 
@@ -71,11 +71,16 @@ public class ISBIChallengeExporter extends AbstractTMAction {
 		}
 		file = IOUtils.askForFileForSaving(file, controller.getGUI(), logger);
 
-		exportToFile(model, trackmate.getSettings(), file);
+		exportToFile( model, trackmate.getSettings(), file, logger );
 	}
 
-	public static void exportToFile(final Model model, final Settings settings, final File file) {
-		final Logger logger = model.getLogger();
+	public static void exportToFile( final Model model, final Settings settings, final File file )
+	{
+		exportToFile( model, settings, file, model.getLogger() );
+	}
+
+	public static void exportToFile( final Model model, final Settings settings, final File file, final Logger logger )
+	{
 		logger.log("Exporting to ISBI 2012 particle tracking challenge format.\n");
 		final int ntracks = model.getTrackModel().nTracks(true);
 		if (ntracks == 0) {
@@ -179,7 +184,7 @@ public class ISBIChallengeExporter extends AbstractTMAction {
 	private static final String Z_ATT = "z";
 	private static final String T_ATT = "t";
 
-	@Plugin( type = TrackMateActionFactory.class, visible = false )
+	@Plugin( type = TrackMateActionFactory.class, visible = true )
 	public static class Factory implements TrackMateActionFactory
 	{
 
