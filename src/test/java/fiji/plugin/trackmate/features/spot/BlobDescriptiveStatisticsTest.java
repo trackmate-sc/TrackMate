@@ -1,18 +1,19 @@
 package fiji.plugin.trackmate.features.spot;
 
 import static org.junit.Assert.assertEquals;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.util.SpotNeighborhood;
+import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
 import net.imglib2.RandomAccess;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgFactory;
-import net.imglib2.meta.Axes;
-import net.imglib2.meta.AxisType;
-import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.util.SpotNeighborhood;
 
 public class BlobDescriptiveStatisticsTest
 {

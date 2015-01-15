@@ -1,20 +1,21 @@
 package fiji.plugin.trackmate.features.spot;
 
 import static org.junit.Assert.assertEquals;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.util.SpotNeighborhood;
 import ij.ImageJ;
+import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.meta.Axes;
-import net.imglib2.meta.AxisType;
-import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 
 import org.junit.Test;
+
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.util.SpotNeighborhood;
 
 public class RadiusEstimatorTest< T extends NativeType< T > & RealType< T >>
 {

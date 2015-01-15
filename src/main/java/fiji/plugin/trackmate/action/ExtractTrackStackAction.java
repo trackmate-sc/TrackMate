@@ -1,14 +1,5 @@
 package fiji.plugin.trackmate.action;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
-import fiji.plugin.trackmate.util.TMUtils;
-import fiji.plugin.trackmate.visualization.trackscheme.SpotIconGrabber;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.measure.Calibration;
@@ -21,13 +12,23 @@ import java.util.TreeSet;
 
 import javax.swing.ImageIcon;
 
+import net.imagej.ImgPlus;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.meta.ImgPlus;
 import net.imglib2.meta.view.HyperSliceImgPlus;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.scijava.plugin.Plugin;
+
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.gui.TrackMateWizard;
+import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.visualization.trackscheme.SpotIconGrabber;
 
 public class ExtractTrackStackAction extends AbstractTMAction {
 

@@ -1,9 +1,5 @@
 package fiji.plugin.trackmate.features.spot;
 
-import fiji.plugin.trackmate.Dimension;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Spot;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -12,12 +8,16 @@ import java.util.Map;
 
 import javax.swing.ImageIcon;
 
-import net.imglib2.meta.ImgPlus;
+import net.imagej.ImgPlus;
 import net.imglib2.meta.view.HyperSliceImgPlus;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 
 import org.scijava.plugin.Plugin;
+
+import fiji.plugin.trackmate.Dimension;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Spot;
 
 /**
  * A factory for {@link SpotContrastAndSNRAnalyzer}s. Because the analyzers of

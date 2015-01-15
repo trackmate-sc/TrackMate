@@ -2,15 +2,15 @@ package fiji.plugin.trackmate.features.spot;
 
 import static fiji.plugin.trackmate.features.spot.SpotContrastAndSNRAnalyzerFactory.CONTRAST;
 import static fiji.plugin.trackmate.features.spot.SpotContrastAndSNRAnalyzerFactory.SNR;
+
+import java.util.Iterator;
+
+import net.imagej.ImgPlus;
+import net.imglib2.type.numeric.RealType;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.features.FeatureAnalyzer;
 import fiji.plugin.trackmate.util.SpotNeighborhood;
 import fiji.plugin.trackmate.util.SpotNeighborhoodCursor;
-
-import java.util.Iterator;
-
-import net.imglib2.meta.ImgPlus;
-import net.imglib2.type.numeric.RealType;
 
 /**
  * This {@link FeatureAnalyzer} computes both the <a

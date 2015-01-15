@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import net.imagej.ImgPlus;
 import net.imglib2.FinalInterval;
 import net.imglib2.algorithm.Algorithm;
 import net.imglib2.algorithm.Benchmark;
 import net.imglib2.algorithm.MultiThreaded;
-import net.imglib2.meta.ImgPlus;
 import net.imglib2.multithreading.SimpleMultiThreading;
 
 import org.jgrapht.graph.SimpleWeightedGraph;
@@ -44,7 +44,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 
 	public static final String PLUGIN_NAME_STR = "TrackMate";
 
-	public static final String PLUGIN_NAME_VERSION = "2.6.4";
+	public static final String PLUGIN_NAME_VERSION = "2.6.6-SNAPSHOT";
 
 	/**
 	 * The model this trackmate will shape.

@@ -1,11 +1,10 @@
 package fiji.plugin.trackmate.features.spot;
 
-import fiji.plugin.trackmate.Spot;
-
 import java.util.Iterator;
 
-import net.imglib2.meta.ImgPlus;
+import net.imagej.ImgPlus;
 import net.imglib2.type.numeric.RealType;
+import fiji.plugin.trackmate.Spot;
 
 public abstract class IndependentSpotFeatureAnalyzer< T extends RealType< T >> implements SpotAnalyzer< T >
 {

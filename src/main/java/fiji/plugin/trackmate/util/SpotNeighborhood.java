@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.util;
 
+import net.imagej.ImgPlus;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.Positionable;
@@ -10,7 +11,6 @@ import net.imglib2.algorithm.region.localneighborhood.EllipseNeighborhood;
 import net.imglib2.algorithm.region.localneighborhood.EllipsoidNeighborhood;
 import net.imglib2.algorithm.region.localneighborhood.Neighborhood;
 import net.imglib2.algorithm.region.localneighborhood.RectangleNeighborhoodGPL;
-import net.imglib2.meta.ImgPlus;
 import net.imglib2.outofbounds.OutOfBoundsMirrorExpWindowingFactory;
 import net.imglib2.type.numeric.RealType;
 import fiji.plugin.trackmate.Spot;

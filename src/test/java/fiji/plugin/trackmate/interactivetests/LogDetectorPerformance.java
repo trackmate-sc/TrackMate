@@ -1,11 +1,9 @@
 package fiji.plugin.trackmate.interactivetests;
 
 
-import fiji.plugin.trackmate.detection.LogDetector;
-import fiji.plugin.trackmate.util.TMUtils;
-
 import java.util.Random;
 
+import net.imagej.ImgPlus;
 import net.imglib2.RandomAccessible;
 import net.imglib2.algorithm.gauss3.Gauss3;
 import net.imglib2.exception.IncompatibleTypeException;
@@ -13,9 +11,10 @@ import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.array.ArrayRandomAccess;
 import net.imglib2.img.basictypeaccess.array.ShortArray;
-import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.view.Views;
+import fiji.plugin.trackmate.detection.LogDetector;
+import fiji.plugin.trackmate.util.TMUtils;
 
 public class LogDetectorPerformance {
 

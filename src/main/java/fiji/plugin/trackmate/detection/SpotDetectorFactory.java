@@ -1,18 +1,18 @@
 package fiji.plugin.trackmate.detection;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.TrackMateModule;
-import fiji.plugin.trackmate.gui.ConfigurationPanel;
-
 import java.util.Map;
 
+import net.imagej.ImgPlus;
 import net.imglib2.Interval;
-import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 
 import org.jdom2.Element;
+
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.TrackMateModule;
+import fiji.plugin.trackmate.gui.ConfigurationPanel;
 
 /**
  * Mother interface for {@link SpotDetector} factories.
