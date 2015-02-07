@@ -131,7 +131,7 @@ public class KalmanTracker implements SpotTracker, Benchmark
 
 		/*
 		 * Estimate Kalman filter variances.
-		 * 
+		 *
 		 * The search radius is used to derive an estimate of the noise that
 		 * affects position and velocity. The two are linked: if we need a large
 		 * search radius, then the fluoctuations over predicted states are
@@ -325,7 +325,7 @@ public class KalmanTracker implements SpotTracker, Benchmark
 
 	/**
 	 * Returns the saved predicted state as a {@link SpotCollection}.
-	 * 
+	 *
 	 * @return the predicted states.
 	 * @see #setSavePredictions(boolean)
 	 */
@@ -336,7 +336,7 @@ public class KalmanTracker implements SpotTracker, Benchmark
 
 	/**
 	 * Sets whether the tracker saves the predicted states.
-	 * 
+	 *
 	 * @param doSave
 	 *            if <code>true</code>, the predicted states will be saved.
 	 * @see #getPredictions()
@@ -424,7 +424,7 @@ public class KalmanTracker implements SpotTracker, Benchmark
 				if ( getDoublePosition( i ) != o.getDoublePosition( i ) ) { return ( int ) Math.signum( getDoublePosition( i ) - o.getDoublePosition( i ) ); }
 				i++;
 			}
-			return 0;
+			return hashCode() - o.hashCode();
 		}
 	}
 
