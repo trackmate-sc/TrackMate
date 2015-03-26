@@ -78,31 +78,6 @@
 			<artifactId>scijava-common</artifactId>
 		</dependency>
 
-		<!-- OME dependencies -->
-		<dependency>
-			<groupId>ome</groupId>
-			<artifactId>ome-xml</artifactId>
-			<exclusions>
-				<!-- NB: avoid enforcer clashes -->
-				<exclusion>
-					<groupId>joda-time</groupId>
-					<artifactId>joda-time</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>xalan</groupId>
-					<artifactId>serializer</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>xalan</groupId>
-					<artifactId>xalan</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>xml-apis</groupId>
-					<artifactId>xml-apis</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
 		<!-- Third party dependencies -->
 		<dependency>
 			<groupId>batik</groupId>
