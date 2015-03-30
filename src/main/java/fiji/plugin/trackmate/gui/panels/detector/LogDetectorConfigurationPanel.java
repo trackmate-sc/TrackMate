@@ -66,7 +66,7 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 
 	protected JLabel jLabelSegmenterName;
 
-	private JLabel jLabel2;
+	protected JLabel jLabelBlobDiameter;
 
 	protected JButton jButtonRefresh;
 
@@ -302,13 +302,13 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 				jLabelSegmenterName.setText( detectorName );
 			}
 			{
-				jLabel2 = new JLabel();
-				layout.putConstraint( SpringLayout.NORTH, jLabel2, 247, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.WEST, jLabel2, 16, SpringLayout.WEST, this );
-				layout.putConstraint( SpringLayout.EAST, jLabel2, -16, SpringLayout.EAST, this );
-				this.add( jLabel2 );
-				jLabel2.setText( "Estimated blob diameter:" );
-				jLabel2.setFont( FONT );
+				jLabelBlobDiameter = new JLabel();
+				layout.putConstraint( SpringLayout.NORTH, jLabelBlobDiameter, 247, SpringLayout.NORTH, this );
+				layout.putConstraint( SpringLayout.WEST, jLabelBlobDiameter, 16, SpringLayout.WEST, this );
+				layout.putConstraint( SpringLayout.EAST, jLabelBlobDiameter, -16, SpringLayout.EAST, this );
+				this.add( jLabelBlobDiameter );
+				jLabelBlobDiameter.setText( "Estimated blob diameter:" );
+				jLabelBlobDiameter.setFont( FONT );
 
 			}
 			{
