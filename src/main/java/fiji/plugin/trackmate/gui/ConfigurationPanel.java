@@ -7,8 +7,6 @@ import fiji.plugin.trackmate.tracking.SpotTracker;
 import java.awt.event.ActionEvent;
 import java.util.Map;
 
-import ome.xml.model.DetectorSettings;
-
 /**
  * The mother class for all the configuration panels that can configure a {@link SpotDetectorFactory},
  * a {@link SpotTracker}, ...
@@ -26,8 +24,7 @@ public abstract class ConfigurationPanel extends ActionListenablePanel {
 	public final ActionEvent PREVIEW_BUTTON_PUSHED = new ActionEvent(this, 0, "PreviewButtonPushed");
 
 	/**
-	 * Echo the parameters of the given instance of {@link DetectorSettings} on
-	 * this panel.  
+	 * Echo the parameters of the given settings on this panel.  
 	 */
 	public abstract void setSettings(final Map<String, Object> settings);
 	
