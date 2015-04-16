@@ -131,6 +131,7 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 				.newFixedThreadPool(numThreads);
 		final ArrayList<Point> peaksHelp = LocalExtrema.findLocalExtrema(
 				source, check, service);
+		
 		ArrayList<MyPoint> peaks = new ArrayList<MyPoint>();
 		for (Point p : peaksHelp) {
 			MyPoint pTemp = null;
@@ -463,7 +464,7 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 			for (int dx = -1; dx <= 1; dx++) {
 				for (int dy = -1; dy <= 1; dy++) {
 					for (int dz = -1; dz <= 1; dz++) {
-						if (dx != 0 || dy != 0 || dz != 0) {
+						if ( (dx != 0 || dy != 0 || dz != 0) && isInsideBoundaries(x+dx, y+dy, z+dz) ) {
 							MyPoint pNext = new MyPoint(x + dx, y + dy,
 									z + dz);
 							ra.setPosition(pNext);
@@ -483,9 +484,10 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 			// for each pixel in the 3d neighborhood:
 			for (int dx = -1; dx <= 1; dx++) {
 				for (int dy = -1; dy <= 1; dy++) {
-					if (dx != 0 || dy != 0) {
+					if ((dx != 0 || dy != 0) && isInsideBoundaries(x+dx, y+dy, z)) {
 						MyPoint pNext = new MyPoint(x + dx, y + dy,
 								z);
+						
 						ra.setPosition(pNext);
 						double v1 = ra.get().getRealDouble();
 						if(v1>v){
@@ -501,7 +503,7 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 			int z = 0;
 			// for each pixel in the 3d neighborhood:
 			for (int dx = -1; dx <= 1; dx++) {
-					if (dx != 0) {
+					if (dx != 0 && isInsideBoundaries(x+dx, y, z)) {
 						MyPoint pNext = new MyPoint(x + dx, y,
 								z);
 						ra.setPosition(pNext);
