@@ -83,14 +83,10 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 		this.settings = settings;
 		return checkSettings( settings );
 	}
-
-	@Override
-	public SpotDetector< T > getDetector( final Interval interval, final int frame )
+	
+	
+	protected RandomAccessible< T > prepareFrameImg( final int frame )
 	{
-		final double radius = ( Double ) settings.get( KEY_RADIUS );
-		final double threshold = ( Double ) settings.get( KEY_THRESHOLD );
-		final boolean doMedian = ( Boolean ) settings.get( KEY_DO_MEDIAN_FILTERING );
-		final boolean doSubpixel = ( Boolean ) settings.get( KEY_DO_SUBPIXEL_LOCALIZATION );
 		final double[] calibration = TMUtils.getSpatialCalibration( img );
 		RandomAccessible< T > imFrame;
 		final int cDim = TMUtils.findCAxisIndex( img );
@@ -126,6 +122,19 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 		{ // Single line image
 			imFrame = Views.hyperSlice( imFrame, 1, 0 );
 		}
+
+		return imFrame;
+	}
+
+	@Override
+	public SpotDetector< T > getDetector( final Interval interval, final int frame )
+	{
+		final double radius = ( Double ) settings.get( KEY_RADIUS );
+		final double threshold = ( Double ) settings.get( KEY_THRESHOLD );
+		final boolean doMedian = ( Boolean ) settings.get( KEY_DO_MEDIAN_FILTERING );
+		final boolean doSubpixel = ( Boolean ) settings.get( KEY_DO_SUBPIXEL_LOCALIZATION );
+		final double[] calibration = TMUtils.getSpatialCalibration( img );
+		final RandomAccessible< T > imFrame = prepareFrameImg( frame );
 
 		final LogDetector< T > detector = new LogDetector< T >( imFrame, interval, calibration, radius, threshold, doSubpixel, doMedian );
 		detector.setNumThreads( 1 );
