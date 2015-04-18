@@ -235,7 +235,7 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 				final double x = peak.getDoublePosition(0) * calibration[0];
 				final double y = peak.getDoublePosition(1) * calibration[1];
 				final double z = peak.getDoublePosition(2) * calibration[2];
-				final Spot spot = new Spot(x, y, z, 2, quality);
+				final Spot spot = new Spot(x, y, z, 2*calibration[0], quality);
 				spots.add(spot);
 			}
 		} else if (source.numDimensions() > 1) { // 2D
@@ -244,10 +244,11 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 				final Point peak = sortedPeaks.get(i);
 				ra.setPosition(peak);
 				final double quality = ra.get().getRealDouble();
+				IJ.log("xpos: " +peak.getDoublePosition(0)+ " xcal: " + calibration[0]);
 				final double x = peak.getDoublePosition(0) * calibration[0];
 				final double y = peak.getDoublePosition(1) * calibration[1];
 				//radius.get(i)
-				final Spot spot = new Spot(x, y, z, 2, quality);
+				final Spot spot = new Spot(x, y, z, 2*calibration[0], quality);
 				spots.add(spot);
 			}
 		} else { // 1D
@@ -258,7 +259,7 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 				ra.setPosition(peak);
 				final double quality = ra.get().getRealDouble();
 				final double x = peak.getDoublePosition(0) * calibration[0];
-				final Spot spot = new Spot(x, y, z, 2, quality);
+				final Spot spot = new Spot(x, y, z, 2*calibration[0], quality);
 				spots.add(spot);
 			}
 		}
