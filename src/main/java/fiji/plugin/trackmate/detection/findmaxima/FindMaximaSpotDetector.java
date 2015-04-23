@@ -12,26 +12,45 @@ import java.util.Stack;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.scijava.Context;
+import org.scijava.plugin.Parameter;
+
+import net.imagej.ops.AbstractOpTest;
+import net.imagej.ops.OpService;
+import net.imagej.ops.Ops;
+import net.imagej.ops.convolve.*;
+import net.imagej.ops.commands.convolve.Convolve;
 import net.imglib2.Interval;
 import net.imglib2.Point;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
+import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.MultiThreaded;
 import net.imglib2.algorithm.localextrema.LocalExtrema;
 import net.imglib2.algorithm.localextrema.LocalExtrema.MaximumCheck;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgFactory;
+import net.imglib2.img.array.ArrayImgFactory;
+import net.imglib2.img.display.imagej.ImageJFunctions;
+import net.imglib2.outofbounds.OutOfBoundsConstantValueFactory;
+import net.imglib2.outofbounds.OutOfBoundsFactory;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Util;
+import net.imglib2.view.Views;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.detection.SpotDetector;
+import net.imagej.ImageJ;
+import net.imagej.ops.Op;
 
 public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 		implements SpotDetector<T>, MultiThreaded {
 
+	@Parameter
+    private OpService ops;
+    
 	private static final String BASE_ERROR_MESSAGE = "[FindMaximaSpotDetector] ";
 
 	private static final double DEFAULT_RADIUS = 2.5;
@@ -42,7 +61,7 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 
 	private final double[] calibration;
 
-	private double threshold;
+	private double tolerance;
 
 	private int numThreads;
 
@@ -51,9 +70,12 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 	private String errorMessage;
 
 	private List<Spot> spots;
+	private int[][][] m; //Map for labeling visited pixels
+	
+	
 
 	private final double radius;
-	RandomAccess<T> ra;
+	RandomAccess<T> sourceRa;
 
 	/*
 	 * Image Boundaries
@@ -72,11 +94,12 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 		this.img = img;
 		this.interval = DetectionUtils.squeeze(interval);
 		this.calibration = calibration;
-		this.threshold = threshold;
+		this.tolerance = threshold;
 		this.radius = DEFAULT_RADIUS;
 		setNumThreads();
 
 	}
+	
 
 	/*
 	 * METHODS
@@ -90,8 +113,147 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 		}
 		return true;
 	}
+	
+	public Img<FloatType> createSecondDerivativeImage(final Img<FloatType> source){
+		int[] kernelSize = new int[] {3,3};
+		Img<FloatType> kernel = new ArrayImgFactory<FloatType>().create(kernelSize, new FloatType());
+		RandomAccess<FloatType> kernelRa = kernel.randomAccess();
+		//long[] borderSize = new long[] {1, 1};
+		//int[] k = new int[]{1, -2, 1,2, -4, 2,1, -2, 1}; //Second derivative filter
+		int[] k = new int[]{0, 1, 0,1, -4, 1,0, 1, 0}; //Laplace
+		int h = 0;
+		for(int i = 0; i < 3; i++){
+			for(int j = 0; j < 3; j++){
+				kernelRa.setPosition(new Point(i,j));
+				kernelRa.get().set(k[i*3+j]);
+				h++;
+			}
+		}
+	    final Context context = (Context) IJ.runPlugIn("org.scijava.Context", "");
+		final ImageJ ij = new ImageJ(context);
 
-	long T; // Tolerance
+		Img<FloatType> out = new ArrayImgFactory<FloatType>().create(source,new FloatType());
+		OutOfBoundsFactory<FloatType, RandomAccessibleInterval<FloatType>> obf = new OutOfBoundsConstantValueFactory<FloatType, RandomAccessibleInterval<FloatType>>(Util.getTypeFromInterval(source).createVariable());
+		// extend the input
+		RandomAccessibleInterval<FloatType> extendedIn = Views.interval(Views.extend(source, obf), source);
+		// extend the output
+		RandomAccessibleInterval<FloatType> extendedOut = Views.interval(Views.extend(out, obf), out);
+		// convolve
+		ij.op().run(ConvolveNaive.class, extendedOut, extendedIn, kernel);
+		// show the image in a window
+		out = DetectionUtils.applyMedianFilter(out);
+		//ij.ui().show("convolved", out);
+		return out;
+	}
+	
+	/*
+	 * Find Radius Methods:
+	 * - getRadius
+	 * - isLocalMax
+	 */
+	private int getRadius(Point p, Img<FloatType> secondDerivative)
+	{
+		int maxrad=25;
+		/*
+		 * Find the first maxima along the x-direction in second derivative image
+		 */
+		RandomAccess<FloatType> ra = secondDerivative.randomAccess();
+		int startx = p.getIntPosition(0);
+		int starty = p.getIntPosition(1);
+		int rad=2;
+		for(int i = startx; i < startx+maxrad;i++){
+			double[] v = new double[3];
+			int[] pos = {i-1,starty};
+			ra.setPosition(pos);
+			v[0] = ra.get().getRealDouble();
+			pos = new int[]{i,starty};
+			ra.setPosition(pos);
+			v[1] = ra.get().getRealDouble();
+			pos = new int[]{i+1,starty};
+			ra.setPosition(pos);
+			v[2] = ra.get().getRealDouble();
+			if(isLocalMax(v) ){ 
+				//LOCAL MAX!
+				rad = i - startx;
+				break;
+			}
+			else if(v[0]<v[1] && v[1] ==v[2]){ //Probably local max with plateau  /***\
+			  	int xoff = 2;
+			  	pos = new int[]{i+xoff,starty};
+				ra.setPosition(pos);
+			  	double value = ra.get().getRealDouble();
+			  	while(value==v[1] && (i+xoff-startx)<maxrad){
+			  		xoff++;
+			  		pos = new int[]{i+xoff,starty};
+			  		ra.setPosition(pos);
+				 	value = ra.get().getRealDouble();
+			  	}
+			  	if(value<v[1]){ //Local max with plateau!!
+			  		rad = i - startx;
+			  		break;
+			  	}
+			  	 
+			}
+			
+			
+		}
+		
+		
+		/*
+		 * Size of the plateau (0 when no plateau)
+		 */
+		int offset =0;
+		sourceRa.setPosition(new Point(startx,starty));
+		double v0=sourceRa.get().getRealDouble();
+		for(int x = startx+1; x < startx+rad; x++){
+			sourceRa.setPosition(new Point(x,starty));
+			if(v0== sourceRa.get().getRealDouble()){
+				offset++;
+			}else{
+				break;
+			}
+		}
+		
+		/*
+		 * Summed up intensity of the profile and minimum along the profile
+		 */
+		double sum=0;
+		double min =Double.MAX_VALUE;
+		for(int x = startx+offset; x < startx+rad; x++){
+			sourceRa.setPosition(new Point(x,starty));
+			double v = sourceRa.get().getRealDouble();
+			if(v<min){
+				min = v;
+			}
+			sum += v;
+		}
+		sum = sum - (rad-offset)*min;
+		
+		/*
+		 * 96% Threshold
+		 */
+		double partSum = 0;
+		for(int x = startx+offset; x < startx+rad; x++){
+			sourceRa.setPosition(new Point(x,starty));
+			
+			double v = sourceRa.get().getRealDouble()-min;
+			partSum += v;
+			if(partSum/sum>0.99){
+				rad=x-startx;
+				break;
+			}
+			
+		}
+		if(rad<DEFAULT_RADIUS){
+			return (int) DEFAULT_RADIUS;
+		}
+		return rad;
+	}
+	
+	private boolean isLocalMax(double[] v){
+		return (v[1]>v[0] && v[1]>v[2]);
+	}
+
 	ArrayList<MyPoint> sortedPeaks; // List of sortedPeaks (descending by
 									// intensity)
 
@@ -108,7 +270,7 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 				interval, new FloatType());
 		final Img<FloatType> source = DetectionUtils.copyToFloatImg(img,
 				interval, factory);
-		ra = img.randomAccess();
+		sourceRa = img.randomAccess();
 		width = (int) source.dimension(0);
 		height = (int) source.dimension(1);
 		if (source.numDimensions() > 1) {
@@ -120,10 +282,9 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 		 * Find global min;
 		 */
 		double globalmin=getGlobalMin();
-		T = (long) threshold;
 		//All pixels with values smaller as the globalmin+tolerance+2 should be suppressed. Threshold plays the role of tolerance.
-		final FloatType minPeakVal = new FloatType((float)(globalmin+threshold+2));
-		minPeakVal.setReal(globalmin+threshold+2);
+		final FloatType minPeakVal = new FloatType((float)(globalmin+tolerance+2));
+		minPeakVal.setReal(globalmin+tolerance+2);
 
 		final MaximumCheck<FloatType> check = new LocalExtrema.MaximumCheck<FloatType>(
 				minPeakVal);
@@ -161,9 +322,6 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 		/*
 		 * Analyse peaks
 		 */
-
-		
-		int[][][] m = null; // Map to mark the visited positions [x][y][z]
 		if (source.numDimensions() == 1) {
 			m = new int[(int) source.dimension(0)][1][1];
 		}
@@ -183,12 +341,15 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 															// geometrische
 															// Mittel
 
-			ra.setPosition(p);
-			FloodFillRemover(p, ra.get().getRealDouble(), i,
-					(int) T, l, m);
-	
-		
-			if (l.size() > 1) {
+			sourceRa.setPosition(p);
+			boolean remove = FloodFillRemover(p, sourceRa.get().getRealDouble(), i,
+					(int) tolerance, l);
+			
+			if(remove){
+				sortedPeaks.remove(i);
+				i--;
+			}
+			else if (l.size() > 1) {
 				// Replace p with the mean position of l
 				int meanX = 0;
 				int meanY = 0;
@@ -215,51 +376,56 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 					removePeaks.add(i);
 				}
 			}
+		
 		}
+		
 		Collections.sort(removePeaks,Collections.reverseOrder());
 		for (Integer i : removePeaks) {
 			sortedPeaks.remove(i);
 		}
+		
 
 		/*
 		 * Convert to spots.
 		 */
 
 		spots = new ArrayList<Spot>(sortedPeaks.size());
-
+		 Img<FloatType> secondDerivative = createSecondDerivativeImage(source);
 		if (source.numDimensions() > 2) { // 3D
 			for (int i = 0; i < sortedPeaks.size(); i++) {
 				final Point peak = sortedPeaks.get(i);
-				ra.setPosition(peak);
-				final double quality = ra.get().getRealDouble();
+				sourceRa.setPosition(peak);
+				final double quality = sourceRa.get().getRealDouble();
 				final double x = peak.getDoublePosition(0) * calibration[0];
 				final double y = peak.getDoublePosition(1) * calibration[1];
 				final double z = peak.getDoublePosition(2) * calibration[2];
-				final Spot spot = new Spot(x, y, z, 2*calibration[0], quality);
+				final Spot spot = new Spot(x, y, z, getRadius(peak, secondDerivative)*calibration[0], quality);
 				spots.add(spot);
 			}
 		} else if (source.numDimensions() > 1) { // 2D
 			final double z = 0;
 			for (int i = 0; i < sortedPeaks.size(); i++) {
 				final Point peak = sortedPeaks.get(i);
-				ra.setPosition(peak);
-				final double quality = ra.get().getRealDouble();
-				IJ.log("xpos: " +peak.getDoublePosition(0)+ " xcal: " + calibration[0]);
+				sourceRa.setPosition(peak);
+				final double quality = sourceRa.get().getRealDouble();
 				final double x = peak.getDoublePosition(0) * calibration[0];
 				final double y = peak.getDoublePosition(1) * calibration[1];
 				//radius.get(i)
-				final Spot spot = new Spot(x, y, z, 2*calibration[0], quality);
+				//getRadius(peak, secondDerivative) *calibration[0]
+				final Spot spot = new Spot(x, y, z, 2, quality);
 				spots.add(spot);
+				
+				
 			}
 		} else { // 1D
 			final double z = 0;
 			final double y = 0;
 			for (int i = 0; i < sortedPeaks.size(); i++) {
 				final Point peak = sortedPeaks.get(i);
-				ra.setPosition(peak);
-				final double quality = ra.get().getRealDouble();
+				sourceRa.setPosition(peak);
+				final double quality = sourceRa.get().getRealDouble();
 				final double x = peak.getDoublePosition(0) * calibration[0];
-				final Spot spot = new Spot(x, y, z, 2*calibration[0], quality);
+				final Spot spot = new Spot(x, y, z, getRadius(peak, secondDerivative)*calibration[0], quality);
 				spots.add(spot);
 			}
 		}
@@ -272,8 +438,8 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 
 	/**
 	 * Iterative implementation of a flood fill algorithm. Builds a region
-	 * around a start peak upto a intensity tolerance t. If another peak is
-	 * inside the tolerance, it will be removed from the sortedPeaks ArrayList.
+	 * around a start peak upto a intensity tolerance t. If the region touches a region of
+	 * a another maxima, it will be discarded.
 	 * If there are points inside the region with the same intensity as the
 	 * peak, the mean position will be calculated
 	 * 
@@ -292,26 +458,20 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 	 *
 	 * @return Maximum distance from the peak to a point in the region (not used at the moment)
 	 */
-	public double FloodFillRemover(MyPoint peak, double peakIntensity,
-			int peakIndex, int tolerance, ArrayList<Point> l, int[][][] m) {
-		//TODO: REMOVE PLATEAUS MAXIMA!
-		Stack<MyPoint> s = new Stack<MyPoint>();
+	public boolean FloodFillRemover(MyPoint peak, double peakIntensity,
+			int peakIndex, int tolerance, ArrayList<Point> l) {
 		
+		Stack<MyPoint> s = new Stack<MyPoint>();
+		boolean remove = false;
+		m[peak.getIntPosition(0)][peak.getIntPosition(1)][peak.getIntPosition(2)] = peakIndex+1;
 		s.push(peak);
-		m[peak.getIntPosition(0)][peak.getIntPosition(1)][peak.getIntPosition(2)] = peakIndex+1; //mark the peak as visited with its peak index (+1, becaue 0 means unmarked)
-		double maxDistance = Double.MIN_VALUE;
 	
 		while (!s.isEmpty()) {
 			MyPoint p = s.pop();
-			ra.setPosition(p);
-
-			double diff = peakIntensity - ra.get().getRealDouble();
+			sourceRa.setPosition(p);
+			double diff = peakIntensity - sourceRa.get().getRealDouble();
 	
 			if (diff >= 0 && diff <= tolerance) {
-
-				if (distance(p, sortedPeaks.get(peakIndex)) > maxDistance) {
-					maxDistance = distance(p, sortedPeaks.get(peakIndex));
-				}
 				
 				if (Math.abs(diff) < 0.0001) {
 					// If the intensity is equal to the peak intensity, use it
@@ -319,14 +479,7 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 					l.add(p);
 					
 				}
-
-				if (sortedPeaks.contains(p)
-						&& sortedPeaks.indexOf(p) > peakIndex) {
-					// When the visited point is a peak, remove it from the
-					// sortedPeaks list.
-					sortedPeaks.remove(p);
-				}
-
+				
 				if (img.numDimensions() > 2) { //3D
 					int x = p.getIntPosition(0);
 					int y = p.getIntPosition(1);
@@ -338,17 +491,14 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 								if (dx != 0 || dy != 0 || dz != 0) {
 									MyPoint pNext = new MyPoint(x + dx, y + dy,
 											z + dz);
-									if (isInsideBoundaries(x + dx, y + dy, z+ dz)
-											&& m[pNext.getIntPosition(0)][pNext
-													.getIntPosition(1)][pNext
-													.getIntPosition(2)] == 0) {
-										// If inside the image boundaries and the next position is unmarked
-										s.push(pNext);
-										m[pNext.getIntPosition(0)][pNext.getIntPosition(1)][pNext.getIntPosition(2)] = peakIndex+1; //Mark as visited
-										double maxCand = distance(pNext, p) ;
-										if (maxCand > maxDistance) {
-											maxDistance = maxCand;
-										}
+									if (isInsideBoundaries(x + dx, y + dy, z+ dz)){
+											// If inside the image boundaries
+											remove = remove?true:checkRemoveable(pNext,peakIndex,peakIntensity);
+											boolean notVisitedBefore = m[pNext.getIntPosition(0)][pNext.getIntPosition(1)][pNext.getIntPosition(2)] ==0;
+											if(notVisitedBefore){
+												s.push(pNext);
+												m[pNext.getIntPosition(0)][pNext.getIntPosition(1)][pNext.getIntPosition(2)] = peakIndex+1; //Mark as visited
+											}
 									}
 								}
 							}
@@ -366,17 +516,17 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 						for (int dy = -1; dy <= 1; dy++) {
 							if (dx != 0 || dy != 0) {
 								MyPoint pNext = new MyPoint(x + dx, y + dy, z);
-								if (isInsideBoundaries(x + dx, y + dy, z)
-										&& m[pNext.getIntPosition(0)][pNext
-												.getIntPosition(1)][pNext
-												.getIntPosition(2)] == 0) {
-									// If inside the image boundaries and the next position is unmarked
-									s.push(pNext);
-									m[pNext.getIntPosition(0)][pNext.getIntPosition(1)][pNext.getIntPosition(2)] = peakIndex+1; //Mark as visited
-									double maxCand = distance(pNext, p) ;
-									if (maxCand > maxDistance) {
-										maxDistance = maxCand;
+								
+					
+								if (isInsideBoundaries(x + dx, y + dy, z)) {
+									// If inside the image boundaries
+									remove = remove?true:checkRemoveable(pNext,peakIndex,peakIntensity);
+									boolean notVisitedBefore = m[pNext.getIntPosition(0)][pNext.getIntPosition(1)][pNext.getIntPosition(2)] ==0;
+									if(notVisitedBefore){
+										s.push(pNext);
+										m[pNext.getIntPosition(0)][pNext.getIntPosition(1)][pNext.getIntPosition(2)] = peakIndex+1; //Mark as visited
 									}
+									
 								}
 							}
 						}
@@ -392,34 +542,45 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 					for (int dx = -1; dx <= 1; dx++) {
 							if (dx != 0) {
 								MyPoint pNext = new MyPoint(x + dx, y, z);
-								if (isInsideBoundaries(x + dx, y, z)
-										&& m[pNext.getIntPosition(0)][pNext
-												.getIntPosition(1)][pNext
-												.getIntPosition(2)] == 0) {
-									// If inside the image boundaries and the next position is unmarked
-									s.push(pNext);
-									m[pNext.getIntPosition(0)][pNext.getIntPosition(1)][pNext.getIntPosition(2)] = peakIndex+1; //Mark as visited
-									double maxCand = distance(pNext, p) ;
-									if (maxCand > maxDistance) {
-										maxDistance = maxCand;
-									}
+								if (isInsideBoundaries(x + dx, y, z)){
+										// If inside the image boundaries
+										remove = remove?true:checkRemoveable(pNext,peakIndex,peakIntensity);
+										boolean notVisitedBefore = m[pNext.getIntPosition(0)][pNext.getIntPosition(1)][pNext.getIntPosition(2)] ==0;
+										if(notVisitedBefore){
+											s.push(pNext);
+											m[pNext.getIntPosition(0)][pNext.getIntPosition(1)][pNext.getIntPosition(2)] = peakIndex+1; //Mark as visited
+										}
+
 								}
 							}
 					}
 				}
 			}
 		}
-		return maxDistance;
+		return remove;
+	}
+	
+
+	public boolean checkRemoveable(Point pNext, int peakIndex, double peakIntensity){
+		sourceRa.setPosition(pNext);
+		double dInt = peakIntensity - sourceRa.get().getRealDouble();
+		boolean insideTolerance = (dInt >= 0) && dInt<=tolerance;
+		int mValue = m[pNext.getIntPosition(0)][pNext.getIntPosition(1)][pNext.getIntPosition(2)];
+		boolean visitedByAnotherMaxima = (mValue!=(peakIndex+1))&&(mValue!=0);
+		if(insideTolerance && visitedByAnotherMaxima){
+			return true;
+		}
+		return false;
 	}
 	
 	private double getGlobalMin(){
 		double min = Double.MAX_VALUE;
-		if(ra.numDimensions()>2){
+		if(sourceRa.numDimensions()>2){
 			for(int x = 0; x < width; x++){
 				for(int y = 0; y < height; y++){
 					for(int z = 0; z < depth; z++){
-						ra.setPosition(new Point(x,y,z));
-						double v = ra.get().getRealDouble();
+						sourceRa.setPosition(new Point(x,y,z));
+						double v = sourceRa.get().getRealDouble();
 						if(v<min){
 							min = v;
 						}
@@ -427,21 +588,21 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 				}
 			}
 		}
-		else if(ra.numDimensions()>1){ //2D;
+		else if(sourceRa.numDimensions()>1){ //2D;
 			for(int x = 0; x < width; x++){
 				for(int y = 0; y < height; y++){
-					ra.setPosition(new Point(x,y,0));
-					double v = ra.get().getRealDouble();
+					sourceRa.setPosition(new Point(x,y,0));
+					double v = sourceRa.get().getRealDouble();
 					if(v<min){
 						min = v;
 					}
 				}
 			}
 		}
-		else if(ra.numDimensions()>0){ //1D;
+		else if(sourceRa.numDimensions()>0){ //1D;
 			for(int x = 0; x < width; x++){
-				ra.setPosition(new Point(x,0,0));
-				double v = ra.get().getRealDouble();
+				sourceRa.setPosition(new Point(x,0,0));
+				double v = sourceRa.get().getRealDouble();
 				if(v<min){
 					min = v;
 				}
@@ -455,8 +616,8 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 	 */
 	private boolean isLocalMaxima(MyPoint p){
 
-		ra.setPosition(p);
-		double v = ra.get().getRealDouble();
+		sourceRa.setPosition(p);
+		double v = sourceRa.get().getRealDouble();
 		if (img.numDimensions() > 2) {
 			int x = p.getIntPosition(0);
 			int y = p.getIntPosition(1);
@@ -468,8 +629,8 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 						if ( (dx != 0 || dy != 0 || dz != 0) && isInsideBoundaries(x+dx, y+dy, z+dz) ) {
 							MyPoint pNext = new MyPoint(x + dx, y + dy,
 									z + dz);
-							ra.setPosition(pNext);
-							double v1 = ra.get().getRealDouble();
+							sourceRa.setPosition(pNext);
+							double v1 = sourceRa.get().getRealDouble();
 							if(v1>v){
 								return false;
 							}
@@ -489,8 +650,8 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 						MyPoint pNext = new MyPoint(x + dx, y + dy,
 								z);
 						
-						ra.setPosition(pNext);
-						double v1 = ra.get().getRealDouble();
+						sourceRa.setPosition(pNext);
+						double v1 = sourceRa.get().getRealDouble();
 						if(v1>v){
 							return false;
 						}
@@ -507,8 +668,8 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 					if (dx != 0 && isInsideBoundaries(x+dx, y, z)) {
 						MyPoint pNext = new MyPoint(x + dx, y,
 								z);
-						ra.setPosition(pNext);
-						double v1 = ra.get().getRealDouble();
+						sourceRa.setPosition(pNext);
+						double v1 = sourceRa.get().getRealDouble();
 						if(v1>v){
 							return false;
 						}
