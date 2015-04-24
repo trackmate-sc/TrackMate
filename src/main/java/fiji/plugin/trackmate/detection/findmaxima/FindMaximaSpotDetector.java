@@ -4,9 +4,6 @@ import ij.IJ;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 import java.util.concurrent.ExecutorService;
@@ -15,11 +12,8 @@ import java.util.concurrent.Executors;
 import org.scijava.Context;
 import org.scijava.plugin.Parameter;
 
-import net.imagej.ops.AbstractOpTest;
 import net.imagej.ops.OpService;
-import net.imagej.ops.Ops;
 import net.imagej.ops.convolve.*;
-import net.imagej.ops.commands.convolve.Convolve;
 import net.imglib2.Interval;
 import net.imglib2.Point;
 import net.imglib2.RandomAccess;
@@ -31,7 +25,6 @@ import net.imglib2.algorithm.localextrema.LocalExtrema.MaximumCheck;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgFactory;
 import net.imglib2.img.array.ArrayImgFactory;
-import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.outofbounds.OutOfBoundsConstantValueFactory;
 import net.imglib2.outofbounds.OutOfBoundsFactory;
 import net.imglib2.type.NativeType;
@@ -43,7 +36,6 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.detection.SpotDetector;
 import net.imagej.ImageJ;
-import net.imagej.ops.Op;
 
 public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 		implements SpotDetector<T>, MultiThreaded {
@@ -121,12 +113,10 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 		//long[] borderSize = new long[] {1, 1};
 		//int[] k = new int[]{1, -2, 1,2, -4, 2,1, -2, 1}; //Second derivative filter
 		int[] k = new int[]{0, 1, 0,1, -4, 1,0, 1, 0}; //Laplace
-		int h = 0;
 		for(int i = 0; i < 3; i++){
 			for(int j = 0; j < 3; j++){
 				kernelRa.setPosition(new Point(i,j));
 				kernelRa.get().set(k[i*3+j]);
-				h++;
 			}
 		}
 	    final Context context = (Context) IJ.runPlugIn("org.scijava.Context", "");
@@ -337,9 +327,7 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 
 			
 			MyPoint p = sortedPeaks.get(i);
-			ArrayList<Point> l = new ArrayList<Point>(); // Position fürs
-															// geometrische
-															// Mittel
+			ArrayList<Point> l = new ArrayList<Point>();  //Positions with same intensity as the peak
 
 			sourceRa.setPosition(p);
 			boolean remove = FloodFillRemover(p, sourceRa.get().getRealDouble(), i,
@@ -350,31 +338,33 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 				i--;
 			}
 			else if (l.size() > 1) {
-				// Replace p with the mean position of l
-				int meanX = 0;
-				int meanY = 0;
-				int meanZ = 0;
+				//Calculate the geometric center
+				double meanX = 0;
+				double meanY = 0;
+				double meanZ = 0;
 				for (Point lp : l) {
-					meanX += lp.getIntPosition(0);
+					meanX += lp.getDoublePosition(0);
 					if(img.numDimensions()>1){
-						meanY += lp.getIntPosition(1);
+						meanY += lp.getDoublePosition(1);
 						if (img.numDimensions() > 2) {
-							meanZ += lp.getIntPosition(2);
+							meanZ += lp.getDoublePosition(2);
 						}
 					}
 				}
 				meanX = meanX / l.size();
 				meanY = meanY / l.size();
 				meanZ = meanZ / l.size();
-				MyPoint newP = new MyPoint(meanX, meanY, meanZ);
-				boolean isInsideItsRegion = m[meanX][meanY][meanZ]==(i+1);
-				boolean isLocalMax = isLocalMaxima(newP);
-				if(isInsideItsRegion && isLocalMax){
-					sortedPeaks.set(i, newP);
-				}else{
-					//If the new position is not a local max or it is not inside the labeled region.
-					removePeaks.add(i);
+				double[] newPDouble = {meanX,meanY,meanZ};
+				double minDistance = Double.MAX_VALUE;
+				MyPoint minPoint = null;
+				for(Point lp : l){
+					double distance = distance(newPDouble, lp);
+					if(distance < minDistance){
+						minDistance = distance;
+						minPoint = new MyPoint(lp);
+					}
 				}
+				sortedPeaks.set(i, minPoint);
 			}
 		
 		}
@@ -435,6 +425,15 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 
 		return true;
 	}
+	
+	private double distance(double[] p, Point q){
+		double sum = 0;
+		for(int i = 0; i < p.length; i++){
+			sum += Math.pow(p[i]-q.getDoublePosition(i), 2);
+		}
+		sum = Math.sqrt(sum);
+		return sum;
+	}
 
 	/**
 	 * Iterative implementation of a flood fill algorithm. Builds a region
@@ -454,11 +453,10 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 	 *            to the smaller than the tolerance value
 	 * @param l   Points with the same intensity as the peak will be added to
 	 *            that list.
-	 * @param m   A map where all visited pixel are marked.
 	 *
-	 * @return Maximum distance from the peak to a point in the region (not used at the moment)
+	 * @return If the peak should be discarded
 	 */
-	public boolean FloodFillRemover(MyPoint peak, double peakIntensity,
+	private boolean FloodFillRemover(MyPoint peak, double peakIntensity,
 			int peakIndex, int tolerance, ArrayList<Point> l) {
 		
 		Stack<MyPoint> s = new Stack<MyPoint>();
@@ -536,15 +534,19 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 
 					long x = p.getIntPosition(0);
 					long y = 0;
-
 					long z = 0;
 					// for each pixel in the 1d neighborhood:
 					for (int dx = -1; dx <= 1; dx++) {
 							if (dx != 0) {
 								MyPoint pNext = new MyPoint(x + dx, y, z);
 								if (isInsideBoundaries(x + dx, y, z)){
-										// If inside the image boundaries
-										remove = remove?true:checkRemoveable(pNext,peakIndex,peakIntensity);
+										
+									
+										/*
+										 * If once it was decided that the peak has to be removed, keep that decision!
+										 */
+										remove = remove?true:checkRemoveable(pNext,peakIndex,peakIntensity); 
+										
 										boolean notVisitedBefore = m[pNext.getIntPosition(0)][pNext.getIntPosition(1)][pNext.getIntPosition(2)] ==0;
 										if(notVisitedBefore){
 											s.push(pNext);
@@ -561,7 +563,7 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 	}
 	
 
-	public boolean checkRemoveable(Point pNext, int peakIndex, double peakIntensity){
+	private boolean checkRemoveable(Point pNext, int peakIndex, double peakIntensity){
 		sourceRa.setPosition(pNext);
 		double dInt = peakIntensity - sourceRa.get().getRealDouble();
 		boolean insideTolerance = (dInt >= 0) && dInt<=tolerance;
@@ -609,89 +611,6 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 			}
 		}
 		return min;
-	}
-	
-	/**
-	 * Checks if the point p is a local maximum. All pixels in local neighborhood have to be smaller or equal to p.
-	 */
-	private boolean isLocalMaxima(MyPoint p){
-
-		sourceRa.setPosition(p);
-		double v = sourceRa.get().getRealDouble();
-		if (img.numDimensions() > 2) {
-			int x = p.getIntPosition(0);
-			int y = p.getIntPosition(1);
-			int z = p.getIntPosition(2);
-			// for each pixel in the 3d neighborhood:
-			for (int dx = -1; dx <= 1; dx++) {
-				for (int dy = -1; dy <= 1; dy++) {
-					for (int dz = -1; dz <= 1; dz++) {
-						if ( (dx != 0 || dy != 0 || dz != 0) && isInsideBoundaries(x+dx, y+dy, z+dz) ) {
-							MyPoint pNext = new MyPoint(x + dx, y + dy,
-									z + dz);
-							sourceRa.setPosition(pNext);
-							double v1 = sourceRa.get().getRealDouble();
-							if(v1>v){
-								return false;
-							}
-						}
-					}
-				}
-			}
-		}
-		else if (img.numDimensions() > 1) {
-			int x = p.getIntPosition(0);
-			int y = p.getIntPosition(1);
-			int z = 0;
-			// for each pixel in the 3d neighborhood:
-			for (int dx = -1; dx <= 1; dx++) {
-				for (int dy = -1; dy <= 1; dy++) {
-					if ((dx != 0 || dy != 0) && isInsideBoundaries(x+dx, y+dy, z)) {
-						MyPoint pNext = new MyPoint(x + dx, y + dy,
-								z);
-						
-						sourceRa.setPosition(pNext);
-						double v1 = sourceRa.get().getRealDouble();
-						if(v1>v){
-							return false;
-						}
-					}
-				}
-			}
-		}
-		else if (img.numDimensions() > 0) {
-			int x = p.getIntPosition(0);
-			int y = 0;
-			int z = 0;
-			// for each pixel in the 3d neighborhood:
-			for (int dx = -1; dx <= 1; dx++) {
-					if (dx != 0 && isInsideBoundaries(x+dx, y, z)) {
-						MyPoint pNext = new MyPoint(x + dx, y,
-								z);
-						sourceRa.setPosition(pNext);
-						double v1 = sourceRa.get().getRealDouble();
-						if(v1>v){
-							return false;
-						}
-					}
-			}
-		}
-		
-		
-		return true;
-	}
-	/**
-	 * 
-	 * @return distance between point p und q
-	 */
-	private double distance(MyPoint p, MyPoint q) {
-		double dist = 0;
-		for (int i = 0; i < p.numDimensions(); i++) {
-			long d = p.getLongPosition(i) - q.getLongPosition(i);
-			dist += d * d;
-		}
-		dist = Math.sqrt(dist);
-		return dist;
 	}
 
 	/**
