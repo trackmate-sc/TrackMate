@@ -1,3 +1,5 @@
+![](http://jenkins.imagej.net/job/TrackMate/lastBuild/badge/icon)
+
 ![alt tag](http://fiji.sc/images/0/0c/TrackMate-Logo85x50-color-300p.png)
 
 
