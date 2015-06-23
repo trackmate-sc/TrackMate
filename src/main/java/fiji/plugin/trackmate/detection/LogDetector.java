@@ -17,6 +17,7 @@ import net.imglib2.util.Util;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 import fiji.plugin.trackmate.Spot;
+import java.util.concurrent.ExecutorService;
 
 public class LogDetector< T extends RealType< T > & NativeType< T >> implements SpotDetector< T >, MultiThreaded
 {
@@ -130,8 +131,10 @@ public class LogDetector< T extends RealType< T > & NativeType< T >> implements 
 
 		final Img< FloatType > kernel = DetectionUtils.createLoGKernel( radius, ndims, calibration );
 		final FFTConvolution< FloatType > fftconv = new FFTConvolution< FloatType >( floatImg, kernel );
-		fftconv.setExecutorService(Executors.newFixedThreadPool( numThreads ));
+		ExecutorService service = Executors.newFixedThreadPool(numThreads);
+		fftconv.setExecutorService(service);
 		fftconv.convolve();
+		service.shutdown();
 
 		final long[] minopposite = new long[ interval.numDimensions() ];
 		interval.min( minopposite );
