@@ -1,14 +1,5 @@
 package fiji.plugin.trackmate.action;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition;
-import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition.TrackBranchDecomposition;
-import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
 import ij.WindowManager;
 import ij.measure.ResultsTable;
 import ij.text.TextPanel;
@@ -21,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,6 +23,16 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.scijava.plugin.Plugin;
+
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition;
+import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition.TrackBranchDecomposition;
+import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
+import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.gui.TrackMateWizard;
 
 public class TrackBranchAnalysis extends AbstractTMAction
 {
@@ -89,9 +91,37 @@ public class TrackBranchAnalysis extends AbstractTMAction
 				final Branch br = new Branch();
 				branchMap.put( branch, br );
 
+				// Track name from ID
+				br.trackID = model.getTrackModel().name( trackID );
+
 				// First and last spot.
 				br.first = branch.get( 0 );
 				br.last = branch.get( branch.size() - 1 );
+
+				// Distance traveled.
+				br.distanceTraveled = Math.sqrt( br.last.squareDistanceTo( br.first ) );
+
+				// Compute mean velocity "by hand".
+				final double meanV;
+				if ( branch.size() < 2 )
+				{
+					meanV = Double.NaN;
+				}
+				else
+				{
+					final Iterator< Spot > it = branch.iterator();
+					Spot previous = it.next();
+					double sum = 0;
+					while ( it.hasNext() )
+					{
+						final Spot next = it.next();
+						final double dr = Math.sqrt( next.squareDistanceTo( previous ) );
+						sum += dr;
+						previous = next;
+					}
+					meanV = sum / ( branch.size() - 1 );
+				}
+				br.meanVelocity = meanV;
 
 				// Predecessors
 				final Set< DefaultEdge > incomingEdges = branchGraph.incomingEdgesOf( branch );
@@ -145,13 +175,16 @@ public class TrackBranchAnalysis extends AbstractTMAction
 		{
 			table.incrementCounter();
 			table.addLabel( br.toString() );
+			table.addValue( "Track ID", br.trackID );
 			table.addValue( "N predecessors", br.predecessors.size() );
 			table.addValue( "N successors", br.successors.size() );
 			table.addValue( "dt (frames)", br.dt() );
+			table.addValue( "Distance (" + model.getSpaceUnits() + ")", br.distanceTraveled );
+			table.addValue( "Mean velocity (" + model.getSpaceUnits() + "/frames)", br.meanVelocity );
 			table.addValue( "First", br.first.getName() );
 			table.addValue( "Last", br.last.getName() );
 		}
-		table.setPrecision( 0 ); // Everything is int
+		table.setPrecision( 2 );
 		table.show( TABLE_NAME );
 		logger.log( "Done.\n" );
 
@@ -195,13 +228,19 @@ public class TrackBranchAnalysis extends AbstractTMAction
 	 */
 	class Branch implements Comparable< Branch >
 	{
+		double meanVelocity;
+
+		double distanceTraveled;
+
+		String trackID;
+
 		Spot first;
 
 		Spot last;
 
-		 Set< Branch > predecessors;
+		Set< Branch > predecessors;
 
-		 Set< Branch > successors;
+		Set< Branch > successors;
 
 		@Override
 		public String toString()
