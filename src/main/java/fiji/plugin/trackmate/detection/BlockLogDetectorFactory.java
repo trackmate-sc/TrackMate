@@ -1,10 +1,5 @@
 package fiji.plugin.trackmate.detection;
 
-import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_DO_MEDIAN_FILTERING;
-import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_DO_SUBPIXEL_LOCALIZATION;
-import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_RADIUS;
-import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_TARGET_CHANNEL;
-import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_THRESHOLD;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DO_MEDIAN_FILTERING;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DO_SUBPIXEL_LOCALIZATION;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
@@ -13,6 +8,7 @@ import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
 import static fiji.plugin.trackmate.io.IOUtils.readBooleanAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.readIntegerAttribute;
+import static fiji.plugin.trackmate.io.IOUtils.writeAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.writeDoMedian;
 import static fiji.plugin.trackmate.io.IOUtils.writeDoSubPixel;
 import static fiji.plugin.trackmate.io.IOUtils.writeRadius;
@@ -22,18 +18,13 @@ import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.ImageIcon;
-
-import net.imagej.ImgPlus;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.view.Views;
 
 import org.jdom2.Element;
 import org.scijava.plugin.Plugin;
@@ -41,90 +32,32 @@ import org.scijava.plugin.Plugin;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
-import fiji.plugin.trackmate.gui.panels.detector.LogDetectorConfigurationPanel;
+import fiji.plugin.trackmate.gui.panels.detector.BlockLogDetectorConfigurationPanel;
 import fiji.plugin.trackmate.util.TMUtils;
 
 @Plugin( type = SpotDetectorFactory.class )
-public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> implements SpotDetectorFactory< T >
+public class BlockLogDetectorFactory< T extends RealType< T > & NativeType< T >> extends LogDetectorFactory< T >
 {
-
 	/*
 	 * CONSTANTS
 	 */
 
 	/** A string key identifying this factory. */
-	public static final String DETECTOR_KEY = "LOG_DETECTOR";
+	public static final String DETECTOR_KEY = "BLOCK_LOG_DETECTOR";
 
 	/** The pretty name of the target detector. */
-	public static final String NAME = "LoG detector";
+	public static final String NAME = "Block LoG detector";
 
 	/** An html information text. */
-	public static final String INFO_TEXT = "<html>" + "This detector applies a LoG (Laplacian of Gaussian) filter <br>" + "to the image, with a sigma suited to the blob estimated size. <br>" + "Calculations are made in the Fourier space. The maxima in the <br>" + "filtered image are searched for, and maxima too close from each <br>" + "other are suppressed. A quadratic fitting scheme allows to do <br>" + "sub-pixel localization. " + "</html>";
+	public static final String INFO_TEXT = "<html>" + "This detector is a version of the LoG detector that splits the image in several blocks and processes them sequentially. This is made to save memory when processing large images. " + "</html>";
 
-	/*
-	 * FIELDS
-	 */
+	public static final String KEY_NSPLIT = "NSPLIT";
 
-	/** The image to operate on. Multiple frames, single channel. */
-	protected ImgPlus< T > img;
-
-	protected Map< String, Object > settings;
-
-	protected String errorMessage;
+	private static final int DEFAULT_NSPLIT = 4;
 
 	/*
 	 * METHODS
 	 */
-
-	@Override
-	public boolean setTarget( final ImgPlus< T > img, final Map< String, Object > settings )
-	{
-		this.img = img;
-		this.settings = settings;
-		return checkSettings( settings );
-	}
-	
-	
-	protected RandomAccessible< T > prepareFrameImg( final int frame )
-	{
-		final double[] calibration = TMUtils.getSpatialCalibration( img );
-		RandomAccessible< T > imFrame;
-		final int cDim = TMUtils.findCAxisIndex( img );
-		if ( cDim < 0 )
-		{
-			imFrame = img;
-		}
-		else
-		{
-			// In ImgLib2, dimensions are 0-based.
-			final int channel = ( Integer ) settings.get( KEY_TARGET_CHANNEL ) - 1;
-			imFrame = Views.hyperSlice( img, cDim, channel );
-		}
-
-		int timeDim = TMUtils.findTAxisIndex( img );
-		if ( timeDim >= 0 )
-		{
-			if ( cDim >= 0 && timeDim > cDim )
-			{
-				timeDim--;
-			}
-			imFrame = Views.hyperSlice( imFrame, timeDim, frame );
-		}
-
-		// In case we have a 1D image.
-		if ( img.dimension( 0 ) < 2 )
-		{ // Single column image, will be rotated internally.
-			calibration[ 0 ] = calibration[ 1 ]; // It gets NaN otherwise
-			calibration[ 1 ] = 1;
-			imFrame = Views.hyperSlice( imFrame, 0, 0 );
-		}
-		if ( img.dimension( 1 ) < 2 )
-		{ // Single line image
-			imFrame = Views.hyperSlice( imFrame, 1, 0 );
-		}
-
-		return imFrame;
-	}
 
 	@Override
 	public SpotDetector< T > getDetector( final Interval interval, final int frame )
@@ -133,24 +66,23 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 		final double threshold = ( Double ) settings.get( KEY_THRESHOLD );
 		final boolean doMedian = ( Boolean ) settings.get( KEY_DO_MEDIAN_FILTERING );
 		final boolean doSubpixel = ( Boolean ) settings.get( KEY_DO_SUBPIXEL_LOCALIZATION );
+		final int nsplit = ( Integer ) settings.get( KEY_NSPLIT );
+
 		final double[] calibration = TMUtils.getSpatialCalibration( img );
 		final RandomAccessible< T > imFrame = prepareFrameImg( frame );
 
-		final LogDetector< T > detector = new LogDetector< T >( imFrame, interval, calibration, radius, threshold, doSubpixel, doMedian );
+		final BlockLogDetector< T > detector = new BlockLogDetector< T >( imFrame, interval, calibration, radius,
+				threshold, doSubpixel, doMedian, nsplit );
 		detector.setNumThreads( 1 );
 		return detector;
 	}
 
 	@Override
-	public String getKey()
+	public Map< String, Object > getDefaultSettings()
 	{
-		return DETECTOR_KEY;
-	}
-
-	@Override
-	public String getErrorMessage()
-	{
-		return errorMessage;
+		final Map< String, Object > settings = super.getDefaultSettings();
+		settings.put( KEY_NSPLIT, DEFAULT_NSPLIT );
+		return settings;
 	}
 
 	@Override
@@ -163,12 +95,14 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 		ok = ok & checkParameter( settings, KEY_THRESHOLD, Double.class, errorHolder );
 		ok = ok & checkParameter( settings, KEY_DO_MEDIAN_FILTERING, Boolean.class, errorHolder );
 		ok = ok & checkParameter( settings, KEY_DO_SUBPIXEL_LOCALIZATION, Boolean.class, errorHolder );
+		ok = ok & checkParameter( settings, KEY_NSPLIT, Integer.class, errorHolder );
 		final List< String > mandatoryKeys = new ArrayList< String >();
 		mandatoryKeys.add( KEY_TARGET_CHANNEL );
 		mandatoryKeys.add( KEY_RADIUS );
 		mandatoryKeys.add( KEY_THRESHOLD );
 		mandatoryKeys.add( KEY_DO_MEDIAN_FILTERING );
 		mandatoryKeys.add( KEY_DO_SUBPIXEL_LOCALIZATION );
+		mandatoryKeys.add( KEY_NSPLIT );
 		ok = ok & checkMapKeys( settings, mandatoryKeys, null, errorHolder );
 		if ( !ok )
 		{
@@ -181,12 +115,22 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 	public boolean marshall( final Map< String, Object > settings, final Element element )
 	{
 		final StringBuilder errorHolder = new StringBuilder();
-		final boolean ok = writeTargetChannel( settings, element, errorHolder ) && writeRadius( settings, element, errorHolder ) && writeThreshold( settings, element, errorHolder ) && writeDoMedian( settings, element, errorHolder ) && writeDoSubPixel( settings, element, errorHolder );
+		final boolean ok = writeTargetChannel( settings, element, errorHolder )
+				&& writeRadius( settings, element, errorHolder )
+				&& writeThreshold( settings, element, errorHolder )
+				&& writeDoMedian( settings, element, errorHolder )
+				&& writeDoSubPixel( settings, element, errorHolder )
+				&& writeNSplit( settings, element, errorHolder );
 		if ( !ok )
 		{
 			errorMessage = errorHolder.toString();
 		}
 		return ok;
+	}
+
+	public static final boolean writeNSplit( final Map< String, Object > settings, final Element element, final StringBuilder errorHolder )
+	{
+		return writeAttribute( settings, element, KEY_NSPLIT, Integer.class, errorHolder );
 	}
 
 	@Override
@@ -200,6 +144,7 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 		ok = ok & readBooleanAttribute( element, settings, KEY_DO_SUBPIXEL_LOCALIZATION, errorHolder );
 		ok = ok & readBooleanAttribute( element, settings, KEY_DO_MEDIAN_FILTERING, errorHolder );
 		ok = ok & readIntegerAttribute( element, settings, KEY_TARGET_CHANNEL, errorHolder );
+		ok = ok & readIntegerAttribute( element, settings, KEY_NSPLIT, errorHolder );
 		if ( !ok )
 		{
 			errorMessage = errorHolder.toString();
@@ -211,13 +156,13 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 	@Override
 	public ConfigurationPanel getDetectorConfigurationPanel( final Settings settings, final Model model )
 	{
-		return new LogDetectorConfigurationPanel( settings.imp, INFO_TEXT, NAME, model );
+		return new BlockLogDetectorConfigurationPanel( settings.imp, INFO_TEXT, NAME, model );
 	}
 
 	@Override
-	public String getInfoText()
+	public String getKey()
 	{
-		return INFO_TEXT;
+		return DETECTOR_KEY;
 	}
 
 	@Override
@@ -227,21 +172,8 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 	}
 
 	@Override
-	public Map< String, Object > getDefaultSettings()
+	public String getInfoText()
 	{
-		final Map< String, Object > settings = new HashMap< String, Object >();
-		settings.put( KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL );
-		settings.put( KEY_RADIUS, DEFAULT_RADIUS );
-		settings.put( KEY_THRESHOLD, DEFAULT_THRESHOLD );
-		settings.put( KEY_DO_MEDIAN_FILTERING, DEFAULT_DO_MEDIAN_FILTERING );
-		settings.put( KEY_DO_SUBPIXEL_LOCALIZATION, DEFAULT_DO_SUBPIXEL_LOCALIZATION );
-		return settings;
+		return INFO_TEXT;
 	}
-
-	@Override
-	public ImageIcon getIcon()
-	{
-		return null;
-	}
-
 }

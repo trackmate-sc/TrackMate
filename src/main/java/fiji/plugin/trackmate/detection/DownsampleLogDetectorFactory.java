@@ -27,7 +27,6 @@ import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.view.Views;
 
 import org.jdom2.Element;
 import org.scijava.plugin.Plugin;
@@ -67,41 +66,7 @@ public class DownsampleLogDetectorFactory< T extends RealType< T > & NativeType<
 		final int downsamplingFactor = ( Integer ) settings.get( KEY_DOWNSAMPLE_FACTOR );
 		final double[] calibration = TMUtils.getSpatialCalibration( img );
 
-		RandomAccessible< T > imFrame;
-		final int cDim = TMUtils.findCAxisIndex( img );
-		if ( cDim < 0 )
-		{
-			imFrame = img;
-		}
-		else
-		{
-			// In ImgLib2, dimensions are 0-based.
-			final int channel = ( Integer ) settings.get( KEY_TARGET_CHANNEL ) - 1;
-			imFrame = Views.hyperSlice( img, cDim, channel );
-		}
-
-		int timeDim = TMUtils.findTAxisIndex( img );
-		if ( timeDim >= 0 )
-		{
-			if ( cDim >= 0 && timeDim > cDim )
-			{
-				timeDim--;
-			}
-			imFrame = Views.hyperSlice( imFrame, timeDim, frame );
-		}
-
-		// In case we have a 1D image.
-		if ( img.dimension( 0 ) < 2 )
-		{ // Single column image, will be rotated internally.
-			calibration[ 0 ] = calibration[ 1 ]; // It gets NaN otherwise
-			calibration[ 1 ] = 1;
-			imFrame = Views.hyperSlice( imFrame, 0, 0 );
-		}
-		if ( img.dimension( 1 ) < 2 )
-		{ // Single line image
-			imFrame = Views.hyperSlice( imFrame, 1, 0 );
-		}
-
+		final RandomAccessible< T > imFrame = prepareFrameImg( frame );
 		final DownsampleLogDetector< T > detector = new DownsampleLogDetector< T >( imFrame, interval, calibration, radius, threshold, downsamplingFactor );
 		return detector;
 	}
