@@ -73,32 +73,6 @@ import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_FILTER_COLLECTION_ELEMENT
 import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_ID_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_NAME_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.XML_ATTRIBUTE_TRACKER_NAME;
-import fiji.plugin.trackmate.Dimension;
-import fiji.plugin.trackmate.FeatureModel;
-import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.Logger.StringBuilderLogger;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.detection.SpotDetectorFactory;
-import fiji.plugin.trackmate.features.FeatureFilter;
-import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
-import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
-import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
-import fiji.plugin.trackmate.features.track.TrackAnalyzer;
-import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
-import fiji.plugin.trackmate.providers.DetectorProvider;
-import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
-import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
-import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
-import fiji.plugin.trackmate.providers.TrackerProvider;
-import fiji.plugin.trackmate.providers.ViewProvider;
-import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
-import fiji.plugin.trackmate.visualization.ViewFactory;
 import ij.IJ;
 import ij.ImagePlus;
 
@@ -123,6 +97,34 @@ import org.jdom2.input.SAXBuilder;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 import org.jgrapht.graph.SimpleWeightedGraph;
+
+import fiji.plugin.trackmate.Dimension;
+import fiji.plugin.trackmate.FeatureModel;
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.Logger.StringBuilderLogger;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.detection.SpotDetectorFactory;
+import fiji.plugin.trackmate.features.FeatureFilter;
+import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
+import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
+import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
+import fiji.plugin.trackmate.features.track.TrackAnalyzer;
+import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
+import fiji.plugin.trackmate.gui.descriptors.ConfigureViewsDescriptor;
+import fiji.plugin.trackmate.providers.DetectorProvider;
+import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
+import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
+import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
+import fiji.plugin.trackmate.providers.TrackerProvider;
+import fiji.plugin.trackmate.providers.ViewProvider;
+import fiji.plugin.trackmate.tracking.SpotTracker;
+import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
+import fiji.plugin.trackmate.visualization.TrackMateModelView;
+import fiji.plugin.trackmate.visualization.ViewFactory;
 
 public class TmXmlReader
 {
@@ -221,17 +223,18 @@ public class TmXmlReader
 			final String guiState = guiel.getAttributeValue( GUI_STATE_ATTRIBUTE );
 			if ( null == guiState )
 			{
-				logger.error( "Could not find GUI state attribute.\n" );
+				logger.error( "Could not find GUI state attribute. Returning defaults.\n" );
 				ok = false;
+				return ConfigureViewsDescriptor.KEY;
 			}
 			return guiState;
 
 		}
 		else
 		{
-			logger.error( "Could not find GUI state element.\n" );
+			logger.error( "Could not find GUI state element. Returning defaults.\n" );
 			ok = false;
-			return null;
+			return ConfigureViewsDescriptor.KEY;
 		}
 	}
 
@@ -291,7 +294,7 @@ public class TmXmlReader
 		{
 			logger.error( "Could not find GUI state element.\n" );
 			ok = false;
-			return null;
+			return new ArrayList< TrackMateModelView >();
 		}
 	}
 
@@ -1379,5 +1382,4 @@ public class TmXmlReader
 		featureDimensions.put( feature, featureDimension );
 		isIntFeature.put( feature, Boolean.valueOf( isInt ) );
 	}
-
 }
