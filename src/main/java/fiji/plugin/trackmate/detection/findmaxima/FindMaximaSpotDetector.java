@@ -115,10 +115,11 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 		int[] k = new int[]{0, 1, 0,1, -4, 1,0, 1, 0}; //Laplace
 		for(int i = 0; i < 3; i++){
 			for(int j = 0; j < 3; j++){
-				kernelRa.setPosition(new Point(i,j));
+				kernelRa.setPosition(new Point((long)i,(long)j));
 				kernelRa.get().set(k[i*3+j]);
 			}
 		}
+	
 	    final Context context = (Context) IJ.runPlugIn("org.scijava.Context", "");
 		final ImageJ ij = new ImageJ(context);
 
@@ -193,10 +194,10 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 		 * Size of the plateau (0 when no plateau)
 		 */
 		int offset =0;
-		sourceRa.setPosition(new Point(startx,starty));
+		sourceRa.setPosition(new Point((long)startx,(long)starty));
 		double v0=sourceRa.get().getRealDouble();
 		for(int x = startx+1; x < startx+rad; x++){
-			sourceRa.setPosition(new Point(x,starty));
+			sourceRa.setPosition(new Point((long)x,(long)starty));
 			if(v0== sourceRa.get().getRealDouble()){
 				offset++;
 			}else{
@@ -210,7 +211,7 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 		double sum=0;
 		double min =Double.MAX_VALUE;
 		for(int x = startx+offset; x < startx+rad; x++){
-			sourceRa.setPosition(new Point(x,starty));
+			sourceRa.setPosition(new Point((long)x,(long)starty));
 			double v = sourceRa.get().getRealDouble();
 			if(v<min){
 				min = v;
@@ -224,7 +225,7 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 		 */
 		double partSum = 0;
 		for(int x = startx+offset; x < startx+rad; x++){
-			sourceRa.setPosition(new Point(x,starty));
+			sourceRa.setPosition(new Point((long)x,(long)starty));
 			
 			double v = sourceRa.get().getRealDouble()-min;
 			partSum += v;
@@ -583,7 +584,7 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 			for(int x = 0; x < width; x++){
 				for(int y = 0; y < height; y++){
 					for(int z = 0; z < depth; z++){
-						sourceRa.setPosition(new Point(x,y,z));
+						sourceRa.setPosition(new Point((long)x,(long)y,(long)z));
 						double v = sourceRa.get().getRealDouble();
 						if(v<min){
 							min = v;
@@ -595,7 +596,7 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 		else if(sourceRa.numDimensions()>1){ //2D;
 			for(int x = 0; x < width; x++){
 				for(int y = 0; y < height; y++){
-					sourceRa.setPosition(new Point(x,y,0));
+					sourceRa.setPosition(new Point((long)x,(long)y,(long)0));
 					double v = sourceRa.get().getRealDouble();
 					if(v<min){
 						min = v;
@@ -605,7 +606,7 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 		}
 		else if(sourceRa.numDimensions()>0){ //1D;
 			for(int x = 0; x < width; x++){
-				sourceRa.setPosition(new Point(x,0,0));
+				sourceRa.setPosition(new Point((long)x,0l,0l));
 				double v = sourceRa.get().getRealDouble();
 				if(v<min){
 					min = v;
