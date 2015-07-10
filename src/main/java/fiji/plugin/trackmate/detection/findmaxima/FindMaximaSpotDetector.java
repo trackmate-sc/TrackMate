@@ -274,7 +274,7 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 		 */
 		double globalmin=getGlobalMin();
 		//All pixels with values smaller as the globalmin+tolerance+2 should be suppressed. Threshold plays the role of tolerance.
-		final FloatType minPeakVal = new FloatType((float)(globalmin+tolerance+2));
+		final FloatType minPeakVal = new FloatType((float)(globalmin+tolerance+2)); //globalmin+tolerance+2
 		minPeakVal.setReal(globalmin+tolerance+2);
 
 		final MaximumCheck<FloatType> check = new LocalExtrema.MaximumCheck<FloatType>(
@@ -464,6 +464,9 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 		
 		Stack<MyPoint> s = new Stack<MyPoint>();
 		boolean remove = false;
+		if(m[peak.getIntPosition(0)][peak.getIntPosition(1)][peak.getIntPosition(2)]>0){
+			return true;
+		}
 		m[peak.getIntPosition(0)][peak.getIntPosition(1)][peak.getIntPosition(2)] = peakIndex+1;
 		s.push(peak);
 	
@@ -471,8 +474,10 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 			MyPoint p = s.pop();
 			sourceRa.setPosition(p);
 			double diff = peakIntensity - sourceRa.get().getRealDouble();
-	
-			if (diff >= 0 && diff <= tolerance) {
+			if(diff<0){
+				return true;
+			}
+			if (diff>=0 && diff <= tolerance) {
 				
 				if (Math.abs(diff) < 0.0001) {
 					// If the intensity is equal to the peak intensity, use it
@@ -522,12 +527,14 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 								if (isInsideBoundaries(x + dx, y + dy, z)) {
 									// If inside the image boundaries
 									remove = remove?true:checkRemoveable(pNext,peakIndex,peakIntensity);
+									if(remove){
+										return true;
+									}
 									boolean notVisitedBefore = m[pNext.getIntPosition(0)][pNext.getIntPosition(1)][pNext.getIntPosition(2)] ==0;
 									if(notVisitedBefore){
 										s.push(pNext);
 										m[pNext.getIntPosition(0)][pNext.getIntPosition(1)][pNext.getIntPosition(2)] = peakIndex+1; //Mark as visited
-									}
-									
+									}	
 								}
 							}
 						}
@@ -569,7 +576,10 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 	private boolean checkRemoveable(Point pNext, int peakIndex, double peakIntensity){
 		sourceRa.setPosition(pNext);
 		double dInt = peakIntensity - sourceRa.get().getRealDouble();
-		boolean insideTolerance = (dInt >= 0) && dInt<=tolerance;
+		if(dInt<0){
+			return true;
+		}
+		boolean insideTolerance = (dInt >= 0) && Math.abs(dInt)<=tolerance;
 		int mValue = m[pNext.getIntPosition(0)][pNext.getIntPosition(1)][pNext.getIntPosition(2)];
 		boolean visitedByAnotherMaxima = (mValue!=(peakIndex+1))&&(mValue!=0);
 		if(insideTolerance && visitedByAnotherMaxima){
