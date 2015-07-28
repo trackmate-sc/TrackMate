@@ -8,6 +8,7 @@ import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
 import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.readIntegerAttribute;
+import static fiji.plugin.trackmate.io.IOUtils.writeRadius;
 import static fiji.plugin.trackmate.io.IOUtils.writeTargetChannel;
 import static fiji.plugin.trackmate.io.IOUtils.writeThreshold;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
@@ -163,8 +164,9 @@ public class FindMaximaSpotDetectorFactory< T extends RealType< T > & NativeType
 	{
 		final StringBuilder errorHolder = new StringBuilder();
 		final boolean ok =
-				writeTargetChannel( settings, element, errorHolder )
-				&& writeThreshold( settings, element, errorHolder );
+				writeRadius( settings, element, errorHolder )
+						&& writeTargetChannel( settings, element, errorHolder )
+						&& writeThreshold( settings, element, errorHolder );
 		if ( !ok )
 		{
 			errorMessage = errorHolder.toString();
@@ -179,6 +181,7 @@ public class FindMaximaSpotDetectorFactory< T extends RealType< T > & NativeType
 		final StringBuilder errorHolder = new StringBuilder();
 		boolean ok = true;
 		ok = ok & readDoubleAttribute( element, settings, KEY_THRESHOLD, errorHolder );
+		ok = ok & readDoubleAttribute( element, settings, KEY_RADIUS, errorHolder );
 		ok = ok & readIntegerAttribute( element, settings, KEY_TARGET_CHANNEL, errorHolder );
 		if ( !ok )
 		{
