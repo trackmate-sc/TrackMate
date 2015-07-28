@@ -1,7 +1,9 @@
 package fiji.plugin.trackmate.detection.findmaxima;
 
+import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_RADIUS;
 import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_THRESHOLD;
+import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
 import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
@@ -10,6 +12,7 @@ import static fiji.plugin.trackmate.io.IOUtils.writeTargetChannel;
 import static fiji.plugin.trackmate.io.IOUtils.writeThreshold;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
+import ij.measure.Calibration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -195,28 +198,47 @@ public class FindMaximaSpotDetectorFactory< T extends RealType< T > & NativeType
 			@Override
 			protected void initGUI()
 			{
+				// Customize GUI.
+
 				super.initGUI();
 				jCheckBoxMedianFilter.setVisible( false );
 				jCheckSubPixel.setVisible( false );
-				jTextFieldBlobDiameter.setVisible( false );
-				jLabelBlobDiameterUnit.setVisible( false );
-				jLabelBlobDiameter.setVisible( false );
+				jLabelThreshold.setText( "Tolerance:" );
 			}
 
 			@Override
 			public void setSettings( final Map< String, Object > settings )
 			{
 				sliderChannel.setValue( ( Integer ) settings.get( KEY_TARGET_CHANNEL ) );
+				double radius = ( Double ) settings.get( KEY_RADIUS );
+				if ( imp != null )
+				{
+					final Calibration calibration = imp.getCalibration();
+					// Not too large
+					final double maxWidth = imp.getWidth() * 0.5 * ( calibration == null ? 1 : calibration.pixelWidth );
+					final double maxHeight = imp.getHeight() * 0.5 * ( calibration == null ? 1 : calibration.pixelHeight );
+					final double max = maxWidth < maxHeight ? maxWidth : maxHeight;
+					if ( radius > max )
+					{
+						radius *= max * 4 / ( imp.getWidth() + imp.getHeight() );
+					}
+					// Not too small
+					final double pw = calibration == null ? 1 : calibration.pixelWidth;
+					radius = Math.max( radius / pw, 1.5 ) * pw;
+				}
+				jTextFieldBlobDiameter.setText( "" + ( 2 * radius ) );
 				jTextFieldThreshold.setText( "" + settings.get( KEY_THRESHOLD ) );
 			}
 
 			@Override
 			public Map< String, Object > getSettings()
 			{
-				final HashMap< String, Object > settings = new HashMap< String, Object >( 2 );
+				final HashMap< String, Object > settings = new HashMap< String, Object >( 5 );
 				final int targetChannel = sliderChannel.getValue();
+				final double expectedRadius = NumberParser.parseDouble( jTextFieldBlobDiameter.getText() ) / 2;
 				final double threshold = NumberParser.parseDouble( jTextFieldThreshold.getText() );
 				settings.put( KEY_TARGET_CHANNEL, targetChannel );
+				settings.put( KEY_RADIUS, expectedRadius );
 				settings.put( KEY_THRESHOLD, threshold );
 				return settings;
 			}
@@ -236,6 +258,7 @@ public class FindMaximaSpotDetectorFactory< T extends RealType< T > & NativeType
 		final Map< String, Object > settings = new HashMap< String, Object >();
 		settings.put( KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL );
 		settings.put( KEY_THRESHOLD, DEFAULT_THRESHOLD );
+		settings.put( KEY_RADIUS, DEFAULT_RADIUS );
 		return settings;
 	}
 
@@ -246,9 +269,11 @@ public class FindMaximaSpotDetectorFactory< T extends RealType< T > & NativeType
 		final StringBuilder errorHolder = new StringBuilder();
 		ok = ok & checkParameter( settings, KEY_TARGET_CHANNEL, Integer.class, errorHolder );
 		ok = ok & checkParameter( settings, KEY_THRESHOLD, Double.class, errorHolder );
+		ok = ok & checkParameter( settings, KEY_RADIUS, Double.class, errorHolder );
 		final List< String > mandatoryKeys = new ArrayList< String >();
 		mandatoryKeys.add( KEY_TARGET_CHANNEL );
 		mandatoryKeys.add( KEY_THRESHOLD );
+		mandatoryKeys.add( KEY_RADIUS );
 		ok = ok & checkMapKeys( settings, mandatoryKeys, null, errorHolder );
 		if ( !ok )
 		{
