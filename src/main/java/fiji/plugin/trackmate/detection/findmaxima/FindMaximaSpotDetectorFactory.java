@@ -104,6 +104,7 @@ public class FindMaximaSpotDetectorFactory< T extends RealType< T > & NativeType
 	public SpotDetector< T > getDetector( final Interval interval, final int frame )
 	{
 		final double threshold = ( Double ) settings.get( KEY_THRESHOLD );
+		final double radius = ( Double ) settings.get(KEY_RADIUS);
 		final double[] calibration = TMUtils.getSpatialCalibration( img );
 		RandomAccessible< T > imFrame;
 		final int cDim = TMUtils.findCAxisIndex( img );
@@ -140,7 +141,7 @@ public class FindMaximaSpotDetectorFactory< T extends RealType< T > & NativeType
 			imFrame = Views.hyperSlice( imFrame, 1, 0 );
 		}
 
-		final FindMaximaSpotDetector< T > detector = new FindMaximaSpotDetector< T >( imFrame, interval, calibration, threshold );
+		final FindMaximaSpotDetector< T > detector = new FindMaximaSpotDetector< T >( imFrame, interval, calibration, threshold,radius );
 		detector.setNumThreads( 1 );
 		return detector;
 	}

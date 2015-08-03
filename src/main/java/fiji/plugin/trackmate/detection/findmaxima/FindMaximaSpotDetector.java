@@ -14,6 +14,7 @@ import org.scijava.plugin.Parameter;
 
 import net.imagej.ops.OpService;
 import net.imagej.ops.convolve.*;
+import net.imagej.patcher.LegacyInjector;
 import net.imglib2.Interval;
 import net.imglib2.Point;
 import net.imglib2.RandomAccess;
@@ -64,7 +65,9 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 	private List<Spot> spots;
 	private int[][][] m; //Map for labeling visited pixels
 	
-	
+	static {
+		LegacyInjector.preinit();
+	}
 
 	private final double radius;
 	RandomAccess<T> sourceRa;
@@ -82,12 +85,12 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 
 	public FindMaximaSpotDetector(final RandomAccessible<T> img,
 			final Interval interval, final double[] calibration,
-			final double threshold) {
+			final double threshold, final double radius) {
 		this.img = img;
 		this.interval = DetectionUtils.squeeze(interval);
 		this.calibration = calibration;
 		this.tolerance = threshold;
-		this.radius = DEFAULT_RADIUS;
+		this.radius = radius;
 		setNumThreads();
 
 	}
@@ -121,7 +124,7 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 		}
 	
 	    final Context context = (Context) IJ.runPlugIn("org.scijava.Context", "");
-		final ImageJ ij = new ImageJ(context);
+		final ImageJ ij = new ImageJ();
 
 		Img<FloatType> out = new ArrayImgFactory<FloatType>().create(source,new FloatType());
 		OutOfBoundsFactory<FloatType, RandomAccessibleInterval<FloatType>> obf = new OutOfBoundsConstantValueFactory<FloatType, RandomAccessibleInterval<FloatType>>(Util.getTypeFromInterval(source).createVariable());
@@ -142,12 +145,14 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 	 * - getRadius
 	 * - isLocalMax
 	 */
+	
+	
 	private int getRadius(Point p, Img<FloatType> secondDerivative)
 	{
 		int maxrad=25;
-		/*
-		 * Find the first maxima along the x-direction in second derivative image
-		 */
+		
+		//Find the first maxima along the x-direction in second derivative image
+		
 		RandomAccess<FloatType> ra = secondDerivative.randomAccess();
 		int startx = p.getIntPosition(0);
 		int starty = p.getIntPosition(1);
@@ -190,9 +195,9 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 		}
 		
 		
-		/*
-		 * Size of the plateau (0 when no plateau)
-		 */
+		
+		//Size of the plateau (0 when no plateau)
+		
 		int offset =0;
 		sourceRa.setPosition(new Point((long)startx,(long)starty));
 		double v0=sourceRa.get().getRealDouble();
@@ -205,9 +210,8 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 			}
 		}
 		
-		/*
-		 * Summed up intensity of the profile and minimum along the profile
-		 */
+		
+		//Summed up intensity of the profile and minimum along the profile
 		double sum=0;
 		double min =Double.MAX_VALUE;
 		for(int x = startx+offset; x < startx+rad; x++){
@@ -220,9 +224,8 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 		}
 		sum = sum - (rad-offset)*min;
 		
-		/*
-		 * 96% Threshold
-		 */
+		
+		//96% Threshold
 		double partSum = 0;
 		for(int x = startx+offset; x < startx+rad; x++){
 			sourceRa.setPosition(new Point((long)x,(long)starty));
@@ -381,7 +384,7 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 		 */
 
 		spots = new ArrayList<Spot>(sortedPeaks.size());
-		 Img<FloatType> secondDerivative = createSecondDerivativeImage(source);
+		// Img<FloatType> secondDerivative = createSecondDerivativeImage(source);
 		if (source.numDimensions() > 2) { // 3D
 			for (int i = 0; i < sortedPeaks.size(); i++) {
 				final Point peak = sortedPeaks.get(i);
@@ -390,7 +393,7 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 				final double x = peak.getDoublePosition(0) * calibration[0];
 				final double y = peak.getDoublePosition(1) * calibration[1];
 				final double z = peak.getDoublePosition(2) * calibration[2];
-				double radius = 2; //getRadius(peak, secondDerivative)*calibration[0]
+				//double radius = 2; //getRadius(peak, secondDerivative)*calibration[0]
 				final Spot spot = new Spot(x, y, z,radius, quality);
 				spots.add(spot);
 			}
@@ -403,7 +406,7 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 				final double x = peak.getDoublePosition(0) * calibration[0];
 				final double y = peak.getDoublePosition(1) * calibration[1];
 				//radius.get(i)
-				double radius = 2; //getRadius(peak, secondDerivative)*calibration[0]
+			//	double radius = 2; //getRadius(peak, secondDerivative)*calibration[0]
 				final Spot spot = new Spot(x, y, z, radius, quality);
 				spots.add(spot);
 				
@@ -417,7 +420,7 @@ public class FindMaximaSpotDetector<T extends RealType<T> & NativeType<T>>
 				sourceRa.setPosition(peak);
 				final double quality = sourceRa.get().getRealDouble();
 				final double x = peak.getDoublePosition(0) * calibration[0];
-				double radius = 2; //getRadius(peak, secondDerivative)*calibration[0]
+			//	double radius = 2; //getRadius(peak, secondDerivative)*calibration[0]
 				final Spot spot = new Spot(x, y, z, 2, quality);
 				spots.add(spot);
 			}
