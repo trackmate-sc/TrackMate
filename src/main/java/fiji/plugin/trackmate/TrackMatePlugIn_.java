@@ -7,6 +7,7 @@ import ij.ImageJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.plugin.PlugIn;
+import net.imagej.*;
 
 public class TrackMatePlugIn_ implements PlugIn
 {
@@ -132,7 +133,8 @@ public class TrackMatePlugIn_ implements PlugIn
 	public static void main( final String[] args )
 	{
 		ImageJ.main( args );
-		new TrackMatePlugIn_().run( "samples/FakeTracks.tif" );
+		//net.imagej.Main.main();
+		new TrackMatePlugIn_().run( "/home/thorsten/samples/FakeTracks.tif" );
 	}
 
 }
