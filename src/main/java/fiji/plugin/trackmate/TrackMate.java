@@ -1,14 +1,12 @@
 package fiji.plugin.trackmate;
 
-import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.imagej.ImgPlus;
-import net.imglib2.FinalInterval;
+import net.imglib2.Interval;
 import net.imglib2.algorithm.Algorithm;
 import net.imglib2.algorithm.Benchmark;
 import net.imglib2.algorithm.MultiThreaded;
@@ -296,75 +294,9 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 		 * Prepare interval
 		 */
 		final ImgPlus img = TMUtils.rawWraps( settings.imp );
-
-		final long[] max = new long[ img.numDimensions() ];
-		final long[] min = new long[ img.numDimensions() ];
-
-		// X, we must have it
-		final int xindex = TMUtils.findXAxisIndex( img );
-		if ( xindex < 0 )
-		{
-			errorMessage = "Source image has no X axis.\n";
-			return false;
-		}
-		min[ xindex ] = settings.xstart;
-		max[ xindex ] = settings.xend;
-		// Y, we must have it
-		final int yindex = TMUtils.findYAxisIndex( img );
-		if ( yindex < 0 )
-		{
-			errorMessage = "Source image has no Y axis.\n";
-			return false;
-		}
-		min[ yindex ] = settings.ystart;
-		max[ yindex ] = settings.yend;
-		// Z, we MIGHT have it
+		final Interval interval = TMUtils.getInterval( img, settings );
 		final int zindex = TMUtils.findZAxisIndex( img );
-		if ( zindex >= 0 )
-		{
-			min[ zindex ] = settings.zstart;
-			max[ zindex ] = settings.zend;
-		}
-		// CHANNEL, we might have it
-		final int cindex = TMUtils.findCAxisIndex( img );
-		if ( cindex >= 0 )
-		{
-			min[ cindex ] = ( Integer ) settings.detectorSettings.get( KEY_TARGET_CHANNEL ) - 1;
-			max[ cindex ] = min[ cindex ];
-		}
-		// TIME, we might have it, but anyway we leave the start & end
-		// management to the threads below
-		final int tindex = TMUtils.findTAxisIndex( img );
 
-		/*
-		 * We want to exclude time (if we have it) from out interval and source,
-		 * so that we can provide the detector instance with a hyperslice that
-		 * does NOT have time as a dimension.
-		 */
-		final long[] intervalMin;
-		final long[] intervalMax;
-		if ( tindex >= 0 )
-		{
-			intervalMin = new long[ min.length - 1 ];
-			intervalMax = new long[ min.length - 1 ];
-			int nindex = -1;
-			for ( int d = 0; d < min.length; d++ )
-			{
-				if ( d == tindex )
-				{
-					continue;
-				}
-				nindex++;
-				intervalMin[ nindex ] = Math.max( 0l, min[ d ] );
-				intervalMax[ nindex ] = Math.min( img.max( d ), max[ d ] );
-			}
-		}
-		else
-		{
-			intervalMin = min;
-			intervalMax = max;
-		}
-		final FinalInterval interval = new FinalInterval( intervalMin, intervalMax );
 		factory.setTarget( img, settings.detectorSettings );
 
 		final int numFrames = settings.tend - settings.tstart + 1;

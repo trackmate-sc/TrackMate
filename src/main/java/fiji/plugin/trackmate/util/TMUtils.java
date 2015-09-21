@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.util;
 
+import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 import ij.ImagePlus;
 
 import java.text.SimpleDateFormat;
@@ -19,12 +20,16 @@ import net.imagej.ImgPlus;
 import net.imagej.ImgPlusMetadata;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
+import net.imglib2.FinalInterval;
+import net.imglib2.Interval;
 import net.imglib2.img.ImagePlusAdapter;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.util.Util;
 import fiji.plugin.trackmate.Dimension;
+import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.detection.DetectorKeys;
 
 /**
  * List of static utilities for the {@link TrackMate} trackmate
@@ -563,6 +568,98 @@ public class TMUtils
 	public static final String getCurrentTimeString()
 	{
 		return DATE_FORMAT.format( new Date() );
+	}
+
+	/**
+	 * Returns an interval object that in the specified {@link ImgPlus} <b>slice
+	 * in a single time frame</b>.
+	 * <p>
+	 * The specified {@link Settings} object is used to determine a crop-cube
+	 * that will determine the X,Y,Z size of the interval. A single channel will
+	 * be taken in the case of a multi-channel image. If the detector set in the
+	 * settings object has a parameter for the target channel
+	 * {@link DetectorKeys#KEY_TARGET_CHANNEL}, it will be used; otherwise the
+	 * first channel will be taken.
+	 * <p>
+	 * If the specified {@link ImgPlus} has a time axis, it will be dropped and
+	 * the returned interval will have one dimension less.
+	 * 
+	 * @param img
+	 *            the source image into which the interval is to be defined.
+	 * @param settings
+	 *            the settings object that will determine the interval size.
+	 * @return a new interval.
+	 */
+	public static final Interval getInterval( final ImgPlus< ? > img, final Settings settings )
+	{
+		final long[] max = new long[ img.numDimensions() ];
+		final long[] min = new long[ img.numDimensions() ];
+
+		// X, we must have it.
+		final int xindex = TMUtils.findXAxisIndex( img );
+		min[ xindex ] = settings.xstart;
+		max[ xindex ] = settings.xend;
+
+		// Y, we must have it.
+		final int yindex = TMUtils.findYAxisIndex( img );
+		min[ yindex ] = settings.ystart;
+		max[ yindex ] = settings.yend;
+
+		// Z, we MIGHT have it.
+		final int zindex = TMUtils.findZAxisIndex( img );
+		if ( zindex >= 0 )
+		{
+			min[ zindex ] = settings.zstart;
+			max[ zindex ] = settings.zend;
+		}
+
+		// CHANNEL, we might have it.
+		final int cindex = TMUtils.findCAxisIndex( img );
+		if ( cindex >= 0 )
+		{
+			Integer c = ( Integer ) settings.detectorSettings.get( KEY_TARGET_CHANNEL ); // 1-based.
+			if ( null == c )
+			{
+				c = 1;
+			}
+			min[ cindex ] = c - 1; // 0-based.
+			max[ cindex ] = min[ cindex ];
+		}
+
+		// TIME, we might have it, but anyway we leave the start & end
+		// management to elsewhere.
+		final int tindex = TMUtils.findTAxisIndex( img );
+
+		/*
+		 * We want to exclude time (if we have it) from out interval and source,
+		 * so that we can provide the detector instance with a hyperslice that
+		 * does NOT have time as a dimension.
+		 */
+		final long[] intervalMin;
+		final long[] intervalMax;
+		if ( tindex >= 0 )
+		{
+			intervalMin = new long[ min.length - 1 ];
+			intervalMax = new long[ min.length - 1 ];
+			int nindex = -1;
+			for ( int d = 0; d < min.length; d++ )
+			{
+				if ( d == tindex )
+				{
+					continue;
+				}
+				nindex++;
+				intervalMin[ nindex ] = Math.max( 0l, min[ d ] );
+				intervalMax[ nindex ] = Math.min( img.max( d ), max[ d ] );
+			}
+		}
+		else
+		{
+			intervalMin = min;
+			intervalMax = max;
+		}
+		final FinalInterval interval = new FinalInterval( intervalMin, intervalMax );
+		return interval;
 	}
 
 	private TMUtils()
