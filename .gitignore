@@ -11,3 +11,6 @@
 
 ## Interactive tests ##
 /samples/
+
+## MacOSX
+.DS_Store
