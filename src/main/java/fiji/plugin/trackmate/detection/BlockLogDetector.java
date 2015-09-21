@@ -7,7 +7,6 @@ import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.util.Util;
 
 public class BlockLogDetector< T extends RealType< T > & NativeType< T >> extends LogDetector< T >
 {
@@ -54,8 +53,6 @@ public class BlockLogDetector< T extends RealType< T > & NativeType< T >> extend
 			{
 
 				final Interval currentInterval = getBlock( ix, iy );
-				System.out.println( "block ix=" + ix + ", iy=" + iy + " " + Util.printInterval( currentInterval ) );// DEBUG
-
 				final LogDetector< T > logDetector = new LogDetector< T >( img, currentInterval,
 						calibration, radius, threshold, doSubPixelLocalization, doMedianFilter );
 				logDetector.setNumThreads( numThreads );
