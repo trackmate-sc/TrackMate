@@ -69,8 +69,13 @@ public class BlockLogDetector< T extends RealType< T > & NativeType< T >> extend
 
 	protected Interval getBlock( final int ix, final int iy )
 	{
+		return getBlock( interval, iy, ix, nsplit );
+	}
+
+	public static final Interval getBlock( final Interval interval, final int nsplit, final int ix, final int iy )
+	{
 		final int[] index = new int[] { ix, iy };
-		
+
 		final long[] min = new long[ interval.numDimensions() ];
 		interval.min( min );
 
