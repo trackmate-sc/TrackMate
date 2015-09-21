@@ -125,7 +125,7 @@ public class BlockLogDetectorConfigurationPanel extends LogDetectorConfiguration
 			for ( int j = 0; j < nsplit; j++ )
 			{
 				final Interval block = BlockLogDetector.getBlock( interval, nsplit, i, j );
-				final Roi roi = new Roi( block.min( 0 ), block.min( 1 ), block.dimension( 0 ), block.dimension( 1 ) );
+				final Roi roi = new Roi( 0.5 + block.min( 0 ), 0.5 + block.min( 1 ), block.dimension( 0 ) - 1, block.dimension( 1 ) - 1 );
 				roiList.add( roi );
 				overlay.add( roi );
 			}
