@@ -26,7 +26,7 @@ import fiji.plugin.trackmate.util.TMUtils;
  * This class is used to take a snapshot of a {@link Spot} object (or
  * collection) from its coordinates and an {@link ImagePlus} that contain the
  * pixel data.
- * 
+ *
  * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> - Dec 2010 - 2014
  */
 public class SpotIconGrabber< T extends RealType< T >>
@@ -44,13 +44,19 @@ public class SpotIconGrabber< T extends RealType< T >>
 	 * radius coordinates are used to get a location on the image given at
 	 * construction. Physical coordinates are transformed in pixel coordinates
 	 * thanks to the calibration stored in the {@link ImgPlus}.
+	 *
+	 * @param spot
+	 *            the spot to generate a thumbnail image from.
+	 * @param radiusFactor
+	 *            a factor that determines the size of the thumbnail. The
+	 *            thumbnail will have a size equal to the spot diameter times
+	 *            this radius.
 	 */
-	public String getImageString( final Spot spot )
+	public String getImageString( final Spot spot, final double radiusFactor )
 	{
 		// Get crop coordinates
 		final double[] calibration = TMUtils.getSpatialCalibration( img );
-		final double radius = spot.getFeature( Spot.RADIUS ); // physical units,
-																// REQUIRED!
+		final double radius = spot.getFeature( Spot.RADIUS ) * radiusFactor;
 		final long x = Math.round( ( spot.getFeature( Spot.POSITION_X ) - radius ) / calibration[ 0 ] );
 		final long y = Math.round( ( spot.getFeature( Spot.POSITION_Y ) - radius ) / calibration[ 1 ] );
 		final long width = Math.max( 1, Math.round( 2 * radius / calibration[ 0 ] ) );

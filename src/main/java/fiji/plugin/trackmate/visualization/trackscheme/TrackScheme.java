@@ -1,26 +1,5 @@
 package fiji.plugin.trackmate.visualization.trackscheme;
 
-import com.mxgraph.model.mxCell;
-import com.mxgraph.model.mxGeometry;
-import com.mxgraph.model.mxICell;
-import com.mxgraph.model.mxIGraphModel;
-import com.mxgraph.util.mxCellRenderer;
-import com.mxgraph.util.mxConstants;
-import com.mxgraph.util.mxEvent;
-import com.mxgraph.util.mxEventObject;
-import com.mxgraph.util.mxEventSource.mxIEventListener;
-import com.mxgraph.util.mxRectangle;
-import com.mxgraph.util.mxStyleUtils;
-import com.mxgraph.view.mxGraphSelectionModel;
-
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.ModelChangeEvent;
-import fiji.plugin.trackmate.SelectionChangeEvent;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.visualization.AbstractTrackMateModelView;
-import fiji.plugin.trackmate.visualization.TrackColorGenerator;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import ij.ImagePlus;
 
 import java.awt.Color;
@@ -45,6 +24,27 @@ import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
+
+import com.mxgraph.model.mxCell;
+import com.mxgraph.model.mxGeometry;
+import com.mxgraph.model.mxICell;
+import com.mxgraph.model.mxIGraphModel;
+import com.mxgraph.util.mxCellRenderer;
+import com.mxgraph.util.mxConstants;
+import com.mxgraph.util.mxEvent;
+import com.mxgraph.util.mxEventObject;
+import com.mxgraph.util.mxEventSource.mxIEventListener;
+import com.mxgraph.util.mxRectangle;
+import com.mxgraph.util.mxStyleUtils;
+import com.mxgraph.view.mxGraphSelectionModel;
+
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.ModelChangeEvent;
+import fiji.plugin.trackmate.SelectionChangeEvent;
+import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.visualization.AbstractTrackMateModelView;
+import fiji.plugin.trackmate.visualization.TrackColorGenerator;
 
 public class TrackScheme extends AbstractTrackMateModelView
 {
@@ -282,11 +282,12 @@ public class TrackScheme extends AbstractTrackMateModelView
 			}
 			if ( null == cell )
 			{
-				// mxCell not present in graph. Most likely because the
-				// corresponding spot belonged
-				// to an invisible track, and a cell was not created for it when
-				// TrackScheme was
-				// launched. So we create one on the fly now.
+				/*
+				 * mxCell not present in graph. Most likely because the
+				 * corresponding spot belonged to an invisible track, and a cell
+				 * was not created for it when TrackScheme was launched. So we
+				 * create one on the fly now.
+				 */
 				final int row = getUnlaidSpotColumn();
 				cell = insertSpotInGraph( spot, row );
 				final int frame = spot.getFeature( Spot.FRAME ).intValue();
@@ -297,7 +298,8 @@ public class TrackScheme extends AbstractTrackMateModelView
 			if ( spotImageUpdater != null && doThumbnailCapture )
 			{
 				String style = cell.getStyle();
-				final String imageStr = spotImageUpdater.getImageString( spot );
+				final double radiusFactor = ( Double ) displaySettings.get( KEY_SPOT_RADIUS_RATIO );
+				final String imageStr = spotImageUpdater.getImageString( spot, radiusFactor );
 				style = mxStyleUtils.setStyle( style, mxConstants.STYLE_IMAGE, "data:image/base64," + imageStr );
 				graph.getModel().setStyle( cell, style );
 			}
@@ -331,9 +333,10 @@ public class TrackScheme extends AbstractTrackMateModelView
 		final mxGeometry geometry = new mxGeometry( x, y, DEFAULT_CELL_WIDTH, DEFAULT_CELL_HEIGHT );
 		cellAdded.setGeometry( geometry );
 		// Set its style
+		final double radiusFactor = ( Double ) displaySettings.get( KEY_SPOT_RADIUS_RATIO );
 		if ( null != spotImageUpdater && doThumbnailCapture )
 		{
-			final String imageStr = spotImageUpdater.getImageString( spot );
+			final String imageStr = spotImageUpdater.getImageString( spot, radiusFactor );
 			graph.getModel().setStyle( cellAdded, mxConstants.STYLE_IMAGE + "=" + "data:image/base64," + imageStr );
 		}
 		return cellAdded;
@@ -778,7 +781,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 	@Override
 	public void setDisplaySettings( final String key, final Object value )
 	{
-		if ( key == TrackMateModelView.KEY_TRACK_COLORING )
+		if ( key == KEY_TRACK_COLORING )
 		{
 			if ( null != stylist )
 			{
@@ -789,6 +792,10 @@ public class TrackScheme extends AbstractTrackMateModelView
 				doTrackStyle();
 				refresh();
 			}
+		}
+		else if ( key == KEY_SPOT_RADIUS_RATIO )
+		{
+			thumbnailCaptured = false;
 		}
 		displaySettings.put( key, value );
 	}
@@ -1251,6 +1258,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 		if ( null != spotImageUpdater )
 		{
 			gui.logger.setStatus( "Collecting spot thumbnails." );
+			final double radiusFactor = ( Double ) displaySettings.get( KEY_SPOT_RADIUS_RATIO );
 			int index = 0;
 			try
 			{
@@ -1263,7 +1271,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 					{
 
 						final mxICell cell = graph.getCellFor( spot );
-						final String imageStr = spotImageUpdater.getImageString( spot );
+						final String imageStr = spotImageUpdater.getImageString( spot, radiusFactor );
 						String style = cell.getStyle();
 						style = mxStyleUtils.setStyle( style, mxConstants.STYLE_IMAGE, "data:image/base64," + imageStr );
 						graph.getModel().setStyle( cell, style );
