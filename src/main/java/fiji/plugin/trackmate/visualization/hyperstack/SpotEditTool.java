@@ -2,6 +2,7 @@ package fiji.plugin.trackmate.visualization.hyperstack;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.gui.FreehandRoi;
 import ij.gui.ImageCanvas;
 import ij.gui.Toolbar;
 
@@ -19,6 +20,7 @@ import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -99,6 +101,8 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	 * The last {@link ImagePlus} on which an action happened.
 	 */
 	ImagePlus imp;
+
+	private FreehandRoi roiedit;
 
 	/*
 	 * CONSTRUCTOR
@@ -234,12 +238,12 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 			// If no target, we clear selection
 			if ( null == target )
 			{
-
 				if ( !autolinkingmode )
 				{
 					selectionModel.clearSelection();
 				}
-
+				roiedit = null;
+				imp.setRoi( roiedit );
 			}
 			else
 			{
@@ -397,7 +401,57 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 
 	@Override
 	public void mouseReleased( final MouseEvent e )
-	{}
+	{
+		if ( null != roiedit )
+		{
+			new Thread( "SpotEditTool roiedit processing" )
+			{
+				@Override
+				public void run()
+				{
+					roiedit.mouseReleased( e );
+					final ImagePlus imp = getImagePlus( e );
+					final HyperStackDisplayer displayer = displayers.get( imp );
+					final int frame = displayer.imp.getFrame() - 1;
+					final Model model = displayer.getModel();
+					final SelectionModel selectionModel = displayer.getSelectionModel();
+
+					final Iterator< Spot > it;
+					if ( IJ.shiftKeyDown() )
+					{
+						it = model.getSpots().iterator( true );
+					}
+					else
+					{
+						it = model.getSpots().iterator( frame, true );
+					}
+
+					final Collection< Spot > added = new ArrayList< Spot >();
+					final double calibration[] = TMUtils.getSpatialCalibration( imp );
+
+					while ( it.hasNext() )
+					{
+						final Spot spot = it.next();
+						final double x = spot.getFeature( Spot.POSITION_X );
+						final double y = spot.getFeature( Spot.POSITION_Y );
+						// In pixel units
+						final int xp = ( int ) ( x / calibration[ 0 ] + 0.5f );
+						final int yp = ( int ) ( y / calibration[ 1 ] + 0.5f );
+
+						if ( roiedit.contains( xp, yp ) )
+						{
+							added.add( spot );
+						}
+					}
+
+					if ( !added.isEmpty() )
+					{
+						selectionModel.addSpotToSelection( added );
+					}
+				};
+			}.start();
+		}
+	}
 
 	@Override
 	public void mouseEntered( final MouseEvent e )
@@ -416,19 +470,45 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 		if ( null == displayer )
 			return;
 		final Spot editedSpot = editedSpots.get( imp );
-		if ( null == editedSpot )
-			return;
+		if ( null != editedSpot )
+		{
 
-		final Point mouseLocation = e.getPoint();
-		final ImageCanvas canvas = getImageCanvas( e );
-		final double x = ( -0.5 + canvas.offScreenXD( mouseLocation.x ) ) * calibration[ 0 ];
-		final double y = ( -0.5 + canvas.offScreenYD( mouseLocation.y ) ) * calibration[ 1 ];
-		final double z = ( imp.getSlice() - 1 ) * calibration[ 2 ];
-		editedSpot.putFeature( Spot.POSITION_X, x );
-		editedSpot.putFeature( Spot.POSITION_Y, y );
-		editedSpot.putFeature( Spot.POSITION_Z, z );
-		displayer.imp.updateAndDraw();
-		updateStatusBar( editedSpot, imp.getCalibration().getUnits() );
+			final Point mouseLocation = e.getPoint();
+			final ImageCanvas canvas = getImageCanvas( e );
+			final double x = ( -0.5 + canvas.offScreenXD( mouseLocation.x ) ) * calibration[ 0 ];
+			final double y = ( -0.5 + canvas.offScreenYD( mouseLocation.y ) ) * calibration[ 1 ];
+			final double z = ( imp.getSlice() - 1 ) * calibration[ 2 ];
+			editedSpot.putFeature( Spot.POSITION_X, x );
+			editedSpot.putFeature( Spot.POSITION_Y, y );
+			editedSpot.putFeature( Spot.POSITION_Z, z );
+			displayer.imp.updateAndDraw();
+			updateStatusBar( editedSpot, imp.getCalibration().getUnits() );
+		}
+		else
+		{
+			if ( null == roiedit )
+			{
+				if ( !IJ.spaceBarDown() )
+				{
+					roiedit = new FreehandRoi( e.getX(), e.getY(), imp )
+					{
+						private static final long serialVersionUID = 1L;
+
+						@Override
+						protected void handleMouseUp( final int screenX, final int screenY )
+						{
+							type = FREEROI;
+							super.handleMouseUp( screenX, screenY );
+						}
+					};
+					imp.setRoi( roiedit );
+				}
+			}
+			else
+			{
+				roiedit.mouseDragged( e );
+			}
+		}
 	}
 
 	@Override
