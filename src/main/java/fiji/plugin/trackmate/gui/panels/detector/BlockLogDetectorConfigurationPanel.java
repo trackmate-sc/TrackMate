@@ -5,18 +5,26 @@ import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
-import ij.ImagePlus;
+import ij.gui.Overlay;
+import ij.gui.Roi;
 
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 import javax.swing.JLabel;
 import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
 
+import net.imglib2.Interval;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.detection.BlockLogDetector;
 import fiji.plugin.trackmate.detection.BlockLogDetectorFactory;
-import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
+import fiji.plugin.trackmate.util.TMUtils;
 import fiji.util.NumberParser;
 
 public class BlockLogDetectorConfigurationPanel extends LogDetectorConfigurationPanel
@@ -27,14 +35,16 @@ public class BlockLogDetectorConfigurationPanel extends LogDetectorConfiguration
 
 	private JNumericTextField jTextFieldNSplit;
 
-	public BlockLogDetectorConfigurationPanel( final ImagePlus imp, final String infoText, final String detectorName, final Model model )
+	private Collection< Roi > roiList = Collections.emptyList();
+
+	public BlockLogDetectorConfigurationPanel( final Settings settings, final Model model, final String infoText, final String detectorName )
 	{
-		super( imp, infoText, detectorName, model );
+		super( settings, model, infoText, detectorName );
 	}
 
 	@SuppressWarnings( "rawtypes" )
 	@Override
-	protected SpotDetectorFactory< ? > getDetectorFactory()
+	protected BlockLogDetectorFactory< ? > getDetectorFactory()
 	{
 		return new BlockLogDetectorFactory();
 	}
@@ -77,7 +87,7 @@ public class BlockLogDetectorConfigurationPanel extends LogDetectorConfiguration
 			add( jLabelThreshold );
 		}
 	}
-	
+
 	@Override
 	public Map< String, Object > getSettings()
 	{
@@ -88,10 +98,54 @@ public class BlockLogDetectorConfigurationPanel extends LogDetectorConfiguration
 	}
 
 	@Override
-	public void setSettings(final Map<String, Object> settings) {
-		sliderChannel.setValue((Integer) settings.get(KEY_TARGET_CHANNEL));
-		jTextFieldBlobDiameter.setText("" + (2 * (Double) settings.get(KEY_RADIUS)));
-		jTextFieldThreshold.setText("" + settings.get(KEY_THRESHOLD));
+	public void setSettings( final Map< String, Object > settings )
+	{
+		sliderChannel.setValue( ( Integer ) settings.get( KEY_TARGET_CHANNEL ) );
+		jTextFieldBlobDiameter.setText( "" + ( 2 * ( Double ) settings.get( KEY_RADIUS ) ) );
+		jTextFieldThreshold.setText( "" + settings.get( KEY_THRESHOLD ) );
 		jTextFieldNSplit.setText( "" + settings.get( KEY_NSPLIT ) );
+	}
+
+	@Override
+	protected void preview()
+	{
+		clean();
+		Overlay overlay = imp.getOverlay();
+		if ( null == overlay )
+		{
+			overlay = new Overlay();
+		}
+
+		final int nsplit = NumberParser.parseInteger( jTextFieldNSplit.getText() );
+		roiList = new ArrayList< Roi >(nsplit*nsplit);
+		
+		final Interval interval = TMUtils.getInterval( TMUtils.rawWraps( imp ), settings );
+		for ( int i = 0; i < nsplit; i++ )
+		{
+			for ( int j = 0; j < nsplit; j++ )
+			{
+				final Interval block = BlockLogDetector.getBlock( interval, nsplit, i, j );
+				final Roi roi = new Roi( block.min( 0 ), block.min( 1 ), block.dimension( 0 ), block.dimension( 1 ) );
+				roiList.add( roi );
+				overlay.add( roi );
+			}
+		}
+		overlay.setStrokeColor( Color.CYAN.darker() );
+		imp.setOverlay( overlay );
+		super.preview();
+	}
+
+	@Override
+	public void clean()
+	{
+		super.clean();
+		final Overlay overlay = imp.getOverlay();
+		if ( null != overlay )
+		{
+			for ( final Roi roi : roiList )
+			{
+				overlay.remove( roi );
+			}
+		}
 	}
 }

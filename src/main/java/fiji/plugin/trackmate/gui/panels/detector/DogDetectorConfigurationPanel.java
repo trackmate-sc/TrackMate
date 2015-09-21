@@ -1,21 +1,23 @@
 package fiji.plugin.trackmate.gui.panels.detector;
 
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.detection.DogDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
-import ij.ImagePlus;
 
 public class DogDetectorConfigurationPanel extends LogDetectorConfigurationPanel {
 
 	private static final long serialVersionUID = 1L;
 
-	public DogDetectorConfigurationPanel(ImagePlus imp, String infoText, String detectorName, Model model) {
-		super(imp, infoText, detectorName, model);
+	public DogDetectorConfigurationPanel( final Settings settings, final Model model, final String infoText, final String detectorName )
+	{
+		super( settings, model, infoText, detectorName );
 	}
-	
-	@SuppressWarnings("rawtypes")
+
+	@SuppressWarnings( "rawtypes" )
 	@Override
-	protected SpotDetectorFactory<?> getDetectorFactory() {
+	protected SpotDetectorFactory< ? > getDetectorFactory()
+	{
 		return new DogDetectorFactory();
 	}
 

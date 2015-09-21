@@ -1,13 +1,13 @@
 package fiji.plugin.trackmate.gui.descriptors;
 
+import java.awt.Component;
+import java.util.Map;
+
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
-
-import java.awt.Component;
-import java.util.Map;
 
 public class DetectorConfigurationDescriptor implements WizardPanelDescriptor
 {
@@ -76,6 +76,7 @@ public class DetectorConfigurationDescriptor implements WizardPanelDescriptor
 	@Override
 	public void aboutToHidePanel()
 	{
+		configPanel.clean();
 		final SpotDetectorFactory< ? > factory = trackmate.getSettings().detectorFactory;
 		Map< String, Object > settings = configPanel.getSettings();
 		final boolean settingsOk = factory.checkSettings( settings );

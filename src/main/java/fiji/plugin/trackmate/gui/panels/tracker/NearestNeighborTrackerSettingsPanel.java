@@ -4,8 +4,6 @@ import static fiji.plugin.trackmate.gui.TrackMateWizard.BIG_FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.TEXTFIELD_DIMENSION;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
-import fiji.plugin.trackmate.gui.ConfigurationPanel;
-import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
 
 import java.awt.Font;
 import java.util.HashMap;
@@ -13,6 +11,9 @@ import java.util.Map;
 
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+
+import fiji.plugin.trackmate.gui.ConfigurationPanel;
+import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
 
 public class NearestNeighborTrackerSettingsPanel extends ConfigurationPanel {
 
@@ -26,7 +27,7 @@ public class NearestNeighborTrackerSettingsPanel extends ConfigurationPanel {
 	private final String spaceUnits;
 
 
-	public NearestNeighborTrackerSettingsPanel(String trackerName, String infoText, String spaceUnits) {
+	public NearestNeighborTrackerSettingsPanel(final String trackerName, final String infoText, final String spaceUnits) {
 		this.trackerName = trackerName;
 		this.infoText = infoText;
 		this.spaceUnits = spaceUnits;
@@ -35,7 +36,7 @@ public class NearestNeighborTrackerSettingsPanel extends ConfigurationPanel {
 
 	@Override
 	public Map<String, Object> getSettings() {
-		Map<String, Object> settings = new HashMap<String, Object>();
+		final Map<String, Object> settings = new HashMap<String, Object>();
 		settings.put(KEY_LINKING_MAX_DISTANCE, maxDistField.getValue());
 		return settings;
 	}
@@ -50,7 +51,7 @@ public class NearestNeighborTrackerSettingsPanel extends ConfigurationPanel {
 
 		setLayout(null);
 
-		JLabel lblSettingsForTracker = new JLabel("Settings for tracker:");
+		final JLabel lblSettingsForTracker = new JLabel("Settings for tracker:");
 		lblSettingsForTracker.setBounds(10, 11, 280, 20);
 		lblSettingsForTracker.setFont(FONT);
 		add(lblSettingsForTracker);
@@ -71,7 +72,7 @@ public class NearestNeighborTrackerSettingsPanel extends ConfigurationPanel {
 				.replace("<html>", "<html><p align=\"justify\">"));
 		add(labelTrackerDescription);
 
-		JLabel lblMaximalLinkingDistance = new JLabel("Maximal linking distance: ");
+		final JLabel lblMaximalLinkingDistance = new JLabel("Maximal linking distance: ");
 		lblMaximalLinkingDistance.setFont(FONT);
 		lblMaximalLinkingDistance.setBounds(10, 314, 164, 20);
 		add(lblMaximalLinkingDistance);
@@ -87,4 +88,8 @@ public class NearestNeighborTrackerSettingsPanel extends ConfigurationPanel {
 		labelUnits.setBounds(236, 314, 34, 20);
 		add(labelUnits);
 	}
+
+	@Override
+	public void clean()
+	{}
 }

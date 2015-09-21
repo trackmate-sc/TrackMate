@@ -118,7 +118,7 @@ public class ManualDetectorFactory< T extends RealType< T > & NativeType< T >> i
 	@Override
 	public ConfigurationPanel getDetectorConfigurationPanel( final Settings settings, final Model model )
 	{
-		return new BasicDetectorConfigurationPanel( settings.imp, INFO_TEXT, NAME, model );
+		return new BasicDetectorConfigurationPanel( settings, model, INFO_TEXT, NAME );
 	}
 
 	@Override

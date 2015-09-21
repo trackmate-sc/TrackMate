@@ -121,4 +121,8 @@ public class KalmanTrackerConfigPanel extends ConfigurationPanel
 		settings.put( KEY_GAP_CLOSING_MAX_FRAME_GAP, ( int ) tfMaxFrameGap.getValue() );
 		return settings;
 	}
+
+	@Override
+	public void clean()
+	{}
 }

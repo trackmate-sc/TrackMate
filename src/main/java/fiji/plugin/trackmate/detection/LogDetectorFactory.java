@@ -211,7 +211,7 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 	@Override
 	public ConfigurationPanel getDetectorConfigurationPanel( final Settings settings, final Model model )
 	{
-		return new LogDetectorConfigurationPanel( settings.imp, INFO_TEXT, NAME, model );
+		return new LogDetectorConfigurationPanel( settings, model, INFO_TEXT, NAME );
 	}
 
 	@Override

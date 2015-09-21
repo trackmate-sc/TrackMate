@@ -156,7 +156,7 @@ public class BlockLogDetectorFactory< T extends RealType< T > & NativeType< T >>
 	@Override
 	public ConfigurationPanel getDetectorConfigurationPanel( final Settings settings, final Model model )
 	{
-		return new BlockLogDetectorConfigurationPanel( settings.imp, INFO_TEXT, NAME, model );
+		return new BlockLogDetectorConfigurationPanel( settings, model, INFO_TEXT, NAME );
 	}
 
 	@Override

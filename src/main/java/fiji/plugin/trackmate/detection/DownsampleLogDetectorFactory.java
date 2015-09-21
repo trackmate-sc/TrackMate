@@ -133,7 +133,7 @@ public class DownsampleLogDetectorFactory< T extends RealType< T > & NativeType<
 	@Override
 	public ConfigurationPanel getDetectorConfigurationPanel( final Settings settings, final Model model )
 	{
-		return new DownSampleLogDetectorConfigurationPanel( settings.imp, model );
+		return new DownSampleLogDetectorConfigurationPanel( settings, model );
 	}
 
 	@Override

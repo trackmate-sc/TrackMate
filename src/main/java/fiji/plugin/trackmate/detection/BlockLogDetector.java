@@ -69,7 +69,7 @@ public class BlockLogDetector< T extends RealType< T > & NativeType< T >> extend
 
 	protected Interval getBlock( final int ix, final int iy )
 	{
-		return getBlock( interval, iy, ix, nsplit );
+		return getBlock( interval, nsplit, ix, iy );
 	}
 
 	public static final Interval getBlock( final Interval interval, final int nsplit, final int ix, final int iy )

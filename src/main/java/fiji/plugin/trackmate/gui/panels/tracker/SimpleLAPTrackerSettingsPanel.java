@@ -27,10 +27,6 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_FEATURE_PEN
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_MAX_DISTANCE;
-import fiji.plugin.trackmate.gui.ConfigurationPanel;
-import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
-import fiji.plugin.trackmate.tracking.oldlap.LAPTracker;
-import fiji.util.NumberParser;
 
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -41,6 +37,11 @@ import java.util.Map;
 
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+
+import fiji.plugin.trackmate.gui.ConfigurationPanel;
+import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
+import fiji.plugin.trackmate.tracking.oldlap.LAPTracker;
+import fiji.util.NumberParser;
 
 /**
  * A simplified configuration panel for the {@link LAPTracker}.
@@ -59,16 +60,16 @@ public class SimpleLAPTrackerSettingsPanel extends ConfigurationPanel {
 	private JNumericTextField jTextFieldLinkingDistance;
 	private JLabel jLabelTrackerDescription;
 
-	private String infoText;
-	private String trackerName;
-	private String spaceUnits;
+	private final String infoText;
+	private final String trackerName;
+	private final String spaceUnits;
 
 	/*
 	 * CONSTRUCTOR
 	 */
 
 
-	public SimpleLAPTrackerSettingsPanel(String trackerName, String infoText, String spaceUnits) {
+	public SimpleLAPTrackerSettingsPanel(final String trackerName, final String infoText, final String spaceUnits) {
 		this.trackerName = trackerName;
 		this.infoText = infoText;
 		this.spaceUnits = spaceUnits;
@@ -86,7 +87,7 @@ public class SimpleLAPTrackerSettingsPanel extends ConfigurationPanel {
 
 	@Override
 	public Map<String, Object> getSettings() {
-		Map<String, Object> settings = new HashMap<String, Object>();
+		final Map<String, Object> settings = new HashMap<String, Object>();
 		// Linking
 		settings.put(KEY_LINKING_FEATURE_PENALTIES, DEFAULT_LINKING_FEATURE_PENALTIES);
 		// Gap closing
@@ -125,14 +126,14 @@ public class SimpleLAPTrackerSettingsPanel extends ConfigurationPanel {
 	private void initGUI() {
 		try {
 			this.setPreferredSize(new java.awt.Dimension(300, 500));
-			GridBagLayout thisLayout = new GridBagLayout();
+			final GridBagLayout thisLayout = new GridBagLayout();
 			thisLayout.rowWeights = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0};
 			thisLayout.rowHeights = new int[] {31, 50, 119, 7, 50, 50, 50, 50};
 			thisLayout.columnWeights = new double[] {0.0, 0.0, 0.1};
 			thisLayout.columnWidths = new int[] {203, 42, 7};
 			this.setLayout(thisLayout);
 			{
-				JLabel jLabel1 = new JLabel();
+				final JLabel jLabel1 = new JLabel();
 				this.add(jLabel1, new GridBagConstraints(0, 0, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 10, 0, 10), 0, 0));
 				jLabel1.setFont(FONT);
 				jLabel1.setText("Settings for tracker:");
@@ -155,19 +156,19 @@ public class SimpleLAPTrackerSettingsPanel extends ConfigurationPanel {
 						.replace("<html>", "<html><p align=\"justify\">"));
 			}
 			{
-				JLabel jLabel2 = new JLabel();
+				final JLabel jLabel2 = new JLabel();
 				this.add(jLabel2, new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 10, 0, 0), 0, 0));
 				jLabel2.setFont(FONT);
 				jLabel2.setText("Linking max distance:");
 			}
 			{
-				JLabel jLabel3 = new JLabel();
+				final JLabel jLabel3 = new JLabel();
 				this.add(jLabel3, new GridBagConstraints(0, 5, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 10, 0, 0), 0, 0));
 				jLabel3.setFont(FONT);
 				jLabel3.setText("Gap-closing max distance:");
 			}
 			{
-				JLabel jLabel4 = new JLabel();
+				final JLabel jLabel4 = new JLabel();
 				this.add(jLabel4, new GridBagConstraints(0, 6, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 10, 0, 0), 0, 0));
 				jLabel4.setFont(FONT);
 				jLabel4.setText("Gap-closing max frame gap:");
@@ -208,8 +209,12 @@ public class SimpleLAPTrackerSettingsPanel extends ConfigurationPanel {
 				jLabelGapClosingTimeCutoffUnit.setFont(FONT);
 			}
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 	}
+
+	@Override
+	public void clean()
+	{}
 }

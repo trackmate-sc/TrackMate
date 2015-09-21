@@ -108,6 +108,8 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 	/** The layout in charge of laying out this panel content. */
 	protected SpringLayout layout;
 
+	protected final Settings settings;
+
 	/*
 	 * CONSTRUCTOR
 	 */
@@ -116,22 +118,23 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 	 * Creates a new {@link LogDetectorConfigurationPanel}, a GUI able to
 	 * configure settings suitable to {@link LogDetectorFactory} and derived
 	 * implementations.
-	 * 
-	 * @param imp
-	 *            the {@link ImagePlus} to read the image content from as well
-	 *            as other metadata.
-	 * @param infoText
-	 *            the detector info text, will be displayed on the panel.
-	 * @param detectorName
-	 *            the detector name, will be displayed on the panel.
+	 *
+	 * @param settings
+	 *            the {@link Settings} object to get the source image from as
+	 *            well as physical calibration date and target interval.
 	 * @param model
 	 *            the {@link Model} that will be fed with the preview results.
 	 *            It is the responsibility of the views registered to listen to
 	 *            model change to display the preview results.
+	 * @param infoText
+	 *            the detector info text, will be displayed on the panel.
+	 * @param detectorName
+	 *            the detector name, will be displayed on the panel.
 	 */
-	public LogDetectorConfigurationPanel( final ImagePlus imp, final String infoText, final String detectorName, final Model model )
+	public LogDetectorConfigurationPanel( final Settings settings, final Model model, final String infoText, final String detectorName )
 	{
-		this.imp = imp;
+		this.settings = settings;
+		this.imp = settings.imp;
 		this.infoText = infoText;
 		this.detectorName = detectorName;
 		this.model = model;
@@ -207,7 +210,7 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 	/**
 	 * Launch detection on the current frame.
 	 */
-	private void preview()
+	protected void preview()
 	{
 		btnPreview.setEnabled( false );
 		new Thread( "TrackMate preview detection thread" )
@@ -491,4 +494,8 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 			e.printStackTrace();
 		}
 	}
+
+	@Override
+	public void clean()
+	{}
 }

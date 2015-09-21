@@ -74,7 +74,7 @@ public class DogDetectorFactory< T extends RealType< T > & NativeType< T >> exte
 	@Override
 	public ConfigurationPanel getDetectorConfigurationPanel( final Settings settings, final Model model )
 	{
-		return new DogDetectorConfigurationPanel( settings.imp, DogDetectorFactory.INFO_TEXT, DogDetectorFactory.NAME, model );
+		return new DogDetectorConfigurationPanel( settings, model, DogDetectorFactory.INFO_TEXT, DogDetectorFactory.NAME );
 	}
 
 }
