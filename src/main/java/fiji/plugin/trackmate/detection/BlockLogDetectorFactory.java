@@ -53,7 +53,7 @@ public class BlockLogDetectorFactory< T extends RealType< T > & NativeType< T >>
 
 	public static final String KEY_NSPLIT = "NSPLIT";
 
-	private static final int DEFAULT_NSPLIT = 4;
+	private static final int DEFAULT_NSPLIT = 2;
 
 	/*
 	 * METHODS
