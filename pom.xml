@@ -22,6 +22,10 @@
 	<dependencies>
 		<!-- Fiji dependencies -->
 		<dependency>
+			<groupId>net.imagej</groupId>
+			<artifactId>ij</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>3D_Viewer</artifactId>
 		</dependency>
@@ -53,11 +57,11 @@
 		</dependency>
 
 		<!-- SciJava dependencies -->
-		<dependency>
+ 		<dependency>
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-common</artifactId>
 		</dependency>
-
+ 
 		<!-- Third party dependencies -->
 		<dependency>
 			<groupId>batik</groupId>
