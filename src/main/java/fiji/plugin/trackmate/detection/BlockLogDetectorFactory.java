@@ -49,7 +49,16 @@ public class BlockLogDetectorFactory< T extends RealType< T > & NativeType< T >>
 	public static final String NAME = "Block LoG detector";
 
 	/** An html information text. */
-	public static final String INFO_TEXT = "<html>" + "This detector is a version of the LoG detector that splits the image in several blocks and processes them sequentially. This is made to save memory when processing large images. " + "</html>";
+	public static final String INFO_TEXT = "<html>" + "This detector is a version of the LoG detector "
+			+ "that splits the image in several blocks and processes them sequentially. "
+			+ "<p>"
+			+ "This is made to save memory when processing large images. Indeed, the LoG detector "
+			+ "has to generate temporary images for processing, which can be a problem when "
+			+ "dealing with large source images. This detector splits the source image in to "
+			+ "several blocks and process them sequentially. Each block is expected to generate smaller "
+			+ "temporary images. Don't forget to configure TrackMate "
+			+ "to use onle 1 thread. "
+			+ "</html>";
 
 	public static final String KEY_NSPLIT = "NSPLIT";
 
