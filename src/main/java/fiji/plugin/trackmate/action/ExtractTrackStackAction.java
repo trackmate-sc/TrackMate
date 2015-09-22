@@ -6,6 +6,7 @@ import ij.ImageStack;
 import ij.measure.Calibration;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -44,9 +45,12 @@ public class ExtractTrackStackAction extends AbstractTMAction
 			"Generate a stack of images taken from the track " +
 			"that joins two selected spots. " +
 			"<p>" +
-			"There must be exactly 2 spots selected for this action " +
-			"to work, and they must belong to a track that connects " +
-			"them." +
+			"There must be exactly 1 or 2 spots selected for this action " +
+			"to work. If 1 spot is selected, them the stack is extracted from "
+			+ "the track it belongs to, from the first spot in time to the last in time. "
+			+ "If there are 2 spots selected, they must belong to a track that connects "
+			+ "them. A path is then found that joins them and the stack is extracted "
+			+ "from this path." +
 			"<p>" +
 			"A stack of images will be generated from the spots that join " +
 			"them, defining the image size with the largest spot encountered. " +
@@ -91,8 +95,20 @@ public class ExtractTrackStackAction extends AbstractTMAction
 		int nspots = selection.size();
 		if ( nspots != 2 )
 		{
-			logger.error( "Expected 2 spots in the selection, got " + nspots + ".\nAborting.\n" );
-			return;
+			if ( nspots == 1 )
+			{
+				final Integer trackID = model.getTrackModel().trackIDOf( selectionModel.getSpotSelection().iterator().next() );
+				final List< Spot > spots = new ArrayList< Spot >( model.getTrackModel().trackSpots( trackID ) );
+				Collections.sort( spots, Spot.frameComparator );
+				selectionModel.clearSelection();
+				selectionModel.addSpotToSelection( spots.get( 0 ) );
+				selectionModel.addSpotToSelection( spots.get( spots.size() - 1 ) );
+			}
+			else
+			{
+				logger.error( "Expected 1 or 2 spots in the selection, got " + nspots + ".\nAborting.\n" );
+				return;
+			}
 		}
 
 		// Get start & end
@@ -118,6 +134,8 @@ public class ExtractTrackStackAction extends AbstractTMAction
 			logger.error( "The 2 spots are not connected.\nAborting\n" );
 			return;
 		}
+		selectionModel.clearEdgeSelection();
+		selectionModel.addEdgeToSelection( edges );
 
 		// Build spot list
 		// & Get largest diameter
@@ -128,7 +146,6 @@ public class ExtractTrackStackAction extends AbstractTMAction
 		double radius = Math.abs( start.getFeature( Spot.RADIUS ) ) * radiusRatio;
 		for ( final DefaultWeightedEdge edge : edges )
 		{
-
 			current = model.getTrackModel().getEdgeSource( edge );
 			if ( current == previous )
 			{
