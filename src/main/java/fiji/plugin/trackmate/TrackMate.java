@@ -276,7 +276,9 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 	public boolean execDetection()
 	{
 		final Logger logger = model.getLogger();
-		logger.log( "Starting detection process.\n" );
+		logger.log( "Starting detection process using "
+				+ ( ( numThreads > 1 ) ? ( numThreads + " threads" ) : "1 thread" )
+				+ ".\n" );
 
 		final SpotDetectorFactory< ? > factory = settings.detectorFactory;
 		if ( null == factory )
@@ -317,6 +319,12 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 		 */
 		final int nSimultaneousFrames = Math.min( numThreads, numFrames );
 		final int threadsPerFrame = Math.max( 1, numThreads / nSimultaneousFrames );
+		
+		logger.log( "Detection processes " 
+				+ ( ( nSimultaneousFrames > 1 ) ? ( nSimultaneousFrames + " frames" ) : "1 frame" )
+				+ " simultaneously and allocates "
+				+ ( ( threadsPerFrame > 1 ) ? ( threadsPerFrame + " threads" ) : "1 thread" )
+				+ " per frame.\n" );
 
 		final Thread[] threads = SimpleMultiThreading.newThreads( nSimultaneousFrames );
 		final AtomicBoolean ok = new AtomicBoolean( true );
