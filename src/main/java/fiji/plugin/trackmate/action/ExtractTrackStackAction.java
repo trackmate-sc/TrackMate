@@ -29,6 +29,7 @@ import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.trackscheme.SpotIconGrabber;
 
 @SuppressWarnings( "deprecation" )
@@ -63,13 +64,16 @@ public class ExtractTrackStackAction extends AbstractTMAction
 
 	private final SelectionModel selectionModel;
 
+	private final double radiusRatio;
+
 	/*
 	 * CONSTRUCTOR
 	 */
 
-	public ExtractTrackStackAction( final SelectionModel selectionModel )
+	public ExtractTrackStackAction( final SelectionModel selectionModel, final double radiusRatio )
 	{
 		this.selectionModel = selectionModel;
+		this.radiusRatio = radiusRatio;
 	}
 
 	/*
@@ -121,7 +125,7 @@ public class ExtractTrackStackAction extends AbstractTMAction
 		path.add( start );
 		Spot previous = start;
 		Spot current;
-		double radius = Math.abs( start.getFeature( Spot.RADIUS ) );
+		double radius = Math.abs( start.getFeature( Spot.RADIUS ) ) * radiusRatio;
 		for ( final DefaultWeightedEdge edge : edges )
 		{
 
@@ -266,7 +270,8 @@ public class ExtractTrackStackAction extends AbstractTMAction
 		@Override
 		public TrackMateAction create( final TrackMateGUIController controller )
 		{
-			return new ExtractTrackStackAction( controller.getSelectionModel() );
+			final double radiusRatio = ( Double ) controller.getGuimodel().getDisplaySettings().get( TrackMateModelView.KEY_SPOT_RADIUS_RATIO );
+			return new ExtractTrackStackAction( controller.getSelectionModel(), radiusRatio );
 		}
 
 	}
