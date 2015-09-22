@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.action;
 
+import ij.CompositeImage;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.measure.Calibration;
@@ -147,50 +148,53 @@ public class ExtractTrackStackAction extends AbstractTMAction
 		// Common coordinates
 		final Settings settings = trackmate.getSettings();
 		final double[] calibration = TMUtils.getSpatialCalibration( settings.imp );
-		final int targetChannel = settings.imp.getC() - 1; // From current selection
 		final int width = ( int ) Math.ceil( 2 * radius * RESIZE_FACTOR / calibration[ 0 ] );
 		final int height = ( int ) Math.ceil( 2 * radius * RESIZE_FACTOR / calibration[ 1 ] );
 
 		// Extract target channel
 		final ImgPlus img = TMUtils.rawWraps( settings.imp );
-		final ImgPlus imgC = HyperSliceImgPlus.fixChannelAxis( img, targetChannel );
 
 		// Prepare new image holder:
 		final ImageStack stack = new ImageStack( width, height );
 
 		// Iterate over set to grab imglib image
 		int zpos = 0;
+		final int nChannels = settings.imp.getNChannels();
 		for ( final Spot spot : sortedSpots )
 		{
 
 			// Extract image for current frame
 			final int frame = spot.getFeature( Spot.FRAME ).intValue();
 
-			final ImgPlus imgCT = HyperSliceImgPlus.fixTimeAxis( imgC, frame );
-
-			// Compute target coordinates for current spot
-			final int x = ( int ) ( Math.round( ( spot.getFeature( Spot.POSITION_X ) ) / calibration[ 0 ] ) - width / 2 );
-			final int y = ( int ) ( Math.round( ( spot.getFeature( Spot.POSITION_Y ) ) / calibration[ 1 ] ) - height / 2 );
-			long slice = 0;
-			if ( imgCT.numDimensions() > 2 )
+			for ( int c = 0; c < nChannels; c++ )
 			{
-				slice = Math.round( spot.getFeature( Spot.POSITION_Z ) / calibration[ 2 ] );
-				if ( slice < 0 )
+				final ImgPlus imgC = HyperSliceImgPlus.fixChannelAxis( img, c );
+				final ImgPlus imgCT = HyperSliceImgPlus.fixTimeAxis( imgC, frame );
+
+				// Compute target coordinates for current spot
+				final int x = ( int ) ( Math.round( ( spot.getFeature( Spot.POSITION_X ) ) / calibration[ 0 ] ) - width / 2 );
+				final int y = ( int ) ( Math.round( ( spot.getFeature( Spot.POSITION_Y ) ) / calibration[ 1 ] ) - height / 2 );
+				long slice = 0;
+				if ( imgCT.numDimensions() > 2 )
 				{
-					slice = 0;
+					slice = Math.round( spot.getFeature( Spot.POSITION_Z ) / calibration[ 2 ] );
+					if ( slice < 0 )
+					{
+						slice = 0;
+					}
+					if ( slice >= imgCT.dimension( 2 ) )
+					{
+						slice = imgCT.dimension( 2 ) - 1;
+					}
 				}
-				if ( slice >= imgCT.dimension( 2 ) )
-				{
-					slice = imgCT.dimension( 2 ) - 1;
-				}
+
+				final SpotIconGrabber< ? > grabber = new SpotIconGrabber( imgCT );
+				final Img crop = grabber.grabImage( x, y, slice, width, height );
+
+				// Copy to central holder
+				stack.addSlice( spot.toString(), ImageJFunctions.wrap( crop, crop.toString() ).getProcessor() );
+
 			}
-
-			final SpotIconGrabber< ? > grabber = new SpotIconGrabber( imgCT );
-			final Img crop = grabber.grabImage( x, y, slice, width, height );
-
-			// Copy to central holder
-			stack.addSlice( spot.toString(), ImageJFunctions.wrap( crop, crop.toString() ).getProcessor() );
-
 			logger.setProgress( ( float ) ( zpos + 1 ) / nspots );
 			zpos++;
 
@@ -205,11 +209,29 @@ public class ExtractTrackStackAction extends AbstractTMAction
 		impCal.pixelWidth = calibration[ 0 ];
 		impCal.pixelHeight = calibration[ 1 ];
 		impCal.frameInterval = settings.dt;
-		stackTrack.setDimensions( 1, 1, nspots );
+		stackTrack.setDimensions( nChannels, 1, nspots );
 
 		//Display it
-		stackTrack.show();
-		stackTrack.resetDisplayRange();
+		if ( nChannels > 1 )
+		{
+			final CompositeImage cmp = new CompositeImage( stackTrack, CompositeImage.COMPOSITE );
+			if ( settings.imp instanceof CompositeImage )
+			{
+				final CompositeImage scmp = ( CompositeImage ) settings.imp;
+				for ( int c = 0; c < nChannels; c++ )
+				{
+					cmp.setChannelLut( scmp.getChannelLut( c+1 ), c+1 );;
+				}
+			}
+
+			cmp.show();
+			cmp.resetDisplayRange();
+		}
+		else
+		{
+			stackTrack.show();
+			stackTrack.resetDisplayRange();
+		}
 
 	}
 
