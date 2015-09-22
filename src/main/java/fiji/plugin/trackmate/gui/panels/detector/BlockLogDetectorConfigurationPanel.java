@@ -1,6 +1,8 @@
 package fiji.plugin.trackmate.gui.panels.detector;
 
 import static fiji.plugin.trackmate.detection.BlockLogDetectorFactory.KEY_NSPLIT;
+import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DO_MEDIAN_FILTERING;
+import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DO_SUBPIXEL_LOCALIZATION;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
@@ -104,6 +106,8 @@ public class BlockLogDetectorConfigurationPanel extends LogDetectorConfiguration
 		jTextFieldBlobDiameter.setText( "" + ( 2 * ( Double ) settings.get( KEY_RADIUS ) ) );
 		jTextFieldThreshold.setText( "" + settings.get( KEY_THRESHOLD ) );
 		jTextFieldNSplit.setText( "" + settings.get( KEY_NSPLIT ) );
+		jCheckSubPixel.setSelected( ( Boolean ) settings.get( KEY_DO_SUBPIXEL_LOCALIZATION ) );
+		jCheckBoxMedianFilter.setSelected( ( Boolean ) settings.get( KEY_DO_MEDIAN_FILTERING ) );
 	}
 
 	@Override
