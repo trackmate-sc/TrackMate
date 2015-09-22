@@ -1,11 +1,5 @@
 package fiji.plugin.trackmate.gui.panels;
 
-import fiji.plugin.trackmate.features.spot.SpotContrastAndSNRAnalyzerFactory;
-import fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory;
-import fiji.plugin.trackmate.features.spot.SpotMorphologyAnalyzerFactory;
-import fiji.plugin.trackmate.util.TMUtils;
-import fiji.util.NumberParser;
-
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -57,6 +51,12 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.data.statistics.LogHistogramDataset;
+
+import fiji.plugin.trackmate.features.spot.SpotContrastAndSNRAnalyzerFactory;
+import fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory;
+import fiji.plugin.trackmate.features.spot.SpotMorphologyAnalyzerFactory;
+import fiji.plugin.trackmate.util.TMUtils;
+import fiji.util.NumberParser;
 
 public class FilterPanel extends javax.swing.JPanel
 {
@@ -254,7 +254,17 @@ public class FilterPanel extends javax.swing.JPanel
 		final int index = jComboBoxFeature.getSelectedIndex();
 		key = allKeys.get( index );
 		final double[] values = valuesMap.get( key );
-		if ( null == values || 0 == values.length )
+		// Check if all the values are NaNs.
+		boolean isAllNaNs = true;
+		for ( final double v : values )
+		{
+			if ( !Double.isNaN( v ) )
+			{
+				isAllNaNs = false;
+				break;
+			}
+		}
+		if ( null == values || 0 == values.length || isAllNaNs )
 		{
 			dataset = new LogHistogramDataset();
 			threshold = Double.NaN;
