@@ -17,6 +17,7 @@ import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_C
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_DISPLAY_DEPTH;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_DISPLAY_MODE;
 import ij.IJ;
+import ij.Prefs;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -213,6 +214,7 @@ public class TrackMateGUIController implements ActionListener
 		}
 
 		this.trackmate = trackmate;
+		trackmate.setNumThreads( Prefs.getThreads() );
 
 		/*
 		 * Instantiate GUI
