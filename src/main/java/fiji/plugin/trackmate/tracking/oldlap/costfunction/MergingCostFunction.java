@@ -4,10 +4,6 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_MERGING
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_BLOCKING_VALUE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_MAX_DISTANCE;
-import Jama.Matrix;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.tracking.LAPUtils;
-import fiji.plugin.trackmate.tracking.oldlap.LAPTracker;
 
 import java.util.List;
 import java.util.Map;
@@ -17,6 +13,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
 import net.imglib2.algorithm.OutputAlgorithm;
 import net.imglib2.multithreading.SimpleMultiThreading;
+import Jama.Matrix;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.tracking.LAPUtils;
+import fiji.plugin.trackmate.tracking.oldlap.LAPTracker;
 
 /**
  * <p>Merging cost function used with {@link LAPTracker}.
@@ -37,6 +37,7 @@ import net.imglib2.multithreading.SimpleMultiThreading;
  * @author Jean-Yves Tinevez
  *
  */
+@SuppressWarnings( "deprecation" )
 public class MergingCostFunction extends MultiThreadedBenchmarkAlgorithm implements OutputAlgorithm<Matrix> {
 
 	/** If false, gap closing will be prohibited. */
@@ -52,7 +53,7 @@ public class MergingCostFunction extends MultiThreadedBenchmarkAlgorithm impleme
 	protected Matrix m;
 
 	@SuppressWarnings("unchecked")
-	public MergingCostFunction(Map<String, Object> settings, List<SortedSet<Spot>> trackSegments, List<Spot> middlePoints) {
+	public MergingCostFunction(final Map<String, Object> settings, final List<SortedSet<Spot>> trackSegments, final List<Spot> middlePoints) {
 		this.maxDist 			= (Double) settings.get(KEY_MERGING_MAX_DISTANCE);
 		this.blockingValue		= (Double) settings.get(KEY_BLOCKING_VALUE);
 		this.featurePenalties	= (Map<String, Double>) settings.get(KEY_MERGING_FEATURE_PENALTIES);
@@ -67,7 +68,7 @@ public class MergingCostFunction extends MultiThreadedBenchmarkAlgorithm impleme
 
 	@Override
 	public boolean process() {
-		long start = System.currentTimeMillis();
+		final long start = System.currentTimeMillis();
 		// If we are not allow to catch merging events, simply fill the matrix with blocking values.
 		if (!allowed) {
 			m = new Matrix(trackSegments.size(), 0, blockingValue);
@@ -84,17 +85,18 @@ public class MergingCostFunction extends MultiThreadedBenchmarkAlgorithm impleme
 
 				threads[ithread] = new Thread("LAPTracker merging cost thread "+(1+ithread)+"/"+threads.length) {  
 
+					@Override
 					public void run() {
 
 						for (int i = ai.getAndIncrement(); i < trackSegments.size(); i = ai.getAndIncrement()) {
-							Spot end = trackSegments.get(i).last();
+							final Spot end = trackSegments.get(i).last();
 
 							for (int j = 0; j < middlePoints.size(); j++) {
-								Spot middle = middlePoints.get(j);
+								final Spot middle = middlePoints.get(j);
 
 								// Frame threshold - middle Spot must be one frame ahead of the end Spot
-								int endFrame = end.getFeature(Spot.FRAME).intValue();
-								int middleFrame = middle.getFeature(Spot.FRAME).intValue();
+								final int endFrame = end.getFeature(Spot.FRAME).intValue();
+								final int middleFrame = middle.getFeature(Spot.FRAME).intValue();
 								// We only merge from one frame to the next one, no more
 								if (middleFrame - endFrame != 1) {
 									m.set(i, j, blockingValue);
@@ -102,7 +104,7 @@ public class MergingCostFunction extends MultiThreadedBenchmarkAlgorithm impleme
 								}
 
 								// Initial cost
-								double cost = LAPUtils.computeLinkingCostFor(end, middle, maxDist, blockingValue, featurePenalties);
+								final double cost = LAPUtils.computeLinkingCostFor(end, middle, maxDist, blockingValue, featurePenalties);
 								m.set(i, j, cost);
 							}
 						}
@@ -113,7 +115,7 @@ public class MergingCostFunction extends MultiThreadedBenchmarkAlgorithm impleme
 			SimpleMultiThreading.startAndJoin(threads);
 		}
 		
-		long end = System.currentTimeMillis();
+		final long end = System.currentTimeMillis();
 		processingTime = end - start;
 		return true;
 	}

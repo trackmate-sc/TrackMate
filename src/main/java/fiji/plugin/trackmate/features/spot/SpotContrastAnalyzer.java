@@ -10,6 +10,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.util.SpotNeighborhood;
 import fiji.plugin.trackmate.util.SpotNeighborhoodCursor;
 
+@SuppressWarnings( "deprecation" )
 public class SpotContrastAnalyzer< T extends RealType< T >> extends IndependentSpotFeatureAnalyzer< T >
 {
 
@@ -20,9 +21,10 @@ public class SpotContrastAnalyzer< T extends RealType< T >> extends IndependentS
 		super( img, spots );
 	}
 
+	@Override
 	public final void process( final Spot spot )
 	{
-		double contrast = getContrast( spot );
+		final double contrast = getContrast( spot );
 		spot.putFeature( KEY, Math.abs( contrast ) );
 	}
 
@@ -42,13 +44,13 @@ public class SpotContrastAnalyzer< T extends RealType< T >> extends IndependentS
 		final double radius = spot.getFeature( Spot.RADIUS );
 		long innerRingVolume = 0;
 		long outerRingVolume = 0;
-		double radius2 = radius * radius;
-		double innerRadius2 = radius2 * ( 1 - RAD_PERCENTAGE ) * ( 1 - RAD_PERCENTAGE );
+		final double radius2 = radius * radius;
+		final double innerRadius2 = radius2 * ( 1 - RAD_PERCENTAGE ) * ( 1 - RAD_PERCENTAGE );
 		double innerTotalIntensity = 0;
 		double outerTotalIntensity = 0;
 		double dist2;
 
-		SpotNeighborhoodCursor< T > cursor = neighborhood.cursor();
+		final SpotNeighborhoodCursor< T > cursor = neighborhood.cursor();
 		while ( cursor.hasNext() )
 		{
 			cursor.fwd();
@@ -65,8 +67,8 @@ public class SpotContrastAnalyzer< T extends RealType< T >> extends IndependentS
 			}
 		}
 
-		double innerMeanIntensity = innerTotalIntensity / innerRingVolume;
-		double outerMeanIntensity = outerTotalIntensity / outerRingVolume;
+		final double innerMeanIntensity = innerTotalIntensity / innerRingVolume;
+		final double outerMeanIntensity = outerTotalIntensity / outerRingVolume;
 		return innerMeanIntensity - outerMeanIntensity;
 	}
 }

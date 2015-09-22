@@ -11,6 +11,7 @@ import net.imglib2.img.basictypeaccess.array.ShortArray;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 
+@SuppressWarnings( "deprecation" )
 public class SpotNeighborhoodTest
 {
 

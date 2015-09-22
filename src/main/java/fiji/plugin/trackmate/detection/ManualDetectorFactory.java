@@ -27,6 +27,7 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.panels.detector.BasicDetectorConfigurationPanel;
 
+@SuppressWarnings( "deprecation" )
 @Plugin( type = SpotDetectorFactory.class )
 public class ManualDetectorFactory< T extends RealType< T > & NativeType< T >> implements SpotDetectorFactory< T >
 {

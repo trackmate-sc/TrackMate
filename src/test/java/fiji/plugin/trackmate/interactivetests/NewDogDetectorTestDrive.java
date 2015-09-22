@@ -38,6 +38,7 @@ import net.imglib2.util.Util;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 
+@SuppressWarnings( "deprecation" )
 public class NewDogDetectorTestDrive {
 
 	public static void main( final String[] args )

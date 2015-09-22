@@ -73,6 +73,7 @@ import fiji.plugin.trackmate.util.SpotNeighborhoodCursor;
  * 
  * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> Apr 1, 2011 - 2012
  */
+@SuppressWarnings( "deprecation" )
 public class SpotMorphologyAnalyzer< T extends RealType< T >> extends IndependentSpotFeatureAnalyzer< T >
 {
 

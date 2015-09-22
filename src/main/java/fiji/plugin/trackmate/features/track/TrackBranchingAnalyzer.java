@@ -1,9 +1,5 @@
 package fiji.plugin.trackmate.features.track;
 
-import fiji.plugin.trackmate.Dimension;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Spot;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -21,6 +17,11 @@ import net.imglib2.multithreading.SimpleMultiThreading;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.scijava.plugin.Plugin;
 
+import fiji.plugin.trackmate.Dimension;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Spot;
+
+@SuppressWarnings( "deprecation" )
 @Plugin( type = TrackAnalyzer.class )
 public class TrackBranchingAnalyzer implements TrackAnalyzer, MultiThreaded
 {
@@ -184,7 +185,7 @@ public class TrackBranchingAnalyzer implements TrackAnalyzer, MultiThreaded
 						{
 							final Spot source = model.getTrackModel().getEdgeSource( edge );
 							final Spot target = model.getTrackModel().getEdgeTarget( edge );
-							int gaplength = (int)Math.abs( target.diffTo( source, Spot.FRAME ) ) - 1;
+							final int gaplength = (int)Math.abs( target.diffTo( source, Spot.FRAME ) ) - 1;
 							if ( gaplength > 0 )
 							{
 								ngaps++;

@@ -14,6 +14,7 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.util.TMUtils;
 
+@SuppressWarnings( "deprecation" )
 public class SemiAutoTracker< T extends RealType< T > & NativeType< T >> extends AbstractSemiAutoTracker< T >
 {
 

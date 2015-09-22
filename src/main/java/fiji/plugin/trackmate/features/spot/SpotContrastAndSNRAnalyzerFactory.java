@@ -27,6 +27,7 @@ import fiji.plugin.trackmate.Spot;
  *
  * @author Jean- Yves Tinevez
  */
+@SuppressWarnings( "deprecation" )
 @Plugin( type = SpotAnalyzerFactory.class, priority = 1d )
 public class SpotContrastAndSNRAnalyzerFactory< T extends RealType< T > & NativeType< T >> implements SpotAnalyzerFactory< T >
 {

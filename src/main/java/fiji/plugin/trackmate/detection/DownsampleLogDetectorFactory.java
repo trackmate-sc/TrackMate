@@ -37,6 +37,7 @@ import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.panels.detector.DownSampleLogDetectorConfigurationPanel;
 import fiji.plugin.trackmate.util.TMUtils;
 
+@SuppressWarnings( "deprecation" )
 @Plugin( type = SpotDetectorFactory.class )
 public class DownsampleLogDetectorFactory< T extends RealType< T > & NativeType< T >> extends LogDetectorFactory< T >
 {

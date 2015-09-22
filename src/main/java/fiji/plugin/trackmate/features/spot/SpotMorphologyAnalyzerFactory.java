@@ -20,6 +20,7 @@ import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 
+@SuppressWarnings( "deprecation" )
 @Plugin( type = SpotAnalyzerFactory.class, enabled = false )
 public class SpotMorphologyAnalyzerFactory< T extends RealType< T > & NativeType< T >> implements SpotAnalyzerFactory< T >
 {

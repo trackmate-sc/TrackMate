@@ -21,6 +21,7 @@ import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
  *
  * @author Jean-Yves Tinevez - 2012
  */
+@SuppressWarnings( "deprecation" )
 public interface SpotAnalyzerFactory< T extends RealType< T > & NativeType< T >> extends FeatureAnalyzer
 {
 

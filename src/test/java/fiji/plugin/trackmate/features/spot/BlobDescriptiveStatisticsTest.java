@@ -15,6 +15,7 @@ import org.junit.Test;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.util.SpotNeighborhood;
 
+@SuppressWarnings( "deprecation" )
 public class BlobDescriptiveStatisticsTest
 {
 

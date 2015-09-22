@@ -17,8 +17,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
 
-import org.scijava.util.AppUtils;
-
 
 public class ManualTrackingPlugIn_ extends TrackMatePlugIn_ implements PlugIn
 {
@@ -115,7 +113,9 @@ public class ManualTrackingPlugIn_ extends TrackMatePlugIn_ implements PlugIn
 	public static void main(final String[] args) {
 		ImageJ.main(args);
 
-		final File file = new File(AppUtils.getBaseDirectory(TrackMate.class), "samples/FakeTracks.tif");
+//		final File file = new File(AppUtils.getBaseDirectory(TrackMate.class), "samples/FakeTracks.tif");
+		final File file = new File( "/Users/tinevez/Projects/EArena/Data/O2Hypoxia/OMERO/150501_invivoO2_ACQ05/5_3_5_2_2.tif" );
+
 
 		if (!file.exists())
 			try {

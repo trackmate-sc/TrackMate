@@ -1,10 +1,5 @@
 package fiji.plugin.trackmate.features.edges;
 
-import fiji.plugin.trackmate.Dimension;
-import fiji.plugin.trackmate.FeatureModel;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Spot;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -20,6 +15,12 @@ import net.imglib2.multithreading.SimpleMultiThreading;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.scijava.plugin.Plugin;
 
+import fiji.plugin.trackmate.Dimension;
+import fiji.plugin.trackmate.FeatureModel;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Spot;
+
+@SuppressWarnings( "deprecation" )
 @Plugin( type = EdgeAnalyzer.class )
 public class EdgeTargetAnalyzer implements EdgeAnalyzer, MultiThreaded
 {

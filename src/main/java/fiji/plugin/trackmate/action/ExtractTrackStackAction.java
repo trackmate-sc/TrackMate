@@ -30,6 +30,7 @@ import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.trackscheme.SpotIconGrabber;
 
+@SuppressWarnings( "deprecation" )
 public class ExtractTrackStackAction extends AbstractTMAction {
 
 

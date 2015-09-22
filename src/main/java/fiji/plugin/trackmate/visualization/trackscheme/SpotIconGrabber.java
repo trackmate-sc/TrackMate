@@ -29,6 +29,7 @@ import fiji.plugin.trackmate.util.TMUtils;
  *
  * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> - Dec 2010 - 2014
  */
+@SuppressWarnings( "deprecation" )
 public class SpotIconGrabber< T extends RealType< T >>
 {
 

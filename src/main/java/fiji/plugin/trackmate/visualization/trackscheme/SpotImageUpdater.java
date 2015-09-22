@@ -10,6 +10,7 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.util.TMUtils;
 
+@SuppressWarnings( "deprecation" )
 public class SpotImageUpdater
 {
 

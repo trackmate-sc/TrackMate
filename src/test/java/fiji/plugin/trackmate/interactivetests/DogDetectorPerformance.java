@@ -16,6 +16,7 @@ import net.imglib2.view.Views;
 import fiji.plugin.trackmate.detection.DogDetector;
 import fiji.plugin.trackmate.util.TMUtils;
 
+@SuppressWarnings( "deprecation" )
 public class DogDetectorPerformance {
 
 	public static void main(final String[] args) throws IncompatibleTypeException {

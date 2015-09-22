@@ -15,6 +15,7 @@ import net.imglib2.outofbounds.OutOfBoundsMirrorExpWindowingFactory;
 import net.imglib2.type.numeric.RealType;
 import fiji.plugin.trackmate.Spot;
 
+@SuppressWarnings( "deprecation" )
 public class SpotNeighborhood< T extends RealType< T >> implements Neighborhood< T >
 {
 

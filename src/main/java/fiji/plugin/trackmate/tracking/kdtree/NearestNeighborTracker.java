@@ -3,11 +3,6 @@ package fiji.plugin.trackmate.tracking.kdtree;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
-import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.util.TMUtils;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -24,6 +19,13 @@ import net.imglib2.multithreading.SimpleMultiThreading;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.tracking.SpotTracker;
+import fiji.plugin.trackmate.util.TMUtils;
+
+@SuppressWarnings( "deprecation" )
 public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm	implements SpotTracker {
 
 	/*

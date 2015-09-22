@@ -27,6 +27,7 @@ import fiji.plugin.trackmate.util.TMUtils;
  * @author Jean-Yves Tinevez - 2013
  * 
  */
+@SuppressWarnings( "deprecation" )
 public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 {
 

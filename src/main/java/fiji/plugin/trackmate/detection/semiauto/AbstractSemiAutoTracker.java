@@ -50,6 +50,7 @@ import fiji.plugin.trackmate.tracking.SpotTracker;
  *            {@link NativeType} to use with most TrackMate {@link SpotDetector}
  *            s.
  */
+@SuppressWarnings( "deprecation" )
 public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeType< T >> implements Algorithm, MultiThreaded
 {
 

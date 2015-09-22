@@ -30,6 +30,7 @@ import fiji.plugin.trackmate.util.SpotNeighborhoodCursor;
  * 
  * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> 2011 - 2012
  */
+@SuppressWarnings( "deprecation" )
 public class SpotContrastAndSNRAnalyzer< T extends RealType< T >> extends IndependentSpotFeatureAnalyzer< T >
 {
 
@@ -51,9 +52,9 @@ public class SpotContrastAndSNRAnalyzer< T extends RealType< T >> extends Indepe
 	@Override
 	public final void process( final Spot spot )
 	{
-		double[] vals = getContrastAndSNR( spot );
-		double contrast = vals[ 0 ];
-		double snr = vals[ 1 ];
+		final double[] vals = getContrastAndSNR( spot );
+		final double contrast = vals[ 0 ];
+		final double snr = vals[ 1 ];
 		spot.putFeature( CONTRAST, contrast );
 		spot.putFeature( SNR, snr );
 	}
@@ -64,16 +65,16 @@ public class SpotContrastAndSNRAnalyzer< T extends RealType< T >> extends Indepe
 	private final double[] getContrastAndSNR( final Spot spot )
 	{
 
-		SpotNeighborhood< T > neighborhood = new SpotNeighborhood< T >( spot, img );
+		final SpotNeighborhood< T > neighborhood = new SpotNeighborhood< T >( spot, img );
 
 		final double radius = spot.getFeature( Spot.RADIUS );
-		double radius2 = radius * radius;
+		final double radius2 = radius * radius;
 		int n_out = 0; // inner number of pixels
 		double dist2;
 		double sum_out = 0;
 
 		// Compute mean in the outer ring
-		SpotNeighborhoodCursor< T > cursor = neighborhood.cursor();
+		final SpotNeighborhoodCursor< T > cursor = neighborhood.cursor();
 		while ( cursor.hasNext() )
 		{
 			cursor.fwd();
@@ -84,15 +85,15 @@ public class SpotContrastAndSNRAnalyzer< T extends RealType< T >> extends Indepe
 				sum_out += cursor.get().getRealFloat();
 			}
 		}
-		double mean_out = sum_out / n_out;
-		double mean_in = spot.getFeature( SpotIntensityAnalyzerFactory.MEAN_INTENSITY );
-		double std_in = spot.getFeature( SpotIntensityAnalyzerFactory.STANDARD_DEVIATION );
+		final double mean_out = sum_out / n_out;
+		final double mean_in = spot.getFeature( SpotIntensityAnalyzerFactory.MEAN_INTENSITY );
+		final double std_in = spot.getFeature( SpotIntensityAnalyzerFactory.STANDARD_DEVIATION );
 
 		// Compute contrast
-		double contrast = ( mean_in - mean_out ) / ( mean_in + mean_out );
+		final double contrast = ( mean_in - mean_out ) / ( mean_in + mean_out );
 
 		// Compute snr
-		double snr = ( mean_in - mean_out ) / std_in;
+		final double snr = ( mean_in - mean_out ) / std_in;
 
 		final double[] ret = new double[ 2 ];
 		ret[ 0 ] = contrast;
