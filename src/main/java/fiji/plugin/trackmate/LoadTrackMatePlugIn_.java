@@ -39,8 +39,8 @@ import fiji.plugin.trackmate.providers.ViewProvider;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.util.Version;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
+import fiji.plugin.trackmate.visualization.ViewUtils;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
-import fiji.plugin.trackmate.visualization.trackscheme.SpotImageUpdater;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
 public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
@@ -207,15 +207,16 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		{
 			logger.error( "Problem reading the settings:\n" + reader.getErrorMessage() );
 		}
+		if ( null == settings.imp )
+		{
+			settings.imp = ViewUtils.makeEmpytImagePlus( model );
+		}
 
 		// Hook actions
 		postRead( trackmate );
 
 		// GUI position
-		if ( null != settings.imp )
-		{
-			GuiUtils.positionWindow( controller.getGUI(), settings.imp.getWindow() );
-		}
+		GuiUtils.positionWindow( controller.getGUI(), settings.imp.getWindow() );
 
 		// GUI state
 		String guiState = reader.getGUIState();
@@ -227,8 +228,10 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		{
 			if ( view instanceof TrackScheme )
 			{
-				final TrackScheme trackscheme = ( TrackScheme ) view;
-				trackscheme.setSpotImageUpdater( new SpotImageUpdater( settings ) );
+				//				final TrackScheme trackscheme = ( TrackScheme ) view;
+				//				trackscheme.setSpotImageUpdater( new SpotImageUpdater( settings ) );
+				continue;
+				// Don't relaunch TrackScheme.
 			}
 		}
 
@@ -253,6 +256,11 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		final Map< String, Object > displaySettings = controller.getGuimodel().getDisplaySettings();
 		for ( final TrackMateModelView view : views )
 		{
+			if ( view instanceof TrackScheme )
+			{
+				continue;
+				// Don't relaunch TrackScheme.
+			}
 			controller.getGuimodel().addView( view );
 			for ( final String key : displaySettings.keySet() )
 			{
@@ -372,12 +380,14 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 	{
 		ImageJ.main( args );
 		final LoadTrackMatePlugIn_ plugIn = new LoadTrackMatePlugIn_();
-		plugIn.run( "samples/FakeTracks.xml" );
-		// plugIn.run(
-		// "/Users/tinevez/Desktop/Data/Mamut/parhyale/BDV130418A325_NoTempReg-mamut_JY2.xml"
-		// );
+		//		plugIn.run( "samples/FakeTracks.xml" );
+		//		plugIn.run( "/Users/tinevez/Projects/NJouvenet/Data/TIRF2C/Hela TIM1wt DV_1-disappear.xml" );
+		plugIn.run(
+				"/Volumes/Data/BDV_MVD_5v_final_mamut.xml"
+				);
 //		plugIn.run( "/Users/tinevez/Projects/EArena/Data/O2Hypoxia/OMERO/150501_invivoO2_ACQ05/5_3_5_2_2_neutrophils.xml" );
 		//		plugIn.run( "/Users/tinevez/Desktop/test.xml" );
+		//		plugIn.run( "/Users/tinevez/Projects/AMikhailova/Data/Synch/SiC + SAg2.xml" );
 	}
 
 }
