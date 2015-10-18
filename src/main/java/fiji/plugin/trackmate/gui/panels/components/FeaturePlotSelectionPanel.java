@@ -2,12 +2,6 @@ package fiji.plugin.trackmate.gui.panels.components;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 
-import com.itextpdf.text.Font;
-
-import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
-import fiji.plugin.trackmate.util.TMUtils;
-import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
-
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -32,10 +26,16 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+import com.itextpdf.text.Font;
+
+import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
+import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
+
 /**
  * A simple Panel to allow the selection of a X key amongst an enum, and of multiple Y keys
  * from the same enum. This is intended as a GUI panel to prepare for the plotting of data.
- * 
+ *
  * @author Jean-Yves Tinevez <tinevez@pasteur.fr> - January 2011 - 2012
  */
 public class FeaturePlotSelectionPanel extends ActionListenablePanel {
@@ -55,22 +55,23 @@ public class FeaturePlotSelectionPanel extends ActionListenablePanel {
 	private JButton jButtonAdd;
 	private JPanel jPanelButtons;
 	private JLabel jLabelYFeatures;
-	private JComboBox jComboBoxXFeature;
+	private JComboBox< String > jComboBoxXFeature;
 
-	private Stack<JComboBox> comboBoxes = new Stack<JComboBox>();
-	private Stack<Component> struts = new Stack<Component>();
-	private String xKey;
-	private List<String> features;
-	private Map<String, String> featureNames;
+	private final Stack< JComboBox< String >> comboBoxes = new Stack< JComboBox< String >>();
+	private final Stack<Component> struts = new Stack<Component>();
+	private final String xKey;
+	private final List<String> features;
+	private final Map<String, String> featureNames;
 	private JPanel topPanel;
 	private JPanel centerPanel;
-	private JComboBox jComboBoxYFeature;
+
+	private JComboBox< String > jComboBoxYFeature;
 
 	/*
 	 * CONSTRUCTOR
 	 */
 
-	public FeaturePlotSelectionPanel(String xKey, Collection<String> features, Map<String, String> featureNames) {
+	public FeaturePlotSelectionPanel(final String xKey, final Collection<String> features, final Map<String, String> featureNames) {
 		super();
 		this.xKey = xKey;
 		this.features = new ArrayList<String>(features);
@@ -82,16 +83,16 @@ public class FeaturePlotSelectionPanel extends ActionListenablePanel {
 	/*
 	 * PUBLIC METHODS
 	 */
-	
+
 	@Override
-	public void setEnabled(boolean enabled) {
-		for (Component component : topPanel.getComponents()) {
+	public void setEnabled(final boolean enabled) {
+		for (final Component component : topPanel.getComponents()) {
 			component.setEnabled(enabled);
 		}
-		for (Component component : centerPanel.getComponents()) {
+		for (final Component component : centerPanel.getComponents()) {
 			component.setEnabled(enabled);
 		}
-		for (Component component : jPanelYFeatures.getComponents()) {
+		for (final Component component : jPanelYFeatures.getComponents()) {
 			component.setEnabled(enabled);
 		}
 		super.setEnabled(enabled);
@@ -109,8 +110,8 @@ public class FeaturePlotSelectionPanel extends ActionListenablePanel {
 	 * use a {@link Set}, duplicates are trimmed.
 	 */
 	public Set<String> getYKeys() {
-		Set<String> yKeys = new HashSet<String>(comboBoxes.size());
-		for(JComboBox box : comboBoxes)
+		final Set<String> yKeys = new HashSet<String>(comboBoxes.size());
+		for ( final JComboBox< String > box : comboBoxes )
 			yKeys.add(features.get(box.getSelectedIndex()));
 		return yKeys;
 	}
@@ -123,9 +124,9 @@ public class FeaturePlotSelectionPanel extends ActionListenablePanel {
 		if (comboBoxes.size() > MAX_FEATURE_ALLOWED)
 			return;
 
-		ComboBoxModel jComboBoxYFeatureModel = new DefaultComboBoxModel(
+		final ComboBoxModel< String > jComboBoxYFeatureModel = new DefaultComboBoxModel< String >(
 				TMUtils.getArrayFromMaping(features, featureNames).toArray(new String[] {}));
-		JComboBox jComboBoxYFeature = new JComboBox();
+		final JComboBox< String > jComboBoxYFeature = new JComboBox< String >();
 		jComboBoxYFeature.setModel(jComboBoxYFeatureModel);
 		jComboBoxYFeature.setMaximumSize(COMBO_BOX_MAX_SIZE);
 		jComboBoxYFeature.setFont(FONT);
@@ -137,7 +138,7 @@ public class FeaturePlotSelectionPanel extends ActionListenablePanel {
 			jComboBoxYFeature.setSelectedIndex(newIndex);
 		}
 
-		Component strut = Box.createVerticalStrut(10);
+		final Component strut = Box.createVerticalStrut(10);
 		jPanelYFeatures.add(strut);
 		jPanelYFeatures.add(jComboBoxYFeature);
 		jPanelYFeatures.revalidate();
@@ -147,7 +148,7 @@ public class FeaturePlotSelectionPanel extends ActionListenablePanel {
 
 	private void removeFeature() {
 		if (comboBoxes.size() <= 1)
-			return;		
+			return;
 		jPanelYFeatures.remove(comboBoxes.pop());
 		jPanelYFeatures.remove(struts.pop());
 		jPanelYFeatures.revalidate();
@@ -162,15 +163,15 @@ public class FeaturePlotSelectionPanel extends ActionListenablePanel {
 	private void firePlotSelectionData() {
 		// Prepare command string. Does not matter actually, but let's do it right.
 		String command = "Plot ";
-		String[] Y = getYKeys().toArray(new String[] {});
+		final String[] Y = getYKeys().toArray(new String[] {});
 		for (int i = 0; i < Y.length-1; i++) {
 			command += (Y[i] + ", ");
 		}
 		command += Y[Y.length-1];
 		command += " vs " + getXKey();
 
-		ActionEvent plotEvent = new ActionEvent(this, 0, command );
-		for (ActionListener listener : actionListeners) {
+		final ActionEvent plotEvent = new ActionEvent(this, 0, command );
+		for (final ActionListener listener : actionListeners) {
 			listener.actionPerformed(plotEvent);
 		}
 	}
@@ -185,11 +186,11 @@ public class FeaturePlotSelectionPanel extends ActionListenablePanel {
 				topPanel.setMinimumSize(new Dimension(300, 100));
 				add(topPanel, BorderLayout.NORTH);
 				topPanel.setLayout(null);
-				JButton plotButton = new JButton("Plot features", PLOT_ICON);
+				final JButton plotButton = new JButton("Plot features", PLOT_ICON);
 				plotButton.setBounds(80, 27, 140, 40);
 				plotButton.addActionListener(new ActionListener() {
 					@Override
-					public void actionPerformed(ActionEvent arg0) {
+					public void actionPerformed(final ActionEvent arg0) {
 						firePlotSelectionData();
 					}
 				});
@@ -204,9 +205,9 @@ public class FeaturePlotSelectionPanel extends ActionListenablePanel {
 				jLabelXFeature.setFont(FONT.deriveFont(12));
 			}
 			{
-				ComboBoxModel jComboBoxXFeatureModel = new DefaultComboBoxModel(
+				final ComboBoxModel< String > jComboBoxXFeatureModel = new DefaultComboBoxModel< String >(
 						TMUtils.getArrayFromMaping(features, featureNames).toArray(new String[] {}));
-				jComboBoxXFeature = new JComboBox();
+				jComboBoxXFeature = new JComboBox< String >();
 				jComboBoxXFeature.setBounds(30, 117, COMBO_BOX_MAX_SIZE.width, COMBO_BOX_MAX_SIZE.height);
 				topPanel.add(jComboBoxXFeature);
 				jComboBoxXFeature.setModel(jComboBoxXFeatureModel);
@@ -243,7 +244,7 @@ public class FeaturePlotSelectionPanel extends ActionListenablePanel {
 			{
 				jPanelButtons = new JPanel();
 				jPanelButtons.setPreferredSize(new Dimension(250, 50));
-				BoxLayout jPanelButtonsLayout = new BoxLayout(jPanelButtons, javax.swing.BoxLayout.X_AXIS);
+				final BoxLayout jPanelButtonsLayout = new BoxLayout(jPanelButtons, javax.swing.BoxLayout.X_AXIS);
 				jPanelButtons.setLayout(jPanelButtonsLayout);
 				this.add(jPanelButtons, BorderLayout.SOUTH);
 				{
@@ -251,9 +252,9 @@ public class FeaturePlotSelectionPanel extends ActionListenablePanel {
 					jPanelButtons.add(jButtonAdd);
 					jButtonAdd.setIcon(ADD_ICON);
 					jButtonAdd.setMaximumSize(BUTTON_SIZE);
-					jButtonAdd.addActionListener(new ActionListener() {	
+					jButtonAdd.addActionListener(new ActionListener() {
 						@Override
-						public void actionPerformed(ActionEvent e) {
+						public void actionPerformed(final ActionEvent e) {
 							addFeature();
 						}
 					});
@@ -265,24 +266,24 @@ public class FeaturePlotSelectionPanel extends ActionListenablePanel {
 					jButtonRemove.setMaximumSize(BUTTON_SIZE);
 					jButtonRemove.addActionListener(new ActionListener() {
 						@Override
-						public void actionPerformed(ActionEvent e) {
+						public void actionPerformed(final ActionEvent e) {
 							removeFeature();
 						}
 					});
 				}
 			}
 			{
-				ComboBoxModel jComboBoxYFeatureModel = new DefaultComboBoxModel(
+				final ComboBoxModel< String > jComboBoxYFeatureModel = new DefaultComboBoxModel< String >(
 						TMUtils.getArrayFromMaping(features, featureNames).toArray(new String[] {}));
-				jComboBoxYFeature = new JComboBox();
+				jComboBoxYFeature = new JComboBox< String >();
 				jComboBoxYFeature.setModel(jComboBoxYFeatureModel);
 				jComboBoxYFeature.setPreferredSize(COMBO_BOX_MAX_SIZE);
 				jComboBoxYFeature.setMaximumSize(COMBO_BOX_MAX_SIZE);
 				jComboBoxYFeature.setFont(FONT);
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 }

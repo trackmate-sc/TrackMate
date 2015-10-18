@@ -1,7 +1,6 @@
 package fiji.plugin.trackmate.gui.panels.components;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
-import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
 
 import java.awt.BorderLayout;
 import java.awt.Canvas;
@@ -24,6 +23,8 @@ import javax.swing.JPanel;
 
 import org.jfree.chart.renderer.InterpolatePaintScale;
 
+import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
+
 public class JPanelColorByFeatureGUI extends ActionListenablePanel {
 
 	/*
@@ -37,7 +38,7 @@ public class JPanelColorByFeatureGUI extends ActionListenablePanel {
 	 */
 	public final ActionEvent COLOR_FEATURE_CHANGED = new ActionEvent(this, 1, "ColorFeatureChanged");
 	private JLabel jLabelSetColorBy;
-	private JComboBox jComboBoxSetColorBy;
+	private JComboBox< String > jComboBoxSetColorBy;
 	private JPanel jPanelByFeature;
 	private Canvas canvasColor;
 	private JPanel jPanelColor;
@@ -49,10 +50,10 @@ public class JPanelColorByFeatureGUI extends ActionListenablePanel {
 	 */
 
 	private String setColorByFeature;
-	
+
 	private Map<String, double[]> featureValues;
-	private Map<String, String> featureNames;
-	private List<String> features;
+	private final Map<String, String> featureNames;
+	private final List<String> features;
 
 	/*
 	 * CONSTRUCTOR
@@ -73,7 +74,7 @@ public class JPanelColorByFeatureGUI extends ActionListenablePanel {
 	 * Forward the enabled flag to all components off this panel.
 	 */
 	@Override
-	public void setEnabled(boolean enabled) {
+	public void setEnabled(final boolean enabled) {
 		jLabelSetColorBy.setEnabled(enabled);
 		jComboBoxSetColorBy.setEnabled(enabled);
 		canvasColor.setEnabled(enabled);
@@ -82,8 +83,8 @@ public class JPanelColorByFeatureGUI extends ActionListenablePanel {
 	public String getSelectedFeature() {
 		return setColorByFeature;
 	}
-	
-	public void setColorByFeature(String feature) {
+
+	public void setColorByFeature(final String feature) {
 		if (null == feature) {
 			jComboBoxSetColorBy.setSelectedIndex(0);
 		} else {
@@ -94,14 +95,14 @@ public class JPanelColorByFeatureGUI extends ActionListenablePanel {
 	/*
 	 * PRIVATE METHODS
 	 */
-	
+
 
 	/**
 	 * Forward the 'color by feature' action to the caller of this GUI.
 	 */
 	private void colorByFeatureChanged() {
-		int selection = jComboBoxSetColorBy.getSelectedIndex();
-		if (selection == 0) { 
+		final int selection = jComboBoxSetColorBy.getSelectedIndex();
+		if (selection == 0) {
 			setColorByFeature = null;
 		} else {
 			setColorByFeature = features.get(selection-1);
@@ -109,7 +110,7 @@ public class JPanelColorByFeatureGUI extends ActionListenablePanel {
 		fireAction(COLOR_FEATURE_CHANGED);
 	}
 
-	private void repaintColorCanvas(Graphics g) {
+	private void repaintColorCanvas(final Graphics g) {
 		if (null == setColorByFeature) {
 			g.clearRect(0, 0, canvasColor.getWidth(), canvasColor.getHeight());
 			return;
@@ -139,9 +140,9 @@ public class JPanelColorByFeatureGUI extends ActionListenablePanel {
 		}
 		g.setColor(Color.WHITE);
 		g.setFont(SMALL_FONT.deriveFont(Font.BOLD));
-		FontMetrics fm = g.getFontMetrics();
-		String minStr = String.format("%.1f", min);
-		String maxStr = String.format("%.1f", max);
+		final FontMetrics fm = g.getFontMetrics();
+		final String minStr = String.format("%.1f", min);
+		final String maxStr = String.format("%.1f", max);
 		g.drawString(minStr, 1, height/2 + fm.getHeight()/2);
 		g.drawString(maxStr, width - fm.stringWidth(maxStr)-1, height/2 + fm.getHeight()/2);
 	}
@@ -150,12 +151,12 @@ public class JPanelColorByFeatureGUI extends ActionListenablePanel {
 	private void initGUI() {
 
 		{
-			BorderLayout layout = new BorderLayout();
+			final BorderLayout layout = new BorderLayout();
 			setLayout(layout);
 			this.setPreferredSize(new java.awt.Dimension(270, 45));
 
 			jPanelByFeature = new JPanel();
-			BoxLayout jPanelByFeatureLayout = new BoxLayout(jPanelByFeature, javax.swing.BoxLayout.X_AXIS);
+			final BoxLayout jPanelByFeatureLayout = new BoxLayout(jPanelByFeature, javax.swing.BoxLayout.X_AXIS);
 			jPanelByFeature.setLayout(jPanelByFeatureLayout);
 			add(jPanelByFeature, BorderLayout.CENTER);
 			jPanelByFeature.setPreferredSize(new java.awt.Dimension(270, 25));
@@ -169,19 +170,20 @@ public class JPanelColorByFeatureGUI extends ActionListenablePanel {
 				jLabelSetColorBy.setFont(SMALL_FONT);
 			}
 			{
-				String[] featureStringList = new String[features.size()+1];
+				final String[] featureStringList = new String[features.size()+1];
 				featureStringList[0] = "Default";
-				for (int i = 0; i < features.size(); i++) 
+				for (int i = 0; i < features.size(); i++)
 					featureStringList[i+1] = featureNames.get(features.get(i));
-				ComboBoxModel jComboBoxSetColorByModel = new DefaultComboBoxModel(featureStringList);
-				jComboBoxSetColorBy = new JComboBox();
+				final ComboBoxModel< String > jComboBoxSetColorByModel = new DefaultComboBoxModel< String >( featureStringList );
+				jComboBoxSetColorBy = new JComboBox< String >();
 				jPanelByFeature.add(Box.createHorizontalStrut(5));
 				jPanelByFeature.add(Box.createHorizontalStrut(5));
 				jPanelByFeature.add(jComboBoxSetColorBy);
 				jComboBoxSetColorBy.setModel(jComboBoxSetColorByModel);
 				jComboBoxSetColorBy.setFont(SMALL_FONT);
 				jComboBoxSetColorBy.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
+					@Override
+					public void actionPerformed(final ActionEvent e) {
 						colorByFeatureChanged();
 						canvasColor.repaint();
 					}
@@ -190,7 +192,7 @@ public class JPanelColorByFeatureGUI extends ActionListenablePanel {
 		}
 		{
 			jPanelColor = new JPanel();
-			BorderLayout jPanelColorLayout = new BorderLayout();
+			final BorderLayout jPanelColorLayout = new BorderLayout();
 			add(jPanelColor, BorderLayout.SOUTH);
 			jPanelColor.setLayout(jPanelColorLayout);
 			jPanelColor.setPreferredSize(new java.awt.Dimension(10, 20));
@@ -198,7 +200,7 @@ public class JPanelColorByFeatureGUI extends ActionListenablePanel {
 				canvasColor = new Canvas() {
 					private static final long serialVersionUID = -2174317490066575040L;
 					@Override
-					public void paint(Graphics g) {
+					public void paint(final Graphics g) {
 						repaintColorCanvas(g);
 					}
 				};
@@ -212,7 +214,7 @@ public class JPanelColorByFeatureGUI extends ActionListenablePanel {
 		return featureValues;
 	}
 
-	public void setFeatureValues(Map<String, double[]> featureValues) {
+	public void setFeatureValues(final Map<String, double[]> featureValues) {
 		this.featureValues = featureValues;
 	}
 }

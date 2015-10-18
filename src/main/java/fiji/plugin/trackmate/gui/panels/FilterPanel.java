@@ -73,7 +73,7 @@ public class FilterPanel extends javax.swing.JPanel
 
 	private final ChangeEvent CHANGE_EVENT = new ChangeEvent( this );
 
-	JComboBox jComboBoxFeature;
+	JComboBox< String > jComboBoxFeature;
 
 	private ChartPanel chartPanel;
 
@@ -313,8 +313,8 @@ public class FilterPanel extends javax.swing.JPanel
 			this.setMaximumSize( panelMaxSize );
 			this.setBorder( new LineBorder( annotationColor, 1, true ) );
 			{
-				final ComboBoxModel jComboBoxFeatureModel = new DefaultComboBoxModel( TMUtils.getArrayFromMaping( allKeys, keyNames ).toArray( new String[] {} ) );
-				jComboBoxFeature = new JComboBox();
+				final ComboBoxModel< String > jComboBoxFeatureModel = new DefaultComboBoxModel< String >( TMUtils.getArrayFromMaping( allKeys, keyNames ).toArray( new String[] {} ) );
+				jComboBoxFeature = new JComboBox< String >();
 				this.add( jComboBoxFeature, new GridBagConstraints( 0, 0, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 2, 5, 2, 5 ), 0, 0 ) );
 				jComboBoxFeature.setModel( jComboBoxFeatureModel );
 				jComboBoxFeature.setFont( FONT );

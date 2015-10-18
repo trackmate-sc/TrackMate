@@ -1,7 +1,6 @@
 package fiji.plugin.trackmate.visualization.trackscheme;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
-import fiji.plugin.trackmate.visualization.trackscheme.utils.SearchBar;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -16,6 +15,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JToolBar;
+
+import fiji.plugin.trackmate.visualization.trackscheme.utils.SearchBar;
 
 public class TrackSchemeToolbar extends JToolBar
 {
@@ -247,10 +248,10 @@ public class TrackSchemeToolbar extends JToolBar
 			} );
 		}
 
-		final JComboBox selectStyleBox;
+		final JComboBox< String > selectStyleBox;
 		{
 			final Set< String > styleNames = new HashSet< String >( TrackSchemeStylist.VERTEX_STYLES.keySet() );
-			selectStyleBox = new JComboBox( styleNames.toArray() );
+			selectStyleBox = new JComboBox< String >( styleNames.toArray( new String[] {} ) );
 			selectStyleBox.setMinimumSize( new Dimension( 80, 20 ) );
 			selectStyleBox.setSelectedItem( TrackSchemeStylist.DEFAULT_STYLE_NAME );
 			selectStyleBox.setMaximumSize( new Dimension( 200, 30 ) );

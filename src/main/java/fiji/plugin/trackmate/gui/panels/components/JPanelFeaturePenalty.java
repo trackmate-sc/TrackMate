@@ -2,8 +2,6 @@ package fiji.plugin.trackmate.gui.panels.components;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.TEXTFIELD_DIMENSION;
-import fiji.plugin.trackmate.util.TMUtils;
-import fiji.util.NumberParser;
 
 import java.util.List;
 import java.util.Map;
@@ -12,13 +10,16 @@ import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 
+import fiji.plugin.trackmate.util.TMUtils;
+import fiji.util.NumberParser;
+
 public class JPanelFeaturePenalty extends javax.swing.JPanel {
 
 	private static final long serialVersionUID = 3848390144561204540L;
-	private JComboBox jComboBoxFeature;
+	private JComboBox< String > jComboBoxFeature;
 	private JNumericTextField jTextFieldFeatureWeight;
 	private final List<String> features;
-	private Map<String, String> featureNames;
+	private final Map<String, String> featureNames;
 
 	public JPanelFeaturePenalty(final List<String> features, final Map<String, String> featureNames, final int index) {
 		super();
@@ -32,8 +33,8 @@ public class JPanelFeaturePenalty extends javax.swing.JPanel {
 	 * PUBLIC METHODS
 	 */
 
-	public void setSelectedFeature(String feature, double weight) {
-		int index = features.indexOf(feature);
+	public void setSelectedFeature(final String feature, final double weight) {
+		final int index = features.indexOf(feature);
 		if (index < 0) {
 			return;
 		}
@@ -50,7 +51,7 @@ public class JPanelFeaturePenalty extends javax.swing.JPanel {
 	}
 
 	@Override
-	public void setEnabled(boolean enabled) {
+	public void setEnabled(final boolean enabled) {
 		super.setEnabled(enabled);
 		jComboBoxFeature.setEnabled(enabled);
 		jTextFieldFeatureWeight.setEnabled(enabled);
@@ -66,9 +67,9 @@ public class JPanelFeaturePenalty extends javax.swing.JPanel {
 			this.setSize(280, 40);
 			this.setLayout(null);
 			{
-				ComboBoxModel jComboBoxFeatureModel = new DefaultComboBoxModel(
+				final ComboBoxModel< String > jComboBoxFeatureModel = new DefaultComboBoxModel< String >(
 						TMUtils.getArrayFromMaping(features, featureNames).toArray(new String[] {}));
-				jComboBoxFeature = new JComboBox();
+				jComboBoxFeature = new JComboBox< String >();
 				this.add(jComboBoxFeature);
 				jComboBoxFeature.setModel(jComboBoxFeatureModel);
 				jComboBoxFeature.setBounds(2, 4, 205, 22);
@@ -82,7 +83,7 @@ public class JPanelFeaturePenalty extends javax.swing.JPanel {
 				jTextFieldFeatureWeight.setSize(TEXTFIELD_DIMENSION);
 				jTextFieldFeatureWeight.setFont(SMALL_FONT);
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 	}
