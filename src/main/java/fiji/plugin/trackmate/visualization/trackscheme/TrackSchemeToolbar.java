@@ -248,7 +248,7 @@ public class TrackSchemeToolbar extends JToolBar
 			} );
 		}
 
-		final JComboBox< String > selectStyleBox;
+		final JComboBox selectStyleBox;
 		{
 			final Set< String > styleNames = new HashSet< String >( TrackSchemeStylist.VERTEX_STYLES.keySet() );
 			selectStyleBox = new JComboBox< String >( styleNames.toArray( new String[] {} ) );

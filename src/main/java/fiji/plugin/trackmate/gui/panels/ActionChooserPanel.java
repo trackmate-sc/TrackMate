@@ -1,6 +1,13 @@
 package fiji.plugin.trackmate.gui.panels;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.action.TrackMateAction;
+import fiji.plugin.trackmate.gui.LogPanel;
+import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.gui.TrackMateWizard;
+import fiji.plugin.trackmate.providers.ActionProvider;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -17,14 +24,6 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.SpringLayout;
-
-import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.action.TrackMateAction;
-import fiji.plugin.trackmate.gui.LogPanel;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
-import fiji.plugin.trackmate.providers.ActionProvider;
 
 public class ActionChooserPanel {
 
@@ -158,8 +157,7 @@ public class ActionChooserPanel {
 		}
 
 		@Override
-		public Component getListCellRendererComponent( final JList< ? > list, final Object value, final int index, final boolean isSelected, final boolean cellHasFocus )
-		{
+		public Component getListCellRendererComponent(final JList list, final Object value, final int index, final boolean isSelected, final boolean cellHasFocus) {
 			final JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 			final ImageIcon icon = icons.get(value);
 			label.setIcon(icon);

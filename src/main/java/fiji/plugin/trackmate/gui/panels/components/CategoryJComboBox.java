@@ -2,6 +2,8 @@ package fiji.plugin.trackmate.gui.panels.components;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
 
+import com.itextpdf.text.Font;
+
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -25,22 +27,20 @@ import javax.swing.JList;
 import javax.swing.KeyStroke;
 import javax.swing.ListCellRenderer;
 
-import com.itextpdf.text.Font;
-
 /**
  * A JcomboBox that displays categories, and return the category the selected
  * item belong to.
- *
+ * 
  * @author Jean-Yves Tinevez, adapted from
  *         http://java-swing-tips.blogspot.fr/2010
  *         /03/non-selectable-jcombobox-items.html
- *
+ * 
  * @param <K>
  *            the type of the category objects
  * @param <V>
  *            the type of the items
  */
-public class CategoryJComboBox< K, V > extends JComboBox< Object >
+public class CategoryJComboBox< K, V > extends JComboBox
 {
 
 	private static final long serialVersionUID = 1L;
@@ -160,11 +160,11 @@ public class CategoryJComboBox< K, V > extends JComboBox< Object >
 	private void init()
 	{
 		setFont( SMALL_FONT );
-		final ListCellRenderer< ? super Object > r = getRenderer();
-		setRenderer( new ListCellRenderer< Object >()
+		final ListCellRenderer r = getRenderer();
+		setRenderer( new ListCellRenderer()
 		{
 			@Override
-			public Component getListCellRendererComponent( final JList< ? extends Object > list, final Object value, final int index, final boolean isSelected, final boolean cellHasFocus )
+			public Component getListCellRendererComponent( final JList list, final Object value, final int index, final boolean isSelected, final boolean cellHasFocus )
 			{
 				JLabel c;
 				if ( categoryIndexSet.contains( index ) )
@@ -183,7 +183,6 @@ public class CategoryJComboBox< K, V > extends JComboBox< Object >
 				}
 				return c;
 			}
-
 		} );
 
 		final Action up = new AbstractAction()

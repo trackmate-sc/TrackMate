@@ -362,7 +362,7 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 	{
 
 		@SuppressWarnings( "serial" )
-		final AbstractListModel< String > lm = new AbstractListModel< String >()
+		final AbstractListModel lm = new AbstractListModel()
 		{
 			@Override
 			public int getSize()
@@ -371,7 +371,7 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 			}
 
 			@Override
-			public String getElementAt( final int index )
+			public Object getElementAt( final int index )
 			{
 				return headers[ index ];
 			}
@@ -408,7 +408,7 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 			}
 		} );
 
-		final JList< String > rowHeader = new JList< String >( lm );
+		final JList rowHeader = new JList( lm );
 		rowHeader.setFixedCellHeight( table.getRowHeight() );
 		rowHeader.setCellRenderer( new RowHeaderRenderer( table ) );
 		rowHeader.setBackground( getBackground() );
@@ -466,7 +466,7 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 	 * INNER CLASS
 	 */
 
-	private class RowHeaderRenderer extends JLabel implements ListCellRenderer< String >, Serializable
+	private class RowHeaderRenderer extends JLabel implements ListCellRenderer, Serializable
 	{
 
 		private static final long serialVersionUID = -1L;
@@ -483,7 +483,7 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 		}
 
 		@Override
-		public Component getListCellRendererComponent( final JList< ? extends String > list, final String value, final int index, final boolean isSelected, final boolean cellHasFocus )
+		public Component getListCellRendererComponent( final JList list, final Object value, final int index, final boolean isSelected, final boolean cellHasFocus )
 		{
 			setText( ( value == null ) ? "" : value.toString() );
 			return this;

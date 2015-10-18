@@ -34,7 +34,7 @@ public class ImagePlusChooser extends javax.swing.JFrame
 
 	private JLabel jLabelSelect;
 
-	private JComboBox< String > jComboBoxImage;
+	private JComboBox jComboBoxImage;
 
 	private JButton jButtonCancel;
 
@@ -211,8 +211,8 @@ public class ImagePlusChooser extends javax.swing.JFrame
 					jLabelSelect.setBounds( 12, 10, 258, 15 );
 				}
 				{
-					final ComboBoxModel< String > jComboBoxImageModel = new DefaultComboBoxModel< String >( getImageNames() );
-					jComboBoxImage = new JComboBox< String >();
+					final ComboBoxModel jComboBoxImageModel = new DefaultComboBoxModel( getImageNames() );
+					jComboBoxImage = new JComboBox();
 					jPanelMain.add( jComboBoxImage );
 					jComboBoxImage.setFont( SMALL_FONT );
 					jComboBoxImage.setModel( jComboBoxImageModel );

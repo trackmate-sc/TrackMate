@@ -23,7 +23,7 @@ public class ListChooserPanel extends ActionListenablePanel {
 
 	private static final long serialVersionUID = -1837635847479649545L;
 	protected JLabel jLabelHeader;
-	protected JComboBox< String > jComboBoxChoice;
+	protected JComboBox jComboBoxChoice;
 	protected List<String> items;
 	protected List<String> infoTexts;
 	protected JLabel jLabelHelpText;
@@ -33,7 +33,7 @@ public class ListChooserPanel extends ActionListenablePanel {
 	 * CONSTRUCTOR
 	 */
 
-	public ListChooserPanel(final List<String> items, final List<String> infoTexts, final String typeName) {
+	public ListChooserPanel(List<String> items, List<String> infoTexts, String typeName) {
 		super();
 		this.infoTexts = infoTexts;
 		this.typeName = typeName;
@@ -49,7 +49,7 @@ public class ListChooserPanel extends ActionListenablePanel {
 		return jComboBoxChoice.getSelectedIndex();
 	}
 
-	public void setChoice(final int index) {
+	public void setChoice(int index) {
 		jComboBoxChoice.setSelectedIndex(index);
 	}
 
@@ -61,7 +61,7 @@ public class ListChooserPanel extends ActionListenablePanel {
 	private void initGUI() {
 		try {
 			this.setPreferredSize(new Dimension(392, 470));
-			final SpringLayout springLayout = new SpringLayout();
+			SpringLayout springLayout = new SpringLayout();
 			setLayout(springLayout);
 			{
 				jLabelHeader = new JLabel();
@@ -74,9 +74,9 @@ public class ListChooserPanel extends ActionListenablePanel {
 				jLabelHeader.setText("Select a "+typeName);
 			}
 			{
-				final String[] names = items.toArray(new String[] {});
-				final ComboBoxModel< String > jComboBoxDisplayerChoiceModel = new DefaultComboBoxModel< String >( names );
-				jComboBoxChoice = new JComboBox< String >();
+				String[] names = items.toArray(new String[] {});
+				ComboBoxModel jComboBoxDisplayerChoiceModel = new DefaultComboBoxModel(names);
+				jComboBoxChoice = new JComboBox();
 				springLayout.putConstraint(SpringLayout.NORTH, jComboBoxChoice, 48, SpringLayout.NORTH, this);
 				springLayout.putConstraint(SpringLayout.WEST, jComboBoxChoice, 10, SpringLayout.WEST, this);
 				springLayout.putConstraint(SpringLayout.SOUTH, jComboBoxChoice, 75, SpringLayout.NORTH, this);
@@ -86,7 +86,7 @@ public class ListChooserPanel extends ActionListenablePanel {
 				jComboBoxChoice.setFont(FONT);
 				jComboBoxChoice.addActionListener(new ActionListener() {
 					@Override
-					public void actionPerformed(final ActionEvent e) {
+					public void actionPerformed(ActionEvent e) {
 						echo(jComboBoxChoice.getSelectedIndex());
 					}
 				});
@@ -101,12 +101,12 @@ public class ListChooserPanel extends ActionListenablePanel {
 				echo(jComboBoxChoice.getSelectedIndex());
 				this.add(jLabelHelpText);
 			}
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	private void echo(final int index) {
+	private void echo(int index) {
 		jLabelHelpText.setText(infoTexts.get(index)
 				.replace("<br>", "")
 				.replace("<p>", "<p align=\"justify\">")
