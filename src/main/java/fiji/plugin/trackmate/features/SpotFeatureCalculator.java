@@ -15,7 +15,9 @@ import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.features.spot.IndependentSpotFeatureAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.util.TMUtils;
@@ -173,7 +175,22 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 						{
 							@SuppressWarnings( "unchecked" )
 							final SpotAnalyzer< ? > analyzer = factory.getAnalyzer( model, img, frame, targetChannel );
-							analyzer.process();
+							if ( analyzer instanceof IndependentSpotFeatureAnalyzer )
+							{
+								// Independent: we can process only the spot to update.
+								@SuppressWarnings( "rawtypes" )
+								final IndependentSpotFeatureAnalyzer analyzer2 = ( IndependentSpotFeatureAnalyzer ) analyzer;
+								for ( final Spot spot : toCompute.iterable( frame, false ) )
+								{
+									analyzer2.process( spot );
+								}
+							}
+							else
+							{
+								// Process all spots of the frame at once.
+								analyzer.process();
+							}
+
 						}
 
 						logger.setProgress( progress.incrementAndGet() / ( float ) numFrames );
