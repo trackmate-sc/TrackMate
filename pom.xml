@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
 		<groupId>sc.fiji</groupId>
 		<artifactId>pom-fiji</artifactId>
-		<version>15.7.0</version>
+		<version>16.1.0</version>
 		<relativePath />
 	</parent>
 
@@ -34,6 +35,13 @@
 			<artifactId>fiji-lib</artifactId>
 		</dependency>
 
+		<!-- ImageJ dependency -->
+		<dependency>
+			<groupId>net.imagej</groupId>
+			<artifactId>imagej-deprecated</artifactId>
+			<version>0.1.0</version>
+		</dependency>
+
 		<!-- ImgLib2 dependencies -->
 		<dependency>
 			<groupId>net.imglib2</groupId>
@@ -57,11 +65,11 @@
 		</dependency>
 
 		<!-- SciJava dependencies -->
- 		<dependency>
+		<dependency>
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-common</artifactId>
 		</dependency>
- 
+
 		<!-- Third party dependencies -->
 		<dependency>
 			<groupId>batik</groupId>
@@ -156,7 +164,9 @@
 	</developers>
 
 	<contributors>
-		<contributor><name>Nick Perry</name></contributor>
+		<contributor>
+			<name>Nick Perry</name>
+		</contributor>
 		<contributor>
 			<name>Curtis Rueden</name>
 			<email>ctrueden@wisc.edu</email>
