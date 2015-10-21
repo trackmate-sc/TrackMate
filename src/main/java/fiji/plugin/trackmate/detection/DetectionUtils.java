@@ -31,7 +31,7 @@ import net.imglib2.util.Intervals;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.detection.util.MedianFilter;
+import fiji.plugin.trackmate.detection.util.MedianFilter2D;
 
 public class DetectionUtils
 {
@@ -173,7 +173,7 @@ public class DetectionUtils
 	 */
 	public static final < R extends RealType< R > & NativeType< R >> Img< R > applyMedianFilter( final RandomAccessibleInterval< R > image )
 	{
-		final MedianFilter< R > medFilt = new MedianFilter< R >( image, 1 );
+		final MedianFilter2D< R > medFilt = new MedianFilter2D< R >( image, 1 );
 		if ( !medFilt.checkInput() || !medFilt.process() ) { return null; }
 		return medFilt.getResult();
 	}
