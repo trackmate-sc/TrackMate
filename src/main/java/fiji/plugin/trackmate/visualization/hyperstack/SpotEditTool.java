@@ -438,7 +438,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 						final int xp = ( int ) ( x / calibration[ 0 ] + 0.5f );
 						final int yp = ( int ) ( y / calibration[ 1 ] + 0.5f );
 
-						if ( roiedit.contains( xp, yp ) )
+						if ( null != roiedit && roiedit.contains( xp, yp ) )
 						{
 							added.add( spot );
 						}
