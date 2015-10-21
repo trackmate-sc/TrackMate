@@ -525,6 +525,21 @@ public class TrackMateGUIController implements ActionListener
 				// Reset the default save location.
 				SomeDialogDescriptor.file = null;
 			}
+
+			@Override
+			public void displayingPanel()
+			{
+				super.displayingPanel();
+				if ( startDialoDescriptor.isImpValid() )
+				{
+					// Ensure we reset default save location
+					gui.setNextButtonEnabled( true );
+				}
+				else
+				{
+					gui.setNextButtonEnabled( false );
+				}
+			}
 		};
 		// Listen if the selected imp is valid and toggle next button
 		// accordingly.
