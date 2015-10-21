@@ -30,7 +30,6 @@ import fiji.plugin.trackmate.util.SpotNeighborhoodCursor;
  * 
  * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; 2011 - 2012
  */
-@SuppressWarnings( "deprecation" )
 public class SpotContrastAndSNRAnalyzer< T extends RealType< T >> extends IndependentSpotFeatureAnalyzer< T >
 {
 

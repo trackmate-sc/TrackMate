@@ -10,7 +10,6 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.util.SpotNeighborhood;
 import fiji.plugin.trackmate.util.SpotNeighborhoodCursor;
 
-@SuppressWarnings( "deprecation" )
 public class SpotContrastAnalyzer< T extends RealType< T >> extends IndependentSpotFeatureAnalyzer< T >
 {
 

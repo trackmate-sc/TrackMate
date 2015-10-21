@@ -22,7 +22,6 @@ import fiji.plugin.trackmate.gui.ConfigurationPanel;
  * detector parameters from/to XML, and of generating a suitable configuration
  * panel for GUI interaction.
  */
-@SuppressWarnings( "deprecation" )
 public interface SpotDetectorFactory< T extends RealType< T > & NativeType< T >> extends TrackMateModule
 {
 

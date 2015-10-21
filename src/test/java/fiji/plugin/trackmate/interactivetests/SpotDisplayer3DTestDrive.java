@@ -37,7 +37,6 @@ import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 
-@SuppressWarnings( "deprecation" )
 public class SpotDisplayer3DTestDrive
 {
 

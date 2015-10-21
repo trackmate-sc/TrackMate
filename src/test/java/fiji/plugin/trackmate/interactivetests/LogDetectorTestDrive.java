@@ -26,7 +26,6 @@ import fiji.plugin.trackmate.util.TMUtils;
  * @author Jean-Yves Tinevez
  *
  */
-@SuppressWarnings( "deprecation" )
 public class LogDetectorTestDrive
 {
 

@@ -18,7 +18,6 @@ import fiji.plugin.trackmate.util.SpotNeighborhood;
 //import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.SKEWNESS;
 //import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.VARIANCE;
 
-@SuppressWarnings( "deprecation" )
 public class SpotIntensityAnalyzer< T extends RealType< T >> extends IndependentSpotFeatureAnalyzer< T >
 {
 

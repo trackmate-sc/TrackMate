@@ -6,7 +6,6 @@ import net.imagej.ImgPlus;
 import net.imglib2.type.numeric.RealType;
 import fiji.plugin.trackmate.Spot;
 
-@SuppressWarnings( "deprecation" )
 public abstract class IndependentSpotFeatureAnalyzer< T extends RealType< T >> implements SpotAnalyzer< T >
 {
 

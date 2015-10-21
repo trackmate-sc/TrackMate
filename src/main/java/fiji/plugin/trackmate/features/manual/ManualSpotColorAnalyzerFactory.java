@@ -20,7 +20,6 @@ import fiji.plugin.trackmate.features.spot.SpotAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 
-@SuppressWarnings( "deprecation" )
 @Plugin( type = SpotAnalyzerFactory.class )
 public class ManualSpotColorAnalyzerFactory< T extends RealType< T > & NativeType< T >> implements SpotAnalyzerFactory< T >
 {

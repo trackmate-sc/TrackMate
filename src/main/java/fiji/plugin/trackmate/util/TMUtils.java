@@ -34,7 +34,6 @@ import fiji.plugin.trackmate.detection.DetectorKeys;
 /**
  * List of static utilities for the {@link TrackMate} trackmate
  */
-@SuppressWarnings( "deprecation" )
 public class TMUtils
 {
 
