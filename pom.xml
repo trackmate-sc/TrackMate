@@ -39,7 +39,6 @@
 		<dependency>
 			<groupId>net.imagej</groupId>
 			<artifactId>imagej-deprecated</artifactId>
-			<version>0.1.0</version>
 		</dependency>
 
 		<!-- ImgLib2 dependencies -->
