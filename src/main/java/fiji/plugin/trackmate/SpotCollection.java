@@ -31,7 +31,7 @@ import net.imglib2.algorithm.MultiThreaded;
  * benefit from multithreaded computation ({@link #filter(Collection)},
  * {@link #filter(FeatureFilter)}
  *
- * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> - Feb 2011 - 2013
+ * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; - Feb 2011 - 2013
  *
  */
 public class SpotCollection implements MultiThreaded

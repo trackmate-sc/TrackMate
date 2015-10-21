@@ -1,7 +1,5 @@
 package fiji.plugin.trackmate.visualization;
 
-import fiji.plugin.trackmate.Spot;
-
 import org.jgrapht.graph.DefaultWeightedEdge;
 
 /**
@@ -23,12 +21,14 @@ public interface TrackColorGenerator extends FeatureColorGenerator<DefaultWeight
 	/**
 	 * This is a hack for performance:
 	 * <p>
-	 * For color generators that depends only on the track edges and spots are in, 
-	 * we can skip some computations by specifying first the trackID, and returning
-	 * always the same color - ignoring the spot and edge argument of the {@link #color(DefaultWeightedEdge)}
-	 * and {@link #color(Spot)} methods - while we iterate through the track.
+	 * For color generators that depends only on the track edges and spots are
+	 * in, we can skip some computations by specifying first the trackID, and
+	 * returning always the same color - ignoring the spot and edge argument of
+	 * the {@link FeatureColorGenerator#color(Object)} methods - while we
+	 * iterate through the track.
 	 * <p>
-	 * Color generators that return a color per object can otherwise ignore this method.
+	 * Color generators that return a color per object can otherwise ignore this
+	 * method.
 	 * 
 	 * @param trackID
 	 */

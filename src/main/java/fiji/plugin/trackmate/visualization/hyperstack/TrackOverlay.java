@@ -28,7 +28,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 /**
  * The overlay class in charge of drawing the tracks on the hyperstack window.
  *
- * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> 2010 - 2011
+ * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; 2010 - 2011
  */
 public class TrackOverlay extends Roi
 {

@@ -1,7 +1,6 @@
 package fiji.plugin.trackmate.visualization.threedviewer;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
-import customnode.CustomTriangleMesh;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import ij3d.ContentNode;
 
@@ -29,6 +28,8 @@ import javax.vecmath.Point3f;
 import javax.vecmath.Point4d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
+
+import customnode.CustomTriangleMesh;
 
 public class SpotGroupNode<K> extends ContentNode {
 
@@ -128,15 +129,21 @@ public class SpotGroupNode<K> extends ContentNode {
 	}
 
 	/**
-	 * Create a new {@link SpotGroupNode} with spots at position and with color given in argument.
+	 * Create a new {@link SpotGroupNode} with spots at position and with color
+	 * given in argument.
 	 * <p>
-	 * The positions are given by a {@link Point4d} map. The <code>x</code>,  <code>y</code>,  <code>z</code>
-	 * are used to specify the spot center, and the <code>w</code> field its radius.
-	 * The same color is used for all the spots, with a transparency of 0.
+	 * The positions are given by a {@link Point4d} map. The <code>x</code>,
+	 * <code>y</code>, <code>z</code> are used to specify the spot center, and
+	 * the <code>w</code> field its radius. The same color is used for all the
+	 * spots, with a transparency of 0.
 	 * <p>
-	 * The arguments are copied on creation, ensuring that are unmodified by this class, and vice-versa.
+	 * The arguments are copied on creation, ensuring that are unmodified by
+	 * this class, and vice-versa.
+	 * 
 	 * @param centers
-	 * @param colors
+	 *            a map that maps spot to their centers as Point4d.
+	 * @param color
+	 *            the spot color as Color3f.
 	 */
 	public SpotGroupNode(final HashMap<K, Point4d> centers, final Color3f color) {
 		this.centers = new HashMap<K, Point4d>(centers);
@@ -395,8 +402,8 @@ public class SpotGroupNode<K> extends ContentNode {
 	 */
 
 	/**
-	 * Set the visibility of all spots given in argument to <code>true<code>, all the others
-	 * are set to invisible.
+	 * Set the visibility of all spots given in argument to <code>true</code>,
+	 * all the others are set to invisible.
 	 */
 	public void setVisible(final Iterable<K> toShow) {
 		switchMask = new BitSet(meshes.size());

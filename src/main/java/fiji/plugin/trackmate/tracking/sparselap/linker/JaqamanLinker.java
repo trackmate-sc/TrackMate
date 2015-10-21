@@ -1,9 +1,5 @@
 package fiji.plugin.trackmate.tracking.sparselap.linker;
 
-import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.tracking.sparselap.costfunction.CostFunction;
-import fiji.plugin.trackmate.tracking.sparselap.costmatrix.CostMatrixCreator;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,6 +10,8 @@ import java.util.Map;
 import net.imglib2.algorithm.BenchmarkAlgorithm;
 import net.imglib2.algorithm.OutputAlgorithm;
 import net.imglib2.util.Util;
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.tracking.sparselap.costmatrix.CostMatrixCreator;
 
 /**
  * Links two lists of objects based on the LAP framework described in Jaqaman
@@ -37,21 +35,13 @@ public class JaqamanLinker< K extends Comparable< K >, J extends Comparable< J >
 	private final Logger logger;
 
 	/**
-	 * Creates a new linker for the two specified object lists.
+	 * Creates a new linker for the specified cost matrix creator. See Jaqaman
+	 * <i>et al.</i>, Nature Methods, <b>2008</b>, Figure 1b.
 	 * 
-	 * @param sources
-	 *            the source objects.
-	 * @param targets
-	 *            the target objects.
-	 * @param costFunction
-	 *            a {@link CostFunction} that can compute a cost to link any
-	 *            source to any target.
-	 * @param costThreshold
-	 *            the cost threshold above which linking will be forbidden.
-	 * @param alternativeCostFactor
-	 *            the Jaqaman et al. 2008 alternative cost factor, required to
-	 *            build the cost for a link <b>not to happen</b>.
-	 * @see {Jaqaman <i>et al.</i>, Nature Methods, <b>2008</b>, Figure 1b.}
+	 * @param costMatrixCreator
+	 *            the class in charge of creating linking costs.
+	 * @param logger
+	 *            a logger that will receive progress messages.
 	 */
 	public JaqamanLinker( final CostMatrixCreator< K, J > costMatrixCreator, final Logger logger )
 	{

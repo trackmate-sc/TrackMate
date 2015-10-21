@@ -4,7 +4,7 @@ package fiji.plugin.trackmate.io;
 /**
  * Contains the key string used for xml marshaling, for TrackMate xml files
  * version prior to 1.3
- * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com>  2010-2012
+ * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt;  2010-2012
   */
 class TmXmlKeys_v12 {
 	

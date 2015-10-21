@@ -114,7 +114,7 @@ public abstract class Logger extends PrintWriter
 
 	/**
 	 * This {@link Logger} simply outputs to the standard output and standard
-	 * error. The {@link #setProgress(float)} method is ignored, the
+	 * error. The {@link #setProgress(double)} method is ignored, the
 	 * {@link #setStatus(String)} is sent to the console.
 	 */
 	public static Logger DEFAULT_LOGGER = new Logger()

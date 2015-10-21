@@ -1,13 +1,13 @@
 package fiji.plugin.trackmate.tracking;
 
+import java.util.Map;
+
+import org.jdom2.Element;
+
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMateModule;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
-
-import java.util.Map;
-
-import org.jdom2.Element;
 
 public interface SpotTrackerFactory extends TrackMateModule
 {
@@ -39,7 +39,7 @@ public interface SpotTrackerFactory extends TrackMateModule
 	 * <p>
 	 * Only parameters specific to the concrete tracker factory are marshalled.
 	 * The element also always receive an attribute named
-	 * {@value TrackerKeys#XML_ATTRIBUTE_DETECTOR_NAME} that saves the target
+	 * {@value TrackerKeys#XML_ATTRIBUTE_TRACKER_NAME} that saves the target
 	 * {@link SpotTracker} key.
 	 *
 	 * @return true if marshalling was successful. If not, check

@@ -33,8 +33,9 @@ public class SpotIntensityAnalyzer< T extends RealType< T >> extends Independent
 
 	/**
 	 * Compute descriptive statistics items for this spot. Implementation
-	 * follows {@link http
-	 * ://en.wikipedia.org/wiki/Algorithms_for_calculating_variance}.
+	 * follows <a
+	 * href=http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
+	 * >Wikipedia/Algorithms for calculating variance</a>.
 	 */
 	@Override
 	public final void process( final Spot spot )

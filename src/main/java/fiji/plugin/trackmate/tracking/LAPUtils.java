@@ -32,7 +32,6 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_FEATURE_P
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
-import fiji.plugin.trackmate.Spot;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -54,6 +53,8 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
+
+import fiji.plugin.trackmate.Spot;
 
 public class LAPUtils {
 
@@ -202,40 +203,45 @@ public class LAPUtils {
 
 
 	/**
-	 * @return true if the settings map can be used with the LAP trackers. We do not check that all the spot features
-	 * used in penalties are indeed found in all spots, because if such a feature is absent from one spot, the
-	 * LAP trackers simply ignores the penalty and does not generate an error.
-	 * @param settings the map to test.
-	 * @param errorHolder a {@link StringBuilder} that will contain an error message if the check is
-	 * not successful.
+	 * @return true if the settings map can be used with the LAP trackers. We do
+	 *         not check that all the spot features used in penalties are indeed
+	 *         found in all spots, because if such a feature is absent from one
+	 *         spot, the LAP trackers simply ignores the penalty and does not
+	 *         generate an error.
+	 * @param settings
+	 *            the map to test.
+	 * @param errorHolder
+	 *            a {@link StringBuilder} that will contain an error message if
+	 *            the check is not successful.
 	 */
-	public static final boolean checkSettingsValidity(final Map<String, Object> settings, final StringBuilder str) {
+	public static final boolean checkSettingsValidity( final Map< String, Object > settings, final StringBuilder errorHolder )
+	{
 		if (null == settings) {
-			str.append("Settings map is null.\n");
+			errorHolder.append( "Settings map is null.\n" );
 			return false;
 		}
 
 		boolean ok = true;
 		// Linking
-		ok = ok & checkParameter(settings, KEY_LINKING_MAX_DISTANCE, Double.class, str);
-		ok = ok & checkFeatureMap(settings, KEY_LINKING_FEATURE_PENALTIES, str);
+		ok = ok & checkParameter( settings, KEY_LINKING_MAX_DISTANCE, Double.class, errorHolder );
+		ok = ok & checkFeatureMap( settings, KEY_LINKING_FEATURE_PENALTIES, errorHolder );
 		// Gap-closing
-		ok = ok & checkParameter(settings, KEY_ALLOW_GAP_CLOSING, Boolean.class, str);
-		ok = ok & checkParameter(settings, KEY_GAP_CLOSING_MAX_DISTANCE, Double.class, str);
-		ok = ok & checkParameter(settings, KEY_GAP_CLOSING_MAX_FRAME_GAP, Integer.class, str);
-		ok = ok & checkFeatureMap(settings, KEY_GAP_CLOSING_FEATURE_PENALTIES, str);
+		ok = ok & checkParameter( settings, KEY_ALLOW_GAP_CLOSING, Boolean.class, errorHolder );
+		ok = ok & checkParameter( settings, KEY_GAP_CLOSING_MAX_DISTANCE, Double.class, errorHolder );
+		ok = ok & checkParameter( settings, KEY_GAP_CLOSING_MAX_FRAME_GAP, Integer.class, errorHolder );
+		ok = ok & checkFeatureMap( settings, KEY_GAP_CLOSING_FEATURE_PENALTIES, errorHolder );
 		// Splitting
-		ok = ok & checkParameter(settings, KEY_ALLOW_TRACK_SPLITTING, Boolean.class, str);
-		ok = ok & checkParameter(settings, KEY_SPLITTING_MAX_DISTANCE, Double.class, str);
-		ok = ok & checkFeatureMap(settings, KEY_SPLITTING_FEATURE_PENALTIES, str);
+		ok = ok & checkParameter( settings, KEY_ALLOW_TRACK_SPLITTING, Boolean.class, errorHolder );
+		ok = ok & checkParameter( settings, KEY_SPLITTING_MAX_DISTANCE, Double.class, errorHolder );
+		ok = ok & checkFeatureMap( settings, KEY_SPLITTING_FEATURE_PENALTIES, errorHolder );
 		// Merging
-		ok = ok & checkParameter(settings, KEY_ALLOW_TRACK_MERGING, Boolean.class, str);
-		ok = ok & checkParameter(settings, KEY_MERGING_MAX_DISTANCE, Double.class, str);
-		ok = ok & checkFeatureMap(settings, KEY_MERGING_FEATURE_PENALTIES, str);
+		ok = ok & checkParameter( settings, KEY_ALLOW_TRACK_MERGING, Boolean.class, errorHolder );
+		ok = ok & checkParameter( settings, KEY_MERGING_MAX_DISTANCE, Double.class, errorHolder );
+		ok = ok & checkFeatureMap( settings, KEY_MERGING_FEATURE_PENALTIES, errorHolder );
 		// Others
-		ok = ok & checkParameter(settings, KEY_CUTOFF_PERCENTILE, Double.class, str);
-		ok = ok & checkParameter(settings, KEY_ALTERNATIVE_LINKING_COST_FACTOR, Double.class, str);
-		ok = ok & checkParameter(settings, KEY_BLOCKING_VALUE, Double.class, str);
+		ok = ok & checkParameter( settings, KEY_CUTOFF_PERCENTILE, Double.class, errorHolder );
+		ok = ok & checkParameter( settings, KEY_ALTERNATIVE_LINKING_COST_FACTOR, Double.class, errorHolder );
+		ok = ok & checkParameter( settings, KEY_BLOCKING_VALUE, Double.class, errorHolder );
 
 		// Check keys
 		final List<String> mandatoryKeys = new ArrayList<String>();
@@ -255,7 +261,7 @@ public class LAPUtils {
 		optionalKeys.add(KEY_GAP_CLOSING_FEATURE_PENALTIES);
 		optionalKeys.add(KEY_SPLITTING_FEATURE_PENALTIES);
 		optionalKeys.add(KEY_MERGING_FEATURE_PENALTIES);
-		ok = ok & checkMapKeys(settings, mandatoryKeys, optionalKeys, str);
+		ok = ok & checkMapKeys( settings, mandatoryKeys, optionalKeys, errorHolder );
 
 		return ok;
 	}
@@ -264,20 +270,23 @@ public class LAPUtils {
 	/**
 	 * Check the validity of a feature penalty map in a settings map.
 	 * <p>
-	 * A feature penalty setting is valid if it is either <code>null</code> (not here, that is)
-	 * or an actual Map<String, Double>. Then, all its keys must be Strings and all its values
-	 * as well.
+	 * A feature penalty setting is valid if it is either <code>null</code> (not
+	 * here, that is) or an actual <code>Map&lt;String, Double&gt;</code>. Then,
+	 * all its keys must be Strings and all its values as well.
 	 *
-	 * @param map the map to inspect.
-	 * @param key  the key that should map to a feature penalty map.
-	 * @param errorHolder will be appended with an error message.
-	 * @return  true if the feature penalty map is valid.
+	 * @param map
+	 *            the map to inspect.
+	 * @param featurePenaltiesKey
+	 *            the key that should map to a feature penalty map.
+	 * @param errorHolder
+	 *            will be appended with an error message.
+	 * @return true if the feature penalty map is valid.
 	 */
 	@SuppressWarnings("rawtypes")
 	public static final boolean checkFeatureMap(final Map<String, Object> map, final String featurePenaltiesKey, final StringBuilder errorHolder) {
 		final Object obj = map.get(featurePenaltiesKey);
 		if (null == obj) {
-			return true; // NOt here is acceptable
+ return true; // Not here is acceptable
 		}
 		if (!(obj instanceof Map)) {
 			errorHolder.append("Feature penalty map is not of the right class. Expected a Map, got a "+obj.getClass().getName()+".\n");

@@ -1,5 +1,9 @@
 package fiji.plugin.trackmate;
 
+import javax.swing.ImageIcon;
+
+import org.scijava.plugin.SciJavaPlugin;
+
 import fiji.plugin.trackmate.action.TrackMateActionFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
@@ -7,10 +11,6 @@ import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.visualization.ViewFactory;
-
-import javax.swing.ImageIcon;
-
-import org.scijava.plugin.SciJavaPlugin;
 
 /**
  * Interface for TrackMate modules.
@@ -20,7 +20,7 @@ import org.scijava.plugin.SciJavaPlugin;
  * annotate its class with for instance
  *
  * <pre>
- * @Plugin( type = SpotAnalyzerFactory.class, priority = 1d, visible = false )
+ * &#64;Plugin( type = SpotAnalyzerFactory.class, priority = 1d, visible = false )
  * </pre>
  * 
  * This will have a {@link SpotAnalyzerFactory} module registered in TrackMate.
@@ -46,7 +46,7 @@ import org.scijava.plugin.SciJavaPlugin;
  * use actions for TrackMate from the GUI.
  * </ul>
  * 
- * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> 2014
+ * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; 2014
  *
  */
 public interface TrackMateModule extends SciJavaPlugin

@@ -38,7 +38,7 @@ import org.jgrapht.traverse.DepthFirstIterator;
  * depending on the lane they belong to. Each lane's width and color is
  * available to other classes for further exploitation.
  *
- * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> - Mar 2011 - 2012 -
+ * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; - Mar 2011 - 2012 -
  *         2014
  *
  */

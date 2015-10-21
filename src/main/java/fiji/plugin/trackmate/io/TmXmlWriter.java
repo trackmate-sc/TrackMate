@@ -71,23 +71,6 @@ import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_FILTER_COLLECTION_ELEMENT
 import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_ID_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_NAME_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.XML_ATTRIBUTE_TRACKER_NAME;
-import fiji.plugin.trackmate.Dimension;
-import fiji.plugin.trackmate.FeatureModel;
-import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.features.FeatureFilter;
-import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
-import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
-import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
-import fiji.plugin.trackmate.features.track.TrackAnalyzer;
-import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
-import fiji.plugin.trackmate.gui.TrackMateGUIModel;
-import fiji.plugin.trackmate.providers.DetectorProvider;
-import fiji.plugin.trackmate.providers.TrackerProvider;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -107,6 +90,22 @@ import org.jdom2.Element;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import org.jgrapht.graph.DefaultWeightedEdge;
+
+import fiji.plugin.trackmate.Dimension;
+import fiji.plugin.trackmate.FeatureModel;
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.features.FeatureFilter;
+import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
+import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
+import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
+import fiji.plugin.trackmate.features.track.TrackAnalyzer;
+import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
+import fiji.plugin.trackmate.gui.TrackMateGUIModel;
+import fiji.plugin.trackmate.visualization.TrackMateModelView;
 
 public class TmXmlWriter
 {
@@ -159,7 +158,7 @@ public class TmXmlWriter
 	 *
 	 * @see #appendLog(String)
 	 * @see #appendModel(Model)
-	 * @see #appendSettings(Settings, DetectorProvider, TrackerProvider)
+	 * @see #appendSettings(Settings)
 	 */
 	public void writeToFile() throws FileNotFoundException, IOException
 	{

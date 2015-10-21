@@ -18,7 +18,7 @@ import java.awt.Rectangle;
  * only need to recalculate the image bounds to have them scaling with 
  * the cell size.
  *   
- * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> Mar 2011 - 2012
+ * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; Mar 2011 - 2012
  */
 public class mxScaledLabelShape extends mxRectangleShape {
 

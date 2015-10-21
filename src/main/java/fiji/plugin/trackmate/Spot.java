@@ -31,7 +31,7 @@ import net.imglib2.util.Util;
  * later for saving, retrieving and loading. Interfering with this value will
  * predictively cause undesired behavior.
  *
- * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> 2010, 2013
+ * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; 2010, 2013
  *
  */
 public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Comparable< Spot >

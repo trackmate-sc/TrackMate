@@ -3,7 +3,7 @@ package fiji.plugin.trackmate.features;
 /**
  * A helper class to store a feature filter. It is just made of 3 public fields.
  *
- * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> Sep 23, 2010
+ * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; Sep 23, 2010
  *
  */
 public class FeatureFilter

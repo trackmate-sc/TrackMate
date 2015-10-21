@@ -1,10 +1,5 @@
 package fiji.plugin.trackmate.io;
 
-import fiji.plugin.trackmate.Logger.StringBuilderLogger;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -19,16 +14,22 @@ import org.jdom2.input.SAXBuilder;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
+import fiji.plugin.trackmate.Logger.StringBuilderLogger;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotCollection;
+
 /**
- * A reader for the XML files generated in the TrackManager of the ICY software
- * {@linkplain http://icy.bioimageanalysis.org/plugin/Track_Manager}.
+ * A reader for the XML files generated in the TrackManager of the Icy software
+ * <a href=http://icy.bioimageanalysis.org/plugin/Track_Manager>Icy/Track
+ * Manager </a>.
  * <p>
  * The reader requires a calibration s to operate, so as to generate a proper
- * model objects. Indeed, the ICY file format stores the detection coordinates
+ * model objects. Indeed, the Icy file format stores the detection coordinates
  * in pixel coordinates, while TrackMate uses image coordinates. We need a
  * proper calibration for conversion.
  *
- * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> Apr 2014
+ * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; Apr 2014
  */
 public class IcyXmlReader
 {

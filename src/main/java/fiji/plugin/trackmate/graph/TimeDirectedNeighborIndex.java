@@ -1,7 +1,5 @@
 package fiji.plugin.trackmate.graph;
 
-import fiji.plugin.trackmate.Spot;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -21,6 +19,8 @@ import org.jgrapht.event.VertexSetListener;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.util.ModifiableInteger;
 
+import fiji.plugin.trackmate.Spot;
+
 public class TimeDirectedNeighborIndex extends NeighborIndex<Spot, DefaultWeightedEdge>{
 
 
@@ -28,11 +28,11 @@ public class TimeDirectedNeighborIndex extends NeighborIndex<Spot, DefaultWeight
 
 	Map<Spot, Neighbors<Spot, DefaultWeightedEdge>> predecessorMap = new HashMap<Spot, Neighbors<Spot, DefaultWeightedEdge>>();
 	Map<Spot, Neighbors<Spot, DefaultWeightedEdge>> successorMap = new HashMap<Spot, Neighbors<Spot, DefaultWeightedEdge>>();
-	private Graph<Spot, DefaultWeightedEdge> graph;
+	private final Graph<Spot, DefaultWeightedEdge> graph;
 
 	//~ Constructors -----------------------------------------------------------
 
-	public TimeDirectedNeighborIndex(Graph<Spot, DefaultWeightedEdge> g) {
+	public TimeDirectedNeighborIndex(final Graph<Spot, DefaultWeightedEdge> g) {
 		super(g);
 		this.graph = g;
 	}
@@ -51,7 +51,7 @@ public class TimeDirectedNeighborIndex extends NeighborIndex<Spot, DefaultWeight
 	 *
 	 * @return all unique predecessors of the specified vertex
 	 */
-	public Set<Spot> predecessorsOf(Spot v)
+	public Set<Spot> predecessorsOf(final Spot v)
 	{
 		return getPredecessors(v).getNeighbors();
 	}
@@ -62,13 +62,14 @@ public class TimeDirectedNeighborIndex extends NeighborIndex<Spot, DefaultWeight
 	 * in the returned list. Because a list of predecessors can not be
 	 * efficiently maintained, it is reconstructed on every invocation by
 	 * duplicating entries in the neighbor set. It is thus more efficient to use
-	 * {@link #predecessorsOf(Object)} unless duplicate neighbors are required.
+	 * {@link #predecessorsOf(Spot)} unless duplicate neighbors are required.
 	 *
-	 * @param v the vertex whose predecessors are desired
+	 * @param v
+	 *            the vertex whose predecessors are desired
 	 *
 	 * @return all predecessors of the specified vertex
 	 */
-	public List<Spot> predecessorListOf(Spot v)
+	public List<Spot> predecessorListOf(final Spot v)
 	{
 		return getPredecessors(v).getNeighborList();
 	}
@@ -83,7 +84,7 @@ public class TimeDirectedNeighborIndex extends NeighborIndex<Spot, DefaultWeight
 	 *
 	 * @return all unique successors of the specified vertex
 	 */
-	public Set<Spot> successorsOf(Spot v)
+	public Set<Spot> successorsOf(final Spot v)
 	{
 		return getSuccessors(v).getNeighbors();
 	}
@@ -93,14 +94,15 @@ public class TimeDirectedNeighborIndex extends NeighborIndex<Spot, DefaultWeight
 	 * vertex. If the graph is a multigraph, vertices may appear more than once
 	 * in the returned list. Because a list of successors can not be efficiently
 	 * maintained, it is reconstructed on every invocation by duplicating
-	 * entries in the neighbor set. It is thus more efficient to use {@link
-	 * #successorsOf(Object)} unless duplicate neighbors are required.
+	 * entries in the neighbor set. It is thus more efficient to use
+	 * {@link #successorsOf(Spot)} unless duplicate neighbors are required.
 	 *
-	 * @param v the vertex whose successors are desired
+	 * @param v
+	 *            the vertex whose successors are desired
 	 *
 	 * @return all successors of the specified vertex
 	 */
-	public List<Spot> successorListOf(Spot v)
+	public List<Spot> successorListOf(final Spot v)
 	{
 		return getSuccessors(v).getNeighborList();
 	}
@@ -108,11 +110,12 @@ public class TimeDirectedNeighborIndex extends NeighborIndex<Spot, DefaultWeight
 	/**
 	 * @see GraphListener#edgeAdded(GraphEdgeChangeEvent)
 	 */
-	public void edgeAdded(GraphEdgeChangeEvent<Spot, DefaultWeightedEdge> e)
+	@Override
+	public void edgeAdded(final GraphEdgeChangeEvent<Spot, DefaultWeightedEdge> e)
 	{
-		DefaultWeightedEdge edge = e.getEdge();
-		Spot source = graph.getEdgeSource(edge);
-		Spot target = graph.getEdgeTarget(edge);
+		final DefaultWeightedEdge edge = e.getEdge();
+		final Spot source = graph.getEdgeSource(edge);
+		final Spot target = graph.getEdgeTarget(edge);
 
 		// if a map does not already contain an entry,
 		// then skip addNeighbor, since instantiating the map
@@ -134,11 +137,12 @@ public class TimeDirectedNeighborIndex extends NeighborIndex<Spot, DefaultWeight
 	/**
 	 * @see GraphListener#edgeRemoved(GraphEdgeChangeEvent)
 	 */
-	public void edgeRemoved(GraphEdgeChangeEvent<Spot, DefaultWeightedEdge> e)
+	@Override
+	public void edgeRemoved(final GraphEdgeChangeEvent<Spot, DefaultWeightedEdge> e)
 	{
-		DefaultWeightedEdge edge = e.getEdge();
-		Spot source = graph.getEdgeSource(edge);
-		Spot target = graph.getEdgeTarget(edge);
+		final DefaultWeightedEdge edge = e.getEdge();
+		final Spot source = graph.getEdgeSource(edge);
+		final Spot target = graph.getEdgeTarget(edge);
 		if (successorMap.containsKey(source)) {
 			successorMap.get(source).removeNeighbor(target);
 		}
@@ -150,7 +154,8 @@ public class TimeDirectedNeighborIndex extends NeighborIndex<Spot, DefaultWeight
 	/**
 	 * @see VertexSetListener#vertexAdded(GraphVertexChangeEvent)
 	 */
-	public void vertexAdded(GraphVertexChangeEvent<Spot> e)
+	@Override
+	public void vertexAdded(final GraphVertexChangeEvent<Spot> e)
 	{
 		// nothing to cache until there are edges
 	}
@@ -158,21 +163,22 @@ public class TimeDirectedNeighborIndex extends NeighborIndex<Spot, DefaultWeight
 	/**
 	 * @see VertexSetListener#vertexRemoved(GraphVertexChangeEvent)
 	 */
-	public void vertexRemoved(GraphVertexChangeEvent<Spot> e)
+	@Override
+	public void vertexRemoved(final GraphVertexChangeEvent<Spot> e)
 	{
 		predecessorMap.remove(e.getVertex());
 		successorMap.remove(e.getVertex());
 	}
 
-	private Neighbors<Spot, DefaultWeightedEdge> getPredecessors(Spot v)
+	private Neighbors<Spot, DefaultWeightedEdge> getPredecessors(final Spot v)
 	{
 		Neighbors<Spot, DefaultWeightedEdge> neighbors = predecessorMap.get(v);
 		if (neighbors == null) {
-			List<Spot> nl = Graphs.neighborListOf(graph, v);
-			List<Spot> bnl = new ArrayList<Spot>();
-			int ts = v.getFeature(Spot.FRAME).intValue();
-			for (Spot spot : nl) {
-				int tt = spot.getFeature(Spot.FRAME).intValue();
+			final List<Spot> nl = Graphs.neighborListOf(graph, v);
+			final List<Spot> bnl = new ArrayList<Spot>();
+			final int ts = v.getFeature(Spot.FRAME).intValue();
+			for (final Spot spot : nl) {
+				final int tt = spot.getFeature(Spot.FRAME).intValue();
 				if (tt < ts) {
 					bnl.add(spot);
 				}
@@ -183,15 +189,15 @@ public class TimeDirectedNeighborIndex extends NeighborIndex<Spot, DefaultWeight
 		return neighbors;
 	}
 
-	private Neighbors<Spot, DefaultWeightedEdge> getSuccessors(Spot v)
+	private Neighbors<Spot, DefaultWeightedEdge> getSuccessors(final Spot v)
 	{
 		Neighbors<Spot, DefaultWeightedEdge> neighbors = successorMap.get(v);
 		if (neighbors == null) {
-			List<Spot> nl = Graphs.neighborListOf(graph, v);
-			List<Spot> bnl = new ArrayList<Spot>();
-			int ts = v.getFeature(Spot.FRAME).intValue();
-			for (Spot spot : nl) {
-				int tt = spot.getFeature(Spot.FRAME).intValue();
+			final List<Spot> nl = Graphs.neighborListOf(graph, v);
+			final List<Spot> bnl = new ArrayList<Spot>();
+			final int ts = v.getFeature(Spot.FRAME).intValue();
+			for (final Spot spot : nl) {
+				final int tt = spot.getFeature(Spot.FRAME).intValue();
 				if (tt > ts) {
 					bnl.add(spot);
 				}
@@ -211,24 +217,24 @@ public class TimeDirectedNeighborIndex extends NeighborIndex<Spot, DefaultWeight
      */
     static class Neighbors<V, E>
     {
-        private Map<V, ModifiableInteger> neighborCounts =
+        private final Map<V, ModifiableInteger> neighborCounts =
             new LinkedHashMap<V, ModifiableInteger>();
 
         // TODO could eventually make neighborSet modifiable, resulting
         // in edge removals from the graph
-        private Set<V> neighborSet =
+        private final Set<V> neighborSet =
             Collections.unmodifiableSet(
                 neighborCounts.keySet());
 
-        public Neighbors(V v, Collection<V> neighbors)
+        public Neighbors(final V v, final Collection<V> neighbors)
         {
             // add all current neighbors
-            for (V neighbor : neighbors) {
+            for (final V neighbor : neighbors) {
                 addNeighbor(neighbor);
             }
         }
 
-        public void addNeighbor(V v)
+        public void addNeighbor(final V v)
         {
             ModifiableInteger count = neighborCounts.get(v);
             if (count == null) {
@@ -239,9 +245,9 @@ public class TimeDirectedNeighborIndex extends NeighborIndex<Spot, DefaultWeight
             }
         }
 
-        public void removeNeighbor(V v)
+        public void removeNeighbor(final V v)
         {
-            ModifiableInteger count = neighborCounts.get(v);
+            final ModifiableInteger count = neighborCounts.get(v);
             if (count == null) {
                 throw new IllegalArgumentException(
                     "Attempting to remove a neighbor that wasn't present");
@@ -260,13 +266,13 @@ public class TimeDirectedNeighborIndex extends NeighborIndex<Spot, DefaultWeight
 
         public List<V> getNeighborList()
         {
-            List<V> neighbors = new ArrayList<V>();
+            final List<V> neighbors = new ArrayList<V>();
             for (
-                Map.Entry<V, ModifiableInteger> entry
+                final Map.Entry<V, ModifiableInteger> entry
                 : neighborCounts.entrySet())
             {
-                V v = entry.getKey();
-                int count = entry.getValue().intValue();
+                final V v = entry.getKey();
+                final int count = entry.getValue().intValue();
                 for (int i = 0; i < count; i++) {
                     neighbors.add(v);
                 }

@@ -75,7 +75,7 @@ import fiji.util.NumberParser;
  * A configuration panel used to tune the aspect of spots and tracks in multiple
  * {@link AbstractTrackMateModelView}. This GUI takes the role of a controller.
  *
- * @author Jean-Yves Tinevez <tinevez@pasteur.fr> - 2010 - 2011
+ * @author Jean-Yves Tinevez &lt;tinevez@pasteur.fr&gt; - 2010 - 2011
  */
 public class ConfigureViewsPanel extends ActionListenablePanel
 {

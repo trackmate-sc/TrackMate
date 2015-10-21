@@ -1153,7 +1153,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 	 */
 
 	/**
-	 * Toggle whether drag-&-drop linking is allowed.
+	 * Toggles whether drag-&amp;-drop linking is allowed.
 	 *
 	 * @return the current settings value, after toggling.
 	 */
@@ -1165,7 +1165,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 	}
 
 	/**
-	 * Toggle whether thumbnail capture is enabled.
+	 * Toggles whether thumbnail capture is enabled.
 	 *
 	 * @return the current settings value, after toggling.
 	 */

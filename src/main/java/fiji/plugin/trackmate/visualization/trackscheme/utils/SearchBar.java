@@ -1,10 +1,5 @@
 package fiji.plugin.trackmate.visualization.trackscheme.utils;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -21,6 +16,11 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.JTextField;
+
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.gui.TrackMateWizard;
+import fiji.plugin.trackmate.visualization.TrackMateModelView;
 
 @SuppressWarnings( "unchecked" )
 public class SearchBar extends JTextField
@@ -49,7 +49,10 @@ public class SearchBar extends JTextField
 	/**
 	 * Creates new form SearchBox
 	 * 
-	 * @param text
+	 * @param model
+	 *            the model to search in.
+	 * @param view
+	 *            the view to update when a spot is found.
 	 */
 	public SearchBar( final Model model, final TrackMateModelView view )
 	{

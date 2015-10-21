@@ -51,6 +51,22 @@ import static fiji.plugin.trackmate.io.TmXmlKeys_v20.SPOT_NAME_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.io.TmXmlKeys_v20.TRACKER_SETTINGS_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys_v20.TRACK_FILTER_COLLECTION_ELEMENT_KEY;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.XML_ATTRIBUTE_TRACKER_NAME;
+import ij.IJ;
+import ij.ImagePlus;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.jdom2.Attribute;
+import org.jdom2.DataConversionException;
+import org.jdom2.Element;
+import org.jgrapht.graph.SimpleDirectedWeightedGraph;
+
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
@@ -85,21 +101,6 @@ import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
-import ij.IJ;
-import ij.ImagePlus;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.jdom2.Attribute;
-import org.jdom2.DataConversionException;
-import org.jdom2.Element;
-import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 
 public class TmXmlReader_v20 extends TmXmlReader {
 
@@ -120,7 +121,7 @@ public class TmXmlReader_v20 extends TmXmlReader {
 
 	/**
 	 * @return the log text saved in the specified file, or <code>null</code> if
-	 *         log text was not saved. Must be called after {@link #process()}.
+	 *         log text was not saved.
 	 */
 	public String getLogText() {
 		final Element logElement = root.getChild(LOG_ELEMENT_KEY);

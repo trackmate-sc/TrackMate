@@ -1,12 +1,11 @@
 package fiji.plugin.trackmate.features.track;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.features.FeatureAnalyzer;
-
 import java.util.Collection;
 
 import net.imglib2.algorithm.Benchmark;
 import net.imglib2.algorithm.MultiThreaded;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.features.FeatureAnalyzer;
 
 /**
  * Mother interface for the classes that can compute the feature of tracks.
@@ -27,8 +26,8 @@ import net.imglib2.algorithm.MultiThreaded;
  * (<i>e.g.</i> adding a lonely spot, or a new track is likely not to affect all
  * tracks in some case).
  * <p>
- * So the {@link #process(Collection)} will be called selectively on new or
- * modified tracks every time a change happens. It will be called from the
+ * So the {@link #process(Collection, Model)} will be called selectively on new
+ * or modified tracks every time a change happens. It will be called from the
  * {@link Model} after a {@link Model#endUpdate()}, before any listener gets
  * notified.
  *

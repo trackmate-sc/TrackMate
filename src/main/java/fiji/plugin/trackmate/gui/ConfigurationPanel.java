@@ -11,7 +11,7 @@ import fiji.plugin.trackmate.tracking.SpotTracker;
  * The mother class for all the configuration panels that can configure a {@link SpotDetectorFactory},
  * a {@link SpotTracker}, ...
  * 
- * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> 2011 - 2012
+ * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; 2011 - 2012
  *
  */
 public abstract class ConfigurationPanel extends ActionListenablePanel {

@@ -34,7 +34,7 @@ import javax.swing.SwingConstants;
  * A simple Panel to allow the selection of a X key amongst an enum, and of multiple Y keys
  * from the same enum. This is intended as a GUI panel to prepare for the plotting of data.
  * 
- * @author Jean-Yves Tinevez <tinevez@pasteur.fr> - January 2011 - 2012
+ * @author Jean-Yves Tinevez &lt;tinevez@pasteur.fr&gt; - January 2011 - 2012
  */
 public class FeaturePlotSelectionPanel extends ActionListenablePanel {
 

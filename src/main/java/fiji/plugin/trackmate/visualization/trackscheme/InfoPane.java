@@ -46,7 +46,6 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionChangeEvent;
 import fiji.plugin.trackmate.SelectionChangeListener;
 import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.features.SpotFeatureGrapher;
 import fiji.plugin.trackmate.util.OnRequestUpdater;
@@ -91,9 +90,9 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 	 *
 	 * @param model
 	 *            the {@link Model} from which the spot collection is taken.
-	 * @param settings
-	 *            the {@link Settings} object we use to retrieve spot feature
-	 *            names.
+	 * @param selectionModel
+	 *            the {@link SelectionModel} from which we read what to show in
+	 *            the table.
 	 */
 	public InfoPane( final Model model, final SelectionModel selectionModel )
 	{

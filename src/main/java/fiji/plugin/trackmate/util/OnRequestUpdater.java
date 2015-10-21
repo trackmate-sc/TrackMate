@@ -8,7 +8,6 @@ package fiji.plugin.trackmate.util;
  * Its main author is Albert Cardona, and I transcribe here a mail where he
  * explained to me (JYT) the concept of the updater:
  * <p>
- * <i>
  * The logic is the following:
  * <p>
  * The thread has an infinite loop in its run method, so that it never dies
@@ -43,7 +42,6 @@ package fiji.plugin.trackmate.util;
  * once for every call to doUpdate(), but likely much less times: only as many
  * as can be executed (and need be executed), and not more.
  * <p>
- * </i>
  * In a later mail, Johannes Schindelin explained to me that this solution was 
  * not optimal, and that for general heavy use refreshing, another solution must
  * be sought. In the meantime, it is recommended that this class is used for
@@ -83,6 +81,7 @@ public class OnRequestUpdater extends Thread {
 		}
 	}
 
+	@Override
 	public void run() {
 		while (!isInterrupted()) {
 			try {
@@ -100,7 +99,7 @@ public class OnRequestUpdater extends Thread {
 					}
 					// else loop through to update again
 				}
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				e.printStackTrace();
 			}
 		}

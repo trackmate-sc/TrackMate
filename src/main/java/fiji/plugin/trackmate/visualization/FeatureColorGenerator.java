@@ -14,7 +14,9 @@ public interface FeatureColorGenerator< K > extends MinMaxAdjustable
 
 	/**
 	 * Returns a color for the given object.
-	 * @param the object to color.
+	 * 
+	 * @param obj
+	 *            the object to color.
 	 * @return a color for this object.
 	 */
 	public Color color( K obj );

@@ -25,7 +25,7 @@ import fiji.plugin.trackmate.visualization.TrackMateModelView;
  * A GUI for TrackMate, strongly inspired from the spots detection GUI of the
  * Imaris® software from <a href="http://www.bitplane.com/">Bitplane</a>.
  * 
- * @author Jean-Yves Tinevez <tinevez@pasteur.fr> - September 2010 - 2014
+ * @author Jean-Yves Tinevez &lt;tinevez@pasteur.fr&gt; - September 2010 - 2014
  */
 public class TrackMateWizard extends JFrame implements ActionListener
 {
@@ -189,16 +189,14 @@ public class TrackMateWizard extends JFrame implements ActionListener
 	}
 
 	/**
-	 * Sets the current panel to that identified by the String passed in. It
-	 * must be the {@link WizardPanelDescriptor} string ID, not the component
-	 * string ID.
-	 *
-	 * @param descriptorID
-	 *            String-based panel identifier
+	 * Sets the current panel to that identified by the WizardPanelDescriptor
+	 * passed in.
+	 * 
+	 * @param descriptor
+	 *            the descriptor to show.
 	 */
 	public void show( final WizardPanelDescriptor descriptor )
 	{
-
 		SwingUtilities.invokeLater( new Runnable()
 		{
 

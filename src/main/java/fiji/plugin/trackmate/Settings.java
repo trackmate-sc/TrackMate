@@ -1,5 +1,16 @@
 package fiji.plugin.trackmate;
 
+import ij.ImagePlus;
+import ij.gui.Roi;
+import ij.io.FileInfo;
+
+import java.awt.Polygon;
+import java.awt.Rectangle;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import fiji.plugin.trackmate.detection.DetectorKeys;
 import fiji.plugin.trackmate.detection.SpotDetector;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
@@ -13,16 +24,6 @@ import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import fiji.plugin.trackmate.tracking.TrackerKeys;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
-import ij.ImagePlus;
-import ij.gui.Roi;
-import ij.io.FileInfo;
-
-import java.awt.Polygon;
-import java.awt.Rectangle;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * This class is used to store user settings for the {@link TrackMate}
@@ -116,8 +117,7 @@ public class Settings
 	// Filters
 
 	/**
-	 * The feature filter list that is used to generate {@link #filteredSpots}
-	 * from {@link #spots}.
+	 * The feature filter list.
 	 */
 	protected List< FeatureFilter > spotFilters = new ArrayList< FeatureFilter >();
 
@@ -641,8 +641,7 @@ public class Settings
 	 */
 
 	/**
-	 * Add a filter to the list of spot filters to deal with when executing
-	 * {@link #execFiltering()}.
+	 * Add a filter to the list of spot filters.
 	 */
 	public void addSpotFilter( final FeatureFilter filter )
 	{

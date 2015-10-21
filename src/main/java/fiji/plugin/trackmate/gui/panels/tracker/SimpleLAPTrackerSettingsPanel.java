@@ -46,7 +46,7 @@ import fiji.util.NumberParser;
 /**
  * A simplified configuration panel for the {@link LAPTracker}.
  * 
- * @author Jean-Yves Tinevez <tinevez@pasteur.fr> - 2010-2011
+ * @author Jean-Yves Tinevez &lt;tinevez@pasteur.fr&gt; - 2010-2011
  */
 public class SimpleLAPTrackerSettingsPanel extends ConfigurationPanel {
 

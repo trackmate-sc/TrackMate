@@ -10,7 +10,7 @@ import org.jfree.util.PublicCloneable;
 /**
  * This class implements a {@link PaintScale} that generate colors interpolated 
  * within a list of given color, using a linear scale.
- * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> - Sept 2010
+ * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; - Sept 2010
  */
 public class InterpolatePaintScale implements PaintScale, PublicCloneable, Serializable {
 

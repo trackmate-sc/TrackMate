@@ -16,7 +16,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
  * edge of a TrackMate model. An edge, or a link, is the single link that exists
  * between two spots after tracking.
  *
- * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com>
+ * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt;
  */
 public interface EdgeAnalyzer extends Benchmark, FeatureAnalyzer, MultiThreaded
 {

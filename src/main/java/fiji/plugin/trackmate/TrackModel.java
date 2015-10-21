@@ -1,13 +1,5 @@
 package fiji.plugin.trackmate;
 
-import fiji.plugin.trackmate.graph.Function1;
-import fiji.plugin.trackmate.graph.SortedDepthFirstIterator;
-import fiji.plugin.trackmate.graph.TimeDirectedDepthFirstIterator;
-import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
-import fiji.plugin.trackmate.graph.TimeDirectedSortedDepthFirstIterator;
-import fiji.plugin.trackmate.util.AlphanumComparator;
-import fiji.plugin.trackmate.util.TMUtils;
-
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -38,6 +30,14 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.GraphIterator;
+
+import fiji.plugin.trackmate.graph.Function1;
+import fiji.plugin.trackmate.graph.SortedDepthFirstIterator;
+import fiji.plugin.trackmate.graph.TimeDirectedDepthFirstIterator;
+import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
+import fiji.plugin.trackmate.graph.TimeDirectedSortedDepthFirstIterator;
+import fiji.plugin.trackmate.util.AlphanumComparator;
+import fiji.plugin.trackmate.util.TMUtils;
 
 /**
  * A component of {@link Model} specialized for tracks
@@ -582,9 +582,10 @@ public class TrackModel
 	/**
 	 * Returns the track ID the specified spot belong to, or <code>null</code>
 	 * if the specified spot cannot be found in this model.
-	 *
-	 * @param edge
+	 * 
+	 * @param spot
 	 *            the spot to search for.
+	 *
 	 * @return the track ID it belongs to.
 	 */
 	public Integer trackIDOf( final Spot spot )
@@ -869,7 +870,7 @@ public class TrackModel
 	 * {@link TrackModel#edgesAdded} and {@link TrackModel#edgesRemoved} fields,
 	 * that will be used to notify listeners of the model.
 	 *
-	 * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> Aug 12, 2011
+	 * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; Aug 12, 2011
 	 *
 	 */
 	private class MyGraphListener implements GraphListener< Spot, DefaultWeightedEdge >

@@ -28,7 +28,7 @@ import fiji.plugin.trackmate.util.SpotNeighborhoodCursor;
  * <u>Important</u>: this analyzer relies on some results provided by the
  * {@link SpotIntensityAnalyzer} analyzer. Thus, it <b>must</b> be run after it.
  * 
- * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> 2011 - 2012
+ * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; 2011 - 2012
  */
 @SuppressWarnings( "deprecation" )
 public class SpotContrastAndSNRAnalyzer< T extends RealType< T >> extends IndependentSpotFeatureAnalyzer< T >

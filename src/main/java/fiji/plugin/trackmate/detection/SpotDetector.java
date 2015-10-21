@@ -19,7 +19,7 @@ import net.imglib2.type.numeric.RealType;
  * concrete implementation per thread, to process multiple frames
  * simultaneously.
  * 
- * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> 2010 - 2012
+ * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; 2010 - 2012
  * 
  */
 public interface SpotDetector< T extends RealType< T > & NativeType< T >> extends OutputAlgorithm< List< Spot >>, Benchmark

@@ -1,7 +1,5 @@
 package fiji.plugin.trackmate;
 
-import fiji.plugin.trackmate.features.FeatureFilter;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -9,6 +7,8 @@ import java.util.Set;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
+
+import fiji.plugin.trackmate.features.FeatureFilter;
 
 /**
  * <h1>The model for the data managed by TrackMate trackmate.</h1>
@@ -19,7 +19,7 @@ import org.jgrapht.graph.SimpleWeightedGraph;
  * accesses to the data, some specialized methods had to be created, hopefully
  * built in coherent sets.
  *
- * @author Jean-Yves Tinevez <tinevez@pasteur.fr> - 2010-2013
+ * @author Jean-Yves Tinevez &lt;tinevez@pasteur.fr&gt; - 2010-2013
  *
  */
 public class Model
@@ -464,9 +464,6 @@ public class Model
 	 *            the frame the spot originated from
 	 * @param toFrame
 	 *            the destination frame
-	 * @param doNotify
-	 *            if false, {@link ModelChangeListener}s will not be notified of
-	 *            this change
 	 * @return the spot that was moved, or <code>null</code> if it could not be
 	 *         found in the source frame
 	 */

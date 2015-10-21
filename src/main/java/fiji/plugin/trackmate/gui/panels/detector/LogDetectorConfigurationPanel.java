@@ -47,7 +47,7 @@ import fiji.util.NumberParser;
 /**
  * Configuration panel for spot detectors based on LoG detector.
  * 
- * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> 2010 - 2014
+ * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; 2010 - 2014
  */
 public class LogDetectorConfigurationPanel extends ConfigurationPanel
 {

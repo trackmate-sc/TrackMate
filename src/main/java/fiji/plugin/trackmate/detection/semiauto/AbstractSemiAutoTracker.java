@@ -24,7 +24,7 @@ import fiji.plugin.trackmate.detection.SpotDetector;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 
 /**
- * A class made to perform semi-automated tracking of spots in TrackMate &
+ * A class made to perform semi-automated tracking of spots in TrackMate &amp;
  * friends
  * <p>
  * The user has to select one spot, one a meaningful location. The spot location

@@ -110,20 +110,6 @@ import fiji.plugin.trackmate.tracking.oldlap.hungarian.HungarianAlgorithm;
  * To use the default cost matrices/function, use the default constructor, and
  * simply call {@link #process()}.
  *
- * <p>
- * If you wish to using your specify your own cost matrices:
- *
- * <ol>
- * <li>Instantiate this class normally.
- * <li>Set the linking cost matrix using {@link #setLinkingCosts(ArrayList)}.</li>
- * <li>Execute {@link #linkObjectsToTrackSegments()}.</li>
- * <li>Get the track segments created using {@link #getTrackSegments()}.</li>
- * <li>Create the segment cost matrix.
- * <li>Set the segment cost matrix using {@link #setSegmentCosts(double[][])}.</li>
- * <li>Run {@link #linkTrackSegmentsToFinalTracks(ArrayList)} to compute the
- * final tracks.</li>
- * </ol>
- *
  * @author Nicholas Perry
  */
 @SuppressWarnings( "deprecation" )
@@ -178,7 +164,7 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 	protected int[] splittingMiddlePointsSegmentIndices;
 	/** The graph this tracker will use to link spots. */
 	protected SimpleWeightedGraph<Spot, DefaultWeightedEdge> graph;
-	/** The Spot collection that will be linked in the {@link #graph.} */
+	/** The Spot collection that will be linked in the graph. */
 	protected final SpotCollection spots;
 	/** The settings map that configures this tracker. */
 	protected final Map< String, Object > settings;
@@ -254,8 +240,7 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 	/**
 	 * Returns the track segments computed from step (1).
 	 *
-	 * @return Returns a reference to the track segments, or null if
-	 *         {@link #computeTrackSegments()} hasn't been executed.
+	 * @return the track segments.
 	 */
 	public List<SortedSet<Spot>> getTrackSegments() {
 		return trackSegments;
@@ -408,10 +393,8 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 	/**
 	 * Creates the final tracks computed from step 2.
 	 *
-	 * @see TrackSegmentCostMatrixCreator#getMiddlePoints()
-	 * @param middlePoints
-	 *            A list of the middle points of the track segments.
-	 * @return True if execution completes successfully, false otherwise.
+	 * @return <code>true</code> if execution completes successfully,
+	 *         <code>false</code> otherwise.
 	 */
 	public boolean linkTrackSegmentsToFinalTracks() {
 		final double blockingValue = (Double) settings.get(KEY_BLOCKING_VALUE);
@@ -450,11 +433,7 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 	 * <p>
 	 * For each frame, compute the cost matrix to link each spot to another spot
 	 * in the next frame. Then compute the optimal track segments using this
-	 * cost matrix. Finally, update the {@link #trackGraph} field with found
-	 * links.
-	 *
-	 * @see LAPTracker#createFrameToFrameLinkingCostMatrix(List, List,
-	 *      TrackerSettings)
+	 * cost matrix. Finally, update the graph with found links.
 	 */
 	public boolean solveLAPForTrackSegments() {
 		final double blockingValue = (Double) settings.get(KEY_BLOCKING_VALUE);

@@ -108,7 +108,7 @@ public class TrackSchemeActions {
 	/**
 	 * Centers the view to the first cell in selection.
 	 * 
-	 * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> Sep 12, 2013
+	 * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; Sep 12, 2013
 	 * 
 	 */
 	public static class HomeAction extends AbstractAction {
@@ -161,7 +161,7 @@ public class TrackSchemeActions {
 	/**
 	 * Centers the view to the last cell in selection, sorted by frame number.
 	 * 
-	 * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> Sep 12, 2013
+	 * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; Sep 12, 2013
 	 * 
 	 */
 	public static class EndAction extends AbstractAction {

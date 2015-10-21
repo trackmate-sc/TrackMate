@@ -21,7 +21,7 @@ import javax.swing.text.StyleContext;
 
 /**
  * A panel using s {@link JTextPane} to log events.
- * @author Jean-Yves Tinevez <tinevez@pasteur.fr> - September 2010 - January 2011.
+ * @author Jean-Yves Tinevez &lt;tinevez@pasteur.fr&gt; - September 2010 - January 2011.
  */
 public class LogPanel extends ActionListenablePanel {
 

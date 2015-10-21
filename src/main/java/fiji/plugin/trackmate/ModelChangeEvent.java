@@ -68,13 +68,15 @@ public class ModelChangeEvent extends EventObject {
 	 * visibility changed.
 	 */
 	public static final int 	TRACKS_VISIBILITY_CHANGED = 7;
+	
 	/**
-	 * Event type indicating that model was modified,
-	 * by adding, removing or changing the feature of some spots, and/or
-	 * adding or removing edges in the tracks.
-	 * Content of the modification can be accessed by {@link #getSpots()},
-	 * {@link #getSpotFlags()}, {@link #getFromFrame()} and {@link #getToFrame()},
-	 * and for the tracks: {@link #getEdges()} and {@link #getEdgeFlags()}.
+	 * Event type indicating that model was modified, by adding, removing or
+	 * changing the feature of some spots, and/or adding or removing edges in
+	 * the tracks. Content of the modification can be accessed by
+	 * {@link #getSpots()}, {@link #getSpotFlag(Spot)},
+	 * {@link #getFromFrame(Spot)} and {@link #getToFrame(Spot)}, and for the
+	 * tracks: {@link #getEdges()} and {@link #getEdgeFlag(DefaultWeightedEdge)}
+	 * .
 	 */
 	public static final int 	MODEL_MODIFIED = 8;
 

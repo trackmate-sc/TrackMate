@@ -24,7 +24,7 @@ import java.util.List;
  * <p>
  * This matrix follow the row compressed storage convention, taken from the
  * Volgenant paper: <code>Volgenant. Linear and semi-assignment problems: A core
- * oriented approach. Computers & Operations Research (1996) vol. 23 (10) pp.
+ * oriented approach. Computers &amp; Operations Research (1996) vol. 23 (10) pp.
  * 917-932</code>
  * 
  * @author Jean-Yves Tinevez - 2014

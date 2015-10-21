@@ -27,7 +27,7 @@ import fiji.plugin.trackmate.util.TMUtils;
  * collection) from its coordinates and an {@link ImagePlus} that contain the
  * pixel data.
  *
- * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> - Dec 2010 - 2014
+ * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; - Dec 2010 - 2014
  */
 @SuppressWarnings( "deprecation" )
 public class SpotIconGrabber< T extends RealType< T >>

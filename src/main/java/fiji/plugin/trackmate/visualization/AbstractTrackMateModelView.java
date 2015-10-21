@@ -15,7 +15,7 @@ import java.util.Map;
  * tracks on top of the image data.
  * <p>
  *
- * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> Jan 2011
+ * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; Jan 2011
  */
 public abstract class AbstractTrackMateModelView implements SelectionChangeListener, TrackMateModelView, ModelChangeListener
 {

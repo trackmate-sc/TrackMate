@@ -25,7 +25,7 @@ public class DetectorKeys
 	 * <li> {@link LogDetector}
 	 * <li> {@link DogDetector}
 	 * <li> {@link DownsampleLogDetector}
-	 * <ul>
+	 * </ul>
 	 */
 	public static final String KEY_TARGET_CHANNEL = "TARGET_CHANNEL";
 
@@ -42,7 +42,7 @@ public class DetectorKeys
 	 * <li> {@link DogDetector}
 	 * <li> {@link DownsampleLogDetector}
 	 * <li> {@link ManualDetectorFactory}
-	 * <ul>
+	 * </ul>
 	 */
 	public static final String KEY_RADIUS = "RADIUS";
 

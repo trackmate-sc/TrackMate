@@ -3,9 +3,9 @@ package fiji.plugin.trackmate.tracking.oldlap.hungarian;
 /**
  * Implements the LAPJV algorithm.
  * <p>
- * Based on: Jonker, R., & Volgenant, A. (1987). <i>A shortest augmenting path
- * algorithm for dense and sparse linear assignment problems</i>. Computing,
- * 38(4), 325-340.
+ * Based on: Jonker, R., &amp; Volgenant, A. (1987). <i>A shortest augmenting
+ * path algorithm for dense and sparse linear assignment problems</i>.
+ * Computing, 38(4), 325-340.
  * </p>
  * 
  * @author Johannes Schindelin
@@ -13,17 +13,18 @@ package fiji.plugin.trackmate.tracking.oldlap.hungarian;
 
 public class JonkerVolgenantAlgorithm implements AssignmentAlgorithm
 {
-	public int[][] computeAssignments( double[][] costMatrix )
+	@Override
+	public int[][] computeAssignments( final double[][] costMatrix )
 	{
-		int n = costMatrix.length;
-		double[] v = new double[ n ];
+		final int n = costMatrix.length;
+		final double[] v = new double[ n ];
 
 		// x and y contain the row/column indexes *plus 1* so that
 		// x[column] == 0 means it is unassigned
-		int[] x = new int[ n ];
-		int[] y = new int[ n ];
+		final int[] x = new int[ n ];
+		final int[] y = new int[ n ];
 
-		int[] col = new int[ n ];
+		final int[] col = new int[ n ];
 
 		// initialization
 		// step 1: column reduction
@@ -58,7 +59,7 @@ public class JonkerVolgenantAlgorithm implements AssignmentAlgorithm
 
 		// step 2: reduction transfer
 		int f = 0;
-		int[] free = new int[ n ];
+		final int[] free = new int[ n ];
 		for ( int i = 0; i < n; i++ )
 		{
 			if ( x[ i ] == 0 )
@@ -75,7 +76,7 @@ public class JonkerVolgenantAlgorithm implements AssignmentAlgorithm
 			else
 			{
 				// reduction transfer from assigned row
-				int j1 = x[ i ] - 1;
+				final int j1 = x[ i ] - 1;
 				double min = Double.MAX_VALUE;
 				for ( int j = 0; j < n; j++ )
 				{
@@ -93,7 +94,7 @@ public class JonkerVolgenantAlgorithm implements AssignmentAlgorithm
 
 		if ( f == 0 )
 		{
-			int[][] solution = new int[ n ][ 2 ];
+			final int[][] solution = new int[ n ][ 2 ];
 			for ( int i = 0; i < n; i++ )
 			{
 				solution[ i ][ 0 ] = i;
@@ -107,17 +108,17 @@ public class JonkerVolgenantAlgorithm implements AssignmentAlgorithm
 		for ( int count = 0; count < 2; count++ )
 		{
 			int k = 0;
-			int f0 = f;
+			final int f0 = f;
 			f = 0;
 			while ( k < f0 )
 			{
-				int i = free[ k++ ];
+				final int i = free[ k++ ];
 				double v0 = costMatrix[ i ][ 0 ] - v[ 0 ];
 				int j0 = 0, j1 = -1;
 				double vj = Double.MAX_VALUE;
 				for ( int j = 1; j < n; j++ )
 				{
-					double h = costMatrix[ i ][ j ] - v[ j ];
+					final double h = costMatrix[ i ][ j ] - v[ j ];
 					if ( h < vj )
 					{
 						if ( h > v0 )
@@ -164,12 +165,13 @@ public class JonkerVolgenantAlgorithm implements AssignmentAlgorithm
 		}
 
 		// augmentation
-		int f0 = f;
-		double[] d = new double[ n ];
-		int[] pred = new int[ n ];
+		final int f0 = f;
+		final double[] d = new double[ n ];
+		final int[] pred = new int[ n ];
 		for ( f = 0; f < f0; f++ )
 		{
-			int i1 = free[ f ], low = 0, up = 0;
+			final int i1 = free[ f ];
+			int low = 0, up = 0;
 			// initialize d- and pred-array
 			for ( int j = 0; j < n; j++ )
 			{
@@ -189,7 +191,7 @@ public class JonkerVolgenantAlgorithm implements AssignmentAlgorithm
 					for ( int k = up; k < n; k++ )
 					{
 						j = col[ k ];
-						double h = d[ j ];
+						final double h = d[ j ];
 						if ( h <= min )
 						{
 							if ( h < min )
@@ -213,13 +215,13 @@ public class JonkerVolgenantAlgorithm implements AssignmentAlgorithm
 				// scan a row
 				do
 				{
-					int j1 = col[ low++ ];
+					final int j1 = col[ low++ ];
 					i = y[ j1 ] - 1;
-					double u1 = costMatrix[ i ][ j1 ] - v[ j1 ] - min;
+					final double u1 = costMatrix[ i ][ j1 ] - v[ j1 ] - min;
 					for ( int k = up; k < n; k++ )
 					{
 						j = col[ k ];
-						double h = costMatrix[ i ][ j ] - v[ j ] - u1;
+						final double h = costMatrix[ i ][ j ] - v[ j ] - u1;
 						if ( h < d[ j ] )
 						{
 							d[ j ] = h;
@@ -243,7 +245,7 @@ public class JonkerVolgenantAlgorithm implements AssignmentAlgorithm
 			// updating of column pieces
 			for ( int k = 0; k < last; k++ )
 			{
-				int j0 = col[ k ];
+				final int j0 = col[ k ];
 				v[ j0 ] += d[ j0 ] - min;
 			}
 
@@ -252,14 +254,14 @@ public class JonkerVolgenantAlgorithm implements AssignmentAlgorithm
 			{
 				i = pred[ j ];
 				y[ j ] = i + 1;
-				int k = j;
+				final int k = j;
 				j = x[ i ] - 1;
 				x[ i ] = k + 1;
 			}
 			while ( i1 != i );
 		}
 
-		int[][] solution = new int[ n ][ 2 ];
+		final int[][] solution = new int[ n ][ 2 ];
 		for ( int i = 0; i < n; i++ )
 		{
 			solution[ i ][ 0 ] = i;

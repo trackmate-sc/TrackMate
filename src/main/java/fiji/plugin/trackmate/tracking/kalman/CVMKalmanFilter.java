@@ -72,9 +72,8 @@ public class CVMKalmanFilter
 	 * @param velocityProcessStd
 	 *            the std of the additive white gaussian noise affecting the
 	 *            <b>velocity</b> evolution. Careful, we expect it to be in
-	 *            units of
-	 *            <code>length/frame<code>. Large values means that the velocity
-	 *            undergoes heavy fluctuations.
+	 *            units of <code>length/frame</code>. Large values means that
+	 *            the velocity undergoes heavy fluctuations.
 	 * @param positionMeasurementStd
 	 *            the std of the additive white gaussian noise affecting the
 	 *            position <b>measurement</b>. Large values means that the

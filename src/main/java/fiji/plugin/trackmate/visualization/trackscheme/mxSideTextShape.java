@@ -20,7 +20,7 @@ import java.util.Map;
 /**
  * A text shape that draws edge label along the edge line and parallel to it.
  * Works only if the chosen edge style is {@link mxConnectorShape}.
- * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> Jun 30, 2011
+ * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; Jun 30, 2011
  *
  */
 public class mxSideTextShape extends mxDefaultTextShape {

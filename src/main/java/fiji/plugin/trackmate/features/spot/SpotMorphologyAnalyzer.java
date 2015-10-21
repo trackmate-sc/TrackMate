@@ -48,30 +48,33 @@ import fiji.plugin.trackmate.util.SpotNeighborhoodCursor;
  * always 0, the THETA angles are 0, and ELLIPSOIDFIT_AXISPHI_B and
  * ELLIPSOIDFIT_AXISPHI_C differ by π/2.
  * <p>
- * From the semi-axis length, a morphology index is computed, echoed in the
- * {@link SpotFeature#MORPHOLOGY} feature. Spots are classified according to the
- * shape of their most-resembling ellipsoid. We look for equality between
- * semi-axes, with a certain tolerance, which value is
+ * From the semi-axis length, a morphology index is computed. Spots are
+ * classified according to the shape of their most-resembling ellipsoid. We look
+ * for equality between semi-axes, with a certain tolerance, which value is
  * {@link #SIGNIFICANCE_FACTOR}.
  * <p>
- * In the 2D case, if b > c are the semi-axes length
+ * In the 2D case, if b &gt; c are the semi-axes length
  * <ul>
- * <li>if b ≅ c, then this index has the value {@link #SPHERE}
- * <li>otherwise, it has the value {@link #PROLATE}
+ * <li>if b ≅ c, then this index has the value
+ * {@link SpotMorphologyAnalyzerFactory#SPHERE}
+ * <li>otherwise, it has the value {@link SpotMorphologyAnalyzerFactory#PROLATE}
  * </ul>
  * <p>
- * In the 2D case, if a > b > c are the semi-axes length
+ * In the 2D case, if a &gt; b &gt; c are the semi-axes length
  * <ul>
- * <li>if a ≅ b ≅ c, then this index has the value {@link #SPHERE}
- * <li>if a ≅ b > c, then this index has the value {@link #OBLATE}: the spot
- * resembles a flat disk
- * <li>if a > b ≅ c, then this index has the value {@link #PROLATE}: the spot
- * resembles a rugby ball
- * <li>otherwise it has the value {@link #SCALENE}; the spot's shape has nothing
- * particular
+ * <li>if a ≅ b ≅ c, then this index has the value
+ * {@link SpotMorphologyAnalyzerFactory#SPHERE}
+ * <li>if a ≅ b &gt; c, then this index has the value
+ * {@link SpotMorphologyAnalyzerFactory#OBLATE}: the spot resembles a flat disk
+ * <li>if a &gt; b ≅ c, then this index has the value
+ * {@link SpotMorphologyAnalyzerFactory#PROLATE}: the spot resembles a rugby
+ * ball
+ * <li>otherwise it has the value {@link SpotMorphologyAnalyzerFactory#SCALENE};
+ * the spot's shape has nothing particular
  * </ul>
  * 
- * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> Apr 1, 2011 - 2012
+ * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; Apr 1, 2011 -
+ *         2012
  */
 @SuppressWarnings( "deprecation" )
 public class SpotMorphologyAnalyzer< T extends RealType< T >> extends IndependentSpotFeatureAnalyzer< T >

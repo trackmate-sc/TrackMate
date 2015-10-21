@@ -153,7 +153,7 @@ public class TmXmlReader
 	/**
 	 * If <code>false</code>, an error occurred during reading.
 	 * 
-	 * @see #getErrorMessage().
+	 * @see #getErrorMessage()
 	 */
 	protected boolean ok = true;
 

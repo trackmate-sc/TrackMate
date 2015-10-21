@@ -32,7 +32,7 @@ import org.jfree.data.xy.DefaultXYDataset;
  * A collection of static utilities made to export {@link JFreeChart} charts 
  * to various scalable file format.
  * 
- * @author Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> Jul 20, 2011
+ * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; Jul 20, 2011
  */
 public class ChartExporter {
 

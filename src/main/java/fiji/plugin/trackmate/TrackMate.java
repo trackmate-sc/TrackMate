@@ -241,8 +241,6 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 	 * <p>
 	 * The {@link ModelChangeListener}s of the model will be notified when the
 	 * successful process is over.
-	 *
-	 * @see #getTrackGraph()
 	 */
 	public boolean execTracking()
 	{
@@ -497,20 +495,17 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 	 * features, or displaying them.
 	 * <p>
 	 * Any {@link SpotDetector} is expected to at least compute the
-	 * {@link SpotFeature#QUALITY} value for each spot it creates, so it is
-	 * possible to set up an initial filtering on this Feature, prior to any
-	 * other operation.
+	 * {@link Spot#QUALITY} value for each spot it creates, so it is possible to
+	 * set up an initial filtering on this feature, prior to any other
+	 * operation.
 	 * <p>
 	 * This method simply takes all the detected spots, and discard those whose
 	 * quality value is below the threshold set by
-	 * {@link #setInitialSpotFilter(Float)}. The spot field is overwritten, and
-	 * discarded spots can't be recalled.
+	 * {@link Settings#initialSpotFilterValue}. The spot field is overwritten,
+	 * and discarded spots can't be recalled.
 	 * <p>
 	 * The {@link ModelChangeListener}s of this model will be notified with a
 	 * {@link ModelChangeEvent#SPOTS_COMPUTED} event.
-	 *
-	 * @see #getSpots()
-	 * @see #setInitialFilter(Float)
 	 */
 	public boolean execInitialSpotFiltering()
 	{
@@ -538,15 +533,14 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 	 * features in this step should allow to rule them out.
 	 * <p>
 	 * This method simply takes all the detected spots, and mark as visible the
-	 * spots whose features satisfy all of the filters entered with the method
-	 * {@link #addFilter(SpotFilter)}.
+	 * spots whose features satisfy all of the filters in the {@link Settings}
+	 * object.
 	 * <p>
 	 * The {@link ModelChangeListener}s of this model will be notified with a
 	 * {@link ModelChangeEvent#SPOTS_FILTERED} event.
 	 *
 	 * @param doLogIt
 	 *            if true, will send a message to the {@link Model#logger}.
-	 * @see #getFilteredSpots()
 	 */
 	public boolean execSpotFiltering( final boolean doLogIt )
 	{

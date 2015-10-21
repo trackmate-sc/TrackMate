@@ -19,13 +19,10 @@ import net.imglib2.util.Util;
  * <ul>
  * <li>my (JYT) limited understanding of the original Volgemant paper (
  * <code>Volgenant. Linear and semi-assignment problems:
- * A core oriented approach. Computers & Operations Research (1996) vol. 23 (10)
+ * A core oriented approach. Computers &amp; Operations Research (1996) vol. 23 (10)
  * pp. 917-932</code>);</li>
  * <li>my limited understanding of Lee Kamensky python implementation of the
- * same algorithm in python using numpy for the CellProfilter project (
- * {@link https://
- * github.com/CellProfiler/CellProfiler/blob/master/cellprofiler/cpmath/lapjv.
- * py});</li>
+ * same algorithm in python using numpy for the CellProfilter project;</li>
  * <li>Johannes java implementation of the algorithm for non-sparse matrices.</li>
  * </ul>
  * <p>
@@ -38,7 +35,10 @@ import net.imglib2.util.Util;
  * 
  * @author Jean-Yves Tinevez - 2014
  * @author Johannes Schindelin
- * @see http://www.sciencedirect.com/science/article/pii/030505489600010X#
+ * @see <a
+ *      href=http://www.sciencedirect.com/science/article/pii/030505489600010X
+ *      >A. Volgenant
+ *      "Linear and semi-assignment problems: A core oriented approach"</a>
  */
 public class LAPJV implements OutputAlgorithm< int[] >, Benchmark
 {
