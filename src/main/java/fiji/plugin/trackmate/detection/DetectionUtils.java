@@ -76,12 +76,6 @@ public class DetectionUtils
 		final ArrayCursor< FloatType > c = kernel.cursor();
 		final long[] coords = new long[ nDims ];
 
-		/*
-		 * The gaussian normalization factor, divided by a constant value. This
-		 * is a fudge factor, that more or less put the quality values close to
-		 * the maximal value of a blob of optimal radius.
-		 */
-		final double C = 1d / 20d * Math.pow( 1d / sigma / Math.sqrt( 2 * Math.PI ), nDims );
 
 		// Work in image coordinates
 		while ( c.hasNext() )
@@ -89,15 +83,29 @@ public class DetectionUtils
 			c.fwd();
 			c.localize( coords );
 
-			double mantissa = 0;
-			double exponent = 0;
+			double sumx2 = 0.;
+			double mantissa = 0.;
 			for ( int d = 0; d < coords.length; d++ )
 			{
 				final double x = calibration[ d ] * ( coords[ d ] - middle[ d ] );
-				mantissa += -C * ( x * x / sigma / sigma - 1d );
-				exponent += -x * x / 2d / sigma / sigma;
+				sumx2 += ( x * x );
+				mantissa += 1. / sigmaPixels[ d ] / sigmaPixels[ d ] * ( x * x / sigma / sigma - 1 );
 			}
-			c.get().setReal( mantissa * Math.exp( exponent ) );
+			final double exponent = -sumx2 / 2. / sigma / sigma;
+
+			/*
+			 * LoG normalization factor, so that the filtered peak have the
+			 * maximal value for spots that have the size this kernel is tuned
+			 * to. With this value, the peak value will be of the same order of
+			 * magnitude than the raw spot (if it has the right size). This
+			 * value also ensures that if the image has its calibration changed,
+			 * one will retrieve the same peak value than before scaling.
+			 * However, I (JYT) could not derive the exact formula if the image
+			 * is scaled differently across X, Y and Z.
+			 */
+			final double C = 1. / Math.PI / sigmaPixels[ 0 ] / sigmaPixels[ 0 ];
+
+			c.get().setReal( -C * mantissa * Math.exp( exponent ) );
 		}
 
 		return kernel;
