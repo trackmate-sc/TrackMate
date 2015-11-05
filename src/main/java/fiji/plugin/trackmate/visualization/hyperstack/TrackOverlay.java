@@ -14,7 +14,6 @@ import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
@@ -43,9 +42,6 @@ public class TrackOverlay extends Roi
 	protected final Model model;
 
 	private TrackColorGenerator colorGenerator;
-
-	/** Used to store clip bounds. */
-	private final Rectangle clip = new Rectangle();
 
 	private static final Stroke NORMAL_STROKE = new BasicStroke();
 
@@ -76,16 +72,17 @@ public class TrackOverlay extends Roi
 	@Override
 	public final synchronized void drawOverlay( final Graphics g )
 	{
+		final Graphics2D g2d = ( Graphics2D ) g;
+
+		final double magnification = getMagnification();
+
+		// Painted clip in window coordinates.
 		final int xcorner = ic.offScreenX( 0 );
 		final int ycorner = ic.offScreenY( 0 );
-		final double magnification = getMagnification();
-		
-		// Painted clip in window coordinates.
 		final double minx = xcorner;
 		final double miny = ycorner;
-		g.getClipBounds( clip );
-		final double maxx = minx + clip.getWidth() / magnification;
-		final double maxy = miny + clip.getHeight() / magnification;
+		final double maxx = minx + ic.getWidth() / magnification;
+		final double maxy = miny + ic.getHeight() / magnification;
 
 		final boolean tracksVisible = ( Boolean ) displaySettings.get( TrackMateModelView.KEY_TRACKS_VISIBLE );
 		if ( !tracksVisible || model.getTrackModel().nTracks( true ) == 0 )
@@ -95,7 +92,6 @@ public class TrackOverlay extends Roi
 		final double drawingDepth = ( Double ) displaySettings.get( TrackMateModelView.KEY_DRAWING_DEPTH );
 		final double zslice = ( imp.getSlice() - 1 ) * calibration[ 2 ];
 
-		final Graphics2D g2d = ( Graphics2D ) g;
 		// Save graphic device original settings
 		final AffineTransform originalTransform = g2d.getTransform();
 		final Composite originalComposite = g2d.getComposite();
@@ -394,7 +390,6 @@ public class TrackOverlay extends Roi
 		final int y1 = ( int ) Math.round( y1s );
 
 		g2d.drawLine( x0, y0, x1, y1 );
-
 	}
 
 	public void setTrackColorGenerator( final TrackColorGenerator colorGenerator )
