@@ -11,8 +11,8 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.TreeMap;
 
-import javax.vecmath.Color4f;
-import javax.vecmath.Point4d;
+import org.scijava.vecmath.Color4f;
+import org.scijava.vecmath.Point4d;
 
 public class SpotGroupNodeTestDrive
 {

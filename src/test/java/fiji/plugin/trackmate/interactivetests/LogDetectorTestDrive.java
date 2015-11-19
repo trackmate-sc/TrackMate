@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Random;
 
-import javax.vecmath.Point3d;
+import org.scijava.vecmath.Point3d;
 
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;

@@ -18,7 +18,7 @@ import ij3d.ImageWindow3D;
 import java.awt.Color;
 
 import javax.swing.ImageIcon;
-import javax.vecmath.Color3f;
+import org.scijava.vecmath.Color3f;
 
 import org.scijava.plugin.Plugin;
 

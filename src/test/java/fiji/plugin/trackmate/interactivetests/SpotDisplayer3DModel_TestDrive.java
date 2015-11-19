@@ -7,7 +7,7 @@ import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.threedviewer.SpotDisplayer3D;
 import ij3d.Image3DUniverse;
-import ij3d.Install_J3D;
+import ij3d.ImageJ_3D_Viewer;
 
 import java.io.File;
 
@@ -19,7 +19,7 @@ public class SpotDisplayer3DModel_TestDrive {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		System.out.println(Install_J3D.getJava3DVersion());
+		System.out.println(ImageJ_3D_Viewer.getJava3DVersion());
 		
 		File file = new File(AppUtils.getBaseDirectory(TrackMate.class), "samples/FakeTracks.xml");
 		ij.ImageJ.main(args);

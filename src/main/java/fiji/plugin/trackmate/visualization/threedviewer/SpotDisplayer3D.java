@@ -23,10 +23,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import javax.media.j3d.BadTransformException;
-import javax.vecmath.Color3f;
-import javax.vecmath.Color4f;
-import javax.vecmath.Point4d;
+import org.scijava.java3d.BadTransformException;
+import org.scijava.vecmath.Color3f;
+import org.scijava.vecmath.Color4f;
+import org.scijava.vecmath.Point4d;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 

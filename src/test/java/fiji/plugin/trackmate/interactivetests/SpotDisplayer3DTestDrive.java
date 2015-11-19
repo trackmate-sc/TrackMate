@@ -15,7 +15,7 @@ import fiji.plugin.trackmate.visualization.threedviewer.SpotDisplayer3D;
 import ij.ImagePlus;
 import ij.process.StackConverter;
 import ij3d.Image3DUniverse;
-import ij3d.Install_J3D;
+import ij3d.ImageJ_3D_Viewer;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -43,7 +43,7 @@ public class SpotDisplayer3DTestDrive
 	public static void main( final String[] args )
 	{
 
-		System.out.println( Install_J3D.getJava3DVersion() );
+		System.out.println( ImageJ_3D_Viewer.getJava3DVersion() );
 
 		final int N_BLOBS = 20;
 		final double RADIUS = 5; // µm

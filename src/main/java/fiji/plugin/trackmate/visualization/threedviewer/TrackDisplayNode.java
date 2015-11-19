@@ -16,19 +16,19 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import javax.media.j3d.Appearance;
-import javax.media.j3d.BranchGroup;
-import javax.media.j3d.LineArray;
-import javax.media.j3d.LineAttributes;
-import javax.media.j3d.RenderingAttributes;
-import javax.media.j3d.Shape3D;
-import javax.media.j3d.Switch;
-import javax.media.j3d.TransparencyAttributes;
-import javax.media.j3d.View;
-import javax.vecmath.Color3f;
-import javax.vecmath.Color4f;
-import javax.vecmath.Point3d;
-import javax.vecmath.Tuple3d;
+import org.scijava.java3d.Appearance;
+import org.scijava.java3d.BranchGroup;
+import org.scijava.java3d.LineArray;
+import org.scijava.java3d.LineAttributes;
+import org.scijava.java3d.RenderingAttributes;
+import org.scijava.java3d.Shape3D;
+import org.scijava.java3d.Switch;
+import org.scijava.java3d.TransparencyAttributes;
+import org.scijava.java3d.View;
+import org.scijava.vecmath.Color3f;
+import org.scijava.vecmath.Color4f;
+import org.scijava.vecmath.Point3d;
+import org.scijava.vecmath.Tuple3d;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 
