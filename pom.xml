@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>sc.fiji</groupId>
 		<artifactId>pom-fiji</artifactId>
-		<version>18.1.0</version>
+		<version>19.0.0</version>
 		<relativePath />
 	</parent>
 
@@ -120,7 +120,6 @@
 		<!-- Target Fiji dir for clean upload. -->
 		<imagej.app.directory>../Fiji.app/</imagej.app.directory>
 		<scijava.jvm.version>1.7</scijava.jvm.version>
-		<ImageJ_3D_Viewer.version>4.0.1</ImageJ_3D_Viewer.version>
 	</properties>
 
 	<repositories>
