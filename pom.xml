@@ -12,8 +12,76 @@
 
 	<artifactId>TrackMate_</artifactId>
 	<version>3.0.0-SNAPSHOT</version>
+
 	<name>plugins/TrackMate_.jar</name>
 	<description />
+
+	<developers>
+		<developer>
+			<id>tinevez</id>
+			<name>Jean-Yves Tinevez</name>
+			<email>jean-yves.tinevez@pasteur.fr</email>
+			<url>http://www.pasteur.fr/ip/easysite/pasteur/fr/recherche/plates-formes-technologiques/imagopole/plates-formes-imagopole/la-plate-forme-d-imagerie-dynamique/equipe-pfid/equipe-pfid-jyt</url>
+			<organization>Institut Pasteur</organization>
+			<organizationUrl>http://www.pasteur.fr/</organizationUrl>
+			<roles>
+				<role>architect</role>
+				<role>developer</role>
+			</roles>
+			<timezone>+1</timezone>
+		</developer>
+		<developer>
+			<id>dscho</id>
+			<name>Johannes Schindelin</name>
+			<email>schindelin@wisc.edu</email>
+			<url>http://loci.wisc.edu/people/johannes-schindelin</url>
+			<organization>UW-Madison LOCI</organization>
+			<organizationUrl>http://loci.wisc.edu/</organizationUrl>
+			<roles>
+				<role>architect</role>
+				<role>developer</role>
+			</roles>
+			<timezone>-6</timezone>
+		</developer>
+	</developers>
+	<contributors>
+		<contributor>
+			<name>Nick Perry</name>
+		</contributor>
+		<contributor>
+			<name>Curtis Rueden</name>
+			<email>ctrueden@wisc.edu</email>
+			<url>http://loci.wisc.edu/people/curtis-rueden</url>
+			<organization>UW-Madison LOCI</organization>
+			<organizationUrl>http://loci.wisc.edu/</organizationUrl>
+			<roles>
+				<role>architect</role>
+				<role>developer</role>
+			</roles>
+			<timezone>-6</timezone>
+		</contributor>
+		<contributor>
+			<name>Tobias Pietzsch</name>
+			<email>tobias.pietzsch@gmail.com</email>
+			<organization>MPI-CBG at Dresden</organization>
+			<organizationUrl>http://mpi-cbg.de/</organizationUrl>
+			<roles>
+				<role>developer</role>
+			</roles>
+			<timezone>+1</timezone>
+		</contributor>
+	</contributors>
+
+	<scm>
+		<connection>scm:git:git://github.com/fiji/TrackMate</connection>
+		<developerConnection>scm:git:git@github.com:fiji/TrackMate</developerConnection>
+		<tag>HEAD</tag>
+		<url>https://github.com/fiji/TrackMate</url>
+	</scm>
+	<ciManagement>
+		<system>Jenkins</system>
+		<url>http://jenkins.imagej.net/job/TrackMate/</url>
+	</ciManagement>
 
 	<properties>
 		<!-- Target Fiji dir for clean upload. -->
@@ -21,6 +89,14 @@
 		<scijava.jvm.version>1.7</scijava.jvm.version>
 		<ImageJ_3D_Viewer.version>4.0.1</ImageJ_3D_Viewer.version>
 	</properties>
+
+	<repositories>
+		<!-- NB: for project parent -->
+		<repository>
+			<id>imagej.public</id>
+			<url>http://maven.imagej.net/content/groups/public</url>
+		</repository>
+	</repositories>
 
 	<dependencies>
 		<!-- Fiji dependencies -->
@@ -132,82 +208,4 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
-	<developers>
-		<developer>
-			<id>tinevez</id>
-			<name>Jean-Yves Tinevez</name>
-			<email>jean-yves.tinevez@pasteur.fr</email>
-			<url>http://www.pasteur.fr/ip/easysite/pasteur/fr/recherche/plates-formes-technologiques/imagopole/plates-formes-imagopole/la-plate-forme-d-imagerie-dynamique/equipe-pfid/equipe-pfid-jyt</url>
-			<organization>Institut Pasteur</organization>
-			<organizationUrl>http://www.pasteur.fr/</organizationUrl>
-			<roles>
-				<role>architect</role>
-				<role>developer</role>
-			</roles>
-			<timezone>+1</timezone>
-		</developer>
-		<developer>
-			<id>dscho</id>
-			<name>Johannes Schindelin</name>
-			<email>schindelin@wisc.edu</email>
-			<url>http://loci.wisc.edu/people/johannes-schindelin</url>
-			<organization>UW-Madison LOCI</organization>
-			<organizationUrl>http://loci.wisc.edu/</organizationUrl>
-			<roles>
-				<role>architect</role>
-				<role>developer</role>
-			</roles>
-			<timezone>-6</timezone>
-		</developer>
-	</developers>
-
-	<contributors>
-		<contributor>
-			<name>Nick Perry</name>
-		</contributor>
-		<contributor>
-			<name>Curtis Rueden</name>
-			<email>ctrueden@wisc.edu</email>
-			<url>http://loci.wisc.edu/people/curtis-rueden</url>
-			<organization>UW-Madison LOCI</organization>
-			<organizationUrl>http://loci.wisc.edu/</organizationUrl>
-			<roles>
-				<role>architect</role>
-				<role>developer</role>
-			</roles>
-			<timezone>-6</timezone>
-		</contributor>
-		<contributor>
-			<name>Tobias Pietzsch</name>
-			<email>tobias.pietzsch@gmail.com</email>
-			<organization>MPI-CBG at Dresden</organization>
-			<organizationUrl>http://mpi-cbg.de/</organizationUrl>
-			<roles>
-				<role>developer</role>
-			</roles>
-			<timezone>+1</timezone>
-		</contributor>
-	</contributors>
-
-	<ciManagement>
-		<system>Jenkins</system>
-		<url>http://jenkins.imagej.net/job/TrackMate/</url>
-	</ciManagement>
-
-	<scm>
-		<connection>scm:git:git://github.com/fiji/TrackMate</connection>
-		<developerConnection>scm:git:git@github.com:fiji/TrackMate</developerConnection>
-		<tag>HEAD</tag>
-		<url>https://github.com/fiji/TrackMate</url>
-	</scm>
-
-	<repositories>
-		<!-- NB: for project parent -->
-		<repository>
-			<id>imagej.public</id>
-			<url>http://maven.imagej.net/content/groups/public</url>
-		</repository>
-	</repositories>
-
 </project>
