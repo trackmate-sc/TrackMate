@@ -25,21 +25,37 @@
 			<organization>Institut Pasteur</organization>
 			<organizationUrl>http://www.pasteur.fr/</organizationUrl>
 			<roles>
-				<role>architect</role>
+				<role>founder</role>
+				<role>lead</role>
 				<role>developer</role>
+				<role>debugger</role>
+				<role>reviewer</role>
+				<role>support</role>
+				<role>maintainer</role>
 			</roles>
 			<timezone>+1</timezone>
 		</developer>
 		<developer>
-			<id>dscho</id>
-			<name>Johannes Schindelin</name>
-			<email>schindelin@wisc.edu</email>
-			<url>http://loci.wisc.edu/people/johannes-schindelin</url>
+			<id>ctrueden</id>
+			<name>Curtis Rueden</name>
+			<email>ctrueden@wisc.edu</email>
+			<url>http://loci.wisc.edu/people/curtis-rueden</url>
 			<organization>UW-Madison LOCI</organization>
 			<organizationUrl>http://loci.wisc.edu/</organizationUrl>
 			<roles>
-				<role>architect</role>
-				<role>developer</role>
+				<role>maintainer</role>
+			</roles>
+			<timezone>-6</timezone>
+		</developer>
+		<developer>
+			<id>hinerm</id>
+			<name>Mark Hiner</name>
+			<email>hiner@wisc.edu</email>
+			<url>http://loci.wisc.edu/people/mark-hiner</url>
+			<organization>UW-Madison LOCI</organization>
+			<organizationUrl>http://loci.wisc.edu/</organizationUrl>
+			<roles>
+				<role>maintainer</role>
 			</roles>
 			<timezone>-6</timezone>
 		</developer>
@@ -47,29 +63,42 @@
 	<contributors>
 		<contributor>
 			<name>Nick Perry</name>
+			<url>http://imagej.net/User:NicholasPerry</url>
+			<roles><role>founder</role></roles>
+			<properties><id>nickp</id></properties>
 		</contributor>
 		<contributor>
-			<name>Curtis Rueden</name>
-			<email>ctrueden@wisc.edu</email>
-			<url>http://loci.wisc.edu/people/curtis-rueden</url>
-			<organization>UW-Madison LOCI</organization>
-			<organizationUrl>http://loci.wisc.edu/</organizationUrl>
-			<roles>
-				<role>architect</role>
-				<role>developer</role>
-			</roles>
-			<timezone>-6</timezone>
+			<name>Johannes Schindelin</name>
+			<url>http://imagej.net/User:Schindelin</url>
+			<roles><role>founder</role></roles>
+			<properties><id>dscho</id></properties>
+		</contributor>
+		<contributor><name>Gary Baker</name></contributor>
+		<contributor>
+			<name>Albert Cardona</name>
+			<url>http://imagej.net/User:Albertcardona</url>
+			<properties><id>acardona</id></properties>
+		</contributor>
+		<contributor>
+			<name>Barry DeZonia</name>
+			<url>http://imagej.net/User:Bdezonia</url>
+			<properties><id>bdezonia</id></properties>
+		</contributor>
+		<contributor>
+			<name>Stefan Helfrich</name>
+			<properties><id>stelfrich</id></properties>
+		</contributor>
+		<contributor>
+			<name>Hadrien Mary</name>
+			<properties><id>hadim</id></properties>
 		</contributor>
 		<contributor>
 			<name>Tobias Pietzsch</name>
-			<email>tobias.pietzsch@gmail.com</email>
-			<organization>MPI-CBG at Dresden</organization>
-			<organizationUrl>http://mpi-cbg.de/</organizationUrl>
-			<roles>
-				<role>developer</role>
-			</roles>
-			<timezone>+1</timezone>
+			<url>http://imagej.net/User:Pietzsch</url>
+			<properties><id>tpietzsch</id></properties>
 		</contributor>
+		<contributor><name>Barak Naveh</name></contributor>
+		<contributor><name>Chen Ye</name></contributor>
 	</contributors>
 
 	<scm>
