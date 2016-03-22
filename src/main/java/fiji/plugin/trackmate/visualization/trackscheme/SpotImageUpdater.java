@@ -4,11 +4,11 @@ import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 
 import java.util.Map;
 
-import net.imagej.ImgPlus;
-import net.imglib2.meta.view.HyperSliceImgPlus;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.util.TMUtils;
+import net.imagej.ImgPlus;
+import net.imglib2.meta.view.HyperSliceImgPlus;
 
 @SuppressWarnings( "deprecation" )
 public class SpotImageUpdater
@@ -48,10 +48,7 @@ public class SpotImageUpdater
 	@SuppressWarnings( { "rawtypes", "unchecked" } )
 	public String getImageString( final Spot spot, final double radiusFactor )
 	{
-
-		final Integer frame = spot.getFeature( Spot.FRAME ).intValue();
-		if ( null == frame )
-			return "";
+		final int frame = spot.getFeature( Spot.FRAME ).intValue();
 		if ( frame == previousFrame )
 		{
 			// Keep the same image than in memory
@@ -69,10 +66,10 @@ public class SpotImageUpdater
 				{
 					targetChannel = ( ( Integer ) obj ) - 1;
 				}
-			} // TODO: be more flexible about that
+			}
+			final ImgPlus fixChannelAxis = HyperSliceImgPlus.fixChannelAxis( img, targetChannel );
 			final ImgPlus< ? > imgCT = HyperSliceImgPlus.fixTimeAxis(
-					HyperSliceImgPlus.fixChannelAxis( img, targetChannel ),
-					frame );
+					fixChannelAxis, frame );
 			grabber = new SpotIconGrabber( imgCT );
 			previousFrame = frame;
 		}
