@@ -5,13 +5,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import net.imagej.ImgPlus;
-import net.imglib2.Interval;
-import net.imglib2.algorithm.Algorithm;
-import net.imglib2.algorithm.Benchmark;
-import net.imglib2.algorithm.MultiThreaded;
-import net.imglib2.multithreading.SimpleMultiThreading;
-
 import org.jgrapht.graph.SimpleWeightedGraph;
 
 import fiji.plugin.trackmate.detection.SpotDetector;
@@ -22,6 +15,12 @@ import fiji.plugin.trackmate.features.SpotFeatureCalculator;
 import fiji.plugin.trackmate.features.TrackFeatureCalculator;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.util.TMUtils;
+import net.imagej.ImgPlus;
+import net.imglib2.Interval;
+import net.imglib2.algorithm.Algorithm;
+import net.imglib2.algorithm.Benchmark;
+import net.imglib2.algorithm.MultiThreaded;
+import net.imglib2.multithreading.SimpleMultiThreading;
 
 /**
  * <p>
@@ -43,7 +42,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 
 	public static final String PLUGIN_NAME_STR = "TrackMate";
 
-	public static final String PLUGIN_NAME_VERSION = "2.8.2-SNAPSHOT";
+	public static final String PLUGIN_NAME_VERSION = "3.0.1-SNAPSHOT";
 
 	/**
 	 * The model this trackmate will shape.
@@ -318,8 +317,8 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 		 */
 		final int nSimultaneousFrames = Math.min( numThreads, numFrames );
 		final int threadsPerFrame = Math.max( 1, numThreads / nSimultaneousFrames );
-		
-		logger.log( "Detection processes " 
+
+		logger.log( "Detection processes "
 				+ ( ( nSimultaneousFrames > 1 ) ? ( nSimultaneousFrames + " frames" ) : "1 frame" )
 				+ " simultaneously and allocates "
 				+ ( ( threadsPerFrame > 1 ) ? ( threadsPerFrame + " threads" ) : "1 thread" )
