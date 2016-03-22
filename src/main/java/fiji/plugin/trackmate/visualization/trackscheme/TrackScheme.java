@@ -1,7 +1,5 @@
 package fiji.plugin.trackmate.visualization.trackscheme;
 
-import ij.ImagePlus;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -45,6 +43,7 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.visualization.AbstractTrackMateModelView;
 import fiji.plugin.trackmate.visualization.TrackColorGenerator;
+import ij.ImagePlus;
 
 public class TrackScheme extends AbstractTrackMateModelView
 {
@@ -152,9 +151,6 @@ public class TrackScheme extends AbstractTrackMateModelView
 	 * styles allowing it.
 	 */
 	private boolean doThumbnailCapture = DEFAULT_THUMBNAILS_ENABLED;
-
-	/** Flag reporting whether we ran a thumbnail capture. See createThumbnails. */
-	private boolean thumbnailCaptured = false;
 
 	/*
 	 * CONSTRUCTORS
@@ -793,10 +789,6 @@ public class TrackScheme extends AbstractTrackMateModelView
 				refresh();
 			}
 		}
-		else if ( key == KEY_SPOT_RADIUS_RATIO )
-		{
-			thumbnailCaptured = false;
-		}
 		displaySettings.put( key, value );
 	}
 
@@ -1171,7 +1163,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 	 */
 	public boolean toggleThumbnail()
 	{
-		if ( !doThumbnailCapture && !thumbnailCaptured )
+		if ( !doThumbnailCapture )
 		{
 			createThumbnails();
 		}
@@ -1269,7 +1261,6 @@ public class TrackScheme extends AbstractTrackMateModelView
 				{
 					for ( final Spot spot : spotPerFrame.get( frame ) )
 					{
-
 						final mxICell cell = graph.getCellFor( spot );
 						final String imageStr = spotImageUpdater.getImageString( spot, radiusFactor );
 						String style = cell.getStyle();
@@ -1285,8 +1276,6 @@ public class TrackScheme extends AbstractTrackMateModelView
 				graph.getModel().endUpdate();
 				gui.logger.setProgress( 0d );
 				gui.logger.setStatus( "" );
-				thumbnailCaptured = true; // After that they will be kept in
-				// synch thanks to #modelChanged
 			}
 		}
 	}

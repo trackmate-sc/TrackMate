@@ -1,9 +1,5 @@
 package fiji.plugin.trackmate.visualization.trackscheme;
 
-import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
-
-import java.util.Map;
-
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.util.TMUtils;
@@ -14,7 +10,9 @@ import net.imglib2.meta.view.HyperSliceImgPlus;
 public class SpotImageUpdater
 {
 
-	private Integer previousFrame;
+	private int previousFrame;
+
+	private int previousChannel;
 
 	private SpotIconGrabber< ? > grabber;
 
@@ -31,6 +29,7 @@ public class SpotImageUpdater
 	{
 		this.settings = settings;
 		this.previousFrame = -1;
+		this.previousChannel = -1;
 	}
 
 	/**
@@ -49,29 +48,20 @@ public class SpotImageUpdater
 	public String getImageString( final Spot spot, final double radiusFactor )
 	{
 		final int frame = spot.getFeature( Spot.FRAME ).intValue();
-		if ( frame == previousFrame )
+		final int targetChannel = settings.imp.getC() - 1;
+		if ( frame == previousFrame && targetChannel == previousChannel )
 		{
 			// Keep the same image than in memory
 		}
 		else
 		{
 			final ImgPlus img = TMUtils.rawWraps( settings.imp );
-			int targetChannel = 0;
-			if ( settings != null && settings.detectorSettings != null )
-			{
-				// Try to extract it from detector settings target channel
-				final Map< String, Object > ds = settings.detectorSettings;
-				final Object obj = ds.get( KEY_TARGET_CHANNEL );
-				if ( null != obj && obj instanceof Integer )
-				{
-					targetChannel = ( ( Integer ) obj ) - 1;
-				}
-			}
 			final ImgPlus fixChannelAxis = HyperSliceImgPlus.fixChannelAxis( img, targetChannel );
 			final ImgPlus< ? > imgCT = HyperSliceImgPlus.fixTimeAxis(
 					fixChannelAxis, frame );
 			grabber = new SpotIconGrabber( imgCT );
 			previousFrame = frame;
+			previousChannel = targetChannel;
 		}
 		return grabber.getImageString( spot, radiusFactor );
 	}
