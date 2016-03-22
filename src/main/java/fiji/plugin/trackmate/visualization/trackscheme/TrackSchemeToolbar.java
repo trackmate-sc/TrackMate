@@ -90,7 +90,7 @@ public class TrackSchemeToolbar extends JToolBar
 		toggleLinkingButton.setToolTipText( "Toggle linking" );
 
 		/*
-		 * Toggle thumnail mode
+		 * Toggle thumbnail mode
 		 */
 		final boolean defaultThumbnailsEnabled = TrackScheme.DEFAULT_THUMBNAILS_ENABLED;
 		final Action toggleThumbnailAction = new AbstractAction( null, defaultThumbnailsEnabled ? THUMBNAIL_ON_ICON : THUMBNAIL_OFF_ICON )
@@ -248,10 +248,10 @@ public class TrackSchemeToolbar extends JToolBar
 			} );
 		}
 
-		final JComboBox selectStyleBox;
+		final JComboBox< String > selectStyleBox;
 		{
 			final Set< String > styleNames = new HashSet< String >( TrackSchemeStylist.VERTEX_STYLES.keySet() );
-			selectStyleBox = new JComboBox( styleNames.toArray( new String[] {} ) );
+			selectStyleBox = new JComboBox< String >( styleNames.toArray( new String[] {} ) );
 			selectStyleBox.setPreferredSize( new Dimension( 80, 20 ) );
 			selectStyleBox.setSelectedItem( TrackSchemeStylist.DEFAULT_STYLE_NAME );
 			selectStyleBox.setMaximumSize( new Dimension( 200, 30 ) );

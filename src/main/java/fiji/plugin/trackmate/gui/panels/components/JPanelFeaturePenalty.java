@@ -18,7 +18,7 @@ public class JPanelFeaturePenalty extends javax.swing.JPanel
 
 	private static final long serialVersionUID = 3848390144561204540L;
 
-	private JComboBox jComboBoxFeature;
+	private JComboBox< String > jComboBoxFeature;
 
 	private JNumericTextField jTextFieldFeatureWeight;
 
@@ -77,9 +77,9 @@ public class JPanelFeaturePenalty extends javax.swing.JPanel
 			this.setSize( 280, 40 );
 			this.setLayout( null );
 			{
-				final ComboBoxModel jComboBoxFeatureModel = new DefaultComboBoxModel(
+				final ComboBoxModel< String > jComboBoxFeatureModel = new DefaultComboBoxModel< String >(
 						TMUtils.getArrayFromMaping( features, featureNames ).toArray( new String[] {} ) );
-				jComboBoxFeature = new JComboBox();
+				jComboBoxFeature = new JComboBox< String >();
 				this.add( jComboBoxFeature );
 				jComboBoxFeature.setModel( jComboBoxFeatureModel );
 				jComboBoxFeature.setBounds( 2, 4, 205, 22 );

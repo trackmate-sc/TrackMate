@@ -2,8 +2,6 @@ package fiji.plugin.trackmate.gui.panels.components;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
-import ij.ImagePlus;
-import ij.WindowManager;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -21,6 +19,9 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import ij.ImagePlus;
+import ij.WindowManager;
+
 public class ImagePlusChooser extends javax.swing.JFrame
 {
 
@@ -34,7 +35,7 @@ public class ImagePlusChooser extends javax.swing.JFrame
 
 	private JLabel jLabelSelect;
 
-	private JComboBox jComboBoxImage;
+	private JComboBox< String > jComboBoxImage;
 
 	private JButton jButtonCancel;
 
@@ -211,8 +212,8 @@ public class ImagePlusChooser extends javax.swing.JFrame
 					jLabelSelect.setBounds( 12, 10, 258, 15 );
 				}
 				{
-					final ComboBoxModel jComboBoxImageModel = new DefaultComboBoxModel( getImageNames() );
-					jComboBoxImage = new JComboBox();
+					final ComboBoxModel< String > jComboBoxImageModel = new DefaultComboBoxModel< String >( getImageNames() );
+					jComboBoxImage = new JComboBox< String >();
 					jPanelMain.add( jComboBoxImage );
 					jComboBoxImage.setFont( SMALL_FONT );
 					jComboBoxImage.setModel( jComboBoxImageModel );

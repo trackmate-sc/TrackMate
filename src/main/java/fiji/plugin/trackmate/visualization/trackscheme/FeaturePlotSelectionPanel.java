@@ -68,9 +68,9 @@ public class FeaturePlotSelectionPanel extends ActionListenablePanel
 
 	private JLabel jLabelYFeatures;
 
-	private JComboBox jComboBoxXFeature;
+	private JComboBox< String > jComboBoxXFeature;
 
-	private final Stack< JComboBox > comboBoxes = new Stack< JComboBox >();
+	private final Stack< JComboBox< String > > comboBoxes = new Stack< JComboBox< String > >();
 
 	private final Stack< Component > struts = new Stack< Component >();
 
@@ -113,7 +113,7 @@ public class FeaturePlotSelectionPanel extends ActionListenablePanel
 	public Set< String > getYKeys()
 	{
 		final Set< String > yKeys = new HashSet< String >( comboBoxes.size() );
-		for ( final JComboBox box : comboBoxes )
+		for ( final JComboBox< String > box : comboBoxes )
 			yKeys.add( features.get( box.getSelectedIndex() ) );
 		return yKeys;
 	}
@@ -128,9 +128,9 @@ public class FeaturePlotSelectionPanel extends ActionListenablePanel
 		if ( comboBoxes.size() > MAX_FEATURE_ALLOWED )
 			return;
 
-		final ComboBoxModel jComboBoxYFeatureModel = new DefaultComboBoxModel(
+		final ComboBoxModel< String > jComboBoxYFeatureModel = new DefaultComboBoxModel< String >(
 				TMUtils.getArrayFromMaping( features, featureNames ).toArray( new String[] {} ) );
-		final JComboBox jComboBoxYFeature = new JComboBox();
+		final JComboBox< String > jComboBoxYFeature = new JComboBox< String >();
 		jComboBoxYFeature.setModel( jComboBoxYFeatureModel );
 		jComboBoxYFeature.setPreferredSize( COMBO_BOX_SIZE );
 		jComboBoxYFeature.setMaximumSize( COMBO_BOX_SIZE );
@@ -200,9 +200,9 @@ public class FeaturePlotSelectionPanel extends ActionListenablePanel
 				jLabelXFeature.setBounds( 8, 66, 148, 26 );
 			}
 			{
-				final ComboBoxModel jComboBoxXFeatureModel = new DefaultComboBoxModel(
+				final ComboBoxModel< String > jComboBoxXFeatureModel = new DefaultComboBoxModel< String >(
 						TMUtils.getArrayFromMaping( features, featureNames ).toArray( new String[] {} ) );
-				jComboBoxXFeature = new JComboBox();
+				jComboBoxXFeature = new JComboBox< String >();
 				this.add( jComboBoxXFeature );
 				jComboBoxXFeature.setModel( jComboBoxXFeatureModel );
 				jComboBoxXFeature.setFont( SMALL_FONT );

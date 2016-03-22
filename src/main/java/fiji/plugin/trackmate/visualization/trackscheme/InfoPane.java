@@ -2,7 +2,6 @@ package fiji.plugin.trackmate.visualization.trackscheme;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
-import ij.measure.ResultsTable;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -51,6 +50,7 @@ import fiji.plugin.trackmate.features.SpotFeatureGrapher;
 import fiji.plugin.trackmate.util.OnRequestUpdater;
 import fiji.plugin.trackmate.util.OnRequestUpdater.Refreshable;
 import fiji.plugin.trackmate.util.TMUtils;
+import ij.measure.ResultsTable;
 
 public class InfoPane extends JPanel implements SelectionChangeListener
 {
@@ -361,7 +361,7 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 	{
 
 		@SuppressWarnings( "serial" )
-		final AbstractListModel lm = new AbstractListModel()
+		final AbstractListModel< String > lm = new AbstractListModel< String >()
 		{
 			@Override
 			public int getSize()
@@ -370,7 +370,7 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 			}
 
 			@Override
-			public Object getElementAt( final int index )
+			public String getElementAt( final int index )
 			{
 				return headers[ index ];
 			}
@@ -407,7 +407,7 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 			}
 		} );
 
-		final JList rowHeader = new JList( lm );
+		final JList< String > rowHeader = new JList< String >( lm );
 		rowHeader.setFixedCellHeight( table.getRowHeight() );
 		rowHeader.setCellRenderer( new RowHeaderRenderer( table ) );
 		rowHeader.setBackground( getBackground() );
@@ -465,7 +465,7 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 	 * INNER CLASS
 	 */
 
-	private class RowHeaderRenderer extends JLabel implements ListCellRenderer, Serializable
+	private class RowHeaderRenderer extends JLabel implements ListCellRenderer< String >, Serializable
 	{
 
 		private static final long serialVersionUID = -1L;
@@ -482,9 +482,10 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 		}
 
 		@Override
-		public Component getListCellRendererComponent( final JList list, final Object value, final int index, final boolean isSelected, final boolean cellHasFocus )
+		public Component getListCellRendererComponent( final JList< ? extends String > list, final String value,
+				final int index, final boolean isSelected, final boolean cellHasFocus )
 		{
-			setText( ( value == null ) ? "" : value.toString() );
+			setText( ( value == null ) ? "" : value );
 			return this;
 		}
 	}

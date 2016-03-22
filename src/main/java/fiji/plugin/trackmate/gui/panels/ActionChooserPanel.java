@@ -178,7 +178,7 @@ public class ActionChooserPanel
 		}
 
 		@Override
-		public Component getListCellRendererComponent( final JList list, final Object value, final int index, final boolean isSelected, final boolean cellHasFocus )
+		public Component getListCellRendererComponent( final JList< ? > list, final Object value, final int index, final boolean isSelected, final boolean cellHasFocus )
 		{
 			final JLabel label = ( JLabel ) super.getListCellRendererComponent( list, value, index, isSelected, cellHasFocus );
 			final ImageIcon icon = icons.get( value );

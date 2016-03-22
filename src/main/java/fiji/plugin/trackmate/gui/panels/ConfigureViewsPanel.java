@@ -101,7 +101,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 
 	private JLabel jLabelTrackDisplayMode;
 
-	private JComboBox jComboBoxDisplayMode;
+	private JComboBox< String > jComboBoxDisplayMode;
 
 	private JLabel jLabelDisplayOptions;
 
@@ -635,8 +635,8 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 				}
 				{
 					final String[] keyNames = TrackMateModelView.TRACK_DISPLAY_MODE_DESCRIPTION;
-					final ComboBoxModel jComboBoxDisplayModeModel = new DefaultComboBoxModel( keyNames );
-					jComboBoxDisplayMode = new JComboBox();
+					final ComboBoxModel< String > jComboBoxDisplayModeModel = new DefaultComboBoxModel< String >( keyNames );
+					jComboBoxDisplayMode = new JComboBox< String >();
 					jComboBoxDisplayMode.setModel( jComboBoxDisplayModeModel );
 					jComboBoxDisplayMode.setSelectedIndex( 0 );
 					jComboBoxDisplayMode.setFont( SMALL_FONT );

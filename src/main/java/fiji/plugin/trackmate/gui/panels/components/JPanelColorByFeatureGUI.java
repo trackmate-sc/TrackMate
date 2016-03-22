@@ -42,7 +42,7 @@ public class JPanelColorByFeatureGUI extends ActionListenablePanel
 
 	private JLabel jLabelSetColorBy;
 
-	private JComboBox jComboBoxSetColorBy;
+	private JComboBox< String > jComboBoxSetColorBy;
 
 	private JPanel jPanelByFeature;
 
@@ -199,8 +199,8 @@ public class JPanelColorByFeatureGUI extends ActionListenablePanel
 				featureStringList[ 0 ] = "Default";
 				for ( int i = 0; i < features.size(); i++ )
 					featureStringList[ i + 1 ] = featureNames.get( features.get( i ) );
-				final ComboBoxModel jComboBoxSetColorByModel = new DefaultComboBoxModel( featureStringList );
-				jComboBoxSetColorBy = new JComboBox();
+				final ComboBoxModel< String > jComboBoxSetColorByModel = new DefaultComboBoxModel< String >( featureStringList );
+				jComboBoxSetColorBy = new JComboBox< String >();
 				jPanelByFeature.add( Box.createHorizontalStrut( 5 ) );
 				jPanelByFeature.add( Box.createHorizontalStrut( 5 ) );
 				jPanelByFeature.add( jComboBoxSetColorBy );
