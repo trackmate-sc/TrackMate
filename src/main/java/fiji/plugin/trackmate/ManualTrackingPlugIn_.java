@@ -1,16 +1,17 @@
 package fiji.plugin.trackmate;
 
+import java.util.Map;
+
 import fiji.plugin.trackmate.detection.ManualDetectorFactory;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.ManualTrackingGUIController;
 import fiji.plugin.trackmate.tracking.ManualTrackerFactory;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
+import ij.ImageJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.plugin.PlugIn;
-
-import java.util.Map;
 
 
 public class ManualTrackingPlugIn_ extends TrackMatePlugIn_ implements PlugIn
@@ -18,7 +19,7 @@ public class ManualTrackingPlugIn_ extends TrackMatePlugIn_ implements PlugIn
 
 	/**
 	 * Runs the Manual tracking with TrackMate GUI plugin.
-	 * 
+	 *
 	 * @param imagePath
 	 *            a path to an image that can be read by ImageJ. If set, the
 	 *            image will be opened and TrackMate will be started set to
@@ -96,5 +97,11 @@ public class ManualTrackingPlugIn_ extends TrackMatePlugIn_ implements PlugIn
 		settings.trackerFactory = new ManualTrackerFactory();
 		settings.trackerSettings = settings.trackerFactory.getDefaultSettings();
 		return settings;
+	}
+
+	public static void main( final String[] args )
+	{
+		ImageJ.main( args );
+		new ManualTrackingPlugIn_().run( "samples/Merged.tif" );
 	}
 }

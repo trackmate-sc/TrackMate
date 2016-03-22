@@ -1,5 +1,19 @@
 package fiji.plugin.trackmate.visualization.threedviewer;
 
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
+
+import org.jgrapht.graph.DefaultWeightedEdge;
+import org.scijava.java3d.BadTransformException;
+import org.scijava.vecmath.Color3f;
+import org.scijava.vecmath.Color4f;
+import org.scijava.vecmath.Point4d;
+
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.SelectionChangeEvent;
@@ -13,22 +27,6 @@ import fiji.plugin.trackmate.visualization.TrackColorGenerator;
 import ij3d.Content;
 import ij3d.ContentInstant;
 import ij3d.Image3DUniverse;
-
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-
-import org.scijava.java3d.BadTransformException;
-import org.scijava.vecmath.Color3f;
-import org.scijava.vecmath.Color4f;
-import org.scijava.vecmath.Point4d;
-
-import org.jgrapht.graph.DefaultWeightedEdge;
 
 public class SpotDisplayer3D extends AbstractTrackMateModelView
 {
@@ -119,173 +117,12 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 
 		case ModelChangeEvent.MODEL_MODIFIED:
 		{
-
 			/*
-			 * Deal with spots first.
+			 * We do not do anything. I could not find a good way to dynamically
+			 * change the content of a 3D viewer content. So the 3D viewer just
+			 * shows a snapshot of the TrackMate model when it was launched, and
+			 * is not kept in sync with modifications afterwards.
 			 */
-
-			// Useful fields.
-			@SuppressWarnings( "unchecked" )
-			final FeatureColorGenerator< Spot > spotColorGenerator = ( FeatureColorGenerator< Spot > ) displaySettings.get( KEY_SPOT_COLORING );
-			final double radiusRatio = ( Double ) displaySettings.get( KEY_SPOT_RADIUS_RATIO );
-
-			// Iterate each spot of the event.
-			final Set< Spot > spotsModified = event.getSpots();
-			for ( final Spot spot : spotsModified )
-			{
-				final int spotFlag = event.getSpotFlag( spot );
-				final int frame = spot.getFeature( Spot.FRAME ).intValue();
-				final SpotGroupNode< Spot > spotGroupNode = blobs.get( frame );
-
-				switch ( spotFlag )
-				{
-				case ModelChangeEvent.FLAG_SPOT_REMOVED:
-					spotGroupNode.remove( spot );
-					break;
-
-				case ModelChangeEvent.FLAG_SPOT_ADDED:
-				{
-
-					// Sphere location and radius
-					final double[] coords = new double[ 3 ];
-					TMUtils.localize( spot, coords );
-					final Double radius = spot.getFeature( Spot.RADIUS );
-					final double[] pos = new double[] { coords[ 0 ], coords[ 1 ], coords[ 2 ], radius * radiusRatio };
-					final Point4d center = new Point4d( pos );
-
-					// Sphere color
-					final Color4f color = new Color4f( spotColorGenerator.color( spot ) );
-					color.w = 0;
-
-					// Do we have an empty frame?
-					if ( null == spotGroupNode )
-					{
-						/*
-						 * We then just give up. I dig really hard on an elegant
-						 * way to add a new ContentInstant for a missing frame,
-						 * but found no satisfying way. There is no good way to
-						 * add spots to an empty frame. The way I found is very
-						 * similar to closing the 3D viewer and re-opening it,
-						 * therefore I let the user do it.
-						 *
-						 * So because of this, the SpotDisplayer3D is only a
-						 * partial ModelListener.
-						 */
-						System.err.println( "[SpotDisplayer3D] The TrackMate 3D viewer cannot deal with adding a spot to an empty frame." );
-					}
-					else
-					{
-						spotGroupNode.add( spot, center, color );
-					}
-
-					break;
-				}
-
-				case ModelChangeEvent.FLAG_SPOT_FRAME_CHANGED:
-				{
-
-					// Where did it belonged?
-					Integer targetFrame = -1;
-					for ( final Integer f : blobs.keySet() )
-					{
-						if ( blobs.get( f ).centers.containsKey( spot ) )
-						{
-							targetFrame = f;
-							break;
-						}
-					}
-
-					if ( targetFrame < 0 )
-					{
-						System.err.println( "[SpotDisplayer3D] Could not find the frame spot " + spot + " belongs to." );
-						return;
-					}
-
-					blobs.get( targetFrame ).remove( spot );
-					// Sphere location and radius
-					final double[] coords = new double[ 3 ];
-					TMUtils.localize( spot, coords );
-					final Double radius = spot.getFeature( Spot.RADIUS );
-					final double[] pos = new double[] { coords[ 0 ], coords[ 1 ], coords[ 2 ], radius * radiusRatio };
-					final Point4d center = new Point4d( pos );
-
-					// Sphere color
-					final Color4f color = new Color4f( spotColorGenerator.color( spot ) );
-					color.w = 0;
-					if ( null == spotGroupNode )
-					{
-						/*
-						 * We then just give up. See above.
-						 */
-						System.err.println( "[SpotDisplayer3D] The TrackMate 3D viewer cannot deal with moving a spot to an empty frame." );
-					}
-					else
-					{
-						spotGroupNode.add( spot, center, color );
-					}
-					break;
-				}
-
-				case ModelChangeEvent.FLAG_SPOT_MODIFIED:
-				{
-					if ( null != spotGroupNode )
-					{
-						spotGroupNode.remove( spot );
-						// Sphere location and radius
-						final double[] coords = new double[ 3 ];
-						TMUtils.localize( spot, coords );
-						final Double radius = spot.getFeature( Spot.RADIUS );
-						final double[] pos = new double[] { coords[ 0 ], coords[ 1 ], coords[ 2 ], radius * radiusRatio };
-						final Point4d center = new Point4d( pos );
-
-						// Sphere color
-						final Color4f color = new Color4f( spotColorGenerator.color( spot ) );
-						color.w = 0;
-						spotGroupNode.add( spot, center, color );
-					}
-					break;
-				}
-
-				default:
-				{
-					System.err.println( "[SpotDisplayer3D] Unknown spot flag ID: " + spotFlag );
-				}
-				}
-			}
-
-			/*
-			 * Deal with edges
-			 */
-
-			for ( final DefaultWeightedEdge edge : event.getEdges() )
-			{
-				final int edgeFlag = event.getEdgeFlag( edge );
-				switch ( edgeFlag )
-				{
-				case ModelChangeEvent.FLAG_EDGE_ADDED:
-				case ModelChangeEvent.FLAG_EDGE_MODIFIED:
-				case ModelChangeEvent.FLAG_EDGE_REMOVED:
-				{
-					if ( null == trackNode )
-					{
-						trackContent = makeTrackContent();
-						universe.removeContent( TRACK_CONTENT_NAME );
-						universe.addContent( trackContent );
-					}
-					else
-					{
-						trackNode.makeMeshes();
-						updateTrackColors();
-					}
-					break;
-				}
-
-				default:
-				{
-					System.err.println( "[SpotDisplayer3D] Unknown edge flag ID: " + edgeFlag );
-				}
-				}
-			}
 			break;
 		}
 

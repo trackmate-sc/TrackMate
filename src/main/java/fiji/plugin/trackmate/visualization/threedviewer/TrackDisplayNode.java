@@ -341,6 +341,8 @@ public class TrackDisplayNode extends ContentNode implements TimelapseListener
 	{
 		// First, find to what track it belongs to
 		final int trackID = model.getTrackModel().trackIDOf( edge );
+		if ( null == edgeIndices.get( trackID ) || null == edgeIndices.get( trackID ).get( edge ) )
+			return;
 
 		// Set color of corresponding line primitive
 		final Color4f color4 = new Color4f();

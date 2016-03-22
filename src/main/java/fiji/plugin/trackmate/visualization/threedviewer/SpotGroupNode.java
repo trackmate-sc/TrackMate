@@ -529,7 +529,9 @@ public class SpotGroupNode< K > extends ContentNode
 
 	public Color3f getColor3f( final K key )
 	{
-		return new Color3f( colors.get( key ).x, colors.get( key ).y, colors.get( key ).z );
+		if ( null != colors.get( key ) ) { return new Color3f( colors.get( key ).x, colors.get( key ).y, colors.get( key ).z ); }
+		// We were asked for the color of a key we do not have.
+		return null;
 	}
 
 	/**

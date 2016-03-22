@@ -1,15 +1,15 @@
 package fiji.plugin.trackmate.action;
 
+import javax.swing.ImageIcon;
+
+import org.scijava.plugin.Plugin;
+
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.visualization.threedviewer.SpotDisplayer3D;
 import ij3d.Image3DUniverse;
 import ij3d.ImageWindow3D;
-
-import javax.swing.ImageIcon;
-
-import org.scijava.plugin.Plugin;
 
 public class LinkNew3DViewerAction extends AbstractTMAction
 {
@@ -18,7 +18,17 @@ public class LinkNew3DViewerAction extends AbstractTMAction
 
 	private final static String KEY = "NEW_3DVIEWER";
 
-	private static final String INFO_TEXT = "<html>" + "This action opens a new 3D viewer, containing only the overlay (spot and tracks), <br> " + "properly linked to the current controller." + "<p>" + "Useful to have synchronized 2D vs 3D views." + "</html>";
+	private static final String INFO_TEXT = "<html>"
+			+ "This action opens a new 3D viewer, containing only the overlay (spot and tracks), <br> "
+			+ "properly linked to the current controller."
+			+ "<p>"
+			+ "Useful to have synchronized 2D vs 3D views, but note that this 3D view <br> "
+			+ "is not kept in sync with manual editing of the model."
+			+ "If you manually edit the model (add, remove, move or modify a spot; delete, <br>"
+			+ "cut, merge a track, etc...) this view will not show the modifications. <br>"
+			+ "It contains an immutable snapshot of the model taken at the time when <br>"
+			+ "it was launched. "
+			+ "</html>";
 
 	public static final ImageIcon ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/page_white_link.png" ) );
 
