@@ -1,5 +1,10 @@
 package fiji.plugin.trackmate.detection.semiauto;
 
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.util.TMUtils;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imglib2.FinalInterval;
@@ -8,11 +13,6 @@ import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.view.Views;
-import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.util.TMUtils;
 
 public class SemiAutoTracker< T extends RealType< T > & NativeType< T >> extends AbstractSemiAutoTracker< T >
 {
@@ -21,10 +21,13 @@ public class SemiAutoTracker< T extends RealType< T > & NativeType< T >> extends
 
 	private final double dt;
 
+	private final ImagePlus imp;
+
 	@SuppressWarnings( "unchecked" )
 	public SemiAutoTracker( final Model model, final SelectionModel selectionModel, final ImagePlus imp, final Logger logger )
 	{
 		super( model, selectionModel, logger );
+		this.imp = imp;
 		this.img = TMUtils.rawWraps( imp );
 		final double ldt = imp.getCalibration().frameInterval;
 		if ( ldt == 0 )
@@ -86,8 +89,7 @@ public class SemiAutoTracker< T extends RealType< T > & NativeType< T >> extends
 		 * Extract crop cube
 		 */
 
-		final int targetChannel = 0; // TODO when spot will store the channel
-										// they are created on, use it.
+		final int targetChannel = imp.getC() - 1;
 
 		final long width = img.dimension( 0 );
 		final long height = img.dimension( 1 );
