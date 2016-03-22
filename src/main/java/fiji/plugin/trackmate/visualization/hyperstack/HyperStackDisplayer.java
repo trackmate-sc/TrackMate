@@ -1,9 +1,5 @@
 package fiji.plugin.trackmate.visualization.hyperstack;
 
-import ij.ImagePlus;
-import ij.gui.Overlay;
-import ij.gui.Roi;
-
 import java.util.Set;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -17,6 +13,9 @@ import fiji.plugin.trackmate.visualization.AbstractTrackMateModelView;
 import fiji.plugin.trackmate.visualization.TrackColorGenerator;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewUtils;
+import ij.ImagePlus;
+import ij.gui.Overlay;
+import ij.gui.Roi;
 
 public class HyperStackDisplayer extends AbstractTrackMateModelView
 {
@@ -158,7 +157,7 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 		final int frame = spot.getFeature( Spot.FRAME ).intValue();
 		final double dz = imp.getCalibration().pixelDepth;
 		final long z = Math.round( spot.getFeature( Spot.POSITION_Z ) / dz ) + 1;
-		imp.setPosition( 1, ( int ) z, frame + 1 );
+		imp.setPosition( imp.getC(), ( int ) z, frame + 1 );
 	}
 
 	@Override
