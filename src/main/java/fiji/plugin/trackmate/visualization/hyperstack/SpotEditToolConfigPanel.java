@@ -3,7 +3,6 @@ package fiji.plugin.trackmate.visualization.hyperstack;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.BIG_FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
-import ij.ImagePlus;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -36,6 +35,7 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
 import fiji.plugin.trackmate.util.ModelTools;
+import ij.ImagePlus;
 
 public class SpotEditToolConfigPanel extends JFrame
 {
@@ -62,7 +62,7 @@ public class SpotEditToolConfigPanel extends JFrame
 		final Image newimg = image.getScaledInstance( 32, 32, java.awt.Image.SCALE_SMOOTH );
 		SEMIAUTO_TRACKING_ICON = new ImageIcon( newimg );
 	}
-	
+
 	@SuppressWarnings( "unused" )
 	private final static ImageIcon LINK_SPOTS_ICON;
 	static
@@ -80,6 +80,8 @@ public class SpotEditToolConfigPanel extends JFrame
 	private final JNumericTextField jNFNFrames;
 
 	private final SpotEditTool parent;
+
+	private final JNumericTextField jNFNStepwiseTime;
 
 
 	public SpotEditToolConfigPanel( final SpotEditTool parent )
@@ -212,7 +214,7 @@ public class SpotEditToolConfigPanel extends JFrame
 		final JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setHorizontalScrollBarPolicy( ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER );
 		scrollPane.setVerticalScrollBarPolicy( ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS );
-		scrollPane.setBounds( 210, 51, 264, 271 );
+		scrollPane.setBounds( 210, 51, 264, 328 );
 		mainPanel.add( scrollPane );
 
 		final JTextPane textPane = new JTextPane();
@@ -222,14 +224,14 @@ public class SpotEditToolConfigPanel extends JFrame
 		scrollPane.setViewportView( textPane );
 
 		final JPanel panelButtons = new JPanel();
-		panelButtons.setBounds( 6, 205, 192, 117 );
+		panelButtons.setBounds( 6, 262, 192, 117 );
 		panelButtons.setBorder( new LineBorder( new Color( 252, 117, 0 ), 1, false ) );
 		mainPanel.add( panelButtons );
 		panelButtons.setLayout( null );
 
 		final JLabel lblSelectionTools = new JLabel( "Selection tools" );
 		lblSelectionTools.setFont( FONT.deriveFont( Font.BOLD ) );
-		lblSelectionTools.setBounds( 10, 11, 172, 14 );
+		lblSelectionTools.setBounds( 6, 11, 172, 14 );
 		panelButtons.add( lblSelectionTools );
 
 		final JButton buttonSelectTrack = new JButton( SELECT_TRACK_ICON );
@@ -290,6 +292,31 @@ public class SpotEditToolConfigPanel extends JFrame
 				"belong to, forward in time.</html>" );
 		panelButtons.add( lblSelectTrackDown );
 
+		final JPanel panel = new JPanel();
+		panel.setBorder( new LineBorder( new Color( 252, 117, 0 ) ) );
+		panel.setBounds( 6, 201, 192, 53 );
+		mainPanel.add( panel );
+		panel.setLayout( null );
+
+		final JLabel lblNavigationTools = new JLabel( "Navigation tools" );
+		lblNavigationTools.setBounds( 6, 6, 172, 14 );
+		lblNavigationTools.setFont( FONT.deriveFont( Font.BOLD ) );
+		panel.add( lblNavigationTools );
+
+		jNFNStepwiseTime = new JNumericTextField( ( double ) parent.params.stepwiseTimeBrowsing );
+		jNFNStepwiseTime.setBounds( 137, 26, 49, 18 );
+		jNFNStepwiseTime.setFormat( "%.0f" );
+		jNFNStepwiseTime.setHorizontalAlignment( SwingConstants.CENTER );
+		jNFNStepwiseTime.setFont( SMALL_FONT );
+		jNFNStepwiseTime.addActionListener( al );
+		jNFNStepwiseTime.addFocusListener( fl );
+		panel.add( jNFNStepwiseTime );
+
+		final JLabel lblJumpByb = new JLabel( "Stepwise time browsing" );
+		lblJumpByb.setBounds( 10, 29, 120, 14 );
+		lblJumpByb.setFont( SMALL_FONT );
+		panel.add( lblJumpByb );
+
 		logger = new Logger()
 		{
 
@@ -330,7 +357,7 @@ public class SpotEditToolConfigPanel extends JFrame
 			{}
 		};
 
-		setSize( 480, 350 );
+		setSize( 487, 418 );
 		setDefaultCloseOperation( JFrame.HIDE_ON_CLOSE );
 		setVisible( true );
 	}
@@ -373,7 +400,7 @@ public class SpotEditToolConfigPanel extends JFrame
 
 	/**
 	 * Returns the {@link Logger} that outputs on this config panel.
-	 * 
+	 *
 	 * @return the {@link Logger} instance of this panel.
 	 */
 	public Logger getLogger()
@@ -386,6 +413,7 @@ public class SpotEditToolConfigPanel extends JFrame
 		parent.params.distanceTolerance = jNFDistanceTolerance.getValue();
 		parent.params.qualityThreshold = jNFQualityThreshold.getValue();
 		parent.params.nFrames = ( int ) jNFNFrames.getValue();
+		parent.params.stepwiseTimeBrowsing = ( int ) jNFNStepwiseTime.getValue();
 	}
 
 	private void semiAutoTracking()

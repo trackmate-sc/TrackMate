@@ -1028,6 +1028,34 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 
 		}
 
+		case KeyEvent.VK_G:
+		case KeyEvent.VK_F:
+		{
+			// Stepwise time browsing.
+			final int currentT = imp.getT() - 1;
+			final int prevStep = ( currentT / params.stepwiseTimeBrowsing ) * params.stepwiseTimeBrowsing;
+			int tp;
+			if ( keycode == KeyEvent.VK_G )
+			{
+				tp = prevStep + params.stepwiseTimeBrowsing;
+			}
+			else
+			{
+				if ( currentT == prevStep )
+				{
+					tp = currentT - params.stepwiseTimeBrowsing;
+				}
+				else
+				{
+					tp = prevStep;
+				}
+			}
+			imp.setT( tp + 1 );
+
+			e.consume();
+			break;
+		}
+
 		case KeyEvent.VK_W:
 		{
 			e.consume(); // consume it: we do not want IJ to close the window
@@ -1173,6 +1201,11 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 		 * We process at most nFrames. Make it 0 or negative to have no bounds.
 		 */
 		int nFrames = 10;
+
+		/**
+		 * By how many frames to jymp when we do step-wide time browsing.
+		 */
+		int stepwiseTimeBrowsing = 5;
 
 		@Override
 		public String toString()
