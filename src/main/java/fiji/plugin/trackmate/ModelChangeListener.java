@@ -12,6 +12,9 @@ public interface ModelChangeListener extends EventListener {
 
 	/**
 	 * This notification is fired when a {@link Model} has been changed.
+	 * 
+	 * @param event
+	 *            the {@link ModelChangeEvent}.
 	 */
 	public void modelChanged(final ModelChangeEvent event);
 	

@@ -118,6 +118,11 @@ public class SpotCollection implements MultiThreaded
 	 * If the frame does not exist yet in the collection, it is created and
 	 * added. Upon adding, the added spot has its feature {@link Spot#FRAME}
 	 * updated with the passed frame value.
+	 * 
+	 * @param spot
+	 *            the spot to add.
+	 * @param frame
+	 *            the frame to add it to.
 	 */
 	public void add( final Spot spot, final Integer frame )
 	{
@@ -138,6 +143,12 @@ public class SpotCollection implements MultiThreaded
 	 * If the spot frame collection does not exist yet, nothing is done and
 	 * <code>false</code> is returned. If the spot cannot be found in the frame
 	 * content, nothing is done and <code>false</code> is returned.
+	 * 
+	 * @param spot
+	 *            the spot to remove.
+	 * @param frame
+	 *            the frame to remove it from.
+	 * @return <code>true</code> if the spot was succesfully removed.
 	 */
 	public boolean remove( final Spot spot, final Integer frame )
 	{
@@ -147,7 +158,7 @@ public class SpotCollection implements MultiThreaded
 	}
 
 	/**
-	 * Marks all the content of this collection as visible or invisible,
+	 * Marks all the content of this collection as visible or invisible.
 	 *
 	 * @param visible
 	 *            if true, all spots will be marked as visible.
@@ -520,6 +531,8 @@ public class SpotCollection implements MultiThreaded
 	/**
 	 * Returns the number of spots at the given frame.
 	 *
+	 * @param frame
+	 *            the frame.
 	 * @param visibleSpotsOnly
 	 *            if true, will only count visible spots. If false count all
 	 *            spots.

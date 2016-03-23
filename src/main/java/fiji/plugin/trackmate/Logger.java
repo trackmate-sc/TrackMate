@@ -1,11 +1,11 @@
 package fiji.plugin.trackmate;
 
-import ij.IJ;
-
 import java.awt.Color;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
+
+import ij.IJ;
 
 /**
  * This class is used to log messages occurring during TrackMate execution.
@@ -62,16 +62,27 @@ public abstract class Logger extends PrintWriter
 
 	/**
 	 * Append the message to the logger, with the specified color.
+	 * 
+	 * @param message
+	 *            the message to append.
+	 * @param color
+	 *            the color to use.
 	 */
 	public abstract void log( String message, Color color );
 
 	/**
 	 * Send the message to the error channel of this logger.
+	 * 
+	 * @param message
+	 *            the message to send.
 	 */
 	public abstract void error( String message );
 
 	/**
 	 * Append the message to the logger with default black color.
+	 * 
+	 * @param message
+	 *            the message to append.
 	 */
 	public void log( final String message )
 	{
@@ -81,11 +92,17 @@ public abstract class Logger extends PrintWriter
 	/**
 	 * Set the progress value of the process logged by this logger. Values
 	 * should be between 0 and 1, 1 meaning the process if finished.
+	 * 
+	 * @param val
+	 *            the progress value (double from 0 to 1).
 	 */
 	public abstract void setProgress( double val );
 
 	/**
 	 * Set the status to be displayed by this logger.
+	 * 
+	 * @param status
+	 *            the status to display.
 	 */
 	public abstract void setStatus( String status );
 

@@ -99,7 +99,10 @@ public class ModelChangeEvent extends EventObject {
 	/**
 	 * Create a new event, reflecting a change in a {@link Model}.
 	 *
-	 * @param source  the object source of this event
+	 * @param source
+	 *            the object source of this event.
+	 * @param eventID
+	 *            the evend ID to use for this event.
 	 */
 	public ModelChangeEvent(final Object source, final int eventID) {
 		super(source);
@@ -158,7 +161,11 @@ public class ModelChangeEvent extends EventObject {
 	}
 
 	/**
-	 * @return  the modification flag for the given spot affected by this event.
+	 * Returns the modification flag for the given spot affected by this event.
+	 * 
+	 * @param spot
+	 *            the spot to query.
+	 * @return the modification flag.
 	 * @see #FLAG_SPOT_ADDED
 	 * @see #FLAG_SPOT_MODIFIED
 	 * @see #FLAG_SPOT_REMOVED
@@ -168,7 +175,11 @@ public class ModelChangeEvent extends EventObject {
 	}
 
 	/**
-	 * @return  the modification flag for the given edge affected by this event.
+	 * Returns the modification flag for the given edge affected by this event.
+	 * 
+	 * @param edge
+	 *            the edge to query.
+	 * @return the modification flag.
 	 * @see #FLAG_EDGE_ADDED
 	 * @see #FLAG_EDGE_REMOVED
 	 */

@@ -1,9 +1,5 @@
 package fiji.plugin.trackmate;
 
-import ij.IJ;
-import ij.ImageJ;
-import ij.plugin.PlugIn;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
@@ -42,6 +38,9 @@ import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewUtils;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
+import ij.IJ;
+import ij.ImageJ;
+import ij.plugin.PlugIn;
 
 public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 {
@@ -349,6 +348,8 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 	 * Creates the {@link TmXmlReader} instance that will be used to load the
 	 * file.
 	 *
+	 * @param file
+	 *            the file to read from.
 	 * @return a new {@link TmXmlReader} instance.
 	 */
 	protected TmXmlReader createReader( final File file )
@@ -359,6 +360,7 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 	/**
 	 * Hook for subclassers: <br>
 	 * Creates the {@link Settings} instance that will be used to tune the
+	 * tracking process.
 	 *
 	 * @return a new {@link Settings} instance.
 	 */
@@ -373,9 +375,6 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 	 * MAIN METHOD
 	 */
 
-	/**
-	 * @param args
-	 */
 	public static void main( final String[] args )
 	{
 		ImageJ.main( args );

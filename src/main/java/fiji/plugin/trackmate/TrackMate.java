@@ -207,7 +207,9 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 	/**
 	 * Calculate all features for all tracks.
 	 *
-	 * @return
+	 * @param doLogIt
+	 *            if <code>true</code>, messages will be sent to the logger.
+	 * @return <code>true</code> if the computation completed without errors.
 	 */
 	public boolean computeTrackFeatures( final boolean doLogIt )
 	{
@@ -239,6 +241,8 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 	 * <p>
 	 * The {@link ModelChangeListener}s of the model will be notified when the
 	 * successful process is over.
+	 * 
+	 * @return <code>true</code> if the computation completed without errors.
 	 */
 	public boolean execTracking()
 	{
@@ -504,6 +508,8 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 	 * <p>
 	 * The {@link ModelChangeListener}s of this model will be notified with a
 	 * {@link ModelChangeEvent#SPOTS_COMPUTED} event.
+	 * 
+	 * @return <code>true</code> if the computation completed without errors.
 	 */
 	public boolean execInitialSpotFiltering()
 	{
@@ -538,7 +544,9 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 	 * {@link ModelChangeEvent#SPOTS_FILTERED} event.
 	 *
 	 * @param doLogIt
-	 *            if true, will send a message to the {@link Model#logger}.
+	 *            if <code>true</code>, will send a message to the
+	 *            {@link Model#logger}.
+	 * @return <code>true</code> if the computation completed without errors.
 	 */
 	public boolean execSpotFiltering( final boolean doLogIt )
 	{

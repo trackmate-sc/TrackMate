@@ -86,7 +86,7 @@ public class Model
 
 	// OTHERS
 
-	/** The logger to append processes messages */
+	/** The logger to append processes messages. */
 	private Logger logger = Logger.DEFAULT_LOGGER;
 
 	private String spaceUnits = "pixels";
@@ -301,6 +301,8 @@ public class Model
 
 	/**
 	 * Returns the {@link TrackModel} that manages the tracks for this model.
+	 * 
+	 * @return the track model.
 	 */
 	public TrackModel getTrackModel()
 	{
@@ -413,6 +415,9 @@ public class Model
 	/**
 	 * Set the logger that will receive the messages from the processes
 	 * occurring within this trackmate.
+	 * 
+	 * @param logger
+	 *            the {@link Logger} to use.
 	 */
 	public void setLogger( final Logger logger )
 	{
@@ -421,6 +426,8 @@ public class Model
 
 	/**
 	 * Return the logger currently set for this model.
+	 * 
+	 * @return the {@link Logger} used.
 	 */
 	public Logger getLogger()
 	{
@@ -505,6 +512,11 @@ public class Model
 	 * 	model.endUpdate();
 	 * }
 	 * </pre>
+	 * 
+	 * @param spotToAdd
+	 *            the spot to add.
+	 * @param toFrame
+	 *            the frame to add it to.
 	 *
 	 * @return the spot just added.
 	 */

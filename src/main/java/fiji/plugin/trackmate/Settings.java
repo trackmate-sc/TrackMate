@@ -245,6 +245,8 @@ public class Settings
 
 	/**
 	 * Returns a string description of the target image.
+	 * 
+	 * @return a string representation of the target image.
 	 */
 	public String toStringImageInfo()
 	{
@@ -500,6 +502,8 @@ public class Settings
 	 * Adds a {@link SpotAnalyzerFactory} to the {@link List} of spot analyzers
 	 * configured, at the specified index.
 	 *
+	 * @param index
+	 *            index at which the analyzer is to be inserted.
 	 * @param spotAnalyzer
 	 *            the {@link fiji.plugin.trackmate.features.spot.SpotAnalyzer}
 	 *            to add, at the specified index in the list.
@@ -563,7 +567,10 @@ public class Settings
 	/**
 	 * Adds a {@link EdgeAnalyzer} to the {@link List} of edge analyzers
 	 * configured, at the specified index.
-	 *
+	 * 
+	 * @param index
+	 *            index at which the analyzer is to be inserted.
+	 * 
 	 * @param edgeAnalyzer
 	 *            the {@link EdgeAnalyzer} to add, at the specified index in the
 	 *            list.
@@ -626,7 +633,10 @@ public class Settings
 	/**
 	 * Adds a {@link TrackAnalyzer} to the {@link List} of track analyzers
 	 * configured, at the specified index.
-	 *
+	 * 
+	 * @param index
+	 *            index at which the analyzer is to be inserted.
+	 * 
 	 * @param trackAnalyzer
 	 *            the {@link TrackAnalyzer} to add, at the specified index in
 	 *            the list.
@@ -656,6 +666,9 @@ public class Settings
 
 	/**
 	 * Add a filter to the list of spot filters.
+	 * 
+	 * @param filter
+	 *            the filter to add.
 	 */
 	public void addSpotFilter( final FeatureFilter filter )
 	{
@@ -683,7 +696,12 @@ public class Settings
 		this.spotFilters = spotFilters;
 	}
 
-	/** Add a filter to the list of track filters. */
+	/**
+	 * Add a filter to the list of track filters.
+	 * 
+	 * @param filter
+	 *            the filter to add.
+	 */
 	public void addTrackFilter( final FeatureFilter filter )
 	{
 		trackFilters.add( filter );

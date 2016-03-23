@@ -16,7 +16,7 @@ public class SelectionChangeEvent extends EventObject {
 	private static final long serialVersionUID = -8920831578922412606L;
 
 	/** Changes in {@link DefaultWeightedEdge} selection this event represents. */
-	private Map<DefaultWeightedEdge, Boolean> edges;
+	private final Map<DefaultWeightedEdge, Boolean> edges;
 
 	/** Changes in {@link Spot} selection this event represents. */
 	protected Map<Spot, Boolean> spots;
@@ -28,13 +28,23 @@ public class SelectionChangeEvent extends EventObject {
 	/**
 	 * Represents a change in the selection of a displayed TM model.
 	 * <p>
-	 * Two maps are given. The first one represent changes in the spot selection. The {@link Boolean} 
-	 * mapped to a {@link Spot} key specifies if the spot was added to the selection (<code>true</code>)
-	 * or removed from it (<code>false</code>). The same goes for the {@link DefaultWeightedEdge} map.
-	 * <code>null</code>s are accepted for the two maps, to specify that no changes happened for the 
-	 * corresponding type.
+	 * Two maps are given. The first one represent changes in the spot
+	 * selection. The {@link Boolean} mapped to a {@link Spot} key specifies if
+	 * the spot was added to the selection (<code>true</code>) or removed from
+	 * it (<code>false</code>). The same goes for the
+	 * {@link DefaultWeightedEdge} map. <code>null</code>s are accepted for the
+	 * two maps, to specify that no changes happened for the corresponding type.
+	 * 
+	 * @param source
+	 *            the source object that fires this event.
+	 * @param spots
+	 *            the spots that are added or removed from the selection by this
+	 *            event.
+	 * @param edges
+	 *            the edges that are added or removed from the selection by this
+	 *            event.
 	 */
-	public SelectionChangeEvent(Object source, Map<Spot, Boolean> spots, Map<DefaultWeightedEdge, Boolean> edges) {
+	public SelectionChangeEvent(final Object source, final Map<Spot, Boolean> spots, final Map<DefaultWeightedEdge, Boolean> edges) {
 		super(source);
 		this.spots = spots;
 		this.edges = edges;

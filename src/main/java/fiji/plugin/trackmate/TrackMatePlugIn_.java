@@ -93,7 +93,9 @@ public class TrackMatePlugIn_ implements PlugIn
 	 * Creates the {@link Settings} instance that will be used to tune the
 	 * {@link TrackMate} instance. It is initialized by default with values
 	 * taken from the current {@link ImagePlus}.
-	 *
+	 * 
+	 * @param imp
+	 *            the {@link ImagePlus} to operate on.
 	 * @return a new {@link Settings} instance.
 	 */
 	protected Settings createSettings( final ImagePlus imp )
@@ -126,9 +128,6 @@ public class TrackMatePlugIn_ implements PlugIn
 	 * MAIN METHOD
 	 */
 
-	/**
-	 * @param args
-	 */
 	public static void main( final String[] args )
 	{
 		ImageJ.main( args );

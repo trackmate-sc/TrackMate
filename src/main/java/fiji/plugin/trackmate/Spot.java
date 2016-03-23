@@ -1,7 +1,6 @@
 package fiji.plugin.trackmate;
 
 import static fiji.plugin.trackmate.SpotCollection.VISIBLITY;
-import fiji.plugin.trackmate.util.AlphanumComparator;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import fiji.plugin.trackmate.util.AlphanumComparator;
 import net.imglib2.AbstractEuclideanSpace;
 import net.imglib2.RealLocalizable;
 import net.imglib2.util.Util;
@@ -49,7 +49,7 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 	/** A user-supplied name for this spot. */
 	private String name;
 
-	/** This spot ID */
+	/** This spot ID. */
 	private final int ID;
 
 	/*
@@ -219,6 +219,9 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 
 	/**
 	 * Set the name of this Spot.
+	 * 
+	 * @param name
+	 *            the name to use.
 	 */
 	public void setName( final String name )
 	{
@@ -243,6 +246,8 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 
 	/**
 	 * Return a string representation of this spot, with calculated features.
+	 * 
+	 * @return a string representation of the spot.
 	 */
 	public String echo()
 	{
@@ -337,6 +342,7 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 	 *            the spot to compare to.
 	 * @param feature
 	 *            the name of the feature to use for calculation.
+	 * @return the difference in feature value.
 	 */
 	public double diffTo( final Spot s, final String feature )
 	{
@@ -364,6 +370,7 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 	 *            the spot to compare to.
 	 * @param feature
 	 *            the name of the feature to use for calculation.
+	 * @return the absolute normalized difference feature value.
 	 */
 	public double normalizeDiffTo( final Spot s, final String feature )
 	{

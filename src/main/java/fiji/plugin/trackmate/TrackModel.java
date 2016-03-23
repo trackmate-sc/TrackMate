@@ -38,7 +38,7 @@ import fiji.plugin.trackmate.util.AlphanumComparator;
 import fiji.plugin.trackmate.util.TMUtils;
 
 /**
- * A component of {@link Model} specialized for tracks
+ * A component of {@link Model} specialized for tracks.
  *
  * @author Jean-Yves Tinevez
  */
@@ -312,6 +312,8 @@ public class TrackModel
 	 *            a map that will receive mappings from {@link Spot} to the new
 	 *            vertices. Can be <code>null</code> if you do not want to get
 	 *            the mappings
+	 * @param <V>
+	 *            the type of the vertices.
 	 * @return a new {@link SimpleDirectedWeightedGraph}.
 	 */
 	public < V > SimpleDirectedWeightedGraph< V, DefaultWeightedEdge > copy( final VertexFactory< V > factory, final Function1< Spot, V > function, final Map< Spot, V > mappings )
@@ -349,6 +351,14 @@ public class TrackModel
 	}
 
 	/**
+	 * Returns <code>true</code> if this model contains the specified edge.
+	 * 
+	 * @param source
+	 *            the edge source vertex.
+	 * @param target
+	 *            the edge target vertex.
+	 * @return <code>true</code> if this model contains the specified edge.
+	 * 
 	 * @see org.jgrapht.Graph#containsEdge(Object, Object)
 	 */
 	public boolean containsEdge( final Spot source, final Spot target )
@@ -357,6 +367,14 @@ public class TrackModel
 	}
 
 	/**
+	 * Returns the specified edge.
+	 * 
+	 * @param source
+	 *            the edge source vertex.
+	 * @param target
+	 *            the edge target vertex.
+	 * @return the specified edge, or <code>null</code> if it does not exist.
+	 * 
 	 * @see org.jgrapht.Graph#getEdge(Object, Object)
 	 */
 	public DefaultWeightedEdge getEdge( final Spot source, final Spot target )
@@ -365,6 +383,13 @@ public class TrackModel
 	}
 
 	/**
+	 * Returns the set of edges of a spot.
+	 * 
+	 * @param spot
+	 *            the spot.
+	 * @return the set of edges connected to this spot. Can be empty if the spot
+	 *         does not have any edge.
+	 * 
 	 * @see org.jgrapht.Graph#edgesOf(Object)
 	 */
 	public Set< DefaultWeightedEdge > edgesOf( final Spot spot )
@@ -380,6 +405,13 @@ public class TrackModel
 	}
 
 	/**
+	 * Returns a set of the edges contained in this model. The set is backed by
+	 * the graph, so changes to the graph are reflected in the set. If the graph
+	 * is modified while an iteration over the set is in progress, the results
+	 * of the iteration are undefined.
+	 * 
+	 * @return the edges of this model.
+	 * 
 	 * @see org.jgrapht.Graph#edgeSet()
 	 */
 	public Set< DefaultWeightedEdge > edgeSet()
@@ -388,6 +420,13 @@ public class TrackModel
 	}
 
 	/**
+	 * Returns a set of the vertices contained in this graph. The set is backed
+	 * by the graph, so changes to the graph are reflected in the set. If the
+	 * graph is modified while an iteration over the set is in progress, the
+	 * results of the iteration are undefined.
+	 * 
+	 * @return the vertices of this model.
+	 * 
 	 * @see org.jgrapht.Graph#vertexSet()
 	 */
 	public Set< Spot > vertexSet()
@@ -396,6 +435,12 @@ public class TrackModel
 	}
 
 	/**
+	 * Returns the source spot of the specified edge.
+	 * 
+	 * @param e
+	 *            the edge.
+	 * @return the source spot of this edge.
+	 * 
 	 * @see org.jgrapht.Graph#getEdgeSource(Object)
 	 */
 	public Spot getEdgeSource( final DefaultWeightedEdge e )
@@ -404,6 +449,12 @@ public class TrackModel
 	}
 
 	/**
+	 * Returns the target spot of the specified edge.
+	 * 
+	 * @param e
+	 *            the edge.
+	 * @return the target spot of this edge.
+	 * 
 	 * @see org.jgrapht.Graph#getEdgeTarget(Object)
 	 */
 	public Spot getEdgeTarget( final DefaultWeightedEdge e )
@@ -412,6 +463,13 @@ public class TrackModel
 	}
 
 	/**
+	 * Returns the weight assigned to the specified edge. Its physical meaning
+	 * depend on the particle-linking algorithm used to generate the edge.
+	 * 
+	 * @param edge
+	 *            the edge.
+	 * @return the edge weight.
+	 * 
 	 * @see org.jgrapht.Graph#getEdgeWeight(Object)
 	 */
 	public double getEdgeWeight( final DefaultWeightedEdge edge )
@@ -598,6 +656,9 @@ public class TrackModel
 	/**
 	 * Generates initial connected sets in bulk, from a graph. All sets are
 	 * created visible, and are give a default name.
+	 * 
+	 * @param graph
+	 *            the graph to read edges and vertices from.
 	 */
 	private void init( final UndirectedGraph< Spot, DefaultWeightedEdge > graph )
 	{
@@ -688,6 +749,7 @@ public class TrackModel
 	 *            the links.
 	 * @param directed
 	 *            if true returns a directed iterator, undirected if false.
+	 * @return a new depth-first iterator.
 	 */
 	public GraphIterator< Spot, DefaultWeightedEdge > getDepthFirstIterator( final Spot start, final boolean directed )
 	{
@@ -717,6 +779,7 @@ public class TrackModel
 	 * @param comparator
 	 *            the comparator to use to pick children in order when
 	 *            branching.
+	 * @return a new depth-first iterator.
 	 */
 	public SortedDepthFirstIterator< Spot, DefaultWeightedEdge > getSortedDepthFirstIterator( final Spot start, final Comparator< Spot > comparator, final boolean directed )
 	{

@@ -79,6 +79,7 @@ public class FeatureModel
 	 * are left blank.
 	 *
 	 * @param model
+	 *            the parent {@link Model}.
 	 */
 	protected FeatureModel( final Model model )
 	{
@@ -209,6 +210,10 @@ public class FeatureModel
 	 *            the short name of these features.
 	 * @param featureDimensions
 	 *            the dimension of these features.
+	 * @param isIntFeature
+	 *            whether some of these features are made of <code>int</code>s (
+	 *            <code>true</code>) or <code>double</code>s (<code>false</code>
+	 *            ).
 	 */
 	public void declareEdgeFeatures( final Collection< String > features, final Map< String, String > featureNames, final Map< String, String > featureShortNames, final Map< String, Dimension > featureDimensions, final Map< String, Boolean > isIntFeature )
 	{
@@ -283,6 +288,8 @@ public class FeatureModel
 
 	/**
 	 * Returns the track features that are dealt with in this model.
+	 * 
+	 * @return the collection of track features managed in this model.
 	 */
 	public Collection< String > getTrackFeatures()
 	{
@@ -302,6 +309,10 @@ public class FeatureModel
 	 *            the short name of these features.
 	 * @param featureDimensions
 	 *            the dimension of these features.
+	 * @param isIntFeature
+	 *            whether some of these features are made of <code>int</code>s (
+	 *            <code>true</code>) or <code>double</code>s (<code>false</code>
+	 *            ).
 	 */
 	public void declareTrackFeatures( final Collection< String > features, final Map< String, String > featureNames, final Map< String, String > featureShortNames, final Map< String, Dimension > featureDimensions, final Map< String, Boolean > isIntFeature )
 	{
@@ -330,6 +341,8 @@ public class FeatureModel
 	/**
 	 * Returns the name mapping of the track features that are dealt with in
 	 * this model.
+	 * 
+	 * @return the feature name.
 	 */
 	public Map< String, String > getTrackFeatureNames()
 	{
@@ -340,7 +353,7 @@ public class FeatureModel
 	 * Returns the short name mapping of the track features that are dealt with
 	 * in this model.
 	 *
-	 * @return
+	 * @return the feature short name.
 	 */
 	public Map< String, String > getTrackFeatureShortNames()
 	{
@@ -350,6 +363,8 @@ public class FeatureModel
 	/**
 	 * Returns the dimension mapping of the track features that are dealt with
 	 * in this model.
+	 * 
+	 * @return the feature dimension.
 	 */
 	public Map< String, Dimension > getTrackFeatureDimensions()
 	{
@@ -400,6 +415,7 @@ public class FeatureModel
 	 *            the track ID to quest.
 	 * @param feature
 	 *            the desired feature.
+	 * @return the value of the specified feature.
 	 */
 	public Double getTrackFeature( final Integer trackID, final String feature )
 	{
@@ -467,6 +483,10 @@ public class FeatureModel
 	 *            the short name of these features.
 	 * @param featureDimensions
 	 *            the dimension of these features.
+	 * @param isIntFeature
+	 *            whether some of these features are made of <code>int</code>s (
+	 *            <code>true</code>) or <code>double</code>s (<code>false</code>
+	 *            ).
 	 */
 	public void declareSpotFeatures( final Collection< String > features, final Map< String, String > featureNames, final Map< String, String > featureShortNames, final Map< String, Dimension > featureDimensions, final Map< String, Boolean > isIntFeature )
 	{
@@ -572,6 +592,8 @@ public class FeatureModel
 
 	/**
 	 * Echoes the full content of this {@link FeatureModel}.
+	 * 
+	 * @return a String representation of the full content of this model.
 	 */
 	public String echo()
 	{
