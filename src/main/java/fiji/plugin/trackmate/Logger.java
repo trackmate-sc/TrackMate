@@ -62,7 +62,7 @@ public abstract class Logger extends PrintWriter
 
 	/**
 	 * Append the message to the logger, with the specified color.
-	 * 
+	 *
 	 * @param message
 	 *            the message to append.
 	 * @param color
@@ -72,7 +72,7 @@ public abstract class Logger extends PrintWriter
 
 	/**
 	 * Send the message to the error channel of this logger.
-	 * 
+	 *
 	 * @param message
 	 *            the message to send.
 	 */
@@ -80,7 +80,7 @@ public abstract class Logger extends PrintWriter
 
 	/**
 	 * Append the message to the logger with default black color.
-	 * 
+	 *
 	 * @param message
 	 *            the message to append.
 	 */
@@ -92,7 +92,7 @@ public abstract class Logger extends PrintWriter
 	/**
 	 * Set the progress value of the process logged by this logger. Values
 	 * should be between 0 and 1, 1 meaning the process if finished.
-	 * 
+	 *
 	 * @param val
 	 *            the progress value (double from 0 to 1).
 	 */
@@ -100,7 +100,7 @@ public abstract class Logger extends PrintWriter
 
 	/**
 	 * Set the status to be displayed by this logger.
-	 * 
+	 *
 	 * @param status
 	 *            the status to display.
 	 */
@@ -190,7 +190,37 @@ public abstract class Logger extends PrintWriter
 		{
 			IJ.showStatus( status );
 		}
+	};
 
+	/**
+	 * This {@link Logger} outputs everything to the ImageJ toolbar. This is not
+	 * optimal for long messages. Colors are ignored.
+	 */
+	public static Logger IJTOOLBAR_LOGGER = new Logger()
+	{
+		@Override
+		public void log( final String message, final Color color )
+		{
+			IJ.showStatus( message );
+		}
+
+		@Override
+		public void error( final String message )
+		{
+			IJ.showStatus( message );
+		}
+
+		@Override
+		public void setProgress( final double val )
+		{
+			IJ.showProgress( val );
+		}
+
+		@Override
+		public void setStatus( final String status )
+		{
+			IJ.showStatus( status );
+		}
 	};
 
 	/**
@@ -251,9 +281,9 @@ public abstract class Logger extends PrintWriter
 	 * message. This class is used to report progress of a sub-process. If it is
 	 * sent to a subprocess, the master logger can show a progress in a range
 	 * and from a starting point that can be specified.
-	 * 
+	 *
 	 * @author Jean-Yves Tinevez - 2014
-	 * 
+	 *
 	 */
 	public static class SlaveLogger extends Logger
 	{
@@ -269,7 +299,7 @@ public abstract class Logger extends PrintWriter
 		 * the following way: If a sub-process reports a progress of
 		 * <code>val</code>, then the master logger will receive the progress
 		 * value <code>progressStart + progressRange * val</code>.
-		 * 
+		 *
 		 * @param master
 		 *            the master {@link Logger}.
 		 * @param progressStart
