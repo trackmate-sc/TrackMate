@@ -1,11 +1,5 @@
 package fiji.plugin.trackmate.visualization.hyperstack;
 
-import ij.IJ;
-import ij.ImagePlus;
-import ij.gui.FreehandRoi;
-import ij.gui.ImageCanvas;
-import ij.gui.Toolbar;
-
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.event.ComponentEvent;
@@ -39,6 +33,11 @@ import fiji.plugin.trackmate.detection.semiauto.SemiAutoTracker;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.tool.AbstractTool;
 import fiji.tool.ToolWithOptions;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.gui.FreehandRoi;
+import ij.gui.ImageCanvas;
+import ij.gui.Toolbar;
 
 public class SpotEditTool extends AbstractTool implements MouseMotionListener, MouseListener, MouseWheelListener, KeyListener, ToolWithOptions
 {
@@ -562,7 +561,11 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 		{
 			radius += e.getWheelRotation() * dx * FINE_STEP;
 		}
-		if ( radius < dx ) { return; }
+		if ( radius < dx )
+		{
+			e.consume();
+			return;
+		}
 
 		editedSpot.putFeature( Spot.RADIUS, radius );
 		displayer.imp.updateAndDraw();
