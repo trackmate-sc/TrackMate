@@ -5,16 +5,15 @@ import static fiji.plugin.trackmate.features.spot.SpotContrastAndSNRAnalyzerFact
 
 import java.util.Iterator;
 
-import net.imagej.ImgPlus;
-import net.imglib2.type.numeric.RealType;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.features.FeatureAnalyzer;
 import fiji.plugin.trackmate.util.SpotNeighborhood;
 import fiji.plugin.trackmate.util.SpotNeighborhoodCursor;
+import net.imagej.ImgPlus;
+import net.imglib2.type.numeric.RealType;
 
 /**
- * This {@link FeatureAnalyzer} computes both the <a
- * href=http://en.wikipedia.org/wiki/Michelson_contrast#Formula>Michelson
+ * This {@link fiji.plugin.trackmate.features.FeatureAnalyzer} computes both the
+ * <a href=http://en.wikipedia.org/wiki/Michelson_contrast#Formula>Michelson
  * contrast</a> and the SNR for each spot:
  * <p>
  * The contrast is defined as <code>C = (I_in - I_out) / (I_in + I_out)</code>
@@ -30,7 +29,7 @@ import fiji.plugin.trackmate.util.SpotNeighborhoodCursor;
  * 
  * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; 2011 - 2012
  */
-public class SpotContrastAndSNRAnalyzer< T extends RealType< T >> extends IndependentSpotFeatureAnalyzer< T >
+public class SpotContrastAndSNRAnalyzer< T extends RealType< T > > extends IndependentSpotFeatureAnalyzer< T >
 {
 
 	protected static final double RAD_PERCENTAGE = 1f;

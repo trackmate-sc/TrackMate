@@ -16,8 +16,6 @@ import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACKS_
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_COLORING;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_DISPLAY_DEPTH;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_DISPLAY_MODE;
-import ij.IJ;
-import ij.Prefs;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -37,18 +35,13 @@ import javax.swing.event.ChangeListener;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionChangeListener;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.action.ExportStatsToIJAction;
 import fiji.plugin.trackmate.detection.ManualDetectorFactory;
-import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.features.ModelFeatureUpdater;
-import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.edges.EdgeVelocityAnalyzer;
-import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
-import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.descriptors.ActionChooserDescriptor;
 import fiji.plugin.trackmate.gui.descriptors.ConfigureViewsDescriptor;
@@ -78,7 +71,6 @@ import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.providers.ViewProvider;
 import fiji.plugin.trackmate.tracking.ManualTrackerFactory;
-import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.ManualEdgeColorGenerator;
@@ -90,6 +82,8 @@ import fiji.plugin.trackmate.visualization.SpotColorGeneratorPerTrackFeature;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.trackscheme.SpotImageUpdater;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
+import ij.IJ;
+import ij.Prefs;
 
 public class TrackMateGUIController implements ActionListener
 {
@@ -269,7 +263,6 @@ public class TrackMateGUIController implements ActionListener
 	 * PUBLIC METHODS
 	 */
 
-
 	/**
 	 * Creates a new {@link TrackMateGUIController} instance, set to operate on
 	 * the specified {@link TrackMate} instance.
@@ -311,7 +304,8 @@ public class TrackMateGUIController implements ActionListener
 
 	/**
 	 * Exposes the {@link SelectionModel} shared amongst all
-	 * {@link SelectionChangeListener}s controlled by this instance.
+	 * {@link fiji.plugin.trackmate.SelectionChangeListener}s controlled by this
+	 * instance.
 	 *
 	 * @return the {@link SelectionModel}.
 	 */
@@ -394,7 +388,7 @@ public class TrackMateGUIController implements ActionListener
 
 	/**
 	 * Returns the {@link DetectorProvider} instance, serving
-	 * {@link SpotDetectorFactory}s to this GUI
+	 * {@link fiji.plugin.trackmate.detection.SpotDetectorFactory}s to this GUI
 	 *
 	 * @return the detector provider.
 	 */
@@ -405,7 +399,8 @@ public class TrackMateGUIController implements ActionListener
 
 	/**
 	 * Returns the {@link SpotAnalyzerProvider} instance, serving
-	 * {@link SpotAnalyzerFactory}s to this GUI.
+	 * {@link fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory}s to this
+	 * GUI.
 	 *
 	 * @return the spot analyzer provider.
 	 */
@@ -416,7 +411,7 @@ public class TrackMateGUIController implements ActionListener
 
 	/**
 	 * Returns the {@link EdgeAnalyzerProvider} instance, serving
-	 * {@link EdgeAnalyzer}s to this GUI.
+	 * {@link fiji.plugin.trackmate.features.edges.EdgeAnalyzer}s to this GUI.
 	 *
 	 * @return the edge analyzer provider.
 	 */
@@ -427,7 +422,7 @@ public class TrackMateGUIController implements ActionListener
 
 	/**
 	 * Returns the {@link TrackAnalyzerProvider} instance, serving
-	 * {@link TrackAnalyzer}s to this GUI.
+	 * {@link fiji.plugin.trackmate.features.track.TrackAnalyzer}s to this GUI.
 	 *
 	 * @return the track analyzer provider.
 	 */
@@ -437,8 +432,8 @@ public class TrackMateGUIController implements ActionListener
 	}
 
 	/**
-	 * Returns the {@link TrackerProvider} instance, serving {@link SpotTracker}
-	 * s to this GUI.
+	 * Returns the {@link TrackerProvider} instance, serving
+	 * {@link fiji.plugin.trackmate.tracking.SpotTracker}s to this GUI.
 	 *
 	 * @return the tracker provider.
 	 */

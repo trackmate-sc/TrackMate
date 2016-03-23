@@ -1,7 +1,5 @@
 package fiji.plugin.trackmate;
 
-import fiji.plugin.trackmate.features.FeatureFilter;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -10,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -18,11 +15,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import fiji.plugin.trackmate.features.FeatureFilter;
 import net.imglib2.algorithm.MultiThreaded;
 
 /**
- * A utility class that wrap the {@link SortedMap} we use to store the spots
- * contained in each frame with a few utility methods.
+ * A utility class that wrap the {@link java.util.SortedMap} we use to store the
+ * spots contained in each frame with a few utility methods.
  * <p>
  * Internally we rely on ConcurrentSkipListMap to allow concurrent access
  * without clashes.
@@ -31,7 +29,8 @@ import net.imglib2.algorithm.MultiThreaded;
  * benefit from multithreaded computation ({@link #filter(Collection)},
  * {@link #filter(FeatureFilter)}
  *
- * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; - Feb 2011 - 2013
+ * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; - Feb 2011 -
+ *         2013
  *
  */
 public class SpotCollection implements MultiThreaded
@@ -56,7 +55,7 @@ public class SpotCollection implements MultiThreaded
 	private static final long TIME_OUT_DELAY = 1;
 
 	/** The frame by frame list of spot this object wrap. */
-	private ConcurrentSkipListMap< Integer, Set< Spot >> content = new ConcurrentSkipListMap< Integer, Set< Spot >>();
+	private ConcurrentSkipListMap< Integer, Set< Spot > > content = new ConcurrentSkipListMap< Integer, Set< Spot > >();
 
 	private int numThreads;
 
@@ -1221,10 +1220,10 @@ public class SpotCollection implements MultiThreaded
 	 *            the map to buidl the spot collection from.
 	 * @return a new SpotCollection.
 	 */
-	public static SpotCollection fromMap( final Map< Integer, Set< Spot >> source )
+	public static SpotCollection fromMap( final Map< Integer, Set< Spot > > source )
 	{
 		final SpotCollection sc = new SpotCollection();
-		sc.content = new ConcurrentSkipListMap< Integer, Set< Spot >>( source );
+		sc.content = new ConcurrentSkipListMap< Integer, Set< Spot > >( source );
 		return sc;
 	}
 }

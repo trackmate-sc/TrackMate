@@ -88,7 +88,7 @@ public class SubpixelLocalizationBugTest
 
 	public static void test3D( final String[] args )
 	{
-		final ArrayImg< FloatType, FloatArray > I = ArrayImgs.floats( 256, 128, 32 );
+		final ArrayImg< FloatType, FloatArray > I = ArrayImgs.floats( 32, 128, 256 );
 
 		final double A = 128;
 		final double spot_sigma = 1.7;
@@ -98,9 +98,9 @@ public class SubpixelLocalizationBugTest
 		for ( int j = 0; j < 11; j++ )
 		{
 
-			final double xf = 20. * j + 10. + j / 10.;
+			final double zf = 20. * j + 10. + j / 10.;
 			final double yf = 64.4;
-			final double zf = 16.2;
+			final double xf = 16.2;
 			final double[] posf = new double[] { xf, yf, zf };
 			final RealPoint rpos = new RealPoint( posf );
 

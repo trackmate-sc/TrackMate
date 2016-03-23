@@ -12,11 +12,10 @@ package fiji.plugin.trackmate.util;
 import java.io.File;
 
 import javax.imageio.ImageIO;
-import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 
 /**
- * Filter for use in a {@link JFileChooser}.
+ * Filter for use in a {@link javax.swing.JFileChooser}.
  */
 public class DefaultFileFilter extends FileFilter
 {
@@ -32,14 +31,14 @@ public class DefaultFileFilter extends FileFilter
 	protected String desc;
 
 	/**
-	 * Constructs a new filter for the specified extension and descpription.
+	 * Constructs a new filter for the specified extension and description.
 	 * 
 	 * @param extension
 	 *            The extension to accept files with.
 	 * @param description
 	 *            The description of the file format.
 	 */
-	public DefaultFileFilter(String extension, String description)
+	public DefaultFileFilter( final String extension, final String description )
 	{
 		ext = extension.toLowerCase();
 		desc = description;
@@ -53,9 +52,10 @@ public class DefaultFileFilter extends FileFilter
 	 *            The file to be checked.
 	 * @return Returns true if the file is accepted.
 	 */
-	public boolean accept(File file)
+	@Override
+	public boolean accept( final File file )
 	{
-		return file.isDirectory() || file.getName().toLowerCase().endsWith(ext);
+		return file.isDirectory() || file.getName().toLowerCase().endsWith( ext );
 	}
 
 	/**
@@ -63,6 +63,7 @@ public class DefaultFileFilter extends FileFilter
 	 * 
 	 * @return Returns the description.
 	 */
+	@Override
 	public String getDescription()
 	{
 		return desc;
@@ -84,7 +85,7 @@ public class DefaultFileFilter extends FileFilter
 	 * @param extension
 	 *            The extension to set.
 	 */
-	public void setExtension(String extension)
+	public void setExtension( final String extension )
 	{
 		this.ext = extension;
 	}
@@ -114,7 +115,7 @@ public class DefaultFileFilter extends FileFilter
 		 * @param description
 		 *            The description to use for the file filter.
 		 */
-		public ImageFileFilter(String description)
+		public ImageFileFilter( final String description )
 		{
 			desc = description;
 		}
@@ -127,21 +128,16 @@ public class DefaultFileFilter extends FileFilter
 		 *            The file to be checked.
 		 * @return Returns true if the file is accepted.
 		 */
-		public boolean accept(File file)
+		@Override
+		public boolean accept( final File file )
 		{
-			if (file.isDirectory())
-			{
-				return true;
-			}
+			if ( file.isDirectory() ) { return true; }
 
-			String filename = file.toString().toLowerCase();
+			final String filename = file.toString().toLowerCase();
 
-			for (int j = 0; j < imageFormats.length; j++)
+			for ( int j = 0; j < imageFormats.length; j++ )
 			{
-				if (filename.endsWith("." + imageFormats[j].toLowerCase()))
-				{
-					return true;
-				}
+				if ( filename.endsWith( "." + imageFormats[ j ].toLowerCase() ) ) { return true; }
 			}
 
 			return false;
@@ -152,6 +148,7 @@ public class DefaultFileFilter extends FileFilter
 		 * 
 		 * @return Returns the description.
 		 */
+		@Override
 		public String getDescription()
 		{
 			return desc;
@@ -179,7 +176,7 @@ public class DefaultFileFilter extends FileFilter
 		 * @param description
 		 *            The description to use for the filter.
 		 */
-		public EditorFileFilter(String description)
+		public EditorFileFilter( final String description )
 		{
 			desc = description;
 		}
@@ -190,16 +187,14 @@ public class DefaultFileFilter extends FileFilter
 		 * 
 		 * @return Returns true if the file is accepted.
 		 */
-		public boolean accept(File file)
+		@Override
+		public boolean accept( final File file )
 		{
-			if (file.isDirectory())
-			{
-				return true;
-			}
+			if ( file.isDirectory() ) { return true; }
 
-			String filename = file.getName().toLowerCase();
+			final String filename = file.getName().toLowerCase();
 
-			return filename.endsWith(".xml") || filename.endsWith(".xml.gz");
+			return filename.endsWith( ".xml" ) || filename.endsWith( ".xml.gz" );
 		}
 
 		/**
@@ -207,6 +202,7 @@ public class DefaultFileFilter extends FileFilter
 		 * 
 		 * @return Returns the description.
 		 */
+		@Override
 		public String getDescription()
 		{
 			return desc;

@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.jgrapht.graph.SimpleWeightedGraph;
-
 import fiji.plugin.trackmate.detection.SpotDetector;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.features.EdgeFeatureCalculator;
@@ -32,9 +30,9 @@ import net.imglib2.multithreading.SimpleMultiThreading;
  * <b>Required input:</b> A 2D or 3D time-lapse image with bright blobs.
  * </p>
  *
- * @author Nicholas Perry, Jean-Yves Tinevez, Johannes Schindelin - Institut
- *         Pasteur - July 2010 - 2011 - 2012 - 2013 - 2014
- *
+ * @author Nicholas Perry
+ * @author Johannes Schindelin
+ * @author Jean-Yves Tinevez - Institut Pasteur - July 2010 - 2016
  */
 @SuppressWarnings( "deprecation" )
 public class TrackMate implements Benchmark, MultiThreaded, Algorithm
@@ -235,8 +233,9 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 	 * <p>
 	 * This method links all the selected spots from the thresholding part using
 	 * the selected tracking algorithm. This tracking process will generate a
-	 * graph (more precisely a {@link SimpleWeightedGraph}) made of the spot
-	 * election for its vertices, and edges representing the links.
+	 * graph (more precisely a {@link org.jgrapht.graph.SimpleWeightedGraph})
+	 * made of the spot election for its vertices, and edges representing the
+	 * links.
 	 * <p>
 	 * The {@link ModelChangeListener}s of the model will be notified when the
 	 * successful process is over.

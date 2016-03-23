@@ -1,9 +1,5 @@
 package fiji.plugin.trackmate;
 
-import ij.ImagePlus;
-import ij.gui.Roi;
-import ij.io.FileInfo;
-
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -11,19 +7,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import fiji.plugin.trackmate.detection.DetectorKeys;
-import fiji.plugin.trackmate.detection.SpotDetector;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.features.FeatureAnalyzer;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
-import fiji.plugin.trackmate.features.spot.SpotAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
-import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
-import fiji.plugin.trackmate.tracking.TrackerKeys;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
+import ij.ImagePlus;
+import ij.gui.Roi;
+import ij.io.FileInfo;
 
 /**
  * This class is used to store user settings for the {@link TrackMate}
@@ -34,7 +27,8 @@ public class Settings
 
 	/**
 	 * The ImagePlus to operate on. Will also be used by some
-	 * {@link TrackMateModelView} as a GUI target.
+	 * {@link fiji.plugin.trackmate.visualization.TrackMateModelView} as a GUI
+	 * target.
 	 */
 	public ImagePlus imp;
 
@@ -51,25 +45,39 @@ public class Settings
 	 */
 	public int tstart;
 
-	/** The time-frame index, <b>0-based</b>, of the last time-point to process. */
+	/**
+	 * The time-frame index, <b>0-based</b>, of the last time-point to process.
+	 */
 	public int tend;
 
-	/** The lowest pixel X position, <b>0-based</b>, of the volume to process. */
+	/**
+	 * The lowest pixel X position, <b>0-based</b>, of the volume to process.
+	 */
 	public int xstart;
 
-	/** The highest pixel X position, <b>0-based</b>, of the volume to process. */
+	/**
+	 * The highest pixel X position, <b>0-based</b>, of the volume to process.
+	 */
 	public int xend;
 
-	/** The lowest pixel Y position, <b>0-based</b>, of the volume to process. */
+	/**
+	 * The lowest pixel Y position, <b>0-based</b>, of the volume to process.
+	 */
 	public int ystart;
 
-	/** The lowest pixel Y position, <b>0-based</b>, of the volume to process. */
+	/**
+	 * The lowest pixel Y position, <b>0-based</b>, of the volume to process.
+	 */
 	public int yend;
 
-	/** The lowest pixel Z position, <b>0-based</b>, of the volume to process. */
+	/**
+	 * The lowest pixel Z position, <b>0-based</b>, of the volume to process.
+	 */
 	public int zstart;
 
-	/** The lowest pixel Z position, <b>0-based</b>, of the volume to process. */
+	/**
+	 * The lowest pixel Z position, <b>0-based</b>, of the volume to process.
+	 */
 	public int zend;
 
 	/** Target channel for detection, <b>1-based</b>. */
@@ -97,20 +105,25 @@ public class Settings
 
 	/**
 	 * The name of the detector factory to use. It will be used to generate
-	 * {@link SpotDetector} for each target frame.
+	 * {@link fiji.plugin.trackmate.detection.SpotDetector} for each target
+	 * frame.
 	 */
 	public SpotDetectorFactory< ? > detectorFactory;
 
 	/** The the tracker to use. */
 	public SpotTrackerFactory trackerFactory;
 
-	/** Settings map for {@link SpotDetector}.  
-	 *  @see DetectorKeys for parameters and defaults.  
+	/**
+	 * Settings map for {@link fiji.plugin.trackmate.detection.SpotDetector}.
+	 * 
+	 * @see fiji.plugin.trackmate.detection.DetectorKeys
 	 */
 	public Map< String, Object > detectorSettings = new HashMap< String, Object >();
 
-	/** Settings map for {@link SpotTracker}.
-	 *  @see TrackerKeys for parameters and defaults.
+	/**
+	 * Settings map for {@link fiji.plugin.trackmate.tracking.SpotTracker}.
+	 * 
+	 * @see fiji.plugin.trackmate.tracking.TrackerKeys
 	 */
 	public Map< String, Object > trackerSettings = new HashMap< String, Object >();
 
@@ -139,7 +152,7 @@ public class Settings
 	 * features. They are ordered in a {@link List} in case some analyzers
 	 * requires the results of another analyzer to proceed.
 	 */
-	protected List< SpotAnalyzerFactory< ? >> spotAnalyzerFactories = new ArrayList< SpotAnalyzerFactory< ? >>();
+	protected List< SpotAnalyzerFactory< ? > > spotAnalyzerFactories = new ArrayList< SpotAnalyzerFactory< ? > >();
 
 	// Edge features
 
@@ -465,9 +478,9 @@ public class Settings
 	 *
 	 * @return the list of {@link SpotAnalyzerFactory}s.
 	 */
-	public List< SpotAnalyzerFactory< ? >> getSpotAnalyzerFactories()
+	public List< SpotAnalyzerFactory< ? > > getSpotAnalyzerFactories()
 	{
-		return new ArrayList< SpotAnalyzerFactory< ? >>( spotAnalyzerFactories );
+		return new ArrayList< SpotAnalyzerFactory< ? > >( spotAnalyzerFactories );
 	}
 
 	/**
@@ -475,7 +488,8 @@ public class Settings
 	 * configured.
 	 *
 	 * @param spotAnalyzer
-	 *            the {@link SpotAnalyzer} to add, at the end of the list.
+	 *            the {@link fiji.plugin.trackmate.features.spot.SpotAnalyzer}
+	 *            to add, at the end of the list.
 	 */
 	public void addSpotAnalyzerFactory( final SpotAnalyzerFactory< ? > spotAnalyzer )
 	{
@@ -487,8 +501,8 @@ public class Settings
 	 * configured, at the specified index.
 	 *
 	 * @param spotAnalyzer
-	 *            the {@link SpotAnalyzer} to add, at the specified index in the
-	 *            list.
+	 *            the {@link fiji.plugin.trackmate.features.spot.SpotAnalyzer}
+	 *            to add, at the specified index in the list.
 	 */
 	public void addSpotAnalyzerFactory( final int index, final SpotAnalyzerFactory< ? > spotAnalyzer )
 	{

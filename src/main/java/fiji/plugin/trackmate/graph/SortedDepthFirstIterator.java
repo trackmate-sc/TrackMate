@@ -22,489 +22,592 @@ import org.jgrapht.event.ConnectedComponentTraversalEvent;
 import org.jgrapht.event.EdgeTraversalEvent;
 import org.jgrapht.event.VertexTraversalEvent;
 import org.jgrapht.traverse.AbstractGraphIterator;
-import org.jgrapht.traverse.CrossComponentIterator;
 import org.jgrapht.util.TypeUtil;
 
 /**
  * A depth-first iterator, that - when branching - chooses the next vertex
  * according to a specified comparator.
  * <p>
- * I had to copy-paste whole sections of JGraphT code to make this one:
- * I could not extend the desired class, for the interesting method and field
- * were private.
+ * I had to copy-paste whole sections of JGraphT code to make this one: I could
+ * not extend the desired class, for the interesting method and field were
+ * private.
  *
  * @author Jean-Yves Tinevez 2012-2013
  */
-public class SortedDepthFirstIterator<V, E> extends AbstractGraphIterator<V, E> {
+public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, E >
+{
 
-	//~ Static fields/initializers ---------------------------------------------
+	// ~ Static fields/initializers
+	// ---------------------------------------------
 
-    private static final int CCS_BEFORE_COMPONENT = 1;
-    private static final int CCS_WITHIN_COMPONENT = 2;
-    private static final int CCS_AFTER_COMPONENT = 3;
-    /**
-     * Sentinel object. Unfortunately, we can't use null, because ArrayDeque
-     * won't accept those. And we don't want to rely on the caller to provide a
-     * sentinel object for us. So we have to play typecasting games.
-     */
-    private static final Object SENTINEL = new Object();
-    /**
-     * Standard vertex visit state enumeration.
-     */
-    private static enum VisitColor {
-        /**
-         * Vertex has not been returned via iterator yet.
-         */
-        WHITE,
+	private static final int CCS_BEFORE_COMPONENT = 1;
 
-        /**
-         * Vertex has been returned via iterator, but we're not done with all of
-         * its out-edges yet.
-         */
-        GRAY,
+	private static final int CCS_WITHIN_COMPONENT = 2;
 
-        /**
-         * Vertex has been returned via iterator, and we're done with all of its
-         * out-edges.
-         */
-        BLACK
-    }
+	private static final int CCS_AFTER_COMPONENT = 3;
 
-    //~ Instance fields --------------------------------------------------------
+	/**
+	 * Sentinel object. Unfortunately, we can't use null, because ArrayDeque
+	 * won't accept those. And we don't want to rely on the caller to provide a
+	 * sentinel object for us. So we have to play typecasting games.
+	 */
+	private static final Object SENTINEL = new Object();
 
-    private final Deque<Object> stack = new ArrayDeque<Object>();
-    private transient TypeUtil<V> vertexTypeDecl = null;
-    private final ConnectedComponentTraversalEvent ccFinishedEvent =
-        new ConnectedComponentTraversalEvent(
-            this,
-            ConnectedComponentTraversalEvent.CONNECTED_COMPONENT_FINISHED);
-    private final ConnectedComponentTraversalEvent ccStartedEvent =
-        new ConnectedComponentTraversalEvent(
-            this,
-            ConnectedComponentTraversalEvent.CONNECTED_COMPONENT_STARTED);
-    private final FlyweightEdgeEvent<V, E> reusableEdgeEvent;
-    private final FlyweightVertexEvent<V> reusableVertexEvent;
-    private Iterator<V> vertexIterator = null;
-    /**
-     * Stores the vertices that have been seen during iteration and (optionally)
-     * some additional traversal info regarding each vertex.
-     */
-    protected Map<V, VisitColor> seen = new HashMap<V, VisitColor>();
-    private V startVertex;
-    protected Specifics<V, E> specifics;
-    protected final Graph<V, E> graph;
-    protected final Comparator<V> comparator;
-    /** The connected component state   */
-    private int state = CCS_BEFORE_COMPONENT;
+	/**
+	 * Standard vertex visit state enumeration.
+	 */
+	private static enum VisitColor
+	{
+		/**
+		 * Vertex has not been returned via iterator yet.
+		 */
+		WHITE,
 
-    //~ Constructors -----------------------------------------------------------
+		/**
+		 * Vertex has been returned via iterator, but we're not done with all of
+		 * its out-edges yet.
+		 */
+		GRAY,
 
-    /**
-     * Creates a new iterator for the specified graph. Iteration will start at
-     * the specified start vertex. If the specified start vertex is <code>
-     * null</code>, Iteration will start at an arbitrary graph vertex.
-     *
-     * @param g the graph to be iterated.
-     * @param startVertex the vertex iteration to be started.
-     *
-     * @throws IllegalArgumentException if <code>g==null</code> or does not
-     * contain <code>startVertex</code>
-     */
-    public SortedDepthFirstIterator(final Graph<V, E> g, final V startVertex, final Comparator<V> comparator)     {
-        super();
-        this.comparator = comparator;
-        this.graph = g;
+		/**
+		 * Vertex has been returned via iterator, and we're done with all of its
+		 * out-edges.
+		 */
+		BLACK
+	}
 
-        specifics = createGraphSpecifics(g);
-        vertexIterator = g.vertexSet().iterator();
-        setCrossComponentTraversal(startVertex == null);
+	// ~ Instance fields
+	// --------------------------------------------------------
 
-        reusableEdgeEvent = new FlyweightEdgeEvent<V, E>(this, null);
-        reusableVertexEvent = new FlyweightVertexEvent<V>(this, null);
+	private final Deque< Object > stack = new ArrayDeque< Object >();
 
-        if (startVertex == null) {
-            // pick a start vertex if graph not empty
-            if (vertexIterator.hasNext()) {
-                this.startVertex = vertexIterator.next();
-            } else {
-                this.startVertex = null;
-            }
-        } else if (g.containsVertex(startVertex)) {
-            this.startVertex = startVertex;
-        } else {
-            throw new IllegalArgumentException(
-                "graph must contain the start vertex");
-        }
-    }
+	private transient TypeUtil< V > vertexTypeDecl = null;
 
-    //~ Methods ----------------------------------------------------------------
+	private final ConnectedComponentTraversalEvent ccFinishedEvent =
+			new ConnectedComponentTraversalEvent(
+					this,
+					ConnectedComponentTraversalEvent.CONNECTED_COMPONENT_FINISHED );
 
-    /**
-     * @see java.util.Iterator#hasNext()
-     */
-    @Override
-    public boolean hasNext()    {
-        if (startVertex != null) {
-            encounterStartVertex();
-        }
+	private final ConnectedComponentTraversalEvent ccStartedEvent =
+			new ConnectedComponentTraversalEvent(
+					this,
+					ConnectedComponentTraversalEvent.CONNECTED_COMPONENT_STARTED );
 
-        if (isConnectedComponentExhausted()) {
-            if (state == CCS_WITHIN_COMPONENT) {
-                state = CCS_AFTER_COMPONENT;
-                if (nListeners != 0) {
-                    fireConnectedComponentFinished(ccFinishedEvent);
-                }
-            }
+	private final FlyweightEdgeEvent< V, E > reusableEdgeEvent;
 
-            if (isCrossComponentTraversal()) {
-                while (vertexIterator.hasNext()) {
-                    final V v = vertexIterator.next();
+	private final FlyweightVertexEvent< V > reusableVertexEvent;
 
-                    if (!seen.containsKey(v)) {
-                        encounterVertex(v, null);
-                        state = CCS_BEFORE_COMPONENT;
+	private Iterator< V > vertexIterator = null;
 
-                        return true;
-                    }
-                }
+	/**
+	 * Stores the vertices that have been seen during iteration and (optionally)
+	 * some additional traversal info regarding each vertex.
+	 */
+	protected Map< V, VisitColor > seen = new HashMap< V, VisitColor >();
 
-                return false;
-            } else {
-                return false;
-            }
-        } else {
-            return true;
-        }
-    }
+	private V startVertex;
 
-    /**
-     * @see java.util.Iterator#next()
-     */
-    @Override
-    public V next()   {
+	protected Specifics< V, E > specifics;
 
+	protected final Graph< V, E > graph;
 
+	protected final Comparator< V > comparator;
 
-        if (startVertex != null) {
-            encounterStartVertex();
-        }
+	/** The connected component state */
+	private int state = CCS_BEFORE_COMPONENT;
 
-        if (hasNext()) {
-            if (state == CCS_BEFORE_COMPONENT) {
-                state = CCS_WITHIN_COMPONENT;
-                if (nListeners != 0) {
-                    fireConnectedComponentStarted(ccStartedEvent);
-                }
-            }
+	// ~ Constructors
+	// -----------------------------------------------------------
 
-            final V nextVertex = provideNextVertex();
-            if (nListeners != 0) {
-                fireVertexTraversed(createVertexTraversalEvent(nextVertex));
-            }
+	/**
+	 * Creates a new iterator for the specified graph. Iteration will start at
+	 * the specified start vertex. If the specified start vertex is <code>
+	 * null</code>, Iteration will start at an arbitrary graph vertex.
+	 *
+	 * @param g
+	 *            the graph to be iterated.
+	 * @param startVertex
+	 *            the vertex iteration to be started.
+	 *
+	 * @throws IllegalArgumentException
+	 *             if <code>g==null</code> or does not contain
+	 *             <code>startVertex</code>
+	 */
+	public SortedDepthFirstIterator( final Graph< V, E > g, final V startVertex, final Comparator< V > comparator )
+	{
+		super();
+		this.comparator = comparator;
+		this.graph = g;
 
-            addUnseenChildrenOf(nextVertex);
+		specifics = createGraphSpecifics( g );
+		vertexIterator = g.vertexSet().iterator();
+		setCrossComponentTraversal( startVertex == null );
 
-            return nextVertex;
-        } else {
-            throw new NoSuchElementException();
-        }
-    }
+		reusableEdgeEvent = new FlyweightEdgeEvent< V, E >( this, null );
+		reusableVertexEvent = new FlyweightVertexEvent< V >( this, null );
 
-    /**
-     * Called when a vertex has been finished (meaning is dependent on traversal
-     * represented by subclass).
-     *
-     * @param vertex vertex which has been finished
-     */
-    private void finishVertex(final V vertex) {
-        if (nListeners != 0) {
-            fireVertexFinished(createVertexTraversalEvent(vertex));
-        }
-    }
+		if ( startVertex == null )
+		{
+			// pick a start vertex if graph not empty
+			if ( vertexIterator.hasNext() )
+			{
+				this.startVertex = vertexIterator.next();
+			}
+			else
+			{
+				this.startVertex = null;
+			}
+		}
+		else if ( g.containsVertex( startVertex ) )
+		{
+			this.startVertex = startVertex;
+		}
+		else
+		{
+			throw new IllegalArgumentException(
+					"graph must contain the start vertex" );
+		}
+	}
 
-    // -------------------------------------------------------------------------
+	// ~ Methods
+	// ----------------------------------------------------------------
 
-    private static <V, E> Specifics<V, E> createGraphSpecifics(final Graph<V, E> g) {
-        if (g instanceof DirectedGraph) {
-            return new DirectedSpecifics<V, E>((DirectedGraph<V, E>) g);
-        } else {
-            return new UndirectedSpecifics<V, E>(g);
-        }
-    }
+	/**
+	 * @see java.util.Iterator#hasNext()
+	 */
+	@Override
+	public boolean hasNext()
+	{
+		if ( startVertex != null )
+		{
+			encounterStartVertex();
+		}
 
-    /**
-     * This is where we add the multiple children in proper sorted order.
-     */
-    protected void addUnseenChildrenOf(final V vertex) {
+		if ( isConnectedComponentExhausted() )
+		{
+			if ( state == CCS_WITHIN_COMPONENT )
+			{
+				state = CCS_AFTER_COMPONENT;
+				if ( nListeners != 0 )
+				{
+					fireConnectedComponentFinished( ccFinishedEvent );
+				}
+			}
+
+			if ( isCrossComponentTraversal() )
+			{
+				while ( vertexIterator.hasNext() )
+				{
+					final V v = vertexIterator.next();
+
+					if ( !seen.containsKey( v ) )
+					{
+						encounterVertex( v, null );
+						state = CCS_BEFORE_COMPONENT;
+
+						return true;
+					}
+				}
+
+				return false;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		else
+		{
+			return true;
+		}
+	}
+
+	/**
+	 * @see java.util.Iterator#next()
+	 */
+	@Override
+	public V next()
+	{
+
+		if ( startVertex != null )
+		{
+			encounterStartVertex();
+		}
+
+		if ( hasNext() )
+		{
+			if ( state == CCS_BEFORE_COMPONENT )
+			{
+				state = CCS_WITHIN_COMPONENT;
+				if ( nListeners != 0 )
+				{
+					fireConnectedComponentStarted( ccStartedEvent );
+				}
+			}
+
+			final V nextVertex = provideNextVertex();
+			if ( nListeners != 0 )
+			{
+				fireVertexTraversed( createVertexTraversalEvent( nextVertex ) );
+			}
+
+			addUnseenChildrenOf( nextVertex );
+
+			return nextVertex;
+		}
+		else
+		{
+			throw new NoSuchElementException();
+		}
+	}
+
+	/**
+	 * Called when a vertex has been finished (meaning is dependent on traversal
+	 * represented by subclass).
+	 *
+	 * @param vertex
+	 *            vertex which has been finished
+	 */
+	private void finishVertex( final V vertex )
+	{
+		if ( nListeners != 0 )
+		{
+			fireVertexFinished( createVertexTraversalEvent( vertex ) );
+		}
+	}
+
+	// -------------------------------------------------------------------------
+
+	private static < V, E > Specifics< V, E > createGraphSpecifics( final Graph< V, E > g )
+	{
+		if ( g instanceof DirectedGraph )
+		{
+			return new DirectedSpecifics< V, E >( ( DirectedGraph< V, E > ) g );
+		}
+		else
+		{
+			return new UndirectedSpecifics< V, E >( g );
+		}
+	}
+
+	/**
+	 * This is where we add the multiple children in proper sorted order.
+	 */
+	protected void addUnseenChildrenOf( final V vertex )
+	{
 
 		// Retrieve target vertices, and sort them in a list
 		final List< V > sortedChildren = new ArrayList< V >();
-    	// Keep a map of matching edges so that we can retrieve them in the same order
-    	final Map<V, E> localEdges = new HashMap<V, E>();
+		// Keep a map of matching edges so that we can retrieve them in the same
+		// order
+		final Map< V, E > localEdges = new HashMap< V, E >();
 
-        for (final E edge : specifics.edgesOf(vertex)) {
-        	final V oppositeV = Graphs.getOppositeVertex(graph, edge, vertex);
-        	if (!seen.containsKey(oppositeV)) {
-        		sortedChildren.add(oppositeV);
-        	}
-        	localEdges.put(oppositeV, edge);
-        }
+		for ( final E edge : specifics.edgesOf( vertex ) )
+		{
+			final V oppositeV = Graphs.getOppositeVertex( graph, edge, vertex );
+			if ( !seen.containsKey( oppositeV ) )
+			{
+				sortedChildren.add( oppositeV );
+			}
+			localEdges.put( oppositeV, edge );
+		}
 		Collections.sort( sortedChildren, Collections.reverseOrder( comparator ) );
 
 		final Iterator< V > it = sortedChildren.iterator();
-        while (it.hasNext()) {
+		while ( it.hasNext() )
+		{
 			final V child = it.next();
 
-            if (nListeners != 0) {
-                fireEdgeTraversed(createEdgeTraversalEvent(localEdges.get(child)));
-            }
+			if ( nListeners != 0 )
+			{
+				fireEdgeTraversed( createEdgeTraversalEvent( localEdges.get( child ) ) );
+			}
 
-            if (seen.containsKey(child)) {
-                encounterVertexAgain(child, localEdges.get(child));
-            } else {
-                encounterVertex(child, localEdges.get(child));
-            }
-        }
-    }
+			if ( seen.containsKey( child ) )
+			{
+				encounterVertexAgain( child, localEdges.get( child ) );
+			}
+			else
+			{
+				encounterVertex( child, localEdges.get( child ) );
+			}
+		}
+	}
 
-    protected EdgeTraversalEvent<V, E> createEdgeTraversalEvent(final E edge) {
-        if (isReuseEvents()) {
-            reusableEdgeEvent.setEdge(edge);
+	protected EdgeTraversalEvent< V, E > createEdgeTraversalEvent( final E edge )
+	{
+		if ( isReuseEvents() )
+		{
+			reusableEdgeEvent.setEdge( edge );
 
-            return reusableEdgeEvent;
-        } else {
-            return new EdgeTraversalEvent<V, E>(this, edge);
-        }
-    }
+			return reusableEdgeEvent;
+		}
+		else
+		{
+			return new EdgeTraversalEvent< V, E >( this, edge );
+		}
+	}
 
-    private VertexTraversalEvent<V> createVertexTraversalEvent(final V vertex) {
-        if (isReuseEvents()) {
-            reusableVertexEvent.setVertex(vertex);
+	private VertexTraversalEvent< V > createVertexTraversalEvent( final V vertex )
+	{
+		if ( isReuseEvents() )
+		{
+			reusableVertexEvent.setVertex( vertex );
 
-            return reusableVertexEvent;
-        } else {
-            return new VertexTraversalEvent<V>(this, vertex);
-        }
-    }
+			return reusableVertexEvent;
+		}
+		else
+		{
+			return new VertexTraversalEvent< V >( this, vertex );
+		}
+	}
 
-    private void encounterStartVertex() {
-        encounterVertex(startVertex, null);
-        startVertex = null;
-    }
+	private void encounterStartVertex()
+	{
+		encounterVertex( startVertex, null );
+		startVertex = null;
+	}
 
+	// ~ Depth-first iterator methods
+	// ----------------------------------------------------------------
 
+	/**
+	 * @see org.jgrapht.traverse.CrossComponentIterator#isConnectedComponentExhausted()
+	 */
+	private boolean isConnectedComponentExhausted()
+	{
+		for ( ;; )
+		{
+			if ( stack.isEmpty() ) { return true; }
+			if ( stack.getLast() != SENTINEL )
+			{
+				// Found a non-sentinel.
+				return false;
+			}
 
+			// Found a sentinel: pop it, record the finish time,
+			// and then loop to check the rest of the stack.
 
+			// Pop null we peeked at above.
+			stack.removeLast();
 
+			// This will pop corresponding vertex to be recorded as finished.
+			recordFinish();
+		}
+	}
 
-    //~ Depth-first iterator methods ----------------------------------------------------------------
+	/**
+	 * @see org.jgrapht.traverse.CrossComponentIterator#encounterVertex(Object,
+	 *      Object)
+	 */
+	protected void encounterVertex( final V vertex, final E edge )
+	{
+		seen.put( vertex, VisitColor.WHITE );
+		stack.addLast( vertex );
+	}
 
-    /**
-     * @see CrossComponentIterator#isConnectedComponentExhausted()
-     */
-    private boolean isConnectedComponentExhausted() {
-        for (;;) {
-            if (stack.isEmpty()) {
-                return true;
-            }
-            if (stack.getLast() != SENTINEL) {
-                // Found a non-sentinel.
-                return false;
-            }
+	/**
+	 * @see org.jgrapht.traverse.CrossComponentIterator#encounterVertexAgain(Object,
+	 *      Object)
+	 */
+	protected void encounterVertexAgain( final V vertex, final E edge )
+	{
+		final VisitColor color = seen.get( vertex );
+		if ( color != VisitColor.WHITE )
+		{
+			// We've already visited this vertex; no need to mess with the
+			// stack (either it's BLACK and not there at all, or it's GRAY
+			// and therefore just a sentinel).
+			return;
+		}
 
-            // Found a sentinel:  pop it, record the finish time,
-            // and then loop to check the rest of the stack.
+		// Since we've encountered it before, and it's still WHITE, it
+		// *must* be on the stack. Use removeLastOccurrence on the
+		// assumption that for typical topologies and traversals,
+		// it's likely to be nearer the top of the stack than
+		// the bottom of the stack.
+		final boolean found = stack.removeLastOccurrence( vertex );
+		assert ( found );
+		stack.addLast( vertex );
+	}
 
-            // Pop null we peeked at above.
-            stack.removeLast();
+	/**
+	 * @see CrossComponentIterator#provideNextVertex()
+	 */
+	private V provideNextVertex()
+	{
+		V v;
+		for ( ;; )
+		{
+			final Object o = stack.removeLast();
+			if ( o == SENTINEL )
+			{
+				// This is a finish-time sentinel we previously pushed.
+				recordFinish();
+				// Now carry on with another pop until we find a non-sentinel
+			}
+			else
+			{
+				// Got a real vertex to start working on
+				v = TypeUtil.uncheckedCast( o, vertexTypeDecl );
+				break;
+			}
+		}
 
-            // This will pop corresponding vertex to be recorded as finished.
-            recordFinish();
-        }
-    }
+		// Push a sentinel for v onto the stack so that we'll know
+		// when we're done with it.
+		stack.addLast( v );
+		stack.addLast( SENTINEL );
+		seen.put( v, VisitColor.GRAY );
+		return v;
+	}
 
-    /**
-     * @see CrossComponentIterator#encounterVertex(Object, Object)
-     */
-    protected void encounterVertex(final V vertex, final E edge) {
-    	seen.put(vertex, VisitColor.WHITE);
-        stack.addLast(vertex);
-    }
+	private void recordFinish()
+	{
+		final V v = TypeUtil.uncheckedCast( stack.removeLast(), vertexTypeDecl );
+		seen.put( v, VisitColor.BLACK );
+		finishVertex( v );
+	}
 
-    /**
-     * @see CrossComponentIterator#encounterVertexAgain(Object, Object)
-     */
-    protected void encounterVertexAgain(final V vertex, final E edge) {
-        final VisitColor color = seen.get(vertex);
-        if (color != VisitColor.WHITE) {
-            // We've already visited this vertex; no need to mess with the
-            // stack (either it's BLACK and not there at all, or it's GRAY
-            // and therefore just a sentinel).
-            return;
-        }
+	// ~ Inner Classes
+	// ----------------------------------------------------------
 
-        // Since we've encountered it before, and it's still WHITE, it
-        // *must* be on the stack.  Use removeLastOccurrence on the
-        // assumption that for typical topologies and traversals,
-        // it's likely to be nearer the top of the stack than
-        // the bottom of the stack.
-        final boolean found = stack.removeLastOccurrence(vertex);
-        assert (found);
-        stack.addLast(vertex);
-    }
+	/**
+	 * Provides unified interface for operations that are different in directed
+	 * graphs and in undirected graphs.
+	 */
+	abstract static class Specifics< VV, EE >
+	{
+		/**
+		 * Returns the edges outgoing from the specified vertex in case of
+		 * directed graph, and the edge touching the specified vertex in case of
+		 * undirected graph.
+		 *
+		 * @param vertex
+		 *            the vertex whose outgoing edges are to be returned.
+		 *
+		 * @return the edges outgoing from the specified vertex in case of
+		 *         directed graph, and the edge touching the specified vertex in
+		 *         case of undirected graph.
+		 */
+		public abstract Set< ? extends EE > edgesOf( VV vertex );
+	}
 
-    /**
-     * @see CrossComponentIterator#provideNextVertex()
-     */
-    private V provideNextVertex() {
-        V v;
-        for (;;) {
-            final Object o = stack.removeLast();
-            if (o == SENTINEL) {
-                // This is a finish-time sentinel we previously pushed.
-                recordFinish();
-                // Now carry on with another pop until we find a non-sentinel
-            } else {
-                // Got a real vertex to start working on
-                v = TypeUtil.uncheckedCast(o, vertexTypeDecl);
-                break;
-            }
-        }
+	/**
+	 * A reusable edge event.
+	 *
+	 * @author Barak Naveh
+	 * @since Aug 11, 2003
+	 */
+	private static class FlyweightEdgeEvent< VV, localE > extends EdgeTraversalEvent< VV, localE >
+	{
+		private static final long serialVersionUID = 4051327833765000755L;
 
-        // Push a sentinel for v onto the stack so that we'll know
-        // when we're done with it.
-        stack.addLast(v);
-        stack.addLast(SENTINEL);
-        seen.put(v, VisitColor.GRAY);
-        return v;
-    }
+		/**
+		 * @see EdgeTraversalEvent#EdgeTraversalEvent(Object, Object)
+		 */
+		public FlyweightEdgeEvent( final Object eventSource, final localE edge )
+		{
+			super( eventSource, edge );
+		}
 
-    private void recordFinish() {
-        final V v = TypeUtil.uncheckedCast(stack.removeLast(), vertexTypeDecl);
-        seen.put(v, VisitColor.BLACK);
-        finishVertex(v);
-    }
+		/**
+		 * Sets the edge of this event.
+		 *
+		 * @param edge
+		 *            the edge to be set.
+		 */
+		protected void setEdge( final localE edge )
+		{
+			this.edge = edge;
+		}
+	}
 
-    //~ Inner Classes ----------------------------------------------------------
+	/**
+	 * A reusable vertex event.
+	 *
+	 * @author Barak Naveh
+	 * @since Aug 11, 2003
+	 */
+	private static class FlyweightVertexEvent< VV > extends VertexTraversalEvent< VV >
+	{
+		private static final long serialVersionUID = 3834024753848399924L;
 
-    /**
-     * Provides unified interface for operations that are different in directed
-     * graphs and in undirected graphs.
-     */
-    abstract static class Specifics<VV, EE> {
-        /**
-         * Returns the edges outgoing from the specified vertex in case of
-         * directed graph, and the edge touching the specified vertex in case of
-         * undirected graph.
-         *
-         * @param vertex the vertex whose outgoing edges are to be returned.
-         *
-         * @return the edges outgoing from the specified vertex in case of
-         * directed graph, and the edge touching the specified vertex in case of
-         * undirected graph.
-         */
-        public abstract Set<? extends EE> edgesOf(VV vertex);
-    }
+		/**
+		 * @see VertexTraversalEvent#VertexTraversalEvent(Object, Object)
+		 */
+		public FlyweightVertexEvent( final Object eventSource, final VV vertex )
+		{
+			super( eventSource, vertex );
+		}
 
-    /**
-     * A reusable edge event.
-     *
-     * @author Barak Naveh
-     * @since Aug 11, 2003
-     */
-    private static class FlyweightEdgeEvent<VV, localE> extends EdgeTraversalEvent<VV, localE> {
-        private static final long serialVersionUID = 4051327833765000755L;
+		/**
+		 * Sets the vertex of this event.
+		 *
+		 * @param vertex
+		 *            the vertex to be set.
+		 */
+		protected void setVertex( final VV vertex )
+		{
+			this.vertex = vertex;
+		}
+	}
 
-        /**
-         * @see EdgeTraversalEvent#EdgeTraversalEvent(Object, Object)
-         */
-        public FlyweightEdgeEvent(final Object eventSource, final localE edge) {
-            super(eventSource, edge);
-        }
+	/**
+	 * An implementation of {@link Specifics} for a directed graph.
+	 */
+	private static class DirectedSpecifics< VV, EE > extends Specifics< VV, EE >
+	{
+		private final DirectedGraph< VV, EE > graph;
 
-        /**
-         * Sets the edge of this event.
-         *
-         * @param edge the edge to be set.
-         */
-        protected void setEdge(final localE edge) {
-            this.edge = edge;
-        }
-    }
+		/**
+		 * Creates a new DirectedSpecifics object.
+		 *
+		 * @param g
+		 *            the graph for which this specifics object to be created.
+		 */
+		public DirectedSpecifics( final DirectedGraph< VV, EE > g )
+		{
+			graph = g;
+		}
 
-    /**
-     * A reusable vertex event.
-     *
-     * @author Barak Naveh
-     * @since Aug 11, 2003
-     */
-    private static class FlyweightVertexEvent<VV> extends VertexTraversalEvent<VV> {
-        private static final long serialVersionUID = 3834024753848399924L;
+		/**
+		 * @see CrossComponentIterator.Specifics#edgesOf(Object)
+		 */
+		@Override
+		public Set< ? extends EE > edgesOf( final VV vertex )
+		{
+			return graph.outgoingEdgesOf( vertex );
+		}
+	}
 
-        /**
-         * @see VertexTraversalEvent#VertexTraversalEvent(Object, Object)
-         */
-        public FlyweightVertexEvent(final Object eventSource, final VV vertex) {
-            super(eventSource, vertex);
-        }
+	/**
+	 * An implementation of {@link Specifics} in which edge direction (if any)
+	 * is ignored.
+	 */
+	private static class UndirectedSpecifics< VV, EE > extends Specifics< VV, EE >
+	{
+		private final Graph< VV, EE > graph;
 
-        /**
-         * Sets the vertex of this event.
-         *
-         * @param vertex the vertex to be set.
-         */
-        protected void setVertex(final VV vertex) {
-            this.vertex = vertex;
-        }
-    }
+		/**
+		 * Creates a new UndirectedSpecifics object.
+		 *
+		 * @param g
+		 *            the graph for which this specifics object to be created.
+		 */
+		public UndirectedSpecifics( final Graph< VV, EE > g )
+		{
+			graph = g;
+		}
 
-    /**
-     * An implementation of {@link Specifics} for a directed graph.
-     */
-    private static class DirectedSpecifics<VV, EE> extends Specifics<VV, EE> {
-        private final DirectedGraph<VV, EE> graph;
-
-        /**
-         * Creates a new DirectedSpecifics object.
-         *
-         * @param g the graph for which this specifics object to be created.
-         */
-        public DirectedSpecifics(final DirectedGraph<VV, EE> g) {
-            graph = g;
-        }
-
-        /**
-         * @see CrossComponentIterator.Specifics#edgesOf(Object)
-         */
-        @Override
-		public Set<? extends EE> edgesOf(final VV vertex) {
-            return graph.outgoingEdgesOf(vertex);
-        }
-    }
-
-    /**
-     * An implementation of {@link Specifics} in which edge direction (if any)
-     * is ignored.
-     */
-    private static class UndirectedSpecifics<VV, EE> extends Specifics<VV, EE> {
-        private final Graph<VV, EE> graph;
-
-        /**
-         * Creates a new UndirectedSpecifics object.
-         *
-         * @param g the graph for which this specifics object to be created.
-         */
-        public UndirectedSpecifics(final Graph<VV, EE> g) {
-            graph = g;
-        }
-
-        /**
-         * @see CrossComponentIterator.Specifics#edgesOf(Object)
-         */
-        @Override
-		public Set<EE> edgesOf(final VV vertex) {
-            return graph.edgesOf(vertex);
-        }
-    }
+		/**
+		 * @see CrossComponentIterator.Specifics#edgesOf(Object)
+		 */
+		@Override
+		public Set< EE > edgesOf( final VV vertex )
+		{
+			return graph.edgesOf( vertex );
+		}
+	}
 
 }

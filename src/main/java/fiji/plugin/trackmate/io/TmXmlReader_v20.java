@@ -51,8 +51,6 @@ import static fiji.plugin.trackmate.io.TmXmlKeys_v20.SPOT_NAME_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.io.TmXmlKeys_v20.TRACKER_SETTINGS_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys_v20.TRACK_FILTER_COLLECTION_ELEMENT_KEY;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.XML_ATTRIBUTE_TRACKER_NAME;
-import ij.IJ;
-import ij.ImagePlus;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -65,7 +63,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.jdom2.Attribute;
 import org.jdom2.DataConversionException;
 import org.jdom2.Element;
-import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Logger;
@@ -97,12 +94,14 @@ import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.providers.ViewProvider;
-import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
+import ij.IJ;
+import ij.ImagePlus;
 
-public class TmXmlReader_v20 extends TmXmlReader {
+public class TmXmlReader_v20 extends TmXmlReader
+{
 
 	/*
 	 * CONSTRUCTORS
@@ -111,8 +110,9 @@ public class TmXmlReader_v20 extends TmXmlReader {
 	/**
 	 * Initialize this reader to read the file given in argument.
 	 */
-	public TmXmlReader_v20(final File file) {
-		super(file);
+	public TmXmlReader_v20( final File file )
+	{
+		super( file );
 	}
 
 	/*
@@ -123,11 +123,15 @@ public class TmXmlReader_v20 extends TmXmlReader {
 	 * @return the log text saved in the specified file, or <code>null</code> if
 	 *         log text was not saved.
 	 */
-	public String getLogText() {
-		final Element logElement = root.getChild(LOG_ELEMENT_KEY);
-		if (null != logElement) {
+	public String getLogText()
+	{
+		final Element logElement = root.getChild( LOG_ELEMENT_KEY );
+		if ( null != logElement )
+		{
 			return logElement.getTextTrim();
-		} else {
+		}
+		else
+		{
 			return "";
 		}
 	}
@@ -136,10 +140,11 @@ public class TmXmlReader_v20 extends TmXmlReader {
 	 * We default to the main hyperstack view.
 	 */
 	@Override
-	public Collection<TrackMateModelView> getViews(final ViewProvider provider, final Model model, final Settings settings, final SelectionModel selectionModel) {
-		final Collection<TrackMateModelView> views = new ArrayList<TrackMateModelView>(1);
+	public Collection< TrackMateModelView > getViews( final ViewProvider provider, final Model model, final Settings settings, final SelectionModel selectionModel )
+	{
+		final Collection< TrackMateModelView > views = new ArrayList< TrackMateModelView >( 1 );
 		final TrackMateModelView view = provider.getFactory( HyperStackDisplayer.KEY ).create( model, settings, selectionModel );
-		views.add(view);
+		views.add( view );
 		return views;
 	}
 
@@ -147,7 +152,8 @@ public class TmXmlReader_v20 extends TmXmlReader {
 	 * We default to the configure view panel.
 	 */
 	@Override
-	public String getGUIState() {
+	public String getGUIState()
+	{
 		return ConfigureViewsDescriptor.KEY;
 	}
 
@@ -155,31 +161,37 @@ public class TmXmlReader_v20 extends TmXmlReader {
 	 * @return the version string stored in the file.
 	 */
 	@Override
-	public String getVersion() {
-		return root.getAttribute(PLUGIN_VERSION_ATTRIBUTE_NAME).getValue();
+	public String getVersion()
+	{
+		return root.getAttribute( PLUGIN_VERSION_ATTRIBUTE_NAME ).getValue();
 	}
 
 	@Override
-	public String getErrorMessage() {
+	public String getErrorMessage()
+	{
 		return logger.toString();
 	}
 
 	@Override
-	public Model getModel() {
+	public Model getModel()
+	{
 		final Model model = new Model();
 
 		// Physical units - fetch them from the settings element
-		final Element infoEl = root.getChild(IMAGE_ELEMENT_KEY);
+		final Element infoEl = root.getChild( IMAGE_ELEMENT_KEY );
 		String spaceUnits;
 		String timeUnits;
-		if (null != infoEl) {
-			spaceUnits = infoEl.getAttributeValue(IMAGE_SPATIAL_UNITS_ATTRIBUTE_NAME);
-			timeUnits = infoEl.getAttributeValue(IMAGE_TIME_UNITS_ATTRIBUTE_NAME);
-		} else {
+		if ( null != infoEl )
+		{
+			spaceUnits = infoEl.getAttributeValue( IMAGE_SPATIAL_UNITS_ATTRIBUTE_NAME );
+			timeUnits = infoEl.getAttributeValue( IMAGE_TIME_UNITS_ATTRIBUTE_NAME );
+		}
+		else
+		{
 			spaceUnits = "pixel";
 			timeUnits = "frame";
 		}
-		model.setPhysicalUnits(spaceUnits, timeUnits);
+		model.setPhysicalUnits( spaceUnits, timeUnits );
 
 		// Feature declaration - has to be manual declaration
 		final FeatureModel fm = model.getFeatureModel();
@@ -202,26 +214,32 @@ public class TmXmlReader_v20 extends TmXmlReader {
 		// Spots - we can find them under the root element
 		final SpotCollection spots = getAllSpots();
 		setSpotsVisibility();
-		model.setSpots(spots, false);
+		model.setSpots( spots, false );
 
 		// Tracks - we can find them under the root element
-		if (!readTracks(root, model)) {
+		if ( !readTracks( root, model ) )
+		{
 			ok = false;
 		}
 
 		// Track features
-		try {
-			final Map<Integer, Map<String, Double>> savedFeatureMap = readTrackFeatures(root);
-			for (final Integer savedKey : savedFeatureMap.keySet()) {
+		try
+		{
+			final Map< Integer, Map< String, Double > > savedFeatureMap = readTrackFeatures( root );
+			for ( final Integer savedKey : savedFeatureMap.keySet() )
+			{
 
-				final Map<String, Double> savedFeatures = savedFeatureMap.get(savedKey);
-				for (final String feature : savedFeatures.keySet()) {
-					model.getFeatureModel().putTrackFeature(savedKey, feature, savedFeatures.get(feature));
+				final Map< String, Double > savedFeatures = savedFeatureMap.get( savedKey );
+				for ( final String feature : savedFeatures.keySet() )
+				{
+					model.getFeatureModel().putTrackFeature( savedKey, feature, savedFeatures.get( feature ) );
 				}
 			}
-		} catch (final RuntimeException re) {
-			logger.error("Problem populating track features:\n");
-			logger.error(re.getMessage());
+		}
+		catch ( final RuntimeException re )
+		{
+			logger.error( "Problem populating track features:\n" );
+			logger.error( re.getMessage() );
 			ok = false;
 		}
 
@@ -230,35 +248,39 @@ public class TmXmlReader_v20 extends TmXmlReader {
 	}
 
 	@Override
-	public void readSettings(final Settings settings, final DetectorProvider detectorProvider, final TrackerProvider trackerProvider, final SpotAnalyzerProvider spotAnalyzerProvider, final EdgeAnalyzerProvider edgeAnalyzerProvider, final TrackAnalyzerProvider trackAnalyzerProvider) {
+	public void readSettings( final Settings settings, final DetectorProvider detectorProvider, final TrackerProvider trackerProvider, final SpotAnalyzerProvider spotAnalyzerProvider, final EdgeAnalyzerProvider edgeAnalyzerProvider, final TrackAnalyzerProvider trackAnalyzerProvider )
+	{
 		settings.imp = getImage();
-		getBaseSettings(settings);
-		getDetectorSettings(settings, detectorProvider);
-		getTrackerSettings(settings, trackerProvider);
+		getBaseSettings( settings );
+		getDetectorSettings( settings, detectorProvider );
+		getTrackerSettings( settings, trackerProvider );
 		settings.initialSpotFilterValue = getInitialFilter().value;
-		settings.setSpotFilters(getSpotFeatureFilters());
-		settings.setTrackFilters(getTrackFeatureFilters());
+		settings.setSpotFilters( getSpotFeatureFilters() );
+		settings.setTrackFilters( getTrackFeatureFilters() );
 
 		// Analyzers - we add them all
 		settings.clearSpotAnalyzerFactories();
 		final List< String > spotAnalyzerKeys = spotAnalyzerProvider.getKeys();
-		for (final String key : spotAnalyzerKeys) {
-			final SpotAnalyzerFactory<?> spotFeatureAnalyzer = spotAnalyzerProvider.getFactory(key);
-			settings.addSpotAnalyzerFactory(spotFeatureAnalyzer);
+		for ( final String key : spotAnalyzerKeys )
+		{
+			final SpotAnalyzerFactory< ? > spotFeatureAnalyzer = spotAnalyzerProvider.getFactory( key );
+			settings.addSpotAnalyzerFactory( spotFeatureAnalyzer );
 		}
 
 		settings.clearEdgeAnalyzers();
-		final List<String> edgeAnalyzerKeys = edgeAnalyzerProvider.getKeys();
-		for (final String key : edgeAnalyzerKeys) {
-			final EdgeAnalyzer edgeAnalyzer = edgeAnalyzerProvider.getFactory(key);
-			settings.addEdgeAnalyzer(edgeAnalyzer);
+		final List< String > edgeAnalyzerKeys = edgeAnalyzerProvider.getKeys();
+		for ( final String key : edgeAnalyzerKeys )
+		{
+			final EdgeAnalyzer edgeAnalyzer = edgeAnalyzerProvider.getFactory( key );
+			settings.addEdgeAnalyzer( edgeAnalyzer );
 		}
 
 		settings.clearTrackAnalyzers();
-		final List<String> trackAnalyzerKeys = trackAnalyzerProvider.getKeys();
-		for (final String key : trackAnalyzerKeys) {
-			final TrackAnalyzer trackAnalyzer = trackAnalyzerProvider.getFactory(key);
-			settings.addTrackAnalyzer(trackAnalyzer);
+		final List< String > trackAnalyzerKeys = trackAnalyzerProvider.getKeys();
+		for ( final String key : trackAnalyzerKeys )
+		{
+			final TrackAnalyzer trackAnalyzer = trackAnalyzerProvider.getFactory( key );
+			settings.addTrackAnalyzer( trackAnalyzer );
 		}
 
 	}
@@ -270,91 +292,106 @@ public class TmXmlReader_v20 extends TmXmlReader {
 	/**
 	 * Returns a map of the saved track features, as they appear in the file
 	 */
-	private Map<Integer, Map<String, Double>> readTrackFeatures(final Element modelElement) {
+	private Map< Integer, Map< String, Double > > readTrackFeatures( final Element modelElement )
+	{
 
-		final HashMap<Integer, Map<String, Double>> featureMap = new HashMap<Integer, Map<String, Double>>();
+		final HashMap< Integer, Map< String, Double > > featureMap = new HashMap< Integer, Map< String, Double > >();
 
-		final Element allTracksElement = modelElement.getChild(TRACK_COLLECTION_ELEMENT_KEY);
-		if (null == allTracksElement) {
-			logger.error("Cannot find the track collection in file.\n");
+		final Element allTracksElement = modelElement.getChild( TRACK_COLLECTION_ELEMENT_KEY );
+		if ( null == allTracksElement )
+		{
+			logger.error( "Cannot find the track collection in file.\n" );
 			ok = false;
 			return null;
 		}
 
 		// Load tracks
-		final List<Element> trackElements = allTracksElement.getChildren(TRACK_ELEMENT_KEY);
-		for (final Element trackElement : trackElements) {
+		final List< Element > trackElements = allTracksElement.getChildren( TRACK_ELEMENT_KEY );
+		for ( final Element trackElement : trackElements )
+		{
 
 			int trackID = -1;
-			try {
-				trackID = trackElement.getAttribute(TrackIndexAnalyzer.TRACK_ID).getIntValue();
-			} catch (final DataConversionException e1) {
-				logger.error("Found a track with invalid trackID for " + trackElement + ". Skipping.\n");
+			try
+			{
+				trackID = trackElement.getAttribute( TrackIndexAnalyzer.TRACK_ID ).getIntValue();
+			}
+			catch ( final DataConversionException e1 )
+			{
+				logger.error( "Found a track with invalid trackID for " + trackElement + ". Skipping.\n" );
 				ok = false;
 				continue;
 			}
 
-			final HashMap<String, Double> trackMap = new HashMap<String, Double>();
+			final HashMap< String, Double > trackMap = new HashMap< String, Double >();
 
-			final List<Attribute> attributes = trackElement.getAttributes();
-			for (final Attribute attribute : attributes) {
+			final List< Attribute > attributes = trackElement.getAttributes();
+			for ( final Attribute attribute : attributes )
+			{
 
 				String attName = attribute.getName();
-				if (attName.equals(TRACK_NAME_ATTRIBUTE_NAME)) { // Skip trackID attribute
+				if ( attName.equals( TRACK_NAME_ATTRIBUTE_NAME ) )
+				{ // Skip trackID attribute
 					continue;
-				} else if (attName.equals("X_LOCATION")) { // convert old names on the fly
+				}
+				else if ( attName.equals( "X_LOCATION" ) )
+				{ // convert old names on the fly
 					attName = TrackLocationAnalyzer.X_LOCATION;
-				} else if (attName.equals("Y_LOCATION")) {
+				}
+				else if ( attName.equals( "Y_LOCATION" ) )
+				{
 					attName = TrackLocationAnalyzer.Y_LOCATION;
-				} else if (attName.equals("Z_LOCATION")) {
+				}
+				else if ( attName.equals( "Z_LOCATION" ) )
+				{
 					attName = TrackLocationAnalyzer.Z_LOCATION;
 				}
 
 				Double attVal = Double.NaN;
-				try {
+				try
+				{
 					attVal = attribute.getDoubleValue();
-				} catch (final DataConversionException e) {
-					logger.error("Track " + trackID + ": Cannot read the feature " + attName + " value. Skipping.\n");
+				}
+				catch ( final DataConversionException e )
+				{
+					logger.error( "Track " + trackID + ": Cannot read the feature " + attName + " value. Skipping.\n" );
 					ok = false;
 					continue;
 				}
 
-				trackMap.put(attName, attVal);
+				trackMap.put( attName, attVal );
 
 			}
 
-			featureMap.put(trackID, trackMap);
+			featureMap.put( trackID, trackMap );
 		}
 
 		return featureMap;
 
 	}
 
-	private ImagePlus getImage() {
-		final Element imageInfoElement = root.getChild(IMAGE_ELEMENT_KEY);
-		if (null == imageInfoElement)
-		{
-			return null; // value will still be null
+	private ImagePlus getImage()
+	{
+		final Element imageInfoElement = root.getChild( IMAGE_ELEMENT_KEY );
+		if ( null == imageInfoElement ) { return null; // value will still be
+														// null
 		}
-		final String filename = imageInfoElement.getAttributeValue(IMAGE_FILENAME_ATTRIBUTE_NAME);
-		String folder = imageInfoElement.getAttributeValue(IMAGE_FOLDER_ATTRIBUTE_NAME);
-		if (null == filename || filename.isEmpty()) {
-			return null;
-		}
-		if (null == folder || folder.isEmpty())
+		final String filename = imageInfoElement.getAttributeValue( IMAGE_FILENAME_ATTRIBUTE_NAME );
+		String folder = imageInfoElement.getAttributeValue( IMAGE_FOLDER_ATTRIBUTE_NAME );
+		if ( null == filename || filename.isEmpty() ) { return null; }
+		if ( null == folder || folder.isEmpty() )
 		{
 			folder = file.getParent(); // it is a relative path, then
 		}
-		File imageFile = new File(folder, filename);
-		if (!imageFile.exists() || !imageFile.canRead()) {
-			// Could not find it to the absolute path. Then we look for the same path of the xml file
+		File imageFile = new File( folder, filename );
+		if ( !imageFile.exists() || !imageFile.canRead() )
+		{
+			// Could not find it to the absolute path. Then we look for the same
+			// path of the xml file
 			folder = file.getParent();
-			imageFile = new File(folder, filename);
-			if (!imageFile.exists() || !imageFile.canRead()) {
-				return null;
-			}
+			imageFile = new File( folder, filename );
+			if ( !imageFile.exists() || !imageFile.canRead() ) { return null; }
 		}
-		return IJ.openImage(imageFile.getAbsolutePath());
+		return IJ.openImage( imageFile.getAbsolutePath() );
 	}
 
 	/**
@@ -362,16 +399,15 @@ public class TmXmlReader_v20 extends TmXmlReader {
 	 * <code>null</code> if the initial threshold data cannot be found in the
 	 * file.
 	 */
-	private FeatureFilter getInitialFilter() {
+	private FeatureFilter getInitialFilter()
+	{
 
-		final Element itEl = root.getChild(INITIAL_SPOT_FILTER_ELEMENT_KEY);
-		if (null == itEl) {
-			return null;
-		}
-		final String feature = itEl.getAttributeValue(FILTER_FEATURE_ATTRIBUTE_NAME);
-		final Double value = readDoubleAttribute(itEl, FILTER_VALUE_ATTRIBUTE_NAME, logger);
-		final boolean isAbove = readBooleanAttribute(itEl, FILTER_ABOVE_ATTRIBUTE_NAME, logger);
-		final FeatureFilter ft = new FeatureFilter(feature, value, isAbove);
+		final Element itEl = root.getChild( INITIAL_SPOT_FILTER_ELEMENT_KEY );
+		if ( null == itEl ) { return null; }
+		final String feature = itEl.getAttributeValue( FILTER_FEATURE_ATTRIBUTE_NAME );
+		final Double value = readDoubleAttribute( itEl, FILTER_VALUE_ATTRIBUTE_NAME, logger );
+		final boolean isAbove = readBooleanAttribute( itEl, FILTER_ABOVE_ATTRIBUTE_NAME, logger );
+		final FeatureFilter ft = new FeatureFilter( feature, value, isAbove );
 		return ft;
 	}
 
@@ -380,20 +416,20 @@ public class TmXmlReader_v20 extends TmXmlReader {
 	 * Return <code>null</code> if the spot feature filters data cannot be found
 	 * in the file.
 	 */
-	private List<FeatureFilter> getSpotFeatureFilters() {
+	private List< FeatureFilter > getSpotFeatureFilters()
+	{
 
-		final List<FeatureFilter> featureThresholds = new ArrayList<FeatureFilter>();
-		final Element ftCollectionEl = root.getChild(SPOT_FILTER_COLLECTION_ELEMENT_KEY);
-		if (null == ftCollectionEl) {
-			return null;
-		}
-		final List<Element> ftEls = ftCollectionEl.getChildren(FILTER_ELEMENT_KEY);
-		for (final Element ftEl : ftEls) {
-			final String feature = ftEl.getAttributeValue(FILTER_FEATURE_ATTRIBUTE_NAME);
-			final Double value = readDoubleAttribute(ftEl, FILTER_VALUE_ATTRIBUTE_NAME, logger);
-			final boolean isAbove = readBooleanAttribute(ftEl, FILTER_ABOVE_ATTRIBUTE_NAME, logger);
-			final FeatureFilter ft = new FeatureFilter(feature, value, isAbove);
-			featureThresholds.add(ft);
+		final List< FeatureFilter > featureThresholds = new ArrayList< FeatureFilter >();
+		final Element ftCollectionEl = root.getChild( SPOT_FILTER_COLLECTION_ELEMENT_KEY );
+		if ( null == ftCollectionEl ) { return null; }
+		final List< Element > ftEls = ftCollectionEl.getChildren( FILTER_ELEMENT_KEY );
+		for ( final Element ftEl : ftEls )
+		{
+			final String feature = ftEl.getAttributeValue( FILTER_FEATURE_ATTRIBUTE_NAME );
+			final Double value = readDoubleAttribute( ftEl, FILTER_VALUE_ATTRIBUTE_NAME, logger );
+			final boolean isAbove = readBooleanAttribute( ftEl, FILTER_ABOVE_ATTRIBUTE_NAME, logger );
+			final FeatureFilter ft = new FeatureFilter( feature, value, isAbove );
+			featureThresholds.add( ft );
 		}
 		return featureThresholds;
 	}
@@ -403,50 +439,54 @@ public class TmXmlReader_v20 extends TmXmlReader {
 	 *         Return <code>null</code> if the track feature filters data cannot
 	 *         be found in the file.
 	 */
-	private List<FeatureFilter> getTrackFeatureFilters() {
-		final List<FeatureFilter> featureThresholds = new ArrayList<FeatureFilter>();
-		final Element ftCollectionEl = root.getChild(TRACK_FILTER_COLLECTION_ELEMENT_KEY);
-		if (null == ftCollectionEl) {
-			return null;
-		}
-		final List<Element> ftEls = ftCollectionEl.getChildren(FILTER_ELEMENT_KEY);
-		for (final Element ftEl : ftEls) {
-			final String feature = ftEl.getAttributeValue(FILTER_FEATURE_ATTRIBUTE_NAME);
-			final Double value = readDoubleAttribute(ftEl, FILTER_VALUE_ATTRIBUTE_NAME, logger);
-			final boolean isAbove = readBooleanAttribute(ftEl, FILTER_ABOVE_ATTRIBUTE_NAME, logger);
-			final FeatureFilter ft = new FeatureFilter(feature, value, isAbove);
-			featureThresholds.add(ft);
+	private List< FeatureFilter > getTrackFeatureFilters()
+	{
+		final List< FeatureFilter > featureThresholds = new ArrayList< FeatureFilter >();
+		final Element ftCollectionEl = root.getChild( TRACK_FILTER_COLLECTION_ELEMENT_KEY );
+		if ( null == ftCollectionEl ) { return null; }
+		final List< Element > ftEls = ftCollectionEl.getChildren( FILTER_ELEMENT_KEY );
+		for ( final Element ftEl : ftEls )
+		{
+			final String feature = ftEl.getAttributeValue( FILTER_FEATURE_ATTRIBUTE_NAME );
+			final Double value = readDoubleAttribute( ftEl, FILTER_VALUE_ATTRIBUTE_NAME, logger );
+			final boolean isAbove = readBooleanAttribute( ftEl, FILTER_ABOVE_ATTRIBUTE_NAME, logger );
+			final FeatureFilter ft = new FeatureFilter( feature, value, isAbove );
+			featureThresholds.add( ft );
 		}
 		return featureThresholds;
 	}
 
-	private void getBaseSettings(final Settings settings) {
+	private void getBaseSettings( final Settings settings )
+	{
 		// Basic settings
-		final Element settingsEl = root.getChild(SETTINGS_ELEMENT_KEY);
-		if (null != settingsEl) {
-			settings.xstart = readIntAttribute(settingsEl, SETTINGS_XSTART_ATTRIBUTE_NAME, logger, 1);
-			settings.xend = readIntAttribute(settingsEl, SETTINGS_XEND_ATTRIBUTE_NAME, logger, 512);
-			settings.ystart = readIntAttribute(settingsEl, SETTINGS_YSTART_ATTRIBUTE_NAME, logger, 1);
-			settings.yend = readIntAttribute(settingsEl, SETTINGS_YEND_ATTRIBUTE_NAME, logger, 512);
-			settings.zstart = readIntAttribute(settingsEl, SETTINGS_ZSTART_ATTRIBUTE_NAME, logger, 1);
-			settings.zend = readIntAttribute(settingsEl, SETTINGS_ZEND_ATTRIBUTE_NAME, logger, 10);
-			settings.tstart = readIntAttribute(settingsEl, SETTINGS_TSTART_ATTRIBUTE_NAME, logger, 1);
-			settings.tend = readIntAttribute(settingsEl, SETTINGS_TEND_ATTRIBUTE_NAME, logger, 10);
-			//			settings.detectionChannel = readIntAttribute(settingsEl, SETTINGS_DETECTION_CHANNEL_ATTRIBUTE_NAME, logger, 1);
+		final Element settingsEl = root.getChild( SETTINGS_ELEMENT_KEY );
+		if ( null != settingsEl )
+		{
+			settings.xstart = readIntAttribute( settingsEl, SETTINGS_XSTART_ATTRIBUTE_NAME, logger, 1 );
+			settings.xend = readIntAttribute( settingsEl, SETTINGS_XEND_ATTRIBUTE_NAME, logger, 512 );
+			settings.ystart = readIntAttribute( settingsEl, SETTINGS_YSTART_ATTRIBUTE_NAME, logger, 1 );
+			settings.yend = readIntAttribute( settingsEl, SETTINGS_YEND_ATTRIBUTE_NAME, logger, 512 );
+			settings.zstart = readIntAttribute( settingsEl, SETTINGS_ZSTART_ATTRIBUTE_NAME, logger, 1 );
+			settings.zend = readIntAttribute( settingsEl, SETTINGS_ZEND_ATTRIBUTE_NAME, logger, 10 );
+			settings.tstart = readIntAttribute( settingsEl, SETTINGS_TSTART_ATTRIBUTE_NAME, logger, 1 );
+			settings.tend = readIntAttribute( settingsEl, SETTINGS_TEND_ATTRIBUTE_NAME, logger, 10 );
+			// settings.detectionChannel = readIntAttribute(settingsEl,
+			// SETTINGS_DETECTION_CHANNEL_ATTRIBUTE_NAME, logger, 1);
 		}
 		// Image info settings
-		final Element infoEl = root.getChild(IMAGE_ELEMENT_KEY);
-		if (null != infoEl) {
-			settings.dx = readDoubleAttribute(infoEl, IMAGE_PIXEL_WIDTH_ATTRIBUTE_NAME, logger);
-			settings.dy = readDoubleAttribute(infoEl, IMAGE_PIXEL_HEIGHT_ATTRIBUTE_NAME, logger);
-			settings.dz = readDoubleAttribute(infoEl, IMAGE_VOXEL_DEPTH_ATTRIBUTE_NAME, logger);
-			settings.dt = readDoubleAttribute(infoEl, IMAGE_TIME_INTERVAL_ATTRIBUTE_NAME, logger);
-			settings.width = readIntAttribute(infoEl, IMAGE_WIDTH_ATTRIBUTE_NAME, logger, 512);
-			settings.height = readIntAttribute(infoEl, IMAGE_HEIGHT_ATTRIBUTE_NAME, logger, 512);
-			settings.nslices = readIntAttribute(infoEl, IMAGE_NSLICES_ATTRIBUTE_NAME, logger, 1);
-			settings.nframes = readIntAttribute(infoEl, IMAGE_NFRAMES_ATTRIBUTE_NAME, logger, 1);
-			settings.imageFileName = infoEl.getAttributeValue(IMAGE_FILENAME_ATTRIBUTE_NAME);
-			settings.imageFolder = infoEl.getAttributeValue(IMAGE_FOLDER_ATTRIBUTE_NAME);
+		final Element infoEl = root.getChild( IMAGE_ELEMENT_KEY );
+		if ( null != infoEl )
+		{
+			settings.dx = readDoubleAttribute( infoEl, IMAGE_PIXEL_WIDTH_ATTRIBUTE_NAME, logger );
+			settings.dy = readDoubleAttribute( infoEl, IMAGE_PIXEL_HEIGHT_ATTRIBUTE_NAME, logger );
+			settings.dz = readDoubleAttribute( infoEl, IMAGE_VOXEL_DEPTH_ATTRIBUTE_NAME, logger );
+			settings.dt = readDoubleAttribute( infoEl, IMAGE_TIME_INTERVAL_ATTRIBUTE_NAME, logger );
+			settings.width = readIntAttribute( infoEl, IMAGE_WIDTH_ATTRIBUTE_NAME, logger, 512 );
+			settings.height = readIntAttribute( infoEl, IMAGE_HEIGHT_ATTRIBUTE_NAME, logger, 512 );
+			settings.nslices = readIntAttribute( infoEl, IMAGE_NSLICES_ATTRIBUTE_NAME, logger, 1 );
+			settings.nframes = readIntAttribute( infoEl, IMAGE_NFRAMES_ATTRIBUTE_NAME, logger, 1 );
+			settings.imageFileName = infoEl.getAttributeValue( IMAGE_FILENAME_ATTRIBUTE_NAME );
+			settings.imageFolder = infoEl.getAttributeValue( IMAGE_FOLDER_ATTRIBUTE_NAME );
 		}
 	}
 
@@ -469,11 +509,10 @@ public class TmXmlReader_v20 extends TmXmlReader {
 	 *            the {@link DetectorProvider} that can unmarshal detector and
 	 *            detector settings.
 	 */
-	private void getDetectorSettings(final Settings settings, final DetectorProvider provider) {
-		final Element element = root.getChild(DETECTOR_SETTINGS_ELEMENT_KEY);
-		if (null == element) {
-			return;
-		}
+	private void getDetectorSettings( final Settings settings, final DetectorProvider provider )
+	{
+		final Element element = root.getChild( DETECTOR_SETTINGS_ELEMENT_KEY );
+		if ( null == element ) { return; }
 
 		// Get the detector key
 		final String detectorKey = element.getAttributeValue( XML_ATTRIBUTE_DETECTOR_NAME );
@@ -484,7 +523,8 @@ public class TmXmlReader_v20 extends TmXmlReader {
 		}
 
 		final SpotDetectorFactory< ? > factory = provider.getFactory( detectorKey );
-		if (null == factory) {
+		if ( null == factory )
+		{
 			logger.error( "The detector identified by the key " + detectorKey + " is unknown to TrackMate.\n" );
 			ok = false;
 			return;
@@ -493,7 +533,8 @@ public class TmXmlReader_v20 extends TmXmlReader {
 		final Map< String, Object > ds = new HashMap< String, Object >();
 		ok = factory.unmarshall( element, ds );
 
-		if (!ok) {
+		if ( !ok )
+		{
 			logger.error( factory.getErrorMessage() );
 			this.ok = false;
 			return;
@@ -521,11 +562,10 @@ public class TmXmlReader_v20 extends TmXmlReader {
 	 *            the {@link TrackerProvider} that can unmarshal tracker and
 	 *            tracker settings.
 	 */
-	private void getTrackerSettings(final Settings settings, final TrackerProvider provider) {
-		final Element element = root.getChild(TRACKER_SETTINGS_ELEMENT_KEY);
-		if (null == element) {
-			return;
-		}
+	private void getTrackerSettings( final Settings settings, final TrackerProvider provider )
+	{
+		final Element element = root.getChild( TRACKER_SETTINGS_ELEMENT_KEY );
+		if ( null == element ) { return; }
 
 		// Get the tracker key
 		final String trackerKey = element.getAttributeValue( XML_ATTRIBUTE_TRACKER_NAME );
@@ -544,10 +584,11 @@ public class TmXmlReader_v20 extends TmXmlReader {
 		}
 
 		// All the hard work is delegated to the factory.
-		final Map<String, Object> ds = new HashMap<String, Object>();
+		final Map< String, Object > ds = new HashMap< String, Object >();
 		final boolean ok = factory.unmarshall( element, ds );
 
-		if (!ok) {
+		if ( !ok )
+		{
 			logger.error( factory.getErrorMessage() );
 			this.ok = false;
 			return;
@@ -557,17 +598,16 @@ public class TmXmlReader_v20 extends TmXmlReader {
 		settings.trackerFactory = factory;
 	}
 
-
 	/**
 	 * Read the list of all spots stored in this file.
 	 * <p>
 	 * Internally, this methods also builds the cache field, which will be
 	 * required by the following methods:
 	 * <ul>
-	 * <li> {@link #getFilteredSpots()}
-	 * <li> {@link #readTracks()}
-	 * <li> {@link #readTrackEdges(SimpleDirectedWeightedGraph)}
-	 * <li> {@link #readTrackSpots(SimpleDirectedWeightedGraph)}
+	 * <li>{@link #getFilteredSpots()}
+	 * <li>{@link #readTracks()}
+	 * <li>{@link #readTrackEdges(SimpleDirectedWeightedGraph)}
+	 * <li>{@link #readTrackSpots(SimpleDirectedWeightedGraph)}
 	 * </ul>
 	 * It is therefore sensible to call this method first, just afther
 	 * {@link #parse()}ing the file. If not called, this method will be called
@@ -576,45 +616,49 @@ public class TmXmlReader_v20 extends TmXmlReader {
 	 * @return a {@link SpotCollection}. Return <code>null</code> if the spot
 	 *         section is not present in the file.
 	 */
-	private SpotCollection getAllSpots() {
+	private SpotCollection getAllSpots()
+	{
 		// Root element for collection
-		final Element spotCollection = root.getChild(SPOT_COLLECTION_ELEMENT_KEY);
-		if (null == spotCollection) {
-			return null;
-		}
+		final Element spotCollection = root.getChild( SPOT_COLLECTION_ELEMENT_KEY );
+		if ( null == spotCollection ) { return null; }
 
 		// Retrieve children elements for each frame
-		final List<Element> frameContent = spotCollection.getChildren(SPOT_FRAME_COLLECTION_ELEMENT_KEY);
+		final List< Element > frameContent = spotCollection.getChildren( SPOT_FRAME_COLLECTION_ELEMENT_KEY );
 
 		// Determine total number of spots
-		int nspots = readIntAttribute(spotCollection, SPOT_COLLECTION_NSPOTS_ATTRIBUTE_NAME, Logger.VOID_LOGGER);
-		if (nspots == 0) {
-			// Could not find it or read it. Determine it by quick sweeping through children element
-			for (final Element currentFrameContent : frameContent) {
-				nspots += currentFrameContent.getChildren(SPOT_ELEMENT_KEY).size();
+		int nspots = readIntAttribute( spotCollection, SPOT_COLLECTION_NSPOTS_ATTRIBUTE_NAME, Logger.VOID_LOGGER );
+		if ( nspots == 0 )
+		{
+			// Could not find it or read it. Determine it by quick sweeping
+			// through children element
+			for ( final Element currentFrameContent : frameContent )
+			{
+				nspots += currentFrameContent.getChildren( SPOT_ELEMENT_KEY ).size();
 			}
 		}
 
 		// Instantiate cache
-		cache = new ConcurrentHashMap<Integer, Spot>(nspots);
+		cache = new ConcurrentHashMap< Integer, Spot >( nspots );
 
 		// Load collection and build cache
 		int currentFrame = 0;
-		ArrayList<Spot> spotList;
+		ArrayList< Spot > spotList;
 		final SpotCollection allSpots = new SpotCollection();
 
-		for (final Element currentFrameContent : frameContent) {
+		for ( final Element currentFrameContent : frameContent )
+		{
 
-			currentFrame = readIntAttribute(currentFrameContent, FRAME_ATTRIBUTE_NAME, logger);
-			final List<Element> spotContent = currentFrameContent.getChildren(SPOT_ELEMENT_KEY);
-			spotList = new ArrayList<Spot>(spotContent.size());
-			for (final Element spotElement : spotContent) {
-				final Spot spot = createSpotFrom(spotElement);
-				spotList.add(spot);
-				cache.put(spot.ID(), spot);
+			currentFrame = readIntAttribute( currentFrameContent, FRAME_ATTRIBUTE_NAME, logger );
+			final List< Element > spotContent = currentFrameContent.getChildren( SPOT_ELEMENT_KEY );
+			spotList = new ArrayList< Spot >( spotContent.size() );
+			for ( final Element spotElement : spotContent )
+			{
+				final Spot spot = createSpotFrom( spotElement );
+				spotList.add( spot );
+				cache.put( spot.ID(), spot );
 			}
 
-			allSpots.put(currentFrame, spotList);
+			allSpots.put( currentFrame, spotList );
 		}
 		return allSpots;
 	}
@@ -622,54 +666,61 @@ public class TmXmlReader_v20 extends TmXmlReader {
 	/**
 	 * Sets the spot visibility as stored in this file.
 	 */
-	private void setSpotsVisibility() {
-		final Element selectedSpotCollection = root.getChild(FILTERED_SPOT_ELEMENT_KEY);
-		if (null == selectedSpotCollection) {
-			return;
-		}
+	private void setSpotsVisibility()
+	{
+		final Element selectedSpotCollection = root.getChild( FILTERED_SPOT_ELEMENT_KEY );
+		if ( null == selectedSpotCollection ) { return; }
 
-		if (null == cache)
+		if ( null == cache )
 		{
 			getAllSpots(); // build it if it's not here
 		}
 
-		final List<Element> frameContent = selectedSpotCollection.getChildren(FILTERED_SPOT_COLLECTION_ELEMENT_KEY);
+		final List< Element > frameContent = selectedSpotCollection.getChildren( FILTERED_SPOT_COLLECTION_ELEMENT_KEY );
 
-		for (final Element currentFrameContent : frameContent) {
-			final List<Element> spotContent = currentFrameContent.getChildren(SPOT_ID_ELEMENT_KEY);
+		for ( final Element currentFrameContent : frameContent )
+		{
+			final List< Element > spotContent = currentFrameContent.getChildren( SPOT_ID_ELEMENT_KEY );
 			// Loop over all spot element
-			for (final Element spotEl : spotContent) {
+			for ( final Element spotEl : spotContent )
+			{
 				// Find corresponding spot in cache
-				final int ID = readIntAttribute(spotEl, SPOT_ID_ATTRIBUTE_NAME, logger);
-				final Spot spot = cache.get(ID);
-				spot.putFeature(SpotCollection.VISIBLITY, SpotCollection.ONE);
+				final int ID = readIntAttribute( spotEl, SPOT_ID_ATTRIBUTE_NAME, logger );
+				final Spot spot = cache.get( ID );
+				spot.putFeature( SpotCollection.VISIBLITY, SpotCollection.ONE );
 			}
 		}
 	}
 
-	private Spot createSpotFrom(final Element spotEl) {
-		final int ID = readIntAttribute(spotEl, SPOT_ID_ATTRIBUTE_NAME, logger);
-		final Spot spot = new Spot(ID);
+	private Spot createSpotFrom( final Element spotEl )
+	{
+		final int ID = readIntAttribute( spotEl, SPOT_ID_ATTRIBUTE_NAME, logger );
+		final Spot spot = new Spot( ID );
 
-		final List<Attribute> atts = spotEl.getAttributes();
-		atts.remove(SPOT_ID_ATTRIBUTE_NAME);
+		final List< Attribute > atts = spotEl.getAttributes();
+		atts.remove( SPOT_ID_ATTRIBUTE_NAME );
 
-		String name = spotEl.getAttributeValue(SPOT_NAME_ATTRIBUTE_NAME);
-		if (null == name || name.equals(""))
+		String name = spotEl.getAttributeValue( SPOT_NAME_ATTRIBUTE_NAME );
+		if ( null == name || name.equals( "" ) )
 		{
 			name = "ID" + ID;
 		}
-		spot.setName(name);
-		atts.remove(SPOT_NAME_ATTRIBUTE_NAME);
+		spot.setName( name );
+		atts.remove( SPOT_NAME_ATTRIBUTE_NAME );
 
-		for (final Attribute att : atts) {
-			if (att.getName().equals(SPOT_NAME_ATTRIBUTE_NAME) || att.getName().equals(SPOT_ID_ATTRIBUTE_NAME)) {
+		for ( final Attribute att : atts )
+		{
+			if ( att.getName().equals( SPOT_NAME_ATTRIBUTE_NAME ) || att.getName().equals( SPOT_ID_ATTRIBUTE_NAME ) )
+			{
 				continue;
 			}
-			try {
-				spot.putFeature(att.getName(), att.getDoubleValue());
-			} catch (final DataConversionException e) {
-				logger.error("Cannot read the feature " + att.getName() + " value. Skipping.\n");
+			try
+			{
+				spot.putFeature( att.getName(), att.getDoubleValue() );
+			}
+			catch ( final DataConversionException e )
+			{
+				logger.error( "Cannot read the feature " + att.getName() + " value. Skipping.\n" );
 			}
 		}
 		return spot;

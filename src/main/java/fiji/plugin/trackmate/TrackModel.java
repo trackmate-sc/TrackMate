@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jgrapht.Graph;
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.VertexFactory;
 import org.jgrapht.alg.DijkstraShortestPath;
@@ -20,7 +19,6 @@ import org.jgrapht.event.GraphEdgeChangeEvent;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.event.GraphVertexChangeEvent;
 import org.jgrapht.event.TraversalListener;
-import org.jgrapht.event.TraversalListenerAdapter;
 import org.jgrapht.event.VertexTraversalEvent;
 import org.jgrapht.graph.AsUnweightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -110,11 +108,11 @@ public class TrackModel
 
 	private int IDcounter = 0;
 
-	private Map< Integer, Set< DefaultWeightedEdge >> connectedEdgeSets;
+	private Map< Integer, Set< DefaultWeightedEdge > > connectedEdgeSets;
 
 	Map< DefaultWeightedEdge, Integer > edgeToID;
 
-	private Map< Integer, Set< Spot >> connectedVertexSets;
+	private Map< Integer, Set< Spot > > connectedVertexSets;
 
 	Map< Spot, Integer > vertexToID;
 
@@ -194,7 +192,7 @@ public class TrackModel
 	 * @param trackNames
 	 *            the track names.
 	 */
-	public void from( final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph, final Map< Integer, Set< Spot >> trackSpots, final Map< Integer, Set< DefaultWeightedEdge >> trackEdges, final Map< Integer, Boolean > trackVisibility, final Map< Integer, String > trackNames )
+	public void from( final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph, final Map< Integer, Set< Spot > > trackSpots, final Map< Integer, Set< DefaultWeightedEdge > > trackEdges, final Map< Integer, Boolean > trackVisibility, final Map< Integer, String > trackNames )
 	{
 
 		if ( null != this.graph )
@@ -351,7 +349,7 @@ public class TrackModel
 	}
 
 	/**
-	 * @see Graph#containsEdge(Object, Object)
+	 * @see org.jgrapht.Graph#containsEdge(Object, Object)
 	 */
 	public boolean containsEdge( final Spot source, final Spot target )
 	{
@@ -359,7 +357,7 @@ public class TrackModel
 	}
 
 	/**
-	 * @see Graph#getEdge(Object, Object)
+	 * @see org.jgrapht.Graph#getEdge(Object, Object)
 	 */
 	public DefaultWeightedEdge getEdge( final Spot source, final Spot target )
 	{
@@ -367,7 +365,7 @@ public class TrackModel
 	}
 
 	/**
-	 * @see Graph#edgesOf(Object)
+	 * @see org.jgrapht.Graph#edgesOf(Object)
 	 */
 	public Set< DefaultWeightedEdge > edgesOf( final Spot spot )
 	{
@@ -382,7 +380,7 @@ public class TrackModel
 	}
 
 	/**
-	 * @see Graph#edgeSet()
+	 * @see org.jgrapht.Graph#edgeSet()
 	 */
 	public Set< DefaultWeightedEdge > edgeSet()
 	{
@@ -390,7 +388,7 @@ public class TrackModel
 	}
 
 	/**
-	 * @see Graph#vertexSet()
+	 * @see org.jgrapht.Graph#vertexSet()
 	 */
 	public Set< Spot > vertexSet()
 	{
@@ -398,7 +396,7 @@ public class TrackModel
 	}
 
 	/**
-	 * @see Graph#getEdgeSource(Object)
+	 * @see org.jgrapht.Graph#getEdgeSource(Object)
 	 */
 	public Spot getEdgeSource( final DefaultWeightedEdge e )
 	{
@@ -406,7 +404,7 @@ public class TrackModel
 	}
 
 	/**
-	 * @see Graph#getEdgeTarget(Object)
+	 * @see org.jgrapht.Graph#getEdgeTarget(Object)
 	 */
 	public Spot getEdgeTarget( final DefaultWeightedEdge e )
 	{
@@ -414,7 +412,7 @@ public class TrackModel
 	}
 
 	/**
-	 * @see Graph#getEdgeWeight(Object)
+	 * @see org.jgrapht.Graph#getEdgeWeight(Object)
 	 */
 	public double getEdgeWeight( final DefaultWeightedEdge edge )
 	{
@@ -608,8 +606,8 @@ public class TrackModel
 		IDcounter = 0;
 		visibility = new HashMap< Integer, Boolean >();
 		names = new HashMap< Integer, String >();
-		connectedVertexSets = new HashMap< Integer, Set< Spot >>();
-		connectedEdgeSets = new HashMap< Integer, Set< DefaultWeightedEdge >>();
+		connectedVertexSets = new HashMap< Integer, Set< Spot > >();
+		connectedEdgeSets = new HashMap< Integer, Set< DefaultWeightedEdge > >();
 
 		edgesAdded.clear();
 		edgesModified.clear();

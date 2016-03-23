@@ -37,8 +37,6 @@ import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxGraphView;
 
-import fiji.plugin.trackmate.Model;
-
 public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEventListener
 {
 
@@ -309,8 +307,6 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 				reset();
 			}
 
-
-
 		};
 	}
 
@@ -321,9 +317,7 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 	@Override
 	public void paintBackground( final Graphics g )
 	{
-		if ( paintDecorationLevel == 0 ) {
-			return;
-		}
+		if ( paintDecorationLevel == 0 ) { return; }
 
 		final int width = getViewport().getView().getSize().width;
 		final int height = getViewport().getView().getSize().height;
@@ -333,7 +327,6 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 		g.setFont( FONT.deriveFont( ( float ) ( 12 * scale ) ).deriveFont( Font.BOLD ) );
 		g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 		final Rectangle paintBounds = g.getClipBounds();
-
 
 		// Scaled sizes
 		final double xcs = TrackScheme.X_COLUMN_SIZE * scale;
@@ -376,7 +369,7 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 	/**
 	 * This listener method will be invoked when a new edge has been created
 	 * interactively in the graph component. It is used then to update the
-	 * underlying {@link Model}.
+	 * underlying {@link fiji.plugin.trackmate.Model}.
 	 */
 	@Override
 	public void invoke( final Object sender, final mxEventObject evt )
@@ -496,7 +489,8 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 						scrollPane.setVisible( false );
 						scrollPane.setOpaque( false );
 						int cwidth = columnWidths[ column ] * xcs;
-						if (column == 0) {
+						if ( column == 0 )
+						{
 							// Special case 1st column.
 							cwidth += xcs;
 						}

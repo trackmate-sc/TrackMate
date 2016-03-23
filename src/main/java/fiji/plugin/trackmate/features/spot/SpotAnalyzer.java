@@ -2,7 +2,6 @@ package fiji.plugin.trackmate.features.spot;
 
 import net.imglib2.algorithm.Algorithm;
 import net.imglib2.algorithm.Benchmark;
-import fiji.plugin.trackmate.Spot;
 
 /**
  * Interface for a class that can compute feature on a collection of spots.
@@ -10,9 +9,8 @@ import fiji.plugin.trackmate.Spot;
  * The spot collection to operate on is given at construction by the
  * {@link SpotAnalyzerFactory} that instantiated and configured this instance.
  * Calling the {@link #process()} method result in updating the feature map of
- * each spot directly, calling {@link Spot#putFeature(String, Double)}.
+ * each spot directly, calling
+ * {@link fiji.plugin.trackmate.Spot#putFeature(String, Double)}.
  */
 public interface SpotAnalyzer< T > extends Algorithm, Benchmark
-{
-
-}
+{}

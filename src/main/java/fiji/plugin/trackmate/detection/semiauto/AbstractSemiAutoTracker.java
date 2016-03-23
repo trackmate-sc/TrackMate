@@ -7,6 +7,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.detection.LogDetector;
+import fiji.plugin.trackmate.detection.SpotDetector;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.algorithm.Algorithm;
@@ -15,13 +21,6 @@ import net.imglib2.multithreading.SimpleMultiThreading;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
-import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.detection.LogDetector;
-import fiji.plugin.trackmate.detection.SpotDetector;
-import fiji.plugin.trackmate.tracking.SpotTracker;
 
 /**
  * A class made to perform semi-automated tracking of spots in TrackMate &amp;
@@ -51,7 +50,7 @@ import fiji.plugin.trackmate.tracking.SpotTracker;
  *            s.
  */
 @SuppressWarnings( "deprecation" )
-public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeType< T >> implements Algorithm, MultiThreaded
+public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeType< T > > implements Algorithm, MultiThreaded
 {
 
 	/** Minimal size of neighborhoods, in spot diameter units. */
@@ -184,7 +183,7 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 		{
 
 			nSpotProcessed++;
-			
+
 			/*
 			 * Extract spot & features
 			 */
@@ -364,7 +363,7 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 	 * @param quality
 	 *            the quality threshold below which found spots will be
 	 *            discarded.
-	 * @return a new {@link SpotTracker}.
+	 * @return a new {@link SpotDetector}.
 	 */
 	protected SpotDetector< T > createDetector( final RandomAccessible< T > img, final Interval interval, final double[] calibration, final double radius, final double quality )
 	{
@@ -424,9 +423,9 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 
 		/**
 		 * The source image calibration. That is: the pixel sizes in all
-		 * dimensions, to account for anisotropy in the source image
-		 * (<i>e.g.</i>dz might larger that dx, and the detector needs to
-		 * exploit that).
+		 * dimensions, to account for anisotropy in the source image (
+		 * <i>e.g.</i>dz might larger that dx, and the detector needs to exploit
+		 * that).
 		 * <p>
 		 * The segmented spots will be returned with coordinates scaled with
 		 * this calibration (image coordinates).

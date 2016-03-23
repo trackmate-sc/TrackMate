@@ -1,8 +1,5 @@
 package fiji.plugin.trackmate.providers;
 
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.visualization.ViewFactory;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -16,7 +13,10 @@ import org.scijava.log.LogService;
 import org.scijava.plugin.PluginInfo;
 import org.scijava.plugin.PluginService;
 
-public class ViewProvider {
+import fiji.plugin.trackmate.visualization.ViewFactory;
+
+public class ViewProvider
+{
 	/**
 	 * The view keys, in the order they will appear in the GUI.
 	 */
@@ -31,19 +31,19 @@ public class ViewProvider {
 	 */
 
 	/**
-	 * This provider provides the GUI with the model views currently available in the
-	 * TrackMate trackmate. Each view is identified by a key String, which can be used
-	 * to retrieve new instance of the view.
+	 * This provider provides the GUI with the model views currently available
+	 * in the TrackMate trackmate. Each view is identified by a key String,
+	 * which can be used to retrieve new instance of the view.
 	 * <p>
-	 * If you want to add custom views to TrackMate, a simple way is to extend this
-	 * factory so that it is registered with the custom views and provide this
-	 * extended factory to the {@link TrackMate} trackmate.
+	 * If you want to add custom views to TrackMate, a simple way is to extend
+	 * this factory so that it is registered with the custom views and provide
+	 * this extended factory to the {@link fiji.plugin.trackmate.TrackMate}
+	 * trackmate.
 	 */
-	public ViewProvider() {
+	public ViewProvider()
+	{
 		registerViews();
 	}
-
-
 
 	private void registerView( final String key, final ViewFactory view, final boolean visible )
 	{
@@ -75,9 +75,9 @@ public class ViewProvider {
 		final Context context = new Context( LogService.class, PluginService.class );
 		final LogService log = context.getService( LogService.class );
 		final PluginService pluginService = context.getService( PluginService.class );
-		final List< PluginInfo< ViewFactory >> infos = pluginService.getPluginsOfType( ViewFactory.class );
+		final List< PluginInfo< ViewFactory > > infos = pluginService.getPluginsOfType( ViewFactory.class );
 
-		final Comparator< PluginInfo< ViewFactory >> priorityComparator = new Comparator< PluginInfo< ViewFactory > >()
+		final Comparator< PluginInfo< ViewFactory > > priorityComparator = new Comparator< PluginInfo< ViewFactory > >()
 		{
 			@Override
 			public int compare( final PluginInfo< ViewFactory > o1, final PluginInfo< ViewFactory > o2 )

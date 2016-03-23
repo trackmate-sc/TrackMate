@@ -73,8 +73,6 @@ import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_FILTER_COLLECTION_ELEMENT
 import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_ID_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_NAME_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.XML_ATTRIBUTE_TRACKER_NAME;
-import ij.IJ;
-import ij.ImagePlus;
 
 import java.io.File;
 import java.io.IOException;
@@ -95,7 +93,6 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 import org.jgrapht.graph.DefaultWeightedEdge;
-import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
 import fiji.plugin.trackmate.Dimension;
@@ -121,10 +118,11 @@ import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.providers.ViewProvider;
-import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewFactory;
+import ij.IJ;
+import ij.ImagePlus;
 
 public class TmXmlReader
 {
@@ -332,7 +330,7 @@ public class TmXmlReader
 
 		try
 		{
-			final Map< Integer, Map< String, Double >> savedFeatureMap = readTrackFeatures( modelElement );
+			final Map< Integer, Map< String, Double > > savedFeatureMap = readTrackFeatures( modelElement );
 			for ( final Integer savedKey : savedFeatureMap.keySet() )
 			{
 
@@ -380,8 +378,8 @@ public class TmXmlReader
 	 *            will skip reading detector parameters.
 	 * @param trackerProvider
 	 *            the tracker provider, required to configure the settings with
-	 *            a correct {@link SpotTracker}. If <code>null</code>, will skip
-	 *            reading tracker parameters.
+	 *            a correct {@link fiji.plugin.trackmate.tracking.SpotTracker}.
+	 *            If <code>null</code>, will skip reading tracker parameters.
 	 * @param spotAnalyzerProvider
 	 *            the spot analyzer provider, required to instantiates the saved
 	 *            {@link SpotAnalyzerFactory}s. If <code>null</code>, will skip
@@ -508,10 +506,10 @@ public class TmXmlReader
 	/**
 	 * Returns a map of the saved track features, as they appear in the file
 	 */
-	private Map< Integer, Map< String, Double >> readTrackFeatures( final Element modelElement )
+	private Map< Integer, Map< String, Double > > readTrackFeatures( final Element modelElement )
 	{
 
-		final HashMap< Integer, Map< String, Double >> featureMap = new HashMap< Integer, Map< String, Double >>();
+		final HashMap< Integer, Map< String, Double > > featureMap = new HashMap< Integer, Map< String, Double > >();
 
 		final Element allTracksElement = modelElement.getChild( TRACK_COLLECTION_ELEMENT_KEY );
 		if ( null == allTracksElement )
@@ -805,9 +803,9 @@ public class TmXmlReader
 	 * Internally, this methods also builds the cache field, which will be
 	 * required by the following methods:
 	 * <ul>
-	 * <li> {@link #readTracks()}
-	 * <li> {@link #readTrackEdges(SimpleDirectedWeightedGraph)}
-	 * <li> {@link #readTrackSpots(SimpleDirectedWeightedGraph)}
+	 * <li>{@link #readTracks()}
+	 * <li>{@link #readTrackEdges(SimpleDirectedWeightedGraph)}
+	 * <li>{@link #readTrackSpots(SimpleDirectedWeightedGraph)}
 	 * </ul>
 	 * It is therefore sensible to call this method first, just after
 	 * {@link #parse()}ing the file. If not called, this method will be called
@@ -842,7 +840,7 @@ public class TmXmlReader
 
 		// Load collection and build cache
 		int currentFrame = 0;
-		final Map< Integer, Set< Spot >> content = new HashMap< Integer, Set< Spot >>( frameContent.size() );
+		final Map< Integer, Set< Spot > > content = new HashMap< Integer, Set< Spot > >( frameContent.size() );
 		for ( final Element currentFrameContent : frameContent )
 		{
 
@@ -876,8 +874,8 @@ public class TmXmlReader
 
 		// What we have to flesh out from the file
 		final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph = new SimpleWeightedGraph< Spot, DefaultWeightedEdge >( DefaultWeightedEdge.class );
-		final Map< Integer, Set< Spot >> connectedVertexSet = new HashMap< Integer, Set< Spot >>( trackElements.size() );
-		final Map< Integer, Set< DefaultWeightedEdge >> connectedEdgeSet = new HashMap< Integer, Set< DefaultWeightedEdge >>( trackElements.size() );
+		final Map< Integer, Set< Spot > > connectedVertexSet = new HashMap< Integer, Set< Spot > >( trackElements.size() );
+		final Map< Integer, Set< DefaultWeightedEdge > > connectedEdgeSet = new HashMap< Integer, Set< DefaultWeightedEdge > >( trackElements.size() );
 		final Map< Integer, String > savedTrackNames = new HashMap< Integer, String >( trackElements.size() );
 
 		// The list of edge features. that we will set.

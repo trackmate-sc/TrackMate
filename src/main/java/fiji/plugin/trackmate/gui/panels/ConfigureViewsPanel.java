@@ -59,7 +59,6 @@ import fiji.plugin.trackmate.gui.panels.components.ColorByFeatureGUIPanel;
 import fiji.plugin.trackmate.gui.panels.components.ColorByFeatureGUIPanel.Category;
 import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
 import fiji.plugin.trackmate.gui.panels.components.SetColorScaleDialog;
-import fiji.plugin.trackmate.visualization.AbstractTrackMateModelView;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.ManualEdgeColorGenerator;
 import fiji.plugin.trackmate.visualization.ManualSpotColorGenerator;
@@ -73,7 +72,8 @@ import fiji.util.NumberParser;
 
 /**
  * A configuration panel used to tune the aspect of spots and tracks in multiple
- * {@link AbstractTrackMateModelView}. This GUI takes the role of a controller.
+ * {@link fiji.plugin.trackmate.visualization.AbstractTrackMateModelView}. This
+ * GUI takes the role of a controller.
  *
  * @author Jean-Yves Tinevez &lt;tinevez@pasteur.fr&gt; - 2010 - 2011
  */
@@ -92,7 +92,9 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 
 	private static final String TRACKSCHEME_BUTTON_TOOLTIP = "<html>" + "Launch a new instance of TrackScheme.</html>";
 
-	/** A map of String/Object that configures the look and feel of the views. */
+	/**
+	 * A map of String/Object that configures the look and feel of the views.
+	 */
 	protected Map< String, Object > displaySettings = new HashMap< String, Object >();
 
 	protected JButton jButtonShowTrackScheme;
@@ -267,7 +269,8 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 
 	public void setSpotColorGeneratorPerTrackFeature( final FeatureColorGenerator< Spot > spotColorGeneratorPerTrackFeature )
 	{
-		if (null != this.spotColorGeneratorPerTrackFeature) {
+		if ( null != this.spotColorGeneratorPerTrackFeature )
+		{
 			this.spotColorGeneratorPerTrackFeature.terminate();
 		}
 		this.spotColorGeneratorPerTrackFeature = spotColorGeneratorPerTrackFeature;
@@ -311,7 +314,6 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 		}
 		this.manualEdgeColorGenerator = manualEdgeColorGenerator;
 	}
-
 
 	/**
 	 * Refreshes some components of this GUI with current values of the model.
@@ -425,8 +427,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 						.addGroup( gl_jPanelSpotOptions.createSequentialGroup()
 								.addContainerGap()
 								.addComponent( jPanelSpotColor, GroupLayout.DEFAULT_SIZE, 266, Short.MAX_VALUE )
-								.addContainerGap() )
-				);
+								.addContainerGap() ) );
 		gl_jPanelSpotOptions.setVerticalGroup(
 				gl_jPanelSpotOptions.createParallelGroup( Alignment.LEADING )
 						.addGroup( gl_jPanelSpotOptions.createSequentialGroup()
@@ -440,8 +441,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 								.addComponent( jCheckBoxDisplayNames )
 								.addPreferredGap( ComponentPlacement.RELATED )
 								.addComponent( jPanelSpotColor, GroupLayout.PREFERRED_SIZE, 49, Short.MAX_VALUE )
-								.addContainerGap() )
-				);
+								.addContainerGap() ) );
 		jPanelSpotOptions.setLayout( gl_jPanelSpotOptions );
 
 		/*
@@ -555,8 +555,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 						.addGroup( gl_jPanelTrackOptions.createSequentialGroup()
 								.addContainerGap()
 								.addComponent( trackColorGUI, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE )
-								.addContainerGap() )
-				);
+								.addContainerGap() ) );
 		gl_jPanelTrackOptions.setVerticalGroup(
 				gl_jPanelTrackOptions.createParallelGroup( Alignment.LEADING )
 						.addGroup( gl_jPanelTrackOptions.createSequentialGroup()
@@ -574,8 +573,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 										.addComponent( jTextFieldFrameDepth, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE ) )
 								.addPreferredGap( ComponentPlacement.RELATED )
 								.addComponent( trackColorGUI, GroupLayout.PREFERRED_SIZE, 43, Short.MAX_VALUE )
-								.addGap( 9 ) )
-				);
+								.addGap( 9 ) ) );
 		jPanelTrackOptions.setLayout( gl_jPanelTrackOptions );
 
 		if ( spotColorGenerator != null )
@@ -983,8 +981,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 									.addGroup( groupLayout.createParallelGroup( Alignment.TRAILING )
 											.addComponent( jPanelButtons, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 280, Short.MAX_VALUE )
 											.addComponent( jpanelDrawingDepth, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 280, Short.MAX_VALUE ) )
-									.addGap( 10 ) )
-					);
+									.addGap( 10 ) ) );
 			groupLayout.setVerticalGroup(
 					groupLayout.createParallelGroup( Alignment.LEADING )
 							.addGroup( groupLayout.createSequentialGroup()
@@ -1002,8 +999,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 									.addComponent( jpanelDrawingDepth, GroupLayout.PREFERRED_SIZE, 34, GroupLayout.PREFERRED_SIZE )
 									.addPreferredGap( ComponentPlacement.RELATED )
 									.addComponent( jPanelButtons, GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE )
-									.addContainerGap() )
-					);
+									.addContainerGap() ) );
 
 			setLayout( groupLayout );
 

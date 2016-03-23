@@ -1,7 +1,6 @@
 package fiji.plugin.trackmate.util;
 
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
-import ij.ImagePlus;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -16,6 +15,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import fiji.plugin.trackmate.Dimension;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.Spot;
+import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imagej.ImgPlusMetadata;
 import net.imagej.axis.Axes;
@@ -25,14 +28,9 @@ import net.imglib2.Interval;
 import net.imglib2.img.ImagePlusAdapter;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.util.Util;
-import fiji.plugin.trackmate.Dimension;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.detection.DetectorKeys;
 
 /**
- * List of static utilities for the {@link TrackMate} trackmate
+ * List of static utilities for {@link fiji.plugin.trackmate.TrackMate}.
  */
 public class TMUtils
 {
@@ -48,10 +46,10 @@ public class TMUtils
 	 * http://stackoverflow.com
 	 * /questions/109383/how-to-sort-a-mapkey-value-on-the-values-in-java
 	 */
-	public static < K, V extends Comparable< ? super V >> Map< K, V > sortByValue( final Map< K, V > map, final Comparator< V > comparator )
+	public static < K, V extends Comparable< ? super V > > Map< K, V > sortByValue( final Map< K, V > map, final Comparator< V > comparator )
 	{
-		final List< Map.Entry< K, V >> list = new LinkedList< Map.Entry< K, V >>( map.entrySet() );
-		Collections.sort( list, new Comparator< Map.Entry< K, V >>()
+		final List< Map.Entry< K, V > > list = new LinkedList< Map.Entry< K, V > >( map.entrySet() );
+		Collections.sort( list, new Comparator< Map.Entry< K, V > >()
 		{
 			@Override
 			public int compare( final Map.Entry< K, V > o1, final Map.Entry< K, V > o2 )
@@ -578,8 +576,8 @@ public class TMUtils
 	 * that will determine the X,Y,Z size of the interval. A single channel will
 	 * be taken in the case of a multi-channel image. If the detector set in the
 	 * settings object has a parameter for the target channel
-	 * {@link DetectorKeys#KEY_TARGET_CHANNEL}, it will be used; otherwise the
-	 * first channel will be taken.
+	 * {@link fiji.plugin.trackmate.detection.DetectorKeys#KEY_TARGET_CHANNEL},
+	 * it will be used; otherwise the first channel will be taken.
 	 * <p>
 	 * If the specified {@link ImgPlus} has a time axis, it will be dropped and
 	 * the returned interval will have one dimension less.

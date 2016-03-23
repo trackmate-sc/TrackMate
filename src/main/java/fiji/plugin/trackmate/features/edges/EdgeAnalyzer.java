@@ -1,15 +1,13 @@
 package fiji.plugin.trackmate.features.edges;
 
-import fiji.plugin.trackmate.FeatureModel;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.features.FeatureAnalyzer;
-
 import java.util.Collection;
 
+import org.jgrapht.graph.DefaultWeightedEdge;
+
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.features.FeatureAnalyzer;
 import net.imglib2.algorithm.Benchmark;
 import net.imglib2.algorithm.MultiThreaded;
-
-import org.jgrapht.graph.DefaultWeightedEdge;
 
 /**
  * Interface for analyzers that can compute scalar numerical features for an
@@ -23,7 +21,7 @@ public interface EdgeAnalyzer extends Benchmark, FeatureAnalyzer, MultiThreaded
 
 	/**
 	 * Scores a collection of link between two spots. The results must be stored
-	 * in the {@link FeatureModel}.
+	 * in the {@link fiji.plugin.trackmate.FeatureModel}.
 	 * <p>
 	 * Note: ideally concrete implementation should work in a multi-threaded
 	 * fashion for performance reason, when possible.

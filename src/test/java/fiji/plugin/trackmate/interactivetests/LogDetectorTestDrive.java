@@ -6,6 +6,10 @@ import java.util.Random;
 
 import org.scijava.vecmath.Point3d;
 
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.detection.LogDetector;
+import fiji.plugin.trackmate.util.SpotNeighborhood;
+import fiji.plugin.trackmate.util.TMUtils;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
@@ -14,11 +18,6 @@ import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.util.Util;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.detection.DownsampleLogDetector;
-import fiji.plugin.trackmate.detection.LogDetector;
-import fiji.plugin.trackmate.util.SpotNeighborhood;
-import fiji.plugin.trackmate.util.TMUtils;
 
 /**
  * Test class for {@link DownsampleLogDetector}

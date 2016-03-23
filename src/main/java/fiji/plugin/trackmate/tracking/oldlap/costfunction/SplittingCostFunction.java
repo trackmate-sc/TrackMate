@@ -10,21 +10,24 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
-import net.imglib2.algorithm.OutputAlgorithm;
-import net.imglib2.multithreading.SimpleMultiThreading;
 import Jama.Matrix;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.tracking.LAPUtils;
-import fiji.plugin.trackmate.tracking.oldlap.LAPTracker;
+import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
+import net.imglib2.algorithm.OutputAlgorithm;
+import net.imglib2.multithreading.SimpleMultiThreading;
 
 /**
- * <p>Splitting cost function used with {@link LAPTracker}.
+ * <p>
+ * Splitting cost function used with
+ * {@link fiji.plugin.trackmate.tracking.oldlap.LAPTracker}.
  * 
- * <p>The <b>cost function</b> is determined by the default equation in the
+ * <p>
+ * The <b>cost function</b> is determined by the default equation in the
  * TrackMate trackmate, see below.
- * <p>  
- *  It slightly differs from the Jaqaman article, see equation (5) and (6) in the paper.
+ * <p>
+ * It slightly differs from the Jaqaman article, see equation (5) and (6) in the
+ * paper.
  * <p>
  * The <b>thresholds</b> used are:
  * <ul>
@@ -38,100 +41,117 @@ import fiji.plugin.trackmate.tracking.oldlap.LAPTracker;
  *
  */
 @SuppressWarnings( "deprecation" )
-public class SplittingCostFunction extends MultiThreadedBenchmarkAlgorithm implements OutputAlgorithm<Matrix> {
+public class SplittingCostFunction extends MultiThreadedBenchmarkAlgorithm implements OutputAlgorithm< Matrix >
+{
 
 	private static final boolean DEBUG = false;
 
 	/** The distance threshold. */
 	protected final double maxDist;
+
 	/** The value used to block an assignment in the cost matrix. */
 	protected final double blockingValue;
-	/** Thresholds for the feature ratios. */
-	protected final Map<String, Double> featurePenalties;
-	private final boolean allowSplitting;
-	protected final List<SortedSet<Spot>> trackSegments;
-	protected final List<Spot> middlePoints;
-	protected Matrix m;
 
+	/** Thresholds for the feature ratios. */
+	protected final Map< String, Double > featurePenalties;
+
+	private final boolean allowSplitting;
+
+	protected final List< SortedSet< Spot > > trackSegments;
+
+	protected final List< Spot > middlePoints;
+
+	protected Matrix m;
 
 	/*
 	 * CONSTRUCTOR
 	 */
 
-
-	@SuppressWarnings("unchecked")
-	public SplittingCostFunction(final Map<String, Object> settings, final List<SortedSet<Spot>> trackSegments, final List<Spot> middlePoints) {
-		this.maxDist 			= (Double) settings.get(KEY_SPLITTING_MAX_DISTANCE);
-		this.blockingValue		= (Double) settings.get(KEY_BLOCKING_VALUE);
-		this.featurePenalties	= (Map<String, Double>) settings.get(KEY_SPLITTING_FEATURE_PENALTIES);
-		this.allowSplitting		= (Boolean) settings.get(KEY_ALLOW_TRACK_SPLITTING);
-		this.trackSegments 		= trackSegments;
-		this.middlePoints		= middlePoints;
+	@SuppressWarnings( "unchecked" )
+	public SplittingCostFunction( final Map< String, Object > settings, final List< SortedSet< Spot > > trackSegments, final List< Spot > middlePoints )
+	{
+		this.maxDist = ( Double ) settings.get( KEY_SPLITTING_MAX_DISTANCE );
+		this.blockingValue = ( Double ) settings.get( KEY_BLOCKING_VALUE );
+		this.featurePenalties = ( Map< String, Double > ) settings.get( KEY_SPLITTING_FEATURE_PENALTIES );
+		this.allowSplitting = ( Boolean ) settings.get( KEY_ALLOW_TRACK_SPLITTING );
+		this.trackSegments = trackSegments;
+		this.middlePoints = middlePoints;
 	}
 
 	/*
 	 * METHODS
 	 */
 
-
 	@Override
-	public boolean process() {
+	public boolean process()
+	{
 		final long start = System.currentTimeMillis();
-		if (DEBUG)
-			System.out.println("-- DEBUG information from SplittingCostFunction --");
+		if ( DEBUG )
+			System.out.println( "-- DEBUG information from SplittingCostFunction --" );
 
-		if (!allowSplitting) {
-			
-			m = new Matrix(middlePoints.size(), trackSegments.size(), blockingValue);
-			
-		} else {
+		if ( !allowSplitting )
+		{
+
+			m = new Matrix( middlePoints.size(), trackSegments.size(), blockingValue );
+
+		}
+		else
+		{
 
 			// Prepare threads
-			final Thread[] threads = SimpleMultiThreading.newThreads(numThreads);
+			final Thread[] threads = SimpleMultiThreading.newThreads( numThreads );
 
-			m = new Matrix(middlePoints.size(), trackSegments.size());
+			m = new Matrix( middlePoints.size(), trackSegments.size() );
 
 			// Prepare the thread array
-			final AtomicInteger ai = new AtomicInteger(0);
-			for (int ithread = 0; ithread < threads.length; ithread++) {
+			final AtomicInteger ai = new AtomicInteger( 0 );
+			for ( int ithread = 0; ithread < threads.length; ithread++ )
+			{
 
-				threads[ithread] = new Thread("LAPTracker splitting cost thread "+(1+ithread)+"/"+threads.length) {  
+				threads[ ithread ] = new Thread( "LAPTracker splitting cost thread " + ( 1 + ithread ) + "/" + threads.length )
+				{
 
 					@Override
-					public void run() {
+					public void run()
+					{
 
-						for (int i = ai.getAndIncrement(); i < middlePoints.size(); i = ai.getAndIncrement()) {
+						for ( int i = ai.getAndIncrement(); i < middlePoints.size(); i = ai.getAndIncrement() )
+						{
 
-							final Spot middle = middlePoints.get(i);
+							final Spot middle = middlePoints.get( i );
 
-							for (int j = 0; j < trackSegments.size(); j++) {
+							for ( int j = 0; j < trackSegments.size(); j++ )
+							{
 
-								final SortedSet<Spot> track = trackSegments.get(j);
+								final SortedSet< Spot > track = trackSegments.get( j );
 								final Spot start = track.first();
 
-								if (DEBUG)
-									System.out.println("Segment "+j);
-								if (track.contains(middle)) {	
-									m.set(i, j, blockingValue);
+								if ( DEBUG )
+									System.out.println( "Segment " + j );
+								if ( track.contains( middle ) )
+								{
+									m.set( i, j, blockingValue );
 									continue;
 								}
 
-								// Frame threshold - middle Spot must be one frame behind of the start Spot
-								final int startFrame = start.getFeature(Spot.FRAME).intValue();
-								final int middleFrame = middle.getFeature(Spot.FRAME).intValue();
-								if (startFrame - middleFrame != 1 ) {
-									m.set(i, j, blockingValue);
+								// Frame threshold - middle Spot must be one
+								// frame behind of the start Spot
+								final int startFrame = start.getFeature( Spot.FRAME ).intValue();
+								final int middleFrame = middle.getFeature( Spot.FRAME ).intValue();
+								if ( startFrame - middleFrame != 1 )
+								{
+									m.set( i, j, blockingValue );
 									continue;
 								}
 
-								final double cost = LAPUtils.computeLinkingCostFor(start, middle, maxDist, blockingValue, featurePenalties);
-								m.set(i, j, cost);
+								final double cost = LAPUtils.computeLinkingCostFor( start, middle, maxDist, blockingValue, featurePenalties );
+								m.set( i, j, cost );
 							}
 						}
 					}
 				};
 			}
-			SimpleMultiThreading.startAndJoin(threads);
+			SimpleMultiThreading.startAndJoin( threads );
 		}
 
 		final long end = System.currentTimeMillis();
@@ -140,12 +160,14 @@ public class SplittingCostFunction extends MultiThreadedBenchmarkAlgorithm imple
 	}
 
 	@Override
-	public boolean checkInput() {
+	public boolean checkInput()
+	{
 		return true;
 	}
 
 	@Override
-	public Matrix getResult() {
+	public Matrix getResult()
+	{
 		return m;
 	}
 }
