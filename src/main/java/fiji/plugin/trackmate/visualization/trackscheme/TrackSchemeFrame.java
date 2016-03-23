@@ -146,6 +146,7 @@ public class TrackSchemeFrame extends JFrame
 
 		final JSplitPane inner = new JSplitPane( JSplitPane.VERTICAL_SPLIT, graphOutline, infoPane );
 		inner.setDividerLocation( 120 );
+		inner.setMinimumSize( new Dimension( 0, 0 ) );
 
 		final JSplitPane splitPane = new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, inner, graphComponent );
 		splitPane.setDividerLocation( 170 );
