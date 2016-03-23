@@ -1,5 +1,8 @@
 package fiji.plugin.trackmate.action;
 
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+
 import javax.swing.ImageIcon;
 
 import org.scijava.plugin.Plugin;
@@ -50,11 +53,49 @@ public class LinkNew3DViewerAction extends AbstractTMAction
 				logger.log( "Rendering 3D overlay...\n" );
 				final Image3DUniverse universe = new Image3DUniverse();
 				final ImageWindow3D win = new ImageWindow3D( "TrackMate 3D Viewer", universe );
+
 				win.setIconImage( TrackMateWizard.TRACKMATE_ICON.getImage() );
 				universe.init( win );
 				win.pack();
 				win.setVisible( true );
 				final SpotDisplayer3D newDisplayer = new SpotDisplayer3D( trackmate.getModel(), controller.getSelectionModel(), universe );
+
+				// Deregister on window closing.
+				win.addWindowListener( new WindowListener()
+				{
+
+					@Override
+					public void windowOpened( final WindowEvent e )
+					{}
+
+					@Override
+					public void windowIconified( final WindowEvent e )
+					{}
+
+					@Override
+					public void windowDeiconified( final WindowEvent e )
+					{}
+
+					@Override
+					public void windowDeactivated( final WindowEvent e )
+					{}
+
+					@Override
+					public void windowClosing( final WindowEvent e )
+					{
+						controller.getSelectionModel().removeSelectionChangeListener( newDisplayer );
+						trackmate.getModel().removeModelChangeListener( newDisplayer );
+					}
+
+					@Override
+					public void windowClosed( final WindowEvent e )
+					{}
+
+					@Override
+					public void windowActivated( final WindowEvent e )
+					{}
+				} );
+
 				for ( final String key : controller.getGuimodel().getDisplaySettings().keySet() )
 				{
 					newDisplayer.setDisplaySettings( key, controller.getGuimodel().getDisplaySettings().get( key ) );

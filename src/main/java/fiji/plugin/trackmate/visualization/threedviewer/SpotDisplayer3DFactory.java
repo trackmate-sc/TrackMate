@@ -1,6 +1,8 @@
 package fiji.plugin.trackmate.visualization.threedviewer;
 
 import java.awt.Color;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
 import javax.swing.ImageIcon;
 
@@ -91,7 +93,46 @@ public class SpotDisplayer3DFactory implements ViewFactory
 				}
 			}
 		}
-		return new SpotDisplayer3D( model, selectionModel, universe );
+
+		final SpotDisplayer3D view = new SpotDisplayer3D( model, selectionModel, universe );
+
+		// Deregister on window closing.
+		win.addWindowListener( new WindowListener()
+		{
+
+			@Override
+			public void windowOpened( final WindowEvent e )
+			{}
+
+			@Override
+			public void windowIconified( final WindowEvent e )
+			{}
+
+			@Override
+			public void windowDeiconified( final WindowEvent e )
+			{}
+
+			@Override
+			public void windowDeactivated( final WindowEvent e )
+			{}
+
+			@Override
+			public void windowClosing( final WindowEvent e )
+			{
+				selectionModel.removeSelectionChangeListener( view );
+				model.removeModelChangeListener( view );
+			}
+
+			@Override
+			public void windowClosed( final WindowEvent e )
+			{}
+
+			@Override
+			public void windowActivated( final WindowEvent e )
+			{}
+		} );
+
+		return view;
 	}
 
 	@Override
