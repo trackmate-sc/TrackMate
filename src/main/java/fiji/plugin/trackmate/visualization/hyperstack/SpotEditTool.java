@@ -900,10 +900,16 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 					try
 					{
 						// Remove old ones
+						final HashSet< Spot > toRemove = new HashSet< >(  );
 						for ( final Iterator< Spot > it = spots.iterator( currentFrame, true ); it.hasNext(); )
 						{
-							model.removeSpot( it.next() );
+							toRemove.add( it.next() );
 						}
+						for ( final Spot spot : toRemove )
+						{
+							model.removeSpot( spot );
+						}
+
 						// Add new ones
 						for ( final Spot spot : copiedSpots )
 						{
