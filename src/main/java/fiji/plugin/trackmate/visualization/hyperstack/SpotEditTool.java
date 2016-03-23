@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Set;
 
 import javax.swing.SwingUtilities;
@@ -92,7 +93,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 
 	SpotEditToolParams params = new SpotEditToolParams();
 
-	private Logger logger = Logger.VOID_LOGGER;
+	private Logger logger = Logger.IJTOOLBAR_LOGGER;
 
 	private SpotEditToolConfigPanel configPanel;
 
@@ -608,7 +609,6 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 		// Delete currently edited spot
 		case KeyEvent.VK_DELETE:
 		{
-
 			if ( null == editedSpot )
 			{
 				final ArrayList< Spot > spotSelection = new ArrayList< Spot >( selectionModel.getSpotSelection() );
@@ -620,10 +620,12 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 					for ( final DefaultWeightedEdge edge : edgeSelection )
 					{
 						model.removeEdge( edge );
+						logger.log( "Removed edge " + edge + ".\n" );
 					}
 					for ( final Spot spot : spotSelection )
 					{
 						model.removeSpot( spot );
+						logger.log( "Removed spot " + spot + ".\n" );
 					}
 				}
 				finally
@@ -638,6 +640,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 				try
 				{
 					model.removeSpot( editedSpot );
+					logger.log( "Removed " + editedSpot + ".\n" );
 				}
 				finally
 				{
@@ -660,7 +663,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 
 				if ( e.isShiftDown() )
 				{
-
+					logger.log( "Semi-automatic tracking.\n" );
 					// Semi-auto tracking
 					semiAutoTracking( model, selectionModel, imp );
 
@@ -691,6 +694,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 					try
 					{
 						model.addSpotTo( newSpot, frame );
+						logger.log( "Added spot " + newSpot + " to frame " + frame + ".\n" );
 					}
 					finally
 					{
@@ -760,6 +764,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 				try
 				{
 					model.removeSpot( target );
+					logger.log( "Removed spot " + target + ".\n" );
 				}
 				finally
 				{
@@ -786,8 +791,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 				final int frame = displayer.imp.getFrame() - 1;
 				final Spot clickLocation = makeSpot( imp, displayer, canvas, null );
 				quickEditedSpot = model.getSpots().getSpotAt( clickLocation, frame, true );
-				if ( null == quickEditedSpot ) { return; // un-consumed event
-				}
+				if ( null == quickEditedSpot ) { return; }
 			}
 			e.consume();
 			break;
@@ -834,6 +838,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 				try
 				{
 					model.updateFeatures( target );
+					logger.log( String.format( Locale.US, "Changed spot " + target + " radius to %.1f " + model.getSpaceUnits() + ".\n", radius ) );
 				}
 				finally
 				{
@@ -909,6 +914,8 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 					{
 						model.endUpdate();
 						imp.updateAndDraw();
+						logger.log( "Removed spots of frame " + currentFrame + ".\n" );
+						logger.log( "Copied spots of frame " + ( currentFrame - 1 ) + " to frame " + currentFrame + ".\n" );
 					}
 				}
 
@@ -1086,11 +1093,11 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 		String statusString = "";
 		if ( null == spot.getName() || spot.getName().equals( "" ) )
 		{
-			statusString = String.format( "Spot ID%d, x = %.1f, y = %.1f, z = %.1f, r = %.1f %s", spot.ID(), spot.getFeature( Spot.POSITION_X ), spot.getFeature( Spot.POSITION_Y ), spot.getFeature( Spot.POSITION_Z ), spot.getFeature( Spot.RADIUS ), units );
+			statusString = String.format( Locale.US, "Spot ID%d, x = %.1f, y = %.1f, z = %.1f, r = %.1f %s", spot.ID(), spot.getFeature( Spot.POSITION_X ), spot.getFeature( Spot.POSITION_Y ), spot.getFeature( Spot.POSITION_Z ), spot.getFeature( Spot.RADIUS ), units );
 		}
 		else
 		{
-			statusString = String.format( "Spot %s, x = %.1f, y = %.1f, z = %.1f, r = %.1f %s", spot.getName(), spot.getFeature( Spot.POSITION_X ), spot.getFeature( Spot.POSITION_Y ), spot.getFeature( Spot.POSITION_Z ), spot.getFeature( Spot.RADIUS ), units );
+			statusString = String.format( Locale.US, "Spot %s, x = %.1f, y = %.1f, z = %.1f, r = %.1f %s", spot.getName(), spot.getFeature( Spot.POSITION_X ), spot.getFeature( Spot.POSITION_Y ), spot.getFeature( Spot.POSITION_Z ), spot.getFeature( Spot.RADIUS ), units );
 		}
 		IJ.showStatus( statusString );
 	}
@@ -1126,7 +1133,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 				@Override
 				public void windowClosing( final WindowEvent e )
 				{
-					logger = Logger.VOID_LOGGER;
+					logger = Logger.IJTOOLBAR_LOGGER;
 				}
 			} );
 		}
