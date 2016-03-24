@@ -199,7 +199,6 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	@Override
 	public void mouseClicked( final MouseEvent e )
 	{
-
 		final ImagePlus imp = getImagePlus( e );
 		final HyperStackDisplayer displayer = displayers.get( imp );
 		if ( DEBUG )
@@ -241,6 +240,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 				if ( !autolinkingmode )
 				{
 					selectionModel.clearSelection();
+					logger.log( "Cleared selection.\n" );
 				}
 				roiedit = null;
 				imp.setRoi( roiedit );
@@ -281,6 +281,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 				if ( null != target && null != target.getFeature( Spot.RADIUS ) )
 				{
 					radius = target.getFeature( Spot.RADIUS );
+					logger.log( "Editing spot " + target + ".\n" );
 				}
 				else
 				{
@@ -299,6 +300,8 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 						previousRadius = radius;
 					}
 					target.putFeature( Spot.RADIUS, previousRadius );
+					logger.log( "Creating new spot.\n" );
+
 				}
 				editedSpot = target;
 				displayer.spotOverlay.editingSpot = editedSpot;
@@ -346,6 +349,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 						// The spots pre-existed and was not moved across frames
 						model.updateFeatures( editedSpot );
 					}
+					logger.log( "Finished editing spot " + editedSpot + ".\n" );
 
 				}
 				finally
@@ -447,8 +451,14 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 					if ( !added.isEmpty() )
 					{
 						selectionModel.addSpotToSelection( added );
+						if ( added.size() == 1 )
+							logger.log( "Added one spot to selection.\n" );
+						else
+							logger.log( "Added " + added.size() + " spots to selection.\n" );
 					}
+					roiedit = null;
 				};
+
 			}.start();
 		}
 	}
@@ -1012,7 +1022,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 						}
 						else
 						{
-							logger.error( "Cannot create an edge between two spots belonging in the same frame." );
+							logger.error( "Cannot create an edge between two spots belonging to the same frame.\n" );
 						}
 					}
 
