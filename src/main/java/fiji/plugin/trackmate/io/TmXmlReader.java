@@ -121,6 +121,7 @@ import fiji.plugin.trackmate.providers.ViewProvider;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewFactory;
+import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 import ij.IJ;
 import ij.ImagePlus;
 
@@ -272,6 +273,10 @@ public class TmXmlReader
 				}
 				else
 				{
+					// Do not instantiate TrackScheme if found in the file.
+					if ( viewKey.equals( TrackScheme.KEY ) )
+						continue;
+
 					final ViewFactory factory = provider.getFactory( viewKey );
 					final TrackMateModelView view = factory.create( model, settings, selectionModel );
 					if ( null == view )

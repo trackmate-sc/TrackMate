@@ -96,7 +96,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 	/** Do we capture thumbnails by default? */
 	static final boolean DEFAULT_THUMBNAILS_ENABLED = false;
 
-	static final String KEY = "TRACKSCHEME";
+	public static final String KEY = "TRACKSCHEME";
 
 	/*
 	 * FIELDS
