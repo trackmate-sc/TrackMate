@@ -1,13 +1,5 @@
 package fiji.plugin.trackmate.visualization.hyperstack;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.util.TMUtils;
-import fiji.plugin.trackmate.visualization.TrackColorGenerator;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
-import ij.ImagePlus;
-import ij.gui.Roi;
-
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -23,6 +15,14 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
+
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.visualization.TrackColorGenerator;
+import fiji.plugin.trackmate.visualization.TrackMateModelView;
+import ij.ImagePlus;
+import ij.gui.Roi;
 
 /**
  * The overlay class in charge of drawing the tracks on the hyperstack window.
@@ -137,6 +137,30 @@ public class TrackOverlay extends Roi
 		switch ( trackDisplayMode )
 		{
 
+		case TrackMateModelView.TRACK_DISPLAY_MODE_SELECTION_ONLY:
+		{
+			for ( final DefaultWeightedEdge edge : highlight )
+			{
+				source = model.getTrackModel().getEdgeSource( edge );
+				target = model.getTrackModel().getEdgeTarget( edge );
+				if ( !isOnClip( source, target, minx, miny, maxx, maxy, calibration ) )
+				{
+					continue;
+				}
+
+				final double zs = source.getFeature( Spot.POSITION_Z ).doubleValue();
+				final double zt = target.getFeature( Spot.POSITION_Z ).doubleValue();
+				if ( doLimitDrawingDepth && Math.abs( zs - zslice ) > drawingDepth && Math.abs( zt - zslice ) > drawingDepth )
+					continue;
+
+				final Integer trackID = model.getTrackModel().trackIDOf( edge );
+				colorGenerator.setCurrentTrackID( trackID );
+				g2d.setColor( colorGenerator.color( edge ) );
+				drawEdge( g2d, source, target, xcorner, ycorner, magnification );
+			}
+
+			break;
+		}
 		case TrackMateModelView.TRACK_DISPLAY_MODE_WHOLE:
 		{
 			for ( final Integer trackID : filteredTrackKeys )
@@ -255,18 +279,21 @@ public class TrackOverlay extends Roi
 		}
 		}
 
-		// Deal with highlighted edges first: brute and thick display
-		g2d.setStroke( SELECTION_STROKE );
-		g2d.setColor( TrackMateModelView.DEFAULT_HIGHLIGHT_COLOR );
-		for ( final DefaultWeightedEdge edge : highlight )
+		if ( trackDisplayMode != TrackMateModelView.TRACK_DISPLAY_MODE_SELECTION_ONLY )
 		{
-			source = model.getTrackModel().getEdgeSource( edge );
-			target = model.getTrackModel().getEdgeTarget( edge );
-			if ( !isOnClip( source, target, minx, miny, maxx, maxy, calibration ) )
+			// Deal with highlighted edges first: brute and thick display
+			g2d.setStroke( SELECTION_STROKE );
+			g2d.setColor( TrackMateModelView.DEFAULT_HIGHLIGHT_COLOR );
+			for ( final DefaultWeightedEdge edge : highlight )
 			{
-				continue;
+				source = model.getTrackModel().getEdgeSource( edge );
+				target = model.getTrackModel().getEdgeTarget( edge );
+				if ( !isOnClip( source, target, minx, miny, maxx, maxy, calibration ) )
+				{
+					continue;
+				}
+				drawEdge( g2d, source, target, xcorner, ycorner, magnification );
 			}
-			drawEdge( g2d, source, target, xcorner, ycorner, magnification );
 		}
 
 		// Restore graphic device original settings

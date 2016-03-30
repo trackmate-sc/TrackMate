@@ -1,14 +1,6 @@
 package fiji.plugin.trackmate.visualization.hyperstack;
 
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_SPOT_COLORING;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.util.TMUtils;
-import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
-import ij.ImagePlus;
-import ij.gui.Roi;
 
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
@@ -25,6 +17,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
+import fiji.plugin.trackmate.visualization.TrackMateModelView;
+import ij.ImagePlus;
+import ij.gui.Roi;
 
 /**
  * The overlay class in charge of drawing the spot images on the hyperstack
@@ -87,6 +88,8 @@ public class SpotOverlay extends Roi
 
 		final boolean doLimitDrawingDepth = ( Boolean ) displaySettings.get( TrackMateModelView.KEY_LIMIT_DRAWING_DEPTH );
 		final double drawingDepth = ( Double ) displaySettings.get( TrackMateModelView.KEY_DRAWING_DEPTH );
+		final int trackDisplayMode = ( Integer ) displaySettings.get( TrackMateModelView.KEY_TRACK_DISPLAY_MODE );
+		final boolean selectionOnly = ( trackDisplayMode == TrackMateModelView.TRACK_DISPLAY_MODE_SELECTION_ONLY );
 
 		final Graphics2D g2d = ( Graphics2D ) g;
 		// Save graphic device original settings
@@ -109,32 +112,11 @@ public class SpotOverlay extends Roi
 		@SuppressWarnings( "unchecked" )
 		final FeatureColorGenerator< Spot > colorGenerator = ( FeatureColorGenerator< Spot > ) displaySettings.get( KEY_SPOT_COLORING );
 		g2d.setStroke( new BasicStroke( 1.0f ) );
-		for ( final Iterator< Spot > iterator = spots.iterator( frame, true ); iterator.hasNext(); )
+
+		if ( selectionOnly && null != spotSelection)
 		{
-			final Spot spot = iterator.next();
+			// Track display mode only displays selection.
 
-			if ( editingSpot == spot || ( spotSelection != null && spotSelection.contains( spot ) ) )
-			{
-				continue;
-			}
-
-			final Color color = colorGenerator.color( spot );
-			g2d.setColor( color );
-
-			final double z = spot.getFeature( Spot.POSITION_Z ).doubleValue();
-			if ( doLimitDrawingDepth && Math.abs( z - zslice ) > drawingDepth )
-			{
-				continue;
-			}
-
-			drawSpot( g2d, spot, zslice, xcorner, ycorner, mag );
-		}
-
-		// Deal with spot selection
-		if ( null != spotSelection )
-		{
-			g2d.setStroke( new BasicStroke( 2.0f ) );
-			g2d.setColor( TrackMateModelView.DEFAULT_HIGHLIGHT_COLOR );
 			for ( final Spot spot : spotSelection )
 			{
 				if ( spot == editingSpot )
@@ -142,15 +124,70 @@ public class SpotOverlay extends Roi
 					continue;
 				}
 				final int sFrame = spot.getFeature( Spot.FRAME ).intValue();
-				if ( DEBUG )
-				{
-					System.out.println( "[SpotOverlay] For spot " + spot + " in selection, found frame " + sFrame );
-				}
 				if ( sFrame != frame )
 				{
 					continue;
 				}
+
+				final double z = spot.getFeature( Spot.POSITION_Z ).doubleValue();
+				if ( doLimitDrawingDepth && Math.abs( z - zslice ) > drawingDepth )
+				{
+					continue;
+				}
+				
+				final Color color = colorGenerator.color( spot );
+				g2d.setColor( color );
 				drawSpot( g2d, spot, zslice, xcorner, ycorner, mag );
+			}
+
+		}
+		else
+		{
+			// Other track displays.
+
+			for ( final Iterator< Spot > iterator = spots.iterator( frame, true ); iterator.hasNext(); )
+			{
+				final Spot spot = iterator.next();
+
+				if ( editingSpot == spot || ( spotSelection != null && spotSelection.contains( spot ) ) )
+				{
+					continue;
+				}
+
+				final Color color = colorGenerator.color( spot );
+				g2d.setColor( color );
+
+				final double z = spot.getFeature( Spot.POSITION_Z ).doubleValue();
+				if ( doLimitDrawingDepth && Math.abs( z - zslice ) > drawingDepth )
+				{
+					continue;
+				}
+
+				drawSpot( g2d, spot, zslice, xcorner, ycorner, mag );
+			}
+
+			// Deal with spot selection
+			if ( null != spotSelection )
+			{
+				g2d.setStroke( new BasicStroke( 2.0f ) );
+				g2d.setColor( TrackMateModelView.DEFAULT_HIGHLIGHT_COLOR );
+				for ( final Spot spot : spotSelection )
+				{
+					if ( spot == editingSpot )
+					{
+						continue;
+					}
+					final int sFrame = spot.getFeature( Spot.FRAME ).intValue();
+					if ( DEBUG )
+					{
+						System.out.println( "[SpotOverlay] For spot " + spot + " in selection, found frame " + sFrame );
+					}
+					if ( sFrame != frame )
+					{
+						continue;
+					}
+					drawSpot( g2d, spot, zslice, xcorner, ycorner, mag );
+				}
 			}
 		}
 
