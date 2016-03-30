@@ -118,6 +118,7 @@ public class TrackOverlay extends Roi
 		{
 		case TrackMateModelView.TRACK_DISPLAY_MODE_LOCAL:
 		case TrackMateModelView.TRACK_DISPLAY_MODE_LOCAL_QUICK:
+		case TrackMateModelView.TRACK_DISPLAY_MODE_SELECTION_ONLY:
 			minT = currentFrame - trackDisplayDepth;
 			maxT = currentFrame + trackDisplayDepth;
 			break;
@@ -144,9 +145,12 @@ public class TrackOverlay extends Roi
 				source = model.getTrackModel().getEdgeSource( edge );
 				target = model.getTrackModel().getEdgeTarget( edge );
 				if ( !isOnClip( source, target, minx, miny, maxx, maxy, calibration ) )
-				{
 					continue;
-				}
+
+				source = model.getTrackModel().getEdgeSource( edge );
+				final int sourceFrame = source.getFeature( Spot.FRAME ).intValue();
+				if ( sourceFrame < minT || sourceFrame >= maxT )
+					continue;
 
 				final double zs = source.getFeature( Spot.POSITION_Z ).doubleValue();
 				final double zt = target.getFeature( Spot.POSITION_Z ).doubleValue();
@@ -156,7 +160,9 @@ public class TrackOverlay extends Roi
 				final Integer trackID = model.getTrackModel().trackIDOf( edge );
 				colorGenerator.setCurrentTrackID( trackID );
 				g2d.setColor( colorGenerator.color( edge ) );
-				drawEdge( g2d, source, target, xcorner, ycorner, magnification );
+
+				transparency = ( float ) ( 1 - Math.abs( ( double ) sourceFrame - currentFrame ) / trackDisplayDepth );
+				drawEdge( g2d, source, target, xcorner, ycorner, magnification, transparency );
 			}
 
 			break;
@@ -173,15 +179,10 @@ public class TrackOverlay extends Roi
 				}
 				for ( final DefaultWeightedEdge edge : track )
 				{
-					//					if ( highlight.contains( edge ) )
-					//						continue;
-
 					source = model.getTrackModel().getEdgeSource( edge );
 					target = model.getTrackModel().getEdgeTarget( edge );
 					if ( !isOnClip( source, target, minx, miny, maxx, maxy, calibration ) )
-					{
 						continue;
-					}
 
 					final double zs = source.getFeature( Spot.POSITION_Z ).doubleValue();
 					final double zt = target.getFeature( Spot.POSITION_Z ).doubleValue();
@@ -212,9 +213,6 @@ public class TrackOverlay extends Roi
 				}
 				for ( final DefaultWeightedEdge edge : track )
 				{
-					//					if ( highlight.contains( edge ) )
-					//						continue;
-
 					source = model.getTrackModel().getEdgeSource( edge );
 					final int sourceFrame = source.getFeature( Spot.FRAME ).intValue();
 					if ( sourceFrame < minT || sourceFrame >= maxT )
@@ -222,9 +220,7 @@ public class TrackOverlay extends Roi
 
 					target = model.getTrackModel().getEdgeTarget( edge );
 					if ( !isOnClip( source, target, minx, miny, maxx, maxy, calibration ) )
-					{
 						continue;
-					}
 
 					final double zs = source.getFeature( Spot.POSITION_Z ).doubleValue();
 					final double zt = target.getFeature( Spot.POSITION_Z ).doubleValue();
@@ -255,9 +251,6 @@ public class TrackOverlay extends Roi
 				}
 				for ( final DefaultWeightedEdge edge : track )
 				{
-					//					if ( highlight.contains( edge ) )
-					//						continue;
-
 					source = model.getTrackModel().getEdgeSource( edge );
 					final int sourceFrame = source.getFeature( Spot.FRAME ).intValue();
 					if ( sourceFrame < minT || sourceFrame >= maxT )
@@ -266,9 +259,7 @@ public class TrackOverlay extends Roi
 					transparency = ( float ) ( 1 - Math.abs( ( double ) sourceFrame - currentFrame ) / trackDisplayDepth );
 					target = model.getTrackModel().getEdgeTarget( edge );
 					if ( !isOnClip( source, target, minx, miny, maxx, maxy, calibration ) )
-					{
 						continue;
-					}
 
 					g2d.setColor( colorGenerator.color( edge ) );
 					drawEdge( g2d, source, target, xcorner, ycorner, magnification, transparency );
@@ -284,14 +275,13 @@ public class TrackOverlay extends Roi
 			// Deal with highlighted edges first: brute and thick display
 			g2d.setStroke( SELECTION_STROKE );
 			g2d.setColor( TrackMateModelView.DEFAULT_HIGHLIGHT_COLOR );
+			g2d.setComposite( AlphaComposite.getInstance( AlphaComposite.SRC_OVER ) );
 			for ( final DefaultWeightedEdge edge : highlight )
 			{
 				source = model.getTrackModel().getEdgeSource( edge );
 				target = model.getTrackModel().getEdgeTarget( edge );
 				if ( !isOnClip( source, target, minx, miny, maxx, maxy, calibration ) )
-				{
 					continue;
-				}
 				drawEdge( g2d, source, target, xcorner, ycorner, magnification );
 			}
 		}
@@ -318,28 +308,13 @@ public class TrackOverlay extends Roi
 		final double y1p = y1i / calibration[ 1 ] + 0.5f;
 
 		// Is any spot inside the clip?
-		if ( ( x0p > minx && x0p < maxx && y0p > miny && y0p < maxy ) || ( x1p > minx && x1p < maxx && y1p > miny && y1p < maxy ) )
-		{
-			return true;
-		}
+		if ( ( x0p > minx && x0p < maxx && y0p > miny && y0p < maxy ) || ( x1p > minx && x1p < maxx && y1p > miny && y1p < maxy ) ) { return true; }
 
 		// Do we cross any of the 4 borders of the clip?
-		if ( segmentsCross( x0p, y0p, x1p, y1p, minx, miny, maxx, miny ) )
-		{
-			return true;
-		}
-		if ( segmentsCross( x0p, y0p, x1p, y1p, maxx, miny, maxx, maxy ) )
-		{
-			return true;
-		}
-		if ( segmentsCross( x0p, y0p, x1p, y1p, minx, maxy, maxx, maxy ) )
-		{
-			return true;
-		}
-		if ( segmentsCross( x0p, y0p, x1p, y1p, minx, miny, minx, maxy ) )
-		{
-			return true;
-		}
+		if ( segmentsCross( x0p, y0p, x1p, y1p, minx, miny, maxx, miny ) ) { return true; }
+		if ( segmentsCross( x0p, y0p, x1p, y1p, maxx, miny, maxx, maxy ) ) { return true; }
+		if ( segmentsCross( x0p, y0p, x1p, y1p, minx, maxy, maxx, maxy ) ) { return true; }
+		if ( segmentsCross( x0p, y0p, x1p, y1p, minx, miny, minx, maxy ) ) { return true; }
 		return false;
 	}
 
@@ -347,20 +322,19 @@ public class TrackOverlay extends Roi
 	 * PROTECTED METHODS
 	 */
 
-
 	private static final boolean segmentsCross( final double x0, final double y0, final double x1, final double y1, final double x2, final double y2, final double x3, final double y3 )
 	{
-	    final double s1_x = x1 - x0;
-	    final double s1_y = y1 - y0;
-	    final double s2_x = x3 - x2;
-	    final double s2_y = y3 - y2;
+		final double s1_x = x1 - x0;
+		final double s1_y = y1 - y0;
+		final double s2_x = x3 - x2;
+		final double s2_y = y3 - y2;
 
 		final double det = ( -s2_x * s1_y + s1_x * s2_y );
 		if ( det < Float.MIN_NORMAL )
 			return false;
 
 		final double s = ( -s1_y * ( x0 - x2 ) + s1_x * ( y0 - y2 ) ); // / det;
-		final double t = ( s2_x * ( y0 - y2 ) - s2_y * ( x0 - x2 ) ); //  / det;
+		final double t = ( s2_x * ( y0 - y2 ) - s2_y * ( x0 - x2 ) ); // / det;
 
 		return ( s >= 0 && s <= det && t >= 0 && t <= det );
 	}
