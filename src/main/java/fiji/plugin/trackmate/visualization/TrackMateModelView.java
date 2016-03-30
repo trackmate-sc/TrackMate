@@ -34,7 +34,8 @@ public interface TrackMateModelView
 	 * Defines the key for the track display mode. Possible values are
 	 * {@link #TRACK_DISPLAY_MODE_WHOLE}, {@link #TRACK_DISPLAY_MODE_LOCAL},
 	 * {@link #TRACK_DISPLAY_MODE_LOCAL_BACKWARD},
-	 * {@value #TRACK_DISPLAY_MODE_LOCAL_FORWARD}.
+	 * {@value #TRACK_DISPLAY_MODE_LOCAL_FORWARD},
+	 * {@value #TRACK_DISPLAY_MODE_SELECTION_ONLY}.
 	 */
 	public static final String KEY_TRACK_DISPLAY_MODE = "TrackDisplaymode";
 
