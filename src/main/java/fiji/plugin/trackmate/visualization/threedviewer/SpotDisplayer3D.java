@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -24,6 +25,7 @@ import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.AbstractTrackMateModelView;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.TrackColorGenerator;
+import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import ij3d.Content;
 import ij3d.ContentInstant;
 import ij3d.Image3DUniverse;
@@ -59,8 +61,6 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 	private HashMap< Spot, Color3f > previousColorHighlight;
 
 	private HashMap< Spot, Integer > previousFrameHighlight;
-
-	private HashMap< DefaultWeightedEdge, Color > previousEdgeHighlight;
 
 	private TreeMap< Integer, ContentInstant > contentAllFrames;
 
@@ -136,9 +136,11 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 	@Override
 	public void selectionChanged( final SelectionChangeEvent event )
 	{
-		// Highlight
-		highlightEdges( selectionModel.getEdgeSelection() );
-		highlightSpots( selectionModel.getSpotSelection() );
+		// Highlight edges.
+		trackNode.setSelection( selectionModel.getEdgeSelection() );
+		trackNode.refresh();
+		// Highlight spots.
+		displaySpotSelection( ( Integer ) displaySettings.get( KEY_TRACK_DISPLAY_MODE ) == TrackMateModelView.TRACK_DISPLAY_MODE_SELECTION_ONLY );
 		// Center on last spot
 		super.selectionChanged( event );
 	}
@@ -213,6 +215,7 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 		else if ( key == KEY_TRACK_DISPLAY_MODE && null != trackNode )
 		{
 			trackNode.setTrackDisplayMode( ( Integer ) value );
+			displaySpotSelection( ( Integer ) value == TrackMateModelView.TRACK_DISPLAY_MODE_SELECTION_ONLY );
 		}
 		else if ( key == KEY_TRACK_DISPLAY_DEPTH && null != trackNode )
 		{
@@ -388,6 +391,20 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 					}
 				}
 			}
+
+		/*
+		 * Don't color spot selection in the highlight color if we are
+		 * displaying selection only.
+		 */
+		final Integer trackDisplayMode = ( Integer ) displaySettings.get( KEY_TRACK_DISPLAY_MODE );
+		if ( trackDisplayMode == TrackMateModelView.TRACK_DISPLAY_MODE_SELECTION_ONLY )
+			return;
+
+		/*
+		 * Store previous color value and color the spot selection with the
+		 * highlight color.
+		 */
+
 		previousSpotHighlight = new ArrayList< Spot >( spots.size() );
 		previousColorHighlight = new HashMap< Spot, Color3f >( spots.size() );
 		previousFrameHighlight = new HashMap< Spot, Integer >( spots.size() );
@@ -409,22 +426,62 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 		}
 	}
 
-	private void highlightEdges( final Collection< DefaultWeightedEdge > edges )
+	/**
+	 * Changes the visibility of the displayed spot.
+	 *
+	 * @param onlySpotSelection
+	 *            If <code>true</code>, we display on the spots in the
+	 *            selection. Otherwise we display all spots marked as visible.
+	 */
+	private void displaySpotSelection( final boolean onlySpotSelection )
 	{
-		// Restore previous display settings for previously highlighted edges
-		if ( null != previousEdgeHighlight )
-			for ( final DefaultWeightedEdge edge : previousEdgeHighlight.keySet() )
-				trackNode.setColor( edge, previousEdgeHighlight.get( edge ) );
+		final Set< Spot > spotSelection = selectionModel.getSpotSelection();
+		if ( onlySpotSelection )
+		{
+			if ( spotSelection.isEmpty() )
+			{
+				for ( final Integer frame : blobs.keySet() )
+				{
+					blobs.get( frame ).setVisible( false );
+				}
+				return;
+			}
 
-		// Store current color settings
-		previousEdgeHighlight = new HashMap< DefaultWeightedEdge, Color >();
-		for ( final DefaultWeightedEdge edge : edges )
-			previousEdgeHighlight.put( edge, trackNode.getColor( edge ) );
+			// Sort spots in selection per frame.
+			final HashMap< Integer, ArrayList< Spot > > spotsPerFrame = new HashMap< >( blobs.size() );
+			for ( final Integer frame : blobs.keySet() )
+			{
+				final ArrayList< Spot > spots = new ArrayList< >();
+				spotsPerFrame.put( frame, spots );
+			}
 
-		// Change edge color
-		final Color highlightColor = ( Color ) displaySettings.get( KEY_HIGHLIGHT_COLOR );
-		for ( final DefaultWeightedEdge edge : edges )
-			trackNode.setColor( edge, highlightColor );
+			for ( final Spot spot : spotSelection )
+			{
+				final int frame = spot.getFeature( Spot.FRAME ).intValue();
+				final ArrayList< Spot > spots = spotsPerFrame.get( Integer.valueOf( frame ) );
+				spots.add( spot );
+			}
+
+			// Mark then as visible, the others as invisible.
+			for ( final Integer frame : spotsPerFrame.keySet() )
+			{
+				blobs.get( frame ).setVisible( spotsPerFrame.get( frame ) );
+			}
+
+			// Restore proper color.
+			updateSpotColors();
+			updateTrackColors();
+		}
+		else
+		{
+			// Make all visible spots visible here.
+			for ( final int frame : blobs.keySet() )
+			{
+				final Iterable< Spot > spots = model.getSpots().iterable( frame, true );
+				blobs.get( frame ).setVisible( spots );
+			}
+			highlightSpots( spotSelection );
+		}
 	}
 
 	@Override

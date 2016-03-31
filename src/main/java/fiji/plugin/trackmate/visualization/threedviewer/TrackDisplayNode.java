@@ -88,6 +88,10 @@ public class TrackDisplayNode extends ContentNode implements TimelapseListener
 	 */
 	private HashMap< Integer, Integer > switchMaskIndex;
 
+	private Collection< DefaultWeightedEdge > edgeSelection;
+
+	private HashMap< DefaultWeightedEdge, Color > previousEdgeHighlight;
+
 	/*
 	 * CONSTRUCTOR
 	 */
@@ -154,6 +158,53 @@ public class TrackDisplayNode extends ContentNode implements TimelapseListener
 
 		case TrackMateModelView.TRACK_DISPLAY_MODE_WHOLE:
 		{
+			break;
+		}
+
+		case TrackMateModelView.TRACK_DISPLAY_MODE_SELECTION_ONLY:
+		{
+			if ( null == edgeSelection )
+				break;
+
+			// Make them all invisible.
+			for ( final int frame : frameIndices.keySet() )
+			{
+				for ( final Integer trackID : lines.keySet() )
+				{
+					final LineArray line = lines.get( trackID );
+					for ( final Integer index : frameIndices.get( frame ).get( trackID ) )
+					{
+						line.getColor( index, color );
+						color.w = 0;
+						line.setColor( index, color );
+						line.setColor( index + 1, color );
+					}
+				}
+			}
+
+			// Restore visibility of selection.
+			for ( final DefaultWeightedEdge edge : edgeSelection )
+			{
+				final Integer trackID = model.getTrackModel().trackIDOf( edge );
+				final Integer index = edgeIndices.get( trackID ).get( edge );
+				final LineArray line = lines.get( trackID );
+				if ( null == line )
+					continue;
+
+				final int frame = model.getTrackModel().getEdgeSource( edge ).getFeature( Spot.FRAME ).intValue();
+				final int frameDist = Math.abs( frame  - currentTimePoint );
+				float tp;
+				if ( frameDist > displayDepth )
+					tp = 0f;
+				else
+					tp = 1f - ( float ) frameDist / displayDepth;
+
+				line.getColor( index, color );
+				color.w = tp;
+				line.setColor( index, color );
+				line.setColor( index + 1, color );
+			}
+
 			break;
 		}
 
@@ -332,6 +383,25 @@ public class TrackDisplayNode extends ContentNode implements TimelapseListener
 		}
 		}
 
+		// Deal now with selection
+		if ( ( null != edgeSelection ) && ( displayMode != TrackMateModelView.TRACK_DISPLAY_MODE_SELECTION_ONLY ) )
+		{
+			// Restore previous display settings for previously highlighted
+			// edges
+			if ( null != previousEdgeHighlight )
+				for ( final DefaultWeightedEdge edge : previousEdgeHighlight.keySet() )
+					setColor( edge, previousEdgeHighlight.get( edge ) );
+
+			// Store current color settings
+			previousEdgeHighlight = new HashMap< DefaultWeightedEdge, Color >();
+			for ( final DefaultWeightedEdge edge : edgeSelection )
+				previousEdgeHighlight.put( edge, getColor( edge ) );
+
+			// Change edge color
+			final Color highlightColor = TrackMateModelView.DEFAULT_HIGHLIGHT_COLOR;
+			for ( final DefaultWeightedEdge edge : edgeSelection )
+				setColor( edge, highlightColor );
+		}
 	}
 
 	/**
@@ -500,6 +570,11 @@ public class TrackDisplayNode extends ContentNode implements TimelapseListener
 		branchGroup.setCapability( BranchGroup.ALLOW_DETACH );
 		branchGroup.addChild( trackSwitch );
 		addChild( branchGroup );
+	}
+
+	public void setSelection( final Collection< DefaultWeightedEdge > edgeSelection )
+	{
+		this.edgeSelection = edgeSelection;
 	}
 
 	/*

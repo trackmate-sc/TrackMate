@@ -34,7 +34,8 @@ public interface TrackMateModelView
 	 * Defines the key for the track display mode. Possible values are
 	 * {@link #TRACK_DISPLAY_MODE_WHOLE}, {@link #TRACK_DISPLAY_MODE_LOCAL},
 	 * {@link #TRACK_DISPLAY_MODE_LOCAL_BACKWARD},
-	 * {@value #TRACK_DISPLAY_MODE_LOCAL_FORWARD}.
+	 * {@value #TRACK_DISPLAY_MODE_LOCAL_FORWARD},
+	 * {@value #TRACK_DISPLAY_MODE_SELECTION_ONLY}.
 	 */
 	public static final String KEY_TRACK_DISPLAY_MODE = "TrackDisplaymode";
 
@@ -154,6 +155,12 @@ public interface TrackMateModelView
 	 */
 	public static final int TRACK_DISPLAY_MODE_LOCAL_FORWARD_QUICK = 6;
 
+	/**
+	 * Track display mode where only the content of the current selection is
+	 * displayed.
+	 */
+	public static final int TRACK_DISPLAY_MODE_SELECTION_ONLY = 7;
+
 	/*
 	 * DESCRIPTIONS
 	 */
@@ -161,7 +168,16 @@ public interface TrackMateModelView
 	/**
 	 * String that describe the corresponding track display mode.
 	 */
-	public static final String[] TRACK_DISPLAY_MODE_DESCRIPTION = new String[] { "Show all entire tracks", "Show local tracks", "Show local tracks, backward", "Show local tracks, forward", "Local tracks (fast)", "Local tracks, backward (fast)", "Local tracks, forward (fast)" };
+	public static final String[] TRACK_DISPLAY_MODE_DESCRIPTION = new String[] {
+			"Show all entire tracks",
+			"Show local tracks",
+			"Show local tracks, backward",
+			"Show local tracks, forward",
+			"Local tracks (fast)",
+			"Local tracks, backward (fast)",
+			"Local tracks, forward (fast)",
+			"Show selection only"
+	};
 
 	/*
 	 * DEFAULTS
