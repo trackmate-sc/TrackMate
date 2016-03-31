@@ -1,6 +1,6 @@
 [![](http://jenkins.imagej.net/job/TrackMate/lastBuild/badge/icon)](http://jenkins.imagej.net/job/TrackMate/)
 
-![alt tag](http://imagej.net/File:TrackMate-Logo85x50-color-300p.png)
+![TrackMate logo](http://imagej.net/_images/0/0c/TrackMate-Logo85x50-color-300p.png)
 
 
 TrackMate
