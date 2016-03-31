@@ -18,21 +18,21 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_FEATURE_P
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
-import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.Logger.SlaveLogger;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.tracking.SpotTracker;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
-
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
+
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.Logger.SlaveLogger;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.tracking.SpotTracker;
+import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
 
 public class SparseLAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotTracker
 {
@@ -172,6 +172,7 @@ public class SparseLAPTracker extends MultiThreadedBenchmarkAlgorithm implements
 
 		// Solve.
 		final SparseLAPSegmentTracker segmentLinker = new SparseLAPSegmentTracker( graph, slSettings );
+		segmentLinker.setNumThreads( numThreads );
 		final SlaveLogger slLogger = new SlaveLogger( logger, 0.5, 0.5 );
 		segmentLinker.setLogger( slLogger );
 

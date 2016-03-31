@@ -8,29 +8,29 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_FEATURE
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_FRAME_GAP;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
+
+import java.util.Map;
+
+import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.graph.SimpleWeightedGraph;
+
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Logger.SlaveLogger;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.tracking.sparselap.costmatrix.JaqamanSegmentCostMatrixCreator;
 import fiji.plugin.trackmate.tracking.sparselap.linker.JaqamanLinker;
-
-import java.util.Map;
-
 import net.imglib2.algorithm.Benchmark;
-
-import org.jgrapht.graph.DefaultWeightedEdge;
-import org.jgrapht.graph.SimpleWeightedGraph;
 
 /**
  * This class tracks deals with the second step of tracking according to the LAP
  * tracking framework formulated by Jaqaman, K. et al.
  * "Robust single-particle tracking in live-cell time-lapse sequences." Nature
  * Methods, 2008.
- * 
+ *
  * <p>
  * In this tracking framework, tracking is divided into two steps:
- * 
+ *
  * <ol>
  * <li>Identify individual track segments</li>
  * <li>Gap closing, merging and splitting</li>
@@ -125,6 +125,7 @@ public class SparseLAPSegmentTracker implements SpotTracker, Benchmark
 		logger.setProgress( 0d );
 		logger.setStatus( "Creating the segment linking cost matrix..." );
 		final JaqamanSegmentCostMatrixCreator costMatrixCreator = new JaqamanSegmentCostMatrixCreator( graph, settings );
+		costMatrixCreator.setNumThreads( numThreads );
 		final SlaveLogger jlLogger = new SlaveLogger( logger, 0, 0.9 );
 		final JaqamanLinker< Spot, Spot > linker = new JaqamanLinker< Spot, Spot >( costMatrixCreator, jlLogger );
 		if ( !linker.checkInput() || !linker.process() )
