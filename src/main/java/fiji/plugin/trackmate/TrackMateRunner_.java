@@ -39,21 +39,76 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 	 * List of arguments usable in the macro.
 	 */
 
+	/**
+	 * The macro parameter to set the detection radius of particles. Accept
+	 * double values in physical units.
+	 */
 	private static final String ARG_RADIUS = "radius";
 
+	/**
+	 * The macro parameter to set the quality threshold of the detector. Accept
+	 * double values.
+	 */
 	private static final String ARG_THRESHOLD = "threshold";
 
+	/**
+	 * The macro parameter to set whether we do sub-pixel particle localization.
+	 * Accept boolean values.
+	 */
 	private static final String ARG_SUBPIXEL = "subpixel";
 
+	/**
+	 * The macro parameter to set whether we pre-process the input image with a
+	 * 3x3 median filter. Accept boolean values.
+	 */
 	private static final String ARG_MEDIAN = "median";
 
+	/**
+	 * The macro parameter to set what channel in the input image to operate on.
+	 * Accept integer values.
+	 */
 	private static final String ARG_CHANNEL = "channel";
 
+	/**
+	 * The macro parameter to set what is the maximal frame-to-frame linking
+	 * distance. Accept double values in physical units.
+	 */
 	private static final String ARG_MAX_DISTANCE = "max_distance";
 
+	/**
+	 * The macro parameter to set what is the maximal gap-closing distance.
+	 * Accept double values in physical units.
+	 */
 	private static final String ARG_MAX_GAP_DISTANCE = "max_gap_distance";
 
+	/**
+	 * The macro parameter to set what is the maximal acceptable frame gap when
+	 * doing gap closing. Accept integer values.
+	 */
 	private static final String ARG_MAX_GAP_FRAMES = "max_frame_gap";
+
+	/**
+	 * The macro parameter to set whether we should launch the GUI.
+	 */
+	private static final String ARG_USE_GUI = "use_gui";
+
+	/**
+	 * The macro parameter to set the input image, identified by its ImageJ ID
+	 * or number. See {@link WindowManager#getImage(int)}.
+	 */
+	private static final String ARG_INPUT_IMAGE_ID = "image_id";
+
+	/**
+	 * The macro parameter to set the input image, identified by its name. See
+	 * {@link WindowManager#getImage(String)}.
+	 */
+	private static final String ARG_INPUT_IMAGE_NAME = "image_name";
+
+	/**
+	 * The macro parameter to set the input file, identified by its path. Use an
+	 * empty path to open a dialog. See {@link IJ#openImage(String)}.
+	 */
+	private static final String ARG_INPUT_IMAGE_PATH = "image_path";
 
 	/*
 	 * Other fields
@@ -68,40 +123,6 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 		logger = new LogRecorder( Logger.IJ_LOGGER );
 		logger.log( "Received the following arg string: " + arg + "\n" );
 
-		/*
-		 * Check if we have an image.
-		 */
-
-		final ImagePlus imp = WindowManager.getCurrentImage();
-		if ( null == imp )
-		{
-			logger.error( "No image selected. Aborting.\n" );
-			return;
-		}
-
-
-		if ( !imp.isVisible() )
-		{
-			imp.setOpenAsHyperStack( true );
-			imp.show();
-		}
-		GuiUtils.userCheckImpDimensions( imp );
-
-		settings = createSettings( imp );
-		model = createModel();
-		trackmate = createTrackMate();
-
-		/*
-		 * Configure default settings.
-		 */
-
-		// Default detector.
-		settings.detectorFactory = new LogDetectorFactory<>();
-		settings.detectorSettings = settings.detectorFactory.getDefaultSettings();
-
-		// Default tracker.
-		settings.trackerFactory = new SimpleSparseLAPTrackerFactory();
-		settings.trackerSettings = settings.trackerFactory.getDefaultSettings();
 
 		/*
 		 * Parse macro arguments.
@@ -119,13 +140,107 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 
 		if ( null != arg )
 		{
-			final Map< String, ValuePair< String, MacroArgumentConverter > > detectorParsers = prepareDetectorParsableArguments();
-			final Map< String, ValuePair< String, MacroArgumentConverter > > trackerParsers = prepareTrackerParsableArguments();
 
 			try
 			{
 				final Map< String, String > macroOptions = SplitString.splitMacroOptions( arg );
 				final Set< String > unknownParameters = new HashSet<>( macroOptions.keySet() );
+
+				/*
+				 * Find what we will operate on: An opened image? A file?
+				 */
+
+				ImagePlus imp;
+				if ( macroOptions.containsKey( ARG_INPUT_IMAGE_ID ) )
+				{
+					final String val = macroOptions.get( ARG_INPUT_IMAGE_ID );
+					try
+					{
+						final int id = Integer.parseInt( val );
+						imp = WindowManager.getImage( id );
+						if ( null == imp )
+						{
+							logger.error( "There is not an opened image with ID " + id + ".\n" );
+							return;
+						}
+					}
+					catch ( final NumberFormatException nfe )
+					{
+						logger.error( "Could not parse the image ID set by the "
+								+ ARG_INPUT_IMAGE_ID + " paramter. Got " + val
+								+ ", expected an integer.\n" );
+						return;
+					}
+				}
+				else if ( macroOptions.containsKey( ARG_INPUT_IMAGE_NAME ) )
+				{
+					final String imageName = macroOptions.get( ARG_INPUT_IMAGE_NAME );
+					imp = WindowManager.getImage( imageName );
+					if ( null == imp )
+					{
+						logger.error( "There is not an opened image with name " + imageName + ".\n" );
+						return;
+					}
+				}
+				else if ( macroOptions.containsKey( ARG_INPUT_IMAGE_PATH ) )
+				{
+					final String imagePath = macroOptions.get( ARG_INPUT_IMAGE_PATH );
+					imp = new ImagePlus( imagePath );
+					if ( null == imp.getOriginalFileInfo() )
+					{
+						logger.error( "Could not load image with path " + imagePath + ".\n" );
+						return;
+					}
+				}
+				else
+				{
+					imp = WindowManager.getCurrentImage();
+					if ( null == imp )
+					{
+						logger.error( "Please open an image before running TrackMate." );
+						return;
+					}
+				}
+
+				/*
+				 * Check if we have to use the GUI.
+				 */
+
+				if ( macroOptions.containsKey( ARG_USE_GUI ) && macroOptions.get( ARG_USE_GUI ).equalsIgnoreCase( "true" ) )
+				{
+
+					if ( !imp.isVisible() )
+					{
+						imp.setOpenAsHyperStack( true );
+						imp.show();
+					}
+					GuiUtils.userCheckImpDimensions( imp );
+
+					// TODO TODO
+				}
+
+				/*
+				 * Check if we have an image.
+				 */
+
+				settings = createSettings( imp );
+				model = createModel();
+				trackmate = createTrackMate();
+
+				/*
+				 * Configure default settings.
+				 */
+
+				final Map< String, ValuePair< String, MacroArgumentConverter > > detectorParsers = prepareDetectorParsableArguments();
+				final Map< String, ValuePair< String, MacroArgumentConverter > > trackerParsers = prepareTrackerParsableArguments();
+
+				// Default detector.
+				settings.detectorFactory = new LogDetectorFactory< >();
+				settings.detectorSettings = settings.detectorFactory.getDefaultSettings();
+
+				// Default tracker.
+				settings.trackerFactory = new SimpleSparseLAPTrackerFactory();
+				settings.trackerSettings = settings.trackerFactory.getDefaultSettings();
 
 				/*
 				 * Detector parameters.
@@ -228,7 +343,7 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 
 		}
 	}
-	
+
 	@Override
 	protected Settings createSettings( final ImagePlus imp )
 	{
@@ -263,18 +378,18 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 
 		return s;
 	}
-	
+
 	/**
 	 * Prepare a map of all the arguments that are accepted by this macro for
 	 * the detection part.
-	 * 
+	 *
 	 * @return a map of parsers that can handle macro parameters.
 	 */
 	private Map< String, ValuePair< String, MacroArgumentConverter > > prepareDetectorParsableArguments()
 	{
 		// Map
 		final Map< String, ValuePair< String, MacroArgumentConverter > > parsers = new HashMap<>();
-		
+
 		// Converters.
 		final DoubleMacroArgumentConverter doubleConverter = new DoubleMacroArgumentConverter();
 		final IntegerMacroArgumentConverter integerConverter = new IntegerMacroArgumentConverter();
@@ -284,7 +399,7 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 		final ValuePair< String, MacroArgumentConverter > radiusPair =
 				new ValuePair< String, TrackMateRunner_.MacroArgumentConverter >( DetectorKeys.KEY_RADIUS, doubleConverter );
 		parsers.put( ARG_RADIUS, radiusPair );
-		
+
 		// Spot quality threshold.
 		final ValuePair< String, MacroArgumentConverter > thresholdPair =
 				new ValuePair< String, TrackMateRunner_.MacroArgumentConverter >( DetectorKeys.KEY_THRESHOLD, doubleConverter );
@@ -307,11 +422,11 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 
 		return parsers;
 	}
-	
+
 	/**
 	 * Prepare a map of all the arguments that are accepted by this macro for
 	 * the particle-linking part.
-	 * 
+	 *
 	 * @return a map of parsers that can handle macro parameters.
 	 */
 	private Map< String, ValuePair< String, MacroArgumentConverter > > prepareTrackerParsableArguments()
@@ -340,7 +455,7 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 
 		return parsers;
 	}
-	
+
 
 	/*
 	 * PRIVATE CLASSES AND INTERFACES
