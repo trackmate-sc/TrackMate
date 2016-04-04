@@ -2,13 +2,27 @@ package fiji.plugin.trackmate;
 
 import java.text.ParseException;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import fiji.plugin.trackmate.detection.DetectorKeys;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
+import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
+import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
+import fiji.plugin.trackmate.features.track.TrackAnalyzer;
+import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
+import fiji.plugin.trackmate.gui.GuiUtils;
+import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
+import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
+import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
+import fiji.plugin.trackmate.tracking.TrackerKeys;
 import fiji.plugin.trackmate.tracking.sparselap.SimpleSparseLAPTrackerFactory;
 import fiji.plugin.trackmate.util.LogRecorder;
+import fiji.plugin.trackmate.visualization.PerTrackFeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
+import fiji.plugin.trackmate.visualization.ViewFactory;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayerFactory;
 import fiji.util.SplitString;
 import ij.IJ;
@@ -16,10 +30,9 @@ import ij.ImageJ;
 import ij.ImagePlus;
 import ij.Macro;
 import ij.WindowManager;
-import ij.plugin.PlugIn;
 import net.imglib2.util.ValuePair;
 
-public class TrackMateRunner_ implements PlugIn
+public class TrackMateRunner_ extends TrackMatePlugIn_
 {
 
 	/*
@@ -35,6 +48,12 @@ public class TrackMateRunner_ implements PlugIn
 	private static final String ARG_MEDIAN = "median";
 
 	private static final String ARG_CHANNEL = "channel";
+
+	private static final String ARG_MAX_DISTANCE = "max_distance";
+
+	private static final String ARG_MAX_GAP_DISTANCE = "max_gap_distance";
+
+	private static final String ARG_MAX_GAP_FRAMES = "max_frame_gap";
 
 	/*
 	 * Other fields
@@ -60,12 +79,21 @@ public class TrackMateRunner_ implements PlugIn
 			return;
 		}
 
+
+		if ( !imp.isVisible() )
+		{
+			imp.setOpenAsHyperStack( true );
+			imp.show();
+		}
+		GuiUtils.userCheckImpDimensions( imp );
+
+		settings = createSettings( imp );
+		model = createModel();
+		trackmate = createTrackMate();
+
 		/*
 		 * Configure default settings.
 		 */
-
-		final Settings settings = new Settings();
-		settings.setFrom( imp );
 
 		// Default detector.
 		settings.detectorFactory = new LogDetectorFactory<>();
@@ -91,21 +119,27 @@ public class TrackMateRunner_ implements PlugIn
 
 		if ( null != arg )
 		{
-			final Map< String, ValuePair< String, MacroArgumentConverter > > parsers = prepareParsableArguments();
+			final Map< String, ValuePair< String, MacroArgumentConverter > > detectorParsers = prepareDetectorParsableArguments();
+			final Map< String, ValuePair< String, MacroArgumentConverter > > trackerParsers = prepareTrackerParsableArguments();
 
 			try
 			{
 				final Map< String, String > macroOptions = SplitString.splitMacroOptions( arg );
+				final Set< String > unknownParameters = new HashSet<>( macroOptions.keySet() );
+
+				/*
+				 * Detector parameters.
+				 */
 
 				for ( final String parameter : macroOptions.keySet() )
 				{
 					final String value = macroOptions.get( parameter );
-					final ValuePair< String, MacroArgumentConverter > parser = parsers.get( parameter );
+					final ValuePair< String, MacroArgumentConverter > parser = detectorParsers.get( parameter );
 					if ( parser == null )
 					{
-						logger.error( "Unknown parameter name: " + parameter + ". Skipping.\n" );
 						continue;
 					}
+					unknownParameters.remove( parameter );
 
 					final String key = parser.getA();
 					final MacroArgumentConverter converter = parser.getB();
@@ -123,6 +157,48 @@ public class TrackMateRunner_ implements PlugIn
 
 				}
 
+				/*
+				 * Tracker parameters.
+				 */
+
+				for ( final String parameter : macroOptions.keySet() )
+				{
+					final String value = macroOptions.get( parameter );
+					final ValuePair< String, MacroArgumentConverter > parser = trackerParsers.get( parameter );
+					if ( parser == null )
+					{
+						continue;
+					}
+					unknownParameters.remove( parameter );
+
+					final String key = parser.getA();
+					final MacroArgumentConverter converter = parser.getB();
+					try
+					{
+
+						final Object val = converter.convert( value );
+						settings.trackerSettings.put( key, val );
+					}
+					catch ( final NumberFormatException nfe )
+					{
+						logger.error( "Cannot interprete value for parameter " + parameter + ": " + value + ". Skipping.\n" );
+						continue;
+					}
+
+				}
+
+				/*
+				 * Unknown parameters.
+				 */
+				if ( !unknownParameters.isEmpty() )
+				{
+					logger.error( "The following parameters are unkown:\n" );
+					for ( final String unknownParameter : unknownParameters )
+					{
+						logger.error( "  " + unknownParameter );
+					}
+				}
+
 			}
 			catch ( final ParseException e )
 			{
@@ -131,28 +207,70 @@ public class TrackMateRunner_ implements PlugIn
 			}
 
 			logger.log( "Final settings object is:\n" + settings );
-			final TrackMate trackmate = new TrackMate( settings );
 			if (!trackmate.checkInput() || !trackmate.process())
 			{
 				logger.error( "Error while performing tracking:\n" + trackmate.getErrorMessage() );
 				return;
 			}
 
-			final HyperStackDisplayerFactory displayerFactory = new HyperStackDisplayerFactory();
-			final SelectionModel selectionModel = new SelectionModel( trackmate.getModel() );
-			final TrackMateModelView view = displayerFactory.create( trackmate.getModel(), trackmate.getSettings(), selectionModel );
+			/*
+			 * Display results.
+			 */
+
+			final SelectionModel selectionModel = new SelectionModel( model );
+
+			final ViewFactory displayerFactory = new HyperStackDisplayerFactory();
+			final TrackMateModelView view = displayerFactory.create( model, trackmate.getSettings(), selectionModel );
+			final PerTrackFeatureColorGenerator trackColor = new PerTrackFeatureColorGenerator( model, TrackIndexAnalyzer.TRACK_INDEX );
+			view.setDisplaySettings( TrackMateModelView.KEY_TRACK_COLORING, trackColor );
+
 			view.render();
 
 		}
 	}
 	
+	@Override
+	protected Settings createSettings( final ImagePlus imp )
+	{
+		final Settings s = super.createSettings( imp );
+
+		s.clearSpotAnalyzerFactories();
+		final SpotAnalyzerProvider spotAnalyzerProvider = new SpotAnalyzerProvider();
+		final List< String > spotAnalyzerKeys = spotAnalyzerProvider.getKeys();
+		for ( final String key : spotAnalyzerKeys )
+		{
+			final SpotAnalyzerFactory< ? > spotFeatureAnalyzer = spotAnalyzerProvider.getFactory( key );
+			s.addSpotAnalyzerFactory( spotFeatureAnalyzer );
+		}
+
+		s.clearEdgeAnalyzers();
+		final EdgeAnalyzerProvider edgeAnalyzerProvider = new EdgeAnalyzerProvider();
+		final List< String > edgeAnalyzerKeys = edgeAnalyzerProvider.getKeys();
+		for ( final String key : edgeAnalyzerKeys )
+		{
+			final EdgeAnalyzer edgeAnalyzer = edgeAnalyzerProvider.getFactory( key );
+			s.addEdgeAnalyzer( edgeAnalyzer );
+		}
+
+		s.clearTrackAnalyzers();
+		final TrackAnalyzerProvider trackAnalyzerProvider = new TrackAnalyzerProvider();
+		final List< String > trackAnalyzerKeys = trackAnalyzerProvider.getKeys();
+		for ( final String key : trackAnalyzerKeys )
+		{
+			final TrackAnalyzer trackAnalyzer = trackAnalyzerProvider.getFactory( key );
+			s.addTrackAnalyzer( trackAnalyzer );
+		}
+
+		return s;
+	}
 	
 	/**
-	 * Prepare a map of all the arguments that are accepted by this macro.
+	 * Prepare a map of all the arguments that are accepted by this macro for
+	 * the detection part.
 	 * 
-	 * @return
+	 * @return a map of parsers that can handle macro parameters.
 	 */
-	private Map< String, ValuePair< String, MacroArgumentConverter > > prepareParsableArguments()
+	private Map< String, ValuePair< String, MacroArgumentConverter > > prepareDetectorParsableArguments()
 	{
 		// Map
 		final Map< String, ValuePair< String, MacroArgumentConverter > > parsers = new HashMap<>();
@@ -190,6 +308,38 @@ public class TrackMateRunner_ implements PlugIn
 		return parsers;
 	}
 	
+	/**
+	 * Prepare a map of all the arguments that are accepted by this macro for
+	 * the particle-linking part.
+	 * 
+	 * @return a map of parsers that can handle macro parameters.
+	 */
+	private Map< String, ValuePair< String, MacroArgumentConverter > > prepareTrackerParsableArguments()
+	{
+		// Map
+		final Map< String, ValuePair< String, MacroArgumentConverter > > parsers = new HashMap<>();
+
+		// Converters.
+		final DoubleMacroArgumentConverter doubleConverter = new DoubleMacroArgumentConverter();
+		final IntegerMacroArgumentConverter integerConverter = new IntegerMacroArgumentConverter();
+
+		// Max linking distance.
+		final ValuePair< String, MacroArgumentConverter > maxDistancePair =
+				new ValuePair< String, TrackMateRunner_.MacroArgumentConverter >( TrackerKeys.KEY_LINKING_MAX_DISTANCE, doubleConverter );
+		parsers.put( ARG_MAX_DISTANCE, maxDistancePair );
+
+		// Max gap distance.
+		final ValuePair< String, MacroArgumentConverter > maxGapDistancePair =
+				new ValuePair< String, TrackMateRunner_.MacroArgumentConverter >( TrackerKeys.KEY_GAP_CLOSING_MAX_DISTANCE, doubleConverter );
+		parsers.put( ARG_MAX_GAP_DISTANCE, maxGapDistancePair );
+
+		// Target channel.
+		final ValuePair< String, MacroArgumentConverter > maxGapFramesPair =
+				new ValuePair< String, TrackMateRunner_.MacroArgumentConverter >( TrackerKeys.KEY_GAP_CLOSING_MAX_FRAME_GAP, integerConverter );
+		parsers.put( ARG_MAX_GAP_FRAMES, maxGapFramesPair );
+
+		return parsers;
+	}
 	
 
 	/*
@@ -236,7 +386,7 @@ public class TrackMateRunner_ implements PlugIn
 	{
 		ImageJ.main( args );
 		IJ.openImage( "samples/FakeTracks.tif" ).show();
-		new TrackMateRunner_().run( "radius=2.5 threshold=50.1 subpixel=false median=false channel=1" );
+		new TrackMateRunner_().run( "radius=2.5 threshold=50.1 subpixel=true median=false channel=1 max_frame_gap=0" );
 	}
 
 }
