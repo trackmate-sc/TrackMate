@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,6 +21,7 @@ import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.gui.descriptors.ConfigureViewsDescriptor;
 import fiji.plugin.trackmate.io.TmXmlWriter;
 import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
 import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
@@ -26,6 +29,7 @@ import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.tracking.TrackerKeys;
 import fiji.plugin.trackmate.tracking.sparselap.SimpleSparseLAPTrackerFactory;
 import fiji.plugin.trackmate.util.LogRecorder;
+import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.PerTrackFeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewFactory;
@@ -131,6 +135,37 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 	 */
 	private static final String ARG_EXPORT_TO = "export_to";
 
+	/**
+	 * The macro parameter to set whether we should display results after
+	 * processing. Accept boolean values. Is ignored if the {@link #ARG_USE_GUI}
+	 * is set to <code>true</code>.
+	 */
+	private static final String ARG_DISPLAY_RESULTS = "display_results";
+
+	/**
+	 * The collection of supprted macro parameters.
+	 */
+	private static final Collection< String > SUPPORTED_ARGS = new ArrayList<>();
+
+	static
+	{
+		SUPPORTED_ARGS.add( ARG_CHANNEL );
+		SUPPORTED_ARGS.add( ARG_DISPLAY_RESULTS );
+		SUPPORTED_ARGS.add( ARG_EXPORT_TO );
+		SUPPORTED_ARGS.add( ARG_INPUT_IMAGE_ID );
+		SUPPORTED_ARGS.add( ARG_INPUT_IMAGE_NAME );
+		SUPPORTED_ARGS.add( ARG_INPUT_IMAGE_PATH );
+		SUPPORTED_ARGS.add( ARG_MAX_DISTANCE );
+		SUPPORTED_ARGS.add( ARG_MAX_GAP_DISTANCE );
+		SUPPORTED_ARGS.add( ARG_MAX_GAP_FRAMES );
+		SUPPORTED_ARGS.add( ARG_MEDIAN );
+		SUPPORTED_ARGS.add( ARG_SAVE_TO );
+		SUPPORTED_ARGS.add( ARG_SUBPIXEL );
+		SUPPORTED_ARGS.add( ARG_THRESHOLD );
+		SUPPORTED_ARGS.add( ARG_USE_GUI );
+		SUPPORTED_ARGS.add( ARG_RADIUS );
+	}
+
 	/*
 	 * Other fields
 	 */
@@ -142,7 +177,6 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 	{
 
 		logger = new LogRecorder( Logger.IJ_LOGGER );
-		logger.log( "Received the following arg string: " + arg + "\n" );
 
 
 		/*
@@ -154,12 +188,11 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 			final String macroOption = Macro.getOptions();
 			if ( null != macroOption )
 			{
-				logger.log( "Detecting empty arg, catching macro option:\n" + macroOption + '\n' );
 				arg = macroOption;
 			}
 		}
 
-		if ( null != arg )
+		if ( null != arg && !arg.isEmpty() )
 		{
 
 			try
@@ -170,9 +203,10 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 				 * Unknown parameters.
 				 */
 				final Set< String > unknownParameters = new HashSet<>( macroOptions.keySet() );
+				unknownParameters.removeAll( SUPPORTED_ARGS );
 				if ( !unknownParameters.isEmpty() )
 				{
-					logger.error( "The following parameters are unkown:\n" );
+					logger.error( "The following parameters are unkown and were ignored:\n" );
 					for ( final String unknownParameter : unknownParameters )
 					{
 						logger.error( "  " + unknownParameter );
@@ -343,6 +377,8 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 					 * Run TrackMate with the settings.
 					 */
 
+					final String welcomeMessage = TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION + " started on:\n" + TMUtils.getCurrentTimeString() + '\n';
+					logger.log( welcomeMessage );
 					if ( !trackmate.checkInput() || !trackmate.process() )
 					{
 						logger.error( "Error while performing tracking:\n" + trackmate.getErrorMessage() );
@@ -413,14 +449,48 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 					 * Display results.
 					 */
 
-					final SelectionModel selectionModel = new SelectionModel( model );
+					if ( macroOptions.containsKey( ARG_DISPLAY_RESULTS ) && macroOptions.get( ARG_DISPLAY_RESULTS ).equalsIgnoreCase( "true" ) )
+					{
+						// Make image visible.
+						if ( !settings.imp.isVisible() )
+						{
+							settings.imp.setOpenAsHyperStack( true );
+							settings.imp.show();
+						}
 
-					final ViewFactory displayerFactory = new HyperStackDisplayerFactory();
-					final TrackMateModelView view = displayerFactory.create( model, trackmate.getSettings(), selectionModel );
-					final PerTrackFeatureColorGenerator trackColor = new PerTrackFeatureColorGenerator( model, TrackIndexAnalyzer.TRACK_INDEX );
-					view.setDisplaySettings( TrackMateModelView.KEY_TRACK_COLORING, trackColor );
+						// Add visualization.
 
-					view.render();
+						final SelectionModel selectionModel = new SelectionModel( model );
+
+						final ViewFactory displayerFactory = new HyperStackDisplayerFactory();
+						final TrackMateModelView view = displayerFactory.create( model, settings, selectionModel );
+						final PerTrackFeatureColorGenerator trackColor = new PerTrackFeatureColorGenerator( model, TrackIndexAnalyzer.TRACK_INDEX );
+						view.setDisplaySettings( TrackMateModelView.KEY_TRACK_COLORING, trackColor );
+
+
+						/*
+						 * And show GUI.
+						 */
+
+						final TrackMateGUIController controller = new TrackMateGUIController( trackmate );
+						// GUI position
+						GuiUtils.positionWindow( controller.getGUI(), settings.imp.getWindow() );
+
+						// GUI state
+						final String guiState = ConfigureViewsDescriptor.KEY;
+						controller.setGUIStateString( guiState );
+						controller.getGuimodel().addView( view );
+						final Map< String, Object > displaySettings = controller.getGuimodel().getDisplaySettings();
+						for ( final String key : displaySettings.keySet() )
+						{
+							view.setDisplaySettings( key, displaySettings.get( key ) );
+						}
+						view.render();
+
+						// Log.
+						controller.getGUI().getLogPanel().setTextContent( logger.toString() );
+
+					}
 				}
 
 			}
@@ -429,9 +499,13 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 				logger.error( "Could not parse plugin option string: " + e.getMessage() + ".\n" );
 				e.printStackTrace();
 			}
-
-
-
+		}
+		else
+		{
+			/*
+			 * No argument. We run the GUI as is.
+			 */
+			super.run( arg );
 		}
 	}
 
@@ -596,12 +670,14 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 						+ "save_to=[/Users/tinevez/Desktop/TrackMateSaveTest.xml] "
 						+ "export_to=[/Users/tinevez/Desktop/TrackMateExportTest.xml] "
 						+ "image_path=[samples/FakeTracks.tif] "
+						+ "display_results=true "
 						+ "radius=2.5 "
 						+ "threshold=50.1 "
 						+ "subpixel=false "
 						+ "median=false "
 						+ "channel=1 "
-						+ "max_frame_gap=0" );
+						+ "max_frame_gap=0 "
+						+ "paf!=pif!" );
 	}
 
 }
