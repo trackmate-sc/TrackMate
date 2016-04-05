@@ -1,15 +1,5 @@
 package fiji.plugin.trackmate.visualization.trackscheme;
 
-import com.mxgraph.model.mxCell;
-import com.mxgraph.model.mxICell;
-import com.mxgraph.swing.util.mxGraphActions;
-import com.mxgraph.util.mxEvent;
-import com.mxgraph.util.mxEventObject;
-import com.mxgraph.util.mxEventSource.mxIEventListener;
-import com.mxgraph.view.mxGraph;
-
-import fiji.plugin.trackmate.Spot;
-
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Point2D;
@@ -21,66 +11,95 @@ import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
-public class TrackSchemeActions {
+import com.mxgraph.model.mxCell;
+import com.mxgraph.model.mxICell;
+import com.mxgraph.swing.util.mxGraphActions;
+import com.mxgraph.util.mxEvent;
+import com.mxgraph.util.mxEventObject;
+import com.mxgraph.util.mxEventSource.mxIEventListener;
+import com.mxgraph.view.mxGraph;
 
-	private static final ImageIcon RESET_ZOOM_ICON = new ImageIcon(TrackSchemeFrame.class.getResource("resources/zoom.png"));
-	private static final ImageIcon ZOOM_IN_ICON = new ImageIcon(TrackSchemeFrame.class.getResource("resources/zoom_in.png"));
-	private static final ImageIcon ZOOM_OUT_ICON = new ImageIcon(TrackSchemeFrame.class.getResource("resources/zoom_out.png"));
-	private static final ImageIcon EDIT_ICON = new ImageIcon(TrackSchemeFrame.class.getResource("resources/tag_blue_edit.png"));
-	private static final ImageIcon HOME_ICON = new ImageIcon(TrackSchemeFrame.class.getResource("resources/control_start.png"));
-	private static final ImageIcon END_ICON = new ImageIcon(TrackSchemeFrame.class.getResource("resources/control_end.png"));
+import fiji.plugin.trackmate.Spot;
 
-	static final Action editAction = new EditAction("edit", EDIT_ICON);
+public class TrackSchemeActions
+{
 
-	static final Action homeAction = new HomeAction("home", HOME_ICON);
+	private static final ImageIcon RESET_ZOOM_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/zoom.png" ) );
 
-	private static Action endAction = new EndAction("end", END_ICON);
+	private static final ImageIcon ZOOM_IN_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/zoom_in.png" ) );
 
-	private static Action resetZoomAction = new ResetZoomAction("resetZoom", RESET_ZOOM_ICON);
+	private static final ImageIcon ZOOM_OUT_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/zoom_out.png" ) );
+
+	private static final ImageIcon EDIT_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/tag_blue_edit.png" ) );
+
+	private static final ImageIcon HOME_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/control_start.png" ) );
+
+	private static final ImageIcon END_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/control_end.png" ) );
+
+	static final Action editAction = new EditAction( "edit", EDIT_ICON );
+
+	static final Action homeAction = new HomeAction( "home", HOME_ICON );
+
+	private static Action endAction = new EndAction( "end", END_ICON );
+
+	private static Action resetZoomAction = new ResetZoomAction( "resetZoom", RESET_ZOOM_ICON );
 
 	private static Action zoomInAction;
-	static {
+
+	static
+	{
 		zoomInAction = mxGraphActions.getZoomInAction();
-		zoomInAction.putValue(Action.SMALL_ICON, ZOOM_IN_ICON);
+		zoomInAction.putValue( Action.SMALL_ICON, ZOOM_IN_ICON );
 	}
 
 	private static Action zoomOutAction;
-	static {
+
+	static
+	{
 		zoomOutAction = mxGraphActions.getZoomOutAction();
-		zoomOutAction.putValue(Action.SMALL_ICON, ZOOM_OUT_ICON);
+		zoomOutAction.putValue( Action.SMALL_ICON, ZOOM_OUT_ICON );
 	}
 
-	private TrackSchemeActions() {}
+	private TrackSchemeActions()
+	{}
 
-	public static Action getEditAction() {
+	public static Action getEditAction()
+	{
 		return editAction;
 	}
 
-	public static Action getHomeAction() {
+	public static Action getHomeAction()
+	{
 		return homeAction;
 	}
 
-	public static Action getEndAction() {
+	public static Action getEndAction()
+	{
 		return endAction;
 	}
 
-	public static Action getResetZoomAction() {
+	public static Action getResetZoomAction()
+	{
 		return resetZoomAction;
 	}
 
-	public static Action getZoomInAction() {
+	public static Action getZoomInAction()
+	{
 		return zoomInAction;
 	}
 
-	public static Action getZoomOutAction() {
+	public static Action getZoomOutAction()
+	{
 		return zoomOutAction;
 	}
 
-	public static Action getSelectNoneAction() {
+	public static Action getSelectNoneAction()
+	{
 		return mxGraphActions.getSelectNoneAction();
 	}
 
-	public static Action getSelectAllAction() {
+	public static Action getSelectAllAction()
+	{
 		return mxGraphActions.getSelectAllAction();
 	}
 
@@ -88,147 +107,184 @@ public class TrackSchemeActions {
 	 * ACTION CLASSES
 	 */
 
-	public static class ResetZoomAction extends AbstractAction {
+	public static class ResetZoomAction extends AbstractAction
+	{
 
 		private static final long serialVersionUID = 1L;
 
-		public ResetZoomAction(final String name, final Icon icon) {
-			super(name, icon);
+		public ResetZoomAction( final String name, final Icon icon )
+		{
+			super( name, icon );
 		}
 
 		@Override
-		public void actionPerformed(final ActionEvent e) {
-			if (e.getSource() instanceof TrackSchemeGraphComponent) {
-				final TrackSchemeGraphComponent graphComponent = ((TrackSchemeGraphComponent) e.getSource());
-				graphComponent.zoomTo(1.0, false);
+		public void actionPerformed( final ActionEvent e )
+		{
+			if ( e.getSource() instanceof TrackSchemeGraphComponent )
+			{
+				final TrackSchemeGraphComponent graphComponent = ( ( TrackSchemeGraphComponent ) e.getSource() );
+				graphComponent.zoomTo( 1.0, false );
 			}
 		}
 	}
 
 	/**
 	 * Centers the view to the first cell in selection.
-	 * 
+	 *
 	 * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; Sep 12, 2013
-	 * 
+	 *
 	 */
-	public static class HomeAction extends AbstractAction {
+	public static class HomeAction extends AbstractAction
+	{
 
 		private static final long serialVersionUID = 1L;
 
-		public HomeAction(final String name, final Icon icon) {
-			super(name, icon);
+		public HomeAction( final String name, final Icon icon )
+		{
+			super( name, icon );
 		}
 
 		@Override
-		public void actionPerformed(final ActionEvent e) {
+		public void actionPerformed( final ActionEvent e )
+		{
 
-			if (e.getSource() instanceof TrackSchemeGraphComponent) {
-				final TrackSchemeGraphComponent graphComponent = ((TrackSchemeGraphComponent) e.getSource());
+			if ( e.getSource() instanceof TrackSchemeGraphComponent )
+			{
+				final TrackSchemeGraphComponent graphComponent = ( ( TrackSchemeGraphComponent ) e.getSource() );
 				mxCell cell = null;
 				final JGraphXAdapter graph = graphComponent.getGraph();
-				final List<mxCell> vertices = getSelectionVertices(graph);
-				if (!vertices.isEmpty()) {
+				final List< mxCell > vertices = getSelectionVertices( graph );
+				if ( !vertices.isEmpty() )
+				{
 					int minFrame = Integer.MAX_VALUE;
-					for (final mxCell mxCell : vertices) {
-						final int frame = graph.getSpotFor(mxCell).getFeature(Spot.FRAME).intValue();
-						if (frame < minFrame) {
+					for ( final mxCell mxCell : vertices )
+					{
+						final int frame = graph.getSpotFor( mxCell ).getFeature( Spot.FRAME ).intValue();
+						if ( frame < minFrame )
+						{
 							minFrame = frame;
 							cell = mxCell;
 						}
 					}
-				} else {
-					final List<mxCell> edges = getSelectionEdges(graph);
-					if (!edges.isEmpty()) {
+				}
+				else
+				{
+					final List< mxCell > edges = getSelectionEdges( graph );
+					if ( !edges.isEmpty() )
+					{
 						int minFrame = Integer.MAX_VALUE;
-						for (final mxCell mxCell : edges) {
+						for ( final mxCell mxCell : edges )
+						{
 							final mxICell target = mxCell.getTarget();
-							final int frame = graph.getSpotFor(target).getFeature(Spot.FRAME).intValue();
-							if (frame < minFrame) {
+							final int frame = graph.getSpotFor( target ).getFeature( Spot.FRAME ).intValue();
+							if ( frame < minFrame )
+							{
 								minFrame = frame;
 								cell = mxCell;
 							}
 						}
-						cell = edges.get(edges.size() - 1);
-					} else {
+						cell = edges.get( edges.size() - 1 );
+					}
+					else
+					{
 						return;
 					}
 				}
-				graphComponent.scrollCellToVisible(cell, true);
+				graphComponent.scrollCellToVisible( cell, true );
 			}
 		}
 	}
 
 	/**
 	 * Centers the view to the last cell in selection, sorted by frame number.
-	 * 
+	 *
 	 * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; Sep 12, 2013
-	 * 
+	 *
 	 */
-	public static class EndAction extends AbstractAction {
+	public static class EndAction extends AbstractAction
+	{
 
 		private static final long serialVersionUID = 1L;
 
-		public EndAction(final String name, final Icon icon) {
-			super(name, icon);
+		public EndAction( final String name, final Icon icon )
+		{
+			super( name, icon );
 		}
 
 		@Override
-		public void actionPerformed(final ActionEvent e) {
+		public void actionPerformed( final ActionEvent e )
+		{
 
-			if (e.getSource() instanceof TrackSchemeGraphComponent) {
-				final TrackSchemeGraphComponent graphComponent = ((TrackSchemeGraphComponent) e.getSource());
+			if ( e.getSource() instanceof TrackSchemeGraphComponent )
+			{
+				final TrackSchemeGraphComponent graphComponent = ( ( TrackSchemeGraphComponent ) e.getSource() );
 				mxCell cell = null;
 				final JGraphXAdapter graph = graphComponent.getGraph();
-				final List<mxCell> vertices = getSelectionVertices(graph);
+				final List< mxCell > vertices = getSelectionVertices( graph );
 
-				if (!vertices.isEmpty()) {
+				if ( !vertices.isEmpty() )
+				{
 					int maxFrame = Integer.MIN_VALUE;
-					for (final mxCell mxCell : vertices) {
-						final int frame = graph.getSpotFor(mxCell).getFeature(Spot.FRAME).intValue();
-						if (frame > maxFrame) {
+					for ( final mxCell mxCell : vertices )
+					{
+						final int frame = graph.getSpotFor( mxCell ).getFeature( Spot.FRAME ).intValue();
+						if ( frame > maxFrame )
+						{
 							maxFrame = frame;
 							cell = mxCell;
 						}
 					}
-				} else {
-					final List<mxCell> edges = getSelectionEdges(graph);
-					if (!edges.isEmpty()) {
+				}
+				else
+				{
+					final List< mxCell > edges = getSelectionEdges( graph );
+					if ( !edges.isEmpty() )
+					{
 						int maxFrame = Integer.MIN_VALUE;
-						for (final mxCell mxCell : edges) {
+						for ( final mxCell mxCell : edges )
+						{
 							final mxICell target = mxCell.getTarget();
-							final int frame = graph.getSpotFor(target).getFeature(Spot.FRAME).intValue();
-							if (frame > maxFrame) {
+							final int frame = graph.getSpotFor( target ).getFeature( Spot.FRAME ).intValue();
+							if ( frame > maxFrame )
+							{
 								maxFrame = frame;
 								cell = mxCell;
 							}
 						}
-						cell = edges.get(edges.size() - 1);
-					} else {
+						cell = edges.get( edges.size() - 1 );
+					}
+					else
+					{
 						return;
 					}
 				}
-				graphComponent.scrollCellToVisible(cell, true);
+				graphComponent.scrollCellToVisible( cell, true );
 			}
 		}
 	}
 
-	public static class EditAction extends AbstractAction {
+	public static class EditAction extends AbstractAction
+	{
 
 		private static final long serialVersionUID = 1L;
 
-		public EditAction(final String name, final Icon icon) {
-			super(name, icon);
+		public EditAction( final String name, final Icon icon )
+		{
+			super( name, icon );
 		}
 
 		@Override
-		public void actionPerformed(final ActionEvent e) {
-			if (e.getSource() instanceof TrackSchemeGraphComponent) {
-				final TrackSchemeGraphComponent graphComponent = ((TrackSchemeGraphComponent) e.getSource());
-				multiEditSpotName(graphComponent, e);
+		public void actionPerformed( final ActionEvent e )
+		{
+			if ( e.getSource() instanceof TrackSchemeGraphComponent )
+			{
+				final TrackSchemeGraphComponent graphComponent = ( ( TrackSchemeGraphComponent ) e.getSource() );
+				multiEditSpotName( graphComponent, e );
 			}
 		}
 
-		private void multiEditSpotName(final TrackSchemeGraphComponent graphComponent, final ActionEvent triggerEvent) {
+		private void multiEditSpotName( final TrackSchemeGraphComponent graphComponent, final ActionEvent triggerEvent )
+		{
 			/*
 			 * We want to display the editing window in the cell is the closer
 			 * to where the user clicked. That is not perfect, because we can
@@ -238,48 +294,55 @@ public class TrackSchemeActions {
 			 * as location for the editing window.
 			 */
 			final JGraphXAdapter graph = graphComponent.getGraph();
-			final List<mxCell> vertices = getSelectionVertices(graph);
-			if (vertices.isEmpty()) {
-				return;
-			}
+			final List< mxCell > vertices = getSelectionVertices( graph );
+			if ( vertices.isEmpty() ) { return; }
 
 			final Point mousePosition = graphComponent.getMousePosition();
 			final mxCell tc;
-			if (null != mousePosition) {
-				tc = getClosestCell(vertices, mousePosition);
-			} else {
-				tc = vertices.get(0);
+			if ( null != mousePosition )
+			{
+				tc = getClosestCell( vertices, mousePosition );
 			}
-			vertices.remove(tc);
+			else
+			{
+				tc = vertices.get( 0 );
+			}
+			vertices.remove( tc );
 
-			graphComponent.startEditingAtCell(tc, triggerEvent);
-			graphComponent.addListener(mxEvent.LABEL_CHANGED, new mxIEventListener() {
+			graphComponent.startEditingAtCell( tc, triggerEvent );
+			graphComponent.addListener( mxEvent.LABEL_CHANGED, new mxIEventListener()
+			{
 
 				@Override
-				public void invoke(final Object sender, final mxEventObject evt) {
-					for (final mxCell cell : vertices) {
-						cell.setValue(tc.getValue());
-						graph.getSpotFor(cell).setName(tc.getValue().toString());
+				public void invoke( final Object sender, final mxEventObject evt )
+				{
+					for ( final mxCell cell : vertices )
+					{
+						cell.setValue( tc.getValue() );
+						graph.getSpotFor( cell ).setName( tc.getValue().toString() );
 					}
 					graphComponent.refresh();
-					graphComponent.removeListener(this);
+					graphComponent.removeListener( this );
 				}
-			});
+			} );
 		}
 
 		/**
 		 * Return, from the given list of cell, the one which is the closer to
 		 * the {@link #point} of this instance.
-		 * 
+		 *
 		 * @param point
 		 */
-		private mxCell getClosestCell(final Iterable<mxCell> vertices, final Point2D point) {
+		private mxCell getClosestCell( final Iterable< mxCell > vertices, final Point2D point )
+		{
 			double min_dist = Double.POSITIVE_INFINITY;
 			mxCell target_cell = null;
-			for (final mxCell cell : vertices) {
+			for ( final mxCell cell : vertices )
+			{
 				final Point location = cell.getGeometry().getPoint();
-				final double dist = location.distanceSq(point);
-				if (dist < min_dist) {
+				final double dist = location.distanceSq( point );
+				if ( dist < min_dist )
+				{
 					min_dist = dist;
 					target_cell = cell;
 				}
@@ -292,26 +355,30 @@ public class TrackSchemeActions {
 	 * PRIVATE STATIC METHODS
 	 */
 
-	private static List<mxCell> getSelectionVertices(final mxGraph graph) {
+	private static List< mxCell > getSelectionVertices( final mxGraph graph )
+	{
 		// Build selection categories
 		final Object[] selection = graph.getSelectionCells();
-		final ArrayList<mxCell> vertices = new ArrayList<mxCell>();
-		for (final Object obj : selection) {
-			final mxCell cell = (mxCell) obj;
-			if (cell.isVertex())
-				vertices.add(cell);
+		final ArrayList< mxCell > vertices = new ArrayList< mxCell >();
+		for ( final Object obj : selection )
+		{
+			final mxCell cell = ( mxCell ) obj;
+			if ( cell.isVertex() )
+				vertices.add( cell );
 		}
 		return vertices;
 	}
 
-	private static List<mxCell> getSelectionEdges(final mxGraph graph) {
+	private static List< mxCell > getSelectionEdges( final mxGraph graph )
+	{
 		// Build selection categories
 		final Object[] selection = graph.getSelectionCells();
-		final ArrayList<mxCell> edges = new ArrayList<mxCell>();
-		for (final Object obj : selection) {
-			final mxCell cell = (mxCell) obj;
-			if (cell.isEdge())
-				edges.add(cell);
+		final ArrayList< mxCell > edges = new ArrayList< mxCell >();
+		for ( final Object obj : selection )
+		{
+			final mxCell cell = ( mxCell ) obj;
+			if ( cell.isEdge() )
+				edges.add( cell );
 		}
 		return edges;
 	}
