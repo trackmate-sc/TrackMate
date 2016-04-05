@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.visualization.trackscheme;
 
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -24,6 +25,11 @@ import fiji.plugin.trackmate.Spot;
 public class TrackSchemeActions
 {
 
+	/**
+	 * When panning with the keyboard, by how much pixels to move.
+	 */
+	private static final int PAN_AMOUNT = 100;
+
 	private static final ImageIcon RESET_ZOOM_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/zoom.png" ) );
 
 	private static final ImageIcon ZOOM_IN_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/zoom_in.png" ) );
@@ -36,11 +42,35 @@ public class TrackSchemeActions
 
 	private static final ImageIcon END_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/control_end.png" ) );
 
+	private static final ImageIcon ARROW_UP_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/arrow_up.png" ) );
+
+	private static final ImageIcon ARROW_DOWN_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/arrow_down.png" ) );
+
+	private static final ImageIcon ARROW_LEFT_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/arrow_left.png" ) );
+
+	private static final ImageIcon ARROW_RIGHT_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/arrow_right.png" ) );
+
 	static final Action editAction = new EditAction( "edit", EDIT_ICON );
 
 	static final Action homeAction = new HomeAction( "home", HOME_ICON );
 
 	private static Action endAction = new EndAction( "end", END_ICON );
+
+	private static Action panUpAction = new PanAction( "panUp", ARROW_UP_ICON, 0, -PAN_AMOUNT );
+
+	private static Action panDownAction = new PanAction( "panDown", ARROW_DOWN_ICON, 0, PAN_AMOUNT );
+
+	private static Action panLeftAction = new PanAction( "panLeft", ARROW_LEFT_ICON, -PAN_AMOUNT, 0 );
+
+	private static Action panRightAction = new PanAction( "panRight", ARROW_RIGHT_ICON, PAN_AMOUNT, 0 );
+
+	private static Action panUpLeftAction = new PanAction( "panUpLeft", ARROW_UP_ICON, -PAN_AMOUNT, -PAN_AMOUNT );
+
+	private static Action panUpRightAction = new PanAction( "panUpRight", ARROW_DOWN_ICON, PAN_AMOUNT, -PAN_AMOUNT );
+
+	private static Action panDownLeftAction = new PanAction( "panDownLeft", ARROW_LEFT_ICON, -PAN_AMOUNT, PAN_AMOUNT );
+
+	private static Action panDownRightAction = new PanAction( "panDownRight", ARROW_RIGHT_ICON, PAN_AMOUNT, PAN_AMOUNT );
 
 	private static Action resetZoomAction = new ResetZoomAction( "resetZoom", RESET_ZOOM_ICON );
 
@@ -103,9 +133,81 @@ public class TrackSchemeActions
 		return mxGraphActions.getSelectAllAction();
 	}
 
+	public static Action getPanDownAction()
+	{
+		return panDownAction;
+	}
+
+	public static Action getPanLeftAction()
+	{
+		return panLeftAction;
+	}
+
+	public static Action getPanRightAction()
+	{
+		return panRightAction;
+	}
+
+	public static Action getPanUpAction()
+	{
+		return panUpAction;
+	}
+
+	public static Action getPanDownLeftAction()
+	{
+		return panDownLeftAction;
+	}
+
+	public static Action getPanDownRightAction()
+	{
+		return panDownRightAction;
+	}
+
+	public static Action getPanUpLeftAction()
+	{
+		return panUpLeftAction;
+	}
+
+	public static Action getPanUpRightAction()
+	{
+		return panUpRightAction;
+	}
+
 	/*
 	 * ACTION CLASSES
 	 */
+
+	public static class PanAction extends AbstractAction
+	{
+
+		private static final long serialVersionUID = 1L;
+
+		private final int amountx;
+
+		private final int amounty;
+
+		public PanAction( final String name, final Icon icon, final int amountx, final int amounty )
+		{
+			super( name, icon );
+			this.amountx = amountx;
+			this.amounty = amounty;
+		}
+
+		@Override
+		public void actionPerformed( final ActionEvent e )
+		{
+			if ( e.getSource() instanceof TrackSchemeGraphComponent )
+			{
+				final TrackSchemeGraphComponent graphComponent = ( ( TrackSchemeGraphComponent ) e.getSource() );
+				final Rectangle r = graphComponent.getViewport().getViewRect();
+
+				final int right = r.x + ( ( amountx < 0 ) ? 0 : r.width ) + amountx;
+				final int bottom = r.y + ( ( amounty < 0 ) ? 0 : r.height ) + amounty;
+
+				graphComponent.getGraphControl().scrollRectToVisible( new Rectangle( right, bottom, 0, 0 ) );
+			}
+		}
+	}
 
 	public static class ResetZoomAction extends AbstractAction
 	{

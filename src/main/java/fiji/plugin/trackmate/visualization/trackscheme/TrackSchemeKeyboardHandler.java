@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.visualization.trackscheme;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
@@ -47,10 +48,18 @@ public class TrackSchemeKeyboardHandler extends mxKeyboardHandler
 
 		map.put( KeyStroke.getKeyStroke( "ADD" ), "zoomIn" );
 		map.put( KeyStroke.getKeyStroke( "EQUALS" ), "zoomIn" );
-		map.put( KeyStroke.getKeyStroke( "EQUALS" ), "zoomIn" );
 		map.put( KeyStroke.getKeyStroke( "SUBTRACT" ), "zoomOut" );
 		map.put( KeyStroke.getKeyStroke( "MINUS" ), "zoomOut" );
 		map.put( KeyStroke.getKeyStroke( "shift EQUALS" ), "resetZoom" );
+
+		map.put( KeyStroke.getKeyStroke( KeyEvent.VK_NUMPAD4, 0 ), "panLeft" );
+		map.put( KeyStroke.getKeyStroke( KeyEvent.VK_NUMPAD6, 0 ), "panRight" );
+		map.put( KeyStroke.getKeyStroke( KeyEvent.VK_NUMPAD8, 0 ), "panUp" );
+		map.put( KeyStroke.getKeyStroke( KeyEvent.VK_NUMPAD2, 0 ), "panDown" );
+		map.put( KeyStroke.getKeyStroke( KeyEvent.VK_NUMPAD9, 0 ), "panUpRight" );
+		map.put( KeyStroke.getKeyStroke( KeyEvent.VK_NUMPAD3, 0 ), "panDownRight" );
+		map.put( KeyStroke.getKeyStroke( KeyEvent.VK_NUMPAD1, 0 ), "panDownLeft" );
+		map.put( KeyStroke.getKeyStroke( KeyEvent.VK_NUMPAD7, 0 ), "panUpLeft" );
 
 		map.put( KeyStroke.getKeyStroke( "control A" ), "selectAll" );
 		map.put( KeyStroke.getKeyStroke( "control shift A" ), "selectNone" );
@@ -82,6 +91,15 @@ public class TrackSchemeKeyboardHandler extends mxKeyboardHandler
 		map.put( "zoomIn", TrackSchemeActions.getZoomInAction() );
 		map.put( "zoomOut", TrackSchemeActions.getZoomOutAction() );
 		map.put( "resetZoom", TrackSchemeActions.getResetZoomAction() );
+
+		map.put( "panUp", TrackSchemeActions.getPanUpAction() );
+		map.put( "panDown", TrackSchemeActions.getPanDownAction() );
+		map.put( "panLeft", TrackSchemeActions.getPanLeftAction() );
+		map.put( "panRight", TrackSchemeActions.getPanRightAction() );
+		map.put( "panUpLeft", TrackSchemeActions.getPanUpLeftAction() );
+		map.put( "panDownLeft", TrackSchemeActions.getPanDownLeftAction() );
+		map.put( "panUpRight", TrackSchemeActions.getPanUpRightAction() );
+		map.put( "panDownRight", TrackSchemeActions.getPanDownRightAction() );
 
 		map.put( "selectNone", TrackSchemeActions.getSelectNoneAction() );
 		map.put( "selectAll", TrackSchemeActions.getSelectAllAction() );
