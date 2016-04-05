@@ -9,6 +9,8 @@ import java.awt.FlowLayout;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -209,8 +211,25 @@ public class TrackSchemeFrame extends JFrame
 			}
 		} );
 
-		gc.setKeepSelectionVisibleOnZoom( true );
+		gc.getGraphControl().addMouseWheelListener( new MouseWheelListener()
+		{
 
+			@Override
+			public void mouseWheelMoved( final MouseWheelEvent e )
+			{
+				if ( gc.isPanningEvent( e ) )
+				{
+					final boolean in = e.getWheelRotation() < 0;
+					if ( in )
+						gc.zoomIn();
+					else
+						gc.zoomOut();
+				}
+			}
+		} );
+
+		gc.setKeepSelectionVisibleOnZoom( true );
+		gc.setPanning( true );
 		return gc;
 	}
 
