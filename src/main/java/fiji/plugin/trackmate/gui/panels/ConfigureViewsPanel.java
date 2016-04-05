@@ -420,10 +420,10 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 												.addComponent( jCheckBoxDisplayNames, GroupLayout.DEFAULT_SIZE, 267, Short.MAX_VALUE )
 												.addContainerGap() )
 										.addGroup( gl_jPanelSpotOptions.createSequentialGroup()
-												.addComponent( jLabelSpotRadius, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE )
+												.addComponent( jLabelSpotRadius, GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE )
 												.addGap( 5 )
-												.addComponent( jTextFieldSpotRadius, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE )
-												.addGap( 114 ) ) ) )
+												.addComponent( jTextFieldSpotRadius, GroupLayout.DEFAULT_SIZE, 45, Short.MAX_VALUE )
+												.addGap( 103 ) ) ) )
 						.addGroup( gl_jPanelSpotOptions.createSequentialGroup()
 								.addContainerGap()
 								.addComponent( jPanelSpotColor, GroupLayout.DEFAULT_SIZE, 266, Short.MAX_VALUE )
@@ -431,16 +431,17 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 		gl_jPanelSpotOptions.setVerticalGroup(
 				gl_jPanelSpotOptions.createParallelGroup( Alignment.LEADING )
 						.addGroup( gl_jPanelSpotOptions.createSequentialGroup()
-								.addGap( 5 )
 								.addGroup( gl_jPanelSpotOptions.createParallelGroup( Alignment.LEADING )
 										.addGroup( gl_jPanelSpotOptions.createSequentialGroup()
-												.addGap( 3 )
+												.addGap( 8 )
 												.addComponent( jLabelSpotRadius ) )
-										.addComponent( jTextFieldSpotRadius, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE ) )
-								.addGap( 5 )
+										.addGroup( gl_jPanelSpotOptions.createSequentialGroup()
+												.addGap( 5 )
+												.addComponent( jTextFieldSpotRadius, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE ) ) )
+								.addPreferredGap( ComponentPlacement.RELATED )
 								.addComponent( jCheckBoxDisplayNames )
 								.addPreferredGap( ComponentPlacement.RELATED )
-								.addComponent( jPanelSpotColor, GroupLayout.PREFERRED_SIZE, 49, Short.MAX_VALUE )
+								.addComponent( jPanelSpotColor, GroupLayout.PREFERRED_SIZE, 51, Short.MAX_VALUE )
 								.addContainerGap() ) );
 		jPanelSpotOptions.setLayout( gl_jPanelSpotOptions );
 
@@ -546,10 +547,10 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 												.addComponent( jCheckBoxLimitDepth, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE )
 												.addGap( 6 ) )
 										.addGroup( gl_jPanelTrackOptions.createSequentialGroup()
-												.addComponent( jLabelFrameDepth, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE )
+												.addComponent( jLabelFrameDepth, GroupLayout.DEFAULT_SIZE, 103, Short.MAX_VALUE )
 												.addGap( 5 )
-												.addComponent( jTextFieldFrameDepth, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE )
-												.addGap( 123 ) )
+												.addComponent( jTextFieldFrameDepth, GroupLayout.DEFAULT_SIZE, 49, Short.MAX_VALUE )
+												.addGap( 108 ) )
 										.addComponent( jLabelTrackDisplayMode, GroupLayout.DEFAULT_SIZE, 265, Short.MAX_VALUE ) )
 								.addGap( 8 ) )
 						.addGroup( gl_jPanelTrackOptions.createSequentialGroup()
@@ -565,14 +566,15 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 								.addComponent( jComboBoxDisplayMode, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE )
 								.addGap( 5 )
 								.addComponent( jCheckBoxLimitDepth, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE )
-								.addGap( 5 )
 								.addGroup( gl_jPanelTrackOptions.createParallelGroup( Alignment.LEADING )
 										.addGroup( gl_jPanelTrackOptions.createSequentialGroup()
-												.addGap( 3 )
+												.addGap( 8 )
 												.addComponent( jLabelFrameDepth, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE ) )
-										.addComponent( jTextFieldFrameDepth, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE ) )
+										.addGroup( gl_jPanelTrackOptions.createSequentialGroup()
+												.addGap( 5 )
+												.addComponent( jTextFieldFrameDepth, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE ) ) )
 								.addPreferredGap( ComponentPlacement.RELATED )
-								.addComponent( trackColorGUI, GroupLayout.PREFERRED_SIZE, 43, Short.MAX_VALUE )
+								.addComponent( trackColorGUI, GroupLayout.PREFERRED_SIZE, 49, Short.MAX_VALUE )
 								.addGap( 9 ) ) );
 		jPanelTrackOptions.setLayout( gl_jPanelTrackOptions );
 
@@ -692,6 +694,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 					displaySettings.put( KEY_TRACK_DISPLAY_DEPTH, Integer.valueOf( TrackMateModelView.DEFAULT_TRACK_DISPLAY_DEPTH ) );
 
 					jTextFieldFrameDepth = new JTextField();
+					jTextFieldFrameDepth.setHorizontalAlignment( SwingConstants.CENTER );
 					jTextFieldFrameDepth.setFont( SMALL_FONT );
 					jTextFieldFrameDepth.setText( "" + TrackMateModelView.DEFAULT_TRACK_DISPLAY_DEPTH );
 					jTextFieldFrameDepth.setPreferredSize( new java.awt.Dimension( 34, 20 ) );
@@ -871,9 +874,11 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 				} );
 
 				textFieldDrawingDepth = new JNumericTextField( TrackMateModelView.DEFAULT_DRAWING_DEPTH );
+				textFieldDrawingDepth.setFormat( "%.1f" );
+				textFieldDrawingDepth.setHorizontalAlignment( SwingConstants.CENTER );
 				textFieldDrawingDepth.setFont( SMALL_FONT );
 				jpanelDrawingDepth.add( textFieldDrawingDepth );
-				textFieldDrawingDepth.setColumns( 3 );
+				textFieldDrawingDepth.setColumns( 7 );
 				textFieldDrawingDepth.addActionListener( new ActionListener()
 				{
 					@Override
