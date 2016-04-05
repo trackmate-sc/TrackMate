@@ -364,6 +364,10 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			}
 		}
 
+		getRowHeader().invalidate();
+		getRowHeader().repaint();
+		getColumnHeader().invalidate();
+		getColumnHeader().repaint();
 	}
 
 	/**
@@ -399,8 +403,6 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			maintainScrollBar( true, newScale / scale, center );
 			maintainScrollBar( false, newScale / scale, center );
 		}
-		getRowHeader().repaint();
-		getColumnHeader().repaint();
 	}
 
 	public void loopPaintDecorationLevel()
