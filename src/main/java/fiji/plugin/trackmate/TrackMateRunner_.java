@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import fiji.plugin.trackmate.action.ExportTracksToXML;
 import fiji.plugin.trackmate.detection.DetectorKeys;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
@@ -122,6 +123,13 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 	 * the {@link #ARG_USE_GUI} is set to <code>true</code>.
 	 */
 	private static final String ARG_SAVE_TO = "save_to";
+
+	/**
+	 * The macro parameter to set the path to export to simplified XML. See
+	 * {@link fiji.plugin.trackmate.action.ExportTracksToXML}. Is ignored if the
+	 * {@link #ARG_USE_GUI} is set to <code>true</code>.
+	 */
+	private static final String ARG_EXPORT_TO = "export_to";
 
 	/*
 	 * Other fields
@@ -362,12 +370,39 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 						}
 						catch ( final FileNotFoundException e )
 						{
-							logger.error( "File not found:\n" + e.getMessage() + '\n' );
+							logger.error( "When saving to " + save_path + ", file not found:\n" + e.getMessage() + '\n' );
 							return;
 						}
 						catch ( final IOException e )
 						{
-							logger.error( "Input/Output error:\n" + e.getMessage() + '\n' );
+							logger.error( "When saving to " + save_path + ", Input/Output error:\n" + e.getMessage() + '\n' );
+							return;
+						}
+
+					}
+
+					/*
+					 * Export results to simplified XML.
+					 */
+
+					if ( macroOptions.containsKey( ARG_EXPORT_TO ) )
+					{
+						final String export_path_str = macroOptions.get( ARG_EXPORT_TO );
+						final File export_path = new File( export_path_str );
+
+						try
+						{
+							ExportTracksToXML.export( model, settings, export_path );
+							logger.log( "Data exported to: " + export_path.toString() + '\n' );
+						}
+						catch ( final FileNotFoundException e )
+						{
+							logger.error( "When exporting to " + export_path + ", file not found:\n" + e.getMessage() + '\n' );
+							return;
+						}
+						catch ( final IOException e )
+						{
+							logger.error( "When exporting to " + export_path + ", Input/Output error:\n" + e.getMessage() + '\n' );
 							return;
 						}
 
@@ -556,7 +591,17 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 	public static void main( final String[] args )
 	{
 		ImageJ.main( args );
-		new TrackMateRunner_().run( "use_gui=false save_to=[/Users/tinevez/Desktop/TrackMateSaveTest.xml] image_path=[samples/FakeTracks.tif] radius=2.5 threshold=50.1 subpixel=false median=false channel=1 max_frame_gap=0" );
+		new TrackMateRunner_().run(
+				"use_gui=false "
+						+ "save_to=[/Users/tinevez/Desktop/TrackMateSaveTest.xml] "
+						+ "export_to=[/Users/tinevez/Desktop/TrackMateExportTest.xml] "
+						+ "image_path=[samples/FakeTracks.tif] "
+						+ "radius=2.5 "
+						+ "threshold=50.1 "
+						+ "subpixel=false "
+						+ "median=false "
+						+ "channel=1 "
+						+ "max_frame_gap=0" );
 	}
 
 }
