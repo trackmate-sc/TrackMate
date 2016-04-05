@@ -1,5 +1,8 @@
 package fiji.plugin.trackmate;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,6 +17,8 @@ import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.GuiUtils;
+import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.io.TmXmlWriter;
 import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
 import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
@@ -25,7 +30,6 @@ import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewFactory;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayerFactory;
 import fiji.util.SplitString;
-import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij.Macro;
@@ -88,7 +92,9 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 	private static final String ARG_MAX_GAP_FRAMES = "max_frame_gap";
 
 	/**
-	 * The macro parameter to set whether we should launch the GUI.
+	 * The macro parameter to set whether we should launch the GUI to perform
+	 * tracking. The other parameters entered with macro argument will be used
+	 * as default.
 	 */
 	private static final String ARG_USE_GUI = "use_gui";
 
@@ -109,6 +115,13 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 	 * empty path to open a dialog. See {@link IJ#openImage(String)}.
 	 */
 	private static final String ARG_INPUT_IMAGE_PATH = "image_path";
+
+	/**
+	 * The macro parameter to set the path to the XML file for saving to a
+	 * TrackMate file, once the tracking process has completed. Is ignored if
+	 * the {@link #ARG_USE_GUI} is set to <code>true</code>.
+	 */
+	private static final String ARG_SAVE_TO = "save_to";
 
 	/*
 	 * Other fields
@@ -144,7 +157,19 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 			try
 			{
 				final Map< String, String > macroOptions = SplitString.splitMacroOptions( arg );
+
+				/*
+				 * Unknown parameters.
+				 */
 				final Set< String > unknownParameters = new HashSet<>( macroOptions.keySet() );
+				if ( !unknownParameters.isEmpty() )
+				{
+					logger.error( "The following parameters are unkown:\n" );
+					for ( final String unknownParameter : unknownParameters )
+					{
+						logger.error( "  " + unknownParameter );
+					}
+				}
 
 				/*
 				 * Find what we will operate on: An opened image? A file?
@@ -203,24 +228,7 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 				}
 
 				/*
-				 * Check if we have to use the GUI.
-				 */
-
-				if ( macroOptions.containsKey( ARG_USE_GUI ) && macroOptions.get( ARG_USE_GUI ).equalsIgnoreCase( "true" ) )
-				{
-
-					if ( !imp.isVisible() )
-					{
-						imp.setOpenAsHyperStack( true );
-						imp.show();
-					}
-					GuiUtils.userCheckImpDimensions( imp );
-
-					// TODO TODO
-				}
-
-				/*
-				 * Check if we have an image.
+				 * Instantiate TrackMate.
 				 */
 
 				settings = createSettings( imp );
@@ -254,7 +262,6 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 					{
 						continue;
 					}
-					unknownParameters.remove( parameter );
 
 					final String key = parser.getA();
 					final MacroArgumentConverter converter = parser.getB();
@@ -284,7 +291,6 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 					{
 						continue;
 					}
-					unknownParameters.remove( parameter );
 
 					final String key = parser.getA();
 					final MacroArgumentConverter converter = parser.getB();
@@ -303,15 +309,83 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 				}
 
 				/*
-				 * Unknown parameters.
+				 * Check if we have to use the GUI.
 				 */
-				if ( !unknownParameters.isEmpty() )
+
+				if ( macroOptions.containsKey( ARG_USE_GUI ) && macroOptions.get( ARG_USE_GUI ).equalsIgnoreCase( "true" ) )
 				{
-					logger.error( "The following parameters are unkown:\n" );
-					for ( final String unknownParameter : unknownParameters )
+
+					if ( !imp.isVisible() )
 					{
-						logger.error( "  " + unknownParameter );
+						imp.setOpenAsHyperStack( true );
+						imp.show();
 					}
+					GuiUtils.userCheckImpDimensions( imp );
+					final TrackMateGUIController controller = new TrackMateGUIController( trackmate );
+					if ( imp != null )
+					{
+						GuiUtils.positionWindow( controller.getGUI(), imp.getWindow() );
+					}
+					return;
+				}
+				else
+				{
+
+					/*
+					 * Run TrackMate with the settings.
+					 */
+
+					if ( !trackmate.checkInput() || !trackmate.process() )
+					{
+						logger.error( "Error while performing tracking:\n" + trackmate.getErrorMessage() );
+						return;
+					}
+
+					/*
+					 * Save results.
+					 */
+					
+					if ( macroOptions.containsKey( ARG_SAVE_TO ) )
+					{
+						final String save_path_str = macroOptions.get( ARG_SAVE_TO );
+						final File save_path = new File( save_path_str );
+						final TmXmlWriter writer = new TmXmlWriter( save_path, logger );
+
+						writer.appendLog( logger.toString() );
+						writer.appendModel( trackmate.getModel() );
+						writer.appendSettings( trackmate.getSettings() );
+
+						try
+						{
+							writer.writeToFile();
+							logger.log( "Data saved to: " + save_path.toString() + '\n' );
+						}
+						catch ( final FileNotFoundException e )
+						{
+							logger.error( "File not found:\n" + e.getMessage() + '\n' );
+							return;
+						}
+						catch ( final IOException e )
+						{
+							logger.error( "Input/Output error:\n" + e.getMessage() + '\n' );
+							return;
+						}
+
+					}
+
+
+					/*
+					 * Display results.
+					 */
+
+					final SelectionModel selectionModel = new SelectionModel( model );
+
+					final ViewFactory displayerFactory = new HyperStackDisplayerFactory();
+					final TrackMateModelView view = displayerFactory.create( model, trackmate.getSettings(), selectionModel );
+					final PerTrackFeatureColorGenerator trackColor = new PerTrackFeatureColorGenerator( model, TrackIndexAnalyzer.TRACK_INDEX );
+					view.setDisplaySettings( TrackMateModelView.KEY_TRACK_COLORING, trackColor );
+
+					view.render();
 				}
 
 			}
@@ -321,25 +395,7 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 				e.printStackTrace();
 			}
 
-			logger.log( "Final settings object is:\n" + settings );
-			if (!trackmate.checkInput() || !trackmate.process())
-			{
-				logger.error( "Error while performing tracking:\n" + trackmate.getErrorMessage() );
-				return;
-			}
 
-			/*
-			 * Display results.
-			 */
-
-			final SelectionModel selectionModel = new SelectionModel( model );
-
-			final ViewFactory displayerFactory = new HyperStackDisplayerFactory();
-			final TrackMateModelView view = displayerFactory.create( model, trackmate.getSettings(), selectionModel );
-			final PerTrackFeatureColorGenerator trackColor = new PerTrackFeatureColorGenerator( model, TrackIndexAnalyzer.TRACK_INDEX );
-			view.setDisplaySettings( TrackMateModelView.KEY_TRACK_COLORING, trackColor );
-
-			view.render();
 
 		}
 	}
@@ -500,8 +556,7 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 	public static void main( final String[] args )
 	{
 		ImageJ.main( args );
-		IJ.openImage( "samples/FakeTracks.tif" ).show();
-		new TrackMateRunner_().run( "radius=2.5 threshold=50.1 subpixel=true median=false channel=1 max_frame_gap=0" );
+		new TrackMateRunner_().run( "use_gui=false save_to=[/Users/tinevez/Desktop/TrackMateSaveTest.xml] image_path=[samples/FakeTracks.tif] radius=2.5 threshold=50.1 subpixel=false median=false channel=1 max_frame_gap=0" );
 	}
 
 }
