@@ -58,30 +58,6 @@ public class TrackSchemeActions
 
 	private static final ImageIcon ARROW_DOWNRIGHT_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/arrow_se.png" ) );
 
-	static final Action editAction = new EditAction( "edit", EDIT_ICON );
-
-	static final Action homeAction = new HomeAction( "home", HOME_ICON );
-
-	private static Action endAction = new EndAction( "end", END_ICON );
-
-	private static Action panUpAction = new PanAction( "panUp", ARROW_UP_ICON, 0, -PAN_AMOUNT );
-
-	private static Action panDownAction = new PanAction( "panDown", ARROW_DOWN_ICON, 0, PAN_AMOUNT );
-
-	private static Action panLeftAction = new PanAction( "panLeft", ARROW_LEFT_ICON, -PAN_AMOUNT, 0 );
-
-	private static Action panRightAction = new PanAction( "panRight", ARROW_RIGHT_ICON, PAN_AMOUNT, 0 );
-
-	private static Action panUpLeftAction = new PanAction( "panUpLeft", ARROW_UPLEFT_ICON, -PAN_AMOUNT, -PAN_AMOUNT );
-
-	private static Action panUpRightAction = new PanAction( "panUpRight", ARROW_UPRIGHT_ICON, PAN_AMOUNT, -PAN_AMOUNT );
-
-	private static Action panDownLeftAction = new PanAction( "panDownLeft", ARROW_DOWNLEFT_ICON, -PAN_AMOUNT, PAN_AMOUNT );
-
-	private static Action panDownRightAction = new PanAction( "panDownRight", ARROW_DOWNRIGHT_ICON, PAN_AMOUNT, PAN_AMOUNT );
-
-	private static Action resetZoomAction = new ResetZoomAction( "resetZoom", RESET_ZOOM_ICON );
-
 	private static Action zoomInAction;
 
 	static
@@ -101,34 +77,52 @@ public class TrackSchemeActions
 	private TrackSchemeActions()
 	{}
 
-	public static Action getEditAction()
+	public static Action getEditAction( final TrackSchemeGraphComponent graphComponent )
 	{
-		return editAction;
+		return new EditAction( "edit", EDIT_ICON, graphComponent );
 	}
 
-	public static Action getHomeAction()
+	public static Action getHomeAction( final TrackSchemeGraphComponent graphComponent )
 	{
-		return homeAction;
+		return new HomeAction( "home", HOME_ICON, graphComponent );
 	}
 
-	public static Action getEndAction()
+	public static Action getEndAction( final TrackSchemeGraphComponent graphComponent )
 	{
-		return endAction;
+		return new EndAction( "end", END_ICON, graphComponent );
 	}
 
-	public static Action getResetZoomAction()
+	public static Action getResetZoomAction( final TrackSchemeGraphComponent graphComponent )
 	{
-		return resetZoomAction;
+		return new ResetZoomAction( "resetZoom", RESET_ZOOM_ICON, graphComponent );
 	}
 
-	public static Action getZoomInAction()
+	public static Action getZoomInAction( final TrackSchemeGraphComponent graphComponent )
 	{
-		return zoomInAction;
+		return new AbstractAction( "zoomIn", ZOOM_IN_ICON )
+		{
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed( final ActionEvent e )
+			{
+				graphComponent.zoomIn();
+			}
+		};
 	}
 
-	public static Action getZoomOutAction()
+	public static Action getZoomOutAction( final TrackSchemeGraphComponent graphComponent )
 	{
-		return zoomOutAction;
+		return new AbstractAction( "zoomOut", ZOOM_OUT_ICON )
+		{
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed( final ActionEvent e )
+			{
+				graphComponent.zoomOut();
+			}
+		};
 	}
 
 	public static Action getSelectNoneAction()
@@ -141,51 +135,51 @@ public class TrackSchemeActions
 		return mxGraphActions.getSelectAllAction();
 	}
 
-	public static Action getPanDownAction()
+	public static Action getPanDownAction( final TrackSchemeGraphComponent graphComponent )
 	{
-		return panDownAction;
+		return new PanAction( "panDown", ARROW_DOWN_ICON, graphComponent, 0, PAN_AMOUNT );
 	}
 
-	public static Action getPanLeftAction()
+	public static Action getPanLeftAction( final TrackSchemeGraphComponent graphComponent )
 	{
-		return panLeftAction;
+		return new PanAction( "panLeft", ARROW_LEFT_ICON, graphComponent, -PAN_AMOUNT, 0 );
 	}
 
-	public static Action getPanRightAction()
+	public static Action getPanRightAction( final TrackSchemeGraphComponent graphComponent )
 	{
-		return panRightAction;
+		return new PanAction( "panRight", ARROW_RIGHT_ICON, graphComponent, PAN_AMOUNT, 0 );
 	}
 
-	public static Action getPanUpAction()
+	public static Action getPanUpAction( final TrackSchemeGraphComponent graphComponent )
 	{
-		return panUpAction;
+		return new PanAction( "panUp", ARROW_UP_ICON, graphComponent, 0, -PAN_AMOUNT );
 	}
 
-	public static Action getPanDownLeftAction()
+	public static Action getPanDownLeftAction( final TrackSchemeGraphComponent graphComponent )
 	{
-		return panDownLeftAction;
+		return new PanAction( "panDownLeft", ARROW_DOWNLEFT_ICON, graphComponent, -PAN_AMOUNT, PAN_AMOUNT );
 	}
 
-	public static Action getPanDownRightAction()
+	public static Action getPanDownRightAction( final TrackSchemeGraphComponent graphComponent )
 	{
-		return panDownRightAction;
+		return new PanAction( "panDownRight", ARROW_DOWNRIGHT_ICON, graphComponent, PAN_AMOUNT, PAN_AMOUNT );
 	}
 
-	public static Action getPanUpLeftAction()
+	public static Action getPanUpLeftAction( final TrackSchemeGraphComponent graphComponent )
 	{
-		return panUpLeftAction;
+		return new PanAction( "panUpLeft", ARROW_UPLEFT_ICON, graphComponent, -PAN_AMOUNT, -PAN_AMOUNT );
 	}
 
-	public static Action getPanUpRightAction()
+	public static Action getPanUpRightAction( final TrackSchemeGraphComponent graphComponent )
 	{
-		return panUpRightAction;
+		return new PanAction( "panUpRight", ARROW_UPRIGHT_ICON, graphComponent, PAN_AMOUNT, -PAN_AMOUNT );
 	}
 
 	/*
 	 * ACTION CLASSES
 	 */
 
-	public static class PanAction extends AbstractAction
+	private static class PanAction extends AbstractAction
 	{
 
 		private static final long serialVersionUID = 1L;
@@ -194,9 +188,12 @@ public class TrackSchemeActions
 
 		private final int amounty;
 
-		public PanAction( final String name, final Icon icon, final int amountx, final int amounty )
+		private final TrackSchemeGraphComponent graphComponent;
+
+		public PanAction( final String name, final Icon icon, final TrackSchemeGraphComponent graphComponent, final int amountx, final int amounty )
 		{
 			super( name, icon );
+			this.graphComponent = graphComponent;
 			this.amountx = amountx;
 			this.amounty = amounty;
 		}
@@ -204,38 +201,32 @@ public class TrackSchemeActions
 		@Override
 		public void actionPerformed( final ActionEvent e )
 		{
-			if ( e.getSource() instanceof TrackSchemeGraphComponent )
-			{
-				final TrackSchemeGraphComponent graphComponent = ( ( TrackSchemeGraphComponent ) e.getSource() );
-				final Rectangle r = graphComponent.getViewport().getViewRect();
-
-				final int right = r.x + ( ( amountx < 0 ) ? 0 : r.width ) + amountx;
-				final int bottom = r.y + ( ( amounty < 0 ) ? 0 : r.height ) + amounty;
-
-				graphComponent.getGraphControl().scrollRectToVisible( new Rectangle( right, bottom, 0, 0 ) );
-			}
+			final Rectangle r = graphComponent.getViewport().getViewRect();
+			final int right = r.x + ( ( amountx < 0 ) ? 0 : r.width ) + amountx;
+			final int bottom = r.y + ( ( amounty < 0 ) ? 0 : r.height ) + amounty;
+			graphComponent.getGraphControl().scrollRectToVisible( new Rectangle( right, bottom, 0, 0 ) );
 		}
 	}
 
-	public static class ResetZoomAction extends AbstractAction
+	private static class ResetZoomAction extends AbstractAction
 	{
 
 		private static final long serialVersionUID = 1L;
 
-		public ResetZoomAction( final String name, final Icon icon )
+		private final TrackSchemeGraphComponent graphComponent;
+
+		public ResetZoomAction( final String name, final Icon icon, final TrackSchemeGraphComponent graphComponent )
 		{
 			super( name, icon );
+			this.graphComponent = graphComponent;
 		}
 
 		@Override
 		public void actionPerformed( final ActionEvent e )
 		{
-			if ( e.getSource() instanceof TrackSchemeGraphComponent )
-			{
-				final TrackSchemeGraphComponent graphComponent = ( ( TrackSchemeGraphComponent ) e.getSource() );
-				graphComponent.zoomTo( 1.0, false );
-			}
+			graphComponent.zoomTo( 1.0, false );
 		}
+
 	}
 
 	/**
@@ -244,64 +235,63 @@ public class TrackSchemeActions
 	 * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; Sep 12, 2013
 	 *
 	 */
-	public static class HomeAction extends AbstractAction
+	private static class HomeAction extends AbstractAction
 	{
 
 		private static final long serialVersionUID = 1L;
 
-		public HomeAction( final String name, final Icon icon )
+		private final TrackSchemeGraphComponent graphComponent;
+
+		public HomeAction( final String name, final Icon icon, final TrackSchemeGraphComponent graphComponent )
 		{
 			super( name, icon );
+			this.graphComponent = graphComponent;
 		}
 
 		@Override
 		public void actionPerformed( final ActionEvent e )
 		{
 
-			if ( e.getSource() instanceof TrackSchemeGraphComponent )
+			mxCell cell = null;
+			final JGraphXAdapter graph = graphComponent.getGraph();
+			final List< mxCell > vertices = getSelectionVertices( graph );
+			if ( !vertices.isEmpty() )
 			{
-				final TrackSchemeGraphComponent graphComponent = ( ( TrackSchemeGraphComponent ) e.getSource() );
-				mxCell cell = null;
-				final JGraphXAdapter graph = graphComponent.getGraph();
-				final List< mxCell > vertices = getSelectionVertices( graph );
-				if ( !vertices.isEmpty() )
+				int minFrame = Integer.MAX_VALUE;
+				for ( final mxCell mxCell : vertices )
+				{
+					final int frame = graph.getSpotFor( mxCell ).getFeature( Spot.FRAME ).intValue();
+					if ( frame < minFrame )
+					{
+						minFrame = frame;
+						cell = mxCell;
+					}
+				}
+			}
+			else
+			{
+				final List< mxCell > edges = getSelectionEdges( graph );
+				if ( !edges.isEmpty() )
 				{
 					int minFrame = Integer.MAX_VALUE;
-					for ( final mxCell mxCell : vertices )
+					for ( final mxCell mxCell : edges )
 					{
-						final int frame = graph.getSpotFor( mxCell ).getFeature( Spot.FRAME ).intValue();
+						final mxICell target = mxCell.getTarget();
+						final int frame = graph.getSpotFor( target ).getFeature( Spot.FRAME ).intValue();
 						if ( frame < minFrame )
 						{
 							minFrame = frame;
 							cell = mxCell;
 						}
 					}
+					cell = edges.get( edges.size() - 1 );
 				}
 				else
 				{
-					final List< mxCell > edges = getSelectionEdges( graph );
-					if ( !edges.isEmpty() )
-					{
-						int minFrame = Integer.MAX_VALUE;
-						for ( final mxCell mxCell : edges )
-						{
-							final mxICell target = mxCell.getTarget();
-							final int frame = graph.getSpotFor( target ).getFeature( Spot.FRAME ).intValue();
-							if ( frame < minFrame )
-							{
-								minFrame = frame;
-								cell = mxCell;
-							}
-						}
-						cell = edges.get( edges.size() - 1 );
-					}
-					else
-					{
-						return;
-					}
+					return;
 				}
-				graphComponent.scrollCellToVisible( cell, true );
 			}
+			graphComponent.scrollCellToVisible( cell, true );
 		}
 	}
 
@@ -311,23 +301,22 @@ public class TrackSchemeActions
 	 * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; Sep 12, 2013
 	 *
 	 */
-	public static class EndAction extends AbstractAction
+	private static class EndAction extends AbstractAction
 	{
 
 		private static final long serialVersionUID = 1L;
 
-		public EndAction( final String name, final Icon icon )
+		private final TrackSchemeGraphComponent graphComponent;
+
+		public EndAction( final String name, final Icon icon, final TrackSchemeGraphComponent graphComponent )
 		{
 			super( name, icon );
+			this.graphComponent = graphComponent;
 		}
 
 		@Override
 		public void actionPerformed( final ActionEvent e )
 		{
-
-			if ( e.getSource() instanceof TrackSchemeGraphComponent )
-			{
-				final TrackSchemeGraphComponent graphComponent = ( ( TrackSchemeGraphComponent ) e.getSource() );
 				mxCell cell = null;
 				final JGraphXAdapter graph = graphComponent.getGraph();
 				final List< mxCell > vertices = getSelectionVertices( graph );
@@ -370,7 +359,6 @@ public class TrackSchemeActions
 				}
 				graphComponent.scrollCellToVisible( cell, true );
 			}
-		}
 	}
 
 	public static class EditAction extends AbstractAction
@@ -378,19 +366,18 @@ public class TrackSchemeActions
 
 		private static final long serialVersionUID = 1L;
 
-		public EditAction( final String name, final Icon icon )
+		private final TrackSchemeGraphComponent graphComponent;
+
+		public EditAction( final String name, final Icon icon, final TrackSchemeGraphComponent graphComponent )
 		{
 			super( name, icon );
+			this.graphComponent = graphComponent;
 		}
 
 		@Override
 		public void actionPerformed( final ActionEvent e )
 		{
-			if ( e.getSource() instanceof TrackSchemeGraphComponent )
-			{
-				final TrackSchemeGraphComponent graphComponent = ( ( TrackSchemeGraphComponent ) e.getSource() );
 				multiEditSpotName( graphComponent, e );
-			}
 		}
 
 		private void multiEditSpotName( final TrackSchemeGraphComponent graphComponent, final ActionEvent triggerEvent )

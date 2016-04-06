@@ -154,6 +154,8 @@ public class TrackSchemeFrame extends JFrame
 		splitPane.setDividerLocation( 170 );
 		getContentPane().add( splitPane, BorderLayout.CENTER );
 
+		final TrackSchemeKeyboardHandler keyboardHandler = new TrackSchemeKeyboardHandler( graphComponent, new TrackNavigator( trackScheme.getModel(), trackScheme.getSelectionModel() ) );
+		keyboardHandler.installKeyboardActions( this.getRootPane() );
 	}
 
 	/*
@@ -187,7 +189,6 @@ public class TrackSchemeFrame extends JFrame
 
 		new mxRubberband( gc );
 		// new mxKeyboardHandler(gc);
-		new TrackSchemeKeyboardHandler( gc, new TrackNavigator( trackScheme.getModel(), trackScheme.getSelectionModel() ) );
 
 		// Popup menu
 		gc.getGraphControl().addMouseListener( new MouseAdapter()

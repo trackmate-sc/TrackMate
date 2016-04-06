@@ -8,25 +8,38 @@ import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-import com.mxgraph.swing.handler.mxKeyboardHandler;
 import com.mxgraph.swing.util.mxGraphActions;
 
 import fiji.plugin.trackmate.util.TrackNavigator;
 
-public class TrackSchemeKeyboardHandler extends mxKeyboardHandler
+public class TrackSchemeKeyboardHandler
 {
 
 	private final TrackNavigator navigator;
 
+	private final TrackSchemeGraphComponent graphComponent;
+
 	public TrackSchemeKeyboardHandler( final TrackSchemeGraphComponent graphComponent, final TrackNavigator navigator )
 	{
-		super( graphComponent );
+		this.graphComponent = graphComponent;
 		this.navigator = navigator;
 	}
 
-	@Override
+	public void installKeyboardActions( final JComponent component )
+	{
+		InputMap inputMap = getInputMap( JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT );
+		SwingUtilities.replaceUIInputMap( component,
+				JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, inputMap );
+
+		inputMap = getInputMap( JComponent.WHEN_FOCUSED );
+		SwingUtilities.replaceUIInputMap( component,
+				JComponent.WHEN_FOCUSED, inputMap );
+		SwingUtilities.replaceUIActionMap( component, createActionMap() );
+	}
+
 	protected InputMap getInputMap( final int condition )
 	{
 		InputMap map = null;
@@ -77,29 +90,28 @@ public class TrackSchemeKeyboardHandler extends mxKeyboardHandler
 	/**
 	 * Return the mapping between JTree's input map and JGraph's actions.
 	 */
-	@Override
 	protected ActionMap createActionMap()
 	{
 		final ActionMap map = ( ActionMap ) UIManager.get( "ScrollPane.actionMap" );
 
-		map.put( "edit", TrackSchemeActions.getEditAction() );
+		map.put( "edit", TrackSchemeActions.getEditAction( graphComponent ) );
 		map.put( "delete", mxGraphActions.getDeleteAction() );
 
-		map.put( "home", TrackSchemeActions.getHomeAction() );
-		map.put( "end", TrackSchemeActions.getEndAction() );
+		map.put( "home", TrackSchemeActions.getHomeAction( graphComponent ) );
+		map.put( "end", TrackSchemeActions.getEndAction( graphComponent ) );
 
-		map.put( "zoomIn", TrackSchemeActions.getZoomInAction() );
-		map.put( "zoomOut", TrackSchemeActions.getZoomOutAction() );
-		map.put( "resetZoom", TrackSchemeActions.getResetZoomAction() );
+		map.put( "zoomIn", TrackSchemeActions.getZoomInAction( graphComponent ) );
+		map.put( "zoomOut", TrackSchemeActions.getZoomOutAction( graphComponent ) );
+		map.put( "resetZoom", TrackSchemeActions.getResetZoomAction( graphComponent ) );
 
-		map.put( "panUp", TrackSchemeActions.getPanUpAction() );
-		map.put( "panDown", TrackSchemeActions.getPanDownAction() );
-		map.put( "panLeft", TrackSchemeActions.getPanLeftAction() );
-		map.put( "panRight", TrackSchemeActions.getPanRightAction() );
-		map.put( "panUpLeft", TrackSchemeActions.getPanUpLeftAction() );
-		map.put( "panDownLeft", TrackSchemeActions.getPanDownLeftAction() );
-		map.put( "panUpRight", TrackSchemeActions.getPanUpRightAction() );
-		map.put( "panDownRight", TrackSchemeActions.getPanDownRightAction() );
+		map.put( "panUp", TrackSchemeActions.getPanUpAction( graphComponent ) );
+		map.put( "panDown", TrackSchemeActions.getPanDownAction( graphComponent ) );
+		map.put( "panLeft", TrackSchemeActions.getPanLeftAction( graphComponent ) );
+		map.put( "panRight", TrackSchemeActions.getPanRightAction( graphComponent ) );
+		map.put( "panUpLeft", TrackSchemeActions.getPanUpLeftAction( graphComponent ) );
+		map.put( "panDownLeft", TrackSchemeActions.getPanDownLeftAction( graphComponent ) );
+		map.put( "panUpRight", TrackSchemeActions.getPanUpRightAction( graphComponent ) );
+		map.put( "panDownRight", TrackSchemeActions.getPanDownRightAction( graphComponent ) );
 
 		map.put( "selectNone", TrackSchemeActions.getSelectNoneAction() );
 		map.put( "selectAll", TrackSchemeActions.getSelectAllAction() );
