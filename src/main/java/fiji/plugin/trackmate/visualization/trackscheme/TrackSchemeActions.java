@@ -50,6 +50,14 @@ public class TrackSchemeActions
 
 	private static final ImageIcon ARROW_RIGHT_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/arrow_right.png" ) );
 
+	private static final ImageIcon ARROW_UPLEFT_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/arrow_nw.png" ) );
+
+	private static final ImageIcon ARROW_DOWNLEFT_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/arrow_sw.png" ) );
+
+	private static final ImageIcon ARROW_UPRIGHT_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/arrow_ne.png" ) );
+
+	private static final ImageIcon ARROW_DOWNRIGHT_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/arrow_se.png" ) );
+
 	static final Action editAction = new EditAction( "edit", EDIT_ICON );
 
 	static final Action homeAction = new HomeAction( "home", HOME_ICON );
@@ -64,13 +72,13 @@ public class TrackSchemeActions
 
 	private static Action panRightAction = new PanAction( "panRight", ARROW_RIGHT_ICON, PAN_AMOUNT, 0 );
 
-	private static Action panUpLeftAction = new PanAction( "panUpLeft", ARROW_UP_ICON, -PAN_AMOUNT, -PAN_AMOUNT );
+	private static Action panUpLeftAction = new PanAction( "panUpLeft", ARROW_UPLEFT_ICON, -PAN_AMOUNT, -PAN_AMOUNT );
 
-	private static Action panUpRightAction = new PanAction( "panUpRight", ARROW_DOWN_ICON, PAN_AMOUNT, -PAN_AMOUNT );
+	private static Action panUpRightAction = new PanAction( "panUpRight", ARROW_UPRIGHT_ICON, PAN_AMOUNT, -PAN_AMOUNT );
 
-	private static Action panDownLeftAction = new PanAction( "panDownLeft", ARROW_LEFT_ICON, -PAN_AMOUNT, PAN_AMOUNT );
+	private static Action panDownLeftAction = new PanAction( "panDownLeft", ARROW_DOWNLEFT_ICON, -PAN_AMOUNT, PAN_AMOUNT );
 
-	private static Action panDownRightAction = new PanAction( "panDownRight", ARROW_RIGHT_ICON, PAN_AMOUNT, PAN_AMOUNT );
+	private static Action panDownRightAction = new PanAction( "panDownRight", ARROW_DOWNRIGHT_ICON, PAN_AMOUNT, PAN_AMOUNT );
 
 	private static Action resetZoomAction = new ResetZoomAction( "resetZoom", RESET_ZOOM_ICON );
 
