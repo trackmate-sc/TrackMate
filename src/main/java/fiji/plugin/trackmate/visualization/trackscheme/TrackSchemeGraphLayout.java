@@ -5,6 +5,18 @@ import static fiji.plugin.trackmate.visualization.trackscheme.TrackScheme.DEFAUL
 import static fiji.plugin.trackmate.visualization.trackscheme.TrackScheme.X_COLUMN_SIZE;
 import static fiji.plugin.trackmate.visualization.trackscheme.TrackScheme.Y_COLUMN_SIZE;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.graph.SimpleDirectedGraph;
+import org.jgrapht.traverse.DepthFirstIterator;
+
 import com.mxgraph.layout.mxGraphLayout;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
@@ -17,20 +29,7 @@ import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition.TrackBranchDecomp
 import fiji.plugin.trackmate.graph.GraphUtils;
 import fiji.plugin.trackmate.graph.SortedDepthFirstIterator;
 import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
 import net.imglib2.algorithm.Benchmark;
-
-import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.DefaultWeightedEdge;
-import org.jgrapht.graph.SimpleDirectedGraph;
-import org.jgrapht.traverse.DepthFirstIterator;
 
 /**
  * This {@link mxGraphLayout} arranges cells on a graph in lanes corresponding
@@ -296,6 +295,10 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 			{
 				rowLengths.put( i, columns[ i ] );
 			}
+
+			// Move vertices cells to front, to make them easily selectable.
+			final Object[] verticesCells = graph.getVertexCells().toArray();
+			graph.cellsOrdered( verticesCells, false );
 
 		}
 		finally
