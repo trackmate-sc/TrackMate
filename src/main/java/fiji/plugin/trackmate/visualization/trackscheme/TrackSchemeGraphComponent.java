@@ -12,6 +12,8 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
@@ -60,6 +62,10 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 
 	private int paintDecorationLevel = TrackScheme.DEFAULT_PAINT_DECORATION_LEVEL;
 
+	/** Flag that states whether the use is holding the space key down. */
+	private boolean spaceDown = false;
+
+
 	/*
 	 * CONSTRUCTOR
 	 */
@@ -85,6 +91,29 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 		setRowHeaderView( new RowHeader() );
 		setColumnHeaderView( new ColumnHeader() );
 		setCorner( ScrollPaneConstants.UPPER_LEFT_CORNER, new TopLeftCorner() );
+
+		// Listen to space key down
+		addKeyListener( new KeyListener()
+		{
+
+			@Override
+			public void keyTyped( final KeyEvent e )
+			{}
+
+			@Override
+			public void keyReleased( final KeyEvent e )
+			{
+				if ( e.getKeyCode() == 32 )
+					spaceDown = false;
+			}
+
+			@Override
+			public void keyPressed( final KeyEvent e )
+			{
+				if ( e.getKeyCode() == 32 && !spaceDown )
+					spaceDown = true;
+			}
+		} );
 	}
 
 	/*
@@ -101,6 +130,12 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 	public boolean isToggleEvent( final MouseEvent event )
 	{
 		return event.isShiftDown();
+	}
+
+	@Override
+	public boolean isPanningEvent( final MouseEvent event )
+	{
+		return spaceDown;
 	}
 
 	/**
