@@ -188,7 +188,6 @@ public class TrackSchemeFrame extends JFrame
 		 */
 
 		new mxRubberband( gc );
-		// new mxKeyboardHandler(gc);
 
 		// Popup menu
 		gc.getGraphControl().addMouseListener( new MouseAdapter()
@@ -212,7 +211,7 @@ public class TrackSchemeFrame extends JFrame
 			}
 		} );
 
-		gc.getGraphControl().addMouseWheelListener( new MouseWheelListener()
+		gc.addMouseWheelListener( new MouseWheelListener()
 		{
 
 			@Override
