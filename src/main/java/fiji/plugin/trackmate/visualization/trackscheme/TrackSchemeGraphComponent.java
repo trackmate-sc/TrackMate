@@ -398,6 +398,11 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 				}
 			}
 		}
+
+		getColumnHeader().revalidate();
+		getRowHeader().revalidate();
+		getCorner( ScrollPaneConstants.UPPER_LEFT_CORNER ).revalidate();
+
 	}
 
 	/**
@@ -496,7 +501,7 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 
 					// Scaled sizes
 					final int xcs = Math.round( TrackScheme.X_COLUMN_SIZE * scale );
-					final int ycs = Math.round( TrackScheme.Y_COLUMN_SIZE * scale );
+					final int ycs = Math.min( TrackScheme.Y_COLUMN_SIZE, Math.round( TrackScheme.Y_COLUMN_SIZE * scale ) );
 
 					// Look for target column
 					if ( null != columnWidths )

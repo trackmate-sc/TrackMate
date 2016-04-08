@@ -155,7 +155,8 @@ public class TrackSchemeFrame extends JFrame
 		getContentPane().add( splitPane, BorderLayout.CENTER );
 
 		final TrackSchemeKeyboardHandler keyboardHandler = new TrackSchemeKeyboardHandler( graphComponent, new TrackNavigator( trackScheme.getModel(), trackScheme.getSelectionModel() ) );
-		keyboardHandler.installKeyboardActions( this.getRootPane() );
+		keyboardHandler.installKeyboardActions( graphComponent );
+		keyboardHandler.installKeyboardActions( infoPane );
 	}
 
 	/*

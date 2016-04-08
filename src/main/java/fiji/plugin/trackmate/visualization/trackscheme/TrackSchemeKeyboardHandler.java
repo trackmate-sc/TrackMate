@@ -30,11 +30,7 @@ public class TrackSchemeKeyboardHandler
 
 	public void installKeyboardActions( final JComponent component )
 	{
-		InputMap inputMap = getInputMap( JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT );
-		SwingUtilities.replaceUIInputMap( component,
-				JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, inputMap );
-
-		inputMap = getInputMap( JComponent.WHEN_FOCUSED );
+		final InputMap inputMap = getInputMap( JComponent.WHEN_FOCUSED );
 		SwingUtilities.replaceUIInputMap( component,
 				JComponent.WHEN_FOCUSED, inputMap );
 		SwingUtilities.replaceUIActionMap( component, createActionMap() );
