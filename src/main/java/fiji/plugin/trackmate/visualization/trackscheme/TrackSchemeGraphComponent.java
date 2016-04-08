@@ -398,11 +398,6 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 				}
 			}
 		}
-
-		getRowHeader().invalidate();
-		getRowHeader().repaint();
-		getColumnHeader().invalidate();
-		getColumnHeader().repaint();
 	}
 
 	/**
@@ -484,11 +479,13 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 
 		public ColumnHeader()
 		{
+			setLayout( null );
 			setOpaque( true );
 			setBackground( BACKGROUND_COLOR_1 );
 			setToolTipText( "Column header tool tip" );;
 			addMouseListener( new MouseAdapter()
 			{
+
 				@Override
 				public void mouseClicked( final MouseEvent event )
 				{
@@ -521,16 +518,17 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 						final String oldName = trackScheme.getModel().getTrackModel().name( columnTrackIDs[ column ] );
 						final Integer trackID = columnTrackIDs[ column ];
 
-						final JScrollPane scrollPane = new JScrollPane();
-						scrollPane.getViewport().setOpaque( false );
-						scrollPane.setVisible( false );
-						scrollPane.setOpaque( false );
 						int cwidth = columnWidths[ column ] * xcs;
 						if ( column == 0 )
 						{
 							// Special case 1st column.
 							cwidth += xcs;
 						}
+
+						final JScrollPane scrollPane = new JScrollPane();
+						scrollPane.getViewport().setOpaque( false );
+						scrollPane.setVisible( false );
+						scrollPane.setOpaque( false );
 						scrollPane.setBounds( xc - cwidth, 0, cwidth, ycs );
 						scrollPane.setVisible( true );
 
@@ -556,7 +554,7 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 						} );
 
 						scrollPane.setViewportView( textArea );
-						ColumnHeader.this.add( scrollPane, 0 );
+						ColumnHeader.this.add( scrollPane );
 
 						textArea.revalidate();
 						textArea.requestFocusInWindow();
@@ -646,6 +644,7 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 					g.drawLine( ( int ) x, 0, ( int ) x, ( int ) ycs );
 				}
 			}
+
 			// Last column header
 			g.setColor( Color.decode( TrackScheme.DEFAULT_COLOR ) );
 			g.drawString( "Unlaid spots", ( int ) ( x + 20d ), ( int ) ( ycs / 2d ) );
