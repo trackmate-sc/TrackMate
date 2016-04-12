@@ -275,6 +275,7 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 
 				settings = createSettings( imp );
 				model = createModel();
+				model.setLogger( logger );
 				trackmate = createTrackMate();
 
 				/*
