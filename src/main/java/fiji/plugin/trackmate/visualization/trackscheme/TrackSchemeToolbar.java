@@ -199,9 +199,9 @@ public class TrackSchemeToolbar extends JToolBar
 		final JButton captureUndecoratedButton = new JButton( captureUndecoratedAction );
 		final JButton captureDecoratedButton = new JButton( captureDecoratedAction );
 		final JButton saveButton = new JButton( saveAction );
-		captureUndecoratedButton.setToolTipText( "Capture undecorated track scheme" );
-		captureDecoratedButton.setToolTipText( "Capture decorated track scheme" );
-		saveButton.setToolTipText( "Export to.." );
+		captureUndecoratedButton.setToolTipText( "Capture undecorated TrackScheme (zoom=1)." );
+		captureDecoratedButton.setToolTipText( "Capture TrackScheme with decorations." );
+		saveButton.setToolTipText( "Export to..." );
 
 		/*
 		 * display background decorations
@@ -218,7 +218,7 @@ public class TrackSchemeToolbar extends JToolBar
 
 			};
 			loopDisplayDecorationsButton = new JButton( toggleDisplayDecorations );
-			loopDisplayDecorationsButton.setToolTipText( "Loop display decorations" );
+			loopDisplayDecorationsButton.setToolTipText( "Loop display decorations." );
 		}
 
 		/*

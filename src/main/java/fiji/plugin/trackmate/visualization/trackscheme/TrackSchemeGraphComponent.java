@@ -12,6 +12,8 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
@@ -60,6 +62,10 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 
 	private int paintDecorationLevel = TrackScheme.DEFAULT_PAINT_DECORATION_LEVEL;
 
+	/** Flag that states whether the use is holding the space key down. */
+	private boolean spaceDown = false;
+
+
 	/*
 	 * CONSTRUCTOR
 	 */
@@ -85,6 +91,29 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 		setRowHeaderView( new RowHeader() );
 		setColumnHeaderView( new ColumnHeader() );
 		setCorner( ScrollPaneConstants.UPPER_LEFT_CORNER, new TopLeftCorner() );
+
+		// Listen to space key down
+		addKeyListener( new KeyListener()
+		{
+
+			@Override
+			public void keyTyped( final KeyEvent e )
+			{}
+
+			@Override
+			public void keyReleased( final KeyEvent e )
+			{
+				if ( e.getKeyCode() == 32 )
+					spaceDown = false;
+			}
+
+			@Override
+			public void keyPressed( final KeyEvent e )
+			{
+				if ( e.getKeyCode() == 32 && !spaceDown )
+					spaceDown = true;
+			}
+		} );
 	}
 
 	/*
@@ -101,6 +130,12 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 	public boolean isToggleEvent( final MouseEvent event )
 	{
 		return event.isShiftDown();
+	}
+
+	@Override
+	public boolean isPanningEvent( final MouseEvent event )
+	{
+		return spaceDown;
 	}
 
 	/**
@@ -364,6 +399,10 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			}
 		}
 
+		getColumnHeader().revalidate();
+		getRowHeader().revalidate();
+		getCorner( ScrollPaneConstants.UPPER_LEFT_CORNER ).revalidate();
+
 	}
 
 	/**
@@ -399,8 +438,6 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			maintainScrollBar( true, newScale / scale, center );
 			maintainScrollBar( false, newScale / scale, center );
 		}
-		getRowHeader().repaint();
-		getColumnHeader().repaint();
 	}
 
 	public void loopPaintDecorationLevel()
@@ -447,11 +484,13 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 
 		public ColumnHeader()
 		{
+			setLayout( null );
 			setOpaque( true );
 			setBackground( BACKGROUND_COLOR_1 );
 			setToolTipText( "Column header tool tip" );;
 			addMouseListener( new MouseAdapter()
 			{
+
 				@Override
 				public void mouseClicked( final MouseEvent event )
 				{
@@ -462,7 +501,7 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 
 					// Scaled sizes
 					final int xcs = Math.round( TrackScheme.X_COLUMN_SIZE * scale );
-					final int ycs = Math.round( TrackScheme.Y_COLUMN_SIZE * scale );
+					final int ycs = Math.min( TrackScheme.Y_COLUMN_SIZE, Math.round( TrackScheme.Y_COLUMN_SIZE * scale ) );
 
 					// Look for target column
 					if ( null != columnWidths )
@@ -484,16 +523,17 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 						final String oldName = trackScheme.getModel().getTrackModel().name( columnTrackIDs[ column ] );
 						final Integer trackID = columnTrackIDs[ column ];
 
-						final JScrollPane scrollPane = new JScrollPane();
-						scrollPane.getViewport().setOpaque( false );
-						scrollPane.setVisible( false );
-						scrollPane.setOpaque( false );
 						int cwidth = columnWidths[ column ] * xcs;
 						if ( column == 0 )
 						{
 							// Special case 1st column.
 							cwidth += xcs;
 						}
+
+						final JScrollPane scrollPane = new JScrollPane();
+						scrollPane.getViewport().setOpaque( false );
+						scrollPane.setVisible( false );
+						scrollPane.setOpaque( false );
 						scrollPane.setBounds( xc - cwidth, 0, cwidth, ycs );
 						scrollPane.setVisible( true );
 
@@ -519,7 +559,7 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 						} );
 
 						scrollPane.setViewportView( textArea );
-						ColumnHeader.this.add( scrollPane, 0 );
+						ColumnHeader.this.add( scrollPane );
 
 						textArea.revalidate();
 						textArea.requestFocusInWindow();
@@ -609,6 +649,7 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 					g.drawLine( ( int ) x, 0, ( int ) x, ( int ) ycs );
 				}
 			}
+
 			// Last column header
 			g.setColor( Color.decode( TrackScheme.DEFAULT_COLOR ) );
 			g.drawString( "Unlaid spots", ( int ) ( x + 20d ), ( int ) ( ycs / 2d ) );

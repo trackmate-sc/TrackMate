@@ -9,6 +9,8 @@ import java.awt.FlowLayout;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -152,6 +154,9 @@ public class TrackSchemeFrame extends JFrame
 		splitPane.setDividerLocation( 170 );
 		getContentPane().add( splitPane, BorderLayout.CENTER );
 
+		final TrackSchemeKeyboardHandler keyboardHandler = new TrackSchemeKeyboardHandler( graphComponent, new TrackNavigator( trackScheme.getModel(), trackScheme.getSelectionModel() ) );
+		keyboardHandler.installKeyboardActions( graphComponent );
+		keyboardHandler.installKeyboardActions( infoPane );
 	}
 
 	/*
@@ -184,8 +189,6 @@ public class TrackSchemeFrame extends JFrame
 		 */
 
 		new mxRubberband( gc );
-		// new mxKeyboardHandler(gc);
-		new TrackSchemeKeyboardHandler( gc, new TrackNavigator( trackScheme.getModel(), trackScheme.getSelectionModel() ) );
 
 		// Popup menu
 		gc.getGraphControl().addMouseListener( new MouseAdapter()
@@ -209,8 +212,25 @@ public class TrackSchemeFrame extends JFrame
 			}
 		} );
 
-		gc.setKeepSelectionVisibleOnZoom( true );
+		gc.addMouseWheelListener( new MouseWheelListener()
+		{
 
+			@Override
+			public void mouseWheelMoved( final MouseWheelEvent e )
+			{
+				if ( gc.isPanningEvent( e ) )
+				{
+					final boolean in = e.getWheelRotation() < 0;
+					if ( in )
+						gc.zoomIn();
+					else
+						gc.zoomOut();
+				}
+			}
+		} );
+
+		gc.setKeepSelectionVisibleOnZoom( true );
+		gc.setPanning( true );
 		return gc;
 	}
 
