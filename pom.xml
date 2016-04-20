@@ -19,10 +19,7 @@
 		<developer>
 			<id>tinevez</id>
 			<name>Jean-Yves Tinevez</name>
-			<email>jean-yves.tinevez@pasteur.fr</email>
-			<url>https://research.pasteur.fr/en/member/jean-yves-tinevez/</url>
-			<organization>Institut Pasteur</organization>
-			<organizationUrl>http://www.pasteur.fr/</organizationUrl>
+			<url>http://imagej.net/User:JeanYvesTinevez</url>
 			<roles>
 				<role>founder</role>
 				<role>lead</role>
@@ -32,31 +29,22 @@
 				<role>support</role>
 				<role>maintainer</role>
 			</roles>
-			<timezone>+1</timezone>
 		</developer>
 		<developer>
 			<id>ctrueden</id>
 			<name>Curtis Rueden</name>
-			<email>ctrueden@wisc.edu</email>
-			<url>http://loci.wisc.edu/people/curtis-rueden</url>
-			<organization>UW-Madison LOCI</organization>
-			<organizationUrl>http://loci.wisc.edu/</organizationUrl>
+			<url>http://imagej.net/User:Rueden</url>
 			<roles>
 				<role>maintainer</role>
 			</roles>
-			<timezone>-6</timezone>
 		</developer>
 		<developer>
 			<id>hinerm</id>
 			<name>Mark Hiner</name>
-			<email>hiner@wisc.edu</email>
-			<url>http://loci.wisc.edu/people/mark-hiner</url>
-			<organization>UW-Madison LOCI</organization>
-			<organizationUrl>http://loci.wisc.edu/</organizationUrl>
+			<url>http://imagej.net/User:Hinerm</url>
 			<roles>
 				<role>maintainer</role>
 			</roles>
-			<timezone>-6</timezone>
 		</developer>
 	</developers>
 	<contributors>
