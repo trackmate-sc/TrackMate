@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>TrackMate_</artifactId>
-	<version>3.2.1-SNAPSHOT</version>
+	<version>3.2.1</version>
 
 	<name>plugins/TrackMate_.jar</name>
 	<description />
@@ -91,7 +91,7 @@
 	<scm>
 		<connection>scm:git:git://github.com/fiji/TrackMate</connection>
 		<developerConnection>scm:git:git@github.com:fiji/TrackMate</developerConnection>
-		<tag>HEAD</tag>
+		<tag>TrackMate_-3.2.1</tag>
 		<url>https://github.com/fiji/TrackMate</url>
 	</scm>
 	<issueManagement>
