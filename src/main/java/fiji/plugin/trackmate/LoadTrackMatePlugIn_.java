@@ -51,6 +51,8 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 
 	protected Settings settings;
 
+	private TrackMateGUIController controller;
+
 	private static final String KEY = "LoadPlugin";
 
 	public LoadTrackMatePlugIn_()
@@ -192,7 +194,7 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 			// trackmate.computeTrackFeatures(true);
 		}
 
-		final TrackMateGUIController controller = new TrackMateGUIController( trackmate );
+		controller = new TrackMateGUIController( trackmate );
 
 		// We feed then the reader with the providers taken from the NEW
 		// controller.
@@ -271,6 +273,21 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		// Text
 		controller.getGUI().getLogPanel().setTextContent( logText );
 		model.getLogger().log( "File loaded on " + TMUtils.getCurrentTimeString() + '\n', Logger.BLUE_COLOR );
+	}
+
+	public Model getModel()
+	{
+		return model;
+	}
+
+	public Settings getSettings()
+	{
+		return settings;
+	}
+
+	public TrackMateGUIController getController()
+	{
+		return controller;
 	}
 
 	/**
@@ -379,7 +396,7 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 	{
 		ImageJ.main( args );
 		final LoadTrackMatePlugIn_ plugIn = new LoadTrackMatePlugIn_();
-		plugIn.run( "samples/FakeTracks.xml" );
+		plugIn.run( "" );
 		//		plugIn.run( "/Users/tinevez/Projects/NJouvenet/Data/TIRF2C/Hela TIM1wt DV_1-disappear.xml" );
 		//		plugIn.run(
 		//				"/Volumes/Data/BDV_MVD_5v_final_mamut.xml"
