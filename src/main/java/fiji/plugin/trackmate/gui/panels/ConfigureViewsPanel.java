@@ -219,6 +219,11 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 		return jButtonDoAnalysis;
 	}
 
+	public JLabel getTitleJLabel()
+	{
+		return jLabelDisplayOptions;
+	}
+
 	/**
 	 * Overrides the track color generator configured in this panel, allowing to
 	 * share instances.
