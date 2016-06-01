@@ -15,9 +15,11 @@ import java.util.Set;
 import fiji.plugin.trackmate.action.ExportTracksToXML;
 import fiji.plugin.trackmate.detection.DetectorKeys;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
+import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
+import fiji.plugin.trackmate.features.track.TrackBranchingAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
@@ -143,7 +145,14 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 	private static final String ARG_DISPLAY_RESULTS = "display_results";
 
 	/**
-	 * The collection of supprted macro parameters.
+	 * The macro parameter to set the track filter value on the number of spots
+	 * in tracks. If used, tracks made of less spots than the specified value
+	 * will be filtered out.
+	 */
+	private static final String ARG_FILTER_TRACKS_NSPOTS_ABOVE = "filter_tracks_nspots_above";
+
+	/**
+	 * The collection of supported macro parameters.
 	 */
 	private static final Collection< String > SUPPORTED_ARGS = new ArrayList<>();
 
@@ -164,6 +173,7 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 		SUPPORTED_ARGS.add( ARG_THRESHOLD );
 		SUPPORTED_ARGS.add( ARG_USE_GUI );
 		SUPPORTED_ARGS.add( ARG_RADIUS );
+		SUPPORTED_ARGS.add( ARG_FILTER_TRACKS_NSPOTS_ABOVE );
 	}
 
 	/*
@@ -284,6 +294,7 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 
 				final Map< String, ValuePair< String, MacroArgumentConverter > > detectorParsers = prepareDetectorParsableArguments();
 				final Map< String, ValuePair< String, MacroArgumentConverter > > trackerParsers = prepareTrackerParsableArguments();
+				final Map< String, FilterGenerator > trackFiltersParsers = prepareTrackFiltersParsableArguments();
 
 				// Default detector.
 				settings.detectorFactory = new LogDetectorFactory< >();
@@ -342,6 +353,32 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 
 						final Object val = converter.convert( value );
 						settings.trackerSettings.put( key, val );
+					}
+					catch ( final NumberFormatException nfe )
+					{
+						logger.error( "Cannot interprete value for parameter " + parameter + ": " + value + ". Skipping.\n" );
+						continue;
+					}
+
+				}
+
+				/*
+				 * Track filters.
+				 */
+
+				for ( final String parameter : macroOptions.keySet() )
+				{
+					final String value = macroOptions.get( parameter );
+					final FilterGenerator converter = trackFiltersParsers.get( parameter );
+					if ( converter == null )
+					{
+						continue;
+					}
+
+					try
+					{
+						final FeatureFilter featureFilter = converter.get( value );
+						settings.addTrackFilter( featureFilter );
 					}
 					catch ( final NumberFormatException nfe )
 					{
@@ -622,10 +659,44 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 		return parsers;
 	}
 
+	private Map< String, FilterGenerator > prepareTrackFiltersParsableArguments()
+	{
+		// Map
+		final Map< String, FilterGenerator > parsers = new HashMap<>();
+
+		// Filter on NSpots.
+		final FilterGenerator nSpotsFilter = new FilterAboveGenerator( TrackBranchingAnalyzer.NUMBER_SPOTS );
+
+		parsers.put( ARG_FILTER_TRACKS_NSPOTS_ABOVE, nSpotsFilter );
+		return parsers;
+	}
 
 	/*
 	 * PRIVATE CLASSES AND INTERFACES
 	 */
+
+	private static interface FilterGenerator
+	{
+		public FeatureFilter get( final String valStr ) throws NumberFormatException;
+	}
+
+	private static class FilterAboveGenerator implements FilterGenerator
+	{
+		private final String feature;
+
+		public FilterAboveGenerator( final String feature )
+		{
+			this.feature = feature;
+		}
+
+		@Override
+		public FeatureFilter get( final String valStr ) throws NumberFormatException
+		{
+			final double value = Double.parseDouble( valStr );
+			final FeatureFilter ff = new FeatureFilter( feature, value, true );
+			return ff;
+		}
+	}
 
 	private static interface MacroArgumentConverter
 	{
