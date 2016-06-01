@@ -1,5 +1,12 @@
 package fiji.plugin.trackmate.gui.descriptors;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
@@ -15,13 +22,6 @@ import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.ImagePlus;
 import ij.WindowManager;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 public class StartDialogDescriptor implements WizardPanelDescriptor
 {
@@ -147,6 +147,9 @@ public class StartDialogDescriptor implements WizardPanelDescriptor
 		}
 
 		trackmate.getModel().getLogger().log( settings.toStringFeatureAnalyzersInfo() );
+		trackmate.computeSpotFeatures( true );
+		trackmate.computeEdgeFeatures( true );
+		trackmate.computeTrackFeatures( true );
 
 		/*
 		 * Launch the ImagePlus view now.
