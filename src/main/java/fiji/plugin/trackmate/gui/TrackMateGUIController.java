@@ -1074,12 +1074,31 @@ public class TrackMateGUIController implements ActionListener
 			}
 			else
 			{
-
 				disableButtonsAndStoreState();
 				guimodel.previousDescriptor = guimodel.currentDescriptor;
 				gui.show( logPanelDescriptor );
 				gui.setLogButtonEnabled( true );
 				guimodel.displayingLog = true;
+			}
+		}
+		else if ( event == gui.DISPLAY_CONFIG_BUTTON_PRESSED )
+		{
+			if ( guimodel.displayingDisplayConfig )
+			{
+
+				restoreButtonsState();
+				gui.show( guimodel.previousDescriptor );
+				guimodel.displayingDisplayConfig = false;
+
+			}
+			else
+			{
+				disableButtonsAndStoreState();
+				guimodel.previousDescriptor = guimodel.currentDescriptor;
+				configureViewsDescriptor.getComponent().refreshGUI();
+				gui.show( configureViewsDescriptor );
+				gui.setDisplayConfigButtonEnabled( true );
+				guimodel.displayingDisplayConfig = true;
 			}
 		}
 	}

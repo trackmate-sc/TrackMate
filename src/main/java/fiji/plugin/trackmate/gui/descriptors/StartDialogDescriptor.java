@@ -81,7 +81,9 @@ public class StartDialogDescriptor implements WizardPanelDescriptor
 
 	@Override
 	public void aboutToDisplayPanel()
-	{}
+	{
+		controller.getGUI().setDisplayConfigButtonEnabled( false );
+	}
 
 	@Override
 	public void displayingPanel()
@@ -171,6 +173,7 @@ public class StartDialogDescriptor implements WizardPanelDescriptor
 			mainView.setDisplaySettings( key, displaySettings.get( key ) );
 		}
 		mainView.render();
+		controller.getGUI().setDisplayConfigButtonEnabled( true );
 	}
 
 	@Override

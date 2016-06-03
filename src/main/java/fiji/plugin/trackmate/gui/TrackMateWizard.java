@@ -40,7 +40,7 @@ public class TrackMateWizard extends JFrame implements ActionListener
 
 	JButton jButtonLog;
 
-	JButton jButtonConfigDisplay;
+	JButton jButtonDisplayConfig;
 
 	/*
 	 * DEFAULT VISIBILITY & PUBLIC CONSTANTS
@@ -254,6 +254,19 @@ public class TrackMateWizard extends JFrame implements ActionListener
 		} );
 	}
 
+	public void setDisplayConfigButtonEnabled( final boolean b )
+	{
+		controller.guimodel.displayConfigButtonState = b;
+		SwingUtilities.invokeLater( new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				jButtonDisplayConfig.setEnabled( b );
+			}
+		} );
+	}
+
 	public void setPreviousButtonEnabled( final boolean b )
 	{
 		controller.guimodel.previousButtonState = b;
@@ -341,7 +354,7 @@ public class TrackMateWizard extends JFrame implements ActionListener
 			jButtonSave = addButton( "Save", SAVE_ICON, 78, 2, 76, 25, SAVE_BUTTON_PRESSED );
 			jPanelButtons.add( Box.createHorizontalGlue() );
 			jButtonLog = addButton( null, LOG_ICON, 157, 2, 30, 25, LOG_BUTTON_PRESSED );
-			jButtonConfigDisplay = addButton( null, DISPLAY_CONFIG_ICON, 157, 2, 30, 25, DISPLAY_CONFIG_BUTTON_PRESSED );
+			jButtonDisplayConfig = addButton( null, DISPLAY_CONFIG_ICON, 157, 2, 30, 25, DISPLAY_CONFIG_BUTTON_PRESSED );
 			jPanelButtons.add( Box.createHorizontalGlue() );
 			jButtonPrevious = addButton( null, PREVIOUS_ICON, 190, 2, 30, 25, PREVIOUS_BUTTON_PRESSED );
 			jButtonNext = addButton( NEXT_TEXT, NEXT_ICON, 220, 2, 73, 25, NEXT_BUTTON_PRESSED );
@@ -383,5 +396,4 @@ public class TrackMateWizard extends JFrame implements ActionListener
 	{
 		return jButtonNext;
 	}
-
 }

@@ -1,11 +1,11 @@
 package fiji.plugin.trackmate.gui;
 
-import fiji.plugin.trackmate.gui.descriptors.WizardPanelDescriptor;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
+
+import fiji.plugin.trackmate.gui.descriptors.WizardPanelDescriptor;
+import fiji.plugin.trackmate.visualization.TrackMateModelView;
 
 public class TrackMateGUIModel {
 
@@ -18,10 +18,21 @@ public class TrackMateGUIModel {
 	 */
 	boolean actionFlag = true;
 	
-	/** Is used to determine whether we are currently displaying the log panel after the
-	 * user has pressed the log button. If true, then our state is "currently displaying log". */
+	/**
+	 * Is used to determine whether we are currently displaying the log panel
+	 * after the user has pressed the log button. If <code>true</code>, then our
+	 * state is "currently displaying log".
+	 */
 	boolean displayingLog = false;
 	
+	/**
+	 * Is used to determine whether we are currently displaying the display
+	 * config panel after the user has pressed the display config button. If
+	 * <code>true</code>, then our state is
+	 * "currently displaying display config" .
+	 */
+	public boolean displayingDisplayConfig = false;
+
 	boolean loadButtonState;
 	
 	boolean saveButtonState;
@@ -29,6 +40,8 @@ public class TrackMateGUIModel {
 	boolean nextButtonState;
 	
 	boolean previousButtonState;
+
+	boolean displayConfigButtonState;
 
 	/** The panel descriptor currently displayed. */ 
 	WizardPanelDescriptor currentDescriptor;
@@ -58,7 +71,7 @@ public class TrackMateGUIModel {
 	 * managed by this GUI.
 	 * @param view the {@link TrackMateModelView} to add.
 	 */
-	public void addView(TrackMateModelView view) {
+	public void addView(final TrackMateModelView view) {
 		views.add(view);
 	}
 	
@@ -67,7 +80,7 @@ public class TrackMateGUIModel {
 	 * managed by this GUI.
 	 * @param view the {@link TrackMateModelView} to remove.
 	 */
-	public void removeView(TrackMateModelView view) {
+	public void removeView(final TrackMateModelView view) {
 		views.remove(view);
 	}
 
@@ -75,7 +88,7 @@ public class TrackMateGUIModel {
 		return displaySettings;
 	}
 	
-	public void setDisplaySettings(Map<String, Object> displaySettings) {
+	public void setDisplaySettings(final Map<String, Object> displaySettings) {
 		this.displaySettings = displaySettings;
 	}
 	
