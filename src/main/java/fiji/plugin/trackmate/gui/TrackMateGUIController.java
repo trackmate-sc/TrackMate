@@ -1257,7 +1257,8 @@ public class TrackMateGUIController implements ActionListener
 	{
 		final JButton button = configureViewsDescriptor.getComponent().getDoAnalysisButton();
 		button.setEnabled( false );
-		disableButtonsAndStoreState();
+		if ( guimodel.displayingLog == false && guimodel.displayingDisplayConfig == false )
+			disableButtonsAndStoreState();
 		gui.show( logPanelDescriptor );
 		new Thread( "TrackMate export analysis to IJ thread." )
 		{
@@ -1272,8 +1273,9 @@ public class TrackMateGUIController implements ActionListener
 				finally
 				{
 					gui.show( configureViewsDescriptor );
-					restoreButtonsState();
 					button.setEnabled( true );
+					if ( guimodel.displayingLog == false && guimodel.displayingDisplayConfig == false )
+						restoreButtonsState();
 				}
 			};
 		}.start();
