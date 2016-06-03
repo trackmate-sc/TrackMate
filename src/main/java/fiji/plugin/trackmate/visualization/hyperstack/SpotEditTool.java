@@ -84,7 +84,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	HashMap< ImagePlus, HyperStackDisplayer > displayers = new HashMap< ImagePlus, HyperStackDisplayer >();
 
 	/** Stores the config panel attached to each {@link ImagePlus}. */
-	private final HashMap< ImagePlus, FloatingDisplayConfigFrame > configFrames = new HashMap<>();
+//	private final HashMap< ImagePlus, FloatingDisplayConfigFrame > configFrames = new HashMap<>();
 
 	/** The radius of the previously edited spot. */
 	private Double previousRadius = null;
