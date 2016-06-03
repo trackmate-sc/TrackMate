@@ -1196,6 +1196,8 @@ public class TrackMateGUIController implements ActionListener
 		guimodel.saveButtonState = gui.jButtonSave.isEnabled();
 		guimodel.previousButtonState = gui.jButtonPrevious.isEnabled();
 		guimodel.nextButtonState = gui.jButtonNext.isEnabled();
+		guimodel.displayConfigButtonState = gui.jButtonDisplayConfig.isEnabled();
+		guimodel.logButtonState = gui.jButtonLog.isEnabled();
 		SwingUtilities.invokeLater( new Runnable()
 		{
 			@Override
@@ -1206,6 +1208,7 @@ public class TrackMateGUIController implements ActionListener
 				gui.jButtonPrevious.setEnabled( false );
 				gui.jButtonSave.setEnabled( false );
 				gui.jButtonLog.setEnabled( false );
+				gui.jButtonDisplayConfig.setEnabled( false );
 			}
 		} );
 	}
@@ -1221,7 +1224,8 @@ public class TrackMateGUIController implements ActionListener
 		gui.setSaveButtonEnabled( guimodel.saveButtonState );
 		gui.setPreviousButtonEnabled( guimodel.previousButtonState );
 		gui.setNextButtonEnabled( guimodel.nextButtonState );
-		gui.setLogButtonEnabled( true );
+		gui.setDisplayConfigButtonEnabled( guimodel.displayConfigButtonState );
+		gui.setLogButtonEnabled( guimodel.logButtonState );
 	}
 
 	private void launchTrackScheme()

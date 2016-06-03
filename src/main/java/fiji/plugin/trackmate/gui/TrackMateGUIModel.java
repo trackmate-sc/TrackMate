@@ -41,6 +41,8 @@ public class TrackMateGUIModel {
 	
 	boolean previousButtonState;
 
+	boolean logButtonState;
+
 	boolean displayConfigButtonState;
 
 	/** The panel descriptor currently displayed. */ 
@@ -57,6 +59,7 @@ public class TrackMateGUIModel {
 	/** The current display settings, that will be passed to any new view
 	 * registered in the GUI.  */
 	private Map<String, Object> displaySettings;
+
 
 	/**
 	 * Returns the collection of views instantiated and registered in the GUI. 
