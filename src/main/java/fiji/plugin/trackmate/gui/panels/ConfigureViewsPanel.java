@@ -88,7 +88,13 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 
 	public ActionEvent DO_ANALYSIS_BUTTON_PRESSED = new ActionEvent( this, 1, "DoAnalysisButtonPushed" );
 
-	private static final String ANALYSIS_BUTTON_TOOLTIP = "<html>" + "Export all spot, edge and track features <br>" + "to ImageJ tables.</html>";
+	public ActionEvent DO_ANALYSIS_BUTTON_WITH_SHIFT_PRESSED = new ActionEvent( this, 2, "DoAnalysisButtonWithShiftPushed" );
+
+	private static final String ANALYSIS_BUTTON_TOOLTIP = "<html>"
+			+ "Export the features of all tracks, edges and all <br>"
+			+ "spots belonging to a track to ImageJ tables. <br>"
+			+ "With <code>shift</code> pressed, the features <br>"
+			+ "of all spot are exported.</html>";
 
 	private static final String TRACKSCHEME_BUTTON_TOOLTIP = "<html>" + "Launch a new instance of TrackScheme.</html>";
 
@@ -947,9 +953,12 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 					jButtonDoAnalysis.addActionListener( new ActionListener()
 					{
 						@Override
-						public void actionPerformed( final ActionEvent arg0 )
+						public void actionPerformed( final ActionEvent event )
 						{
-							fireAction( DO_ANALYSIS_BUTTON_PRESSED );
+							if ( ( event.getModifiers() & ActionEvent.SHIFT_MASK ) != 0 )
+								fireAction( DO_ANALYSIS_BUTTON_WITH_SHIFT_PRESSED );
+							else
+								fireAction( DO_ANALYSIS_BUTTON_PRESSED );
 						}
 					} );
 				}

@@ -38,6 +38,8 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.action.AbstractTMAction;
+import fiji.plugin.trackmate.action.ExportAllSpotsStatsAction;
 import fiji.plugin.trackmate.action.ExportStatsToIJAction;
 import fiji.plugin.trackmate.detection.ManualDetectorFactory;
 import fiji.plugin.trackmate.features.ModelFeatureUpdater;
@@ -699,7 +701,12 @@ public class TrackMateGUIController implements ActionListener
 				}
 				else if ( event == configureViewsDescriptor.getComponent().DO_ANALYSIS_BUTTON_PRESSED )
 				{
-					launchDoAnalysis();
+					launchDoAnalysis( false );
+
+				}
+				else if ( event == configureViewsDescriptor.getComponent().DO_ANALYSIS_BUTTON_WITH_SHIFT_PRESSED )
+				{
+					launchDoAnalysis( true );
 
 				}
 				else
@@ -1261,7 +1268,7 @@ public class TrackMateGUIController implements ActionListener
 		}.start();
 	}
 
-	private void launchDoAnalysis()
+	private void launchDoAnalysis( final boolean showAllSpotStats )
 	{
 		final JButton button = configureViewsDescriptor.getComponent().getDoAnalysisButton();
 		button.setEnabled( false );
@@ -1275,8 +1282,14 @@ public class TrackMateGUIController implements ActionListener
 			{
 				try
 				{
-					final ExportStatsToIJAction action = new ExportStatsToIJAction();
+					AbstractTMAction action;
+					if ( showAllSpotStats )
+						action = new ExportAllSpotsStatsAction();
+					else
+						action = new ExportStatsToIJAction();
+
 					action.execute( trackmate );
+
 				}
 				finally
 				{
