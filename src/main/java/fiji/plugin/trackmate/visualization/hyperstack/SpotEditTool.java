@@ -21,7 +21,6 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
 
-import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -620,21 +619,21 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 		switch ( keycode )
 		{
 
-		case KeyEvent.VK_R:
-		{
-			FloatingDisplayConfigFrame configFrame = configFrames.get( imp );
-			if ( null == configFrame )
-			{
-				final String title = displayer.getImp().getShortTitle();
-				configFrame = new FloatingDisplayConfigFrame( model, displayer, title );
-				configFrame.setDefaultCloseOperation( JFrame.HIDE_ON_CLOSE );
-				configFrame.setLocationRelativeTo( displayer.getImp().getWindow() );
-				configFrames.put( imp, configFrame );
-			}
-
-			configFrame.setVisible( !configFrame.isVisible() );
-			break;
-		}
+//		case KeyEvent.VK_R:
+//		{
+//			FloatingDisplayConfigFrame configFrame = configFrames.get( imp );
+//			if ( null == configFrame )
+//			{
+//				final String title = displayer.getImp().getShortTitle();
+//				configFrame = new FloatingDisplayConfigFrame( model, displayer, title );
+//				configFrame.setDefaultCloseOperation( JFrame.HIDE_ON_CLOSE );
+//				configFrame.setLocationRelativeTo( displayer.getImp().getWindow() );
+//				configFrames.put( imp, configFrame );
+//			}
+//
+//			configFrame.setVisible( !configFrame.isVisible() );
+//			break;
+//		}
 
 		// Delete currently edited spot
 		case KeyEvent.VK_DELETE:
