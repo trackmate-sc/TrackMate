@@ -40,6 +40,8 @@ public class TrackMateWizard extends JFrame implements ActionListener
 
 	JButton jButtonLog;
 
+	JButton jButtonConfigDisplay;
+
 	/*
 	 * DEFAULT VISIBILITY & PUBLIC CONSTANTS
 	 */
@@ -72,7 +74,9 @@ public class TrackMateWizard extends JFrame implements ActionListener
 
 	private static final Icon SAVE_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/page_save.png" ) );
 
-	private static final Icon LOG_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/information.png" ) );;
+	private static final Icon LOG_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/information.png" ) );
+
+	private static final Icon DISPLAY_CONFIG_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/wrench_orange.png" ) );
 
 	/*
 	 * DEFAULT VISIBILITY FIELDS
@@ -93,6 +97,9 @@ public class TrackMateWizard extends JFrame implements ActionListener
 	/** This {@link ActionEvent} is fired when the 'log' button is pressed. */
 	final ActionEvent LOG_BUTTON_PRESSED = new ActionEvent( this, 4, "LogButtonPressed" );
 
+	/** This {@link ActionEvent} is fired when the 'display config' button is pressed. */
+	final ActionEvent DISPLAY_CONFIG_BUTTON_PRESSED = new ActionEvent( this, 5, "ConfigDisplayButtonPressed" );
+
 	/*
 	 * FIELDS
 	 */
@@ -108,6 +115,7 @@ public class TrackMateWizard extends JFrame implements ActionListener
 	private TrackMateModelView displayer;
 
 	private final TrackMateGUIController controller;
+
 
 	/*
 	 * CONSTRUCTOR
@@ -333,6 +341,7 @@ public class TrackMateWizard extends JFrame implements ActionListener
 			jButtonSave = addButton( "Save", SAVE_ICON, 78, 2, 76, 25, SAVE_BUTTON_PRESSED );
 			jPanelButtons.add( Box.createHorizontalGlue() );
 			jButtonLog = addButton( null, LOG_ICON, 157, 2, 30, 25, LOG_BUTTON_PRESSED );
+			jButtonConfigDisplay = addButton( null, DISPLAY_CONFIG_ICON, 157, 2, 30, 25, DISPLAY_CONFIG_BUTTON_PRESSED );
 			jPanelButtons.add( Box.createHorizontalGlue() );
 			jButtonPrevious = addButton( null, PREVIOUS_ICON, 190, 2, 30, 25, PREVIOUS_BUTTON_PRESSED );
 			jButtonNext = addButton( NEXT_TEXT, NEXT_ICON, 220, 2, 73, 25, NEXT_BUTTON_PRESSED );
