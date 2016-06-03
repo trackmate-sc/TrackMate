@@ -1095,7 +1095,11 @@ public class TrackMateGUIController implements ActionListener
 			{
 				disableButtonsAndStoreState();
 				guimodel.previousDescriptor = guimodel.currentDescriptor;
+				trackmate.computeSpotFeatures( true );
+				trackmate.computeEdgeFeatures( true );
+				trackmate.computeTrackFeatures( true );
 				configureViewsDescriptor.getComponent().refreshGUI();
+				configureViewsDescriptor.getComponent().refreshColorFeatures();
 				gui.show( configureViewsDescriptor );
 				gui.setDisplayConfigButtonEnabled( true );
 				guimodel.displayingDisplayConfig = true;
