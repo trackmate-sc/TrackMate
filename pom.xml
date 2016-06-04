@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>TrackMate_</artifactId>
-	<version>3.2.2-SNAPSHOT</version>
+	<version>3.3.0</version>
 
 	<name>plugins/TrackMate_.jar</name>
 	<description />
