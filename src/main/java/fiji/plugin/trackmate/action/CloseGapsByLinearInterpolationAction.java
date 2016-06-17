@@ -1,16 +1,15 @@
 package fiji.plugin.trackmate.action;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.*;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 import ij.gui.WaitForUserDialog;
 import net.imglib2.RealPoint;
+import org.jgrapht.graph.DefaultWeightedEdge;
 import org.scijava.plugin.Plugin;
 
 import javax.swing.*;
+import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -38,76 +37,66 @@ public class CloseGapsByLinearInterpolationAction extends AbstractTMAction {
     public void execute(final TrackMate trackmate) {
         final Model model = trackmate.getModel();
 
+        TrackModel trackModel = model.getTrackModel();
 
-        Set<Integer> trackIDs = model.getTrackModel().trackIDs(true);
+        boolean changed = true;
 
-        // go through all tracks
-        for (Integer trackID : trackIDs)
-        {
-            Set<Spot> spots = model.getTrackModel().trackSpots(trackID);
-            if (spots != null) {
-                model.beginUpdate();
+        while (changed) {
+            changed = false;
 
-                // go through all spots, search for gaps
-                for (Spot currentSpot : spots) {
-                    int currentFrame = currentSpot.getFeatures().get("FRAME").intValue();
+            Set<DefaultWeightedEdge> edges = model.getTrackModel().edgeSet();
+            for (DefaultWeightedEdge edge : edges) {
+                Spot currentSpot = trackModel.getEdgeSource(edge);
+                Spot nextSpot = trackModel.getEdgeTarget(edge);
 
-                    Spot nextSpot = null;
-                    int nextFrame = 0;
+                int currentFrame = currentSpot.getFeature(Spot.FRAME).intValue();
+                int nextFrame = nextSpot.getFeature(Spot.FRAME).intValue();
 
-                    // find the next following spot
-                    for (Spot futureSpot : spots) {
-                        int futureFrame = futureSpot.getFeatures().get("FRAME").intValue();
-                        if (futureFrame > currentFrame) {
-                            if (nextSpot == null || nextFrame > futureFrame) {
-                                nextSpot = futureSpot;
-                                nextFrame = futureFrame;
-                            }
+                if (nextSpot != null && (nextFrame - currentFrame > 1)) {
+                    model.beginUpdate();
+
+                    double[] currentPosition = new double[3];
+                    double[] nextPosition = new double[3];
+
+                    nextSpot.localize(nextPosition);
+                    currentSpot.localize(currentPosition);
+
+                    model.removeEdge(currentSpot, nextSpot);
+
+                    Spot formerSpot = currentSpot;
+                    for (int f = currentFrame + 1; f < nextFrame; f++) {
+                        double weight = (double) (nextFrame - f) / (nextFrame - currentFrame);
+
+
+                        double[] position = new double[3];
+                        for (int d = 0; d < currentSpot.numDimensions(); d++) {
+                            position[d] = weight * currentPosition[d] + (1.0 - weight) * nextPosition[d];
                         }
+
+                        RealPoint rp = new RealPoint(position);
+
+                        Spot newSpot = new Spot(rp, 0, 0);
+
+                        // Set some properties of the new spot
+                        interpolateFeature(newSpot, currentSpot, nextSpot, weight, "RADIUS");
+                        interpolateFeature(newSpot, currentSpot, nextSpot, weight, "QUALITY");
+                        interpolateFeature(newSpot, currentSpot, nextSpot, weight, "POSITION_T");
+                        newSpot.getFeatures().put("FRAME", (double) f);
+
+                        model.addSpotTo(newSpot, f);
+                        model.addEdge(formerSpot, newSpot, 1.0);
+                        formerSpot = newSpot;
                     }
+                    model.addEdge(formerSpot, nextSpot, 1.0);
+                    model.endUpdate();
 
-                    // if a following spot was found and there is a gap between current and next
-                    if (nextSpot != null && (nextFrame - currentFrame > 1)) {
-
-                        double[] currentPosition = new double[3];
-                        double[] nextPosition = new double[3];
-
-                        nextSpot.localize(nextPosition);
-                        currentSpot.localize(currentPosition);
-
-                        model.removeEdge(currentSpot, nextSpot);
-
-                        Spot formerSpot = currentSpot;
-                        for (int f = currentFrame + 1; f < nextFrame; f++) {
-                            double weight = (double) (nextFrame - f) / (nextFrame - currentFrame);
-
-
-                            double[] position = new double[3];
-                            for (int d = 0; d < currentSpot.numDimensions(); d++) {
-                                position[d] = weight * currentPosition[d] + (1.0 - weight) * nextPosition[d];
-                            }
-
-                            RealPoint rp = new RealPoint(position);
-
-                            Spot newSpot = new Spot(rp, 0, 0);
-
-                            // Set some properties of the new spot
-                            interpolateFeature(newSpot, currentSpot, nextSpot, weight, "RADIUS");
-                            interpolateFeature(newSpot, currentSpot, nextSpot, weight, "QUALITY");
-                            interpolateFeature(newSpot, currentSpot, nextSpot, weight, "POSITION_T");
-                            newSpot.getFeatures().put("TRACK_ID", trackID.doubleValue());
-                            newSpot.getFeatures().put("FRAME", (double) f);
-
-                            model.addSpotTo(newSpot, f);
-                            model.addEdge(formerSpot, newSpot, 1.0);
-                            formerSpot = newSpot;
-                        }
-                    }
+                    changed = true;
+                    break;
                 }
-                model.endUpdate();
             }
         }
     }
+
 
     private void interpolateFeature(Spot targetSpot, Spot spot1, Spot spot2, double weight, String feature)
     {
