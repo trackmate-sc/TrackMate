@@ -62,8 +62,10 @@ public class CloseGapsByLinearInterpolationAction extends AbstractTMAction
 				int currentFrame = currentSpot.getFeature( Spot.FRAME ).intValue();
 				int nextFrame = nextSpot.getFeature( Spot.FRAME ).intValue();
 
-				if ( nextSpot != null && ( nextFrame - currentFrame > 1 ) )
+				if ( nextSpot != null && ( Math.abs( nextFrame - currentFrame ) > 1 ) )
 				{
+					int presign = nextFrame > currentFrame ? 1 : -1;
+
 					model.beginUpdate();
 
 					double[] currentPosition = new double[ 3 ];
@@ -77,7 +79,7 @@ public class CloseGapsByLinearInterpolationAction extends AbstractTMAction
 					// create new spots in between; interpolate coordinates and
 					// some features
 					Spot formerSpot = currentSpot;
-					for ( int f = currentFrame + 1; f < nextFrame; f++ )
+					for ( int f = currentFrame + presign; ( f < nextFrame && presign == 1 ) || ( f > nextFrame && presign == -1 ); f += presign )
 					{
 						double weight = ( double ) ( nextFrame - f ) / ( nextFrame - currentFrame );
 
