@@ -122,6 +122,60 @@ public class CloseGapsByLinearInterpolationActionTest
 		checkPositions( spots, referencePositions );
 	}
 
+
+	@Test
+	public void testIfGapsInDividingBackwardsTracksAreClosed()
+	{
+		TrackMate trackmate = new TrackMate();
+
+		// Build a linear track with a division and a gap between spots
+		final Model model = trackmate.getModel();
+		model.beginUpdate();
+
+		Spot spot0 = createSpot( 0, 0, 0 );
+		Spot spot1 = createSpot( 1, 1, 0 );
+		Spot spot2 = createSpot( 2, 2, 0 );
+		Spot spot5a = createSpot( 5, 5, 0 );
+		Spot spot5b = createSpot( 8, 8, 0 );
+
+		model.addSpotTo( spot0, 0 );
+		model.addSpotTo( spot1, 1 );
+		model.addSpotTo( spot2, 2 );
+		model.addSpotTo( spot5a, -1 );
+		model.addSpotTo( spot5b, -1 );
+
+		model.addEdge( spot0, spot1, 1.0 );
+		model.addEdge( spot1, spot2, 1.0 );
+		model.addEdge(spot2, spot5a, 1.0);
+		model.addEdge( spot2, spot5b, 1.0 );
+
+		model.endUpdate();
+
+		// close gaps
+		CloseGapsByLinearInterpolationAction cgblia = new CloseGapsByLinearInterpolationAction();
+		cgblia.execute( trackmate );
+
+		TrackModel trackModel = model.getTrackModel();
+
+		// Check if positions were interpolated in the right way
+		GraphIterator< Spot, DefaultWeightedEdge > spots = trackModel.getDepthFirstIterator( spot0, false );
+
+		double[][] referencePositions =
+				{
+						{ 0, 0 },
+						{ 1, 1 },
+						{ 2, 2 },
+						{ 4, 4 },
+						{ 6, 6 },
+						{ 8, 8 },
+						{ 3, 3 },
+						{ 4, 4 },
+						{ 5, 5 }
+				};
+
+		checkPositions( spots, referencePositions );
+	}
+
 	private void checkPositions( GraphIterator< Spot, DefaultWeightedEdge > spots, double[][] referencePositions )
 	{
 
