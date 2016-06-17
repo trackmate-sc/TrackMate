@@ -51,7 +51,8 @@ public class CloseGapsByLinearInterpolationAction extends AbstractTMAction
 		{
 			changed = false;
 
-            // Got through all edges, check if the frame distance between spots is larger than 1
+			// Got through all edges, check if the frame distance between spots
+			// is larger than 1
 			Set< DefaultWeightedEdge > edges = model.getTrackModel().edgeSet();
 			for ( DefaultWeightedEdge edge : edges )
 			{
@@ -73,7 +74,8 @@ public class CloseGapsByLinearInterpolationAction extends AbstractTMAction
 
 					model.removeEdge( currentSpot, nextSpot );
 
-                    // create new spots in between; interpolate coordinates and some features
+					// create new spots in between; interpolate coordinates and
+					// some features
 					Spot formerSpot = currentSpot;
 					for ( int f = currentFrame + 1; f < nextFrame; f++ )
 					{
@@ -101,7 +103,7 @@ public class CloseGapsByLinearInterpolationAction extends AbstractTMAction
 					model.addEdge( formerSpot, nextSpot, 1.0 );
 					model.endUpdate();
 
-                    // Restart search to prevent ConcurrentModificationException
+					// Restart search to prevent ConcurrentModificationException
 					changed = true;
 					break;
 				}

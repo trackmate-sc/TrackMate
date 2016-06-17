@@ -27,7 +27,7 @@ public class CloseGapsByLinearInterpolationActionTest
 	{
 		TrackMate trackmate = new TrackMate();
 
-        // Build a linear track with no division but a gap between spots
+		// Build a linear track with no division but a gap between spots
 		final Model model = trackmate.getModel();
 		model.beginUpdate();
 
@@ -47,13 +47,13 @@ public class CloseGapsByLinearInterpolationActionTest
 
 		model.endUpdate();
 
-        // close gap
+		// close gap
 		CloseGapsByLinearInterpolationAction cgblia = new CloseGapsByLinearInterpolationAction();
 		cgblia.execute( trackmate );
 
 		TrackModel trackModel = model.getTrackModel();
 
-        // Check if positions were interpolated in the right way
+		// Check if positions were interpolated in the right way
 		GraphIterator< Spot, DefaultWeightedEdge > spots = trackModel.getDepthFirstIterator( spot0, true );
 
 		double[][] referencePositions =
@@ -74,7 +74,7 @@ public class CloseGapsByLinearInterpolationActionTest
 	{
 		TrackMate trackmate = new TrackMate();
 
-        // Build a linear track with a division and a gap between spots
+		// Build a linear track with a division and a gap between spots
 		final Model model = trackmate.getModel();
 		model.beginUpdate();
 
@@ -97,13 +97,13 @@ public class CloseGapsByLinearInterpolationActionTest
 
 		model.endUpdate();
 
-        // close gaps
+		// close gaps
 		CloseGapsByLinearInterpolationAction cgblia = new CloseGapsByLinearInterpolationAction();
 		cgblia.execute( trackmate );
 
 		TrackModel trackModel = model.getTrackModel();
 
-        // Check if positions were interpolated in the right way
+		// Check if positions were interpolated in the right way
 		GraphIterator< Spot, DefaultWeightedEdge > spots = trackModel.getDepthFirstIterator( spot0, true );
 
 		double[][] referencePositions =
