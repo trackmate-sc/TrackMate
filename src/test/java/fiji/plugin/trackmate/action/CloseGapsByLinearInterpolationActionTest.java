@@ -122,7 +122,6 @@ public class CloseGapsByLinearInterpolationActionTest
 		checkPositions( spots, referencePositions );
 	}
 
-
 	@Test
 	public void testIfGapsInDividingBackwardsTracksAreClosed()
 	{
@@ -146,7 +145,7 @@ public class CloseGapsByLinearInterpolationActionTest
 
 		model.addEdge( spot0, spot1, 1.0 );
 		model.addEdge( spot1, spot2, 1.0 );
-		model.addEdge(spot2, spot5a, 1.0);
+		model.addEdge( spot2, spot5a, 1.0 );
 		model.addEdge( spot2, spot5b, 1.0 );
 
 		model.endUpdate();
