@@ -85,6 +85,10 @@
 		</contributor>
 		<contributor><name>Barak Naveh</name></contributor>
 		<contributor><name>Chen Ye</name></contributor>
+		<contributor>
+			<name>Robert Haase</name>
+			<properties><id>haesleinhuepf</id></properties>
+		</contributor>
 	</contributors>
 
 	<scm>
