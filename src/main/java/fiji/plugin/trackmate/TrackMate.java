@@ -40,7 +40,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 
 	public static final String PLUGIN_NAME_STR = "TrackMate";
 
-	public static final String PLUGIN_NAME_VERSION = "3.2.1-SNAPSHOT";
+	public static final String PLUGIN_NAME_VERSION = "3.3.1-SNAPSHOT";
 
 	/**
 	 * The model this trackmate will shape.
@@ -241,7 +241,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 	 * <p>
 	 * The {@link ModelChangeListener}s of the model will be notified when the
 	 * successful process is over.
-	 * 
+	 *
 	 * @return <code>true</code> if the computation completed without errors.
 	 */
 	public boolean execTracking()
@@ -508,7 +508,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 	 * <p>
 	 * The {@link ModelChangeListener}s of this model will be notified with a
 	 * {@link ModelChangeEvent#SPOTS_COMPUTED} event.
-	 * 
+	 *
 	 * @return <code>true</code> if the computation completed without errors.
 	 */
 	public boolean execInitialSpotFiltering()

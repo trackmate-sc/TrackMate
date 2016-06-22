@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>TrackMate_</artifactId>
-	<version>3.2.2-SNAPSHOT</version>
+	<version>3.3.1-SNAPSHOT</version>
 
 	<name>plugins/TrackMate_.jar</name>
 	<description />
@@ -34,14 +34,6 @@
 			<id>ctrueden</id>
 			<name>Curtis Rueden</name>
 			<url>http://imagej.net/User:Rueden</url>
-			<roles>
-				<role>maintainer</role>
-			</roles>
-		</developer>
-		<developer>
-			<id>hinerm</id>
-			<name>Mark Hiner</name>
-			<url>http://imagej.net/User:Hinerm</url>
 			<roles>
 				<role>maintainer</role>
 			</roles>
@@ -75,6 +67,11 @@
 			<name>Stefan Helfrich</name>
 			<url>http://imagej.net/User:Stelfrich</url>
 			<properties><id>stelfrich</id></properties>
+		</contributor>
+		<contributor>
+			<name>Mark Hiner</name>
+			<url>http://imagej.net/User:Hinerm</url>
+			<properties><id>hinerm</id></properties>
 		</contributor>
 		<contributor>
 			<name>Hadrien Mary</name>
