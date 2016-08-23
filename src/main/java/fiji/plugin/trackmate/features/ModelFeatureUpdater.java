@@ -1,15 +1,16 @@
 package fiji.plugin.trackmate.features;
 
+import java.util.ArrayList;
+
+import org.jgrapht.graph.DefaultWeightedEdge;
+
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.ModelChangeListener;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
-
-import java.util.ArrayList;
-
-import org.jgrapht.graph.DefaultWeightedEdge;
+import net.imglib2.algorithm.MultiThreaded;
 
 /**
  * A utility class that listens to the change occurring in a model, and updates
@@ -18,12 +19,15 @@ import org.jgrapht.graph.DefaultWeightedEdge;
  *    
  * @author Jean-Yves Tinevez - 2013
  */
-public class ModelFeatureUpdater implements ModelChangeListener {
+public class ModelFeatureUpdater implements ModelChangeListener, MultiThreaded
+{
 
 	private final SpotFeatureCalculator spotFeatureCalculator;
 	private final EdgeFeatureCalculator edgeFeatureCalculator;
 	private final TrackFeatureCalculator trackFeatureCalculator;
 	private final Model model;
+
+	private int numThreads;
 
 	/**
 	 * Constructs and activate a {@link ModelFeatureUpdater}. The new instance is 
@@ -38,6 +42,7 @@ public class ModelFeatureUpdater implements ModelChangeListener {
 		this.edgeFeatureCalculator = new EdgeFeatureCalculator(model, settings);
 		this.trackFeatureCalculator = new TrackFeatureCalculator(model, settings);
 		model.addModelChangeListener(this);
+		setNumThreads();
 	}
 
 	/**
@@ -84,6 +89,27 @@ public class ModelFeatureUpdater implements ModelChangeListener {
 	 */
 	public void quit() {
 		model.removeModelChangeListener(this);
+	}
+
+	@Override
+	public int getNumThreads()
+	{
+		return numThreads;
+	}
+
+	@Override
+	public void setNumThreads()
+	{
+		setNumThreads( Runtime.getRuntime().availableProcessors() );
+	}
+
+	@Override
+	public void setNumThreads( int numThreads )
+	{
+		this.numThreads = numThreads;
+		spotFeatureCalculator.setNumThreads( numThreads );
+		edgeFeatureCalculator.setNumThreads( numThreads );
+		trackFeatureCalculator.setNumThreads( numThreads );
 	}
 
 }

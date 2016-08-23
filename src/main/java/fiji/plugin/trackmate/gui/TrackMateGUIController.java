@@ -220,7 +220,8 @@ public class TrackMateGUIController implements ActionListener
 		this.logger = gui.getLogger();
 
 		// Feature updater
-		new ModelFeatureUpdater( trackmate.getModel(), trackmate.getSettings() );
+		ModelFeatureUpdater modelFeatureUpdater = new ModelFeatureUpdater( trackmate.getModel(), trackmate.getSettings() );
+		modelFeatureUpdater.setNumThreads( trackmate.getNumThreads() );
 
 		// Feature colorers
 		this.spotColorGenerator = createSpotColorGenerator();

@@ -160,6 +160,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 		final Logger logger = model.getLogger();
 		logger.log( "Computing spot features.\n" );
 		final SpotFeatureCalculator calculator = new SpotFeatureCalculator( model, settings );
+		calculator.setNumThreads( numThreads );
 		if ( calculator.checkInput() && calculator.process() )
 		{
 			if ( doLogIt )
@@ -192,6 +193,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 	{
 		final Logger logger = model.getLogger();
 		final EdgeFeatureCalculator calculator = new EdgeFeatureCalculator( model, settings );
+		calculator.setNumThreads( numThreads );
 		if ( !calculator.checkInput() || !calculator.process() )
 		{
 			errorMessage = "Edge features calculation failed:\n" + calculator.getErrorMessage();
@@ -215,6 +217,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 	{
 		final Logger logger = model.getLogger();
 		final TrackFeatureCalculator calculator = new TrackFeatureCalculator( model, settings );
+		calculator.setNumThreads( numThreads );
 		if ( calculator.checkInput() && calculator.process() )
 		{
 			if ( doLogIt )
