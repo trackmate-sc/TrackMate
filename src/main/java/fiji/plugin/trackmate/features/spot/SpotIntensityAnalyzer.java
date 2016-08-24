@@ -10,13 +10,14 @@ import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.T
 
 import java.util.Iterator;
 
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.util.SpotNeighborhood;
+import fiji.plugin.trackmate.util.SpotNeighborhoodCursor;
+//import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.SKEWNESS;
+//import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.VARIANCE;
 import net.imagej.ImgPlus;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Util;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.util.SpotNeighborhood;
-//import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.SKEWNESS;
-//import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.VARIANCE;
 
 public class SpotIntensityAnalyzer< T extends RealType< T >> extends IndependentSpotFeatureAnalyzer< T >
 {
@@ -43,10 +44,28 @@ public class SpotIntensityAnalyzer< T extends RealType< T >> extends Independent
 		// Prepare neighborhood
 		final SpotNeighborhood< T > neighborhood = new SpotNeighborhood< T >( spot, img );
 		final int npixels = ( int ) neighborhood.size();
+		
+		if ( npixels <= 1 )
+		{
+			/*
+			 * Hack around a bug in spot iterator causing it to never end if the
+			 * size of the spot is lower than one pixel.
+			 */
+			SpotNeighborhoodCursor< T > cursor = neighborhood.cursor();
+			cursor.fwd();
+			double val = cursor.get().getRealDouble();
+
+			spot.putFeature( MEDIAN_INTENSITY, Double.valueOf( val ) );
+			spot.putFeature( MIN_INTENSITY, Double.valueOf( val ) );
+			spot.putFeature( MAX_INTENSITY, Double.valueOf( val ) );
+			spot.putFeature( MEAN_INTENSITY, Double.valueOf( val ) );
+			spot.putFeature( STANDARD_DEVIATION, Double.NaN );
+			spot.putFeature( TOTAL_INTENSITY, Double.valueOf( val ) );
+			return;
+		}
 
 		// For variance, kurtosis and skewness
 		double sum = 0;
-
 		double mean = 0;
 		double M2 = 0;
 		double M3 = 0;

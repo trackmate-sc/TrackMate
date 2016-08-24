@@ -4,11 +4,11 @@ import static fiji.plugin.trackmate.features.spot.SpotRadiusEstimatorFactory.EST
 
 import java.util.Iterator;
 
-import net.imagej.ImgPlus;
-import net.imglib2.type.numeric.RealType;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.util.SpotNeighborhood;
 import fiji.plugin.trackmate.util.SpotNeighborhoodCursor;
+import net.imagej.ImgPlus;
+import net.imglib2.type.numeric.RealType;
 
 public class SpotRadiusEstimator< T extends RealType< T >> extends IndependentSpotFeatureAnalyzer< T >
 {
@@ -60,6 +60,12 @@ public class SpotRadiusEstimator< T extends RealType< T >> extends IndependentSp
 		tmpSpot.putFeature( Spot.RADIUS, diameters[ nDiameters - 1 ] / 2 );
 
 		final SpotNeighborhood< T > neighborhood = new SpotNeighborhood< T >( tmpSpot, img );
+		if ( neighborhood.size() <= 1 )
+		{
+			spot.putFeature( ESTIMATED_DIAMETER, Double.valueOf( radius ) );
+			return;
+		}
+
 		final SpotNeighborhoodCursor< T > cursor = neighborhood.cursor();
 		double d2, val;
 		int i;
