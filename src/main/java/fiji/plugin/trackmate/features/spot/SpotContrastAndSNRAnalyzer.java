@@ -62,10 +62,16 @@ public class SpotContrastAndSNRAnalyzer< T extends RealType< T > > extends Indep
 	 */
 	private final double[] getContrastAndSNR( final Spot spot )
 	{
-
-		final SpotNeighborhood< T > neighborhood = new SpotNeighborhood< T >( spot, img );
+		final double mean_in = spot.getFeature( SpotIntensityAnalyzerFactory.MEAN_INTENSITY );
+		final double std_in = spot.getFeature( SpotIntensityAnalyzerFactory.STANDARD_DEVIATION );
 
 		final double radius = spot.getFeature( Spot.RADIUS );
+		Spot largeSpot = new Spot( spot );
+		largeSpot.putFeature( Spot.RADIUS, 2 * radius );
+
+		final SpotNeighborhood< T > neighborhood = new SpotNeighborhood< T >( largeSpot, img );
+		if ( neighborhood.size() <= 1 ) { return new double[] { Double.NaN, Double.NaN }; }
+
 		final double radius2 = radius * radius;
 		int n_out = 0; // inner number of pixels
 		double dist2;
@@ -84,8 +90,6 @@ public class SpotContrastAndSNRAnalyzer< T extends RealType< T > > extends Indep
 			}
 		}
 		final double mean_out = sum_out / n_out;
-		final double mean_in = spot.getFeature( SpotIntensityAnalyzerFactory.MEAN_INTENSITY );
-		final double std_in = spot.getFeature( SpotIntensityAnalyzerFactory.STANDARD_DEVIATION );
 
 		// Compute contrast
 		final double contrast = ( mean_in - mean_out ) / ( mean_in + mean_out );
