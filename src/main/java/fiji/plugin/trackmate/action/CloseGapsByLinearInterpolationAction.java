@@ -1,16 +1,19 @@
 package fiji.plugin.trackmate.action;
 
-import fiji.plugin.trackmate.*;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
-import ij.gui.WaitForUserDialog;
-import net.imglib2.RealPoint;
+import java.util.Set;
+
+import javax.swing.ImageIcon;
+
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.scijava.plugin.Plugin;
 
-import javax.swing.*;
-import java.util.Iterator;
-import java.util.Set;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.TrackModel;
+import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.gui.TrackMateWizard;
+import net.imglib2.RealPoint;
 
 /**
  * This action allows to close gaps in tracks by creating new intermediate spots
@@ -34,16 +37,18 @@ public class CloseGapsByLinearInterpolationAction extends AbstractTMAction
 
 	public static final String KEY = "CLOSE_GAPS_BY_LINEAR_INPERPOLATION";
 
-	public static final String INFO_TEXT = "<html>" +
-			"This action closes gaps in tracks by introducing new spots. The spots positions and size are calculated using linear interpolation." +
-			"</html>";
+	public static final String INFO_TEXT = "<html>" 
+			+ "This action closes gaps in tracks by introducing new spots. "
+			+ "The spots positions and size are calculated "
+			+ "using linear interpolation." 
+			+ "</html>";
 
 	@Override
 	public void execute( final TrackMate trackmate )
 	{
 		final Model model = trackmate.getModel();
 
-		TrackModel trackModel = model.getTrackModel();
+		final TrackModel trackModel = model.getTrackModel();
 
 		boolean changed = true;
 
@@ -53,23 +58,23 @@ public class CloseGapsByLinearInterpolationAction extends AbstractTMAction
 
 			// Got through all edges, check if the frame distance between spots
 			// is larger than 1
-			Set< DefaultWeightedEdge > edges = model.getTrackModel().edgeSet();
-			for ( DefaultWeightedEdge edge : edges )
+			final Set< DefaultWeightedEdge > edges = model.getTrackModel().edgeSet();
+			for ( final DefaultWeightedEdge edge : edges )
 			{
-				Spot currentSpot = trackModel.getEdgeSource( edge );
-				Spot nextSpot = trackModel.getEdgeTarget( edge );
+				final Spot currentSpot = trackModel.getEdgeSource( edge );
+				final Spot nextSpot = trackModel.getEdgeTarget( edge );
 
-				int currentFrame = currentSpot.getFeature( Spot.FRAME ).intValue();
-				int nextFrame = nextSpot.getFeature( Spot.FRAME ).intValue();
+				final int currentFrame = currentSpot.getFeature( Spot.FRAME ).intValue();
+				final int nextFrame = nextSpot.getFeature( Spot.FRAME ).intValue();
 
 				if ( nextSpot != null && ( Math.abs( nextFrame - currentFrame ) > 1 ) )
 				{
-					int presign = nextFrame > currentFrame ? 1 : -1;
+					final int presign = nextFrame > currentFrame ? 1 : -1;
 
 					model.beginUpdate();
 
-					double[] currentPosition = new double[ 3 ];
-					double[] nextPosition = new double[ 3 ];
+					final double[] currentPosition = new double[ 3 ];
+					final double[] nextPosition = new double[ 3 ];
 
 					nextSpot.localize( nextPosition );
 					currentSpot.localize( currentPosition );
@@ -79,19 +84,20 @@ public class CloseGapsByLinearInterpolationAction extends AbstractTMAction
 					// create new spots in between; interpolate coordinates and
 					// some features
 					Spot formerSpot = currentSpot;
-					for ( int f = currentFrame + presign; ( f < nextFrame && presign == 1 ) || ( f > nextFrame && presign == -1 ); f += presign )
+					for ( int f = currentFrame + presign; ( f < nextFrame && presign == 1 ) 
+							|| ( f > nextFrame && presign == -1 ); f += presign )
 					{
-						double weight = ( double ) ( nextFrame - f ) / ( nextFrame - currentFrame );
+						final double weight = ( double ) ( nextFrame - f ) / ( nextFrame - currentFrame );
 
-						double[] position = new double[ 3 ];
+						final double[] position = new double[ 3 ];
 						for ( int d = 0; d < currentSpot.numDimensions(); d++ )
 						{
 							position[ d ] = weight * currentPosition[ d ] + ( 1.0 - weight ) * nextPosition[ d ];
 						}
 
-						RealPoint rp = new RealPoint( position );
+						final RealPoint rp = new RealPoint( position );
 
-						Spot newSpot = new Spot( rp, 0, 0 );
+						final Spot newSpot = new Spot( rp, 0, 0 );
 
 						// Set some properties of the new spot
 						interpolateFeature( newSpot, currentSpot, nextSpot, weight, Spot.RADIUS );
@@ -113,14 +119,15 @@ public class CloseGapsByLinearInterpolationAction extends AbstractTMAction
 		}
 	}
 
-	private void interpolateFeature( Spot targetSpot, Spot spot1, Spot spot2, double weight, String feature )
+	private void interpolateFeature( final Spot targetSpot, final Spot spot1, final Spot spot2, final double weight, final String feature )
 	{
 		if ( targetSpot.getFeatures().containsKey( feature ) )
 		{
 			targetSpot.getFeatures().remove( feature );
 		}
 
-		targetSpot.getFeatures().put( feature, weight * spot1.getFeature( feature ) + ( 1.0 - weight ) * spot2.getFeature( feature ) );
+		targetSpot.getFeatures().put( feature, 
+				weight * spot1.getFeature( feature ) + ( 1.0 - weight ) * spot2.getFeature( feature ) );
 	}
 
 	@Plugin( type = TrackMateActionFactory.class )
