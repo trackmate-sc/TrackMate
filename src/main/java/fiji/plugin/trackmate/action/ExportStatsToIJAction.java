@@ -1,10 +1,9 @@
 package fiji.plugin.trackmate.action;
 
-import ij.measure.ResultsTable;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -21,6 +20,7 @@ import fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.util.ModelTools;
+import ij.measure.ResultsTable;
 
 public class ExportStatsToIJAction extends AbstractTMAction
 {
@@ -98,11 +98,22 @@ public class ExportStatsToIJAction extends AbstractTMAction
 		// Sort by track
 		for ( final Integer trackID : trackIDs )
 		{
+			// Comparators
+			final Comparator< DefaultWeightedEdge > edgeTimeComparator = ModelTools.featureEdgeComparator( EdgeTimeLocationAnalyzer.TIME, fm );
+			final Comparator< DefaultWeightedEdge > edgeSourceSpotTimeComparator = new EdgeSourceSpotFrameComparator( model );
 
 			final Set< DefaultWeightedEdge > track = model.getTrackModel().trackEdges( trackID );
-			// Sort them by frame
 			final List< DefaultWeightedEdge > sortedTrack = new ArrayList< DefaultWeightedEdge >( track );
-			Collections.sort( sortedTrack, ModelTools.featureEdgeComparator( EdgeTimeLocationAnalyzer.TIME, fm ) );
+
+			/*
+			 * Sort them by frame, if the EdgeTimeLocationAnalyzer feature is
+			 * declared.
+			 */
+
+			if ( model.getFeatureModel().getEdgeFeatures().contains( EdgeTimeLocationAnalyzer.KEY ) )
+				Collections.sort( sortedTrack, edgeTimeComparator );
+			else
+				Collections.sort( sortedTrack, edgeSourceSpotTimeComparator );
 
 			for ( final DefaultWeightedEdge edge : sortedTrack )
 			{
@@ -216,4 +227,26 @@ public class ExportStatsToIJAction extends AbstractTMAction
 		}
 	}
 
+	private static final class EdgeSourceSpotFrameComparator implements Comparator< DefaultWeightedEdge >
+	{
+
+		private final Model model;
+
+		public EdgeSourceSpotFrameComparator( final Model model )
+		{
+			this.model = model;
+		}
+
+		@Override
+		public int compare( final DefaultWeightedEdge e1, final DefaultWeightedEdge e2 )
+		{
+			final double t1 = model.getTrackModel().getEdgeSource( e1 ).getFeature( Spot.FRAME ).doubleValue();
+			final double t2 = model.getTrackModel().getEdgeSource( e2 ).getFeature( Spot.FRAME ).doubleValue();
+			if ( t1 < t2 ) { return -1; }
+			if ( t1 > t2 ) { return 1; }
+			return 0;
+		}
+
+	}
+	
 }
