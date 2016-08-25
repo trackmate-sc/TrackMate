@@ -93,6 +93,7 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
 import fiji.plugin.trackmate.Dimension;
@@ -118,6 +119,7 @@ import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.providers.ViewProvider;
+import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewFactory;
@@ -278,6 +280,13 @@ public class TmXmlReader
 						continue;
 
 					final ViewFactory factory = provider.getFactory( viewKey );
+					if ( null == factory )
+					{
+						logger.error( "Unknown view factory for key " + viewKey + ".\n" );
+						ok = false;
+						continue;
+					}
+
 					final TrackMateModelView view = factory.create( model, settings, selectionModel );
 					if ( null == view )
 					{
