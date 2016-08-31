@@ -158,8 +158,13 @@ public class EdgeFeatureGrapher extends AbstractFeatureGrapher
 						final XYEdgeSeries edgeSeries = edgeDataset.getSeries( featureNames.get( yFeature ) );
 						final Number x0 = fm.getEdgeFeature( edge0, xFeature );
 						final Number y0 = fm.getEdgeFeature( edge0, yFeature );
-						final Number x1 = fm.getEdgeFeature( edge1, xFeature );;
+						final Number x1 = fm.getEdgeFeature( edge1, xFeature );
 						final Number y1 = fm.getEdgeFeature( edge1, yFeature );
+						
+						// Some feature values might be null.
+						if (null == x0 || null == y0 || null == x1 || null == y1)
+							continue;
+						
 						edgeSeries.addEdge( x0.doubleValue(), y0.doubleValue(), x1.doubleValue(), y1.doubleValue() );
 					}
 				}

@@ -132,9 +132,8 @@ public class TrackFeatureGrapher extends AbstractFeatureGrapher
 				final Double x = fm.getTrackFeature( trackID, xFeature );
 				final Double y = fm.getTrackFeature( trackID, feature );
 				if ( null == x || null == y )
-				{
 					continue;
-				}
+
 				series.add( x.doubleValue(), y.doubleValue() );
 			}
 			dataset.addSeries( series );

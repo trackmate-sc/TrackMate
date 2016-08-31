@@ -143,9 +143,8 @@ public class SpotFeatureGrapher extends AbstractFeatureGrapher
 				final Double x = spot.getFeature( xFeature );
 				final Double y = spot.getFeature( feature );
 				if ( null == x || null == y )
-				{
 					continue;
-				}
+
 				series.add( x.doubleValue(), y.doubleValue() );
 			}
 			dataset.addSeries( series );
