@@ -7,8 +7,6 @@ import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
-import ij.gui.Overlay;
-import ij.gui.Roi;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -20,7 +18,6 @@ import javax.swing.JLabel;
 import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
 
-import net.imglib2.Interval;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.detection.BlockLogDetector;
@@ -28,6 +25,9 @@ import fiji.plugin.trackmate.detection.BlockLogDetectorFactory;
 import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.util.NumberParser;
+import ij.gui.Overlay;
+import ij.gui.Roi;
+import net.imglib2.Interval;
 
 public class BlockLogDetectorConfigurationPanel extends LogDetectorConfigurationPanel
 {
@@ -78,7 +78,7 @@ public class BlockLogDetectorConfigurationPanel extends LogDetectorConfiguration
 
 			layout.putConstraint( SpringLayout.NORTH, jTextFieldNSplit, 290, SpringLayout.NORTH, this );
 			layout.putConstraint( SpringLayout.WEST, jTextFieldNSplit, 168, SpringLayout.WEST, this );
-			layout.putConstraint( SpringLayout.EAST, jTextFieldNSplit, 208, SpringLayout.WEST, this );
+			layout.putConstraint( SpringLayout.EAST, jTextFieldNSplit, -100, SpringLayout.EAST, this );
 			jTextFieldNSplit.setFont( FONT );
 			add( jTextFieldNSplit );
 		}
@@ -86,6 +86,7 @@ public class BlockLogDetectorConfigurationPanel extends LogDetectorConfiguration
 			remove( jLabelThreshold );
 			layout.putConstraint( SpringLayout.NORTH, jLabelThreshold, 270, SpringLayout.NORTH, this );
 			layout.putConstraint( SpringLayout.WEST, jLabelThreshold, 16, SpringLayout.WEST, this );
+			layout.putConstraint( SpringLayout.EAST, jLabelThreshold, 162, SpringLayout.WEST, this );
 			add( jLabelThreshold );
 		}
 	}
