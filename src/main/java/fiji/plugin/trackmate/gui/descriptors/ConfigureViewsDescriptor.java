@@ -56,7 +56,10 @@ public class ConfigureViewsDescriptor implements WizardPanelDescriptor
 
 	@Override
 	public void comingBackToPanel()
-	{}
+	{
+		panel.refreshGUI();
+		panel.refreshColorFeatures();
+	}
 
 	@Override
 	public String getKey()
