@@ -396,14 +396,7 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 	{
 		ImageJ.main( args );
 		final LoadTrackMatePlugIn_ plugIn = new LoadTrackMatePlugIn_();
-		plugIn.run( "" );
-		//		plugIn.run( "/Users/tinevez/Projects/NJouvenet/Data/TIRF2C/Hela TIM1wt DV_1-disappear.xml" );
-		//		plugIn.run(
-		//				"/Volumes/Data/BDV_MVD_5v_final_mamut.xml"
-		//				);
-//		plugIn.run( "/Users/tinevez/Projects/EArena/Data/O2Hypoxia/OMERO/150501_invivoO2_ACQ05/5_3_5_2_2_neutrophils.xml" );
-		//		plugIn.run( "/Users/tinevez/Desktop/test.xml" );
-		//		plugIn.run( "/Users/tinevez/Projects/AMikhailova/Data/Synch/SiC + SAg2.xml" );
+		plugIn.run( "samples/FakeTracks.xml" );
 	}
 
 }
