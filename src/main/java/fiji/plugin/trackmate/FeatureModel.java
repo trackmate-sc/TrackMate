@@ -112,7 +112,10 @@ public class FeatureModel
 		int index = 0;
 		for ( final Integer trackID : keys )
 		{
-			val[ index++ ] = getTrackFeature( trackID, trackFeature ).doubleValue();
+			final Double tf = getTrackFeature( trackID, trackFeature );
+			if ( null == tf )
+				continue;
+			val[ index++ ] = tf.doubleValue();
 		}
 		return val;
 	}
@@ -145,7 +148,10 @@ public class FeatureModel
 		{
 			for ( final DefaultWeightedEdge edge : model.getTrackModel().trackEdges( trackID ) )
 			{
-				val[ index++ ] = getEdgeFeature( edge, edgeFeature ).doubleValue();
+				final Double ef = getEdgeFeature( edge, edgeFeature );
+				if ( null == ef )
+					continue;
+				val[ index++ ] = ef.doubleValue();
 			}
 		}
 		return val;
