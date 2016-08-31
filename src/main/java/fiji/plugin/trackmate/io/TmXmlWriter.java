@@ -714,8 +714,6 @@ public class TmXmlWriter
 		Double val;
 		Attribute featureAttribute;
 
-		System.out.println( fm ); // DEBUG
-
 		for ( final String feature : spot.getFeatures().keySet() )
 		{
 			val = spot.getFeature( feature );
@@ -726,9 +724,6 @@ public class TmXmlWriter
 			}
 
 			final String str;
-
-			System.out.println( feature ); // DEBUG
-			System.out.println( fm.getSpotFeatureIsInt().get( feature ) ); // DEBUG
 
 			if ( fm.getSpotFeatureIsInt().get( feature ).booleanValue() )
 			{
