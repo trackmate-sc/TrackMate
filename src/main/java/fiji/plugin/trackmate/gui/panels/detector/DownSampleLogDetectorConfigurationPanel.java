@@ -76,7 +76,7 @@ public class DownSampleLogDetectorConfigurationPanel extends LogDetectorConfigur
 
 			layout.putConstraint( SpringLayout.NORTH, jTextFieldDownSample, 290, SpringLayout.NORTH, this );
 			layout.putConstraint( SpringLayout.WEST, jTextFieldDownSample, 168, SpringLayout.WEST, this );
-			layout.putConstraint( SpringLayout.EAST, jTextFieldDownSample, 208, SpringLayout.WEST, this );
+			layout.putConstraint( SpringLayout.EAST, jTextFieldDownSample, -100, SpringLayout.EAST, this );
 			jTextFieldDownSample.setFont( FONT );
 			add( jTextFieldDownSample );
 		}
@@ -84,6 +84,7 @@ public class DownSampleLogDetectorConfigurationPanel extends LogDetectorConfigur
 			remove( jLabelThreshold );
 			layout.putConstraint( SpringLayout.NORTH, jLabelThreshold, 270, SpringLayout.NORTH, this );
 			layout.putConstraint( SpringLayout.WEST, jLabelThreshold, 16, SpringLayout.WEST, this );
+			layout.putConstraint( SpringLayout.EAST, jLabelThreshold, 162, SpringLayout.WEST, this );
 			add( jLabelThreshold );
 		}
 	}
