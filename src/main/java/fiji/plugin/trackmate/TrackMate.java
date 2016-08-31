@@ -547,8 +547,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 	 * {@link ModelChangeEvent#SPOTS_FILTERED} event.
 	 *
 	 * @param doLogIt
-	 *            if <code>true</code>, will send a message to the
-	 *            {@link Model#logger}.
+	 *            if <code>true</code>, will send a message to the model logger.
 	 * @return <code>true</code> if the computation completed without errors.
 	 */
 	public boolean execSpotFiltering( final boolean doLogIt )

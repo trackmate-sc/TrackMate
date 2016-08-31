@@ -14,9 +14,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
-import net.imglib2.multithreading.SimpleMultiThreading;
-
 import org.jgrapht.alg.ConnectivityInspector;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
@@ -31,6 +28,8 @@ import fiji.plugin.trackmate.tracking.oldlap.costmatrix.TrackSegmentCostMatrixCr
 import fiji.plugin.trackmate.tracking.oldlap.hungarian.AssignmentAlgorithm;
 import fiji.plugin.trackmate.tracking.oldlap.hungarian.AssignmentProblem;
 import fiji.plugin.trackmate.tracking.oldlap.hungarian.HungarianAlgorithm;
+import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
+import net.imglib2.multithreading.SimpleMultiThreading;
 
 /**
  *
@@ -563,10 +562,11 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 	}
 
 	/**
-	 * Compute the optimal final track using the cost matrix
-	 * {@link LAPTracker#segmentCosts}.
+	 * Computes and returns the optimal final track using the cost matrix
+	 * segment costs.
 	 *
-	 * @return True if executes correctly, false otherwise.
+	 * @return <code>true</code> if this executes correctly, <code>false</code>
+	 *         otherwise.
 	 */
 	public int[][] solveLAPForFinalTracks() {
 		// Solve the LAP using the Hungarian Algorithm

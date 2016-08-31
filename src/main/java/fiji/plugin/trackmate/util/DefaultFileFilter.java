@@ -45,8 +45,8 @@ public class DefaultFileFilter extends FileFilter
 	}
 
 	/**
-	 * Returns true if <code>file</code> is a directory or ends with
-	 * {@link #ext}.
+	 * Returns true if <code>file</code> is a directory or ends with the
+	 * specified extension.
 	 * 
 	 * @param file
 	 *            The file to be checked.

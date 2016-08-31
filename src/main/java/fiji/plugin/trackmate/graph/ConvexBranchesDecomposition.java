@@ -1,9 +1,5 @@
 package fiji.plugin.trackmate.graph;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackModel;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -14,14 +10,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.imglib2.algorithm.Algorithm;
-import net.imglib2.algorithm.Benchmark;
-
 import org.jgrapht.alg.ConnectivityInspector;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.graph.SimpleGraph;
+
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackModel;
+import net.imglib2.algorithm.Algorithm;
+import net.imglib2.algorithm.Benchmark;
 
 /**
  * A class that can decompose the tracks of a {@link Model} in convex branches.
@@ -612,10 +611,10 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 	 * linear, convex branches.
 	 * <p>
 	 * These links are returned as a collection of 2-elements list. If the
-	 * instance was created with {@link #forbidMiddleLinks} sets to
+	 * instance was created with <code>forbidMiddleLinks</code> sets to
 	 * <code>true</code>, it is ensured that the first element of all links is
 	 * the last spot of a branch, and the second element of this link is the
-	 * first spot of another branch. Otherwise, a link cam target a spot within
+	 * first spot of another branch. Otherwise, a link can target a spot within
 	 * a branch.
 	 *
 	 * @return a collection of links as a 2-elements list.
@@ -630,7 +629,7 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 	 * it to split it in branches.
 	 * <p>
 	 * These links are returned as a collection of 2-elements list. If the
-	 * instance was created with {@link #forbidMiddleLinks} sets to
+	 * instance was created with <code>forbidMiddleLinks</code> sets to
 	 * <code>true</code>, it is ensured that the first element of all links is
 	 * the last spot of a branch, and the second element of this link is the
 	 * first spot of another branch. Otherwise, a link can target a spot within

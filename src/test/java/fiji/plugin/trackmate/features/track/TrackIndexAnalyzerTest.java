@@ -5,10 +5,6 @@ package fiji.plugin.trackmate.features.track;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.ModelChangeEvent;
-import fiji.plugin.trackmate.ModelChangeListener;
-import fiji.plugin.trackmate.Spot;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,13 +14,18 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.ModelChangeEvent;
+import fiji.plugin.trackmate.ModelChangeListener;
+import fiji.plugin.trackmate.Spot;
+
 /**
  * @author Jean-Yves Tinevez
  */
 public class TrackIndexAnalyzerTest
 {
 
-	private static final int N_TRACKS = 10;
+	public static final int N_TRACKS = 10;
 
 	private static final int DEPTH = 5;
 
@@ -59,11 +60,6 @@ public class TrackIndexAnalyzerTest
 		}
 	}
 
-	/**
-	 * Test method for
-	 * {@link fiji.plugin.trackmate.features.track.TrackIndexAnalyzer#process(java.util.Collection)}
-	 * .
-	 */
 	@Test
 	public final void testProcess()
 	{
@@ -87,11 +83,6 @@ public class TrackIndexAnalyzerTest
 		}
 	}
 
-	/**
-	 * Test method for
-	 * {@link fiji.plugin.trackmate.features.track.TrackIndexAnalyzer#modelChanged(fiji.plugin.trackmate.ModelChangeEvent)}
-	 * .
-	 */
 	@Test
 	public final void testModelChanged()
 	{
@@ -179,7 +170,6 @@ public class TrackIndexAnalyzerTest
 		{
 			assertEquals( i, model.getFeatureModel().getTrackFeature( it.next(), TrackIndexAnalyzer.TRACK_INDEX ).longValue() );
 		}
-		// FIXME
 		// FAILS BECAUSE TRANCK INDEX IS A GLOBAL TRACK ANALYZER AND NEEDS TO
 		// RECOMPUTE FOR THE WHOLE MODEL
 		// C:EST LA VIE

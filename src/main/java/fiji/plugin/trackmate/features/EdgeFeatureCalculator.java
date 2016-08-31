@@ -1,18 +1,17 @@
 package fiji.plugin.trackmate.features;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import org.jgrapht.graph.DefaultWeightedEdge;
+
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
-
-import org.jgrapht.graph.DefaultWeightedEdge;
 
 /**
  * A class dedicated to centralizing the calculation of the numerical features
@@ -91,8 +90,8 @@ public class EdgeFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 	 * @param edges
 	 *            the edges to compute.
 	 * @param doLogIt
-	 *            if <code>true</code>, the logger of the {@link #model} will be
-	 *            notified of the calculation.
+	 *            if <code>true</code>, the logger of the model will be notified
+	 *            of the calculation.
 	 */
 	public void computeEdgesFeatures( final Collection< DefaultWeightedEdge > edges, final boolean doLogIt )
 	{

@@ -28,8 +28,9 @@ public interface SpotTrackerFactory extends TrackMateModule
 	 * Returns a new GUI panel able to configure the settings suitable for the
 	 * target tracker identified by the key parameter.
 	 *
-	 * @param model the model used to
-	 * @return
+	 * @param model
+	 *            the model that will be modified by the target tracker.
+	 * @return a new configuration panel.
 	 */
 	public ConfigurationPanel getTrackerConfigurationPanel( final Model model );
 

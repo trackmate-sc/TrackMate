@@ -19,6 +19,7 @@ import org.jgrapht.event.GraphEdgeChangeEvent;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.event.GraphVertexChangeEvent;
 import org.jgrapht.event.TraversalListener;
+import org.jgrapht.event.TraversalListenerAdapter;
 import org.jgrapht.event.VertexTraversalEvent;
 import org.jgrapht.graph.AsUnweightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -799,19 +800,19 @@ public class TrackModel
 	}
 
 	/**
-	 * @return shortest path between two connected spot, using Dijkstra's
-	 *         algorithm. The edge weights, if any, are ignored here, meaning
-	 *         that the returned path is the shortest in terms of number of
-	 *         edges.
-	 *         <p>
-	 *         Return <code>null</code> if the two spots are not connected by a
-	 *         track, or if one of the spot do not belong to the graph, or if
-	 *         the {@link #graph} field is <code>null</code>.
+	 * Returns the shortest path between two connected spot, using Dijkstra's
+	 * algorithm. The edge weights, if any, are ignored here, meaning that the
+	 * returned path is the shortest in terms of number of edges.
+	 * <p>
+	 * Returns <code>null</code> if the two spots are not connected by a track,
+	 * or if one of the spot do not belong to the graph, or if the graph field
+	 * is <code>null</code>.
 	 *
 	 * @param source
 	 *            the spot to start the path with
 	 * @param target
 	 *            the spot to stop the path with
+	 * @return the shortest path, as a list of edges.
 	 */
 	public List< DefaultWeightedEdge > dijkstraShortestPath( final Spot source, final Spot target )
 	{

@@ -23,7 +23,8 @@ import net.imglib2.util.Util;
  * pp. 917-932</code>);</li>
  * <li>my limited understanding of Lee Kamensky python implementation of the
  * same algorithm in python using numpy for the CellProfilter project;</li>
- * <li>Johannes java implementation of the algorithm for non-sparse matrices.</li>
+ * <li>Johannes java implementation of the algorithm for non-sparse matrices.
+ * </li>
  * </ul>
  * <p>
  * Computation time performance degrades significantly compared to the
@@ -35,9 +36,9 @@ import net.imglib2.util.Util;
  * 
  * @author Jean-Yves Tinevez - 2014
  * @author Johannes Schindelin
- * @see <a
- *      href=http://www.sciencedirect.com/science/article/pii/030505489600010X
- *      >A. Volgenant
+ * @see <a href=
+ *      "http://www.sciencedirect.com/science/article/pii/030505489600010X"> A.
+ *      Volgenant
  *      "Linear and semi-assignment problems: A core oriented approach"</a>
  */
 public class LAPJV implements OutputAlgorithm< int[] >, Benchmark

@@ -211,7 +211,7 @@ public class FilterPanel extends javax.swing.JPanel
 
 	/**
 	 * Refreshes the histogram content. Call this method when the values in the
-	 * {@link #valuesMap} changed to update histogram display.
+	 * values map changed to update histogram display.
 	 */
 	public void refresh()
 	{

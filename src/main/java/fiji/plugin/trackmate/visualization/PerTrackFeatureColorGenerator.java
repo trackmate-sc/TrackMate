@@ -4,12 +4,6 @@
 package fiji.plugin.trackmate.visualization;
 
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.DEFAULT_TRACK_COLOR;
-import fiji.plugin.trackmate.FeatureModel;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.ModelChangeEvent;
-import fiji.plugin.trackmate.ModelChangeListener;
-import fiji.plugin.trackmate.TrackModel;
-import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 
 import java.awt.Color;
 import java.util.HashMap;
@@ -18,6 +12,13 @@ import java.util.Set;
 
 import org.jfree.chart.renderer.InterpolatePaintScale;
 import org.jgrapht.graph.DefaultWeightedEdge;
+
+import fiji.plugin.trackmate.FeatureModel;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.ModelChangeEvent;
+import fiji.plugin.trackmate.ModelChangeListener;
+import fiji.plugin.trackmate.TrackModel;
+import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 
 /**
  * A {@link TrackColorGenerator} that generate colors based on the whole track
@@ -53,11 +54,11 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 	}
 
 	/**
-	 * Set the track feature to set the color with.
+	 * Sets the track feature to generate color with.
 	 * <p>
 	 * First, the track features are <b>re-calculated</b> for the target feature
-	 * values to be accurate. We rely on the {@link #model} instance for that.
-	 * Then colors are calculated for all tracks when this method is called, and
+	 * values to be accurate. We rely on the model instance for that. Then
+	 * colors are calculated for all tracks when this method is called, and
 	 * cached.
 	 *
 	 * @param feature

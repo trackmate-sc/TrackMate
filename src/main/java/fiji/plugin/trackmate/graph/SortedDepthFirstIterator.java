@@ -22,6 +22,7 @@ import org.jgrapht.event.ConnectedComponentTraversalEvent;
 import org.jgrapht.event.EdgeTraversalEvent;
 import org.jgrapht.event.VertexTraversalEvent;
 import org.jgrapht.traverse.AbstractGraphIterator;
+import org.jgrapht.traverse.CrossComponentIterator;
 import org.jgrapht.util.TypeUtil;
 
 /**
@@ -571,9 +572,6 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 			graph = g;
 		}
 
-		/**
-		 * @see CrossComponentIterator.Specifics#edgesOf(Object)
-		 */
 		@Override
 		public Set< ? extends EE > edgesOf( final VV vertex )
 		{
@@ -600,9 +598,6 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 			graph = g;
 		}
 
-		/**
-		 * @see CrossComponentIterator.Specifics#edgesOf(Object)
-		 */
 		@Override
 		public Set< EE > edgesOf( final VV vertex )
 		{

@@ -236,7 +236,6 @@ public class Model
 	 * Returns the spatial units for the quantities stored in this model.
 	 *
 	 * @return the spatial units.
-	 * @return the spatial units.
 	 */
 	public String getSpaceUnits()
 	{

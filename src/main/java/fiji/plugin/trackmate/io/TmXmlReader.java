@@ -656,7 +656,8 @@ public class TmXmlReader
 	 * 
 	 * @param settingsElement
 	 *            the settings {@link Element} to read parameters from.
-	 * @return a new {@link Settings} object.
+	 * @param settings
+	 *            the {@link Settings} to feed/
 	 */
 	private void getBaseSettings( final Element settingsElement, final Settings settings )
 	{

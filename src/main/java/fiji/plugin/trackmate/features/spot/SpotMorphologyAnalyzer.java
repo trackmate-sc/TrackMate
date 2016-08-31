@@ -12,6 +12,11 @@ import static fiji.plugin.trackmate.features.spot.SpotMorphologyAnalyzerFactory.
 import java.util.Arrays;
 import java.util.Iterator;
 
+import Jama.EigenvalueDecomposition;
+import Jama.Matrix;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.util.SpotNeighborhood;
+import fiji.plugin.trackmate.util.SpotNeighborhoodCursor;
 import net.imagej.ImgPlus;
 import net.imagej.axis.DefaultLinearAxis;
 import net.imglib2.algorithm.region.localneighborhood.EllipseCursor;
@@ -21,11 +26,6 @@ import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
-import Jama.EigenvalueDecomposition;
-import Jama.Matrix;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.util.SpotNeighborhood;
-import fiji.plugin.trackmate.util.SpotNeighborhoodCursor;
 
 /**
  * This {@link SpotAnalyzer} computes morphology features for the given spots.
@@ -83,7 +83,7 @@ public class SpotMorphologyAnalyzer< T extends RealType< T >> extends Independen
 	 * Significance factor to determine when a semiaxis length should be
 	 * considered significantly larger than the others.
 	 */
-	private static final double SIGNIFICANCE_FACTOR = 1.2;
+	public static final double SIGNIFICANCE_FACTOR = 1.2;
 
 	public SpotMorphologyAnalyzer( final ImgPlus< T > imgCT, final Iterator< Spot > spots )
 	{

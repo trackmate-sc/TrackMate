@@ -128,6 +128,7 @@ import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.providers.ViewProvider;
+import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTrackerFactory;
 import fiji.plugin.trackmate.tracking.oldlap.FastLAPTrackerFactory;
@@ -368,7 +369,7 @@ public class TmXmlReader_v12 extends TmXmlReader
 	 * the model modified by this reader.
 	 * 
 	 * @param model
-	 * @return true if the tracks were found in the file, false otherwise.
+	 *            the model to feed.
 	 */
 	private void readTracks( final Model model )
 	{
@@ -622,15 +623,6 @@ public class TmXmlReader_v12 extends TmXmlReader
 
 	}
 
-	/**
-	 * Return the settings for the TrackMate session saved in this file.
-	 * <p>
-	 * The settings object will have its {@link SegmenterSettings} and
-	 * {@link TrackerSettings} set default values will be used.
-	 *
-	 * @return a full Settings object
-	 * @throws DataConversionException
-	 */
 	private void getBaseSettings( final Settings settings )
 	{
 		// Basic settings

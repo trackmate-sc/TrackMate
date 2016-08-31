@@ -136,7 +136,7 @@ public class Settings
 
 	/**
 	 * The initial quality filter value that is used to clip spots of low
-	 * quality from {@link Model#spots}.
+	 * quality from spots.
 	 */
 	public Double initialSpotFilterValue = Double.valueOf( 0 );
 

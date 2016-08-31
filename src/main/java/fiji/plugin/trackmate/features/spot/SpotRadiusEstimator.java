@@ -17,9 +17,9 @@ public class SpotRadiusEstimator< T extends RealType< T >> extends IndependentSp
 	 * FIELDS
 	 */
 
-	private static final double MIN_DIAMETER_RATIO = 0.1f;
+	public static final double MIN_DIAMETER_RATIO = 0.1f;
 
-	private static final double MAX_DIAMETER_RATIO = 2;
+	public static final double MAX_DIAMETER_RATIO = 2;
 
 	/** The number of different diameters to try. */
 	protected int nDiameters = 20;
@@ -29,8 +29,8 @@ public class SpotRadiusEstimator< T extends RealType< T >> extends IndependentSp
 	 * for a spot. Estimated diameter is obtained by finding the diameter that
 	 * gives the maximum contrast, as calculated by difference in mean intensity
 	 * in successive rings. Searched diameters are linearly spread between
-	 * <code>diameter</code> * {@value #MIN_DIAMETER_RATIO} and
-	 * <code>diameter</code> * {@value #MAX_DIAMETER_RATIO}. The optimum is them
+	 * <code>diameter</code> {@value #MIN_DIAMETER_RATIO} and
+	 * <code>diameter</code> {@value #MAX_DIAMETER_RATIO}. The optimum is them
 	 * calculated by doing an interpolation over calculated values.
 	 */
 	public SpotRadiusEstimator( final ImgPlus< T > img, final Iterator< Spot > spots )
@@ -92,8 +92,6 @@ public class SpotRadiusEstimator< T extends RealType< T >> extends IndependentSp
 		for ( int j = 0; j < contrasts.length - 1; j++ )
 		{
 			contrasts[ j + 1 ] = -( mean_intensities[ j + 1 ] - mean_intensities[ j ] );
-			// System.out.println(String.format("For diameter %.1f, found contrast of %.1f",
-			// diameters[j], contrasts[j])); //DEBUG
 		}
 
 		// Find max contrast

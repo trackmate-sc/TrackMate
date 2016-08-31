@@ -17,15 +17,15 @@ import java.util.Set;
 public class HungarianAlgorithm implements AssignmentAlgorithm {
 
 	@Override
-    public int[][] computeAssignments(double[][] matrix) {
+    public int[][] computeAssignments(final double[][] matrix) {
 
 		// check if we have less than 1 line, 1 column, which causes normal algo to hang.
-		int nlines = matrix.length;
+		final int nlines = matrix.length;
 		if (nlines == 0) {
 			// no spot
 			return new int[][] { {  } };
 		}
-		int ncols = matrix[0].length;
+		final int ncols = matrix[0].length;
 		if (nlines <=1 && ncols <= 1)
 			return new int[][] { {  } };
 
@@ -34,13 +34,13 @@ public class HungarianAlgorithm implements AssignmentAlgorithm {
 
 
         // non negative values are the index of the starred or primed zero in the row or column
-        int[] starsByRow = new int[matrix.length]; Arrays.fill(starsByRow,-1);
-        int[] starsByCol = new int[matrix[0].length]; Arrays.fill(starsByCol,-1);
-        int[] primesByRow = new int[matrix.length]; Arrays.fill(primesByRow,-1);
+        final int[] starsByRow = new int[matrix.length]; Arrays.fill(starsByRow,-1);
+        final int[] starsByCol = new int[matrix[0].length]; Arrays.fill(starsByCol,-1);
+        final int[] primesByRow = new int[matrix.length]; Arrays.fill(primesByRow,-1);
 
         // 1s mean covered, 0s mean not covered
-        int[] coveredRows = new int[matrix.length];
-        int[] coveredCols = new int[matrix[0].length];
+        final int[] coveredRows = new int[matrix.length];
+        final int[] coveredCols = new int[matrix[0].length];
 
         // star any zero that has no other starred zero in the same row or column
         initStars(matrix, starsByRow, starsByCol);
@@ -57,7 +57,7 @@ public class HungarianAlgorithm implements AssignmentAlgorithm {
             }
 
             // check if there is a starred zero in the primed zero's row
-            int columnIndex = starsByRow[primedZero[0]];
+            final int columnIndex = starsByRow[primedZero[0]];
             if (-1 == columnIndex){
 
                 // if not, then we need to increment the zeroes and start over
@@ -77,7 +77,7 @@ public class HungarianAlgorithm implements AssignmentAlgorithm {
         // ok now we should have assigned everything
         // take the starred zeroes in each column as the correct assignments
 
-        int[][] retval = new int[matrix.length][];
+        final int[][] retval = new int[matrix.length][];
         for (int i = 0; i < starsByCol.length;  i++) {
             retval[i] = new int[]{starsByCol[i],i};
         }
@@ -89,8 +89,8 @@ public class HungarianAlgorithm implements AssignmentAlgorithm {
 
     }
 
-    private boolean allAreCovered(int[] coveredCols) {
-        for (int covered : coveredCols) {
+    private boolean allAreCovered(final int[] coveredCols) {
+        for (final int covered : coveredCols) {
             if (0 == covered) return false;
         }
         return true;
@@ -98,14 +98,10 @@ public class HungarianAlgorithm implements AssignmentAlgorithm {
 
 
     /**
-     * the first step of the hungarian algorithm
-     * is to find the smallest element in each row
-     * and subtract it's values from all elements
-     * in that row
-     *
-     * @return the next step to perform
-     */
-    private void reduceMatrix(double[][] matrix) {
+	 * The first step of the hungarian algorithm is to find the smallest element
+	 * in each row and subtract it's values from all elements in that row
+	 */
+    private void reduceMatrix(final double[][] matrix) {
 
         for (int i = 0; i < matrix.length; i++) {
 
@@ -140,24 +136,22 @@ public class HungarianAlgorithm implements AssignmentAlgorithm {
     }
 
     /**
-     * init starred zeroes
-     *
-     * for each column find the first zero
-     * if there is no other starred zero in that row
-     * then star the zero, cover the column and row and
-     * go onto the next column
-     *
-     * @param costMatrix
-     * @param starredZeroes
-     * @param coveredRows
-     * @param coveredCols
-     * @return the next step to perform
-     */
-    private void initStars(double costMatrix[][], int[] starsByRow, int[] starsByCol) {
+	 * Init starred zeroes.
+	 *
+	 * for each column find the first zero if there is no other starred zero in
+	 * that row then star the zero, cover the column and row and go onto the
+	 * next column
+	 *
+	 * @param costMatrix
+	 * @param starredZeroes
+	 * @param coveredRows
+	 * @param coveredCols
+	 */
+    private void initStars(final double costMatrix[][], final int[] starsByRow, final int[] starsByCol) {
 
 
-        int [] rowHasStarredZero = new int[costMatrix.length];
-        int [] colHasStarredZero = new int[costMatrix[0].length];
+        final int [] rowHasStarredZero = new int[costMatrix.length];
+        final int [] colHasStarredZero = new int[costMatrix[0].length];
 
         for (int i = 0; i < costMatrix.length; i++) {
             for (int j = 0; j < costMatrix[i].length; j++) {
@@ -178,7 +172,7 @@ public class HungarianAlgorithm implements AssignmentAlgorithm {
      * @param starsByCol
      * @param coveredCols
      */
-    private void coverColumnsOfStarredZeroes(int[] starsByCol, int[] coveredCols) {
+    private void coverColumnsOfStarredZeroes(final int[] starsByCol, final int[] coveredCols) {
         for (int i = 0; i < starsByCol.length; i++) {
             coveredCols[i] = -1 == starsByCol[i] ? 0 : 1;
         }
@@ -193,8 +187,8 @@ public class HungarianAlgorithm implements AssignmentAlgorithm {
      * @param coveredCols
      * @return
      */
-    private int[] primeSomeUncoveredZero(double matrix[][], int[] primesByRow,
-                                       int[] coveredRows, int[] coveredCols) {
+    private int[] primeSomeUncoveredZero(final double matrix[][], final int[] primesByRow,
+                                       final int[] coveredRows, final int[] coveredCols) {
 
 
         // find an uncovered zero and prime it
@@ -222,12 +216,12 @@ public class HungarianAlgorithm implements AssignmentAlgorithm {
      * @param starsByCol
      * @param primesByRow
      */
-    private void incrementSetOfStarredZeroes(int[] unpairedZeroPrime, int[] starsByRow, int[] starsByCol, int[] primesByRow) {
+    private void incrementSetOfStarredZeroes(final int[] unpairedZeroPrime, final int[] starsByRow, final int[] starsByCol, final int[] primesByRow) {
 
         // build the alternating zero sequence (prime, star, prime, star, etc)
         int i, j = unpairedZeroPrime[1];
 
-        Set<int[]> zeroSequence = new LinkedHashSet<int[]>();
+        final Set<int[]> zeroSequence = new LinkedHashSet<int[]>();
         zeroSequence.add(unpairedZeroPrime);
         boolean paired = false;
         do {
@@ -243,7 +237,7 @@ public class HungarianAlgorithm implements AssignmentAlgorithm {
 
         // unstar each starred zero of the sequence
         // and star each primed zero of the sequence
-        for (int[] zero : zeroSequence) {
+        for (final int[] zero : zeroSequence) {
             if (starsByCol[zero[1]] == zero[0]) {
                 starsByCol[zero[1]] = -1;
                 starsByRow[zero[0]] = -1;
@@ -257,7 +251,7 @@ public class HungarianAlgorithm implements AssignmentAlgorithm {
     }
 
 
-    private void makeMoreZeroes(double[][] matrix, int[] coveredRows, int[] coveredCols) {
+    private void makeMoreZeroes(final double[][] matrix, final int[] coveredRows, final int[] coveredCols) {
 
         // find the minimum uncovered value
         double minUncoveredValue = Double.MAX_VALUE;
