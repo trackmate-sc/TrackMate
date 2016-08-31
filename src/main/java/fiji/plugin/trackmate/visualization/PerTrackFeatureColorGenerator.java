@@ -139,7 +139,7 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 				Color color;
 				if ( null == val )
 				{
-					color = DEFAULT_TRACK_COLOR;
+					color = TrackMateModelView.DEFAULT_UNASSIGNED_FEATURE_COLOR;
 				}
 				else if ( Double.isNaN( val.doubleValue() ) )
 				{

@@ -1,14 +1,14 @@
 package fiji.plugin.trackmate.visualization;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.ModelChangeEvent;
-import fiji.plugin.trackmate.ModelChangeListener;
-import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
-
 import java.awt.Color;
 
 import org.jfree.chart.renderer.InterpolatePaintScale;
 import org.jgrapht.graph.DefaultWeightedEdge;
+
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.ModelChangeEvent;
+import fiji.plugin.trackmate.ModelChangeListener;
+import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
 
 public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackColorGenerator
 {
@@ -56,11 +56,13 @@ public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackC
 	public Color color( final DefaultWeightedEdge edge )
 	{
 		final Double feat = model.getFeatureModel().getEdgeFeature( edge, feature );
+
 		if ( null == feat )
-		{
-			return TrackMateModelView.DEFAULT_TRACK_COLOR;
-		}
-		if ( Double.isNaN( feat.doubleValue() ) ) { return TrackMateModelView.DEFAULT_UNDEFINED_FEATURE_COLOR; }
+			return TrackMateModelView.DEFAULT_UNASSIGNED_FEATURE_COLOR;
+
+		if ( Double.isNaN( feat.doubleValue() ) )
+			return TrackMateModelView.DEFAULT_UNDEFINED_FEATURE_COLOR;
+
 		final double val = feat.doubleValue();
 		return generator.getPaint( ( val - min ) / ( max - min ) );
 	}
