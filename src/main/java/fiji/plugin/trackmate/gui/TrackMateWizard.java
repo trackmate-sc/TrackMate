@@ -336,7 +336,7 @@ public class TrackMateWizard extends JFrame implements ActionListener
 				jPanelMain = new JPanel();
 				getContentPane().add( jPanelMain, BorderLayout.CENTER );
 				jPanelMain.setLayout( new BorderLayout() );
-				jPanelMain.setPreferredSize( new java.awt.Dimension( 300, 461 ) );
+				jPanelMain.setPreferredSize( new java.awt.Dimension( 310, 461 ) );
 			}
 			jPanelButtons = new JPanel();
 			jPanelButtons.setLayout( new BoxLayout( jPanelButtons, BoxLayout.X_AXIS ) );
