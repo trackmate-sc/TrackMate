@@ -8,8 +8,6 @@ import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.BIG_FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
-import ij.ImagePlus;
-import ij.measure.Calibration;
 
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -43,6 +41,8 @@ import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
 import fiji.plugin.trackmate.util.JLabelLogger;
 import fiji.util.NumberParser;
+import ij.ImagePlus;
+import ij.measure.Calibration;
 
 /**
  * Configuration panel for spot detectors based on LoG detector.
@@ -308,7 +308,6 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 				jLabel2 = new JLabel();
 				layout.putConstraint( SpringLayout.NORTH, jLabel2, 247, SpringLayout.NORTH, this );
 				layout.putConstraint( SpringLayout.WEST, jLabel2, 16, SpringLayout.WEST, this );
-				layout.putConstraint( SpringLayout.EAST, jLabel2, -16, SpringLayout.EAST, this );
 				this.add( jLabel2 );
 				jLabel2.setText( "Estimated blob diameter:" );
 				jLabel2.setFont( FONT );
@@ -316,10 +315,10 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 			}
 			{
 				jTextFieldBlobDiameter = new JNumericTextField();
-				layout.putConstraint( SpringLayout.NORTH, jTextFieldBlobDiameter, 247, SpringLayout.NORTH, this );
+				layout.putConstraint( SpringLayout.EAST, jLabel2, -6, SpringLayout.WEST, jTextFieldBlobDiameter );
 				layout.putConstraint( SpringLayout.WEST, jTextFieldBlobDiameter, 168, SpringLayout.WEST, this );
+				layout.putConstraint( SpringLayout.NORTH, jTextFieldBlobDiameter, 247, SpringLayout.NORTH, this );
 				layout.putConstraint( SpringLayout.SOUTH, jTextFieldBlobDiameter, 263, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.EAST, jTextFieldBlobDiameter, 208, SpringLayout.WEST, this );
 				jTextFieldBlobDiameter.setHorizontalAlignment( SwingConstants.CENTER );
 				jTextFieldBlobDiameter.setColumns( 5 );
 				jTextFieldBlobDiameter.setText( "5" );
@@ -328,10 +327,11 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 			}
 			{
 				jLabelBlobDiameterUnit = new JLabel();
-				layout.putConstraint( SpringLayout.NORTH, jLabelBlobDiameterUnit, 245, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.WEST, jLabelBlobDiameterUnit, 228, SpringLayout.WEST, this );
+				layout.putConstraint( SpringLayout.EAST, jTextFieldBlobDiameter, -11, SpringLayout.WEST, jLabelBlobDiameterUnit );
+				layout.putConstraint( SpringLayout.WEST, jLabelBlobDiameterUnit, -62, SpringLayout.EAST, jLabel1 );
+				layout.putConstraint( SpringLayout.NORTH, jLabelBlobDiameterUnit, -2, SpringLayout.NORTH, jLabel2 );
 				layout.putConstraint( SpringLayout.SOUTH, jLabelBlobDiameterUnit, 262, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.EAST, jLabelBlobDiameterUnit, 268, SpringLayout.WEST, this );
+				layout.putConstraint( SpringLayout.EAST, jLabelBlobDiameterUnit, 0, SpringLayout.EAST, jLabel1 );
 				this.add( jLabelBlobDiameterUnit );
 				jLabelBlobDiameterUnit.setFont( FONT );
 				jLabelBlobDiameterUnit.setText( spaceUnits );
@@ -361,7 +361,7 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 				layout.putConstraint( SpringLayout.NORTH, jLabelThreshold, -42, SpringLayout.NORTH, jCheckBoxMedianFilter );
 				layout.putConstraint( SpringLayout.WEST, jLabelThreshold, 16, SpringLayout.WEST, this );
 				layout.putConstraint( SpringLayout.SOUTH, jLabelThreshold, -29, SpringLayout.NORTH, jCheckBoxMedianFilter );
-				layout.putConstraint( SpringLayout.EAST, jLabelThreshold, 168, SpringLayout.WEST, this );
+				layout.putConstraint( SpringLayout.EAST, jLabelThreshold, 162, SpringLayout.WEST, this );
 				this.add( jLabelThreshold );
 				jLabelThreshold.setText( "Threshold:" );
 				jLabelThreshold.setFont( FONT );
@@ -369,9 +369,9 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 			{
 				jTextFieldThreshold = new JNumericTextField();
 				layout.putConstraint( SpringLayout.NORTH, jTextFieldThreshold, 268, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.WEST, jTextFieldThreshold, 168, SpringLayout.WEST, this );
+				layout.putConstraint( SpringLayout.WEST, jTextFieldThreshold, 6, SpringLayout.EAST, jLabelThreshold );
 				layout.putConstraint( SpringLayout.SOUTH, jTextFieldThreshold, 284, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.EAST, jTextFieldThreshold, 208, SpringLayout.WEST, this );
+				layout.putConstraint( SpringLayout.EAST, jTextFieldThreshold, -78, SpringLayout.EAST, this );
 				jTextFieldThreshold.setHorizontalAlignment( SwingConstants.CENTER );
 				jTextFieldThreshold.setText( "0" );
 				this.add( jTextFieldThreshold );
