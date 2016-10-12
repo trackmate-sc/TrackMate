@@ -8,6 +8,15 @@ TrackMate
 
 TrackMate is your buddy for your everyday tracking.
 
+
+Citation
+--------
+
+Please note that TrackMate is available through Fiji, and is based on a publication. If you use it successfully for your research please be so kind to cite our work:
+
+Jean-Yves Tinevez, Nick Perry, Johannes Schindelin, Genevieve M. Hoopes, Gregory D. Reynolds, Emmanuel Laplantine, Sebastian Y. Bednarek, Spencer L. Shorte, Kevin W. Eliceiri, __TrackMate: An open and extensible platform for single-particle tracking__, Methods, Available online 3 October 2016, ISSN 1046-2023, http://dx.doi.org/10.1016/j.ymeth.2016.09.016. (http://www.sciencedirect.com/science/article/pii/S1046202316303346)
+
+
 Single Particle Tracking
 ------------------------
 
