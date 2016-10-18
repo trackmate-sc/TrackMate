@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.media.*?>
+<?import javafx.scene.web.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.*?>
+<?import javafx.geometry.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Accordion?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="860.0" prefWidth="1400.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fiji.plugin.trackmate.visualization.trajeditor.ui.RootLayoutController">
+   <center>
+      <SplitPane fx:id="mainSplitPane" dividerPositions="0.25">
+         <items>
+            <SplitPane dividerPositions="0.5, 0.5" orientation="VERTICAL">
+               <items>
+                  <VBox fx:id="spotTableViewBox">
+                     <children>
+                        <Label text="Spots">
+                           <padding>
+                              <Insets bottom="10.0" top="10.0" />
+                           </padding>
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                     </children>
+                     <VBox.margin>
+                        <Insets bottom="20.0" />
+                     </VBox.margin>
+                     <padding>
+                        <Insets bottom="10.0" />
+                     </padding>
+                  </VBox>
+                  <VBox fx:id="trackTableViewBox">
+                     <children>
+                        <Label text="Tracks">
+                           <padding>
+                              <Insets bottom="10.0" top="10.0" />
+                           </padding>
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                     </children>
+                     <padding>
+                        <Insets bottom="10.0" />
+                     </padding>
+                  </VBox>
+                  <VBox fx:id="detailedTableViewBox" VBox.vgrow="ALWAYS">
+                     <children>
+                        <Label text="Details">
+                           <padding>
+                              <Insets bottom="10.0" top="10.0" />
+                           </padding>
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </VBox>
+               </items>
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </padding>
+            </SplitPane>
+            <TabPane fx:id="plotsPane" tabClosingPolicy="ALL_TABS" />
+         </items>
+      </SplitPane>
+   </center>
+   <bottom>
+      <HBox HBox.hgrow="ALWAYS">
+         <children>
+            <Pane prefWidth="200.0" HBox.hgrow="ALWAYS" />
+            <Label id="statusBar" fx:id="statusBar">
+               <HBox.margin>
+                  <Insets right="10.0" />
+               </HBox.margin></Label>
+            <ProgressBar id="progressBar" fx:id="progressBar" prefWidth="200.0" progress="0.0" BorderPane.alignment="CENTER" HBox.hgrow="NEVER" />
+         </children>
+         <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+         </padding>
+      </HBox>
+   </bottom>
+   <top>
+      <ToolBar>
+         <items>
+            <Label text="The awesome toolbar !" />
+            <Pane prefWidth="200.0" HBox.hgrow="ALWAYS" />
+            <Button fx:id="testButton" mnemonicParsing="false" text="The Magic Test Button" />
+            <Button fx:id="addPlotButton" mnemonicParsing="false" text="Add plot" />
+            <Button fx:id="saveModelButton" mnemonicParsing="false" text="Save model" />
+         </items>
+      </ToolBar>
+   </top>
+</BorderPane>

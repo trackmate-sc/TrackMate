@@ -84,6 +84,7 @@ import fiji.plugin.trackmate.visualization.SpotColorGeneratorPerTrackFeature;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.trackscheme.SpotImageUpdater;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
+import fiji.plugin.trackmate.visualization.trajeditor.TrajEditor;
 import ij.IJ;
 import ij.Prefs;
 
@@ -710,6 +711,11 @@ public class TrackMateGUIController implements ActionListener
 					launchDoAnalysis( true );
 
 				}
+                                else if ( event == configureViewsDescriptor.getComponent().TRAJ_EDITOR_BUTTON_PRESSED )
+				{
+					launchTrajEditor();
+
+				}
 				else
 				{
 					System.out.println( "[TrackMateGUIController] Caught unknown event: " + event );
@@ -1261,6 +1267,34 @@ public class TrackMateGUIController implements ActionListener
 					public void windowClosing( final WindowEvent e )
 					{
 						guimodel.removeView( trackscheme );
+					}
+				} );
+
+				button.setEnabled( true );
+			};
+		}.start();
+	}
+        
+        	private void launchTrajEditor()
+	{
+		final JButton button = configureViewsDescriptor.getComponent().getTrackSchemeButton();
+		button.setEnabled( false );
+		new Thread( "Launching TrajEditor thread" )
+		{
+			@Override
+			public void run()
+			{
+				final TrajEditor trajeditor = new TrajEditor( trackmate.getModel(), selectionModel );
+				
+				trajeditor.render();
+				guimodel.addView( trajeditor );
+				// De-register
+				trajeditor.getGUI().addWindowListener( new WindowAdapter()
+				{
+					@Override
+					public void windowClosing( final WindowEvent e )
+					{
+						guimodel.removeView( trajeditor );
 					}
 				} );
 
