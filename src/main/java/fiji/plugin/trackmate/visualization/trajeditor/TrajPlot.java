@@ -255,17 +255,17 @@ class TrajPlot extends Tab implements ModelChangeListener {
                     switch (event.getSpotFlag(spot)) {
 
                         case ModelChangeEvent.FLAG_SPOT_REMOVED:
-                            this.removeSpotBridge(spot);
+                            //this.removeSpotBridge(spot);
                             break;
 
                         case ModelChangeEvent.FLAG_SPOT_ADDED:
-                            this.spotsModel.add(new SpotBridge(spot, this));
+                            //this.spotsModel.add(new SpotBridge(spot, this));
                             break;
 
                         case ModelChangeEvent.FLAG_SPOT_FRAME_CHANGED:
                         case ModelChangeEvent.FLAG_SPOT_MODIFIED:
-                            SpotBridge spotBridge = this.getSpotBridge(spot);
-                            spotBridge.setSpotName(spot.getName());
+                            //SpotBridge spotBridge = this.getSpotBridge(spot);
+                            //spotBridge.setSpotName(spot.getName());
                             break;
 
                         default:
