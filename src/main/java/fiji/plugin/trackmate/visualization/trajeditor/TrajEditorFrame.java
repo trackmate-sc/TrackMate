@@ -111,9 +111,8 @@ public class TrajEditorFrame extends JFrame {
     }
 
     public void addPlot() {
-        Platform.runLater(() -> {
-            String name = "Plot #" + (this.controller.getPlotsPane().getTabs().size() + 1);
-            TrajPlot trajPlot = new TrajPlot(name, this.modelBridge, this.controller, this,
+        Platform.runLater(() -> {           
+            TrajPlot trajPlot = new TrajPlot(this.modelBridge, this.controller, this,
             this.defaultXFeatureKey, this.defaultYFeatureKey);
             this.controller.getPlotsPane().getTabs().add(trajPlot);
         });

@@ -42,6 +42,8 @@ import javax.imageio.ImageIO;
  */
 class TrajPlot extends Tab implements ModelChangeListener {
 
+    private static int COUNTER = 0;
+    
     private final RootLayoutController controller;
     private final ModelBridge modelBridge;
     private final Model model;
@@ -65,9 +67,8 @@ class TrajPlot extends Tab implements ModelChangeListener {
 
     private VBox box;
 
-    public TrajPlot(String name, ModelBridge modelBridge,
-            RootLayoutController controller, TrajEditorFrame parent,
-            String xFeatureKey, String yFeatureKey) {
+    public TrajPlot(ModelBridge modelBridge, RootLayoutController controller,
+            TrajEditorFrame parent, String xFeatureKey, String yFeatureKey) {
         super();
 
         this.controller = controller;
@@ -82,7 +83,8 @@ class TrajPlot extends Tab implements ModelChangeListener {
 
         this.chartBuilder = new ChartBuilder(this.modelBridge);
 
-        this.setText(name);
+        this.setText("Plot #" + (COUNTER + 1));
+        COUNTER++;
 
         this.init();
 
