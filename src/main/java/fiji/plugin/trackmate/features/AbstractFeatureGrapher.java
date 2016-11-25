@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.features;
 
+import static fiji.plugin.trackmate.visualization.TrackMateModelView.DEFAULT_COLOR_MAP;
 import static fiji.plugin.trackmate.visualization.trackscheme.TrackScheme.TRACK_SCHEME_ICON;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
@@ -30,7 +31,7 @@ public abstract class AbstractFeatureGrapher {
 	
 	protected static final Shape DEFAULT_SHAPE = new Ellipse2D.Double(-3, -3, 6, 6);
 
-	protected final InterpolatePaintScale paints = InterpolatePaintScale.Jet; 
+	protected final InterpolatePaintScale paints = DEFAULT_COLOR_MAP; 
 	protected final String xFeature;
 	protected final Set<String> yFeatures;
 	protected final Model model;

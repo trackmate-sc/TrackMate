@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.gui.panels.components;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
+import static fiji.plugin.trackmate.visualization.TrackMateModelView.DEFAULT_COLOR_MAP;
 
 import java.awt.BorderLayout;
 import java.awt.Canvas;
@@ -51,7 +52,7 @@ public class JPanelColorByFeatureGUI extends ActionListenablePanel
 
 	private JPanel jPanelColor;
 
-	protected InterpolatePaintScale colorMap = InterpolatePaintScale.Jet;
+	protected InterpolatePaintScale colorMap = DEFAULT_COLOR_MAP;
 
 	/*
 	 * DEFAULT VISIBILITY
