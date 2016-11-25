@@ -225,7 +225,7 @@ public interface TrackMateModelView
 	/**
 	 * The default color map.
 	 */
-	public static final InterpolatePaintScale DEFAULT_COLOR_MAP = InterpolatePaintScale.Jet;
+	public static final InterpolatePaintScale DEFAULT_COLOR_MAP = InterpolatePaintScale.Viridis;
 
 	/**
 	 * The default drawing depth, in image units.
