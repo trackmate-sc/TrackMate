@@ -158,6 +158,7 @@ public class StartDialogPanel extends ActionListenablePanel
 		final Roi roi = imp.getRoi();
 		if ( null != roi )
 		{
+			settings.roi = roi;
 			settings.polygon = roi.getPolygon();
 		}
 		// File info
