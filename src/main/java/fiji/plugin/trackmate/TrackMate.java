@@ -13,6 +13,7 @@ import fiji.plugin.trackmate.features.SpotFeatureCalculator;
 import fiji.plugin.trackmate.features.TrackFeatureCalculator;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.util.TMUtils;
+import ij.gui.ShapeRoi;
 import net.imagej.ImgPlus;
 import net.imglib2.Interval;
 import net.imglib2.algorithm.Algorithm;
@@ -108,9 +109,18 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 		TMUtils.translateSpots( spotsThisFrame, settings.xstart * calibration[ 0 ], settings.ystart * calibration[ 1 ], settings.zstart * calibration[ 2 ] );
 		List< Spot > prunedSpots;
 		// Prune if outside of ROI
-		if ( null != settings.polygon )
+		if ( settings.roi instanceof ShapeRoi )
 		{
-			prunedSpots = new ArrayList< Spot >();
+			prunedSpots = new ArrayList<>();
+			for ( final Spot spot : spotsThisFrame )
+			{
+				if ( settings.roi.contains( (int) Math.round( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ] ), (int) Math.round( spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) ) )
+					prunedSpots.add( spot );
+			}
+		}
+		else if ( null != settings.polygon )
+		{
+			prunedSpots = new ArrayList<>();
 			for ( final Spot spot : spotsThisFrame )
 			{
 				if ( settings.polygon.contains( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ], spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) )
@@ -395,7 +405,16 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 								}
 
 								List< Spot > prunedSpots;
-								if ( null != settings.polygon )
+								if ( settings.roi instanceof ShapeRoi )
+								{
+									prunedSpots = new ArrayList<>();
+									for ( final Spot spot : spotsThisFrame )
+									{
+										if ( settings.roi.contains( (int) Math.round( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ] ), (int) Math.round( spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) ) )
+											prunedSpots.add( spot );
+									}
+								}
+								else if ( null != settings.polygon )
 								{
 									prunedSpots = new ArrayList< Spot >();
 									for ( final Spot spot : spotsThisFrame )

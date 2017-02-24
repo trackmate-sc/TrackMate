@@ -90,6 +90,11 @@
 			<url>http://imagej.net/User:Haesleinhuepf</url>
 			<properties><id>haesleinhuepf</id></properties>
 		</contributor>
+		<contributor>
+			<name>Jan Eglinger</name>
+			<url>http://imagej.net/User:Eglinger</url>
+			<properties><id>imagejan</id></properties>
+		</contributor>
 	</contributors>
 
 	<scm>

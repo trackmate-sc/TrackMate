@@ -39,6 +39,13 @@ public class Settings
 	 */
 	public Polygon polygon;
 
+	/**
+	 * The region of interest (ROI). This will be used to crop the image and to
+	 * discard found spots outside the ROI. If <code>null</code>, the whole
+	 * image is considered.
+	 */
+	public Roi roi;
+
 	// Crop cube
 	/**
 	 * The time-frame index, <b>0-based</b>, of the first time-point to process.
@@ -217,7 +224,7 @@ public class Settings
 		this.zend = imp.getNSlices() - 1;
 		this.tstart = 0;
 		this.tend = imp.getNFrames() - 1;
-		final Roi roi = imp.getRoi();
+		this.roi = imp.getRoi();
 		if ( roi == null )
 		{
 			this.xstart = 0;
