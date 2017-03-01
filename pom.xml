@@ -138,8 +138,6 @@
 		<license.licenseName>gpl_v3</license.licenseName>
 		<license.copyrightOwners>Fiji developers.</license.copyrightOwners>
 		<license.projectName>Fiji distribution of ImageJ for the life sciences.</license.projectName>
-		<!-- Target Fiji dir for clean upload. -->
-		<imagej.app.directory>../Fiji.app/</imagej.app.directory>
 	</properties>
 
 	<repositories>
