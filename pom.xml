@@ -129,8 +129,8 @@
 		<url>https://github.com/fiji/TrackMate/issues</url>
 	</issueManagement>
 	<ciManagement>
-		<system>Jenkins</system>
-		<url>http://jenkins.imagej.net/job/TrackMate/</url>
+		<system>Travis CI</system>
+		<url>https://travis-ci.org/fiji/TrackMate</url>
 	</ciManagement>
 
 	<properties>

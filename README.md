@@ -1,4 +1,4 @@
-[![](http://jenkins.imagej.net/job/TrackMate/lastBuild/badge/icon)](http://jenkins.imagej.net/job/TrackMate/)
+[![](https://travis-ci.org/fiji/TrackMate.svg?branch=master)](https://travis-ci.org/fiji/TrackMate)
 
 ![TrackMate logo](http://imagej.net/_images/0/0c/TrackMate-Logo85x50-color-300p.png)
 
