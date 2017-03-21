@@ -1,33 +1,35 @@
 package fiji.plugin.trackmate.visualization.trackscheme;
 
-import ij.ImagePlus;
-import ij.process.ImageProcessor;
-
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import com.mxgraph.util.mxBase64;
+
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.util.TMUtils;
+import ij.ImagePlus;
+import ij.process.ImageProcessor;
 import net.imagej.ImgPlus;
+import net.imglib2.Cursor;
+import net.imglib2.Interval;
 import net.imglib2.RandomAccess;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.outofbounds.OutOfBoundsConstantValueFactory;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.util.Intervals;
+import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
-
-import com.mxgraph.util.mxBase64;
-
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.util.TMUtils;
 
 /**
  * This class is used to take a snapshot of a {@link Spot} object (or
  * collection) from its coordinates and an {@link ImagePlus} that contain the
  * pixel data.
  *
- * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; - Dec 2010 - 2014
+ * @author Jean-Yves Tinevez - Dec 2010 - 2017
  */
 public class SpotIconGrabber< T extends RealType< T >>
 {
@@ -99,6 +101,22 @@ public class SpotIconGrabber< T extends RealType< T >>
 		}
 	}
 
+	/**
+	 * Returns a 2D slice extract around the specified coordinates.
+	 * 
+	 * @param x
+	 *            top-left x coordinate.
+	 * @param y
+	 *            top-left y coordinate.
+	 * @param slice
+	 *            z-slice index.
+	 * @param width
+	 *            width of the extract.
+	 * @param height
+	 *            height of the extract.
+	 * @return a new {@link Img} containing the extract, potentially padded with
+	 *         0s.
+	 */
 	public final Img< T > grabImage( final long x, final long y, final long slice, final long width, final long height )
 	{
 
@@ -126,6 +144,44 @@ public class SpotIconGrabber< T extends RealType< T >>
 				targetCursor.setPosition( j, 1 );
 				targetCursor.get().set( sourceCursor.get() );
 			}
+		}
+		return crop;
+	}
+
+	/**
+	 * Returns a 3D cropped copy around the specified coordinates.
+	 * 
+	 * @param x
+	 *            top-left x coordinate.
+	 * @param y
+	 *            top left y coordinate.
+	 * @param slice
+	 *            central z-slice index.
+	 * @param width
+	 *            width of the extract.
+	 * @param height
+	 *            height of the extract.
+	 * @param depth
+	 *            depth (along z) of the extract.
+	 * @return a new {@link Img} containing the extract, potentially padded with
+	 *         0s.
+	 */
+	public final Img< T > grabImage( final long x, final long y, final long slice, final long width, final long height, final long depth )
+	{
+		final long[] minsize = new long[] { x, y, slice - depth / 2, width, height, depth };
+		final Interval interval = Intervals.createMinSize( minsize );
+
+		// Copy cropped view
+		final Img< T > crop = img.factory().create( interval, img.firstElement().copy() );
+		final IntervalView< T > view = Views.zeroMin(Views.interval( Views.extendZero( img ), interval ) );
+		final RandomAccess< T > sourceRA = view.randomAccess( view );
+		final Cursor< T > targetCursor = crop.localizingCursor();
+
+		while ( targetCursor.hasNext() )
+		{
+			targetCursor.fwd();
+			sourceRA.setPosition( targetCursor );
+			targetCursor.get().set( sourceRA.get() );
 		}
 		return crop;
 	}

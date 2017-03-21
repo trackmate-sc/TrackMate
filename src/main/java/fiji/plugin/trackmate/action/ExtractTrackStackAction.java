@@ -1,10 +1,5 @@
 package fiji.plugin.trackmate.action;
 
-import ij.CompositeImage;
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.measure.Calibration;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -14,24 +9,26 @@ import java.util.TreeSet;
 
 import javax.swing.ImageIcon;
 
-import net.imagej.ImgPlus;
-import net.imglib2.img.Img;
-import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.meta.view.HyperSliceImgPlus;
-
 import org.jgrapht.graph.DefaultWeightedEdge;
-import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.util.TMUtils;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.trackscheme.SpotIconGrabber;
+import ij.CompositeImage;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.measure.Calibration;
+import ij.process.ImageProcessor;
+import net.imagej.ImgPlus;
+import net.imglib2.img.Img;
+import net.imglib2.img.display.imagej.ImageJFunctions;
+import net.imglib2.meta.view.HyperSliceImgPlus;
+import net.imglib2.view.Views;
 
 @SuppressWarnings( "deprecation" )
 public class ExtractTrackStackAction extends AbstractTMAction
@@ -41,21 +38,21 @@ public class ExtractTrackStackAction extends AbstractTMAction
 
 	public static final String KEY = "EXTRACT_TRACK_STACK";
 
-	public static final String INFO_TEXT = "<html> " +
-			"Generate a stack of images taken from the track " +
-			"that joins two selected spots. " +
-			"<p>" +
-			"There must be exactly 1 or 2 spots selected for this action " +
-			"to work. If 1 spot is selected, them the stack is extracted from "
+	public static final String INFO_TEXT = "<html> "
+			+ "Generate a stack of images taken from the track "
+			+ "that joins two selected spots. "
+			+ "<p> "
+			+ "There must be exactly 1 or 2 spots selected for this action "
+			+ "to work. If only one spot is selected, then the stack is extracted from "
 			+ "the track it belongs to, from the first spot in time to the last in time. "
-			+ "If there are 2 spots selected, they must belong to a track that connects "
+			+ "If there are two spots selected, they must belong to a track that connects "
 			+ "them. A path is then found that joins them and the stack is extracted "
-			+ "from this path." +
-			"<p>" +
-			"A stack of images will be generated from the spots that join " +
-			"them, defining the image size with the largest spot encountered. " +
-			"The central spot slice is taken in case of 3D data. The currently " +
-			"selected channel is used. " +
+			+ "from this path."
+			+ "<p> "
+			+ "A stack of images will be generated from the spots that join "
+			+ "them. A GUI allows specifying the size of the extract, in units of the largest "
+			+ "spot in the track, and whether to capture a 2D or 3D stack over time. "
+			+ "All channels are captured. " +
 			"</html>";
 
 	public static final ImageIcon ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/magnifier.png" ) );
@@ -70,14 +67,17 @@ public class ExtractTrackStackAction extends AbstractTMAction
 
 	private final double radiusRatio;
 
+	private final boolean do3d;
+
 	/*
 	 * CONSTRUCTOR
 	 */
 
-	public ExtractTrackStackAction( final SelectionModel selectionModel, final double radiusRatio )
+	public ExtractTrackStackAction( final SelectionModel selectionModel, final double radiusRatio, final boolean do3d )
 	{
 		this.selectionModel = selectionModel;
 		this.radiusRatio = radiusRatio;
+		this.do3d = do3d;
 	}
 
 	/*
@@ -88,7 +88,7 @@ public class ExtractTrackStackAction extends AbstractTMAction
 	@Override
 	public void execute( final TrackMate trackmate )
 	{
-		logger.log( "Capturing track stack.\n" );
+		logger.log( "Capturing " + ( do3d ? "3D" : "2D" ) + " track stack.\n" );
 
 		final Model model = trackmate.getModel();
 		final Set< Spot > selection = selectionModel.getSpotSelection();
@@ -171,6 +171,11 @@ public class ExtractTrackStackAction extends AbstractTMAction
 		final double[] calibration = TMUtils.getSpatialCalibration( settings.imp );
 		final int width = ( int ) Math.ceil( 2 * radius * RESIZE_FACTOR / calibration[ 0 ] );
 		final int height = ( int ) Math.ceil( 2 * radius * RESIZE_FACTOR / calibration[ 1 ] );
+		final int depth;
+		if ( do3d )
+			depth = ( int ) Math.ceil( 2 * radius * RESIZE_FACTOR / calibration[ 2 ] );
+		else
+			depth = 1;
 
 		// Extract target channel
 		final ImgPlus img = TMUtils.rawWraps( settings.imp );
@@ -179,8 +184,10 @@ public class ExtractTrackStackAction extends AbstractTMAction
 		final ImageStack stack = new ImageStack( width, height );
 
 		// Iterate over set to grab imglib image
-		int zpos = 0;
+		int progress = 0;
 		final int nChannels = settings.imp.getNChannels();
+
+
 		for ( final Spot spot : sortedSpots )
 		{
 
@@ -200,24 +207,32 @@ public class ExtractTrackStackAction extends AbstractTMAction
 				{
 					slice = Math.round( spot.getFeature( Spot.POSITION_Z ) / calibration[ 2 ] );
 					if ( slice < 0 )
-					{
 						slice = 0;
-					}
+
 					if ( slice >= imgCT.dimension( 2 ) )
-					{
 						slice = imgCT.dimension( 2 ) - 1;
-					}
 				}
 
 				final SpotIconGrabber< ? > grabber = new SpotIconGrabber( imgCT );
-				final Img crop = grabber.grabImage( x, y, slice, width, height );
-
-				// Copy to central holder
-				stack.addSlice( spot.toString(), ImageJFunctions.wrap( crop, crop.toString() ).getProcessor() );
+				if ( do3d )
+				{
+					final Img crop = grabber.grabImage( x, y, slice, width, height, depth );
+					// Copy it so stack
+					for ( int i = 0; i < crop.dimension( 2 ); i++ )
+					{
+						final ImageProcessor processor = ImageJFunctions.wrap( Views.hyperSlice( crop, 2, i ), crop.toString() ).getProcessor();
+						stack.addSlice( spot.toString(), processor );
+					}
+				}
+				else
+				{
+					final Img crop = grabber.grabImage( x, y, slice, width, height );
+					stack.addSlice( spot.toString(), ImageJFunctions.wrap( crop, crop.toString() ).getProcessor() );
+				}
 
 			}
-			logger.setProgress( ( float ) ( zpos + 1 ) / nspots );
-			zpos++;
+			logger.setProgress( ( float ) ( progress + 1 ) / nspots );
+			progress++;
 
 		}
 
@@ -229,8 +244,10 @@ public class ExtractTrackStackAction extends AbstractTMAction
 		impCal.setUnit( settings.imp.getCalibration().getUnit() );
 		impCal.pixelWidth = calibration[ 0 ];
 		impCal.pixelHeight = calibration[ 1 ];
+		impCal.pixelDepth = calibration[ 2 ];
 		impCal.frameInterval = settings.dt;
-		stackTrack.setDimensions( nChannels, 1, nspots );
+		stackTrack.setDimensions( nChannels, depth, nspots );
+		stackTrack.setOpenAsHyperStack( true );
 
 		//Display it
 		if ( nChannels > 1 )
@@ -240,56 +257,20 @@ public class ExtractTrackStackAction extends AbstractTMAction
 			{
 				final CompositeImage scmp = ( CompositeImage ) settings.imp;
 				for ( int c = 0; c < nChannels; c++ )
-				{
 					cmp.setChannelLut( scmp.getChannelLut( c+1 ), c+1 );;
-				}
 			}
 
 			cmp.show();
+			cmp.setZ( depth / 2 + 1 );
 			cmp.resetDisplayRange();
 		}
 		else
 		{
 			stackTrack.show();
+			stackTrack.setZ( depth / 2 + 1 );
 			stackTrack.resetDisplayRange();
 		}
 
-	}
-
-	@Plugin( type = TrackMateActionFactory.class )
-	public static class Factory implements TrackMateActionFactory
-	{
-
-		@Override
-		public String getInfoText()
-		{
-			return INFO_TEXT;
-		}
-
-		@Override
-		public String getName()
-		{
-			return NAME;
-		}
-
-		@Override
-		public String getKey()
-		{
-			return KEY;
-		}
-
-		@Override
-		public ImageIcon getIcon()
-		{
-			return ICON;
-		}
-
-		@Override
-		public TrackMateAction create( final TrackMateGUIController controller )
-		{
-			final double radiusRatio = ( Double ) controller.getGuimodel().getDisplaySettings().get( TrackMateModelView.KEY_SPOT_RADIUS_RATIO );
-			return new ExtractTrackStackAction( controller.getSelectionModel(), radiusRatio );
-		}
-
+		logger.log( "Done." );
 	}
 }
