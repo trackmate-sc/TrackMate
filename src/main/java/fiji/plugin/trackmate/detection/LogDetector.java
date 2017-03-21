@@ -2,8 +2,10 @@ package fiji.plugin.trackmate.detection;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import fiji.plugin.trackmate.Spot;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.algorithm.MultiThreaded;
@@ -12,12 +14,12 @@ import net.imglib2.img.Img;
 import net.imglib2.img.ImgFactory;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.complex.ComplexFloatType;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.util.Intervals;
 import net.imglib2.util.Util;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
-import fiji.plugin.trackmate.Spot;
-import java.util.concurrent.ExecutorService;
 
 public class LogDetector< T extends RealType< T > & NativeType< T >> implements SpotDetector< T >, MultiThreaded
 {
@@ -119,29 +121,35 @@ public class LogDetector< T extends RealType< T > & NativeType< T >> implements 
 		}
 
 
+		// Squeeze singleton dimensions
 		int ndims = interval.numDimensions();
 		for ( int d = 0; d < interval.numDimensions(); d++ )
-		{
-			// Squeeze singleton dimensions
 			if ( interval.dimension( d ) <= 1 )
-			{
 				ndims--;
-			}
-		}
 
 		final Img< FloatType > kernel = DetectionUtils.createLoGKernel( radius, ndims, calibration );
 		final FFTConvolution< FloatType > fftconv = new FFTConvolution< FloatType >( floatImg, kernel );
-		ExecutorService service = Executors.newFixedThreadPool(numThreads);
+
+		/*
+		 * Determine the right img factory for FFT calculation.
+		 */
+		Interval fftinterval = floatImg;
+		for ( int d = 0; d < kernel.numDimensions(); d++ )
+			fftinterval = Intervals.expand( fftinterval, kernel.dimension( d ), d );
+		final ImgFactory< ComplexFloatType > imgFactory = Util.getArrayOrCellImgFactory( fftinterval, new ComplexFloatType() );
+		fftconv.setFFTImgFactory( imgFactory );
+
+		final ExecutorService service = Executors.newFixedThreadPool(numThreads);
 		fftconv.setExecutorService(service);
+
 		fftconv.convolve();
 		service.shutdown();
 
 		final long[] minopposite = new long[ interval.numDimensions() ];
 		interval.min( minopposite );
 		for ( int d = 0; d < minopposite.length; d++ )
-		{
 			minopposite[ d ] = -minopposite[ d ];
-		}
+
 		final IntervalView< FloatType > to = Views.offset( floatImg, minopposite );
 		spots = DetectionUtils.findLocalMaxima( to, threshold, calibration, radius, doSubPixelLocalization, numThreads );
 
