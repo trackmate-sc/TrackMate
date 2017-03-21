@@ -9,9 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 
-import net.imglib2.RealPoint;
-import net.imglib2.algorithm.Benchmark;
-
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
@@ -23,6 +20,8 @@ import fiji.plugin.trackmate.tracking.sparselap.costfunction.CostFunction;
 import fiji.plugin.trackmate.tracking.sparselap.costfunction.SquareDistCostFunction;
 import fiji.plugin.trackmate.tracking.sparselap.costmatrix.JaqamanLinkingCostMatrixCreator;
 import fiji.plugin.trackmate.tracking.sparselap.linker.JaqamanLinker;
+import net.imglib2.RealPoint;
+import net.imglib2.algorithm.Benchmark;
 
 public class KalmanTracker implements SpotTracker, Benchmark
 {
@@ -114,20 +113,33 @@ public class KalmanTracker implements SpotTracker, Benchmark
 		// Find first and second non-empty frames.
 		final NavigableSet< Integer > keySet = spots.keySet();
 		final Iterator< Integer > frameIterator = keySet.iterator();
-		final int firstFrame = frameIterator.next();
-		if ( !frameIterator.hasNext() ) { return true; }
-		final int secondFrame = frameIterator.next();
 
 		/*
 		 * Initialize. Find first links just based on square distance. We do
 		 * this via the orphan spots lists.
 		 */
 
+		// Spots in the PREVIOUS frame that were not part of a link.
+		Collection< Spot > previousOrphanSpots = new ArrayList<>();
+		if ( !frameIterator.hasNext() ) { return true; }
+		int firstFrame = frameIterator.next();
+		while ( previousOrphanSpots.isEmpty() )
+		{
+			previousOrphanSpots = generateSpotList( spots, firstFrame );
+			if ( !frameIterator.hasNext() ) { return true; }
+			firstFrame = frameIterator.next();
+		}
+
 		// Spots in the current frame that are not part of a new link (no
 		// parent).
-		Collection< Spot > orphanSpots = generateSpotList( spots, secondFrame );
-		// Spots in the PREVIOUS frame that were not part of a link.
-		Collection< Spot > previousOrphanSpots = generateSpotList( spots, firstFrame );
+		Collection< Spot > orphanSpots = new ArrayList<>();
+		int secondFrame = firstFrame;
+		while ( orphanSpots.isEmpty() )
+		{
+			orphanSpots = generateSpotList( spots, secondFrame );
+			if ( !frameIterator.hasNext() ) { return true; }
+			secondFrame = frameIterator.next();
+		}
 
 		/*
 		 * Estimate Kalman filter variances.
