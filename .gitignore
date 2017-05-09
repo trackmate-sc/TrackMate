@@ -14,3 +14,9 @@
 
 ## MacOSX
 .DS_Store
+
+## IntelliJ (IDEA) ##
+*.iml
+*.eml
+.idea/
+.idea/libraries/
