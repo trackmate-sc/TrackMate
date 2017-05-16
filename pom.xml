@@ -143,6 +143,7 @@
 		<batik.version>1.9</batik.version>
 		<batik-constants.version>${batik.version}</batik-constants.version>
 		<batik-i18n.version>${batik.version}</batik-i18n.version>
+		<jgraphx.version>3.4.1.3</jgraphx.version>
 	</properties>
 
 	<repositories>
