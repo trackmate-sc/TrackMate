@@ -138,6 +138,11 @@
 		<license.licenseName>gpl_v3</license.licenseName>
 		<license.copyrightOwners>Fiji developers.</license.copyrightOwners>
 		<license.projectName>Fiji distribution of ImageJ for the life sciences.</license.projectName>
+
+		<!-- TEMP: until pom-scijava 15.0.0 is released. -->
+		<batik.version>1.9</batik.version>
+		<batik-constants.version>${batik.version}</batik-constants.version>
+		<batik-i18n.version>${batik.version}</batik-i18n.version>
 	</properties>
 
 	<repositories>
@@ -230,6 +235,18 @@
 		<dependency>
 			<groupId>org.apache.xmlgraphics</groupId>
 			<artifactId>batik-svggen</artifactId>
+		</dependency>
+		<dependency>
+			<!-- NB: Required, but unfortunately undeclared, by batik-svggen. -->
+			<groupId>org.apache.xmlgraphics</groupId>
+			<artifactId>batik-constants</artifactId>
+			<version>${batik-constants.version}</version>
+		</dependency>
+		<dependency>
+			<!-- NB: Required, but unfortunately undeclared, by batik-dom. -->
+			<groupId>org.apache.xmlgraphics</groupId>
+			<artifactId>batik-i18n</artifactId>
+			<version>${batik-i18n.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jdom</groupId>
