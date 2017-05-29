@@ -68,6 +68,7 @@ import fiji.plugin.trackmate.visualization.SpotColorGenerator;
 import fiji.plugin.trackmate.visualization.SpotColorGeneratorPerTrackFeature;
 import fiji.plugin.trackmate.visualization.TrackColorGenerator;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
+import static fiji.plugin.trackmate.visualization.trajeditor.TrajEditor.TRAJ_EDITOR_ICON_16X16;
 import fiji.util.NumberParser;
 
 /**
@@ -89,6 +90,8 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 	public ActionEvent DO_ANALYSIS_BUTTON_PRESSED = new ActionEvent( this, 1, "DoAnalysisButtonPushed" );
 
 	public ActionEvent DO_ANALYSIS_BUTTON_WITH_SHIFT_PRESSED = new ActionEvent( this, 2, "DoAnalysisButtonWithShiftPushed" );
+        
+        public ActionEvent TRAJ_EDITOR_BUTTON_PRESSED = new ActionEvent( this, 3, "TrajEditorButtonPushed" );
 
 	private static final String ANALYSIS_BUTTON_TOOLTIP = "<html>"
 			+ "Export the features of all tracks, edges and all <br>"
@@ -97,6 +100,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 			+ "of all spot are exported.</html>";
 
 	private static final String TRACKSCHEME_BUTTON_TOOLTIP = "<html>" + "Launch a new instance of TrackScheme.</html>";
+        private static final String TRAJEDITOR_BUTTON_TOOLTIP = "<html>" + "Launch a new instance of TrajEditor.</html>";
 
 	/**
 	 * A map of String/Object that configures the look and feel of the views.
@@ -104,6 +108,8 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 	protected Map< String, Object > displaySettings = new HashMap< String, Object >();
 
 	protected JButton jButtonShowTrackScheme;
+        
+        protected JButton jButtonShowTrajEditor;
 
 	protected JButton jButtonDoAnalysis;
 
@@ -942,12 +948,20 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 				jPanelButtons.add( jButtonShowTrackScheme );
 				jButtonShowTrackScheme.setText( "TrackScheme" );
 				jButtonShowTrackScheme.setIcon( TRACK_SCHEME_ICON_16x16 );
-				jButtonShowTrackScheme.setFont( FONT );
+				jButtonShowTrackScheme.setFont( SMALL_FONT );
 				jButtonShowTrackScheme.setToolTipText( TRACKSCHEME_BUTTON_TOOLTIP );
+                                
+                                jButtonShowTrajEditor = new JButton();
+				jPanelButtons.add( jButtonShowTrajEditor );
+				jButtonShowTrajEditor.setText("TrajEditor");
+				jButtonShowTrajEditor.setIcon(TRAJ_EDITOR_ICON_16X16);
+				jButtonShowTrajEditor.setFont(SMALL_FONT);
+				jButtonShowTrajEditor.setToolTipText( TRAJEDITOR_BUTTON_TOOLTIP );
+                                
 				{
 					jButtonDoAnalysis = new JButton( "Analysis" );
 					jPanelButtons.add( jButtonDoAnalysis );
-					jButtonDoAnalysis.setFont( FONT );
+					jButtonDoAnalysis.setFont( SMALL_FONT );
 					jButtonDoAnalysis.setIcon( DO_ANALYSIS_ICON );
 					jButtonDoAnalysis.setToolTipText( ANALYSIS_BUTTON_TOOLTIP );
 					jButtonDoAnalysis.addActionListener( new ActionListener()
@@ -970,6 +984,16 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 						fireAction( TRACK_SCHEME_BUTTON_PRESSED );
 					}
 				} );
+                                
+                                jButtonShowTrajEditor.addActionListener( new ActionListener()
+				{
+					@Override
+					public void actionPerformed( final ActionEvent e )
+					{
+						fireAction( TRAJ_EDITOR_BUTTON_PRESSED );
+					}
+				} );
+                                
 			}
 
 			final GroupLayout groupLayout = new GroupLayout( this );
