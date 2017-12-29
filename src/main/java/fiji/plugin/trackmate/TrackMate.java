@@ -33,7 +33,7 @@ import net.imglib2.multithreading.SimpleMultiThreading;
  *
  * @author Nicholas Perry
  * @author Johannes Schindelin
- * @author Jean-Yves Tinevez - Institut Pasteur - July 2010 - 2016
+ * @author Jean-Yves Tinevez - Institut Pasteur - July 2010 - 2018
  */
 @SuppressWarnings( "deprecation" )
 public class TrackMate implements Benchmark, MultiThreaded, Algorithm
@@ -41,7 +41,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 
 	public static final String PLUGIN_NAME_STR = "TrackMate";
 
-	public static final String PLUGIN_NAME_VERSION = "3.5.1-SNAPSHOT";
+	public static final String PLUGIN_NAME_VERSION = "3.6.0";
 
 	/**
 	 * The model this trackmate will shape.
