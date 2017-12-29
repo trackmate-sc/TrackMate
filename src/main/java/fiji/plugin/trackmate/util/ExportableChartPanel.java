@@ -14,7 +14,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
 import org.jfree.chart.ChartPanel;
-import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYDataset;
@@ -222,8 +222,7 @@ public class ExportableChartPanel extends ChartPanel
 		}
 		if ( file.getPath().endsWith( ".png" ) )
 		{
-			ChartUtilities.saveChartAsPNG( file, getChart(), getWidth(), getHeight() );
-
+			ChartUtils.saveChartAsPNG( file, getChart(), getWidth(), getHeight() );
 		}
 		else if ( file.getPath().endsWith( ".pdf" ) )
 		{
