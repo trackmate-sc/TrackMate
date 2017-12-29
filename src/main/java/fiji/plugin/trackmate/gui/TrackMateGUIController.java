@@ -220,7 +220,7 @@ public class TrackMateGUIController implements ActionListener
 		this.logger = gui.getLogger();
 
 		// Feature updater
-		ModelFeatureUpdater modelFeatureUpdater = new ModelFeatureUpdater( trackmate.getModel(), trackmate.getSettings() );
+		final ModelFeatureUpdater modelFeatureUpdater = new ModelFeatureUpdater( trackmate.getModel(), trackmate.getSettings() );
 		modelFeatureUpdater.setNumThreads( trackmate.getNumThreads() );
 
 		// Feature colorers
@@ -963,7 +963,12 @@ public class TrackMateGUIController implements ActionListener
 		final String welcomeMessage = TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION + " started on:\n" + TMUtils.getCurrentTimeString() + '\n';
 		// Log GUI processing start
 		gui.getLogger().log( welcomeMessage, Logger.BLUE_COLOR );
-
+		gui.getLogger().log( "Please note that TrackMate is available through Fiji, and is based on a publication. "
+				+ "If you use it successfully for your research please be so kind to cite our work:\n" );
+		gui.getLogger().log( "Tinevez, JY.; Perry, N. & Schindelin, J. et al. (2017), 'TrackMate: An open and extensible platform for single-particle tracking.', "
+				+ "Methods 115: 80-90, PMID 27713081.\n", Logger.GREEN_COLOR );
+		gui.getLogger().log( "https://www.ncbi.nlm.nih.gov/pubmed/27713081\n", Logger.BLUE_COLOR );
+		gui.getLogger().log( "https://scholar.google.com/scholar?cluster=9846627681021220605\n", Logger.BLUE_COLOR );
 		// Execute about to be displayed action of the new one
 		panelDescriptor.aboutToDisplayPanel();
 
