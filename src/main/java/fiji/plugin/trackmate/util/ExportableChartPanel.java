@@ -3,8 +3,6 @@ package fiji.plugin.trackmate.util;
 import java.awt.Container;
 import java.awt.FileDialog;
 import java.awt.Frame;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -12,13 +10,13 @@ import java.io.IOException;
 import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.filechooser.FileFilter;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYDataset;
-import org.jfree.ui.ExtensionFileFilter;
 
 import com.itextpdf.text.DocumentException;
 
@@ -77,22 +75,18 @@ public class ExportableChartPanel extends ChartPanel
 	@Override
 	protected JPopupMenu createPopupMenu( final boolean properties, final boolean copy, final boolean save, final boolean print, final boolean zoom )
 	{
-		final JPopupMenu menu = super.createPopupMenu( properties, copy, save, print, zoom );
+		final JPopupMenu menu = super.createPopupMenu( properties, copy, false, print, zoom );
 
 		menu.addSeparator();
 
-		final JMenuItem exportTableItem = new JMenuItem( "Display data tables" );
-		exportTableItem.setActionCommand( "TABLES" );
-		exportTableItem.addActionListener( new ActionListener()
-		{
+		final JMenuItem displayTableItem = new JMenuItem( "Display data tables" );
+		displayTableItem.setActionCommand( "TABLES" );
+		displayTableItem.addActionListener( e -> createDataTable() );
+		menu.add( displayTableItem );
 
-			@Override
-			public void actionPerformed( final ActionEvent e )
-			{
-				createDataTable();
-			}
-		} );
-		menu.add( exportTableItem );
+		final JMenuItem exportToFile = new JMenuItem( "Export plot to file" );
+		exportToFile.addActionListener( e -> doSaveAs() );
+		menu.add( exportToFile );
 
 		return menu;
 	}
@@ -111,11 +105,7 @@ public class ExportableChartPanel extends ChartPanel
 
 		final String xColumnName = plot.getDomainAxis().getLabel();
 
-		final ResultsTable table = new ResultsTable(); // In OUR case this will
-														// work:
-														// there is one common X
-														// axis
-
+		final ResultsTable table = new ResultsTable();
 		final int nPoints = plot.getDataset( 0 ).getItemCount( 0 );
 		for ( int k = 0; k < nPoints; k++ )
 		{
@@ -151,32 +141,23 @@ public class ExportableChartPanel extends ChartPanel
 	/**
 	 * Opens a file chooser and gives the user an opportunity to save the chart
 	 * in PNG, PDF or SVG format.
-	 *
-	 * @throws IOException
-	 *             if there is an I/O error.
 	 */
 	@Override
-	public void doSaveAs() throws IOException
+	public void doSaveAs()
 	{
-
-		File file = null;
-
+		final File file;
 		if ( IJ.isMacintosh() )
 		{
-			// use the native file dialog on the mac
 			Container dialogParent = getParent();
 			while ( !( dialogParent instanceof Frame ) )
-			{
 				dialogParent = dialogParent.getParent();
-			}
-			final Frame frame = ( Frame ) dialogParent;
 
+			final Frame frame = ( Frame ) dialogParent;
 			final FileDialog dialog = new FileDialog( frame, "Export chart to PNG, PDF or SVG", FileDialog.SAVE );
 			String defaultDir = null;
 			if ( getDefaultDirectoryForSaveAs() != null )
-			{
 				defaultDir = getDefaultDirectoryForSaveAs().getPath();
-			}
+			
 			dialog.setDirectory( defaultDir );
 			final FilenameFilter filter = new FilenameFilter()
 			{
@@ -189,40 +170,77 @@ public class ExportableChartPanel extends ChartPanel
 			dialog.setFilenameFilter( filter );
 			dialog.setVisible( true );
 			final String selectedFile = dialog.getFile();
-
 			if ( null == selectedFile )
 				return;
 
 			file = new File( dialog.getDirectory(), selectedFile );
-
 		}
 		else
 		{
-
 			final JFileChooser fileChooser = new JFileChooser();
 			fileChooser.setCurrentDirectory( getDefaultDirectoryForSaveAs() );
-			final ExtensionFileFilter filter1 = new ExtensionFileFilter( "PNG Image File", ".png" );
-			final ExtensionFileFilter filter2 = new ExtensionFileFilter( "Portable Document File (PDF)", ".pdf" );
-			final ExtensionFileFilter filter3 = new ExtensionFileFilter( "Scalable Vector Graphics (SVG)", ".svg" );
-			fileChooser.setAcceptAllFileFilterUsed( false );
-			fileChooser.addChoosableFileFilter( filter1 );
-			fileChooser.addChoosableFileFilter( filter2 );
-			fileChooser.addChoosableFileFilter( filter3 );
+			fileChooser.addChoosableFileFilter( new FileFilter()
+			{
 
+				@Override
+				public String getDescription()
+				{
+					return "PNG Image File";
+				}
+
+				@Override
+				public boolean accept( final File f )
+				{
+					return f.getName().toLowerCase().endsWith( ".png" );
+				}
+			} );
+			fileChooser.addChoosableFileFilter( new FileFilter()
+			{
+
+				@Override
+				public String getDescription()
+				{
+					return "Portable Document File (PDF)";
+				}
+
+				@Override
+				public boolean accept( final File f )
+				{
+					return f.getName().toLowerCase().endsWith( ".pdf" );
+				}
+			} );
+			fileChooser.addChoosableFileFilter( new FileFilter()
+			{
+
+				@Override
+				public String getDescription()
+				{
+					return "Scalable Vector Graphics (SVG)";
+				}
+
+				@Override
+				public boolean accept( final File f )
+				{
+					return f.getName().toLowerCase().endsWith( ".svg" );
+				}
+			} );
 			final int option = fileChooser.showSaveDialog( this );
-			if ( option == JFileChooser.APPROVE_OPTION )
-			{
-				file = fileChooser.getSelectedFile();
-
-			}
-			else
-			{
+			if ( option != JFileChooser.APPROVE_OPTION )
 				return;
-			}
+
+			file = fileChooser.getSelectedFile();
 		}
+
 		if ( file.getPath().endsWith( ".png" ) )
 		{
-			ChartUtils.saveChartAsPNG( file, getChart(), getWidth(), getHeight() );
+			try
+			{
+				ChartUtils.saveChartAsPNG( file, getChart(), getWidth(), getHeight() );
+			}
+			catch ( final IOException e )
+			{
+				e.printStackTrace();
+			}
 		}
 		else if ( file.getPath().endsWith( ".pdf" ) )
 		{
@@ -230,7 +248,7 @@ public class ExportableChartPanel extends ChartPanel
 			{
 				ChartExporter.exportChartAsPDF( getChart(), getBounds(), file );
 			}
-			catch ( final DocumentException e )
+			catch ( final DocumentException | IOException e )
 			{
 				e.printStackTrace();
 			}
@@ -238,7 +256,18 @@ public class ExportableChartPanel extends ChartPanel
 		}
 		else if ( file.getPath().endsWith( ".svg" ) )
 		{
-			ChartExporter.exportChartAsSVG( getChart(), getBounds(), file );
+			try
+			{
+				ChartExporter.exportChartAsSVG( getChart(), getBounds(), file );
+			}
+			catch ( final IOException e )
+			{
+				e.printStackTrace();
+			}
+		}
+		else
+		{
+			IJ.error( "Invalid file extension.", "Please choose a filename with one of the 3 supported extension: .png, .pdf or .svg." );
 		}
 	}
 

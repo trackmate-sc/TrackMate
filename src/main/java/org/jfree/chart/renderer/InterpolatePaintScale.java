@@ -5,21 +5,20 @@ import java.io.Serializable;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.jfree.util.PublicCloneable;
-
 /**
  * This class implements a {@link PaintScale} that generate colors interpolated 
  * within a list of given color, using a linear scale.
  * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; - Sept 2010
  */
-public class InterpolatePaintScale implements PaintScale, PublicCloneable, Serializable {
+public class InterpolatePaintScale implements PaintScale, Serializable
+{
 
 	private static final long serialVersionUID = 2977884191627862512L;
 	private static final Color DEFAULT_COLOR = Color.BLACK;
-	private double lowerBound;
-	private double upperBound;
-	private TreeMap<Double, Color> colors = new TreeMap<Double, Color>();
-	private Color defaultColor;
+	private final double lowerBound;
+	private final double upperBound;
+	private final TreeMap<Double, Color> colors = new TreeMap<Double, Color>();
+	private final Color defaultColor;
 
 	/*
 	 * INNER CLASSES
@@ -49,7 +48,7 @@ public class InterpolatePaintScale implements PaintScale, PublicCloneable, Seria
 	/**
 	 * Create a paint scale with given lower and upper bound, and a specified default color.
 	 */
-	public InterpolatePaintScale(double lowerBound, double upperBound, Color defaultColor) {
+	public InterpolatePaintScale(final double lowerBound, final double upperBound, final Color defaultColor) {
 		this.lowerBound = lowerBound;
 		this.upperBound = upperBound;
 		this.defaultColor = defaultColor;
@@ -58,7 +57,7 @@ public class InterpolatePaintScale implements PaintScale, PublicCloneable, Seria
 	/**
 	 * Create a paint scale with a given lower and upper bound and a default black color.
 	 */
-	public InterpolatePaintScale(double lowerBound, double upperBound) {
+	public InterpolatePaintScale(final double lowerBound, final double upperBound) {
 		this(lowerBound, upperBound, DEFAULT_COLOR);
 	}
 
@@ -79,7 +78,7 @@ public class InterpolatePaintScale implements PaintScale, PublicCloneable, Seria
 	 * <code>value</code>. If <code>value</code> is greater than the upper bound or lower
 	 * than the lower bound set at construction, this call will be ignored. 
 	 */
-	public void add(double value, Color color) {
+	public void add(final double value, final Color color) {
 		if (value > upperBound) return;
 		if (value < lowerBound) return;
 		colors.put(value, color);
@@ -105,10 +104,10 @@ public class InterpolatePaintScale implements PaintScale, PublicCloneable, Seria
 			value = upperBound;
 		if (value < lowerBound)
 			value = lowerBound;
-		Set<Double> keys = colors.keySet();
+		final Set<Double> keys = colors.keySet();
 		double bottom = colors.firstKey();
 		double top = colors.lastKey();
-		for (double key : keys) { 
+		for (final double key : keys) { 
 			top = key;
 			if (value < key) 
 				break;
@@ -122,11 +121,11 @@ public class InterpolatePaintScale implements PaintScale, PublicCloneable, Seria
 		else
 			alpha = (value-bottom) / (top - bottom);
 		
-		Color colorBottom = colors.get(bottom);
-		Color colorTop = colors.get(top);
-		int red 	= (int) ((1-alpha) * colorBottom.getRed() + alpha * colorTop.getRed());
-		int green 	= (int) ((1-alpha) * colorBottom.getGreen() + alpha * colorTop.getGreen()); 
-		int blue	= (int) ((1-alpha) * colorBottom.getBlue() + alpha *  colorTop.getBlue()); 
+		final Color colorBottom = colors.get(bottom);
+		final Color colorTop = colors.get(top);
+		final int red 	= (int) ((1-alpha) * colorBottom.getRed() + alpha * colorTop.getRed());
+		final int green 	= (int) ((1-alpha) * colorBottom.getGreen() + alpha * colorTop.getGreen()); 
+		final int blue	= (int) ((1-alpha) * colorBottom.getBlue() + alpha *  colorTop.getBlue()); 
 		return new Color(red, green, blue);
 	}
 
@@ -135,9 +134,10 @@ public class InterpolatePaintScale implements PaintScale, PublicCloneable, Seria
 		return upperBound;
 	}
 	
+	@Override
 	public InterpolatePaintScale clone() {
-		InterpolatePaintScale ips = new InterpolatePaintScale(lowerBound, upperBound);
-		for(double key : colors.keySet())
+		final InterpolatePaintScale ips = new InterpolatePaintScale(lowerBound, upperBound);
+		for(final double key : colors.keySet())
 			ips.add(key, colors.get(key));
 		return ips;
 	}
