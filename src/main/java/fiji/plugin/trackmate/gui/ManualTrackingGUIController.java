@@ -27,13 +27,9 @@ public class ManualTrackingGUIController extends TrackMateGUIController
 	protected WizardPanelDescriptor previousDescriptor( final WizardPanelDescriptor currentDescriptor )
 	{
 		if ( currentDescriptor == configureViewsDescriptor )
-		{
 			return null;
-		}
-		else
-		{
-			return super.previousDescriptor( currentDescriptor );
-		}
+
+		return super.previousDescriptor( currentDescriptor );
 	}
 
 	@Override

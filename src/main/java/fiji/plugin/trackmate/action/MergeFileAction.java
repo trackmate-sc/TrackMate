@@ -101,7 +101,7 @@ public class MergeFileAction extends AbstractTMAction {
 				 */
 
 				final Set<Spot> spots = modelToMerge.getTrackModel().trackSpots(id);
-				final HashMap<Spot, Spot> mapOldToNew = new HashMap<Spot, Spot>(spots.size());
+				final HashMap<Spot, Spot> mapOldToNew = new HashMap<>(spots.size());
 
 				Spot newSpot = null; // we keep a reference to the new spot, needed below
 				for (final Spot oldSpot : spots) {

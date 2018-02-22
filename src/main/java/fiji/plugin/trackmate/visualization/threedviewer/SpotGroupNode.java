@@ -12,6 +12,7 @@ import org.scijava.java3d.Appearance;
 import org.scijava.java3d.BranchGroup;
 import org.scijava.java3d.ColoringAttributes;
 import org.scijava.java3d.Font3D;
+import org.scijava.java3d.Group;
 import org.scijava.java3d.LineAttributes;
 import org.scijava.java3d.OrientedShape3D;
 import org.scijava.java3d.Switch;
@@ -130,18 +131,18 @@ public class SpotGroupNode< K > extends ContentNode
 	 */
 	public SpotGroupNode( final Map< K, Point4d > centers, final Map< K, Color4f > colors )
 	{
-		this.centers = new HashMap< K, Point4d >( centers );
-		this.colors = new HashMap< K, Color4f >( colors );
+		this.centers = new HashMap< >( centers );
+		this.colors = new HashMap< >( colors );
 		//
 		this.spotSwitch = new Switch( Switch.CHILD_MASK );
 		spotSwitch.setCapability( Switch.ALLOW_SWITCH_WRITE );
-		spotSwitch.setCapability( Switch.ALLOW_CHILDREN_WRITE );
-		spotSwitch.setCapability( Switch.ALLOW_CHILDREN_EXTEND );
+		spotSwitch.setCapability( Group.ALLOW_CHILDREN_WRITE );
+		spotSwitch.setCapability( Group.ALLOW_CHILDREN_EXTEND );
 		//
 		this.textSwitch = new Switch( Switch.CHILD_MASK );
 		textSwitch.setCapability( Switch.ALLOW_SWITCH_WRITE );
-		textSwitch.setCapability( Switch.ALLOW_CHILDREN_WRITE );
-		textSwitch.setCapability( Switch.ALLOW_CHILDREN_EXTEND );
+		textSwitch.setCapability( Group.ALLOW_CHILDREN_WRITE );
+		textSwitch.setCapability( Group.ALLOW_CHILDREN_EXTEND );
 		//
 		this.switchMask = new BitSet();
 		makeMeshes();
@@ -166,21 +167,21 @@ public class SpotGroupNode< K > extends ContentNode
 	 */
 	public SpotGroupNode( final HashMap< K, Point4d > centers, final Color3f color )
 	{
-		this.centers = new HashMap< K, Point4d >( centers );
-		this.colors = new HashMap< K, Color4f >( centers.size() );
+		this.centers = new HashMap< >( centers );
+		this.colors = new HashMap< >( centers.size() );
 		for ( final K key : centers.keySet() )
 		{
 			colors.put( key, new Color4f( color.x, color.y, color.z, 0 ) );
 		}
 		this.spotSwitch = new Switch( Switch.CHILD_MASK );
 		spotSwitch.setCapability( Switch.ALLOW_SWITCH_WRITE );
-		spotSwitch.setCapability( Switch.ALLOW_CHILDREN_WRITE );
-		spotSwitch.setCapability( Switch.ALLOW_CHILDREN_EXTEND );
+		spotSwitch.setCapability( Group.ALLOW_CHILDREN_WRITE );
+		spotSwitch.setCapability( Group.ALLOW_CHILDREN_EXTEND );
 		//
 		this.textSwitch = new Switch( Switch.CHILD_MASK );
 		textSwitch.setCapability( Switch.ALLOW_SWITCH_WRITE );
-		textSwitch.setCapability( Switch.ALLOW_CHILDREN_WRITE );
-		textSwitch.setCapability( Switch.ALLOW_CHILDREN_EXTEND );
+		textSwitch.setCapability( Group.ALLOW_CHILDREN_WRITE );
+		textSwitch.setCapability( Group.ALLOW_CHILDREN_EXTEND );
 		//
 		this.switchMask = new BitSet();
 		makeMeshes();
@@ -229,9 +230,9 @@ public class SpotGroupNode< K > extends ContentNode
 	 */
 	protected void makeMeshes()
 	{
-		meshes = new HashMap< K, CustomTriangleMesh >( centers.size() );
-		texts = new HashMap< K, TransformGroup >( centers.size() );
-		indices = new HashMap< K, Integer >( centers.size() );
+		meshes = new HashMap< >( centers.size() );
+		texts = new HashMap< >( centers.size() );
+		indices = new HashMap< >( centers.size() );
 		spotSwitch.removeAllChildren();
 		textSwitch.removeAllChildren();
 		int index = 0;
@@ -391,15 +392,15 @@ public class SpotGroupNode< K > extends ContentNode
 	/**
 	 * Create the list of points of the mesh of sphere, centered on (x, y, z) of
 	 * radius r, based on the {@link #globe} cache calculated by
-	 * {@link #generateGlobe()}.
+	 * {@link #generateGlobe(int, int)}.
 	 * <p>
-	 * Will throw a NPE if {@link #generateGlobe()} is not called before.
+	 * Will throw a NPE if {@link #generateGlobe(int, int)} is not called before.
 	 */
 	private List< Point3f > createSphere( final double x, final double y, final double z, final double r )
 	{
 
 		// Create triangular faces and add them to the list
-		final ArrayList< Point3f > list = new ArrayList< Point3f >();
+		final ArrayList< Point3f > list = new ArrayList< >();
 		for ( int j = 0; j < globe.length - 1; j++ )
 		{ // the parallels
 			for ( int k = 0; k < globe[ 0 ].length - 1; k++ )

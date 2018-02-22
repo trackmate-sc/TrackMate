@@ -10,8 +10,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 import javax.swing.ImageIcon;
 
-import net.imglib2.algorithm.Benchmark;
-import net.imglib2.algorithm.MultiThreaded;
 import net.imglib2.multithreading.SimpleMultiThreading;
 import net.imglib2.util.Util;
 
@@ -25,7 +23,7 @@ import fiji.plugin.trackmate.Spot;
 
 @SuppressWarnings( "deprecation" )
 @Plugin( type = TrackAnalyzer.class )
-public class TrackSpeedStatisticsAnalyzer implements TrackAnalyzer, MultiThreaded, Benchmark
+public class TrackSpeedStatisticsAnalyzer implements TrackAnalyzer
 {
 
 	/*
@@ -46,15 +44,15 @@ public class TrackSpeedStatisticsAnalyzer implements TrackAnalyzer, MultiThreade
 	// public static final String TRACK_SPEED_KURTOSIS = "TRACK_SPEED_KURTOSIS";
 	// public static final String TRACK_SPEED_SKEWNESS = "TRACK_SPEED_SKEWNESS";
 
-	public static final List< String > FEATURES = new ArrayList< String >( 5 );
+	public static final List< String > FEATURES = new ArrayList< >( 5 );
 
-	public static final Map< String, String > FEATURE_NAMES = new HashMap< String, String >( 5 );
+	public static final Map< String, String > FEATURE_NAMES = new HashMap< >( 5 );
 
-	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< String, String >( 5 );
+	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< >( 5 );
 
-	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 5 );
+	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< >( 5 );
 
-	public static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 5 );
+	public static final Map< String, Boolean > IS_INT = new HashMap< >( 5 );
 
 	static
 	{
@@ -124,7 +122,7 @@ public class TrackSpeedStatisticsAnalyzer implements TrackAnalyzer, MultiThreade
 
 		if ( trackIDs.isEmpty() ) { return; }
 
-		final ArrayBlockingQueue< Integer > queue = new ArrayBlockingQueue< Integer >( trackIDs.size(), false, trackIDs );
+		final ArrayBlockingQueue< Integer > queue = new ArrayBlockingQueue< >( trackIDs.size(), false, trackIDs );
 		final FeatureModel fm = model.getFeatureModel();
 
 		final Thread[] threads = SimpleMultiThreading.newThreads( numThreads );
@@ -163,10 +161,8 @@ public class TrackSpeedStatisticsAnalyzer implements TrackAnalyzer, MultiThreade
 							final Spot target = model.getTrackModel().getEdgeTarget( edge );
 
 							// Edge velocity
-							final Double d2 = source.squareDistanceTo( target );
-							final Double dt = source.diffTo( target, Spot.POSITION_T );
-							if ( d2 == null || dt == null )
-								continue;
+							final double d2 = source.squareDistanceTo( target );
+							final double dt = source.diffTo( target, Spot.POSITION_T );
 							val = Math.sqrt( d2 ) / Math.abs( dt );
 
 							// For median, min and max
@@ -244,7 +240,7 @@ public class TrackSpeedStatisticsAnalyzer implements TrackAnalyzer, MultiThreade
 	public long getProcessingTime()
 	{
 		return processingTime;
-	};
+	}
 
 	@Override
 	public String getKey()

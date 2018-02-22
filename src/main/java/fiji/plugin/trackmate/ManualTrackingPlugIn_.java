@@ -1,7 +1,6 @@
 package fiji.plugin.trackmate;
 
 import java.util.Map;
-
 import fiji.plugin.trackmate.detection.ManualDetectorFactory;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.ManualTrackingGUIController;
@@ -11,10 +10,8 @@ import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij.WindowManager;
-import ij.plugin.PlugIn;
 
-
-public class ManualTrackingPlugIn_ extends TrackMatePlugIn_ implements PlugIn
+public class ManualTrackingPlugIn_ extends TrackMatePlugIn_
 {
 
 	/**
@@ -66,10 +63,7 @@ public class ManualTrackingPlugIn_ extends TrackMatePlugIn_ implements PlugIn
 		 */
 
 		final ManualTrackingGUIController controller = new ManualTrackingGUIController( trackmate );
-		if ( imp != null )
-		{
-			GuiUtils.positionWindow( controller.getGUI(), imp.getWindow() );
-		}
+		GuiUtils.positionWindow( controller.getGUI(), imp.getWindow() );
 
 		/*
 		 * Launch view
@@ -89,14 +83,14 @@ public class ManualTrackingPlugIn_ extends TrackMatePlugIn_ implements PlugIn
 	@Override
 	protected Settings createSettings( final ImagePlus imp )
 	{
-		final Settings settings = super.createSettings( imp );
+		final Settings lSettings = super.createSettings( imp );
 		// Manual detection
-		settings.detectorFactory = new ManualDetectorFactory();
-		settings.detectorSettings = settings.detectorFactory.getDefaultSettings();
+		lSettings.detectorFactory = new ManualDetectorFactory();
+		lSettings.detectorSettings = lSettings.detectorFactory.getDefaultSettings();
 		// Manual tracker
-		settings.trackerFactory = new ManualTrackerFactory();
-		settings.trackerSettings = settings.trackerFactory.getDefaultSettings();
-		return settings;
+		lSettings.trackerFactory = new ManualTrackerFactory();
+		lSettings.trackerSettings = lSettings.trackerFactory.getDefaultSettings();
+		return lSettings;
 	}
 
 	public static void main( final String[] args )

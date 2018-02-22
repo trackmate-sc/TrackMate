@@ -46,13 +46,13 @@ public class DownsampleLogDetectorFactory< T extends RealType< T > & NativeType<
 	 */
 
 	/** A string key identifying this factory. */
-	public static final String DETECTOR_KEY = "DOWNSAMPLE_LOG_DETECTOR";
+	public static final String THIS_DETECTOR_KEY = "DOWNSAMPLE_LOG_DETECTOR";
 
 	/** The pretty name of the target detector. */
-	public static final String NAME = "Downsample LoG detector";
+	public static final String THIS_NAME = "Downsample LoG detector";
 
 	/** An html information text. */
-	public static final String INFO_TEXT = "<html>" + "This detector is basically identical to the LoG detector, except <br>" + "that images are downsampled before filtering, giving it a good <br>" + "kick in speed, particularly for large spot sizes. It is the fastest for <br>" + "large spot sizes (>&nbsp;~20 pixels), at the cost of precision in localization. " + "</html>";
+	public static final String THIS_INFO_TEXT = "<html>" + "This detector is basically identical to the LoG detector, except <br>" + "that images are downsampled before filtering, giving it a good <br>" + "kick in speed, particularly for large spot sizes. It is the fastest for <br>" + "large spot sizes (>&nbsp;~20 pixels), at the cost of precision in localization. " + "</html>";
 
 	/*
 	 * METHODS
@@ -67,7 +67,7 @@ public class DownsampleLogDetectorFactory< T extends RealType< T > & NativeType<
 		final double[] calibration = TMUtils.getSpatialCalibration( img );
 
 		final RandomAccessible< T > imFrame = prepareFrameImg( frame );
-		final DownsampleLogDetector< T > detector = new DownsampleLogDetector< T >( imFrame, interval, calibration, radius, threshold, downsamplingFactor );
+		final DownsampleLogDetector< T > detector = new DownsampleLogDetector< >( imFrame, interval, calibration, radius, threshold, downsamplingFactor );
 		return detector;
 	}
 
@@ -82,13 +82,13 @@ public class DownsampleLogDetectorFactory< T extends RealType< T > & NativeType<
 	@Override
 	public String getKey()
 	{
-		return DETECTOR_KEY;
+		return THIS_DETECTOR_KEY;
 	}
 
 	@Override
 	public String getName()
 	{
-		return NAME;
+		return THIS_NAME;
 	}
 
 	@Override
@@ -100,29 +100,29 @@ public class DownsampleLogDetectorFactory< T extends RealType< T > & NativeType<
 	@Override
 	public Map< String, Object > getDefaultSettings()
 	{
-		final Map< String, Object > settings = new HashMap< String, Object >();
-		settings.put( KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL );
-		settings.put( KEY_RADIUS, DEFAULT_RADIUS );
-		settings.put( KEY_THRESHOLD, DEFAULT_THRESHOLD );
-		settings.put( KEY_DOWNSAMPLE_FACTOR, DEFAULT_DOWNSAMPLE_FACTOR );
-		return settings;
+		final Map< String, Object > lSettings = new HashMap< >();
+		lSettings.put( KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL );
+		lSettings.put( KEY_RADIUS, DEFAULT_RADIUS );
+		lSettings.put( KEY_THRESHOLD, DEFAULT_THRESHOLD );
+		lSettings.put( KEY_DOWNSAMPLE_FACTOR, DEFAULT_DOWNSAMPLE_FACTOR );
+		return lSettings;
 	}
 
 	@Override
-	public boolean checkSettings( final Map< String, Object > settings )
+	public boolean checkSettings( final Map< String, Object > lSettings )
 	{
 		boolean ok = true;
 		final StringBuilder errorHolder = new StringBuilder();
-		ok = ok & checkParameter( settings, KEY_TARGET_CHANNEL, Integer.class, errorHolder );
-		ok = ok & checkParameter( settings, KEY_RADIUS, Double.class, errorHolder );
-		ok = ok & checkParameter( settings, KEY_THRESHOLD, Double.class, errorHolder );
-		ok = ok & checkParameter( settings, KEY_DOWNSAMPLE_FACTOR, Integer.class, errorHolder );
-		final List< String > mandatoryKeys = new ArrayList< String >();
+		ok = ok & checkParameter( lSettings, KEY_TARGET_CHANNEL, Integer.class, errorHolder );
+		ok = ok & checkParameter( lSettings, KEY_RADIUS, Double.class, errorHolder );
+		ok = ok & checkParameter( lSettings, KEY_THRESHOLD, Double.class, errorHolder );
+		ok = ok & checkParameter( lSettings, KEY_DOWNSAMPLE_FACTOR, Integer.class, errorHolder );
+		final List< String > mandatoryKeys = new ArrayList< >();
 		mandatoryKeys.add( KEY_TARGET_CHANNEL );
 		mandatoryKeys.add( KEY_RADIUS );
 		mandatoryKeys.add( KEY_THRESHOLD );
 		mandatoryKeys.add( KEY_DOWNSAMPLE_FACTOR );
-		ok = ok & checkMapKeys( settings, mandatoryKeys, null, errorHolder );
+		ok = ok & checkMapKeys( lSettings, mandatoryKeys, null, errorHolder );
 		if ( !ok )
 		{
 			errorMessage = errorHolder.toString();
@@ -131,16 +131,16 @@ public class DownsampleLogDetectorFactory< T extends RealType< T > & NativeType<
 	}
 
 	@Override
-	public ConfigurationPanel getDetectorConfigurationPanel( final Settings settings, final Model model )
+	public ConfigurationPanel getDetectorConfigurationPanel( final Settings lSettings, final Model model )
 	{
-		return new DownSampleLogDetectorConfigurationPanel( settings, model );
+		return new DownSampleLogDetectorConfigurationPanel( lSettings, model );
 	}
 
 	@Override
-	public boolean marshall( final Map< String, Object > settings, final Element element )
+	public boolean marshall( final Map< String, Object > lSettings, final Element element )
 	{
 		final StringBuilder errorHolder = new StringBuilder();
-		final boolean ok = writeTargetChannel( settings, element, errorHolder ) && writeRadius( settings, element, errorHolder ) && writeThreshold( settings, element, errorHolder ) && writeDownsamplingFactor( settings, element, errorHolder );
+		final boolean ok = writeTargetChannel( lSettings, element, errorHolder ) && writeRadius( lSettings, element, errorHolder ) && writeThreshold( lSettings, element, errorHolder ) && writeDownsamplingFactor( lSettings, element, errorHolder );
 		if ( !ok )
 		{
 			errorMessage = errorHolder.toString();
@@ -149,21 +149,21 @@ public class DownsampleLogDetectorFactory< T extends RealType< T > & NativeType<
 	}
 
 	@Override
-	public boolean unmarshall( final Element element, final Map< String, Object > settings )
+	public boolean unmarshall( final Element element, final Map< String, Object > lSettings )
 	{
-		settings.clear();
+		lSettings.clear();
 		final StringBuilder errorHolder = new StringBuilder();
 		boolean ok = true;
-		ok = ok & readDoubleAttribute( element, settings, KEY_RADIUS, errorHolder );
-		ok = ok & readDoubleAttribute( element, settings, KEY_THRESHOLD, errorHolder );
-		ok = ok & readIntegerAttribute( element, settings, KEY_DOWNSAMPLE_FACTOR, errorHolder );
-		ok = ok & readIntegerAttribute( element, settings, KEY_TARGET_CHANNEL, errorHolder );
+		ok = ok & readDoubleAttribute( element, lSettings, KEY_RADIUS, errorHolder );
+		ok = ok & readDoubleAttribute( element, lSettings, KEY_THRESHOLD, errorHolder );
+		ok = ok & readIntegerAttribute( element, lSettings, KEY_DOWNSAMPLE_FACTOR, errorHolder );
+		ok = ok & readIntegerAttribute( element, lSettings, KEY_TARGET_CHANNEL, errorHolder );
 		if ( !ok )
 		{
 			errorMessage = errorHolder.toString();
 			return false;
 		}
-		return checkSettings( settings );
+		return checkSettings( lSettings );
 	}
 
 }

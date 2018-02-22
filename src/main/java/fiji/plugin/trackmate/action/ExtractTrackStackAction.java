@@ -98,7 +98,7 @@ public class ExtractTrackStackAction extends AbstractTMAction
 			if ( nspots == 1 )
 			{
 				final Integer trackID = model.getTrackModel().trackIDOf( selectionModel.getSpotSelection().iterator().next() );
-				final List< Spot > spots = new ArrayList< Spot >( model.getTrackModel().trackSpots( trackID ) );
+				final List< Spot > spots = new ArrayList<>( model.getTrackModel().trackSpots( trackID ) );
 				Collections.sort( spots, Spot.frameComparator );
 				selectionModel.clearSelection();
 				selectionModel.addSpotToSelection( spots.get( 0 ) );
@@ -139,7 +139,7 @@ public class ExtractTrackStackAction extends AbstractTMAction
 
 		// Build spot list
 		// & Get largest diameter
-		final List< Spot > path = new ArrayList< Spot >( edges.size() );
+		final List< Spot > path = new ArrayList<>( edges.size() );
 		path.add( start );
 		Spot previous = start;
 		Spot current;
@@ -162,7 +162,7 @@ public class ExtractTrackStackAction extends AbstractTMAction
 		path.add( end );
 
 		// Sort spot by ascending frame number
-		final TreeSet< Spot > sortedSpots = new TreeSet< Spot >( Spot.timeComparator );
+		final TreeSet< Spot > sortedSpots = new TreeSet<>( Spot.timeComparator );
 		sortedSpots.addAll( path );
 		nspots = sortedSpots.size();
 
@@ -257,7 +257,7 @@ public class ExtractTrackStackAction extends AbstractTMAction
 			{
 				final CompositeImage scmp = ( CompositeImage ) settings.imp;
 				for ( int c = 0; c < nChannels; c++ )
-					cmp.setChannelLut( scmp.getChannelLut( c+1 ), c+1 );;
+					cmp.setChannelLut( scmp.getChannelLut( c+1 ), c+1 );
 			}
 
 			cmp.show();

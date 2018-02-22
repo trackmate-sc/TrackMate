@@ -31,8 +31,8 @@ public class DetectorChoiceDescriptor implements WizardPanelDescriptor
 		this.detectorProvider = detectorProvider;
 		this.controller = controller;
 		final List< String > visibleKeys = detectorProvider.getVisibleKeys();
-		final List< String > detectorNames = new ArrayList< String >( visibleKeys.size() );
-		final List< String > infoTexts = new ArrayList< String >( visibleKeys.size() );
+		final List< String > detectorNames = new ArrayList< >( visibleKeys.size() );
+		final List< String > infoTexts = new ArrayList< >( visibleKeys.size() );
 		for ( final String key : visibleKeys )
 		{
 			detectorNames.add( detectorProvider.getFactory( key ).getName() );

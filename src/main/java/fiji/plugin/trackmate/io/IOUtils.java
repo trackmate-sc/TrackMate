@@ -81,8 +81,8 @@ public class IOUtils {
 			final JFileChooser fileChooser = new JFileChooser(file.getParent()) {
 				private static final long serialVersionUID = 1L;
 				@Override
-			    protected JDialog createDialog( final Component parent ) throws HeadlessException {
-			        final JDialog dialog = super.createDialog( parent );
+			    protected JDialog createDialog( final Component lParent ) throws HeadlessException {
+			        final JDialog dialog = super.createDialog( lParent );
 			        dialog.setIconImage( TRACKMATE_ICON.getImage() );
 			        return dialog;
 			    }
@@ -139,8 +139,8 @@ public class IOUtils {
 			final JFileChooser fileChooser = new JFileChooser(file.getParent()) {
 				private static final long serialVersionUID = 1L;
 				@Override
-			    protected JDialog createDialog( final Component parent ) throws HeadlessException {
-			        final JDialog dialog = super.createDialog( parent );
+			    protected JDialog createDialog( final Component lParent ) throws HeadlessException {
+			        final JDialog dialog = super.createDialog( lParent );
 			        dialog.setIconImage( TRACKMATE_ICON.getImage() );
 			        return dialog;
 			    }
@@ -206,9 +206,9 @@ public class IOUtils {
 				private static final long serialVersionUID = 1L;
 
 				@Override
-				protected JDialog createDialog( final Component parent ) throws HeadlessException
+				protected JDialog createDialog( final Component lParent ) throws HeadlessException
 				{
-					final JDialog dialog = super.createDialog( parent );
+					final JDialog dialog = super.createDialog( lParent );
 					dialog.setIconImage( TRACKMATE_ICON.getImage() );
 					return dialog;
 				}

@@ -10,7 +10,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 import javax.swing.ImageIcon;
 
-import net.imglib2.algorithm.MultiThreaded;
 import net.imglib2.multithreading.SimpleMultiThreading;
 
 import org.scijava.plugin.Plugin;
@@ -22,7 +21,7 @@ import fiji.plugin.trackmate.Spot;
 
 @SuppressWarnings( "deprecation" )
 @Plugin( type = TrackAnalyzer.class )
-public class TrackDurationAnalyzer implements TrackAnalyzer, MultiThreaded
+public class TrackDurationAnalyzer implements TrackAnalyzer
 {
 
 	public static final String KEY = "Track duration";
@@ -35,15 +34,15 @@ public class TrackDurationAnalyzer implements TrackAnalyzer, MultiThreaded
 
 	public static final String TRACK_DISPLACEMENT = "TRACK_DISPLACEMENT";
 
-	public static final List< String > FEATURES = new ArrayList< String >( 4 );
+	public static final List< String > FEATURES = new ArrayList< >( 4 );
 
-	public static final Map< String, String > FEATURE_NAMES = new HashMap< String, String >( 4 );
+	public static final Map< String, String > FEATURE_NAMES = new HashMap< >( 4 );
 
-	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< String, String >( 4 );
+	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< >( 4 );
 
-	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 4 );
+	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< >( 4 );
 
-	public static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 4 );
+	public static final Map< String, Boolean > IS_INT = new HashMap< >( 4 );
 
 	static
 	{
@@ -94,7 +93,7 @@ public class TrackDurationAnalyzer implements TrackAnalyzer, MultiThreaded
 
 		if ( trackIDs.isEmpty() ) { return; }
 
-		final ArrayBlockingQueue< Integer > queue = new ArrayBlockingQueue< Integer >( trackIDs.size(), false, trackIDs );
+		final ArrayBlockingQueue< Integer > queue = new ArrayBlockingQueue< >( trackIDs.size(), false, trackIDs );
 		final FeatureModel fm = model.getFeatureModel();
 
 		final Thread[] threads = SimpleMultiThreading.newThreads( numThreads );
@@ -130,7 +129,9 @@ public class TrackDurationAnalyzer implements TrackAnalyzer, MultiThreaded
 								endSpot = spot;
 							}
 						}
-
+						if (null == startSpot || null == endSpot)
+							continue;
+						
 						fm.putTrackFeature( trackID, TRACK_DURATION, ( maxT - minT ) );
 						fm.putTrackFeature( trackID, TRACK_START, minT );
 						fm.putTrackFeature( trackID, TRACK_STOP, maxT );

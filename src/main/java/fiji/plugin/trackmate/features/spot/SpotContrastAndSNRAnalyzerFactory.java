@@ -41,15 +41,15 @@ public class SpotContrastAndSNRAnalyzerFactory< T extends RealType< T > & Native
 
 	public static final String SNR = "SNR";
 
-	public static final ArrayList< String > FEATURES = new ArrayList< String >( 2 );
+	public static final ArrayList< String > FEATURES = new ArrayList< >( 2 );
 
-	public static final HashMap< String, String > FEATURE_NAMES = new HashMap< String, String >( 2 );
+	public static final HashMap< String, String > FEATURE_NAMES = new HashMap< >( 2 );
 
-	public static final HashMap< String, String > FEATURE_SHORT_NAMES = new HashMap< String, String >( 2 );
+	public static final HashMap< String, String > FEATURE_SHORT_NAMES = new HashMap< >( 2 );
 
-	public static final HashMap< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 2 );
+	public static final HashMap< String, Dimension > FEATURE_DIMENSIONS = new HashMap< >( 2 );
 
-	public static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 2 );
+	public static final Map< String, Boolean > IS_INT = new HashMap< >( 2 );
 
 	static
 	{
@@ -78,7 +78,7 @@ public class SpotContrastAndSNRAnalyzerFactory< T extends RealType< T > & Native
 		final ImgPlus< T > imgC = HyperSliceImgPlus.fixChannelAxis( img, channel );
 		final ImgPlus< T > imgCT = HyperSliceImgPlus.fixTimeAxis( imgC, frame );
 		final Iterator< Spot > spots = model.getSpots().iterator( frame, false );
-		return new SpotContrastAndSNRAnalyzer< T >( imgCT, spots );
+		return new SpotContrastAndSNRAnalyzer< >( imgCT, spots );
 	}
 
 	@Override

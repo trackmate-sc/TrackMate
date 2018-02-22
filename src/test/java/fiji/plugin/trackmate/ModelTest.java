@@ -185,9 +185,7 @@ public class ModelTest {
 
 		// Stitched, so we should get back one track again
 		assertEquals(1, model.getTrackModel().nTracks(false));
-
 	}
-
 
 	/**
 	 * Test if manual adding spots and links in one update step is caught as a single
@@ -347,16 +345,13 @@ public class ModelTest {
 
 	}
 
-
-
 	@Test
 	public void testRemovingWholeTracksAtOnce() {
 		final int N_TRACKS = 2;
 		final int DEPTH = 10;
 		final Model model = new Model();
-		final Collection<Spot> trackSpots = new HashSet<Spot>();
-		final Collection<DefaultWeightedEdge> trackEdges = new HashSet<DefaultWeightedEdge>();
-
+		final Collection<Spot> trackSpots = new HashSet<>();
+		final Collection<DefaultWeightedEdge> trackEdges = new HashSet<>();
 
 		// Create model
 		model.beginUpdate();
@@ -416,15 +411,9 @@ public class ModelTest {
 		model.endUpdate();
 	}
 
-
-
-
-
-
 	/*
 	 * EXAMPLE
 	 */
-
 
 	public void exampleManipulation() {
 
@@ -439,7 +428,6 @@ public class ModelTest {
 		final Spot s3 = new Spot( 0d, 0d, 0d, 1d, -1d, "S3" );
 		final Spot s4 = new Spot( 0d, 0d, 0d, 1d, -1d, "S4" );
 		final Spot s5 = new Spot( 0d, 0d, 0d, 1d, -1d, "S5" );
-
 
 		System.out.println("Create the graph in one update:");
 		model.beginUpdate();
@@ -468,8 +456,6 @@ public class ModelTest {
 		System.out.println();
 		System.out.println();
 
-
-
 		// Remove one spot and see what happens
 		System.out.println("Removing a single spot in the middle of the track:");
 		model.beginUpdate();
@@ -488,11 +474,8 @@ public class ModelTest {
 		System.out.println("Track visibility is:");
 		System.out.println(model.getTrackModel().trackIDs(true));
 
-
-
 		System.out.println();
 		System.out.println();
-
 
 		System.out.println("Making the first track invisible:");
 		model.beginUpdate();
@@ -505,11 +488,8 @@ public class ModelTest {
 		System.out.println("Track visibility is:");
 		System.out.println(model.getTrackModel().trackIDs(true));
 
-
-
 		System.out.println();
 		System.out.println();
-
 
 		System.out.println("Reconnect the 2 tracks:");
 		model.beginUpdate();
@@ -518,7 +498,6 @@ public class ModelTest {
 		} finally {
 			model.endUpdate();
 		}
-
 
 		System.out.println();
 		System.out.println();
@@ -534,19 +513,6 @@ public class ModelTest {
 
 	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 	public static void main(final String[] args) {
 		new ModelTest().exampleManipulation();
 	}
@@ -559,6 +525,5 @@ public class ModelTest {
 			System.out.println(event);
 
 		}
-
 	}
 }

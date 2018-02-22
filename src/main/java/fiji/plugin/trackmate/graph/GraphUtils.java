@@ -58,7 +58,7 @@ public class GraphUtils {
 		/*
 		 * Find how many different frames we have
 		 */
-		TreeSet<Integer> frames = new TreeSet<Integer>();
+		TreeSet<Integer> frames = new TreeSet<>();
 		for (Spot spot : model.vertexSet()) {
 			frames.add(spot.getFeature(Spot.FRAME).intValue());
 		}
@@ -68,12 +68,12 @@ public class GraphUtils {
 		/*
 		 * Build string, one StringBuilder per frame
 		 */
-		HashMap<Integer, StringBuilder> strings = new HashMap<Integer, StringBuilder>(nframes);
+		HashMap<Integer, StringBuilder> strings = new HashMap<>(nframes);
 		for (Integer frame : frames) {
 			strings.put(frame, new StringBuilder());
 		}
 
-		HashMap<Integer, StringBuilder> below = new HashMap<Integer, StringBuilder>(nframes);
+		HashMap<Integer, StringBuilder> below = new HashMap<>(nframes);
 		for (Integer frame : frames) {
 			below.put(frame, new StringBuilder());
 		}
@@ -81,7 +81,7 @@ public class GraphUtils {
 		/*
 		 * Keep track of where the carret is for each spot
 		 */
-		Map<Spot, Integer> carretPos = new HashMap<Spot, Integer>(model.vertexSet().size()); 
+		Map<Spot, Integer> carretPos = new HashMap<>(model.vertexSet().size()); 
 
 		/*
 		 * Comparator to have spots order by name
@@ -283,7 +283,7 @@ public class GraphUtils {
 		};
 
 
-		Map<Spot, int[]> mappings = new HashMap<Spot, int[]>();
+		Map<Spot, int[]> mappings = new HashMap<>();
 		SimpleDirectedWeightedGraph<int[], DefaultWeightedEdge> leafTree = model.copy(factory, isLeafFun, mappings);
 
 		/*
@@ -294,8 +294,8 @@ public class GraphUtils {
 		 * By the way we compute the largest spot name
 		 */
 
-		Set<Spot> roots = new HashSet<Spot>(model.nTracks(false)); // approx
-		Set<Spot> firsts = new HashSet<Spot>(model.nTracks(false)); // exact
+		Set<Spot> roots = new HashSet<>(model.nTracks(false)); // approx
+		Set<Spot> firsts = new HashSet<>(model.nTracks(false)); // exact
 		Set<Integer> ids = model.trackIDs(false);
 		for (Integer id : ids) {
 			Set<Spot> track = model.trackSpots(id);
@@ -323,7 +323,7 @@ public class GraphUtils {
 			}
 		};
 
-		RecursiveCumSum<int[], DefaultWeightedEdge> cumsum = new RecursiveCumSum<int[], DefaultWeightedEdge>(leafTree, cumsumFun);
+		RecursiveCumSum<int[], DefaultWeightedEdge> cumsum = new RecursiveCumSum<>(leafTree, cumsumFun);
 		for(Spot root : firsts) {
 			int[] current = mappings.get(root);
 			cumsum.apply(current);
@@ -332,7 +332,7 @@ public class GraphUtils {
 		/*
 		 * Convert to map of spot vs integer 
 		 */
-		Map<Spot, Integer> widths = new HashMap<Spot, Integer>();
+		Map<Spot, Integer> widths = new HashMap<>();
 		for (Spot spot : model.vertexSet()) {
 			widths.put(spot, mappings.get(spot)[0]);
 		}
@@ -360,7 +360,7 @@ public class GraphUtils {
 	 * predecessors.
 	 */
 	public static final Set<Spot> getSibblings(final DirectedNeighborIndex<Spot, DefaultWeightedEdge> cache, final Spot spot) {
-		HashSet<Spot> sibblings = new HashSet<Spot>();
+		HashSet<Spot> sibblings = new HashSet<>();
 		Set<Spot> predecessors = cache.predecessorsOf(spot);
 		for (Spot predecessor : predecessors) {
 			sibblings.addAll(cache.successorsOf(predecessor));

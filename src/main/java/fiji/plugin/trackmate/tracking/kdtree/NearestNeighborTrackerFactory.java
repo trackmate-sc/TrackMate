@@ -100,7 +100,7 @@ public class NearestNeighborTrackerFactory implements SpotTrackerFactory
 	@Override
 	public Map< String, Object > getDefaultSettings()
 	{
-		final Map< String, Object > settings = new HashMap< String, Object >();
+		final Map< String, Object > settings = new HashMap<>();
 		settings.put( KEY_LINKING_MAX_DISTANCE, DEFAULT_LINKING_MAX_DISTANCE );
 		return settings;
 	}

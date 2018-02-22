@@ -160,7 +160,7 @@ public class ConvexBranchesDecompositionTest
 		}
 
 		// Test unicity
-		final Set< Spot > allSpots = new HashSet< Spot >();
+		final Set< Spot > allSpots = new HashSet< >();
 		for ( final List< Spot > branch : branches )
 		{
 			allSpots.addAll( branch );
@@ -196,7 +196,7 @@ public class ConvexBranchesDecompositionTest
 		final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph = builder.getResult();
 
 		// Are all the source spots in the reconstructed graph?
-		final Set< Spot > allSourceSpots = new HashSet< Spot >();
+		final Set< Spot > allSourceSpots = new HashSet< >();
 		for ( final Integer trackID : model.getTrackModel().trackIDs( true ) )
 		{
 			allSourceSpots.addAll( model.getTrackModel().trackSpots( trackID ) );
@@ -211,7 +211,7 @@ public class ConvexBranchesDecompositionTest
 		}
 
 		// Are all the source edges in the reconstructed graph?
-		final Set< DefaultWeightedEdge > allSourceEdges = new HashSet< DefaultWeightedEdge >();
+		final Set< DefaultWeightedEdge > allSourceEdges = new HashSet< >();
 		for ( final Integer trackId : model.getTrackModel().trackIDs( true ) )
 		{
 			allSourceEdges.addAll( model.getTrackModel().trackEdges( trackId ) );

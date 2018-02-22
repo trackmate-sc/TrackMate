@@ -42,9 +42,9 @@ public class BasicDetectorConfigurationPanel extends LogDetectorConfigurationPan
 	@Override
 	public Map< String, Object > getSettings()
 	{
-		final Map< String, Object > settings = new HashMap< String, Object >( 1 );
-		settings.put( KEY_RADIUS, NumberParser.parseDouble( jTextFieldBlobDiameter.getText() ) );
-		return settings;
+		final Map< String, Object > lSettings = new HashMap<>( 1 );
+		lSettings.put( KEY_RADIUS, NumberParser.parseDouble( jTextFieldBlobDiameter.getText() ) );
+		return lSettings;
 	}
 
 }

@@ -17,15 +17,13 @@ import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 import ij.ImagePlus;
 
 import java.io.File;
-import java.io.IOException;
 
-import org.jdom2.JDOMException;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.scijava.util.AppUtils;
 
 public class BadEdgeRemoval_TestDrive {
 
-	public static void main(final String[] args) throws JDOMException, IOException, InterruptedException {
+	public static void main(final String[] args) throws InterruptedException {
 
 		ij.ImageJ.main(args);
 

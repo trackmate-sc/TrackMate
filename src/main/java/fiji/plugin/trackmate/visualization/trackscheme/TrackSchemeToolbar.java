@@ -15,6 +15,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JToolBar;
+import javax.swing.SwingConstants;
 
 import fiji.plugin.trackmate.visualization.trackscheme.utils.SearchBar;
 
@@ -24,34 +25,22 @@ public class TrackSchemeToolbar extends JToolBar
 	private static final long serialVersionUID = 3442140463984241266L;
 
 	private static final ImageIcon LINKING_ON_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/connect.png" ) );
-
 	private static final ImageIcon LINKING_OFF_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/connect_bw.png" ) );
-
 	private static final ImageIcon THUMBNAIL_ON_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/images.png" ) );
-
-	private static final ImageIcon THUMBNAIL_OFF_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/images_bw.png" ) );;
-
+	private static final ImageIcon THUMBNAIL_OFF_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/images_bw.png" ) );
 	private static final ImageIcon RESET_ZOOM_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/zoom.png" ) );
-
 	private static final ImageIcon ZOOM_IN_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/zoom_in.png" ) );
-
 	private static final ImageIcon ZOOM_OUT_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/zoom_out.png" ) );
-
 	private static final ImageIcon REFRESH_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/refresh.png" ) );
-
 	private static final ImageIcon CAPTURE_UNDECORATED_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/camera_go.png" ) );
-
 	private static final ImageIcon CAPTURE_DECORATED_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/camera_edit.png" ) );
-
 	private static final ImageIcon DISPLAY_DECORATIONS_ON_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/application_view_columns.png" ) );
-
 	private static final ImageIcon SELECT_STYLE_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/theme.png" ) );
-
 	private final TrackScheme trackScheme;
 
 	public TrackSchemeToolbar( final TrackScheme trackScheme )
 	{
-		super( "Track Scheme toolbar", JToolBar.HORIZONTAL );
+		super( "Track Scheme toolbar", SwingConstants.HORIZONTAL );
 		this.trackScheme = trackScheme;
 		init();
 	}
@@ -72,18 +61,14 @@ public class TrackSchemeToolbar extends JToolBar
 			@Override
 			public void actionPerformed( final ActionEvent e )
 			{
-				final boolean enabled = trackScheme.toggleLinking();
+				final boolean isEnabled = trackScheme.toggleLinking();
 				ImageIcon connectIcon;
-				if ( !enabled )
-				{
+				if ( !isEnabled )
 					connectIcon = LINKING_OFF_ICON;
-				}
 				else
-				{
 					connectIcon = LINKING_ON_ICON;
-				}
-				putValue( SMALL_ICON, connectIcon );
 
+				putValue( SMALL_ICON, connectIcon );
 			}
 		};
 		final JButton toggleLinkingButton = new JButton( toggleLinkingAction );
@@ -103,19 +88,15 @@ public class TrackSchemeToolbar extends JToolBar
 					@Override
 					public void run()
 					{
-						final boolean enabled = trackScheme.toggleThumbnail();
+						final boolean isEnabled = trackScheme.toggleThumbnail();
 						ImageIcon thumbnailIcon;
-						if ( !enabled )
-						{
+						if ( !isEnabled )
 							thumbnailIcon = THUMBNAIL_OFF_ICON;
-						}
 						else
-						{
 							thumbnailIcon = THUMBNAIL_ON_ICON;
-						}
+
 						putValue( SMALL_ICON, thumbnailIcon );
 					}
-
 				}.start();
 			}
 		};
@@ -250,8 +231,8 @@ public class TrackSchemeToolbar extends JToolBar
 
 		final JComboBox< String > selectStyleBox;
 		{
-			final Set< String > styleNames = new HashSet< String >( TrackSchemeStylist.VERTEX_STYLES.keySet() );
-			selectStyleBox = new JComboBox< String >( styleNames.toArray( new String[] {} ) );
+			final Set< String > styleNames = new HashSet< >( TrackSchemeStylist.VERTEX_STYLES.keySet() );
+			selectStyleBox = new JComboBox< >( styleNames.toArray( new String[] {} ) );
 			selectStyleBox.setPreferredSize( new Dimension( 80, 20 ) );
 			selectStyleBox.setSelectedItem( TrackSchemeStylist.DEFAULT_STYLE_NAME );
 			selectStyleBox.setMaximumSize( new Dimension( 200, 30 ) );

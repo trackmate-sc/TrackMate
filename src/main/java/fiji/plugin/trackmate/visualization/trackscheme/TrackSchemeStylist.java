@@ -33,9 +33,9 @@ public class TrackSchemeStylist {
 	static final String 			SIMPLE_STYLE_NAME = "simple";
 	static final String 			DEFAULT_STYLE_NAME = SIMPLE_STYLE_NAME;
 
-	private static final HashMap<String, Object> FULL_VERTEX_STYLE = new HashMap<String, Object>();
-	private static final HashMap<String, Object> SIMPLE_VERTEX_STYLE = new HashMap<String, Object>();
-	private static final HashMap<String, Object> BASIC_EDGE_STYLE = new HashMap<String, Object>();
+	private static final HashMap<String, Object> FULL_VERTEX_STYLE = new HashMap<>();
+	private static final HashMap<String, Object> SIMPLE_VERTEX_STYLE = new HashMap<>();
+	private static final HashMap<String, Object> BASIC_EDGE_STYLE = new HashMap<>();
 	static {
 		FULL_VERTEX_STYLE.put(mxConstants.STYLE_FILLCOLOR, "white");
 		FULL_VERTEX_STYLE.put(mxConstants.STYLE_FONTCOLOR, "black");
@@ -58,7 +58,7 @@ public class TrackSchemeStylist {
 		BASIC_EDGE_STYLE.put(mxConstants.STYLE_STROKEWIDTH, 2.0f);
 		BASIC_EDGE_STYLE.put(mxConstants.STYLE_STROKECOLOR, DEFAULT_COLOR);
 
-		VERTEX_STYLES = new HashMap<String, Map<String, Object> >(2);
+		VERTEX_STYLES = new HashMap< >(2);
 		VERTEX_STYLES.put(FULL_STYLE_NAME, FULL_VERTEX_STYLE);
 		VERTEX_STYLES.put(SIMPLE_STYLE_NAME, SIMPLE_VERTEX_STYLE);
 
@@ -94,7 +94,7 @@ public class TrackSchemeStylist {
 	 */
 	public synchronized Set<mxICell> execute(final Map<Integer, Set<mxCell>> edgeMap) {
 
-		final HashSet<mxICell> verticesChanged = new HashSet<mxICell>(edgeMap.size());
+		final HashSet<mxICell> verticesChanged = new HashSet<>(edgeMap.size());
 		graphx.getModel().beginUpdate();
 		try {
 
@@ -190,20 +190,17 @@ public class TrackSchemeStylist {
 		setVertexStyle(vertex, colorstr);
 	}
 
-
 	private static final String getStyleValue(final String style, final String key) {
 		final int index = style.indexOf(key + "=");
 
-		if (index < 0) {
+		if (index < 0) 
 			return "";
-		} else {
-			final int start = style.indexOf("=", index) + 1;
-			int cont = style.indexOf(";", start);
-			if (cont < 0) {
-				cont = style.length();
-			}
-			return style.substring(start, cont);
-		}
-	}
 
+		final int start = style.indexOf("=", index) + 1;
+		int cont = style.indexOf(";", start);
+		if (cont < 0) 
+			cont = style.length();
+
+		return style.substring(start, cont);
+	}
 }

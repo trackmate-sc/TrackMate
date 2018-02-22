@@ -81,10 +81,10 @@ public class FloatingDisplayConfigFrame extends JFrame
 			public void displaySettingsChanged( final DisplaySettingsEvent event )
 			{
 				guimodel.getDisplaySettings().put( event.getKey(), event.getNewValue() );
-				for ( final TrackMateModelView view : guimodel.getViews() )
+				for ( final TrackMateModelView lView : guimodel.getViews() )
 				{
-					view.setDisplaySettings( event.getKey(), event.getNewValue() );
-					view.refresh();
+					lView.setDisplaySettings( event.getKey(), event.getNewValue() );
+					lView.refresh();
 				}
 			}
 		};

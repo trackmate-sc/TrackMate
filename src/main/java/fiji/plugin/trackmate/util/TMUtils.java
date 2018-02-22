@@ -48,7 +48,7 @@ public class TMUtils
 	 */
 	public static < K, V extends Comparable< ? super V > > Map< K, V > sortByValue( final Map< K, V > map, final Comparator< V > comparator )
 	{
-		final List< Map.Entry< K, V > > list = new LinkedList< Map.Entry< K, V > >( map.entrySet() );
+		final List< Map.Entry< K, V > > list = new LinkedList< >( map.entrySet() );
 		Collections.sort( list, new Comparator< Map.Entry< K, V > >()
 		{
 			@Override
@@ -58,7 +58,7 @@ public class TMUtils
 			}
 		} );
 
-		final LinkedHashMap< K, V > result = new LinkedHashMap< K, V >();
+		final LinkedHashMap< K, V > result = new LinkedHashMap< >();
 		for ( final Map.Entry< K, V > entry : list )
 		{
 			result.put( entry.getKey(), entry.getValue() );
@@ -133,11 +133,11 @@ public class TMUtils
 	{
 		if ( null == optionalKeys )
 		{
-			optionalKeys = new ArrayList< T >();
+			optionalKeys = new ArrayList< >();
 		}
 		if ( null == mandatoryKeys )
 		{
-			mandatoryKeys = new ArrayList< T >();
+			mandatoryKeys = new ArrayList< >();
 		}
 		boolean ok = true;
 		final Set< T > keySet = map.keySet();
@@ -199,7 +199,7 @@ public class TMUtils
 	 */
 	public static final < J, K > List< K > getArrayFromMaping( final List< J > keys, final Map< J, K > mapping )
 	{
-		final List< K > names = new ArrayList< K >( keys.size() );
+		final List< K > names = new ArrayList< >( keys.size() );
 		for ( int i = 0; i < keys.size(); i++ )
 		{
 			names.add( mapping.get( keys.get( i ) ) );
@@ -459,8 +459,7 @@ public class TMUtils
 	 * Given a histogram array <code>hist</code>, built with an initial amount
 	 * of <code>nPoints</code> data item, this method return the bin index that
 	 * thresholds the histogram in 2 classes. The threshold is performed using
-	 * the Otsu Threshold Method, {@link http
-	 * ://www.labbookpages.co.uk/software/imgProc/otsuThreshold.html}.
+	 * the Otsu Threshold Method.
 	 * 
 	 * @param hist
 	 *            the histogram array

@@ -30,8 +30,8 @@ public class SpotGroupNodeTestDrive
 		final int RADIUS = 10;
 
 		final Random ran = new Random();
-		final HashMap< Spot, Point4d > centers = new HashMap< Spot, Point4d >( N_BLOBS );
-		final HashMap< Spot, Color4f > colors = new HashMap< Spot, Color4f >( N_BLOBS );
+		final HashMap< Spot, Point4d > centers = new HashMap< >( N_BLOBS );
+		final HashMap< Spot, Color4f > colors = new HashMap< >( N_BLOBS );
 		Point4d center;
 		Color4f color;
 		Spot spot;
@@ -49,11 +49,11 @@ public class SpotGroupNodeTestDrive
 			colors.put( spot, color );
 		}
 
-		final SpotGroupNode< Spot > sg = new SpotGroupNode< Spot >( centers, colors );
+		final SpotGroupNode< Spot > sg = new SpotGroupNode< >( centers, colors );
 		// sg.setName("spots");
 		final ContentInstant ci = new ContentInstant( "t0" );
 		ci.display( sg );
-		final TreeMap< Integer, ContentInstant > instants = new TreeMap< Integer, ContentInstant >();
+		final TreeMap< Integer, ContentInstant > instants = new TreeMap< >();
 		instants.put( 0, ci );
 		final Content c = new Content( "instants", instants );
 

@@ -11,7 +11,7 @@ public class RecursiveCumSum<V, E> {
 	private final Function2<V, V> function;
 
 	public RecursiveCumSum(final SimpleDirectedGraph<V, E> graph, final Function2<V, V> function) {
-		this.cache = new DirectedNeighborIndex<V, E>(graph);
+		this.cache = new DirectedNeighborIndex<>(graph);
 		this.function = function;
 	}
 	
@@ -22,15 +22,13 @@ public class RecursiveCumSum<V, E> {
 		if (children.size() == 0) {
 			// It is a leaf
 			return current;
-		} else {
-			
-			V val = current;
-			for (V child : children) {
-				function.compute(val, apply(child), val);
-			}
-			return val;
-			
 		}
+		
+		V val = current;
+		for (V child : children) 
+			function.compute(val, apply(child), val);
+
+		return val;
 		
 	}
 

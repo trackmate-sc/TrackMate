@@ -9,7 +9,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 import javax.swing.ImageIcon;
 
-import net.imglib2.algorithm.MultiThreaded;
 import net.imglib2.multithreading.SimpleMultiThreading;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -22,7 +21,7 @@ import fiji.plugin.trackmate.Spot;
 
 @SuppressWarnings( "deprecation" )
 @Plugin( type = EdgeAnalyzer.class )
-public class EdgeVelocityAnalyzer implements EdgeAnalyzer, MultiThreaded
+public class EdgeVelocityAnalyzer implements EdgeAnalyzer
 {
 
 	public static final String KEY = "Edge velocity";
@@ -34,15 +33,15 @@ public class EdgeVelocityAnalyzer implements EdgeAnalyzer, MultiThreaded
 
 	public static final String DISPLACEMENT = "DISPLACEMENT";
 
-	public static final List< String > FEATURES = new ArrayList< String >( 2 );
+	public static final List< String > FEATURES = new ArrayList< >( 2 );
 
-	public static final Map< String, String > FEATURE_NAMES = new HashMap< String, String >( 2 );
+	public static final Map< String, String > FEATURE_NAMES = new HashMap< >( 2 );
 
-	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< String, String >( 2 );
+	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< >( 2 );
 
-	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 2 );
+	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< >( 2 );
 
-	public static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 2 );
+	public static final Map< String, Boolean > IS_INT = new HashMap< >( 2 );
 
 	static
 	{
@@ -89,7 +88,7 @@ public class EdgeVelocityAnalyzer implements EdgeAnalyzer, MultiThreaded
 
 		final FeatureModel featureModel = model.getFeatureModel();
 
-		final ArrayBlockingQueue< DefaultWeightedEdge > queue = new ArrayBlockingQueue< DefaultWeightedEdge >( edges.size(), false, edges );
+		final ArrayBlockingQueue< DefaultWeightedEdge > queue = new ArrayBlockingQueue< >( edges.size(), false, edges );
 
 		final Thread[] threads = SimpleMultiThreading.newThreads( numThreads );
 		for ( int i = 0; i < threads.length; i++ )

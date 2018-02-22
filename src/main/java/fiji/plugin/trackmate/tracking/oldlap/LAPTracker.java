@@ -202,7 +202,7 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 	 * creating a new graph, containing the spots but no edge.
 	 */
 	public void reset() {
-		graph = new SimpleWeightedGraph<Spot, DefaultWeightedEdge>(DefaultWeightedEdge.class);
+		graph = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
 		final Iterator<Spot> it = spots.iterator(true);
 		while (it.hasNext()) {
 			graph.addVertex(it.next());
@@ -438,7 +438,7 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 		final double blockingValue = (Double) settings.get(KEY_BLOCKING_VALUE);
 
 		// Prepare frame pairs in order, not necessarily separated by 1.
-		final ArrayList<int[]> framePairs = new ArrayList<int[]>(spots.keySet().size() - 1);
+		final ArrayList<int[]> framePairs = new ArrayList<>(spots.keySet().size() - 1);
 		final Iterator<Integer> frameIterator = spots.keySet().iterator();
 		int frame0 = frameIterator.next();
 		int frame1;
@@ -464,17 +464,17 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 					for (int i = ai.getAndIncrement(); i < framePairs.size(); i = ai.getAndIncrement()) {
 
 						// Get frame pairs
-						final int frame0 = framePairs.get(i)[0];
-						final int frame1 = framePairs.get(i)[1];
+						final int lFrame0 = framePairs.get(i)[0];
+						final int lFrame1 = framePairs.get(i)[1];
 
 						// Get spots - we have to create a list from each content
-						final List<Spot> t0 = new ArrayList<Spot>(spots.getNSpots(frame0, true));
-						for (final Iterator<Spot> iterator = spots.iterator(frame0, true); iterator.hasNext();) {
+						final List<Spot> t0 = new ArrayList<>(spots.getNSpots(lFrame0, true));
+						for (final Iterator<Spot> iterator = spots.iterator(lFrame0, true); iterator.hasNext();) {
 							t0.add(iterator.next());
 
 						}
-						final List<Spot> t1 = new ArrayList<Spot>(spots.getNSpots(frame1, true));
-						for (final Iterator<Spot> iterator = spots.iterator(frame1, true); iterator.hasNext();) {
+						final List<Spot> t1 = new ArrayList<>(spots.getNSpots(lFrame1, true));
+						for (final Iterator<Spot> iterator = spots.iterator(lFrame1, true); iterator.hasNext();) {
 							t1.add(iterator.next());
 						}
 
@@ -546,14 +546,14 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 	 *            the list of spots in the first frame
 	 * @param t1
 	 *            the list of spots in the second frame
-	 * @param settings
+	 * @param lSettings
 	 *            the tracker settings that specifies how this cost should be
 	 *            created
 	 * @return the cost matrix as an array of array of double
 	 */
-	protected double[][] createFrameToFrameLinkingCostMatrix(final List<Spot> t0, final List<Spot> t1, final Map<String, Object> settings) {
+	protected double[][] createFrameToFrameLinkingCostMatrix(final List<Spot> t0, final List<Spot> t1, final Map<String, Object> lSettings) {
 		// Create cost matrix
-		final LinkingCostMatrixCreator objCosts = new LinkingCostMatrixCreator(t0, t1, settings);
+		final LinkingCostMatrixCreator objCosts = new LinkingCostMatrixCreator(t0, t1, lSettings);
 		if (!objCosts.checkInput() || !objCosts.process()) {
 			errorMessage = BASE_ERROR_MESSAGE + objCosts.getErrorMessage();
 			return null;
@@ -582,15 +582,14 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 	 * result of step 1
 	 * <p>
 	 * We have recorded the tracks as edges in the track graph, we now turn them
-	 * into multiple explicit sets of Spots, sorted by their
-	 * {@link SpotFeature#FRAME}.
+	 * into multiple explicit sets of Spots, sorted by their {@link Spot#FRAME}.
 	 */
 	private void compileTrackSegments() {
-		final ConnectivityInspector<Spot, DefaultWeightedEdge> inspector = new ConnectivityInspector<Spot, DefaultWeightedEdge>(graph);
+		final ConnectivityInspector<Spot, DefaultWeightedEdge> inspector = new ConnectivityInspector<>(graph);
 		final List<Set<Spot>> unsortedSegments = inspector.connectedSets();
-		trackSegments = new ArrayList<SortedSet<Spot>>(unsortedSegments.size());
+		trackSegments = new ArrayList<>(unsortedSegments.size());
 		for (final Set<Spot> set : unsortedSegments) {
-			final SortedSet<Spot> sortedSet = new TreeSet<Spot>(Spot.frameComparator);
+			final SortedSet<Spot> sortedSet = new TreeSet<>(Spot.frameComparator);
 			sortedSet.addAll(set);
 			trackSegments.add(sortedSet);
 		}
@@ -655,17 +654,18 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 						int indexTrack = 0;
 						int indexSpot = 0;
 						for (final SortedSet<Spot> t : trackSegments)
+						{
 							if (t.contains(middle)) {
 								track = t;
 								for (final Spot spot : track) {
 									if (spot == middle)
 										break;
-									else
-										indexSpot++;
+									indexSpot++;
 								}
 								break;
-							} else
-								indexTrack++;
+							}
+							indexTrack++;
+						}
 						System.out.println("Merging from segment " + i + " end to spot " + indexSpot + " in segment " + indexTrack + ".");
 					}
 
@@ -686,17 +686,18 @@ public class LAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 						int indexTrack = 0;
 						int indexSpot = 0;
 						for (final SortedSet<Spot> t : trackSegments)
+						{
 							if (t.contains(mother)) {
 								track = t;
 								for (final Spot spot : track) {
 									if (spot == mother)
 										break;
-									else
-										indexSpot++;
+									indexSpot++;
 								}
 								break;
-							} else
-								indexTrack++;
+							}
+							indexTrack++;
+						}
 						System.out.println("Splitting from spot " + indexSpot + " in segment " + indexTrack + " to segment" + j + ".");
 					}
 				}

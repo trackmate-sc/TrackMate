@@ -28,18 +28,16 @@ import ij.IJ;
 import ij.ImagePlus;
 
 import java.io.File;
-import java.io.IOException;
 
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import org.jdom2.JDOMException;
 import org.scijava.util.AppUtils;
 
 public class TrackVisualizerTestDrive {
 
-	public static void main(final String[] args) throws JDOMException, IOException {
+	public static void main(final String[] args) {
 
 		if (IJ.isMacOSX() || IJ.isWindows()) {
 			try {

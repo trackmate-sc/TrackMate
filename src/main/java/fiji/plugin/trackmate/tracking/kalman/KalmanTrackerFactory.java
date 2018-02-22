@@ -150,7 +150,7 @@ public class KalmanTrackerFactory implements SpotTrackerFactory
 	@Override
 	public Map< String, Object > getDefaultSettings()
 	{
-		final Map< String, Object > sm = new HashMap< String, Object >( 3 );
+		final Map< String, Object > sm = new HashMap<>( 3 );
 		sm.put( KEY_KALMAN_SEARCH_RADIUS, DEFAULT_MAX_SEARCH_RADIUS );
 		sm.put( KEY_LINKING_MAX_DISTANCE, DEFAULT_LINKING_MAX_DISTANCE );
 		sm.put( KEY_GAP_CLOSING_MAX_FRAME_GAP, DEFAULT_GAP_CLOSING_MAX_FRAME_GAP );

@@ -39,17 +39,16 @@ public class TrackLocationAnalyzerTest
 		model.beginUpdate();
 		try
 		{
-
-			expectedX = new HashMap< Integer, Double >( N_TRACKS );
-			expectedY = new HashMap< Integer, Double >( N_TRACKS );
-			expectedZ = new HashMap< Integer, Double >( N_TRACKS );
+			expectedX = new HashMap< >( N_TRACKS );
+			expectedY = new HashMap< >( N_TRACKS );
+			expectedZ = new HashMap< >( N_TRACKS );
 
 			for ( int i = 0; i < N_TRACKS; i++ )
 			{
 
 				Spot previous = null;
 
-				final HashSet< Spot > track = new HashSet< Spot >();
+				final HashSet< Spot > track = new HashSet< >();
 				for ( int j = 0; j <= DEPTH; j++ )
 				{
 					// We use deterministic locations
@@ -99,7 +98,7 @@ public class TrackLocationAnalyzerTest
 	public final void testModelChanged()
 	{
 		// Copy old keys
-		final HashSet< Integer > oldKeys = new HashSet< Integer >( model.getTrackModel().trackIDs( true ) );
+		final HashSet< Integer > oldKeys = new HashSet< >( model.getTrackModel().trackIDs( true ) );
 
 		// First analysis
 		final TestTrackLocationAnalyzer analyzer = new TestTrackLocationAnalyzer();
@@ -156,7 +155,7 @@ public class TrackLocationAnalyzerTest
 		// New change: remove the first spot on the first track - it should be
 		// re-analyzed
 		final Integer firstKey = oldKeys.iterator().next();
-		final TreeSet< Spot > sortedTrack = new TreeSet< Spot >( Spot.frameComparator );
+		final TreeSet< Spot > sortedTrack = new TreeSet< >( Spot.frameComparator );
 		sortedTrack.addAll( model.getTrackModel().trackSpots( firstKey ) );
 		final Iterator< Spot > it = sortedTrack.iterator();
 		final Spot firstSpot = it.next();

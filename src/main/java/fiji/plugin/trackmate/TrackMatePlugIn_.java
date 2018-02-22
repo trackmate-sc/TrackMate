@@ -65,10 +65,7 @@ public class TrackMatePlugIn_ implements PlugIn
 		 */
 
 		final TrackMateGUIController controller = new TrackMateGUIController( trackmate );
-		if ( imp != null )
-		{
-			GuiUtils.positionWindow( controller.getGUI(), imp.getWindow() );
-		}
+		GuiUtils.positionWindow( controller.getGUI(), imp.getWindow() );
 	}
 
 	/*
@@ -100,9 +97,9 @@ public class TrackMatePlugIn_ implements PlugIn
 	 */
 	protected Settings createSettings( final ImagePlus imp )
 	{
-		final Settings settings = new Settings();
-		settings.setFrom( imp );
-		return settings;
+		final Settings lSettings = new Settings();
+		lSettings.setFrom( imp );
+		return lSettings;
 	}
 
 	/**

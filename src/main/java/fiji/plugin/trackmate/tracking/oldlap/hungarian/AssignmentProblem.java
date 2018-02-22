@@ -1,6 +1,5 @@
 package fiji.plugin.trackmate.tracking.oldlap.hungarian;
 
-
 /**
  * An implementation of this: http://en.wikipedia.org/wiki/Hungarian_algorithm
  * <p>
@@ -14,32 +13,31 @@ package fiji.plugin.trackmate.tracking.oldlap.hungarian;
  * 
  * @author Gary Baker
  */
-public class AssignmentProblem {
+public class AssignmentProblem
+{
 
-    private final double[][] costMatrix;
+	private final double[][] costMatrix;
 
-    public AssignmentProblem(final double[][] aCostMatrix) {
-        costMatrix = aCostMatrix;
-    }
+	public AssignmentProblem( final double[][] aCostMatrix )
+	{
+		costMatrix = aCostMatrix;
+	}
 
-    private double[][] copyOfMatrix() {
-        // make a copy of the passed array
-        final double[][] retval = new double[costMatrix.length][];
-        for (int i = 0; i < costMatrix.length; i++) {
-            retval[i] = new double[costMatrix[i].length];
-            System.arraycopy(costMatrix[i], 0, retval[i], 0, costMatrix[i].length);
-        }
-        return retval;
-    }
+	private double[][] copyOfMatrix()
+	{
+		// make a copy of the passed array
+		final double[][] retval = new double[ costMatrix.length ][];
+		for ( int i = 0; i < costMatrix.length; i++ )
+		{
+			retval[ i ] = new double[ costMatrix[ i ].length ];
+			System.arraycopy( costMatrix[ i ], 0, retval[ i ], 0, costMatrix[ i ].length );
+		}
+		return retval;
+	}
 
-
-    public int[][] solve(final AssignmentAlgorithm anAlgorithm) {
-
-        final double[][] costMatrix = copyOfMatrix();
-        return anAlgorithm.computeAssignments(costMatrix);
-
-    }
-
-
-
+	public int[][] solve( final AssignmentAlgorithm anAlgorithm )
+	{
+		final double[][] lCostMatrix = copyOfMatrix();
+		return anAlgorithm.computeAssignments( lCostMatrix );
+	}
 }

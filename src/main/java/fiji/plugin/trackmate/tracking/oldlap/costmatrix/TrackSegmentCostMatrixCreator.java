@@ -137,7 +137,7 @@ public class TrackSegmentCostMatrixCreator extends LAPTrackerCostMatrixCreator {
 			errorMessage = "There are no track segments.";
 			return false;
 		}
-		final StringBuilder errorHolder = new StringBuilder();;
+		final StringBuilder errorHolder = new StringBuilder();
 		if (!LAPUtils.checkSettingsValidity(settings, errorHolder )) {
 			errorMessage = errorHolder.toString();
 			return false;
@@ -190,7 +190,7 @@ public class TrackSegmentCostMatrixCreator extends LAPTrackerCostMatrixCreator {
 			} else {
 				// If we can skip matrix creation for merging and splitting, 
 				// we will not try to keep a list of merging and splitting candidates.
-				middlePoints = new ArrayList<Spot>(0);
+				middlePoints = new ArrayList<>(0);
 				splittingMiddlePoints = middlePoints;
 				mergingMiddlePoints   = middlePoints;
 				
@@ -239,22 +239,22 @@ public class TrackSegmentCostMatrixCreator extends LAPTrackerCostMatrixCreator {
 	 * Create a List of candidate spots for splitting or merging events. 
 	 * A desirable candidate is a spot belonging to a track with at least 2 spots.
 	 * 
-	 * @param trackSegments A List of track segments, where each segment is its own List of Spots.
+	 * @param lTrackSegments A List of track segments, where each segment is its own List of Spots.
 	 * @return A List containing references to all suitable candidate Spots in the track segments.
 	 */
-	public List<Spot> getTrackSegmentMiddlePoints(final List<SortedSet<Spot>> trackSegments) {
+	public List<Spot> getTrackSegmentMiddlePoints(final List<SortedSet<Spot>> lTrackSegments) {
 		int n_spots = 0;
-		for (final SortedSet<Spot> trackSegment : trackSegments) {
+		for (final SortedSet<Spot> trackSegment : lTrackSegments) {
 			n_spots += trackSegment.size();
 		}
-		final List<Spot> middlePoints = new ArrayList<Spot>(n_spots);
-		for (final SortedSet<Spot> trackSegment : trackSegments) {
+		final List<Spot> lMiddlePoints = new ArrayList<>(n_spots);
+		for (final SortedSet<Spot> trackSegment : lTrackSegments) {
 			
 			if (trackSegment.size() > 1) {
-				middlePoints.addAll(trackSegment);
+				lMiddlePoints.addAll(trackSegment);
 			}
 		}
-		return middlePoints;
+		return lMiddlePoints;
 	}
 
 
@@ -341,9 +341,8 @@ public class TrackSegmentCostMatrixCreator extends LAPTrackerCostMatrixCreator {
 		if (!gapClosing.checkInput() || !gapClosing.process()) {
 			errorMessage = "Error in gap-closing cost sub matrix creation: " + gapClosing.getErrorMessage();
 			return null;
-		} else {
-			return gapClosing.getResult();
 		}
+		return gapClosing.getResult();
 	}
 
 
@@ -357,17 +356,15 @@ public class TrackSegmentCostMatrixCreator extends LAPTrackerCostMatrixCreator {
 		if (!merging.checkInput() || !merging.process()) {
 			errorMessage = "Error in merging cost sub-matrix creation: " + merging.getErrorMessage();
 			return null;
-		} else {
-			mergingScores = merging.getResult();
 		}
+		mergingScores = merging.getResult();
 		
 		if (PRUNING_OPTIMIZATION) {
-			mergingMiddlePoints = new ArrayList<Spot>();
+			mergingMiddlePoints = new ArrayList<>();
 			return pruneColumns(mergingScores, mergingMiddlePoints);
-		} else {
-			mergingMiddlePoints = middlePoints;
-			return mergingScores;
 		}
+		mergingMiddlePoints = middlePoints;
+		return mergingScores;
 	}
 	
 
@@ -382,17 +379,15 @@ public class TrackSegmentCostMatrixCreator extends LAPTrackerCostMatrixCreator {
 		if (!splitting.checkInput() || !splitting.process()) {
 			errorMessage = "Error in splitting cost sub-matrix creation: " + splitting.getErrorMessage();
 			return null;
-		} else {
-			splittingScores = splitting.getResult();
 		}
+		splittingScores = splitting.getResult();
 		
 		if (PRUNING_OPTIMIZATION) {
-			splittingMiddlePoints = new ArrayList<Spot>();
+			splittingMiddlePoints = new ArrayList<>();
 			return pruneRows(splittingScores, splittingMiddlePoints);
-		} else {
-			splittingMiddlePoints = middlePoints;
-			return splittingScores;
 		}
+		splittingMiddlePoints = middlePoints;
+		return splittingScores;
 	}
 
 
@@ -405,7 +400,7 @@ public class TrackSegmentCostMatrixCreator extends LAPTrackerCostMatrixCreator {
 		final double blockingValue = (Double) settings.get(KEY_BLOCKING_VALUE);
 		// Find all columns that contain a cost (a value != BLOCKED)
 		final double[][] full = m.copy().getArray();
-		final ArrayList<double[]> usefulColumns = new ArrayList<double[]>();
+		final ArrayList<double[]> usefulColumns = new ArrayList<>();
 		for (int j = 0; j < m.getColumnDimension(); j++) {
 			boolean containsCost = false;
 			final double[] curCol = new double[m.getRowDimension()];
@@ -445,7 +440,7 @@ public class TrackSegmentCostMatrixCreator extends LAPTrackerCostMatrixCreator {
 		// Find all rows that contain a cost (a value != BLOCKED)
 		final double[][] full = m.copy().getArray();
 		double[] curRow;
-		final ArrayList<double[]> usefulRows = new ArrayList<double[]>();
+		final ArrayList<double[]> usefulRows = new ArrayList<>();
 		for (int i = 0; i < m.getRowDimension(); i++) {
 			boolean containsCost = false;
 			curRow = full[i];
@@ -483,7 +478,7 @@ public class TrackSegmentCostMatrixCreator extends LAPTrackerCostMatrixCreator {
 		final double alternativeLinkingCostFactor = (Double) settings.get(KEY_ALTERNATIVE_LINKING_COST_FACTOR);
 		
 		// Get a list of all non-BLOCKED cost
-		final ArrayList<Double> scores = new ArrayList<Double>();
+		final ArrayList<Double> scores = new ArrayList<>();
 		for (int i = 0; i < m.getRowDimension(); i++) {
 			for (int j = 0; j < m.getColumnDimension(); j++) {
 				if (m.get(i, j) < blockingValue) {

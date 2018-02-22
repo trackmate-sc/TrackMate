@@ -43,11 +43,11 @@ public class LogDetectorTestDrive
 
 		// Create 3D image
 		final Img< UnsignedByteType > source = new ArrayImgFactory< UnsignedByteType >().create( new int[] { ( int ) ( WIDTH / CALIBRATION[ 0 ] ), ( int ) ( HEIGHT / CALIBRATION[ 1 ] ), ( int ) ( DEPTH / CALIBRATION[ 2 ] ) }, new UnsignedByteType() );
-		final ImgPlus< UnsignedByteType > img = new ImgPlus< UnsignedByteType >( source, "Test", AXES, CALIBRATION );
+		final ImgPlus< UnsignedByteType > img = new ImgPlus< >( source, "Test", AXES, CALIBRATION );
 
 		// Random blobs
 		final double[] radiuses = new double[ N_BLOBS ];
-		final ArrayList< double[] > centers = new ArrayList< double[] >( N_BLOBS );
+		final ArrayList< double[] > centers = new ArrayList< >( N_BLOBS );
 		final int[] intensities = new int[ N_BLOBS ];
 		double x, y, z;
 		for ( int i = 0; i < N_BLOBS; i++ )
@@ -65,7 +65,7 @@ public class LogDetectorTestDrive
 		{
 			final Spot tmpSpot = new Spot( centers.get( i )[ 0 ], centers.get( i )[ 1 ], centers.get( i )[ 2 ], radiuses[ i ], -1d );
 			tmpSpot.putFeature( Spot.RADIUS, radiuses[ i ] );
-			final SpotNeighborhood< UnsignedByteType > sphere = new SpotNeighborhood< UnsignedByteType >( tmpSpot, img );
+			final SpotNeighborhood< UnsignedByteType > sphere = new SpotNeighborhood< >( tmpSpot, img );
 			for ( final UnsignedByteType pixel : sphere )
 			{
 				pixel.set( intensities[ i ] );
@@ -73,7 +73,7 @@ public class LogDetectorTestDrive
 		}
 
 		// Instantiate detector
-		final LogDetector< UnsignedByteType > detector = new LogDetector< UnsignedByteType >( img, img, TMUtils.getSpatialCalibration( img ), RADIUS, 0, true, false );
+		final LogDetector< UnsignedByteType > detector = new LogDetector< >( img, img, TMUtils.getSpatialCalibration( img ), RADIUS, 0, true, false );
 
 		// Segment
 		final long start = System.currentTimeMillis();
@@ -97,7 +97,7 @@ public class LogDetectorTestDrive
 		double dist, min_dist;
 		int best_index = 0;
 		double[] best_match;
-		final ArrayList< Spot > spot_list = new ArrayList< Spot >( spots );
+		final ArrayList< Spot > spot_list = new ArrayList< >( spots );
 		Spot best_spot = null;
 		final double[] coords = new double[ 3 ];
 		final String[] posFeats = Spot.POSITION_FEATURES;
@@ -128,6 +128,8 @@ public class LogDetectorTestDrive
 					}
 				}
 			}
+			if ( null == best_spot )
+				continue;
 
 			spot_list.remove( best_spot );
 			best_match = centers.remove( best_index );

@@ -24,6 +24,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
 
 import com.mxgraph.canvas.mxGraphics2DCanvas;
 import com.mxgraph.model.mxCell;
@@ -203,14 +204,14 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			{
 				if ( graphComponent.isEnabled() && isEnabled() && !e.isConsumed() )
 				{
-					final mxGraph graph = graphComponent.getGraph();
+					final mxGraph lGraph = graphComponent.getGraph();
 					double dx = 0;
 					double dy = 0;
 
 					if ( first != null && ( cellBounds != null || movePreview.isActive() ) )
 					{
-						final double scale = graph.getView().getScale();
-						final mxPoint trans = graph.getView().getTranslate();
+						final double scale = lGraph.getView().getScale();
+						final mxPoint trans = lGraph.getView().getTranslate();
 
 						// TODO: Simplify math below, this was copy pasted from
 						// getPreviewLocation with the rounding removed
@@ -254,13 +255,13 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 							{
 								if ( tmp == null && e.getButton() == MouseEvent.BUTTON1 )
 								{
-									graph.clearSelection(); // JYT I did this to
+									lGraph.clearSelection(); // JYT I did this to
 									// keep selection
 									// even if we
 									// right-click
 									// elsewhere
 								}
-								else if ( graph.isSwimlane( tmp ) && graphComponent.getCanvas().hitSwimlaneContent( graphComponent, graph.getView().getState( tmp ), e.getX(), e.getY() ) )
+								else if ( lGraph.isSwimlane( tmp ) && graphComponent.getCanvas().hitSwimlaneContent( graphComponent, lGraph.getView().getState( tmp ), e.getX(), e.getY() ) )
 								{
 									graphComponent.selectCellForEvent( tmp, e );
 								}
@@ -294,9 +295,9 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 						// need other variable
 						// trace("cell", cell);
 
-						if ( target == null && isRemoveCellsFromParent() && shouldRemoveCellFromParent( graph.getModel().getParent( initialCell ), cells, e ) )
+						if ( target == null && isRemoveCellsFromParent() && shouldRemoveCellFromParent( lGraph.getModel().getParent( initialCell ), cells, e ) )
 						{
-							target = graph.getDefaultParent();
+							target = lGraph.getDefaultParent();
 						}
 
 						final boolean clone = isCloneEnabled() && graphComponent.isCloneEvent( e );
@@ -304,7 +305,7 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 
 						if ( cells != result )
 						{
-							graph.setSelectionCells( result );
+							lGraph.setSelectionCells( result );
 						}
 
 						e.consume();
@@ -326,9 +327,9 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 						final mxCellState targetState = marker.getValidState();
 						final Object target = ( targetState != null ) ? targetState.getCell() : null;
 
-						if ( graph.isSplitEnabled() && graph.isSplitTarget( target, cells ) )
+						if ( lGraph.isSplitEnabled() && lGraph.isSplitTarget( target, cells ) )
 						{
-							graph.splitEdge( target, cells, dx, dy );
+							lGraph.splitEdge( target, cells, dx, dy );
 						}
 						else
 						{
@@ -487,7 +488,7 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			setLayout( null );
 			setOpaque( true );
 			setBackground( BACKGROUND_COLOR_1 );
-			setToolTipText( "Column header tool tip" );;
+			setToolTipText( "Column header tool tip" );
 			addMouseListener( new MouseAdapter()
 			{
 
@@ -542,7 +543,7 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 						textArea.setBorder( BorderFactory.createLineBorder( Color.ORANGE, 2 ) );
 						textArea.setOpaque( true );
 						textArea.setBackground( BACKGROUND_COLOR_1 );
-						textArea.setHorizontalAlignment( JTextField.CENTER );
+						textArea.setHorizontalAlignment( SwingConstants.CENTER );
 						textArea.setFont( FONT.deriveFont( 12 * scale ).deriveFont( Font.BOLD ) );
 						textArea.addActionListener( new ActionListener()
 						{

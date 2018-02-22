@@ -10,8 +10,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 import javax.swing.ImageIcon;
 
-import net.imglib2.algorithm.Benchmark;
-import net.imglib2.algorithm.MultiThreaded;
 import net.imglib2.multithreading.SimpleMultiThreading;
 import net.imglib2.util.Util;
 
@@ -24,7 +22,7 @@ import fiji.plugin.trackmate.Spot;
 
 @SuppressWarnings( "deprecation" )
 @Plugin( type = TrackAnalyzer.class )
-public class TrackSpotQualityFeatureAnalyzer implements TrackAnalyzer, MultiThreaded, Benchmark
+public class TrackSpotQualityFeatureAnalyzer implements TrackAnalyzer
 {
 
 	/*
@@ -42,15 +40,15 @@ public class TrackSpotQualityFeatureAnalyzer implements TrackAnalyzer, MultiThre
 
 	public static final String TRACK_STD_QUALITY = "TRACK_STD_QUALITY";
 
-	public static final List< String > FEATURES = new ArrayList< String >( 5 );
+	public static final List< String > FEATURES = new ArrayList< >( 5 );
 
-	public static final Map< String, String > FEATURE_NAMES = new HashMap< String, String >( 5 );
+	public static final Map< String, String > FEATURE_NAMES = new HashMap< >( 5 );
 
-	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< String, String >( 5 );
+	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< >( 5 );
 
-	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 5 );
+	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< >( 5 );
 
-	public static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 5 );
+	public static final Map< String, Boolean > IS_INT = new HashMap< >( 5 );
 
 	static
 	{
@@ -110,7 +108,7 @@ public class TrackSpotQualityFeatureAnalyzer implements TrackAnalyzer, MultiThre
 
 		if ( trackIDs.isEmpty() ) { return; }
 
-		final ArrayBlockingQueue< Integer > queue = new ArrayBlockingQueue< Integer >( trackIDs.size(), false, trackIDs );
+		final ArrayBlockingQueue< Integer > queue = new ArrayBlockingQueue< >( trackIDs.size(), false, trackIDs );
 		final FeatureModel fm = model.getFeatureModel();
 
 		final Thread[] threads = SimpleMultiThreading.newThreads( numThreads );
@@ -194,7 +192,7 @@ public class TrackSpotQualityFeatureAnalyzer implements TrackAnalyzer, MultiThre
 	public long getProcessingTime()
 	{
 		return processingTime;
-	};
+	}
 
 	@Override
 	public String getKey()

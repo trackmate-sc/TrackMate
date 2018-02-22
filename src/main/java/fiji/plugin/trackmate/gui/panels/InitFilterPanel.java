@@ -74,12 +74,12 @@ public class InitFilterPanel extends ActionListenablePanel
 			this.remove( jPanelThreshold );
 		}
 
-		final ArrayList< String > keys = new ArrayList< String >( 1 );
+		final ArrayList< String > keys = new ArrayList< >( 1 );
 		keys.add( Spot.QUALITY );
-		final HashMap< String, String > keyNames = new HashMap< String, String >( 1 );
+		final HashMap< String, String > keyNames = new HashMap< >( 1 );
 		keyNames.put( Spot.QUALITY, Spot.FEATURE_NAMES.get( Spot.QUALITY ) );
 
-		final Map< String, double[] > features = new HashMap< String, double[] >( 1 );
+		final Map< String, double[] > features = new HashMap< >( 1 );
 		features.put( Spot.QUALITY, values );
 
 		jPanelThreshold = new FilterPanel( features, keys, keyNames );

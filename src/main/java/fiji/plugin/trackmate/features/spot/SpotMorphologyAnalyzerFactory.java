@@ -38,15 +38,15 @@ public class SpotMorphologyAnalyzerFactory< T extends RealType< T > & NativeType
 	/** The key name of the morphology feature this analyzer computes. */
 	public final static String MORPHOLOGY = "MORPHOLOGY";
 
-	public static final ArrayList< String > FEATURES = new ArrayList< String >( 10 );
+	public static final ArrayList< String > FEATURES = new ArrayList< >( 10 );
 
-	public static final HashMap< String, String > FEATURE_NAMES = new HashMap< String, String >( 10 );
+	public static final HashMap< String, String > FEATURE_NAMES = new HashMap< >( 10 );
 
-	public static final HashMap< String, String > FEATURE_SHORT_NAMES = new HashMap< String, String >( 10 );
+	public static final HashMap< String, String > FEATURE_SHORT_NAMES = new HashMap< >( 10 );
 
-	public static final HashMap< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 10 );
+	public static final HashMap< String, Dimension > FEATURE_DIMENSIONS = new HashMap< >( 10 );
 
-	public static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 10 );
+	public static final Map< String, Boolean > IS_INT = new HashMap< >( 10 );
 
 	static
 	{
@@ -126,7 +126,7 @@ public class SpotMorphologyAnalyzerFactory< T extends RealType< T > & NativeType
 		final ImgPlus< T > imgC = HyperSliceImgPlus.fixChannelAxis( img, channel );
 		final ImgPlus< T > imgCT = HyperSliceImgPlus.fixTimeAxis( imgC, frame );
 		final Iterator< Spot > spots = model.getSpots().iterator( frame, false );
-		return new SpotMorphologyAnalyzer< T >( imgCT, spots );
+		return new SpotMorphologyAnalyzer< >( imgCT, spots );
 	}
 
 	@Override

@@ -57,7 +57,7 @@ public class KalmanTrackerInteractiveTest
 
 		for ( final Integer trackID : model.getTrackModel().trackIDs( true ) )
 		{
-			final List< Spot > track = new ArrayList< Spot >( model.getTrackModel().trackSpots( trackID ) );
+			final List< Spot > track = new ArrayList< >( model.getTrackModel().trackSpots( trackID ) );
 			Collections.sort( track, Spot.frameComparator );
 
 			final Spot first = track.get( 0 );
@@ -80,7 +80,7 @@ public class KalmanTrackerInteractiveTest
 		int totalChanges = 0;
 		for ( final Integer trackID : model.getTrackModel().trackIDs( true ) )
 		{
-			final List< Spot > track = new ArrayList< Spot >( model.getTrackModel().trackSpots( trackID ) );
+			final List< Spot > track = new ArrayList< >( model.getTrackModel().trackSpots( trackID ) );
 			Collections.sort( track, Spot.frameComparator );
 			final Iterator< Spot > iterator = track.iterator();
 
@@ -113,7 +113,7 @@ public class KalmanTrackerInteractiveTest
 	{
 		final double initialSearchRadius = 2 * WIDTH / ( NFRAMES );
 
-		final Map< String, Object > settings = new HashMap< String, Object >();
+		final Map< String, Object > settings = new HashMap< >();
 		settings.put( TrackerKeys.KEY_LINKING_MAX_DISTANCE, initialSearchRadius );
 		settings.put( TrackerKeys.KEY_LINKING_FEATURE_PENALTIES, Collections.emptyMap() );
 		settings.put( TrackerKeys.KEY_ALTERNATIVE_LINKING_COST_FACTOR, 1.05d );

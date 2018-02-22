@@ -3,11 +3,11 @@ package fiji.plugin.trackmate.util;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
 
+import com.itextpdf.awt.PdfGraphics2D;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfWriter;
 
-import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -56,11 +56,11 @@ public class ChartExporter {
 		chart.draw(svgGenerator, bounds);
 
 		// Write svg file
-		OutputStream outputStream = new FileOutputStream(svgFile);
-		Writer out = new OutputStreamWriter(outputStream, "UTF-8");
-		svgGenerator.stream(out, true /* use css */);						
-		outputStream.flush();
-		outputStream.close();
+		try (OutputStream outputStream = new FileOutputStream( svgFile );
+				Writer out = new OutputStreamWriter( outputStream, "UTF-8" ))
+		{
+			svgGenerator.stream( out, true );
+		}
 	}
 
 	/**
@@ -86,12 +86,11 @@ public class ChartExporter {
         document.open();
         // step 4
         PdfContentByte canvas = writer.getDirectContent();
-        Graphics2D g2 = canvas.createGraphics(pageSize.getWidth(), pageSize.getHeight());
+        PdfGraphics2D g2 = new PdfGraphics2D( canvas, pageSize.getWidth(), pageSize.getHeight() );
         chart.draw(g2, bounds);
         g2.dispose();
         // step 5
         document.close();
-
 	}
 
 

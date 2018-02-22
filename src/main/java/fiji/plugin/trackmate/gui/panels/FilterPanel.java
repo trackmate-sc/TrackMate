@@ -103,7 +103,7 @@ public class FilterPanel extends javax.swing.JPanel
 
 	private final Map< String, String > keyNames;
 
-	private final ArrayList< ChangeListener > listeners = new ArrayList< ChangeListener >();
+	private final ArrayList< ChangeListener > listeners = new ArrayList< >();
 
 	/*
 	 * CONSTRUCTOR
@@ -264,7 +264,7 @@ public class FilterPanel extends javax.swing.JPanel
 				break;
 			}
 		}
-		if ( null == values || 0 == values.length || isAllNaNs )
+		if ( 0 == values.length || isAllNaNs )
 		{
 			dataset = new LogHistogramDataset();
 			threshold = Double.NaN;
@@ -313,9 +313,9 @@ public class FilterPanel extends javax.swing.JPanel
 			this.setMaximumSize( panelMaxSize );
 			this.setBorder( new LineBorder( annotationColor, 1, true ) );
 			{
-				final ComboBoxModel< String > jComboBoxFeatureModel = new DefaultComboBoxModel< String >(
+				final ComboBoxModel< String > jComboBoxFeatureModel = new DefaultComboBoxModel< >(
 						TMUtils.getArrayFromMaping( allKeys, keyNames ).toArray( new String[] {} ) );
-				jComboBoxFeature = new JComboBox< String >();
+				jComboBoxFeature = new JComboBox< >();
 				this.add( jComboBoxFeature, new GridBagConstraints( 0, 0, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 2, 5, 2, 5 ), 0, 0 ) );
 				jComboBoxFeature.setModel( jComboBoxFeatureModel );
 				jComboBoxFeature.setFont( FONT );
@@ -553,12 +553,12 @@ public class FilterPanel extends javax.swing.JPanel
 
 		final String[] features = new String[] { SpotContrastAndSNRAnalyzerFactory.KEY, SpotMorphologyAnalyzerFactory.KEY, SpotIntensityAnalyzerFactory.KEY };
 
-		final Map< String, String > featureNames = new HashMap< String, String >();
+		final Map< String, String > featureNames = new HashMap< >();
 		featureNames.put( features[ 0 ], "Contrast" );
 		featureNames.put( features[ 1 ], "Morphology" );
 		featureNames.put( features[ 2 ], "Mean intensity" );
 
-		final Map< String, double[] > fv = new HashMap< String, double[] >();
+		final Map< String, double[] > fv = new HashMap< >();
 		for ( final String feature : features )
 		{
 			final double[] val = new double[ N_ITEMS ];

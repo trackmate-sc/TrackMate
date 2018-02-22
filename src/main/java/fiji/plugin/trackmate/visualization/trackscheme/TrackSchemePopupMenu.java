@@ -130,10 +130,10 @@ public class TrackSchemePopupMenu extends JPopupMenu
 			@Override
 			public void invoke( final Object sender, final mxEventObject evt )
 			{
-				for ( final mxCell cell : vertices )
+				for ( final mxCell lCell : vertices )
 				{
-					cell.setValue( tc.getValue() );
-					trackScheme.getGraph().getSpotFor( cell ).setName( tc.getValue().toString() );
+					lCell.setValue( tc.getValue() );
+					trackScheme.getGraph().getSpotFor( lCell ).setName( tc.getValue().toString() );
 				}
 				graphComponent.refresh();
 				graphComponent.removeListener( this );
@@ -149,14 +149,14 @@ public class TrackSchemePopupMenu extends JPopupMenu
 	{
 		double min_dist = Double.POSITIVE_INFINITY;
 		mxCell target_cell = null;
-		for ( final mxCell cell : vertices )
+		for ( final mxCell lCell : vertices )
 		{
-			final Point location = cell.getGeometry().getPoint();
+			final Point location = lCell.getGeometry().getPoint();
 			final double dist = location.distanceSq( point );
 			if ( dist < min_dist )
 			{
 				min_dist = dist;
-				target_cell = cell;
+				target_cell = lCell;
 			}
 		}
 		return target_cell;
@@ -182,19 +182,15 @@ public class TrackSchemePopupMenu extends JPopupMenu
 
 		// Build selection categories
 		final Object[] selection = trackScheme.getGraph().getSelectionCells();
-		final ArrayList< mxCell > vertices = new ArrayList< mxCell >();
-		final ArrayList< mxCell > edges = new ArrayList< mxCell >();
+		final ArrayList< mxCell > vertices = new ArrayList< >();
+		final ArrayList< mxCell > edges = new ArrayList< >();
 		for ( final Object obj : selection )
 		{
-			final mxCell cell = ( mxCell ) obj;
-			if ( cell.isVertex() )
-			{
-				vertices.add( cell );
-			}
-			else if ( cell.isEdge() )
-			{
-				edges.add( cell );
-			}
+			final mxCell lCell = ( mxCell ) obj;
+			if ( lCell.isVertex() )
+				vertices.add( lCell );
+			else if ( lCell.isEdge() )
+				edges.add( lCell );
 		}
 
 		// Select whole tracks

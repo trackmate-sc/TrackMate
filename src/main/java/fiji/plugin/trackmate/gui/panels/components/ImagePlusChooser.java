@@ -43,7 +43,7 @@ public class ImagePlusChooser extends javax.swing.JFrame
 
 	private ArrayList< ImagePlus > images;
 
-	private final ArrayList< ActionListener > listeners = new ArrayList< ActionListener >();
+	private final ArrayList< ActionListener > listeners = new ArrayList< >();
 
 	private final String windowTitle;
 
@@ -144,8 +144,8 @@ public class ImagePlusChooser extends javax.swing.JFrame
 		final int index = jComboBoxImage.getSelectedIndex();
 		if ( index < 1 )
 			return null;
-		else
-			return images.get( index - 1 );
+		
+		return images.get( index - 1 );
 	}
 
 	/*
@@ -169,11 +169,11 @@ public class ImagePlusChooser extends javax.swing.JFrame
 		if ( null == IDs )
 		{
 			image_names = new String[] { extraOption };
-			images = new ArrayList< ImagePlus >();
+			images = new ArrayList< >();
 			return image_names;
 		}
 		ImagePlus imp;
-		images = new ArrayList< ImagePlus >( IDs.length );
+		images = new ArrayList< >( IDs.length );
 		for ( int i = 0; i < IDs.length; i++ )
 		{
 			imp = WindowManager.getImage( IDs[ i ] );
@@ -212,8 +212,8 @@ public class ImagePlusChooser extends javax.swing.JFrame
 					jLabelSelect.setBounds( 12, 10, 258, 15 );
 				}
 				{
-					final ComboBoxModel< String > jComboBoxImageModel = new DefaultComboBoxModel< String >( getImageNames() );
-					jComboBoxImage = new JComboBox< String >();
+					final ComboBoxModel< String > jComboBoxImageModel = new DefaultComboBoxModel< >( getImageNames() );
+					jComboBoxImage = new JComboBox< >();
 					jPanelMain.add( jComboBoxImage );
 					jComboBoxImage.setFont( SMALL_FONT );
 					jComboBoxImage.setModel( jComboBoxImageModel );

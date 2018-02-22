@@ -32,8 +32,8 @@ public class TrackerChoiceDescriptor implements WizardPanelDescriptor
 		this.controller = controller;
 		this.trackerProvider = trackerProvider;
 		final List< String > keys = trackerProvider.getVisibleKeys();
-		final List< String > trackerNames = new ArrayList< String >( keys.size() );
-		final List< String > infoTexts = new ArrayList< String >( keys.size() );
+		final List< String > trackerNames = new ArrayList< >( keys.size() );
+		final List< String > infoTexts = new ArrayList< >( keys.size() );
 		for ( final String key : keys )
 		{
 			trackerNames.add( trackerProvider.getFactory( key ).getName() );
@@ -133,7 +133,7 @@ public class TrackerChoiceDescriptor implements WizardPanelDescriptor
 		}
 		else
 		{
-			key = SimpleSparseLAPTrackerFactory.TRACKER_KEY;
+			key = SimpleSparseLAPTrackerFactory.THIS2_TRACKER_KEY;
 		}
 		final int index = trackerProvider.getVisibleKeys().indexOf( key );
 

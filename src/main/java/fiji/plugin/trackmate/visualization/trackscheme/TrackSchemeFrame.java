@@ -18,6 +18,7 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import com.mxgraph.model.mxICell;
@@ -79,7 +80,7 @@ public class TrackSchemeFrame extends JFrame
 
 		final JLabel statusLabel = new JLabel( " " );
 		statusLabel.setFont( SMALL_FONT );
-		statusLabel.setHorizontalAlignment( JLabel.RIGHT );
+		statusLabel.setHorizontalAlignment( SwingConstants.RIGHT );
 		statusLabel.setPreferredSize( new Dimension( 200, 12 ) );
 		statusPanel.add( statusLabel );
 
@@ -134,9 +135,9 @@ public class TrackSchemeFrame extends JFrame
 	 * PUBLIC METHODS
 	 */
 
-	public void init( final JGraphXAdapter graph )
+	public void init( final JGraphXAdapter lGraph )
 	{
-		this.graph = graph;
+		this.graph = lGraph;
 		// GraphComponent
 		graphComponent = createGraphComponent();
 

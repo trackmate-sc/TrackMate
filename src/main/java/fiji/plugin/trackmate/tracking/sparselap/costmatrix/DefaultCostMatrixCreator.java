@@ -98,12 +98,12 @@ public class DefaultCostMatrixCreator< K extends Comparable< K >, J extends Comp
 	@Override
 	public boolean process()
 	{
-		uniqueRows = new ArrayList< K >( new HashSet< K >( rows ) );
+		uniqueRows = new ArrayList< >( new HashSet< >( rows ) );
 		Collections.sort( uniqueRows );
-		uniqueCols = new ArrayList< J >( new HashSet< J >( cols ) );
+		uniqueCols = new ArrayList< >( new HashSet< >( cols ) );
 		Collections.sort( uniqueCols );
 
-		final List< Assignment > assignments = new ArrayList< Assignment >( costs.length );
+		final List< Assignment > assignments = new ArrayList< >( costs.length );
 		for ( int i = 0; i < costs.length; i++ )
 		{
 			final K rowObj = rows.get( i );

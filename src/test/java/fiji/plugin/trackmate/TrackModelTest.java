@@ -54,8 +54,8 @@ public class TrackModelTest
 	{
 		// Build segments
 		final TrackModel model = new TrackModel();
-		final List< Spot > trackEnds = new ArrayList< Spot >();
-		final List< Spot > trackStarts = new ArrayList< Spot >();
+		final List< Spot > trackEnds = new ArrayList< >();
+		final List< Spot > trackStarts = new ArrayList< >();
 		for ( int i = 0; i < N_TRACKS; i++ )
 		{
 			Spot previous = null;
@@ -98,7 +98,7 @@ public class TrackModelTest
 	{
 		// Build 1 long track
 		final TrackModel model = new TrackModel();
-		final List< Spot > trackBreaks = new ArrayList< Spot >();
+		final List< Spot > trackBreaks = new ArrayList< >();
 		Spot previous = null;
 		for ( int i = 0; i < N_TRACKS; i++ )
 		{
@@ -136,7 +136,7 @@ public class TrackModelTest
 	{
 		// Build 1 long track
 		final TrackModel model = new TrackModel();
-		final List< DefaultWeightedEdge > trackBreaks = new ArrayList< DefaultWeightedEdge >();
+		final List< DefaultWeightedEdge > trackBreaks = new ArrayList< >();
 		Spot previous = new Spot( 0d, 0d, 0d, 1d, -1d );
 		model.addSpot( previous );
 		for ( int i = 0; i < N_TRACKS; i++ )
@@ -187,7 +187,7 @@ public class TrackModelTest
 			}
 		}
 		// Make some of them invisible
-		final Set< Integer > toHide = new HashSet< Integer >( N_TRACKS );
+		final Set< Integer > toHide = new HashSet< >( N_TRACKS );
 		for ( final Integer id : model.trackIDs( true ) )
 		{
 			if ( new Random().nextBoolean() )
@@ -238,7 +238,7 @@ public class TrackModelTest
 		model.setVisibility( toHide, false );
 
 		// Get the id of the other one
-		final Set< Integer > ids = new HashSet< Integer >( model.trackIDs( false ) );
+		final Set< Integer > ids = new HashSet< >( model.trackIDs( false ) );
 		ids.remove( toHide );
 		final Integer shown = ids.iterator().next();
 

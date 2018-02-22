@@ -25,6 +25,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
 
 import com.itextpdf.text.Font;
 
@@ -72,9 +73,9 @@ public class FeaturePlotSelectionPanel extends ActionListenablePanel
 
 	private JComboBox< String > jComboBoxXFeature;
 
-	private final Stack< JComboBox< String > > comboBoxes = new Stack< JComboBox< String > >();
+	private final Stack< JComboBox< String > > comboBoxes = new Stack< >();
 
-	private final Stack< Component > struts = new Stack< Component >();
+	private final Stack< Component > struts = new Stack< >();
 
 	private final String xKey;
 
@@ -96,7 +97,7 @@ public class FeaturePlotSelectionPanel extends ActionListenablePanel
 	{
 		super();
 		this.xKey = xKey;
-		this.features = new ArrayList< String >( features );
+		this.features = new ArrayList< >( features );
 		this.featureNames = featureNames;
 		initGUI();
 		addFeature();
@@ -138,7 +139,7 @@ public class FeaturePlotSelectionPanel extends ActionListenablePanel
 	 */
 	public Set< String > getYKeys()
 	{
-		final Set< String > yKeys = new HashSet< String >( comboBoxes.size() );
+		final Set< String > yKeys = new HashSet< >( comboBoxes.size() );
 		for ( final JComboBox< String > box : comboBoxes )
 			yKeys.add( features.get( box.getSelectedIndex() ) );
 		return yKeys;
@@ -153,26 +154,26 @@ public class FeaturePlotSelectionPanel extends ActionListenablePanel
 		if ( comboBoxes.size() > MAX_FEATURE_ALLOWED )
 			return;
 
-		final ComboBoxModel< String > jComboBoxYFeatureModel = new DefaultComboBoxModel< String >(
+		final ComboBoxModel< String > jComboBoxYFeatureModel = new DefaultComboBoxModel< >(
 				TMUtils.getArrayFromMaping( features, featureNames ).toArray( new String[] {} ) );
-		final JComboBox< String > jComboBoxYFeature = new JComboBox< String >();
-		jComboBoxYFeature.setModel( jComboBoxYFeatureModel );
-		jComboBoxYFeature.setMaximumSize( COMBO_BOX_MAX_SIZE );
-		jComboBoxYFeature.setFont( FONT );
+		final JComboBox< String > lJComboBoxYFeature = new JComboBox< >();
+		lJComboBoxYFeature.setModel( jComboBoxYFeatureModel );
+		lJComboBoxYFeature.setMaximumSize( COMBO_BOX_MAX_SIZE );
+		lJComboBoxYFeature.setFont( FONT );
 
 		if ( !comboBoxes.isEmpty() )
 		{
 			int newIndex = comboBoxes.get( comboBoxes.size() - 1 ).getSelectedIndex() + 1;
 			if ( newIndex >= features.size() )
 				newIndex = 0;
-			jComboBoxYFeature.setSelectedIndex( newIndex );
+			lJComboBoxYFeature.setSelectedIndex( newIndex );
 		}
 
 		final Component strut = Box.createVerticalStrut( 10 );
 		jPanelYFeatures.add( strut );
-		jPanelYFeatures.add( jComboBoxYFeature );
+		jPanelYFeatures.add( lJComboBoxYFeature );
 		jPanelYFeatures.revalidate();
-		comboBoxes.push( jComboBoxYFeature );
+		comboBoxes.push( lJComboBoxYFeature );
 		struts.push( strut );
 	}
 
@@ -243,9 +244,9 @@ public class FeaturePlotSelectionPanel extends ActionListenablePanel
 				jLabelXFeature.setFont( FONT.deriveFont( 12 ) );
 			}
 			{
-				final ComboBoxModel< String > jComboBoxXFeatureModel = new DefaultComboBoxModel< String >(
+				final ComboBoxModel< String > jComboBoxXFeatureModel = new DefaultComboBoxModel< >(
 						TMUtils.getArrayFromMaping( features, featureNames ).toArray( new String[] {} ) );
-				jComboBoxXFeature = new JComboBox< String >();
+				jComboBoxXFeature = new JComboBox< >();
 				jComboBoxXFeature.setBounds( 30, 117, COMBO_BOX_MAX_SIZE.width, COMBO_BOX_MAX_SIZE.height );
 				topPanel.add( jComboBoxXFeature );
 				jComboBoxXFeature.setModel( jComboBoxXFeatureModel );
@@ -271,7 +272,7 @@ public class FeaturePlotSelectionPanel extends ActionListenablePanel
 				jScrollPaneYFeatures.setBorder( null );
 				centerPanel.add( jScrollPaneYFeatures );
 				jScrollPaneYFeatures.setPreferredSize( new java.awt.Dimension( 169, 137 ) );
-				jScrollPaneYFeatures.setHorizontalScrollBarPolicy( JScrollPane.HORIZONTAL_SCROLLBAR_NEVER );
+				jScrollPaneYFeatures.setHorizontalScrollBarPolicy( ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER );
 				{
 					jPanelYFeatures = new JPanel();
 					jPanelYFeatures.setBorder( null );
@@ -315,9 +316,9 @@ public class FeaturePlotSelectionPanel extends ActionListenablePanel
 				}
 			}
 			{
-				final ComboBoxModel< String > jComboBoxYFeatureModel = new DefaultComboBoxModel< String >(
+				final ComboBoxModel< String > jComboBoxYFeatureModel = new DefaultComboBoxModel< >(
 						TMUtils.getArrayFromMaping( features, featureNames ).toArray( new String[] {} ) );
-				jComboBoxYFeature = new JComboBox< String >();
+				jComboBoxYFeature = new JComboBox< >();
 				jComboBoxYFeature.setModel( jComboBoxYFeatureModel );
 				jComboBoxYFeature.setPreferredSize( COMBO_BOX_MAX_SIZE );
 				jComboBoxYFeature.setMaximumSize( COMBO_BOX_MAX_SIZE );

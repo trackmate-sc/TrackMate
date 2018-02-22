@@ -28,15 +28,15 @@ public class ManualSpotColorAnalyzerFactory< T extends RealType< T > & NativeTyp
 
 	public static final String KEY = "MANUAL_SPOT_COLOR_ANALYZER";
 
-	static final List< String > FEATURES = new ArrayList< String >( 1 );
+	static final List< String > FEATURES = new ArrayList< >( 1 );
 
-	static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< String, String >( 1 );
+	static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< >( 1 );
 
-	static final Map< String, String > FEATURE_NAMES = new HashMap< String, String >( 1 );
+	static final Map< String, String > FEATURE_NAMES = new HashMap< >( 1 );
 
-	static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 1 );
+	static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< >( 1 );
 
-	static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 1 );
+	static final Map< String, Boolean > IS_INT = new HashMap< >( 1 );
 
 	static final String INFO_TEXT = "<html>A dummy analyzer for the feature that stores the color manually assigned to each spot.</html>";
 

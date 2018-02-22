@@ -36,6 +36,7 @@ import java.util.Map;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
 public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
@@ -230,8 +231,8 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 				MouseWheelListener[] l = jScrollPaneLinkingFeatures.getMouseWheelListeners();
 				jScrollPaneLinkingFeatures.removeMouseWheelListener(l[0]);
 				this.add(jScrollPaneLinkingFeatures, new GridBagConstraints(0, 6, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-				jScrollPaneLinkingFeatures.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-				jScrollPaneLinkingFeatures.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+				jScrollPaneLinkingFeatures.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+				jScrollPaneLinkingFeatures.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 				jPanelLinkingFeatures = new JPanelFeatureSelectionGui();
 				jPanelLinkingFeatures.setDisplayFeatures(features, featureNames);
 				jScrollPaneLinkingFeatures.setViewportView(jPanelLinkingFeatures);
@@ -251,6 +252,7 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 				jCheckBoxAllowGapClosing.setText("Allow gap closing");
 				jCheckBoxAllowGapClosing.setFont(SMALL_FONT);
 				jCheckBoxAllowGapClosing.addActionListener(new ActionListener() {
+					@Override
 					public void actionPerformed(ActionEvent e) {
 						setEnabled(
 								new Component[] {jLabel6, jTextFieldGapClosingMaxDistance, jLabelGapClosingMaxDistanceUnit, 
@@ -301,8 +303,8 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 				MouseWheelListener[] l = jScrollPaneGapClosingFeatures.getMouseWheelListeners();
 				jScrollPaneGapClosingFeatures.removeMouseWheelListener(l[0]);
 				this.add(jScrollPaneGapClosingFeatures, new GridBagConstraints(0, 12, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-				jScrollPaneGapClosingFeatures.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-				jScrollPaneGapClosingFeatures.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+				jScrollPaneGapClosingFeatures.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+				jScrollPaneGapClosingFeatures.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 				jPanelGapClosing = new JPanelFeatureSelectionGui();
 				jPanelGapClosing.setDisplayFeatures(features, featureNames);
 				jScrollPaneGapClosingFeatures.setViewportView(jPanelGapClosing);
@@ -322,11 +324,12 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 				jCheckBoxAllowSplitting.setText("Allow track segment splitting");
 				jCheckBoxAllowSplitting.setFont(SMALL_FONT);
 				jCheckBoxAllowSplitting.addActionListener(new ActionListener() {
+					@Override
 					public void actionPerformed(ActionEvent e) {
 						setEnabled(
 								new Component[] {jLabel10, jTextFieldSplittingMaxDistance, jLabelSplittingMaxDistanceUnit, 
 										jLabel15, jScrollPaneSplittingFeatures, jPanelSplittingFeatures}, 
-										jCheckBoxAllowSplitting.isSelected());;
+										jCheckBoxAllowSplitting.isSelected());
 					}
 				});
 			}
@@ -359,8 +362,8 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 				MouseWheelListener[] l = jScrollPaneSplittingFeatures.getMouseWheelListeners();
 				jScrollPaneSplittingFeatures.removeMouseWheelListener(l[0]);
 				this.add(jScrollPaneSplittingFeatures, new GridBagConstraints(0, 18, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-				jScrollPaneSplittingFeatures.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-				jScrollPaneSplittingFeatures.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+				jScrollPaneSplittingFeatures.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+				jScrollPaneSplittingFeatures.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 				jPanelSplittingFeatures = new JPanelFeatureSelectionGui();
 				jPanelSplittingFeatures.setDisplayFeatures(features, featureNames);
 				jScrollPaneSplittingFeatures.setViewportView(jPanelSplittingFeatures);
@@ -380,6 +383,7 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 				jCheckBoxAllowMerging.setText("Allow track segment merging");
 				jCheckBoxAllowMerging.setFont(SMALL_FONT);
 				jCheckBoxAllowMerging.addActionListener(new ActionListener() {
+					@Override
 					public void actionPerformed(ActionEvent e) {
 						setEnabled(
 								new Component[] {jLabel13, jTextFieldMergingMaxDistance, jLabelMergingMaxDistanceUnit, 
@@ -417,8 +421,8 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 				MouseWheelListener[] l = jScrollPaneMergingFeatures.getMouseWheelListeners();
 				jScrollPaneMergingFeatures.removeMouseWheelListener(l[0]);
 				this.add(jScrollPaneMergingFeatures, new GridBagConstraints(0, 24, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-				jScrollPaneMergingFeatures.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-				jScrollPaneMergingFeatures.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+				jScrollPaneMergingFeatures.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+				jScrollPaneMergingFeatures.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 				jPanelMergingFeatures = new JPanelFeatureSelectionGui();
 				jPanelMergingFeatures.setDisplayFeatures(features, featureNames);
 				jScrollPaneMergingFeatures.setViewportView(jPanelMergingFeatures);

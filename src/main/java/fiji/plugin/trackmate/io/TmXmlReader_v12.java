@@ -186,15 +186,15 @@ public class TmXmlReader_v12 extends TmXmlReader
 	private static final String MAX_LINKING_DISTANCE_ATTRIBUTE = "maxdistance";
 
 	// Forgotten features
-	private static final ArrayList< String > F_FEATURES = new ArrayList< String >( 9 );
+	private static final ArrayList< String > F_FEATURES = new ArrayList< >( 9 );
 
-	private static final HashMap< String, String > F_FEATURE_NAMES = new HashMap< String, String >( 9 );
+	private static final HashMap< String, String > F_FEATURE_NAMES = new HashMap< >( 9 );
 
-	private static final HashMap< String, String > F_FEATURE_SHORT_NAMES = new HashMap< String, String >( 9 );
+	private static final HashMap< String, String > F_FEATURE_SHORT_NAMES = new HashMap< >( 9 );
 
-	private static final HashMap< String, Dimension > F_FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 9 );
+	private static final HashMap< String, Dimension > F_FEATURE_DIMENSIONS = new HashMap< >( 9 );
 
-	private static final HashMap< String, Boolean > F_ISINT = new HashMap< String, Boolean >( 9 );
+	private static final HashMap< String, Boolean > F_ISINT = new HashMap< >( 9 );
 
 	private static final String VARIANCE = "VARIANCE";
 
@@ -293,7 +293,7 @@ public class TmXmlReader_v12 extends TmXmlReader
 	@Override
 	public Collection< TrackMateModelView > getViews( final ViewProvider provider, final Model model, final Settings settings, final SelectionModel selectionModel )
 	{
-		final Collection< TrackMateModelView > views = new ArrayList< TrackMateModelView >( 1 );
+		final Collection< TrackMateModelView > views = new ArrayList< >( 1 );
 		views.add( provider.getFactory( HyperStackDisplayer.KEY ).create( model, settings, selectionModel ) );
 		return views;
 	}
@@ -382,14 +382,14 @@ public class TmXmlReader_v12 extends TmXmlReader
 			getAllSpots(); // build the cache if it's not there
 		}
 
-		final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph = new SimpleWeightedGraph< Spot, DefaultWeightedEdge >( DefaultWeightedEdge.class );
+		final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph = new SimpleWeightedGraph< >( DefaultWeightedEdge.class );
 
 		// Load tracks
 		final List< Element > trackElements = allTracksElement.getChildren( TRACK_ELEMENT_KEY_v12 );
 
-		final Map< Integer, Set< Spot > > trackSpots = new HashMap< Integer, Set< Spot > >( trackElements.size() );
-		final Map< Integer, Set< DefaultWeightedEdge > > trackEdges = new HashMap< Integer, Set< DefaultWeightedEdge > >( trackElements.size() );
-		final Map< Integer, String > trackNames = new HashMap< Integer, String >( trackElements.size() );
+		final Map< Integer, Set< Spot > > trackSpots = new HashMap< >( trackElements.size() );
+		final Map< Integer, Set< DefaultWeightedEdge > > trackEdges = new HashMap< >( trackElements.size() );
+		final Map< Integer, String > trackNames = new HashMap< >( trackElements.size() );
 
 		for ( final Element trackElement : trackElements )
 		{
@@ -400,8 +400,8 @@ public class TmXmlReader_v12 extends TmXmlReader
 			// Iterate over edges
 			final List< Element > edgeElements = trackElement.getChildren( TRACK_EDGE_ELEMENT_KEY_v12 );
 
-			final Set< Spot > spots = new HashSet< Spot >( edgeElements.size() );
-			final Set< DefaultWeightedEdge > edges = new HashSet< DefaultWeightedEdge >( edgeElements.size() );
+			final Set< Spot > spots = new HashSet< >( edgeElements.size() );
+			final Set< DefaultWeightedEdge > edges = new HashSet< >( edgeElements.size() );
 
 			for ( final Element edgeElement : edgeElements )
 			{
@@ -449,10 +449,7 @@ public class TmXmlReader_v12 extends TmXmlReader
 					logger.error( "Bad edge found for track " + trackID );
 					continue;
 				}
-				else
-				{
-					graph.setEdgeWeight( edge, weight );
-				}
+				graph.setEdgeWeight( edge, weight );
 
 				// Add to current track sets
 				spots.add( sourceSpot );
@@ -467,13 +464,13 @@ public class TmXmlReader_v12 extends TmXmlReader
 			trackNames.put( trackID, "Track_" + trackID ); // Default name
 		}
 
-		final Map< Integer, Boolean > trackVisibility = new HashMap< Integer, Boolean >( trackElements.size() );
+		final Map< Integer, Boolean > trackVisibility = new HashMap< >( trackElements.size() );
 		final Set< Integer > savedFilteredTrackIDs = readFilteredTrackIDs();
 		for ( final Integer id : savedFilteredTrackIDs )
 		{
 			trackVisibility.put( id, Boolean.TRUE );
 		}
-		final Set< Integer > ids = new HashSet< Integer >( trackSpots.keySet() );
+		final Set< Integer > ids = new HashSet< >( trackSpots.keySet() );
 		ids.removeAll( savedFilteredTrackIDs );
 		for ( final Integer id : ids )
 		{
@@ -509,7 +506,7 @@ public class TmXmlReader_v12 extends TmXmlReader
 	 */
 	private List< FeatureFilter > getTrackFeatureFilters()
 	{
-		final List< FeatureFilter > featureThresholds = new ArrayList< FeatureFilter >();
+		final List< FeatureFilter > featureThresholds = new ArrayList< >();
 		final Element ftCollectionEl = root.getChild( TRACK_FILTER_COLLECTION_ELEMENT_KEY );
 		if ( null == ftCollectionEl ) { return null; }
 		final List< Element > ftEls = ftCollectionEl.getChildren( FILTER_ELEMENT_KEY );
@@ -547,7 +544,7 @@ public class TmXmlReader_v12 extends TmXmlReader
 	 */
 	private List< FeatureFilter > getSpotFeatureFilters()
 	{
-		final List< FeatureFilter > featureThresholds = new ArrayList< FeatureFilter >();
+		final List< FeatureFilter > featureThresholds = new ArrayList< >();
 		final Element ftCollectionEl = root.getChild( SPOT_FILTER_COLLECTION_ELEMENT_KEY_v12 );
 		if ( null == ftCollectionEl ) { return null; }
 		final List< Element > ftEls = ftCollectionEl.getChildren( FILTER_ELEMENT_KEY_v12 );
@@ -568,7 +565,7 @@ public class TmXmlReader_v12 extends TmXmlReader
 	private Map< Integer, Map< String, Double > > readTrackFeatures()
 	{
 
-		final HashMap< Integer, Map< String, Double > > featureMap = new HashMap< Integer, Map< String, Double > >();
+		final HashMap< Integer, Map< String, Double > > featureMap = new HashMap< >();
 
 		final Element allTracksElement = root.getChild( TRACK_COLLECTION_ELEMENT_KEY_v12 );
 		if ( null == allTracksElement ) { return null; }
@@ -589,7 +586,7 @@ public class TmXmlReader_v12 extends TmXmlReader
 				continue;
 			}
 
-			final HashMap< String, Double > trackMap = new HashMap< String, Double >();
+			final HashMap< String, Double > trackMap = new HashMap< >();
 
 			final List< Attribute > attributes = trackElement.getAttributes();
 			for ( final Attribute attribute : attributes )
@@ -683,7 +680,7 @@ public class TmXmlReader_v12 extends TmXmlReader
 		{
 			if ( segmenterClassName.equals( "fiji.plugin.trackmate.segmentation.DogSegmenter" ) )
 			{
-				segmenterKey = DogDetectorFactory.DETECTOR_KEY;
+				segmenterKey = DogDetectorFactory.THIS_DETECTOR_KEY;
 			}
 			else if ( segmenterClassName.equals( "fiji.plugin.trackmate.segmentation.LogSegmenter" ) )
 			{
@@ -691,7 +688,7 @@ public class TmXmlReader_v12 extends TmXmlReader
 			}
 			else if ( segmenterClassName.equals( "fiji.plugin.trackmate.segmentation.DownSamplingLogSegmenter" ) )
 			{
-				segmenterKey = DownsampleLogDetectorFactory.DETECTOR_KEY;
+				segmenterKey = DownsampleLogDetectorFactory.THIS_DETECTOR_KEY;
 			}
 			else if ( segmenterClassName.equals( "fiji.plugin.trackmate.segmentation.ManualSegmenter" ) )
 			{
@@ -715,7 +712,7 @@ public class TmXmlReader_v12 extends TmXmlReader
 		settings.detectorFactory = factory;
 
 		// Deal with segmenter settings
-		Map< String, Object > ds = new HashMap< String, Object >();
+		Map< String, Object > ds = new HashMap< >();
 
 		final String segmenterSettingsClassName = element.getAttributeValue( SEGMENTER_SETTINGS_CLASS_ATTRIBUTE_NAME_v12 );
 
@@ -734,7 +731,7 @@ public class TmXmlReader_v12 extends TmXmlReader
 			if ( segmenterSettingsClassName.equals( "fiji.plugin.trackmate.segmentation.LogSegmenterSettings" ) )
 			{
 
-				if ( segmenterKey.equals( LogDetectorFactory.DETECTOR_KEY ) || segmenterKey.equals( DogDetectorFactory.DETECTOR_KEY ) )
+				if ( segmenterKey.equals( LogDetectorFactory.DETECTOR_KEY ) || segmenterKey.equals( DogDetectorFactory.THIS_DETECTOR_KEY ) )
 				{
 
 					// The saved class matched, we can update the settings
@@ -770,7 +767,7 @@ public class TmXmlReader_v12 extends TmXmlReader
 			{
 				// DownSample segmenter
 
-				if ( segmenterKey.equals( DownsampleLogDetectorFactory.DETECTOR_KEY ) )
+				if ( segmenterKey.equals( DownsampleLogDetectorFactory.THIS_DETECTOR_KEY ) )
 				{
 
 					// The saved class matched, we can updated the settings
@@ -848,9 +845,9 @@ public class TmXmlReader_v12 extends TmXmlReader
 	}
 
 	/**
-	 * Update the given {@link Settings} object with the {@link TrackerSettings}
+	 * Update the given {@link Settings} object with the TrackerSettings
 	 * and {@link SpotTracker} fields named {@link Settings#trackerSettings} and
-	 * {@link Settings#tracker} read within the XML file this reader is
+	 * Settings#tracker read within the XML file this reader is
 	 * initialized with.
 	 * <p>
 	 * If the tracker settings XML element is not present in the file, the
@@ -875,7 +872,7 @@ public class TmXmlReader_v12 extends TmXmlReader
 		{
 			logger.error( "\nTracker class is not present.\n" );
 			logger.error( "Substituting default.\n" );
-			trackerKey = SimpleFastLAPTrackerFactory.TRACKER_KEY;
+			trackerKey = SimpleFastLAPTrackerFactory.THIS2_TRACKER_KEY;
 
 		}
 		else
@@ -884,12 +881,12 @@ public class TmXmlReader_v12 extends TmXmlReader
 			if ( trackerClassName.equals( "fiji.plugin.trackmate.tracking.SimpleFastLAPTracker" ) || trackerClassName.equals( "fiji.plugin.trackmate.tracking.SimpleLAPTracker" ) )
 			{
 				// convert to simple fast version
-				trackerKey = SimpleFastLAPTrackerFactory.TRACKER_KEY;
+				trackerKey = SimpleFastLAPTrackerFactory.THIS2_TRACKER_KEY;
 			}
 			else if ( trackerClassName.equals( "fiji.plugin.trackmate.tracking.FastLAPTracker" ) || trackerClassName.equals( "fiji.plugin.trackmate.tracking.LAPTracker" ) )
 			{
 				// convert to fast version
-				trackerKey = FastLAPTrackerFactory.TRACKER_KEY;
+				trackerKey = FastLAPTrackerFactory.THIS_TRACKER_KEY;
 			}
 			else if ( trackerClassName.equals( "fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTracker" ) )
 			{
@@ -899,7 +896,7 @@ public class TmXmlReader_v12 extends TmXmlReader
 			{
 				logger.error( "\nUnknown tracker: " + trackerClassName + ".\n" );
 				logger.error( "Substituting default.\n" );
-				trackerKey = SimpleFastLAPTrackerFactory.TRACKER_KEY;
+				trackerKey = SimpleFastLAPTrackerFactory.THIS2_TRACKER_KEY;
 			}
 		}
 		SpotTrackerFactory factory = provider.getFactory( trackerKey );
@@ -913,7 +910,7 @@ public class TmXmlReader_v12 extends TmXmlReader
 
 		// Deal with tracker settings
 		{
-			Map< String, Object > ts = new HashMap< String, Object >();
+			Map< String, Object > ts = new HashMap< >();
 
 			final String trackerSettingsClassName = element.getAttributeValue( TRACKER_SETTINGS_CLASS_ATTRIBUTE_NAME_v12 );
 
@@ -932,7 +929,7 @@ public class TmXmlReader_v12 extends TmXmlReader
 				if ( trackerSettingsClassName.equals( "fiji.plugin.trackmate.tracking.LAPTrackerSettings" ) )
 				{
 
-					if ( trackerKey.equals( SimpleFastLAPTrackerFactory.TRACKER_KEY ) || trackerKey.equals( FastLAPTrackerFactory.TRACKER_KEY ) )
+					if ( trackerKey.equals( SimpleFastLAPTrackerFactory.THIS2_TRACKER_KEY ) || trackerKey.equals( FastLAPTrackerFactory.THIS_TRACKER_KEY ) )
 					{
 
 						/*
@@ -1049,9 +1046,6 @@ public class TmXmlReader_v12 extends TmXmlReader
 	/**
 	 * Return the list of all spots stored in this file.
 	 * 
-	 * @throws DataConversionException
-	 *             if the attribute values are not formatted properly in the
-	 *             file.
 	 * @return a {@link SpotCollection}. Return <code>null</code> if the spot
 	 *         section is not present in the file.
 	 */
@@ -1071,7 +1065,7 @@ public class TmXmlReader_v12 extends TmXmlReader
 		}
 
 		// Instantiate cache
-		cache = new ConcurrentHashMap< Integer, Spot >( nspots );
+		cache = new ConcurrentHashMap< >( nspots );
 
 		int currentFrame = 0;
 		ArrayList< Spot > spotList;
@@ -1082,7 +1076,7 @@ public class TmXmlReader_v12 extends TmXmlReader
 
 			currentFrame = readIntAttribute( currentFrameContent, FRAME_ATTRIBUTE_NAME_v12, logger );
 			final List< Element > spotContent = currentFrameContent.getChildren( SPOT_ELEMENT_KEY_v12 );
-			spotList = new ArrayList< Spot >( spotContent.size() );
+			spotList = new ArrayList< >( spotContent.size() );
 			for ( final Element spotElement : spotContent )
 			{
 				final Spot spot = createSpotFrom( spotElement );
@@ -1105,8 +1099,6 @@ public class TmXmlReader_v12 extends TmXmlReader
 	 * and not added to the selection list. That way, it is certain that all
 	 * spots belonging to the selection list also belong to the global list.
 	 * 
-	 * @param allSpots
-	 *            the list of all spots, from which this selection is made
 	 * @return a {@link SpotCollection}. Each spot of this collection belongs
 	 *         also to the given collection. Return <code>null</code> if the
 	 *         spot selection section does is not present in the file.
@@ -1117,13 +1109,13 @@ public class TmXmlReader_v12 extends TmXmlReader
 		if ( null == selectedSpotCollection ) { return null; }
 
 		final List< Element > frameContent = selectedSpotCollection.getChildren( FILTERED_SPOT_COLLECTION_ELEMENT_KEY_v12 );
-		final Map< Integer, Set< Integer > > visibleIDs = new HashMap< Integer, Set< Integer > >( frameContent.size() );
+		final Map< Integer, Set< Integer > > visibleIDs = new HashMap< >( frameContent.size() );
 
 		for ( final Element currentFrameContent : frameContent )
 		{
 			final int currentFrame = readIntAttribute( currentFrameContent, FRAME_ATTRIBUTE_NAME_v12, logger );
 			final List< Element > spotContent = currentFrameContent.getChildren( SPOT_ID_ELEMENT_KEY_v12 );
-			final HashSet< Integer > IDs = new HashSet< Integer >( spotContent.size() );
+			final HashSet< Integer > IDs = new HashSet< >( spotContent.size() );
 			// Loop over all spot element
 			for ( final Element spotEl : spotContent )
 			{
@@ -1140,8 +1132,6 @@ public class TmXmlReader_v12 extends TmXmlReader
 	/**
 	 * Read and return the list of track indices that define the filtered track
 	 * collection.
-	 * 
-	 * @throws DataConversionException
 	 */
 	private Set< Integer > readFilteredTrackIDs()
 	{
@@ -1150,14 +1140,11 @@ public class TmXmlReader_v12 extends TmXmlReader
 
 		// Work because the track splitting from the graph is deterministic
 		final List< Element > elements = filteredTracksElement.getChildren( TRACK_ID_ELEMENT_KEY_v12 );
-		final HashSet< Integer > filteredTrackIndices = new HashSet< Integer >( elements.size() );
+		final HashSet< Integer > filteredTrackIndices = new HashSet< >( elements.size() );
 		for ( final Element indexElement : elements )
 		{
-			final Integer trackID = readIntAttribute( indexElement, TRACK_ID_ATTRIBUTE_NAME_v12, logger );
-			if ( null != trackID )
-			{
-				filteredTrackIndices.add( trackID );
-			}
+			final int trackID = readIntAttribute( indexElement, TRACK_ID_ATTRIBUTE_NAME_v12, logger );
+			filteredTrackIndices.add( trackID );
 		}
 		return filteredTrackIndices;
 	}
@@ -1309,7 +1296,7 @@ public class TmXmlReader_v12 extends TmXmlReader
 	 */
 	private static final Map< String, Double > readTrackerFeatureMap( final Element element )
 	{
-		final Map< String, Double > map = new HashMap< String, Double >();
+		final Map< String, Double > map = new HashMap< >();
 		final List< Element > featurelinkingElements = element.getChildren( TRACKER_SETTINGS_FEATURE_ELEMENT );
 		for ( final Element el : featurelinkingElements )
 		{

@@ -42,7 +42,7 @@ public class SpotIntensityAnalyzer< T extends RealType< T >> extends Independent
 	{
 
 		// Prepare neighborhood
-		final SpotNeighborhood< T > neighborhood = new SpotNeighborhood< T >( spot, img );
+		final SpotNeighborhood< T > neighborhood = new SpotNeighborhood<>( spot, img );
 		final int npixels = ( int ) neighborhood.size();
 		
 		if ( npixels <= 1 )

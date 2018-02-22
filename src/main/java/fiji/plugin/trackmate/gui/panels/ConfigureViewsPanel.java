@@ -101,7 +101,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 	/**
 	 * A map of String/Object that configures the look and feel of the views.
 	 */
-	protected Map< String, Object > displaySettings = new HashMap< String, Object >();
+	protected Map< String, Object > displaySettings = new HashMap< >();
 
 	protected JButton jButtonShowTrackScheme;
 
@@ -135,7 +135,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 
 	private ColorByFeatureGUIPanel trackColorGUI;
 
-	private final Collection< DisplaySettingsListener > listeners = new HashSet< DisplaySettingsListener >();
+	private final Collection< DisplaySettingsListener > listeners = new HashSet< >();
 
 	private final Model model;
 
@@ -634,7 +634,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 					{
 						for ( final Component c : getComponents() )
 							c.setEnabled( enabled );
-					};
+					}
 				};
 				jPanelTrackOptions.setBorder( new LineBorder( new java.awt.Color( 192, 192, 192 ), 1, true ) );
 				{
@@ -646,8 +646,8 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 				}
 				{
 					final String[] keyNames = TrackMateModelView.TRACK_DISPLAY_MODE_DESCRIPTION;
-					final ComboBoxModel< String > jComboBoxDisplayModeModel = new DefaultComboBoxModel< String >( keyNames );
-					jComboBoxDisplayMode = new JComboBox< String >();
+					final ComboBoxModel< String > jComboBoxDisplayModeModel = new DefaultComboBoxModel< >( keyNames );
+					jComboBoxDisplayMode = new JComboBox< >();
 					jComboBoxDisplayMode.setModel( jComboBoxDisplayModeModel );
 					jComboBoxDisplayMode.setSelectedIndex( 0 );
 					jComboBoxDisplayMode.setFont( SMALL_FONT );
@@ -779,7 +779,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 					{
 						for ( final Component c : getComponents() )
 							c.setEnabled( enabled );
-					};
+					}
 				};
 				jPanelSpotOptions.setBorder( new LineBorder( new java.awt.Color( 192, 192, 192 ), 1, true ) );
 				{
@@ -856,7 +856,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 					{
 						for ( final Component c : getComponents() )
 							c.setEnabled( enabled );
-					};
+					}
 				};
 				final FlowLayout flowLayout = ( FlowLayout ) jpanelDrawingDepth.getLayout();
 				flowLayout.setAlignment( FlowLayout.LEFT );

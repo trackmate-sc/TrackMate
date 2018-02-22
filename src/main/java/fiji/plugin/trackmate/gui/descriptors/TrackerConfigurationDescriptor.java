@@ -20,6 +20,9 @@ public class TrackerConfigurationDescriptor implements WizardPanelDescriptor
 
 	private final TrackMateGUIController controller;
 
+	/**
+	 * @param trackerProvider  
+	 */
 	public TrackerConfigurationDescriptor( final TrackerProvider trackerProvider, final TrackMate trackmate, final TrackMateGUIController controller )
 	{
 		this.trackmate = trackmate;

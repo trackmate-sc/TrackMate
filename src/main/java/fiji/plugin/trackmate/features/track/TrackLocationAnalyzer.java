@@ -10,8 +10,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 import javax.swing.ImageIcon;
 
-import net.imglib2.algorithm.Benchmark;
-import net.imglib2.algorithm.MultiThreaded;
 import net.imglib2.multithreading.SimpleMultiThreading;
 
 import org.scijava.plugin.Plugin;
@@ -23,7 +21,7 @@ import fiji.plugin.trackmate.Spot;
 
 @SuppressWarnings( "deprecation" )
 @Plugin( type = TrackAnalyzer.class )
-public class TrackLocationAnalyzer implements TrackAnalyzer, MultiThreaded, Benchmark
+public class TrackLocationAnalyzer implements TrackAnalyzer
 {
 
 	/*
@@ -37,15 +35,15 @@ public class TrackLocationAnalyzer implements TrackAnalyzer, MultiThreaded, Benc
 
 	public static final String Z_LOCATION = "TRACK_Z_LOCATION";
 
-	public static final List< String > FEATURES = new ArrayList< String >( 3 );
+	public static final List< String > FEATURES = new ArrayList< >( 3 );
 
-	public static final Map< String, String > FEATURE_NAMES = new HashMap< String, String >( 3 );
+	public static final Map< String, String > FEATURE_NAMES = new HashMap< >( 3 );
 
-	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< String, String >( 3 );
+	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< >( 3 );
 
-	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 3 );
+	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< >( 3 );
 
-	public static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 3 );
+	public static final Map< String, Boolean > IS_INT = new HashMap< >( 3 );
 
 	static
 	{
@@ -95,7 +93,7 @@ public class TrackLocationAnalyzer implements TrackAnalyzer, MultiThreaded, Benc
 
 		if ( trackIDs.isEmpty() ) { return; }
 
-		final ArrayBlockingQueue< Integer > queue = new ArrayBlockingQueue< Integer >( trackIDs.size(), false, trackIDs );
+		final ArrayBlockingQueue< Integer > queue = new ArrayBlockingQueue< >( trackIDs.size(), false, trackIDs );
 		final FeatureModel fm = model.getFeatureModel();
 
 		final Thread[] threads = SimpleMultiThreading.newThreads( numThreads );
@@ -166,7 +164,7 @@ public class TrackLocationAnalyzer implements TrackAnalyzer, MultiThreaded, Benc
 	public long getProcessingTime()
 	{
 		return processingTime;
-	};
+	}
 
 	@Override
 	public String getKey()

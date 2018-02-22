@@ -199,8 +199,8 @@ public class JPanelColorByFeatureGUI extends ActionListenablePanel
 				featureStringList[ 0 ] = "Default";
 				for ( int i = 0; i < features.size(); i++ )
 					featureStringList[ i + 1 ] = featureNames.get( features.get( i ) );
-				final ComboBoxModel< String > jComboBoxSetColorByModel = new DefaultComboBoxModel< String >( featureStringList );
-				jComboBoxSetColorBy = new JComboBox< String >();
+				final ComboBoxModel< String > jComboBoxSetColorByModel = new DefaultComboBoxModel< >( featureStringList );
+				jComboBoxSetColorBy = new JComboBox< >();
 				jPanelByFeature.add( Box.createHorizontalStrut( 5 ) );
 				jPanelByFeature.add( Box.createHorizontalStrut( 5 ) );
 				jPanelByFeature.add( jComboBoxSetColorBy );

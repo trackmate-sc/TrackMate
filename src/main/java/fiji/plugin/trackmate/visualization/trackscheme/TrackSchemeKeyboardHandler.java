@@ -38,16 +38,11 @@ public class TrackSchemeKeyboardHandler
 
 	protected InputMap getInputMap( final int condition )
 	{
-		InputMap map = null;
-
+		final InputMap map;
 		if ( condition == JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT )
-		{
 			map = ( InputMap ) UIManager.get( "ScrollPane.ancestorInputMap" );
-		}
-		else if ( condition == JComponent.WHEN_FOCUSED )
-		{
+		else 
 			map = new InputMap();
-		}
 
 		map.put( KeyStroke.getKeyStroke( "F2" ), "edit" );
 		map.put( KeyStroke.getKeyStroke( "DELETE" ), "delete" );

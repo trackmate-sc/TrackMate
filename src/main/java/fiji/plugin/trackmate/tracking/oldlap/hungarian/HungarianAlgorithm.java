@@ -143,9 +143,6 @@ public class HungarianAlgorithm implements AssignmentAlgorithm {
 	 * next column
 	 *
 	 * @param costMatrix
-	 * @param starredZeroes
-	 * @param coveredRows
-	 * @param coveredCols
 	 */
     private void initStars(final double costMatrix[][], final int[] starsByRow, final int[] starsByCol) {
 
@@ -166,9 +163,8 @@ public class HungarianAlgorithm implements AssignmentAlgorithm {
         }
     }
 
-
     /**
-     * just marke the columns covered for any coluimn containing a starred zero
+     * just mark the columns covered for any column containing a starred zero
      * @param starsByCol
      * @param coveredCols
      */
@@ -185,7 +181,6 @@ public class HungarianAlgorithm implements AssignmentAlgorithm {
      * @param primesByRow
      * @param coveredRows
      * @param coveredCols
-     * @return
      */
     private int[] primeSomeUncoveredZero(final double matrix[][], final int[] primesByRow,
                                        final int[] coveredRows, final int[] coveredCols) {
@@ -221,7 +216,7 @@ public class HungarianAlgorithm implements AssignmentAlgorithm {
         // build the alternating zero sequence (prime, star, prime, star, etc)
         int i, j = unpairedZeroPrime[1];
 
-        final Set<int[]> zeroSequence = new LinkedHashSet<int[]>();
+        final Set<int[]> zeroSequence = new LinkedHashSet<>();
         zeroSequence.add(unpairedZeroPrime);
         boolean paired = false;
         do {

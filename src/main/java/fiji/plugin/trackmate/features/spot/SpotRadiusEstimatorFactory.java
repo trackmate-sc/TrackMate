@@ -31,15 +31,15 @@ public class SpotRadiusEstimatorFactory< T extends RealType< T > & NativeType< T
 	/** The single feature key name that this analyzer computes. */
 	public static final String ESTIMATED_DIAMETER = "ESTIMATED_DIAMETER";
 
-	public static final ArrayList< String > FEATURES = new ArrayList< String >( 1 );
+	public static final ArrayList< String > FEATURES = new ArrayList< >( 1 );
 
-	public static final HashMap< String, String > FEATURE_NAMES = new HashMap< String, String >( 1 );
+	public static final HashMap< String, String > FEATURE_NAMES = new HashMap< >( 1 );
 
-	public static final HashMap< String, String > FEATURE_SHORT_NAMES = new HashMap< String, String >( 1 );
+	public static final HashMap< String, String > FEATURE_SHORT_NAMES = new HashMap< >( 1 );
 
-	public static final HashMap< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 1 );
+	public static final HashMap< String, Dimension > FEATURE_DIMENSIONS = new HashMap< >( 1 );
 
-	public static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 1 );
+	public static final Map< String, Boolean > IS_INT = new HashMap< >( 1 );
 
 	static
 	{
@@ -62,7 +62,7 @@ public class SpotRadiusEstimatorFactory< T extends RealType< T > & NativeType< T
 		final ImgPlus< T > imgC = HyperSliceImgPlus.fixChannelAxis( img, channel );
 		final ImgPlus< T > imgCT = HyperSliceImgPlus.fixTimeAxis( imgC, frame );
 		final Iterator< Spot > spots = model.getSpots().iterator( frame, false );
-		return new SpotRadiusEstimator< T >( imgCT, spots );
+		return new SpotRadiusEstimator< >( imgCT, spots );
 	}
 
 	@Override

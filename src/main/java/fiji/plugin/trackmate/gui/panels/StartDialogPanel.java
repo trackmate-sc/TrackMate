@@ -125,7 +125,7 @@ public class StartDialogPanel extends ActionListenablePanel
 				{
 					ex.printStackTrace();
 				}
-			};
+			}
 		} );
 		final GridBagConstraints gbc_lblLinkPubMed = new GridBagConstraints();
 		gbc_lblLinkPubMed.anchor = GridBagConstraints.NORTH;
@@ -152,7 +152,7 @@ public class StartDialogPanel extends ActionListenablePanel
 				{
 					ex.printStackTrace();
 				}
-			};
+			}
 		} );
 		final GridBagConstraints gbc_lblLinkGoogleScholar = new GridBagConstraints();
 		gbc_lblLinkGoogleScholar.fill = GridBagConstraints.HORIZONTAL;
@@ -605,53 +605,53 @@ public class StartDialogPanel extends ActionListenablePanel
 	/**
 	 * Fill the text fields with parameters grabbed from specified ImagePlus.
 	 */
-	public void getFrom( final ImagePlus imp )
+	public void getFrom( final ImagePlus lImp )
 	{
-		this.imp = imp;
-		if ( null == imp )
+		this.imp = lImp;
+		if ( null == lImp )
 		{
 			jLabelImageName.setText( "No image selected." );
 			impValid = false;
 			return;
 		}
 
-		if ( imp.getType() == ImagePlus.COLOR_RGB )
+		if ( lImp.getType() == ImagePlus.COLOR_RGB )
 		{
 			// We do not know how to process RGB images
-			jLabelImageName.setText( imp.getShortTitle() + " is RGB: invalid." );
+			jLabelImageName.setText( lImp.getShortTitle() + " is RGB: invalid." );
 			impValid = false;
 			return;
 		}
 
-		jLabelImageName.setText( "Target: " + imp.getShortTitle() );
-		jTextFieldPixelWidth.setValue( imp.getCalibration().pixelWidth );
-		jTextFieldPixelHeight.setValue( imp.getCalibration().pixelHeight );
-		jTextFieldVoxelDepth.setValue( imp.getCalibration().pixelDepth );
-		if ( imp.getCalibration().frameInterval == 0 )
+		jLabelImageName.setText( "Target: " + lImp.getShortTitle() );
+		jTextFieldPixelWidth.setValue( lImp.getCalibration().pixelWidth );
+		jTextFieldPixelHeight.setValue( lImp.getCalibration().pixelHeight );
+		jTextFieldVoxelDepth.setValue( lImp.getCalibration().pixelDepth );
+		if ( lImp.getCalibration().frameInterval == 0 )
 		{
 			jTextFieldTimeInterval.setValue( 1 );
 			jLabelUnits4.setText( "frame" );
 		}
 		else
 		{
-			jTextFieldTimeInterval.setValue( imp.getCalibration().frameInterval );
-			jLabelUnits4.setText( imp.getCalibration().getTimeUnit() );
+			jTextFieldTimeInterval.setValue( lImp.getCalibration().frameInterval );
+			jLabelUnits4.setText( lImp.getCalibration().getTimeUnit() );
 		}
-		jLabelUnits1.setText( imp.getCalibration().getXUnit() );
-		jLabelUnits2.setText( imp.getCalibration().getYUnit() );
-		jLabelUnits3.setText( imp.getCalibration().getZUnit() );
-		Roi roi = imp.getRoi();
+		jLabelUnits1.setText( lImp.getCalibration().getXUnit() );
+		jLabelUnits2.setText( lImp.getCalibration().getYUnit() );
+		jLabelUnits3.setText( lImp.getCalibration().getZUnit() );
+		Roi roi = lImp.getRoi();
 		if ( null == roi )
-			roi = new Roi( 0, 0, imp.getWidth(), imp.getHeight() );
+			roi = new Roi( 0, 0, lImp.getWidth(), lImp.getHeight() );
 		final Rectangle boundingRect = roi.getBounds();
 		jTextFieldXStart.setText( "" + ( boundingRect.x ) );
 		jTextFieldYStart.setText( "" + ( boundingRect.y ) );
 		jTextFieldXEnd.setText( "" + ( boundingRect.width + boundingRect.x - 1 ) );
 		jTextFieldYEnd.setText( "" + ( boundingRect.height + boundingRect.y - 1 ) );
 		jTextFieldZStart.setText( "" + 0 );
-		jTextFieldZEnd.setText( "" + ( imp.getNSlices() - 1 ) );
+		jTextFieldZEnd.setText( "" + ( lImp.getNSlices() - 1 ) );
 		jTextFieldTStart.setText( "" + 0 );
-		jTextFieldTEnd.setText( "" + ( imp.getNFrames() - 1 ) );
+		jTextFieldTEnd.setText( "" + ( lImp.getNFrames() - 1 ) );
 
 		impValid = true;
 	}

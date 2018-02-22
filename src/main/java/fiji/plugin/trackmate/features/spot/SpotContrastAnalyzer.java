@@ -30,15 +30,13 @@ public class SpotContrastAnalyzer< T extends RealType< T >> extends IndependentS
 	/**
 	 * Compute the contrast for the given spot.
 	 * 
-	 * @param spot
-	 * @param diameter
-	 *            the diameter to search for is in physical units
-	 * @return
+	 * @param spot the spot to measure.
+	 * @return the contrast.
 	 */
 	private final double getContrast( final Spot spot )
 	{
 
-		final SpotNeighborhood< T > neighborhood = new SpotNeighborhood< T >( spot, img );
+		final SpotNeighborhood< T > neighborhood = new SpotNeighborhood<>( spot, img );
 
 		final double radius = spot.getFeature( Spot.RADIUS );
 		long innerRingVolume = 0;

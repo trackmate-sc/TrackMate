@@ -77,8 +77,8 @@ public class JaqamanLinkingCostMatrixCreator< K extends Comparable< K >, J exten
 	{
 		final long start = System.currentTimeMillis();
 
-		final List< K > accSources = new ArrayList< K >();
-		final List< J > accTargets = new ArrayList< J >();
+		final List< K > accSources = new ArrayList< >();
+		final List< J > accTargets = new ArrayList< >();
 		final ResizableDoubleArray costs = new ResizableDoubleArray();
 
 		for ( final K source : sources )
@@ -115,7 +115,7 @@ public class JaqamanLinkingCostMatrixCreator< K extends Comparable< K >, J exten
 		else
 		{
 
-			final DefaultCostMatrixCreator< K, J > cmCreator = new DefaultCostMatrixCreator< K, J >( accSources, accTargets, costs.data, alternativeCostFactor, percentile );
+			final DefaultCostMatrixCreator< K, J > cmCreator = new DefaultCostMatrixCreator< >( accSources, accTargets, costs.data, alternativeCostFactor, percentile );
 			if ( !cmCreator.checkInput() || !cmCreator.process() )
 			{
 				errorMessage = cmCreator.getErrorMessage();

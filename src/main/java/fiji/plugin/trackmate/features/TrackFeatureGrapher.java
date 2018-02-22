@@ -58,7 +58,7 @@ public class TrackFeatureGrapher extends AbstractFeatureGrapher
 		final Set< Dimension > dimensions = getUniqueValues( yFeatures, yDimensions );
 
 		// Generate one panel per different dimension
-		final ArrayList< ExportableChartPanel > chartPanels = new ArrayList< ExportableChartPanel >( dimensions.size() );
+		final ArrayList< ExportableChartPanel > chartPanels = new ArrayList<>( dimensions.size() );
 		for ( final Dimension dimension : dimensions )
 		{
 

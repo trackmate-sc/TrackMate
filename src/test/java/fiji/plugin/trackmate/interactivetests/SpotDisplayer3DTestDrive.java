@@ -57,11 +57,11 @@ public class SpotDisplayer3DTestDrive
 		// Create 3D image
 		System.out.println( "Creating image...." );
 		final Img< UnsignedByteType > source = new ArrayImgFactory< UnsignedByteType >().create( new int[] { ( int ) ( WIDTH / CALIBRATION[ 0 ] ), ( int ) ( HEIGHT / CALIBRATION[ 1 ] ), ( int ) ( DEPTH / CALIBRATION[ 2 ] ) }, new UnsignedByteType() );
-		final ImgPlus< UnsignedByteType > img = new ImgPlus< UnsignedByteType >( source, "test", AXES, CALIBRATION );
+		final ImgPlus< UnsignedByteType > img = new ImgPlus< >( source, "test", AXES, CALIBRATION );
 
 		// Random blobs
 		final double[] radiuses = new double[ N_BLOBS ];
-		final ArrayList< double[] > centers = new ArrayList< double[] >( N_BLOBS );
+		final ArrayList< double[] > centers = new ArrayList< >( N_BLOBS );
 		final int[] intensities = new int[ N_BLOBS ];
 		for ( int i = 0; i < N_BLOBS; i++ )
 		{
@@ -77,7 +77,7 @@ public class SpotDisplayer3DTestDrive
 		for ( int i = 0; i < N_BLOBS; i++ )
 		{
 			final Spot tmpSpot = new Spot( centers.get( i )[ 0 ], centers.get( i )[ 1 ], centers.get( i )[ 2 ], radiuses[ i ], -1d );
-			final SpotNeighborhood< UnsignedByteType > sphere = new SpotNeighborhood< UnsignedByteType >( tmpSpot, img );
+			final SpotNeighborhood< UnsignedByteType > sphere = new SpotNeighborhood< >( tmpSpot, img );
 			for ( final UnsignedByteType pixel : sphere )
 			{
 				pixel.set( intensities[ i ] );
@@ -98,7 +98,7 @@ public class SpotDisplayer3DTestDrive
 		imp.setTitle( "3D blobs" );
 
 		// Create a Spot arrays
-		final List< Spot > spots = new ArrayList< Spot >( N_BLOBS );
+		final List< Spot > spots = new ArrayList< >( N_BLOBS );
 		Spot spot;
 		for ( int i = 0; i < N_BLOBS; i++ )
 		{
@@ -108,7 +108,7 @@ public class SpotDisplayer3DTestDrive
 		}
 
 		System.out.println( "Grabbing features..." );
-		final SpotIntensityAnalyzer< UnsignedByteType > analyzer = new SpotIntensityAnalyzer< UnsignedByteType >( img, spots.iterator() );
+		final SpotIntensityAnalyzer< UnsignedByteType > analyzer = new SpotIntensityAnalyzer< >( img, spots.iterator() );
 		analyzer.process();
 		for ( final Spot s : spots )
 			System.out.println( s );
@@ -125,7 +125,7 @@ public class SpotDisplayer3DTestDrive
 		displayer.render();
 
 		// Launch threshold GUI
-		final List< FeatureFilter > ff = new ArrayList< FeatureFilter >();
+		final List< FeatureFilter > ff = new ArrayList< >();
 		final FilterGuiPanel gui = new FilterGuiPanel( trackmate.getModel(), Arrays.asList( new Category[] { Category.SPOTS } ) );
 		gui.setFilters( ff );
 
@@ -158,7 +158,7 @@ public class SpotDisplayer3DTestDrive
 							displayer.setDisplaySettings( TrackMateModelView.KEY_SPOT_COLORING, spotColorGenerator );
 							displayer.setDisplaySettings( TrackMateModelView.KEY_SPOT_RADIUS_RATIO, RAN.nextDouble() + 1 );
 							displayer.refresh();
-						};
+						}
 					}.start();
 				}
 			}

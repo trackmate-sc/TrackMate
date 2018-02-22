@@ -67,7 +67,7 @@ public class CloseGapsByLinearInterpolationAction extends AbstractTMAction
 				final int currentFrame = currentSpot.getFeature( Spot.FRAME ).intValue();
 				final int nextFrame = nextSpot.getFeature( Spot.FRAME ).intValue();
 
-				if ( nextSpot != null && ( Math.abs( nextFrame - currentFrame ) > 1 ) )
+				if ( Math.abs( nextFrame - currentFrame ) > 1 )
 				{
 					final int presign = nextFrame > currentFrame ? 1 : -1;
 

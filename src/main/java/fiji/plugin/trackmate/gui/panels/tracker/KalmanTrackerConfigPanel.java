@@ -115,7 +115,7 @@ public class KalmanTrackerConfigPanel extends ConfigurationPanel
 	@Override
 	public Map< String, Object > getSettings()
 	{
-		final Map< String, Object > settings = new HashMap< String, Object >();
+		final Map< String, Object > settings = new HashMap<>();
 		settings.put( KEY_LINKING_MAX_DISTANCE, tfInitSearchRadius.getValue() );
 		settings.put( KEY_KALMAN_SEARCH_RADIUS, tfSearchRadius.getValue() );
 		settings.put( KEY_GAP_CLOSING_MAX_FRAME_GAP, ( int ) tfMaxFrameGap.getValue() );

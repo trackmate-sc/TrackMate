@@ -166,7 +166,7 @@ public class SquareNeighborhoodCursor3x3<T> implements Cursor<T>, Bounded {
 
 	@Override
 	public Cursor<T> copyCursor() {
-		return new SquareNeighborhoodCursor3x3<T>(source, center);
+		return new SquareNeighborhoodCursor3x3<>(source, center);
 	}
 
 	@Override

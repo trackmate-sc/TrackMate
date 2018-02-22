@@ -23,9 +23,9 @@ import javax.swing.event.ChangeListener;
 public class TrackFilterDescriptor implements WizardPanelDescriptor
 {
 
-	private final ArrayList< ChangeListener > changeListeners = new ArrayList< ChangeListener >();
+	private final ArrayList< ChangeListener > changeListeners = new ArrayList< >();
 
-	private final ArrayList< ActionListener > actionListeners = new ArrayList< ActionListener >();
+	private final ArrayList< ActionListener > actionListeners = new ArrayList< >();
 
 	private static final String KEY = "FilterTracks";
 

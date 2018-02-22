@@ -49,7 +49,7 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 	/** The target model to draw spot from. */
 	private final Model model;
 
-	private final JGraphXAdapter graph;
+	private final JGraphXAdapter graphAdapter;
 
 	private final TrackSchemeGraphComponent component;
 
@@ -70,7 +70,7 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 	public TrackSchemeGraphLayout( final JGraphXAdapter graph, final Model model, final TrackSchemeGraphComponent component )
 	{
 		super( graph );
-		this.graph = graph;
+		this.graphAdapter = graph;
 		this.model = model;
 		this.component = component;
 	}
@@ -80,7 +80,7 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 	 */
 
 	@Override
-	public void execute( final Object parent )
+	public void execute( final Object lParent )
 	{
 
 		final long start = System.currentTimeMillis();
@@ -89,8 +89,8 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 		 * To be able to deal with lonely cells later (i.e. cells that are not
 		 * part of a track), we retrieve the list of all cells.
 		 */
-		final Object[] objs = graph.getChildVertices( graph.getDefaultParent() );
-		final ArrayList< mxCell > lonelyCells = new ArrayList< mxCell >( objs.length );
+		final Object[] objs = graphAdapter.getChildVertices( graphAdapter.getDefaultParent() );
+		final ArrayList< mxCell > lonelyCells = new ArrayList< >( objs.length );
 		for ( final Object obj : objs )
 		{
 			lonelyCells.add( ( mxCell ) obj );
@@ -111,7 +111,7 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 		 */
 		final int maxFrame = model.getSpots().lastKey();
 
-		graph.getModel().beginUpdate();
+		graphAdapter.getModel().beginUpdate();
 		try
 		{
 
@@ -142,7 +142,7 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 				component.columnTrackIDs[ trackIndex ] = trackID;
 
 				// Get first spot
-				final TreeSet< Spot > sortedTrack = new TreeSet< Spot >( Spot.frameComparator );
+				final TreeSet< Spot > sortedTrack = new TreeSet< >( Spot.frameComparator );
 				sortedTrack.addAll( track );
 				final Spot first = sortedTrack.first();
 
@@ -172,7 +172,7 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 
 						// Get corresponding JGraphX cell, add it if it does not
 						// exist in the JGraphX yet
-						final mxICell cell = graph.getCellFor( spot );
+						final mxICell cell = graphAdapter.getCellFor( spot );
 
 						// This is cell is in a track, remove it from the list
 						// of lonely cells
@@ -209,7 +209,7 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 
 					final TrackBranchDecomposition branchDecomposition = ConvexBranchesDecomposition.processTrack( trackID, model.getTrackModel(), neighborCache, false, false );
 					final SimpleDirectedGraph< List< Spot >, DefaultEdge > branchGraph = ConvexBranchesDecomposition.buildBranchGraph( branchDecomposition );
-					final DepthFirstIterator< List< Spot >, DefaultEdge > depthFirstIterator = new DepthFirstIterator< List< Spot >, DefaultEdge >( branchGraph );
+					final DepthFirstIterator< List< Spot >, DefaultEdge > depthFirstIterator = new DepthFirstIterator< >( branchGraph );
 
 					while ( depthFirstIterator.hasNext() )
 					{
@@ -234,7 +234,7 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 						{
 							// Get corresponding JGraphX cell, add it if it does
 							// not exist in the JGraphX yet
-							final mxICell cell = graph.getCellFor( spot );
+							final mxICell cell = graphAdapter.getCellFor( spot );
 
 							// This is cell is in a track, remove it from the
 							// list of lonely cells
@@ -284,26 +284,26 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 			// Deal with lonely cells
 			for ( final mxCell cell : lonelyCells )
 			{
-				final Spot spot = graph.getSpotFor( cell );
+				final Spot spot = graphAdapter.getSpotFor( cell );
 				final int frame = spot.getFeature( Spot.FRAME ).intValue();
 				setCellGeometry( cell, frame, columns[ frame ]++ );
 			}
 
 			// Before we leave, we regenerate the row length, for our brothers
-			rowLengths = new HashMap< Integer, Integer >( columns.length );
+			rowLengths = new HashMap< >( columns.length );
 			for ( int i = 0; i < columns.length; i++ )
 			{
 				rowLengths.put( i, columns[ i ] );
 			}
 
 			// Move vertices cells to front, to make them easily selectable.
-			final Object[] verticesCells = graph.getVertexCells().toArray();
-			graph.cellsOrdered( verticesCells, false );
+			final Object[] verticesCells = graphAdapter.getVertexCells().toArray();
+			graphAdapter.cellsOrdered( verticesCells, false );
 
 		}
 		finally
 		{
-			graph.getModel().endUpdate();
+			graphAdapter.getModel().endUpdate();
 		}
 
 		final long end = System.currentTimeMillis();

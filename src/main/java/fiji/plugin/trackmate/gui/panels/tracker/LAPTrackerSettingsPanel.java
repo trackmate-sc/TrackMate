@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
 
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 
@@ -57,8 +58,8 @@ public class LAPTrackerSettingsPanel extends ConfigurationPanel {
 			{
 				final JScrollPane jScrollPaneMain = new JScrollPane();
 				this.add(jScrollPaneMain, BorderLayout.CENTER);
-				jScrollPaneMain.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-				jScrollPaneMain.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+				jScrollPaneMain.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+				jScrollPaneMain.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 				jScrollPaneMain.getVerticalScrollBar().setUnitIncrement(24);
 				{
 					jPanelMain = new JPanelTrackerSettingsMain(trackerName, spaceUnits, features, featureNames);

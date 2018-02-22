@@ -1,6 +1,6 @@
 package fiji.plugin.trackmate.features.track;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import fiji.plugin.trackmate.Model;
@@ -185,7 +185,7 @@ public class TrackBranchingAnalyzerTest
 	public final void testModelChanged()
 	{
 		// Copy old keys
-		final HashSet< Integer > oldKeys = new HashSet< Integer >( model.getTrackModel().trackIDs( true ) );
+		final HashSet< Integer > oldKeys = new HashSet< >( model.getTrackModel().trackIDs( true ) );
 
 		// First analysis
 		final TestTrackBranchingAnalyzer analyzer = new TestTrackBranchingAnalyzer( model );
@@ -241,14 +241,14 @@ public class TrackBranchingAnalyzerTest
 		// New change: graft a new spot on the first track - it should be
 		// re-analyzed
 		final Integer firstKey = oldKeys.iterator().next();
-		final Spot firstSpot = model.getTrackModel().trackSpots( firstKey ).iterator().next();
+		final Spot lFirstSpot = model.getTrackModel().trackSpots( firstKey ).iterator().next();
 		Spot newSpot = null;
-		final int firstFrame = firstSpot.getFeature( Spot.FRAME ).intValue();
+		final int firstFrame = lFirstSpot.getFeature( Spot.FRAME ).intValue();
 		model.beginUpdate();
 		try
 		{
 			newSpot = model.addSpotTo( new Spot( 0d, 0d, 0d, 1d, -1d ), firstFrame + 1 );
-			model.addEdge( firstSpot, newSpot, 1 );
+			model.addEdge( lFirstSpot, newSpot, 1 );
 		}
 		finally
 		{
@@ -261,7 +261,7 @@ public class TrackBranchingAnalyzerTest
 		// Check the track IDs: must be of size 1, and key to the track with
 		// firstSpot and newSpot in it
 		assertEquals( 1, analyzer.keys.size() );
-		assertTrue( model.getTrackModel().trackSpots( analyzer.keys.iterator().next() ).contains( firstSpot ) );
+		assertTrue( model.getTrackModel().trackSpots( analyzer.keys.iterator().next() ).contains( lFirstSpot ) );
 		assertTrue( model.getTrackModel().trackSpots( analyzer.keys.iterator().next() ).contains( newSpot ) );
 
 	}
@@ -271,7 +271,7 @@ public class TrackBranchingAnalyzerTest
 	{
 
 		// Copy old keys
-		final HashSet< Integer > oldKeys = new HashSet< Integer >( model.getTrackModel().trackIDs( true ) );
+		final HashSet< Integer > oldKeys = new HashSet< >( model.getTrackModel().trackIDs( true ) );
 
 		// First analysis
 		final TestTrackBranchingAnalyzer analyzer = new TestTrackBranchingAnalyzer( model );
@@ -312,7 +312,7 @@ public class TrackBranchingAnalyzerTest
 		}
 
 		// Get the last spot in time
-		final TreeSet< Spot > track = new TreeSet< Spot >( Spot.frameComparator );
+		final TreeSet< Spot > track = new TreeSet< >( Spot.frameComparator );
 		track.addAll( model.getTrackModel().trackSpots( splittingTrackID ) );
 		final Spot lastSpot = track.last();
 
@@ -333,6 +333,7 @@ public class TrackBranchingAnalyzerTest
 
 		// Check the track IDs: must be of size 1, and must be the track split
 		assertEquals( 1, analyzer.keys.size() );
+		assertNotNull( splittingTrackID );
 		assertEquals( splittingTrackID.longValue(), analyzer.keys.iterator().next().longValue() );
 
 		// Check that the features have been well calculated: it must now be a
@@ -346,7 +347,7 @@ public class TrackBranchingAnalyzerTest
 	{
 
 		// Copy old keys
-		final HashSet< Integer > oldKeys = new HashSet< Integer >( model.getTrackModel().trackIDs( true ) );
+		final HashSet< Integer > oldKeys = new HashSet< >( model.getTrackModel().trackIDs( true ) );
 
 		// First analysis
 		final TestTrackBranchingAnalyzer analyzer = new TestTrackBranchingAnalyzer( model );
@@ -416,6 +417,9 @@ public class TrackBranchingAnalyzerTest
 
 		private Collection< Integer > keys;
 
+		/**
+		 * @param model  
+		 */
 		public TestTrackBranchingAnalyzer( final Model model )
 		{
 			super();

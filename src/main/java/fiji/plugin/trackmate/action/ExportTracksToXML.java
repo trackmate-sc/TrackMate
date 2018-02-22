@@ -152,7 +152,7 @@ public class ExportTracksToXML extends AbstractTMAction {
 			trackElement.setAttribute(NSPOTS_ATT, ""+track.size());
 
 			// Sort them by time
-			final TreeSet<Spot> sortedTrack = new TreeSet<Spot>(Spot.timeComparator);
+			final TreeSet<Spot> sortedTrack = new TreeSet<>(Spot.timeComparator);
 			sortedTrack.addAll(track);
 
 			for (final Spot spot : sortedTrack) {

@@ -97,6 +97,9 @@ public class SearchBar extends JTextField
 		}
 	}
 
+	/**
+	 * @param evt  
+	 */
 	private void searchBoxFocusGained( final java.awt.event.FocusEvent evt )
 	{
 		setFont( NORMAL_FONT );
@@ -104,6 +107,9 @@ public class SearchBar extends JTextField
 //		setText( null );
 	}
 
+	/**
+	 * @param evt  
+	 */
 	private void searchBoxFocusLost( final java.awt.event.FocusEvent evt )
 	{
 		setFont( NORMAL_FONT );
@@ -186,7 +192,7 @@ public class SearchBar extends JTextField
 
 		private Spot firstSpotOf( final Integer trackID )
 		{
-			final List< Spot > trackSpots = new ArrayList< Spot >( model.getTrackModel().trackSpots( trackID ) );
+			final List< Spot > trackSpots = new ArrayList<>( model.getTrackModel().trackSpots( trackID ) );
 			Collections.sort( trackSpots, Spot.frameComparator );
 			return trackSpots.get( 0 );
 		}
@@ -197,5 +203,4 @@ public class SearchBar extends JTextField
 			throw new UnsupportedOperationException();
 		}
 	}
-
 }

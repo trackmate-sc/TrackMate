@@ -61,9 +61,9 @@ public class ActionChooserPanel
 		this.controller = controller;
 		this.trackmate = trackmate;
 		final List< String > actionKeys = actionProvider.getVisibleKeys();
-		final List< String > names = new ArrayList< String >( actionKeys.size() );
-		final List< String > infoTexts = new ArrayList< String >( actionKeys.size() );
-		icons = new ArrayList< ImageIcon >( actionKeys.size() );
+		final List< String > names = new ArrayList< >( actionKeys.size() );
+		final List< String > infoTexts = new ArrayList< >( actionKeys.size() );
+		icons = new ArrayList< >( actionKeys.size() );
 		for ( final String key : actionKeys )
 		{
 			infoTexts.add( actionProvider.getFactory( key ).getInfoText() );
@@ -152,7 +152,7 @@ public class ActionChooserPanel
 		layout.putConstraint( SpringLayout.WEST, logPanel, 10, SpringLayout.WEST, panel );
 		layout.putConstraint( SpringLayout.EAST, logPanel, -10, SpringLayout.EAST, panel );
 
-		final HashMap< String, ImageIcon > iconMap = new HashMap< String, ImageIcon >();
+		final HashMap< String, ImageIcon > iconMap = new HashMap< >();
 		for ( int i = 0; i < icons.size(); i++ )
 		{
 			iconMap.put( panel.items.get( i ), icons.get( i ) );
@@ -170,18 +170,18 @@ public class ActionChooserPanel
 	{
 		private static final long serialVersionUID = 1L;
 
-		private HashMap< String, ImageIcon > icons = null;
+		private HashMap< String, ImageIcon > lIcons = null;
 
 		public IconListRenderer( final HashMap< String, ImageIcon > icons )
 		{
-			this.icons = icons;
+			this.lIcons = icons;
 		}
 
 		@Override
 		public Component getListCellRendererComponent( final JList< ? > list, final Object value, final int index, final boolean isSelected, final boolean cellHasFocus )
 		{
 			final JLabel label = ( JLabel ) super.getListCellRendererComponent( list, value, index, isSelected, cellHasFocus );
-			final ImageIcon icon = icons.get( value );
+			final ImageIcon icon = lIcons.get( value );
 			label.setIcon( icon );
 			return label;
 		}

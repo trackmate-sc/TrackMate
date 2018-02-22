@@ -418,19 +418,19 @@ public class ColorByFeatureGUIPanel extends ActionListenablePanel implements Min
 	 *
 	 * @return a new {@link CategoryJComboBox}.
 	 */
-	protected CategoryJComboBox< Category, String > createComboBoxSelector( final List< Category > categories )
+	protected CategoryJComboBox< Category, String > createComboBoxSelector( final List< Category > lCategories )
 	{
-		final LinkedHashMap< Category, Collection< String >> features = new LinkedHashMap< Category, Collection< String >>( categories.size() );
-		final HashMap< Category, String > categoryNames = new HashMap< Category, String >( categories.size() );
-		final HashMap< String, String > featureNames = new HashMap< String, String >();
+		final LinkedHashMap< Category, Collection< String >> features = new LinkedHashMap<>( lCategories.size() );
+		final HashMap< Category, String > categoryNames = new HashMap< >( lCategories.size() );
+		final HashMap< String, String > featureNames = new HashMap< >();
 
-		for ( final Category category : categories )
+		for ( final Category category : lCategories )
 		{
 			switch ( category )
 			{
 			case SPOTS:
 				categoryNames.put( Category.SPOTS, "Spot features:" );
-				final Collection< String > spotFeatures = new ArrayList< String >( model.getFeatureModel().getSpotFeatures() );
+				final Collection< String > spotFeatures = new ArrayList< >( model.getFeatureModel().getSpotFeatures() );
 				features.put( Category.SPOTS, spotFeatures );
 				// Deal with manual coloring separately.
 				spotFeatures.remove( ManualSpotColorAnalyzerFactory.FEATURE );
@@ -440,7 +440,7 @@ public class ColorByFeatureGUIPanel extends ActionListenablePanel implements Min
 
 			case EDGES:
 				categoryNames.put( Category.EDGES, "Edge features:" );
-				final Collection< String > edgeFeatures = new ArrayList< String >( model.getFeatureModel().getEdgeFeatures() );
+				final Collection< String > edgeFeatures = new ArrayList< >( model.getFeatureModel().getEdgeFeatures() );
 				// Deal with manual coloring separately.
 				edgeFeatures.remove( ManualEdgeColorAnalyzer.FEATURE );
 
@@ -457,7 +457,7 @@ public class ColorByFeatureGUIPanel extends ActionListenablePanel implements Min
 
 			case DEFAULT:
 				categoryNames.put( Category.DEFAULT, "Default:" );
-				final Collection< String > defaultOptions = new ArrayList< String >( 1 );
+				final Collection< String > defaultOptions = new ArrayList< >( 1 );
 				defaultOptions.add( UNIFORM_KEY );
 				defaultOptions.add( MANUAL_KEY );
 				features.put( Category.DEFAULT, defaultOptions );
@@ -469,7 +469,7 @@ public class ColorByFeatureGUIPanel extends ActionListenablePanel implements Min
 				throw new IllegalArgumentException( "Unknown category: " + category );
 			}
 		}
-		return new CategoryJComboBox< Category, String >( features, featureNames, categoryNames );
+		return new CategoryJComboBox< >( features, featureNames, categoryNames );
 	}
 
 	/**

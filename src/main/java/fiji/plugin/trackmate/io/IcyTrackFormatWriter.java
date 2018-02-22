@@ -116,8 +116,8 @@ public class IcyTrackFormatWriter implements Algorithm, Benchmark
 		// trackGroup.setAttribute( "description", TrackMate.PLUGIN_NAME_STR +
 		// "_v" + TrackMate.PLUGIN_NAME_VERSION + "_export" );
 
-		final Map< Spot, Integer > beginnings = new HashMap< Spot, Integer >();
-		final Map< Spot, Integer > endings = new HashMap< Spot, Integer >();
+		final Map< Spot, Integer > beginnings = new HashMap< >();
+		final Map< Spot, Integer > endings = new HashMap< >();
 
 		final Collection< List< Spot >> branches = splitter.getBranches();
 		for ( final List< Spot > branch : branches )

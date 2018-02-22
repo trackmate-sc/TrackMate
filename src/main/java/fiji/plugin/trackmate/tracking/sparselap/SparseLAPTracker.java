@@ -129,7 +129,7 @@ public class SparseLAPTracker extends MultiThreadedBenchmarkAlgorithm implements
 
 
 		// Prepare settings object
-		final Map< String, Object > ftfSettings = new HashMap< String, Object >();
+		final Map< String, Object > ftfSettings = new HashMap< >();
 		ftfSettings.put( KEY_LINKING_MAX_DISTANCE, settings.get( KEY_LINKING_MAX_DISTANCE ) );
 		ftfSettings.put( KEY_ALTERNATIVE_LINKING_COST_FACTOR, settings.get( KEY_ALTERNATIVE_LINKING_COST_FACTOR ) );
 		ftfSettings.put( KEY_LINKING_FEATURE_PENALTIES, settings.get( KEY_LINKING_FEATURE_PENALTIES ) );
@@ -152,7 +152,7 @@ public class SparseLAPTracker extends MultiThreadedBenchmarkAlgorithm implements
 		 */
 
 		// Prepare settings object
-		final Map< String, Object > slSettings = new HashMap< String, Object >();
+		final Map< String, Object > slSettings = new HashMap< >();
 
 		slSettings.put( KEY_ALLOW_GAP_CLOSING, settings.get( KEY_ALLOW_GAP_CLOSING ) );
 		slSettings.put( KEY_GAP_CLOSING_FEATURE_PENALTIES, settings.get( KEY_GAP_CLOSING_FEATURE_PENALTIES ) );
@@ -227,7 +227,7 @@ public class SparseLAPTracker extends MultiThreadedBenchmarkAlgorithm implements
 		ok = ok & checkParameter( settings, KEY_ALTERNATIVE_LINKING_COST_FACTOR, Double.class, str );
 
 		// Check keys
-		final List< String > mandatoryKeys = new ArrayList< String >();
+		final List< String > mandatoryKeys = new ArrayList< >();
 		mandatoryKeys.add( KEY_LINKING_MAX_DISTANCE );
 		mandatoryKeys.add( KEY_ALLOW_GAP_CLOSING );
 		mandatoryKeys.add( KEY_GAP_CLOSING_MAX_DISTANCE );
@@ -238,7 +238,7 @@ public class SparseLAPTracker extends MultiThreadedBenchmarkAlgorithm implements
 		mandatoryKeys.add( KEY_MERGING_MAX_DISTANCE );
 		mandatoryKeys.add( KEY_ALTERNATIVE_LINKING_COST_FACTOR );
 		mandatoryKeys.add( KEY_CUTOFF_PERCENTILE );
-		final List< String > optionalKeys = new ArrayList< String >();
+		final List< String > optionalKeys = new ArrayList< >();
 		optionalKeys.add( KEY_LINKING_FEATURE_PENALTIES );
 		optionalKeys.add( KEY_GAP_CLOSING_FEATURE_PENALTIES );
 		optionalKeys.add( KEY_SPLITTING_FEATURE_PENALTIES );

@@ -22,7 +22,6 @@ import org.jgrapht.event.ConnectedComponentTraversalEvent;
 import org.jgrapht.event.EdgeTraversalEvent;
 import org.jgrapht.event.VertexTraversalEvent;
 import org.jgrapht.traverse.AbstractGraphIterator;
-import org.jgrapht.traverse.CrossComponentIterator;
 import org.jgrapht.util.TypeUtil;
 
 /**
@@ -80,7 +79,7 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 	// ~ Instance fields
 	// --------------------------------------------------------
 
-	private final Deque< Object > stack = new ArrayDeque< Object >();
+	private final Deque< Object > stack = new ArrayDeque< >();
 
 	private transient TypeUtil< V > vertexTypeDecl = null;
 
@@ -104,7 +103,7 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 	 * Stores the vertices that have been seen during iteration and (optionally)
 	 * some additional traversal info regarding each vertex.
 	 */
-	protected Map< V, VisitColor > seen = new HashMap< V, VisitColor >();
+	protected Map< V, VisitColor > seen = new HashMap< >();
 
 	private V startVertex;
 
@@ -144,8 +143,8 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 		vertexIterator = g.vertexSet().iterator();
 		setCrossComponentTraversal( startVertex == null );
 
-		reusableEdgeEvent = new FlyweightEdgeEvent< V, E >( this, null );
-		reusableVertexEvent = new FlyweightVertexEvent< V >( this, null );
+		reusableEdgeEvent = new FlyweightEdgeEvent< >( this, null );
+		reusableVertexEvent = new FlyweightVertexEvent< >( this, null );
 
 		if ( startVertex == null )
 		{
@@ -212,15 +211,9 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 
 				return false;
 			}
-			else
-			{
-				return false;
-			}
+			return false;
 		}
-		else
-		{
-			return true;
-		}
+		return true;
 	}
 
 	/**
@@ -256,10 +249,7 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 
 			return nextVertex;
 		}
-		else
-		{
-			throw new NoSuchElementException();
-		}
+		throw new NoSuchElementException();
 	}
 
 	/**
@@ -282,13 +272,9 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 	private static < V, E > Specifics< V, E > createGraphSpecifics( final Graph< V, E > g )
 	{
 		if ( g instanceof DirectedGraph )
-		{
-			return new DirectedSpecifics< V, E >( ( DirectedGraph< V, E > ) g );
-		}
-		else
-		{
-			return new UndirectedSpecifics< V, E >( g );
-		}
+			return new DirectedSpecifics< >( ( DirectedGraph< V, E > ) g );
+
+		return new UndirectedSpecifics< >( g );
 	}
 
 	/**
@@ -298,10 +284,10 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 	{
 
 		// Retrieve target vertices, and sort them in a list
-		final List< V > sortedChildren = new ArrayList< V >();
+		final List< V > sortedChildren = new ArrayList< >();
 		// Keep a map of matching edges so that we can retrieve them in the same
 		// order
-		final Map< V, E > localEdges = new HashMap< V, E >();
+		final Map< V, E > localEdges = new HashMap< >();
 
 		for ( final E edge : specifics.edgesOf( vertex ) )
 		{
@@ -340,13 +326,10 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 		if ( isReuseEvents() )
 		{
 			reusableEdgeEvent.setEdge( edge );
-
 			return reusableEdgeEvent;
 		}
-		else
-		{
-			return new EdgeTraversalEvent< V, E >( this, edge );
-		}
+
+		return new EdgeTraversalEvent< >( this, edge );
 	}
 
 	private VertexTraversalEvent< V > createVertexTraversalEvent( final V vertex )
@@ -354,13 +337,10 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 		if ( isReuseEvents() )
 		{
 			reusableVertexEvent.setVertex( vertex );
-
 			return reusableVertexEvent;
 		}
-		else
-		{
-			return new VertexTraversalEvent< V >( this, vertex );
-		}
+
+		return new VertexTraversalEvent< >( this, vertex );
 	}
 
 	private void encounterStartVertex()
@@ -372,9 +352,6 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 	// ~ Depth-first iterator methods
 	// ----------------------------------------------------------------
 
-	/**
-	 * @see org.jgrapht.traverse.CrossComponentIterator#isConnectedComponentExhausted()
-	 */
 	private boolean isConnectedComponentExhausted()
 	{
 		for ( ;; )
@@ -398,8 +375,7 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 	}
 
 	/**
-	 * @see org.jgrapht.traverse.CrossComponentIterator#encounterVertex(Object,
-	 *      Object)
+	 * @param edge  
 	 */
 	protected void encounterVertex( final V vertex, final E edge )
 	{
@@ -408,8 +384,7 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 	}
 
 	/**
-	 * @see org.jgrapht.traverse.CrossComponentIterator#encounterVertexAgain(Object,
-	 *      Object)
+	 * @param edge  
 	 */
 	protected void encounterVertexAgain( final V vertex, final E edge )
 	{
@@ -432,9 +407,6 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 		stack.addLast( vertex );
 	}
 
-	/**
-	 * @see CrossComponentIterator#provideNextVertex()
-	 */
 	private V provideNextVertex()
 	{
 		V v;
@@ -554,9 +526,6 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 		}
 	}
 
-	/**
-	 * An implementation of {@link Specifics} for a directed graph.
-	 */
 	private static class DirectedSpecifics< VV, EE > extends Specifics< VV, EE >
 	{
 		private final DirectedGraph< VV, EE > graph;
@@ -579,10 +548,6 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 		}
 	}
 
-	/**
-	 * An implementation of {@link Specifics} in which edge direction (if any)
-	 * is ignored.
-	 */
 	private static class UndirectedSpecifics< VV, EE > extends Specifics< VV, EE >
 	{
 		private final Graph< VV, EE > graph;

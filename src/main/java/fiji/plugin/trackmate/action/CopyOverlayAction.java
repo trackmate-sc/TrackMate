@@ -85,9 +85,9 @@ public class CopyOverlayAction extends AbstractTMAction
 	private TrackMate trackmate;
 
 	@Override
-	public void execute( final TrackMate trackmate )
+	public void execute( final TrackMate tm )
 	{
-		this.trackmate = trackmate;
+		this.trackmate = tm;
 		final ImagePlusChooser impChooser = new ImagePlusChooser( "Copy overlay", "Copy overlay to:", "New 3D viewer" );
 		impChooser.setLocationRelativeTo( null );
 		impChooser.setVisible( true );
@@ -106,7 +106,7 @@ public class CopyOverlayAction extends AbstractTMAction
 						@Override
 						public void run()
 						{
-							selectionModel = new SelectionModel( trackmate.getModel() );
+							selectionModel = new SelectionModel( tm.getModel() );
 							// Instantiate displayer
 							final ImagePlus dest = impChooser.getSelectedImagePlus();
 							impChooser.setVisible( false );
@@ -115,30 +115,30 @@ public class CopyOverlayAction extends AbstractTMAction
 							if ( null == dest )
 							{
 								logger.log( "Copying data and overlay to new 3D viewer\n" );
-								newDisplayer = new SpotDisplayer3DFactory().create( trackmate.getModel(), trackmate.getSettings(), selectionModel );
+								newDisplayer = new SpotDisplayer3DFactory().create( tm.getModel(), tm.getSettings(), selectionModel );
 								title = "3D viewer overlay";
 							}
 							else
 							{
 								logger.log( "Copying overlay to " + dest.getShortTitle() + "\n" );
-								newDisplayer = new HyperStackDisplayer( trackmate.getModel(), selectionModel, dest );
+								newDisplayer = new HyperStackDisplayer( tm.getModel(), selectionModel, dest );
 								title = dest.getShortTitle() + " ctrl";
 							}
 							newDisplayer.render();
 
-							panel = new ConfigureViewsPanel( trackmate.getModel() );
+							panel = new ConfigureViewsPanel( tm.getModel() );
 
 							/*
 							 * Deal with display settings listener.
 							 */
 
 							guimodel = new TrackMateGUIModel();
-							final SpotColorGenerator spotColorGenerator = new SpotColorGenerator( trackmate.getModel() );
-							final PerTrackFeatureColorGenerator trackColorGenerator = new PerTrackFeatureColorGenerator( trackmate.getModel(), TrackIndexAnalyzer.TRACK_INDEX );
-							final PerEdgeFeatureColorGenerator edgeColorGenerator = new PerEdgeFeatureColorGenerator( trackmate.getModel(), EdgeVelocityAnalyzer.VELOCITY );
-							final ManualEdgeColorGenerator manualEdgeColorGenerator = new ManualEdgeColorGenerator( trackmate.getModel() );
+							final SpotColorGenerator spotColorGenerator = new SpotColorGenerator( tm.getModel() );
+							final PerTrackFeatureColorGenerator trackColorGenerator = new PerTrackFeatureColorGenerator( tm.getModel(), TrackIndexAnalyzer.TRACK_INDEX );
+							final PerEdgeFeatureColorGenerator edgeColorGenerator = new PerEdgeFeatureColorGenerator( tm.getModel(), EdgeVelocityAnalyzer.VELOCITY );
+							final ManualEdgeColorGenerator manualEdgeColorGenerator = new ManualEdgeColorGenerator( tm.getModel() );
 							final ManualSpotColorGenerator manualSpotColorGenerator = new ManualSpotColorGenerator();
-							final SpotColorGeneratorPerTrackFeature spotColorGeneratorPerTrackFeature = new SpotColorGeneratorPerTrackFeature( trackmate.getModel(), TrackIndexAnalyzer.TRACK_INDEX );
+							final SpotColorGeneratorPerTrackFeature spotColorGeneratorPerTrackFeature = new SpotColorGeneratorPerTrackFeature( tm.getModel(), TrackIndexAnalyzer.TRACK_INDEX );
 
 							panel.setSpotColorGenerator( spotColorGenerator );
 							panel.setSpotColorGeneratorPerTrackFeature( spotColorGeneratorPerTrackFeature );
@@ -147,7 +147,7 @@ public class CopyOverlayAction extends AbstractTMAction
 							panel.setManualEdgeColorGenerator( manualEdgeColorGenerator );
 							panel.setManualSpotColorGenerator( manualSpotColorGenerator );
 
-							final Map< String, Object > displaySettings = new HashMap< String, Object >();
+							final Map< String, Object > displaySettings = new HashMap<>();
 							displaySettings.put( KEY_COLOR, DEFAULT_SPOT_COLOR );
 							displaySettings.put( KEY_HIGHLIGHT_COLOR, DEFAULT_HIGHLIGHT_COLOR );
 							displaySettings.put( KEY_SPOTS_VISIBLE, true );
@@ -259,7 +259,7 @@ public class CopyOverlayAction extends AbstractTMAction
 				} );
 
 				button.setEnabled( true );
-			};
+			}
 		}.start();
 	}
 
@@ -281,7 +281,7 @@ public class CopyOverlayAction extends AbstractTMAction
 				{
 					button.setEnabled( true );
 				}
-			};
+			}
 		}.start();
 	}
 

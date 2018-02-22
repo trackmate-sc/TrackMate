@@ -19,7 +19,6 @@ import fiji.plugin.trackmate.visualization.ViewUtils;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
 import ij.ImagePlus;
-import ij.plugin.PlugIn;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -28,7 +27,7 @@ import java.util.Map;
 
 import javax.swing.JFrame;
 
-public class LoadICYTrackPlugIn_ extends LoadTrackMatePlugIn_ implements PlugIn
+public class LoadICYTrackPlugIn_ extends LoadTrackMatePlugIn_
 {
 
 	private static final String KEY = "ICY_LOADER";
@@ -216,16 +215,15 @@ public class LoadICYTrackPlugIn_ extends LoadTrackMatePlugIn_ implements PlugIn
 		model.getLogger().log( "File loaded on " + TMUtils.getCurrentTimeString() + '\n', Logger.BLUE_COLOR );
 	}
 
-
 	@Override
-	protected TmXmlReader createReader( final File file )
+	protected TmXmlReader createReader( final File lFile )
 	{
 		throw new UnsupportedOperationException( "Cannot instantiate a TrackMate reader for a ICY loader." );
 	}
 
-	protected IcyXmlReader createReader( final File file, final double[] calibration, final double dt )
+	protected IcyXmlReader createReader( final File lFile, final double[] calibration, final double dt )
 	{
-		return new IcyXmlReader( file, calibration, dt );
+		return new IcyXmlReader( lFile, calibration, dt );
 	}
 
 	@Override

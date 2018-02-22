@@ -102,7 +102,7 @@ public class SpotMorphologyAnalyzer< T extends RealType< T >> extends Independen
 		{
 
 			// 3D case
-			final SpotNeighborhood< T > neighborhood = new SpotNeighborhood< T >( spot, img );
+			final SpotNeighborhood< T > neighborhood = new SpotNeighborhood< >( spot, img );
 			final SpotNeighborhoodCursor< T > cursor = neighborhood.cursor();
 
 			double x, y, z;
@@ -189,7 +189,7 @@ public class SpotMorphologyAnalyzer< T extends RealType< T >> extends Independen
 		{
 
 			// 2D case
-			final SpotNeighborhood< T > neighborhood = new SpotNeighborhood< T >( spot, img );
+			final SpotNeighborhood< T > neighborhood = new SpotNeighborhood< >( spot, img );
 			final SpotNeighborhoodCursor< T > cursor = neighborhood.cursor();
 			double x, y;
 			double x2, y2;
@@ -287,35 +287,30 @@ public class SpotMorphologyAnalyzer< T extends RealType< T >> extends Independen
 			final double b = semiaxes[ 1 ];
 			if ( b >= SIGNIFICANCE_FACTOR * a )
 				return PROLATE;
-			else
-				return SPHERE;
-
+			
+			return SPHERE;
 		}
-		else
-		{
-			// 3D case
+		
+		// 3D case.
+		final double a = semiaxes[ 0 ]; // Smallest
+		final double b = semiaxes[ 1 ];
+		final double c = semiaxes[ 2 ]; // Largest
 
-			final double a = semiaxes[ 0 ]; // Smallest
-			final double b = semiaxes[ 1 ];
-			final double c = semiaxes[ 2 ]; // Largest
+		// Sphere: all equals with respect to significance, that is: the
+		// largest semi-axes must not
+		// be larger that factor * the smallest
+		if ( c < SIGNIFICANCE_FACTOR * a )
+			return SPHERE;
 
-			// Sphere: all equals with respect to significance, that is: the
-			// largest semi-axes must not
-			// be larger that factor * the smallest
-			if ( c < SIGNIFICANCE_FACTOR * a )
-				return SPHERE;
+		// Oblate: the 2 largest are equals with respect to significance
+		if ( c < SIGNIFICANCE_FACTOR * b )
+			return OBLATE;
 
-			// Oblate: the 2 largest are equals with respect to significance
-			if ( c < SIGNIFICANCE_FACTOR * b )
-				return OBLATE;
+		// Prolate: the 2 smallest are equals with respect to significance
+		if ( b < SIGNIFICANCE_FACTOR * a )
+			return PROLATE;
 
-			// Prolate: the 2 smallest are equals with respect to significance
-			if ( b < SIGNIFICANCE_FACTOR * a )
-				return PROLATE;
-
-			return SCALENE;
-
-		}
+		return SCALENE;
 
 	}
 
@@ -337,7 +332,7 @@ public class SpotMorphologyAnalyzer< T extends RealType< T >> extends Independen
 
 		// Create blank image
 		final Img< UnsignedByteType > img = new ArrayImgFactory< UnsignedByteType >().create( new int[] { 200, 200 }, new UnsignedByteType() );
-		final ImgPlus< UnsignedByteType > imgplus = new ImgPlus< UnsignedByteType >( img );
+		final ImgPlus< UnsignedByteType > imgplus = new ImgPlus< >( img );
 		for ( int d = 0; d < imgplus.numDimensions(); d++ )
 		{
 			imgplus.setAxis( new DefaultLinearAxis( imgplus.axis( d ).type(), calibration[ d ] ), d );
@@ -351,7 +346,7 @@ public class SpotMorphologyAnalyzer< T extends RealType< T >> extends Independen
 		final long[] center = new long[] { size_x / 2, size_y / 2 };
 		final long[] radiuses = new long[] { max_radius, max_radius };
 
-		final EllipseNeighborhood< UnsignedByteType > disc = new EllipseNeighborhood< UnsignedByteType >( img, center, radiuses );
+		final EllipseNeighborhood< UnsignedByteType > disc = new EllipseNeighborhood< >( img, center, radiuses );
 		final EllipseCursor< UnsignedByteType > sc = disc.cursor();
 
 		double r2, phi, term;
@@ -377,7 +372,7 @@ public class SpotMorphologyAnalyzer< T extends RealType< T >> extends Independen
 		start = System.currentTimeMillis();
 		final Spot spot = new Spot( center[ 0 ], center[ 1 ], 0d, max_radius, -1d );
 
-		final SpotMorphologyAnalyzer< UnsignedByteType > bm = new SpotMorphologyAnalyzer< UnsignedByteType >( imgplus, null );
+		final SpotMorphologyAnalyzer< UnsignedByteType > bm = new SpotMorphologyAnalyzer< >( imgplus, null );
 		bm.process( spot );
 
 		System.out.println( "Blob morphology analyzed in " + ( end - start ) + " ms." );

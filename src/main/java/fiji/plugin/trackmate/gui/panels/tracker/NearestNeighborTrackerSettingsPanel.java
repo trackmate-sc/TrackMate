@@ -36,7 +36,7 @@ public class NearestNeighborTrackerSettingsPanel extends ConfigurationPanel {
 
 	@Override
 	public Map<String, Object> getSettings() {
-		final Map<String, Object> settings = new HashMap<String, Object>();
+		final Map<String, Object> settings = new HashMap<>();
 		settings.put(KEY_LINKING_MAX_DISTANCE, maxDistField.getValue());
 		return settings;
 	}

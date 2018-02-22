@@ -42,11 +42,11 @@ public class RadiusEstimatorTest< T extends NativeType< T > & RealType< T >>
 
 		// Create 3 spots image
 		final Img< UnsignedByteType > img = new ArrayImgFactory< UnsignedByteType >().create( new int[] { 200, 200, 400 }, new UnsignedByteType() );
-		final ImgPlus< UnsignedByteType > testImage = new ImgPlus< UnsignedByteType >( img, "Test", axes, calibration );
+		final ImgPlus< UnsignedByteType > testImage = new ImgPlus< >( img, "Test", axes, calibration );
 
 		for ( final Spot s : spots )
 		{
-			final SpotNeighborhood< UnsignedByteType > sphere = new SpotNeighborhood< UnsignedByteType >( s, testImage );
+			final SpotNeighborhood< UnsignedByteType > sphere = new SpotNeighborhood< >( s, testImage );
 			for ( final UnsignedByteType pixel : sphere )
 			{
 				pixel.set( on );
@@ -54,7 +54,7 @@ public class RadiusEstimatorTest< T extends NativeType< T > & RealType< T >>
 		}
 
 		// Apply the estimator
-		final SpotRadiusEstimator< UnsignedByteType > es = new SpotRadiusEstimator< UnsignedByteType >( testImage, null );
+		final SpotRadiusEstimator< UnsignedByteType > es = new SpotRadiusEstimator< >( testImage, null );
 
 		Spot s;
 		double r;
@@ -82,11 +82,11 @@ public class RadiusEstimatorTest< T extends NativeType< T > & RealType< T >>
 
 		// Create 3 spots image
 		final Img< UnsignedByteType > img = new ArrayImgFactory< UnsignedByteType >().create( new int[] { 200, 200, 400 }, new UnsignedByteType() );
-		final ImgPlus< UnsignedByteType > testImage = new ImgPlus< UnsignedByteType >( img, "Test", axes, calibration );
+		final ImgPlus< UnsignedByteType > testImage = new ImgPlus< >( img, "Test", axes, calibration );
 
 		for ( final Spot s : spots )
 		{
-			final SpotNeighborhood< UnsignedByteType > sphere = new SpotNeighborhood< UnsignedByteType >( s, testImage );
+			final SpotNeighborhood< UnsignedByteType > sphere = new SpotNeighborhood< >( s, testImage );
 			for ( final UnsignedByteType pixel : sphere )
 			{
 				pixel.set( on );
@@ -97,7 +97,7 @@ public class RadiusEstimatorTest< T extends NativeType< T > & RealType< T >>
 		imp.show();
 
 		// Apply the estimator
-		final SpotRadiusEstimator< UnsignedByteType > es = new SpotRadiusEstimator< UnsignedByteType >( testImage, null );
+		final SpotRadiusEstimator< UnsignedByteType > es = new SpotRadiusEstimator< >( testImage, null );
 
 		Spot s;
 		double r;

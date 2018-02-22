@@ -105,21 +105,19 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 		{
 
 			// Create value->color map
-			colorMap = new HashMap< Integer, Color >( trackIDs.size() );
+			colorMap = new HashMap< >( trackIDs.size() );
 			for ( final Integer trackID : trackIDs )
-			{
 				colorMap.put( trackID, DEFAULT_TRACK_COLOR );
-			}
 		}
 		else if ( feature.equals( TrackIndexAnalyzer.TRACK_INDEX ) )
 		{
 			// Create value->color map
-			colorMap = new HashMap< Integer, Color >( trackIDs.size() );
+			colorMap = new HashMap< >( trackIDs.size() );
 			int index = 0;
 			for ( final Integer trackID : trackIDs )
 			{
-				final Color color = generator.getPaint( ( double ) index++ / ( trackIDs.size() - 1 ) );
-				colorMap.put( trackID, color );
+				final Color lColor = generator.getPaint( ( double ) index++ / ( trackIDs.size() - 1 ) );
+				colorMap.put( trackID, lColor );
 			}
 		}
 		else
@@ -132,24 +130,19 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 
 			// Create value->color map
 			final FeatureModel fm = model.getFeatureModel();
-			colorMap = new HashMap< Integer, Color >( trackIDs.size() );
+			colorMap = new HashMap< >( trackIDs.size() );
 			for ( final Integer trackID : trackIDs )
 			{
 				final Double val = fm.getTrackFeature( trackID, feature );
-				Color color;
+				final Color lColor;
 				if ( null == val )
-				{
-					color = TrackMateModelView.DEFAULT_UNASSIGNED_FEATURE_COLOR;
-				}
+					lColor = TrackMateModelView.DEFAULT_UNASSIGNED_FEATURE_COLOR;
 				else if ( Double.isNaN( val.doubleValue() ) )
-				{
-					color = TrackMateModelView.DEFAULT_UNDEFINED_FEATURE_COLOR;
-				}
+					lColor = TrackMateModelView.DEFAULT_UNDEFINED_FEATURE_COLOR;
 				else
-				{
-					color = generator.getPaint( ( val - min ) / ( max - min ) );
-				}
-				colorMap.put( trackID, color );
+					lColor = generator.getPaint( ( val - min ) / ( max - min ) );
+
+				colorMap.put( trackID, lColor );
 			}
 		}
 	}

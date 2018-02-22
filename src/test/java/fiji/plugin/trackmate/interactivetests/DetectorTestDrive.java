@@ -66,7 +66,7 @@ public class DetectorTestDrive
 		for ( int i = 2; i < 12; i++ )
 		{
 			final double tRadius = i / 2d;
-			final LogDetector< T > detector = new LogDetector< T >( img, img, calibration, tRadius, 100d, true, false );
+			final LogDetector< T > detector = new LogDetector< >( img, img, calibration, tRadius, 100d, true, false );
 			if ( !detector.checkInput() || !detector.process() )
 			{
 				System.err.println( detector.getErrorMessage() );

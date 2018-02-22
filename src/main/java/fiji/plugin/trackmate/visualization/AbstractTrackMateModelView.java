@@ -98,28 +98,27 @@ public abstract class AbstractTrackMateModelView implements SelectionChangeListe
 	/**
 	 * Provides default display settings.
 	 *
-	 * @param model
+	 * @param lModel
 	 *            the model this view operate on. Needed for some display
 	 *            settings.
-	 * @return
 	 */
-	protected Map< String, Object > initDisplaySettings( final Model model )
+	protected Map< String, Object > initDisplaySettings( final Model lModel )
 	{
-		final Map< String, Object > displaySettings = new HashMap< String, Object >( 11 );
-		displaySettings.put( KEY_COLOR, DEFAULT_SPOT_COLOR );
-		displaySettings.put( KEY_HIGHLIGHT_COLOR, DEFAULT_HIGHLIGHT_COLOR );
-		displaySettings.put( KEY_SPOTS_VISIBLE, true );
-		displaySettings.put( KEY_DISPLAY_SPOT_NAMES, false );
-		displaySettings.put( KEY_SPOT_COLORING, new DummySpotColorGenerator() );
-		displaySettings.put( KEY_SPOT_RADIUS_RATIO, 1.0d );
-		displaySettings.put( KEY_TRACKS_VISIBLE, true );
-		displaySettings.put( KEY_TRACK_DISPLAY_MODE, DEFAULT_TRACK_DISPLAY_MODE );
-		displaySettings.put( KEY_TRACK_DISPLAY_DEPTH, DEFAULT_TRACK_DISPLAY_DEPTH );
-		displaySettings.put( KEY_TRACK_COLORING, new DummyTrackColorGenerator() );
-		displaySettings.put( KEY_COLORMAP, DEFAULT_COLOR_MAP );
-		displaySettings.put( KEY_LIMIT_DRAWING_DEPTH, DEFAULT_LIMIT_DRAWING_DEPTH );
-		displaySettings.put( KEY_DRAWING_DEPTH, DEFAULT_DRAWING_DEPTH );
-		return displaySettings;
+		final Map< String, Object > lDisplaySettings = new HashMap<>( 11 );
+		lDisplaySettings.put( KEY_COLOR, DEFAULT_SPOT_COLOR );
+		lDisplaySettings.put( KEY_HIGHLIGHT_COLOR, DEFAULT_HIGHLIGHT_COLOR );
+		lDisplaySettings.put( KEY_SPOTS_VISIBLE, true );
+		lDisplaySettings.put( KEY_DISPLAY_SPOT_NAMES, false );
+		lDisplaySettings.put( KEY_SPOT_COLORING, new DummySpotColorGenerator() );
+		lDisplaySettings.put( KEY_SPOT_RADIUS_RATIO, 1.0d );
+		lDisplaySettings.put( KEY_TRACKS_VISIBLE, true );
+		lDisplaySettings.put( KEY_TRACK_DISPLAY_MODE, DEFAULT_TRACK_DISPLAY_MODE );
+		lDisplaySettings.put( KEY_TRACK_DISPLAY_DEPTH, DEFAULT_TRACK_DISPLAY_DEPTH );
+		lDisplaySettings.put( KEY_TRACK_COLORING, new DummyTrackColorGenerator() );
+		lDisplaySettings.put( KEY_COLORMAP, DEFAULT_COLOR_MAP );
+		lDisplaySettings.put( KEY_LIMIT_DRAWING_DEPTH, DEFAULT_LIMIT_DRAWING_DEPTH );
+		lDisplaySettings.put( KEY_DRAWING_DEPTH, DEFAULT_DRAWING_DEPTH );
+		return lDisplaySettings;
 	}
 
 }

@@ -255,7 +255,7 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 		universe.addTimelapseListener( trackNode );
 
 		// Pass tracks instant to all instants
-		final TreeMap< Integer, ContentInstant > instants = new TreeMap< Integer, ContentInstant >();
+		final TreeMap< Integer, ContentInstant > instants = new TreeMap< >();
 		final ContentInstant trackCI = new ContentInstant( "Tracks_all_frames" );
 		trackCI.display( trackNode );
 		instants.put( 0, trackCI );
@@ -268,8 +268,8 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 	private void makeSpotContent()
 	{
 
-		blobs = new TreeMap< Integer, SpotGroupNode< Spot >>();
-		contentAllFrames = new TreeMap< Integer, ContentInstant >();
+		blobs = new TreeMap<>();
+		contentAllFrames = new TreeMap< >();
 		final double radiusRatio = ( Double ) displaySettings.get( KEY_SPOT_RADIUS_RATIO );
 		final SpotCollection spots = model.getSpots();
 		@SuppressWarnings( "unchecked" )
@@ -292,8 +292,8 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 
 	private void buildFrameContent( final SpotCollection spots, final Integer frame, final double radiusRatio, final FeatureColorGenerator< Spot > spotColorGenerator )
 	{
-		final Map< Spot, Point4d > centers = new HashMap< Spot, Point4d >( spots.getNSpots( frame, false ) );
-		final Map< Spot, Color4f > colors = new HashMap< Spot, Color4f >( spots.getNSpots( frame, false ) );
+		final Map< Spot, Point4d > centers = new HashMap< >( spots.getNSpots( frame, false ) );
+		final Map< Spot, Color4f > colors = new HashMap< >( spots.getNSpots( frame, false ) );
 		final double[] coords = new double[ 3 ];
 
 		for ( final Iterator< Spot > it = spots.iterator( frame, false ); it.hasNext(); )
@@ -307,7 +307,7 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 			col.w = 0f;
 			colors.put( spot, col );
 		}
-		final SpotGroupNode< Spot > blobGroup = new SpotGroupNode< Spot >( centers, colors );
+		final SpotGroupNode< Spot > blobGroup = new SpotGroupNode< >( centers, colors );
 		final ContentInstant contentThisFrame = new ContentInstant( "Spots_frame_" + frame );
 
 		try
@@ -405,9 +405,9 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 		 * highlight color.
 		 */
 
-		previousSpotHighlight = new ArrayList< Spot >( spots.size() );
-		previousColorHighlight = new HashMap< Spot, Color3f >( spots.size() );
-		previousFrameHighlight = new HashMap< Spot, Integer >( spots.size() );
+		previousSpotHighlight = new ArrayList< >( spots.size() );
+		previousColorHighlight = new HashMap< >( spots.size() );
+		previousFrameHighlight = new HashMap< >( spots.size() );
 
 		final Color3f highlightColor = new Color3f( ( Color ) displaySettings.get( KEY_HIGHLIGHT_COLOR ) );
 		for ( final Spot spot : spots )

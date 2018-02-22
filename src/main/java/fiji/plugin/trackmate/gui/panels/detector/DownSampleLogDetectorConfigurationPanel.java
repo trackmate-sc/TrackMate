@@ -35,7 +35,7 @@ public class DownSampleLogDetectorConfigurationPanel extends LogDetectorConfigur
 
 	public DownSampleLogDetectorConfigurationPanel( final Settings settings, final Model model )
 	{
-		super( settings, model, DownsampleLogDetectorFactory.INFO_TEXT, DownsampleLogDetectorFactory.NAME );
+		super( settings, model, DownsampleLogDetectorFactory.THIS_INFO_TEXT, DownsampleLogDetectorFactory.THIS_NAME );
 	}
 
 	/*
@@ -92,16 +92,16 @@ public class DownSampleLogDetectorConfigurationPanel extends LogDetectorConfigur
 	@Override
 	public Map< String, Object > getSettings()
 	{
-		final Map< String, Object > settings = new HashMap< String, Object >( 5 );
+		final Map< String, Object > lSettings = new HashMap<>( 5 );
 		final int targetChannel = sliderChannel.getValue();
 		final double expectedRadius = NumberParser.parseDouble( jTextFieldBlobDiameter.getText() ) / 2;
 		final double threshold = NumberParser.parseDouble( jTextFieldThreshold.getText() );
 		final int downsamplefactor = NumberParser.parseInteger( jTextFieldDownSample.getText() );
-		settings.put( KEY_TARGET_CHANNEL, targetChannel );
-		settings.put( KEY_RADIUS, expectedRadius );
-		settings.put( KEY_THRESHOLD, threshold );
-		settings.put( KEY_DOWNSAMPLE_FACTOR, downsamplefactor );
-		return settings;
+		lSettings.put( KEY_TARGET_CHANNEL, targetChannel );
+		lSettings.put( KEY_RADIUS, expectedRadius );
+		lSettings.put( KEY_THRESHOLD, threshold );
+		lSettings.put( KEY_DOWNSAMPLE_FACTOR, downsamplefactor );
+		return lSettings;
 	}
 
 	@Override

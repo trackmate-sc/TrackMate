@@ -441,7 +441,7 @@ public class LAPJV implements OutputAlgorithm< int[] >, Benchmark
 		colWidth = colWidth + 1;
 		colWidth = Math.max( colWidth, 7 );
 
-		final Set< String > unassignedColNames = new HashSet< String >( Arrays.asList( colNames ) );
+		final Set< String > unassignedColNames = new HashSet<>( Arrays.asList( colNames ) );
 
 		for ( int i = 0; i < rows.size(); i++ )
 		{

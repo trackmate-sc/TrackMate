@@ -23,6 +23,7 @@ import java.util.Set;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingConstants;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 
@@ -82,7 +83,7 @@ public class GrapherPanel extends ActionListenablePanel
 
 		setLayout( new BorderLayout( 0, 0 ) );
 
-		final JTabbedPane tabbedPane = new JTabbedPane( JTabbedPane.TOP );
+		final JTabbedPane tabbedPane = new JTabbedPane( SwingConstants.TOP );
 		add( tabbedPane, BorderLayout.CENTER );
 
 		panelSpot = new JPanel();
@@ -180,7 +181,7 @@ public class GrapherPanel extends ActionListenablePanel
 		final String xFeature = spotFeatureSelectionPanel.getXKey();
 		final Set< String > yFeatures = spotFeatureSelectionPanel.getYKeys();
 		// Collect only the spots that are in tracks
-		final List< Spot > spots = new ArrayList< Spot >( trackmate.getModel().getSpots().getNSpots( true ) );
+		final List< Spot > spots = new ArrayList< >( trackmate.getModel().getSpots().getNSpots( true ) );
 		for ( final Integer trackID : trackmate.getModel().getTrackModel().trackIDs( true ) )
 		{
 			spots.addAll( trackmate.getModel().getTrackModel().trackSpots( trackID ) );
@@ -192,7 +193,7 @@ public class GrapherPanel extends ActionListenablePanel
 	private void plotEdgeFeatures()
 	{
 		// Collect edges in filtered tracks
-		final List< DefaultWeightedEdge > edges = new ArrayList< DefaultWeightedEdge >();
+		final List< DefaultWeightedEdge > edges = new ArrayList< >();
 		for ( final Integer trackID : trackmate.getModel().getTrackModel().trackIDs( true ) )
 		{
 			edges.addAll( trackmate.getModel().getTrackModel().trackEdges( trackID ) );

@@ -58,13 +58,13 @@ public class Model
 	 */
 	private int updateLevel = 0;
 
-	private final HashSet< Spot > spotsAdded = new HashSet< Spot >();
+	private final HashSet< Spot > spotsAdded = new HashSet< >();
 
-	private final HashSet< Spot > spotsRemoved = new HashSet< Spot >();
+	private final HashSet< Spot > spotsRemoved = new HashSet< >();
 
-	private final HashSet< Spot > spotsMoved = new HashSet< Spot >();
+	private final HashSet< Spot > spotsMoved = new HashSet< >();
 
-	private final HashSet< Spot > spotsUpdated = new HashSet< Spot >();
+	private final HashSet< Spot > spotsUpdated = new HashSet< >();
 
 	/**
 	 * The event cache. During a transaction, some modifications might trigger
@@ -74,7 +74,6 @@ public class Model
 	 * the int IDs of the events listed in {@link ModelChangeEvent}, namely
 	 * <ul>
 	 * <li> {@link ModelChangeEvent#SPOTS_COMPUTED}
-	 * <li> {@link ModelChangeEvent#SPOT_FILTERED}
 	 * <li> {@link ModelChangeEvent#TRACKS_COMPUTED}
 	 * <li> {@link ModelChangeEvent#TRACKS_VISIBILITY_CHANGED}
 	 * </ul>
@@ -82,7 +81,7 @@ public class Model
 	 * for it needs to be configured with modification spot and edge targets, so
 	 * it uses a different system (see {@link #flushUpdate()}).
 	 */
-	private final HashSet< Integer > eventCache = new HashSet< Integer >();
+	private final HashSet< Integer > eventCache = new HashSet< >();
 
 	// OTHERS
 
@@ -96,10 +95,9 @@ public class Model
 	// LISTENERS
 
 	/**
-	 * The list of listeners listening to model content change, that is, changes
-	 * in {@link #spots}, {@link #filteredSpots} and {@link #trackGraph}.
+	 * The list of listeners listening to model content change.
 	 */
-	Set< ModelChangeListener > modelChangeListeners = new LinkedHashSet< ModelChangeListener >();
+	Set< ModelChangeListener > modelChangeListeners = new LinkedHashSet< >();
 
 	/*
 	 * CONSTRUCTOR
@@ -558,23 +556,16 @@ public class Model
 		{
 			spotsRemoved.add( spotToRemove ); // TRANSACTION
 			if ( DEBUG )
-			{
 				System.out.println( "[TrackMateModel] Removing spot " + spotToRemove + " from frame " + fromFrame );
-			}
-			trackModel.removeSpot( spotToRemove ); // changes to edges will be
-													// caught automatically by
-													// the TrackGraphModel
+
+			trackModel.removeSpot( spotToRemove ); 
+			// changes to edges will be caught automatically by the TrackGraphModel
 			return spotToRemove;
 		}
-		else
-		{
-			if ( DEBUG )
-			{
-				System.err.println( "[TrackMateModel] The spot " + spotToRemove + " cannot be found in frame " + fromFrame );
-			}
-			return null;
+		if ( DEBUG )
+			System.err.println( "[TrackMateModel] The spot " + spotToRemove + " cannot be found in frame " + fromFrame );
 
-		}
+		return null;
 	}
 
 	/**
@@ -760,7 +751,7 @@ public class Model
 		final int nEdgesToSignal = trackModel.edgesAdded.size() + trackModel.edgesRemoved.size() + trackModel.edgesModified.size();
 
 		// Do we have tracks to update?
-		final HashSet< Integer > tracksToUpdate = new HashSet< Integer >( trackModel.tracksUpdated );
+		final HashSet< Integer > tracksToUpdate = new HashSet< >( trackModel.tracksUpdated );
 
 		// We also want to update the tracks that have edges that were modified
 		for ( final DefaultWeightedEdge modifiedEdge : trackModel.edgesModified )
@@ -772,7 +763,7 @@ public class Model
 		final int nSpotsToUpdate = spotsAdded.size() + spotsMoved.size() + spotsUpdated.size();
 		if ( nSpotsToUpdate > 0 )
 		{
-			final HashSet< Spot > spotsToUpdate = new HashSet< Spot >( nSpotsToUpdate );
+			final HashSet< Spot > spotsToUpdate = new HashSet< >( nSpotsToUpdate );
 			spotsToUpdate.addAll( spotsAdded );
 			spotsToUpdate.addAll( spotsMoved );
 			spotsToUpdate.addAll( spotsUpdated );

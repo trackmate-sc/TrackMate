@@ -15,8 +15,7 @@ public class XYEdgeSeriesCollection extends AbstractSeriesDataset implements XYD
 	 */
 
 	private static final long serialVersionUID = 1157323153460912998L;
-	private ArrayList<XYEdgeSeries> seriesList = new ArrayList<XYEdgeSeries>();
-	
+	private ArrayList<XYEdgeSeries> seriesList = new ArrayList<>();
 	
 	/*
 	 * PUBLIC METHODS

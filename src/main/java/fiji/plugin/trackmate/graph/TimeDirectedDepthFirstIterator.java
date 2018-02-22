@@ -15,9 +15,8 @@ public class TimeDirectedDepthFirstIterator extends SortedDepthFirstIterator<Spo
 		super(g, startVertex, null);
 	}
 	
-	
-	
-    protected void addUnseenChildrenOf(Spot vertex) {
+    @Override
+	protected void addUnseenChildrenOf(Spot vertex) {
     	
     	int ts = vertex.getFeature(Spot.FRAME).intValue();
         for (DefaultWeightedEdge edge : specifics.edgesOf(vertex)) {

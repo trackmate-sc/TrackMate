@@ -56,7 +56,7 @@ public class SpotNeighborhood< T extends RealType< T >> implements Neighborhood<
 		 * have to test pedantically.
 		 */
 
-		final OutOfBoundsMirrorExpWindowingFactory< T, RandomAccessibleInterval< T >> oob = new OutOfBoundsMirrorExpWindowingFactory< T, RandomAccessibleInterval< T >>();
+		final OutOfBoundsMirrorExpWindowingFactory< T, RandomAccessibleInterval< T >> oob = new OutOfBoundsMirrorExpWindowingFactory<>();
 		if ( img.numDimensions() == 2 && img.dimension( 0 ) < 2 || img.dimension( 1 ) < 2 )
 		{
 			if ( img.dimension( 0 ) < 2 )
@@ -67,17 +67,17 @@ public class SpotNeighborhood< T extends RealType< T >> implements Neighborhood<
 			{
 				span[ 1 ] = 0;
 			}
-			this.neighborhood = new RectangleNeighborhoodGPL< T >( img, oob );
+			this.neighborhood = new RectangleNeighborhoodGPL< >( img, oob );
 			neighborhood.setPosition( center );
 			neighborhood.setSpan( span );
 		}
 		else if ( img.numDimensions() == 2 )
 		{
-			this.neighborhood = new EllipseNeighborhood< T >( img, center, span, oob );
+			this.neighborhood = new EllipseNeighborhood< >( img, center, span, oob );
 		}
 		else if ( img.numDimensions() == 3 )
 		{
-			this.neighborhood = new EllipsoidNeighborhood< T >( img, center, span, oob );
+			this.neighborhood = new EllipsoidNeighborhood< >( img, center, span, oob );
 		}
 		else
 		{
@@ -93,7 +93,7 @@ public class SpotNeighborhood< T extends RealType< T >> implements Neighborhood<
 	@Override
 	public final SpotNeighborhoodCursor< T > cursor()
 	{
-		return new SpotNeighborhoodCursor< T >( this );
+		return new SpotNeighborhoodCursor< >( this );
 	}
 
 	@Override

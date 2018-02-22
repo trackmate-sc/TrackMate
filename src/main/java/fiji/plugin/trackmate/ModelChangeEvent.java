@@ -38,7 +38,7 @@ public class ModelChangeEvent extends EventObject {
 	 */
 	public static final int FLAG_EDGE_MODIFIED = 6;
 
-	public static final Map<Integer, String> flagsToString = new HashMap<Integer, String>(7);
+	public static final Map<Integer, String> flagsToString = new HashMap<>(7);
 	static {
 		flagsToString.put(FLAG_SPOT_ADDED, "Spot added");
 		flagsToString.put(FLAG_SPOT_FRAME_CHANGED, "Spot frame changed");
@@ -81,17 +81,17 @@ public class ModelChangeEvent extends EventObject {
 	public static final int 	MODEL_MODIFIED = 8;
 
 	/** Spots affected by this event. */
-	private final HashSet<Spot> spots = new HashSet<Spot>();
+	private final HashSet<Spot> spots = new HashSet<>();
 	/** Edges affected by this event. */
-	private final HashSet<DefaultWeightedEdge> edges = new HashSet<DefaultWeightedEdge>();
+	private final HashSet<DefaultWeightedEdge> edges = new HashSet<>();
 	/** For spots removed or moved: frame from which they were removed or moved. */
-	private final HashMap<Spot, Integer> fromFrame = new HashMap<Spot, Integer>();
+	private final HashMap<Spot, Integer> fromFrame = new HashMap<>();
 	/** For spots removed or added: frame to which they were added or moved. */
-	private final HashMap<Spot, Integer> toFrame = new HashMap<Spot, Integer>();
+	private final HashMap<Spot, Integer> toFrame = new HashMap<>();
 	/** Modification flag for spots affected by this event. */
-	private final HashMap<Spot, Integer> spotFlags = new HashMap<Spot, Integer>();
+	private final HashMap<Spot, Integer> spotFlags = new HashMap<>();
 	/** Modification flag for edges affected by this event. */
-	private final HashMap<DefaultWeightedEdge, Integer> edgeFlags = new HashMap<DefaultWeightedEdge, Integer>();
+	private final HashMap<DefaultWeightedEdge, Integer> edgeFlags = new HashMap<>();
 	/** The event type for this instance. */
 	private final int eventID;
 	private Set<Integer> trackUpdated;
@@ -113,16 +113,16 @@ public class ModelChangeEvent extends EventObject {
 		return this.eventID;
 	}
 
-	public boolean addAllSpots(final Collection<Spot> spots) {
-		return this.spots.addAll(spots);
+	public boolean addAllSpots(final Collection<Spot> lSpots) {
+		return this.spots.addAll(lSpots);
 	}
 
 	public boolean addSpot(final Spot spot) {
 		return this.spots.add(spot);
 	}
 
-	public boolean addAllEdges(final Collection<DefaultWeightedEdge> edges) {
-		return this.edges.addAll(edges);
+	public boolean addAllEdges(final Collection<DefaultWeightedEdge> lEdges) {
+		return this.edges.addAll(lEdges);
 	}
 	public boolean addEdge(final DefaultWeightedEdge edge) {
 		return edges.add(edge);
@@ -136,12 +136,12 @@ public class ModelChangeEvent extends EventObject {
 		return spotFlags.put(spot, flag);
 	}
 
-	public Integer putFromFrame(final Spot spot, final Integer fromFrame) {
-		return this.fromFrame.put(spot, fromFrame);
+	public Integer putFromFrame(final Spot spot, final Integer lFromFrame) {
+		return this.fromFrame.put(spot, lFromFrame);
 	}
 
-	public Integer putToFrame(final Spot spot, final Integer toFrame) {
-		return this.toFrame.put(spot, toFrame);
+	public Integer putToFrame(final Spot spot, final Integer lToFrame) {
+		return this.toFrame.put(spot, lToFrame);
 	}
 
 	/**

@@ -380,7 +380,7 @@ public class TrackSchemeActions
 				multiEditSpotName( graphComponent, e );
 		}
 
-		private void multiEditSpotName( final TrackSchemeGraphComponent graphComponent, final ActionEvent triggerEvent )
+		private void multiEditSpotName( final TrackSchemeGraphComponent lGraphComponent, final ActionEvent triggerEvent )
 		{
 			/*
 			 * We want to display the editing window in the cell is the closer
@@ -390,24 +390,20 @@ public class TrackSchemeActions
 			 * idea for that yet, because JGraphX is expecting to receive a cell
 			 * as location for the editing window.
 			 */
-			final JGraphXAdapter graph = graphComponent.getGraph();
+			final JGraphXAdapter graph = lGraphComponent.getGraph();
 			final List< mxCell > vertices = getSelectionVertices( graph );
 			if ( vertices.isEmpty() ) { return; }
 
-			final Point mousePosition = graphComponent.getMousePosition();
+			final Point mousePosition = lGraphComponent.getMousePosition();
 			final mxCell tc;
 			if ( null != mousePosition )
-			{
 				tc = getClosestCell( vertices, mousePosition );
-			}
 			else
-			{
 				tc = vertices.get( 0 );
-			}
 			vertices.remove( tc );
 
-			graphComponent.startEditingAtCell( tc, triggerEvent );
-			graphComponent.addListener( mxEvent.LABEL_CHANGED, new mxIEventListener()
+			lGraphComponent.startEditingAtCell( tc, triggerEvent );
+			lGraphComponent.addListener( mxEvent.LABEL_CHANGED, new mxIEventListener()
 			{
 
 				@Override
@@ -418,15 +414,15 @@ public class TrackSchemeActions
 						cell.setValue( tc.getValue() );
 						graph.getSpotFor( cell ).setName( tc.getValue().toString() );
 					}
-					graphComponent.refresh();
-					graphComponent.removeListener( this );
+					lGraphComponent.refresh();
+					lGraphComponent.removeListener( this );
 				}
 			} );
 		}
 
 		/**
 		 * Return, from the given list of cell, the one which is the closer to
-		 * the {@link #point} of this instance.
+		 * the point of this instance.
 		 *
 		 * @param point
 		 */
@@ -456,7 +452,7 @@ public class TrackSchemeActions
 	{
 		// Build selection categories
 		final Object[] selection = graph.getSelectionCells();
-		final ArrayList< mxCell > vertices = new ArrayList< mxCell >();
+		final ArrayList< mxCell > vertices = new ArrayList< >();
 		for ( final Object obj : selection )
 		{
 			final mxCell cell = ( mxCell ) obj;
@@ -470,7 +466,7 @@ public class TrackSchemeActions
 	{
 		// Build selection categories
 		final Object[] selection = graph.getSelectionCells();
-		final ArrayList< mxCell > edges = new ArrayList< mxCell >();
+		final ArrayList< mxCell > edges = new ArrayList< >();
 		for ( final Object obj : selection )
 		{
 			final mxCell cell = ( mxCell ) obj;

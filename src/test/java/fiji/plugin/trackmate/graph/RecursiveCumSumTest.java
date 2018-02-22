@@ -14,7 +14,7 @@ public class RecursiveCumSumTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		tree = new SimpleDirectedGraph<int[], DefaultEdge>(DefaultEdge.class);
+		tree = new SimpleDirectedGraph<>(DefaultEdge.class);
 		
 		root = new int[] { 1};
 		int[] c1 = new int[] {1};
@@ -48,7 +48,7 @@ public class RecursiveCumSumTest {
 				output[0] =  input1[0] + input2[0];
 			}
 		};
-		RecursiveCumSum<int[], DefaultEdge> fun = new RecursiveCumSum<int[], DefaultEdge>(tree, function);
+		RecursiveCumSum<int[], DefaultEdge> fun = new RecursiveCumSum<>(tree, function);
 		int[] val = fun.apply(root);
 		assertEquals(7, val[0]);
 	}

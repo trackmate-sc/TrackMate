@@ -38,8 +38,8 @@ public class EdgeTimeAndLocationAnalyzerTest
 	@Before
 	public void setUp()
 	{
-		edgePos = new HashMap< DefaultWeightedEdge, Double >();
-		edgeTime = new HashMap< DefaultWeightedEdge, Double >();
+		edgePos = new HashMap< >();
+		edgeTime = new HashMap< >();
 
 		model = new Model();
 		model.beginUpdate();
@@ -127,7 +127,7 @@ public class EdgeTimeAndLocationAnalyzerTest
 			@Override
 			public void modelChanged( final ModelChangeEvent event )
 			{
-				final HashSet< DefaultWeightedEdge > edgesToUpdate = new HashSet< DefaultWeightedEdge >();
+				final HashSet< DefaultWeightedEdge > edgesToUpdate = new HashSet< >();
 				for ( final DefaultWeightedEdge edge : event.getEdges() )
 				{
 					if ( event.getEdgeFlag( edge ) != ModelChangeEvent.FLAG_EDGE_REMOVED )
@@ -145,7 +145,7 @@ public class EdgeTimeAndLocationAnalyzerTest
 				{
 
 					// Get the all the edges of the track they belong to
-					final HashSet< DefaultWeightedEdge > globalEdgesToUpdate = new HashSet< DefaultWeightedEdge >();
+					final HashSet< DefaultWeightedEdge > globalEdgesToUpdate = new HashSet< >();
 					for ( final DefaultWeightedEdge edge : edgesToUpdate )
 					{
 						final Integer motherTrackID = model.getTrackModel().trackIDOf( edge );
@@ -181,12 +181,11 @@ public class EdgeTimeAndLocationAnalyzerTest
 		private Collection< DefaultWeightedEdge > edges;
 
 		@Override
-		public void process( final Collection< DefaultWeightedEdge > edges, final Model model )
+		public void process( final Collection< DefaultWeightedEdge > lEdges, final Model model )
 		{
 			this.hasBeenRun = true;
-			this.edges = edges;
-			super.process( edges, model );
+			this.edges = lEdges;
+			super.process( lEdges, model );
 		}
-
 	}
 }

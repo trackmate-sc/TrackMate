@@ -13,6 +13,9 @@ public class Debug
 		fiji.Debug.runFilter( "/Users/tinevez/Development/TrackMate/samples/FakeTracks.tif", "TrackMate", "" );
 	}
 
+	/**
+	 * @param args  
+	 */
 	public static void main2( final String[] args )
 	{
 		final File file = new File( "/Users/tinevez/Desktop/CRTD62.xml" );

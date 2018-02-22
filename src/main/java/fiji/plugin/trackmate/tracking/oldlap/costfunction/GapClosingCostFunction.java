@@ -131,9 +131,9 @@ public class GapClosingCostFunction extends MultiThreadedBenchmarkAlgorithm impl
 								}
 
 								final SortedSet< Spot > seg2 = trackSegments.get( j );
-								final Spot start = seg2.first();
+								final Spot lStart = seg2.first();
 								// get first Spot of seg2
-								final int startFrame = start.getFeature( Spot.FRAME ).intValue();
+								final int startFrame = lStart.getFeature( Spot.FRAME ).intValue();
 
 								/*
 								 * Frame cutoff. A value of 1 means a gap of 1
@@ -148,7 +148,7 @@ public class GapClosingCostFunction extends MultiThreadedBenchmarkAlgorithm impl
 									continue;
 								}
 
-								final double cost = LAPUtils.computeLinkingCostFor( end, start, maxDist, blockingValue, featurePenalties );
+								final double cost = LAPUtils.computeLinkingCostFor( end, lStart, maxDist, blockingValue, featurePenalties );
 								m.set( i, j, cost );
 							}
 						}

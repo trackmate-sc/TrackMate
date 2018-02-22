@@ -55,7 +55,7 @@ public class ExportStatsToIJAction extends AbstractTMAction
 		{
 			final Set< Spot > track = model.getTrackModel().trackSpots( trackID );
 			// Sort by frame
-			final List< Spot > sortedTrack = new ArrayList< Spot >( track );
+			final List< Spot > sortedTrack = new ArrayList<>( track );
 			Collections.sort( sortedTrack, Spot.frameComparator );
 
 			for ( final Spot spot : sortedTrack )
@@ -103,7 +103,7 @@ public class ExportStatsToIJAction extends AbstractTMAction
 			final Comparator< DefaultWeightedEdge > edgeSourceSpotTimeComparator = new EdgeSourceSpotFrameComparator( model );
 
 			final Set< DefaultWeightedEdge > track = model.getTrackModel().trackEdges( trackID );
-			final List< DefaultWeightedEdge > sortedTrack = new ArrayList< DefaultWeightedEdge >( track );
+			final List< DefaultWeightedEdge > sortedTrack = new ArrayList<>( track );
 
 			/*
 			 * Sort them by frame, if the EdgeTimeLocationAnalyzer feature is

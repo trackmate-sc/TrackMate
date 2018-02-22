@@ -60,7 +60,6 @@ public class LAPUtils {
 
 	private static final Border RED_BORDER = new LineBorder(Color.RED);
 
-
 	/*
 	 * STATIC KEYS Mainly used for marshalling.
 	 */
@@ -114,23 +113,23 @@ public class LAPUtils {
 	 * @return a new map.
 	 */
 	public static final Map<String, Object> getDefaultLAPSettingsMap() {
-		final Map<String, Object> settings = new HashMap<String, Object>();
+		final Map<String, Object> settings = new HashMap<>();
 		// Linking
 		settings.put(KEY_LINKING_MAX_DISTANCE, DEFAULT_LINKING_MAX_DISTANCE);
-		settings.put(KEY_LINKING_FEATURE_PENALTIES, new HashMap<String, Double>(DEFAULT_LINKING_FEATURE_PENALTIES));
+		settings.put(KEY_LINKING_FEATURE_PENALTIES, new HashMap<>(DEFAULT_LINKING_FEATURE_PENALTIES));
 		// Gap closing
 		settings.put(KEY_ALLOW_GAP_CLOSING, DEFAULT_ALLOW_GAP_CLOSING);
 		settings.put(KEY_GAP_CLOSING_MAX_FRAME_GAP, DEFAULT_GAP_CLOSING_MAX_FRAME_GAP);
 		settings.put(KEY_GAP_CLOSING_MAX_DISTANCE, DEFAULT_GAP_CLOSING_MAX_DISTANCE);
-		settings.put(KEY_GAP_CLOSING_FEATURE_PENALTIES, new HashMap<String, Double>(DEFAULT_GAP_CLOSING_FEATURE_PENALTIES));
+		settings.put(KEY_GAP_CLOSING_FEATURE_PENALTIES, new HashMap<>(DEFAULT_GAP_CLOSING_FEATURE_PENALTIES));
 		// Track splitting
 		settings.put(KEY_ALLOW_TRACK_SPLITTING, DEFAULT_ALLOW_TRACK_SPLITTING);
 		settings.put(KEY_SPLITTING_MAX_DISTANCE, DEFAULT_SPLITTING_MAX_DISTANCE);
-		settings.put(KEY_SPLITTING_FEATURE_PENALTIES, new HashMap<String, Double>(DEFAULT_SPLITTING_FEATURE_PENALTIES));
+		settings.put(KEY_SPLITTING_FEATURE_PENALTIES, new HashMap<>(DEFAULT_SPLITTING_FEATURE_PENALTIES));
 		// Track merging
 		settings.put(KEY_ALLOW_TRACK_MERGING, DEFAULT_ALLOW_TRACK_MERGING);
 		settings.put(KEY_MERGING_MAX_DISTANCE, DEFAULT_MERGING_MAX_DISTANCE);
-		settings.put(KEY_MERGING_FEATURE_PENALTIES, new HashMap<String, Double>(DEFAULT_MERGING_FEATURE_PENALTIES));
+		settings.put(KEY_MERGING_FEATURE_PENALTIES, new HashMap<>(DEFAULT_MERGING_FEATURE_PENALTIES));
 		// Others
 		settings.put(KEY_BLOCKING_VALUE, DEFAULT_BLOCKING_VALUE);
 		settings.put(KEY_ALTERNATIVE_LINKING_COST_FACTOR, DEFAULT_ALTERNATIVE_LINKING_COST_FACTOR);
@@ -244,7 +243,7 @@ public class LAPUtils {
 		ok = ok & checkParameter( settings, KEY_BLOCKING_VALUE, Double.class, errorHolder );
 
 		// Check keys
-		final List<String> mandatoryKeys = new ArrayList<String>();
+		final List<String> mandatoryKeys = new ArrayList<>();
 		mandatoryKeys.add(KEY_LINKING_MAX_DISTANCE);
 		mandatoryKeys.add(KEY_ALLOW_GAP_CLOSING);
 		mandatoryKeys.add(KEY_GAP_CLOSING_MAX_DISTANCE);
@@ -256,7 +255,7 @@ public class LAPUtils {
 		mandatoryKeys.add(KEY_ALTERNATIVE_LINKING_COST_FACTOR);
 		mandatoryKeys.add(KEY_CUTOFF_PERCENTILE);
 		mandatoryKeys.add(KEY_BLOCKING_VALUE);
-		final List<String> optionalKeys = new ArrayList<String>();
+		final List<String> optionalKeys = new ArrayList<>();
 		optionalKeys.add(KEY_LINKING_FEATURE_PENALTIES);
 		optionalKeys.add(KEY_GAP_CLOSING_FEATURE_PENALTIES);
 		optionalKeys.add(KEY_SPLITTING_FEATURE_PENALTIES);

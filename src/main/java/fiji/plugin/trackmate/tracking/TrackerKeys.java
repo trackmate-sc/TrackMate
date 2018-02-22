@@ -72,7 +72,7 @@ public class TrackerKeys
 	 * A default value for the {@value #KEY_LINKING_FEATURE_PENALTIES}
 	 * parameter.
 	 */
-	public static final Map< String, Double > DEFAULT_LINKING_FEATURE_PENALTIES = new HashMap< String, Double >();
+	public static final Map< String, Double > DEFAULT_LINKING_FEATURE_PENALTIES = new HashMap< >();
 
 	/**
 	 * Key for the parameter specifying whether we allow the detection of
@@ -124,7 +124,7 @@ public class TrackerKeys
 	 * A default value for the {@value #KEY_GAP_CLOSING_FEATURE_PENALTIES}
 	 * parameter.
 	 */
-	public static final Map< String, Double > DEFAULT_GAP_CLOSING_FEATURE_PENALTIES = new HashMap< String, Double >();
+	public static final Map< String, Double > DEFAULT_GAP_CLOSING_FEATURE_PENALTIES = new HashMap< >();
 
 	/**
 	 * Key for the parameter specifying whether we allow the detection of
@@ -160,7 +160,7 @@ public class TrackerKeys
 	 * A default value for the {@value #KEY_MERGING_FEATURE_PENALTIES}
 	 * parameter.
 	 */
-	public static final Map< String, Double > DEFAULT_MERGING_FEATURE_PENALTIES = new HashMap< String, Double >();
+	public static final Map< String, Double > DEFAULT_MERGING_FEATURE_PENALTIES = new HashMap< >();
 
 	/**
 	 * Key for the parameter specifying whether we allow the detection of
@@ -201,7 +201,7 @@ public class TrackerKeys
 	 * A default value for the {@value #KEY_SPLITTING_FEATURE_PENALTIES}
 	 * parameter.
 	 */
-	public static final Map< String, Double > DEFAULT_SPLITTING_FEATURE_PENALTIES = new HashMap< String, Double >();
+	public static final Map< String, Double > DEFAULT_SPLITTING_FEATURE_PENALTIES = new HashMap< >();
 
 	/**
 	 * Key for the parameter specifying the factor used to compute alternative

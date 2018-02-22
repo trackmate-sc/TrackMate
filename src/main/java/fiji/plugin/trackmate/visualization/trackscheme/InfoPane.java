@@ -13,7 +13,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -98,7 +97,7 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 	{
 		this.model = model;
 		this.selectionModel = selectionModel;
-		final List< String > features = new ArrayList< String >( model.getFeatureModel().getSpotFeatures() );
+		final List< String > features = new ArrayList< >( model.getFeatureModel().getSpotFeatures() );
 		final Map< String, String > featureNames = model.getFeatureModel().getSpotFeatureShortNames();
 		final List< String > headerList = TMUtils.getArrayFromMaping( features, featureNames );
 		headerList.add( 0, "Track ID" );
@@ -189,7 +188,7 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 		 * Sort using a list; TreeSet does not allow several identical frames,
 		 * which is likely to happen.
 		 */
-		final List< Spot > sortedSpots = new ArrayList< Spot >( spotSelection );
+		final List< Spot > sortedSpots = new ArrayList< >( spotSelection );
 		Collections.sort( sortedSpots, Spot.frameComparator );
 
 		@SuppressWarnings( "serial" )
@@ -202,7 +201,7 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 			}
 		};
 
-		final List< String > features = new ArrayList< String >( model.getFeatureModel().getSpotFeatures() );
+		final List< String > features = new ArrayList< >( model.getFeatureModel().getSpotFeatures() );
 		for ( final Spot spot : sortedSpots )
 		{
 			if ( null == spot )
@@ -240,7 +239,7 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 			public boolean isOpaque()
 			{
 				return false;
-			};
+			}
 
 			@Override
 			public Color getBackground()
@@ -295,9 +294,9 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 
 	private void exportTableToImageJ()
 	{
-		final ResultsTable table = new ResultsTable();
+		final ResultsTable lTable = new ResultsTable();
 		final FeatureModel fm = model.getFeatureModel();
-		final List< String > features = new ArrayList< String >( fm.getSpotFeatures() );
+		final List< String > features = new ArrayList< >( fm.getSpotFeatures() );
 
 		final int ncols = spotSelection.size();
 		final int nrows = headers.length;
@@ -307,19 +306,19 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 		 * Track ID
 		 */
 
-		table.incrementCounter();
-		table.setLabel( "TRACK_ID", 0 );
+		lTable.incrementCounter();
+		lTable.setLabel( "TRACK_ID", 0 );
 		for ( int i = 0; i < ncols; i++ )
 		{
 			final Spot spot = spotArray[ i ];
 			final Integer trackID = model.getTrackModel().trackIDOf( spot );
 			if ( null == trackID )
 			{
-				table.addValue( spot.getName(), "None" );
+				lTable.addValue( spot.getName(), "None" );
 			}
 			else
 			{
-				table.addValue( spot.getName(), "" + trackID.intValue() );
+				lTable.addValue( spot.getName(), "" + trackID.intValue() );
 			}
 		}
 
@@ -329,32 +328,32 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 
 		for ( int j = 0; j < nrows - 1; j++ )
 		{
-			table.incrementCounter();
+			lTable.incrementCounter();
 			final String feature = features.get( j );
-			table.setLabel( feature, j + 1 );
+			lTable.setLabel( feature, j + 1 );
 			for ( int i = 0; i < ncols; i++ )
 			{
 				final Spot spot = spotArray[ i ];
 				final Double val = spot.getFeature( feature );
 				if ( val == null )
 				{
-					table.addValue( spot.getName(), "None" );
+					lTable.addValue( spot.getName(), "None" );
 				}
 				else
 				{
 					if ( fm.getSpotFeatureIsInt().get( feature ) )
 					{
-						table.addValue( spot.getName(), "" + val.intValue() );
+						lTable.addValue( spot.getName(), "" + val.intValue() );
 					}
 					else
 					{
-						table.addValue( spot.getName(), val.doubleValue() );
+						lTable.addValue( spot.getName(), val.doubleValue() );
 					}
 				}
 			}
 		}
 
-		table.show( "TrackMate Selection" );
+		lTable.show( "TrackMate Selection" );
 	}
 
 	private void init()
@@ -407,7 +406,7 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 			}
 		} );
 
-		final JList< String > rowHeader = new JList< String >( lm );
+		final JList< String > rowHeader = new JList< >( lm );
 		rowHeader.setFixedCellHeight( table.getRowHeight() );
 		rowHeader.setCellRenderer( new RowHeaderRenderer( table ) );
 		rowHeader.setBackground( getBackground() );
@@ -418,7 +417,7 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 		scrollTable.setOpaque( false );
 		scrollTable.getViewport().setOpaque( false );
 
-		final List< String > features = new ArrayList< String >( model.getFeatureModel().getSpotFeatures() );
+		final List< String > features = new ArrayList< >( model.getFeatureModel().getSpotFeatures() );
 		final Map< String, String > featureNames = model.getFeatureModel().getSpotFeatureShortNames();
 		featureSelectionPanel = new FeaturePlotSelectionPanel( Spot.POSITION_T, features, featureNames );
 
@@ -465,7 +464,7 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 	 * INNER CLASS
 	 */
 
-	private class RowHeaderRenderer extends JLabel implements ListCellRenderer< String >, Serializable
+	private class RowHeaderRenderer extends JLabel implements ListCellRenderer< String >
 	{
 
 		private static final long serialVersionUID = -1L;

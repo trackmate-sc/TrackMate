@@ -18,7 +18,7 @@ public class JonkerVolgenantTest
 	private double pseudoRandom( final double min, final double max )
 	{
 		int random = pseudoRandom() & 0x7fffffff;
-		return min + random * ( ( max - min ) / ( double ) Integer.MAX_VALUE );
+		return min + random * ( ( max - min ) / Integer.MAX_VALUE );
 	}
 
 	private double[][] generateMatrix( final int n )

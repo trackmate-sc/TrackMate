@@ -38,8 +38,8 @@ public class ViewChoiceDescriptor implements WizardPanelDescriptor
 		this.controller = controller;
 		// Only views that are set to be visible in the menu.
 		final List< String > visibleKeys = viewProvider.getVisibleViews();
-		final List< String > viewerNames = new ArrayList< String >( visibleKeys.size() );
-		final List< String > infoTexts = new ArrayList< String >( visibleKeys.size() );
+		final List< String > viewerNames = new ArrayList< >( visibleKeys.size() );
+		final List< String > infoTexts = new ArrayList< >( visibleKeys.size() );
 		for ( final String key : visibleKeys )
 		{
 			infoTexts.add( viewProvider.getFactory( key ).getInfoText() );
@@ -126,7 +126,7 @@ public class ViewChoiceDescriptor implements WizardPanelDescriptor
 				}
 				guimodel.addView( view );
 				view.render();
-			};
+			}
 		}.start();
 	}
 

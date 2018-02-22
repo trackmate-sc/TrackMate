@@ -12,6 +12,8 @@ import java.util.Set;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.scijava.java3d.Appearance;
 import org.scijava.java3d.BranchGroup;
+import org.scijava.java3d.GeometryArray;
+import org.scijava.java3d.Group;
 import org.scijava.java3d.LineArray;
 import org.scijava.java3d.LineAttributes;
 import org.scijava.java3d.RenderingAttributes;
@@ -38,7 +40,7 @@ public class TrackDisplayNode extends ContentNode implements TimelapseListener
 	private final Model model;
 
 	/** Hold the color and transparency of all spots for a given track. */
-	private final HashMap< Integer, Color > colors = new HashMap< Integer, Color >();
+	private final HashMap< Integer, Color > colors = new HashMap< >();
 
 	private int displayDepth = TrackMateModelView.DEFAULT_TRACK_DISPLAY_DEPTH;
 
@@ -393,7 +395,7 @@ public class TrackDisplayNode extends ContentNode implements TimelapseListener
 					setColor( edge, previousEdgeHighlight.get( edge ) );
 
 			// Store current color settings
-			previousEdgeHighlight = new HashMap< DefaultWeightedEdge, Color >();
+			previousEdgeHighlight = new HashMap< >();
 			for ( final DefaultWeightedEdge edge : edgeSelection )
 				previousEdgeHighlight.put( edge, getColor( edge ) );
 
@@ -464,8 +466,8 @@ public class TrackDisplayNode extends ContentNode implements TimelapseListener
 
 		this.trackSwitch = new Switch( Switch.CHILD_MASK );
 		trackSwitch.setCapability( Switch.ALLOW_SWITCH_WRITE );
-		trackSwitch.setCapability( Switch.ALLOW_CHILDREN_WRITE );
-		trackSwitch.setCapability( Switch.ALLOW_CHILDREN_EXTEND );
+		trackSwitch.setCapability( Group.ALLOW_CHILDREN_WRITE );
+		trackSwitch.setCapability( Group.ALLOW_CHILDREN_EXTEND );
 		this.switchMask = new BitSet();
 
 		// All edges of ALL tracks
@@ -473,7 +475,7 @@ public class TrackDisplayNode extends ContentNode implements TimelapseListener
 
 		// Instantiate refs fields
 		final int nframes = model.getSpots().keySet().size();
-		frameIndices = new HashMap< Integer, HashMap< Integer, ArrayList< Integer > > >( nframes, 1 ); // optimum
+		frameIndices = new HashMap< >( nframes, 1 ); // optimum
 		for ( final int frameIndex : model.getSpots().keySet() )
 		{
 			frameIndices.put( frameIndex, new HashMap< Integer, ArrayList< Integer > >( ntracks ) );
@@ -482,13 +484,13 @@ public class TrackDisplayNode extends ContentNode implements TimelapseListener
 				frameIndices.get( frameIndex ).put( trackID, new ArrayList< Integer >() );
 			}
 		}
-		edgeIndices = new HashMap< Integer, HashMap< DefaultWeightedEdge, Integer > >( ntracks );
+		edgeIndices = new HashMap< >( ntracks );
 		for ( final Integer trackID : model.getTrackModel().trackIDs( true ) )
 		{
 			final int nedges = model.getTrackModel().trackEdges( trackID ).size();
 			edgeIndices.put( trackID, new HashMap< DefaultWeightedEdge, Integer >( nedges, 1 ) );
 		}
-		lines = new HashMap< Integer, LineArray >( ntracks );
+		lines = new HashMap< >( ntracks );
 
 		// Holder for coordinates (array ref will not be used, just its
 		// elements)
@@ -506,7 +508,7 @@ public class TrackDisplayNode extends ContentNode implements TimelapseListener
 		appearance.setRenderingAttributes( renderingAtts );
 
 		// Iterate over each track
-		switchMaskIndex = new HashMap< Integer, Integer >( ntracks );
+		switchMaskIndex = new HashMap< >( ntracks );
 		int trackIndex = 0;
 		for ( final Integer trackID : model.getTrackModel().trackIDs( true ) )
 		{
@@ -515,8 +517,8 @@ public class TrackDisplayNode extends ContentNode implements TimelapseListener
 			final Set< DefaultWeightedEdge > track = model.getTrackModel().trackEdges( trackID );
 
 			// One line object to display all edges of one track
-			final LineArray line = new LineArray( 2 * track.size(), LineArray.COORDINATES | LineArray.COLOR_4 );
-			line.setCapability( LineArray.ALLOW_COLOR_WRITE );
+			final LineArray line = new LineArray( 2 * track.size(), GeometryArray.COORDINATES | GeometryArray.COLOR_4 );
+			line.setCapability( GeometryArray.ALLOW_COLOR_WRITE );
 
 			// Color
 			Color trackColor = colors.get( trackID );

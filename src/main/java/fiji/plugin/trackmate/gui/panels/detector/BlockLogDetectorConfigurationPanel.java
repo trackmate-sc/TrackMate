@@ -94,10 +94,10 @@ public class BlockLogDetectorConfigurationPanel extends LogDetectorConfiguration
 	@Override
 	public Map< String, Object > getSettings()
 	{
-		final Map< String, Object > settings = super.getSettings();
+		final Map< String, Object > lSettings = super.getSettings();
 		final int nsplit = NumberParser.parseInteger( jTextFieldNSplit.getText() );
-		settings.put( KEY_NSPLIT, nsplit );
-		return settings;
+		lSettings.put( KEY_NSPLIT, nsplit );
+		return lSettings;
 	}
 
 	@Override
@@ -122,7 +122,7 @@ public class BlockLogDetectorConfigurationPanel extends LogDetectorConfiguration
 		}
 
 		final int nsplit = NumberParser.parseInteger( jTextFieldNSplit.getText() );
-		roiList = new ArrayList< Roi >(nsplit*nsplit);
+		roiList = new ArrayList<>(nsplit*nsplit);
 		
 		final Interval interval = TMUtils.getInterval( TMUtils.rawWraps( imp ), settings );
 		for ( int i = 0; i < nsplit; i++ )

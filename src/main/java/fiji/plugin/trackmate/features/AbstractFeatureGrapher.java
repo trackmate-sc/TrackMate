@@ -21,6 +21,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
 
 import org.jfree.chart.renderer.InterpolatePaintScale;
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -64,7 +65,7 @@ public abstract class AbstractFeatureGrapher {
 		
 		// Scroll pane
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		scrollPane.setViewportView(panel);
 
 		// The frame
@@ -82,7 +83,7 @@ public abstract class AbstractFeatureGrapher {
 	 * @return the unique mapped values in the given map, for the collection of keys given.
 	 */
 	protected final <K, V> Set<V> getUniqueValues(Iterable<K> keys, Map<K,V> map) {
-		HashSet<V> mapping = new HashSet<V>();
+		HashSet<V> mapping = new HashSet<>();
 		for (K key : keys) {
 			mapping.add(map.get(key));
 		}
@@ -97,7 +98,7 @@ public abstract class AbstractFeatureGrapher {
 	 * @param map the map to search in
 	 */
 	protected final <K, V> List<K> getCommonKeys(final V targetValue, final Iterable<K> keys, final Map<K,V> map) {
-		ArrayList<K> foundKeys = new ArrayList<K>();
+		ArrayList<K> foundKeys = new ArrayList<>();
 		for (K key : keys) {
 			if (map.get(key).equals(targetValue)) {
 				foundKeys.add(key);
@@ -110,9 +111,9 @@ public abstract class AbstractFeatureGrapher {
 	 * @return a suitable plot title built from the given target features
 	 */
 	
-	protected final String buildPlotTitle(final Iterable<String> yFeatures, final Map<String, String> featureNames) {
+	protected final String buildPlotTitle(final Iterable<String> lYFeatures, final Map<String, String> featureNames) {
 		StringBuilder sb = new StringBuilder("Plot of ");
-		Iterator<String> it = yFeatures.iterator();
+		Iterator<String> it = lYFeatures.iterator();
 		sb.append(featureNames.get(it.next()) );
 		while(it.hasNext()) {
 			sb.append(", ");
@@ -129,7 +130,7 @@ public abstract class AbstractFeatureGrapher {
 	 */
 	protected final List<DefaultWeightedEdge> getInsideEdges(final Collection<Spot> spots) {
 		int nspots = spots.size();
-		ArrayList<DefaultWeightedEdge> edges = new ArrayList<DefaultWeightedEdge>(nspots);
+		ArrayList<DefaultWeightedEdge> edges = new ArrayList<>(nspots);
 		TrackModel trackModel = model.getTrackModel();
 		for (DefaultWeightedEdge edge : trackModel.edgeSet()) {
 			Spot source = trackModel.getEdgeSource(edge);

@@ -30,6 +30,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -69,15 +70,15 @@ public class FilterGuiPanel extends ActionListenablePanel implements ChangeListe
 
 	private final OnRequestUpdater updater;
 
-	private final Stack< FilterPanel > thresholdPanels = new Stack< FilterPanel >();
+	private final Stack< FilterPanel > thresholdPanels = new Stack< >();
 
-	private final Stack< Component > struts = new Stack< Component >();
+	private final Stack< Component > struts = new Stack< >();
 
 	private int newFeatureIndex;
 
-	private List< FeatureFilter > featureFilters = new ArrayList< FeatureFilter >();
+	private List< FeatureFilter > featureFilters = new ArrayList< >();
 
-	private final ArrayList< ChangeListener > changeListeners = new ArrayList< ChangeListener >();
+	private final ArrayList< ChangeListener > changeListeners = new ArrayList< >();
 
 	private final Map< String, String > featureNames;
 
@@ -102,8 +103,8 @@ public class FilterGuiPanel extends ActionListenablePanel implements ChangeListe
 		this.model = model;
 		this.categories = categories;
 
-		this.features = new ArrayList< String >();
-		this.featureNames = new HashMap< String, String >();
+		this.features = new ArrayList< >();
+		this.featureNames = new HashMap< >();
 		for ( final Category category : categories )
 		{
 			switch ( category )
@@ -140,7 +141,7 @@ public class FilterGuiPanel extends ActionListenablePanel implements ChangeListe
 			}
 		} );
 
-		this.featureValues = new HashMap< String, double[] >();
+		this.featureValues = new HashMap< >();
 		refreshDisplayedFeatureValues();
 		initGUI();
 	}
@@ -348,7 +349,7 @@ public class FilterGuiPanel extends ActionListenablePanel implements ChangeListe
 		{
 			System.out.println( "[FilterGuiPanel] #refresh()" );
 		}
-		featureFilters = new ArrayList< FeatureFilter >( thresholdPanels.size() );
+		featureFilters = new ArrayList< >( thresholdPanels.size() );
 		for ( final FilterPanel tp : thresholdPanels )
 		{
 			featureFilters.add( new FeatureFilter( tp.getKey(), new Double( tp.getThreshold() ), tp.isAboveThreshold() ) );
@@ -439,8 +440,8 @@ public class FilterGuiPanel extends ActionListenablePanel implements ChangeListe
 				jScrollPaneThresholds = new JScrollPane();
 				this.add( jScrollPaneThresholds, BorderLayout.CENTER );
 				jScrollPaneThresholds.setPreferredSize( new java.awt.Dimension( 250, 389 ) );
-				jScrollPaneThresholds.setHorizontalScrollBarPolicy( JScrollPane.HORIZONTAL_SCROLLBAR_NEVER );
-				jScrollPaneThresholds.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_ALWAYS );
+				jScrollPaneThresholds.setHorizontalScrollBarPolicy( ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER );
+				jScrollPaneThresholds.setVerticalScrollBarPolicy( ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS );
 				{
 					jPanelAllThresholds = new JPanel();
 					final BoxLayout jPanelAllThresholdsLayout = new BoxLayout( jPanelAllThresholds, BoxLayout.Y_AXIS );

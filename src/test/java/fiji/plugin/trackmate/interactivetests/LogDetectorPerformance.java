@@ -48,7 +48,7 @@ public class LogDetectorPerformance {
 
 			final RandomAccessible< UnsignedShortType > source = Views.extendMirrorSingle( img );
 			Gauss3.gauss( rad / Math.sqrt( 2 ), source, img );
-			final ImgPlus< UnsignedShortType > imgplus = new ImgPlus< UnsignedShortType >( img );
+			final ImgPlus< UnsignedShortType > imgplus = new ImgPlus< >( img );
 
 			{
 				for ( int i = 0; i < nwarmups; i++ )
@@ -96,7 +96,7 @@ public class LogDetectorPerformance {
 
 			final RandomAccessible< UnsignedShortType > source = Views.extendMirrorSingle( img );
 			Gauss3.gauss( rad / Math.sqrt( 2 ), source, img );
-			final ImgPlus< UnsignedShortType > imgplus = new ImgPlus< UnsignedShortType >( img );
+			final ImgPlus< UnsignedShortType > imgplus = new ImgPlus< >( img );
 
 			{
 				for ( int i = 0; i < nwarmups; i++ )
@@ -146,7 +146,7 @@ public class LogDetectorPerformance {
 
 			final RandomAccessible< UnsignedShortType > source = Views.extendMirrorSingle( img );
 			Gauss3.gauss( rad / Math.sqrt( 2 ), source, img );
-			final ImgPlus< UnsignedShortType > imgplus = new ImgPlus< UnsignedShortType >( img );
+			final ImgPlus< UnsignedShortType > imgplus = new ImgPlus< >( img );
 
 			{
 				for ( int i = 0; i < nwarmups; i++ )
@@ -194,7 +194,7 @@ public class LogDetectorPerformance {
 
 			final RandomAccessible< UnsignedShortType > source = Views.extendMirrorSingle( img );
 			Gauss3.gauss( rad / Math.sqrt( img.numDimensions() ), source, img );
-			final ImgPlus< UnsignedShortType > imgplus = new ImgPlus< UnsignedShortType >( img );
+			final ImgPlus< UnsignedShortType > imgplus = new ImgPlus< >( img );
 
 			{
 				for ( int i = 0; i < nwarmups; i++ )
@@ -213,7 +213,7 @@ public class LogDetectorPerformance {
 	}
 
 	private static final void execTest(final ImgPlus<UnsignedShortType> imgplus, final double rad) {
-		final LogDetector< UnsignedShortType > detector = new LogDetector< UnsignedShortType >( imgplus, imgplus, TMUtils.getSpatialCalibration( imgplus ), rad, 1, false, false );
+		final LogDetector< UnsignedShortType > detector = new LogDetector< >( imgplus, imgplus, TMUtils.getSpatialCalibration( imgplus ), rad, 1, false, false );
 		detector.setNumThreads(1);
 		if (!detector.checkInput() || !detector.process()) {
 			System.out.println(detector.getErrorMessage());

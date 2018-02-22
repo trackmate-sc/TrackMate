@@ -116,11 +116,10 @@ public class NearestNeighborFlagSearchOnKDTree<T> implements NearestNeighborSear
 	
 	@Override
 	public NearestNeighborFlagSearchOnKDTree<T> copy() {
-		final NearestNeighborFlagSearchOnKDTree<T> copy = new NearestNeighborFlagSearchOnKDTree<T>( tree );
+		final NearestNeighborFlagSearchOnKDTree<T> copy = new NearestNeighborFlagSearchOnKDTree<>( tree );
 		System.arraycopy( pos, 0, copy.pos, 0, pos.length );
 		copy.bestPoint = bestPoint;
 		copy.bestSquDistance = bestSquDistance;
 		return copy;
 	}
-	
 }

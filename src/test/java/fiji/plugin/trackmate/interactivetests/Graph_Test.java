@@ -30,7 +30,7 @@ public class Graph_Test
 	private static void pickLeavesOfOneTrack( final Model model )
 	{
 		final TimeDirectedNeighborIndex cache = model.getTrackModel().getDirectedNeighborIndex();
-		final TreeSet< Spot > spots = new TreeSet< Spot >( Spot.frameComparator );
+		final TreeSet< Spot > spots = new TreeSet< >( Spot.frameComparator );
 		spots.addAll( model.getTrackModel().vertexSet() );
 		final Spot first = spots.first();
 		final GraphIterator< Spot, DefaultWeightedEdge > iterator = model.getTrackModel().getDepthFirstIterator( first, true );

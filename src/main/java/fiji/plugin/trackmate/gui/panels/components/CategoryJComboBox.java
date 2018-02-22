@@ -52,7 +52,7 @@ public class CategoryJComboBox< K, V > extends JComboBox< Object >
 	protected static final String INDENT = "  ";
 
 	/** Indices of items that should be displayed as a category name. */
-	private final HashSet< Integer > categoryIndexSet = new HashSet< Integer >();
+	private final HashSet< Integer > categoryIndexSet = new HashSet< >();
 
 	private boolean isCategoryIndex = false;
 
@@ -69,7 +69,7 @@ public class CategoryJComboBox< K, V > extends JComboBox< Object >
 	public CategoryJComboBox( final Map< K, Collection< V >> items, final Map< V, String > itemNames, final Map< K, String > categoryNames )
 	{
 		super();
-		this.invertMap = new HashMap< V, K >();
+		this.invertMap = new HashMap< >();
 		this.itemNames = itemNames;
 		this.categoryNames = categoryNames;
 		init();
@@ -86,10 +86,8 @@ public class CategoryJComboBox< K, V > extends JComboBox< Object >
 				invertMap.put( item, category );
 			}
 		}
-		if ( null != items && items.size() > 0 )
-		{
+		if ( items.size() > 0 )
 			setSelectedIndex( 1 );
-		}
 	}
 
 	/*
@@ -242,27 +240,27 @@ public class CategoryJComboBox< K, V > extends JComboBox< Object >
 	public static void main( final String[] args )
 	{
 		//
-		final List< String > fruits = new ArrayList< String >( 5 );
+		final List< String > fruits = new ArrayList< >( 5 );
 		fruits.add( "Apple" );
 		fruits.add( "Pear" );
 		fruits.add( "Orange" );
 		fruits.add( "Strawberry" );
 		//
-		final List< String > cars = new ArrayList< String >( 3 );
+		final List< String > cars = new ArrayList< >( 3 );
 		cars.add( "Peugeot" );
 		cars.add( "Ferrari" );
 		cars.add( "Ford" );
 		//
-		final List< String > computers = new ArrayList< String >( 2 );
+		final List< String > computers = new ArrayList< >( 2 );
 		computers.add( "PC" );
 		computers.add( "Mac" );
 		//
-		final LinkedHashMap< String, Collection< String >> items = new LinkedHashMap< String, Collection< String >>( 3 );
+		final LinkedHashMap< String, Collection< String >> items = new LinkedHashMap<>( 3 );
 		items.put( "Fruits", fruits );
 		items.put( "Cars", cars );
 		items.put( "Computers", computers );
 		//
-		final Map< String, String > itemNames = new HashMap< String, String >();
+		final Map< String, String > itemNames = new HashMap< >();
 		for ( final String key : items.keySet() )
 		{
 			for ( final String string : items.get( key ) )
@@ -271,14 +269,14 @@ public class CategoryJComboBox< K, V > extends JComboBox< Object >
 			}
 		}
 		//
-		final Map< String, String > categoryNames = new HashMap< String, String >();
+		final Map< String, String > categoryNames = new HashMap< >();
 		for ( final String key : items.keySet() )
 		{
 			categoryNames.put( key, key );
 		}
 		// Ouf!
 
-		final CategoryJComboBox< String, String > cb = new CategoryJComboBox< String, String >( items, itemNames, categoryNames );
+		final CategoryJComboBox< String, String > cb = new CategoryJComboBox< >( items, itemNames, categoryNames );
 		cb.addActionListener( new ActionListener()
 		{
 			@Override

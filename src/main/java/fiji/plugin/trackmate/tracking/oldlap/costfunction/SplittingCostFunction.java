@@ -124,7 +124,7 @@ public class SplittingCostFunction extends MultiThreadedBenchmarkAlgorithm imple
 							{
 
 								final SortedSet< Spot > track = trackSegments.get( j );
-								final Spot start = track.first();
+								final Spot lStart = track.first();
 
 								if ( DEBUG )
 									System.out.println( "Segment " + j );
@@ -136,7 +136,7 @@ public class SplittingCostFunction extends MultiThreadedBenchmarkAlgorithm imple
 
 								// Frame threshold - middle Spot must be one
 								// frame behind of the start Spot
-								final int startFrame = start.getFeature( Spot.FRAME ).intValue();
+								final int startFrame = lStart.getFeature( Spot.FRAME ).intValue();
 								final int middleFrame = middle.getFeature( Spot.FRAME ).intValue();
 								if ( startFrame - middleFrame != 1 )
 								{
@@ -144,7 +144,7 @@ public class SplittingCostFunction extends MultiThreadedBenchmarkAlgorithm imple
 									continue;
 								}
 
-								final double cost = LAPUtils.computeLinkingCostFor( start, middle, maxDist, blockingValue, featurePenalties );
+								final double cost = LAPUtils.computeLinkingCostFor( lStart, middle, maxDist, blockingValue, featurePenalties );
 								m.set( i, j, cost );
 							}
 						}

@@ -15,14 +15,12 @@ import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 import ij.ImagePlus;
 
 import java.io.File;
-import java.io.IOException;
 
-import org.jdom2.JDOMException;
 import org.scijava.util.AppUtils;
 
 public class HyperStackDisplayerTestDrive {
 
-	public static void main(final String[] args) throws JDOMException, IOException {
+	public static void main(final String[] args) {
 
 		ij.ImageJ.main(args);
 

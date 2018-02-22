@@ -239,10 +239,10 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 
 		final Set< Integer > trackIDs = tm.trackIDs( true );
 
-		branches = new ArrayList< List< Spot >>();
-		branchesPerTrack = new HashMap< Integer, Collection< List< Spot >>>();
-		links = new ArrayList< List< Spot > >();
-		linksPerTrack = new HashMap< Integer, Collection< List< Spot > >>();
+		branches = new ArrayList<>();
+		branchesPerTrack = new HashMap<>();
+		links = new ArrayList< >();
+		linksPerTrack = new HashMap<>();
 		for ( final Integer trackID : trackIDs )
 		{
 			final TrackBranchDecomposition branchDecomposition = processTrack( trackID, tm, neighborIndex, forbidMiddleLinks, forbidGaps );
@@ -289,7 +289,7 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 	{
 		final Set< Spot > allSpots = tm.trackSpots( trackID );
 		final Set< DefaultWeightedEdge > allEdges = tm.trackEdges( trackID );
-		final SimpleGraph< Spot, DefaultWeightedEdge > graph = new SimpleGraph< Spot, DefaultWeightedEdge >( DefaultWeightedEdge.class );
+		final SimpleGraph< Spot, DefaultWeightedEdge > graph = new SimpleGraph< >( DefaultWeightedEdge.class );
 
 		for ( final Spot spot : allSpots )
 		{
@@ -300,7 +300,7 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 			graph.addEdge( tm.getEdgeSource( edge ), tm.getEdgeTarget( edge ) );
 		}
 
-		final Collection< List< Spot >> links = new HashSet< List< Spot > >();
+		final Collection< List< Spot >> links = new HashSet< >();
 		for ( final Spot spot : allSpots )
 		{
 			final Set< Spot > successors = neighborIndex.successorsOf( spot );
@@ -449,7 +449,7 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 		if ( forbidGaps )
 		{
 			final Set< DefaultWeightedEdge > newEdges = graph.edgeSet();
-			final Set< DefaultWeightedEdge > toRemove = new HashSet< DefaultWeightedEdge >();
+			final Set< DefaultWeightedEdge > toRemove = new HashSet< >();
 			for ( final DefaultWeightedEdge edge : newEdges )
 			{
 				final Spot source = graph.getEdgeSource( edge );
@@ -471,13 +471,13 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 		 * Output
 		 */
 
-		final ConnectivityInspector< Spot, DefaultWeightedEdge > connectivity = new ConnectivityInspector< Spot, DefaultWeightedEdge >( graph );
+		final ConnectivityInspector< Spot, DefaultWeightedEdge > connectivity = new ConnectivityInspector< >( graph );
 		final List< Set< Spot >> connectedSets = connectivity.connectedSets();
-		final Collection< List< Spot >> branches = new HashSet< List< Spot > >( connectedSets.size() );
+		final Collection< List< Spot >> branches = new HashSet< >( connectedSets.size() );
 		final Comparator< Spot > comparator = Spot.frameComparator;
 		for ( final Set< Spot > set : connectedSets )
 		{
-			final List< Spot > branch = new ArrayList< Spot >( set.size() );
+			final List< Spot > branch = new ArrayList< >( set.size() );
 			branch.addAll( set );
 			Collections.sort( branch, comparator );
 			branches.add( branch );
@@ -504,15 +504,15 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 	 */
 	public static final SimpleDirectedGraph< List< Spot >, DefaultEdge > buildBranchGraph( final TrackBranchDecomposition branchDecomposition )
 	{
-		final SimpleDirectedGraph< List< Spot >, DefaultEdge > branchGraph = new SimpleDirectedGraph< List< Spot >, DefaultEdge >( DefaultEdge.class );
+		final SimpleDirectedGraph< List< Spot >, DefaultEdge > branchGraph = new SimpleDirectedGraph< >( DefaultEdge.class );
 
 		final Collection< List< Spot >> branches = branchDecomposition.branches;
 		final Collection< List< Spot >> links = branchDecomposition.links;
 
 		// Map of the first spot of each branch.
-		final Map< Spot, List< Spot > > firstSpots = new HashMap< Spot, List< Spot > >( branches.size() );
+		final Map< Spot, List< Spot > > firstSpots = new HashMap< >( branches.size() );
 		// Map of the last spot of each branch.
-		final Map< Spot, List< Spot > > lastSpots = new HashMap< Spot, List< Spot > >( branches.size() );
+		final Map< Spot, List< Spot > > lastSpots = new HashMap< >( branches.size() );
 		for ( final List< Spot > branch : branches )
 		{
 			firstSpots.put( branch.get( 0 ), branch );
@@ -565,7 +565,7 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 
 	private static final List< Spot > makeLink( final Spot spotA, final Spot spotB )
 	{
-		final List< Spot > link = new ArrayList< Spot >( 2 );
+		final List< Spot > link = new ArrayList< >( 2 );
 		link.add( spotA );
 		link.add( spotB );
 		return link;

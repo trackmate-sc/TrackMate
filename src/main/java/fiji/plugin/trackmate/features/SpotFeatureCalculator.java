@@ -113,7 +113,6 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 	 * {@link SpotAnalyzer}s, for the given {@link SpotCollection}.
 	 * 
 	 * @param toCompute
-	 * @param analyzers
 	 */
 	private void computeSpotFeaturesAgent( final SpotCollection toCompute, final List< SpotAnalyzerFactory< ? >> analyzerFactories, final boolean doLogIt )
 	{
@@ -133,7 +132,7 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 			return;
 
 		// Do it.
-		final List< Integer > frameSet = new ArrayList< Integer >( toCompute.keySet() );
+		final List< Integer > frameSet = new ArrayList<>( toCompute.keySet() );
 		final int numFrames = frameSet.size();
 
 		final AtomicInteger ai = new AtomicInteger( 0 );

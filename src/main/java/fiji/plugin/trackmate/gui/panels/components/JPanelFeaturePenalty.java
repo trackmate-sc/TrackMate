@@ -77,9 +77,9 @@ public class JPanelFeaturePenalty extends javax.swing.JPanel
 			this.setSize( 280, 40 );
 			this.setLayout( null );
 			{
-				final ComboBoxModel< String > jComboBoxFeatureModel = new DefaultComboBoxModel< String >(
+				final ComboBoxModel< String > jComboBoxFeatureModel = new DefaultComboBoxModel< >(
 						TMUtils.getArrayFromMaping( features, featureNames ).toArray( new String[] {} ) );
-				jComboBoxFeature = new JComboBox< String >();
+				jComboBoxFeature = new JComboBox< >();
 				this.add( jComboBoxFeature );
 				jComboBoxFeature.setModel( jComboBoxFeatureModel );
 				jComboBoxFeature.setBounds( 2, 4, 205, 22 );

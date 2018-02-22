@@ -9,7 +9,7 @@ package fiji.plugin.trackmate.tracking.oldlap.hungarian;
  * http://www.cse.ust.hk/~golin/COMP572/Notes/Matching.pdf
  * <p>
  * A few definitions: a labeling (AKA potential) of the vertices is a
- * real-valued function l such that weight(x, y) &lt;= l(x) + l(y). Those edges
+ * real-valued function l such that weight(x, lY) &lt;= l(x) + l(lY). Those edges
  * whose weight is equal to the sum of the connected vertices' labelings are
  * called <u>tight</u>.
  * <p>
@@ -100,6 +100,7 @@ public class MunkresKuhnAlgorithm implements AssignmentAlgorithm {
 	protected int[] queue;
 	protected int x, queueStart, queueEnd;
 
+	@Override
 	public int[][] computeAssignments(double[][] costMatrix) {
 		weight = costMatrix;
 		M = weight.length;
@@ -119,9 +120,9 @@ public class MunkresKuhnAlgorithm implements AssignmentAlgorithm {
 
 		int[][] result = new int[matchingY.length][];
 		int counter = 0;
-		for (int x = 0; x < matchingY.length; x++)
-			if (matchingY[x] >= 0 && weight[x][matchingY[x]] != NO_EDGE_VALUE)
-				result[counter++] = new int[] { x, matchingY[x] };
+		for (int lX = 0; lX < matchingY.length; lX++)
+			if (matchingY[lX] >= 0 && weight[lX][matchingY[lX]] != NO_EDGE_VALUE)
+				result[counter++] = new int[] { lX, matchingY[lX] };
 		if (counter < result.length) {
 			int[][] newResult = new int[counter][];
 			System.arraycopy(result, 0, newResult, 0, counter);
@@ -133,10 +134,10 @@ public class MunkresKuhnAlgorithm implements AssignmentAlgorithm {
 
 	public double getTotalWeight() {
 		double result = 0;
-		for (int x = 0; x < M; x++)
-			result += -labelingX[x];
-		for (int y = 0; y < M; y++)
-			result += -labelingY[y];
+		for (int lX = 0; lX < M; lX++)
+			result += -labelingX[lX];
+		for (int lY = 0; lY < M; lY++)
+			result += -labelingY[lY];
 		return result;
 	}
 
@@ -151,11 +152,11 @@ public class MunkresKuhnAlgorithm implements AssignmentAlgorithm {
 		labelingX = new double[M];
 		labelingY = new double[N];
 
-		for (int x = 0; x < M; x++) {
-			labelingX[x] = -weight[x][0];
-			for (int y = 1; y < N; y++)
-				if (labelingX[x] < -weight[x][y])
-					labelingX[x] = -weight[x][y];
+		for (int lX = 0; lX < M; lX++) {
+			labelingX[lX] = -weight[lX][0];
+			for (int lY = 1; lY < N; lY++)
+				if (labelingX[lX] < -weight[lX][lY])
+					labelingX[lX] = -weight[lX][lY];
 		}
 
 		slack = new double[N];
@@ -172,109 +173,109 @@ public class MunkresKuhnAlgorithm implements AssignmentAlgorithm {
 	final protected void calculate() {
 		for (int matches = 0; matches < M && matches < N; matches++) {
 			// pick free vertex
-			int x = findUnmatchedX();
+			int lX = findUnmatchedX();
 
 			// initialize S and T
 			for (int i = 0; i < S.length; i++)
 				S[i] = false;
 			for (int i = 0; i < T.length; i++)
 				T[i] = false;
-			S[x] = true;
+			S[lX] = true;
 
-			for (int y = 0; y < N; y++) {
-				slack[y] = labelingX[x] + labelingY[y] - -weight[x][y];
-				slackX[y] = x;
+			for (int lY = 0; lY < N; lY++) {
+				slack[lY] = labelingX[lX] + labelingY[lY] - -weight[lX][lY];
+				slackX[lY] = lX;
 			}
 
-			startBreadthFirstSearch(x);
+			startBreadthFirstSearch(lX);
 
 			for (;;) {
-				int y = findY();
-				if (y >= 0)
-					previousX[y] = queue[queueStart];
+				int lY = findY();
+				if (lY >= 0)
+					previousX[lY] = queue[queueStart];
 				else {
-					y = updateLabels();
-					if (y < 0) // no unmatched y was found, continue breadth-first search
+					lY = updateLabels();
+					if (lY < 0) // no unmatched lY was found, continue breadth-first search
 						continue;
 				}
-				if (matchingX[y] < 0) {
-					augmentPath(y);
+				if (matchingX[lY] < 0) {
+					augmentPath(lY);
 					break;
 				}
-				extendAlternatingTree(y, matchingX[y]);
+				extendAlternatingTree(lY, matchingX[lY]);
 			}
 		}
 	}
 
 	final protected int findUnmatchedX() {
-		for (int x = 0; x < M; x++)
-			if (matchingY[x] < 0)
-				return x;
+		for (int lX = 0; lX < M; lX++)
+			if (matchingY[lX] < 0)
+				return lX;
 		return -1;
 	}
 
 	// start breadth-first search
-	final protected void startBreadthFirstSearch(final int x) {
+	final protected void startBreadthFirstSearch(final int lX) {
 		queueStart = queueEnd = 0;
-		queue[queueEnd++] = x;
+		queue[queueEnd++] = lX;
 	}
 
-	// find a y that is not in the alternating tree yet
+	// find a lY that is not in the alternating tree yet
 	final protected int findY() {
 		while (queueStart < queueEnd) {
-			int x = queue[queueStart];
-			for (int y = 0; y < N; y++)
-				if (!T[y] && isTight(x, y))
-					return y;
+			int lX = queue[queueStart];
+			for (int lY = 0; lY < N; lY++)
+				if (!T[lY] && isTight(lX, lY))
+					return lY;
 			queueStart++;
 		}
 		queueStart = queueEnd = 0;
 		return -1;
 	}
 
-	final protected boolean isTight(final int x, final int y) {
-		return -weight[x][y] == labelingX[x] + labelingY[y];
+	final protected boolean isTight(final int lX, final int lY) {
+		return -weight[lX][lY] == labelingX[lX] + labelingY[lY];
 	}
 
 	final protected int updateLabels() {
 		double delta = Double.MAX_VALUE;
 
-		for (int y = 0; y < N; y++)
-			if (!T[y] && delta > slack[y])
-				delta = slack[y];
-		for (int x = 0; x < M; x++)
-			if (S[x])
-				labelingX[x] -= delta;
-		for (int y = 0; y < N; y++)
-			if (T[y])
-				labelingY[y] += delta;
+		for (int lY = 0; lY < N; lY++)
+			if (!T[lY] && delta > slack[lY])
+				delta = slack[lY];
+		for (int lX = 0; lX < M; lX++)
+			if (S[lX])
+				labelingX[lX] -= delta;
+		for (int lY = 0; lY < N; lY++)
+			if (T[lY])
+				labelingY[lY] += delta;
 			else
-				slack[y] -= delta; // slackX does not change!
+				slack[lY] -= delta; // slackX does not change!
 		// need another loop to keep the slack array intact (extending the tree changes it)
-		for (int y = 0; y < N; y++)
-			if (!T[y] && slack[y] == 0) {
-				previousX[y] = slackX[y];
-				// if y is unmatched, we can return straight away, since the path
+		for (int lY = 0; lY < N; lY++)
+			if (!T[lY] && slack[lY] == 0) {
+				previousX[lY] = slackX[lY];
+				// if lY is unmatched, we can return straight away, since the path
 				// will be augmented and the current tree will be abandoned anyway
-				if (matchingX[y] < 0)
-					return y;
-				extendAlternatingTree(y, matchingX[y]);
+				if (matchingX[lY] < 0)
+					return lY;
+				extendAlternatingTree(lY, matchingX[lY]);
 			}
 		return -1;
 	}
 
-	final protected void augmentPath(int y) {
-		while (y >= 0) {
-			int x = previousX[y];
-			int nextY = matchingY[x];
-			matchingX[y] = x;
-			matchingY[x] = y;
-			y = nextY;
+	final protected void augmentPath(int lY) {
+		while (lY >= 0) {
+			int lX = previousX[lY];
+			int nextY = matchingY[lX];
+			matchingX[lY] = lX;
+			matchingY[lX] = lY;
+			lY = nextY;
 		}
 	}
 
-	final protected void extendAlternatingTree(final int y, final int z) {
-		T[y] = true;
+	final protected void extendAlternatingTree(final int lY, final int z) {
+		T[lY] = true;
 		S[z] = true;
 		queue[queueEnd++] = z;
 		for (int y2 = 0; y2 < N; y2++)
@@ -286,24 +287,24 @@ public class MunkresKuhnAlgorithm implements AssignmentAlgorithm {
 
 	protected boolean verifySlack() {
 		boolean result = true;
-		for (int y = 0; y < N; y++)
-			if (!T[y]) {
+		for (int lY = 0; lY < N; lY++)
+			if (!T[lY]) {
 				double min = Double.MAX_VALUE;
 				int minX = -1;
-				for (int x = 0; x < M; x++)
-					if (S[x] && min > labelingX[x] + labelingY[y] - -weight[x][y]) {
-						min = labelingX[x] + labelingY[y] - -weight[x][y];
-						minX = x;
+				for (int lX = 0; lX < M; lX++)
+					if (S[lX] && min > labelingX[lX] + labelingY[lY] - -weight[lX][lY]) {
+						min = labelingX[lX] + labelingY[lY] - -weight[lX][lY];
+						minX = lX;
 					}
 				if (minX < 0)
 					continue;
-				if (Math.abs(slack[y] - min) / (Math.abs(slack[y]) + 1e-7) > 1e-5) {
-					System.err.println("ERROR: slack[" + y + "] should be " + min + " but is " + slack[y]);
+				if (Math.abs(slack[lY] - min) / (Math.abs(slack[lY]) + 1e-7) > 1e-5) {
+					System.err.println("ERROR: slack[" + lY + "] should be " + min + " but is " + slack[lY]);
 					result = false;
 				}
-				if (slackX[y] != minX && (labelingX[slackX[y]] + labelingY[y] - -weight[slackX[y]][y]
-						!= labelingX[minX] + labelingY[y] - -weight[minX][y])) {
-					System.err.println("ERROR: slackX[" + y + "] should be " + minX + " but is " + slackX[y]);
+				if (slackX[lY] != minX && (labelingX[slackX[lY]] + labelingY[lY] - -weight[slackX[lY]][lY]
+						!= labelingX[minX] + labelingY[lY] - -weight[minX][lY])) {
+					System.err.println("ERROR: slackX[" + lY + "] should be " + minX + " but is " + slackX[lY]);
 					result = false;
 				}
 			}
@@ -312,14 +313,14 @@ public class MunkresKuhnAlgorithm implements AssignmentAlgorithm {
 
 	protected boolean verifyMatching() {
 		boolean result = true;
-		for (int x = 0; x < M; x++)
-			if (matchingY[x] >= 0 && matchingX[matchingY[x]] != x) {
-				System.err.println("error: x = " + x + " matches " + matchingY[x] + ", which matches " + matchingX[matchingY[x]]);
+		for (int lX = 0; lX < M; lX++)
+			if (matchingY[lX] >= 0 && matchingX[matchingY[lX]] != lX) {
+				System.err.println("error: x = " + lX + " matches " + matchingY[lX] + ", which matches " + matchingX[matchingY[lX]]);
 				result = false;
 			}
-		for (int y = 0; y < N; y++)
-			if (matchingX[y] >= 0 && matchingY[matchingX[y]] != y) {
-				System.err.println("error: y = " + y + " matches " + matchingX[x] + ", which matches " + matchingY[matchingX[y]]);
+		for (int lY = 0; lY < N; lY++)
+			if (matchingX[lY] >= 0 && matchingY[matchingX[lY]] != lY) {
+				System.err.println("error: lY = " + lY + " matches " + matchingX[x] + ", which matches " + matchingY[matchingX[lY]]);
 				result = false;
 			}
 		return result;
@@ -327,21 +328,21 @@ public class MunkresKuhnAlgorithm implements AssignmentAlgorithm {
 
 	protected String equalityGraph() {
 		String message = "[";
-		for (int x = 0; x < M; x++)
-			for (int y = 0; y < N; y++)
-				if (labelingX[x] + labelingY[y] == -weight[x][y])
-					message += " " + x + "-" + y;
+		for (int lX = 0; lX < M; lX++)
+			for (int lY = 0; lY < N; lY++)
+				if (labelingX[lX] + labelingY[lY] == -weight[lX][lY])
+					message += " " + lX + "-" + lY;
 		message += " ]";
 		return message;
 	}
 
-	protected String alternatingPath(int y) {
+	protected String alternatingPath(int lY) {
 		String result = " ]";
-		while (y >= 0) {
-			int x = previousX[y];
-			int nextY = matchingY[x];
-			result = " " + x + "-" + y + result;
-			y = nextY;
+		while (lY >= 0) {
+			int lX = previousX[lY];
+			int nextY = matchingY[lX];
+			result = " " + lX + "-" + lY + result;
+			lY = nextY;
 		}
 		return "[" + result;
 	}

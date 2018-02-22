@@ -64,7 +64,7 @@ public class JaqamanSegmentCostMatrixCreatorBenchmark
 		final SpotCollection spots = new SpotCollection();
 		for ( int frame = 0; frame < nFrames; frame++ )
 		{
-			final Collection< Spot > ls = new ArrayList< Spot >( nSpotsPerFrame );
+			final Collection< Spot > ls = new ArrayList< >( nSpotsPerFrame );
 			for ( int j = 0; j < nSpotsPerFrame; j++ )
 			{
 				final Spot spot = new Spot( ran.nextDouble() * 100, ran.nextDouble() * 100, ran.nextDouble() * 100, ran.nextDouble() * 2, ran.nextDouble() * 10 );
@@ -208,7 +208,7 @@ public class JaqamanSegmentCostMatrixCreatorBenchmark
 		final HyperStackDisplayer view = new HyperStackDisplayer( model, new SelectionModel( model ) );
 		view.render();
 
-		final Map< String, Object > s2 = new HashMap< String, Object >();
+		final Map< String, Object > s2 = new HashMap< >();
 		s2.put( KEY_ALLOW_GAP_CLOSING, true );
 		s2.put( KEY_GAP_CLOSING_MAX_DISTANCE, settings.get( KEY_GAP_CLOSING_MAX_DISTANCE ) );
 		s2.put( KEY_GAP_CLOSING_MAX_FRAME_GAP, settings.get( KEY_GAP_CLOSING_MAX_FRAME_GAP ) );
@@ -251,7 +251,7 @@ public class JaqamanSegmentCostMatrixCreatorBenchmark
 		final SpotCollection spots = new SpotCollection();
 		for ( int frame = 0; frame < nFrames; frame++ )
 		{
-			final Collection< Spot > ls = new ArrayList< Spot >( nSpotsPerFrame );
+			final Collection< Spot > ls = new ArrayList< >( nSpotsPerFrame );
 			for ( int j = 0; j < nSpotsPerFrame; j++ )
 			{
 				final Spot spot = new Spot( ran.nextDouble() * 100, ran.nextDouble() * 100, ran.nextDouble() * 100, ran.nextDouble() * 2, ran.nextDouble() * 10 );
@@ -268,7 +268,7 @@ public class JaqamanSegmentCostMatrixCreatorBenchmark
 		 * Frame to frame tracker.
 		 */
 
-		final Map< String, Object > s1 = new HashMap< String, Object >();
+		final Map< String, Object > s1 = new HashMap< >();
 		s1.put( KEY_LINKING_MAX_DISTANCE, 10d );
 		s1.put( KEY_LINKING_FEATURE_PENALTIES, settings.get( KEY_LINKING_FEATURE_PENALTIES ) );
 		s1.put( KEY_ALTERNATIVE_LINKING_COST_FACTOR, settings.get( KEY_ALTERNATIVE_LINKING_COST_FACTOR ) );
@@ -288,7 +288,7 @@ public class JaqamanSegmentCostMatrixCreatorBenchmark
 		 * Segment tracker
 		 */
 
-		final Map< String, Object > s2 = new HashMap< String, Object >();
+		final Map< String, Object > s2 = new HashMap< >();
 		s2.put( KEY_ALLOW_GAP_CLOSING, true );
 		s2.put( KEY_GAP_CLOSING_MAX_DISTANCE, settings.get( KEY_GAP_CLOSING_MAX_DISTANCE ) );
 		s2.put( KEY_GAP_CLOSING_MAX_FRAME_GAP, settings.get( KEY_GAP_CLOSING_MAX_FRAME_GAP ) );

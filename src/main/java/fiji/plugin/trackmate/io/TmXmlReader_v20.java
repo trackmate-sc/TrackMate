@@ -127,13 +127,9 @@ public class TmXmlReader_v20 extends TmXmlReader
 	{
 		final Element logElement = root.getChild( LOG_ELEMENT_KEY );
 		if ( null != logElement )
-		{
 			return logElement.getTextTrim();
-		}
-		else
-		{
-			return "";
-		}
+
+		return "";
 	}
 
 	/**
@@ -142,7 +138,7 @@ public class TmXmlReader_v20 extends TmXmlReader
 	@Override
 	public Collection< TrackMateModelView > getViews( final ViewProvider provider, final Model model, final Settings settings, final SelectionModel selectionModel )
 	{
-		final Collection< TrackMateModelView > views = new ArrayList< TrackMateModelView >( 1 );
+		final Collection< TrackMateModelView > views = new ArrayList< >( 1 );
 		final TrackMateModelView view = provider.getFactory( HyperStackDisplayer.KEY ).create( model, settings, selectionModel );
 		views.add( view );
 		return views;
@@ -295,7 +291,7 @@ public class TmXmlReader_v20 extends TmXmlReader
 	private Map< Integer, Map< String, Double > > readTrackFeatures( final Element modelElement )
 	{
 
-		final HashMap< Integer, Map< String, Double > > featureMap = new HashMap< Integer, Map< String, Double > >();
+		final HashMap< Integer, Map< String, Double > > featureMap = new HashMap< >();
 
 		final Element allTracksElement = modelElement.getChild( TRACK_COLLECTION_ELEMENT_KEY );
 		if ( null == allTracksElement )
@@ -322,7 +318,7 @@ public class TmXmlReader_v20 extends TmXmlReader
 				continue;
 			}
 
-			final HashMap< String, Double > trackMap = new HashMap< String, Double >();
+			final HashMap< String, Double > trackMap = new HashMap< >();
 
 			final List< Attribute > attributes = trackElement.getAttributes();
 			for ( final Attribute attribute : attributes )
@@ -419,7 +415,7 @@ public class TmXmlReader_v20 extends TmXmlReader
 	private List< FeatureFilter > getSpotFeatureFilters()
 	{
 
-		final List< FeatureFilter > featureThresholds = new ArrayList< FeatureFilter >();
+		final List< FeatureFilter > featureThresholds = new ArrayList< >();
 		final Element ftCollectionEl = root.getChild( SPOT_FILTER_COLLECTION_ELEMENT_KEY );
 		if ( null == ftCollectionEl ) { return null; }
 		final List< Element > ftEls = ftCollectionEl.getChildren( FILTER_ELEMENT_KEY );
@@ -441,7 +437,7 @@ public class TmXmlReader_v20 extends TmXmlReader
 	 */
 	private List< FeatureFilter > getTrackFeatureFilters()
 	{
-		final List< FeatureFilter > featureThresholds = new ArrayList< FeatureFilter >();
+		final List< FeatureFilter > featureThresholds = new ArrayList< >();
 		final Element ftCollectionEl = root.getChild( TRACK_FILTER_COLLECTION_ELEMENT_KEY );
 		if ( null == ftCollectionEl ) { return null; }
 		final List< Element > ftEls = ftCollectionEl.getChildren( FILTER_ELEMENT_KEY );
@@ -497,7 +493,7 @@ public class TmXmlReader_v20 extends TmXmlReader
 	 * read within the XML file this reader is initialized with.
 	 * <p>
 	 * As a side effect, this method also configure the {@link DetectorProvider}
-	 * stored in the passed {@link TrackMate_} plugin for the found target
+	 * stored in the passed TrackMate plugin for the found target
 	 * detector factory.
 	 * <p>
 	 * If the detector settings XML element is not present in the file, the
@@ -530,7 +526,7 @@ public class TmXmlReader_v20 extends TmXmlReader
 			return;
 		}
 
-		final Map< String, Object > ds = new HashMap< String, Object >();
+		final Map< String, Object > ds = new HashMap< >();
 		ok = factory.unmarshall( element, ds );
 
 		if ( !ok )
@@ -545,9 +541,9 @@ public class TmXmlReader_v20 extends TmXmlReader
 	}
 
 	/**
-	 * Update the given {@link Settings} object with {@link SpotTracker} proper
+	 * Update the given {@link Settings} object with SpotTracker proper
 	 * settings map fields named {@link Settings#trackerSettings} and
-	 * {@link Settings#tracker} read within the XML file this reader is
+	 * Settings#tracker read within the XML file this reader is
 	 * initialized with.
 	 * <p>
 	 * If the tracker settings XML element is not present in the file, the
@@ -584,10 +580,10 @@ public class TmXmlReader_v20 extends TmXmlReader
 		}
 
 		// All the hard work is delegated to the factory.
-		final Map< String, Object > ds = new HashMap< String, Object >();
-		final boolean ok = factory.unmarshall( element, ds );
+		final Map< String, Object > ds = new HashMap< >();
+		final boolean lOk = factory.unmarshall( element, ds );
 
-		if ( !ok )
+		if ( !lOk )
 		{
 			logger.error( factory.getErrorMessage() );
 			this.ok = false;
@@ -602,15 +598,10 @@ public class TmXmlReader_v20 extends TmXmlReader
 	 * Read the list of all spots stored in this file.
 	 * <p>
 	 * Internally, this methods also builds the cache field, which will be
-	 * required by the following methods:
-	 * <ul>
-	 * <li>{@link #getFilteredSpots()}
-	 * <li>{@link #readTracks()}
-	 * <li>{@link #readTrackEdges(SimpleDirectedWeightedGraph)}
-	 * <li>{@link #readTrackSpots(SimpleDirectedWeightedGraph)}
-	 * </ul>
-	 * It is therefore sensible to call this method first, just afther
-	 * {@link #parse()}ing the file. If not called, this method will be called
+	 * required by other methods.
+	 * 
+	 * It is therefore sensible to call this method first, just after
+	 * parsing the file. If not called, this method will be called
 	 * anyway by the other methods to build the cache.
 	 *
 	 * @return a {@link SpotCollection}. Return <code>null</code> if the spot
@@ -638,7 +629,7 @@ public class TmXmlReader_v20 extends TmXmlReader
 		}
 
 		// Instantiate cache
-		cache = new ConcurrentHashMap< Integer, Spot >( nspots );
+		cache = new ConcurrentHashMap< >( nspots );
 
 		// Load collection and build cache
 		int currentFrame = 0;
@@ -650,7 +641,7 @@ public class TmXmlReader_v20 extends TmXmlReader
 
 			currentFrame = readIntAttribute( currentFrameContent, FRAME_ATTRIBUTE_NAME, logger );
 			final List< Element > spotContent = currentFrameContent.getChildren( SPOT_ELEMENT_KEY );
-			spotList = new ArrayList< Spot >( spotContent.size() );
+			spotList = new ArrayList< >( spotContent.size() );
 			for ( final Element spotElement : spotContent )
 			{
 				final Spot spot = createSpotFrom( spotElement );

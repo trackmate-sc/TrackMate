@@ -176,7 +176,7 @@ public class LAPTrackerFactory implements SpotTrackerFactory
 
 			ok = ok & readDoubleAttribute( linkingElement, settings, KEY_LINKING_MAX_DISTANCE, errorHolder );
 			// feature penalties
-			final Map< String, Double > lfpMap = new HashMap< String, Double >();
+			final Map< String, Double > lfpMap = new HashMap< >();
 			final Element lfpElement = linkingElement.getChild( XML_ELEMENT_NAME_FEATURE_PENALTIES );
 			if ( null != lfpElement )
 			{
@@ -200,7 +200,7 @@ public class LAPTrackerFactory implements SpotTrackerFactory
 			ok = ok & readIntegerAttribute( gapClosingElement, settings, KEY_GAP_CLOSING_MAX_FRAME_GAP, errorHolder );
 			ok = ok & readDoubleAttribute( gapClosingElement, settings, KEY_GAP_CLOSING_MAX_DISTANCE, errorHolder );
 			// feature penalties
-			final Map< String, Double > gcfpm = new HashMap< String, Double >();
+			final Map< String, Double > gcfpm = new HashMap< >();
 			final Element gcfpElement = gapClosingElement.getChild( XML_ELEMENT_NAME_FEATURE_PENALTIES );
 			if ( null != gcfpElement )
 			{
@@ -223,7 +223,7 @@ public class LAPTrackerFactory implements SpotTrackerFactory
 			ok = ok & readBooleanAttribute( trackSplittingElement, settings, KEY_ALLOW_TRACK_SPLITTING, errorHolder );
 			ok = ok & readDoubleAttribute( trackSplittingElement, settings, KEY_SPLITTING_MAX_DISTANCE, errorHolder );
 			// feature penalties
-			final Map< String, Double > tsfpm = new HashMap< String, Double >();
+			final Map< String, Double > tsfpm = new HashMap< >();
 			final Element tsfpElement = trackSplittingElement.getChild( XML_ELEMENT_NAME_FEATURE_PENALTIES );
 			if ( null != tsfpElement )
 			{
@@ -246,7 +246,7 @@ public class LAPTrackerFactory implements SpotTrackerFactory
 			ok = ok & readBooleanAttribute( trackMergingElement, settings, KEY_ALLOW_TRACK_MERGING, errorHolder );
 			ok = ok & readDoubleAttribute( trackMergingElement, settings, KEY_MERGING_MAX_DISTANCE, errorHolder );
 			// feature penalties
-			final Map< String, Double > tmfpm = new HashMap< String, Double >();
+			final Map< String, Double > tmfpm = new HashMap< >();
 			final Element tmfpElement = trackMergingElement.getChild( XML_ELEMENT_NAME_FEATURE_PENALTIES );
 			if ( null != tmfpElement )
 			{

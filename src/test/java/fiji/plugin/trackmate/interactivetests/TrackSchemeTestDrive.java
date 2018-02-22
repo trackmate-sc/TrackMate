@@ -7,14 +7,12 @@ import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
 import java.io.File;
-import java.io.IOException;
 
-import org.jdom2.JDOMException;
 import org.scijava.util.AppUtils;
 
 public class TrackSchemeTestDrive {
 
-	public static void main(final String[] args) throws JDOMException, IOException {
+	public static void main(final String[] args) {
 
 		final File file = new File( AppUtils.getBaseDirectory( TrackMate.class ), "samples/FakeTracks.xml" );
 

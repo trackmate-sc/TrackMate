@@ -209,9 +209,9 @@ public class IcyXmlReader
 		final double dz = calibration[ 2 ];
 
 		// Holders for track model reconstruction
-		final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph = new SimpleWeightedGraph< Spot, DefaultWeightedEdge >( DefaultWeightedEdge.class );
-		final Map< Integer, Spot > firsts = new HashMap< Integer, Spot >();
-		final Map< Integer, Spot > lasts = new HashMap< Integer, Spot >();
+		final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph = new SimpleWeightedGraph< >( DefaultWeightedEdge.class );
+		final Map< Integer, Spot > firsts = new HashMap< >();
+		final Map< Integer, Spot > lasts = new HashMap< >();
 
 		try
 		{

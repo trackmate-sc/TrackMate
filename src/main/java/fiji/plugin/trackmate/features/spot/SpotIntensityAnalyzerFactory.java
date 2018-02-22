@@ -46,15 +46,15 @@ public class SpotIntensityAnalyzerFactory< T extends RealType< T > & NativeType<
 	// public static final String KURTOSIS = "KURTOSIS";
 	// public static final String SKEWNESS = "SKEWNESS";
 
-	public static final ArrayList< String > FEATURES = new ArrayList< String >( 9 );
+	public static final ArrayList< String > FEATURES = new ArrayList< >( 9 );
 
-	public static final HashMap< String, String > FEATURE_NAMES = new HashMap< String, String >( 9 );
+	public static final HashMap< String, String > FEATURE_NAMES = new HashMap< >( 9 );
 
-	public static final HashMap< String, String > FEATURE_SHORT_NAMES = new HashMap< String, String >( 9 );
+	public static final HashMap< String, String > FEATURE_SHORT_NAMES = new HashMap< >( 9 );
 
-	public static final HashMap< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 9 );
+	public static final HashMap< String, Dimension > FEATURE_DIMENSIONS = new HashMap< >( 9 );
 
-	public static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 9 );
+	public static final Map< String, Boolean > IS_INT = new HashMap< >( 9 );
 	static
 	{
 		FEATURES.add( MEAN_INTENSITY );
@@ -118,7 +118,7 @@ public class SpotIntensityAnalyzerFactory< T extends RealType< T > & NativeType<
 		final ImgPlus< T > imgC = HyperSliceImgPlus.fixChannelAxis( img, channel );
 		final ImgPlus< T > imgCT = HyperSliceImgPlus.fixTimeAxis( imgC, frame );
 		final Iterator< Spot > spots = model.getSpots().iterator( frame, false );
-		return new SpotIntensityAnalyzer< T >( imgCT, spots );
+		return new SpotIntensityAnalyzer< >( imgCT, spots );
 	}
 
 	@Override

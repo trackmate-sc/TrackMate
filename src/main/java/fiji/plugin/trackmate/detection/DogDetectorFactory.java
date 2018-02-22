@@ -26,13 +26,13 @@ public class DogDetectorFactory< T extends RealType< T > & NativeType< T >> exte
 	 */
 
 	/** A string key identifying this factory. */
-	public static final String DETECTOR_KEY = "DOG_DETECTOR";
+	public static final String THIS_DETECTOR_KEY = "DOG_DETECTOR";
 
 	/** The pretty name of the target detector. */
-	public static final String NAME = "DoG detector";
+	public static final String THIS_NAME = "DoG detector";
 
 	/** An html information text. */
-	public static final String INFO_TEXT = "<html>" + "This segmenter is based on an approximation of the LoG operator <br> " + "by differences of gaussian (DoG). Computations are made in direct space. <br>" + "It is the quickest for small spot sizes (< ~5 pixels). " + "<p> " + "Spots found too close are suppressed. This segmenter can do sub-pixel <br>" + "localization of spots using a quadratic fitting scheme. It is based on <br>" + "the scale-space framework made by Stephan Preibisch for ImgLib. " + "</html>";
+	public static final String THIS_INFO_TEXT = "<html>" + "This segmenter is based on an approximation of the LoG operator <br> " + "by differences of gaussian (DoG). Computations are made in direct space. <br>" + "It is the quickest for small spot sizes (< ~5 pixels). " + "<p> " + "Spots found too close are suppressed. This segmenter can do sub-pixel <br>" + "localization of spots using a quadratic fitting scheme. It is based on <br>" + "the scale-space framework made by Stephan Preibisch for ImgLib. " + "</html>";
 
 	/*
 	 * METHODS
@@ -48,7 +48,7 @@ public class DogDetectorFactory< T extends RealType< T > & NativeType< T >> exte
 		final double[] calibration = TMUtils.getSpatialCalibration( img );
 
 		final RandomAccessible< T > imFrame = prepareFrameImg( frame );
-		final DogDetector< T > detector = new DogDetector< T >( imFrame, interval, calibration, radius, threshold, doSubpixel, doMedian );
+		final DogDetector< T > detector = new DogDetector<>( imFrame, interval, calibration, radius, threshold, doSubpixel, doMedian );
 		detector.setNumThreads( 1 );
 		return detector;
 	}
@@ -56,25 +56,25 @@ public class DogDetectorFactory< T extends RealType< T > & NativeType< T >> exte
 	@Override
 	public String getKey()
 	{
-		return DETECTOR_KEY;
+		return THIS_DETECTOR_KEY;
 	}
 
 	@Override
 	public String getName()
 	{
-		return NAME;
+		return THIS_NAME;
 	}
 
 	@Override
 	public String getInfoText()
 	{
-		return INFO_TEXT;
+		return THIS_INFO_TEXT;
 	}
 
 	@Override
-	public ConfigurationPanel getDetectorConfigurationPanel( final Settings settings, final Model model )
+	public ConfigurationPanel getDetectorConfigurationPanel( final Settings lSettings, final Model model )
 	{
-		return new DogDetectorConfigurationPanel( settings, model, DogDetectorFactory.INFO_TEXT, DogDetectorFactory.NAME );
+		return new DogDetectorConfigurationPanel( lSettings, model, DogDetectorFactory.THIS_INFO_TEXT, DogDetectorFactory.THIS_NAME );
 	}
 
 }

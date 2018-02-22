@@ -11,7 +11,7 @@ public class ActionListenablePanel extends JPanel {
 
 	private static final long serialVersionUID = -1732282609704990375L;
 
-	protected ArrayList<ActionListener> actionListeners = new ArrayList<ActionListener>();
+	protected ArrayList<ActionListener> actionListeners = new ArrayList<>();
 	
 	/**
 	 * Adds an {@link ActionListener} to this panel. These listeners will be notified when

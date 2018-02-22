@@ -140,7 +140,7 @@ public class ISBIChallengeExporter extends AbstractTMAction {
 			final int trackindex = visibleTracks[i];
 			final Set<Spot> track = model.getTrackModel().trackSpots(trackindex);
 			// Sort them by time
-			final TreeSet<Spot> sortedTrack = new TreeSet<Spot>(Spot.timeComparator);
+			final TreeSet<Spot> sortedTrack = new TreeSet<>(Spot.timeComparator);
 			sortedTrack.addAll(track);
 
 			for (final Spot spot : sortedTrack) {

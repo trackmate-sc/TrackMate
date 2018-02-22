@@ -74,14 +74,14 @@ public class ManualDetectorFactory< T extends RealType< T > & NativeType< T >> i
 	}
 
 	@Override
-	public boolean checkSettings( final Map< String, Object > settings )
+	public boolean checkSettings( final Map< String, Object > lSettings )
 	{
 		final StringBuilder errorHolder = new StringBuilder();
 		boolean ok = true;
-		ok = ok & checkParameter( settings, KEY_RADIUS, Double.class, errorHolder );
-		final List< String > mandatoryKeys = new ArrayList< String >();
+		ok = ok & checkParameter( lSettings, KEY_RADIUS, Double.class, errorHolder );
+		final List< String > mandatoryKeys = new ArrayList< >();
 		mandatoryKeys.add( KEY_RADIUS );
-		ok = ok & checkMapKeys( settings, mandatoryKeys, null, errorHolder );
+		ok = ok & checkMapKeys( lSettings, mandatoryKeys, null, errorHolder );
 		if ( !ok )
 		{
 			errorMessage = errorHolder.toString();
@@ -90,10 +90,10 @@ public class ManualDetectorFactory< T extends RealType< T > & NativeType< T >> i
 	}
 
 	@Override
-	public boolean marshall( final Map< String, Object > settings, final Element element )
+	public boolean marshall( final Map< String, Object > lSettings, final Element element )
 	{
 		final StringBuilder errorHolder = new StringBuilder();
-		final boolean ok = writeRadius( settings, element, errorHolder );
+		final boolean ok = writeRadius( lSettings, element, errorHolder );
 		if ( !ok )
 		{
 			errorMessage = errorHolder.toString();
@@ -102,23 +102,23 @@ public class ManualDetectorFactory< T extends RealType< T > & NativeType< T >> i
 	}
 
 	@Override
-	public boolean unmarshall( final Element element, final Map< String, Object > settings )
+	public boolean unmarshall( final Element element, final Map< String, Object > lSettings )
 	{
-		settings.clear();
+		lSettings.clear();
 		final StringBuilder errorHolder = new StringBuilder();
-		final boolean ok = readDoubleAttribute( element, settings, KEY_RADIUS, errorHolder );
+		final boolean ok = readDoubleAttribute( element, lSettings, KEY_RADIUS, errorHolder );
 		if ( !ok )
 		{
 			errorMessage = errorHolder.toString();
 			return false;
 		}
-		return checkSettings( settings );
+		return checkSettings( lSettings );
 	}
 
 	@Override
-	public ConfigurationPanel getDetectorConfigurationPanel( final Settings settings, final Model model )
+	public ConfigurationPanel getDetectorConfigurationPanel( final Settings lSettings, final Model model )
 	{
-		return new BasicDetectorConfigurationPanel( settings, model, INFO_TEXT, NAME );
+		return new BasicDetectorConfigurationPanel( lSettings, model, INFO_TEXT, NAME );
 	}
 
 	@Override
@@ -136,9 +136,9 @@ public class ManualDetectorFactory< T extends RealType< T > & NativeType< T >> i
 	@Override
 	public Map< String, Object > getDefaultSettings()
 	{
-		final Map< String, Object > settings = new HashMap< String, Object >();
-		settings.put( KEY_RADIUS, DEFAULT_RADIUS );
-		return settings;
+		final Map< String, Object > lSettings = new HashMap< >();
+		lSettings.put( KEY_RADIUS, DEFAULT_RADIUS );
+		return lSettings;
 	}
 
 	@Override

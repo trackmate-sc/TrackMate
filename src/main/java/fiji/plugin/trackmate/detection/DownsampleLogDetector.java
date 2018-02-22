@@ -36,7 +36,7 @@ public class DownsampleLogDetector< T extends RealType< T > & NativeType< T >> i
 	protected String errorMessage;
 
 	/** The list of {@link Spot} that will be populated by this detector. */
-	protected List< Spot > spots = new ArrayList< Spot >();
+	protected List< Spot > spots = new ArrayList<>();
 
 	/** The processing time in ms. */
 	protected long processingTime;
@@ -165,7 +165,7 @@ public class DownsampleLogDetector< T extends RealType< T > & NativeType< T >> i
 		// 2. Segment downsampled image
 
 		// 2.1 Instantiate detector
-		final LogDetector< T > detector = new LogDetector< T >( downsampled, downsampled, dwnCalibration, radius, threshold, false, false );
+		final LogDetector< T > detector = new LogDetector<>( downsampled, downsampled, dwnCalibration, radius, threshold, false, false );
 		detector.setNumThreads( 1 );
 
 		// 2.2 Execute detection

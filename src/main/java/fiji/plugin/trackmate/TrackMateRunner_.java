@@ -37,6 +37,7 @@ import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewFactory;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayerFactory;
 import fiji.util.SplitString;
+import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij.Macro;
@@ -402,133 +403,123 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 					}
 					GuiUtils.userCheckImpDimensions( imp );
 					final TrackMateGUIController controller = new TrackMateGUIController( trackmate );
-					if ( imp != null )
-					{
-						GuiUtils.positionWindow( controller.getGUI(), imp.getWindow() );
-					}
+					GuiUtils.positionWindow( controller.getGUI(), imp.getWindow() );
 					return;
 				}
-				else
+				
+				final String welcomeMessage = TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION + " started on:\n" + TMUtils.getCurrentTimeString() + '\n';
+				logger.log( welcomeMessage );
+				if ( !trackmate.checkInput() || !trackmate.process() )
 				{
+					logger.error( "Error while performing tracking:\n" + trackmate.getErrorMessage() );
+					return;
+				}
 
-					/*
-					 * Run TrackMate with the settings.
-					 */
+				/*
+				 * Save results.
+				 */
+				
+				if ( macroOptions.containsKey( ARG_SAVE_TO ) )
+				{
+					final String save_path_str = macroOptions.get( ARG_SAVE_TO );
+					final File save_path = new File( save_path_str );
+					final TmXmlWriter writer = new TmXmlWriter( save_path, logger );
 
-					final String welcomeMessage = TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION + " started on:\n" + TMUtils.getCurrentTimeString() + '\n';
-					logger.log( welcomeMessage );
-					if ( !trackmate.checkInput() || !trackmate.process() )
+					writer.appendLog( logger.toString() );
+					writer.appendModel( trackmate.getModel() );
+					writer.appendSettings( trackmate.getSettings() );
+
+					try
 					{
-						logger.error( "Error while performing tracking:\n" + trackmate.getErrorMessage() );
+						writer.writeToFile();
+						logger.log( "Data saved to: " + save_path.toString() + '\n' );
+					}
+					catch ( final FileNotFoundException e )
+					{
+						logger.error( "When saving to " + save_path + ", file not found:\n" + e.getMessage() + '\n' );
+						return;
+					}
+					catch ( final IOException e )
+					{
+						logger.error( "When saving to " + save_path + ", Input/Output error:\n" + e.getMessage() + '\n' );
 						return;
 					}
 
-					/*
-					 * Save results.
-					 */
-					
-					if ( macroOptions.containsKey( ARG_SAVE_TO ) )
+				}
+
+				/*
+				 * Export results to simplified XML.
+				 */
+
+				if ( macroOptions.containsKey( ARG_EXPORT_TO ) )
+				{
+					final String export_path_str = macroOptions.get( ARG_EXPORT_TO );
+					final File export_path = new File( export_path_str );
+
+					try
 					{
-						final String save_path_str = macroOptions.get( ARG_SAVE_TO );
-						final File save_path = new File( save_path_str );
-						final TmXmlWriter writer = new TmXmlWriter( save_path, logger );
-
-						writer.appendLog( logger.toString() );
-						writer.appendModel( trackmate.getModel() );
-						writer.appendSettings( trackmate.getSettings() );
-
-						try
-						{
-							writer.writeToFile();
-							logger.log( "Data saved to: " + save_path.toString() + '\n' );
-						}
-						catch ( final FileNotFoundException e )
-						{
-							logger.error( "When saving to " + save_path + ", file not found:\n" + e.getMessage() + '\n' );
-							return;
-						}
-						catch ( final IOException e )
-						{
-							logger.error( "When saving to " + save_path + ", Input/Output error:\n" + e.getMessage() + '\n' );
-							return;
-						}
-
+						ExportTracksToXML.export( model, settings, export_path );
+						logger.log( "Data exported to: " + export_path.toString() + '\n' );
+					}
+					catch ( final FileNotFoundException e )
+					{
+						logger.error( "When exporting to " + export_path + ", file not found:\n" + e.getMessage() + '\n' );
+						return;
+					}
+					catch ( final IOException e )
+					{
+						logger.error( "When exporting to " + export_path + ", Input/Output error:\n" + e.getMessage() + '\n' );
+						return;
 					}
 
-					/*
-					 * Export results to simplified XML.
-					 */
+				}
 
-					if ( macroOptions.containsKey( ARG_EXPORT_TO ) )
+
+				/*
+				 * Display results.
+				 */
+
+				if ( macroOptions.containsKey( ARG_DISPLAY_RESULTS ) && macroOptions.get( ARG_DISPLAY_RESULTS ).equalsIgnoreCase( "true" ) )
+				{
+					// Make image visible.
+					if ( !settings.imp.isVisible() )
 					{
-						final String export_path_str = macroOptions.get( ARG_EXPORT_TO );
-						final File export_path = new File( export_path_str );
-
-						try
-						{
-							ExportTracksToXML.export( model, settings, export_path );
-							logger.log( "Data exported to: " + export_path.toString() + '\n' );
-						}
-						catch ( final FileNotFoundException e )
-						{
-							logger.error( "When exporting to " + export_path + ", file not found:\n" + e.getMessage() + '\n' );
-							return;
-						}
-						catch ( final IOException e )
-						{
-							logger.error( "When exporting to " + export_path + ", Input/Output error:\n" + e.getMessage() + '\n' );
-							return;
-						}
-
+						settings.imp.setOpenAsHyperStack( true );
+						settings.imp.show();
 					}
+
+					// Add visualization.
+
+					final SelectionModel selectionModel = new SelectionModel( model );
+
+					final ViewFactory displayerFactory = new HyperStackDisplayerFactory();
+					final TrackMateModelView view = displayerFactory.create( model, settings, selectionModel );
+					final PerTrackFeatureColorGenerator trackColor = new PerTrackFeatureColorGenerator( model, TrackIndexAnalyzer.TRACK_INDEX );
+					view.setDisplaySettings( TrackMateModelView.KEY_TRACK_COLORING, trackColor );
 
 
 					/*
-					 * Display results.
+					 * And show GUI.
 					 */
 
-					if ( macroOptions.containsKey( ARG_DISPLAY_RESULTS ) && macroOptions.get( ARG_DISPLAY_RESULTS ).equalsIgnoreCase( "true" ) )
+					final TrackMateGUIController controller = new TrackMateGUIController( trackmate );
+					// GUI position
+					GuiUtils.positionWindow( controller.getGUI(), settings.imp.getWindow() );
+
+					// GUI state
+					final String guiState = ConfigureViewsDescriptor.KEY;
+					controller.setGUIStateString( guiState );
+					controller.getGuimodel().addView( view );
+					final Map< String, Object > displaySettings = controller.getGuimodel().getDisplaySettings();
+					for ( final String key : displaySettings.keySet() )
 					{
-						// Make image visible.
-						if ( !settings.imp.isVisible() )
-						{
-							settings.imp.setOpenAsHyperStack( true );
-							settings.imp.show();
-						}
-
-						// Add visualization.
-
-						final SelectionModel selectionModel = new SelectionModel( model );
-
-						final ViewFactory displayerFactory = new HyperStackDisplayerFactory();
-						final TrackMateModelView view = displayerFactory.create( model, settings, selectionModel );
-						final PerTrackFeatureColorGenerator trackColor = new PerTrackFeatureColorGenerator( model, TrackIndexAnalyzer.TRACK_INDEX );
-						view.setDisplaySettings( TrackMateModelView.KEY_TRACK_COLORING, trackColor );
-
-
-						/*
-						 * And show GUI.
-						 */
-
-						final TrackMateGUIController controller = new TrackMateGUIController( trackmate );
-						// GUI position
-						GuiUtils.positionWindow( controller.getGUI(), settings.imp.getWindow() );
-
-						// GUI state
-						final String guiState = ConfigureViewsDescriptor.KEY;
-						controller.setGUIStateString( guiState );
-						controller.getGuimodel().addView( view );
-						final Map< String, Object > displaySettings = controller.getGuimodel().getDisplaySettings();
-						for ( final String key : displaySettings.keySet() )
-						{
-							view.setDisplaySettings( key, displaySettings.get( key ) );
-						}
-						view.render();
-
-						// Log.
-						controller.getGUI().getLogPanel().setTextContent( logger.toString() );
-
+						view.setDisplaySettings( key, displaySettings.get( key ) );
 					}
+					view.render();
+
+					// Log.
+					controller.getGUI().getLogPanel().setTextContent( logger.toString() );
+
 				}
 
 			}
@@ -600,27 +591,27 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 
 		// Spot radius.
 		final ValuePair< String, MacroArgumentConverter > radiusPair =
-				new ValuePair< String, TrackMateRunner_.MacroArgumentConverter >( DetectorKeys.KEY_RADIUS, doubleConverter );
+				new ValuePair< >( DetectorKeys.KEY_RADIUS, doubleConverter );
 		parsers.put( ARG_RADIUS, radiusPair );
 
 		// Spot quality threshold.
 		final ValuePair< String, MacroArgumentConverter > thresholdPair =
-				new ValuePair< String, TrackMateRunner_.MacroArgumentConverter >( DetectorKeys.KEY_THRESHOLD, doubleConverter );
+				new ValuePair< >( DetectorKeys.KEY_THRESHOLD, doubleConverter );
 		parsers.put( ARG_THRESHOLD, thresholdPair );
 
 		// Sub-pixel localization.
 		final ValuePair< String, MacroArgumentConverter > subpixelPair =
-				new ValuePair< String, TrackMateRunner_.MacroArgumentConverter >( DetectorKeys.KEY_DO_SUBPIXEL_LOCALIZATION, booleanConverter );
+				new ValuePair< >( DetectorKeys.KEY_DO_SUBPIXEL_LOCALIZATION, booleanConverter );
 		parsers.put( ARG_SUBPIXEL, subpixelPair );
 
 		// Do median filtering.
 		final ValuePair< String, MacroArgumentConverter > medianPair =
-				new ValuePair< String, TrackMateRunner_.MacroArgumentConverter >( DetectorKeys.KEY_DO_MEDIAN_FILTERING, booleanConverter );
+				new ValuePair< >( DetectorKeys.KEY_DO_MEDIAN_FILTERING, booleanConverter );
 		parsers.put( ARG_MEDIAN, medianPair );
 
 		// Target channel.
 		final ValuePair< String, MacroArgumentConverter > channelPair =
-				new ValuePair< String, TrackMateRunner_.MacroArgumentConverter >( DetectorKeys.KEY_TARGET_CHANNEL, integerConverter );
+				new ValuePair< >( DetectorKeys.KEY_TARGET_CHANNEL, integerConverter );
 		parsers.put( ARG_CHANNEL, channelPair );
 
 		return parsers;
@@ -643,17 +634,17 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 
 		// Max linking distance.
 		final ValuePair< String, MacroArgumentConverter > maxDistancePair =
-				new ValuePair< String, TrackMateRunner_.MacroArgumentConverter >( TrackerKeys.KEY_LINKING_MAX_DISTANCE, doubleConverter );
+				new ValuePair< >( TrackerKeys.KEY_LINKING_MAX_DISTANCE, doubleConverter );
 		parsers.put( ARG_MAX_DISTANCE, maxDistancePair );
 
 		// Max gap distance.
 		final ValuePair< String, MacroArgumentConverter > maxGapDistancePair =
-				new ValuePair< String, TrackMateRunner_.MacroArgumentConverter >( TrackerKeys.KEY_GAP_CLOSING_MAX_DISTANCE, doubleConverter );
+				new ValuePair< >( TrackerKeys.KEY_GAP_CLOSING_MAX_DISTANCE, doubleConverter );
 		parsers.put( ARG_MAX_GAP_DISTANCE, maxGapDistancePair );
 
 		// Target channel.
 		final ValuePair< String, MacroArgumentConverter > maxGapFramesPair =
-				new ValuePair< String, TrackMateRunner_.MacroArgumentConverter >( TrackerKeys.KEY_GAP_CLOSING_MAX_FRAME_GAP, integerConverter );
+				new ValuePair< >( TrackerKeys.KEY_GAP_CLOSING_MAX_FRAME_GAP, integerConverter );
 		parsers.put( ARG_MAX_GAP_FRAMES, maxGapFramesPair );
 
 		return parsers;

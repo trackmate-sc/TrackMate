@@ -96,7 +96,7 @@ public class KalmanTracker implements SpotTracker, Benchmark
 		 * Outputs
 		 */
 
-		graph = new SimpleWeightedGraph< Spot, DefaultWeightedEdge >( DefaultWeightedEdge.class );
+		graph = new SimpleWeightedGraph< >( DefaultWeightedEdge.class );
 		predictionsCollection = new SpotCollection();
 
 		/*
@@ -165,7 +165,7 @@ public class KalmanTracker implements SpotTracker, Benchmark
 		final double positionMeasurementStd = meanSpotRadius / 10d;
 
 		// The master map that contains the currently active KFs.
-		final Map< CVMKalmanFilter, Spot > kalmanFiltersMap = new HashMap< CVMKalmanFilter, Spot >( orphanSpots.size() );
+		final Map< CVMKalmanFilter, Spot > kalmanFiltersMap = new HashMap< >( orphanSpots.size() );
 
 		/*
 		 * Then loop over time, starting from second frame.
@@ -180,7 +180,7 @@ public class KalmanTracker implements SpotTracker, Benchmark
 
 			// Predict for all Kalman filters, and use it to generate linking
 			// candidates.
-			final Map< ComparableRealPoint, CVMKalmanFilter > predictionMap = new HashMap< ComparableRealPoint, CVMKalmanFilter >( kalmanFiltersMap.size() );
+			final Map< ComparableRealPoint, CVMKalmanFilter > predictionMap = new HashMap< >( kalmanFiltersMap.size() );
 			for ( final CVMKalmanFilter kf : kalmanFiltersMap.keySet() )
 			{
 				final double[] X = kf.predict();
@@ -196,11 +196,11 @@ public class KalmanTracker implements SpotTracker, Benchmark
 					predictionsCollection.add( pred, frame );
 				}
 			}
-			final List< ComparableRealPoint > predictions = new ArrayList< ComparableRealPoint >( predictionMap.keySet() );
+			final List< ComparableRealPoint > predictions = new ArrayList< >( predictionMap.keySet() );
 
 			// The KF for which we could not find a measurement in the target
 			// frame. Is updated later.
-			final Collection< CVMKalmanFilter > childlessKFs = new HashSet< CVMKalmanFilter >( kalmanFiltersMap.keySet() );
+			final Collection< CVMKalmanFilter > childlessKFs = new HashSet< >( kalmanFiltersMap.keySet() );
 
 			// Find the global (in space) optimum for associating a prediction
 			// to a measurement.
@@ -209,8 +209,8 @@ public class KalmanTracker implements SpotTracker, Benchmark
 			{
 				// Only link measurements to predictions if we have predictions.
 
-				final JaqamanLinkingCostMatrixCreator< ComparableRealPoint, Spot > crm = new JaqamanLinkingCostMatrixCreator< ComparableRealPoint, Spot >( predictions, measurements, CF, maxCost, ALTERNATIVE_COST_FACTOR, PERCENTILE );
-				final JaqamanLinker< ComparableRealPoint, Spot > linker = new JaqamanLinker< ComparableRealPoint, Spot >( crm );
+				final JaqamanLinkingCostMatrixCreator< ComparableRealPoint, Spot > crm = new JaqamanLinkingCostMatrixCreator< >( predictions, measurements, CF, maxCost, ALTERNATIVE_COST_FACTOR, PERCENTILE );
+				final JaqamanLinker< ComparableRealPoint, Spot > linker = new JaqamanLinker< >( crm );
 				if ( !linker.checkInput() || !linker.process() )
 				{
 					errorMessage = BASE_ERROR_MSG + "Error linking candidates in frame " + frame + ": " + linker.getErrorMessage();
@@ -220,7 +220,7 @@ public class KalmanTracker implements SpotTracker, Benchmark
 				final Map< ComparableRealPoint, Double > costs = linker.getAssignmentCosts();
 
 				// Deal with found links.
-				orphanSpots = new HashSet< Spot >( measurements );
+				orphanSpots = new HashSet< >( measurements );
 				for ( final ComparableRealPoint cm : agnts.keySet() )
 				{
 					final CVMKalmanFilter kf = predictionMap.get( cm );
@@ -264,8 +264,8 @@ public class KalmanTracker implements SpotTracker, Benchmark
 				 * spots of this frame.
 				 */
 
-				final JaqamanLinkingCostMatrixCreator< Spot, Spot > ic = new JaqamanLinkingCostMatrixCreator< Spot, Spot >( previousOrphanSpots, orphanSpots, nucleatingCostFunction, maxInitialCost, ALTERNATIVE_COST_FACTOR, PERCENTILE );
-				final JaqamanLinker< Spot, Spot > newLinker = new JaqamanLinker< Spot, Spot >( ic );
+				final JaqamanLinkingCostMatrixCreator< Spot, Spot > ic = new JaqamanLinkingCostMatrixCreator< >( previousOrphanSpots, orphanSpots, nucleatingCostFunction, maxInitialCost, ALTERNATIVE_COST_FACTOR, PERCENTILE );
+				final JaqamanLinker< Spot, Spot > newLinker = new JaqamanLinker< >( ic );
 				if ( !newLinker.checkInput() || !newLinker.process() )
 				{
 					errorMessage = BASE_ERROR_MSG + "Error linking spots from frame " + ( frame - 1 ) + " to frame " + frame + ": " + newLinker.getErrorMessage();
@@ -408,7 +408,7 @@ public class KalmanTracker implements SpotTracker, Benchmark
 
 	private static final List< Spot > generateSpotList( final SpotCollection spots, final int frame )
 	{
-		final List< Spot > list = new ArrayList< Spot >( spots.getNSpots( frame, true ) );
+		final List< Spot > list = new ArrayList< >( spots.getNSpots( frame, true ) );
 		for ( final Iterator< Spot > iterator = spots.iterator( frame, true ); iterator.hasNext(); )
 		{
 			list.add( iterator.next() );

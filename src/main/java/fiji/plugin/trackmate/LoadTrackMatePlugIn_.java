@@ -293,17 +293,17 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 	/**
 	 * Returns <code>true</code> is the specified file is an ICY track XML file.
 	 *
-	 * @param file
+	 * @param lFile
 	 *            the file to inspect.
 	 * @return <code>true</code> if it is an ICY track XML file.
 	 */
-	protected boolean checkIsICY( final File file )
+	protected boolean checkIsICY( final File lFile )
 	{
 		final SAXBuilder sb = new SAXBuilder();
 		Element r = null;
 		try
 		{
-			final Document document = sb.build( file );
+			final Document document = sb.build( lFile );
 			r = document.getRootElement();
 		}
 		catch ( final JDOMException e )
@@ -365,13 +365,13 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 	 * Creates the {@link TmXmlReader} instance that will be used to load the
 	 * file.
 	 *
-	 * @param file
+	 * @param lFile
 	 *            the file to read from.
 	 * @return a new {@link TmXmlReader} instance.
 	 */
-	protected TmXmlReader createReader( final File file )
+	protected TmXmlReader createReader( final File lFile )
 	{
-		return new TmXmlReader( file );
+		return new TmXmlReader( lFile );
 	}
 
 	/**

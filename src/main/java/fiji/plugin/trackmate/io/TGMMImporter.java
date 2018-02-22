@@ -142,7 +142,7 @@ public class TGMMImporter implements OutputAlgorithm< Model >, Benchmark
 
 		model = new Model();
 		final SpotCollection sc = new SpotCollection();
-		final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph = new SimpleWeightedGraph< Spot, DefaultWeightedEdge >( DefaultWeightedEdge.class );
+		final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph = new SimpleWeightedGraph< >( DefaultWeightedEdge.class );
 
 		final double[] targetCoordsHolder = new double[ 3 ];
 		final double[] sourceCoordsHolder = new double[ 3 ];
@@ -207,13 +207,13 @@ public class TGMMImporter implements OutputAlgorithm< Model >, Benchmark
 				final Element root = doc.getRootElement();
 				final List< Element > detectionEls = root.getChildren( XML_DETECTION_NAME );
 
-				final Collection< Spot > spots = new ArrayList< Spot >( detectionEls.size() );
+				final Collection< Spot > spots = new ArrayList< >( detectionEls.size() );
 
 				/*
 				 * Parse all detections
 				 */
 
-				currentSpotID = new HashMap< Integer, Spot >( detectionEls.size() );
+				currentSpotID = new HashMap< >( detectionEls.size() );
 
 				for ( final Element detectionEl : detectionEls )
 				{

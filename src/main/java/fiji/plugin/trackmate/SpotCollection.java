@@ -55,7 +55,7 @@ public class SpotCollection implements MultiThreaded
 	private static final long TIME_OUT_DELAY = 1;
 
 	/** The frame by frame list of spot this object wrap. */
-	private ConcurrentSkipListMap< Integer, Set< Spot > > content = new ConcurrentSkipListMap< Integer, Set< Spot > >();
+	private ConcurrentSkipListMap< Integer, Set< Spot > > content = new ConcurrentSkipListMap< >();
 
 	private int numThreads;
 
@@ -129,7 +129,7 @@ public class SpotCollection implements MultiThreaded
 		Set< Spot > spots = content.get( frame );
 		if ( null == spots )
 		{
-			spots = new HashSet< Spot >();
+			spots = new HashSet< >();
 			content.put( frame, spots );
 		}
 		spots.add( spot );
@@ -424,30 +424,21 @@ public class SpotCollection implements MultiThreaded
 		final Set< Spot > spots = content.get( frame );
 		if ( null == spots || spots.isEmpty() ) { return null; }
 
-		final TreeMap< Double, Spot > distanceToSpot = new TreeMap< Double, Spot >();
+		final TreeMap< Double, Spot > distanceToSpot = new TreeMap< >();
 		double d2;
 		for ( final Spot s : spots )
 		{
-
 			if ( visibleSpotsOnly && ( s.getFeature( VISIBLITY ).compareTo( ZERO ) <= 0 ) )
-			{
 				continue;
-			}
 
 			d2 = s.squareDistanceTo( location );
 			if ( d2 < s.getFeature( Spot.RADIUS ) * s.getFeature( Spot.RADIUS ) )
-			{
 				distanceToSpot.put( d2, s );
-			}
 		}
 		if ( distanceToSpot.isEmpty() )
-		{
 			return null;
-		}
-		else
-		{
-			return distanceToSpot.firstEntry().getValue();
-		}
+
+		return distanceToSpot.firstEntry().getValue();
 	}
 
 	/**
@@ -472,7 +463,7 @@ public class SpotCollection implements MultiThreaded
 	public final List< Spot > getNClosestSpots( final Spot location, final int frame, int n, final boolean visibleSpotsOnly )
 	{
 		final Set< Spot > spots = content.get( frame );
-		final TreeMap< Double, Spot > distanceToSpot = new TreeMap< Double, Spot >();
+		final TreeMap< Double, Spot > distanceToSpot = new TreeMap< >();
 
 		double d2;
 		for ( final Spot s : spots )
@@ -487,7 +478,7 @@ public class SpotCollection implements MultiThreaded
 			distanceToSpot.put( d2, s );
 		}
 
-		final List< Spot > selectedSpots = new ArrayList< Spot >( n );
+		final List< Spot > selectedSpots = new ArrayList< >( n );
 		final Iterator< Double > it = distanceToSpot.keySet().iterator();
 		while ( n > 0 && it.hasNext() )
 		{
@@ -550,17 +541,13 @@ public class SpotCollection implements MultiThreaded
 				nspots++;
 			}
 			return nspots;
-
 		}
-		else
-		{
 
-			final Set< Spot > spots = content.get( frame );
-			if ( null == spots )
-				return 0;
-			else
-				return spots.size();
-		}
+		final Set< Spot > spots = content.get( frame );
+		if ( null == spots )
+			return 0;
+		
+		return spots.size();
 	}
 
 	/*
@@ -581,7 +568,7 @@ public class SpotCollection implements MultiThreaded
 	 */
 	public Map< String, double[] > collectValues( final Collection< String > features, final boolean visibleOnly )
 	{
-		final Map< String, double[] > featureValues = new ConcurrentHashMap< String, double[] >( features.size() );
+		final Map< String, double[] > featureValues = new ConcurrentHashMap< >( features.size() );
 		final ExecutorService executors = Executors.newFixedThreadPool( numThreads );
 
 		for ( final String feature : features )
@@ -669,13 +656,9 @@ public class SpotCollection implements MultiThreaded
 	public Iterator< Spot > iterator( final boolean visibleSpotsOnly )
 	{
 		if ( visibleSpotsOnly )
-		{
 			return new VisibleSpotsIterator();
-		}
-		else
-		{
-			return new AllSpotsIterator();
-		}
+
+		return new AllSpotsIterator();
 	}
 
 	/**
@@ -694,13 +677,9 @@ public class SpotCollection implements MultiThreaded
 		final Set< Spot > frameContent = content.get( frame );
 		if ( null == frameContent ) { return EMPTY_ITERATOR; }
 		if ( visibleSpotsOnly )
-		{
 			return new VisibleSpotsFrameIterator( frameContent );
-		}
-		else
-		{
-			return frameContent.iterator();
-		}
+
+		return frameContent.iterator();
 	}
 
 	/**
@@ -734,13 +713,9 @@ public class SpotCollection implements MultiThreaded
 	public Iterable< Spot > iterable( final int frame, final boolean visibleSpotsOnly )
 	{
 		if ( visibleSpotsOnly )
-		{
 			return new FrameVisibleIterable( frame );
-		}
-		else
-		{
-			return content.get( frame );
-		}
+
+		return content.get( frame );
 	}
 
 	/*
@@ -760,7 +735,7 @@ public class SpotCollection implements MultiThreaded
 	 */
 	public void put( final int frame, final Collection< Spot > spots )
 	{
-		final Set< Spot > value = new HashSet< Spot >( spots );
+		final Set< Spot > value = new HashSet< >( spots );
 		for ( final Spot spot : value )
 		{
 			spot.putFeature( Spot.FRAME, Double.valueOf( frame ) );
@@ -888,11 +863,9 @@ public class SpotCollection implements MultiThreaded
 						next = null;
 						return;
 					}
-					else
-					{
-						contentIterator = content.get( frameIterator.next() ).iterator();
-						continue;
-					}
+					
+					contentIterator = content.get( frameIterator.next() ).iterator();
+					continue;
 				}
 				next = contentIterator.next();
 				return;
@@ -964,13 +937,11 @@ public class SpotCollection implements MultiThreaded
 						next = null;
 						return;
 					}
-					else
-					{
-						// Yes. Then start iterating over the next frame.
-						currentFrameContent = content.get( frameIterator.next() );
-						contentIterator = currentFrameContent.iterator();
-						continue;
-					}
+					
+					// Yes. Then start iterating over the next frame.
+					currentFrameContent = content.get( frameIterator.next() );
+					contentIterator = currentFrameContent.iterator();
+					continue;
 				}
 				next = contentIterator.next();
 				// Is it visible?
@@ -1091,7 +1062,7 @@ public class SpotCollection implements MultiThreaded
 				public void run()
 				{
 					final Set< Spot > fc = content.get( frame );
-					final Set< Spot > nfc = new HashSet< Spot >( getNSpots( frame, true ) );
+					final Set< Spot > nfc = new HashSet< >( getNSpots( frame, true ) );
 
 					for ( final Spot spot : fc )
 					{
@@ -1141,13 +1112,9 @@ public class SpotCollection implements MultiThreaded
 		public Iterator< Spot > iterator()
 		{
 			if ( visibleSpotsOnly )
-			{
 				return new VisibleSpotsIterator();
-			}
-			else
-			{
-				return new AllSpotsIterator();
-			}
+
+			return new AllSpotsIterator();
 		}
 	}
 
@@ -1215,7 +1182,7 @@ public class SpotCollection implements MultiThreaded
 			Set< Spot > fc = sc.content.get( frame );
 			if ( null == fc )
 			{
-				fc = new HashSet< Spot >();
+				fc = new HashSet< >();
 				sc.content.put( frame, fc );
 			}
 			fc.add( spot );
@@ -1236,7 +1203,7 @@ public class SpotCollection implements MultiThreaded
 	public static SpotCollection fromMap( final Map< Integer, Set< Spot > > source )
 	{
 		final SpotCollection sc = new SpotCollection();
-		sc.content = new ConcurrentSkipListMap< Integer, Set< Spot > >( source );
+		sc.content = new ConcurrentSkipListMap< >( source );
 		return sc;
 	}
 }

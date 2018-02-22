@@ -185,8 +185,8 @@ public class JaqamanLinker< K extends Comparable< K >, J extends Comparable< J >
 		}
 
 		final int[] assgn = solver.getResult();
-		assignments = new HashMap< K, J >();
-		costs = new HashMap< K, Double >();
+		assignments = new HashMap< >();
+		costs = new HashMap< >();
 		for ( int i = 0; i < assgn.length; i++ )
 		{
 			final int j = assgn[ i ];
@@ -213,8 +213,8 @@ public class JaqamanLinker< K extends Comparable< K >, J extends Comparable< J >
 	{
 		if ( null == assignments ) { return "Not solved yet. Process the algorithm prior to calling this method."; }
 
-		final HashSet< K > unassignedSources = new HashSet< K >( costMatrixCreator.getSourceList() );
-		final HashSet< J > unassignedTargets = new HashSet< J >( costMatrixCreator.getTargetList() );
+		final HashSet< K > unassignedSources = new HashSet< >( costMatrixCreator.getSourceList() );
+		final HashSet< J > unassignedTargets = new HashSet< >( costMatrixCreator.getTargetList() );
 
 		int sw = -1;
 		for ( final K source : unassignedSources )

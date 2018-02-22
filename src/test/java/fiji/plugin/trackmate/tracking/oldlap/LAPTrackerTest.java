@@ -35,8 +35,8 @@ public class LAPTrackerTest
 
 		// Create 2 "lines" of spots, keeping track of the manual tracks for
 		// later testing
-		final List< Spot > group1 = new ArrayList< Spot >( nFrames );
-		final List< Spot > group2 = new ArrayList< Spot >( nFrames );
+		final List< Spot > group1 = new ArrayList< >( nFrames );
+		final List< Spot > group2 = new ArrayList< >( nFrames );
 		final SpotCollection spotCollection = new SpotCollection();
 		for ( int i = 0; i < nFrames; i++ )
 		{
@@ -53,7 +53,7 @@ public class LAPTrackerTest
 			group1.add( spot1 );
 			group2.add( spot2 );
 
-			final List< Spot > spots = new ArrayList< Spot >( 2 );
+			final List< Spot > spots = new ArrayList< >( 2 );
 			spots.add( spot1 );
 			spots.add( spot2 );
 			spotCollection.put( i, spots );
@@ -62,7 +62,7 @@ public class LAPTrackerTest
 		// Make them all visible
 		spotCollection.setVisible( true );
 
-		final List< List< Spot >> groups = new ArrayList< List< Spot >>( 2 );
+		final List< List< Spot >> groups = new ArrayList<>( 2 );
 		groups.add( group1 );
 		groups.add( group2 );
 
@@ -97,8 +97,8 @@ public class LAPTrackerTest
 
 		// Create 2 "lines" of spots, keeping track of the manual tracks for
 		// later testing
-		final List< Spot > group1 = new ArrayList< Spot >( nFrames );
-		final List< Spot > group2 = new ArrayList< Spot >( nFrames );
+		final List< Spot > group1 = new ArrayList< >( nFrames );
+		final List< Spot > group2 = new ArrayList< >( nFrames );
 		final SpotCollection spotCollection = new SpotCollection();
 		for ( int i = 0; i < nFrames; i++ )
 		{
@@ -118,7 +118,7 @@ public class LAPTrackerTest
 			group1.add( spot1 );
 			group2.add( spot2 );
 
-			final List< Spot > spots = new ArrayList< Spot >( 2 );
+			final List< Spot > spots = new ArrayList< >( 2 );
 			spots.add( spot1 );
 			spots.add( spot2 );
 			spotCollection.put( i, spots );
@@ -127,7 +127,7 @@ public class LAPTrackerTest
 		// Make them all visible
 		spotCollection.setVisible( true );
 
-		final List< List< Spot >> groups = new ArrayList< List< Spot >>( 2 );
+		final List< List< Spot >> groups = new ArrayList<>( 2 );
 		groups.add( group1 );
 		groups.add( group2 );
 
@@ -163,7 +163,7 @@ public class LAPTrackerTest
 		assertEquals( "The tracking result graph has the wrong number of vertices, ", 2 * nFrames, graph.vertexSet().size() );
 
 		// Check that we have the right number of tracks
-		final ConnectivityInspector< Spot, DefaultWeightedEdge > inspector = new ConnectivityInspector< Spot, DefaultWeightedEdge >( graph );
+		final ConnectivityInspector< Spot, DefaultWeightedEdge > inspector = new ConnectivityInspector< >( graph );
 		final int nTracks = inspector.connectedSets().size();
 		assertEquals( "Did not get the right number of tracks, ", 2, nTracks );
 

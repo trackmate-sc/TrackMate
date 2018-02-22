@@ -28,7 +28,7 @@ public class JPanelFeatureSelectionGui extends javax.swing.JPanel {
 	private JButton jButtonRemove;
 	private JButton jButtonAdd;
 
-	private Stack<JPanelFeaturePenalty> featurePanels = new Stack<JPanelFeaturePenalty>();
+	private Stack<JPanelFeaturePenalty> featurePanels = new Stack<>();
 	private List<String> features;
 	private Map<String, String> featureNames;
 	private int index;
@@ -47,7 +47,7 @@ public class JPanelFeatureSelectionGui extends javax.swing.JPanel {
 	 * The user will be allowed to choose amongst the given features. 
 	 */
 	public void setDisplayFeatures(Collection<String> features, Map<String, String> featureNames) {
-		this.features = new ArrayList<String>(features);
+		this.features = new ArrayList<>(features);
 		this.featureNames = featureNames;
 	}
 
@@ -72,7 +72,7 @@ public class JPanelFeatureSelectionGui extends javax.swing.JPanel {
 	}
 
 	public Map<String, Double>	getFeaturePenalties() {
-		Map<String, Double> weights = new HashMap<String, Double>(featurePanels.size());
+		Map<String, Double> weights = new HashMap<>(featurePanels.size());
 		for (JPanelFeaturePenalty panel : featurePanels) 
 			weights.put(panel.getSelectedFeature(), panel.getPenaltyWeight());
 		return weights;
@@ -81,7 +81,7 @@ public class JPanelFeatureSelectionGui extends javax.swing.JPanel {
 	@Override
 	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
-		ArrayList<Component> components = new ArrayList<Component>(3 + featurePanels.size());
+		ArrayList<Component> components = new ArrayList<>(3 + featurePanels.size());
 		components.add(jPanelButtons);
 		components.add(jButtonAdd);
 		components.add(jButtonRemove);
@@ -133,9 +133,9 @@ public class JPanelFeatureSelectionGui extends javax.swing.JPanel {
 					jButtonRemove.setIcon(new ImageIcon(TrackMateGUIController.class.getResource(REMOVE_ICON)));
 					jButtonRemove.setBounds(48, 5, 21, 22);
 					jButtonRemove.addActionListener(new ActionListener() {
+						@Override
 						public void actionPerformed(ActionEvent e) {
 							removeButtonPushed();
-
 						}
 					});
 				}
@@ -145,6 +145,7 @@ public class JPanelFeatureSelectionGui extends javax.swing.JPanel {
 					jButtonAdd.setIcon(new ImageIcon(TrackMateGUIController.class.getResource(ADD_ICON)));
 					jButtonAdd.setBounds(12, 5, 24, 22);
 					jButtonAdd.addActionListener(new ActionListener() {
+						@Override
 						public void actionPerformed(ActionEvent e) {
 							addButtonPushed();
 						}

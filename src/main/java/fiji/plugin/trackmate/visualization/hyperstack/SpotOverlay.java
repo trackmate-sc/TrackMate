@@ -50,7 +50,7 @@ public class SpotOverlay extends Roi
 
 	protected FontMetrics fm;
 
-	protected Collection< Spot > spotSelection = new ArrayList< Spot >();
+	protected Collection< Spot > spotSelection = new ArrayList<>();
 
 	protected Map< String, Object > displaySettings;
 
@@ -105,7 +105,7 @@ public class SpotOverlay extends Roi
 		fm = g2d.getFontMetrics();
 
 		final double zslice = ( imp.getSlice() - 1 ) * calibration[ 2 ];
-		final double mag = magnification;
+		final double lMag = magnification;
 		final int frame = imp.getFrame() - 1;
 
 		// Deal with normal spots.
@@ -137,7 +137,7 @@ public class SpotOverlay extends Roi
 				
 				final Color color = colorGenerator.color( spot );
 				g2d.setColor( color );
-				drawSpot( g2d, spot, zslice, xcorner, ycorner, mag );
+				drawSpot( g2d, spot, zslice, xcorner, ycorner, lMag );
 			}
 
 		}
@@ -163,7 +163,7 @@ public class SpotOverlay extends Roi
 					continue;
 				}
 
-				drawSpot( g2d, spot, zslice, xcorner, ycorner, mag );
+				drawSpot( g2d, spot, zslice, xcorner, ycorner, lMag );
 			}
 
 			// Deal with spot selection
@@ -186,7 +186,7 @@ public class SpotOverlay extends Roi
 					{
 						continue;
 					}
-					drawSpot( g2d, spot, zslice, xcorner, ycorner, mag );
+					drawSpot( g2d, spot, zslice, xcorner, ycorner, lMag );
 				}
 			}
 		}
@@ -202,13 +202,13 @@ public class SpotOverlay extends Roi
 			g2d.setStroke( new BasicStroke( 1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1.0f, new float[] { 5f, 5f }, 0 ) );
 			final double x = editingSpot.getFeature( Spot.POSITION_X );
 			final double y = editingSpot.getFeature( Spot.POSITION_Y );
-			final double radius = editingSpot.getFeature( Spot.RADIUS ) / calibration[ 0 ] * mag;
+			final double radius = editingSpot.getFeature( Spot.RADIUS ) / calibration[ 0 ] * lMag;
 			// In pixel units
 			final double xp = x / calibration[ 0 ] + 0.5d;
 			final double yp = y / calibration[ 1 ] + 0.5d;
 			// Scale to image zoom
-			final double xs = ( xp - xcorner ) * mag;
-			final double ys = ( yp - ycorner ) * mag;
+			final double xs = ( xp - xcorner ) * lMag;
+			final double ys = ( yp - ycorner ) * lMag;
 			final double radiusRatio = ( Double ) displaySettings.get( TrackMateModelView.KEY_SPOT_RADIUS_RATIO );
 			g2d.drawOval( ( int ) Math.round( xs - radius * radiusRatio ), ( int ) Math.round( ys - radius * radiusRatio ), ( int ) Math.round( 2 * radius * radiusRatio ), ( int ) Math.round( 2 * radius * radiusRatio ) );
 		}
@@ -221,9 +221,12 @@ public class SpotOverlay extends Roi
 		g2d.setFont( originalFont );
 	}
 
+	/**
+	 * @param g2d 
+	 * @param frame  
+	 */
 	protected void drawExtraLayer( final Graphics2D g2d, final int frame )
-	{
-	}
+	{}
 
 	public void setSpotSelection( final Collection< Spot > spots )
 	{
@@ -268,11 +271,10 @@ public class SpotOverlay extends Roi
 				}
 
 				final int yindent = fm.getAscent() / 2;
-				final int ytext = ( int ) ys + yindent;;
+				final int ytext = ( int ) ys + yindent;
 
 				g2d.drawString( spot.toString(), xtext, ytext );
 			}
 		}
 	}
-
 }

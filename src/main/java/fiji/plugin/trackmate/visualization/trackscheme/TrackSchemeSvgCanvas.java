@@ -30,107 +30,102 @@ public class TrackSchemeSvgCanvas extends mxSvgCanvas {
 		Element elem = null;
 		Element background = null;
 
-		if (!shape.equals(mxScaledLabelShape.SHAPE_NAME)) {
-			
-			return super.drawShape(x, y, w, h, style);
-			
-		} else {
+		if ( !shape.equals( mxScaledLabelShape.SHAPE_NAME ) )
+			return super.drawShape( x, y, w, h, style );
 
-			background = document.createElement("rect");
-			elem = background;
+		background = document.createElement("rect");
+		elem = background;
 
-			elem.setAttribute("x", String.valueOf(x));
-			elem.setAttribute("y", String.valueOf(y));
-			elem.setAttribute("width", String.valueOf(w));
-			elem.setAttribute("height", String.valueOf(h));
+		elem.setAttribute("x", String.valueOf(x));
+		elem.setAttribute("y", String.valueOf(y));
+		elem.setAttribute("width", String.valueOf(w));
+		elem.setAttribute("height", String.valueOf(h));
 
-			if (mxUtils.isTrue(style, mxConstants.STYLE_ROUNDED, false)) {
-				String r = String.valueOf(Math.min(w
-						* mxConstants.RECTANGLE_ROUNDING_FACTOR, h
-						* mxConstants.RECTANGLE_ROUNDING_FACTOR));
+		if (mxUtils.isTrue(style, mxConstants.STYLE_ROUNDED, false)) {
+			String r = String.valueOf(Math.min(w
+					* mxConstants.RECTANGLE_ROUNDING_FACTOR, h
+					* mxConstants.RECTANGLE_ROUNDING_FACTOR));
 
-				elem.setAttribute("rx", r);
-				elem.setAttribute("ry", r);
-			}
+			elem.setAttribute("rx", r);
+			elem.setAttribute("ry", r);
+		}
 
-			String img = getImageForStyle(style);
+		String img = getImageForStyle(style);
 
-			if (img != null) {
-				String imgAlign = mxUtils.getString(style, mxConstants.STYLE_IMAGE_ALIGN, mxConstants.ALIGN_LEFT);
-				String imgValign = mxUtils.getString(style, mxConstants.STYLE_IMAGE_VERTICAL_ALIGN, mxConstants.ALIGN_MIDDLE);
-				int imgWidth = (int) (mxUtils.getInt(style, mxConstants.STYLE_IMAGE_WIDTH, mxConstants.DEFAULT_IMAGESIZE) * scale);
-				int imgHeight = (int) (mxUtils.getInt(style, mxConstants.STYLE_IMAGE_HEIGHT, mxConstants.DEFAULT_IMAGESIZE) * scale);
-				int spacing = (int) (mxUtils.getInt(style, mxConstants.STYLE_SPACING, 2) * scale);
+		if (img != null) {
+			String imgAlign = mxUtils.getString(style, mxConstants.STYLE_IMAGE_ALIGN, mxConstants.ALIGN_LEFT);
+			String imgValign = mxUtils.getString(style, mxConstants.STYLE_IMAGE_VERTICAL_ALIGN, mxConstants.ALIGN_MIDDLE);
+			int imgWidth = (int) (mxUtils.getInt(style, mxConstants.STYLE_IMAGE_WIDTH, mxConstants.DEFAULT_IMAGESIZE) * scale);
+			int imgHeight = (int) (mxUtils.getInt(style, mxConstants.STYLE_IMAGE_HEIGHT, mxConstants.DEFAULT_IMAGESIZE) * scale);
+			int spacing = (int) (mxUtils.getInt(style, mxConstants.STYLE_SPACING, 2) * scale);
 
-				mxRectangle imageBounds = getImageBounds(x, y, w, h);
+			mxRectangle imageBounds = getImageBounds(x, y, w, h);
 
-					if (imgAlign.equals(mxConstants.ALIGN_CENTER)) {
-						imageBounds.setX(imageBounds.getX() + (imageBounds.getWidth() - imgWidth) / 2);
-					} else if (imgAlign.equals(mxConstants.ALIGN_RIGHT)) {
-						imageBounds.setX(imageBounds.getX()
-								+ imageBounds.getWidth() - imgWidth - spacing
-								- 2);
-					} else {
-						imageBounds.setX(imageBounds.getX() + spacing + 4);
-					}
-
-				if (imgValign.equals(mxConstants.ALIGN_TOP)) {
-					imageBounds.setY(imageBounds.getY() + spacing);
-				} else if (imgValign.equals(mxConstants.ALIGN_BOTTOM)) {
-					imageBounds.setY(imageBounds.getY()
-							+ imageBounds.getHeight() - imgHeight
-							- spacing);
+				if (imgAlign.equals(mxConstants.ALIGN_CENTER)) {
+					imageBounds.setX(imageBounds.getX() + (imageBounds.getWidth() - imgWidth) / 2);
+				} else if (imgAlign.equals(mxConstants.ALIGN_RIGHT)) {
+					imageBounds.setX(imageBounds.getX()
+							+ imageBounds.getWidth() - imgWidth - spacing
+							- 2);
 				} else {
-					imageBounds.setY(imageBounds.getY() + (imageBounds.getHeight() - imgHeight) / 2);
+					imageBounds.setX(imageBounds.getX() + spacing + 4);
 				}
 
-				imageBounds.setWidth(imgWidth);
-				imageBounds.setHeight(imgHeight);
-
-				elem = document.createElement("g");
-				elem.appendChild(background);
-
-				Element imageElement = createImageElement(
-						imageBounds.getX(), imageBounds.getY(),
-						imageBounds.getWidth(), imageBounds.getHeight(),
-						img, false, false, false, isEmbedded());
-
-				if (opacity != 100) {
-					String value = String.valueOf(opacity / 100);
-					imageElement.setAttribute("opacity", value);
-				}
-
-				elem.appendChild(imageElement);
+			if (imgValign.equals(mxConstants.ALIGN_TOP)) {
+				imageBounds.setY(imageBounds.getY() + spacing);
+			} else if (imgValign.equals(mxConstants.ALIGN_BOTTOM)) {
+				imageBounds.setY(imageBounds.getY()
+						+ imageBounds.getHeight() - imgHeight
+						- spacing);
+			} else {
+				imageBounds.setY(imageBounds.getY() + (imageBounds.getHeight() - imgHeight) / 2);
 			}
 
-			// Paints the glass effect
-			if (mxUtils.isTrue(style, mxConstants.STYLE_GLASS, false)) {
-				double size = 0.4;
+			imageBounds.setWidth(imgWidth);
+			imageBounds.setHeight(imgHeight);
 
-				// TODO: Mask with rectangle or rounded rectangle of label
-				// Creates glass overlay
-				Element glassOverlay = document.createElement("path");
+			elem = document.createElement("g");
+			elem.appendChild(background);
 
-				// LATER: Not sure what the behaviour is for mutiple SVG elements in page.
-				// Probably its possible that this points to an element in another SVG
-				// node which when removed will result in an undefined background.
-				glassOverlay.setAttribute("fill", "url(#"
-						+ getGlassGradientElement().getAttribute("id")
-						+ ")");
+			Element imageElement = createImageElement(
+					imageBounds.getX(), imageBounds.getY(),
+					imageBounds.getWidth(), imageBounds.getHeight(),
+					img, false, false, false, isEmbedded());
 
-				String d = "m " + (x - strokeWidth) + ","
-				+ (y - strokeWidth) + " L " + (x - strokeWidth)
-				+ "," + (y + h * size) + " Q " + (x + w * 0.5)
-				+ "," + (y + h * 0.7) + " " + (x + w + strokeWidth)
-				+ "," + (y + h * size) + " L "
-				+ (x + w + strokeWidth) + "," + (y - strokeWidth)
-				+ " z";
-				glassOverlay.setAttribute("stroke-width",
-						String.valueOf(strokeWidth / 2));
-				glassOverlay.setAttribute("d", d);
-				elem.appendChild(glassOverlay);
+			if (opacity != 100) {
+				String value = String.valueOf(opacity / 100);
+				imageElement.setAttribute("opacity", value);
 			}
-			
+
+			elem.appendChild(imageElement);
+		}
+
+		// Paints the glass effect
+		if (mxUtils.isTrue(style, mxConstants.STYLE_GLASS, false)) {
+			double size = 0.4;
+
+			// TODO: Mask with rectangle or rounded rectangle of label
+			// Creates glass overlay
+			Element glassOverlay = document.createElement("path");
+
+			// LATER: Not sure what the behaviour is for mutiple SVG elements in page.
+			// Probably its possible that this points to an element in another SVG
+			// node which when removed will result in an undefined background.
+			glassOverlay.setAttribute("fill", "url(#"
+					+ getGlassGradientElement().getAttribute("id")
+					+ ")");
+
+			String d = "m " + (x - strokeWidth) + ","
+			+ (y - strokeWidth) + " L " + (x - strokeWidth)
+			+ "," + (y + h * size) + " Q " + (x + w * 0.5)
+			+ "," + (y + h * 0.7) + " " + (x + w + strokeWidth)
+			+ "," + (y + h * size) + " L "
+			+ (x + w + strokeWidth) + "," + (y - strokeWidth)
+			+ " z";
+			glassOverlay.setAttribute("stroke-width",
+					String.valueOf(strokeWidth / 2));
+			glassOverlay.setAttribute("d", d);
+			elem.appendChild(glassOverlay);
 		} 
 
 		double rotation = mxUtils.getDouble(style, mxConstants.STYLE_ROTATION);

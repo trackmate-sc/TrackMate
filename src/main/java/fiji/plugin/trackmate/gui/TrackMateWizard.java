@@ -104,7 +104,7 @@ public class TrackMateWizard extends JFrame implements ActionListener
 	 * FIELDS
 	 */
 
-	private final ArrayList< ActionListener > listeners = new ArrayList< ActionListener >();
+	private final ArrayList< ActionListener > listeners = new ArrayList<>();
 
 	private JPanel jPanelButtons;
 

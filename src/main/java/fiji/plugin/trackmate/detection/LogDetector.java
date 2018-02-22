@@ -46,7 +46,7 @@ public class LogDetector< T extends RealType< T > & NativeType< T >> implements 
 	protected String errorMessage;
 
 	/** The list of {@link Spot} that will be populated by this detector. */
-	protected List< Spot > spots = new ArrayList< Spot >();
+	protected List< Spot > spots = new ArrayList<>();
 
 	/** The processing time in ms. */
 	protected long processingTime;
@@ -92,7 +92,7 @@ public class LogDetector< T extends RealType< T > & NativeType< T >> implements 
 			return false;
 		}
 		return true;
-	};
+	}
 
 	@Override
 	public boolean process()
@@ -128,7 +128,7 @@ public class LogDetector< T extends RealType< T > & NativeType< T >> implements 
 				ndims--;
 
 		final Img< FloatType > kernel = DetectionUtils.createLoGKernel( radius, ndims, calibration );
-		final FFTConvolution< FloatType > fftconv = new FFTConvolution< FloatType >( floatImg, kernel );
+		final FFTConvolution< FloatType > fftconv = new FFTConvolution<>( floatImg, kernel );
 
 		/*
 		 * Determine the right img factory for FFT calculation.

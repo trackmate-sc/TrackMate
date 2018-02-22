@@ -333,13 +333,9 @@ public class SparseCostMatrix
 	{
 		final int k = Arrays.binarySearch( kk, start[ i ], start[ i ] + number[ i ], j );
 		if ( k < 0 )
-		{
 			return missingValue;
-		}
-		else
-		{
-			return cc[ k ];
-		}
+
+		return cc[ k ];
 	}
 
 	/**

@@ -76,15 +76,15 @@ public class TrackBranchAnalysis extends AbstractTMAction
 
 		final TimeDirectedNeighborIndex neighborIndex = model.getTrackModel().getDirectedNeighborIndex();
 
-		final List< Branch > brs = new ArrayList< Branch >();
+		final List< Branch > brs = new ArrayList<>();
 		for ( final Integer trackID : model.getTrackModel().unsortedTrackIDs( true ) )
 		{
 			final TrackBranchDecomposition branchDecomposition = ConvexBranchesDecomposition.processTrack( trackID, model.getTrackModel(), neighborIndex, true, false );
 			final SimpleDirectedGraph< List< Spot >, DefaultEdge > branchGraph = ConvexBranchesDecomposition.buildBranchGraph( branchDecomposition );
 
-			final Map< Branch, Set< List< Spot >> > successorMap = new HashMap< Branch, Set< List< Spot >> >();
-			final Map< Branch, Set< List< Spot >> > predecessorMap = new HashMap< Branch, Set< List< Spot >> >();
-			final Map<List<Spot>, Branch> branchMap = new HashMap< List<Spot>, Branch >();
+			final Map< Branch, Set< List< Spot >> > successorMap = new HashMap<>();
+			final Map< Branch, Set< List< Spot >> > predecessorMap = new HashMap<>();
+			final Map<List<Spot>, Branch> branchMap = new HashMap<>();
 
 			for ( final List< Spot > branch : branchGraph.vertexSet() )
 			{
@@ -125,7 +125,7 @@ public class TrackBranchAnalysis extends AbstractTMAction
 
 				// Predecessors
 				final Set< DefaultEdge > incomingEdges = branchGraph.incomingEdgesOf( branch );
-				final Set< List< Spot >> predecessors = new HashSet< List< Spot > >( incomingEdges.size() );
+				final Set< List< Spot >> predecessors = new HashSet<>( incomingEdges.size() );
 				for ( final DefaultEdge edge : incomingEdges )
 				{
 					final List< Spot > predecessorBranch = branchGraph.getEdgeSource( edge );
@@ -134,7 +134,7 @@ public class TrackBranchAnalysis extends AbstractTMAction
 
 				// Successors
 				final Set< DefaultEdge > outgoingEdges = branchGraph.outgoingEdgesOf( branch );
-				final Set< List< Spot >> successors = new HashSet< List< Spot > >( outgoingEdges.size() );
+				final Set< List< Spot >> successors = new HashSet<>( outgoingEdges.size() );
 				for ( final DefaultEdge edge : outgoingEdges )
 				{
 					final List< Spot > successorBranch = branchGraph.getEdgeTarget( edge );
@@ -148,7 +148,7 @@ public class TrackBranchAnalysis extends AbstractTMAction
 			for ( final Branch br : successorMap.keySet() )
 			{
 				final Set< List< Spot >> succs = successorMap.get( br );
-				final Set<Branch> succBrs = new HashSet< Branch >(succs.size());
+				final Set<Branch> succBrs = new HashSet<>(succs.size());
 				for ( final List<Spot> branch : succs )
 				{
 					final Branch succBr = branchMap.get( branch );
@@ -157,7 +157,7 @@ public class TrackBranchAnalysis extends AbstractTMAction
 				br.successors = succBrs;
 				
 				final Set< List< Spot >> preds = predecessorMap.get( br );
-				final Set<Branch> predBrs = new HashSet< Branch >(preds.size());
+				final Set<Branch> predBrs = new HashSet<>(preds.size());
 				for ( final List<Spot> branch : preds )
 				{
 					final Branch predBr = branchMap.get( branch );
@@ -202,7 +202,7 @@ public class TrackBranchAnalysis extends AbstractTMAction
 					if ( line < 0 ) { return; }
 					final Branch br = brs.get( line );
 					final List< DefaultWeightedEdge > edges = model.getTrackModel().dijkstraShortestPath( br.first, br.last );
-					final Set< Spot > spots = new HashSet< Spot >();
+					final Set< Spot > spots = new HashSet<>();
 					for ( final DefaultWeightedEdge edge : edges )
 					{
 						spots.add( model.getTrackModel().getEdgeSource( edge ) );
@@ -211,7 +211,7 @@ public class TrackBranchAnalysis extends AbstractTMAction
 					selectionModel.clearSelection();
 					selectionModel.addEdgeToSelection( edges );
 					selectionModel.addSpotToSelection( spots );
-				};
+				}
 
 			} );
 		}

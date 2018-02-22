@@ -81,7 +81,7 @@ public class FromContinuousBranches implements OutputAlgorithm< SimpleWeightedGr
 	{
 		final long start = System.currentTimeMillis();
 
-		graph = new SimpleWeightedGraph< Spot, DefaultWeightedEdge >( DefaultWeightedEdge.class );
+		graph = new SimpleWeightedGraph<>( DefaultWeightedEdge.class );
 		for ( final List< Spot > branch : branches )
 		{
 			for ( final Spot spot : branch )

@@ -17,7 +17,7 @@ public class InterpolatePaintScale implements PaintScale, Serializable
 	private static final Color DEFAULT_COLOR = Color.BLACK;
 	private final double lowerBound;
 	private final double upperBound;
-	private final TreeMap<Double, Color> colors = new TreeMap<Double, Color>();
+	private final TreeMap<Double, Color> colors = new TreeMap<>();
 	private final Color defaultColor;
 
 	/*
@@ -111,8 +111,8 @@ public class InterpolatePaintScale implements PaintScale, Serializable
 			top = key;
 			if (value < key) 
 				break;
-			 else 
-				 bottom = top;
+			
+			bottom = top;
 		}
 		
 		double alpha;

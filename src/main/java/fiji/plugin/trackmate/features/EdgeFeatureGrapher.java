@@ -65,7 +65,7 @@ public class EdgeFeatureGrapher extends AbstractFeatureGrapher
 		final Set< Dimension > dimensions = getUniqueValues( yFeatures, yDimensions );
 
 		// Generate one panel per different dimension
-		final ArrayList< ExportableChartPanel > chartPanels = new ArrayList< ExportableChartPanel >( dimensions.size() );
+		final ArrayList< ExportableChartPanel > chartPanels = new ArrayList<>( dimensions.size() );
 		for ( final Dimension dimension : dimensions )
 		{
 
@@ -132,7 +132,7 @@ public class EdgeFeatureGrapher extends AbstractFeatureGrapher
 		renderCharts( chartPanels );
 	}
 
-	private XYEdgeSeriesCollection buildConnectionDataSet( final List< String > targetYFeatures, final List< DefaultWeightedEdge > edges )
+	private XYEdgeSeriesCollection buildConnectionDataSet( final List< String > targetYFeatures, final List< DefaultWeightedEdge > lEdges )
 	{
 		final XYEdgeSeriesCollection edgeDataset = new XYEdgeSeriesCollection();
 		// First create series per y features. At this stage, we assume that
@@ -146,9 +146,9 @@ public class EdgeFeatureGrapher extends AbstractFeatureGrapher
 		// Build dataset. We look for edges that have a spot in common, one for
 		// the target one for the source
 		final FeatureModel fm = model.getFeatureModel();
-		for ( final DefaultWeightedEdge edge0 : edges )
+		for ( final DefaultWeightedEdge edge0 : lEdges )
 		{
-			for ( final DefaultWeightedEdge edge1 : edges )
+			for ( final DefaultWeightedEdge edge1 : lEdges )
 			{
 
 				if ( model.getTrackModel().getEdgeSource( edge0 ).equals( model.getTrackModel().getEdgeTarget( edge1 ) ) )
@@ -177,14 +177,14 @@ public class EdgeFeatureGrapher extends AbstractFeatureGrapher
 	 * @return a new dataset that contains the values, specified from the given
 	 *         feature, and extracted from all the given edges.
 	 */
-	private XYSeriesCollection buildEdgeDataSet( final Iterable< String > targetYFeatures, final Iterable< DefaultWeightedEdge > edges )
+	private XYSeriesCollection buildEdgeDataSet( final Iterable< String > targetYFeatures, final Iterable< DefaultWeightedEdge > lEdges )
 	{
 		final XYSeriesCollection dataset = new XYSeriesCollection();
 		final FeatureModel fm = model.getFeatureModel();
 		for ( final String feature : targetYFeatures )
 		{
 			final XYSeries series = new XYSeries( featureNames.get( feature ) );
-			for ( final DefaultWeightedEdge edge : edges )
+			for ( final DefaultWeightedEdge edge : lEdges )
 			{
 				final Number x = fm.getEdgeFeature( edge, xFeature );
 				final Number y = fm.getEdgeFeature( edge, feature );

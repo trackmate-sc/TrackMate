@@ -35,17 +35,13 @@ public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelC
 	public Color color( final Spot spot )
 	{
 		if ( null == feature )
-		{
 			return TrackMateModelView.DEFAULT_SPOT_COLOR;
-		}
-		else
-		{
-			final Double feat = spot.getFeature( feature );
-			if ( null == feat ) { return TrackMateModelView.DEFAULT_UNASSIGNED_FEATURE_COLOR; }
-			final double val = feat.doubleValue();
-			if ( Double.isNaN( val ) ) { return TrackMateModelView.DEFAULT_UNDEFINED_FEATURE_COLOR; }
-			return generator.getPaint( ( val - min ) / ( max - min ) );
-		}
+
+		final Double feat = spot.getFeature( feature );
+		if ( null == feat ) { return TrackMateModelView.DEFAULT_UNASSIGNED_FEATURE_COLOR; }
+		final double val = feat.doubleValue();
+		if ( Double.isNaN( val ) ) { return TrackMateModelView.DEFAULT_UNDEFINED_FEATURE_COLOR; }
+		return generator.getPaint( ( val - min ) / ( max - min ) );
 	}
 
 	@Override

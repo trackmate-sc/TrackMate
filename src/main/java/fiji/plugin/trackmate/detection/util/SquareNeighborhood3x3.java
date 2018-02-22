@@ -215,24 +215,23 @@ public class SquareNeighborhood3x3 <T> implements Positionable, IterableInterval
 	@Override
 	public long dimension(int d) {
 		if (d < 2 ) 
-			return 3; 
-		else
-			return 1;
+			return 3;
+		return 1;
 	}
 
 	@Override
 	public SquareNeighborhoodCursor3x3<T> cursor() {
-		return  new SquareNeighborhoodCursor3x3<T>(extendedSource, center);
+		return new SquareNeighborhoodCursor3x3<>(extendedSource, center);
 	}
 
 	@Override
 	public SquareNeighborhoodCursor3x3<T> localizingCursor() {
-		return  new SquareNeighborhoodCursor3x3<T>(extendedSource, center);
+		return new SquareNeighborhoodCursor3x3<>(extendedSource, center);
 	}
 	
 	@Override
 	public Iterator<T> iterator() {
-		return  new SquareNeighborhoodCursor3x3<T>(extendedSource, center);
+		return new SquareNeighborhoodCursor3x3<>(extendedSource, center);
 	}
 
 }

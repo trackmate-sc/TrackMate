@@ -59,7 +59,7 @@ public class BlockLogDetector< T extends RealType< T > & NativeType< T >> extend
 			{
 
 				final Interval currentInterval = getBlock( ix, iy );
-				final LogDetector< T > logDetector = new LogDetector< T >( img, currentInterval,
+				final LogDetector< T > logDetector = new LogDetector<>( img, currentInterval,
 						calibration, radius, threshold, doSubPixelLocalization, doMedianFilter );
 				logDetector.setNumThreads( numThreads );
 				if ( !logDetector.checkInput() || !logDetector.process() )
@@ -78,7 +78,7 @@ public class BlockLogDetector< T extends RealType< T > & NativeType< T >> extend
 		 * pixel in A & Y. We prune them by brute force.
 		 */
 
-		final Collection< Spot > toPrune = new ArrayList< Spot >();
+		final Collection< Spot > toPrune = new ArrayList<>();
 		for ( int i = 0; i < spots.size(); i++ )
 		{
 			final Spot a = spots.get( i );

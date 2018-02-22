@@ -273,8 +273,7 @@ public abstract class Logger extends PrintWriter
 		{
 			return sb.toString();
 		}
-
-	};
+	}
 
 	/**
 	 * A logger that wraps a master logger and uses it to echo any received

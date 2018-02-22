@@ -23,15 +23,13 @@ public class TimeDirectedSortedDepthFirstIterator extends SortedDepthFirstIterat
 		super(g, startVertex, comparator);
 	}
 
-
-
     @Override
 	protected void addUnseenChildrenOf(final Spot vertex) {
 
 		// Retrieve target vertices, and sort them in a list
-		final List< Spot > sortedChildren = new ArrayList< Spot >();
+		final List< Spot > sortedChildren = new ArrayList< >();
     	// Keep a map of matching edges so that we can retrieve them in the same order
-    	final Map<Spot, DefaultWeightedEdge> localEdges = new HashMap<Spot, DefaultWeightedEdge>();
+    	final Map<Spot, DefaultWeightedEdge> localEdges = new HashMap<>();
 
     	final int ts = vertex.getFeature(Spot.FRAME).intValue();
         for (final DefaultWeightedEdge edge : specifics.edgesOf(vertex)) {

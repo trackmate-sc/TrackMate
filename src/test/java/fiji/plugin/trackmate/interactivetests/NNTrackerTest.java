@@ -43,7 +43,7 @@ public class NNTrackerTest {
 
 		// 2 - Track the test spots
 		final long start = System.currentTimeMillis();
-		final Map<String, Object> settings = new HashMap<String, Object>();
+		final Map<String, Object> settings = new HashMap<>();
 		settings.put(KEY_LINKING_MAX_DISTANCE, 15d);
 		final NearestNeighborTracker tracker = new NearestNeighborTracker( model.getSpots(), settings );
 		tracker.setLogger(Logger.DEFAULT_LOGGER);

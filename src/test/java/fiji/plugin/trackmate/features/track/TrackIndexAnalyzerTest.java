@@ -69,7 +69,7 @@ public class TrackIndexAnalyzerTest
 		analyzer.process( trackIDs, model );
 
 		// Collect track indices
-		final ArrayList< Integer > trackIndices = new ArrayList< Integer >( trackIDs.size() );
+		final ArrayList< Integer > trackIndices = new ArrayList< >( trackIDs.size() );
 		for ( final Integer trackID : trackIDs )
 		{
 			trackIndices.add( model.getFeatureModel().getTrackFeature( trackID, TrackIndexAnalyzer.TRACK_INDEX ).intValue() );
@@ -94,7 +94,7 @@ public class TrackIndexAnalyzerTest
 		assertTrue( analyzer.hasBeenCalled );
 
 		// Collect track indices
-		final ArrayList< Integer > trackIndices = new ArrayList< Integer >( trackIDs.size() );
+		final ArrayList< Integer > trackIndices = new ArrayList< >( trackIDs.size() );
 		for ( final Integer trackID : trackIDs )
 		{
 			trackIndices.add( model.getFeatureModel().getTrackFeature( trackID, TrackIndexAnalyzer.TRACK_INDEX ).intValue() );

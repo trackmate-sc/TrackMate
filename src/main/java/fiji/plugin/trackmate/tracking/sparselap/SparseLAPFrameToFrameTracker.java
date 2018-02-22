@@ -120,7 +120,7 @@ public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorith
 		final long start = System.currentTimeMillis();
 
 		// Prepare frame pairs in order, not necessarily separated by 1.
-		final ArrayList< int[] > framePairs = new ArrayList< int[] >( spots.keySet().size() - 1 );
+		final ArrayList< int[] > framePairs = new ArrayList< >( spots.keySet().size() - 1 );
 		final Iterator< Integer > frameIterator = spots.keySet().iterator();
 		int frame0 = frameIterator.next();
 		int frame1;
@@ -148,7 +148,7 @@ public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorith
 		final double alternativeCostFactor = ( Double ) settings.get( KEY_ALTERNATIVE_LINKING_COST_FACTOR );
 
 		// Instantiate graph
-		graph = new SimpleWeightedGraph< Spot, DefaultWeightedEdge >( DefaultWeightedEdge.class );
+		graph = new SimpleWeightedGraph< >( DefaultWeightedEdge.class );
 
 		// Prepare threads
 		final Thread[] threads = SimpleMultiThreading.newThreads( numThreads );
@@ -172,37 +172,31 @@ public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorith
 						}
 
 						// Get frame pairs
-						final int frame0 = framePairs.get( i )[ 0 ];
-						final int frame1 = framePairs.get( i )[ 1 ];
+						final int lFrame0 = framePairs.get( i )[ 0 ];
+						final int lFrame1 = framePairs.get( i )[ 1 ];
 
 						// Get spots - we have to create a list from each
 						// content.
-						final List< Spot > sources = new ArrayList< Spot >( spots.getNSpots( frame0, true ) );
-						for ( final Iterator< Spot > iterator = spots.iterator( frame0, true ); iterator.hasNext(); )
-						{
+						final List< Spot > sources = new ArrayList< >( spots.getNSpots( lFrame0, true ) );
+						for ( final Iterator< Spot > iterator = spots.iterator( lFrame0, true ); iterator.hasNext(); )
 							sources.add( iterator.next() );
-						}
 
-						final List< Spot > targets = new ArrayList< Spot >( spots.getNSpots( frame1, true ) );
-						for ( final Iterator< Spot > iterator = spots.iterator( frame1, true ); iterator.hasNext(); )
-						{
+						final List< Spot > targets = new ArrayList< >( spots.getNSpots( lFrame1, true ) );
+						for ( final Iterator< Spot > iterator = spots.iterator( lFrame1, true ); iterator.hasNext(); )
 							targets.add( iterator.next() );
-						}
 
 						if ( sources.isEmpty() || targets.isEmpty() )
-						{
 							continue;
-						}
 
 						/*
 						 * Run the linker.
 						 */
 
-						final JaqamanLinkingCostMatrixCreator< Spot, Spot > creator = new JaqamanLinkingCostMatrixCreator< Spot, Spot >( sources, targets, costFunction, costThreshold, alternativeCostFactor, 1d );
-						final JaqamanLinker< Spot, Spot > linker = new JaqamanLinker< Spot, Spot >( creator );
+						final JaqamanLinkingCostMatrixCreator< Spot, Spot > creator = new JaqamanLinkingCostMatrixCreator< >( sources, targets, costFunction, costThreshold, alternativeCostFactor, 1d );
+						final JaqamanLinker< Spot, Spot > linker = new JaqamanLinker< >( creator );
 						if ( !linker.checkInput() || !linker.process() )
 						{
-							errorMessage = "At frame " + frame0 + " to " + frame1 + ": " + linker.getErrorMessage();
+							errorMessage = "At frame " + lFrame0 + " to " + lFrame1 + ": " + linker.getErrorMessage();
 							ok.set( false );
 							return;
 						}
@@ -266,10 +260,10 @@ public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorith
 		ok = ok & checkParameter( settings, KEY_ALTERNATIVE_LINKING_COST_FACTOR, Double.class, str );
 
 		// Check keys
-		final List< String > mandatoryKeys = new ArrayList< String >();
+		final List< String > mandatoryKeys = new ArrayList< >();
 		mandatoryKeys.add( KEY_LINKING_MAX_DISTANCE );
 		mandatoryKeys.add( KEY_ALTERNATIVE_LINKING_COST_FACTOR );
-		final List< String > optionalKeys = new ArrayList< String >();
+		final List< String > optionalKeys = new ArrayList< >();
 		optionalKeys.add( KEY_LINKING_FEATURE_PENALTIES );
 		ok = ok & checkMapKeys( settings, mandatoryKeys, optionalKeys, str );
 

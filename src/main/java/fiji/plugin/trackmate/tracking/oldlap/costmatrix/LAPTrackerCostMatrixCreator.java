@@ -15,18 +15,12 @@ import net.imglib2.algorithm.OutputAlgorithm;
  * {@link fiji.plugin.trackmate.tracking.oldlap.LAPTracker} class..
  * 
  * @author Nicholas Perry
- *
  */
 public abstract class LAPTrackerCostMatrixCreator extends MultiThreadedBenchmarkAlgorithm implements OutputAlgorithm< double[][] >
 {
 
 	/** The cost matrix created by the class. */
 	protected Matrix costs;
-
-	/**
-	 * Stores a message describing an error incurred during use of the class.
-	 */
-	protected String errorMessage;
 
 	/** The settings to comply to create a cost matrix. */
 	protected final Map< String, Object > settings;
@@ -53,12 +47,6 @@ public abstract class LAPTrackerCostMatrixCreator extends MultiThreadedBenchmark
 	public double[][] getResult()
 	{
 		return costs.getArray();
-	}
-
-	@Override
-	public String getErrorMessage()
-	{
-		return errorMessage;
 	}
 
 	/**

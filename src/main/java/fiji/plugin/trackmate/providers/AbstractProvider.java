@@ -51,10 +51,10 @@ public abstract class AbstractProvider< K extends TrackMateModule >
 
 				Collections.sort( infos, priorityComparator );
 
-				keys = new ArrayList< String >( infos.size() );
-				visibleKeys = new ArrayList< String >( infos.size() );
-				disabled = new ArrayList< String >( infos.size() );
-				implementations = new HashMap< String, K >();
+				keys = new ArrayList< >( infos.size() );
+				visibleKeys = new ArrayList< >( infos.size() );
+				disabled = new ArrayList< >( infos.size() );
+				implementations = new HashMap< >();
 
 				for ( final PluginInfo< K > info : infos )
 				{
@@ -84,17 +84,17 @@ public abstract class AbstractProvider< K extends TrackMateModule >
 
 	public List< String > getKeys()
 	{
-		return new ArrayList< String >( keys );
+		return new ArrayList< >( keys );
 	}
 
 	public List< String > getVisibleKeys()
 	{
-		return new ArrayList< String >( visibleKeys );
+		return new ArrayList< >( visibleKeys );
 	}
 
 	public List< String > getDisabled()
 	{
-		return new ArrayList< String >( disabled );
+		return new ArrayList< >( disabled );
 	}
 
 	public K getFactory( final String key )

@@ -36,7 +36,7 @@ public class mxScaledLabelShape extends mxRectangleShape
 			final Image img = canvas.loadImage( mxUtils.getString( state.getStyle(), mxConstants.STYLE_IMAGE ) );
 			if ( img != null )
 			{
-				final Rectangle bounds = getImageBounds( canvas, state );
+				final Rectangle bounds = getImageBounds( state );
 				final int x = bounds.x;
 				final int y = bounds.y;
 				final int w = bounds.width;
@@ -50,7 +50,7 @@ public class mxScaledLabelShape extends mxRectangleShape
 		}
 	}
 
-	private final Rectangle getImageBounds( final mxGraphics2DCanvas canvas, final mxCellState state )
+	private final Rectangle getImageBounds( final mxCellState state )
 	{
 		final Rectangle cellR = state.getRectangle();
 		final int arc = getArcSize( cellR.width, cellR.height ) / 2;
@@ -58,5 +58,4 @@ public class mxScaledLabelShape extends mxRectangleShape
 		final Rectangle imageBounds = new Rectangle( cellR.x + arc, cellR.y + 2, minSize, minSize );
 		return imageBounds;
 	}
-
 }

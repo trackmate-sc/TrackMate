@@ -126,7 +126,7 @@ public class SemiAutoTracker< T extends RealType< T > & NativeType< T >> extends
 
 		final AffineTransform3D transform = new AffineTransform3D();
 
-		final SearchRegion< T > sn = new SearchRegion< T >();
+		final SearchRegion< T > sn = new SearchRegion<>();
 		RandomAccessible< T > source = img;
 		if ( tindex >= 0 )
 		{

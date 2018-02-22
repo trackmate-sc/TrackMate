@@ -57,7 +57,7 @@ public class ModelFeatureUpdater implements ModelChangeListener, MultiThreaded
 		}
 
 		// Build spot list
-		ArrayList<Spot> spots = new ArrayList<Spot>(event.getSpots().size());
+		ArrayList<Spot> spots = new ArrayList<>(event.getSpots().size());
 		for (Spot spot : event.getSpots()) {
 			if (event.getSpotFlag(spot) != ModelChangeEvent.FLAG_SPOT_REMOVED) {
 				spots.add(spot);
@@ -66,7 +66,7 @@ public class ModelFeatureUpdater implements ModelChangeListener, MultiThreaded
 		SpotCollection sc = SpotCollection.fromCollection(spots);
 		
 		// Build edge list
-		ArrayList<DefaultWeightedEdge> edges = new ArrayList<DefaultWeightedEdge>(event.getEdges().size());
+		ArrayList<DefaultWeightedEdge> edges = new ArrayList<>(event.getEdges().size());
 		for (DefaultWeightedEdge edge : event.getEdges()) {
 			if (event.getEdgeFlag(edge) != ModelChangeEvent.FLAG_EDGE_REMOVED) {
 				edges.add(edge);

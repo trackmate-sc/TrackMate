@@ -69,7 +69,7 @@ public class SpotContrastAndSNRAnalyzer< T extends RealType< T > > extends Indep
 		Spot largeSpot = new Spot( spot );
 		largeSpot.putFeature( Spot.RADIUS, 2 * radius );
 
-		final SpotNeighborhood< T > neighborhood = new SpotNeighborhood< T >( largeSpot, img );
+		final SpotNeighborhood< T > neighborhood = new SpotNeighborhood<>( largeSpot, img );
 		if ( neighborhood.size() <= 1 ) { return new double[] { Double.NaN, Double.NaN }; }
 
 		final double radius2 = radius * radius;

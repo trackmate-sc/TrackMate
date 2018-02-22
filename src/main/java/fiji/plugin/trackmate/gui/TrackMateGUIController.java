@@ -272,13 +272,13 @@ public class TrackMateGUIController implements ActionListener
 	 * <p>
 	 * Subclassers want to override this method to return the correct type.
 	 *
-	 * @param trackmate
+	 * @param lTrackmate
 	 *            the instance that will be piloted by the new controller.
 	 * @return a new instance of the controller.
 	 */
-	public TrackMateGUIController createOn( final TrackMate trackmate )
+	public TrackMateGUIController createOn( final TrackMate lTrackmate )
 	{
-		return new TrackMateGUIController( trackmate );
+		return new TrackMateGUIController( lTrackmate );
 	}
 
 	/**
@@ -499,8 +499,6 @@ public class TrackMateGUIController implements ActionListener
 
 	/**
 	 * Creates the map of next descriptor for each descriptor.
-	 *
-	 * @return
 	 */
 	protected Collection< WizardPanelDescriptor > createDescriptors()
 	{
@@ -741,7 +739,7 @@ public class TrackMateGUIController implements ActionListener
 		/*
 		 * Store created descriptors
 		 */
-		final ArrayList< WizardPanelDescriptor > descriptors = new ArrayList< WizardPanelDescriptor >( 16 );
+		final ArrayList< WizardPanelDescriptor > descriptors = new ArrayList< >( 16 );
 		descriptors.add( actionChooserDescriptor );
 		descriptors.add( configureViewsDescriptor );
 		descriptors.add( detectorChoiceDescriptor );
@@ -782,16 +780,11 @@ public class TrackMateGUIController implements ActionListener
 		}
 		else if ( currentDescriptor == detectorConfigurationDescriptor )
 		{
-
 			if ( trackmate.getSettings().detectorFactory.getKey().equals( ManualDetectorFactory.DETECTOR_KEY ) )
-			{
 				return viewChoiceDescriptor;
-			}
-			else
-			{
-				return detectionDescriptor;
-			}
 
+			return detectionDescriptor;
+			
 		}
 		else if ( currentDescriptor == detectionDescriptor )
 		{
@@ -816,13 +809,9 @@ public class TrackMateGUIController implements ActionListener
 		else if ( currentDescriptor == trackerChoiceDescriptor )
 		{
 			if ( null == trackmate.getSettings().trackerFactory || trackmate.getSettings().trackerFactory.getKey().equals( ManualTrackerFactory.TRACKER_KEY ) )
-			{
 				return trackFilterDescriptor;
-			}
-			else
-			{
-				return trackerConfigurationDescriptor;
-			}
+			
+			return trackerConfigurationDescriptor;
 
 		}
 		else if ( currentDescriptor == trackerConfigurationDescriptor )
@@ -917,13 +906,9 @@ public class TrackMateGUIController implements ActionListener
 		else if ( currentDescriptor == trackFilterDescriptor )
 		{
 			if ( null == trackmate.getSettings().trackerFactory || trackmate.getSettings().trackerFactory.getKey().equals( ManualTrackerFactory.TRACKER_KEY ) )
-			{
 				return trackerChoiceDescriptor;
-			}
-			else
-			{
-				return trackerConfigurationDescriptor;
-			}
+
+			return trackerConfigurationDescriptor;
 
 		}
 		else if ( currentDescriptor == configureViewsDescriptor )
@@ -990,7 +975,7 @@ public class TrackMateGUIController implements ActionListener
 	 */
 	protected Map< String, Object > createDisplaySettings( final Model model )
 	{
-		final Map< String, Object > displaySettings = new HashMap< String, Object >();
+		final Map< String, Object > displaySettings = new HashMap< >();
 		displaySettings.put( KEY_COLOR, DEFAULT_SPOT_COLOR );
 		displaySettings.put( KEY_HIGHLIGHT_COLOR, DEFAULT_HIGHLIGHT_COLOR );
 		displaySettings.put( KEY_SPOTS_VISIBLE, true );
@@ -1058,7 +1043,7 @@ public class TrackMateGUIController implements ActionListener
 				{
 					save();
 					gui.jButtonNext.setEnabled( true );
-				};
+				}
 			}.start();
 
 		}
@@ -1270,7 +1255,7 @@ public class TrackMateGUIController implements ActionListener
 				} );
 
 				button.setEnabled( true );
-			};
+			}
 		}.start();
 	}
 
@@ -1304,7 +1289,7 @@ public class TrackMateGUIController implements ActionListener
 					if ( guimodel.displayingLog == false && guimodel.displayingDisplayConfig == false )
 						restoreButtonsState();
 				}
-			};
+			}
 		}.start();
 	}
 

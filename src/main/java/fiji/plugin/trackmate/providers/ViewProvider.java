@@ -20,11 +20,11 @@ public class ViewProvider
 	/**
 	 * The view keys, in the order they will appear in the GUI.
 	 */
-	protected List< String > keys = new ArrayList< String >();
+	protected List< String > keys = new ArrayList< >();
 
-	protected List< String > visibleKeys = new ArrayList< String >();
+	protected List< String > visibleKeys = new ArrayList< >();
 
-	protected Map< String, ViewFactory > factories = new HashMap< String, ViewFactory >();
+	protected Map< String, ViewFactory > factories = new HashMap< >();
 
 	/*
 	 * BLANK CONSTRUCTOR

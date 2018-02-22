@@ -48,15 +48,13 @@ public class TrackNavigator {
 				if (it.hasNext()) {
 					nextTrackID = it.next();
 					break;
-				} else {
-					nextTrackID = trackIDs.iterator().next(); // loop
 				}
+				nextTrackID = trackIDs.iterator().next(); // loop
 			}
-
 		}
 
 		final Set<Spot> spots = model.getTrackModel().trackSpots(nextTrackID);
-		final TreeSet<Spot> ring = new TreeSet<Spot>(Spot.frameComparator);
+		final TreeSet<Spot> ring = new TreeSet<>(Spot.frameComparator);
 		ring.addAll(spots);
 		Spot target = ring.ceiling(spot);
 		if (null == target) {
@@ -96,17 +94,15 @@ public class TrackNavigator {
 			if (id.equals(trackID)) {
 				if (previousTrackID != null) {
 					break;
-				} else {
-					previousTrackID = lastID;
-					break;
 				}
+				previousTrackID = lastID;
+				break;
 			}
 			previousTrackID = id;
-
 		}
 
 		final Set<Spot> spots = model.getTrackModel().trackSpots(previousTrackID);
-		final TreeSet<Spot> ring = new TreeSet<Spot>(Spot.frameComparator);
+		final TreeSet<Spot> ring = new TreeSet<>(Spot.frameComparator);
 		ring.addAll(spots);
 		Spot target = ring.ceiling(spot);
 		if (null == target) {
@@ -129,7 +125,7 @@ public class TrackNavigator {
 		}
 
 		final int frame = spot.getFeature(Spot.FRAME).intValue();
-		final TreeSet<Spot> ring = new TreeSet<Spot>(Spot.nameComparator);
+		final TreeSet<Spot> ring = new TreeSet<>(Spot.nameComparator);
 
 		final Set<Spot> spots = model.getTrackModel().trackSpots(trackID);
 		for (final Spot s : spots) {
@@ -161,7 +157,7 @@ public class TrackNavigator {
 		}
 
 		final int frame = spot.getFeature(Spot.FRAME).intValue();
-		final TreeSet<Spot> ring = new TreeSet<Spot>(Spot.nameComparator);
+		final TreeSet<Spot> ring = new TreeSet<>(Spot.nameComparator);
 
 		final Set<Spot> spots = model.getTrackModel().trackSpots(trackID);
 		for (final Spot s : spots) {
@@ -216,8 +212,6 @@ public class TrackNavigator {
 	/**
 	 * Return a meaningful spot from the current selection, or <code>null</code>
 	 * if the selection is empty.
-	 * 
-	 * @return
 	 */
 	private Spot getASpot() {
 		// Get it from spot selection

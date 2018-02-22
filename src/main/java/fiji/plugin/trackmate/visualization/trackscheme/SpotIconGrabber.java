@@ -88,10 +88,10 @@ public class SpotIconGrabber< T extends RealType< T >>
 
 		// Convert to base64
 		final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		final BufferedImage img = ip.getBufferedImage();
+		final BufferedImage lImg = ip.getBufferedImage();
 		try
 		{
-			ImageIO.write( img, "png", bos );
+			ImageIO.write( lImg, "png", bos );
 			return mxBase64.encodeToString( bos.toByteArray(), false );
 		}
 		catch ( final IOException e )
@@ -126,7 +126,7 @@ public class SpotIconGrabber< T extends RealType< T >>
 		final T zeroType = img.firstElement().createVariable();
 		zeroType.setZero();
 
-		final OutOfBoundsConstantValueFactory< T, Img< T >> oobf = new OutOfBoundsConstantValueFactory< T, Img< T >>( zeroType );
+		final OutOfBoundsConstantValueFactory< T, Img< T >> oobf = new OutOfBoundsConstantValueFactory<>( zeroType );
 		final RandomAccess< T > sourceCursor = Views.extend( img, oobf ).randomAccess();
 		final RandomAccess< T > targetCursor = crop.randomAccess();
 

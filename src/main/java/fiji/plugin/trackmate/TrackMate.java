@@ -95,35 +95,35 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 	 *
 	 * @param spotsThisFrame
 	 *            the spot list to inspect
-	 * @param settings
+	 * @param lSettings
 	 *            the {@link Settings} object that will be used to retrieve the
 	 *            image ROI and cropping information
 	 * @return a list of spot. Depending on the presence of a polygon ROI, it
 	 *         might be a new, pruned list. Or not.
 	 */
-	protected List< Spot > translateAndPruneSpots( final List< Spot > spotsThisFrame, final Settings settings )
+	protected List< Spot > translateAndPruneSpots( final List< Spot > spotsThisFrame, final Settings lSettings )
 	{
 
 		// Put them back in the right referential
-		final double[] calibration = TMUtils.getSpatialCalibration( settings.imp );
-		TMUtils.translateSpots( spotsThisFrame, settings.xstart * calibration[ 0 ], settings.ystart * calibration[ 1 ], settings.zstart * calibration[ 2 ] );
+		final double[] calibration = TMUtils.getSpatialCalibration( lSettings.imp );
+		TMUtils.translateSpots( spotsThisFrame, lSettings.xstart * calibration[ 0 ], lSettings.ystart * calibration[ 1 ], lSettings.zstart * calibration[ 2 ] );
 		List< Spot > prunedSpots;
 		// Prune if outside of ROI
-		if ( settings.roi instanceof ShapeRoi )
+		if ( lSettings.roi instanceof ShapeRoi )
 		{
 			prunedSpots = new ArrayList<>();
 			for ( final Spot spot : spotsThisFrame )
 			{
-				if ( settings.roi.contains( (int) Math.round( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ] ), (int) Math.round( spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) ) )
+				if ( lSettings.roi.contains( (int) Math.round( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ] ), (int) Math.round( spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) ) )
 					prunedSpots.add( spot );
 			}
 		}
-		else if ( null != settings.polygon )
+		else if ( null != lSettings.polygon )
 		{
 			prunedSpots = new ArrayList<>();
 			for ( final Spot spot : spotsThisFrame )
 			{
-				if ( settings.polygon.contains( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ], spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) )
+				if ( lSettings.polygon.contains( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ], spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) )
 					prunedSpots.add( spot );
 			}
 		}
@@ -174,16 +174,12 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 		if ( calculator.checkInput() && calculator.process() )
 		{
 			if ( doLogIt )
-			{
 				logger.log( "Computation done in " + calculator.getProcessingTime() + " ms.\n" );
-			}
 			return true;
 		}
-		else
-		{
-			errorMessage = "Spot features calculation failed:\n" + calculator.getErrorMessage();
-			return false;
-		}
+
+		errorMessage = "Spot features calculation failed:\n" + calculator.getErrorMessage();
+		return false;
 	}
 
 	/**
@@ -231,16 +227,12 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 		if ( calculator.checkInput() && calculator.process() )
 		{
 			if ( doLogIt )
-			{
 				logger.log( "Computation done in " + calculator.getProcessingTime() + " ms.\n" );
-			}
 			return true;
 		}
-		else
-		{
-			errorMessage = "Track features calculation failed:\n" + calculator.getErrorMessage();
-			return false;
-		}
+
+		errorMessage = "Track features calculation failed:\n" + calculator.getErrorMessage();
+		return false;
 	}
 
 	/**
@@ -269,11 +261,9 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 			model.setTracks( tracker.getResult(), true );
 			return true;
 		}
-		else
-		{
-			errorMessage = "Tracking process failed:\n" + tracker.getErrorMessage();
-			return false;
-		}
+		
+		errorMessage = "Tracking process failed:\n" + tracker.getErrorMessage();
+		return false;
 	}
 
 	/**
@@ -416,7 +406,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 								}
 								else if ( null != settings.polygon )
 								{
-									prunedSpots = new ArrayList< Spot >();
+									prunedSpots = new ArrayList< >();
 									for ( final Spot spot : spotsThisFrame )
 									{
 										if ( settings.polygon.contains( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ], spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) )
@@ -669,6 +659,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 	public boolean process()
 	{
 		if ( !execDetection() ) { return false; }
+		
 		if ( !execInitialSpotFiltering() ) { return false; }
 
 		if ( !computeSpotFeatures( true ) ) { return false; }
@@ -702,13 +693,11 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 	public void setNumThreads( final int numThreads )
 	{
 		this.numThreads = numThreads;
-
 	}
 
 	@Override
 	public long getProcessingTime()
 	{
 		return processingTime;
-	};
-
+	}
 }

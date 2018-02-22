@@ -23,13 +23,9 @@ public class SpotColorGeneratorPerTrackFeature implements FeatureColorGenerator<
 	{
 		final Integer trackID = model.getTrackModel().trackIDOf( spot );
 		if ( null == trackID )
-		{
 			return TrackMateModelView.DEFAULT_SPOT_COLOR;
-		}
-		else
-		{
-			return trackColorGenerator.colorOf( trackID );
-		}
+
+		return trackColorGenerator.colorOf( trackID );
 	}
 
 	@Override

@@ -49,7 +49,7 @@ public class TrimNotVisibleAction extends AbstractTMAction
 
 		final SpotCollection spots = new SpotCollection();
 		spots.setNumThreads( trackmate.getNumThreads() );
-		final Collection< Spot > toRemove = new ArrayList< Spot >();
+		final Collection< Spot > toRemove = new ArrayList<>();
 
 		for ( final Integer trackID : tm.unsortedTrackIDs( false ) )
 		{

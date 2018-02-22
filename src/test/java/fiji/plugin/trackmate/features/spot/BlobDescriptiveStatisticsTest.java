@@ -37,10 +37,10 @@ public class BlobDescriptiveStatisticsTest
 	@Before
 	public void setUp() throws Exception
 	{
-		final ArrayImgFactory< UnsignedShortType > factory = new ArrayImgFactory< UnsignedShortType >();
+		final ArrayImgFactory< UnsignedShortType > factory = new ArrayImgFactory< >();
 		final long[] dims = new long[] { ( long ) ( 2 * CENTER[ 0 ] / CALIBRATION[ 0 ] ), ( long ) ( 2 * CENTER[ 1 ] / CALIBRATION[ 1 ] ) };
 		final Img< UnsignedShortType > img = factory.create( dims, new UnsignedShortType() );
-		img2D = new ImgPlus< UnsignedShortType >( img, "2D", new AxisType[] { Axes.X, Axes.Y }, new double[] { CALIBRATION[ 0 ], CALIBRATION[ 1 ] } );
+		img2D = new ImgPlus< >( img, "2D", new AxisType[] { Axes.X, Axes.Y }, new double[] { CALIBRATION[ 0 ], CALIBRATION[ 1 ] } );
 
 		// We paint MANUALLY a square in the middle of the image
 		final RandomAccess< UnsignedShortType > ra = img.randomAccess();
@@ -62,7 +62,7 @@ public class BlobDescriptiveStatisticsTest
 	@Test
 	public void testProcessSpot2D()
 	{
-		final SpotIntensityAnalyzer< UnsignedShortType > analyzer = new SpotIntensityAnalyzer< UnsignedShortType >( img2D, null );
+		final SpotIntensityAnalyzer< UnsignedShortType > analyzer = new SpotIntensityAnalyzer< >( img2D, null );
 		analyzer.process( spot );
 
 		assertEquals( TEST_VAL, spot.getFeature( SpotIntensityAnalyzerFactory.MEAN_INTENSITY ).doubleValue(), Double.MIN_VALUE );
@@ -79,7 +79,7 @@ public class BlobDescriptiveStatisticsTest
 		test.setUp();
 
 		final Spot tmpSpot = new Spot( CENTER[ 0 ], CENTER[ 1 ], CENTER[ 2 ], RADIUS, -1d );
-		final SpotNeighborhood< UnsignedShortType > disc = new SpotNeighborhood< UnsignedShortType >( tmpSpot, test.img2D );
+		final SpotNeighborhood< UnsignedShortType > disc = new SpotNeighborhood< >( tmpSpot, test.img2D );
 		for ( final UnsignedShortType pixel : disc )
 		{
 			pixel.set( 1500 );

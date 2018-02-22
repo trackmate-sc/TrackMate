@@ -35,7 +35,7 @@ public class TrackOverlay extends Roi
 
 	protected final double[] calibration;
 
-	protected Collection< DefaultWeightedEdge > highlight = new HashSet< DefaultWeightedEdge >();
+	protected Collection< DefaultWeightedEdge > highlight = new HashSet< >();
 
 	protected Map< String, Object > displaySettings;
 
@@ -175,7 +175,7 @@ public class TrackOverlay extends Roi
 				Set< DefaultWeightedEdge > track;
 				synchronized ( model )
 				{
-					track = new HashSet< DefaultWeightedEdge >( model.getTrackModel().trackEdges( trackID ) );
+					track = new HashSet< >( model.getTrackModel().trackEdges( trackID ) );
 				}
 				for ( final DefaultWeightedEdge edge : track )
 				{
@@ -209,7 +209,7 @@ public class TrackOverlay extends Roi
 				Set< DefaultWeightedEdge > track;
 				synchronized ( model )
 				{
-					track = new HashSet< DefaultWeightedEdge >( model.getTrackModel().trackEdges( trackID ) );
+					track = new HashSet< >( model.getTrackModel().trackEdges( trackID ) );
 				}
 				for ( final DefaultWeightedEdge edge : track )
 				{
@@ -247,7 +247,7 @@ public class TrackOverlay extends Roi
 				final Set< DefaultWeightedEdge > track;
 				synchronized ( model )
 				{
-					track = new HashSet< DefaultWeightedEdge >( model.getTrackModel().trackEdges( trackID ) );
+					track = new HashSet< >( model.getTrackModel().trackEdges( trackID ) );
 				}
 				for ( final DefaultWeightedEdge edge : track )
 				{

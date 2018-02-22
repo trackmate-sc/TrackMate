@@ -127,7 +127,7 @@ public class SparseLAPSegmentTracker implements SpotTracker, Benchmark
 		final JaqamanSegmentCostMatrixCreator costMatrixCreator = new JaqamanSegmentCostMatrixCreator( graph, settings );
 		costMatrixCreator.setNumThreads( numThreads );
 		final SlaveLogger jlLogger = new SlaveLogger( logger, 0, 0.9 );
-		final JaqamanLinker< Spot, Spot > linker = new JaqamanLinker< Spot, Spot >( costMatrixCreator, jlLogger );
+		final JaqamanLinker< Spot, Spot > linker = new JaqamanLinker<>( costMatrixCreator, jlLogger );
 		if ( !linker.checkInput() || !linker.process() )
 		{
 			errorMessage = linker.getErrorMessage();

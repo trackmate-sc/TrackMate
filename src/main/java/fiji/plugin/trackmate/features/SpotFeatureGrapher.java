@@ -67,7 +67,7 @@ public class SpotFeatureGrapher extends AbstractFeatureGrapher
 		final Set< Dimension > dimensions = getUniqueValues( yFeatures, yDimensions );
 
 		// Generate one panel per different dimension
-		final ArrayList< ExportableChartPanel > chartPanels = new ArrayList< ExportableChartPanel >( dimensions.size() );
+		final ArrayList< ExportableChartPanel > chartPanels = new ArrayList<>( dimensions.size() );
 		for ( final Dimension dimension : dimensions )
 		{
 
@@ -132,13 +132,13 @@ public class SpotFeatureGrapher extends AbstractFeatureGrapher
 	 * @return a new dataset that contains the values, specified from the given
 	 *         feature, and extracted from all the given spots.
 	 */
-	private XYSeriesCollection buildSpotDataSet( final Iterable< String > targetYFeatures, final Iterable< Spot > spots )
+	private XYSeriesCollection buildSpotDataSet( final Iterable< String > targetYFeatures, final Iterable< Spot > lSpots )
 	{
 		final XYSeriesCollection dataset = new XYSeriesCollection();
 		for ( final String feature : targetYFeatures )
 		{
 			final XYSeries series = new XYSeries( featureNames.get( feature ) );
-			for ( final Spot spot : spots )
+			for ( final Spot spot : lSpots )
 			{
 				final Double x = spot.getFeature( xFeature );
 				final Double y = spot.getFeature( feature );
@@ -158,10 +158,10 @@ public class SpotFeatureGrapher extends AbstractFeatureGrapher
 	 *         returned is a {@link XYEdgeSeriesCollection}, made to plot the
 	 *         lines between 2 points representing 2 spot. We therefore retrieve
 	 */
-	private XYEdgeSeriesCollection buildEdgeDataSet( final Iterable< String > targetYFeatures, final Collection< Spot > spots )
+	private XYEdgeSeriesCollection buildEdgeDataSet( final Iterable< String > targetYFeatures, final Collection< Spot > lSpots )
 	{
 		// Collect edges
-		final List< DefaultWeightedEdge > edges = getInsideEdges( spots );
+		final List< DefaultWeightedEdge > edges = getInsideEdges( lSpots );
 
 		// Build dataset
 		final XYEdgeSeriesCollection edgeDataset = new XYEdgeSeriesCollection();

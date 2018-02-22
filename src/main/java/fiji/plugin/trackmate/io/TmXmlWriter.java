@@ -162,21 +162,12 @@ public class TmXmlWriter
 	 */
 	public void writeToFile() throws FileNotFoundException, IOException
 	{
-		FileOutputStream fos = null;
-		try
+		try ( FileOutputStream fos = new FileOutputStream( file ) )
 		{
 			logger.log( "  Writing to file.\n" );
-			fos = new FileOutputStream( file );
 			final Document document = new Document( root );
 			final XMLOutputter outputter = new XMLOutputter( Format.getPrettyFormat() );
 			outputter.output( document, fos );
-		}
-		finally
-		{
-			if ( null != fos )
-			{
-				fos.close();
-			}
 		}
 	}
 
@@ -421,10 +412,10 @@ public class TmXmlWriter
 		final Element allTracksElement = new Element( TRACK_COLLECTION_ELEMENT_KEY );
 
 		// Prepare track features for writing: we separate ints from doubles
-		final List< String > trackFeatures = new ArrayList< String >( model.getFeatureModel().getTrackFeatures() );
+		final List< String > trackFeatures = new ArrayList< >( model.getFeatureModel().getTrackFeatures() );
 
 		// Same thing for edge features
-		final List< String > edgeFeatures = new ArrayList< String >( model.getFeatureModel().getEdgeFeatures() );
+		final List< String > edgeFeatures = new ArrayList< >( model.getFeatureModel().getEdgeFeatures() );
 
 		final Set<Integer> trackIDs = model.getTrackModel().trackIDs(false);
 		for (final int trackID : trackIDs) {
@@ -462,35 +453,32 @@ public class TmXmlWriter
 				 * track with less than one edge. So we skip writing it.
 				 */
 				continue;
-
 			}
-			else
+			
+			for ( final DefaultWeightedEdge edge : track )
 			{
-				for ( final DefaultWeightedEdge edge : track )
+				final Element edgeElement = new Element(TRACK_EDGE_ELEMENT_KEY);
+				for ( final String feature : edgeFeatures )
 				{
-					final Element edgeElement = new Element(TRACK_EDGE_ELEMENT_KEY);
-					for ( final String feature : edgeFeatures )
+					final Double val = model.getFeatureModel().getEdgeFeature(edge, feature);
+					if ( null == val )
 					{
-						final Double val = model.getFeatureModel().getEdgeFeature(edge, feature);
-						if ( null == val )
-						{
-							// Skip missing features.
-							continue;
-						}
-						String str;
-						if ( model.getFeatureModel().getEdgeFeatureIsInt().get( feature ).booleanValue() )
-						{
-							str = "" + val.intValue();
-						}
-						else
-						{
-							str = val.toString();
-						}
-						edgeElement.setAttribute( feature, str );
+						// Skip missing features.
+						continue;
 					}
-
-					trackElement.addContent( edgeElement );
+					String str;
+					if ( model.getFeatureModel().getEdgeFeatureIsInt().get( feature ).booleanValue() )
+					{
+						str = "" + val.intValue();
+					}
+					else
+					{
+						str = val.toString();
+					}
+					edgeElement.setAttribute( feature, str );
 				}
+
+				trackElement.addContent( edgeElement );
 			}
 			allTracksElement.addContent( trackElement );
 		}
@@ -706,7 +694,7 @@ public class TmXmlWriter
 
 	private static final Element marshalSpot( final Spot spot, final FeatureModel fm )
 	{
-		final Collection<Attribute> attributes = new ArrayList<Attribute>();
+		final Collection<Attribute> attributes = new ArrayList<>();
 		final Attribute IDattribute = new Attribute(SPOT_ID_ATTRIBUTE_NAME, "" + spot.ID());
 		attributes.add(IDattribute);
 		final Attribute nameAttribute = new Attribute(SPOT_NAME_ATTRIBUTE_NAME, spot.getName());

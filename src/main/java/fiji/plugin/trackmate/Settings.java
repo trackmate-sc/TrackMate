@@ -125,21 +125,21 @@ public class Settings
 	 * 
 	 * @see fiji.plugin.trackmate.detection.DetectorKeys
 	 */
-	public Map< String, Object > detectorSettings = new HashMap< String, Object >();
+	public Map< String, Object > detectorSettings = new HashMap< >();
 
 	/**
 	 * Settings map for {@link fiji.plugin.trackmate.tracking.SpotTracker}.
 	 * 
 	 * @see fiji.plugin.trackmate.tracking.TrackerKeys
 	 */
-	public Map< String, Object > trackerSettings = new HashMap< String, Object >();
+	public Map< String, Object > trackerSettings = new HashMap< >();
 
 	// Filters
 
 	/**
 	 * The feature filter list.
 	 */
-	protected List< FeatureFilter > spotFilters = new ArrayList< FeatureFilter >();
+	protected List< FeatureFilter > spotFilters = new ArrayList< >();
 
 	/**
 	 * The initial quality filter value that is used to clip spots of low
@@ -148,7 +148,7 @@ public class Settings
 	public Double initialSpotFilterValue = Double.valueOf( 0 );
 
 	/** The track filter list that is used to prune track and spots. */
-	protected List< FeatureFilter > trackFilters = new ArrayList< FeatureFilter >();
+	protected List< FeatureFilter > trackFilters = new ArrayList< >();
 
 	protected String errorMessage;
 
@@ -159,7 +159,7 @@ public class Settings
 	 * features. They are ordered in a {@link List} in case some analyzers
 	 * requires the results of another analyzer to proceed.
 	 */
-	protected List< SpotAnalyzerFactory< ? > > spotAnalyzerFactories = new ArrayList< SpotAnalyzerFactory< ? > >();
+	protected List< SpotAnalyzerFactory< ? > > spotAnalyzerFactories = new ArrayList< >();
 
 	// Edge features
 
@@ -168,7 +168,7 @@ public class Settings
 	 * They are ordered in a {@link List} in case some analyzers requires the
 	 * results of another analyzer to proceed.
 	 */
-	protected List< EdgeAnalyzer > edgeAnalyzers = new ArrayList< EdgeAnalyzer >();
+	protected List< EdgeAnalyzer > edgeAnalyzers = new ArrayList< >();
 
 	// Track features
 
@@ -177,7 +177,7 @@ public class Settings
 	 * They are ordered in a {@link List} in case some analyzers requires the
 	 * results of another analyzer to proceed.
 	 */
-	protected List< TrackAnalyzer > trackAnalyzers = new ArrayList< TrackAnalyzer >();
+	protected List< TrackAnalyzer > trackAnalyzers = new ArrayList< >();
 
 	/*
 	 * METHODS
@@ -489,7 +489,7 @@ public class Settings
 	 */
 	public List< SpotAnalyzerFactory< ? > > getSpotAnalyzerFactories()
 	{
-		return new ArrayList< SpotAnalyzerFactory< ? > >( spotAnalyzerFactories );
+		return new ArrayList< >( spotAnalyzerFactories );
 	}
 
 	/**
@@ -556,7 +556,7 @@ public class Settings
 	 */
 	public List< EdgeAnalyzer > getEdgeAnalyzers()
 	{
-		return new ArrayList< EdgeAnalyzer >( edgeAnalyzers );
+		return new ArrayList< >( edgeAnalyzers );
 	}
 
 	/**
@@ -622,7 +622,7 @@ public class Settings
 	 */
 	public List< TrackAnalyzer > getTrackAnalyzers()
 	{
-		return new ArrayList< TrackAnalyzer >( trackAnalyzers );
+		return new ArrayList< >( trackAnalyzers );
 	}
 
 	/**

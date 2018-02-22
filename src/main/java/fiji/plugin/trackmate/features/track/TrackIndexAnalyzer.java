@@ -26,15 +26,15 @@ public class TrackIndexAnalyzer implements TrackAnalyzer
 
 	public static final String TRACK_ID = "TRACK_ID";
 
-	public static final List< String > FEATURES = new ArrayList< String >( 2 );
+	public static final List< String > FEATURES = new ArrayList< >( 2 );
 
-	public static final Map< String, String > FEATURE_NAMES = new HashMap< String, String >( 2 );
+	public static final Map< String, String > FEATURE_NAMES = new HashMap< >( 2 );
 
-	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< String, String >( 2 );
+	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< >( 2 );
 
-	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 2 );
+	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< >( 2 );
 
-	public static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 2 );
+	public static final Map< String, Boolean > IS_INT = new HashMap< >( 2 );
 
 	static
 	{

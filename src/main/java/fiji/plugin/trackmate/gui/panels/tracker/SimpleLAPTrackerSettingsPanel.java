@@ -95,12 +95,12 @@ public class SimpleLAPTrackerSettingsPanel extends ConfigurationPanel
 	public void setSettings( final Map< String, Object > settings )
 	{
 		echoSettings( settings );
-	};
+	}
 
 	@Override
 	public Map< String, Object > getSettings()
 	{
-		final Map< String, Object > settings = new HashMap< String, Object >();
+		final Map< String, Object > settings = new HashMap<>();
 		// Linking
 		settings.put( KEY_LINKING_FEATURE_PENALTIES, DEFAULT_LINKING_FEATURE_PENALTIES );
 		// Gap closing

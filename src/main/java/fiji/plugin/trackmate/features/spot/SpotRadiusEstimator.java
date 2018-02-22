@@ -59,7 +59,7 @@ public class SpotRadiusEstimator< T extends RealType< T >> extends IndependentSp
 		final Spot tmpSpot = new Spot( spot );
 		tmpSpot.putFeature( Spot.RADIUS, diameters[ nDiameters - 1 ] / 2 );
 
-		final SpotNeighborhood< T > neighborhood = new SpotNeighborhood< T >( tmpSpot, img );
+		final SpotNeighborhood< T > neighborhood = new SpotNeighborhood<>( tmpSpot, img );
 		if ( neighborhood.size() <= 1 )
 		{
 			spot.putFeature( ESTIMATED_DIAMETER, Double.valueOf( radius ) );
@@ -123,11 +123,9 @@ public class SpotRadiusEstimator< T extends RealType< T >> extends IndependentSp
 		final double d2 = 2 * ( ( y3 - y2 ) / ( x3 - x2 ) - ( y2 - y1 ) / ( x2 - x1 ) ) / ( x3 - x1 );
 		if ( d2 == 0 )
 			return x2;
-		else
-		{
-			final double d1 = ( y3 - y2 ) / ( x3 - x2 ) - d2 / 2 * ( x3 - x2 );
-			return x2 - d1 / d2;
-		}
+
+		final double d1 = ( y3 - y2 ) / ( x3 - x2 ) - d2 / 2 * ( x3 - x2 );
+		return x2 - d1 / d2;
 	}
 
 	private static final double[] prepareDiameters( final double centralDiameter, final int nDiameters )

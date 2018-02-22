@@ -123,7 +123,7 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 	@Override
 	public boolean process()
 	{
-		final Set< Spot > spots = new HashSet< Spot >( selectionModel.getSpotSelection() );
+		final Set< Spot > spots = new HashSet< >( selectionModel.getSpotSelection() );
 		if ( spots.isEmpty() )
 		{
 			errorMessage = BASE_ERROR_MESSAGE + "No spots in selection.\n";
@@ -132,7 +132,7 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 		selectionModel.clearSelection();
 
 		final int nThreads = Math.min( numThreads, spots.size() );
-		final ArrayBlockingQueue< Spot > queue = new ArrayBlockingQueue< Spot >( spots.size(), false, spots );
+		final ArrayBlockingQueue< Spot > queue = new ArrayBlockingQueue< >( spots.size(), false, spots );
 
 		ok = true;
 		final ThreadGroup semiAutoTrackingThreadgroup = new ThreadGroup( "Semi-automatic tracking threads" );
@@ -263,7 +263,7 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 				}
 			}
 
-			if ( !found )
+			if ( !found || target == null )
 			{
 				logger.log( "Spot: " + initialSpot + ": Suitable spot found, but outside the tolerance radius.\n" );
 				return;
@@ -367,7 +367,7 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 	 */
 	protected SpotDetector< T > createDetector( final RandomAccessible< T > img, final Interval interval, final double[] calibration, final double radius, final double quality )
 	{
-		final LogDetector< T > detector = new LogDetector< T >( img, interval, calibration, radius, quality, true, false );
+		final LogDetector< T > detector = new LogDetector< >( img, interval, calibration, radius, quality, true, false );
 		detector.setNumThreads( 1 );
 		return detector;
 	}

@@ -23,47 +23,47 @@ public class FeatureModel
 	 * FIELDS
 	 */
 
-	private final Collection< String > trackFeatures = new LinkedHashSet< String >();
+	private final Collection< String > trackFeatures = new LinkedHashSet< >();
 
-	private final Map< String, String > trackFeatureNames = new HashMap< String, String >();
+	private final Map< String, String > trackFeatureNames = new HashMap< >();
 
-	private final Map< String, String > trackFeatureShortNames = new HashMap< String, String >();
+	private final Map< String, String > trackFeatureShortNames = new HashMap< >();
 
-	private final Map< String, Dimension > trackFeatureDimensions = new HashMap< String, Dimension >();
+	private final Map< String, Dimension > trackFeatureDimensions = new HashMap< >();
 
-	private final Map< String, Boolean > trackFeatureIsInt = new HashMap< String, Boolean >();
+	private final Map< String, Boolean > trackFeatureIsInt = new HashMap< >();
 
 	/**
 	 * Feature storage. We use a Map of Map as a 2D Map. The list maps each
 	 * track to its feature map. The feature map maps each feature to the double
 	 * value for the specified feature.
 	 */
-	Map< Integer, Map< String, Double >> trackFeatureValues = new ConcurrentHashMap< Integer, Map< String, Double >>();
+	Map< Integer, Map< String, Double >> trackFeatureValues = new ConcurrentHashMap<>();
 
 	/**
 	 * Feature storage for edges.
 	 */
-	private final ConcurrentHashMap< DefaultWeightedEdge, ConcurrentHashMap< String, Double >> edgeFeatureValues = new ConcurrentHashMap< DefaultWeightedEdge, ConcurrentHashMap< String, Double >>();
+	private final ConcurrentHashMap< DefaultWeightedEdge, ConcurrentHashMap< String, Double >> edgeFeatureValues = new ConcurrentHashMap<>();
 
-	private final Collection< String > edgeFeatures = new LinkedHashSet< String >();
+	private final Collection< String > edgeFeatures = new LinkedHashSet< >();
 
-	private final Map< String, String > edgeFeatureNames = new HashMap< String, String >();
+	private final Map< String, String > edgeFeatureNames = new HashMap< >();
 
-	private final Map< String, String > edgeFeatureShortNames = new HashMap< String, String >();
+	private final Map< String, String > edgeFeatureShortNames = new HashMap< >();
 
-	private final Map< String, Dimension > edgeFeatureDimensions = new HashMap< String, Dimension >();
+	private final Map< String, Dimension > edgeFeatureDimensions = new HashMap< >();
 
-	private final Map< String, Boolean > edgeFeatureIsInt = new HashMap< String, Boolean >();
+	private final Map< String, Boolean > edgeFeatureIsInt = new HashMap< >();
 
-	private final Collection< String > spotFeatures = new LinkedHashSet< String >();
+	private final Collection< String > spotFeatures = new LinkedHashSet< >();
 
-	private final Map< String, String > spotFeatureNames = new HashMap< String, String >();
+	private final Map< String, String > spotFeatureNames = new HashMap< >();
 
-	private final Map< String, String > spotFeatureShortNames = new HashMap< String, String >();
+	private final Map< String, String > spotFeatureShortNames = new HashMap< >();
 
-	private final Map< String, Dimension > spotFeatureDimensions = new HashMap< String, Dimension >();
+	private final Map< String, Dimension > spotFeatureDimensions = new HashMap< >();
 
-	private final Map< String, Boolean > spotFeatureIsInt = new HashMap< String, Boolean >();
+	private final Map< String, Boolean > spotFeatureIsInt = new HashMap< >();
 
 	private final Model model;
 
@@ -180,7 +180,7 @@ public class FeatureModel
 		ConcurrentHashMap< String, Double > map = edgeFeatureValues.get( edge );
 		if ( null == map )
 		{
-			map = new ConcurrentHashMap< String, Double >();
+			map = new ConcurrentHashMap< >();
 			edgeFeatureValues.put( edge, map );
 		}
 		map.put( feature, value );
@@ -407,7 +407,7 @@ public class FeatureModel
 		Map< String, Double > trackFeatureMap = trackFeatureValues.get( trackID );
 		if ( null == trackFeatureMap )
 		{
-			trackFeatureMap = new HashMap< String, Double >( trackFeatures.size() );
+			trackFeatureMap = new HashMap< >( trackFeatures.size() );
 			trackFeatureValues.put( trackID, trackFeatureMap );
 		}
 		trackFeatureMap.put( feature, value );
@@ -437,7 +437,7 @@ public class FeatureModel
 	 */
 	public Map< String, double[] > getTrackFeatureValues()
 	{
-		final Map< String, double[] > featureValues = new HashMap< String, double[] >();
+		final Map< String, double[] > featureValues = new HashMap< >();
 		Double val;
 		final int nTracks = model.getTrackModel().nTracks( false );
 		for ( final String feature : trackFeatures )
@@ -594,7 +594,7 @@ public class FeatureModel
 		str.append( '\n' );
 
 		return str.toString();
-	};
+	}
 
 	/**
 	 * Echoes the full content of this {@link FeatureModel}.

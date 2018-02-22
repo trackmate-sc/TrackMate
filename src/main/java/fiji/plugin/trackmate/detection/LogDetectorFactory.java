@@ -136,7 +136,7 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 		final double[] calibration = TMUtils.getSpatialCalibration( img );
 		final RandomAccessible< T > imFrame = prepareFrameImg( frame );
 
-		final LogDetector< T > detector = new LogDetector< T >( imFrame, interval, calibration, radius, threshold, doSubpixel, doMedian );
+		final LogDetector< T > detector = new LogDetector<>( imFrame, interval, calibration, radius, threshold, doSubpixel, doMedian );
 		detector.setNumThreads( 1 );
 		return detector;
 	}
@@ -154,22 +154,22 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 	}
 
 	@Override
-	public boolean checkSettings( final Map< String, Object > settings )
+	public boolean checkSettings( final Map< String, Object > lSettings )
 	{
 		boolean ok = true;
 		final StringBuilder errorHolder = new StringBuilder();
-		ok = ok & checkParameter( settings, KEY_TARGET_CHANNEL, Integer.class, errorHolder );
-		ok = ok & checkParameter( settings, KEY_RADIUS, Double.class, errorHolder );
-		ok = ok & checkParameter( settings, KEY_THRESHOLD, Double.class, errorHolder );
-		ok = ok & checkParameter( settings, KEY_DO_MEDIAN_FILTERING, Boolean.class, errorHolder );
-		ok = ok & checkParameter( settings, KEY_DO_SUBPIXEL_LOCALIZATION, Boolean.class, errorHolder );
-		final List< String > mandatoryKeys = new ArrayList< String >();
+		ok = ok & checkParameter( lSettings, KEY_TARGET_CHANNEL, Integer.class, errorHolder );
+		ok = ok & checkParameter( lSettings, KEY_RADIUS, Double.class, errorHolder );
+		ok = ok & checkParameter( lSettings, KEY_THRESHOLD, Double.class, errorHolder );
+		ok = ok & checkParameter( lSettings, KEY_DO_MEDIAN_FILTERING, Boolean.class, errorHolder );
+		ok = ok & checkParameter( lSettings, KEY_DO_SUBPIXEL_LOCALIZATION, Boolean.class, errorHolder );
+		final List< String > mandatoryKeys = new ArrayList<>();
 		mandatoryKeys.add( KEY_TARGET_CHANNEL );
 		mandatoryKeys.add( KEY_RADIUS );
 		mandatoryKeys.add( KEY_THRESHOLD );
 		mandatoryKeys.add( KEY_DO_MEDIAN_FILTERING );
 		mandatoryKeys.add( KEY_DO_SUBPIXEL_LOCALIZATION );
-		ok = ok & checkMapKeys( settings, mandatoryKeys, null, errorHolder );
+		ok = ok & checkMapKeys( lSettings, mandatoryKeys, null, errorHolder );
 		if ( !ok )
 		{
 			errorMessage = errorHolder.toString();
@@ -178,10 +178,10 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 	}
 
 	@Override
-	public boolean marshall( final Map< String, Object > settings, final Element element )
+	public boolean marshall( final Map< String, Object > lSettings, final Element element )
 	{
 		final StringBuilder errorHolder = new StringBuilder();
-		final boolean ok = writeTargetChannel( settings, element, errorHolder ) && writeRadius( settings, element, errorHolder ) && writeThreshold( settings, element, errorHolder ) && writeDoMedian( settings, element, errorHolder ) && writeDoSubPixel( settings, element, errorHolder );
+		final boolean ok = writeTargetChannel( lSettings, element, errorHolder ) && writeRadius( lSettings, element, errorHolder ) && writeThreshold( lSettings, element, errorHolder ) && writeDoMedian( lSettings, element, errorHolder ) && writeDoSubPixel( lSettings, element, errorHolder );
 		if ( !ok )
 		{
 			errorMessage = errorHolder.toString();
@@ -190,28 +190,28 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 	}
 
 	@Override
-	public boolean unmarshall( final Element element, final Map< String, Object > settings )
+	public boolean unmarshall( final Element element, final Map< String, Object > lSettings )
 	{
-		settings.clear();
+		lSettings.clear();
 		final StringBuilder errorHolder = new StringBuilder();
 		boolean ok = true;
-		ok = ok & readDoubleAttribute( element, settings, KEY_RADIUS, errorHolder );
-		ok = ok & readDoubleAttribute( element, settings, KEY_THRESHOLD, errorHolder );
-		ok = ok & readBooleanAttribute( element, settings, KEY_DO_SUBPIXEL_LOCALIZATION, errorHolder );
-		ok = ok & readBooleanAttribute( element, settings, KEY_DO_MEDIAN_FILTERING, errorHolder );
-		ok = ok & readIntegerAttribute( element, settings, KEY_TARGET_CHANNEL, errorHolder );
+		ok = ok & readDoubleAttribute( element, lSettings, KEY_RADIUS, errorHolder );
+		ok = ok & readDoubleAttribute( element, lSettings, KEY_THRESHOLD, errorHolder );
+		ok = ok & readBooleanAttribute( element, lSettings, KEY_DO_SUBPIXEL_LOCALIZATION, errorHolder );
+		ok = ok & readBooleanAttribute( element, lSettings, KEY_DO_MEDIAN_FILTERING, errorHolder );
+		ok = ok & readIntegerAttribute( element, lSettings, KEY_TARGET_CHANNEL, errorHolder );
 		if ( !ok )
 		{
 			errorMessage = errorHolder.toString();
 			return false;
 		}
-		return checkSettings( settings );
+		return checkSettings( lSettings );
 	}
 
 	@Override
-	public ConfigurationPanel getDetectorConfigurationPanel( final Settings settings, final Model model )
+	public ConfigurationPanel getDetectorConfigurationPanel( final Settings lSettings, final Model model )
 	{
-		return new LogDetectorConfigurationPanel( settings, model, INFO_TEXT, NAME );
+		return new LogDetectorConfigurationPanel( lSettings, model, INFO_TEXT, NAME );
 	}
 
 	@Override
@@ -229,13 +229,13 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 	@Override
 	public Map< String, Object > getDefaultSettings()
 	{
-		final Map< String, Object > settings = new HashMap< String, Object >();
-		settings.put( KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL );
-		settings.put( KEY_RADIUS, DEFAULT_RADIUS );
-		settings.put( KEY_THRESHOLD, DEFAULT_THRESHOLD );
-		settings.put( KEY_DO_MEDIAN_FILTERING, DEFAULT_DO_MEDIAN_FILTERING );
-		settings.put( KEY_DO_SUBPIXEL_LOCALIZATION, DEFAULT_DO_SUBPIXEL_LOCALIZATION );
-		return settings;
+		final Map< String, Object > lSettings = new HashMap<>();
+		lSettings.put( KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL );
+		lSettings.put( KEY_RADIUS, DEFAULT_RADIUS );
+		lSettings.put( KEY_THRESHOLD, DEFAULT_THRESHOLD );
+		lSettings.put( KEY_DO_MEDIAN_FILTERING, DEFAULT_DO_MEDIAN_FILTERING );
+		lSettings.put( KEY_DO_SUBPIXEL_LOCALIZATION, DEFAULT_DO_SUBPIXEL_LOCALIZATION );
+		return lSettings;
 	}
 
 	@Override

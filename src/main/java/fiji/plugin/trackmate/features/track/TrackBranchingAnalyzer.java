@@ -11,7 +11,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 import javax.swing.ImageIcon;
 
-import net.imglib2.algorithm.MultiThreaded;
 import net.imglib2.multithreading.SimpleMultiThreading;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -23,7 +22,7 @@ import fiji.plugin.trackmate.Spot;
 
 @SuppressWarnings( "deprecation" )
 @Plugin( type = TrackAnalyzer.class )
-public class TrackBranchingAnalyzer implements TrackAnalyzer, MultiThreaded
+public class TrackBranchingAnalyzer implements TrackAnalyzer
 {
 
 	/*
@@ -43,15 +42,15 @@ public class TrackBranchingAnalyzer implements TrackAnalyzer, MultiThreaded
 
 	public static final String NUMBER_SPOTS = "NUMBER_SPOTS";
 
-	public static final List< String > FEATURES = new ArrayList< String >( 5 );
+	public static final List< String > FEATURES = new ArrayList< >( 5 );
 
-	public static final Map< String, String > FEATURE_NAMES = new HashMap< String, String >( 5 );
+	public static final Map< String, String > FEATURE_NAMES = new HashMap< >( 5 );
 
-	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< String, String >( 5 );
+	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< >( 5 );
 
-	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< String, Dimension >( 5 );
+	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< >( 5 );
 
-	public static final Map< String, Boolean > IS_INT = new HashMap< String, Boolean >( 5 );
+	public static final Map< String, Boolean > IS_INT = new HashMap< >( 5 );
 
 	static
 	{
@@ -112,7 +111,7 @@ public class TrackBranchingAnalyzer implements TrackAnalyzer, MultiThreaded
 
 		if ( trackIDs.isEmpty() ) { return; }
 
-		final ArrayBlockingQueue< Integer > queue = new ArrayBlockingQueue< Integer >( trackIDs.size(), false, trackIDs );
+		final ArrayBlockingQueue< Integer > queue = new ArrayBlockingQueue< >( trackIDs.size(), false, trackIDs );
 
 		final Thread[] threads = SimpleMultiThreading.newThreads( numThreads );
 		for ( int i = 0; i < threads.length; i++ )
@@ -136,7 +135,7 @@ public class TrackBranchingAnalyzer implements TrackAnalyzer, MultiThreaded
 							final Set< DefaultWeightedEdge > edges = model.getTrackModel().edgesOf( spot );
 
 							// get neighbors
-							final Set< Spot > neighbors = new HashSet< Spot >();
+							final Set< Spot > neighbors = new HashSet< >();
 							for ( final DefaultWeightedEdge edge : edges )
 							{
 								neighbors.add( model.getTrackModel().getEdgeSource( edge ) );

@@ -85,8 +85,8 @@ public class ListChooserPanel extends ActionListenablePanel
 			}
 			{
 				final String[] names = items.toArray( new String[] {} );
-				final ComboBoxModel< String > jComboBoxDisplayerChoiceModel = new DefaultComboBoxModel< String >( names );
-				jComboBoxChoice = new JComboBox< String >();
+				final ComboBoxModel< String > jComboBoxDisplayerChoiceModel = new DefaultComboBoxModel< >( names );
+				jComboBoxChoice = new JComboBox< >();
 				springLayout.putConstraint( SpringLayout.NORTH, jComboBoxChoice, 48, SpringLayout.NORTH, this );
 				springLayout.putConstraint( SpringLayout.WEST, jComboBoxChoice, 10, SpringLayout.WEST, this );
 				springLayout.putConstraint( SpringLayout.SOUTH, jComboBoxChoice, 75, SpringLayout.NORTH, this );

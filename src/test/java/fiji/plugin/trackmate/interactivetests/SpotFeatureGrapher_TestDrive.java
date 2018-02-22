@@ -11,13 +11,11 @@ import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
-import org.jdom2.JDOMException;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 import org.scijava.util.AppUtils;
@@ -25,7 +23,7 @@ import org.scijava.util.AppUtils;
 public class SpotFeatureGrapher_TestDrive
 {
 
-	public static void main( final String[] args ) throws JDOMException, IOException
+	public static void main( final String[] args )
 	{
 
 		// Load objects
@@ -33,9 +31,9 @@ public class SpotFeatureGrapher_TestDrive
 		final TmXmlReader reader = new TmXmlReader( file );
 		final Model model = reader.getModel();
 
-		final HashSet< String > Y = new HashSet< String >( 1 );
+		final HashSet< String > Y = new HashSet< >( 1 );
 		Y.add( Spot.POSITION_T );
-		final List< Spot > spots = new ArrayList< Spot >( model.getSpots().getNSpots( true ) );
+		final List< Spot > spots = new ArrayList< >( model.getSpots().getNSpots( true ) );
 		for ( final Iterator< Spot > it = model.getSpots().iterator( true ); it.hasNext(); )
 		{
 			spots.add( it.next() );
@@ -60,7 +58,7 @@ public class SpotFeatureGrapher_TestDrive
 	{
 
 		final int N_SPOTS = 50;
-		final List< Spot > spots = new ArrayList< Spot >( N_SPOTS );
+		final List< Spot > spots = new ArrayList< >( N_SPOTS );
 		final SpotCollection sc = new SpotCollection();
 		for ( int i = 0; i < N_SPOTS; i++ )
 		{
@@ -72,7 +70,7 @@ public class SpotFeatureGrapher_TestDrive
 
 			spots.add( spot );
 
-			final List< Spot > ts = new ArrayList< Spot >( 1 );
+			final List< Spot > ts = new ArrayList< >( 1 );
 			ts.add( spot );
 			sc.put( i, ts );
 			spot.putFeature( SpotCollection.VISIBLITY, SpotCollection.ONE );
@@ -81,7 +79,7 @@ public class SpotFeatureGrapher_TestDrive
 		final Model model = new Model();
 		model.setSpots( sc, false );
 
-		final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph = new SimpleWeightedGraph< Spot, DefaultWeightedEdge >( DefaultWeightedEdge.class );
+		final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph = new SimpleWeightedGraph< >( DefaultWeightedEdge.class );
 		for ( final Spot spot : spots )
 		{
 			graph.addVertex( spot );

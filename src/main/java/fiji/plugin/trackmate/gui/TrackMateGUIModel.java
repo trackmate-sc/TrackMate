@@ -54,7 +54,7 @@ public class TrackMateGUIModel {
 	/** The collection of views instantiated and registered in the GUI. 
 	 * We need to keep track of them so that we can forward them the 
 	 * changes in display settings.	 */
-	Collection<TrackMateModelView> views = new HashSet<TrackMateModelView>();
+	Collection<TrackMateModelView> views = new HashSet<>();
 
 	/** The current display settings, that will be passed to any new view
 	 * registered in the GUI.  */

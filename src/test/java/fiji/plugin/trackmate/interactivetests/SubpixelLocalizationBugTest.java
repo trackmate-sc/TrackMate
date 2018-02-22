@@ -26,6 +26,9 @@ public class SubpixelLocalizationBugTest
 		test3D( args );
 	}
 
+	/**
+	 * @param args  
+	 */
 	public static void test2D( final String[] args )
 	{
 		final ArrayImg< FloatType, FloatArray > I = ArrayImgs.floats( 256, 128 );
@@ -33,7 +36,7 @@ public class SubpixelLocalizationBugTest
 		final double A = 128;
 		final double spot_sigma = 1.7;
 
-		final List< Point > peaks = new ArrayList< Point >( 11 );
+		final List< Point > peaks = new ArrayList< >( 11 );
 
 		for ( int j = 0; j < 1; j++ )
 		{
@@ -60,7 +63,7 @@ public class SubpixelLocalizationBugTest
 			}
 		}
 
-		final SubpixelLocalization< Point, FloatType > localizer = new SubpixelLocalization< Point, FloatType >( I.numDimensions() );
+		final SubpixelLocalization< Point, FloatType > localizer = new SubpixelLocalization< >( I.numDimensions() );
 		localizer.setAllowMaximaTolerance( true );
 		localizer.setCanMoveOutside( true );
 		localizer.setMaxNumMoves( 10 );
@@ -86,6 +89,9 @@ public class SubpixelLocalizationBugTest
 		}
 	}
 
+	/**
+	 * @param args  
+	 */
 	public static void test3D( final String[] args )
 	{
 		final ArrayImg< FloatType, FloatArray > I = ArrayImgs.floats( 32, 128, 256 );
@@ -93,7 +99,7 @@ public class SubpixelLocalizationBugTest
 		final double A = 128;
 		final double spot_sigma = 1.7;
 
-		final List< Point > peaks = new ArrayList< Point >( 11 );
+		final List< Point > peaks = new ArrayList< >( 11 );
 
 		for ( int j = 0; j < 11; j++ )
 		{
@@ -122,7 +128,7 @@ public class SubpixelLocalizationBugTest
 			}
 		}
 
-		final SubpixelLocalization< Point, FloatType > localizer = new SubpixelLocalization< Point, FloatType >( I.numDimensions() );
+		final SubpixelLocalization< Point, FloatType > localizer = new SubpixelLocalization< >( I.numDimensions() );
 		localizer.setAllowMaximaTolerance( true );
 		localizer.setCanMoveOutside( true );
 		localizer.setMaxNumMoves( 10 );

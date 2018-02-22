@@ -149,18 +149,18 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 	@Override
 	public Map< String, Object > getSettings()
 	{
-		final HashMap< String, Object > settings = new HashMap< String, Object >( 5 );
+		final HashMap< String, Object > lSettings = new HashMap< >( 5 );
 		final int targetChannel = sliderChannel.getValue();
 		final double expectedRadius = NumberParser.parseDouble( jTextFieldBlobDiameter.getText() ) / 2;
 		final double threshold = NumberParser.parseDouble( jTextFieldThreshold.getText() );
 		final boolean useMedianFilter = jCheckBoxMedianFilter.isSelected();
 		final boolean doSubPixelLocalization = jCheckSubPixel.isSelected();
-		settings.put( KEY_TARGET_CHANNEL, targetChannel );
-		settings.put( KEY_RADIUS, expectedRadius );
-		settings.put( KEY_THRESHOLD, threshold );
-		settings.put( KEY_DO_MEDIAN_FILTERING, useMedianFilter );
-		settings.put( KEY_DO_SUBPIXEL_LOCALIZATION, doSubPixelLocalization );
-		return settings;
+		lSettings.put( KEY_TARGET_CHANNEL, targetChannel );
+		lSettings.put( KEY_RADIUS, expectedRadius );
+		lSettings.put( KEY_THRESHOLD, threshold );
+		lSettings.put( KEY_DO_MEDIAN_FILTERING, useMedianFilter );
+		lSettings.put( KEY_DO_SUBPIXEL_LOCALIZATION, doSubPixelLocalization );
+		return lSettings;
 	}
 
 	@Override
@@ -218,16 +218,16 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 			@Override
 			public void run()
 			{
-				final Settings settings = new Settings();
-				settings.setFrom( imp );
+				final Settings lSettings = new Settings();
+				lSettings.setFrom( imp );
 				final int frame = imp.getFrame() - 1;
-				settings.tstart = frame;
-				settings.tend = frame;
+				lSettings.tstart = frame;
+				lSettings.tend = frame;
 
-				settings.detectorFactory = getDetectorFactory();
-				settings.detectorSettings = getSettings();
+				lSettings.detectorFactory = getDetectorFactory();
+				lSettings.detectorSettings = getSettings();
 
-				final TrackMate trackmate = new TrackMate( settings );
+				final TrackMate trackmate = new TrackMate( lSettings );
 				trackmate.getModel().setLogger( localLogger );
 
 				final boolean detectionOk = trackmate.execDetection();
@@ -241,7 +241,7 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 				// Wrap new spots in a list.
 				final SpotCollection newspots = trackmate.getModel().getSpots();
 				final Iterator< Spot > it = newspots.iterator( frame, false );
-				final ArrayList< Spot > spotsToCopy = new ArrayList< Spot >( newspots.getNSpots( frame, false ) );
+				final ArrayList< Spot > spotsToCopy = new ArrayList< >( newspots.getNSpots( frame, false ) );
 				while ( it.hasNext() )
 				{
 					spotsToCopy.add( it.next() );
@@ -258,7 +258,7 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 
 				btnPreview.setEnabled( true );
 
-			};
+			}
 		}.start();
 	}
 

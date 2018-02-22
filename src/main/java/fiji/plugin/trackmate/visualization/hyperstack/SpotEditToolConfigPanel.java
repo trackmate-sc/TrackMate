@@ -23,6 +23,7 @@ import javax.swing.JTextPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 import javax.swing.border.LineBorder;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.SimpleAttributeSet;
@@ -358,7 +359,7 @@ public class SpotEditToolConfigPanel extends JFrame
 		};
 
 		setSize( 487, 418 );
-		setDefaultCloseOperation( JFrame.HIDE_ON_CLOSE );
+		setDefaultCloseOperation( WindowConstants.HIDE_ON_CLOSE );
 		setVisible( true );
 	}
 

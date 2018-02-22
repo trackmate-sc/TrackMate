@@ -30,7 +30,7 @@ public class StartDialogDescriptor implements WizardPanelDescriptor
 
 	private final StartDialogPanel panel;
 
-	private final ArrayList< ActionListener > actionListeners = new ArrayList< ActionListener >();
+	private final ArrayList< ActionListener > actionListeners = new ArrayList<>();
 
 	private final TrackMateGUIController controller;
 
