@@ -371,58 +371,32 @@ public class TmXmlWriter
 		/*
 		 * Some numerical features are REQUIRED to be able to save to XML.
 		 * Namely: the track ID feature for track and the edge spot source and
-		 * spot target for edges. If the model does not provide these features
-		 * already, we must recompute them. The test to check whether they are
-		 * here or not is a bit lame: we simply ask if the first track or edge
-		 * has them, adn extrapolate to the whole model.
+		 * spot target for edges. Whether the model provides them as features or
+		 * not, we get them from the model and put them in the XML.
 		 */
-
-		// Track & edges required features
-		if ( model.getTrackModel().nTracks( false ) > 0 )
-		{
-
-			final Set< Integer > trackIDs = model.getTrackModel().unsortedTrackIDs( false );
-			// Find a valid track
-			for ( final Integer trackID : trackIDs )
-			{
-				final Set< DefaultWeightedEdge > track = model.getTrackModel().trackEdges( trackID );
-				if ( track.size() == 0 )
-				{
-					continue;
-				}
-
-				final Double val1 = model.getFeatureModel().getTrackFeature( trackID, TrackIndexAnalyzer.TRACK_ID );
-				if ( null == val1 )
-				{
-					final TrackIndexAnalyzer trackIndexAnalyzer = new TrackIndexAnalyzer();
-					trackIndexAnalyzer.process( trackIDs, model );
-				}
-
-				final DefaultWeightedEdge edge = track.iterator().next();
-				final Double val3 = model.getFeatureModel().getEdgeFeature( edge, EdgeTargetAnalyzer.SPOT_SOURCE_ID );
-				final Double val4 = model.getFeatureModel().getEdgeFeature( edge, EdgeTargetAnalyzer.SPOT_TARGET_ID );
-				if ( null == val3 || null == val4 )
-				{
-					final EdgeTargetAnalyzer edgeTargetAnalyzer = new EdgeTargetAnalyzer();
-					edgeTargetAnalyzer.process( model.getTrackModel().edgeSet(), model );
-				}
-			}
-		}
 
 		final Element allTracksElement = new Element( TRACK_COLLECTION_ELEMENT_KEY );
 
 		// Prepare track features for writing: we separate ints from doubles
 		final List< String > trackFeatures = new ArrayList< >( model.getFeatureModel().getTrackFeatures() );
+		// TrackID is treated separately.
+		trackFeatures.remove( TrackIndexAnalyzer.TRACK_ID );
 
 		// Same thing for edge features
 		final List< String > edgeFeatures = new ArrayList< >( model.getFeatureModel().getEdgeFeatures() );
-
+		// We will treat edge source and target separately.
+		edgeFeatures.remove( EdgeTargetAnalyzer.SPOT_SOURCE_ID );
+		edgeFeatures.remove( EdgeTargetAnalyzer.SPOT_TARGET_ID );
+		
 		final Set<Integer> trackIDs = model.getTrackModel().trackIDs(false);
 		for (final int trackID : trackIDs) {
-			final Set<DefaultWeightedEdge> track = model.getTrackModel().trackEdges(trackID);
 
 			final Element trackElement = new Element(TRACK_ELEMENT_KEY);
+			
+			// Track name.
 			trackElement.setAttribute(TRACK_NAME_ATTRIBUTE_NAME, model.getTrackModel().name(trackID));
+			// Track ID.
+			trackElement.setAttribute(TrackIndexAnalyzer.TRACK_ID, Integer.toString( trackID ));
 
 			for ( final String feature : trackFeatures )
 			{
@@ -432,20 +406,17 @@ public class TmXmlWriter
 					// Skip missing features.
 					continue;
 				}
-				String str;
+				final String str;
 				if ( model.getFeatureModel().getTrackFeatureIsInt().get( feature ).booleanValue() )
-				{
 					str = "" + val.intValue();
-				}
 				else
-				{
 					str = val.toString();
-				}
 				trackElement.setAttribute( feature, str );
 			}
 
 			// Echo edges
-			if ( track.size() == 0 )
+			final Set<DefaultWeightedEdge> track = model.getTrackModel().trackEdges(trackID);
+			if ( track.isEmpty() )
 			{
 				/*
 				 * Special case: the track has only one spot in it, therefore no
@@ -458,6 +429,27 @@ public class TmXmlWriter
 			for ( final DefaultWeightedEdge edge : track )
 			{
 				final Element edgeElement = new Element(TRACK_EDGE_ELEMENT_KEY);
+
+				/*
+				 * Make sure the edge has the right orientation: forward in time.
+				 */
+				final int sourceFrame = model.getTrackModel().getEdgeSource( edge ).getFeature( Spot.FRAME ).intValue();
+				final int targetFrame = model.getTrackModel().getEdgeTarget( edge ).getFeature( Spot.FRAME ).intValue();
+				final int sourceID;
+				final int targetID;
+				if (targetFrame >= sourceFrame)
+				{
+					sourceID = model.getTrackModel().getEdgeSource( edge ).ID();
+					targetID = model.getTrackModel().getEdgeTarget( edge ).ID();
+				}
+				else
+				{
+					sourceID = model.getTrackModel().getEdgeTarget( edge ).ID();
+					targetID = model.getTrackModel().getEdgeSource( edge ).ID();
+				}
+				edgeElement.setAttribute( EdgeTargetAnalyzer.SPOT_SOURCE_ID, Integer.toString( sourceID ) );
+				edgeElement.setAttribute( EdgeTargetAnalyzer.SPOT_TARGET_ID, Integer.toString( targetID ) );
+				
 				for ( final String feature : edgeFeatures )
 				{
 					final Double val = model.getFeatureModel().getEdgeFeature(edge, feature);
@@ -466,15 +458,11 @@ public class TmXmlWriter
 						// Skip missing features.
 						continue;
 					}
-					String str;
+					final String str;
 					if ( model.getFeatureModel().getEdgeFeatureIsInt().get( feature ).booleanValue() )
-					{
 						str = "" + val.intValue();
-					}
 					else
-					{
 						str = val.toString();
-					}
 					edgeElement.setAttribute( feature, str );
 				}
 
