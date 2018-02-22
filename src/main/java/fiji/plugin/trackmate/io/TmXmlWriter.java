@@ -162,7 +162,7 @@ public class TmXmlWriter
 	 */
 	public void writeToFile() throws FileNotFoundException, IOException
 	{
-		try ( FileOutputStream fos = new FileOutputStream( file ) )
+		try (FileOutputStream fos = new FileOutputStream( file ))
 		{
 			logger.log( "  Writing to file.\n" );
 			final Document document = new Document( root );
@@ -318,7 +318,7 @@ public class TmXmlWriter
 		final Element el = new Element( DETECTOR_SETTINGS_ELEMENT_KEY );
 
 		if ( null == settings.detectorFactory ) { return el; }
-		
+
 		// Set the detector factory key NOW.
 		el.setAttribute( XML_ATTRIBUTE_DETECTOR_NAME, settings.detectorFactory.getKey() );
 
@@ -327,13 +327,9 @@ public class TmXmlWriter
 		{
 			final boolean ok = settings.detectorFactory.marshall( settings.detectorSettings, el );
 			if ( !ok )
-			{
 				logger.error( settings.detectorFactory.getErrorMessage() );
-			}
 			else
-			{
 				logger.log( "  Added detector settings.\n" );
-			}
 		}
 
 		return el;
@@ -344,7 +340,7 @@ public class TmXmlWriter
 		final Element el = new Element( TRACKER_SETTINGS_ELEMENT_KEY );
 
 		if ( null == settings.trackerFactory ) { return el; }
-		
+
 		// Set the tracker factory key NOW.
 		el.setAttribute( XML_ATTRIBUTE_TRACKER_NAME, settings.trackerFactory.getKey() );
 
@@ -353,13 +349,9 @@ public class TmXmlWriter
 		{
 			final boolean ok = settings.trackerFactory.marshall( settings.trackerSettings, el );
 			if ( !ok )
-			{
 				logger.error( settings.trackerFactory.getErrorMessage() );
-			}
 			else
-			{
 				logger.log( "  Added tracker settings.\n" );
-			}
 		}
 
 		return el;
@@ -378,29 +370,30 @@ public class TmXmlWriter
 		final Element allTracksElement = new Element( TRACK_COLLECTION_ELEMENT_KEY );
 
 		// Prepare track features for writing: we separate ints from doubles
-		final List< String > trackFeatures = new ArrayList< >( model.getFeatureModel().getTrackFeatures() );
+		final List< String > trackFeatures = new ArrayList<>( model.getFeatureModel().getTrackFeatures() );
 		// TrackID is treated separately.
 		trackFeatures.remove( TrackIndexAnalyzer.TRACK_ID );
 
 		// Same thing for edge features
-		final List< String > edgeFeatures = new ArrayList< >( model.getFeatureModel().getEdgeFeatures() );
+		final List< String > edgeFeatures = new ArrayList<>( model.getFeatureModel().getEdgeFeatures() );
 		// We will treat edge source and target separately.
 		edgeFeatures.remove( EdgeTargetAnalyzer.SPOT_SOURCE_ID );
 		edgeFeatures.remove( EdgeTargetAnalyzer.SPOT_TARGET_ID );
-		
-		final Set<Integer> trackIDs = model.getTrackModel().trackIDs(false);
-		for (final int trackID : trackIDs) {
 
-			final Element trackElement = new Element(TRACK_ELEMENT_KEY);
-			
+		final Set< Integer > trackIDs = model.getTrackModel().trackIDs( false );
+		for ( final int trackID : trackIDs )
+		{
+
+			final Element trackElement = new Element( TRACK_ELEMENT_KEY );
+
 			// Track name.
-			trackElement.setAttribute(TRACK_NAME_ATTRIBUTE_NAME, model.getTrackModel().name(trackID));
+			trackElement.setAttribute( TRACK_NAME_ATTRIBUTE_NAME, model.getTrackModel().name( trackID ) );
 			// Track ID.
-			trackElement.setAttribute(TrackIndexAnalyzer.TRACK_ID, Integer.toString( trackID ));
+			trackElement.setAttribute( TrackIndexAnalyzer.TRACK_ID, Integer.toString( trackID ) );
 
 			for ( final String feature : trackFeatures )
 			{
-				final Double val = model.getFeatureModel().getTrackFeature(trackID, feature);
+				final Double val = model.getFeatureModel().getTrackFeature( trackID, feature );
 				if ( null == val )
 				{
 					// Skip missing features.
@@ -415,7 +408,7 @@ public class TmXmlWriter
 			}
 
 			// Echo edges
-			final Set<DefaultWeightedEdge> track = model.getTrackModel().trackEdges(trackID);
+			final Set< DefaultWeightedEdge > track = model.getTrackModel().trackEdges( trackID );
 			if ( track.isEmpty() )
 			{
 				/*
@@ -425,19 +418,20 @@ public class TmXmlWriter
 				 */
 				continue;
 			}
-			
+
 			for ( final DefaultWeightedEdge edge : track )
 			{
-				final Element edgeElement = new Element(TRACK_EDGE_ELEMENT_KEY);
+				final Element edgeElement = new Element( TRACK_EDGE_ELEMENT_KEY );
 
 				/*
-				 * Make sure the edge has the right orientation: forward in time.
+				 * Make sure the edge has the right orientation: forward in
+				 * time.
 				 */
 				final int sourceFrame = model.getTrackModel().getEdgeSource( edge ).getFeature( Spot.FRAME ).intValue();
 				final int targetFrame = model.getTrackModel().getEdgeTarget( edge ).getFeature( Spot.FRAME ).intValue();
 				final int sourceID;
 				final int targetID;
-				if (targetFrame >= sourceFrame)
+				if ( targetFrame >= sourceFrame )
 				{
 					sourceID = model.getTrackModel().getEdgeSource( edge ).ID();
 					targetID = model.getTrackModel().getEdgeTarget( edge ).ID();
@@ -449,10 +443,10 @@ public class TmXmlWriter
 				}
 				edgeElement.setAttribute( EdgeTargetAnalyzer.SPOT_SOURCE_ID, Integer.toString( sourceID ) );
 				edgeElement.setAttribute( EdgeTargetAnalyzer.SPOT_TARGET_ID, Integer.toString( targetID ) );
-				
+
 				for ( final String feature : edgeFeatures )
 				{
-					final Double val = model.getFeatureModel().getEdgeFeature(edge, feature);
+					final Double val = model.getFeatureModel().getEdgeFeature( edge, feature );
 					if ( null == val )
 					{
 						// Skip missing features.
@@ -519,10 +513,10 @@ public class TmXmlWriter
 			final Element frameSpotsElement = new Element( SPOT_FRAME_COLLECTION_ELEMENT_KEY );
 			frameSpotsElement.setAttribute( FRAME_ATTRIBUTE_NAME, "" + frame );
 
-			for (final Iterator<Spot> it = spots.iterator(frame, false); it.hasNext();)
+			for ( final Iterator< Spot > it = spots.iterator( frame, false ); it.hasNext(); )
 			{
 				final Element spotElement = marshalSpot( it.next(), model.getFeatureModel() );
-				frameSpotsElement.addContent(spotElement);
+				frameSpotsElement.addContent( spotElement );
 			}
 			spotCollectionElement.addContent( frameSpotsElement );
 		}
@@ -537,20 +531,21 @@ public class TmXmlWriter
 		final Element featuresElement = new Element( FEATURE_DECLARATIONS_ELEMENT_KEY );
 
 		// Spots
-		final Element spotFeaturesElement = new Element(SPOT_FEATURES_ELEMENT_KEY);
-		Collection<String> features = fm.getSpotFeatures();
-		Map<String, String> featureNames = fm.getSpotFeatureNames();
-		Map<String, String> featureShortNames = fm.getSpotFeatureShortNames();
-		Map<String, Dimension> featureDimensions = fm.getSpotFeatureDimensions();
+		final Element spotFeaturesElement = new Element( SPOT_FEATURES_ELEMENT_KEY );
+		Collection< String > features = fm.getSpotFeatures();
+		Map< String, String > featureNames = fm.getSpotFeatureNames();
+		Map< String, String > featureShortNames = fm.getSpotFeatureShortNames();
+		Map< String, Dimension > featureDimensions = fm.getSpotFeatureDimensions();
 		Map< String, Boolean > featureIsInt = fm.getSpotFeatureIsInt();
-		for (final String feature : features) {
-			final Element fel = new Element(FEATURE_ELEMENT_KEY);
-			fel.setAttribute(FEATURE_ATTRIBUTE, feature);
-			fel.setAttribute(FEATURE_NAME_ATTRIBUTE, featureNames.get(feature));
-			fel.setAttribute(FEATURE_SHORT_NAME_ATTRIBUTE, featureShortNames.get(feature));
-			fel.setAttribute(FEATURE_DIMENSION_ATTRIBUTE, featureDimensions.get(feature).name());
+		for ( final String feature : features )
+		{
+			final Element fel = new Element( FEATURE_ELEMENT_KEY );
+			fel.setAttribute( FEATURE_ATTRIBUTE, feature );
+			fel.setAttribute( FEATURE_NAME_ATTRIBUTE, featureNames.get( feature ) );
+			fel.setAttribute( FEATURE_SHORT_NAME_ATTRIBUTE, featureShortNames.get( feature ) );
+			fel.setAttribute( FEATURE_DIMENSION_ATTRIBUTE, featureDimensions.get( feature ).name() );
 			fel.setAttribute( FEATURE_ISINT_ATTRIBUTE, featureIsInt.get( feature ).toString() );
-			spotFeaturesElement.addContent(fel);
+			spotFeaturesElement.addContent( fel );
 		}
 		featuresElement.addContent( spotFeaturesElement );
 
@@ -561,14 +556,15 @@ public class TmXmlWriter
 		featureShortNames = fm.getEdgeFeatureShortNames();
 		featureDimensions = fm.getEdgeFeatureDimensions();
 		featureIsInt = fm.getEdgeFeatureIsInt();
-		for (final String feature : features) {
-			final Element fel = new Element(FEATURE_ELEMENT_KEY);
-			fel.setAttribute(FEATURE_ATTRIBUTE, feature);
-			fel.setAttribute(FEATURE_NAME_ATTRIBUTE, featureNames.get(feature));
-			fel.setAttribute(FEATURE_SHORT_NAME_ATTRIBUTE, featureShortNames.get(feature));
-			fel.setAttribute(FEATURE_DIMENSION_ATTRIBUTE, featureDimensions.get(feature).name());
+		for ( final String feature : features )
+		{
+			final Element fel = new Element( FEATURE_ELEMENT_KEY );
+			fel.setAttribute( FEATURE_ATTRIBUTE, feature );
+			fel.setAttribute( FEATURE_NAME_ATTRIBUTE, featureNames.get( feature ) );
+			fel.setAttribute( FEATURE_SHORT_NAME_ATTRIBUTE, featureShortNames.get( feature ) );
+			fel.setAttribute( FEATURE_DIMENSION_ATTRIBUTE, featureDimensions.get( feature ).name() );
 			fel.setAttribute( FEATURE_ISINT_ATTRIBUTE, featureIsInt.get( feature ).toString() );
-			edgeFeaturesElement.addContent(fel);
+			edgeFeaturesElement.addContent( fel );
 		}
 		featuresElement.addContent( edgeFeaturesElement );
 
@@ -579,14 +575,15 @@ public class TmXmlWriter
 		featureShortNames = fm.getTrackFeatureShortNames();
 		featureDimensions = fm.getTrackFeatureDimensions();
 		featureIsInt = fm.getTrackFeatureIsInt();
-		for (final String feature : features) {
-			final Element fel = new Element(FEATURE_ELEMENT_KEY);
-			fel.setAttribute(FEATURE_ATTRIBUTE, feature);
-			fel.setAttribute(FEATURE_NAME_ATTRIBUTE, featureNames.get(feature));
-			fel.setAttribute(FEATURE_SHORT_NAME_ATTRIBUTE, featureShortNames.get(feature));
-			fel.setAttribute(FEATURE_DIMENSION_ATTRIBUTE, featureDimensions.get(feature).name());
+		for ( final String feature : features )
+		{
+			final Element fel = new Element( FEATURE_ELEMENT_KEY );
+			fel.setAttribute( FEATURE_ATTRIBUTE, feature );
+			fel.setAttribute( FEATURE_NAME_ATTRIBUTE, featureNames.get( feature ) );
+			fel.setAttribute( FEATURE_SHORT_NAME_ATTRIBUTE, featureShortNames.get( feature ) );
+			fel.setAttribute( FEATURE_DIMENSION_ATTRIBUTE, featureDimensions.get( feature ).name() );
 			fel.setAttribute( FEATURE_ISINT_ATTRIBUTE, featureIsInt.get( feature ).toString() );
-			trackFeaturesElement.addContent(fel);
+			trackFeaturesElement.addContent( fel );
 		}
 		featuresElement.addContent( trackFeaturesElement );
 
@@ -682,11 +679,11 @@ public class TmXmlWriter
 
 	private static final Element marshalSpot( final Spot spot, final FeatureModel fm )
 	{
-		final Collection<Attribute> attributes = new ArrayList<>();
-		final Attribute IDattribute = new Attribute(SPOT_ID_ATTRIBUTE_NAME, "" + spot.ID());
-		attributes.add(IDattribute);
-		final Attribute nameAttribute = new Attribute(SPOT_NAME_ATTRIBUTE_NAME, spot.getName());
-		attributes.add(nameAttribute);
+		final Collection< Attribute > attributes = new ArrayList<>();
+		final Attribute IDattribute = new Attribute( SPOT_ID_ATTRIBUTE_NAME, "" + spot.ID() );
+		attributes.add( IDattribute );
+		final Attribute nameAttribute = new Attribute( SPOT_NAME_ATTRIBUTE_NAME, spot.getName() );
+		attributes.add( nameAttribute );
 		Double val;
 		Attribute featureAttribute;
 
@@ -709,13 +706,12 @@ public class TmXmlWriter
 			{
 				str = val.toString();
 			}
-			featureAttribute = new Attribute(feature, str);
-			attributes.add(featureAttribute);
+			featureAttribute = new Attribute( feature, str );
+			attributes.add( featureAttribute );
 		}
 
 		final Element spotElement = new Element( SPOT_ELEMENT_KEY );
 		spotElement.setAttributes( attributes );
 		return spotElement;
 	}
-
 }
