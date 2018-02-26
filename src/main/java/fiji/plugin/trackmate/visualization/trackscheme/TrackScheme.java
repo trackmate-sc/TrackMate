@@ -1031,6 +1031,10 @@ public class TrackScheme extends AbstractTrackMateModelView
 		gui.setVisible( true );
 	}
 
+	public void dispose(){
+	   gui.dispose();
+   }
+
 	/*
 	 * INNER CLASSES
 	 */
