@@ -9,6 +9,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.VertexFactory;
@@ -216,6 +217,10 @@ public class TrackModel
 		// Rebuild the id maps
 		IDcounter = 0;
 		vertexToID = new HashMap< >();
+		int nameID;
+		int nameIDCounter = -1;
+		final int prefixLength = DefaultNameGenerator.DEFAULT_NAME_PREFIX.length();
+		final Pattern namePattern = Pattern.compile( "^" + DefaultNameGenerator.DEFAULT_NAME_PREFIX + "[0-9]+$" );		
 		for ( final Integer id : trackSpots.keySet() )
 		{
 			for ( final Spot spot : trackSpots.get( id ) )
@@ -226,8 +231,18 @@ public class TrackModel
 			{
 				IDcounter = id;
 			}
+			// Update the nameIDCounter when the name matches the pattern "^Track_[0-9]+$", otherwise do nothing.
+			if ( namePattern.matcher( name( id ) ).matches() )
+			{
+				nameID = Integer.parseInt( name( id ).substring( prefixLength ) );
+				if ( nameID > nameIDCounter )
+				{
+					nameIDCounter = nameID;
+				}				
+			}
 		}
 		IDcounter++;
+		( ( DefaultNameGenerator ) nameGenerator ).setNameID( ++nameIDCounter );
 
 		edgeToID = new HashMap< >();
 		for ( final Integer id : trackEdges.keySet() )
@@ -1315,6 +1330,7 @@ public class TrackModel
 	private static class DefaultNameGenerator implements Iterator< String >
 	{
 
+		private static final String DEFAULT_NAME_PREFIX = "Track_";
 		private int nameID = 0;
 
 		@Override
@@ -1326,12 +1342,16 @@ public class TrackModel
 		@Override
 		public String next()
 		{
-			return "Track_" + nameID++;
+			return DEFAULT_NAME_PREFIX + nameID++;
 		}
 
 		@Override
 		public void remove()
 		{}
+		
+		public void setNameID( int nameID ) {
+			this.nameID = nameID;
+		}
 
 	}
 
