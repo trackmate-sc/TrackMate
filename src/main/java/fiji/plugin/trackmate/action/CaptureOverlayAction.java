@@ -8,12 +8,14 @@ import java.awt.Robot;
 import java.io.File;
 
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.LoadTrackMatePlugIn_;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackSchemeFrame;
 import ij.IJ;
@@ -44,14 +46,45 @@ public class CaptureOverlayAction extends AbstractTMAction
 			"Also, make sure nothing is moved over the image while capturing. " +
 			"</html>";
 
+	private final TrackMateWizard gui;
+
+	private static int firstFrame = -1;
+
+	private static int lastFrame = -1;
+
+	public CaptureOverlayAction( final TrackMateWizard gui )
+	{
+		this.gui = gui;
+	}
+
 	@Override
 	public void execute( final TrackMate trackmate )
 	{
-		logger.log( "Capturing TrackMate overlay.\n" );
+		final ImagePlus imp = trackmate.getSettings().imp;
+
+		if ( firstFrame < 0 )
+			firstFrame = 1;
+		firstFrame = Math.max( firstFrame, 1 );
+		if ( lastFrame < 0 )
+			lastFrame = imp.getNFrames();
+		lastFrame = Math.min( lastFrame, imp.getNFrames() );
+
+		final CaptureOverlayPanel panel = new CaptureOverlayPanel( firstFrame, lastFrame );
+		final int userInput = JOptionPane.showConfirmDialog( gui, panel, "Capture TrackMate overlay", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, TrackMateWizard.TRACKMATE_ICON );
+		if (userInput != JOptionPane.OK_OPTION)
+			return;
+
+		final int first = panel.getFirstFrame();
+		final int last = panel.getLastFrame();
+		firstFrame = Math.min( last, first );
+		lastFrame = Math.max( last, first );
+		firstFrame = Math.max( 1, firstFrame );
+		lastFrame = Math.min( imp.getNFrames(), lastFrame );
+
+		logger.log( "Capturing TrackMate overlay from frame " + firstFrame + " to " + lastFrame + ".\n" );
 		logger.log( "  Preparing and allocating memory..." );
 		try
 		{
-			final ImagePlus imp = trackmate.getSettings().imp;
 			final ImageWindow win = imp.getWindow();
 			win.toFront();
 			final Point loc = win.getLocation();
@@ -73,23 +106,24 @@ public class CaptureOverlayAction extends AbstractTMAction
 			}
 			logger.log( " done.\n" );
 
-			final int nCaptures = imp.getNFrames();
-
+			final int nCaptures = lastFrame - firstFrame + 1;
 			logger.log( "  Performing capture..." );
 			final int channel = imp.getChannel();
 			final int slice = imp.getSlice();
-			for ( int i = 0; i < nCaptures; i++ )
+			for ( int frame = firstFrame; frame <= lastFrame; frame++ )
 			{
-				logger.setProgress( ( float ) i / nCaptures );
-				imp.setPosition( channel, slice, i + 1 );
+				logger.setProgress( ( float ) ( frame - firstFrame ) / nCaptures );
+				imp.setPosition( channel, slice, frame + 1 );
 
 				IJ.wait( 200 );
 				final Image image = robot.createScreenCapture( r );
 				final ColorProcessor cp = new ColorProcessor( image );
-				stack.addSlice( null, cp );
+				final int index = imp.getStackIndex( channel, slice, frame );
+				stack.addSlice( imp.getImageStack().getSliceLabel( index ), cp );
 			}
 			new ImagePlus( "TrackMate capture", stack ).show();
 			logger.log( " done.\n" );
+			logger.setProgress( 1. );
 		}
 		finally
 		{
@@ -116,7 +150,7 @@ public class CaptureOverlayAction extends AbstractTMAction
 		@Override
 		public TrackMateAction create( final TrackMateGUIController controller )
 		{
-			return new CaptureOverlayAction();
+			return new CaptureOverlayAction( controller.getGUI() );
 		}
 
 		@Override
@@ -149,6 +183,6 @@ public class CaptureOverlayAction extends AbstractTMAction
 		}
 
 		final TrackMate trackmate = loader.getController().getPlugin();
-		new CaptureOverlayAction().execute( trackmate );
+		new CaptureOverlayAction( loader.getController().getGUI() ).execute( trackmate );
 	}
 }
