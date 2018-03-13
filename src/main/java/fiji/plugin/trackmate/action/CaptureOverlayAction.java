@@ -1,15 +1,5 @@
 package fiji.plugin.trackmate.action;
 
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.visualization.trackscheme.TrackSchemeFrame;
-import ij.IJ;
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.gui.ImageCanvas;
-import ij.gui.ImageWindow;
-import ij.process.ColorProcessor;
-
 import java.awt.AWTException;
 import java.awt.Image;
 import java.awt.Point;
@@ -20,14 +10,25 @@ import javax.swing.ImageIcon;
 
 import org.scijava.plugin.Plugin;
 
-public class CaptureOverlayAction extends AbstractTMAction {
+import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.visualization.trackscheme.TrackSchemeFrame;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.gui.ImageCanvas;
+import ij.gui.ImageWindow;
+import ij.process.ColorProcessor;
 
+public class CaptureOverlayAction extends AbstractTMAction
+{
 
+	public static final ImageIcon ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/camera_go.png" ) );
 
-	public static final ImageIcon ICON = new ImageIcon(TrackSchemeFrame.class.getResource("resources/camera_go.png"));
 	public static final String NAME = "Capture overlay";
 
 	public static final String KEY = "CAPTURE_OVERLAY";
+
 	public static final String INFO_TEXT = "<html>" +
 			"If the current displayer is the HyperstackDisplayer, this action <br>" +
 			"will capture the TrackMate overlay with current display settings. <br>" +
@@ -36,15 +37,17 @@ public class CaptureOverlayAction extends AbstractTMAction {
 			"<p>" +
 			"It can take long since we pause between each frame to ensure the whole <br>" +
 			"overlay is redrawn. The current zoom is taken into account. <br>" +
-			"Also, make sure nothing is moved over the image while capturing. "+
+			"Also, make sure nothing is moved over the image while capturing. " +
 			"</html>";
 
 	@Override
-	public void execute(final TrackMate trackmate) {
-		logger.log("Capturing TrackMate overlay.\n");
-		logger.log("  Preparing and allocating memory...");
-		try {
-			final ImagePlus imp =  trackmate.getSettings().imp;
+	public void execute( final TrackMate trackmate )
+	{
+		logger.log( "Capturing TrackMate overlay.\n" );
+		logger.log( "  Preparing and allocating memory..." );
+		try
+		{
+			final ImagePlus imp = trackmate.getSettings().imp;
 			final ImageWindow win = imp.getWindow();
 			win.toFront();
 			final Point loc = win.getLocation();
@@ -52,30 +55,36 @@ public class CaptureOverlayAction extends AbstractTMAction {
 			final Rectangle bounds = ic.getBounds();
 			loc.x += bounds.x;
 			loc.y += bounds.y;
-			final Rectangle r = new Rectangle(loc.x, loc.y, bounds.width, bounds.height);
-			final ImageStack stack = new ImageStack(bounds.width, bounds.height);
+			final Rectangle r = new Rectangle( loc.x, loc.y, bounds.width, bounds.height );
+			final ImageStack stack = new ImageStack( bounds.width, bounds.height );
 			Robot robot;
-			try {
+			try
+			{
 				robot = new Robot();
-			} catch (final AWTException e) {
-				logger.error("Problem creating the image grabber:\n"+e.getLocalizedMessage());
+			}
+			catch ( final AWTException e )
+			{
+				logger.error( "Problem creating the image grabber:\n" + e.getLocalizedMessage() );
 				return;
 			}
-			logger.log(" done.\n");
+			logger.log( " done.\n" );
 
-			logger.log("  Performing capture...");
-			for (int i = 0; i < imp.getStackSize(); i++) {
-				logger.setProgress((float) i / imp.getStackSize());
-				imp.setPosition(i+1);
-				IJ.wait(200);
-				final Image image = robot.createScreenCapture(r);
-				final ColorProcessor cp = new ColorProcessor(image);
-				stack.addSlice(null, cp);
+			logger.log( "  Performing capture..." );
+			for ( int i = 0; i < imp.getStackSize(); i++ )
+			{
+				logger.setProgress( ( float ) i / imp.getStackSize() );
+				imp.setPosition( i + 1 );
+				IJ.wait( 200 );
+				final Image image = robot.createScreenCapture( r );
+				final ColorProcessor cp = new ColorProcessor( image );
+				stack.addSlice( null, cp );
 			}
-			new ImagePlus("TrackMate capture", stack).show();
-			logger.log(" done.\n");
-		} finally {
-			logger.setProgress(0);
+			new ImagePlus( "TrackMate capture", stack ).show();
+			logger.log( " done.\n" );
+		}
+		finally
+		{
+			logger.setProgress( 0 );
 		}
 	}
 
