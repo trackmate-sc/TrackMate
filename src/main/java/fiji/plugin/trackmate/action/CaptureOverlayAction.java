@@ -5,15 +5,19 @@ import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Robot;
+import java.io.File;
 
 import javax.swing.ImageIcon;
 
 import org.scijava.plugin.Plugin;
 
+import fiji.plugin.trackmate.LoadTrackMatePlugIn_;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackSchemeFrame;
 import ij.IJ;
+import ij.ImageJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.ImageCanvas;
@@ -69,11 +73,16 @@ public class CaptureOverlayAction extends AbstractTMAction
 			}
 			logger.log( " done.\n" );
 
+			final int nCaptures = imp.getNFrames();
+
 			logger.log( "  Performing capture..." );
-			for ( int i = 0; i < imp.getStackSize(); i++ )
+			final int channel = imp.getChannel();
+			final int slice = imp.getSlice();
+			for ( int i = 0; i < nCaptures; i++ )
 			{
-				logger.setProgress( ( float ) i / imp.getStackSize() );
-				imp.setPosition( i + 1 );
+				logger.setProgress( ( float ) i / nCaptures );
+				imp.setPosition( channel, slice, i + 1 );
+
 				IJ.wait( 200 );
 				final Image image = robot.createScreenCapture( r );
 				final ColorProcessor cp = new ColorProcessor( image );
@@ -122,5 +131,24 @@ public class CaptureOverlayAction extends AbstractTMAction
 			return NAME;
 		}
 
+	}
+
+	public static void main( final String[] args )
+	{
+		ImageJ.main( args );
+		final File file = new File( "/Users/tinevez/Google Drive/Projects/Contacts/raw data/2015-09-17/Trackmate files/SiC + SAg2_1_20_BCells.xml" );
+		final LoadTrackMatePlugIn_ loader = new LoadTrackMatePlugIn_();
+		loader.run( file.getAbsolutePath() );
+
+		loader.getSettings().imp.setDisplayMode( IJ.GRAYSCALE );
+
+		for ( final TrackMateModelView view : loader.getController().getGuimodel().getViews() )
+		{
+			view.setDisplaySettings( TrackMateModelView.KEY_TRACK_DISPLAY_DEPTH, 100 );
+			view.setDisplaySettings( TrackMateModelView.KEY_TRACK_DISPLAY_MODE, TrackMateModelView.TRACK_DISPLAY_MODE_LOCAL_BACKWARD );
+		}
+
+		final TrackMate trackmate = loader.getController().getPlugin();
+		new CaptureOverlayAction().execute( trackmate );
 	}
 }
