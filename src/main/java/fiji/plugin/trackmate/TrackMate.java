@@ -41,7 +41,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 
 	public static final String PLUGIN_NAME_STR = "TrackMate";
 
-	public static final String PLUGIN_NAME_VERSION = "3.7.0";
+	public static final String PLUGIN_NAME_VERSION = "3.7.1-SNAPSHOT";
 
 	/**
 	 * The model this trackmate will shape.
@@ -261,7 +261,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 			model.setTracks( tracker.getResult(), true );
 			return true;
 		}
-		
+
 		errorMessage = "Tracking process failed:\n" + tracker.getErrorMessage();
 		return false;
 	}
@@ -659,7 +659,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 	public boolean process()
 	{
 		if ( !execDetection() ) { return false; }
-		
+
 		if ( !execInitialSpotFiltering() ) { return false; }
 
 		if ( !computeSpotFeatures( true ) ) { return false; }
