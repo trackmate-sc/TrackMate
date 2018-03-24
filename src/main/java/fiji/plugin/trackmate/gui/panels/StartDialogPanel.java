@@ -136,32 +136,6 @@ public class StartDialogPanel extends ActionListenablePanel
 		gbc_lblLinkPubMed.gridy = 1;
 		add( lblLinkPubMed, gbc_lblLinkPubMed );
 
-		final JLabel lblLinkGoogleScholar = new JLabel( "<html><a href=http://scholar.google.com/scholar?cluster=9846627681021220605>on Google Scholar</a></html>" );
-		lblLinkGoogleScholar.setFont( SMALL_FONT );
-		lblLinkGoogleScholar.setCursor( new Cursor( Cursor.HAND_CURSOR ) );
-		lblLinkGoogleScholar.addMouseListener( new MouseAdapter()
-		{
-			@Override
-			public void mouseClicked( final java.awt.event.MouseEvent e )
-			{
-				try
-				{
-					Desktop.getDesktop().browse( new URI( "http://scholar.google.com/scholar?cluster=9846627681021220605" ) );
-				}
-				catch ( URISyntaxException | IOException ex )
-				{
-					ex.printStackTrace();
-				}
-			}
-		} );
-		final GridBagConstraints gbc_lblLinkGoogleScholar = new GridBagConstraints();
-		gbc_lblLinkGoogleScholar.fill = GridBagConstraints.HORIZONTAL;
-		gbc_lblLinkGoogleScholar.gridwidth = 4;
-		gbc_lblLinkGoogleScholar.insets = new Insets( 0, 10, 5, 5 );
-		gbc_lblLinkGoogleScholar.gridx = 0;
-		gbc_lblLinkGoogleScholar.gridy = 2;
-		add( lblLinkGoogleScholar, gbc_lblLinkGoogleScholar );
-
 		jLabelImageName = new JLabel( "Select an image, and press refresh." );
 		jLabelImageName.setFont( BIG_FONT );
 		final GridBagConstraints gbc_jLabelImageName = new GridBagConstraints();
