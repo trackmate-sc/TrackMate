@@ -1,10 +1,7 @@
 package fiji.plugin.trackmate.action;
 
-import java.awt.AWTException;
-import java.awt.Image;
-import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.Robot;
+import java.awt.image.BufferedImage;
 import java.io.File;
 
 import javax.swing.ImageIcon;
@@ -22,8 +19,7 @@ import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij.ImageStack;
-import ij.gui.ImageCanvas;
-import ij.gui.ImageWindow;
+import ij.measure.Calibration;
 import ij.process.ColorProcessor;
 
 public class CaptureOverlayAction extends AbstractTMAction
@@ -52,6 +48,8 @@ public class CaptureOverlayAction extends AbstractTMAction
 
 	private static int lastFrame = -1;
 
+	private ImagePlus capture;
+
 	public CaptureOverlayAction( final TrackMateWizard gui )
 	{
 		this.gui = gui;
@@ -71,7 +69,7 @@ public class CaptureOverlayAction extends AbstractTMAction
 
 		final CaptureOverlayPanel panel = new CaptureOverlayPanel( firstFrame, lastFrame );
 		final int userInput = JOptionPane.showConfirmDialog( gui, panel, "Capture TrackMate overlay", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, TrackMateWizard.TRACKMATE_ICON );
-		if (userInput != JOptionPane.OK_OPTION)
+		if ( userInput != JOptionPane.OK_OPTION )
 			return;
 
 		final int first = panel.getFirstFrame();
@@ -82,53 +80,71 @@ public class CaptureOverlayAction extends AbstractTMAction
 		lastFrame = Math.min( imp.getNFrames(), lastFrame );
 
 		logger.log( "Capturing TrackMate overlay from frame " + firstFrame + " to " + lastFrame + ".\n" );
-		logger.log( "  Preparing and allocating memory..." );
-		try
-		{
-			final ImageWindow win = imp.getWindow();
-			win.toFront();
-			final Point loc = win.getLocation();
-			final ImageCanvas ic = win.getCanvas();
-			final Rectangle bounds = ic.getBounds();
-			loc.x += bounds.x;
-			loc.y += bounds.y;
-			final Rectangle r = new Rectangle( loc.x, loc.y, bounds.width, bounds.height );
-			final ImageStack stack = new ImageStack( bounds.width, bounds.height );
-			Robot robot;
-			try
-			{
-				robot = new Robot();
-			}
-			catch ( final AWTException e )
-			{
-				logger.error( "Problem creating the image grabber:\n" + e.getLocalizedMessage() );
-				return;
-			}
-			logger.log( " done.\n" );
+		final Rectangle bounds = imp.getCanvas().getBounds();
+		final int width = bounds.width;
+		final int height = bounds.height;
+		final ImageStack stack = new ImageStack( width, height );
+		logger.log( " done.\n" );
 
-			final int nCaptures = lastFrame - firstFrame + 1;
-			logger.log( "  Performing capture..." );
-			final int channel = imp.getChannel();
-			final int slice = imp.getSlice();
-			for ( int frame = firstFrame; frame <= lastFrame; frame++ )
-			{
-				logger.setProgress( ( float ) ( frame - firstFrame ) / nCaptures );
-				imp.setPosition( channel, slice, frame + 1 );
-
-				IJ.wait( 200 );
-				final Image image = robot.createScreenCapture( r );
-				final ColorProcessor cp = new ColorProcessor( image );
-				final int index = imp.getStackIndex( channel, slice, frame );
-				stack.addSlice( imp.getImageStack().getSliceLabel( index ), cp );
-			}
-			new ImagePlus( "TrackMate capture", stack ).show();
-			logger.log( " done.\n" );
-			logger.setProgress( 1. );
-		}
-		finally
+		final int nCaptures = lastFrame - firstFrame + 1;
+		logger.log( "Performing capture..." );
+		final int channel = imp.getChannel();
+		final int slice = imp.getSlice();
+		imp.getCanvas().hideZoomIndicator( true );
+		for ( int frame = firstFrame; frame <= lastFrame; frame++ )
 		{
-			logger.setProgress( 0 );
+			logger.setProgress( ( float ) ( frame - firstFrame ) / nCaptures );
+			imp.setPositionWithoutUpdate( channel, slice, frame + 1 );
+			final BufferedImage bi = new BufferedImage( width, height, BufferedImage.TYPE_INT_ARGB );
+			imp.getCanvas().paint( bi.getGraphics() );
+			final ColorProcessor cp = new ColorProcessor( bi );
+			final int index = imp.getStackIndex( channel, slice, frame );
+			stack.addSlice( imp.getImageStack().getSliceLabel( index ), cp );
 		}
+		imp.getCanvas().hideZoomIndicator( false );
+		this.capture = new ImagePlus( "TrackMate capture of " + imp.getShortTitle(), stack );
+		transferCalibration( imp, capture );
+		capture.show();
+
+		logger.log( " done.\n" );
+		logger.setProgress( 0. );
+	}
+
+	/**
+	 * Transfers the calibration of an {@link ImagePlus} to another one,
+	 * generated from a capture of the first one. Pixels sizes are adapter
+	 * depending on the zoom level during capture.
+	 * 
+	 * @param from
+	 *            the imp to copy from.
+	 * @param to
+	 *            the imp to copy to.
+	 */
+	private void transferCalibration( final ImagePlus from, final ImagePlus to )
+	{
+		final Calibration fc = from.getCalibration();
+		final Calibration tc = to.getCalibration();
+
+		tc.setUnit( fc.getUnit() );
+		tc.setTimeUnit( fc.getTimeUnit() );
+		tc.frameInterval = fc.frameInterval;
+
+		final double mag = from.getCanvas().getMagnification();
+		tc.pixelWidth = fc.pixelWidth / mag;
+		tc.pixelHeight = fc.pixelHeight / mag;
+		tc.pixelDepth = fc.pixelDepth;
+	}
+
+	/**
+	 * Returns a the {@link ImagePlus} resulting from the last
+	 * {@link #execute(TrackMate)} call.
+	 * 
+	 * @return a RGB {@link ImagePlus}, or <code>null</code> if the
+	 *         {@link #execute(TrackMate)} has not been called yet.
+	 */
+	public ImagePlus getCapture()
+	{
+		return capture;
 	}
 
 	@Plugin( type = TrackMateActionFactory.class )
@@ -175,6 +191,11 @@ public class CaptureOverlayAction extends AbstractTMAction
 		loader.run( file.getAbsolutePath() );
 
 		loader.getSettings().imp.setDisplayMode( IJ.GRAYSCALE );
+		loader.getSettings().imp.getCanvas().zoomIn( 50, 50 );
+		loader.getSettings().imp.getCanvas().zoomIn( 50, 50 );
+		loader.getSettings().imp.getCanvas().zoomIn( 50, 50 );
+		loader.getSettings().imp.getCanvas().zoomIn( 50, 50 );
+		loader.getSettings().imp.getCanvas().zoomIn( 50, 50 );
 
 		for ( final TrackMateModelView view : loader.getController().getGuimodel().getViews() )
 		{
