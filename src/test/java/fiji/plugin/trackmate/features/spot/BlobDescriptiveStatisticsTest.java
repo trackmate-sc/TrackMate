@@ -1,19 +1,19 @@
 package fiji.plugin.trackmate.features.spot;
 
 import static org.junit.Assert.assertEquals;
-import net.imagej.ImgPlus;
-import net.imagej.axis.Axes;
-import net.imagej.axis.AxisType;
-import net.imglib2.RandomAccess;
-import net.imglib2.img.Img;
-import net.imglib2.img.array.ArrayImgFactory;
-import net.imglib2.type.numeric.integer.UnsignedShortType;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.util.SpotNeighborhood;
+import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
+import net.imglib2.RandomAccess;
+import net.imglib2.img.Img;
+import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
 
 public class BlobDescriptiveStatisticsTest
 {
@@ -37,9 +37,8 @@ public class BlobDescriptiveStatisticsTest
 	@Before
 	public void setUp() throws Exception
 	{
-		final ArrayImgFactory< UnsignedShortType > factory = new ArrayImgFactory< >();
 		final long[] dims = new long[] { ( long ) ( 2 * CENTER[ 0 ] / CALIBRATION[ 0 ] ), ( long ) ( 2 * CENTER[ 1 ] / CALIBRATION[ 1 ] ) };
-		final Img< UnsignedShortType > img = factory.create( dims, new UnsignedShortType() );
+		final Img< UnsignedShortType > img = ArrayImgs.unsignedShorts( dims );
 		img2D = new ImgPlus< >( img, "2D", new AxisType[] { Axes.X, Axes.Y }, new double[] { CALIBRATION[ 0 ], CALIBRATION[ 1 ] } );
 
 		// We paint MANUALLY a square in the middle of the image

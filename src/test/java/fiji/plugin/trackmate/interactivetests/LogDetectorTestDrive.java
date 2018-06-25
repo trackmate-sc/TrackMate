@@ -15,7 +15,7 @@ import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 import net.imglib2.img.Img;
-import net.imglib2.img.array.ArrayImgFactory;
+import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.util.Util;
@@ -42,7 +42,11 @@ public class LogDetectorTestDrive
 		final AxisType[] AXES = new AxisType[] { Axes.X, Axes.Y, Axes.Z };
 
 		// Create 3D image
-		final Img< UnsignedByteType > source = new ArrayImgFactory< UnsignedByteType >().create( new int[] { ( int ) ( WIDTH / CALIBRATION[ 0 ] ), ( int ) ( HEIGHT / CALIBRATION[ 1 ] ), ( int ) ( DEPTH / CALIBRATION[ 2 ] ) }, new UnsignedByteType() );
+
+		final Img< UnsignedByteType > source = ArrayImgs.unsignedBytes( new long[] {
+				( long ) ( WIDTH / CALIBRATION[ 0 ] ),
+				( long ) ( HEIGHT / CALIBRATION[ 1 ] ),
+				( long ) ( DEPTH / CALIBRATION[ 2 ] ) } );
 		final ImgPlus< UnsignedByteType > img = new ImgPlus< >( source, "Test", AXES, CALIBRATION );
 
 		// Random blobs

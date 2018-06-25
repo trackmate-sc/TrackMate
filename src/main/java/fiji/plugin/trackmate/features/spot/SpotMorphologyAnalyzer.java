@@ -22,7 +22,7 @@ import net.imagej.axis.DefaultLinearAxis;
 import net.imglib2.algorithm.region.localneighborhood.EllipseCursor;
 import net.imglib2.algorithm.region.localneighborhood.EllipseNeighborhood;
 import net.imglib2.img.Img;
-import net.imglib2.img.array.ArrayImgFactory;
+import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
@@ -331,7 +331,7 @@ public class SpotMorphologyAnalyzer< T extends RealType< T >> extends Independen
 		final double[] calibration = new double[] { 1, 1 };
 
 		// Create blank image
-		final Img< UnsignedByteType > img = new ArrayImgFactory< UnsignedByteType >().create( new int[] { 200, 200 }, new UnsignedByteType() );
+		final Img< UnsignedByteType > img = ArrayImgs.unsignedBytes( new long[] { 200, 200 } );
 		final ImgPlus< UnsignedByteType > imgplus = new ImgPlus< >( img );
 		for ( int d = 0; d < imgplus.numDimensions(); d++ )
 		{

@@ -1,5 +1,17 @@
 package fiji.plugin.trackmate.interactivetests;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+
+import javax.swing.JFrame;
+import javax.swing.WindowConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
@@ -16,24 +28,11 @@ import ij.ImagePlus;
 import ij.process.StackConverter;
 import ij3d.Image3DUniverse;
 import ij3d.ImageJ_3D_Viewer;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-
-import javax.swing.JFrame;
-import javax.swing.WindowConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 import net.imglib2.img.Img;
-import net.imglib2.img.array.ArrayImgFactory;
+import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 
@@ -56,7 +55,10 @@ public class SpotDisplayer3DTestDrive
 
 		// Create 3D image
 		System.out.println( "Creating image...." );
-		final Img< UnsignedByteType > source = new ArrayImgFactory< UnsignedByteType >().create( new int[] { ( int ) ( WIDTH / CALIBRATION[ 0 ] ), ( int ) ( HEIGHT / CALIBRATION[ 1 ] ), ( int ) ( DEPTH / CALIBRATION[ 2 ] ) }, new UnsignedByteType() );
+		final Img< UnsignedByteType > source = ArrayImgs.unsignedBytes( new long[] {
+				( long ) ( WIDTH / CALIBRATION[ 0 ] ),
+				( long ) ( HEIGHT / CALIBRATION[ 1 ] ),
+				( long ) ( DEPTH / CALIBRATION[ 2 ] ) } );
 		final ImgPlus< UnsignedByteType > img = new ImgPlus< >( source, "test", AXES, CALIBRATION );
 
 		// Random blobs

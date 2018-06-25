@@ -3,9 +3,12 @@ package fiji.plugin.trackmate.detection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.detection.util.MedianFilter2D;
 import net.imglib2.Cursor;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
@@ -17,6 +20,7 @@ import net.imglib2.algorithm.localextrema.LocalExtrema;
 import net.imglib2.algorithm.localextrema.LocalExtrema.LocalNeighborhoodCheck;
 import net.imglib2.algorithm.localextrema.RefinedPeak;
 import net.imglib2.algorithm.localextrema.SubpixelLocalization;
+import net.imglib2.algorithm.neighborhood.RectangleShape;
 import net.imglib2.converter.RealFloatConverter;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgFactory;
@@ -30,8 +34,6 @@ import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.detection.util.MedianFilter2D;
 
 public class DetectionUtils
 {
@@ -126,7 +128,7 @@ public class DetectionUtils
 	 */
 	public static final < T extends RealType< T >> Img< FloatType > copyToFloatImg( final RandomAccessible< T > img, final Interval interval, final ImgFactory< FloatType > factory )
 	{
-		final Img< FloatType > output = factory.create( interval, new FloatType() );
+		final Img< FloatType > output = factory.create( interval );
 		final long[] min = new long[ interval.numDimensions() ];
 		interval.min( min );
 		final RandomAccess< T > in = Views.offset( img, min ).randomAccess();
@@ -197,7 +199,16 @@ public class DetectionUtils
 		final LocalNeighborhoodCheck< Point, FloatType > localNeighborhoodCheck = new LocalExtrema.MaximumCheck< >( val );
 		final IntervalView< FloatType > dogWithBorder = Views.interval( Views.extendMirrorSingle( source ), Intervals.expand( source, 1 ) );
 		final ExecutorService service = Executors.newFixedThreadPool( numThreads );
-		final List< Point > peaks = LocalExtrema.findLocalExtrema( dogWithBorder, localNeighborhoodCheck, service );
+		List< Point > peaks;
+		try
+		{
+			peaks = LocalExtrema.findLocalExtrema( dogWithBorder, localNeighborhoodCheck, new RectangleShape( 1, true ), service, numThreads );
+		}
+		catch ( InterruptedException | ExecutionException e )
+		{
+			e.printStackTrace();
+			peaks = Collections.emptyList();
+		}
 		service.shutdown();
 
 		if ( peaks.isEmpty() ) { return Collections.emptyList(); }

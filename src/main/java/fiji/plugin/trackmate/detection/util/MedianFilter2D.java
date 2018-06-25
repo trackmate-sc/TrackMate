@@ -80,7 +80,7 @@ public class MedianFilter2D< T extends RealType< T > & NativeType< T >> extends 
 
 		final T type = source.randomAccess().get().createVariable();
 		final ImgFactory< T > factory = Util.getArrayOrCellImgFactory( source, type );
-		this.output = factory.create( source, type );
+		this.output = factory.create( source );
 
 		if ( source.numDimensions() > 2 )
 		{

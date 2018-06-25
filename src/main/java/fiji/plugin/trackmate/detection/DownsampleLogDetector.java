@@ -3,6 +3,7 @@ package fiji.plugin.trackmate.detection;
 import java.util.ArrayList;
 import java.util.List;
 
+import fiji.plugin.trackmate.Spot;
 import net.imglib2.Cursor;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccess;
@@ -11,7 +12,6 @@ import net.imglib2.img.Img;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Util;
-import fiji.plugin.trackmate.Spot;
 
 public class DownsampleLogDetector< T extends RealType< T > & NativeType< T >> implements SpotDetector< T >
 {
@@ -138,7 +138,7 @@ public class DownsampleLogDetector< T extends RealType< T > & NativeType< T >> i
 		// 1. Downsample the image
 
 		final T type = img.randomAccess().get();
-		final Img< T > downsampled = Util.getArrayOrCellImgFactory( interval, type ).create( dimensions, type );
+		final Img< T > downsampled = Util.getArrayOrCellImgFactory( interval, type ).create( dimensions );
 
 		final Cursor< T > dwnCursor = downsampled.localizingCursor();
 		final RandomAccess< T > srcCursor = img.randomAccess();

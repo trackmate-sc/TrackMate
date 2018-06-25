@@ -121,7 +121,7 @@ public class SpotIconGrabber< T extends RealType< T >>
 	{
 
 		// Copy cropped view
-		final Img< T > crop = img.factory().create( new long[] { width, height }, img.firstElement().copy() );
+		final Img< T > crop = img.factory().create( new long[] { width, height } );
 
 		final T zeroType = img.firstElement().createVariable();
 		zeroType.setZero();
@@ -172,7 +172,7 @@ public class SpotIconGrabber< T extends RealType< T >>
 		final Interval interval = Intervals.createMinSize( minsize );
 
 		// Copy cropped view
-		final Img< T > crop = img.factory().create( interval, img.firstElement().copy() );
+		final Img< T > crop = img.factory().create( interval );
 		final IntervalView< T > view = Views.zeroMin(Views.interval( Views.extendZero( img ), interval ) );
 		final RandomAccess< T > sourceRA = view.randomAccess( view );
 		final Cursor< T > targetCursor = crop.localizingCursor();

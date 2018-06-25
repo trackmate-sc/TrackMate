@@ -73,8 +73,8 @@ public class DogDetector< T extends RealType< T > & NativeType< T >> extends Log
 		}
 
 		final FloatType type = new FloatType();
-		final RandomAccessibleInterval< FloatType > dog = Views.offset( Util.getArrayOrCellImgFactory( interval, type ).create( interval, type ), min );
-		final RandomAccessibleInterval< FloatType > dog2 = Views.offset( Util.getArrayOrCellImgFactory( interval, type ).create( interval, type ), min );
+		final RandomAccessibleInterval< FloatType > dog = Views.offset( Util.getArrayOrCellImgFactory( interval, type ).create( interval ), min );
+		final RandomAccessibleInterval< FloatType > dog2 = Views.offset( Util.getArrayOrCellImgFactory( interval, type ).create( interval ), min );
 
 		final double sigma1 = radius / Math.sqrt( interval.numDimensions() ) * 0.9;
 		final double sigma2 = radius / Math.sqrt( interval.numDimensions() ) * 1.1;

@@ -1,21 +1,21 @@
 package fiji.plugin.trackmate.features.spot;
 
 import static org.junit.Assert.assertEquals;
-import ij.ImageJ;
-import net.imagej.ImgPlus;
-import net.imagej.axis.Axes;
-import net.imagej.axis.AxisType;
-import net.imglib2.img.Img;
-import net.imglib2.img.array.ArrayImgFactory;
-import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.type.NativeType;
-import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.integer.UnsignedByteType;
 
 import org.junit.Test;
 
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.util.SpotNeighborhood;
+import ij.ImageJ;
+import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
+import net.imglib2.img.Img;
+import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.img.display.imagej.ImageJFunctions;
+import net.imglib2.type.NativeType;
+import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.integer.UnsignedByteType;
 
 public class RadiusEstimatorTest< T extends NativeType< T > & RealType< T >>
 {
@@ -41,7 +41,7 @@ public class RadiusEstimatorTest< T extends NativeType< T > & RealType< T >>
 		final AxisType[] axes = new AxisType[] { Axes.X, Axes.Y, Axes.Z };
 
 		// Create 3 spots image
-		final Img< UnsignedByteType > img = new ArrayImgFactory< UnsignedByteType >().create( new int[] { 200, 200, 400 }, new UnsignedByteType() );
+		final Img< UnsignedByteType > img = ArrayImgs.unsignedBytes( new long[] { 200, 200, 400 } );
 		final ImgPlus< UnsignedByteType > testImage = new ImgPlus< >( img, "Test", axes, calibration );
 
 		for ( final Spot s : spots )
@@ -81,7 +81,7 @@ public class RadiusEstimatorTest< T extends NativeType< T > & RealType< T >>
 		final AxisType[] axes = new AxisType[] { Axes.X, Axes.Y, Axes.Z };
 
 		// Create 3 spots image
-		final Img< UnsignedByteType > img = new ArrayImgFactory< UnsignedByteType >().create( new int[] { 200, 200, 400 }, new UnsignedByteType() );
+		final Img< UnsignedByteType > img = ArrayImgs.unsignedBytes( new long[] { 200, 200, 400 } );
 		final ImgPlus< UnsignedByteType > testImage = new ImgPlus< >( img, "Test", axes, calibration );
 
 		for ( final Spot s : spots )
