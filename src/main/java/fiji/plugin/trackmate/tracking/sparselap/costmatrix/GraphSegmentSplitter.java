@@ -39,15 +39,21 @@ public class GraphSegmentSplitter
 
 		for ( final Set< Spot > set : connectedSets )
 		{
-			if ( set.size() < 2 )
+			if ( set.size() < 1 )
 			{
 				continue;
 			}
 
 			final List< Spot > list = new ArrayList< >( set );
 			Collections.sort( list, framecomparator );
-
-			segmentEnds.add( list.remove( list.size() - 1 ) );
+			if ( set.size() < 1 )
+			{
+				segmentEnds.add( list.get( 0 ) );
+			}
+			else
+			{
+				segmentEnds.add( list.remove( list.size() - 1 ) );
+			}
 			segmentStarts.add( list.remove( 0 ) );
 			if ( findMiddlePoints )
 			{
