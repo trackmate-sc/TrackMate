@@ -8,7 +8,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import org.jgrapht.Graph;
-import org.jgrapht.alg.ConnectivityInspector;
+import org.jgrapht.alg.connectivity.ConnectivityInspector;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
 public class GraphSegmentSplitter

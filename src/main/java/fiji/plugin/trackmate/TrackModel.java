@@ -9,9 +9,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import org.jgrapht.Graph;
-import org.jgrapht.VertexFactory;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.event.ConnectedComponentTraversalEvent;
 import org.jgrapht.event.EdgeTraversalEvent;
@@ -29,7 +29,6 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.GraphIterator;
-
 import fiji.plugin.trackmate.graph.Function1;
 import fiji.plugin.trackmate.graph.SortedDepthFirstIterator;
 import fiji.plugin.trackmate.graph.TimeDirectedDepthFirstIterator;
@@ -331,7 +330,7 @@ public class TrackModel
 	 *            the type of the vertices.
 	 * @return a new {@link SimpleDirectedWeightedGraph}.
 	 */
-	public < V > SimpleDirectedWeightedGraph< V, DefaultWeightedEdge > copy( final VertexFactory< V > factory, final Function1< Spot, V > function, final Map< Spot, V > mappings )
+	public < V > SimpleDirectedWeightedGraph< V, DefaultWeightedEdge > copy( final Supplier< V > factory, final Function1< Spot, V > function, final Map< Spot, V > mappings )
 	{
 		final SimpleDirectedWeightedGraph< V, DefaultWeightedEdge > copy = new SimpleDirectedWeightedGraph< >( DefaultWeightedEdge.class );
 		final Set< Spot > spots = graph.vertexSet();
@@ -349,7 +348,7 @@ public class TrackModel
 		// Generate new vertices
 		for ( final Spot spot : Collections.unmodifiableCollection( spots ) )
 		{
-			final V vertex = factory.createVertex();
+			final V vertex = factory.get();
 			function.compute( spot, vertex );
 			map.put( spot, vertex );
 			copy.addVertex( vertex );
