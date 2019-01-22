@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.event.ConnectedComponentTraversalEvent;
@@ -135,7 +134,7 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 	 */
 	public SortedDepthFirstIterator( final Graph< V, E > g, final V startVertex, final Comparator< V > comparator )
 	{
-		super();
+		super( g );
 		this.comparator = comparator;
 		this.graph = g;
 
@@ -271,8 +270,8 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 
 	private static < V, E > Specifics< V, E > createGraphSpecifics( final Graph< V, E > g )
 	{
-		if ( g instanceof DirectedGraph )
-			return new DirectedSpecifics< >( ( DirectedGraph< V, E > ) g );
+		if ( g instanceof Graph )
+			return new DirectedSpecifics< >( ( Graph< V, E > ) g );
 
 		return new UndirectedSpecifics< >( g );
 	}
@@ -332,7 +331,7 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 		return new EdgeTraversalEvent< >( this, edge );
 	}
 
-	private VertexTraversalEvent< V > createVertexTraversalEvent( final V vertex )
+	protected VertexTraversalEvent< V > createVertexTraversalEvent( final V vertex )
 	{
 		if ( isReuseEvents() )
 		{
@@ -528,7 +527,7 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 
 	private static class DirectedSpecifics< VV, EE > extends Specifics< VV, EE >
 	{
-		private final DirectedGraph< VV, EE > graph;
+		private final Graph< VV, EE > graph;
 
 		/**
 		 * Creates a new DirectedSpecifics object.
@@ -536,7 +535,7 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 		 * @param g
 		 *            the graph for which this specifics object to be created.
 		 */
-		public DirectedSpecifics( final DirectedGraph< VV, EE > g )
+		public DirectedSpecifics( final Graph< VV, EE > g )
 		{
 			graph = g;
 		}

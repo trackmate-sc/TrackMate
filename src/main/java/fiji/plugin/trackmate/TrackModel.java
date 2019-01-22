@@ -10,8 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
-
-import org.jgrapht.UndirectedGraph;
+import org.jgrapht.Graph;
 import org.jgrapht.VertexFactory;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.event.ConnectedComponentTraversalEvent;
@@ -23,8 +22,8 @@ import org.jgrapht.event.TraversalListener;
 import org.jgrapht.event.TraversalListenerAdapter;
 import org.jgrapht.event.VertexTraversalEvent;
 import org.jgrapht.graph.AsUnweightedGraph;
+import org.jgrapht.graph.DefaultListenableGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
-import org.jgrapht.graph.ListenableUndirectedGraph;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 import org.jgrapht.graph.SimpleWeightedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
@@ -54,7 +53,7 @@ public class TrackModel
 	 * {@link #removeEdge(DefaultWeightedEdge)}, {@link #removeEdge(Spot, Spot)}
 	 * .
 	 */
-	private ListenableUndirectedGraph< Spot, DefaultWeightedEdge > graph;
+	private DefaultListenableGraph< Spot, DefaultWeightedEdge > graph;
 
 	private final MyGraphListener mgl;
 
@@ -158,7 +157,7 @@ public class TrackModel
 		{
 			this.graph.removeGraphListener( mgl );
 		}
-		this.graph = new ListenableUndirectedGraph< >( graph );
+		this.graph = new DefaultListenableGraph< >( graph );
 		this.graph.addGraphListener( mgl );
 		init( graph );
 	}
@@ -201,7 +200,7 @@ public class TrackModel
 		{
 			this.graph.removeGraphListener( mgl );
 		}
-		this.graph = new ListenableUndirectedGraph< >( lGraph );
+		this.graph = new DefaultListenableGraph< >( lGraph );
 		this.graph.addGraphListener( mgl );
 
 		edgesAdded.clear();
@@ -653,7 +652,7 @@ public class TrackModel
 	 * @param lGraph
 	 *            the graph to read edges and vertices from.
 	 */
-	private void init( final UndirectedGraph< Spot, DefaultWeightedEdge > lGraph )
+	private void init( final Graph< Spot, DefaultWeightedEdge > lGraph )
 	{
 		vertexToID = new HashMap< >();
 		edgeToID = new HashMap< >();
@@ -671,7 +670,7 @@ public class TrackModel
 		final Set< Spot > vertexSet = lGraph.vertexSet();
 		if ( vertexSet.size() > 0 )
 		{
-			final BreadthFirstIterator< Spot, DefaultWeightedEdge > i = new BreadthFirstIterator< >( lGraph, null );
+			final BreadthFirstIterator< Spot, DefaultWeightedEdge > i = new BreadthFirstIterator< >( lGraph );
 			i.addTraversalListener( new MyTraversalListener() );
 
 			while ( i.hasNext() )
