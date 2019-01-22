@@ -93,7 +93,7 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 					this,
 					ConnectedComponentTraversalEvent.CONNECTED_COMPONENT_STARTED );
 
-	private final FlyweightEdgeEvent< V, E > reusableEdgeEvent;
+	private final FlyweightEdgeEvent< E > reusableEdgeEvent;
 
 	private final FlyweightVertexEvent< V > reusableVertexEvent;
 
@@ -321,7 +321,7 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 		}
 	}
 
-	protected EdgeTraversalEvent< V, E > createEdgeTraversalEvent( final E edge )
+	protected EdgeTraversalEvent< E > createEdgeTraversalEvent( final E edge )
 	{
 		if ( isReuseEvents() )
 		{
@@ -472,7 +472,7 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 	 * @author Barak Naveh
 	 * @since Aug 11, 2003
 	 */
-	private static class FlyweightEdgeEvent< VV, localE > extends EdgeTraversalEvent< VV, localE >
+	private static class FlyweightEdgeEvent< localE > extends EdgeTraversalEvent< localE >
 	{
 		private static final long serialVersionUID = 4051327833765000755L;
 

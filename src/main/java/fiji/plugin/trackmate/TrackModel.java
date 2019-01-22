@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.VertexFactory;
-import org.jgrapht.alg.DijkstraShortestPath;
+import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.event.ConnectedComponentTraversalEvent;
 import org.jgrapht.event.EdgeTraversalEvent;
 import org.jgrapht.event.GraphEdgeChangeEvent;
@@ -802,8 +802,8 @@ public class TrackModel
 	{
 		if ( null == graph ) { return null; }
 		final AsUnweightedGraph< Spot, DefaultWeightedEdge > unWeightedGrah = new AsUnweightedGraph< >( graph );
-		final DijkstraShortestPath< Spot, DefaultWeightedEdge > pathFinder = new DijkstraShortestPath< >( unWeightedGrah, source, target );
-		final List< DefaultWeightedEdge > path = pathFinder.getPathEdgeList();
+		final DijkstraShortestPath< Spot, DefaultWeightedEdge > pathFinder = new DijkstraShortestPath< >( unWeightedGrah );
+		final List< DefaultWeightedEdge > path = pathFinder.getPath( source, target ).getEdgeList();
 		return path;
 	}
 
@@ -870,7 +870,7 @@ public class TrackModel
 		}
 
 		@Override
-		public void edgeTraversed( final EdgeTraversalEvent< Spot, DefaultWeightedEdge > event )
+		public void edgeTraversed( final EdgeTraversalEvent< DefaultWeightedEdge > event )
 		{
 			final DefaultWeightedEdge e = event.getEdge();
 			currentConnectedEdgeSet.add( e );
