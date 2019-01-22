@@ -7,8 +7,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
-
-import org.jgrapht.UndirectedGraph;
+import org.jgrapht.Graph;
 import org.jgrapht.alg.ConnectivityInspector;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
@@ -20,7 +19,7 @@ public class GraphSegmentSplitter
 
 	private final List< List< Spot >> segmentMiddles;
 
-	public GraphSegmentSplitter( final UndirectedGraph< Spot, DefaultWeightedEdge > graph, final boolean findMiddlePoints )
+	public GraphSegmentSplitter( final Graph< Spot, DefaultWeightedEdge > graph, final boolean findMiddlePoints )
 	{
 		final ConnectivityInspector< Spot, DefaultWeightedEdge > connectivity = new ConnectivityInspector< >( graph );
 		final List< Set< Spot >> connectedSets = connectivity.connectedSets();

@@ -80,7 +80,7 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 
 	private final Deque< Object > stack = new ArrayDeque< >();
 
-	private transient TypeUtil< V > vertexTypeDecl = null;
+	private transient TypeUtil vertexTypeDecl = null;
 
 	private final ConnectedComponentTraversalEvent ccFinishedEvent =
 			new ConnectedComponentTraversalEvent(
@@ -421,7 +421,7 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 			else
 			{
 				// Got a real vertex to start working on
-				v = TypeUtil.uncheckedCast( o, vertexTypeDecl );
+				v = TypeUtil.uncheckedCast( o );
 				break;
 			}
 		}
@@ -436,7 +436,7 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 
 	private void recordFinish()
 	{
-		final V v = TypeUtil.uncheckedCast( stack.removeLast(), vertexTypeDecl );
+		final V v = TypeUtil.uncheckedCast( stack.removeLast() );
 		seen.put( v, VisitColor.BLACK );
 		finishVertex( v );
 	}

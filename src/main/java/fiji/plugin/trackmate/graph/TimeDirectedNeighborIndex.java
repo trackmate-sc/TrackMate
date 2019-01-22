@@ -11,7 +11,7 @@ import java.util.Set;
 
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
-import org.jgrapht.alg.NeighborIndex;
+import org.jgrapht.alg.util.NeighborCache;
 import org.jgrapht.event.GraphEdgeChangeEvent;
 import org.jgrapht.event.GraphVertexChangeEvent;
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -19,7 +19,7 @@ import org.jgrapht.util.ModifiableInteger;
 
 import fiji.plugin.trackmate.Spot;
 
-public class TimeDirectedNeighborIndex extends NeighborIndex< Spot, DefaultWeightedEdge >
+public class TimeDirectedNeighborIndex extends NeighborCache< Spot, DefaultWeightedEdge >
 {
 
 	// ~ Instance fields

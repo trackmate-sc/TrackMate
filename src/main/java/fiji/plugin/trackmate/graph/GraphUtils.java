@@ -14,7 +14,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.jgrapht.VertexFactory;
-import org.jgrapht.alg.DirectedNeighborIndex;
+import org.jgrapht.alg.util.NeighborCache;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 
@@ -359,7 +359,7 @@ public class GraphUtils {
 	 * @return true only if the given model is a tree; that is: every spot has one or less
 	 * predecessors.
 	 */
-	public static final Set<Spot> getSibblings(final DirectedNeighborIndex<Spot, DefaultWeightedEdge> cache, final Spot spot) {
+	public static final Set<Spot> getSibblings(final NeighborCache<Spot, DefaultWeightedEdge> cache, final Spot spot) {
 		HashSet<Spot> sibblings = new HashSet<>();
 		Set<Spot> predecessors = cache.predecessorsOf(spot);
 		for (Spot predecessor : predecessors) {
