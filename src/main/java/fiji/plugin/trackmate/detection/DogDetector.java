@@ -78,7 +78,16 @@ public class DogDetector< T extends RealType< T > & NativeType< T >> extends Log
 
 		final double sigma1 = radius / Math.sqrt( interval.numDimensions() ) * 0.9;
 		final double sigma2 = radius / Math.sqrt( interval.numDimensions() ) * 1.1;
-		final double[][] sigmas = DifferenceOfGaussian.computeSigmas( 0.5, 2, calibration, sigma1, sigma2 );
+
+		/*
+		 * Gotcha: The calibration array used as input for
+		 * DifferenceOfGaussian#computeSigmas() must be of the same dimension
+		 * that the input image.
+		 */
+		final double[] cal = new double[ img.numDimensions() ];
+		for ( int d = 0; d < cal.length; d++ )
+			cal[ d ] = calibration[ d ];
+		final double[][] sigmas = DifferenceOfGaussian.computeSigmas( 0.5, 2, cal, sigma1, sigma2 );
 		try
 		{
 			Gauss3.gauss( sigmas[ 1 ], extended, dog2, numThreads );
