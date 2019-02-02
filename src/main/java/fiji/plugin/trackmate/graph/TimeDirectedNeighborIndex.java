@@ -54,6 +54,7 @@ public class TimeDirectedNeighborIndex extends NeighborCache< Spot, DefaultWeigh
 	 *
 	 * @return all unique predecessors of the specified vertex
 	 */
+	@Override
 	public Set< Spot > predecessorsOf( final Spot v )
 	{
 		return getPredecessors( v ).getNeighbors();
@@ -88,6 +89,7 @@ public class TimeDirectedNeighborIndex extends NeighborCache< Spot, DefaultWeigh
 	 *
 	 * @return all unique successors of the specified vertex
 	 */
+	@Override
 	public Set< Spot > successorsOf( final Spot v )
 	{
 		return getSuccessors( v ).getNeighbors();
