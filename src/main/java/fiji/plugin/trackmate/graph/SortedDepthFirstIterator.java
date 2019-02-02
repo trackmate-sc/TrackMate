@@ -18,8 +18,6 @@ import java.util.Set;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.event.ConnectedComponentTraversalEvent;
-import org.jgrapht.event.EdgeTraversalEvent;
-import org.jgrapht.event.VertexTraversalEvent;
 import org.jgrapht.traverse.AbstractGraphIterator;
 import org.jgrapht.util.TypeUtil;
 
@@ -80,8 +78,6 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 
 	private final Deque< Object > stack = new ArrayDeque< >();
 
-	private transient TypeUtil vertexTypeDecl = null;
-
 	private final ConnectedComponentTraversalEvent ccFinishedEvent =
 			new ConnectedComponentTraversalEvent(
 					this,
@@ -91,10 +87,6 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 			new ConnectedComponentTraversalEvent(
 					this,
 					ConnectedComponentTraversalEvent.CONNECTED_COMPONENT_STARTED );
-
-	private final FlyweightEdgeEvent< E > reusableEdgeEvent;
-
-	private final FlyweightVertexEvent< V > reusableVertexEvent;
 
 	private Iterator< V > vertexIterator = null;
 
@@ -107,8 +99,6 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 	private V startVertex;
 
 	protected Specifics< V, E > specifics;
-
-	protected final Graph< V, E > graph;
 
 	protected final Comparator< V > comparator;
 
@@ -136,14 +126,10 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 	{
 		super( g );
 		this.comparator = comparator;
-		this.graph = g;
 
 		specifics = createGraphSpecifics( g );
 		vertexIterator = g.vertexSet().iterator();
 		setCrossComponentTraversal( startVertex == null );
-
-		reusableEdgeEvent = new FlyweightEdgeEvent< >( this, null );
-		reusableVertexEvent = new FlyweightVertexEvent< >( this, null );
 
 		if ( startVertex == null )
 		{
@@ -270,8 +256,8 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 
 	private static < V, E > Specifics< V, E > createGraphSpecifics( final Graph< V, E > g )
 	{
-		if ( g instanceof Graph )
-			return new DirectedSpecifics< >( ( Graph< V, E > ) g );
+		if (g.getType().isDirected())
+			return new DirectedSpecifics< >( g );
 
 		return new UndirectedSpecifics< >( g );
 	}
@@ -318,28 +304,6 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 				encounterVertex( child, localEdges.get( child ) );
 			}
 		}
-	}
-
-	protected EdgeTraversalEvent< E > createEdgeTraversalEvent( final E edge )
-	{
-		if ( isReuseEvents() )
-		{
-			reusableEdgeEvent.setEdge( edge );
-			return reusableEdgeEvent;
-		}
-
-		return new EdgeTraversalEvent< >( this, edge );
-	}
-
-	protected VertexTraversalEvent< V > createVertexTraversalEvent( final V vertex )
-	{
-		if ( isReuseEvents() )
-		{
-			reusableVertexEvent.setVertex( vertex );
-			return reusableVertexEvent;
-		}
-
-		return new VertexTraversalEvent< >( this, vertex );
 	}
 
 	private void encounterStartVertex()
@@ -463,66 +427,6 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 		 *         case of undirected graph.
 		 */
 		public abstract Set< ? extends EE > edgesOf( VV vertex );
-	}
-
-	/**
-	 * A reusable edge event.
-	 *
-	 * @author Barak Naveh
-	 * @since Aug 11, 2003
-	 */
-	private static class FlyweightEdgeEvent< localE > extends EdgeTraversalEvent< localE >
-	{
-		private static final long serialVersionUID = 4051327833765000755L;
-
-		/**
-		 * @see EdgeTraversalEvent#EdgeTraversalEvent(Object, Object)
-		 */
-		public FlyweightEdgeEvent( final Object eventSource, final localE edge )
-		{
-			super( eventSource, edge );
-		}
-
-		/**
-		 * Sets the edge of this event.
-		 *
-		 * @param edge
-		 *            the edge to be set.
-		 */
-		protected void setEdge( final localE edge )
-		{
-			this.edge = edge;
-		}
-	}
-
-	/**
-	 * A reusable vertex event.
-	 *
-	 * @author Barak Naveh
-	 * @since Aug 11, 2003
-	 */
-	private static class FlyweightVertexEvent< VV > extends VertexTraversalEvent< VV >
-	{
-		private static final long serialVersionUID = 3834024753848399924L;
-
-		/**
-		 * @see VertexTraversalEvent#VertexTraversalEvent(Object, Object)
-		 */
-		public FlyweightVertexEvent( final Object eventSource, final VV vertex )
-		{
-			super( eventSource, vertex );
-		}
-
-		/**
-		 * Sets the vertex of this event.
-		 *
-		 * @param vertex
-		 *            the vertex to be set.
-		 */
-		protected void setVertex( final VV vertex )
-		{
-			this.vertex = vertex;
-		}
 	}
 
 	private static class DirectedSpecifics< VV, EE > extends Specifics< VV, EE >
