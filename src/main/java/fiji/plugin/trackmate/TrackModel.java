@@ -9,11 +9,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
-
-import org.jgrapht.UndirectedGraph;
-import org.jgrapht.VertexFactory;
-import org.jgrapht.alg.DijkstraShortestPath;
+import org.jgrapht.Graph;
+import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.event.ConnectedComponentTraversalEvent;
 import org.jgrapht.event.EdgeTraversalEvent;
 import org.jgrapht.event.GraphEdgeChangeEvent;
@@ -23,14 +22,13 @@ import org.jgrapht.event.TraversalListener;
 import org.jgrapht.event.TraversalListenerAdapter;
 import org.jgrapht.event.VertexTraversalEvent;
 import org.jgrapht.graph.AsUnweightedGraph;
+import org.jgrapht.graph.DefaultListenableGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
-import org.jgrapht.graph.ListenableUndirectedGraph;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 import org.jgrapht.graph.SimpleWeightedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.GraphIterator;
-
 import fiji.plugin.trackmate.graph.Function1;
 import fiji.plugin.trackmate.graph.SortedDepthFirstIterator;
 import fiji.plugin.trackmate.graph.TimeDirectedDepthFirstIterator;
@@ -54,7 +52,7 @@ public class TrackModel
 	 * {@link #removeEdge(DefaultWeightedEdge)}, {@link #removeEdge(Spot, Spot)}
 	 * .
 	 */
-	private ListenableUndirectedGraph< Spot, DefaultWeightedEdge > graph;
+	private DefaultListenableGraph< Spot, DefaultWeightedEdge > graph;
 
 	private final MyGraphListener mgl;
 
@@ -158,7 +156,7 @@ public class TrackModel
 		{
 			this.graph.removeGraphListener( mgl );
 		}
-		this.graph = new ListenableUndirectedGraph< >( graph );
+		this.graph = new DefaultListenableGraph< >( graph );
 		this.graph.addGraphListener( mgl );
 		init( graph );
 	}
@@ -201,7 +199,7 @@ public class TrackModel
 		{
 			this.graph.removeGraphListener( mgl );
 		}
-		this.graph = new ListenableUndirectedGraph< >( lGraph );
+		this.graph = new DefaultListenableGraph< >( lGraph );
 		this.graph.addGraphListener( mgl );
 
 		edgesAdded.clear();
@@ -332,7 +330,7 @@ public class TrackModel
 	 *            the type of the vertices.
 	 * @return a new {@link SimpleDirectedWeightedGraph}.
 	 */
-	public < V > SimpleDirectedWeightedGraph< V, DefaultWeightedEdge > copy( final VertexFactory< V > factory, final Function1< Spot, V > function, final Map< Spot, V > mappings )
+	public < V > SimpleDirectedWeightedGraph< V, DefaultWeightedEdge > copy( final Supplier< V > factory, final Function1< Spot, V > function, final Map< Spot, V > mappings )
 	{
 		final SimpleDirectedWeightedGraph< V, DefaultWeightedEdge > copy = new SimpleDirectedWeightedGraph< >( DefaultWeightedEdge.class );
 		final Set< Spot > spots = graph.vertexSet();
@@ -350,7 +348,7 @@ public class TrackModel
 		// Generate new vertices
 		for ( final Spot spot : Collections.unmodifiableCollection( spots ) )
 		{
-			final V vertex = factory.createVertex();
+			final V vertex = factory.get();
 			function.compute( spot, vertex );
 			map.put( spot, vertex );
 			copy.addVertex( vertex );
@@ -653,7 +651,7 @@ public class TrackModel
 	 * @param lGraph
 	 *            the graph to read edges and vertices from.
 	 */
-	private void init( final UndirectedGraph< Spot, DefaultWeightedEdge > lGraph )
+	private void init( final Graph< Spot, DefaultWeightedEdge > lGraph )
 	{
 		vertexToID = new HashMap< >();
 		edgeToID = new HashMap< >();
@@ -671,7 +669,7 @@ public class TrackModel
 		final Set< Spot > vertexSet = lGraph.vertexSet();
 		if ( vertexSet.size() > 0 )
 		{
-			final BreadthFirstIterator< Spot, DefaultWeightedEdge > i = new BreadthFirstIterator< >( lGraph, null );
+			final BreadthFirstIterator< Spot, DefaultWeightedEdge > i = new BreadthFirstIterator< >( lGraph );
 			i.addTraversalListener( new MyTraversalListener() );
 
 			while ( i.hasNext() )
@@ -802,8 +800,8 @@ public class TrackModel
 	{
 		if ( null == graph ) { return null; }
 		final AsUnweightedGraph< Spot, DefaultWeightedEdge > unWeightedGrah = new AsUnweightedGraph< >( graph );
-		final DijkstraShortestPath< Spot, DefaultWeightedEdge > pathFinder = new DijkstraShortestPath< >( unWeightedGrah, source, target );
-		final List< DefaultWeightedEdge > path = pathFinder.getPathEdgeList();
+		final DijkstraShortestPath< Spot, DefaultWeightedEdge > pathFinder = new DijkstraShortestPath< >( unWeightedGrah );
+		final List< DefaultWeightedEdge > path = pathFinder.getPath( source, target ).getEdgeList();
 		return path;
 	}
 
@@ -870,7 +868,7 @@ public class TrackModel
 		}
 
 		@Override
-		public void edgeTraversed( final EdgeTraversalEvent< Spot, DefaultWeightedEdge > event )
+		public void edgeTraversed( final EdgeTraversalEvent< DefaultWeightedEdge > event )
 		{
 			final DefaultWeightedEdge e = event.getEdge();
 			currentConnectedEdgeSet.add( e );

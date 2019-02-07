@@ -2,16 +2,16 @@ package fiji.plugin.trackmate.graph;
 
 import java.util.Set;
 
-import org.jgrapht.alg.DirectedNeighborIndex;
+import org.jgrapht.alg.util.NeighborCache;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
 public class RecursiveCumSum<V, E> {
 
-	private final DirectedNeighborIndex<V, E> cache;
+	private final NeighborCache<V, E> cache;
 	private final Function2<V, V> function;
 
 	public RecursiveCumSum(final SimpleDirectedGraph<V, E> graph, final Function2<V, V> function) {
-		this.cache = new DirectedNeighborIndex<>(graph);
+		this.cache = new NeighborCache<>(graph);
 		this.function = function;
 	}
 	
