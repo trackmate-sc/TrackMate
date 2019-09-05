@@ -2,6 +2,8 @@ package fiji.plugin.trackmate.util;
 
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import fiji.plugin.trackmate.Dimension;
@@ -659,6 +662,31 @@ public class TMUtils
 		return interval;
 	}
 
+	public static String getTrackMateVersion()
+	{
+		final InputStream is = TMUtils.class.getResourceAsStream( "trackmate-app.properties" );
+		if (null == is)
+			return "could not find app property file";
+		final Properties p = new Properties();
+		try
+		{
+			p.load( is );
+			final String version = p.getProperty( "version" );
+			return version;
+		}
+		catch ( final IOException e )
+		{
+			e.printStackTrace();
+			return "unknown";
+		}
+	}
+
+	public static void main( final String[] args )
+	{
+		System.out.println( getTrackMateVersion() );
+	}
+
+	
 	private TMUtils()
 	{}
 }
