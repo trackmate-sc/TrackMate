@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import fiji.plugin.trackmate.detection.ManualDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetector;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.features.EdgeFeatureCalculator;
@@ -294,6 +295,11 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 		{
 			errorMessage = "Detector settings is null.\n";
 			return false;
+		}
+		if (factory instanceof ManualDetectorFactory)
+		{
+			// Skip detection (don't delete anything) if we received this factory.
+			return true;
 		}
 
 		/*

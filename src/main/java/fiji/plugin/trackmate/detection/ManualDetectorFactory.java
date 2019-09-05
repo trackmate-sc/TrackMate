@@ -8,6 +8,7 @@ import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.panels.detector.BasicDetectorConfigurationPanel;
 
@@ -44,8 +46,39 @@ public class ManualDetectorFactory< T extends RealType< T > & NativeType< T >> i
 	@Override
 	public SpotDetector< T > getDetector( final Interval interval, final int frame )
 	{
-		// Return nothing
-		return null;
+		return new SpotDetector< T >()
+		{
+
+			@Override
+			public List< Spot > getResult()
+			{
+				return Collections.emptyList();
+			}
+
+			@Override
+			public boolean checkInput()
+			{
+				return true;
+			}
+
+			@Override
+			public boolean process()
+			{
+				return true;
+			}
+
+			@Override
+			public String getErrorMessage()
+			{
+				return null;
+			}
+
+			@Override
+			public long getProcessingTime()
+			{
+				return 0;
+			}
+		};
 	}
 
 	@Override
