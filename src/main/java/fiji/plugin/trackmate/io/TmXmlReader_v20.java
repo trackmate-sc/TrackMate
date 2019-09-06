@@ -599,7 +599,7 @@ public class TmXmlReader_v20 extends TmXmlReader
 	 * <p>
 	 * Internally, this methods also builds the cache field, which will be
 	 * required by other methods.
-	 * 
+	 *
 	 * It is therefore sensible to call this method first, just after
 	 * parsing the file. If not called, this method will be called
 	 * anyway by the other methods to build the cache.
@@ -689,7 +689,7 @@ public class TmXmlReader_v20 extends TmXmlReader
 		final Spot spot = new Spot( ID );
 
 		final List< Attribute > atts = spotEl.getAttributes();
-		atts.remove( SPOT_ID_ATTRIBUTE_NAME );
+		removeAttributeFromName( atts, SPOT_ID_ATTRIBUTE_NAME );
 
 		String name = spotEl.getAttributeValue( SPOT_NAME_ATTRIBUTE_NAME );
 		if ( null == name || name.equals( "" ) )
@@ -697,7 +697,7 @@ public class TmXmlReader_v20 extends TmXmlReader
 			name = "ID" + ID;
 		}
 		spot.setName( name );
-		atts.remove( SPOT_NAME_ATTRIBUTE_NAME );
+		removeAttributeFromName( atts, SPOT_NAME_ATTRIBUTE_NAME );
 
 		for ( final Attribute att : atts )
 		{

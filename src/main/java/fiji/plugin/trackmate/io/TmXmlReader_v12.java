@@ -144,7 +144,7 @@ import ij.ImagePlus;
  * prior to 2.0. In the code, we keep the previous vocable of "segmenter"... The
  * code here is extremely pedestrian; we deal with all particular cases
  * explicitly, and convert on the fly to v2 classes.
- * 
+ *
  * @author Jean-Yves Tinevez - 2012
  */
 public class TmXmlReader_v12 extends TmXmlReader
@@ -367,7 +367,7 @@ public class TmXmlReader_v12 extends TmXmlReader
 	/**
 	 * Load the tracks, the track features and the ID of the visible tracks into
 	 * the model modified by this reader.
-	 * 
+	 *
 	 * @param model
 	 *            the model to feed.
 	 */
@@ -1045,7 +1045,7 @@ public class TmXmlReader_v12 extends TmXmlReader
 
 	/**
 	 * Return the list of all spots stored in this file.
-	 * 
+	 *
 	 * @return a {@link SpotCollection}. Return <code>null</code> if the spot
 	 *         section is not present in the file.
 	 */
@@ -1098,7 +1098,7 @@ public class TmXmlReader_v12 extends TmXmlReader
 	 * selection but not in the list given in argument, it is simply ignored,
 	 * and not added to the selection list. That way, it is certain that all
 	 * spots belonging to the selection list also belong to the global list.
-	 * 
+	 *
 	 * @return a {@link SpotCollection}. Each spot of this collection belongs
 	 *         also to the given collection. Return <code>null</code> if the
 	 *         spot selection section does is not present in the file.
@@ -1179,7 +1179,7 @@ public class TmXmlReader_v12 extends TmXmlReader
 		final Spot spot = new Spot( ID );
 
 		final List< Attribute > atts = spotEl.getAttributes();
-		atts.remove( SPOT_ID_ATTRIBUTE_NAME_v12 );
+		removeAttributeFromName( atts, SPOT_ID_ATTRIBUTE_NAME_v12 );
 
 		String name = spotEl.getAttributeValue( SPOT_NAME_v12_ATTRIBUTE_NAME_v12 );
 		if ( null == name || name.equals( "" ) )
@@ -1187,7 +1187,7 @@ public class TmXmlReader_v12 extends TmXmlReader
 			name = "ID" + ID;
 		}
 		spot.setName( name );
-		atts.remove( SPOT_NAME_v12_ATTRIBUTE_NAME_v12 );
+		removeAttributeFromName( atts, SPOT_NAME_v12_ATTRIBUTE_NAME_v12 );
 
 		for ( final Attribute att : atts )
 		{

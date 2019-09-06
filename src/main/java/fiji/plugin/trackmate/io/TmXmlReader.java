@@ -152,7 +152,7 @@ public class TmXmlReader
 
 	/**
 	 * If <code>false</code>, an error occurred during reading.
-	 * 
+	 *
 	 * @see #getErrorMessage()
 	 */
 	protected boolean ok = true;
@@ -208,7 +208,7 @@ public class TmXmlReader
 
 	/**
 	 * Returns the GUI state saved in the file.
-	 * 
+	 *
 	 * @return the saved GUI state, as a string.
 	 */
 	public String getGUIState()
@@ -234,7 +234,7 @@ public class TmXmlReader
 	/**
 	 * Returns the collection of views that were saved in this file. The views
 	 * returned are not rendered yet.
-	 * 
+	 *
 	 * @param provider
 	 *            the {@link ViewProvider} to instantiate the view. Each saved
 	 *            view must be known by the specified provider.
@@ -293,7 +293,7 @@ public class TmXmlReader
 			}
 			return views;
 		}
-		
+
 		logger.error( "Could not find GUI state element.\n" );
 		ok = false;
 		return new ArrayList< >();
@@ -302,7 +302,7 @@ public class TmXmlReader
 	/**
 	 * Returns the model saved in the file, or <code>null</code> if a saved
 	 * model cannot be found in the xml file.
-	 * 
+	 *
 	 * @return a new {@link Model}.
 	 */
 	public Model getModel()
@@ -359,7 +359,7 @@ public class TmXmlReader
 	 * Hook for subclassers:<br>
 	 * Creates the instance of {@link Model} that will be built upon loading
 	 * with this reader.
-	 * 
+	 *
 	 * @return a new {@link Model} instance.
 	 */
 	protected Model createModel()
@@ -372,7 +372,7 @@ public class TmXmlReader
 	 * specified {@link Settings} object according to the xml file content. The
 	 * provided {@link Settings} object is left untouched if the settings
 	 * element cannot be found in the file.
-	 * 
+	 *
 	 * @param settings
 	 *            the {@link Settings} object to flesh out.
 	 * @param detectorProvider
@@ -449,7 +449,7 @@ public class TmXmlReader
 
 	/**
 	 * Returns an explanatory message about the last unsuccessful read attempt.
-	 * 
+	 *
 	 * @return an error message.
 	 * @see #isReadingOk()
 	 */
@@ -461,7 +461,7 @@ public class TmXmlReader
 	/**
 	 * Returns <code>true</code> if the last reading method call happened
 	 * without any warning or error, <code>false</code> otherwise.
-	 * 
+	 *
 	 * @return <code>true</code> if reading was ok.
 	 * @see #getErrorMessage()
 	 */
@@ -578,7 +578,7 @@ public class TmXmlReader
 	 * Return the initial filter value on quality stored in this file. Return
 	 * <code>null</code> if the initial threshold data cannot be found in the
 	 * file.
-	 * 
+	 *
 	 * @param settingsElement
 	 *            the settings {@link Element} to read from.
 	 * @return the initial filter, as a {@link FeatureFilter}.
@@ -595,7 +595,7 @@ public class TmXmlReader
 
 	/**
 	 * Return the list of {@link FeatureFilter} for spots stored in this file.
-	 * 
+	 *
 	 * @param settingsElement
 	 *            the settings {@link Element} to read from.
 	 * @return a list of {@link FeatureFilter}s.
@@ -618,7 +618,7 @@ public class TmXmlReader
 
 	/**
 	 * Returns the list of {@link FeatureFilter} for tracks stored in this file.
-	 * 
+	 *
 	 * @param settingsElement
 	 *            the settings {@link Element} to read from.
 	 * @return a list of {@link FeatureFilter}s.
@@ -642,7 +642,7 @@ public class TmXmlReader
 	/**
 	 * Set the base settings of the provided {@link Settings} object, extracted
 	 * from the specified {@link Element}.
-	 * 
+	 *
 	 * @param settingsElement
 	 *            the settings {@link Element} to read parameters from.
 	 * @param settings
@@ -687,7 +687,7 @@ public class TmXmlReader
 	 * {@link SpotDetectorFactory} and settings map fields named
 	 * {@link Settings#detectorFactory} and {@link Settings#detectorSettings}
 	 * read within the XML file this reader is initialized with.
-	 * 
+	 *
 	 * @param settingsElement
 	 *            the Element in which the {@link Settings} parameters are
 	 *            stored.
@@ -748,7 +748,7 @@ public class TmXmlReader
 	 * If the tracker settings or the tracker info can be read, but cannot be
 	 * understood (most likely because the class the XML refers to is unknown)
 	 * then a default object is substituted.
-	 * 
+	 *
 	 * @param settingsElement
 	 *            the {@link Element} in which the tracker parameters are
 	 *            stored.
@@ -809,7 +809,7 @@ public class TmXmlReader
 	 * It is therefore sensible to call this method first, just after
 	 * parsing the file. If not called, this method will be called
 	 * anyway by the other methods to build the cache.
-	 * 
+	 *
 	 * @param modelElement
 	 *            the {@link Element} in which the model content was written.
 	 * @return a new {@link SpotCollection}.
@@ -862,7 +862,7 @@ public class TmXmlReader
 	 * Load the tracks, the track features and the ID of the filtered tracks
 	 * into the model specified. The track collection element is expected to be
 	 * found as a child of the specified element.
-	 * 
+	 *
 	 * @return true if reading tracks was successful, false otherwise.
 	 */
 	protected boolean readTracks( final Element modelElement, final Model model )
@@ -950,7 +950,7 @@ public class TmXmlReader
 					logger.error( "Bad edge found for track " + trackID + "\n" );
 					return false;
 				}
-				
+
 				graph.setEdgeWeight( edge, weight );
 
 				// Put edge features
@@ -1072,7 +1072,7 @@ public class TmXmlReader
 		final Spot spot = new Spot( ID );
 
 		final List< Attribute > atts = spotEl.getAttributes();
-		atts.remove( SPOT_ID_ATTRIBUTE_NAME );
+		removeAttributeFromName( atts, SPOT_ID_ATTRIBUTE_NAME );
 
 		String name = spotEl.getAttributeValue( SPOT_NAME_ATTRIBUTE_NAME );
 		if ( null == name || name.equals( "" ) )
@@ -1080,7 +1080,7 @@ public class TmXmlReader
 			name = "ID" + ID;
 		}
 		spot.setName( name );
-		atts.remove( SPOT_NAME_ATTRIBUTE_NAME );
+		removeAttributeFromName( atts, SPOT_NAME_ATTRIBUTE_NAME );
 
 		for ( final Attribute att : atts )
 		{
@@ -1091,6 +1091,16 @@ public class TmXmlReader
 			spot.putFeature( att.getName(), Double.valueOf( att.getValue() ) );
 		}
 		return spot;
+	}
+
+	protected static final void removeAttributeFromName( final List<Attribute> attributes, final String attributeNameToRemove)
+	{
+		final List<Attribute> toRemove = new ArrayList<>();
+		for ( final Attribute attribute : attributes )
+			if (attribute.getName().equals( attributeNameToRemove ))
+				toRemove.add( attribute );
+
+		attributes.removeAll( toRemove );
 	}
 
 	private void readFeatureDeclarations( final Element modelElement, final Model model )
