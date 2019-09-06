@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.scijava.util.VersionUtils;
+
 import fiji.plugin.trackmate.detection.ManualDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetector;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
@@ -42,7 +44,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 
 	public static final String PLUGIN_NAME_STR = "TrackMate";
 
-	public static final String PLUGIN_NAME_VERSION = TMUtils.getTrackMateVersion();
+	public static final String PLUGIN_NAME_VERSION = VersionUtils.getVersion( TrackMate.class );
 
 	/**
 	 * The model this trackmate will shape.

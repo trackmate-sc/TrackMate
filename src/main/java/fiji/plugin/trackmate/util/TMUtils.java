@@ -2,8 +2,6 @@ package fiji.plugin.trackmate.util;
 
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,7 +13,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import fiji.plugin.trackmate.Dimension;
@@ -118,7 +115,7 @@ public class TMUtils
 	/**
 	 * Check that the given map has all some keys. Two String collection allows
 	 * specifying that some keys are mandatory, other are optional.
-	 * 
+	 *
 	 * @param map
 	 *            the map to inspect.
 	 * @param mandatoryKeys
@@ -168,7 +165,7 @@ public class TMUtils
 	/**
 	 * Check the presence and the validity of a key in a map, and test it is of
 	 * the desired class.
-	 * 
+	 *
 	 * @param map
 	 *            the map to inspect.
 	 * @param key
@@ -343,7 +340,7 @@ public class TMUtils
 
 	/**
 	 * Returns <code>[range, min, max]</code> of the given double array.
-	 * 
+	 *
 	 * @return A double[] of length 3, where index 0 is the range, index 1 is
 	 *         the min, and index 2 is the max.
 	 */
@@ -463,7 +460,7 @@ public class TMUtils
 	 * of <code>nPoints</code> data item, this method return the bin index that
 	 * thresholds the histogram in 2 classes. The threshold is performed using
 	 * the Otsu Threshold Method.
-	 * 
+	 *
 	 * @param hist
 	 *            the histogram array
 	 * @param nPoints
@@ -583,7 +580,7 @@ public class TMUtils
 	 * <p>
 	 * If the specified {@link ImgPlus} has a time axis, it will be dropped and
 	 * the returned interval will have one dimension less.
-	 * 
+	 *
 	 * @param img
 	 *            the source image into which the interval is to be defined.
 	 * @param settings
@@ -662,31 +659,6 @@ public class TMUtils
 		return interval;
 	}
 
-	public static String getTrackMateVersion()
-	{
-		final InputStream is = TMUtils.class.getResourceAsStream( "trackmate-app.properties" );
-		if (null == is)
-			return "could not find app property file";
-		final Properties p = new Properties();
-		try
-		{
-			p.load( is );
-			final String version = p.getProperty( "version" );
-			return version;
-		}
-		catch ( final IOException e )
-		{
-			e.printStackTrace();
-			return "unknown";
-		}
-	}
-
-	public static void main( final String[] args )
-	{
-		System.out.println( getTrackMateVersion() );
-	}
-
-	
 	private TMUtils()
 	{}
 }
