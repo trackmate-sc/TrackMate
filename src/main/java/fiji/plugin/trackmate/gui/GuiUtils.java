@@ -1,8 +1,5 @@
 package fiji.plugin.trackmate.gui;
 
-import ij.ImagePlus;
-import ij.measure.Calibration;
-
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.DisplayMode;
@@ -12,6 +9,9 @@ import java.awt.Point;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+
+import ij.ImagePlus;
+import ij.measure.Calibration;
 
 public class GuiUtils
 {
@@ -72,9 +72,13 @@ public class GuiUtils
 			case JOptionPane.YES_OPTION:
 				imp.setDimensions( dims[ 2 ], dims[ 4 ], dims[ 3 ] );
 				final Calibration calibration = imp.getCalibration();
-				calibration.frameInterval = 1;
-				calibration.setTimeUnit( "frame" );
+				if ( 0. == calibration.frameInterval )
+				{
+					calibration.frameInterval = 1;
+					calibration.setTimeUnit( "frame" );
+				}
 				break;
+
 			case JOptionPane.CANCEL_OPTION:
 				return;
 			}
