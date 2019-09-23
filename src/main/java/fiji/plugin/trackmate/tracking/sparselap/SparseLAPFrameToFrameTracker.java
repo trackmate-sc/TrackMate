@@ -14,9 +14,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
-import net.imglib2.multithreading.SimpleMultiThreading;
-
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
@@ -29,19 +26,21 @@ import fiji.plugin.trackmate.tracking.sparselap.costfunction.FeaturePenaltyCostF
 import fiji.plugin.trackmate.tracking.sparselap.costfunction.SquareDistCostFunction;
 import fiji.plugin.trackmate.tracking.sparselap.costmatrix.JaqamanLinkingCostMatrixCreator;
 import fiji.plugin.trackmate.tracking.sparselap.linker.JaqamanLinker;
+import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
+import net.imglib2.multithreading.SimpleMultiThreading;
 
 @SuppressWarnings( "deprecation" )
 public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorithm implements SpotTracker
 {
 	private final static String BASE_ERROR_MESSAGE = "[SparseLAPFrameToFrameTracker] ";
 
-	private SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph;
+	protected SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph;
 
-	private Logger logger = Logger.VOID_LOGGER;
+	protected Logger logger = Logger.VOID_LOGGER;
 
-	private final SpotCollection spots;
+	protected final SpotCollection spots;
 
-	private final Map< String, Object > settings;
+	protected final Map< String, Object > settings;
 
 	/*
 	 * CONSTRUCTOR
@@ -120,7 +119,7 @@ public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorith
 		final long start = System.currentTimeMillis();
 
 		// Prepare frame pairs in order, not necessarily separated by 1.
-		final ArrayList< int[] > framePairs = new ArrayList< >( spots.keySet().size() - 1 );
+		final ArrayList< int[] > framePairs = new ArrayList<>( spots.keySet().size() - 1 );
 		final Iterator< Integer > frameIterator = spots.keySet().iterator();
 		int frame0 = frameIterator.next();
 		int frame1;
@@ -134,21 +133,13 @@ public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorith
 		// Prepare cost function
 		@SuppressWarnings( "unchecked" )
 		final Map< String, Double > featurePenalties = ( Map< String, Double > ) settings.get( KEY_LINKING_FEATURE_PENALTIES );
-		final CostFunction< Spot, Spot > costFunction;
-		if ( null == featurePenalties || featurePenalties.isEmpty() )
-		{
-			costFunction = new SquareDistCostFunction();
-		}
-		else
-		{
-			costFunction = new FeaturePenaltyCostFunction( featurePenalties );
-		}
+		final CostFunction< Spot, Spot > costFunction = getCostFunction( featurePenalties );
 		final Double maxDist = ( Double ) settings.get( KEY_LINKING_MAX_DISTANCE );
 		final double costThreshold = maxDist * maxDist;
 		final double alternativeCostFactor = ( Double ) settings.get( KEY_ALTERNATIVE_LINKING_COST_FACTOR );
 
 		// Instantiate graph
-		graph = new SimpleWeightedGraph< >( DefaultWeightedEdge.class );
+		graph = new SimpleWeightedGraph<>( DefaultWeightedEdge.class );
 
 		// Prepare threads
 		final Thread[] threads = SimpleMultiThreading.newThreads( numThreads );
@@ -177,11 +168,11 @@ public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorith
 
 						// Get spots - we have to create a list from each
 						// content.
-						final List< Spot > sources = new ArrayList< >( spots.getNSpots( lFrame0, true ) );
+						final List< Spot > sources = new ArrayList<>( spots.getNSpots( lFrame0, true ) );
 						for ( final Iterator< Spot > iterator = spots.iterator( lFrame0, true ); iterator.hasNext(); )
 							sources.add( iterator.next() );
 
-						final List< Spot > targets = new ArrayList< >( spots.getNSpots( lFrame1, true ) );
+						final List< Spot > targets = new ArrayList<>( spots.getNSpots( lFrame1, true ) );
 						for ( final Iterator< Spot > iterator = spots.iterator( lFrame1, true ); iterator.hasNext(); )
 							targets.add( iterator.next() );
 
@@ -192,8 +183,8 @@ public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorith
 						 * Run the linker.
 						 */
 
-						final JaqamanLinkingCostMatrixCreator< Spot, Spot > creator = new JaqamanLinkingCostMatrixCreator< >( sources, targets, costFunction, costThreshold, alternativeCostFactor, 1d );
-						final JaqamanLinker< Spot, Spot > linker = new JaqamanLinker< >( creator );
+						final JaqamanLinkingCostMatrixCreator< Spot, Spot > creator = new JaqamanLinkingCostMatrixCreator<>( sources, targets, costFunction, costThreshold, alternativeCostFactor, 1d );
+						final JaqamanLinker< Spot, Spot > linker = new JaqamanLinker<>( creator );
 						if ( !linker.checkInput() || !linker.process() )
 						{
 							errorMessage = "At frame " + lFrame0 + " to " + lFrame1 + ": " + linker.getErrorMessage();
@@ -238,6 +229,21 @@ public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorith
 		return ok.get();
 	}
 
+	/**
+	 * Creates a suitable cost function.
+	 *
+	 * @param featurePenalties
+	 *            feature penalties to base costs on. Can be <code>null</code>.
+	 * @return a new {@link CostFunction}
+	 */
+	protected CostFunction< Spot, Spot > getCostFunction( final Map< String, Double > featurePenalties )
+	{
+		if ( null == featurePenalties || featurePenalties.isEmpty() )
+			return new SquareDistCostFunction();
+
+		return new FeaturePenaltyCostFunction( featurePenalties );
+	}
+
 	@Override
 	public void setLogger( final Logger logger )
 	{
@@ -260,10 +266,10 @@ public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorith
 		ok = ok & checkParameter( settings, KEY_ALTERNATIVE_LINKING_COST_FACTOR, Double.class, str );
 
 		// Check keys
-		final List< String > mandatoryKeys = new ArrayList< >();
+		final List< String > mandatoryKeys = new ArrayList<>();
 		mandatoryKeys.add( KEY_LINKING_MAX_DISTANCE );
 		mandatoryKeys.add( KEY_ALTERNATIVE_LINKING_COST_FACTOR );
-		final List< String > optionalKeys = new ArrayList< >();
+		final List< String > optionalKeys = new ArrayList<>();
 		optionalKeys.add( KEY_LINKING_FEATURE_PENALTIES );
 		ok = ok & checkMapKeys( settings, mandatoryKeys, optionalKeys, str );
 
