@@ -250,7 +250,7 @@ public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorith
 		this.logger = logger;
 	}
 
-	private static final boolean checkSettingsValidity( final Map< String, Object > settings, final StringBuilder str )
+	protected boolean checkSettingsValidity( final Map< String, Object > settings, final StringBuilder str )
 	{
 		if ( null == settings )
 		{
