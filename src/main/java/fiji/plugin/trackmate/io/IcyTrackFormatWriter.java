@@ -1,9 +1,5 @@
 package fiji.plugin.trackmate.io;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -13,15 +9,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.imglib2.algorithm.Algorithm;
-import net.imglib2.algorithm.Benchmark;
-
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
+
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition;
+import net.imglib2.algorithm.Algorithm;
+import net.imglib2.algorithm.Benchmark;
 
 public class IcyTrackFormatWriter implements Algorithm, Benchmark
 {
@@ -42,6 +41,8 @@ public class IcyTrackFormatWriter implements Algorithm, Benchmark
 
 	private static final String LINK = "link";
 
+	private static final String DESCRIPTION_ATTRIBUTE = "description";
+
 	private final File file;
 
 	private final Model model;
@@ -52,11 +53,19 @@ public class IcyTrackFormatWriter implements Algorithm, Benchmark
 
 	private final double[] calibration;
 
+	private final String description;
+
 	public IcyTrackFormatWriter( final File file, final Model model, final double[] calibration )
+	{
+		this( file, model, calibration, null );
+	}
+
+	public IcyTrackFormatWriter( final File file, final Model model, final double[] calibration, final String description )
 	{
 		this.file = file;
 		this.model = model;
 		this.calibration = calibration;
+		this.description = description;
 	}
 
 	@Override
@@ -113,8 +122,8 @@ public class IcyTrackFormatWriter implements Algorithm, Benchmark
 		 */
 
 		final Element trackGroup = new Element( TRACK_GROUP );
-		// trackGroup.setAttribute( "description", TrackMate.PLUGIN_NAME_STR +
-		// "_v" + TrackMate.PLUGIN_NAME_VERSION + "_export" );
+		if ( null != description && !description.isEmpty() )
+			trackGroup.setAttribute( DESCRIPTION_ATTRIBUTE, description );
 
 		final Map< Spot, Integer > beginnings = new HashMap< >();
 		final Map< Spot, Integer > endings = new HashMap< >();
