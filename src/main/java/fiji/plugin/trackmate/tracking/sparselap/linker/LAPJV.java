@@ -32,8 +32,8 @@ import net.imglib2.util.Util;
  * 0.1% to 70%, the computation time increased by a factor ranging from 1.5 to 7
  * compared to the non-sparse version. For a given density, the comparison
  * depends very weakly on the matrix size.
- * 
- * 
+ *
+ *
  * @author Jean-Yves Tinevez - 2014
  * @author Johannes Schindelin
  * @see <a href=
@@ -57,7 +57,7 @@ public class LAPJV implements OutputAlgorithm< int[] >, Benchmark
 	/**
 	 * Instantiates a new Jonker-Volgenant algorithm for the specified sparse
 	 * cost matrix.
-	 * 
+	 *
 	 * @param cm
 	 *            the cost matrix of the linear assignment problem to solve.
 	 */
@@ -365,9 +365,9 @@ public class LAPJV implements OutputAlgorithm< int[] >, Benchmark
 			return false;
 		}
 		final double minCost = Util.min( cm.cc );
-		if ( minCost < 0 )
+		if ( minCost <= 0 )
 		{
-			errorMessage = BASE_ERROR_MESSAGE + "This solver only accept positive costs. Found " + minCost + ".";
+			errorMessage = BASE_ERROR_MESSAGE + "This solver only accept strictly positive costs. Found " + minCost + ".";
 			return false;
 		}
 		return true;
@@ -388,7 +388,7 @@ public class LAPJV implements OutputAlgorithm< int[] >, Benchmark
 	/**
 	 * Returns JVS results as row assignments. The row <code>i</code> is
 	 * associated to the column <code>x[i]</code> in the cost matrix.
-	 * 
+	 *
 	 * @return the row assignments as an <code>int[]</code> array. This array is
 	 *         re-instantiated upon calling {@link #process()}.
 	 */
