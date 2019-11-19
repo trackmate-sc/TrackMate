@@ -94,7 +94,7 @@ public class CaptureOverlayAction extends AbstractTMAction
 		for ( int frame = firstFrame; frame <= lastFrame; frame++ )
 		{
 			logger.setProgress( ( float ) ( frame - firstFrame ) / nCaptures );
-			imp.setPositionWithoutUpdate( channel, slice, frame + 1 );
+			imp.setPositionWithoutUpdate( channel, slice, frame );
 			final BufferedImage bi = new BufferedImage( width, height, BufferedImage.TYPE_INT_ARGB );
 			imp.getCanvas().paint( bi.getGraphics() );
 			final ColorProcessor cp = new ColorProcessor( bi );
@@ -114,7 +114,7 @@ public class CaptureOverlayAction extends AbstractTMAction
 	 * Transfers the calibration of an {@link ImagePlus} to another one,
 	 * generated from a capture of the first one. Pixels sizes are adapter
 	 * depending on the zoom level during capture.
-	 * 
+	 *
 	 * @param from
 	 *            the imp to copy from.
 	 * @param to
@@ -138,7 +138,7 @@ public class CaptureOverlayAction extends AbstractTMAction
 	/**
 	 * Returns a the {@link ImagePlus} resulting from the last
 	 * {@link #execute(TrackMate)} call.
-	 * 
+	 *
 	 * @return a RGB {@link ImagePlus}, or <code>null</code> if the
 	 *         {@link #execute(TrackMate)} has not been called yet.
 	 */
