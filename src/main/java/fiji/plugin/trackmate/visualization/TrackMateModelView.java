@@ -7,12 +7,13 @@ import org.jfree.chart.renderer.InterpolatePaintScale;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackMateOptions;
 
 public interface TrackMateModelView
 {
 
 	/*
-	 * KEY-VALUE CONSTANTS FOR LOOK & FILL CUSTOMIZATION
+	 * KEY-VALUE CONSTANTS FOR LOOK & FEEL CUSTOMIZATION
 	 */
 
 	/*
@@ -224,7 +225,11 @@ public interface TrackMateModelView
 
 	/**
 	 * The default color map.
+	 * 
+	 * @deprecated replaced by configurable {@code InterpolatePaintScale} provided
+	 *             by {@code TrackMateOptions}
 	 */
+	@Deprecated
 	public static final InterpolatePaintScale DEFAULT_COLOR_MAP = InterpolatePaintScale.Viridis;
 
 	/**

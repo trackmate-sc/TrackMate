@@ -1,9 +1,9 @@
 package fiji.plugin.trackmate.visualization;
 
-import static fiji.plugin.trackmate.visualization.TrackMateModelView.DEFAULT_COLOR_MAP;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.ModelChangeListener;
+import fiji.plugin.trackmate.TrackMateOptionUtils;
 import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
 
 import java.awt.Color;
@@ -14,7 +14,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackColorGenerator
 {
 
-	private static final InterpolatePaintScale generator = DEFAULT_COLOR_MAP;
+	private InterpolatePaintScale generator;
 
 	private final Model model;
 
@@ -34,6 +34,7 @@ public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackC
 	{
 		this.model = model;
 		model.addModelChangeListener( this );
+		generator = TrackMateOptionUtils.getOptions().getPaintScale();
 		setFeature( feature );
 	}
 

@@ -6,6 +6,7 @@ import fiji.plugin.trackmate.SelectionChangeEvent;
 import fiji.plugin.trackmate.SelectionChangeListener;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackMateOptionUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -115,7 +116,7 @@ public abstract class AbstractTrackMateModelView implements SelectionChangeListe
 		lDisplaySettings.put( KEY_TRACK_DISPLAY_MODE, DEFAULT_TRACK_DISPLAY_MODE );
 		lDisplaySettings.put( KEY_TRACK_DISPLAY_DEPTH, DEFAULT_TRACK_DISPLAY_DEPTH );
 		lDisplaySettings.put( KEY_TRACK_COLORING, new DummyTrackColorGenerator() );
-		lDisplaySettings.put( KEY_COLORMAP, DEFAULT_COLOR_MAP );
+		lDisplaySettings.put( KEY_COLORMAP, TrackMateOptionUtils.getOptions().getPaintScale() );
 		lDisplaySettings.put( KEY_LIMIT_DRAWING_DEPTH, DEFAULT_LIMIT_DRAWING_DEPTH );
 		lDisplaySettings.put( KEY_DRAWING_DEPTH, DEFAULT_DRAWING_DEPTH );
 		return lDisplaySettings;

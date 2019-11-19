@@ -1,9 +1,9 @@
 package fiji.plugin.trackmate.gui.panels.components;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
-import static fiji.plugin.trackmate.visualization.TrackMateModelView.DEFAULT_COLOR_MAP;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.TrackMateOptionUtils;
 import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
 import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
 import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
@@ -89,7 +89,7 @@ public class ColorByFeatureGUIPanel extends ActionListenablePanel implements Min
 
 	private JComponent canvasColor;
 
-	protected InterpolatePaintScale colorMap = DEFAULT_COLOR_MAP;
+	protected InterpolatePaintScale colorMap = TrackMateOptionUtils.getOptions().getPaintScale();
 
 	protected final Model model;
 
