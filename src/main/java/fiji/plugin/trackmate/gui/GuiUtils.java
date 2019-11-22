@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.gui;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.DisplayMode;
@@ -15,6 +16,25 @@ import ij.measure.Calibration;
 
 public class GuiUtils
 {
+	
+	/**
+	 * Returns the black color or white color depending on the specified
+	 * background color, to ensure proper readability of the text on said
+	 * background.
+	 * 
+	 * @param backgroundColor
+	 *            the background color.
+	 * @return the black or white color.
+	 */
+	public static Color textColorForBackground( Color backgroundColor )
+	{
+		if ( ( backgroundColor.getRed() * 0.299
+				+ backgroundColor.getGreen() * 0.587
+				+ backgroundColor.getBlue() * 0.114 ) > 150 )
+			return Color.BLACK;
+		else
+			return Color.WHITE;
+	}
 
 	/**
 	 * Positions a JFrame more or less cleverly next a {@link Component}.
