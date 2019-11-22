@@ -23,6 +23,7 @@ import javax.swing.JPanel;
 
 import org.jfree.chart.renderer.InterpolatePaintScale;
 
+import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
 
 public class JPanelColorByFeatureGUI extends ActionListenablePanel
@@ -169,7 +170,9 @@ public class JPanelColorByFeatureGUI extends ActionListenablePanel
 		final FontMetrics fm = g.getFontMetrics();
 		final String minStr = String.format( "%.1f", min );
 		final String maxStr = String.format( "%.1f", max );
+		g.setColor( GuiUtils.textColorForBackground( colorMap.getPaint( 0. ) ) );
 		g.drawString( minStr, 1, height / 2 + fm.getHeight() / 2 );
+		g.setColor( GuiUtils.textColorForBackground( colorMap.getPaint( 1. ) ) );
 		g.drawString( maxStr, width - fm.stringWidth( maxStr ) - 1, height / 2 + fm.getHeight() / 2 );
 	}
 
