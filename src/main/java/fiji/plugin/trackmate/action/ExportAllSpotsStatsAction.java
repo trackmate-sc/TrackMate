@@ -29,6 +29,8 @@ public class ExportAllSpotsStatsAction extends AbstractTMAction
 			+ "regardless of whether they are in a track or not."
 			+ "</html>";
 
+	private ResultsTable spotTable;
+
 	@Override
 	public void execute( final TrackMate trackmate )
 	{
@@ -42,7 +44,7 @@ public class ExportAllSpotsStatsAction extends AbstractTMAction
 		final Collection< String > spotFeatures = trackmate.getModel().getFeatureModel().getSpotFeatures();
 
 		// Create table
-		final ResultsTable spotTable = new ResultsTable();
+		this.spotTable = new ResultsTable();
 
 		final Iterable< Spot > iterable = model.getSpots().iterable( true );
 		for ( final Spot spot : iterable )
@@ -82,6 +84,18 @@ public class ExportAllSpotsStatsAction extends AbstractTMAction
 
 		// Show tables
 		spotTable.show( "All Spots statistics" );
+	}
+
+	/**
+	 * Returns the results table containing the spot statistics, or
+	 * <code>null</code> if the {@link #execute(TrackMate)} method has not been
+	 * called.
+	 *
+	 * @return the results table containing the spot statistics.
+	 */
+	public ResultsTable getSpotTable()
+	{
+		return spotTable;
 	}
 
 	@Plugin( type = TrackMateActionFactory.class )
