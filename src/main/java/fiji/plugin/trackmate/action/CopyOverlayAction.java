@@ -16,6 +16,20 @@ import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACKS_
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_COLORING;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_DISPLAY_DEPTH;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_DISPLAY_MODE;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+
+import org.scijava.plugin.Plugin;
+
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.edges.EdgeVelocityAnalyzer;
@@ -39,19 +53,6 @@ import fiji.plugin.trackmate.visualization.threedviewer.SpotDisplayer3DFactory;
 import fiji.plugin.trackmate.visualization.trackscheme.SpotImageUpdater;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 import ij.ImagePlus;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-
-import org.scijava.plugin.Plugin;
 
 public class CopyOverlayAction extends AbstractTMAction
 {
@@ -274,7 +275,7 @@ public class CopyOverlayAction extends AbstractTMAction
 			{
 				try
 				{
-					final ExportStatsToIJAction action = new ExportStatsToIJAction();
+					final ExportStatsToIJAction action = new ExportStatsToIJAction( selectionModel );
 					action.execute( trackmate );
 				}
 				finally

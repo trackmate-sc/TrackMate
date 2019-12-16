@@ -784,7 +784,7 @@ public class TrackMateGUIController implements ActionListener
 				return viewChoiceDescriptor;
 
 			return detectionDescriptor;
-			
+
 		}
 		else if ( currentDescriptor == detectionDescriptor )
 		{
@@ -810,7 +810,7 @@ public class TrackMateGUIController implements ActionListener
 		{
 			if ( null == trackmate.getSettings().trackerFactory || trackmate.getSettings().trackerFactory.getKey().equals( ManualTrackerFactory.TRACKER_KEY ) )
 				return trackFilterDescriptor;
-			
+
 			return trackerConfigurationDescriptor;
 
 		}
@@ -1275,9 +1275,9 @@ public class TrackMateGUIController implements ActionListener
 				{
 					AbstractTMAction action;
 					if ( showAllSpotStats )
-						action = new ExportAllSpotsStatsAction();
+						action = new ExportAllSpotsStatsAction( selectionModel );
 					else
-						action = new ExportStatsToIJAction();
+						action = new ExportStatsToIJAction( selectionModel );
 
 					action.execute( trackmate );
 

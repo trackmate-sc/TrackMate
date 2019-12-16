@@ -1,6 +1,10 @@
 package fiji.plugin.trackmate.action;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.swing.ImageIcon;
 
@@ -8,11 +12,15 @@ import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
+import ij.WindowManager;
 import ij.measure.ResultsTable;
+import ij.text.TextPanel;
+import ij.text.TextWindow;
 
 public class ExportAllSpotsStatsAction extends AbstractTMAction
 {
@@ -29,7 +37,18 @@ public class ExportAllSpotsStatsAction extends AbstractTMAction
 			+ "regardless of whether they are in a track or not."
 			+ "</html>";
 
+	private static final String ID_COLUMN = "ID";
+
 	private ResultsTable spotTable;
+
+	private final SelectionModel selectionModel;
+
+	private final static String SPOT_TABLE_NAME = "All Spots statistics";
+
+	public ExportAllSpotsStatsAction( final SelectionModel selectionModel )
+	{
+		this.selectionModel = selectionModel;
+	}
 
 	@Override
 	public void execute( final TrackMate trackmate )
@@ -51,7 +70,7 @@ public class ExportAllSpotsStatsAction extends AbstractTMAction
 		{
 			spotTable.incrementCounter();
 			spotTable.addLabel( spot.getName() );
-			spotTable.addValue( "ID", "" + spot.ID() );
+			spotTable.addValue( ID_COLUMN, "" + spot.ID() );
 
 			// Check if it is in a track.
 			final Integer trackID = model.getTrackModel().trackIDOf( spot );
@@ -83,7 +102,44 @@ public class ExportAllSpotsStatsAction extends AbstractTMAction
 		logger.log( " Done.\n" );
 
 		// Show tables
-		spotTable.show( "All Spots statistics" );
+		spotTable.show( SPOT_TABLE_NAME  );
+
+		// Hack to make the results tables in sync with selection model.
+		if ( null != selectionModel )
+		{
+
+			/*
+			 * Spot table listener.
+			 */
+
+			final TextWindow spotTableWindow = ( TextWindow ) WindowManager.getWindow( SPOT_TABLE_NAME );
+			final TextPanel spotTableTextPanel = spotTableWindow.getTextPanel();
+			spotTableTextPanel.addMouseListener( new MouseAdapter()
+			{
+
+				@Override
+				public void mouseReleased( final MouseEvent e )
+				{
+					final int selStart = spotTableTextPanel.getSelectionStart();
+					final int selEnd = spotTableTextPanel.getSelectionEnd();
+					if ( selStart < 0 || selEnd < 0 )
+						return;
+
+					final int minLine = Math.min( selStart, selEnd );
+					final int maxLine = Math.max( selStart, selEnd );
+					final Set< Spot > spots = new HashSet<>();
+					for ( int row = minLine; row <= maxLine; row++ )
+					{
+						final int spotID = Integer.parseInt( spotTable.getStringValue( ID_COLUMN, row ) );
+						final Spot spot = model.getSpots().search( spotID );
+						if ( null != spot )
+							spots.add( spot );
+					}
+					selectionModel.clearSelection();
+					selectionModel.addSpotToSelection( spots );
+				}
+			} );
+		}
 	}
 
 	/**
@@ -117,7 +173,7 @@ public class ExportAllSpotsStatsAction extends AbstractTMAction
 		@Override
 		public TrackMateAction create( final TrackMateGUIController controller )
 		{
-			return new ExportAllSpotsStatsAction();
+			return new ExportAllSpotsStatsAction( controller.getSelectionModel() );
 		}
 
 		@Override
