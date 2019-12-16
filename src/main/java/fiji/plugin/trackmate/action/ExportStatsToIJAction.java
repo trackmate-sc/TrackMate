@@ -33,6 +33,12 @@ public class ExportStatsToIJAction extends AbstractTMAction
 
 	public static final String INFO_TEXT = "<html>" + "Compute and export all statistics to 3 ImageJ results table." + "Statistisc are separated in features computed for:" + "<ol>" + "	<li> spots in filtered tracks;" + "	<li> links between those spots;" + "	<li> filtered tracks." + "</ol>" + "For tracks and links, they are recalculated prior to exporting. Note " + "that spots and links that are not in a filtered tracks are not part" + "of this export." + "</html>";
 
+	private ResultsTable spotTable;
+
+	private ResultsTable edgeTable;
+
+	private ResultsTable trackTable;
+
 	@Override
 	public void execute( final TrackMate trackmate )
 	{
@@ -47,8 +53,7 @@ public class ExportStatsToIJAction extends AbstractTMAction
 		final Set< Integer > trackIDs = model.getTrackModel().trackIDs( true );
 		final Collection< String > spotFeatures = trackmate.getModel().getFeatureModel().getSpotFeatures();
 
-		// Create table
-		final ResultsTable spotTable = new ResultsTable();
+		this.spotTable = new ResultsTable();
 
 		// Parse spots to insert values as objects
 		for ( final Integer trackID : trackIDs )
@@ -92,8 +97,7 @@ public class ExportStatsToIJAction extends AbstractTMAction
 		// Yield available edge feature
 		final Collection< String > edgeFeatures = fm.getEdgeFeatures();
 
-		// Create table
-		final ResultsTable edgeTable = new ResultsTable();
+		this.edgeTable = new ResultsTable();
 
 		// Sort by track
 		for ( final Integer trackID : trackIDs )
@@ -155,8 +159,7 @@ public class ExportStatsToIJAction extends AbstractTMAction
 		// Yield available edge feature
 		final Collection< String > trackFeatures = fm.getTrackFeatures();
 
-		// Create table
-		final ResultsTable trackTable = new ResultsTable();
+		this.trackTable = new ResultsTable();
 
 		// Sort by track
 		for ( final Integer trackID : trackIDs )
@@ -189,6 +192,42 @@ public class ExportStatsToIJAction extends AbstractTMAction
 		spotTable.show( "Spots in tracks statistics" );
 		edgeTable.show( "Links in tracks statistics" );
 		trackTable.show( "Track statistics" );
+	}
+
+	/**
+	 * Returns the results table containing the spot statistics, or
+	 * <code>null</code> if the {@link #execute(TrackMate)} method has not been
+	 * called.
+	 *
+	 * @return the results table containing the spot statistics.
+	 */
+	public ResultsTable getSpotTable()
+	{
+		return spotTable;
+	}
+
+	/**
+	 * Returns the results table containing the edge statistics, or
+	 * <code>null</code> if the {@link #execute(TrackMate)} method has not been
+	 * called.
+	 *
+	 * @return the results table containing the edge statistics.
+	 */
+	public ResultsTable getEdgeTable()
+	{
+		return edgeTable;
+	}
+
+	/**
+	 * Returns the results table containing the track statistics, or
+	 * <code>null</code> if the {@link #execute(TrackMate)} method has not been
+	 * called.
+	 *
+	 * @return the results table containing the track statistics.
+	 */
+	public ResultsTable getTrackTable()
+	{
+		return trackTable;
 	}
 
 	// Invisible because called on the view config panel.
@@ -248,5 +287,5 @@ public class ExportStatsToIJAction extends AbstractTMAction
 		}
 
 	}
-	
+
 }
