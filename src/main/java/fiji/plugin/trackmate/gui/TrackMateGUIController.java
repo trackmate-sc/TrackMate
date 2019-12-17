@@ -784,7 +784,7 @@ public class TrackMateGUIController implements ActionListener
 				return viewChoiceDescriptor;
 
 			return detectionDescriptor;
-			
+
 		}
 		else if ( currentDescriptor == detectionDescriptor )
 		{
@@ -810,7 +810,7 @@ public class TrackMateGUIController implements ActionListener
 		{
 			if ( null == trackmate.getSettings().trackerFactory || trackmate.getSettings().trackerFactory.getKey().equals( ManualTrackerFactory.TRACKER_KEY ) )
 				return trackFilterDescriptor;
-			
+
 			return trackerConfigurationDescriptor;
 
 		}
@@ -1175,6 +1175,19 @@ public class TrackMateGUIController implements ActionListener
 	{
 		// Store current state
 		guimodel.previousDescriptor = guimodel.currentDescriptor;
+
+		/*
+		 * Special case: if we are currently configuring a detector or a
+		 * tracker, stores the settings currently displayed in TrackMate.
+		 */
+
+		if (guimodel.currentDescriptor.equals( trackerConfigurationDescriptor )
+				|| guimodel.currentDescriptor.equals( detectorConfigurationDescriptor ))
+		{
+			// This will flush currently displayed settings to TrackMate.
+			guimodel.currentDescriptor.aboutToHidePanel();
+		}
+
 
 		// Move to save state and execute
 		saveDescriptor.aboutToDisplayPanel();
