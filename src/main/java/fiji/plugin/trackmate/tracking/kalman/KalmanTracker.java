@@ -222,6 +222,7 @@ public class KalmanTracker implements SpotTracker, Benchmark
 			 * to a measurement.
 			 */
 
+			orphanSpots = new HashSet< >( measurements );
 			if ( !predictions.isEmpty() && !measurements.isEmpty() )
 			{
 				// Only link measurements to predictions if we have predictions.
@@ -243,7 +244,6 @@ public class KalmanTracker implements SpotTracker, Benchmark
 				final Map< ComparableRealPoint, Double > costs = linker.getAssignmentCosts();
 
 				// Deal with found links.
-				orphanSpots = new HashSet< >( measurements );
 				for ( final ComparableRealPoint cm : agnts.keySet() )
 				{
 					final CVMKalmanFilter kf = predictionMap.get( cm );
