@@ -730,19 +730,13 @@ public class TmXmlReader
 			this.ok = false;
 			return;
 		}
+		settings.detectorFactory = factory;
 
 		final Map< String, Object > ds = new HashMap< >();
 		ok = factory.unmarshall( element, ds );
 
-		if ( !ok )
-		{
-			logger.error( factory.getErrorMessage() );
-			this.ok = false;
-			return;
-		}
-
-		settings.detectorSettings = ds;
-		settings.detectorFactory = factory;
+		if ( ok )
+			settings.detectorSettings = ds;
 	}
 
 	/**
@@ -795,18 +789,12 @@ public class TmXmlReader
 			this.ok = false;
 			return;
 		}
+		settings.trackerFactory = factory;
 
 		// All the hard work is delegated to the factory.
 		final boolean lOk = factory.unmarshall( element, ds );
-		if ( !lOk )
-		{
-			logger.error( factory.getErrorMessage() );
-			this.ok = false;
-			return;
-		}
-
-		settings.trackerSettings = ds;
-		settings.trackerFactory = factory;
+		if ( lOk )
+			settings.trackerSettings = ds;
 	}
 
 	/**
