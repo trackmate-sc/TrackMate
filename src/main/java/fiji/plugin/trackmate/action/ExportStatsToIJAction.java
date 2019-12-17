@@ -256,7 +256,7 @@ public class ExportStatsToIJAction extends AbstractTMAction
 					final Set< Spot > spots = new HashSet<>();
 					for ( int row = minLine; row <= maxLine; row++ )
 					{
-						final int spotID = Integer.parseInt( spotTable.getStringValue( ID_COLUMN, row ) );
+						final int spotID = Integer.parseInt( spotTableTextPanel.getResultsTable().getStringValue( ID_COLUMN, row ) );
 						final Spot spot = model.getSpots().search( spotID );
 						if ( null != spot )
 							spots.add( spot );
@@ -298,9 +298,9 @@ public class ExportStatsToIJAction extends AbstractTMAction
 						final Set< DefaultWeightedEdge > edges = new HashSet<>();
 						for ( int row = minLine; row <= maxLine; row++ )
 						{
-							final int sourceID = Integer.parseInt( edgeTable.getStringValue( sourceIDColumn, row ) );
+							final int sourceID = Integer.parseInt( edgeTableTextPanel.getResultsTable().getStringValue( sourceIDColumn, row ) );
 							final Spot source = model.getSpots().search( sourceID );
-							final int targetID = Integer.parseInt( edgeTable.getStringValue( targetIDColumn, row ) );
+							final int targetID = Integer.parseInt( edgeTableTextPanel.getResultsTable().getStringValue( targetIDColumn, row ) );
 							final Spot target = model.getSpots().search( targetID );
 							final DefaultWeightedEdge edge = model.getTrackModel().getEdge( source, target );
 							if ( null != edge )
@@ -336,7 +336,7 @@ public class ExportStatsToIJAction extends AbstractTMAction
 					final Set< Spot > spots = new HashSet<>();
 					for ( int row = minLine; row <= maxLine; row++ )
 					{
-						final int trackID = Integer.parseInt( trackTable.getStringValue( TRACK_ID_COLUMN, row ) );
+						final int trackID = Integer.parseInt( trackTableTextPanel.getResultsTable().getStringValue( TRACK_ID_COLUMN, row ) );
 						spots.addAll( model.getTrackModel().trackSpots( trackID ) );
 						edges.addAll( model.getTrackModel().trackEdges( trackID ) );
 					}
