@@ -122,13 +122,16 @@ public class KalmanTracker implements SpotTracker, Benchmark
 		// Spots in the PREVIOUS frame that were not part of a link.
 		Collection< Spot > previousOrphanSpots = new ArrayList<>();
 		if ( !frameIterator.hasNext() )
-		{ return true; }
+			return true;
+
 		int firstFrame = frameIterator.next();
-		while ( previousOrphanSpots.isEmpty() )
+		while ( true )
 		{
 			previousOrphanSpots = generateSpotList( spots, firstFrame );
 			if ( !frameIterator.hasNext() )
 				return true;
+			if ( !previousOrphanSpots.isEmpty() )
+				break;
 
 			firstFrame = frameIterator.next();
 		}
@@ -138,12 +141,14 @@ public class KalmanTracker implements SpotTracker, Benchmark
 		 * parent).
 		 */
 		Collection< Spot > orphanSpots = new ArrayList<>();
-		int secondFrame = firstFrame;
-		while ( orphanSpots.isEmpty() )
+		int secondFrame = frameIterator.next();
+		while ( true )
 		{
 			orphanSpots = generateSpotList( spots, secondFrame );
 			if ( !frameIterator.hasNext() )
 				return true;
+			if ( !orphanSpots.isEmpty() )
+				break;
 
 			secondFrame = frameIterator.next();
 		}
@@ -153,7 +158,7 @@ public class KalmanTracker implements SpotTracker, Benchmark
 		 *
 		 * The search radius is used to derive an estimate of the noise that
 		 * affects position and velocity. The two are linked: if we need a large
-		 * search radius, then the fluoctuations over predicted states are
+		 * search radius, then the fluctuations over predicted states are
 		 * large.
 		 */
 		final double positionProcessStd = maxSearchRadius / 3d;
@@ -221,7 +226,13 @@ public class KalmanTracker implements SpotTracker, Benchmark
 			{
 				// Only link measurements to predictions if we have predictions.
 
-				final JaqamanLinkingCostMatrixCreator< ComparableRealPoint, Spot > crm = new JaqamanLinkingCostMatrixCreator< >( predictions, measurements, CF, maxCost, ALTERNATIVE_COST_FACTOR, PERCENTILE );
+				final JaqamanLinkingCostMatrixCreator< ComparableRealPoint, Spot > crm = new JaqamanLinkingCostMatrixCreator< >(
+						predictions,
+						measurements,
+						CF,
+						maxCost,
+						ALTERNATIVE_COST_FACTOR,
+						PERCENTILE );
 				final JaqamanLinker< ComparableRealPoint, Spot > linker = new JaqamanLinker< >( crm );
 				if ( !linker.checkInput() || !linker.process() )
 				{
@@ -269,6 +280,7 @@ public class KalmanTracker implements SpotTracker, Benchmark
 			 */
 			if ( !previousOrphanSpots.isEmpty() && !orphanSpots.isEmpty() )
 			{
+
 				/*
 				 * We now deal with orphans of the previous frame. We try to
 				 * find them a target from the list of spots that are not
@@ -276,7 +288,13 @@ public class KalmanTracker implements SpotTracker, Benchmark
 				 * spots of this frame.
 				 */
 
-				final JaqamanLinkingCostMatrixCreator< Spot, Spot > ic = new JaqamanLinkingCostMatrixCreator< >( previousOrphanSpots, orphanSpots, nucleatingCostFunction, maxInitialCost, ALTERNATIVE_COST_FACTOR, PERCENTILE );
+				final JaqamanLinkingCostMatrixCreator< Spot, Spot > ic = new JaqamanLinkingCostMatrixCreator< >(
+						previousOrphanSpots,
+						orphanSpots,
+						nucleatingCostFunction,
+						maxInitialCost,
+						ALTERNATIVE_COST_FACTOR,
+						PERCENTILE );
 				final JaqamanLinker< Spot, Spot > newLinker = new JaqamanLinker< >( ic );
 				if ( !newLinker.checkInput() || !newLinker.process() )
 				{
