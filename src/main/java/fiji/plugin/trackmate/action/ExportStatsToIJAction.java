@@ -202,6 +202,7 @@ public class ExportStatsToIJAction extends AbstractTMAction
 		{
 			trackTable.incrementCounter();
 			trackTable.addLabel( model.getTrackModel().name( trackID ) );
+			trackTable.addValue( TRACK_ID_COLUMN, "" + trackID.intValue() );
 			for ( final String feature : trackFeatures )
 			{
 				final Double val = fm.getTrackFeature( trackID, feature );
