@@ -4,13 +4,6 @@
 package fiji.plugin.trackmate.visualization;
 
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.DEFAULT_TRACK_COLOR;
-import fiji.plugin.trackmate.FeatureModel;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.ModelChangeEvent;
-import fiji.plugin.trackmate.ModelChangeListener;
-import fiji.plugin.trackmate.TrackMateOptionUtils;
-import fiji.plugin.trackmate.TrackModel;
-import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 
 import java.awt.Color;
 import java.util.HashMap;
@@ -19,6 +12,14 @@ import java.util.Set;
 
 import org.jfree.chart.renderer.InterpolatePaintScale;
 import org.jgrapht.graph.DefaultWeightedEdge;
+
+import fiji.plugin.trackmate.FeatureModel;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.ModelChangeEvent;
+import fiji.plugin.trackmate.ModelChangeListener;
+import fiji.plugin.trackmate.TrackMateOptionUtils;
+import fiji.plugin.trackmate.TrackModel;
+import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 
 /**
  * A {@link TrackColorGenerator} that generate colors based on the whole track
@@ -30,7 +31,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 public class PerTrackFeatureColorGenerator implements TrackColorGenerator, ModelChangeListener
 {
 
-	private InterpolatePaintScale generator;
+	private final InterpolatePaintScale generator;
 
 	private Map< Integer, Color > colorMap;
 
@@ -81,19 +82,16 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 		return feature;
 	}
 
-
-
 	@Override
 	public void modelChanged( final ModelChangeEvent event )
 	{
-		if ( !autoMode ) { return; }
+		if ( !autoMode )
+		{ return; }
 		if ( event.getEventID() == ModelChangeEvent.MODEL_MODIFIED )
 		{
 			final Set< DefaultWeightedEdge > edges = event.getEdges();
 			if ( edges.size() > 0 )
-			{
 				refreshColorMap();
-			}
 		}
 	}
 
@@ -106,14 +104,14 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 		{
 
 			// Create value->color map
-			colorMap = new HashMap< >( trackIDs.size() );
+			colorMap = new HashMap<>( trackIDs.size() );
 			for ( final Integer trackID : trackIDs )
 				colorMap.put( trackID, DEFAULT_TRACK_COLOR );
 		}
 		else if ( feature.equals( TrackIndexAnalyzer.TRACK_INDEX ) )
 		{
 			// Create value->color map
-			colorMap = new HashMap< >( trackIDs.size() );
+			colorMap = new HashMap<>( trackIDs.size() );
 			int index = 0;
 			for ( final Integer trackID : trackIDs )
 			{
@@ -125,13 +123,11 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 		{
 			// Get min & max & all values
 			if ( autoMode )
-			{
 				autoMinMax();
-			}
 
 			// Create value->color map
 			final FeatureModel fm = model.getFeatureModel();
-			colorMap = new HashMap< >( trackIDs.size() );
+			colorMap = new HashMap<>( trackIDs.size() );
 			for ( final Integer trackID : trackIDs )
 			{
 				final Double val = fm.getTrackFeature( trackID, feature );
@@ -170,9 +166,7 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 	public void activate()
 	{
 		if ( !model.getModelChangeListener().contains( this ) )
-		{
 			model.addModelChangeListener( this );
-		}
 	}
 
 	/**
@@ -187,7 +181,6 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 	{
 		return colorMap.get( trackID );
 	}
-
 
 	/*
 	 * MINMAXADJUSTABLE
@@ -225,17 +218,13 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 		{
 			final Double val = fm.getTrackFeature( trackID, feature );
 			if ( null == val || Double.isNaN( val.doubleValue() ) )
-			{
 				continue;
-			}
+
 			if ( val < min )
-			{
 				min = val;
-			}
+
 			if ( val > max )
-			{
 				max = val;
-			}
 		}
 	}
 
@@ -275,4 +264,3 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 		refreshColorMap();
 	}
 }
-
