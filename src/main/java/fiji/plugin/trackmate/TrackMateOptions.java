@@ -22,8 +22,8 @@ public class TrackMateOptions extends OptionsPlugin
 
 	@Parameter(
 			label = "Look-up table for scales",
-			choices = { "Viridis", "Jet" } )
-	private String lutChoice = "Viridis";
+			choices = { "Turbo", "Viridis", "Jet" } )
+	private String lutChoice = "Turbo";
 
 	public InterpolatePaintScale getPaintScale()
 	{
@@ -32,8 +32,10 @@ public class TrackMateOptions extends OptionsPlugin
 		case "Jet":
 			return InterpolatePaintScale.Jet;
 		case "Viridis":
-		default:
 			return InterpolatePaintScale.Viridis;
+		case "Turbo":
+		default:
+			return InterpolatePaintScale.Turbo;
 		}
 	}
 }
