@@ -4,6 +4,13 @@
 package fiji.plugin.trackmate.visualization;
 
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.DEFAULT_TRACK_COLOR;
+import fiji.plugin.trackmate.FeatureModel;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.ModelChangeEvent;
+import fiji.plugin.trackmate.ModelChangeListener;
+import fiji.plugin.trackmate.TrackMateOptionUtils;
+import fiji.plugin.trackmate.TrackModel;
+import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 
 import java.awt.Color;
 import java.util.HashMap;
@@ -12,13 +19,6 @@ import java.util.Set;
 
 import org.jfree.chart.renderer.InterpolatePaintScale;
 import org.jgrapht.graph.DefaultWeightedEdge;
-
-import fiji.plugin.trackmate.FeatureModel;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.ModelChangeEvent;
-import fiji.plugin.trackmate.ModelChangeListener;
-import fiji.plugin.trackmate.TrackModel;
-import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 
 /**
  * A {@link TrackColorGenerator} that generate colors based on the whole track
@@ -30,7 +30,7 @@ import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 public class PerTrackFeatureColorGenerator implements TrackColorGenerator, ModelChangeListener
 {
 
-	private static final InterpolatePaintScale generator = InterpolatePaintScale.Jet;
+	private InterpolatePaintScale generator;
 
 	private Map< Integer, Color > colorMap;
 
@@ -50,6 +50,7 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 	{
 		this.model = model;
 		model.addModelChangeListener( this );
+		generator = TrackMateOptionUtils.getOptions().getPaintScale();
 		setFeature( feature );
 	}
 

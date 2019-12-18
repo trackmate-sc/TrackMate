@@ -23,6 +23,7 @@ import javax.swing.JPanel;
 
 import org.jfree.chart.renderer.InterpolatePaintScale;
 
+import fiji.plugin.trackmate.TrackMateOptionUtils;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
 
@@ -51,7 +52,7 @@ public class JPanelColorByFeatureGUI extends ActionListenablePanel
 
 	private JPanel jPanelColor;
 
-	protected InterpolatePaintScale colorMap = InterpolatePaintScale.Jet;
+	protected InterpolatePaintScale colorMap = TrackMateOptionUtils.getOptions().getPaintScale();
 
 	/*
 	 * DEFAULT VISIBILITY

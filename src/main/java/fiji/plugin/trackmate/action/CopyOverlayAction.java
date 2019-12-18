@@ -1,6 +1,5 @@
 package fiji.plugin.trackmate.action;
 
-import static fiji.plugin.trackmate.visualization.TrackMateModelView.DEFAULT_COLOR_MAP;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.DEFAULT_HIGHLIGHT_COLOR;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.DEFAULT_SPOT_COLOR;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.DEFAULT_TRACK_DISPLAY_DEPTH;
@@ -18,6 +17,7 @@ import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_D
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_DISPLAY_MODE;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.TrackMateOptionUtils;
 import fiji.plugin.trackmate.features.edges.EdgeVelocityAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.DisplaySettingsEvent;
@@ -158,7 +158,7 @@ public class CopyOverlayAction extends AbstractTMAction
 							displaySettings.put( KEY_TRACK_DISPLAY_MODE, DEFAULT_TRACK_DISPLAY_MODE );
 							displaySettings.put( KEY_TRACK_DISPLAY_DEPTH, DEFAULT_TRACK_DISPLAY_DEPTH );
 							displaySettings.put( KEY_TRACK_COLORING, trackColorGenerator );
-							displaySettings.put( KEY_COLORMAP, DEFAULT_COLOR_MAP );
+							displaySettings.put( KEY_COLORMAP, TrackMateOptionUtils.getOptions().getPaintScale() );
 							guimodel.setDisplaySettings( displaySettings );
 
 							guimodel.addView( newDisplayer );

@@ -1,6 +1,5 @@
 package fiji.plugin.trackmate.visualization.hyperstack;
 
-import static fiji.plugin.trackmate.visualization.TrackMateModelView.DEFAULT_COLOR_MAP;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_COLORMAP;
 
 import java.awt.BorderLayout;
@@ -12,6 +11,7 @@ import javax.swing.border.EmptyBorder;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackMateOptionUtils;
 import fiji.plugin.trackmate.features.edges.EdgeVelocityAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.DisplaySettingsEvent;
@@ -71,7 +71,7 @@ public class FloatingDisplayConfigFrame extends JFrame
 		if ( null != title )
 			panel.getTitleJLabel().setText( "Display options for " + title + "." );
 
-		displaySettings.put( KEY_COLORMAP, DEFAULT_COLOR_MAP );
+		displaySettings.put( KEY_COLORMAP, TrackMateOptionUtils.getOptions().getPaintScale() );
 		guimodel.setDisplaySettings( displaySettings );
 
 		guimodel.addView( view );

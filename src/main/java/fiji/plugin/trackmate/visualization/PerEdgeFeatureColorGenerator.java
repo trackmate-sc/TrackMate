@@ -1,19 +1,20 @@
 package fiji.plugin.trackmate.visualization;
 
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.ModelChangeEvent;
+import fiji.plugin.trackmate.ModelChangeListener;
+import fiji.plugin.trackmate.TrackMateOptionUtils;
+import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
+
 import java.awt.Color;
 
 import org.jfree.chart.renderer.InterpolatePaintScale;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.ModelChangeEvent;
-import fiji.plugin.trackmate.ModelChangeListener;
-import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
-
 public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackColorGenerator
 {
 
-	private static final InterpolatePaintScale generator = InterpolatePaintScale.Jet;
+	private InterpolatePaintScale generator;
 
 	private final Model model;
 
@@ -33,6 +34,7 @@ public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackC
 	{
 		this.model = model;
 		model.addModelChangeListener( this );
+		generator = TrackMateOptionUtils.getOptions().getPaintScale();
 		setFeature( feature );
 	}
 

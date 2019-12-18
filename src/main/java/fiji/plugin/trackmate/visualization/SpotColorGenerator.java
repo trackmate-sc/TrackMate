@@ -4,6 +4,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.ModelChangeListener;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackMateOptionUtils;
 
 import java.awt.Color;
 import java.util.Set;
@@ -23,12 +24,13 @@ public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelC
 
 	private boolean autoMode = true;
 
-	private static final InterpolatePaintScale generator = InterpolatePaintScale.Jet;
+	private InterpolatePaintScale generator;
 
 	public SpotColorGenerator( final Model model )
 	{
 		this.model = model;
 		model.addModelChangeListener( this );
+		generator = TrackMateOptionUtils.getOptions().getPaintScale();
 	}
 
 	@Override
