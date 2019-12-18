@@ -2,6 +2,8 @@ package org.jfree.chart.renderer;
 
 import java.awt.Color;
 import java.io.Serializable;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -107,6 +109,16 @@ public class InterpolatePaintScale implements PaintScale, Serializable
 			final double[] triplet = triplets[ i ];
 			Turbo.add( alpha, new Color( ( float ) triplet[ 0 ], ( float ) triplet[ 1 ], ( float ) triplet[ 2 ] ) );
 		}
+	}
+
+	public static Map< String, InterpolatePaintScale > getAvailableLUTs()
+	{
+		final Map< String, InterpolatePaintScale > luts = new LinkedHashMap<>();
+		luts.put( "Turbo", Turbo );
+		luts.put( "Jet", Jet );
+		luts.put( "Viridis", Viridis );
+		luts.putAll( InterpolatePaintScaleIO.getLUTs() );
+		return luts;
 	}
 
 	/*
@@ -225,4 +237,15 @@ public class InterpolatePaintScale implements PaintScale, Serializable
 		return ips;
 	}
 
+
+	public static void main( final String[] args )
+	{
+		final StringBuilder str = new StringBuilder();
+		str.append( "{ " );
+		getAvailableLUTs().keySet().forEach( ( k ) -> str.append( '"' + k + "\", " ) );
+		str.deleteCharAt( str.length() - 1 );
+		str.deleteCharAt( str.length() - 1 );
+		str.append( " }" );
+		System.out.println( str );
+	}
 }

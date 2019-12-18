@@ -22,20 +22,11 @@ public class TrackMateOptions extends OptionsPlugin
 
 	@Parameter(
 			label = "Look-up table for scales",
-			choices = { "Turbo", "Viridis", "Jet" } )
+			choices = { "Turbo", "Jet", "Viridis", "Algae", "Amp", "Balance", "Curl", "Deep", "Delta", "Dense", "Gray", "Haline", "Ice", "Matter", "Oxy", "Phase", "Solar", "Speed", "Tempo", "Thermal", "Turbid" }  )
 	private String lutChoice = "Turbo";
 
 	public InterpolatePaintScale getPaintScale()
 	{
-		switch ( lutChoice )
-		{
-		case "Jet":
-			return InterpolatePaintScale.Jet;
-		case "Viridis":
-			return InterpolatePaintScale.Viridis;
-		case "Turbo":
-		default:
-			return InterpolatePaintScale.Turbo;
-		}
+		return InterpolatePaintScale.getAvailableLUTs().get( lutChoice );
 	}
 }
