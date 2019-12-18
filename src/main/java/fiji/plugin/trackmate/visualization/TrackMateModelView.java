@@ -7,7 +7,6 @@ import org.jfree.chart.renderer.InterpolatePaintScale;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackMateOptions;
 
 public interface TrackMateModelView
 {
@@ -62,7 +61,7 @@ public interface TrackMateModelView
 	/**
 	 * Defines the key for the spot visibility. Values are boolean. If
 	 * <code>false</code>, spots are not visible.
-	 * */
+	 */
 	public static final String KEY_SPOTS_VISIBLE = "SpotsVisible";
 
 	/**
@@ -225,9 +224,9 @@ public interface TrackMateModelView
 
 	/**
 	 * The default color map.
-	 * 
-	 * @deprecated replaced by configurable {@code InterpolatePaintScale} provided
-	 *             by {@code TrackMateOptions}
+	 *
+	 * @deprecated replaced by configurable {@code InterpolatePaintScale}
+	 *             provided by {@code TrackMateOptions}
 	 */
 	@Deprecated
 	public static final InterpolatePaintScale DEFAULT_COLOR_MAP = InterpolatePaintScale.Viridis;
