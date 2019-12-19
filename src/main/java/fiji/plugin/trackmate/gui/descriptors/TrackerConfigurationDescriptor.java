@@ -1,13 +1,13 @@
 package fiji.plugin.trackmate.gui.descriptors;
 
+import java.util.Map;
+
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
-
-import java.util.Map;
 
 public class TrackerConfigurationDescriptor implements WizardPanelDescriptor
 {
@@ -21,7 +21,7 @@ public class TrackerConfigurationDescriptor implements WizardPanelDescriptor
 	private final TrackMateGUIController controller;
 
 	/**
-	 * @param trackerProvider  
+	 * @param trackerProvider
 	 */
 	public TrackerConfigurationDescriptor( final TrackerProvider trackerProvider, final TrackMate trackmate, final TrackMateGUIController controller )
 	{
@@ -47,6 +47,7 @@ public class TrackerConfigurationDescriptor implements WizardPanelDescriptor
 		if ( null == settings || !trackerFactory.checkSettingsValidity( settings ) )
 		{
 			settings = trackerFactory.getDefaultSettings();
+			trackmate.getSettings().trackerSettings = settings;
 		}
 		configPanel.setSettings( settings );
 	}

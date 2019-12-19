@@ -1,14 +1,14 @@
 package fiji.plugin.trackmate.gui.descriptors;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.io.TmXmlWriter;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 
 public class SaveDescriptor extends SomeDialogDescriptor
 {
@@ -35,18 +35,25 @@ public class SaveDescriptor extends SomeDialogDescriptor
 		if ( null == file )
 		{
 			File folder;
-			if ( null != trackmate.getSettings().imp && null != trackmate.getSettings().imp.getOriginalFileInfo() && null != trackmate.getSettings().imp.getOriginalFileInfo().directory )
+			if (
+					null != trackmate.getSettings().imp
+					&& null != trackmate.getSettings().imp.getOriginalFileInfo()
+					&& null != trackmate.getSettings().imp.getOriginalFileInfo().directory )
 			{
 				folder = new File( trackmate.getSettings().imp.getOriginalFileInfo().directory );
-				// Update the settings field with the image file location now,
-				// because it's valid.
+				/*
+				 * Update the settings field with the image file location now,
+				 * because it's valid.
+				 */
 				trackmate.getSettings().imageFolder = trackmate.getSettings().imp.getOriginalFileInfo().directory;
 			}
 			else
 			{
 				folder = new File( System.getProperty( "user.dir" ) );
-				// Warn the user that the file cannot be reloaded properly
-				// because the source image does not match a file.
+				/*
+				 * Warn the user that the file cannot be reloaded properly
+				 * because the source image does not match a file.
+				 */
 				logger.error( "Warning: The source image does not match a file on the system."
 						+ "TrackMate won't be able to reload it when opening this XML file.\n"
 						+ "To fix this, save the source image to a TIF file before saving the TrackMate session.\n");
@@ -62,8 +69,10 @@ public class SaveDescriptor extends SomeDialogDescriptor
 			}
 		}
 
-		// If we are to save tracks, we better ensures that track and edge
-		// features are there, even if we have to enforce it
+		/*
+		 * If we are to save tracks, we better ensures that track and edge
+		 * features are there, even if we have to enforce it.
+		 */
 		if ( trackmate.getModel().getTrackModel().nTracks( false ) > 0 )
 		{
 			trackmate.computeEdgeFeatures( true );

@@ -52,6 +52,7 @@ public class DetectorConfigurationDescriptor implements WizardPanelDescriptor
 		if ( null == settings || !factory.checkSettings( settings ) )
 		{
 			settings = factory.getDefaultSettings();
+			trackmate.getSettings().detectorSettings = settings;
 		}
 		configPanel.setSettings( settings );
 	}

@@ -121,23 +121,35 @@ public class KalmanTracker implements SpotTracker, Benchmark
 
 		// Spots in the PREVIOUS frame that were not part of a link.
 		Collection< Spot > previousOrphanSpots = new ArrayList<>();
-		if ( !frameIterator.hasNext() ) { return true; }
+		if ( !frameIterator.hasNext() )
+			return true;
+
 		int firstFrame = frameIterator.next();
-		while ( previousOrphanSpots.isEmpty() )
+		while ( true )
 		{
 			previousOrphanSpots = generateSpotList( spots, firstFrame );
-			if ( !frameIterator.hasNext() ) { return true; }
+			if ( !frameIterator.hasNext() )
+				return true;
+			if ( !previousOrphanSpots.isEmpty() )
+				break;
+
 			firstFrame = frameIterator.next();
 		}
 
-		// Spots in the current frame that are not part of a new link (no
-		// parent).
+		/*
+		 * Spots in the current frame that are not part of a new link (no
+		 * parent).
+		 */
 		Collection< Spot > orphanSpots = new ArrayList<>();
-		int secondFrame = firstFrame;
-		while ( orphanSpots.isEmpty() )
+		int secondFrame = frameIterator.next();
+		while ( true )
 		{
 			orphanSpots = generateSpotList( spots, secondFrame );
-			if ( !frameIterator.hasNext() ) { return true; }
+			if ( !frameIterator.hasNext() )
+				return true;
+			if ( !orphanSpots.isEmpty() )
+				break;
+
 			secondFrame = frameIterator.next();
 		}
 
@@ -146,7 +158,7 @@ public class KalmanTracker implements SpotTracker, Benchmark
 		 *
 		 * The search radius is used to derive an estimate of the noise that
 		 * affects position and velocity. The two are linked: if we need a large
-		 * search radius, then the fluoctuations over predicted states are
+		 * search radius, then the fluctuations over predicted states are
 		 * large.
 		 */
 		final double positionProcessStd = maxSearchRadius / 3d;
@@ -158,9 +170,8 @@ public class KalmanTracker implements SpotTracker, Benchmark
 
 		double meanSpotRadius = 0d;
 		for ( final Spot spot : orphanSpots )
-		{
 			meanSpotRadius += spot.getFeature( Spot.RADIUS ).doubleValue();
-		}
+
 		meanSpotRadius /= orphanSpots.size();
 		final double positionMeasurementStd = meanSpotRadius / 10d;
 
@@ -178,8 +189,10 @@ public class KalmanTracker implements SpotTracker, Benchmark
 			// Use the spot in the next frame has measurements.
 			final List< Spot > measurements = generateSpotList( spots, frame );
 
-			// Predict for all Kalman filters, and use it to generate linking
-			// candidates.
+			/*
+			 * Predict for all Kalman filters, and use it to generate linking
+			 * candidates.
+			 */
 			final Map< ComparableRealPoint, CVMKalmanFilter > predictionMap = new HashMap< >( kalmanFiltersMap.size() );
 			for ( final CVMKalmanFilter kf : kalmanFiltersMap.keySet() )
 			{
@@ -198,18 +211,29 @@ public class KalmanTracker implements SpotTracker, Benchmark
 			}
 			final List< ComparableRealPoint > predictions = new ArrayList< >( predictionMap.keySet() );
 
-			// The KF for which we could not find a measurement in the target
-			// frame. Is updated later.
+			/*
+			 * The KF for which we could not find a measurement in the target
+			 * frame. Is updated later.
+			 */
 			final Collection< CVMKalmanFilter > childlessKFs = new HashSet< >( kalmanFiltersMap.keySet() );
 
-			// Find the global (in space) optimum for associating a prediction
-			// to a measurement.
+			/*
+			 * Find the global (in space) optimum for associating a prediction
+			 * to a measurement.
+			 */
 
+			orphanSpots = new HashSet< >( measurements );
 			if ( !predictions.isEmpty() && !measurements.isEmpty() )
 			{
 				// Only link measurements to predictions if we have predictions.
 
-				final JaqamanLinkingCostMatrixCreator< ComparableRealPoint, Spot > crm = new JaqamanLinkingCostMatrixCreator< >( predictions, measurements, CF, maxCost, ALTERNATIVE_COST_FACTOR, PERCENTILE );
+				final JaqamanLinkingCostMatrixCreator< ComparableRealPoint, Spot > crm = new JaqamanLinkingCostMatrixCreator< >(
+						predictions,
+						measurements,
+						CF,
+						maxCost,
+						ALTERNATIVE_COST_FACTOR,
+						PERCENTILE );
 				final JaqamanLinker< ComparableRealPoint, Spot > linker = new JaqamanLinker< >( crm );
 				if ( !linker.checkInput() || !linker.process() )
 				{
@@ -220,7 +244,6 @@ public class KalmanTracker implements SpotTracker, Benchmark
 				final Map< ComparableRealPoint, Double > costs = linker.getAssignmentCosts();
 
 				// Deal with found links.
-				orphanSpots = new HashSet< >( measurements );
 				for ( final ComparableRealPoint cm : agnts.keySet() )
 				{
 					final CVMKalmanFilter kf = predictionMap.get( cm );
@@ -257,6 +280,7 @@ public class KalmanTracker implements SpotTracker, Benchmark
 			 */
 			if ( !previousOrphanSpots.isEmpty() && !orphanSpots.isEmpty() )
 			{
+
 				/*
 				 * We now deal with orphans of the previous frame. We try to
 				 * find them a target from the list of spots that are not
@@ -264,7 +288,13 @@ public class KalmanTracker implements SpotTracker, Benchmark
 				 * spots of this frame.
 				 */
 
-				final JaqamanLinkingCostMatrixCreator< Spot, Spot > ic = new JaqamanLinkingCostMatrixCreator< >( previousOrphanSpots, orphanSpots, nucleatingCostFunction, maxInitialCost, ALTERNATIVE_COST_FACTOR, PERCENTILE );
+				final JaqamanLinkingCostMatrixCreator< Spot, Spot > ic = new JaqamanLinkingCostMatrixCreator< >(
+						previousOrphanSpots,
+						orphanSpots,
+						nucleatingCostFunction,
+						maxInitialCost,
+						ALTERNATIVE_COST_FACTOR,
+						PERCENTILE );
 				final JaqamanLinker< Spot, Spot > newLinker = new JaqamanLinker< >( ic );
 				if ( !newLinker.checkInput() || !newLinker.process() )
 				{
@@ -306,12 +336,12 @@ public class KalmanTracker implements SpotTracker, Benchmark
 				// Echo we missed a measurement
 				kf.update( null );
 
-				// We can bridge a limited number of gaps. If too much, we die.
-				// If not, we will use predicted state next time.
+				/*
+				 * We can bridge a limited number of gaps. If too much, we die.
+				 * If not, we will use predicted state next time.
+				 */
 				if ( kf.getNOcclusion() > maxFrameGap )
-				{
 					kalmanFiltersMap.remove( kf );
-				}
 			}
 
 			final double progress = ( double ) p / keySet.size();
@@ -319,9 +349,7 @@ public class KalmanTracker implements SpotTracker, Benchmark
 		}
 
 		if ( savePredictions )
-		{
 			predictionsCollection.setVisible( true );
-		}
 
 		final long end = System.currentTimeMillis();
 		processingTime = end - start;
@@ -378,7 +406,6 @@ public class KalmanTracker implements SpotTracker, Benchmark
 		return processingTime;
 	}
 
-
 	@Override
 	public void setLogger( final Logger logger )
 	{
@@ -388,7 +415,9 @@ public class KalmanTracker implements SpotTracker, Benchmark
 	private static final double[] toMeasurement( final Spot spot )
 	{
 		final double[] d = new double[] {
-				spot.getDoublePosition( 0 ), spot.getDoublePosition( 1 ), spot.getDoublePosition( 2 )
+				spot.getDoublePosition( 0 ),
+				spot.getDoublePosition( 1 ),
+				spot.getDoublePosition( 2 )
 		};
 		return d;
 	}
@@ -401,8 +430,14 @@ public class KalmanTracker implements SpotTracker, Benchmark
 
 	private static final double[] estimateInitialState( final Spot first, final Spot second )
 	{
-		final double[] xp = new double[] { second.getDoublePosition( 0 ), second.getDoublePosition( 1 ), second.getDoublePosition( 2 ),
-				second.diffTo( first, Spot.POSITION_X ), second.diffTo( first, Spot.POSITION_Y ), second.diffTo( first, Spot.POSITION_Z ) };
+		final double[] xp = new double[] {
+				second.getDoublePosition( 0 ),
+				second.getDoublePosition( 1 ),
+				second.getDoublePosition( 2 ),
+				second.diffTo( first, Spot.POSITION_X ),
+				second.diffTo( first, Spot.POSITION_Y ),
+				second.diffTo( first, Spot.POSITION_Z )
+		};
 		return xp;
 	}
 
@@ -410,9 +445,8 @@ public class KalmanTracker implements SpotTracker, Benchmark
 	{
 		final List< Spot > list = new ArrayList< >( spots.getNSpots( frame, true ) );
 		for ( final Iterator< Spot > iterator = spots.iterator( frame, true ); iterator.hasNext(); )
-		{
 			list.add( iterator.next() );
-		}
+
 		return list;
 	}
 
@@ -445,7 +479,7 @@ public class KalmanTracker implements SpotTracker, Benchmark
 	 * spots.
 	 */
 	private static final CostFunction< ComparableRealPoint, Spot > CF = new CostFunction< ComparableRealPoint, Spot >()
-			{
+	{
 
 		@Override
 		public double linkingCost( final ComparableRealPoint state, final Spot spot )
@@ -456,7 +490,6 @@ public class KalmanTracker implements SpotTracker, Benchmark
 			return dx * dx + dy * dy + dz * dz + Double.MIN_NORMAL;
 			// So that it's never 0
 		}
-			};
-
+	};
 
 }
