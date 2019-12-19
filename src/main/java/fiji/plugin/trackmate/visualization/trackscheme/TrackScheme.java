@@ -95,7 +95,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 	static final boolean DEFAULT_DO_DISPLAY_COSTS_ON_EDGES = false;
 
 	/** Do we display the background decorations by default? */
-	static final int DEFAULT_PAINT_DECORATION_LEVEL = 2;
+	static final int DEFAULT_PAINT_DECORATION_LEVEL = 1;
 
 	/** Do we toggle linking mode by default? */
 	static final boolean DEFAULT_LINKING_ENABLED = false;
