@@ -56,7 +56,11 @@ public class TrackScheme extends AbstractTrackMateModelView
 
 	private static final boolean DEBUG_SELECTION = false;
 
-	public static final String INFO_TEXT = "<html>" + "TrackScheme displays the tracking results as track lanes, <br>" + "ignoring the spot actual position. " + "<p>" + "Tracks can be edited through link creation and removal." + "</html>";
+	public static final String INFO_TEXT = "<html>"
+			+ "TrackScheme displays the tracking results as track lanes, <br>"
+			+ "ignoring the spot actual position. "
+			+ "<p>" + "Tracks can be edited through link creation and removal."
+			+ "</html>";
 
 	static final int Y_COLUMN_SIZE = 96;
 
@@ -85,7 +89,9 @@ public class TrackScheme extends AbstractTrackMateModelView
 
 	static final Color GRID_COLOR = Color.GRAY;
 
-	/** Are linking costs displayed by default? Can be changed in the toolbar. */
+	/**
+	 * Are linking costs displayed by default? Can be changed in the toolbar.
+	 */
 	static final boolean DEFAULT_DO_DISPLAY_COSTS_ON_EDGES = false;
 
 	/** Do we display the background decorations by default? */
@@ -127,9 +133,9 @@ public class TrackScheme extends AbstractTrackMateModelView
 	/**
 	 * The current row length for each frame. That is, for frame <code>i</code>,
 	 * the number of cells on the row corresponding to frame <code>i</code> is
-	 * <code>rowLength.get(i)</code>. 
+	 * <code>rowLength.get(i)</code>.
 	 */
-	private Map< Integer, Integer > rowLengths = new HashMap< >();
+	private Map< Integer, Integer > rowLengths = new HashMap<>();
 
 	/**
 	 * Stores the column index that is the first one after all the track
@@ -505,13 +511,12 @@ public class TrackScheme extends AbstractTrackMateModelView
 		{
 			System.out.println( "[TrackSchemeFrame] selectionChanged: received event " + event.hashCode() + " from " + event.getSource() + ". Fire flag is " + doFireSelectionChangeEvent );
 		}
-		if ( !doFireSelectionChangeEvent ) {
-			return;
-		}
+		if ( !doFireSelectionChangeEvent )
+		{ return; }
 		doFireSelectionChangeEvent = false;
 
 		{
-			final ArrayList< Object > newSelection = new ArrayList< >( selectionModel.getSpotSelection().size() + selectionModel.getEdgeSelection().size() );
+			final ArrayList< Object > newSelection = new ArrayList<>( selectionModel.getSpotSelection().size() + selectionModel.getEdgeSelection().size() );
 			final Iterator< DefaultWeightedEdge > edgeIt = selectionModel.getEdgeSelection().iterator();
 			while ( edgeIt.hasNext() )
 			{
@@ -566,14 +571,13 @@ public class TrackScheme extends AbstractTrackMateModelView
 	public void modelChanged( final ModelChangeEvent event )
 	{
 		// Only catch model changes
-		if ( event.getEventID() != ModelChangeEvent.MODEL_MODIFIED ) {
-			return;
-		}
+		if ( event.getEventID() != ModelChangeEvent.MODEL_MODIFIED )
+		{ return; }
 
 		graph.getModel().beginUpdate();
 		try
 		{
-			final ArrayList< mxICell > cellsToRemove = new ArrayList< >();
+			final ArrayList< mxICell > cellsToRemove = new ArrayList<>();
 
 			final int targetColumn = getUnlaidSpotColumn();
 
@@ -581,7 +585,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 			if ( !event.getSpots().isEmpty() )
 			{
 
-				final Collection< mxCell > spotsWithStyleToUpdate = new HashSet< >();
+				final Collection< mxCell > spotsWithStyleToUpdate = new HashSet<>();
 
 				for ( final Spot spot : event.getSpots() )
 				{
@@ -638,8 +642,8 @@ public class TrackScheme extends AbstractTrackMateModelView
 					 * Here we keep track of the spot and edge cells which style
 					 * we need to update.
 					 */
-					final Map< Integer, Set< mxCell >> edgesToUpdate = new HashMap<>();
-					final Collection< mxCell > spotsWithStyleToUpdate = new HashSet< >();
+					final Map< Integer, Set< mxCell > > edgesToUpdate = new HashMap<>();
+					final Collection< mxCell > spotsWithStyleToUpdate = new HashSet<>();
 
 					for ( final DefaultWeightedEdge edge : event.getEdges() )
 					{
@@ -688,7 +692,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 									Set< mxCell > edgeSet = edgesToUpdate.get( trackID );
 									if ( edgeSet == null )
 									{
-										edgeSet = new HashSet< >();
+										edgeSet = new HashSet<>();
 										edgesToUpdate.put( trackID, edgeSet );
 									}
 
@@ -718,7 +722,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 							Set< mxCell > edgeSet = edgesToUpdate.get( trackID );
 							if ( edgeSet == null )
 							{
-								edgeSet = new HashSet< >();
+								edgeSet = new HashSet<>();
 								edgesToUpdate.put( trackID, edgeSet );
 							}
 							edgeSet.add( edgeCell );
@@ -731,7 +735,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 							Set< mxCell > edgeSet = edgesToUpdate.get( trackID );
 							if ( edgesToUpdate.get( trackID ) == null )
 							{
-								edgeSet = new HashSet< >();
+								edgeSet = new HashSet<>();
 								edgesToUpdate.put( trackID, edgeSet );
 							}
 							edgeSet.add( graph.getCellFor( edge ) );
@@ -899,13 +903,12 @@ public class TrackScheme extends AbstractTrackMateModelView
 	 */
 	private void userChangedSelection( final Collection< Object > added, final Collection< Object > removed )
 	{ // Seems to be inverted
-		if ( !doFireSelectionChangeEvent ) {
-			return;
-		}
-		final Collection< Spot > spotsToAdd = new ArrayList< >();
-		final Collection< Spot > spotsToRemove = new ArrayList< >();
-		final Collection< DefaultWeightedEdge > edgesToAdd = new ArrayList< >();
-		final Collection< DefaultWeightedEdge > edgesToRemove = new ArrayList< >();
+		if ( !doFireSelectionChangeEvent )
+		{ return; }
+		final Collection< Spot > spotsToAdd = new ArrayList<>();
+		final Collection< Spot > spotsToRemove = new ArrayList<>();
+		final Collection< DefaultWeightedEdge > edgesToAdd = new ArrayList<>();
+		final Collection< DefaultWeightedEdge > edgesToRemove = new ArrayList<>();
 
 		if ( null != added )
 		{
@@ -1048,14 +1051,13 @@ public class TrackScheme extends AbstractTrackMateModelView
 				System.out.println( "[TrackScheme] CellRemovalListener: cells removed - Source of event is " + sender.getClass() + ". Fire flag is " + doFireModelChangeEvent );
 			}
 
-			if ( !doFireModelChangeEvent ) {
-				return;
-			}
+			if ( !doFireModelChangeEvent )
+			{ return; }
 
 			// Separate spots from edges
 			final Object[] objects = ( Object[] ) evt.getProperty( "cells" );
-			final HashSet< Spot > spotsToRemove = new HashSet< >();
-			final ArrayList< DefaultWeightedEdge > edgesToRemove = new ArrayList< >();
+			final HashSet< Spot > spotsToRemove = new HashSet<>();
+			final ArrayList< DefaultWeightedEdge > edgesToRemove = new ArrayList<>();
 			for ( final Object obj : objects )
 			{
 				final mxCell cell = ( mxCell ) obj;
@@ -1126,9 +1128,8 @@ public class TrackScheme extends AbstractTrackMateModelView
 			{
 				System.out.println( "[TrackSchemeFrame] SelectionChangeListener: selection changed by " + sender + ". Fire event flag is " + doFireSelectionChangeEvent );
 			}
-			if ( !doFireSelectionChangeEvent || sender != graph.getSelectionModel() ) {
-				return;
-			}
+			if ( !doFireSelectionChangeEvent || sender != graph.getSelectionModel() )
+			{ return; }
 			final Collection< Object > added = ( Collection< Object > ) evt.getProperty( "added" );
 			final Collection< Object > removed = ( Collection< Object > ) evt.getProperty( "removed" );
 			userChangedSelection( added, removed );
@@ -1183,7 +1184,8 @@ public class TrackScheme extends AbstractTrackMateModelView
 
 	public void doTrackStyle()
 	{
-		if ( null == stylist ) { return; }
+		if ( null == stylist )
+		{ return; }
 		gui.logger.setStatus( "Setting style." );
 
 		graph.getModel().beginUpdate();
@@ -1192,11 +1194,11 @@ public class TrackScheme extends AbstractTrackMateModelView
 
 			// Collect edges
 			final Set< Integer > trackIDs = model.getTrackModel().trackIDs( true );
-			final HashMap< Integer, Set< mxCell >> edgeMap = new HashMap<>( trackIDs.size() );
+			final HashMap< Integer, Set< mxCell > > edgeMap = new HashMap<>( trackIDs.size() );
 			for ( final Integer trackID : trackIDs )
 			{
 				final Set< DefaultWeightedEdge > edges = model.getTrackModel().trackEdges( trackID );
-				final HashSet< mxCell > set = new HashSet< >( edges.size() );
+				final HashSet< mxCell > set = new HashSet<>( edges.size() );
 				for ( final DefaultWeightedEdge edge : edges )
 				{
 					set.add( graph.getCellFor( edge ) );
@@ -1208,7 +1210,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 			final Set< mxICell > verticesUpdated = stylist.execute( edgeMap );
 
 			// Take care of vertices
-			final HashSet< mxCell > missedVertices = new HashSet< >( graph.getVertexCells() );
+			final HashSet< mxCell > missedVertices = new HashSet<>( graph.getVertexCells() );
 			missedVertices.removeAll( verticesUpdated );
 			stylist.updateVertexStyle( missedVertices );
 
@@ -1227,7 +1229,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 	{
 		// Group spots per frame
 		final Set< Integer > frames = model.getSpots().keySet();
-		final HashMap< Integer, HashSet< Spot >> spotPerFrame = new HashMap<>( frames.size() );
+		final HashMap< Integer, HashSet< Spot > > spotPerFrame = new HashMap<>( frames.size() );
 		for ( final Integer frame : frames )
 		{
 			spotPerFrame.put( frame, new HashSet< Spot >( model.getSpots().getNSpots( frame, true ) ) ); // max
@@ -1330,7 +1332,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 	{
 
 		// Sort spots by time
-		final TreeMap< Integer, Spot > spotsInTime = new TreeMap< >();
+		final TreeMap< Integer, Spot > spotsInTime = new TreeMap<>();
 		for ( final Spot spot : selectionModel.getSpotSelection() )
 		{
 			spotsInTime.put( spot.getFeature( Spot.FRAME ).intValue(), spot );
@@ -1444,7 +1446,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 	{
 
 		// Look for spot and edges matching given mxCells
-		final HashSet< Spot > inspectionSpots = new HashSet< >( vertices.size() );
+		final HashSet< Spot > inspectionSpots = new HashSet<>( vertices.size() );
 		for ( final mxCell cell : vertices )
 		{
 			final Spot spot = graph.getSpotFor( cell );
@@ -1458,7 +1460,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 			}
 			inspectionSpots.add( spot );
 		}
-		final HashSet< DefaultWeightedEdge > inspectionEdges = new HashSet< >( edges.size() );
+		final HashSet< DefaultWeightedEdge > inspectionEdges = new HashSet<>( edges.size() );
 		for ( final mxCell cell : edges )
 		{
 			final DefaultWeightedEdge dwe = graph.getEdgeFor( cell );
