@@ -1,6 +1,5 @@
 package fiji.plugin.trackmate.action;
 
-import static fiji.plugin.trackmate.visualization.TrackMateModelView.DEFAULT_COLOR_MAP;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.DEFAULT_HIGHLIGHT_COLOR;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.DEFAULT_SPOT_COLOR;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.DEFAULT_TRACK_DISPLAY_DEPTH;
@@ -32,6 +31,7 @@ import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.TrackMateOptionUtils;
 import fiji.plugin.trackmate.features.edges.EdgeVelocityAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.DisplaySettingsEvent;
@@ -63,7 +63,13 @@ public class CopyOverlayAction extends AbstractTMAction
 
 	public static final String KEY = "COPY_OVERLAY";
 
-	public static final String INFO_TEXT = "<html>" + "This action copies the overlay (spots and tracks) to a new existing ImageJ window <br> " + "or to a new 3D viewer window. This can be useful to have the tracks and spots <br> " + "displayed on a modified image. " + "<p>" + "The new view will be independent, and will have its own control panel.<br> " + "</html>";
+	public static final String INFO_TEXT = "<html>"
+			+ "This action copies the overlay (spots and tracks) to a new existing ImageJ window <br> "
+			+ "or to a new 3D viewer window. This can be useful to have the tracks and spots <br> "
+			+ "displayed on a modified image. "
+			+ "<p>"
+			+ "The new view will be independent, and will have its own control panel.<br> "
+			+ "</html>";
 
 	/**
 	 * The {@link ConfigureViewsPanel} created as a new GUI.
@@ -101,8 +107,6 @@ public class CopyOverlayAction extends AbstractTMAction
 				{
 					new Thread( "TrackMate copying thread" )
 					{
-
-
 
 						@Override
 						public void run()
@@ -159,7 +163,7 @@ public class CopyOverlayAction extends AbstractTMAction
 							displaySettings.put( KEY_TRACK_DISPLAY_MODE, DEFAULT_TRACK_DISPLAY_MODE );
 							displaySettings.put( KEY_TRACK_DISPLAY_DEPTH, DEFAULT_TRACK_DISPLAY_DEPTH );
 							displaySettings.put( KEY_TRACK_COLORING, trackColorGenerator );
-							displaySettings.put( KEY_COLORMAP, DEFAULT_COLOR_MAP );
+							displaySettings.put( KEY_COLORMAP, TrackMateOptionUtils.getOptions().getPaintScale() );
 							guimodel.setDisplaySettings( displaySettings );
 
 							guimodel.addView( newDisplayer );

@@ -28,8 +28,10 @@ import org.jfree.chart.renderer.InterpolatePaintScale;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.TrackMateOptionUtils;
 import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
 import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
+import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
 import fiji.plugin.trackmate.visualization.MinMaxAdjustable;
 
@@ -89,7 +91,7 @@ public class ColorByFeatureGUIPanel extends ActionListenablePanel implements Min
 
 	private JComponent canvasColor;
 
-	protected InterpolatePaintScale colorMap = InterpolatePaintScale.Jet;
+	protected InterpolatePaintScale colorMap = TrackMateOptionUtils.getOptions().getPaintScale();
 
 	protected final Model model;
 
@@ -286,7 +288,10 @@ public class ColorByFeatureGUIPanel extends ActionListenablePanel implements Min
 		final int minStrWidth = fm.stringWidth( minStr );
 		final int maxStrWidth = fm.stringWidth( maxStr );
 
+		g.setColor( GuiUtils.textColorForBackground( colorMap.getPaint( 0. ) ) );
 		g.drawString( dataMinStr, 1, height / 2 + fm.getHeight() / 2 );
+
+		g.setColor( GuiUtils.textColorForBackground( colorMap.getPaint( 1. ) ) );
 		g.drawString( dataMaxStr, width - dataMaxStrWidth - 1, height / 2 + fm.getHeight() / 2 );
 
 		final int iMin = ( int ) ( ( width - 1 ) * ( min - dataMin ) / ( dataMax - dataMin ) );
@@ -294,10 +299,12 @@ public class ColorByFeatureGUIPanel extends ActionListenablePanel implements Min
 
 		if ( ( iMin - minStrWidth ) > dataMinStrWidth + 2 && iMin < ( width - dataMaxStrWidth - 2 ) )
 		{
+			g.setColor( GuiUtils.textColorForBackground( colorMap.getPaint( 0. ) ) );
 			g.drawString( minStr, iMin - minStrWidth, height / 2 );
 		}
 		if ( ( iMax + maxStrWidth ) < ( width - dataMaxStrWidth - 2 ) && iMax > dataMinStrWidth + 2 )
 		{
+			g.setColor( GuiUtils.textColorForBackground( colorMap.getPaint( 1. ) ) );
 			g.drawString( maxStr, iMax, height / 2 );
 		}
 

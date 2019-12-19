@@ -1,14 +1,15 @@
 package fiji.plugin.trackmate.visualization;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.ModelChangeEvent;
-import fiji.plugin.trackmate.ModelChangeListener;
-import fiji.plugin.trackmate.Spot;
-
 import java.awt.Color;
 import java.util.Set;
 
 import org.jfree.chart.renderer.InterpolatePaintScale;
+
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.ModelChangeEvent;
+import fiji.plugin.trackmate.ModelChangeListener;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackMateOptionUtils;
 
 public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelChangeListener
 {
@@ -23,12 +24,13 @@ public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelC
 
 	private boolean autoMode = true;
 
-	private static final InterpolatePaintScale generator = InterpolatePaintScale.Jet;
+	private final InterpolatePaintScale generator;
 
 	public SpotColorGenerator( final Model model )
 	{
 		this.model = model;
 		model.addModelChangeListener( this );
+		generator = TrackMateOptionUtils.getOptions().getPaintScale();
 	}
 
 	@Override
@@ -38,9 +40,13 @@ public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelC
 			return TrackMateModelView.DEFAULT_SPOT_COLOR;
 
 		final Double feat = spot.getFeature( feature );
-		if ( null == feat ) { return TrackMateModelView.DEFAULT_UNASSIGNED_FEATURE_COLOR; }
+		if ( null == feat )
+			return TrackMateModelView.DEFAULT_UNASSIGNED_FEATURE_COLOR;
+
 		final double val = feat.doubleValue();
-		if ( Double.isNaN( val ) ) { return TrackMateModelView.DEFAULT_UNDEFINED_FEATURE_COLOR; }
+		if ( Double.isNaN( val ) )
+			return TrackMateModelView.DEFAULT_UNDEFINED_FEATURE_COLOR;
+
 		return generator.getPaint( ( val - min ) / ( max - min ) );
 	}
 
@@ -65,14 +71,14 @@ public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelC
 	@Override
 	public void modelChanged( final ModelChangeEvent event )
 	{
-		if ( !autoMode || null == feature ) { return; }
+		if ( !autoMode || null == feature )
+		{ return; }
 		if ( event.getEventID() == ModelChangeEvent.MODEL_MODIFIED )
 		{
 			final Set< Spot > spots = event.getSpots();
 			if ( spots.size() > 0 )
-			{
 				computeSpotColors();
-			}
+
 		}
 		else if ( event.getEventID() == ModelChangeEvent.SPOTS_COMPUTED )
 		{
@@ -92,7 +98,9 @@ public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelC
 	{
 		if ( null != feature )
 		{
-			if ( feature.equals( this.feature ) ) { return; }
+			if ( feature.equals( this.feature ) )
+				return;
+
 			this.feature = feature;
 			computeSpotColors();
 		}
@@ -108,7 +116,8 @@ public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelC
 
 	private void computeSpotColors()
 	{
-		if ( null == feature ) { return; }
+		if ( null == feature )
+		{ return; }
 
 		// Get min & max
 		min = Float.POSITIVE_INFINITY;
@@ -121,8 +130,10 @@ public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelC
 				val = spot.getFeature( feature );
 				if ( null == val || Double.isNaN( val.doubleValue() ) )
 					continue;
+
 				if ( val > max )
 					max = val.doubleValue();
+
 				if ( val < min )
 					min = val.doubleValue();
 			}
@@ -183,8 +194,6 @@ public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelC
 	{
 		setAutoMinMaxMode( minMaxAdjustable.isAutoMinMaxMode() );
 		if ( !minMaxAdjustable.isAutoMinMaxMode() )
-		{
 			setMinMax( minMaxAdjustable.getMin(), minMaxAdjustable.getMax() );
-		}
 	}
 }

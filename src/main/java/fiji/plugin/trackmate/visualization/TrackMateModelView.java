@@ -12,7 +12,7 @@ public interface TrackMateModelView
 {
 
 	/*
-	 * KEY-VALUE CONSTANTS FOR LOOK & FILL CUSTOMIZATION
+	 * KEY-VALUE CONSTANTS FOR LOOK & FEEL CUSTOMIZATION
 	 */
 
 	/*
@@ -61,7 +61,7 @@ public interface TrackMateModelView
 	/**
 	 * Defines the key for the spot visibility. Values are boolean. If
 	 * <code>false</code>, spots are not visible.
-	 * */
+	 */
 	public static final String KEY_SPOTS_VISIBLE = "SpotsVisible";
 
 	/**
@@ -224,8 +224,12 @@ public interface TrackMateModelView
 
 	/**
 	 * The default color map.
+	 *
+	 * @deprecated replaced by configurable {@code InterpolatePaintScale}
+	 *             provided by {@code TrackMateOptions}
 	 */
-	public static final InterpolatePaintScale DEFAULT_COLOR_MAP = InterpolatePaintScale.Jet;
+	@Deprecated
+	public static final InterpolatePaintScale DEFAULT_COLOR_MAP = InterpolatePaintScale.Viridis;
 
 	/**
 	 * The default drawing depth, in image units.
