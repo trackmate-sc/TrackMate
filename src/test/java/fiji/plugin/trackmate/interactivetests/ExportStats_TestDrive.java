@@ -1,15 +1,15 @@
 package fiji.plugin.trackmate.interactivetests;
 
+import java.io.File;
+
+import org.scijava.util.AppUtils;
+
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.action.ExportStatsToIJAction;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import ij.ImageJ;
-
-import java.io.File;
-
-import org.scijava.util.AppUtils;
 
 public class ExportStats_TestDrive {
 
@@ -30,7 +30,7 @@ public class ExportStats_TestDrive {
 		final TrackMate trackmate = new TrackMate(model, null);
 
 		// Export
-		final ExportStatsToIJAction exporter = new ExportStatsToIJAction();
+		final ExportStatsToIJAction exporter = new ExportStatsToIJAction( null );
 		exporter.execute(trackmate);
 
 	}
