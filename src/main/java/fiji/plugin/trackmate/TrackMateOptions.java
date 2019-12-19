@@ -23,7 +23,7 @@ public class TrackMateOptions extends OptionsPlugin
 	@Parameter(
 			label = "Look-up table for scales",
 			choices = { "Turbo", "Jet", "Viridis", "Algae", "Amp", "Balance", "Curl", "Deep", "Delta", "Dense", "Gray", "Haline", "Ice", "Matter", "Oxy", "Phase", "Solar", "Speed", "Tempo", "Thermal", "Turbid" }  )
-	private String lutChoice = "Turbo";
+	private String lutChoice = "Jet";
 
 	public InterpolatePaintScale getPaintScale()
 	{
