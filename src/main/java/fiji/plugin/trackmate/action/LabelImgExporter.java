@@ -7,6 +7,7 @@ import javax.swing.ImageIcon;
 
 import org.scijava.plugin.Plugin;
 
+import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
@@ -51,43 +52,38 @@ public class LabelImgExporter extends AbstractTMAction
 	@Override
 	public void execute( final TrackMate trackmate )
 	{
-		createLabelImagePlus( trackmate ).show();
+		createLabelImagePlus( trackmate, logger ).show();
 	}
 
 	public static final ImagePlus createLabelImagePlus( final TrackMate trackmate )
 	{
-		return createLabelImagePlus( trackmate.getModel(), trackmate.getSettings().imp );
+		return createLabelImagePlus( trackmate, Logger.VOID_LOGGER );
+	}
+
+	public static final ImagePlus createLabelImagePlus( final TrackMate trackmate, final Logger logger )
+	{
+		return createLabelImagePlus( trackmate.getModel(), trackmate.getSettings().imp, logger );
 	}
 
 	public static final ImagePlus createLabelImagePlus( final Model model, final ImagePlus imp )
 	{
+		return createLabelImagePlus( model, imp, Logger.VOID_LOGGER );
+	}
+
+	public static final ImagePlus createLabelImagePlus( final Model model, final ImagePlus imp, final Logger logger )
+	{
 		final int[] dimensions = imp.getDimensions();
 		final int[] dims = new int[] { dimensions[ 0 ], dimensions[ 1 ], dimensions[ 3 ], dimensions[ 4 ] };
 
-		final ImagePlus lblImp = createLabelImagePlus( model, dims );
+		final ImagePlus lblImp = createLabelImagePlus( model, dims, logger );
 		lblImp.setCalibration( imp.getCalibration().copy() );
 		lblImp.setTitle( "LblImg_" + imp.getTitle() );
 		return lblImp;
 	}
 
-	/**
-	 * @param model
-	 * @param dimensions
-	 *            the dimensions of the output image (width, height, nZSlices,
-	 *            nFrames) as a 4 element int array.
-	 * @return a new {@link ImagePlus}
-	 */
-
 	public static final ImagePlus createLabelImagePlus( final Model model, final int[] dimensions )
 	{
-		final long[] dims = new long[ 4 ];
-		for ( int d = 0; d < dims.length; d++ )
-			dims[ d ] = dimensions[ d ];
-
-		final ImagePlus lblImp = ImageJFunctions.wrap( createLabelImg( model, dims ), "LblImage" );
-		lblImp.setDimensions( 1, dimensions[ 2 ], dimensions[ 3 ] );
-		lblImp.setOpenAsHyperStack( true );
-		return lblImp;
+		return createLabelImagePlus( model, dimensions, Logger.VOID_LOGGER );
 	}
 
 	/**
@@ -98,7 +94,33 @@ public class LabelImgExporter extends AbstractTMAction
 	 * @return a new {@link ImagePlus}
 	 */
 
+	public static final ImagePlus createLabelImagePlus( final Model model, final int[] dimensions, final Logger logger )
+	{
+		final long[] dims = new long[ 4 ];
+		for ( int d = 0; d < dims.length; d++ )
+			dims[ d ] = dimensions[ d ];
+
+		final ImagePlus lblImp = ImageJFunctions.wrap( createLabelImg( model, dims, logger ), "LblImage" );
+		lblImp.setDimensions( 1, dimensions[ 2 ], dimensions[ 3 ] );
+		lblImp.setOpenAsHyperStack( true );
+		lblImp.resetDisplayRange();
+		return lblImp;
+	}
+
 	public static final Img< UnsignedShortType > createLabelImg( final Model model, final long[] dimensions )
+	{
+		return createLabelImg( model, dimensions, Logger.VOID_LOGGER );
+	}
+
+	/**
+	 * @param model
+	 * @param dimensions
+	 *            the dimensions of the output image (width, height, nZSlices,
+	 *            nFrames) as a 4 element int array.
+	 *
+	 * @return a new {@link ImagePlus}
+	 */
+	public static final Img< UnsignedShortType > createLabelImg( final Model model, final long[] dimensions, final Logger logger )
 	{
 		/*
 		 * Create target image.
@@ -128,6 +150,7 @@ public class LabelImgExporter extends AbstractTMAction
 		 * Frame by frame iteration.
 		 */
 
+		logger.log( "Writing label image.\n" );
 		for ( int frame = 0; frame < dimensions[ 3 ]; frame++ )
 		{
 			final ImgPlus< UnsignedShortType > imgC = HyperSliceImgPlus.fixChannelAxis( imgPlus, 0 );
@@ -145,7 +168,9 @@ public class LabelImgExporter extends AbstractTMAction
 				for ( final UnsignedShortType pixel : neighborhood )
 					pixel.set( id );
 			}
+			logger.setProgress( ( double ) ( 1 + frame ) / dimensions[ 3 ] );
 		}
+		logger.log( "Done.\n" );
 
 		return lblImg;
 	}
