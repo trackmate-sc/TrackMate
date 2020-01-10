@@ -243,6 +243,7 @@ public class LabelImgExporter extends AbstractTMAction
 		lblImp.setCalibration( imp.getCalibration().copy() );
 		lblImp.setTitle( "LblImg_" + imp.getTitle() );
 		return lblImp;
+
 	}
 
 	/**
@@ -542,7 +543,7 @@ public class LabelImgExporter extends AbstractTMAction
 		createLabelImagePlus(
 				plugIn.getModel(),
 				plugIn.getSettings().imp,
-				true,
+				false,
 				true,
 				plugIn.getModel().getLogger() ).show();
 	}
