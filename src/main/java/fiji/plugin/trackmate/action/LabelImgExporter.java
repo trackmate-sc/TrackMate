@@ -1,9 +1,11 @@
 package fiji.plugin.trackmate.action;
 
+import java.awt.Component;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 
 import org.scijava.plugin.Plugin;
 
@@ -14,17 +16,20 @@ import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.util.SpotNeighborhood;
+import fiji.plugin.trackmate.util.TMUtils;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 import net.imglib2.Dimensions;
 import net.imglib2.FinalDimensions;
+import net.imglib2.RandomAccess;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.meta.view.HyperSliceImgPlus;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.util.Util;
+import net.imglib2.view.Views;
 
 @SuppressWarnings( "deprecation" )
 public class LabelImgExporter extends AbstractTMAction
@@ -49,78 +54,331 @@ public class LabelImgExporter extends AbstractTMAction
 
 	public static final String NAME = "Export label image";
 
+	/**
+	 * Parent component to display the dialog.
+	 */
+	private final Component gui;
+
+	public LabelImgExporter( final Component gui )
+	{
+		this.gui = gui;
+	}
+
 	@Override
 	public void execute( final TrackMate trackmate )
 	{
-		createLabelImagePlus( trackmate, logger ).show();
+		/*
+		 * Ask use for option.
+		 */
+
+		final boolean exportSpotsAsDots;
+		final boolean exportTracksOnly;
+		if ( gui != null )
+		{
+			final LabelImgExporterPanel panel = new LabelImgExporterPanel();
+			final int userInput = JOptionPane.showConfirmDialog(
+					gui,
+					panel,
+					"Export to label image",
+					JOptionPane.OK_CANCEL_OPTION,
+					JOptionPane.QUESTION_MESSAGE,
+					TrackMateWizard.TRACKMATE_ICON );
+
+			if ( userInput != JOptionPane.OK_OPTION )
+				return;
+
+			exportSpotsAsDots = panel.isExportSpotsAsDots();
+			exportTracksOnly = panel.isExportTracksOnly();
+		}
+		else
+		{
+			exportSpotsAsDots = false;
+			exportTracksOnly = false;
+		}
+
+		/*
+		 * Generate label image.
+		 */
+
+		createLabelImagePlus( trackmate, exportSpotsAsDots, exportTracksOnly, logger ).show();
 	}
 
-	public static final ImagePlus createLabelImagePlus( final TrackMate trackmate )
+	/**
+	 * Creates a new label {@link ImagePlus} where the spots of the specified
+	 * model are painted as ellipsoids taken from their shape, with their track
+	 * ID as pixel value.
+	 *
+	 * @param trackmate
+	 *            the trackmate instance from which we takes the spots to paint.
+	 *            The label image will have the same calibration, name and
+	 *            dimension from the input image stored in the trackmate
+	 *            settings. The output label image will have the same size that
+	 *            of this input image, except for the number of channels, which
+	 *            will be 1.
+	 * @param exportSpotsAsDots
+	 *            if <code>true</code>, spots will be painted as single dots
+	 *            instead of ellipsoids.
+	 * @param exportTracksOnly
+	 *            if <code>true</code>, only the spots belonging to visible
+	 *            tracks will be painted. If <code>false</code>, spots not
+	 *            belonging to a track will be painted with a unique ID,
+	 *            different from the track IDs and different for each spot.
+	 *
+	 * @return a new {@link ImagePlus}.
+	 */
+	public static final ImagePlus createLabelImagePlus(
+			final TrackMate trackmate,
+			final boolean exportSpotsAsDots,
+			final boolean exportTracksOnly )
 	{
-		return createLabelImagePlus( trackmate, Logger.VOID_LOGGER );
+		return createLabelImagePlus( trackmate, exportSpotsAsDots, exportTracksOnly, Logger.VOID_LOGGER );
 	}
 
-	public static final ImagePlus createLabelImagePlus( final TrackMate trackmate, final Logger logger )
+	/**
+	 * Creates a new label {@link ImagePlus} where the spots of the specified
+	 * model are painted as ellipsoids taken from their shape, with their track
+	 * ID as pixel value.
+	 *
+	 * @param trackmate
+	 *            the trackmate instance from which we takes the spots to paint.
+	 *            The label image will have the same calibration, name and
+	 *            dimension from the input image stored in the trackmate
+	 *            settings. The output label image will have the same size that
+	 *            of this input image, except for the number of channels, which
+	 *            will be 1.
+	 * @param exportSpotsAsDots
+	 *            if <code>true</code>, spots will be painted as single dots
+	 *            instead of ellipsoids.
+	 * @param exportTracksOnly
+	 *            if <code>true</code>, only the spots belonging to visible
+	 *            tracks will be painted. If <code>false</code>, spots not
+	 *            belonging to a track will be painted with a unique ID,
+	 *            different from the track IDs and different for each spot.
+	 * @param logger
+	 *            a {@link Logger} instance, to report progress of the export
+	 *            process.
+	 *
+	 * @return a new {@link ImagePlus}.
+	 */
+	public static final ImagePlus createLabelImagePlus(
+			final TrackMate trackmate,
+			final boolean exportSpotsAsDots,
+			final boolean exportTracksOnly,
+			final Logger logger )
 	{
-		return createLabelImagePlus( trackmate.getModel(), trackmate.getSettings().imp, logger );
+		return createLabelImagePlus( trackmate.getModel(), trackmate.getSettings().imp, exportSpotsAsDots, exportTracksOnly, logger );
 	}
 
-	public static final ImagePlus createLabelImagePlus( final Model model, final ImagePlus imp )
+	/**
+	 * Creates a new label {@link ImagePlus} where the spots of the specified
+	 * model are painted as ellipsoids taken from their shape, with their track
+	 * ID as pixel value.
+	 *
+	 * @param model
+	 *            the model from which we takes the spots to paint.
+	 * @param imp
+	 *            a source image to read calibration, name and dimension from.
+	 *            The output label image will have the same size that of this
+	 *            source image, except for the number of channels, which will be
+	 *            1.
+	 * @param exportSpotsAsDots
+	 *            if <code>true</code>, spots will be painted as single dots
+	 *            instead of ellipsoids.
+	 * @param exportTracksOnly
+	 *            if <code>true</code>, only the spots belonging to visible
+	 *            tracks will be painted. If <code>false</code>, spots not
+	 *            belonging to a track will be painted with a unique ID,
+	 *            different from the track IDs and different for each spot.
+	 *
+	 * @return a new {@link ImagePlus}.
+	 */
+	public static final ImagePlus createLabelImagePlus(
+			final Model model,
+			final ImagePlus imp,
+			final boolean exportSpotsAsDots,
+			final boolean exportTracksOnly )
 	{
-		return createLabelImagePlus( model, imp, Logger.VOID_LOGGER );
+		return createLabelImagePlus( model, imp, exportSpotsAsDots, exportTracksOnly, Logger.VOID_LOGGER );
 	}
 
-	public static final ImagePlus createLabelImagePlus( final Model model, final ImagePlus imp, final Logger logger )
+	/**
+	 * Creates a new label {@link ImagePlus} where the spots of the specified
+	 * model are painted as ellipsoids taken from their shape, with their track
+	 * ID as pixel value.
+	 *
+	 * @param model
+	 *            the model from which we takes the spots to paint.
+	 * @param imp
+	 *            a source image to read calibration, name and dimension from.
+	 *            The output label image will have the same size that of this
+	 *            source image, except for the number of channels, which will be
+	 *            1.
+	 * @param exportSpotsAsDots
+	 *            if <code>true</code>, spots will be painted as single dots
+	 *            instead of ellipsoids.
+	 * @param exportTracksOnly
+	 *            if <code>true</code>, only the spots belonging to visible
+	 *            tracks will be painted. If <code>false</code>, spots not
+	 *            belonging to a track will be painted with a unique ID,
+	 *            different from the track IDs and different for each spot.
+	 * @param logger
+	 *            a {@link Logger} instance, to report progress of the export
+	 *            process.
+	 *
+	 * @return a new {@link ImagePlus}.
+	 */
+	public static final ImagePlus createLabelImagePlus(
+			final Model model,
+			final ImagePlus imp,
+			final boolean exportSpotsAsDots,
+			final boolean exportTracksOnly,
+			final Logger logger )
 	{
 		final int[] dimensions = imp.getDimensions();
 		final int[] dims = new int[] { dimensions[ 0 ], dimensions[ 1 ], dimensions[ 3 ], dimensions[ 4 ] };
 
-		final ImagePlus lblImp = createLabelImagePlus( model, dims, logger );
+		final ImagePlus lblImp = createLabelImagePlus( model, dims, exportSpotsAsDots, exportTracksOnly, logger );
 		lblImp.setCalibration( imp.getCalibration().copy() );
 		lblImp.setTitle( "LblImg_" + imp.getTitle() );
 		return lblImp;
 	}
 
-	public static final ImagePlus createLabelImagePlus( final Model model, final int[] dimensions )
+	/**
+	 * Creates a new label {@link ImagePlus} where the spots of the specified
+	 * model are painted as ellipsoids taken from their shape, with their track
+	 * ID as pixel value.
+	 *
+	 * @param model
+	 *            the model from which we takes the spots to paint.
+	 * @param dimensions
+	 *            the desired dimensions of the output image (width, height,
+	 *            nZSlices, nFrames) as a 4 element int array. Spots outside
+	 *            these dimensions are ignored.
+	 * @param exportSpotsAsDots
+	 *            if <code>true</code>, spots will be painted as single dots
+	 *            instead of ellipsoids.
+	 * @param exportTracksOnly
+	 *            if <code>true</code>, only the spots belonging to visible
+	 *            tracks will be painted. If <code>false</code>, spots not
+	 *            belonging to a track will be painted with a unique ID,
+	 *            different from the track IDs and different for each spot.
+	 *
+	 * @return a new {@link ImagePlus}.
+	 */
+	public static final ImagePlus createLabelImagePlus(
+			final Model model,
+			final int[] dimensions,
+			final boolean exportSpotsAsDots,
+			final boolean exportTracksOnly )
 	{
-		return createLabelImagePlus( model, dimensions, Logger.VOID_LOGGER );
+		return createLabelImagePlus( model, dimensions, exportSpotsAsDots, exportTracksOnly, Logger.VOID_LOGGER );
 	}
 
 	/**
+	 * Creates a new label {@link ImagePlus} where the spots of the specified
+	 * model are painted as ellipsoids taken from their shape, with their track
+	 * ID as pixel value.
+	 *
 	 * @param model
+	 *            the model from which we takes the spots to paint.
 	 * @param dimensions
-	 *            the dimensions of the output image (width, height, nZSlices,
-	 *            nFrames) as a 4 element int array.
-	 * @return a new {@link ImagePlus}
+	 *            the desired dimensions of the output image (width, height,
+	 *            nZSlices, nFrames) as a 4 element int array. Spots outside
+	 *            these dimensions are ignored.
+	 * @param exportSpotsAsDots
+	 *            if <code>true</code>, spots will be painted as single dots
+	 *            instead of ellipsoids.
+	 * @param exportTracksOnly
+	 *            if <code>true</code>, only the spots belonging to visible
+	 *            tracks will be painted. If <code>false</code>, spots not
+	 *            belonging to a track will be painted with a unique ID,
+	 *            different from the track IDs and different for each spot.
+	 * @param logger
+	 *            a {@link Logger} instance, to report progress of the export
+	 *            process.
+	 *
+	 * @return a new {@link ImagePlus}.
 	 */
-
-	public static final ImagePlus createLabelImagePlus( final Model model, final int[] dimensions, final Logger logger )
+	public static final ImagePlus createLabelImagePlus(
+			final Model model,
+			final int[] dimensions,
+			final boolean exportSpotsAsDots,
+			final boolean exportTracksOnly,
+			final Logger logger )
 	{
 		final long[] dims = new long[ 4 ];
 		for ( int d = 0; d < dims.length; d++ )
 			dims[ d ] = dimensions[ d ];
 
-		final ImagePlus lblImp = ImageJFunctions.wrap( createLabelImg( model, dims, logger ), "LblImage" );
+		final ImagePlus lblImp = ImageJFunctions.wrap( createLabelImg( model, dims, exportSpotsAsDots, exportTracksOnly, logger ), "LblImage" );
 		lblImp.setDimensions( 1, dimensions[ 2 ], dimensions[ 3 ] );
 		lblImp.setOpenAsHyperStack( true );
 		lblImp.resetDisplayRange();
 		return lblImp;
 	}
 
-	public static final Img< UnsignedShortType > createLabelImg( final Model model, final long[] dimensions )
+	/**
+	 * Creates a new label {@link Img} of {@link UnsignedShortType} where the
+	 * spots of the specified model are painted as ellipsoids taken from their
+	 * shape, with their track ID as pixel value.
+	 *
+	 * @param model
+	 *            the model from which we takes the spots to paint.
+	 * @param dimensions
+	 *            the desired dimensions of the output image (width, height,
+	 *            nZSlices, nFrames) as a 4 element int array. Spots outside
+	 *            these dimensions are ignored.
+	 * @param exportSpotsAsDots
+	 *            if <code>true</code>, spots will be painted as single dots
+	 *            instead of ellipsoids.
+	 * @param exportTracksOnly
+	 *            if <code>true</code>, only the spots belonging to visible
+	 *            tracks will be painted. If <code>false</code>, spots not
+	 *            belonging to a track will be painted with a unique ID,
+	 *            different from the track IDs and different for each spot.
+	 *
+	 * @return a new {@link Img}.
+	 */
+	public static final Img< UnsignedShortType > createLabelImg(
+			final Model model,
+			final long[] dimensions,
+			final boolean exportSpotsAsDots,
+			final boolean exportTracksOnly )
 	{
-		return createLabelImg( model, dimensions, Logger.VOID_LOGGER );
+		return createLabelImg( model, dimensions, exportSpotsAsDots, exportTracksOnly, Logger.VOID_LOGGER );
 	}
 
 	/**
-	 * @param model
-	 * @param dimensions
-	 *            the dimensions of the output image (width, height, nZSlices,
-	 *            nFrames) as a 4 element int array.
+	 * Creates a new label {@link Img} of {@link UnsignedShortType} where the
+	 * spots of the specified model are painted as ellipsoids taken from their
+	 * shape, with their track ID as pixel value.
 	 *
-	 * @return a new {@link ImagePlus}
+	 * @param model
+	 *            the model from which we takes the spots to paint.
+	 * @param dimensions
+	 *            the desired dimensions of the output image (width, height,
+	 *            nZSlices, nFrames) as a 4 element int array. Spots outside
+	 *            these dimensions are ignored.
+	 * @param exportSpotsAsDots
+	 *            if <code>true</code>, spots will be painted as single dots
+	 *            instead of ellipsoids.
+	 * @param exportTracksOnly
+	 *            if <code>true</code>, only the spots belonging to visible
+	 *            tracks will be painted. If <code>false</code>, spots not
+	 *            belonging to a track will be painted with a unique ID,
+	 *            different from the track IDs and different for each spot.
+	 * @param logger
+	 *            a {@link Logger} instance, to report progress of the export
+	 *            process.
+	 *
+	 * @return a new {@link Img}.
 	 */
-	public static final Img< UnsignedShortType > createLabelImg( final Model model, final long[] dimensions, final Logger logger )
+	public static final Img< UnsignedShortType > createLabelImg(
+			final Model model,
+			final long[] dimensions,
+			final boolean exportSpotsAsDots,
+			final boolean exportTracksOnly,
+			final Logger logger )
 	{
 		/*
 		 * Create target image.
@@ -155,18 +413,28 @@ public class LabelImgExporter extends AbstractTMAction
 		{
 			final ImgPlus< UnsignedShortType > imgC = HyperSliceImgPlus.fixChannelAxis( imgPlus, 0 );
 			final ImgPlus< UnsignedShortType > imgCT = HyperSliceImgPlus.fixTimeAxis( imgC, frame );
+
+			final SpotWriter spotWriter = exportSpotsAsDots
+					? new SpotAsDotWriter( imgCT )
+					: new SpotSphereWriter( imgCT );
+
 			for ( final Spot spot : model.getSpots().iterable( frame, true ) )
 			{
 				final int id;
 				final Integer trackID = model.getTrackModel().trackIDOf( spot );
 				if ( null == trackID || !model.getTrackModel().isVisible( trackID ) )
-					id = lonelySpotID.getAndIncrement();
-				else
-					id = 1 + trackID.intValue();
+				{
+					if ( exportTracksOnly )
+						continue;
 
-				final SpotNeighborhood< UnsignedShortType > neighborhood = new SpotNeighborhood< UnsignedShortType >( spot, imgCT );
-				for ( final UnsignedShortType pixel : neighborhood )
-					pixel.set( id );
+					id = lonelySpotID.getAndIncrement();
+				}
+				else
+				{
+					id = 1 + trackID.intValue();
+				}
+
+				spotWriter.write( spot, id );
 			}
 			logger.setProgress( ( double ) ( 1 + frame ) / dimensions[ 3 ] );
 		}
@@ -194,7 +462,7 @@ public class LabelImgExporter extends AbstractTMAction
 		@Override
 		public TrackMateAction create( final TrackMateGUIController controller )
 		{
-			return new LabelImgExporter();
+			return new LabelImgExporter( controller.getGUI() );
 		}
 
 		@Override
@@ -207,6 +475,60 @@ public class LabelImgExporter extends AbstractTMAction
 		public String getName()
 		{
 			return NAME;
+		}
+	}
+
+	/**
+	 * Interface for classes that can 'write' a spot into a label image.
+	 */
+	private static interface SpotWriter
+	{
+		public void write( Spot spot, int id );
+	}
+
+	private static final class SpotSphereWriter implements SpotWriter
+	{
+
+		private final ImgPlus< UnsignedShortType > img;
+
+		public SpotSphereWriter( final ImgPlus< UnsignedShortType > img )
+		{
+			this.img = img;
+		}
+
+		@Override
+		public void write( final Spot spot, final int id )
+		{
+			final SpotNeighborhood< UnsignedShortType > neighborhood = new SpotNeighborhood< UnsignedShortType >( spot, img );
+			for ( final UnsignedShortType pixel : neighborhood )
+				pixel.set( id );
+		}
+	}
+
+	private static final class SpotAsDotWriter implements SpotWriter
+	{
+
+		private final double[] calibration;
+
+		private final long[] center;
+
+		private final RandomAccess< UnsignedShortType > ra;
+
+		public SpotAsDotWriter( final ImgPlus< UnsignedShortType > img )
+		{
+			this.calibration = TMUtils.getSpatialCalibration( img );
+			this.center = new long[ img.numDimensions() ];
+			this.ra = Views.extendZero( img ).randomAccess();
+		}
+
+		@Override
+		public void write( final Spot spot, final int id )
+		{
+			for ( int d = 0; d < center.length; d++ )
+				center[ d ] = Math.round( spot.getFeature( Spot.POSITION_FEATURES[ d ] ).doubleValue() / calibration[ d ] );
+
+			ra.setPosition( center );
+			ra.get().set( id );
 		}
 	}
 }
