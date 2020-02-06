@@ -2,6 +2,9 @@ package fiji.plugin.trackmate.util;
 
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 
+import ij.IJ;
+import ij.ImagePlus;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,10 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import fiji.plugin.trackmate.Dimension;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.Spot;
-import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imagej.ImgPlusMetadata;
 import net.imagej.axis.Axes;
@@ -28,6 +27,12 @@ import net.imglib2.Interval;
 import net.imglib2.img.ImagePlusAdapter;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.util.Util;
+
+import org.scijava.Context;
+
+import fiji.plugin.trackmate.Dimension;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.Spot;
 
 /**
  * List of static utilities for {@link fiji.plugin.trackmate.TrackMate}.
@@ -657,6 +662,11 @@ public class TMUtils
 		}
 		final FinalInterval interval = new FinalInterval( intervalMin, intervalMax );
 		return interval;
+	}
+
+	/** Obtains the SciJava {@link Context} in use by ImageJ. */
+	public static Context getContext() {
+		return ( Context ) IJ.runPlugIn( "org.scijava.Context", "" );
 	}
 
 	private TMUtils()

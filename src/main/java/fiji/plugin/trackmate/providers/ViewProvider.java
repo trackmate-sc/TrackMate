@@ -13,6 +13,7 @@ import org.scijava.log.LogService;
 import org.scijava.plugin.PluginInfo;
 import org.scijava.plugin.PluginService;
 
+import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.ViewFactory;
 
 public class ViewProvider
@@ -72,7 +73,7 @@ public class ViewProvider
 
 	protected void registerViews()
 	{
-		final Context context = new Context( LogService.class, PluginService.class );
+		final Context context = TMUtils.getContext();
 		final LogService log = context.getService( LogService.class );
 		final PluginService pluginService = context.getService( PluginService.class );
 		final List< PluginInfo< ViewFactory > > infos = pluginService.getPluginsOfType( ViewFactory.class );
