@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.providers;
 
 import fiji.plugin.trackmate.TrackMateModule;
+import fiji.plugin.trackmate.util.TMUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,7 +36,7 @@ public abstract class AbstractProvider< K extends TrackMateModule >
 
 	private void registerModules()
 	{
-		final Context context = new Context( LogService.class, PluginService.class );
+		final Context context = TMUtils.getContext();
 		final LogService log = context.getService( LogService.class );
 		final PluginService pluginService = context.getService( PluginService.class );
 		final List< PluginInfo< K >> infos = pluginService.getPluginsOfType( cl );

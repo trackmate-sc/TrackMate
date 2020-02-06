@@ -665,8 +665,8 @@ public class TMUtils
 	}
 
 	/** Obtains the SciJava {@link Context} in use by ImageJ. */
-	public Context getContext() {
-		return (Context) IJ.runPlugIn("org.scijava.Context", "");
+	public static Context getContext() {
+		return ( Context ) IJ.runPlugIn( "org.scijava.Context", "" );
 	}
 
 	private TMUtils()
