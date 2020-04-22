@@ -223,6 +223,7 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 				final int frame = imp.getFrame() - 1;
 				lSettings.tstart = frame;
 				lSettings.tend = frame;
+				lSettings.roi = settings.roi;
 
 				lSettings.detectorFactory = getDetectorFactory();
 				lSettings.detectorSettings = getSettings();
