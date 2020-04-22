@@ -1,6 +1,5 @@
 package fiji.plugin.trackmate;
 
-import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,13 +30,6 @@ public class Settings
 	 * target.
 	 */
 	public ImagePlus imp;
-
-	/**
-	 * The polygon of interest. This will be used to crop the image and to
-	 * discard found spots out of the polygon. If <code>null</code>, the whole
-	 * image is considered.
-	 */
-	public Polygon polygon;
 
 	/**
 	 * The region of interest (ROI). This will be used to crop the image and to
@@ -231,7 +223,6 @@ public class Settings
 			this.xend = width - 1;
 			this.ystart = 0;
 			this.yend = height - 1;
-			this.polygon = null;
 		}
 		else
 		{
@@ -240,7 +231,6 @@ public class Settings
 			this.xend = boundingRect.width + boundingRect.x;
 			this.ystart = boundingRect.y;
 			this.yend = boundingRect.height + boundingRect.y;
-			this.polygon = roi.getPolygon();
 
 		}
 		// The rest is left to the user

@@ -16,7 +16,6 @@ import fiji.plugin.trackmate.features.SpotFeatureCalculator;
 import fiji.plugin.trackmate.features.TrackFeatureCalculator;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.util.TMUtils;
-import ij.gui.ShapeRoi;
 import net.imagej.ImgPlus;
 import net.imglib2.Interval;
 import net.imglib2.algorithm.Algorithm;
@@ -77,64 +76,6 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 	public TrackMate()
 	{
 		this( new Model(), new Settings() );
-	}
-
-	/*
-	 * PROTECTED METHODS
-	 */
-
-	/**
-	 * This method exists for the following reason:
-	 * <p>
-	 * The detector receives at each frame a cropped image to operate on,
-	 * depending on the user specifying a ROI. It therefore returns spots whose
-	 * coordinates are with respect to the top-left corner of the ROI, not of
-	 * the original image.
-	 * <p>
-	 * This method modifies the given spots to put them back in the image
-	 * coordinate system. Additionally, is a non-square ROI was specified (e.g.
-	 * a polygon), it prunes the spots that are not within the polygon of the
-	 * ROI.
-	 *
-	 * @param spotsThisFrame
-	 *            the spot list to inspect
-	 * @param lSettings
-	 *            the {@link Settings} object that will be used to retrieve the
-	 *            image ROI and cropping information
-	 * @return a list of spot. Depending on the presence of a polygon ROI, it
-	 *         might be a new, pruned list. Or not.
-	 */
-	protected List< Spot > translateAndPruneSpots( final List< Spot > spotsThisFrame, final Settings lSettings )
-	{
-
-		// Put them back in the right referential
-		final double[] calibration = TMUtils.getSpatialCalibration( lSettings.imp );
-		TMUtils.translateSpots( spotsThisFrame, lSettings.xstart * calibration[ 0 ], lSettings.ystart * calibration[ 1 ], lSettings.zstart * calibration[ 2 ] );
-		List< Spot > prunedSpots;
-		// Prune if outside of ROI
-		if ( lSettings.roi instanceof ShapeRoi )
-		{
-			prunedSpots = new ArrayList<>();
-			for ( final Spot spot : spotsThisFrame )
-			{
-				if ( lSettings.roi.contains( (int) Math.round( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ] ), (int) Math.round( spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) ) )
-					prunedSpots.add( spot );
-			}
-		}
-		else if ( null != lSettings.polygon )
-		{
-			prunedSpots = new ArrayList<>();
-			for ( final Spot spot : spotsThisFrame )
-			{
-				if ( lSettings.polygon.contains( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ], spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) )
-					prunedSpots.add( spot );
-			}
-		}
-		else
-		{
-			prunedSpots = spotsThisFrame;
-		}
-		return prunedSpots;
 	}
 
 	/*
@@ -403,21 +344,12 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 								}
 
 								List< Spot > prunedSpots;
-								if ( settings.roi instanceof ShapeRoi )
+								if ( settings.roi != null )
 								{
 									prunedSpots = new ArrayList<>();
 									for ( final Spot spot : spotsThisFrame )
 									{
 										if ( settings.roi.contains( (int) Math.round( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ] ), (int) Math.round( spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) ) )
-											prunedSpots.add( spot );
-									}
-								}
-								else if ( null != settings.polygon )
-								{
-									prunedSpots = new ArrayList< >();
-									for ( final Spot spot : spotsThisFrame )
-									{
-										if ( settings.polygon.contains( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ], spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) )
 											prunedSpots.add( spot );
 									}
 								}

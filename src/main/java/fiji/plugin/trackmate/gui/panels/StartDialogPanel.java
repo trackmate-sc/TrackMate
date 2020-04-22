@@ -533,12 +533,8 @@ public class StartDialogPanel extends ActionListenablePanel
 		// Units
 		model.setPhysicalUnits( jLabelUnits1.getText(), jLabelUnits4.getText() );
 		// Roi
-		final Roi roi = imp.getRoi();
-		if ( null != roi )
-		{
-			settings.roi = roi;
-			settings.polygon = roi.getPolygon();
-		}
+		settings.roi = imp.getRoi();
+
 		// File info
 		if ( null != imp.getOriginalFileInfo() )
 		{
