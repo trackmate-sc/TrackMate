@@ -76,4 +76,23 @@ public interface TrackMateModule extends SciJavaPlugin
 	 */
 	public String getName();
 
+	/**
+	 * Returns a flag that tells TrackMate whether it should strictly forbid
+	 * running this module concurrently.
+	 * <p>
+	 * This might be the case for instance if you have a spot detector that you
+	 * want to run strictly one frame after another, to save resources or
+	 * because the multi-threading of the detector cannot be controlled. In that
+	 * case this flag should be set to <code>true</code>.
+	 * <p>
+	 * If <code>false</code> (the default), the multi-threading will be decided
+	 * by TrackMate.
+	 * 
+	 * @return whether to forbid running this module concurrently
+	 */
+	public default boolean forbidMultithreading()
+	{
+		return false;
+	}
+
 }

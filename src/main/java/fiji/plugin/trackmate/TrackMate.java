@@ -270,7 +270,9 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 		 * frame. But if we have 10 threads and 2 frames, we process the 2
 		 * frames at once, and allocate 5 threads per frame if we can.
 		 */
-		final int nSimultaneousFrames = Math.min( numThreads, numFrames );
+		final int nSimultaneousFrames = ( factory.forbidMultithreading() )
+				? 1
+				: Math.min( numThreads, numFrames );
 		final int threadsPerFrame = Math.max( 1, numThreads / nSimultaneousFrames );
 
 		logger.log( "Detection processes "
