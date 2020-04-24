@@ -10,9 +10,11 @@ import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.T
 import java.util.Iterator;
 
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.util.SpotNeighborhood;
-import fiji.plugin.trackmate.util.SpotNeighborhoodCursor;
 import net.imagej.ImgPlus;
+import net.imglib2.Cursor;
+import net.imglib2.IterableInterval;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Util;
 
@@ -37,18 +39,28 @@ public class SpotIntensityAnalyzer< T extends RealType< T > > extends Independen
 	@Override
 	public final void process( final Spot spot )
 	{
-
 		// Prepare neighborhood
-		final SpotNeighborhood< T > neighborhood = new SpotNeighborhood<>( spot, img );
-		final int npixels = ( int ) neighborhood.size();
+		final IterableInterval< T > neighborhood;
+		final SpotRoi roi = spot.getRoi();
+		if ( null != roi && img.numDimensions() == 2 )
+		{
+			// Operate on ROI only if we have one and the image is 2D.
+			neighborhood = roi.sample( spot, img );
+		}
+		else
+		{
+			// Otherwise default to circle / sphere.
+			neighborhood = new SpotNeighborhood<>( spot, img );
+		}
 
+		final int npixels = ( int ) neighborhood.size();
 		if ( npixels <= 1 )
 		{
 			/*
 			 * Hack around a bug in spot iterator causing it to never end if the
 			 * size of the spot is lower than one pixel.
 			 */
-			final SpotNeighborhoodCursor< T > cursor = neighborhood.cursor();
+			final Cursor< T > cursor = neighborhood.cursor();
 			cursor.fwd();
 			final double val = cursor.get().getRealDouble();
 
@@ -65,9 +77,7 @@ public class SpotIntensityAnalyzer< T extends RealType< T > > extends Independen
 		double sum = 0;
 		double mean = 0;
 		double M2 = 0;
-		double M3 = 0;
-		double M4 = 0;
-		double delta, delta_n, delta_n2;
+		double delta, delta_n;
 		double term1;
 		int n1;
 
@@ -88,11 +98,8 @@ public class SpotIntensityAnalyzer< T extends RealType< T > > extends Independen
 			n++;
 			delta = val - mean;
 			delta_n = delta / n;
-			delta_n2 = delta_n * delta_n;
 			term1 = delta * delta_n * n1;
 			mean = mean + delta_n;
-			M4 = M4 + term1 * delta_n2 * ( n * n - 3 * n + 3 ) + 6 * delta_n2 * M2 - 4 * delta_n * M3;
-			M3 = M3 + term1 * delta_n * ( n - 2 ) - 3 * delta_n * M2;
 			M2 = M2 + term1;
 		}
 
@@ -109,5 +116,6 @@ public class SpotIntensityAnalyzer< T extends RealType< T > > extends Independen
 		spot.putFeature( MEAN_INTENSITY, mean );
 		spot.putFeature( STANDARD_DEVIATION, Math.sqrt( variance ) );
 		spot.putFeature( TOTAL_INTENSITY, sum );
+
 	}
 }
