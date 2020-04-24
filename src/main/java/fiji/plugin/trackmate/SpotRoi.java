@@ -1,5 +1,16 @@
 package fiji.plugin.trackmate;
 
+import net.imagej.ImgPlus;
+import net.imglib2.IterableInterval;
+import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.roi.IterableRegion;
+import net.imglib2.roi.Masks;
+import net.imglib2.roi.Regions;
+import net.imglib2.roi.geom.GeomMasks;
+import net.imglib2.roi.geom.real.WritablePolygon2D;
+import net.imglib2.type.logic.BoolType;
+import net.imglib2.view.Views;
+
 public class SpotRoi
 {
 
@@ -33,14 +44,13 @@ public class SpotRoi
 	 * @param magnification2
 	 * @return a new <code>int</code> array.
 	 */
-	public int[] toPolygonX( final double calibration, final int xcorner, final double spotXCenter, final double magnification )
+	public double[] toPolygonX( final double calibration, final double xcorner, final double spotXCenter, final double magnification )
 	{
-		final int[] xp = new int[ x.length ];
+		final double[] xp = new double[ x.length ];
 		for ( int i = 0; i < xp.length; i++ )
 		{
-			final double xc = ( spotXCenter + x[ i ] ) / calibration + 0.5;
-			final double xs = ( xc - xcorner ) * magnification;
-			xp[ i ] = ( int ) Math.round( xs );
+			final double xc = ( spotXCenter + x[ i ] ) / calibration;
+			xp[ i ] = ( xc - xcorner ) * magnification;
 		}
 		return xp;
 	}
@@ -58,15 +68,28 @@ public class SpotRoi
 	 *            the magnification of the view.
 	 * @return a new <code>int</code> array.
 	 */
-	public int[] toPolygonY( final double calibration, final int ycorner, final double spotYCenter, final double magnification )
+	public double[] toPolygonY( final double calibration, final double ycorner, final double spotYCenter, final double magnification )
 	{
-		final int[] yp = new int[ y.length ];
+		final double[] yp = new double[ y.length ];
 		for ( int i = 0; i < yp.length; i++ )
 		{
-			final double yc = ( spotYCenter + y[ i ] ) / calibration + 0.5;
-			final double ys = ( yc - ycorner ) * magnification;
-			yp[ i ] = ( int ) Math.round( ys );
+			final double yc = ( spotYCenter + y[ i ] ) / calibration;
+			yp[ i ] = ( yc - ycorner ) * magnification;
 		}
 		return yp;
+	}
+
+	public < T > IterableInterval< T > sample( final Spot spot, final ImgPlus< T > img )
+	{
+		return sample( spot.getDoublePosition( 0 ), spot.getDoublePosition( 1 ), img, img.averageScale( 0 ), img.averageScale( 1 ) );
+	}
+
+	public < T > IterableInterval< T > sample( final double spotXCenter, final double spotYCenter, final RandomAccessibleInterval< T > img, final double xScale, final double yScale )
+	{
+		final double[] xp = toPolygonX( xScale, 0, spotXCenter, 1. );
+		final double[] yp = toPolygonY( yScale, 0, spotYCenter, 1. );
+		final WritablePolygon2D polygon = GeomMasks.closedPolygon2D( xp, yp );
+		final IterableRegion< BoolType > region = Masks.toIterableRegion( polygon );
+		return Regions.sample( region, Views.extendMirrorDouble( img ) );
 	}
 }
