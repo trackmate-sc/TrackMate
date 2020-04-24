@@ -14,6 +14,7 @@ import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -21,6 +22,7 @@ import java.util.Map;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
@@ -230,32 +232,45 @@ public class SpotOverlay extends Roi
 		final double radius = spot.getFeature( Spot.RADIUS ) * radiusRatio;
 		// In pixel units
 		final double xp = x / calibration[ 0 ] + 0.5f;
-		final double yp = y / calibration[ 1 ] + 0.5f; // so that spot centers
-		// are displayed on the
-		// pixel centers
+		final double yp = y / calibration[ 1 ] + 0.5f;
+		// so that spot centers are displayed on the pixel centers.
+
 		// Scale to image zoom
 		final double xs = ( xp - xcorner ) * magnification;
 		final double ys = ( yp - ycorner ) * magnification;
 
+		// To paint the label, later.
 		if ( dz2 >= radius * radius )
 		{
 			g2d.fillOval( ( int ) Math.round( xs - 2 * magnification ), ( int ) Math.round( ys - 2 * magnification ), ( int ) Math.round( 4 * magnification ), ( int ) Math.round( 4 * magnification ) );
 		}
 		else
 		{
-			final double apparentRadius = Math.sqrt( radius * radius - dz2 ) / calibration[ 0 ] * magnification;
-			g2d.drawOval( ( int ) Math.round( xs - apparentRadius ), ( int ) Math.round( ys - apparentRadius ), ( int ) Math.round( 2 * apparentRadius ), ( int ) Math.round( 2 * apparentRadius ) );
+			final SpotRoi roi = spot.getRoi();
+			final int textPos;
+			if ( roi == null )
+			{
+				final double apparentRadius = Math.sqrt( radius * radius - dz2 ) / calibration[ 0 ] * magnification;
+				g2d.drawOval( ( int ) Math.round( xs - apparentRadius ), ( int ) Math.round( ys - apparentRadius ), ( int ) Math.round( 2 * apparentRadius ), ( int ) Math.round( 2 * apparentRadius ) );
+				textPos = ( int ) apparentRadius;
+			}
+			else
+			{
+				final int[] polygonX = roi.toPolygonX( calibration[ 0 ], xcorner, x, magnification );
+				final int[] polygonY = roi.toPolygonY( calibration[ 1 ], ycorner, y, magnification );
+				g2d.drawPolygon( polygonX, polygonY, roi.x.length );
+				textPos = Arrays.stream( polygonX ).max().getAsInt();
+			}
+
 			final boolean spotNameVisible = ( Boolean ) displaySettings.get( TrackMateModelView.KEY_DISPLAY_SPOT_NAMES );
 			if ( spotNameVisible )
 			{
 				final String str = spot.toString();
 
 				final int xindent = fm.stringWidth( str );
-				int xtext = ( int ) ( xs + apparentRadius + 5 );
+				int xtext = ( int ) ( xs + textPos + 5 );
 				if ( xtext + xindent > imp.getWindow().getWidth() )
-				{
-					xtext = ( int ) ( xs - apparentRadius - 5 - xindent );
-				}
+					xtext = ( int ) ( xs - textPos - 5 - xindent );
 
 				final int yindent = fm.getAscent() / 2;
 				final int ytext = ( int ) ys + yindent;
