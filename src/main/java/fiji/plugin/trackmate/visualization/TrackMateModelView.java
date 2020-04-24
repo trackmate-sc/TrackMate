@@ -71,6 +71,13 @@ public interface TrackMateModelView
 	public static final String KEY_DISPLAY_SPOT_NAMES = "DisplaySpotNames";
 
 	/**
+	 * Defines the key for the spot display type. Vallues are boolean. If
+	 * <code>true</code> and if some spots have a ROI, they are displayed as
+	 * ROI.
+	 */
+	public static final String KEY_DISPLAY_SPOT_AS_ROIS = "DisplaySpotsAsRois";
+
+	/**
 	 * Defines the key for the spot radius ratio. Value should be a positive
 	 * {@link Double} object. Spots will be rendered with a radius equals to
 	 * their actual radius multiplied by this ratio.
