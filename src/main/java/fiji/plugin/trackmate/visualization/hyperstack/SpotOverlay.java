@@ -13,6 +13,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -239,7 +240,6 @@ public class SpotOverlay extends Roi
 		final double xs = ( xp - xcorner ) * magnification;
 		final double ys = ( yp - ycorner ) * magnification;
 
-		// To paint the label, later.
 		if ( dz2 >= radius * radius )
 		{
 			g2d.fillOval( ( int ) Math.round( xs - 2 * magnification ), ( int ) Math.round( ys - 2 * magnification ), ( int ) Math.round( 4 * magnification ), ( int ) Math.round( 4 * magnification ) );
@@ -248,18 +248,29 @@ public class SpotOverlay extends Roi
 		{
 			final SpotRoi roi = spot.getRoi();
 			final int textPos;
-			if ( roi == null )
+			if ( roi == null || roi.x.length < 2 )
 			{
 				final double apparentRadius = Math.sqrt( radius * radius - dz2 ) / calibration[ 0 ] * magnification;
-				g2d.drawOval( ( int ) Math.round( xs - apparentRadius ), ( int ) Math.round( ys - apparentRadius ), ( int ) Math.round( 2 * apparentRadius ), ( int ) Math.round( 2 * apparentRadius ) );
+				g2d.drawOval(
+						( int ) Math.round( xs - apparentRadius ),
+						( int ) Math.round( ys - apparentRadius ),
+						( int ) Math.round( 2 * apparentRadius ),
+						( int ) Math.round( 2 * apparentRadius ) );
 				textPos = ( int ) apparentRadius;
 			}
 			else
 			{
-				final int[] polygonX = roi.toPolygonX( calibration[ 0 ], xcorner, x, magnification );
-				final int[] polygonY = roi.toPolygonY( calibration[ 1 ], ycorner, y, magnification );
-				g2d.drawPolygon( polygonX, polygonY, roi.x.length );
-				textPos = Arrays.stream( polygonX ).max().getAsInt();
+				final double[] polygonX = roi.toPolygonX( calibration[ 0 ], xcorner - 0.5, x, magnification );
+				final double[] polygonY = roi.toPolygonY( calibration[ 1 ], ycorner - 0.5, y, magnification );
+				// The 0.5 is here so that we plot vertices at pixel centers.
+				final Path2D polygon = new Path2D.Double();
+				polygon.moveTo( polygonX[ 0 ], polygonY[ 0 ] );
+				for ( int i = 1; i < polygonX.length; ++i )
+					polygon.lineTo( polygonX[ i ], polygonY[ i ] );
+				polygon.closePath();
+
+				g2d.draw( polygon );
+				textPos = ( int ) ( Arrays.stream( polygonX ).max().getAsDouble() - xs );
 			}
 
 			final boolean spotNameVisible = ( Boolean ) displaySettings.get( TrackMateModelView.KEY_DISPLAY_SPOT_NAMES );
