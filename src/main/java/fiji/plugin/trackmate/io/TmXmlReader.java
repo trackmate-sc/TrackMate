@@ -51,6 +51,7 @@ import static fiji.plugin.trackmate.io.TmXmlKeys.INITIAL_SPOT_FILTER_ELEMENT_KEY
 import static fiji.plugin.trackmate.io.TmXmlKeys.LOG_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.MODEL_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.PLUGIN_VERSION_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.TmXmlKeys.ROI_N_POINTS_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.io.TmXmlKeys.SETTINGS_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.SPATIAL_UNITS_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.io.TmXmlKeys.SPOT_ANALYSERS_ELEMENT_KEY;
@@ -104,6 +105,7 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
@@ -1055,12 +1057,14 @@ public class TmXmlReader
 
 	private Spot createSpotFrom( final Element spotEl )
 	{
+		// Read id.
 		final int ID = readIntAttribute( spotEl, SPOT_ID_ATTRIBUTE_NAME, logger );
 		final Spot spot = new Spot( ID );
 
 		final List< Attribute > atts = spotEl.getAttributes();
 		removeAttributeFromName( atts, SPOT_ID_ATTRIBUTE_NAME );
 
+		// Read name.
 		String name = spotEl.getAttributeValue( SPOT_NAME_ATTRIBUTE_NAME );
 		if ( null == name || name.equals( "" ) )
 			name = "ID" + ID;
@@ -1068,6 +1072,31 @@ public class TmXmlReader
 		spot.setName( name );
 		removeAttributeFromName( atts, SPOT_NAME_ATTRIBUTE_NAME );
 
+		/*
+		 * Try to read ROI if any.
+		 */
+		final int roiNPoints = readIntAttribute( spotEl, ROI_N_POINTS_ATTRIBUTE_NAME, Logger.VOID_LOGGER );
+		if ( roiNPoints > 2 )
+		{
+			final double[] xrois = new double[ roiNPoints ];
+			final double[] yrois = new double[ roiNPoints ];
+			final String str = spotEl.getText();
+			final String[] vals = str.split( "\\s+" );
+			int index = 0;
+			for ( int i = 0; i < roiNPoints; i++ )
+			{
+				final double x = Double.parseDouble( vals[ index++ ] );
+				xrois[ i ] = x;
+				final double y = Double.parseDouble( vals[ index++ ] );
+				yrois[ i ] = y;
+			}
+			spot.setRoi( new SpotRoi( xrois, yrois ) );
+		}
+		removeAttributeFromName( atts, ROI_N_POINTS_ATTRIBUTE_NAME );
+
+		/*
+		 * Read all other attributes -> features.
+		 */
 		for ( final Attribute att : atts )
 		{
 			if ( att.getName().equals( SPOT_NAME_ATTRIBUTE_NAME ) || att.getName().equals( SPOT_ID_ATTRIBUTE_NAME ) )

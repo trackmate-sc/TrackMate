@@ -48,6 +48,7 @@ import static fiji.plugin.trackmate.io.TmXmlKeys.INITIAL_SPOT_FILTER_ELEMENT_KEY
 import static fiji.plugin.trackmate.io.TmXmlKeys.LOG_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.MODEL_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.PLUGIN_VERSION_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.TmXmlKeys.ROI_N_POINTS_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.io.TmXmlKeys.ROOT_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.SETTINGS_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.SPATIAL_UNITS_ATTRIBUTE_NAME;
@@ -98,6 +99,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
@@ -698,8 +700,24 @@ public class TmXmlWriter
 
 			attributes.add( new Attribute( feature, str ) );
 		}
-
 		final Element spotElement = new Element( SPOT_ELEMENT_KEY );
+
+		final SpotRoi roi = spot.getRoi();
+		if ( roi != null )
+		{
+			final int nPoints = roi.x.length;
+			attributes.add( new Attribute( ROI_N_POINTS_ATTRIBUTE_NAME, Integer.toString( nPoints ) ) );
+			final StringBuilder str = new StringBuilder();
+			for ( int i = 0; i < nPoints; i++ )
+			{
+				str.append( Double.toString( roi.x[ i ] ) );
+				str.append( ' ' );
+				str.append( Double.toString( roi.y[ i ] ) );
+				str.append( ' ' );
+			}
+			spotElement.setText( str.toString() );
+		}
+
 		spotElement.setAttributes( attributes );
 		return spotElement;
 	}
