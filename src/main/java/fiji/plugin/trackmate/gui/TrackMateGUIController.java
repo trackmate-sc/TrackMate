@@ -6,6 +6,7 @@ import static fiji.plugin.trackmate.visualization.TrackMateModelView.DEFAULT_TRA
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.DEFAULT_TRACK_DISPLAY_MODE;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_COLOR;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_COLORMAP;
+import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_DISPLAY_SPOT_AS_ROIS;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_DISPLAY_SPOT_NAMES;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_HIGHLIGHT_COLOR;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_SPOTS_VISIBLE;
@@ -980,6 +981,7 @@ public class TrackMateGUIController implements ActionListener
 		displaySettings.put( KEY_HIGHLIGHT_COLOR, DEFAULT_HIGHLIGHT_COLOR );
 		displaySettings.put( KEY_SPOTS_VISIBLE, true );
 		displaySettings.put( KEY_DISPLAY_SPOT_NAMES, false );
+		displaySettings.put( KEY_DISPLAY_SPOT_AS_ROIS, true );
 		displaySettings.put( KEY_SPOT_COLORING, spotColorGenerator );
 		displaySettings.put( KEY_SPOT_RADIUS_RATIO, 1.0d );
 		displaySettings.put( KEY_TRACKS_VISIBLE, true );

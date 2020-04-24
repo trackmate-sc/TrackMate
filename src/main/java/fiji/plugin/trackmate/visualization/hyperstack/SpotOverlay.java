@@ -240,6 +240,9 @@ public class SpotOverlay extends Roi
 		final double xs = ( xp - xcorner ) * magnification;
 		final double ys = ( yp - ycorner ) * magnification;
 
+		final Boolean displaySpotsAsRoisObj = ( Boolean ) displaySettings.get( TrackMateModelView.KEY_DISPLAY_SPOT_AS_ROIS );
+		final boolean displaySpotsAsRois = ( displaySpotsAsRoisObj != null ) && displaySpotsAsRoisObj.booleanValue();
+
 		if ( dz2 >= radius * radius )
 		{
 			g2d.fillOval( ( int ) Math.round( xs - 2 * magnification ), ( int ) Math.round( ys - 2 * magnification ), ( int ) Math.round( 4 * magnification ), ( int ) Math.round( 4 * magnification ) );
@@ -248,7 +251,7 @@ public class SpotOverlay extends Roi
 		{
 			final SpotRoi roi = spot.getRoi();
 			final int textPos;
-			if ( roi == null || roi.x.length < 2 )
+			if ( !displaySpotsAsRois || roi == null || roi.x.length < 2 )
 			{
 				final double apparentRadius = Math.sqrt( radius * radius - dz2 ) / calibration[ 0 ] * magnification;
 				g2d.drawOval(
