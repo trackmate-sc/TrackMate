@@ -30,6 +30,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.detection.semiauto.SemiAutoTracker;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.tool.AbstractTool;
@@ -811,15 +812,31 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 
 				double radius = target.getFeature( Spot.RADIUS );
 				final double dx = lImp.getCalibration().pixelWidth;
-				if ( e.isShiftDown() )
-					radius += factor * dx * COARSE_STEP;
-				else
-					radius += factor * dx * FINE_STEP;
+				final double increase = ( e.isShiftDown() )
+						? factor * dx * COARSE_STEP
+						: factor * dx * FINE_STEP;
 
+				radius += increase;
 				if ( radius <= dx )
 					return;
 
 				target.putFeature( Spot.RADIUS, radius );
+
+				final SpotRoi roi = target.getRoi();
+				if ( roi != null )
+				{
+					for ( int i = 0; i < roi.x.length; i++ )
+					{
+						final double x = roi.x[ i ];
+						final double y = roi.y[ i ];
+						final double r = Math.sqrt( x * x + y * y );
+						final double costheta = x / r;
+						final double sintheta = y / r;
+						roi.x[ i ] += costheta * r * increase / 12.;
+						roi.y[ i ] += sintheta * r * increase / 12.;
+					}
+				}
+
 				model.beginUpdate();
 				try
 				{
