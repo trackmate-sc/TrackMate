@@ -75,7 +75,7 @@ import fiji.util.NumberParser;
  * {@link fiji.plugin.trackmate.visualization.AbstractTrackMateModelView}. This
  * GUI takes the role of a controller.
  *
- * @author Jean-Yves Tinevez &lt;tinevez@pasteur.fr&gt; - 2010 - 2011
+ * @author Jean-Yves Tinevez
  */
 public class ConfigureViewsPanel extends ActionListenablePanel
 {
@@ -101,7 +101,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 	/**
 	 * A map of String/Object that configures the look and feel of the views.
 	 */
-	protected Map< String, Object > displaySettings = new HashMap< >();
+	protected Map< String, Object > displaySettings = new HashMap<>();
 
 	protected JButton jButtonShowTrackScheme;
 
@@ -135,7 +135,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 
 	private ColorByFeatureGUIPanel trackColorGUI;
 
-	private final Collection< DisplaySettingsListener > listeners = new HashSet< >();
+	private final Collection< DisplaySettingsListener > listeners = new HashSet<>();
 
 	private final Model model;
 
@@ -240,9 +240,8 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 	public void setTrackColorGenerator( final PerTrackFeatureColorGenerator trackColorGenerator )
 	{
 		if ( null != this.trackColorGenerator )
-		{
 			this.trackColorGenerator.terminate();
-		}
+
 		this.trackColorGenerator = trackColorGenerator;
 	}
 
@@ -256,9 +255,8 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 	public void setEdgeColorGenerator( final PerEdgeFeatureColorGenerator edgeColorGenerator )
 	{
 		if ( null != this.edgeColorGenerator )
-		{
 			this.edgeColorGenerator.terminate();
-		}
+
 		this.edgeColorGenerator = edgeColorGenerator;
 	}
 
@@ -272,57 +270,45 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 	public void setSpotColorGenerator( final FeatureColorGenerator< Spot > spotColorGenerator )
 	{
 		if ( null != this.spotColorGenerator )
-		{
 			this.spotColorGenerator.terminate();
-		}
+
 		this.spotColorGenerator = spotColorGenerator;
 	}
 
 	public void setSpotColorGeneratorPerTrackFeature( final FeatureColorGenerator< Spot > spotColorGeneratorPerTrackFeature )
 	{
 		if ( null != this.spotColorGeneratorPerTrackFeature )
-		{
 			this.spotColorGeneratorPerTrackFeature.terminate();
-		}
+
 		this.spotColorGeneratorPerTrackFeature = spotColorGeneratorPerTrackFeature;
 	}
 
 	public void refreshColorFeatures()
 	{
 		if ( ( displaySettings.get( KEY_SPOT_COLORING ) instanceof SpotColorGenerator ) )
-		{
 			jPanelSpotColor.setColorFeature( spotColorGenerator.getFeature() );
-		}
 		else if ( ( displaySettings.get( KEY_SPOT_COLORING ) instanceof ManualSpotColorGenerator ) )
-		{
 			jPanelSpotColor.setColorFeature( ColorByFeatureGUIPanel.MANUAL_KEY );
-		}
 		else if ( ( ( displaySettings.get( KEY_SPOT_COLORING ) instanceof SpotColorGeneratorPerTrackFeature ) ) )
-		{
 			jPanelSpotColor.setColorFeature( spotColorGeneratorPerTrackFeature.getFeature() );
-		}
 
 		if ( !( displaySettings.get( KEY_TRACK_COLORING ) instanceof ManualEdgeColorGenerator ) )
-		{
 			trackColorGUI.setColorFeature( trackColorGenerator.getFeature() );
-		}
 	}
 
 	public void setManualSpotColorGenerator( final ManualSpotColorGenerator manualSpotColorGenerator )
 	{
 		if ( null != this.manualSpotColorGenerator )
-		{
 			this.manualSpotColorGenerator.terminate();
-		}
+
 		this.manualSpotColorGenerator = manualSpotColorGenerator;
 	}
 
 	public void setManualEdgeColorGenerator( final ManualEdgeColorGenerator manualEdgeColorGenerator )
 	{
 		if ( null != this.manualEdgeColorGenerator )
-		{
 			this.manualEdgeColorGenerator.terminate();
-		}
+
 		this.manualEdgeColorGenerator = manualEdgeColorGenerator;
 	}
 
@@ -337,9 +323,8 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 		 */
 
 		if ( null != jPanelSpotColor )
-		{
 			jPanelSpotOptions.remove( jPanelSpotColor );
-		}
+
 		jPanelSpotColor = new ColorByFeatureGUIPanel( model, Arrays.asList( new Category[] { Category.SPOTS, Category.DEFAULT, Category.TRACKS } ) );
 
 		jPanelSpotColor.addMouseListener( new MouseAdapter()
@@ -365,12 +350,12 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 					final JFrame topFrame = ( JFrame ) SwingUtilities.getWindowAncestor( ConfigureViewsPanel.this );
 					final SetColorScaleDialog dialog = new SetColorScaleDialog( topFrame, "Set color scale for spots", colorGenerator );
 					dialog.setVisible( true );
-					if ( !dialog.hasUserPressedOK() ) { return; }
+					if ( !dialog.hasUserPressedOK() )
+						return;
 
 					if ( dialog.isAutoMinMaxMode() )
-					{
 						colorGenerator.autoMinMax();
-					}
+
 					jPanelSpotColor.setFrom( dialog );
 					jPanelSpotColor.autoMinMax();
 
@@ -393,14 +378,18 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 				switch ( category )
 				{
 				case SPOTS:
-					if ( null == spotColorGenerator ) { return; }
+					if ( null == spotColorGenerator )
+						return;
+
 					spotColorGenerator.setFeature( jPanelSpotColor.getColorFeature() );
 					newValue = spotColorGenerator;
 					break;
+
 				case TRACKS:
 					newValue = spotColorGeneratorPerTrackFeature;
 					spotColorGeneratorPerTrackFeature.setFeature( jPanelSpotColor.getColorFeature() );
 					break;
+
 				case DEFAULT:
 					if ( jPanelSpotColor.getColorFeature().equals( ColorByFeatureGUIPanel.UNIFORM_KEY ) )
 					{
@@ -494,12 +483,12 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 					final JFrame topFrame = ( JFrame ) SwingUtilities.getWindowAncestor( ConfigureViewsPanel.this );
 					final SetColorScaleDialog dialog = new SetColorScaleDialog( topFrame, "Set color scale for " + str, colorGenerator );
 					dialog.setVisible( true );
-					if ( !dialog.hasUserPressedOK() ) { return; }
+					if ( !dialog.hasUserPressedOK() )
+						return;
 
 					if ( dialog.isAutoMinMaxMode() )
-					{
 						colorGenerator.autoMinMax();
-					}
+
 					trackColorGUI.setFrom( dialog );
 					trackColorGUI.autoMinMax();
 					final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_TRACK_COLORING, colorGenerator, colorGenerator );
@@ -523,10 +512,12 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 					newValue = trackColorGenerator;
 					newValue.setFeature( trackColorGUI.getColorFeature() );
 					break;
+
 				case EDGES:
 					newValue = edgeColorGenerator;
 					newValue.setFeature( trackColorGUI.getColorFeature() );
 					break;
+
 				case DEFAULT:
 					if ( trackColorGUI.getColorFeature().equals( ColorByFeatureGUIPanel.MANUAL_KEY ) )
 					{
@@ -538,6 +529,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 						newValue.setFeature( null );
 					}
 					break;
+
 				default:
 					throw new IllegalArgumentException( "Unknow track color generator category: " + category );
 				}
@@ -590,13 +582,10 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 		jPanelTrackOptions.setLayout( gl_jPanelTrackOptions );
 
 		if ( spotColorGenerator != null )
-		{
 			jPanelSpotColor.setColorFeature( spotColorGenerator.getFeature() );
-		}
+
 		if ( trackColorGenerator != null )
-		{
 			trackColorGUI.setColorFeature( trackColorGenerator.getFeature() );
-		}
 
 		/*
 		 * Units
@@ -613,9 +602,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 	private void fireDisplaySettingsChange( final DisplaySettingsEvent event )
 	{
 		for ( final DisplaySettingsListener listener : listeners )
-		{
 			listener.displaySettingsChanged( event );
-		}
 	}
 
 	private void initGUI()
@@ -646,8 +633,8 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 				}
 				{
 					final String[] keyNames = TrackMateModelView.TRACK_DISPLAY_MODE_DESCRIPTION;
-					final ComboBoxModel< String > jComboBoxDisplayModeModel = new DefaultComboBoxModel< >( keyNames );
-					jComboBoxDisplayMode = new JComboBox< >();
+					final ComboBoxModel< String > jComboBoxDisplayModeModel = new DefaultComboBoxModel<>( keyNames );
+					jComboBoxDisplayMode = new JComboBox<>();
 					jComboBoxDisplayMode.setModel( jComboBoxDisplayModeModel );
 					jComboBoxDisplayMode.setSelectedIndex( 0 );
 					jComboBoxDisplayMode.setFont( SMALL_FONT );
@@ -680,13 +667,10 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 						{
 							Integer depth;
 							if ( jCheckBoxLimitDepth.isSelected() )
-							{
 								depth = NumberParser.parseInteger( jTextFieldFrameDepth.getText() );
-							}
 							else
-							{
 								depth = ( int ) 1e9;
-							}
+
 							final Integer oldValue = ( Integer ) displaySettings.get( KEY_TRACK_DISPLAY_DEPTH );
 							displaySettings.put( KEY_TRACK_DISPLAY_DEPTH, depth );
 
@@ -1038,18 +1022,13 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 		{
 			final Dimension btd = button.getPreferredSize();
 			if ( btd.width > maxWidth )
-			{
 				maxWidth = btd.width;
-			}
+
 			if ( btd.height > maxHeight )
-			{
 				maxHeight = btd.height;
-			}
 		}
 		final Dimension size = new Dimension( maxWidth, maxHeight );
 		for ( final Component button : buttons )
-		{
 			button.setPreferredSize( size );
-		}
 	}
 }
