@@ -259,7 +259,7 @@ public class TmXmlReader
 		{
 
 			final List< Element > children = guiel.getChildren( GUI_VIEW_ELEMENT_KEY );
-			final Collection< TrackMateModelView > views = new ArrayList< >( children.size() );
+			final Collection< TrackMateModelView > views = new ArrayList<>( children.size() );
 
 			for ( final Element child : children )
 			{
@@ -300,7 +300,7 @@ public class TmXmlReader
 
 		logger.error( "Could not find GUI state element.\n" );
 		ok = false;
-		return new ArrayList< >();
+		return new ArrayList<>();
 	}
 
 	/**
@@ -517,7 +517,7 @@ public class TmXmlReader
 	private Map< Integer, Map< String, Double > > readTrackFeatures( final Element modelElement )
 	{
 
-		final HashMap< Integer, Map< String, Double > > featureMap = new HashMap< >();
+		final HashMap< Integer, Map< String, Double > > featureMap = new HashMap<>();
 
 		final Element allTracksElement = modelElement.getChild( TRACK_COLLECTION_ELEMENT_KEY );
 		if ( null == allTracksElement )
@@ -544,7 +544,7 @@ public class TmXmlReader
 				continue;
 			}
 
-			final HashMap< String, Double > trackMap = new HashMap< >();
+			final HashMap< String, Double > trackMap = new HashMap<>();
 
 			final List< Attribute > attributes = trackElement.getAttributes();
 			for ( final Attribute attribute : attributes )
@@ -605,7 +605,7 @@ public class TmXmlReader
 	 */
 	private List< FeatureFilter > getSpotFeatureFilters( final Element settingsElement )
 	{
-		final List< FeatureFilter > featureThresholds = new ArrayList< >();
+		final List< FeatureFilter > featureThresholds = new ArrayList<>();
 		final Element ftCollectionEl = settingsElement.getChild( SPOT_FILTER_COLLECTION_ELEMENT_KEY );
 		final List< Element > ftEls = ftCollectionEl.getChildren( FILTER_ELEMENT_KEY );
 		for ( final Element ftEl : ftEls )
@@ -628,7 +628,7 @@ public class TmXmlReader
 	 */
 	private List< FeatureFilter > getTrackFeatureFilters( final Element settingsElement )
 	{
-		final List< FeatureFilter > featureThresholds = new ArrayList< >();
+		final List< FeatureFilter > featureThresholds = new ArrayList<>();
 		final Element ftCollectionEl = settingsElement.getChild( TRACK_FILTER_COLLECTION_ELEMENT_KEY );
 		final List< Element > ftEls = ftCollectionEl.getChildren( FILTER_ELEMENT_KEY );
 		for ( final Element ftEl : ftEls )
@@ -732,7 +732,7 @@ public class TmXmlReader
 		}
 		settings.detectorFactory = factory;
 
-		final Map< String, Object > ds = new HashMap< >();
+		final Map< String, Object > ds = new HashMap<>();
 		ok = factory.unmarshall( element, ds );
 
 		if ( ok )
@@ -771,7 +771,7 @@ public class TmXmlReader
 			return;
 		}
 
-		final Map< String, Object > ds = new HashMap< >();
+		final Map< String, Object > ds = new HashMap<>();
 
 		// Get the tracker key
 		final String trackerKey = element.getAttributeValue( XML_ATTRIBUTE_TRACKER_NAME );
@@ -802,10 +802,10 @@ public class TmXmlReader
 	 * <p>
 	 * Internally, this methods also builds the cache field, which will be
 	 * required by the other methods.
-
-	 * It is therefore sensible to call this method first, just after
-	 * parsing the file. If not called, this method will be called
-	 * anyway by the other methods to build the cache.
+	 * 
+	 * It is therefore sensible to call this method first, just after parsing
+	 * the file. If not called, this method will be called anyway by the other
+	 * methods to build the cache.
 	 *
 	 * @param modelElement
 	 *            the {@link Element} in which the model content was written.
@@ -832,17 +832,17 @@ public class TmXmlReader
 		}
 
 		// Instantiate cache
-		cache = new ConcurrentHashMap< >( nspots );
+		cache = new ConcurrentHashMap<>( nspots );
 
 		// Load collection and build cache
 		int currentFrame = 0;
-		final Map< Integer, Set< Spot > > content = new HashMap< >( frameContent.size() );
+		final Map< Integer, Set< Spot > > content = new HashMap<>( frameContent.size() );
 		for ( final Element currentFrameContent : frameContent )
 		{
 
 			currentFrame = readIntAttribute( currentFrameContent, FRAME_ATTRIBUTE_NAME, logger );
 			final List< Element > spotContent = currentFrameContent.getChildren( SPOT_ELEMENT_KEY );
-			final Set< Spot > spotSet = new HashSet< >( spotContent.size() );
+			final Set< Spot > spotSet = new HashSet<>( spotContent.size() );
 			for ( final Element spotElement : spotContent )
 			{
 				final Spot spot = createSpotFrom( spotElement );
@@ -869,10 +869,10 @@ public class TmXmlReader
 		final List< Element > trackElements = allTracksElement.getChildren( TRACK_ELEMENT_KEY );
 
 		// What we have to flesh out from the file
-		final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph = new SimpleWeightedGraph< >( DefaultWeightedEdge.class );
-		final Map< Integer, Set< Spot > > connectedVertexSet = new HashMap< >( trackElements.size() );
-		final Map< Integer, Set< DefaultWeightedEdge > > connectedEdgeSet = new HashMap< >( trackElements.size() );
-		final Map< Integer, String > savedTrackNames = new HashMap< >( trackElements.size() );
+		final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph = new SimpleWeightedGraph<>( DefaultWeightedEdge.class );
+		final Map< Integer, Set< Spot > > connectedVertexSet = new HashMap<>( trackElements.size() );
+		final Map< Integer, Set< DefaultWeightedEdge > > connectedEdgeSet = new HashMap<>( trackElements.size() );
+		final Map< Integer, String > savedTrackNames = new HashMap<>( trackElements.size() );
 
 		// The list of edge features. that we will set.
 		final FeatureModel fm = model.getFeatureModel();
@@ -890,8 +890,8 @@ public class TmXmlReader
 
 			// Iterate over edges & spots
 			final List< Element > edgeElements = trackElement.getChildren( TRACK_EDGE_ELEMENT_KEY );
-			final Set< DefaultWeightedEdge > edges = new HashSet< >( edgeElements.size() );
-			final Set< Spot > spots = new HashSet< >( edgeElements.size() );
+			final Set< DefaultWeightedEdge > edges = new HashSet<>( edgeElements.size() );
+			final Set< Spot > spots = new HashSet<>( edgeElements.size() );
 
 			for ( final Element edgeElement : edgeElements )
 			{
@@ -1033,7 +1033,7 @@ public class TmXmlReader
 		Arrays.sort( IDs );
 
 		final List< Element > elements = filteredTracksElement.getChildren( TRACK_ID_ELEMENT_KEY );
-		final HashSet< Integer > filteredTrackIndices = new HashSet< >( elements.size() );
+		final HashSet< Integer > filteredTrackIndices = new HashSet<>( elements.size() );
 		for ( final Element indexElement : elements )
 		{
 			final int trackID = readIntAttribute( indexElement, TrackIndexAnalyzer.TRACK_ID, logger );
@@ -1078,11 +1078,11 @@ public class TmXmlReader
 		return spot;
 	}
 
-	protected static final void removeAttributeFromName( final List<Attribute> attributes, final String attributeNameToRemove)
+	protected static final void removeAttributeFromName( final List< Attribute > attributes, final String attributeNameToRemove )
 	{
-		final List<Attribute> toRemove = new ArrayList<>();
+		final List< Attribute > toRemove = new ArrayList<>();
 		for ( final Attribute attribute : attributes )
-			if (attribute.getName().equals( attributeNameToRemove ))
+			if ( attribute.getName().equals( attributeNameToRemove ) )
 				toRemove.add( attribute );
 
 		attributes.removeAll( toRemove );
@@ -1112,11 +1112,11 @@ public class TmXmlReader
 		{
 
 			final List< Element > children = spotFeaturesElement.getChildren( FEATURE_ELEMENT_KEY );
-			final Collection< String > features = new ArrayList< >( children.size() );
-			final Map< String, String > featureNames = new HashMap< >( children.size() );
-			final Map< String, String > featureShortNames = new HashMap< >( children.size() );
-			final Map< String, Dimension > featureDimensions = new HashMap< >( children.size() );
-			final Map< String, Boolean > isIntFeature = new HashMap< >();
+			final Collection< String > features = new ArrayList<>( children.size() );
+			final Map< String, String > featureNames = new HashMap<>( children.size() );
+			final Map< String, String > featureShortNames = new HashMap<>( children.size() );
+			final Map< String, Dimension > featureDimensions = new HashMap<>( children.size() );
+			final Map< String, Boolean > isIntFeature = new HashMap<>();
 			for ( final Element child : children )
 				readSingleFeatureDeclaration(
 						child,
@@ -1141,11 +1141,11 @@ public class TmXmlReader
 		{
 
 			final List< Element > children = edgeFeaturesElement.getChildren( FEATURE_ELEMENT_KEY );
-			final Collection< String > features = new ArrayList< >( children.size() );
-			final Map< String, String > featureNames = new HashMap< >( children.size() );
-			final Map< String, String > featureShortNames = new HashMap< >( children.size() );
-			final Map< String, Dimension > featureDimensions = new HashMap< >( children.size() );
-			final Map< String, Boolean > isIntFeature = new HashMap< >( children.size() );
+			final Collection< String > features = new ArrayList<>( children.size() );
+			final Map< String, String > featureNames = new HashMap<>( children.size() );
+			final Map< String, String > featureShortNames = new HashMap<>( children.size() );
+			final Map< String, Dimension > featureDimensions = new HashMap<>( children.size() );
+			final Map< String, Boolean > isIntFeature = new HashMap<>( children.size() );
 			for ( final Element child : children )
 				readSingleFeatureDeclaration(
 						child,
@@ -1170,11 +1170,11 @@ public class TmXmlReader
 		{
 
 			final List< Element > children = trackFeaturesElement.getChildren( FEATURE_ELEMENT_KEY );
-			final Collection< String > features = new ArrayList< >( children.size() );
-			final Map< String, String > featureNames = new HashMap< >( children.size() );
-			final Map< String, String > featureShortNames = new HashMap< >( children.size() );
-			final Map< String, Dimension > featureDimensions = new HashMap< >( children.size() );
-			final Map< String, Boolean > isIntFeature = new HashMap< >();
+			final Collection< String > features = new ArrayList<>( children.size() );
+			final Map< String, String > featureNames = new HashMap<>( children.size() );
+			final Map< String, String > featureShortNames = new HashMap<>( children.size() );
+			final Map< String, Dimension > featureDimensions = new HashMap<>( children.size() );
+			final Map< String, Boolean > isIntFeature = new HashMap<>();
 			for ( final Element child : children )
 				readSingleFeatureDeclaration(
 						child,

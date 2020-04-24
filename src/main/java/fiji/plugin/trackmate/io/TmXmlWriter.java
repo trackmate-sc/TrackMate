@@ -317,7 +317,8 @@ public class TmXmlWriter
 	{
 		final Element el = new Element( DETECTOR_SETTINGS_ELEMENT_KEY );
 
-		if ( null == settings.detectorFactory ) { return el; }
+		if ( null == settings.detectorFactory )
+			return el;
 
 		// Set the detector factory key NOW.
 		el.setAttribute( XML_ATTRIBUTE_DETECTOR_NAME, settings.detectorFactory.getKey() );
@@ -339,7 +340,8 @@ public class TmXmlWriter
 	{
 		final Element el = new Element( TRACKER_SETTINGS_ELEMENT_KEY );
 
-		if ( null == settings.trackerFactory ) { return el; }
+		if ( null == settings.trackerFactory )
+			return el;
 
 		// Set the tracker factory key NOW.
 		el.setAttribute( XML_ATTRIBUTE_TRACKER_NAME, settings.trackerFactory.getKey() );
@@ -395,13 +397,11 @@ public class TmXmlWriter
 			{
 				final Double val = model.getFeatureModel().getTrackFeature( trackID, feature );
 				if ( null == val )
-				{
-					// Skip missing features.
 					continue;
-				}
+
 				final String str;
 				if ( model.getFeatureModel().getTrackFeatureIsInt().get( feature ).booleanValue() )
-					str = "" + val.intValue();
+					str = Integer.toString( val.intValue() );
 				else
 					str = val.toString();
 				trackElement.setAttribute( feature, str );
@@ -448,15 +448,14 @@ public class TmXmlWriter
 				{
 					final Double val = model.getFeatureModel().getEdgeFeature( edge, feature );
 					if ( null == val )
-					{
-						// Skip missing features.
 						continue;
-					}
+
 					final String str;
 					if ( model.getFeatureModel().getEdgeFeatureIsInt().get( feature ).booleanValue() )
-						str = "" + val.intValue();
+						str = Integer.toString( val.intValue() );
 					else
 						str = val.toString();
+
 					edgeElement.setAttribute( feature, str );
 				}
 
@@ -684,30 +683,20 @@ public class TmXmlWriter
 		attributes.add( IDattribute );
 		final Attribute nameAttribute = new Attribute( SPOT_NAME_ATTRIBUTE_NAME, spot.getName() );
 		attributes.add( nameAttribute );
-		Double val;
-		Attribute featureAttribute;
 
 		for ( final String feature : spot.getFeatures().keySet() )
 		{
-			val = spot.getFeature( feature );
+			final Double val = spot.getFeature( feature );
 			if ( null == val )
-			{
-				// Skip missing features.
 				continue;
-			}
 
 			final String str;
-
 			if ( fm.getSpotFeatureIsInt().get( feature ).booleanValue() )
-			{
-				str = "" + val.intValue();
-			}
+				str = Integer.toString( val.intValue() );
 			else
-			{
 				str = val.toString();
-			}
-			featureAttribute = new Attribute( feature, str );
-			attributes.add( featureAttribute );
+
+			attributes.add( new Attribute( feature, str ) );
 		}
 
 		final Element spotElement = new Element( SPOT_ELEMENT_KEY );
