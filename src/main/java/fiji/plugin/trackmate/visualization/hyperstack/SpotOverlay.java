@@ -31,7 +31,7 @@ import ij.gui.Roi;
  * The overlay class in charge of drawing the spot images on the hyperstack
  * window.
  *
- * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; 2010 - 2011
+ * @author Jean-Yves Tinevez
  */
 public class SpotOverlay extends Roi
 {
@@ -82,9 +82,8 @@ public class SpotOverlay extends Roi
 		final SpotCollection spots = model.getSpots();
 
 		final boolean spotVisible = ( Boolean ) displaySettings.get( TrackMateModelView.KEY_SPOTS_VISIBLE );
-		if ( !spotVisible || spots.getNSpots( true ) == 0 ) {
+		if ( !spotVisible || spots.getNSpots( true ) == 0 )
 			return;
-		}
 
 		final boolean doLimitDrawingDepth = ( Boolean ) displaySettings.get( TrackMateModelView.KEY_LIMIT_DRAWING_DEPTH );
 		final double drawingDepth = ( Double ) displaySettings.get( TrackMateModelView.KEY_DRAWING_DEPTH );
@@ -120,20 +119,15 @@ public class SpotOverlay extends Roi
 			for ( final Spot spot : spotSelection )
 			{
 				if ( spot == editingSpot )
-				{
 					continue;
-				}
+
 				final int sFrame = spot.getFeature( Spot.FRAME ).intValue();
 				if ( sFrame != frame )
-				{
 					continue;
-				}
 
 				final double z = spot.getFeature( Spot.POSITION_Z ).doubleValue();
 				if ( doLimitDrawingDepth && Math.abs( z - zslice ) > drawingDepth )
-				{
 					continue;
-				}
 				
 				final Color color = colorGenerator.color( spot );
 				g2d.setColor( color );
@@ -150,18 +144,14 @@ public class SpotOverlay extends Roi
 				final Spot spot = iterator.next();
 
 				if ( editingSpot == spot || ( spotSelection != null && spotSelection.contains( spot ) ) )
-				{
 					continue;
-				}
 
 				final Color color = colorGenerator.color( spot );
 				g2d.setColor( color );
 
 				final double z = spot.getFeature( Spot.POSITION_Z ).doubleValue();
 				if ( doLimitDrawingDepth && Math.abs( z - zslice ) > drawingDepth )
-				{
 					continue;
-				}
 
 				drawSpot( g2d, spot, zslice, xcorner, ycorner, lMag );
 			}
@@ -174,18 +164,15 @@ public class SpotOverlay extends Roi
 				for ( final Spot spot : spotSelection )
 				{
 					if ( spot == editingSpot )
-					{
 						continue;
-					}
+
 					final int sFrame = spot.getFeature( Spot.FRAME ).intValue();
 					if ( DEBUG )
-					{
 						System.out.println( "[SpotOverlay] For spot " + spot + " in selection, found frame " + sFrame );
-					}
+
 					if ( sFrame != frame )
-					{
 						continue;
-					}
+
 					drawSpot( g2d, spot, zslice, xcorner, ycorner, lMag );
 				}
 			}
