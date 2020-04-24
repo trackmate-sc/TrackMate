@@ -3,6 +3,7 @@ package fiji.plugin.trackmate.gui.panels;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.BIG_FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
+import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_DISPLAY_SPOT_AS_ROIS;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_DISPLAY_SPOT_NAMES;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_DRAWING_DEPTH;
 import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_LIMIT_DRAWING_DEPTH;
@@ -133,6 +134,8 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 
 	private JCheckBox jCheckBoxDisplayNames;
 
+	private JCheckBox jCheckBoxDisplaySpotsAsRois;
+
 	private ColorByFeatureGUIPanel trackColorGUI;
 
 	private final Collection< DisplaySettingsListener > listeners = new HashSet<>();
@@ -160,6 +163,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 	private JLabel jLabelSpotRadius;
 
 	protected JPanel jPanelButtons;
+
 
 	/*
 	 * CONSTRUCTOR
@@ -754,6 +758,25 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 				} );
 			}
 			{
+				jCheckBoxDisplaySpotsAsRois = new JCheckBox( "as ROIs" );
+				jCheckBoxDisplaySpotsAsRois.setFont( FONT );
+				jCheckBoxDisplaySpotsAsRois.setSelected( true );
+				jCheckBoxDisplaySpotsAsRois.addActionListener( new ActionListener()
+				{
+					@Override
+					public void actionPerformed( final ActionEvent e )
+					{
+						final Boolean oldValue = ( Boolean ) displaySettings.get( KEY_DISPLAY_SPOT_AS_ROIS );
+						final Boolean newValue = jCheckBoxDisplaySpotsAsRois.isSelected();
+						displaySettings.put( KEY_DISPLAY_SPOT_AS_ROIS, newValue );
+
+						final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_DISPLAY_SPOT_AS_ROIS, newValue, oldValue );
+						fireDisplaySettingsChange( event );
+					}
+				} );
+
+			}
+			{
 				jPanelSpotOptions = new JPanel()
 				{
 					private static final long serialVersionUID = 1L;
@@ -966,6 +989,8 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 							.addGroup( groupLayout.createSequentialGroup()
 									.addGap( 10 )
 									.addComponent( jCheckBoxDisplaySpots, GroupLayout.DEFAULT_SIZE, 280, Short.MAX_VALUE )
+									.addPreferredGap( ComponentPlacement.RELATED )
+									.addComponent( jCheckBoxDisplaySpotsAsRois )
 									.addGap( 10 ) )
 							.addGroup( groupLayout.createSequentialGroup()
 									.addGap( 10 )
@@ -991,7 +1016,9 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 									.addGap( 6 )
 									.addComponent( jLabelDisplayOptions, GroupLayout.PREFERRED_SIZE, 20, GroupLayout.PREFERRED_SIZE )
 									.addGap( 4 )
-									.addComponent( jCheckBoxDisplaySpots )
+									.addGroup( groupLayout.createParallelGroup( Alignment.BASELINE )
+											.addComponent( jCheckBoxDisplaySpots )
+											.addComponent( jCheckBoxDisplaySpotsAsRois ) )
 									.addGap( 2 )
 									.addComponent( jPanelSpotOptions, GroupLayout.PREFERRED_SIZE, 118, GroupLayout.PREFERRED_SIZE )
 									.addGap( 4 )
@@ -1001,7 +1028,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 									.addPreferredGap( ComponentPlacement.UNRELATED )
 									.addComponent( jpanelDrawingDepth, GroupLayout.PREFERRED_SIZE, 34, GroupLayout.PREFERRED_SIZE )
 									.addPreferredGap( ComponentPlacement.RELATED )
-									.addComponent( jPanelButtons, GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE )
+									.addComponent( jPanelButtons, GroupLayout.DEFAULT_SIZE, 92, Short.MAX_VALUE )
 									.addContainerGap() ) );
 
 			setLayout( groupLayout );
