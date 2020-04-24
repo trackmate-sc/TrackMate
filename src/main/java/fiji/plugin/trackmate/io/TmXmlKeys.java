@@ -89,6 +89,12 @@ public class TmXmlKeys {
 	public static final String SPOT_ELEMENT_KEY 						= "Spot";
 
 	/*
+	 * SPOT ROIs.
+	 */
+	
+	public static final String ROI_N_POINTS_ATTRIBUTE_NAME 			= "ROI_N_POINTS";
+
+	/*
 	 * INITIAL SPOT FILTER element
 	 */
 
