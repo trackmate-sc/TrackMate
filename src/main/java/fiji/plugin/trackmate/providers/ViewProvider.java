@@ -1,8 +1,6 @@
 package fiji.plugin.trackmate.providers;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,17 +75,6 @@ public class ViewProvider
 		final LogService log = context.getService( LogService.class );
 		final PluginService pluginService = context.getService( PluginService.class );
 		final List< PluginInfo< ViewFactory > > infos = pluginService.getPluginsOfType( ViewFactory.class );
-
-		final Comparator< PluginInfo< ViewFactory > > priorityComparator = new Comparator< PluginInfo< ViewFactory > >()
-		{
-			@Override
-			public int compare( final PluginInfo< ViewFactory > o1, final PluginInfo< ViewFactory > o2 )
-			{
-				return o1.getPriority() > o2.getPriority() ? 1 : o1.getPriority() < o2.getPriority() ? -1 : 0;
-			}
-		};
-
-		Collections.sort( infos, priorityComparator );
 
 		for ( final PluginInfo< ViewFactory > info : infos )
 		{
