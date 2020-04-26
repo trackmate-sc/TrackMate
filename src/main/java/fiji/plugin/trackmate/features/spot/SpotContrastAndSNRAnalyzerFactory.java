@@ -8,17 +8,16 @@ import java.util.Map;
 
 import javax.swing.ImageIcon;
 
-import net.imagej.ImgPlus;
-import net.imglib2.meta.view.HyperSliceImgPlus;
-import net.imglib2.type.NativeType;
-import net.imglib2.type.numeric.RealType;
-
 import org.scijava.Priority;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
+import net.imagej.ImgPlus;
+import net.imglib2.meta.view.HyperSliceImgPlus;
+import net.imglib2.type.NativeType;
+import net.imglib2.type.numeric.RealType;
 
 /**
  * A factory for {@link SpotContrastAndSNRAnalyzer}s. Because the analyzers of
