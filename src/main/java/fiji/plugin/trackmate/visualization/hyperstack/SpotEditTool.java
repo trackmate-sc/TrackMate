@@ -129,7 +129,6 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 		}
 		if ( DEBUG )
 			System.out.println( "[SpotEditTool] Returning instance: " + instance );
-
 		return instance;
 	}
 
@@ -211,7 +210,6 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 
 			for ( final MouseListener ml : lImp.getCanvas().getMouseListeners() )
 				System.out.println( "[SpotEditTool] mouse listener: " + ml );
-
 		}
 
 		if ( null == displayer )
@@ -311,10 +309,11 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 				if ( DEBUG )
 					System.out.println( "[SpotEditTool] mouseClicked: Got " + editedSpot + " as editing spot for this imp, leaving editing mode." );
 
-				// A hack: we update the current z and t of the edited spot to
-				// the current one,
-				// because it is not updated otherwise: there is no way to
-				// listen to slice change
+				/*
+				 * A hack: we update the current z and t of the edited spot to
+				 * the current one, because it is not updated otherwise: there
+				 * is no way to listen to slice change
+				 */
 				final double calibration[] = TMUtils.getSpatialCalibration( lImp );
 				final double zslice = ( displayer.imp.getSlice() - 1 ) * calibration[ 2 ];
 				editedSpot.putFeature( Spot.POSITION_Z, zslice );
@@ -469,7 +468,6 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 		final Spot editedSpot = editedSpots.get( lImp );
 		if ( null != editedSpot )
 		{
-
 			final Point mouseLocation = e.getPoint();
 			final ImageCanvas canvas = getImageCanvas( e );
 			final double x = ( -0.5 + canvas.offScreenXD( mouseLocation.x ) ) * calibration[ 0 ];
@@ -666,11 +664,9 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 				{
 
 					// Create and drop a new spot
-					double radius;
-					if ( null != previousRadius )
-						radius = previousRadius;
-					else
-						radius = FALL_BACK_RADIUS;
+					final double radius = ( null != previousRadius )
+							? previousRadius
+							: FALL_BACK_RADIUS;
 
 					final Spot newSpot = makeSpot( lImp, displayer, canvas, null );
 					final double dt = lImp.getCalibration().frameInterval;
@@ -744,8 +740,8 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 				final Spot target = model.getSpots().getSpotAt( clickLocation, frame, true );
 				if ( null == target )
 				{
-					e.consume();
 					// Consume it anyway, so that we are not bothered by IJ
+					e.consume();
 					return;
 				}
 
@@ -804,37 +800,28 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 				if ( null == target )
 					return;
 
-				int factor;
-				if ( e.getKeyCode() == KeyEvent.VK_Q )
-					factor = -1;
-				else
-					factor = 1;
+				final double radius = target.getFeature( Spot.RADIUS );
 
-				double radius = target.getFeature( Spot.RADIUS );
+				final int factor = ( e.getKeyCode() == KeyEvent.VK_Q ) ? -1 : 1;
 				final double dx = lImp.getCalibration().pixelWidth;
-				final double increase = ( e.isShiftDown() )
-						? factor * dx * COARSE_STEP
-						: factor * dx * FINE_STEP;
 
-				radius += increase;
-				if ( radius <= dx )
+				final double newRadius = ( e.isShiftDown() )
+						? radius + factor * dx * COARSE_STEP
+						: radius + factor * dx * FINE_STEP;
+
+				if ( newRadius <= dx )
 					return;
 
-				target.putFeature( Spot.RADIUS, radius );
-
 				final SpotRoi roi = target.getRoi();
-				if ( roi != null )
+				if ( null == roi )
 				{
-					for ( int i = 0; i < roi.x.length; i++ )
-					{
-						final double x = roi.x[ i ];
-						final double y = roi.y[ i ];
-						final double r = Math.sqrt( x * x + y * y );
-						final double costheta = x / r;
-						final double sintheta = y / r;
-						roi.x[ i ] += costheta * r * increase / 12.;
-						roi.y[ i ] += sintheta * r * increase / 12.;
-					}
+					target.putFeature( Spot.RADIUS, radius );
+				}
+				else
+				{
+					final double alpha = newRadius / radius;
+					roi.scale( alpha );
+					target.putFeature( Spot.RADIUS, roi.radius() );
 				}
 
 				model.beginUpdate();
@@ -888,6 +875,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 							final Double val = spot.getFeature( key );
 							if ( val == null )
 								continue;
+
 							newSpot.putFeature( key, val );
 						}
 						newSpot.putFeature( Spot.POSITION_T, spot.getFeature( Spot.POSITION_T ) + dt );
@@ -990,15 +978,9 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 							 * can be tracked in a row without having to
 							 * de-select one
 							 */
-							final Spot single;
-							if ( tt > ts )
-								single = target;
-							else
-								single = source;
-
+							final Spot single = ( tt > ts ) ? target : source;
 							selectionModel.clearSpotSelection();
 							selectionModel.addSpotToSelection( single );
-
 						}
 						else
 						{
@@ -1055,15 +1037,21 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	private Spot makeSpot( final ImagePlus lImp, HyperStackDisplayer displayer, final ImageCanvas canvas, Point mouseLocation )
 	{
 		if ( displayer == null )
+		{
 			displayer = displayers.get( lImp );
-
+		}
 		if ( mouseLocation == null )
 		{
 			mouseLocation = MouseInfo.getPointerInfo().getLocation();
 			SwingUtilities.convertPointFromScreen( mouseLocation, canvas );
 		}
 		final double[] calibration = TMUtils.getSpatialCalibration( lImp );
-		return new Spot( ( -0.5d + canvas.offScreenXD( mouseLocation.x ) ) * calibration[ 0 ], ( -0.5d + canvas.offScreenYD( mouseLocation.y ) ) * calibration[ 1 ], ( lImp.getSlice() - 1 ) * calibration[ 2 ], FALL_BACK_RADIUS, -1d );
+		return new Spot(
+				( -0.5d + canvas.offScreenXD( mouseLocation.x ) ) * calibration[ 0 ],
+				( -0.5d + canvas.offScreenYD( mouseLocation.y ) ) * calibration[ 1 ],
+				( lImp.getSlice() - 1 ) * calibration[ 2 ],
+				FALL_BACK_RADIUS,
+				-1d );
 	}
 
 	@Override
