@@ -252,7 +252,11 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 		final Interval interval = TMUtils.getInterval( img, settings );
 		final int zindex = TMUtils.findZAxisIndex( img );
 
-		factory.setTarget( img, settings.detectorSettings );
+		if ( !factory.setTarget( img, settings.detectorSettings ) )
+		{
+			errorMessage = factory.getErrorMessage();
+			return false;
+		}
 
 		final int numFrames = settings.tend - settings.tstart + 1;
 		// Final results holder, for all frames
