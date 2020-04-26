@@ -8,7 +8,7 @@ import java.util.Map;
 
 import org.scijava.plugin.Plugin;
 
-@Plugin( type = SpotTrackerFactory.class, priority = 10d )
+@Plugin( type = SpotTrackerFactory.class, priority = -10d )
 public class FastLAPTrackerFactory extends LAPTrackerFactory
 {
 	public static final String THIS_TRACKER_KEY = "FAST_LAP_TRACKER";

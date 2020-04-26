@@ -12,7 +12,7 @@ import org.scijava.plugin.SciJavaPlugin;
  * annotate its class with for instance
  *
  * <pre>
- * &#64;Plugin( type = SpotAnalyzerFactory.class, priority = 1d, visible = false )
+ * &#64;Plugin( type = SpotAnalyzerFactory.class, priority = -1d, visible = false )
  * </pre>
  * 
  * This will have a
