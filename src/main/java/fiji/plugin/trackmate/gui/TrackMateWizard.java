@@ -244,66 +244,31 @@ public class TrackMateWizard extends JFrame implements ActionListener
 	public void setLogButtonEnabled( final boolean b )
 	{
 		controller.guimodel.loadButtonState = b;
-		SwingUtilities.invokeLater( new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				jButtonLog.setEnabled( b );
-			}
-		} );
+		SwingUtilities.invokeLater( () -> jButtonLog.setEnabled( b ) );
 	}
 
 	public void setDisplayConfigButtonEnabled( final boolean b )
 	{
 		controller.guimodel.displayConfigButtonState = b;
-		SwingUtilities.invokeLater( new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				jButtonDisplayConfig.setEnabled( b );
-			}
-		} );
+		SwingUtilities.invokeLater( () -> jButtonDisplayConfig.setEnabled( b ) );
 	}
 
 	public void setPreviousButtonEnabled( final boolean b )
 	{
 		controller.guimodel.previousButtonState = b;
-		SwingUtilities.invokeLater( new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				jButtonPrevious.setEnabled( b );
-			}
-		} );
+		SwingUtilities.invokeLater( () -> jButtonPrevious.setEnabled( b ) );
 	}
 
 	public void setSaveButtonEnabled( final boolean b )
 	{
 		controller.guimodel.saveButtonState = b;
-		SwingUtilities.invokeLater( new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				jButtonSave.setEnabled( b );
-			}
-		} );
+		SwingUtilities.invokeLater( () -> jButtonSave.setEnabled( b ) );
 	}
 
 	public void setLoadButtonEnabled( final boolean b )
 	{
 		controller.guimodel.loadButtonState = b;
-		SwingUtilities.invokeLater( new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				jButtonLoad.setEnabled( b );
-			}
-		} );
+		SwingUtilities.invokeLater( () -> jButtonLoad.setEnabled( b ) );
 	}
 
 	/*

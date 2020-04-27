@@ -8,9 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import net.imagej.ImgPlus;
-import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
-import net.imglib2.multithreading.SimpleMultiThreading;
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
@@ -21,6 +18,9 @@ import fiji.plugin.trackmate.features.spot.IndependentSpotFeatureAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.util.TMUtils;
+import net.imagej.ImgPlus;
+import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
+import net.imglib2.multithreading.SimpleMultiThreading;
 
 /**
  * A class dedicated to centralizing the calculation of the numerical features
@@ -117,15 +117,7 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 	private void computeSpotFeaturesAgent( final SpotCollection toCompute, final List< SpotAnalyzerFactory< ? >> analyzerFactories, final boolean doLogIt )
 	{
 
-		final Logger logger;
-		if ( doLogIt )
-		{
-			logger = model.getLogger();
-		}
-		else
-		{
-			logger = Logger.VOID_LOGGER;
-		}
+		final Logger logger = doLogIt ? model.getLogger() : Logger.VOID_LOGGER;
 
 		// Can't compute any spot feature without an image to compute on.
 		if ( settings.imp == null )
@@ -146,9 +138,8 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 			final Map< String, Object > ds = settings.detectorSettings;
 			final Object obj = ds.get( KEY_TARGET_CHANNEL );
 			if ( null != obj && obj instanceof Integer )
-			{
 				tc = ( ( Integer ) obj ) - 1;
-			}
+
 		}
 		final int targetChannel = tc;
 
@@ -180,9 +171,7 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 								@SuppressWarnings( "rawtypes" )
 								final IndependentSpotFeatureAnalyzer analyzer2 = ( IndependentSpotFeatureAnalyzer ) analyzer;
 								for ( final Spot spot : toCompute.iterable( frame, false ) )
-								{
 									analyzer2.process( spot );
-								}
 							}
 							else
 							{

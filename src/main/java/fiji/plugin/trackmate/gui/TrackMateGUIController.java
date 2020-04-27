@@ -355,24 +355,16 @@ public class TrackMateGUIController implements ActionListener
 				guimodel.currentDescriptor = descriptor;
 				gui.show( descriptor );
 				if ( null == nextDescriptor( descriptor ) )
-				{
 					gui.setNextButtonEnabled( false );
-				}
 				else
-				{
 					gui.setNextButtonEnabled( true );
-				}
-				if ( null == previousDescriptor( descriptor ) )
-				{
-					gui.setPreviousButtonEnabled( false );
-				}
-				else
-				{
-					gui.setPreviousButtonEnabled( true );
-				}
-				descriptor.displayingPanel();
-				return;
 
+				if ( null == previousDescriptor( descriptor ) )
+					gui.setPreviousButtonEnabled( false );
+				else
+					gui.setPreviousButtonEnabled( true );
+
+				descriptor.displayingPanel();
 			}
 		}
 
@@ -538,22 +530,20 @@ public class TrackMateGUIController implements ActionListener
 				}
 			}
 		};
-		// Listen if the selected imp is valid and toggle next button
-		// accordingly.
+		/*
+		 * Listen if the selected imp is valid and toggle next button
+		 * accordingly.
+		 */
 		startDialoDescriptor.addActionListener( new ActionListener()
 		{
 			@Override
 			public void actionPerformed( final ActionEvent e )
 			{
+				// Ensure we reset default save location
 				if ( startDialoDescriptor.isImpValid() )
-				{
-					// Ensure we reset default save location
 					gui.setNextButtonEnabled( true );
-				}
 				else
-				{
 					gui.setNextButtonEnabled( false );
-				}
 			}
 		} );
 
@@ -600,7 +590,9 @@ public class TrackMateGUIController implements ActionListener
 					final FeatureColorGenerator< Spot > newValue;
 					@SuppressWarnings( "unchecked" )
 					final FeatureColorGenerator< Spot > oldValue = ( FeatureColorGenerator< Spot > ) guimodel.getDisplaySettings().get( KEY_SPOT_COLORING );
-					if ( null == spotFilterDescriptor.getComponent() ) { return; }
+					if ( null == spotFilterDescriptor.getComponent() )
+						return;
+
 					switch ( spotFilterDescriptor.getComponent().getColorCategory() )
 					{
 					case DEFAULT:
@@ -659,13 +651,10 @@ public class TrackMateGUIController implements ActionListener
 			public void actionPerformed( final ActionEvent event )
 			{
 				if ( trackFilterDescriptor.getComponent().getColorCategory().equals( ColorByFeatureGUIPanel.Category.DEFAULT ) )
-				{
 					trackColorGenerator.setFeature( null );
-				}
 				else
-				{
 					trackColorGenerator.setFeature( trackFilterDescriptor.getComponent().getColorFeature() );
-				}
+
 				for ( final TrackMateModelView view : guimodel.views )
 				{
 					view.setDisplaySettings( TrackMateModelView.KEY_TRACK_COLORING, trackColorGenerator );
@@ -695,24 +684,13 @@ public class TrackMateGUIController implements ActionListener
 			public void actionPerformed( final ActionEvent event )
 			{
 				if ( event == configureViewsDescriptor.getComponent().TRACK_SCHEME_BUTTON_PRESSED )
-				{
 					launchTrackScheme();
-
-				}
 				else if ( event == configureViewsDescriptor.getComponent().DO_ANALYSIS_BUTTON_PRESSED )
-				{
 					launchDoAnalysis( false );
-
-				}
 				else if ( event == configureViewsDescriptor.getComponent().DO_ANALYSIS_BUTTON_WITH_SHIFT_PRESSED )
-				{
 					launchDoAnalysis( true );
-
-				}
 				else
-				{
 					System.out.println( "[TrackMateGUIController] Caught unknown event: " + event );
-				}
 			}
 		} );
 		configureViewsDescriptor.getComponent().addDisplaySettingsChangeListener( displaySettingsListener );
@@ -740,7 +718,7 @@ public class TrackMateGUIController implements ActionListener
 		/*
 		 * Store created descriptors
 		 */
-		final ArrayList< WizardPanelDescriptor > descriptors = new ArrayList< >( 16 );
+		final ArrayList< WizardPanelDescriptor > descriptors = new ArrayList<>( 16 );
 		descriptors.add( actionChooserDescriptor );
 		descriptors.add( configureViewsDescriptor );
 		descriptors.add( detectorChoiceDescriptor );
@@ -990,7 +968,7 @@ public class TrackMateGUIController implements ActionListener
 	 */
 	protected Map< String, Object > createDisplaySettings( final Model model )
 	{
-		final Map< String, Object > displaySettings = new HashMap< >();
+		final Map< String, Object > displaySettings = new HashMap<>();
 		displaySettings.put( KEY_COLOR, DEFAULT_SPOT_COLOR );
 		displaySettings.put( KEY_HIGHLIGHT_COLOR, DEFAULT_HIGHLIGHT_COLOR );
 		displaySettings.put( KEY_SPOTS_VISIBLE, true );
@@ -1195,13 +1173,12 @@ public class TrackMateGUIController implements ActionListener
 		 * tracker, stores the settings currently displayed in TrackMate.
 		 */
 
-		if (guimodel.currentDescriptor.equals( trackerConfigurationDescriptor )
-				|| guimodel.currentDescriptor.equals( detectorConfigurationDescriptor ))
+		if ( guimodel.currentDescriptor.equals( trackerConfigurationDescriptor )
+				|| guimodel.currentDescriptor.equals( detectorConfigurationDescriptor ) )
 		{
 			// This will flush currently displayed settings to TrackMate.
 			guimodel.currentDescriptor.aboutToHidePanel();
 		}
-
 
 		// Move to save state and execute
 		saveDescriptor.aboutToDisplayPanel();
@@ -1266,9 +1243,8 @@ public class TrackMateGUIController implements ActionListener
 				final SpotImageUpdater thumbnailUpdater = new SpotImageUpdater( trackmate.getSettings() );
 				trackscheme.setSpotImageUpdater( thumbnailUpdater );
 				for ( final String settingKey : guimodel.getDisplaySettings().keySet() )
-				{
 					trackscheme.setDisplaySettings( settingKey, guimodel.getDisplaySettings().get( settingKey ) );
-				}
+
 				trackscheme.render();
 				guimodel.addView( trackscheme );
 				// De-register
