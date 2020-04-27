@@ -60,20 +60,11 @@ public class TMUtils
 	public static < K, V extends Comparable< ? super V > > Map< K, V > sortByValue( final Map< K, V > map, final Comparator< V > comparator )
 	{
 		final List< Map.Entry< K, V > > list = new LinkedList< >( map.entrySet() );
-		Collections.sort( list, new Comparator< Map.Entry< K, V > >()
-		{
-			@Override
-			public int compare( final Map.Entry< K, V > o1, final Map.Entry< K, V > o2 )
-			{
-				return comparator.compare( o1.getValue(), o2.getValue() );
-			}
-		} );
+		Collections.sort( list, Comparator.comparing( Map.Entry::getValue ) );
 
 		final LinkedHashMap< K, V > result = new LinkedHashMap< >();
 		for ( final Map.Entry< K, V > entry : list )
-		{
 			result.put( entry.getKey(), entry.getValue() );
-		}
 		return result;
 	}
 
@@ -87,9 +78,8 @@ public class TMUtils
 		for ( final String key : map.keySet() )
 		{
 			for ( int i = 0; i < indent; i++ )
-			{
 				builder.append( " " );
-			}
+
 			builder.append( "- " );
 			builder.append( key.toLowerCase().replace( "_", " " ) );
 			builder.append( ": " );
@@ -143,13 +133,11 @@ public class TMUtils
 	public static final < T > boolean checkMapKeys( final Map< T, ? > map, Collection< T > mandatoryKeys, Collection< T > optionalKeys, final StringBuilder errorHolder )
 	{
 		if ( null == optionalKeys )
-		{
 			optionalKeys = new ArrayList< >();
-		}
+
 		if ( null == mandatoryKeys )
-		{
 			mandatoryKeys = new ArrayList< >();
-		}
+
 		boolean ok = true;
 		final Set< T > keySet = map.keySet();
 		for ( final T key : keySet )
@@ -212,36 +200,8 @@ public class TMUtils
 	{
 		final List< K > names = new ArrayList< >( keys.size() );
 		for ( int i = 0; i < keys.size(); i++ )
-		{
 			names.add( mapping.get( keys.get( i ) ) );
-		}
 		return names;
-	}
-
-	/**
-	 * Translate each spot of the given collection by the amount specified in
-	 * argument. The distances are all understood in physical units.
-	 * <p>
-	 * This is meant to deal with a cropped image. The translation will bring
-	 * the spot coordinates back to the top-left corner of the un-cropped image
-	 * reference.
-	 */
-	public static void translateSpots( final Collection< Spot > spots, final double dx, final double dy, final double dz )
-	{
-		final double[] dval = new double[] { dx, dy, dz };
-		final String[] features = new String[] { Spot.POSITION_X, Spot.POSITION_Y, Spot.POSITION_Z };
-		Double val;
-		for ( final Spot spot : spots )
-		{
-			for ( int i = 0; i < features.length; i++ )
-			{
-				val = spot.getFeature( features[ i ] );
-				if ( null != val )
-				{
-					spot.putFeature( features[ i ], val + dval[ i ] );
-				}
-			}
-		}
 	}
 
 	/*
@@ -294,17 +254,11 @@ public class TMUtils
 		for ( int d = 0; d < img.numDimensions(); d++ )
 		{
 			if ( img.axis( d ).type() == Axes.X )
-			{
 				calibration[ 0 ] = img.averageScale( d );
-			}
 			else if ( img.axis( d ).type() == Axes.Y )
-			{
 				calibration[ 1 ] = img.averageScale( d );
-			}
 			else if ( img.axis( d ).type() == Axes.Z )
-			{
 				calibration[ 2 ] = img.averageScale( d );
-			}
 		}
 		return calibration;
 	}
@@ -315,9 +269,8 @@ public class TMUtils
 		calibration[ 0 ] = imp.getCalibration().pixelWidth;
 		calibration[ 1 ] = imp.getCalibration().pixelHeight;
 		if ( imp.getNSlices() > 1 )
-		{
 			calibration[ 2 ] = imp.getCalibration().pixelDepth;
-		}
+
 		return calibration;
 	}
 
@@ -329,10 +282,13 @@ public class TMUtils
 	{
 
 		final int size = values.length;
-		if ( ( p > 1 ) || ( p <= 0 ) ) { throw new IllegalArgumentException( "invalid quantile value: " + p ); }
+		if ( ( p > 1 ) || ( p <= 0 ) )
+			throw new IllegalArgumentException( "invalid quantile value: " + p );
 		// always return single value for n = 1
-		if ( size == 0 ) { return Double.NaN; }
-		if ( size == 1 ) { return values[ 0 ]; }
+		if ( size == 0 )
+			return Double.NaN;
+		if ( size == 1 )
+			return values[ 0 ];
 		final double n = size;
 		final double pos = p * ( n + 1 );
 		final double fpos = Math.floor( pos );
@@ -342,8 +298,10 @@ public class TMUtils
 		System.arraycopy( values, 0, sorted, 0, size );
 		Arrays.sort( sorted );
 
-		if ( pos < 1 ) { return sorted[ 0 ]; }
-		if ( pos >= n ) { return sorted[ size - 1 ]; }
+		if ( pos < 1 )
+			return sorted[ 0 ];
+		if ( pos >= n )
+			return sorted[ size - 1 ];
 		final double lower = sorted[ intPos - 1 ];
 		final double upper = sorted[ intPos ];
 		return lower + dif * ( upper - lower );
@@ -357,21 +315,8 @@ public class TMUtils
 	 */
 	private static final double[] getRange( final double[] data )
 	{
-		double min = Double.POSITIVE_INFINITY;
-		double max = Double.NEGATIVE_INFINITY;
-		double value;
-		for ( int i = 0; i < data.length; i++ )
-		{
-			value = data[ i ];
-			if ( value < min )
-			{
-				min = value;
-			}
-			if ( value > max )
-			{
-				max = value;
-			}
-		}
+		final double min = Arrays.stream( data ).min().getAsDouble();
+		final double max = Arrays.stream( data ).max().getAsDouble();
 		return new double[] { ( max - min ), min, max };
 	}
 
@@ -401,14 +346,12 @@ public class TMUtils
 		final double binWidth = 2 * iqr * Math.pow( size, -0.33 );
 		final double[] range = getRange( values );
 		int nBin = ( int ) ( range[ 0 ] / binWidth + 1 );
+
 		if ( nBin > maxBinNumber )
-		{
 			nBin = maxBinNumber;
-		}
 		else if ( nBin < minBinNumber )
-		{
 			nBin = minBinNumber;
-		}
+
 		return nBin;
 	}
 
@@ -484,9 +427,7 @@ public class TMUtils
 
 		double sum = 0;
 		for ( int t = 0; t < hist.length; t++ )
-		{
 			sum += t * hist[ t ];
-		}
 
 		double sumB = 0;
 		int wB = 0;
@@ -499,15 +440,11 @@ public class TMUtils
 		{
 			wB += hist[ t ]; // Weight Background
 			if ( wB == 0 )
-			{
 				continue;
-			}
 
 			wF = total - wB; // Weight Foreground
 			if ( wF == 0 )
-			{
 				break;
-			}
 
 			sumB += ( t * hist[ t ] );
 
@@ -627,9 +564,8 @@ public class TMUtils
 		{
 			Integer c = ( Integer ) settings.detectorSettings.get( KEY_TARGET_CHANNEL ); // 1-based.
 			if ( null == c )
-			{
 				c = 1;
-			}
+
 			min[ cindex ] = c - 1; // 0-based.
 			max[ cindex ] = min[ cindex ];
 		}
@@ -653,9 +589,8 @@ public class TMUtils
 			for ( int d = 0; d < min.length; d++ )
 			{
 				if ( d == tindex )
-				{
 					continue;
-				}
+
 				nindex++;
 				intervalMin[ nindex ] = Math.max( 0l, min[ d ] );
 				intervalMax[ nindex ] = Math.min( img.max( d ), max[ d ] );
