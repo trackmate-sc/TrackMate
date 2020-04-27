@@ -290,7 +290,7 @@ public class CopyOverlayAction extends AbstractTMAction
 		}.start();
 	}
 
-	@Plugin( type = TrackMateActionFactory.class )
+	@Plugin( type = TrackMateActionFactory.class, enabled = false )
 	public static class Factory implements TrackMateActionFactory
 	{
 
