@@ -107,7 +107,7 @@ public class LinkNew3DViewerAction extends AbstractTMAction
 		}.start();
 	}
 
-	@Plugin( type = TrackMateActionFactory.class )
+	@Plugin( type = TrackMateActionFactory.class, enabled = false )
 	public static class Factory implements TrackMateActionFactory
 	{
 
