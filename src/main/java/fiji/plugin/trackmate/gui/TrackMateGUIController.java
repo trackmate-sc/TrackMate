@@ -791,9 +791,16 @@ public class TrackMateGUIController implements ActionListener
 		else if ( currentDescriptor == detectorConfigurationDescriptor )
 		{
 			if ( trackmate.getSettings().detectorFactory.getKey().equals( ManualDetectorFactory.DETECTOR_KEY ) )
-				return viewChoiceDescriptor;
-
-			return detectionDescriptor;
+			{
+				if ( viewProvider.getVisibleKeys().size() == 1 )
+					return spotFilterDescriptor;
+				else
+					return viewChoiceDescriptor;
+			}
+			else
+			{
+				return detectionDescriptor;
+			}
 
 		}
 		else if ( currentDescriptor == detectionDescriptor )
@@ -803,7 +810,11 @@ public class TrackMateGUIController implements ActionListener
 		}
 		else if ( currentDescriptor == initFilterDescriptor )
 		{
-			return viewChoiceDescriptor;
+			// Skip choice of view if we just have one.
+			if ( viewProvider.getVisibleKeys().size() == 1 )
+				return spotFilterDescriptor;
+			else
+				return viewChoiceDescriptor;
 
 		}
 		else if ( currentDescriptor == viewChoiceDescriptor )
@@ -895,7 +906,10 @@ public class TrackMateGUIController implements ActionListener
 		}
 		else if ( currentDescriptor == spotFilterDescriptor )
 		{
-			return viewChoiceDescriptor;
+			if ( viewProvider.getVisibleKeys().size() == 1 )
+				return detectorConfigurationDescriptor;
+			else
+				return viewChoiceDescriptor;
 
 		}
 		else if ( currentDescriptor == trackerChoiceDescriptor )
@@ -1161,9 +1175,7 @@ public class TrackMateGUIController implements ActionListener
 		// Check if the new panel has a next panel. If not, disable the next
 		// button
 		if ( null == previousDescriptor( panelDescriptor ) )
-		{
 			gui.setPreviousButtonEnabled( false );
-		}
 
 		// Re-enable the previous button, in case it was disabled
 		gui.setNextButtonEnabled( true );
