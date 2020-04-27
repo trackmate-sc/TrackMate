@@ -1,5 +1,11 @@
 package fiji.plugin.trackmate.gui.descriptors;
 
+import java.awt.Component;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.Icon;
+
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
@@ -11,12 +17,6 @@ import fiji.plugin.trackmate.providers.ViewProvider;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewFactory;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
-
-import java.awt.Component;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.Icon;
 
 public class ViewChoiceDescriptor implements WizardPanelDescriptor
 {
@@ -37,7 +37,7 @@ public class ViewChoiceDescriptor implements WizardPanelDescriptor
 		this.guimodel = guimodel;
 		this.controller = controller;
 		// Only views that are set to be visible in the menu.
-		final List< String > visibleKeys = viewProvider.getVisibleViews();
+		final List< String > visibleKeys = viewProvider.getVisibleKeys();
 		final List< String > viewerNames = new ArrayList< >( visibleKeys.size() );
 		final List< String > infoTexts = new ArrayList< >( visibleKeys.size() );
 		for ( final String key : visibleKeys )
@@ -112,7 +112,7 @@ public class ViewChoiceDescriptor implements WizardPanelDescriptor
 			@Override
 			public void run()
 			{
-				final String viewName = viewProvider.getVisibleViews().get( index );
+				final String viewName = viewProvider.getVisibleKeys().get( index );
 
 				// The HyperStack view is already used in the GUI, no need to
 				// re-instantiate it.
