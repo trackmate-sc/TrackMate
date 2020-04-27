@@ -2,9 +2,7 @@ package fiji.plugin.trackmate.util;
 
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 
-import ij.IJ;
-import ij.ImagePlus;
-
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,6 +16,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.scijava.Context;
+
+import fiji.plugin.trackmate.Dimension;
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
+import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
+import fiji.plugin.trackmate.features.track.TrackAnalyzer;
+import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
+import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
+import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
+import ij.IJ;
+import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imagej.ImgPlusMetadata;
 import net.imagej.axis.Axes;
@@ -27,12 +39,6 @@ import net.imglib2.Interval;
 import net.imglib2.img.ImagePlusAdapter;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.util.Util;
-
-import org.scijava.Context;
-
-import fiji.plugin.trackmate.Dimension;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.Spot;
 
 /**
  * List of static utilities for {@link fiji.plugin.trackmate.TrackMate}.
@@ -667,6 +673,92 @@ public class TMUtils
 	/** Obtains the SciJava {@link Context} in use by ImageJ. */
 	public static Context getContext() {
 		return ( Context ) IJ.runPlugIn( "org.scijava.Context", "" );
+	}
+
+	/**
+	 * Declare all feature analyzers (spot, edge and track analyzers) that can
+	 * be found at runtime to the specified settings.
+	 * 
+	 * @param settings
+	 *            the {@link Settings} object to declare the analyzers in.
+	 */
+	public static void declareAllFeatures( final Settings settings )
+	{
+
+		settings.clearSpotAnalyzerFactories();
+		final SpotAnalyzerProvider spotAnalyzerProvider = new SpotAnalyzerProvider();
+		final List< String > spotAnalyzerKeys = spotAnalyzerProvider.getKeys();
+		for ( final String key : spotAnalyzerKeys )
+		{
+			final SpotAnalyzerFactory< ? > spotFeatureAnalyzer = spotAnalyzerProvider.getFactory( key );
+			settings.addSpotAnalyzerFactory( spotFeatureAnalyzer );
+		}
+
+		settings.clearEdgeAnalyzers();
+		final EdgeAnalyzerProvider edgeAnalyzerProvider = new EdgeAnalyzerProvider();
+		final List< String > edgeAnalyzerKeys = edgeAnalyzerProvider.getKeys();
+		for ( final String key : edgeAnalyzerKeys )
+		{
+			final EdgeAnalyzer edgeAnalyzer = edgeAnalyzerProvider.getFactory( key );
+			settings.addEdgeAnalyzer( edgeAnalyzer );
+		}
+
+		settings.clearTrackAnalyzers();
+		final TrackAnalyzerProvider trackAnalyzerProvider = new TrackAnalyzerProvider();
+		final List< String > trackAnalyzerKeys = trackAnalyzerProvider.getKeys();
+		for ( final String key : trackAnalyzerKeys )
+		{
+			final TrackAnalyzer trackAnalyzer = trackAnalyzerProvider.getFactory( key );
+			settings.addTrackAnalyzer( trackAnalyzer );
+		}
+	}
+
+	/**
+	 * Creates a default file path to save the TrackMate session to, based on
+	 * the image TrackMate works on.
+	 * 
+	 * @param settings
+	 *            the settings object from which to read the image, its folder,
+	 *            etc.
+	 * @param logger
+	 *            a logger instance in which to echo problems if any.
+	 * @return a new file.
+	 */
+	public static File proposeTrackMateSaveFile( final Settings settings, final Logger logger )
+	{
+		File folder, file;
+		if ( null != settings.imp
+				&& null != settings.imp.getOriginalFileInfo()
+				&& null != settings.imp.getOriginalFileInfo().directory )
+		{
+			folder = new File( settings.imp.getOriginalFileInfo().directory );
+			/*
+			 * Update the settings field with the image file location now,
+			 * because it's valid.
+			 */
+			settings.imageFolder = settings.imp.getOriginalFileInfo().directory;
+		}
+		else
+		{
+			folder = new File( System.getProperty( "user.dir" ) );
+			/*
+			 * Warn the user that the file cannot be reloaded properly because
+			 * the source image does not match a file.
+			 */
+			logger.error( "Warning: The source image does not match a file on the system."
+					+ "TrackMate won't be able to reload it when opening this XML file.\n"
+					+ "To fix this, save the source image to a TIF file before saving the TrackMate session.\n" );
+			settings.imageFolder = "";
+		}
+		try
+		{
+			file = new File( folder.getPath() + File.separator + settings.imp.getShortTitle() + ".xml" );
+		}
+		catch ( final NullPointerException npe )
+		{
+			file = new File( folder.getPath() + File.separator + "TrackMateData.xml" );
+		}
+		return file;
 	}
 
 	private TMUtils()
