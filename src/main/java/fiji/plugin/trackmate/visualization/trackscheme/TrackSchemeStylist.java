@@ -4,15 +4,6 @@ import static fiji.plugin.trackmate.visualization.trackscheme.TrackScheme.DEFAUL
 import static fiji.plugin.trackmate.visualization.trackscheme.TrackScheme.DEFAULT_CELL_WIDTH;
 import static fiji.plugin.trackmate.visualization.trackscheme.TrackScheme.DEFAULT_COLOR;
 
-import com.mxgraph.model.mxCell;
-import com.mxgraph.model.mxICell;
-import com.mxgraph.util.mxConstants;
-import com.mxgraph.util.mxStyleUtils;
-import com.mxgraph.view.mxPerimeter;
-import com.mxgraph.view.mxStylesheet;
-
-import fiji.plugin.trackmate.visualization.TrackColorGenerator;
-
 import java.awt.Color;
 import java.util.Collection;
 import java.util.HashMap;
@@ -21,6 +12,15 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
+
+import com.mxgraph.model.mxCell;
+import com.mxgraph.model.mxICell;
+import com.mxgraph.util.mxConstants;
+import com.mxgraph.util.mxStyleUtils;
+import com.mxgraph.view.mxPerimeter;
+import com.mxgraph.view.mxStylesheet;
+
+import fiji.plugin.trackmate.visualization.TrackColorGenerator;
 
 public class TrackSchemeStylist {
 
@@ -99,7 +99,6 @@ public class TrackSchemeStylist {
 		try {
 
 			for (final Integer trackID : edgeMap.keySet()) {
-				colorGenerator.setCurrentTrackID(trackID);
 
 				final Set<mxCell> edgesToUpdate = edgeMap.get(trackID);
 				for (final mxCell cell : edgesToUpdate) {
