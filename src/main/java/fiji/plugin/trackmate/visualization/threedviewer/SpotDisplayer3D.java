@@ -278,9 +278,8 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 		for ( final int frame : spots.keySet() )
 		{
 			if ( spots.getNSpots( frame, false ) == 0 )
-			{
 				continue; // Do not create content for empty frames
-			}
+
 			buildFrameContent( spots, frame, radiusRatio, spotColorGenerator );
 		}
 
@@ -366,7 +365,6 @@ public class SpotDisplayer3D extends AbstractTrackMateModelView
 
 		for ( final Integer trackID : model.getTrackModel().trackIDs( true ) )
 		{
-			colorGenerator.setCurrentTrackID( trackID );
 			for ( final DefaultWeightedEdge edge : model.getTrackModel().trackEdges( trackID ) )
 			{
 				final Color color = colorGenerator.color( edge );

@@ -154,10 +154,7 @@ public class TrackOverlay extends Roi
 				if ( doLimitDrawingDepth && Math.abs( zs - zslice ) > drawingDepth && Math.abs( zt - zslice ) > drawingDepth )
 					continue;
 
-				final Integer trackID = model.getTrackModel().trackIDOf( edge );
-				colorGenerator.setCurrentTrackID( trackID );
 				g2d.setColor( colorGenerator.color( edge ) );
-
 				transparency = ( float ) ( 1 - Math.abs( ( double ) sourceFrame - currentFrame ) / trackDisplayDepth );
 				drawEdge( g2d, source, target, xcorner, ycorner, magnification, transparency );
 			}
@@ -168,7 +165,6 @@ public class TrackOverlay extends Roi
 		{
 			for ( final Integer trackID : filteredTrackKeys )
 			{
-				colorGenerator.setCurrentTrackID( trackID );
 				Set< DefaultWeightedEdge > track;
 				synchronized ( model )
 				{
@@ -202,7 +198,6 @@ public class TrackOverlay extends Roi
 
 			for ( final Integer trackID : filteredTrackKeys )
 			{
-				colorGenerator.setCurrentTrackID( trackID );
 				Set< DefaultWeightedEdge > track;
 				synchronized ( model )
 				{
@@ -241,7 +236,6 @@ public class TrackOverlay extends Roi
 
 			for ( final Integer trackID : filteredTrackKeys )
 			{
-				colorGenerator.setCurrentTrackID( trackID );
 				final Set< DefaultWeightedEdge > track;
 				synchronized ( model )
 				{
