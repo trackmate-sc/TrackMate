@@ -1,9 +1,9 @@
 package fiji.plugin.trackmate.visualization;
 
+import java.awt.Color;
+
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
-
-import java.awt.Color;
 
 public class SpotColorGeneratorPerTrackFeature implements FeatureColorGenerator< Spot >
 {
@@ -22,8 +22,8 @@ public class SpotColorGeneratorPerTrackFeature implements FeatureColorGenerator<
 	public Color color( final Spot spot )
 	{
 		final Integer trackID = model.getTrackModel().trackIDOf( spot );
-		if ( null == trackID )
-			return TrackMateModelView.DEFAULT_SPOT_COLOR;
+		if ( null == trackID || !model.getTrackModel().isVisible( trackID ) )
+			return TrackMateModelView.DEFAULT_UNASSIGNED_FEATURE_COLOR;
 
 		return trackColorGenerator.colorOf( trackID );
 	}
