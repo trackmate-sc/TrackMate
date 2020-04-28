@@ -1,13 +1,13 @@
 package fiji.plugin.trackmate.visualization;
 
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
-import fiji.plugin.trackmate.gui.panels.components.ColorByFeatureGUIPanel;
-
 import java.awt.Color;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
+
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
+import fiji.plugin.trackmate.gui.panels.components.ColorByFeatureGUIPanel;
 
 public class ManualEdgeColorGenerator implements TrackColorGenerator
 {
@@ -22,7 +22,8 @@ public class ManualEdgeColorGenerator implements TrackColorGenerator
 	public Color color( final DefaultWeightedEdge  edge)
 	{
 		final Double val = model.getFeatureModel().getEdgeFeature( edge, ManualEdgeColorAnalyzer.FEATURE );
-		if ( null == val ) { return TrackMateModelView.DEFAULT_UNASSIGNED_FEATURE_COLOR; }
+		if ( null == val )
+			return TrackMateModelView.DEFAULT_UNASSIGNED_FEATURE_COLOR;
 		return new Color( val.intValue() );
 	}
 
@@ -42,10 +43,6 @@ public class ManualEdgeColorGenerator implements TrackColorGenerator
 
 	@Override
 	public void activate()
-	{}
-
-	@Override
-	public void setCurrentTrackID( final Integer trackID )
 	{}
 
 	@Override

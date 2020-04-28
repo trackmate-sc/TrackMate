@@ -1,15 +1,15 @@
 package fiji.plugin.trackmate.visualization;
 
+import java.awt.Color;
+
+import org.jfree.chart.renderer.InterpolatePaintScale;
+import org.jgrapht.graph.DefaultWeightedEdge;
+
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.ModelChangeListener;
 import fiji.plugin.trackmate.TrackMateOptionUtils;
 import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
-
-import java.awt.Color;
-
-import org.jfree.chart.renderer.InterpolatePaintScale;
-import org.jgrapht.graph.DefaultWeightedEdge;
 
 public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackColorGenerator
 {
@@ -41,10 +41,10 @@ public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackC
 	@Override
 	public void setFeature( final String feature )
 	{
-		if ( feature.equals( this.feature ) || feature.equals( ManualEdgeColorAnalyzer.FEATURE ) ) { return; }
+		if ( feature.equals( this.feature ) || feature.equals( ManualEdgeColorAnalyzer.FEATURE ) )
+			return;
 		this.feature = feature;
-		// We recompute min and max whatever the mode is set, to have something
-		// meaningful.
+		// We recompute min and max whatever the mode is set, to have something meaningful.
 		resetMinAndMax();
 	}
 
@@ -69,10 +69,6 @@ public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackC
 		return generator.getPaint( ( val - min ) / ( max - min ) );
 	}
 
-	@Override
-	public void setCurrentTrackID( final Integer trackID )
-	{} // ignored
-
 	/**
 	 * If the color scaling mode is set to automatic, monitors if the change
 	 * induces some change in the colormap. Rescale it if so.
@@ -80,7 +76,8 @@ public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackC
 	@Override
 	public void modelChanged( final ModelChangeEvent event )
 	{
-		if ( !autoMinMax || event.getEventID() != ModelChangeEvent.MODEL_MODIFIED || event.getEdges().size() == 0 ) { return; }
+		if ( !autoMinMax || event.getEventID() != ModelChangeEvent.MODEL_MODIFIED || event.getEdges().size() == 0 )
+			return;
 
 		for ( final DefaultWeightedEdge edge : event.getEdges() )
 		{
@@ -155,9 +152,7 @@ public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackC
 	public void activate()
 	{
 		if ( !model.getModelChangeListener().contains( this ) )
-		{
 			model.addModelChangeListener( this );
-		}
 	}
 
 	/*
@@ -215,8 +210,6 @@ public class PerEdgeFeatureColorGenerator implements ModelChangeListener, TrackC
 	{
 		setAutoMinMaxMode( minMaxAdjustable.isAutoMinMaxMode() );
 		if ( !minMaxAdjustable.isAutoMinMaxMode() )
-		{
 			setMinMax( minMaxAdjustable.getMin(), minMaxAdjustable.getMax() );
-		}
 	}
 }

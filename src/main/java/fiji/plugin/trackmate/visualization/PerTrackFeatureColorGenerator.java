@@ -39,8 +39,6 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 
 	private String feature;
 
-	private Color color;
-
 	private double min;
 
 	private double max;
@@ -147,13 +145,11 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 	@Override
 	public Color color( final DefaultWeightedEdge edge )
 	{
-		return color;
-	}
+		final Integer id = model.getTrackModel().trackIDOf( edge );
+		if ( id == null )
+			return TrackMateModelView.DEFAULT_UNASSIGNED_FEATURE_COLOR;
 
-	@Override
-	public void setCurrentTrackID( final Integer trackID )
-	{
-		this.color = colorMap.get( trackID );
+		return colorMap.get( id );
 	}
 
 	@Override
@@ -254,13 +250,10 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator, Model
 	{
 		setAutoMinMaxMode( minMaxAdjustable.isAutoMinMaxMode() );
 		if ( !minMaxAdjustable.isAutoMinMaxMode() )
-		{
 			setMinMax( minMaxAdjustable.getMin(), minMaxAdjustable.getMax() );
-		}
 		else
-		{
 			autoMinMax();
-		}
+
 		refreshColorMap();
 	}
 }
