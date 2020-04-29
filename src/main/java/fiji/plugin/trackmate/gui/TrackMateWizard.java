@@ -17,8 +17,12 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import org.scijava.object.ObjectService;
+
 import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.descriptors.WizardPanelDescriptor;
+import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 
 /**
@@ -196,6 +200,16 @@ public class TrackMateWizard extends JFrame implements ActionListener
 		fireAction( event );
 	}
 
+	@Override
+	public void dispose()
+	{
+		final ObjectService objectService = TMUtils.getContext().service( ObjectService.class );
+		if ( objectService != null )
+			objectService.removeObject( controller.getPlugin() );
+
+		super.dispose();
+	}
+
 	/**
 	 * Sets the current panel to that identified by the WizardPanelDescriptor
 	 * passed in.
@@ -331,7 +345,7 @@ public class TrackMateWizard extends JFrame implements ActionListener
 		{
 			setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
 			setIconImage( TRACKMATE_ICON.getImage() );
-			setTitle( fiji.plugin.trackmate.TrackMate.PLUGIN_NAME_STR + " v" + fiji.plugin.trackmate.TrackMate.PLUGIN_NAME_VERSION );
+			setTitle( TrackMate.PLUGIN_NAME_STR + "v" + TrackMate.PLUGIN_NAME_VERSION );
 			{
 				jPanelMain = new JPanel();
 				getContentPane().add( jPanelMain, BorderLayout.CENTER );

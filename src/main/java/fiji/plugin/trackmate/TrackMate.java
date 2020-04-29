@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.scijava.Named;
 import org.scijava.util.VersionUtils;
 
 import fiji.plugin.trackmate.detection.ManualDetectorFactory;
@@ -38,7 +39,7 @@ import net.imglib2.multithreading.SimpleMultiThreading;
  * @author Jean-Yves Tinevez - Institut Pasteur - July 2010 - 2018
  */
 @SuppressWarnings( "deprecation" )
-public class TrackMate implements Benchmark, MultiThreaded, Algorithm
+public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 {
 
 	public static final String PLUGIN_NAME_STR = "TrackMate";
@@ -58,6 +59,8 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 
 	protected int numThreads = Runtime.getRuntime().availableProcessors();
 
+	private String name;
+
 	/*
 	 * CONSTRUCTORS
 	 */
@@ -71,6 +74,10 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 	{
 		this.model = model;
 		this.settings = settings;
+		name = PLUGIN_NAME_STR + "_v" + PLUGIN_NAME_VERSION;
+		if ( settings.imp != null )
+			name += "_(" + settings.imp.getTitle().replace( ' ', '_' ) + ")";
+		name += "_[" + Integer.toHexString( hashCode() ) + "]";
 	}
 
 	public TrackMate()
@@ -563,7 +570,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 	@Override
 	public String toString()
 	{
-		return PLUGIN_NAME_STR + "v" + PLUGIN_NAME_VERSION;
+		return name;
 	}
 
 	/*
@@ -641,5 +648,19 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm
 	public long getProcessingTime()
 	{
 		return processingTime;
+	}
+
+	// --- org.scijava.Named methods ---
+
+	@Override
+	public String getName()
+	{
+		return name;
+	}
+
+	@Override
+	public void setName( final String name )
+	{
+		this.name = name;
 	}
 }

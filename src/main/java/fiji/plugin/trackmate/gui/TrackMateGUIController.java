@@ -32,6 +32,8 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.scijava.object.ObjectService;
+
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
@@ -218,6 +220,13 @@ public class TrackMateGUIController implements ActionListener
 
 		this.gui = new TrackMateWizard( this );
 		this.logger = gui.getLogger();
+
+		/*
+		 * Add this TrackMate instance to the ObjectService
+		 */
+		ObjectService objectService = TMUtils.getContext().service( ObjectService.class );
+		if ( objectService != null )
+			objectService.addObject( trackmate );
 
 		// Feature updater
 		final ModelFeatureUpdater modelFeatureUpdater = new ModelFeatureUpdater( trackmate.getModel(), trackmate.getSettings() );
