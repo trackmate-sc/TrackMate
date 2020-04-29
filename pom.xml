@@ -140,6 +140,8 @@
 		<license.projectName>Fiji distribution of ImageJ for the life sciences.</license.projectName>
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>deploy-to-scijava</releaseProfiles>
+		<!-- NB: Use ImgLib2 style code formatting (https://github.com/scijava/scijava-coding-style) -->
+		<scijava.coding-style>imglib2</scijava.coding-style>
 	</properties>
 
 	<repositories>
