@@ -17,9 +17,10 @@ import java.util.Map;
 import javax.swing.ImageIcon;
 
 import org.jdom2.Element;
+import org.scijava.Priority;
 import org.scijava.plugin.Plugin;
 
-@Plugin( type = SpotTrackerFactory.class, priority = 1d )
+@Plugin( type = SpotTrackerFactory.class, priority = Priority.LOW )
 public class NearestNeighborTrackerFactory implements SpotTrackerFactory
 {
 	public static final String TRACKER_KEY = "NEAREST_NEIGHBOR_TRACKER";

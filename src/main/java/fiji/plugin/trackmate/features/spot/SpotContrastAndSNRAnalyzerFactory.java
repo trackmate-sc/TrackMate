@@ -13,6 +13,7 @@ import net.imglib2.meta.view.HyperSliceImgPlus;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 
+import org.scijava.Priority;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Dimension;
@@ -28,7 +29,7 @@ import fiji.plugin.trackmate.Spot;
  * @author Jean- Yves Tinevez
  */
 @SuppressWarnings( "deprecation" )
-@Plugin( type = SpotAnalyzerFactory.class, priority = 1d )
+@Plugin( type = SpotAnalyzerFactory.class, priority = Priority.LOW )
 public class SpotContrastAndSNRAnalyzerFactory< T extends RealType< T > & NativeType< T >> implements SpotAnalyzerFactory< T >
 {
 

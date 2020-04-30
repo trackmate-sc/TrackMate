@@ -4,8 +4,6 @@ import fiji.plugin.trackmate.TrackMateModule;
 import fiji.plugin.trackmate.util.TMUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,17 +38,6 @@ public abstract class AbstractProvider< K extends TrackMateModule >
 		final LogService log = context.getService( LogService.class );
 		final PluginService pluginService = context.getService( PluginService.class );
 		final List< PluginInfo< K >> infos = pluginService.getPluginsOfType( cl );
-
-		final Comparator< PluginInfo< K >> priorityComparator = new Comparator< PluginInfo< K > >()
-				{
-			@Override
-			public int compare( final PluginInfo< K > o1, final PluginInfo< K > o2 )
-			{
-				return o1.getPriority() > o2.getPriority() ? 1 : o1.getPriority() < o2.getPriority() ? -1 : 0;
-			}
-				};
-
-				Collections.sort( infos, priorityComparator );
 
 				keys = new ArrayList< >( infos.size() );
 				visibleKeys = new ArrayList< >( infos.size() );
