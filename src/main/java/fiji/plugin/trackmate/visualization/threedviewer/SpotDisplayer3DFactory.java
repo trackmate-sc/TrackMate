@@ -6,6 +6,7 @@ import java.awt.event.WindowListener;
 
 import javax.swing.ImageIcon;
 
+import org.scijava.Priority;
 import org.scijava.plugin.Plugin;
 import org.scijava.vecmath.Color3f;
 
@@ -24,7 +25,7 @@ import ij3d.ContentCreator;
 import ij3d.Image3DUniverse;
 import ij3d.ImageWindow3D;
 
-@Plugin( type = ViewFactory.class, priority = -1d )
+@Plugin( type = ViewFactory.class, priority = Priority.LOW )
 public class SpotDisplayer3DFactory implements ViewFactory
 {
 
