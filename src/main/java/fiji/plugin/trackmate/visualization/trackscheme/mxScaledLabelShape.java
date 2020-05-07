@@ -53,7 +53,7 @@ public class mxScaledLabelShape extends mxRectangleShape
 	private final Rectangle getImageBounds( final mxCellState state )
 	{
 		final Rectangle cellR = state.getRectangle();
-		final int arc = getArcSize( cellR.width, cellR.height ) / 2;
+		final int arc = getArcSize( state, cellR.width, cellR.height ) / 2;
 		final int minSize = Math.min( cellR.width - arc * 2, cellR.height - 4 );
 		final Rectangle imageBounds = new Rectangle( cellR.x + arc, cellR.y + 2, minSize, minSize );
 		return imageBounds;
