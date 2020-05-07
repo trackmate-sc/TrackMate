@@ -144,6 +144,7 @@
 		<scijava.coding-style>imglib2</scijava.coding-style>
 
 		<jgraphx.version>4.1.0</jgraphx.version>
+		<imglib2.version>5.9.2</imglib2.version>
 	</properties>
 
 	<repositories>
