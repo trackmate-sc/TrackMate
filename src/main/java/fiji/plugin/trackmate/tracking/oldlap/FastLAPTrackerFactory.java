@@ -6,9 +6,10 @@ import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 
 import java.util.Map;
 
+import org.scijava.Priority;
 import org.scijava.plugin.Plugin;
 
-@Plugin( type = SpotTrackerFactory.class, priority = 10d )
+@Plugin( type = SpotTrackerFactory.class, priority = Priority.VERY_LOW )
 public class FastLAPTrackerFactory extends LAPTrackerFactory
 {
 	public static final String THIS_TRACKER_KEY = "FAST_LAP_TRACKER";

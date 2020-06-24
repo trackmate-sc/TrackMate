@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.swing.ImageIcon;
 
+import org.scijava.Priority;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Dimension;
@@ -27,7 +28,7 @@ import net.imglib2.type.numeric.RealType;
  * @author Jean- Yves Tinevez
  */
 @SuppressWarnings( "deprecation" )
-@Plugin( type = SpotAnalyzerFactory.class, priority = -1d )
+@Plugin( type = SpotAnalyzerFactory.class, priority = Priority.LOW )
 public class SpotContrastAndSNRAnalyzerFactory< T extends RealType< T > & NativeType< T >> implements SpotAnalyzerFactory< T >
 {
 

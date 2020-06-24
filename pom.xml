@@ -11,7 +11,7 @@
 
 	<groupId>sc.fiji</groupId>
 	<artifactId>TrackMate_</artifactId>
-	<version>6.0.0-SNAPSHOT</version>
+	<version>6.0.1-SNAPSHOT</version>
 
 	<name>TrackMate</name>
 	<description>TrackMate plugin for Fiji.</description>
@@ -142,6 +142,9 @@
 		<releaseProfiles>deploy-to-scijava</releaseProfiles>
 		<!-- NB: Use ImgLib2 style code formatting (https://github.com/scijava/scijava-coding-style) -->
 		<scijava.coding-style>imglib2</scijava.coding-style>
+
+		<jgraphx.version>4.1.0</jgraphx.version>
+		<imglib2.version>5.9.2</imglib2.version>
 	</properties>
 
 	<repositories>
@@ -248,8 +251,9 @@
 			<artifactId>jfreechart</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.tinyjee.jgraphx</groupId>
+			<groupId>com.github.vlsi.mxgraph</groupId>
 			<artifactId>jgraphx</artifactId>
+			<version>${jgraphx.version}</version>
 		</dependency>
 
 		<dependency>
