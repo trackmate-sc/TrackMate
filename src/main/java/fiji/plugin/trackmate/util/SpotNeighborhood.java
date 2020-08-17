@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.util;
 
+import fiji.plugin.trackmate.Spot;
 import net.imagej.ImgPlus;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
@@ -13,7 +14,6 @@ import net.imglib2.algorithm.region.localneighborhood.EllipsoidNeighborhood;
 import net.imglib2.algorithm.region.localneighborhood.RectangleNeighborhoodGPL;
 import net.imglib2.outofbounds.OutOfBoundsMirrorExpWindowingFactory;
 import net.imglib2.type.numeric.RealType;
-import fiji.plugin.trackmate.Spot;
 
 public class SpotNeighborhood< T extends RealType< T >> implements Neighborhood< T >
 {
@@ -123,7 +123,7 @@ public class SpotNeighborhood< T extends RealType< T >> implements Neighborhood<
 	@Override
 	public double realMin( final int d )
 	{
-		return neighborhood.realMax( d );
+		return neighborhood.realMin( d );
 	}
 
 	@Override
