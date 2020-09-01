@@ -1,5 +1,12 @@
 package fiji.plugin.trackmate;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.util.Map;
+
+import javax.swing.JFrame;
+
 import fiji.plugin.trackmate.detection.ManualDetectorFactory;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.GuiUtils;
@@ -19,13 +26,6 @@ import fiji.plugin.trackmate.visualization.ViewUtils;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
 import ij.ImagePlus;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.File;
-import java.util.Map;
-
-import javax.swing.JFrame;
 
 public class LoadICYTrackPlugIn_ extends LoadTrackMatePlugIn_
 {
@@ -184,8 +184,8 @@ public class LoadICYTrackPlugIn_ extends LoadTrackMatePlugIn_
 
 		// Compute features
 		trackmate.computeSpotFeatures( true );
-		trackmate.computeTrackFeatures( true );
 		trackmate.computeEdgeFeatures( true );
+		trackmate.computeTrackFeatures( true );
 
 		// Hook actions
 		postRead( trackmate );
