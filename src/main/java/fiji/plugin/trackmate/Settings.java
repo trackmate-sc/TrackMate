@@ -6,13 +6,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import fiji.plugin.trackmate.detection.DetectorKeys;
+import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.features.FeatureAnalyzer;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
+import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
+import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
+import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
+import fiji.plugin.trackmate.tracking.sparselap.SimpleSparseLAPTrackerFactory;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.io.FileInfo;
@@ -114,14 +120,14 @@ public class Settings
 
 	/**
 	 * Settings map for {@link fiji.plugin.trackmate.detection.SpotDetector}.
-	 * 
+	 *
 	 * @see fiji.plugin.trackmate.detection.DetectorKeys
 	 */
 	public Map< String, Object > detectorSettings = new HashMap< >();
 
 	/**
 	 * Settings map for {@link fiji.plugin.trackmate.tracking.SpotTracker}.
-	 * 
+	 *
 	 * @see fiji.plugin.trackmate.tracking.TrackerKeys
 	 */
 	public Map< String, Object > trackerSettings = new HashMap< >();
@@ -242,7 +248,7 @@ public class Settings
 
 	/**
 	 * Returns a string description of the target image.
-	 * 
+	 *
 	 * @return a string representation of the target image.
 	 */
 	public String toStringImageInfo()
@@ -458,6 +464,52 @@ public class Settings
 	}
 
 	/*
+	 * ALL FEATURES.
+	 */
+
+	/**
+	 * All the spot analyzers, edge analyzers and track analyzers discovered at
+	 * runtime. This method is a convenience for scripting, that simply
+	 * discovers and adds all the analyzers it can find.
+	 */
+	public void addAllAnalyzers()
+	{
+		clearSpotAnalyzerFactories();
+		final SpotAnalyzerProvider spotAnalyzerProvider = new SpotAnalyzerProvider();
+		final List< String > spotAnalyzerKeys = spotAnalyzerProvider.getKeys();
+		for ( final String key : spotAnalyzerKeys )
+			addSpotAnalyzerFactory( spotAnalyzerProvider.getFactory( key ) );
+
+		clearEdgeAnalyzers();
+		final EdgeAnalyzerProvider edgeAnalyzerProvider = new EdgeAnalyzerProvider();
+		final List< String > edgeAnalyzerKeys = edgeAnalyzerProvider.getKeys();
+		for ( final String key : edgeAnalyzerKeys )
+			addEdgeAnalyzer( edgeAnalyzerProvider.getFactory( key ) );
+
+		clearTrackAnalyzers();
+		final TrackAnalyzerProvider trackAnalyzerProvider = new TrackAnalyzerProvider();
+		final List< String > trackAnalyzerKeys = trackAnalyzerProvider.getKeys();
+		for ( final String key : trackAnalyzerKeys )
+			addTrackAnalyzer( trackAnalyzerProvider.getFactory( key ) );
+	}
+
+	/**
+	 * Initialize the detection and tracking part with default parameters. These
+	 * parameters are not mean to be used for all cases and need to be tuned for
+	 * the actual tracking problem.
+	 */
+	public void defaultParameters()
+	{
+		this.detectorFactory = new LogDetectorFactory<>();
+		this.detectorSettings = detectorFactory.getDefaultSettings();
+		detectorSettings.put( DetectorKeys.KEY_RADIUS, 2.5 );
+		this.trackerFactory = new SimpleSparseLAPTrackerFactory();
+		this.trackerSettings = trackerFactory.getDefaultSettings();
+		this.initialSpotFilterValue = 20.;
+	}
+
+
+	/*
 	 * SPOT FEATURES
 	 */
 
@@ -564,10 +616,10 @@ public class Settings
 	/**
 	 * Adds a {@link EdgeAnalyzer} to the {@link List} of edge analyzers
 	 * configured, at the specified index.
-	 * 
+	 *
 	 * @param index
 	 *            index at which the analyzer is to be inserted.
-	 * 
+	 *
 	 * @param edgeAnalyzer
 	 *            the {@link EdgeAnalyzer} to add, at the specified index in the
 	 *            list.
@@ -630,10 +682,10 @@ public class Settings
 	/**
 	 * Adds a {@link TrackAnalyzer} to the {@link List} of track analyzers
 	 * configured, at the specified index.
-	 * 
+	 *
 	 * @param index
 	 *            index at which the analyzer is to be inserted.
-	 * 
+	 *
 	 * @param trackAnalyzer
 	 *            the {@link TrackAnalyzer} to add, at the specified index in
 	 *            the list.
@@ -663,7 +715,7 @@ public class Settings
 
 	/**
 	 * Add a filter to the list of spot filters.
-	 * 
+	 *
 	 * @param filter
 	 *            the filter to add.
 	 */
@@ -695,7 +747,7 @@ public class Settings
 
 	/**
 	 * Add a filter to the list of track filters.
-	 * 
+	 *
 	 * @param filter
 	 *            the filter to add.
 	 */
@@ -754,5 +806,4 @@ public class Settings
 			str.append( '\n' );
 		}
 	}
-
 }
