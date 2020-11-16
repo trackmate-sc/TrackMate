@@ -613,7 +613,7 @@ public class TMUtils
 	/**
 	 * Declare all feature analyzers (spot, edge and track analyzers) that can
 	 * be found at runtime to the specified settings.
-	 * 
+	 *
 	 * @param settings
 	 *            the {@link Settings} object to declare the analyzers in.
 	 */
@@ -621,7 +621,7 @@ public class TMUtils
 	{
 
 		settings.clearSpotAnalyzerFactories();
-		final SpotAnalyzerProvider spotAnalyzerProvider = new SpotAnalyzerProvider();
+		final SpotAnalyzerProvider spotAnalyzerProvider = new SpotAnalyzerProvider( settings.imp );
 		final List< String > spotAnalyzerKeys = spotAnalyzerProvider.getKeys();
 		for ( final String key : spotAnalyzerKeys )
 		{
@@ -651,7 +651,7 @@ public class TMUtils
 	/**
 	 * Creates a default file path to save the TrackMate session to, based on
 	 * the image TrackMate works on.
-	 * 
+	 *
 	 * @param settings
 	 *            the settings object from which to read the image, its folder,
 	 *            etc.

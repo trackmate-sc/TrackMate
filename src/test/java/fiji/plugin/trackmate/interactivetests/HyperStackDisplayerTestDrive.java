@@ -1,5 +1,9 @@
 package fiji.plugin.trackmate.interactivetests;
 
+import java.io.File;
+
+import org.scijava.util.AppUtils;
+
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
@@ -14,10 +18,6 @@ import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 import ij.ImagePlus;
 
-import java.io.File;
-
-import org.scijava.util.AppUtils;
-
 public class HyperStackDisplayerTestDrive {
 
 	public static void main(final String[] args) {
@@ -29,7 +29,7 @@ public class HyperStackDisplayerTestDrive {
 
 		final Model model = reader.getModel();
 		final Settings settings = new Settings();
-		reader.readSettings(settings, null, null, new SpotAnalyzerProvider(), new EdgeAnalyzerProvider(), new TrackAnalyzerProvider());
+		reader.readSettings(settings, null, null, new SpotAnalyzerProvider(settings.imp), new EdgeAnalyzerProvider(), new TrackAnalyzerProvider());
 		final ImagePlus imp = settings.imp;
 
 		new ModelFeatureUpdater(model, settings);

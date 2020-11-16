@@ -406,7 +406,7 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 					GuiUtils.positionWindow( controller.getGUI(), imp.getWindow() );
 					return;
 				}
-				
+
 				final String welcomeMessage = TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION + " started on:\n" + TMUtils.getCurrentTimeString() + '\n';
 				logger.log( welcomeMessage );
 				if ( !trackmate.checkInput() || !trackmate.process() )
@@ -418,7 +418,7 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 				/*
 				 * Save results.
 				 */
-				
+
 				if ( macroOptions.containsKey( ARG_SAVE_TO ) )
 				{
 					final String save_path_str = macroOptions.get( ARG_SAVE_TO );
@@ -544,7 +544,7 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 		final Settings s = super.createSettings( imp );
 
 		s.clearSpotAnalyzerFactories();
-		final SpotAnalyzerProvider spotAnalyzerProvider = new SpotAnalyzerProvider();
+		final SpotAnalyzerProvider spotAnalyzerProvider = new SpotAnalyzerProvider( imp );
 		final List< String > spotAnalyzerKeys = spotAnalyzerProvider.getKeys();
 		for ( final String key : spotAnalyzerKeys )
 		{
