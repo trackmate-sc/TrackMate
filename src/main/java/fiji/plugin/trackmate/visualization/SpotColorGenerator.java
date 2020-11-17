@@ -125,7 +125,7 @@ public class SpotColorGenerator implements FeatureColorGenerator< Spot >, ModelC
 		Double val;
 		for ( final int ikey : model.getSpots().keySet() )
 		{
-			for ( final Spot spot : model.getSpots().iterable( ikey, false ) )
+			for ( final Spot spot : model.getSpots().iterable( ikey, true ) )
 			{
 				val = spot.getFeature( feature );
 				if ( null == val || Double.isNaN( val.doubleValue() ) )
