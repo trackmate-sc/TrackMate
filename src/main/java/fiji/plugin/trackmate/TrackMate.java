@@ -11,6 +11,9 @@ import org.scijava.util.VersionUtils;
 import fiji.plugin.trackmate.detection.ManualDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetector;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
+import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
+import fiji.plugin.trackmate.detection.SpotGlobalDetector;
+import fiji.plugin.trackmate.detection.SpotGlobalDetectorFactory;
 import fiji.plugin.trackmate.features.EdgeFeatureCalculator;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.SpotFeatureCalculator;
@@ -235,7 +238,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 				+ ( ( numThreads > 1 ) ? ( numThreads + " threads" ) : "1 thread" )
 				+ ".\n" );
 
-		final SpotDetectorFactory< ? > factory = settings.detectorFactory;
+		final SpotDetectorFactoryBase< ? > factory = settings.detectorFactory;
 		if ( null == factory )
 		{
 			errorMessage = "Detector factory is null.\n";
@@ -256,8 +259,6 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 		 * Prepare interval
 		 */
 		final ImgPlus img = TMUtils.rawWraps( settings.imp );
-		final Interval interval = TMUtils.getInterval( img, settings );
-		final int zindex = TMUtils.findZAxisIndex( img );
 
 		if ( !factory.setTarget( img, settings.detectorSettings ) )
 		{
@@ -265,6 +266,96 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 			return false;
 		}
 
+		/*
+		 * Separate frame-by-frame or global detection depending on the factory type.
+		 */
+		
+		if (factory instanceof SpotGlobalDetectorFactory )
+		{
+			return processGlobal( ( SpotGlobalDetectorFactory ) factory, img, logger );
+		}
+		else if (factory instanceof SpotDetectorFactory )
+		{
+			return processFrameByFrame( ( SpotDetectorFactory ) factory, img, logger );
+		}
+
+		errorMessage = "Don't know how to handle detector factory of type: " + factory.getClass();
+		return false;
+	}
+
+	@SuppressWarnings( "rawtypes" )
+	private boolean processGlobal( final SpotGlobalDetectorFactory factory, final ImgPlus img, final Logger logger )
+	{
+		final Interval interval = TMUtils.getIntervalWithTime( img, settings );
+
+		// To translate spots, later
+		final double[] calibration = TMUtils.getSpatialCalibration( settings.imp );
+
+		final SpotGlobalDetector< ? > detector = factory.getDetector( interval );
+		if ( detector instanceof MultiThreaded )
+		{
+			final MultiThreaded md = ( MultiThreaded ) detector;
+			md.setNumThreads( numThreads );
+		}
+		
+		// Execute detection
+		logger.setStatus( "Detection..." );
+		if ( detector.checkInput() && detector.process() )
+		{
+			final SpotCollection rawSpots = detector.getResult();
+			rawSpots.setNumThreads( numThreads );
+
+			/*
+			 * Filter out spots not in the ROI.
+			 */
+			final SpotCollection spots;
+			if ( settings.roi != null )
+			{
+				spots = new SpotCollection();
+				spots.setNumThreads( numThreads );
+				for ( int frame = settings.tstart; frame <= settings.tend; frame++ )
+				{
+					for ( final Spot spot : rawSpots.iterable( frame, false ) )
+					{
+						final List< Spot > spotsThisFrame = new ArrayList<>();
+						if ( settings.roi.contains(
+								( int ) Math.round( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ] ),
+								( int ) Math.round( spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) ) )
+						{
+							spotsThisFrame.add( spot );
+						}
+						spots.put( frame, spotsThisFrame );
+					}
+				}
+			}
+			else
+			{
+				spots = rawSpots;
+			}
+
+			// Add detection feature other than position
+			for ( final Spot spot : spots.iterable( false ) )
+				spot.putFeature( Spot.POSITION_T, spot.getFeature( Spot.FRAME ) * settings.dt );
+
+			model.setSpots( spots, true );
+			logger.setStatus( "" );
+			logger.log( "Found " + spots.getNSpots( false ) + " spots.\n" );
+		}
+		else
+		{
+			// Fail: exit and report error.
+			errorMessage = detector.getErrorMessage();
+			return false;
+		}
+
+		return true;
+	}
+
+	@SuppressWarnings( "rawtypes" )
+	private boolean processFrameByFrame( final SpotDetectorFactory factory, final ImgPlus img, final Logger logger )
+	{
+		final Interval interval = TMUtils.getInterval( img, settings );
+		final int zindex = TMUtils.findZAxisIndex( img );
 		final int numFrames = settings.tend - settings.tstart + 1;
 		// Final results holder, for all frames
 		final SpotCollection spots = new SpotCollection();

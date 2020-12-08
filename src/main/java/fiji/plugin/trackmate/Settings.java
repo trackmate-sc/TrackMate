@@ -8,7 +8,7 @@ import java.util.Map;
 
 import fiji.plugin.trackmate.detection.DetectorKeys;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
-import fiji.plugin.trackmate.detection.SpotDetectorFactory;
+import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
 import fiji.plugin.trackmate.features.FeatureAnalyzer;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
@@ -113,7 +113,7 @@ public class Settings
 	 * {@link fiji.plugin.trackmate.detection.SpotDetector} for each target
 	 * frame.
 	 */
-	public SpotDetectorFactory< ? > detectorFactory;
+	public SpotDetectorFactoryBase< ? > detectorFactory;
 
 	/** The the tracker to use. */
 	public SpotTrackerFactory trackerFactory;
@@ -475,7 +475,7 @@ public class Settings
 	public void addAllAnalyzers()
 	{
 		clearSpotAnalyzerFactories();
-		final SpotAnalyzerProvider spotAnalyzerProvider = new SpotAnalyzerProvider();
+		final SpotAnalyzerProvider spotAnalyzerProvider = new SpotAnalyzerProvider( imp );
 		final List< String > spotAnalyzerKeys = spotAnalyzerProvider.getKeys();
 		for ( final String key : spotAnalyzerKeys )
 			addSpotAnalyzerFactory( spotAnalyzerProvider.getFactory( key ) );

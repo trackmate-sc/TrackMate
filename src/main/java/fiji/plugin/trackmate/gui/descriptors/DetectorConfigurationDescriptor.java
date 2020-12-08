@@ -5,7 +5,7 @@ import java.util.Map;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.detection.SpotDetectorFactory;
+import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 
@@ -42,7 +42,7 @@ public class DetectorConfigurationDescriptor implements WizardPanelDescriptor
 	 */
 	private void updateComponent()
 	{
-		final SpotDetectorFactory< ? > factory = trackmate.getSettings().detectorFactory;
+		final SpotDetectorFactoryBase< ? > factory = trackmate.getSettings().detectorFactory;
 		// Regenerate panel
 		configPanel = factory.getDetectorConfigurationPanel( trackmate.getSettings(), trackmate.getModel() );
 		// We assume the provider is already configured with the right target
@@ -78,7 +78,7 @@ public class DetectorConfigurationDescriptor implements WizardPanelDescriptor
 	public void aboutToHidePanel()
 	{
 		configPanel.clean();
-		final SpotDetectorFactory< ? > factory = trackmate.getSettings().detectorFactory;
+		final SpotDetectorFactoryBase< ? > factory = trackmate.getSettings().detectorFactory;
 		Map< String, Object > settings = configPanel.getSettings();
 		final boolean settingsOk = factory.checkSettings( settings );
 		if ( !settingsOk )
