@@ -52,8 +52,8 @@ public class ThresholdDetectorFactory< T extends RealType< T > & NativeType< T >
 			+ "Pixels in the designated channel that have "
 			+ "a value larger than the threshold are considered as part of the foreground, "
 			+ "and used to build connected regions. In 2D, spots are created with "
-			+ "the (possbily simplified) contour of this region. In 3D, a spot is "
-			+ "created for each region in its center with a volume equal to the "
+			+ "the (possibly simplified) contour of the region. In 3D, a spherical "
+			+ "spot is created for each region in its center, with a volume equal to the "
 			+ "region volume."
 			+ "</html>";
 
