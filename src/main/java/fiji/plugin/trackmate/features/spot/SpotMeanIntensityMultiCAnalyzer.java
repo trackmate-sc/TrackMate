@@ -5,11 +5,13 @@ import java.util.Iterator;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.util.SpotNeighborhood;
+import fiji.plugin.trackmate.util.TMUtils;
 import net.imagej.ImgPlus;
-import net.imglib2.Cursor;
 import net.imglib2.IterableInterval;
+import net.imglib2.RandomAccess;
 import net.imglib2.meta.view.HyperSliceImgPlus;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.view.Views;
 
 @SuppressWarnings( "deprecation" )
 public class SpotMeanIntensityMultiCAnalyzer< T extends RealType< T > > extends IndependentSpotFeatureAnalyzer< T >
@@ -44,6 +46,7 @@ public class SpotMeanIntensityMultiCAnalyzer< T extends RealType< T > > extends 
 				neighborhood = new SpotNeighborhood<>( spot, imgC );
 			}
 
+
 			final int npixels = ( int ) neighborhood.size();
 			if ( npixels <= 1 )
 			{
@@ -51,9 +54,15 @@ public class SpotMeanIntensityMultiCAnalyzer< T extends RealType< T > > extends 
 				 * Hack around a bug in spot iterator causing it to never end if
 				 * the size of the spot is lower than one pixel.
 				 */
-				final Cursor< T > cursor = neighborhood.cursor();
-				cursor.fwd();
-				final double val = cursor.get().getRealDouble();
+				final double[] calibration = TMUtils.getSpatialCalibration( img );
+				// Center
+				final long[] center = new long[ img.numDimensions() ];
+				for ( int d = 0; d < center.length; d++ )
+					center[ d ] = Math.round( spot.getFeature( Spot.POSITION_FEATURES[ d ] ).doubleValue() / calibration[ d ] );
+
+				final RandomAccess< T > ra = Views.extendZero( img ).randomAccess();
+				ra.setPosition( center );
+				final double val = ra.get().getRealDouble();
 				spot.putFeature( SpotMeanIntensityMultiCAnalyzerFactory.makeFeatureKey( c ), Double.valueOf( val ) );
 			}
 			else
