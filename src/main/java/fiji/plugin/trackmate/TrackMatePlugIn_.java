@@ -33,7 +33,7 @@ public class TrackMatePlugIn_ implements PlugIn
 		final ImagePlus imp;
 		if ( imagePath != null && imagePath.length() > 0 )
 		{
-			imp = new ImagePlus( imagePath );
+			imp = IJ.openImage( imagePath );
 			if ( null == imp.getOriginalFileInfo() )
 			{
 				IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION, "Could not load image with path " + imagePath + "." );
@@ -49,11 +49,11 @@ public class TrackMatePlugIn_ implements PlugIn
 				return;
 			}
 		}
+		imp.setOpenAsHyperStack( true );
+		imp.setDisplayMode( IJ.COMPOSITE );
 		if ( !imp.isVisible() )
-		{
-			imp.setOpenAsHyperStack( true );
 			imp.show();
-		}
+
 		GuiUtils.userCheckImpDimensions( imp );
 
 		settings = createSettings( imp );
@@ -128,7 +128,10 @@ public class TrackMatePlugIn_ implements PlugIn
 	public static void main( final String[] args )
 	{
 		ImageJ.main( args );
-		new TrackMatePlugIn_().run( "samples/FakeTracks.tif" );
+//		new TrackMatePlugIn_().run( "samples/Stack.tif" );
+//		new TrackMatePlugIn_().run( "samples/Merged.tif" );
+		new TrackMatePlugIn_().run( "samples/MAX_Merged.tif" );
+//		new TrackMatePlugIn_().run( "samples/Mask.tif" );
 	}
 
 }
