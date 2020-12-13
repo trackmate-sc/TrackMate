@@ -9,6 +9,8 @@ import java.util.concurrent.Executors;
 
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.detection.util.MedianFilter2D;
+import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
 import net.imglib2.Cursor;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
@@ -28,7 +30,9 @@ import net.imglib2.img.array.ArrayCursor;
 import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.basictypeaccess.array.FloatArray;
+import net.imglib2.img.display.imagej.ImgPlusViews;
 import net.imglib2.type.NativeType;
+import net.imglib2.type.Type;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
@@ -328,4 +332,29 @@ public class DetectionUtils
 
 		return spots;
 	}
+
+	/**
+	 * Return a view of the specified input image, at the specified channel
+	 * (0-based) and the specified frame (0-based too).
+	 * 
+	 * @param <T>
+	 *            the type of the input image.
+	 * @param img
+	 *            the input image.
+	 * @param channel
+	 *            the channel to extract.
+	 * @param frame
+	 *            the frame to extract.
+	 * @return a view of the input image.
+	 */
+	public static final < T extends Type< T > > RandomAccessibleInterval< T > prepareFrameImg(
+			final ImgPlus< T > img,
+			final int channel,
+			final int frame )
+	{
+		final ImgPlus< T > singleTimePoint = ImgPlusViews.hyperSlice( img, img.dimensionIndex( Axes.TIME ), frame );
+		final ImgPlus< T > singleChannel = ImgPlusViews.hyperSlice( singleTimePoint, singleTimePoint.dimensionIndex( Axes.CHANNEL ), channel );
+		return singleChannel;
+	}
+
 }
