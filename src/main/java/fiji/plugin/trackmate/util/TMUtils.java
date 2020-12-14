@@ -687,7 +687,6 @@ public class TMUtils
 	 */
 	public static void declareAllFeatures( final Settings settings )
 	{
-
 		settings.clearSpotAnalyzerFactories();
 		final SpotAnalyzerProvider spotAnalyzerProvider = new SpotAnalyzerProvider( settings.imp );
 		final List< String > spotAnalyzerKeys = spotAnalyzerProvider.getKeys();

@@ -25,7 +25,7 @@ import ij3d.ContentCreator;
 import ij3d.Image3DUniverse;
 import ij3d.ImageWindow3D;
 
-@Plugin( type = ViewFactory.class, priority = Priority.LOW )
+@Plugin( type = ViewFactory.class, priority = Priority.LOW, enabled = false )
 public class SpotDisplayer3DFactory implements ViewFactory
 {
 

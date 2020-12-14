@@ -59,9 +59,8 @@ public abstract class AbstractProvider< K extends TrackMateModule >
 				implementations.put( key, implementation );
 				keys.add( key );
 				if ( info.isVisible() )
-				{
 					visibleKeys.add( key );
-				}
+
 			}
 			catch ( final InstantiableException e )
 			{
