@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.gui.descriptors;
 
+import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
+
 import java.awt.Component;
 import java.util.Map;
 
@@ -8,6 +10,7 @@ import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.visualization.hyperstack.SpotEditTool;
 
 public class DetectorConfigurationDescriptor implements WizardPanelDescriptor
 {
@@ -88,6 +91,17 @@ public class DetectorConfigurationDescriptor implements WizardPanelDescriptor
 			settings = factory.getDefaultSettings();
 		}
 		trackmate.getSettings().detectorSettings = settings;
+		
+		/*
+		 * Pass the radius in the settings to the spot edit tool if we have such
+		 * a setting.
+		 */
+		final Object obj = settings.get( KEY_RADIUS );
+		if ( obj != null )
+		{
+			final double radius = ( double ) obj;
+			SpotEditTool.getInstance().setRadius( radius );
+		}
 	}
 
 	@Override

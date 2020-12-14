@@ -73,7 +73,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	 * Fall back default radius when the settings does not give a default radius
 	 * to use.
 	 */
-	private static final double FALL_BACK_RADIUS = 5;
+	private static final double FALL_BACK_RADIUS = 5.;
 
 	/** The singleton instance. */
 	private static SpotEditTool instance;
@@ -1141,6 +1141,17 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 		configPanel.setLocation( toolbar.getLocationOnScreen() );
 		configPanel.setVisible( true );
 		logger = configPanel.getLogger();
+	}
+
+	/**
+	 * Sets the radius to use for the next created spot.
+	 * 
+	 * @param radius
+	 *            the radius to use.
+	 */
+	public void setRadius( final double radius )
+	{
+		this.previousRadius = radius;
 	}
 
 	/*
