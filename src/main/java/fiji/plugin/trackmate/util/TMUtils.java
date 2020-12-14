@@ -526,6 +526,74 @@ public class TMUtils
 	 * {@link fiji.plugin.trackmate.detection.DetectorKeys#KEY_TARGET_CHANNEL},
 	 * it will be used; otherwise the first channel will be taken.
 	 * <p>
+	 * If the specified {@link ImgPlus} has a time axis, it will included, using
+	 * the {@link Settings#tstart} and {@link Settings#tend} as bounds.
+	 *
+	 * @param img
+	 *            the source image into which the interval is to be defined.
+	 * @param settings
+	 *            the settings object that will determine the interval size.
+	 * @return a new interval.
+	 */
+	public static final Interval getIntervalWithTime( final ImgPlus< ? > img, final Settings settings )
+	{
+		final long[] max = new long[ img.numDimensions() ];
+		final long[] min = new long[ img.numDimensions() ];
+
+		// X, we must have it.
+		final int xindex = TMUtils.findXAxisIndex( img );
+		min[ xindex ] = settings.xstart;
+		max[ xindex ] = settings.xend;
+
+		// Y, we must have it.
+		final int yindex = TMUtils.findYAxisIndex( img );
+		min[ yindex ] = settings.ystart;
+		max[ yindex ] = settings.yend;
+
+		// Z, we MIGHT have it.
+		final int zindex = TMUtils.findZAxisIndex( img );
+		if ( zindex >= 0 )
+		{
+			min[ zindex ] = settings.zstart;
+			max[ zindex ] = settings.zend;
+		}
+
+		// CHANNEL, we might have it.
+		final int cindex = TMUtils.findCAxisIndex( img );
+		if ( cindex >= 0 )
+		{
+			Integer c = ( Integer ) settings.detectorSettings.get( KEY_TARGET_CHANNEL ); // 1-based.
+			if ( null == c )
+				c = 1;
+
+			min[ cindex ] = c - 1; // 0-based.
+			max[ cindex ] = min[ cindex ];
+		}
+
+		// TIME, we might have it, but anyway we leave the start & end
+		// management to elsewhere.
+		final int tindex = TMUtils.findTAxisIndex( img );
+		if ( tindex >= 0 )
+		{
+			min[ tindex ] = settings.tstart;
+			max[ tindex ] = settings.tend;
+		}
+
+		final FinalInterval interval = new FinalInterval( min, max );
+		return interval;
+	}
+
+	/**
+	 * Returns an interval object that in the specified {@link ImgPlus} <b>slice
+	 * in a single time frame</b>.
+	 * <p>
+	 * The specified {@link Settings} object is used to determine a crop-cube
+	 * that will determine the X,Y,Z size of the interval. A single channel will
+	 * be taken in the case of a multi-channel image. If the detector set in the
+	 * settings object has a parameter for the target channel
+	 * {@link fiji.plugin.trackmate.detection.DetectorKeys#KEY_TARGET_CHANNEL},
+	 * it will be used; otherwise the first channel will be taken.
+	 * <p>
 	 * If the specified {@link ImgPlus} has a time axis, it will be dropped and
 	 * the returned interval will have one dimension less.
 	 *
@@ -613,15 +681,14 @@ public class TMUtils
 	/**
 	 * Declare all feature analyzers (spot, edge and track analyzers) that can
 	 * be found at runtime to the specified settings.
-	 * 
+	 *
 	 * @param settings
 	 *            the {@link Settings} object to declare the analyzers in.
 	 */
 	public static void declareAllFeatures( final Settings settings )
 	{
-
 		settings.clearSpotAnalyzerFactories();
-		final SpotAnalyzerProvider spotAnalyzerProvider = new SpotAnalyzerProvider();
+		final SpotAnalyzerProvider spotAnalyzerProvider = new SpotAnalyzerProvider( settings.imp );
 		final List< String > spotAnalyzerKeys = spotAnalyzerProvider.getKeys();
 		for ( final String key : spotAnalyzerKeys )
 		{
@@ -651,7 +718,7 @@ public class TMUtils
 	/**
 	 * Creates a default file path to save the TrackMate session to, based on
 	 * the image TrackMate works on.
-	 * 
+	 *
 	 * @param settings
 	 *            the settings object from which to read the image, its folder,
 	 *            etc.

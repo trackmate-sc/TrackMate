@@ -112,7 +112,7 @@ import fiji.plugin.trackmate.detection.DogDetectorFactory;
 import fiji.plugin.trackmate.detection.DownsampleLogDetectorFactory;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.detection.ManualDetectorFactory;
-import fiji.plugin.trackmate.detection.SpotDetectorFactory;
+import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
@@ -702,7 +702,7 @@ public class TmXmlReader_v12 extends TmXmlReader
 			}
 		}
 
-		final SpotDetectorFactory< ? > factory = provider.getFactory( segmenterKey );
+		final SpotDetectorFactoryBase< ? > factory = provider.getFactory( segmenterKey );
 		if ( null == factory )
 		{
 			logger.error( "The detector identified by the key " + segmenterKey + " is unknown to TrackMate.\n" );

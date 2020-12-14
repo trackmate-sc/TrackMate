@@ -1,14 +1,14 @@
 package fiji.plugin.trackmate.providers;
 
-import fiji.plugin.trackmate.detection.SpotDetectorFactory;
+import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
 
 @SuppressWarnings( "rawtypes" )
-public class DetectorProvider extends AbstractProvider< SpotDetectorFactory >
+public class DetectorProvider extends AbstractProvider< SpotDetectorFactoryBase >
 {
 
 	public DetectorProvider()
 	{
-		super( SpotDetectorFactory.class );
+		super( SpotDetectorFactoryBase.class );
 	}
 
 	public static void main( final String[] args )

@@ -1,16 +1,16 @@
 package fiji.plugin.trackmate.gui.descriptors;
 
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.detection.LogDetectorFactory;
-import fiji.plugin.trackmate.detection.ManualDetectorFactory;
-import fiji.plugin.trackmate.detection.SpotDetectorFactory;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.gui.panels.ListChooserPanel;
-import fiji.plugin.trackmate.providers.DetectorProvider;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.detection.LogDetectorFactory;
+import fiji.plugin.trackmate.detection.ManualDetectorFactory;
+import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
+import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.gui.panels.ListChooserPanel;
+import fiji.plugin.trackmate.providers.DetectorProvider;
 
 public class DetectorChoiceDescriptor implements WizardPanelDescriptor
 {
@@ -94,7 +94,7 @@ public class DetectorChoiceDescriptor implements WizardPanelDescriptor
 		final String key = detectorProvider.getVisibleKeys().get( index );
 
 		// Configure trackmate settings with selected detector
-		final SpotDetectorFactory< ? > factory = detectorProvider.getFactory( key );
+		final SpotDetectorFactoryBase< ? > factory = detectorProvider.getFactory( key );
 
 		if ( null == factory )
 		{

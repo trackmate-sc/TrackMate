@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.interactivetests;
 
+import java.io.File;
+
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.io.TmXmlReader;
@@ -9,8 +11,6 @@ import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
 import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
-
-import java.io.File;
 
 public class TmXmlReaderV12_TestDrive {
 
@@ -22,7 +22,7 @@ public class TmXmlReaderV12_TestDrive {
 		final TmXmlReader reader = new TmXmlReader_v12(file);
 		final Model model = reader.getModel();
 		final Settings settings = new Settings();
-		reader.readSettings(settings, new DetectorProvider(), new TrackerProvider(), new SpotAnalyzerProvider(), new EdgeAnalyzerProvider(), new TrackAnalyzerProvider());
+		reader.readSettings( settings, new DetectorProvider(), new TrackerProvider(), new SpotAnalyzerProvider( settings.imp ), new EdgeAnalyzerProvider(), new TrackAnalyzerProvider() );
 
 		System.out.println(model);
 		System.out.println(settings);

@@ -503,7 +503,7 @@ public class ColorByFeatureGUIPanel extends ActionListenablePanel implements Min
 			break;
 		case SPOTS:
 			final SpotCollection spots = model.getSpots();
-			values = spots.collectValues( feature, false );
+			values = spots.collectValues( feature, true );
 			break;
 		case DEFAULT:
 			throw new IllegalArgumentException( "Cannot return values for " + category );

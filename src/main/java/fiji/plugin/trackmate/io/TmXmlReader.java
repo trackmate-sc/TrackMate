@@ -107,6 +107,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
+import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
@@ -725,7 +726,7 @@ public class TmXmlReader
 			return;
 		}
 
-		final SpotDetectorFactory< ? > factory = provider.getFactory( detectorKey );
+		final SpotDetectorFactoryBase< ? > factory = provider.getFactory( detectorKey );
 		if ( null == factory )
 		{
 			logger.error( "The detector identified by the key " + detectorKey + " is unknown to TrackMate.\n" );

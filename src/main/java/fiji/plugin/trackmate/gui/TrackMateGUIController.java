@@ -225,7 +225,7 @@ public class TrackMateGUIController implements ActionListener
 		/*
 		 * Add this TrackMate instance to the ObjectService
 		 */
-		ObjectService objectService = TMUtils.getContext().service( ObjectService.class );
+		final ObjectService objectService = TMUtils.getContext().service( ObjectService.class );
 		if ( objectService != null )
 			objectService.addObject( trackmate );
 
@@ -490,7 +490,7 @@ public class TrackMateGUIController implements ActionListener
 
 	protected void createProviders()
 	{
-		spotAnalyzerProvider = new SpotAnalyzerProvider();
+		spotAnalyzerProvider = new SpotAnalyzerProvider( trackmate.getSettings().imp );
 		edgeAnalyzerProvider = new EdgeAnalyzerProvider();
 		trackAnalyzerProvider = new TrackAnalyzerProvider();
 		detectorProvider = new DetectorProvider();

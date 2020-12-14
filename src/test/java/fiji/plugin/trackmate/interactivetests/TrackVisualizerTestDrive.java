@@ -1,5 +1,13 @@
 package fiji.plugin.trackmate.interactivetests;
 
+import java.io.File;
+
+import javax.swing.JFrame;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
+import org.scijava.util.AppUtils;
+
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.ModelChangeListener;
@@ -27,14 +35,6 @@ import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 import ij.IJ;
 import ij.ImagePlus;
 
-import java.io.File;
-
-import javax.swing.JFrame;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-
-import org.scijava.util.AppUtils;
-
 public class TrackVisualizerTestDrive {
 
 	public static void main(final String[] args) {
@@ -59,8 +59,7 @@ public class TrackVisualizerTestDrive {
 		final TmXmlReader reader = new TmXmlReader(file);
 		final Model model = reader.getModel();
 		final Settings settings = new Settings();
-		reader.readSettings(settings, null, null,
- new SpotAnalyzerProvider(), new EdgeAnalyzerProvider(), new TrackAnalyzerProvider());
+		reader.readSettings( settings, null, null, new SpotAnalyzerProvider( null ), new EdgeAnalyzerProvider(), new TrackAnalyzerProvider() );
 		final TrackMate trackmate = new TrackMate(model, settings);
 		new ModelFeatureUpdater(model, settings);
 
