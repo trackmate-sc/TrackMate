@@ -36,13 +36,14 @@ public class KalmanTrackerFactory implements SpotTrackerFactory
 			+ "a new track."
 			+ "<br/></html>";
 
-	private static final String INFO_TEXT = "<html>This tracker is best suited for objects that "
+	private static final String INFO_TEXT = "<html>"
+			+ "This tracker is best suited for objects that "
 			+ "move with a roughly constant velocity vector."
 			+ "<p>"
 			+ "It relies on the Kalman filter to predict the next most likely position of a spot. "
 			+ "The predictions for all current tracks are linked to the spots actually "
 			+ "found in the next frame, thanks to the LAP framework already present in the LAP tracker. "
-			+ "Predictions are continuously refined and the tracker can accomodate moderate "
+			+ "Predictions are continuously refined and the tracker can accommodate moderate "
 			+ "velocity direction and magnitude changes. "
 			+ "<p>"
 			+ "This tracker can bridge gaps: If a spot is not found close enough to a prediction, "
@@ -57,7 +58,7 @@ public class KalmanTrackerFactory implements SpotTrackerFactory
 
 	private static final String KEY = "KALMAN_TRACKER";
 
-	private static final String NAME = "Linear motion LAP tracker";
+	private static final String NAME = "Kalman tracker";
 
 	public static final String KEY_KALMAN_SEARCH_RADIUS = "KALMAN_SEARCH_RADIUS";
 
