@@ -14,6 +14,8 @@ import javax.swing.event.ChangeListener;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.ModelChangeEvent;
+import fiji.plugin.trackmate.ModelChangeListener;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
@@ -72,6 +74,19 @@ public class SpotFilterDescriptor implements WizardPanelDescriptor
 			public void stateChanged( final ChangeEvent event )
 			{
 				fireThresholdChanged( event );
+			}
+		} );
+
+		/*
+		 * Listen to changes in the model.
+		 */
+		trackmate.getModel().addModelChangeListener( new ModelChangeListener()
+		{
+
+			@Override
+			public void modelChanged( final ModelChangeEvent event )
+			{
+				component.refreshDisplayedFeatureValues();
 			}
 		} );
 
