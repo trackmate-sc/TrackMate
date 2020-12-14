@@ -468,9 +468,17 @@ public class DetectionUtils
 			final int channel,
 			final int frame )
 	{
-		final ImgPlus< T > singleTimePoint = ImgPlusViews.hyperSlice( img, img.dimensionIndex( Axes.TIME ), frame );
-		final ImgPlus< T > singleChannel = ImgPlusViews.hyperSlice( singleTimePoint, singleTimePoint.dimensionIndex( Axes.CHANNEL ), channel );
+		final ImgPlus< T > singleTimePoint;
+		if ( img.dimensionIndex( Axes.TIME ) < 0 )
+			singleTimePoint = img;
+		else
+			singleTimePoint = ImgPlusViews.hyperSlice( img, img.dimensionIndex( Axes.TIME ), frame );
+
+		final ImgPlus< T > singleChannel;
+		if ( singleTimePoint.dimensionIndex( Axes.CHANNEL ) < 0 )
+			singleChannel = singleTimePoint;
+		else
+			singleChannel = ImgPlusViews.hyperSlice( singleTimePoint, singleTimePoint.dimensionIndex( Axes.CHANNEL ), channel );
 		return singleChannel;
 	}
-
 }
