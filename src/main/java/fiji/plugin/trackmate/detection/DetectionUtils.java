@@ -2,12 +2,20 @@ package fiji.plugin.trackmate.detection;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.util.MedianFilter2D;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
@@ -41,6 +49,115 @@ import net.imglib2.view.Views;
 
 public class DetectionUtils
 {
+
+	/**
+	 * Preview a detection results.
+	 * <p>
+	 * This method returns immediately and execute the detection in a separate
+	 * thread. It executes the detection in one frame only and writes the
+	 * results in the specified model object.
+	 * 
+	 * @param model
+	 *            the model to write detection results in.
+	 * @param settings
+	 *            the settings to use for the image input and the ROI input.
+	 * @param detectorFactory
+	 *            the detector factory to use for detection.
+	 * @param detectorSettings
+	 *            the settings for the detection, specific to the detector
+	 *            factory/
+	 * @param frame
+	 *            the frame (0-based) to execute the detection in.
+	 * @param logger
+	 *            a logger to write results and error messages to.
+	 * @param buttonEnabler
+	 *            a consumer that will receive <code>false</code> at the
+	 *            beginning of the preview, and <code>true</code> at its end.
+	 *            Can be used to disable GUI elements.
+	 */
+	public static final void preview(
+			final Model model,
+			final Settings settings,
+			final SpotDetectorFactoryBase< ? > detectorFactory,
+			final Map< String, Object > detectorSettings,
+			final int frame,
+			final Logger logger,
+			final Consumer< Boolean > buttonEnabler
+			)
+	{
+		buttonEnabler.accept( false );
+		new Thread( "TrackMate preview detection thread" )
+		{
+			@Override
+			public void run()
+			{
+				try
+				{
+
+					final Settings lSettings = new Settings();
+					lSettings.setFrom( settings.imp );
+					lSettings.tstart = frame;
+					lSettings.tend = frame;
+					lSettings.roi = settings.roi;
+
+					lSettings.detectorFactory = detectorFactory;
+					lSettings.detectorSettings = detectorSettings;
+
+					final TrackMate trackmate = new TrackMate( lSettings );
+					trackmate.getModel().setLogger( logger );
+
+					final boolean detectionOk = trackmate.execDetection();
+					if ( !detectionOk )
+					{
+						logger.error( trackmate.getErrorMessage() );
+						return;
+					}
+					logger.log( "Found " + trackmate.getModel().getSpots().getNSpots( false ) + " spots." );
+
+					// Wrap new spots in a list.
+					final SpotCollection newspots = trackmate.getModel().getSpots();
+					final Iterator< Spot > it = newspots.iterator( frame, false );
+					final ArrayList< Spot > spotsToCopy = new ArrayList<>( newspots.getNSpots( frame, false ) );
+					while ( it.hasNext() )
+						spotsToCopy.add( it.next() );
+
+					// Pass new spot list to model.
+					model.getSpots().put( frame, spotsToCopy );
+					// Make them visible
+					for ( final Spot spot : spotsToCopy )
+						spot.putFeature( SpotCollection.VISIBLITY, SpotCollection.ONE );
+
+					// Generate event for listener to reflect changes.
+					model.setSpots( model.getSpots(), true );
+
+				}
+				catch ( final Exception e )
+				{
+					logger.error( e.getMessage() );
+					e.printStackTrace();
+				}
+				finally
+				{
+					buttonEnabler.accept( true );
+				}
+			}
+		}.start();
+	}
+
+	/**
+	 * Returns <code>true</code> if the specified image is 2D. It can have
+	 * multiple channels and multiple time-points; this method only looks at
+	 * whether several Z-slices can be found.
+	 * 
+	 * @param img
+	 *            the image.
+	 * @return
+	 */
+	public static final boolean is2D( final ImgPlus< ? > img )
+	{
+		return img.dimensionIndex( Axes.Z ) < 0
+				|| img.dimension( img.dimensionIndex( Axes.Z ) ) <= 1;
+	}
 
 	/**
 	 * Creates a laplacian of gaussian (LoG) kernel tuned for blobs with a
@@ -81,7 +198,6 @@ public class DetectionUtils
 
 		final ArrayCursor< FloatType > c = kernel.cursor();
 		final long[] coords = new long[ nDims ];
-
 
 		// Work in image coordinates
 		while ( c.hasNext() )
@@ -130,14 +246,14 @@ public class DetectionUtils
 	 *         start at (0, 0), the new image will have its first pixel at
 	 *         coordinates (0, 0).
 	 */
-	public static final < T extends RealType< T >> Img< FloatType > copyToFloatImg( final RandomAccessible< T > img, final Interval interval, final ImgFactory< FloatType > factory )
+	public static final < T extends RealType< T > > Img< FloatType > copyToFloatImg( final RandomAccessible< T > img, final Interval interval, final ImgFactory< FloatType > factory )
 	{
 		final Img< FloatType > output = factory.create( interval );
 		final long[] min = new long[ interval.numDimensions() ];
 		interval.min( min );
 		final RandomAccess< T > in = Views.offset( img, min ).randomAccess();
 		final Cursor< FloatType > out = output.cursor();
-		final RealFloatConverter< T > c = new RealFloatConverter< >();
+		final RealFloatConverter< T > c = new RealFloatConverter<>();
 
 		while ( out.hasNext() )
 		{
@@ -185,10 +301,11 @@ public class DetectionUtils
 	/**
 	 * Apply a simple 3x3 median filter to the target image.
 	 */
-	public static final < R extends RealType< R > & NativeType< R >> Img< R > applyMedianFilter( final RandomAccessibleInterval< R > image )
+	public static final < R extends RealType< R > & NativeType< R > > Img< R > applyMedianFilter( final RandomAccessibleInterval< R > image )
 	{
-		final MedianFilter2D< R > medFilt = new MedianFilter2D< >( image, 1 );
-		if ( !medFilt.checkInput() || !medFilt.process() ) { return null; }
+		final MedianFilter2D< R > medFilt = new MedianFilter2D<>( image, 1 );
+		if ( !medFilt.checkInput() || !medFilt.process() )
+		{ return null; }
 		return medFilt.getResult();
 	}
 
@@ -200,7 +317,7 @@ public class DetectionUtils
 
 		final FloatType val = new FloatType();
 		val.setReal( threshold );
-		final LocalNeighborhoodCheck< Point, FloatType > localNeighborhoodCheck = new LocalExtrema.MaximumCheck< >( val );
+		final LocalNeighborhoodCheck< Point, FloatType > localNeighborhoodCheck = new LocalExtrema.MaximumCheck<>( val );
 		final IntervalView< FloatType > dogWithBorder = Views.interval( Views.extendMirrorSingle( source ), Intervals.expand( source, 1 ) );
 		final ExecutorService service = Executors.newFixedThreadPool( numThreads );
 		List< Point > peaks;
@@ -215,7 +332,8 @@ public class DetectionUtils
 		}
 		service.shutdown();
 
-		if ( peaks.isEmpty() ) { return Collections.emptyList(); }
+		if ( peaks.isEmpty() )
+		{ return Collections.emptyList(); }
 
 		final List< Spot > spots;
 		if ( doSubPixelLocalization )
@@ -225,15 +343,15 @@ public class DetectionUtils
 			 * Sub-pixel localize them.
 			 */
 
-			final SubpixelLocalization< Point, FloatType > spl = new SubpixelLocalization< >( source.numDimensions() );
+			final SubpixelLocalization< Point, FloatType > spl = new SubpixelLocalization<>( source.numDimensions() );
 			spl.setNumThreads( numThreads );
 			spl.setReturnInvalidPeaks( true );
 			spl.setCanMoveOutside( true );
 			spl.setAllowMaximaTolerance( true );
 			spl.setMaxNumMoves( 10 );
-			final ArrayList< RefinedPeak< Point >> refined = spl.process( peaks, dogWithBorder, source );
+			final ArrayList< RefinedPeak< Point > > refined = spl.process( peaks, dogWithBorder, source );
 
-			spots = new ArrayList< >( refined.size() );
+			spots = new ArrayList<>( refined.size() );
 			final RandomAccess< FloatType > ra = source.randomAccess();
 
 			/*
@@ -286,7 +404,7 @@ public class DetectionUtils
 		}
 		else
 		{
-			spots = new ArrayList< >( peaks.size() );
+			spots = new ArrayList<>( peaks.size() );
 			final RandomAccess< FloatType > ra = source.randomAccess();
 			if ( source.numDimensions() > 2 )
 			{ // 3D
