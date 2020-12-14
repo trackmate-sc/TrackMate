@@ -33,6 +33,7 @@ import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
+import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.util.JLabelLogger;
 import ij.ImagePlus;
@@ -323,6 +324,8 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 				settings.imp.getFrame() - 1,
 				localLogger,
 				b -> btnPreview.setEnabled( b ) ) );
+		GuiUtils.selectAllOnFocus( ftfDiameter );
+		GuiUtils.selectAllOnFocus( ftfQualityThreshold );
 	}
 
 	/*
