@@ -128,7 +128,7 @@ public class FilterGuiPanel extends ActionListenablePanel implements ChangeListe
 				featureNames.put( ColorByFeatureGUIPanel.UNIFORM_KEY, ColorByFeatureGUIPanel.UNIFORM_NAME );
 				break;
 			default:
-				throw new IllegalArgumentException( "Unkown category: " + category );
+				throw new IllegalArgumentException( "Unknown category: " + category );
 			}
 		}
 
@@ -527,5 +527,4 @@ public class FilterGuiPanel extends ActionListenablePanel implements ChangeListe
 			e.printStackTrace();
 		}
 	}
-
 }

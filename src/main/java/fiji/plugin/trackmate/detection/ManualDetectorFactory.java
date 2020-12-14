@@ -15,11 +15,6 @@ import java.util.Map;
 
 import javax.swing.ImageIcon;
 
-import net.imagej.ImgPlus;
-import net.imglib2.Interval;
-import net.imglib2.type.NativeType;
-import net.imglib2.type.numeric.RealType;
-
 import org.jdom2.Element;
 import org.scijava.plugin.Plugin;
 
@@ -27,17 +22,24 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
-import fiji.plugin.trackmate.gui.panels.detector.BasicDetectorConfigurationPanel;
+import fiji.plugin.trackmate.gui.panels.detector.ManualDetectorConfigurationPanel;
+import net.imagej.ImgPlus;
+import net.imglib2.Interval;
+import net.imglib2.type.NativeType;
+import net.imglib2.type.numeric.RealType;
 
 @Plugin( type = SpotDetectorFactory.class )
-public class ManualDetectorFactory< T extends RealType< T > & NativeType< T >> implements SpotDetectorFactory< T >
+public class ManualDetectorFactory< T extends RealType< T > & NativeType< T > > implements SpotDetectorFactory< T >
 {
 
 	public static final String DETECTOR_KEY = "MANUAL_DETECTOR";
 
 	public static final String NAME = "Manual annotation";
 
-	public static final String INFO_TEXT = "<html>" + "Selecting this will skip the automatic detection phase, and jump directly <br>" + "to manual segmentation. A default spot size will be asked for. " + "</html>";
+	public static final String INFO_TEXT = "<html>"
+			+ "Selecting this will skip the automatic detection phase, and jump directly <br>"
+			+ "to manual segmentation. A default spot size will be asked for. "
+			+ "</html>";
 
 	protected String errorMessage;
 
@@ -112,13 +114,12 @@ public class ManualDetectorFactory< T extends RealType< T > & NativeType< T >> i
 		final StringBuilder errorHolder = new StringBuilder();
 		boolean ok = true;
 		ok = ok & checkParameter( lSettings, KEY_RADIUS, Double.class, errorHolder );
-		final List< String > mandatoryKeys = new ArrayList< >();
+		final List< String > mandatoryKeys = new ArrayList<>();
 		mandatoryKeys.add( KEY_RADIUS );
 		ok = ok & checkMapKeys( lSettings, mandatoryKeys, null, errorHolder );
 		if ( !ok )
-		{
 			errorMessage = errorHolder.toString();
-		}
+
 		return ok;
 	}
 
@@ -128,9 +129,7 @@ public class ManualDetectorFactory< T extends RealType< T > & NativeType< T >> i
 		final StringBuilder errorHolder = new StringBuilder();
 		final boolean ok = writeRadius( lSettings, element, errorHolder );
 		if ( !ok )
-		{
 			errorMessage = errorHolder.toString();
-		}
 		return ok;
 	}
 
@@ -149,9 +148,9 @@ public class ManualDetectorFactory< T extends RealType< T > & NativeType< T >> i
 	}
 
 	@Override
-	public ConfigurationPanel getDetectorConfigurationPanel( final Settings lSettings, final Model model )
+	public ConfigurationPanel getDetectorConfigurationPanel( final Settings settings, final Model model )
 	{
-		return new BasicDetectorConfigurationPanel( lSettings, model, INFO_TEXT, NAME );
+		return new ManualDetectorConfigurationPanel( INFO_TEXT, NAME );
 	}
 
 	@Override
@@ -169,7 +168,7 @@ public class ManualDetectorFactory< T extends RealType< T > & NativeType< T >> i
 	@Override
 	public Map< String, Object > getDefaultSettings()
 	{
-		final Map< String, Object > lSettings = new HashMap< >();
+		final Map< String, Object > lSettings = new HashMap<>();
 		lSettings.put( KEY_RADIUS, DEFAULT_RADIUS );
 		return lSettings;
 	}

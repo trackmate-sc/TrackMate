@@ -290,7 +290,7 @@ public class FilterPanel extends javax.swing.JPanel
 	{
 		final String selectedFeature = allKeys.get( jComboBoxFeature.getSelectedIndex() );
 		final double[] values = valuesMap.get( selectedFeature );
-		if ( null != values )
+		if ( null != values && values.length > 0 )
 		{
 			threshold = TMUtils.otsuThreshold( valuesMap.get( selectedFeature ) );
 			redrawThresholdMarker();

@@ -10,105 +10,68 @@ import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
 
 import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JSlider;
-import javax.swing.JTextField;
-import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
 import fiji.plugin.trackmate.util.JLabelLogger;
-import fiji.util.NumberParser;
 import ij.ImagePlus;
 import ij.measure.Calibration;
 
 /**
  * Configuration panel for spot detectors based on LoG detector.
  * 
- * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; 2010 - 2014
+ * @author Jean-Yves Tinevez
  */
 public class LogDetectorConfigurationPanel extends ConfigurationPanel
 {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final String TOOLTIP_PREVIEW = "<html>" + "Preview the current settings on the current frame." + "<p>" + "Advice: change the settings until you get at least <br>" + "<b>all</b> the spots you want, and do not mind the <br>" + "spurious spots too much. You will get a chance to <br>" + "get rid of them later." + "</html>";
+	private static final String TOOLTIP_PREVIEW = "<html>"
+			+ "Preview the current settings on the current frame."
+			+ "<p>"
+			+ "Advice: change the settings until you get at least <br>"
+			+ "<b>all</b> the spots you want, and do not mind the <br>"
+			+ "spurious spots too much. You will get a chance to <br>"
+			+ "get rid of them later."
+			+ "</html>";
 
-	private static final String TOOLTIP_REFRESH = "<html>" + "Will read the threshold from the current <br>" + "ImagePlus and use its value here.</html>";
-
-	private static final ImageIcon ICON_REFRESH = new ImageIcon( TrackMateGUIController.class.getResource( "images/arrow_refresh_small.png" ) );
+	private static final NumberFormat FORMAT = new DecimalFormat( "#.###" );
 
 	private static final ImageIcon ICON_PREVIEW = new ImageIcon( TrackMateGUIController.class.getResource( "images/flag_checked.png" ) );
 
-	private JLabel jLabel1;
-
-	protected JLabel jLabelSegmenterName;
-
-	private JLabel jLabel2;
-
-	protected JButton jButtonRefresh;
-
-	protected JButton btnPreview;
-
-	protected JTextField jTextFieldThreshold;
-
-	protected JLabel jLabelThreshold;
-
-	protected JLabel jLabelHelpText;
+	protected JFormattedTextField ftfQualityThreshold;
 
 	protected JCheckBox jCheckBoxMedianFilter;
 
-	protected JLabel jLabelBlobDiameterUnit;
-
-	protected JTextField jTextFieldBlobDiameter;
+	protected JFormattedTextField ftfDiameter;
 
 	protected JCheckBox jCheckSubPixel;
 
-	/** The HTML text that will be displayed as a help. */
-	protected JLabel lblSegmentInChannel;
-
 	protected JSlider sliderChannel;
 
-	protected JLabel labelChannel;
-
-	protected final String infoText;
-
-	protected final String spaceUnits;
-
-	protected final String detectorName;
-
-	protected final ImagePlus imp;
-
-	protected final Model model;
-
-	private Logger localLogger;
-
-	/** The layout in charge of laying out this panel content. */
-	protected SpringLayout layout;
-
-	protected final Settings settings;
+	private final ImagePlus imp;
 
 	/*
 	 * CONSTRUCTOR
@@ -133,13 +96,233 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 	 */
 	public LogDetectorConfigurationPanel( final Settings settings, final Model model, final String infoText, final String detectorName )
 	{
-		this.settings = settings;
 		this.imp = settings.imp;
-		this.infoText = infoText;
-		this.detectorName = detectorName;
-		this.model = model;
-		this.spaceUnits = model.getSpaceUnits();
-		initGUI();
+
+		this.setPreferredSize( new java.awt.Dimension( 300, 461 ) );
+		final GridBagLayout gridBagLayout = new GridBagLayout();
+		gridBagLayout.columnWeights = new double[] { 0.0, 0.0, 1.0, 0.0 };
+		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0 };
+		setLayout( gridBagLayout );
+
+		final JLabel jLabelPreTitle = new JLabel();
+		final GridBagConstraints gbcLabelPreTitle = new GridBagConstraints();
+		gbcLabelPreTitle.anchor = GridBagConstraints.NORTH;
+		gbcLabelPreTitle.fill = GridBagConstraints.HORIZONTAL;
+		gbcLabelPreTitle.insets = new Insets( 5, 5, 5, 5 );
+		gbcLabelPreTitle.gridwidth = 4;
+		gbcLabelPreTitle.gridx = 0;
+		gbcLabelPreTitle.gridy = 0;
+		this.add( jLabelPreTitle, gbcLabelPreTitle );
+		jLabelPreTitle.setText( "Settings for detector:" );
+		jLabelPreTitle.setFont( FONT );
+
+		final JLabel jLabelSegmenterName = new JLabel();
+		final GridBagConstraints gbcLabelSegmenterName = new GridBagConstraints();
+		gbcLabelSegmenterName.anchor = GridBagConstraints.NORTH;
+		gbcLabelSegmenterName.fill = GridBagConstraints.HORIZONTAL;
+		gbcLabelSegmenterName.insets = new Insets( 5, 5, 5, 5 );
+		gbcLabelSegmenterName.gridwidth = 4;
+		gbcLabelSegmenterName.gridx = 0;
+		gbcLabelSegmenterName.gridy = 1;
+		this.add( jLabelSegmenterName, gbcLabelSegmenterName );
+		jLabelSegmenterName.setFont( BIG_FONT );
+		jLabelSegmenterName.setText( detectorName );
+
+		final JLabel jLabelHelpText = new JLabel();
+		final GridBagConstraints gbcLabelHelpText = new GridBagConstraints();
+		gbcLabelHelpText.fill = GridBagConstraints.BOTH;
+		gbcLabelHelpText.insets = new Insets( 5, 5, 5, 5 );
+		gbcLabelHelpText.gridwidth = 4;
+		gbcLabelHelpText.gridx = 0;
+		gbcLabelHelpText.gridy = 2;
+		this.add( jLabelHelpText, gbcLabelHelpText );
+		jLabelHelpText.setFont( FONT.deriveFont( Font.ITALIC ) );
+		jLabelHelpText.setText( infoText.replace( "<br>", "" ).replace( "<p>", "<p align=\"justify\">" ).replace( "<html>", "<html><p align=\"justify\">" ) );
+
+		final JLabel lblSegmentInChannel = new JLabel( "Detect in channel:" );
+		lblSegmentInChannel.setFont( SMALL_FONT );
+		final GridBagConstraints gbcSegmentInChannel = new GridBagConstraints();
+		gbcSegmentInChannel.gridwidth = 2;
+		gbcSegmentInChannel.anchor = GridBagConstraints.EAST;
+		gbcSegmentInChannel.insets = new Insets( 5, 5, 5, 5 );
+		gbcSegmentInChannel.gridx = 0;
+		gbcSegmentInChannel.gridy = 4;
+		add( lblSegmentInChannel, gbcSegmentInChannel );
+
+		sliderChannel = new JSlider();
+		final GridBagConstraints gbc_sliderChannel = new GridBagConstraints();
+		gbc_sliderChannel.fill = GridBagConstraints.BOTH;
+		gbc_sliderChannel.insets = new Insets( 5, 5, 5, 5 );
+		gbc_sliderChannel.gridx = 2;
+		gbc_sliderChannel.gridy = 4;
+		add( sliderChannel, gbc_sliderChannel );
+
+		final JLabel labelChannel = new JLabel( "1" );
+		labelChannel.setHorizontalAlignment( SwingConstants.CENTER );
+		labelChannel.setFont( SMALL_FONT );
+		final GridBagConstraints gbcLabelChannel = new GridBagConstraints();
+		gbcLabelChannel.anchor = GridBagConstraints.WEST;
+		gbcLabelChannel.fill = GridBagConstraints.VERTICAL;
+		gbcLabelChannel.insets = new Insets( 5, 5, 5, 5 );
+		gbcLabelChannel.gridx = 3;
+		gbcLabelChannel.gridy = 4;
+		add( labelChannel, gbcLabelChannel );
+
+		final JLabel jLabelEstimDiameter = new JLabel();
+		final GridBagConstraints gbc_jLabel2 = new GridBagConstraints();
+		gbc_jLabel2.anchor = GridBagConstraints.EAST;
+		gbc_jLabel2.insets = new Insets( 5, 5, 5, 5 );
+		gbc_jLabel2.gridwidth = 2;
+		gbc_jLabel2.gridx = 0;
+		gbc_jLabel2.gridy = 5;
+		this.add( jLabelEstimDiameter, gbc_jLabel2 );
+		jLabelEstimDiameter.setText( "Estimated object diameter:" );
+		jLabelEstimDiameter.setFont( SMALL_FONT );
+
+		ftfDiameter = new JFormattedTextField( FORMAT );
+		ftfDiameter.setHorizontalAlignment( SwingConstants.CENTER );
+		ftfDiameter.setValue( Double.valueOf( 10. ) );
+		final GridBagConstraints gbcTextFieldBlobDiameter = new GridBagConstraints();
+		gbcTextFieldBlobDiameter.anchor = GridBagConstraints.SOUTH;
+		gbcTextFieldBlobDiameter.fill = GridBagConstraints.HORIZONTAL;
+		gbcTextFieldBlobDiameter.insets = new Insets( 5, 5, 5, 5 );
+		gbcTextFieldBlobDiameter.gridx = 2;
+		gbcTextFieldBlobDiameter.gridy = 5;
+		this.add( ftfDiameter, gbcTextFieldBlobDiameter );
+		ftfDiameter.setFont( SMALL_FONT );
+
+		final JLabel jLabelBlobDiameterUnit = new JLabel();
+		final GridBagConstraints gbcLabelBlobDiameterUnit = new GridBagConstraints();
+		gbcLabelBlobDiameterUnit.fill = GridBagConstraints.BOTH;
+		gbcLabelBlobDiameterUnit.insets = new Insets( 5, 5, 5, 5 );
+		gbcLabelBlobDiameterUnit.gridx = 3;
+		gbcLabelBlobDiameterUnit.gridy = 5;
+		this.add( jLabelBlobDiameterUnit, gbcLabelBlobDiameterUnit );
+		jLabelBlobDiameterUnit.setFont( SMALL_FONT );
+		jLabelBlobDiameterUnit.setText( "pixels" );
+
+		final JLabel jLabelThreshold = new JLabel();
+		final GridBagConstraints gbcLabelThreshold = new GridBagConstraints();
+		gbcLabelThreshold.anchor = GridBagConstraints.EAST;
+		gbcLabelThreshold.insets = new Insets( 5, 5, 5, 5 );
+		gbcLabelThreshold.gridwidth = 2;
+		gbcLabelThreshold.gridx = 0;
+		gbcLabelThreshold.gridy = 6;
+		this.add( jLabelThreshold, gbcLabelThreshold );
+		jLabelThreshold.setText( "Quality threshold:" );
+		jLabelThreshold.setFont( SMALL_FONT );
+
+		ftfQualityThreshold = new JFormattedTextField( FORMAT );
+		ftfQualityThreshold.setHorizontalAlignment( SwingConstants.CENTER );
+		ftfQualityThreshold.setValue( Double.valueOf( 0. ) );
+		final GridBagConstraints gbcTextFieldThreshold = new GridBagConstraints();
+		gbcTextFieldThreshold.fill = GridBagConstraints.BOTH;
+		gbcTextFieldThreshold.insets = new Insets( 5, 5, 5, 5 );
+		gbcTextFieldThreshold.gridx = 2;
+		gbcTextFieldThreshold.gridy = 6;
+		this.add( ftfQualityThreshold, gbcTextFieldThreshold );
+		ftfQualityThreshold.setFont( SMALL_FONT );
+
+		final JLabel lblPreProcess = new JLabel( "Pre-process with median filter:" );
+		lblPreProcess.setFont( SMALL_FONT );
+		final GridBagConstraints gbcPreProcess = new GridBagConstraints();
+		gbcPreProcess.gridwidth = 2;
+		gbcPreProcess.anchor = GridBagConstraints.EAST;
+		gbcPreProcess.insets = new Insets( 5, 5, 5, 5 );
+		gbcPreProcess.gridx = 0;
+		gbcPreProcess.gridy = 7;
+		add( lblPreProcess, gbcPreProcess );
+
+		jCheckBoxMedianFilter = new JCheckBox();
+		final GridBagConstraints gbcCheckBoxMedianFilter = new GridBagConstraints();
+		gbcCheckBoxMedianFilter.anchor = GridBagConstraints.NORTH;
+		gbcCheckBoxMedianFilter.fill = GridBagConstraints.HORIZONTAL;
+		gbcCheckBoxMedianFilter.insets = new Insets( 5, 5, 5, 5 );
+		gbcCheckBoxMedianFilter.gridwidth = 2;
+		gbcCheckBoxMedianFilter.gridx = 2;
+		gbcCheckBoxMedianFilter.gridy = 7;
+		this.add( jCheckBoxMedianFilter, gbcCheckBoxMedianFilter );
+		jCheckBoxMedianFilter.setFont( FONT );
+
+		final JLabel lblSubPixelLoc = new JLabel( "Sub-pixel localization:" );
+		lblSubPixelLoc.setFont( SMALL_FONT );
+		final GridBagConstraints gbcSubPixelLoc = new GridBagConstraints();
+		gbcSubPixelLoc.anchor = GridBagConstraints.EAST;
+		gbcSubPixelLoc.gridwidth = 2;
+		gbcSubPixelLoc.insets = new Insets( 5, 5, 5, 5 );
+		gbcSubPixelLoc.gridx = 0;
+		gbcSubPixelLoc.gridy = 8;
+		add( lblSubPixelLoc, gbcSubPixelLoc );
+
+		// Add sub-pixel checkbox
+		jCheckSubPixel = new JCheckBox();
+		final GridBagConstraints gbcCheckSubPixel = new GridBagConstraints();
+		gbcCheckSubPixel.anchor = GridBagConstraints.NORTH;
+		gbcCheckSubPixel.fill = GridBagConstraints.HORIZONTAL;
+		gbcCheckSubPixel.insets = new Insets( 5, 5, 5, 5 );
+		gbcCheckSubPixel.gridwidth = 2;
+		gbcCheckSubPixel.gridx = 2;
+		gbcCheckSubPixel.gridy = 8;
+		this.add( jCheckSubPixel, gbcCheckSubPixel );
+		jCheckSubPixel.setFont( SMALL_FONT );
+
+		final JButton btnPreview = new JButton( "Preview", ICON_PREVIEW );
+		btnPreview.setToolTipText( TOOLTIP_PREVIEW );
+		final GridBagConstraints gbcBtnPreview = new GridBagConstraints();
+		gbcBtnPreview.anchor = GridBagConstraints.NORTHEAST;
+		gbcBtnPreview.insets = new Insets( 5, 5, 5, 5 );
+		gbcBtnPreview.gridwidth = 3;
+		gbcBtnPreview.gridx = 1;
+		gbcBtnPreview.gridy = 10;
+		this.add( btnPreview, gbcBtnPreview );
+		btnPreview.setFont( SMALL_FONT );
+
+		final JLabelLogger labelLogger = new JLabelLogger();
+		labelLogger.setText( "   " );
+		final GridBagConstraints gbcLabelLogger = new GridBagConstraints();
+		gbcLabelLogger.insets = new Insets( 5, 5, 5, 5 );
+		gbcLabelLogger.fill = GridBagConstraints.BOTH;
+		gbcLabelLogger.gridwidth = 4;
+		gbcLabelLogger.gridx = 0;
+		gbcLabelLogger.gridy = 11;
+		add( labelLogger, gbcLabelLogger );
+		final Logger localLogger = labelLogger.getLogger();
+
+		/*
+		 * Deal with channels: the slider and channel labels are only visible if
+		 * we find more than one channel.
+		 */
+		final int nChannels = settings.imp.getNChannels();
+		sliderChannel.setMaximum( nChannels );
+		sliderChannel.setMinimum( 1 );
+		sliderChannel.setValue( settings.imp.getChannel() );
+
+		if ( nChannels <= 1 )
+		{
+			labelChannel.setVisible( false );
+			lblSegmentInChannel.setVisible( false );
+			sliderChannel.setVisible( false );
+		}
+		else
+		{
+			labelChannel.setVisible( true );
+			lblSegmentInChannel.setVisible( true );
+			sliderChannel.setVisible( true );
+		}
+
+		/*
+		 * Listeners and stuff.
+		 */
+
+		sliderChannel.addChangeListener( e -> labelChannel.setText( "" + sliderChannel.getValue() ) );
+		btnPreview.addActionListener( e -> DetectionUtils.preview(
+				model,
+				settings,
+				getDetectorFactory(),
+				getSettings(),
+				settings.imp.getFrame() - 1,
+				localLogger,
+				b -> btnPreview.setEnabled( b ) ) );
 	}
 
 	/*
@@ -149,10 +332,10 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 	@Override
 	public Map< String, Object > getSettings()
 	{
-		final HashMap< String, Object > lSettings = new HashMap< >( 5 );
+		final HashMap< String, Object > lSettings = new HashMap<>( 5 );
 		final int targetChannel = sliderChannel.getValue();
-		final double expectedRadius = NumberParser.parseDouble( jTextFieldBlobDiameter.getText() ) / 2;
-		final double threshold = NumberParser.parseDouble( jTextFieldThreshold.getText() );
+		final double expectedRadius = ( ( Number ) ftfDiameter.getValue() ).doubleValue() / 2.;
+		final double threshold = ( ( Number ) ftfQualityThreshold.getValue() ).doubleValue();
 		final boolean useMedianFilter = jCheckBoxMedianFilter.isSelected();
 		final boolean doSubPixelLocalization = jCheckSubPixel.isSelected();
 		lSettings.put( KEY_TARGET_CHANNEL, targetChannel );
@@ -170,22 +353,23 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 		double radius = ( Double ) settings.get( KEY_RADIUS );
 		if ( imp != null )
 		{
+			// Prevent aberrant values for the radius.
 			final Calibration calibration = imp.getCalibration();
+
 			// Not too large
 			final double maxWidth = imp.getWidth() * 0.5 * ( calibration == null ? 1 : calibration.pixelWidth );
 			final double maxHeight = imp.getHeight() * 0.5 * ( calibration == null ? 1 : calibration.pixelHeight );
 			final double max = maxWidth < maxHeight ? maxWidth : maxHeight;
 			if ( radius > max )
-			{
 				radius *= max * 4 / ( imp.getWidth() + imp.getHeight() );
-			}
+
 			// Not too small
 			final double pw = calibration == null ? 1 : calibration.pixelWidth;
 			radius = Math.max( radius / pw, 1.5 ) * pw;
 		}
-		jTextFieldBlobDiameter.setText( "" + ( 2 * radius ) );
+		ftfDiameter.setText( "" + ( 2 * radius ) );
 		jCheckBoxMedianFilter.setSelected( ( Boolean ) settings.get( KEY_DO_MEDIAN_FILTERING ) );
-		jTextFieldThreshold.setText( "" + settings.get( KEY_THRESHOLD ) );
+		ftfQualityThreshold.setText( "" + settings.get( KEY_THRESHOLD ) );
 		jCheckSubPixel.setSelected( ( Boolean ) settings.get( KEY_DO_SUBPIXEL_LOCALIZATION ) );
 	}
 
@@ -201,299 +385,6 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 	protected SpotDetectorFactory< ? > getDetectorFactory()
 	{
 		return new LogDetectorFactory();
-	}
-
-	/*
-	 * PRIVATE METHODS
-	 */
-
-	/**
-	 * Launch detection on the current frame.
-	 */
-	protected void preview()
-	{
-		btnPreview.setEnabled( false );
-		new Thread( "TrackMate preview detection thread" )
-		{
-			@Override
-			public void run()
-			{
-				final Settings lSettings = new Settings();
-				lSettings.setFrom( imp );
-				final int frame = imp.getFrame() - 1;
-				lSettings.tstart = frame;
-				lSettings.tend = frame;
-				lSettings.roi = settings.roi;
-
-				lSettings.detectorFactory = getDetectorFactory();
-				lSettings.detectorSettings = getSettings();
-
-				final TrackMate trackmate = new TrackMate( lSettings );
-				trackmate.getModel().setLogger( localLogger );
-
-				final boolean detectionOk = trackmate.execDetection();
-				if ( !detectionOk )
-				{
-					localLogger.error( trackmate.getErrorMessage() );
-					return;
-				}
-				localLogger.log( "Found " + trackmate.getModel().getSpots().getNSpots( false ) + " spots." );
-
-				// Wrap new spots in a list.
-				final SpotCollection newspots = trackmate.getModel().getSpots();
-				final Iterator< Spot > it = newspots.iterator( frame, false );
-				final ArrayList< Spot > spotsToCopy = new ArrayList< >( newspots.getNSpots( frame, false ) );
-				while ( it.hasNext() )
-				{
-					spotsToCopy.add( it.next() );
-				}
-				// Pass new spot list to model.
-				model.getSpots().put( frame, spotsToCopy );
-				// Make them visible
-				for ( final Spot spot : spotsToCopy )
-				{
-					spot.putFeature( SpotCollection.VISIBLITY, SpotCollection.ONE );
-				}
-				// Generate event for listener to reflect changes.
-				model.setSpots( model.getSpots(), true );
-
-				btnPreview.setEnabled( true );
-
-			}
-		}.start();
-	}
-
-	/**
-	 * Fill the text fields with parameters grabbed from stored ImagePlus.
-	 */
-	private void refresh()
-	{
-		if ( null == imp ) {
-			return;
-		}
-		double threshold = imp.getProcessor().getMinThreshold();
-		if ( threshold < 0 )
-		{
-			threshold = 0;
-		}
-		jTextFieldThreshold.setText( String.format( "%.0f", threshold ) );
-		sliderChannel.setValue( imp.getC() );
-	}
-
-	protected void initGUI()
-	{
-		try
-		{
-			this.setPreferredSize( new java.awt.Dimension( 300, 461 ) );
-			layout = new SpringLayout();
-			setLayout( layout );
-			{
-				jLabel1 = new JLabel();
-				layout.putConstraint( SpringLayout.NORTH, jLabel1, 10, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.WEST, jLabel1, 5, SpringLayout.WEST, this );
-				layout.putConstraint( SpringLayout.EAST, jLabel1, -5, SpringLayout.EAST, this );
-				this.add( jLabel1 );
-				jLabel1.setText( "Settings for detector:" );
-				jLabel1.setFont( FONT );
-			}
-			{
-				jLabelSegmenterName = new JLabel();
-				layout.putConstraint( SpringLayout.NORTH, jLabelSegmenterName, 33, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.WEST, jLabelSegmenterName, 11, SpringLayout.WEST, this );
-				layout.putConstraint( SpringLayout.EAST, jLabelSegmenterName, -11, SpringLayout.EAST, this );
-				this.add( jLabelSegmenterName );
-				jLabelSegmenterName.setFont( BIG_FONT );
-				jLabelSegmenterName.setText( detectorName );
-			}
-			{
-				jLabel2 = new JLabel();
-				layout.putConstraint( SpringLayout.NORTH, jLabel2, 247, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.WEST, jLabel2, 16, SpringLayout.WEST, this );
-				this.add( jLabel2 );
-				jLabel2.setText( "Estimated blob diameter:" );
-				jLabel2.setFont( FONT );
-
-			}
-			{
-				jTextFieldBlobDiameter = new JNumericTextField();
-				layout.putConstraint( SpringLayout.EAST, jLabel2, -6, SpringLayout.WEST, jTextFieldBlobDiameter );
-				layout.putConstraint( SpringLayout.WEST, jTextFieldBlobDiameter, 168, SpringLayout.WEST, this );
-				layout.putConstraint( SpringLayout.NORTH, jTextFieldBlobDiameter, 247, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.SOUTH, jTextFieldBlobDiameter, 263, SpringLayout.NORTH, this );
-				jTextFieldBlobDiameter.setHorizontalAlignment( SwingConstants.CENTER );
-				jTextFieldBlobDiameter.setColumns( 5 );
-				jTextFieldBlobDiameter.setText( "5" );
-				this.add( jTextFieldBlobDiameter );
-				jTextFieldBlobDiameter.setFont( FONT );
-			}
-			{
-				jLabelBlobDiameterUnit = new JLabel();
-				layout.putConstraint( SpringLayout.EAST, jTextFieldBlobDiameter, -11, SpringLayout.WEST, jLabelBlobDiameterUnit );
-				layout.putConstraint( SpringLayout.WEST, jLabelBlobDiameterUnit, -62, SpringLayout.EAST, jLabel1 );
-				layout.putConstraint( SpringLayout.NORTH, jLabelBlobDiameterUnit, -2, SpringLayout.NORTH, jLabel2 );
-				layout.putConstraint( SpringLayout.SOUTH, jLabelBlobDiameterUnit, 262, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.EAST, jLabelBlobDiameterUnit, 0, SpringLayout.EAST, jLabel1 );
-				this.add( jLabelBlobDiameterUnit );
-				jLabelBlobDiameterUnit.setFont( FONT );
-				jLabelBlobDiameterUnit.setText( spaceUnits );
-			}
-			{
-				jCheckBoxMedianFilter = new JCheckBox();
-				layout.putConstraint( SpringLayout.NORTH, jCheckBoxMedianFilter, 312, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.WEST, jCheckBoxMedianFilter, 11, SpringLayout.WEST, this );
-				layout.putConstraint( SpringLayout.SOUTH, jCheckBoxMedianFilter, 333, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.EAST, jCheckBoxMedianFilter, 241, SpringLayout.WEST, this );
-				this.add( jCheckBoxMedianFilter );
-				jCheckBoxMedianFilter.setText( "Use median filter " );
-				jCheckBoxMedianFilter.setFont( FONT );
-			}
-			{
-				jLabelHelpText = new JLabel();
-				layout.putConstraint( SpringLayout.NORTH, jLabelHelpText, 60, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.WEST, jLabelHelpText, 10, SpringLayout.WEST, this );
-				layout.putConstraint( SpringLayout.SOUTH, jLabelHelpText, 164, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.EAST, jLabelHelpText, -10, SpringLayout.EAST, this );
-				this.add( jLabelHelpText );
-				jLabelHelpText.setFont( FONT.deriveFont( Font.ITALIC ) );
-				jLabelHelpText.setText( infoText.replace( "<br>", "" ).replace( "<p>", "<p align=\"justify\">" ).replace( "<html>", "<html><p align=\"justify\">" ) );
-			}
-			{
-				jLabelThreshold = new JLabel();
-				layout.putConstraint( SpringLayout.NORTH, jLabelThreshold, -42, SpringLayout.NORTH, jCheckBoxMedianFilter );
-				layout.putConstraint( SpringLayout.WEST, jLabelThreshold, 16, SpringLayout.WEST, this );
-				layout.putConstraint( SpringLayout.SOUTH, jLabelThreshold, -29, SpringLayout.NORTH, jCheckBoxMedianFilter );
-				layout.putConstraint( SpringLayout.EAST, jLabelThreshold, 162, SpringLayout.WEST, this );
-				this.add( jLabelThreshold );
-				jLabelThreshold.setText( "Threshold:" );
-				jLabelThreshold.setFont( FONT );
-			}
-			{
-				jTextFieldThreshold = new JNumericTextField();
-				layout.putConstraint( SpringLayout.NORTH, jTextFieldThreshold, 268, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.WEST, jTextFieldThreshold, 6, SpringLayout.EAST, jLabelThreshold );
-				layout.putConstraint( SpringLayout.SOUTH, jTextFieldThreshold, 284, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.EAST, jTextFieldThreshold, -78, SpringLayout.EAST, this );
-				jTextFieldThreshold.setHorizontalAlignment( SwingConstants.CENTER );
-				jTextFieldThreshold.setText( "0" );
-				this.add( jTextFieldThreshold );
-				jTextFieldThreshold.setFont( FONT );
-			}
-			{
-				// Add sub-pixel checkbox
-				jCheckSubPixel = new JCheckBox();
-				layout.putConstraint( SpringLayout.NORTH, jCheckSubPixel, 336, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.WEST, jCheckSubPixel, 11, SpringLayout.WEST, this );
-				layout.putConstraint( SpringLayout.SOUTH, jCheckSubPixel, 357, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.EAST, jCheckSubPixel, 242, SpringLayout.WEST, this );
-				this.add( jCheckSubPixel );
-				jCheckSubPixel.setText( "Do sub-pixel localization " );
-				jCheckSubPixel.setFont( FONT );
-			}
-			{
-				lblSegmentInChannel = new JLabel( "Segment in channel:" );
-				layout.putConstraint( SpringLayout.NORTH, lblSegmentInChannel, 219, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.WEST, lblSegmentInChannel, 16, SpringLayout.WEST, this );
-				layout.putConstraint( SpringLayout.EAST, lblSegmentInChannel, 116, SpringLayout.WEST, this );
-				lblSegmentInChannel.setFont( SMALL_FONT );
-				add( lblSegmentInChannel );
-
-				sliderChannel = new JSlider();
-				layout.putConstraint( SpringLayout.NORTH, sliderChannel, 213, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.WEST, sliderChannel, 126, SpringLayout.WEST, this );
-				layout.putConstraint( SpringLayout.SOUTH, sliderChannel, 236, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.EAST, sliderChannel, 217, SpringLayout.WEST, this );
-				sliderChannel.addChangeListener( new ChangeListener()
-				{
-					@Override
-					public void stateChanged( final ChangeEvent e )
-					{
-						labelChannel.setText( "" + sliderChannel.getValue() );
-					}
-				} );
-				add( sliderChannel );
-
-				labelChannel = new JLabel( "1" );
-				layout.putConstraint( SpringLayout.NORTH, labelChannel, 216, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.WEST, labelChannel, 228, SpringLayout.WEST, this );
-				layout.putConstraint( SpringLayout.SOUTH, labelChannel, 234, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.EAST, labelChannel, 249, SpringLayout.WEST, this );
-				labelChannel.setHorizontalAlignment( SwingConstants.CENTER );
-				labelChannel.setFont( SMALL_FONT );
-				add( labelChannel );
-			}
-			{
-				jButtonRefresh = new JButton( "Refresh treshold", ICON_REFRESH );
-				layout.putConstraint( SpringLayout.NORTH, jButtonRefresh, 370, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.WEST, jButtonRefresh, 11, SpringLayout.WEST, this );
-				layout.putConstraint( SpringLayout.SOUTH, jButtonRefresh, 395, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.EAST, jButtonRefresh, 131, SpringLayout.WEST, this );
-				// this.add( jButtonRefresh );
-				jButtonRefresh.setToolTipText( TOOLTIP_REFRESH );
-				jButtonRefresh.setFont( SMALL_FONT );
-				jButtonRefresh.addActionListener( new ActionListener()
-				{
-					@Override
-					public void actionPerformed( final ActionEvent e )
-					{
-						refresh();
-					}
-				} );
-			}
-			{
-				btnPreview = new JButton( "Preview", ICON_PREVIEW );
-				layout.putConstraint( SpringLayout.NORTH, btnPreview, 370, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.WEST, btnPreview, -141, SpringLayout.EAST, this );
-				layout.putConstraint( SpringLayout.SOUTH, btnPreview, 395, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.EAST, btnPreview, -10, SpringLayout.EAST, this );
-				btnPreview.setToolTipText( TOOLTIP_PREVIEW );
-				this.add( btnPreview );
-				btnPreview.setFont( SMALL_FONT );
-				btnPreview.addActionListener( new ActionListener()
-				{
-					@Override
-					public void actionPerformed( final ActionEvent e )
-					{
-						preview();
-					}
-				} );
-			}
-
-			{
-
-				// Deal with channels: the slider and channel labels are only
-				// visible if we find more than one channel.
-				final int n_channels = imp.getNChannels();
-				sliderChannel.setMaximum( n_channels );
-				sliderChannel.setMinimum( 1 );
-				sliderChannel.setValue( imp.getChannel() );
-
-				if ( n_channels <= 1 )
-				{
-					labelChannel.setVisible( false );
-					lblSegmentInChannel.setVisible( false );
-					sliderChannel.setVisible( false );
-				}
-				else
-				{
-					labelChannel.setVisible( true );
-					lblSegmentInChannel.setVisible( true );
-					sliderChannel.setVisible( true );
-				}
-			}
-			{
-				final JLabelLogger labelLogger = new JLabelLogger();
-				layout.putConstraint( SpringLayout.NORTH, labelLogger, 407, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.WEST, labelLogger, 10, SpringLayout.WEST, this );
-				layout.putConstraint( SpringLayout.SOUTH, labelLogger, 431, SpringLayout.NORTH, this );
-				layout.putConstraint( SpringLayout.EAST, labelLogger, -10, SpringLayout.EAST, this );
-				add( labelLogger );
-				localLogger = labelLogger.getLogger();
-			}
-		}
-		catch ( final Exception e )
-		{
-			e.printStackTrace();
-		}
 	}
 
 	@Override

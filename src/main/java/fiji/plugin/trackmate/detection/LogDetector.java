@@ -147,10 +147,7 @@ public class LogDetector< T extends RealType< T > & NativeType< T >> implements 
 
 		final long[] minopposite = new long[ interval.numDimensions() ];
 		interval.min( minopposite );
-		for ( int d = 0; d < minopposite.length; d++ )
-			minopposite[ d ] = -minopposite[ d ];
-
-		final IntervalView< FloatType > to = Views.offset( floatImg, minopposite );
+		final IntervalView< FloatType > to = Views.translate( floatImg, minopposite );
 		spots = DetectionUtils.findLocalMaxima( to, threshold, calibration, radius, doSubPixelLocalization, numThreads );
 
 		final long end = System.currentTimeMillis();
