@@ -516,18 +516,16 @@ public class TMUtils
 	}
 
 	/**
-	 * Returns an interval object that in the specified {@link ImgPlus} <b>slice
-	 * in a single time frame</b>.
+	 * Returns an interval object that slices in the specified {@link ImgPlus}
+	 * <b>in a single channel</b> (the channel dimension is dropped).
 	 * <p>
 	 * The specified {@link Settings} object is used to determine a crop-cube
-	 * that will determine the X,Y,Z size of the interval. A single channel will
-	 * be taken in the case of a multi-channel image. If the detector set in the
-	 * settings object has a parameter for the target channel
-	 * {@link fiji.plugin.trackmate.detection.DetectorKeys#KEY_TARGET_CHANNEL},
-	 * it will be used; otherwise the first channel will be taken.
+	 * that will determine the X,Y,Z size of the interval. The channel dimension
+	 * will be dropped.
 	 * <p>
-	 * If the specified {@link ImgPlus} has a time axis, it will included, using
-	 * the {@link Settings#tstart} and {@link Settings#tend} as bounds.
+	 * If the specified {@link ImgPlus} has a time axis, it will be included,
+	 * using the {@link Settings#tstart} and {@link Settings#tend} as bounds. If
+	 * it is a singleton dimension (1 time-point) it won't be dropped.
 	 *
 	 * @param img
 	 *            the source image into which the interval is to be defined.
@@ -558,18 +556,6 @@ public class TMUtils
 			max[ zindex ] = settings.zend;
 		}
 
-		// CHANNEL, we might have it.
-		final int cindex = TMUtils.findCAxisIndex( img );
-		if ( cindex >= 0 )
-		{
-			Integer c = ( Integer ) settings.detectorSettings.get( KEY_TARGET_CHANNEL ); // 1-based.
-			if ( null == c )
-				c = 1;
-
-			min[ cindex ] = c - 1; // 0-based.
-			max[ cindex ] = min[ cindex ];
-		}
-
 		// TIME, we might have it, but anyway we leave the start & end
 		// management to elsewhere.
 		final int tindex = TMUtils.findTAxisIndex( img );
@@ -579,7 +565,32 @@ public class TMUtils
 			max[ tindex ] = settings.tend;
 		}
 
-		final FinalInterval interval = new FinalInterval( min, max );
+		// CHANNEL, we might have it, we drop it.
+		final long[] max2;
+		final long[] min2;
+		final int cindex = TMUtils.findCAxisIndex( img );
+		if ( cindex >= 0 )
+		{
+			max2 = new long[ img.numDimensions() - 1 ];
+			min2 = new long[ img.numDimensions() - 1 ];
+			int d2 = 0;
+			for ( int d = 0; d < min.length; d++ )
+			{
+				if ( d != cindex )
+				{
+					min2[ d2 ] = min[ d ];
+					max2[ d2 ] = max[ d ];
+					d2++;
+				}
+			}
+		}
+		else
+		{
+			max2 = max;
+			min2 = min;
+		}
+
+		final FinalInterval interval = new FinalInterval( min2, max2 );
 		return interval;
 	}
 
