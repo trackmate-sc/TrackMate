@@ -13,7 +13,9 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Path2D;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -21,6 +23,7 @@ import java.util.Map;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
@@ -31,7 +34,7 @@ import ij.gui.Roi;
  * The overlay class in charge of drawing the spot images on the hyperstack
  * window.
  *
- * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; 2010 - 2011
+ * @author Jean-Yves Tinevez
  */
 public class SpotOverlay extends Roi
 {
@@ -82,9 +85,8 @@ public class SpotOverlay extends Roi
 		final SpotCollection spots = model.getSpots();
 
 		final boolean spotVisible = ( Boolean ) displaySettings.get( TrackMateModelView.KEY_SPOTS_VISIBLE );
-		if ( !spotVisible || spots.getNSpots( true ) == 0 ) {
+		if ( !spotVisible || spots.getNSpots( true ) == 0 )
 			return;
-		}
 
 		final boolean doLimitDrawingDepth = ( Boolean ) displaySettings.get( TrackMateModelView.KEY_LIMIT_DRAWING_DEPTH );
 		final double drawingDepth = ( Double ) displaySettings.get( TrackMateModelView.KEY_DRAWING_DEPTH );
@@ -120,20 +122,15 @@ public class SpotOverlay extends Roi
 			for ( final Spot spot : spotSelection )
 			{
 				if ( spot == editingSpot )
-				{
 					continue;
-				}
+
 				final int sFrame = spot.getFeature( Spot.FRAME ).intValue();
 				if ( sFrame != frame )
-				{
 					continue;
-				}
 
 				final double z = spot.getFeature( Spot.POSITION_Z ).doubleValue();
 				if ( doLimitDrawingDepth && Math.abs( z - zslice ) > drawingDepth )
-				{
 					continue;
-				}
 				
 				final Color color = colorGenerator.color( spot );
 				g2d.setColor( color );
@@ -150,18 +147,14 @@ public class SpotOverlay extends Roi
 				final Spot spot = iterator.next();
 
 				if ( editingSpot == spot || ( spotSelection != null && spotSelection.contains( spot ) ) )
-				{
 					continue;
-				}
 
 				final Color color = colorGenerator.color( spot );
 				g2d.setColor( color );
 
 				final double z = spot.getFeature( Spot.POSITION_Z ).doubleValue();
 				if ( doLimitDrawingDepth && Math.abs( z - zslice ) > drawingDepth )
-				{
 					continue;
-				}
 
 				drawSpot( g2d, spot, zslice, xcorner, ycorner, lMag );
 			}
@@ -174,18 +167,15 @@ public class SpotOverlay extends Roi
 				for ( final Spot spot : spotSelection )
 				{
 					if ( spot == editingSpot )
-					{
 						continue;
-					}
+
 					final int sFrame = spot.getFeature( Spot.FRAME ).intValue();
 					if ( DEBUG )
-					{
 						System.out.println( "[SpotOverlay] For spot " + spot + " in selection, found frame " + sFrame );
-					}
+
 					if ( sFrame != frame )
-					{
 						continue;
-					}
+
 					drawSpot( g2d, spot, zslice, xcorner, ycorner, lMag );
 				}
 			}
@@ -243,12 +233,15 @@ public class SpotOverlay extends Roi
 		final double radius = spot.getFeature( Spot.RADIUS ) * radiusRatio;
 		// In pixel units
 		final double xp = x / calibration[ 0 ] + 0.5f;
-		final double yp = y / calibration[ 1 ] + 0.5f; // so that spot centers
-		// are displayed on the
-		// pixel centers
+		final double yp = y / calibration[ 1 ] + 0.5f;
+		// so that spot centers are displayed on the pixel centers.
+
 		// Scale to image zoom
 		final double xs = ( xp - xcorner ) * magnification;
 		final double ys = ( yp - ycorner ) * magnification;
+
+		final Boolean displaySpotsAsRoisObj = ( Boolean ) displaySettings.get( TrackMateModelView.KEY_DISPLAY_SPOT_AS_ROIS );
+		final boolean displaySpotsAsRois = ( displaySpotsAsRoisObj != null ) && displaySpotsAsRoisObj.booleanValue();
 
 		if ( dz2 >= radius * radius )
 		{
@@ -256,19 +249,42 @@ public class SpotOverlay extends Roi
 		}
 		else
 		{
-			final double apparentRadius = Math.sqrt( radius * radius - dz2 ) / calibration[ 0 ] * magnification;
-			g2d.drawOval( ( int ) Math.round( xs - apparentRadius ), ( int ) Math.round( ys - apparentRadius ), ( int ) Math.round( 2 * apparentRadius ), ( int ) Math.round( 2 * apparentRadius ) );
+			final SpotRoi roi = spot.getRoi();
+			final int textPos;
+			if ( !displaySpotsAsRois || roi == null || roi.x.length < 2 )
+			{
+				final double apparentRadius = Math.sqrt( radius * radius - dz2 ) / calibration[ 0 ] * magnification;
+				g2d.drawOval(
+						( int ) Math.round( xs - apparentRadius ),
+						( int ) Math.round( ys - apparentRadius ),
+						( int ) Math.round( 2 * apparentRadius ),
+						( int ) Math.round( 2 * apparentRadius ) );
+				textPos = ( int ) apparentRadius;
+			}
+			else
+			{
+				final double[] polygonX = roi.toPolygonX( calibration[ 0 ], xcorner - 0.5, x, magnification );
+				final double[] polygonY = roi.toPolygonY( calibration[ 1 ], ycorner - 0.5, y, magnification );
+				// The 0.5 is here so that we plot vertices at pixel centers.
+				final Path2D polygon = new Path2D.Double();
+				polygon.moveTo( polygonX[ 0 ], polygonY[ 0 ] );
+				for ( int i = 1; i < polygonX.length; ++i )
+					polygon.lineTo( polygonX[ i ], polygonY[ i ] );
+				polygon.closePath();
+
+				g2d.draw( polygon );
+				textPos = ( int ) ( Arrays.stream( polygonX ).max().getAsDouble() - xs );
+			}
+
 			final boolean spotNameVisible = ( Boolean ) displaySettings.get( TrackMateModelView.KEY_DISPLAY_SPOT_NAMES );
 			if ( spotNameVisible )
 			{
 				final String str = spot.toString();
 
 				final int xindent = fm.stringWidth( str );
-				int xtext = ( int ) ( xs + apparentRadius + 5 );
+				int xtext = ( int ) ( xs + textPos + 5 );
 				if ( xtext + xindent > imp.getWindow().getWidth() )
-				{
-					xtext = ( int ) ( xs - apparentRadius - 5 - xindent );
-				}
+					xtext = ( int ) ( xs - textPos - 5 - xindent );
 
 				final int yindent = fm.getAscent() / 2;
 				final int ytext = ( int ) ys + yindent;

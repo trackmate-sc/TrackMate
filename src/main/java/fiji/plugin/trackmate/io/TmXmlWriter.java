@@ -48,6 +48,7 @@ import static fiji.plugin.trackmate.io.TmXmlKeys.INITIAL_SPOT_FILTER_ELEMENT_KEY
 import static fiji.plugin.trackmate.io.TmXmlKeys.LOG_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.MODEL_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.PLUGIN_VERSION_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.TmXmlKeys.ROI_N_POINTS_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.io.TmXmlKeys.ROOT_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.SETTINGS_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.SPATIAL_UNITS_ATTRIBUTE_NAME;
@@ -98,6 +99,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
@@ -317,7 +319,8 @@ public class TmXmlWriter
 	{
 		final Element el = new Element( DETECTOR_SETTINGS_ELEMENT_KEY );
 
-		if ( null == settings.detectorFactory ) { return el; }
+		if ( null == settings.detectorFactory )
+			return el;
 
 		// Set the detector factory key NOW.
 		el.setAttribute( XML_ATTRIBUTE_DETECTOR_NAME, settings.detectorFactory.getKey() );
@@ -339,7 +342,8 @@ public class TmXmlWriter
 	{
 		final Element el = new Element( TRACKER_SETTINGS_ELEMENT_KEY );
 
-		if ( null == settings.trackerFactory ) { return el; }
+		if ( null == settings.trackerFactory )
+			return el;
 
 		// Set the tracker factory key NOW.
 		el.setAttribute( XML_ATTRIBUTE_TRACKER_NAME, settings.trackerFactory.getKey() );
@@ -395,13 +399,11 @@ public class TmXmlWriter
 			{
 				final Double val = model.getFeatureModel().getTrackFeature( trackID, feature );
 				if ( null == val )
-				{
-					// Skip missing features.
 					continue;
-				}
+
 				final String str;
 				if ( model.getFeatureModel().getTrackFeatureIsInt().get( feature ).booleanValue() )
-					str = "" + val.intValue();
+					str = Integer.toString( val.intValue() );
 				else
 					str = val.toString();
 				trackElement.setAttribute( feature, str );
@@ -448,15 +450,14 @@ public class TmXmlWriter
 				{
 					final Double val = model.getFeatureModel().getEdgeFeature( edge, feature );
 					if ( null == val )
-					{
-						// Skip missing features.
 						continue;
-					}
+
 					final String str;
 					if ( model.getFeatureModel().getEdgeFeatureIsInt().get( feature ).booleanValue() )
-						str = "" + val.intValue();
+						str = Integer.toString( val.intValue() );
 					else
 						str = val.toString();
+
 					edgeElement.setAttribute( feature, str );
 				}
 
@@ -684,33 +685,39 @@ public class TmXmlWriter
 		attributes.add( IDattribute );
 		final Attribute nameAttribute = new Attribute( SPOT_NAME_ATTRIBUTE_NAME, spot.getName() );
 		attributes.add( nameAttribute );
-		Double val;
-		Attribute featureAttribute;
 
 		for ( final String feature : spot.getFeatures().keySet() )
 		{
-			val = spot.getFeature( feature );
+			final Double val = spot.getFeature( feature );
 			if ( null == val )
-			{
-				// Skip missing features.
 				continue;
-			}
 
 			final String str;
-
 			if ( fm.getSpotFeatureIsInt().get( feature ).booleanValue() )
-			{
-				str = "" + val.intValue();
-			}
+				str = Integer.toString( val.intValue() );
 			else
-			{
 				str = val.toString();
+
+			attributes.add( new Attribute( feature, str ) );
+		}
+		final Element spotElement = new Element( SPOT_ELEMENT_KEY );
+
+		final SpotRoi roi = spot.getRoi();
+		if ( roi != null )
+		{
+			final int nPoints = roi.x.length;
+			attributes.add( new Attribute( ROI_N_POINTS_ATTRIBUTE_NAME, Integer.toString( nPoints ) ) );
+			final StringBuilder str = new StringBuilder();
+			for ( int i = 0; i < nPoints; i++ )
+			{
+				str.append( Double.toString( roi.x[ i ] ) );
+				str.append( ' ' );
+				str.append( Double.toString( roi.y[ i ] ) );
+				str.append( ' ' );
 			}
-			featureAttribute = new Attribute( feature, str );
-			attributes.add( featureAttribute );
+			spotElement.setText( str.toString() );
 		}
 
-		final Element spotElement = new Element( SPOT_ELEMENT_KEY );
 		spotElement.setAttributes( attributes );
 		return spotElement;
 	}

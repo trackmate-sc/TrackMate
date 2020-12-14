@@ -52,6 +52,13 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 	/** This spot ID. */
 	private final int ID;
 
+	/**
+	 * The polygon that represents the 2D roi around the spot. Can be
+	 * <code>null</code> if the detector that created this spot does not support
+	 * ROIs or for 3D images.
+	 */
+	private SpotRoi roi;
+
 	/*
 	 * CONSTRUCTORS
 	 */
@@ -207,6 +214,16 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 			return false;
 		final Spot os = ( Spot ) other;
 		return os.ID == this.ID;
+	}
+
+	public void setRoi( final SpotRoi roi )
+	{
+		this.roi = roi;
+	}
+
+	public SpotRoi getRoi()
+	{
+		return roi;
 	}
 
 	/**

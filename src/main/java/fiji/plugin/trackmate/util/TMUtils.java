@@ -2,9 +2,7 @@ package fiji.plugin.trackmate.util;
 
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 
-import ij.IJ;
-import ij.ImagePlus;
-
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,6 +16,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.scijava.Context;
+
+import fiji.plugin.trackmate.Dimension;
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
+import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
+import fiji.plugin.trackmate.features.track.TrackAnalyzer;
+import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
+import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
+import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
+import ij.IJ;
+import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imagej.ImgPlusMetadata;
 import net.imagej.axis.Axes;
@@ -27,12 +39,6 @@ import net.imglib2.Interval;
 import net.imglib2.img.ImagePlusAdapter;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.util.Util;
-
-import org.scijava.Context;
-
-import fiji.plugin.trackmate.Dimension;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.Spot;
 
 /**
  * List of static utilities for {@link fiji.plugin.trackmate.TrackMate}.
@@ -54,20 +60,11 @@ public class TMUtils
 	public static < K, V extends Comparable< ? super V > > Map< K, V > sortByValue( final Map< K, V > map, final Comparator< V > comparator )
 	{
 		final List< Map.Entry< K, V > > list = new LinkedList< >( map.entrySet() );
-		Collections.sort( list, new Comparator< Map.Entry< K, V > >()
-		{
-			@Override
-			public int compare( final Map.Entry< K, V > o1, final Map.Entry< K, V > o2 )
-			{
-				return comparator.compare( o1.getValue(), o2.getValue() );
-			}
-		} );
+		Collections.sort( list, Comparator.comparing( Map.Entry::getValue ) );
 
 		final LinkedHashMap< K, V > result = new LinkedHashMap< >();
 		for ( final Map.Entry< K, V > entry : list )
-		{
 			result.put( entry.getKey(), entry.getValue() );
-		}
 		return result;
 	}
 
@@ -81,9 +78,8 @@ public class TMUtils
 		for ( final String key : map.keySet() )
 		{
 			for ( int i = 0; i < indent; i++ )
-			{
 				builder.append( " " );
-			}
+
 			builder.append( "- " );
 			builder.append( key.toLowerCase().replace( "_", " " ) );
 			builder.append( ": " );
@@ -137,13 +133,11 @@ public class TMUtils
 	public static final < T > boolean checkMapKeys( final Map< T, ? > map, Collection< T > mandatoryKeys, Collection< T > optionalKeys, final StringBuilder errorHolder )
 	{
 		if ( null == optionalKeys )
-		{
 			optionalKeys = new ArrayList< >();
-		}
+
 		if ( null == mandatoryKeys )
-		{
 			mandatoryKeys = new ArrayList< >();
-		}
+
 		boolean ok = true;
 		final Set< T > keySet = map.keySet();
 		for ( final T key : keySet )
@@ -206,36 +200,8 @@ public class TMUtils
 	{
 		final List< K > names = new ArrayList< >( keys.size() );
 		for ( int i = 0; i < keys.size(); i++ )
-		{
 			names.add( mapping.get( keys.get( i ) ) );
-		}
 		return names;
-	}
-
-	/**
-	 * Translate each spot of the given collection by the amount specified in
-	 * argument. The distances are all understood in physical units.
-	 * <p>
-	 * This is meant to deal with a cropped image. The translation will bring
-	 * the spot coordinates back to the top-left corner of the un-cropped image
-	 * reference.
-	 */
-	public static void translateSpots( final Collection< Spot > spots, final double dx, final double dy, final double dz )
-	{
-		final double[] dval = new double[] { dx, dy, dz };
-		final String[] features = new String[] { Spot.POSITION_X, Spot.POSITION_Y, Spot.POSITION_Z };
-		Double val;
-		for ( final Spot spot : spots )
-		{
-			for ( int i = 0; i < features.length; i++ )
-			{
-				val = spot.getFeature( features[ i ] );
-				if ( null != val )
-				{
-					spot.putFeature( features[ i ], val + dval[ i ] );
-				}
-			}
-		}
 	}
 
 	/*
@@ -288,17 +254,11 @@ public class TMUtils
 		for ( int d = 0; d < img.numDimensions(); d++ )
 		{
 			if ( img.axis( d ).type() == Axes.X )
-			{
 				calibration[ 0 ] = img.averageScale( d );
-			}
 			else if ( img.axis( d ).type() == Axes.Y )
-			{
 				calibration[ 1 ] = img.averageScale( d );
-			}
 			else if ( img.axis( d ).type() == Axes.Z )
-			{
 				calibration[ 2 ] = img.averageScale( d );
-			}
 		}
 		return calibration;
 	}
@@ -309,9 +269,8 @@ public class TMUtils
 		calibration[ 0 ] = imp.getCalibration().pixelWidth;
 		calibration[ 1 ] = imp.getCalibration().pixelHeight;
 		if ( imp.getNSlices() > 1 )
-		{
 			calibration[ 2 ] = imp.getCalibration().pixelDepth;
-		}
+
 		return calibration;
 	}
 
@@ -323,10 +282,13 @@ public class TMUtils
 	{
 
 		final int size = values.length;
-		if ( ( p > 1 ) || ( p <= 0 ) ) { throw new IllegalArgumentException( "invalid quantile value: " + p ); }
+		if ( ( p > 1 ) || ( p <= 0 ) )
+			throw new IllegalArgumentException( "invalid quantile value: " + p );
 		// always return single value for n = 1
-		if ( size == 0 ) { return Double.NaN; }
-		if ( size == 1 ) { return values[ 0 ]; }
+		if ( size == 0 )
+			return Double.NaN;
+		if ( size == 1 )
+			return values[ 0 ];
 		final double n = size;
 		final double pos = p * ( n + 1 );
 		final double fpos = Math.floor( pos );
@@ -336,8 +298,10 @@ public class TMUtils
 		System.arraycopy( values, 0, sorted, 0, size );
 		Arrays.sort( sorted );
 
-		if ( pos < 1 ) { return sorted[ 0 ]; }
-		if ( pos >= n ) { return sorted[ size - 1 ]; }
+		if ( pos < 1 )
+			return sorted[ 0 ];
+		if ( pos >= n )
+			return sorted[ size - 1 ];
 		final double lower = sorted[ intPos - 1 ];
 		final double upper = sorted[ intPos ];
 		return lower + dif * ( upper - lower );
@@ -351,21 +315,8 @@ public class TMUtils
 	 */
 	private static final double[] getRange( final double[] data )
 	{
-		double min = Double.POSITIVE_INFINITY;
-		double max = Double.NEGATIVE_INFINITY;
-		double value;
-		for ( int i = 0; i < data.length; i++ )
-		{
-			value = data[ i ];
-			if ( value < min )
-			{
-				min = value;
-			}
-			if ( value > max )
-			{
-				max = value;
-			}
-		}
+		final double min = Arrays.stream( data ).min().getAsDouble();
+		final double max = Arrays.stream( data ).max().getAsDouble();
 		return new double[] { ( max - min ), min, max };
 	}
 
@@ -395,14 +346,12 @@ public class TMUtils
 		final double binWidth = 2 * iqr * Math.pow( size, -0.33 );
 		final double[] range = getRange( values );
 		int nBin = ( int ) ( range[ 0 ] / binWidth + 1 );
+
 		if ( nBin > maxBinNumber )
-		{
 			nBin = maxBinNumber;
-		}
 		else if ( nBin < minBinNumber )
-		{
 			nBin = minBinNumber;
-		}
+
 		return nBin;
 	}
 
@@ -478,9 +427,7 @@ public class TMUtils
 
 		double sum = 0;
 		for ( int t = 0; t < hist.length; t++ )
-		{
 			sum += t * hist[ t ];
-		}
 
 		double sumB = 0;
 		int wB = 0;
@@ -493,15 +440,11 @@ public class TMUtils
 		{
 			wB += hist[ t ]; // Weight Background
 			if ( wB == 0 )
-			{
 				continue;
-			}
 
 			wF = total - wB; // Weight Foreground
 			if ( wF == 0 )
-			{
 				break;
-			}
 
 			sumB += ( t * hist[ t ] );
 
@@ -621,9 +564,8 @@ public class TMUtils
 		{
 			Integer c = ( Integer ) settings.detectorSettings.get( KEY_TARGET_CHANNEL ); // 1-based.
 			if ( null == c )
-			{
 				c = 1;
-			}
+
 			min[ cindex ] = c - 1; // 0-based.
 			max[ cindex ] = min[ cindex ];
 		}
@@ -647,9 +589,8 @@ public class TMUtils
 			for ( int d = 0; d < min.length; d++ )
 			{
 				if ( d == tindex )
-				{
 					continue;
-				}
+
 				nindex++;
 				intervalMin[ nindex ] = Math.max( 0l, min[ d ] );
 				intervalMax[ nindex ] = Math.min( img.max( d ), max[ d ] );
@@ -667,6 +608,92 @@ public class TMUtils
 	/** Obtains the SciJava {@link Context} in use by ImageJ. */
 	public static Context getContext() {
 		return ( Context ) IJ.runPlugIn( "org.scijava.Context", "" );
+	}
+
+	/**
+	 * Declare all feature analyzers (spot, edge and track analyzers) that can
+	 * be found at runtime to the specified settings.
+	 * 
+	 * @param settings
+	 *            the {@link Settings} object to declare the analyzers in.
+	 */
+	public static void declareAllFeatures( final Settings settings )
+	{
+
+		settings.clearSpotAnalyzerFactories();
+		final SpotAnalyzerProvider spotAnalyzerProvider = new SpotAnalyzerProvider();
+		final List< String > spotAnalyzerKeys = spotAnalyzerProvider.getKeys();
+		for ( final String key : spotAnalyzerKeys )
+		{
+			final SpotAnalyzerFactory< ? > spotFeatureAnalyzer = spotAnalyzerProvider.getFactory( key );
+			settings.addSpotAnalyzerFactory( spotFeatureAnalyzer );
+		}
+
+		settings.clearEdgeAnalyzers();
+		final EdgeAnalyzerProvider edgeAnalyzerProvider = new EdgeAnalyzerProvider();
+		final List< String > edgeAnalyzerKeys = edgeAnalyzerProvider.getKeys();
+		for ( final String key : edgeAnalyzerKeys )
+		{
+			final EdgeAnalyzer edgeAnalyzer = edgeAnalyzerProvider.getFactory( key );
+			settings.addEdgeAnalyzer( edgeAnalyzer );
+		}
+
+		settings.clearTrackAnalyzers();
+		final TrackAnalyzerProvider trackAnalyzerProvider = new TrackAnalyzerProvider();
+		final List< String > trackAnalyzerKeys = trackAnalyzerProvider.getKeys();
+		for ( final String key : trackAnalyzerKeys )
+		{
+			final TrackAnalyzer trackAnalyzer = trackAnalyzerProvider.getFactory( key );
+			settings.addTrackAnalyzer( trackAnalyzer );
+		}
+	}
+
+	/**
+	 * Creates a default file path to save the TrackMate session to, based on
+	 * the image TrackMate works on.
+	 * 
+	 * @param settings
+	 *            the settings object from which to read the image, its folder,
+	 *            etc.
+	 * @param logger
+	 *            a logger instance in which to echo problems if any.
+	 * @return a new file.
+	 */
+	public static File proposeTrackMateSaveFile( final Settings settings, final Logger logger )
+	{
+		File folder, file;
+		if ( null != settings.imp
+				&& null != settings.imp.getOriginalFileInfo()
+				&& null != settings.imp.getOriginalFileInfo().directory )
+		{
+			folder = new File( settings.imp.getOriginalFileInfo().directory );
+			/*
+			 * Update the settings field with the image file location now,
+			 * because it's valid.
+			 */
+			settings.imageFolder = settings.imp.getOriginalFileInfo().directory;
+		}
+		else
+		{
+			folder = new File( System.getProperty( "user.dir" ) );
+			/*
+			 * Warn the user that the file cannot be reloaded properly because
+			 * the source image does not match a file.
+			 */
+			logger.error( "Warning: The source image does not match a file on the system."
+					+ "TrackMate won't be able to reload it when opening this XML file.\n"
+					+ "To fix this, save the source image to a TIF file before saving the TrackMate session.\n" );
+			settings.imageFolder = "";
+		}
+		try
+		{
+			file = new File( folder.getPath() + File.separator + settings.imp.getShortTitle() + ".xml" );
+		}
+		catch ( final NullPointerException npe )
+		{
+			file = new File( folder.getPath() + File.separator + "TrackMateData.xml" );
+		}
+		return file;
 	}
 
 	private TMUtils()

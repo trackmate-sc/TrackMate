@@ -27,7 +27,7 @@ import ij.gui.Roi;
 /**
  * The overlay class in charge of drawing the tracks on the hyperstack window.
  *
- * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; 2010 - 2011
+ * @author Jean-Yves Tinevez
  */
 public class TrackOverlay extends Roi
 {
@@ -35,7 +35,7 @@ public class TrackOverlay extends Roi
 
 	protected final double[] calibration;
 
-	protected Collection< DefaultWeightedEdge > highlight = new HashSet< >();
+	protected Collection< DefaultWeightedEdge > highlight = new HashSet<>();
 
 	protected Map< String, Object > displaySettings;
 
@@ -97,7 +97,6 @@ public class TrackOverlay extends Roi
 		final Composite originalComposite = g2d.getComposite();
 		final Stroke originalStroke = g2d.getStroke();
 		final Color originalColor = g2d.getColor();
-		Spot source, target;
 
 		// Normal edges
 		final int currentFrame = imp.getFrame() - 1;
@@ -106,10 +105,9 @@ public class TrackOverlay extends Roi
 		final Set< Integer > filteredTrackKeys = model.getTrackModel().unsortedTrackIDs( true );
 
 		g2d.setStroke( NORMAL_STROKE );
-		if ( trackDisplayMode == TrackMateModelView.TRACK_DISPLAY_MODE_LOCAL || trackDisplayMode == TrackMateModelView.TRACK_DISPLAY_MODE_LOCAL_QUICK )
-		{
+		if ( trackDisplayMode == TrackMateModelView.TRACK_DISPLAY_MODE_LOCAL
+				|| trackDisplayMode == TrackMateModelView.TRACK_DISPLAY_MODE_LOCAL_QUICK )
 			g2d.setComposite( AlphaComposite.getInstance( AlphaComposite.SRC_OVER ) );
-		}
 
 		// Determine bounds for limited view modes
 		int minT = 0;
@@ -142,12 +140,11 @@ public class TrackOverlay extends Roi
 		{
 			for ( final DefaultWeightedEdge edge : highlight )
 			{
-				source = model.getTrackModel().getEdgeSource( edge );
-				target = model.getTrackModel().getEdgeTarget( edge );
+				final Spot source = model.getTrackModel().getEdgeSource( edge );
+				final Spot target = model.getTrackModel().getEdgeTarget( edge );
 				if ( !isOnClip( source, target, minx, miny, maxx, maxy, calibration ) )
 					continue;
 
-				source = model.getTrackModel().getEdgeSource( edge );
 				final int sourceFrame = source.getFeature( Spot.FRAME ).intValue();
 				if ( sourceFrame < minT || sourceFrame >= maxT )
 					continue;
@@ -157,10 +154,7 @@ public class TrackOverlay extends Roi
 				if ( doLimitDrawingDepth && Math.abs( zs - zslice ) > drawingDepth && Math.abs( zt - zslice ) > drawingDepth )
 					continue;
 
-				final Integer trackID = model.getTrackModel().trackIDOf( edge );
-				colorGenerator.setCurrentTrackID( trackID );
 				g2d.setColor( colorGenerator.color( edge ) );
-
 				transparency = ( float ) ( 1 - Math.abs( ( double ) sourceFrame - currentFrame ) / trackDisplayDepth );
 				drawEdge( g2d, source, target, xcorner, ycorner, magnification, transparency );
 			}
@@ -171,16 +165,15 @@ public class TrackOverlay extends Roi
 		{
 			for ( final Integer trackID : filteredTrackKeys )
 			{
-				colorGenerator.setCurrentTrackID( trackID );
 				Set< DefaultWeightedEdge > track;
 				synchronized ( model )
 				{
-					track = new HashSet< >( model.getTrackModel().trackEdges( trackID ) );
+					track = new HashSet<>( model.getTrackModel().trackEdges( trackID ) );
 				}
 				for ( final DefaultWeightedEdge edge : track )
 				{
-					source = model.getTrackModel().getEdgeSource( edge );
-					target = model.getTrackModel().getEdgeTarget( edge );
+					final Spot source = model.getTrackModel().getEdgeSource( edge );
+					final Spot target = model.getTrackModel().getEdgeTarget( edge );
 					if ( !isOnClip( source, target, minx, miny, maxx, maxy, calibration ) )
 						continue;
 
@@ -205,20 +198,20 @@ public class TrackOverlay extends Roi
 
 			for ( final Integer trackID : filteredTrackKeys )
 			{
-				colorGenerator.setCurrentTrackID( trackID );
 				Set< DefaultWeightedEdge > track;
 				synchronized ( model )
 				{
-					track = new HashSet< >( model.getTrackModel().trackEdges( trackID ) );
+					track = new HashSet<>( model.getTrackModel().trackEdges( trackID ) );
 				}
+
 				for ( final DefaultWeightedEdge edge : track )
 				{
-					source = model.getTrackModel().getEdgeSource( edge );
+					final Spot source = model.getTrackModel().getEdgeSource( edge );
 					final int sourceFrame = source.getFeature( Spot.FRAME ).intValue();
 					if ( sourceFrame < minT || sourceFrame >= maxT )
 						continue;
 
-					target = model.getTrackModel().getEdgeTarget( edge );
+					final Spot target = model.getTrackModel().getEdgeTarget( edge );
 					if ( !isOnClip( source, target, minx, miny, maxx, maxy, calibration ) )
 						continue;
 
@@ -243,21 +236,20 @@ public class TrackOverlay extends Roi
 
 			for ( final Integer trackID : filteredTrackKeys )
 			{
-				colorGenerator.setCurrentTrackID( trackID );
 				final Set< DefaultWeightedEdge > track;
 				synchronized ( model )
 				{
-					track = new HashSet< >( model.getTrackModel().trackEdges( trackID ) );
+					track = new HashSet<>( model.getTrackModel().trackEdges( trackID ) );
 				}
 				for ( final DefaultWeightedEdge edge : track )
 				{
-					source = model.getTrackModel().getEdgeSource( edge );
+					final Spot source = model.getTrackModel().getEdgeSource( edge );
 					final int sourceFrame = source.getFeature( Spot.FRAME ).intValue();
 					if ( sourceFrame < minT || sourceFrame >= maxT )
 						continue;
 
 					transparency = ( float ) ( 1 - Math.abs( ( double ) sourceFrame - currentFrame ) / trackDisplayDepth );
-					target = model.getTrackModel().getEdgeTarget( edge );
+					final Spot target = model.getTrackModel().getEdgeTarget( edge );
 					if ( !isOnClip( source, target, minx, miny, maxx, maxy, calibration ) )
 						continue;
 
@@ -278,8 +270,8 @@ public class TrackOverlay extends Roi
 			g2d.setComposite( AlphaComposite.getInstance( AlphaComposite.SRC_OVER ) );
 			for ( final DefaultWeightedEdge edge : highlight )
 			{
-				source = model.getTrackModel().getEdgeSource( edge );
-				target = model.getTrackModel().getEdgeTarget( edge );
+				final Spot source = model.getTrackModel().getEdgeSource( edge );
+				final Spot target = model.getTrackModel().getEdgeTarget( edge );
 				if ( !isOnClip( source, target, minx, miny, maxx, maxy, calibration ) )
 					continue;
 				drawEdge( g2d, source, target, xcorner, ycorner, magnification );
@@ -308,13 +300,20 @@ public class TrackOverlay extends Roi
 		final double y1p = y1i / calibration[ 1 ] + 0.5f;
 
 		// Is any spot inside the clip?
-		if ( ( x0p > minx && x0p < maxx && y0p > miny && y0p < maxy ) || ( x1p > minx && x1p < maxx && y1p > miny && y1p < maxy ) ) { return true; }
+		if ( ( x0p > minx && x0p < maxx && y0p > miny && y0p < maxy )
+				|| ( x1p > minx && x1p < maxx && y1p > miny && y1p < maxy ) )
+			return true;
 
 		// Do we cross any of the 4 borders of the clip?
-		if ( segmentsCross( x0p, y0p, x1p, y1p, minx, miny, maxx, miny ) ) { return true; }
-		if ( segmentsCross( x0p, y0p, x1p, y1p, maxx, miny, maxx, maxy ) ) { return true; }
-		if ( segmentsCross( x0p, y0p, x1p, y1p, minx, maxy, maxx, maxy ) ) { return true; }
-		if ( segmentsCross( x0p, y0p, x1p, y1p, minx, miny, minx, maxy ) ) { return true; }
+		if ( segmentsCross( x0p, y0p, x1p, y1p, minx, miny, maxx, miny ) )
+			return true;
+		if ( segmentsCross( x0p, y0p, x1p, y1p, maxx, miny, maxx, maxy ) )
+			return true;
+		if ( segmentsCross( x0p, y0p, x1p, y1p, minx, maxy, maxx, maxy ) )
+			return true;
+		if ( segmentsCross( x0p, y0p, x1p, y1p, minx, miny, minx, maxy ) )
+			return true;
+
 		return false;
 	}
 

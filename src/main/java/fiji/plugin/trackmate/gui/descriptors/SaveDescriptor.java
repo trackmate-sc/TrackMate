@@ -9,6 +9,7 @@ import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.io.TmXmlWriter;
+import fiji.plugin.trackmate.util.TMUtils;
 
 public class SaveDescriptor extends SomeDialogDescriptor
 {
@@ -33,41 +34,7 @@ public class SaveDescriptor extends SomeDialogDescriptor
 		final Logger logger = logPanel.getLogger();
 		logger.log( "Saving data...\n", Logger.BLUE_COLOR );
 		if ( null == file )
-		{
-			File folder;
-			if (
-					null != trackmate.getSettings().imp
-					&& null != trackmate.getSettings().imp.getOriginalFileInfo()
-					&& null != trackmate.getSettings().imp.getOriginalFileInfo().directory )
-			{
-				folder = new File( trackmate.getSettings().imp.getOriginalFileInfo().directory );
-				/*
-				 * Update the settings field with the image file location now,
-				 * because it's valid.
-				 */
-				trackmate.getSettings().imageFolder = trackmate.getSettings().imp.getOriginalFileInfo().directory;
-			}
-			else
-			{
-				folder = new File( System.getProperty( "user.dir" ) );
-				/*
-				 * Warn the user that the file cannot be reloaded properly
-				 * because the source image does not match a file.
-				 */
-				logger.error( "Warning: The source image does not match a file on the system."
-						+ "TrackMate won't be able to reload it when opening this XML file.\n"
-						+ "To fix this, save the source image to a TIF file before saving the TrackMate session.\n");
-				trackmate.getSettings().imageFolder = "";
-			}
-			try
-			{
-				file = new File( folder.getPath() + File.separator + trackmate.getSettings().imp.getShortTitle() + ".xml" );
-			}
-			catch ( final NullPointerException npe )
-			{
-				file = new File( folder.getPath() + File.separator + "TrackMateData.xml" );
-			}
-		}
+			file = TMUtils.proposeTrackMateSaveFile( trackmate.getSettings(), logger );
 
 		/*
 		 * If we are to save tracks, we better ensures that track and edge
@@ -80,7 +47,8 @@ public class SaveDescriptor extends SomeDialogDescriptor
 		}
 
 		final File tmpFile = IOUtils.askForFileForSaving( file, controller.getGUI(), logger );
-		if ( null == tmpFile ) { return; }
+		if ( null == tmpFile )
+			return;
 		file = tmpFile;
 
 		/*

@@ -1,14 +1,13 @@
 package fiji.plugin.trackmate.gui.descriptors;
 
+import javax.swing.Icon;
+
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.panels.InitFilterPanel;
-
-import javax.swing.Icon;
 
 public class InitFilterDescriptor implements WizardPanelDescriptor
 {
@@ -59,9 +58,8 @@ public class InitFilterDescriptor implements WizardPanelDescriptor
 				final double[] values = new double[ spots.getNSpots( false ) ];
 				int index = 0;
 				for ( final Spot spot : spots.iterable( false ) )
-				{
 					values[ index++ ] = spot.getFeature( Spot.QUALITY );
-				}
+
 				component.setValues( values );
 
 				final Double initialFilterValue = trackmate.getSettings().initialSpotFilterValue;
@@ -79,15 +77,7 @@ public class InitFilterDescriptor implements WizardPanelDescriptor
 
 	@Override
 	public void aboutToHidePanel()
-	{
-
-		final FeatureFilter initialThreshold = component.getFeatureThreshold();
-		trackmate.getSettings().initialSpotFilterValue = initialThreshold.value;
-
-		/*
-		 * We will do the filtering in the next panel.
-		 */
-	}
+	{}
 
 	@Override
 	public void comingBackToPanel()

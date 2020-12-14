@@ -1,6 +1,5 @@
 package fiji.plugin.trackmate.features.spot;
 
-//import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.KURTOSIS;
 import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.MAX_INTENSITY;
 import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.MEAN_INTENSITY;
 import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.MEDIAN_INTENSITY;
@@ -11,15 +10,15 @@ import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.T
 import java.util.Iterator;
 
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.util.SpotNeighborhood;
-import fiji.plugin.trackmate.util.SpotNeighborhoodCursor;
-//import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.SKEWNESS;
-//import static fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory.VARIANCE;
 import net.imagej.ImgPlus;
+import net.imglib2.Cursor;
+import net.imglib2.IterableInterval;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Util;
 
-public class SpotIntensityAnalyzer< T extends RealType< T >> extends IndependentSpotFeatureAnalyzer< T >
+public class SpotIntensityAnalyzer< T extends RealType< T > > extends IndependentSpotFeatureAnalyzer< T >
 {
 
 	public SpotIntensityAnalyzer( final ImgPlus< T > img, final Iterator< Spot > spots )
@@ -40,20 +39,30 @@ public class SpotIntensityAnalyzer< T extends RealType< T >> extends Independent
 	@Override
 	public final void process( final Spot spot )
 	{
-
 		// Prepare neighborhood
-		final SpotNeighborhood< T > neighborhood = new SpotNeighborhood<>( spot, img );
+		final IterableInterval< T > neighborhood;
+		final SpotRoi roi = spot.getRoi();
+		if ( null != roi && img.numDimensions() == 2 )
+		{
+			// Operate on ROI only if we have one and the image is 2D.
+			neighborhood = roi.sample( spot, img );
+		}
+		else
+		{
+			// Otherwise default to circle / sphere.
+			neighborhood = new SpotNeighborhood<>( spot, img );
+		}
+
 		final int npixels = ( int ) neighborhood.size();
-		
 		if ( npixels <= 1 )
 		{
 			/*
 			 * Hack around a bug in spot iterator causing it to never end if the
 			 * size of the spot is lower than one pixel.
 			 */
-			SpotNeighborhoodCursor< T > cursor = neighborhood.cursor();
+			final Cursor< T > cursor = neighborhood.cursor();
 			cursor.fwd();
-			double val = cursor.get().getRealDouble();
+			final double val = cursor.get().getRealDouble();
 
 			spot.putFeature( MEDIAN_INTENSITY, Double.valueOf( val ) );
 			spot.putFeature( MIN_INTENSITY, Double.valueOf( val ) );
@@ -68,19 +77,16 @@ public class SpotIntensityAnalyzer< T extends RealType< T >> extends Independent
 		double sum = 0;
 		double mean = 0;
 		double M2 = 0;
-		double M3 = 0;
-		double M4 = 0;
-		double delta, delta_n, delta_n2;
+		double delta, delta_n;
 		double term1;
 		int n1;
 
 		// Others
-		double val;
 		final double[] pixel_values = new double[ npixels ];
 		int n = 0;
 		for ( final T pixel : neighborhood )
 		{
-			val = pixel.getRealDouble();
+			final double val = pixel.getRealDouble();
 
 			// For median, min and max
 			pixel_values[ n ] = val;
@@ -92,11 +98,8 @@ public class SpotIntensityAnalyzer< T extends RealType< T >> extends Independent
 			n++;
 			delta = val - mean;
 			delta_n = delta / n;
-			delta_n2 = delta_n * delta_n;
 			term1 = delta * delta_n * n1;
 			mean = mean + delta_n;
-			M4 = M4 + term1 * delta_n2 * ( n * n - 3 * n + 3 ) + 6 * delta_n2 * M2 - 4 * delta_n * M3;
-			M3 = M3 + term1 * delta_n * ( n - 2 ) - 3 * delta_n * M2;
 			M2 = M2 + term1;
 		}
 
@@ -106,17 +109,13 @@ public class SpotIntensityAnalyzer< T extends RealType< T >> extends Independent
 		final double max = pixel_values[ npixels - 1 ];
 		mean = sum / npixels;
 		final double variance = M2 / ( npixels - 1 );
-		// double kurtosis = (n*M4) / (M2*M2) - 3;
-		// double skewness = Math.sqrt(n) * M3 / Math.pow(M2, 3/2.0);
 
 		spot.putFeature( MEDIAN_INTENSITY, median );
 		spot.putFeature( MIN_INTENSITY, min );
 		spot.putFeature( MAX_INTENSITY, max );
 		spot.putFeature( MEAN_INTENSITY, mean );
-		// spot.putFeature(VARIANCE, variance);
 		spot.putFeature( STANDARD_DEVIATION, Math.sqrt( variance ) );
 		spot.putFeature( TOTAL_INTENSITY, sum );
-		// spot.putFeature(KURTOSIS, kurtosis);
-		// spot.putFeature(SKEWNESS, skewness);
+
 	}
 }

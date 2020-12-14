@@ -1,5 +1,17 @@
 package fiji.plugin.trackmate.gui.descriptors;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
+import javax.swing.Icon;
+import javax.swing.JLabel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
@@ -9,17 +21,8 @@ import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.panels.components.ColorByFeatureGUIPanel.Category;
 import fiji.plugin.trackmate.gui.panels.components.FilterGuiPanel;
+import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 public class SpotFilterDescriptor implements WizardPanelDescriptor
 {
@@ -55,10 +58,6 @@ public class SpotFilterDescriptor implements WizardPanelDescriptor
 	public void aboutToDisplayPanel()
 	{
 		component = new FilterGuiPanel( trackmate.getModel(), Arrays.asList( new Category[] { Category.SPOTS, Category.DEFAULT } ) );
-		component.refreshDisplayedFeatureValues();
-		final Settings settings = trackmate.getSettings();
-		component.setFilters( settings.getSpotFilters() );
-		component.setColorFeature( spotColorGenerator.getFeature() );
 		component.addActionListener( new ActionListener()
 		{
 			@Override
@@ -75,7 +74,64 @@ public class SpotFilterDescriptor implements WizardPanelDescriptor
 				fireThresholdChanged( event );
 			}
 		} );
-		controller.getGUI().setNextButtonEnabled( true );
+
+		final String oldText = controller.getGUI().getNextButton().getText();
+		final Icon oldIcon = controller.getGUI().getNextButton().getIcon();
+		controller.getGUI().getNextButton().setText( "Please wait..." );
+		controller.getGUI().getNextButton().setIcon( null );
+
+		new Thread( "TrackMate spot feature calculation thread." )
+		{
+			@Override
+			public void run()
+			{
+				final EverythingDisablerAndReenabler enabler1 = new EverythingDisablerAndReenabler( component, new Class[] { JLabel.class } );
+				final EverythingDisablerAndReenabler enabler2 = new EverythingDisablerAndReenabler( controller.getGUI(), new Class[] { JLabel.class } );
+				try
+				{
+					enabler1.disable();
+					enabler2.disable();
+					controller.getGUI().setLogButtonEnabled( true );
+					controller.getGUI().setPreviousButtonEnabled( false );
+
+					final TrackMate trackmate = controller.getPlugin();
+					final Model model = trackmate.getModel();
+					final Logger logger = model.getLogger();
+					final String str = "Initial thresholding with a quality threshold above " + String.format( "%.1f", trackmate.getSettings().initialSpotFilterValue ) + " ...\n";
+					logger.log( str, Logger.BLUE_COLOR );
+					final int ntotal = model.getSpots().getNSpots( false );
+					trackmate.execInitialSpotFiltering();
+					final int nselected = model.getSpots().getNSpots( false );
+					logger.log( String.format( "Retained %d spots out of %d.\n", nselected, ntotal ) );
+
+					/*
+					 * We have some spots so we need to compute spot features
+					 * will we render them.
+					 */
+					logger.log( "Calculating spot features...\n", Logger.BLUE_COLOR );
+					// Calculate features
+					final long start = System.currentTimeMillis();
+					trackmate.computeSpotFeatures( true );
+					final long end = System.currentTimeMillis();
+					logger.log( String.format( "Calculating features done in %.1f s.\n", ( end - start ) / 1e3f ), Logger.BLUE_COLOR );
+
+					// Refresh component.
+					component.refreshDisplayedFeatureValues();
+					final Settings settings = trackmate.getSettings();
+					component.setFilters( settings.getSpotFilters() );
+					component.setColorFeature( spotColorGenerator.getFeature() );
+					fireThresholdChanged( null );
+				}
+				finally
+				{
+					controller.getGUI().getNextButton().setText( oldText );
+					controller.getGUI().getNextButton().setIcon( oldIcon );
+					enabler1.reenable();
+					enabler2.reenable();
+					controller.getGUI().setNextButtonEnabled( true );
+				}
+			}
+		}.start();
 	}
 
 	@Override
@@ -198,8 +254,6 @@ public class SpotFilterDescriptor implements WizardPanelDescriptor
 	private void fireThresholdChanged( final ChangeEvent e )
 	{
 		for ( final ChangeListener cl : changeListeners )
-		{
 			cl.stateChanged( e );
-		}
 	}
 }
