@@ -130,8 +130,9 @@ public class TrackMatePlugIn_ implements PlugIn
 		ImageJ.main( args );
 //		new TrackMatePlugIn_().run( "samples/Stack.tif" );
 //		new TrackMatePlugIn_().run( "samples/Merged.tif" );
-		new TrackMatePlugIn_().run( "samples/MAX_Merged.tif" );
+//		new TrackMatePlugIn_().run( "samples/MAX_Merged.tif" );
 //		new TrackMatePlugIn_().run( "samples/Mask.tif" );
+		new TrackMatePlugIn_().run( "samples/FakeTracks.tif" );
 	}
 
 }

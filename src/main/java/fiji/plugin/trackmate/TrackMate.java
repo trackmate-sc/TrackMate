@@ -224,7 +224,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 	 * Execute the detection part.
 	 * <p>
 	 * This method configure the chosen {@link Settings#detectorFactory} with
-	 * the source image and the detectr settings and execute the detection
+	 * the source image and the detector settings and execute the detection
 	 * process for all the frames set in the {@link Settings} object of the
 	 * target model.
 	 *
