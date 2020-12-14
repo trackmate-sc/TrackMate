@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tracking.oldlap;
+package fiji.plugin.trackmate.tracking;
 
 import static fiji.plugin.trackmate.io.IOUtils.marshallMap;
 import static fiji.plugin.trackmate.io.IOUtils.readBooleanAttribute;
@@ -26,13 +26,6 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_FEATURE_PEN
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_MAX_DISTANCE;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.gui.ConfigurationPanel;
-import fiji.plugin.trackmate.gui.panels.tracker.LAPTrackerSettingsPanel;
-import fiji.plugin.trackmate.tracking.LAPUtils;
-import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -41,48 +34,24 @@ import java.util.Map;
 import javax.swing.ImageIcon;
 
 import org.jdom2.Element;
-import org.scijava.plugin.Plugin;
 
-@Plugin( type = SpotTrackerFactory.class, visible = false )
-public class LAPTrackerFactory implements SpotTrackerFactory
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.gui.ConfigurationPanel;
+import fiji.plugin.trackmate.gui.panels.tracker.LAPTrackerSettingsPanel;
+
+/**
+ * Base class for LAP-based trackers.
+ */
+public abstract class LAPTrackerFactory implements SpotTrackerFactory
 {
-
-	public static final String TRACKER_KEY = "LAP_TRACKER";
-
-	public static final String NAME = "LAP Tracker";
-
-	public static final String INFO_TEXT = "<html>" + "This tracker is based on the Linear Assignment Problem mathematical framework. <br>" + "Its implementation is derived from the following paper: <br>" + "<i>Robust single-particle tracking in live-cell time-lapse sequences</i> - <br>" + "Jaqaman <i> et al.</i>, 2008, Nature Methods. <br>" + "</html>";
 
 	private String errorMessage;
 
-	@Override
-	public String getInfoText()
-	{
-		return INFO_TEXT;
-	}
 
 	@Override
 	public ImageIcon getIcon()
 	{
 		return null;
-	}
-
-	@Override
-	public String getKey()
-	{
-		return TRACKER_KEY;
-	}
-
-	@Override
-	public String getName()
-	{
-		return NAME;
-	}
-
-	@Override
-	public SpotTracker create( final SpotCollection spots, final Map< String, Object > settings )
-	{
-		return new LAPTracker( spots, settings );
 	}
 
 	@Override

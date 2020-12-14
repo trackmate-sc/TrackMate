@@ -14,20 +14,6 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_FEATURE_PEN
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_MAX_DISTANCE;
-import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.io.TmXmlReader;
-import fiji.plugin.trackmate.providers.TrackerProvider;
-import fiji.plugin.trackmate.tracking.LAPUtils;
-import fiji.plugin.trackmate.tracking.oldlap.FastLAPTrackerFactory;
-import fiji.plugin.trackmate.tracking.sparselap.costmatrix.JaqamanSegmentCostMatrixCreator;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
-import ij.ImageJ;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -39,6 +25,20 @@ import java.util.Set;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
+
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.io.TmXmlReader;
+import fiji.plugin.trackmate.providers.TrackerProvider;
+import fiji.plugin.trackmate.tracking.LAPUtils;
+import fiji.plugin.trackmate.tracking.sparselap.costmatrix.JaqamanSegmentCostMatrixCreator;
+import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
+import ij.ImageJ;
 
 public class JaqamanSegmentCostMatrixCreatorBenchmark
 {
@@ -130,30 +130,11 @@ public class JaqamanSegmentCostMatrixCreatorBenchmark
 		System.out.println( "Done in " + ( end - start ) + " ms." );
 
 		/*
-		 * NON-SPARSE
-		 */
-		
-		final Model m2 = new Model();
-		m2.setSpots( spots, false );
-
-		settings.trackerFactory = new FastLAPTrackerFactory();
-		final long start2 = System.currentTimeMillis();
-		final TrackMate trackmate2 = new TrackMate( m2, settings );
-		final boolean ok2 = trackmate2.execTracking();
-		if ( !ok2 )
-		{
-			System.err.println( trackmate2.getErrorMessage() );
-		}
-		final long end2 = System.currentTimeMillis();
-		System.out.println( "Done in " + ( end2 - start2 ) + " ms." );
-
-
-		/*
 		 * TEST
 		 */
 
 		int good = 0;
-		int bad = 0;
+		final int bad = 0;
 		for ( final Spot spot : spots.iterable( true ) )
 		{
 			final Set< DefaultWeightedEdge > edges = m1.getTrackModel().edgesOf( spot );
@@ -163,12 +144,6 @@ public class JaqamanSegmentCostMatrixCreatorBenchmark
 				if ( s1 == spot )
 				{
 					s1 = m1.getTrackModel().getEdgeTarget( edge );
-				}
-
-				if ( !m2.getTrackModel().containsEdge( spot, s1 ) )
-				{
-					System.out.println( "Could not find edge " + edge + " in 2nd model." );
-					bad++;
 				}
 				else
 				{
