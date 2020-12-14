@@ -6,11 +6,9 @@ import java.util.Map;
 import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
 
 /**
- * The mother class for all the configuration panels that can configure a
- * {@link fiji.plugin.trackmate.detection.SpotDetectorFactory}, a
- * {@link fiji.plugin.trackmate.tracking.SpotTracker}, ...
+ * The mother class for all the configuration panels.
  * 
- * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; 2011 - 2012
+ * @author Jean-Yves Tinevez
  *
  */
 public abstract class ConfigurationPanel extends ActionListenablePanel
