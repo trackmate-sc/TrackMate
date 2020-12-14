@@ -10,13 +10,9 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.swing.ImageIcon;
@@ -31,9 +27,6 @@ import javax.swing.SwingUtilities;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.detection.MaskUtils;
@@ -75,15 +68,7 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 
 	private static final ImageIcon ICON_PREVIEW = new ImageIcon( TrackMateGUIController.class.getResource( "images/flag_checked.png" ) );
 
-	protected final ImagePlus imp;
-
-	protected final Model model;
-
-	private final Logger localLogger;
-
 	protected final Settings settings;
-
-	protected JButton btnPreview;
 
 	protected JCheckBox jCheckBoxSimplify;
 
@@ -133,8 +118,7 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 			final String detectorName )
 	{
 		this.settings = settings;
-		this.imp = settings.imp;
-		this.model = model;
+		final ImagePlus imp = settings.imp;
 
 		setPreferredSize( new Dimension( 300, 511 ) );
 		final GridBagLayout gridBagLayout = new GridBagLayout();
@@ -247,7 +231,7 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 		jCheckBoxSimplify.setText( "Simplify contours." );
 		jCheckBoxSimplify.setFont( FONT );
 
-		btnPreview = new JButton( "Preview", ICON_PREVIEW );
+		final JButton btnPreview = new JButton( "Preview", ICON_PREVIEW );
 		btnPreview.setToolTipText( TOOLTIP_PREVIEW );
 		final GridBagConstraints gbc_btnPreview = new GridBagConstraints();
 		gbc_btnPreview.anchor = GridBagConstraints.NORTHEAST;
@@ -257,14 +241,7 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 		gbc_btnPreview.gridy = 8;
 		this.add( btnPreview, gbc_btnPreview );
 		btnPreview.setFont( SMALL_FONT );
-		btnPreview.addActionListener( new ActionListener()
-		{
-			@Override
-			public void actionPerformed( final ActionEvent e )
-			{
-				preview();
-			}
-		} );
+
 		final JLabelLogger labelLogger = new JLabelLogger();
 		labelLogger.setText( "    " );
 		final GridBagConstraints gbc_labelLogger = new GridBagConstraints();
@@ -275,7 +252,7 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 		gbc_labelLogger.gridx = 0;
 		gbc_labelLogger.gridy = 9;
 		add( labelLogger, gbc_labelLogger );
-		localLogger = labelLogger.getLogger();
+		final Logger localLogger = labelLogger.getLogger();
 
 		/*
 		 * Deal with channels: the slider and channel labels are only visible if
@@ -298,6 +275,15 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 		}
 
 		btnAutoThreshold.addActionListener( e -> autoThreshold() );
+
+		btnPreview.addActionListener( e -> DetectionUtils.preview(
+				model,
+				settings,
+				getDetectorFactory(),
+				getSettings(),
+				imp.getFrame() - 1,
+				localLogger,
+				b -> btnPreview.setEnabled( b ) ) );
 	}
 
 	/*
@@ -371,76 +357,6 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 	protected SpotDetectorFactory< ? > getDetectorFactory()
 	{
 		return new ThresholdDetectorFactory();
-	}
-
-	/*
-	 * PRIVATE METHODS
-	 */
-
-	/**
-	 * Launch detection on the current frame.
-	 */
-	protected void preview()
-	{
-		btnPreview.setEnabled( false );
-		new Thread( "TrackMate preview detection thread" )
-		{
-			@Override
-			public void run()
-			{
-				try
-				{
-
-					final Settings lSettings = new Settings();
-					lSettings.setFrom( imp );
-					final int frame = imp.getFrame() - 1;
-					lSettings.tstart = frame;
-					lSettings.tend = frame;
-					lSettings.roi = settings.roi;
-
-					lSettings.detectorFactory = getDetectorFactory();
-					lSettings.detectorSettings = getSettings();
-
-					final TrackMate trackmate = new TrackMate( lSettings );
-					trackmate.getModel().setLogger( localLogger );
-
-					final boolean detectionOk = trackmate.execDetection();
-					if ( !detectionOk )
-					{
-						localLogger.error( trackmate.getErrorMessage() );
-						return;
-					}
-					localLogger.log( "Found " + trackmate.getModel().getSpots().getNSpots( false ) + " spots." );
-
-					// Wrap new spots in a list.
-					final SpotCollection newspots = trackmate.getModel().getSpots();
-					final Iterator< Spot > it = newspots.iterator( frame, false );
-					final ArrayList< Spot > spotsToCopy = new ArrayList<>( newspots.getNSpots( frame, false ) );
-					while ( it.hasNext() )
-						spotsToCopy.add( it.next() );
-
-					// Pass new spot list to model.
-					model.getSpots().put( frame, spotsToCopy );
-					// Make them visible
-					for ( final Spot spot : spotsToCopy )
-						spot.putFeature( SpotCollection.VISIBLITY, SpotCollection.ONE );
-
-					// Generate event for listener to reflect changes.
-					model.setSpots( model.getSpots(), true );
-
-				}
-				catch (final Exception e)
-				{
-					localLogger.error( e.getMessage() );
-					e.printStackTrace();
-				}
-				finally
-				{
-					btnPreview.setEnabled( true );
-				}
-
-			}
-		}.start();
 	}
 
 	@Override
