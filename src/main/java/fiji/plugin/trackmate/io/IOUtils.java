@@ -38,6 +38,32 @@ import ij.IJ;
 public class IOUtils
 {
 
+	public static final boolean canReadFile( final String path, final StringBuilder errorHolder )
+	{
+		if ( path.isEmpty() )
+		{
+			errorHolder.append( "The path to the file is empty." );
+			return false;
+		}
+		final File file = new File( path );
+		if ( !file.exists() )
+		{
+			errorHolder.append( "The file " + path + " does not exist." );
+			return false;
+		}
+		if ( !file.isFile() )
+		{
+			errorHolder.append( "The path" + path + " is not a file." );
+			return false;
+		}
+		if ( !file.canRead() )
+		{
+			errorHolder.append( "The file" + path + " cannot be read." );
+			return false;
+		}
+		return true;
+	}
+
 	/**
 	 * Prompts the user for a xml file to save to.
 	 *
@@ -523,7 +549,7 @@ public class IOUtils
 
 		if ( !expectedClass.isInstance( obj ) )
 		{
-			errorHolder.append( "Exoected " + parameterKey + " parameter to be a " + expectedClass.getName() + " but was a " + obj.getClass().getName() + ".\n" );
+			errorHolder.append( "Expected " + parameterKey + " parameter to be a " + expectedClass.getName() + " but was a " + obj.getClass().getName() + ".\n" );
 			return false;
 		}
 
