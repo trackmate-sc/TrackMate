@@ -7,7 +7,6 @@ import java.util.Random;
 import org.scijava.vecmath.Point3d;
 
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.detection.DownsampleLogDetector;
 import fiji.plugin.trackmate.detection.LogDetector;
 import fiji.plugin.trackmate.util.SpotNeighborhood;
 import fiji.plugin.trackmate.util.TMUtils;

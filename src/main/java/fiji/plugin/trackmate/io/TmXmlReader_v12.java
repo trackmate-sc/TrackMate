@@ -109,7 +109,6 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.detection.DogDetectorFactory;
-import fiji.plugin.trackmate.detection.DownsampleLogDetectorFactory;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.detection.ManualDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
@@ -688,7 +687,7 @@ public class TmXmlReader_v12 extends TmXmlReader
 			}
 			else if ( segmenterClassName.equals( "fiji.plugin.trackmate.segmentation.DownSamplingLogSegmenter" ) )
 			{
-				segmenterKey = DownsampleLogDetectorFactory.THIS_DETECTOR_KEY;
+				segmenterKey = "DOWNSAMPLE_LOG_DETECTOR";
 			}
 			else if ( segmenterClassName.equals( "fiji.plugin.trackmate.segmentation.ManualSegmenter" ) )
 			{
@@ -767,7 +766,7 @@ public class TmXmlReader_v12 extends TmXmlReader
 			{
 				// DownSample segmenter
 
-				if ( segmenterKey.equals( DownsampleLogDetectorFactory.THIS_DETECTOR_KEY ) )
+				if ( segmenterKey.equals( "DOWNSAMPLE_LOG_DETECTOR" ) )
 				{
 
 					// The saved class matched, we can updated the settings
