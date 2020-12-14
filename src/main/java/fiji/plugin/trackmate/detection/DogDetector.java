@@ -67,14 +67,9 @@ public class DogDetector< T extends RealType< T > & NativeType< T >> extends Log
 		// We need to shift coordinates by -min[] to have the correct location.
 		final long[] min = new long[ interval.numDimensions() ];
 		interval.min( min );
-		for ( int d = 0; d < min.length; d++ )
-		{
-			min[ d ] = -min[ d ];
-		}
-
 		final FloatType type = new FloatType();
-		final RandomAccessibleInterval< FloatType > dog = Views.offset( Util.getArrayOrCellImgFactory( interval, type ).create( interval ), min );
-		final RandomAccessibleInterval< FloatType > dog2 = Views.offset( Util.getArrayOrCellImgFactory( interval, type ).create( interval ), min );
+		final RandomAccessibleInterval< FloatType > dog = Views.translate( Util.getArrayOrCellImgFactory( interval, type ).create( interval ), min );
+		final RandomAccessibleInterval< FloatType > dog2 = Views.translate( Util.getArrayOrCellImgFactory( interval, type ).create( interval ), min );
 
 		final double sigma1 = radius / Math.sqrt( interval.numDimensions() ) * 0.9;
 		final double sigma2 = radius / Math.sqrt( interval.numDimensions() ) * 1.1;

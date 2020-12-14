@@ -249,12 +249,10 @@ public class DetectionUtils
 	public static final < T extends RealType< T > > Img< FloatType > copyToFloatImg( final RandomAccessible< T > img, final Interval interval, final ImgFactory< FloatType > factory )
 	{
 		final Img< FloatType > output = factory.create( interval );
-		final long[] min = new long[ interval.numDimensions() ];
-		interval.min( min );
-		final RandomAccess< T > in = Views.offset( img, min ).randomAccess();
+		final RandomAccess< T > in = Views.zeroMin( Views.interval( img, interval ) ).randomAccess();
 		final Cursor< FloatType > out = output.cursor();
 		final RealFloatConverter< T > c = new RealFloatConverter<>();
-
+		
 		while ( out.hasNext() )
 		{
 			out.fwd();
