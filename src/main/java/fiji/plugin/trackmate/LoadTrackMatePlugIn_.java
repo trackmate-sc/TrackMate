@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
@@ -72,30 +73,21 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 	public void run( final String filePath )
 	{
 
-		// I can't stand the metal look. If this is a problem, contact me
-		// (jeanyves.tinevez@gmail.com)
+		/*
+		 * I can't stand the metal look. If this is a problem, contact me
+		 * (jeanyves.tinevez at gmail dot com)
+		 */
 		if ( IJ.isMacOSX() || IJ.isWindows() )
 		{
 			try
 			{
 				UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
 			}
-			catch ( final ClassNotFoundException e )
+			catch ( ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e )
 			{
 				e.printStackTrace();
 			}
-			catch ( final InstantiationException e )
-			{
-				e.printStackTrace();
-			}
-			catch ( final IllegalAccessException e )
-			{
-				e.printStackTrace();
-			}
-			catch ( final UnsupportedLookAndFeelException e )
-			{
-				e.printStackTrace();
-			}
+
 		}
 
 		final Logger logger = Logger.IJ_LOGGER; // logPanel.getLogger();
@@ -159,19 +151,20 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		if ( !reader.isReadingOk() )
 		{
 			logger.error( reader.getErrorMessage() );
-			logger.error( "Aborting.\n" ); // If I cannot even open the xml
-			// file, it is not worth going on.
+			logger.error( "Aborting.\n" );
+			/*
+			 * If I cannot even open the xml file, it is not worth going on.
+			 */
 			return;
 		}
 
 		// Log
 		final String logText = reader.getLog() + '\n';
+
 		// Model
 		model = reader.getModel();
 		if ( !reader.isReadingOk() )
-		{
 			logger.error( "Problem reading the model:\n" + reader.getErrorMessage() );
-		}
 
 		// Settings -> empty for now.
 		settings = createSettings();
@@ -203,15 +196,19 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		final SpotAnalyzerProvider spotAnalyzerProvider = controller.getSpotAnalyzerProvider();
 		final EdgeAnalyzerProvider edgeAnalyzerProvider = controller.getEdgeAnalyzerProvider();
 		final TrackAnalyzerProvider trackAnalyzerProvider = controller.getTrackAnalyzerProvider();
-		reader.readSettings( settings, detectorProvider, trackerProvider, spotAnalyzerProvider, edgeAnalyzerProvider, trackAnalyzerProvider );
+		reader.readSettings(
+				settings,
+				detectorProvider,
+				trackerProvider,
+				spotAnalyzerProvider,
+				edgeAnalyzerProvider,
+				trackAnalyzerProvider );
+
 		if ( !reader.isReadingOk() )
-		{
 			logger.error( "Problem reading the settings:\n" + reader.getErrorMessage() );
-		}
+
 		if ( null == settings.imp )
-		{
 			settings.imp = ViewUtils.makeEmpytImagePlus( model );
-		}
 
 		// Hook actions
 		postRead( trackmate );
@@ -225,28 +222,19 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		// Views
 		final ViewProvider viewProvider = controller.getViewProvider();
 		final Collection< TrackMateModelView > views = reader.getViews( viewProvider, model, settings, controller.getSelectionModel() );
-		for ( final TrackMateModelView view : views )
-		{
-			if ( view instanceof TrackScheme )
-			{
-				//				final TrackScheme trackscheme = ( TrackScheme ) view;
-				//				trackscheme.setSpotImageUpdater( new SpotImageUpdater( settings ) );
-				continue;
-				// Don't relaunch TrackScheme.
-			}
-		}
 
 		if ( !reader.isReadingOk() )
 		{
+			logger.error( "Some errors occurred while reading file:\n" );
+			logger.error( reader.getErrorMessage() );
 			final Logger newlogger = controller.getGUI().getLogger();
-			newlogger.error( "Some errors occured while reading file:\n" );
+			newlogger.error( "Some errors occurred while reading file:\n" );
 			newlogger.error( reader.getErrorMessage() );
 		}
 
 		if ( null == guiState )
-		{
 			guiState = ConfigureViewsDescriptor.KEY;
-		}
+
 		controller.setGUIStateString( guiState );
 
 		// Setup and render views
@@ -258,20 +246,21 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		for ( final TrackMateModelView view : views )
 		{
 			if ( view instanceof TrackScheme )
-			{
-				continue;
-				// Don't relaunch TrackScheme.
-			}
+				continue; // Don't relaunch TrackScheme.
+
 			controller.getGuimodel().addView( view );
 			for ( final String key : displaySettings.keySet() )
-			{
 				view.setDisplaySettings( key, displaySettings.get( key ) );
-			}
+
 			view.render();
 		}
 
 		// Text
-		controller.getGUI().getLogPanel().setTextContent( logText );
+		controller.getGUI().getLogger().log( "Session log saved in the file:\n"
+				+ "--------------------\n"
+				+ logText
+				+ "--------------------\n",
+				Color.GRAY );
 		model.getLogger().log( "File loaded on " + TMUtils.getCurrentTimeString() + '\n', Logger.BLUE_COLOR );
 	}
 
