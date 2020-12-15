@@ -345,8 +345,8 @@ public class TrackMateGUIController implements ActionListener
 	{
 		for ( final WizardPanelDescriptor descriptor : registeredDescriptors )
 		{
-
-			if ( stateKey.equals( descriptor.getKey() ) )
+			if ( stateKey.trim().replaceAll( " [^\\x00-\\x7F]", "" ).equals(
+					descriptor.getKey().trim().replaceAll( " [^\\x00-\\x7F]", "" ) ) )
 			{
 
 				if ( descriptor.equals( spotFilterDescriptor ) )
@@ -371,6 +371,7 @@ public class TrackMateGUIController implements ActionListener
 					gui.setPreviousButtonEnabled( true );
 
 				descriptor.displayingPanel();
+				return;
 			}
 		}
 
