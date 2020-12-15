@@ -55,7 +55,6 @@ import fiji.plugin.trackmate.gui.descriptors.DetectorChoiceDescriptor;
 import fiji.plugin.trackmate.gui.descriptors.DetectorConfigurationDescriptor;
 import fiji.plugin.trackmate.gui.descriptors.GrapherDescriptor;
 import fiji.plugin.trackmate.gui.descriptors.InitFilterDescriptor;
-import fiji.plugin.trackmate.gui.descriptors.LoadDescriptor;
 import fiji.plugin.trackmate.gui.descriptors.LogPanelDescriptor;
 import fiji.plugin.trackmate.gui.descriptors.SaveDescriptor;
 import fiji.plugin.trackmate.gui.descriptors.SomeDialogDescriptor;
@@ -154,8 +153,6 @@ public class TrackMateGUIController implements ActionListener
 	protected LogPanelDescriptor logPanelDescriptor;
 
 	protected SaveDescriptor saveDescriptor;
-
-	protected LoadDescriptor loadDescriptor;
 
 	protected Collection< WizardPanelDescriptor > registeredDescriptors;
 
@@ -720,11 +717,6 @@ public class TrackMateGUIController implements ActionListener
 		saveDescriptor = new SaveDescriptor( this );
 
 		/*
-		 * Load descriptor
-		 */
-		loadDescriptor = new LoadDescriptor( this );
-
-		/*
 		 * Store created descriptors
 		 */
 		final ArrayList< WizardPanelDescriptor > descriptors = new ArrayList<>( 16 );
@@ -735,7 +727,6 @@ public class TrackMateGUIController implements ActionListener
 		descriptors.add( detectionDescriptor );
 		descriptors.add( grapherDescriptor );
 		descriptors.add( initFilterDescriptor );
-		descriptors.add( loadDescriptor );
 		descriptors.add( logPanelDescriptor );
 		descriptors.add( saveDescriptor );
 		descriptors.add( spotFilterDescriptor );
@@ -955,7 +946,7 @@ public class TrackMateGUIController implements ActionListener
 		gui.getLogger().log( "Tinevez, JY.; Perry, N. & Schindelin, J. et al. (2017), 'TrackMate: An open and extensible platform for single-particle tracking.', "
 				+ "Methods 115: 80-90, PMID 27713081.\n", Logger.GREEN_COLOR );
 		gui.getLogger().log( "https://www.ncbi.nlm.nih.gov/pubmed/27713081\n", Logger.BLUE_COLOR );
-		gui.getLogger().log( "https://scholar.google.com/scholar?cluster=9846627681021220605\n", Logger.BLUE_COLOR );
+		gui.getLogger().log( "https://www.sciencedirect.com/science/article/pii/S1046202316303346\n", Logger.BLUE_COLOR );
 		// Execute about to be displayed action of the new one
 		panelDescriptor.aboutToDisplayPanel();
 
@@ -1013,24 +1004,6 @@ public class TrackMateGUIController implements ActionListener
 		{
 
 			previous();
-
-		}
-		else if ( event == gui.LOAD_BUTTON_PRESSED && guimodel.actionFlag )
-		{
-
-			/*
-			 * TODO: There is actually NO load button anymore. The user load the
-			 * data directly through another plugin call. We left this code here
-			 * intact in case I change my mind. Removing it will actually
-			 * trigger an appreciable simplification of the code, but I let it
-			 * linger here a bit more. - Sep 2013
-			 */
-
-			guimodel.actionFlag = false;
-			gui.jButtonNext.setText( "Resume" );
-			disableButtonsAndStoreState();
-			load();
-			restoreButtonsState();
 
 		}
 		else if ( event == gui.SAVE_BUTTON_PRESSED && guimodel.actionFlag )
@@ -1157,19 +1130,6 @@ public class TrackMateGUIController implements ActionListener
 
 		// Re-enable the previous button, in case it was disabled
 		gui.setNextButtonEnabled( true );
-	}
-
-	private void load()
-	{
-		// Store current state
-		guimodel.previousDescriptor = guimodel.currentDescriptor;
-
-		// Move to load state and show log panel
-		loadDescriptor.aboutToDisplayPanel();
-		gui.show( loadDescriptor );
-
-		// Instantiate GuiReader, ask for file, and load it in memory
-		loadDescriptor.displayingPanel();
 	}
 
 	private void save()
