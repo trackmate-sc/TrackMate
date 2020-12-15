@@ -1,10 +1,9 @@
 package fiji.plugin.trackmate.detection;
 
 import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_TARGET_CHANNEL;
-import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.io.IOUtils.readBooleanAttribute;
-import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
+import static fiji.plugin.trackmate.io.IOUtils.readIntegerAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.writeAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.writeTargetChannel;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
@@ -119,7 +118,7 @@ public class MaskDetectorFactory< T extends RealType< T > & NativeType< T > > ex
 		lSettings.clear();
 		final StringBuilder errorHolder = new StringBuilder();
 		boolean ok = true;
-		ok = ok & readDoubleAttribute( element, lSettings, KEY_RADIUS, errorHolder );
+		ok = ok & readIntegerAttribute( element, lSettings, KEY_TARGET_CHANNEL, errorHolder );
 		ok = ok & readBooleanAttribute( element, lSettings, KEY_SIMPLIFY_CONTOURS, errorHolder );
 		if ( !ok )
 		{
