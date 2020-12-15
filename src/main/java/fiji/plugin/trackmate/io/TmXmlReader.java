@@ -652,7 +652,7 @@ public class TmXmlReader
 	 * @param settingsElement
 	 *            the settings {@link Element} to read parameters from.
 	 * @param settings
-	 *            the {@link Settings} to feed/
+	 *            the {@link Settings} to feed.
 	 */
 	private void getBaseSettings( final Element settingsElement, final Settings settings )
 	{
@@ -668,8 +668,6 @@ public class TmXmlReader
 			settings.zend = readIntAttribute( settingsEl, CROP_ZEND_ATTRIBUTE_NAME, logger, 10 );
 			settings.tstart = readIntAttribute( settingsEl, CROP_TSTART_ATTRIBUTE_NAME, logger, 1 );
 			settings.tend = readIntAttribute( settingsEl, CROP_TEND_ATTRIBUTE_NAME, logger, 10 );
-			// settings.detectionChannel = readIntAttribute(settingsEl,
-			// CROP_DETECTION_CHANNEL_ATTRIBUTE_NAME, logger, 1);
 		}
 		// Image info settings
 		final Element infoEl = settingsElement.getChild( IMAGE_ELEMENT_KEY );
@@ -738,8 +736,9 @@ public class TmXmlReader
 		final Map< String, Object > ds = new HashMap<>();
 		ok = factory.unmarshall( element, ds );
 
-		if ( ok )
-			settings.detectorSettings = ds;
+		settings.detectorSettings = ds;
+		if ( !ok )
+			logger.error( factory.getErrorMessage() );
 	}
 
 	/**
