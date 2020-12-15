@@ -9,16 +9,17 @@ import java.awt.Font;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
-import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
 
 public class NearestNeighborTrackerSettingsPanel extends ConfigurationPanel {
 
 	private static final long serialVersionUID = 1L;
-	private JNumericTextField maxDistField;
+
+	private JFormattedTextField maxDistField;
 	private JLabel labelTrackerDescription;
 	private JLabel labelUnits;
 	private JLabel labelTracker;
@@ -37,13 +38,13 @@ public class NearestNeighborTrackerSettingsPanel extends ConfigurationPanel {
 	@Override
 	public Map<String, Object> getSettings() {
 		final Map<String, Object> settings = new HashMap<>();
-		settings.put(KEY_LINKING_MAX_DISTANCE, maxDistField.getValue());
+		settings.put( KEY_LINKING_MAX_DISTANCE, ( ( Number ) maxDistField.getValue() ).doubleValue() );
 		return settings;
 	}
 
 	@Override
 	public void setSettings(final Map<String, Object> settings) {
-		maxDistField.setText(""+settings.get(KEY_LINKING_MAX_DISTANCE));
+		maxDistField.setValue( settings.get( KEY_LINKING_MAX_DISTANCE ) );
 	}
 
 
@@ -77,7 +78,7 @@ public class NearestNeighborTrackerSettingsPanel extends ConfigurationPanel {
 		lblMaximalLinkingDistance.setBounds(10, 314, 164, 20);
 		add(lblMaximalLinkingDistance);
 
-		maxDistField = new JNumericTextField();
+		maxDistField = new JFormattedTextField( 15. );
 		maxDistField.setFont(FONT);
 		maxDistField.setBounds(184, 316, 62, 16);
 		maxDistField.setSize(TEXTFIELD_DIMENSION);

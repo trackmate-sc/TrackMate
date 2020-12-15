@@ -15,6 +15,7 @@ import java.awt.event.FocusListener;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -34,7 +35,6 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
-import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
 import fiji.plugin.trackmate.util.ModelTools;
 import ij.ImagePlus;
 
@@ -74,15 +74,15 @@ public class SpotEditToolConfigPanel extends JFrame
 	}
 	private final Logger logger;
 
-	private final JNumericTextField jNFQualityThreshold;
+	private final JFormattedTextField jNFQualityThreshold;
 
-	private final JNumericTextField jNFDistanceTolerance;
+	private final JFormattedTextField jNFDistanceTolerance;
 
-	private final JNumericTextField jNFNFrames;
+	private final JFormattedTextField jNFNFrames;
 
 	private final SpotEditTool parent;
 
-	private final JNumericTextField jNFNStepwiseTime;
+	private final JFormattedTextField jNFNStepwiseTime;
 
 
 	public SpotEditToolConfigPanel( final SpotEditTool parent )
@@ -153,7 +153,7 @@ public class SpotEditToolConfigPanel extends JFrame
 		lblQualityThreshold.setFont( SMALL_FONT );
 		panelSemiAutoParams.add( lblQualityThreshold );
 
-		jNFQualityThreshold = new JNumericTextField( parent.params.qualityThreshold );
+		jNFQualityThreshold = new JFormattedTextField( parent.params.qualityThreshold );
 		jNFQualityThreshold.setHorizontalAlignment( SwingConstants.CENTER );
 		jNFQualityThreshold.setFont( SMALL_FONT );
 		jNFQualityThreshold.setBounds( 137, 64, 49, 18 );
@@ -170,7 +170,7 @@ public class SpotEditToolConfigPanel extends JFrame
 		lblDistanceTolerance.setFont( SMALL_FONT );
 		panelSemiAutoParams.add( lblDistanceTolerance );
 
-		jNFDistanceTolerance = new JNumericTextField( parent.params.distanceTolerance );
+		jNFDistanceTolerance = new JFormattedTextField( parent.params.distanceTolerance );
 		jNFDistanceTolerance.setHorizontalAlignment( SwingConstants.CENTER );
 		jNFDistanceTolerance.setFont( SMALL_FONT );
 		jNFDistanceTolerance.setBounds( 137, 84, 49, 18 );
@@ -184,8 +184,7 @@ public class SpotEditToolConfigPanel extends JFrame
 		lblNFrames.setFont( SMALL_FONT );
 		panelSemiAutoParams.add( lblNFrames );
 
-		jNFNFrames = new JNumericTextField( ( double ) parent.params.nFrames );
-		jNFNFrames.setFormat( "%.0f" );
+		jNFNFrames = new JFormattedTextField( parent.params.nFrames );
 		jNFNFrames.setBounds( 137, 104, 49, 18 );
 		jNFNFrames.setHorizontalAlignment( SwingConstants.CENTER );
 		jNFNFrames.setFont( SMALL_FONT );
@@ -304,9 +303,8 @@ public class SpotEditToolConfigPanel extends JFrame
 		lblNavigationTools.setFont( FONT.deriveFont( Font.BOLD ) );
 		panel.add( lblNavigationTools );
 
-		jNFNStepwiseTime = new JNumericTextField( ( double ) parent.params.stepwiseTimeBrowsing );
+		jNFNStepwiseTime = new JFormattedTextField( parent.params.stepwiseTimeBrowsing );
 		jNFNStepwiseTime.setBounds( 137, 26, 49, 18 );
-		jNFNStepwiseTime.setFormat( "%.0f" );
 		jNFNStepwiseTime.setHorizontalAlignment( SwingConstants.CENTER );
 		jNFNStepwiseTime.setFont( SMALL_FONT );
 		jNFNStepwiseTime.addActionListener( al );
@@ -411,10 +409,10 @@ public class SpotEditToolConfigPanel extends JFrame
 
 	private void updateParamsFromTextFields()
 	{
-		parent.params.distanceTolerance = jNFDistanceTolerance.getValue();
-		parent.params.qualityThreshold = jNFQualityThreshold.getValue();
-		parent.params.nFrames = ( int ) jNFNFrames.getValue();
-		parent.params.stepwiseTimeBrowsing = ( int ) jNFNStepwiseTime.getValue();
+		parent.params.distanceTolerance = ( ( Number ) jNFDistanceTolerance.getValue() ).doubleValue();
+		parent.params.qualityThreshold = ( ( Number ) jNFQualityThreshold.getValue() ).doubleValue();
+		parent.params.nFrames = ( ( Number ) jNFNFrames.getValue() ).intValue();
+		parent.params.stepwiseTimeBrowsing = ( ( Number ) jNFNStepwiseTime.getValue() ).intValue();
 	}
 
 	private void semiAutoTracking()

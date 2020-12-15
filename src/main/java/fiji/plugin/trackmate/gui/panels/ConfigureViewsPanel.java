@@ -25,6 +25,8 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -40,10 +42,10 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -58,7 +60,6 @@ import fiji.plugin.trackmate.gui.DisplaySettingsListener;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.panels.components.ColorByFeatureGUIPanel;
 import fiji.plugin.trackmate.gui.panels.components.ColorByFeatureGUIPanel.Category;
-import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
 import fiji.plugin.trackmate.gui.panels.components.SetColorScaleDialog;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.ManualEdgeColorGenerator;
@@ -69,7 +70,6 @@ import fiji.plugin.trackmate.visualization.SpotColorGenerator;
 import fiji.plugin.trackmate.visualization.SpotColorGeneratorPerTrackFeature;
 import fiji.plugin.trackmate.visualization.TrackColorGenerator;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
-import fiji.util.NumberParser;
 
 /**
  * A configuration panel used to tune the aspect of spots and tracks in multiple
@@ -82,6 +82,8 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 {
 
 	private static final long serialVersionUID = 1L;
+
+	private static final NumberFormat FORMAT = new DecimalFormat( "#.###" );
 
 	private static final Icon DO_ANALYSIS_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/calculator.png" ) );
 
@@ -124,13 +126,13 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 
 	private JCheckBox jCheckBoxLimitDepth;
 
-	private JTextField jTextFieldFrameDepth;
+	private JFormattedTextField jTextFieldFrameDepth;
 
 	private JLabel jLabelFrameDepth;
 
 	private ColorByFeatureGUIPanel jPanelSpotColor;
 
-	private JNumericTextField jTextFieldSpotRadius;
+	private JFormattedTextField jTextFieldSpotRadius;
 
 	private JCheckBox jCheckBoxDisplayNames;
 
@@ -154,7 +156,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 
 	private FeatureColorGenerator< Spot > spotColorGeneratorPerTrackFeature;
 
-	private JNumericTextField textFieldDrawingDepth;
+	private JFormattedTextField textFieldDrawingDepth;
 
 	private JPanel jpanelDrawingDepth;
 
@@ -671,7 +673,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 						{
 							Integer depth;
 							if ( jCheckBoxLimitDepth.isSelected() )
-								depth = NumberParser.parseInteger( jTextFieldFrameDepth.getText() );
+								depth = ( ( Number ) jTextFieldFrameDepth.getValue() ).intValue();
 							else
 								depth = ( int ) 1e9;
 
@@ -692,10 +694,10 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 				{
 					displaySettings.put( KEY_TRACK_DISPLAY_DEPTH, Integer.valueOf( TrackMateModelView.DEFAULT_TRACK_DISPLAY_DEPTH ) );
 
-					jTextFieldFrameDepth = new JTextField();
+					jTextFieldFrameDepth = new JFormattedTextField( 10 );
 					jTextFieldFrameDepth.setHorizontalAlignment( SwingConstants.CENTER );
 					jTextFieldFrameDepth.setFont( SMALL_FONT );
-					jTextFieldFrameDepth.setText( "" + TrackMateModelView.DEFAULT_TRACK_DISPLAY_DEPTH );
+					jTextFieldFrameDepth.setValue( TrackMateModelView.DEFAULT_TRACK_DISPLAY_DEPTH );
 					jTextFieldFrameDepth.setPreferredSize( new java.awt.Dimension( 34, 20 ) );
 					jTextFieldFrameDepth.addActionListener( new ActionListener()
 					{
@@ -705,7 +707,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 							final Integer oldValue = ( Integer ) displaySettings.get( KEY_TRACK_DISPLAY_DEPTH );
 							try
 							{
-								final Integer depth = NumberParser.parseInteger( jTextFieldFrameDepth.getText() );
+								final int depth = ( ( Number ) jTextFieldFrameDepth.getValue() ).intValue();
 								displaySettings.put( KEY_TRACK_DISPLAY_DEPTH, depth );
 
 								final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_TRACK_DISPLAY_DEPTH, depth, oldValue );
@@ -713,7 +715,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 							}
 							catch ( final NumberFormatException nfe )
 							{
-								jTextFieldFrameDepth.setText( "" + oldValue );
+								jTextFieldFrameDepth.setValue( Integer.valueOf( oldValue ) );
 							}
 						}
 					} );
@@ -794,7 +796,8 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 					jLabelSpotRadius.setText( "  Spot display radius ratio:" );
 					jLabelSpotRadius.setFont( SMALL_FONT );
 
-					jTextFieldSpotRadius = new JNumericTextField( "1" );
+					jTextFieldSpotRadius = new JFormattedTextField( FORMAT );
+					jTextFieldSpotRadius.setValue( Double.valueOf( 1. ) );
 					jTextFieldSpotRadius.setHorizontalAlignment( SwingConstants.CENTER );
 					jTextFieldSpotRadius.setPreferredSize( new java.awt.Dimension( 34, 20 ) );
 					jTextFieldSpotRadius.setFont( SMALL_FONT );
@@ -817,7 +820,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 						public void focusLost( final FocusEvent e )
 						{
 							final Double oldValue = ( Double ) displaySettings.get( KEY_SPOT_RADIUS_RATIO );
-							final Double newValue = ( double ) jTextFieldSpotRadius.getValue();
+							final Double newValue = ( ( Number ) jTextFieldSpotRadius.getValue() ).doubleValue();
 							displaySettings.put( KEY_SPOT_RADIUS_RATIO, newValue );
 
 							final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_SPOT_RADIUS_RATIO, newValue, oldValue );
@@ -891,19 +894,19 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 					}
 				} );
 
-				textFieldDrawingDepth = new JNumericTextField( TrackMateModelView.DEFAULT_DRAWING_DEPTH );
-				textFieldDrawingDepth.setFormat( "%.1f" );
+				textFieldDrawingDepth = new JFormattedTextField( FORMAT );
+				textFieldDrawingDepth.setValue( TrackMateModelView.DEFAULT_DRAWING_DEPTH );
 				textFieldDrawingDepth.setHorizontalAlignment( SwingConstants.CENTER );
 				textFieldDrawingDepth.setFont( SMALL_FONT );
-				jpanelDrawingDepth.add( textFieldDrawingDepth );
 				textFieldDrawingDepth.setColumns( 7 );
+				jpanelDrawingDepth.add( textFieldDrawingDepth );
 				textFieldDrawingDepth.addActionListener( new ActionListener()
 				{
 					@Override
 					public void actionPerformed( final ActionEvent e )
 					{
 						final Double oldValue = ( Double ) displaySettings.get( KEY_DRAWING_DEPTH );
-						final Double newValue = textFieldDrawingDepth.getValue();
+						final Double newValue = ( ( Number ) textFieldDrawingDepth.getValue() ).doubleValue();
 						displaySettings.put( KEY_DRAWING_DEPTH, newValue );
 
 						final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_DRAWING_DEPTH, newValue, oldValue );
@@ -916,7 +919,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 					public void focusLost( final FocusEvent e )
 					{
 						final Double oldValue = ( Double ) displaySettings.get( KEY_SPOT_RADIUS_RATIO );
-						final Double newValue = textFieldDrawingDepth.getValue();
+						final Double newValue = ( ( Number ) textFieldDrawingDepth.getValue() ).doubleValue();
 						displaySettings.put( KEY_DRAWING_DEPTH, newValue );
 
 						final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_DRAWING_DEPTH, newValue, oldValue );

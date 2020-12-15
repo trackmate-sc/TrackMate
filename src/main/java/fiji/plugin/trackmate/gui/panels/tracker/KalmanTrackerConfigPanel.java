@@ -11,21 +11,21 @@ import java.awt.Font;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
-import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
 
 public class KalmanTrackerConfigPanel extends ConfigurationPanel
 {
 	private static final long serialVersionUID = 1L;
 
-	private final JNumericTextField tfInitSearchRadius;
+	private final JFormattedTextField tfInitSearchRadius;
 
-	private final JNumericTextField tfSearchRadius;
+	private final JFormattedTextField tfSearchRadius;
 
-	private final JNumericTextField tfMaxFrameGap;
+	private final JFormattedTextField tfMaxFrameGap;
 
 	public KalmanTrackerConfigPanel( final String trackerName, final String infoText, final String spaceUnits )
 	{
@@ -67,21 +67,21 @@ public class KalmanTrackerConfigPanel extends ConfigurationPanel
 		lblMaxFrameGap.setBounds( 6, 404, 173, 16 );
 		add( lblMaxFrameGap );
 
-		tfInitSearchRadius = new JNumericTextField();
+		tfInitSearchRadius = new JFormattedTextField( 15. );
 		tfInitSearchRadius.setHorizontalAlignment( SwingConstants.CENTER );
 		tfInitSearchRadius.setFont( FONT );
 		tfInitSearchRadius.setBounds( 167, 348, 60, 28 );
 		add( tfInitSearchRadius );
 		tfInitSearchRadius.setSize( TEXTFIELD_DIMENSION );
 
-		tfSearchRadius = new JNumericTextField();
+		tfSearchRadius = new JFormattedTextField( 15. );
 		tfSearchRadius.setHorizontalAlignment( SwingConstants.CENTER );
 		tfSearchRadius.setFont( FONT );
 		tfSearchRadius.setBounds( 167, 376, 60, 28 );
 		add( tfSearchRadius );
 		tfSearchRadius.setSize( TEXTFIELD_DIMENSION );
 
-		tfMaxFrameGap = new JNumericTextField();
+		tfMaxFrameGap = new JFormattedTextField( 2 );
 		tfMaxFrameGap.setHorizontalAlignment( SwingConstants.CENTER );
 		tfMaxFrameGap.setFont( FONT );
 		tfMaxFrameGap.setBounds( 167, 404, 60, 28 );
@@ -107,18 +107,18 @@ public class KalmanTrackerConfigPanel extends ConfigurationPanel
 	@Override
 	public void setSettings( final Map< String, Object > settings )
 	{
-		tfInitSearchRadius.setText( "" + settings.get( KEY_LINKING_MAX_DISTANCE ) );
-		tfSearchRadius.setText( "" + settings.get( KEY_KALMAN_SEARCH_RADIUS ) );
-		tfMaxFrameGap.setText( "" + settings.get( KEY_GAP_CLOSING_MAX_FRAME_GAP ) );
+		tfInitSearchRadius.setValue( settings.get( KEY_LINKING_MAX_DISTANCE ) );
+		tfSearchRadius.setValue( settings.get( KEY_KALMAN_SEARCH_RADIUS ) );
+		tfMaxFrameGap.setValue( settings.get( KEY_GAP_CLOSING_MAX_FRAME_GAP ) );
 	}
 
 	@Override
 	public Map< String, Object > getSettings()
 	{
 		final Map< String, Object > settings = new HashMap<>();
-		settings.put( KEY_LINKING_MAX_DISTANCE, tfInitSearchRadius.getValue() );
-		settings.put( KEY_KALMAN_SEARCH_RADIUS, tfSearchRadius.getValue() );
-		settings.put( KEY_GAP_CLOSING_MAX_FRAME_GAP, ( int ) tfMaxFrameGap.getValue() );
+		settings.put( KEY_LINKING_MAX_DISTANCE, ( ( Number ) tfInitSearchRadius.getValue() ).doubleValue() );
+		settings.put( KEY_KALMAN_SEARCH_RADIUS, ( ( Number ) tfSearchRadius.getValue() ).doubleValue() );
+		settings.put( KEY_GAP_CLOSING_MAX_FRAME_GAP, ( ( Number ) tfMaxFrameGap.getValue() ).intValue() );
 		return settings;
 	}
 

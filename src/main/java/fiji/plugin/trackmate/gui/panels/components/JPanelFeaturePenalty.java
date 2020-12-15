@@ -9,9 +9,9 @@ import java.util.Map;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
+import javax.swing.JFormattedTextField;
 
 import fiji.plugin.trackmate.util.TMUtils;
-import fiji.util.NumberParser;
 
 public class JPanelFeaturePenalty extends javax.swing.JPanel
 {
@@ -20,7 +20,7 @@ public class JPanelFeaturePenalty extends javax.swing.JPanel
 
 	private JComboBox< String > jComboBoxFeature;
 
-	private JNumericTextField jTextFieldFeatureWeight;
+	private JFormattedTextField jTextFieldFeatureWeight;
 
 	private final List< String > features;
 
@@ -44,7 +44,7 @@ public class JPanelFeaturePenalty extends javax.swing.JPanel
 		final int index = features.indexOf( feature );
 		if ( index < 0 ) { return; }
 		jComboBoxFeature.setSelectedIndex( index );
-		jTextFieldFeatureWeight.setText( "" + weight );
+		jTextFieldFeatureWeight.setValue( Double.valueOf( weight ) );
 	}
 
 	public String getSelectedFeature()
@@ -54,7 +54,7 @@ public class JPanelFeaturePenalty extends javax.swing.JPanel
 
 	public double getPenaltyWeight()
 	{
-		return NumberParser.parseDouble( jTextFieldFeatureWeight.getText() );
+		return ( ( Number ) jTextFieldFeatureWeight.getValue() ).doubleValue();
 	}
 
 	@Override
@@ -86,9 +86,8 @@ public class JPanelFeaturePenalty extends javax.swing.JPanel
 				jComboBoxFeature.setFont( SMALL_FONT );
 			}
 			{
-				jTextFieldFeatureWeight = new JNumericTextField();
+				jTextFieldFeatureWeight = new JFormattedTextField( 1.0 );
 				this.add( jTextFieldFeatureWeight );
-				jTextFieldFeatureWeight.setText( "1.0" );
 				jTextFieldFeatureWeight.setBounds( 220, 4, 30, 22 );
 				jTextFieldFeatureWeight.setSize( TEXTFIELD_DIMENSION );
 				jTextFieldFeatureWeight.setFont( SMALL_FONT );

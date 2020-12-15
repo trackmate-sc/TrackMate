@@ -2,7 +2,6 @@ package fiji.plugin.trackmate.gui.panels.components;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.BIG_FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
-import fiji.plugin.trackmate.visualization.MinMaxAdjustable;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -13,11 +12,14 @@ import java.awt.event.ActionListener;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
+
+import fiji.plugin.trackmate.visualization.MinMaxAdjustable;
 
 public class SetColorScaleDialog extends JDialog implements MinMaxAdjustable
 {
@@ -31,9 +33,9 @@ public class SetColorScaleDialog extends JDialog implements MinMaxAdjustable
 
 	private final ButtonGroup buttonGroup = new ButtonGroup();
 
-	private final JNumericTextField textFieldMin;
+	private final JFormattedTextField textFieldMin;
 
-	private final JNumericTextField textFieldMax;
+	private final JFormattedTextField textFieldMax;
 
 	private final JRadioButton rdbtnAutomaticScale;
 
@@ -80,7 +82,7 @@ public class SetColorScaleDialog extends JDialog implements MinMaxAdjustable
 		lblMin.setFont( FONT.deriveFont( 11f ) );
 		lblMin.setBounds( 35, 11, 90, 16 );
 
-		textFieldMin = new JNumericTextField( toAdjust.getMin() );
+		textFieldMin = new JFormattedTextField( toAdjust.getMin() );
 		textFieldMin.setFont( FONT.deriveFont( 11f ) );
 		textFieldMin.setHorizontalAlignment( SwingConstants.TRAILING );
 		textFieldMin.setBounds( 137, 8, 50, 20 );
@@ -91,7 +93,7 @@ public class SetColorScaleDialog extends JDialog implements MinMaxAdjustable
 		lblMax.setFont( FONT.deriveFont( 11f ) );
 		lblMax.setBounds( 35, 60, 90, 16 );
 
-		textFieldMax = new JNumericTextField( toAdjust.getMax() );
+		textFieldMax = new JFormattedTextField( toAdjust.getMax() );
 		textFieldMax.setFont( FONT.deriveFont( 11f ) );
 		textFieldMax.setHorizontalAlignment( SwingConstants.TRAILING );
 		textFieldMax.setBounds( 137, 57, 50, 20 );
@@ -179,16 +181,16 @@ public class SetColorScaleDialog extends JDialog implements MinMaxAdjustable
 	@Override
 	public double getMin()
 	{
-		final double min = textFieldMin.getValue();
-		final double max = textFieldMax.getValue();
+		final double min = ( ( Number ) textFieldMin.getValue() ).doubleValue();
+		final double max = ( ( Number ) textFieldMax.getValue() ).doubleValue();
 		return max > min ? min : max;
 	}
 
 	@Override
 	public double getMax()
 	{
-		final double min = textFieldMin.getValue();
-		final double max = textFieldMax.getValue();
+		final double min = ( ( Number ) textFieldMin.getValue() ).doubleValue();
+		final double max = ( ( Number ) textFieldMax.getValue() ).doubleValue();
 		return max > min ? max : min;
 	}
 
@@ -230,7 +232,7 @@ public class SetColorScaleDialog extends JDialog implements MinMaxAdjustable
 	@Override
 	public void setMinMax( final double min, final double max )
 	{
-		textFieldMin.setText( "" + min );
-		textFieldMax.setText( "" + max );
+		textFieldMin.setValue( min );
+		textFieldMax.setValue( max );
 	}
 }

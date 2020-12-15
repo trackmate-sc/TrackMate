@@ -35,12 +35,11 @@ import java.awt.Insets;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
-import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
-import fiji.util.NumberParser;
 
 /**
  * A simplified configuration panel for the
@@ -61,11 +60,11 @@ public class SimpleLAPTrackerSettingsPanel extends ConfigurationPanel
 
 	private JLabel jLabelGapClosingMaxDistanceUnit;
 
-	private JNumericTextField jTextFieldGapClosingTimeCutoff;
+	private JFormattedTextField jTextFieldGapClosingTimeCutoff;
 
-	private JNumericTextField jTextFieldGapClosingDistanceCutoff;
+	private JFormattedTextField jTextFieldGapClosingDistanceCutoff;
 
-	private JNumericTextField jTextFieldLinkingDistance;
+	private JFormattedTextField jTextFieldLinkingDistance;
 
 	private JLabel jLabelTrackerDescription;
 
@@ -119,9 +118,9 @@ public class SimpleLAPTrackerSettingsPanel extends ConfigurationPanel
 		settings.put( KEY_ALTERNATIVE_LINKING_COST_FACTOR, DEFAULT_ALTERNATIVE_LINKING_COST_FACTOR );
 		settings.put( KEY_CUTOFF_PERCENTILE, DEFAULT_CUTOFF_PERCENTILE );
 		// Panel ones
-		settings.put( KEY_LINKING_MAX_DISTANCE, NumberParser.parseDouble( jTextFieldLinkingDistance.getText() ) );
-		settings.put( KEY_GAP_CLOSING_MAX_DISTANCE, NumberParser.parseDouble( jTextFieldGapClosingDistanceCutoff.getText() ) );
-		settings.put( KEY_GAP_CLOSING_MAX_FRAME_GAP, NumberParser.parseInteger( jTextFieldGapClosingTimeCutoff.getText() ) );
+		settings.put( KEY_LINKING_MAX_DISTANCE, ( ( Number ) jTextFieldLinkingDistance.getValue() ).doubleValue() );
+		settings.put( KEY_GAP_CLOSING_MAX_DISTANCE, ( ( Number ) jTextFieldGapClosingDistanceCutoff.getValue() ).doubleValue() );
+		settings.put( KEY_GAP_CLOSING_MAX_FRAME_GAP, ( ( Number ) jTextFieldGapClosingTimeCutoff.getValue() ).intValue() );
 		// Hop!
 		return settings;
 	}
@@ -132,9 +131,9 @@ public class SimpleLAPTrackerSettingsPanel extends ConfigurationPanel
 
 	private void echoSettings( final Map< String, Object > settings )
 	{
-		jTextFieldLinkingDistance.setText( String.format( "%.1f", ( Double ) settings.get( KEY_LINKING_MAX_DISTANCE ) ) );
-		jTextFieldGapClosingDistanceCutoff.setText( String.format( "%.1f", ( Double ) settings.get( KEY_GAP_CLOSING_MAX_DISTANCE ) ) );
-		jTextFieldGapClosingTimeCutoff.setText( String.format( "%d", ( Integer ) settings.get( KEY_GAP_CLOSING_MAX_FRAME_GAP ) ) );
+		jTextFieldLinkingDistance.setValue( settings.get( KEY_LINKING_MAX_DISTANCE ) );
+		jTextFieldGapClosingDistanceCutoff.setValue( settings.get( KEY_GAP_CLOSING_MAX_DISTANCE ) );
+		jTextFieldGapClosingTimeCutoff.setValue( settings.get( KEY_GAP_CLOSING_MAX_FRAME_GAP ) );
 	}
 
 	private void initGUI()
@@ -190,19 +189,19 @@ public class SimpleLAPTrackerSettingsPanel extends ConfigurationPanel
 				jLabel4.setText( "Gap-closing max frame gap:" );
 			}
 			{
-				jTextFieldLinkingDistance = new JNumericTextField();
+				jTextFieldLinkingDistance = new JFormattedTextField();
 				jTextFieldLinkingDistance.setMinimumSize( TEXTFIELD_DIMENSION );
 				this.add( jTextFieldLinkingDistance, new GridBagConstraints( 1, 4, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets( 0, 0, 0, 0 ), 0, 0 ) );
 				jTextFieldLinkingDistance.setFont( FONT );
 			}
 			{
-				jTextFieldGapClosingDistanceCutoff = new JNumericTextField();
+				jTextFieldGapClosingDistanceCutoff = new JFormattedTextField();
 				jTextFieldGapClosingDistanceCutoff.setMinimumSize( TEXTFIELD_DIMENSION );
 				this.add( jTextFieldGapClosingDistanceCutoff, new GridBagConstraints( 1, 5, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets( 0, 0, 0, 0 ), 0, 0 ) );
 				jTextFieldGapClosingDistanceCutoff.setFont( FONT );
 			}
 			{
-				jTextFieldGapClosingTimeCutoff = new JNumericTextField();
+				jTextFieldGapClosingTimeCutoff = new JFormattedTextField();
 				jTextFieldGapClosingTimeCutoff.setMinimumSize( TEXTFIELD_DIMENSION );
 				this.add( jTextFieldGapClosingTimeCutoff, new GridBagConstraints( 1, 6, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets( 0, 0, 0, 0 ), 0, 0 ) );
 				jTextFieldGapClosingTimeCutoff.setFont( FONT );

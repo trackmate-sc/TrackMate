@@ -16,10 +16,6 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_FEATURE_PEN
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_MAX_DISTANCE;
-import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
-import fiji.plugin.trackmate.gui.panels.components.JPanelFeatureSelectionGui;
-import fiji.plugin.trackmate.tracking.LAPUtils;
-import fiji.util.NumberParser;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -34,10 +30,14 @@ import java.util.Collection;
 import java.util.Map;
 
 import javax.swing.JCheckBox;
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
+
+import fiji.plugin.trackmate.gui.panels.components.JPanelFeatureSelectionGui;
+import fiji.plugin.trackmate.tracking.LAPUtils;
 
 public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 
@@ -45,7 +45,8 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 
 //	private JLabel jLabelTrackDescription;
 	private JLabel jLabelSplittingMaxDistanceUnit;
-	private JNumericTextField jTextFieldSplittingMaxDistance;
+
+	private JFormattedTextField jTextFieldSplittingMaxDistance;
 	private JCheckBox jCheckBoxAllowSplitting;
 	private JLabel jLabelTrackerName;
 	private JPanelFeatureSelectionGui jPanelGapClosing;
@@ -54,16 +55,20 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 	private JPanelFeatureSelectionGui jPanelSplittingFeatures;
 	private JScrollPane jScrollPaneMergingFeatures;
 	private JLabel jLabelMergingMaxDistanceUnit;
-	private JNumericTextField jTextFieldMergingMaxDistance;
+
+	private JFormattedTextField jTextFieldMergingMaxDistance;
 	private JCheckBox jCheckBoxAllowMerging;
 	private JScrollPane jScrollPaneSplittingFeatures;
 	private JScrollPane jScrollPaneGapClosingFeatures;
-	private JNumericTextField jTextFieldGapClosingMaxFrameInterval;
+
+	private JFormattedTextField jTextFieldGapClosingMaxFrameInterval;
 	private JLabel jLabelGapClosingMaxDistanceUnit;
-	private JNumericTextField jTextFieldGapClosingMaxDistance;
+
+	private JFormattedTextField jTextFieldGapClosingMaxDistance;
 	private JCheckBox jCheckBoxAllowGapClosing;
 	private JLabel jLabelLinkingMaxDistanceUnits;
-	private JNumericTextField jTextFieldLinkingMaxDistance;
+
+	private JFormattedTextField jTextFieldLinkingMaxDistance;
 	private JLabel jLabel6;
 	private JLabel jLabel7;
 	private JLabel jLabel8;
@@ -94,20 +99,20 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 	@SuppressWarnings("unchecked")
 	void echoSettings(final Map<String, Object> settings) {
 
-		jTextFieldLinkingMaxDistance.setText(String.format("%.1f", (Double) settings.get(KEY_LINKING_MAX_DISTANCE)));
+		jTextFieldLinkingMaxDistance.setValue( settings.get( KEY_LINKING_MAX_DISTANCE ) );
 		jPanelLinkingFeatures.setSelectedFeaturePenalties((Map<String, Double>) settings.get(KEY_LINKING_FEATURE_PENALTIES));
 
 		jCheckBoxAllowGapClosing.setSelected((Boolean) settings.get(KEY_ALLOW_GAP_CLOSING));
-		jTextFieldGapClosingMaxDistance.setText(String.format("%.1f", (Double) settings.get(KEY_GAP_CLOSING_MAX_DISTANCE)));
-		jTextFieldGapClosingMaxFrameInterval.setText(String.format("%d", (Integer) settings.get(KEY_GAP_CLOSING_MAX_FRAME_GAP)));
+		jTextFieldGapClosingMaxDistance.setValue( settings.get( KEY_GAP_CLOSING_MAX_DISTANCE ) );
+		jTextFieldGapClosingMaxFrameInterval.setValue( settings.get( KEY_GAP_CLOSING_MAX_FRAME_GAP ) );
 		jPanelGapClosing.setSelectedFeaturePenalties((Map<String, Double>) settings.get(KEY_GAP_CLOSING_FEATURE_PENALTIES));
 
 		jCheckBoxAllowSplitting.setSelected((Boolean) settings.get(KEY_ALLOW_TRACK_SPLITTING));
-		jTextFieldSplittingMaxDistance.setText(String.format("%.1f", (Double) settings.get(KEY_SPLITTING_MAX_DISTANCE)));
+		jTextFieldSplittingMaxDistance.setValue( settings.get( KEY_SPLITTING_MAX_DISTANCE ) );
 		jPanelSplittingFeatures.setSelectedFeaturePenalties((Map<String, Double>) settings.get(KEY_SPLITTING_FEATURE_PENALTIES));
 
 		jCheckBoxAllowMerging.setSelected((Boolean) settings.get(KEY_ALLOW_TRACK_MERGING));
-		jTextFieldMergingMaxDistance.setText(String.format("%.1f", (Double) settings.get(KEY_SPLITTING_MAX_DISTANCE)));
+		jTextFieldMergingMaxDistance.setValue( settings.get( KEY_SPLITTING_MAX_DISTANCE ) );
 		jPanelMergingFeatures.setSelectedFeaturePenalties((Map<String, Double>) settings.get(KEY_MERGING_FEATURE_PENALTIES));
 
 		setEnabled(
@@ -131,22 +136,22 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 	 * @return a new settings {@link Map} with values taken from this panel.
 	 */
 	public Map<String, Object> getSettings() {
-		Map<String, Object> settings = LAPUtils.getDefaultLAPSettingsMap();
+		final Map<String, Object> settings = LAPUtils.getDefaultLAPSettingsMap();
 
-		settings.put(KEY_LINKING_MAX_DISTANCE, NumberParser.parseDouble(jTextFieldLinkingMaxDistance.getText()));
+		settings.put( KEY_LINKING_MAX_DISTANCE, ( ( Number ) jTextFieldLinkingMaxDistance.getValue() ).doubleValue() );
 		settings.put(KEY_LINKING_FEATURE_PENALTIES, jPanelLinkingFeatures.getFeaturePenalties());
 
 		settings.put(KEY_ALLOW_GAP_CLOSING, jCheckBoxAllowGapClosing.isSelected());
-		settings.put(KEY_GAP_CLOSING_MAX_DISTANCE, NumberParser.parseDouble(jTextFieldGapClosingMaxDistance.getText()));
-		settings.put(KEY_GAP_CLOSING_MAX_FRAME_GAP, NumberParser.parseInteger(jTextFieldGapClosingMaxFrameInterval.getText()));
+		settings.put( KEY_GAP_CLOSING_MAX_DISTANCE, ( ( Number ) jTextFieldGapClosingMaxDistance.getValue() ).doubleValue() );
+		settings.put( KEY_GAP_CLOSING_MAX_FRAME_GAP, ( ( Number ) jTextFieldGapClosingMaxFrameInterval.getValue() ).intValue() );
 		settings.put(KEY_GAP_CLOSING_FEATURE_PENALTIES, jPanelGapClosing.getFeaturePenalties());
 
 		settings.put(KEY_ALLOW_TRACK_SPLITTING, jCheckBoxAllowSplitting.isSelected());
-		settings.put(KEY_SPLITTING_MAX_DISTANCE, NumberParser.parseDouble(jTextFieldSplittingMaxDistance.getText()));
+		settings.put( KEY_SPLITTING_MAX_DISTANCE, ( ( Number ) jTextFieldSplittingMaxDistance.getValue() ).doubleValue() );
 		settings.put(KEY_SPLITTING_FEATURE_PENALTIES, jPanelSplittingFeatures.getFeaturePenalties());
 
 		settings.put(KEY_ALLOW_TRACK_MERGING, jCheckBoxAllowMerging.isSelected());
-		settings.put(KEY_MERGING_MAX_DISTANCE, NumberParser.parseDouble(jTextFieldMergingMaxDistance.getText()));
+		settings.put( KEY_MERGING_MAX_DISTANCE, ( ( Number ) jTextFieldMergingMaxDistance.getValue() ).doubleValue() );
 		settings.put(KEY_MERGING_FEATURE_PENALTIES, jPanelMergingFeatures.getFeaturePenalties());
 
 		return settings;
@@ -159,8 +164,8 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 	 */
 
 
-	private void setEnabled(final Component[] components, boolean enable) {
-		for(Component component : components)
+	private void setEnabled(final Component[] components, final boolean enable) {
+		for(final Component component : components)
 			component.setEnabled(enable);
 	}
 
@@ -170,7 +175,7 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 
 		try {
 			this.setPreferredSize(new Dimension(280, 1000));
-			GridBagLayout thisLayout = new GridBagLayout();
+			final GridBagLayout thisLayout = new GridBagLayout();
 			thisLayout.columnWidths = new int[] {180, 50, 50};
 			thisLayout.columnWeights = new double[] {0.1, 0.8, 0.1};
 //			thisLayout.rowHeights = new int[] {15, 20, 60, 15, 10, 15, 95, 15, 15, 15, 15, 15, 95, 15, 15, 15, 15, 15, 95, 15, 15, 15, 15, 15, 95};
@@ -178,7 +183,7 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 			thisLayout.rowWeights = new double[] {0.0, 0.1, 0.25, 0.1, 0.0, 0.0, 0.25, 0.1, 0.0, 0.0, 0.0, 0.0, 0.25, 0.1, 0.0, 0.0, 0.0, 0.0, 0.25, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0};
 			this.setLayout(thisLayout);
 			{
-				JLabel jLabel1 = new JLabel();
+				final JLabel jLabel1 = new JLabel();
 				this.add(jLabel1, new GridBagConstraints(0, 0, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(10, 10, 0, 10), 0, 0));
 				jLabel1.setText("Settings for tracker:");
 				jLabel1.setFont(FONT);
@@ -197,19 +202,19 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 //				jLabelTrackDescription.setFont(SMALL_FONT.deriveFont(Font.ITALIC));
 //			}
 			{
-				JLabel jLabel2 = new JLabel();
+				final JLabel jLabel2 = new JLabel();
 				this.add(jLabel2, new GridBagConstraints(0, 3, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 10, 0, 10), 0, 0));
 				jLabel2.setText("Frame to frame linking:");
 				jLabel2.setFont(BIG_FONT.deriveFont(Font.BOLD));
 			}
 			{
-				JLabel jLabel3 = new JLabel();
+				final JLabel jLabel3 = new JLabel();
 				this.add(jLabel3, new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 10, 0, 10), 0, 0));
 				jLabel3.setText("Max distance:");
 				jLabel3.setFont(SMALL_FONT);
 			}
 			{
-				jTextFieldLinkingMaxDistance = new JNumericTextField();
+				jTextFieldLinkingMaxDistance = new JFormattedTextField();
 				this.add(jTextFieldLinkingMaxDistance, new GridBagConstraints(1, 4, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
 				jTextFieldLinkingMaxDistance.setFont(SMALL_FONT);
 				jTextFieldLinkingMaxDistance.setSize(TEXTFIELD_DIMENSION);
@@ -221,14 +226,14 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 				jLabelLinkingMaxDistanceUnits.setText(spaceUnits);
 			}
 			{
-				JLabel jLabel4 = new JLabel();
+				final JLabel jLabel4 = new JLabel();
 				this.add(jLabel4, new GridBagConstraints(0, 5, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 10, 0, 10), 0, 0));
 				jLabel4.setText("Feature penalties");
 				jLabel4.setFont(SMALL_FONT);
 			}
 			{
-				JScrollPane jScrollPaneLinkingFeatures = new JScrollPane();
-				MouseWheelListener[] l = jScrollPaneLinkingFeatures.getMouseWheelListeners();
+				final JScrollPane jScrollPaneLinkingFeatures = new JScrollPane();
+				final MouseWheelListener[] l = jScrollPaneLinkingFeatures.getMouseWheelListeners();
 				jScrollPaneLinkingFeatures.removeMouseWheelListener(l[0]);
 				this.add(jScrollPaneLinkingFeatures, new GridBagConstraints(0, 6, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 				jScrollPaneLinkingFeatures.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -241,7 +246,7 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 			// Gap closing
 
 			{
-				JLabel jLabel5 = new JLabel();
+				final JLabel jLabel5 = new JLabel();
 				this.add(jLabel5, new GridBagConstraints(0, 7, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(20, 10, 0, 10), 0, 0));
 				jLabel5.setText("Track segment gap closing:");
 				jLabel5.setFont(BIG_FONT.deriveFont(Font.BOLD));
@@ -253,7 +258,7 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 				jCheckBoxAllowGapClosing.setFont(SMALL_FONT);
 				jCheckBoxAllowGapClosing.addActionListener(new ActionListener() {
 					@Override
-					public void actionPerformed(ActionEvent e) {
+					public void actionPerformed(final ActionEvent e) {
 						setEnabled(
 								new Component[] {jLabel6, jTextFieldGapClosingMaxDistance, jLabelGapClosingMaxDistanceUnit, 
 										jLabel7, jTextFieldGapClosingMaxFrameInterval, jTextFieldGapClosingMaxFrameInterval, 
@@ -269,7 +274,7 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 				jLabel6.setFont(SMALL_FONT);
 			}
 			{
-				jTextFieldGapClosingMaxDistance = new JNumericTextField();
+				jTextFieldGapClosingMaxDistance = new JFormattedTextField();
 				this.add(jTextFieldGapClosingMaxDistance, new GridBagConstraints(1, 9, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
 				jTextFieldGapClosingMaxDistance.setSize(TEXTFIELD_DIMENSION);
 				jTextFieldGapClosingMaxDistance.setFont(SMALL_FONT);
@@ -287,7 +292,7 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 				jLabel7.setFont(SMALL_FONT);
 			}
 			{
-				jTextFieldGapClosingMaxFrameInterval = new JNumericTextField();
+				jTextFieldGapClosingMaxFrameInterval = new JFormattedTextField();
 				this.add(jTextFieldGapClosingMaxFrameInterval, new GridBagConstraints(1, 10, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
 				jTextFieldGapClosingMaxFrameInterval.setSize(TEXTFIELD_DIMENSION);
 				jTextFieldGapClosingMaxFrameInterval.setFont(SMALL_FONT);
@@ -300,7 +305,7 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 			}
 			{
 				jScrollPaneGapClosingFeatures = new JScrollPane();
-				MouseWheelListener[] l = jScrollPaneGapClosingFeatures.getMouseWheelListeners();
+				final MouseWheelListener[] l = jScrollPaneGapClosingFeatures.getMouseWheelListeners();
 				jScrollPaneGapClosingFeatures.removeMouseWheelListener(l[0]);
 				this.add(jScrollPaneGapClosingFeatures, new GridBagConstraints(0, 12, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 				jScrollPaneGapClosingFeatures.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -313,7 +318,7 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 			// Splitting
 
 			{
-				JLabel jLabel9 = new JLabel();
+				final JLabel jLabel9 = new JLabel();
 				this.add(jLabel9, new GridBagConstraints(0, 13, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(20, 10, 0, 10), 0, 0));
 				jLabel9.setText("Track segment splitting:");
 				jLabel9.setFont(BIG_FONT.deriveFont(Font.BOLD));
@@ -325,7 +330,7 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 				jCheckBoxAllowSplitting.setFont(SMALL_FONT);
 				jCheckBoxAllowSplitting.addActionListener(new ActionListener() {
 					@Override
-					public void actionPerformed(ActionEvent e) {
+					public void actionPerformed(final ActionEvent e) {
 						setEnabled(
 								new Component[] {jLabel10, jTextFieldSplittingMaxDistance, jLabelSplittingMaxDistanceUnit, 
 										jLabel15, jScrollPaneSplittingFeatures, jPanelSplittingFeatures}, 
@@ -340,7 +345,7 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 				jLabel10.setFont(SMALL_FONT);
 			}
 			{
-				jTextFieldSplittingMaxDistance = new JNumericTextField();
+				jTextFieldSplittingMaxDistance = new JFormattedTextField();
 				this.add(jTextFieldSplittingMaxDistance, new GridBagConstraints(1, 15, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
 				jTextFieldSplittingMaxDistance.setSize(TEXTFIELD_DIMENSION);
 				jTextFieldSplittingMaxDistance.setFont(SMALL_FONT);
@@ -359,7 +364,7 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 			}
 			{
 				jScrollPaneSplittingFeatures = new JScrollPane();
-				MouseWheelListener[] l = jScrollPaneSplittingFeatures.getMouseWheelListeners();
+				final MouseWheelListener[] l = jScrollPaneSplittingFeatures.getMouseWheelListeners();
 				jScrollPaneSplittingFeatures.removeMouseWheelListener(l[0]);
 				this.add(jScrollPaneSplittingFeatures, new GridBagConstraints(0, 18, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 				jScrollPaneSplittingFeatures.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -372,7 +377,7 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 			// Merging
 
 			{
-				JLabel jLabel12 = new JLabel();
+				final JLabel jLabel12 = new JLabel();
 				this.add(jLabel12, new GridBagConstraints(0, 19, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(20, 10, 0, 10), 0, 0));
 				jLabel12.setText("Track segment merging:");
 				jLabel12.setFont(BIG_FONT.deriveFont(Font.BOLD));
@@ -384,7 +389,7 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 				jCheckBoxAllowMerging.setFont(SMALL_FONT);
 				jCheckBoxAllowMerging.addActionListener(new ActionListener() {
 					@Override
-					public void actionPerformed(ActionEvent e) {
+					public void actionPerformed(final ActionEvent e) {
 						setEnabled(
 								new Component[] {jLabel13, jTextFieldMergingMaxDistance, jLabelMergingMaxDistanceUnit, 
 										jLabel16, jScrollPaneMergingFeatures, jPanelMergingFeatures}, 
@@ -399,7 +404,7 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 				jLabel13.setFont(SMALL_FONT);
 			}
 			{
-				jTextFieldMergingMaxDistance = new JNumericTextField();
+				jTextFieldMergingMaxDistance = new JFormattedTextField();
 				this.add(jTextFieldMergingMaxDistance, new GridBagConstraints(1, 21, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
 				jTextFieldMergingMaxDistance.setSize(TEXTFIELD_DIMENSION);
 				jTextFieldMergingMaxDistance.setFont(SMALL_FONT);
@@ -418,7 +423,7 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 			}
 			{
 				jScrollPaneMergingFeatures = new JScrollPane();
-				MouseWheelListener[] l = jScrollPaneMergingFeatures.getMouseWheelListeners();
+				final MouseWheelListener[] l = jScrollPaneMergingFeatures.getMouseWheelListeners();
 				jScrollPaneMergingFeatures.removeMouseWheelListener(l[0]);
 				this.add(jScrollPaneMergingFeatures, new GridBagConstraints(0, 24, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 				jScrollPaneMergingFeatures.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -428,7 +433,7 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 				jScrollPaneMergingFeatures.setViewportView(jPanelMergingFeatures);
 			}
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 
