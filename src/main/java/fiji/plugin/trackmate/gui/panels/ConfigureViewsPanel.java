@@ -807,7 +807,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 						public void actionPerformed( final ActionEvent e )
 						{
 							final Double oldValue = ( Double ) displaySettings.get( KEY_SPOT_RADIUS_RATIO );
-							final Double newValue = ( double ) jTextFieldSpotRadius.getValue();
+							final Double newValue = ( ( Number ) jTextFieldSpotRadius.getValue() ).doubleValue();
 							displaySettings.put( KEY_SPOT_RADIUS_RATIO, newValue );
 
 							final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_SPOT_RADIUS_RATIO, newValue, oldValue );
