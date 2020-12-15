@@ -1,5 +1,11 @@
 package fiji.plugin.trackmate.gui.descriptors;
 
+import java.io.File;
+import java.util.Collection;
+import java.util.Map;
+
+import org.scijava.util.VersionUtils;
+
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
@@ -17,15 +23,10 @@ import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.providers.ViewProvider;
 import fiji.plugin.trackmate.util.TMUtils;
-import fiji.plugin.trackmate.util.Version;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import fiji.plugin.trackmate.visualization.trackscheme.SpotImageUpdater;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
-
-import java.io.File;
-import java.util.Collection;
-import java.util.Map;
 
 public class LoadDescriptor extends SomeDialogDescriptor
 {
@@ -68,13 +69,13 @@ public class LoadDescriptor extends SomeDialogDescriptor
 
 		// Read the file content
 		TmXmlReader reader = new TmXmlReader( file );
-		final Version version = new Version( reader.getVersion() );
-		if ( version.compareTo( new Version( "2.0.0" ) ) < 0 )
+		final String version = reader.getVersion();
+		if ( VersionUtils.compare( version, "2.0.0" ) < 0 )
 		{
 			logger.log( "Detecting a file version " + version + ". Using the right reader.\n", Logger.GREEN_COLOR );
 			reader = new TmXmlReader_v12( file );
 		}
-		else if ( version.compareTo( new Version( "2.1.0" ) ) < 0 )
+		else if ( VersionUtils.compare( version, "2.1.0" ) < 0 )
 		{
 			logger.log( "Detecting a file version " + version + ". Using the right reader.\n", Logger.GREEN_COLOR );
 			reader = new TmXmlReader_v20( file );

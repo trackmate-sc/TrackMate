@@ -14,6 +14,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
+import org.scijava.util.VersionUtils;
 
 import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
 import fiji.plugin.trackmate.features.edges.EdgeVelocityAnalyzer;
@@ -33,7 +34,6 @@ import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.providers.ViewProvider;
 import fiji.plugin.trackmate.util.TMUtils;
-import fiji.plugin.trackmate.util.Version;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewUtils;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
@@ -145,13 +145,13 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 			return;
 		}
 
-		final Version version = new Version( reader.getVersion() );
-		if ( version.compareTo( new Version( "2.0.0" ) ) < 0 )
+		final String version = reader.getVersion();
+		if ( VersionUtils.compare( version, "2.0.0" ) < 0 )
 		{
 			logger.log( "Detecting a file version " + version + ". Using the right reader.\n", Logger.GREEN_COLOR );
 			reader = new TmXmlReader_v12( file );
 		}
-		else if ( version.compareTo( new Version( "2.1.0" ) ) < 0 )
+		else if ( VersionUtils.compare( version, "2.1.0" ) < 0 )
 		{
 			logger.log( "Detecting a file version " + version + ". Using the right reader.\n", Logger.GREEN_COLOR );
 			reader = new TmXmlReader_v20( file );
@@ -181,14 +181,14 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 
 		// Tune model and settings to be usable in the GUI even with old
 		// versions
-		if ( version.compareTo( new Version( "2.0.0" ) ) < 0 )
+		if ( VersionUtils.compare( version, "2.0.0" ) < 0 )
 		{
 			settings.addEdgeAnalyzer( new EdgeTargetAnalyzer() );
 			settings.addEdgeAnalyzer( new EdgeVelocityAnalyzer() );
 			model.setLogger( Logger.IJ_LOGGER );
 			trackmate.computeEdgeFeatures( true );
 		}
-		else if ( version.compareTo( new Version( "2.1.0" ) ) < 0 )
+		else if ( VersionUtils.compare( version, "2.1.0" ) < 0 )
 		{
 			model.setLogger( Logger.IJ_LOGGER );
 			// trackmate.computeTrackFeatures(true);
@@ -396,7 +396,8 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 	{
 		ImageJ.main( args );
 		final LoadTrackMatePlugIn_ plugIn = new LoadTrackMatePlugIn_();
-		plugIn.run( "samples/FakeTracks.xml" );
+//		plugIn.run( "samples/FakeTracks.xml" );
+		plugIn.run( "samples/MAX_Merged.xml" );
 	}
 
 }

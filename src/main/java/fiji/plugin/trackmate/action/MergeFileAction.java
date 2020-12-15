@@ -3,6 +3,17 @@
  */
 package fiji.plugin.trackmate.action;
 
+import java.awt.Frame;
+import java.io.File;
+import java.util.HashMap;
+import java.util.Set;
+
+import javax.swing.ImageIcon;
+
+import org.jgrapht.graph.DefaultWeightedEdge;
+import org.scijava.plugin.Plugin;
+import org.scijava.util.VersionUtils;
+
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
@@ -14,17 +25,6 @@ import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.io.TmXmlReader_v12;
 import fiji.plugin.trackmate.io.TmXmlReader_v20;
-import fiji.plugin.trackmate.util.Version;
-
-import java.awt.Frame;
-import java.io.File;
-import java.util.HashMap;
-import java.util.Set;
-
-import javax.swing.ImageIcon;
-
-import org.jgrapht.graph.DefaultWeightedEdge;
-import org.scijava.plugin.Plugin;
 
 public class MergeFileAction extends AbstractTMAction {
 
@@ -70,11 +70,14 @@ public class MergeFileAction extends AbstractTMAction {
 
 		// Read the file content
 		TmXmlReader reader = new TmXmlReader(file);
-		final Version version = new Version(reader.getVersion());
-		if (version.compareTo(new Version("2.0.0")) < 0) {
+		final String version = reader.getVersion();
+		if ( VersionUtils.compare( version, "2.0.0" ) < 0 )
+		{
 			logger.log("Detecting a file version " + version + ". Using the right reader.\n", Logger.GREEN_COLOR);
 			reader = new TmXmlReader_v12(file);
-		} else if (version.compareTo(new Version("2.1.0")) < 0) {
+		}
+		else if ( VersionUtils.compare( version, "2.1.0" ) < 0 )
+		{
 			logger.log("Detecting a file version " + version + ". Using the right reader.\n", Logger.GREEN_COLOR);
 			reader = new TmXmlReader_v20(file);
 		}
