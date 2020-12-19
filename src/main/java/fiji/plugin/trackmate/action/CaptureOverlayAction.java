@@ -3,22 +3,17 @@ package fiji.plugin.trackmate.action;
 import java.awt.Component;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.io.File;
 
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 
 import org.scijava.plugin.Plugin;
 
-import fiji.plugin.trackmate.LoadTrackMatePlugIn;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackSchemeFrame;
-import ij.IJ;
-import ij.ImageJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.measure.Calibration;
@@ -227,31 +222,5 @@ public class CaptureOverlayAction extends AbstractTMAction
 		{
 			return NAME;
 		}
-
-	}
-
-	public static void main( final String[] args )
-	{
-		ImageJ.main( args );
-		final File file = new File( "samples/FakeTracks.xml" );
-		final LoadTrackMatePlugIn loader = new LoadTrackMatePlugIn();
-		loader.run( file.getAbsolutePath() );
-
-		loader.getSettings().imp.setDisplayMode( IJ.GRAYSCALE );
-		loader.getSettings().imp.getCanvas().zoomIn( 50, 50 );
-		loader.getSettings().imp.getCanvas().zoomIn( 50, 50 );
-		loader.getSettings().imp.getCanvas().zoomIn( 50, 50 );
-		loader.getSettings().imp.getCanvas().zoomIn( 50, 50 );
-		loader.getSettings().imp.getCanvas().zoomIn( 50, 50 );
-
-		for ( final TrackMateModelView view : loader.getController().getGuimodel().getViews() )
-		{
-			view.setDisplaySettings( TrackMateModelView.KEY_TRACK_DISPLAY_DEPTH, 100 );
-			view.setDisplaySettings( TrackMateModelView.KEY_TRACK_DISPLAY_MODE, TrackMateModelView.TRACK_DISPLAY_MODE_LOCAL_BACKWARD );
-		}
-
-		final TrackMate trackmate = loader.getController().getPlugin();
-		final ImagePlus capture = CaptureOverlayAction.capture( trackmate, 15, 25 );
-		capture.show();
 	}
 }

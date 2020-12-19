@@ -9,7 +9,6 @@ import javax.swing.JOptionPane;
 
 import org.scijava.plugin.Plugin;
 
-import fiji.plugin.trackmate.LoadTrackMatePlugIn;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
@@ -18,7 +17,6 @@ import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.util.SpotNeighborhood;
 import fiji.plugin.trackmate.util.TMUtils;
-import ij.ImageJ;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
@@ -533,18 +531,5 @@ public class LabelImgExporter extends AbstractTMAction
 			ra.setPosition( center );
 			ra.get().set( id );
 		}
-	}
-
-	public static void main( final String[] args )
-	{
-		ImageJ.main( args );
-		final LoadTrackMatePlugIn plugIn = new LoadTrackMatePlugIn();
-		plugIn.run( "samples/FakeTracks.xml" );
-		createLabelImagePlus(
-				plugIn.getModel(),
-				plugIn.getSettings().imp,
-				false,
-				true,
-				plugIn.getModel().getLogger() ).show();
 	}
 }
