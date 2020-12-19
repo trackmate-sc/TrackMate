@@ -6,7 +6,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import fiji.plugin.trackmate.features.FeatureFilter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +16,8 @@ import java.util.Random;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import fiji.plugin.trackmate.features.FeatureFilter;
 
 public class SpotCollectionTest
 {
@@ -153,7 +154,7 @@ public class SpotCollectionTest
 			targetSpot = it.next();
 
 		assertNotNull( targetSpot );
-		targetSpot.putFeature( SpotCollection.VISIBLITY, SpotCollection.ONE );
+		targetSpot.putFeature( SpotCollection.VISIBILITY, SpotCollection.ONE );
 		// Test for visibility
 		it = sc.iterator( false );
 		while ( it.hasNext() )
@@ -244,55 +245,6 @@ public class SpotCollectionTest
 	}
 
 	@Test
-	public void testGetNClosestSpots()
-	{
-		// Filter by QUALITY lower than 20
-		final FeatureFilter filter = new FeatureFilter( Spot.QUALITY, 20d, false );
-		sc.filter( filter );
-
-		final Spot location = new Spot( 50.1, 50.1, 50.1, 1d, -1d );
-		for ( final Integer frame : frames )
-		{
-
-			// Request 31 closest non-visible spots
-			List< Spot > target = sc.getNClosestSpots( location, frame, 31, false );
-			// We should get all 31
-			assertEquals( 31, target.size() );
-			// Their QUALITY should be between 35 and 65
-			for ( final Spot spot : target )
-			{
-				assertTrue( 35 <= spot.getFeature( Spot.QUALITY ) );
-				assertTrue( 65 >= spot.getFeature( Spot.QUALITY ) );
-			}
-			// They should be returned sorted:
-			// The first one should be the one with quality 50
-			assertEquals( 50d, target.get( 0 ).getFeature( Spot.QUALITY ), Double.MIN_VALUE );
-			// The last one should be the one with quality 35, because the
-			// target location is 50.1
-			assertEquals( 35d, target.get( 30 ).getFeature( Spot.QUALITY ), Double.MIN_VALUE );
-			// The fore-to-last should be the one with quality 65
-			assertEquals( 65d, target.get( 29 ).getFeature( Spot.QUALITY ), Double.MIN_VALUE );
-
-			// Request 31 closest *visible* spots
-			target = sc.getNClosestSpots( location, frame, 31, true );
-			// We should get only 21, since there is only 21 left after
-			// filtering
-			assertEquals( 21, target.size() );
-			// Their QUALITY should be between 0 and 20
-			for ( final Spot spot : target )
-			{
-				assertTrue( 0 <= spot.getFeature( Spot.QUALITY ) );
-				assertTrue( 20 >= spot.getFeature( Spot.QUALITY ) );
-			}
-			// They should be returned sorted:
-			// The first one should be the one with quality 20
-			assertEquals( 20d, target.get( 0 ).getFeature( Spot.QUALITY ), Double.MIN_VALUE );
-			// The last one should be the one with quality 0
-			assertEquals( 0d, target.get( 20 ).getFeature( Spot.QUALITY ), Double.MIN_VALUE );
-		}
-	}
-
-	@Test
 	public void testGetNSpots()
 	{
 		// Filter by QUALITY lower than 20
@@ -348,7 +300,7 @@ public class SpotCollectionTest
 			{
 				final Spot spot = it.next();
 				markedSpots.add( spot );
-				spot.putFeature( SpotCollection.VISIBLITY, SpotCollection.ONE );
+				spot.putFeature( SpotCollection.VISIBILITY, SpotCollection.ONE );
 			}
 		}
 
@@ -394,7 +346,7 @@ public class SpotCollectionTest
 		{
 			final Spot spot = it.next();
 			markedSpots.add( spot );
-			spot.putFeature( SpotCollection.VISIBLITY, SpotCollection.ONE );
+			spot.putFeature( SpotCollection.VISIBILITY, SpotCollection.ONE );
 		}
 		// See if we iterate over them.
 		it = sc.iterator( targetFrame, true );
@@ -502,7 +454,7 @@ public class SpotCollectionTest
 
 	private static final boolean isVisible( final Spot spot )
 	{
-		return spot.getFeature( SpotCollection.VISIBLITY ).compareTo( SpotCollection.ZERO ) > 0;
+		return spot.getFeature( SpotCollection.VISIBILITY ).compareTo( SpotCollection.ZERO ) > 0;
 	}
 
 }
