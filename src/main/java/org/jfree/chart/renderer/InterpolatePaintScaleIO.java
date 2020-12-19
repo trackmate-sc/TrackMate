@@ -12,9 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -43,19 +41,19 @@ public class InterpolatePaintScaleIO
 		}
 	}
 
-	static Map< String, InterpolatePaintScale > getLUTs()
+	static List< InterpolatePaintScale > getLUTs()
 	{
 		return loadLUTs();
 	}
 
-	private static Map< String, InterpolatePaintScale > loadLUTs()
+	private static List< InterpolatePaintScale > loadLUTs()
 	{
-		final Map< String, InterpolatePaintScale > luts = new LinkedHashMap<>();
+		final List< InterpolatePaintScale > luts = new ArrayList<>();
 		for ( final URI lutFolder : LUT_FOLDERS )
 		{
 			try
 			{
-				luts.putAll( loadLUTs( lutFolder ) );
+				luts.addAll( loadLUTs( lutFolder ) );
 			}
 			catch ( final IOException e )
 			{
@@ -65,7 +63,7 @@ public class InterpolatePaintScaleIO
 		return luts;
 	}
 
-	private static Map< String, InterpolatePaintScale > loadLUTs( final URI folder ) throws IOException
+	private static List< InterpolatePaintScale > loadLUTs( final URI folder ) throws IOException
 	{
 		if ( folder.getScheme().equals( "jar" ) )
 		{
@@ -85,9 +83,9 @@ public class InterpolatePaintScaleIO
 		}
 	}
 
-	private static Map< String, InterpolatePaintScale > loadLUTs( final Path folderPath ) throws IOException
+	private static List< InterpolatePaintScale > loadLUTs( final Path folderPath ) throws IOException
 	{
-		final Map< String, InterpolatePaintScale > luts = new LinkedHashMap<>();
+		final List< InterpolatePaintScale > luts = new ArrayList<>();
 		if ( Files.exists( folderPath ) )
 		{
 			final String glob = "*.lut";
@@ -100,9 +98,7 @@ public class InterpolatePaintScaleIO
 					if ( null == lut )
 						System.err.println( "Could not read LUT file: " + path + ". Skipping." );
 
-					final String fileName = path.getFileName().toString();
-					final String lutName = fileName.substring( 0, fileName.indexOf( '.' ) );
-					luts.put( lutName, lut );
+					luts.add( lut );
 				}
 			}
 		}
@@ -111,8 +107,9 @@ public class InterpolatePaintScaleIO
 
 	private static final InterpolatePaintScale importLUT( final Path path ) throws IOException
 	{
-		String name = path.getFileName().toString();
-		name = name.substring( 0, name.indexOf( '.' ) ).toLowerCase();
+		final String fileName = path.getFileName().toString();
+		final String lutName = fileName.substring( 0, fileName.indexOf( '.' ) );
+
 		try (final Scanner scanner = new Scanner( path ))
 		{
 
@@ -120,7 +117,7 @@ public class InterpolatePaintScaleIO
 			final IntArray intAlphas = new IntArray();
 			final AtomicInteger nLines = new AtomicInteger( 0 );
 
-			final InterpolatePaintScale ips = new InterpolatePaintScale( 0, 1 );
+			final InterpolatePaintScale ips = new InterpolatePaintScale( lutName, 0., 1. );
 			while ( scanner.hasNext() )
 			{
 				if ( !scanner.hasNextInt() )

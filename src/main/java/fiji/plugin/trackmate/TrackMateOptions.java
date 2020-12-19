@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate;
 
+import java.util.List;
+
 import org.jfree.chart.renderer.InterpolatePaintScale;
 import org.scijava.menu.MenuConstants;
 import org.scijava.options.OptionsPlugin;
@@ -22,11 +24,18 @@ public class TrackMateOptions extends OptionsPlugin
 
 	@Parameter(
 			label = "Look-up table for scales",
-			choices = { "Turbo", "Jet", "Viridis", "Algae", "Amp", "Balance", "Curl", "Deep", "Delta", "Dense", "Gray", "Haline", "Ice", "Matter", "Oxy", "Phase", "Solar", "Speed", "Tempo", "Thermal", "Turbid" }  )
-	private String lutChoice = "Jet";
+			choices = { "Turbo", "Jet", "Viridis", "Algae", "Amp", "Balance", "Curl", "Deep", "Delta", "Dense", "Gray", "Haline", "Ice", "Matter", "Oxy", "Phase", "Solar", "Speed", "Tempo", "Thermal", "Turbid" } )
+	private final String lutChoice = "Jet";
 
 	public InterpolatePaintScale getPaintScale()
 	{
-		return InterpolatePaintScale.getAvailableLUTs().get( lutChoice );
+		final List< InterpolatePaintScale > luts = InterpolatePaintScale.getAvailableLUTs();
+		for ( final InterpolatePaintScale lut : luts )
+		{
+			if ( lut.getName().equals( lutChoice ) )
+				return lut;
+		}
+		System.err.println( "Unknown color-map: " + lutChoice );
+		return InterpolatePaintScale.Jet;
 	}
 }
