@@ -344,7 +344,7 @@ public class SpotCollection implements MultiThreaded
 		for ( final Spot spot : spots )
 		{
 
-			if ( visibleSpotsOnly && isVisible( spot ) )
+			if ( visibleSpotsOnly && !isVisible( spot ) )
 				continue;
 
 			final double d2 = spot.squareDistanceTo( location );
@@ -384,7 +384,7 @@ public class SpotCollection implements MultiThreaded
 		Spot bestSpot = null;
 		for ( final Spot spot : spots )
 		{
-			if ( visibleSpotsOnly && isVisible( spot ) )
+			if ( visibleSpotsOnly && !isVisible( spot ) )
 				continue;
 
 			final double d2 = spot.squareDistanceTo( location );
