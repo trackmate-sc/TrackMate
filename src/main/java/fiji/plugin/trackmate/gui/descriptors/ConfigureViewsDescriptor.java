@@ -1,14 +1,11 @@
 package fiji.plugin.trackmate.gui.descriptors;
 
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackMate;
+import javax.swing.Action;
+
+import fiji.plugin.trackmate.gui.DisplaySettings;
+import fiji.plugin.trackmate.gui.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.panels.ConfigureViewsPanel;
-import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
-import fiji.plugin.trackmate.visualization.ManualEdgeColorGenerator;
-import fiji.plugin.trackmate.visualization.ManualSpotColorGenerator;
-import fiji.plugin.trackmate.visualization.PerEdgeFeatureColorGenerator;
-import fiji.plugin.trackmate.visualization.PerTrackFeatureColorGenerator;
 
 public class ConfigureViewsDescriptor implements WizardPanelDescriptor
 {
@@ -19,16 +16,22 @@ public class ConfigureViewsDescriptor implements WizardPanelDescriptor
 
 	private final TrackMateGUIController controller;
 
-	public ConfigureViewsDescriptor( final TrackMate trackmate, final FeatureColorGenerator< Spot > spotColorGenerator, final PerEdgeFeatureColorGenerator edgeColorGenerator, final PerTrackFeatureColorGenerator trackColorGenerator, final FeatureColorGenerator< Spot > spotColorGeneratorPerTrackFeature, final ManualSpotColorGenerator manualSpotColorGenerator, final ManualEdgeColorGenerator manualEdgeColorGenerator, final TrackMateGUIController controller )
+	public ConfigureViewsDescriptor(
+			final DisplaySettings ds,
+			final FeatureDisplaySelector featureSelector,
+			final TrackMateGUIController controller,
+			final Action launchTrackSchemeAction,
+			final Action showTrackTablesAction,
+			final Action showSpotTableAction )
 	{
 		this.controller = controller;
-		this.panel = new ConfigureViewsPanel( trackmate.getModel() );
-		panel.setSpotColorGenerator( spotColorGenerator );
-		panel.setEdgeColorGenerator( edgeColorGenerator );
-		panel.setTrackColorGenerator( trackColorGenerator );
-		panel.setManualSpotColorGenerator( manualSpotColorGenerator );
-		panel.setManualEdgeColorGenerator( manualEdgeColorGenerator );
-		panel.setSpotColorGeneratorPerTrackFeature( spotColorGeneratorPerTrackFeature );
+		this.panel = new ConfigureViewsPanel(
+				ds, 
+				featureSelector, 
+				controller.getPlugin().getModel().getSpaceUnits(),
+				launchTrackSchemeAction,
+				showTrackTablesAction,
+				showSpotTableAction );
 	}
 
 	@Override
@@ -39,15 +42,12 @@ public class ConfigureViewsDescriptor implements WizardPanelDescriptor
 
 	@Override
 	public void aboutToDisplayPanel()
-	{
-		panel.refreshGUI();
-		controller.getGUI().setNextButtonEnabled( true );
-	}
+	{}
 
 	@Override
 	public void displayingPanel()
 	{
-		panel.refreshColorFeatures();
+		controller.getGUI().setNextButtonEnabled( true );
 	}
 
 	@Override
@@ -56,10 +56,7 @@ public class ConfigureViewsDescriptor implements WizardPanelDescriptor
 
 	@Override
 	public void comingBackToPanel()
-	{
-		panel.refreshGUI();
-		panel.refreshColorFeatures();
-	}
+	{}
 
 	@Override
 	public String getKey()
