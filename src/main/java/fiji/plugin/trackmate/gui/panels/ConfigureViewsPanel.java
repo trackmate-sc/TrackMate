@@ -12,6 +12,7 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionListener;
 
 import javax.swing.Action;
 import javax.swing.JButton;
@@ -339,9 +340,26 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 			setEnabled( panelTrackOptions, chkboxDisplayTracks.isSelected() );
 			cmbboxTrackDisplayMode.setEnabled( chkboxDisplayTracks.isSelected() );
 			} );
-		chkboxFadeTracks.addActionListener( e -> spinnerFadeRange.setEnabled( chkboxDisplayTracks.isSelected() && chkboxFadeTracks.isSelected() ) );
+		
+		final ActionListener fadeTrackBtnEnable = e -> {
+			final boolean shouldBeEnabled = chkboxDisplayTracks.isSelected()
+					&& cmbboxTrackDisplayMode.getSelectedItem() != TrackDisplayMode.FULL;
+			chkboxFadeTracks.setEnabled( shouldBeEnabled );
+		};
+		chkboxDisplayTracks.addActionListener( fadeTrackBtnEnable );
+		cmbboxTrackDisplayMode.addActionListener( fadeTrackBtnEnable );
+		
+		final ActionListener fadeTrackRangeEnable = e -> {
+			final boolean shouldBeEnabled = chkboxDisplayTracks.isSelected() 
+					&& cmbboxTrackDisplayMode.getSelectedItem() != TrackDisplayMode.FULL
+					&& chkboxFadeTracks.isSelected();
+			spinnerFadeRange.setEnabled( shouldBeEnabled );
+		};
+		cmbboxTrackDisplayMode.addActionListener( fadeTrackRangeEnable );
+		chkboxDisplayTracks.addActionListener( fadeTrackRangeEnable );
+		chkboxFadeTracks.addActionListener( fadeTrackRangeEnable );
+		
 		chckbxLimitZDepth.addActionListener( e -> spinnerDrawingZDepth.setEnabled( chckbxLimitZDepth.isSelected() ) );
-		chkboxDisplayTracks.addActionListener( e -> spinnerFadeRange.setEnabled( chkboxDisplayTracks.isSelected() && chkboxFadeTracks.isSelected() ) );
 
 		chkboxDisplaySpots.addActionListener( e -> ds.setSpotVisible( chkboxDisplaySpots.isSelected() ) );
 		ftfSpotRadius.addPropertyChangeListener( "value", e -> ds.setSpotDisplayRadius( ( ( Number ) ftfSpotRadius.getValue() ).doubleValue() ) );
@@ -355,25 +373,25 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 		 */
 
 		chkboxDisplaySpots.setSelected( ds.isSpotVisible() );
-		ftfSpotRadius.setValue( Double.valueOf( ds.getSpotDisplayRadius() ) );
 		chkboxSpotNames.setSelected( ds.isSpotShowName() );
 		chkboxDisplayTracks.setSelected( ds.isTrackVisible() );
 		chkboxFadeTracks.setSelected( ds.isFadeTracks() );
+		chckbxLimitZDepth.setSelected( ds.isZDrawingDepthLimited() );
+		ftfSpotRadius.setValue( Double.valueOf( ds.getSpotDisplayRadius() ) );
 		fadeTrackDepthModel.setValue( Integer.valueOf( ds.getFadeTrackRange() ) );
 		numberModelDrawingZDepth.setValue( Double.valueOf( ds.getZDrawingDepth() ) );
+		cmbboxTrackDisplayMode.setSelectedItem( ds.getTrackDisplayMode() );
 
-		setEnabled( panelSpotOptions, chkboxDisplaySpots.isSelected() );
-		setEnabled( panelTrackOptions, chkboxDisplayTracks.isSelected() );
 		spinnerDrawingZDepth.setEnabled( chckbxLimitZDepth.isSelected() );
-		spinnerFadeRange.setEnabled( chkboxDisplayTracks.isSelected() && chkboxFadeTracks.isSelected() );
+		fadeTrackBtnEnable.actionPerformed( null );
 	}
 
 	private static final void setEnabled( final Container container, final boolean enabled )
 	{
 		for ( final Component component : container.getComponents() )
 		{
-			if ( component instanceof JSpinner )
-				continue; // Treat JSpinners elsewhere.
+			if ( component instanceof JSpinner || component instanceof JCheckBox )
+				continue; // Treat them elsewhere.
 			component.setEnabled( enabled );
 			if (component instanceof Container)
 				setEnabled( ( Container ) component, enabled );
