@@ -4,12 +4,9 @@ import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Map;
 
-import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.WindowConstants;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -17,8 +14,7 @@ import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 import org.scijava.util.VersionUtils;
 
-import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
-import fiji.plugin.trackmate.features.edges.EdgeVelocityAnalyzer;
+import fiji.plugin.trackmate.gui.DisplaySettings;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.LogPanel;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
@@ -26,13 +22,6 @@ import fiji.plugin.trackmate.gui.descriptors.ConfigureViewsDescriptor;
 import fiji.plugin.trackmate.gui.descriptors.SomeDialogDescriptor;
 import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.io.TmXmlReader;
-import fiji.plugin.trackmate.io.TmXmlReader_v12;
-import fiji.plugin.trackmate.io.TmXmlReader_v20;
-import fiji.plugin.trackmate.providers.DetectorProvider;
-import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
-import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
-import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
-import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.providers.ViewProvider;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
@@ -41,18 +30,11 @@ import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 import ij.IJ;
 import ij.ImageJ;
+import ij.ImagePlus;
 import ij.plugin.PlugIn;
 
 public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 {
-
-	private JFrame frame;
-
-	protected Model model;
-
-	protected Settings settings;
-
-	private TrackMateGUIController controller;
 
 	private static final String KEY = "LoadPlugin";
 
@@ -101,7 +83,7 @@ public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 				final File parent2 = parent == null ? null : parent.getParentFile();
 				file = new File( parent2 != null ? parent2 : parent != null ? parent : folder, "TrackMateData.xml" );
 			}
-			final File tmpFile = IOUtils.askForFileForLoading( file, "Load a TrackMate XML file", frame, logger );
+			final File tmpFile = IOUtils.askForFileForLoading( file, "Load a TrackMate XML file", null, logger );
 			if ( null == tmpFile ) { return; }
 			file = tmpFile;
 		}
@@ -120,17 +102,8 @@ public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 			}
 		}
 
-		// Check if we have an ICY track XML file.
-		if ( checkIsICY( file ) )
-		{
-			logger.log( "Detecting an ICY track XML file. Loading...\n" );
-			final LoadICYTrackPlugIn loadICY = new LoadICYTrackPlugIn();
-			loadICY.run( file.getAbsolutePath() );
-			return;
-		}
-
 		// Read the file content
-		TmXmlReader reader = createReader( file );
+		final TmXmlReader reader = createReader( file );
 		if ( !reader.isReadingOk() )
 		{
 			IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION, reader.getErrorMessage() );
@@ -138,15 +111,11 @@ public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 		}
 
 		final String version = reader.getVersion();
-		if ( VersionUtils.compare( version, "2.0.0" ) < 0 )
+		if ( VersionUtils.compare( version, "2.1.0" ) < 0 )
 		{
-			logger.log( "Detecting a file version " + version + ". Using the right reader.\n", Logger.GREEN_COLOR );
-			reader = new TmXmlReader_v12( file );
-		}
-		else if ( VersionUtils.compare( version, "2.1.0" ) < 0 )
-		{
-			logger.log( "Detecting a file version " + version + ". Using the right reader.\n", Logger.GREEN_COLOR );
-			reader = new TmXmlReader_v20( file );
+			// Since v7.0.0 we do not support TrackMate file version < 2.1.0.
+			logger.error( "Cannot read TrackMate file version lower than 2.1.0.\nAborting.\n" );
+			return;
 		}
 		if ( !reader.isReadingOk() )
 		{
@@ -162,56 +131,74 @@ public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 		final String logText = reader.getLog() + '\n';
 
 		// Model
-		model = reader.getModel();
+		final Model model = reader.getModel();
 		if ( !reader.isReadingOk() )
 			logger.error( "Problem reading the model:\n" + reader.getErrorMessage() );
 
-		// Settings -> empty for now.
-		settings = createSettings();
+		/*
+		 * Read image.
+		 */
 
-		// With this we can create a new controller from the provided one:
-		final TrackMate trackmate = createTrackMate();
+		final ImagePlus imp = reader.readImage();
 
-		// Tune model and settings to be usable in the GUI even with old
-		// versions
-		if ( VersionUtils.compare( version, "2.0.0" ) < 0 )
-		{
-			settings.addEdgeAnalyzer( new EdgeTargetAnalyzer() );
-			settings.addEdgeAnalyzer( new EdgeVelocityAnalyzer() );
-			model.setLogger( Logger.IJ_LOGGER );
-			trackmate.computeEdgeFeatures( true );
-		}
-		else if ( VersionUtils.compare( version, "2.1.0" ) < 0 )
-		{
-			model.setLogger( Logger.IJ_LOGGER );
-			// trackmate.computeTrackFeatures(true);
-		}
+		/*
+		 * Read settings.
+		 */
 
-		controller = new TrackMateGUIController( trackmate );
-
-		// We feed then the reader with the providers taken from the NEW
-		// controller.
-		final DetectorProvider detectorProvider = controller.getDetectorProvider();
-		final TrackerProvider trackerProvider = controller.getTrackerProvider();
-		final SpotAnalyzerProvider spotAnalyzerProvider = controller.getSpotAnalyzerProvider();
-		final EdgeAnalyzerProvider edgeAnalyzerProvider = controller.getEdgeAnalyzerProvider();
-		final TrackAnalyzerProvider trackAnalyzerProvider = controller.getTrackAnalyzerProvider();
-		reader.readSettings(
-				settings,
-				detectorProvider,
-				trackerProvider,
-				spotAnalyzerProvider,
-				edgeAnalyzerProvider,
-				trackAnalyzerProvider );
-
+		final Settings settings = reader.readSettings( imp );
 		if ( !reader.isReadingOk() )
 			logger.error( "Problem reading the settings:\n" + reader.getErrorMessage() );
 
 		if ( null == settings.imp )
 			settings.imp = ViewUtils.makeEmpytImagePlus( model );
 
+		/*
+		 * Create TrackMate.
+		 */
+
+		final TrackMate trackmate = new TrackMate( model, settings );
+
 		// Hook actions
 		postRead( trackmate );
+
+		// Display settings.
+		final DisplaySettings displaySettings = reader.getDisplaySettings();
+
+		// Selection model.
+		final SelectionModel selectionModel = new SelectionModel( model );
+
+		// Views
+		final Collection< TrackMateModelView > views = reader.getViews(
+				new ViewProvider(),
+				model,
+				settings,
+				selectionModel,
+				displaySettings );
+
+		if ( !reader.isReadingOk() )
+		{
+			logger.error( "Some errors occurred while reading file:\n" );
+			logger.error( reader.getErrorMessage() );
+		}
+
+		/*
+		 * Setup and render views
+		 */
+
+		// At least one view.
+		if ( views.isEmpty() )
+			views.add( new HyperStackDisplayer( model, selectionModel, settings.imp, displaySettings ) );
+
+		for ( final TrackMateModelView view : views )
+		{
+			if ( view instanceof TrackScheme )
+				continue; // Don't relaunch TrackScheme.
+
+			view.render();
+		}
+
+		// Create GUI.
+		final TrackMateGUIController controller = new TrackMateGUIController( trackmate, displaySettings, selectionModel );
 
 		// GUI position
 		GuiUtils.positionWindow( controller.getGUI(), settings.imp.getWindow() );
@@ -219,41 +206,14 @@ public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 		// GUI state
 		String guiState = reader.getGUIState();
 
-		// Views
-		final ViewProvider viewProvider = controller.getViewProvider();
-		final Collection< TrackMateModelView > views = reader.getViews( viewProvider, model, settings, controller.getSelectionModel() );
-
-		if ( !reader.isReadingOk() )
-		{
-			logger.error( "Some errors occurred while reading file:\n" );
-			logger.error( reader.getErrorMessage() );
-			final Logger newlogger = controller.getGUI().getLogger();
-			newlogger.error( "Some errors occurred while reading file:\n" );
-			newlogger.error( reader.getErrorMessage() );
-		}
-
 		if ( null == guiState )
 			guiState = ConfigureViewsDescriptor.KEY;
 
+		/*
+		 * Set GUI state.
+		 */
+
 		controller.setGUIStateString( guiState );
-
-		// Setup and render views
-		if ( views.isEmpty() )
-		{ // at least one view.
-			views.add( new HyperStackDisplayer( model, controller.getSelectionModel(), settings.imp ) );
-		}
-		final Map< String, Object > displaySettings = controller.getGuimodel().getDisplaySettings();
-		for ( final TrackMateModelView view : views )
-		{
-			if ( view instanceof TrackScheme )
-				continue; // Don't relaunch TrackScheme.
-
-			controller.getGuimodel().addView( view );
-			for ( final String key : displaySettings.keySet() )
-				view.setDisplaySettings( key, displaySettings.get( key ) );
-
-			view.render();
-		}
 
 		// Text
 		controller.getGUI().getLogger().log( "Session log saved in the file:\n"
@@ -262,21 +222,13 @@ public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 				+ "--------------------\n",
 				Color.GRAY );
 		model.getLogger().log( "File loaded on " + TMUtils.getCurrentTimeString() + '\n', Logger.BLUE_COLOR );
-	}
 
-	public Model getModel()
-	{
-		return model;
-	}
-
-	public Settings getSettings()
-	{
-		return settings;
-	}
-
-	public TrackMateGUIController getController()
-	{
-		return controller;
+		if ( !reader.isReadingOk() )
+		{
+			final Logger newlogger = controller.getGUI().getLogger();
+			newlogger.error( "Some errors occurred while reading file:\n" );
+			newlogger.error( reader.getErrorMessage() );
+		}
 	}
 
 	/**
@@ -303,19 +255,14 @@ public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 		{
 			return false;
 		}
-		if ( !r.getName().equals( "root" ) || r.getChild( "trackfile" ) == null ) { return false; }
+		if ( !r.getName().equals( "root" ) || r.getChild( "trackfile" ) == null )
+		{ return false; }
 		return true;
 	}
 
 	@Override
 	public void displayingPanel()
-	{
-		frame = new JFrame();
-		frame.getContentPane().add( logPanel );
-		frame.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
-		frame.pack();
-		frame.setVisible( true );
-	}
+	{}
 
 	@Override
 	public String getKey()
@@ -340,17 +287,6 @@ public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 
 	/**
 	 * Hook for subclassers: <br>
-	 * Creates the TrackMate instance that will be controlled in the GUI.
-	 *
-	 * @return a new {@link TrackMate} instance.
-	 */
-	protected TrackMate createTrackMate()
-	{
-		return new TrackMate( model, settings );
-	}
-
-	/**
-	 * Hook for subclassers: <br>
 	 * Creates the {@link TmXmlReader} instance that will be used to load the
 	 * file.
 	 *
@@ -363,20 +299,6 @@ public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 		return new TmXmlReader( lFile );
 	}
 
-	/**
-	 * Hook for subclassers: <br>
-	 * Creates the {@link Settings} instance that will be used to tune the
-	 * tracking process.
-	 *
-	 * @return a new {@link Settings} instance.
-	 */
-	protected Settings createSettings()
-	{
-		return new Settings();
-	}
-
-
-
 	/*
 	 * MAIN METHOD
 	 */
@@ -388,5 +310,4 @@ public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 //		plugIn.run( "samples/FakeTracks.xml" );
 		plugIn.run( "samples/MAX_Merged.xml" );
 	}
-
 }

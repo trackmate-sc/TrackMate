@@ -1,6 +1,5 @@
 package fiji.plugin.trackmate;
 
-import java.util.Map;
 import fiji.plugin.trackmate.detection.ManualDetectorFactory;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.ManualTrackingGUIController;
@@ -57,24 +56,24 @@ public class ManualTrackingPlugIn extends TrackMatePlugIn
 		settings = createSettings( imp );
 		model = createModel();
 		trackmate = createTrackMate();
+		final SelectionModel selectionModel = new SelectionModel( model );
 
 		/*
 		 * Launch GUI.
 		 */
 
-		final ManualTrackingGUIController controller = new ManualTrackingGUIController( trackmate );
+		final ManualTrackingGUIController controller = new ManualTrackingGUIController( trackmate, displaySettings, selectionModel );
 		GuiUtils.positionWindow( controller.getGUI(), imp.getWindow() );
 
 		/*
 		 * Launch view
 		 */
 
-		final HyperStackDisplayer view = new HyperStackDisplayer( trackmate.getModel(), controller.getSelectionModel(), imp );
-		final Map< String, Object > displaySettings = controller.getGuimodel().getDisplaySettings();
-		for ( final String key : displaySettings.keySet() )
-		{
-			view.setDisplaySettings( key, displaySettings.get( key ) );
-		}
+		final HyperStackDisplayer view = new HyperStackDisplayer(
+				model,
+				selectionModel,
+				imp,
+				displaySettings );
 		view.render();
 		controller.getGuimodel().addView( view );
 	}
