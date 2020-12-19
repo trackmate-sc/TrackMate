@@ -1,10 +1,5 @@
 package fiji.plugin.trackmate.features.manual;
 
-import fiji.plugin.trackmate.Dimension;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,30 +11,32 @@ import javax.swing.ImageIcon;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.scijava.plugin.Plugin;
 
+import fiji.plugin.trackmate.Dimension;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
+import fiji.plugin.trackmate.gui.DisplaySettings;
+
 @Plugin( type = EdgeAnalyzer.class )
 public class ManualEdgeColorAnalyzer implements EdgeAnalyzer
 {
 
-	public static final String FEATURE = "MANUAL_COLOR";
+	public static final String FEATURE = "MANUAL_EGE_COLOR";
 
 	public static final String KEY = "MANUAL_EDGE_COLOR_ANALYZER";
 
-	static final List< String > FEATURES = new ArrayList< >( 1 );
+	static final List< String > FEATURES = new ArrayList<>( 1 );
 
-	static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< >( 1 );
+	static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap<>( 1 );
 
-	static final Map< String, String > FEATURE_NAMES = new HashMap< >( 1 );
+	static final Map< String, String > FEATURE_NAMES = new HashMap<>( 1 );
 
-	static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< >( 1 );
+	static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap<>( 1 );
 
-	static final Map< String, Boolean > IS_INT = new HashMap< >( 1 );
+	static final Map< String, Boolean > IS_INT = new HashMap<>( 1 );
 
 	static final String INFO_TEXT = "<html>A dummy analyzer for the feature that stores the color manually assigned to each edge.</html>";
 
 	static final String NAME = "Manual edge color analyzer";
-
-	private static final Double DEFAULT_COLOR_VALUE = Double.valueOf( TrackMateModelView.DEFAULT_UNASSIGNED_FEATURE_COLOR.getRGB() );
-
 
 	static
 	{
@@ -114,7 +111,6 @@ public class ManualEdgeColorAnalyzer implements EdgeAnalyzer
 		return INFO_TEXT;
 	}
 
-
 	@Override
 	public ImageIcon getIcon()
 	{
@@ -131,12 +127,11 @@ public class ManualEdgeColorAnalyzer implements EdgeAnalyzer
 	public void process( final Collection< DefaultWeightedEdge > edges, final Model model )
 	{
 		final long start = System.currentTimeMillis();
+		final Double unassignedColor = Double.valueOf( DisplaySettings.defaultStyle().getMissingValueColor().getRGB() );
 		for ( final DefaultWeightedEdge edge : edges )
 		{
 			if ( null == model.getFeatureModel().getEdgeFeature( edge, FEATURE ) )
-			{
-				model.getFeatureModel().putEdgeFeature( edge, FEATURE, DEFAULT_COLOR_VALUE );
-			}
+				model.getFeatureModel().putEdgeFeature( edge, FEATURE, unassignedColor );
 		}
 		final long end = System.currentTimeMillis();
 		processingTime = end - start;
