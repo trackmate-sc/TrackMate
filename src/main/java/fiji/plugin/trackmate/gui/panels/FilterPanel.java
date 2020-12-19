@@ -2,39 +2,40 @@ package fiji.plugin.trackmate.gui.panels;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import javax.swing.ButtonGroup;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JRadioButton;
 import javax.swing.WindowConstants;
 import javax.swing.border.LineBorder;
@@ -52,12 +53,20 @@ import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.data.statistics.LogHistogramDataset;
 
+import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.spot.SpotContrastAndSNRAnalyzerFactory;
 import fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory;
-import fiji.plugin.trackmate.features.spot.SpotMorphologyAnalyzerFactory;
+import fiji.plugin.trackmate.features.spot.SpotRadiusEstimatorFactory;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.util.NumberParser;
 
+/**
+ *
+ * Revised December 2020.
+ *
+ * @author Jean-Yves Tinevez
+ *
+ */
 public class FilterPanel extends javax.swing.JPanel
 {
 
@@ -73,114 +82,206 @@ public class FilterPanel extends javax.swing.JPanel
 
 	private final ChangeEvent CHANGE_EVENT = new ChangeEvent( this );
 
-	JComboBox< String > jComboBoxFeature;
+	private final XYPlot plot;
 
-	private ChartPanel chartPanel;
-
-	private JButton jButtonAutoThreshold;
-
-	JRadioButton jRadioButtonBelow;
-
-	JRadioButton jRadioButtonAbove;
-
-	private LogHistogramDataset dataset;
-
-	private JFreeChart chart;
-
-	private XYPlot plot;
-
-	private IntervalMarker intervalMarker;
+	private final IntervalMarker intervalMarker;
 
 	private double threshold;
 
-	private final Map< String, double[] > valuesMap;
+	private final Function< String, double[] > valueCollector;
 
-	private XYTextSimpleAnnotation annotation;
+	private final XYTextSimpleAnnotation annotation;
 
-	private String key;
+	private final ArrayList< ChangeListener > listeners = new ArrayList<>();
 
-	private final List< String > allKeys;
+	final JRadioButton rdbtnAbove;
 
-	private final Map< String, String > keyNames;
+	final JRadioButton rdbtnBelow;
 
-	private final ArrayList< ChangeListener > listeners = new ArrayList< >();
+	final JComboBox< String > cmbboxFeatureKeys;
+
 
 	/*
 	 * CONSTRUCTOR
 	 */
 
-	public FilterPanel( final List< String > allKeys, final Map< String, String > keyNames, final Map< String, double[] > valuesMap, final int selectedKey )
+	public FilterPanel(
+			final Map< String, String > keyNames,
+			final Function< String, double[] > valueCollector,
+			final FeatureFilter filter )
 	{
-		super();
-		this.valuesMap = valuesMap;
-		this.allKeys = allKeys;
-		this.keyNames = keyNames;
-		initGUI();
-		jComboBoxFeature.setSelectedIndex( selectedKey );
-	}
+		this.valueCollector = valueCollector;
 
-	public FilterPanel( final Map< String, double[] > valuesMap, final List< String > allKeys, final Map< String, String > keyNames )
-	{
-		this( allKeys, keyNames, valuesMap, 0 );
+		final Dimension panelSize = new java.awt.Dimension( 250, 140 );
+		final Dimension panelMaxSize = new java.awt.Dimension( 1000, 140 );
+		final GridBagLayout thisLayout = new GridBagLayout();
+		thisLayout.rowWeights = new double[] { 0.0, 1.0, 0.0 };
+		thisLayout.rowHeights = new int[] { 10, 7, 15 };
+		thisLayout.columnWeights = new double[] { 0.0, 0.0, 1.0 };
+		thisLayout.columnWidths = new int[] { 7, 20, 7 };
+		this.setLayout( thisLayout );
+		this.setPreferredSize( panelSize );
+		this.setMaximumSize( panelMaxSize );
+		this.setBorder( new LineBorder( annotationColor, 1, true ) );
+
+		/*
+		 * Feature selection box.
+		 */
+
+		final ComboBoxModel< String > cmbboxFeatureNameModel = new DefaultComboBoxModel<>( keyNames.keySet().toArray( new String[] {} ) );
+		cmbboxFeatureKeys = new JComboBox<>( cmbboxFeatureNameModel );
+		cmbboxFeatureKeys.setRenderer( new DefaultListCellRenderer()
+		{
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public Component getListCellRendererComponent( final JList< ? > list, final Object value, final int index, final boolean isSelected, final boolean cellHasFocus )
+			{
+				final JLabel lbl = ( JLabel ) super.getListCellRendererComponent( list, value, index, isSelected, cellHasFocus );
+				lbl.setText( keyNames.get( value ) );
+				return lbl;
+			}
+		} );
+		cmbboxFeatureKeys.setFont( FONT );
+		this.add( cmbboxFeatureKeys, new GridBagConstraints( 0, 0, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 2, 5, 2, 5 ), 0, 0 ) );
+
+		/*
+		 * Create histogram plot.
+		 */
+
+		final LogHistogramDataset dataset = new LogHistogramDataset();
+		final JFreeChart chart = ChartFactory.createHistogram( null, null, null, dataset, PlotOrientation.VERTICAL, false, false, false );
+
+		plot = chart.getXYPlot();
+		final XYBarRenderer renderer = ( XYBarRenderer ) plot.getRenderer();
+		renderer.setShadowVisible( false );
+		renderer.setMargin( 0 );
+		renderer.setBarPainter( new StandardXYBarPainter() );
+		renderer.setDrawBarOutline( true );
+		renderer.setSeriesOutlinePaint( 0, new Color( 0.2f, 0.2f, 0.2f ) );
+		renderer.setSeriesPaint( 0, new Color( 0.3f, 0.3f, 0.3f, 0.5f ) );
+
+		plot.setBackgroundPaint( new Color( 1, 1, 1, 0 ) );
+		plot.setOutlineVisible( false );
+		plot.setDomainCrosshairVisible( false );
+		plot.setDomainGridlinesVisible( false );
+		plot.setRangeCrosshairVisible( false );
+		plot.setRangeGridlinesVisible( false );
+
+		plot.getRangeAxis().setVisible( false );
+		plot.getDomainAxis().setVisible( false );
+
+		chart.setBorderVisible( false );
+		chart.setBackgroundPaint( new Color( 0.6f, 0.6f, 0.7f ) );
+
+		intervalMarker = new IntervalMarker( 0, 0, new Color( 0.3f, 0.5f, 0.8f ), new BasicStroke(), new Color( 0, 0, 0.5f ), new BasicStroke( 1.5f ), 0.5f );
+		plot.addDomainMarker( intervalMarker );
+
+		final ChartPanel chartPanel = new ChartPanel( chart );
+		final MouseListener[] mls = chartPanel.getMouseListeners();
+		for ( final MouseListener ml : mls )
+			chartPanel.removeMouseListener( ml );
+
+		chartPanel.addMouseListener( new MouseAdapter()
+		{
+			@Override
+			public void mouseClicked( final MouseEvent e )
+			{
+				chartPanel.requestFocusInWindow();
+				threshold = getXFromChartEvent( e, chartPanel );
+				redrawThresholdMarker();
+			}
+		} );
+		chartPanel.addMouseMotionListener( new MouseAdapter()
+		{
+			@Override
+			public void mouseDragged( final MouseEvent e )
+			{
+				threshold = getXFromChartEvent( e, chartPanel );
+				redrawThresholdMarker();
+			}
+		} );
+		chartPanel.setFocusable( true );
+		chartPanel.addFocusListener( new FocusListener()
+		{
+
+			@Override
+			public void focusLost( final FocusEvent e )
+			{
+				annotation.setColor( annotationColor.darker() );
+			}
+
+			@Override
+			public void focusGained( final FocusEvent e )
+			{
+				annotation.setColor( Color.RED.darker() );
+			}
+		} );
+		chartPanel.addKeyListener( new MyKeyListener() );
+
+		annotation = new XYTextSimpleAnnotation( chartPanel );
+		annotation.setFont( SMALL_FONT.deriveFont( Font.BOLD ) );
+		annotation.setColor( annotationColor.darker() );
+		plot.addAnnotation( annotation );
+
+		chartPanel.setPreferredSize( new Dimension( 0, 0 ) );
+		this.add( chartPanel, new GridBagConstraints( 0, 1, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets( 0, 0, 0, 0 ), 0, 0 ) );
+		chartPanel.setOpaque( false );
+
+		/*
+		 * Threshold.
+		 */
+
+		final JButton btnAutoThreshold = new JButton();
+		this.add( btnAutoThreshold, new GridBagConstraints( 2, 2, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets( 0, 0, 0, 10 ), 0, 0 ) );
+		btnAutoThreshold.setText( "Auto" );
+		btnAutoThreshold.setFont( SMALL_FONT );
+		btnAutoThreshold.addActionListener( e -> autoThreshold() );
+
+		rdbtnAbove = new JRadioButton();
+		this.add( rdbtnAbove, new GridBagConstraints( 0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets( 0, 10, 0, 0 ), 0, 0 ) );
+		rdbtnAbove.setText( "Above" );
+		rdbtnAbove.setFont( SMALL_FONT );
+		rdbtnAbove.addActionListener( e -> redrawThresholdMarker() );
+
+		rdbtnBelow = new JRadioButton();
+		this.add( rdbtnBelow, new GridBagConstraints( 1, 2, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets( 0, 5, 0, 0 ), 0, 0 ) );
+		rdbtnBelow.setText( "Below" );
+		rdbtnBelow.addActionListener( e -> redrawThresholdMarker() );
+		rdbtnBelow.setFont( SMALL_FONT );
+
+		final ButtonGroup buttonGroup = new ButtonGroup();
+		buttonGroup.add( rdbtnAbove );
+		buttonGroup.add( rdbtnBelow );
+
+		/*
+		 * Listeners & co.
+		 */
+
+		cmbboxFeatureKeys.addActionListener( e -> comboBoxSelectionChanged() );
+
+		/*
+		 * Current values.
+		 */
+
+		cmbboxFeatureKeys.setSelectedItem( filter.feature );
+		rdbtnAbove.setSelected( filter.isAbove );
+		rdbtnBelow.setSelected( !filter.isAbove );
+		if ( Double.isNaN( filter.value ) )
+			autoThreshold();
+		else
+			this.threshold = filter.value;
+		redrawThresholdMarker();
 	}
 
 	/*
 	 * PUBLIC METHODS
 	 */
 
-	/**
-	 * Set the threshold currently selected for the data displayed in this
-	 * panel.
-	 *
-	 * @see #isAboveThreshold()
-	 */
-	public void setThreshold( final double threshold )
+	public FeatureFilter getFilter()
 	{
-		this.threshold = threshold;
-		redrawThresholdMarker();
-	}
-
-	/**
-	 * Set if the current threshold should be taken above or below its value.
-	 *
-	 * @param isAbove
-	 *            if true, the threshold will be related as above its value.
-	 */
-	public void setAboveThreshold( final boolean isAbove )
-	{
-		jRadioButtonAbove.setSelected( isAbove );
-		jRadioButtonBelow.setSelected( !isAbove );
-		redrawThresholdMarker();
-	}
-
-	/**
-	 * Return the threshold currently selected for the data displayed in this
-	 * panel.
-	 *
-	 * @see #isAboveThreshold()
-	 */
-	public double getThreshold()
-	{
-		return threshold;
-	}
-
-	/**
-	 * Return true if the user selected the above threshold option for the data
-	 * displayed in this panel.
-	 *
-	 * @see #getThreshold()
-	 */
-	public boolean isAboveThreshold()
-	{
-		return jRadioButtonAbove.isSelected();
-	}
-
-	/**
-	 * Return the Enum constant selected in this panel.
-	 */
-	public String getKey()
-	{
-		return key;
+		return new FeatureFilter( ( String ) cmbboxFeatureKeys.getSelectedItem(), threshold, rdbtnAbove.isSelected() );
 	}
 
 	/**
@@ -215,10 +316,11 @@ public class FilterPanel extends javax.swing.JPanel
 	 */
 	public void refresh()
 	{
-		final double old = getThreshold();
-		key = allKeys.get( jComboBoxFeature.getSelectedIndex() );
-		final double[] values = valuesMap.get( key );
+		final double old = threshold;
+		final String key = ( String ) cmbboxFeatureKeys.getSelectedItem();
+		final double[] values = valueCollector.apply( key );
 
+		final LogHistogramDataset dataset;
 		if ( null == values || 0 == values.length )
 		{
 			dataset = new LogHistogramDataset();
@@ -230,13 +332,12 @@ public class FilterPanel extends javax.swing.JPanel
 			final int nBins = TMUtils.getNBins( values, 8, 100 );
 			dataset = new LogHistogramDataset();
 			if ( nBins > 1 )
-			{
 				dataset.addSeries( DATA_SERIES_NAME, values, nBins );
-			}
 		}
 		plot.setDataset( dataset );
 		threshold = old;
-		chartPanel.repaint();
+		repaint();
+		redrawThresholdMarker();
 	}
 
 	/*
@@ -251,20 +352,11 @@ public class FilterPanel extends javax.swing.JPanel
 
 	private void comboBoxSelectionChanged()
 	{
-		final int index = jComboBoxFeature.getSelectedIndex();
-		key = allKeys.get( index );
-		final double[] values = valuesMap.get( key );
-		// Check if all the values are NaNs.
-		boolean isAllNaNs = true;
-		for ( final double v : values )
-		{
-			if ( !Double.isNaN( v ) )
-			{
-				isAllNaNs = false;
-				break;
-			}
-		}
-		if ( 0 == values.length || isAllNaNs )
+		final String key = ( String ) cmbboxFeatureKeys.getSelectedItem();
+		final double[] values = valueCollector.apply( key );
+
+		final LogHistogramDataset dataset;
+		if ( null == values || 0 == values.length )
 		{
 			dataset = new LogHistogramDataset();
 			threshold = Double.NaN;
@@ -277,9 +369,7 @@ public class FilterPanel extends javax.swing.JPanel
 			final int nBins = TMUtils.getNBins( values, 8, 100 );
 			dataset = new LogHistogramDataset();
 			if ( nBins > 1 )
-			{
 				dataset.addSeries( DATA_SERIES_NAME, values, nBins );
-			}
 		}
 		plot.setDataset( dataset );
 		resetAxes();
@@ -288,209 +378,16 @@ public class FilterPanel extends javax.swing.JPanel
 
 	private void autoThreshold()
 	{
-		final String selectedFeature = allKeys.get( jComboBoxFeature.getSelectedIndex() );
-		final double[] values = valuesMap.get( selectedFeature );
+		final String key = ( String ) cmbboxFeatureKeys.getSelectedItem();
+		final double[] values = valueCollector.apply( key );
 		if ( null != values && values.length > 0 )
 		{
-			threshold = TMUtils.otsuThreshold( valuesMap.get( selectedFeature ) );
+			threshold = TMUtils.otsuThreshold( values );
 			redrawThresholdMarker();
 		}
 	}
 
-	private void initGUI()
-	{
-		final Dimension panelSize = new java.awt.Dimension( 250, 140 );
-		final Dimension panelMaxSize = new java.awt.Dimension( 1000, 140 );
-		try
-		{
-			final GridBagLayout thisLayout = new GridBagLayout();
-			thisLayout.rowWeights = new double[] { 0.0, 1.0, 0.0 };
-			thisLayout.rowHeights = new int[] { 10, 7, 15 };
-			thisLayout.columnWeights = new double[] { 0.0, 0.0, 1.0 };
-			thisLayout.columnWidths = new int[] { 7, 20, 7 };
-			this.setLayout( thisLayout );
-			this.setPreferredSize( panelSize );
-			this.setMaximumSize( panelMaxSize );
-			this.setBorder( new LineBorder( annotationColor, 1, true ) );
-			{
-				final ComboBoxModel< String > jComboBoxFeatureModel = new DefaultComboBoxModel< >(
-						TMUtils.getArrayFromMaping( allKeys, keyNames ).toArray( new String[] {} ) );
-				jComboBoxFeature = new JComboBox< >();
-				this.add( jComboBoxFeature, new GridBagConstraints( 0, 0, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 2, 5, 2, 5 ), 0, 0 ) );
-				jComboBoxFeature.setModel( jComboBoxFeatureModel );
-				jComboBoxFeature.setFont( FONT );
-				jComboBoxFeature.addActionListener( new ActionListener()
-				{
-					@Override
-					public void actionPerformed( final ActionEvent e )
-					{
-						comboBoxSelectionChanged();
-					}
-				} );
-			}
-			{
-				createHistogramPlot();
-				chartPanel.setPreferredSize( new Dimension( 0, 0 ) );
-				this.add( chartPanel, new GridBagConstraints( 0, 1, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets( 0, 0, 0, 0 ), 0, 0 ) );
-				chartPanel.setOpaque( false );
-			}
-			{
-				jButtonAutoThreshold = new JButton();
-				this.add( jButtonAutoThreshold, new GridBagConstraints( 2, 2, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets( 0, 0, 0, 10 ), 0, 0 ) );
-				jButtonAutoThreshold.setText( "Auto" );
-				jButtonAutoThreshold.setFont( SMALL_FONT );
-				jButtonAutoThreshold.addActionListener( new ActionListener()
-				{
-					@Override
-					public void actionPerformed( final ActionEvent e )
-					{
-						autoThreshold();
-					}
-				} );
-			}
-			{
-				jRadioButtonAbove = new JRadioButton();
-				this.add( jRadioButtonAbove, new GridBagConstraints( 0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets( 0, 10, 0, 0 ), 0, 0 ) );
-				jRadioButtonAbove.setText( "Above" );
-				jRadioButtonAbove.setFont( SMALL_FONT );
-				jRadioButtonAbove.addActionListener( new ActionListener()
-				{
-					@Override
-					public void actionPerformed( final ActionEvent e )
-					{
-						redrawThresholdMarker();
-					}
-				} );
-			}
-			{
-				jRadioButtonBelow = new JRadioButton();
-				this.add( jRadioButtonBelow, new GridBagConstraints( 1, 2, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets( 0, 5, 0, 0 ), 0, 0 ) );
-				jRadioButtonBelow.setText( "Below" );
-				jRadioButtonBelow.addActionListener( new ActionListener()
-				{
-					@Override
-					public void actionPerformed( final ActionEvent e )
-					{
-						redrawThresholdMarker();
-					}
-				} );
-				jRadioButtonBelow.setFont( SMALL_FONT );
-			}
-			{
-				final ButtonGroup buttonGroup = new ButtonGroup();
-				buttonGroup.add( jRadioButtonAbove );
-				buttonGroup.add( jRadioButtonBelow );
-				jRadioButtonAbove.setSelected( true );
-			}
-		}
-		catch ( final Exception e )
-		{
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * Instantiate and configure the histogram chart.
-	 */
-	private void createHistogramPlot()
-	{
-		dataset = new LogHistogramDataset();
-		chart = ChartFactory.createHistogram( null, null, null, dataset, PlotOrientation.VERTICAL, false, false, false );
-
-		plot = chart.getXYPlot();
-		final XYBarRenderer renderer = ( XYBarRenderer ) plot.getRenderer();
-		renderer.setShadowVisible( false );
-		renderer.setMargin( 0 );
-		renderer.setBarPainter( new StandardXYBarPainter() );
-		renderer.setDrawBarOutline( true );
-		renderer.setSeriesOutlinePaint( 0, Color.BLACK );
-		renderer.setSeriesPaint( 0, new Color( 1, 1, 1, 0 ) );
-
-		plot.setBackgroundPaint( new Color( 1, 1, 1, 0 ) );
-		plot.setOutlineVisible( false );
-		plot.setDomainCrosshairVisible( false );
-		plot.setDomainGridlinesVisible( false );
-		plot.setRangeCrosshairVisible( false );
-		plot.setRangeGridlinesVisible( false );
-
-		plot.getRangeAxis().setVisible( false );
-		plot.getDomainAxis().setVisible( false );
-
-		chart.setBorderVisible( false );
-		chart.setBackgroundPaint( new Color( 0.6f, 0.6f, 0.7f ) );
-
-		intervalMarker = new IntervalMarker( 0, 0, new Color( 0.3f, 0.5f, 0.8f ), new BasicStroke(), new Color( 0, 0, 0.5f ), new BasicStroke( 1.5f ), 0.5f );
-		plot.addDomainMarker( intervalMarker );
-
-		chartPanel = new ChartPanel( chart );
-		final MouseListener[] mls = chartPanel.getMouseListeners();
-		for ( final MouseListener ml : mls )
-			chartPanel.removeMouseListener( ml );
-
-		chartPanel.addMouseListener( new MouseListener()
-		{
-			@Override
-			public void mouseReleased( final MouseEvent e )
-			{}
-
-			@Override
-			public void mousePressed( final MouseEvent e )
-			{}
-
-			@Override
-			public void mouseExited( final MouseEvent e )
-			{}
-
-			@Override
-			public void mouseEntered( final MouseEvent e )
-			{}
-
-			@Override
-			public void mouseClicked( final MouseEvent e )
-			{
-				chartPanel.requestFocusInWindow();
-				threshold = getXFromChartEvent( e );
-				redrawThresholdMarker();
-			}
-		} );
-		chartPanel.addMouseMotionListener( new MouseMotionListener()
-		{
-			@Override
-			public void mouseMoved( final MouseEvent e )
-			{}
-
-			@Override
-			public void mouseDragged( final MouseEvent e )
-			{
-				threshold = getXFromChartEvent( e );
-				redrawThresholdMarker();
-			}
-		} );
-		chartPanel.setFocusable( true );
-		chartPanel.addFocusListener( new FocusListener()
-		{
-
-			@Override
-			public void focusLost( final FocusEvent arg0 )
-			{
-				annotation.setColor( annotationColor.darker() );
-			}
-
-			@Override
-			public void focusGained( final FocusEvent arg0 )
-			{
-				annotation.setColor( Color.RED.darker() );
-			}
-		} );
-		chartPanel.addKeyListener( new MyKeyListener() );
-
-		annotation = new XYTextSimpleAnnotation( chartPanel );
-		annotation.setFont( SMALL_FONT.deriveFont( Font.BOLD ) );
-		annotation.setColor( annotationColor.darker() );
-		plot.addAnnotation( annotation );
-	}
-
-	private double getXFromChartEvent( final MouseEvent mouseEvent )
+	private double getXFromChartEvent( final MouseEvent mouseEvent, final ChartPanel chartPanel )
 	{
 		final Rectangle2D plotArea = chartPanel.getScreenDataArea();
 		return plot.getDomainAxis().java2DToValue( mouseEvent.getX(), plotArea, plot.getDomainAxisEdge() );
@@ -498,12 +395,12 @@ public class FilterPanel extends javax.swing.JPanel
 
 	private void redrawThresholdMarker()
 	{
-		final String selectedFeature = allKeys.get( jComboBoxFeature.getSelectedIndex() );
-		final double[] values = valuesMap.get( selectedFeature );
+		final String key = ( String ) cmbboxFeatureKeys.getSelectedItem();
+		final double[] values = valueCollector.apply( key );
 		if ( null == values )
 			return;
 
-		if ( jRadioButtonAbove.isSelected() )
+		if ( rdbtnAbove.isSelected() )
 		{
 			intervalMarker.setStartValue( threshold );
 			intervalMarker.setEndValue( plot.getDomainAxis().getUpperBound() );
@@ -513,17 +410,14 @@ public class FilterPanel extends javax.swing.JPanel
 			intervalMarker.setStartValue( plot.getDomainAxis().getLowerBound() );
 			intervalMarker.setEndValue( threshold );
 		}
-		float x, y;
-		if ( threshold > 0.85 * plot.getDomainAxis().getUpperBound() )
-		{
-			x = ( float ) ( threshold - 0.15 * plot.getDomainAxis().getRange().getLength() );
-		}
-		else
-		{
-			x = ( float ) ( threshold + 0.05 * plot.getDomainAxis().getRange().getLength() );
-		}
 
-		y = ( float ) ( 0.85 * plot.getRangeAxis().getUpperBound() );
+		final float x;
+		if ( threshold > 0.85 * plot.getDomainAxis().getUpperBound() )
+			x = ( float ) ( threshold - 0.15 * plot.getDomainAxis().getRange().getLength() );
+		else
+			x = ( float ) ( threshold + 0.05 * plot.getDomainAxis().getRange().getLength() );
+
+		final float y = ( float ) ( 0.85 * plot.getRangeAxis().getUpperBound() );
 		annotation.setText( String.format( "%.2f", threshold ) );
 		annotation.setLocation( x, y );
 		fireThresholdChanged();
@@ -551,14 +445,14 @@ public class FilterPanel extends javax.swing.JPanel
 		final Random ran = new Random();
 		double mean;
 
-		final String[] features = new String[] { SpotContrastAndSNRAnalyzerFactory.KEY, SpotMorphologyAnalyzerFactory.KEY, SpotIntensityAnalyzerFactory.KEY };
+		final String[] features = new String[] { SpotContrastAndSNRAnalyzerFactory.CONTRAST, SpotRadiusEstimatorFactory.ESTIMATED_DIAMETER, SpotIntensityAnalyzerFactory.MAX_INTENSITY };
 
-		final Map< String, String > featureNames = new HashMap< >();
+		final Map< String, String > featureNames = new HashMap<>();
 		featureNames.put( features[ 0 ], "Contrast" );
-		featureNames.put( features[ 1 ], "Morphology" );
-		featureNames.put( features[ 2 ], "Mean intensity" );
+		featureNames.put( features[ 1 ], "Diameter" );
+		featureNames.put( features[ 2 ], "Max intensity" );
 
-		final Map< String, double[] > fv = new HashMap< >();
+		final Map< String, double[] > fv = new HashMap<>();
 		for ( final String feature : features )
 		{
 			final double[] val = new double[ N_ITEMS ];
@@ -568,8 +462,12 @@ public class FilterPanel extends javax.swing.JPanel
 			fv.put( feature, val );
 		}
 
+		// Dummy values.
+		final Function< String, double[] > vc = key -> fv.get( key );
+		final FeatureFilter filter = new FeatureFilter( SpotRadiusEstimatorFactory.ESTIMATED_DIAMETER, 0.5, false );
+
 		// Create GUI
-		final FilterPanel tp = new FilterPanel( fv, Arrays.asList( features ), featureNames );
+		final FilterPanel tp = new FilterPanel( featureNames, vc, filter );
 		tp.resetAxes();
 		final JFrame frame = new JFrame();
 		frame.getContentPane().add( tp );
@@ -592,6 +490,8 @@ public class FilterPanel extends javax.swing.JPanel
 		private static final long WAIT_DELAY = 1; // s
 
 		private static final double INCREASE_FACTOR = 0.1;
+
+		private static final double SLOW_INCREASE_FACTOR = 0.005;
 
 		private String strNumber = "";
 
@@ -628,13 +528,13 @@ public class FilterPanel extends javax.swing.JPanel
 			// Is it arrow keys?
 			if ( e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_KP_LEFT )
 			{
-				threshold -= INCREASE_FACTOR * plot.getDomainAxis().getRange().getLength();
+				threshold -= ( e.isControlDown() ? SLOW_INCREASE_FACTOR : INCREASE_FACTOR ) * plot.getDomainAxis().getRange().getLength();
 				redrawThresholdMarker();
 				return;
 			}
 			else if ( e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_KP_RIGHT )
 			{
-				threshold += INCREASE_FACTOR * plot.getDomainAxis().getRange().getLength();
+				threshold += ( e.isControlDown() ? SLOW_INCREASE_FACTOR : INCREASE_FACTOR ) * plot.getDomainAxis().getRange().getLength();
 				redrawThresholdMarker();
 				return;
 			}
