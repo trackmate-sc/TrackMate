@@ -4,6 +4,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMateModule;
+import fiji.plugin.trackmate.gui.DisplaySettings;
 
 public interface ViewFactory extends TrackMateModule
 {
@@ -18,8 +19,10 @@ public interface ViewFactory extends TrackMateModule
 	 *            use to display the model.
 	 * @param selectionModel
 	 *            the {@link SelectionModel} model to share in the created view.
+	 * @param displaySettings
+	 *            the display settings to use to paint the view.
 	 * @return a new view of the specified model.
 	 */
-	public TrackMateModelView create( final Model model, final Settings settings, final SelectionModel selectionModel );
+	public TrackMateModelView create( final Model model, final Settings settings, final SelectionModel selectionModel, final DisplaySettings displaySettings );
 
 }

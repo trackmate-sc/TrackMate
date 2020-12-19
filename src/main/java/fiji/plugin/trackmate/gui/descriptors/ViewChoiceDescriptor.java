@@ -83,9 +83,7 @@ public class ViewChoiceDescriptor implements WizardPanelDescriptor
 					return;
 
 				final ViewFactory factory = viewProvider.getFactory( viewName );
-				final TrackMateModelView view = factory.create( trackmate.getModel(), trackmate.getSettings(), selectionModel );
-				for ( final String settingKey : guimodel.getDisplaySettings().keySet() )
-					view.setDisplaySettings( settingKey, guimodel.getDisplaySettings().get( settingKey ) );
+				final TrackMateModelView view = factory.create( trackmate.getModel(), trackmate.getSettings(), selectionModel, controller.getDisplaySettings() );
 
 				guimodel.addView( view );
 				view.render();
