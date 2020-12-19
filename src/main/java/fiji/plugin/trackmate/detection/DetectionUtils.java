@@ -125,7 +125,7 @@ public class DetectionUtils
 					model.getSpots().put( frame, spotsToCopy );
 					// Make them visible
 					for ( final Spot spot : spotsToCopy )
-						spot.putFeature( SpotCollection.VISIBLITY, SpotCollection.ONE );
+						spot.putFeature( SpotCollection.VISIBILITY, SpotCollection.ONE );
 
 					// Generate event for listener to reflect changes.
 					model.setSpots( model.getSpots(), true );
