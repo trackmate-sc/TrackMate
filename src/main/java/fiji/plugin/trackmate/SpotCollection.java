@@ -1,8 +1,10 @@
 package fiji.plugin.trackmate;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -279,17 +281,16 @@ public class SpotCollection implements MultiThreaded
 				public void run()
 				{
 					final Set< Spot > spots = content.get( frame );
-					boolean isAbove, shouldNotBeVisible;
 					for ( final Spot spot : spots )
 					{
 
-						shouldNotBeVisible = false;
+						boolean shouldNotBeVisible = false;
 						for ( final FeatureFilter featureFilter : filters )
 						{
 
 							final Double val = spot.getFeature( featureFilter.feature );
 							final double tval = featureFilter.value;
-							isAbove = featureFilter.isAbove;
+							final boolean isAbove = featureFilter.isAbove;
 
 							if ( isAbove && val.compareTo( tval ) < 0 || !isAbove && val.compareTo( tval ) > 0 )
 							{
@@ -852,38 +853,26 @@ public class SpotCollection implements MultiThreaded
 	}
 
 	/**
-	 * Returns a new {@link SpotCollection}, made of only the spots marked as
-	 * visible. All the spots will then be marked as not-visible.
-	 *
-	 * @return a new spot collection, made of only the spots marked as visible.
+	 * Remove all the non-visible spots of this collection.
 	 */
-	public SpotCollection crop()
+	public void crop()
 	{
-		final SpotCollection ns = new SpotCollection();
-		ns.setNumThreads( numThreads );
-
 		final Collection< Integer > frames = content.keySet();
 		final ExecutorService executors = Executors.newFixedThreadPool( numThreads );
 		for ( final Integer frame : frames )
 		{
-
 			final Runnable command = new Runnable()
 			{
 				@Override
 				public void run()
 				{
 					final Set< Spot > fc = content.get( frame );
-					final Set< Spot > nfc = new HashSet<>( getNSpots( frame, true ) );
-
+					final List< Spot > toRemove = new ArrayList<>();
 					for ( final Spot spot : fc )
-					{
-						if ( isVisible( spot ) )
-						{
-							nfc.add( spot );
-							spot.putFeature( VISIBILITY, ZERO );
-						}
-					}
-					ns.content.put( frame, nfc );
+						if ( !isVisible( spot ) )
+							toRemove.add( spot );
+
+					fc.removeAll( toRemove );
 				}
 			};
 			executors.execute( command );
@@ -900,7 +889,6 @@ public class SpotCollection implements MultiThreaded
 		{
 			e.printStackTrace();
 		}
-		return ns;
 	}
 
 	/**
@@ -1018,6 +1006,6 @@ public class SpotCollection implements MultiThreaded
 
 	private static final boolean isVisible( final Spot spot )
 	{
-		return spot.getFeature( VISIBILITY ).compareTo( ZERO ) <= 0;
+		return spot.getFeature( VISIBILITY ).compareTo( ZERO ) > 0;
 	}
 }

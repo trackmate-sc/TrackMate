@@ -65,10 +65,9 @@ public class SpotCollectionTest
 	{
 		final FeatureFilter filter = new FeatureFilter( Spot.QUALITY, 2d, false );
 		sc.filter( filter );
-		final SpotCollection sc2 = sc.crop();
-		assertEquals( 3 * N_FRAMES, sc2.getNSpots( false ) );
-		assertEquals( 0, sc2.getNSpots( true ) );
-
+		sc.crop();
+		assertEquals( 3 * N_FRAMES, sc.getNSpots( false ) );
+		assertEquals( 3 * N_FRAMES, sc.getNSpots( true ) );
 	}
 
 	@Test
