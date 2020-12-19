@@ -61,6 +61,7 @@ public class SaveDescriptor extends SomeDialogDescriptor
 		writer.appendModel( trackmate.getModel() );
 		writer.appendSettings( trackmate.getSettings() );
 		writer.appendGUIState( controller.getGuimodel() );
+		writer.appendDisplaySettings( controller.getDisplaySettings() );
 
 		try
 		{
