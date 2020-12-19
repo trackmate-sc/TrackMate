@@ -19,13 +19,12 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
-import org.jfree.chart.renderer.InterpolatePaintScale;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackMateOptionUtils;
 import fiji.plugin.trackmate.TrackModel;
+import fiji.plugin.trackmate.gui.DisplaySettings;
 import fiji.plugin.trackmate.util.ExportableChartPanel;
 
 public abstract class AbstractFeatureGrapher
@@ -33,19 +32,20 @@ public abstract class AbstractFeatureGrapher
 
 	protected static final Shape DEFAULT_SHAPE = new Ellipse2D.Double( -3, -3, 6, 6 );
 
-	protected final InterpolatePaintScale paints = TrackMateOptionUtils.getOptions().getPaintScale();
-
 	protected final String xFeature;
 
 	protected final Set< String > yFeatures;
 
 	protected final Model model;
 
-	public AbstractFeatureGrapher( final String xFeature, final Set< String > yFeatures, final Model model )
+	protected final DisplaySettings displaySettings;
+
+	public AbstractFeatureGrapher( final String xFeature, final Set< String > yFeatures, final Model model, final DisplaySettings displaySettings )
 	{
 		this.xFeature = xFeature;
 		this.yFeatures = yFeatures;
 		this.model = model;
+		this.displaySettings = displaySettings;
 	}
 
 	/**

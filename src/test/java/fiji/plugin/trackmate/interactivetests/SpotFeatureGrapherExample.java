@@ -21,7 +21,7 @@ import fiji.plugin.trackmate.gui.DisplaySettings;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
-public class SpotFeatureGrapher_TestDrive
+public class SpotFeatureGrapherExample
 {
 
 	public static void main( final String[] args )
@@ -36,11 +36,9 @@ public class SpotFeatureGrapher_TestDrive
 		Y.add( Spot.POSITION_T );
 		final List< Spot > spots = new ArrayList<>( model.getSpots().getNSpots( true ) );
 		for ( final Iterator< Spot > it = model.getSpots().iterator( true ); it.hasNext(); )
-		{
 			spots.add( it.next() );
-		}
 
-		final SpotFeatureGrapher grapher = new SpotFeatureGrapher( Spot.POSITION_X, Y, spots, model );
+		final SpotFeatureGrapher grapher = new SpotFeatureGrapher( Spot.POSITION_X, Y, spots, model, DisplaySettings.defaultStyle().copy() );
 		grapher.render();
 
 		final TrackIndexAnalyzer analyzer = new TrackIndexAnalyzer();
@@ -82,9 +80,8 @@ public class SpotFeatureGrapher_TestDrive
 
 		final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph = new SimpleWeightedGraph<>( DefaultWeightedEdge.class );
 		for ( final Spot spot : spots )
-		{
 			graph.addVertex( spot );
-		}
+
 		Spot source = spots.get( 0 );
 		for ( int i = 1; i < N_SPOTS; i++ )
 		{

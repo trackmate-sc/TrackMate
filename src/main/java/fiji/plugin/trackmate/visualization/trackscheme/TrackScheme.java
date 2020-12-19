@@ -160,7 +160,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 	public TrackScheme( final Model model, final SelectionModel selectionModel, final DisplaySettings displaySettings )
 	{
 		super( model, selectionModel, displaySettings );
-		this.gui = new TrackSchemeFrame( this );
+		this.gui = new TrackSchemeFrame( this, displaySettings );
 		final String title = "TrackScheme";
 		gui.setTitle( title );
 		gui.setSize( DEFAULT_SIZE );

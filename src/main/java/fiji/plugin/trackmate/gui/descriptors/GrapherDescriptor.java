@@ -1,10 +1,10 @@
 package fiji.plugin.trackmate.gui.descriptors;
 
+import java.awt.Component;
+
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.GrapherPanel;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
-
-import java.awt.Component;
 
 public class GrapherDescriptor implements WizardPanelDescriptor
 {
@@ -17,7 +17,7 @@ public class GrapherDescriptor implements WizardPanelDescriptor
 
 	public GrapherDescriptor( final TrackMate trackmate, final TrackMateGUIController controller )
 	{
-		this.panel = new GrapherPanel( trackmate );
+		this.panel = new GrapherPanel( trackmate, controller.getDisplaySettings() );
 		this.controller = controller;
 	}
 

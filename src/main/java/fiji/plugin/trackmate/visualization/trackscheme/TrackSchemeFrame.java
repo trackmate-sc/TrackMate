@@ -17,6 +17,7 @@ import com.mxgraph.swing.mxGraphOutline;
 import com.mxgraph.swing.handler.mxRubberband;
 
 import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.gui.DisplaySettings;
 import fiji.plugin.trackmate.util.TrackNavigator;
 
 public class TrackSchemeFrame extends JFrame
@@ -44,13 +45,16 @@ public class TrackSchemeFrame extends JFrame
 
 	protected final Logger logger = Logger.IJTOOLBAR_LOGGER;
 
+	private final DisplaySettings displaySettings;
+
 	/*
 	 * CONSTRUCTORS
 	 */
 
-	public TrackSchemeFrame( final TrackScheme trackScheme )
+	public TrackSchemeFrame( final TrackScheme trackScheme, final DisplaySettings displaySettings )
 	{
 		this.trackScheme = trackScheme;
+		this.displaySettings = displaySettings;
 		this.graph = trackScheme.getGraph();
 
 		// Frame look
@@ -74,7 +78,7 @@ public class TrackSchemeFrame extends JFrame
 		graphComponent = createGraphComponent();
 
 		// Add the info pane
-		infoPane = new InfoPane( trackScheme.getModel(), trackScheme.getSelectionModel() );
+		infoPane = new InfoPane( trackScheme.getModel(), trackScheme.getSelectionModel(), displaySettings );
 
 		// Add the graph outline
 		final mxGraphOutline graphOutline = new mxGraphOutline( graphComponent );

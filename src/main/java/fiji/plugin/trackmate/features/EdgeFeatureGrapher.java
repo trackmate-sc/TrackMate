@@ -13,6 +13,7 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.InterpolatePaintScale;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -21,6 +22,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.gui.DisplaySettings;
 import fiji.plugin.trackmate.util.ExportableChartPanel;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.util.XYEdgeRenderer;
@@ -38,9 +40,9 @@ public class EdgeFeatureGrapher extends AbstractFeatureGrapher
 
 	private final Map< String, String > featureNames;
 
-	public EdgeFeatureGrapher( final String xFeature, final Set< String > yFeatures, final List< DefaultWeightedEdge > edges, final Model model )
+	public EdgeFeatureGrapher( final String xFeature, final Set< String > yFeatures, final List< DefaultWeightedEdge > edges, final Model model, final DisplaySettings displaySettings )
 	{
-		super( xFeature, yFeatures, model );
+		super( xFeature, yFeatures, model, displaySettings );
 		this.edges = edges;
 		this.xDimension = model.getFeatureModel().getEdgeFeatureDimensions().get( xFeature );
 		this.yDimensions = model.getFeatureModel().getEdgeFeatureDimensions();
@@ -50,6 +52,7 @@ public class EdgeFeatureGrapher extends AbstractFeatureGrapher
 	@Override
 	public void render()
 	{
+		final InterpolatePaintScale colormap = displaySettings.getColormap();
 
 		// Check x units
 		final String xdim = TMUtils.getUnitsFor( xDimension, model.getSpaceUnits(), model.getTimeUnits() );
@@ -119,8 +122,8 @@ public class EdgeFeatureGrapher extends AbstractFeatureGrapher
 				pointRenderer.setSeriesOutlinePaint( i, Color.black );
 				pointRenderer.setSeriesLinesVisible( i, false );
 				pointRenderer.setSeriesShape( i, DEFAULT_SHAPE, false );
-				pointRenderer.setSeriesPaint( i, paints.getPaint( ( double ) i / nseries ), false );
-				edgeRenderer.setSeriesPaint( i, paints.getPaint( ( double ) i / nseries ), false );
+				pointRenderer.setSeriesPaint( i, colormap.getPaint( ( double ) i / nseries ), false );
+				edgeRenderer.setSeriesPaint( i, colormap.getPaint( ( double ) i / nseries ), false );
 			}
 
 			// The panel
