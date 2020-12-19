@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -104,77 +103,6 @@ public class FeatureModel
 				TrackIndexAnalyzer.FEATURE_SHORT_NAMES,
 				TrackIndexAnalyzer.FEATURE_DIMENSIONS,
 				TrackIndexAnalyzer.IS_INT );
-	}
-
-	/*
-	 * METHODS
-	 */
-
-	/**
-	 * Returns a new double array with all the values for the specified track
-	 * feature.
-	 *
-	 * @param trackFeature
-	 *            the track feature to parse. Throw an
-	 *            {@link IllegalArgumentException} if the feature is unknown.
-	 * @param visibleOnly
-	 *            if <code>true</code>, will only include visible tracks, all
-	 *            the tracks otherwise.
-	 * @return a new <code>double[]</code>, one element per track.
-	 */
-	public double[] getTrackFeatureValues( final String trackFeature, final boolean visibleOnly )
-	{
-		if ( !trackFeatures.contains( trackFeature ) )
-			throw new IllegalArgumentException( "Unknown track feature: " + trackFeature );
-		final Set< Integer > keys = model.getTrackModel().trackIDs( visibleOnly );
-		final double[] val = new double[ keys.size() ];
-		int index = 0;
-		for ( final Integer trackID : keys )
-		{
-			final Double tf = getTrackFeature( trackID, trackFeature );
-			if ( null == tf )
-				continue;
-			val[ index++ ] = tf.doubleValue();
-		}
-		return val;
-	}
-
-	/**
-	 * Returns a new double array with all the values for the specified edge
-	 * feature.
-	 *
-	 * @param edgeFeature
-	 *            the track feature to parse. Throw an
-	 *            {@link IllegalArgumentException} if the feature is unknown.
-	 * @param visibleOnly
-	 *            if <code>true</code>, will only include edges in visible
-	 *            tracks, in all the tracks otherwise.
-	 * @return a new <code>double[]</code>, one element per edge.
-	 */
-	public double[] getEdgeFeatureValues( final String edgeFeature, final boolean visibleOnly )
-	{
-		if ( !edgeFeatures.contains( edgeFeature ) )
-		{ throw new IllegalArgumentException( "Unknown edge feature: " + edgeFeature ); }
-		final Set< Integer > keys = model.getTrackModel().trackIDs( visibleOnly );
-		int nvals = 0;
-		for ( final Integer trackID : keys )
-		{
-			nvals += model.getTrackModel().trackEdges( trackID ).size();
-		}
-
-		final double[] val = new double[ nvals ];
-		int index = 0;
-		for ( final Integer trackID : keys )
-		{
-			for ( final DefaultWeightedEdge edge : model.getTrackModel().trackEdges( trackID ) )
-			{
-				final Double ef = getEdgeFeature( edge, edgeFeature );
-				if ( null == ef )
-					continue;
-				val[ index++ ] = ef.doubleValue();
-			}
-		}
-		return val;
 	}
 
 	/*
