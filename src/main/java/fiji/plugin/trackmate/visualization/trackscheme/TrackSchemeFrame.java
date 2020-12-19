@@ -1,11 +1,7 @@
 package fiji.plugin.trackmate.visualization.trackscheme;
 
-import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
-
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -13,13 +9,8 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 
 import com.mxgraph.model.mxICell;
 import com.mxgraph.swing.mxGraphOutline;
@@ -51,8 +42,7 @@ public class TrackSchemeFrame extends JFrame
 	/** The graph component in charge of painting the graph. */
 	TrackSchemeGraphComponent graphComponent;
 
-	/** The {@link Logger} that sends messages to the TrackScheme status bar. */
-	final Logger logger;
+	protected final Logger logger = Logger.IJTOOLBAR_LOGGER;
 
 	/*
 	 * CONSTRUCTORS
@@ -71,64 +61,6 @@ public class TrackSchemeFrame extends JFrame
 
 		// Add a ToolBar
 		getContentPane().add( createToolBar(), BorderLayout.NORTH );
-
-		// Add the status bar
-		final JPanel statusPanel = new JPanel();
-		getContentPane().add( statusPanel, BorderLayout.SOUTH );
-
-		statusPanel.setLayout( new FlowLayout( FlowLayout.RIGHT ) );
-
-		final JLabel statusLabel = new JLabel( " " );
-		statusLabel.setFont( SMALL_FONT );
-		statusLabel.setHorizontalAlignment( SwingConstants.RIGHT );
-		statusLabel.setPreferredSize( new Dimension( 200, 12 ) );
-		statusPanel.add( statusLabel );
-
-		final JProgressBar progressBar = new JProgressBar();
-		progressBar.setPreferredSize( new Dimension( 146, 12 ) );
-		statusPanel.add( progressBar );
-
-		this.logger = new Logger()
-		{
-			@Override
-			public void log( final String message, final Color color )
-			{
-				SwingUtilities.invokeLater( new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						statusLabel.setText( message );
-						statusLabel.setForeground( color );
-					}
-				} );
-			}
-
-			@Override
-			public void error( final String message )
-			{
-				log( message, Color.RED );
-			}
-
-			@Override
-			public void setProgress( final double val )
-			{
-				SwingUtilities.invokeLater( new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						progressBar.setValue( ( int ) ( val * 100 ) );
-					}
-				} );
-			}
-
-			@Override
-			public void setStatus( final String status )
-			{
-				log( status, Logger.BLUE_COLOR );
-			}
-		};
 	}
 
 	/*

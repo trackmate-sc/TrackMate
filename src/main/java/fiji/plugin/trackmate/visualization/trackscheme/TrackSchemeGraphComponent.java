@@ -213,8 +213,6 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 						final double scale = lGraph.getView().getScale();
 						final mxPoint trans = lGraph.getView().getTranslate();
 
-						// TODO: Simplify math below, this was copy pasted from
-						// getPreviewLocation with the rounding removed
 						dx = e.getX() - first.x;
 						dy = e.getY() - first.y;
 
@@ -279,34 +277,22 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 						if ( graphComponent.isConstrainedEvent( e ) )
 						{
 							if ( Math.abs( dx ) > Math.abs( dy ) )
-							{
 								dy = 0;
-							}
 							else
-							{
 								dx = 0;
-							}
 						}
 
 						final mxCellState markedState = marker.getMarkedState();
 						Object target = ( markedState != null ) ? markedState.getCell() : null;
 
-						// FIXME: Cell is null if selection was carried out,
-						// need other variable
-						// trace("cell", cell);
-
 						if ( target == null && isRemoveCellsFromParent() && shouldRemoveCellFromParent( lGraph.getModel().getParent( initialCell ), cells, e ) )
-						{
 							target = lGraph.getDefaultParent();
-						}
 
 						final boolean clone = isCloneEnabled() && graphComponent.isCloneEvent( e );
 						final Object[] result = movePreview.stop( true, e, dx, dy, clone, target );
 
 						if ( cells != result )
-						{
 							lGraph.setSelectionCells( result );
-						}
 
 						e.consume();
 					}
@@ -315,26 +301,18 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 						if ( constrainedEvent )
 						{
 							if ( Math.abs( dx ) > Math.abs( dy ) )
-							{
 								dy = 0;
-							}
 							else
-							{
 								dx = 0;
-							}
 						}
 
 						final mxCellState targetState = marker.getValidState();
 						final Object target = ( targetState != null ) ? targetState.getCell() : null;
 
 						if ( lGraph.isSplitEnabled() && lGraph.isSplitTarget( target, cells ) )
-						{
 							lGraph.splitEdge( target, cells, dx, dy );
-						}
 						else
-						{
 							moveCells( cells, dx, dy, target, e );
-						}
 
 						e.consume();
 					}
@@ -376,9 +354,8 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			while ( y < height )
 			{
 				if ( y > paintBounds.y - ycs && y < paintBounds.y + paintBounds.height )
-				{
 					g.fillRect( 0, ( int ) y, width, ( int ) ycs );
-				}
+
 				y += 2d * ycs;
 			}
 		}
@@ -444,9 +421,8 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 	public void loopPaintDecorationLevel()
 	{
 		if ( paintDecorationLevel++ >= MAX_DECCORATION_LEVELS )
-		{
 			paintDecorationLevel = 0;
-		}
+
 		repaint();
 	}
 
@@ -585,19 +561,20 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 				int index = 0;
 				while ( x < point.x )
 				{
-					if ( index >= columnTrackIDs.length ) { return "Unlaid spots"; }
+					if ( index >= columnTrackIDs.length )
+						return "Single spots";
+
 					final int cw = columnWidths[ index++ ];
 					x += cw * xcs;
 				}
+
 				if ( index == 0 )
-				{
 					index = 1;
-				}
+
 				String columnName = trackScheme.getModel().getTrackModel().name( columnTrackIDs[ index - 1 ] );
 				if ( null == columnName )
-				{
 					columnName = "Name not set";
-				}
+
 				return columnName;
 			}
 			return "";
@@ -632,19 +609,14 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 					final int cw = columnWidths[ i ];
 					String columnName = trackScheme.getModel().getTrackModel().name( columnTrackIDs[ i ] );
 					if ( null == columnName )
-					{
 						columnName = "Name not set";
-					}
-					if ( i == 0 )
-					{
-						// Special case column 1.
-						g.drawString( columnName, 20, ( int ) ( ycs / 2d ) );
 
-					}
+					// Special case column 1.
+					if ( i == 0 )
+						g.drawString( columnName, 20, ( int ) ( ycs / 2d ) );
 					else
-					{
 						g.drawString( columnName, ( int ) ( x + 20d ), ( int ) ( ycs / 2d ) );
-					}
+
 					x += cw * xcs;
 					g.setColor( LINE_COLOR );
 					g.drawLine( ( int ) x, 0, ( int ) x, ( int ) ycs );
@@ -653,7 +625,7 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 
 			// Last column header
 			g.setColor( Color.decode( TrackScheme.DEFAULT_COLOR ) );
-			g.drawString( "Unlaid spots", ( int ) ( x + 20d ), ( int ) ( ycs / 2d ) );
+			g.drawString( "Single spots", ( int ) ( x + 20d ), ( int ) ( ycs / 2d ) );
 		}
 
 		@Override
@@ -716,9 +688,8 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 				while ( y < height )
 				{
 					if ( y > paintBounds.y - ycs && y < paintBounds.y + paintBounds.height )
-					{
 						g.fillRect( 0, ( int ) y, ( int ) xcs, ( int ) ycs );
-					}
+
 					y += 2d * ycs;
 				}
 			}
@@ -726,9 +697,8 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			// Header separator
 			g.setColor( TrackSchemeGraphComponent.LINE_COLOR );
 			if ( xcs > paintBounds.x && xcs < paintBounds.x + paintBounds.width )
-			{
 				g.drawLine( ( int ) xcs, paintBounds.y, ( int ) xcs, paintBounds.y + paintBounds.height );
-			}
+
 
 			// Row headers
 			final double x = xcs / 4d;
@@ -755,7 +725,5 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			final double xcs = TrackScheme.X_COLUMN_SIZE * scale + 1;
 			return new Dimension( ( int ) xcs, ( int ) viewport.getPreferredSize().getHeight() );
 		}
-
 	}
-
 }
