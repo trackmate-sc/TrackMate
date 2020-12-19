@@ -2,28 +2,24 @@ package fiji.plugin.trackmate.features;
 
 /**
  * A helper class to store a feature filter. It is just made of 3 public fields.
- *
- * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; Sep 23, 2010
- *
+ * <p>
+ * Sep 23, 2010, revised in December 2020.
+ * 
+ * @author Jean-Yves Tinevez
  */
 public class FeatureFilter
 {
 	public final String feature;
 
-	public final Double value;
+	public final double value;
 
 	public final boolean isAbove;
 
-	public FeatureFilter( final String feature, final Double value, final boolean isAbove )
+	public FeatureFilter( final String feature, final double value, final boolean isAbove )
 	{
 		this.feature = feature;
 		this.value = value;
 		this.isAbove = isAbove;
-	}
-
-	public FeatureFilter( final String feature, final double value, final boolean isAbove )
-	{
-		this( feature, Double.valueOf( value ), isAbove );
 	}
 
 	@Override
@@ -34,7 +30,7 @@ public class FeatureFilter
 			str += " > ";
 		else
 			str += " < ";
-		str += value.toString();
+		str += "" + value;
 		return str;
 	}
 
