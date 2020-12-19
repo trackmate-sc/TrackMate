@@ -405,6 +405,18 @@ public class Model
 
 	}
 
+	/**
+	 * Notify the {@link ModelChangeListener}s of this model that feature values
+	 * have been computed. This method serves as a manual trigger for this
+	 * event.
+	 */
+	public void notifyFeaturesComputed()
+	{
+		final ModelChangeEvent event = new ModelChangeEvent( this, ModelChangeEvent.FEATURES_COMPUTED );
+		for ( final ModelChangeListener listener : modelChangeListeners )
+			listener.modelChanged( event );
+	}
+
 	/*
 	 * LOGGER
 	 */
