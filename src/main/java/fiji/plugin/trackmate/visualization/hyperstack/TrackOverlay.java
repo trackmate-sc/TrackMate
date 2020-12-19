@@ -11,16 +11,17 @@ import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.features.FeatureUtils;
+import fiji.plugin.trackmate.gui.DisplaySettings;
+import fiji.plugin.trackmate.gui.DisplaySettings.TrackDisplayMode;
 import fiji.plugin.trackmate.util.TMUtils;
-import fiji.plugin.trackmate.visualization.TrackColorGenerator;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
+import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 import ij.ImagePlus;
 import ij.gui.Roi;
 
@@ -37,11 +38,9 @@ public class TrackOverlay extends Roi
 
 	protected Collection< DefaultWeightedEdge > highlight = new HashSet<>();
 
-	protected Map< String, Object > displaySettings;
+	protected DisplaySettings displaySettings;
 
 	protected final Model model;
-
-	private TrackColorGenerator colorGenerator;
 
 	private static final Stroke NORMAL_STROKE = new BasicStroke();
 
@@ -51,7 +50,7 @@ public class TrackOverlay extends Roi
 	 * CONSTRUCTOR
 	 */
 
-	public TrackOverlay( final Model model, final ImagePlus imp, final Map< String, Object > displaySettings )
+	public TrackOverlay( final Model model, final ImagePlus imp, final DisplaySettings displaySettings )
 	{
 		super( 0, 0, imp );
 		this.model = model;
@@ -84,12 +83,11 @@ public class TrackOverlay extends Roi
 		final double maxx = minx + ic.getWidth() / magnification;
 		final double maxy = miny + ic.getHeight() / magnification;
 
-		final boolean tracksVisible = ( Boolean ) displaySettings.get( TrackMateModelView.KEY_TRACKS_VISIBLE );
-		if ( !tracksVisible || model.getTrackModel().nTracks( true ) == 0 )
+		if ( !displaySettings.isTrackVisible() || model.getTrackModel().nTracks( true ) == 0 )
 			return;
 
-		final boolean doLimitDrawingDepth = ( Boolean ) displaySettings.get( TrackMateModelView.KEY_LIMIT_DRAWING_DEPTH );
-		final double drawingDepth = ( Double ) displaySettings.get( TrackMateModelView.KEY_DRAWING_DEPTH );
+		final boolean doLimitDrawingDepth = displaySettings.isZDrawingDepthLimited();
+		final double drawingDepth = displaySettings.getZDrawingDepth();
 		final double zslice = ( imp.getSlice() - 1 ) * calibration[ 2 ];
 
 		// Save graphic device original settings
@@ -100,43 +98,45 @@ public class TrackOverlay extends Roi
 
 		// Normal edges
 		final int currentFrame = imp.getFrame() - 1;
-		final int trackDisplayMode = ( Integer ) displaySettings.get( TrackMateModelView.KEY_TRACK_DISPLAY_MODE );
-		final int trackDisplayDepth = ( Integer ) displaySettings.get( TrackMateModelView.KEY_TRACK_DISPLAY_DEPTH );
+		final TrackDisplayMode trackDisplayMode = displaySettings.getTrackDisplayMode();
+		final int trackDisplayDepth = displaySettings.isFadeTracks() ? displaySettings.getFadeTrackRange() : 1_000_000_000;
 		final Set< Integer > filteredTrackKeys = model.getTrackModel().unsortedTrackIDs( true );
 
 		g2d.setStroke( NORMAL_STROKE );
-		if ( trackDisplayMode == TrackMateModelView.TRACK_DISPLAY_MODE_LOCAL
-				|| trackDisplayMode == TrackMateModelView.TRACK_DISPLAY_MODE_LOCAL_QUICK )
+		if ( trackDisplayMode == TrackDisplayMode.LOCAL )
 			g2d.setComposite( AlphaComposite.getInstance( AlphaComposite.SRC_OVER ) );
 
+		g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING,
+				displaySettings.getUseAntialiasing() ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
+
+		// Color generator.
+		final FeatureColorGenerator< DefaultWeightedEdge > colorGenerator = FeatureUtils.createTrackColorGenerator( model, displaySettings );
+
 		// Determine bounds for limited view modes
-		int minT = 0;
-		int maxT = 0;
+		final int minT;
+		final int maxT;
 		switch ( trackDisplayMode )
 		{
-		case TrackMateModelView.TRACK_DISPLAY_MODE_LOCAL:
-		case TrackMateModelView.TRACK_DISPLAY_MODE_LOCAL_QUICK:
-		case TrackMateModelView.TRACK_DISPLAY_MODE_SELECTION_ONLY:
+		default:
+		case LOCAL:
+		case SELECTION_ONLY:
 			minT = currentFrame - trackDisplayDepth;
 			maxT = currentFrame + trackDisplayDepth;
 			break;
-		case TrackMateModelView.TRACK_DISPLAY_MODE_LOCAL_FORWARD:
-		case TrackMateModelView.TRACK_DISPLAY_MODE_LOCAL_FORWARD_QUICK:
+		case LOCAL_FORWARD:
 			minT = currentFrame;
 			maxT = currentFrame + trackDisplayDepth;
 			break;
-		case TrackMateModelView.TRACK_DISPLAY_MODE_LOCAL_BACKWARD:
-		case TrackMateModelView.TRACK_DISPLAY_MODE_LOCAL_BACKWARD_QUICK:
+		case LOCAL_BACKWARD:
 			minT = currentFrame - trackDisplayDepth;
 			maxT = currentFrame;
 			break;
 		}
 
-		float transparency;
 		switch ( trackDisplayMode )
 		{
 
-		case TrackMateModelView.TRACK_DISPLAY_MODE_SELECTION_ONLY:
+		case SELECTION_ONLY:
 		{
 			for ( final DefaultWeightedEdge edge : highlight )
 			{
@@ -155,21 +155,17 @@ public class TrackOverlay extends Roi
 					continue;
 
 				g2d.setColor( colorGenerator.color( edge ) );
-				transparency = ( float ) ( 1 - Math.abs( ( double ) sourceFrame - currentFrame ) / trackDisplayDepth );
+				final float transparency = ( float ) ( 1 - Math.abs( ( double ) sourceFrame - currentFrame ) / trackDisplayDepth );
 				drawEdge( g2d, source, target, xcorner, ycorner, magnification, transparency );
 			}
 
 			break;
 		}
-		case TrackMateModelView.TRACK_DISPLAY_MODE_WHOLE:
+		case FULL:
 		{
 			for ( final Integer trackID : filteredTrackKeys )
 			{
-				Set< DefaultWeightedEdge > track;
-				synchronized ( model )
-				{
-					track = new HashSet<>( model.getTrackModel().trackEdges( trackID ) );
-				}
+				final Set< DefaultWeightedEdge > track = new HashSet<>( model.getTrackModel().trackEdges( trackID ) );
 				for ( final DefaultWeightedEdge edge : track )
 				{
 					final Spot source = model.getTrackModel().getEdgeSource( edge );
@@ -188,51 +184,10 @@ public class TrackOverlay extends Roi
 			}
 			break;
 		}
-
-		case TrackMateModelView.TRACK_DISPLAY_MODE_LOCAL_QUICK:
-		case TrackMateModelView.TRACK_DISPLAY_MODE_LOCAL_FORWARD_QUICK:
-		case TrackMateModelView.TRACK_DISPLAY_MODE_LOCAL_BACKWARD_QUICK:
+		case LOCAL:
+		case LOCAL_BACKWARD:
+		case LOCAL_FORWARD:
 		{
-
-			g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF );
-
-			for ( final Integer trackID : filteredTrackKeys )
-			{
-				Set< DefaultWeightedEdge > track;
-				synchronized ( model )
-				{
-					track = new HashSet<>( model.getTrackModel().trackEdges( trackID ) );
-				}
-
-				for ( final DefaultWeightedEdge edge : track )
-				{
-					final Spot source = model.getTrackModel().getEdgeSource( edge );
-					final int sourceFrame = source.getFeature( Spot.FRAME ).intValue();
-					if ( sourceFrame < minT || sourceFrame >= maxT )
-						continue;
-
-					final Spot target = model.getTrackModel().getEdgeTarget( edge );
-					if ( !isOnClip( source, target, minx, miny, maxx, maxy, calibration ) )
-						continue;
-
-					final double zs = source.getFeature( Spot.POSITION_Z ).doubleValue();
-					final double zt = target.getFeature( Spot.POSITION_Z ).doubleValue();
-					if ( doLimitDrawingDepth && Math.abs( zs - zslice ) > drawingDepth && Math.abs( zt - zslice ) > drawingDepth )
-						continue;
-
-					g2d.setColor( colorGenerator.color( edge ) );
-					drawEdge( g2d, source, target, xcorner, ycorner, magnification );
-				}
-			}
-			break;
-		}
-
-		case TrackMateModelView.TRACK_DISPLAY_MODE_LOCAL:
-		case TrackMateModelView.TRACK_DISPLAY_MODE_LOCAL_FORWARD:
-		case TrackMateModelView.TRACK_DISPLAY_MODE_LOCAL_BACKWARD:
-		{
-
-			g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
 			for ( final Integer trackID : filteredTrackKeys )
 			{
@@ -248,7 +203,7 @@ public class TrackOverlay extends Roi
 					if ( sourceFrame < minT || sourceFrame >= maxT )
 						continue;
 
-					transparency = ( float ) ( 1 - Math.abs( ( double ) sourceFrame - currentFrame ) / trackDisplayDepth );
+					final float transparency = ( float ) ( 1 - Math.abs( ( double ) sourceFrame - currentFrame ) / trackDisplayDepth );
 					final Spot target = model.getTrackModel().getEdgeTarget( edge );
 					if ( !isOnClip( source, target, minx, miny, maxx, maxy, calibration ) )
 						continue;
@@ -262,11 +217,11 @@ public class TrackOverlay extends Roi
 		}
 		}
 
-		if ( trackDisplayMode != TrackMateModelView.TRACK_DISPLAY_MODE_SELECTION_ONLY )
+		if ( trackDisplayMode != TrackDisplayMode.SELECTION_ONLY )
 		{
 			// Deal with highlighted edges first: brute and thick display
 			g2d.setStroke( SELECTION_STROKE );
-			g2d.setColor( TrackMateModelView.DEFAULT_HIGHLIGHT_COLOR );
+			g2d.setColor( displaySettings.getHighlightColor() );
 			g2d.setComposite( AlphaComposite.getInstance( AlphaComposite.SRC_OVER ) );
 			for ( final DefaultWeightedEdge edge : highlight )
 			{
@@ -283,7 +238,6 @@ public class TrackOverlay extends Roi
 		g2d.setComposite( originalComposite );
 		g2d.setStroke( originalStroke );
 		g2d.setColor( originalColor );
-
 	}
 
 	private static final boolean isOnClip( final Spot source, final Spot target, final double minx, final double miny, final double maxx, final double maxy, final double[] calibration )
@@ -391,10 +345,4 @@ public class TrackOverlay extends Roi
 
 		g2d.drawLine( x0, y0, x1, y1 );
 	}
-
-	public void setTrackColorGenerator( final TrackColorGenerator colorGenerator )
-	{
-		this.colorGenerator = colorGenerator;
-	}
-
 }
