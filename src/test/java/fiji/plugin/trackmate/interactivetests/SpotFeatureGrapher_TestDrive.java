@@ -1,15 +1,5 @@
 package fiji.plugin.trackmate.interactivetests;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.features.SpotFeatureGrapher;
-import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
-import fiji.plugin.trackmate.io.TmXmlReader;
-import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -19,6 +9,17 @@ import java.util.List;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 import org.scijava.util.AppUtils;
+
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.features.SpotFeatureGrapher;
+import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
+import fiji.plugin.trackmate.gui.DisplaySettings;
+import fiji.plugin.trackmate.io.TmXmlReader;
+import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
 public class SpotFeatureGrapher_TestDrive
 {
@@ -31,9 +32,9 @@ public class SpotFeatureGrapher_TestDrive
 		final TmXmlReader reader = new TmXmlReader( file );
 		final Model model = reader.getModel();
 
-		final HashSet< String > Y = new HashSet< >( 1 );
+		final HashSet< String > Y = new HashSet<>( 1 );
 		Y.add( Spot.POSITION_T );
-		final List< Spot > spots = new ArrayList< >( model.getSpots().getNSpots( true ) );
+		final List< Spot > spots = new ArrayList<>( model.getSpots().getNSpots( true ) );
 		for ( final Iterator< Spot > it = model.getSpots().iterator( true ); it.hasNext(); )
 		{
 			spots.add( it.next() );
@@ -45,7 +46,7 @@ public class SpotFeatureGrapher_TestDrive
 		final TrackIndexAnalyzer analyzer = new TrackIndexAnalyzer();
 		analyzer.process( model.getTrackModel().trackIDs( true ), model );
 		// needed for trackScheme
-		final TrackScheme trackScheme = new TrackScheme( model, new SelectionModel( model ) );
+		final TrackScheme trackScheme = new TrackScheme( model, new SelectionModel( model ), DisplaySettings.defaultStyle().copy() );
 		trackScheme.render();
 
 	}
@@ -58,7 +59,7 @@ public class SpotFeatureGrapher_TestDrive
 	{
 
 		final int N_SPOTS = 50;
-		final List< Spot > spots = new ArrayList< >( N_SPOTS );
+		final List< Spot > spots = new ArrayList<>( N_SPOTS );
 		final SpotCollection sc = new SpotCollection();
 		for ( int i = 0; i < N_SPOTS; i++ )
 		{
@@ -70,16 +71,16 @@ public class SpotFeatureGrapher_TestDrive
 
 			spots.add( spot );
 
-			final List< Spot > ts = new ArrayList< >( 1 );
+			final List< Spot > ts = new ArrayList<>( 1 );
 			ts.add( spot );
 			sc.put( i, ts );
-			spot.putFeature( SpotCollection.VISIBLITY, SpotCollection.ONE );
+			spot.putFeature( SpotCollection.VISIBILITY, SpotCollection.ONE );
 		}
 
 		final Model model = new Model();
 		model.setSpots( sc, false );
 
-		final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph = new SimpleWeightedGraph< >( DefaultWeightedEdge.class );
+		final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph = new SimpleWeightedGraph<>( DefaultWeightedEdge.class );
 		for ( final Spot spot : spots )
 		{
 			graph.addVertex( spot );

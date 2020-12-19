@@ -1,31 +1,40 @@
 package fiji.plugin.trackmate.interactivetests;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.io.TmXmlReader;
-import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
-
 import java.io.File;
 
 import org.scijava.util.AppUtils;
 
-public class TrackSchemeTestDrive {
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.features.edges.EdgeVelocityAnalyzer;
+import fiji.plugin.trackmate.gui.DisplaySettings;
+import fiji.plugin.trackmate.gui.DisplaySettings.ObjectType;
+import fiji.plugin.trackmate.io.TmXmlReader;
+import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
-	public static void main(final String[] args) {
+public class TrackSchemeTestDrive
+{
+
+	public static void main( final String[] args )
+	{
 
 		final File file = new File( AppUtils.getBaseDirectory( TrackMate.class ), "samples/FakeTracks.xml" );
 
-		final TmXmlReader reader = new TmXmlReader(file);
+		final TmXmlReader reader = new TmXmlReader( file );
 		final Model model = reader.getModel();
+		System.out.println( model.getFeatureModel().echo() );
 
-		System.out.println("From the XML file:");
-		System.out.println("Found "+model.getTrackModel().nTracks(false)+" tracks in total.");
+		System.out.println( "From the XML file:" );
+		System.out.println( "Found " + model.getTrackModel().nTracks( false ) + " tracks in total." );
 		System.out.println();
 
+		final DisplaySettings ds = DisplaySettings.defaultStyle().copy();
+		ds.setTrackColorBy( ObjectType.EDGES, EdgeVelocityAnalyzer.DISPLACEMENT );
+
 		// Instantiate displayer
-		final SelectionModel sm = new SelectionModel(model);
-		final TrackScheme trackscheme = new TrackScheme(model, sm);
+		final SelectionModel sm = new SelectionModel( model );
+		final TrackScheme trackscheme = new TrackScheme( model, sm, ds );
 		trackscheme.render();
 		trackscheme.refresh();
 	}

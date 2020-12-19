@@ -6,6 +6,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition.TrackBranchDecomposition;
+import fiji.plugin.trackmate.gui.DisplaySettings;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
 public class ConvexBranchDecompositionDebug
@@ -49,7 +50,7 @@ public class ConvexBranchDecompositionDebug
 		model.addEdge( sb3, sb4, -2 );
 
 		final SelectionModel sm = new SelectionModel( model );
-		final TrackScheme trackScheme = new TrackScheme( model, sm );
+		final TrackScheme trackScheme = new TrackScheme( model, sm, DisplaySettings.defaultStyle().copy() );
 		trackScheme.render();
 
 		final TrackModel tm = model.getTrackModel();
