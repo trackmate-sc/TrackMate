@@ -107,9 +107,8 @@ public class EdgeFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 	{
 		final Logger logger = model.getLogger();
 		if ( doLogIt )
-		{
 			logger.log( "Computing edge features:\n", Logger.BLUE_COLOR );
-		}
+
 		for ( final EdgeAnalyzer analyzer : analyzers )
 		{
 			if ( analyzer.isManualFeature() )
@@ -121,7 +120,6 @@ public class EdgeFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 			analyzer.process( edges, model );
 			if ( doLogIt )
 				logger.log( "  - " + analyzer.getName() + " in " + analyzer.getProcessingTime() + " ms.\n" );
-
 		}
 	}
 
