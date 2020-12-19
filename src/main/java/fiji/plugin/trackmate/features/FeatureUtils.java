@@ -15,11 +15,17 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
+import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
+import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.gui.DisplaySettings;
 import fiji.plugin.trackmate.gui.DisplaySettings.ObjectType;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
+import fiji.plugin.trackmate.visualization.ManualEdgeColorGenerator;
+import fiji.plugin.trackmate.visualization.ManualEdgePerSpotColorGenerator;
+import fiji.plugin.trackmate.visualization.ManualSpotColorGenerator;
+import fiji.plugin.trackmate.visualization.ManualSpotPerEdgeColorGenerator;
 import fiji.plugin.trackmate.visualization.PerEdgeFeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.PerSpotFeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.PerTrackFeatureColorGenerator;
@@ -179,14 +185,17 @@ public class FeatureUtils
 
 	public static final FeatureColorGenerator< Spot > createSpotColorGenerator( final Model model, final DisplaySettings displaySettings )
 	{
-		final FeatureColorGenerator< Spot > colorGenerator;
 		switch ( displaySettings.getSpotColorByType() )
 		{
 		case DEFAULT:
-			colorGenerator = new UniformSpotColorGenerator( displaySettings.getSpotUniformColor() );
-			break;
+			return new UniformSpotColorGenerator( displaySettings.getSpotUniformColor() );
+
 		case EDGES:
-			colorGenerator = new SpotColorGeneratorPerEdgeFeature(
+
+			if ( displaySettings.getSpotColorByFeature().equals( ManualEdgeColorAnalyzer.FEATURE ) )
+				return new ManualSpotPerEdgeColorGenerator( model, displaySettings.getMissingValueColor() );
+
+			return new SpotColorGeneratorPerEdgeFeature(
 					model,
 					displaySettings.getSpotColorByFeature(),
 					displaySettings.getMissingValueColor(),
@@ -194,18 +203,22 @@ public class FeatureUtils
 					displaySettings.getColormap(),
 					displaySettings.getSpotMin(),
 					displaySettings.getSpotMax() );
-			break;
+
 		case SPOTS:
-			colorGenerator = new SpotColorGenerator(
+
+			if ( displaySettings.getSpotColorByFeature().equals( ManualSpotColorAnalyzerFactory.FEATURE ) )
+				return new ManualSpotColorGenerator( displaySettings.getMissingValueColor() );
+
+			return new SpotColorGenerator(
 					displaySettings.getSpotColorByFeature(),
 					displaySettings.getMissingValueColor(),
 					displaySettings.getUndefinedValueColor(),
 					displaySettings.getColormap(),
 					displaySettings.getSpotMin(),
 					displaySettings.getSpotMax() );
-			break;
+
 		case TRACKS:
-			colorGenerator = new SpotColorGeneratorPerTrackFeature(
+			return new SpotColorGeneratorPerTrackFeature(
 					model,
 					displaySettings.getSpotColorByFeature(),
 					displaySettings.getMissingValueColor(),
@@ -213,24 +226,25 @@ public class FeatureUtils
 					displaySettings.getColormap(),
 					displaySettings.getSpotMin(),
 					displaySettings.getSpotMax() );
-			break;
+
 		default:
 			throw new IllegalArgumentException( "Unknown type: " + displaySettings.getSpotColorByType() );
-
 		}
-		return colorGenerator;
 	}
 
 	public static final FeatureColorGenerator< DefaultWeightedEdge > createTrackColorGenerator( final Model model, final DisplaySettings displaySettings )
 	{
-		final FeatureColorGenerator< DefaultWeightedEdge > colorGenerator;
 		switch ( displaySettings.getTrackColorByType() )
 		{
 		case DEFAULT:
-			colorGenerator = new UniformTrackColorGenerator( displaySettings.getTrackUniformColor() );
-			break;
+			return new UniformTrackColorGenerator( displaySettings.getTrackUniformColor() );
+
 		case EDGES:
-			colorGenerator = new PerEdgeFeatureColorGenerator(
+
+			if ( displaySettings.getTrackColorByFeature().equals( ManualEdgeColorAnalyzer.FEATURE ) )
+				return new ManualEdgeColorGenerator( model, displaySettings.getMissingValueColor() );
+
+			return new PerEdgeFeatureColorGenerator(
 					model,
 					displaySettings.getTrackColorByFeature(),
 					displaySettings.getMissingValueColor(),
@@ -238,9 +252,13 @@ public class FeatureUtils
 					displaySettings.getColormap(),
 					displaySettings.getTrackMin(),
 					displaySettings.getTrackMax() );
-			break;
+
 		case SPOTS:
-			colorGenerator = new PerSpotFeatureColorGenerator(
+
+			if ( displaySettings.getTrackColorByFeature().equals( ManualSpotColorAnalyzerFactory.FEATURE ) )
+				return new ManualEdgePerSpotColorGenerator( model, displaySettings.getMissingValueColor() );
+
+			return new PerSpotFeatureColorGenerator(
 					model,
 					displaySettings.getTrackColorByFeature(),
 					displaySettings.getMissingValueColor(),
@@ -248,9 +266,9 @@ public class FeatureUtils
 					displaySettings.getColormap(),
 					displaySettings.getTrackMin(),
 					displaySettings.getTrackMax() );
-			break;
+
 		case TRACKS:
-			colorGenerator = new PerTrackFeatureColorGenerator(
+			return new PerTrackFeatureColorGenerator(
 					model,
 					displaySettings.getTrackColorByFeature(),
 					displaySettings.getMissingValueColor(),
@@ -258,12 +276,10 @@ public class FeatureUtils
 					displaySettings.getColormap(),
 					displaySettings.getTrackMin(),
 					displaySettings.getTrackMax() );
-			break;
+
 		default:
 			throw new IllegalArgumentException( "Unknown type: " + displaySettings.getTrackColorByType() );
-
 		}
-		return colorGenerator;
 	}
 
 	public static final Model DUMMY_MODEL = new Model();
