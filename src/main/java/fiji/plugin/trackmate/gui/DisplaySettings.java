@@ -8,6 +8,8 @@ import java.util.Objects;
 import org.jfree.chart.renderer.InterpolatePaintScale;
 import org.scijava.listeners.Listeners;
 
+import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
+
 public class DisplaySettings
 {
 
@@ -622,7 +624,7 @@ public class DisplaySettings
 		df.spotUniformColor = new Color( 0.8f, 0.2f, 0.8f );
 		df.spotVisible = true;
 		df.trackDisplayMode = TrackDisplayMode.FULL;
-		df.trackColorByFeature = USE_UNIFORM_COLOR_KEY;
+		df.trackColorByFeature = TrackIndexAnalyzer.TRACK_INDEX;
 		df.trackColorByType = ObjectType.DEFAULT;
 		df.trackUniformColor = new Color( 0.8f, 0.8f, 0.2f );
 		df.trackMin = 0.;
