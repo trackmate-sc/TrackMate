@@ -306,7 +306,7 @@ public class FeatureDisplaySelector
 			lblMin.setFont( SMALL_FONT );
 			panelMinMax.add( lblMin );
 
-			final JFormattedTextField ftfMin = new JFormattedTextField();
+			final JFormattedTextField ftfMin = new JFormattedTextField( Double.valueOf( getMin( target ) ) );
 			ftfMin.setMaximumSize( new Dimension( 180, 2147483647 ) );
 			GuiUtils.selectAllOnFocus( ftfMin );
 			ftfMin.setHorizontalAlignment( SwingConstants.CENTER );
@@ -320,21 +320,13 @@ public class FeatureDisplaySelector
 			lblMax.setFont( SMALL_FONT );
 			panelMinMax.add( lblMax );
 
-			final JFormattedTextField ftfMax = new JFormattedTextField();
+			final JFormattedTextField ftfMax = new JFormattedTextField( Double.valueOf( getMax( target ) ) );
 			ftfMax.setMaximumSize( new Dimension( 180, 2147483647 ) );
 			GuiUtils.selectAllOnFocus( ftfMax );
 			ftfMax.setHorizontalAlignment( SwingConstants.CENTER );
 			ftfMax.setFont( SMALL_FONT );
 			ftfMax.setColumns( 7 );
 			panelMinMax.add( ftfMax );
-
-			/*
-			 * Set current values.
-			 */
-
-			ftfMin.setValue( Double.valueOf( getMin( target ) ) );
-			ftfMax.setValue( Double.valueOf( getMax( target ) ) );
-			cmbboxColor.setSelectedItem( getColorByFeature( target ) );
 
 			/*
 			 * Listeners.
@@ -472,6 +464,13 @@ public class FeatureDisplaySelector
 
 				canvasColor.repaint();
 			} );
+
+
+			/*
+			 * Set current values.
+			 */
+
+			cmbboxColor.setSelectedItem( getColorByFeature( target ) );
 		}
 	}
 
