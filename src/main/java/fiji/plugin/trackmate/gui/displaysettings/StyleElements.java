@@ -1,26 +1,52 @@
 package fiji.plugin.trackmate.gui.displaysettings;
 
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.DoubleSupplier;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.ListCellRenderer;
+import javax.swing.SpinnerListModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
+import org.jfree.chart.renderer.InterpolatePaintScale;
+
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.gui.DisplaySettings.ObjectType;
+import fiji.plugin.trackmate.gui.FeatureDisplaySelector;
+import fiji.plugin.trackmate.gui.GuiUtils;
+import fiji.plugin.trackmate.gui.panels.components.CategoryJComboBox;
+
 public class StyleElements
 {
+	private static final DecimalFormat format = new DecimalFormat( "#.###" );
+
 	public static Separator separator()
 	{
 		return new Separator();
@@ -67,9 +93,46 @@ public class StyleElements
 		};
 	}
 
-	public static DoubleElement doubleElement( final String label, final double rangeMin, final double rangeMax, final DoubleSupplier get, final Consumer< Double > set )
+	public static ColormapElement colormapElement( final String label, final Supplier< InterpolatePaintScale > get, final Consumer< InterpolatePaintScale > set )
 	{
-		return new DoubleElement( label, rangeMin, rangeMax )
+		return new ColormapElement( label )
+		{
+
+			@Override
+			public InterpolatePaintScale get()
+			{
+				return get.get();
+			}
+
+			@Override
+			public void set( final InterpolatePaintScale v )
+			{
+				set.accept( v );
+			}
+		};
+	}
+
+	public static BoundedDoubleElement boundedDoubleElement( final String label, final double rangeMin, final double rangeMax, final DoubleSupplier get, final Consumer< Double > set )
+	{
+		return new BoundedDoubleElement( label, rangeMin, rangeMax )
+		{
+			@Override
+			public double get()
+			{
+				return get.getAsDouble();
+			}
+
+			@Override
+			public void set( final double v )
+			{
+				set.accept( v );
+			}
+		};
+	}
+
+	public static DoubleElement doubleElement( final String label, final DoubleSupplier get, final Consumer< Double > set )
+	{
+		return new DoubleElement( label )
 		{
 			@Override
 			public double get()
@@ -103,6 +166,50 @@ public class StyleElements
 		};
 	}
 
+	public static < E > EnumElement< E > enumElement( final String label, final E[] values, final Supplier< E > get, final Consumer< E > set )
+	{
+		return new EnumElement< E >( label, values )
+		{
+
+			@Override
+			public E getValue()
+			{
+				return get.get();
+			}
+
+			@Override
+			public void setValue( final E e )
+			{
+				set.accept( e );
+			}
+		};
+	}
+
+	public static FeatureElement featureElement( final String label, final Supplier< ObjectType > typeGet, final Supplier< String > featureGet, final BiConsumer< ObjectType, String > set )
+	{
+		return new FeatureElement( label )
+		{
+			
+			@Override
+			public void setValue( final ObjectType type, final String feature )
+			{
+				set.accept( type, feature );
+			}
+			
+			@Override
+			public ObjectType getType()
+			{
+				return typeGet.get();
+			}
+			
+			@Override
+			public String getFeature()
+			{
+				return featureGet.get();
+			}
+		};
+	}
+
 	public interface StyleElementVisitor
 	{
 		public default void visit( final Separator element )
@@ -125,12 +232,32 @@ public class StyleElements
 			throw new UnsupportedOperationException();
 		}
 
+		public default void visit( final BoundedDoubleElement doubleElement )
+		{
+			throw new UnsupportedOperationException();
+		}
+
 		public default void visit( final DoubleElement doubleElement )
 		{
 			throw new UnsupportedOperationException();
 		}
 
 		public default void visit( final IntElement intElement )
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		public default < E > void visit( final EnumElement< E > enumElement )
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		public default void visit( final FeatureElement featureElement )
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		public default void visit( final ColormapElement element )
 		{
 			throw new UnsupportedOperationException();
 		}
@@ -179,6 +306,92 @@ public class StyleElements
 		{
 			visitor.visit( this );
 		}
+	}
+
+	public static abstract class EnumElement< E > implements StyleElement
+	{
+		private final ArrayList< Consumer< E > > onSet = new ArrayList<>();
+
+		private final String label;
+
+		private final E[] values;
+
+		public EnumElement( final String label, final E[] values )
+		{
+			this.label = label;
+			this.values = values;
+		}
+
+		public String getLabel()
+		{
+			return label;
+		}
+
+		@Override
+		public void accept( final StyleElementVisitor visitor )
+		{
+			visitor.visit( this );
+		}
+
+		public void onSet( final Consumer< E > set )
+		{
+			onSet.add( set );
+		}
+
+		@Override
+		public void update()
+		{
+			onSet.forEach( c -> c.accept( getValue() ) );
+		}
+
+		public abstract E getValue();
+
+		public abstract void setValue( E e );
+
+		public E[] getValues()
+		{
+			return values;
+		}
+	}
+
+	public static abstract class FeatureElement implements StyleElement
+	{
+		private final ArrayList< BiConsumer< ObjectType, String > > onSet = new ArrayList<>();
+
+		private final String label;
+
+		public FeatureElement( final String label )
+		{
+			this.label = label;
+		}
+
+		public String getLabel()
+		{
+			return label;
+		}
+
+		@Override
+		public void accept( final StyleElementVisitor visitor )
+		{
+			visitor.visit( this );
+		}
+
+		public void onSet( final BiConsumer< ObjectType, String > set )
+		{
+			onSet.add( set );
+		}
+
+		@Override
+		public void update()
+		{
+			onSet.forEach( c -> c.accept( getType(), getFeature() ) );
+		}
+
+		public abstract ObjectType getType();
+
+		public abstract String getFeature();
+
+		public abstract void setValue( ObjectType type, String feature );
 	}
 
 	public static abstract class ColorElement implements StyleElement
@@ -257,13 +470,13 @@ public class StyleElements
 		public abstract void set( boolean b );
 	}
 
-	public static abstract class DoubleElement implements StyleElement
+	public static abstract class BoundedDoubleElement implements StyleElement
 	{
 		private final BoundedValueDouble value;
 
 		private final String label;
 
-		public DoubleElement( final String label, final double rangeMin, final double rangeMax )
+		public BoundedDoubleElement( final String label, final double rangeMin, final double rangeMax )
 		{
 			final double currentValue = Math.max( rangeMin, Math.min( rangeMax, get() ) );
 			value = new BoundedValueDouble( rangeMin, rangeMax, currentValue )
@@ -304,6 +517,54 @@ public class StyleElements
 		{
 			if ( get() != value.getCurrentValue() )
 				value.setCurrentValue( get() );
+		}
+	}
+
+	public static abstract class DoubleElement implements StyleElement
+	{
+
+		private final ArrayList< Consumer< Double > > onSet = new ArrayList<>();
+
+		private double value;
+
+		private final String label;
+
+		public DoubleElement( final String label )
+		{
+			value = 0.;
+			this.label = label;
+		}
+
+		public double getValue()
+		{
+			return value;
+		}
+
+		public String getLabel()
+		{
+			return label;
+		}
+
+		@Override
+		public void accept( final StyleElementVisitor visitor )
+		{
+			visitor.visit( this );
+		}
+
+		public abstract double get();
+
+		public abstract void set( double v );
+
+		public void onSet( final Consumer< Double > set )
+		{
+			onSet.add( set );
+		}
+
+		@Override
+		public void update()
+		{
+			if ( get() != value )
+				value = get();
 		}
 	}
 
@@ -357,6 +618,44 @@ public class StyleElements
 		}
 	}
 
+	public static abstract class ColormapElement implements StyleElement
+	{
+		private final ArrayList< Consumer< InterpolatePaintScale > > onSet = new ArrayList<>();
+
+		private final String label;
+
+		public ColormapElement( final String label )
+		{
+			this.label = label;
+		}
+
+		public String getLabel()
+		{
+			return label;
+		}
+
+		@Override
+		public void accept( final StyleElementVisitor visitor )
+		{
+			visitor.visit( this );
+		}
+
+		public abstract InterpolatePaintScale get();
+
+		public abstract void set( InterpolatePaintScale v );
+
+		public void onSet( final Consumer< InterpolatePaintScale > set )
+		{
+			onSet.add( set );
+		}
+
+		@Override
+		public void update()
+		{
+			onSet.forEach( c -> c.accept( get() ) );
+		}
+	}
+
 	/*
 	 *
 	 * ===============================================================
@@ -368,10 +667,104 @@ public class StyleElements
 		return new JLabel( element.getLabel() );
 	}
 
+	public static CategoryJComboBox< ObjectType, String > linkedFeatureSelector( final FeatureElement element )
+	{
+		final Settings settings = new Settings();
+		settings.addAllAnalyzers();
+		final CategoryJComboBox< ObjectType, String > selector = FeatureDisplaySelector.createComboBoxSelector( null, settings );
+		selector.setSelectedItem( element.getFeature() );
+		selector.addActionListener( e -> element.setValue( selector.getSelectedCategory(), selector.getSelectedItem() ) );
+		element.onSet( ( type, feature ) -> {
+			if ( !feature.equals( selector.getSelectedItem() ) )
+				selector.setSelectedItem( feature );
+		} );
+		return selector;
+	}
+
+	public static JComboBox< InterpolatePaintScale > linkedColormapChooser( final ColormapElement element )
+	{
+		final JComboBox< InterpolatePaintScale > cb = new JComboBox< InterpolatePaintScale >(
+				InterpolatePaintScale.getAvailableLUTs().toArray( new InterpolatePaintScale[] {} ) );
+		cb.setRenderer( new ColormapRenderer() );
+		cb.setSelectedItem( element.get() );
+		cb.addActionListener( e -> element.set( ( InterpolatePaintScale ) cb.getSelectedItem() ) );
+		element.onSet( cm -> {
+			if ( cm != cb.getSelectedItem() )
+				cb.setSelectedItem( cm );
+		} );
+		return cb;
+	}
+
+	private static final class ColormapRenderer extends JPanel implements ListCellRenderer< InterpolatePaintScale >
+	{
+
+		private static final long serialVersionUID = 1L;
+
+		private InterpolatePaintScale lut = InterpolatePaintScale.Jet;
+
+		private final DefaultListCellRenderer lbl;
+
+		public ColormapRenderer()
+		{
+			setPreferredSize( new Dimension( 150, 20 ) );
+			final BoxLayout itemlayout = new BoxLayout( this, BoxLayout.LINE_AXIS );
+			this.lbl = new DefaultListCellRenderer();
+			setLayout( itemlayout );
+			add( lbl );
+			add( Box.createHorizontalGlue() );
+			add( new JComponent()
+			{
+
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public void paint( final Graphics g )
+				{
+
+					final int width = getWidth();
+					final int height = getHeight();
+					for ( int i = 0; i < width; i++ )
+					{
+						final double beta = ( double ) i / ( width - 1 );
+						g.setColor( lut.getPaint( beta ) );
+						g.drawLine( i, 0, i, height );
+					}
+					g.setColor( this.getParent().getBackground() );
+					g.drawRect( 0, 0, width, height );
+				}
+
+				@Override
+				public Dimension getMaximumSize()
+				{
+					return new Dimension( 100, 20 );
+				}
+
+				@Override
+				public Dimension getPreferredSize()
+				{
+					return getMaximumSize();
+				}
+			} );
+		}
+
+		@Override
+		public Component getListCellRendererComponent(
+				final JList< ? extends InterpolatePaintScale > list,
+				final InterpolatePaintScale value,
+				final int index,
+				final boolean isSelected,
+				final boolean cellHasFocus )
+		{
+			this.lut = value;
+			lbl.getListCellRendererComponent( list, value.getName(), index, isSelected, cellHasFocus );
+			setBackground( lbl.getBackground() );
+			return this;
+		}
+	}
+
 	public static JCheckBox linkedCheckBox( final BooleanElement element, final String label )
 	{
 		final JCheckBox checkbox = new JCheckBox( label, element.get() );
-		checkbox.setFocusable( false );
 		checkbox.addActionListener( ( e ) -> element.set( checkbox.isSelected() ) );
 		element.onSet( b -> {
 			if ( b != checkbox.isSelected() )
@@ -380,10 +773,10 @@ public class StyleElements
 		return checkbox;
 	}
 
-	public static JButton linkedColorButton( final ColorElement element, final String label, final JColorChooser colorChooser )
+	public static JButton linkedColorButton( final ColorElement element, final JColorChooser colorChooser )
 	{
-		final ColorIcon icon = new ColorIcon( element.getColor(), 16, 2 );
-		final JButton button = new JButton( label, icon );
+		final ColorIcon icon = new ColorIcon( element.getColor(), 16, 0 );
+		final JButton button = new JButton( icon );
 		button.setOpaque( false );
 		button.setContentAreaFilled( false );
 		button.setBorderPainted( false );
@@ -391,7 +784,6 @@ public class StyleElements
 		button.setMargin( new Insets( 0, 0, 0, 0 ) );
 		button.setBorder( new EmptyBorder( 2, 5, 2, 2 ) );
 		button.setHorizontalAlignment( SwingConstants.LEFT );
-		button.setFocusable( false );
 		button.addActionListener( e -> {
 			colorChooser.setColor( element.getColor() );
 			final JDialog d = JColorChooser.createDialog( button, "Choose a color", true, colorChooser, new ActionListener()
@@ -418,16 +810,51 @@ public class StyleElements
 	{
 		final SliderPanel slider = new SliderPanel( null, element.getValue(), 1 );
 		slider.setNumColummns( tfCols );
-		slider.setBorder( new EmptyBorder( 0, 0, 0, 6 ) );
+		slider.setBorder( new EmptyBorder( 0, 0, 0, 0 ) );
 		return slider;
 	}
 
-	public static SliderPanelDouble linkedSliderPanel( final DoubleElement element, final int tfCols )
+	public static SliderPanelDouble linkedSliderPanel( final BoundedDoubleElement element, final int tfCols )
 	{
-		final SliderPanelDouble slider = new SliderPanelDouble( null, element.getValue(), 1 );
+		return linkedSliderPanel( element, tfCols, 1. );
+	}
+
+	public static SliderPanelDouble linkedSliderPanel( final BoundedDoubleElement element, final int tfCols, final double stepSize )
+	{
+		final SliderPanelDouble slider = new SliderPanelDouble( null, element.getValue(), stepSize );
 		slider.setDecimalFormat( "0.####" );
 		slider.setNumColummns( tfCols );
-		slider.setBorder( new EmptyBorder( 0, 0, 0, 6 ) );
+		slider.setBorder( new EmptyBorder( 0, 0, 0, 0 ) );
 		return slider;
+	}
+
+	@SuppressWarnings( "unchecked" )
+	public static < E > JSpinner linkedSpinnerEnumSelector( final EnumElement< E > element )
+	{
+		final SpinnerListModel model = new SpinnerListModel( element.getValues() );
+		final JSpinner spinner = new JSpinner( model );
+		model.setValue( element.getValue() );
+		model.addChangeListener( e -> element.setValue( ( E ) model.getValue() ) );
+		element.onSet( e -> {
+			if ( e != model.getValue() )
+				model.setValue( e );
+		} );
+		return spinner;
+	}
+
+	public static JFormattedTextField linkedFormattedTextField( final DoubleElement element )
+	{
+		final JFormattedTextField ftf = new JFormattedTextField( format );
+		ftf.setHorizontalAlignment( JFormattedTextField.RIGHT );
+		ftf.setValue( Double.valueOf( element.get() ) );
+		GuiUtils.selectAllOnFocus( ftf );
+
+		ftf.addActionListener( e -> element.set( ( ( Number ) ftf.getValue() ).doubleValue() ) );
+		element.onSet( d -> {
+			if ( d != ( ( Number ) ftf.getValue() ).doubleValue() )
+				ftf.setValue( Double.valueOf( element.value ) );
+		} );
+
+		return ftf;
 	}
 }
