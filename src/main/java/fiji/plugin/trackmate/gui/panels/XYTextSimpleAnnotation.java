@@ -1,4 +1,4 @@
-package org.jfree.chart.annotations;
+package fiji.plugin.trackmate.gui.panels;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -7,6 +7,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 
 import org.jfree.chart.ChartPanel;
+import org.jfree.chart.annotations.AbstractXYAnnotation;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.event.AnnotationChangeEvent;
 import org.jfree.chart.plot.PlotRenderingInfo;
