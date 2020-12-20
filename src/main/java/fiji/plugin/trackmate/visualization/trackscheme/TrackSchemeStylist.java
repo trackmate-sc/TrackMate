@@ -151,7 +151,7 @@ public class TrackSchemeStylist
 		fullStyle.put( mxConstants.STYLE_FONTFAMILY, font.getFamily() );
 		fullStyle.put( mxConstants.STYLE_FONTSIZE, "" + font.getSize() );
 		fullStyle.put( mxConstants.STYLE_FONTSTYLE, "" + font.getStyle() );
-
+		
 		final FeatureColorGenerator< Spot > spotColorGenerator = FeatureUtils.createSpotColorGenerator( model, displaySettings );
 		final Color missingValueColor = displaySettings.getMissingValueColor();
 
@@ -168,7 +168,8 @@ public class TrackSchemeStylist
 						color = missingValueColor;
 
 					final String colorstr = Integer.toHexString( color.getRGB() ).substring( 2 );
-					setVertexStyle( vertex, colorstr );
+					final String fillcolorstr = displaySettings.isTrackSchemeFillBox() ? colorstr : "white";
+					setVertexStyle( vertex, colorstr, fillcolorstr );
 				}
 			}
 		}
@@ -178,7 +179,7 @@ public class TrackSchemeStylist
 		}
 	}
 
-	private void setVertexStyle( final mxICell vertex, final String colorstr )
+	private void setVertexStyle( final mxICell vertex, final String colorstr, final String fillcolorstr )
 	{
 		String targetStyle = vertex.getStyle();
 		targetStyle = mxStyleUtils.removeAllStylenames( targetStyle );
@@ -194,7 +195,7 @@ public class TrackSchemeStylist
 		}
 		else
 		{
-			targetStyle = mxStyleUtils.setStyle( targetStyle, mxConstants.STYLE_FILLCOLOR, "white" );
+			targetStyle = mxStyleUtils.setStyle( targetStyle, mxConstants.STYLE_FILLCOLOR, fillcolorstr );
 			width = DEFAULT_CELL_WIDTH;
 			height = DEFAULT_CELL_HEIGHT;
 		}
