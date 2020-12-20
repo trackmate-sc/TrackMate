@@ -11,7 +11,7 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.ObjectType;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.ImagePlus;
@@ -61,7 +61,7 @@ public class KalmanTrackerInteractiveTest2
 		final SelectionModel selectionModel = new SelectionModel( model );
 
 		final DisplaySettings ds = DisplaySettings.defaultStyle().copy();
-		ds.setSpotColorBy( ObjectType.SPOTS, Spot.QUALITY );
+		ds.setSpotColorBy( TrackMateObject.SPOTS, Spot.QUALITY );
 
 		final HyperStackDisplayer view = new HyperStackDisplayer( model, selectionModel, imp, ds );
 		view.render();

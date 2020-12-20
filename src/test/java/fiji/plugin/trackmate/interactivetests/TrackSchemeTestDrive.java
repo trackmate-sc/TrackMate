@@ -9,7 +9,7 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.edges.EdgeVelocityAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.ObjectType;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
@@ -30,7 +30,7 @@ public class TrackSchemeTestDrive
 		System.out.println();
 
 		final DisplaySettings ds = DisplaySettings.defaultStyle().copy();
-		ds.setTrackColorBy( ObjectType.EDGES, EdgeVelocityAnalyzer.DISPLACEMENT );
+		ds.setTrackColorBy( TrackMateObject.EDGES, EdgeVelocityAnalyzer.DISPLACEMENT );
 
 		// Instantiate displayer
 		final SelectionModel sm = new SelectionModel( model );

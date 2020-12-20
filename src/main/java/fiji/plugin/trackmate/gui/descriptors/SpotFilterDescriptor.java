@@ -18,7 +18,7 @@ import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.gui.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.ObjectType;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.gui.panels.components.FilterGuiPanel;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
 
@@ -44,7 +44,7 @@ public class SpotFilterDescriptor implements WizardPanelDescriptor
 		this.component = new FilterGuiPanel(
 				controller.getPlugin().getModel(),
 				controller.getPlugin().getSettings(),
-				ObjectType.SPOTS,
+				TrackMateObject.SPOTS,
 				filters,
 				Spot.QUALITY,
 				featureSelector );

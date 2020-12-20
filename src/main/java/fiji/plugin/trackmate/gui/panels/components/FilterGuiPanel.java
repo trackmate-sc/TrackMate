@@ -36,7 +36,7 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.gui.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.ObjectType;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
 import fiji.plugin.trackmate.gui.panels.FilterPanel;
 import fiji.plugin.trackmate.util.OnRequestUpdater;
@@ -70,7 +70,7 @@ public class FilterGuiPanel extends ActionListenablePanel implements ChangeListe
 
 	private final JLabel lblInfo;
 
-	private final ObjectType target;
+	private final TrackMateObject target;
 
 	private final Settings settings;
 
@@ -83,7 +83,7 @@ public class FilterGuiPanel extends ActionListenablePanel implements ChangeListe
 	public FilterGuiPanel( 
 			final Model model, 
 			final Settings settings, 
-			final ObjectType target, 
+			final TrackMateObject target, 
 			final List< FeatureFilter > filters,
 			final String defaultFeature,
 			final FeatureDisplaySelector featureSelector )

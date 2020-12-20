@@ -10,7 +10,7 @@ import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.ObjectType;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.gui.panels.InitFilterPanel;
 
 public class InitFilterDescriptor implements WizardPanelDescriptor
@@ -29,7 +29,7 @@ public class InitFilterDescriptor implements WizardPanelDescriptor
 		this.trackmate = trackmate;
 		this.controller = controller;
 		final Function< String, double[] > valuesCollector = key -> FeatureUtils.collectFeatureValues(
-				Spot.QUALITY, ObjectType.SPOTS, trackmate.getModel(), trackmate.getSettings(), false );
+				Spot.QUALITY, TrackMateObject.SPOTS, trackmate.getModel(), trackmate.getSettings(), false );
 		this.component = new InitFilterPanel( filter, valuesCollector );
 	}
 

@@ -20,7 +20,7 @@ import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.ObjectType;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.ManualEdgeColorGenerator;
 import fiji.plugin.trackmate.visualization.ManualEdgePerSpotColorGenerator;
@@ -42,7 +42,7 @@ public class FeatureUtils
 
 	public static final String USE_UNIFORM_COLOR_KEY = "UNIFORM_COLOR";
 
-	public static final Map< String, String > collectFeatureKeys( final ObjectType target, final Model model, final Settings settings )
+	public static final Map< String, String > collectFeatureKeys( final TrackMateObject target, final Model model, final Settings settings )
 	{
 		final Map< String, String > inverseMap = new HashMap<>();
 		// will be used to sort.
@@ -138,7 +138,7 @@ public class FeatureUtils
 	 */
 	public static double[] collectFeatureValues(
 			final String featureKey,
-			final ObjectType target,
+			final TrackMateObject target,
 			final Model model,
 			final Settings settings,
 			final boolean visibleOnly )

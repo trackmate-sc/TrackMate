@@ -9,7 +9,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.ObjectType;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 import ij.ImageJ;
@@ -59,8 +59,8 @@ public class KalmanTrackerInteractiveTest3
 		}
 
 		final DisplaySettings ds = DisplaySettings.defaultStyle().copy();
-		ds.setSpotColorBy( ObjectType.SPOTS, Spot.QUALITY );
-		ds.setTrackColorBy( ObjectType.TRACKS, TrackIndexAnalyzer.TRACK_INDEX );
+		ds.setSpotColorBy( TrackMateObject.SPOTS, Spot.QUALITY );
+		ds.setTrackColorBy( TrackMateObject.TRACKS, TrackIndexAnalyzer.TRACK_INDEX );
 		ds.setSpotShowName( true );
 
 		final TrackIndexAnalyzer ta = new TrackIndexAnalyzer();

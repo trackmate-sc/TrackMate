@@ -40,7 +40,7 @@ import org.jfree.chart.renderer.InterpolatePaintScale;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.gui.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.GuiUtils;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.ObjectType;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.gui.panels.components.CategoryJComboBox;
 
 public class StyleElements
@@ -185,19 +185,19 @@ public class StyleElements
 		};
 	}
 
-	public static FeatureElement featureElement( final String label, final Supplier< ObjectType > typeGet, final Supplier< String > featureGet, final BiConsumer< ObjectType, String > set )
+	public static FeatureElement featureElement( final String label, final Supplier< TrackMateObject > typeGet, final Supplier< String > featureGet, final BiConsumer< TrackMateObject, String > set )
 	{
 		return new FeatureElement( label )
 		{
 			
 			@Override
-			public void setValue( final ObjectType type, final String feature )
+			public void setValue( final TrackMateObject type, final String feature )
 			{
 				set.accept( type, feature );
 			}
 			
 			@Override
-			public ObjectType getType()
+			public TrackMateObject getType()
 			{
 				return typeGet.get();
 			}
@@ -356,7 +356,7 @@ public class StyleElements
 
 	public static abstract class FeatureElement implements StyleElement
 	{
-		private final ArrayList< BiConsumer< ObjectType, String > > onSet = new ArrayList<>();
+		private final ArrayList< BiConsumer< TrackMateObject, String > > onSet = new ArrayList<>();
 
 		private final String label;
 
@@ -376,7 +376,7 @@ public class StyleElements
 			visitor.visit( this );
 		}
 
-		public void onSet( final BiConsumer< ObjectType, String > set )
+		public void onSet( final BiConsumer< TrackMateObject, String > set )
 		{
 			onSet.add( set );
 		}
@@ -387,11 +387,11 @@ public class StyleElements
 			onSet.forEach( c -> c.accept( getType(), getFeature() ) );
 		}
 
-		public abstract ObjectType getType();
+		public abstract TrackMateObject getType();
 
 		public abstract String getFeature();
 
-		public abstract void setValue( ObjectType type, String feature );
+		public abstract void setValue( TrackMateObject type, String feature );
 	}
 
 	public static abstract class ColorElement implements StyleElement
@@ -667,11 +667,11 @@ public class StyleElements
 		return new JLabel( element.getLabel() );
 	}
 
-	public static CategoryJComboBox< ObjectType, String > linkedFeatureSelector( final FeatureElement element )
+	public static CategoryJComboBox< TrackMateObject, String > linkedFeatureSelector( final FeatureElement element )
 	{
 		final Settings settings = new Settings();
 		settings.addAllAnalyzers();
-		final CategoryJComboBox< ObjectType, String > selector = FeatureDisplaySelector.createComboBoxSelector( null, settings );
+		final CategoryJComboBox< TrackMateObject, String > selector = FeatureDisplaySelector.createComboBoxSelector( null, settings );
 		selector.setSelectedItem( element.getFeature() );
 		selector.addActionListener( e -> element.setValue( selector.getSelectedCategory(), selector.getSelectedItem() ) );
 		element.onSet( ( type, feature ) -> {

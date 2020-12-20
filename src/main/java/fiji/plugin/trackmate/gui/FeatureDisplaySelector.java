@@ -4,10 +4,10 @@ import static fiji.plugin.trackmate.features.FeatureUtils.DUMMY_MODEL;
 import static fiji.plugin.trackmate.features.FeatureUtils.collectFeatureKeys;
 import static fiji.plugin.trackmate.features.FeatureUtils.collectFeatureValues;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
-import static fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.ObjectType.DEFAULT;
-import static fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.ObjectType.EDGES;
-import static fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.ObjectType.SPOTS;
-import static fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.ObjectType.TRACKS;
+import static fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject.DEFAULT;
+import static fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject.EDGES;
+import static fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject.SPOTS;
+import static fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject.TRACKS;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -53,7 +53,7 @@ import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
 import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.ObjectType;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.gui.panels.components.CategoryJComboBox;
 
 public class FeatureDisplaySelector
@@ -84,7 +84,7 @@ public class FeatureDisplaySelector
 	 */
 	public JPanel createSelectorForSpots()
 	{
-		return createSelectorFor( ObjectType.SPOTS );
+		return createSelectorFor( TrackMateObject.SPOTS );
 	}
 
 	public JPanel createSelectorForTracks()
@@ -92,34 +92,34 @@ public class FeatureDisplaySelector
 		return createSelectorFor( TRACKS );
 	}
 
-	public JPanel createSelectorFor( final ObjectType target )
+	public JPanel createSelectorFor( final TrackMateObject target )
 	{
 		return new FeatureSelectorPanel( target );
 	}
 
-	private ObjectType getColorByType( final ObjectType target )
+	private TrackMateObject getColorByType( final TrackMateObject target )
 	{
 		return target == SPOTS ? ds.getSpotColorByType() : ds.getTrackColorByType();
 	}
 
-	private String getColorByFeature( final ObjectType target )
+	private String getColorByFeature( final TrackMateObject target )
 	{
 		return target == SPOTS ? ds.getSpotColorByFeature() : ds.getTrackColorByFeature();
 	}
 
-	private double getMin( final ObjectType target )
+	private double getMin( final TrackMateObject target )
 	{
 		return target == SPOTS ? ds.getSpotMin() : ds.getTrackMin();
 	}
 
-	private double getMax( final ObjectType target )
+	private double getMax( final TrackMateObject target )
 	{
 		return target == SPOTS ? ds.getSpotMax() : ds.getTrackMax();
 	}
 
-	private double[] autoMinMax( final ObjectType target )
+	private double[] autoMinMax( final TrackMateObject target )
 	{
-		final ObjectType type = getColorByType( target );
+		final TrackMateObject type = getColorByType( target );
 		final String feature = getColorByFeature( target );
 
 		switch ( type )
@@ -156,14 +156,14 @@ public class FeatureDisplaySelector
 	 *
 	 * @return a new {@link CategoryJComboBox}.
 	 */
-	public static final CategoryJComboBox< ObjectType, String > createComboBoxSelector( final Model model, final Settings settings )
+	public static final CategoryJComboBox< TrackMateObject, String > createComboBoxSelector( final Model model, final Settings settings )
 	{
-		final List< ObjectType > categoriesIn = Arrays.asList( ObjectType.values() );
-		final LinkedHashMap< ObjectType, Collection< String > > features = new LinkedHashMap<>( categoriesIn.size() );
-		final HashMap< ObjectType, String > categoryNames = new HashMap<>( categoriesIn.size() );
+		final List< TrackMateObject > categoriesIn = Arrays.asList( TrackMateObject.values() );
+		final LinkedHashMap< TrackMateObject, Collection< String > > features = new LinkedHashMap<>( categoriesIn.size() );
+		final HashMap< TrackMateObject, String > categoryNames = new HashMap<>( categoriesIn.size() );
 		final HashMap< String, String > featureNames = new HashMap<>();
 
-		for ( final ObjectType category : categoriesIn )
+		for ( final TrackMateObject category : categoriesIn )
 		{
 			final Map< String, String > featureKeys = collectFeatureKeys( category, model, settings );
 			features.put( category, featureKeys.keySet() );
@@ -191,7 +191,7 @@ public class FeatureDisplaySelector
 				throw new IllegalArgumentException( "Unknown object type: " + category );
 			}
 		}
-		final CategoryJComboBox< ObjectType, String > cb = new CategoryJComboBox<>( features, featureNames, categoryNames );
+		final CategoryJComboBox< TrackMateObject, String > cb = new CategoryJComboBox<>( features, featureNames, categoryNames );
 
 		/*
 		 * Listen to new features appearing.
@@ -201,11 +201,11 @@ public class FeatureDisplaySelector
 			model.addModelChangeListener( ( event ) -> {
 				if ( event.getEventID() == ModelChangeEvent.FEATURES_COMPUTED )
 				{
-					final LinkedHashMap< ObjectType, Collection< String > > features2 = new LinkedHashMap<>( categoriesIn.size() );
-					final HashMap< ObjectType, String > categoryNames2 = new HashMap<>( categoriesIn.size() );
+					final LinkedHashMap< TrackMateObject, Collection< String > > features2 = new LinkedHashMap<>( categoriesIn.size() );
+					final HashMap< TrackMateObject, String > categoryNames2 = new HashMap<>( categoriesIn.size() );
 					final HashMap< String, String > featureNames2 = new HashMap<>();
 
-					for ( final ObjectType category : categoriesIn )
+					for ( final TrackMateObject category : categoriesIn )
 					{
 						final Map< String, String > featureKeys = collectFeatureKeys( category, model, settings );
 						features2.put( category, featureKeys.keySet() );
@@ -249,7 +249,7 @@ public class FeatureDisplaySelector
 
 		private static final long serialVersionUID = 1L;
 
-		public FeatureSelectorPanel( final ObjectType target )
+		public FeatureSelectorPanel( final TrackMateObject target )
 		{
 
 			final GridBagLayout layout = new GridBagLayout();
@@ -268,7 +268,7 @@ public class FeatureDisplaySelector
 			gbcLblColorBy.gridy = 0;
 			add( lblColorBy, gbcLblColorBy );
 
-			final CategoryJComboBox< ObjectType, String > cmbboxColor = createComboBoxSelector( model, settings );
+			final CategoryJComboBox< TrackMateObject, String > cmbboxColor = createComboBoxSelector( model, settings );
 			final GridBagConstraints gbcCmbboxColor = new GridBagConstraints();
 			gbcCmbboxColor.insets = new Insets( 0, 0, 5, 0 );
 			gbcCmbboxColor.fill = GridBagConstraints.HORIZONTAL;
@@ -480,9 +480,9 @@ public class FeatureDisplaySelector
 
 		private static final long serialVersionUID = 1L;
 
-		private final ObjectType target;
+		private final TrackMateObject target;
 
-		public CanvasColor( final ObjectType target )
+		public CanvasColor( final TrackMateObject target )
 		{
 			this.target = target;
 		}

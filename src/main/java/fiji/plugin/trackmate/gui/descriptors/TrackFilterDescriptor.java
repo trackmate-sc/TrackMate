@@ -17,7 +17,7 @@ import fiji.plugin.trackmate.features.track.TrackBranchingAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.ObjectType;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.gui.panels.components.FilterGuiPanel;
 
 public class TrackFilterDescriptor implements WizardPanelDescriptor
@@ -42,7 +42,7 @@ public class TrackFilterDescriptor implements WizardPanelDescriptor
 		this.component = new FilterGuiPanel(
 				controller.getPlugin().getModel(),
 				controller.getPlugin().getSettings(),
-				ObjectType.TRACKS,
+				TrackMateObject.TRACKS,
 				filters,
 				TrackBranchingAnalyzer.NUMBER_SPOTS,
 				featureSelector );
@@ -60,8 +60,8 @@ public class TrackFilterDescriptor implements WizardPanelDescriptor
 	@Override
 	public void aboutToDisplayPanel()
 	{
-		controller.getDisplaySettings().setSpotColorBy( ObjectType.TRACKS, TrackIndexAnalyzer.TRACK_INDEX );
-		controller.getDisplaySettings().setTrackColorBy( ObjectType.TRACKS, TrackIndexAnalyzer.TRACK_INDEX );
+		controller.getDisplaySettings().setSpotColorBy( TrackMateObject.TRACKS, TrackIndexAnalyzer.TRACK_INDEX );
+		controller.getDisplaySettings().setTrackColorBy( TrackMateObject.TRACKS, TrackIndexAnalyzer.TRACK_INDEX );
 		controller.getGUI().setNextButtonEnabled( true );
 	}
 

@@ -145,7 +145,7 @@ import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.descriptors.ConfigureViewsDescriptor;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.ObjectType;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackDisplayMode;
 import fiji.plugin.trackmate.providers.DetectorProvider;
 import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
@@ -290,7 +290,7 @@ public class TmXmlReader
 
 		ds.setSpotVisible( readBooleanAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_SPOT_VISIBLE, logger, ds.isSpotVisible() ) );
 		ds.setSpotUniformColor( new Color( readIntAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_SPOT_UNIFORM_COLOR, logger, ds.getSpotUniformColor().getRGB() ), true ) );
-		final ObjectType spotColorBy = ObjectType.valueOf( dsel.getAttributeValue( DISPLAY_SETTINGS_ATTRIBUTE_SPOT_COLOR_BY, ds.getSpotColorByType().name() ) );
+		final TrackMateObject spotColorBy = TrackMateObject.valueOf( dsel.getAttributeValue( DISPLAY_SETTINGS_ATTRIBUTE_SPOT_COLOR_BY, ds.getSpotColorByType().name() ) );
 		final String spotColorFeature = dsel.getAttributeValue( DISPLAY_SETTINGS_ATTRIBUTE_SPOT_COLOR_FEATURE, ds.getSpotColorByFeature() );
 		ds.setSpotColorBy( spotColorBy, spotColorFeature );
 		final double spotmin = readDoubleAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_SPOT_MIN, logger, ds.getSpotMin() );
@@ -303,7 +303,7 @@ public class TmXmlReader
 		ds.setTrackVisible( readBooleanAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_TRACK_VISIBLE, logger, ds.isTrackVisible() ) );
 		ds.setTrackDisplayMode( TrackDisplayMode.valueOf( dsel.getAttributeValue( DISPLAY_SETTINGS_ATTRIBUTE_TRACK_DISPLAY_MODE, TrackDisplayMode.FULL.name() ) ) );
 		ds.setTrackUniformColor( new Color( readIntAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_TRACK_UNIFORM_COLOR, logger, ds.getTrackUniformColor().getRGB() ), true ) );
-		final ObjectType trackColorBy = ObjectType.valueOf( dsel.getAttributeValue( DISPLAY_SETTINGS_ATTRIBUTE_TRACK_COLOR_BY, ds.getTrackColorByType().name() ) );
+		final TrackMateObject trackColorBy = TrackMateObject.valueOf( dsel.getAttributeValue( DISPLAY_SETTINGS_ATTRIBUTE_TRACK_COLOR_BY, ds.getTrackColorByType().name() ) );
 		final String trackColorFeature = dsel.getAttributeValue( DISPLAY_SETTINGS_ATTRIBUTE_TRACK_COLOR_FEATURE, ds.getTrackColorByFeature() );
 		ds.setTrackColorBy( trackColorBy, trackColorFeature );
 		final double trackmin = readDoubleAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_TRACK_MIN, logger, ds.getTrackMin() );

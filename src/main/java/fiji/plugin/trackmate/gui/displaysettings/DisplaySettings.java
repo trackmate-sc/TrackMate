@@ -19,7 +19,7 @@ public class DisplaySettings
 	/** The uniform color for spots. */
 	private Color spotUniformColor;
 
-	private ObjectType spotColorByType;
+	private TrackMateObject spotColorByType;
 
 	private String spotColorByFeature;
 
@@ -37,7 +37,7 @@ public class DisplaySettings
 
 	private double trackMax;
 
-	private ObjectType trackColorByType;
+	private TrackMateObject trackColorByType;
 
 	private String trackColorByFeature;
 
@@ -252,12 +252,12 @@ public class DisplaySettings
 		return spotColorByFeature;
 	}
 
-	public ObjectType getSpotColorByType()
+	public TrackMateObject getSpotColorByType()
 	{
 		return spotColorByType;
 	}
 
-	public synchronized void setSpotColorBy( final ObjectType spotColorByType, final String spotColorByFeature )
+	public synchronized void setSpotColorBy( final TrackMateObject spotColorByType, final String spotColorByFeature )
 	{
 		boolean fire = false;
 		if ( this.spotColorByType != spotColorByType )
@@ -395,12 +395,12 @@ public class DisplaySettings
 		return trackColorByFeature;
 	}
 
-	public ObjectType getTrackColorByType()
+	public TrackMateObject getTrackColorByType()
 	{
 		return trackColorByType;
 	}
 
-	public synchronized void setTrackColorBy( final ObjectType trackColorByType, final String trackColorByFeature )
+	public synchronized void setTrackColorBy( final TrackMateObject trackColorByType, final String trackColorByFeature )
 	{
 		boolean fire = false;
 		if ( this.trackColorByType != trackColorByType )
@@ -575,13 +575,13 @@ public class DisplaySettings
 		}
 	}
 
-	public enum ObjectType
+	public enum TrackMateObject
 	{
 		DEFAULT( "Default" ), SPOTS( "spots" ), EDGES( "edges" ), TRACKS( "tracks" );
 
 		private String name;
 
-		private ObjectType( final String name )
+		private TrackMateObject( final String name )
 		{
 			this.name = name;
 		}
@@ -620,7 +620,7 @@ public class DisplaySettings
 		df.highlightColor = new Color( 0.2f, 0.9f, 0.2f );
 		df.missingValueColor = Color.GRAY.darker();
 		df.spotColorByFeature = USE_UNIFORM_COLOR_KEY;
-		df.spotColorByType = ObjectType.DEFAULT;
+		df.spotColorByType = TrackMateObject.DEFAULT;
 		df.spotDisplayedAsRoi = true;
 		df.spotDisplayRadius = 1.;
 		df.spotMin = 0.;
@@ -630,7 +630,7 @@ public class DisplaySettings
 		df.spotVisible = true;
 		df.trackDisplayMode = TrackDisplayMode.FULL;
 		df.trackColorByFeature = TrackIndexAnalyzer.TRACK_INDEX;
-		df.trackColorByType = ObjectType.DEFAULT;
+		df.trackColorByType = TrackMateObject.DEFAULT;
 		df.trackUniformColor = new Color( 0.8f, 0.8f, 0.2f );
 		df.trackMin = 0.;
 		df.trackMax = 10.;
