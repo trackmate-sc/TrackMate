@@ -593,7 +593,6 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 
 			double x = xcs;
 			// Column headers
-			g.setColor( ds.getTrackSchemeForegroundColor() );
 			if ( null != columnWidths )
 			{
 				for ( int i = 0; i < columnWidths.length; i++ )
@@ -603,6 +602,7 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 					if ( null == columnName )
 						columnName = "Name not set";
 
+					g.setColor( ds.getTrackSchemeForegroundColor() );
 					// Special case column 1.
 					if ( i == 0 )
 						g.drawString( columnName, 20, ( int ) ( ycs / 2d ) );
@@ -610,6 +610,7 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 						g.drawString( columnName, ( int ) ( x + 20d ), ( int ) ( ycs / 2d ) );
 
 					x += cw * xcs;
+					g.setColor( ds.getTrackSchemeDecorationColor() );
 					g.drawLine( ( int ) x, 0, ( int ) x, ( int ) ycs );
 				}
 			}
