@@ -58,6 +58,12 @@ public class FeatureUtils
 				for ( final String featureKey : model.getFeatureModel().getSpotFeatureNames().keySet() )
 					inverseMap.put( model.getFeatureModel().getSpotFeatureNames().get( featureKey ), featureKey );
 			}
+			else
+			{
+				// If we have no model, we still want to add spot features.
+				for ( final String featureKey : Spot.FEATURE_NAMES.keySet() )
+					inverseMap.put( Spot.FEATURE_NAMES.get( featureKey ), featureKey );
+			}
 			if ( settings != null )
 			{
 				for ( final SpotAnalyzerFactory< ? > sf : settings.getSpotAnalyzerFactories() )
