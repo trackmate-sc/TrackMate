@@ -100,6 +100,8 @@ public class DisplaySettings
 
 	private Color trackschemeDecorationColor;
 
+	private boolean trackschemeFillBox;
+
 	private final transient Listeners.List< UpdateListener > updateListeners;
 
 
@@ -175,6 +177,7 @@ public class DisplaySettings
 		trackschemeBackgroundColor2 = ds.trackschemeBackgroundColor2;
 		trackschemeDecorationColor = ds.trackschemeDecorationColor;
 		trackschemeForegroundColor = ds.trackschemeForegroundColor;
+		trackschemeFillBox = ds.trackschemeFillBox;
 
 		notifyListeners();
 	}
@@ -648,6 +651,20 @@ public class DisplaySettings
 		}
 	}
 
+	public boolean isTrackSchemeFillBox()
+	{
+		return trackschemeFillBox;
+	}
+
+	public synchronized void setTrackschemeFillBox( final boolean trackschemeFillBox )
+	{
+		if ( this.trackschemeFillBox != trackschemeFillBox )
+		{
+			this.trackschemeFillBox = trackschemeFillBox;
+			notifyListeners();
+		}
+	}
+
 	/*
 	 * Other methods.
 	 */
@@ -777,6 +794,7 @@ public class DisplaySettings
 		df.trackschemeBackgroundColor2 = Color.LIGHT_GRAY;
 		df.trackschemeForegroundColor = Color.BLACK;
 		df.trackschemeDecorationColor = Color.BLACK;
+		df.trackschemeFillBox = false;
 	}
 
 	public static DisplaySettings defaultStyle()

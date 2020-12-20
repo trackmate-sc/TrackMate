@@ -275,6 +275,7 @@ public class DisplaySettingsPanel extends JPanel
 				colorElement( "background color 1", ds::getTrackSchemeBackgroundColor1, ds::setTrackSchemeBackgroundColor1 ),
 				colorElement( "background color 2", ds::getTrackSchemeBackgroundColor2, ds::setTrackSchemeBackgroundColor2 ),
 				colorElement( "decoration color", ds::getTrackSchemeDecorationColor, ds::setTrackSchemeDecorationColor ),
+				booleanElement( "fill box", ds::isTrackSchemeFillBox, ds::setTrackschemeFillBox ),
 
 				separator() );
 	}
