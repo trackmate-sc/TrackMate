@@ -50,8 +50,8 @@ import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
 import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.Colormap;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.gui.panels.components.CategoryJComboBox;
 
@@ -404,7 +404,7 @@ public class FeatureDisplaySelector
 					ftfMin.setEnabled( hasMinMax );
 					ftfMax.setEnabled( hasMinMax );
 					btnAutoMinMax.setEnabled( hasMinMax );
-					if ( hasMinMax )
+					if ( hasMinMax && !cmbboxColor.getSelectedItem().equals( getColorByFeature( target ) ) )
 					{
 						final double[] minmax = autoMinMax( target );
 						ftfMin.setValue( Double.valueOf( minmax[ 0 ] ) );
@@ -429,7 +429,7 @@ public class FeatureDisplaySelector
 					ftfMin.setEnabled( hasMinMax );
 					ftfMax.setEnabled( hasMinMax );
 					btnAutoMinMax.setEnabled( hasMinMax );
-					if ( hasMinMax )
+					if ( hasMinMax && !cmbboxColor.getSelectedItem().equals( getColorByFeature( target ) ) )
 					{
 						final double[] minmax = autoMinMax( target );
 						ftfMin.setValue( Double.valueOf( minmax[ 0 ] ) );
