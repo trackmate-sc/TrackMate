@@ -29,7 +29,7 @@ public class DisplaySettingsIO
 	private static Gson getGson()
 	{
 		final GsonBuilder builder = new GsonBuilder();
-		builder.registerTypeAdapter( InterpolatePaintScale.class, new ColormapSerializer() );
+		builder.registerTypeAdapter( Colormap.class, new ColormapSerializer() );
 		builder.registerTypeAdapter( Color.class, new ColorSerializer() );
 		return builder.setPrettyPrinting().create();
 	}
@@ -85,21 +85,21 @@ public class DisplaySettingsIO
 		return DisplaySettings.defaultStyle().copy();
 	}
 
-	private static final class ColormapSerializer implements JsonSerializer< InterpolatePaintScale >, JsonDeserializer< InterpolatePaintScale >
+	private static final class ColormapSerializer implements JsonSerializer< Colormap >, JsonDeserializer< Colormap >
 	{
 
 		@Override
-		public JsonElement serialize( final InterpolatePaintScale src, final Type typeOfSrc, final JsonSerializationContext context )
+		public JsonElement serialize( final Colormap src, final Type typeOfSrc, final JsonSerializationContext context )
 		{
 			final JsonPrimitive cmapObj = new JsonPrimitive( src.getName() );
 			return cmapObj;
 		}
 
 		@Override
-		public InterpolatePaintScale deserialize( final JsonElement json, final Type typeOfT, final JsonDeserializationContext context ) throws JsonParseException
+		public Colormap deserialize( final JsonElement json, final Type typeOfT, final JsonDeserializationContext context ) throws JsonParseException
 		{
 			final String name = json.getAsString();
-			for ( final InterpolatePaintScale colormap : InterpolatePaintScale.getAvailableLUTs() )
+			for ( final Colormap colormap : Colormap.getAvailableLUTs() )
 			{
 				if ( colormap.getName().equals( name ) )
 					return colormap;

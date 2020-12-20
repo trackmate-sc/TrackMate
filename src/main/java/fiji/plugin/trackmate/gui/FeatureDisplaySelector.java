@@ -51,7 +51,7 @@ import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
 import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.gui.displaysettings.InterpolatePaintScale;
+import fiji.plugin.trackmate.gui.displaysettings.Colormap;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.gui.panels.components.CategoryJComboBox;
 
@@ -338,10 +338,10 @@ public class FeatureDisplaySelector
 			 */
 
 			final JPopupMenu colormapMenu = new JPopupMenu();
-			final List< InterpolatePaintScale > cmaps = InterpolatePaintScale.getAvailableLUTs();
-			for ( final InterpolatePaintScale cmap : cmaps )
+			final List< Colormap > cmaps = Colormap.getAvailableLUTs();
+			for ( final Colormap cmap : cmaps )
 			{
-				final InterpolatePaintScale lut = cmap;
+				final Colormap lut = cmap;
 				final JMenuItem item = new JMenuItem();
 				item.setPreferredSize( new Dimension( 100, 20 ) );
 				final BoxLayout itemlayout = new BoxLayout( item, BoxLayout.LINE_AXIS );
@@ -506,7 +506,7 @@ public class FeatureDisplaySelector
 			final double max = getMax( target );
 			final double dataMin = autoMinMax[ 0 ];
 			final double dataMax = autoMinMax[ 1 ];
-			final InterpolatePaintScale colormap = ds.getColormap();
+			final Colormap colormap = ds.getColormap();
 			final double alphaMin = ( ( min - dataMin ) / ( dataMax - dataMin ) );
 			final double alphaMax = ( ( max - dataMin ) / ( dataMax - dataMin ) );
 			final int width = getWidth();

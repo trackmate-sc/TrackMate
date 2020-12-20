@@ -7,7 +7,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.gui.displaysettings.InterpolatePaintScale;
+import fiji.plugin.trackmate.gui.displaysettings.Colormap;
 
 public class SpotColorGeneratorPerEdgeFeature implements FeatureColorGenerator< Spot >
 {
@@ -23,7 +23,7 @@ public class SpotColorGeneratorPerEdgeFeature implements FeatureColorGenerator< 
 			final String edgeFeature,
 			final Color missingValueColor,
 			final Color undefinedValueColor,
-			final InterpolatePaintScale colormap,
+			final Colormap colormap,
 			final double min,
 			final double max )
 	{

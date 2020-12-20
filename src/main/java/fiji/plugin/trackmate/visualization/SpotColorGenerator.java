@@ -3,7 +3,7 @@ package fiji.plugin.trackmate.visualization;
 import java.awt.Color;
 
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.gui.displaysettings.InterpolatePaintScale;
+import fiji.plugin.trackmate.gui.displaysettings.Colormap;
 
 public class SpotColorGenerator implements FeatureColorGenerator< Spot >
 {
@@ -14,7 +14,7 @@ public class SpotColorGenerator implements FeatureColorGenerator< Spot >
 
 	private final Color undefinedValueColor;
 
-	private final InterpolatePaintScale colormap;
+	private final Colormap colormap;
 
 	private final double min;
 
@@ -24,7 +24,7 @@ public class SpotColorGenerator implements FeatureColorGenerator< Spot >
 			final String feature,
 			final Color missingValueColor,
 			final Color undefinedValueColor,
-			final InterpolatePaintScale colormap,
+			final Colormap colormap,
 			final double min,
 			final double max )
 	{

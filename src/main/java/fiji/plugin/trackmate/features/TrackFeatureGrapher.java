@@ -21,7 +21,7 @@ import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.gui.displaysettings.InterpolatePaintScale;
+import fiji.plugin.trackmate.gui.displaysettings.Colormap;
 import fiji.plugin.trackmate.util.ExportableChartPanel;
 import fiji.plugin.trackmate.util.TMUtils;
 
@@ -45,7 +45,7 @@ public class TrackFeatureGrapher extends AbstractFeatureGrapher
 	@Override
 	public void render()
 	{
-		final InterpolatePaintScale colormap = displaySettings.getColormap();
+		final Colormap colormap = displaySettings.getColormap();
 
 		// Check x units
 		final String xdim = TMUtils.getUnitsFor( xDimension, model.getSpaceUnits(), model.getTimeUnits() );

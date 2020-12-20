@@ -144,7 +144,7 @@ import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.descriptors.ConfigureViewsDescriptor;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.gui.displaysettings.InterpolatePaintScale;
+import fiji.plugin.trackmate.gui.displaysettings.Colormap;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackDisplayMode;
 import fiji.plugin.trackmate.providers.DetectorProvider;
@@ -284,7 +284,7 @@ public class TmXmlReader
 		ds.setUseAntialiasing( readBooleanAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_ANTIALIASING, logger, ds.getUseAntialiasing() ) );
 
 		final String cmapname = dsel.getAttributeValue( DISPLAY_SETTINGS_ATTRIBUTE_COLORMAP );
-		for ( final InterpolatePaintScale cmap : InterpolatePaintScale.getAvailableLUTs() )
+		for ( final Colormap cmap : Colormap.getAvailableLUTs() )
 			if ( cmap.getName().equals( cmapname ) )
 				ds.setColormap( cmap );
 

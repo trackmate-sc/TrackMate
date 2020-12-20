@@ -91,19 +91,19 @@ public class StyleElements
 		};
 	}
 
-	public static ColormapElement colormapElement( final String label, final Supplier< InterpolatePaintScale > get, final Consumer< InterpolatePaintScale > set )
+	public static ColormapElement colormapElement( final String label, final Supplier< Colormap > get, final Consumer< Colormap > set )
 	{
 		return new ColormapElement( label )
 		{
 
 			@Override
-			public InterpolatePaintScale get()
+			public Colormap get()
 			{
 				return get.get();
 			}
 
 			@Override
-			public void set( final InterpolatePaintScale v )
+			public void set( final Colormap v )
 			{
 				set.accept( v );
 			}
@@ -618,7 +618,7 @@ public class StyleElements
 
 	public static abstract class ColormapElement implements StyleElement
 	{
-		private final ArrayList< Consumer< InterpolatePaintScale > > onSet = new ArrayList<>();
+		private final ArrayList< Consumer< Colormap > > onSet = new ArrayList<>();
 
 		private final String label;
 
@@ -638,11 +638,11 @@ public class StyleElements
 			visitor.visit( this );
 		}
 
-		public abstract InterpolatePaintScale get();
+		public abstract Colormap get();
 
-		public abstract void set( InterpolatePaintScale v );
+		public abstract void set( Colormap v );
 
-		public void onSet( final Consumer< InterpolatePaintScale > set )
+		public void onSet( final Consumer< Colormap > set )
 		{
 			onSet.add( set );
 		}
@@ -679,13 +679,13 @@ public class StyleElements
 		return selector;
 	}
 
-	public static JComboBox< InterpolatePaintScale > linkedColormapChooser( final ColormapElement element )
+	public static JComboBox< Colormap > linkedColormapChooser( final ColormapElement element )
 	{
-		final JComboBox< InterpolatePaintScale > cb = new JComboBox< InterpolatePaintScale >(
-				InterpolatePaintScale.getAvailableLUTs().toArray( new InterpolatePaintScale[] {} ) );
+		final JComboBox< Colormap > cb = new JComboBox< Colormap >(
+				Colormap.getAvailableLUTs().toArray( new Colormap[] {} ) );
 		cb.setRenderer( new ColormapRenderer() );
 		cb.setSelectedItem( element.get() );
-		cb.addActionListener( e -> element.set( ( InterpolatePaintScale ) cb.getSelectedItem() ) );
+		cb.addActionListener( e -> element.set( ( Colormap ) cb.getSelectedItem() ) );
 		element.onSet( cm -> {
 			if ( cm != cb.getSelectedItem() )
 				cb.setSelectedItem( cm );
@@ -693,12 +693,12 @@ public class StyleElements
 		return cb;
 	}
 
-	private static final class ColormapRenderer extends JPanel implements ListCellRenderer< InterpolatePaintScale >
+	private static final class ColormapRenderer extends JPanel implements ListCellRenderer< Colormap >
 	{
 
 		private static final long serialVersionUID = 1L;
 
-		private InterpolatePaintScale lut = InterpolatePaintScale.Jet;
+		private Colormap lut = Colormap.Jet;
 
 		private final DefaultListCellRenderer lbl;
 
@@ -747,8 +747,8 @@ public class StyleElements
 
 		@Override
 		public Component getListCellRendererComponent(
-				final JList< ? extends InterpolatePaintScale > list,
-				final InterpolatePaintScale value,
+				final JList< ? extends Colormap > list,
+				final Colormap value,
 				final int index,
 				final boolean isSelected,
 				final boolean cellHasFocus )

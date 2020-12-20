@@ -64,7 +64,7 @@ public class DisplaySettings
 	private TrackDisplayMode trackDisplayMode;
 
 	/** The color map. */
-	private InterpolatePaintScale colormap;
+	private Colormap colormap;
 
 	/** Whether we should limit the Z drawing depth. */
 	private boolean limitZDrawingDepth;
@@ -162,12 +162,12 @@ public class DisplaySettings
 		}
 	}
 
-	public InterpolatePaintScale getColormap()
+	public Colormap getColormap()
 	{
 		return colormap;
 	}
 
-	public synchronized void setColormap( final InterpolatePaintScale colormap )
+	public synchronized void setColormap( final Colormap colormap )
 	{
 		if ( this.colormap != colormap )
 		{
@@ -611,7 +611,7 @@ public class DisplaySettings
 	{
 		df = new DisplaySettings();
 		df.useAntialiasing = true;
-		df.colormap = InterpolatePaintScale.Jet;
+		df.colormap = Colormap.Jet;
 		df.limitZDrawingDepth = false;
 		df.drawingZDepth = 10.;
 		df.fadeTracks = true;
