@@ -143,10 +143,11 @@ import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.descriptors.ConfigureViewsDescriptor;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.Colormap;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackDisplayMode;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
 import fiji.plugin.trackmate.providers.DetectorProvider;
 import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
 import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
@@ -268,7 +269,7 @@ public class TmXmlReader
 
 	public DisplaySettings getDisplaySettings()
 	{
-		final DisplaySettings ds = DisplaySettings.defaultStyle().copy();
+		final DisplaySettings ds = DisplaySettingsIO.readUserDefault();
 		final Element dsel = root.getChild( DISPLAY_SETTINGS_ELEMENT_KEY );
 		if ( null == dsel )
 		{
@@ -341,7 +342,8 @@ public class TmXmlReader
 			final ViewProvider provider,
 			final Model model,
 			final Settings settings,
-			final SelectionModel selectionModel, final DisplaySettings displaySettings )
+			final SelectionModel selectionModel,
+			final DisplaySettings displaySettings )
 	{
 		final Element guiel = root.getChild( GUI_STATE_ELEMENT_KEY );
 		if ( null != guiel )

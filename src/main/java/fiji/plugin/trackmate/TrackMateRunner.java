@@ -24,6 +24,7 @@ import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.descriptors.ConfigureViewsDescriptor;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
 import fiji.plugin.trackmate.io.TmXmlWriter;
 import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
 import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
@@ -280,10 +281,10 @@ public class TrackMateRunner extends TrackMatePlugIn
 				}
 
 				/*
-				 * Display settings. Use defaults.
+				 * Display settings. Use user defaults.
 				 */
 
-				final DisplaySettings displaySettings = DisplaySettings.defaultStyle().copy();
+				final DisplaySettings displaySettings = DisplaySettingsIO.readUserDefault();
 
 				/*
 				 * Instantiate TrackMate.

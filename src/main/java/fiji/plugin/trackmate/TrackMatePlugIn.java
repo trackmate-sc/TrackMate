@@ -3,6 +3,7 @@ package fiji.plugin.trackmate;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
@@ -79,7 +80,7 @@ public class TrackMatePlugIn implements PlugIn
 
 	protected DisplaySettings createDisplaySettings()
 	{
-		return DisplaySettings.defaultStyle().copy();
+		return DisplaySettingsIO.readUserDefault();
 	}
 
 	/**
