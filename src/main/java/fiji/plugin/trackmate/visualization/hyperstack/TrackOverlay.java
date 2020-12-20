@@ -42,10 +42,6 @@ public class TrackOverlay extends Roi
 
 	protected final Model model;
 
-	private static final Stroke NORMAL_STROKE = new BasicStroke();
-
-	private static final Stroke SELECTION_STROKE = new BasicStroke( 4.0f );
-
 	/*
 	 * CONSTRUCTOR
 	 */
@@ -102,7 +98,7 @@ public class TrackOverlay extends Roi
 		final int trackDisplayDepth = displaySettings.isFadeTracks() ? displaySettings.getFadeTrackRange() : 1_000_000_000;
 		final Set< Integer > filteredTrackKeys = model.getTrackModel().unsortedTrackIDs( true );
 
-		g2d.setStroke( NORMAL_STROKE );
+		g2d.setStroke( new BasicStroke( ( float ) displaySettings.getLineThickness() ) );
 		if ( trackDisplayMode == TrackDisplayMode.LOCAL )
 			g2d.setComposite( AlphaComposite.getInstance( AlphaComposite.SRC_OVER ) );
 
@@ -220,7 +216,7 @@ public class TrackOverlay extends Roi
 		if ( trackDisplayMode != TrackDisplayMode.SELECTION_ONLY )
 		{
 			// Deal with highlighted edges first: brute and thick display
-			g2d.setStroke( SELECTION_STROKE );
+			g2d.setStroke( new BasicStroke( ( float ) displaySettings.getSelectionLineThickness() ) );
 			g2d.setColor( displaySettings.getHighlightColor() );
 			g2d.setComposite( AlphaComposite.getInstance( AlphaComposite.SRC_OVER ) );
 			for ( final DefaultWeightedEdge edge : highlight )

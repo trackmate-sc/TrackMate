@@ -1,7 +1,5 @@
 package fiji.plugin.trackmate.visualization.trackscheme;
 
-import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -40,14 +38,10 @@ import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxGraphView;
 
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+
 public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEventListener
 {
-
-	public static final Color BACKGROUND_COLOR_1 = Color.GRAY;
-
-	public static final Color BACKGROUND_COLOR_2 = Color.LIGHT_GRAY;
-
-	public static final Color LINE_COLOR = Color.BLACK;
 
 	private static final long serialVersionUID = -1L;
 
@@ -66,18 +60,21 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 	/** Flag that states whether the use is holding the space key down. */
 	private boolean spaceDown = false;
 
+	private final DisplaySettings ds;
+
 
 	/*
 	 * CONSTRUCTOR
 	 */
 
-	public TrackSchemeGraphComponent( final JGraphXAdapter graph, final TrackScheme trackScheme )
+	public TrackSchemeGraphComponent( final JGraphXAdapter graph, final TrackScheme trackScheme, final DisplaySettings ds )
 	{
 		super( graph );
 		this.trackScheme = trackScheme;
+		this.ds = ds;
 
 		getViewport().setOpaque( true );
-		getViewport().setBackground( BACKGROUND_COLOR_1 );
+		getViewport().setBackground( ds.getTrackSchemeBackgroundColor1() );
 		setZoomFactor( 2.0 );
 
 		connectionHandler.addListener( mxEvent.CONNECT, this );
@@ -331,15 +328,16 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 	@Override
 	public void paintBackground( final Graphics g )
 	{
-		if ( paintDecorationLevel == 0 ) { return; }
+		if ( paintDecorationLevel == 0 )
+			return;
 
 		final int width = getViewport().getView().getSize().width;
 		final int height = getViewport().getView().getSize().height;
 		final double scale = graph.getView().getScale();
 
 		final Graphics2D g2d = ( Graphics2D ) g;
-		g.setFont( FONT.deriveFont( ( float ) ( 12 * scale ) ).deriveFont( Font.BOLD ) );
-		g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
+		g.setFont( ds.getFont().deriveFont( ( float ) ( 12 * scale ) ).deriveFont( Font.BOLD ) );
+		g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, ds.getUseAntialiasing() ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
 		final Rectangle paintBounds = g.getClipBounds();
 
 		// Scaled sizes
@@ -349,7 +347,7 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 		if ( paintDecorationLevel > 1 )
 		{
 			// Alternating row color
-			g.setColor( BACKGROUND_COLOR_2 );
+			g.setColor( ds.getTrackSchemeBackgroundColor2() );
 			double y = 0;
 			while ( y < height )
 			{
@@ -366,7 +364,7 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			// Column headers
 			if ( null != columnWidths )
 			{
-				g.setColor( LINE_COLOR );
+				g.setColor( ds.getTrackSchemeDecorationColor() );
 				for ( int i = 0; i < columnWidths.length; i++ )
 				{
 					final int cw = columnWidths[ i ];
@@ -380,7 +378,6 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 		getColumnHeader().revalidate();
 		getRowHeader().revalidate();
 		getCorner( ScrollPaneConstants.UPPER_LEFT_CORNER ).revalidate();
-
 	}
 
 	/**
@@ -437,7 +434,7 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 		public TopLeftCorner()
 		{
 			setOpaque( true );
-			setBackground( BACKGROUND_COLOR_1 );
+			setBackground( ds.getTrackSchemeBackgroundColor1() );
 		}
 
 		@Override
@@ -446,9 +443,9 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			final double scale = graph.getView().getScale();
 			final double xcs = TrackScheme.X_COLUMN_SIZE * Math.min( 1d, scale );
 			final double ycs = TrackScheme.Y_COLUMN_SIZE * Math.min( 1d, scale );
-			g.setColor( BACKGROUND_COLOR_1 );
+			g.setColor( ds.getTrackSchemeBackgroundColor1() );
 			g.fillRect( 0, 0, ( int ) xcs, ( int ) ycs );
-			g.setColor( LINE_COLOR );
+			g.setColor( ds.getTrackSchemeDecorationColor() );
 			g.drawLine( 0, ( int ) ycs, ( int ) xcs, ( int ) ycs );
 			g.drawLine( ( int ) xcs, 0, ( int ) xcs, ( int ) ycs );
 		}
@@ -463,7 +460,7 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 		{
 			setLayout( null );
 			setOpaque( true );
-			setBackground( BACKGROUND_COLOR_1 );
+			setBackground( ds.getTrackSchemeBackgroundColor1() );
 			setToolTipText( "Column header tool tip" );
 			addMouseListener( new MouseAdapter()
 			{
@@ -490,22 +487,19 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 							final int cw = columnWidths[ column ];
 							xc += cw * xcs;
 							if ( x < xc )
-							{
 								break;
-							}
 						}
 
-						if ( column >= columnWidths.length ) { return; }
+						if ( column >= columnWidths.length )
+							return;
 
 						final String oldName = trackScheme.getModel().getTrackModel().name( columnTrackIDs[ column ] );
 						final Integer trackID = columnTrackIDs[ column ];
 
 						int cwidth = columnWidths[ column ] * xcs;
+						// Special case 1st column.
 						if ( column == 0 )
-						{
-							// Special case 1st column.
 							cwidth += xcs;
-						}
 
 						final JScrollPane scrollPane = new JScrollPane();
 						scrollPane.getViewport().setOpaque( false );
@@ -518,9 +512,9 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 						final JTextField textArea = new JTextField( oldName );
 						textArea.setBorder( BorderFactory.createLineBorder( Color.ORANGE, 2 ) );
 						textArea.setOpaque( true );
-						textArea.setBackground( BACKGROUND_COLOR_1 );
+						textArea.setBackground( ds.getTrackSchemeBackgroundColor1() );
 						textArea.setHorizontalAlignment( SwingConstants.CENTER );
-						textArea.setFont( FONT.deriveFont( 12 * scale ).deriveFont( Font.BOLD ) );
+						textArea.setFont( ds.getFont().deriveFont( 12 * scale ).deriveFont( Font.BOLD ) );
 						textArea.addActionListener( new ActionListener()
 						{
 							// Get track name and pass it to model
@@ -541,9 +535,7 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 						textArea.revalidate();
 						textArea.requestFocusInWindow();
 						textArea.selectAll();
-
 					}
-
 				}
 			} );
 		}
@@ -587,21 +579,22 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			final double scale = graph.getView().getScale();
 
 			final float fontScale = ( float ) ( 12 * Math.min( 1d, scale ) );
-			g.setFont( FONT.deriveFont( fontScale ).deriveFont( Font.BOLD ) );
+			g.setFont( ds.getFont().deriveFont( fontScale ).deriveFont( Font.BOLD ) );
 			g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 			final Rectangle paintBounds = g.getClipBounds();
-			g.setColor( BACKGROUND_COLOR_1 );
+			g.setColor( ds.getTrackSchemeBackgroundColor1() );
 			g.fillRect( paintBounds.x, paintBounds.y, paintBounds.x + paintBounds.width, paintBounds.height );
 
 			// Scaled sizes
 			final double xcs = TrackScheme.X_COLUMN_SIZE * scale;
 			final double ycs = TrackScheme.Y_COLUMN_SIZE * Math.min( 1d, scale );
 
-			g.setColor( LINE_COLOR );
+			g.setColor( ds.getTrackSchemeDecorationColor() );
 			g.drawLine( paintBounds.x, ( int ) ycs, paintBounds.x + paintBounds.width, ( int ) ycs );
 
 			double x = xcs;
 			// Column headers
+			g.setColor( ds.getTrackSchemeForegroundColor() );
 			if ( null != columnWidths )
 			{
 				for ( int i = 0; i < columnWidths.length; i++ )
@@ -618,7 +611,6 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 						g.drawString( columnName, ( int ) ( x + 20d ), ( int ) ( ycs / 2d ) );
 
 					x += cw * xcs;
-					g.setColor( LINE_COLOR );
 					g.drawLine( ( int ) x, 0, ( int ) x, ( int ) ycs );
 				}
 			}
@@ -646,7 +638,7 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 		public RowHeader()
 		{
 			setOpaque( true );
-			setBackground( BACKGROUND_COLOR_1 );
+			setBackground( ds.getTrackSchemeBackgroundColor1() );
 			setToolTipText( "Row header tooltip" );
 		}
 
@@ -667,8 +659,8 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			final double scale = graph.getView().getScale();
 
 			final float fontScale = ( float ) ( 12 * Math.min( 1d, scale ) );
-			g.setFont( FONT.deriveFont( fontScale ).deriveFont( Font.BOLD ) );
-			g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
+			g.setFont( ds.getFont().deriveFont( fontScale ).deriveFont( Font.BOLD ) );
+			g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, ds.getUseAntialiasing() ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
 			final Rectangle paintBounds = g.getClipBounds();
 
 			final int height = viewport.getView().getSize().height;
@@ -678,13 +670,13 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			final double ycs = TrackScheme.Y_COLUMN_SIZE * scale;
 
 			// Alternating row color
-			g.setColor( BACKGROUND_COLOR_1 );
+			g.setColor( ds.getTrackSchemeBackgroundColor1() );
 			g.fillRect( paintBounds.x, paintBounds.y, paintBounds.width, paintBounds.height );
 
 			double y = 0;
 			if ( paintDecorationLevel > 1 )
 			{
-				g.setColor( BACKGROUND_COLOR_2 );
+				g.setColor( ds.getTrackSchemeBackgroundColor2() );
 				while ( y < height )
 				{
 					if ( y > paintBounds.y - ycs && y < paintBounds.y + paintBounds.height )
@@ -695,12 +687,12 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			}
 
 			// Header separator
-			g.setColor( TrackSchemeGraphComponent.LINE_COLOR );
+			g.setColor( ds.getTrackSchemeDecorationColor() );
 			if ( xcs > paintBounds.x && xcs < paintBounds.x + paintBounds.width )
 				g.drawLine( ( int ) xcs, paintBounds.y, ( int ) xcs, paintBounds.y + paintBounds.height );
 
-
 			// Row headers
+			g.setColor( ds.getTrackSchemeForegroundColor() );
 			final double x = xcs / 4d;
 			y = ycs / 2d;
 

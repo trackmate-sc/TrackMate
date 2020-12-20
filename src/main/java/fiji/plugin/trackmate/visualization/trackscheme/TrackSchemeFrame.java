@@ -111,7 +111,7 @@ public class TrackSchemeFrame extends JFrame
 	 */
 	private TrackSchemeGraphComponent createGraphComponent()
 	{
-		final TrackSchemeGraphComponent gc = new TrackSchemeGraphComponent( graph, trackScheme );
+		final TrackSchemeGraphComponent gc = new TrackSchemeGraphComponent( graph, trackScheme, displaySettings );
 		gc.getVerticalScrollBar().setUnitIncrement( 16 );
 		gc.getHorizontalScrollBar().setUnitIncrement( 16 );
 

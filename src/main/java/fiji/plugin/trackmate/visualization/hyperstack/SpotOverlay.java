@@ -40,10 +40,6 @@ public class SpotOverlay extends Roi
 
 	private static final long serialVersionUID = 1L;
 
-	private static final Font LABEL_FONT = new Font( "Arial", Font.BOLD, 12 );
-
-	private static final boolean DEBUG = false;
-
 	protected Spot editingSpot;
 
 	protected final double[] calibration;
@@ -100,7 +96,7 @@ public class SpotOverlay extends Roi
 		final Font originalFont = g2d.getFont();
 
 		g2d.setComposite( composite );
-		g2d.setFont( LABEL_FONT );
+		g2d.setFont( displaySettings.getFont() );
 		g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING,
 				displaySettings.getUseAntialiasing() ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
 		fm = g2d.getFontMetrics();
@@ -112,7 +108,7 @@ public class SpotOverlay extends Roi
 		// Deal with normal spots.
 		final FeatureColorGenerator< Spot > colorGenerator = FeatureUtils.createSpotColorGenerator( model, displaySettings );
 
-		g2d.setStroke( new BasicStroke( 1.0f ) );
+		g2d.setStroke( new BasicStroke( ( float ) displaySettings.getLineThickness() ) );
 
 		if ( selectionOnly && null != spotSelection)
 		{
@@ -159,7 +155,7 @@ public class SpotOverlay extends Roi
 			// Deal with spot selection
 			if ( null != spotSelection )
 			{
-				g2d.setStroke( new BasicStroke( 2.0f ) );
+				g2d.setStroke( new BasicStroke( ( float ) displaySettings.getSelectionLineThickness() ) );
 				g2d.setColor( displaySettings.getHighlightColor() );
 				for ( final Spot spot : spotSelection )
 				{
@@ -167,9 +163,6 @@ public class SpotOverlay extends Roi
 						continue;
 
 					final int sFrame = spot.getFeature( Spot.FRAME ).intValue();
-					if ( DEBUG )
-						System.out.println( "[SpotOverlay] For spot " + spot + " in selection, found frame " + sFrame );
-
 					if ( sFrame != frame )
 						continue;
 
@@ -187,7 +180,12 @@ public class SpotOverlay extends Roi
 		if ( null != editingSpot )
 		{
 			g2d.setColor( displaySettings.getHighlightColor() );
-			g2d.setStroke( new BasicStroke( 1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1.0f, new float[] { 5f, 5f }, 0 ) );
+			g2d.setStroke( new BasicStroke(
+					( float ) displaySettings.getLineThickness(),
+					BasicStroke.CAP_ROUND,
+					BasicStroke.JOIN_ROUND,
+					1.0f,
+					new float[] { 5f, 5f }, 0 ) );
 			final double x = editingSpot.getFeature( Spot.POSITION_X );
 			final double y = editingSpot.getFeature( Spot.POSITION_Y );
 			final double radius = editingSpot.getFeature( Spot.RADIUS ) / calibration[ 0 ] * lMag;
