@@ -21,7 +21,7 @@ import com.mxgraph.view.mxStylesheet;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.features.FeatureUtils;
-import fiji.plugin.trackmate.gui.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 
 public class TrackSchemeStylist

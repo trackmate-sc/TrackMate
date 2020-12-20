@@ -15,7 +15,6 @@ import javax.swing.UnsupportedLookAndFeelException;
 import org.scijava.command.Command;
 import org.scijava.plugin.Plugin;
 
-import fiji.plugin.trackmate.gui.DisplaySettings;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 import ij.ImageJ;
 

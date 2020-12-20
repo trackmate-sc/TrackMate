@@ -1,8 +1,8 @@
 package fiji.plugin.trackmate;
 
-import fiji.plugin.trackmate.gui.DisplaySettings;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;

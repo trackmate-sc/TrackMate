@@ -23,7 +23,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.gui.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.util.ExportableChartPanel;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.util.XYEdgeRenderer;

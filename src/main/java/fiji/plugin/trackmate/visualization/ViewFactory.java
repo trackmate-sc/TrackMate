@@ -4,7 +4,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMateModule;
-import fiji.plugin.trackmate.gui.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 
 public interface ViewFactory extends TrackMateModule
 {

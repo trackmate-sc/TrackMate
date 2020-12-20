@@ -17,7 +17,7 @@ import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.SpotFeatureGrapher;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
-import fiji.plugin.trackmate.gui.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 

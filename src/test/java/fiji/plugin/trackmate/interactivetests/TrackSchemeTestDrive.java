@@ -8,8 +8,8 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.edges.EdgeVelocityAnalyzer;
-import fiji.plugin.trackmate.gui.DisplaySettings;
-import fiji.plugin.trackmate.gui.DisplaySettings.ObjectType;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.ObjectType;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 

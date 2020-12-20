@@ -35,8 +35,7 @@ import javax.swing.SwingConstants;
 
 import com.itextpdf.text.Font;
 
-import fiji.plugin.trackmate.gui.DisplaySettings;
-import fiji.plugin.trackmate.gui.DisplaySettings.TrackDisplayMode;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackDisplayMode;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.BooleanElement;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.BoundedDoubleElement;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.ColorElement;

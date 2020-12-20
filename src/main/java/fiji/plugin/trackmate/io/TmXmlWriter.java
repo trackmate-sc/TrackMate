@@ -133,8 +133,8 @@ import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
-import fiji.plugin.trackmate.gui.DisplaySettings;
 import fiji.plugin.trackmate.gui.TrackMateGUIModel;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 
 public class TmXmlWriter

@@ -14,7 +14,7 @@ import org.scijava.plugin.Plugin;
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
-import fiji.plugin.trackmate.gui.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 
 @Plugin( type = EdgeAnalyzer.class )
 public class ManualEdgeColorAnalyzer implements EdgeAnalyzer

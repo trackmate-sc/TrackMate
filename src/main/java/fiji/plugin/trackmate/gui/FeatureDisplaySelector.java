@@ -3,11 +3,11 @@ package fiji.plugin.trackmate.gui;
 import static fiji.plugin.trackmate.features.FeatureUtils.DUMMY_MODEL;
 import static fiji.plugin.trackmate.features.FeatureUtils.collectFeatureKeys;
 import static fiji.plugin.trackmate.features.FeatureUtils.collectFeatureValues;
-import static fiji.plugin.trackmate.gui.DisplaySettings.ObjectType.DEFAULT;
-import static fiji.plugin.trackmate.gui.DisplaySettings.ObjectType.EDGES;
-import static fiji.plugin.trackmate.gui.DisplaySettings.ObjectType.SPOTS;
-import static fiji.plugin.trackmate.gui.DisplaySettings.ObjectType.TRACKS;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
+import static fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.ObjectType.DEFAULT;
+import static fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.ObjectType.EDGES;
+import static fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.ObjectType.SPOTS;
+import static fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.ObjectType.TRACKS;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -52,7 +52,8 @@ import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
 import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
-import fiji.plugin.trackmate.gui.DisplaySettings.ObjectType;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.ObjectType;
 import fiji.plugin.trackmate.gui.panels.components.CategoryJComboBox;
 
 public class FeatureDisplaySelector

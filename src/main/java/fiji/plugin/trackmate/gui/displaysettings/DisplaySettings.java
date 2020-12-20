@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.gui;
+package fiji.plugin.trackmate.gui.displaysettings;
 
 import static fiji.plugin.trackmate.features.FeatureUtils.USE_UNIFORM_COLOR_KEY;
 

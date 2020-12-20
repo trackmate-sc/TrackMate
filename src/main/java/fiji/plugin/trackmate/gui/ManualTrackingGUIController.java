@@ -3,6 +3,7 @@ package fiji.plugin.trackmate.gui;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.descriptors.WizardPanelDescriptor;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 
 public class ManualTrackingGUIController extends TrackMateGUIController
 {

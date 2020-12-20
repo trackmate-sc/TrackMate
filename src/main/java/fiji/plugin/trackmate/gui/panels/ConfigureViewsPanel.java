@@ -26,10 +26,10 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
-import fiji.plugin.trackmate.gui.DisplaySettings;
-import fiji.plugin.trackmate.gui.DisplaySettings.TrackDisplayMode;
 import fiji.plugin.trackmate.gui.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.GuiUtils;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackDisplayMode;
 
 /**
  * A configuration panel used to tune the aspect of spots and tracks in multiple

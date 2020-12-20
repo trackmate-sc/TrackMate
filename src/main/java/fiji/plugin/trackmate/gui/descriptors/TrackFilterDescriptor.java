@@ -15,9 +15,9 @@ import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.track.TrackBranchingAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
-import fiji.plugin.trackmate.gui.DisplaySettings.ObjectType;
 import fiji.plugin.trackmate.gui.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.ObjectType;
 import fiji.plugin.trackmate.gui.panels.components.FilterGuiPanel;
 
 public class TrackFilterDescriptor implements WizardPanelDescriptor

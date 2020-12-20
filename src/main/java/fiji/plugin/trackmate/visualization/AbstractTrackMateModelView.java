@@ -8,7 +8,7 @@ import fiji.plugin.trackmate.SelectionChangeEvent;
 import fiji.plugin.trackmate.SelectionChangeListener;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.gui.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 
 /**
  * An abstract class for spot displayers, that can overlay detected spots and

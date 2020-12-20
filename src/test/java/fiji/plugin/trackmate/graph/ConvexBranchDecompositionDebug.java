@@ -6,7 +6,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition.TrackBranchDecomposition;
-import fiji.plugin.trackmate.gui.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
 public class ConvexBranchDecompositionDebug

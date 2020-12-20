@@ -17,7 +17,7 @@ import com.mxgraph.swing.mxGraphOutline;
 import com.mxgraph.swing.handler.mxRubberband;
 
 import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.gui.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.util.TrackNavigator;
 
 public class TrackSchemeFrame extends JFrame

@@ -38,9 +38,9 @@ import javax.swing.border.EmptyBorder;
 import org.jfree.chart.renderer.InterpolatePaintScale;
 
 import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.gui.DisplaySettings.ObjectType;
 import fiji.plugin.trackmate.gui.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.GuiUtils;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.ObjectType;
 import fiji.plugin.trackmate.gui.panels.components.CategoryJComboBox;
 
 public class StyleElements

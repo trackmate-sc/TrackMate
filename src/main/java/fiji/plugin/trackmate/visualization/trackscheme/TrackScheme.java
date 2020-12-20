@@ -41,7 +41,7 @@ import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.SelectionChangeEvent;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.gui.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.visualization.AbstractTrackMateModelView;
 import ij.ImagePlus;
 

@@ -23,8 +23,6 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-import fiji.plugin.trackmate.gui.DisplaySettings;
-
 public class DisplaySettingsIO
 {
 
