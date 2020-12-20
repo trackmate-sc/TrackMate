@@ -1,4 +1,4 @@
-package org.jfree.chart.renderer;
+package fiji.plugin.trackmate.visualization;
 
 import java.awt.Color;
 

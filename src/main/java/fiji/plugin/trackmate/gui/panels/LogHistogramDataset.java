@@ -1,4 +1,6 @@
-package org.jfree.data.statistics;
+package fiji.plugin.trackmate.gui.panels;
+
+import org.jfree.data.statistics.HistogramDataset;
 
 /**
  * A {@link HistogramDataset} that returns the log of the count in each bin (plus one),
