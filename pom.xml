@@ -245,6 +245,11 @@
 		    <artifactId>fontchooser</artifactId>
     		<version>2.4</version>
 		</dependency>
+		<dependency>
+		    <groupId>org.drjekyll</groupId>
+		    <artifactId>fontchooser</artifactId>
+    		<version>2.4</version>
+		</dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
