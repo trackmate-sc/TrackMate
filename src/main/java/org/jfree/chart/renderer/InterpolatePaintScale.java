@@ -3,6 +3,7 @@ package org.jfree.chart.renderer;
 import java.awt.Color;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
@@ -113,14 +114,20 @@ public class InterpolatePaintScale implements PaintScale, Serializable
 		}
 	}
 
+	private static final List< InterpolatePaintScale > LUTS;
+	static
+	{
+		final List< InterpolatePaintScale > tmpLUTS = new ArrayList<>();
+		tmpLUTS.add( Jet );
+		tmpLUTS.add( Turbo );
+		tmpLUTS.add( Viridis );
+		tmpLUTS.addAll( InterpolatePaintScaleIO.getLUTs() );
+		LUTS = Collections.unmodifiableList( tmpLUTS );
+	}
+
 	public static List< InterpolatePaintScale > getAvailableLUTs()
 	{
-		final List< InterpolatePaintScale > luts = new ArrayList<>();
-		luts.add( Jet );
-		luts.add( Turbo );
-		luts.add( Viridis );
-		luts.addAll( InterpolatePaintScaleIO.getLUTs() );
-		return luts;
+		return LUTS;
 	}
 
 	/*
