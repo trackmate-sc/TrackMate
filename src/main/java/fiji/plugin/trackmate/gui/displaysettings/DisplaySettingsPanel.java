@@ -7,12 +7,14 @@ import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.colormapEl
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.doubleElement;
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.enumElement;
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.featureElement;
+import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.fontElement;
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.intElement;
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.label;
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedCheckBox;
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedColorButton;
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedColormapChooser;
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedFeatureSelector;
+import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedFontButton;
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedFormattedTextField;
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedSliderPanel;
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedSpinnerEnumSelector;
@@ -43,6 +45,7 @@ import fiji.plugin.trackmate.gui.displaysettings.StyleElements.ColormapElement;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.DoubleElement;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.EnumElement;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.FeatureElement;
+import fiji.plugin.trackmate.gui.displaysettings.StyleElements.FontElement;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.IntElement;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.LabelElement;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.Separator;
@@ -165,6 +168,14 @@ public class DisplaySettingsPanel extends JPanel
 								new JLabel( element.getLabel() ) );
 					}
 
+					@Override
+					public void visit( final FontElement element )
+					{
+						addToLayout(
+								linkedFontButton( element ),
+								new JLabel( element.getLabel() ) );
+					}
+
 					private void addToLayout( final JComponent comp1, final JComponent comp2 )
 					{
 						c.gridwidth = 1;
@@ -236,6 +247,7 @@ public class DisplaySettingsPanel extends JPanel
 				colorElement( "track uniform color", ds::getTrackUniformColor, ds::setTrackUniformColor ),
 				booleanElement( "fade track in time", ds::isFadeTracks, ds::setFadeTracks ),
 				intElement( "track fade range", 0, 500, ds::getFadeTrackRange, ds::setFadeTrackRange ),
+
 				separator(),
 
 				label( "General" ),
@@ -249,9 +261,21 @@ public class DisplaySettingsPanel extends JPanel
 				colorElement( "color for missing values", ds::getMissingValueColor, ds::setMissingValueColor ),
 				colorElement( "color for undefined values", ds::getUndefinedValueColor, ds::setUndefinedValueColor ),
 
+				boundedDoubleElement( "line thickness", 0., 10., ds::getLineThickness, ds::setLineThickness ),
+				boundedDoubleElement( "selection line thickness", 0., 10., ds::getSelectionLineThickness, ds::setSelectionLineThickness ),
+				fontElement( "font", ds::getFont, ds::setFont ),
+
 				booleanElement( "anti-aliasing", ds::getUseAntialiasing, ds::setUseAntialiasing ),
 
-				separator() );
+				separator(),
 
+				label( "TrackScheme" ),
+
+				colorElement( "foreground color", ds::getTrackSchemeForegroundColor, ds::setTrackSchemeForegroundColor ),
+				colorElement( "background color 1", ds::getTrackSchemeBackgroundColor1, ds::setTrackSchemeBackgroundColor1 ),
+				colorElement( "background color 2", ds::getTrackSchemeBackgroundColor2, ds::setTrackSchemeBackgroundColor2 ),
+				colorElement( "decoration color", ds::getTrackSchemeDecorationColor, ds::setTrackSchemeDecorationColor ),
+
+				separator() );
 	}
 }

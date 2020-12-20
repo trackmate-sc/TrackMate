@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.gui.displaysettings;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -9,6 +10,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -65,7 +67,10 @@ public class ConfigTrackMateDisplaySettings implements Command
 		
 		final DisplaySettings ds = DisplaySettingsIO.readUserDefault();
 		final DisplaySettingsPanel editor = new DisplaySettingsPanel( ds );
-		configPanel.add( editor, BorderLayout.CENTER );
+		final JScrollPane scrollPane = new JScrollPane( editor, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER );
+		scrollPane.setPreferredSize( new Dimension( 350, 500 ) );
+		scrollPane.getVerticalScrollBar().setUnitIncrement( 16 );
+		configPanel.add( scrollPane, BorderLayout.CENTER );
 		
 		/*
 		 * Listeners.
@@ -80,10 +85,10 @@ public class ConfigTrackMateDisplaySettings implements Command
 		 */
 
 		final JFrame frame = new JFrame( "TrackMate default settings" );
-		frame.setLocationRelativeTo( null );
 		frame.setIconImage( TrackMateWizard.TRACKMATE_ICON.getImage() );
 		frame.getContentPane().add( configPanel );
 		frame.pack();
+		frame.setLocationRelativeTo( null );
 		frame.setVisible( true );
 	}
 

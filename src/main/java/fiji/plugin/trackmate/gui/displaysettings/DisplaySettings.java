@@ -3,6 +3,7 @@ package fiji.plugin.trackmate.gui.displaysettings;
 import static fiji.plugin.trackmate.features.FeatureUtils.USE_UNIFORM_COLOR_KEY;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.util.Objects;
 
 import org.scijava.listeners.Listeners;
@@ -85,7 +86,22 @@ public class DisplaySettings
 
 	private boolean trackVisible;
 
+	private Font font;
+
+	private double lineThickness;
+
+	private double selectionLineThickness;
+
+	private Color trackschemeBackgroundColor1;
+
+	private Color trackschemeBackgroundColor2;
+
+	private Color trackschemeForegroundColor;
+
+	private Color trackschemeDecorationColor;
+
 	private final transient Listeners.List< UpdateListener > updateListeners;
+
 
 	private DisplaySettings()
 	{
@@ -113,7 +129,7 @@ public class DisplaySettings
 		return copy( null );
 	}
 
-	public synchronized void set( final DisplaySettings ds )
+	synchronized void set( final DisplaySettings ds )
 	{
 		name = ds.name;
 
@@ -144,6 +160,14 @@ public class DisplaySettings
 		missingValueColor = ds.missingValueColor;
 		undefinedValueColor = ds.undefinedValueColor;
 		useAntialiasing = ds.useAntialiasing;
+
+		font = ds.font;
+		lineThickness = ds.lineThickness;
+		selectionLineThickness = ds.selectionLineThickness;
+		trackschemeBackgroundColor1 = ds.trackschemeBackgroundColor1;
+		trackschemeBackgroundColor2 = ds.trackschemeBackgroundColor2;
+		trackschemeDecorationColor = ds.trackschemeDecorationColor;
+		trackschemeForegroundColor = ds.trackschemeForegroundColor;
 
 		notifyListeners();
 	}
@@ -519,6 +543,108 @@ public class DisplaySettings
 		}
 	}
 
+	public Font getFont()
+	{
+		return font;
+	}
+
+	public synchronized void setFont( final Font font )
+	{
+		if ( this.font != font )
+		{
+			this.font = font;
+			notifyListeners();
+		}
+	}
+
+	public double getLineThickness()
+	{
+		return lineThickness;
+	}
+
+	public synchronized void setLineThickness( final double lineThickness )
+	{
+		if ( this.lineThickness != lineThickness )
+		{
+			this.lineThickness = lineThickness;
+			notifyListeners();
+		}
+	}
+
+	public double getSelectionLineThickness()
+	{
+		return selectionLineThickness;
+	}
+
+	public synchronized void setSelectionLineThickness( final double selectionLineThickness )
+	{
+		if ( this.selectionLineThickness != selectionLineThickness )
+		{
+			this.selectionLineThickness = selectionLineThickness;
+			notifyListeners();
+		}
+	}
+
+	public Color getTrackSchemeBackgroundColor1()
+	{
+		return trackschemeBackgroundColor1;
+	}
+
+	public synchronized void setTrackSchemeBackgroundColor1( final Color trackschemeBackgroundColor1 )
+	{
+		if ( this.trackschemeBackgroundColor1 != trackschemeBackgroundColor1 )
+		{
+			this.trackschemeBackgroundColor1 = trackschemeBackgroundColor1;
+			notifyListeners();
+		}
+	}
+
+	public Color getTrackSchemeBackgroundColor2()
+	{
+		return trackschemeBackgroundColor2;
+	}
+
+	public synchronized void setTrackSchemeBackgroundColor2( final Color trackschemeBackgroundColor2 )
+	{
+		if ( this.trackschemeBackgroundColor2 != trackschemeBackgroundColor2 )
+		{
+			this.trackschemeBackgroundColor2 = trackschemeBackgroundColor2;
+			notifyListeners();
+		}
+	}
+
+	public Color getTrackSchemeDecorationColor()
+	{
+		return trackschemeDecorationColor;
+	}
+
+	public synchronized void setTrackSchemeDecorationColor( final Color trackschemeDecorationColor )
+	{
+		if ( this.trackschemeDecorationColor != trackschemeDecorationColor )
+		{
+			this.trackschemeDecorationColor = trackschemeDecorationColor;
+			notifyListeners();
+		}
+	}
+
+	public Color getTrackSchemeForegroundColor()
+	{
+		return trackschemeForegroundColor;
+	}
+
+	public synchronized void setTrackSchemeForegroundColor( final Color trackschemeForegroundColor )
+	{
+		if ( this.trackschemeForegroundColor != trackschemeForegroundColor )
+		{
+			this.trackschemeForegroundColor = trackschemeForegroundColor;
+			notifyListeners();
+		}
+	}
+
+	/*
+	 * Other methods.
+	 */
+
 	private void notifyListeners()
 	{
 		for ( final UpdateListener l : updateListeners.list )
@@ -636,6 +762,15 @@ public class DisplaySettings
 		df.trackVisible = true;
 		df.undefinedValueColor = Color.BLACK;
 		df.name = "Default";
+
+		df.font = new Font( "Arial", Font.BOLD, 12 );
+		df.lineThickness = 1.0f;
+		df.selectionLineThickness = 4.0f;
+
+		df.trackschemeBackgroundColor1 = Color.GRAY;
+		df.trackschemeBackgroundColor2 = Color.LIGHT_GRAY;
+		df.trackschemeForegroundColor = Color.BLACK;
+		df.trackschemeDecorationColor = Color.BLACK;
 	}
 
 	public static DisplaySettings defaultStyle()
@@ -646,37 +781,11 @@ public class DisplaySettings
 	@Override
 	public String toString()
 	{
-		final StringBuilder str = new StringBuilder( super.toString() );
-		str.append( String.format( "\n%20s: %s", "name", name ) );
+		return DisplaySettingsIO.toJSon( this );
+	}
 
-		str.append( String.format( "\n%20s: %s", "spotVisible", "" + spotVisible ) );
-		str.append( String.format( "\n%20s: %s", "spotDisplayedAsRoi", "" + spotDisplayedAsRoi ) );
-		str.append( String.format( "\n%20s: %s", "spotShowName", "" + spotShowName ) );
-		str.append( String.format( "\n%20s: %s", "spotDisplayRadius", "" + spotDisplayRadius ) );
-		str.append( String.format( "\n%20s: %s", "spotColorByType", spotColorByType ) );
-		str.append( String.format( "\n%20s: %s", "spotColorByFeature", spotColorByFeature ) );
-		str.append( String.format( "\n%20s: %s", "spotMin", "" + spotMin ) );
-		str.append( String.format( "\n%20s: %s", "spotMax", "" + spotMax ) );
-		str.append( String.format( "\n%20s: %s", "spotUniformColor", "" + spotUniformColor ) );
-
-		str.append( String.format( "\n%20s: %s", "trackVisible", "" + trackVisible ) );
-		str.append( String.format( "\n%20s: %s", "trackDisplayMode", trackDisplayMode ) );
-		str.append( String.format( "\n%20s: %s", "trackColorByType", trackColorByType ) );
-		str.append( String.format( "\n%20s: %s", "trackColorByFeature", trackColorByFeature ) );
-		str.append( String.format( "\n%20s: %s", "trackMin", "" + trackMin ) );
-		str.append( String.format( "\n%20s: %s", "trackMax", "" + trackMax ) );
-		str.append( String.format( "\n%20s: %s", "trackUniformColor", "" + trackUniformColor ) );
-		str.append( String.format( "\n%20s: %s", "fadeTracks", "" + fadeTracks ) );
-		str.append( String.format( "\n%20s: %s", "fadeTrackRange", "" + fadeTrackRange ) );
-
-		str.append( String.format( "\n%20s: %s", "colormap", colormap.getName() ) );
-		str.append( String.format( "\n%20s: %s", "limitZDrawingDepth", "" + limitZDrawingDepth ) );
-		str.append( String.format( "\n%20s: %s", "drawingZDepth", "" + drawingZDepth ) );
-		str.append( String.format( "\n%20s: %s", "highlightColor", "" + highlightColor ) );
-		str.append( String.format( "\n%20s: %s", "missingValueColor", "" + missingValueColor ) );
-		str.append( String.format( "\n%20s: %s", "undefinedValueColor", "" + undefinedValueColor ) );
-		str.append( String.format( "\n%20s: %s", "useAntialiasing", "" + useAntialiasing ) );
-
-		return str.toString();
+	public static void main( final String[] args )
+	{
+		System.out.println( df.toString() );
 	}
 }

@@ -26,6 +26,11 @@ public class DisplaySettingsIO
 
 	private static File userDefaultFile = new File( new File( System.getProperty( "user.home" ), ".trackmate" ), "userdefaultsettings.json" );
 
+	public static String toJSon( final DisplaySettings ds )
+	{
+		return getGson().toJson( ds );
+	}
+
 	private static Gson getGson()
 	{
 		final GsonBuilder builder = new GsonBuilder();
@@ -36,9 +41,7 @@ public class DisplaySettingsIO
 
 	public static void saveToUserDefault( final DisplaySettings ds )
 	{
-		System.out.println( "Saving " + ds ); // DEBUG
-
-		final String str = getGson().toJson( ds );
+		final String str = toJSon( ds );
 
 		if ( !userDefaultFile.exists() )
 			userDefaultFile.getParentFile().mkdirs();
@@ -151,5 +154,4 @@ public class DisplaySettingsIO
 	{
 		System.out.println( readUserDefault() );
 	}
-
 }

@@ -3,6 +3,7 @@ package fiji.plugin.trackmate.gui.displaysettings;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -34,6 +35,8 @@ import javax.swing.ListCellRenderer;
 import javax.swing.SpinnerListModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
+
+import org.drjekyll.fontchooser.FontDialog;
 
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.gui.FeatureDisplaySelector;
@@ -208,6 +211,29 @@ public class StyleElements
 		};
 	}
 
+	public static FontElement fontElement( final String label, final Supplier< Font > get, final Consumer< Font > set )
+	{
+		return new FontElement( label )
+		{
+
+			@Override
+			public void set( final Font font )
+			{
+				set.accept( font );
+			}
+
+			@Override
+			public Font get()
+			{
+				return get.get();
+			}
+		};
+	}
+
+	/*
+	 * Visitor interface.
+	 */
+
 	public interface StyleElementVisitor
 	{
 		public default void visit( final Separator element )
@@ -259,6 +285,12 @@ public class StyleElements
 		{
 			throw new UnsupportedOperationException();
 		}
+
+		public default void visit( final FontElement fontElement )
+		{
+			throw new UnsupportedOperationException();
+		}
+
 	}
 
 	/*
@@ -654,6 +686,53 @@ public class StyleElements
 		}
 	}
 
+	public static abstract class FontElement implements StyleElement
+	{
+
+		private final ArrayList< Consumer< Font > > onSet = new ArrayList<>();
+
+		private Font value;
+
+		private final String label;
+
+		public FontElement( final String label )
+		{
+			this.label = label;
+		}
+
+		public Font getValue()
+		{
+			return value;
+		}
+
+		public String getLabel()
+		{
+			return label;
+		}
+
+		@Override
+		public void accept( final StyleElementVisitor visitor )
+		{
+			visitor.visit( this );
+		}
+
+		public abstract Font get();
+
+		public abstract void set( Font font );
+
+		public void onSet( final Consumer< Font > set )
+		{
+			onSet.add( set );
+		}
+
+		@Override
+		public void update()
+		{
+			if ( get() != value )
+				value = get();
+		}
+	}
+
 	/*
 	 *
 	 * ===============================================================
@@ -854,5 +933,19 @@ public class StyleElements
 		} );
 
 		return ftf;
+	}
+
+	public static JButton linkedFontButton( final FontElement element )
+	{
+		final JButton btn = new JButton( "Select font" );
+		btn.setFont( element.get() );
+		btn.addPropertyChangeListener( "font", e -> element.set( btn.getFont() ) );
+		element.onSet( font -> {
+			if ( !font.equals( btn.getFont() ) )
+				btn.setFont( font );
+		} );
+		btn.addActionListener( e -> FontDialog.showDialog( btn ) );
+
+		return btn;
 	}
 }
