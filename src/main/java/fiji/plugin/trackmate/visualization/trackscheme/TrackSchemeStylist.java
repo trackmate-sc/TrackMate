@@ -77,7 +77,6 @@ public class TrackSchemeStylist
 		BASIC_EDGE_STYLE.put( mxConstants.STYLE_VERTICAL_ALIGN, mxConstants.ALIGN_MIDDLE );
 		BASIC_EDGE_STYLE.put( mxConstants.STYLE_STARTARROW, mxConstants.NONE );
 		BASIC_EDGE_STYLE.put( mxConstants.STYLE_ENDARROW, mxConstants.NONE );
-		BASIC_EDGE_STYLE.put( mxConstants.STYLE_STROKEWIDTH, 2.0f );
 		BASIC_EDGE_STYLE.put( mxConstants.STYLE_STROKECOLOR, DEFAULT_COLOR );
 		BASIC_EDGE_STYLE.put( mxConstants.STYLE_NOLABEL, true );
 
@@ -120,7 +119,6 @@ public class TrackSchemeStylist
 	 */
 	public synchronized void updateEdgeStyle( final Collection< mxCell > edges )
 	{
-		edgeStyle.put( mxConstants.STYLE_STROKEWIDTH, displaySettings.getLineThickness() );
 		final FeatureColorGenerator< DefaultWeightedEdge > trackColorGenerator = FeatureUtils.createTrackColorGenerator( model, displaySettings );
 		final Color missingValueColor = displaySettings.getMissingValueColor();
 		graphx.getModel().beginUpdate();
@@ -136,6 +134,7 @@ public class TrackSchemeStylist
 				final String colorstr = Integer.toHexString( color.getRGB() ).substring( 2 );
 				String style = cell.getStyle();
 				style = mxStyleUtils.setStyle( style, mxConstants.STYLE_STROKECOLOR, colorstr );
+				style = mxStyleUtils.setStyle( style, mxConstants.STYLE_STROKEWIDTH, Float.toString( ( float ) displaySettings.getLineThickness() ) );
 				graphx.getModel().setStyle( cell, style );
 			}
 		}
