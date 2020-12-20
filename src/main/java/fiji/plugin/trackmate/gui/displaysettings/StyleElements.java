@@ -35,8 +35,6 @@ import javax.swing.SpinnerListModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
-import org.jfree.chart.renderer.InterpolatePaintScale;
-
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.gui.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.GuiUtils;

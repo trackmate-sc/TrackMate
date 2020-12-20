@@ -1,4 +1,4 @@
-package org.jfree.chart.renderer;
+package fiji.plugin.trackmate.gui.displaysettings;
 
 import java.awt.Color;
 import java.io.IOException;

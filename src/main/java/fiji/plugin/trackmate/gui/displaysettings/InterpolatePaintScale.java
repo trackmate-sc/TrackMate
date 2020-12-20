@@ -1,4 +1,4 @@
-package org.jfree.chart.renderer;
+package fiji.plugin.trackmate.gui.displaysettings;
 
 import java.awt.Color;
 import java.io.Serializable;
@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
+
+import org.jfree.chart.renderer.PaintScale;
 
 /**
  * This class implements a {@link PaintScale} that generate colors interpolated

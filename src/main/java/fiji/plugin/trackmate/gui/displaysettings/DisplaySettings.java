@@ -5,7 +5,6 @@ import static fiji.plugin.trackmate.features.FeatureUtils.USE_UNIFORM_COLOR_KEY;
 import java.awt.Color;
 import java.util.Objects;
 
-import org.jfree.chart.renderer.InterpolatePaintScale;
 import org.scijava.listeners.Listeners;
 
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;

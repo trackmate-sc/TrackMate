@@ -2,10 +2,9 @@ package fiji.plugin.trackmate.visualization;
 
 import java.awt.Color;
 
-import org.jfree.chart.renderer.InterpolatePaintScale;
-
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.gui.displaysettings.InterpolatePaintScale;
 
 public class SpotColorGeneratorPerTrackFeature implements FeatureColorGenerator< Spot >
 {
