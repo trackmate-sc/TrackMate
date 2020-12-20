@@ -103,8 +103,15 @@ public class DisplaySettings
 	private final transient Listeners.List< UpdateListener > updateListeners;
 
 
-	private DisplaySettings()
+	public DisplaySettings()
 	{
+		this.updateListeners = new Listeners.SynchronizedList<>();
+		set( df );
+	}
+
+	private DisplaySettings( final String name )
+	{
+		this.name = name;
 		this.updateListeners = new Listeners.SynchronizedList<>();
 	}
 
@@ -735,7 +742,7 @@ public class DisplaySettings
 	private static final DisplaySettings df;
 	static
 	{
-		df = new DisplaySettings();
+		df = new DisplaySettings( "Default" );
 		df.useAntialiasing = true;
 		df.colormap = Colormap.Jet;
 		df.limitZDrawingDepth = false;
@@ -761,7 +768,6 @@ public class DisplaySettings
 		df.trackMax = 10.;
 		df.trackVisible = true;
 		df.undefinedValueColor = Color.BLACK;
-		df.name = "Default";
 
 		df.font = new Font( "Arial", Font.BOLD, 12 );
 		df.lineThickness = 1.0f;
@@ -781,7 +787,7 @@ public class DisplaySettings
 	@Override
 	public String toString()
 	{
-		return DisplaySettingsIO.toJSon( this );
+		return DisplaySettingsIO.toJson( this );
 	}
 
 	public static void main( final String[] args )
