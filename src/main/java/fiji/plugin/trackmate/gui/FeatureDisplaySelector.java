@@ -155,7 +155,7 @@ public class FeatureDisplaySelector
 	 *
 	 * @return a new {@link CategoryJComboBox}.
 	 */
-	private final CategoryJComboBox< ObjectType, String > createComboBoxSelector()
+	public static final CategoryJComboBox< ObjectType, String > createComboBoxSelector( final Model model, final Settings settings )
 	{
 		final List< ObjectType > categoriesIn = Arrays.asList( ObjectType.values() );
 		final LinkedHashMap< ObjectType, Collection< String > > features = new LinkedHashMap<>( categoriesIn.size() );
@@ -196,44 +196,45 @@ public class FeatureDisplaySelector
 		 * Listen to new features appearing.
 		 */
 
-		model.addModelChangeListener( ( event ) -> {
-			if ( event.getEventID() == ModelChangeEvent.FEATURES_COMPUTED )
-			{
-				final LinkedHashMap< ObjectType, Collection< String > > features2 = new LinkedHashMap<>( categoriesIn.size() );
-				final HashMap< ObjectType, String > categoryNames2 = new HashMap<>( categoriesIn.size() );
-				final HashMap< String, String > featureNames2 = new HashMap<>();
-
-				for ( final ObjectType category : categoriesIn )
+		if ( null != model )
+			model.addModelChangeListener( ( event ) -> {
+				if ( event.getEventID() == ModelChangeEvent.FEATURES_COMPUTED )
 				{
-					final Map< String, String > featureKeys = collectFeatureKeys( category, model, settings );
-					features2.put( category, featureKeys.keySet() );
-					featureNames2.putAll( featureKeys );
+					final LinkedHashMap< ObjectType, Collection< String > > features2 = new LinkedHashMap<>( categoriesIn.size() );
+					final HashMap< ObjectType, String > categoryNames2 = new HashMap<>( categoriesIn.size() );
+					final HashMap< String, String > featureNames2 = new HashMap<>();
 
-					switch ( category )
+					for ( final ObjectType category : categoriesIn )
 					{
-					case SPOTS:
-						categoryNames2.put( SPOTS, "Spot features:" );
-						break;
+						final Map< String, String > featureKeys = collectFeatureKeys( category, model, settings );
+						features2.put( category, featureKeys.keySet() );
+						featureNames2.putAll( featureKeys );
 
-					case EDGES:
-						categoryNames2.put( EDGES, "Edge features:" );
-						break;
+						switch ( category )
+						{
+						case SPOTS:
+							categoryNames2.put( SPOTS, "Spot features:" );
+							break;
 
-					case TRACKS:
-						categoryNames2.put( TRACKS, "Track features:" );
-						break;
+						case EDGES:
+							categoryNames2.put( EDGES, "Edge features:" );
+							break;
 
-					case DEFAULT:
-						categoryNames2.put( DEFAULT, "Default:" );
-						break;
+						case TRACKS:
+							categoryNames2.put( TRACKS, "Track features:" );
+							break;
 
-					default:
-						throw new IllegalArgumentException( "Unknown object type: " + category );
+						case DEFAULT:
+							categoryNames2.put( DEFAULT, "Default:" );
+							break;
+
+						default:
+							throw new IllegalArgumentException( "Unknown object type: " + category );
+						}
 					}
+					cb.setItems( features2, featureNames2, categoryNames2 );
 				}
-				cb.setItems( features2, featureNames2, categoryNames2 );
-			}
-		} );
+			} );
 
 		return cb;
 	}
@@ -266,7 +267,7 @@ public class FeatureDisplaySelector
 			gbcLblColorBy.gridy = 0;
 			add( lblColorBy, gbcLblColorBy );
 
-			final CategoryJComboBox< ObjectType, String > cmbboxColor = createComboBoxSelector();
+			final CategoryJComboBox< ObjectType, String > cmbboxColor = createComboBoxSelector( model, settings );
 			final GridBagConstraints gbcCmbboxColor = new GridBagConstraints();
 			gbcCmbboxColor.insets = new Insets( 0, 0, 5, 0 );
 			gbcCmbboxColor.fill = GridBagConstraints.HORIZONTAL;
@@ -464,7 +465,6 @@ public class FeatureDisplaySelector
 
 				canvasColor.repaint();
 			} );
-
 
 			/*
 			 * Set current values.
