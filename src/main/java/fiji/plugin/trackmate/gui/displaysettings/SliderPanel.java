@@ -30,6 +30,7 @@ package fiji.plugin.trackmate.gui.displaysettings;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -47,6 +48,8 @@ import javax.swing.event.ChangeListener;
 public class SliderPanel extends JPanel implements BoundedValue.UpdateListener
 {
 	private static final long serialVersionUID = 6444334522127424416L;
+
+	public static final Dimension PANEL_SIZE = new Dimension( 100, 20 );
 
 	private final JSlider slider;
 
@@ -66,6 +69,7 @@ public class SliderPanel extends JPanel implements BoundedValue.UpdateListener
 	{
 		super();
 		setLayout( new BorderLayout( 10, 10 ) );
+		setPreferredSize( PANEL_SIZE );
 
 		slider = new JSlider( SwingConstants.HORIZONTAL, model.getRangeMin(), model.getRangeMax(), model.getCurrentValue() );
 		spinner = new JSpinner();

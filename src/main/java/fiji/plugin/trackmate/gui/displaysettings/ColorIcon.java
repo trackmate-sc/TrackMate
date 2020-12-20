@@ -47,7 +47,10 @@ public class ColorIcon implements Icon
 		final Graphics2D g2d = ( Graphics2D ) g;
 		g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 		g2d.setColor( color );
-		g2d.fill( new RoundRectangle2D.Float( x + pad, y + pad, size, size, 5, 5 ) );
+		final RoundRectangle2D.Float shape = new RoundRectangle2D.Float( x + pad, y + pad, size, size, 5, 5 );
+		g2d.fill( shape );
+		g2d.setColor( Color.BLACK );
+		g2d.draw( shape );
 	}
 
 	public void setColor( final Color color )

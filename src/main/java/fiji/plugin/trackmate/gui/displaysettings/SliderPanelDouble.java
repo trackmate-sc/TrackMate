@@ -51,7 +51,7 @@ public class SliderPanelDouble extends JPanel implements BoundedValueDouble.Upda
 {
 	private static final long serialVersionUID = 6444334522127424416L;
 
-	private static final int sliderLength = 10000;
+	private static final int sliderLength = 50;
 
 	private final JSlider slider;
 
@@ -88,6 +88,7 @@ public class SliderPanelDouble extends JPanel implements BoundedValueDouble.Upda
 	{
 		super();
 		setLayout( new BorderLayout( 10, 10 ) );
+		setPreferredSize( SliderPanel.PANEL_SIZE );
 
 		dmin = model.getRangeMin();
 		dmax = model.getRangeMax();
