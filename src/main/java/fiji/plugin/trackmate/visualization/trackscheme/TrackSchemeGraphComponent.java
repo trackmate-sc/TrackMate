@@ -79,12 +79,11 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 
 		connectionHandler.addListener( mxEvent.CONNECT, this );
 
-		// Our own cell painter, that displays an image (if any) and a label
-		// next to it.
+		/*
+		 * Our own cell painter, that displays an image (if any) and a label
+		 * next to it.
+		 */
 		mxGraphics2DCanvas.putShape( mxScaledLabelShape.SHAPE_NAME, new mxScaledLabelShape() );
-		// Replace default painter for edge label so that we can draw labels
-		// parallel to edges.
-		mxGraphics2DCanvas.putTextShape( mxGraphics2DCanvas.TEXT_SHAPE_DEFAULT, new mxSideTextShape() );
 
 		setRowHeaderView( new RowHeader() );
 		setColumnHeaderView( new ColumnHeader() );
@@ -336,7 +335,7 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 		final double scale = graph.getView().getScale();
 
 		final Graphics2D g2d = ( Graphics2D ) g;
-		g.setFont( ds.getFont().deriveFont( ( float ) ( 12 * scale ) ).deriveFont( Font.BOLD ) );
+		g.setFont( ds.getFont().deriveFont( ( float ) ( 12 * scale ) ) );
 		g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, ds.getUseAntialiasing() ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
 		final Rectangle paintBounds = g.getClipBounds();
 
@@ -579,7 +578,7 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			final double scale = graph.getView().getScale();
 
 			final float fontScale = ( float ) ( 12 * Math.min( 1d, scale ) );
-			g.setFont( ds.getFont().deriveFont( fontScale ).deriveFont( Font.BOLD ) );
+			g.setFont( ds.getFont().deriveFont( fontScale ) );
 			g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 			final Rectangle paintBounds = g.getClipBounds();
 			g.setColor( ds.getTrackSchemeBackgroundColor1() );
@@ -659,7 +658,7 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			final double scale = graph.getView().getScale();
 
 			final float fontScale = ( float ) ( 12 * Math.min( 1d, scale ) );
-			g.setFont( ds.getFont().deriveFont( fontScale ).deriveFont( Font.BOLD ) );
+			g.setFont( ds.getFont().deriveFont( fontScale ) );
 			g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, ds.getUseAntialiasing() ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
 			final Rectangle paintBounds = g.getClipBounds();
 

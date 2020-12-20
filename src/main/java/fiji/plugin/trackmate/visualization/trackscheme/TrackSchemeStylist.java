@@ -5,8 +5,11 @@ import static fiji.plugin.trackmate.visualization.trackscheme.TrackScheme.DEFAUL
 import static fiji.plugin.trackmate.visualization.trackscheme.TrackScheme.DEFAULT_COLOR;
 
 import java.awt.Color;
+import java.awt.Font;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -34,19 +37,25 @@ public class TrackSchemeStylist
 
 	private String globalStyle = DEFAULT_STYLE_NAME;
 
-	static final Map< String, Map< String, Object > > VERTEX_STYLES;
+	private final Map< String, Object > simpleStyle;
 
-	static final String FULL_STYLE_NAME = "full";
+	private final Map< String, Object > fullStyle;
 
-	static final String SIMPLE_STYLE_NAME = "simple";
+	private final Map< String, Object > edgeStyle;
 
-	static final String DEFAULT_STYLE_NAME = SIMPLE_STYLE_NAME;
+	static final List< String > VERTEX_STYLE_NAMES = new ArrayList<>();
 
-	private static final HashMap< String, Object > FULL_VERTEX_STYLE = new HashMap<>();
+	private static final String FULL_STYLE_NAME = "full";
 
-	private static final HashMap< String, Object > SIMPLE_VERTEX_STYLE = new HashMap<>();
+	private static final String SIMPLE_STYLE_NAME = "simple";
 
-	private static final HashMap< String, Object > BASIC_EDGE_STYLE = new HashMap<>();
+	private static final String DEFAULT_STYLE_NAME = SIMPLE_STYLE_NAME;
+
+	private static final Map< String, Object > FULL_VERTEX_STYLE = new HashMap<>();
+
+	private static final Map< String, Object > SIMPLE_VERTEX_STYLE = new HashMap<>();
+
+	private static final Map< String, Object > BASIC_EDGE_STYLE = new HashMap<>();
 
 	static
 	{
@@ -70,11 +79,10 @@ public class TrackSchemeStylist
 		BASIC_EDGE_STYLE.put( mxConstants.STYLE_ENDARROW, mxConstants.NONE );
 		BASIC_EDGE_STYLE.put( mxConstants.STYLE_STROKEWIDTH, 2.0f );
 		BASIC_EDGE_STYLE.put( mxConstants.STYLE_STROKECOLOR, DEFAULT_COLOR );
+		BASIC_EDGE_STYLE.put( mxConstants.STYLE_NOLABEL, true );
 
-		VERTEX_STYLES = new HashMap<>( 2 );
-		VERTEX_STYLES.put( FULL_STYLE_NAME, FULL_VERTEX_STYLE );
-		VERTEX_STYLES.put( SIMPLE_STYLE_NAME, SIMPLE_VERTEX_STYLE );
-
+		VERTEX_STYLE_NAMES.add( SIMPLE_STYLE_NAME );
+		VERTEX_STYLE_NAMES.add( FULL_STYLE_NAME );
 	}
 
 	public TrackSchemeStylist( final Model model, final JGraphXAdapter graphx, final DisplaySettings displaySettings )
@@ -82,13 +90,17 @@ public class TrackSchemeStylist
 		this.model = model;
 		this.graphx = graphx;
 		this.displaySettings = displaySettings;
+		// Copy styles.
+		this.simpleStyle = new HashMap<>( SIMPLE_VERTEX_STYLE );
+		this.fullStyle = new HashMap<>( FULL_VERTEX_STYLE );
+		this.edgeStyle = new HashMap<>( BASIC_EDGE_STYLE );
 
 		// Prepare styles
 		final mxStylesheet styleSheet = graphx.getStylesheet();
-		styleSheet.setDefaultEdgeStyle( BASIC_EDGE_STYLE );
-		styleSheet.setDefaultVertexStyle( SIMPLE_VERTEX_STYLE );
-		styleSheet.putCellStyle( FULL_STYLE_NAME, FULL_VERTEX_STYLE );
-		styleSheet.putCellStyle( SIMPLE_STYLE_NAME, SIMPLE_VERTEX_STYLE );
+		styleSheet.setDefaultEdgeStyle( edgeStyle );
+		styleSheet.setDefaultVertexStyle( simpleStyle );
+		styleSheet.putCellStyle( FULL_STYLE_NAME, fullStyle );
+		styleSheet.putCellStyle( SIMPLE_STYLE_NAME, simpleStyle );
 	}
 
 	public void setStyle( final String styleName )
@@ -108,6 +120,7 @@ public class TrackSchemeStylist
 	 */
 	public synchronized void updateEdgeStyle( final Collection< mxCell > edges )
 	{
+		edgeStyle.put( mxConstants.STYLE_STROKEWIDTH, displaySettings.getLineThickness() );
 		final FeatureColorGenerator< DefaultWeightedEdge > trackColorGenerator = FeatureUtils.createTrackColorGenerator( model, displaySettings );
 		final Color missingValueColor = displaySettings.getMissingValueColor();
 		graphx.getModel().beginUpdate();
@@ -134,6 +147,11 @@ public class TrackSchemeStylist
 
 	public void updateVertexStyle( final Collection< mxCell > vertices )
 	{
+		final Font font = displaySettings.getFont();
+		fullStyle.put( mxConstants.STYLE_FONTFAMILY, font.getFamily() );
+		fullStyle.put( mxConstants.STYLE_FONTSIZE, "" + font.getSize() );
+		fullStyle.put( mxConstants.STYLE_FONTSTYLE, "" + font.getStyle() );
+
 		final FeatureColorGenerator< Spot > spotColorGenerator = FeatureUtils.createSpotColorGenerator( model, displaySettings );
 		final Color missingValueColor = displaySettings.getMissingValueColor();
 
