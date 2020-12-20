@@ -44,7 +44,6 @@ public class FeatureUtils
 
 	public static final Map< String, String > collectFeatureKeys( final ObjectType target, final Model model, final Settings settings )
 	{
-		final FeatureModel fm = model.getFeatureModel();
 		final Map< String, String > inverseMap = new HashMap<>();
 		// will be used to sort.
 
@@ -56,8 +55,8 @@ public class FeatureUtils
 			// Collect all.
 			if ( model != null )
 			{
-				for ( final String featureKey : fm.getSpotFeatureNames().keySet() )
-					inverseMap.put( fm.getSpotFeatureNames().get( featureKey ), featureKey );
+				for ( final String featureKey : model.getFeatureModel().getSpotFeatureNames().keySet() )
+					inverseMap.put( model.getFeatureModel().getSpotFeatureNames().get( featureKey ), featureKey );
 			}
 			if ( settings != null )
 			{
@@ -72,8 +71,8 @@ public class FeatureUtils
 		{
 			if ( model != null )
 			{
-				for ( final String featureKey : fm.getEdgeFeatureNames().keySet() )
-					inverseMap.put( fm.getEdgeFeatureNames().get( featureKey ), featureKey );
+				for ( final String featureKey : model.getFeatureModel().getEdgeFeatureNames().keySet() )
+					inverseMap.put( model.getFeatureModel().getEdgeFeatureNames().get( featureKey ), featureKey );
 			}
 			if ( settings != null )
 			{
@@ -88,8 +87,8 @@ public class FeatureUtils
 		{
 			if ( model != null )
 			{
-				for ( final String featureKey : fm.getTrackFeatureNames().keySet() )
-					inverseMap.put( fm.getTrackFeatureNames().get( featureKey ), featureKey );
+				for ( final String featureKey : model.getFeatureModel().getTrackFeatureNames().keySet() )
+					inverseMap.put( model.getFeatureModel().getTrackFeatureNames().get( featureKey ), featureKey );
 			}
 			if ( settings != null )
 			{
