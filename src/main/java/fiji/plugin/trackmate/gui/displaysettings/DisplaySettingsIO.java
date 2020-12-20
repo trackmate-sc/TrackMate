@@ -11,6 +11,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.stream.Collectors;
 
+import org.jdom2.Element;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
@@ -26,10 +28,21 @@ public class DisplaySettingsIO
 
 	private static File userDefaultFile = new File( new File( System.getProperty( "user.home" ), ".trackmate" ), "userdefaultsettings.json" );
 
-	public static String toJSon( final DisplaySettings ds )
+	public static void toXML( final DisplaySettings ds, final Element dsel )
+	{
+		dsel.setText( toJson( ds ) );
+	}
+
+	public static String toJson( final DisplaySettings ds )
 	{
 		return getGson().toJson( ds );
 	}
+	
+	public static DisplaySettings fromJson( final String str )
+	{
+		return ( str == null || str.isEmpty() ) ? readUserDefault() : getGson().fromJson( str, DisplaySettings.class );
+	}
+
 
 	private static Gson getGson()
 	{
@@ -41,7 +54,7 @@ public class DisplaySettingsIO
 
 	public static void saveToUserDefault( final DisplaySettings ds )
 	{
-		final String str = toJSon( ds );
+		final String str = toJson( ds );
 
 		if ( !userDefaultFile.exists() )
 			userDefaultFile.getParentFile().mkdirs();
@@ -71,7 +84,7 @@ public class DisplaySettingsIO
 			final String str = Files.lines( Paths.get( userDefaultFile.getAbsolutePath() ) )
 					.collect( Collectors.joining( System.lineSeparator() ) );
 
-			return getGson().fromJson( str, DisplaySettings.class );
+			return fromJson( str );
 		}
 		catch ( final FileNotFoundException e )
 		{

@@ -176,36 +176,6 @@ public class TmXmlKeys {
 	 * DISPLAY SETTINGS.
 	 */
 
-	public static final String DISPLAY_SETTINGS_ELEMENT_KEY						= "DisplaySettings";
-
-	public static final String DISPLAY_SETTINGS_ATTRIBUTE_NAME					= "name";
-	public static final String DISPLAY_SETTINGS_ATTRIBUTE_UNDEFINED_COLOR		= "undefinedcolor";
-	public static final String DISPLAY_SETTINGS_ATTRIBUTE_MISSING_COLOR			= "missingcolor";
-	public static final String DISPLAY_SETTINGS_ATTRIBUTE_HIGHLIGHT_COLOR		= "highlightcolor";
-	public static final String DISPLAY_SETTINGS_ATTRIBUTE_COLORMAP				= "colormap";
-	public static final String DISPLAY_SETTINGS_ATTRIBUTE_ANTIALIASING			= "antialiasing";
-	
-	public static final String DISPLAY_SETTINGS_ATTRIBUTE_SPOT_VISIBLE			= "spotvisible";
-	public static final String DISPLAY_SETTINGS_ATTRIBUTE_SPOT_UNIFORM_COLOR	= "spotuniformcolor";
-	public static final String DISPLAY_SETTINGS_ATTRIBUTE_SPOT_COLOR_BY			= "spotcolorby";
-	public static final String DISPLAY_SETTINGS_ATTRIBUTE_SPOT_COLOR_FEATURE	= "spotcolorfeature";
-	public static final String DISPLAY_SETTINGS_ATTRIBUTE_SPOT_MIN 				= "spotmin";
-	public static final String DISPLAY_SETTINGS_ATTRIBUTE_SPOT_MAX 				= "spotmax";
-	public static final String DISPLAY_SETTINGS_ATTRIBUTE_SPOT_DISPLAY_RADIUS	= "spotdisplayradius";
-	public static final String DISPLAY_SETTINGS_ATTRIBUTE_SPOT_DISPLAY_AS_ROI	= "spotdisplayasroi";
-	public static final String DISPLAY_SETTINGS_ATTRIBUTE_SPOT_SHOW_NAME		= "spotshowname";	
-	
-	public static final String DISPLAY_SETTINGS_ATTRIBUTE_TRACK_VISIBLE			= "trackvisible";
-	public static final String DISPLAY_SETTINGS_ATTRIBUTE_TRACK_DISPLAY_MODE	= "trackdisplaymode";
-	public static final String DISPLAY_SETTINGS_ATTRIBUTE_TRACK_UNIFORM_COLOR	= "trackuniformcolor";
-	public static final String DISPLAY_SETTINGS_ATTRIBUTE_TRACK_COLOR_BY		= "trackcolorby";
-	public static final String DISPLAY_SETTINGS_ATTRIBUTE_TRACK_COLOR_FEATURE	= "trackcolorfeature";
-	public static final String DISPLAY_SETTINGS_ATTRIBUTE_TRACK_MIN 			= "trackmin";
-	public static final String DISPLAY_SETTINGS_ATTRIBUTE_TRACK_MAX 			= "trackmax";
-	public static final String DISPLAY_SETTINGS_ATTRIBUTE_TRACK_FADE 			= "trackfade";
-	public static final String DISPLAY_SETTINGS_ATTRIBUTE_TRACK_FADE_RANGE		= "trackfaderange";
-	
-	public static final String DISPLAY_SETTINGS_ATTRIBUTE_LIMIT_Z_DEPTH			= "limitzdepth";
-	public static final String DISPLAY_SETTINGS_ATTRIBUTE_Z_DEPTH				= "zdepth";
+	public static final String DISPLAY_SETTINGS_ELEMENT_KEY				= "DisplaySettings";
 }
 
