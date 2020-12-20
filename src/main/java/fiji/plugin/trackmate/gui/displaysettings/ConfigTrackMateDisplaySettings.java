@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -27,8 +28,25 @@ import ij.ImageJ;
 public class ConfigTrackMateDisplaySettings implements Command
 {
 
+	private static final ImageIcon APPLY_ICON  = new ImageIcon( TrackMateWizard.class.getResource( "images/page_save.png" ) );
+	private static final ImageIcon REVERT_ICON  = new ImageIcon( TrackMateWizard.class.getResource( "images/page_refresh.png" ) );
+	private static final ImageIcon RESET_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/page_white.png" ) );
+
+	private static final String APPLY_TOOLTIP = "<html>Save the current settings to the user default settings. "
+			+ "They will be used in all the following TrackMate sessions.</html>";
+	private static final String REVERT_TOOLTIP = "<html>Revert the current settings to the ones saved in the "
+			+ "user default settings file.</html>";
+	private static final String RESET_TOOLTIP = "<html>Reset the current settings to the built-in defaults.</html>";
+
 	@Override
 	public void run()
+	{
+		editor( DisplaySettingsIO.readUserDefault(),
+				"Configure the default settings to be used by TrackMate.",
+				"TrackMate user default settings" ).setVisible( true );
+	}
+
+	public static JFrame editor( final DisplaySettings ds, final String titleStr, final String frameName )
 	{
 		final JPanel configPanel = new JPanel();
 		configPanel.setLayout( new BorderLayout() );
@@ -38,7 +56,7 @@ public class ConfigTrackMateDisplaySettings implements Command
 		 */
 
 		final JLabel title = new JLabel( "<html><i>"
-				+ "Configure the default settings to be used by TrackMate. "
+				+ titleStr
 				+ "</i></html>" );
 		title.setBorder( BorderFactory.createEmptyBorder( 10, 5, 10, 5 ) );
 		configPanel.add( title, BorderLayout.NORTH );
@@ -50,9 +68,12 @@ public class ConfigTrackMateDisplaySettings implements Command
 		final JPanel panelButton = new JPanel();
 		final BoxLayout panelButtonLayout = new BoxLayout( panelButton, BoxLayout.LINE_AXIS );
 		panelButton.setLayout( panelButtonLayout );
-		final JButton btnReset = new JButton( "Reset" );
-		final JButton btnRevert = new JButton( "Revert" );
-		final JButton btnApply = new JButton( "Apply" );
+		final JButton btnReset = new JButton( "Reset", RESET_ICON );
+		btnReset.setToolTipText( RESET_TOOLTIP );
+		final JButton btnRevert = new JButton( "Revert", REVERT_ICON );
+		btnRevert.setToolTipText( REVERT_TOOLTIP );
+		final JButton btnApply = new JButton( "Apply", APPLY_ICON );
+		btnApply.setToolTipText( APPLY_TOOLTIP );
 		panelButton.add( btnReset );
 		panelButton.add( Box.createHorizontalStrut( 5 ) );
 		panelButton.add( btnRevert );
@@ -65,7 +86,6 @@ public class ConfigTrackMateDisplaySettings implements Command
 		 * Display settings editor.
 		 */
 		
-		final DisplaySettings ds = DisplaySettingsIO.readUserDefault();
 		final DisplaySettingsPanel editor = new DisplaySettingsPanel( ds );
 		final JScrollPane scrollPane = new JScrollPane( editor, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER );
 		scrollPane.setPreferredSize( new Dimension( 350, 500 ) );
@@ -76,20 +96,29 @@ public class ConfigTrackMateDisplaySettings implements Command
 		 * Listeners.
 		 */
 
-		btnReset.addActionListener( e -> ds.set( DisplaySettings.defaultStyle().copy( "User-default" ) ) );
-		btnRevert.addActionListener( e -> ds.set( DisplaySettingsIO.readUserDefault() ) );
-		btnApply.addActionListener( e -> DisplaySettingsIO.saveToUserDefault( ds ) );
+		btnReset.addActionListener( e -> {
+			ds.set( DisplaySettings.defaultStyle().copy( "User-default" ) );
+			title.setText( "Reset the current settings to the built-in defaults." );
+		} );
+		btnRevert.addActionListener( e -> {
+			ds.set( DisplaySettingsIO.readUserDefault() );
+			title.setText( "Reverted the current settings to the user defaults." );
+		} );
+		btnApply.addActionListener( e -> {
+			DisplaySettingsIO.saveToUserDefault( ds );
+			title.setText( "Saved the current settings to the user defaults file." );
+		} );
 
 		/*
 		 * Create and show frame.
 		 */
 
-		final JFrame frame = new JFrame( "TrackMate default settings" );
+		final JFrame frame = new JFrame( frameName );
 		frame.setIconImage( TrackMateWizard.TRACKMATE_ICON.getImage() );
 		frame.getContentPane().add( configPanel );
 		frame.pack();
 		frame.setLocationRelativeTo( null );
-		frame.setVisible( true );
+		return frame;
 	}
 
 	public static void main( final String[] args ) throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException
