@@ -86,7 +86,7 @@ public class DisplaySettings
 
 	private boolean trackVisible;
 
-	private final Listeners.List< UpdateListener > updateListeners;
+	private final transient Listeners.List< UpdateListener > updateListeners;
 
 	private DisplaySettings()
 	{
@@ -114,34 +114,39 @@ public class DisplaySettings
 		return copy( null );
 	}
 
-	private synchronized void set( final DisplaySettings ds )
+	public synchronized void set( final DisplaySettings ds )
 	{
 		name = ds.name;
+
+		spotVisible = ds.spotVisible;
+		spotDisplayedAsRoi = ds.spotDisplayedAsRoi;
+		spotShowName = ds.spotShowName;
+		spotDisplayRadius = ds.spotDisplayRadius;
+		spotColorByType = ds.spotColorByType;
+		spotColorByFeature = ds.spotColorByFeature;
+		spotMin = ds.spotMin;
+		spotMax = ds.spotMax;
+		spotUniformColor = ds.spotUniformColor;
+
+		trackVisible = ds.trackVisible;
+		trackColorByFeature = ds.trackColorByFeature;
+		trackColorByType = ds.trackColorByType;
+		trackDisplayMode = ds.trackDisplayMode;
+		trackMin = ds.trackMin;
+		trackMax = ds.trackMax;
+		fadeTracks = ds.fadeTracks;
+		fadeTrackRange = ds.fadeTrackRange;
+		trackUniformColor = ds.trackUniformColor;
+
 		colormap = ds.colormap;
 		limitZDrawingDepth = ds.limitZDrawingDepth;
 		drawingZDepth = ds.drawingZDepth;
 		highlightColor = ds.highlightColor;
-		fadeTracks = ds.fadeTracks;
 		missingValueColor = ds.missingValueColor;
-		spotColorByFeature = ds.spotColorByFeature;
-		spotColorByType = ds.spotColorByType;
-		spotDisplayedAsRoi = ds.spotDisplayedAsRoi;
-		spotDisplayRadius = ds.spotDisplayRadius;
-		spotMax = ds.spotMax;
-		spotMin = ds.spotMin;
-		spotShowName = ds.spotShowName;
-		spotUniformColor = ds.spotUniformColor;
-		spotVisible = ds.spotVisible;
-		fadeTrackRange = ds.fadeTrackRange;
-		trackColorByFeature = ds.trackColorByFeature;
-		trackColorByType = ds.trackColorByType;
-		trackDisplayMode = ds.trackDisplayMode;
-		trackUniformColor = ds.trackUniformColor;
-		trackMin = ds.trackMin;
-		trackMax = ds.trackMax;
-		trackVisible = ds.trackVisible;
 		undefinedValueColor = ds.undefinedValueColor;
 		useAntialiasing = ds.useAntialiasing;
+
+		notifyListeners();
 	}
 
 	public String getName()
@@ -467,7 +472,7 @@ public class DisplaySettings
 		return trackUniformColor;
 	}
 
-	public void setTrackUniformColor( final Color trackUniformColor )
+	public synchronized void setTrackUniformColor( final Color trackUniformColor )
 	{
 		if ( this.trackUniformColor != trackUniformColor )
 		{
@@ -644,23 +649,34 @@ public class DisplaySettings
 	{
 		final StringBuilder str = new StringBuilder( super.toString() );
 		str.append( String.format( "\n%20s: %s", "name", name ) );
+
 		str.append( String.format( "\n%20s: %s", "spotVisible", "" + spotVisible ) );
 		str.append( String.format( "\n%20s: %s", "spotDisplayedAsRoi", "" + spotDisplayedAsRoi ) );
-		str.append( String.format( "\n%20s: %s", "spotDisplayRadius", "" + spotDisplayRadius ) );
 		str.append( String.format( "\n%20s: %s", "spotShowName", "" + spotShowName ) );
-		str.append( String.format( "\n%20s: %s", "spotColorByType", "" + spotColorByType ) );
-		str.append( String.format( "\n%20s: %s", "spotColorByFeature", "" + spotColorByFeature ) );
+		str.append( String.format( "\n%20s: %s", "spotDisplayRadius", "" + spotDisplayRadius ) );
+		str.append( String.format( "\n%20s: %s", "spotColorByType", spotColorByType ) );
+		str.append( String.format( "\n%20s: %s", "spotColorByFeature", spotColorByFeature ) );
 		str.append( String.format( "\n%20s: %s", "spotMin", "" + spotMin ) );
 		str.append( String.format( "\n%20s: %s", "spotMax", "" + spotMax ) );
+		str.append( String.format( "\n%20s: %s", "spotUniformColor", "" + spotUniformColor ) );
+
 		str.append( String.format( "\n%20s: %s", "trackVisible", "" + trackVisible ) );
-		str.append( String.format( "\n%20s: %s", "trackDisplayMode", "" + trackDisplayMode ) );
-		str.append( String.format( "\n%20s: %s", "trackColorByType", "" + trackColorByType ) );
-		str.append( String.format( "\n%20s: %s", "trackColorByFeature", "" + trackColorByFeature ) );
-		str.append( String.format( "\n%20s: %s", "trackUniformColor", "" + trackUniformColor ) );
+		str.append( String.format( "\n%20s: %s", "trackDisplayMode", trackDisplayMode ) );
+		str.append( String.format( "\n%20s: %s", "trackColorByType", trackColorByType ) );
+		str.append( String.format( "\n%20s: %s", "trackColorByFeature", trackColorByFeature ) );
 		str.append( String.format( "\n%20s: %s", "trackMin", "" + trackMin ) );
 		str.append( String.format( "\n%20s: %s", "trackMax", "" + trackMax ) );
+		str.append( String.format( "\n%20s: %s", "trackUniformColor", "" + trackUniformColor ) );
 		str.append( String.format( "\n%20s: %s", "fadeTracks", "" + fadeTracks ) );
 		str.append( String.format( "\n%20s: %s", "fadeTrackRange", "" + fadeTrackRange ) );
+
+		str.append( String.format( "\n%20s: %s", "colormap", colormap.getName() ) );
+		str.append( String.format( "\n%20s: %s", "limitZDrawingDepth", "" + limitZDrawingDepth ) );
+		str.append( String.format( "\n%20s: %s", "drawingZDepth", "" + drawingZDepth ) );
+		str.append( String.format( "\n%20s: %s", "highlightColor", "" + highlightColor ) );
+		str.append( String.format( "\n%20s: %s", "missingValueColor", "" + missingValueColor ) );
+		str.append( String.format( "\n%20s: %s", "undefinedValueColor", "" + undefinedValueColor ) );
+		str.append( String.format( "\n%20s: %s", "useAntialiasing", "" + useAntialiasing ) );
 
 		return str.toString();
 	}
