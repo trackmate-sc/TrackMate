@@ -15,6 +15,7 @@ import java.awt.Insets;
 import java.awt.event.ActionListener;
 
 import javax.swing.Action;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -29,6 +30,7 @@ import javax.swing.border.LineBorder;
 
 import fiji.plugin.trackmate.gui.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.GuiUtils;
+import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.displaysettings.ConfigTrackMateDisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackDisplayMode;
@@ -47,6 +49,8 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 	private static final long serialVersionUID = 1L;
 
 	private static final Color BORDER_COLOR = new java.awt.Color( 192, 192, 192 );
+
+	private static final ImageIcon EDIT_SETTINGS_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/cog_edit.png" ) );
 
 	/*
 	 * CONSTRUCTOR
@@ -94,7 +98,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 		editor.setLocationRelativeTo( this.getParent() );
 		editor.setDefaultCloseOperation( JFrame.HIDE_ON_CLOSE );
 
-		final JButton btnEditSettings = new JButton( "Edit settings" );
+		final JButton btnEditSettings = new JButton( "Edit settings", EDIT_SETTINGS_ICON );
 		btnEditSettings.addActionListener( e -> editor.setVisible( !editor.isVisible() ) );
 
 		final GridBagConstraints gbcBtnEditSettings = new GridBagConstraints();
