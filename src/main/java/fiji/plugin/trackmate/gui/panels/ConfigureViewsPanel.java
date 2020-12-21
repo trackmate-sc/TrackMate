@@ -91,7 +91,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 		/*
 		 * Settings editor.
 		 */
-		
+
 		final JFrame editor = ConfigTrackMateDisplaySettings.editor( ds,
 				"Configure the display settings used in this current session.",
 				"TrackMate display settings" );
@@ -302,17 +302,16 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 		 * Draw Z Depth
 		 */
 
-		final JPanel panelDrawingZDepth = new JPanel();
+		final FlowLayout flowLayout = new FlowLayout( FlowLayout.LEFT, 5, 0 );
+		final JPanel panelDrawingZDepth = new JPanel( flowLayout );
 		panelDrawingZDepth.setBorder( new LineBorder( BORDER_COLOR, 1, true ) );
-		final FlowLayout flowLayout = (FlowLayout) panelDrawingZDepth.getLayout();
-		flowLayout.setAlignment(FlowLayout.LEFT);
-		final GridBagConstraints gbc_panelDrawingZDepth = new GridBagConstraints();
-		gbc_panelDrawingZDepth.gridwidth = 2;
-		gbc_panelDrawingZDepth.insets = new Insets( 0, 5, 5, 5 );
-		gbc_panelDrawingZDepth.fill = GridBagConstraints.BOTH;
-		gbc_panelDrawingZDepth.gridx = 0;
-		gbc_panelDrawingZDepth.gridy = 5;
-		add(panelDrawingZDepth, gbc_panelDrawingZDepth);
+		final GridBagConstraints gbcPanelDrawingZDepth = new GridBagConstraints();
+		gbcPanelDrawingZDepth.gridwidth = 2;
+		gbcPanelDrawingZDepth.insets = new Insets( 0, 5, 5, 5 );
+		gbcPanelDrawingZDepth.fill = GridBagConstraints.BOTH;
+		gbcPanelDrawingZDepth.gridx = 0;
+		gbcPanelDrawingZDepth.gridy = 5;
+		add( panelDrawingZDepth, gbcPanelDrawingZDepth );
 
 		final JCheckBox chckbxLimitZDepth = new JCheckBox( "Limit drawing Z depth" );
 		chckbxLimitZDepth.setFont( SMALL_FONT );
@@ -325,7 +324,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 
 		final JLabel lblDrawingZDepthUnits = new JLabel( spaceUnits );
 		lblDrawingZDepthUnits.setFont( SMALL_FONT );
-		panelDrawingZDepth.add(lblDrawingZDepthUnits);
+		panelDrawingZDepth.add( lblDrawingZDepthUnits );
 
 		/*
 		 * Panel for view buttons.
@@ -355,7 +354,6 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 		gbcPanelButtons.gridy = 7;
 		add( panelButtons, gbcPanelButtons );
 
-
 		/*
 		 * Listeners & co.
 		 */
@@ -364,11 +362,11 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 			setEnabled( panelSpotOptions, chkboxDisplaySpots.isSelected() );
 			chkboxDisplaySpotsAsRois.setEnabled( chkboxDisplaySpots.isSelected() );
 		} );
-		chkboxDisplayTracks.addActionListener( e -> { 
+		chkboxDisplayTracks.addActionListener( e -> {
 			setEnabled( panelTrackOptions, chkboxDisplayTracks.isSelected() );
 			cmbboxTrackDisplayMode.setEnabled( chkboxDisplayTracks.isSelected() );
-			} );
-		
+		} );
+
 		final ActionListener fadeTrackBtnEnable = e -> {
 			final boolean shouldBeEnabled = chkboxDisplayTracks.isSelected()
 					&& cmbboxTrackDisplayMode.getSelectedItem() != TrackDisplayMode.FULL;
@@ -376,9 +374,10 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 		};
 		chkboxDisplayTracks.addActionListener( fadeTrackBtnEnable );
 		cmbboxTrackDisplayMode.addActionListener( fadeTrackBtnEnable );
-		
+
 		final ActionListener fadeTrackRangeEnable = e -> {
-			final boolean shouldBeEnabled = chkboxDisplayTracks.isSelected() 
+			final boolean shouldBeEnabled = chkboxDisplayTracks
+					.isSelected()
 					&& cmbboxTrackDisplayMode.getSelectedItem() != TrackDisplayMode.FULL
 					&& chkboxFadeTracks.isSelected();
 			spinnerFadeRange.setEnabled( shouldBeEnabled );
@@ -386,7 +385,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 		cmbboxTrackDisplayMode.addActionListener( fadeTrackRangeEnable );
 		chkboxDisplayTracks.addActionListener( fadeTrackRangeEnable );
 		chkboxFadeTracks.addActionListener( fadeTrackRangeEnable );
-		
+
 		chckbxLimitZDepth.addActionListener( e -> spinnerDrawingZDepth.setEnabled( chckbxLimitZDepth.isSelected() ) );
 
 		chkboxDisplaySpots.addActionListener( e -> ds.setSpotVisible( chkboxDisplaySpots.isSelected() ) );
@@ -428,7 +427,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 			if ( component instanceof JSpinner || component instanceof JCheckBox )
 				continue; // Treat them elsewhere.
 			component.setEnabled( enabled );
-			if (component instanceof Container)
+			if ( component instanceof Container )
 				setEnabled( ( Container ) component, enabled );
 		}
 	}

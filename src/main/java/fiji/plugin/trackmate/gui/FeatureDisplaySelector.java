@@ -252,7 +252,7 @@ public class FeatureDisplaySelector
 		{
 
 			final GridBagLayout layout = new GridBagLayout();
-			layout.rowHeights = new int[] { 0, 0, 30 };
+			layout.rowHeights = new int[] { 0, 0, 20 };
 			layout.columnWeights = new double[] { 0.0, 1.0 };
 			layout.rowWeights = new double[] { 0.0, 0.0, 0.0 };
 			setLayout( layout );
@@ -269,7 +269,6 @@ public class FeatureDisplaySelector
 
 			final CategoryJComboBox< TrackMateObject, String > cmbboxColor = createComboBoxSelector( model, settings );
 			final GridBagConstraints gbcCmbboxColor = new GridBagConstraints();
-			gbcCmbboxColor.insets = new Insets( 0, 0, 5, 0 );
 			gbcCmbboxColor.fill = GridBagConstraints.HORIZONTAL;
 			gbcCmbboxColor.gridx = 1;
 			gbcCmbboxColor.gridy = 0;
@@ -277,7 +276,6 @@ public class FeatureDisplaySelector
 
 			final JPanel panelColorMap = new JPanel();
 			final GridBagConstraints gbcPanelColorMap = new GridBagConstraints();
-			gbcPanelColorMap.insets = new Insets( 5, 0, 5, 0 );
 			gbcPanelColorMap.gridwidth = 2;
 			gbcPanelColorMap.fill = GridBagConstraints.BOTH;
 			gbcPanelColorMap.gridx = 0;
