@@ -136,7 +136,6 @@ public class FileChooser
 			 */
 			if ( selectedFile != null )
 			{
-				System.out.println( "selectedFile = " + selectedFile );
 				if ( isDirectoriesOnly )
 				{
 					fd.setDirectory( selectedFile );
@@ -200,57 +199,4 @@ public class FileChooser
 		final String OS = System.getProperty( "os.name", "generic" ).toLowerCase( Locale.ENGLISH );
 		return ( OS.indexOf( "mac" ) >= 0 ) || ( OS.indexOf( "darwin" ) >= 0 );
 	}
-
-//	public static void main( final String[] args )
-//	{
-//		final FileFilter xmlfileFilter = new FileFilter()
-//		{
-//			@Override
-//			public String getDescription()
-//			{
-//				return "xml files";
-//			}
-//
-//			@Override
-//			public boolean accept( final File f )
-//			{
-//				if ( f.isDirectory() )
-//					return true;
-//				if ( f.isFile() )
-//				{
-//			        final String s = f.getName();
-//			        final int i = s.lastIndexOf('.');
-//			        if (i > 0 &&  i < s.length() - 1) {
-//			            final String ext = s.substring(i+1).toLowerCase();
-//			            return ext.equals( "xml" );
-//			        }
-//				}
-//				return false;
-//			}
-//		};
-//		final Component parent = null;
-//		final String selectedFile = null;
-//		final FileFilter fileFilter = xmlfileFilter;
-//		final String dialogTitle = null;
-//		final DialogType dialogType = DialogType.LOAD;
-//		final SelectionMode selectionMode = SelectionMode.FILES_ONLY;
-//		final File file = FileChooser.chooseFile( useJFileChooser, parent, selectedFile, fileFilter, dialogTitle, dialogType, selectionMode );
-//
-//		System.out.println( file );
-//	}
-//
-//	public static void main( final String[] args )
-//	{
-//		final Context context = new Context( UIService.class );
-//		final UIService service = context.getService( UIService.class );
-//		final File file = service.chooseFile( null, "open" );
-//		System.out.println( file );
-//
-//		final ImageJ ij = new ImageJ();
-//
-//		// ask the user for a file to open
-//		final File file2 = ij.ui().chooseFile(null, "open");
-//		System.out.println( file );
-//
-//	}
 }
