@@ -346,4 +346,34 @@ public class FeatureUtils
 			DUMMY_MODEL.endUpdate();
 		}
 	}
+
+	public static final double[] autoMinMax( final Model model, final Settings settings, final TrackMateObject type, final String feature )
+	{
+		switch ( type )
+		{
+		case DEFAULT:
+			return new double[] { 0., 0. };
+
+		case EDGES:
+		case SPOTS:
+		case TRACKS:
+		{
+			final double[] values = collectFeatureValues( feature, type, model, settings, true );
+			double min = Double.POSITIVE_INFINITY;
+			double max = Double.NEGATIVE_INFINITY;
+			for ( final double val : values )
+			{
+				if ( val < min )
+					min = val;
+
+				if ( val > max )
+					max = val;
+			}
+			return new double[] { min, max };
+		}
+
+		default:
+			throw new IllegalArgumentException( "Unexpected TrackMate object type: " + type );
+		}
+	}
 }
