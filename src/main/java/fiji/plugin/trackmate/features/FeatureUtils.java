@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.features;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -34,6 +35,7 @@ import fiji.plugin.trackmate.visualization.SpotColorGeneratorPerEdgeFeature;
 import fiji.plugin.trackmate.visualization.SpotColorGeneratorPerTrackFeature;
 import fiji.plugin.trackmate.visualization.UniformSpotColorGenerator;
 import fiji.plugin.trackmate.visualization.UniformTrackColorGenerator;
+import fiji.plugin.trackmate.visualization.WholeTrackFeatureColorGenerator;
 
 public class FeatureUtils
 {
@@ -274,6 +276,30 @@ public class FeatureUtils
 
 		case TRACKS:
 			return new PerTrackFeatureColorGenerator(
+					model,
+					displaySettings.getTrackColorByFeature(),
+					displaySettings.getMissingValueColor(),
+					displaySettings.getUndefinedValueColor(),
+					displaySettings.getColormap(),
+					displaySettings.getTrackMin(),
+					displaySettings.getTrackMax() );
+
+		default:
+			throw new IllegalArgumentException( "Unknown type: " + displaySettings.getTrackColorByType() );
+		}
+	}
+
+	public static final FeatureColorGenerator< Integer > createWholeTrackColorGenerator( final Model model, final DisplaySettings displaySettings )
+	{
+		switch ( displaySettings.getTrackColorByType() )
+		{
+		case DEFAULT:
+		case SPOTS:
+			return id -> Color.WHITE;
+
+		case EDGES:
+		case TRACKS:
+			return new WholeTrackFeatureColorGenerator(
 					model,
 					displaySettings.getTrackColorByFeature(),
 					displaySettings.getMissingValueColor(),
