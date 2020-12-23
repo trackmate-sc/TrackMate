@@ -1,7 +1,8 @@
 package fiji.plugin.trackmate.visualization.table;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,6 +15,10 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -21,6 +26,7 @@ import javax.swing.JTable;
 import javax.swing.JToggleButton;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 
@@ -33,7 +39,11 @@ import fiji.plugin.trackmate.SelectionChangeListener;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.features.FeatureUtils;
+import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.util.FileChooser;
+import fiji.plugin.trackmate.util.FileChooser.DialogType;
+import fiji.plugin.trackmate.util.FileChooser.SelectionMode;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
@@ -45,6 +55,10 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 	private static final long serialVersionUID = 1L;
 
 	private static final String KEY = "TRACK_TABLES";
+
+	private static final ImageIcon CSV_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/page_save.png" ) );
+
+	private static String selectedFile = System.getProperty( "user.home" );
 
 	private final Model model;
 
@@ -86,8 +100,16 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 		mainPanel.add( tabbedPane, BorderLayout.CENTER );
 
 		// Tool bar.
-		final JPanel toolbar = new JPanel( new FlowLayout( FlowLayout.RIGHT ) );
-		toolbar.add( new SearchBar( model, this ) );
+		final JPanel toolbar = new JPanel();
+		final BoxLayout layout = new BoxLayout( toolbar, BoxLayout.LINE_AXIS );
+		toolbar.setLayout( layout );
+		final JButton exportBtn = new JButton( "Export to CSV", CSV_ICON );
+		exportBtn.addActionListener( e -> exportToCsv( ( TablePanel< ? > ) tabbedPane.getSelectedComponent() ) );
+		toolbar.add( exportBtn );
+		toolbar.add( Box.createHorizontalGlue() );
+		final SearchBar searchBar = new SearchBar( model, this );
+		searchBar.setMaximumSize( new java.awt.Dimension( 160, 30 ) );
+		toolbar.add( searchBar );
 		final JToggleButton tglColoring = new JToggleButton( "coloring" );
 		tglColoring.addActionListener( e -> {
 			spotTable.setUseColoring( tglColoring.isSelected() );
@@ -108,6 +130,30 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 		ds.listeners().add( () -> refresh() );
 		selectionModel.addSelectionChangeListener( this );
 		model.addModelChangeListener( this );
+	}
+
+	private < O > void exportToCsv( final TablePanel< O > table )
+	{
+		final File file = FileChooser.chooseFile(
+				this,
+				selectedFile,
+				new FileNameExtensionFilter( "CSV files", "csv" ),
+				"Export table to CSV",
+				DialogType.SAVE,
+				SelectionMode.FILES_ONLY );
+		if ( null == file )
+			return;
+
+		selectedFile = file.getAbsolutePath();
+		try
+		{
+			table.exportToCsv( file );
+		}
+		catch ( final IOException e )
+		{
+			model.getLogger().error( "Problem exporting to file "
+					+ file + "\n" + e.getMessage() );
+		}
 	}
 
 	private final TablePanel< Integer > createTrackTable( final Model model, final DisplaySettings ds )

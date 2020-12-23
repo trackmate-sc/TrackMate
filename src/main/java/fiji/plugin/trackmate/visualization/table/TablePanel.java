@@ -7,6 +7,9 @@ import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
@@ -30,7 +33,10 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+
+import com.opencsv.CSVWriter;
 
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
@@ -107,7 +113,7 @@ public class TablePanel< O > extends JPanel
 		this.labelSetter = labelSetter;
 		this.columnClasses = new ArrayList<>();
 		this.mapToTooltip = new ArrayList<>();
-		
+
 		this.tableModel = new MyTableModel();
 		final DefaultTableColumnModel tableColumnModel = new DefaultTableColumnModel();
 		this.table = new JTable( tableModel, tableColumnModel )
@@ -217,7 +223,7 @@ public class TablePanel< O > extends JPanel
 		// First column is label.
 		headerLine.add( "<html><b>Label<br> <br></html>" );
 		mapToTooltip.add( "Object name" );
-		
+
 		columnClasses.add( String.class );
 		tableColumnModel.addColumn( new TableColumn( colIndex++ ) );
 		// Units for feature columns.
@@ -232,8 +238,8 @@ public class TablePanel< O > extends JPanel
 			final String units = featureUnits.get( feature );
 
 			String headerStr = "<html><center><b>"
-							+ featureShortNames.get( feature )
-							+ "</b><br>";
+					+ featureShortNames.get( feature )
+					+ "</b><br>";
 			headerStr += ( units == null || units.isEmpty() ) ? "<br> </html>" : "(" + units + ")</html>";
 			headerLine.add( headerStr );
 			tableColumnModel.addColumn( new TableColumn( colIndex++ ) );
@@ -359,7 +365,7 @@ public class TablePanel< O > extends JPanel
 		private final DecimalFormat nf;
 
 		private static final long serialVersionUID = 1L;
-		
+
 		private final FeatureColorGenerator< O > defaultColoring = o -> Color.WHITE;
 
 		public MyTableCellRenderer()
@@ -433,5 +439,74 @@ public class TablePanel< O > extends JPanel
 	public JScrollPane getScrollPane()
 	{
 		return scrollPane;
+	}
+
+	public void exportToCsv( final File file ) throws IOException
+	{
+		try (CSVWriter writer = new CSVWriter( new FileWriter( file ), CSVWriter.DEFAULT_SEPARATOR ))
+		{
+			final int nCols = table.getColumnCount();
+
+			/*
+			 * Header.
+			 */
+
+			final String[] content = new String[ nCols ];
+
+			// Header 1st line.
+			content[ 0 ] = "NAME";
+			for ( int i = 1; i < content.length; i++ )
+				content[ i ] = features.get( i - 1 );
+			writer.writeNext( content );
+
+			// Header 2nd line.
+			content[ 0 ] = "";
+			for ( int i = 1; i < content.length; i++ )
+				content[ i ] = featureNames.get( features.get( i - 1 ) );
+			writer.writeNext( content );
+
+			// Header 3rd line.
+			content[ 0 ] = "";
+			for ( int i = 1; i < content.length; i++ )
+				content[ i ] = featureShortNames.get( features.get( i - 1 ) );
+			writer.writeNext( content );
+
+			// Header 4th line.
+			content[ 0 ] = "";
+			for ( int i = 1; i < content.length; i++ )
+			{
+				final String feature = features.get( i - 1 );
+				final String units = featureUnits.get( feature );
+				final String unitsStr = ( units == null || units.isEmpty() ) ? "" : "(" + units + ")";
+				content[ i ] = unitsStr;
+			}
+			writer.writeNext( content );
+
+			/*
+			 * Content.
+			 */
+
+			final int nRows = table.getRowCount();
+			final TableModel model = table.getModel();
+			for ( int r = 0; r < nRows; r++ )
+			{
+				final int row = table.convertRowIndexToModel( r );
+				for ( int col = 0; col < nCols; col++ )
+				{
+					final Object obj = model.getValueAt( row, col );
+					if ( null == obj )
+						content[ col ] = "";
+					else if ( obj instanceof Integer )
+						content[ col ] = Integer.toString( ( Integer ) obj );
+					else if ( obj instanceof Double )
+						content[ col ] = Double.toString( ( Double ) obj );
+					else if ( obj instanceof Boolean )
+						content[ col ] = ( ( Boolean ) obj ) ? "1" : "0";
+					else
+						content[ col ] = obj.toString();
+				}
+				writer.writeNext( content );
+			}
+		}
 	}
 }
