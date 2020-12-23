@@ -918,7 +918,7 @@ public class TrackMateGUIController implements ActionListener
 				{
 					AbstractTMAction action;
 					if ( showSpotTable )
-						action = new ExportAllSpotsStatsAction( selectionModel );
+						action = new ExportAllSpotsStatsAction( selectionModel, displaySettings );
 					else
 						action = new ExportStatsToIJAction( selectionModel, displaySettings );
 
