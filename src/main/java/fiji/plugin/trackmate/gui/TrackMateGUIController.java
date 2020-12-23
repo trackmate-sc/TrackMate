@@ -920,7 +920,7 @@ public class TrackMateGUIController implements ActionListener
 					if ( showSpotTable )
 						action = new ExportAllSpotsStatsAction( selectionModel );
 					else
-						action = new ExportStatsToIJAction( selectionModel );
+						action = new ExportStatsToIJAction( selectionModel, displaySettings );
 
 					action.execute( trackmate );
 
