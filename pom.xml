@@ -250,7 +250,11 @@
 		    <artifactId>fontchooser</artifactId>
     		<version>2.4</version>
 		</dependency>
-
+		<dependency>
+			<groupId>com.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+		</dependency>
+		
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
