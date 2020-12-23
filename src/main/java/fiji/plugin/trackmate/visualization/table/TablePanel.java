@@ -51,8 +51,6 @@ public class TablePanel< O > extends JPanel
 
 	private final JTable table;
 
-	private final MyTableModel tableModel;
-
 	private final List< Class< ? > > columnClasses;
 
 	private final List< String > mapToTooltip;
@@ -60,8 +58,6 @@ public class TablePanel< O > extends JPanel
 	private final Function< O, String > labelGenerator;
 
 	private final BiConsumer< O, String > labelSetter;
-
-	private final JScrollPane scrollPane;
 
 	private final List< O > objects;
 
@@ -74,10 +70,6 @@ public class TablePanel< O > extends JPanel
 	private final Map< String, String > featureShortNames;
 
 	private final Map< String, String > featureUnits;
-
-	private final Map< String, Boolean > isInts;
-
-	private final Map< String, String > infoTexts;
 
 	private final TObjectIntHashMap< O > map;
 
@@ -102,8 +94,6 @@ public class TablePanel< O > extends JPanel
 		this.featureNames = featureNames;
 		this.featureShortNames = featureShortNames;
 		this.featureUnits = featureUnits;
-		this.isInts = isInts;
-		this.infoTexts = infoTexts;
 		this.colorSupplier = colorSupplier;
 		this.objects = new ArrayList<>();
 		this.map = new TObjectIntHashMap<>();
@@ -114,7 +104,8 @@ public class TablePanel< O > extends JPanel
 		this.columnClasses = new ArrayList<>();
 		this.mapToTooltip = new ArrayList<>();
 
-		this.tableModel = new MyTableModel();
+		// Table column model.
+		final MyTableModel tableModel = new MyTableModel();
 		final DefaultTableColumnModel tableColumnModel = new DefaultTableColumnModel();
 		this.table = new JTable( tableModel, tableColumnModel )
 		{
@@ -127,17 +118,72 @@ public class TablePanel< O > extends JPanel
 				return ( labelSetter != null && column == 0 );
 			}
 		};
+		table.setColumnModel( tableColumnModel );
+
 		table.putClientProperty( "JTable.autoStartsEdit", Boolean.FALSE );
 		table.getInputMap().put( KeyStroke.getKeyStroke( KeyEvent.VK_ENTER, 0 ), "startEditing" );
 
 		table.setRowHeight( ROW_HEIGHT );
 		table.getSelectionModel().setSelectionMode( ListSelectionModel.MULTIPLE_INTERVAL_SELECTION );
-		refreshColumns();
+
+		// Class of columns.
+		columnClasses.clear();
+		// Last line of header is for units.
+		final List< String > headerLine = new ArrayList<>();
+		// Map from column index to tooltip strings.
+		mapToTooltip.clear();
+
+		// Provide tooltips on the fly.
+		table.getTableHeader().addMouseMotionListener( new MyTableToolTipProvider() );
+
+		int colIndex = 0;
+		// First column is label.
+		headerLine.add( "<html><b>Label<br> <br></html>" );
+		mapToTooltip.add( "Object name" );
+
+		columnClasses.add( String.class );
+		tableColumnModel.addColumn( new TableColumn( colIndex++ ) );
+		// Units for feature columns.
+		for ( final String feature : features )
+		{
+			String tooltipStr = "<html>" + featureNames.get( feature );
+			final String infoText = infoTexts.get( feature );
+			if ( infoText != null )
+				tooltipStr += "<p>" + infoText + "</p>";
+			tooltipStr += "</html>";
+			mapToTooltip.add( tooltipStr );
+			final String units = featureUnits.get( feature );
+
+			String headerStr = "<html><center><b>"
+					+ featureShortNames.get( feature )
+					+ "</b><br>";
+			headerStr += ( units == null || units.isEmpty() ) ? "<br> </html>" : "(" + units + ")</html>";
+			headerLine.add( headerStr );
+			tableColumnModel.addColumn( new TableColumn( colIndex++ ) );
+
+			final Class< ? > pclass;
+			if ( isInts.get( feature ) )
+				pclass = Integer.class;
+			else
+				pclass = Double.class;
+			columnClasses.add( pclass );
+		}
+
+		// Pass last line to column headers and set cell renderer.
+		final MyTableCellRenderer cellRenderer = new MyTableCellRenderer();
+		for ( int c = 0; c < tableColumnModel.getColumnCount(); c++ )
+		{
+			final TableColumn column = tableColumnModel.getColumn( c );
+			column.setHeaderValue( headerLine.get( c ) );
+			column.setCellRenderer( cellRenderer );
+		}
+
+		tableModel.fireTableStructureChanged();
 
 		final TableRowSorter< MyTableModel > sorter = new TableRowSorter<>( tableModel );
 		table.setRowSorter( sorter );
 
-		this.scrollPane = new JScrollPane( table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED );
+		final JScrollPane scrollPane = new JScrollPane( table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED );
 		table.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
 
 		setLayout( new BorderLayout() );
@@ -204,64 +250,87 @@ public class TablePanel< O > extends JPanel
 		table.scrollRectToVisible( cellRect );
 	}
 
-	private void refreshColumns()
+	/**
+	 * Starts editing the label of the object currently selected in the table.
+	 * Has not effect if the table focus is not on the first column (the label
+	 * column).
+	 */
+	public void editCurrentLabel()
 	{
-		// Class of columns.
-		columnClasses.clear();
-		// Last line of header is for units.
-		final List< String > headerLine = new ArrayList<>();
-		// Map from column index to tooltip strings.
-		mapToTooltip.clear();
-		// Table column model.
-		final TableColumnModel tableColumnModel = new DefaultTableColumnModel();
-		table.setColumnModel( tableColumnModel );
+		final int col = table.getSelectedColumn();
+		final int row = table.getSelectedRow();
+		if ( col != 0 || row < 0 )
+			return;
+		table.editCellAt( row, col );
+	}
 
-		// Provide tooltips on the fly.
-		table.getTableHeader().addMouseMotionListener( new MyTableToolTipProvider() );
-
-		int colIndex = 0;
-		// First column is label.
-		headerLine.add( "<html><b>Label<br> <br></html>" );
-		mapToTooltip.add( "Object name" );
-
-		columnClasses.add( String.class );
-		tableColumnModel.addColumn( new TableColumn( colIndex++ ) );
-		// Units for feature columns.
-		for ( final String feature : features )
+	public void exportToCsv( final File file ) throws IOException
+	{
+		try (CSVWriter writer = new CSVWriter( new FileWriter( file ), CSVWriter.DEFAULT_SEPARATOR ))
 		{
-			String tooltipStr = "<html>" + featureNames.get( feature );
-			final String infoText = infoTexts.get( feature );
-			if ( infoText != null )
-				tooltipStr += "<p>" + infoText + "</p>";
-			tooltipStr += "</html>";
-			mapToTooltip.add( tooltipStr );
-			final String units = featureUnits.get( feature );
+			final int nCols = table.getColumnCount();
 
-			String headerStr = "<html><center><b>"
-					+ featureShortNames.get( feature )
-					+ "</b><br>";
-			headerStr += ( units == null || units.isEmpty() ) ? "<br> </html>" : "(" + units + ")</html>";
-			headerLine.add( headerStr );
-			tableColumnModel.addColumn( new TableColumn( colIndex++ ) );
+			/*
+			 * Header.
+			 */
 
-			final Class< ? > pclass;
-			if ( isInts.get( feature ) )
-				pclass = Integer.class;
-			else
-				pclass = Double.class;
-			columnClasses.add( pclass );
+			final String[] content = new String[ nCols ];
+
+			// Header 1st line.
+			content[ 0 ] = "NAME";
+			for ( int i = 1; i < content.length; i++ )
+				content[ i ] = features.get( i - 1 );
+			writer.writeNext( content );
+
+			// Header 2nd line.
+			content[ 0 ] = "";
+			for ( int i = 1; i < content.length; i++ )
+				content[ i ] = featureNames.get( features.get( i - 1 ) );
+			writer.writeNext( content );
+
+			// Header 3rd line.
+			content[ 0 ] = "";
+			for ( int i = 1; i < content.length; i++ )
+				content[ i ] = featureShortNames.get( features.get( i - 1 ) );
+			writer.writeNext( content );
+
+			// Header 4th line.
+			content[ 0 ] = "";
+			for ( int i = 1; i < content.length; i++ )
+			{
+				final String feature = features.get( i - 1 );
+				final String units = featureUnits.get( feature );
+				final String unitsStr = ( units == null || units.isEmpty() ) ? "" : "(" + units + ")";
+				content[ i ] = unitsStr;
+			}
+			writer.writeNext( content );
+
+			/*
+			 * Content.
+			 */
+
+			final int nRows = table.getRowCount();
+			final TableModel model = table.getModel();
+			for ( int r = 0; r < nRows; r++ )
+			{
+				final int row = table.convertRowIndexToModel( r );
+				for ( int col = 0; col < nCols; col++ )
+				{
+					final Object obj = model.getValueAt( row, col );
+					if ( null == obj )
+						content[ col ] = "";
+					else if ( obj instanceof Integer )
+						content[ col ] = Integer.toString( ( Integer ) obj );
+					else if ( obj instanceof Double )
+						content[ col ] = Double.toString( ( Double ) obj );
+					else if ( obj instanceof Boolean )
+						content[ col ] = ( ( Boolean ) obj ) ? "1" : "0";
+					else
+						content[ col ] = obj.toString();
+				}
+				writer.writeNext( content );
+			}
 		}
-
-		// Pass last line to column headers and set cell renderer.
-		final MyTableCellRenderer cellRenderer = new MyTableCellRenderer();
-		for ( int c = 0; c < tableColumnModel.getColumnCount(); c++ )
-		{
-			final TableColumn column = tableColumnModel.getColumn( c );
-			column.setHeaderValue( headerLine.get( c ) );
-			column.setCellRenderer( cellRenderer );
-		}
-
-		tableModel.fireTableStructureChanged();
 	}
 
 	/*
@@ -296,12 +365,6 @@ public class TablePanel< O > extends JPanel
 	{
 
 		private static final long serialVersionUID = 1L;
-
-		@Override
-		public Class< ? > getColumnClass( final int columnIndex )
-		{
-			return columnClasses.get( columnIndex );
-		}
 
 		@Override
 		public int getRowCount()
@@ -422,91 +485,4 @@ public class TablePanel< O > extends JPanel
 		}
 	}
 
-	/**
-	 * Starts editing the label of the object currently selected in the table.
-	 * Has not effect if the table focus is not on the first column (the label
-	 * column).
-	 */
-	public void editCurrentLabel()
-	{
-		final int col = table.getSelectedColumn();
-		final int row = table.getSelectedRow();
-		if ( col != 0 || row < 0 )
-			return;
-		table.editCellAt( row, col );
-	}
-
-	public JScrollPane getScrollPane()
-	{
-		return scrollPane;
-	}
-
-	public void exportToCsv( final File file ) throws IOException
-	{
-		try (CSVWriter writer = new CSVWriter( new FileWriter( file ), CSVWriter.DEFAULT_SEPARATOR ))
-		{
-			final int nCols = table.getColumnCount();
-
-			/*
-			 * Header.
-			 */
-
-			final String[] content = new String[ nCols ];
-
-			// Header 1st line.
-			content[ 0 ] = "NAME";
-			for ( int i = 1; i < content.length; i++ )
-				content[ i ] = features.get( i - 1 );
-			writer.writeNext( content );
-
-			// Header 2nd line.
-			content[ 0 ] = "";
-			for ( int i = 1; i < content.length; i++ )
-				content[ i ] = featureNames.get( features.get( i - 1 ) );
-			writer.writeNext( content );
-
-			// Header 3rd line.
-			content[ 0 ] = "";
-			for ( int i = 1; i < content.length; i++ )
-				content[ i ] = featureShortNames.get( features.get( i - 1 ) );
-			writer.writeNext( content );
-
-			// Header 4th line.
-			content[ 0 ] = "";
-			for ( int i = 1; i < content.length; i++ )
-			{
-				final String feature = features.get( i - 1 );
-				final String units = featureUnits.get( feature );
-				final String unitsStr = ( units == null || units.isEmpty() ) ? "" : "(" + units + ")";
-				content[ i ] = unitsStr;
-			}
-			writer.writeNext( content );
-
-			/*
-			 * Content.
-			 */
-
-			final int nRows = table.getRowCount();
-			final TableModel model = table.getModel();
-			for ( int r = 0; r < nRows; r++ )
-			{
-				final int row = table.convertRowIndexToModel( r );
-				for ( int col = 0; col < nCols; col++ )
-				{
-					final Object obj = model.getValueAt( row, col );
-					if ( null == obj )
-						content[ col ] = "";
-					else if ( obj instanceof Integer )
-						content[ col ] = Integer.toString( ( Integer ) obj );
-					else if ( obj instanceof Double )
-						content[ col ] = Double.toString( ( Double ) obj );
-					else if ( obj instanceof Boolean )
-						content[ col ] = ( ( Boolean ) obj ) ? "1" : "0";
-					else
-						content[ col ] = obj.toString();
-				}
-				writer.writeNext( content );
-			}
-		}
-	}
 }
