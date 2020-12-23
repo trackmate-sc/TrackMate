@@ -58,7 +58,7 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 
 	private static final ImageIcon CSV_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/page_save.png" ) );
 
-	private static String selectedFile = System.getProperty( "user.home" );
+	public static String selectedFile = System.getProperty( "user.home" ) + File.separator + "export.csv";
 
 	private final Model model;
 
