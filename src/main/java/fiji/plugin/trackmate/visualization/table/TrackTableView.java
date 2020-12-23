@@ -37,6 +37,7 @@ import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
+import fiji.plugin.trackmate.visualization.trackscheme.utils.SearchBar;
 
 public class TrackTableView extends JFrame implements TrackMateModelView, ModelChangeListener, SelectionChangeListener
 {
@@ -86,6 +87,7 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 
 		// Tool bar.
 		final JPanel toolbar = new JPanel( new FlowLayout( FlowLayout.RIGHT ) );
+		toolbar.add( new SearchBar( model, this ) );
 		final JToggleButton tglColoring = new JToggleButton( "coloring" );
 		tglColoring.addActionListener( e -> {
 			spotTable.setUseColoring( tglColoring.isSelected() );
