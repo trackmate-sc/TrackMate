@@ -22,7 +22,7 @@ public class ExportAllSpotsStatsAction extends AbstractTMAction
 	public static final String KEY = "EXPORT_ALL_SPOTS_STATS";
 
 	public static final String INFO_TEXT = "<html>"
-			+ "Compute and export the statistics of all spots to a table."
+			+ "Export the statistics of all spots to a table. "
 			+ "The numerical features of all visible spots are exported, "
 			+ "regardless of whether they are in a track or not."
 			+ "</html>";

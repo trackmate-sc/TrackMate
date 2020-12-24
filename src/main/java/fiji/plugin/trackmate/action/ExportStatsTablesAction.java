@@ -12,33 +12,32 @@ import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.visualization.table.TrackTableView;
 
-public class ExportStatsToIJAction extends AbstractTMAction
+public class ExportStatsTablesAction extends AbstractTMAction
 {
 
 	public static final ImageIcon ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/calculator.png" ) );
 
 	public static final String NAME = "Export statistics to tables";
 
-	public static final String KEY = "EXPORT_STATS_TO_IJ";
+	public static final String KEY = "EXPORT_STATS";
 
 	public static final String INFO_TEXT = "<html>"
-			+ "Compute and export all statistics to 3 ImageJ results table. "
+			+ "Compute and export all statistics to 3 tables. "
 			+ "Statistisc are separated in features computed for: "
 			+ "<ol> "
-			+ "	<li> spots in filtered tracks; "
-			+ "	<li> links between those spots; "
-			+ "	<li> filtered tracks. "
+			+ "	<li> spots in visible tracks; "
+			+ "	<li> edges between those spots; "
+			+ "	<li> visible tracks. "
 			+ "</ol> "
-			+ "For tracks and links, they are recalculated prior to exporting. Note "
-			+ "that spots and links that are not in a filtered tracks are not part "
-			+ "of this export."
+			+ "Note that spots and edges that are not in "
+			+ "visible tracks won't be visible in the tables."
 			+ "</html>";
 
 	private final SelectionModel selectionModel;
 
 	private final DisplaySettings displaySettings;
 
-	public ExportStatsToIJAction( final SelectionModel selectionModel, final DisplaySettings displaySettings )
+	public ExportStatsTablesAction( final SelectionModel selectionModel, final DisplaySettings displaySettings )
 	{
 		this.selectionModel = selectionModel;
 		this.displaySettings = displaySettings;
@@ -71,7 +70,7 @@ public class ExportStatsToIJAction extends AbstractTMAction
 		@Override
 		public TrackMateAction create( final TrackMateGUIController controller )
 		{
-			return new ExportStatsToIJAction( controller.getSelectionModel(), controller.getDisplaySettings() );
+			return new ExportStatsTablesAction( controller.getSelectionModel(), controller.getDisplaySettings() );
 		}
 
 		@Override

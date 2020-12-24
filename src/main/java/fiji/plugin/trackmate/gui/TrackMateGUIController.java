@@ -23,7 +23,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.action.AbstractTMAction;
 import fiji.plugin.trackmate.action.ExportAllSpotsStatsAction;
-import fiji.plugin.trackmate.action.ExportStatsToIJAction;
+import fiji.plugin.trackmate.action.ExportStatsTablesAction;
 import fiji.plugin.trackmate.detection.ManualDetectorFactory;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.ModelFeatureUpdater;
@@ -920,7 +920,7 @@ public class TrackMateGUIController implements ActionListener
 					if ( showSpotTable )
 						action = new ExportAllSpotsStatsAction( selectionModel, displaySettings );
 					else
-						action = new ExportStatsToIJAction( selectionModel, displaySettings );
+						action = new ExportStatsTablesAction( selectionModel, displaySettings );
 
 					action.execute( trackmate );
 
