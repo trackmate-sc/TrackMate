@@ -23,7 +23,7 @@ import net.imglib2.multithreading.SimpleMultiThreading;
 public class TrackSpotQualityFeatureAnalyzer implements TrackAnalyzer
 {
 
-	public static final String KEY = "TRACK_SPOT_QUALITY";
+	public static final String KEY = "Track quality";
 
 	public static final String TRACK_MEAN_QUALITY = "TRACK_MEAN_QUALITY";
 	public static final List< String > FEATURES = Collections.singletonList( TRACK_MEAN_QUALITY );
