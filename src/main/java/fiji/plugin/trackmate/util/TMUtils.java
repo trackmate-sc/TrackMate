@@ -774,6 +774,24 @@ public class TMUtils
 		return file;
 	}
 
+	public static final double variance( final double[] data )
+	{
+		final double mean = Util.average( data );
+		double variance = 0;
+		for ( int i = 0; i < data.length; i++ )
+		{
+			final double dx = data[ i ] - mean;
+			variance += dx * dx;
+		}
+		variance /= data.length;
+		return variance;
+	}
+
+	public static final double standardDeviation( final double[] data )
+	{
+		return Math.sqrt( variance( data ) );
+	}
+
 	private TMUtils()
 	{}
 }
