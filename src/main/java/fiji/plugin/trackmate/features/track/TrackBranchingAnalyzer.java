@@ -11,14 +11,13 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 import javax.swing.ImageIcon;
 
-import net.imglib2.multithreading.SimpleMultiThreading;
-
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
+import net.imglib2.multithreading.SimpleMultiThreading;
 
 @SuppressWarnings( "deprecation" )
 @Plugin( type = TrackAnalyzer.class )
@@ -31,26 +30,17 @@ public class TrackBranchingAnalyzer implements TrackAnalyzer
 	public static final String KEY = "Branching analyzer";
 
 	public static final String NUMBER_GAPS = "NUMBER_GAPS";
-
 	public static final String LONGEST_GAP = "LONGEST_GAP";
-
 	public static final String NUMBER_SPLITS = "NUMBER_SPLITS";
-
 	public static final String NUMBER_MERGES = "NUMBER_MERGES";
-
 	public static final String NUMBER_COMPLEX = "NUMBER_COMPLEX";
-
 	public static final String NUMBER_SPOTS = "NUMBER_SPOTS";
 
-	public static final List< String > FEATURES = new ArrayList< >( 5 );
-
-	public static final Map< String, String > FEATURE_NAMES = new HashMap< >( 5 );
-
-	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< >( 5 );
-
-	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< >( 5 );
-
-	public static final Map< String, Boolean > IS_INT = new HashMap< >( 5 );
+	public static final List< String > FEATURES = new ArrayList<>( 6 );
+	public static final Map< String, String > FEATURE_NAMES = new HashMap<>( 6 );
+	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap<>( 6 );
+	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap<>( 6 );
+	public static final Map< String, Boolean > IS_INT = new HashMap<>( 6 );
 
 	static
 	{
@@ -66,14 +56,14 @@ public class TrackBranchingAnalyzer implements TrackAnalyzer
 		FEATURE_NAMES.put( LONGEST_GAP, "Longest gap" );
 		FEATURE_NAMES.put( NUMBER_SPLITS, "Number of split events" );
 		FEATURE_NAMES.put( NUMBER_MERGES, "Number of merge events" );
-		FEATURE_NAMES.put( NUMBER_COMPLEX, "Complex points" );
+		FEATURE_NAMES.put( NUMBER_COMPLEX, "Number of complex points" );
 
-		FEATURE_SHORT_NAMES.put( NUMBER_SPOTS, "N spots" );
-		FEATURE_SHORT_NAMES.put( NUMBER_GAPS, "Gaps" );
+		FEATURE_SHORT_NAMES.put( NUMBER_SPOTS, "Track N spots" );
+		FEATURE_SHORT_NAMES.put( NUMBER_GAPS, "Track N gaps" );
 		FEATURE_SHORT_NAMES.put( LONGEST_GAP, "Longest gap" );
-		FEATURE_SHORT_NAMES.put( NUMBER_SPLITS, "Splits" );
-		FEATURE_SHORT_NAMES.put( NUMBER_MERGES, "Merges" );
-		FEATURE_SHORT_NAMES.put( NUMBER_COMPLEX, "Complex" );
+		FEATURE_SHORT_NAMES.put( NUMBER_SPLITS, "Track N splits" );
+		FEATURE_SHORT_NAMES.put( NUMBER_MERGES, "Track N merges" );
+		FEATURE_SHORT_NAMES.put( NUMBER_COMPLEX, "Track N complex" );
 
 		FEATURE_DIMENSIONS.put( NUMBER_SPOTS, Dimension.NONE );
 		FEATURE_DIMENSIONS.put( NUMBER_GAPS, Dimension.NONE );
@@ -109,9 +99,10 @@ public class TrackBranchingAnalyzer implements TrackAnalyzer
 	public void process( final Collection< Integer > trackIDs, final Model model )
 	{
 
-		if ( trackIDs.isEmpty() ) { return; }
+		if ( trackIDs.isEmpty() )
+		{ return; }
 
-		final ArrayBlockingQueue< Integer > queue = new ArrayBlockingQueue< >( trackIDs.size(), false, trackIDs );
+		final ArrayBlockingQueue< Integer > queue = new ArrayBlockingQueue<>( trackIDs.size(), false, trackIDs );
 
 		final Thread[] threads = SimpleMultiThreading.newThreads( numThreads );
 		for ( int i = 0; i < threads.length; i++ )
@@ -135,7 +126,7 @@ public class TrackBranchingAnalyzer implements TrackAnalyzer
 							final Set< DefaultWeightedEdge > edges = model.getTrackModel().edgesOf( spot );
 
 							// get neighbors
-							final Set< Spot > neighbors = new HashSet< >();
+							final Set< Spot > neighbors = new HashSet<>();
 							for ( final DefaultWeightedEdge edge : edges )
 							{
 								neighbors.add( model.getTrackModel().getEdgeSource( edge ) );
@@ -149,34 +140,22 @@ public class TrackBranchingAnalyzer implements TrackAnalyzer
 							for ( final Spot neighbor : neighbors )
 							{
 								if ( spot.diffTo( neighbor, Spot.FRAME ) > 0 )
-								{
 									earlier++; // neighbor is before in time
-								}
 								else
-								{
 									later++;
-								}
 							}
 
 							// Test for classical spot
 							if ( earlier == 1 && later == 1 )
-							{
 								continue;
-							}
 
 							// classify spot
 							if ( earlier <= 1 && later > 1 )
-							{
 								nsplits++;
-							}
 							else if ( later <= 1 && earlier > 1 )
-							{
 								nmerges++;
-							}
 							else if ( later > 1 && earlier > 1 )
-							{
 								ncomplex++;
-							}
 						}
 
 						int ngaps = 0, longestgap = 0;
@@ -184,14 +163,12 @@ public class TrackBranchingAnalyzer implements TrackAnalyzer
 						{
 							final Spot source = model.getTrackModel().getEdgeSource( edge );
 							final Spot target = model.getTrackModel().getEdgeTarget( edge );
-							final int gaplength = (int)Math.abs( target.diffTo( source, Spot.FRAME ) ) - 1;
+							final int gaplength = ( int ) Math.abs( target.diffTo( source, Spot.FRAME ) ) - 1;
 							if ( gaplength > 0 )
 							{
 								ngaps++;
 								if ( longestgap < gaplength )
-								{
 									longestgap = gaplength;
-								}
 							}
 						}
 
@@ -299,5 +276,4 @@ public class TrackBranchingAnalyzer implements TrackAnalyzer
 	{
 		return false;
 	}
-
 }

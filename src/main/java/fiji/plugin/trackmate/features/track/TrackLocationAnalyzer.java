@@ -10,14 +10,13 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 import javax.swing.ImageIcon;
 
-import net.imglib2.multithreading.SimpleMultiThreading;
-
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
+import net.imglib2.multithreading.SimpleMultiThreading;
 
 @SuppressWarnings( "deprecation" )
 @Plugin( type = TrackAnalyzer.class )
@@ -30,19 +29,12 @@ public class TrackLocationAnalyzer implements TrackAnalyzer
 	public static final String KEY = "Track location";
 
 	public static final String X_LOCATION = "TRACK_X_LOCATION";
-
 	public static final String Y_LOCATION = "TRACK_Y_LOCATION";
-
 	public static final String Z_LOCATION = "TRACK_Z_LOCATION";
-
 	public static final List< String > FEATURES = new ArrayList< >( 3 );
-
 	public static final Map< String, String > FEATURE_NAMES = new HashMap< >( 3 );
-
 	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< >( 3 );
-
 	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< >( 3 );
-
 	public static final Map< String, Boolean > IS_INT = new HashMap< >( 3 );
 
 	static
@@ -51,13 +43,13 @@ public class TrackLocationAnalyzer implements TrackAnalyzer
 		FEATURES.add( Y_LOCATION );
 		FEATURES.add( Z_LOCATION );
 
-		FEATURE_NAMES.put( X_LOCATION, "X Location (mean)" );
-		FEATURE_NAMES.put( Y_LOCATION, "Y Location (mean)" );
-		FEATURE_NAMES.put( Z_LOCATION, "Z Location (mean)" );
+		FEATURE_NAMES.put( X_LOCATION, "Track mean X" );
+		FEATURE_NAMES.put( Y_LOCATION, "Track mean Y" );
+		FEATURE_NAMES.put( Z_LOCATION, "Track mean Z" );
 
-		FEATURE_SHORT_NAMES.put( X_LOCATION, "X" );
-		FEATURE_SHORT_NAMES.put( Y_LOCATION, "Y" );
-		FEATURE_SHORT_NAMES.put( Z_LOCATION, "Z" );
+		FEATURE_SHORT_NAMES.put( X_LOCATION, "Track X" );
+		FEATURE_SHORT_NAMES.put( Y_LOCATION, "Track Y" );
+		FEATURE_SHORT_NAMES.put( Z_LOCATION, "Track Z" );
 
 		FEATURE_DIMENSIONS.put( X_LOCATION, Dimension.POSITION );
 		FEATURE_DIMENSIONS.put( Y_LOCATION, Dimension.POSITION );
@@ -130,7 +122,6 @@ public class TrackLocationAnalyzer implements TrackAnalyzer
 						fm.putTrackFeature( trackID, Z_LOCATION, z );
 
 					}
-
 				}
 			};
 		}
