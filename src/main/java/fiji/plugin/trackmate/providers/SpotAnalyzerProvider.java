@@ -22,6 +22,9 @@ public class SpotAnalyzerProvider extends AbstractProvider< SpotAnalyzerFactory 
 	public SpotAnalyzerFactory getFactory( final String key )
 	{
 		final SpotAnalyzerFactory factory = super.getFactory( key );
+		if ( factory == null )
+			return null;
+
 		factory.setSource( imp );
 		return factory;
 	}
