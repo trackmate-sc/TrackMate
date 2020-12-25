@@ -1,8 +1,11 @@
 package fiji.plugin.trackmate.features.spot;
 
+import static fiji.plugin.trackmate.features.spot.SpotIntensityMultiCAnalyzerFactory.makeFeatureKey;
+
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +17,7 @@ import org.scijava.plugin.Plugin;
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
+import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imglib2.meta.view.HyperSliceImgPlus;
 import net.imglib2.type.NativeType;
@@ -32,34 +36,23 @@ import net.imglib2.type.numeric.RealType;
 public class SpotContrastAndSNRAnalyzerFactory< T extends RealType< T > & NativeType< T >> implements SpotAnalyzerFactory< T >
 {
 
-	/*
-	 * FIELDS
-	 */
+	public static final String CONTRAST = "CONTRAST_CH";
+	public static final String SNR = "SNR_CH";
 
-	/** The single feature key name that this analyzer computes. */
-	public static final String CONTRAST = "CONTRAST";
-	public static final String SNR = "SNR";
-	public static final List< String > FEATURES = new ArrayList< >( 2 );
-	public static final Map< String, String > FEATURE_NAMES = new HashMap< >( 2 );
-	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< >( 2 );
-	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< >( 2 );
-	public static final Map< String, Boolean > IS_INT = new HashMap< >( 2 );
-
-	static
-	{
-		FEATURES.add( CONTRAST );
-		FEATURES.add( SNR );
-		FEATURE_NAMES.put( CONTRAST, "Contrast" );
-		FEATURE_NAMES.put( SNR, "Signal/Noise ratio" );
-		FEATURE_SHORT_NAMES.put( CONTRAST, "Constrast" );
-		FEATURE_SHORT_NAMES.put( SNR, "SNR" );
-		FEATURE_DIMENSIONS.put( CONTRAST, Dimension.NONE );
-		FEATURE_DIMENSIONS.put( SNR, Dimension.NONE );
-		IS_INT.put( CONTRAST, Boolean.FALSE );
-		IS_INT.put( SNR, Boolean.FALSE );
-	}
+	private static final String CONTRAST_NAME = "Contrast ch";
+	private static final String SNR_NAME = "Signal/Noise ratio ch";
+	private static final String CONTRAST_SHORTNAME = "Contrast ch";
+	private static final String SNR_SHORTNAME = "Signal/Noise ratio ch";
+	private static final List< String > FEATURES = Arrays.asList( new String[] {
+			CONTRAST, SNR } );
+	private static final List< String > FEATURE_SHORTNAMES = Arrays.asList( new String[] {
+			CONTRAST_SHORTNAME, SNR_SHORTNAME } );
+	private static final List< String > FEATURE_NAMES = Arrays.asList( new String[] {
+			CONTRAST_NAME, SNR_NAME } );
 
 	public static final String KEY = "Spot contrast and SNR";
+
+	private int nChannels = 1;
 
 
 	/*
@@ -69,10 +62,9 @@ public class SpotContrastAndSNRAnalyzerFactory< T extends RealType< T > & Native
 	@Override
 	public SpotContrastAndSNRAnalyzer< T > getAnalyzer( final Model model, final ImgPlus< T > img, final int frame, final int channel )
 	{
-		final ImgPlus< T > imgC = HyperSliceImgPlus.fixChannelAxis( img, channel );
-		final ImgPlus< T > imgCT = HyperSliceImgPlus.fixTimeAxis( imgC, frame );
+		final ImgPlus< T > imgT = HyperSliceImgPlus.fixTimeAxis( img, frame );
 		final Iterator< Spot > spots = model.getSpots().iterator( frame, false );
-		return new SpotContrastAndSNRAnalyzer< >( imgCT, spots );
+		return new SpotContrastAndSNRAnalyzer<>( imgT, spots, nChannels );
 	}
 
 	@Override
@@ -84,26 +76,66 @@ public class SpotContrastAndSNRAnalyzerFactory< T extends RealType< T > & Native
 	@Override
 	public List< String > getFeatures()
 	{
-		return FEATURES;
+		final List< String > features = new ArrayList<>( nChannels * FEATURES.size() );
+		for ( int c = 0; c < nChannels; c++ )
+			for ( final String feature : FEATURES )
+				features.add( makeFeatureKey( feature, c ) );
+
+		return features;
 	}
 
 	@Override
 	public Map< String, String > getFeatureShortNames()
 	{
-		return FEATURE_SHORT_NAMES;
+		final Map< String, String > names = new LinkedHashMap<>( nChannels * FEATURES.size() );
+		for ( int c = 0; c < nChannels; c++ )
+			for ( int i = 0; i < FEATURES.size(); i++ )
+			{
+				final String feature = FEATURES.get( i );
+				final String shortName = FEATURE_SHORTNAMES.get( i );
+				names.put( makeFeatureKey( feature, c ), makeFeatureKey( shortName, c ) );
+			}
+
+		return names;
 	}
 
 	@Override
 	public Map< String, String > getFeatureNames()
 	{
-		return FEATURE_NAMES;
+		final Map< String, String > names = new LinkedHashMap<>( nChannels * FEATURES.size() );
+		for ( int c = 0; c < nChannels; c++ )
+			for ( int i = 0; i < FEATURES.size(); i++ )
+			{
+				final String feature = FEATURES.get( i );
+				final String shortName = FEATURE_NAMES.get( i );
+				names.put( makeFeatureKey( feature, c ), makeFeatureKey( shortName, c ) );
+			}
+
+		return names;
 	}
 
 	@Override
 	public Map< String, Dimension > getFeatureDimensions()
 	{
-		return FEATURE_DIMENSIONS;
+		final List< String > features = getFeatures();
+		final Map< String, Dimension > dimensions = new LinkedHashMap<>( features.size() );
+		for ( final String feature : features )
+			dimensions.put( feature, Dimension.NONE );
+
+		return dimensions;
 	}
+
+	@Override
+	public Map< String, Boolean > getIsIntFeature()
+	{
+		final List< String > features = getFeatures();
+		final Map< String, Boolean > isints = new LinkedHashMap<>( features.size() );
+		for ( final String feature : features )
+			isints.put( feature, Boolean.FALSE );
+
+		return isints;
+	}
+
 
 	@Override
 	public String getInfoText()
@@ -124,14 +156,17 @@ public class SpotContrastAndSNRAnalyzerFactory< T extends RealType< T > & Native
 	}
 
 	@Override
-	public Map< String, Boolean > getIsIntFeature()
-	{
-		return IS_INT;
-	}
-
-	@Override
 	public boolean isManualFeature()
 	{
 		return false;
+	}
+
+	@Override
+	public void setSource( final ImagePlus imp )
+	{
+		if ( null != imp )
+			this.nChannels = imp.getNChannels();
+		else
+			this.nChannels = 1;
 	}
 }

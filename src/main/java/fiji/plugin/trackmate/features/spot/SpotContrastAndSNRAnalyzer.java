@@ -2,6 +2,9 @@ package fiji.plugin.trackmate.features.spot;
 
 import static fiji.plugin.trackmate.features.spot.SpotContrastAndSNRAnalyzerFactory.CONTRAST;
 import static fiji.plugin.trackmate.features.spot.SpotContrastAndSNRAnalyzerFactory.SNR;
+import static fiji.plugin.trackmate.features.spot.SpotIntensityMultiCAnalyzerFactory.MEAN_INTENSITY;
+import static fiji.plugin.trackmate.features.spot.SpotIntensityMultiCAnalyzerFactory.STD_INTENSITY;
+import static fiji.plugin.trackmate.features.spot.SpotIntensityMultiCAnalyzerFactory.makeFeatureKey;
 
 import java.util.Iterator;
 
@@ -9,6 +12,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.util.SpotNeighborhood;
 import fiji.plugin.trackmate.util.SpotNeighborhoodCursor;
 import net.imagej.ImgPlus;
+import net.imglib2.meta.view.HyperSliceImgPlus;
 import net.imglib2.type.numeric.RealType;
 
 /**
@@ -27,20 +31,24 @@ import net.imglib2.type.numeric.RealType;
  * <u>Important</u>: this analyzer relies on some results provided by the
  * {@link SpotIntensityAnalyzer} analyzer. Thus, it <b>must</b> be run after it.
  * 
- * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; 2011 - 2012
+ * @author Jean-Yves Tinevez, 2011 - 2012. Revised December 2020.
  */
+@SuppressWarnings( "deprecation" )
 public class SpotContrastAndSNRAnalyzer< T extends RealType< T > > extends IndependentSpotFeatureAnalyzer< T >
 {
 
 	protected static final double RAD_PERCENTAGE = 1f;
 
+	private final int nChannels;
+
 	/*
 	 * CONSTRUCTOR
 	 */
 
-	public SpotContrastAndSNRAnalyzer( final ImgPlus< T > img, final Iterator< Spot > spots )
+	public SpotContrastAndSNRAnalyzer( final ImgPlus< T > img, final Iterator< Spot > spots, final int nChannels )
 	{
 		super( img, spots );
+		this.nChannels = nChannels;
 	}
 
 	/*
@@ -50,56 +58,64 @@ public class SpotContrastAndSNRAnalyzer< T extends RealType< T > > extends Indep
 	@Override
 	public final void process( final Spot spot )
 	{
-		final double[] vals = getContrastAndSNR( spot );
-		final double contrast = vals[ 0 ];
-		final double snr = vals[ 1 ];
-		spot.putFeature( CONTRAST, contrast );
-		spot.putFeature( SNR, snr );
+		for ( int c = 0; c < nChannels; c++ )
+		{
+			final double[] vals = getContrastAndSNR( spot, c );
+			final double contrast = vals[ 0 ];
+			final double snr = vals[ 1 ];
+
+			spot.putFeature( makeFeatureKey( CONTRAST, c ), contrast );
+			spot.putFeature( makeFeatureKey( SNR, c ), snr );
+		}
 	}
 
 	/**
 	 * Compute the contrast for the given spot.
+	 * 
+	 * @param c
+	 *            the channel to compute on.
 	 */
-	private final double[] getContrastAndSNR( final Spot spot )
+	private final double[] getContrastAndSNR( final Spot spot, final int c )
 	{
-		final double mean_in = spot.getFeature( SpotIntensityAnalyzerFactory.MEAN_INTENSITY );
-		final double std_in = spot.getFeature( SpotIntensityAnalyzerFactory.STANDARD_DEVIATION );
+		final ImgPlus< T > imgC = HyperSliceImgPlus.fixChannelAxis( img, c );
+
+		final String meanFeature = makeFeatureKey( MEAN_INTENSITY, c );
+		final String stdFeature = makeFeatureKey( STD_INTENSITY, c );
+		final double meanIn = spot.getFeature( meanFeature );
+		final double stdIn = spot.getFeature( stdFeature );
 
 		final double radius = spot.getFeature( Spot.RADIUS );
-		Spot largeSpot = new Spot( spot );
+		final Spot largeSpot = new Spot( spot );
 		largeSpot.putFeature( Spot.RADIUS, 2 * radius );
 
-		final SpotNeighborhood< T > neighborhood = new SpotNeighborhood<>( largeSpot, img );
-		if ( neighborhood.size() <= 1 ) { return new double[] { Double.NaN, Double.NaN }; }
+		final SpotNeighborhood< T > neighborhood = new SpotNeighborhood<>( largeSpot, imgC );
+		if ( neighborhood.size() <= 1 )
+			return new double[] { Double.NaN, Double.NaN };
 
 		final double radius2 = radius * radius;
-		int n_out = 0; // inner number of pixels
-		double dist2;
-		double sum_out = 0;
+		int nOut = 0; // inner number of pixels
+		double sumOut = 0;
 
 		// Compute mean in the outer ring
 		final SpotNeighborhoodCursor< T > cursor = neighborhood.cursor();
 		while ( cursor.hasNext() )
 		{
 			cursor.fwd();
-			dist2 = cursor.getDistanceSquared();
+			final double dist2 = cursor.getDistanceSquared();
 			if ( dist2 > radius2 )
 			{
-				n_out++;
-				sum_out += cursor.get().getRealFloat();
+				nOut++;
+				sumOut += cursor.get().getRealDouble();
 			}
 		}
-		final double mean_out = sum_out / n_out;
+		final double meanOut = sumOut / nOut;
 
 		// Compute contrast
-		final double contrast = ( mean_in - mean_out ) / ( mean_in + mean_out );
+		final double contrast = ( meanIn - meanOut ) / ( meanIn + meanOut );
 
 		// Compute snr
-		final double snr = ( mean_in - mean_out ) / std_in;
+		final double snr = ( meanIn - meanOut ) / stdIn;
 
-		final double[] ret = new double[ 2 ];
-		ret[ 0 ] = contrast;
-		ret[ 1 ] = snr;
-		return ret;
+		return new double[] { contrast, snr };
 	}
 }
