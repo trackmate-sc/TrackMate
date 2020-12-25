@@ -792,6 +792,11 @@ public class TMUtils
 		return Math.sqrt( variance( data ) );
 	}
 
+	public static double sum( final double[] intensities )
+	{
+		return Arrays.stream( intensities ).sum();
+	}
+
 	private TMUtils()
 	{}
 }
