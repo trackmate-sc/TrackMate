@@ -38,17 +38,11 @@ public class SpotContrastAndSNRAnalyzerFactory< T extends RealType< T > & Native
 
 	/** The single feature key name that this analyzer computes. */
 	public static final String CONTRAST = "CONTRAST";
-
 	public static final String SNR = "SNR";
-
-	public static final ArrayList< String > FEATURES = new ArrayList< >( 2 );
-
-	public static final HashMap< String, String > FEATURE_NAMES = new HashMap< >( 2 );
-
-	public static final HashMap< String, String > FEATURE_SHORT_NAMES = new HashMap< >( 2 );
-
-	public static final HashMap< String, Dimension > FEATURE_DIMENSIONS = new HashMap< >( 2 );
-
+	public static final List< String > FEATURES = new ArrayList< >( 2 );
+	public static final Map< String, String > FEATURE_NAMES = new HashMap< >( 2 );
+	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< >( 2 );
+	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< >( 2 );
 	public static final Map< String, Boolean > IS_INT = new HashMap< >( 2 );
 
 	static
