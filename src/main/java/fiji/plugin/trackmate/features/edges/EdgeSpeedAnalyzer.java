@@ -9,8 +9,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 import javax.swing.ImageIcon;
 
-import net.imglib2.multithreading.SimpleMultiThreading;
-
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.scijava.plugin.Plugin;
 
@@ -18,46 +16,38 @@ import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
+import net.imglib2.multithreading.SimpleMultiThreading;
 
 @SuppressWarnings( "deprecation" )
 @Plugin( type = EdgeAnalyzer.class )
-public class EdgeVelocityAnalyzer implements EdgeAnalyzer
+public class EdgeSpeedAnalyzer implements EdgeAnalyzer
 {
 
-	public static final String KEY = "Edge velocity";
+	public static final String KEY = "Edge speed";
 
-	/*
-	 * FEATURE NAMES
-	 */
-	public static final String VELOCITY = "VELOCITY";
-
+	public static final String SPEED = "SPEED";
 	public static final String DISPLACEMENT = "DISPLACEMENT";
-
 	public static final List< String > FEATURES = new ArrayList< >( 2 );
-
 	public static final Map< String, String > FEATURE_NAMES = new HashMap< >( 2 );
-
 	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< >( 2 );
-
 	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< >( 2 );
-
 	public static final Map< String, Boolean > IS_INT = new HashMap< >( 2 );
 
 	static
 	{
-		FEATURES.add( VELOCITY );
+		FEATURES.add( SPEED );
 		FEATURES.add( DISPLACEMENT );
 
-		FEATURE_NAMES.put( VELOCITY, "Velocity" );
+		FEATURE_NAMES.put( SPEED, "Speed" );
 		FEATURE_NAMES.put( DISPLACEMENT, "Displacement" );
 
-		FEATURE_SHORT_NAMES.put( VELOCITY, "V" );
-		FEATURE_SHORT_NAMES.put( DISPLACEMENT, "D" );
+		FEATURE_SHORT_NAMES.put( SPEED, "Speed" );
+		FEATURE_SHORT_NAMES.put( DISPLACEMENT, "Displacement" );
 
-		FEATURE_DIMENSIONS.put( VELOCITY, Dimension.VELOCITY );
+		FEATURE_DIMENSIONS.put( SPEED, Dimension.VELOCITY );
 		FEATURE_DIMENSIONS.put( DISPLACEMENT, Dimension.LENGTH );
 
-		IS_INT.put( VELOCITY, Boolean.FALSE );
+		IS_INT.put( SPEED, Boolean.FALSE );
 		IS_INT.put( DISPLACEMENT, Boolean.FALSE );
 	}
 
@@ -69,7 +59,7 @@ public class EdgeVelocityAnalyzer implements EdgeAnalyzer
 	 * CONSTRUCTOR
 	 */
 
-	public EdgeVelocityAnalyzer()
+	public EdgeSpeedAnalyzer()
 	{
 		setNumThreads();
 	}
@@ -83,17 +73,15 @@ public class EdgeVelocityAnalyzer implements EdgeAnalyzer
 	@Override
 	public void process( final Collection< DefaultWeightedEdge > edges, final Model model )
 	{
-
-		if ( edges.isEmpty() ) { return; }
+		if ( edges.isEmpty() )
+			return;
 
 		final FeatureModel featureModel = model.getFeatureModel();
-
 		final ArrayBlockingQueue< DefaultWeightedEdge > queue = new ArrayBlockingQueue< >( edges.size(), false, edges );
-
 		final Thread[] threads = SimpleMultiThreading.newThreads( numThreads );
 		for ( int i = 0; i < threads.length; i++ )
 		{
-			threads[ i ] = new Thread( "EdgeVelocityAnalyzer thread " + i )
+			threads[ i ] = new Thread( "EdgeSpeedAnalyzer thread " + i )
 			{
 				@Override
 				public void run()
@@ -109,12 +97,11 @@ public class EdgeVelocityAnalyzer implements EdgeAnalyzer
 						final double dz = target.diffTo( source, Spot.POSITION_Z );
 						final double dt = target.diffTo( source, Spot.POSITION_T );
 						final double D = Math.sqrt( dx * dx + dy * dy + dz * dz );
-						final double V = D / Math.abs( dt );
+						final double S = D / Math.abs( dt );
 
-						featureModel.putEdgeFeature( edge, VELOCITY, V );
+						featureModel.putEdgeFeature( edge, SPEED, S );
 						featureModel.putEdgeFeature( edge, DISPLACEMENT, D );
 					}
-
 				}
 			};
 		}
@@ -147,7 +134,6 @@ public class EdgeVelocityAnalyzer implements EdgeAnalyzer
 	public void setNumThreads( final int numThreads )
 	{
 		this.numThreads = numThreads;
-
 	}
 
 	@Override

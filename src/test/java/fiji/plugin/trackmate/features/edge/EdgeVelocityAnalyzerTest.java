@@ -6,7 +6,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.ModelChangeListener;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.features.edges.EdgeVelocityAnalyzer;
+import fiji.plugin.trackmate.features.edges.EdgeSpeedAnalyzer;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -89,14 +89,14 @@ public class EdgeVelocityAnalyzerTest
 	public final void testProcess()
 	{
 		// Process model
-		final EdgeVelocityAnalyzer analyzer = new EdgeVelocityAnalyzer();
+		final EdgeSpeedAnalyzer analyzer = new EdgeSpeedAnalyzer();
 		analyzer.process( model.getTrackModel().edgeSet(), model );
 
 		// Collect features
 		for ( final DefaultWeightedEdge edge : model.getTrackModel().edgeSet() )
 		{
-			assertEquals( edgeV.get( edge ).doubleValue(), model.getFeatureModel().getEdgeFeature( edge, EdgeVelocityAnalyzer.VELOCITY ).doubleValue(), Double.MIN_VALUE );
-			assertEquals( edgeD.get( edge ).doubleValue(), model.getFeatureModel().getEdgeFeature( edge, EdgeVelocityAnalyzer.DISPLACEMENT ).doubleValue(), Double.MIN_VALUE );
+			assertEquals( edgeV.get( edge ).doubleValue(), model.getFeatureModel().getEdgeFeature( edge, EdgeSpeedAnalyzer.SPEED ).doubleValue(), Double.MIN_VALUE );
+			assertEquals( edgeD.get( edge ).doubleValue(), model.getFeatureModel().getEdgeFeature( edge, EdgeSpeedAnalyzer.DISPLACEMENT ).doubleValue(), Double.MIN_VALUE );
 		}
 	}
 
@@ -159,7 +159,7 @@ public class EdgeVelocityAnalyzerTest
 		assertEquals( 2, analyzer.edges.size() );
 	}
 
-	private static class TestEdgeVelocityAnalyzer extends EdgeVelocityAnalyzer
+	private static class TestEdgeVelocityAnalyzer extends EdgeSpeedAnalyzer
 	{
 
 		private boolean hasBeenRun = false;
