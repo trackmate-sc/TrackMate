@@ -5,7 +5,6 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,11 +19,11 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.EdgeFeatureGrapher;
+import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.features.SpotFeatureGrapher;
 import fiji.plugin.trackmate.features.TrackFeatureGrapher;
-import fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer;
-import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
 import fiji.plugin.trackmate.gui.panels.components.FeaturePlotSelectionPanel;
 
@@ -32,17 +31,11 @@ public class GrapherPanel extends ActionListenablePanel
 {
 
 	private static final ImageIcon SPOT_ICON = new ImageIcon( GrapherPanel.class.getResource( "images/Icon1_print_transparency.png" ) );
-
 	private static final ImageIcon EDGE_ICON = new ImageIcon( GrapherPanel.class.getResource( "images/Icon2_print_transparency.png" ) );
-
 	private static final ImageIcon TRACK_ICON = new ImageIcon( GrapherPanel.class.getResource( "images/Icon3b_print_transparency.png" ) );
-
 	public static final ImageIcon SPOT_ICON_64x64;
-
 	public static final ImageIcon EDGE_ICON_64x64;
-
 	public static final ImageIcon TRACK_ICON_64x64;
-
 	static
 	{
 		final Image image1 = SPOT_ICON.getImage();
@@ -109,9 +102,9 @@ public class GrapherPanel extends ActionListenablePanel
 	{
 		// regen spot features
 		panelSpot.removeAll();
-		final Collection< String > spotFeatures = trackmate.getModel().getFeatureModel().getSpotFeatures();
-		final Map< String, String > spotFeatureNames = trackmate.getModel().getFeatureModel().getSpotFeatureNames();
-		spotFeatureSelectionPanel = new FeaturePlotSelectionPanel( Spot.POSITION_T, spotFeatures, spotFeatureNames );
+		final Map< String, String > spotFeatureNames = FeatureUtils.collectFeatureKeys( TrackMateObject.SPOTS, trackmate.getModel(), trackmate.getSettings() );
+		final Set< String > spotFeatures = spotFeatureNames.keySet();
+		spotFeatureSelectionPanel = new FeaturePlotSelectionPanel( "T", "Mean intensity ch1", spotFeatures, spotFeatureNames );
 		panelSpot.add( spotFeatureSelectionPanel );
 		spotFeatureSelectionPanel.addActionListener( new ActionListener()
 		{
@@ -133,9 +126,9 @@ public class GrapherPanel extends ActionListenablePanel
 
 		// regen edge features
 		panelEdges.removeAll();
-		final Collection< String > edgeFeatures = trackmate.getModel().getFeatureModel().getEdgeFeatures();
-		final Map< String, String > edgeFeatureNames = trackmate.getModel().getFeatureModel().getEdgeFeatureNames();
-		edgeFeatureSelectionPanel = new FeaturePlotSelectionPanel( EdgeTimeLocationAnalyzer.TIME, edgeFeatures, edgeFeatureNames );
+		final Map< String, String > edgeFeatureNames = FeatureUtils.collectFeatureKeys( TrackMateObject.EDGES, trackmate.getModel(), trackmate.getSettings() );
+		final Set< String > edgeFeatures = edgeFeatureNames.keySet();
+		edgeFeatureSelectionPanel = new FeaturePlotSelectionPanel( "Edge time", "Speed", edgeFeatures, edgeFeatureNames );
 		panelEdges.add( edgeFeatureSelectionPanel );
 		edgeFeatureSelectionPanel.addActionListener( new ActionListener()
 		{
@@ -157,9 +150,9 @@ public class GrapherPanel extends ActionListenablePanel
 
 		// regen trak features
 		panelTracks.removeAll();
-		final Collection< String > trackFeatures = trackmate.getModel().getFeatureModel().getTrackFeatures();
-		final Map< String, String > trackFeatureNames = trackmate.getModel().getFeatureModel().getTrackFeatureNames();
-		trackFeatureSelectionPanel = new FeaturePlotSelectionPanel( TrackIndexAnalyzer.TRACK_INDEX, trackFeatures, trackFeatureNames );
+		final Map< String, String > trackFeatureNames = FeatureUtils.collectFeatureKeys( TrackMateObject.TRACKS, trackmate.getModel(), trackmate.getSettings() );
+		final Set< String > trackFeatures = trackFeatureNames.keySet();
+		trackFeatureSelectionPanel = new FeaturePlotSelectionPanel( "Track index", "Number of spots in track", trackFeatures, trackFeatureNames );
 		panelTracks.add( trackFeatureSelectionPanel );
 		trackFeatureSelectionPanel.addActionListener( new ActionListener()
 		{
@@ -184,12 +177,12 @@ public class GrapherPanel extends ActionListenablePanel
 	{
 		final String xFeature = spotFeatureSelectionPanel.getXKey();
 		final Set< String > yFeatures = spotFeatureSelectionPanel.getYKeys();
+
 		// Collect only the spots that are in tracks
-		final List< Spot > spots = new ArrayList< >( trackmate.getModel().getSpots().getNSpots( true ) );
+		final List< Spot > spots = new ArrayList<>( trackmate.getModel().getSpots().getNSpots( true ) );
 		for ( final Integer trackID : trackmate.getModel().getTrackModel().trackIDs( true ) )
-		{
 			spots.addAll( trackmate.getModel().getTrackModel().trackSpots( trackID ) );
-		}
+
 		final SpotFeatureGrapher grapher = new SpotFeatureGrapher( xFeature, yFeatures, spots, trackmate.getModel(), displaySettings );
 		grapher.render();
 	}
@@ -197,11 +190,10 @@ public class GrapherPanel extends ActionListenablePanel
 	private void plotEdgeFeatures()
 	{
 		// Collect edges in filtered tracks
-		final List< DefaultWeightedEdge > edges = new ArrayList< >();
+		final List< DefaultWeightedEdge > edges = new ArrayList<>();
 		for ( final Integer trackID : trackmate.getModel().getTrackModel().trackIDs( true ) )
-		{
 			edges.addAll( trackmate.getModel().getTrackModel().trackEdges( trackID ) );
-		}
+
 		// Prepare grapher
 		final String xFeature = edgeFeatureSelectionPanel.getXKey();
 		final Set< String > yFeatures = edgeFeatureSelectionPanel.getYKeys();
@@ -217,5 +209,4 @@ public class GrapherPanel extends ActionListenablePanel
 		final TrackFeatureGrapher grapher = new TrackFeatureGrapher( xFeature, yFeatures, trackmate.getModel(), displaySettings );
 		grapher.render();
 	}
-
 }
