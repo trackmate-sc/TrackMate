@@ -471,43 +471,33 @@ public class TMUtils
 	 */
 	public static final String getUnitsFor( final Dimension dimension, final String spaceUnits, final String timeUnits )
 	{
-		String units = "no unit";
 		switch ( dimension )
 		{
 		case ANGLE:
-			units = "Radians";
-			break;
+			return "radians";
 		case INTENSITY:
-			units = "Counts";
-			break;
+			return "counts";
 		case INTENSITY_SQUARED:
-			units = "Counts^2";
-			break;
+			return "counts^2";
 		case NONE:
-			units = "";
-			break;
+			return "";
 		case POSITION:
 		case LENGTH:
-			units = spaceUnits;
-			break;
+			return spaceUnits;
+		case AREA:
+			return spaceUnits + "^2";
 		case QUALITY:
-			units = "Quality";
-			break;
+			return "quality";
 		case TIME:
-			units = timeUnits;
-			break;
+			return timeUnits;
 		case VELOCITY:
-			units = spaceUnits + "/" + timeUnits;
-			break;
+			return spaceUnits + "/" + timeUnits;
 		case RATE:
-			units = "/" + timeUnits;
-			break;
+			return "/" + timeUnits;
 		default:
-			break;
 		case STRING:
 			return null;
 		}
-		return units;
 	}
 
 	public static final String getCurrentTimeString()
