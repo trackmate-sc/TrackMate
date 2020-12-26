@@ -17,6 +17,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.util.MedianFilter2D;
+import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imglib2.Cursor;
@@ -157,6 +158,11 @@ public class DetectionUtils
 	{
 		return img.dimensionIndex( Axes.Z ) < 0
 				|| img.dimension( img.dimensionIndex( Axes.Z ) ) <= 1;
+	}
+
+	public static final boolean is2D( final ImagePlus imp )
+	{
+		return imp.getNSlices() <= 1;
 	}
 
 	/**
