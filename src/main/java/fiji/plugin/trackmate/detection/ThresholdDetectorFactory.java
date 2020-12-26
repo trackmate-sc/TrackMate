@@ -104,6 +104,12 @@ public class ThresholdDetectorFactory< T extends RealType< T > & NativeType< T >
 	}
 
 	@Override
+	public boolean has2Dsegmentation()
+	{
+		return true;
+	}
+
+	@Override
 	public String getKey()
 	{
 		return DETECTOR_KEY;
