@@ -352,6 +352,7 @@ public class MaskUtils
 				xpoly[ i ] = calibration[ 0 ] * ( interval.min( 0 ) + fPolygon.xpoints[ i ] );
 				ypoly[ i ] = calibration[ 1 ] * ( interval.min( 1 ) + fPolygon.ypoints[ i ] );
 			}
+
 			spots.add( SpotRoi.createSpot( xpoly, ypoly, quality ) );
 		}
 		return spots;
@@ -450,7 +451,7 @@ public class MaskUtils
 	 */
 	public static final List< double[] > douglasPeucker( final List< double[] > list, final double epsilon )
 	{
-		final List< double[] > resultList = new ArrayList< double[] >();
+		final List< double[] > resultList = new ArrayList< >();
 		douglasPeucker( list, 0, list.size(), epsilon, resultList );
 		return resultList;
 	}
