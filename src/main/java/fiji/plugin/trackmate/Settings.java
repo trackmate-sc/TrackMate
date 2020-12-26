@@ -13,6 +13,7 @@ import fiji.plugin.trackmate.features.FeatureAnalyzer;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
+import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactoryBase;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
 import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
@@ -157,7 +158,7 @@ public class Settings
 	 * features. They are ordered in a {@link List} in case some analyzers
 	 * requires the results of another analyzer to proceed.
 	 */
-	protected List< SpotAnalyzerFactory< ? > > spotAnalyzerFactories = new ArrayList< >();
+	protected List< SpotAnalyzerFactoryBase< ? > > spotAnalyzerFactories = new ArrayList<>();
 
 	// Edge features
 
@@ -529,7 +530,7 @@ public class Settings
 	 *
 	 * @return the list of {@link SpotAnalyzerFactory}s.
 	 */
-	public List< SpotAnalyzerFactory< ? > > getSpotAnalyzerFactories()
+	public List< SpotAnalyzerFactoryBase< ? > > getSpotAnalyzerFactories()
 	{
 		return new ArrayList< >( spotAnalyzerFactories );
 	}
@@ -542,7 +543,7 @@ public class Settings
 	 *            the {@link fiji.plugin.trackmate.features.spot.SpotAnalyzer}
 	 *            to add, at the end of the list.
 	 */
-	public void addSpotAnalyzerFactory( final SpotAnalyzerFactory< ? > spotAnalyzer )
+	public void addSpotAnalyzerFactory( final SpotAnalyzerFactoryBase< ? > spotAnalyzer )
 	{
 		spotAnalyzerFactories.add( spotAnalyzer );
 	}
@@ -781,22 +782,20 @@ public class Settings
 	 * PRIVATE METHODS
 	 */
 
-	private final void prettyPrintFeatureAnalyzer( final List< ? extends FeatureAnalyzer > analyzers, final StringBuilder str )
+	public static final void prettyPrintFeatureAnalyzer( final List< ? extends FeatureAnalyzer > analyzers, final StringBuilder str )
 	{
 		for ( final FeatureAnalyzer analyzer : analyzers )
 		{
 			str.append( " - " + analyzer.getName() + " provides: " );
 			for ( final String feature : analyzer.getFeatures() )
-			{
 				str.append( analyzer.getFeatureShortNames().get( feature ) + ", " );
-			}
+
 			str.deleteCharAt( str.length() - 1 );
 			str.deleteCharAt( str.length() - 1 );
 			// be precise
 			if ( str.charAt( str.length() - 1 ) != '.' )
-			{
 				str.append( '.' );
-			}
+
 			// manual?
 			if ( analyzer.isManualFeature() )
 			{
