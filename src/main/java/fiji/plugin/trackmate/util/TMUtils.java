@@ -488,6 +488,8 @@ public class TMUtils
 			return spaceUnits + "^2";
 		case QUALITY:
 			return "quality";
+		case COST:
+			return "cost";
 		case TIME:
 			return timeUnits;
 		case VELOCITY:

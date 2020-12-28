@@ -3,6 +3,7 @@ package fiji.plugin.trackmate;
 public enum Dimension {
 	NONE,
 	QUALITY,
+	COST,
 	INTENSITY,
 	INTENSITY_SQUARED,
 	POSITION,

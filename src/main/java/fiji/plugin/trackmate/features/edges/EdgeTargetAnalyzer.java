@@ -53,7 +53,7 @@ public class EdgeTargetAnalyzer implements EdgeAnalyzer
 
 		FEATURE_DIMENSIONS.put( SPOT_SOURCE_ID, Dimension.NONE );
 		FEATURE_DIMENSIONS.put( SPOT_TARGET_ID, Dimension.NONE );
-		FEATURE_DIMENSIONS.put( EDGE_COST, Dimension.NONE );
+		FEATURE_DIMENSIONS.put( EDGE_COST, Dimension.COST );
 
 		IS_INT.put( SPOT_SOURCE_ID, Boolean.TRUE );
 		IS_INT.put( SPOT_TARGET_ID, Boolean.TRUE );
