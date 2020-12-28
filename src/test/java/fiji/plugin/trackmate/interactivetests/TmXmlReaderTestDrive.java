@@ -11,6 +11,7 @@ import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.providers.DetectorProvider;
 import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
 import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
+import fiji.plugin.trackmate.providers.SpotMorphologyAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import ij.ImagePlus;
@@ -34,7 +35,8 @@ public class TmXmlReaderTestDrive
 				new TrackerProvider(),
 				new SpotAnalyzerProvider( imp ),
 				new EdgeAnalyzerProvider(),
-				new TrackAnalyzerProvider() );
+				new TrackAnalyzerProvider(),
+				new SpotMorphologyAnalyzerProvider( imp ) );
 
 		System.out.println( settings );
 		System.out.println( model );

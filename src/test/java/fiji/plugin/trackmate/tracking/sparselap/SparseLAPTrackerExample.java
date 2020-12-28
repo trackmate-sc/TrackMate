@@ -36,7 +36,6 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.io.TmXmlReader;
-import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
@@ -49,7 +48,7 @@ public class SparseLAPTrackerExample
 		final TmXmlReader reader = new TmXmlReader( file );
 		final Model model = reader.getModel();
 
-		final Settings settings0 = reader.readSettings( null, null, new TrackerProvider(), null, null, null );
+		final Settings settings0 = reader.readSettings( null );
 
 		final Map< String, Object > settings = settings0.trackerSettings;
 		// Linking

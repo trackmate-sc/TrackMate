@@ -113,6 +113,7 @@ import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
+import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactoryBase;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.descriptors.ConfigureViewsDescriptor;
@@ -121,6 +122,7 @@ import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
 import fiji.plugin.trackmate.providers.DetectorProvider;
 import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
 import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
+import fiji.plugin.trackmate.providers.SpotMorphologyAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.providers.ViewProvider;
@@ -406,7 +408,8 @@ public class TmXmlReader
 				new TrackerProvider(),
 				new SpotAnalyzerProvider( imp ),
 				new EdgeAnalyzerProvider(),
-				new TrackAnalyzerProvider() );
+				new TrackAnalyzerProvider(),
+				new SpotMorphologyAnalyzerProvider( imp ) );
 	}
 
 	/**
@@ -442,7 +445,8 @@ public class TmXmlReader
 			final TrackerProvider trackerProvider,
 			final SpotAnalyzerProvider spotAnalyzerProvider,
 			final EdgeAnalyzerProvider edgeAnalyzerProvider,
-			final TrackAnalyzerProvider trackAnalyzerProvider )
+			final TrackAnalyzerProvider trackAnalyzerProvider,
+			final SpotMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider )
 	{
 		final Element settingsElement = root.getChild( SETTINGS_ELEMENT_KEY );
 		if ( null == settingsElement )
@@ -480,7 +484,8 @@ public class TmXmlReader
 				settings,
 				spotAnalyzerProvider,
 				edgeAnalyzerProvider,
-				trackAnalyzerProvider );
+				trackAnalyzerProvider,
+				spotMorphologyAnalyzerProvider );
 
 		return settings;
 	}
@@ -1259,7 +1264,8 @@ public class TmXmlReader
 			final Settings settings,
 			final SpotAnalyzerProvider spotAnalyzerProvider,
 			final EdgeAnalyzerProvider edgeAnalyzerProvider,
-			final TrackAnalyzerProvider trackAnalyzerProvider )
+			final TrackAnalyzerProvider trackAnalyzerProvider,
+			final SpotMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider )
 	{
 
 		final Element analyzersEl = settingsElement.getChild( ANALYZER_COLLECTION_ELEMENT_KEY );
@@ -1304,12 +1310,23 @@ public class TmXmlReader
 							continue;
 						}
 
-						final SpotAnalyzerFactory< ? > spotAnalyzer = spotAnalyzerProvider.getFactory( key );
+						SpotAnalyzerFactoryBase< ? > spotAnalyzer = spotAnalyzerProvider.getFactory( key );
+						if ( null == spotAnalyzer )
+						{
+							/*
+							 * Special case: if we cannot find a matching
+							 * analyzer for a declared factory, then we will try
+							 * to see whether it is a morphology spot analyzer,
+							 * that are treated separately. If it is not, we
+							 * give up.
+							 */
+							spotAnalyzer = spotMorphologyAnalyzerProvider.getFactory( key );
+						}
+
 						if ( null == spotAnalyzer )
 						{
 							logger.error( "Unknown spot analyzer key: " + key + ".\n" );
 							ok = false;
-
 						}
 						else
 						{

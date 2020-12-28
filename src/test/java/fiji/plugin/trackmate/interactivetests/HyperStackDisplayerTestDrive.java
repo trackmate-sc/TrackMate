@@ -12,9 +12,6 @@ import fiji.plugin.trackmate.features.ModelFeatureUpdater;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackDisplayMode;
 import fiji.plugin.trackmate.io.TmXmlReader;
-import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
-import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
-import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 import ij.ImagePlus;
@@ -30,7 +27,7 @@ public class HyperStackDisplayerTestDrive {
 
 		final Model model = reader.getModel();
 		final ImagePlus imp = reader.readImage();
-		final Settings settings = reader.readSettings( imp, null, null, new SpotAnalyzerProvider( imp ), new EdgeAnalyzerProvider(), new TrackAnalyzerProvider() );
+		final Settings settings = reader.readSettings( imp );
 
 		final DisplaySettings ds = DisplaySettings.defaultStyle().copy();
 		ds.setSpotShowName( true );
