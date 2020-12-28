@@ -347,6 +347,34 @@ public class TrackSchemePopupMenu extends JPopupMenu
 				}
 			} );
 		}
+		
+		
+		add( new AbstractAction( "Clear manual color of selection" )
+		{
+			@Override
+			public void actionPerformed( final ActionEvent e )
+			{
+				for ( final mxCell mxCell : vertices )
+				{
+					final Spot spot = trackScheme.getGraph().getSpotFor( mxCell );
+					spot.getFeatures().remove( ManualSpotColorAnalyzerFactory.FEATURE );
+				}
+				for ( final mxCell mxCell : edges )
+				{
+					final DefaultWeightedEdge edge = trackScheme.getGraph().getEdgeFor( mxCell );
+					trackScheme.getModel().getFeatureModel().removeEdgeFeature( edge, ManualEdgeColorAnalyzer.FEATURE );
+				}
+				
+				SwingUtilities.invokeLater( new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						trackScheme.doTrackStyle();
+					}
+				} );
+			}
+		} );
 
 
 		// Remove
