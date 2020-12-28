@@ -48,7 +48,7 @@ public class TrackDurationAnalyzer implements TrackAnalyzer
 		FEATURE_NAMES.put( TRACK_STOP, "Track stop" );
 		FEATURE_NAMES.put( TRACK_DISPLACEMENT, "Track displacement" );
 
-		FEATURE_SHORT_NAMES.put( TRACK_DURATION, "Track duration" );
+		FEATURE_SHORT_NAMES.put( TRACK_DURATION, "Duration" );
 		FEATURE_SHORT_NAMES.put( TRACK_START, "Track start" );
 		FEATURE_SHORT_NAMES.put( TRACK_STOP, "Track stop" );
 		FEATURE_SHORT_NAMES.put( TRACK_DISPLACEMENT, "Track disp." );

@@ -41,8 +41,8 @@ public class SpotContrastAndSNRAnalyzerFactory< T extends RealType< T > & Native
 
 	private static final String CONTRAST_NAME = "Contrast ch";
 	private static final String SNR_NAME = "Signal/Noise ratio ch";
-	private static final String CONTRAST_SHORTNAME = "Contrast ch";
-	private static final String SNR_SHORTNAME = "Signal/Noise ratio ch";
+	private static final String CONTRAST_SHORTNAME = "Ctrst ch";
+	private static final String SNR_SHORTNAME = "SNR ch";
 	private static final List< String > FEATURES = Arrays.asList( new String[] {
 			CONTRAST, SNR } );
 	private static final List< String > FEATURE_SHORTNAMES = Arrays.asList( new String[] {

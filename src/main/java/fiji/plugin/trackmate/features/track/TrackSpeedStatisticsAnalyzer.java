@@ -57,10 +57,10 @@ public class TrackSpeedStatisticsAnalyzer implements TrackAnalyzer
 		FEATURE_NAMES.put( TRACK_MIN_SPEED, "Track min speed" );
 		FEATURE_NAMES.put( TRACK_MEDIAN_SPEED, "Track median speed" );
 
-		FEATURE_SHORT_NAMES.put( TRACK_MEAN_SPEED, "Mean speed" );
+		FEATURE_SHORT_NAMES.put( TRACK_MEAN_SPEED, "Mean sp." );
 		FEATURE_SHORT_NAMES.put( TRACK_MAX_SPEED, "Max speed" );
 		FEATURE_SHORT_NAMES.put( TRACK_MIN_SPEED, "Min speed" );
-		FEATURE_SHORT_NAMES.put( TRACK_MEDIAN_SPEED, "Median speed" );
+		FEATURE_SHORT_NAMES.put( TRACK_MEDIAN_SPEED, "Med. speed" );
 		FEATURE_SHORT_NAMES.put( TRACK_STD_SPEED, "Std speed" );
 
 		FEATURE_DIMENSIONS.put( TRACK_MEAN_SPEED, Dimension.VELOCITY );

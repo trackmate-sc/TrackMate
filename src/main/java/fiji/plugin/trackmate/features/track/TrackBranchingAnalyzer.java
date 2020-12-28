@@ -46,10 +46,10 @@ public class TrackBranchingAnalyzer implements TrackAnalyzer
 	{
 		FEATURES.add( NUMBER_SPOTS );
 		FEATURES.add( NUMBER_GAPS );
-		FEATURES.add( LONGEST_GAP );
 		FEATURES.add( NUMBER_SPLITS );
 		FEATURES.add( NUMBER_MERGES );
 		FEATURES.add( NUMBER_COMPLEX );
+		FEATURES.add( LONGEST_GAP );
 
 		FEATURE_NAMES.put( NUMBER_SPOTS, "Number of spots in track" );
 		FEATURE_NAMES.put( NUMBER_GAPS, "Number of gaps" );
@@ -58,12 +58,12 @@ public class TrackBranchingAnalyzer implements TrackAnalyzer
 		FEATURE_NAMES.put( NUMBER_MERGES, "Number of merge events" );
 		FEATURE_NAMES.put( NUMBER_COMPLEX, "Number of complex points" );
 
-		FEATURE_SHORT_NAMES.put( NUMBER_SPOTS, "Track N spots" );
-		FEATURE_SHORT_NAMES.put( NUMBER_GAPS, "Track N gaps" );
-		FEATURE_SHORT_NAMES.put( LONGEST_GAP, "Longest gap" );
-		FEATURE_SHORT_NAMES.put( NUMBER_SPLITS, "Track N splits" );
-		FEATURE_SHORT_NAMES.put( NUMBER_MERGES, "Track N merges" );
-		FEATURE_SHORT_NAMES.put( NUMBER_COMPLEX, "Track N complex" );
+		FEATURE_SHORT_NAMES.put( NUMBER_SPOTS, "N spots" );
+		FEATURE_SHORT_NAMES.put( NUMBER_GAPS, "N gaps" );
+		FEATURE_SHORT_NAMES.put( NUMBER_SPLITS, "N splits" );
+		FEATURE_SHORT_NAMES.put( NUMBER_MERGES, "N merges" );
+		FEATURE_SHORT_NAMES.put( NUMBER_COMPLEX, "N complex" );
+		FEATURE_SHORT_NAMES.put( LONGEST_GAP, "Lgst gap" );
 
 		FEATURE_DIMENSIONS.put( NUMBER_SPOTS, Dimension.NONE );
 		FEATURE_DIMENSIONS.put( NUMBER_GAPS, Dimension.NONE );

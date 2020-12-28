@@ -42,7 +42,7 @@ public class EdgeSpeedAnalyzer implements EdgeAnalyzer
 		FEATURE_NAMES.put( DISPLACEMENT, "Displacement" );
 
 		FEATURE_SHORT_NAMES.put( SPEED, "Speed" );
-		FEATURE_SHORT_NAMES.put( DISPLACEMENT, "Displacement" );
+		FEATURE_SHORT_NAMES.put( DISPLACEMENT, "Disp." );
 
 		FEATURE_DIMENSIONS.put( SPEED, Dimension.VELOCITY );
 		FEATURE_DIMENSIONS.put( DISPLACEMENT, Dimension.LENGTH );

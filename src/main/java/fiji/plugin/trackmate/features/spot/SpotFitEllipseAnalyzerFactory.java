@@ -41,10 +41,10 @@ public class SpotFitEllipseAnalyzerFactory< T extends RealType< T > & NativeType
 	private static final Map< String, Boolean > FEATURE_ISINTS = new HashMap< >();
 	static
 	{
-		FEATURE_SHORTNAMES.put( X0, "Ellipse x0" );
-		FEATURE_SHORTNAMES.put( Y0, "Ellipse y0" );
+		FEATURE_SHORTNAMES.put( X0, "El. x0" );
+		FEATURE_SHORTNAMES.put( Y0, "El. y0" );
 		FEATURE_SHORTNAMES.put( MAJOR, "El. long axis" );
-		FEATURE_SHORTNAMES.put( MINOR, "El. short axis" );
+		FEATURE_SHORTNAMES.put( MINOR, "El. sh. axis" );
 		FEATURE_SHORTNAMES.put( THETA, "El. angle" );
 		FEATURE_SHORTNAMES.put( ASPECTRATIO, "El. a.r." );
 
