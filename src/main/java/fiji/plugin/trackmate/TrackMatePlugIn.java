@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate;
 
+import fiji.plugin.trackmate.gui.DisplaySettings;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import ij.IJ;
@@ -16,6 +17,8 @@ public class TrackMatePlugIn implements PlugIn
 	protected Settings settings;
 
 	protected Model model;
+
+	protected DisplaySettings displaySettings;
 
 	/**
 	 * Runs the TrackMate GUI plugin.
@@ -58,19 +61,26 @@ public class TrackMatePlugIn implements PlugIn
 
 		settings = createSettings( imp );
 		model = createModel();
+		final SelectionModel selectionModel = new SelectionModel( model );
 		trackmate = createTrackMate();
+		displaySettings = createDisplaySettings();
 
 		/*
 		 * Launch GUI.
 		 */
 
-		final TrackMateGUIController controller = new TrackMateGUIController( trackmate );
+		final TrackMateGUIController controller = new TrackMateGUIController( trackmate, displaySettings, selectionModel );
 		GuiUtils.positionWindow( controller.getGUI(), imp.getWindow() );
 	}
 
 	/*
 	 * HOOKS
 	 */
+
+	protected DisplaySettings createDisplaySettings()
+	{
+		return DisplaySettings.defaultStyle().copy();
+	}
 
 	/**
 	 * Hook for subclassers: <br>
@@ -90,7 +100,7 @@ public class TrackMatePlugIn implements PlugIn
 	 * Creates the {@link Settings} instance that will be used to tune the
 	 * {@link TrackMate} instance. It is initialized by default with values
 	 * taken from the current {@link ImagePlus}.
-	 * 
+	 *
 	 * @param imp
 	 *            the {@link ImagePlus} to operate on.
 	 * @return a new {@link Settings} instance.

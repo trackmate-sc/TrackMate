@@ -4,21 +4,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
-import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
-import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.panels.StartDialogPanel;
-import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
-import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
-import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -44,14 +36,7 @@ public class StartDialogDescriptor implements WizardPanelDescriptor
 	{
 		this.controller = controller;
 		this.panel = new StartDialogPanel();
-		panel.addActionListener( new ActionListener()
-		{
-			@Override
-			public void actionPerformed( final ActionEvent event )
-			{
-				fireAction( event );
-			}
-		} );
+		panel.addActionListener( e -> fireAction( e ) );
 	}
 
 	/*
@@ -121,33 +106,7 @@ public class StartDialogDescriptor implements WizardPanelDescriptor
 		 * specified in the providers.
 		 */
 
-		settings.clearSpotAnalyzerFactories();
-		final SpotAnalyzerProvider spotAnalyzerProvider = controller.getSpotAnalyzerProvider();
-		final List< String > spotAnalyzerKeys = spotAnalyzerProvider.getKeys();
-		for ( final String key : spotAnalyzerKeys )
-		{
-			final SpotAnalyzerFactory< ? > spotFeatureAnalyzer = spotAnalyzerProvider.getFactory( key );
-			settings.addSpotAnalyzerFactory( spotFeatureAnalyzer );
-		}
-
-		settings.clearEdgeAnalyzers();
-		final EdgeAnalyzerProvider edgeAnalyzerProvider = controller.getEdgeAnalyzerProvider();
-		final List< String > edgeAnalyzerKeys = edgeAnalyzerProvider.getKeys();
-		for ( final String key : edgeAnalyzerKeys )
-		{
-			final EdgeAnalyzer edgeAnalyzer = edgeAnalyzerProvider.getFactory( key );
-			settings.addEdgeAnalyzer( edgeAnalyzer );
-		}
-
-		settings.clearTrackAnalyzers();
-		final TrackAnalyzerProvider trackAnalyzerProvider = controller.getTrackAnalyzerProvider();
-		final List< String > trackAnalyzerKeys = trackAnalyzerProvider.getKeys();
-		for ( final String key : trackAnalyzerKeys )
-		{
-			final TrackAnalyzer trackAnalyzer = trackAnalyzerProvider.getFactory( key );
-			settings.addTrackAnalyzer( trackAnalyzer );
-		}
-
+		settings.addAllAnalyzers();
 		trackmate.getModel().getLogger().log( settings.toStringFeatureAnalyzersInfo() );
 		trackmate.computeSpotFeatures( true );
 		trackmate.computeEdgeFeatures( true );
@@ -165,13 +124,8 @@ public class StartDialogDescriptor implements WizardPanelDescriptor
 		}
 
 		final SelectionModel selectionModel = controller.getSelectionModel();
-		mainView = new HyperStackDisplayer( model, selectionModel, settings.imp );
+		mainView = new HyperStackDisplayer( model, selectionModel, settings.imp, controller.getDisplaySettings() );
 		controller.getGuimodel().addView( mainView );
-		final Map< String, Object > displaySettings = controller.getGuimodel().getDisplaySettings();
-		for ( final String key : displaySettings.keySet() )
-		{
-			mainView.setDisplaySettings( key, displaySettings.get( key ) );
-		}
 		mainView.render();
 		controller.getGUI().setDisplayConfigButtonEnabled( true );
 	}

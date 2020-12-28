@@ -17,6 +17,7 @@ import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.InputMap;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -36,8 +37,7 @@ import com.itextpdf.text.Font;
  *
  *
  * @author Jean-Yves Tinevez, adapted from
- *         http://java-swing-tips.blogspot.fr/2010
- *         /03/non-selectable-jcombobox-items.html
+ *         http://java-swing-tips.blogspot.fr/2010/03/non-selectable-jcombobox-items.html
  *
  * @param <K>
  *            the type of the category objects
@@ -56,11 +56,11 @@ public class CategoryJComboBox< K, V > extends JComboBox< Object >
 
 	private boolean isCategoryIndex = false;
 
-	private final Map< V, String > itemNames;
+	private Map< V, String > itemNames;
 
 	private final HashMap< V, K > invertMap;
 
-	private final Map< K, String > categoryNames;
+	private Map< K, String > categoryNames;
 
 	/*
 	 * CONSTRUCTOR
@@ -70,24 +70,47 @@ public class CategoryJComboBox< K, V > extends JComboBox< Object >
 	{
 		super();
 		this.invertMap = new HashMap< >();
+		setItems( items, itemNames, categoryNames );
+	}
+
+	public void setItems( final Map< K, Collection< V > > items, final Map< V, String > itemNames, final Map< K, String > categoryNames )
+	{
+		invertMap.clear();
+		categoryIndexSet.clear();
+
 		this.itemNames = itemNames;
 		this.categoryNames = categoryNames;
-		init();
+
+		final V previous = getSelectedItem();
+		final DefaultComboBoxModel< Object > model = new DefaultComboBoxModel<>();
 
 		// Feed the combo box
 		for ( final K category : items.keySet() )
 		{
-			addItem( category, true );
+			model.addElement( category );
+			categoryIndexSet.add( model.getSize() - 1 );
 
 			final Collection< V > categoryItems = items.get( category );
 			for ( final V item : categoryItems )
 			{
-				addItem( item, false );
+				model.addElement( item );
 				invertMap.put( item, category );
 			}
 		}
-		if ( items.size() > 0 )
-			setSelectedIndex( 1 );
+
+		setModel( model );
+		init();
+
+//		&& previous.getClass().isAssignableFrom( items.get( items.keySet().iterator().next() ).iterator().next().getClass() ) )
+		if ( previous != null )
+		{
+			setSelectedItem( previous );
+		}
+		else
+		{
+			if ( items.size() > 0 )
+				setSelectedItem( items.get( items.keySet().iterator().next() ).iterator().next() );
+		}
 	}
 
 	/*
@@ -145,15 +168,6 @@ public class CategoryJComboBox< K, V > extends JComboBox< Object >
 	/*
 	 * PRIVATE METHODS
 	 */
-
-	private void addItem( final Object anObject, final boolean isCategoryName )
-	{
-		super.addItem( anObject );
-		if ( isCategoryName )
-		{
-			categoryIndexSet.add( getItemCount() - 1 );
-		}
-	}
 
 	/**
 	 * Called at instantiation: prepare the {@link JComboBox} with correct

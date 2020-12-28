@@ -1,24 +1,24 @@
 package fiji.plugin.trackmate.gui.descriptors;
 
-import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.features.FeatureFilter;
-import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.gui.panels.components.ColorByFeatureGUIPanel.Category;
-import fiji.plugin.trackmate.gui.panels.components.FilterGuiPanel;
-import fiji.plugin.trackmate.visualization.PerTrackFeatureColorGenerator;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.features.FeatureFilter;
+import fiji.plugin.trackmate.features.track.TrackBranchingAnalyzer;
+import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
+import fiji.plugin.trackmate.gui.DisplaySettings.ObjectType;
+import fiji.plugin.trackmate.gui.FeatureDisplaySelector;
+import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.gui.panels.components.FilterGuiPanel;
 
 public class TrackFilterDescriptor implements WizardPanelDescriptor
 {
@@ -29,19 +29,26 @@ public class TrackFilterDescriptor implements WizardPanelDescriptor
 
 	private static final String KEY = "FilterTracks";
 
-	private FilterGuiPanel component;
-
-	private final TrackMate trackmate;
-
-	private final PerTrackFeatureColorGenerator trackColorGenerator;
+	private final FilterGuiPanel component;
 
 	private final TrackMateGUIController controller;
 
-	public TrackFilterDescriptor( final TrackMate trackmate, final PerTrackFeatureColorGenerator trackColorGenerator, final TrackMateGUIController controller )
+	public TrackFilterDescriptor(
+			final TrackMateGUIController controller,
+			final List< FeatureFilter > filters,
+			final FeatureDisplaySelector featureSelector )
 	{
-		this.trackmate = trackmate;
-		this.trackColorGenerator = trackColorGenerator;
 		this.controller = controller;
+		this.component = new FilterGuiPanel(
+				controller.getPlugin().getModel(),
+				controller.getPlugin().getSettings(),
+				ObjectType.TRACKS,
+				filters,
+				TrackBranchingAnalyzer.NUMBER_SPOTS,
+				featureSelector );
+
+		component.addActionListener( e -> fireAction( e ) );
+		component.addChangeListener( e -> fireThresholdChanged( e ) );
 	}
 
 	@Override
@@ -53,46 +60,19 @@ public class TrackFilterDescriptor implements WizardPanelDescriptor
 	@Override
 	public void aboutToDisplayPanel()
 	{
-		component = new FilterGuiPanel( trackmate.getModel(), Arrays.asList( new Category[] { Category.TRACKS, Category.DEFAULT } ) );
-		component.setFilters( trackmate.getSettings().getTrackFilters() );
-		component.setColorFeature( TrackIndexAnalyzer.TRACK_INDEX );
-		component.addActionListener( new ActionListener()
-		{
-			@Override
-			public void actionPerformed( final ActionEvent event )
-			{
-				fireAction( event );
-			}
-		} );
-		component.addChangeListener( new ChangeListener()
-		{
-			@Override
-			public void stateChanged( final ChangeEvent event )
-			{
-				fireThresholdChanged( event );
-			}
-		} );
-		component.setColorFeature( trackColorGenerator.getFeature() );
-	}
-
-	@Override
-	public void displayingPanel()
-	{
-		if ( null == component )
-		{
-			// Happens when loading at this stage.
-			aboutToDisplayPanel();
-		}
-		else
-		{
-			component.setColorFeature( trackColorGenerator.getFeature() );
-		}
+		controller.getDisplaySettings().setSpotColorBy( ObjectType.TRACKS, TrackIndexAnalyzer.TRACK_INDEX );
+		controller.getDisplaySettings().setTrackColorBy( ObjectType.TRACKS, TrackIndexAnalyzer.TRACK_INDEX );
 		controller.getGUI().setNextButtonEnabled( true );
 	}
 
 	@Override
+	public void displayingPanel()
+	{}
+
+	@Override
 	public void aboutToHidePanel()
 	{
+		final TrackMate trackmate = controller.getPlugin();
 		final Logger logger = trackmate.getModel().getLogger();
 		logger.log( "Performing track filtering on the following features:\n", Logger.BLUE_COLOR );
 		final List< FeatureFilter > featureFilters = component.getFeatureFilters();
@@ -117,9 +97,9 @@ public class TrackFilterDescriptor implements WizardPanelDescriptor
 				str += '\n';
 				logger.log( str );
 			}
-			logger.log( "Kept " + model.getTrackModel().nTracks( true ) + " tracks out of " + model.getTrackModel().nTracks( false ) + ".\n" );
+			logger.log( "Kept " + model.getTrackModel().nTracks( true )
+					+ " tracks out of " + model.getTrackModel().nTracks( false ) + ".\n" );
 		}
-		trackmate.computeEdgeFeatures( true );
 	}
 
 	@Override
@@ -196,8 +176,6 @@ public class TrackFilterDescriptor implements WizardPanelDescriptor
 	private void fireThresholdChanged( final ChangeEvent e )
 	{
 		for ( final ChangeListener cl : changeListeners )
-		{
 			cl.stateChanged( e );
-		}
 	}
 }

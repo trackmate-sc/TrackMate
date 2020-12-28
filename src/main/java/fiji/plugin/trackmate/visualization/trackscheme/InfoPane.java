@@ -46,6 +46,7 @@ import fiji.plugin.trackmate.SelectionChangeListener;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.features.SpotFeatureGrapher;
+import fiji.plugin.trackmate.gui.DisplaySettings;
 import fiji.plugin.trackmate.util.OnRequestUpdater;
 import fiji.plugin.trackmate.util.OnRequestUpdater.Refreshable;
 import fiji.plugin.trackmate.util.TMUtils;
@@ -79,6 +80,8 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 	/** The table headers, taken from spot feature names. */
 	private final String[] headers;
 
+	private final DisplaySettings displaySettings;
+
 	/*
 	 * CONSTRUCTOR
 	 */
@@ -93,10 +96,11 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 	 *            the {@link SelectionModel} from which we read what to show in
 	 *            the table.
 	 */
-	public InfoPane( final Model model, final SelectionModel selectionModel )
+	public InfoPane( final Model model, final SelectionModel selectionModel, final DisplaySettings displaySettings )
 	{
 		this.model = model;
 		this.selectionModel = selectionModel;
+		this.displaySettings = displaySettings;
 		final List< String > features = new ArrayList< >( model.getFeatureModel().getSpotFeatures() );
 		final Map< String, String > featureNames = model.getFeatureModel().getSpotFeatureShortNames();
 		final List< String > headerList = TMUtils.getArrayFromMaping( features, featureNames );
@@ -456,7 +460,7 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 		final Set< Spot > spots = selectionModel.getSpotSelection();
 		if ( yFeatures.isEmpty() || spots.isEmpty() ) { return; }
 
-		final SpotFeatureGrapher grapher = new SpotFeatureGrapher( xFeature, yFeatures, spots, model );
+		final SpotFeatureGrapher grapher = new SpotFeatureGrapher( xFeature, yFeatures, spots, model, displaySettings );
 		grapher.render();
 	}
 

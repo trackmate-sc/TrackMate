@@ -80,6 +80,12 @@ public class ModelChangeEvent extends EventObject {
 	 */
 	public static final int 	MODEL_MODIFIED = 8;
 
+	/**
+	 * Event type indicated that the feature values for the objects in this
+	 * model have been computed.
+	 */
+	public static final int FEATURES_COMPUTED = 9;
+
 	/** Spots affected by this event. */
 	private final HashSet<Spot> spots = new HashSet<>();
 	/** Edges affected by this event. */

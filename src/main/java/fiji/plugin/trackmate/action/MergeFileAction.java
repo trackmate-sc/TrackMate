@@ -12,9 +12,7 @@ import javax.swing.ImageIcon;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.scijava.plugin.Plugin;
-import org.scijava.util.VersionUtils;
 
-import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
@@ -23,12 +21,12 @@ import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.descriptors.SomeDialogDescriptor;
 import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.io.TmXmlReader;
-import fiji.plugin.trackmate.io.TmXmlReader_v12;
-import fiji.plugin.trackmate.io.TmXmlReader_v20;
 
-public class MergeFileAction extends AbstractTMAction {
+public class MergeFileAction extends AbstractTMAction
+{
 
-	public static final ImageIcon ICON = new ImageIcon(TrackMateWizard.class.getResource("images/arrow_merge.png"));
+	public static final ImageIcon ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/arrow_merge.png" ) );
+
 	public static final String NAME = "Merge a TrackMate file";
 
 	public static final String KEY = "MERGE_OTHER_FILE";
@@ -54,67 +52,64 @@ public class MergeFileAction extends AbstractTMAction {
 	}
 
 	@Override
-	public void execute(final TrackMate trackmate) {
+	public void execute( final TrackMate trackmate )
+	{
 
 		File file = SomeDialogDescriptor.file;
-		if (null == file) {
-			final File folder = new File(System.getProperty("user.dir")).getParentFile().getParentFile();
-			file = new File(folder.getPath() + File.separator + "TrackMateData.xml");
+		if ( null == file )
+		{
+			final File folder = new File( System.getProperty( "user.dir" ) ).getParentFile().getParentFile();
+			file = new File( folder.getPath() + File.separator + "TrackMateData.xml" );
 		}
 
 		final File tmpFile = IOUtils.askForFileForLoading( file, "Merge a TrackMate XML file", parent, logger );
-		if (null == tmpFile) {
+		if ( null == tmpFile )
 			return;
-		}
 		file = tmpFile;
 
 		// Read the file content
-		TmXmlReader reader = new TmXmlReader(file);
-		final String version = reader.getVersion();
-		if ( VersionUtils.compare( version, "2.0.0" ) < 0 )
+		final TmXmlReader reader = new TmXmlReader( file );
+		if ( !reader.isReadingOk() )
 		{
-			logger.log("Detecting a file version " + version + ". Using the right reader.\n", Logger.GREEN_COLOR);
-			reader = new TmXmlReader_v12(file);
-		}
-		else if ( VersionUtils.compare( version, "2.1.0" ) < 0 )
-		{
-			logger.log("Detecting a file version " + version + ". Using the right reader.\n", Logger.GREEN_COLOR);
-			reader = new TmXmlReader_v20(file);
-		}
-		if (!reader.isReadingOk()) {
-			logger.error(reader.getErrorMessage());
-			logger.error("Aborting.\n"); // If I cannot even open the xml file, it is not worth going on.
+			logger.error( reader.getErrorMessage() );
+			logger.error( "Aborting.\n" );
 			return;
 		}
 
 		// Model
 		final Model modelToMerge = reader.getModel();
 		final Model model = trackmate.getModel();
-		final int nNewTracks = modelToMerge.getTrackModel().nTracks(true);
+		final int nNewTracks = modelToMerge.getTrackModel().nTracks( true );
 
 		int progress = 0;
 		model.beginUpdate();
 
 		int nNewSpots = 0;
-		try {
-			for (final int id : modelToMerge.getTrackModel().trackIDs(true)) {
+		try
+		{
+			for ( final int id : modelToMerge.getTrackModel().trackIDs( true ) )
+			{
 
 				/*
 				 * Add new spots built on the ones in the file.
 				 */
 
-				final Set<Spot> spots = modelToMerge.getTrackModel().trackSpots(id);
-				final HashMap<Spot, Spot> mapOldToNew = new HashMap<>(spots.size());
+				final Set< Spot > spots = modelToMerge.getTrackModel().trackSpots( id );
+				final HashMap< Spot, Spot > mapOldToNew = new HashMap<>( spots.size() );
 
-				Spot newSpot = null; // we keep a reference to the new spot, needed below
-				for (final Spot oldSpot : spots) {
-					// An awkward way to avoid spot ID conflicts after loading two files
+				Spot newSpot = null;
+				for ( final Spot oldSpot : spots )
+				{
+					/*
+					 * An awkward way to avoid spot ID conflicts after loading
+					 * two files
+					 */
 					newSpot = new Spot( oldSpot );
-					for (final String feature : oldSpot.getFeatures().keySet()) {
-						newSpot.putFeature(feature, oldSpot.getFeature(feature));
-					}
-					mapOldToNew.put(oldSpot, newSpot);
-					model.addSpotTo(newSpot, oldSpot.getFeature(Spot.FRAME).intValue());
+					for ( final String feature : oldSpot.getFeatures().keySet() )
+						newSpot.putFeature( feature, oldSpot.getFeature( feature ) );
+
+					mapOldToNew.put( oldSpot, newSpot );
+					model.addSpotTo( newSpot, oldSpot.getFeature( Spot.FRAME ).intValue() );
 					nNewSpots++;
 				}
 
@@ -122,35 +117,37 @@ public class MergeFileAction extends AbstractTMAction {
 				 * Link new spots from info in the file.
 				 */
 
-				final Set<DefaultWeightedEdge> edges = modelToMerge.getTrackModel().trackEdges(id);
-				for (final DefaultWeightedEdge edge : edges) {
-					final Spot oldSource = modelToMerge.getTrackModel().getEdgeSource(edge);
-					final Spot oldTarget = modelToMerge.getTrackModel().getEdgeTarget(edge);
-					final Spot newSource = mapOldToNew.get(oldSource);
-					final Spot newTarget = mapOldToNew.get(oldTarget);
-					final double weight = modelToMerge.getTrackModel().getEdgeWeight(edge);
+				final Set< DefaultWeightedEdge > edges = modelToMerge.getTrackModel().trackEdges( id );
+				for ( final DefaultWeightedEdge edge : edges )
+				{
+					final Spot oldSource = modelToMerge.getTrackModel().getEdgeSource( edge );
+					final Spot oldTarget = modelToMerge.getTrackModel().getEdgeTarget( edge );
+					final Spot newSource = mapOldToNew.get( oldSource );
+					final Spot newTarget = mapOldToNew.get( oldTarget );
+					final double weight = modelToMerge.getTrackModel().getEdgeWeight( edge );
 
-					model.addEdge(newSource, newTarget, weight);
+					model.addEdge( newSource, newTarget, weight );
 				}
 
 				/*
 				 * Put back track names
 				 */
 
-				final String trackName = modelToMerge.getTrackModel().name(id);
-				final int newId = model.getTrackModel().trackIDOf(newSpot);
-				model.getTrackModel().setName(newId, trackName);
+				final String trackName = modelToMerge.getTrackModel().name( id );
+				final int newId = model.getTrackModel().trackIDOf( newSpot );
+				model.getTrackModel().setName( newId, trackName );
 
 				progress++;
-				logger.setProgress((double) progress / nNewTracks);
+				logger.setProgress( ( double ) progress / nNewTracks );
 			}
 
-		} finally {
-			model.endUpdate();
-			logger.setProgress(0);
-			logger.log("Imported " + nNewTracks + " tracks made of " + nNewSpots + " spots.\n");
 		}
-
+		finally
+		{
+			model.endUpdate();
+			logger.setProgress( 0 );
+			logger.log( "Imported " + nNewTracks + " tracks made of " + nNewSpots + " spots.\n" );
+		}
 	}
 
 	@Plugin( type = TrackMateActionFactory.class, visible = true )

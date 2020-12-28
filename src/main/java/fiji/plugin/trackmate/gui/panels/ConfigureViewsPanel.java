@@ -3,73 +3,33 @@ package fiji.plugin.trackmate.gui.panels;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.BIG_FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
-import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_DISPLAY_SPOT_AS_ROIS;
-import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_DISPLAY_SPOT_NAMES;
-import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_DRAWING_DEPTH;
-import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_LIMIT_DRAWING_DEPTH;
-import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_SPOTS_VISIBLE;
-import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_SPOT_COLORING;
-import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_SPOT_RADIUS_RATIO;
-import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACKS_VISIBLE;
-import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_COLORING;
-import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_DISPLAY_DEPTH;
-import static fiji.plugin.trackmate.visualization.TrackMateModelView.KEY_TRACK_DISPLAY_MODE;
-import static fiji.plugin.trackmate.visualization.trackscheme.TrackScheme.TRACK_SCHEME_ICON_16x16;
 
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 
-import javax.swing.ComboBoxModel;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
+import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 
-import org.jgrapht.graph.DefaultWeightedEdge;
-
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.gui.DisplaySettingsEvent;
-import fiji.plugin.trackmate.gui.DisplaySettingsListener;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
-import fiji.plugin.trackmate.gui.panels.components.ColorByFeatureGUIPanel;
-import fiji.plugin.trackmate.gui.panels.components.ColorByFeatureGUIPanel.Category;
-import fiji.plugin.trackmate.gui.panels.components.SetColorScaleDialog;
-import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
-import fiji.plugin.trackmate.visualization.ManualEdgeColorGenerator;
-import fiji.plugin.trackmate.visualization.ManualSpotColorGenerator;
-import fiji.plugin.trackmate.visualization.PerEdgeFeatureColorGenerator;
-import fiji.plugin.trackmate.visualization.PerTrackFeatureColorGenerator;
-import fiji.plugin.trackmate.visualization.SpotColorGenerator;
-import fiji.plugin.trackmate.visualization.SpotColorGeneratorPerTrackFeature;
-import fiji.plugin.trackmate.visualization.TrackColorGenerator;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
+import fiji.plugin.trackmate.gui.DisplaySettings;
+import fiji.plugin.trackmate.gui.DisplaySettings.TrackDisplayMode;
+import fiji.plugin.trackmate.gui.FeatureDisplaySelector;
+import fiji.plugin.trackmate.gui.GuiUtils;
 
 /**
  * A configuration panel used to tune the aspect of spots and tracks in multiple
@@ -83,982 +43,358 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 
 	private static final long serialVersionUID = 1L;
 
-	private static final NumberFormat FORMAT = new DecimalFormat( "#.###" );
-
-	private static final Icon DO_ANALYSIS_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/calculator.png" ) );
-
-	public ActionEvent TRACK_SCHEME_BUTTON_PRESSED = new ActionEvent( this, 0, "TrackSchemeButtonPushed" );
-
-	public ActionEvent DO_ANALYSIS_BUTTON_PRESSED = new ActionEvent( this, 1, "DoAnalysisButtonPushed" );
-
-	public ActionEvent DO_ANALYSIS_BUTTON_WITH_SHIFT_PRESSED = new ActionEvent( this, 2, "DoAnalysisButtonWithShiftPushed" );
-
-	private static final String ANALYSIS_BUTTON_TOOLTIP = "<html>"
-			+ "Export the features of all tracks, edges and all <br>"
-			+ "spots belonging to a track to ImageJ tables. <br>"
-			+ "With <code>shift</code> pressed, the features <br>"
-			+ "of all spot are exported.</html>";
-
-	private static final String TRACKSCHEME_BUTTON_TOOLTIP = "<html>" + "Launch a new instance of TrackScheme.</html>";
-
-	/**
-	 * A map of String/Object that configures the look and feel of the views.
-	 */
-	protected Map< String, Object > displaySettings = new HashMap<>();
-
-	protected JButton jButtonShowTrackScheme;
-
-	protected JButton jButtonDoAnalysis;
-
-	private JLabel jLabelTrackDisplayMode;
-
-	private JComboBox< String > jComboBoxDisplayMode;
-
-	private JLabel jLabelDisplayOptions;
-
-	private JPanel jPanelSpotOptions;
-
-	private JCheckBox jCheckBoxDisplaySpots;
-
-	private JPanel jPanelTrackOptions;
-
-	private JCheckBox jCheckBoxDisplayTracks;
-
-	private JCheckBox jCheckBoxLimitDepth;
-
-	private JFormattedTextField jTextFieldFrameDepth;
-
-	private JLabel jLabelFrameDepth;
-
-	private ColorByFeatureGUIPanel jPanelSpotColor;
-
-	private JFormattedTextField jTextFieldSpotRadius;
-
-	private JCheckBox jCheckBoxDisplayNames;
-
-	private JCheckBox jCheckBoxDisplaySpotsAsRois;
-
-	private ColorByFeatureGUIPanel trackColorGUI;
-
-	private final Collection< DisplaySettingsListener > listeners = new HashSet<>();
-
-	private final Model model;
-
-	private PerTrackFeatureColorGenerator trackColorGenerator;
-
-	private PerEdgeFeatureColorGenerator edgeColorGenerator;
-
-	private FeatureColorGenerator< Spot > spotColorGenerator;
-
-	private ManualSpotColorGenerator manualSpotColorGenerator;
-
-	private ManualEdgeColorGenerator manualEdgeColorGenerator;
-
-	private FeatureColorGenerator< Spot > spotColorGeneratorPerTrackFeature;
-
-	private JFormattedTextField textFieldDrawingDepth;
-
-	private JPanel jpanelDrawingDepth;
-
-	private JLabel lblDrawingDepthUnits;
-
-	private JLabel jLabelSpotRadius;
-
-	protected JPanel jPanelButtons;
-
+	private static final Color BORDER_COLOR = new java.awt.Color( 192, 192, 192 );
 
 	/*
 	 * CONSTRUCTOR
 	 */
 
-	public ConfigureViewsPanel( final Model model )
+	public ConfigureViewsPanel(
+			final DisplaySettings ds,
+			final FeatureDisplaySelector featureSelector,
+			final String spaceUnits,
+			final Action launchTrackSchemeAction,
+			final Action showTrackTablesAction,
+			final Action showSpotTableAction )
 	{
-		this.model = model;
-		initGUI();
-		refreshGUI();
-		resizeButtons();
-	}
+		this.setPreferredSize( new Dimension( 300, 521 ) );
+		this.setSize( 300, 500 );
 
-	/*
-	 * PUBLIC METHODS
-	 */
-
-	/**
-	 * Adds the specified {@link DisplaySettingsListener} to the collection of
-	 * listeners that will be notified when a display settings change is made on
-	 * this GUI.
-	 *
-	 * @param listener
-	 *            the listener to add.
-	 */
-	public void addDisplaySettingsChangeListener( final DisplaySettingsListener listener )
-	{
-		listeners.add( listener );
-	}
-
-	/**
-	 * Removes the specified {@link DisplaySettingsListener} from the collection
-	 * of listeners of this GUI.
-	 *
-	 * @param listener
-	 *            the listener to remove.
-	 * @return <code>true</code> if the listener belonged to the list of
-	 *         registered listener and was successfully removed.
-	 */
-	public boolean removeDisplaySettingsChangeListener( final DisplaySettingsListener listener )
-	{
-		return listeners.remove( listener );
-	}
-
-	/**
-	 * Exposes the {@link JButton} that should trigger the launch of
-	 * TrackScheme.
-	 *
-	 * @return the TrackScheme {@link JButton}.
-	 */
-	public JButton getTrackSchemeButton()
-	{
-		return jButtonShowTrackScheme;
-	}
-
-	/**
-	 * Exposes the {@link JButton} that should trigger the launch of analysis.
-	 *
-	 * @return the analysis {@link JButton}.
-	 */
-	public JButton getDoAnalysisButton()
-	{
-		return jButtonDoAnalysis;
-	}
-
-	public JLabel getTitleJLabel()
-	{
-		return jLabelDisplayOptions;
-	}
-
-	/**
-	 * Overrides the track color generator configured in this panel, allowing to
-	 * share instances.
-	 *
-	 * @param trackColorGenerator
-	 *            the new color generator. The previous one will be terminated.
-	 */
-	public void setTrackColorGenerator( final PerTrackFeatureColorGenerator trackColorGenerator )
-	{
-		if ( null != this.trackColorGenerator )
-			this.trackColorGenerator.terminate();
-
-		this.trackColorGenerator = trackColorGenerator;
-	}
-
-	/**
-	 * Overrides the edge color generator configured in this panel, allowing to
-	 * share instances.
-	 *
-	 * @param edgeColorGenerator
-	 *            the new color generator. The previous one will be terminated.
-	 */
-	public void setEdgeColorGenerator( final PerEdgeFeatureColorGenerator edgeColorGenerator )
-	{
-		if ( null != this.edgeColorGenerator )
-			this.edgeColorGenerator.terminate();
-
-		this.edgeColorGenerator = edgeColorGenerator;
-	}
-
-	/**
-	 * Overrides the spot color generator configured in this panel, allowing to
-	 * share instances.
-	 *
-	 * @param spotColorGenerator
-	 *            the new color generator.
-	 */
-	public void setSpotColorGenerator( final FeatureColorGenerator< Spot > spotColorGenerator )
-	{
-		if ( null != this.spotColorGenerator )
-			this.spotColorGenerator.terminate();
-
-		this.spotColorGenerator = spotColorGenerator;
-	}
-
-	public void setSpotColorGeneratorPerTrackFeature( final FeatureColorGenerator< Spot > spotColorGeneratorPerTrackFeature )
-	{
-		if ( null != this.spotColorGeneratorPerTrackFeature )
-			this.spotColorGeneratorPerTrackFeature.terminate();
-
-		this.spotColorGeneratorPerTrackFeature = spotColorGeneratorPerTrackFeature;
-	}
-
-	public void refreshColorFeatures()
-	{
-		if ( ( displaySettings.get( KEY_SPOT_COLORING ) instanceof SpotColorGenerator ) )
-			jPanelSpotColor.setColorFeature( spotColorGenerator.getFeature() );
-		else if ( ( displaySettings.get( KEY_SPOT_COLORING ) instanceof ManualSpotColorGenerator ) )
-			jPanelSpotColor.setColorFeature( ColorByFeatureGUIPanel.MANUAL_KEY );
-		else if ( ( ( displaySettings.get( KEY_SPOT_COLORING ) instanceof SpotColorGeneratorPerTrackFeature ) ) )
-			jPanelSpotColor.setColorFeature( spotColorGeneratorPerTrackFeature.getFeature() );
-
-		if ( !( displaySettings.get( KEY_TRACK_COLORING ) instanceof ManualEdgeColorGenerator ) )
-			trackColorGUI.setColorFeature( trackColorGenerator.getFeature() );
-	}
-
-	public void setManualSpotColorGenerator( final ManualSpotColorGenerator manualSpotColorGenerator )
-	{
-		if ( null != this.manualSpotColorGenerator )
-			this.manualSpotColorGenerator.terminate();
-
-		this.manualSpotColorGenerator = manualSpotColorGenerator;
-	}
-
-	public void setManualEdgeColorGenerator( final ManualEdgeColorGenerator manualEdgeColorGenerator )
-	{
-		if ( null != this.manualEdgeColorGenerator )
-			this.manualEdgeColorGenerator.terminate();
-
-		this.manualEdgeColorGenerator = manualEdgeColorGenerator;
-	}
-
-	/**
-	 * Refreshes some components of this GUI with current values of the model.
-	 */
-	public void refreshGUI()
-	{
+		final GridBagLayout layout = new GridBagLayout();
+		layout.columnWeights = new double[] { 1.0, 1.0 };
+		layout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 };
+		setLayout( layout );
 
 		/*
-		 * Spot coloring
+		 * Title
 		 */
 
-		if ( null != jPanelSpotColor )
-			jPanelSpotOptions.remove( jPanelSpotColor );
-
-		jPanelSpotColor = new ColorByFeatureGUIPanel( model, Arrays.asList( new Category[] { Category.SPOTS, Category.DEFAULT, Category.TRACKS } ) );
-
-		jPanelSpotColor.addMouseListener( new MouseAdapter()
-		{
-			@Override
-			public void mouseClicked( final MouseEvent e )
-			{
-				if ( e.getClickCount() == 2 )
-				{
-					final FeatureColorGenerator< Spot > colorGenerator;
-					final Category category = jPanelSpotColor.getColorGeneratorCategory();
-					switch ( category )
-					{
-					case TRACKS:
-						colorGenerator = spotColorGeneratorPerTrackFeature;
-						break;
-
-					default:
-						colorGenerator = spotColorGenerator;
-						break;
-					}
-
-					final JFrame topFrame = ( JFrame ) SwingUtilities.getWindowAncestor( ConfigureViewsPanel.this );
-					final SetColorScaleDialog dialog = new SetColorScaleDialog( topFrame, "Set color scale for spots", colorGenerator );
-					dialog.setVisible( true );
-					if ( !dialog.hasUserPressedOK() )
-						return;
-
-					if ( dialog.isAutoMinMaxMode() )
-						colorGenerator.autoMinMax();
-
-					jPanelSpotColor.setFrom( dialog );
-					jPanelSpotColor.autoMinMax();
-
-					final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_SPOT_COLORING, colorGenerator, colorGenerator );
-					fireDisplaySettingsChange( event );
-				}
-
-			}
-		} );
-
-		jPanelSpotColor.addActionListener( new ActionListener()
-		{
-			@Override
-			public void actionPerformed( final ActionEvent e )
-			{
-				@SuppressWarnings( "unchecked" )
-				final FeatureColorGenerator< Spot > oldValue = ( FeatureColorGenerator< Spot > ) displaySettings.get( KEY_SPOT_COLORING );
-				final FeatureColorGenerator< Spot > newValue;
-				final Category category = jPanelSpotColor.getColorGeneratorCategory();
-				switch ( category )
-				{
-				case SPOTS:
-					if ( null == spotColorGenerator )
-						return;
-
-					spotColorGenerator.setFeature( jPanelSpotColor.getColorFeature() );
-					newValue = spotColorGenerator;
-					break;
-
-				case TRACKS:
-					newValue = spotColorGeneratorPerTrackFeature;
-					spotColorGeneratorPerTrackFeature.setFeature( jPanelSpotColor.getColorFeature() );
-					break;
-
-				case DEFAULT:
-					if ( jPanelSpotColor.getColorFeature().equals( ColorByFeatureGUIPanel.UNIFORM_KEY ) )
-					{
-						spotColorGenerator.setFeature( null );
-						newValue = spotColorGenerator;
-					}
-					else
-					{
-						newValue = manualSpotColorGenerator;
-					}
-					break;
-				default:
-					throw new IllegalArgumentException( "Unknow spot color generator category: " + category );
-				}
-				displaySettings.put( KEY_SPOT_COLORING, newValue );
-				final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_SPOT_COLORING, newValue, oldValue );
-				fireDisplaySettingsChange( event );
-			}
-		} );
-		jPanelSpotColor.autoMinMax();
-		final GroupLayout gl_jPanelSpotOptions = new GroupLayout( jPanelSpotOptions );
-		gl_jPanelSpotOptions.setHorizontalGroup(
-				gl_jPanelSpotOptions.createParallelGroup( Alignment.LEADING )
-						.addGroup( gl_jPanelSpotOptions.createSequentialGroup()
-								.addGap( 5 )
-								.addGroup( gl_jPanelSpotOptions.createParallelGroup( Alignment.LEADING )
-										.addGroup( gl_jPanelSpotOptions.createSequentialGroup()
-												.addComponent( jCheckBoxDisplayNames, GroupLayout.DEFAULT_SIZE, 267, Short.MAX_VALUE )
-												.addContainerGap() )
-										.addGroup( gl_jPanelSpotOptions.createSequentialGroup()
-												.addComponent( jLabelSpotRadius, GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE )
-												.addGap( 5 )
-												.addComponent( jTextFieldSpotRadius, GroupLayout.DEFAULT_SIZE, 45, Short.MAX_VALUE )
-												.addGap( 103 ) ) ) )
-						.addGroup( gl_jPanelSpotOptions.createSequentialGroup()
-								.addContainerGap()
-								.addComponent( jPanelSpotColor, GroupLayout.DEFAULT_SIZE, 266, Short.MAX_VALUE )
-								.addContainerGap() ) );
-		gl_jPanelSpotOptions.setVerticalGroup(
-				gl_jPanelSpotOptions.createParallelGroup( Alignment.LEADING )
-						.addGroup( gl_jPanelSpotOptions.createSequentialGroup()
-								.addGroup( gl_jPanelSpotOptions.createParallelGroup( Alignment.LEADING )
-										.addGroup( gl_jPanelSpotOptions.createSequentialGroup()
-												.addGap( 8 )
-												.addComponent( jLabelSpotRadius ) )
-										.addGroup( gl_jPanelSpotOptions.createSequentialGroup()
-												.addGap( 5 )
-												.addComponent( jTextFieldSpotRadius, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE ) ) )
-								.addPreferredGap( ComponentPlacement.RELATED )
-								.addComponent( jCheckBoxDisplayNames )
-								.addPreferredGap( ComponentPlacement.RELATED )
-								.addComponent( jPanelSpotColor, GroupLayout.PREFERRED_SIZE, 51, Short.MAX_VALUE )
-								.addContainerGap() ) );
-		jPanelSpotOptions.setLayout( gl_jPanelSpotOptions );
+		final JLabel lblDisplayOptions = new JLabel();
+		lblDisplayOptions.setText( "Display options" );
+		lblDisplayOptions.setFont( BIG_FONT );
+		lblDisplayOptions.setHorizontalAlignment( SwingConstants.LEFT );
+		final GridBagConstraints gbcLabelDisplayOptions = new GridBagConstraints();
+		gbcLabelDisplayOptions.gridwidth = 2;
+		gbcLabelDisplayOptions.fill = GridBagConstraints.BOTH;
+		gbcLabelDisplayOptions.insets = new Insets( 5, 5, 5, 5 );
+		gbcLabelDisplayOptions.gridx = 0;
+		gbcLabelDisplayOptions.gridy = 0;
+		add( lblDisplayOptions, gbcLabelDisplayOptions );
 
 		/*
-		 * Track coloring
+		 * Display spot checkbox.
 		 */
 
-		if ( null != trackColorGUI )
-		{
-			jPanelTrackOptions.remove( trackColorGUI );
-		}
+		final JCheckBox chkboxDisplaySpots = new JCheckBox();
+		chkboxDisplaySpots.setText( "Display spots" );
+		chkboxDisplaySpots.setFont( FONT );
+		final GridBagConstraints gbcCheckBoxDisplaySpots = new GridBagConstraints();
+		gbcCheckBoxDisplaySpots.anchor = GridBagConstraints.NORTH;
+		gbcCheckBoxDisplaySpots.fill = GridBagConstraints.HORIZONTAL;
+		gbcCheckBoxDisplaySpots.insets = new Insets( 0, 5, 0, 5 );
+		gbcCheckBoxDisplaySpots.gridx = 0;
+		gbcCheckBoxDisplaySpots.gridy = 1;
+		add( chkboxDisplaySpots, gbcCheckBoxDisplaySpots );
 
-		trackColorGUI = new ColorByFeatureGUIPanel( model, Arrays.asList( new Category[] { Category.TRACKS, Category.EDGES, Category.DEFAULT } ) );
-		// trackColorGUI.setPreferredSize(new java.awt.Dimension(265, 45));
-
-		trackColorGUI.addMouseListener( new MouseAdapter()
-		{
-			@Override
-			public void mouseClicked( final MouseEvent e )
-			{
-				if ( e.getClickCount() == 2 )
-				{
-					final FeatureColorGenerator< DefaultWeightedEdge > colorGenerator;
-					final String str;
-					final Category category = trackColorGUI.getColorGeneratorCategory();
-					switch ( category )
-					{
-					case TRACKS:
-						colorGenerator = trackColorGenerator;
-						str = "tracks";
-						break;
-
-					default:
-						colorGenerator = edgeColorGenerator;
-						str = "edges";
-						break;
-					}
-
-					final JFrame topFrame = ( JFrame ) SwingUtilities.getWindowAncestor( ConfigureViewsPanel.this );
-					final SetColorScaleDialog dialog = new SetColorScaleDialog( topFrame, "Set color scale for " + str, colorGenerator );
-					dialog.setVisible( true );
-					if ( !dialog.hasUserPressedOK() )
-						return;
-
-					if ( dialog.isAutoMinMaxMode() )
-						colorGenerator.autoMinMax();
-
-					trackColorGUI.setFrom( dialog );
-					trackColorGUI.autoMinMax();
-					final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_TRACK_COLORING, colorGenerator, colorGenerator );
-					fireDisplaySettingsChange( event );
-				}
-
-			}
-		} );
-
-		trackColorGUI.addActionListener( new ActionListener()
-		{
-			@Override
-			public void actionPerformed( final ActionEvent e )
-			{
-				final TrackColorGenerator oldValue = ( TrackColorGenerator ) displaySettings.get( KEY_TRACK_COLORING );
-				TrackColorGenerator newValue;
-				final Category category = trackColorGUI.getColorGeneratorCategory();
-				switch ( category )
-				{
-				case TRACKS:
-					newValue = trackColorGenerator;
-					newValue.setFeature( trackColorGUI.getColorFeature() );
-					break;
-
-				case EDGES:
-					newValue = edgeColorGenerator;
-					newValue.setFeature( trackColorGUI.getColorFeature() );
-					break;
-
-				case DEFAULT:
-					if ( trackColorGUI.getColorFeature().equals( ColorByFeatureGUIPanel.MANUAL_KEY ) )
-					{
-						newValue = manualEdgeColorGenerator;
-					}
-					else
-					{
-						newValue = trackColorGenerator;
-						newValue.setFeature( null );
-					}
-					break;
-
-				default:
-					throw new IllegalArgumentException( "Unknow track color generator category: " + category );
-				}
-				displaySettings.put( KEY_TRACK_COLORING, newValue );
-				// new value vs old value does not really hold.
-				final DisplaySettingsEvent event = new DisplaySettingsEvent( trackColorGUI, KEY_TRACK_COLORING, newValue, oldValue );
-				fireDisplaySettingsChange( event );
-			}
-		} );
-		final GroupLayout gl_jPanelTrackOptions = new GroupLayout( jPanelTrackOptions );
-		gl_jPanelTrackOptions.setHorizontalGroup(
-				gl_jPanelTrackOptions.createParallelGroup( Alignment.LEADING )
-						.addGroup( gl_jPanelTrackOptions.createSequentialGroup()
-								.addGap( 5 )
-								.addGroup( gl_jPanelTrackOptions.createParallelGroup( Alignment.TRAILING )
-										.addComponent( jComboBoxDisplayMode, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE )
-										.addGroup( gl_jPanelTrackOptions.createSequentialGroup()
-												.addComponent( jCheckBoxLimitDepth, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE )
-												.addGap( 6 ) )
-										.addGroup( gl_jPanelTrackOptions.createSequentialGroup()
-												.addComponent( jLabelFrameDepth, GroupLayout.DEFAULT_SIZE, 103, Short.MAX_VALUE )
-												.addGap( 5 )
-												.addComponent( jTextFieldFrameDepth, GroupLayout.DEFAULT_SIZE, 49, Short.MAX_VALUE )
-												.addGap( 108 ) )
-										.addComponent( jLabelTrackDisplayMode, GroupLayout.DEFAULT_SIZE, 265, Short.MAX_VALUE ) )
-								.addGap( 8 ) )
-						.addGroup( gl_jPanelTrackOptions.createSequentialGroup()
-								.addContainerGap()
-								.addComponent( trackColorGUI, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE )
-								.addContainerGap() ) );
-		gl_jPanelTrackOptions.setVerticalGroup(
-				gl_jPanelTrackOptions.createParallelGroup( Alignment.LEADING )
-						.addGroup( gl_jPanelTrackOptions.createSequentialGroup()
-								.addGap( 5 )
-								.addComponent( jLabelTrackDisplayMode, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE )
-								.addGap( 5 )
-								.addComponent( jComboBoxDisplayMode, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE )
-								.addGap( 5 )
-								.addComponent( jCheckBoxLimitDepth, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE )
-								.addGroup( gl_jPanelTrackOptions.createParallelGroup( Alignment.LEADING )
-										.addGroup( gl_jPanelTrackOptions.createSequentialGroup()
-												.addGap( 8 )
-												.addComponent( jLabelFrameDepth, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE ) )
-										.addGroup( gl_jPanelTrackOptions.createSequentialGroup()
-												.addGap( 5 )
-												.addComponent( jTextFieldFrameDepth, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE ) ) )
-								.addPreferredGap( ComponentPlacement.RELATED )
-								.addComponent( trackColorGUI, GroupLayout.PREFERRED_SIZE, 49, Short.MAX_VALUE )
-								.addGap( 9 ) ) );
-		jPanelTrackOptions.setLayout( gl_jPanelTrackOptions );
-
-		if ( spotColorGenerator != null )
-			jPanelSpotColor.setColorFeature( spotColorGenerator.getFeature() );
-
-		if ( trackColorGenerator != null )
-			trackColorGUI.setColorFeature( trackColorGenerator.getFeature() );
+		final JCheckBox chkboxDisplaySpotsAsRois = new JCheckBox();
+		chkboxDisplaySpotsAsRois.setText( "as ROIs" );
+		final GridBagConstraints gbc_chkboxDisplaySpotsAsRois = new GridBagConstraints();
+		gbc_chkboxDisplaySpotsAsRois.insets = new Insets( 0, 0, 0, 5 );
+		gbc_chkboxDisplaySpotsAsRois.anchor = GridBagConstraints.EAST;
+		gbc_chkboxDisplaySpotsAsRois.gridx = 1;
+		gbc_chkboxDisplaySpotsAsRois.gridy = 1;
+		add( chkboxDisplaySpotsAsRois, gbc_chkboxDisplaySpotsAsRois );
+		chkboxDisplaySpotsAsRois.setFont( FONT );
+		chkboxDisplaySpotsAsRois.addActionListener( e -> ds.setSpotDisplayedAsRoi( chkboxDisplaySpotsAsRois.isSelected() ) );
+		chkboxDisplaySpotsAsRois.setSelected( ds.isSpotDisplayedAsRoi() );
 
 		/*
-		 * Units
+		 * Spot options panel.
 		 */
 
-		lblDrawingDepthUnits.setText( model.getSpaceUnits() );
+		final JPanel panelSpotOptions = new JPanel();
+		panelSpotOptions.setBorder( new LineBorder( BORDER_COLOR, 1, true ) );
+		final GridBagConstraints gbcPanelSpotOptions = new GridBagConstraints();
+		gbcPanelSpotOptions.gridwidth = 2;
+		gbcPanelSpotOptions.insets = new Insets( 0, 5, 5, 5 );
+		gbcPanelSpotOptions.fill = GridBagConstraints.BOTH;
+		gbcPanelSpotOptions.gridx = 0;
+		gbcPanelSpotOptions.gridy = 2;
+		add( panelSpotOptions, gbcPanelSpotOptions );
+		final GridBagLayout gblPanelSpotOptions = new GridBagLayout();
+		gblPanelSpotOptions.columnWeights = new double[] { 0.0, 1.0 };
+		gblPanelSpotOptions.rowWeights = new double[] { 0.0, 0.0 };
+		panelSpotOptions.setLayout( gblPanelSpotOptions );
 
+		final JLabel lblSpotRadius = new JLabel( "Spot display radius ratio:" );
+		lblSpotRadius.setFont( SMALL_FONT );
+		final GridBagConstraints gbcLblSpotRadius = new GridBagConstraints();
+		gbcLblSpotRadius.anchor = GridBagConstraints.EAST;
+		gbcLblSpotRadius.insets = new Insets( 5, 5, 0, 5 );
+		gbcLblSpotRadius.gridx = 0;
+		gbcLblSpotRadius.gridy = 0;
+		panelSpotOptions.add( lblSpotRadius, gbcLblSpotRadius );
+
+		final JFormattedTextField ftfSpotRadius = new JFormattedTextField();
+		GuiUtils.selectAllOnFocus( ftfSpotRadius );
+		ftfSpotRadius.setHorizontalAlignment( SwingConstants.CENTER );
+		ftfSpotRadius.setFont( SMALL_FONT );
+		ftfSpotRadius.setMinimumSize( new Dimension( 80, 20 ) );
+		ftfSpotRadius.setColumns( 5 );
+		final GridBagConstraints gbcFtfSpotRadius = new GridBagConstraints();
+		gbcFtfSpotRadius.insets = new Insets( 5, 0, 0, 0 );
+		gbcFtfSpotRadius.anchor = GridBagConstraints.WEST;
+		gbcFtfSpotRadius.gridx = 1;
+		gbcFtfSpotRadius.gridy = 0;
+		panelSpotOptions.add( ftfSpotRadius, gbcFtfSpotRadius );
+
+		final JLabel lblSpotName = new JLabel( "Display spot names:" );
+		lblSpotName.setFont( SMALL_FONT );
+		final GridBagConstraints gbcLblSpotName = new GridBagConstraints();
+		gbcLblSpotName.anchor = GridBagConstraints.EAST;
+		gbcLblSpotName.insets = new Insets( 0, 0, 0, 5 );
+		gbcLblSpotName.gridx = 0;
+		gbcLblSpotName.gridy = 1;
+		panelSpotOptions.add( lblSpotName, gbcLblSpotName );
+
+		final JCheckBox chkboxSpotNames = new JCheckBox();
+		final GridBagConstraints gbcChkboxSpotNames = new GridBagConstraints();
+		gbcChkboxSpotNames.anchor = GridBagConstraints.WEST;
+		gbcChkboxSpotNames.gridx = 1;
+		gbcChkboxSpotNames.gridy = 1;
+		panelSpotOptions.add( chkboxSpotNames, gbcChkboxSpotNames );
+
+		final JPanel selectorForSpots = featureSelector.createSelectorForSpots();
+		final GridBagConstraints gbcCmbboxSpotColor = new GridBagConstraints();
+		gbcCmbboxSpotColor.insets = new Insets( 0, 5, 5, 5 );
+		gbcCmbboxSpotColor.fill = GridBagConstraints.BOTH;
+		gbcCmbboxSpotColor.gridwidth = 2;
+		gbcCmbboxSpotColor.gridx = 0;
+		gbcCmbboxSpotColor.gridy = 3;
+		panelSpotOptions.add( selectorForSpots, gbcCmbboxSpotColor );
+
+		/*
+		 * Tracks.
+		 */
+
+		final JCheckBox chkboxDisplayTracks = new JCheckBox();
+		chkboxDisplayTracks.setText( "Display tracks" );
+		chkboxDisplayTracks.setFont( FONT );
+		final GridBagConstraints gbcCheckBoxDisplayTracks = new GridBagConstraints();
+		gbcCheckBoxDisplayTracks.anchor = GridBagConstraints.NORTH;
+		gbcCheckBoxDisplayTracks.fill = GridBagConstraints.HORIZONTAL;
+		gbcCheckBoxDisplayTracks.insets = new Insets( 5, 5, 0, 5 );
+		gbcCheckBoxDisplayTracks.gridx = 0;
+		gbcCheckBoxDisplayTracks.gridy = 3;
+		add( chkboxDisplayTracks, gbcCheckBoxDisplayTracks );
+
+		final JComboBox< TrackDisplayMode > cmbboxTrackDisplayMode = new JComboBox<>( TrackDisplayMode.values() );
+		final GridBagConstraints gbc_cmbboxTrackDisplayMode = new GridBagConstraints();
+		gbc_cmbboxTrackDisplayMode.fill = GridBagConstraints.HORIZONTAL;
+		gbc_cmbboxTrackDisplayMode.insets = new Insets( 5, 0, 0, 5 );
+		gbc_cmbboxTrackDisplayMode.gridx = 1;
+		gbc_cmbboxTrackDisplayMode.gridy = 3;
+		add( cmbboxTrackDisplayMode, gbc_cmbboxTrackDisplayMode );
+		cmbboxTrackDisplayMode.setFont( SMALL_FONT );
+		cmbboxTrackDisplayMode.addActionListener( e -> ds.setTrackDisplayMode( ( TrackDisplayMode ) cmbboxTrackDisplayMode.getSelectedItem() ) );
+		cmbboxTrackDisplayMode.setSelectedItem( ds.getTrackDisplayMode() );
+
+		/*
+		 * Tracks display options.
+		 */
+
+		final JPanel panelTrackOptions = new JPanel();
+		panelTrackOptions.setBorder( new LineBorder( BORDER_COLOR, 1, true ) );
+		final GridBagConstraints gbcPanelTrackOptions = new GridBagConstraints();
+		gbcPanelTrackOptions.gridwidth = 2;
+		gbcPanelTrackOptions.insets = new Insets( 0, 5, 5, 5 );
+		gbcPanelTrackOptions.fill = GridBagConstraints.BOTH;
+		gbcPanelTrackOptions.gridx = 0;
+		gbcPanelTrackOptions.gridy = 4;
+		add( panelTrackOptions, gbcPanelTrackOptions );
+		final GridBagLayout gblPanelTrackOptions = new GridBagLayout();
+		gblPanelTrackOptions.columnWeights = new double[] { 0.0, 0.0, 1.0 };
+		gblPanelTrackOptions.rowWeights = new double[] { 0.0, 0.0 };
+		panelTrackOptions.setLayout( gblPanelTrackOptions );
+
+		final JLabel lblFadeTracks = new JLabel( "Fade tracks in time:" );
+		lblFadeTracks.setFont( SMALL_FONT );
+		final GridBagConstraints gbcLblFadeTracks = new GridBagConstraints();
+		gbcLblFadeTracks.anchor = GridBagConstraints.EAST;
+		gbcLblFadeTracks.insets = new Insets( 0, 5, 0, 5 );
+		gbcLblFadeTracks.gridx = 0;
+		gbcLblFadeTracks.gridy = 0;
+		panelTrackOptions.add( lblFadeTracks, gbcLblFadeTracks );
+
+		final JCheckBox chkboxFadeTracks = new JCheckBox();
+		final GridBagConstraints gbcChckbxFadeTracks = new GridBagConstraints();
+		gbcChckbxFadeTracks.insets = new Insets( 0, 0, 0, 5 );
+		gbcChckbxFadeTracks.anchor = GridBagConstraints.WEST;
+		gbcChckbxFadeTracks.gridx = 1;
+		gbcChckbxFadeTracks.gridy = 0;
+		panelTrackOptions.add( chkboxFadeTracks, gbcChckbxFadeTracks );
+
+		final JLabel lblFadeRange = new JLabel( "Fade range:" );
+		lblFadeRange.setFont( SMALL_FONT );
+		final GridBagConstraints gbcLblFadeRange = new GridBagConstraints();
+		gbcLblFadeRange.anchor = GridBagConstraints.EAST;
+		gbcLblFadeRange.insets = new Insets( 0, 0, 0, 5 );
+		gbcLblFadeRange.gridx = 0;
+		gbcLblFadeRange.gridy = 1;
+		panelTrackOptions.add( lblFadeRange, gbcLblFadeRange );
+
+		final SpinnerNumberModel fadeTrackDepthModel = new SpinnerNumberModel( ds.getFadeTrackRange(), 1, 1000, 1 );
+		final JSpinner spinnerFadeRange = new JSpinner( fadeTrackDepthModel );
+		spinnerFadeRange.setFont( SMALL_FONT );
+		final GridBagConstraints gbcSpinnerFadeRange = new GridBagConstraints();
+		gbcSpinnerFadeRange.insets = new Insets( 0, 0, 0, 5 );
+		gbcSpinnerFadeRange.anchor = GridBagConstraints.WEST;
+		gbcSpinnerFadeRange.gridx = 1;
+		gbcSpinnerFadeRange.gridy = 1;
+		panelTrackOptions.add( spinnerFadeRange, gbcSpinnerFadeRange );
+
+		final JLabel lblFadeRangeUnits = new JLabel( "time-points" );
+		lblFadeRangeUnits.setFont( SMALL_FONT );
+		final GridBagConstraints gbcFadeRangeUnit = new GridBagConstraints();
+		gbcFadeRangeUnit.anchor = GridBagConstraints.WEST;
+		gbcFadeRangeUnit.gridx = 2;
+		gbcFadeRangeUnit.gridy = 1;
+		panelTrackOptions.add( lblFadeRangeUnits, gbcFadeRangeUnit );
+
+		final JPanel selectorForTracks = featureSelector.createSelectorForTracks();
+		final GridBagConstraints gbcCmbboxTrackColor = new GridBagConstraints();
+		gbcCmbboxTrackColor.insets = new Insets( 5, 5, 5, 5 );
+		gbcCmbboxTrackColor.fill = GridBagConstraints.BOTH;
+		gbcCmbboxTrackColor.gridwidth = 3;
+		gbcCmbboxTrackColor.gridx = 0;
+		gbcCmbboxTrackColor.gridy = 3;
+		panelTrackOptions.add( selectorForTracks, gbcCmbboxTrackColor );
+
+		/*
+		 * Draw Z Depth
+		 */
+
+		final JPanel panelDrawingZDepth = new JPanel();
+		panelDrawingZDepth.setBorder( new LineBorder( BORDER_COLOR, 1, true ) );
+		final FlowLayout flowLayout = (FlowLayout) panelDrawingZDepth.getLayout();
+		flowLayout.setAlignment(FlowLayout.LEFT);
+		final GridBagConstraints gbc_panelDrawingZDepth = new GridBagConstraints();
+		gbc_panelDrawingZDepth.gridwidth = 2;
+		gbc_panelDrawingZDepth.insets = new Insets( 0, 5, 5, 5 );
+		gbc_panelDrawingZDepth.fill = GridBagConstraints.BOTH;
+		gbc_panelDrawingZDepth.gridx = 0;
+		gbc_panelDrawingZDepth.gridy = 5;
+		add(panelDrawingZDepth, gbc_panelDrawingZDepth);
+
+		final JCheckBox chckbxLimitZDepth = new JCheckBox( "Limit drawing Z depth" );
+		chckbxLimitZDepth.setFont( SMALL_FONT );
+		panelDrawingZDepth.add( chckbxLimitZDepth );
+
+		final SpinnerNumberModel numberModelDrawingZDepth = new SpinnerNumberModel( ds.getZDrawingDepth(), 0.5, 5000., 0.5 );
+		final JSpinner spinnerDrawingZDepth = new JSpinner( numberModelDrawingZDepth );
+		spinnerDrawingZDepth.setFont( SMALL_FONT );
+		panelDrawingZDepth.add( spinnerDrawingZDepth );
+
+		final JLabel lblDrawingZDepthUnits = new JLabel( spaceUnits );
+		lblDrawingZDepthUnits.setFont( SMALL_FONT );
+		panelDrawingZDepth.add(lblDrawingZDepthUnits);
+
+		/*
+		 * Panel for view buttons.
+		 */
+
+		final JPanel panelButtons = new JPanel();
+
+		// TrackScheme button.
+		final JButton btnShowTrackScheme = new JButton( launchTrackSchemeAction );
+		panelButtons.add( btnShowTrackScheme );
+		btnShowTrackScheme.setFont( FONT );
+
+		// Do analysis button.
+		final JButton btnShowTrackTables = new JButton( showTrackTablesAction );
+		panelButtons.add( btnShowTrackTables );
+		btnShowTrackTables.setFont( FONT );
+
+		final JButton btnShowSpotTable = new JButton( showSpotTableAction );
+		panelButtons.add( btnShowSpotTable );
+		btnShowSpotTable.setFont( FONT );
+
+		final GridBagConstraints gbcPanelButtons = new GridBagConstraints();
+		gbcPanelButtons.gridwidth = 2;
+		gbcPanelButtons.anchor = GridBagConstraints.SOUTH;
+		gbcPanelButtons.fill = GridBagConstraints.HORIZONTAL;
+		gbcPanelButtons.gridx = 0;
+		gbcPanelButtons.gridy = 7;
+		add( panelButtons, gbcPanelButtons );
+
+
+		/*
+		 * Listeners & co.
+		 */
+
+		chkboxDisplaySpots.addActionListener( e -> {
+			setEnabled( panelSpotOptions, chkboxDisplaySpots.isSelected() );
+			chkboxDisplaySpotsAsRois.setEnabled( chkboxDisplaySpots.isSelected() );
+		} );
+		chkboxDisplayTracks.addActionListener( e -> { 
+			setEnabled( panelTrackOptions, chkboxDisplayTracks.isSelected() );
+			cmbboxTrackDisplayMode.setEnabled( chkboxDisplayTracks.isSelected() );
+			} );
+		
+		final ActionListener fadeTrackBtnEnable = e -> {
+			final boolean shouldBeEnabled = chkboxDisplayTracks.isSelected()
+					&& cmbboxTrackDisplayMode.getSelectedItem() != TrackDisplayMode.FULL;
+			chkboxFadeTracks.setEnabled( shouldBeEnabled );
+		};
+		chkboxDisplayTracks.addActionListener( fadeTrackBtnEnable );
+		cmbboxTrackDisplayMode.addActionListener( fadeTrackBtnEnable );
+		
+		final ActionListener fadeTrackRangeEnable = e -> {
+			final boolean shouldBeEnabled = chkboxDisplayTracks.isSelected() 
+					&& cmbboxTrackDisplayMode.getSelectedItem() != TrackDisplayMode.FULL
+					&& chkboxFadeTracks.isSelected();
+			spinnerFadeRange.setEnabled( shouldBeEnabled );
+		};
+		cmbboxTrackDisplayMode.addActionListener( fadeTrackRangeEnable );
+		chkboxDisplayTracks.addActionListener( fadeTrackRangeEnable );
+		chkboxFadeTracks.addActionListener( fadeTrackRangeEnable );
+		
+		chckbxLimitZDepth.addActionListener( e -> spinnerDrawingZDepth.setEnabled( chckbxLimitZDepth.isSelected() ) );
+
+		chkboxDisplaySpots.addActionListener( e -> ds.setSpotVisible( chkboxDisplaySpots.isSelected() ) );
+		ftfSpotRadius.addPropertyChangeListener( "value", e -> ds.setSpotDisplayRadius( ( ( Number ) ftfSpotRadius.getValue() ).doubleValue() ) );
+		chkboxSpotNames.addActionListener( e -> ds.setSpotShowName( chkboxSpotNames.isSelected() ) );
+		chkboxDisplayTracks.addActionListener( e -> ds.setTrackVisible( chkboxDisplayTracks.isSelected() ) );
+		chkboxFadeTracks.addActionListener( e -> ds.setFadeTracks( chkboxFadeTracks.isSelected() ) );
+		fadeTrackDepthModel.addChangeListener( e -> ds.setFadeTrackRange( fadeTrackDepthModel.getNumber().intValue() ) );
+
+		/*
+		 * Set current values.
+		 */
+
+		chkboxDisplaySpots.setSelected( ds.isSpotVisible() );
+		chkboxSpotNames.setSelected( ds.isSpotShowName() );
+		chkboxDisplayTracks.setSelected( ds.isTrackVisible() );
+		chkboxFadeTracks.setSelected( ds.isFadeTracks() );
+		chckbxLimitZDepth.setSelected( ds.isZDrawingDepthLimited() );
+		ftfSpotRadius.setValue( Double.valueOf( ds.getSpotDisplayRadius() ) );
+		fadeTrackDepthModel.setValue( Integer.valueOf( ds.getFadeTrackRange() ) );
+		numberModelDrawingZDepth.setValue( Double.valueOf( ds.getZDrawingDepth() ) );
+		cmbboxTrackDisplayMode.setSelectedItem( ds.getTrackDisplayMode() );
+
+		spinnerDrawingZDepth.setEnabled( chckbxLimitZDepth.isSelected() );
+		fadeTrackBtnEnable.actionPerformed( null );
 	}
 
-	/*
-	 * PRIVATE METHODS
-	 */
-
-	private void fireDisplaySettingsChange( final DisplaySettingsEvent event )
+	private static final void setEnabled( final Container container, final boolean enabled )
 	{
-		for ( final DisplaySettingsListener listener : listeners )
-			listener.displaySettingsChanged( event );
-	}
-
-	private void initGUI()
-	{
-		try
+		for ( final Component component : container.getComponents() )
 		{
-			this.setPreferredSize( new Dimension( 300, 521 ) );
-			this.setSize( 300, 500 );
-			{
-				jPanelTrackOptions = new JPanel()
-				{
-					private static final long serialVersionUID = -1805693239189343720L;
-
-					@Override
-					public void setEnabled( final boolean enabled )
-					{
-						for ( final Component c : getComponents() )
-							c.setEnabled( enabled );
-					}
-				};
-				jPanelTrackOptions.setBorder( new LineBorder( new java.awt.Color( 192, 192, 192 ), 1, true ) );
-				{
-					jLabelTrackDisplayMode = new JLabel();
-					jLabelTrackDisplayMode.setText( "  Track display mode:" );
-					jLabelTrackDisplayMode.setBounds( 10, 163, 268, 15 );
-					jLabelTrackDisplayMode.setFont( FONT );
-					jLabelTrackDisplayMode.setPreferredSize( new java.awt.Dimension( 261, 14 ) );
-				}
-				{
-					final String[] keyNames = TrackMateModelView.TRACK_DISPLAY_MODE_DESCRIPTION;
-					final ComboBoxModel< String > jComboBoxDisplayModeModel = new DefaultComboBoxModel<>( keyNames );
-					jComboBoxDisplayMode = new JComboBox<>();
-					jComboBoxDisplayMode.setModel( jComboBoxDisplayModeModel );
-					jComboBoxDisplayMode.setSelectedIndex( 0 );
-					jComboBoxDisplayMode.setFont( SMALL_FONT );
-					jComboBoxDisplayMode.setPreferredSize( new java.awt.Dimension( 265, 27 ) );
-					jComboBoxDisplayMode.addActionListener( new ActionListener()
-					{
-						@Override
-						public void actionPerformed( final ActionEvent e )
-						{
-							final Integer oldValue = ( Integer ) displaySettings.get( KEY_TRACK_DISPLAY_MODE );
-							final Integer newValue = jComboBoxDisplayMode.getSelectedIndex();
-							displaySettings.put( KEY_TRACK_DISPLAY_MODE, newValue );
-
-							final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_TRACK_DISPLAY_MODE, newValue, oldValue );
-							fireDisplaySettingsChange( event );
-						}
-					} );
-				}
-				{
-					jCheckBoxLimitDepth = new JCheckBox();
-					jCheckBoxLimitDepth.setText( "Limit frame depth" );
-					jCheckBoxLimitDepth.setBounds( 6, 216, 272, 23 );
-					jCheckBoxLimitDepth.setFont( FONT );
-					jCheckBoxLimitDepth.setSelected( true );
-					jCheckBoxLimitDepth.setPreferredSize( new java.awt.Dimension( 259, 23 ) );
-					jCheckBoxLimitDepth.addActionListener( new ActionListener()
-					{
-						@Override
-						public void actionPerformed( final ActionEvent e )
-						{
-							Integer depth;
-							if ( jCheckBoxLimitDepth.isSelected() )
-								depth = ( ( Number ) jTextFieldFrameDepth.getValue() ).intValue();
-							else
-								depth = ( int ) 1e9;
-
-							final Integer oldValue = ( Integer ) displaySettings.get( KEY_TRACK_DISPLAY_DEPTH );
-							displaySettings.put( KEY_TRACK_DISPLAY_DEPTH, depth );
-
-							final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_TRACK_DISPLAY_DEPTH, depth, oldValue );
-							fireDisplaySettingsChange( event );
-						}
-					} );
-				}
-				{
-					jLabelFrameDepth = new JLabel();
-					jLabelFrameDepth.setText( "  Frame depth:" );
-					jLabelFrameDepth.setFont( SMALL_FONT );
-					jLabelFrameDepth.setPreferredSize( new java.awt.Dimension( 103, 14 ) );
-				}
-				{
-					displaySettings.put( KEY_TRACK_DISPLAY_DEPTH, Integer.valueOf( TrackMateModelView.DEFAULT_TRACK_DISPLAY_DEPTH ) );
-
-					jTextFieldFrameDepth = new JFormattedTextField( 10 );
-					jTextFieldFrameDepth.setHorizontalAlignment( SwingConstants.CENTER );
-					jTextFieldFrameDepth.setFont( SMALL_FONT );
-					jTextFieldFrameDepth.setValue( TrackMateModelView.DEFAULT_TRACK_DISPLAY_DEPTH );
-					jTextFieldFrameDepth.setPreferredSize( new java.awt.Dimension( 34, 20 ) );
-					jTextFieldFrameDepth.addActionListener( new ActionListener()
-					{
-						@Override
-						public void actionPerformed( final ActionEvent e )
-						{
-							final Integer oldValue = ( Integer ) displaySettings.get( KEY_TRACK_DISPLAY_DEPTH );
-							try
-							{
-								final int depth = ( ( Number ) jTextFieldFrameDepth.getValue() ).intValue();
-								displaySettings.put( KEY_TRACK_DISPLAY_DEPTH, depth );
-
-								final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_TRACK_DISPLAY_DEPTH, depth, oldValue );
-								fireDisplaySettingsChange( event );
-							}
-							catch ( final NumberFormatException nfe )
-							{
-								jTextFieldFrameDepth.setValue( Integer.valueOf( oldValue ) );
-							}
-						}
-					} );
-				}
-			}
-			{
-				jCheckBoxDisplayTracks = new JCheckBox();
-				jCheckBoxDisplayTracks.setText( "Display tracks" );
-				jCheckBoxDisplayTracks.setFont( FONT );
-				jCheckBoxDisplayTracks.setSelected( true );
-				jCheckBoxDisplayTracks.addActionListener( new ActionListener()
-				{
-					@Override
-					public void actionPerformed( final ActionEvent e )
-					{
-						final Boolean oldValue = ( Boolean ) displaySettings.get( KEY_TRACKS_VISIBLE );
-						final Boolean newValue = jCheckBoxDisplayTracks.isSelected();
-						displaySettings.put( KEY_TRACKS_VISIBLE, newValue );
-
-						final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_TRACKS_VISIBLE, newValue, oldValue );
-						fireDisplaySettingsChange( event );
-					}
-				} );
-			}
-			{
-				jCheckBoxDisplaySpots = new JCheckBox();
-				jCheckBoxDisplaySpots.setText( "Display spots" );
-				jCheckBoxDisplaySpots.setFont( FONT );
-				jCheckBoxDisplaySpots.setSelected( true );
-				jCheckBoxDisplaySpots.addActionListener( new ActionListener()
-				{
-					@Override
-					public void actionPerformed( final ActionEvent e )
-					{
-						final Boolean oldValue = ( Boolean ) displaySettings.get( KEY_SPOTS_VISIBLE );
-						final Boolean newValue = jCheckBoxDisplaySpots.isSelected();
-						displaySettings.put( KEY_SPOTS_VISIBLE, newValue );
-
-						final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_SPOTS_VISIBLE, newValue, oldValue );
-						fireDisplaySettingsChange( event );
-					}
-				} );
-			}
-			{
-				jCheckBoxDisplaySpotsAsRois = new JCheckBox( "as ROIs" );
-				jCheckBoxDisplaySpotsAsRois.setFont( FONT );
-				jCheckBoxDisplaySpotsAsRois.setSelected( true );
-				jCheckBoxDisplaySpotsAsRois.addActionListener( new ActionListener()
-				{
-					@Override
-					public void actionPerformed( final ActionEvent e )
-					{
-						final Boolean oldValue = ( Boolean ) displaySettings.get( KEY_DISPLAY_SPOT_AS_ROIS );
-						final Boolean newValue = jCheckBoxDisplaySpotsAsRois.isSelected();
-						displaySettings.put( KEY_DISPLAY_SPOT_AS_ROIS, newValue );
-
-						final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_DISPLAY_SPOT_AS_ROIS, newValue, oldValue );
-						fireDisplaySettingsChange( event );
-					}
-				} );
-
-			}
-			{
-				jPanelSpotOptions = new JPanel()
-				{
-					private static final long serialVersionUID = 1L;
-
-					@Override
-					public void setEnabled( final boolean enabled )
-					{
-						for ( final Component c : getComponents() )
-							c.setEnabled( enabled );
-					}
-				};
-				jPanelSpotOptions.setBorder( new LineBorder( new java.awt.Color( 192, 192, 192 ), 1, true ) );
-				{
-					jLabelSpotRadius = new JLabel();
-					jLabelSpotRadius.setText( "  Spot display radius ratio:" );
-					jLabelSpotRadius.setFont( SMALL_FONT );
-
-					jTextFieldSpotRadius = new JFormattedTextField( FORMAT );
-					jTextFieldSpotRadius.setValue( Double.valueOf( 1. ) );
-					jTextFieldSpotRadius.setHorizontalAlignment( SwingConstants.CENTER );
-					jTextFieldSpotRadius.setPreferredSize( new java.awt.Dimension( 34, 20 ) );
-					jTextFieldSpotRadius.setFont( SMALL_FONT );
-					jTextFieldSpotRadius.addActionListener( new ActionListener()
-					{
-						@Override
-						public void actionPerformed( final ActionEvent e )
-						{
-							final Double oldValue = ( Double ) displaySettings.get( KEY_SPOT_RADIUS_RATIO );
-							final Double newValue = ( ( Number ) jTextFieldSpotRadius.getValue() ).doubleValue();
-							displaySettings.put( KEY_SPOT_RADIUS_RATIO, newValue );
-
-							final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_SPOT_RADIUS_RATIO, newValue, oldValue );
-							fireDisplaySettingsChange( event );
-						}
-					} );
-					jTextFieldSpotRadius.addFocusListener( new FocusListener()
-					{
-						@Override
-						public void focusLost( final FocusEvent e )
-						{
-							final Double oldValue = ( Double ) displaySettings.get( KEY_SPOT_RADIUS_RATIO );
-							final Double newValue = ( ( Number ) jTextFieldSpotRadius.getValue() ).doubleValue();
-							displaySettings.put( KEY_SPOT_RADIUS_RATIO, newValue );
-
-							final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_SPOT_RADIUS_RATIO, newValue, oldValue );
-							fireDisplaySettingsChange( event );
-						}
-
-						@Override
-						public void focusGained( final FocusEvent e )
-						{}
-					} );
-				}
-				{
-					jCheckBoxDisplayNames = new JCheckBox();
-					jCheckBoxDisplayNames.setText( "Display spot names" );
-					jCheckBoxDisplayNames.setFont( SMALL_FONT );
-					jCheckBoxDisplayNames.setSelected( false );
-					jCheckBoxDisplayNames.addActionListener( new ActionListener()
-					{
-						@Override
-						public void actionPerformed( final ActionEvent e )
-						{
-							final Boolean oldValue = ( Boolean ) displaySettings.get( KEY_DISPLAY_SPOT_NAMES );
-							final Boolean newValue = jCheckBoxDisplayNames.isSelected();
-							displaySettings.put( KEY_DISPLAY_SPOT_NAMES, newValue );
-
-							final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_DISPLAY_SPOT_NAMES, newValue, oldValue );
-							fireDisplaySettingsChange( event );
-						}
-					} );
-				}
-			}
-			{
-				/*
-				 * DRAWING DEPTH
-				 */
-
-				jpanelDrawingDepth = new JPanel()
-				{
-					private static final long serialVersionUID = 1L;
-
-					@Override
-					public void setEnabled( final boolean enabled )
-					{
-						for ( final Component c : getComponents() )
-							c.setEnabled( enabled );
-					}
-				};
-				final FlowLayout flowLayout = ( FlowLayout ) jpanelDrawingDepth.getLayout();
-				flowLayout.setAlignment( FlowLayout.LEFT );
-				jpanelDrawingDepth.setBorder( new LineBorder( new java.awt.Color( 192, 192, 192 ), 1, true ) );
-
-				final JCheckBox chckbxDrawingDepth = new JCheckBox( "Limit drawing depth" );
-				chckbxDrawingDepth.setFont( SMALL_FONT );
-				chckbxDrawingDepth.setSelected( TrackMateModelView.DEFAULT_LIMIT_DRAWING_DEPTH );
-				jpanelDrawingDepth.add( chckbxDrawingDepth );
-				chckbxDrawingDepth.addActionListener( new ActionListener()
-				{
-					@Override
-					public void actionPerformed( final ActionEvent e )
-					{
-						final Boolean oldValue = ( Boolean ) displaySettings.get( KEY_LIMIT_DRAWING_DEPTH );
-						final Boolean newValue = chckbxDrawingDepth.isSelected();
-
-						textFieldDrawingDepth.setEnabled( newValue );
-						lblDrawingDepthUnits.setEnabled( newValue );
-
-						displaySettings.put( KEY_LIMIT_DRAWING_DEPTH, newValue );
-
-						final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_LIMIT_DRAWING_DEPTH, newValue, oldValue );
-						fireDisplaySettingsChange( event );
-					}
-				} );
-
-				textFieldDrawingDepth = new JFormattedTextField( FORMAT );
-				textFieldDrawingDepth.setValue( TrackMateModelView.DEFAULT_DRAWING_DEPTH );
-				textFieldDrawingDepth.setHorizontalAlignment( SwingConstants.CENTER );
-				textFieldDrawingDepth.setFont( SMALL_FONT );
-				textFieldDrawingDepth.setColumns( 7 );
-				jpanelDrawingDepth.add( textFieldDrawingDepth );
-				textFieldDrawingDepth.addActionListener( new ActionListener()
-				{
-					@Override
-					public void actionPerformed( final ActionEvent e )
-					{
-						final Double oldValue = ( Double ) displaySettings.get( KEY_DRAWING_DEPTH );
-						final Double newValue = ( ( Number ) textFieldDrawingDepth.getValue() ).doubleValue();
-						displaySettings.put( KEY_DRAWING_DEPTH, newValue );
-
-						final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_DRAWING_DEPTH, newValue, oldValue );
-						fireDisplaySettingsChange( event );
-					}
-				} );
-				textFieldDrawingDepth.addFocusListener( new FocusListener()
-				{
-					@Override
-					public void focusLost( final FocusEvent e )
-					{
-						final Double oldValue = ( Double ) displaySettings.get( KEY_SPOT_RADIUS_RATIO );
-						final Double newValue = ( ( Number ) textFieldDrawingDepth.getValue() ).doubleValue();
-						displaySettings.put( KEY_DRAWING_DEPTH, newValue );
-
-						final DisplaySettingsEvent event = new DisplaySettingsEvent( ConfigureViewsPanel.this, KEY_DRAWING_DEPTH, newValue, oldValue );
-						fireDisplaySettingsChange( event );
-					}
-
-					@Override
-					public void focusGained( final FocusEvent e )
-					{}
-				} );
-
-				lblDrawingDepthUnits = new JLabel( model.getSpaceUnits() );
-				lblDrawingDepthUnits.setFont( SMALL_FONT );
-				jpanelDrawingDepth.add( lblDrawingDepthUnits );
-
-				textFieldDrawingDepth.setEnabled( chckbxDrawingDepth.isSelected() );
-				lblDrawingDepthUnits.setEnabled( chckbxDrawingDepth.isSelected() );
-			}
-			{
-				jLabelDisplayOptions = new JLabel();
-				jLabelDisplayOptions.setText( "Display options" );
-				jLabelDisplayOptions.setFont( BIG_FONT );
-				jLabelDisplayOptions.setHorizontalAlignment( SwingConstants.LEFT );
-			}
-
-			jPanelButtons = new JPanel();
-			jPanelButtons.setLayout( new WrapLayout() );
-			{
-				jButtonShowTrackScheme = new JButton();
-				jPanelButtons.add( jButtonShowTrackScheme );
-				jButtonShowTrackScheme.setText( "TrackScheme" );
-				jButtonShowTrackScheme.setIcon( TRACK_SCHEME_ICON_16x16 );
-				jButtonShowTrackScheme.setFont( FONT );
-				jButtonShowTrackScheme.setToolTipText( TRACKSCHEME_BUTTON_TOOLTIP );
-				{
-					jButtonDoAnalysis = new JButton( "Analysis" );
-					jPanelButtons.add( jButtonDoAnalysis );
-					jButtonDoAnalysis.setFont( FONT );
-					jButtonDoAnalysis.setIcon( DO_ANALYSIS_ICON );
-					jButtonDoAnalysis.setToolTipText( ANALYSIS_BUTTON_TOOLTIP );
-					jButtonDoAnalysis.addActionListener( new ActionListener()
-					{
-						@Override
-						public void actionPerformed( final ActionEvent event )
-						{
-							if ( ( event.getModifiers() & ActionEvent.SHIFT_MASK ) != 0 )
-								fireAction( DO_ANALYSIS_BUTTON_WITH_SHIFT_PRESSED );
-							else
-								fireAction( DO_ANALYSIS_BUTTON_PRESSED );
-						}
-					} );
-				}
-				jButtonShowTrackScheme.addActionListener( new ActionListener()
-				{
-					@Override
-					public void actionPerformed( final ActionEvent e )
-					{
-						fireAction( TRACK_SCHEME_BUTTON_PRESSED );
-					}
-				} );
-			}
-
-			final GroupLayout groupLayout = new GroupLayout( this );
-			groupLayout.setHorizontalGroup(
-					groupLayout.createParallelGroup( Alignment.TRAILING )
-							.addGroup( groupLayout.createSequentialGroup()
-									.addGap( 14 )
-									.addComponent( jLabelDisplayOptions, GroupLayout.DEFAULT_SIZE, 280, Short.MAX_VALUE )
-									.addGap( 6 ) )
-							.addGroup( groupLayout.createSequentialGroup()
-									.addGap( 10 )
-									.addComponent( jCheckBoxDisplaySpots, GroupLayout.DEFAULT_SIZE, 280, Short.MAX_VALUE )
-									.addPreferredGap( ComponentPlacement.RELATED )
-									.addComponent( jCheckBoxDisplaySpotsAsRois )
-									.addGap( 10 ) )
-							.addGroup( groupLayout.createSequentialGroup()
-									.addGap( 10 )
-									.addComponent( jPanelSpotOptions, GroupLayout.PREFERRED_SIZE, 280, Short.MAX_VALUE )
-									.addGap( 10 ) )
-							.addGroup( groupLayout.createSequentialGroup()
-									.addGap( 10 )
-									.addComponent( jCheckBoxDisplayTracks, GroupLayout.DEFAULT_SIZE, 284, Short.MAX_VALUE )
-									.addContainerGap() )
-							.addGroup( groupLayout.createSequentialGroup()
-									.addGap( 10 )
-									.addComponent( jPanelTrackOptions, GroupLayout.PREFERRED_SIZE, 280, Short.MAX_VALUE )
-									.addGap( 10 ) )
-							.addGroup( groupLayout.createSequentialGroup()
-									.addGap( 10 )
-									.addGroup( groupLayout.createParallelGroup( Alignment.TRAILING )
-											.addComponent( jPanelButtons, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 280, Short.MAX_VALUE )
-											.addComponent( jpanelDrawingDepth, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 280, Short.MAX_VALUE ) )
-									.addGap( 10 ) ) );
-			groupLayout.setVerticalGroup(
-					groupLayout.createParallelGroup( Alignment.LEADING )
-							.addGroup( groupLayout.createSequentialGroup()
-									.addGap( 6 )
-									.addComponent( jLabelDisplayOptions, GroupLayout.PREFERRED_SIZE, 20, GroupLayout.PREFERRED_SIZE )
-									.addGap( 4 )
-									.addGroup( groupLayout.createParallelGroup( Alignment.BASELINE )
-											.addComponent( jCheckBoxDisplaySpots )
-											.addComponent( jCheckBoxDisplaySpotsAsRois ) )
-									.addGap( 2 )
-									.addComponent( jPanelSpotOptions, GroupLayout.PREFERRED_SIZE, 118, GroupLayout.PREFERRED_SIZE )
-									.addGap( 4 )
-									.addComponent( jCheckBoxDisplayTracks )
-									.addGap( 1 )
-									.addComponent( jPanelTrackOptions, GroupLayout.PREFERRED_SIZE, 170, GroupLayout.PREFERRED_SIZE )
-									.addPreferredGap( ComponentPlacement.UNRELATED )
-									.addComponent( jpanelDrawingDepth, GroupLayout.PREFERRED_SIZE, 34, GroupLayout.PREFERRED_SIZE )
-									.addPreferredGap( ComponentPlacement.RELATED )
-									.addComponent( jPanelButtons, GroupLayout.DEFAULT_SIZE, 92, Short.MAX_VALUE )
-									.addContainerGap() ) );
-
-			setLayout( groupLayout );
-
+			if ( component instanceof JSpinner || component instanceof JCheckBox )
+				continue; // Treat them elsewhere.
+			component.setEnabled( enabled );
+			if (component instanceof Container)
+				setEnabled( ( Container ) component, enabled );
 		}
-		catch ( final Exception e )
-		{
-			e.printStackTrace();
-		}
-	}
-
-	protected void resizeButtons()
-	{
-		final Component[] buttons = jPanelButtons.getComponents();
-		int maxWidth = -1;
-		int maxHeight = -1;
-		for ( final Component button : buttons )
-		{
-			final Dimension btd = button.getPreferredSize();
-			if ( btd.width > maxWidth )
-				maxWidth = btd.width;
-
-			if ( btd.height > maxHeight )
-				maxHeight = btd.height;
-		}
-		final Dimension size = new Dimension( maxWidth, maxHeight );
-		for ( final Component button : buttons )
-			button.setPreferredSize( size );
 	}
 }

@@ -1,15 +1,5 @@
 package fiji.plugin.trackmate.gui;
 
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.features.EdgeFeatureGrapher;
-import fiji.plugin.trackmate.features.SpotFeatureGrapher;
-import fiji.plugin.trackmate.features.TrackFeatureGrapher;
-import fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer;
-import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
-import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
-import fiji.plugin.trackmate.gui.panels.components.FeaturePlotSelectionPanel;
-
 import java.awt.BorderLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -26,6 +16,16 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
+
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.features.EdgeFeatureGrapher;
+import fiji.plugin.trackmate.features.SpotFeatureGrapher;
+import fiji.plugin.trackmate.features.TrackFeatureGrapher;
+import fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer;
+import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
+import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
+import fiji.plugin.trackmate.gui.panels.components.FeaturePlotSelectionPanel;
 
 public class GrapherPanel extends ActionListenablePanel
 {
@@ -73,13 +73,16 @@ public class GrapherPanel extends ActionListenablePanel
 
 	private FeaturePlotSelectionPanel trackFeatureSelectionPanel;
 
+	private final DisplaySettings displaySettings;
+
 	/*
 	 * CONSTRUCTOR
 	 */
 
-	public GrapherPanel( final TrackMate trackmate )
+	public GrapherPanel( final TrackMate trackmate, final DisplaySettings displaySettings )
 	{
 		this.trackmate = trackmate;
+		this.displaySettings = displaySettings;
 
 		setLayout( new BorderLayout( 0, 0 ) );
 
@@ -186,7 +189,7 @@ public class GrapherPanel extends ActionListenablePanel
 		{
 			spots.addAll( trackmate.getModel().getTrackModel().trackSpots( trackID ) );
 		}
-		final SpotFeatureGrapher grapher = new SpotFeatureGrapher( xFeature, yFeatures, spots, trackmate.getModel() );
+		final SpotFeatureGrapher grapher = new SpotFeatureGrapher( xFeature, yFeatures, spots, trackmate.getModel(), displaySettings );
 		grapher.render();
 	}
 
@@ -201,7 +204,7 @@ public class GrapherPanel extends ActionListenablePanel
 		// Prepare grapher
 		final String xFeature = edgeFeatureSelectionPanel.getXKey();
 		final Set< String > yFeatures = edgeFeatureSelectionPanel.getYKeys();
-		final EdgeFeatureGrapher grapher = new EdgeFeatureGrapher( xFeature, yFeatures, edges, trackmate.getModel() );
+		final EdgeFeatureGrapher grapher = new EdgeFeatureGrapher( xFeature, yFeatures, edges, trackmate.getModel(), displaySettings );
 		grapher.render();
 	}
 
@@ -210,7 +213,7 @@ public class GrapherPanel extends ActionListenablePanel
 		// Prepare grapher
 		final String xFeature = trackFeatureSelectionPanel.getXKey();
 		final Set< String > yFeatures = trackFeatureSelectionPanel.getYKeys();
-		final TrackFeatureGrapher grapher = new TrackFeatureGrapher( xFeature, yFeatures, trackmate.getModel() );
+		final TrackFeatureGrapher grapher = new TrackFeatureGrapher( xFeature, yFeatures, trackmate.getModel(), displaySettings );
 		grapher.render();
 	}
 

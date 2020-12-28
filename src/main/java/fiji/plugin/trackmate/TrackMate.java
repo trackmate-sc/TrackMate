@@ -129,6 +129,8 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 		{
 			if ( doLogIt )
 				logger.log( "Computation done in " + calculator.getProcessingTime() + " ms.\n" );
+
+			model.notifyFeaturesComputed();
 			return true;
 		}
 
@@ -160,9 +162,9 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 			return false;
 		}
 		if ( doLogIt )
-		{
 			logger.log( "Computation done in " + calculator.getProcessingTime() + " ms.\n" );
-		}
+
+		model.notifyFeaturesComputed();
 		return true;
 	}
 
@@ -182,6 +184,8 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 		{
 			if ( doLogIt )
 				logger.log( "Computation done in " + calculator.getProcessingTime() + " ms.\n" );
+
+			model.notifyFeaturesComputed();
 			return true;
 		}
 
@@ -575,12 +579,9 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 		final Double initialSpotFilterValue = settings.initialSpotFilterValue;
 		final FeatureFilter featureFilter = new FeatureFilter( Spot.QUALITY, initialSpotFilterValue, true );
 
-		SpotCollection spots = model.getSpots();
+		final SpotCollection spots = model.getSpots();
 		spots.filter( featureFilter );
-
-		spots = spots.crop();
-
-		model.setSpots( spots, true ); // Forget about the previous one
+		spots.crop();
 		return true;
 	}
 

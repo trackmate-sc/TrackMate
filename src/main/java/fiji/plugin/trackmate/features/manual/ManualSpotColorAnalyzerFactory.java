@@ -7,10 +7,6 @@ import java.util.Map;
 
 import javax.swing.ImageIcon;
 
-import net.imagej.ImgPlus;
-import net.imglib2.type.NativeType;
-import net.imglib2.type.numeric.RealType;
-
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Dimension;
@@ -18,31 +14,32 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
+import fiji.plugin.trackmate.gui.DisplaySettings;
+import net.imagej.ImgPlus;
+import net.imglib2.type.NativeType;
+import net.imglib2.type.numeric.RealType;
 
 @Plugin( type = SpotAnalyzerFactory.class )
-public class ManualSpotColorAnalyzerFactory< T extends RealType< T > & NativeType< T >> implements SpotAnalyzerFactory< T >
+public class ManualSpotColorAnalyzerFactory< T extends RealType< T > & NativeType< T > > implements SpotAnalyzerFactory< T >
 {
 
-	public static final String FEATURE = "MANUAL_COLOR";
+	public static final String FEATURE = "MANUAL_SPOT_COLOR";
 
 	public static final String KEY = "MANUAL_SPOT_COLOR_ANALYZER";
 
-	static final List< String > FEATURES = new ArrayList< >( 1 );
+	static final List< String > FEATURES = new ArrayList<>( 1 );
 
-	static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< >( 1 );
+	static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap<>( 1 );
 
-	static final Map< String, String > FEATURE_NAMES = new HashMap< >( 1 );
+	static final Map< String, String > FEATURE_NAMES = new HashMap<>( 1 );
 
-	static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< >( 1 );
+	static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap<>( 1 );
 
-	static final Map< String, Boolean > IS_INT = new HashMap< >( 1 );
+	static final Map< String, Boolean > IS_INT = new HashMap<>( 1 );
 
 	static final String INFO_TEXT = "<html>A dummy analyzer for the feature that stores the color manually assigned to each spot.</html>";
 
 	static final String NAME = "Manual spot color analyzer";
-
-	private static final Double DEFAULT_COLOR_VALUE = Double.valueOf( TrackMateModelView.DEFAULT_UNASSIGNED_FEATURE_COLOR.getRGB() );
 
 	static
 	{
@@ -117,7 +114,7 @@ public class ManualSpotColorAnalyzerFactory< T extends RealType< T > & NativeTyp
 	public SpotAnalyzer< T > getAnalyzer( final Model model, final ImgPlus< T > img, final int frame, final int channel )
 	{
 		return new SpotAnalyzer< T >()
-				{
+		{
 
 			private long processingTime;
 
@@ -131,12 +128,11 @@ public class ManualSpotColorAnalyzerFactory< T extends RealType< T > & NativeTyp
 			public boolean process()
 			{
 				final long start = System.currentTimeMillis();
+				final Double unassignedColor = Double.valueOf( DisplaySettings.defaultStyle().getMissingValueColor().getRGB() );
 				for ( final Spot spot : model.getSpots().iterable( false ) )
 				{
 					if ( null == spot.getFeature( FEATURE ) )
-					{
-						spot.putFeature( FEATURE, DEFAULT_COLOR_VALUE );
-					}
+						spot.putFeature( FEATURE, unassignedColor );
 				}
 				final long end = System.currentTimeMillis();
 				processingTime = end - start;
@@ -154,6 +150,6 @@ public class ManualSpotColorAnalyzerFactory< T extends RealType< T > & NativeTyp
 			{
 				return processingTime;
 			}
-				};
+		};
 	}
 }

@@ -1,15 +1,16 @@
 package fiji.plugin.trackmate.visualization.hyperstack;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
-import fiji.plugin.trackmate.visualization.ViewFactory;
-import ij.ImagePlus;
-
 import javax.swing.ImageIcon;
 
 import org.scijava.plugin.Plugin;
+
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.gui.DisplaySettings;
+import fiji.plugin.trackmate.visualization.TrackMateModelView;
+import fiji.plugin.trackmate.visualization.ViewFactory;
+import ij.ImagePlus;
 
 @Plugin( type = ViewFactory.class )
 public class HyperStackDisplayerFactory implements ViewFactory
@@ -20,18 +21,10 @@ public class HyperStackDisplayerFactory implements ViewFactory
 	private static final String NAME = "HyperStack Displayer";
 
 	@Override
-	public TrackMateModelView create( final Model model, final Settings settings, final SelectionModel selectionModel )
+	public TrackMateModelView create( final Model model, final Settings settings, final SelectionModel selectionModel, final DisplaySettings displaySettings )
 	{
-		final ImagePlus imp;
-		if ( settings == null )
-		{
-			imp = null;
-		}
-		else
-		{
-			imp = settings.imp;
-		}
-		return new HyperStackDisplayer( model, selectionModel, imp );
+		final ImagePlus imp = ( settings == null ) ? null : settings.imp;
+		return new HyperStackDisplayer( model, selectionModel, imp, displaySettings );
 	}
 
 	@Override
@@ -57,5 +50,4 @@ public class HyperStackDisplayerFactory implements ViewFactory
 	{
 		return null;
 	}
-
 }

@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.gui.panels.components;
 
+import static fiji.plugin.trackmate.features.FeatureUtils.collectFeatureKeys;
+import static fiji.plugin.trackmate.features.FeatureUtils.collectFeatureValues;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.BIG_FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
 
@@ -7,15 +9,17 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.EmptyStackException;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.function.Function;
 
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -28,17 +32,17 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.features.FeatureFilter;
+import fiji.plugin.trackmate.gui.DisplaySettings.ObjectType;
+import fiji.plugin.trackmate.gui.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
 import fiji.plugin.trackmate.gui.panels.FilterPanel;
-import fiji.plugin.trackmate.gui.panels.components.ColorByFeatureGUIPanel.Category;
 import fiji.plugin.trackmate.util.OnRequestUpdater;
 
 public class FilterGuiPanel extends ActionListenablePanel implements ChangeListener
 {
-
-	private static final boolean DEBUG = false;
 
 	private static final long serialVersionUID = -1L;
 
@@ -50,100 +54,124 @@ public class FilterGuiPanel extends ActionListenablePanel implements ChangeListe
 
 	public ActionEvent COLOR_FEATURE_CHANGED = null;
 
-	private JPanel jPanelBottom;
-
-	private ColorByFeatureGUIPanel jPanelColorByFeatureGUI;
-
-	private JScrollPane jScrollPaneThresholds;
-
-	private JPanel jPanelAllThresholds;
-
-	private JPanel jPanelButtons;
-
-	private JButton jButtonRemoveThreshold;
-
-	private JButton jButtonAddThreshold;
-
-	private JLabel jLabelInfo;
-
-	private JLabel jTopLabel;
-
 	private final OnRequestUpdater updater;
 
-	private final Stack< FilterPanel > thresholdPanels = new Stack< >();
+	private final Stack< FilterPanel > filterPanels = new Stack<>();
 
-	private final Stack< Component > struts = new Stack< >();
+	private final Stack< Component > struts = new Stack<>();
 
-	private int newFeatureIndex;
+	private final List< FeatureFilter > featureFilters = new ArrayList<>();
 
-	private List< FeatureFilter > featureFilters = new ArrayList< >();
-
-	private final ArrayList< ChangeListener > changeListeners = new ArrayList< >();
-
-	private final Map< String, String > featureNames;
-
-	private final List< Category > categories;
+	private final List< ChangeListener > changeListeners = new ArrayList<>();
 
 	private final Model model;
 
-	private final List< String > features;
+	private final JPanel allThresholdsPanel;
 
-	/**
-	 * Holds the map of feature values. Is made final so that the instance can
-	 * be shared with the components of this panel.
-	 */
-	private final Map< String, double[] > featureValues;
+	private final JLabel lblInfo;
+
+	private final ObjectType target;
+
+	private final Settings settings;
+
+	private final String defaultFeature;
 
 	/*
 	 * CONSTRUCTOR
 	 */
 
-	public FilterGuiPanel( final Model model, final List< Category > categories )
+	public FilterGuiPanel( 
+			final Model model, 
+			final Settings settings, 
+			final ObjectType target, 
+			final List< FeatureFilter > filters,
+			final String defaultFeature,
+			final FeatureDisplaySelector featureSelector )
 	{
+
 		this.model = model;
-		this.categories = categories;
+		this.settings = settings;
+		this.target = target;
+		this.defaultFeature = defaultFeature;
+		this.updater = new OnRequestUpdater( () -> refresh() );
 
-		this.features = new ArrayList< >();
-		this.featureNames = new HashMap< >();
-		for ( final Category category : categories )
-		{
-			switch ( category )
-			{
-			case SPOTS:
-				features.addAll( model.getFeatureModel().getSpotFeatures() );
-				featureNames.putAll( model.getFeatureModel().getSpotFeatureNames() );
-				break;
-			case EDGES:
-				features.addAll( model.getFeatureModel().getEdgeFeatures() );
-				featureNames.putAll( model.getFeatureModel().getEdgeFeatureNames() );
-				break;
-			case TRACKS:
-				features.addAll( model.getFeatureModel().getTrackFeatures() );
-				featureNames.putAll( model.getFeatureModel().getTrackFeatureNames() );
-				break;
-			case DEFAULT:
-				// We do not want to allow filtering on manual or default
-				// categories.
-				// features.add( ColorByFeatureGUIPanel.UNIFORM_KEY );
-				featureNames.put( ColorByFeatureGUIPanel.UNIFORM_KEY, ColorByFeatureGUIPanel.UNIFORM_NAME );
-				break;
-			default:
-				throw new IllegalArgumentException( "Unknown category: " + category );
-			}
-		}
+		this.setLayout( new BorderLayout() );
+		setPreferredSize( new Dimension( 270, 500 ) );
 
-		this.updater = new OnRequestUpdater( new OnRequestUpdater.Refreshable()
-		{
-			@Override
-			public void refresh()
-			{
-				FilterGuiPanel.this.refresh();
-			}
-		} );
+		final JLabel lblTop = new JLabel( "      Set filters on " + target );
+		lblTop.setFont( BIG_FONT );
+		lblTop.setPreferredSize( new Dimension( 300, 40 ) );
+		this.add( lblTop, BorderLayout.NORTH );
 
-		this.featureValues = new HashMap< >();
-		refreshDisplayedFeatureValues();
-		initGUI();
+		final JScrollPane scrollPaneThresholds = new JScrollPane();
+		this.add( scrollPaneThresholds, BorderLayout.CENTER );
+		scrollPaneThresholds.setPreferredSize( new java.awt.Dimension( 250, 389 ) );
+		scrollPaneThresholds.setHorizontalScrollBarPolicy( ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER );
+		scrollPaneThresholds.setVerticalScrollBarPolicy( ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS );
+
+		allThresholdsPanel = new JPanel();
+		final BoxLayout jPanelAllThresholdsLayout = new BoxLayout( allThresholdsPanel, BoxLayout.Y_AXIS );
+		allThresholdsPanel.setLayout( jPanelAllThresholdsLayout );
+		scrollPaneThresholds.setViewportView( allThresholdsPanel );
+
+		final JPanel bottomPanel = new JPanel();
+		bottomPanel.setLayout( new BorderLayout() );
+		this.add( bottomPanel, BorderLayout.SOUTH );
+
+		final JPanel buttonsPanel = new JPanel();
+		bottomPanel.add( buttonsPanel, BorderLayout.NORTH );
+		final BoxLayout jPanelButtonsLayout = new BoxLayout( buttonsPanel, javax.swing.BoxLayout.X_AXIS );
+		buttonsPanel.setLayout( jPanelButtonsLayout );
+		buttonsPanel.setPreferredSize( new java.awt.Dimension( 270, 22 ) );
+		buttonsPanel.setSize( 270, 25 );
+		buttonsPanel.setMaximumSize( new java.awt.Dimension( 32767, 25 ) );
+
+		buttonsPanel.add( Box.createHorizontalStrut( 5 ) );
+		final JButton btnAddThreshold = new JButton();
+		buttonsPanel.add( btnAddThreshold );
+		btnAddThreshold.setIcon( new ImageIcon( TrackMateWizard.class.getResource( ADD_ICON ) ) );
+		btnAddThreshold.setFont( SMALL_FONT );
+		btnAddThreshold.setPreferredSize( new java.awt.Dimension( 24, 24 ) );
+		btnAddThreshold.setSize( 24, 24 );
+		btnAddThreshold.setMinimumSize( new java.awt.Dimension( 24, 24 ) );
+
+		buttonsPanel.add( Box.createHorizontalStrut( 5 ) );
+		final JButton btnRemoveThreshold = new JButton();
+		buttonsPanel.add( btnRemoveThreshold );
+		btnRemoveThreshold.setIcon( new ImageIcon( TrackMateWizard.class.getResource( REMOVE_ICON ) ) );
+		btnRemoveThreshold.setFont( SMALL_FONT );
+		btnRemoveThreshold.setPreferredSize( new java.awt.Dimension( 24, 24 ) );
+		btnRemoveThreshold.setSize( 24, 24 );
+		btnRemoveThreshold.setMinimumSize( new java.awt.Dimension( 24, 24 ) );
+
+		buttonsPanel.add( Box.createHorizontalGlue() );
+		buttonsPanel.add( Box.createHorizontalStrut( 5 ) );
+
+		lblInfo = new JLabel();
+		lblInfo.setFont( SMALL_FONT );
+		buttonsPanel.add( lblInfo );
+		
+		/*
+		 * Color for spots.
+		 */
+		
+		final JPanel coloringPanel = featureSelector.createSelectorFor( target );
+		coloringPanel.setBorder( BorderFactory.createEmptyBorder( 5, 5, 5, 5 ) );
+		bottomPanel.add( coloringPanel, BorderLayout.CENTER );
+
+		/*
+		 * Listeners & co.
+		 */
+
+		btnAddThreshold.addActionListener( e -> addFilterPanel() );
+		btnRemoveThreshold.addActionListener( e -> removeThresholdPanel() );
+
+		/*
+		 * Initial values.
+		 */
+
+		for ( final FeatureFilter ft : filters )
+			addFilterPanel( ft );
 	}
 
 	/*
@@ -151,63 +179,14 @@ public class FilterGuiPanel extends ActionListenablePanel implements ChangeListe
 	 */
 
 	/**
-	 * Calls the re-calculation of the feature values displayed in the filter
-	 * panels.
+	 * Refresh the histograms displayed in the filter panels.
 	 */
-	public void refreshDisplayedFeatureValues()
+	public void refreshValues()
 	{
-		featureValues.clear();
-		for ( final Category category : categories )
-		{
-			switch ( category )
-			{
-			case SPOTS:
-				featureValues.putAll( model.getSpots().collectValues( model.getFeatureModel().getSpotFeatures(), false ) );
-				break;
-			case TRACKS:
-				featureValues.putAll( model.getFeatureModel().getTrackFeatureValues() );
-				break;
-			case DEFAULT:
-				break;
-			case EDGES:
-				throw new IllegalArgumentException( "Edge filtering is not implemented." );
-			default:
-				throw new IllegalArgumentException( "Don't know what to do with category: " + category );
-			}
-		}
+		for ( final FilterPanel filterPanel : filterPanels )
+			filterPanel.refresh();
 	}
 
-	/**
-	 * Set the feature filters to display and layout in this panel.
-	 *
-	 * @param filters
-	 *            the list of {@link FeatureFilter}s that should be already
-	 *            present in the GUI (for loading purpose). Can be
-	 *            <code>null</code> or empty.
-	 */
-	public void setFilters( final List< FeatureFilter > filters )
-	{
-		// Clean current panels
-		final int n_panels = thresholdPanels.size();
-		for ( int i = 0; i < n_panels; i++ )
-		{
-			removeThresholdPanel();
-		}
-
-		if ( null != filters )
-		{
-
-			for ( final FeatureFilter ft : filters )
-			{
-				addFilterPanel( ft );
-			}
-			if ( filters.isEmpty() )
-				newFeatureIndex = 0;
-			else
-				newFeatureIndex = this.features.indexOf( filters.get( filters.size() - 1 ).feature );
-
-		}
-	}
 
 	/**
 	 * Called when one of the {@link FilterPanel} is changed by the user.
@@ -224,24 +203,6 @@ public class FilterGuiPanel extends ActionListenablePanel implements ChangeListe
 	public List< FeatureFilter > getFeatureFilters()
 	{
 		return featureFilters;
-	}
-
-	/**
-	 * Returns the feature selected in the "color by feature" comb-box.
-	 */
-	public String getColorFeature()
-	{
-		return jPanelColorByFeatureGUI.getColorFeature();
-	}
-
-	public Category getColorCategory()
-	{
-		return jPanelColorByFeatureGUI.getColorGeneratorCategory();
-	}
-
-	public void setColorFeature( final String feature )
-	{
-		jPanelColorByFeatureGUI.setColorFeature( feature );
 	}
 
 	/**
@@ -270,261 +231,143 @@ public class FilterGuiPanel extends ActionListenablePanel implements ChangeListe
 		return changeListeners;
 	}
 
-	/*
-	 * PRIVATE METHODS
-	 */
-
-	private void fireThresholdChanged( final ChangeEvent e )
-	{
-		for ( final ChangeListener cl : changeListeners )
-		{
-			cl.stateChanged( e );
-		}
-	}
-
 	public void addFilterPanel()
 	{
-		addFilterPanel( features.get( newFeatureIndex ) );
-	}
-
-	public void addFilterPanel( final FeatureFilter filter )
-	{
-		if ( null == filter )
-			return;
-
-		final int filterIndex = features.indexOf( filter.feature );
-		final FilterPanel tp = new FilterPanel( features, featureNames, featureValues, filterIndex );
-		tp.setThreshold( filter.value );
-		tp.setAboveThreshold( filter.isAbove );
-		tp.addChangeListener( this );
-		newFeatureIndex++;
-		if ( newFeatureIndex >= features.size() )
-			newFeatureIndex = 0;
-		final Component strut = Box.createVerticalStrut( 5 );
-		struts.push( strut );
-		thresholdPanels.push( tp );
-		jPanelAllThresholds.add( tp );
-		jPanelAllThresholds.add( strut );
-		jPanelAllThresholds.revalidate();
-		stateChanged( CHANGE_EVENT );
+		addFilterPanel( guessNextFeature() );
 	}
 
 	public void addFilterPanel( final String feature )
 	{
-		if ( null == featureValues )
-			return;
-		final FilterPanel tp = new FilterPanel( features, featureNames, featureValues, features.indexOf( feature ) );
+		// NaN will signal making an auto-threshold.
+		final FeatureFilter filter = new FeatureFilter( feature, Double.NaN, true );
+		addFilterPanel( filter );
+	}
+
+	public void addFilterPanel( final FeatureFilter filter )
+	{
+		final Map< String, String > featureNames = collectFeatureKeys( target, model, settings );
+		final Function< String, double[] > valueCollector = ( featureKey ) -> collectFeatureValues( featureKey, target, model, settings, false );
+		final FilterPanel tp = new FilterPanel( featureNames, valueCollector, filter );
+
 		tp.addChangeListener( this );
-		newFeatureIndex++;
-		if ( newFeatureIndex >= features.size() )
-			newFeatureIndex = 0;
 		final Component strut = Box.createVerticalStrut( 5 );
 		struts.push( strut );
-		thresholdPanels.push( tp );
-		jPanelAllThresholds.add( tp );
-		jPanelAllThresholds.add( strut );
-		jPanelAllThresholds.revalidate();
+		filterPanels.push( tp );
+		allThresholdsPanel.add( tp );
+		allThresholdsPanel.add( strut );
+		allThresholdsPanel.revalidate();
 		stateChanged( CHANGE_EVENT );
+	}
+
+	/*
+	 * PRIVATE METHODS
+	 */
+
+	/**
+	 * Notify change listeners.
+	 *
+	 * @param e
+	 *            the event.
+	 */
+	private void fireThresholdChanged( final ChangeEvent e )
+	{
+		for ( final ChangeListener cl : changeListeners )
+			cl.stateChanged( e );
+	}
+
+	private String guessNextFeature()
+	{
+		final Map< String, String > featureNames = collectFeatureKeys( target, model, settings );
+		final Iterator< String > it = featureNames.keySet().iterator();
+		if ( !it.hasNext() )
+			return ""; // It's likely something is not right.
+
+		if ( featureFilters.isEmpty() )
+			return ( defaultFeature == null || !featureNames.keySet().contains( defaultFeature ) ) ? it.next() : defaultFeature;
+
+		final FeatureFilter lastFilter = featureFilters.get( featureFilters.size() - 1 );
+		final String lastFeature = lastFilter.feature;
+		while ( it.hasNext() )
+			if ( it.next().equals( lastFeature ) && it.hasNext() )
+				return it.next();
+
+		return featureNames.keySet().iterator().next();
 	}
 
 	private void removeThresholdPanel()
 	{
 		try
 		{
-			final FilterPanel tp = thresholdPanels.pop();
+			final FilterPanel tp = filterPanels.pop();
 			tp.removeChangeListener( this );
 			final Component strut = struts.pop();
-			jPanelAllThresholds.remove( strut );
-			jPanelAllThresholds.remove( tp );
-			jPanelAllThresholds.repaint();
+			allThresholdsPanel.remove( strut );
+			allThresholdsPanel.remove( tp );
+			allThresholdsPanel.repaint();
 			stateChanged( CHANGE_EVENT );
 		}
 		catch ( final EmptyStackException ese )
 		{}
 	}
 
+	/**
+	 * Refresh the {@link #featureFilters} field, notify change listeners and
+	 * display the number of selected items.
+	 */
 	private void refresh()
 	{
-		if ( DEBUG )
-		{
-			System.out.println( "[FilterGuiPanel] #refresh()" );
-		}
-		featureFilters = new ArrayList< >( thresholdPanels.size() );
-		for ( final FilterPanel tp : thresholdPanels )
-		{
-			featureFilters.add( new FeatureFilter( tp.getKey(), new Double( tp.getThreshold() ), tp.isAboveThreshold() ) );
-		}
+		featureFilters.clear();
+		for ( final FilterPanel tp : filterPanels )
+			featureFilters.add( tp.getFilter() );
+
 		fireThresholdChanged( null );
 		updateInfoText();
 	}
 
 	private void updateInfoText()
 	{
-		String info = "";
-		int nobjects = 0;
-
-		for ( final double[] values : featureValues.values() )
-		{ // bulletproof against unspecified features, which are signaled by
-			// empty arrays
-			if ( values.length > 0 )
-			{
-				nobjects = values.length;
-				break;
-			}
+		final Map< String, String > featureNames = collectFeatureKeys( target, model, settings );
+		if ( featureNames.isEmpty() )
+		{
+			lblInfo.setText( "No features found." );
+			return;
 		}
 
-		if ( nobjects == 0 )
-		{
-			info = "No objects.";
-		}
-		else if ( featureFilters == null || featureFilters.isEmpty() )
-		{
-			info = "Keep all " + nobjects + " " + categories.get( 0 ) + ".";
-		}
-		else
-		{
-			int nselected = 0;
-			double val;
-			for ( int i = 0; i < nobjects; i++ )
-			{
-				boolean ok = true;
-				for ( final FeatureFilter filter : featureFilters )
-				{
-					final double[] values = featureValues.get( filter.feature );
-					if ( i >= values.length || values.length == 0 )
-					{ // bulletproof
-						continue;
-					}
-					val = values[ i ];
-					if ( filter.isAbove )
-					{
-						if ( val < filter.value )
-						{
-							ok = false;
-							break;
-						}
-					}
-					else
-					{
-						if ( val > filter.value )
-						{
-							ok = false;
-							break;
-						}
-					}
-				}
-				if ( ok )
-					nselected++;
-			}
-			info = "Keep " + nselected + " " + categories.get( 0 ) + " out of  " + nobjects + ".";
-		}
-		jLabelInfo.setText( info );
+		final String firstFeature = featureNames.keySet().iterator().next();
+		final int nobjects = collectFeatureValues( firstFeature, target, model, settings, false ).length;
 
-	}
+		if ( featureFilters == null || featureFilters.isEmpty() )
+		{
+			final String info = "Keep all " + nobjects + " " + target + ".";
+			lblInfo.setText( info );
+			return;
+		}
 
-	private void initGUI()
-	{
-		try
+		final boolean[] selected = new boolean[ nobjects ];
+		Arrays.fill( selected, true );
+
+		for ( final FeatureFilter filter : featureFilters )
 		{
-			final BorderLayout thisLayout = new BorderLayout();
-			this.setLayout( thisLayout );
-			setPreferredSize( new Dimension( 270, 500 ) );
+			final double[] values = collectFeatureValues( filter.feature, target, model, settings, false );
+			if ( filter.isAbove )
 			{
-				jTopLabel = new JLabel();
-				jTopLabel.setText( "      Set filters on " + categories.get( 0 ).toString() );
-				jTopLabel.setFont( BIG_FONT );
-				jTopLabel.setPreferredSize( new Dimension( 300, 40 ) );
-				this.add( jTopLabel, BorderLayout.NORTH );
+				for ( int i = 0; i < nobjects; i++ )
+					if ( values[ i ] < filter.value )
+						selected[ i ] = false;
 			}
+			else
 			{
-				jScrollPaneThresholds = new JScrollPane();
-				this.add( jScrollPaneThresholds, BorderLayout.CENTER );
-				jScrollPaneThresholds.setPreferredSize( new java.awt.Dimension( 250, 389 ) );
-				jScrollPaneThresholds.setHorizontalScrollBarPolicy( ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER );
-				jScrollPaneThresholds.setVerticalScrollBarPolicy( ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS );
-				{
-					jPanelAllThresholds = new JPanel();
-					final BoxLayout jPanelAllThresholdsLayout = new BoxLayout( jPanelAllThresholds, BoxLayout.Y_AXIS );
-					jPanelAllThresholds.setLayout( jPanelAllThresholdsLayout );
-					jScrollPaneThresholds.setViewportView( jPanelAllThresholds );
-				}
-			}
-			{
-				jPanelBottom = new JPanel();
-				final BorderLayout jPanelBottomLayout = new BorderLayout();
-				jPanelBottom.setLayout( jPanelBottomLayout );
-				this.add( jPanelBottom, BorderLayout.SOUTH );
-				jPanelBottom.setPreferredSize( new java.awt.Dimension( 270, 71 ) );
-				{
-					jPanelButtons = new JPanel();
-					jPanelBottom.add( jPanelButtons, BorderLayout.NORTH );
-					final BoxLayout jPanelButtonsLayout = new BoxLayout( jPanelButtons, javax.swing.BoxLayout.X_AXIS );
-					jPanelButtons.setLayout( jPanelButtonsLayout );
-					jPanelButtons.setPreferredSize( new java.awt.Dimension( 270, 22 ) );
-					jPanelButtons.setSize( 270, 25 );
-					jPanelButtons.setMaximumSize( new java.awt.Dimension( 32767, 25 ) );
-					{
-						jPanelButtons.add( Box.createHorizontalStrut( 5 ) );
-						jButtonAddThreshold = new JButton();
-						jPanelButtons.add( jButtonAddThreshold );
-						jButtonAddThreshold.setIcon( new ImageIcon( TrackMateWizard.class.getResource( ADD_ICON ) ) );
-						jButtonAddThreshold.setFont( SMALL_FONT );
-						jButtonAddThreshold.setPreferredSize( new java.awt.Dimension( 24, 24 ) );
-						jButtonAddThreshold.setSize( 24, 24 );
-						jButtonAddThreshold.setMinimumSize( new java.awt.Dimension( 24, 24 ) );
-						jButtonAddThreshold.addActionListener( new ActionListener()
-						{
-							@Override
-							public void actionPerformed( final ActionEvent e )
-							{
-								addFilterPanel();
-							}
-						} );
-					}
-					{
-						jPanelButtons.add( Box.createHorizontalStrut( 5 ) );
-						jButtonRemoveThreshold = new JButton();
-						jPanelButtons.add( jButtonRemoveThreshold );
-						jButtonRemoveThreshold.setIcon( new ImageIcon( TrackMateWizard.class.getResource( REMOVE_ICON ) ) );
-						jButtonRemoveThreshold.setFont( SMALL_FONT );
-						jButtonRemoveThreshold.setPreferredSize( new java.awt.Dimension( 24, 24 ) );
-						jButtonRemoveThreshold.setSize( 24, 24 );
-						jButtonRemoveThreshold.setMinimumSize( new java.awt.Dimension( 24, 24 ) );
-						jButtonRemoveThreshold.addActionListener( new ActionListener()
-						{
-							@Override
-							public void actionPerformed( final ActionEvent e )
-							{
-								removeThresholdPanel();
-							}
-						} );
-						jPanelButtons.add( Box.createHorizontalGlue() );
-					}
-					{
-						jPanelButtons.add( Box.createHorizontalStrut( 5 ) );
-						jLabelInfo = new JLabel();
-						jLabelInfo.setFont( SMALL_FONT );
-						jPanelButtons.add( jLabelInfo );
-					}
-				}
-				{
-					jPanelColorByFeatureGUI = new ColorByFeatureGUIPanel( model, categories );
-					COLOR_FEATURE_CHANGED = jPanelColorByFeatureGUI.COLOR_FEATURE_CHANGED;
-					jPanelColorByFeatureGUI.addActionListener( new ActionListener()
-					{
-						@Override
-						public void actionPerformed( final ActionEvent e )
-						{
-							fireAction( COLOR_FEATURE_CHANGED );
-						}
-					} );
-					jPanelBottom.add( jPanelColorByFeatureGUI );
-				}
+				for ( int i = 0; i < nobjects; i++ )
+					if ( values[ i ] > filter.value )
+						selected[ i ] = false;
 			}
 		}
-		catch ( final Exception e )
-		{
-			e.printStackTrace();
-		}
+
+		int nselected = 0;
+		for ( final boolean b : selected )
+			if ( b )
+				nselected++;
+		final String info = "Keep " + nselected + " " + target + " out of  " + nobjects + ".";
+		lblInfo.setText( info );
 	}
 }

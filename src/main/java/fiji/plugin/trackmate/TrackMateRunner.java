@@ -20,7 +20,7 @@ import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackBranchingAnalyzer;
-import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
+import fiji.plugin.trackmate.gui.DisplaySettings;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.descriptors.ConfigureViewsDescriptor;
@@ -32,7 +32,6 @@ import fiji.plugin.trackmate.tracking.TrackerKeys;
 import fiji.plugin.trackmate.tracking.sparselap.SimpleSparseLAPTrackerFactory;
 import fiji.plugin.trackmate.util.LogRecorder;
 import fiji.plugin.trackmate.util.TMUtils;
-import fiji.plugin.trackmate.visualization.PerTrackFeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewFactory;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayerFactory;
@@ -281,11 +280,18 @@ public class TrackMateRunner extends TrackMatePlugIn
 				}
 
 				/*
+				 * Display settings. Use defaults.
+				 */
+
+				final DisplaySettings displaySettings = DisplaySettings.defaultStyle().copy();
+
+				/*
 				 * Instantiate TrackMate.
 				 */
 
 				settings = createSettings( imp );
 				model = createModel();
+				final SelectionModel selectionModel = new SelectionModel( model );
 				model.setLogger( logger );
 				trackmate = createTrackMate();
 
@@ -402,7 +408,7 @@ public class TrackMateRunner extends TrackMatePlugIn
 						imp.show();
 					}
 					GuiUtils.userCheckImpDimensions( imp );
-					final TrackMateGUIController controller = new TrackMateGUIController( trackmate );
+					final TrackMateGUIController controller = new TrackMateGUIController( trackmate, displaySettings, selectionModel );
 					GuiUtils.positionWindow( controller.getGUI(), imp.getWindow() );
 					return;
 				}
@@ -488,38 +494,27 @@ public class TrackMateRunner extends TrackMatePlugIn
 						settings.imp.show();
 					}
 
-					// Add visualization.
-
-					final SelectionModel selectionModel = new SelectionModel( model );
-
-					final ViewFactory displayerFactory = new HyperStackDisplayerFactory();
-					final TrackMateModelView view = displayerFactory.create( model, settings, selectionModel );
-					final PerTrackFeatureColorGenerator trackColor = new PerTrackFeatureColorGenerator( model, TrackIndexAnalyzer.TRACK_INDEX );
-					view.setDisplaySettings( TrackMateModelView.KEY_TRACK_COLORING, trackColor );
-
-
 					/*
 					 * And show GUI.
 					 */
 
-					final TrackMateGUIController controller = new TrackMateGUIController( trackmate );
+					final TrackMateGUIController controller = new TrackMateGUIController( trackmate, displaySettings, selectionModel );
 					// GUI position
 					GuiUtils.positionWindow( controller.getGUI(), settings.imp.getWindow() );
+
+					// Add visualization.
+
+					final ViewFactory displayerFactory = new HyperStackDisplayerFactory();
+					final TrackMateModelView view = displayerFactory.create( model, settings, selectionModel, displaySettings );
 
 					// GUI state
 					final String guiState = ConfigureViewsDescriptor.KEY;
 					controller.setGUIStateString( guiState );
 					controller.getGuimodel().addView( view );
-					final Map< String, Object > displaySettings = controller.getGuimodel().getDisplaySettings();
-					for ( final String key : displaySettings.keySet() )
-					{
-						view.setDisplaySettings( key, displaySettings.get( key ) );
-					}
 					view.render();
 
 					// Log.
 					controller.getGUI().getLogPanel().setTextContent( logger.toString() );
-
 				}
 
 			}

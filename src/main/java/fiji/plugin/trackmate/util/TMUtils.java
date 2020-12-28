@@ -196,11 +196,11 @@ public class TMUtils
 	 * Returns the mapping in a map that is targeted by a list of keys, in the
 	 * order given in the list.
 	 */
-	public static final < J, K > List< K > getArrayFromMaping( final List< J > keys, final Map< J, K > mapping )
+	public static final < J, K > List< K > getArrayFromMaping( final Collection< J > keys, final Map< J, K > mapping )
 	{
 		final List< K > names = new ArrayList< >( keys.size() );
-		for ( int i = 0; i < keys.size(); i++ )
-			names.add( mapping.get( keys.get( i ) ) );
+		for ( final J key : keys )
+			names.add( mapping.get( key ) );
 		return names;
 	}
 

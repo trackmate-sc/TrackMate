@@ -1,19 +1,18 @@
 package fiji.plugin.trackmate.tracking.kalman;
 
+import java.util.Random;
+
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
-import fiji.plugin.trackmate.visualization.PerTrackFeatureColorGenerator;
-import fiji.plugin.trackmate.visualization.SpotColorGenerator;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
+import fiji.plugin.trackmate.gui.DisplaySettings;
+import fiji.plugin.trackmate.gui.DisplaySettings.ObjectType;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 import ij.ImageJ;
-
-import java.util.Random;
 
 public class KalmanTrackerInteractiveTest3
 {
@@ -39,9 +38,7 @@ public class KalmanTrackerInteractiveTest3
 		final KalmanTracker tracker = new KalmanTracker( spots, maxSearchRadius, maxFrameGap, initialSearchRadius );
 		tracker.setLogger( Logger.DEFAULT_LOGGER );
 		if ( !tracker.checkInput() || !tracker.process() )
-		{
 			System.err.println( tracker.getErrorMessage() );
-		}
 
 		final Model model = new Model();
 		model.setSpots( spots, false );
@@ -53,37 +50,27 @@ public class KalmanTrackerInteractiveTest3
 		try
 		{
 			for ( final Integer f : predictions.keySet() )
-			{
 				for ( final Spot s : predictions.iterable( f, true ) )
-				{
 					model.addSpotTo( s, f );
-				}
-			}
 		}
 		finally
 		{
 			model.endUpdate();
 		}
 
-		final SelectionModel selectionModel = new SelectionModel( model );
-		final HyperStackDisplayer view = new HyperStackDisplayer( model, selectionModel );
+		final DisplaySettings ds = DisplaySettings.defaultStyle().copy();
+		ds.setSpotColorBy( ObjectType.SPOTS, Spot.QUALITY );
+		ds.setTrackColorBy( ObjectType.TRACKS, TrackIndexAnalyzer.TRACK_INDEX );
+		ds.setSpotShowName( true );
 
 		final TrackIndexAnalyzer ta = new TrackIndexAnalyzer();
 		ta.process( model.getTrackModel().trackIDs( true ), model );
 
-		final SpotColorGenerator scg = new SpotColorGenerator( model );
-		scg.setFeature( Spot.QUALITY );
-		view.setDisplaySettings( TrackMateModelView.KEY_SPOT_COLORING, scg );
-		final PerTrackFeatureColorGenerator tcg = new PerTrackFeatureColorGenerator( model, TrackIndexAnalyzer.TRACK_INDEX );
-		view.setDisplaySettings( TrackMateModelView.KEY_TRACK_COLORING, tcg );
-		view.setDisplaySettings( TrackMateModelView.KEY_DISPLAY_SPOT_NAMES, true );
-		// view.setDisplaySettings( TrackMateModelView.KEY_TRACK_DISPLAY_MODE,
-		// TrackMateModelView.TRACK_DISPLAY_MODE_LOCAL );
+		final SelectionModel selectionModel = new SelectionModel( model );
+		final HyperStackDisplayer view = new HyperStackDisplayer( model, selectionModel, ds );
 		view.render();
 
-		final TrackScheme trackscheme = new TrackScheme( model, selectionModel );
-		trackscheme.setDisplaySettings( TrackMateModelView.KEY_TRACK_COLORING, tcg );
-		trackscheme.setDisplaySettings( TrackMateModelView.KEY_DISPLAY_SPOT_NAMES, true );
+		final TrackScheme trackscheme = new TrackScheme( model, selectionModel, ds );
 		trackscheme.render();
 
 		return model;

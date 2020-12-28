@@ -1,7 +1,5 @@
 package fiji.plugin.trackmate.tracking.kalman;
 
-import ij.ImagePlus;
-
 import java.io.File;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -10,13 +8,13 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.gui.DisplaySettings;
+import fiji.plugin.trackmate.gui.DisplaySettings.ObjectType;
 import fiji.plugin.trackmate.io.TmXmlReader;
-import fiji.plugin.trackmate.visualization.SpotColorGenerator;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
+import ij.ImagePlus;
 
 public class KalmanTrackerInteractiveTest2
 {
@@ -34,9 +32,7 @@ public class KalmanTrackerInteractiveTest2
 		final Model model = reader.getModel();
 		final SpotCollection spots = model.getSpots();
 
-		final Settings settings = new Settings();
-		reader.readSettings( settings, null, null, null, null, null );
-
+		final ImagePlus imp = reader.readImage();
 		final KalmanTracker tracker = new KalmanTracker( spots, 15d, 2, 15d );
 		tracker.setLogger( Logger.DEFAULT_LOGGER );
 		if ( !tracker.checkInput() || !tracker.process() )
@@ -53,12 +49,8 @@ public class KalmanTrackerInteractiveTest2
 		{
 			final SpotCollection predictions = tracker.getPredictions();
 			for ( final Integer frame : predictions.keySet() )
-			{
 				for ( final Spot spot : predictions.iterable( frame, true ) )
-				{
 					model.addSpotTo( spot, frame );
-				}
-			}
 		}
 		finally
 		{
@@ -67,12 +59,11 @@ public class KalmanTrackerInteractiveTest2
 
 		ij.ImageJ.main( args );
 		final SelectionModel selectionModel = new SelectionModel( model );
-		final ImagePlus imp = settings.imp;
-		final HyperStackDisplayer view = new HyperStackDisplayer( model, selectionModel, imp );
-		final SpotColorGenerator scg = new SpotColorGenerator( model );
-		scg.setFeature( Spot.QUALITY );
-		view.setDisplaySettings( TrackMateModelView.KEY_SPOT_COLORING, scg );
+
+		final DisplaySettings ds = DisplaySettings.defaultStyle().copy();
+		ds.setSpotColorBy( ObjectType.SPOTS, Spot.QUALITY );
+
+		final HyperStackDisplayer view = new HyperStackDisplayer( model, selectionModel, imp, ds );
 		view.render();
 	}
-
 }

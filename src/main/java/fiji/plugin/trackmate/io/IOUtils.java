@@ -340,7 +340,12 @@ public class IOUtils
 
 	public static final double readDoubleAttribute( final Element element, final String name, final Logger logger )
 	{
-		double val = 0;
+		return readDoubleAttribute( element, name, logger, 0. );
+	}
+
+	public static final double readDoubleAttribute( final Element element, final String name, final Logger logger, final double defaultValue )
+	{
+		double val = defaultValue;
 		final Attribute att = element.getAttribute( name );
 		if ( null == att )
 		{
@@ -360,7 +365,12 @@ public class IOUtils
 
 	public static final boolean readBooleanAttribute( final Element element, final String name, final Logger logger )
 	{
-		boolean val = false;
+		return readBooleanAttribute( element, name, logger, false );
+	}
+
+	public static final boolean readBooleanAttribute( final Element element, final String name, final Logger logger, final boolean defaultValue )
+	{
+		boolean val = defaultValue;
 		final Attribute att = element.getAttribute( name );
 		if ( null == att )
 		{

@@ -2,23 +2,21 @@ package fiji.plugin.trackmate.gui.panels;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.BIG_FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.features.FeatureFilter;
-import fiji.plugin.trackmate.util.OnRequestUpdater;
-import fiji.plugin.trackmate.util.OnRequestUpdater.Refreshable;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.function.Function;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SpringLayout;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.features.FeatureFilter;
+import fiji.plugin.trackmate.util.OnRequestUpdater;
 
 public class InitFilterPanel extends ActionListenablePanel
 {
@@ -29,86 +27,90 @@ public class InitFilterPanel extends ActionListenablePanel
 
 	private static final String SELECTED_SPOT_STRING = "Selected spots: %d out of %d";
 
-	private FilterPanel jPanelThreshold;
+	private final OnRequestUpdater updater;
 
-	private JPanel jPanelFields;
+	private final Function< String, double[] > valueCollector;
 
-	private JLabel jLabelInitialThreshold;
+	private final FilterPanel filterPanel;
 
-	private JLabel jLabelExplanation;
-
-	private JLabel jLabelSelectedSpots;
-
-	private JPanel jPanelText;
+	private final JLabel lblSelectedSpots;
 
 	private double[] values;
 
-	OnRequestUpdater updater;
 
 	/**
 	 * Default constructor, initialize component.
+	 *
+	 * @param filter
+	 * @param valueCollector
 	 */
-	public InitFilterPanel()
+	public InitFilterPanel( final FeatureFilter filter, final Function< String, double[] > valueCollector )
 	{
-		this.updater = new OnRequestUpdater( new Refreshable()
-		{
-			@Override
-			public void refresh()
-			{
-				thresholdChanged();
-			}
-		} );
-		initGUI();
+		this.valueCollector = valueCollector;
+		this.updater = new OnRequestUpdater( () -> thresholdChanged() );
+
+		final BorderLayout thisLayout = new BorderLayout();
+		this.setLayout( thisLayout );
+		this.setPreferredSize( new java.awt.Dimension( 300, 500 ) );
+
+		final JPanel panelFields = new JPanel();
+		this.add( panelFields, BorderLayout.SOUTH );
+		panelFields.setPreferredSize( new java.awt.Dimension( 300, 100 ) );
+		panelFields.setLayout( null );
+
+		lblSelectedSpots = new JLabel( "Please wait..." );
+		panelFields.add( lblSelectedSpots );
+		lblSelectedSpots.setBounds( 12, 12, 276, 15 );
+		lblSelectedSpots.setFont( FONT );
+
+		final JPanel panelText = new JPanel();
+		this.add( panelText, BorderLayout.NORTH );
+		panelText.setPreferredSize( new Dimension( 300, 200 ) );
+		final SpringLayout slPanelText = new SpringLayout();
+		panelText.setLayout( slPanelText );
+
+		final JLabel lblInitialThreshold = new JLabel();
+		slPanelText.putConstraint( SpringLayout.NORTH, lblInitialThreshold, 12, SpringLayout.NORTH, panelText );
+		slPanelText.putConstraint( SpringLayout.WEST, lblInitialThreshold, 12, SpringLayout.WEST, panelText );
+		slPanelText.putConstraint( SpringLayout.SOUTH, lblInitialThreshold, 27, SpringLayout.NORTH, panelText );
+		slPanelText.putConstraint( SpringLayout.EAST, lblInitialThreshold, -12, SpringLayout.EAST, panelText );
+		panelText.add( lblInitialThreshold );
+		lblInitialThreshold.setText( "Initial thresholding" );
+		lblInitialThreshold.setFont( BIG_FONT );
+
+		final JLabel lblExplanation = new JLabel();
+		slPanelText.putConstraint( SpringLayout.NORTH, lblExplanation, 39, SpringLayout.NORTH, panelText );
+		slPanelText.putConstraint( SpringLayout.WEST, lblExplanation, 12, SpringLayout.WEST, panelText );
+		slPanelText.putConstraint( SpringLayout.SOUTH, lblExplanation, -39, SpringLayout.SOUTH, panelText );
+		slPanelText.putConstraint( SpringLayout.EAST, lblExplanation, -12, SpringLayout.EAST, panelText );
+		panelText.add( lblExplanation );
+		lblExplanation.setText( EXPLANATION_TEXT );
+		lblExplanation.setFont( FONT.deriveFont( Font.ITALIC ) );
+
+		final ArrayList< String > keys = new ArrayList<>( 1 );
+		keys.add( Spot.QUALITY );
+		final HashMap< String, String > keyNames = new HashMap<>( 1 );
+		keyNames.put( Spot.QUALITY, Spot.FEATURE_NAMES.get( Spot.QUALITY ) );
+
+		filterPanel = new FilterPanel( keyNames, valueCollector, filter );
+		filterPanel.cmbboxFeatureKeys.setEnabled( false );
+		filterPanel.rdbtnAbove.setEnabled( false );
+		filterPanel.rdbtnBelow.setEnabled( false );
+		this.add( filterPanel, BorderLayout.CENTER );
+		filterPanel.setPreferredSize( new java.awt.Dimension( 300, 200 ) );
+		filterPanel.addChangeListener( e -> updater.doUpdate() );
+
+		refresh();
 	}
 
 	/*
 	 * PUBLIC METHOD
 	 */
 
-	public void setValues( final double[] values )
+	public void refresh()
 	{
-		this.values = values;
-
-		if ( null != jPanelThreshold )
-		{
-			this.remove( jPanelThreshold );
-		}
-
-		final ArrayList< String > keys = new ArrayList< >( 1 );
-		keys.add( Spot.QUALITY );
-		final HashMap< String, String > keyNames = new HashMap< >( 1 );
-		keyNames.put( Spot.QUALITY, Spot.FEATURE_NAMES.get( Spot.QUALITY ) );
-
-		final Map< String, double[] > features = new HashMap< >( 1 );
-		features.put( Spot.QUALITY, values );
-
-		jPanelThreshold = new FilterPanel( features, keys, keyNames );
-		jPanelThreshold.jComboBoxFeature.setEnabled( false );
-		jPanelThreshold.jRadioButtonAbove.setEnabled( false );
-		jPanelThreshold.jRadioButtonBelow.setEnabled( false );
-		this.add( jPanelThreshold, BorderLayout.CENTER );
-		jPanelThreshold.setPreferredSize( new java.awt.Dimension( 300, 200 ) );
-		jPanelThreshold.addChangeListener( new ChangeListener()
-		{
-			@Override
-			public void stateChanged( final ChangeEvent e )
-			{
-				updater.doUpdate();
-			}
-		} );
-
-	}
-
-	public void setInitialFilterValue( final Double initialFilterValue )
-	{
-		if ( null != initialFilterValue )
-		{
-			jPanelThreshold.setThreshold( initialFilterValue );
-		}
-		else
-		{
-			jPanelThreshold.setThreshold( 0 );
-		}
+		values = valueCollector.apply( Spot.QUALITY );
+		filterPanel.refresh();
 		updater.doUpdate();
 	}
 
@@ -117,7 +119,7 @@ public class InitFilterPanel extends ActionListenablePanel
 	 */
 	public FeatureFilter getFeatureThreshold()
 	{
-		return new FeatureFilter( jPanelThreshold.getKey(), new Double( jPanelThreshold.getThreshold() ), jPanelThreshold.isAboveThreshold() );
+		return filterPanel.getFilter();
 	}
 
 	/*
@@ -126,8 +128,10 @@ public class InitFilterPanel extends ActionListenablePanel
 
 	private void thresholdChanged()
 	{
-		final double threshold = jPanelThreshold.getThreshold();
-		final boolean isAbove = jPanelThreshold.isAboveThreshold();
+		final FeatureFilter filter = filterPanel.getFilter();
+		final double threshold = filter.value;
+		final boolean isAbove = filter.isAbove;
+
 		if ( null == values )
 			return;
 		final int nspots = values.length;
@@ -135,70 +139,15 @@ public class InitFilterPanel extends ActionListenablePanel
 		if ( isAbove )
 		{
 			for ( final double val : values )
-				if ( val >= threshold )
+				if ( val > threshold )
 					nselected++;
 		}
 		else
 		{
 			for ( final double val : values )
-				if ( val <= threshold )
+				if ( val < threshold )
 					nselected++;
 		}
-		jLabelSelectedSpots.setText( String.format( SELECTED_SPOT_STRING, nselected, nspots ) );
-	}
-
-	private void initGUI()
-	{
-		try
-		{
-			final BorderLayout thisLayout = new BorderLayout();
-			this.setLayout( thisLayout );
-			this.setPreferredSize( new java.awt.Dimension( 300, 500 ) );
-
-			{
-				jPanelFields = new JPanel();
-				this.add( jPanelFields, BorderLayout.SOUTH );
-				jPanelFields.setPreferredSize( new java.awt.Dimension( 300, 100 ) );
-				jPanelFields.setLayout( null );
-				{
-					jLabelSelectedSpots = new JLabel();
-					jPanelFields.add( jLabelSelectedSpots );
-					jLabelSelectedSpots.setText( "Please wait..." );
-					jLabelSelectedSpots.setBounds( 12, 12, 276, 15 );
-					jLabelSelectedSpots.setFont( FONT );
-				}
-			}
-			{
-				jPanelText = new JPanel();
-				this.add( jPanelText, BorderLayout.NORTH );
-				jPanelText.setPreferredSize( new Dimension( 300, 200 ) );
-				final SpringLayout sl_jPanelText = new SpringLayout();
-				jPanelText.setLayout( sl_jPanelText );
-				{
-					jLabelInitialThreshold = new JLabel();
-					sl_jPanelText.putConstraint( SpringLayout.NORTH, jLabelInitialThreshold, 12, SpringLayout.NORTH, jPanelText );
-					sl_jPanelText.putConstraint( SpringLayout.WEST, jLabelInitialThreshold, 12, SpringLayout.WEST, jPanelText );
-					sl_jPanelText.putConstraint( SpringLayout.SOUTH, jLabelInitialThreshold, 27, SpringLayout.NORTH, jPanelText );
-					sl_jPanelText.putConstraint( SpringLayout.EAST, jLabelInitialThreshold, -12, SpringLayout.EAST, jPanelText );
-					jPanelText.add( jLabelInitialThreshold );
-					jLabelInitialThreshold.setText( "Initial thresholding" );
-					jLabelInitialThreshold.setFont( BIG_FONT );
-				}
-				{
-					jLabelExplanation = new JLabel();
-					sl_jPanelText.putConstraint( SpringLayout.NORTH, jLabelExplanation, 39, SpringLayout.NORTH, jPanelText );
-					sl_jPanelText.putConstraint( SpringLayout.WEST, jLabelExplanation, 12, SpringLayout.WEST, jPanelText );
-					sl_jPanelText.putConstraint( SpringLayout.SOUTH, jLabelExplanation, -39, SpringLayout.SOUTH, jPanelText );
-					sl_jPanelText.putConstraint( SpringLayout.EAST, jLabelExplanation, -12, SpringLayout.EAST, jPanelText );
-					jPanelText.add( jLabelExplanation );
-					jLabelExplanation.setText( EXPLANATION_TEXT );
-					jLabelExplanation.setFont( FONT.deriveFont( Font.ITALIC ) );
-				}
-			}
-		}
-		catch ( final Exception e )
-		{
-			e.printStackTrace();
-		}
+		lblSelectedSpots.setText( String.format( SELECTED_SPOT_STRING, nselected, nspots ) );
 	}
 }

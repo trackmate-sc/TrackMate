@@ -17,6 +17,33 @@ import static fiji.plugin.trackmate.io.TmXmlKeys.CROP_YSTART_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.io.TmXmlKeys.CROP_ZEND_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.io.TmXmlKeys.CROP_ZSTART_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.io.TmXmlKeys.DETECTOR_SETTINGS_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_ANTIALIASING;
+import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_COLORMAP;
+import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_HIGHLIGHT_COLOR;
+import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_LIMIT_Z_DEPTH;
+import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_MISSING_COLOR;
+import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_SPOT_COLOR_BY;
+import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_SPOT_COLOR_FEATURE;
+import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_SPOT_DISPLAY_AS_ROI;
+import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_SPOT_DISPLAY_RADIUS;
+import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_SPOT_MAX;
+import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_SPOT_MIN;
+import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_SPOT_SHOW_NAME;
+import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_SPOT_UNIFORM_COLOR;
+import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_SPOT_VISIBLE;
+import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_TRACK_COLOR_BY;
+import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_TRACK_COLOR_FEATURE;
+import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_TRACK_DISPLAY_MODE;
+import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_TRACK_FADE;
+import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_TRACK_FADE_RANGE;
+import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_TRACK_MAX;
+import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_TRACK_MIN;
+import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_TRACK_UNIFORM_COLOR;
+import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_TRACK_VISIBLE;
+import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_UNDEFINED_COLOR;
+import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_Z_DEPTH;
+import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.EDGE_ANALYSERS_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.EDGE_FEATURES_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_ATTRIBUTE;
@@ -75,6 +102,7 @@ import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_ID_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_NAME_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.XML_ATTRIBUTE_TRACKER_NAME;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -93,6 +121,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
+import org.jfree.chart.renderer.InterpolatePaintScale;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
@@ -114,6 +143,9 @@ import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
+import fiji.plugin.trackmate.gui.DisplaySettings;
+import fiji.plugin.trackmate.gui.DisplaySettings.ObjectType;
+import fiji.plugin.trackmate.gui.DisplaySettings.TrackDisplayMode;
 import fiji.plugin.trackmate.gui.descriptors.ConfigureViewsDescriptor;
 import fiji.plugin.trackmate.providers.DetectorProvider;
 import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
@@ -234,6 +266,58 @@ public class TmXmlReader
 		return ConfigureViewsDescriptor.KEY;
 	}
 
+	public DisplaySettings getDisplaySettings()
+	{
+		final DisplaySettings ds = DisplaySettings.defaultStyle().copy();
+		final Element dsel = root.getChild( DISPLAY_SETTINGS_ELEMENT_KEY );
+		if ( null == dsel )
+		{
+			logger.error( "Could not find the display-settings element. Returning defaults.\n" );
+			ok = false;
+			return ds;
+		}
+
+		ds.setName( dsel.getAttributeValue( DISPLAY_SETTINGS_ATTRIBUTE_NAME ) );
+		ds.setUndefinedValueColor( new Color( readIntAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_UNDEFINED_COLOR, logger, ds.getUndefinedValueColor().getRGB() ), true ) );
+		ds.setMissingValueColor( new Color( readIntAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_MISSING_COLOR, logger, ds.getMissingValueColor().getRGB() ), true ) );
+		ds.setHighlightColor( new Color( readIntAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_HIGHLIGHT_COLOR, logger, ds.getHighlightColor().getRGB() ), true ) );
+		ds.setUseAntialiasing( readBooleanAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_ANTIALIASING, logger, ds.getUseAntialiasing() ) );
+
+		final String cmapname = dsel.getAttributeValue( DISPLAY_SETTINGS_ATTRIBUTE_COLORMAP );
+		for ( final InterpolatePaintScale cmap : InterpolatePaintScale.getAvailableLUTs() )
+			if ( cmap.getName().equals( cmapname ) )
+				ds.setColormap( cmap );
+
+		ds.setSpotVisible( readBooleanAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_SPOT_VISIBLE, logger, ds.isSpotVisible() ) );
+		ds.setSpotUniformColor( new Color( readIntAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_SPOT_UNIFORM_COLOR, logger, ds.getSpotUniformColor().getRGB() ), true ) );
+		final ObjectType spotColorBy = ObjectType.valueOf( dsel.getAttributeValue( DISPLAY_SETTINGS_ATTRIBUTE_SPOT_COLOR_BY, ds.getSpotColorByType().name() ) );
+		final String spotColorFeature = dsel.getAttributeValue( DISPLAY_SETTINGS_ATTRIBUTE_SPOT_COLOR_FEATURE, ds.getSpotColorByFeature() );
+		ds.setSpotColorBy( spotColorBy, spotColorFeature );
+		final double spotmin = readDoubleAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_SPOT_MIN, logger, ds.getSpotMin() );
+		final double spotmax = readDoubleAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_SPOT_MAX, logger, ds.getSpotMax() );
+		ds.setSpotMinMax( spotmin, spotmax );
+		ds.setSpotDisplayRadius( readDoubleAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_SPOT_DISPLAY_RADIUS, logger, ds.getSpotDisplayRadius() ) );
+		ds.setSpotDisplayedAsRoi( readBooleanAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_SPOT_DISPLAY_AS_ROI, logger, ds.isSpotDisplayedAsRoi() ) );
+		ds.setSpotDisplayedAsRoi( readBooleanAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_SPOT_SHOW_NAME, logger, ds.isSpotShowName() ) );
+
+		ds.setTrackVisible( readBooleanAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_TRACK_VISIBLE, logger, ds.isTrackVisible() ) );
+		ds.setTrackDisplayMode( TrackDisplayMode.valueOf( dsel.getAttributeValue( DISPLAY_SETTINGS_ATTRIBUTE_TRACK_DISPLAY_MODE, TrackDisplayMode.FULL.name() ) ) );
+		ds.setTrackUniformColor( new Color( readIntAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_TRACK_UNIFORM_COLOR, logger, ds.getTrackUniformColor().getRGB() ), true ) );
+		final ObjectType trackColorBy = ObjectType.valueOf( dsel.getAttributeValue( DISPLAY_SETTINGS_ATTRIBUTE_TRACK_COLOR_BY, ds.getTrackColorByType().name() ) );
+		final String trackColorFeature = dsel.getAttributeValue( DISPLAY_SETTINGS_ATTRIBUTE_TRACK_COLOR_FEATURE, ds.getTrackColorByFeature() );
+		ds.setTrackColorBy( trackColorBy, trackColorFeature );
+		final double trackmin = readDoubleAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_TRACK_MIN, logger, ds.getTrackMin() );
+		final double trackmax = readDoubleAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_TRACK_MAX, logger, ds.getTrackMax() );
+		ds.setTrackMinMax( trackmin, trackmax );
+		ds.setFadeTracks( readBooleanAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_TRACK_FADE, logger, ds.isFadeTracks() ) );
+		ds.setFadeTrackRange( readIntAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_TRACK_FADE_RANGE, logger, ds.getFadeTrackRange() ) );
+
+		ds.setZDrawingDepthLimited( readBooleanAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_LIMIT_Z_DEPTH, logger, ds.isZDrawingDepthLimited() ) );
+		ds.setZDrawingDepth( readDoubleAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_Z_DEPTH, logger, ds.getZDrawingDepth() ) );
+
+		return ds;
+	}
+
 	/**
 	 * Returns the collection of views that were saved in this file. The views
 	 * returned are not rendered yet.
@@ -248,6 +332,8 @@ public class TmXmlReader
 	 * @param selectionModel
 	 *            the {@link SelectionModel} model that will be shared with the
 	 *            new views.
+	 * @param displaySettings
+	 *            the display settings to pass to the view.
 	 * @return the collection of views.
 	 * @see TrackMateModelView#render()
 	 */
@@ -255,7 +341,7 @@ public class TmXmlReader
 			final ViewProvider provider,
 			final Model model,
 			final Settings settings,
-			final SelectionModel selectionModel )
+			final SelectionModel selectionModel, final DisplaySettings displaySettings )
 	{
 		final Element guiel = root.getChild( GUI_STATE_ELEMENT_KEY );
 		if ( null != guiel )
@@ -286,7 +372,7 @@ public class TmXmlReader
 						continue;
 					}
 
-					final TrackMateModelView view = factory.create( model, settings, selectionModel );
+					final TrackMateModelView view = factory.create( model, settings, selectionModel, displaySettings );
 					if ( null == view )
 					{
 						logger.error( "Unknown view for key " + viewKey + ".\n" );
@@ -372,14 +458,31 @@ public class TmXmlReader
 		return new Model();
 	}
 
+	public ImagePlus readImage()
+	{
+		final Element settingsElement = root.getChild( SETTINGS_ELEMENT_KEY );
+		if ( null == settingsElement )
+			return null;
+
+		return getImage( settingsElement );
+	}
+
+	public Settings readSettings( final ImagePlus imp )
+	{
+		return readSettings( imp,
+				new DetectorProvider(),
+				new TrackerProvider(),
+				new SpotAnalyzerProvider( imp ),
+				new EdgeAnalyzerProvider(),
+				new TrackAnalyzerProvider() );
+	}
+
 	/**
 	 * Reads the settings element of the file, and sets the fields of the
-	 * specified {@link Settings} object according to the xml file content. The
-	 * provided {@link Settings} object is left untouched if the settings
-	 * element cannot be found in the file.
+	 * specified {@link Settings} object according to the xml file content.
+	 * 
+	 * @param imp
 	 *
-	 * @param settings
-	 *            the {@link Settings} object to flesh out.
 	 * @param detectorProvider
 	 *            the detector provider, required to configure the settings with
 	 *            a correct {@link SpotDetectorFactory}. If <code>null</code>,
@@ -401,8 +504,8 @@ public class TmXmlReader
 	 *            saved {@link TrackAnalyzer}s. If <code>null</code>, will skip
 	 *            reading track analyzers.
 	 */
-	public void readSettings(
-			final Settings settings,
+	public Settings readSettings(
+			final ImagePlus imp,
 			final DetectorProvider detectorProvider,
 			final TrackerProvider trackerProvider,
 			final SpotAnalyzerProvider spotAnalyzerProvider,
@@ -411,13 +514,13 @@ public class TmXmlReader
 	{
 		final Element settingsElement = root.getChild( SETTINGS_ELEMENT_KEY );
 		if ( null == settingsElement )
-			return;
+			return null;
+
+		final Settings settings = new Settings();
+		settings.imp = imp;
 
 		// Base
 		getBaseSettings( settingsElement, settings );
-
-		// Image
-		settings.imp = getImage( settingsElement );
 
 		// Detector
 		if ( null != detectorProvider )
@@ -446,6 +549,8 @@ public class TmXmlReader
 				spotAnalyzerProvider,
 				edgeAnalyzerProvider,
 				trackAnalyzerProvider );
+
+		return settings;
 	}
 
 	/**
@@ -804,7 +909,7 @@ public class TmXmlReader
 	 * <p>
 	 * Internally, this methods also builds the cache field, which will be
 	 * required by the other methods.
-	 * 
+	 *
 	 * It is therefore sensible to call this method first, just after parsing
 	 * the file. If not called, this method will be called anyway by the other
 	 * methods to build the cache.

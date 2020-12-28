@@ -4,16 +4,18 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
+
+import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
+import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 
 /**
  * This class represents the part of the {@link Model} that is in charge of
  * dealing with spot features and track features.
  *
- * @author Jean-Yves Tinevez, 2011, 2012
+ * @author Jean-Yves Tinevez, 2011, 2012. Revised December 2020.
  *
  */
 public class FeatureModel
@@ -23,51 +25,49 @@ public class FeatureModel
 	 * FIELDS
 	 */
 
-	private final Collection< String > trackFeatures = new LinkedHashSet< >();
+	private final Collection< String > trackFeatures = new LinkedHashSet<>();
 
-	private final Map< String, String > trackFeatureNames = new HashMap< >();
+	private final Map< String, String > trackFeatureNames = new HashMap<>();
 
-	private final Map< String, String > trackFeatureShortNames = new HashMap< >();
+	private final Map< String, String > trackFeatureShortNames = new HashMap<>();
 
-	private final Map< String, Dimension > trackFeatureDimensions = new HashMap< >();
+	private final Map< String, Dimension > trackFeatureDimensions = new HashMap<>();
 
-	private final Map< String, Boolean > trackFeatureIsInt = new HashMap< >();
+	private final Map< String, Boolean > trackFeatureIsInt = new HashMap<>();
 
 	/**
 	 * Feature storage. We use a Map of Map as a 2D Map. The list maps each
 	 * track to its feature map. The feature map maps each feature to the double
 	 * value for the specified feature.
 	 */
-	Map< Integer, Map< String, Double >> trackFeatureValues = new ConcurrentHashMap<>();
+	Map< Integer, Map< String, Double > > trackFeatureValues = new ConcurrentHashMap<>();
 
 	/**
 	 * Feature storage for edges.
 	 */
-	private final ConcurrentHashMap< DefaultWeightedEdge, ConcurrentHashMap< String, Double >> edgeFeatureValues = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap< DefaultWeightedEdge, ConcurrentHashMap< String, Double > > edgeFeatureValues = new ConcurrentHashMap<>();
 
-	private final Collection< String > edgeFeatures = new LinkedHashSet< >();
+	private final Collection< String > edgeFeatures = new LinkedHashSet<>();
 
-	private final Map< String, String > edgeFeatureNames = new HashMap< >();
+	private final Map< String, String > edgeFeatureNames = new HashMap<>();
 
-	private final Map< String, String > edgeFeatureShortNames = new HashMap< >();
+	private final Map< String, String > edgeFeatureShortNames = new HashMap<>();
 
-	private final Map< String, Dimension > edgeFeatureDimensions = new HashMap< >();
+	private final Map< String, Dimension > edgeFeatureDimensions = new HashMap<>();
 
-	private final Map< String, Boolean > edgeFeatureIsInt = new HashMap< >();
+	private final Map< String, Boolean > edgeFeatureIsInt = new HashMap<>();
 
-	private final Collection< String > spotFeatures = new LinkedHashSet< >();
+	private final Collection< String > spotFeatures = new LinkedHashSet<>();
 
-	private final Map< String, String > spotFeatureNames = new HashMap< >();
+	private final Map< String, String > spotFeatureNames = new HashMap<>();
 
-	private final Map< String, String > spotFeatureShortNames = new HashMap< >();
+	private final Map< String, String > spotFeatureShortNames = new HashMap<>();
 
-	private final Map< String, Dimension > spotFeatureDimensions = new HashMap< >();
+	private final Map< String, Dimension > spotFeatureDimensions = new HashMap<>();
 
-	private final Map< String, Boolean > spotFeatureIsInt = new HashMap< >();
+	private final Map< String, Boolean > spotFeatureIsInt = new HashMap<>();
 
 	private final Model model;
-
-
 
 	/*
 	 * CONSTRUCTOR
@@ -84,77 +84,25 @@ public class FeatureModel
 	protected FeatureModel( final Model model )
 	{
 		this.model = model;
-		// Adds the base spot features
-		declareSpotFeatures( Spot.FEATURES, Spot.FEATURE_NAMES, Spot.FEATURE_SHORT_NAMES, Spot.FEATURE_DIMENSIONS, Spot.IS_INT );
-	}
-
-	/*
-	 * METHODS
-	 */
-
-	/**
-	 * Returns a new double array with all the values for the specified track
-	 * feature.
-	 *
-	 * @param trackFeature
-	 *            the track feature to parse. Throw an
-	 *            {@link IllegalArgumentException} if the feature is unknown.
-	 * @param visibleOnly
-	 *            if <code>true</code>, will only include visible tracks, all
-	 *            the tracks otherwise.
-	 * @return a new <code>double[]</code>, one element per track.
-	 */
-	public double[] getTrackFeatureValues( final String trackFeature, final boolean visibleOnly )
-	{
-		if ( !trackFeatures.contains( trackFeature ) ) { throw new IllegalArgumentException( "Unknown track feature: " + trackFeature ); }
-		final Set< Integer > keys = model.getTrackModel().trackIDs( visibleOnly );
-		final double[] val = new double[ keys.size() ];
-		int index = 0;
-		for ( final Integer trackID : keys )
-		{
-			final Double tf = getTrackFeature( trackID, trackFeature );
-			if ( null == tf )
-				continue;
-			val[ index++ ] = tf.doubleValue();
-		}
-		return val;
-	}
-
-	/**
-	 * Returns a new double array with all the values for the specified edge
-	 * feature.
-	 *
-	 * @param edgeFeature
-	 *            the track feature to parse. Throw an
-	 *            {@link IllegalArgumentException} if the feature is unknown.
-	 * @param visibleOnly
-	 *            if <code>true</code>, will only include edges in visible
-	 *            tracks, in all the tracks otherwise.
-	 * @return a new <code>double[]</code>, one element per edge.
-	 */
-	public double[] getEdgeFeatureValues( final String edgeFeature, final boolean visibleOnly )
-	{
-		if ( !edgeFeatures.contains( edgeFeature ) ) { throw new IllegalArgumentException( "Unknown edge feature: " + edgeFeature ); }
-		final Set< Integer > keys = model.getTrackModel().trackIDs( visibleOnly );
-		int nvals = 0;
-		for ( final Integer trackID : keys )
-		{
-			nvals += model.getTrackModel().trackEdges( trackID ).size();
-		}
-
-		final double[] val = new double[ nvals ];
-		int index = 0;
-		for ( final Integer trackID : keys )
-		{
-			for ( final DefaultWeightedEdge edge : model.getTrackModel().trackEdges( trackID ) )
-			{
-				final Double ef = getEdgeFeature( edge, edgeFeature );
-				if ( null == ef )
-					continue;
-				val[ index++ ] = ef.doubleValue();
-			}
-		}
-		return val;
+		// Adds the base spot, edge & track features
+		declareSpotFeatures(
+				Spot.FEATURES,
+				Spot.FEATURE_NAMES,
+				Spot.FEATURE_SHORT_NAMES,
+				Spot.FEATURE_DIMENSIONS,
+				Spot.IS_INT );
+		declareEdgeFeatures(
+				EdgeTargetAnalyzer.FEATURES,
+				EdgeTargetAnalyzer.FEATURE_NAMES,
+				EdgeTargetAnalyzer.FEATURE_SHORT_NAMES,
+				EdgeTargetAnalyzer.FEATURE_DIMENSIONS,
+				EdgeTargetAnalyzer.IS_INT );
+		declareTrackFeatures(
+				TrackIndexAnalyzer.FEATURES,
+				TrackIndexAnalyzer.FEATURE_NAMES,
+				TrackIndexAnalyzer.FEATURE_SHORT_NAMES,
+				TrackIndexAnalyzer.FEATURE_DIMENSIONS,
+				TrackIndexAnalyzer.IS_INT );
 	}
 
 	/*
@@ -180,7 +128,7 @@ public class FeatureModel
 		ConcurrentHashMap< String, Double > map = edgeFeatureValues.get( edge );
 		if ( null == map )
 		{
-			map = new ConcurrentHashMap< >();
+			map = new ConcurrentHashMap<>();
 			edgeFeatureValues.put( edge, map );
 		}
 		map.put( feature, value );
@@ -189,7 +137,8 @@ public class FeatureModel
 	public Double getEdgeFeature( final DefaultWeightedEdge edge, final String featureName )
 	{
 		final ConcurrentHashMap< String, Double > map = edgeFeatureValues.get( edge );
-		if ( null == map ) { return null; }
+		if ( null == map )
+			return null;
 		return map.get( featureName );
 	}
 
@@ -227,19 +176,23 @@ public class FeatureModel
 		for ( final String feature : features )
 		{
 			final String name = featureNames.get( feature );
-			if ( null == name ) { throw new IllegalArgumentException( "Feature " + feature + " misses a name." ); }
+			if ( null == name )
+				throw new IllegalArgumentException( "Feature " + feature + " misses a name." );
 			edgeFeatureNames.put( feature, name );
 
 			final String shortName = featureShortNames.get( feature );
-			if ( null == shortName ) { throw new IllegalArgumentException( "Feature " + feature + " misses a short name." ); }
+			if ( null == shortName )
+				throw new IllegalArgumentException( "Feature " + feature + " misses a short name." );
 			edgeFeatureShortNames.put( feature, shortName );
 
 			final Dimension dimension = featureDimensions.get( feature );
-			if ( null == dimension ) { throw new IllegalArgumentException( "Feature " + feature + " misses a dimension." ); }
+			if ( null == dimension )
+				throw new IllegalArgumentException( "Feature " + feature + " misses a dimension." );
 			edgeFeatureDimensions.put( feature, dimension );
 
 			final Boolean isInt = isIntFeature.get( feature );
-			if ( null == isInt ) { throw new IllegalArgumentException( "Feature " + feature + " misses the isInt flag." ); }
+			if ( null == isInt )
+				throw new IllegalArgumentException( "Feature " + feature + " misses the isInt flag." );
 			edgeFeatureIsInt.put( feature, isInt );
 		}
 	}
@@ -327,19 +280,23 @@ public class FeatureModel
 		{
 
 			final String name = featureNames.get( feature );
-			if ( null == name ) { throw new IllegalArgumentException( "Feature " + feature + " misses a name." ); }
+			if ( null == name )
+				throw new IllegalArgumentException( "Feature " + feature + " misses a name." );
 			trackFeatureNames.put( feature, name );
 
 			final String shortName = featureShortNames.get( feature );
-			if ( null == shortName ) { throw new IllegalArgumentException( "Feature " + feature + " misses a short name." ); }
+			if ( null == shortName )
+				throw new IllegalArgumentException( "Feature " + feature + " misses a short name." );
 			trackFeatureShortNames.put( feature, shortName );
 
 			final Dimension dimension = featureDimensions.get( feature );
-			if ( null == dimension ) { throw new IllegalArgumentException( "Feature " + feature + " misses a dimension." ); }
+			if ( null == dimension )
+				throw new IllegalArgumentException( "Feature " + feature + " misses a dimension." );
 			trackFeatureDimensions.put( feature, dimension );
 
 			final Boolean isInt = isIntFeature.get( feature );
-			if ( null == isInt ) { throw new IllegalArgumentException( "Feature " + feature + " misses the isInt flag." ); }
+			if ( null == isInt )
+				throw new IllegalArgumentException( "Feature " + feature + " misses the isInt flag." );
 			trackFeatureIsInt.put( feature, isInt );
 		}
 	}
@@ -407,7 +364,7 @@ public class FeatureModel
 		Map< String, Double > trackFeatureMap = trackFeatureValues.get( trackID );
 		if ( null == trackFeatureMap )
 		{
-			trackFeatureMap = new HashMap< >( trackFeatures.size() );
+			trackFeatureMap = new HashMap<>( trackFeatures.size() );
 			trackFeatureValues.put( trackID, trackFeatureMap );
 		}
 		trackFeatureMap.put( feature, value );
@@ -426,7 +383,7 @@ public class FeatureModel
 	public Double getTrackFeature( final Integer trackID, final String feature )
 	{
 		final Map< String, Double > valueMap = trackFeatureValues.get( trackID );
-		return valueMap.get( feature );
+		return valueMap == null ? null : valueMap.get( feature );
 	}
 
 	/**
@@ -437,7 +394,7 @@ public class FeatureModel
 	 */
 	public Map< String, double[] > getTrackFeatureValues()
 	{
-		final Map< String, double[] > featureValues = new HashMap< >();
+		final Map< String, double[] > featureValues = new HashMap<>();
 		Double val;
 		final int nTracks = model.getTrackModel().nTracks( false );
 		for ( final String feature : trackFeatures )
@@ -450,23 +407,14 @@ public class FeatureModel
 			{
 				val = getTrackFeature( trackID, feature );
 				if ( null == val )
-				{
 					continue;
-				}
+
 				values[ index++ ] = val;
 				noDataFlag = false;
 			}
 
 			if ( noDataFlag )
-			{
-				featureValues.put( feature, new double[ 0 ] ); // Empty array to
-				// signal no
-				// data
-			}
-			else
-			{
-				featureValues.put( feature, values );
-			}
+				featureValues.put( feature, noDataFlag ? new double[ 0 ] : values );
 		}
 		return featureValues;
 	}
@@ -501,19 +449,23 @@ public class FeatureModel
 		{
 
 			final String name = featureNames.get( feature );
-			if ( null == name ) { throw new IllegalArgumentException( "Feature " + feature + " misses a name." ); }
+			if ( null == name )
+				throw new IllegalArgumentException( "Feature " + feature + " misses a name." );
 			spotFeatureNames.put( feature, name );
 
 			final String shortName = featureShortNames.get( feature );
-			if ( null == shortName ) { throw new IllegalArgumentException( "Feature " + feature + " misses a short name." ); }
+			if ( null == shortName )
+				throw new IllegalArgumentException( "Feature " + feature + " misses a short name." );
 			spotFeatureShortNames.put( feature, shortName );
 
 			final Dimension dimension = featureDimensions.get( feature );
-			if ( null == dimension ) { throw new IllegalArgumentException( "Feature " + feature + " misses a dimension." ); }
+			if ( null == dimension )
+				throw new IllegalArgumentException( "Feature " + feature + " misses a dimension." );
 			spotFeatureDimensions.put( feature, dimension );
 
 			final Boolean isInt = isIntFeature.get( feature );
-			if ( null == isInt ) { throw new IllegalArgumentException( "Feature " + feature + " misses the isInt flag." ); }
+			if ( null == isInt )
+				throw new IllegalArgumentException( "Feature " + feature + " misses the isInt flag." );
 			spotFeatureIsInt.put( feature, isInt );
 
 		}
@@ -634,7 +586,7 @@ public class FeatureModel
 	 * STATIC UTILS
 	 */
 
-	private static final < K > void appendFeatureValues( final StringBuilder str, final Map< K, ? extends Map< String, Double >> values )
+	private static final < K > void appendFeatureValues( final StringBuilder str, final Map< K, ? extends Map< String, Double > > values )
 	{
 		for ( final K key : values.keySet() )
 		{
@@ -642,9 +594,7 @@ public class FeatureModel
 			str.append( header );
 			final Map< String, Double > map = values.get( key );
 			for ( final String feature : map.keySet() )
-			{
 				str.append( "     - " + feature + " = " + map.get( feature ) + '\n' );
-			}
 		}
 	}
 
@@ -654,13 +604,9 @@ public class FeatureModel
 		{
 			str.append( "   - " + feature + ": " + featureNames.get( feature ) + ", '" + featureShortNames.get( feature ) + "' (" + featureDimensions.get( feature ) + ")" );
 			if ( isIntFeature.get( feature ).booleanValue() )
-			{
 				str.append( " - integer valued.\n" );
-			}
 			else
-			{
 				str.append( " - double valued.\n" );
-			}
 		}
 	}
 }

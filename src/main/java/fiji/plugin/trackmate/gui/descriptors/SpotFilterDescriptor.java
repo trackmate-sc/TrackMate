@@ -3,7 +3,6 @@ package fiji.plugin.trackmate.gui.descriptors;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -14,40 +13,44 @@ import javax.swing.event.ChangeListener;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.ModelChangeEvent;
-import fiji.plugin.trackmate.ModelChangeListener;
-import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.FeatureFilter;
+import fiji.plugin.trackmate.gui.DisplaySettings.ObjectType;
+import fiji.plugin.trackmate.gui.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.gui.panels.components.ColorByFeatureGUIPanel.Category;
 import fiji.plugin.trackmate.gui.panels.components.FilterGuiPanel;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
-import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 
 public class SpotFilterDescriptor implements WizardPanelDescriptor
 {
 
-	private final ArrayList< ActionListener > actionListeners = new ArrayList< >();
+	private final ArrayList< ActionListener > actionListeners = new ArrayList<>();
 
-	private final ArrayList< ChangeListener > changeListeners = new ArrayList< >();
+	private final ArrayList< ChangeListener > changeListeners = new ArrayList<>();
 
 	private static final String KEY = "SpotFilter";
 
-	private FilterGuiPanel component;
-
-	private final TrackMate trackmate;
-
-	private final FeatureColorGenerator< Spot > spotColorGenerator;
+	private final FilterGuiPanel component;
 
 	private final TrackMateGUIController controller;
 
-	public SpotFilterDescriptor( final TrackMate trackmate, final FeatureColorGenerator< Spot > spotColorGenerator, final TrackMateGUIController controller )
+	public SpotFilterDescriptor(
+			final TrackMateGUIController controller,
+			final List< FeatureFilter > filters,
+			final FeatureDisplaySelector featureSelector )
 	{
-		this.trackmate = trackmate;
-		this.spotColorGenerator = spotColorGenerator;
 		this.controller = controller;
+		this.component = new FilterGuiPanel(
+				controller.getPlugin().getModel(),
+				controller.getPlugin().getSettings(),
+				ObjectType.SPOTS,
+				filters,
+				Spot.QUALITY,
+				featureSelector );
+
+		component.addActionListener( e -> fireAction( e ) );
+		component.addChangeListener( e -> fireThresholdChanged( e ) );
 	}
 
 	@Override
@@ -59,37 +62,6 @@ public class SpotFilterDescriptor implements WizardPanelDescriptor
 	@Override
 	public void aboutToDisplayPanel()
 	{
-		component = new FilterGuiPanel( trackmate.getModel(), Arrays.asList( new Category[] { Category.SPOTS, Category.DEFAULT } ) );
-		component.addActionListener( new ActionListener()
-		{
-			@Override
-			public void actionPerformed( final ActionEvent event )
-			{
-				fireAction( event );
-			}
-		} );
-		component.addChangeListener( new ChangeListener()
-		{
-			@Override
-			public void stateChanged( final ChangeEvent event )
-			{
-				fireThresholdChanged( event );
-			}
-		} );
-
-		/*
-		 * Listen to changes in the model.
-		 */
-		trackmate.getModel().addModelChangeListener( new ModelChangeListener()
-		{
-
-			@Override
-			public void modelChanged( final ModelChangeEvent event )
-			{
-				component.refreshDisplayedFeatureValues();
-			}
-		} );
-
 		final String oldText = controller.getGUI().getNextButton().getText();
 		final Icon oldIcon = controller.getGUI().getNextButton().getIcon();
 		controller.getGUI().getNextButton().setText( "Please wait..." );
@@ -112,7 +84,9 @@ public class SpotFilterDescriptor implements WizardPanelDescriptor
 					final TrackMate trackmate = controller.getPlugin();
 					final Model model = trackmate.getModel();
 					final Logger logger = model.getLogger();
-					final String str = "Initial thresholding with a quality threshold above " + String.format( "%.1f", trackmate.getSettings().initialSpotFilterValue ) + " ...\n";
+					final String str = "Initial thresholding with a quality threshold above "
+							+ String.format( "%.1f", trackmate.getSettings().initialSpotFilterValue )
+							+ " ...\n";
 					logger.log( str, Logger.BLUE_COLOR );
 					final int ntotal = model.getSpots().getNSpots( false );
 					trackmate.execInitialSpotFiltering();
@@ -131,10 +105,7 @@ public class SpotFilterDescriptor implements WizardPanelDescriptor
 					logger.log( String.format( "Calculating features done in %.1f s.\n", ( end - start ) / 1e3f ), Logger.BLUE_COLOR );
 
 					// Refresh component.
-					component.refreshDisplayedFeatureValues();
-					final Settings settings = trackmate.getSettings();
-					component.setFilters( settings.getSpotFilters() );
-					component.setColorFeature( spotColorGenerator.getFeature() );
+					component.refreshValues();
 					fireThresholdChanged( null );
 				}
 				finally
@@ -152,12 +123,7 @@ public class SpotFilterDescriptor implements WizardPanelDescriptor
 	@Override
 	public void displayingPanel()
 	{
-		if ( null == component )
-		{
-			// This happens when we load data: the component gets initialized
-			// only in another method
-			aboutToDisplayPanel();
-		}
+		final TrackMate trackmate = controller.getPlugin();
 		trackmate.getSettings().setSpotFilters( component.getFeatureFilters() );
 		trackmate.execSpotFiltering( false );
 	}
@@ -165,6 +131,7 @@ public class SpotFilterDescriptor implements WizardPanelDescriptor
 	@Override
 	public void aboutToHidePanel()
 	{
+		final TrackMate trackmate = controller.getPlugin();
 		final Logger logger = trackmate.getModel().getLogger();
 		logger.log( "Performing spot filtering on the following features:\n", Logger.BLUE_COLOR );
 		final Model model = trackmate.getModel();

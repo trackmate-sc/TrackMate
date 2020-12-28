@@ -20,7 +20,7 @@ import ij.measure.Calibration;
 
 public class GuiUtils
 {
-	
+
 	private static final FocusListener selectAllFocusListener = new FocusListener()
 	{
 
@@ -47,7 +47,7 @@ public class GuiUtils
 	 * Returns the black color or white color depending on the specified
 	 * background color, to ensure proper readability of the text on said
 	 * background.
-	 * 
+	 *
 	 * @param backgroundColor
 	 *            the background color.
 	 * @return the black or white color.
@@ -113,7 +113,12 @@ public class GuiUtils
 		final int[] dims = imp.getDimensions();
 		if ( dims[ 4 ] == 1 && dims[ 3 ] > 1 )
 		{
-			switch ( JOptionPane.showConfirmDialog( null, "It appears this image has 1 timepoint but " + dims[ 3 ] + " slices.\n" + "Do you want to swap Z and T?", "Z/T swapped?", JOptionPane.YES_NO_CANCEL_OPTION ) )
+			switch ( JOptionPane.showConfirmDialog( null,
+					"It appears this image has 1 timepoint but "
+							+ dims[ 3 ]
+							+ " slices.\n"
+							+ "Do you want to swap Z and T?",
+					"Z/T swapped?", JOptionPane.YES_NO_CANCEL_OPTION ) )
 			{
 			case JOptionPane.YES_OPTION:
 				imp.setDimensions( dims[ 2 ], dims[ 4 ], dims[ 3 ] );
@@ -130,5 +135,4 @@ public class GuiUtils
 			}
 		}
 	}
-
 }

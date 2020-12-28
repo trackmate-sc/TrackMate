@@ -801,7 +801,6 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 					return;
 
 				final double radius = target.getFeature( Spot.RADIUS );
-
 				final int factor = ( e.getKeyCode() == KeyEvent.VK_Q ) ? -1 : 1;
 				final double dx = lImp.getCalibration().pixelWidth;
 
@@ -815,7 +814,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 				final SpotRoi roi = target.getRoi();
 				if ( null == roi )
 				{
-					target.putFeature( Spot.RADIUS, radius );
+					target.putFeature( Spot.RADIUS, newRadius );
 				}
 				else
 				{
@@ -932,8 +931,11 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 				if ( selectedSpots.size() == 2 )
 				{
 					final Iterator< Spot > it = selectedSpots.iterator();
-					final Spot source = it.next();
-					final Spot target = it.next();
+					final Spot sourceTmp = it.next();
+					final Spot targetTmp = it.next();
+
+					final Spot source = sourceTmp.diffTo( targetTmp, Spot.FRAME ) < 0 ? sourceTmp : targetTmp;
+					final Spot target = sourceTmp.diffTo( targetTmp, Spot.FRAME ) < 0 ? targetTmp : sourceTmp;
 
 					if ( model.getTrackModel().containsEdge( source, target ) )
 					{
