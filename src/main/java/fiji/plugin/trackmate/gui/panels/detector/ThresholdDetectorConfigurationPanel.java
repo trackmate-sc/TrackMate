@@ -71,7 +71,7 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 
 	protected final Settings settings;
 
-	protected JCheckBox jCheckBoxSimplify;
+	protected JCheckBox chkboxSimplify;
 
 	protected JSlider sliderChannel;
 
@@ -130,130 +130,130 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 		setLayout( gridBagLayout );
 
 		final JLabel jLabelPreTitle = new JLabel();
-		final GridBagConstraints gbc_jLabel1 = new GridBagConstraints();
-		gbc_jLabel1.anchor = GridBagConstraints.NORTHWEST;
-		gbc_jLabel1.insets = new Insets( 5, 5, 5, 5 );
-		gbc_jLabel1.gridwidth = 3;
-		gbc_jLabel1.gridx = 0;
-		gbc_jLabel1.gridy = 0;
-		this.add( jLabelPreTitle, gbc_jLabel1 );
+		final GridBagConstraints gbcLabel1 = new GridBagConstraints();
+		gbcLabel1.anchor = GridBagConstraints.NORTHWEST;
+		gbcLabel1.insets = new Insets( 5, 5, 5, 5 );
+		gbcLabel1.gridwidth = 3;
+		gbcLabel1.gridx = 0;
+		gbcLabel1.gridy = 0;
+		this.add( jLabelPreTitle, gbcLabel1 );
 		jLabelPreTitle.setText( "Settings for detector:" );
 		jLabelPreTitle.setFont( FONT );
 
 		final JLabel jLabelDetectorName = new JLabel();
 		jLabelDetectorName.setFont( BIG_FONT );
-		final GridBagConstraints gbc_jLabelSegmenterName = new GridBagConstraints();
-		gbc_jLabelSegmenterName.anchor = GridBagConstraints.NORTHWEST;
-		gbc_jLabelSegmenterName.insets = new Insets( 5, 5, 5, 5 );
-		gbc_jLabelSegmenterName.gridwidth = 3;
-		gbc_jLabelSegmenterName.gridx = 0;
-		gbc_jLabelSegmenterName.gridy = 1;
-		this.add( jLabelDetectorName, gbc_jLabelSegmenterName );
+		final GridBagConstraints gbclblSegmenterName = new GridBagConstraints();
+		gbclblSegmenterName.anchor = GridBagConstraints.NORTHWEST;
+		gbclblSegmenterName.insets = new Insets( 5, 5, 5, 5 );
+		gbclblSegmenterName.gridwidth = 3;
+		gbclblSegmenterName.gridx = 0;
+		gbclblSegmenterName.gridy = 1;
+		this.add( jLabelDetectorName, gbclblSegmenterName );
 		jLabelDetectorName.setFont( BIG_FONT );
 		jLabelDetectorName.setText( detectorName );
 
 		final JLabel jLabelHelpText = new JLabel();
-		final GridBagConstraints gbc_jLabelHelpText = new GridBagConstraints();
-		gbc_jLabelHelpText.anchor = GridBagConstraints.WEST;
-		gbc_jLabelHelpText.fill = GridBagConstraints.BOTH;
-		gbc_jLabelHelpText.insets = new Insets( 5, 5, 5, 5 );
-		gbc_jLabelHelpText.gridwidth = 3;
-		gbc_jLabelHelpText.gridx = 0;
-		gbc_jLabelHelpText.gridy = 2;
-		this.add( jLabelHelpText, gbc_jLabelHelpText );
+		final GridBagConstraints gbcLblHelpText = new GridBagConstraints();
+		gbcLblHelpText.anchor = GridBagConstraints.WEST;
+		gbcLblHelpText.fill = GridBagConstraints.BOTH;
+		gbcLblHelpText.insets = new Insets( 5, 5, 5, 5 );
+		gbcLblHelpText.gridwidth = 3;
+		gbcLblHelpText.gridx = 0;
+		gbcLblHelpText.gridy = 2;
+		this.add( jLabelHelpText, gbcLblHelpText );
 		jLabelHelpText.setFont( FONT.deriveFont( Font.ITALIC ) );
 		jLabelHelpText.setText( infoText.replace( "<br>", "" ).replace( "<p>", "<p align=\"justify\">" ).replace( "<html>", "<html><p align=\"justify\">" ) );
 
 		final JLabel labelChannel = new JLabel( "1" );
 		labelChannel.setHorizontalAlignment( SwingConstants.CENTER );
 		labelChannel.setFont( SMALL_FONT );
-		final GridBagConstraints gbc_labelChannel = new GridBagConstraints();
-		gbc_labelChannel.fill = GridBagConstraints.VERTICAL;
-		gbc_labelChannel.insets = new Insets( 5, 5, 5, 5 );
-		gbc_labelChannel.gridx = 2;
-		gbc_labelChannel.gridy = 4;
-		add( labelChannel, gbc_labelChannel );
+		final GridBagConstraints gbcLblChannel = new GridBagConstraints();
+		gbcLblChannel.fill = GridBagConstraints.VERTICAL;
+		gbcLblChannel.insets = new Insets( 5, 5, 5, 5 );
+		gbcLblChannel.gridx = 2;
+		gbcLblChannel.gridy = 4;
+		add( labelChannel, gbcLblChannel );
 
 		sliderChannel = new JSlider();
 		sliderChannel.addChangeListener( e -> labelChannel.setText( "" + sliderChannel.getValue() ) );
 
 		final JLabel lblDetectInChannel = new JLabel( "Segment in channel:" );
 		lblDetectInChannel.setFont( SMALL_FONT );
-		final GridBagConstraints gbc_lblDetectInChannel = new GridBagConstraints();
-		gbc_lblDetectInChannel.anchor = GridBagConstraints.EAST;
-		gbc_lblDetectInChannel.insets = new Insets( 5, 5, 5, 5 );
-		gbc_lblDetectInChannel.gridx = 0;
-		gbc_lblDetectInChannel.gridy = 4;
-		add( lblDetectInChannel, gbc_lblDetectInChannel );
+		final GridBagConstraints gbcLblDetectInChannel = new GridBagConstraints();
+		gbcLblDetectInChannel.anchor = GridBagConstraints.EAST;
+		gbcLblDetectInChannel.insets = new Insets( 5, 5, 5, 5 );
+		gbcLblDetectInChannel.gridx = 0;
+		gbcLblDetectInChannel.gridy = 4;
+		add( lblDetectInChannel, gbcLblDetectInChannel );
 
-		final GridBagConstraints gbc_sliderChannel = new GridBagConstraints();
-		gbc_sliderChannel.fill = GridBagConstraints.BOTH;
-		gbc_sliderChannel.insets = new Insets( 5, 5, 5, 5 );
-		gbc_sliderChannel.gridx = 1;
-		gbc_sliderChannel.gridy = 4;
-		add( sliderChannel, gbc_sliderChannel );
+		final GridBagConstraints gbcSliderChannel = new GridBagConstraints();
+		gbcSliderChannel.fill = GridBagConstraints.BOTH;
+		gbcSliderChannel.insets = new Insets( 5, 5, 5, 5 );
+		gbcSliderChannel.gridx = 1;
+		gbcSliderChannel.gridy = 4;
+		add( sliderChannel, gbcSliderChannel );
 
 		lblIntensityThreshold = new JLabel( "Intensity threshold:" );
 		lblIntensityThreshold.setFont( SMALL_FONT );
-		final GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
-		gbc_lblNewLabel.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel.insets = new Insets( 5, 5, 5, 5 );
-		gbc_lblNewLabel.gridx = 0;
-		gbc_lblNewLabel.gridy = 5;
-		add( lblIntensityThreshold, gbc_lblNewLabel );
+		final GridBagConstraints gbcLblNewLabel = new GridBagConstraints();
+		gbcLblNewLabel.anchor = GridBagConstraints.EAST;
+		gbcLblNewLabel.insets = new Insets( 5, 5, 5, 5 );
+		gbcLblNewLabel.gridx = 0;
+		gbcLblNewLabel.gridy = 5;
+		add( lblIntensityThreshold, gbcLblNewLabel );
 
 		ftfIntensityThreshold = new JFormattedTextField( THRESHOLD_FORMAT );
 		GuiUtils.selectAllOnFocus( ftfIntensityThreshold );
 		ftfIntensityThreshold.setValue( Double.valueOf( 0. ) );
 		ftfIntensityThreshold.setFont( SMALL_FONT );
 		ftfIntensityThreshold.setHorizontalAlignment( SwingConstants.CENTER );
-		final GridBagConstraints gbc_ftfIntensityThreshold = new GridBagConstraints();
-		gbc_ftfIntensityThreshold.fill = GridBagConstraints.HORIZONTAL;
-		gbc_ftfIntensityThreshold.insets = new Insets( 5, 5, 5, 5 );
-		gbc_ftfIntensityThreshold.gridx = 1;
-		gbc_ftfIntensityThreshold.gridy = 5;
-		add( ftfIntensityThreshold, gbc_ftfIntensityThreshold );
+		final GridBagConstraints gbcFtfIntensityThreshold = new GridBagConstraints();
+		gbcFtfIntensityThreshold.fill = GridBagConstraints.HORIZONTAL;
+		gbcFtfIntensityThreshold.insets = new Insets( 5, 5, 5, 5 );
+		gbcFtfIntensityThreshold.gridx = 1;
+		gbcFtfIntensityThreshold.gridy = 5;
+		add( ftfIntensityThreshold, gbcFtfIntensityThreshold );
 
 		btnAutoThreshold = new JButton( "Auto" );
 		btnAutoThreshold.setFont( SMALL_FONT );
-		final GridBagConstraints gbc_btnAutoThreshold = new GridBagConstraints();
-		gbc_btnAutoThreshold.insets = new Insets( 5, 5, 5, 5 );
-		gbc_btnAutoThreshold.gridx = 2;
-		gbc_btnAutoThreshold.gridy = 5;
-		add( btnAutoThreshold, gbc_btnAutoThreshold );
+		final GridBagConstraints gbcBtnAutoThreshold = new GridBagConstraints();
+		gbcBtnAutoThreshold.insets = new Insets( 5, 5, 5, 5 );
+		gbcBtnAutoThreshold.gridx = 2;
+		gbcBtnAutoThreshold.gridy = 5;
+		add( btnAutoThreshold, gbcBtnAutoThreshold );
 
-		jCheckBoxSimplify = new JCheckBox();
-		final GridBagConstraints gbc_jCheckBoxSimplify = new GridBagConstraints();
-		gbc_jCheckBoxSimplify.anchor = GridBagConstraints.NORTHWEST;
-		gbc_jCheckBoxSimplify.insets = new Insets( 5, 5, 5, 5 );
-		gbc_jCheckBoxSimplify.gridwidth = 3;
-		gbc_jCheckBoxSimplify.gridx = 0;
-		gbc_jCheckBoxSimplify.gridy = 6;
-		this.add( jCheckBoxSimplify, gbc_jCheckBoxSimplify );
-		jCheckBoxSimplify.setText( "Simplify contours." );
-		jCheckBoxSimplify.setFont( FONT );
+		chkboxSimplify = new JCheckBox();
+		final GridBagConstraints gbChkboxSimplify = new GridBagConstraints();
+		gbChkboxSimplify.anchor = GridBagConstraints.NORTHWEST;
+		gbChkboxSimplify.insets = new Insets( 5, 5, 5, 5 );
+		gbChkboxSimplify.gridwidth = 3;
+		gbChkboxSimplify.gridx = 0;
+		gbChkboxSimplify.gridy = 6;
+		this.add( chkboxSimplify, gbChkboxSimplify );
+		chkboxSimplify.setText( "Simplify contours." );
+		chkboxSimplify.setFont( FONT );
 
 		final JButton btnPreview = new JButton( "Preview", ICON_PREVIEW );
 		btnPreview.setToolTipText( TOOLTIP_PREVIEW );
-		final GridBagConstraints gbc_btnPreview = new GridBagConstraints();
-		gbc_btnPreview.anchor = GridBagConstraints.NORTHEAST;
-		gbc_btnPreview.insets = new Insets( 5, 5, 5, 5 );
-		gbc_btnPreview.gridwidth = 3;
-		gbc_btnPreview.gridx = 0;
-		gbc_btnPreview.gridy = 8;
-		this.add( btnPreview, gbc_btnPreview );
+		final GridBagConstraints gbcBtnPreview = new GridBagConstraints();
+		gbcBtnPreview.anchor = GridBagConstraints.NORTHEAST;
+		gbcBtnPreview.insets = new Insets( 5, 5, 5, 5 );
+		gbcBtnPreview.gridwidth = 3;
+		gbcBtnPreview.gridx = 0;
+		gbcBtnPreview.gridy = 8;
+		this.add( btnPreview, gbcBtnPreview );
 		btnPreview.setFont( SMALL_FONT );
 
 		final JLabelLogger labelLogger = new JLabelLogger();
 		labelLogger.setText( "    " );
-		final GridBagConstraints gbc_labelLogger = new GridBagConstraints();
-		gbc_labelLogger.insets = new Insets( 5, 5, 5, 5 );
-		gbc_labelLogger.anchor = GridBagConstraints.NORTH;
-		gbc_labelLogger.fill = GridBagConstraints.HORIZONTAL;
-		gbc_labelLogger.gridwidth = 3;
-		gbc_labelLogger.gridx = 0;
-		gbc_labelLogger.gridy = 9;
-		add( labelLogger, gbc_labelLogger );
+		final GridBagConstraints gbcLblLogger = new GridBagConstraints();
+		gbcLblLogger.insets = new Insets( 5, 5, 5, 5 );
+		gbcLblLogger.anchor = GridBagConstraints.NORTH;
+		gbcLblLogger.fill = GridBagConstraints.HORIZONTAL;
+		gbcLblLogger.gridwidth = 3;
+		gbcLblLogger.gridx = 0;
+		gbcLblLogger.gridy = 9;
+		add( labelLogger, gbcLblLogger );
 		final Logger localLogger = labelLogger.getLogger();
 
 		/*
@@ -324,7 +324,7 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 	public Map< String, Object > getSettings()
 	{
 		final int targetChannel = sliderChannel.getValue();
-		final boolean simplify = jCheckBoxSimplify.isSelected();
+		final boolean simplify = chkboxSimplify.isSelected();
 		final double intensityThreshold = ( ( Number ) ftfIntensityThreshold.getValue() ).doubleValue();
 
 		final HashMap< String, Object > lSettings = new HashMap<>( 3 );
@@ -338,7 +338,7 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 	public void setSettings( final Map< String, Object > settings )
 	{
 		sliderChannel.setValue( ( Integer ) settings.get( KEY_TARGET_CHANNEL ) );
-		jCheckBoxSimplify.setSelected( ( Boolean ) settings.get( ThresholdDetectorFactory.KEY_SIMPLIFY_CONTOURS ) );
+		chkboxSimplify.setSelected( ( Boolean ) settings.get( ThresholdDetectorFactory.KEY_SIMPLIFY_CONTOURS ) );
 
 		final Double intensityThreshold = Double.valueOf( ( Double ) settings.get( ThresholdDetectorFactory.KEY_INTENSITY_THRESHOLD ) );
 		if ( intensityThreshold == null || intensityThreshold == 0. )

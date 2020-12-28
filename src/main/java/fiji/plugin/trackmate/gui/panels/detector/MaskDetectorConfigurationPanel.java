@@ -46,7 +46,7 @@ public class MaskDetectorConfigurationPanel extends ThresholdDetectorConfigurati
 	public void setSettings( final Map< String, Object > settings )
 	{
 		sliderChannel.setValue( ( Integer ) settings.get( KEY_TARGET_CHANNEL ) );
-		jCheckBoxSimplify.setSelected( ( Boolean ) settings.get( ThresholdDetectorFactory.KEY_SIMPLIFY_CONTOURS ) );
+		chkboxSimplify.setSelected( ( Boolean ) settings.get( ThresholdDetectorFactory.KEY_SIMPLIFY_CONTOURS ) );
 	}
 
 	/**
