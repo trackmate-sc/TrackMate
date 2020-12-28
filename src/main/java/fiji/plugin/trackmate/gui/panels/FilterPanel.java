@@ -18,9 +18,7 @@ import java.awt.event.MouseListener;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -33,11 +31,9 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JRadioButton;
-import javax.swing.WindowConstants;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -52,9 +48,6 @@ import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 
 import fiji.plugin.trackmate.features.FeatureFilter;
-import fiji.plugin.trackmate.features.spot.SpotContrastAndSNRAnalyzerFactory;
-import fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory;
-import fiji.plugin.trackmate.features.spot.SpotRadiusEstimatorFactory;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.util.NumberParser;
 
@@ -427,51 +420,6 @@ public class FilterPanel extends javax.swing.JPanel
 		plot.getRangeAxis().setUpperMargin( 0 );
 		plot.getDomainAxis().setLowerMargin( 0 );
 		plot.getDomainAxis().setUpperMargin( 0 );
-	}
-
-	/*
-	 * MAIN METHOD
-	 */
-
-	/**
-	 * Display this JPanel inside a new JFrame.
-	 */
-	public static void main( final String[] args )
-	{
-		// Prepare fake data
-		final int N_ITEMS = 100;
-		final Random ran = new Random();
-		double mean;
-
-		final String[] features = new String[] { SpotContrastAndSNRAnalyzerFactory.CONTRAST, SpotRadiusEstimatorFactory.ESTIMATED_DIAMETER, SpotIntensityAnalyzerFactory.MAX_INTENSITY };
-
-		final Map< String, String > featureNames = new HashMap<>();
-		featureNames.put( features[ 0 ], "Contrast" );
-		featureNames.put( features[ 1 ], "Diameter" );
-		featureNames.put( features[ 2 ], "Max intensity" );
-
-		final Map< String, double[] > fv = new HashMap<>();
-		for ( final String feature : features )
-		{
-			final double[] val = new double[ N_ITEMS ];
-			mean = ran.nextDouble() * 10;
-			for ( int j = 0; j < val.length; j++ )
-				val[ j ] = ran.nextGaussian() + 5 + mean;
-			fv.put( feature, val );
-		}
-
-		// Dummy values.
-		final Function< String, double[] > vc = key -> fv.get( key );
-		final FeatureFilter filter = new FeatureFilter( SpotRadiusEstimatorFactory.ESTIMATED_DIAMETER, 0.5, false );
-
-		// Create GUI
-		final FilterPanel tp = new FilterPanel( featureNames, vc, filter );
-		tp.resetAxes();
-		final JFrame frame = new JFrame();
-		frame.getContentPane().add( tp );
-		frame.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
-		frame.pack();
-		frame.setVisible( true );
 	}
 
 	/**

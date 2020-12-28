@@ -57,6 +57,12 @@ public class MaskDetectorFactory< T extends RealType< T > & NativeType< T > > ex
 			+ "</html>";
 
 	@Override
+	public boolean has2Dsegmentation()
+	{
+		return true;
+	}
+
+	@Override
 	public SpotDetector< T > getDetector( final Interval interval, final int frame )
 	{
 		final double intensityThreshold = 0.;

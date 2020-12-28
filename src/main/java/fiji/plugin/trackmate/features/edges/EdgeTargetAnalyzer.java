@@ -9,8 +9,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 import javax.swing.ImageIcon;
 
-import net.imglib2.multithreading.SimpleMultiThreading;
-
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.scijava.plugin.Plugin;
 
@@ -18,6 +16,7 @@ import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
+import net.imglib2.multithreading.SimpleMultiThreading;
 
 @SuppressWarnings( "deprecation" )
 @Plugin( type = EdgeAnalyzer.class )
@@ -30,19 +29,12 @@ public class EdgeTargetAnalyzer implements EdgeAnalyzer
 	 * FEATURE NAMES
 	 */
 	public static final String SPOT_SOURCE_ID = "SPOT_SOURCE_ID";
-
 	public static final String SPOT_TARGET_ID = "SPOT_TARGET_ID";
-
 	public static final String EDGE_COST = "LINK_COST";
-
 	public static final List< String > FEATURES = new ArrayList< >( 3 );
-
 	public static final Map< String, String > FEATURE_NAMES = new HashMap< >( 3 );
-
 	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< >( 3 );
-
 	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< >( 3 );
-
 	public static final Map< String, Boolean > IS_INT = new HashMap< >( 3 );
 
 	static
@@ -53,7 +45,7 @@ public class EdgeTargetAnalyzer implements EdgeAnalyzer
 
 		FEATURE_NAMES.put( SPOT_SOURCE_ID, "Source spot ID" );
 		FEATURE_NAMES.put( SPOT_TARGET_ID, "Target spot ID" );
-		FEATURE_NAMES.put( EDGE_COST, "Link cost" );
+		FEATURE_NAMES.put( EDGE_COST, "Edge cost" );
 
 		FEATURE_SHORT_NAMES.put( SPOT_SOURCE_ID, "Source ID" );
 		FEATURE_SHORT_NAMES.put( SPOT_TARGET_ID, "Target ID" );
@@ -66,7 +58,6 @@ public class EdgeTargetAnalyzer implements EdgeAnalyzer
 		IS_INT.put( SPOT_SOURCE_ID, Boolean.TRUE );
 		IS_INT.put( SPOT_TARGET_ID, Boolean.TRUE );
 		IS_INT.put( EDGE_COST, Boolean.FALSE );
-
 	}
 
 	private int numThreads;
@@ -92,12 +83,11 @@ public class EdgeTargetAnalyzer implements EdgeAnalyzer
 	public void process( final Collection< DefaultWeightedEdge > edges, final Model model )
 	{
 
-		if ( edges.isEmpty() ) { return; }
+		if ( edges.isEmpty() )
+			return;
 
 		final FeatureModel featureModel = model.getFeatureModel();
-
 		final ArrayBlockingQueue< DefaultWeightedEdge > queue = new ArrayBlockingQueue< >( edges.size(), false, edges );
-
 		final Thread[] threads = SimpleMultiThreading.newThreads( numThreads );
 		for ( int i = 0; i < threads.length; i++ )
 		{
@@ -117,7 +107,6 @@ public class EdgeTargetAnalyzer implements EdgeAnalyzer
 						final Spot target = model.getTrackModel().getEdgeTarget( edge );
 						featureModel.putEdgeFeature( edge, SPOT_TARGET_ID, Double.valueOf( target.ID() ) );
 					}
-
 				}
 			};
 		}
@@ -150,7 +139,6 @@ public class EdgeTargetAnalyzer implements EdgeAnalyzer
 	public void setNumThreads( final int numThreads )
 	{
 		this.numThreads = numThreads;
-
 	}
 
 	@Override

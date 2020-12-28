@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.Icon;
 import javax.swing.JLabel;
@@ -13,13 +14,17 @@ import javax.swing.event.ChangeListener;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.features.FeatureFilter;
+import fiji.plugin.trackmate.features.spot.SpotMorphologyAnalyzerFactory;
 import fiji.plugin.trackmate.gui.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.gui.panels.components.FilterGuiPanel;
+import fiji.plugin.trackmate.providers.SpotMorphologyAnalyzerProvider;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
 
 public class SpotFilterDescriptor implements WizardPanelDescriptor
@@ -92,6 +97,28 @@ public class SpotFilterDescriptor implements WizardPanelDescriptor
 					trackmate.execInitialSpotFiltering();
 					final int nselected = model.getSpots().getNSpots( false );
 					logger.log( String.format( "Retained %d spots out of %d.\n", nselected, ntotal ) );
+
+					/*
+					 * Should we add morphology feature analyzers?
+					 */
+
+					if ( trackmate.getSettings().detectorFactory != null
+							&& trackmate.getSettings().detectorFactory.has2Dsegmentation()
+							&& DetectionUtils.is2D( trackmate.getSettings().imp ) )
+					{
+						logger.log( "Adding morphology analyzers...\n", Logger.BLUE_COLOR );
+						final Settings settings = trackmate.getSettings();
+						final SpotMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider = new SpotMorphologyAnalyzerProvider( settings.imp );
+						final List< SpotMorphologyAnalyzerFactory< ? > > factories = spotMorphologyAnalyzerProvider
+								.getKeys()
+								.stream()
+								.map( key -> spotMorphologyAnalyzerProvider.getFactory(	key ) )
+								.collect( Collectors.toList() );
+						factories.forEach( settings::addSpotAnalyzerFactory );
+						final StringBuilder strb = new StringBuilder();
+						Settings.prettyPrintFeatureAnalyzer( factories, strb );
+						logger.log( strb.toString() );
+					}
 
 					/*
 					 * We have some spots so we need to compute spot features

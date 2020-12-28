@@ -1,9 +1,5 @@
 package fiji.plugin.trackmate.features.track;
 
-import fiji.plugin.trackmate.Dimension;
-import fiji.plugin.trackmate.FeatureModel;
-import fiji.plugin.trackmate.Model;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -14,6 +10,10 @@ import javax.swing.ImageIcon;
 
 import org.scijava.plugin.Plugin;
 
+import fiji.plugin.trackmate.Dimension;
+import fiji.plugin.trackmate.FeatureModel;
+import fiji.plugin.trackmate.Model;
+
 @Plugin( type = TrackAnalyzer.class )
 public class TrackIndexAnalyzer implements TrackAnalyzer
 {
@@ -22,18 +22,13 @@ public class TrackIndexAnalyzer implements TrackAnalyzer
 	public static final String KEY = "Track index";
 
 	/** The key for the feature TRACK_INDEX */
+
 	public static final String TRACK_INDEX = "TRACK_INDEX";
-
 	public static final String TRACK_ID = "TRACK_ID";
-
 	public static final List< String > FEATURES = new ArrayList< >( 2 );
-
 	public static final Map< String, String > FEATURE_NAMES = new HashMap< >( 2 );
-
 	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< >( 2 );
-
 	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< >( 2 );
-
 	public static final Map< String, Boolean > IS_INT = new HashMap< >( 2 );
 
 	static

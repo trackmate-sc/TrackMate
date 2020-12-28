@@ -292,7 +292,7 @@ public class SpotCollection implements MultiThreaded
 							final double tval = featureFilter.value;
 							final boolean isAbove = featureFilter.isAbove;
 
-							if ( isAbove && val.compareTo( tval ) < 0 || !isAbove && val.compareTo( tval ) > 0 )
+							if ( null == val || isAbove && val.compareTo( tval ) < 0 || !isAbove && val.compareTo( tval ) > 0 )
 							{
 								shouldNotBeVisible = true;
 								break;

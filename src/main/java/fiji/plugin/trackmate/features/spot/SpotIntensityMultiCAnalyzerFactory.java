@@ -1,7 +1,5 @@
 package fiji.plugin.trackmate.features.spot;
 
-import static fiji.plugin.trackmate.features.spot.SpotIntensityMultiCAnalyzerFactory.makeFeatureKey;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -11,7 +9,6 @@ import java.util.Map;
 
 import javax.swing.ImageIcon;
 
-import org.scijava.Priority;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Dimension;
@@ -23,54 +20,62 @@ import net.imglib2.meta.view.HyperSliceImgPlus;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 
-/**
- * A factory for {@link SpotContrastAndSNRAnalyzer}s. Because the analyzers of
- * this factory depends on some features defined in
- * {@link SpotIntensityAnalyzer}s, we use a higher priority, so that computation
- * are done after the aforementioned analyzer are done.
- *
- * @author Jean- Yves Tinevez
- */
 @SuppressWarnings( "deprecation" )
-@Plugin( type = SpotAnalyzerFactory.class, priority = Priority.LOW )
-public class SpotContrastAndSNRAnalyzerFactory< T extends RealType< T > & NativeType< T >> implements SpotAnalyzerFactory< T >
+@Plugin( type = SpotAnalyzerFactory.class )
+public class SpotIntensityMultiCAnalyzerFactory< T extends RealType< T > & NativeType< T > > implements SpotAnalyzerFactory< T >
 {
 
-	public static final String CONTRAST = "CONTRAST_CH";
-	public static final String SNR = "SNR_CH";
+	private static final String KEY = "Spot intensity";
+	
+	static final String MEAN_INTENSITY = "MEAN_INTENSITY_CH";
+	static final String MEDIAN_INTENSITY = "MEDIAN_INTENSITY_CH";
+	static final String MIN_INTENSITY = "MIN_INTENSITY_CH";
+	static final String MAX_INTENSITY = "MAX_INTENSITY_CH";
+	static final String TOTAL_INTENSITY = "TOTAL_INTENSITY_CH";
+	static final String STD_INTENSITY = "STD_INTENSITY_CH";
 
-	private static final String CONTRAST_NAME = "Contrast ch";
-	private static final String SNR_NAME = "Signal/Noise ratio ch";
-	private static final String CONTRAST_SHORTNAME = "Contrast ch";
-	private static final String SNR_SHORTNAME = "Signal/Noise ratio ch";
+	private static final String MEAN_SHORT_NAME = "Mean ch";
+	private static final String MEAN_NAME = "Mean intensity ch";
+	private static final String MEDIAN_SHORT_NAME = "Median ch";
+	private static final String MEDIAN_NAME = "Median intensity ch";
+	private static final String MIN_SHORT_NAME = "Min ch";
+	private static final String MIN_NAME = "Min intensity ch";
+	private static final String MAX_SHORT_NAME = "Max ch";
+	private static final String MAX_NAME = "Max intensity ch";
+	private static final String SUM_SHORT_NAME = "Sum ch";
+	private static final String SUM_NAME = "Sum intensity ch";
+	private static final String STD_SHORT_NAME = "Std ch";
+	private static final String STD_NAME = "Std intensity ch";
+
 	private static final List< String > FEATURES = Arrays.asList( new String[] {
-			CONTRAST, SNR } );
+			MEAN_INTENSITY, MEDIAN_INTENSITY, MIN_INTENSITY, MAX_INTENSITY, TOTAL_INTENSITY, STD_INTENSITY } );
 	private static final List< String > FEATURE_SHORTNAMES = Arrays.asList( new String[] {
-			CONTRAST_SHORTNAME, SNR_SHORTNAME } );
+			MEAN_SHORT_NAME, MEDIAN_SHORT_NAME, MIN_SHORT_NAME, MAX_SHORT_NAME, SUM_SHORT_NAME, STD_SHORT_NAME } );
 	private static final List< String > FEATURE_NAMES = Arrays.asList( new String[] {
-			CONTRAST_NAME, SNR_NAME } );
-
-	public static final String KEY = "Spot contrast and SNR";
+			MEAN_NAME, MEDIAN_NAME, MIN_NAME, MAX_NAME, SUM_NAME, STD_NAME } );
 
 	private int nChannels = 1;
 
-
-	/*
-	 * METHODS
-	 */
-
 	@Override
-	public SpotContrastAndSNRAnalyzer< T > getAnalyzer( final Model model, final ImgPlus< T > img, final int frame, final int channel )
+	public void setSource( final ImagePlus imp )
 	{
-		final ImgPlus< T > imgT = HyperSliceImgPlus.fixTimeAxis( img, frame );
-		final Iterator< Spot > spots = model.getSpots().iterator( frame, false );
-		return new SpotContrastAndSNRAnalyzer<>( imgT, spots, nChannels );
+		if ( null != imp )
+			this.nChannels = imp.getNChannels();
+		else
+			this.nChannels = 1;
 	}
 
 	@Override
-	public String getKey()
+	public SpotAnalyzer< T > getAnalyzer( final Model model, final ImgPlus< T > img, final int frame, final int channel )
 	{
-		return KEY;
+		final ImgPlus< T > imgT = HyperSliceImgPlus.fixTimeAxis( img, frame );
+		final Iterator< Spot > spots = model.getSpots().iterator( frame, false );
+		return new SpotIntensityMultiCAnalyzer< >( imgT, spots, nChannels );
+	}
+
+	static final String makeFeatureKey( final String feature, final int c )
+	{
+		return feature + ( c + 1 );
 	}
 
 	@Override
@@ -120,7 +125,7 @@ public class SpotContrastAndSNRAnalyzerFactory< T extends RealType< T > & Native
 		final List< String > features = getFeatures();
 		final Map< String, Dimension > dimensions = new LinkedHashMap<>( features.size() );
 		for ( final String feature : features )
-			dimensions.put( feature, Dimension.NONE );
+			dimensions.put( feature, Dimension.INTENSITY );
 
 		return dimensions;
 	}
@@ -136,6 +141,11 @@ public class SpotContrastAndSNRAnalyzerFactory< T extends RealType< T > & Native
 		return isints;
 	}
 
+	@Override
+	public boolean isManualFeature()
+	{
+		return false;
+	}
 
 	@Override
 	public String getInfoText()
@@ -150,23 +160,14 @@ public class SpotContrastAndSNRAnalyzerFactory< T extends RealType< T > & Native
 	}
 
 	@Override
-	public String getName()
+	public String getKey()
 	{
 		return KEY;
 	}
 
 	@Override
-	public boolean isManualFeature()
+	public String getName()
 	{
-		return false;
-	}
-
-	@Override
-	public void setSource( final ImagePlus imp )
-	{
-		if ( null != imp )
-			this.nChannels = imp.getNChannels();
-		else
-			this.nChannels = 1;
+		return KEY;
 	}
 }

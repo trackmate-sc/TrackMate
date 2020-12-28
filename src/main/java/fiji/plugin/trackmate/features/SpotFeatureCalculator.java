@@ -16,7 +16,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.features.spot.IndependentSpotFeatureAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzer;
-import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
+import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactoryBase;
 import fiji.plugin.trackmate.util.TMUtils;
 import net.imagej.ImgPlus;
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
@@ -79,7 +79,7 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 		final long start = System.currentTimeMillis();
 
 		// Declare what you do.
-		for ( final SpotAnalyzerFactory< ? > factory : settings.getSpotAnalyzerFactories() )
+		for ( final SpotAnalyzerFactoryBase< ? > factory : settings.getSpotAnalyzerFactories() )
 		{
 			final Collection< String > features = factory.getFeatures();
 			final Map< String, String > featureNames = factory.getFeatureNames();
@@ -104,7 +104,7 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 	 */
 	public void computeSpotFeatures( final SpotCollection toCompute, final boolean doLogIt )
 	{
-		final List< SpotAnalyzerFactory< ? >> spotFeatureAnalyzers = settings.getSpotAnalyzerFactories();
+		final List< SpotAnalyzerFactoryBase< ? > > spotFeatureAnalyzers = settings.getSpotAnalyzerFactories();
 		computeSpotFeaturesAgent( toCompute, spotFeatureAnalyzers, doLogIt );
 	}
 
@@ -114,7 +114,7 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 	 * 
 	 * @param toCompute
 	 */
-	private void computeSpotFeaturesAgent( final SpotCollection toCompute, final List< SpotAnalyzerFactory< ? >> analyzerFactories, final boolean doLogIt )
+	private void computeSpotFeaturesAgent( final SpotCollection toCompute, final List< SpotAnalyzerFactoryBase< ? > > analyzerFactories, final boolean doLogIt )
 	{
 
 		final Logger logger = doLogIt ? model.getLogger() : Logger.VOID_LOGGER;
@@ -161,7 +161,7 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 					{
 
 						final int frame = frameSet.get( index );
-						for ( final SpotAnalyzerFactory< ? > factory : analyzerFactories )
+						for ( final SpotAnalyzerFactoryBase< ? > factory : analyzerFactories )
 						{
 							@SuppressWarnings( "unchecked" )
 							final SpotAnalyzer< ? > analyzer = factory.getAnalyzer( model, img, frame, targetChannel );

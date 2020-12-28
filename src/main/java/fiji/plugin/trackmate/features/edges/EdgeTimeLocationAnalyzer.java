@@ -9,8 +9,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 import javax.swing.ImageIcon;
 
-import net.imglib2.multithreading.SimpleMultiThreading;
-
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.scijava.plugin.Plugin;
 
@@ -18,33 +16,26 @@ import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
+import net.imglib2.multithreading.SimpleMultiThreading;
 
 @SuppressWarnings( "deprecation" )
 @Plugin( type = EdgeAnalyzer.class )
 public class EdgeTimeLocationAnalyzer implements EdgeAnalyzer
 {
 
-	public static final String KEY = "Edge mean location";
+	public static final String KEY = "Edge location";
 
 	/*
 	 * FEATURE NAMES
 	 */
 	public static final String TIME = "EDGE_TIME";
-
 	public static final String X_LOCATION = "EDGE_X_LOCATION";
-
 	public static final String Y_LOCATION = "EDGE_Y_LOCATION";
-
 	public static final String Z_LOCATION = "EDGE_Z_LOCATION";
-
 	public static final List< String > FEATURES = new ArrayList< >( 4 );
-
 	public static final Map< String, String > FEATURE_NAMES = new HashMap< >( 4 );
-
 	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< >( 4 );
-
 	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< >( 4 );
-
 	public static final Map< String, Boolean > IS_INT = new HashMap< >( 4 );
 
 	static
@@ -54,15 +45,15 @@ public class EdgeTimeLocationAnalyzer implements EdgeAnalyzer
 		FEATURES.add( Y_LOCATION );
 		FEATURES.add( Z_LOCATION );
 
-		FEATURE_NAMES.put( TIME, "Time (mean)" );
-		FEATURE_NAMES.put( X_LOCATION, "X Location (mean)" );
-		FEATURE_NAMES.put( Y_LOCATION, "Y Location (mean)" );
-		FEATURE_NAMES.put( Z_LOCATION, "Z Location (mean)" );
+		FEATURE_NAMES.put( TIME, "Edge time" );
+		FEATURE_NAMES.put( X_LOCATION, "Edge X" );
+		FEATURE_NAMES.put( Y_LOCATION, "Edge Y" );
+		FEATURE_NAMES.put( Z_LOCATION, "Edge Z" );
 
-		FEATURE_SHORT_NAMES.put( TIME, "T" );
-		FEATURE_SHORT_NAMES.put( X_LOCATION, "X" );
-		FEATURE_SHORT_NAMES.put( Y_LOCATION, "Y" );
-		FEATURE_SHORT_NAMES.put( Z_LOCATION, "Z" );
+		FEATURE_SHORT_NAMES.put( TIME, "Edge T" );
+		FEATURE_SHORT_NAMES.put( X_LOCATION, "Edge X" );
+		FEATURE_SHORT_NAMES.put( Y_LOCATION, "Edge Y" );
+		FEATURE_SHORT_NAMES.put( Z_LOCATION, "Edge Z" );
 
 		FEATURE_DIMENSIONS.put( TIME, Dimension.TIME );
 		FEATURE_DIMENSIONS.put( X_LOCATION, Dimension.POSITION );

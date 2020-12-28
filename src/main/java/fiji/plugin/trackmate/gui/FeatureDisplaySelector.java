@@ -1,6 +1,5 @@
 package fiji.plugin.trackmate.gui;
 
-import static fiji.plugin.trackmate.features.FeatureUtils.DUMMY_MODEL;
 import static fiji.plugin.trackmate.features.FeatureUtils.collectFeatureKeys;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
 import static fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject.DEFAULT;
@@ -579,7 +578,7 @@ public class FeatureDisplaySelector
 
 		final DisplaySettings ds = DisplaySettings.defaultStyle().copy();
 //		ds.listeners().add( () -> System.out.println( "\n" + new Date() + "\nDisplay settings changed:\n" + ds ) );
-		final FeatureDisplaySelector featureSelector = new FeatureDisplaySelector( DUMMY_MODEL, null, ds );
+		final FeatureDisplaySelector featureSelector = new FeatureDisplaySelector( FeatureUtils.DUMMY_MODEL, null, ds );
 		final JFrame frame = new JFrame();
 		frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
 		frame.getContentPane().add( featureSelector.createSelectorForSpots() );

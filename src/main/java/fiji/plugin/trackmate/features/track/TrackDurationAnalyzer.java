@@ -10,14 +10,13 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 import javax.swing.ImageIcon;
 
-import net.imglib2.multithreading.SimpleMultiThreading;
-
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
+import net.imglib2.multithreading.SimpleMultiThreading;
 
 @SuppressWarnings( "deprecation" )
 @Plugin( type = TrackAnalyzer.class )
@@ -27,21 +26,14 @@ public class TrackDurationAnalyzer implements TrackAnalyzer
 	public static final String KEY = "Track duration";
 
 	public static final String TRACK_DURATION = "TRACK_DURATION";
-
 	public static final String TRACK_START = "TRACK_START";
-
 	public static final String TRACK_STOP = "TRACK_STOP";
-
 	public static final String TRACK_DISPLACEMENT = "TRACK_DISPLACEMENT";
 
 	public static final List< String > FEATURES = new ArrayList< >( 4 );
-
 	public static final Map< String, String > FEATURE_NAMES = new HashMap< >( 4 );
-
 	public static final Map< String, String > FEATURE_SHORT_NAMES = new HashMap< >( 4 );
-
 	public static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< >( 4 );
-
 	public static final Map< String, Boolean > IS_INT = new HashMap< >( 4 );
 
 	static
@@ -51,15 +43,15 @@ public class TrackDurationAnalyzer implements TrackAnalyzer
 		FEATURES.add( TRACK_STOP );
 		FEATURES.add( TRACK_DISPLACEMENT );
 
-		FEATURE_NAMES.put( TRACK_DURATION, "Duration of track" );
+		FEATURE_NAMES.put( TRACK_DURATION, "Track duration" );
 		FEATURE_NAMES.put( TRACK_START, "Track start" );
 		FEATURE_NAMES.put( TRACK_STOP, "Track stop" );
 		FEATURE_NAMES.put( TRACK_DISPLACEMENT, "Track displacement" );
 
-		FEATURE_SHORT_NAMES.put( TRACK_DURATION, "Duration" );
-		FEATURE_SHORT_NAMES.put( TRACK_START, "T start" );
-		FEATURE_SHORT_NAMES.put( TRACK_STOP, "T stop" );
-		FEATURE_SHORT_NAMES.put( TRACK_DISPLACEMENT, "Displacement" );
+		FEATURE_SHORT_NAMES.put( TRACK_DURATION, "Track duration" );
+		FEATURE_SHORT_NAMES.put( TRACK_START, "Track start" );
+		FEATURE_SHORT_NAMES.put( TRACK_STOP, "Track stop" );
+		FEATURE_SHORT_NAMES.put( TRACK_DISPLACEMENT, "Track disp." );
 
 		FEATURE_DIMENSIONS.put( TRACK_DURATION, Dimension.TIME );
 		FEATURE_DIMENSIONS.put( TRACK_START, Dimension.TIME );

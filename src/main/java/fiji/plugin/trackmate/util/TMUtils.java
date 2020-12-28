@@ -471,43 +471,33 @@ public class TMUtils
 	 */
 	public static final String getUnitsFor( final Dimension dimension, final String spaceUnits, final String timeUnits )
 	{
-		String units = "no unit";
 		switch ( dimension )
 		{
 		case ANGLE:
-			units = "Radians";
-			break;
+			return "radians";
 		case INTENSITY:
-			units = "Counts";
-			break;
+			return "counts";
 		case INTENSITY_SQUARED:
-			units = "Counts^2";
-			break;
+			return "counts^2";
 		case NONE:
-			units = "";
-			break;
+			return "";
 		case POSITION:
 		case LENGTH:
-			units = spaceUnits;
-			break;
+			return spaceUnits;
+		case AREA:
+			return spaceUnits + "^2";
 		case QUALITY:
-			units = "Quality";
-			break;
+			return "quality";
 		case TIME:
-			units = timeUnits;
-			break;
+			return timeUnits;
 		case VELOCITY:
-			units = spaceUnits + "/" + timeUnits;
-			break;
+			return spaceUnits + "/" + timeUnits;
 		case RATE:
-			units = "/" + timeUnits;
-			break;
+			return "/" + timeUnits;
 		default:
-			break;
 		case STRING:
 			return null;
 		}
-		return units;
 	}
 
 	public static final String getCurrentTimeString()
@@ -772,6 +762,29 @@ public class TMUtils
 			file = new File( folder.getPath() + File.separator + "TrackMateData.xml" );
 		}
 		return file;
+	}
+
+	public static final double variance( final double[] data )
+	{
+		final double mean = Util.average( data );
+		double variance = 0;
+		for ( int i = 0; i < data.length; i++ )
+		{
+			final double dx = data[ i ] - mean;
+			variance += dx * dx;
+		}
+		variance /= data.length;
+		return variance;
+	}
+
+	public static final double standardDeviation( final double[] data )
+	{
+		return Math.sqrt( variance( data ) );
+	}
+
+	public static double sum( final double[] intensities )
+	{
+		return Arrays.stream( intensities ).sum();
 	}
 
 	private TMUtils()

@@ -32,6 +32,11 @@ public class SpotRoi
 		this.y = y;
 	}
 
+	public SpotRoi copy()
+	{
+		return new SpotRoi( x.clone(), y.clone() );
+	}
+
 	/**
 	 * Returns a new <code>int</code> array containing the X pixel coordinates
 	 * to which to paint this polygon.

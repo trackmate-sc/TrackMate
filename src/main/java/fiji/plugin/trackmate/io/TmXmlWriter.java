@@ -104,7 +104,7 @@ import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
-import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
+import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactoryBase;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.TrackMateGUIModel;
@@ -653,7 +653,7 @@ public class TmXmlWriter
 
 		// Spot analyzers
 		final Element spotAnalyzersEl = new Element( SPOT_ANALYSERS_ELEMENT_KEY );
-		for ( final SpotAnalyzerFactory< ? > analyzer : settings.getSpotAnalyzerFactories() )
+		for ( final SpotAnalyzerFactoryBase< ? > analyzer : settings.getSpotAnalyzerFactories() )
 		{
 			final Element el = new Element( ANALYSER_ELEMENT_KEY );
 			el.setAttribute( ANALYSER_KEY_ATTRIBUTE, analyzer.getKey() );

@@ -18,7 +18,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
 import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
-import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
+import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactoryBase;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
@@ -68,7 +68,7 @@ public class FeatureUtils
 			}
 			if ( settings != null )
 			{
-				for ( final SpotAnalyzerFactory< ? > sf : settings.getSpotAnalyzerFactories() )
+				for ( final SpotAnalyzerFactoryBase< ? > sf : settings.getSpotAnalyzerFactories() )
 					for ( final String featureKey : sf.getFeatureNames().keySet() )
 						inverseMap.put( sf.getFeatureNames().get( featureKey ), featureKey );
 			}
