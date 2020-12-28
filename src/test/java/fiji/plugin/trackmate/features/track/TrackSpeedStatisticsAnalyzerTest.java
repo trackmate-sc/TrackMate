@@ -3,10 +3,6 @@ package fiji.plugin.trackmate.features.track;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.ModelChangeEvent;
-import fiji.plugin.trackmate.ModelChangeListener;
-import fiji.plugin.trackmate.Spot;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,6 +12,11 @@ import java.util.TreeSet;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.ModelChangeEvent;
+import fiji.plugin.trackmate.ModelChangeListener;
+import fiji.plugin.trackmate.Spot;
 
 public class TrackSpeedStatisticsAnalyzerTest
 {
@@ -84,8 +85,8 @@ public class TrackSpeedStatisticsAnalyzerTest
 		for ( final Integer trackID : model.getTrackModel().trackIDs( true ) )
 		{
 
-			assertEquals( expectedVmax.get( trackID ), model.getFeatureModel().getTrackFeature( trackID, TrackSpeedStatisticsAnalyzer.TRACK_MAX_SPEED ) );
-			assertEquals( expectedVmean.get( trackID ), model.getFeatureModel().getTrackFeature( trackID, TrackSpeedStatisticsAnalyzer.TRACK_MEAN_SPEED ) );
+			assertEquals( expectedVmax.get( trackID ), model.getFeatureModel().getTrackFeature( trackID, TrackSpeedStatisticsAnalyzer.TRACK_MAX_SPEED ), 1e-9 );
+			assertEquals( expectedVmean.get( trackID ), model.getFeatureModel().getTrackFeature( trackID, TrackSpeedStatisticsAnalyzer.TRACK_MEAN_SPEED ), 1e-9 );
 
 		}
 	}
