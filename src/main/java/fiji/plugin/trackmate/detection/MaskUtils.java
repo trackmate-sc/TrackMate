@@ -325,24 +325,25 @@ public class MaskUtils
 		{
 			final PolygonRoi roi = new PolygonRoi( polygon, PolygonRoi.POLYGON );
 
-			// Measure quality.
-			final double quality;
-			if ( null == qualityImp )
-			{
-				quality = 1.;
-			}
-			else
-			{
-				qualityImp.setRoi( roi );
-				quality = qualityImp.getStatistics( Measurements.MIN_MAX ).max;
-			}
-
 			// Create Spot ROI.
 			final PolygonRoi fRoi;
 			if ( simplify )
 				fRoi = simplify( roi, SMOOTH_INTERVAL, DOUGLAS_PEUCKER_MAX_DISTANCE );
 			else
 				fRoi = roi;
+
+			// Measure quality.
+			final double quality;
+			if ( null == qualityImp )
+			{
+				quality = fRoi.getStatistics().area;
+			}
+			else
+			{
+				qualityImp.setRoi( fRoi );
+				quality = qualityImp.getStatistics( Measurements.MIN_MAX ).max;
+			}
+
 
 			final Polygon fPolygon = fRoi.getPolygon();
 			final double[] xpoly = new double[ fPolygon.npoints ];
