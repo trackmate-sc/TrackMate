@@ -10,7 +10,7 @@ import javax.swing.JOptionPane;
 
 import org.scijava.plugin.Plugin;
 
-import fiji.plugin.trackmate.LoadTrackMatePlugIn_;
+import fiji.plugin.trackmate.LoadTrackMatePlugIn;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
@@ -234,7 +234,7 @@ public class CaptureOverlayAction extends AbstractTMAction
 	{
 		ImageJ.main( args );
 		final File file = new File( "samples/FakeTracks.xml" );
-		final LoadTrackMatePlugIn_ loader = new LoadTrackMatePlugIn_();
+		final LoadTrackMatePlugIn loader = new LoadTrackMatePlugIn();
 		loader.run( file.getAbsolutePath() );
 
 		loader.getSettings().imp.setDisplayMode( IJ.GRAYSCALE );

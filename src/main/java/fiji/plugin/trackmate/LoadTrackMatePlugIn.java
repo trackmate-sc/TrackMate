@@ -43,7 +43,7 @@ import ij.IJ;
 import ij.ImageJ;
 import ij.plugin.PlugIn;
 
-public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
+public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 {
 
 	private JFrame frame;
@@ -56,7 +56,7 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 
 	private static final String KEY = "LoadPlugin";
 
-	public LoadTrackMatePlugIn_()
+	public LoadTrackMatePlugIn()
 	{
 		super( new LogPanel() );
 	}
@@ -124,7 +124,7 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 		if ( checkIsICY( file ) )
 		{
 			logger.log( "Detecting an ICY track XML file. Loading...\n" );
-			final LoadICYTrackPlugIn_ loadICY = new LoadICYTrackPlugIn_();
+			final LoadICYTrackPlugIn loadICY = new LoadICYTrackPlugIn();
 			loadICY.run( file.getAbsolutePath() );
 			return;
 		}
@@ -384,7 +384,7 @@ public class LoadTrackMatePlugIn_ extends SomeDialogDescriptor implements PlugIn
 	public static void main( final String[] args )
 	{
 		ImageJ.main( args );
-		final LoadTrackMatePlugIn_ plugIn = new LoadTrackMatePlugIn_();
+		final LoadTrackMatePlugIn plugIn = new LoadTrackMatePlugIn();
 //		plugIn.run( "samples/FakeTracks.xml" );
 		plugIn.run( "samples/MAX_Merged.xml" );
 	}

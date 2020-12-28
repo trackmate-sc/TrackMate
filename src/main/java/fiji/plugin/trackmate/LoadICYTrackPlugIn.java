@@ -27,7 +27,7 @@ import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
 import ij.ImagePlus;
 
-public class LoadICYTrackPlugIn_ extends LoadTrackMatePlugIn_
+public class LoadICYTrackPlugIn extends LoadTrackMatePlugIn
 {
 
 	private static final String KEY = "ICY_LOADER";

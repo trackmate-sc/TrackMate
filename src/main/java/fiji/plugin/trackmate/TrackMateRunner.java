@@ -44,7 +44,7 @@ import ij.Macro;
 import ij.WindowManager;
 import net.imglib2.util.ValuePair;
 
-public class TrackMateRunner_ extends TrackMatePlugIn_
+public class TrackMateRunner extends TrackMatePlugIn
 {
 
 	/*
@@ -728,7 +728,7 @@ public class TrackMateRunner_ extends TrackMatePlugIn_
 	public static void main( final String[] args )
 	{
 		ImageJ.main( args );
-		new TrackMateRunner_().run(
+		new TrackMateRunner().run(
 				"use_gui=false "
 						+ "save_to=[/Users/tinevez/Desktop/TrackMateSaveTest.xml] "
 						+ "export_to=[/Users/tinevez/Desktop/TrackMateExportTest.xml] "

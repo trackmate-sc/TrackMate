@@ -11,7 +11,7 @@ import ij.ImageJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 
-public class ManualTrackingPlugIn_ extends TrackMatePlugIn_
+public class ManualTrackingPlugIn extends TrackMatePlugIn
 {
 
 	/**
@@ -96,6 +96,6 @@ public class ManualTrackingPlugIn_ extends TrackMatePlugIn_
 	public static void main( final String[] args )
 	{
 		ImageJ.main( args );
-		new ManualTrackingPlugIn_().run( "samples/Merged.tif" );
+		new ManualTrackingPlugIn().run( "samples/Merged.tif" );
 	}
 }

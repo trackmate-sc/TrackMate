@@ -8,7 +8,7 @@ import ij.ImagePlus;
 import ij.WindowManager;
 import ij.plugin.PlugIn;
 
-public class TrackMatePlugIn_ implements PlugIn
+public class TrackMatePlugIn implements PlugIn
 {
 
 	protected TrackMate trackmate;
@@ -132,7 +132,7 @@ public class TrackMatePlugIn_ implements PlugIn
 //		new TrackMatePlugIn_().run( "samples/Merged.tif" );
 //		new TrackMatePlugIn_().run( "samples/MAX_Merged.tif" );
 //		new TrackMatePlugIn_().run( "samples/Mask.tif" );
-		new TrackMatePlugIn_().run( "samples/FakeTracks.tif" );
+		new TrackMatePlugIn().run( "samples/FakeTracks.tif" );
 	}
 
 }

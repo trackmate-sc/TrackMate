@@ -9,7 +9,7 @@ import javax.swing.JOptionPane;
 
 import org.scijava.plugin.Plugin;
 
-import fiji.plugin.trackmate.LoadTrackMatePlugIn_;
+import fiji.plugin.trackmate.LoadTrackMatePlugIn;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
@@ -538,7 +538,7 @@ public class LabelImgExporter extends AbstractTMAction
 	public static void main( final String[] args )
 	{
 		ImageJ.main( args );
-		final LoadTrackMatePlugIn_ plugIn = new LoadTrackMatePlugIn_();
+		final LoadTrackMatePlugIn plugIn = new LoadTrackMatePlugIn();
 		plugIn.run( "samples/FakeTracks.xml" );
 		createLabelImagePlus(
 				plugIn.getModel(),
