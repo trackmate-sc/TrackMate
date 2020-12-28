@@ -10,7 +10,7 @@
 	</parent>
 
 	<groupId>sc.fiji</groupId>
-	<artifactId>TrackMate_</artifactId>
+	<artifactId>TrackMate</artifactId>
 	<version>7.0.0-SNAPSHOT</version>
 
 	<name>TrackMate</name>
