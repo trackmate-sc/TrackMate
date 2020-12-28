@@ -109,7 +109,8 @@ public class SpotFilterDescriptor implements WizardPanelDescriptor
 						logger.log( "Adding morphology analyzers...\n", Logger.BLUE_COLOR );
 						final Settings settings = trackmate.getSettings();
 						final SpotMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider = new SpotMorphologyAnalyzerProvider( settings.imp );
-						final List< SpotMorphologyAnalyzerFactory< ? > > factories = spotMorphologyAnalyzerProvider
+						@SuppressWarnings( "rawtypes" )
+						final List< SpotMorphologyAnalyzerFactory > factories = spotMorphologyAnalyzerProvider
 								.getKeys()
 								.stream()
 								.map( key -> spotMorphologyAnalyzerProvider.getFactory(	key ) )
