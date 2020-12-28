@@ -143,6 +143,22 @@ public class FeatureModel
 	}
 
 	/**
+	 * Remove the value of the designated feature for the specified edge.
+	 * 
+	 * @param edge
+	 *            the edge
+	 * @param feature
+	 *            the feature
+	 */
+	public void removeEdgeFeature( final DefaultWeightedEdge edge, final String feature )
+	{
+		final ConcurrentHashMap< String, Double > map = edgeFeatureValues.get( edge );
+		if ( null == map )
+			return;
+		map.remove( feature );
+	}
+
+	/**
 	 * Returns edge features as declared in this model.
 	 *
 	 * @return the edge features.
@@ -368,6 +384,23 @@ public class FeatureModel
 			trackFeatureValues.put( trackID, trackFeatureMap );
 		}
 		trackFeatureMap.put( feature, value );
+	}
+
+	/**
+	 * Remove the value of the designated feature for the track with the
+	 * specified ID.
+	 * 
+	 * @param trackID
+	 *            the track ID
+	 * @param feature
+	 *            the feature
+	 */
+	public void removeTrackFeature( final Integer trackID, final String feature )
+	{
+		final Map< String, Double > map = trackFeatureValues.get( trackID );
+		if ( null == map )
+			return;
+		map.remove( feature );
 	}
 
 	/**
