@@ -45,13 +45,11 @@ import javax.swing.event.ChangeListener;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.annotations.XYTextSimpleAnnotation;
 import org.jfree.chart.plot.IntervalMarker;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
-import org.jfree.data.statistics.LogHistogramDataset;
 
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.spot.SpotContrastAndSNRAnalyzerFactory;

@@ -13,8 +13,8 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
-import fiji.plugin.trackmate.gui.DisplaySettings;
-import fiji.plugin.trackmate.gui.DisplaySettings.ObjectType;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.tracking.TrackerKeys;
 import fiji.plugin.trackmate.tracking.sparselap.SparseLAPFrameToFrameTracker;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
@@ -130,8 +130,8 @@ public class KalmanTrackerInteractiveTest
 		ta.process( model.getTrackModel().trackIDs( true ), model );
 
 		final DisplaySettings ds = DisplaySettings.defaultStyle().copy();
-		ds.setSpotColorBy( ObjectType.SPOTS, Spot.QUALITY );
-		ds.setTrackColorBy( ObjectType.TRACKS, TrackIndexAnalyzer.TRACK_INDEX );
+		ds.setSpotColorBy( TrackMateObject.SPOTS, Spot.QUALITY );
+		ds.setTrackColorBy( TrackMateObject.TRACKS, TrackIndexAnalyzer.TRACK_INDEX );
 		ds.setSpotShowName( true );
 
 		final SelectionModel selectionModel = new SelectionModel( model );
@@ -173,8 +173,8 @@ public class KalmanTrackerInteractiveTest
 		}
 
 		final DisplaySettings ds = DisplaySettings.defaultStyle().copy();
-		ds.setSpotColorBy( ObjectType.SPOTS, Spot.QUALITY );
-		ds.setTrackColorBy( ObjectType.TRACKS, TrackIndexAnalyzer.TRACK_INDEX );
+		ds.setSpotColorBy( TrackMateObject.SPOTS, Spot.QUALITY );
+		ds.setTrackColorBy( TrackMateObject.TRACKS, TrackIndexAnalyzer.TRACK_INDEX );
 		ds.setSpotShowName( true );
 
 		final TrackIndexAnalyzer ta = new TrackIndexAnalyzer();

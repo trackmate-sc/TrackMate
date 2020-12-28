@@ -17,32 +17,6 @@ import static fiji.plugin.trackmate.io.TmXmlKeys.CROP_YSTART_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.io.TmXmlKeys.CROP_ZEND_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.io.TmXmlKeys.CROP_ZSTART_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.io.TmXmlKeys.DETECTOR_SETTINGS_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_ANTIALIASING;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_COLORMAP;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_HIGHLIGHT_COLOR;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_LIMIT_Z_DEPTH;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_MISSING_COLOR;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_SPOT_COLOR_BY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_SPOT_COLOR_FEATURE;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_SPOT_DISPLAY_AS_ROI;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_SPOT_DISPLAY_RADIUS;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_SPOT_MAX;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_SPOT_MIN;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_SPOT_SHOW_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_SPOT_UNIFORM_COLOR;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_SPOT_VISIBLE;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_TRACK_COLOR_BY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_TRACK_COLOR_FEATURE;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_TRACK_DISPLAY_MODE;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_TRACK_FADE;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_TRACK_FADE_RANGE;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_TRACK_MAX;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_TRACK_MIN;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_TRACK_UNIFORM_COLOR;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_TRACK_VISIBLE;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_UNDEFINED_COLOR;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ATTRIBUTE_Z_DEPTH;
 import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.EDGE_ANALYSERS_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.EDGE_FEATURES_ELEMENT_KEY;
@@ -102,7 +76,6 @@ import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_ID_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_NAME_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.XML_ATTRIBUTE_TRACKER_NAME;
 
-import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -121,7 +94,6 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
-import org.jfree.chart.renderer.InterpolatePaintScale;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
@@ -143,10 +115,9 @@ import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
-import fiji.plugin.trackmate.gui.DisplaySettings;
-import fiji.plugin.trackmate.gui.DisplaySettings.ObjectType;
-import fiji.plugin.trackmate.gui.DisplaySettings.TrackDisplayMode;
 import fiji.plugin.trackmate.gui.descriptors.ConfigureViewsDescriptor;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
 import fiji.plugin.trackmate.providers.DetectorProvider;
 import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
 import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
@@ -268,54 +239,14 @@ public class TmXmlReader
 
 	public DisplaySettings getDisplaySettings()
 	{
-		final DisplaySettings ds = DisplaySettings.defaultStyle().copy();
 		final Element dsel = root.getChild( DISPLAY_SETTINGS_ELEMENT_KEY );
 		if ( null == dsel )
 		{
-			logger.error( "Could not find the display-settings element. Returning defaults.\n" );
+			logger.error( "Could not find the display-settings element. Returning user defaults.\n" );
 			ok = false;
-			return ds;
+			return DisplaySettingsIO.readUserDefault();
 		}
-
-		ds.setName( dsel.getAttributeValue( DISPLAY_SETTINGS_ATTRIBUTE_NAME ) );
-		ds.setUndefinedValueColor( new Color( readIntAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_UNDEFINED_COLOR, logger, ds.getUndefinedValueColor().getRGB() ), true ) );
-		ds.setMissingValueColor( new Color( readIntAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_MISSING_COLOR, logger, ds.getMissingValueColor().getRGB() ), true ) );
-		ds.setHighlightColor( new Color( readIntAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_HIGHLIGHT_COLOR, logger, ds.getHighlightColor().getRGB() ), true ) );
-		ds.setUseAntialiasing( readBooleanAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_ANTIALIASING, logger, ds.getUseAntialiasing() ) );
-
-		final String cmapname = dsel.getAttributeValue( DISPLAY_SETTINGS_ATTRIBUTE_COLORMAP );
-		for ( final InterpolatePaintScale cmap : InterpolatePaintScale.getAvailableLUTs() )
-			if ( cmap.getName().equals( cmapname ) )
-				ds.setColormap( cmap );
-
-		ds.setSpotVisible( readBooleanAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_SPOT_VISIBLE, logger, ds.isSpotVisible() ) );
-		ds.setSpotUniformColor( new Color( readIntAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_SPOT_UNIFORM_COLOR, logger, ds.getSpotUniformColor().getRGB() ), true ) );
-		final ObjectType spotColorBy = ObjectType.valueOf( dsel.getAttributeValue( DISPLAY_SETTINGS_ATTRIBUTE_SPOT_COLOR_BY, ds.getSpotColorByType().name() ) );
-		final String spotColorFeature = dsel.getAttributeValue( DISPLAY_SETTINGS_ATTRIBUTE_SPOT_COLOR_FEATURE, ds.getSpotColorByFeature() );
-		ds.setSpotColorBy( spotColorBy, spotColorFeature );
-		final double spotmin = readDoubleAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_SPOT_MIN, logger, ds.getSpotMin() );
-		final double spotmax = readDoubleAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_SPOT_MAX, logger, ds.getSpotMax() );
-		ds.setSpotMinMax( spotmin, spotmax );
-		ds.setSpotDisplayRadius( readDoubleAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_SPOT_DISPLAY_RADIUS, logger, ds.getSpotDisplayRadius() ) );
-		ds.setSpotDisplayedAsRoi( readBooleanAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_SPOT_DISPLAY_AS_ROI, logger, ds.isSpotDisplayedAsRoi() ) );
-		ds.setSpotDisplayedAsRoi( readBooleanAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_SPOT_SHOW_NAME, logger, ds.isSpotShowName() ) );
-
-		ds.setTrackVisible( readBooleanAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_TRACK_VISIBLE, logger, ds.isTrackVisible() ) );
-		ds.setTrackDisplayMode( TrackDisplayMode.valueOf( dsel.getAttributeValue( DISPLAY_SETTINGS_ATTRIBUTE_TRACK_DISPLAY_MODE, TrackDisplayMode.FULL.name() ) ) );
-		ds.setTrackUniformColor( new Color( readIntAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_TRACK_UNIFORM_COLOR, logger, ds.getTrackUniformColor().getRGB() ), true ) );
-		final ObjectType trackColorBy = ObjectType.valueOf( dsel.getAttributeValue( DISPLAY_SETTINGS_ATTRIBUTE_TRACK_COLOR_BY, ds.getTrackColorByType().name() ) );
-		final String trackColorFeature = dsel.getAttributeValue( DISPLAY_SETTINGS_ATTRIBUTE_TRACK_COLOR_FEATURE, ds.getTrackColorByFeature() );
-		ds.setTrackColorBy( trackColorBy, trackColorFeature );
-		final double trackmin = readDoubleAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_TRACK_MIN, logger, ds.getTrackMin() );
-		final double trackmax = readDoubleAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_TRACK_MAX, logger, ds.getTrackMax() );
-		ds.setTrackMinMax( trackmin, trackmax );
-		ds.setFadeTracks( readBooleanAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_TRACK_FADE, logger, ds.isFadeTracks() ) );
-		ds.setFadeTrackRange( readIntAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_TRACK_FADE_RANGE, logger, ds.getFadeTrackRange() ) );
-
-		ds.setZDrawingDepthLimited( readBooleanAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_LIMIT_Z_DEPTH, logger, ds.isZDrawingDepthLimited() ) );
-		ds.setZDrawingDepth( readDoubleAttribute( dsel, DISPLAY_SETTINGS_ATTRIBUTE_Z_DEPTH, logger, ds.getZDrawingDepth() ) );
-
-		return ds;
+		return DisplaySettingsIO.fromJson( dsel.getText() );
 	}
 
 	/**
@@ -341,7 +272,8 @@ public class TmXmlReader
 			final ViewProvider provider,
 			final Model model,
 			final Settings settings,
-			final SelectionModel selectionModel, final DisplaySettings displaySettings )
+			final SelectionModel selectionModel,
+			final DisplaySettings displaySettings )
 	{
 		final Element guiel = root.getChild( GUI_STATE_ELEMENT_KEY );
 		if ( null != guiel )

@@ -5,8 +5,6 @@ import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -231,10 +229,9 @@ public class TrackSchemeToolbar extends JToolBar
 
 		final JComboBox< String > selectStyleBox;
 		{
-			final Set< String > styleNames = new HashSet< >( TrackSchemeStylist.VERTEX_STYLES.keySet() );
-			selectStyleBox = new JComboBox< >( styleNames.toArray( new String[] {} ) );
+			selectStyleBox = new JComboBox<>( TrackSchemeStylist.VERTEX_STYLE_NAMES.toArray( new String[] {} ) );
 			selectStyleBox.setPreferredSize( new Dimension( 80, 20 ) );
-			selectStyleBox.setSelectedItem( TrackSchemeStylist.DEFAULT_STYLE_NAME );
+			selectStyleBox.setSelectedIndex( 0 );
 			selectStyleBox.setMaximumSize( new Dimension( 200, 30 ) );
 			selectStyleBox.setFont( FONT );
 			selectStyleBox.addActionListener( new ActionListener()

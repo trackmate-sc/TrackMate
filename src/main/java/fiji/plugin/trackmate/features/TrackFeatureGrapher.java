@@ -13,7 +13,6 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.InterpolatePaintScale;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -21,7 +20,8 @@ import org.jfree.data.xy.XYSeriesCollection;
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.gui.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.Colormap;
 import fiji.plugin.trackmate.util.ExportableChartPanel;
 import fiji.plugin.trackmate.util.TMUtils;
 
@@ -45,7 +45,7 @@ public class TrackFeatureGrapher extends AbstractFeatureGrapher
 	@Override
 	public void render()
 	{
-		final InterpolatePaintScale colormap = displaySettings.getColormap();
+		final Colormap colormap = displaySettings.getColormap();
 
 		// Check x units
 		final String xdim = TMUtils.getUnitsFor( xDimension, model.getSpaceUnits(), model.getTimeUnits() );

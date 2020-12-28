@@ -2,10 +2,10 @@ package fiji.plugin.trackmate.visualization;
 
 import java.awt.Color;
 
-import org.jfree.chart.renderer.InterpolatePaintScale;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.gui.displaysettings.Colormap;
 
 public class PerEdgeFeatureColorGenerator implements TrackColorGenerator
 {
@@ -18,7 +18,7 @@ public class PerEdgeFeatureColorGenerator implements TrackColorGenerator
 
 	private final Color undefinedValueColor;
 
-	private final InterpolatePaintScale colormap;
+	private final Colormap colormap;
 
 	private final double min;
 
@@ -29,7 +29,7 @@ public class PerEdgeFeatureColorGenerator implements TrackColorGenerator
 			final String edgeFeature,
 			final Color missingValueColor,
 			final Color undefinedValueColor,
-			final InterpolatePaintScale colormap,
+			final Colormap colormap,
 			final double min,
 			final double max )
 	{

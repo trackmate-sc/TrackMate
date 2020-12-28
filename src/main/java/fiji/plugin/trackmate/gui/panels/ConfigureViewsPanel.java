@@ -15,10 +15,12 @@ import java.awt.Insets;
 import java.awt.event.ActionListener;
 
 import javax.swing.Action;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
@@ -26,10 +28,13 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
-import fiji.plugin.trackmate.gui.DisplaySettings;
-import fiji.plugin.trackmate.gui.DisplaySettings.TrackDisplayMode;
 import fiji.plugin.trackmate.gui.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.GuiUtils;
+import fiji.plugin.trackmate.gui.TrackMateWizard;
+import fiji.plugin.trackmate.gui.displaysettings.ConfigTrackMateDisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackDisplayMode;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.UpdateListener;
 
 /**
  * A configuration panel used to tune the aspect of spots and tracks in multiple
@@ -44,6 +49,8 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 	private static final long serialVersionUID = 1L;
 
 	private static final Color BORDER_COLOR = new java.awt.Color( 192, 192, 192 );
+
+	private static final ImageIcon EDIT_SETTINGS_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/cog_edit.png" ) );
 
 	/*
 	 * CONSTRUCTOR
@@ -74,12 +81,33 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 		lblDisplayOptions.setFont( BIG_FONT );
 		lblDisplayOptions.setHorizontalAlignment( SwingConstants.LEFT );
 		final GridBagConstraints gbcLabelDisplayOptions = new GridBagConstraints();
-		gbcLabelDisplayOptions.gridwidth = 2;
+		gbcLabelDisplayOptions.gridwidth = 1;
 		gbcLabelDisplayOptions.fill = GridBagConstraints.BOTH;
 		gbcLabelDisplayOptions.insets = new Insets( 5, 5, 5, 5 );
 		gbcLabelDisplayOptions.gridx = 0;
 		gbcLabelDisplayOptions.gridy = 0;
 		add( lblDisplayOptions, gbcLabelDisplayOptions );
+
+		/*
+		 * Settings editor.
+		 */
+
+		final JFrame editor = ConfigTrackMateDisplaySettings.editor( ds,
+				"Configure the display settings used in this current session.",
+				"TrackMate display settings" );
+		editor.setLocationRelativeTo( this.getParent() );
+		editor.setDefaultCloseOperation( JFrame.HIDE_ON_CLOSE );
+
+		final JButton btnEditSettings = new JButton( "Edit settings", EDIT_SETTINGS_ICON );
+		btnEditSettings.addActionListener( e -> editor.setVisible( !editor.isVisible() ) );
+
+		final GridBagConstraints gbcBtnEditSettings = new GridBagConstraints();
+		gbcBtnEditSettings.fill = GridBagConstraints.NONE;
+		gbcBtnEditSettings.insets = new Insets( 5, 5, 5, 5 );
+		gbcBtnEditSettings.anchor = GridBagConstraints.EAST;
+		gbcBtnEditSettings.gridx = 1;
+		gbcBtnEditSettings.gridy = 0;
+		add( btnEditSettings, gbcBtnEditSettings );
 
 		/*
 		 * Display spot checkbox.
@@ -98,12 +126,12 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 
 		final JCheckBox chkboxDisplaySpotsAsRois = new JCheckBox();
 		chkboxDisplaySpotsAsRois.setText( "as ROIs" );
-		final GridBagConstraints gbc_chkboxDisplaySpotsAsRois = new GridBagConstraints();
-		gbc_chkboxDisplaySpotsAsRois.insets = new Insets( 0, 0, 0, 5 );
-		gbc_chkboxDisplaySpotsAsRois.anchor = GridBagConstraints.EAST;
-		gbc_chkboxDisplaySpotsAsRois.gridx = 1;
-		gbc_chkboxDisplaySpotsAsRois.gridy = 1;
-		add( chkboxDisplaySpotsAsRois, gbc_chkboxDisplaySpotsAsRois );
+		final GridBagConstraints gbcChkboxDisplaySpotsAsRois = new GridBagConstraints();
+		gbcChkboxDisplaySpotsAsRois.insets = new Insets( 0, 0, 0, 5 );
+		gbcChkboxDisplaySpotsAsRois.anchor = GridBagConstraints.EAST;
+		gbcChkboxDisplaySpotsAsRois.gridx = 1;
+		gbcChkboxDisplaySpotsAsRois.gridy = 1;
+		add( chkboxDisplaySpotsAsRois, gbcChkboxDisplaySpotsAsRois );
 		chkboxDisplaySpotsAsRois.setFont( FONT );
 		chkboxDisplaySpotsAsRois.addActionListener( e -> ds.setSpotDisplayedAsRoi( chkboxDisplaySpotsAsRois.isSelected() ) );
 		chkboxDisplaySpotsAsRois.setSelected( ds.isSpotDisplayedAsRoi() );
@@ -274,17 +302,16 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 		 * Draw Z Depth
 		 */
 
-		final JPanel panelDrawingZDepth = new JPanel();
+		final FlowLayout flowLayout = new FlowLayout( FlowLayout.LEFT, 5, 0 );
+		final JPanel panelDrawingZDepth = new JPanel( flowLayout );
 		panelDrawingZDepth.setBorder( new LineBorder( BORDER_COLOR, 1, true ) );
-		final FlowLayout flowLayout = (FlowLayout) panelDrawingZDepth.getLayout();
-		flowLayout.setAlignment(FlowLayout.LEFT);
-		final GridBagConstraints gbc_panelDrawingZDepth = new GridBagConstraints();
-		gbc_panelDrawingZDepth.gridwidth = 2;
-		gbc_panelDrawingZDepth.insets = new Insets( 0, 5, 5, 5 );
-		gbc_panelDrawingZDepth.fill = GridBagConstraints.BOTH;
-		gbc_panelDrawingZDepth.gridx = 0;
-		gbc_panelDrawingZDepth.gridy = 5;
-		add(panelDrawingZDepth, gbc_panelDrawingZDepth);
+		final GridBagConstraints gbcPanelDrawingZDepth = new GridBagConstraints();
+		gbcPanelDrawingZDepth.gridwidth = 2;
+		gbcPanelDrawingZDepth.insets = new Insets( 0, 5, 5, 5 );
+		gbcPanelDrawingZDepth.fill = GridBagConstraints.BOTH;
+		gbcPanelDrawingZDepth.gridx = 0;
+		gbcPanelDrawingZDepth.gridy = 5;
+		add( panelDrawingZDepth, gbcPanelDrawingZDepth );
 
 		final JCheckBox chckbxLimitZDepth = new JCheckBox( "Limit drawing Z depth" );
 		chckbxLimitZDepth.setFont( SMALL_FONT );
@@ -297,7 +324,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 
 		final JLabel lblDrawingZDepthUnits = new JLabel( spaceUnits );
 		lblDrawingZDepthUnits.setFont( SMALL_FONT );
-		panelDrawingZDepth.add(lblDrawingZDepthUnits);
+		panelDrawingZDepth.add( lblDrawingZDepthUnits );
 
 		/*
 		 * Panel for view buttons.
@@ -327,7 +354,6 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 		gbcPanelButtons.gridy = 7;
 		add( panelButtons, gbcPanelButtons );
 
-
 		/*
 		 * Listeners & co.
 		 */
@@ -336,11 +362,11 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 			setEnabled( panelSpotOptions, chkboxDisplaySpots.isSelected() );
 			chkboxDisplaySpotsAsRois.setEnabled( chkboxDisplaySpots.isSelected() );
 		} );
-		chkboxDisplayTracks.addActionListener( e -> { 
+		chkboxDisplayTracks.addActionListener( e -> {
 			setEnabled( panelTrackOptions, chkboxDisplayTracks.isSelected() );
 			cmbboxTrackDisplayMode.setEnabled( chkboxDisplayTracks.isSelected() );
-			} );
-		
+		} );
+
 		final ActionListener fadeTrackBtnEnable = e -> {
 			final boolean shouldBeEnabled = chkboxDisplayTracks.isSelected()
 					&& cmbboxTrackDisplayMode.getSelectedItem() != TrackDisplayMode.FULL;
@@ -348,9 +374,10 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 		};
 		chkboxDisplayTracks.addActionListener( fadeTrackBtnEnable );
 		cmbboxTrackDisplayMode.addActionListener( fadeTrackBtnEnable );
-		
+
 		final ActionListener fadeTrackRangeEnable = e -> {
-			final boolean shouldBeEnabled = chkboxDisplayTracks.isSelected() 
+			final boolean shouldBeEnabled = chkboxDisplayTracks
+					.isSelected()
 					&& cmbboxTrackDisplayMode.getSelectedItem() != TrackDisplayMode.FULL
 					&& chkboxFadeTracks.isSelected();
 			spinnerFadeRange.setEnabled( shouldBeEnabled );
@@ -358,7 +385,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 		cmbboxTrackDisplayMode.addActionListener( fadeTrackRangeEnable );
 		chkboxDisplayTracks.addActionListener( fadeTrackRangeEnable );
 		chkboxFadeTracks.addActionListener( fadeTrackRangeEnable );
-		
+
 		chckbxLimitZDepth.addActionListener( e -> spinnerDrawingZDepth.setEnabled( chckbxLimitZDepth.isSelected() ) );
 
 		chkboxDisplaySpots.addActionListener( e -> ds.setSpotVisible( chkboxDisplaySpots.isSelected() ) );
@@ -372,16 +399,23 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 		 * Set current values.
 		 */
 
-		chkboxDisplaySpots.setSelected( ds.isSpotVisible() );
-		chkboxSpotNames.setSelected( ds.isSpotShowName() );
-		chkboxDisplayTracks.setSelected( ds.isTrackVisible() );
-		chkboxFadeTracks.setSelected( ds.isFadeTracks() );
-		chckbxLimitZDepth.setSelected( ds.isZDrawingDepthLimited() );
-		ftfSpotRadius.setValue( Double.valueOf( ds.getSpotDisplayRadius() ) );
-		fadeTrackDepthModel.setValue( Integer.valueOf( ds.getFadeTrackRange() ) );
-		numberModelDrawingZDepth.setValue( Double.valueOf( ds.getZDrawingDepth() ) );
-		cmbboxTrackDisplayMode.setSelectedItem( ds.getTrackDisplayMode() );
+		final UpdateListener l = () -> {
+			chkboxDisplaySpots.setSelected( ds.isSpotVisible() );
+			chkboxDisplaySpotsAsRois.setSelected( ds.isSpotDisplayedAsRoi() );
+			chkboxSpotNames.setSelected( ds.isSpotShowName() );
+			chkboxDisplayTracks.setSelected( ds.isTrackVisible() );
+			chkboxFadeTracks.setSelected( ds.isFadeTracks() );
+			chckbxLimitZDepth.setSelected( ds.isZDrawingDepthLimited() );
+			ftfSpotRadius.setValue( Double.valueOf( ds.getSpotDisplayRadius() ) );
+			fadeTrackDepthModel.setValue( Integer.valueOf( ds.getFadeTrackRange() ) );
+			numberModelDrawingZDepth.setValue( Double.valueOf( ds.getZDrawingDepth() ) );
+			cmbboxTrackDisplayMode.setSelectedItem( ds.getTrackDisplayMode() );
 
+			setEnabled( panelSpotOptions, chkboxDisplaySpots.isSelected() );
+			setEnabled( panelTrackOptions, chkboxDisplayTracks.isSelected() );
+		};
+		l.displaySettingsChanged();
+		ds.listeners().add( l );
 		spinnerDrawingZDepth.setEnabled( chckbxLimitZDepth.isSelected() );
 		fadeTrackBtnEnable.actionPerformed( null );
 	}
@@ -393,7 +427,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 			if ( component instanceof JSpinner || component instanceof JCheckBox )
 				continue; // Treat them elsewhere.
 			component.setEnabled( enabled );
-			if (component instanceof Container)
+			if ( component instanceof Container )
 				setEnabled( ( Container ) component, enabled );
 		}
 	}

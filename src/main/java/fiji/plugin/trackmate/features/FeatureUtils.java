@@ -19,8 +19,8 @@ import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
 import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
-import fiji.plugin.trackmate.gui.DisplaySettings;
-import fiji.plugin.trackmate.gui.DisplaySettings.ObjectType;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.ManualEdgeColorGenerator;
 import fiji.plugin.trackmate.visualization.ManualEdgePerSpotColorGenerator;
@@ -42,9 +42,8 @@ public class FeatureUtils
 
 	public static final String USE_UNIFORM_COLOR_KEY = "UNIFORM_COLOR";
 
-	public static final Map< String, String > collectFeatureKeys( final ObjectType target, final Model model, final Settings settings )
+	public static final Map< String, String > collectFeatureKeys( final TrackMateObject target, final Model model, final Settings settings )
 	{
-		final FeatureModel fm = model.getFeatureModel();
 		final Map< String, String > inverseMap = new HashMap<>();
 		// will be used to sort.
 
@@ -56,8 +55,14 @@ public class FeatureUtils
 			// Collect all.
 			if ( model != null )
 			{
-				for ( final String featureKey : fm.getSpotFeatureNames().keySet() )
-					inverseMap.put( fm.getSpotFeatureNames().get( featureKey ), featureKey );
+				for ( final String featureKey : model.getFeatureModel().getSpotFeatureNames().keySet() )
+					inverseMap.put( model.getFeatureModel().getSpotFeatureNames().get( featureKey ), featureKey );
+			}
+			else
+			{
+				// If we have no model, we still want to add spot features.
+				for ( final String featureKey : Spot.FEATURE_NAMES.keySet() )
+					inverseMap.put( Spot.FEATURE_NAMES.get( featureKey ), featureKey );
 			}
 			if ( settings != null )
 			{
@@ -72,8 +77,8 @@ public class FeatureUtils
 		{
 			if ( model != null )
 			{
-				for ( final String featureKey : fm.getEdgeFeatureNames().keySet() )
-					inverseMap.put( fm.getEdgeFeatureNames().get( featureKey ), featureKey );
+				for ( final String featureKey : model.getFeatureModel().getEdgeFeatureNames().keySet() )
+					inverseMap.put( model.getFeatureModel().getEdgeFeatureNames().get( featureKey ), featureKey );
 			}
 			if ( settings != null )
 			{
@@ -88,8 +93,8 @@ public class FeatureUtils
 		{
 			if ( model != null )
 			{
-				for ( final String featureKey : fm.getTrackFeatureNames().keySet() )
-					inverseMap.put( fm.getTrackFeatureNames().get( featureKey ), featureKey );
+				for ( final String featureKey : model.getFeatureModel().getTrackFeatureNames().keySet() )
+					inverseMap.put( model.getFeatureModel().getTrackFeatureNames().get( featureKey ), featureKey );
 			}
 			if ( settings != null )
 			{
@@ -133,7 +138,7 @@ public class FeatureUtils
 	 */
 	public static double[] collectFeatureValues(
 			final String featureKey,
-			final ObjectType target,
+			final TrackMateObject target,
 			final Model model,
 			final Settings settings,
 			final boolean visibleOnly )

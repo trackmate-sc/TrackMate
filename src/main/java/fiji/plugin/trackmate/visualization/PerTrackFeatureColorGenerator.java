@@ -8,14 +8,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.jfree.chart.renderer.GlasbeyLut;
-import org.jfree.chart.renderer.InterpolatePaintScale;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
+import fiji.plugin.trackmate.gui.displaysettings.Colormap;
 
 /**
  * A {@link TrackColorGenerator} that generate colors based on the whole track
@@ -33,7 +32,7 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator
 
 	private final String feature;
 
-	private final InterpolatePaintScale cmap;
+	private final Colormap cmap;
 
 	private final Color missingValueColor;
 
@@ -42,7 +41,7 @@ public class PerTrackFeatureColorGenerator implements TrackColorGenerator
 			final String trackFeature,
 			final Color missingValueColor,
 			final Color undefinedValueColor,
-			final InterpolatePaintScale colormap,
+			final Colormap colormap,
 			final double min,
 			final double max )
 	{

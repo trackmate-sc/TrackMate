@@ -1,11 +1,14 @@
-package org.jfree.chart.renderer;
+package fiji.plugin.trackmate.gui.displaysettings;
 
 import java.awt.Color;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
+
+import org.jfree.chart.renderer.PaintScale;
 
 /**
  * This class implements a {@link PaintScale} that generate colors interpolated
@@ -13,7 +16,7 @@ import java.util.TreeMap;
  *
  * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; - Sept 2010
  */
-public class InterpolatePaintScale implements PaintScale, Serializable
+public class Colormap implements PaintScale, Serializable
 {
 
 	private static final long serialVersionUID = 2977884191627862512L;
@@ -35,13 +38,13 @@ public class InterpolatePaintScale implements PaintScale, Serializable
 
 
 	/**
-	 * An {@link InterpolatePaintScale} that maps a typical "Jet" colormap going
+	 * An {@link Colormap} that maps a typical "Jet" colormap going
 	 * from blue to red to the range [0, 1].
 	 */
-	public static final InterpolatePaintScale Jet;
+	public static final Colormap Jet;
 	static
 	{
-		Jet = new InterpolatePaintScale( "Jet", 0., 1. );
+		Jet = new Colormap( "Jet", 0., 1. );
 		Jet.add( 0.00, new Color( 0.0f, 0.0f, 1.0f ) );
 		Jet.add( 0.16, new Color( 0.0f, 0.5f, 1.0f ) );
 		Jet.add( 0.33, new Color( 0.0f, 1.0f, 1.0f ) );
@@ -52,13 +55,13 @@ public class InterpolatePaintScale implements PaintScale, Serializable
 	}
 
 	/**
-	 * An {@link InterpolatePaintScale} that replicates the matplotlib "Viridis"
+	 * An {@link Colormap} that replicates the matplotlib "Viridis"
 	 * colormap.
 	 */
-	public static final InterpolatePaintScale Viridis;
+	public static final Colormap Viridis;
 	static
 	{
-		Viridis = new InterpolatePaintScale( "Viridis", 0., 1. );
+		Viridis = new Colormap( "Viridis", 0., 1. );
 		Viridis.add( 0.00, new Color( 68, 1, 84 ) );
 		Viridis.add( 0.05, new Color( 71, 18, 101 ) );
 		Viridis.add( 0.10, new Color( 72, 35, 116 ) );
@@ -86,7 +89,7 @@ public class InterpolatePaintScale implements PaintScale, Serializable
 	 * The TURBO color-map, from Google LLC, Anton Mikhailov.
 	 * https://gist.github.com/mikhailov-work/ee72ba4191942acecc03fe6da94fc73f
 	 */
-	public static final InterpolatePaintScale Turbo;
+	public static final Colormap Turbo;
 
 	private final String name;
 	static
@@ -103,7 +106,7 @@ public class InterpolatePaintScale implements PaintScale, Serializable
 				{ 0.96187, 0.41093, 0.09310 }, { 0.95801, 0.39958, 0.08831 }, { 0.95398, 0.38836, 0.08362 }, { 0.94977, 0.37729, 0.07905 }, { 0.94538, 0.36638, 0.07461 }, { 0.94084, 0.35566, 0.07031 }, { 0.93612, 0.34513, 0.06616 }, { 0.93125, 0.33482, 0.06218 }, { 0.92623, 0.32473, 0.05837 }, { 0.92105, 0.31489, 0.05475 }, { 0.91572, 0.30530, 0.05134 }, { 0.91024, 0.29599, 0.04814 }, { 0.90463, 0.28696, 0.04516 }, { 0.89888, 0.27824, 0.04243 }, { 0.89298, 0.26981, 0.03993 }, { 0.88691, 0.26152, 0.03753 }, { 0.88066, 0.25334, 0.03521 }, { 0.87422, 0.24526, 0.03297 }, { 0.86760, 0.23730, 0.03082 }, { 0.86079, 0.22945, 0.02875 }, { 0.85380, 0.22170, 0.02677 }, { 0.84662, 0.21407, 0.02487 }, { 0.83926, 0.20654, 0.02305 }, { 0.83172, 0.19912, 0.02131 }, { 0.82399, 0.19182, 0.01966 },
 				{ 0.81608, 0.18462, 0.01809 }, { 0.80799, 0.17753, 0.01660 }, { 0.79971, 0.17055, 0.01520 }, { 0.79125, 0.16368, 0.01387 }, { 0.78260, 0.15693, 0.01264 }, { 0.77377, 0.15028, 0.01148 }, { 0.76476, 0.14374, 0.01041 }, { 0.75556, 0.13731, 0.00942 }, { 0.74617, 0.13098, 0.00851 }, { 0.73661, 0.12477, 0.00769 }, { 0.72686, 0.11867, 0.00695 }, { 0.71692, 0.11268, 0.00629 }, { 0.70680, 0.10680, 0.00571 }, { 0.69650, 0.10102, 0.00522 }, { 0.68602, 0.09536, 0.00481 }, { 0.67535, 0.08980, 0.00449 }, { 0.66449, 0.08436, 0.00424 }, { 0.65345, 0.07902, 0.00408 }, { 0.64223, 0.07380, 0.00401 }, { 0.63082, 0.06868, 0.00401 }, { 0.61923, 0.06367, 0.00410 }, { 0.60746, 0.05878, 0.00427 }, { 0.59550, 0.05399, 0.00453 }, { 0.58336, 0.04931, 0.00486 }, { 0.57103, 0.04474, 0.00529 },
 				{ 0.55852, 0.04028, 0.00579 }, { 0.54583, 0.03593, 0.00638 }, { 0.53295, 0.03169, 0.00705 }, { 0.51989, 0.02756, 0.00780 }, { 0.50664, 0.02354, 0.00863 }, { 0.49321, 0.01963, 0.00955 }, { 0.47960, 0.01583, 0.01055 } };
-		Turbo = new InterpolatePaintScale( "Turbo", 0., 1. );
+		Turbo = new Colormap( "Turbo", 0., 1. );
 		final int nTriplets = triplets.length;
 		for ( int i = 0; i < nTriplets; i++ )
 		{
@@ -113,14 +116,20 @@ public class InterpolatePaintScale implements PaintScale, Serializable
 		}
 	}
 
-	public static List< InterpolatePaintScale > getAvailableLUTs()
+	private static final List< Colormap > LUTS;
+	static
 	{
-		final List< InterpolatePaintScale > luts = new ArrayList<>();
-		luts.add( Jet );
-		luts.add( Turbo );
-		luts.add( Viridis );
-		luts.addAll( InterpolatePaintScaleIO.getLUTs() );
-		return luts;
+		final List< Colormap > tmpLUTS = new ArrayList<>();
+		tmpLUTS.add( Jet );
+		tmpLUTS.add( Turbo );
+		tmpLUTS.add( Viridis );
+		tmpLUTS.addAll( ColormapIO.getLUTs() );
+		LUTS = Collections.unmodifiableList( tmpLUTS );
+	}
+
+	public static List< Colormap > getAvailableLUTs()
+	{
+		return LUTS;
 	}
 
 	/*
@@ -131,7 +140,7 @@ public class InterpolatePaintScale implements PaintScale, Serializable
 	 * Create a paint scale with given lower and upper bound, and a specified
 	 * default color.
 	 */
-	public InterpolatePaintScale( final String name, final double lowerBound, final double upperBound, final Color defaultColor )
+	public Colormap( final String name, final double lowerBound, final double upperBound, final Color defaultColor )
 	{
 		this.name = name;
 		this.lowerBound = lowerBound;
@@ -143,7 +152,7 @@ public class InterpolatePaintScale implements PaintScale, Serializable
 	 * Create a paint scale with a given lower and upper bound and a default
 	 * black color.
 	 */
-	public InterpolatePaintScale( final String name, final double lowerBound, final double upperBound )
+	public Colormap( final String name, final double lowerBound, final double upperBound )
 	{
 		this( name, lowerBound, upperBound, DEFAULT_COLOR );
 	}
@@ -152,7 +161,7 @@ public class InterpolatePaintScale implements PaintScale, Serializable
 	 * Create a paint scale with a lower bound of 0, an upper bound of 1 and a
 	 * default black color.
 	 */
-	public InterpolatePaintScale( final String name )
+	public Colormap( final String name )
 	{
 		this( name, 0, 1 );
 	}
@@ -237,9 +246,9 @@ public class InterpolatePaintScale implements PaintScale, Serializable
 	}
 
 	@Override
-	public InterpolatePaintScale clone()
+	public Colormap clone()
 	{
-		final InterpolatePaintScale ips = new InterpolatePaintScale( name, lowerBound, upperBound );
+		final Colormap ips = new Colormap( name, lowerBound, upperBound );
 		for ( final double key : colors.keySet() )
 			ips.add( key, colors.get( key ) );
 		return ips;

@@ -1,4 +1,4 @@
-package org.jfree.chart.renderer;
+package fiji.plugin.trackmate.gui.displaysettings;
 
 import java.awt.Color;
 import java.io.IOException;
@@ -19,12 +19,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.scijava.util.IntArray;
 
 /**
- * Loat LUTS for {@link InterpolatePaintScale}. Code adapted from what we did in
+ * Loat LUTS for {@link Colormap}. Code adapted from what we did in
  * Mastodon.
  *
  * @author Jean-Yves Tinevez 2019
  */
-public class InterpolatePaintScaleIO
+public class ColormapIO
 {
 
 	private static final List< URI > LUT_FOLDERS = new ArrayList<>();
@@ -32,7 +32,7 @@ public class InterpolatePaintScaleIO
 	{
 		try
 		{
-			final URI BUILTIN_LUT_FOLDER = InterpolatePaintScaleIO.class.getResource( "luts/" ).toURI();
+			final URI BUILTIN_LUT_FOLDER = ColormapIO.class.getResource( "luts/" ).toURI();
 			LUT_FOLDERS.add( BUILTIN_LUT_FOLDER );
 		}
 		catch ( final URISyntaxException e )
@@ -41,14 +41,14 @@ public class InterpolatePaintScaleIO
 		}
 	}
 
-	static List< InterpolatePaintScale > getLUTs()
+	static List< Colormap > getLUTs()
 	{
 		return loadLUTs();
 	}
 
-	private static List< InterpolatePaintScale > loadLUTs()
+	private static List< Colormap > loadLUTs()
 	{
-		final List< InterpolatePaintScale > luts = new ArrayList<>();
+		final List< Colormap > luts = new ArrayList<>();
 		for ( final URI lutFolder : LUT_FOLDERS )
 		{
 			try
@@ -63,7 +63,7 @@ public class InterpolatePaintScaleIO
 		return luts;
 	}
 
-	private static List< InterpolatePaintScale > loadLUTs( final URI folder ) throws IOException
+	private static List< Colormap > loadLUTs( final URI folder ) throws IOException
 	{
 		if ( folder.getScheme().equals( "jar" ) )
 		{
@@ -83,9 +83,9 @@ public class InterpolatePaintScaleIO
 		}
 	}
 
-	private static List< InterpolatePaintScale > loadLUTs( final Path folderPath ) throws IOException
+	private static List< Colormap > loadLUTs( final Path folderPath ) throws IOException
 	{
-		final List< InterpolatePaintScale > luts = new ArrayList<>();
+		final List< Colormap > luts = new ArrayList<>();
 		if ( Files.exists( folderPath ) )
 		{
 			final String glob = "*.lut";
@@ -94,7 +94,7 @@ public class InterpolatePaintScaleIO
 				for ( final Path path : folderStream )
 				{
 
-					final InterpolatePaintScale lut = importLUT( path );
+					final Colormap lut = importLUT( path );
 					if ( null == lut )
 						System.err.println( "Could not read LUT file: " + path + ". Skipping." );
 
@@ -105,7 +105,7 @@ public class InterpolatePaintScaleIO
 		return luts;
 	}
 
-	private static final InterpolatePaintScale importLUT( final Path path ) throws IOException
+	private static final Colormap importLUT( final Path path ) throws IOException
 	{
 		final String fileName = path.getFileName().toString();
 		final String lutName = fileName.substring( 0, fileName.indexOf( '.' ) );
@@ -117,7 +117,7 @@ public class InterpolatePaintScaleIO
 			final IntArray intAlphas = new IntArray();
 			final AtomicInteger nLines = new AtomicInteger( 0 );
 
-			final InterpolatePaintScale ips = new InterpolatePaintScale( lutName, 0., 1. );
+			final Colormap ips = new Colormap( lutName, 0., 1. );
 			while ( scanner.hasNext() )
 			{
 				if ( !scanner.hasNextInt() )
