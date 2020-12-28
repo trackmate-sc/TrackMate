@@ -125,6 +125,7 @@ public class TablePanel< O > extends JPanel
 
 		table.setRowHeight( ROW_HEIGHT );
 		table.getSelectionModel().setSelectionMode( ListSelectionModel.MULTIPLE_INTERVAL_SELECTION );
+		table.setGridColor( table.getTableHeader().getBackground() );
 
 		// Class of columns.
 		columnClasses.clear();
