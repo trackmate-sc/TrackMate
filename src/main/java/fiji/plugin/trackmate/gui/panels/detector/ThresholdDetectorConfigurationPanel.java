@@ -33,6 +33,7 @@ import fiji.plugin.trackmate.detection.MaskUtils;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.detection.ThresholdDetectorFactory;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
+import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.util.JLabelLogger;
 import fiji.plugin.trackmate.util.TMUtils;
@@ -176,7 +177,7 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 		sliderChannel = new JSlider();
 		sliderChannel.addChangeListener( e -> labelChannel.setText( "" + sliderChannel.getValue() ) );
 
-		final JLabel lblDetectInChannel = new JLabel( "Detect in channel:" );
+		final JLabel lblDetectInChannel = new JLabel( "Segment in channel:" );
 		lblDetectInChannel.setFont( SMALL_FONT );
 		final GridBagConstraints gbc_lblDetectInChannel = new GridBagConstraints();
 		gbc_lblDetectInChannel.anchor = GridBagConstraints.EAST;
@@ -202,6 +203,7 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 		add( lblIntensityThreshold, gbc_lblNewLabel );
 
 		ftfIntensityThreshold = new JFormattedTextField( THRESHOLD_FORMAT );
+		GuiUtils.selectAllOnFocus( ftfIntensityThreshold );
 		ftfIntensityThreshold.setValue( Double.valueOf( 0. ) );
 		ftfIntensityThreshold.setFont( SMALL_FONT );
 		ftfIntensityThreshold.setHorizontalAlignment( SwingConstants.CENTER );
