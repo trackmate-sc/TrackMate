@@ -332,6 +332,10 @@ public class MaskUtils
 			else
 				fRoi = roi;
 
+			// Don't include ROIs that have been shrunk to < 1 pixel.
+			if ( fRoi.getNCoordinates() < 3 || fRoi.getStatistics().area <= 0. )
+				continue;
+
 			// Measure quality.
 			final double quality;
 			if ( null == qualityImp )
@@ -466,7 +470,6 @@ public class MaskUtils
 			points.add( new double[] { fPoly.xpoints[ i ], fPoly.ypoints[ i ] } );
 
 		final List< double[] > simplifiedPoints = douglasPeucker( points, epsilon );
-
 		final float[] sX = new float[ simplifiedPoints.size() ];
 		final float[] sY = new float[ simplifiedPoints.size() ];
 		for ( int i = 0; i < sX.length; i++ )
