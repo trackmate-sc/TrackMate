@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.visualization.table;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,6 +40,8 @@ import fiji.plugin.trackmate.SelectionChangeListener;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.features.FeatureUtils;
+import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
+import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.util.FileChooser;
@@ -188,9 +191,9 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 						featureUnits,
 						isInts,
 						infoTexts,
+						coloring,
 						labelGenerator,
-						labelSetter,
-						coloring );
+						labelSetter );
 
 		table.getTable().getSelectionModel().addListSelectionListener(
 				new TrackTableSelectionListener() );
@@ -220,6 +223,9 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 				model.getTrackModel().getEdgeSource( edge ).getName(), model.getTrackModel().getEdgeTarget( edge ).getName() );
 		final BiConsumer< DefaultWeightedEdge, String > labelSetter = null;
 
+		final BiConsumer< DefaultWeightedEdge, Color > colorSetter =
+				( edge, color ) -> model.getFeatureModel().putEdgeFeature( edge, ManualEdgeColorAnalyzer.FEATURE, Double.valueOf( color.getRGB() ) );
+
 		final Supplier< FeatureColorGenerator< DefaultWeightedEdge > > coloring =
 				() -> FeatureUtils.createTrackColorGenerator( model, ds );
 
@@ -233,9 +239,11 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 						featureUnits,
 						isInts,
 						infoTexts,
+						coloring,
 						labelGenerator,
 						labelSetter,
-						coloring );
+						ManualEdgeColorAnalyzer.FEATURE,
+						colorSetter );
 
 		table.getTable().getSelectionModel().addListSelectionListener(
 				new EdgeTableSelectionListener() );
@@ -264,6 +272,9 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 		final Function< Spot, String > labelGenerator = spot -> spot.getName();
 		final BiConsumer< Spot, String > labelSetter = ( spot, label ) -> spot.setName( label );
 
+		final BiConsumer< Spot, Color > colorSetter =
+				( spot, color ) -> spot.putFeature( ManualSpotColorAnalyzerFactory.FEATURE, Double.valueOf( color.getRGB() ) );
+
 		final Supplier< FeatureColorGenerator< Spot > > coloring =
 				() -> FeatureUtils.createSpotColorGenerator( model, ds );
 
@@ -277,9 +288,11 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 						featureUnits,
 						isInts,
 						infoTexts,
+						coloring,
 						labelGenerator,
 						labelSetter,
-						coloring );
+						ManualSpotColorAnalyzerFactory.FEATURE,
+						colorSetter );
 
 		table.getTable().getSelectionModel().addListSelectionListener(
 				new SpotTableSelectionListener() );

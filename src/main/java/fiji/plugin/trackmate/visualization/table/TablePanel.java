@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -20,7 +22,10 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import javax.swing.JComponent;
+import javax.swing.AbstractCellEditor;
+import javax.swing.JButton;
+import javax.swing.JColorChooser;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -31,6 +36,7 @@ import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableColumnModel;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
@@ -39,6 +45,7 @@ import javax.swing.table.TableRowSorter;
 import com.opencsv.CSVWriter;
 
 import fiji.plugin.trackmate.gui.GuiUtils;
+import fiji.plugin.trackmate.gui.displaysettings.ColorIcon;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 import gnu.trove.map.hash.TObjectIntHashMap;
 
@@ -75,6 +82,8 @@ public class TablePanel< O > extends JPanel
 
 	private final Supplier< FeatureColorGenerator< O > > colorSupplier;
 
+	private final String manualColorFeature;
+
 	private boolean useColoring;
 
 	public TablePanel(
@@ -86,15 +95,46 @@ public class TablePanel< O > extends JPanel
 			final Map< String, String > featureUnits,
 			final Map< String, Boolean > isInts,
 			final Map< String, String > infoTexts,
+			final Supplier< FeatureColorGenerator< O > > colorSupplier,
+			final Function< O, String > labelGenerator,
+			final BiConsumer< O, String > labelSetter )
+	{
+		this( objects,
+				features,
+				featureFun,
+				featureNames,
+				featureShortNames,
+				featureUnits,
+				isInts,
+				infoTexts,
+				colorSupplier,
+				labelGenerator,
+				labelSetter,
+				null,
+				null );
+	}
+
+	public TablePanel(
+			final Iterable< O > objects,
+			final List< String > features,
+			final BiFunction< O, String, Double > featureFun,
+			final Map< String, String > featureNames,
+			final Map< String, String > featureShortNames,
+			final Map< String, String > featureUnits,
+			final Map< String, Boolean > isInts,
+			final Map< String, String > infoTexts,
+			final Supplier< FeatureColorGenerator< O > > colorSupplier,
 			final Function< O, String > labelGenerator,
 			final BiConsumer< O, String > labelSetter,
-			final Supplier< FeatureColorGenerator< O > > colorSupplier )
+			final String manualColorFeature,
+			final BiConsumer< O, Color > colorSetter )
 	{
 		this.featureFun = featureFun;
 		this.featureNames = featureNames;
 		this.featureShortNames = featureShortNames;
 		this.featureUnits = featureUnits;
 		this.colorSupplier = colorSupplier;
+		this.manualColorFeature = manualColorFeature;
 		this.objects = new ArrayList<>();
 		this.map = new TObjectIntHashMap<>();
 		setObjects( objects );
@@ -114,8 +154,9 @@ public class TablePanel< O > extends JPanel
 			@Override
 			public boolean isCellEditable( final int row, final int column )
 			{
-				// Only label and tags are editable.
-				return ( labelSetter != null && column == 0 );
+				// Only label and colors are editable.
+				return ( labelSetter != null && column == 0 )
+						|| ( colorSetter != null && features.get( column - 1 ).equals( manualColorFeature ) );
 			}
 		};
 		table.setColumnModel( tableColumnModel );
@@ -163,7 +204,10 @@ public class TablePanel< O > extends JPanel
 			tableColumnModel.addColumn( new TableColumn( colIndex++ ) );
 
 			final Class< ? > pclass;
-			if ( isInts.get( feature ) )
+
+			if ( feature.equals( manualColorFeature ) )
+				pclass = Color.class;
+			else if ( isInts.get( feature ) )
 				pclass = Integer.class;
 			else
 				pclass = Double.class;
@@ -172,11 +216,14 @@ public class TablePanel< O > extends JPanel
 
 		// Pass last line to column headers and set cell renderer.
 		final MyTableCellRenderer cellRenderer = new MyTableCellRenderer();
+		final int colorcolumn = features.indexOf( manualColorFeature ) + 1;
 		for ( int c = 0; c < tableColumnModel.getColumnCount(); c++ )
 		{
 			final TableColumn column = tableColumnModel.getColumn( c );
 			column.setHeaderValue( headerLine.get( c ) );
 			column.setCellRenderer( cellRenderer );
+			if ( c == colorcolumn && null != colorSetter )
+				column.setCellEditor( new MyColorEditor( colorSetter ) );
 		}
 
 		tableModel.fireTableStructureChanged();
@@ -395,6 +442,10 @@ public class TablePanel< O > extends JPanel
 			{
 				final String feature = features.get( columnIndex - 1 );
 				final Double val = featureFun.apply( o, feature );
+
+				if ( feature.equals( manualColorFeature ) )
+					return new Color( val == null ? 0 : val.intValue(), true );
+
 				if ( val == null )
 					return null;
 
@@ -432,6 +483,8 @@ public class TablePanel< O > extends JPanel
 
 		private final FeatureColorGenerator< O > defaultColoring = o -> Color.WHITE;
 
+		private final ColorIcon colorIcon;
+
 		public MyTableCellRenderer()
 		{
 			this.normalBorder = ( ( JLabel ) super.getTableCellRendererComponent( table, "", false, false, 0, 0 ) ).getBorder();
@@ -439,13 +492,14 @@ public class TablePanel< O > extends JPanel
 			final DecimalFormatSymbols formatSymbols = new DecimalFormatSymbols();
 			formatSymbols.setNaN( "NaN" );
 			nf.setDecimalFormatSymbols( formatSymbols );
+			colorIcon = new ColorIcon( new Color( 0 ) );
 		}
 
 		@Override
 		public Component getTableCellRendererComponent( final JTable table, final Object value, final boolean isSelected, final boolean hasFocus, final int row, final int column )
 		{
 			final FeatureColorGenerator< O > coloring = useColoring ? colorSupplier.get() : defaultColoring;
-			final JComponent c = ( JComponent ) super.getTableCellRendererComponent( table, value, isSelected, hasFocus, row, column );
+			final JLabel c = ( JLabel ) super.getTableCellRendererComponent( table, value, isSelected, hasFocus, row, column );
 			c.setBorder( normalBorder );
 
 			final O o = getObjectForViewRow( row );
@@ -467,6 +521,7 @@ public class TablePanel< O > extends JPanel
 				c.setForeground( table.getSelectionForeground() );
 			}
 
+			c.setIcon( null );
 			if ( value instanceof Double )
 			{
 				setHorizontalAlignment( JLabel.RIGHT );
@@ -477,6 +532,13 @@ public class TablePanel< O > extends JPanel
 			{
 				setHorizontalAlignment( JLabel.RIGHT );
 			}
+			else if ( value instanceof Color )
+			{
+				colorIcon.setColor( ( Color ) value );
+				c.setIcon( colorIcon );
+				c.setText( null );
+				setHorizontalAlignment( JLabel.CENTER );
+			}
 			else
 			{
 				setHorizontalAlignment( JLabel.LEFT );
@@ -486,4 +548,69 @@ public class TablePanel< O > extends JPanel
 		}
 	}
 
+	private class MyColorEditor extends AbstractCellEditor implements TableCellEditor
+	{
+
+		private final JColorChooser colorChooser = new JColorChooser();
+
+		private static final long serialVersionUID = 1L;
+
+		private final BiConsumer< O, Color > colorSetter;
+
+		public MyColorEditor( final BiConsumer< O, Color > colorSetter )
+		{
+			this.colorSetter = colorSetter;
+		}
+
+		@Override
+		public Object getCellEditorValue()
+		{
+			return null;
+		}
+
+		@Override
+		public Component getTableCellEditorComponent(
+				final JTable table,
+				final Object value,
+				final boolean isSelected,
+				final int row,
+				final int column )
+		{
+			final ColorIcon icon = new ColorIcon( ( Color ) value, 16, 0 );
+			final JButton button = new JButton( icon );
+			button.setHorizontalAlignment( JLabel.CENTER );
+			button.addActionListener( e -> {
+				colorChooser.setColor( ( Color ) value );
+				final JDialog d = JColorChooser.createDialog( button, "Choose a color", true, colorChooser, new ActionListener()
+				{
+					@Override
+					public void actionPerformed( final ActionEvent arg0 )
+					{
+						final Color c = colorChooser.getColor();
+						if ( c != null )
+						{
+							final int[] rows = TablePanel.this.getTable().getSelectedRows();
+							if ( rows.length > 1 )
+							{
+								for ( final int r : rows )
+								{
+									final O o = TablePanel.this.getObjectForViewRow( r );
+									colorSetter.accept( o, c );
+								}
+								TablePanel.this.repaint();
+							}
+							else
+							{
+								final O o = TablePanel.this.getObjectForViewRow( row );
+								colorSetter.accept( o, c );
+							}
+							icon.setColor( c );
+						}
+					}
+				}, null );
+				d.setVisible( true );
+			} );
+			return button;
+		}
+	}
 }

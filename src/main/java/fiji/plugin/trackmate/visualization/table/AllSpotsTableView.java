@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.visualization.table;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ import fiji.plugin.trackmate.SelectionChangeListener;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.features.FeatureUtils;
+import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.util.FileChooser;
 import fiji.plugin.trackmate.util.FileChooser.DialogType;
@@ -154,6 +156,9 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 		final Supplier< FeatureColorGenerator< Spot > > coloring =
 				() -> FeatureUtils.createSpotColorGenerator( model, ds );
 
+		final BiConsumer< Spot, Color > colorSetter =
+				( spot, color ) -> spot.putFeature( ManualSpotColorAnalyzerFactory.FEATURE, Double.valueOf( color.getRGB() ) );
+				
 		final TablePanel< Spot > table =
 				new TablePanel<>(
 						model.getSpots().iterable( true ),
@@ -164,9 +169,11 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 						featureUnits,
 						isInts,
 						infoTexts,
+						coloring,
 						labelGenerator,
 						labelSetter,
-						coloring );
+						ManualSpotColorAnalyzerFactory.FEATURE,
+						colorSetter );
 
 		table.getTable().getSelectionModel().addListSelectionListener(
 				new SpotTableSelectionListener() );

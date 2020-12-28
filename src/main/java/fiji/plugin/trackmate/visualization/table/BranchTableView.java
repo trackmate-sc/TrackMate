@@ -257,9 +257,9 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 				featureUnits,
 				BRANCH_FEATURES_ISINTS,
 				infoTexts,
+				colorSupplier,
 				labelGenerator,
-				labelSetter,
-				colorSupplier );
+				labelSetter );
 
 		table.getTable().getSelectionModel().addListSelectionListener(
 				new BranchTableSelectionListener() );
