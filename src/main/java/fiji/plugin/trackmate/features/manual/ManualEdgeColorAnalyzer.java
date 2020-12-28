@@ -14,7 +14,6 @@ import org.scijava.plugin.Plugin;
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 
 @Plugin( type = EdgeAnalyzer.class )
 public class ManualEdgeColorAnalyzer implements EdgeAnalyzer
@@ -125,17 +124,7 @@ public class ManualEdgeColorAnalyzer implements EdgeAnalyzer
 
 	@Override
 	public void process( final Collection< DefaultWeightedEdge > edges, final Model model )
-	{
-		final long start = System.currentTimeMillis();
-		final Double unassignedColor = Double.valueOf( DisplaySettings.defaultStyle().getMissingValueColor().getRGB() );
-		for ( final DefaultWeightedEdge edge : edges )
-		{
-			if ( null == model.getFeatureModel().getEdgeFeature( edge, FEATURE ) )
-				model.getFeatureModel().putEdgeFeature( edge, FEATURE, unassignedColor );
-		}
-		final long end = System.currentTimeMillis();
-		processingTime = end - start;
-	}
+	{}
 
 	@Override
 	public boolean isLocal()

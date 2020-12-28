@@ -11,10 +11,8 @@ import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import net.imagej.ImgPlus;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
@@ -116,8 +114,6 @@ public class ManualSpotColorAnalyzerFactory< T extends RealType< T > & NativeTyp
 		return new SpotAnalyzer< T >()
 		{
 
-			private long processingTime;
-
 			@Override
 			public boolean checkInput()
 			{
@@ -127,15 +123,6 @@ public class ManualSpotColorAnalyzerFactory< T extends RealType< T > & NativeTyp
 			@Override
 			public boolean process()
 			{
-				final long start = System.currentTimeMillis();
-				final Double unassignedColor = Double.valueOf( DisplaySettings.defaultStyle().getMissingValueColor().getRGB() );
-				for ( final Spot spot : model.getSpots().iterable( false ) )
-				{
-					if ( null == spot.getFeature( FEATURE ) )
-						spot.putFeature( FEATURE, unassignedColor );
-				}
-				final long end = System.currentTimeMillis();
-				processingTime = end - start;
 				return true;
 			}
 
@@ -148,7 +135,7 @@ public class ManualSpotColorAnalyzerFactory< T extends RealType< T > & NativeTyp
 			@Override
 			public long getProcessingTime()
 			{
-				return processingTime;
+				return 0l;
 			}
 		};
 	}
