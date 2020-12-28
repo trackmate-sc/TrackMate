@@ -2,7 +2,6 @@ package fiji.plugin.trackmate.gui;
 
 import static fiji.plugin.trackmate.features.FeatureUtils.DUMMY_MODEL;
 import static fiji.plugin.trackmate.features.FeatureUtils.collectFeatureKeys;
-import static fiji.plugin.trackmate.features.FeatureUtils.collectFeatureValues;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
 import static fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject.DEFAULT;
 import static fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject.EDGES;
@@ -120,33 +119,7 @@ public class FeatureDisplaySelector
 	{
 		final TrackMateObject type = getColorByType( target );
 		final String feature = getColorByFeature( target );
-
-		switch ( type )
-		{
-		case DEFAULT:
-			return new double[] { 0., 0. };
-
-		case EDGES:
-		case SPOTS:
-		case TRACKS:
-		{
-			final double[] values = collectFeatureValues( feature, type, model, settings, true );
-			double min = Double.POSITIVE_INFINITY;
-			double max = Double.NEGATIVE_INFINITY;
-			for ( final double val : values )
-			{
-				if ( val < min )
-					min = val;
-
-				if ( val > max )
-					max = val;
-			}
-			return new double[] { min, max };
-		}
-
-		default:
-			throw new IllegalArgumentException( "Unexpected TrackMate object type: " + type );
-		}
+		return FeatureUtils.autoMinMax( model, settings, type, feature );
 	}
 
 	/**

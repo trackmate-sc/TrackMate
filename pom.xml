@@ -195,13 +195,10 @@
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-common</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-listeners</artifactId>
 		</dependency>
-
-		<!-- Java3D dependencies -->
 
 		<!-- Third party dependencies -->
 		<dependency>
@@ -241,15 +238,20 @@
 		    <artifactId>fontchooser</artifactId>
     		<version>2.4</version>
 		</dependency>
-
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
+			<groupId>com.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
+		</dependency>
+		
+		<!-- Test dependencies -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

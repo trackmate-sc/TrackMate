@@ -10,28 +10,34 @@ import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.visualization.table.AllSpotsTableView;
+import fiji.plugin.trackmate.visualization.table.TrackTableView;
 
-public class ExportAllSpotsStatsAction extends AbstractTMAction
+public class ExportStatsTablesAction extends AbstractTMAction
 {
 
 	public static final ImageIcon ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/calculator.png" ) );
 
-	public static final String NAME = "Export all spots statistics";
+	public static final String NAME = "Export statistics to tables";
 
-	public static final String KEY = "EXPORT_ALL_SPOTS_STATS";
+	public static final String KEY = "EXPORT_STATS";
 
 	public static final String INFO_TEXT = "<html>"
-			+ "Export the statistics of all spots to a table. "
-			+ "The numerical features of all visible spots are exported, "
-			+ "regardless of whether they are in a track or not."
+			+ "Compute and export all statistics to 3 tables. "
+			+ "Statistisc are separated in features computed for: "
+			+ "<ol> "
+			+ "	<li> spots in visible tracks; "
+			+ "	<li> edges between those spots; "
+			+ "	<li> visible tracks. "
+			+ "</ol> "
+			+ "Note that spots and edges that are not in "
+			+ "visible tracks won't be visible in the tables."
 			+ "</html>";
 
 	private final SelectionModel selectionModel;
 
 	private final DisplaySettings displaySettings;
 
-	public ExportAllSpotsStatsAction( final SelectionModel selectionModel, final DisplaySettings displaySettings )
+	public ExportStatsTablesAction( final SelectionModel selectionModel, final DisplaySettings displaySettings )
 	{
 		this.selectionModel = selectionModel;
 		this.displaySettings = displaySettings;
@@ -41,10 +47,11 @@ public class ExportAllSpotsStatsAction extends AbstractTMAction
 	public void execute( final TrackMate trackmate )
 	{
 		final Model model = trackmate.getModel();
-		new AllSpotsTableView( model, selectionModel, displaySettings ).render();
+		new TrackTableView( model, selectionModel, displaySettings ).render();
 	}
 
-	@Plugin( type = TrackMateActionFactory.class )
+	// Invisible because called on the view config panel.
+	@Plugin( type = TrackMateActionFactory.class, visible = false )
 	public static class Factory implements TrackMateActionFactory
 	{
 
@@ -63,7 +70,7 @@ public class ExportAllSpotsStatsAction extends AbstractTMAction
 		@Override
 		public TrackMateAction create( final TrackMateGUIController controller )
 		{
-			return new ExportAllSpotsStatsAction( controller.getSelectionModel(), controller.getDisplaySettings() );
+			return new ExportStatsTablesAction( controller.getSelectionModel(), controller.getDisplaySettings() );
 		}
 
 		@Override

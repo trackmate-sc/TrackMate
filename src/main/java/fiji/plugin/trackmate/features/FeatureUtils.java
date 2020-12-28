@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.features;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -34,6 +35,7 @@ import fiji.plugin.trackmate.visualization.SpotColorGeneratorPerEdgeFeature;
 import fiji.plugin.trackmate.visualization.SpotColorGeneratorPerTrackFeature;
 import fiji.plugin.trackmate.visualization.UniformSpotColorGenerator;
 import fiji.plugin.trackmate.visualization.UniformTrackColorGenerator;
+import fiji.plugin.trackmate.visualization.WholeTrackFeatureColorGenerator;
 
 public class FeatureUtils
 {
@@ -287,6 +289,30 @@ public class FeatureUtils
 		}
 	}
 
+	public static final FeatureColorGenerator< Integer > createWholeTrackColorGenerator( final Model model, final DisplaySettings displaySettings )
+	{
+		switch ( displaySettings.getTrackColorByType() )
+		{
+		case DEFAULT:
+		case SPOTS:
+			return id -> Color.WHITE;
+
+		case EDGES:
+		case TRACKS:
+			return new WholeTrackFeatureColorGenerator(
+					model,
+					displaySettings.getTrackColorByFeature(),
+					displaySettings.getMissingValueColor(),
+					displaySettings.getUndefinedValueColor(),
+					displaySettings.getColormap(),
+					displaySettings.getTrackMin(),
+					displaySettings.getTrackMax() );
+
+		default:
+			throw new IllegalArgumentException( "Unknown type: " + displaySettings.getTrackColorByType() );
+		}
+	}
+
 	public static final Model DUMMY_MODEL = new Model();
 	static
 	{
@@ -318,6 +344,36 @@ public class FeatureUtils
 		finally
 		{
 			DUMMY_MODEL.endUpdate();
+		}
+	}
+
+	public static final double[] autoMinMax( final Model model, final Settings settings, final TrackMateObject type, final String feature )
+	{
+		switch ( type )
+		{
+		case DEFAULT:
+			return new double[] { 0., 0. };
+
+		case EDGES:
+		case SPOTS:
+		case TRACKS:
+		{
+			final double[] values = collectFeatureValues( feature, type, model, settings, true );
+			double min = Double.POSITIVE_INFINITY;
+			double max = Double.NEGATIVE_INFINITY;
+			for ( final double val : values )
+			{
+				if ( val < min )
+					min = val;
+
+				if ( val > max )
+					max = val;
+			}
+			return new double[] { min, max };
+		}
+
+		default:
+			throw new IllegalArgumentException( "Unexpected TrackMate object type: " + type );
 		}
 	}
 }
