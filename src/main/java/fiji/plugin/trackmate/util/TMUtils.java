@@ -773,7 +773,7 @@ public class TMUtils
 			final double dx = data[ i ] - mean;
 			variance += dx * dx;
 		}
-		variance /= data.length;
+		variance /= ( data.length - 1 );
 		return variance;
 	}
 
