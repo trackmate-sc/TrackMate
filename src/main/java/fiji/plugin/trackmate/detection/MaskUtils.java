@@ -354,8 +354,8 @@ public class MaskUtils
 			final double[] ypoly = new double[ fPolygon.npoints ];
 			for ( int i = 0; i < fPolygon.npoints; i++ )
 			{
-				xpoly[ i ] = calibration[ 0 ] * ( interval.min( 0 ) + fPolygon.xpoints[ i ] );
-				ypoly[ i ] = calibration[ 1 ] * ( interval.min( 1 ) + fPolygon.ypoints[ i ] );
+				xpoly[ i ] = calibration[ 0 ] * ( interval.min( 0 ) + fPolygon.xpoints[ i ] - 0.5 );
+				ypoly[ i ] = calibration[ 1 ] * ( interval.min( 1 ) + fPolygon.ypoints[ i ] - 0.5 );
 			}
 
 			spots.add( SpotRoi.createSpot( xpoly, ypoly, quality ) );
