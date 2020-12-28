@@ -264,6 +264,7 @@ public class FeatureDisplaySelector
 			gbcPanelMinMax.fill = GridBagConstraints.BOTH;
 			gbcPanelMinMax.gridx = 0;
 			gbcPanelMinMax.gridy = 1;
+			gbcPanelMinMax.insets = new Insets( 2, 0, 0, 0 );
 			add( panelMinMax, gbcPanelMinMax );
 			panelMinMax.setLayout( new BoxLayout( panelMinMax, BoxLayout.X_AXIS ) );
 
@@ -273,7 +274,7 @@ public class FeatureDisplaySelector
 
 			panelMinMax.add( Box.createHorizontalGlue() );
 
-			final JLabel lblMin = new JLabel( "min:" );
+			final JLabel lblMin = new JLabel( "min" );
 			lblMin.setFont( SMALL_FONT );
 			panelMinMax.add( lblMin );
 
@@ -287,7 +288,7 @@ public class FeatureDisplaySelector
 
 			panelMinMax.add( Box.createHorizontalGlue() );
 
-			final JLabel lblMax = new JLabel( "max:" );
+			final JLabel lblMax = new JLabel( "max" );
 			lblMax.setFont( SMALL_FONT );
 			panelMinMax.add( lblMax );
 

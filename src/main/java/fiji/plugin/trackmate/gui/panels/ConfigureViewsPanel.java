@@ -302,7 +302,7 @@ public class ConfigureViewsPanel extends ActionListenablePanel
 		 * Draw Z Depth
 		 */
 
-		final FlowLayout flowLayout = new FlowLayout( FlowLayout.LEFT, 5, 0 );
+		final FlowLayout flowLayout = new FlowLayout( FlowLayout.LEFT, 5, 2 );
 		final JPanel panelDrawingZDepth = new JPanel( flowLayout );
 		panelDrawingZDepth.setBorder( new LineBorder( BORDER_COLOR, 1, true ) );
 		final GridBagConstraints gbcPanelDrawingZDepth = new GridBagConstraints();
