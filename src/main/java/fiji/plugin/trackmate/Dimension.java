@@ -13,5 +13,6 @@ public enum Dimension {
 	TIME,
 	ANGLE,
 	RATE, // count per frames
+	ANGLE_RATE,
 	STRING; // for non-numeric features
 }

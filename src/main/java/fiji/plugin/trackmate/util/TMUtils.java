@@ -496,6 +496,8 @@ public class TMUtils
 			return spaceUnits + "/" + timeUnits;
 		case RATE:
 			return "/" + timeUnits;
+		case ANGLE_RATE:
+			return "rad/" + timeUnits;
 		default:
 		case STRING:
 			return null;
