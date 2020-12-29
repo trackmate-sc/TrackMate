@@ -152,11 +152,12 @@ public class TablePanel< O > extends JPanel
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public boolean isCellEditable( final int row, final int column )
+			public boolean isCellEditable( final int row, final int viewcolumn )
 			{
+				final int column = convertColumnIndexToModel( viewcolumn );
 				// Only label and colors are editable.
 				return ( labelSetter != null && column == 0 )
-						|| ( colorSetter != null && features.get( column - 1 ).equals( manualColorFeature ) );
+						|| ( colorSetter != null && column > 0 && features.get( column - 1 ).equals( manualColorFeature ) );
 			}
 		};
 		table.setColumnModel( tableColumnModel );
@@ -298,20 +299,6 @@ public class TablePanel< O > extends JPanel
 		table.scrollRectToVisible( cellRect );
 	}
 
-	/**
-	 * Starts editing the label of the object currently selected in the table.
-	 * Has not effect if the table focus is not on the first column (the label
-	 * column).
-	 */
-	public void editCurrentLabel()
-	{
-		final int col = table.getSelectedColumn();
-		final int row = table.getSelectedRow();
-		if ( col != 0 || row < 0 )
-			return;
-		table.editCellAt( row, col );
-	}
-
 	public void exportToCsv( final File file ) throws IOException
 	{
 		try (CSVWriter writer = new CSVWriter( new FileWriter( file ), CSVWriter.DEFAULT_SEPARATOR ))
@@ -393,7 +380,8 @@ public class TablePanel< O > extends JPanel
 		public void mouseMoved( final MouseEvent evt )
 		{
 			final TableColumnModel tableColumnModel = table.getColumnModel();
-			final int vColIndex = tableColumnModel.getColumnIndexAtX( evt.getX() );
+			final int col = tableColumnModel.getColumnIndexAtX( evt.getX() );
+			final int vColIndex = table.convertColumnIndexToModel( col );
 			if ( vColIndex != previousCol )
 			{
 				if ( vColIndex >= 0 && vColIndex < mapToTooltip.size() )
