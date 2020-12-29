@@ -36,6 +36,7 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
+import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.util.FileChooser;
 import fiji.plugin.trackmate.util.FileChooser.DialogType;
@@ -65,6 +66,7 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 	public AllSpotsTableView( final Model model, final SelectionModel selectionModel, final DisplaySettings ds )
 	{
 		super( "All spots table" );
+		setIconImage( TrackMateWizard.TRACKMATE_ICON.getImage() );
 		this.model = model;
 		this.selectionModel = selectionModel;
 
@@ -138,7 +140,6 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 	private final TablePanel< Spot > createSpotTable( final Model model, final DisplaySettings ds )
 	{
 		final List< String > features = new ArrayList<>( model.getFeatureModel().getSpotFeatures() );
-		final BiFunction< Spot, String, Double > featureFun = ( spot, feature ) -> spot.getFeature( feature );
 		final Map< String, String > featureNames = model.getFeatureModel().getSpotFeatureNames();
 		final Map< String, String > featureShortNames = model.getFeatureModel().getSpotFeatureShortNames();
 		final Map< String, String > featureUnits = new HashMap<>();
@@ -152,6 +153,26 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 		final Map< String, String > infoTexts = new HashMap<>();
 		final Function< Spot, String > labelGenerator = spot -> spot.getName();
 		final BiConsumer< Spot, String > labelSetter = ( spot, label ) -> spot.setName( label );
+
+		/*
+		 * Feature provider. We add a fake one to show the spot track ID.
+		 */
+		final String TRACK_ID = "TRACK_ID";
+		features.add( 0, TRACK_ID );
+		featureNames.put( TRACK_ID, "Track ID" );
+		featureShortNames.put( TRACK_ID, "Track ID" );
+		featureUnits.put( TRACK_ID, "" );
+		isInts.put( TRACK_ID, Boolean.TRUE );
+		infoTexts.put( TRACK_ID, "The id of the track this spot belongs to." );
+		
+		final BiFunction< Spot, String, Double > featureFun = ( spot, feature ) -> {
+			if ( feature.equals( TRACK_ID ) )
+			{
+				final Integer trackID = model.getTrackModel().trackIDOf( spot );
+				return trackID == null ? null : trackID.doubleValue();
+			}
+			return spot.getFeature( feature );
+		};
 
 		final Supplier< FeatureColorGenerator< Spot > > coloring =
 				() -> FeatureUtils.createSpotColorGenerator( model, ds );

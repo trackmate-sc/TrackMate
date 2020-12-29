@@ -78,6 +78,7 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 	public TrackTableView( final Model model, final SelectionModel selectionModel, final DisplaySettings ds )
 	{
 		super( "Track tables" );
+		setIconImage( TrackMateWizard.TRACKMATE_ICON.getImage() );
 		this.model = model;
 		this.selectionModel = selectionModel;
 
@@ -207,7 +208,6 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 		for ( final Integer trackID : model.getTrackModel().unsortedTrackIDs( true ) )
 			objects.addAll( model.getTrackModel().trackEdges( trackID ) );
 		final List< String > features = new ArrayList<>( model.getFeatureModel().getEdgeFeatures() );
-		final BiFunction< DefaultWeightedEdge, String, Double > featureFun = ( edge, feature ) -> model.getFeatureModel().getEdgeFeature( edge, feature );
 		final Map< String, String > featureNames = model.getFeatureModel().getEdgeFeatureNames();
 		final Map< String, String > featureShortNames = model.getFeatureModel().getEdgeFeatureShortNames();
 		final Map< String, String > featureUnits = new HashMap<>();
@@ -222,6 +222,26 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 		final Function< DefaultWeightedEdge, String > labelGenerator = edge -> String.format( "%s → %s",
 				model.getTrackModel().getEdgeSource( edge ).getName(), model.getTrackModel().getEdgeTarget( edge ).getName() );
 		final BiConsumer< DefaultWeightedEdge, String > labelSetter = null;
+
+		/*
+		 * Feature provider. We add a fake one to show the spot track ID.
+		 */
+		final String TRACK_ID = "TRACK_ID";
+		features.add( 0, TRACK_ID );
+		featureNames.put( TRACK_ID, "Track ID" );
+		featureShortNames.put( TRACK_ID, "Track ID" );
+		featureUnits.put( TRACK_ID, "" );
+		isInts.put( TRACK_ID, Boolean.TRUE );
+		infoTexts.put( TRACK_ID, "The id of the track this spot belongs to." );
+
+		final BiFunction< DefaultWeightedEdge, String, Double > featureFun = ( edge, feature ) -> {
+			if ( feature.equals( TRACK_ID ) )
+			{
+				final Integer trackID = model.getTrackModel().trackIDOf( edge );
+				return trackID == null ? null : trackID.doubleValue();
+			}
+			return model.getFeatureModel().getEdgeFeature( edge, feature );
+		};
 
 		final BiConsumer< DefaultWeightedEdge, Color > colorSetter =
 				( edge, color ) -> model.getFeatureModel().putEdgeFeature( edge, ManualEdgeColorAnalyzer.FEATURE, Double.valueOf( color.getRGB() ) );
@@ -257,7 +277,6 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 		for ( final Integer trackID : model.getTrackModel().unsortedTrackIDs( true ) )
 			objects.addAll( model.getTrackModel().trackSpots( trackID ) );
 		final List< String > features = new ArrayList<>( model.getFeatureModel().getSpotFeatures() );
-		final BiFunction< Spot, String, Double > featureFun = ( spot, feature ) -> spot.getFeature( feature );
 		final Map< String, String > featureNames = model.getFeatureModel().getSpotFeatureNames();
 		final Map< String, String > featureShortNames = model.getFeatureModel().getSpotFeatureShortNames();
 		final Map< String, String > featureUnits = new HashMap<>();
@@ -271,6 +290,26 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 		final Map< String, String > infoTexts = new HashMap<>();
 		final Function< Spot, String > labelGenerator = spot -> spot.getName();
 		final BiConsumer< Spot, String > labelSetter = ( spot, label ) -> spot.setName( label );
+
+		/*
+		 * Feature provider. We add a fake one to show the spot track ID.
+		 */
+		final String TRACK_ID = "TRACK_ID";
+		features.add( 0, TRACK_ID );
+		featureNames.put( TRACK_ID, "Track ID" );
+		featureShortNames.put( TRACK_ID, "Track ID" );
+		featureUnits.put( TRACK_ID, "" );
+		isInts.put( TRACK_ID, Boolean.TRUE );
+		infoTexts.put( TRACK_ID, "The id of the track this spot belongs to." );
+
+		final BiFunction< Spot, String, Double > featureFun = ( spot, feature ) -> {
+			if ( feature.equals( TRACK_ID ) )
+			{
+				final Integer trackID = model.getTrackModel().trackIDOf( spot );
+				return trackID == null ? null : trackID.doubleValue();
+			}
+			return spot.getFeature( feature );
+		};
 
 		final BiConsumer< Spot, Color > colorSetter =
 				( spot, color ) -> spot.putFeature( ManualSpotColorAnalyzerFactory.FEATURE, Double.valueOf( color.getRGB() ) );

@@ -39,6 +39,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition;
 import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition.TrackBranchDecomposition;
 import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
+import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.util.FileChooser;
 import fiji.plugin.trackmate.util.FileChooser.DialogType;
 import fiji.plugin.trackmate.util.FileChooser.SelectionMode;
@@ -64,6 +65,7 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 	public BranchTableView( final Model model, final SelectionModel selectionModel )
 	{
 		super( "Branch table" );
+		setIconImage( TrackMateWizard.TRACKMATE_ICON.getImage() );
 		this.model = model;
 		this.selectionModel = selectionModel;
 
