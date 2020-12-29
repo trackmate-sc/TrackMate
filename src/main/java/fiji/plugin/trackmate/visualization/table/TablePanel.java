@@ -360,6 +360,11 @@ public class TablePanel< O > extends JPanel
 						content[ col ] = Double.toString( ( Double ) obj );
 					else if ( obj instanceof Boolean )
 						content[ col ] = ( ( Boolean ) obj ) ? "1" : "0";
+					else if ( obj instanceof Color )
+					{
+						final Color color = ( Color ) obj;
+						content[ col ] = String.format( "r=%d;g=%d;b=%d", color.getRed(), color.getGreen(), color.getBlue() );
+					}
 					else
 						content[ col ] = obj.toString();
 				}
@@ -432,7 +437,7 @@ public class TablePanel< O > extends JPanel
 				final Double val = featureFun.apply( o, feature );
 
 				if ( feature.equals( manualColorFeature ) )
-					return new Color( val == null ? 0 : val.intValue(), true );
+					return val == null ? null : new Color( val.intValue(), true );
 
 				if ( val == null )
 					return null;
