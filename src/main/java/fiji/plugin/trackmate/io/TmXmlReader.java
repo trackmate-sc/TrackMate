@@ -406,10 +406,10 @@ public class TmXmlReader
 		return readSettings( imp,
 				new DetectorProvider(),
 				new TrackerProvider(),
-				new SpotAnalyzerProvider( imp ),
+				new SpotAnalyzerProvider( imp.getNChannels() ),
 				new EdgeAnalyzerProvider(),
 				new TrackAnalyzerProvider(),
-				new SpotMorphologyAnalyzerProvider( imp ) );
+				new SpotMorphologyAnalyzerProvider( imp.getNChannels() ) );
 	}
 
 	/**
@@ -631,7 +631,7 @@ public class TmXmlReader
 	 *            the settings {@link Element} to read from.
 	 * @return the initial filter, as a {@link FeatureFilter}.
 	 */
-	private FeatureFilter getInitialFilter( final Element settingsElement )
+	protected FeatureFilter getInitialFilter( final Element settingsElement )
 	{
 		final Element itEl = settingsElement.getChild( INITIAL_SPOT_FILTER_ELEMENT_KEY );
 		final String feature = itEl.getAttributeValue( FILTER_FEATURE_ATTRIBUTE_NAME );
@@ -648,7 +648,7 @@ public class TmXmlReader
 	 *            the settings {@link Element} to read from.
 	 * @return a list of {@link FeatureFilter}s.
 	 */
-	private List< FeatureFilter > getSpotFeatureFilters( final Element settingsElement )
+	protected List< FeatureFilter > getSpotFeatureFilters( final Element settingsElement )
 	{
 		final List< FeatureFilter > featureThresholds = new ArrayList<>();
 		final Element ftCollectionEl = settingsElement.getChild( SPOT_FILTER_COLLECTION_ELEMENT_KEY );
@@ -671,7 +671,7 @@ public class TmXmlReader
 	 *            the settings {@link Element} to read from.
 	 * @return a list of {@link FeatureFilter}s.
 	 */
-	private List< FeatureFilter > getTrackFeatureFilters( final Element settingsElement )
+	protected List< FeatureFilter > getTrackFeatureFilters( final Element settingsElement )
 	{
 		final List< FeatureFilter > featureThresholds = new ArrayList<>();
 		final Element ftCollectionEl = settingsElement.getChild( TRACK_FILTER_COLLECTION_ELEMENT_KEY );
@@ -743,7 +743,7 @@ public class TmXmlReader
 	 *            a {@link DetectorProvider}, required to read detector
 	 *            parameters.
 	 */
-	private void getDetectorSettings(
+	protected void getDetectorSettings(
 			final Element settingsElement,
 			final Settings settings,
 			final DetectorProvider provider )
@@ -802,7 +802,7 @@ public class TmXmlReader
 	 *            the {@link TrackerProvider}, required to read the tracker
 	 *            parameters.
 	 */
-	private void getTrackerSettings(
+	protected void getTrackerSettings(
 			final Element settingsElement,
 			final Settings settings,
 			final TrackerProvider provider )
