@@ -540,7 +540,7 @@ public class TrackMateRunner extends TrackMatePlugIn
 		final Settings s = super.createSettings( imp );
 
 		s.clearSpotAnalyzerFactories();
-		final SpotAnalyzerProvider spotAnalyzerProvider = new SpotAnalyzerProvider( imp );
+		final SpotAnalyzerProvider spotAnalyzerProvider = new SpotAnalyzerProvider( imp.getNChannels() );
 		final List< String > spotAnalyzerKeys = spotAnalyzerProvider.getKeys();
 		for ( final String key : spotAnalyzerKeys )
 		{

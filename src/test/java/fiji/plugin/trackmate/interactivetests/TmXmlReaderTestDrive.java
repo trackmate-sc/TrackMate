@@ -33,10 +33,10 @@ public class TmXmlReaderTestDrive
 				imp,
 				new DetectorProvider(),
 				new TrackerProvider(),
-				new SpotAnalyzerProvider( imp ),
+				new SpotAnalyzerProvider( imp.getNChannels() ),
 				new EdgeAnalyzerProvider(),
 				new TrackAnalyzerProvider(),
-				new SpotMorphologyAnalyzerProvider( imp ) );
+				new SpotMorphologyAnalyzerProvider( imp.getNChannels() ) );
 
 		System.out.println( settings );
 		System.out.println( model );

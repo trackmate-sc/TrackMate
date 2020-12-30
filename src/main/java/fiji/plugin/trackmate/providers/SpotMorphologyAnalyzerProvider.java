@@ -1,18 +1,17 @@
 package fiji.plugin.trackmate.providers;
 
 import fiji.plugin.trackmate.features.spot.SpotMorphologyAnalyzerFactory;
-import ij.ImagePlus;
 
 @SuppressWarnings( "rawtypes" )
 public class SpotMorphologyAnalyzerProvider extends AbstractProvider< SpotMorphologyAnalyzerFactory >
 {
 
-	private final ImagePlus imp;
+	private final int nChannels;
 
-	public SpotMorphologyAnalyzerProvider(final ImagePlus imp)
+	public SpotMorphologyAnalyzerProvider( final int nChannels )
 	{
 		super( SpotMorphologyAnalyzerFactory.class );
-		this.imp = imp;
+		this.nChannels = nChannels;
 	}
 
 	@Override
@@ -22,13 +21,13 @@ public class SpotMorphologyAnalyzerProvider extends AbstractProvider< SpotMorpho
 		if ( factory == null )
 			return null;
 
-		factory.setSource( imp );
+		factory.setNChannels( nChannels );
 		return factory;
 	}
 
 	public static void main( final String[] args )
 	{
-		final SpotMorphologyAnalyzerProvider provider = new SpotMorphologyAnalyzerProvider( null );
+		final SpotMorphologyAnalyzerProvider provider = new SpotMorphologyAnalyzerProvider( 2 );
 		System.out.println( provider.echo() );
 	}
 }

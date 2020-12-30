@@ -476,7 +476,7 @@ public class Settings
 	public void addAllAnalyzers()
 	{
 		clearSpotAnalyzerFactories();
-		final SpotAnalyzerProvider spotAnalyzerProvider = new SpotAnalyzerProvider( imp );
+		final SpotAnalyzerProvider spotAnalyzerProvider = new SpotAnalyzerProvider( imp.getNChannels() );
 		final List< String > spotAnalyzerKeys = spotAnalyzerProvider.getKeys();
 		for ( final String key : spotAnalyzerKeys )
 			addSpotAnalyzerFactory( spotAnalyzerProvider.getFactory( key ) );

@@ -14,7 +14,6 @@ import org.scijava.plugin.Plugin;
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
-import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imglib2.meta.view.HyperSliceImgPlus;
 import net.imglib2.type.NativeType;
@@ -57,12 +56,9 @@ public class SpotIntensityMultiCAnalyzerFactory< T extends RealType< T > & Nativ
 	private int nChannels = 1;
 
 	@Override
-	public void setSource( final ImagePlus imp )
+	public void setNChannels( final int nChannels )
 	{
-		if ( null != imp )
-			this.nChannels = imp.getNChannels();
-		else
-			this.nChannels = 1;
+		this.nChannels = nChannels;
 	}
 
 	@Override

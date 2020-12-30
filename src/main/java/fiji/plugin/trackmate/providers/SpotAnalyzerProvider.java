@@ -1,7 +1,6 @@
 package fiji.plugin.trackmate.providers;
 
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
-import ij.ImagePlus;
 
 /**
  * A provider for the spot analyzer factories provided in the GUI.
@@ -10,12 +9,12 @@ import ij.ImagePlus;
 public class SpotAnalyzerProvider extends AbstractProvider< SpotAnalyzerFactory >
 {
 
-	private final ImagePlus imp;
+	private final int nChannels;
 
-	public SpotAnalyzerProvider(final ImagePlus imp)
+	public SpotAnalyzerProvider( final int nChannels )
 	{
 		super( SpotAnalyzerFactory.class );
-		this.imp = imp;
+		this.nChannels = nChannels;
 	}
 
 	@Override
@@ -25,13 +24,13 @@ public class SpotAnalyzerProvider extends AbstractProvider< SpotAnalyzerFactory 
 		if ( factory == null )
 			return null;
 
-		factory.setSource( imp );
+		factory.setNChannels( nChannels );
 		return factory;
 	}
 
 	public static void main( final String[] args )
 	{
-		final SpotAnalyzerProvider provider = new SpotAnalyzerProvider( null );
+		final SpotAnalyzerProvider provider = new SpotAnalyzerProvider( 2 );
 		System.out.println( provider.echo() );
 	}
 }
