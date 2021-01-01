@@ -2,7 +2,6 @@ package fiji.plugin.trackmate.features.spot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,8 +11,6 @@ import javax.swing.ImageIcon;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Dimension;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Spot;
 import net.imagej.ImgPlus;
 import net.imglib2.meta.view.HyperSliceImgPlus;
 import net.imglib2.type.NativeType;
@@ -61,12 +58,13 @@ public class SpotIntensityMultiCAnalyzerFactory< T extends RealType< T > & Nativ
 		this.nChannels = nChannels;
 	}
 
+
 	@Override
-	public SpotAnalyzer< T > getAnalyzer( final Model model, final ImgPlus< T > img, final int frame, final int channel )
+	public SpotAnalyzer< T > getAnalyzer( final ImgPlus< T > img, final int frame, final int channel )
 	{
 		final ImgPlus< T > imgT = HyperSliceImgPlus.fixTimeAxis( img, frame );
-		final Iterator< Spot > spots = model.getSpots().iterator( frame, false );
-		return new SpotIntensityMultiCAnalyzer< >( imgT, spots, nChannels );
+		final ImgPlus< T > imgTC = HyperSliceImgPlus.fixChannelAxis( imgT, channel );
+		return new SpotIntensityMultiCAnalyzer<>( imgTC, channel );
 	}
 
 	static final String makeFeatureKey( final String feature, final int c )

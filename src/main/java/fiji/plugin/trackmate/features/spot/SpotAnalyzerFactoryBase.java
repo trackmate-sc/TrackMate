@@ -1,6 +1,5 @@
 package fiji.plugin.trackmate.features.spot;
 
-import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.features.FeatureAnalyzer;
 import net.imagej.ImgPlus;
 import net.imglib2.type.NativeType;
@@ -18,20 +17,23 @@ public interface SpotAnalyzerFactoryBase< T extends RealType< T > & NativeType< 
 
 	/**
 	 * Returns a configured {@link SpotAnalyzer} ready to operate on the given
-	 * frame (0-based) and given channel (0-based). The target frame image and
-	 * the target spots are retrieved from the {@link Model} thanks to the given
-	 * frame and channel index.
+	 * frame (0-based) and given channel (0-based).
+	 * <p>
+	 * This method will be called once per time-point <b>and per channel</b> of
+	 * the source image. If a feature is defined independently of channels,
+	 * implementation must care to skip generating several identical features
+	 * when called on several channels.
 	 *
-	 * @param model
-	 *            the {@link Model} to take the spots from.
 	 * @param img
-	 *            the 5D (X, Y, Z, C, T) source image.
+	 *            the 5D (X, Y, Z, C, T) source image. It is the responsibility
+	 *            of the implementation of this method to reslice it for the
+	 *            specified time-point and channel.
 	 * @param frame
 	 *            the target frame to operate on.
 	 * @param channel
 	 *            the target channel to operate on.
 	 */
-	public SpotAnalyzer< T > getAnalyzer( final Model model, ImgPlus< T > img, int frame, int channel );
+	public SpotAnalyzer< T > getAnalyzer( ImgPlus< T > img, int frame, int channel );
 
 	/**
 	 * Sets the number if channels in the source image that will be analyzed by

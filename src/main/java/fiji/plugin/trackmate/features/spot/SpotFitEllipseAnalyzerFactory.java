@@ -2,7 +2,6 @@ package fiji.plugin.trackmate.features.spot;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -11,20 +10,16 @@ import javax.swing.ImageIcon;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Dimension;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.detection.DetectionUtils;
 import net.imagej.ImgPlus;
-import net.imglib2.meta.view.HyperSliceImgPlus;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 
-@SuppressWarnings( "deprecation" )
 @Plugin( type = SpotMorphologyAnalyzerFactory.class )
 public class SpotFitEllipseAnalyzerFactory< T extends RealType< T > & NativeType< T > > implements SpotMorphologyAnalyzerFactory< T >
 {
 
 	public static final String KEY = "Spot fit 2D ellipse";
-	
 	
 	public static final String X0 = "ELLIPSE_X0";
 	public static final String Y0 = "ELLIPSE_Y0";
@@ -70,12 +65,15 @@ public class SpotFitEllipseAnalyzerFactory< T extends RealType< T > & NativeType
 		FEATURE_ISINTS.put( ASPECTRATIO, Boolean.FALSE );
 	}
 
+
 	@Override
-	public SpotFitEllipseAnalyzer< T > getAnalyzer( final Model model, final ImgPlus< T > img, final int frame, final int channel )
+	public SpotAnalyzer< T > getAnalyzer( final ImgPlus< T > img, final int frame, final int channel )
 	{
-		final ImgPlus< T > imgT = HyperSliceImgPlus.fixTimeAxis( img, frame );
-		final Iterator< Spot > spots = model.getSpots().iterator( frame, false );
-		return new SpotFitEllipseAnalyzer<>( imgT, spots );
+		// Don't run more than once.
+		if ( channel != 0 )
+			return SpotAnalyzer.dummyAnalyzer();
+
+		return new SpotFitEllipseAnalyzer<>( DetectionUtils.is2D( img ) );
 	}
 
 	@Override

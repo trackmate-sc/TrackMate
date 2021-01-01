@@ -4,7 +4,6 @@ import static fiji.plugin.trackmate.features.spot.SpotIntensityMultiCAnalyzerFac
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,8 +14,6 @@ import org.scijava.Priority;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Dimension;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Spot;
 import net.imagej.ImgPlus;
 import net.imglib2.meta.view.HyperSliceImgPlus;
 import net.imglib2.type.NativeType;
@@ -58,12 +55,13 @@ public class SpotContrastAndSNRAnalyzerFactory< T extends RealType< T > & Native
 	 * METHODS
 	 */
 
+
 	@Override
-	public SpotContrastAndSNRAnalyzer< T > getAnalyzer( final Model model, final ImgPlus< T > img, final int frame, final int channel )
+	public SpotAnalyzer< T > getAnalyzer( final ImgPlus< T > img, final int frame, final int channel )
 	{
 		final ImgPlus< T > imgT = HyperSliceImgPlus.fixTimeAxis( img, frame );
-		final Iterator< Spot > spots = model.getSpots().iterator( frame, false );
-		return new SpotContrastAndSNRAnalyzer<>( imgT, spots, nChannels );
+		final ImgPlus< T > imgTC = HyperSliceImgPlus.fixChannelAxis( imgT, channel );
+		return new SpotContrastAndSNRAnalyzer<>( imgTC, channel );
 	}
 
 	@Override

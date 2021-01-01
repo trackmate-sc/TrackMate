@@ -1,35 +1,35 @@
 package fiji.plugin.trackmate.features;
 
-import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.features.spot.IndependentSpotFeatureAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactoryBase;
 import fiji.plugin.trackmate.util.TMUtils;
 import net.imagej.ImgPlus;
+import net.imglib2.algorithm.MultiThreaded;
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
-import net.imglib2.multithreading.SimpleMultiThreading;
 
 /**
  * A class dedicated to centralizing the calculation of the numerical features
  * of spots, through {@link SpotAnalyzer}s.
  * 
- * @author Jean-Yves Tinevez - 2013
+ * @author Jean-Yves Tinevez - 2013. Revised December 2020.
  * 
  */
-@SuppressWarnings( "deprecation" )
 public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 {
 
@@ -76,7 +76,6 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 	@Override
 	public boolean process()
 	{
-		final long start = System.currentTimeMillis();
 
 		// Declare what you do.
 		for ( final SpotAnalyzerFactoryBase< ? > factory : settings.getSpotAnalyzerFactories() )
@@ -91,16 +90,13 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 
 		// Do it.
 		computeSpotFeaturesAgent( model.getSpots(), settings.getSpotAnalyzerFactories(), true );
-
-		final long end = System.currentTimeMillis();
-		processingTime = end - start;
 		return true;
 	}
 
 	/**
 	 * Calculates all the spot features configured in the {@link Settings}
-	 * object for the specified spot collection. Features are calculated for
-	 * each spot, using their location, and the raw image.
+	 * object, but only for the spots in the specified collection. Features are
+	 * calculated for each spot, using their location, and the raw image.
 	 */
 	public void computeSpotFeatures( final SpotCollection toCompute, final boolean doLogIt )
 	{
@@ -113,86 +109,99 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 	 * {@link SpotAnalyzer}s, for the given {@link SpotCollection}.
 	 * 
 	 * @param toCompute
+	 *            the spots to compute.
+	 * @param analyzerFactories
+	 *            the analyzer factories to use for computation.
+	 * @param doLogIt
+	 *            whether we should report progress to the user.
 	 */
 	private void computeSpotFeaturesAgent( final SpotCollection toCompute, final List< SpotAnalyzerFactoryBase< ? > > analyzerFactories, final boolean doLogIt )
 	{
-
+		final long start = System.currentTimeMillis();
 		final Logger logger = doLogIt ? model.getLogger() : Logger.VOID_LOGGER;
 
 		// Can't compute any spot feature without an image to compute on.
 		if ( settings.imp == null )
 			return;
 
+		@SuppressWarnings( "rawtypes" )
+		final ImgPlus img = TMUtils.rawWraps( settings.imp );
+
 		// Do it.
 		final List< Integer > frameSet = new ArrayList<>( toCompute.keySet() );
 		final int numFrames = frameSet.size();
 
-		final AtomicInteger ai = new AtomicInteger( 0 );
-		final AtomicInteger progress = new AtomicInteger( 0 );
-		final Thread[] threads = SimpleMultiThreading.newThreads( numThreads );
+		/*
+		 * Fine tune multi-threading: If we have 10 threads and 15 frames to
+		 * process, we process 10 frames at once, and allocate 1 thread per
+		 * frame. But if we have 10 threads and 2 frames, we process the 2
+		 * frames at once, and allocate 5 threads per frame if we can.
+		 */
+		final int nSimultaneousFrames = Math.max( 1, Math.min( numThreads, numFrames ) );
+		final int threadsPerFrame = Math.max( 1, numThreads / nSimultaneousFrames );
 
-		int tc = 0;
-		if ( settings != null && settings.detectorSettings != null )
+		if ( doLogIt )
 		{
-			// Try to extract it from detector settings target channel
-			final Map< String, Object > ds = settings.detectorSettings;
-			final Object obj = ds.get( KEY_TARGET_CHANNEL );
-			if ( null != obj && obj instanceof Integer )
-				tc = ( ( Integer ) obj ) - 1;
-
+			logger.setStatus( "Calculating " + toCompute.getNSpots( false ) + " spots features..." );
+			logger.log( "Computing spot features "
+					+ ( ( nSimultaneousFrames > 1 ) ? ( nSimultaneousFrames + " frames" ) : "1 frame" )
+					+ " simultaneously and allocates "
+					+ ( ( threadsPerFrame > 1 ) ? ( threadsPerFrame + " threads" ) : "1 thread" )
+					+ " per frame.\n" );
 		}
-		final int targetChannel = tc;
 
-		@SuppressWarnings( "rawtypes" )
-		final ImgPlus img = TMUtils.rawWraps( settings.imp );
-
-		// Prepare the thread array
-		for ( int ithread = 0; ithread < threads.length; ithread++ )
+		final AtomicInteger progress = new AtomicInteger( 0 );
+		final List< Callable< Void > > tasks = new ArrayList<>( numFrames );
+		for ( int iFrame = 0; iFrame < numFrames; iFrame++ )
 		{
-
-			threads[ ithread ] = new Thread( "TrackMate spot feature calculating thread " + ( 1 + ithread ) + "/" + threads.length )
+			final int index = iFrame;
+			// Create one task per frame.
+			final Callable< Void > frameTask = new Callable< Void >()
 			{
-
 				@Override
-				public void run()
+				public Void call() throws Exception
 				{
+					final int frame = frameSet.get( index );
 
-					for ( int index = ai.getAndIncrement(); index < numFrames; index = ai.getAndIncrement() )
+					for ( int channel = 0; channel < settings.imp.getNChannels(); channel++ )
 					{
-
-						final int frame = frameSet.get( index );
 						for ( final SpotAnalyzerFactoryBase< ? > factory : analyzerFactories )
 						{
 							@SuppressWarnings( "unchecked" )
-							final SpotAnalyzer< ? > analyzer = factory.getAnalyzer( model, img, frame, targetChannel );
-							if ( analyzer instanceof IndependentSpotFeatureAnalyzer )
-							{
-								// Independent: we can process only the spot to update.
-								@SuppressWarnings( "rawtypes" )
-								final IndependentSpotFeatureAnalyzer analyzer2 = ( IndependentSpotFeatureAnalyzer ) analyzer;
-								for ( final Spot spot : toCompute.iterable( frame, false ) )
-									analyzer2.process( spot );
-							}
-							else
-							{
-								// Process all spots of the frame at once.
-								analyzer.process();
-							}
+							final SpotAnalyzer< ? > analyzer = factory.getAnalyzer( img, frame, channel );
+							// Fine-tune multithreading if we can.
+							if ( analyzer instanceof MultiThreaded )
+								( ( MultiThreaded ) analyzer ).setNumThreads( threadsPerFrame );
 
-						}
+							analyzer.process( toCompute.iterable( frame, false ) );
 
-						logger.setProgress( progress.incrementAndGet() / ( float ) numFrames );
-					} // Finished looping over frames
+						} // Finished looping over analyzers
+					} // Finished looping over channels
+
+					logger.setProgress( progress.incrementAndGet() / ( double ) numFrames );
+					return null;
 				}
 			};
+			tasks.add( frameTask );
 		}
-		logger.setStatus( "Calculating " + toCompute.getNSpots( false ) + " spots features..." );
-		logger.setProgress( 0 );
 
-		SimpleMultiThreading.startAndJoin( threads );
+		final ExecutorService executorService = Executors.newFixedThreadPool( nSimultaneousFrames );
+		List< Future< Void > > futures;
+		try
+		{
+			futures = executorService.invokeAll( tasks );
+			for ( final Future< Void > future : futures )
+				future.get();
+		}
+		catch ( InterruptedException | ExecutionException e )
+		{
+			e.printStackTrace();
+		}
 
+		executorService.shutdown();
 		logger.setProgress( 1 );
 		logger.setStatus( "" );
+		final long end = System.currentTimeMillis();
+		processingTime = end - start;
 	}
-
 }

@@ -1,16 +1,44 @@
 package fiji.plugin.trackmate.features.spot;
 
-import net.imglib2.algorithm.Algorithm;
-import net.imglib2.algorithm.Benchmark;
+import fiji.plugin.trackmate.Spot;
+import net.imglib2.type.NativeType;
+import net.imglib2.type.numeric.RealType;
 
 /**
- * Interface for a class that can compute feature on a collection of spots.
- * <p>
- * The spot collection to operate on is given at construction by the
- * {@link SpotAnalyzerFactory} that instantiated and configured this instance.
- * Calling the {@link #process()} method result in updating the feature map of
- * each spot directly, calling
- * {@link fiji.plugin.trackmate.Spot#putFeature(String, Double)}.
+ * Interface for a class that can compute feature of spots.
  */
-public interface SpotAnalyzer< T > extends Algorithm, Benchmark
-{}
+public interface SpotAnalyzer< T >
+{
+
+	/**
+	 * Scores a collection spots for the specified channel. The results must be
+	 * stored in the {@link Spot} instance.
+	 *
+	 * @param spots
+	 *            an iterable over spots whose features are to be calculated.
+	 */
+	public void process( final Iterable< Spot > spots );
+
+	/**
+	 * Returns a {@link SpotAnalyzer} that does nothing.
+	 * 
+	 * @param <T>
+	 *            the type of the dummy spot analyzer.
+	 * @return a dummy spot analyzer.
+	 */
+	@SuppressWarnings( "unchecked" )
+	public static < T extends RealType< T > & NativeType< T > > SpotAnalyzer< T > dummyAnalyzer()
+	{
+		return ( SpotAnalyzer< T > ) DUMMY_ANALYZER;
+	}
+
+	static final SpotAnalyzer< ? > DUMMY_ANALYZER = new DummySpotAnalyzer<>();
+
+	static class DummySpotAnalyzer< T extends RealType< T > & NativeType< T > > implements SpotAnalyzer< T >
+	{
+
+		@Override
+		public void process( final Iterable< Spot > spots )
+		{}
+	}
+}

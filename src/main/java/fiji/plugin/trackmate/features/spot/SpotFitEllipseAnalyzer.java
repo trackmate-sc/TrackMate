@@ -1,26 +1,21 @@
 package fiji.plugin.trackmate.features.spot;
 
-import java.util.Iterator;
-
 import Jama.EigenvalueDecomposition;
 import Jama.Matrix;
 import Jama.SingularValueDecomposition;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotRoi;
-import fiji.plugin.trackmate.detection.DetectionUtils;
-import net.imagej.ImgPlus;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Util;
 
-public class SpotFitEllipseAnalyzer< T extends RealType< T > > extends IndependentSpotFeatureAnalyzer< T >
+public class SpotFitEllipseAnalyzer< T extends RealType< T > > extends AbstractSpotFeatureAnalyzer< T >
 {
 
 	private final boolean is2D;
 
-	public SpotFitEllipseAnalyzer( final ImgPlus< T > img, final Iterator< Spot > spots )
+	public SpotFitEllipseAnalyzer( final boolean is2D )
 	{
-		super( img, spots );
-		this.is2D = DetectionUtils.is2D( img );
+		this.is2D = is2D;
 	}
 
 	@Override

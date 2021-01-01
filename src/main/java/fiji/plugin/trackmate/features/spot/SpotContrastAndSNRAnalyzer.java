@@ -7,8 +7,6 @@ import static fiji.plugin.trackmate.features.spot.SpotIntensityMultiCAnalyzerFac
 import static fiji.plugin.trackmate.features.spot.SpotIntensityMultiCAnalyzerFactory.TOTAL_INTENSITY;
 import static fiji.plugin.trackmate.features.spot.SpotIntensityMultiCAnalyzerFactory.makeFeatureKey;
 
-import java.util.Iterator;
-
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.detection.DetectionUtils;
@@ -16,7 +14,6 @@ import fiji.plugin.trackmate.util.SpotNeighborhood;
 import fiji.plugin.trackmate.util.SpotNeighborhoodCursor;
 import net.imagej.ImgPlus;
 import net.imglib2.IterableInterval;
-import net.imglib2.meta.view.HyperSliceImgPlus;
 import net.imglib2.type.numeric.RealType;
 
 /**
@@ -37,22 +34,32 @@ import net.imglib2.type.numeric.RealType;
  * 
  * @author Jean-Yves Tinevez, 2011 - 2012. Revised December 2020.
  */
-@SuppressWarnings( "deprecation" )
-public class SpotContrastAndSNRAnalyzer< T extends RealType< T > > extends IndependentSpotFeatureAnalyzer< T >
+public class SpotContrastAndSNRAnalyzer< T extends RealType< T > > extends AbstractSpotFeatureAnalyzer< T >
 {
 
 	protected static final double RAD_PERCENTAGE = 1f;
 
-	private final int nChannels;
+	private final int channel;
+
+	private final ImgPlus< T > img;
 
 	/*
 	 * CONSTRUCTOR
 	 */
 
-	public SpotContrastAndSNRAnalyzer( final ImgPlus< T > img, final Iterator< Spot > spots, final int nChannels )
+	/**
+	 * Instantiates an analyzer for contrast and SNR.
+	 * 
+	 * @param img
+	 *            the 2D or 3D image of the desired time-point and channel to
+	 *            operate on,
+	 * @param channel
+	 *            the channel to operate on.
+	 */
+	public SpotContrastAndSNRAnalyzer( final ImgPlus< T > img, final int channel )
 	{
-		super( img, spots );
-		this.nChannels = nChannels;
+		this.img = img;
+		this.channel = channel;
 	}
 
 	/*
@@ -62,29 +69,8 @@ public class SpotContrastAndSNRAnalyzer< T extends RealType< T > > extends Indep
 	@Override
 	public final void process( final Spot spot )
 	{
-		for ( int c = 0; c < nChannels; c++ )
-		{
-			final double[] vals = getContrastAndSNR( spot, c );
-			final double contrast = vals[ 0 ];
-			final double snr = vals[ 1 ];
-
-			spot.putFeature( makeFeatureKey( CONTRAST, c ), contrast );
-			spot.putFeature( makeFeatureKey( SNR, c ), snr );
-		}
-	}
-
-	/**
-	 * Compute the contrast for the given spot.
-	 * 
-	 * @param c
-	 *            the channel to compute on.
-	 */
-	private final double[] getContrastAndSNR( final Spot spot, final int c )
-	{
-		final ImgPlus< T > imgC = HyperSliceImgPlus.fixChannelAxis( img, c );
-
-		final String meanFeature = makeFeatureKey( MEAN_INTENSITY, c );
-		final String stdFeature = makeFeatureKey( STD_INTENSITY, c );
+		final String meanFeature = makeFeatureKey( MEAN_INTENSITY, channel );
+		final String stdFeature = makeFeatureKey( STD_INTENSITY, channel );
 		final double meanIn = spot.getFeature( meanFeature );
 		final double stdIn = spot.getFeature( stdFeature );
 		final double radius = spot.getFeature( Spot.RADIUS );
@@ -93,17 +79,17 @@ public class SpotContrastAndSNRAnalyzer< T extends RealType< T > > extends Indep
 		// Operate on ROI only if we have one and the image is 2D.
 		final double meanOut;
 		final SpotRoi roi = spot.getRoi();
-		if ( null != roi && DetectionUtils.is2D( imgC ) )
+		if ( null != roi && DetectionUtils.is2D( img ) )
 		{
 			final double alpha = outterRadius / radius;
 			final SpotRoi outterRoi = roi.copy();
 			outterRoi.scale( alpha );
-			final IterableInterval< T > neighborhood = outterRoi.sample( spot, imgC );
+			final IterableInterval< T > neighborhood = outterRoi.sample( spot, img );
 			double outterSum = 0.;
 			for ( final T t : neighborhood )
 				outterSum += t.getRealDouble();
 
-			final String sumFeature = makeFeatureKey( TOTAL_INTENSITY, c );
+			final String sumFeature = makeFeatureKey( TOTAL_INTENSITY, channel );
 			final double innterSum = spot.getFeature( sumFeature );
 			outterSum -= innterSum;
 			meanOut = outterSum / ( outterRoi.area() - roi.area() );
@@ -113,9 +99,13 @@ public class SpotContrastAndSNRAnalyzer< T extends RealType< T > > extends Indep
 			// Otherwise default to circle / sphere.
 			final Spot largeSpot = new Spot( spot );
 			largeSpot.putFeature( Spot.RADIUS, outterRadius );
-			final SpotNeighborhood< T > neighborhood = new SpotNeighborhood<>( largeSpot, imgC );
+			final SpotNeighborhood< T > neighborhood = new SpotNeighborhood<>( largeSpot, img );
 			if ( neighborhood.size() <= 1 )
-				return new double[] { Double.NaN, Double.NaN };
+			{
+				spot.putFeature( makeFeatureKey( CONTRAST, channel ), Double.NaN );
+				spot.putFeature( makeFeatureKey( SNR, channel ), Double.NaN );
+				return;
+			}
 
 			final double radius2 = radius * radius;
 			int nOut = 0; // inner number of pixels
@@ -142,6 +132,7 @@ public class SpotContrastAndSNRAnalyzer< T extends RealType< T > > extends Indep
 		// Compute snr
 		final double snr = ( meanIn - meanOut ) / stdIn;
 
-		return new double[] { contrast, snr };
+		spot.putFeature( makeFeatureKey( CONTRAST, channel ), contrast );
+		spot.putFeature( makeFeatureKey( SNR, channel ), snr );
 	}
 }

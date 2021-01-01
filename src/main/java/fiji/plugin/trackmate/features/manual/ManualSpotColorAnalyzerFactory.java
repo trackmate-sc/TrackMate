@@ -10,7 +10,6 @@ import javax.swing.ImageIcon;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Dimension;
-import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import net.imagej.ImgPlus;
@@ -109,34 +108,8 @@ public class ManualSpotColorAnalyzerFactory< T extends RealType< T > & NativeTyp
 	}
 
 	@Override
-	public SpotAnalyzer< T > getAnalyzer( final Model model, final ImgPlus< T > img, final int frame, final int channel )
+	public SpotAnalyzer< T > getAnalyzer( final ImgPlus< T > img, final int frame, final int channel )
 	{
-		return new SpotAnalyzer< T >()
-		{
-
-			@Override
-			public boolean checkInput()
-			{
-				return true;
-			}
-
-			@Override
-			public boolean process()
-			{
-				return true;
-			}
-
-			@Override
-			public String getErrorMessage()
-			{
-				return "";
-			}
-
-			@Override
-			public long getProcessingTime()
-			{
-				return 0l;
-			}
-		};
+		return SpotAnalyzer.dummyAnalyzer();
 	}
 }

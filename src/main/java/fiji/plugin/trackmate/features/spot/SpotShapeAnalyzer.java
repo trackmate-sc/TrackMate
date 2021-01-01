@@ -1,22 +1,17 @@
 package fiji.plugin.trackmate.features.spot;
 
-import java.util.Iterator;
-
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotRoi;
-import fiji.plugin.trackmate.detection.DetectionUtils;
-import net.imagej.ImgPlus;
 import net.imglib2.type.numeric.RealType;
 
-public class SpotShapeAnalyzer< T extends RealType< T > > extends IndependentSpotFeatureAnalyzer< T >
+public class SpotShapeAnalyzer< T extends RealType< T > > extends AbstractSpotFeatureAnalyzer< T >
 {
 
 	private final boolean is2D;
 
-	public SpotShapeAnalyzer( final ImgPlus< T > img, final Iterator< Spot > spots )
+	public SpotShapeAnalyzer( final boolean is2D )
 	{
-		super( img, spots );
-		this.is2D = DetectionUtils.is2D( img );
+		this.is2D = is2D;
 	}
 
 	@Override
