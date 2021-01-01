@@ -328,7 +328,7 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 	 * @return the feature value, as a {@link Double}. Will be <code>null</code>
 	 *         if it has not been set.
 	 */
-	public final Double getFeature( final String feature )
+	public Double getFeature( final String feature )
 	{
 		return features.get( feature );
 	}
@@ -342,7 +342,7 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 	 *            the value to store, as a {@link Double}. Using
 	 *            <code>null</code> will have unpredicted outcomes.
 	 */
-	public final void putFeature( final String feature, final Double value )
+	public void putFeature( final String feature, final Double value )
 	{
 		features.put( feature, value );
 	}
