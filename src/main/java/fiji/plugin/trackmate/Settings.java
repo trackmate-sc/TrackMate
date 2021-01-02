@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.detection.DetectorKeys;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
@@ -17,6 +18,7 @@ import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactoryBase;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
 import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
+import fiji.plugin.trackmate.providers.SpotMorphologyAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import fiji.plugin.trackmate.tracking.sparselap.SimpleSparseLAPTrackerFactory;
@@ -124,21 +126,21 @@ public class Settings
 	 *
 	 * @see fiji.plugin.trackmate.detection.DetectorKeys
 	 */
-	public Map< String, Object > detectorSettings = new HashMap< >();
+	public Map< String, Object > detectorSettings = new HashMap<>();
 
 	/**
 	 * Settings map for {@link fiji.plugin.trackmate.tracking.SpotTracker}.
 	 *
 	 * @see fiji.plugin.trackmate.tracking.TrackerKeys
 	 */
-	public Map< String, Object > trackerSettings = new HashMap< >();
+	public Map< String, Object > trackerSettings = new HashMap<>();
 
 	// Filters
 
 	/**
 	 * The feature filter list.
 	 */
-	protected List< FeatureFilter > spotFilters = new ArrayList< >();
+	protected List< FeatureFilter > spotFilters = new ArrayList<>();
 
 	/**
 	 * The initial quality filter value that is used to clip spots of low
@@ -147,7 +149,7 @@ public class Settings
 	public Double initialSpotFilterValue = Double.valueOf( 0 );
 
 	/** The track filter list that is used to prune track and spots. */
-	protected List< FeatureFilter > trackFilters = new ArrayList< >();
+	protected List< FeatureFilter > trackFilters = new ArrayList<>();
 
 	protected String errorMessage;
 
@@ -167,7 +169,7 @@ public class Settings
 	 * They are ordered in a {@link List} in case some analyzers requires the
 	 * results of another analyzer to proceed.
 	 */
-	protected List< EdgeAnalyzer > edgeAnalyzers = new ArrayList< >();
+	protected List< EdgeAnalyzer > edgeAnalyzers = new ArrayList<>();
 
 	// Track features
 
@@ -176,7 +178,7 @@ public class Settings
 	 * They are ordered in a {@link List} in case some analyzers requires the
 	 * results of another analyzer to proceed.
 	 */
-	protected List< TrackAnalyzer > trackAnalyzers = new ArrayList< >();
+	protected List< TrackAnalyzer > trackAnalyzers = new ArrayList<>();
 
 	/*
 	 * METHODS
@@ -187,8 +189,8 @@ public class Settings
 		// Source image
 		this.imp = imp;
 
-		if ( null == imp ) { return; // we leave field default values
-		}
+		if ( null == imp )
+			return; // we leave field default values
 
 		// File info
 		final FileInfo fileInfo = imp.getOriginalFileInfo();
@@ -208,15 +210,13 @@ public class Settings
 		this.height = imp.getHeight();
 		this.nslices = imp.getNSlices();
 		this.nframes = imp.getNFrames();
-		this.dx = ( float ) imp.getCalibration().pixelWidth;
-		this.dy = ( float ) imp.getCalibration().pixelHeight;
-		this.dz = ( float ) imp.getCalibration().pixelDepth;
-		this.dt = ( float ) imp.getCalibration().frameInterval;
+		this.dx = imp.getCalibration().pixelWidth;
+		this.dy = imp.getCalibration().pixelHeight;
+		this.dz = imp.getCalibration().pixelDepth;
+		this.dt = imp.getCalibration().frameInterval;
 
 		if ( dt == 0 )
-		{
-			dt = 1;
-		}
+			dt = 1.;
 
 		// Crop cube
 		this.zstart = 0;
@@ -238,7 +238,6 @@ public class Settings
 			this.xend = boundingRect.width + boundingRect.x;
 			this.ystart = boundingRect.y;
 			this.yend = boundingRect.height + boundingRect.y;
-
 		}
 		// The rest is left to the user
 	}
@@ -475,19 +474,24 @@ public class Settings
 	 */
 	public void addAllAnalyzers()
 	{
-		clearSpotAnalyzerFactories();
 		final SpotAnalyzerProvider spotAnalyzerProvider = new SpotAnalyzerProvider( imp == null ? 1 : imp.getNChannels() );
 		final List< String > spotAnalyzerKeys = spotAnalyzerProvider.getKeys();
 		for ( final String key : spotAnalyzerKeys )
 			addSpotAnalyzerFactory( spotAnalyzerProvider.getFactory( key ) );
 
-		clearEdgeAnalyzers();
+		if ( imp != null && DetectionUtils.is2D( imp ) )
+		{
+			final SpotMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider = new SpotMorphologyAnalyzerProvider( imp.getNChannels() );
+			final List< String > spotMorphologyAnaylyzerKeys = spotMorphologyAnalyzerProvider.getKeys();
+			for ( final String key : spotMorphologyAnaylyzerKeys )
+				addSpotAnalyzerFactory( spotMorphologyAnalyzerProvider.getFactory( key ) );
+		}
+
 		final EdgeAnalyzerProvider edgeAnalyzerProvider = new EdgeAnalyzerProvider();
 		final List< String > edgeAnalyzerKeys = edgeAnalyzerProvider.getKeys();
 		for ( final String key : edgeAnalyzerKeys )
 			addEdgeAnalyzer( edgeAnalyzerProvider.getFactory( key ) );
 
-		clearTrackAnalyzers();
 		final TrackAnalyzerProvider trackAnalyzerProvider = new TrackAnalyzerProvider();
 		final List< String > trackAnalyzerKeys = trackAnalyzerProvider.getKeys();
 		for ( final String key : trackAnalyzerKeys )
@@ -508,7 +512,6 @@ public class Settings
 		this.trackerSettings = trackerFactory.getDefaultSettings();
 		this.initialSpotFilterValue = 20.;
 	}
-
 
 	/*
 	 * SPOT FEATURES
@@ -532,7 +535,7 @@ public class Settings
 	 */
 	public List< SpotAnalyzerFactoryBase< ? > > getSpotAnalyzerFactories()
 	{
-		return new ArrayList< >( spotAnalyzerFactories );
+		return new ArrayList<>( spotAnalyzerFactories );
 	}
 
 	/**
@@ -545,6 +548,8 @@ public class Settings
 	 */
 	public void addSpotAnalyzerFactory( final SpotAnalyzerFactoryBase< ? > spotAnalyzer )
 	{
+		if ( contains( spotAnalyzer ) )
+			return;
 		spotAnalyzerFactories.add( spotAnalyzer );
 	}
 
@@ -560,6 +565,8 @@ public class Settings
 	 */
 	public void addSpotAnalyzerFactory( final int index, final SpotAnalyzerFactory< ? > spotAnalyzer )
 	{
+		if ( contains( spotAnalyzer ) )
+			return;
 		spotAnalyzerFactories.add( index, spotAnalyzer );
 	}
 
@@ -575,6 +582,15 @@ public class Settings
 	public boolean removeSpotAnalyzerFactory( final SpotAnalyzerFactory< ? > spotAnalyzer )
 	{
 		return spotAnalyzerFactories.remove( spotAnalyzer );
+	}
+
+	private boolean contains( final SpotAnalyzerFactoryBase< ? > spotAnalyzer )
+	{
+		for ( final SpotAnalyzerFactoryBase< ? > saf : spotAnalyzerFactories )
+			if ( saf.getKey().equals( spotAnalyzer.getKey() ) )
+				return true;
+
+		return false;
 	}
 
 	/*
@@ -599,7 +615,7 @@ public class Settings
 	 */
 	public List< EdgeAnalyzer > getEdgeAnalyzers()
 	{
-		return new ArrayList< >( edgeAnalyzers );
+		return new ArrayList<>( edgeAnalyzers );
 	}
 
 	/**
@@ -611,6 +627,8 @@ public class Settings
 	 */
 	public void addEdgeAnalyzer( final EdgeAnalyzer edgeAnalyzer )
 	{
+		if ( contains( edgeAnalyzer ) )
+			return;
 		edgeAnalyzers.add( edgeAnalyzer );
 	}
 
@@ -627,6 +645,8 @@ public class Settings
 	 */
 	public void addEdgeAnalyzer( final int index, final EdgeAnalyzer edgeAnalyzer )
 	{
+		if ( contains( edgeAnalyzer ) )
+			return;
 		edgeAnalyzers.add( index, edgeAnalyzer );
 	}
 
@@ -641,6 +661,15 @@ public class Settings
 	public boolean removeEdgeAnalyzer( final EdgeAnalyzer edgeAnalyzer )
 	{
 		return edgeAnalyzers.remove( edgeAnalyzer );
+	}
+
+	private boolean contains( final EdgeAnalyzer edgeAnalyzer )
+	{
+		for ( final EdgeAnalyzer ea : edgeAnalyzers )
+			if ( ea.getKey().equals( edgeAnalyzer.getKey() ) )
+				return true;
+
+		return false;
 	}
 
 	/*
@@ -665,7 +694,7 @@ public class Settings
 	 */
 	public List< TrackAnalyzer > getTrackAnalyzers()
 	{
-		return new ArrayList< >( trackAnalyzers );
+		return new ArrayList<>( trackAnalyzers );
 	}
 
 	/**
@@ -677,6 +706,8 @@ public class Settings
 	 */
 	public void addTrackAnalyzer( final TrackAnalyzer trackAnalyzer )
 	{
+		if ( contains( trackAnalyzer ) )
+			return;
 		trackAnalyzers.add( trackAnalyzer );
 	}
 
@@ -693,6 +724,8 @@ public class Settings
 	 */
 	public void addTrackAnalyzer( final int index, final TrackAnalyzer trackAnalyzer )
 	{
+		if ( contains( trackAnalyzer ) )
+			return;
 		trackAnalyzers.add( index, trackAnalyzer );
 	}
 
@@ -708,6 +741,15 @@ public class Settings
 	public boolean removeTrackAnalyzer( final TrackAnalyzer trackAnalyzer )
 	{
 		return trackAnalyzers.remove( trackAnalyzer );
+	}
+
+	private boolean contains( final TrackAnalyzer trackAnalyzer )
+	{
+		for ( final TrackAnalyzer ta : trackAnalyzers )
+			if ( ta.getKey().equals( trackAnalyzer.getKey() ) )
+				return true;
+
+		return false;
 	}
 
 	/*
