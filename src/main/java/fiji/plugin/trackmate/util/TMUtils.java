@@ -22,12 +22,6 @@ import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
-import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
-import fiji.plugin.trackmate.features.track.TrackAnalyzer;
-import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
-import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
-import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
@@ -681,43 +675,6 @@ public class TMUtils
 	/** Obtains the SciJava {@link Context} in use by ImageJ. */
 	public static Context getContext() {
 		return ( Context ) IJ.runPlugIn( "org.scijava.Context", "" );
-	}
-
-	/**
-	 * Declare all feature analyzers (spot, edge and track analyzers) that can
-	 * be found at runtime to the specified settings.
-	 *
-	 * @param settings
-	 *            the {@link Settings} object to declare the analyzers in.
-	 */
-	public static void declareAllFeatures( final Settings settings )
-	{
-		settings.clearSpotAnalyzerFactories();
-		final SpotAnalyzerProvider spotAnalyzerProvider = new SpotAnalyzerProvider( settings.imp.getNChannels() );
-		final List< String > spotAnalyzerKeys = spotAnalyzerProvider.getKeys();
-		for ( final String key : spotAnalyzerKeys )
-		{
-			final SpotAnalyzerFactory< ? > spotFeatureAnalyzer = spotAnalyzerProvider.getFactory( key );
-			settings.addSpotAnalyzerFactory( spotFeatureAnalyzer );
-		}
-
-		settings.clearEdgeAnalyzers();
-		final EdgeAnalyzerProvider edgeAnalyzerProvider = new EdgeAnalyzerProvider();
-		final List< String > edgeAnalyzerKeys = edgeAnalyzerProvider.getKeys();
-		for ( final String key : edgeAnalyzerKeys )
-		{
-			final EdgeAnalyzer edgeAnalyzer = edgeAnalyzerProvider.getFactory( key );
-			settings.addEdgeAnalyzer( edgeAnalyzer );
-		}
-
-		settings.clearTrackAnalyzers();
-		final TrackAnalyzerProvider trackAnalyzerProvider = new TrackAnalyzerProvider();
-		final List< String > trackAnalyzerKeys = trackAnalyzerProvider.getKeys();
-		for ( final String key : trackAnalyzerKeys )
-		{
-			final TrackAnalyzer trackAnalyzer = trackAnalyzerProvider.getFactory( key );
-			settings.addTrackAnalyzer( trackAnalyzer );
-		}
 	}
 
 	/**
