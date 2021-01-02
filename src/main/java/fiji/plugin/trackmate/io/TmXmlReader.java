@@ -455,6 +455,15 @@ public class TmXmlReader
 		final Settings settings = new Settings();
 		settings.imp = imp;
 
+		/*
+		 * Backward compatibility: for now we add all the analyzers we know of
+		 * at runtime. This kind of kills the need to read the analyzers list
+		 * specified in the TrackMate file, but this gives a fully working
+		 * application with the file loaded, and that can be saved without
+		 * issues.
+		 */
+		settings.addAllAnalyzers();
+
 		// Base
 		getBaseSettings( settingsElement, settings );
 
