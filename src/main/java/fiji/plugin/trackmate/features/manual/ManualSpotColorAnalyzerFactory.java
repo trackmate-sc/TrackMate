@@ -22,7 +22,7 @@ public class ManualSpotColorAnalyzerFactory< T extends RealType< T > & NativeTyp
 
 	public static final String FEATURE = "MANUAL_SPOT_COLOR";
 
-	public static final String KEY = "MANUAL_SPOT_COLOR_ANALYZER";
+	public static final String KEY = "Manual spot color";
 
 	static final List< String > FEATURES = new ArrayList<>( 1 );
 
@@ -36,7 +36,7 @@ public class ManualSpotColorAnalyzerFactory< T extends RealType< T > & NativeTyp
 
 	static final String INFO_TEXT = "<html>A dummy analyzer for the feature that stores the color manually assigned to each spot.</html>";
 
-	static final String NAME = "Manual spot color analyzer";
+	static final String NAME = KEY;
 
 	static
 	{

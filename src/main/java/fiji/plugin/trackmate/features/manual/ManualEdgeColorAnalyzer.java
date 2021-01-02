@@ -21,7 +21,7 @@ public class ManualEdgeColorAnalyzer implements EdgeAnalyzer
 
 	public static final String FEATURE = "MANUAL_EGE_COLOR";
 
-	public static final String KEY = "MANUAL_EDGE_COLOR_ANALYZER";
+	public static final String KEY = "Manual edge color";
 
 	static final List< String > FEATURES = new ArrayList<>( 1 );
 
@@ -35,7 +35,7 @@ public class ManualEdgeColorAnalyzer implements EdgeAnalyzer
 
 	static final String INFO_TEXT = "<html>A dummy analyzer for the feature that stores the color manually assigned to each edge.</html>";
 
-	static final String NAME = "Manual edge color analyzer";
+	static final String NAME = KEY;
 
 	static
 	{
