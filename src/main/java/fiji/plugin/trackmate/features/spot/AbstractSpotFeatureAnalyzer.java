@@ -42,7 +42,14 @@ public abstract class AbstractSpotFeatureAnalyzer< T extends RealType< T > > imp
 				@Override
 				public Void call() throws Exception
 				{
-					process( spot );
+					try
+					{
+						process( spot );
+					}
+					catch ( final Exception e )
+					{
+						e.printStackTrace();
+					}
 					return null;
 				}
 			};
