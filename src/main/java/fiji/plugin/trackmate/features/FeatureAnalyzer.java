@@ -1,10 +1,10 @@
 package fiji.plugin.trackmate.features;
 
-import fiji.plugin.trackmate.Dimension;
-import fiji.plugin.trackmate.TrackMateModule;
-
 import java.util.List;
 import java.util.Map;
+
+import fiji.plugin.trackmate.Dimension;
+import fiji.plugin.trackmate.TrackMateModule;
 
 public interface FeatureAnalyzer extends TrackMateModule
 {
@@ -52,5 +52,4 @@ public interface FeatureAnalyzer extends TrackMateModule
 	 *         manual feature.
 	 */
 	public boolean isManualFeature();
-
 }

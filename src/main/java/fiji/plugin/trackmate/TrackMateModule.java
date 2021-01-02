@@ -94,5 +94,4 @@ public interface TrackMateModule extends SciJavaPlugin
 	{
 		return false;
 	}
-
 }
