@@ -359,6 +359,7 @@ public class FilterPanel extends javax.swing.JPanel
 		{
 			final int nBins = TMUtils.getNBins( values, 8, 100 );
 			dataset = new LogHistogramDataset();
+
 			if ( nBins > 1 )
 				dataset.addSeries( DATA_SERIES_NAME, values, nBins );
 		}

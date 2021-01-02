@@ -129,7 +129,7 @@ public class FeatureUtils
 	}
 
 	/**
-	 * Can contains {@link Double#NaN} for missing or undefined values.
+	 * Missing or undefined values are not included.
 	 *
 	 * @param featureKey
 	 * @param target
@@ -159,7 +159,8 @@ public class FeatureUtils
 				for ( final DefaultWeightedEdge edge : model.getTrackModel().trackEdges( trackID ) )
 				{
 					final Double ef = fm.getEdgeFeature( edge, featureKey );
-					val.addValue( ef == null ? Double.NaN : ef.doubleValue() );
+					if ( ef != null && !ef.isNaN() )
+						val.add( ef.doubleValue() );
 				}
 			}
 			return val.copyArray();
@@ -171,7 +172,8 @@ public class FeatureUtils
 			for ( final Spot spot : model.getSpots().iterable( visibleOnly ) )
 			{
 				final Double sf = spot.getFeature( featureKey );
-				val.addValue( sf == null ? Double.NaN : sf.doubleValue() );
+				if ( sf != null && !sf.isNaN() )
+					val.add( sf.doubleValue() );
 			}
 			return val.copyArray();
 		}
@@ -181,7 +183,8 @@ public class FeatureUtils
 			for ( final Integer trackID : model.getTrackModel().trackIDs( visibleOnly ) )
 			{
 				final Double tf = fm.getTrackFeature( trackID, featureKey );
-				val.addValue( tf == null ? Double.NaN : tf.doubleValue() );
+				if ( tf != null && !tf.isNaN() )
+					val.add( tf.doubleValue() );
 			}
 			return val.copyArray();
 		}
@@ -374,6 +377,28 @@ public class FeatureUtils
 
 		default:
 			throw new IllegalArgumentException( "Unexpected TrackMate object type: " + type );
+		}
+	}
+
+	public static final int nObjects( final Model model, final TrackMateObject target, final boolean visibleOnly )
+	{
+		switch ( target )
+		{
+		case DEFAULT:
+			throw new UnsupportedOperationException( "Cannot return the number of objects for type DEFAULT." );
+		case EDGES:
+		{
+			int nEdges = 0;
+			for ( final Integer trackID : model.getTrackModel().unsortedTrackIDs( visibleOnly ) )
+				nEdges += model.getTrackModel().trackEdges( trackID ).size();
+			return nEdges;
+		}
+		case SPOTS:
+			return model.getSpots().getNSpots( visibleOnly );
+		case TRACKS:
+			return model.getTrackModel().nTracks( visibleOnly );
+		default:
+			throw new IllegalArgumentException( "Unknown TrackMate object: " + target );
 		}
 	}
 }

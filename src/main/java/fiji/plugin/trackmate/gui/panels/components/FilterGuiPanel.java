@@ -2,6 +2,7 @@ package fiji.plugin.trackmate.gui.panels.components;
 
 import static fiji.plugin.trackmate.features.FeatureUtils.collectFeatureKeys;
 import static fiji.plugin.trackmate.features.FeatureUtils.collectFeatureValues;
+import static fiji.plugin.trackmate.features.FeatureUtils.nObjects;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.BIG_FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
 
@@ -10,7 +11,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.EmptyStackException;
 import java.util.Iterator;
@@ -333,9 +333,7 @@ public class FilterGuiPanel extends ActionListenablePanel implements ChangeListe
 			return;
 		}
 
-		final String firstFeature = featureNames.keySet().iterator().next();
-		final int nobjects = collectFeatureValues( firstFeature, target, model, settings, false ).length;
-
+		final int nobjects = nObjects( model, target, false );
 		if ( featureFilters == null || featureFilters.isEmpty() )
 		{
 			final String info = "Keep all " + nobjects + " " + target + ".";
@@ -343,30 +341,7 @@ public class FilterGuiPanel extends ActionListenablePanel implements ChangeListe
 			return;
 		}
 
-		final boolean[] selected = new boolean[ nobjects ];
-		Arrays.fill( selected, true );
-
-		for ( final FeatureFilter filter : featureFilters )
-		{
-			final double[] values = collectFeatureValues( filter.feature, target, model, settings, false );
-			if ( filter.isAbove )
-			{
-				for ( int i = 0; i < nobjects; i++ )
-					if ( values[ i ] < filter.value )
-						selected[ i ] = false;
-			}
-			else
-			{
-				for ( int i = 0; i < nobjects; i++ )
-					if ( values[ i ] > filter.value )
-						selected[ i ] = false;
-			}
-		}
-
-		int nselected = 0;
-		for ( final boolean b : selected )
-			if ( b )
-				nselected++;
+		final int nselected = nObjects( model, target, true );
 		final String info = "Keep " + nselected + " " + target + " out of  " + nobjects + ".";
 		lblInfo.setText( info );
 	}
