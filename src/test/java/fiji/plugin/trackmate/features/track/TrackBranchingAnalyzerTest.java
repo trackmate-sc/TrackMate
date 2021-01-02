@@ -1,12 +1,9 @@
 package fiji.plugin.trackmate.features.track;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.ModelChangeEvent;
-import fiji.plugin.trackmate.ModelChangeListener;
-import fiji.plugin.trackmate.Spot;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -14,6 +11,11 @@ import java.util.TreeSet;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.ModelChangeEvent;
+import fiji.plugin.trackmate.ModelChangeListener;
+import fiji.plugin.trackmate.Spot;
 
 public class TrackBranchingAnalyzerTest
 {
@@ -225,7 +227,6 @@ public class TrackBranchingAnalyzerTest
 
 		// Check the track IDs the analyzer received - none of the old keys must
 		// be in it
-		System.out.println( analyzer.keys );// DEBUG
 		for ( final Integer calledKey : analyzer.keys )
 		{
 			if ( oldKeys.contains( calledKey ) )
