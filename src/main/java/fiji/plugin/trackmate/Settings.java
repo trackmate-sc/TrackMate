@@ -479,7 +479,7 @@ public class Settings
 		for ( final String key : spotAnalyzerKeys )
 			addSpotAnalyzerFactory( spotAnalyzerProvider.getFactory( key ) );
 
-		if ( imp != null && DetectionUtils.is2D( imp ) )
+		if ( imp != null && DetectionUtils.is2D( imp ) && detectorFactory != null && detectorFactory.has2Dsegmentation() )
 		{
 			final SpotMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider = new SpotMorphologyAnalyzerProvider( imp.getNChannels() );
 			final List< String > spotMorphologyAnaylyzerKeys = spotMorphologyAnalyzerProvider.getKeys();
