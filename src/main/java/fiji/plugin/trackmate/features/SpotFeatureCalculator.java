@@ -143,9 +143,10 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 		if ( doLogIt )
 		{
 			logger.setStatus( "Calculating " + toCompute.getNSpots( false ) + " spots features..." );
-			logger.log( "Computing spot features "
+			logger.log( "Computing spot features", Logger.BLUE_COLOR );
+			logger.log( " over "
 					+ ( ( nSimultaneousFrames > 1 ) ? ( nSimultaneousFrames + " frames" ) : "1 frame" )
-					+ " simultaneously and allocates "
+					+ " simultaneously and allocating "
 					+ ( ( threadsPerFrame > 1 ) ? ( threadsPerFrame + " threads" ) : "1 thread" )
 					+ " per frame.\n" );
 		}
@@ -172,6 +173,9 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 							// Fine-tune multithreading if we can.
 							if ( analyzer instanceof MultiThreaded )
 								( ( MultiThreaded ) analyzer ).setNumThreads( threadsPerFrame );
+
+							if ( doLogIt )
+								logger.setStatus( factory.getName() + " - ch" + ( channel + 1 ) + " - frame " + ( frame + 1 ) );
 
 							analyzer.process( toCompute.iterable( frame, false ) );
 

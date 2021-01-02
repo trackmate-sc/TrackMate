@@ -122,7 +122,6 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 	public boolean computeSpotFeatures( final boolean doLogIt )
 	{
 		final Logger logger = model.getLogger();
-		logger.log( "Computing spot features.\n" );
 		final SpotFeatureCalculator calculator = new SpotFeatureCalculator( model, settings );
 		calculator.setNumThreads( numThreads );
 		if ( calculator.checkInput() && calculator.process() )
