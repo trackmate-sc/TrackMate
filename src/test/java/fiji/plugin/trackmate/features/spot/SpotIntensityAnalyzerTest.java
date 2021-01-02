@@ -60,7 +60,7 @@ public class SpotIntensityAnalyzerTest
 	@Test
 	public void testProcessSpot2D()
 	{
-		final SpotIntensityMultiCAnalyzer< UnsignedShortType > analyzer = new SpotIntensityMultiCAnalyzer<>( null, 1 );
+		final SpotIntensityMultiCAnalyzer< UnsignedShortType > analyzer = new SpotIntensityMultiCAnalyzer<>( img2D, 0 );
 		analyzer.process( spot );
 
 		assertEquals( TEST_VAL, spot.getFeature( SpotIntensityMultiCAnalyzerFactory.MEAN_INTENSITY + '1' ).doubleValue(), 1e-10 );
