@@ -310,7 +310,7 @@ public class TrackMateWizard extends JFrame implements ActionListener
 		{
 			setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
 			setIconImage( TRACKMATE_ICON.getImage() );
-			setTitle( TrackMate.PLUGIN_NAME_STR + "v" + TrackMate.PLUGIN_NAME_VERSION );
+			setTitle( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION );
 			{
 				jPanelMain = new JPanel();
 				getContentPane().add( jPanelMain, BorderLayout.CENTER );

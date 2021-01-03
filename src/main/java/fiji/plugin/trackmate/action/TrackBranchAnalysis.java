@@ -48,10 +48,14 @@ public class TrackBranchAnalysis extends AbstractTMAction
 	@Override
 	public void execute( final TrackMate trackmate )
 	{
-		final Model model = trackmate.getModel();
-		new BranchTableView( model, selectionModel ).render();
+		createBranchTable( trackmate.getModel(), selectionModel ).render();
 	}
 
+	public static final BranchTableView createBranchTable( final Model model, final SelectionModel selectionModel )
+	{
+		return new BranchTableView( model, selectionModel );
+	}
+	
 	@Plugin( type = TrackMateActionFactory.class, enabled = true )
 	public static class Factory implements TrackMateActionFactory
 	{

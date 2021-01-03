@@ -23,14 +23,14 @@ public class ExportStatsTablesAction extends AbstractTMAction
 
 	public static final String INFO_TEXT = "<html>"
 			+ "Compute and export all statistics to 3 tables. "
-			+ "Statistisc are separated in features computed for: "
+			+ "Statistics are separated in features computed for: "
 			+ "<ol> "
 			+ "	<li> spots in visible tracks; "
 			+ "	<li> edges between those spots; "
 			+ "	<li> visible tracks. "
 			+ "</ol> "
 			+ "Note that spots and edges that are not in "
-			+ "visible tracks won't be visible in the tables."
+			+ "visible tracks won't be displayed in the tables."
 			+ "</html>";
 
 	private final SelectionModel selectionModel;
@@ -46,8 +46,12 @@ public class ExportStatsTablesAction extends AbstractTMAction
 	@Override
 	public void execute( final TrackMate trackmate )
 	{
-		final Model model = trackmate.getModel();
-		new TrackTableView( model, selectionModel, displaySettings ).render();
+		createTrackTables( trackmate.getModel(), selectionModel, displaySettings ).render();
+	}
+
+	public static TrackTableView createTrackTables( final Model model, final SelectionModel selectionModel, final DisplaySettings displaySettings )
+	{
+		return new TrackTableView( model, selectionModel, displaySettings );
 	}
 
 	// Invisible because called on the view config panel.

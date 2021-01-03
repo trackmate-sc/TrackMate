@@ -96,11 +96,11 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 
 		// Tabbed pane.
 		final JTabbedPane tabbedPane = new JTabbedPane( JTabbedPane.LEFT );
-		tabbedPane.add( "Spots", spotTable );
-		tabbedPane.add( "Edges", edgeTable );
-		tabbedPane.add( "Tracks", trackTable );
+		tabbedPane.add( "Spots", spotTable.getPanel() );
+		tabbedPane.add( "Edges", edgeTable.getPanel() );
+		tabbedPane.add( "Tracks", trackTable.getPanel() );
 
-		tabbedPane.setSelectedComponent( spotTable );
+		tabbedPane.setSelectedComponent( spotTable.getPanel() );
 		mainPanel.add( tabbedPane, BorderLayout.CENTER );
 
 		// Tool bar.
@@ -108,7 +108,7 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 		final BoxLayout layout = new BoxLayout( toolbar, BoxLayout.LINE_AXIS );
 		toolbar.setLayout( layout );
 		final JButton exportBtn = new JButton( "Export to CSV", CSV_ICON );
-		exportBtn.addActionListener( e -> exportToCsv( ( TablePanel< ? > ) tabbedPane.getSelectedComponent() ) );
+		exportBtn.addActionListener( e -> exportToCsv( tabbedPane.getSelectedIndex() ) );
 		toolbar.add( exportBtn );
 		toolbar.add( Box.createHorizontalGlue() );
 		final SearchBar searchBar = new SearchBar( model, this );
@@ -136,8 +136,24 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 		model.addModelChangeListener( this );
 	}
 
-	private < O > void exportToCsv( final TablePanel< O > table )
+	private  void exportToCsv( final int index )
 	{
+		final TablePanel< ? > table;
+		switch ( index )
+		{
+		case 0:
+			table = spotTable;
+			break;
+		case 1:
+			table = edgeTable;
+			break;
+		case 2:
+			table = trackTable;
+			break;
+		default:
+			throw new IllegalArgumentException( "Unknown table with index " + index );
+		}
+		
 		final File file = FileChooser.chooseFile(
 				this,
 				selectedFile,
@@ -461,6 +477,21 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 	@Override
 	public void clear()
 	{}
+
+	public TablePanel< Spot > getSpotTable()
+	{
+		return spotTable;
+	}
+
+	public TablePanel< DefaultWeightedEdge > getEdgeTable()
+	{
+		return edgeTable;
+	}
+
+	public TablePanel< Integer > getTrackTable()
+	{
+		return trackTable;
+	}
 
 	/**
 	 * Forward spot table selection to selection model.

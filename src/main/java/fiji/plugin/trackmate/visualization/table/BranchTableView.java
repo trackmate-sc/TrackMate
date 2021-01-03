@@ -79,7 +79,7 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 		// Table.
 		this.branchTable = createBranchTable( model );
 
-		mainPanel.add( branchTable, BorderLayout.CENTER );
+		mainPanel.add( branchTable.getPanel(), BorderLayout.CENTER );
 
 		// Tool bar.
 		final JPanel toolbar = new JPanel();
@@ -93,6 +93,11 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 
 		getContentPane().add( mainPanel );
 		pack();
+	}
+
+	public TablePanel< Branch > getBranchTable()
+	{
+		return branchTable;
 	}
 
 	private < O > void exportToCsv()
@@ -342,7 +347,7 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 	/**
 	 * A class to describe a branch.
 	 */
-	class Branch implements Comparable< Branch >
+	public static class Branch implements Comparable< Branch >
 	{
 
 		private final Map< String, Double > features = new HashMap<>();
@@ -413,21 +418,13 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 	}
 
 	private static final String TRACK_ID = "TRACK_ID";
-
 	private static final String N_PREDECESSORS = "N_PREDECESSORS";
-
 	private static final String N_SUCCESSORS = "N_SUCCESSORS";
-
 	private static final String DELTA_T = "DELTA_T";
-
 	private static final String DISTANCE = "DISTANCE";
-
 	private static final String MEAN_VELOCITY = "MEAN_VELOCITY";
-
 	private static final String FIRST = "FIRST";
-
 	private static final String LAST = "LAST";
-
 	private static final List< String > BRANCH_FEATURES = Arrays.asList( new String[] {
 			TRACK_ID,
 			N_PREDECESSORS,
@@ -440,11 +437,8 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 	} );
 
 	private static final Map< String, String > BRANCH_FEATURES_NAMES = new HashMap<>();
-
 	private static final Map< String, String > BRANCH_FEATURES_SHORTNAMES = new HashMap<>();
-
 	private static final Map< String, Boolean > BRANCH_FEATURES_ISINTS = new HashMap<>();
-
 	private static final Map< String, Dimension > BRANCH_FEATURES_DIMENSIONS = new HashMap<>();
 	static
 	{
@@ -459,7 +453,7 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 		BRANCH_FEATURES_DIMENSIONS.put( N_PREDECESSORS, Dimension.NONE );
 
 		BRANCH_FEATURES_NAMES.put( N_SUCCESSORS, "Track ID" );
-		BRANCH_FEATURES_SHORTNAMES.put( N_SUCCESSORS, "N sucessors" );
+		BRANCH_FEATURES_SHORTNAMES.put( N_SUCCESSORS, "N successors" );
 		BRANCH_FEATURES_ISINTS.put( N_SUCCESSORS, Boolean.TRUE );
 		BRANCH_FEATURES_DIMENSIONS.put( N_SUCCESSORS, Dimension.NONE );
 
@@ -468,7 +462,7 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 		BRANCH_FEATURES_ISINTS.put( DELTA_T, Boolean.FALSE );
 		BRANCH_FEATURES_DIMENSIONS.put( DELTA_T, Dimension.TIME );
 
-		BRANCH_FEATURES_NAMES.put( DISTANCE, "Distance travelled" );
+		BRANCH_FEATURES_NAMES.put( DISTANCE, "Distance traveled" );
 		BRANCH_FEATURES_SHORTNAMES.put( DISTANCE, "Dist" );
 		BRANCH_FEATURES_ISINTS.put( DISTANCE, Boolean.FALSE );
 		BRANCH_FEATURES_DIMENSIONS.put( DISTANCE, Dimension.LENGTH );

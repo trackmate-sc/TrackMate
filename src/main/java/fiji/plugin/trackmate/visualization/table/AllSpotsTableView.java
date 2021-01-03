@@ -80,7 +80,7 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 		// Table.
 		this.spotTable = createSpotTable( model, ds );
 
-		mainPanel.add( spotTable, BorderLayout.CENTER );
+		mainPanel.add( spotTable.getPanel(), BorderLayout.CENTER );
 
 		// Tool bar.
 		final JPanel toolbar = new JPanel();

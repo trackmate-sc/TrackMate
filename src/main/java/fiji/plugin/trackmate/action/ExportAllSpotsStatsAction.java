@@ -40,8 +40,12 @@ public class ExportAllSpotsStatsAction extends AbstractTMAction
 	@Override
 	public void execute( final TrackMate trackmate )
 	{
-		final Model model = trackmate.getModel();
-		new AllSpotsTableView( model, selectionModel, displaySettings ).render();
+		createSpotsTable( trackmate.getModel(), selectionModel, displaySettings ).render();
+	}
+
+	public static final AllSpotsTableView createSpotsTable( final Model model, final SelectionModel selectionModel, final DisplaySettings displaySettings )
+	{
+		return new AllSpotsTableView( model, selectionModel, displaySettings );
 	}
 
 	@Plugin( type = TrackMateActionFactory.class )

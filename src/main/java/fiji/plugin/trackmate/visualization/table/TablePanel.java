@@ -49,10 +49,8 @@ import fiji.plugin.trackmate.gui.displaysettings.ColorIcon;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 import gnu.trove.map.hash.TObjectIntHashMap;
 
-public class TablePanel< O > extends JPanel
+public class TablePanel< O >
 {
-
-	private static final long serialVersionUID = 1L;
 
 	private static final int ROW_HEIGHT = 26;
 
@@ -85,6 +83,8 @@ public class TablePanel< O > extends JPanel
 	private final String manualColorFeature;
 
 	private boolean useColoring;
+
+	private final JPanel panel;
 
 	public TablePanel(
 			final Iterable< O > objects,
@@ -129,6 +129,7 @@ public class TablePanel< O > extends JPanel
 			final String manualColorFeature,
 			final BiConsumer< O, Color > colorSetter )
 	{
+		this.panel = new JPanel();
 		this.featureFun = featureFun;
 		this.featureNames = featureNames;
 		this.featureShortNames = featureShortNames;
@@ -235,8 +236,8 @@ public class TablePanel< O > extends JPanel
 		final JScrollPane scrollPane = new JScrollPane( table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED );
 		table.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
 
-		setLayout( new BorderLayout() );
-		add( scrollPane, BorderLayout.CENTER );
+		panel.setLayout( new BorderLayout() );
+		panel.add( scrollPane, BorderLayout.CENTER );
 	}
 
 	public void setUseColoring( final boolean useColoring )
@@ -254,6 +255,17 @@ public class TablePanel< O > extends JPanel
 			this.objects.add( o );
 			map.put( o, index++ );
 		}
+	}
+
+	/**
+	 * The panel in which the table is displayed. This is the component to add
+	 * to client UI.
+	 * 
+	 * @return the main panel.
+	 */
+	public JPanel getPanel()
+	{
+		return panel;
 	}
 
 	/**
@@ -590,7 +602,7 @@ public class TablePanel< O > extends JPanel
 									final O o = TablePanel.this.getObjectForViewRow( r );
 									colorSetter.accept( o, c );
 								}
-								TablePanel.this.repaint();
+								panel.repaint();
 							}
 							else
 							{
