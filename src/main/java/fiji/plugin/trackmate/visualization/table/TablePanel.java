@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -191,6 +192,15 @@ public class TablePanel< O >
 		// Units for feature columns.
 		for ( final String feature : features )
 		{
+			final Class< ? > pclass;
+			if ( feature.equals( manualColorFeature ) )
+				pclass = Color.class;
+			else if ( isInts.get( feature ) )
+				pclass = Integer.class;
+			else
+				pclass = Double.class;
+			columnClasses.add( pclass );
+
 			String tooltipStr = "<html>" + featureNames.get( feature );
 			final String infoText = infoTexts.get( feature );
 			if ( infoText != null )
@@ -205,16 +215,22 @@ public class TablePanel< O >
 			headerStr += ( units == null || units.isEmpty() ) ? "<br> </html>" : "(" + units + ")</html>";
 			headerLine.add( headerStr );
 			tableColumnModel.addColumn( new TableColumn( colIndex++ ) );
+		}
 
-			final Class< ? > pclass;
 
-			if ( feature.equals( manualColorFeature ) )
-				pclass = Color.class;
-			else if ( isInts.get( feature ) )
-				pclass = Integer.class;
+		// Sorting.
+		final TableRowSorter< MyTableModel > sorter = new TableRowSorter<>( tableModel );
+		table.setRowSorter( sorter );
+		for ( int c = 0; c < columnClasses.size(); c++ )
+		{
+			if ( columnClasses.get( c ).equals( Integer.class ) )
+				sorter.setComparator( c, ( i1, i2 ) -> Integer.compare( ( int ) i1, ( int ) i2 ) );
+			else if ( columnClasses.get( c ).equals( Double.class ) )
+				sorter.setComparator( c, ( d1, d2 ) -> Double.compare( ( double ) d1, ( double ) d2 ) );
+			else if ( columnClasses.get( c ).equals( Color.class ) )
+				sorter.setComparator( c, ( c1, c2 ) -> c1.toString().compareTo( c2.toString() ) );
 			else
-				pclass = Double.class;
-			columnClasses.add( pclass );
+				sorter.setComparator( c, Comparator.naturalOrder() );
 		}
 
 		// Pass last line to column headers and set cell renderer.
@@ -228,9 +244,6 @@ public class TablePanel< O >
 			if ( c == colorcolumn && null != colorSetter )
 				column.setCellEditor( new MyColorEditor( colorSetter ) );
 		}
-
-		final TableRowSorter< MyTableModel > sorter = new TableRowSorter<>( tableModel );
-		table.setRowSorter( sorter );
 
 		final JScrollPane scrollPane = new JScrollPane( table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED );
 		table.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
