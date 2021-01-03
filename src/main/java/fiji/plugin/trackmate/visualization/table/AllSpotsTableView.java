@@ -2,6 +2,7 @@ package fiji.plugin.trackmate.visualization.table;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.event.WindowAdapter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.UpdateListener;
 import fiji.plugin.trackmate.util.FileChooser;
 import fiji.plugin.trackmate.util.FileChooser.DialogType;
 import fiji.plugin.trackmate.util.FileChooser.SelectionMode;
@@ -108,9 +110,20 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 		 * Listeners.
 		 */
 
-		ds.listeners().add( () -> refresh() );
+		final UpdateListener refresher = () -> refresh();
+		ds.listeners().add( refresher );
 		selectionModel.addSelectionChangeListener( this );
 		model.addModelChangeListener( this );
+		addWindowListener( new WindowAdapter()
+		{
+			@Override
+			public void windowClosing( final java.awt.event.WindowEvent e )
+			{
+				selectionModel.removeSelectionChangeListener( AllSpotsTableView.this );
+				model.removeModelChangeListener( AllSpotsTableView.this );
+				ds.listeners().remove( refresher );
+			};
+		} );
 	}
 
 	private < O > void exportToCsv()
@@ -225,8 +238,8 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 		}
 
 		final List< Spot > spots = new ArrayList<>();
-		for ( final Integer trackID : model.getTrackModel().unsortedTrackIDs( true ) )
-			spots.addAll( model.getTrackModel().trackSpots( trackID ) );
+		for ( final Spot spot : model.getSpots().iterable( true ) )
+			spots.add( spot );
 		spotTable.setObjects( spots );
 
 		refresh();

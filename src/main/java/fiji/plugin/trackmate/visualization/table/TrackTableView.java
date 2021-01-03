@@ -2,6 +2,7 @@ package fiji.plugin.trackmate.visualization.table;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.event.WindowAdapter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
 import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.UpdateListener;
 import fiji.plugin.trackmate.util.FileChooser;
 import fiji.plugin.trackmate.util.FileChooser.DialogType;
 import fiji.plugin.trackmate.util.FileChooser.SelectionMode;
@@ -131,9 +133,20 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 		 * Listeners.
 		 */
 
-		ds.listeners().add( () -> refresh() );
+		final UpdateListener refresher = () -> refresh();
+		ds.listeners().add( refresher );
 		selectionModel.addSelectionChangeListener( this );
 		model.addModelChangeListener( this );
+		addWindowListener( new WindowAdapter()
+		{
+			@Override
+			public void windowClosing( final java.awt.event.WindowEvent e )
+			{
+				selectionModel.removeSelectionChangeListener( TrackTableView.this );
+				model.removeModelChangeListener( TrackTableView.this );
+				ds.listeners().remove( refresher );
+			};
+		} );
 	}
 
 	private  void exportToCsv( final int index )

@@ -137,8 +137,7 @@ public class TablePanel< O >
 		this.colorSupplier = colorSupplier;
 		this.manualColorFeature = manualColorFeature;
 		this.objects = new ArrayList<>();
-		this.map = new TObjectIntHashMap<>();
-		setObjects( objects );
+		this.map = new TObjectIntHashMap<>( 10, 0.5f, -1 );
 		this.features = features;
 		this.labelGenerator = labelGenerator;
 		this.labelSetter = labelSetter;
@@ -147,6 +146,7 @@ public class TablePanel< O >
 
 		// Table column model.
 		final MyTableModel tableModel = new MyTableModel();
+
 		final DefaultTableColumnModel tableColumnModel = new DefaultTableColumnModel();
 		this.table = new JTable( tableModel, tableColumnModel )
 		{
@@ -162,6 +162,7 @@ public class TablePanel< O >
 			}
 		};
 		table.setColumnModel( tableColumnModel );
+		setObjects( objects );
 
 		table.putClientProperty( "JTable.autoStartsEdit", Boolean.FALSE );
 		table.getInputMap().put( KeyStroke.getKeyStroke( KeyEvent.VK_ENTER, 0 ), "startEditing" );
@@ -228,8 +229,6 @@ public class TablePanel< O >
 				column.setCellEditor( new MyColorEditor( colorSetter ) );
 		}
 
-		tableModel.fireTableStructureChanged();
-
 		final TableRowSorter< MyTableModel > sorter = new TableRowSorter<>( tableModel );
 		table.setRowSorter( sorter );
 
@@ -245,6 +244,7 @@ public class TablePanel< O >
 		this.useColoring = useColoring;
 	}
 
+	@SuppressWarnings( "unchecked" )
 	public void setObjects( final Iterable< O > objects )
 	{
 		this.objects.clear();
@@ -255,6 +255,7 @@ public class TablePanel< O >
 			this.objects.add( o );
 			map.put( o, index++ );
 		}
+		( ( MyTableModel ) table.getModel() ).fireTableDataChanged();
 	}
 
 	/**
@@ -299,7 +300,15 @@ public class TablePanel< O >
 		final int modelRow = map.get( o );
 		if ( modelRow < 0 ) // Object not in table.
 			return -1;
-		return table.convertRowIndexToView( modelRow );
+		try
+		{
+			return table.convertRowIndexToView( modelRow );
+		}
+		catch ( final IndexOutOfBoundsException e )
+		{
+			// Table has been cleared.
+			return -1;
+		}
 	}
 
 	public void scrollToObject( final O o )
