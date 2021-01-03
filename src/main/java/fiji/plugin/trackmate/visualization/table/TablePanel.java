@@ -24,6 +24,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import javax.swing.AbstractCellEditor;
+import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JDialog;
@@ -31,8 +32,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -243,6 +246,8 @@ public class TablePanel< O >
 			column.setCellRenderer( cellRenderer );
 			if ( c == colorcolumn && null != colorSetter )
 				column.setCellEditor( new MyColorEditor( colorSetter ) );
+			else if ( c== 0 && null != labelSetter)
+				column.setCellEditor( new MyLabelEditor() );
 		}
 
 		final JScrollPane scrollPane = new JScrollPane( table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED );
@@ -638,6 +643,28 @@ public class TablePanel< O >
 				d.setVisible( true );
 			} );
 			return button;
+		}
+	}
+
+	/**
+	 * A cell editor for text that selects all when triggered for editing.
+	 */
+	private static class MyLabelEditor extends DefaultCellEditor
+	{
+
+		private static final long serialVersionUID = 1L;
+
+		public MyLabelEditor()
+		{
+			super( new JTextField() );
+		}
+
+		@Override
+		public Component getTableCellEditorComponent( final JTable table, final Object value, final boolean isSelected, final int row, final int column )
+		{
+			final JTextField textfield = ( JTextField ) super.getTableCellEditorComponent( table, value, isSelected, row, column );
+			SwingUtilities.invokeLater( () -> textfield.selectAll() );
+			return textfield;
 		}
 	}
 }
