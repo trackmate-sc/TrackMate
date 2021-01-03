@@ -23,28 +23,25 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.descriptors.WizardPanelDescriptor;
 import fiji.plugin.trackmate.util.TMUtils;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
 
 /**
  * A GUI for TrackMate, strongly inspired from the spots detection GUI of the
  * Imaris® software from <a href="http://www.bitplane.com/">Bitplane</a>.
  * 
- * @author Jean-Yves Tinevez &lt;tinevez@pasteur.fr&gt; - September 2010 - 2014
+ * @author Jean-Yves Tinevez - September 2010 - 2014
  */
 public class TrackMateWizard extends JFrame implements ActionListener
 {
 
-	JButton jButtonSave;
+	final JButton jButtonSave;
 
-	JButton jButtonLoad;
+	final JButton jButtonPrevious;
 
-	JButton jButtonPrevious;
+	final JButton jButtonNext;
 
-	JButton jButtonNext;
+	final JButton jButtonLog;
 
-	JButton jButtonLog;
-
-	JButton jButtonDisplayConfig;
+	final JButton jButtonDisplayConfig;
 
 	/*
 	 * DEFAULT VISIBILITY & PUBLIC CONSTANTS
@@ -74,8 +71,6 @@ public class TrackMateWizard extends JFrame implements ActionListener
 
 	private static final Icon PREVIOUS_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/arrow_left.png" ) );
 
-	private static final Icon LOAD_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/page_go.png" ) );
-
 	private static final Icon SAVE_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/page_save.png" ) );
 
 	private static final Icon LOG_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/information.png" ) );
@@ -89,7 +84,9 @@ public class TrackMateWizard extends JFrame implements ActionListener
 	/** This {@link ActionEvent} is fired when the 'next' button is pressed. */
 	final ActionEvent NEXT_BUTTON_PRESSED = new ActionEvent( this, 0, "NextButtonPressed" );
 
-	/** This {@link ActionEvent} is fired when the 'previous' button is pressed. */
+	/**
+	 * This {@link ActionEvent} is fired when the 'previous' button is pressed.
+	 */
 	final ActionEvent PREVIOUS_BUTTON_PRESSED = new ActionEvent( this, 1, "PreviousButtonPressed" );
 
 	/** This {@link ActionEvent} is fired when the 'load' button is pressed. */
@@ -101,7 +98,10 @@ public class TrackMateWizard extends JFrame implements ActionListener
 	/** This {@link ActionEvent} is fired when the 'log' button is pressed. */
 	final ActionEvent LOG_BUTTON_PRESSED = new ActionEvent( this, 4, "LogButtonPressed" );
 
-	/** This {@link ActionEvent} is fired when the 'display config' button is pressed. */
+	/**
+	 * This {@link ActionEvent} is fired when the 'display config' button is
+	 * pressed.
+	 */
 	final ActionEvent DISPLAY_CONFIG_BUTTON_PRESSED = new ActionEvent( this, 5, "ConfigDisplayButtonPressed" );
 
 	/*
@@ -110,16 +110,13 @@ public class TrackMateWizard extends JFrame implements ActionListener
 
 	private final ArrayList< ActionListener > listeners = new ArrayList<>();
 
-	private JPanel jPanelButtons;
+	private final JPanel jPanelButtons;
 
-	private JPanel jPanelMain;
+	private final JPanel jPanelMain;
 
-	private LogPanel logPanel;
-
-	private TrackMateModelView displayer;
+	private final LogPanel logPanel;
 
 	private final TrackMateGUIController controller;
-
 
 	/*
 	 * CONSTRUCTOR
@@ -128,7 +125,30 @@ public class TrackMateWizard extends JFrame implements ActionListener
 	public TrackMateWizard( final TrackMateGUIController controller )
 	{
 		this.controller = controller;
-		initGUI();
+		setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
+		setIconImage( TRACKMATE_ICON.getImage() );
+		setTitle( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION );
+
+		jPanelMain = new JPanel();
+		getContentPane().add( jPanelMain, BorderLayout.CENTER );
+		jPanelMain.setLayout( new BorderLayout() );
+		jPanelMain.setPreferredSize( new java.awt.Dimension( 310, 461 ) );
+
+		jPanelButtons = new JPanel();
+		jPanelButtons.setLayout( new BoxLayout( jPanelButtons, BoxLayout.X_AXIS ) );
+		getContentPane().add( jPanelButtons, BorderLayout.SOUTH );
+		jPanelButtons.setLayout( new BoxLayout( jPanelButtons, BoxLayout.LINE_AXIS ) );
+
+		jButtonSave = addButton( "Save", SAVE_ICON, SAVE_BUTTON_PRESSED );
+		jPanelButtons.add( Box.createHorizontalGlue() );
+		jButtonLog = addButton( null, LOG_ICON, LOG_BUTTON_PRESSED );
+		jButtonDisplayConfig = addButton( null, DISPLAY_CONFIG_ICON, DISPLAY_CONFIG_BUTTON_PRESSED );
+		jPanelButtons.add( Box.createHorizontalGlue() );
+		jButtonPrevious = addButton( null, PREVIOUS_ICON, PREVIOUS_BUTTON_PRESSED );
+		jButtonNext = addButton( NEXT_TEXT, NEXT_ICON, NEXT_BUTTON_PRESSED );
+
+		logPanel = new LogPanel();
+		pack();
 	}
 
 	/*
@@ -172,23 +192,6 @@ public class TrackMateWizard extends JFrame implements ActionListener
 	public LogPanel getLogPanel()
 	{
 		return logPanel;
-	}
-
-	/**
-	 * Returns a reference to the {@link TrackMateModelView} linked to this
-	 * wizard.
-	 */
-	public TrackMateModelView getDisplayer()
-	{
-		return displayer;
-	}
-
-	/**
-	 * Sets the {@link TrackMateModelView} to be linked to this wizard.
-	 */
-	public void setDisplayer( final TrackMateModelView displayer )
-	{
-		this.displayer = displayer;
 	}
 
 	/**
@@ -237,21 +240,12 @@ public class TrackMateWizard extends JFrame implements ActionListener
 	public void setNextButtonEnabled( final boolean b )
 	{
 		controller.guimodel.nextButtonState = b;
-		SwingUtilities.invokeLater( new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				jButtonNext.setEnabled( b );
-				if ( b )
-				{
-					jButtonNext.requestFocusInWindow();
-				}
-				else
-				{
-					jButtonPrevious.requestFocusInWindow();
-				}
-			}
+		SwingUtilities.invokeLater( () -> {
+			jButtonNext.setEnabled( b );
+			if ( b )
+				jButtonNext.requestFocusInWindow();
+			else
+				jButtonPrevious.requestFocusInWindow();
 		} );
 	}
 
@@ -279,12 +273,6 @@ public class TrackMateWizard extends JFrame implements ActionListener
 		SwingUtilities.invokeLater( () -> jButtonSave.setEnabled( b ) );
 	}
 
-	public void setLoadButtonEnabled( final boolean b )
-	{
-		controller.guimodel.loadButtonState = b;
-		SwingUtilities.invokeLater( () -> jButtonLoad.setEnabled( b ) );
-	}
-
 	/*
 	 * PRIVATE METHODS
 	 */
@@ -301,73 +289,14 @@ public class TrackMateWizard extends JFrame implements ActionListener
 		}
 	}
 
-	/**
-	 * Layout this GUI.
-	 */
-	private void initGUI()
-	{
-		try
-		{
-			setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
-			setIconImage( TRACKMATE_ICON.getImage() );
-			setTitle( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION );
-			{
-				jPanelMain = new JPanel();
-				getContentPane().add( jPanelMain, BorderLayout.CENTER );
-				jPanelMain.setLayout( new BorderLayout() );
-				jPanelMain.setPreferredSize( new java.awt.Dimension( 310, 461 ) );
-			}
-			jPanelButtons = new JPanel();
-			jPanelButtons.setLayout( new BoxLayout( jPanelButtons, BoxLayout.X_AXIS ) );
-			getContentPane().add( jPanelButtons, BorderLayout.SOUTH );
-			jPanelButtons.setLayout( new BoxLayout( jPanelButtons, BoxLayout.LINE_AXIS ) );
-
-			/*
-			 * We don't show the load button anymore. Load action can be
-			 * accessed from the menu. Out of simplicity, we leave the load
-			 * button logic in place, but do not show it.
-			 */
-			jButtonLoad = addButton( "Load", LOAD_ICON, 2, 2, 76, 25, LOAD_BUTTON_PRESSED );
-			jPanelButtons.remove( jButtonLoad );
-
-			jButtonSave = addButton( "Save", SAVE_ICON, 78, 2, 76, 25, SAVE_BUTTON_PRESSED );
-			jPanelButtons.add( Box.createHorizontalGlue() );
-			jButtonLog = addButton( null, LOG_ICON, 157, 2, 30, 25, LOG_BUTTON_PRESSED );
-			jButtonDisplayConfig = addButton( null, DISPLAY_CONFIG_ICON, 157, 2, 30, 25, DISPLAY_CONFIG_BUTTON_PRESSED );
-			jPanelButtons.add( Box.createHorizontalGlue() );
-			jButtonPrevious = addButton( null, PREVIOUS_ICON, 190, 2, 30, 25, PREVIOUS_BUTTON_PRESSED );
-			jButtonNext = addButton( NEXT_TEXT, NEXT_ICON, 220, 2, 73, 25, NEXT_BUTTON_PRESSED );
-			pack();
-			// Only instantiate the logger panel, the rest will be done by the
-			// controller
-			{
-				logPanel = new LogPanel();
-			}
-		}
-		catch ( final Exception e )
-		{
-			e.printStackTrace();
-		}
-		repaint();
-		validate();
-	}
-
-	private JButton addButton( final String label, final Icon icon, final int x, final int y, final int width, final int height, final ActionEvent action )
+	private JButton addButton( final String label, final Icon icon, final ActionEvent action )
 	{
 		final JButton button = new JButton();
 		jPanelButtons.add( button );
 		button.setText( label );
 		button.setIcon( icon );
 		button.setFont( FONT );
-		button.setBounds( x, y, width, height );
-		button.addActionListener( new ActionListener()
-		{
-			@Override
-			public void actionPerformed( final ActionEvent e )
-			{
-				fireAction( action );
-			}
-		} );
+		button.addActionListener( e -> fireAction( action ) );
 		return button;
 	}
 

@@ -842,7 +842,6 @@ public class TrackMateGUIController implements ActionListener
 	 */
 	public void disableButtonsAndStoreState()
 	{
-		guimodel.loadButtonState = gui.jButtonLoad.isEnabled();
 		guimodel.saveButtonState = gui.jButtonSave.isEnabled();
 		guimodel.previousButtonState = gui.jButtonPrevious.isEnabled();
 		guimodel.nextButtonState = gui.jButtonNext.isEnabled();
@@ -853,7 +852,6 @@ public class TrackMateGUIController implements ActionListener
 			@Override
 			public void run()
 			{
-				gui.jButtonLoad.setEnabled( false );
 				gui.jButtonNext.setEnabled( false );
 				gui.jButtonPrevious.setEnabled( false );
 				gui.jButtonSave.setEnabled( false );
@@ -870,7 +868,6 @@ public class TrackMateGUIController implements ActionListener
 	 */
 	public void restoreButtonsState()
 	{
-		gui.setLoadButtonEnabled( guimodel.loadButtonState );
 		gui.setSaveButtonEnabled( guimodel.saveButtonState );
 		gui.setPreviousButtonEnabled( guimodel.previousButtonState );
 		gui.setNextButtonEnabled( guimodel.nextButtonState );
