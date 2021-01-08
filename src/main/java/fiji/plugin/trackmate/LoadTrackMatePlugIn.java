@@ -309,5 +309,6 @@ public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 		final LoadTrackMatePlugIn plugIn = new LoadTrackMatePlugIn();
 //		plugIn.run( "samples/FakeTracks.xml" );
 		plugIn.run( "samples/MAX_Merged.xml" );
+//		plugIn.run( "" );
 	}
 }
