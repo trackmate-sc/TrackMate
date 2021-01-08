@@ -72,7 +72,7 @@ public class ConfigTrackMateDisplaySettings implements Command
 		btnReset.setToolTipText( RESET_TOOLTIP );
 		final JButton btnRevert = new JButton( "Revert", REVERT_ICON );
 		btnRevert.setToolTipText( REVERT_TOOLTIP );
-		final JButton btnApply = new JButton( "Apply", APPLY_ICON );
+		final JButton btnApply = new JButton( "Save to user defaults", APPLY_ICON );
 		btnApply.setToolTipText( APPLY_TOOLTIP );
 		panelButton.add( btnReset );
 		panelButton.add( Box.createHorizontalStrut( 5 ) );
