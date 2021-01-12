@@ -267,6 +267,8 @@ public class TrackMateGUIController implements ActionListener
 				else
 					gui.setPreviousButtonEnabled( true );
 
+				gui.setDisplayConfigButtonEnabled( !descriptor.equals( configureViewsDescriptor ) );
+
 				descriptor.displayingPanel();
 				return;
 			}
