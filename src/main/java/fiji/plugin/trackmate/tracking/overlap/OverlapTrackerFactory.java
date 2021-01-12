@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tracking.roi;
+package fiji.plugin.trackmate.tracking.overlap;
 
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
 
@@ -15,10 +15,10 @@ import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
-import fiji.plugin.trackmate.tracking.roi.IoUTracker.IoUCalculation;
+import fiji.plugin.trackmate.tracking.overlap.OverlapTracker.IoUCalculation;
 
 @Plugin( type = SpotTrackerFactory.class )
-public class IoUTrackerFactory implements SpotTrackerFactory
+public class OverlapTrackerFactory implements SpotTrackerFactory
 {
 
 	final static String BASE_ERROR_MESSAGE = "[IoUTracker] ";
@@ -57,16 +57,16 @@ public class IoUTrackerFactory implements SpotTrackerFactory
 	 */
 	public static final String PRECISE_CALCULATION = IoUCalculation.PRECISE.name();
 
-	public static final String TRACKER_KEY = "IOU_TRACKER";
+	public static final String TRACKER_KEY = "OVERLAP_TRACKER";
 
-	public static final String TRACKER_NAME = "IoU tracker";
+	public static final String TRACKER_NAME = "Overlap tracker";
 
 	public static final String TRACKER_INFO_TEXT = "<html> "
-			+ "This tracker is a simple extension of the Intersection - over - Union tracker. "
+			+ "This tracker is a simple extension of the Intersection - over - Union (IoU) tracker. "
 			+ "<p> "
 			+ "<p> "
 			+ "It generates links between spots whose shapes overlap between consecutive frames. "
-			+ "When several spots are elligible as a source for a target, the one with the largest IoU "
+			+ "When several spots are eligible as a source for a target, the one with the largest IoU "
 			+ "is chosen."
 			+ "<p> "
 			+ "<p> "
@@ -114,13 +114,13 @@ public class IoUTrackerFactory implements SpotTrackerFactory
 		final double minIoU = ( Double ) settings.get( KEY_MIN_IOU );
 		final String methodStr = ( String ) settings.get( KEY_IOU_CALCULATION );
 		final IoUCalculation method = IoUCalculation.valueOf( methodStr );
-		return new IoUTracker( spots, method, minIoU, pixelSize );
+		return new OverlapTracker( spots, method, minIoU, pixelSize );
 	}
 
 	@Override
 	public ConfigurationPanel getTrackerConfigurationPanel( final Model model )
 	{
-		return new IoUTrackerSettingsPanel();
+		return new OverlapTrackerSettingsPanel();
 	}
 
 	@Override

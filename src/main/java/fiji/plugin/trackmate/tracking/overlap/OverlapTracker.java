@@ -1,6 +1,6 @@
-package fiji.plugin.trackmate.tracking.roi;
+package fiji.plugin.trackmate.tracking.overlap;
 
-import static fiji.plugin.trackmate.tracking.roi.IoUTrackerFactory.BASE_ERROR_MESSAGE;
+import static fiji.plugin.trackmate.tracking.overlap.OverlapTrackerFactory.BASE_ERROR_MESSAGE;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,7 +33,7 @@ import math.geom2d.polygon.Rectangle2D;
 import math.geom2d.polygon.SimplePolygon2D;
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
 
-public class IoUTracker extends MultiThreadedBenchmarkAlgorithm implements SpotTracker
+public class OverlapTracker extends MultiThreadedBenchmarkAlgorithm implements SpotTracker
 {
 
 	public static enum IoUCalculation
@@ -79,7 +79,7 @@ public class IoUTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 	 * CONSTRUCTOR
 	 */
 
-	public IoUTracker( final SpotCollection spots, final IoUCalculation method, final double minIoU, final double enlargeFactor )
+	public OverlapTracker( final SpotCollection spots, final IoUCalculation method, final double minIoU, final double enlargeFactor )
 	{
 		this.spots = spots;
 		this.method = method;

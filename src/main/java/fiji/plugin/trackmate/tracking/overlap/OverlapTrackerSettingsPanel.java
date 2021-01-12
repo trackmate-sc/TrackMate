@@ -1,10 +1,10 @@
-package fiji.plugin.trackmate.tracking.roi;
+package fiji.plugin.trackmate.tracking.overlap;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.BIG_FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
-import static fiji.plugin.trackmate.tracking.roi.IoUTrackerFactory.KEY_IOU_CALCULATION;
-import static fiji.plugin.trackmate.tracking.roi.IoUTrackerFactory.KEY_MIN_IOU;
-import static fiji.plugin.trackmate.tracking.roi.IoUTrackerFactory.KEY_SCALE_FACTOR;
+import static fiji.plugin.trackmate.tracking.overlap.OverlapTrackerFactory.KEY_IOU_CALCULATION;
+import static fiji.plugin.trackmate.tracking.overlap.OverlapTrackerFactory.KEY_MIN_IOU;
+import static fiji.plugin.trackmate.tracking.overlap.OverlapTrackerFactory.KEY_SCALE_FACTOR;
 
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -23,9 +23,9 @@ import javax.swing.JRadioButton;
 import javax.swing.SwingConstants;
 
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
-import fiji.plugin.trackmate.tracking.roi.IoUTracker.IoUCalculation;
+import fiji.plugin.trackmate.tracking.overlap.OverlapTracker.IoUCalculation;
 
-public class IoUTrackerSettingsPanel extends ConfigurationPanel
+public class OverlapTrackerSettingsPanel extends ConfigurationPanel
 {
 
 	private static final long serialVersionUID = 1L;
@@ -38,7 +38,7 @@ public class IoUTrackerSettingsPanel extends ConfigurationPanel
 
 	private JRadioButton rdbtnPrecise;
 
-	public IoUTrackerSettingsPanel()
+	public OverlapTrackerSettingsPanel()
 	{
 		final GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 164, 59, 0 };
@@ -57,7 +57,7 @@ public class IoUTrackerSettingsPanel extends ConfigurationPanel
 		gbc_lblSettingsForTracker.gridy = 0;
 		add( lblSettingsForTracker, gbc_lblSettingsForTracker );
 
-		final JLabel labelTracker = new JLabel( IoUTrackerFactory.TRACKER_NAME );
+		final JLabel labelTracker = new JLabel( OverlapTrackerFactory.TRACKER_NAME );
 		labelTracker.setFont( BIG_FONT );
 		labelTracker.setHorizontalAlignment( SwingConstants.CENTER );
 		final GridBagConstraints gbc_labelTracker = new GridBagConstraints();
@@ -70,7 +70,7 @@ public class IoUTrackerSettingsPanel extends ConfigurationPanel
 
 		final JLabel labelTrackerDescription = new JLabel( "<tracker description>" );
 		labelTrackerDescription.setFont( FONT.deriveFont( Font.ITALIC ) );
-		labelTrackerDescription.setText( IoUTrackerFactory.TRACKER_INFO_TEXT
+		labelTrackerDescription.setText( OverlapTrackerFactory.TRACKER_INFO_TEXT
 				.replace( "<br>", "" )
 				.replace( "<p>", "<p align=\"justify\">" )
 				.replace( "<html>", "<html><p align=\"justify\">" ) );
