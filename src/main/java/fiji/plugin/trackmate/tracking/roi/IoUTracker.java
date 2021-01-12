@@ -330,17 +330,17 @@ public class IoUTracker extends MultiThreadedBenchmarkAlgorithm implements SpotT
 		@Override
 		public IoULink call() throws Exception
 		{
-			final double targetArea = targetPoly.area();
+			final double targetArea = Math.abs( targetPoly.area() );
 			double maxIoU = minIoU;
 			Spot bestSpot = null;
 			for ( final Spot spot : sourceGeometries.keySet() )
 			{
 				final Polygon2D sourcePoly = sourceGeometries.get( spot );
-				final double intersection = Polygons2D.intersection( targetPoly, sourcePoly ).area();
+				final double intersection = Math.abs( Polygons2D.intersection( targetPoly, sourcePoly ).area() );
 				if ( intersection == 0. )
 					continue;
 
-				final double union = sourcePoly.area() + targetArea - intersection;
+				final double union = Math.abs( sourcePoly.area() ) + targetArea - intersection;
 				final double iou = intersection / union;
 				if ( iou > maxIoU )
 				{
