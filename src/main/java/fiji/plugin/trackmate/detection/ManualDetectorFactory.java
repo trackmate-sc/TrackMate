@@ -46,6 +46,12 @@ public class ManualDetectorFactory< T extends RealType< T > & NativeType< T > > 
 	protected Map< String, Object > settings;
 
 	@Override
+	public boolean has2Dsegmentation()
+	{
+		return true;
+	}
+
+	@Override
 	public SpotDetector< T > getDetector( final Interval interval, final int frame )
 	{
 		return new SpotDetector< T >()
