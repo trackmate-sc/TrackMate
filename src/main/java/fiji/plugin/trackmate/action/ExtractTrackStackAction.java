@@ -27,10 +27,8 @@ import ij.process.ImageProcessor;
 import net.imagej.ImgPlus;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.meta.view.HyperSliceImgPlus;
 import net.imglib2.view.Views;
 
-@SuppressWarnings( "deprecation" )
 public class ExtractTrackStackAction extends AbstractTMAction
 {
 
@@ -196,8 +194,7 @@ public class ExtractTrackStackAction extends AbstractTMAction
 
 			for ( int c = 0; c < nChannels; c++ )
 			{
-				final ImgPlus imgC = HyperSliceImgPlus.fixChannelAxis( img, c );
-				final ImgPlus imgCT = HyperSliceImgPlus.fixTimeAxis( imgC, frame );
+				final ImgPlus imgCT = TMUtils.hyperSlice( img, c, frame );
 
 				// Compute target coordinates for current spot
 				final int x = ( int ) ( Math.round( ( spot.getFeature( Spot.POSITION_X ) ) / calibration[ 0 ] ) - width / 2 );

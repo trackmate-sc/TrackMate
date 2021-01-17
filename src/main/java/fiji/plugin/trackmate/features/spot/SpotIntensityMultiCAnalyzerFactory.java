@@ -11,12 +11,11 @@ import javax.swing.ImageIcon;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Dimension;
+import fiji.plugin.trackmate.util.TMUtils;
 import net.imagej.ImgPlus;
-import net.imglib2.meta.view.HyperSliceImgPlus;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 
-@SuppressWarnings( "deprecation" )
 @Plugin( type = SpotAnalyzerFactory.class )
 public class SpotIntensityMultiCAnalyzerFactory< T extends RealType< T > & NativeType< T > > implements SpotAnalyzerFactory< T >
 {
@@ -62,8 +61,7 @@ public class SpotIntensityMultiCAnalyzerFactory< T extends RealType< T > & Nativ
 	@Override
 	public SpotAnalyzer< T > getAnalyzer( final ImgPlus< T > img, final int frame, final int channel )
 	{
-		final ImgPlus< T > imgT = HyperSliceImgPlus.fixTimeAxis( img, frame );
-		final ImgPlus< T > imgTC = HyperSliceImgPlus.fixChannelAxis( imgT, channel );
+		final ImgPlus< T > imgTC = TMUtils.hyperSlice( img, channel, frame );
 		return new SpotIntensityMultiCAnalyzer<>( imgTC, channel );
 	}
 

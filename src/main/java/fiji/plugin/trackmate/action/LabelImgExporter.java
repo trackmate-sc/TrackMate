@@ -26,12 +26,10 @@ import net.imglib2.FinalDimensions;
 import net.imglib2.RandomAccess;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.meta.view.HyperSliceImgPlus;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 
-@SuppressWarnings( "deprecation" )
 public class LabelImgExporter extends AbstractTMAction
 {
 
@@ -421,9 +419,7 @@ public class LabelImgExporter extends AbstractTMAction
 		logger.log( "Writing label image.\n" );
 		for ( int frame = 0; frame < dimensions[ 3 ]; frame++ )
 		{
-			final ImgPlus< UnsignedShortType > imgC = HyperSliceImgPlus.fixChannelAxis( imgPlus, 0 );
-			final ImgPlus< UnsignedShortType > imgCT = HyperSliceImgPlus.fixTimeAxis( imgC, frame );
-
+			final ImgPlus< UnsignedShortType > imgCT = TMUtils.hyperSlice( imgPlus, 0, frame );
 			final SpotWriter spotWriter = exportSpotsAsDots
 					? new SpotAsDotWriter( imgCT )
 					: new SpotRoiWriter( imgCT );

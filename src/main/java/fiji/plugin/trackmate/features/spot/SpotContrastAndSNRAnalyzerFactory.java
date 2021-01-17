@@ -14,8 +14,8 @@ import org.scijava.Priority;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Dimension;
+import fiji.plugin.trackmate.util.TMUtils;
 import net.imagej.ImgPlus;
-import net.imglib2.meta.view.HyperSliceImgPlus;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 
@@ -27,7 +27,6 @@ import net.imglib2.type.numeric.RealType;
  *
  * @author Jean- Yves Tinevez
  */
-@SuppressWarnings( "deprecation" )
 @Plugin( type = SpotAnalyzerFactory.class, priority = Priority.LOW )
 public class SpotContrastAndSNRAnalyzerFactory< T extends RealType< T > & NativeType< T >> implements SpotAnalyzerFactory< T >
 {
@@ -59,8 +58,7 @@ public class SpotContrastAndSNRAnalyzerFactory< T extends RealType< T > & Native
 	@Override
 	public SpotAnalyzer< T > getAnalyzer( final ImgPlus< T > img, final int frame, final int channel )
 	{
-		final ImgPlus< T > imgT = HyperSliceImgPlus.fixTimeAxis( img, frame );
-		final ImgPlus< T > imgTC = HyperSliceImgPlus.fixChannelAxis( imgT, channel );
+		final ImgPlus< T > imgTC = TMUtils.hyperSlice( img, channel, frame );
 		return new SpotContrastAndSNRAnalyzer<>( imgTC, channel );
 	}
 

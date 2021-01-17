@@ -4,9 +4,7 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.util.TMUtils;
 import net.imagej.ImgPlus;
-import net.imglib2.meta.view.HyperSliceImgPlus;
 
-@SuppressWarnings( "deprecation" )
 public class SpotImageUpdater
 {
 
@@ -56,9 +54,8 @@ public class SpotImageUpdater
 		else
 		{
 			final ImgPlus img = TMUtils.rawWraps( settings.imp );
-			final ImgPlus fixChannelAxis = HyperSliceImgPlus.fixChannelAxis( img, targetChannel );
-			final ImgPlus< ? > imgCT = HyperSliceImgPlus.fixTimeAxis(
-					fixChannelAxis, frame );
+			final ImgPlus< ? > imgCT = TMUtils.hyperSlice( img, targetChannel, frame );
+
 			grabber = new SpotIconGrabber( imgCT );
 			previousFrame = frame;
 			previousChannel = targetChannel;
