@@ -21,6 +21,7 @@ import fiji.plugin.trackmate.features.TrackFeatureCalculator;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.util.TMUtils;
 import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
 import net.imglib2.Interval;
 import net.imglib2.algorithm.Algorithm;
 import net.imglib2.algorithm.Benchmark;
@@ -41,7 +42,6 @@ import net.imglib2.multithreading.SimpleMultiThreading;
  * @author Johannes Schindelin
  * @author Jean-Yves Tinevez - Institut Pasteur - July 2010 - 2018
  */
-@SuppressWarnings( "deprecation" )
 public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 {
 
@@ -358,7 +358,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 	private boolean processFrameByFrame( final SpotDetectorFactory factory, final ImgPlus img, final Logger logger )
 	{
 		final Interval interval = TMUtils.getInterval( img, settings );
-		final int zindex = TMUtils.findZAxisIndex( img );
+		final int zindex = img.dimensionIndex( Axes.Z );
 		final int numFrames = settings.tend - settings.tstart + 1;
 		// Final results holder, for all frames
 		final SpotCollection spots = new SpotCollection();
