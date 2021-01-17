@@ -9,6 +9,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -22,7 +27,6 @@ import fiji.plugin.trackmate.util.TMUtils;
 import net.imglib2.KDTree;
 import net.imglib2.RealPoint;
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
-import net.imglib2.multithreading.SimpleMultiThreading;
 
 public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm implements SpotTracker
 {
@@ -73,100 +77,114 @@ public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm impl
 
 		final double maxLinkingDistance = ( Double ) settings.get( KEY_LINKING_MAX_DISTANCE );
 		final double maxDistSquare = maxLinkingDistance * maxLinkingDistance;
-
 		final TreeSet< Integer > frames = new TreeSet<>( spots.keySet() );
-		final Thread[] threads = new Thread[ numThreads ];
 
-		// Prepare the thread array
-		final AtomicInteger ai = new AtomicInteger( frames.first() );
+		// Prepare executors.
 		final AtomicInteger progress = new AtomicInteger( 0 );
-		for ( int ithread = 0; ithread < threads.length; ithread++ )
+		final ExecutorService executors = Executors.newFixedThreadPool( numThreads );
+		final List< Future< Void > > futures = new ArrayList<>( frames.size() );
+		for ( int i = frames.first(); i < frames.last(); i++ )
 		{
-
-			threads[ ithread ] = new Thread( "Nearest neighbor tracker thread " + ( 1 + ithread ) + "/" + threads.length )
+			final int frame = i;
+			final Future< Void > future = executors.submit( new Callable< Void >()
 			{
 
 				@Override
-				public void run()
+				public Void call() throws Exception
 				{
+					// Build frame pair
+					final int sourceFrame = frame;
+					final int targetFrame = frames.higher( frame );
 
-					for ( int i = ai.getAndIncrement(); i < frames.last(); i = ai.getAndIncrement() )
+					final int nTargetSpots = spots.getNSpots( targetFrame, true );
+					if ( nTargetSpots < 1 )
 					{
+						logger.setProgress( progress.incrementAndGet() / ( double ) frames.size() );
+						return null;
+					}
 
-						// Build frame pair
-						final int sourceFrame = i;
-						final int targetFrame = frames.higher( i );
+					final List< RealPoint > targetCoords = new ArrayList<>( nTargetSpots );
+					final List< FlagNode< Spot > > targetNodes = new ArrayList<>( nTargetSpots );
+					final Iterator< Spot > targetIt = spots.iterator( targetFrame, true );
+					while ( targetIt.hasNext() )
+					{
+						final double[] coords = new double[ 3 ];
+						final Spot spot = targetIt.next();
+						TMUtils.localize( spot, coords );
+						targetCoords.add( new RealPoint( coords ) );
+						targetNodes.add( new FlagNode<>( spot ) );
+					}
 
-						final int nTargetSpots = spots.getNSpots( targetFrame, true );
-						if ( nTargetSpots < 1 )
+					final KDTree< FlagNode< Spot > > tree = new KDTree<>( targetNodes, targetCoords );
+					final NearestNeighborFlagSearchOnKDTree< Spot > search = new NearestNeighborFlagSearchOnKDTree<>( tree );
+
+					/*
+					 * For each spot in the source frame, find its nearest
+					 * neighbor in the target frame.
+					 */
+					final Iterator< Spot > sourceIt = spots.iterator( sourceFrame, true );
+					while ( sourceIt.hasNext() )
+					{
+						final Spot source = sourceIt.next();
+						final double[] coords = new double[ 3 ];
+						TMUtils.localize( source, coords );
+						final RealPoint sourceCoords = new RealPoint( coords );
+						search.search( sourceCoords );
+
+						final double squareDist = search.getSquareDistance();
+						final FlagNode< Spot > targetNode = search.getSampler().get();
+
+						/*
+						 * The closest we could find is too far. We skip this
+						 * source spot and do not create a link
+						 */
+						if ( squareDist > maxDistSquare )
 							continue;
 
-						final List< RealPoint > targetCoords = new ArrayList<>( nTargetSpots );
-						final List< FlagNode< Spot > > targetNodes = new ArrayList<>( nTargetSpots );
-						final Iterator< Spot > targetIt = spots.iterator( targetFrame, true );
-						while ( targetIt.hasNext() )
+						/*
+						 * Everything is ok. This node is free and below max
+						 * dist. We create a link and mark this node as
+						 * assigned.
+						 */
+
+						targetNode.setVisited( true );
+						synchronized ( graph )
 						{
-							final double[] coords = new double[ 3 ];
-							final Spot spot = targetIt.next();
-							TMUtils.localize( spot, coords );
-							targetCoords.add( new RealPoint( coords ) );
-							targetNodes.add( new FlagNode<>( spot ) );
+							final DefaultWeightedEdge edge = graph.addEdge( source, targetNode.getValue() );
+							graph.setEdgeWeight( edge, squareDist );
 						}
-
-						final KDTree< FlagNode< Spot > > tree = new KDTree<>( targetNodes, targetCoords );
-						final NearestNeighborFlagSearchOnKDTree< Spot > search = new NearestNeighborFlagSearchOnKDTree<>( tree );
-
-						// For each spot in the source frame, find its nearest
-						// neighbor in the target frame
-						final Iterator< Spot > sourceIt = spots.iterator( sourceFrame, true );
-						while ( sourceIt.hasNext() )
-						{
-							final Spot source = sourceIt.next();
-							final double[] coords = new double[ 3 ];
-							TMUtils.localize( source, coords );
-							final RealPoint sourceCoords = new RealPoint( coords );
-							search.search( sourceCoords );
-
-							final double squareDist = search.getSquareDistance();
-							final FlagNode< Spot > targetNode = search.getSampler().get();
-
-							/*
-							 * The closest we could find is too far. We skip
-							 * this source spot and do not create a link
-							 */
-							if ( squareDist > maxDistSquare )
-								continue;
-
-							/*
-							 * Everything is ok. This node is free and below max
-							 * dist. We create a link and mark this node as
-							 * assigned.
-							 */
-
-							targetNode.setVisited( true );
-							synchronized ( graph )
-							{
-								final DefaultWeightedEdge edge = graph.addEdge( source, targetNode.getValue() );
-								graph.setEdgeWeight( edge, squareDist );
-							}
-
-						}
-						logger.setProgress( progress.incrementAndGet() / ( float ) frames.size() );
 					}
+					logger.setProgress( progress.incrementAndGet() / ( double ) frames.size() );
+					return null;
 				}
-			};
+			} );
+			futures.add( future );
 		}
 
 		logger.setStatus( "Tracking..." );
 		logger.setProgress( 0 );
 
-		SimpleMultiThreading.startAndJoin( threads );
+		try
+		{
+			for ( final Future< Void > future : futures )
+				future.get();
 
-		logger.setProgress( 1 );
-		logger.setStatus( "" );
+			executors.shutdown();
+		}
+		catch ( InterruptedException | ExecutionException e )
+		{
+			e.printStackTrace();
+			errorMessage = e.getMessage();
+			return false;
+		}
+		finally
+		{
+			logger.setProgress( 1 );
+			logger.setStatus( "" );
 
-		final long end = System.currentTimeMillis();
-		processingTime = end - start;
+			final long end = System.currentTimeMillis();
+			processingTime = end - start;
+		}
 		return true;
 	}
 
