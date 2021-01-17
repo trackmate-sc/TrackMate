@@ -15,7 +15,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
-import fiji.plugin.trackmate.util.SpotNeighborhood;
+import fiji.plugin.trackmate.util.SpotUtil;
 import fiji.plugin.trackmate.util.TMUtils;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
@@ -236,8 +236,13 @@ public class LabelImgExporter extends AbstractTMAction
 	{
 		final int[] dimensions = imp.getDimensions();
 		final int[] dims = new int[] { dimensions[ 0 ], dimensions[ 1 ], dimensions[ 3 ], dimensions[ 4 ] };
-
-		final ImagePlus lblImp = createLabelImagePlus( model, dims, exportSpotsAsDots, exportTracksOnly, logger );
+		final double[] calibration = new double[] {
+				imp.getCalibration().pixelWidth,
+				imp.getCalibration().pixelHeight,
+				imp.getCalibration().pixelDepth,
+				imp.getCalibration().frameInterval
+		};
+		final ImagePlus lblImp = createLabelImagePlus( model, dims, calibration, exportSpotsAsDots, exportTracksOnly, logger );
 		lblImp.setCalibration( imp.getCalibration().copy() );
 		lblImp.setTitle( "LblImg_" + imp.getTitle() );
 		return lblImp;
@@ -269,10 +274,11 @@ public class LabelImgExporter extends AbstractTMAction
 	public static final ImagePlus createLabelImagePlus(
 			final Model model,
 			final int[] dimensions,
+			final double[] calibration,
 			final boolean exportSpotsAsDots,
 			final boolean exportTracksOnly )
 	{
-		return createLabelImagePlus( model, dimensions, exportSpotsAsDots, exportTracksOnly, Logger.VOID_LOGGER );
+		return createLabelImagePlus( model, dimensions, calibration, exportSpotsAsDots, exportTracksOnly, Logger.VOID_LOGGER );
 	}
 
 	/**
@@ -303,6 +309,7 @@ public class LabelImgExporter extends AbstractTMAction
 	public static final ImagePlus createLabelImagePlus(
 			final Model model,
 			final int[] dimensions,
+			final double[] calibration,
 			final boolean exportSpotsAsDots,
 			final boolean exportTracksOnly,
 			final Logger logger )
@@ -311,7 +318,7 @@ public class LabelImgExporter extends AbstractTMAction
 		for ( int d = 0; d < dims.length; d++ )
 			dims[ d ] = dimensions[ d ];
 
-		final ImagePlus lblImp = ImageJFunctions.wrap( createLabelImg( model, dims, exportSpotsAsDots, exportTracksOnly, logger ), "LblImage" );
+		final ImagePlus lblImp = ImageJFunctions.wrap( createLabelImg( model, dims, calibration, exportSpotsAsDots, exportTracksOnly, logger ), "LblImage" );
 		lblImp.setDimensions( 1, dimensions[ 2 ], dimensions[ 3 ] );
 		lblImp.setOpenAsHyperStack( true );
 		lblImp.resetDisplayRange();
@@ -343,10 +350,11 @@ public class LabelImgExporter extends AbstractTMAction
 	public static final Img< UnsignedShortType > createLabelImg(
 			final Model model,
 			final long[] dimensions,
+			final double[] calibration,
 			final boolean exportSpotsAsDots,
 			final boolean exportTracksOnly )
 	{
-		return createLabelImg( model, dimensions, exportSpotsAsDots, exportTracksOnly, Logger.VOID_LOGGER );
+		return createLabelImg( model, dimensions, calibration, exportSpotsAsDots, exportTracksOnly, Logger.VOID_LOGGER );
 	}
 
 	/**
@@ -377,6 +385,7 @@ public class LabelImgExporter extends AbstractTMAction
 	public static final Img< UnsignedShortType > createLabelImg(
 			final Model model,
 			final long[] dimensions,
+			final double[] calibration,
 			final boolean exportSpotsAsDots,
 			final boolean exportTracksOnly,
 			final Logger logger )
@@ -391,7 +400,7 @@ public class LabelImgExporter extends AbstractTMAction
 				Axes.Y,
 				Axes.Z,
 				Axes.TIME };
-		final ImgPlus< UnsignedShortType > imgPlus = new ImgPlus<>( lblImg, "LblImg", axes );
+		final ImgPlus< UnsignedShortType > imgPlus = new ImgPlus<>( lblImg, "LblImg", axes, calibration );
 
 		/*
 		 * Determine the starting id for spots not in tracks.
@@ -417,7 +426,7 @@ public class LabelImgExporter extends AbstractTMAction
 
 			final SpotWriter spotWriter = exportSpotsAsDots
 					? new SpotAsDotWriter( imgCT )
-					: new SpotSphereWriter( imgCT );
+					: new SpotRoiWriter( imgCT );
 
 			for ( final Spot spot : model.getSpots().iterable( frame, true ) )
 			{
@@ -487,12 +496,12 @@ public class LabelImgExporter extends AbstractTMAction
 		public void write( Spot spot, int id );
 	}
 
-	private static final class SpotSphereWriter implements SpotWriter
+	private static final class SpotRoiWriter implements SpotWriter
 	{
 
 		private final ImgPlus< UnsignedShortType > img;
 
-		public SpotSphereWriter( final ImgPlus< UnsignedShortType > img )
+		public SpotRoiWriter( final ImgPlus< UnsignedShortType > img )
 		{
 			this.img = img;
 		}
@@ -500,8 +509,7 @@ public class LabelImgExporter extends AbstractTMAction
 		@Override
 		public void write( final Spot spot, final int id )
 		{
-			final SpotNeighborhood< UnsignedShortType > neighborhood = new SpotNeighborhood< UnsignedShortType >( spot, img );
-			for ( final UnsignedShortType pixel : neighborhood )
+			for ( final UnsignedShortType pixel : SpotUtil.iterable( spot, img ) )
 				pixel.set( id );
 		}
 	}
