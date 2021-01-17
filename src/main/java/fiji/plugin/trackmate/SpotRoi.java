@@ -97,7 +97,7 @@ public class SpotRoi
 		final double[] yp = toPolygonY( yScale, 0, spotYCenter, 1. );
 		final WritablePolygon2D polygon = GeomMasks.closedPolygon2D( xp, yp );
 		final IterableRegion< BoolType > region = Masks.toIterableRegion( polygon );
-		return Regions.sample( region, Views.extendMirrorDouble( img ) );
+		return Regions.sample( region, Views.extendMirrorDouble( Views.dropSingletonDimensions( img ) ) );
 	}
 
 	public double radius()
