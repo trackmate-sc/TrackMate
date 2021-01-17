@@ -1,11 +1,15 @@
 package fiji.plugin.trackmate.detection.semiauto;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
@@ -17,7 +21,6 @@ import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.algorithm.Algorithm;
 import net.imglib2.algorithm.MultiThreaded;
-import net.imglib2.multithreading.SimpleMultiThreading;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
@@ -49,7 +52,6 @@ import net.imglib2.type.numeric.RealType;
  *            {@link NativeType} to use with most TrackMate {@link SpotDetector}
  *            s.
  */
-@SuppressWarnings( "deprecation" )
 public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeType< T > > implements Algorithm, MultiThreaded
 {
 
@@ -131,28 +133,28 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 		}
 		selectionModel.clearSelection();
 
-		final int nThreads = Math.min( numThreads, spots.size() );
-		final ArrayBlockingQueue< Spot > queue = new ArrayBlockingQueue< >( spots.size(), false, spots );
-
 		ok = true;
-		final ThreadGroup semiAutoTrackingThreadgroup = new ThreadGroup( "Semi-automatic tracking threads" );
-		final Thread[] threads = SimpleMultiThreading.newThreads( nThreads );
-		for ( int i = 0; i < threads.length; i++ )
+		final int nThreads = Math.min( numThreads, spots.size() );
+		final ExecutorService executors = Executors.newFixedThreadPool( nThreads );
+		final List< Future< ? > > futures = new ArrayList<>( spots.size() );
+		for ( final Spot spot : spots )
 		{
-			threads[ i ] = new Thread( semiAutoTrackingThreadgroup, new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					Spot spot;
-					while ( ( spot = queue.poll() ) != null )
-					{
-						processSpot( spot );
-					}
-				}
-			} );
+			final Future< ? > future = executors.submit( () -> processSpot( spot ) );
+			futures.add( future );
 		}
-		SimpleMultiThreading.startAndJoin( threads );
+		try
+		{
+			for ( final Future< ? > future : futures )
+				future.get();
+
+			executors.shutdown();
+		}
+		catch ( InterruptedException | ExecutionException e )
+		{
+			ok = false;
+			errorMessage = e.getMessage();
+			e.printStackTrace();
+		}
 		return ok;
 	}
 
