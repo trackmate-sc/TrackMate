@@ -27,10 +27,11 @@ import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imagej.ImgPlusMetadata;
 import net.imagej.axis.Axes;
-import net.imagej.axis.AxisType;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.img.ImagePlusAdapter;
+import net.imglib2.img.display.imagej.ImgPlusViews;
+import net.imglib2.type.Type;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.util.Util;
 
@@ -201,40 +202,6 @@ public class TMUtils
 	/*
 	 * ImgPlus & calibration & axes
 	 */
-
-	/**
-	 * Returns the index of the target axis in the given metadata. Return -1 if
-	 * the axis was not found.
-	 */
-	private static final int findAxisIndex( final ImgPlusMetadata img, final AxisType axis )
-	{
-		return img.dimensionIndex( axis );
-	}
-
-	public static final int findXAxisIndex( final ImgPlusMetadata img )
-	{
-		return findAxisIndex( img, Axes.X );
-	}
-
-	public static final int findYAxisIndex( final ImgPlusMetadata img )
-	{
-		return findAxisIndex( img, Axes.Y );
-	}
-
-	public static final int findZAxisIndex( final ImgPlusMetadata img )
-	{
-		return findAxisIndex( img, Axes.Z );
-	}
-
-	public static final int findTAxisIndex( final ImgPlusMetadata img )
-	{
-		return findAxisIndex( img, Axes.TIME );
-	}
-
-	public static final int findCAxisIndex( final ImgPlusMetadata img )
-	{
-		return findAxisIndex( img, Axes.CHANNEL );
-	}
 
 	/**
 	 * Return the xyz calibration stored in an {@link ImgPlusMetadata} in a
@@ -503,6 +470,13 @@ public class TMUtils
 		return DATE_FORMAT.format( new Date() );
 	}
 
+	public static < T extends Type< T > > ImgPlus< T > hyperSlice( final ImgPlus< T > img, final long channel, final long frame )
+	{
+		final ImgPlus< T > imgT = ImgPlusViews.hyperSlice( img, img.dimensionIndex( Axes.TIME ), frame );
+		final ImgPlus< T > imgTC = ImgPlusViews.hyperSlice( imgT, imgT.dimensionIndex( Axes.CHANNEL ), channel );
+		return imgTC;
+	}
+
 	/**
 	 * Returns an interval object that slices in the specified {@link ImgPlus}
 	 * <b>in a single channel</b> (the channel dimension is dropped).
@@ -527,17 +501,17 @@ public class TMUtils
 		final long[] min = new long[ img.numDimensions() ];
 
 		// X, we must have it.
-		final int xindex = TMUtils.findXAxisIndex( img );
+		final int xindex = img.dimensionIndex( Axes.X );
 		min[ xindex ] = settings.xstart;
 		max[ xindex ] = settings.xend;
 
 		// Y, we must have it.
-		final int yindex = TMUtils.findYAxisIndex( img );
+		final int yindex = img.dimensionIndex( Axes.Y );
 		min[ yindex ] = settings.ystart;
 		max[ yindex ] = settings.yend;
 
 		// Z, we MIGHT have it.
-		final int zindex = TMUtils.findZAxisIndex( img );
+		final int zindex = img.dimensionIndex( Axes.Z );
 		if ( zindex >= 0 )
 		{
 			min[ zindex ] = settings.zstart;
@@ -546,7 +520,7 @@ public class TMUtils
 
 		// TIME, we might have it, but anyway we leave the start & end
 		// management to elsewhere.
-		final int tindex = TMUtils.findTAxisIndex( img );
+		final int tindex = img.dimensionIndex( Axes.TIME );
 		if ( tindex >= 0 )
 		{
 			min[ tindex ] = settings.tstart;
@@ -556,7 +530,7 @@ public class TMUtils
 		// CHANNEL, we might have it, we drop it.
 		final long[] max2;
 		final long[] min2;
-		final int cindex = TMUtils.findCAxisIndex( img );
+		final int cindex = img.dimensionIndex( Axes.CHANNEL );
 		if ( cindex >= 0 )
 		{
 			max2 = new long[ img.numDimensions() - 1 ];
@@ -608,17 +582,17 @@ public class TMUtils
 		final long[] min = new long[ img.numDimensions() ];
 
 		// X, we must have it.
-		final int xindex = TMUtils.findXAxisIndex( img );
+		final int xindex = img.dimensionIndex( Axes.X );
 		min[ xindex ] = settings.xstart;
 		max[ xindex ] = settings.xend;
 
 		// Y, we must have it.
-		final int yindex = TMUtils.findYAxisIndex( img );
+		final int yindex = img.dimensionIndex( Axes.Y );
 		min[ yindex ] = settings.ystart;
 		max[ yindex ] = settings.yend;
 
 		// Z, we MIGHT have it.
-		final int zindex = TMUtils.findZAxisIndex( img );
+		final int zindex = img.dimensionIndex( Axes.Z );
 		if ( zindex >= 0 )
 		{
 			min[ zindex ] = settings.zstart;
@@ -626,7 +600,7 @@ public class TMUtils
 		}
 
 		// CHANNEL, we might have it.
-		final int cindex = TMUtils.findCAxisIndex( img );
+		final int cindex = img.dimensionIndex( Axes.CHANNEL );
 		if ( cindex >= 0 )
 		{
 			Integer c = ( Integer ) settings.detectorSettings.get( KEY_TARGET_CHANNEL ); // 1-based.
@@ -639,7 +613,7 @@ public class TMUtils
 
 		// TIME, we might have it, but anyway we leave the start & end
 		// management to elsewhere.
-		final int tindex = TMUtils.findTAxisIndex( img );
+		final int tindex = img.dimensionIndex( Axes.TIME );
 
 		/*
 		 * We want to exclude time (if we have it) from out interval and source,
