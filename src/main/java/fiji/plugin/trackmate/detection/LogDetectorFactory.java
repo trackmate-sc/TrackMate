@@ -28,13 +28,6 @@ import java.util.Map;
 
 import javax.swing.ImageIcon;
 
-import net.imagej.ImgPlus;
-import net.imglib2.Interval;
-import net.imglib2.RandomAccessible;
-import net.imglib2.type.NativeType;
-import net.imglib2.type.numeric.RealType;
-import net.imglib2.view.Views;
-
 import org.jdom2.Element;
 import org.scijava.plugin.Plugin;
 
@@ -43,6 +36,13 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.panels.detector.LogDetectorConfigurationPanel;
 import fiji.plugin.trackmate.util.TMUtils;
+import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
+import net.imglib2.Interval;
+import net.imglib2.RandomAccessible;
+import net.imglib2.type.NativeType;
+import net.imglib2.type.numeric.RealType;
+import net.imglib2.view.Views;
 
 @Plugin( type = SpotDetectorFactory.class )
 public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> implements SpotDetectorFactory< T >
@@ -89,7 +89,7 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 	{
 		final double[] calibration = TMUtils.getSpatialCalibration( img );
 		RandomAccessible< T > imFrame;
-		final int cDim = TMUtils.findCAxisIndex( img );
+		final int cDim = img.dimensionIndex( Axes.CHANNEL );
 		if ( cDim < 0 )
 		{
 			imFrame = img;
@@ -101,13 +101,12 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 			imFrame = Views.hyperSlice( img, cDim, channel );
 		}
 
-		int timeDim = TMUtils.findTAxisIndex( img );
+		int timeDim = img.dimensionIndex( Axes.TIME );
 		if ( timeDim >= 0 )
 		{
 			if ( cDim >= 0 && timeDim > cDim )
-			{
 				timeDim--;
-			}
+
 			imFrame = Views.hyperSlice( imFrame, timeDim, frame );
 		}
 

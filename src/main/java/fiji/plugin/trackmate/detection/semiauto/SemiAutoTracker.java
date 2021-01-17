@@ -7,6 +7,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.util.TMUtils;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
 import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -49,8 +50,8 @@ public class SemiAutoTracker< T extends RealType< T > & NativeType< T >> extends
 		 * Source, rai and transform
 		 */
 
-		final int tindex = TMUtils.findTAxisIndex( img );
-		final int cindex = TMUtils.findCAxisIndex( img );
+		final int tindex = img.dimensionIndex( Axes.TIME );
+		final int cindex = img.dimensionIndex( Axes.CHANNEL );
 		if ( frame >= img.dimension( tindex ) )
 		{
 			logger.log( "Spot: " + spot + ": No more time-points.\n" );
@@ -105,7 +106,7 @@ public class SemiAutoTracker< T extends RealType< T > & NativeType< T >> extends
 
 		long[] min;
 		long[] max;
-		if ( img.dimension( TMUtils.findZAxisIndex( img ) ) > 1 )
+		if ( img.dimension( img.dimensionIndex( Axes.Z ) ) > 1 )
 		{
 			// 3D
 			min = new long[] { x0, y0, z0 };
