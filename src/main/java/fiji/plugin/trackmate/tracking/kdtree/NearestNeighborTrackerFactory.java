@@ -88,9 +88,9 @@ public class NearestNeighborTrackerFactory implements SpotTrackerFactory
 	{
 		final StringBuilder str = new StringBuilder();
 		final boolean ok = writeAttribute( settings, element, KEY_LINKING_MAX_DISTANCE, Double.class, str );
-		if (!ok) {
+		if ( !ok )
 			errorMessage = str.toString();
-		}
+
 		return ok;
 	}
 
@@ -101,9 +101,8 @@ public class NearestNeighborTrackerFactory implements SpotTrackerFactory
 		final StringBuilder errorHolder = new StringBuilder();
 		final boolean ok = readDoubleAttribute( element, settings, KEY_LINKING_MAX_DISTANCE, errorHolder );
 		if ( !ok )
-		{
 			errorMessage = errorHolder.toString();
-		}
+
 		return ok;
 	}
 
@@ -127,9 +126,8 @@ public class NearestNeighborTrackerFactory implements SpotTrackerFactory
 		final StringBuilder str = new StringBuilder();
 		final boolean ok = NearestNeighborTracker.checkInput( settings, str );
 		if ( !ok )
-		{
 			errorMessage = str.toString();
-		}
+
 		return ok;
 	}
 
@@ -138,5 +136,4 @@ public class NearestNeighborTrackerFactory implements SpotTrackerFactory
 	{
 		return errorMessage;
 	}
-
 }
