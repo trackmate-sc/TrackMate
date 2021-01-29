@@ -7,11 +7,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.ImageIcon;
+
+import org.scijava.plugin.Plugin;
+
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.DetectionUtils;
+import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.util.TMUtils;
 import net.imagej.ImgPlus;
 import net.imglib2.Localizable;
@@ -231,6 +238,82 @@ public class SpotGaussianFitter extends MultiThreadedBenchmarkAlgorithm
 				}
 			}
 			return true;
+		}
+	}
+
+	public static class SpotGaussianFitterAction extends AbstractTMAction
+	{
+
+		@Override
+		public void execute( final TrackMate trackmate )
+		{
+			logger.log( "Refining the position of spots using gaussian fitting.\n" );
+			logger.log( "Fitting " + trackmate.getModel().getSpots().getNSpots( true ) + " visible spots using " + "threads.\n" );
+
+			final SpotGaussianFitter fitter = new SpotGaussianFitter( trackmate.getModel(), trackmate.getSettings(), logger );
+			fitter.setNumThreads( trackmate.getNumThreads() );
+			if ( !fitter.checkInput() || !fitter.process() )
+			{
+				logger.error( fitter.getErrorMessage() );
+				return;
+			}
+			logger.log( String.format( "Fitting completed in %.1f s.\n", ( fitter.getProcessingTime() / 1000. ) ) );
+		}
+	}
+
+	@Plugin( type = TrackMateActionFactory.class )
+	public static class Factory implements TrackMateActionFactory
+	{
+
+		public static final ImageIcon ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/gauss_fit.png" ) );
+
+		public static final String NAME = "Refine spot position with gaussian fitting";
+
+		public static final String KEY = "GAUSS_FIT";
+
+		public static final String INFO_TEXT = "<html>" +
+				"This action performs sub-localization of spots using gaussian peak fitting. "
+				+ "<p>"
+				+ "The fit process will update the spot position and their radius, using the "
+				+ "results from the gaussian fit. Of course it works best when the peaks in the image "
+				+ "ressemble gaussian functions. The fitting process uses the spots information (position "
+				+ "and radius) as initial values for the fit."
+				+ "<p>"
+				+ "It works for both 2D and 3D images. "
+				+ "In 3D it accounts for non-isotropic calibration (and possible PSF "
+				+ "deformation in the Z direction) thanks to an elliptic gaussian function, "
+				+ "with axes constrained to be along X, Y and Z. "
+				+ "In 2D we use an isotropic gaussian."
+				+ "</html>";
+
+		@Override
+		public String getInfoText()
+		{
+			return INFO_TEXT;
+		}
+
+		@Override
+		public String getKey()
+		{
+			return KEY;
+		}
+
+		@Override
+		public TrackMateAction create( final TrackMateGUIController controller )
+		{
+			return new SpotGaussianFitterAction();
+		}
+
+		@Override
+		public ImageIcon getIcon()
+		{
+			return ICON;
+		}
+
+		@Override
+		public String getName()
+		{
+			return NAME;
 		}
 	}
 }
