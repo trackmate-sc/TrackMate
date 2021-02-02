@@ -30,7 +30,9 @@ import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegion;
 import net.imglib2.roi.labeling.LabelRegionCursor;
 import net.imglib2.roi.labeling.LabelRegions;
+import net.imglib2.type.BooleanType;
 import net.imglib2.type.logic.BitType;
+import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.IntType;
@@ -148,14 +150,29 @@ public class MaskUtils
 		return kStar;
 	}
 
+	/**
+	 * Creates a zero-min label image from a thresholded input image.
+	 * 
+	 * @param <T>
+	 *            the type of the input image. Must be real, scalar.
+	 * @param input
+	 *            the input image.
+	 * @param interval
+	 *            the interval in the input image to analyze.
+	 * @param threshold
+	 *            the threshold to apply to the input image.
+	 * @param numThreads
+	 *            how many threads to use for multithreaded computation.
+	 * @return a new label image.
+	 */
 	public static final < T extends RealType< T > > ImgLabeling< Integer, IntType > toLabeling(
-			final RandomAccessible< T > mask,
+			final RandomAccessible< T > input,
 			final Interval interval,
 			final double threshold,
 			final int numThreads )
 	{
 		// Crop.
-		final IntervalView< T > crop = Views.interval( mask, interval );
+		final IntervalView< T > crop = Views.interval( input, interval );
 		final IntervalView< T > in = Views.zeroMin( crop );
 		final Converter< T, BitType > converter = ( a, b ) -> b.set( a.getRealDouble() > threshold );
 		final RandomAccessible< BitType > bitMask = Converters.convertRAI( in, converter, new BitType() );
@@ -183,18 +200,59 @@ public class MaskUtils
 		return labeling;
 	}
 
-	public static < T extends RealType< T >, R extends RealType< R > > List< Spot > toSpots(
+	/**
+	 * Creates spots from a grayscale image, thresholded to create a mask. A
+	 * spot is created for each connected-component of the mask, with a size
+	 * that matches the mask size.
+	 * 
+	 * @param <T>
+	 *            the type of the input image. Must be real, scalar.
+	 * @param input
+	 *            the input image.
+	 * @param interval
+	 *            the interval in the input image to analyze.
+	 * @param calibration
+	 *            the physical calibration.
+	 * @param threshold
+	 *            the threshold to apply to the input image.
+	 * @param numThreads
+	 *            how many threads to use for multithreaded computation.
+	 * @return a list of spots, without ROI.
+	 */
+	public static < T extends RealType< T > > List< Spot > fromThreshold(
 			final RandomAccessible< T > input,
 			final Interval interval,
 			final double[] calibration,
 			final double threshold,
 			final int numThreads )
 	{
-		final double quality = 1.;
-
 		// Get labeling from mask.
 		final ImgLabeling< Integer, IntType > labeling = toLabeling( input, interval, threshold, numThreads );
+		return fromLabeling(
+				labeling,
+				interval,
+				calibration );
+	}
 
+	/**
+	 * Creates spots from a label image.
+	 * 
+	 * @param <R>
+	 *            the type that backs-up the labeling.
+	 * @param labeling
+	 *            the labeling, must be zero-min.
+	 * @param interval
+	 *            the interval, used to reposition the spots from the zero-min
+	 *            labeling to the proper coordinates.
+	 * @param calibration
+	 *            the physical calibration.
+	 * @return a list of spots, without ROI.
+	 */
+	public static < R extends IntegerType< R > > List< Spot > fromLabeling(
+			final ImgLabeling< Integer, R > labeling,
+			final Interval interval,
+			final double[] calibration )
+	{
 		// Parse each component.
 		final LabelRegions< Integer > regions = new LabelRegions<>( labeling );
 		final Iterator< LabelRegion< Integer > > iterator = regions.iterator();
@@ -228,14 +286,37 @@ public class MaskUtils
 			final double radius = ( labeling.numDimensions() == 2 )
 					? Math.sqrt( volume / Math.PI )
 					: Math.pow( 3. * volume / ( 4. * Math.PI ), 1. / 3. );
+			final double quality = region.size();
 			spots.add( new Spot( x, y, z, radius, quality ) );
 		}
 
 		return spots;
 	}
 
-	public static < T extends RealType< T >, R extends RealType< R > > List< Spot > toSpots(
-			final RandomAccessible< T > mask,
+	/**
+	 * Creates spots from a grayscale image, thresholded to create a mask. A
+	 * spot is created for each connected-component of the mask, with a size
+	 * that matches the mask size. The quality of the spots is read from another
+	 * image, by taking the max pixel value of this image with the ROI.
+	 * 
+	 * @param <T>
+	 *            the type of the input image. Must be real, scalar.
+	 * @param input
+	 *            the input image.
+	 * @param interval
+	 *            the interval in the input image to analyze.
+	 * @param calibration
+	 *            the physical calibration.
+	 * @param threshold
+	 *            the threshold to apply to the input image.
+	 * @param numThreads
+	 *            how many threads to use for multithreaded computation.
+	 * @param qualityImage
+	 *            the image in which to read the quality value.
+	 * @return a list of spots, without ROI.
+	 */
+	public static < T extends RealType< T >, R extends RealType< R > > List< Spot > fromThreshold(
+			final RandomAccessible< T > input,
 			final Interval interval,
 			final double[] calibration,
 			final double threshold,
@@ -243,7 +324,7 @@ public class MaskUtils
 			final RandomAccessibleInterval< R > qualityImage )
 	{
 		// Get labeling from mask.
-		final ImgLabeling< Integer, IntType > labeling = toLabeling( mask, interval, threshold, numThreads );
+		final ImgLabeling< Integer, IntType > labeling = toLabeling( input, interval, threshold, numThreads );
 
 		// Crop of the quality image.
 		final IntervalView< R > cropQuality = Views.interval( qualityImage, interval );
@@ -299,20 +380,100 @@ public class MaskUtils
 		return spots;
 	}
 
-	public static final < T extends RealType< T >, R extends NumericType< R > > List< Spot > toSpotsWithROI(
+	/**
+	 * Creates spots <b>with their ROIs</b> from a <b>2D</b> grayscale image,
+	 * thresholded to create a mask. A spot is created for each
+	 * connected-component of the mask, with a size that matches the mask size.
+	 * The quality of the spots is read from another image, by taking the max
+	 * pixel value of this image with the ROI.
+	 * 
+	 * @param <T>
+	 *            the type of the input image. Must be real, scalar.
+	 * @param <S>
+	 *            the type of the quality image. Must be real, scalar.
+	 * @param input
+	 *            the input image. Must be 2D.
+	 * @param interval
+	 *            the interval in the input image to analyze.
+	 * @param calibration
+	 *            the physical calibration.
+	 * @param threshold
+	 *            the threshold to apply to the input image.
+	 * @param simplify
+	 *            if <code>true</code> the polygon will be post-processed to be
+	 *            smoother and contain less points.
+	 * @param numThreads
+	 *            how many threads to use for multithreaded computation.
+	 * @param qualityImage
+	 *            the image in which to read the quality value.
+	 * @return a list of spots, with ROI.
+	 */
+	public static final < T extends RealType< T >, S extends NumericType< S > > List< Spot > fromThresholdWithROI(
 			final RandomAccessible< T > input,
 			final Interval interval,
 			final double[] calibration,
 			final double threshold,
 			final boolean simplify,
-			final RandomAccessibleInterval< R > qualityImage )
+			final int numThreads,
+			final RandomAccessibleInterval< S > qualityImage )
 	{
-		// Crop.
-		final IntervalView< T > crop = Views.interval( input, interval );
-		final IntervalView< T > mask = Views.zeroMin( crop );
+		if ( input.numDimensions() != 2 )
+			throw new IllegalArgumentException( "Can only process 2D images with this method, but got " + input.numDimensions() + "D." );
+		
+		// Get labeling.
+		final ImgLabeling< Integer, IntType > labeling = toLabeling( input, interval, threshold, numThreads );
+		return fromLabelingWithROI( labeling, interval, calibration, simplify, qualityImage );
+	}
 
-		// Get polygons.
-		final List< Polygon > polygons = maskToPolygons( mask, threshold );
+	/**
+	 * Creates spots <b>with ROIs</b> from a <b>2D</b> label image. The quality
+	 * value is read from a secondary image, byt taking the max value in each
+	 * ROI.
+	 * 
+	 * @param <R>
+	 *            the type that backs-up the labeling.
+	 * @param <S>
+	 *            the type of the quality image. Must be real, scalar.
+	 * @param labeling
+	 *            the labeling, must be zero-min and 2D..
+	 * @param interval
+	 *            the interval, used to reposition the spots from the zero-min
+	 *            labeling to the proper coordinates.
+	 * @param calibration
+	 *            the physical calibration.
+	 * @param simplify
+	 *            if <code>true</code> the polygon will be post-processed to be
+	 *            smoother and contain less points.
+	 * @param qualityImage
+	 *            the image in which to read the quality value.
+	 * @return a list of spots, with ROI.
+	 */
+	public static < R extends IntegerType< R >, S extends NumericType< S > > List< Spot > fromLabelingWithROI(
+			final ImgLabeling< Integer, R > labeling,
+			final Interval interval,
+			final double[] calibration,
+			final boolean simplify,
+			final RandomAccessibleInterval< S > qualityImage )
+	{
+		if ( labeling.numDimensions() != 2 )
+			throw new IllegalArgumentException( "Can only process 2D images with this method, but got " + labeling.numDimensions() + "D." );
+
+		final LabelRegions< Integer > regions = new LabelRegions< Integer >( labeling );
+
+		// Parse regions to create polygons on boundaries.
+		final List< Polygon > polygons = new ArrayList<>( regions.getExistingLabels().size() );
+		final Iterator< LabelRegion< Integer > > iterator = regions.iterator();
+		while ( iterator.hasNext() )
+		{
+			final LabelRegion< Integer > region = iterator.next();
+			// Analyze in zero-min region.
+			final List< Polygon > pp = maskToPolygons( Views.zeroMin( region ) );
+			// Translate back to interval coords.
+			for ( final Polygon polygon : pp )
+				polygon.translate( ( int ) region.min( 0 ), ( int ) region.min( 1 ) );
+
+			polygons.addAll( pp );
+		}
 
 		// Quality image.
 		final List< Spot > spots = new ArrayList<>( polygons.size() );
@@ -347,7 +508,6 @@ public class MaskUtils
 				qualityImp.setRoi( fRoi );
 				quality = qualityImp.getStatistics( Measurements.MIN_MAX ).max;
 			}
-
 
 			final Polygon fPolygon = fRoi.getPolygon();
 			final double[] xpoly = new double[ fPolygon.npoints ];
@@ -483,22 +643,47 @@ public class MaskUtils
 	}
 
 	/**
-	 * Parse an image to threshold and return a list of polygons for the
-	 * external contours of white objects.
+	 * Start at 1.
+	 * 
+	 * @return a new iterator that goes like 1, 2, 3, ...
+	 */
+	public static final Iterator< Integer > labelGenerator()
+	{
+		return new Iterator< Integer >()
+		{
+
+			private int currentVal = 0;
+
+			@Override
+			public Integer next()
+			{
+				currentVal++;
+				return Integer.valueOf( currentVal );
+			}
+
+			@Override
+			public boolean hasNext()
+			{
+				return true;
+			}
+		};
+	}
+
+	/**
+	 * Parse a 2D mask and return a list of polygons for the external contours
+	 * of white objects.
 	 * <p>
 	 * Warning: cannot deal with holes, they are simply ignored.
 	 * <p>
 	 * Copied and adapted from ImageJ1 code by Wayne Rasband.
 	 * 
 	 * @param <T>
-	 *            the type of the source image, must be real.
+	 *            the type of the mask.
 	 * @param mask
 	 *            the mask image.
 	 * @return a new list of polygons.
 	 */
-	public static final < T extends RealType< T > > List< Polygon > maskToPolygons(
-			final RandomAccessibleInterval< T > mask,
-			final double threshold )
+	private static final < T extends BooleanType< T > > List< Polygon > maskToPolygons( final RandomAccessibleInterval< T > mask )
 	{
 		final int w = ( int ) mask.dimension( 0 );
 		final int h = ( int ) mask.dimension( 1 );
@@ -520,14 +705,14 @@ public class MaskUtils
 			Outline oAfterLowerRightCorner = null;
 
 			ra.setPosition( 0, 0 );
-			thisRow[ 1 ] = y < h ? ra.get().getRealDouble() > threshold : false;
+			thisRow[ 1 ] = y < h ? ra.get().get() : false;
 
 			for ( int x = 0; x <= w; x++ )
 			{
 				// we need to read one pixel ahead
 				ra.setPosition( x + 1, 0 );
 				if ( y < h && x < w - 1 )
-					thisRow[ x + 2 ] = ra.get().getRealDouble() > threshold;
+					thisRow[ x + 2 ] = ra.get().get();
 				else if ( x < w - 1 )
 					thisRow[ x + 2 ] = false;
 
@@ -932,33 +1117,6 @@ public class MaskUtils
 			}
 			return res + "]";
 		}
-	}
-
-	/**
-	 * Start at 1.
-	 * 
-	 * @return a new iterator that goes like 1, 2, 3, ...
-	 */
-	public static final Iterator< Integer > labelGenerator()
-	{
-		return new Iterator< Integer >()
-		{
-
-			private int currentVal = 0;
-
-			@Override
-			public Integer next()
-			{
-				currentVal++;
-				return Integer.valueOf( currentVal );
-			}
-
-			@Override
-			public boolean hasNext()
-			{
-				return true;
-			}
-		};
 	}
 
 }

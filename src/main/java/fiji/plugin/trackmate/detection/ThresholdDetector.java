@@ -94,7 +94,7 @@ public class ThresholdDetector< T extends RealType< T > & NativeType< T > > impl
 			/*
 			 * 2D: we compute and store the contour.
 			 */
-			spots = MaskUtils.toSpotsWithROI( input, interval, calibration, threshold, simplify, null );
+			spots = MaskUtils.fromThresholdWithROI( input, interval, calibration, threshold, simplify, numThreads, null );
 
 		}
 		else if ( input.numDimensions() == 3 )
@@ -102,7 +102,7 @@ public class ThresholdDetector< T extends RealType< T > & NativeType< T > > impl
 			/*
 			 * 3D: We create spots of the same volume that of the region.
 			 */
-			spots = MaskUtils.toSpots( input, interval, calibration, threshold, numThreads );
+			spots = MaskUtils.fromThreshold( input, interval, calibration, threshold, numThreads );
 		}
 		else
 		{
