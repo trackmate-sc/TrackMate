@@ -1,10 +1,12 @@
 package fiji.plugin.trackmate;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.scijava.Cancelable;
 import org.scijava.Named;
 import org.scijava.util.VersionUtils;
 
@@ -40,9 +42,10 @@ import net.imglib2.multithreading.SimpleMultiThreading;
  *
  * @author Nicholas Perry
  * @author Johannes Schindelin
- * @author Jean-Yves Tinevez - Institut Pasteur - July 2010 - 2018
+ * @author Jean-Yves Tinevez - Institut Pasteur - July 2010 - 2018, revised in
+ *         2021
  */
-public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
+public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Cancelable
 {
 
 	public static final String PLUGIN_NAME_STR = "TrackMate";
@@ -63,6 +66,12 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 	protected int numThreads = Runtime.getRuntime().availableProcessors();
 
 	private String name;
+
+	private boolean isCanceled;
+
+	private String cancelReason;
+
+	private List< Cancelable > cancelables = Collections.synchronizedList( new ArrayList<>() );
 
 	/*
 	 * CONSTRUCTORS
@@ -121,8 +130,13 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 	 */
 	public boolean computeSpotFeatures( final boolean doLogIt )
 	{
+		isCanceled = false;
+		cancelReason = null;
+		cancelables.clear();
+
 		final Logger logger = model.getLogger();
 		final SpotFeatureCalculator calculator = new SpotFeatureCalculator( model, settings );
+		cancelables.add( calculator );
 		calculator.setNumThreads( numThreads );
 		if ( calculator.checkInput() && calculator.process() )
 		{
@@ -208,9 +222,15 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 	 */
 	public boolean execTracking()
 	{
+		isCanceled = false;
+		cancelReason = null;
+		cancelables.clear();
+
 		final Logger logger = model.getLogger();
 		logger.log( "Starting tracking process.\n" );
 		final SpotTracker tracker = settings.trackerFactory.create( model.getSpots(), settings.trackerSettings );
+		if ( tracker instanceof Cancelable )
+			cancelables.add( ( Cancelable ) tracker );
 		tracker.setNumThreads( numThreads );
 		tracker.setLogger( logger );
 		if ( tracker.checkInput() && tracker.process() )
@@ -236,6 +256,10 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 	@SuppressWarnings( { "rawtypes", "unchecked" } )
 	public boolean execDetection()
 	{
+		isCanceled = false;
+		cancelReason = null;
+		cancelables.clear();
+
 		final Logger logger = model.getLogger();
 		logger.log( "Starting detection process using "
 				+ ( ( numThreads > 1 ) ? ( numThreads + " threads" ) : "1 thread" )
@@ -272,7 +296,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 		/*
 		 * Separate frame-by-frame or global detection depending on the factory type.
 		 */
-		
+
 		if (factory instanceof SpotGlobalDetectorFactory )
 		{
 			return processGlobal( ( SpotGlobalDetectorFactory ) factory, img, logger );
@@ -300,7 +324,10 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 			final MultiThreaded md = ( MultiThreaded ) detector;
 			md.setNumThreads( numThreads );
 		}
-		
+
+		if ( detector instanceof Cancelable )
+			cancelables.add( ( Cancelable ) detector );
+
 		// Execute detection
 		logger.setStatus( "Detection..." );
 		if ( detector.checkInput() && detector.process() )
@@ -396,20 +423,6 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 
 			threads[ ithread ] = new Thread( "TrackMate spot detection thread " + ( 1 + ithread ) + "/" + threads.length )
 			{
-				private boolean wasInterrupted()
-				{
-					try
-					{
-						if ( isInterrupted() )
-							return true;
-						sleep( 0 );
-						return false;
-					}
-					catch ( final InterruptedException e )
-					{
-						return true;
-					}
-				}
 
 				@Override
 				public void run()
@@ -418,6 +431,9 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 					for ( int frame = ai.getAndIncrement(); frame <= settings.tend; frame = ai.getAndIncrement() )
 						try
 						{
+							if ( isCanceled() )
+								return;
+
 							// Yield detector for target frame
 							final SpotDetector< ? > detector = factory.getDetector( interval, frame );
 							if ( detector instanceof MultiThreaded )
@@ -426,8 +442,8 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 								md.setNumThreads( threadsPerFrame );
 							}
 
-							if ( wasInterrupted() )
-								return;
+							if ( detector instanceof Cancelable )
+								cancelables.add( ( Cancelable ) detector );
 
 							// Execute detection
 							if ( ok.get() && detector.checkInput() && detector.process() )
@@ -456,7 +472,9 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 									prunedSpots = new ArrayList<>();
 									for ( final Spot spot : spotsThisFrame )
 									{
-										if ( settings.roi.contains( (int) Math.round( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ] ), (int) Math.round( spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) ) )
+										if ( settings.roi.contains(
+												( int ) Math.round( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ] ),
+												( int ) Math.round( spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) ) )
 											prunedSpots.add( spot );
 									}
 								}
@@ -702,21 +720,29 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 	@Override
 	public boolean process()
 	{
-		if ( !execDetection() ) { return false; }
+		if ( isCanceled() || !execDetection() )
+			return false;
 
-		if ( !execInitialSpotFiltering() ) { return false; }
+		if ( isCanceled() || !execInitialSpotFiltering() )
+			return false;
 
-		if ( !computeSpotFeatures( true ) ) { return false; }
+		if ( isCanceled() || !computeSpotFeatures( true ) )
+			return false;
 
-		if ( !execSpotFiltering( true ) ) { return false; }
+		if ( isCanceled() || !execSpotFiltering( true ) )
+			return false;
 
-		if ( !execTracking() ) { return false; }
+		if ( isCanceled() || !execTracking() )
+			return false;
 
-		if ( !computeEdgeFeatures( true ) ) { return false; }
+		if ( isCanceled() || !computeEdgeFeatures( true ) )
+			return false;
 
-		if ( !computeTrackFeatures( true ) ) { return false; }
+		if ( isCanceled() || !computeTrackFeatures( true ) )
+			return false;
 
-		if ( !execTrackFiltering( true ) ) { return false; }
+		if ( isCanceled() || !execTrackFiltering( true ) )
+			return false;
 
 
 		return true;
@@ -758,5 +784,28 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 	public void setName( final String name )
 	{
 		this.name = name;
+	}
+
+	// --- org.scijava.Cancelable methods ---
+
+	@Override
+	public boolean isCanceled()
+	{
+		return isCanceled;
+	}
+
+	@Override
+	public void cancel( final String reason )
+	{
+		isCanceled = true;
+		cancelReason = reason;
+		cancelables.forEach( c -> c.cancel( reason ) );
+		cancelables.clear();
+	}
+
+	@Override
+	public String getCancelReason()
+	{
+		return cancelReason;
 	}
 }
