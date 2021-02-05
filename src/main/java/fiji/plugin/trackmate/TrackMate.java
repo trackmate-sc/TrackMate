@@ -71,7 +71,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 
 	private String cancelReason;
 
-	private List< Cancelable > cancelables = Collections.synchronizedList( new ArrayList<>() );
+	private final List< Cancelable > cancelables = Collections.synchronizedList( new ArrayList<>() );
 
 	/*
 	 * CONSTRUCTORS
@@ -166,8 +166,13 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 	 */
 	public boolean computeEdgeFeatures( final boolean doLogIt )
 	{
+		isCanceled = false;
+		cancelReason = null;
+		cancelables.clear();
+
 		final Logger logger = model.getLogger();
 		final EdgeFeatureCalculator calculator = new EdgeFeatureCalculator( model, settings );
+		cancelables.add( calculator );
 		calculator.setNumThreads( numThreads );
 		if ( !calculator.checkInput() || !calculator.process() )
 		{
@@ -190,8 +195,13 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 	 */
 	public boolean computeTrackFeatures( final boolean doLogIt )
 	{
+		isCanceled = false;
+		cancelReason = null;
+		cancelables.clear();
+
 		final Logger logger = model.getLogger();
 		final TrackFeatureCalculator calculator = new TrackFeatureCalculator( model, settings );
+		cancelables.add( calculator );
 		calculator.setNumThreads( numThreads );
 		if ( calculator.checkInput() && calculator.process() )
 		{
@@ -590,6 +600,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 	 */
 	public boolean execInitialSpotFiltering()
 	{
+		// Cannot be canceled.
 		final Logger logger = model.getLogger();
 		logger.log( "Starting initial filtering process.\n" );
 
@@ -623,6 +634,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 	 */
 	public boolean execSpotFiltering( final boolean doLogIt )
 	{
+		// Cannot be canceled.
 		if ( doLogIt )
 		{
 			final Logger logger = model.getLogger();
@@ -634,6 +646,8 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 
 	public boolean execTrackFiltering( final boolean doLogIt )
 	{
+		// Cannot be canceled.
+
 		if ( doLogIt )
 		{
 			final Logger logger = model.getLogger();
@@ -720,30 +734,43 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 	@Override
 	public boolean process()
 	{
-		if ( isCanceled() || !execDetection() )
+		if ( !execDetection() )
 			return false;
+		if ( isCanceled() )
+			return true;
 
-		if ( isCanceled() || !execInitialSpotFiltering() )
+		if ( !execInitialSpotFiltering() )
 			return false;
+		if ( isCanceled() )
+			return true;
 
-		if ( isCanceled() || !computeSpotFeatures( true ) )
+		if ( !computeSpotFeatures( true ) )
 			return false;
+		if ( isCanceled() )
+			return true;
 
-		if ( isCanceled() || !execSpotFiltering( true ) )
+		if ( !execSpotFiltering( true ) )
 			return false;
+		if ( isCanceled() )
+			return true;
 
-		if ( isCanceled() || !execTracking() )
+		if ( !execTracking() )
 			return false;
+		if ( isCanceled() )
+			return true;
 
-		if ( isCanceled() || !computeEdgeFeatures( true ) )
+		if ( !computeEdgeFeatures( true ) )
 			return false;
+		if ( isCanceled() )
+			return true;
 
-		if ( isCanceled() || !computeTrackFeatures( true ) )
+		if ( !computeTrackFeatures( true ) )
 			return false;
+		if ( isCanceled() )
+			return true;
 
-		if ( isCanceled() || !execTrackFiltering( true ) )
+		if ( !execTrackFiltering( true ) )
 			return false;
-
 
 		return true;
 	}
