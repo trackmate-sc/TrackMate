@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
+import org.scijava.Cancelable;
 
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Logger;
@@ -20,7 +21,7 @@ import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
  * @author Jean-Yves Tinevez - 2013
  *
  */
-public class EdgeFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
+public class EdgeFeatureCalculator extends MultiThreadedBenchmarkAlgorithm implements Cancelable
 {
 
 	private static final String BASE_ERROR_MSG = "[EdgeFeatureCalculator] ";
@@ -28,6 +29,10 @@ public class EdgeFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 	private final Settings settings;
 
 	private final Model model;
+
+	private boolean isCanceled;
+
+	private String cancelReason;
 
 	public EdgeFeatureCalculator( final Model model, final Settings settings )
 	{
@@ -105,12 +110,18 @@ public class EdgeFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 
 	private void computeEdgeFeaturesAgent( final Collection< DefaultWeightedEdge > edges, final List< EdgeAnalyzer > analyzers, final boolean doLogIt )
 	{
+		isCanceled = false;
+		cancelReason = null;
+
 		final Logger logger = model.getLogger();
 		if ( doLogIt )
 			logger.log( "Computing edge features:\n", Logger.BLUE_COLOR );
 
 		for ( final EdgeAnalyzer analyzer : analyzers )
 		{
+			if ( isCanceled() )
+				return;
+			
 			if ( analyzer.isManualFeature() )
 			{
 				// Skip manual features.
@@ -123,4 +134,24 @@ public class EdgeFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 		}
 	}
 
+	// --- org.scijava.Cancelable methods ---
+
+	@Override
+	public boolean isCanceled()
+	{
+		return isCanceled;
+	}
+
+	@Override
+	public void cancel( final String reason )
+	{
+		isCanceled = true;
+		cancelReason = reason;
+	}
+
+	@Override
+	public String getCancelReason()
+	{
+		return cancelReason;
+	}
 }

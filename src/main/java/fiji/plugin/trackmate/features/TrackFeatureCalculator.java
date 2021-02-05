@@ -1,15 +1,16 @@
 package fiji.plugin.trackmate.features;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import org.scijava.Cancelable;
+
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
 
 /**
@@ -19,7 +20,7 @@ import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
  * @author Jean-Yves Tinevez - 2013
  *
  */
-public class TrackFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
+public class TrackFeatureCalculator extends MultiThreadedBenchmarkAlgorithm implements Cancelable
 {
 
 	private static final String BASE_ERROR_MSG = "[TrackFeatureCalculator] ";
@@ -27,6 +28,10 @@ public class TrackFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 	private final Settings settings;
 
 	private final Model model;
+
+	private boolean isCanceled;
+
+	private String cancelReason;
 
 	public TrackFeatureCalculator( final Model model, final Settings settings )
 	{
@@ -101,6 +106,9 @@ public class TrackFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 	 */
 	private void computeTrackFeaturesAgent( final Collection< Integer > trackIDs, final List< TrackAnalyzer > analyzers, final boolean doLogIt )
 	{
+		isCanceled = false;
+		cancelReason = null;
+
 		final Logger logger = model.getLogger();
 		if ( doLogIt )
 		{
@@ -109,6 +117,9 @@ public class TrackFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 
 		for ( final TrackAnalyzer analyzer : analyzers )
 		{
+			if ( isCanceled() )
+				return;
+
 			if ( analyzer.isManualFeature() )
 			{
 				// Skip manual analyzers
@@ -129,5 +140,26 @@ public class TrackFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 				logger.log( "  - " + analyzer.getName() + " in " + analyzer.getProcessingTime() + " ms.\n" );
 
 		}
+	}
+
+	// --- org.scijava.Cancelable methods ---
+
+	@Override
+	public boolean isCanceled()
+	{
+		return isCanceled;
+	}
+
+	@Override
+	public void cancel( final String reason )
+	{
+		isCanceled = true;
+		cancelReason = reason;
+	}
+
+	@Override
+	public String getCancelReason()
+	{
+		return cancelReason;
 	}
 }
