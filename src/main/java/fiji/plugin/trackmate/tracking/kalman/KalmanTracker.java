@@ -97,6 +97,9 @@ public class KalmanTracker implements SpotTracker, Benchmark, Cancelable
 	{
 		final long start = System.currentTimeMillis();
 
+		isCanceled = false;
+		cancelReason = null;
+
 		/*
 		 * Outputs
 		 */
@@ -189,7 +192,9 @@ public class KalmanTracker implements SpotTracker, Benchmark, Cancelable
 		int p = 1;
 		for ( int frame = secondFrame; frame <= keySet.last(); frame++ )
 		{
-			if isCanceled
+			if ( isCanceled() )
+				return true; // It's ok to be canceled.
+
 			p++;
 
 			// Use the spot in the next frame has measurements.

@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
+import org.scijava.Cancelable;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
@@ -33,7 +34,7 @@ import fiji.plugin.trackmate.tracking.sparselap.costmatrix.JaqamanLinkingCostMat
 import fiji.plugin.trackmate.tracking.sparselap.linker.JaqamanLinker;
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
 
-public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorithm implements SpotTracker
+public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorithm implements SpotTracker, Cancelable
 {
 	private final static String BASE_ERROR_MESSAGE = "[SparseLAPFrameToFrameTracker] ";
 
@@ -44,6 +45,10 @@ public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorith
 	protected final SpotCollection spots;
 
 	protected final Map< String, Object > settings;
+
+	private boolean isCanceled;
+
+	private String cancelReason;
 
 	/*
 	 * CONSTRUCTOR
@@ -74,6 +79,9 @@ public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorith
 	@Override
 	public boolean process()
 	{
+		isCanceled = false;
+		cancelReason = null;
+
 		/*
 		 * Check input now.
 		 */
@@ -157,7 +165,7 @@ public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorith
 				@Override
 				public Void call() throws Exception
 				{
-					if ( !ok.get() )
+					if ( !ok.get() || isCanceled() )
 						return null;
 
 					// Get frame pairs
@@ -284,5 +292,26 @@ public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorith
 		ok = ok & checkMapKeys( settings, mandatoryKeys, optionalKeys, str );
 
 		return ok;
+	}
+
+	// --- org.scijava.Cancelable methods ---
+
+	@Override
+	public boolean isCanceled()
+	{
+		return isCanceled;
+	}
+
+	@Override
+	public void cancel( final String reason )
+	{
+		isCanceled = true;
+		cancelReason = reason;
+	}
+
+	@Override
+	public String getCancelReason()
+	{
+		return cancelReason;
 	}
 }

@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
+import org.scijava.Cancelable;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
@@ -28,7 +29,7 @@ import net.imglib2.KDTree;
 import net.imglib2.RealPoint;
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
 
-public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm implements SpotTracker
+public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm implements SpotTracker, Cancelable
 {
 
 	/*
@@ -42,6 +43,10 @@ public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm impl
 	protected Logger logger = Logger.VOID_LOGGER;
 
 	protected SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph;
+
+	private boolean isCanceled;
+
+	private String cancelReason;
 
 	/*
 	 * CONSTRUCTOR
@@ -73,6 +78,9 @@ public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm impl
 	{
 		final long start = System.currentTimeMillis();
 
+		isCanceled = false;
+		cancelReason = null;
+
 		reset();
 
 		final double maxLinkingDistance = ( Double ) settings.get( KEY_LINKING_MAX_DISTANCE );
@@ -92,6 +100,9 @@ public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm impl
 				@Override
 				public Void call() throws Exception
 				{
+					if ( isCanceled() )
+						return null;
+
 					// Build frame pair
 					final int sourceFrame = frame;
 					final int targetFrame = frames.higher( frame );
@@ -215,5 +226,26 @@ public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm impl
 	public void setLogger( final Logger logger )
 	{
 		this.logger = logger;
+	}
+
+	// --- org.scijava.Cancelable methods ---
+
+	@Override
+	public boolean isCanceled()
+	{
+		return isCanceled;
+	}
+
+	@Override
+	public void cancel( final String reason )
+	{
+		isCanceled = true;
+		cancelReason = reason;
+	}
+
+	@Override
+	public String getCancelReason()
+	{
+		return cancelReason;
 	}
 }

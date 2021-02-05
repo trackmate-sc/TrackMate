@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
+import org.scijava.Cancelable;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Logger.SlaveLogger;
@@ -34,7 +35,7 @@ import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
 
-public class SparseLAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotTracker
+public class SparseLAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotTracker, Cancelable
 {
 	private final static String BASE_ERROR_MESSAGE = "[SparseLAPTracker] ";
 
@@ -45,6 +46,12 @@ public class SparseLAPTracker extends MultiThreadedBenchmarkAlgorithm implements
 	private final SpotCollection spots;
 
 	private final Map< String, Object > settings;
+
+	private boolean isCanceled;
+
+	private String cancelReason;
+
+	private Cancelable cancelable;
 
 	/*
 	 * CONSTRUCTOR
@@ -75,6 +82,9 @@ public class SparseLAPTracker extends MultiThreadedBenchmarkAlgorithm implements
 	@Override
 	public boolean process()
 	{
+		isCanceled = false;
+		cancelReason = null;
+		cancelable = null;
 
 		/*
 		 * Check input now.
@@ -135,6 +145,7 @@ public class SparseLAPTracker extends MultiThreadedBenchmarkAlgorithm implements
 		ftfSettings.put( KEY_LINKING_FEATURE_PENALTIES, settings.get( KEY_LINKING_FEATURE_PENALTIES ) );
 
 		final SparseLAPFrameToFrameTracker frameToFrameLinker = new SparseLAPFrameToFrameTracker( spots, ftfSettings );
+		cancelable = frameToFrameLinker;
 		frameToFrameLinker.setNumThreads( numThreads );
 		final SlaveLogger ftfLogger = new SlaveLogger( logger, 0, 0.5 );
 		frameToFrameLinker.setLogger( ftfLogger );
@@ -146,6 +157,7 @@ public class SparseLAPTracker extends MultiThreadedBenchmarkAlgorithm implements
 		}
 
 		graph = frameToFrameLinker.getResult();
+		cancelable = null;
 
 		/*
 		 * 2. Gap-closing, merging and splitting.
@@ -247,5 +259,28 @@ public class SparseLAPTracker extends MultiThreadedBenchmarkAlgorithm implements
 		ok = ok & checkMapKeys( settings, mandatoryKeys, optionalKeys, str );
 
 		return ok;
+	}
+
+	// --- org.scijava.Cancelable methods ---
+
+	@Override
+	public boolean isCanceled()
+	{
+		return isCanceled;
+	}
+
+	@Override
+	public void cancel( final String reason )
+	{
+		isCanceled = true;
+		cancelReason = reason;
+		if ( cancelable != null )
+			cancelable.cancel( reason );
+	}
+
+	@Override
+	public String getCancelReason()
+	{
+		return cancelReason;
 	}
 }

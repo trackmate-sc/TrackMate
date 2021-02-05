@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
+import org.scijava.Cancelable;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
@@ -33,7 +34,7 @@ import math.geom2d.polygon.Rectangle2D;
 import math.geom2d.polygon.SimplePolygon2D;
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
 
-public class OverlapTracker extends MultiThreadedBenchmarkAlgorithm implements SpotTracker
+public class OverlapTracker extends MultiThreadedBenchmarkAlgorithm implements SpotTracker, Cancelable
 {
 
 	public static enum IoUCalculation
@@ -75,6 +76,10 @@ public class OverlapTracker extends MultiThreadedBenchmarkAlgorithm implements S
 
 	private final double minIoU;
 
+	private boolean isCanceled;
+
+	private String cancelReason;
+
 	/*
 	 * CONSTRUCTOR
 	 */
@@ -106,6 +111,8 @@ public class OverlapTracker extends MultiThreadedBenchmarkAlgorithm implements S
 	@Override
 	public boolean process()
 	{
+		isCanceled = false;
+		cancelReason = null;
 
 		/*
 		 * Check input now.
@@ -170,7 +177,7 @@ public class OverlapTracker extends MultiThreadedBenchmarkAlgorithm implements S
 		int progress = 0;
 		while ( frameIterator.hasNext() )
 		{
-			if ( !ok.get() )
+			if ( !ok.get() || isCanceled() )
 				break;
 
 			final int targetFrame = frameIterator.next();
@@ -192,7 +199,7 @@ public class OverlapTracker extends MultiThreadedBenchmarkAlgorithm implements S
 			// Get results.
 			for ( final Future< IoULink > future : futures )
 			{
-				if ( !ok.get() )
+				if ( !ok.get() || isCanceled() )
 					break;
 
 				try
@@ -366,5 +373,26 @@ public class OverlapTracker extends MultiThreadedBenchmarkAlgorithm implements S
 			this.target = target;
 			this.iou = iou;
 		}
+	}
+
+	// --- org.scijava.Cancelable methods ---
+
+	@Override
+	public boolean isCanceled()
+	{
+		return isCanceled;
+	}
+
+	@Override
+	public void cancel( final String reason )
+	{
+		isCanceled = true;
+		cancelReason = reason;
+	}
+
+	@Override
+	public String getCancelReason()
+	{
+		return cancelReason;
 	}
 }
