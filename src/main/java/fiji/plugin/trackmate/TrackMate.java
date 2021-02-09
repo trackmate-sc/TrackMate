@@ -3,6 +3,11 @@ package fiji.plugin.trackmate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -28,7 +33,6 @@ import net.imglib2.Interval;
 import net.imglib2.algorithm.Algorithm;
 import net.imglib2.algorithm.Benchmark;
 import net.imglib2.algorithm.MultiThreaded;
-import net.imglib2.multithreading.SimpleMultiThreading;
 
 /**
  * <p>
@@ -286,9 +290,10 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 			errorMessage = "Detector settings is null.\n";
 			return false;
 		}
-		if (factory instanceof ManualDetectorFactory)
+		if ( factory instanceof ManualDetectorFactory )
 		{
-			// Skip detection (don't delete anything) if we received this factory.
+			// Skip detection (don't delete anything) if we received this
+			// factory.
 			return true;
 		}
 
@@ -304,17 +309,16 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 		}
 
 		/*
-		 * Separate frame-by-frame or global detection depending on the factory type.
+		 * Separate frame-by-frame or global detection depending on the factory
+		 * type.
 		 */
 
-		if (factory instanceof SpotGlobalDetectorFactory )
+		if ( factory instanceof SpotGlobalDetectorFactory )
 		{
 			return processGlobal( ( SpotGlobalDetectorFactory ) factory, img, logger );
 		}
-		else if (factory instanceof SpotDetectorFactory )
-		{
-			return processFrameByFrame( ( SpotDetectorFactory ) factory, img, logger );
-		}
+		else if ( factory instanceof SpotDetectorFactory )
+		{ return processFrameByFrame( ( SpotDetectorFactory ) factory, img, logger ); }
 
 		errorMessage = "Don't know how to handle detector factory of type: " + factory.getClass();
 		return false;
@@ -423,144 +427,120 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 				+ ( ( threadsPerFrame > 1 ) ? ( threadsPerFrame + " threads" ) : "1 thread" )
 				+ " per frame.\n" );
 
-		final Thread[] threads = SimpleMultiThreading.newThreads( nSimultaneousFrames );
-		final AtomicBoolean ok = new AtomicBoolean( true );
-
-		// Prepare the thread array
-		final AtomicInteger ai = new AtomicInteger( settings.tstart );
-		for ( int ithread = 0; ithread < threads.length; ithread++ )
+		final ExecutorService executorService = Executors.newFixedThreadPool( nSimultaneousFrames );
+		final List< Future< Boolean > > tasks = new ArrayList<>( numFrames );
+		for ( int i = settings.tstart; i <= settings.tend; i++ )
 		{
-
-			threads[ ithread ] = new Thread( "TrackMate spot detection thread " + ( 1 + ithread ) + "/" + threads.length )
+			final int frame = i;
+			final Callable< Boolean > callable = new Callable< Boolean >()
 			{
 
 				@Override
-				public void run()
+				public Boolean call() throws Exception
 				{
+					if ( isCanceled() )
+						return Boolean.TRUE; // ok to be canceled.
 
-					for ( int frame = ai.getAndIncrement(); frame <= settings.tend; frame = ai.getAndIncrement() )
-						try
+					// Yield detector for target frame
+					final SpotDetector< ? > detector = factory.getDetector( interval, frame );
+					if ( detector instanceof MultiThreaded )
+					{
+						final MultiThreaded md = ( MultiThreaded ) detector;
+						md.setNumThreads( threadsPerFrame );
+					}
+
+					if ( detector instanceof Cancelable )
+						cancelables.add( ( Cancelable ) detector );
+
+					// Execute detection
+					if ( detector.checkInput() && detector.process() )
+					{
+						// On success, get results.
+						final List< Spot > spotsThisFrame = detector.getResult();
+
+						/*
+						 * Special case: if we have a single column image, then
+						 * the detectors internally dealt with a single line
+						 * image. We need to permute back the X & Y coordinates
+						 * if it's the case.
+						 */
+						if ( img.dimension( 0 ) < 2 && zindex < 0 )
 						{
-							if ( isCanceled() )
-								return;
-
-							// Yield detector for target frame
-							final SpotDetector< ? > detector = factory.getDetector( interval, frame );
-							if ( detector instanceof MultiThreaded )
+							for ( final Spot spot : spotsThisFrame )
 							{
-								final MultiThreaded md = ( MultiThreaded ) detector;
-								md.setNumThreads( threadsPerFrame );
+								spot.putFeature( Spot.POSITION_Y, spot.getDoublePosition( 0 ) );
+								spot.putFeature( Spot.POSITION_X, 0d );
 							}
-
-							if ( detector instanceof Cancelable )
-								cancelables.add( ( Cancelable ) detector );
-
-							// Execute detection
-							if ( ok.get() && detector.checkInput() && detector.process() )
-							{
-								// On success, get results.
-								final List< Spot > spotsThisFrame = detector.getResult();
-
-								/*
-								 * Special case: if we have a single column
-								 * image, then the detectors internally dealt
-								 * with a single line image. We need to permute
-								 * back the X & Y coordinates if it's the case.
-								 */
-								if ( img.dimension( 0 ) < 2 && zindex < 0 )
-								{
-									for ( final Spot spot : spotsThisFrame )
-									{
-										spot.putFeature( Spot.POSITION_Y, spot.getDoublePosition( 0 ) );
-										spot.putFeature( Spot.POSITION_X, 0d );
-									}
-								}
-
-								List< Spot > prunedSpots;
-								if ( settings.roi != null )
-								{
-									prunedSpots = new ArrayList<>();
-									for ( final Spot spot : spotsThisFrame )
-									{
-										if ( settings.roi.contains(
-												( int ) Math.round( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ] ),
-												( int ) Math.round( spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) ) )
-											prunedSpots.add( spot );
-									}
-								}
-								else
-								{
-									prunedSpots = spotsThisFrame;
-								}
-								// Add detection feature other than position
-								for ( final Spot spot : prunedSpots )
-								{
-									// FRAME will be set upon adding to
-									// SpotCollection.
-									spot.putFeature( Spot.POSITION_T, frame * settings.dt );
-								}
-								// Store final results for this frame
-								spots.put( frame, prunedSpots );
-								// Report
-								spotFound.addAndGet( prunedSpots.size() );
-								logger.setProgress( progress.incrementAndGet() / ( double ) numFrames );
-
-							}
-							else
-							{
-								// Fail: exit and report error.
-								ok.set( false );
-								errorMessage = detector.getErrorMessage();
-								return;
-							}
-
 						}
-						catch ( final RuntimeException e )
+
+						List< Spot > prunedSpots;
+						if ( settings.roi != null )
 						{
-							final Throwable cause = e.getCause();
-							if ( cause != null && cause instanceof InterruptedException ) { return; }
-							throw e;
+							prunedSpots = new ArrayList<>();
+							for ( final Spot spot : spotsThisFrame )
+							{
+								if ( settings.roi.contains(
+										( int ) Math.round( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ] ),
+										( int ) Math.round( spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) ) )
+									prunedSpots.add( spot );
+							}
 						}
+						else
+						{
+							prunedSpots = spotsThisFrame;
+						}
+						// Add detection feature other than position
+						for ( final Spot spot : prunedSpots )
+						{
+							// FRAME will be set upon adding to
+							// SpotCollection.
+							spot.putFeature( Spot.POSITION_T, frame * settings.dt );
+						}
+						// Store final results for this frame
+						spots.put( frame, prunedSpots );
+						// Report
+						spotFound.addAndGet( prunedSpots.size() );
+						logger.setProgress( progress.incrementAndGet() / ( double ) numFrames );
+
+					}
+					else
+					{
+						// Fail: exit and report error.
+						errorMessage = detector.getErrorMessage();
+						return Boolean.FALSE;
+					}
+					return Boolean.TRUE;
 				}
 			};
+			final Future< Boolean > task = executorService.submit( callable );
+			tasks.add( task );
 		}
-
 		logger.setStatus( "Detection..." );
 		logger.setProgress( 0 );
 
+		final AtomicBoolean reportOk = new AtomicBoolean( true );
 		try
 		{
-			SimpleMultiThreading.startAndJoin( threads );
-		}
-		catch ( final RuntimeException e )
-		{
-			ok.set( false );
-			if ( e.getCause() != null && e.getCause() instanceof InterruptedException )
+			for ( final Future< Boolean > task : tasks )
 			{
-				errorMessage = "Detection workers interrupted.\n";
-				for ( final Thread thread : threads )
-					thread.interrupt();
-				for ( final Thread thread : threads )
+				final Boolean ok = task.get();
+				if ( !ok )
 				{
-					if ( thread.isAlive() )
-						try
-						{
-							thread.join();
-						}
-						catch ( final InterruptedException e2 )
-						{
-							// ignore
-						}
+					reportOk.set( false );
+					break;
 				}
 			}
-			else
-			{
-				throw e;
-			}
 		}
+		catch ( InterruptedException | ExecutionException e )
+		{
+			errorMessage = "Problem during detection: " + e.getMessage();
+			reportOk.set( false );
+			e.printStackTrace();
+		}
+
 		model.setSpots( spots, true );
 
-		if ( ok.get() )
+		if ( reportOk.get() )
 		{
 			logger.log( "Found " + spotFound.get() + " spots.\n" );
 		}
@@ -571,7 +551,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 		}
 		logger.setProgress( 1 );
 		logger.setStatus( "" );
-		return ok.get();
+		return reportOk.get();
 	}
 
 	/**
