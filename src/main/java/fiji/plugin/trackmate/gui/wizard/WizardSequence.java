@@ -1,6 +1,4 @@
-package fiji.plugin.trackmate.gui;
-
-import fiji.plugin.trackmate.gui.descriptors.WizardPanelDescriptor;
+package fiji.plugin.trackmate.gui.wizard;
 
 /**
  * Interface for classes that allows specifying what descriptors are traversed
@@ -18,14 +16,14 @@ public interface WizardSequence
 	 *
 	 * @return the first descriptor to show.
 	 */
-	public WizardPanelDescriptor init();
+	public WizardPanelDescriptor2 init();
 
 	/**
 	 * Returns the descriptor currently displayed.
 	 *
 	 * @return the descriptor currently displayed
 	 */
-	public WizardPanelDescriptor current();
+	public WizardPanelDescriptor2 current();
 
 	/**
 	 * Returns the next descriptor to display. Returns <code>null</code> if the
@@ -33,7 +31,7 @@ public interface WizardSequence
 	 *
 	 * @return the next descriptor to display.
 	 */
-	public WizardPanelDescriptor next();
+	public WizardPanelDescriptor2 next();
 
 	/**
 	 * Returns the previous descriptor to display. Returns <code>null</code> if
@@ -41,7 +39,23 @@ public interface WizardSequence
 	 *
 	 * @return the previous descriptor to display.
 	 */
-	public WizardPanelDescriptor previous();
+	public WizardPanelDescriptor2 previous();
+
+	/**
+	 * Returns the descriptor in charge of logging events. It can be accessed
+	 * out of the normal sequence by a special button in the wizard.
+	 * 
+	 * @return the descriptor in charge of logging events.
+	 */
+	public WizardPanelDescriptor2 logDescriptor();
+
+	/**
+	 * Returns the descriptor in charge of configure the views. It can be
+	 * accessed out of the normal sequence by a special button in the wizard.
+	 * 
+	 * @return the descriptor in charge of configuring the views.
+	 */
+	public WizardPanelDescriptor2 configDescriptor();
 
 	/**
 	 * Returns <code>true</code> if the sequence has an element after the

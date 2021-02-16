@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.gui;
+package fiji.plugin.trackmate.gui.wizard;
 
 import java.awt.Component;
 import java.awt.image.BufferedImage;

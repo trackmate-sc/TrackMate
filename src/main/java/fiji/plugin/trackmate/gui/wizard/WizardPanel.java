@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.gui;
+package fiji.plugin.trackmate.gui.wizard;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -8,7 +8,6 @@ import java.awt.GridLayout;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -16,8 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.border.EmptyBorder;
 
-import fiji.plugin.trackmate.gui.TransitionAnimator.Direction;
-import fiji.plugin.trackmate.gui.descriptors.WizardPanelDescriptor;
+import fiji.plugin.trackmate.gui.wizard.TransitionAnimator.Direction;
 import net.imglib2.ui.PainterThread;
 import net.imglib2.ui.PainterThread.Paintable;
 
@@ -29,14 +27,14 @@ public class WizardPanel extends JPanel
 	public static final Font BIG_FONT = new Font( "Arial", Font.PLAIN, 14 );
 	public static final Font SMALL_FONT = FONT.deriveFont( 8 );
 	
-	public static final ImageIcon TRACKMATE_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/Logo50x50-color-nofont-72p.png" ) );
+	public static final ImageIcon TRACKMATE_ICON = new ImageIcon( WizardPanel.class.getResource( "../images/Logo50x50-color-nofont-72p.png" ) );
 
-	static final ImageIcon SAVE_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/page_save.png" ) );
-	static final ImageIcon LOG_ICON = new ImageIcon( WizardPanel.class.getResource( "information.png" ) );
-	static final ImageIcon NEXT_ICON = new ImageIcon( WizardPanel.class.getResource( "arrow_right.png" ) );
-	static final ImageIcon PREVIOUS_ICON = new ImageIcon( WizardPanel.class.getResource( "arrow_left.png" ) );
-	static final ImageIcon CANCEL_ICON = new ImageIcon( WizardPanel.class.getResource( "cancel.png" ) );
-	static final Icon DISPLAY_CONFIG_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/wrench_orange.png" ) );
+	static final ImageIcon SAVE_ICON = new ImageIcon( WizardPanel.class.getResource( "../images/page_save.png" ) );
+	static final ImageIcon LOG_ICON = new ImageIcon( WizardPanel.class.getResource( "../images/information.png" ) );
+	static final ImageIcon NEXT_ICON = new ImageIcon( WizardPanel.class.getResource( "../images/arrow_right.png" ) );
+	static final ImageIcon PREVIOUS_ICON = new ImageIcon( WizardPanel.class.getResource( "../images/arrow_left.png" ) );
+	static final ImageIcon CANCEL_ICON = new ImageIcon( WizardPanel.class.getResource( "../images/cancel.png" ) );
+	static final ImageIcon DISPLAY_CONFIG_ICON = new ImageIcon( WizardPanel.class.getResource( "../images/wrench_orange.png" ) );
 
 	private final CardLayout cardLayout;
 
@@ -98,13 +96,13 @@ public class WizardPanel extends JPanel
 		panelMain.setLayout( cardLayout );
 	}
 
-	public void display( final WizardPanelDescriptor current )
+	public void display( final WizardPanelDescriptor2 current )
 	{
-		panelMain.add( current.getComponent(), current.getKey() );
-		cardLayout.show( panelMain, current.getKey() );
+		panelMain.add( current.getPanelComponent(), current.getPanelDescriptorIdentifier() );
+		cardLayout.show( panelMain, current.getPanelDescriptorIdentifier() );
 	}
 
-	public void transition( final WizardPanelDescriptor to, final WizardPanelDescriptor from, final Direction direction )
+	public void transition( final WizardPanelDescriptor2 to, final WizardPanelDescriptor2 from, final Direction direction )
 	{
 		animatorPanel.start( from, to, direction );
 	}
@@ -119,7 +117,7 @@ public class WizardPanel extends JPanel
 
 		private TransitionAnimator animator;
 
-		private WizardPanelDescriptor to;
+		private WizardPanelDescriptor2 to;
 
 		private final PainterThread painterThread;
 
@@ -132,10 +130,10 @@ public class WizardPanel extends JPanel
 			painterThread.start();
 		}
 
-		public void start( final WizardPanelDescriptor from, final WizardPanelDescriptor to, final Direction direction )
+		public void start( final WizardPanelDescriptor2 from, final WizardPanelDescriptor2 to, final Direction direction )
 		{
 			this.to = to;
-			this.animator = new TransitionAnimator( from.getComponent(), to.getComponent(), direction, duration );
+			this.animator = new TransitionAnimator( from.getPanelComponent(), to.getPanelComponent(), direction, duration );
 			label.setIcon( new ImageIcon( animator.getCurrent( System.currentTimeMillis() ) ) );
 
 			panelMain.add( this, "transitionCard" );
@@ -146,8 +144,8 @@ public class WizardPanel extends JPanel
 		{
 			animator = null;
 			panelMain.remove( this );
-			panelMain.add( to.getComponent(), to.getKey() );
-			cardLayout.show( panelMain, to.getKey() );
+			panelMain.add( to.getPanelComponent(), to.getPanelDescriptorIdentifier() );
+			cardLayout.show( panelMain, to.getPanelDescriptorIdentifier() );
 		}
 
 		@Override

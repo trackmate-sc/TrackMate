@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package fiji.plugin.trackmate.gui;
+package fiji.plugin.trackmate.gui.wizard;
 
 
 /**
