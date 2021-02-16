@@ -200,7 +200,7 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 		gbcLabelBlobDiameterUnit.gridy = 5;
 		this.add( jLabelBlobDiameterUnit, gbcLabelBlobDiameterUnit );
 		jLabelBlobDiameterUnit.setFont( SMALL_FONT );
-		jLabelBlobDiameterUnit.setText( "pixels" );
+		jLabelBlobDiameterUnit.setText( model.getSpaceUnits() );
 
 		final JLabel jLabelThreshold = new JLabel();
 		final GridBagConstraints gbcLabelThreshold = new GridBagConstraints();
