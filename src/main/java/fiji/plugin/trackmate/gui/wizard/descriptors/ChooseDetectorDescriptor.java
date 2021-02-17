@@ -61,7 +61,7 @@ public class ChooseDetectorDescriptor extends WizardPanelDescriptor2
 
 		if ( null == factory )
 		{
-			trackmate.getModel().getLogger().error( "[DetectorChoiceDescriptor] Cannot find detector named "
+			trackmate.getModel().getLogger().error( "[ChooseDetectorDescriptor] Cannot find detector named "
 					+ detectorKey
 					+ " in current TrackMate modules." );
 			return;

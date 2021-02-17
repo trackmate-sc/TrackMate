@@ -9,7 +9,7 @@ import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor2;
 public class ExecuteDetectionDescriptor extends WizardPanelDescriptor2
 {
 
-	public static final String KEY = "Execute detection";
+	public static final String KEY = "ExecuteDetection";
 
 	private final TrackMate trackmate;
 
