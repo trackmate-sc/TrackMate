@@ -196,6 +196,6 @@ public class TrackMateWizardSequence implements WizardSequence
 		final ConfigurationPanel detectorConfigurationPanel = detectorFactory.getDetectorConfigurationPanel( trackmate.getSettings(), trackmate.getModel() );
 		detectorConfigurationPanel.setSettings( defaultSettings );
 		trackmate.getSettings().detectorSettings = defaultSettings;
-		return new SpotDetectorDescriptor( detectorConfigurationPanel );
+		return new SpotDetectorDescriptor( trackmate.getSettings(), detectorConfigurationPanel );
 	}
 }
