@@ -134,15 +134,23 @@ public class TrackMateWizardSequence implements WizardSequence
 			getDetectorConfigDescriptor();
 
 		if ( current == chooseTrackerDescriptor )
-		{
-			final SpotTrackerDescriptor configDescriptor = getTrackerConfigDescriptor();
-			next.put( chooseTrackerDescriptor, configDescriptor );
-			next.put( configDescriptor, executeTrackingDescriptor );
-			previous.put( configDescriptor, chooseTrackerDescriptor );
-			previous.put( executeTrackingDescriptor, configDescriptor );
-			previous.put( trackFilterDescriptor, configDescriptor );
-		}
+			getTrackerConfigDescriptor();
+
 		current = next.get( current );
+		return current;
+	}
+
+
+	@Override
+	public WizardPanelDescriptor2 previous()
+	{
+		if ( current == trackFilterDescriptor )
+			getTrackerConfigDescriptor();
+
+		if ( current == spotFilterDescriptor )
+			getDetectorConfigDescriptor();
+
+		current = previous.get( current );
 		return current;
 	}
 
@@ -158,12 +166,6 @@ public class TrackMateWizardSequence implements WizardSequence
 		return current;
 	}
 
-	@Override
-	public WizardPanelDescriptor2 previous()
-	{
-		current = previous.get( current );
-		return current;
-	}
 
 	@Override
 	public WizardPanelDescriptor2 logDescriptor()
@@ -175,6 +177,12 @@ public class TrackMateWizardSequence implements WizardSequence
 	public WizardPanelDescriptor2 configDescriptor()
 	{
 		return configureViewsDescriptor;
+	}
+
+	@Override
+	public WizardPanelDescriptor2 save()
+	{
+		return saveDescriptor;
 	}
 
 	@Override
@@ -207,6 +215,45 @@ public class TrackMateWizardSequence implements WizardSequence
 		map.put( configureViewsDescriptor, grapherDescriptor );
 		map.put( grapherDescriptor, actionChooserDescriptor );
 		return map;
+	}
+
+	@Override
+	public void setCurrent( final String panelIdentifier )
+	{
+		if ( panelIdentifier.equals( SpotDetectorDescriptor.KEY ) )
+		{
+			current = getDetectorConfigDescriptor();
+			return;
+		}
+
+		if ( panelIdentifier.equals( TrackerConfigurationDescriptor.KEY ) )
+		{
+			current = getTrackerConfigDescriptor();
+			return;
+		}
+
+		final List< WizardPanelDescriptor2 > descriptors = Arrays.asList( new WizardPanelDescriptor2[] {
+				logDescriptor,
+				chooseDetectorDescriptor,
+				executeDetectionDescriptor,
+				initFilterDescriptor,
+				spotFilterDescriptor,
+				chooseTrackerDescriptor,
+				executeTrackingDescriptor,
+				trackFilterDescriptor,
+				configureViewsDescriptor,
+				grapherDescriptor,
+				actionChooserDescriptor,
+				saveDescriptor
+		} );
+		for ( final WizardPanelDescriptor2 w : descriptors )
+		{
+			if ( w.getPanelDescriptorIdentifier().equals( panelIdentifier ) )
+			{
+				current = w;
+				break;
+			}
+		}
 	}
 
 	/**
@@ -396,50 +443,5 @@ public class TrackMateWizardSequence implements WizardSequence
 				action.execute( trackmate, selectionModel, displaySettings, null );
 			}
 		}.start();
-	}
-
-	@Override
-	public WizardPanelDescriptor2 save()
-	{
-		return saveDescriptor;
-	}
-
-	@Override
-	public void setCurrent( final String panelIdentifier )
-	{
-		if ( panelIdentifier.equals( SpotDetectorDescriptor.KEY ) )
-		{
-			current = getDetectorConfigDescriptor();
-			return;
-		}
-
-		if ( panelIdentifier.equals( TrackerConfigurationDescriptor.KEY ) )
-		{
-			current = getTrackerConfigDescriptor();
-			return;
-		}
-
-		final List< WizardPanelDescriptor2 > descriptors = Arrays.asList( new WizardPanelDescriptor2[] {
-				logDescriptor,
-				chooseDetectorDescriptor,
-				executeDetectionDescriptor,
-				initFilterDescriptor,
-				spotFilterDescriptor,
-				chooseTrackerDescriptor,
-				executeTrackingDescriptor,
-				trackFilterDescriptor,
-				configureViewsDescriptor,
-				grapherDescriptor,
-				actionChooserDescriptor,
-				saveDescriptor
-		} );
-		for ( final WizardPanelDescriptor2 w : descriptors )
-		{
-			if ( w.getPanelDescriptorIdentifier().equals( panelIdentifier ) )
-			{
-				current = w;
-				break;
-			}
-		}
 	}
 }
