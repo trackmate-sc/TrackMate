@@ -1,15 +1,18 @@
 package fiji.plugin.trackmate.action;
 
+import java.awt.Frame;
+
 import javax.swing.ImageIcon;
 
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 
 public class RecomputeFeatureAction extends AbstractTMAction
 {
@@ -26,8 +29,9 @@ public class RecomputeFeatureAction extends AbstractTMAction
 			+ "running this action are added and computed. " +
 			"</html>";
 
+
 	@Override
-	public void execute( final TrackMate trackmate )
+	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
 	{
 		recompute( trackmate, logger );
 	}
@@ -61,7 +65,7 @@ public class RecomputeFeatureAction extends AbstractTMAction
 		}
 
 		@Override
-		public TrackMateAction create( final TrackMateGUIController controller )
+		public TrackMateAction create()
 		{
 			return new RecomputeFeatureAction();
 		}

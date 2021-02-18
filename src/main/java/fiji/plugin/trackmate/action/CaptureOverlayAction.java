@@ -1,6 +1,6 @@
 package fiji.plugin.trackmate.action;
 
-import java.awt.Component;
+import java.awt.Frame;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
@@ -10,9 +10,10 @@ import javax.swing.JOptionPane;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackSchemeFrame;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -39,19 +40,12 @@ public class CaptureOverlayAction extends AbstractTMAction
 			"Also, make sure nothing is moved over the image while capturing. " +
 			"</html>";
 
-	private final Component gui;
-
 	private static int firstFrame = -1;
 
 	private static int lastFrame = -1;
 
-	public CaptureOverlayAction( final Component gui )
-	{
-		this.gui = gui;
-	}
-
 	@Override
-	public void execute( final TrackMate trackmate )
+	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame gui )
 	{
 		final ImagePlus imp = trackmate.getSettings().imp;
 
@@ -206,9 +200,9 @@ public class CaptureOverlayAction extends AbstractTMAction
 		}
 
 		@Override
-		public TrackMateAction create( final TrackMateGUIController controller )
+		public TrackMateAction create()
 		{
-			return new CaptureOverlayAction( controller.getGUI() );
+			return new CaptureOverlayAction();
 		}
 
 		@Override

@@ -46,7 +46,7 @@ public class CloseGapsByLinearInterpolationActionTest
 
 		// close gap
 		final CloseGapsByLinearInterpolationAction cgblia = new CloseGapsByLinearInterpolationAction();
-		cgblia.execute( trackmate );
+		cgblia.execute( trackmate, null, null, null );
 
 		final TrackModel trackModel = model.getTrackModel();
 
@@ -89,7 +89,7 @@ public class CloseGapsByLinearInterpolationActionTest
 
 		// close gaps
 		final CloseGapsByLinearInterpolationAction cgblia = new CloseGapsByLinearInterpolationAction();
-		cgblia.execute( trackmate );
+		cgblia.execute( trackmate, null, null, null );
 
 		final TrackModel trackModel = model.getTrackModel();
 
@@ -132,7 +132,7 @@ public class CloseGapsByLinearInterpolationActionTest
 
 		// close gaps
 		final CloseGapsByLinearInterpolationAction cgblia = new CloseGapsByLinearInterpolationAction();
-		cgblia.execute( trackmate );
+		cgblia.execute( trackmate, null, null, null );
 
 		final TrackModel trackModel = model.getTrackModel();
 

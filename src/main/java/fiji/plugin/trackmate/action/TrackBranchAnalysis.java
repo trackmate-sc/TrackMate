@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.action;
 
+import java.awt.Frame;
 import java.awt.Image;
 
 import javax.swing.ImageIcon;
@@ -9,8 +10,8 @@ import org.scijava.plugin.Plugin;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.visualization.table.BranchTableView;
 
 public class TrackBranchAnalysis extends AbstractTMAction
@@ -38,15 +39,8 @@ public class TrackBranchAnalysis extends AbstractTMAction
 		ICON = new ImageIcon( newimg );
 	}
 
-	private final SelectionModel selectionModel;
-
-	public TrackBranchAnalysis( final SelectionModel selectionModel )
-	{
-		this.selectionModel = selectionModel;
-	}
-
 	@Override
-	public void execute( final TrackMate trackmate )
+	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
 	{
 		createBranchTable( trackmate.getModel(), selectionModel ).render();
 	}
@@ -79,9 +73,9 @@ public class TrackBranchAnalysis extends AbstractTMAction
 		}
 
 		@Override
-		public TrackMateAction create( final TrackMateGUIController controller )
+		public TrackMateAction create()
 		{
-			return new TrackBranchAnalysis( controller.getSelectionModel() );
+			return new TrackBranchAnalysis();
 		}
 
 		@Override

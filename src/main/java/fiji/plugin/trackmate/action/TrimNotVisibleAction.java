@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.action;
 
+import java.awt.Frame;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -8,12 +9,13 @@ import javax.swing.ImageIcon;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 
 public class TrimNotVisibleAction extends AbstractTMAction
 {
@@ -37,12 +39,8 @@ public class TrimNotVisibleAction extends AbstractTMAction
 
 	public static final String NAME = "Trim non-visible data";
 
-	public TrimNotVisibleAction()
-	{
-	}
-
 	@Override
-	public void execute( final TrackMate trackmate )
+	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
 	{
 		final Model model = trackmate.getModel();
 		final TrackModel tm = model.getTrackModel();
@@ -56,26 +54,21 @@ public class TrimNotVisibleAction extends AbstractTMAction
 			if ( !tm.isVisible( trackID ) )
 			{
 				for ( final Spot spot : tm.trackSpots( trackID ) )
-				{
 					toRemove.add( spot );
-				}
 			}
 			else
 			{
 				for ( final Spot spot : tm.trackSpots( trackID ) )
-				{
 					spots.add( spot, spot.getFeature( Spot.FRAME ).intValue() );
-				}
 			}
-
 		}
+
 		model.beginUpdate();
 		try
 		{
 			for ( final Spot spot : toRemove )
-			{
 				model.removeSpot( spot );
-			}
+
 			model.setSpots( spots, false );
 		}
 		finally
@@ -101,7 +94,7 @@ public class TrimNotVisibleAction extends AbstractTMAction
 		}
 
 		@Override
-		public TrackMateAction create( final TrackMateGUIController controller )
+		public TrackMateAction create()
 		{
 			return new TrimNotVisibleAction();
 		}
@@ -117,6 +110,5 @@ public class TrimNotVisibleAction extends AbstractTMAction
 		{
 			return NAME;
 		}
-
 	}
 }

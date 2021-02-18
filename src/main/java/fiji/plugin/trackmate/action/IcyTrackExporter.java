@@ -1,17 +1,19 @@
 package fiji.plugin.trackmate.action;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
-import fiji.plugin.trackmate.io.IOUtils;
-import fiji.plugin.trackmate.io.IcyTrackFormatWriter;
-
+import java.awt.Frame;
 import java.io.File;
 
 import javax.swing.ImageIcon;
 
 import org.scijava.plugin.Plugin;
+
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.gui.TrackMateWizard;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.io.IOUtils;
+import fiji.plugin.trackmate.io.IcyTrackFormatWriter;
 
 public class IcyTrackExporter extends AbstractTMAction
 {
@@ -24,16 +26,8 @@ public class IcyTrackExporter extends AbstractTMAction
 
 	private static final ImageIcon ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/icy16.png" ) );
 
-	private final TrackMateGUIController controller;
-
-
-	public IcyTrackExporter( final TrackMateGUIController controller )
-	{
-		this.controller = controller;
-	}
-
 	@Override
-	public void execute( final TrackMate trackmate )
+	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
 	{
 
 		logger.log( "Exporting tracks to Icy format.\n" );
@@ -66,8 +60,9 @@ public class IcyTrackExporter extends AbstractTMAction
 		{
 			file = new File( folder.getPath() + File.separator + "IcyTracks.xml" );
 		}
-		file = IOUtils.askForFileForSaving( file, controller.getGUI(), logger );
-		if ( null == file ) { return; }
+		file = IOUtils.askForFileForSaving( file, parent, logger );
+		if ( null == file )
+		{ return; }
 
 		logger.log( "  Writing to file.\n" );
 
@@ -110,9 +105,9 @@ public class IcyTrackExporter extends AbstractTMAction
 		}
 
 		@Override
-		public TrackMateAction create( final TrackMateGUIController controller )
+		public TrackMateAction create()
 		{
-			return new IcyTrackExporter( controller );
+			return new IcyTrackExporter();
 		}
 
 		@Override

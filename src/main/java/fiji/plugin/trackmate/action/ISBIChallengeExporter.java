@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.action;
 
+import java.awt.Frame;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -20,11 +21,12 @@ import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.io.IOUtils;
 
 public class ISBIChallengeExporter extends AbstractTMAction {
@@ -41,24 +43,10 @@ public class ISBIChallengeExporter extends AbstractTMAction {
 				"Only tracks are exported. If there is no track, this action " +
 				"does nothing. " +
 				"</html>";
-	private final TrackMateGUIController	controller;
-
-
-	/*
-	 * CONSTRUCTOR
-	 */
-
-	public ISBIChallengeExporter(final TrackMateGUIController controller) {
-		this.controller = controller;
-	}
-
-
-	/*
-	 * METHODS
-	 */
 
 	@Override
-	public void execute(final TrackMate trackmate) {
+	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
+	{
 		final Model model = trackmate.getModel();
 		File file;
 		final File folder = new File(System.getProperty("user.dir")).getParentFile().getParentFile();
@@ -69,7 +57,7 @@ public class ISBIChallengeExporter extends AbstractTMAction {
 		} catch (final NullPointerException npe) {
 			file = new File(folder.getPath() + File.separator + "ISBIChallenge2012Result.xml");
 		}
-		file = IOUtils.askForFileForSaving(file, controller.getGUI(), logger);
+		file = IOUtils.askForFileForSaving( file, parent, logger );
 
 		exportToFile( model, trackmate.getSettings(), file, logger );
 	}
@@ -166,23 +154,21 @@ public class ISBIChallengeExporter extends AbstractTMAction {
 		return root;
 	}
 
-
 	/*
 	 * XML KEYS
 	 */
 
-	private static final String CONTENT_KEY = "TrackContestISBI2012";
-	private static final String DATE_ATT = "generationDateTime";
-	private static final String SNR_ATT = "snr";
-	private static final String DENSITY_ATT = "density";
-	private static final String SCENARIO_ATT = "scenario";
-
-	private static final String TRACK_KEY = "particle";
-	private static final String SPOT_KEY = "detection";
-	private static final String X_ATT = "x";
-	private static final String Y_ATT = "y";
-	private static final String Z_ATT = "z";
-	private static final String T_ATT = "t";
+	private static final String CONTENT_KEY 	= "TrackContestISBI2012";
+	private static final String DATE_ATT 		= "generationDateTime";
+	private static final String SNR_ATT 		= "snr";
+	private static final String DENSITY_ATT 	= "density";
+	private static final String SCENARIO_ATT 	= "scenario";
+	private static final String TRACK_KEY 		= "particle";
+	private static final String SPOT_KEY 		= "detection";
+	private static final String X_ATT 			= "x";
+	private static final String Y_ATT 			= "y";
+	private static final String Z_ATT 			= "z";
+	private static final String T_ATT 			= "t";
 
 	@Plugin( type = TrackMateActionFactory.class, visible = true )
 	public static class Factory implements TrackMateActionFactory
@@ -213,10 +199,9 @@ public class ISBIChallengeExporter extends AbstractTMAction {
 		}
 
 		@Override
-		public TrackMateAction create( final TrackMateGUIController controller )
+		public TrackMateAction create()
 		{
-			return new ISBIChallengeExporter( controller );
+			return new ISBIChallengeExporter();
 		}
-
 	}
 }

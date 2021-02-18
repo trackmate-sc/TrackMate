@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.action;
 
+import java.awt.Frame;
 import java.util.Set;
 
 import javax.swing.ImageIcon;
@@ -8,11 +9,12 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import net.imglib2.RealPoint;
 
 /**
@@ -43,8 +45,9 @@ public class CloseGapsByLinearInterpolationAction extends AbstractTMAction
 			+ "using linear interpolation." 
 			+ "</html>";
 
+
 	@Override
-	public void execute( final TrackMate trackmate )
+	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
 	{
 		final Model model = trackmate.getModel();
 
@@ -159,10 +162,9 @@ public class CloseGapsByLinearInterpolationAction extends AbstractTMAction
 		}
 
 		@Override
-		public TrackMateAction create( final TrackMateGUIController controller )
+		public TrackMateAction create()
 		{
 			return new CloseGapsByLinearInterpolationAction();
 		}
 	}
-
 }

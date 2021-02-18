@@ -1,6 +1,6 @@
 package fiji.plugin.trackmate.action;
 
-import java.awt.Component;
+import java.awt.Frame;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -11,10 +11,11 @@ import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.util.SpotUtil;
 import fiji.plugin.trackmate.util.TMUtils;
 import ij.ImagePlus;
@@ -52,18 +53,8 @@ public class LabelImgExporter extends AbstractTMAction
 
 	public static final String NAME = "Export label image";
 
-	/**
-	 * Parent component to display the dialog.
-	 */
-	private final Component gui;
-
-	public LabelImgExporter( final Component gui )
-	{
-		this.gui = gui;
-	}
-
 	@Override
-	public void execute( final TrackMate trackmate )
+	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame gui )
 	{
 		/*
 		 * Ask use for option.
@@ -466,9 +457,9 @@ public class LabelImgExporter extends AbstractTMAction
 		}
 
 		@Override
-		public TrackMateAction create( final TrackMateGUIController controller )
+		public TrackMateAction create()
 		{
-			return new LabelImgExporter( controller.getGUI() );
+			return new LabelImgExporter();
 		}
 
 		@Override
