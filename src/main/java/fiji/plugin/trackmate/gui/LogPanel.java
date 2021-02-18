@@ -1,8 +1,6 @@
 package fiji.plugin.trackmate.gui;
 
-import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
-import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
+import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -18,6 +16,9 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
+
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
 
 /**
  * A panel using s {@link JTextPane} to log events.
@@ -40,7 +41,7 @@ public class LogPanel extends ActionListenablePanel {
 		logger = new Logger() {
 
 			@Override
-			public void error(String message) {
+			public void error(final String message) {
 				log(message, Logger.ERROR_COLOR);				
 			}
 
@@ -49,9 +50,9 @@ public class LogPanel extends ActionListenablePanel {
 				SwingUtilities.invokeLater(new Runnable() {
 					@Override
 					public void run() {
-						StyleContext sc = StyleContext.getDefaultStyleContext();
-						AttributeSet aset = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, color);
-						int len = jTextPaneLog.getDocument().getLength();
+						final StyleContext sc = StyleContext.getDefaultStyleContext();
+						final AttributeSet aset = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, color);
+						final int len = jTextPaneLog.getDocument().getLength();
 						jTextPaneLog.setCaretPosition(len);
 						jTextPaneLog.setCharacterAttributes(aset, false);
 						jTextPaneLog.replaceSelection(message);
@@ -106,7 +107,7 @@ public class LogPanel extends ActionListenablePanel {
 	 * Set the text content currently displayed in the log panel.
 	 * @param log  the text to display.
 	 */
-	public void setTextContent(String log) {
+	public void setTextContent(final String log) {
 		jTextPaneLog.setText(log);
 	}
 	
@@ -117,12 +118,12 @@ public class LogPanel extends ActionListenablePanel {
 	
 	private void initGUI() {
 		try {
-			BorderLayout thisLayout = new BorderLayout();
+			final BorderLayout thisLayout = new BorderLayout();
 			this.setLayout(thisLayout);
 			this.setPreferredSize(new java.awt.Dimension(270, 500));
 			{
 				jPanelProgressBar = new JPanel();
-				BorderLayout jPanelProgressBarLayout = new BorderLayout();
+				final BorderLayout jPanelProgressBarLayout = new BorderLayout();
 				jPanelProgressBar.setLayout(jPanelProgressBarLayout);
 				this.add(jPanelProgressBar, BorderLayout.NORTH);
 				jPanelProgressBar.setPreferredSize(new java.awt.Dimension(270, 32));
@@ -146,7 +147,7 @@ public class LogPanel extends ActionListenablePanel {
 					jTextPaneLog.setBackground(this.getBackground());
 				}
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -159,9 +160,9 @@ public class LogPanel extends ActionListenablePanel {
 	 * Auto-generated main method to display this 
 	 * JPanel inside a new JFrame.
 	 */
-	public static void main(String[] args) {
-		JFrame frame = new JFrame();
-		LogPanel lp = new LogPanel();
+	public static void main(final String[] args) {
+		final JFrame frame = new JFrame();
+		final LogPanel lp = new LogPanel();
 		frame.getContentPane().add(lp);
 		frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		frame.pack();

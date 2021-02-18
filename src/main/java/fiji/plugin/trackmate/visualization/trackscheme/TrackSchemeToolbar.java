@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.visualization.trackscheme;
 
+import static fiji.plugin.trackmate.gui.Fonts.FONT;
 import static fiji.plugin.trackmate.gui.Icons.CAPTURE_DECORATED_ICON;
 import static fiji.plugin.trackmate.gui.Icons.CAPTURE_UNDECORATED_ICON;
 import static fiji.plugin.trackmate.gui.Icons.DISPLAY_DECORATIONS_ON_ICON;
@@ -12,7 +13,6 @@ import static fiji.plugin.trackmate.gui.Icons.THUMBNAIL_OFF_ICON;
 import static fiji.plugin.trackmate.gui.Icons.THUMBNAIL_ON_ICON;
 import static fiji.plugin.trackmate.gui.Icons.ZOOM_IN_ICON;
 import static fiji.plugin.trackmate.gui.Icons.ZOOM_OUT_ICON;
-import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;

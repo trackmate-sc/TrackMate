@@ -1,7 +1,7 @@
 package fiji.plugin.trackmate.gui.wizard.descriptors.panels;
 
-import static fiji.plugin.trackmate.gui.TrackMateWizard.BIG_FONT;
-import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
+import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
+import static fiji.plugin.trackmate.gui.Fonts.FONT;
 
 import java.awt.Component;
 import java.awt.Font;

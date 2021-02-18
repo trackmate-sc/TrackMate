@@ -1,6 +1,6 @@
 package fiji.plugin.trackmate.gui.panels.components;
 
-import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
+import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;

@@ -1,10 +1,10 @@
 package fiji.plugin.trackmate.visualization.trackscheme;
 
+import static fiji.plugin.trackmate.gui.Fonts.FONT;
+import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
 import static fiji.plugin.trackmate.gui.Icons.ADD_ICON;
 import static fiji.plugin.trackmate.gui.Icons.PLOT_ICON;
 import static fiji.plugin.trackmate.gui.Icons.REMOVE_ICON;
-import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
-import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
 
 import java.awt.Component;
 import java.awt.Dimension;

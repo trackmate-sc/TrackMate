@@ -1,7 +1,7 @@
 package fiji.plugin.trackmate.tracking.overlap;
 
-import static fiji.plugin.trackmate.gui.TrackMateWizard.BIG_FONT;
-import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
+import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
+import static fiji.plugin.trackmate.gui.Fonts.FONT;
 import static fiji.plugin.trackmate.tracking.overlap.OverlapTrackerFactory.KEY_IOU_CALCULATION;
 import static fiji.plugin.trackmate.tracking.overlap.OverlapTrackerFactory.KEY_MIN_IOU;
 import static fiji.plugin.trackmate.tracking.overlap.OverlapTrackerFactory.KEY_SCALE_FACTOR;
@@ -36,7 +36,7 @@ public class OverlapTrackerSettingsPanel extends ConfigurationPanel
 
 	private final JRadioButton rdbtnFast;
 
-	private JRadioButton rdbtnPrecise;
+	private final JRadioButton rdbtnPrecise;
 
 	public OverlapTrackerSettingsPanel()
 	{

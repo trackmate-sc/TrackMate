@@ -1,8 +1,8 @@
 package fiji.plugin.trackmate.gui.panels;
 
-import static fiji.plugin.trackmate.gui.TrackMateWizard.BIG_FONT;
-import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
-import static fiji.plugin.trackmate.gui.TrackMateWizard.TEXTFIELD_DIMENSION;
+import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
+import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
+import static fiji.plugin.trackmate.gui.Fonts.TEXTFIELD_DIMENSION;
 
 import java.awt.Cursor;
 import java.awt.Desktop;

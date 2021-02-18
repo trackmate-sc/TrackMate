@@ -1,7 +1,7 @@
 package fiji.plugin.trackmate.gui.wizard.descriptors.panels;
 
+import static fiji.plugin.trackmate.gui.Fonts.FONT;
 import static fiji.plugin.trackmate.gui.Icons.EXECUTE_ICON;
-import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 
 import java.awt.GridBagConstraints;
 import java.awt.Insets;

@@ -1,7 +1,7 @@
 package fiji.plugin.trackmate.gui;
 
 import static fiji.plugin.trackmate.features.FeatureUtils.collectFeatureKeys;
-import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
+import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
 import static fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject.DEFAULT;
 import static fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject.EDGES;
 import static fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject.SPOTS;

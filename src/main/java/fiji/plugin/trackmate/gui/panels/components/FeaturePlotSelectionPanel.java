@@ -1,9 +1,9 @@
 package fiji.plugin.trackmate.gui.panels.components;
 
+import static fiji.plugin.trackmate.gui.Fonts.FONT;
 import static fiji.plugin.trackmate.gui.Icons.ADD_ICON;
 import static fiji.plugin.trackmate.gui.Icons.PLOT_ICON;
 import static fiji.plugin.trackmate.gui.Icons.REMOVE_ICON;
-import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 
 import java.awt.BorderLayout;
 import java.awt.Component;

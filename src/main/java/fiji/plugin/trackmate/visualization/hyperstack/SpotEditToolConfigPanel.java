@@ -1,14 +1,14 @@
 package fiji.plugin.trackmate.visualization.hyperstack;
 
+import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
+import static fiji.plugin.trackmate.gui.Fonts.FONT;
+import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
 import static fiji.plugin.trackmate.gui.Icons.SELECT_TRACK_ICON;
 import static fiji.plugin.trackmate.gui.Icons.SELECT_TRACK_ICON_DOWNWARDS;
 import static fiji.plugin.trackmate.gui.Icons.SELECT_TRACK_ICON_UPWARDS;
 import static fiji.plugin.trackmate.gui.Icons.SPOT_ICON_64x64;
 import static fiji.plugin.trackmate.gui.Icons.TRACK_ICON;
 import static fiji.plugin.trackmate.gui.Icons.TRACK_ICON_64x64;
-import static fiji.plugin.trackmate.gui.TrackMateWizard.BIG_FONT;
-import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
-import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
 
 import java.awt.Color;
 import java.awt.Font;

@@ -3,10 +3,10 @@ package fiji.plugin.trackmate.gui.panels.components;
 import static fiji.plugin.trackmate.features.FeatureUtils.collectFeatureKeys;
 import static fiji.plugin.trackmate.features.FeatureUtils.collectFeatureValues;
 import static fiji.plugin.trackmate.features.FeatureUtils.nObjects;
+import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
+import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
 import static fiji.plugin.trackmate.gui.Icons.ADD_ICON;
 import static fiji.plugin.trackmate.gui.Icons.REMOVE_ICON;
-import static fiji.plugin.trackmate.gui.TrackMateWizard.BIG_FONT;
-import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
 
 import java.awt.BorderLayout;
 import java.awt.Component;

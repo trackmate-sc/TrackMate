@@ -1,12 +1,7 @@
 package fiji.plugin.trackmate.util;
 
-import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
-import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
-
-import com.itextpdf.awt.PdfGraphics2D;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.pdf.PdfContentByte;
-import com.itextpdf.text.pdf.PdfWriter;
+import static fiji.plugin.trackmate.gui.Fonts.FONT;
+import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
 
 import java.awt.Rectangle;
 import java.io.File;
@@ -27,6 +22,11 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.DefaultXYDataset;
 
+import com.itextpdf.awt.PdfGraphics2D;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfWriter;
+
 
 /**
  * A collection of static utilities made to export {@link JFreeChart} charts 
@@ -44,13 +44,13 @@ public class ChartExporter {
 	 * @param svgFile the output file.
 	 * @throws IOException if writing the svgFile fails.
 	 */
-	public static void exportChartAsSVG(JFreeChart chart, Rectangle bounds, File svgFile) throws IOException {
+	public static void exportChartAsSVG(final JFreeChart chart, final Rectangle bounds, final File svgFile) throws IOException {
 		// Get a DOMImplementation and create an XML document
-		org.w3c.dom.DOMImplementation domImpl =	GenericDOMImplementation.getDOMImplementation();
-		org.w3c.dom.Document document = domImpl.createDocument(null, "svg", null);
+		final org.w3c.dom.DOMImplementation domImpl =	GenericDOMImplementation.getDOMImplementation();
+		final org.w3c.dom.Document document = domImpl.createDocument(null, "svg", null);
 
 		// Create an instance of the SVG Generator
-		SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
+		final SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
 
 		// draw the chart in the SVG generator
 		chart.draw(svgGenerator, bounds);
@@ -76,17 +76,17 @@ public class ChartExporter {
 	 * @throws IOException if writing the pdfFile fails.
 	 * @throws DocumentException  
 	 */
-	public static void exportChartAsPDF(JFreeChart chart, Rectangle bounds, File pdfFile) throws IOException, DocumentException {
+	public static void exportChartAsPDF(final JFreeChart chart, final Rectangle bounds, final File pdfFile) throws IOException, DocumentException {
 		// step 1
-		com.itextpdf.text.Rectangle pageSize = new com.itextpdf.text.Rectangle(bounds.x, bounds.y, bounds.width, bounds.height);
-        com.itextpdf.text.Document document = new com.itextpdf.text.Document(pageSize);
+		final com.itextpdf.text.Rectangle pageSize = new com.itextpdf.text.Rectangle(bounds.x, bounds.y, bounds.width, bounds.height);
+        final com.itextpdf.text.Document document = new com.itextpdf.text.Document(pageSize);
         // step 2
-        PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(pdfFile));
+        final PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(pdfFile));
         // step 3
         document.open();
         // step 4
-        PdfContentByte canvas = writer.getDirectContent();
-        PdfGraphics2D g2 = new PdfGraphics2D( canvas, pageSize.getWidth(), pageSize.getHeight() );
+        final PdfContentByte canvas = writer.getDirectContent();
+        final PdfGraphics2D g2 = new PdfGraphics2D( canvas, pageSize.getWidth(), pageSize.getHeight() );
         chart.draw(g2, bounds);
         g2.dispose();
         // step 5
@@ -96,7 +96,7 @@ public class ChartExporter {
 
 	private static Object[] createDummyChart() {
 		// Collect data
-		int nPoints = 200;
+		final int nPoints = 200;
 		final double[][] data = new double[2][nPoints];
 
 		int index = 0;
@@ -107,42 +107,42 @@ public class ChartExporter {
 		}
 
 		// Plot data
-		String xAxisLabel = "Time (s)";
-		String yAxisLabel = "N spots";
-		String title = "Nspots vs Time for something.";
-		DefaultXYDataset dataset = new DefaultXYDataset();
+		final String xAxisLabel = "Time (s)";
+		final String yAxisLabel = "N spots";
+		final String title = "Nspots vs Time for something.";
+		final DefaultXYDataset dataset = new DefaultXYDataset();
 		dataset.addSeries("Nspots", data);
 
-		JFreeChart chart = ChartFactory.createXYLineChart(title, xAxisLabel, yAxisLabel, dataset, PlotOrientation.VERTICAL, true, true, false);
+		final JFreeChart chart = ChartFactory.createXYLineChart(title, xAxisLabel, yAxisLabel, dataset, PlotOrientation.VERTICAL, true, true, false);
 		chart.getTitle().setFont(FONT);
 		chart.getLegend().setItemFont(SMALL_FONT);
 
 		// The plot
-		XYPlot plot = chart.getXYPlot();
+		final XYPlot plot = chart.getXYPlot();
 		//				plot.setRenderer(0, pointRenderer);
 		plot.getRangeAxis().setLabelFont(FONT);
 		plot.getRangeAxis().setTickLabelFont(SMALL_FONT);
 		plot.getDomainAxis().setLabelFont(FONT);
 		plot.getDomainAxis().setTickLabelFont(SMALL_FONT);
 
-		ExportableChartPanel panel = new ExportableChartPanel(chart);
+		final ExportableChartPanel panel = new ExportableChartPanel(chart);
 
-		JFrame frame = new JFrame(title);
+		final JFrame frame = new JFrame(title);
 		frame.setSize(500, 270);
 		frame.getContentPane().add(panel);
 		frame.setVisible(true);
 
-		Object[] out = new Object[2];
+		final Object[] out = new Object[2];
 		out[0] = chart;
 		out[1] = panel;
 
 		return out;
 	}
 
-	public static void main(String[] args) throws IOException, DocumentException {
-		Object[] stuff = createDummyChart();
-		ChartPanel panel = (ChartPanel) stuff[1];
-		JFreeChart chart = (JFreeChart) stuff[0];
+	public static void main(final String[] args) throws IOException, DocumentException {
+		final Object[] stuff = createDummyChart();
+		final ChartPanel panel = (ChartPanel) stuff[1];
+		final JFreeChart chart = (JFreeChart) stuff[0];
 		ChartExporter.exportChartAsPDF(chart, panel.getBounds(), new File("/Users/tinevez/Desktop/ExportTest.pdf"));
 	}
 
