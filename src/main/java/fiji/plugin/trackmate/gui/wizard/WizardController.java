@@ -5,6 +5,7 @@ import static fiji.plugin.trackmate.gui.Icons.DISPLAY_CONFIG_ICON;
 import static fiji.plugin.trackmate.gui.Icons.LOG_ICON;
 import static fiji.plugin.trackmate.gui.Icons.NEXT_ICON;
 import static fiji.plugin.trackmate.gui.Icons.PREVIOUS_ICON;
+import static fiji.plugin.trackmate.gui.Icons.REVERT_ICON;
 import static fiji.plugin.trackmate.gui.Icons.SAVE_ICON;
 
 import java.awt.Container;
@@ -33,21 +34,18 @@ public class WizardController
 		this.wizardPanel = new WizardPanel();
 		wizardPanel.btnSave.setAction( getSaveAction() );
 		wizardPanel.btnLog.setAction( getLogAction() );
+		wizardPanel.btnDisplayConfig.setAction( getDisplayConfigAction() );
 		wizardPanel.btnNext.setAction( getNextAction() );
 		wizardPanel.btnPrevious.setAction( getPreviousAction() );
 		wizardPanel.btnCancel.setAction( getCancelAction() );
+		wizardPanel.btnResume.setAction( getResumeAction() );
 		wizardPanel.btnCancel.setVisible( false );
-		wizardPanel.btnDisplayConfig.setAction( getDisplayConfigAction() );
+		wizardPanel.btnResume.setVisible( false );
 	}
 
 	public WizardPanel getWizardPanel()
 	{
 		return wizardPanel;
-	}
-
-	protected void save()
-	{
-		System.out.println( "Trying to save" ); // DEBUG
 	}
 
 	protected void log( final boolean show )
@@ -172,6 +170,44 @@ public class WizardController
 		descriptor.displayingPanel();
 	}
 
+	protected void save()
+	{
+		final WizardPanelDescriptor2 saveDescriptor = sequence.save();
+		wizardPanel.btnSave.setVisible( false );
+		wizardPanel.btnPrevious.setVisible( false );
+		wizardPanel.btnDisplayConfig.setVisible( false );
+		wizardPanel.btnLog.setVisible( false );
+		wizardPanel.btnNext.setVisible( false );
+		wizardPanel.btnResume.setVisible( true );
+
+		new Thread( () -> {
+			saveDescriptor.aboutToDisplayPanel();
+			saveDescriptor.targetPanel.setSize( sequence.current().targetPanel.getSize() );
+			display( saveDescriptor, sequence.current(), Direction.BOTTOM );
+			saveDescriptor.displayingPanel();
+		} ).start();
+	}
+
+	protected void resume()
+	{
+		final WizardPanelDescriptor2 saveDescriptor = sequence.save();
+		try
+		{
+			saveDescriptor.aboutToHidePanel();
+		}
+		finally
+		{
+			wizardPanel.btnResume.setVisible( false );
+			wizardPanel.btnSave.setVisible( true );
+			wizardPanel.btnPrevious.setVisible( true );
+			wizardPanel.btnDisplayConfig.setVisible( true );
+			wizardPanel.btnLog.setVisible( true );
+			wizardPanel.btnNext.setVisible( true );
+			sequence.current().targetPanel.setSize( saveDescriptor.targetPanel.getSize() );
+			display( sequence.current(), saveDescriptor, Direction.TOP );
+		}
+	}
+
 	private void display( final WizardPanelDescriptor2 to, final WizardPanelDescriptor2 from, final Direction direction )
 	{
 		if ( null == to )
@@ -267,6 +303,23 @@ public class WizardController
 		};
 		saveAction.putValue( Action.SMALL_ICON, SAVE_ICON );
 		return saveAction;
+	}
+
+	private Action getResumeAction()
+	{
+		final AbstractAction resumeAction = new AbstractAction( "Resume" )
+		{
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed( final ActionEvent e )
+			{
+				resume();
+			}
+		};
+		resumeAction.putValue( Action.SMALL_ICON, REVERT_ICON );
+		return resumeAction;
 	}
 
 	private Action getDisplayConfigAction()

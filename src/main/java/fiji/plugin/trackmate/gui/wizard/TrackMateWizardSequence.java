@@ -35,6 +35,7 @@ import fiji.plugin.trackmate.gui.wizard.descriptors.ExecuteTrackingDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.GrapherDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.InitFilterDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.LogPanelDescriptor2;
+import fiji.plugin.trackmate.gui.wizard.descriptors.SaveDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.SpotDetectorDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.SpotFilterDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.SpotTrackerDescriptor;
@@ -86,6 +87,8 @@ public class TrackMateWizardSequence implements WizardSequence
 
 	private final ActionChooserDescriptor actionChooserDescriptor;
 
+	private final SaveDescriptor saveDescriptor;
+
 	public TrackMateWizardSequence( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings )
 	{
 		this.trackmate = trackmate;
@@ -115,6 +118,7 @@ public class TrackMateWizardSequence implements WizardSequence
 		configureViewsDescriptor = new ConfigureViewsDescriptor( displaySettings, featureSelector, new LaunchTrackSchemeAction(), new ShowTrackTablesAction(), new ShowSpotTableAction(), model.getSpaceUnits() );
 		grapherDescriptor = new GrapherDescriptor( trackmate, displaySettings );
 		actionChooserDescriptor = new ActionChooserDescriptor( new ActionProvider(), trackmate, selectionModel, displaySettings );
+		saveDescriptor = new SaveDescriptor( trackmate, displaySettings, this );
 
 		this.next = getForwardSequence();
 		this.previous = getBackwardSequence();
@@ -384,5 +388,11 @@ public class TrackMateWizardSequence implements WizardSequence
 				action.execute( trackmate, selectionModel, displaySettings, null );
 			}
 		}.start();
+	}
+
+	@Override
+	public WizardPanelDescriptor2 save()
+	{
+		return saveDescriptor;
 	}
 }

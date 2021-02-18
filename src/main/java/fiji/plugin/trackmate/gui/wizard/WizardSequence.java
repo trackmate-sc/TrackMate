@@ -74,4 +74,11 @@ public interface WizardSequence
 	 *         current one.
 	 */
 	public boolean hasPrevious();
+
+	/**
+	 * Returns the panel in charge of saving the data.
+	 * 
+	 * @return the panel in charge of saving the data.
+	 */
+	public WizardPanelDescriptor2 save();
 }

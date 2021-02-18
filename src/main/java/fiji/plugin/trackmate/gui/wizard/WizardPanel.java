@@ -45,7 +45,10 @@ public class WizardPanel extends JPanel
 
 	final JButton btnCancel;
 
+	final JButton btnResume;
+
 	final JPanel panelButtons;
+
 
 	public WizardPanel()
 	{
@@ -80,6 +83,9 @@ public class WizardPanel extends JPanel
 
 		btnNext = new JButton();
 		panelButtons.add( btnNext );
+		
+		btnResume = new JButton();
+		panelButtons.add( btnResume );
 
 		this.panelMain = new JPanel();
 		add( panelMain, BorderLayout.CENTER );
