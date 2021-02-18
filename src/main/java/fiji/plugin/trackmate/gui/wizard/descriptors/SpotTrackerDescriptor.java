@@ -8,7 +8,7 @@ import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor2;
 public class SpotTrackerDescriptor extends WizardPanelDescriptor2
 {
 
-	private static final String KEY = "ConfigureTracker";
+	public static final String KEY = "ConfigureTracker";
 
 	private final Settings settings;
 

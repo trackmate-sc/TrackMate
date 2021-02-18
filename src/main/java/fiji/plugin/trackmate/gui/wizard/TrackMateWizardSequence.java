@@ -27,7 +27,6 @@ import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.LogPanel;
-import fiji.plugin.trackmate.gui.descriptors.TrackerConfigurationDescriptor;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ActionChooserDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ChooseDetectorDescriptor;
@@ -228,7 +227,7 @@ public class TrackMateWizardSequence implements WizardSequence
 			return;
 		}
 
-		if ( panelIdentifier.equals( TrackerConfigurationDescriptor.KEY ) )
+		if ( panelIdentifier.equals( SpotTrackerDescriptor.KEY ) )
 		{
 			current = getTrackerConfigDescriptor();
 			return;
