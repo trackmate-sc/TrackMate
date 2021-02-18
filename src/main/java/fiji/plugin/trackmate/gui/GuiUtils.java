@@ -14,7 +14,10 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
+import ij.IJ;
 import ij.ImagePlus;
 import ij.measure.Calibration;
 
@@ -133,6 +136,22 @@ public class GuiUtils
 			case JOptionPane.CANCEL_OPTION:
 				return;
 			}
+		}
+	}
+
+	public static void setSystemLookAndFeel()
+	{
+		if ( IJ.isMacOSX() || IJ.isWindows() )
+		{
+			try
+			{
+				UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
+			}
+			catch ( ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e )
+			{
+				e.printStackTrace();
+			}
+
 		}
 	}
 }
