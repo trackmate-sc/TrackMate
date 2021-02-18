@@ -21,6 +21,7 @@ import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.action.AbstractTMAction;
 import fiji.plugin.trackmate.action.ExportAllSpotsStatsAction;
 import fiji.plugin.trackmate.action.ExportStatsTablesAction;
+import fiji.plugin.trackmate.detection.ManualDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
@@ -46,6 +47,7 @@ import fiji.plugin.trackmate.gui.wizard.descriptors.TrackFilterDescriptor;
 import fiji.plugin.trackmate.providers.ActionProvider;
 import fiji.plugin.trackmate.providers.DetectorProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
+import fiji.plugin.trackmate.tracking.ManualTrackerFactory;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import fiji.plugin.trackmate.visualization.trackscheme.SpotImageUpdater;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
@@ -267,6 +269,20 @@ public class TrackMateWizardSequence implements WizardSequence
 		final SpotDetectorFactoryBase< ? > detectorFactory = trackmate.getSettings().detectorFactory;
 
 		/*
+		 * Special case: are we dealing with the manual detector? If yes, no
+		 * config, no detection.
+		 */
+		if ( detectorFactory.getKey().equals( ManualDetectorFactory.DETECTOR_KEY ) )
+		{
+			// Position sequence next and previous.
+			next.put( chooseDetectorDescriptor, spotFilterDescriptor );
+			previous.put( spotFilterDescriptor, chooseDetectorDescriptor );
+			previous.put( executeDetectionDescriptor, chooseDetectorDescriptor );
+			previous.put( initFilterDescriptor, chooseDetectorDescriptor );
+			return null;
+		}
+
+		/*
 		 * Copy as much settings as we can to the potentially new config
 		 * descriptor.
 		 */
@@ -274,9 +290,10 @@ public class TrackMateWizardSequence implements WizardSequence
 		final Map< String, Object > oldSettings1 = new HashMap<>( trackmate.getSettings().detectorSettings );
 		// From previous panel.
 		final Map< String, Object > oldSettings2 = new HashMap<>();
-		final SpotDetectorDescriptor previousSpotDetectorDescriptor = ( SpotDetectorDescriptor ) next.get( chooseDetectorDescriptor );
-		if ( previousSpotDetectorDescriptor != null )
+		final WizardPanelDescriptor2 previousDescriptor = next.get( chooseDetectorDescriptor );
+		if ( previousDescriptor != null && previousDescriptor instanceof SpotDetectorDescriptor )
 		{
+			final SpotDetectorDescriptor previousSpotDetectorDescriptor = ( SpotDetectorDescriptor ) previousDescriptor;
 			final ConfigurationPanel detectorConfigPanel = ( ConfigurationPanel ) previousSpotDetectorDescriptor.targetPanel;
 			oldSettings2.putAll( detectorConfigPanel.getSettings() );
 		}
@@ -318,6 +335,18 @@ public class TrackMateWizardSequence implements WizardSequence
 		final SpotTrackerFactory trackerFactory = trackmate.getSettings().trackerFactory;
 
 		/*
+		 * Special case: are we dealing with the manual tracker? If yes, no
+		 * config, no detection.
+		 */
+		if ( trackerFactory.getKey().equals( ManualTrackerFactory.TRACKER_KEY ) )
+		{
+			// Position sequence next and previous.
+			next.put( chooseTrackerDescriptor, trackFilterDescriptor );
+			previous.put( executeTrackingDescriptor, chooseTrackerDescriptor );
+			previous.put( trackFilterDescriptor, chooseTrackerDescriptor );
+			return null;
+		}
+		/*
 		 * Copy as much settings as we can to the potentially new config
 		 * descriptor.
 		 */
@@ -325,9 +354,10 @@ public class TrackMateWizardSequence implements WizardSequence
 		final Map< String, Object > oldSettings1 = new HashMap<>( trackmate.getSettings().trackerSettings );
 		// From previous panel.
 		final Map< String, Object > oldSettings2 = new HashMap<>();
-		final SpotTrackerDescriptor previousTrackerDetectorDescriptor = ( SpotTrackerDescriptor ) next.get( chooseTrackerDescriptor );
-		if ( previousTrackerDetectorDescriptor != null )
+		final WizardPanelDescriptor2 previousDescriptor = next.get( chooseTrackerDescriptor );
+		if ( previousDescriptor != null && previousDescriptor instanceof SpotTrackerDescriptor )
 		{
+			final SpotTrackerDescriptor previousTrackerDetectorDescriptor = ( SpotTrackerDescriptor ) previousDescriptor;
 			final ConfigurationPanel detectorConfigPanel = ( ConfigurationPanel ) previousTrackerDetectorDescriptor.targetPanel;
 			oldSettings2.putAll( detectorConfigPanel.getSettings() );
 		}
