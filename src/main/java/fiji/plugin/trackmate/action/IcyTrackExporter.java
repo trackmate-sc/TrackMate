@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.action;
 
+import static fiji.plugin.trackmate.gui.Icons.ICY_ICON;
+
 import java.awt.Frame;
 import java.io.File;
 
@@ -10,7 +12,6 @@ import org.scijava.plugin.Plugin;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.io.IcyTrackFormatWriter;
@@ -18,13 +19,15 @@ import fiji.plugin.trackmate.io.IcyTrackFormatWriter;
 public class IcyTrackExporter extends AbstractTMAction
 {
 
-	private static final String INFO_TEXT = "<html>Export the visible tracks in the current model to a XML file that can be read by the TrackManager plugin of the <a href='http://icy.bioimageanalysis.org/'>Icy software</a>.";
+	private static final String INFO_TEXT = "<html>"
+			+ "Export the visible tracks in the current model to a "
+			+ "XML file that can be read by the TrackManager plugin of the "
+			+ "<a href='http://icy.bioimageanalysis.org/'>Icy software</a>."
+			+ "</html>";
 
 	private static final String NAME = "Export tracks to Icy";
 
 	private static final String KEY = "ICY_EXPORTER";
-
-	private static final ImageIcon ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/icy16.png" ) );
 
 	@Override
 	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
@@ -113,8 +116,7 @@ public class IcyTrackExporter extends AbstractTMAction
 		@Override
 		public ImageIcon getIcon()
 		{
-			return ICON;
+			return ICY_ICON;
 		}
 	}
-
 }

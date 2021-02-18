@@ -27,15 +27,6 @@ public class WizardPanel extends JPanel
 	public static final Font BIG_FONT = new Font( "Arial", Font.PLAIN, 14 );
 	public static final Font SMALL_FONT = FONT.deriveFont( 8 );
 	
-	public static final ImageIcon TRACKMATE_ICON = new ImageIcon( WizardPanel.class.getResource( "../images/Logo50x50-color-nofont-72p.png" ) );
-
-	static final ImageIcon SAVE_ICON = new ImageIcon( WizardPanel.class.getResource( "../images/page_save.png" ) );
-	static final ImageIcon LOG_ICON = new ImageIcon( WizardPanel.class.getResource( "../images/information.png" ) );
-	static final ImageIcon NEXT_ICON = new ImageIcon( WizardPanel.class.getResource( "../images/arrow_right.png" ) );
-	static final ImageIcon PREVIOUS_ICON = new ImageIcon( WizardPanel.class.getResource( "../images/arrow_left.png" ) );
-	static final ImageIcon CANCEL_ICON = new ImageIcon( WizardPanel.class.getResource( "../images/cancel.png" ) );
-	static final ImageIcon DISPLAY_CONFIG_ICON = new ImageIcon( WizardPanel.class.getResource( "../images/wrench_orange.png" ) );
-
 	private final CardLayout cardLayout;
 
 	private final AnimatorPanel animatorPanel;

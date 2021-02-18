@@ -1,5 +1,8 @@
 package fiji.plugin.trackmate.visualization.table;
 
+import static fiji.plugin.trackmate.gui.Icons.CSV_ICON;
+import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.WindowAdapter;
@@ -37,7 +40,6 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.UpdateListener;
 import fiji.plugin.trackmate.util.FileChooser;
@@ -68,7 +70,7 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 	public AllSpotsTableView( final Model model, final SelectionModel selectionModel, final DisplaySettings ds )
 	{
 		super( "All spots table" );
-		setIconImage( TrackMateWizard.TRACKMATE_ICON.getImage() );
+		setIconImage( TRACKMATE_ICON.getImage() );
 		this.model = model;
 		this.selectionModel = selectionModel;
 
@@ -88,7 +90,7 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 		final JPanel toolbar = new JPanel();
 		final BoxLayout layout = new BoxLayout( toolbar, BoxLayout.LINE_AXIS );
 		toolbar.setLayout( layout );
-		final JButton exportBtn = new JButton( "Export to CSV", TrackTableView.CSV_ICON );
+		final JButton exportBtn = new JButton( "Export to CSV", CSV_ICON );
 		exportBtn.addActionListener( e -> exportToCsv() );
 		toolbar.add( exportBtn );
 		toolbar.add( Box.createHorizontalGlue() );

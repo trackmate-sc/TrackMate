@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.action;
 
+import static fiji.plugin.trackmate.gui.Icons.SAVE_ICON;
+
 import java.awt.Frame;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -22,14 +24,12 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.util.TMUtils;
 
 public class ExportTracksToXML extends AbstractTMAction {
 
-	public static final ImageIcon ICON = new ImageIcon(TrackMateWizard.class.getResource("images/page_save.png"));
 	public static final String NAME = "Export tracks to XML file";
 
 	public static final String KEY = "EXPORT_TRACKS_TO_XML_SIMPLE";
@@ -214,7 +214,7 @@ public class ExportTracksToXML extends AbstractTMAction {
 		@Override
 		public ImageIcon getIcon()
 		{
-			return ICON;
+			return SAVE_ICON;
 		}
 	}
 }

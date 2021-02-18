@@ -1,20 +1,20 @@
 package fiji.plugin.trackmate.gui.descriptors;
 
-import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.LogPanel;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
-import fiji.plugin.trackmate.util.TMUtils;
+import static fiji.plugin.trackmate.gui.Icons.CANCEL_ICON;
+import static fiji.plugin.trackmate.gui.Icons.NEXT_ICON;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
+
+import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.gui.LogPanel;
+import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.util.TMUtils;
 
 public class DetectionDescriptor implements WizardPanelDescriptor
 {
@@ -22,8 +22,6 @@ public class DetectionDescriptor implements WizardPanelDescriptor
 	private static final String KEY = "Detection";
 
 	protected static final String CANCEL_TEXT = "Cancel";
-
-	protected static final Icon CANCEL_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/cancel.png" ) );
 
 	protected final LogPanel logPanel;
 
@@ -106,8 +104,7 @@ public class DetectionDescriptor implements WizardPanelDescriptor
 				{
 					nextButton.addActionListener( actionListener );
 				}
-				nextButton.setText( TrackMateWizard.NEXT_TEXT );
-				nextButton.setIcon( TrackMateWizard.NEXT_ICON );
+				nextButton.setIcon( NEXT_ICON );
 			}
 		};
 		motherThread.start();

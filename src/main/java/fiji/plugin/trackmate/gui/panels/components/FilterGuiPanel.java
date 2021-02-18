@@ -3,6 +3,8 @@ package fiji.plugin.trackmate.gui.panels.components;
 import static fiji.plugin.trackmate.features.FeatureUtils.collectFeatureKeys;
 import static fiji.plugin.trackmate.features.FeatureUtils.collectFeatureValues;
 import static fiji.plugin.trackmate.features.FeatureUtils.nObjects;
+import static fiji.plugin.trackmate.gui.Icons.ADD_ICON;
+import static fiji.plugin.trackmate.gui.Icons.REMOVE_ICON;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.BIG_FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
 
@@ -22,7 +24,6 @@ import java.util.function.Function;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -35,7 +36,6 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.gui.FeatureDisplaySelector;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
 import fiji.plugin.trackmate.gui.panels.FilterPanel;
@@ -45,10 +45,6 @@ public class FilterGuiPanel extends ActionListenablePanel implements ChangeListe
 {
 
 	private static final long serialVersionUID = -1L;
-
-	private static final String ADD_ICON = "images/add.png";
-
-	private static final String REMOVE_ICON = "images/delete.png";
 
 	private final ChangeEvent CHANGE_EVENT = new ChangeEvent( this );
 
@@ -129,7 +125,7 @@ public class FilterGuiPanel extends ActionListenablePanel implements ChangeListe
 		buttonsPanel.add( Box.createHorizontalStrut( 5 ) );
 		final JButton btnAddThreshold = new JButton();
 		buttonsPanel.add( btnAddThreshold );
-		btnAddThreshold.setIcon( new ImageIcon( TrackMateWizard.class.getResource( ADD_ICON ) ) );
+		btnAddThreshold.setIcon( ADD_ICON );
 		btnAddThreshold.setFont( SMALL_FONT );
 		btnAddThreshold.setPreferredSize( new java.awt.Dimension( 24, 24 ) );
 		btnAddThreshold.setSize( 24, 24 );
@@ -138,7 +134,7 @@ public class FilterGuiPanel extends ActionListenablePanel implements ChangeListe
 		buttonsPanel.add( Box.createHorizontalStrut( 5 ) );
 		final JButton btnRemoveThreshold = new JButton();
 		buttonsPanel.add( btnRemoveThreshold );
-		btnRemoveThreshold.setIcon( new ImageIcon( TrackMateWizard.class.getResource( REMOVE_ICON ) ) );
+		btnRemoveThreshold.setIcon( REMOVE_ICON );
 		btnRemoveThreshold.setFont( SMALL_FONT );
 		btnRemoveThreshold.setPreferredSize( new java.awt.Dimension( 24, 24 ) );
 		btnRemoveThreshold.setSize( 24, 24 );

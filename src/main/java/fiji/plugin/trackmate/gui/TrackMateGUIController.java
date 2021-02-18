@@ -1,5 +1,9 @@
 package fiji.plugin.trackmate.gui;
 
+import static fiji.plugin.trackmate.gui.Icons.SPOT_TABLE_ICON;
+import static fiji.plugin.trackmate.gui.Icons.TRACK_SCHEME_ICON_16x16;
+import static fiji.plugin.trackmate.gui.Icons.TRACK_TABLES_ICON;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -8,8 +12,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.swing.AbstractAction;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -21,9 +23,6 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.action.AbstractTMAction;
-import fiji.plugin.trackmate.action.ExportAllSpotsStatsAction;
-import fiji.plugin.trackmate.action.ExportStatsTablesAction;
 import fiji.plugin.trackmate.detection.ManualDetectorFactory;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.ModelFeatureUpdater;
@@ -915,13 +914,13 @@ public class TrackMateGUIController implements ActionListener
 			{
 				try
 				{
-					AbstractTMAction action;
-					if ( showSpotTable )
-						action = new ExportAllSpotsStatsAction( selectionModel, displaySettings );
-					else
-						action = new ExportStatsTablesAction( selectionModel, displaySettings );
-
-					action.execute( trackmate );
+//					AbstractTMAction action;
+//					if ( showSpotTable )
+//						action = new ExportAllSpotsStatsAction( selectionModel, displaySettings );
+//					else
+//						action = new ExportStatsTablesAction( selectionModel, displaySettings );
+//
+//					action.execute( trackmate );
 
 				}
 				finally
@@ -933,10 +932,6 @@ public class TrackMateGUIController implements ActionListener
 			}
 		}.start();
 	}
-
-	private static final Icon TRACK_TABLES_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/table_multiple.png" ) );
-
-	private static final Icon SPOT_TABLE_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/table.png" ) );
 
 	private static final String TRACK_TABLES_BUTTON_TOOLTIP = "<html>"
 			+ "Export the features of all tracks, edges and all <br>"
@@ -953,7 +948,7 @@ public class TrackMateGUIController implements ActionListener
 
 		private LaunchTrackSchemeAction()
 		{
-			super( "TrackScheme", TrackScheme.TRACK_SCHEME_ICON_16x16 );
+			super( "TrackScheme", TRACK_SCHEME_ICON_16x16 );
 			putValue( SHORT_DESCRIPTION, TRACKSCHEME_BUTTON_TOOLTIP );
 		}
 

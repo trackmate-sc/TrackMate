@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.action;
 
+import static fiji.plugin.trackmate.gui.Icons.ORANGE_ASTERISK_ICON;
+
 import java.awt.Frame;
 import java.util.Set;
 
@@ -13,7 +15,6 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import net.imglib2.RealPoint;
 
@@ -32,8 +33,6 @@ import net.imglib2.RealPoint;
  */
 public class CloseGapsByLinearInterpolationAction extends AbstractTMAction
 {
-
-	public static final ImageIcon ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/spot_icon.png" ) );
 
 	public static final String NAME = "Close gaps by introducing new spots";
 
@@ -158,7 +157,7 @@ public class CloseGapsByLinearInterpolationAction extends AbstractTMAction
 		@Override
 		public ImageIcon getIcon()
 		{
-			return ICON;
+			return ORANGE_ASTERISK_ICON;
 		}
 
 		@Override

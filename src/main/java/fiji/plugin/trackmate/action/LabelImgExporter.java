@@ -1,5 +1,8 @@
 package fiji.plugin.trackmate.action;
 
+import static fiji.plugin.trackmate.gui.Icons.LABEL_IMG_ICON;
+import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
+
 import java.awt.Frame;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -14,7 +17,6 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.util.SpotUtil;
 import fiji.plugin.trackmate.util.TMUtils;
@@ -49,8 +51,6 @@ public class LabelImgExporter extends AbstractTMAction
 
 	public static final String KEY = "EXPORT_LABEL_IMG";
 
-	public static final ImageIcon ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/picture_key.png" ) );
-
 	public static final String NAME = "Export label image";
 
 	@Override
@@ -71,7 +71,7 @@ public class LabelImgExporter extends AbstractTMAction
 					"Export to label image",
 					JOptionPane.OK_CANCEL_OPTION,
 					JOptionPane.QUESTION_MESSAGE,
-					TrackMateWizard.TRACKMATE_ICON );
+					TRACKMATE_ICON );
 
 			if ( userInput != JOptionPane.OK_OPTION )
 				return;
@@ -465,7 +465,7 @@ public class LabelImgExporter extends AbstractTMAction
 		@Override
 		public ImageIcon getIcon()
 		{
-			return ICON;
+			return LABEL_IMG_ICON;
 		}
 
 		@Override

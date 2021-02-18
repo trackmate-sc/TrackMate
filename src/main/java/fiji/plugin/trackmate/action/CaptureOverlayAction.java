@@ -1,5 +1,8 @@
 package fiji.plugin.trackmate.action;
 
+import static fiji.plugin.trackmate.gui.Icons.CAMERA_ICON;
+import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
+
 import java.awt.Frame;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -12,9 +15,7 @@ import org.scijava.plugin.Plugin;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.visualization.trackscheme.TrackSchemeFrame;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.measure.Calibration;
@@ -22,8 +23,6 @@ import ij.process.ColorProcessor;
 
 public class CaptureOverlayAction extends AbstractTMAction
 {
-
-	public static final ImageIcon ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/camera_go.png" ) );
 
 	public static final String NAME = "Capture overlay";
 
@@ -65,7 +64,7 @@ public class CaptureOverlayAction extends AbstractTMAction
 					"Capture TrackMate overlay",
 					JOptionPane.OK_CANCEL_OPTION,
 					JOptionPane.QUESTION_MESSAGE,
-					TrackMateWizard.TRACKMATE_ICON );
+					TRACKMATE_ICON );
 
 			if ( userInput != JOptionPane.OK_OPTION )
 				return;
@@ -208,7 +207,7 @@ public class CaptureOverlayAction extends AbstractTMAction
 		@Override
 		public ImageIcon getIcon()
 		{
-			return ICON;
+			return CAMERA_ICON;
 		}
 
 		@Override

@@ -1,5 +1,12 @@
 package fiji.plugin.trackmate.gui.wizard;
 
+import static fiji.plugin.trackmate.gui.Icons.CANCEL_ICON;
+import static fiji.plugin.trackmate.gui.Icons.DISPLAY_CONFIG_ICON;
+import static fiji.plugin.trackmate.gui.Icons.LOG_ICON;
+import static fiji.plugin.trackmate.gui.Icons.NEXT_ICON;
+import static fiji.plugin.trackmate.gui.Icons.PREVIOUS_ICON;
+import static fiji.plugin.trackmate.gui.Icons.SAVE_ICON;
+
 import java.awt.Container;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
@@ -188,7 +195,7 @@ public class WizardController
 				next();
 			}
 		};
-		nextAction.putValue( Action.SMALL_ICON, WizardPanel.NEXT_ICON );
+		nextAction.putValue( Action.SMALL_ICON, NEXT_ICON );
 		return nextAction;
 	}
 
@@ -206,7 +213,7 @@ public class WizardController
 			}
 		};
 		previousAction.putValue( Action.NAME, "" );
-		previousAction.putValue( Action.SMALL_ICON, WizardPanel.PREVIOUS_ICON );
+		previousAction.putValue( Action.SMALL_ICON, PREVIOUS_ICON );
 		return previousAction;
 	}
 
@@ -223,7 +230,7 @@ public class WizardController
 				log( wizardPanel.btnLog.isSelected() );
 			}
 		};
-		logAction.putValue( Action.SMALL_ICON, WizardPanel.LOG_ICON );
+		logAction.putValue( Action.SMALL_ICON, LOG_ICON );
 		logAction.putValue( Action.NAME, "" );
 		return logAction;
 	}
@@ -241,7 +248,7 @@ public class WizardController
 				cancel();
 			}
 		};
-		cancelAction.putValue( Action.SMALL_ICON, WizardPanel.CANCEL_ICON );
+		cancelAction.putValue( Action.SMALL_ICON, CANCEL_ICON );
 		return cancelAction;
 	}
 
@@ -258,7 +265,7 @@ public class WizardController
 				save();
 			}
 		};
-		saveAction.putValue( Action.SMALL_ICON, WizardPanel.SAVE_ICON );
+		saveAction.putValue( Action.SMALL_ICON, SAVE_ICON );
 		return saveAction;
 	}
 
@@ -275,7 +282,7 @@ public class WizardController
 				displayConfig( wizardPanel.btnDisplayConfig.isSelected() );
 			}
 		};
-		configAction.putValue( Action.SMALL_ICON, WizardPanel.DISPLAY_CONFIG_ICON );
+		configAction.putValue( Action.SMALL_ICON, DISPLAY_CONFIG_ICON );
 		configAction.putValue( Action.NAME, "" );
 		return configAction;
 	}

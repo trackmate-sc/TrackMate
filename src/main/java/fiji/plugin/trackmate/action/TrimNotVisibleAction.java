@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.action;
 
+import static fiji.plugin.trackmate.gui.Icons.BIN_ICON;
+
 import java.awt.Frame;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,7 +16,6 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 
 public class TrimNotVisibleAction extends AbstractTMAction
@@ -34,8 +35,6 @@ public class TrimNotVisibleAction extends AbstractTMAction
 			+ "</html>";
 
 	public static final String KEY = "TRIM_NOT_VISIBLE";
-
-	public static final ImageIcon ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/bin_empty.png" ) );
 
 	public static final String NAME = "Trim non-visible data";
 
@@ -102,7 +101,7 @@ public class TrimNotVisibleAction extends AbstractTMAction
 		@Override
 		public ImageIcon getIcon()
 		{
-			return ICON;
+			return BIN_ICON;
 		}
 
 		@Override

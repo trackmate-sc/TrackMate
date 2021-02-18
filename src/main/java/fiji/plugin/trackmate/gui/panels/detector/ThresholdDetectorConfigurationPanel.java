@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.gui.panels.detector;
 
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
+import static fiji.plugin.trackmate.gui.Icons.PREVIEW_ICON;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.BIG_FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
@@ -15,7 +16,6 @@ import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFormattedTextField;
@@ -34,7 +34,6 @@ import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.detection.ThresholdDetectorFactory;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.GuiUtils;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.util.JLabelLogger;
 import fiji.plugin.trackmate.util.TMUtils;
 import ij.ImagePlus;
@@ -66,8 +65,6 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 			+ "spurious spots too much. You will get a chance to <br>"
 			+ "get rid of them later."
 			+ "</html>";
-
-	private static final ImageIcon ICON_PREVIEW = new ImageIcon( TrackMateGUIController.class.getResource( "images/flag_checked.png" ) );
 
 	protected final Settings settings;
 
@@ -233,7 +230,7 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 		chkboxSimplify.setText( "Simplify contours." );
 		chkboxSimplify.setFont( FONT );
 
-		final JButton btnPreview = new JButton( "Preview", ICON_PREVIEW );
+		final JButton btnPreview = new JButton( "Preview", PREVIEW_ICON );
 		btnPreview.setToolTipText( TOOLTIP_PREVIEW );
 		final GridBagConstraints gbcBtnPreview = new GridBagConstraints();
 		gbcBtnPreview.anchor = GridBagConstraints.NORTHEAST;

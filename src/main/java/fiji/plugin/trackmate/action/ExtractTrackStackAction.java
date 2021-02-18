@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.action;
 
+import static fiji.plugin.trackmate.gui.Icons.MAGNIFIER_ICON;
+
 import java.awt.Frame;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,7 +22,6 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.trackscheme.SpotIconGrabber;
@@ -62,8 +63,6 @@ public class ExtractTrackStackAction extends AbstractTMAction
 	private static double diameterFactor = 1.5d;
 
 	private static int dimChoice = 0;
-
-	public static final ImageIcon ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/magnifier.png" ) );
 
 	/**
 	 * By how much we resize the capture window to get a nice border around the
@@ -353,7 +352,7 @@ public class ExtractTrackStackAction extends AbstractTMAction
 	}
 
 	@Plugin( type = TrackMateActionFactory.class )
-	public class ExtractTrackStackActionFactory implements TrackMateActionFactory
+	public static class ExtractTrackStackActionFactory implements TrackMateActionFactory
 	{
 
 		@Override
@@ -377,7 +376,7 @@ public class ExtractTrackStackAction extends AbstractTMAction
 		@Override
 		public ImageIcon getIcon()
 		{
-			return ExtractTrackStackAction.ICON;
+			return MAGNIFIER_ICON;
 		}
 
 		@Override
@@ -385,6 +384,5 @@ public class ExtractTrackStackAction extends AbstractTMAction
 		{
 			return new ExtractTrackStackAction();
 		}
-
 	}
 }

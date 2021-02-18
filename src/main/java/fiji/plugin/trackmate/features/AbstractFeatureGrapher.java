@@ -1,6 +1,6 @@
 package fiji.plugin.trackmate.features;
 
-import static fiji.plugin.trackmate.visualization.trackscheme.TrackScheme.TRACK_SCHEME_ICON;
+import static fiji.plugin.trackmate.gui.Icons.TRACK_SCHEME_ICON;
 
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;

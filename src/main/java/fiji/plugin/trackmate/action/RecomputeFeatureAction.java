@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.action;
 
+import static fiji.plugin.trackmate.gui.Icons.CALCULATOR_ICON;
+
 import java.awt.Frame;
 
 import javax.swing.ImageIcon;
@@ -11,13 +13,10 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 
 public class RecomputeFeatureAction extends AbstractTMAction
 {
-
-	public static final ImageIcon ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/calculator.png" ) );
 
 	public static final String NAME = "Recompute all features";
 
@@ -61,7 +60,7 @@ public class RecomputeFeatureAction extends AbstractTMAction
 		@Override
 		public ImageIcon getIcon()
 		{
-			return ICON;
+			return CALCULATOR_ICON;
 		}
 
 		@Override

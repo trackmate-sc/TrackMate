@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.action;
 
+import static fiji.plugin.trackmate.gui.Icons.ISBI_ICON;
+
 import java.awt.Frame;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -25,13 +27,11 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.io.IOUtils;
 
 public class ISBIChallengeExporter extends AbstractTMAction {
 
-	public static final ImageIcon ICON = new ImageIcon(TrackMateWizard.class.getResource("images/ISBIlogo.png"));
 	public static final String NAME = "Export to ISBI challenge format";
 
 	public static final String KEY = "EXPORT_TO_ISBI_CHALLENGE_FORMAT";
@@ -195,7 +195,7 @@ public class ISBIChallengeExporter extends AbstractTMAction {
 		@Override
 		public ImageIcon getIcon()
 		{
-			return ICON;
+			return ISBI_ICON;
 		}
 
 		@Override

@@ -3,7 +3,6 @@ package fiji.plugin.trackmate.visualization.trackscheme;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.Point;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -17,7 +16,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import javax.swing.ImageIcon;
 import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
 
@@ -47,11 +45,6 @@ import ij.ImagePlus;
 
 public class TrackScheme extends AbstractTrackMateModelView
 {
-
-	/*
-	 * CONSTANTS
-	 */
-
 	public static final String INFO_TEXT = "<html>"
 			+ "TrackScheme displays the tracking results as track lanes, <br>"
 			+ "ignoring the spot actual position. "
@@ -65,17 +58,6 @@ public class TrackScheme extends AbstractTrackMateModelView
 	static final int DEFAULT_CELL_WIDTH = 128;
 
 	static final int DEFAULT_CELL_HEIGHT = 40;
-
-	public static final ImageIcon TRACK_SCHEME_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/Icon3a_print_transparency.png" ) );
-
-	public static final ImageIcon TRACK_SCHEME_ICON_16x16;
-
-	static
-	{
-		final Image image = TRACK_SCHEME_ICON.getImage();
-		final Image newimg = image.getScaledInstance( 16, 16, java.awt.Image.SCALE_SMOOTH );
-		TRACK_SCHEME_ICON_16x16 = new ImageIcon( newimg ); // transform it back
-	}
 
 	public static final String DEFAULT_COLOR = "#FF00FF";
 

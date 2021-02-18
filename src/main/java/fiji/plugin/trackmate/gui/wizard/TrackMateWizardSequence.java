@@ -1,13 +1,15 @@
 package fiji.plugin.trackmate.gui.wizard;
 
+import static fiji.plugin.trackmate.gui.Icons.SPOT_TABLE_ICON;
+import static fiji.plugin.trackmate.gui.Icons.TRACK_SCHEME_ICON_16x16;
+import static fiji.plugin.trackmate.gui.Icons.TRACK_TABLES_ICON;
+
 import java.awt.event.ActionEvent;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.swing.AbstractAction;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
@@ -24,11 +26,13 @@ import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.LogPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.wizard.descriptors.ActionChooserDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ChooseDetectorDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ChooseTrackerDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ConfigureViewsDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ExecuteDetectionDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ExecuteTrackingDescriptor;
+import fiji.plugin.trackmate.gui.wizard.descriptors.GrapherDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.InitFilterDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.LogPanelDescriptor2;
 import fiji.plugin.trackmate.gui.wizard.descriptors.SpotDetectorDescriptor;
@@ -36,6 +40,7 @@ import fiji.plugin.trackmate.gui.wizard.descriptors.SpotFilterDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.SpotTrackerDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.StartDialogDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.TrackFilterDescriptor;
+import fiji.plugin.trackmate.providers.ActionProvider;
 import fiji.plugin.trackmate.providers.DetectorProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
@@ -77,6 +82,10 @@ public class TrackMateWizardSequence implements WizardSequence
 
 	private final ConfigureViewsDescriptor configureViewsDescriptor;
 
+	private final GrapherDescriptor grapherDescriptor;
+
+	private final ActionChooserDescriptor actionChooserDescriptor;
+
 	public TrackMateWizardSequence( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings )
 	{
 		this.trackmate = trackmate;
@@ -104,6 +113,8 @@ public class TrackMateWizardSequence implements WizardSequence
 		executeTrackingDescriptor = new ExecuteTrackingDescriptor( trackmate, logPanel );
 		trackFilterDescriptor = new TrackFilterDescriptor( trackmate, trackFilters, featureSelector );
 		configureViewsDescriptor = new ConfigureViewsDescriptor( displaySettings, featureSelector, new LaunchTrackSchemeAction(), new ShowTrackTablesAction(), new ShowSpotTableAction(), model.getSpaceUnits() );
+		grapherDescriptor = new GrapherDescriptor( trackmate, displaySettings );
+		actionChooserDescriptor = new ActionChooserDescriptor( new ActionProvider(), trackmate, selectionModel, displaySettings );
 
 		this.next = getForwardSequence();
 		this.previous = getBackwardSequence();
@@ -145,7 +156,7 @@ public class TrackMateWizardSequence implements WizardSequence
 	@Override
 	public boolean hasNext()
 	{
-		return true; // current != chooseDetectorDescriptor;
+		return current != actionChooserDescriptor;
 	}
 
 	@Override
@@ -186,6 +197,8 @@ public class TrackMateWizardSequence implements WizardSequence
 		map.put( chooseDetectorDescriptor, startDialogDescriptor );
 		map.put( chooseTrackerDescriptor, spotFilterDescriptor );
 		map.put( configureViewsDescriptor, trackFilterDescriptor );
+		map.put( grapherDescriptor, configureViewsDescriptor );
+		map.put( actionChooserDescriptor, grapherDescriptor );
 		return map;
 	}
 
@@ -198,6 +211,8 @@ public class TrackMateWizardSequence implements WizardSequence
 		map.put( spotFilterDescriptor, chooseTrackerDescriptor );
 		map.put( executeTrackingDescriptor, trackFilterDescriptor );
 		map.put( trackFilterDescriptor, configureViewsDescriptor );
+		map.put( configureViewsDescriptor, grapherDescriptor );
+		map.put( grapherDescriptor, actionChooserDescriptor );
 		return map;
 	}
 
@@ -283,10 +298,6 @@ public class TrackMateWizardSequence implements WizardSequence
 		return new SpotTrackerDescriptor( trackmate.getSettings(), trackerConfigurationPanel );
 	}
 
-	private static final Icon TRACK_TABLES_ICON = new ImageIcon( TrackMateWizardSequence.class.getResource( "../images/table_multiple.png" ) );
-
-	private static final Icon SPOT_TABLE_ICON = new ImageIcon( TrackMateWizardSequence.class.getResource( "../images/table.png" ) );
-
 	private static final String TRACK_TABLES_BUTTON_TOOLTIP = "<html>"
 			+ "Export the features of all tracks, edges and all <br>"
 			+ "spots belonging to a track to ImageJ tables."
@@ -302,7 +313,7 @@ public class TrackMateWizardSequence implements WizardSequence
 
 		private LaunchTrackSchemeAction()
 		{
-			super( "TrackScheme", TrackScheme.TRACK_SCHEME_ICON_16x16 );
+			super( "TrackScheme", TRACK_SCHEME_ICON_16x16 );
 			putValue( SHORT_DESCRIPTION, TRACKSCHEME_BUTTON_TOOLTIP );
 		}
 
@@ -366,11 +377,11 @@ public class TrackMateWizardSequence implements WizardSequence
 			{
 				AbstractTMAction action;
 				if ( showSpotTable )
-					action = new ExportAllSpotsStatsAction( selectionModel, displaySettings );
+					action = new ExportAllSpotsStatsAction();
 				else
-					action = new ExportStatsTablesAction( selectionModel, displaySettings );
+					action = new ExportStatsTablesAction();
 
-				action.execute( trackmate );
+				action.execute( trackmate, selectionModel, displaySettings, null );
 			}
 		}.start();
 	}

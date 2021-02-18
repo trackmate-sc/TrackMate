@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.action;
 
+import static fiji.plugin.trackmate.gui.Icons.CALCULATOR_ICON;
+
 import java.awt.Frame;
 
 import javax.swing.ImageIcon;
@@ -9,14 +11,11 @@ import org.scijava.plugin.Plugin;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.visualization.table.TrackTableView;
 
 public class ExportStatsTablesAction extends AbstractTMAction
 {
-
-	public static final ImageIcon ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/calculator.png" ) );
 
 	public static final String NAME = "Export statistics to tables";
 
@@ -71,7 +70,7 @@ public class ExportStatsTablesAction extends AbstractTMAction
 		@Override
 		public ImageIcon getIcon()
 		{
-			return ICON;
+			return CALCULATOR_ICON;
 		}
 
 		@Override

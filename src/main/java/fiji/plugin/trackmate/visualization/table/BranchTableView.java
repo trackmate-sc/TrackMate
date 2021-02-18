@@ -1,5 +1,8 @@
 package fiji.plugin.trackmate.visualization.table;
 
+import static fiji.plugin.trackmate.gui.Icons.CSV_ICON;
+import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.io.File;
@@ -39,7 +42,6 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition;
 import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition.TrackBranchDecomposition;
 import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.util.FileChooser;
 import fiji.plugin.trackmate.util.FileChooser.DialogType;
 import fiji.plugin.trackmate.util.FileChooser.SelectionMode;
@@ -65,7 +67,7 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 	public BranchTableView( final Model model, final SelectionModel selectionModel )
 	{
 		super( "Branch table" );
-		setIconImage( TrackMateWizard.TRACKMATE_ICON.getImage() );
+		setIconImage( TRACKMATE_ICON.getImage() );
 		this.model = model;
 		this.selectionModel = selectionModel;
 
@@ -85,7 +87,7 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 		final JPanel toolbar = new JPanel();
 		final BoxLayout layout = new BoxLayout( toolbar, BoxLayout.LINE_AXIS );
 		toolbar.setLayout( layout );
-		final JButton exportBtn = new JButton( "Export to CSV", TrackTableView.CSV_ICON );
+		final JButton exportBtn = new JButton( "Export to CSV", CSV_ICON );
 		exportBtn.addActionListener( e -> exportToCsv() );
 		toolbar.add( exportBtn );
 		toolbar.add( Box.createHorizontalGlue() );

@@ -5,6 +5,7 @@ import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DO_SUBPIXEL_LOCAL
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
+import static fiji.plugin.trackmate.gui.Icons.PREVIEW_ICON;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.BIG_FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
@@ -18,7 +19,6 @@ import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFormattedTextField;
@@ -34,7 +34,6 @@ import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.GuiUtils;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.util.JLabelLogger;
 import ij.ImagePlus;
 import ij.measure.Calibration;
@@ -59,8 +58,6 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 			+ "</html>";
 
 	private static final NumberFormat FORMAT = new DecimalFormat( "#.###" );
-
-	private static final ImageIcon ICON_PREVIEW = new ImageIcon( TrackMateGUIController.class.getResource( "images/flag_checked.png" ) );
 
 	protected JFormattedTextField ftfQualityThreshold;
 
@@ -267,7 +264,7 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 		this.add( jCheckSubPixel, gbcCheckSubPixel );
 		jCheckSubPixel.setFont( SMALL_FONT );
 
-		final JButton btnPreview = new JButton( "Preview", ICON_PREVIEW );
+		final JButton btnPreview = new JButton( "Preview", PREVIEW_ICON );
 		btnPreview.setToolTipText( TOOLTIP_PREVIEW );
 		final GridBagConstraints gbcBtnPreview = new GridBagConstraints();
 		gbcBtnPreview.anchor = GridBagConstraints.NORTHEAST;

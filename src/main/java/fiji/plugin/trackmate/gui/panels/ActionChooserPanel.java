@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.gui.panels;
 
+import static fiji.plugin.trackmate.gui.Icons.EXECUTE_ICON;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 
 import java.awt.Component;
@@ -11,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import javax.swing.DefaultListCellRenderer;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -20,16 +20,12 @@ import javax.swing.SpringLayout;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.action.TrackMateAction;
 import fiji.plugin.trackmate.gui.LogPanel;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.providers.ActionProvider;
 
 public class ActionChooserPanel
 {
-
-	private static final Icon EXECUTE_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/control_play_blue.png" ) );
 
 	public final ActionEvent ACTION_STARTED = new ActionEvent( this, 0, "ActionStarted" );
 
@@ -116,17 +112,17 @@ public class ActionChooserPanel
 							panel.fireAction( ACTION_STARTED );
 							final int actionIndex = panel.getChoice();
 							final String actionKey = actionProvider.getVisibleKeys().get( actionIndex );
-							final TrackMateAction action = actionProvider.getFactory( actionKey ).create( controller );
-							if ( null == action )
-							{
-								logger.error( "Unknown action: " + actionKey + ".\n" );
-							}
-							else
-							{
-								action.setLogger( logger );
-								action.execute( trackmate );
-								panel.fireAction( ACTION_FINISHED );
-							}
+//							final TrackMateAction action = actionProvider.getFactory( actionKey ).create( controller );
+//							if ( null == action )
+//							{
+//								logger.error( "Unknown action: " + actionKey + ".\n" );
+//							}
+//							else
+//							{
+//								action.setLogger( logger );
+//								action.execute( trackmate );
+//								panel.fireAction( ACTION_FINISHED );
+//							}
 						}
 						finally
 						{

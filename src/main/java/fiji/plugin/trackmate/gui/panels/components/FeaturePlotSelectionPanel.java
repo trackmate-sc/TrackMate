@@ -1,5 +1,8 @@
 package fiji.plugin.trackmate.gui.panels.components;
 
+import static fiji.plugin.trackmate.gui.Icons.ADD_ICON;
+import static fiji.plugin.trackmate.gui.Icons.PLOT_ICON;
+import static fiji.plugin.trackmate.gui.Icons.REMOVE_ICON;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 
 import java.awt.BorderLayout;
@@ -20,7 +23,6 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -30,23 +32,19 @@ import javax.swing.ScrollPaneConstants;
 
 import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
 import fiji.plugin.trackmate.util.TMUtils;
-import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
 /**
  * A simple Panel to allow the selection of a X key amongst an enum, and of
  * multiple Y keys from the same enum. This is intended as a GUI panel to
  * prepare for the plotting of data.
  *
- * @author Jean-Yves Tinevez &lt;tinevez@pasteur.fr&gt; - January 2011 - 2012
+ * @author Jean-Yves Tinevez - January 2011 - 2012
  */
 public class FeaturePlotSelectionPanel extends ActionListenablePanel
 {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final ImageIcon PLOT_ICON = new ImageIcon( TrackScheme.class.getResource( "resources/plots.png" ) );
-	private static final ImageIcon ADD_ICON = new ImageIcon( TrackScheme.class.getResource( "resources/add.png" ) );
-	private static final ImageIcon REMOVE_ICON = new ImageIcon( TrackScheme.class.getResource( "resources/delete.png" ) );
 	private static final Dimension BUTTON_SIZE = new Dimension( 24, 24 );
 	private static final Dimension COMBO_BOX_MAX_SIZE = new java.awt.Dimension( 220, 22 );
 	private static final int MAX_FEATURE_ALLOWED = 10;

@@ -1,5 +1,8 @@
 package fiji.plugin.trackmate.visualization.trackscheme;
 
+import static fiji.plugin.trackmate.gui.Icons.ADD_ICON;
+import static fiji.plugin.trackmate.gui.Icons.PLOT_ICON;
+import static fiji.plugin.trackmate.gui.Icons.REMOVE_ICON;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
 
@@ -17,7 +20,6 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -42,12 +44,6 @@ public class FeaturePlotSelectionPanel extends ActionListenablePanel
 {
 
 	private static final long serialVersionUID = 1L;
-
-	private static final ImageIcon PLOT_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/plots.png" ) );
-
-	private static final ImageIcon ADD_ICON = new ImageIcon( FeaturePlotSelectionPanel.class.getResource( "resources/add.png" ) );
-
-	private static final ImageIcon REMOVE_ICON = new ImageIcon( FeaturePlotSelectionPanel.class.getResource( "resources/delete.png" ) );
 
 	private static final Dimension BUTTON_SIZE = new Dimension( 24, 24 );
 

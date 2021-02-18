@@ -1,5 +1,12 @@
 package fiji.plugin.trackmate.gui;
 
+import static fiji.plugin.trackmate.gui.Icons.DISPLAY_CONFIG_ICON;
+import static fiji.plugin.trackmate.gui.Icons.LOG_ICON;
+import static fiji.plugin.trackmate.gui.Icons.NEXT_ICON;
+import static fiji.plugin.trackmate.gui.Icons.PREVIOUS_ICON;
+import static fiji.plugin.trackmate.gui.Icons.SAVE_ICON;
+import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -10,7 +17,6 @@ import java.util.ArrayList;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -55,27 +61,15 @@ public class TrackMateWizard extends JFrame implements ActionListener
 
 	public static final Dimension TEXTFIELD_DIMENSION = new Dimension( 40, 18 );
 
-	public static final Icon NEXT_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/arrow_right.png" ) );
-
 	public static final String NEXT_TEXT = "Next";
 
 	public static final String RESUME_TEXT = "Resume";
-
-	public static final ImageIcon TRACKMATE_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/Logo50x50-color-nofont-72p.png" ) );
 
 	/*
 	 * PRIVATE CONSTANTS
 	 */
 
 	private static final long serialVersionUID = -4092131926852771798L;
-
-	private static final Icon PREVIOUS_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/arrow_left.png" ) );
-
-	private static final Icon SAVE_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/page_save.png" ) );
-
-	private static final Icon LOG_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/information.png" ) );
-
-	private static final Icon DISPLAY_CONFIG_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/wrench_orange.png" ) );
 
 	/*
 	 * DEFAULT VISIBILITY FIELDS

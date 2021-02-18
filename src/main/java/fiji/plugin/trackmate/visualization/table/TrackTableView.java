@@ -1,5 +1,8 @@
 package fiji.plugin.trackmate.visualization.table;
 
+import static fiji.plugin.trackmate.gui.Icons.CSV_ICON;
+import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.WindowAdapter;
@@ -19,7 +22,6 @@ import java.util.function.Supplier;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -43,7 +45,6 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
 import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.UpdateListener;
 import fiji.plugin.trackmate.util.FileChooser;
@@ -60,8 +61,6 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 	private static final long serialVersionUID = 1L;
 
 	private static final String KEY = "TRACK_TABLES";
-
-	static final ImageIcon CSV_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/page_save.png" ) );
 
 	public static String selectedFile = System.getProperty( "user.home" ) + File.separator + "export.csv";
 
@@ -80,7 +79,7 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 	public TrackTableView( final Model model, final SelectionModel selectionModel, final DisplaySettings ds )
 	{
 		super( "Track tables" );
-		setIconImage( TrackMateWizard.TRACKMATE_ICON.getImage() );
+		setIconImage( TRACKMATE_ICON.getImage() );
 		this.model = model;
 		this.selectionModel = selectionModel;
 

@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.gui.wizard;
 
+import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
+
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -76,7 +78,7 @@ public class TrackMateWizardPlugin implements PlugIn
 		// Wizard.
 		final TrackMateWizardSequence sequence = new TrackMateWizardSequence( trackmate, selectionModel, displaySettings );
 		final JFrame frame = run( sequence, "TrackMate on " + imp.getShortTitle() );
-		frame.setIconImage( WizardPanel.TRACKMATE_ICON.getImage() );
+		frame.setIconImage( TRACKMATE_ICON.getImage() );
 		GuiUtils.positionWindow( frame, imp.getWindow() );
 		frame.setVisible( true );
 	}

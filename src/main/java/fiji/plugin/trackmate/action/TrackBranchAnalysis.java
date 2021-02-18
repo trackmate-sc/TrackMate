@@ -1,7 +1,8 @@
 package fiji.plugin.trackmate.action;
 
+import static fiji.plugin.trackmate.gui.Icons.BRANCH_ICON_16x16;
+
 import java.awt.Frame;
-import java.awt.Image;
 
 import javax.swing.ImageIcon;
 
@@ -10,7 +11,6 @@ import org.scijava.plugin.Plugin;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.visualization.table.BranchTableView;
 
@@ -30,14 +30,6 @@ public class TrackBranchAnalysis extends AbstractTMAction
 	private static final String KEY = "TRACK_BRANCH_ANALYSIS";
 
 	private static final String NAME = "Branch hierarchy analysis";
-
-	private static final ImageIcon ICON;
-	static
-	{
-		final Image image = new ImageIcon( TrackMateWizard.class.getResource( "images/Icons4_print_transparency.png" ) ).getImage();
-		final Image newimg = image.getScaledInstance( 16, 16, java.awt.Image.SCALE_SMOOTH );
-		ICON = new ImageIcon( newimg );
-	}
 
 	@Override
 	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
@@ -81,7 +73,7 @@ public class TrackBranchAnalysis extends AbstractTMAction
 		@Override
 		public ImageIcon getIcon()
 		{
-			return ICON;
+			return BRANCH_ICON_16x16;
 		}
 	}
 }

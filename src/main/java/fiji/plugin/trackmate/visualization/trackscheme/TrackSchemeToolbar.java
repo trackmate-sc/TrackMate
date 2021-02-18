@@ -1,5 +1,17 @@
 package fiji.plugin.trackmate.visualization.trackscheme;
 
+import static fiji.plugin.trackmate.gui.Icons.CAPTURE_DECORATED_ICON;
+import static fiji.plugin.trackmate.gui.Icons.CAPTURE_UNDECORATED_ICON;
+import static fiji.plugin.trackmate.gui.Icons.DISPLAY_DECORATIONS_ON_ICON;
+import static fiji.plugin.trackmate.gui.Icons.LINKING_OFF_ICON;
+import static fiji.plugin.trackmate.gui.Icons.LINKING_ON_ICON;
+import static fiji.plugin.trackmate.gui.Icons.REFRESH_ICON;
+import static fiji.plugin.trackmate.gui.Icons.RESET_ZOOM_ICON;
+import static fiji.plugin.trackmate.gui.Icons.SELECT_STYLE_ICON;
+import static fiji.plugin.trackmate.gui.Icons.THUMBNAIL_OFF_ICON;
+import static fiji.plugin.trackmate.gui.Icons.THUMBNAIL_ON_ICON;
+import static fiji.plugin.trackmate.gui.Icons.ZOOM_IN_ICON;
+import static fiji.plugin.trackmate.gui.Icons.ZOOM_OUT_ICON;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 
 import java.awt.Dimension;
@@ -22,18 +34,6 @@ public class TrackSchemeToolbar extends JToolBar
 
 	private static final long serialVersionUID = 3442140463984241266L;
 
-	private static final ImageIcon LINKING_ON_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/connect.png" ) );
-	private static final ImageIcon LINKING_OFF_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/connect_bw.png" ) );
-	private static final ImageIcon THUMBNAIL_ON_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/images.png" ) );
-	private static final ImageIcon THUMBNAIL_OFF_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/images_bw.png" ) );
-	private static final ImageIcon RESET_ZOOM_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/zoom.png" ) );
-	private static final ImageIcon ZOOM_IN_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/zoom_in.png" ) );
-	private static final ImageIcon ZOOM_OUT_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/zoom_out.png" ) );
-	private static final ImageIcon REFRESH_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/refresh.png" ) );
-	private static final ImageIcon CAPTURE_UNDECORATED_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/camera_go.png" ) );
-	private static final ImageIcon CAPTURE_DECORATED_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/camera_edit.png" ) );
-	private static final ImageIcon DISPLAY_DECORATIONS_ON_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/application_view_columns.png" ) );
-	private static final ImageIcon SELECT_STYLE_ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/theme.png" ) );
 	private final TrackScheme trackScheme;
 
 	public TrackSchemeToolbar( final TrackScheme trackScheme )
