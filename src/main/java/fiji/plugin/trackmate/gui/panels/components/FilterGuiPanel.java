@@ -37,11 +37,10 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.gui.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
-import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
 import fiji.plugin.trackmate.gui.panels.FilterPanel;
 import fiji.plugin.trackmate.util.OnRequestUpdater;
 
-public class FilterGuiPanel extends ActionListenablePanel implements ChangeListener
+public class FilterGuiPanel extends JPanel implements ChangeListener
 {
 
 	private static final long serialVersionUID = -1L;

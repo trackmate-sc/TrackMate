@@ -26,10 +26,9 @@ import fiji.plugin.trackmate.features.SpotFeatureGrapher;
 import fiji.plugin.trackmate.features.TrackFeatureGrapher;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
-import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
 import fiji.plugin.trackmate.gui.panels.components.FeaturePlotSelectionPanel;
 
-public class GrapherPanel extends ActionListenablePanel
+public class GrapherPanel extends JPanel
 {
 
 	private static final long serialVersionUID = 1L;

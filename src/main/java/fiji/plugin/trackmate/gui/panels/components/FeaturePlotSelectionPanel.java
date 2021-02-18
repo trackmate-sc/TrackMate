@@ -30,7 +30,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
-import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
 import fiji.plugin.trackmate.util.TMUtils;
 
 /**
@@ -40,7 +39,7 @@ import fiji.plugin.trackmate.util.TMUtils;
  *
  * @author Jean-Yves Tinevez - January 2011 - 2012
  */
-public class FeaturePlotSelectionPanel extends ActionListenablePanel
+public class FeaturePlotSelectionPanel extends JPanel
 {
 
 	private static final long serialVersionUID = 1L;

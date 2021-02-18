@@ -30,7 +30,6 @@ import javax.swing.SwingConstants;
 
 import com.itextpdf.text.Font;
 
-import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
 import fiji.plugin.trackmate.util.TMUtils;
 
 /**
@@ -38,9 +37,9 @@ import fiji.plugin.trackmate.util.TMUtils;
  * multiple Y keys from the same enum. This is intended as a GUI panel to
  * prepare for the plotting of data.
  *
- * @author Jean-Yves Tinevez &lt;tinevez@pasteur.fr&gt; - January 2011 - 2012
+ * @author Jean-Yves Tinevez - January 2011 - 2012
  */
-public class FeaturePlotSelectionPanel extends ActionListenablePanel
+public class FeaturePlotSelectionPanel extends JPanel
 {
 
 	private static final long serialVersionUID = 1L;

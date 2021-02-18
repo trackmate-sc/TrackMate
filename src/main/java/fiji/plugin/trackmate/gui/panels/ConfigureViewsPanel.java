@@ -42,7 +42,7 @@ import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.UpdateListener;
  *
  * @author Jean-Yves Tinevez
  */
-public class ConfigureViewsPanel extends ActionListenablePanel
+public class ConfigureViewsPanel extends JPanel
 {
 
 	private static final long serialVersionUID = 1L;

@@ -18,7 +18,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.util.OnRequestUpdater;
 
-public class InitFilterPanel extends ActionListenablePanel
+public class InitFilterPanel extends JPanel
 {
 
 	private static final long serialVersionUID = 1L;

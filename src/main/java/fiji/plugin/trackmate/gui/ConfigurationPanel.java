@@ -3,7 +3,7 @@ package fiji.plugin.trackmate.gui;
 import java.awt.event.ActionEvent;
 import java.util.Map;
 
-import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
+import javax.swing.JPanel;
 
 /**
  * The mother class for all the configuration panels.
@@ -11,7 +11,7 @@ import fiji.plugin.trackmate.gui.panels.ActionListenablePanel;
  * @author Jean-Yves Tinevez
  *
  */
-public abstract class ConfigurationPanel extends ActionListenablePanel
+public abstract class ConfigurationPanel extends JPanel
 {
 
 	private static final long serialVersionUID = 1L;
