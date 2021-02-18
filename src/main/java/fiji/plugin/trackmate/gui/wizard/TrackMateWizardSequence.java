@@ -5,6 +5,7 @@ import static fiji.plugin.trackmate.gui.Icons.TRACK_SCHEME_ICON_16x16;
 import static fiji.plugin.trackmate.gui.Icons.TRACK_TABLES_ICON;
 
 import java.awt.event.ActionEvent;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.LogPanel;
+import fiji.plugin.trackmate.gui.descriptors.TrackerConfigurationDescriptor;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ActionChooserDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ChooseDetectorDescriptor;
@@ -57,9 +59,9 @@ public class TrackMateWizardSequence implements WizardSequence
 
 	private final DisplaySettings displaySettings;
 
-	private final StartDialogDescriptor startDialogDescriptor;
-
 	private WizardPanelDescriptor2 current;
+
+	private final StartDialogDescriptor startDialogDescriptor;
 
 	private final Map< WizardPanelDescriptor2, WizardPanelDescriptor2 > next;
 
@@ -122,28 +124,15 @@ public class TrackMateWizardSequence implements WizardSequence
 
 		this.next = getForwardSequence();
 		this.previous = getBackwardSequence();
-	}
-
-	@Override
-	public WizardPanelDescriptor2 init()
-	{
 		current = startDialogDescriptor;
-		return current;
 	}
 
 	@Override
 	public WizardPanelDescriptor2 next()
 	{
 		if ( current == chooseDetectorDescriptor )
-		{
-			final SpotDetectorDescriptor configDescriptor = getDetectorConfigDescriptor();
-			next.put( chooseDetectorDescriptor, configDescriptor );
-			next.put( configDescriptor, executeDetectionDescriptor );
-			previous.put( configDescriptor, chooseDetectorDescriptor );
-			previous.put( executeDetectionDescriptor, configDescriptor );
-			previous.put( initFilterDescriptor, configDescriptor );
-			previous.put( spotFilterDescriptor, configDescriptor );
-		}
+			getDetectorConfigDescriptor();
+
 		if ( current == chooseTrackerDescriptor )
 		{
 			final SpotTrackerDescriptor configDescriptor = getTrackerConfigDescriptor();
@@ -258,7 +247,17 @@ public class TrackMateWizardSequence implements WizardSequence
 		final ConfigurationPanel detectorConfigurationPanel = detectorFactory.getDetectorConfigurationPanel( trackmate.getSettings(), trackmate.getModel() );
 		detectorConfigurationPanel.setSettings( defaultSettings );
 		trackmate.getSettings().detectorSettings = defaultSettings;
-		return new SpotDetectorDescriptor( trackmate.getSettings(), detectorConfigurationPanel );
+		final SpotDetectorDescriptor configDescriptor = new SpotDetectorDescriptor( trackmate.getSettings(), detectorConfigurationPanel );
+
+		// Position sequence next and previous.
+		next.put( chooseDetectorDescriptor, configDescriptor );
+		next.put( configDescriptor, executeDetectionDescriptor );
+		previous.put( configDescriptor, chooseDetectorDescriptor );
+		previous.put( executeDetectionDescriptor, configDescriptor );
+		previous.put( initFilterDescriptor, configDescriptor );
+		previous.put( spotFilterDescriptor, configDescriptor );
+
+		return configDescriptor;
 	}
 
 	/**
@@ -299,7 +298,16 @@ public class TrackMateWizardSequence implements WizardSequence
 		final ConfigurationPanel trackerConfigurationPanel = trackerFactory.getTrackerConfigurationPanel( trackmate.getModel() );
 		trackerConfigurationPanel.setSettings( defaultSettings );
 		trackmate.getSettings().trackerSettings = defaultSettings;
-		return new SpotTrackerDescriptor( trackmate.getSettings(), trackerConfigurationPanel );
+		final SpotTrackerDescriptor configDescriptor = new SpotTrackerDescriptor( trackmate.getSettings(), trackerConfigurationPanel );
+
+		// Position sequence next and previous.
+		next.put( chooseTrackerDescriptor, configDescriptor );
+		next.put( configDescriptor, executeTrackingDescriptor );
+		previous.put( configDescriptor, chooseTrackerDescriptor );
+		previous.put( executeTrackingDescriptor, configDescriptor );
+		previous.put( trackFilterDescriptor, configDescriptor );
+		
+		return configDescriptor;
 	}
 
 	private static final String TRACK_TABLES_BUTTON_TOOLTIP = "<html>"
@@ -394,5 +402,44 @@ public class TrackMateWizardSequence implements WizardSequence
 	public WizardPanelDescriptor2 save()
 	{
 		return saveDescriptor;
+	}
+
+	@Override
+	public void setCurrent( final String panelIdentifier )
+	{
+		if ( panelIdentifier.equals( SpotDetectorDescriptor.KEY ) )
+		{
+			current = getDetectorConfigDescriptor();
+			return;
+		}
+
+		if ( panelIdentifier.equals( TrackerConfigurationDescriptor.KEY ) )
+		{
+			current = getTrackerConfigDescriptor();
+			return;
+		}
+
+		final List< WizardPanelDescriptor2 > descriptors = Arrays.asList( new WizardPanelDescriptor2[] {
+				logDescriptor,
+				chooseDetectorDescriptor,
+				executeDetectionDescriptor,
+				initFilterDescriptor,
+				spotFilterDescriptor,
+				chooseTrackerDescriptor,
+				executeTrackingDescriptor,
+				trackFilterDescriptor,
+				configureViewsDescriptor,
+				grapherDescriptor,
+				actionChooserDescriptor,
+				saveDescriptor
+		} );
+		for ( final WizardPanelDescriptor2 w : descriptors )
+		{
+			if ( w.getPanelDescriptorIdentifier().equals( panelIdentifier ) )
+			{
+				current = w;
+				break;
+			}
+		}
 	}
 }

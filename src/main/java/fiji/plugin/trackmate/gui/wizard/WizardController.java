@@ -162,7 +162,7 @@ public class WizardController
 
 	public void init()
 	{
-		final WizardPanelDescriptor2 descriptor = sequence.init();
+		final WizardPanelDescriptor2 descriptor = sequence.current();
 		wizardPanel.btnPrevious.setEnabled( sequence.hasPrevious() );
 		wizardPanel.btnNext.setEnabled( sequence.hasNext() );
 		descriptor.aboutToDisplayPanel();

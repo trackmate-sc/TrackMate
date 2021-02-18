@@ -12,7 +12,7 @@ import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 public class TrackerConfigurationDescriptor implements WizardPanelDescriptor
 {
 
-	private static final String KEY = "ConfigureTracker";
+	public static final String KEY = "ConfigureTracker";
 
 	private final TrackMate trackmate;
 

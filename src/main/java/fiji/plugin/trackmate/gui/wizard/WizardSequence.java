@@ -1,5 +1,10 @@
 package fiji.plugin.trackmate.gui.wizard;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
+import javax.swing.JFrame;
+
 /**
  * Interface for classes that allows specifying what descriptors are traversed
  * in the Wizard.
@@ -10,13 +15,35 @@ public interface WizardSequence
 {
 
 	/**
-	 * Performs initialization of the sequence and returns the first descriptor
-	 * to display in the wizard. Calling this method again reinitializes the
-	 * sequence.
-	 *
-	 * @return the first descriptor to show.
+	 * Launches the wizard to play this sequence.
+	 * 
+	 * @return the {@link JFrame} in which the wizard is displayed.
 	 */
-	public WizardPanelDescriptor2 init();
+	public default JFrame run( final String title )
+	{
+		final WizardController controller = new WizardController( this );
+		final JFrame frame = new JFrame();
+		frame.getContentPane().add( controller.getWizardPanel() );
+		frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
+		frame.setSize( 350, 520 );
+		frame.setTitle( title );
+		controller.init();
+		frame.addWindowListener( new WindowAdapter()
+		{
+			@Override
+			public void windowClosing( final WindowEvent e )
+			{
+				onClose();
+			};
+		} );
+		return frame;
+	}
+
+	/**
+	 * Method called when the wizard is closed.
+	 */
+	public default void onClose()
+	{}
 
 	/**
 	 * Returns the descriptor currently displayed.
@@ -81,4 +108,14 @@ public interface WizardSequence
 	 * @return the panel in charge of saving the data.
 	 */
 	public WizardPanelDescriptor2 save();
+
+	/**
+	 * Position the sequence so that its current descriptor is the one with the
+	 * specified identifier. If the identifier is unknown to the sequence, do
+	 * nothing.
+	 * 
+	 * @param panelIdentifier
+	 *            the descriptor identifier.
+	 */
+	public void setCurrent( String panelIdentifier );
 }
