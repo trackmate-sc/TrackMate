@@ -32,8 +32,6 @@ import static fiji.plugin.trackmate.io.TmXmlKeys.FILTER_VALUE_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.io.TmXmlKeys.FRAME_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_STATE_ATTRIBUTE;
 import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_STATE_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_VIEW_ATTRIBUTE;
-import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_VIEW_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_FILENAME_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_FOLDER_ATTRIBUTE_NAME;
@@ -107,10 +105,8 @@ import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactoryBase;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
-import fiji.plugin.trackmate.gui.TrackMateGUIModel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
 
 public class TmXmlWriter
 {
@@ -278,23 +274,13 @@ public class TmXmlWriter
 	/**
 	 * Appends the current GUI state as a state string to the document.
 	 *
-	 * @param guimodel
-	 *            the GUI model from which the GUI state and registered view
-	 *            will be read.
+	 * @param currentPanelIdentifier
+	 *            the key to the panel currently displaying.
 	 */
-	public void appendGUIState( final TrackMateGUIModel guimodel )
+	public void appendGUIState( final String currentPanelIdentifier )
 	{
 		final Element guiel = new Element( GUI_STATE_ELEMENT_KEY );
-		// state
-		guiel.setAttribute( GUI_STATE_ATTRIBUTE, guimodel.getGUIStateString() );
-		// views
-		for ( final TrackMateModelView view : guimodel.getViews() )
-		{
-			final Element viewel = new Element( GUI_VIEW_ELEMENT_KEY );
-			viewel.setAttribute( GUI_VIEW_ATTRIBUTE, view.getKey() );
-			guiel.addContent( viewel );
-		}
-
+		guiel.setAttribute( GUI_STATE_ATTRIBUTE, currentPanelIdentifier );
 		root.addContent( guiel );
 		logger.log( "  Added GUI current state.\n" );
 	}
