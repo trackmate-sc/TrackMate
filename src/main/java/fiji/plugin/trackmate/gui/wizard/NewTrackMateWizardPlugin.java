@@ -74,11 +74,26 @@ public class NewTrackMateWizardPlugin implements PlugIn
 		displayer.render();
 
 		// Wizard.
-		final TrackMateWizardSequence sequence = new TrackMateWizardSequence( trackmate, selectionModel, displaySettings );
+		final WizardSequence sequence = createSequence( trackmate, selectionModel, displaySettings );
 		final JFrame frame = sequence.run( "TrackMate on " + imp.getShortTitle() );
 		frame.setIconImage( TRACKMATE_ICON.getImage() );
 		GuiUtils.positionWindow( frame, imp.getWindow() );
 		frame.setVisible( true );
+	}
+
+	/**
+	 * Hook for subclassers: <br>
+	 * Will create and position the sequence that will be played by the wizard
+	 * launched by this plugin.
+	 * 
+	 * @param trackmate
+	 * @param selectionModel
+	 * @param displaySettings
+	 * @return
+	 */
+	protected WizardSequence createSequence( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings )
+	{
+		return new TrackMateWizardSequence( trackmate, selectionModel, displaySettings );
 	}
 
 	/**
