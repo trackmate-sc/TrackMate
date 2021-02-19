@@ -145,7 +145,12 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 		if ( calculator.checkInput() && calculator.process() )
 		{
 			if ( doLogIt )
+			{
+				if ( isCanceled() )
+					logger.log( "Spot feature calculation canceled. Reason:\n" + getCancelReason() + "\n" );
+
 				logger.log( "Computation done in " + calculator.getProcessingTime() + " ms.\n" );
+			}
 
 			model.notifyFeaturesComputed();
 			return true;
@@ -184,7 +189,12 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 			return false;
 		}
 		if ( doLogIt )
+		{
+			if ( isCanceled() )
+				logger.log( "Spot feature calculation canceled. Reason:\n" + getCancelReason() + "\n" );
+
 			logger.log( "Computation done in " + calculator.getProcessingTime() + " ms.\n" );
+		}
 
 		model.notifyFeaturesComputed();
 		return true;
@@ -210,7 +220,12 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 		if ( calculator.checkInput() && calculator.process() )
 		{
 			if ( doLogIt )
+			{
+				if ( isCanceled() )
+					logger.log( "Spot feature calculation canceled. Reason:\n" + getCancelReason() + "\n" );
+
 				logger.log( "Computation done in " + calculator.getProcessingTime() + " ms.\n" );
+			}
 
 			model.notifyFeaturesComputed();
 			return true;
@@ -249,6 +264,9 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 		tracker.setLogger( logger );
 		if ( tracker.checkInput() && tracker.process() )
 		{
+			if ( isCanceled() )
+				logger.log( "Tracking canceled. Reason:\n" + getCancelReason() + "\n" );
+
 			model.setTracks( tracker.getResult(), true );
 			return true;
 		}
@@ -385,6 +403,8 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 
 			model.setSpots( spots, true );
 			logger.setStatus( "" );
+			if ( isCanceled() )
+				logger.log( "Detection canceled. Reason:\n" + getCancelReason() + "\n" );
 			logger.log( "Found " + spots.getNSpots( false ) + " spots.\n" );
 		}
 		else
@@ -544,6 +564,8 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 
 		if ( reportOk.get() )
 		{
+			if ( isCanceled() )
+				logger.log( "Detection canceled after " + ( progress.get() + 1 ) + " frames. Reason:\n" + getCancelReason() + "\n" );
 			logger.log( "Found " + spotFound.get() + " spots.\n" );
 		}
 		else
