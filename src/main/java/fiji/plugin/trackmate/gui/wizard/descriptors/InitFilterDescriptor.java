@@ -9,9 +9,9 @@ import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.gui.components.InitFilterPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
-import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor2;
+import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
 
-public class InitFilterDescriptor extends WizardPanelDescriptor2
+public class InitFilterDescriptor extends WizardPanelDescriptor
 {
 
 	private static final String KEY = "InitialFiltering";

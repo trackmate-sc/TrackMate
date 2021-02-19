@@ -3,9 +3,9 @@ package fiji.plugin.trackmate.gui.wizard.descriptors;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.components.GrapherPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor2;
+import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
 
-public class GrapherDescriptor extends WizardPanelDescriptor2
+public class GrapherDescriptor extends WizardPanelDescriptor
 {
 
 	private static final String KEY = "GraphFeatures";

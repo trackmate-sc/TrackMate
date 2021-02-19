@@ -6,10 +6,10 @@ import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
 import fiji.plugin.trackmate.gui.components.ModuleChooserPanel;
-import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor2;
+import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
 import fiji.plugin.trackmate.providers.DetectorProvider;
 
-public class ChooseDetectorDescriptor extends WizardPanelDescriptor2
+public class ChooseDetectorDescriptor extends WizardPanelDescriptor
 {
 
 	private static final String KEY = "ChooseDetector";

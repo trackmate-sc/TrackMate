@@ -4,9 +4,9 @@ import org.scijava.Cancelable;
 
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.components.LogPanel;
-import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor2;
+import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
 
-public class ExecuteDetectionDescriptor extends WizardPanelDescriptor2
+public class ExecuteDetectionDescriptor extends WizardPanelDescriptor
 {
 
 	public static final String KEY = "ExecuteDetection";

@@ -14,10 +14,10 @@ import fiji.plugin.trackmate.features.spot.SpotMorphologyAnalyzerFactory;
 import fiji.plugin.trackmate.gui.components.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.components.FilterGuiPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
-import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor2;
+import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
 import fiji.plugin.trackmate.providers.SpotMorphologyAnalyzerProvider;
 
-public class SpotFilterDescriptor extends WizardPanelDescriptor2
+public class SpotFilterDescriptor extends WizardPanelDescriptor
 {
 
 	private static final String KEY = "SpotFilter";

@@ -50,7 +50,7 @@ public interface WizardSequence
 	 *
 	 * @return the descriptor currently displayed
 	 */
-	public WizardPanelDescriptor2 current();
+	public WizardPanelDescriptor current();
 
 	/**
 	 * Returns the next descriptor to display. Returns <code>null</code> if the
@@ -58,7 +58,7 @@ public interface WizardSequence
 	 *
 	 * @return the next descriptor to display.
 	 */
-	public WizardPanelDescriptor2 next();
+	public WizardPanelDescriptor next();
 
 	/**
 	 * Returns the previous descriptor to display. Returns <code>null</code> if
@@ -66,7 +66,7 @@ public interface WizardSequence
 	 *
 	 * @return the previous descriptor to display.
 	 */
-	public WizardPanelDescriptor2 previous();
+	public WizardPanelDescriptor previous();
 
 	/**
 	 * Returns the descriptor in charge of logging events. It can be accessed
@@ -74,7 +74,7 @@ public interface WizardSequence
 	 * 
 	 * @return the descriptor in charge of logging events.
 	 */
-	public WizardPanelDescriptor2 logDescriptor();
+	public WizardPanelDescriptor logDescriptor();
 
 	/**
 	 * Returns the descriptor in charge of configure the views. It can be
@@ -82,7 +82,7 @@ public interface WizardSequence
 	 * 
 	 * @return the descriptor in charge of configuring the views.
 	 */
-	public WizardPanelDescriptor2 configDescriptor();
+	public WizardPanelDescriptor configDescriptor();
 
 	/**
 	 * Returns <code>true</code> if the sequence has an element after the
@@ -107,7 +107,7 @@ public interface WizardSequence
 	 * 
 	 * @return the panel in charge of saving the data.
 	 */
-	public WizardPanelDescriptor2 save();
+	public WizardPanelDescriptor save();
 
 	/**
 	 * Position the sequence so that its current descriptor is the one with the

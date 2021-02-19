@@ -4,10 +4,10 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.components.ActionChooserPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor2;
+import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
 import fiji.plugin.trackmate.providers.ActionProvider;
 
-public class ActionChooserDescriptor extends WizardPanelDescriptor2
+public class ActionChooserDescriptor extends WizardPanelDescriptor
 {
 
 	private static final String KEY = "Actions";

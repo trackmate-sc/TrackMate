@@ -4,10 +4,10 @@ package fiji.plugin.trackmate.gui.wizard.descriptors;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
-import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor2;
+import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
 import fiji.plugin.trackmate.util.TMUtils;
 
-public class SpotTrackerDescriptor extends WizardPanelDescriptor2
+public class SpotTrackerDescriptor extends WizardPanelDescriptor
 {
 
 	public static final String KEY = "ConfigureTracker";

@@ -93,13 +93,13 @@ public class WizardPanel extends JPanel
 		panelMain.setLayout( cardLayout );
 	}
 
-	public void display( final WizardPanelDescriptor2 current )
+	public void display( final WizardPanelDescriptor current )
 	{
 		panelMain.add( current.getPanelComponent(), current.getPanelDescriptorIdentifier() );
 		cardLayout.show( panelMain, current.getPanelDescriptorIdentifier() );
 	}
 
-	public void transition( final WizardPanelDescriptor2 to, final WizardPanelDescriptor2 from, final Direction direction )
+	public void transition( final WizardPanelDescriptor to, final WizardPanelDescriptor from, final Direction direction )
 	{
 		animatorPanel.start( from, to, direction );
 	}
@@ -114,7 +114,7 @@ public class WizardPanel extends JPanel
 
 		private TransitionAnimator animator;
 
-		private WizardPanelDescriptor2 to;
+		private WizardPanelDescriptor to;
 
 		private final PainterThread painterThread;
 
@@ -127,7 +127,7 @@ public class WizardPanel extends JPanel
 			painterThread.start();
 		}
 
-		public void start( final WizardPanelDescriptor2 from, final WizardPanelDescriptor2 to, final Direction direction )
+		public void start( final WizardPanelDescriptor from, final WizardPanelDescriptor to, final Direction direction )
 		{
 			this.to = to;
 			this.animator = new TransitionAnimator( from.getPanelComponent(), to.getPanelComponent(), direction, duration );

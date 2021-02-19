@@ -4,12 +4,12 @@ import java.util.Map;
 
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.components.ModuleChooserPanel;
-import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor2;
+import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import fiji.plugin.trackmate.tracking.sparselap.SimpleSparseLAPTrackerFactory;
 
-public class ChooseTrackerDescriptor extends WizardPanelDescriptor2
+public class ChooseTrackerDescriptor extends WizardPanelDescriptor
 {
 
 	private static final String KEY = "ChooseTracker";

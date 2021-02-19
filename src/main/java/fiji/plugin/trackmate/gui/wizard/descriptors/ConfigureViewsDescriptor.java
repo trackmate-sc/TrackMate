@@ -5,9 +5,9 @@ import javax.swing.Action;
 import fiji.plugin.trackmate.gui.components.ConfigureViewsPanel;
 import fiji.plugin.trackmate.gui.components.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor2;
+import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
 
-public class ConfigureViewsDescriptor extends WizardPanelDescriptor2
+public class ConfigureViewsDescriptor extends WizardPanelDescriptor
 {
 
 	public static final String KEY = "ConfigureViews";

@@ -30,13 +30,13 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.GuiUtils;
-import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor2;
+import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
 import fiji.plugin.trackmate.util.TMUtils;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.measure.Calibration;
 
-public class StartDialogDescriptor extends WizardPanelDescriptor2
+public class StartDialogDescriptor extends WizardPanelDescriptor
 {
 
 	private static final String KEY = "Start";

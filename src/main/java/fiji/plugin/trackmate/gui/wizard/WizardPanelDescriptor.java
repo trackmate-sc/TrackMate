@@ -4,14 +4,14 @@ import java.awt.Component;
 
 import org.scijava.Cancelable;
 
-public class WizardPanelDescriptor2
+public class WizardPanelDescriptor
 {
 
 	protected Component targetPanel;
 
 	protected final String panelIdentifier;
 
-	public WizardPanelDescriptor2( final String panelIdentifier )
+	public WizardPanelDescriptor( final String panelIdentifier )
 	{
 		this.panelIdentifier = panelIdentifier;
 	}

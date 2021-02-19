@@ -1,9 +1,9 @@
 package fiji.plugin.trackmate.gui.wizard.descriptors;
 
 import fiji.plugin.trackmate.gui.components.LogPanel;
-import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor2;
+import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
 
-public class LogPanelDescriptor2 extends WizardPanelDescriptor2
+public class LogPanelDescriptor2 extends WizardPanelDescriptor
 {
 
 	public static final String KEY = "LogPanel";

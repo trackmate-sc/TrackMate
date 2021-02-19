@@ -82,12 +82,12 @@ public class WizardController
 
 	protected synchronized void previous()
 	{
-		final WizardPanelDescriptor2 current = sequence.current();
+		final WizardPanelDescriptor current = sequence.current();
 		if ( current == null )
 			return;
 
 		current.aboutToHidePanel();
-		final WizardPanelDescriptor2 back = sequence.previous();
+		final WizardPanelDescriptor back = sequence.previous();
 		if ( null == back )
 			return;
 
@@ -100,12 +100,12 @@ public class WizardController
 
 	protected synchronized void next()
 	{
-		final WizardPanelDescriptor2 current = sequence.current();
+		final WizardPanelDescriptor current = sequence.current();
 		if ( current == null )
 			return;
 
 		current.aboutToHidePanel();
-		final WizardPanelDescriptor2 next = sequence.next();
+		final WizardPanelDescriptor next = sequence.next();
 		if ( null == next)
 			return;
 
@@ -162,7 +162,7 @@ public class WizardController
 
 	public void init()
 	{
-		final WizardPanelDescriptor2 descriptor = sequence.current();
+		final WizardPanelDescriptor descriptor = sequence.current();
 		wizardPanel.btnPrevious.setEnabled( sequence.hasPrevious() );
 		wizardPanel.btnNext.setEnabled( sequence.hasNext() );
 		descriptor.aboutToDisplayPanel();
@@ -172,7 +172,7 @@ public class WizardController
 
 	protected void save()
 	{
-		final WizardPanelDescriptor2 saveDescriptor = sequence.save();
+		final WizardPanelDescriptor saveDescriptor = sequence.save();
 		wizardPanel.btnSave.setVisible( false );
 		wizardPanel.btnPrevious.setVisible( false );
 		wizardPanel.btnDisplayConfig.setVisible( false );
@@ -190,7 +190,7 @@ public class WizardController
 
 	protected void resume()
 	{
-		final WizardPanelDescriptor2 saveDescriptor = sequence.save();
+		final WizardPanelDescriptor saveDescriptor = sequence.save();
 		try
 		{
 			saveDescriptor.aboutToHidePanel();
@@ -208,7 +208,7 @@ public class WizardController
 		}
 	}
 
-	private void display( final WizardPanelDescriptor2 to, final WizardPanelDescriptor2 from, final Direction direction )
+	private void display( final WizardPanelDescriptor to, final WizardPanelDescriptor from, final Direction direction )
 	{
 		if ( null == to )
 			return;

@@ -60,13 +60,13 @@ public class TrackMateWizardSequence implements WizardSequence
 
 	private final DisplaySettings displaySettings;
 
-	private WizardPanelDescriptor2 current;
+	private WizardPanelDescriptor current;
 
 	private final StartDialogDescriptor startDialogDescriptor;
 
-	private final Map< WizardPanelDescriptor2, WizardPanelDescriptor2 > next;
+	private final Map< WizardPanelDescriptor, WizardPanelDescriptor > next;
 
-	private final Map< WizardPanelDescriptor2, WizardPanelDescriptor2 > previous;
+	private final Map< WizardPanelDescriptor, WizardPanelDescriptor > previous;
 
 	private final LogPanelDescriptor2 logDescriptor;
 
@@ -129,7 +129,7 @@ public class TrackMateWizardSequence implements WizardSequence
 	}
 
 	@Override
-	public WizardPanelDescriptor2 next()
+	public WizardPanelDescriptor next()
 	{
 		if ( current == chooseDetectorDescriptor )
 			getDetectorConfigDescriptor();
@@ -143,7 +143,7 @@ public class TrackMateWizardSequence implements WizardSequence
 
 
 	@Override
-	public WizardPanelDescriptor2 previous()
+	public WizardPanelDescriptor previous()
 	{
 		if ( current == trackFilterDescriptor )
 			getTrackerConfigDescriptor();
@@ -162,26 +162,26 @@ public class TrackMateWizardSequence implements WizardSequence
 	}
 
 	@Override
-	public WizardPanelDescriptor2 current()
+	public WizardPanelDescriptor current()
 	{
 		return current;
 	}
 
 
 	@Override
-	public WizardPanelDescriptor2 logDescriptor()
+	public WizardPanelDescriptor logDescriptor()
 	{
 		return logDescriptor;
 	}
 
 	@Override
-	public WizardPanelDescriptor2 configDescriptor()
+	public WizardPanelDescriptor configDescriptor()
 	{
 		return configureViewsDescriptor;
 	}
 
 	@Override
-	public WizardPanelDescriptor2 save()
+	public WizardPanelDescriptor save()
 	{
 		return saveDescriptor;
 	}
@@ -192,9 +192,9 @@ public class TrackMateWizardSequence implements WizardSequence
 		return current != startDialogDescriptor;
 	}
 
-	private Map< WizardPanelDescriptor2, WizardPanelDescriptor2 > getBackwardSequence()
+	private Map< WizardPanelDescriptor, WizardPanelDescriptor > getBackwardSequence()
 	{
-		final Map< WizardPanelDescriptor2, WizardPanelDescriptor2 > map = new HashMap<>();
+		final Map< WizardPanelDescriptor, WizardPanelDescriptor > map = new HashMap<>();
 		map.put( startDialogDescriptor, null );
 		map.put( chooseDetectorDescriptor, startDialogDescriptor );
 		map.put( chooseTrackerDescriptor, spotFilterDescriptor );
@@ -204,9 +204,9 @@ public class TrackMateWizardSequence implements WizardSequence
 		return map;
 	}
 
-	private Map< WizardPanelDescriptor2, WizardPanelDescriptor2 > getForwardSequence()
+	private Map< WizardPanelDescriptor, WizardPanelDescriptor > getForwardSequence()
 	{
-		final Map< WizardPanelDescriptor2, WizardPanelDescriptor2 > map = new HashMap<>();
+		final Map< WizardPanelDescriptor, WizardPanelDescriptor > map = new HashMap<>();
 		map.put( startDialogDescriptor, chooseDetectorDescriptor );
 		map.put( executeDetectionDescriptor, initFilterDescriptor );
 		map.put( initFilterDescriptor, spotFilterDescriptor );
@@ -233,7 +233,7 @@ public class TrackMateWizardSequence implements WizardSequence
 			return;
 		}
 
-		final List< WizardPanelDescriptor2 > descriptors = Arrays.asList( new WizardPanelDescriptor2[] {
+		final List< WizardPanelDescriptor > descriptors = Arrays.asList( new WizardPanelDescriptor[] {
 				logDescriptor,
 				chooseDetectorDescriptor,
 				executeDetectionDescriptor,
@@ -247,7 +247,7 @@ public class TrackMateWizardSequence implements WizardSequence
 				actionChooserDescriptor,
 				saveDescriptor
 		} );
-		for ( final WizardPanelDescriptor2 w : descriptors )
+		for ( final WizardPanelDescriptor w : descriptors )
 		{
 			if ( w.getPanelDescriptorIdentifier().equals( panelIdentifier ) )
 			{
@@ -289,7 +289,7 @@ public class TrackMateWizardSequence implements WizardSequence
 		final Map< String, Object > oldSettings1 = new HashMap<>( trackmate.getSettings().detectorSettings );
 		// From previous panel.
 		final Map< String, Object > oldSettings2 = new HashMap<>();
-		final WizardPanelDescriptor2 previousDescriptor = next.get( chooseDetectorDescriptor );
+		final WizardPanelDescriptor previousDescriptor = next.get( chooseDetectorDescriptor );
 		if ( previousDescriptor != null && previousDescriptor instanceof SpotDetectorDescriptor )
 		{
 			final SpotDetectorDescriptor previousSpotDetectorDescriptor = ( SpotDetectorDescriptor ) previousDescriptor;
@@ -353,7 +353,7 @@ public class TrackMateWizardSequence implements WizardSequence
 		final Map< String, Object > oldSettings1 = new HashMap<>( trackmate.getSettings().trackerSettings );
 		// From previous panel.
 		final Map< String, Object > oldSettings2 = new HashMap<>();
-		final WizardPanelDescriptor2 previousDescriptor = next.get( chooseTrackerDescriptor );
+		final WizardPanelDescriptor previousDescriptor = next.get( chooseTrackerDescriptor );
 		if ( previousDescriptor != null && previousDescriptor instanceof SpotTrackerDescriptor )
 		{
 			final SpotTrackerDescriptor previousTrackerDetectorDescriptor = ( SpotTrackerDescriptor ) previousDescriptor;
