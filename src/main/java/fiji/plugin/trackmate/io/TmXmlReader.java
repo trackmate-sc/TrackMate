@@ -406,10 +406,10 @@ public class TmXmlReader
 		return readSettings( imp,
 				new DetectorProvider(),
 				new TrackerProvider(),
-				new SpotAnalyzerProvider( imp.getNChannels() ),
+				new SpotAnalyzerProvider( ( imp == null ) ? 1 : imp.getNChannels() ),
 				new EdgeAnalyzerProvider(),
 				new TrackAnalyzerProvider(),
-				new SpotMorphologyAnalyzerProvider( imp.getNChannels() ) );
+				new SpotMorphologyAnalyzerProvider( ( imp == null ) ? 1 : imp.getNChannels() ) );
 	}
 
 	/**
