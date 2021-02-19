@@ -63,9 +63,6 @@ public class WizardPanel extends JPanel
 		this.btnSave = new JButton();
 		panelButtons.add( btnSave );
 
-		this.btnCancel = new JButton();
-		panelButtons.add( btnCancel );
-
 		final Component horizontalGlue_1 = Box.createHorizontalGlue();
 		panelButtons.add( horizontalGlue_1 );
 
@@ -84,6 +81,9 @@ public class WizardPanel extends JPanel
 		btnNext = new JButton();
 		panelButtons.add( btnNext );
 		
+		this.btnCancel = new JButton();
+		panelButtons.add( btnCancel );
+
 		btnResume = new JButton();
 		panelButtons.add( btnResume );
 

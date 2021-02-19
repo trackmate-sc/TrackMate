@@ -147,6 +147,7 @@ public class WizardController
 				try
 				{
 					reenabler.disable();
+					wizardPanel.btnNext.setVisible( false );
 					wizardPanel.btnCancel.setVisible( true );
 					wizardPanel.btnCancel.setEnabled( true );
 					runnable.run();
@@ -154,6 +155,7 @@ public class WizardController
 				finally
 				{
 					wizardPanel.btnCancel.setVisible( false);
+					wizardPanel.btnNext.setVisible( true );
 					reenabler.reenable();
 				}
 			};
