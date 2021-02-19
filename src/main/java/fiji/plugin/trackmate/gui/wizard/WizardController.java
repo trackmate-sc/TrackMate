@@ -147,10 +147,16 @@ public class WizardController
 				try
 				{
 					reenabler.disable();
+					// Wait for the animation to finish.
+					Thread.sleep( 200 );
 					wizardPanel.btnNext.setVisible( false );
 					wizardPanel.btnCancel.setVisible( true );
 					wizardPanel.btnCancel.setEnabled( true );
 					runnable.run();
+				}
+				catch ( final InterruptedException e )
+				{
+					e.printStackTrace();
 				}
 				finally
 				{
