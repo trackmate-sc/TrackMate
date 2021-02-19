@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.gui.wizard;
+package fiji.plugin.trackmate;
 
 import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
 
@@ -9,14 +9,10 @@ import javax.swing.JFrame;
 
 import org.scijava.util.VersionUtils;
 
-import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.LogPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.wizard.TrackMateWizardSequence;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ConfigureViewsDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.LogPanelDescriptor2;
 import fiji.plugin.trackmate.gui.wizard.descriptors.SomeDialogDescriptor;
@@ -31,12 +27,12 @@ import ij.ImageJ;
 import ij.ImagePlus;
 import ij.plugin.PlugIn;
 
-public class LoadTrackMateWizardPlugIn extends SomeDialogDescriptor implements PlugIn
+public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 {
 
 	private static final String KEY = "LoadPlugin";
 
-	public LoadTrackMateWizardPlugIn()
+	public LoadTrackMatePlugIn()
 	{
 		super( KEY, new LogPanel() );
 	}
@@ -162,7 +158,7 @@ public class LoadTrackMateWizardPlugIn extends SomeDialogDescriptor implements P
 		}
 
 		// Main view.
-		final TrackMateModelView displayer = new HyperStackDisplayer( model, selectionModel, imp, displaySettings );
+		final TrackMateModelView displayer = new HyperStackDisplayer( model, selectionModel, settings.imp, displaySettings );
 		displayer.render();
 		
 		// GUI state
@@ -174,14 +170,14 @@ public class LoadTrackMateWizardPlugIn extends SomeDialogDescriptor implements P
 		// Wizard.
 		final TrackMateWizardSequence sequence = new TrackMateWizardSequence( trackmate, selectionModel, displaySettings );
 		sequence.setCurrent( panelIdentifier );
-		final JFrame frame = sequence.run( "TrackMate on " + imp.getShortTitle() );
+		final JFrame frame = sequence.run( "TrackMate on " + settings.imp.getShortTitle() );
 		frame.setIconImage( TRACKMATE_ICON.getImage() );
-		GuiUtils.positionWindow( frame, imp.getWindow() );
+		GuiUtils.positionWindow( frame, settings.imp.getWindow() );
 		frame.setVisible( true );
 
 		// Text		
 		final LogPanelDescriptor2 logDescriptor = ( LogPanelDescriptor2 ) sequence.logDescriptor();
-		final LogPanel logPanel = ( LogPanel ) logDescriptor.targetPanel;
+		final LogPanel logPanel = ( LogPanel ) logDescriptor.getPanelComponent();
 		final Logger logger2 = logPanel.getLogger();
 		
 		logger2.log( "Session log saved in the file:\n"
@@ -234,9 +230,9 @@ public class LoadTrackMateWizardPlugIn extends SomeDialogDescriptor implements P
 	public static void main( final String[] args )
 	{
 		ImageJ.main( args );
-		final LoadTrackMateWizardPlugIn plugIn = new LoadTrackMateWizardPlugIn();
+		final LoadTrackMatePlugIn plugIn = new LoadTrackMatePlugIn();
 //		plugIn.run( "samples/FakeTracks.xml" );
-		plugIn.run( "samples/MAX_Merged.xml" );
-//		plugIn.run( "" );
+//		plugIn.run( "samples/MAX_Merged.xml" );
+		plugIn.run( "" );
 	}
 }

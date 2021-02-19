@@ -1,16 +1,14 @@
-package fiji.plugin.trackmate.gui.wizard;
+package fiji.plugin.trackmate;
 
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.ManualDetectorFactory;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.wizard.WizardSequence;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ConfigureViewsDescriptor;
 import fiji.plugin.trackmate.tracking.ManualTrackerFactory;
 import ij.ImageJ;
 import ij.ImagePlus;
 
-public class ManualTrackingWizardPlugIn extends NewTrackMateWizardPlugin
+public class ManualTrackingPlugIn extends TrackMatePlugIn
 {
 
 	@Override
@@ -38,6 +36,6 @@ public class ManualTrackingWizardPlugIn extends NewTrackMateWizardPlugin
 	public static void main( final String[] args )
 	{
 		ImageJ.main( args );
-		new ManualTrackingWizardPlugIn().run( "samples/Merged.tif" );
+		new ManualTrackingPlugIn().run( "samples/Merged.tif" );
 	}
 }

@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.gui.wizard;
+package fiji.plugin.trackmate;
 
 import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
 
@@ -6,13 +6,11 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
+import fiji.plugin.trackmate.gui.wizard.TrackMateWizardSequence;
+import fiji.plugin.trackmate.gui.wizard.WizardSequence;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
@@ -21,7 +19,7 @@ import ij.ImagePlus;
 import ij.WindowManager;
 import ij.plugin.PlugIn;
 
-public class NewTrackMateWizardPlugin implements PlugIn
+public class TrackMatePlugIn implements PlugIn
 {
 
 	@Override
@@ -162,7 +160,7 @@ public class NewTrackMateWizardPlugin implements PlugIn
 		ImageJ.main( args );
 //		new TrackMatePlugIn().run( "samples/Stack.tif" );
 //		new TrackMatePlugIn().run( "samples/Merged.tif" );
-		new NewTrackMateWizardPlugin().run( "samples/MAX_Merged.tif" );
+		new TrackMatePlugIn().run( "samples/MAX_Merged.tif" );
 //		new TrackMatePlugIn().run( "samples/Mask.tif" );
 //		new TrackMatePlugIn().run( "samples/FakeTracks.tif" );
 	}
