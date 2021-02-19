@@ -16,6 +16,10 @@ public class Icons
 
 	public static final ImageIcon TRACK_SCHEME_ICON = new ImageIcon( Icons.class.getResource( "images/Icon3a_print_transparency.png" ) );
 
+	public static final ImageIcon TRACKMATE_ICON = new ImageIcon( Icons.class.getResource( "images/Logo50x50-color-nofont-72p.png" ) );
+
+	public static final ImageIcon TRACKMATE_ICON_16x16;
+
 	public static final ImageIcon TRACK_SCHEME_ICON_16x16;
 
 	public static final ImageIcon SPOT_ICON_64x64;
@@ -46,6 +50,10 @@ public class Icons
 		final Image image5 = TRACK_SCHEME_ICON.getImage();
 		final Image newimg5 = image5.getScaledInstance( 16, 16, java.awt.Image.SCALE_SMOOTH );
 		TRACK_SCHEME_ICON_16x16 = new ImageIcon( newimg5 );
+
+		final Image image6 = TRACKMATE_ICON.getImage();
+		final Image newimg6 = image6.getScaledInstance( 16, 16, java.awt.Image.SCALE_SMOOTH );
+		TRACKMATE_ICON_16x16 = new ImageIcon( newimg6 );
 	}
 
 	public static final ImageIcon TRACK_TABLES_ICON = new ImageIcon( Icons.class.getResource( "images/table_multiple.png" ) );
@@ -68,6 +76,8 @@ public class Icons
 
 	public static final ImageIcon EDIT_SETTINGS_ICON = new ImageIcon( Icons.class.getResource( "images/cog_edit.png" ) );
 
+	public static final ImageIcon COG_ICON = new ImageIcon( Icons.class.getResource( "images/cog.png" ) );
+
 	public static final ImageIcon PLOT_ICON = new ImageIcon( Icons.class.getResource( "images/plots.png" ) );
 
 	public static final ImageIcon ADD_ICON = new ImageIcon( Icons.class.getResource( "images/add.png" ) );
@@ -75,8 +85,6 @@ public class Icons
 	public static final ImageIcon REMOVE_ICON = new ImageIcon( Icons.class.getResource( "images/delete.png" ) );
 
 	public static final ImageIcon PREVIEW_ICON = new ImageIcon( Icons.class.getResource( "images/flag_checked.png" ) );
-
-	public static final ImageIcon TRACKMATE_ICON = new ImageIcon( Icons.class.getResource( "images/Logo50x50-color-nofont-72p.png" ) );
 
 	public static final ImageIcon CSV_ICON = new ImageIcon( Icons.class.getResource( "images/page_save.png" ) );
 
