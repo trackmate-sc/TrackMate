@@ -233,6 +233,13 @@ public class TrackMateWizardSequence implements WizardSequence
 			return;
 		}
 
+		if ( panelIdentifier.equals( InitFilterDescriptor.KEY ) )
+		{
+			getDetectorConfigDescriptor();
+			current = initFilterDescriptor;
+			return;
+		}
+
 		final List< WizardPanelDescriptor > descriptors = Arrays.asList( new WizardPanelDescriptor[] {
 				logDescriptor,
 				chooseDetectorDescriptor,

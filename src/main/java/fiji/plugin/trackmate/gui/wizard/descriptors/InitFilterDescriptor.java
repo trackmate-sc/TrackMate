@@ -14,7 +14,7 @@ import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
 public class InitFilterDescriptor extends WizardPanelDescriptor
 {
 
-	private static final String KEY = "InitialFiltering";
+	public static final String KEY = "InitialFiltering";
 
 	private final TrackMate trackmate;
 
