@@ -36,7 +36,7 @@ public class InitFilterDescriptor extends WizardPanelDescriptor2
 			@Override
 			public void run()
 			{
-				trackmate.getModel().getLogger().log( "Computing spot quality histogram...\n", Logger.BLUE_COLOR );
+				trackmate.getModel().getLogger().log( "\nComputing spot quality histogram...\n", Logger.BLUE_COLOR );
 				final InitFilterPanel component = ( InitFilterPanel ) targetPanel;
 				component.refresh();
 			}

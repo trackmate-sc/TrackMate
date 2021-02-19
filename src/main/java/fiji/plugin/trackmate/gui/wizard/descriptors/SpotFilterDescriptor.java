@@ -77,7 +77,7 @@ public class SpotFilterDescriptor extends WizardPanelDescriptor2
 						&& trackmate.getSettings().detectorFactory.has2Dsegmentation()
 						&& DetectionUtils.is2D( trackmate.getSettings().imp ) )
 				{
-					logger.log( "Adding morphology analyzers...\n", Logger.BLUE_COLOR );
+					logger.log( "\nAdding morphology analyzers...\n", Logger.BLUE_COLOR );
 					final Settings settings = trackmate.getSettings();
 					final SpotMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider = new SpotMorphologyAnalyzerProvider( settings.imp.getNChannels() );
 					@SuppressWarnings( "rawtypes" )
@@ -96,12 +96,12 @@ public class SpotFilterDescriptor extends WizardPanelDescriptor2
 				 * We have some spots so we need to compute spot features will
 				 * we render them.
 				 */
-				logger.log( "Calculating spot features...\n", Logger.BLUE_COLOR );
+				logger.log( "\nCalculating spot features...\n", Logger.BLUE_COLOR );
 				// Calculate features
 				final long start = System.currentTimeMillis();
 				trackmate.computeSpotFeatures( true );
 				final long end = System.currentTimeMillis();
-				logger.log( String.format( "Calculating features done in %.1f s.\n", ( end - start ) / 1e3f ), Logger.BLUE_COLOR );
+				logger.log( String.format( "Calculating features done in %.1f s.\n", ( end - start ) / 1e3f ) );
 
 				// Refresh component.
 				final FilterGuiPanel component = ( FilterGuiPanel ) targetPanel;
@@ -123,7 +123,7 @@ public class SpotFilterDescriptor extends WizardPanelDescriptor2
 	public void aboutToHidePanel()
 	{
 		final Logger logger = trackmate.getModel().getLogger();
-		logger.log( "Performing spot filtering on the following features:\n", Logger.BLUE_COLOR );
+		logger.log( "\nPerforming spot filtering on the following features:\n", Logger.BLUE_COLOR );
 		final Model model = trackmate.getModel();
 		final FilterGuiPanel component = ( FilterGuiPanel ) targetPanel;
 		final List< FeatureFilter > featureFilters = component.getFeatureFilters();

@@ -23,7 +23,12 @@ public class ExecuteTrackingDescriptor extends WizardPanelDescriptor2
 	@Override
 	public Runnable getForwardRunnable()
 	{
-		return () -> trackmate.execTracking();
+		return () -> {
+			final long start = System.currentTimeMillis();
+			trackmate.execTracking();
+			final long end = System.currentTimeMillis();
+			trackmate.getModel().getLogger().log( String.format( "Tracking done in %.1f s.\n", ( end - start ) / 1e3f ) );
+		};
 	}
 
 	@Override

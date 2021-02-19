@@ -241,7 +241,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 		cancelables.clear();
 
 		final Logger logger = model.getLogger();
-		logger.log( "Starting tracking process.\n" );
+		logger.log( "Starting tracking process.\n", Logger.BLUE_COLOR );
 		final SpotTracker tracker = settings.trackerFactory.create( model.getSpots(), settings.trackerSettings );
 		if ( tracker instanceof Cancelable )
 			cancelables.add( ( Cancelable ) tracker );
@@ -277,7 +277,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 		final Logger logger = model.getLogger();
 		logger.log( "Starting detection process using "
 				+ ( ( numThreads > 1 ) ? ( numThreads + " threads" ) : "1 thread" )
-				+ ".\n" );
+				+ ".\n", Logger.BLUE_COLOR );
 
 		final SpotDetectorFactoryBase< ? > factory = settings.detectorFactory;
 		if ( null == factory )
@@ -318,7 +318,9 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 			return processGlobal( ( SpotGlobalDetectorFactory ) factory, img, logger );
 		}
 		else if ( factory instanceof SpotDetectorFactory )
-		{ return processFrameByFrame( ( SpotDetectorFactory ) factory, img, logger ); }
+		{ 
+			return processFrameByFrame( ( SpotDetectorFactory ) factory, img, logger ); 
+		}
 
 		errorMessage = "Don't know how to handle detector factory of type: " + factory.getClass();
 		return false;

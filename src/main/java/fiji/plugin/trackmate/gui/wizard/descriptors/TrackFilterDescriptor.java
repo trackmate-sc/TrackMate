@@ -60,13 +60,13 @@ public class TrackFilterDescriptor extends WizardPanelDescriptor2
 				 * We have some tracks so we need to compute spot features will
 				 * we render them.
 				 */
-				logger.log( "Calculating track features...\n", Logger.BLUE_COLOR );
+				logger.log( "\n" );
 				// Calculate features
 				final long start = System.currentTimeMillis();
 				trackmate.computeEdgeFeatures( true );
 				trackmate.computeTrackFeatures( true );
 				final long end = System.currentTimeMillis();
-				logger.log( String.format( "Calculating features done in %.1f s.\n", ( end - start ) / 1e3f ), Logger.BLUE_COLOR );
+				logger.log( String.format( "Calculating features done in %.1f s.\n", ( end - start ) / 1e3f ) );
 
 				// Refresh component.
 				final FilterGuiPanel component = ( FilterGuiPanel ) targetPanel;
@@ -86,7 +86,7 @@ public class TrackFilterDescriptor extends WizardPanelDescriptor2
 	public void aboutToHidePanel()
 	{
 		final Logger logger = trackmate.getModel().getLogger();
-		logger.log( "Performing track filtering on the following features:\n", Logger.BLUE_COLOR );
+		logger.log( "\nPerforming track filtering on the following features:\n", Logger.BLUE_COLOR );
 		final Model model = trackmate.getModel();
 		final FilterGuiPanel component = ( FilterGuiPanel ) targetPanel;
 		final List< FeatureFilter > featureFilters = component.getFeatureFilters();

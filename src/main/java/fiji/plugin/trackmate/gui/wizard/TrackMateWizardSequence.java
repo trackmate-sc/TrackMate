@@ -310,7 +310,7 @@ public class TrackMateWizardSequence implements WizardSequence
 		final ConfigurationPanel detectorConfigurationPanel = detectorFactory.getDetectorConfigurationPanel( trackmate.getSettings(), trackmate.getModel() );
 		detectorConfigurationPanel.setSettings( defaultSettings );
 		trackmate.getSettings().detectorSettings = defaultSettings;
-		final SpotDetectorDescriptor configDescriptor = new SpotDetectorDescriptor( trackmate.getSettings(), detectorConfigurationPanel );
+		final SpotDetectorDescriptor configDescriptor = new SpotDetectorDescriptor( trackmate.getSettings(), detectorConfigurationPanel, trackmate.getModel().getLogger() );
 
 		// Position sequence next and previous.
 		next.put( chooseDetectorDescriptor, configDescriptor );
@@ -374,7 +374,7 @@ public class TrackMateWizardSequence implements WizardSequence
 		final ConfigurationPanel trackerConfigurationPanel = trackerFactory.getTrackerConfigurationPanel( trackmate.getModel() );
 		trackerConfigurationPanel.setSettings( defaultSettings );
 		trackmate.getSettings().trackerSettings = defaultSettings;
-		final SpotTrackerDescriptor configDescriptor = new SpotTrackerDescriptor( trackmate.getSettings(), trackerConfigurationPanel );
+		final SpotTrackerDescriptor configDescriptor = new SpotTrackerDescriptor( trackmate.getSettings(), trackerConfigurationPanel, trackmate.getModel().getLogger() );
 
 		// Position sequence next and previous.
 		next.put( chooseTrackerDescriptor, configDescriptor );

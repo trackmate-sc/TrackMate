@@ -28,8 +28,10 @@ import javax.swing.SwingConstants;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor2;
+import fiji.plugin.trackmate.util.TMUtils;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.measure.Calibration;
@@ -52,6 +54,22 @@ public class StartDialogDescriptor extends WizardPanelDescriptor2
 	}
 
 	@Override
+	public void aboutToDisplayPanel()
+	{
+		final String welcomeMessage = TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION + " started on:\n" + TMUtils.getCurrentTimeString() + '\n';
+		// Log GUI processing start
+		logger.log( welcomeMessage, Logger.BLUE_COLOR );
+		logger.log( "Please note that TrackMate is available through Fiji, and is based on a publication. "
+				+ "If you use it successfully for your research please be so kind to cite our work:\n" );
+		logger.log( "Tinevez, JY.; Perry, N. & Schindelin, J. et al. (2017), 'TrackMate: An open and extensible platform for single-particle tracking.', "
+				+ "Methods 115: 80-90, PMID 27713081.\n", Logger.GREEN_COLOR );
+		logger.log( "https://www.ncbi.nlm.nih.gov/pubmed/27713081\n", Logger.BLUE_COLOR );
+		logger.log( "https://www.sciencedirect.com/science/article/pii/S1046202316303346\n", Logger.BLUE_COLOR );
+		logger.log( "\nNumerical feature analyzers:\n", Logger.BLUE_COLOR );
+		logger.log( settings.toStringFeatureAnalyzersInfo() );
+	}
+
+	@Override
 	public void aboutToHidePanel()
 	{
 		// Copy the values in the panel to the settings object.
@@ -64,6 +82,8 @@ public class StartDialogDescriptor extends WizardPanelDescriptor2
 		settings.zend = ( ( Number ) panel.tfZEnd.getValue() ).intValue();
 		settings.tstart = ( ( Number ) panel.tfTStart.getValue() ).intValue();
 		settings.tend = ( ( Number ) panel.tfTEnd.getValue() ).intValue();
+		// Log
+		logger.log( "\nImage region of interest:\n", Logger.BLUE_COLOR );
 		logger.log( settings.toStringImageInfo() );
 	}
 

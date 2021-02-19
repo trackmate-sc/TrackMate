@@ -151,8 +151,7 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm imple
 		if ( doLogIt )
 		{
 			logger.setStatus( "Calculating " + toCompute.getNSpots( false ) + " spots features..." );
-			logger.log( "Computing spot features", Logger.BLUE_COLOR );
-			logger.log( " over "
+			logger.log( "Computing spot features over "
 					+ ( ( nSimultaneousFrames > 1 ) ? ( nSimultaneousFrames + " frames" ) : "1 frame" )
 					+ " simultaneously and allocating "
 					+ ( ( threadsPerFrame > 1 ) ? ( threadsPerFrame + " threads" ) : "1 thread" )
