@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.gui.panels;
+package fiji.plugin.trackmate.gui.components;
 
 import java.awt.Color;
 import java.awt.Font;

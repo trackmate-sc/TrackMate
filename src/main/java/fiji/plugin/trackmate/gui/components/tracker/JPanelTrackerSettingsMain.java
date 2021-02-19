@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.gui.panels.tracker;
+package fiji.plugin.trackmate.gui.components.tracker;
 
 import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
 import static fiji.plugin.trackmate.gui.Fonts.FONT;
@@ -36,7 +36,7 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
-import fiji.plugin.trackmate.gui.panels.components.JPanelFeatureSelectionGui;
+import fiji.plugin.trackmate.gui.components.JPanelFeatureSelectionGui;
 import fiji.plugin.trackmate.tracking.LAPUtils;
 
 public class JPanelTrackerSettingsMain extends javax.swing.JPanel {

@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.gui;
+package fiji.plugin.trackmate.gui.components;
 
 import static fiji.plugin.trackmate.gui.Icons.EDGE_ICON_64x64;
 import static fiji.plugin.trackmate.gui.Icons.SPOT_ICON_64x64;
@@ -24,7 +24,6 @@ import fiji.plugin.trackmate.features.SpotFeatureGrapher;
 import fiji.plugin.trackmate.features.TrackFeatureGrapher;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
-import fiji.plugin.trackmate.gui.panels.components.FeaturePlotSelectionPanel;
 
 public class GrapherPanel extends JPanel
 {

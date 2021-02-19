@@ -3,8 +3,8 @@ package fiji.plugin.trackmate.gui.wizard.descriptors;
 import java.util.Map;
 
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.gui.components.ModuleChooserPanel;
 import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor2;
-import fiji.plugin.trackmate.gui.wizard.descriptors.panels.ModuleChooserPanel;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import fiji.plugin.trackmate.tracking.sparselap.SimpleSparseLAPTrackerFactory;
@@ -38,7 +38,7 @@ public class ChooseTrackerDescriptor extends WizardPanelDescriptor2
 			key = trackmate.getSettings().trackerFactory.getKey();
 
 		@SuppressWarnings( "unchecked" )
-		final ModuleChooserPanel< SpotTrackerFactory > component = ( ModuleChooserPanel< SpotTrackerFactory > ) targetPanel;
+		final ModuleChooserPanel< SpotTrackerFactory > component = (fiji.plugin.trackmate.gui.components.ModuleChooserPanel< SpotTrackerFactory > ) targetPanel;
 		component.setSelectedModuleKey( key );
 	}
 
@@ -53,7 +53,7 @@ public class ChooseTrackerDescriptor extends WizardPanelDescriptor2
 	{
 		// Configure the detector provider with choice made in panel
 		@SuppressWarnings( "unchecked" )
-		final ModuleChooserPanel< SpotTrackerFactory > component = ( ModuleChooserPanel< SpotTrackerFactory > ) targetPanel;
+		final ModuleChooserPanel< SpotTrackerFactory > component = (fiji.plugin.trackmate.gui.components.ModuleChooserPanel< SpotTrackerFactory > ) targetPanel;
 		final String trackerKey = component.getSelectedModuleKey();
 
 		// Configure trackmate settings with selected detector

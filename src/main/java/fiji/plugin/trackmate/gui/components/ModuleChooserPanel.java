@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.gui.wizard.descriptors.panels;
+package fiji.plugin.trackmate.gui.components;
 
 import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
 import static fiji.plugin.trackmate.gui.Fonts.FONT;

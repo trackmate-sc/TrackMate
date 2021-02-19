@@ -7,8 +7,8 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.FeatureUtils;
+import fiji.plugin.trackmate.gui.components.InitFilterPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
-import fiji.plugin.trackmate.gui.panels.InitFilterPanel;
 import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor2;
 
 public class InitFilterDescriptor extends WizardPanelDescriptor2

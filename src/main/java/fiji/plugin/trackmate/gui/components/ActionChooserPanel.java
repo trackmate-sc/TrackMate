@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.gui.wizard.descriptors.panels;
+package fiji.plugin.trackmate.gui.components;
 
 import static fiji.plugin.trackmate.gui.Fonts.FONT;
 import static fiji.plugin.trackmate.gui.Icons.EXECUTE_ICON;
@@ -18,7 +18,6 @@ import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.action.CaptureOverlayAction;
 import fiji.plugin.trackmate.action.TrackMateAction;
 import fiji.plugin.trackmate.action.TrackMateActionFactory;
-import fiji.plugin.trackmate.gui.LogPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.providers.ActionProvider;
 

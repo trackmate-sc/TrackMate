@@ -27,8 +27,8 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
-import fiji.plugin.trackmate.gui.panels.components.FeaturePlotSelectionPanel;
-import fiji.plugin.trackmate.gui.panels.components.FeaturePlotSelectionPanel.PlotAction;
+import fiji.plugin.trackmate.gui.components.FeaturePlotSelectionPanel;
+import fiji.plugin.trackmate.gui.components.FeaturePlotSelectionPanel.PlotAction;
 import fiji.plugin.trackmate.util.TMUtils;
 
 /**

@@ -3,7 +3,7 @@ package fiji.plugin.trackmate.gui.wizard.descriptors;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.gui.ConfigurationPanel;
+import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor2;
 import fiji.plugin.trackmate.util.TMUtils;
 

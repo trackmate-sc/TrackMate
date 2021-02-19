@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.gui.panels.detector;
+package fiji.plugin.trackmate.gui.components.detector;
 
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DO_MEDIAN_FILTERING;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DO_SUBPIXEL_LOCALIZATION;
@@ -32,8 +32,8 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
-import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.GuiUtils;
+import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.util.JLabelLogger;
 import ij.ImagePlus;
 import ij.measure.Calibration;

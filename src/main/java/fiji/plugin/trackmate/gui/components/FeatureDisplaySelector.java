@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.gui;
+package fiji.plugin.trackmate.gui.components;
 
 import static fiji.plugin.trackmate.features.FeatureUtils.collectFeatureKeys;
 import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
@@ -48,10 +48,10 @@ import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
 import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
+import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.displaysettings.Colormap;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
-import fiji.plugin.trackmate.gui.panels.components.CategoryJComboBox;
 
 public class FeatureDisplaySelector
 {

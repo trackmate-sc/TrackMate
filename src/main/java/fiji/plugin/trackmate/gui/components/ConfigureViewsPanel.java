@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.gui.panels;
+package fiji.plugin.trackmate.gui.components;
 
 import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
 import static fiji.plugin.trackmate.gui.Fonts.FONT;
@@ -28,7 +28,6 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
-import fiji.plugin.trackmate.gui.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.displaysettings.ConfigTrackMateDisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;

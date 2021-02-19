@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.gui.panels.detector;
+package fiji.plugin.trackmate.gui.components.detector;
 
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 

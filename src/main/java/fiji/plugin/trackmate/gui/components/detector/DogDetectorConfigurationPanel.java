@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.gui.panels.detector;
+package fiji.plugin.trackmate.gui.components.detector;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;

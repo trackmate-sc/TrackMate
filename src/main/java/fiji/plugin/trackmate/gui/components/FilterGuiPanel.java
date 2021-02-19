@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.gui.panels.components;
+package fiji.plugin.trackmate.gui.components;
 
 import static fiji.plugin.trackmate.features.FeatureUtils.collectFeatureKeys;
 import static fiji.plugin.trackmate.features.FeatureUtils.collectFeatureValues;
@@ -35,9 +35,7 @@ import javax.swing.event.ChangeListener;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.features.FeatureFilter;
-import fiji.plugin.trackmate.gui.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
-import fiji.plugin.trackmate.gui.panels.FilterPanel;
 import fiji.plugin.trackmate.util.OnRequestUpdater;
 
 public class FilterGuiPanel extends JPanel implements ChangeListener

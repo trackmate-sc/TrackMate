@@ -1,7 +1,7 @@
 package fiji.plugin.trackmate.gui.wizard.descriptors;
 
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.GrapherPanel;
+import fiji.plugin.trackmate.gui.components.GrapherPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor2;
 

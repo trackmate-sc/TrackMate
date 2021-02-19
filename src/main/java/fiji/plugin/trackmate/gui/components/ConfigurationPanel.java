@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.gui;
+package fiji.plugin.trackmate.gui.components;
 
 import java.awt.event.ActionEvent;
 import java.util.Map;

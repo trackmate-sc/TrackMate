@@ -11,9 +11,9 @@ import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.spot.SpotMorphologyAnalyzerFactory;
-import fiji.plugin.trackmate.gui.FeatureDisplaySelector;
+import fiji.plugin.trackmate.gui.components.FeatureDisplaySelector;
+import fiji.plugin.trackmate.gui.components.FilterGuiPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
-import fiji.plugin.trackmate.gui.panels.components.FilterGuiPanel;
 import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor2;
 import fiji.plugin.trackmate.providers.SpotMorphologyAnalyzerProvider;
 
