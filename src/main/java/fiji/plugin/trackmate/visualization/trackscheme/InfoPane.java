@@ -57,8 +57,6 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 
 	private static final long serialVersionUID = -1L;
 
-	private FeaturePlotSelectionPanel featureSelectionPanel;
-
 	private JTable table;
 
 	private JScrollPane scrollTable;
@@ -421,9 +419,13 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 		scrollTable.setOpaque( false );
 		scrollTable.getViewport().setOpaque( false );
 
-		final List< String > features = new ArrayList< >( model.getFeatureModel().getSpotFeatures() );
-		final Map< String, String > featureNames = model.getFeatureModel().getSpotFeatureShortNames();
-		featureSelectionPanel = new FeaturePlotSelectionPanel( Spot.POSITION_T, features, featureNames );
+		final List< String > spotFeatures = new ArrayList<>( model.getFeatureModel().getSpotFeatures() );
+		final Map< String, String > spotFeatureNames = model.getFeatureModel().getSpotFeatureShortNames();
+		final SmallFeaturePlotSelectionPanel featureSelectionPanel = new SmallFeaturePlotSelectionPanel(
+				"T",
+				spotFeatures,
+				spotFeatureNames,
+				( xKey, yKeys ) -> new Thread( () -> plotSelectionData( xKey, yKeys ) ).start() );
 
 		final JSplitPane inner = new JSplitPane( JSplitPane.VERTICAL_SPLIT, scrollTable, featureSelectionPanel );
 		inner.setDividerLocation( 200 );
@@ -431,19 +433,6 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 		inner.setBorder( null );
 		setLayout( new BorderLayout() );
 		add( inner, BorderLayout.CENTER );
-
-		// Add listener for plot events
-		featureSelectionPanel.addActionListener( new ActionListener()
-		{
-			@Override
-			public void actionPerformed( final ActionEvent e )
-			{
-				final String xFeature = featureSelectionPanel.getXKey();
-				final Set< String > yFeatures = featureSelectionPanel.getYKeys();
-				plotSelectionData( xFeature, yFeatures );
-			}
-		} );
-
 	}
 
 	/**
@@ -458,7 +447,8 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 	private void plotSelectionData( final String xFeature, final Set< String > yFeatures )
 	{
 		final Set< Spot > spots = selectionModel.getSpotSelection();
-		if ( yFeatures.isEmpty() || spots.isEmpty() ) { return; }
+		if ( yFeatures.isEmpty() || spots.isEmpty() )
+			return;
 
 		final SpotFeatureGrapher grapher = new SpotFeatureGrapher( xFeature, yFeatures, spots, model, displaySettings );
 		grapher.render();

@@ -9,8 +9,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -44,6 +42,14 @@ public class FeaturePlotSelectionPanel extends JPanel
 
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Action to execute when the plot button is clicked.
+	 */
+	public static interface PlotAction
+	{
+		public void plot( String xKey, Set< String > yKeys );
+	}
+
 	private static final Dimension BUTTON_SIZE = new Dimension( 24, 24 );
 	private static final Dimension COMBO_BOX_MAX_SIZE = new java.awt.Dimension( 220, 22 );
 	private static final int MAX_FEATURE_ALLOWED = 10;
@@ -64,15 +70,15 @@ public class FeaturePlotSelectionPanel extends JPanel
 	 * CONSTRUCTOR
 	 */
 
-	public FeaturePlotSelectionPanel( final String xKey, final String yKey, final Collection< String > features, final Map< String, String > featureNames )
+	public FeaturePlotSelectionPanel(
+			final String xKey,
+			final String yKey,
+			final Collection< String > features,
+			final Map< String, String > featureNames,
+			final PlotAction plotAction )
 	{
-		super();
 		this.features = new ArrayList<>( features );
 		this.featureNames = featureNames;
-
-		/*
-		 * GUI.
-		 */
 
 		this.setPreferredSize( new Dimension( 300, 450 ) );
 		setLayout( new BorderLayout( 0, 0 ) );
@@ -83,7 +89,6 @@ public class FeaturePlotSelectionPanel extends JPanel
 		topPanel.setLayout( null );
 		final JButton plotButton = new JButton( "Plot features", PLOT_ICON );
 		plotButton.setBounds( 80, 27, 140, 40 );
-		plotButton.addActionListener( e -> firePlotSelectionData() );
 		topPanel.add( plotButton );
 		plotButton.setFont( FONT.deriveFont( Font.BOLD ) );
 
@@ -151,35 +156,18 @@ public class FeaturePlotSelectionPanel extends JPanel
 		cmbboxYFeature.setMaximumSize( COMBO_BOX_MAX_SIZE );
 		cmbboxYFeature.setFont( FONT );
 
-		/*
-		 * Add a feature
-		 */
-
+		// Add the default feature
 		addFeature( yKey );
-	}
 
-	/*
-	 * PUBLIC METHODS
-	 */
+		// Listener.
+		plotButton.addActionListener( e -> {
+			final String sKey = this.features.get( cmbboxXFeature.getSelectedIndex() );
+			final Set< String > yKeys = new HashSet<>( comboBoxes.size() );
+			for ( final JComboBox< String > box : comboBoxes )
+				yKeys.add( this.features.get( box.getSelectedIndex() ) );
 
-	/**
-	 * Return the enum constant selected in the X combo-box feature.
-	 */
-	public String getXKey()
-	{
-		return features.get( cmbboxXFeature.getSelectedIndex() );
-	}
-
-	/**
-	 * Return a set of the keys selected in the Y feature panel. Since we use a
-	 * {@link Set}, duplicates are trimmed.
-	 */
-	public Set< String > getYKeys()
-	{
-		final Set< String > yKeys = new HashSet<>( comboBoxes.size() );
-		for ( final JComboBox< String > box : comboBoxes )
-			yKeys.add( features.get( box.getSelectedIndex() ) );
-		return yKeys;
+			plotAction.plot( sKey, yKeys );
+		} );
 	}
 
 	/*
@@ -228,25 +216,5 @@ public class FeaturePlotSelectionPanel extends JPanel
 		panelYFeatures.remove( struts.pop() );
 		panelYFeatures.revalidate();
 		panelYFeatures.repaint();
-	}
-
-	/**
-	 * Notifies listeners that the plot feature button has been pressed.
-	 */
-	private void firePlotSelectionData()
-	{
-		// Prepare command string. Does not matter actually, but let's do it
-		// right.
-		String command = "Plot ";
-		final String[] Y = getYKeys().toArray( new String[] {} );
-		for ( int i = 0; i < Y.length - 1; i++ )
-			command += ( Y[ i ] + ", " );
-
-		command += Y[ Y.length - 1 ];
-		command += " vs " + getXKey();
-
-		final ActionEvent plotEvent = new ActionEvent( this, 0, command );
-		for ( final ActionListener listener : actionListeners )
-			listener.actionPerformed( plotEvent );
 	}
 }
