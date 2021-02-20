@@ -102,6 +102,10 @@ public class DisplaySettings
 
 	private boolean trackschemeFillBox;
 
+	private boolean spotFilled;
+
+	private double spotTransparencyAlpha;
+
 	private final transient Listeners.List< UpdateListener > updateListeners;
 
 
@@ -151,6 +155,8 @@ public class DisplaySettings
 		spotMin = ds.spotMin;
 		spotMax = ds.spotMax;
 		spotUniformColor = ds.spotUniformColor;
+		spotFilled = ds.spotFilled;
+		spotTransparencyAlpha = ds.spotTransparencyAlpha;
 
 		trackVisible = ds.trackVisible;
 		trackColorByFeature = ds.trackColorByFeature;
@@ -347,15 +353,18 @@ public class DisplaySettings
 
 	public synchronized void setSpotMinMax( final double spotMin, final double spotMax )
 	{
+		final double smin = Math.min( spotMin, spotMax );
+		final double smax = Math.max( spotMin, spotMax );
+
 		boolean notify = false;
-		if ( this.spotMin != spotMin )
+		if ( this.spotMin != smin )
 		{
-			this.spotMin = spotMin;
+			this.spotMin = smin;
 			notify = true;
 		}
-		if ( this.spotMax != spotMax )
+		if ( this.spotMax != smax )
 		{
-			this.spotMax = spotMax;
+			this.spotMax = smax;
 			notify = true;
 		}
 		if ( notify )
@@ -462,15 +471,18 @@ public class DisplaySettings
 
 	public synchronized void setTrackMinMax( final double trackMin, final double trackMax )
 	{
+		final double tmin = Math.min( trackMin, trackMax );
+		final double tmax = Math.max( trackMin, trackMax );
+
 		boolean notify = false;
-		if ( this.trackMin != trackMin )
+		if ( this.trackMin != tmin )
 		{
-			this.trackMin = trackMin;
+			this.trackMin = tmin;
 			notify = true;
 		}
-		if ( this.trackMax != trackMax )
+		if ( this.trackMax != tmax )
 		{
-			this.trackMax = trackMax;
+			this.trackMax = tmax;
 			notify = true;
 		}
 		if ( notify )
@@ -591,6 +603,34 @@ public class DisplaySettings
 		if ( this.selectionLineThickness != selectionLineThickness )
 		{
 			this.selectionLineThickness = selectionLineThickness;
+			notifyListeners();
+		}
+	}
+
+	public boolean isSpotFilled()
+	{
+		return spotFilled;
+	}
+
+	public synchronized void setSpotFilled( final boolean isSpotFilled )
+	{
+		if ( this.spotFilled != isSpotFilled )
+		{
+			this.spotFilled = isSpotFilled;
+			notifyListeners();
+		}
+	}
+
+	public double getSpotTransparencyAlpha()
+	{
+		return spotTransparencyAlpha;
+	}
+
+	public synchronized void setSpotTransparencyAlpha( final double spotTransparencyAlpha )
+	{
+		if ( this.spotTransparencyAlpha != spotTransparencyAlpha )
+		{
+			this.spotTransparencyAlpha = spotTransparencyAlpha;
 			notifyListeners();
 		}
 	}
@@ -772,9 +812,11 @@ public class DisplaySettings
 		df.spotColorByType = TrackMateObject.DEFAULT;
 		df.spotDisplayedAsRoi = true;
 		df.spotDisplayRadius = 1.;
+		df.spotFilled = false;
 		df.spotMin = 0.;
 		df.spotMax = 10.;
 		df.spotShowName = false;
+		df.spotTransparencyAlpha = 1.;
 		df.spotUniformColor = new Color( 0.8f, 0.2f, 0.8f );
 		df.spotVisible = true;
 		df.trackDisplayMode = TrackDisplayMode.FULL;

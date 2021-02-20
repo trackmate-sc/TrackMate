@@ -40,7 +40,17 @@ public class DisplaySettingsIO
 	
 	public static DisplaySettings fromJson( final String str )
 	{
-		return ( str == null || str.isEmpty() ) ? readUserDefault() : getGson().fromJson( str, DisplaySettings.class );
+		final DisplaySettings ds = ( str == null || str.isEmpty() ) ? readUserDefault() : getGson().fromJson( str, DisplaySettings.class );
+
+		// Sanitize min and max.
+		final double spotMin = ds.getSpotMin();
+		final double spotMax = ds.getSpotMax();
+		ds.setSpotMinMax( Math.min( spotMin, spotMax ), Math.max( spotMin, spotMax ) );
+		final double trackMin = ds.getTrackMin();
+		final double trackMax = ds.getTrackMax();
+		ds.setTrackMinMax( Math.min( trackMin, trackMax ), Math.max( trackMin, trackMax ) );
+
+		return ds;
 	}
 
 

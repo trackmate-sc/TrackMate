@@ -44,8 +44,6 @@ public class SpotOverlay extends Roi
 
 	protected final double[] calibration;
 
-	protected Composite composite = AlphaComposite.getInstance( AlphaComposite.SRC_OVER );
-
 	protected FontMetrics fm;
 
 	protected Collection< Spot > spotSelection = new ArrayList<>();
@@ -86,8 +84,11 @@ public class SpotOverlay extends Roi
 		final double drawingDepth = displaySettings.getZDrawingDepth();
 		final TrackDisplayMode trackDisplayMode = displaySettings.getTrackDisplayMode();
 		final boolean selectionOnly = ( trackDisplayMode == TrackDisplayMode.SELECTION_ONLY );
+		final boolean filled = displaySettings.isSpotFilled();
+		final float alpha = ( float ) displaySettings.getSpotTransparencyAlpha();
 
 		final Graphics2D g2d = ( Graphics2D ) g;
+
 		// Save graphic device original settings
 		final AffineTransform originalTransform = g2d.getTransform();
 		final Composite originalComposite = g2d.getComposite();
@@ -95,7 +96,7 @@ public class SpotOverlay extends Roi
 		final Color originalColor = g2d.getColor();
 		final Font originalFont = g2d.getFont();
 
-		g2d.setComposite( composite );
+		g2d.setComposite( AlphaComposite.getInstance( AlphaComposite.SRC_OVER, alpha ) );
 		g2d.setFont( displaySettings.getFont() );
 		g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING,
 				displaySettings.getUseAntialiasing() ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
@@ -128,7 +129,7 @@ public class SpotOverlay extends Roi
 
 				final Color color = colorGenerator.color( spot );
 				g2d.setColor( color );
-				drawSpot( g2d, spot, zslice, xcorner, ycorner, lMag );
+				drawSpot( g2d, spot, zslice, xcorner, ycorner, lMag, filled );
 			}
 
 		}
@@ -149,7 +150,7 @@ public class SpotOverlay extends Roi
 				if ( doLimitDrawingDepth && Math.abs( z - zslice ) > drawingDepth )
 					continue;
 
-				drawSpot( g2d, spot, zslice, xcorner, ycorner, lMag );
+				drawSpot( g2d, spot, zslice, xcorner, ycorner, lMag, filled );
 			}
 
 			// Deal with spot selection
@@ -166,7 +167,7 @@ public class SpotOverlay extends Roi
 					if ( sFrame != frame )
 						continue;
 
-					drawSpot( g2d, spot, zslice, xcorner, ycorner, lMag );
+					drawSpot( g2d, spot, zslice, xcorner, ycorner, lMag, filled );
 				}
 			}
 		}
@@ -219,7 +220,7 @@ public class SpotOverlay extends Roi
 		this.spotSelection = spots;
 	}
 
-	protected void drawSpot( final Graphics2D g2d, final Spot spot, final double zslice, final int xcorner, final int ycorner, final double magnification )
+	protected void drawSpot( final Graphics2D g2d, final Spot spot, final double zslice, final int xcorner, final int ycorner, final double magnification, final boolean filled )
 	{
 		final double x = spot.getFeature( Spot.POSITION_X );
 		final double y = spot.getFeature( Spot.POSITION_Y );
@@ -247,11 +248,18 @@ public class SpotOverlay extends Roi
 		if ( !displaySettings.isSpotDisplayedAsRoi() || roi == null || roi.x.length < 2 )
 		{
 			final double apparentRadius = Math.sqrt( radius * radius - dz2 ) / calibration[ 0 ] * magnification;
-			g2d.drawOval(
-					( int ) Math.round( xs - apparentRadius ),
-					( int ) Math.round( ys - apparentRadius ),
-					( int ) Math.round( 2 * apparentRadius ),
-					( int ) Math.round( 2 * apparentRadius ) );
+			if ( filled )
+				g2d.fillOval(
+						( int ) Math.round( xs - apparentRadius ),
+						( int ) Math.round( ys - apparentRadius ),
+						( int ) Math.round( 2 * apparentRadius ),
+						( int ) Math.round( 2 * apparentRadius ) );
+			else
+				g2d.drawOval(
+						( int ) Math.round( xs - apparentRadius ),
+						( int ) Math.round( ys - apparentRadius ),
+						( int ) Math.round( 2 * apparentRadius ),
+						( int ) Math.round( 2 * apparentRadius ) );
 			textPos = ( int ) apparentRadius;
 		}
 		else
@@ -265,7 +273,10 @@ public class SpotOverlay extends Roi
 				polygon.lineTo( polygonX[ i ], polygonY[ i ] );
 			polygon.closePath();
 
-			g2d.draw( polygon );
+			if ( filled )
+				g2d.fill( polygon );
+			else
+				g2d.draw( polygon );
 			textPos = ( int ) ( Arrays.stream( polygonX ).max().getAsDouble() - xs );
 		}
 

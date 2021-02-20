@@ -229,6 +229,8 @@ public class DisplaySettingsPanel extends JPanel
 				label( "Spots" ),
 				booleanElement( "draw spots", ds::isSpotVisible, ds::setSpotVisible ),
 				booleanElement( "draw spots as ROIs", ds::isSpotDisplayedAsRoi, ds::setSpotDisplayedAsRoi ),
+				booleanElement( "draw spots filled", ds::isSpotFilled, ds::setSpotFilled ),
+				boundedDoubleElement( "spot alpha transparency", 0., 1., ds::getSpotTransparencyAlpha, ds::setSpotTransparencyAlpha ),
 				booleanElement( "show spot names", ds::isSpotShowName, ds::setSpotShowName ),
 				boundedDoubleElement( "spot radius ratio", 0., 20., ds::getSpotDisplayRadius, ds::setSpotDisplayRadius ),
 				featureElement( "spot color", ds::getSpotColorByType, ds::getSpotColorByFeature, ( type, feature ) -> ds.setSpotColorBy( type, feature ) ),
