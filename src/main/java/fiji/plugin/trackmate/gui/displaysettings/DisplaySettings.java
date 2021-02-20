@@ -102,6 +102,10 @@ public class DisplaySettings
 
 	private boolean trackschemeFillBox;
 
+	private boolean spotFilled;
+
+	private double spotTransparencyAlpha;
+
 	private final transient Listeners.List< UpdateListener > updateListeners;
 
 
@@ -151,6 +155,8 @@ public class DisplaySettings
 		spotMin = ds.spotMin;
 		spotMax = ds.spotMax;
 		spotUniformColor = ds.spotUniformColor;
+		spotFilled = ds.spotFilled;
+		spotTransparencyAlpha = ds.spotTransparencyAlpha;
 
 		trackVisible = ds.trackVisible;
 		trackColorByFeature = ds.trackColorByFeature;
@@ -595,6 +601,34 @@ public class DisplaySettings
 		}
 	}
 
+	public boolean isSpotFilled()
+	{
+		return spotFilled;
+	}
+
+	public synchronized void setSpotFilled( final boolean isSpotFilled )
+	{
+		if ( this.spotFilled != isSpotFilled )
+		{
+			this.spotFilled = isSpotFilled;
+			notifyListeners();
+		}
+	}
+
+	public double getSpotTransparencyAlpha()
+	{
+		return spotTransparencyAlpha;
+	}
+
+	public synchronized void setSpotTransparencyAlpha( final double spotTransparencyAlpha )
+	{
+		if ( this.spotTransparencyAlpha != spotTransparencyAlpha )
+		{
+			this.spotTransparencyAlpha = spotTransparencyAlpha;
+			notifyListeners();
+		}
+	}
+
 	public Color getTrackSchemeBackgroundColor1()
 	{
 		return trackschemeBackgroundColor1;
@@ -772,9 +806,11 @@ public class DisplaySettings
 		df.spotColorByType = TrackMateObject.DEFAULT;
 		df.spotDisplayedAsRoi = true;
 		df.spotDisplayRadius = 1.;
+		df.spotFilled = false;
 		df.spotMin = 0.;
 		df.spotMax = 10.;
 		df.spotShowName = false;
+		df.spotTransparencyAlpha = 1.;
 		df.spotUniformColor = new Color( 0.8f, 0.2f, 0.8f );
 		df.spotVisible = true;
 		df.trackDisplayMode = TrackDisplayMode.FULL;
