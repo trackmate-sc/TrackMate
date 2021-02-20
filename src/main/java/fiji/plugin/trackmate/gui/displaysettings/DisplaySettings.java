@@ -353,15 +353,18 @@ public class DisplaySettings
 
 	public synchronized void setSpotMinMax( final double spotMin, final double spotMax )
 	{
+		final double smin = Math.min( spotMin, spotMax );
+		final double smax = Math.max( spotMin, spotMax );
+
 		boolean notify = false;
-		if ( this.spotMin != spotMin )
+		if ( this.spotMin != smin )
 		{
-			this.spotMin = spotMin;
+			this.spotMin = smin;
 			notify = true;
 		}
-		if ( this.spotMax != spotMax )
+		if ( this.spotMax != smax )
 		{
-			this.spotMax = spotMax;
+			this.spotMax = smax;
 			notify = true;
 		}
 		if ( notify )
@@ -468,15 +471,18 @@ public class DisplaySettings
 
 	public synchronized void setTrackMinMax( final double trackMin, final double trackMax )
 	{
+		final double tmin = Math.min( trackMin, trackMax );
+		final double tmax = Math.max( trackMin, trackMax );
+
 		boolean notify = false;
-		if ( this.trackMin != trackMin )
+		if ( this.trackMin != tmin )
 		{
-			this.trackMin = trackMin;
+			this.trackMin = tmin;
 			notify = true;
 		}
-		if ( this.trackMax != trackMax )
+		if ( this.trackMax != tmax )
 		{
-			this.trackMax = trackMax;
+			this.trackMax = tmax;
 			notify = true;
 		}
 		if ( notify )
