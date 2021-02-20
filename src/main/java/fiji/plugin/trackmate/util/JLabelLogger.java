@@ -1,11 +1,12 @@
 package fiji.plugin.trackmate.util;
 
-import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
+import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
 
 import java.awt.Color;
 
 import javax.swing.JLabel;
+
+import fiji.plugin.trackmate.Logger;
 
 public class JLabelLogger extends JLabel {
 	
@@ -14,7 +15,7 @@ public class JLabelLogger extends JLabel {
 
 	public JLabelLogger() {
 		this.logger = new MyLogger(this);
-		setFont(TrackMateWizard.SMALL_FONT);
+		setFont( SMALL_FONT );
 	}
 	
 	public Logger getLogger() {
@@ -32,27 +33,27 @@ public class JLabelLogger extends JLabel {
 
 		private final JLabelLogger label;
 
-		public MyLogger(JLabelLogger logger) {
+		public MyLogger(final JLabelLogger logger) {
 			this.label = logger;
 		}
 
 		@Override
-		public void log(String message, Color color) {
+		public void log(final String message, final Color color) {
 			label.setText(message);
 			label.setForeground(color);
 		}
 
 		@Override
-		public void error(String message) {
+		public void error(final String message) {
 			log(message, Logger.ERROR_COLOR);
 		}
 
 		/** Ignored. */
 		@Override
-		public void setProgress(double val) {}
+		public void setProgress(final double val) {}
 
 		@Override
-		public void setStatus(String status) {
+		public void setStatus(final String status) {
 			log(status, Logger.BLUE_COLOR);
 		}
 		

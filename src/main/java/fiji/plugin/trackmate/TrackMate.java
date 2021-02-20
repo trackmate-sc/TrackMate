@@ -1,10 +1,17 @@
 package fiji.plugin.trackmate;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.scijava.Cancelable;
 import org.scijava.Named;
 import org.scijava.util.VersionUtils;
 
@@ -26,7 +33,6 @@ import net.imglib2.Interval;
 import net.imglib2.algorithm.Algorithm;
 import net.imglib2.algorithm.Benchmark;
 import net.imglib2.algorithm.MultiThreaded;
-import net.imglib2.multithreading.SimpleMultiThreading;
 
 /**
  * <p>
@@ -40,9 +46,10 @@ import net.imglib2.multithreading.SimpleMultiThreading;
  *
  * @author Nicholas Perry
  * @author Johannes Schindelin
- * @author Jean-Yves Tinevez - Institut Pasteur - July 2010 - 2018
+ * @author Jean-Yves Tinevez - Institut Pasteur - July 2010 - 2018, revised in
+ *         2021
  */
-public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
+public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Cancelable
 {
 
 	public static final String PLUGIN_NAME_STR = "TrackMate";
@@ -63,6 +70,12 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 	protected int numThreads = Runtime.getRuntime().availableProcessors();
 
 	private String name;
+
+	private boolean isCanceled;
+
+	private String cancelReason;
+
+	private final List< Cancelable > cancelables = Collections.synchronizedList( new ArrayList<>() );
 
 	/*
 	 * CONSTRUCTORS
@@ -121,13 +134,23 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 	 */
 	public boolean computeSpotFeatures( final boolean doLogIt )
 	{
+		isCanceled = false;
+		cancelReason = null;
+		cancelables.clear();
+
 		final Logger logger = model.getLogger();
 		final SpotFeatureCalculator calculator = new SpotFeatureCalculator( model, settings );
+		cancelables.add( calculator );
 		calculator.setNumThreads( numThreads );
 		if ( calculator.checkInput() && calculator.process() )
 		{
 			if ( doLogIt )
+			{
+				if ( isCanceled() )
+					logger.log( "Spot feature calculation canceled. Reason:\n" + getCancelReason() + "\n" );
+
 				logger.log( "Computation done in " + calculator.getProcessingTime() + " ms.\n" );
+			}
 
 			model.notifyFeaturesComputed();
 			return true;
@@ -152,8 +175,13 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 	 */
 	public boolean computeEdgeFeatures( final boolean doLogIt )
 	{
+		isCanceled = false;
+		cancelReason = null;
+		cancelables.clear();
+
 		final Logger logger = model.getLogger();
 		final EdgeFeatureCalculator calculator = new EdgeFeatureCalculator( model, settings );
+		cancelables.add( calculator );
 		calculator.setNumThreads( numThreads );
 		if ( !calculator.checkInput() || !calculator.process() )
 		{
@@ -161,7 +189,12 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 			return false;
 		}
 		if ( doLogIt )
+		{
+			if ( isCanceled() )
+				logger.log( "Spot feature calculation canceled. Reason:\n" + getCancelReason() + "\n" );
+
 			logger.log( "Computation done in " + calculator.getProcessingTime() + " ms.\n" );
+		}
 
 		model.notifyFeaturesComputed();
 		return true;
@@ -176,13 +209,23 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 	 */
 	public boolean computeTrackFeatures( final boolean doLogIt )
 	{
+		isCanceled = false;
+		cancelReason = null;
+		cancelables.clear();
+
 		final Logger logger = model.getLogger();
 		final TrackFeatureCalculator calculator = new TrackFeatureCalculator( model, settings );
+		cancelables.add( calculator );
 		calculator.setNumThreads( numThreads );
 		if ( calculator.checkInput() && calculator.process() )
 		{
 			if ( doLogIt )
+			{
+				if ( isCanceled() )
+					logger.log( "Spot feature calculation canceled. Reason:\n" + getCancelReason() + "\n" );
+
 				logger.log( "Computation done in " + calculator.getProcessingTime() + " ms.\n" );
+			}
 
 			model.notifyFeaturesComputed();
 			return true;
@@ -208,13 +251,22 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 	 */
 	public boolean execTracking()
 	{
+		isCanceled = false;
+		cancelReason = null;
+		cancelables.clear();
+
 		final Logger logger = model.getLogger();
-		logger.log( "Starting tracking process.\n" );
+		logger.log( "Starting tracking process.\n", Logger.BLUE_COLOR );
 		final SpotTracker tracker = settings.trackerFactory.create( model.getSpots(), settings.trackerSettings );
+		if ( tracker instanceof Cancelable )
+			cancelables.add( ( Cancelable ) tracker );
 		tracker.setNumThreads( numThreads );
 		tracker.setLogger( logger );
 		if ( tracker.checkInput() && tracker.process() )
 		{
+			if ( isCanceled() )
+				logger.log( "Tracking canceled. Reason:\n" + getCancelReason() + "\n" );
+
 			model.setTracks( tracker.getResult(), true );
 			return true;
 		}
@@ -236,10 +288,14 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 	@SuppressWarnings( { "rawtypes", "unchecked" } )
 	public boolean execDetection()
 	{
+		isCanceled = false;
+		cancelReason = null;
+		cancelables.clear();
+
 		final Logger logger = model.getLogger();
 		logger.log( "Starting detection process using "
 				+ ( ( numThreads > 1 ) ? ( numThreads + " threads" ) : "1 thread" )
-				+ ".\n" );
+				+ ".\n", Logger.BLUE_COLOR );
 
 		final SpotDetectorFactoryBase< ? > factory = settings.detectorFactory;
 		if ( null == factory )
@@ -252,9 +308,10 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 			errorMessage = "Detector settings is null.\n";
 			return false;
 		}
-		if (factory instanceof ManualDetectorFactory)
+		if ( factory instanceof ManualDetectorFactory )
 		{
-			// Skip detection (don't delete anything) if we received this factory.
+			// Skip detection (don't delete anything) if we received this
+			// factory.
 			return true;
 		}
 
@@ -270,16 +327,17 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 		}
 
 		/*
-		 * Separate frame-by-frame or global detection depending on the factory type.
+		 * Separate frame-by-frame or global detection depending on the factory
+		 * type.
 		 */
-		
-		if (factory instanceof SpotGlobalDetectorFactory )
+
+		if ( factory instanceof SpotGlobalDetectorFactory )
 		{
 			return processGlobal( ( SpotGlobalDetectorFactory ) factory, img, logger );
 		}
-		else if (factory instanceof SpotDetectorFactory )
-		{
-			return processFrameByFrame( ( SpotDetectorFactory ) factory, img, logger );
+		else if ( factory instanceof SpotDetectorFactory )
+		{ 
+			return processFrameByFrame( ( SpotDetectorFactory ) factory, img, logger ); 
 		}
 
 		errorMessage = "Don't know how to handle detector factory of type: " + factory.getClass();
@@ -300,7 +358,10 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 			final MultiThreaded md = ( MultiThreaded ) detector;
 			md.setNumThreads( numThreads );
 		}
-		
+
+		if ( detector instanceof Cancelable )
+			cancelables.add( ( Cancelable ) detector );
+
 		// Execute detection
 		logger.setStatus( "Detection..." );
 		if ( detector.checkInput() && detector.process() )
@@ -342,6 +403,8 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 
 			model.setSpots( spots, true );
 			logger.setStatus( "" );
+			if ( isCanceled() )
+				logger.log( "Detection canceled. Reason:\n" + getCancelReason() + "\n" );
 			logger.log( "Found " + spots.getNSpots( false ) + " spots.\n" );
 		}
 		else
@@ -386,154 +449,123 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 				+ ( ( threadsPerFrame > 1 ) ? ( threadsPerFrame + " threads" ) : "1 thread" )
 				+ " per frame.\n" );
 
-		final Thread[] threads = SimpleMultiThreading.newThreads( nSimultaneousFrames );
-		final AtomicBoolean ok = new AtomicBoolean( true );
-
-		// Prepare the thread array
-		final AtomicInteger ai = new AtomicInteger( settings.tstart );
-		for ( int ithread = 0; ithread < threads.length; ithread++ )
+		final ExecutorService executorService = Executors.newFixedThreadPool( nSimultaneousFrames );
+		final List< Future< Boolean > > tasks = new ArrayList<>( numFrames );
+		for ( int i = settings.tstart; i <= settings.tend; i++ )
 		{
-
-			threads[ ithread ] = new Thread( "TrackMate spot detection thread " + ( 1 + ithread ) + "/" + threads.length )
+			final int frame = i;
+			final Callable< Boolean > callable = new Callable< Boolean >()
 			{
-				private boolean wasInterrupted()
-				{
-					try
-					{
-						if ( isInterrupted() )
-							return true;
-						sleep( 0 );
-						return false;
-					}
-					catch ( final InterruptedException e )
-					{
-						return true;
-					}
-				}
 
 				@Override
-				public void run()
+				public Boolean call() throws Exception
 				{
+					if ( isCanceled() )
+						return Boolean.TRUE; // ok to be canceled.
 
-					for ( int frame = ai.getAndIncrement(); frame <= settings.tend; frame = ai.getAndIncrement() )
-						try
+					// Yield detector for target frame
+					final SpotDetector< ? > detector = factory.getDetector( interval, frame );
+					if ( detector instanceof MultiThreaded )
+					{
+						final MultiThreaded md = ( MultiThreaded ) detector;
+						md.setNumThreads( threadsPerFrame );
+					}
+
+					if ( detector instanceof Cancelable )
+						cancelables.add( ( Cancelable ) detector );
+
+					// Execute detection
+					if ( detector.checkInput() && detector.process() )
+					{
+						// On success, get results.
+						final List< Spot > spotsThisFrame = detector.getResult();
+
+						/*
+						 * Special case: if we have a single column image, then
+						 * the detectors internally dealt with a single line
+						 * image. We need to permute back the X & Y coordinates
+						 * if it's the case.
+						 */
+						if ( img.dimension( 0 ) < 2 && zindex < 0 )
 						{
-							// Yield detector for target frame
-							final SpotDetector< ? > detector = factory.getDetector( interval, frame );
-							if ( detector instanceof MultiThreaded )
+							for ( final Spot spot : spotsThisFrame )
 							{
-								final MultiThreaded md = ( MultiThreaded ) detector;
-								md.setNumThreads( threadsPerFrame );
+								spot.putFeature( Spot.POSITION_Y, spot.getDoublePosition( 0 ) );
+								spot.putFeature( Spot.POSITION_X, 0d );
 							}
-
-							if ( wasInterrupted() )
-								return;
-
-							// Execute detection
-							if ( ok.get() && detector.checkInput() && detector.process() )
-							{
-								// On success, get results.
-								final List< Spot > spotsThisFrame = detector.getResult();
-
-								/*
-								 * Special case: if we have a single column
-								 * image, then the detectors internally dealt
-								 * with a single line image. We need to permute
-								 * back the X & Y coordinates if it's the case.
-								 */
-								if ( img.dimension( 0 ) < 2 && zindex < 0 )
-								{
-									for ( final Spot spot : spotsThisFrame )
-									{
-										spot.putFeature( Spot.POSITION_Y, spot.getDoublePosition( 0 ) );
-										spot.putFeature( Spot.POSITION_X, 0d );
-									}
-								}
-
-								List< Spot > prunedSpots;
-								if ( settings.roi != null )
-								{
-									prunedSpots = new ArrayList<>();
-									for ( final Spot spot : spotsThisFrame )
-									{
-										if ( settings.roi.contains( (int) Math.round( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ] ), (int) Math.round( spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) ) )
-											prunedSpots.add( spot );
-									}
-								}
-								else
-								{
-									prunedSpots = spotsThisFrame;
-								}
-								// Add detection feature other than position
-								for ( final Spot spot : prunedSpots )
-								{
-									// FRAME will be set upon adding to
-									// SpotCollection.
-									spot.putFeature( Spot.POSITION_T, frame * settings.dt );
-								}
-								// Store final results for this frame
-								spots.put( frame, prunedSpots );
-								// Report
-								spotFound.addAndGet( prunedSpots.size() );
-								logger.setProgress( progress.incrementAndGet() / ( double ) numFrames );
-
-							}
-							else
-							{
-								// Fail: exit and report error.
-								ok.set( false );
-								errorMessage = detector.getErrorMessage();
-								return;
-							}
-
 						}
-						catch ( final RuntimeException e )
+
+						List< Spot > prunedSpots;
+						if ( settings.roi != null )
 						{
-							final Throwable cause = e.getCause();
-							if ( cause != null && cause instanceof InterruptedException ) { return; }
-							throw e;
+							prunedSpots = new ArrayList<>();
+							for ( final Spot spot : spotsThisFrame )
+							{
+								if ( settings.roi.contains(
+										( int ) Math.round( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ] ),
+										( int ) Math.round( spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) ) )
+									prunedSpots.add( spot );
+							}
 						}
+						else
+						{
+							prunedSpots = spotsThisFrame;
+						}
+						// Add detection feature other than position
+						for ( final Spot spot : prunedSpots )
+						{
+							// FRAME will be set upon adding to
+							// SpotCollection.
+							spot.putFeature( Spot.POSITION_T, frame * settings.dt );
+						}
+						// Store final results for this frame
+						spots.put( frame, prunedSpots );
+						// Report
+						spotFound.addAndGet( prunedSpots.size() );
+						logger.setProgress( progress.incrementAndGet() / ( double ) numFrames );
+
+					}
+					else
+					{
+						// Fail: exit and report error.
+						errorMessage = detector.getErrorMessage();
+						return Boolean.FALSE;
+					}
+					return Boolean.TRUE;
 				}
 			};
+			final Future< Boolean > task = executorService.submit( callable );
+			tasks.add( task );
 		}
-
 		logger.setStatus( "Detection..." );
 		logger.setProgress( 0 );
 
+		final AtomicBoolean reportOk = new AtomicBoolean( true );
 		try
 		{
-			SimpleMultiThreading.startAndJoin( threads );
-		}
-		catch ( final RuntimeException e )
-		{
-			ok.set( false );
-			if ( e.getCause() != null && e.getCause() instanceof InterruptedException )
+			for ( final Future< Boolean > task : tasks )
 			{
-				errorMessage = "Detection workers interrupted.\n";
-				for ( final Thread thread : threads )
-					thread.interrupt();
-				for ( final Thread thread : threads )
+				final Boolean ok = task.get();
+				if ( !ok )
 				{
-					if ( thread.isAlive() )
-						try
-						{
-							thread.join();
-						}
-						catch ( final InterruptedException e2 )
-						{
-							// ignore
-						}
+					reportOk.set( false );
+					break;
 				}
 			}
-			else
-			{
-				throw e;
-			}
 		}
+		catch ( InterruptedException | ExecutionException e )
+		{
+			errorMessage = "Problem during detection: " + e.getMessage();
+			reportOk.set( false );
+			e.printStackTrace();
+		}
+
 		model.setSpots( spots, true );
 
-		if ( ok.get() )
+		if ( reportOk.get() )
 		{
+			if ( isCanceled() )
+				logger.log( "Detection canceled after " + ( progress.get() + 1 ) + " frames. Reason:\n" + getCancelReason() + "\n" );
 			logger.log( "Found " + spotFound.get() + " spots.\n" );
 		}
 		else
@@ -543,7 +575,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 		}
 		logger.setProgress( 1 );
 		logger.setStatus( "" );
-		return ok.get();
+		return reportOk.get();
 	}
 
 	/**
@@ -572,6 +604,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 	 */
 	public boolean execInitialSpotFiltering()
 	{
+		// Cannot be canceled.
 		final Logger logger = model.getLogger();
 		logger.log( "Starting initial filtering process.\n" );
 
@@ -605,6 +638,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 	 */
 	public boolean execSpotFiltering( final boolean doLogIt )
 	{
+		// Cannot be canceled.
 		if ( doLogIt )
 		{
 			final Logger logger = model.getLogger();
@@ -616,6 +650,8 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 
 	public boolean execTrackFiltering( final boolean doLogIt )
 	{
+		// Cannot be canceled.
+
 		if ( doLogIt )
 		{
 			final Logger logger = model.getLogger();
@@ -702,22 +738,43 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 	@Override
 	public boolean process()
 	{
-		if ( !execDetection() ) { return false; }
+		if ( !execDetection() )
+			return false;
+		if ( isCanceled() )
+			return true;
 
-		if ( !execInitialSpotFiltering() ) { return false; }
+		if ( !execInitialSpotFiltering() )
+			return false;
+		if ( isCanceled() )
+			return true;
 
-		if ( !computeSpotFeatures( true ) ) { return false; }
+		if ( !computeSpotFeatures( true ) )
+			return false;
+		if ( isCanceled() )
+			return true;
 
-		if ( !execSpotFiltering( true ) ) { return false; }
+		if ( !execSpotFiltering( true ) )
+			return false;
+		if ( isCanceled() )
+			return true;
 
-		if ( !execTracking() ) { return false; }
+		if ( !execTracking() )
+			return false;
+		if ( isCanceled() )
+			return true;
 
-		if ( !computeEdgeFeatures( true ) ) { return false; }
+		if ( !computeEdgeFeatures( true ) )
+			return false;
+		if ( isCanceled() )
+			return true;
 
-		if ( !computeTrackFeatures( true ) ) { return false; }
+		if ( !computeTrackFeatures( true ) )
+			return false;
+		if ( isCanceled() )
+			return true;
 
-		if ( !execTrackFiltering( true ) ) { return false; }
-
+		if ( !execTrackFiltering( true ) )
+			return false;
 
 		return true;
 	}
@@ -758,5 +815,28 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named
 	public void setName( final String name )
 	{
 		this.name = name;
+	}
+
+	// --- org.scijava.Cancelable methods ---
+
+	@Override
+	public boolean isCanceled()
+	{
+		return isCanceled;
+	}
+
+	@Override
+	public void cancel( final String reason )
+	{
+		isCanceled = true;
+		cancelReason = reason;
+		cancelables.forEach( c -> c.cancel( reason ) );
+		cancelables.clear();
+	}
+
+	@Override
+	public String getCancelReason()
+	{
+		return cancelReason;
 	}
 }

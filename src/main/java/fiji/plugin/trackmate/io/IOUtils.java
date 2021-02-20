@@ -6,7 +6,7 @@ import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DO_SUBPIXEL_LOCAL
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
-import static fiji.plugin.trackmate.gui.TrackMateWizard.TRACKMATE_ICON;
+import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
 
 import java.awt.Component;
 import java.awt.FileDialog;

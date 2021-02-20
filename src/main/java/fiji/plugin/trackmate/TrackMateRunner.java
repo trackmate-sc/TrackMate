@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate;
 
+import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -11,24 +13,26 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.JFrame;
+
 import fiji.plugin.trackmate.action.ExportTracksToXML;
 import fiji.plugin.trackmate.detection.DetectorKeys;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.track.TrackBranchingAnalyzer;
 import fiji.plugin.trackmate.gui.GuiUtils;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.gui.descriptors.ConfigureViewsDescriptor;
+import fiji.plugin.trackmate.gui.components.LogPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
+import fiji.plugin.trackmate.gui.wizard.WizardSequence;
+import fiji.plugin.trackmate.gui.wizard.descriptors.ConfigureViewsDescriptor;
+import fiji.plugin.trackmate.gui.wizard.descriptors.LogPanelDescriptor2;
 import fiji.plugin.trackmate.io.TmXmlWriter;
 import fiji.plugin.trackmate.tracking.TrackerKeys;
 import fiji.plugin.trackmate.tracking.sparselap.SimpleSparseLAPTrackerFactory;
 import fiji.plugin.trackmate.util.LogRecorder;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
-import fiji.plugin.trackmate.visualization.ViewFactory;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayerFactory;
+import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import fiji.util.SplitString;
 import ij.IJ;
 import ij.ImageJ;
@@ -37,6 +41,9 @@ import ij.Macro;
 import ij.WindowManager;
 import net.imglib2.util.ValuePair;
 
+/**
+ * An extension of TrackMate plugin that makes it executable from a macro.
+ */
 public class TrackMateRunner extends TrackMatePlugIn
 {
 
@@ -179,7 +186,7 @@ public class TrackMateRunner extends TrackMatePlugIn
 	@Override
 	public void run( String arg )
 	{
-
+		GuiUtils.setSystemLookAndFeel();
 		logger = new LogRecorder( Logger.IJ_LOGGER );
 
 
@@ -191,9 +198,7 @@ public class TrackMateRunner extends TrackMatePlugIn
 		{
 			final String macroOption = Macro.getOptions();
 			if ( null != macroOption )
-			{
 				arg = macroOption;
-			}
 		}
 
 		if ( null != arg && !arg.isEmpty() )
@@ -203,18 +208,14 @@ public class TrackMateRunner extends TrackMatePlugIn
 			{
 				final Map< String, String > macroOptions = SplitString.splitMacroOptions( arg );
 
-				/*
-				 * Unknown parameters.
-				 */
+				// Unknown parameters.
 				final Set< String > unknownParameters = new HashSet<>( macroOptions.keySet() );
 				unknownParameters.removeAll( SUPPORTED_ARGS );
 				if ( !unknownParameters.isEmpty() )
 				{
 					logger.error( "The following parameters are unkown and were ignored:\n" );
 					for ( final String unknownParameter : unknownParameters )
-					{
 						logger.error( "  " + unknownParameter );
-					}
 				}
 
 				/*
@@ -274,20 +275,15 @@ public class TrackMateRunner extends TrackMatePlugIn
 				}
 
 				/*
-				 * Display settings. Use user defaults.
-				 */
-
-				final DisplaySettings displaySettings = DisplaySettingsIO.readUserDefault();
-
-				/*
 				 * Instantiate TrackMate.
 				 */
 
-				settings = createSettings( imp );
-				model = createModel();
+				final Settings settings = createSettings( imp );
+				final Model model = createModel( imp );
 				final SelectionModel selectionModel = new SelectionModel( model );
 				model.setLogger( logger );
-				trackmate = createTrackMate();
+				final TrackMate trackmate = createTrackMate( model, settings );
+				final DisplaySettings displaySettings = createDisplaySettings();
 
 				/*
 				 * Configure default settings.
@@ -314,15 +310,12 @@ public class TrackMateRunner extends TrackMatePlugIn
 					final String value = macroOptions.get( parameter );
 					final ValuePair< String, MacroArgumentConverter > parser = detectorParsers.get( parameter );
 					if ( parser == null )
-					{
 						continue;
-					}
 
 					final String key = parser.getA();
 					final MacroArgumentConverter converter = parser.getB();
 					try
 					{
-
 						final Object val = converter.convert( value );
 						settings.detectorSettings.put( key, val );
 					}
@@ -331,7 +324,6 @@ public class TrackMateRunner extends TrackMatePlugIn
 						logger.error( "Cannot interprete value for parameter " + parameter + ": " + value + ". Skipping.\n" );
 						continue;
 					}
-
 				}
 
 				/*
@@ -343,15 +335,12 @@ public class TrackMateRunner extends TrackMatePlugIn
 					final String value = macroOptions.get( parameter );
 					final ValuePair< String, MacroArgumentConverter > parser = trackerParsers.get( parameter );
 					if ( parser == null )
-					{
 						continue;
-					}
 
 					final String key = parser.getA();
 					final MacroArgumentConverter converter = parser.getB();
 					try
 					{
-
 						final Object val = converter.convert( value );
 						settings.trackerSettings.put( key, val );
 					}
@@ -372,9 +361,7 @@ public class TrackMateRunner extends TrackMatePlugIn
 					final String value = macroOptions.get( parameter );
 					final FilterGenerator converter = trackFiltersParsers.get( parameter );
 					if ( converter == null )
-					{
 						continue;
-					}
 
 					try
 					{
@@ -402,8 +389,16 @@ public class TrackMateRunner extends TrackMatePlugIn
 						imp.show();
 					}
 					GuiUtils.userCheckImpDimensions( imp );
-					final TrackMateGUIController controller = new TrackMateGUIController( trackmate, displaySettings, selectionModel );
-					GuiUtils.positionWindow( controller.getGUI(), imp.getWindow() );
+					// Main view.
+					final TrackMateModelView displayer = new HyperStackDisplayer( model, selectionModel, imp, displaySettings );
+					displayer.render();
+
+					// Wizard.
+					final WizardSequence sequence = createSequence( trackmate, selectionModel, displaySettings );
+					final JFrame frame = sequence.run( "TrackMate on " + imp.getShortTitle() );
+					frame.setIconImage( TRACKMATE_ICON.getImage() );
+					GuiUtils.positionWindow( frame, imp.getWindow() );
+					frame.setVisible( true );
 					return;
 				}
 
@@ -492,25 +487,23 @@ public class TrackMateRunner extends TrackMatePlugIn
 					 * And show GUI.
 					 */
 
-					final TrackMateGUIController controller = new TrackMateGUIController( trackmate, displaySettings, selectionModel );
-					// GUI position
-					GuiUtils.positionWindow( controller.getGUI(), settings.imp.getWindow() );
+					// Main view.
+					final TrackMateModelView displayer = new HyperStackDisplayer( model, selectionModel, imp, displaySettings );
+					displayer.render();
 
-					// Add visualization.
-
-					final ViewFactory displayerFactory = new HyperStackDisplayerFactory();
-					final TrackMateModelView view = displayerFactory.create( model, settings, selectionModel, displaySettings );
-
-					// GUI state
-					final String guiState = ConfigureViewsDescriptor.KEY;
-					controller.setGUIStateString( guiState );
-					controller.getGuimodel().addView( view );
-					view.render();
+					// Wizard.
+					final WizardSequence sequence = createSequence( trackmate, selectionModel, displaySettings );
+					sequence.setCurrent( ConfigureViewsDescriptor.KEY );
+					final JFrame frame = sequence.run( "TrackMate on " + imp.getShortTitle() );
+					frame.setIconImage( TRACKMATE_ICON.getImage() );
+					GuiUtils.positionWindow( frame, imp.getWindow() );
+					frame.setVisible( true );
 
 					// Log.
-					controller.getGUI().getLogPanel().setTextContent( logger.toString() );
+					final LogPanelDescriptor2 logDescriptor = ( LogPanelDescriptor2 ) sequence.logDescriptor();
+					final LogPanel logPanel = ( LogPanel ) logDescriptor.getPanelComponent();
+					logPanel.setTextContent( logger.toString() );
 				}
-
 			}
 			catch ( final ParseException e )
 			{

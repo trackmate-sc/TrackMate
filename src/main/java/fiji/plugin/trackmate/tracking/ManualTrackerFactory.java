@@ -2,7 +2,7 @@ package fiji.plugin.trackmate.tracking;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.gui.ConfigurationPanel;
+import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 
 import java.util.Map;
 

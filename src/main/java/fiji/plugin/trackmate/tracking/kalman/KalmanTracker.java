@@ -11,6 +11,7 @@ import java.util.NavigableSet;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
+import org.scijava.Cancelable;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
@@ -23,7 +24,7 @@ import fiji.plugin.trackmate.tracking.sparselap.linker.JaqamanLinker;
 import net.imglib2.RealPoint;
 import net.imglib2.algorithm.Benchmark;
 
-public class KalmanTracker implements SpotTracker, Benchmark
+public class KalmanTracker implements SpotTracker, Benchmark, Cancelable
 {
 
 	private static final double ALTERNATIVE_COST_FACTOR = 1.05d;
@@ -51,6 +52,10 @@ public class KalmanTracker implements SpotTracker, Benchmark
 	private SpotCollection predictionsCollection;
 
 	private long processingTime;
+
+	private boolean isCanceled;
+
+	private String cancelReason;
 
 	/*
 	 * CONSTRUCTOR
@@ -91,6 +96,9 @@ public class KalmanTracker implements SpotTracker, Benchmark
 	public boolean process()
 	{
 		final long start = System.currentTimeMillis();
+
+		isCanceled = false;
+		cancelReason = null;
 
 		/*
 		 * Outputs
@@ -184,6 +192,9 @@ public class KalmanTracker implements SpotTracker, Benchmark
 		int p = 1;
 		for ( int frame = secondFrame; frame <= keySet.last(); frame++ )
 		{
+			if ( isCanceled() )
+				return true; // It's ok to be canceled.
+
 			p++;
 
 			// Use the spot in the next frame has measurements.
@@ -492,4 +503,24 @@ public class KalmanTracker implements SpotTracker, Benchmark
 		}
 	};
 
+	// --- org.scijava.Cancelable methods ---
+
+	@Override
+	public boolean isCanceled()
+	{
+		return isCanceled;
+	}
+
+	@Override
+	public void cancel( final String reason )
+	{
+		isCanceled = true;
+		cancelReason = reason;
+	}
+
+	@Override
+	public String getCancelReason()
+	{
+		return cancelReason;
+	}
 }

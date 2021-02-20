@@ -1,9 +1,18 @@
 package fiji.plugin.trackmate;
 
+import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
+
+import javax.swing.JFrame;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
 import fiji.plugin.trackmate.gui.GuiUtils;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
+import fiji.plugin.trackmate.gui.wizard.TrackMateWizardSequence;
+import fiji.plugin.trackmate.gui.wizard.WizardSequence;
+import fiji.plugin.trackmate.visualization.TrackMateModelView;
+import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
@@ -13,27 +22,10 @@ import ij.plugin.PlugIn;
 public class TrackMatePlugIn implements PlugIn
 {
 
-	protected TrackMate trackmate;
-
-	protected Settings settings;
-
-	protected Model model;
-
-	protected DisplaySettings displaySettings;
-
-	/**
-	 * Runs the TrackMate GUI plugin.
-	 *
-	 * @param imagePath
-	 *            a path to an image that can be read by ImageJ. If set, the
-	 *            image will be opened and TrackMate will be started set to
-	 *            operate on it. If <code>null</code> or 0-length, TrackMate
-	 *            will be set to operate on the image currently opened in
-	 *            ImageJ.
-	 */
 	@Override
 	public void run( final String imagePath )
 	{
+		GuiUtils.setSystemLookAndFeel();
 		final ImagePlus imp;
 		if ( imagePath != null && imagePath.length() > 0 )
 		{
@@ -49,10 +41,18 @@ public class TrackMatePlugIn implements PlugIn
 			imp = WindowManager.getCurrentImage();
 			if ( null == imp )
 			{
-				IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION, "Please open an image before running TrackMate." );
+				IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION,
+						"Please open an image before running TrackMate." );
+				return;
+			}
+			else if ( imp.getType() == ImagePlus.COLOR_RGB )
+			{
+				IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION,
+						"TrackMate does not work on RGB images." );
 				return;
 			}
 		}
+
 		imp.setOpenAsHyperStack( true );
 		imp.setDisplayMode( IJ.COMPOSITE );
 		if ( !imp.isVisible() )
@@ -60,40 +60,56 @@ public class TrackMatePlugIn implements PlugIn
 
 		GuiUtils.userCheckImpDimensions( imp );
 
-		settings = createSettings( imp );
-		model = createModel();
+		// Main objects.
+		final Settings settings = createSettings( imp );
+		final Model model = createModel( imp );
+		final TrackMate trackmate = createTrackMate( model, settings );
 		final SelectionModel selectionModel = new SelectionModel( model );
-		trackmate = createTrackMate();
-		displaySettings = createDisplaySettings();
+		final DisplaySettings displaySettings = createDisplaySettings();
 
-		/*
-		 * Launch GUI.
-		 */
+		// Main view.
+		final TrackMateModelView displayer = new HyperStackDisplayer( model, selectionModel, imp, displaySettings );
+		displayer.render();
 
-		final TrackMateGUIController controller = new TrackMateGUIController( trackmate, displaySettings, selectionModel );
-		GuiUtils.positionWindow( controller.getGUI(), imp.getWindow() );
+		// Wizard.
+		final WizardSequence sequence = createSequence( trackmate, selectionModel, displaySettings );
+		final JFrame frame = sequence.run( "TrackMate on " + imp.getShortTitle() );
+		frame.setIconImage( TRACKMATE_ICON.getImage() );
+		GuiUtils.positionWindow( frame, imp.getWindow() );
+		frame.setVisible( true );
 	}
 
-	/*
-	 * HOOKS
+	/**
+	 * Hook for subclassers: <br>
+	 * Will create and position the sequence that will be played by the wizard
+	 * launched by this plugin.
+	 * 
+	 * @param trackmate
+	 * @param selectionModel
+	 * @param displaySettings
+	 * @return
 	 */
-
-	protected DisplaySettings createDisplaySettings()
+	protected WizardSequence createSequence( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings )
 	{
-		return DisplaySettingsIO.readUserDefault();
+		return new TrackMateWizardSequence( trackmate, selectionModel, displaySettings );
 	}
 
 	/**
 	 * Hook for subclassers: <br>
 	 * Creates the {@link Model} instance that will be used to store data in the
 	 * {@link TrackMate} instance.
+	 * 
+	 * @param imp
 	 *
 	 * @return a new {@link Model} instance.
 	 */
-
-	protected Model createModel()
+	protected Model createModel( final ImagePlus imp )
 	{
-		return new Model();
+		final Model model = new Model();
+		model.setPhysicalUnits(
+				imp.getCalibration().getUnit(),
+				imp.getCalibration().getTimeUnit() );
+		return model;
 	}
 
 	/**
@@ -108,9 +124,10 @@ public class TrackMatePlugIn implements PlugIn
 	 */
 	protected Settings createSettings( final ImagePlus imp )
 	{
-		final Settings lSettings = new Settings();
-		lSettings.setFrom( imp );
-		return lSettings;
+		final Settings ls = new Settings();
+		ls.setFrom( imp );
+		ls.addAllAnalyzers();
+		return ls;
 	}
 
 	/**
@@ -119,7 +136,7 @@ public class TrackMatePlugIn implements PlugIn
 	 *
 	 * @return a new {@link TrackMate} instance.
 	 */
-	protected TrackMate createTrackMate()
+	protected TrackMate createTrackMate( final Model model, final Settings settings )
 	{
 		/*
 		 * Since we are now sure that we will be working on this model with this
@@ -132,12 +149,14 @@ public class TrackMatePlugIn implements PlugIn
 		return new TrackMate( model, settings );
 	}
 
-	/*
-	 * MAIN METHOD
-	 */
-
-	public static void main( final String[] args )
+	protected DisplaySettings createDisplaySettings()
 	{
+		return DisplaySettingsIO.readUserDefault().copy( "CurrentDisplaySettings" );
+	}
+
+	public static void main( final String[] args ) throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException
+	{
+		UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
 		ImageJ.main( args );
 //		new TrackMatePlugIn().run( "samples/Stack.tif" );
 //		new TrackMatePlugIn().run( "samples/Merged.tif" );
@@ -145,5 +164,4 @@ public class TrackMatePlugIn implements PlugIn
 //		new TrackMatePlugIn().run( "samples/Mask.tif" );
 //		new TrackMatePlugIn().run( "samples/FakeTracks.tif" );
 	}
-
 }

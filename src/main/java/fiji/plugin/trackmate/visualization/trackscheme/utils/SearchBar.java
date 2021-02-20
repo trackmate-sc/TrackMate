@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.visualization.trackscheme.utils;
 
+import static fiji.plugin.trackmate.gui.Fonts.FONT;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -19,7 +21,6 @@ import javax.swing.JTextField;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 
 @SuppressWarnings( "unchecked" )
@@ -27,7 +28,7 @@ public class SearchBar extends JTextField
 {
 	private static final long serialVersionUID = 1L;
 
-	private final static Font NORMAL_FONT = TrackMateWizard.FONT.deriveFont( 10f );
+	private final static Font NORMAL_FONT = FONT.deriveFont( 10f );
 
 	private final static Font NOTFOUND_FONT;
 	static

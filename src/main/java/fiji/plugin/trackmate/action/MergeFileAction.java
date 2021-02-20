@@ -3,6 +3,8 @@
  */
 package fiji.plugin.trackmate.action;
 
+import static fiji.plugin.trackmate.gui.Icons.MERGE_ICON;
+
 import java.awt.Frame;
 import java.io.File;
 import java.util.HashMap;
@@ -14,18 +16,16 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
-import fiji.plugin.trackmate.gui.descriptors.SomeDialogDescriptor;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.wizard.descriptors.SomeDialogDescriptor;
 import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.io.TmXmlReader;
 
 public class MergeFileAction extends AbstractTMAction
 {
-
-	public static final ImageIcon ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/arrow_merge.png" ) );
 
 	public static final String NAME = "Merge a TrackMate file";
 
@@ -44,17 +44,9 @@ public class MergeFileAction extends AbstractTMAction
 			+ "data was generated on the raw source."
 			+ "</html>";
 
-	private final Frame parent;
-
-	public MergeFileAction( final Frame parent )
-	{
-		this.parent = parent;
-	}
-
 	@Override
-	public void execute( final TrackMate trackmate )
+	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
 	{
-
 		File file = SomeDialogDescriptor.file;
 		if ( null == file )
 		{
@@ -175,13 +167,13 @@ public class MergeFileAction extends AbstractTMAction
 		@Override
 		public ImageIcon getIcon()
 		{
-			return ICON;
+			return MERGE_ICON;
 		}
 
 		@Override
-		public TrackMateAction create( final TrackMateGUIController controller )
+		public TrackMateAction create()
 		{
-			return new MergeFileAction( controller.getGUI() );
+			return new MergeFileAction();
 		}
 	}
 }

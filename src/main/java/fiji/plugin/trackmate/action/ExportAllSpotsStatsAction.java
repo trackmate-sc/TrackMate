@@ -1,5 +1,9 @@
 package fiji.plugin.trackmate.action;
 
+import static fiji.plugin.trackmate.gui.Icons.CALCULATOR_ICON;
+
+import java.awt.Frame;
+
 import javax.swing.ImageIcon;
 
 import org.scijava.plugin.Plugin;
@@ -7,15 +11,11 @@ import org.scijava.plugin.Plugin;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.visualization.table.AllSpotsTableView;
 
 public class ExportAllSpotsStatsAction extends AbstractTMAction
 {
-
-	public static final ImageIcon ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/calculator.png" ) );
 
 	public static final String NAME = "Export all spots statistics";
 
@@ -27,18 +27,8 @@ public class ExportAllSpotsStatsAction extends AbstractTMAction
 			+ "regardless of whether they are in a track or not."
 			+ "</html>";
 
-	private final SelectionModel selectionModel;
-
-	private final DisplaySettings displaySettings;
-
-	public ExportAllSpotsStatsAction( final SelectionModel selectionModel, final DisplaySettings displaySettings )
-	{
-		this.selectionModel = selectionModel;
-		this.displaySettings = displaySettings;
-	}
-
 	@Override
-	public void execute( final TrackMate trackmate )
+	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
 	{
 		createSpotsTable( trackmate.getModel(), selectionModel, displaySettings ).render();
 	}
@@ -65,15 +55,15 @@ public class ExportAllSpotsStatsAction extends AbstractTMAction
 		}
 
 		@Override
-		public TrackMateAction create( final TrackMateGUIController controller )
+		public TrackMateAction create()
 		{
-			return new ExportAllSpotsStatsAction( controller.getSelectionModel(), controller.getDisplaySettings() );
+			return new ExportAllSpotsStatsAction();
 		}
 
 		@Override
 		public ImageIcon getIcon()
 		{
-			return ICON;
+			return CALCULATOR_ICON;
 		}
 
 		@Override

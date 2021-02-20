@@ -1,12 +1,16 @@
 package fiji.plugin.trackmate.gui.displaysettings;
 
+import static fiji.plugin.trackmate.gui.Icons.APPLY_ICON;
+import static fiji.plugin.trackmate.gui.Icons.RESET_ICON;
+import static fiji.plugin.trackmate.gui.Icons.REVERT_ICON;
+import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -18,7 +22,6 @@ import javax.swing.UnsupportedLookAndFeelException;
 import org.scijava.command.Command;
 import org.scijava.plugin.Plugin;
 
-import fiji.plugin.trackmate.gui.TrackMateWizard;
 import ij.ImageJ;
 
 @Plugin( type = Command.class,
@@ -27,10 +30,6 @@ import ij.ImageJ;
 		menuPath = "Edit >  Options > Configure TrackMate display settings..." )
 public class ConfigTrackMateDisplaySettings implements Command
 {
-
-	private static final ImageIcon APPLY_ICON  = new ImageIcon( TrackMateWizard.class.getResource( "images/page_save.png" ) );
-	private static final ImageIcon REVERT_ICON  = new ImageIcon( TrackMateWizard.class.getResource( "images/page_refresh.png" ) );
-	private static final ImageIcon RESET_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/page_white.png" ) );
 
 	private static final String APPLY_TOOLTIP = "<html>Save the current settings to the user default settings. "
 			+ "They will be used in all the following TrackMate sessions.</html>";
@@ -114,7 +113,7 @@ public class ConfigTrackMateDisplaySettings implements Command
 		 */
 
 		final JFrame frame = new JFrame( frameName );
-		frame.setIconImage( TrackMateWizard.TRACKMATE_ICON.getImage() );
+		frame.setIconImage( TRACKMATE_ICON.getImage() );
 		frame.getContentPane().add( configPanel );
 		frame.pack();
 		frame.setLocationRelativeTo( null );

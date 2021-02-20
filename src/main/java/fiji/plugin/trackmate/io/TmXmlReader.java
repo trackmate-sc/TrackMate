@@ -116,9 +116,9 @@ import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactoryBase;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
-import fiji.plugin.trackmate.gui.descriptors.ConfigureViewsDescriptor;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
+import fiji.plugin.trackmate.gui.wizard.descriptors.ConfigureViewsDescriptor;
 import fiji.plugin.trackmate.providers.DetectorProvider;
 import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
 import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
@@ -406,10 +406,10 @@ public class TmXmlReader
 		return readSettings( imp,
 				new DetectorProvider(),
 				new TrackerProvider(),
-				new SpotAnalyzerProvider( imp.getNChannels() ),
+				new SpotAnalyzerProvider( ( imp == null ) ? 1 : imp.getNChannels() ),
 				new EdgeAnalyzerProvider(),
 				new TrackAnalyzerProvider(),
-				new SpotMorphologyAnalyzerProvider( imp.getNChannels() ) );
+				new SpotMorphologyAnalyzerProvider( ( imp == null ) ? 1 : imp.getNChannels() ) );
 	}
 
 	/**

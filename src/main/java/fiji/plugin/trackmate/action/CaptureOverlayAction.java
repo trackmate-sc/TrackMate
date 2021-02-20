@@ -1,6 +1,9 @@
 package fiji.plugin.trackmate.action;
 
-import java.awt.Component;
+import static fiji.plugin.trackmate.gui.Icons.CAMERA_ICON;
+import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
+
+import java.awt.Frame;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
@@ -10,10 +13,9 @@ import javax.swing.JOptionPane;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
-import fiji.plugin.trackmate.visualization.trackscheme.TrackSchemeFrame;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.measure.Calibration;
@@ -21,8 +23,6 @@ import ij.process.ColorProcessor;
 
 public class CaptureOverlayAction extends AbstractTMAction
 {
-
-	public static final ImageIcon ICON = new ImageIcon( TrackSchemeFrame.class.getResource( "resources/camera_go.png" ) );
 
 	public static final String NAME = "Capture overlay";
 
@@ -39,19 +39,12 @@ public class CaptureOverlayAction extends AbstractTMAction
 			"Also, make sure nothing is moved over the image while capturing. " +
 			"</html>";
 
-	private final Component gui;
-
 	private static int firstFrame = -1;
 
 	private static int lastFrame = -1;
 
-	public CaptureOverlayAction( final Component gui )
-	{
-		this.gui = gui;
-	}
-
 	@Override
-	public void execute( final TrackMate trackmate )
+	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame gui )
 	{
 		final ImagePlus imp = trackmate.getSettings().imp;
 
@@ -71,7 +64,7 @@ public class CaptureOverlayAction extends AbstractTMAction
 					"Capture TrackMate overlay",
 					JOptionPane.OK_CANCEL_OPTION,
 					JOptionPane.QUESTION_MESSAGE,
-					TrackMateWizard.TRACKMATE_ICON );
+					TRACKMATE_ICON );
 
 			if ( userInput != JOptionPane.OK_OPTION )
 				return;
@@ -206,15 +199,15 @@ public class CaptureOverlayAction extends AbstractTMAction
 		}
 
 		@Override
-		public TrackMateAction create( final TrackMateGUIController controller )
+		public TrackMateAction create()
 		{
-			return new CaptureOverlayAction( controller.getGUI() );
+			return new CaptureOverlayAction();
 		}
 
 		@Override
 		public ImageIcon getIcon()
 		{
-			return ICON;
+			return CAMERA_ICON;
 		}
 
 		@Override

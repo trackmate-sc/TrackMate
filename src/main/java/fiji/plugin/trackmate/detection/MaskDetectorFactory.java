@@ -21,8 +21,8 @@ import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.gui.ConfigurationPanel;
-import fiji.plugin.trackmate.gui.panels.detector.MaskDetectorConfigurationPanel;
+import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
+import fiji.plugin.trackmate.gui.components.detector.MaskDetectorConfigurationPanel;
 import fiji.plugin.trackmate.util.TMUtils;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;

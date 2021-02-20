@@ -1,33 +1,27 @@
 package fiji.plugin.trackmate;
 
+import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
+
 import java.awt.Color;
 import java.io.File;
-import java.io.IOException;
-import java.util.Collection;
 
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.JFrame;
 
-import org.jdom2.Document;
-import org.jdom2.Element;
-import org.jdom2.JDOMException;
-import org.jdom2.input.SAXBuilder;
 import org.scijava.util.VersionUtils;
 
 import fiji.plugin.trackmate.gui.GuiUtils;
-import fiji.plugin.trackmate.gui.LogPanel;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.gui.descriptors.ConfigureViewsDescriptor;
-import fiji.plugin.trackmate.gui.descriptors.SomeDialogDescriptor;
+import fiji.plugin.trackmate.gui.components.LogPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.wizard.TrackMateWizardSequence;
+import fiji.plugin.trackmate.gui.wizard.descriptors.ConfigureViewsDescriptor;
+import fiji.plugin.trackmate.gui.wizard.descriptors.LogPanelDescriptor2;
+import fiji.plugin.trackmate.gui.wizard.descriptors.SomeDialogDescriptor;
 import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.io.TmXmlReader;
-import fiji.plugin.trackmate.providers.ViewProvider;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewUtils;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
-import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
@@ -40,7 +34,7 @@ public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 
 	public LoadTrackMatePlugIn()
 	{
-		super( new LogPanel() );
+		super( KEY, new LogPanel() );
 	}
 
 	/**
@@ -54,23 +48,11 @@ public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 	@Override
 	public void run( final String filePath )
 	{
-
 		/*
 		 * I can't stand the metal look. If this is a problem, contact me
 		 * (jeanyves.tinevez at gmail dot com)
 		 */
-		if ( IJ.isMacOSX() || IJ.isWindows() )
-		{
-			try
-			{
-				UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
-			}
-			catch ( ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e )
-			{
-				e.printStackTrace();
-			}
-
-		}
+		GuiUtils.setSystemLookAndFeel();
 
 		final Logger logger = Logger.IJ_LOGGER; // logPanel.getLogger();
 		if ( null == filePath || filePath.length() == 0 )
@@ -92,12 +74,14 @@ public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 			file = new File( filePath );
 			if ( !file.exists() )
 			{
-				IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION, "Could not find file with path " + filePath + "." );
+				IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION,
+						"Could not find file with path " + filePath + "." );
 				return;
 			}
 			if ( !file.canRead() )
 			{
-				IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION, "Could not read file with path " + filePath + "." );
+				IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION,
+						"Could not read file with path " + filePath + "." );
 				return;
 			}
 		}
@@ -167,107 +151,47 @@ public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 		// Selection model.
 		final SelectionModel selectionModel = new SelectionModel( model );
 
-		// Views
-		final Collection< TrackMateModelView > views = reader.getViews(
-				new ViewProvider(),
-				model,
-				settings,
-				selectionModel,
-				displaySettings );
-
 		if ( !reader.isReadingOk() )
 		{
 			logger.error( "Some errors occurred while reading file:\n" );
 			logger.error( reader.getErrorMessage() );
 		}
 
-		/*
-		 * Setup and render views
-		 */
-
-		// At least one view.
-		if ( views.isEmpty() )
-			views.add( new HyperStackDisplayer( model, selectionModel, settings.imp, displaySettings ) );
-
-		for ( final TrackMateModelView view : views )
-		{
-			if ( view instanceof TrackScheme )
-				continue; // Don't relaunch TrackScheme.
-
-			view.render();
-		}
-
-		// Create GUI.
-		final TrackMateGUIController controller = new TrackMateGUIController( trackmate, displaySettings, selectionModel );
-
-		// GUI position
-		GuiUtils.positionWindow( controller.getGUI(), settings.imp.getWindow() );
-
+		// Main view.
+		final TrackMateModelView displayer = new HyperStackDisplayer( model, selectionModel, settings.imp, displaySettings );
+		displayer.render();
+		
 		// GUI state
-		String guiState = reader.getGUIState();
+		String panelIdentifier = reader.getGUIState();
+		
+		if ( null == panelIdentifier )
+			panelIdentifier = ConfigureViewsDescriptor.KEY;
 
-		if ( null == guiState )
-			guiState = ConfigureViewsDescriptor.KEY;
+		// Wizard.
+		final TrackMateWizardSequence sequence = new TrackMateWizardSequence( trackmate, selectionModel, displaySettings );
+		sequence.setCurrent( panelIdentifier );
+		final JFrame frame = sequence.run( "TrackMate on " + settings.imp.getShortTitle() );
+		frame.setIconImage( TRACKMATE_ICON.getImage() );
+		GuiUtils.positionWindow( frame, settings.imp.getWindow() );
+		frame.setVisible( true );
 
-		/*
-		 * Set GUI state.
-		 */
-
-		controller.setGUIStateString( guiState );
-
-		// Text
-		controller.getGUI().getLogger().log( "Session log saved in the file:\n"
+		// Text		
+		final LogPanelDescriptor2 logDescriptor = ( LogPanelDescriptor2 ) sequence.logDescriptor();
+		final LogPanel logPanel = ( LogPanel ) logDescriptor.getPanelComponent();
+		final Logger logger2 = logPanel.getLogger();
+		
+		logger2.log( "Session log saved in the file:\n"
 				+ "--------------------\n"
 				+ logText
 				+ "--------------------\n",
 				Color.GRAY );
-		model.getLogger().log( "File loaded on " + TMUtils.getCurrentTimeString() + '\n', Logger.BLUE_COLOR );
+		logger2.log( "File loaded on " + TMUtils.getCurrentTimeString() + '\n', Logger.BLUE_COLOR );
 
 		if ( !reader.isReadingOk() )
 		{
-			final Logger newlogger = controller.getGUI().getLogger();
-			newlogger.error( "Some errors occurred while reading file:\n" );
-			newlogger.error( reader.getErrorMessage() );
+			logger2.error( "Some errors occurred while reading file:\n" );
+			logger2.error( reader.getErrorMessage() );
 		}
-	}
-
-	/**
-	 * Returns <code>true</code> is the specified file is an ICY track XML file.
-	 *
-	 * @param lFile
-	 *            the file to inspect.
-	 * @return <code>true</code> if it is an ICY track XML file.
-	 */
-	protected boolean checkIsICY( final File lFile )
-	{
-		final SAXBuilder sb = new SAXBuilder();
-		Element r = null;
-		try
-		{
-			final Document document = sb.build( lFile );
-			r = document.getRootElement();
-		}
-		catch ( final JDOMException e )
-		{
-			return false;
-		}
-		catch ( final IOException e )
-		{
-			return false;
-		}
-		if ( !r.getName().equals( "root" ) || r.getChild( "trackfile" ) == null )
-		{ return false; }
-		return true;
-	}
-
-	@Override
-	public void displayingPanel()
-	{}
-
-	@Override
-	public String getKey()
-	{
-		return KEY;
 	}
 
 	/*
@@ -308,7 +232,7 @@ public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 		ImageJ.main( args );
 		final LoadTrackMatePlugIn plugIn = new LoadTrackMatePlugIn();
 //		plugIn.run( "samples/FakeTracks.xml" );
-		plugIn.run( "samples/MAX_Merged.xml" );
-//		plugIn.run( "" );
+//		plugIn.run( "samples/MAX_Merged.xml" );
+		plugIn.run( "" );
 	}
 }

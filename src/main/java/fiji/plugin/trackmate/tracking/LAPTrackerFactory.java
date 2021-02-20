@@ -36,8 +36,8 @@ import javax.swing.ImageIcon;
 import org.jdom2.Element;
 
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.gui.ConfigurationPanel;
-import fiji.plugin.trackmate.gui.panels.tracker.LAPTrackerSettingsPanel;
+import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
+import fiji.plugin.trackmate.gui.components.tracker.LAPTrackerSettingsPanel;
 
 /**
  * Base class for LAP-based trackers.

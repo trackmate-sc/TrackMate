@@ -1,6 +1,10 @@
 package fiji.plugin.trackmate.action;
 
+import static fiji.plugin.trackmate.gui.Icons.MAGNIFIER_ICON;
+
+import java.awt.Frame;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -10,18 +14,21 @@ import java.util.TreeSet;
 import javax.swing.ImageIcon;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
+import org.scijava.plugin.Plugin;
 
+import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.trackscheme.SpotIconGrabber;
 import ij.CompositeImage;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.gui.GenericDialog;
 import ij.measure.Calibration;
 import ij.process.ImageProcessor;
 import net.imagej.ImgPlus;
@@ -53,7 +60,9 @@ public class ExtractTrackStackAction extends AbstractTMAction
 			+ "All channels are captured. " +
 			"</html>";
 
-	public static final ImageIcon ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/magnifier.png" ) );
+	private static double diameterFactor = 1.5d;
+
+	private static int dimChoice = 0;
 
 	/**
 	 * By how much we resize the capture window to get a nice border around the
@@ -61,46 +70,65 @@ public class ExtractTrackStackAction extends AbstractTMAction
 	 */
 	private static final float RESIZE_FACTOR = 1.5f;
 
-	private final SelectionModel selectionModel;
-
-	private final double radiusRatio;
-
-	private final boolean do3d;
-
-	/*
-	 * CONSTRUCTOR
-	 */
-
-	public ExtractTrackStackAction( final SelectionModel selectionModel, final double radiusRatio, final boolean do3d )
-	{
-		this.selectionModel = selectionModel;
-		this.radiusRatio = radiusRatio;
-		this.do3d = do3d;
-	}
-
-	/*
-	 * METHODS
-	 */
-
-	@SuppressWarnings( { "unchecked", "rawtypes" } )
 	@Override
-	public void execute( final TrackMate trackmate )
+	public void execute(
+			final TrackMate trackmate,
+			final SelectionModel selectionModel,
+			final DisplaySettings displaySettings,
+			final Frame parent )
 	{
+		// Show dialog.
+		final GenericDialog dialog = new GenericDialog( "Extract track stack", parent );
+
+		// Radius factor
+		dialog.addSlider( "Image size (spot\ndiameter units):", 0.1, 5.1, diameterFactor );
+
+		// Central slice vs 3D
+		final String[] dimChoices = new String[] { "Central slice ", "3D" };
+		dialog.addRadioButtonGroup( "Dimensionality:", dimChoices, 2, 1, dimChoices[ dimChoice ] );
+
+		// Show & Read user input
+		dialog.showDialog();
+		if ( dialog.wasCanceled() )
+			return;
+
+		diameterFactor = dialog.getNextNumber();
+		dimChoice = Arrays.asList( dimChoices ).indexOf( dialog.getNextRadioButton() );
+		final boolean do3d = dimChoice == 1;
+
 		logger.log( "Capturing " + ( do3d ? "3D" : "2D" ) + " track stack.\n" );
 
 		final Model model = trackmate.getModel();
 		final Set< Spot > selection = selectionModel.getSpotSelection();
-		int nspots = selection.size();
+		final int nspots = selection.size();
 		if ( nspots != 2 )
 		{
 			if ( nspots == 1 )
 			{
-				final Integer trackID = model.getTrackModel().trackIDOf( selectionModel.getSpotSelection().iterator().next() );
+				final Spot spot = selection.iterator().next();
+
+				// Put the path in the selection.
+				final Integer trackID = model.getTrackModel().trackIDOf( spot );
 				final List< Spot > spots = new ArrayList<>( model.getTrackModel().trackSpots( trackID ) );
 				Collections.sort( spots, Spot.frameComparator );
+				final Spot start = spots.get( 0 );
+				final Spot end = spots.get( spots.size() - 1 );
 				selectionModel.clearSelection();
-				selectionModel.addSpotToSelection( spots.get( 0 ) );
-				selectionModel.addSpotToSelection( spots.get( spots.size() - 1 ) );
+				selectionModel.addSpotToSelection( start );
+				selectionModel.addSpotToSelection( end );
+				final List< DefaultWeightedEdge > edges = model.getTrackModel().dijkstraShortestPath( start, end );
+				if ( null == edges )
+				{
+					logger.error( "The 2 spots are not connected.\nAborting\n" );
+					return;
+				}
+				selectionModel.addEdgeToSelection( edges );
+
+				// Get stack.
+				final ImagePlus imp = trackStack( trackmate, spot, do3d, logger );
+				imp.show();
+				imp.setZ( imp.getNSlices() / 2 + 1 );
+				imp.resetDisplayRange();
 			}
 			else
 			{
@@ -108,46 +136,100 @@ public class ExtractTrackStackAction extends AbstractTMAction
 				return;
 			}
 		}
-
-		// Get start & end
-		Spot tmp1, tmp2, start, end;
-		final Iterator< Spot > it = selection.iterator();
-		tmp1 = it.next();
-		tmp2 = it.next();
-		if ( tmp1.getFeature( Spot.POSITION_T ) > tmp2.getFeature( Spot.POSITION_T ) )
+		else
 		{
-			end = tmp1;
-			start = tmp2;
+			final Iterator< Spot > it = selection.iterator();
+			final Spot start = it.next();
+			final Spot end = it.next();
+
+			// Put the path in the selection.
+			selectionModel.clearSelection();
+			selectionModel.addSpotToSelection( start );
+			selectionModel.addSpotToSelection( end );
+			final Spot start1;
+			final Spot end1;
+			if ( start.getFeature( Spot.POSITION_T ) > end.getFeature( Spot.POSITION_T ) )
+			{
+				end1 = start;
+				start1 = end;
+			}
+			else
+			{
+				end1 = end;
+				start1 = start;
+			}
+			final List< DefaultWeightedEdge > edges = model.getTrackModel().dijkstraShortestPath( start1, end1 );
+			if ( null == edges )
+			{
+				logger.error( "The 2 spots are not connected.\nAborting\n" );
+				return;
+			}
+			selectionModel.addEdgeToSelection( edges );
+
+			// Get stack.
+			final ImagePlus imp = trackStack( trackmate, start1, end1, do3d, logger );
+			imp.show();
+			imp.setZ( imp.getNSlices() / 2 + 1 );
+			imp.resetDisplayRange();
+		}
+	}
+
+	public static final ImagePlus trackStack(
+			final TrackMate trackmate,
+			final Spot spot,
+			final boolean do3d,
+			final Logger logger )
+	{
+		final Model model = trackmate.getModel();
+		final Integer trackID = model.getTrackModel().trackIDOf( spot );
+		final List< Spot > spots = new ArrayList<>( model.getTrackModel().trackSpots( trackID ) );
+		Collections.sort( spots, Spot.frameComparator );
+		final Spot start = spots.get( 0 );
+		final Spot end = spots.get( spots.size() - 1 );
+		return trackStack( trackmate, start, end, do3d, logger );
+	}
+
+	public static final ImagePlus trackStack(
+			final TrackMate trackmate,
+			final Spot start,
+			final Spot end,
+			final boolean do3d,
+			final Logger logger )
+	{
+		final Model model = trackmate.getModel();
+		final Spot start1;
+		final Spot end1;
+		if ( start.getFeature( Spot.POSITION_T ) > end.getFeature( Spot.POSITION_T ) )
+		{
+			end1 = start;
+			start1 = end;
 		}
 		else
 		{
-			end = tmp2;
-			start = tmp1;
+			end1 = end;
+			start1 = start;
 		}
-
-		// Find path
-		final List< DefaultWeightedEdge > edges = model.getTrackModel().dijkstraShortestPath( start, end );
+		final List< DefaultWeightedEdge > edges = model.getTrackModel().dijkstraShortestPath( start1, end1 );
 		if ( null == edges )
 		{
 			logger.error( "The 2 spots are not connected.\nAborting\n" );
-			return;
+			return null;
 		}
-		selectionModel.clearEdgeSelection();
-		selectionModel.addEdgeToSelection( edges );
 
-		// Build spot list
-		// & Get largest diameter
+		/*
+		 * Build spot list & Get largest diameter.
+		 */
 		final List< Spot > path = new ArrayList<>( edges.size() );
-		path.add( start );
-		Spot previous = start;
+		path.add( start1 );
+		Spot previous = start1;
 		Spot current;
-		double radius = Math.abs( start.getFeature( Spot.RADIUS ) ) * radiusRatio;
+		double radius = Math.abs( start1.getFeature( Spot.RADIUS ) ) * diameterFactor;
 		for ( final DefaultWeightedEdge edge : edges )
 		{
 			current = model.getTrackModel().getEdgeSource( edge );
 			if ( current == previous )
 			{
-				current = model.getTrackModel().getEdgeTarget( edge ); // We have to check both in case of bad oriented edges
+				current = model.getTrackModel().getEdgeTarget( edge );
 			}
 			path.add( current );
 			final double ct = Math.abs( current.getFeature( Spot.RADIUS ) );
@@ -157,15 +239,25 @@ public class ExtractTrackStackAction extends AbstractTMAction
 			}
 			previous = current;
 		}
-		path.add( end );
+		path.add( end1 );
 
 		// Sort spot by ascending frame number
 		final TreeSet< Spot > sortedSpots = new TreeSet<>( Spot.timeComparator );
 		sortedSpots.addAll( path );
-		nspots = sortedSpots.size();
+		return trackStack( trackmate.getSettings(), path, radius, do3d, logger );
+	}
+
+	@SuppressWarnings( { "unchecked", "rawtypes" } )
+	public static final ImagePlus trackStack(
+			final Settings settings,
+			final List< Spot > path,
+			final double radius,
+			final boolean do3d,
+			final Logger logger )
+	{
+		final int nspots = path.size();
 
 		// Common coordinates
-		final Settings settings = trackmate.getSettings();
 		final double[] calibration = TMUtils.getSpatialCalibration( settings.imp );
 		final int width = ( int ) Math.ceil( 2 * radius * RESIZE_FACTOR / calibration[ 0 ] );
 		final int height = ( int ) Math.ceil( 2 * radius * RESIZE_FACTOR / calibration[ 1 ] );
@@ -185,8 +277,7 @@ public class ExtractTrackStackAction extends AbstractTMAction
 		int progress = 0;
 		final int nChannels = settings.imp.getNChannels();
 
-
-		for ( final Spot spot : sortedSpots )
+		for ( final Spot spot : path )
 		{
 
 			// Extract image for current frame
@@ -226,16 +317,14 @@ public class ExtractTrackStackAction extends AbstractTMAction
 					final Img crop = grabber.grabImage( x, y, slice, width, height );
 					stack.addSlice( spot.toString(), ImageJFunctions.wrap( crop, crop.toString() ).getProcessor() );
 				}
-
 			}
 			logger.setProgress( ( float ) ( progress + 1 ) / nspots );
 			progress++;
-
 		}
 
 		// Convert to plain ImageJ
 		final ImagePlus stackTrack = new ImagePlus( "", stack );
-		stackTrack.setTitle( "Path from " + start + " to " + end );
+		stackTrack.setTitle( "Path from " + path.get( 0 ) + " to " + path.get( path.size() - 1 ) );
 		final Calibration impCal = stackTrack.getCalibration();
 		impCal.setTimeUnit( settings.imp.getCalibration().getTimeUnit() );
 		impCal.setUnit( settings.imp.getCalibration().getUnit() );
@@ -245,8 +334,9 @@ public class ExtractTrackStackAction extends AbstractTMAction
 		impCal.frameInterval = settings.dt;
 		stackTrack.setDimensions( nChannels, depth, nspots );
 		stackTrack.setOpenAsHyperStack( true );
+		logger.log( "Done." );
 
-		//Display it
+		// Display it
 		if ( nChannels > 1 )
 		{
 			final CompositeImage cmp = new CompositeImage( stackTrack, CompositeImage.COMPOSITE );
@@ -254,20 +344,45 @@ public class ExtractTrackStackAction extends AbstractTMAction
 			{
 				final CompositeImage scmp = ( CompositeImage ) settings.imp;
 				for ( int c = 0; c < nChannels; c++ )
-					cmp.setChannelLut( scmp.getChannelLut( c+1 ), c+1 );
+					cmp.setChannelLut( scmp.getChannelLut( c + 1 ), c + 1 );
 			}
-
-			cmp.show();
-			cmp.setZ( depth / 2 + 1 );
-			cmp.resetDisplayRange();
+			return cmp;
 		}
-		else
+		return stackTrack;
+	}
+
+	@Plugin( type = TrackMateActionFactory.class )
+	public static class ExtractTrackStackActionFactory implements TrackMateActionFactory
+	{
+
+		@Override
+		public String getInfoText()
 		{
-			stackTrack.show();
-			stackTrack.setZ( depth / 2 + 1 );
-			stackTrack.resetDisplayRange();
+			return ExtractTrackStackAction.INFO_TEXT;
 		}
 
-		logger.log( "Done." );
+		@Override
+		public String getName()
+		{
+			return ExtractTrackStackAction.NAME;
+		}
+
+		@Override
+		public String getKey()
+		{
+			return ExtractTrackStackAction.KEY;
+		}
+
+		@Override
+		public ImageIcon getIcon()
+		{
+			return MAGNIFIER_ICON;
+		}
+
+		@Override
+		public TrackMateAction create()
+		{
+			return new ExtractTrackStackAction();
+		}
 	}
 }

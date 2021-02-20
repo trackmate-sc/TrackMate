@@ -1,15 +1,10 @@
 package fiji.plugin.trackmate.action;
 
-import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
-import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.util.ExportableChartPanel;
-import fiji.plugin.trackmate.visualization.trackscheme.TrackSchemeFrame;
+import static fiji.plugin.trackmate.gui.Fonts.FONT;
+import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
+import static fiji.plugin.trackmate.gui.Icons.PLOT_ICON;
+
+import java.awt.Frame;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -21,10 +16,17 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.scijava.plugin.Plugin;
 
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.util.ExportableChartPanel;
+
 public class PlotNSpotsVsTimeAction extends AbstractTMAction {
 
-
-	public static final ImageIcon ICON = new ImageIcon(TrackSchemeFrame.class.getResource("resources/plots.png"));
 	public static final String NAME = "Plot N spots vs time";
 
 	public static final String KEY = "PLOT_NSPOTS_VS_TIME";
@@ -34,7 +36,8 @@ public class PlotNSpotsVsTimeAction extends AbstractTMAction {
 			"</html>";
 
 	@Override
-	public void execute(final TrackMate trackmate) {
+	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
+	{
 		// Collect data
 		final Model model = trackmate.getModel();
 		final Settings settings = trackmate.getSettings();
@@ -79,7 +82,6 @@ public class PlotNSpotsVsTimeAction extends AbstractTMAction {
 		frame.setVisible(true);
 	}
 
-
 	@Plugin( type = TrackMateActionFactory.class )
 	public static class Factory implements TrackMateActionFactory
 	{
@@ -105,11 +107,11 @@ public class PlotNSpotsVsTimeAction extends AbstractTMAction {
 		@Override
 		public ImageIcon getIcon()
 		{
-			return ICON;
+			return PLOT_ICON;
 		}
 
 		@Override
-		public TrackMateAction create( final TrackMateGUIController controller )
+		public TrackMateAction create()
 		{
 			return new PlotNSpotsVsTimeAction();
 		}

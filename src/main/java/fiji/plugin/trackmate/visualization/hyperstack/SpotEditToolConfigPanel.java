@@ -1,19 +1,23 @@
 package fiji.plugin.trackmate.visualization.hyperstack;
 
-import static fiji.plugin.trackmate.gui.TrackMateWizard.BIG_FONT;
-import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
-import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
+import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
+import static fiji.plugin.trackmate.gui.Fonts.FONT;
+import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
+import static fiji.plugin.trackmate.gui.Icons.SELECT_TRACK_ICON;
+import static fiji.plugin.trackmate.gui.Icons.SELECT_TRACK_ICON_DOWNWARDS;
+import static fiji.plugin.trackmate.gui.Icons.SELECT_TRACK_ICON_UPWARDS;
+import static fiji.plugin.trackmate.gui.Icons.SPOT_ICON_64x64;
+import static fiji.plugin.trackmate.gui.Icons.TRACK_ICON;
+import static fiji.plugin.trackmate.gui.Icons.TRACK_ICON_64x64;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
@@ -34,7 +38,6 @@ import javax.swing.text.StyleContext;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.util.ModelTools;
 import ij.ImagePlus;
 
@@ -42,36 +45,6 @@ public class SpotEditToolConfigPanel extends JFrame
 {
 	private static final long serialVersionUID = 1L;
 
-	private final static ImageIcon ICON;
-	static
-	{
-		final Image image = new ImageIcon( TrackMateWizard.class.getResource( "images/Icon3b_print_transparency.png" ) ).getImage();
-		final Image newimg = image.getScaledInstance( 32, 32, java.awt.Image.SCALE_SMOOTH );
-		ICON = new ImageIcon( newimg );
-	}
-
-	private final static ImageIcon SELECT_TRACK_ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/arrow_updown.png" ) );
-
-	private final static ImageIcon SELECT_TRACK_ICON_UPWARDS = new ImageIcon( TrackMateWizard.class.getResource( "images/arrow_up.png" ) );
-
-	private final static ImageIcon SELECT_TRACK_ICON_DOWNWARDS = new ImageIcon( TrackMateWizard.class.getResource( "images/arrow_down.png" ) );
-
-	private final static ImageIcon SEMIAUTO_TRACKING_ICON;
-	static
-	{
-		final Image image = new ImageIcon( TrackMateWizard.class.getResource( "images/Icon1_print_transparency.png" ) ).getImage();
-		final Image newimg = image.getScaledInstance( 32, 32, java.awt.Image.SCALE_SMOOTH );
-		SEMIAUTO_TRACKING_ICON = new ImageIcon( newimg );
-	}
-
-	@SuppressWarnings( "unused" )
-	private final static ImageIcon LINK_SPOTS_ICON;
-	static
-	{
-		final Image image = new ImageIcon( TrackMateWizard.class.getResource( "images/Icon2_print_transparency.png" ) ).getImage();
-		final Image newimg = image.getScaledInstance( 32, 32, java.awt.Image.SCALE_SMOOTH );
-		LINK_SPOTS_ICON = new ImageIcon( newimg );
-	}
 	private final Logger logger;
 
 	private final JFormattedTextField jNFQualityThreshold;
@@ -119,7 +92,7 @@ public class SpotEditToolConfigPanel extends JFrame
 		 */
 
 		setTitle( "TrackMate tools" );
-		setIconImage( ICON.getImage() );
+		setIconImage( TRACK_ICON.getImage() );
 		setResizable( false );
 		getContentPane().setLayout( new BoxLayout( getContentPane(), BoxLayout.X_AXIS ) );
 
@@ -130,7 +103,7 @@ public class SpotEditToolConfigPanel extends JFrame
 		final JLabel lblTitle = new JLabel( "TrackMate tools" );
 		lblTitle.setBounds( 6, 6, 395, 33 );
 		lblTitle.setFont( BIG_FONT );
-		lblTitle.setIcon( ICON );
+		lblTitle.setIcon( TRACK_ICON_64x64 );
 		mainPanel.add( lblTitle );
 
 		final JPanel panelSemiAutoParams = new JPanel();
@@ -192,7 +165,7 @@ public class SpotEditToolConfigPanel extends JFrame
 		jNFNFrames.addFocusListener( fl );
 		panelSemiAutoParams.add( jNFNFrames );
 
-		final JButton buttonSemiAutoTracking = new JButton( SEMIAUTO_TRACKING_ICON );
+		final JButton buttonSemiAutoTracking = new JButton( SPOT_ICON_64x64 );
 		buttonSemiAutoTracking.setBounds( 6, 31, 33, 23 );
 		panelSemiAutoParams.add( buttonSemiAutoTracking );
 		buttonSemiAutoTracking.addActionListener( new ActionListener()

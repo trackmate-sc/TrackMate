@@ -3,12 +3,9 @@
  */
 package fiji.plugin.trackmate.action;
 
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
+import static fiji.plugin.trackmate.gui.Icons.TIME_ICON;
 
+import java.awt.Frame;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -16,10 +13,15 @@ import javax.swing.ImageIcon;
 
 import org.scijava.plugin.Plugin;
 
+import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+
 public class ResetSpotTimeFeatureAction extends AbstractTMAction {
 
 
-	public static final ImageIcon ICON = new ImageIcon(TrackMateWizard.class.getResource("images/time.png"));
 	public static final String NAME = "Reset spot time";
 	public static final String INFO_TEXT = "<html>" +
 			"Reset the time feature of all spots: it is set to the frame number "  +
@@ -28,8 +30,10 @@ public class ResetSpotTimeFeatureAction extends AbstractTMAction {
 
 	private static final String KEY = "RESET_SPOT_TIME";
 
+
 	@Override
-	public void execute(final TrackMate trackmate) {
+	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
+	{
 		logger.log("Reset spot time.\n");
 		double dt = trackmate.getSettings().dt;
 		if (dt == 0) {
@@ -72,11 +76,11 @@ public class ResetSpotTimeFeatureAction extends AbstractTMAction {
 		@Override
 		public ImageIcon getIcon()
 		{
-			return ICON;
+			return TIME_ICON;
 		}
 
 		@Override
-		public TrackMateAction create( final TrackMateGUIController controller )
+		public TrackMateAction create()
 		{
 			return new ResetSpotTimeFeatureAction();
 		}

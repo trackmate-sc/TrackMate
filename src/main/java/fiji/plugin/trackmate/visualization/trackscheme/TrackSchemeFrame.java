@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.visualization.trackscheme;
 
+import static fiji.plugin.trackmate.gui.Icons.TRACK_SCHEME_ICON;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Point;
@@ -58,7 +60,7 @@ public class TrackSchemeFrame extends JFrame
 		this.graph = trackScheme.getGraph();
 
 		// Frame look
-		setIconImage( TrackScheme.TRACK_SCHEME_ICON.getImage() );
+		setIconImage( TRACK_SCHEME_ICON.getImage() );
 
 		// Layout
 		getContentPane().setLayout( new BorderLayout() );

@@ -11,6 +11,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.scijava.Cancelable;
+
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
@@ -26,11 +28,11 @@ import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
 /**
  * A class dedicated to centralizing the calculation of the numerical features
  * of spots, through {@link SpotAnalyzer}s.
- * 
+ *
  * @author Jean-Yves Tinevez - 2013. Revised December 2020.
- * 
+ *
  */
-public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
+public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm implements Cancelable
 {
 
 	private static final String BASE_ERROR_MSG = "[SpotFeatureCalculator] ";
@@ -38,6 +40,10 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 	private final Settings settings;
 
 	private final Model model;
+
+	private boolean isCanceled;
+
+	private String cancelReason;
 
 	public SpotFeatureCalculator( final Model model, final Settings settings )
 	{
@@ -107,7 +113,7 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 	/**
 	 * The method in charge of computing spot features with the given
 	 * {@link SpotAnalyzer}s, for the given {@link SpotCollection}.
-	 * 
+	 *
 	 * @param toCompute
 	 *            the spots to compute.
 	 * @param analyzerFactories
@@ -117,6 +123,8 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 	 */
 	private void computeSpotFeaturesAgent( final SpotCollection toCompute, final List< SpotAnalyzerFactoryBase< ? > > analyzerFactories, final boolean doLogIt )
 	{
+		isCanceled = false;
+		cancelReason = null;
 		final long start = System.currentTimeMillis();
 		final Logger logger = doLogIt ? model.getLogger() : Logger.VOID_LOGGER;
 
@@ -143,8 +151,7 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 		if ( doLogIt )
 		{
 			logger.setStatus( "Calculating " + toCompute.getNSpots( false ) + " spots features..." );
-			logger.log( "Computing spot features", Logger.BLUE_COLOR );
-			logger.log( " over "
+			logger.log( "Computing spot features over "
 					+ ( ( nSimultaneousFrames > 1 ) ? ( nSimultaneousFrames + " frames" ) : "1 frame" )
 					+ " simultaneously and allocating "
 					+ ( ( threadsPerFrame > 1 ) ? ( threadsPerFrame + " threads" ) : "1 thread" )
@@ -168,6 +175,9 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 					{
 						for ( final SpotAnalyzerFactoryBase< ? > factory : analyzerFactories )
 						{
+							if ( isCanceled() )
+								return null;
+
 							@SuppressWarnings( "unchecked" )
 							final SpotAnalyzer< ? > analyzer = factory.getAnalyzer( img, frame, channel );
 							// Fine-tune multithreading if we can.
@@ -207,5 +217,26 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm
 		logger.setStatus( "" );
 		final long end = System.currentTimeMillis();
 		processingTime = end - start;
+	}
+
+	// --- org.scijava.Cancelable methods ---
+
+	@Override
+	public boolean isCanceled()
+	{
+		return isCanceled;
+	}
+
+	@Override
+	public void cancel( final String reason )
+	{
+		isCanceled = true;
+		cancelReason = reason;
+	}
+
+	@Override
+	public String getCancelReason()
+	{
+		return cancelReason;
 	}
 }
