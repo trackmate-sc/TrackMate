@@ -128,7 +128,7 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 		} );
 	}
 
-	private < O > void exportToCsv()
+	public void exportToCsv()
 	{
 		final File file = FileChooser.chooseFile(
 				this,
@@ -141,18 +141,23 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 			return;
 
 		selectedFile = file.getAbsolutePath();
+		exportToCsv( selectedFile );
+	}
+
+	public void exportToCsv( final String csvFile )
+	{
 		try
 		{
-			spotTable.exportToCsv( file );
+			spotTable.exportToCsv( new File( csvFile ) );
 		}
 		catch ( final IOException e )
 		{
 			model.getLogger().error( "Problem exporting to file "
-					+ file + "\n" + e.getMessage() );
+					+ csvFile + "\n" + e.getMessage() );
 		}
 	}
 
-	private final TablePanel< Spot > createSpotTable( final Model model, final DisplaySettings ds )
+	public final TablePanel< Spot > createSpotTable( final Model model, final DisplaySettings ds )
 	{
 		final List< String > features = new ArrayList<>( model.getFeatureModel().getSpotFeatures() );
 		final Map< String, String > featureNames = model.getFeatureModel().getSpotFeatureNames();
