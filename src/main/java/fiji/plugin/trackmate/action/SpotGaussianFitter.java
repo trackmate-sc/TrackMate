@@ -2,6 +2,7 @@ package fiji.plugin.trackmate.action;
 
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 
+import java.awt.Frame;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,12 +14,13 @@ import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.DetectionUtils;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.gui.TrackMateWizard;
+import fiji.plugin.trackmate.gui.Icons;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.util.TMUtils;
 import net.imagej.ImgPlus;
 import net.imglib2.Localizable;
@@ -245,7 +247,7 @@ public class SpotGaussianFitter extends MultiThreadedBenchmarkAlgorithm
 	{
 
 		@Override
-		public void execute( final TrackMate trackmate )
+		public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
 		{
 			logger.log( "Refining the position of spots using gaussian fitting.\n" );
 			logger.log( "Fitting " + trackmate.getModel().getSpots().getNSpots( true ) + " visible spots using " + "threads.\n" );
@@ -264,8 +266,6 @@ public class SpotGaussianFitter extends MultiThreadedBenchmarkAlgorithm
 	@Plugin( type = TrackMateActionFactory.class )
 	public static class Factory implements TrackMateActionFactory
 	{
-
-		public static final ImageIcon ICON = new ImageIcon( TrackMateWizard.class.getResource( "images/gauss_fit.png" ) );
 
 		public static final String NAME = "Refine spot position with gaussian fitting";
 
@@ -299,7 +299,7 @@ public class SpotGaussianFitter extends MultiThreadedBenchmarkAlgorithm
 		}
 
 		@Override
-		public TrackMateAction create( final TrackMateGUIController controller )
+		public TrackMateAction create()
 		{
 			return new SpotGaussianFitterAction();
 		}
@@ -307,7 +307,7 @@ public class SpotGaussianFitter extends MultiThreadedBenchmarkAlgorithm
 		@Override
 		public ImageIcon getIcon()
 		{
-			return ICON;
+			return Icons.SPOT_ICON_64x64;
 		}
 
 		@Override

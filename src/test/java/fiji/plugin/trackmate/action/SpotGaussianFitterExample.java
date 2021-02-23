@@ -1,7 +1,10 @@
 package fiji.plugin.trackmate.action;
 
+import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
+
 import java.io.File;
 
+import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -10,10 +13,10 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.gui.descriptors.ConfigureViewsDescriptor;
+import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
+import fiji.plugin.trackmate.gui.wizard.TrackMateWizardSequence;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.ImageJ;
@@ -45,7 +48,13 @@ public class SpotGaussianFitterExample
 
 		final HyperStackDisplayer view = new HyperStackDisplayer( model, selectionModel, imp, ds );
 		view.render();
-		final TrackMateGUIController controller = new TrackMateGUIController( new TrackMate( model, settings ), ds, selectionModel );
-		controller.setGUIStateString( ConfigureViewsDescriptor.KEY );
+
+		final TrackMateWizardSequence sequence = new TrackMateWizardSequence( new TrackMate( model, settings ), selectionModel, ds );
+		sequence.setCurrent( "Actions" );
+		final JFrame frame = sequence.run( "Test Gauss-fitting action" );
+
+		frame.setIconImage( TRACKMATE_ICON.getImage() );
+		GuiUtils.positionWindow( frame, settings.imp.getWindow() );
+		frame.setVisible( true );
 	}
 }
