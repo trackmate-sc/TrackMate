@@ -62,14 +62,11 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 
 	private final TablePanel< Branch > branchTable;
 
-	private final SelectionModel selectionModel;
-
 	public BranchTableView( final Model model, final SelectionModel selectionModel )
 	{
 		super( "Branch table" );
 		setIconImage( TRACKMATE_ICON.getImage() );
 		this.model = model;
-		this.selectionModel = selectionModel;
 
 		/*
 		 * GUI.
@@ -79,7 +76,7 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 		mainPanel.setLayout( new BorderLayout() );
 
 		// Table.
-		this.branchTable = createBranchTable( model );
+		this.branchTable = createBranchTable( model, selectionModel );
 
 		mainPanel.add( branchTable.getPanel(), BorderLayout.CENTER );
 
@@ -102,7 +99,7 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 		return branchTable;
 	}
 
-	private < O > void exportToCsv()
+	public void exportToCsv()
 	{
 		final File file = FileChooser.chooseFile(
 				this,
@@ -115,18 +112,23 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 			return;
 
 		selectedFile = file.getAbsolutePath();
+		exportToCsv( selectedFile );
+	}
+
+	public void exportToCsv( final String csvFile )
+	{
 		try
 		{
-			branchTable.exportToCsv( file );
+			branchTable.exportToCsv( new File( csvFile ) );
 		}
 		catch ( final IOException e )
 		{
 			model.getLogger().error( "Problem exporting to file "
-					+ file + "\n" + e.getMessage() );
+					+ csvFile + "\n" + e.getMessage() );
 		}
 	}
 
-	private final TablePanel< Branch > createBranchTable( final Model model )
+	public static final TablePanel< Branch > createBranchTable( final Model model, final SelectionModel selectionModel )
 	{
 		final Logger logger = model.getLogger();
 
@@ -271,7 +273,7 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 				labelSetter );
 
 		table.getTable().getSelectionModel().addListSelectionListener(
-				new BranchTableSelectionListener() );
+				new BranchTableSelectionListener( table, model, selectionModel ) );
 
 		return table;
 	}
@@ -312,8 +314,21 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 	/**
 	 * Forward spot table selection to selection model.
 	 */
-	private final class BranchTableSelectionListener implements ListSelectionListener
+	private static final class BranchTableSelectionListener implements ListSelectionListener
 	{
+
+		private final TablePanel< Branch > branchTable;
+
+		private final Model model;
+
+		private final SelectionModel selectionModel;
+
+		public BranchTableSelectionListener( final TablePanel< Branch > branchTable, final Model model, final SelectionModel selectionModel )
+		{
+			this.branchTable = branchTable;
+			this.model = model;
+			this.selectionModel = selectionModel;
+		}
 
 		@Override
 		public void valueChanged( final ListSelectionEvent event )
