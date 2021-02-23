@@ -112,6 +112,9 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 		 * Listeners.
 		 */
 
+		spotTable.getTable().getSelectionModel().addListSelectionListener(
+				new SpotTableSelectionListener() );
+
 		final UpdateListener refresher = () -> refresh();
 		ds.listeners().add( refresher );
 		selectionModel.addSelectionChangeListener( this );
@@ -157,7 +160,7 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 		}
 	}
 
-	public final TablePanel< Spot > createSpotTable( final Model model, final DisplaySettings ds )
+	public static final TablePanel< Spot > createSpotTable( final Model model, final DisplaySettings ds )
 	{
 		final List< String > features = new ArrayList<>( model.getFeatureModel().getSpotFeatures() );
 		final Map< String, String > featureNames = model.getFeatureModel().getSpotFeatureNames();
@@ -215,10 +218,6 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 						labelSetter,
 						ManualSpotColorAnalyzerFactory.FEATURE,
 						colorSetter );
-
-		table.getTable().getSelectionModel().addListSelectionListener(
-				new SpotTableSelectionListener() );
-
 		return table;
 	}
 
