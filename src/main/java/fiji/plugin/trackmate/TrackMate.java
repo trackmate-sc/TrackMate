@@ -257,7 +257,20 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 
 		final Logger logger = model.getLogger();
 		logger.log( "Starting tracking process.\n", Logger.BLUE_COLOR );
+
+		if ( settings.trackerFactory == null )
+		{
+			logger.log( "Tracker factory is not defined. Skipping tracking.\n" );
+			return true; // Not an error.
+		}
+
 		final SpotTracker tracker = settings.trackerFactory.create( model.getSpots(), settings.trackerSettings );
+		if ( tracker == null )
+		{
+			logger.log( "Tracker return by factory is null. Skipping tracking.\n" );
+			return true; // Not an error.
+		}
+
 		if ( tracker instanceof Cancelable )
 			cancelables.add( ( Cancelable ) tracker );
 		tracker.setNumThreads( numThreads );
