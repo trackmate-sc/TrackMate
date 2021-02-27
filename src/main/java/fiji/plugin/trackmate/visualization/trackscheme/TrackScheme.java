@@ -157,6 +157,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 			}
 		} );
 		gui.setLocationByPlatform( true );
+		gui.setLocationRelativeTo( null );
 		gui.setVisible( true );
 	}
 
