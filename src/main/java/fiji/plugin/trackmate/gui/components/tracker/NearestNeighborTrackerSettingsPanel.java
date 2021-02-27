@@ -13,6 +13,7 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
+import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 
 public class NearestNeighborTrackerSettingsPanel extends ConfigurationPanel {
@@ -88,6 +89,9 @@ public class NearestNeighborTrackerSettingsPanel extends ConfigurationPanel {
 		labelUnits.setFont(FONT);
 		labelUnits.setBounds(236, 314, 34, 20);
 		add(labelUnits);
+
+		// Select text-fields content on focus.
+		GuiUtils.selectAllOnFocus( maxDistField );
 	}
 
 	@Override

@@ -22,6 +22,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.SwingConstants;
 
+import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.tracking.overlap.OverlapTracker.IoUCalculation;
 
@@ -154,6 +155,10 @@ public class OverlapTrackerSettingsPanel extends ConfigurationPanel
 		gbc_ftfScaleFactor.gridx = 1;
 		gbc_ftfScaleFactor.gridy = 5;
 		add( ftfScaleFactor, gbc_ftfScaleFactor );
+
+		// Select text-fields content on focus.
+		GuiUtils.selectAllOnFocus( ftfMinIoU );
+		GuiUtils.selectAllOnFocus( ftfScaleFactor );
 	}
 
 	@Override

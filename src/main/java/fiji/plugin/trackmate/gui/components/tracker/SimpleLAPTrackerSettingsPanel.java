@@ -39,6 +39,7 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
+import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 
 /**
@@ -223,6 +224,11 @@ public class SimpleLAPTrackerSettingsPanel extends ConfigurationPanel
 				this.add( jLabelGapClosingTimeCutoffUnit, new GridBagConstraints( 2, 6, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.HORIZONTAL, new Insets( 0, 0, 0, 10 ), 0, 0 ) );
 				jLabelGapClosingTimeCutoffUnit.setFont( FONT );
 			}
+
+			// Select text-fields content on focus.
+			GuiUtils.selectAllOnFocus( jTextFieldLinkingDistance );
+			GuiUtils.selectAllOnFocus( jTextFieldGapClosingDistanceCutoff );
+			GuiUtils.selectAllOnFocus( jTextFieldGapClosingTimeCutoff );
 
 		}
 		catch ( final Exception e )

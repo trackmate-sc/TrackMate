@@ -11,6 +11,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
 
+import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.util.TMUtils;
 
 public class JPanelFeaturePenalty extends javax.swing.JPanel
@@ -92,6 +93,9 @@ public class JPanelFeaturePenalty extends javax.swing.JPanel
 				jTextFieldFeatureWeight.setSize( TEXTFIELD_DIMENSION );
 				jTextFieldFeatureWeight.setFont( SMALL_FONT );
 			}
+
+			// Select text-field content on focus.
+			GuiUtils.selectAllOnFocus( jTextFieldFeatureWeight );
 		}
 		catch ( final Exception e )
 		{

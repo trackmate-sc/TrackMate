@@ -36,6 +36,7 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
+import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.components.JPanelFeatureSelectionGui;
 import fiji.plugin.trackmate.tracking.LAPUtils;
 
@@ -433,11 +434,15 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
 				jScrollPaneMergingFeatures.setViewportView(jPanelMergingFeatures);
 			}
 
+			// Select text-fields content on focus.
+			GuiUtils.selectAllOnFocus( jTextFieldGapClosingMaxDistance );
+			GuiUtils.selectAllOnFocus( jTextFieldGapClosingMaxFrameInterval );
+			GuiUtils.selectAllOnFocus( jTextFieldLinkingMaxDistance );
+			GuiUtils.selectAllOnFocus( jTextFieldMergingMaxDistance );
+			GuiUtils.selectAllOnFocus( jTextFieldSplittingMaxDistance );
+
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}
-
 	}
-
-
 }
