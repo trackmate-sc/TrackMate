@@ -15,6 +15,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 
 import org.scijava.Cancelable;
 
@@ -176,6 +177,7 @@ public class WizardController
 		descriptor.aboutToDisplayPanel();
 		wizardPanel.display( descriptor );
 		descriptor.displayingPanel();
+		SwingUtilities.invokeLater( () -> wizardPanel.btnNext.requestFocusInWindow() );
 	}
 
 	protected void save()
