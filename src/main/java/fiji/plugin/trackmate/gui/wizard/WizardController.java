@@ -57,11 +57,18 @@ public class WizardController
 			display( sequence.logDescriptor(), sequence.current(), Direction.TOP );
 			wizardPanel.btnNext.setEnabled( false );
 			wizardPanel.btnPrevious.setEnabled( false );
+			wizardPanel.btnDisplayConfig.setEnabled( false );
+			wizardPanel.btnCancel.setEnabled( false );
+			wizardPanel.btnSave.setEnabled( false );
+
 		}
 		else
 		{
 			sequence.current().targetPanel.setSize( sequence.logDescriptor().targetPanel.getSize() );
 			display( sequence.current(), sequence.logDescriptor(), Direction.BOTTOM );
+			wizardPanel.btnDisplayConfig.setEnabled( true );
+			wizardPanel.btnCancel.setEnabled( true );
+			wizardPanel.btnSave.setEnabled( true );
 		}
 	}
 
@@ -73,11 +80,19 @@ public class WizardController
 			display( sequence.configDescriptor(), sequence.current(), Direction.BOTTOM );
 			wizardPanel.btnNext.setEnabled( false );
 			wizardPanel.btnPrevious.setEnabled( false );
+			wizardPanel.btnLog.setEnabled( false );
+			wizardPanel.btnCancel.setEnabled( false );
+			wizardPanel.btnSave.setEnabled( false );
+
 		}
 		else
 		{
 			sequence.current().targetPanel.setSize( sequence.configDescriptor().targetPanel.getSize() );
 			display( sequence.current(), sequence.configDescriptor(), Direction.TOP );
+			wizardPanel.btnLog.setEnabled( true );
+			wizardPanel.btnCancel.setEnabled( true );
+			wizardPanel.btnSave.setEnabled( true );
+
 		}
 	}
 
