@@ -32,6 +32,7 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,38 +54,95 @@ public class SimpleLAPTrackerSettingsPanel extends ConfigurationPanel
 
 	private static final long serialVersionUID = -1L;
 
-	private JLabel jLabelLinkingMaxDistanceUnit;
+	private final JFormattedTextField txtfldGapClosingTimeCutoff;
 
-	private JLabel jLabelTrackerName;
+	private final JFormattedTextField txtfldGapClosingDistanceCutoff;
 
-	private JLabel jLabelGapClosingTimeCutoffUnit;
-
-	private JLabel jLabelGapClosingMaxDistanceUnit;
-
-	private JFormattedTextField jTextFieldGapClosingTimeCutoff;
-
-	private JFormattedTextField jTextFieldGapClosingDistanceCutoff;
-
-	private JFormattedTextField jTextFieldLinkingDistance;
-
-	private JLabel jLabelTrackerDescription;
-
-	private final String infoText;
-
-	private final String trackerName;
-
-	private final String spaceUnits;
-
-	/*
-	 * CONSTRUCTOR
-	 */
+	private final JFormattedTextField txtfldLinkingDistance;
 
 	public SimpleLAPTrackerSettingsPanel( final String trackerName, final String infoText, final String spaceUnits )
 	{
-		this.trackerName = trackerName;
-		this.infoText = infoText;
-		this.spaceUnits = spaceUnits;
-		initGUI();
+		final DecimalFormat decimalFormat = new DecimalFormat( "0.0" );
+
+		this.setPreferredSize( new java.awt.Dimension( 300, 500 ) );
+		final GridBagLayout thisLayout = new GridBagLayout();
+		thisLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 };
+		thisLayout.rowHeights = new int[] { 31, 50, 119, 7, 50, 50, 50, 50 };
+		thisLayout.columnWeights = new double[] { 0.0, 0.0, 0.1 };
+		thisLayout.columnWidths = new int[] { 203, 42, 7 };
+		this.setLayout( thisLayout );
+
+		final JLabel lbl1 = new JLabel();
+		this.add( lbl1, new GridBagConstraints( 0, 0, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets( 0, 10, 0, 10 ), 0, 0 ) );
+		lbl1.setFont( FONT );
+		lbl1.setText( "Settings for tracker:" );
+
+		final JLabel lblTrackerName = new JLabel();
+		this.add( lblTrackerName, new GridBagConstraints( 0, 1, 3, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, new Insets( 10, 20, 0, 0 ), 0, 0 ) );
+		lblTrackerName.setHorizontalTextPosition( SwingConstants.CENTER );
+		lblTrackerName.setHorizontalAlignment( SwingConstants.CENTER );
+		lblTrackerName.setFont( BIG_FONT );
+		lblTrackerName.setText( trackerName );
+
+		final JLabel lblTrackerDescription = new JLabel();
+		this.add( lblTrackerDescription, new GridBagConstraints( 0, 2, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets( 10, 10, 10, 10 ), 0, 0 ) );
+		lblTrackerDescription.setFont( FONT.deriveFont( Font.ITALIC ) );
+		lblTrackerDescription.setText( infoText
+				.replace( "<br>", "" )
+				.replace( "<p>", "<p align=\"justify\">" )
+				.replace( "<html>", "<html><p align=\"justify\">" ) );
+
+		final JLabel lbl2 = new JLabel();
+		this.add( lbl2, new GridBagConstraints( 0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 0, 10, 0, 0 ), 0, 0 ) );
+		lbl2.setFont( FONT );
+		lbl2.setText( "Linking max distance:" );
+
+		final JLabel lbl3 = new JLabel();
+		this.add( lbl3, new GridBagConstraints( 0, 5, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 0, 10, 0, 0 ), 0, 0 ) );
+		lbl3.setFont( FONT );
+		lbl3.setText( "Gap-closing max distance:" );
+
+		final JLabel lbl4 = new JLabel();
+		this.add( lbl4, new GridBagConstraints( 0, 6, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 0, 10, 0, 0 ), 0, 0 ) );
+		lbl4.setFont( FONT );
+		lbl4.setText( "Gap-closing max frame gap:" );
+
+		txtfldLinkingDistance = new JFormattedTextField( decimalFormat );
+		txtfldLinkingDistance.setMinimumSize( TEXTFIELD_DIMENSION );
+		this.add( txtfldLinkingDistance, new GridBagConstraints( 1, 4, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets( 0, 0, 0, 0 ), 0, 0 ) );
+		txtfldLinkingDistance.setFont( FONT );
+		txtfldLinkingDistance.setHorizontalAlignment( JFormattedTextField.CENTER );
+
+		txtfldGapClosingDistanceCutoff = new JFormattedTextField( decimalFormat );
+		txtfldGapClosingDistanceCutoff.setMinimumSize( TEXTFIELD_DIMENSION );
+		this.add( txtfldGapClosingDistanceCutoff, new GridBagConstraints( 1, 5, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets( 0, 0, 0, 0 ), 0, 0 ) );
+		txtfldGapClosingDistanceCutoff.setFont( FONT );
+		txtfldGapClosingDistanceCutoff.setHorizontalAlignment( JFormattedTextField.CENTER );
+
+		txtfldGapClosingTimeCutoff = new JFormattedTextField( Integer.valueOf( 2 ) );
+		txtfldGapClosingTimeCutoff.setMinimumSize( TEXTFIELD_DIMENSION );
+		this.add( txtfldGapClosingTimeCutoff, new GridBagConstraints( 1, 6, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets( 0, 0, 0, 0 ), 0, 0 ) );
+		txtfldGapClosingTimeCutoff.setFont( FONT );
+		txtfldGapClosingTimeCutoff.setHorizontalAlignment( JFormattedTextField.CENTER );
+
+		final JLabel lblMaxDistanceUnit = new JLabel();
+		this.add( lblMaxDistanceUnit, new GridBagConstraints( 2, 4, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.HORIZONTAL, new Insets( 0, 0, 0, 10 ), 0, 0 ) );
+		lblMaxDistanceUnit.setFont( FONT );
+		lblMaxDistanceUnit.setText( " " + spaceUnits );
+
+		final JLabel lblGapClosingMaxDistanceUnit = new JLabel();
+		this.add( lblGapClosingMaxDistanceUnit, new GridBagConstraints( 2, 5, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.HORIZONTAL, new Insets( 0, 0, 0, 10 ), 0, 0 ) );
+		lblGapClosingMaxDistanceUnit.setFont( FONT );
+		lblGapClosingMaxDistanceUnit.setText( " " + spaceUnits );
+
+		final JLabel lblGapClosingTimeCutoffUnit = new JLabel();
+		this.add( lblGapClosingTimeCutoffUnit, new GridBagConstraints( 2, 6, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.HORIZONTAL, new Insets( 0, 0, 0, 10 ), 0, 0 ) );
+		lblGapClosingTimeCutoffUnit.setFont( FONT );
+
+		// Select text-fields content on focus.
+		GuiUtils.selectAllOnFocus( txtfldLinkingDistance );
+		GuiUtils.selectAllOnFocus( txtfldGapClosingDistanceCutoff );
+		GuiUtils.selectAllOnFocus( txtfldGapClosingTimeCutoff );
 	}
 
 	/*
@@ -119,9 +177,9 @@ public class SimpleLAPTrackerSettingsPanel extends ConfigurationPanel
 		settings.put( KEY_ALTERNATIVE_LINKING_COST_FACTOR, DEFAULT_ALTERNATIVE_LINKING_COST_FACTOR );
 		settings.put( KEY_CUTOFF_PERCENTILE, DEFAULT_CUTOFF_PERCENTILE );
 		// Panel ones
-		settings.put( KEY_LINKING_MAX_DISTANCE, ( ( Number ) jTextFieldLinkingDistance.getValue() ).doubleValue() );
-		settings.put( KEY_GAP_CLOSING_MAX_DISTANCE, ( ( Number ) jTextFieldGapClosingDistanceCutoff.getValue() ).doubleValue() );
-		settings.put( KEY_GAP_CLOSING_MAX_FRAME_GAP, ( ( Number ) jTextFieldGapClosingTimeCutoff.getValue() ).intValue() );
+		settings.put( KEY_LINKING_MAX_DISTANCE, ( ( Number ) txtfldLinkingDistance.getValue() ).doubleValue() );
+		settings.put( KEY_GAP_CLOSING_MAX_DISTANCE, ( ( Number ) txtfldGapClosingDistanceCutoff.getValue() ).doubleValue() );
+		settings.put( KEY_GAP_CLOSING_MAX_FRAME_GAP, ( ( Number ) txtfldGapClosingTimeCutoff.getValue() ).intValue() );
 		// Hop!
 		return settings;
 	}
@@ -132,109 +190,9 @@ public class SimpleLAPTrackerSettingsPanel extends ConfigurationPanel
 
 	private void echoSettings( final Map< String, Object > settings )
 	{
-		jTextFieldLinkingDistance.setValue( settings.get( KEY_LINKING_MAX_DISTANCE ) );
-		jTextFieldGapClosingDistanceCutoff.setValue( settings.get( KEY_GAP_CLOSING_MAX_DISTANCE ) );
-		jTextFieldGapClosingTimeCutoff.setValue( settings.get( KEY_GAP_CLOSING_MAX_FRAME_GAP ) );
-	}
-
-	private void initGUI()
-	{
-		try
-		{
-			this.setPreferredSize( new java.awt.Dimension( 300, 500 ) );
-			final GridBagLayout thisLayout = new GridBagLayout();
-			thisLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 };
-			thisLayout.rowHeights = new int[] { 31, 50, 119, 7, 50, 50, 50, 50 };
-			thisLayout.columnWeights = new double[] { 0.0, 0.0, 0.1 };
-			thisLayout.columnWidths = new int[] { 203, 42, 7 };
-			this.setLayout( thisLayout );
-			{
-				final JLabel jLabel1 = new JLabel();
-				this.add( jLabel1, new GridBagConstraints( 0, 0, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets( 0, 10, 0, 10 ), 0, 0 ) );
-				jLabel1.setFont( FONT );
-				jLabel1.setText( "Settings for tracker:" );
-			}
-			{
-				jLabelTrackerName = new JLabel();
-				this.add( jLabelTrackerName, new GridBagConstraints( 0, 1, 3, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, new Insets( 10, 20, 0, 0 ), 0, 0 ) );
-				jLabelTrackerName.setHorizontalTextPosition( SwingConstants.CENTER );
-				jLabelTrackerName.setHorizontalAlignment( SwingConstants.CENTER );
-				jLabelTrackerName.setFont( BIG_FONT );
-				jLabelTrackerName.setText( trackerName );
-			}
-			{
-				jLabelTrackerDescription = new JLabel();
-				this.add( jLabelTrackerDescription, new GridBagConstraints( 0, 2, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets( 10, 10, 10, 10 ), 0, 0 ) );
-				jLabelTrackerDescription.setFont( FONT.deriveFont( Font.ITALIC ) );
-				jLabelTrackerDescription.setText( infoText
-						.replace( "<br>", "" )
-						.replace( "<p>", "<p align=\"justify\">" )
-						.replace( "<html>", "<html><p align=\"justify\">" ) );
-			}
-			{
-				final JLabel jLabel2 = new JLabel();
-				this.add( jLabel2, new GridBagConstraints( 0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 0, 10, 0, 0 ), 0, 0 ) );
-				jLabel2.setFont( FONT );
-				jLabel2.setText( "Linking max distance:" );
-			}
-			{
-				final JLabel jLabel3 = new JLabel();
-				this.add( jLabel3, new GridBagConstraints( 0, 5, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 0, 10, 0, 0 ), 0, 0 ) );
-				jLabel3.setFont( FONT );
-				jLabel3.setText( "Gap-closing max distance:" );
-			}
-			{
-				final JLabel jLabel4 = new JLabel();
-				this.add( jLabel4, new GridBagConstraints( 0, 6, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 0, 10, 0, 0 ), 0, 0 ) );
-				jLabel4.setFont( FONT );
-				jLabel4.setText( "Gap-closing max frame gap:" );
-			}
-			{
-				jTextFieldLinkingDistance = new JFormattedTextField();
-				jTextFieldLinkingDistance.setMinimumSize( TEXTFIELD_DIMENSION );
-				this.add( jTextFieldLinkingDistance, new GridBagConstraints( 1, 4, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets( 0, 0, 0, 0 ), 0, 0 ) );
-				jTextFieldLinkingDistance.setFont( FONT );
-			}
-			{
-				jTextFieldGapClosingDistanceCutoff = new JFormattedTextField();
-				jTextFieldGapClosingDistanceCutoff.setMinimumSize( TEXTFIELD_DIMENSION );
-				this.add( jTextFieldGapClosingDistanceCutoff, new GridBagConstraints( 1, 5, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets( 0, 0, 0, 0 ), 0, 0 ) );
-				jTextFieldGapClosingDistanceCutoff.setFont( FONT );
-			}
-			{
-				jTextFieldGapClosingTimeCutoff = new JFormattedTextField();
-				jTextFieldGapClosingTimeCutoff.setMinimumSize( TEXTFIELD_DIMENSION );
-				this.add( jTextFieldGapClosingTimeCutoff, new GridBagConstraints( 1, 6, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets( 0, 0, 0, 0 ), 0, 0 ) );
-				jTextFieldGapClosingTimeCutoff.setFont( FONT );
-			}
-			{
-				jLabelLinkingMaxDistanceUnit = new JLabel();
-				this.add( jLabelLinkingMaxDistanceUnit, new GridBagConstraints( 2, 4, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.HORIZONTAL, new Insets( 0, 0, 0, 10 ), 0, 0 ) );
-				jLabelLinkingMaxDistanceUnit.setFont( FONT );
-				jLabelLinkingMaxDistanceUnit.setText( spaceUnits );
-			}
-			{
-				jLabelGapClosingMaxDistanceUnit = new JLabel();
-				this.add( jLabelGapClosingMaxDistanceUnit, new GridBagConstraints( 2, 5, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.HORIZONTAL, new Insets( 0, 0, 0, 10 ), 0, 0 ) );
-				jLabelGapClosingMaxDistanceUnit.setFont( FONT );
-				jLabelGapClosingMaxDistanceUnit.setText( spaceUnits );
-			}
-			{
-				jLabelGapClosingTimeCutoffUnit = new JLabel();
-				this.add( jLabelGapClosingTimeCutoffUnit, new GridBagConstraints( 2, 6, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.HORIZONTAL, new Insets( 0, 0, 0, 10 ), 0, 0 ) );
-				jLabelGapClosingTimeCutoffUnit.setFont( FONT );
-			}
-
-			// Select text-fields content on focus.
-			GuiUtils.selectAllOnFocus( jTextFieldLinkingDistance );
-			GuiUtils.selectAllOnFocus( jTextFieldGapClosingDistanceCutoff );
-			GuiUtils.selectAllOnFocus( jTextFieldGapClosingTimeCutoff );
-
-		}
-		catch ( final Exception e )
-		{
-			e.printStackTrace();
-		}
+		txtfldLinkingDistance.setValue( settings.get( KEY_LINKING_MAX_DISTANCE ) );
+		txtfldGapClosingDistanceCutoff.setValue( settings.get( KEY_GAP_CLOSING_MAX_DISTANCE ) );
+		txtfldGapClosingTimeCutoff.setValue( settings.get( KEY_GAP_CLOSING_MAX_FRAME_GAP ) );
 	}
 
 	@Override
