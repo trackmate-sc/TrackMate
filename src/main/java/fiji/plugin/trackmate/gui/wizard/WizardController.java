@@ -178,6 +178,7 @@ public class WizardController
 				{
 					wizardPanel.btnCancel.setVisible( false);
 					wizardPanel.btnNext.setVisible( true );
+					wizardPanel.btnNext.requestFocusInWindow();
 					reenabler.reenable();
 				}
 			};
