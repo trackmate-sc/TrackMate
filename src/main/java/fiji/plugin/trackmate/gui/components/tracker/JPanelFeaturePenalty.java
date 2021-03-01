@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.gui.components;
+package fiji.plugin.trackmate.gui.components.tracker;
 
 import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
 import static fiji.plugin.trackmate.gui.Fonts.TEXTFIELD_DIMENSION;

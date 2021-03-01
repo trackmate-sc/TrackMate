@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.gui.components;
+package fiji.plugin.trackmate.gui.components.tracker;
 
 import static fiji.plugin.trackmate.gui.Icons.ADD_ICON;
 import static fiji.plugin.trackmate.gui.Icons.REMOVE_ICON;

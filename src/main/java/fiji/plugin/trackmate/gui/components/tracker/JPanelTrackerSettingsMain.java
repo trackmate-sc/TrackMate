@@ -37,7 +37,6 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
 import fiji.plugin.trackmate.gui.GuiUtils;
-import fiji.plugin.trackmate.gui.components.JPanelFeatureSelectionGui;
 import fiji.plugin.trackmate.tracking.LAPUtils;
 
 public class JPanelTrackerSettingsMain extends javax.swing.JPanel {
