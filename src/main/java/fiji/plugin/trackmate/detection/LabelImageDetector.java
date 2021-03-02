@@ -88,7 +88,7 @@ public class LabelImageDetector< T extends RealType< T > & NativeType< T > > imp
 
 		if ( type instanceof IntegerType )
 		{
-			processIntegerImg( ( RandomAccessibleInterval< IntegerType > ) Views.zeroMin( rai ) );
+			processIntegerImg( ( RandomAccessibleInterval ) Views.zeroMin( rai ) );
 		}
 		else
 		{
