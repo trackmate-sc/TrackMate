@@ -190,8 +190,8 @@
 			<artifactId>imglib2-roi</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>net.imglib2</groupId>
-			<artifactId>imglib2-ui</artifactId>
+			<groupId>sc.fiji</groupId>
+			<artifactId>bigdataviewer-core</artifactId>
 		</dependency>
 
 		<!-- SciJava dependencies -->
