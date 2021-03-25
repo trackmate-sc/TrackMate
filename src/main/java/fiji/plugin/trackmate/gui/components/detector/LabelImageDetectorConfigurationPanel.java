@@ -7,7 +7,6 @@ import java.util.Map;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.detection.LabeImageDetectorFactory;
-import fiji.plugin.trackmate.detection.MaskDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.detection.ThresholdDetectorFactory;
 
@@ -62,6 +61,6 @@ public class LabelImageDetectorConfigurationPanel extends ThresholdDetectorConfi
 	@SuppressWarnings( "rawtypes" )
 	protected SpotDetectorFactory< ? > getDetectorFactory()
 	{
-		return new MaskDetectorFactory();
+		return new LabeImageDetectorFactory();
 	}
 }
