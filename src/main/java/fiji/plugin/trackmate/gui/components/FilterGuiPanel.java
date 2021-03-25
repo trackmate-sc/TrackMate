@@ -9,6 +9,7 @@ import static fiji.plugin.trackmate.gui.Icons.ADD_ICON;
 import static fiji.plugin.trackmate.gui.Icons.REMOVE_ICON;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -27,11 +28,14 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.features.FeatureFilter;
@@ -69,6 +73,12 @@ public class FilterGuiPanel extends JPanel implements ChangeListener
 
 	private final String defaultFeature;
 
+	private final ProgressBarLogger logger;
+
+	private final JLabel lblTop;
+
+	private final JProgressBar progressBar;
+
 	/*
 	 * CONSTRUCTOR
 	 */
@@ -91,10 +101,19 @@ public class FilterGuiPanel extends JPanel implements ChangeListener
 		this.setLayout( new BorderLayout() );
 		setPreferredSize( new Dimension( 270, 500 ) );
 
-		final JLabel lblTop = new JLabel( "      Set filters on " + target );
+		final JPanel topPanel = new JPanel();
+		add( topPanel, BorderLayout.NORTH );
+		topPanel.setLayout( new BorderLayout( 0, 0 ) );
+
+		lblTop = new JLabel( "      Set filters on " + target );
 		lblTop.setFont( BIG_FONT );
 		lblTop.setPreferredSize( new Dimension( 300, 40 ) );
-		this.add( lblTop, BorderLayout.NORTH );
+		topPanel.add( lblTop, BorderLayout.NORTH );
+
+		progressBar = new JProgressBar();
+		progressBar.setStringPainted( true );
+		progressBar.setPreferredSize( new Dimension( 1300, 40 ) );
+		topPanel.add( progressBar );
 
 		final JScrollPane scrollPaneThresholds = new JScrollPane();
 		this.add( scrollPaneThresholds, BorderLayout.CENTER );
@@ -165,6 +184,10 @@ public class FilterGuiPanel extends JPanel implements ChangeListener
 
 		for ( final FeatureFilter ft : filters )
 			addFilterPanel( ft );
+
+		lblTop.setVisible( false ); // For now
+		logger = new ProgressBarLogger();
+
 	}
 
 	/*
@@ -250,6 +273,17 @@ public class FilterGuiPanel extends JPanel implements ChangeListener
 		allThresholdsPanel.add( strut );
 		allThresholdsPanel.revalidate();
 		stateChanged( CHANGE_EVENT );
+	}
+
+	public void showProgressBar( final boolean show )
+	{
+		progressBar.setVisible( show );
+		lblTop.setVisible( !show );
+	}
+
+	public Logger getLogger()
+	{
+		return logger;
 	}
 
 	/*
@@ -338,4 +372,41 @@ public class FilterGuiPanel extends JPanel implements ChangeListener
 		final String info = "Keep " + nselected + " " + target + " out of  " + nobjects + ".";
 		lblInfo.setText( info );
 	}
+
+	/*
+	 * INNER CLASSES
+	 */
+
+	private final class ProgressBarLogger extends Logger
+	{
+
+		@Override
+		public void error( final String message )
+		{
+			log( message, Logger.ERROR_COLOR );
+		}
+
+		@Override
+		public void log( final String message, final Color color )
+		{
+			SwingUtilities.invokeLater( () -> progressBar.setString( message ) );
+		}
+
+		@Override
+		public void setStatus( final String status )
+		{
+			SwingUtilities.invokeLater( () -> progressBar.setString( status ) );
+		}
+
+		@Override
+		public void setProgress( double val )
+		{
+			if ( val < 0 )
+				val = 0;
+			if ( val > 1 )
+				val = 1;
+			final int intVal = ( int ) ( val * 100 );
+			SwingUtilities.invokeLater( () -> progressBar.setValue( intVal ) );
+		}
+	};
 }
