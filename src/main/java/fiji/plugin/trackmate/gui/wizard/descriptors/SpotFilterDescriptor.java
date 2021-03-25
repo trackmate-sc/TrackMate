@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import javax.swing.JLabel;
 
+import org.scijava.Cancelable;
+
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
@@ -177,5 +179,11 @@ public class SpotFilterDescriptor extends WizardPanelDescriptor
 			final int nselected = model.getSpots().getNSpots( true );
 			logger.log( "Kept " + nselected + " spots out of " + ntotal + ".\n" );
 		}
+	}
+
+	@Override
+	public Cancelable getCancelable()
+	{
+		return trackmate;
 	}
 }
