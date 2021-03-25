@@ -71,11 +71,7 @@ public class LabelImageDetector< T extends RealType< T > & NativeType< T > > imp
 	@Override
 	public boolean checkInput()
 	{
-		final T type = Util.getTypeFromInterval( Views.interval( input, interval ) );
-		if ( type instanceof IntegerType )
-			return true;
-
-		return false;
+		return true;
 	}
 
 	@SuppressWarnings( { "unchecked", "rawtypes" } )
