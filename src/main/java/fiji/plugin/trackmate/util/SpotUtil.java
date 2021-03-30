@@ -26,8 +26,7 @@ public class SpotUtil
 	public static final < T extends RealType< T > > IterableInterval< T > iterable( final SpotRoi roi, final RealLocalizable center, final ImgPlus< T > img )
 	{
 		final SpotRoiIterable< T > neighborhood = new SpotRoiIterable<>( roi, center, img );
-		final int npixels = ( int ) neighborhood.size();
-		if ( npixels <= 1 )
+		if ( neighborhood.dimension( 0 ) <= 1 && neighborhood.dimension( 1 ) <= 1 )
 			return makeSinglePixelIterable( center, img );
 		else
 			return neighborhood;
@@ -36,7 +35,6 @@ public class SpotUtil
 	public static final < T extends RealType< T > > IterableInterval< T > iterable( final Spot spot, final ImgPlus< T > img )
 	{
 		// Prepare neighborhood
-		final IterableInterval< T > neighborhood;
 		final SpotRoi roi = spot.getRoi();
 		if ( null != roi && DetectionUtils.is2D( img ) )
 		{
@@ -46,7 +44,7 @@ public class SpotUtil
 		else
 		{
 			// Otherwise default to circle / sphere.
-			neighborhood = new SpotNeighborhood<>( spot, img );
+			final SpotNeighborhood< T > neighborhood = new SpotNeighborhood<>( spot, img );
 
 			final int npixels = ( int ) neighborhood.size();
 			if ( npixels <= 1 )
