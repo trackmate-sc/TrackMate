@@ -20,7 +20,7 @@ public class SpotFeatureComputationBenchmark
 
 	public static void main( final String[] args )
 	{
-		final int N_TESTS = 5;
+		final int N_TESTS = 50;
 
 		final File file = new File( SpotFeatureComputationBenchmark.class.getResource( "LabelImage.xml" ).getFile() );
 		final TmXmlReader reader = new TmXmlReader( file );
@@ -69,7 +69,7 @@ public class SpotFeatureComputationBenchmark
 				durations[ i ] = duration;
 //				System.out.println( String.format( "  completed in %.1f s.", duration ) );
 			}
-			System.out.println( String.format( "Median over %d tests: %.1f s", N_TESTS, Util.median( durations ) ) );
+			System.out.println( String.format( "Median over %d tests: %.3f s", N_TESTS, Util.median( durations ) ) );
 		}
 	}
 }
