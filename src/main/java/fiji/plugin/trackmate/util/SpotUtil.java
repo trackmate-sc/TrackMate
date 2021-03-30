@@ -223,7 +223,7 @@ public class SpotUtil
 			while ( cursor.hasNext() )
 			{
 				cursor.fwd();
-				if ( isInside( cursor, x, y, img ) )
+				if ( isInside( cursor, x, y ) )
 				{
 					hasNext = cursor.hasNext();
 					return;
@@ -232,11 +232,8 @@ public class SpotUtil
 			hasNext = false;
 		}
 
-		private static final boolean isInside( final Localizable localizable, final double[] x, final double[] y, final Interval bounds )
+		private static final boolean isInside( final Localizable localizable, final double[] x, final double[] y )
 		{
-			if ( !Intervals.contains( bounds, localizable ) )
-				return false;
-
 			// Taken from Imglib2-roi GeomMaths. No edge case.
 			final double xl = localizable.getDoublePosition( 0 );
 			final double yl = localizable.getDoublePosition( 1 );
@@ -263,7 +260,7 @@ public class SpotUtil
 		{
 			final IntervalView< T > view = Views.interval( img, interval );
 			cursor = view.localizingCursor();
-			ra = img.randomAccess();
+			ra = Views.extendMirrorSingle( img ).randomAccess();
 			fetch();
 		}
 
