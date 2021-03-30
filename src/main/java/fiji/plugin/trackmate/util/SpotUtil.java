@@ -12,6 +12,7 @@ import net.imglib2.Interval;
 import net.imglib2.IterableInterval;
 import net.imglib2.Localizable;
 import net.imglib2.RandomAccess;
+import net.imglib2.RealLocalizable;
 import net.imglib2.Sampler;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Intervals;
@@ -22,6 +23,16 @@ import net.imglib2.view.Views;
 public class SpotUtil
 {
 
+	public static final < T extends RealType< T > > IterableInterval< T > iterable( final SpotRoi roi, final RealLocalizable center, final ImgPlus< T > img )
+	{
+		final SpotRoiIterable< T > neighborhood = new SpotRoiIterable<>( roi, center, img );
+		final int npixels = ( int ) neighborhood.size();
+		if ( npixels <= 1 )
+			return makeSinglePixelIterable( center, img );
+		else
+			return neighborhood;
+	}
+
 	public static final < T extends RealType< T > > IterableInterval< T > iterable( final Spot spot, final ImgPlus< T > img )
 	{
 		// Prepare neighborhood
@@ -30,52 +41,55 @@ public class SpotUtil
 		if ( null != roi && DetectionUtils.is2D( img ) )
 		{
 			// Operate on ROI only if we have one and the image is 2D.
-			neighborhood = new SpotRoiIterable<>( spot, img );
+			return iterable( roi, spot, img );
 		}
 		else
 		{
 			// Otherwise default to circle / sphere.
 			neighborhood = new SpotNeighborhood<>( spot, img );
-		}
 
-		final int npixels = ( int ) neighborhood.size();
-		if ( npixels <= 1 )
-		{
-			final double[] calibration = TMUtils.getSpatialCalibration( img );
-			final long[] min = new long[ img.numDimensions() ];
-			final long[] max = new long[ img.numDimensions() ];
-			for ( int d = 0; d < min.length; d++ )
-			{
-				final long center = Math.round( spot.getFeature( Spot.POSITION_FEATURES[ d ] ).doubleValue() / calibration[ d ] );
-				min[ d ] = center;
-				max[ d ] = center + 1;
-			}
-
-			final Interval interval = new FinalInterval( min, max );
-			return Views.interval( img, interval );
-		}
-		else
-		{
-			return neighborhood;
+			final int npixels = ( int ) neighborhood.size();
+			if ( npixels <= 1 )
+				return makeSinglePixelIterable( spot, img );
+			else
+				return neighborhood;
 		}
 	}
 
-	private static final class SpotRoiIterable< T > implements IterableInterval< T >
+	private static < T > IterableInterval< T > makeSinglePixelIterable( final RealLocalizable center, final ImgPlus< T > img )
+	{
+		final double[] calibration = TMUtils.getSpatialCalibration( img );
+		final long[] min = new long[ img.numDimensions() ];
+		final long[] max = new long[ img.numDimensions() ];
+		for ( int d = 0; d < min.length; d++ )
+		{
+			final long cx = Math.round( center.getDoublePosition( d ) / calibration[ d ] );
+			min[ d ] = cx;
+			max[ d ] = cx + 1;
+		}
+
+		final Interval interval = new FinalInterval( min, max );
+		return Views.interval( img, interval );
+	}
+
+	private static final class SpotRoiIterable< T extends RealType< T > > implements IterableInterval< T >
 	{
 
-		private final FinalInterval interval;
+		private final SpotRoi roi;
 
-		private final Spot spot;
+		private final RealLocalizable center;
 
 		private final ImgPlus< T > img;
 
-		public SpotRoiIterable( final Spot spot, final ImgPlus< T > img )
+		private final FinalInterval interval;
+
+		public SpotRoiIterable( final SpotRoi roi, final RealLocalizable center, final ImgPlus< T > img )
 		{
-			this.spot = spot;
+			this.roi = roi;
+			this.center = center;
 			this.img = img;
-			final SpotRoi roi = spot.getRoi();
-			final double[] x = roi.toPolygonX( img.averageScale( 0 ), 0, spot.getDoublePosition( 0 ), 1. );
-			final double[] y = roi.toPolygonX( img.averageScale( 1 ), 0, spot.getDoublePosition( 1 ), 1. );
+			final double[] x = roi.toPolygonX( img.averageScale( 0 ), 0, center.getDoublePosition( 0 ), 1. );
+			final double[] y = roi.toPolygonX( img.averageScale( 1 ), 0, center.getDoublePosition( 1 ), 1. );
 			final long minX = ( long ) Math.floor( Util.min( x ) );
 			final long maxX = ( long ) Math.ceil( Util.max( x ) );
 			final long minY = ( long ) Math.floor( Util.min( y ) );
@@ -141,7 +155,7 @@ public class SpotUtil
 		@Override
 		public Cursor< T > cursor()
 		{
-			return new MyCursor< T >( spot, img );
+			return new MyCursor< T >( roi, center, img );
 		}
 
 		@Override
@@ -157,10 +171,12 @@ public class SpotUtil
 		}
 	}
 
-	private static final class MyCursor< T > implements Cursor< T >
+	private static final class MyCursor< T extends RealType< T > > implements Cursor< T >
 	{
 
-		private final Spot spot;
+		private final SpotRoi roi;
+
+		private final RealLocalizable center;
 
 		private final ImgPlus< T > img;
 
@@ -176,13 +192,13 @@ public class SpotUtil
 
 		private RandomAccess< T > ra;
 
-		public MyCursor( final Spot spot, final ImgPlus< T > img )
+		public MyCursor( final SpotRoi roi, final RealLocalizable center, final ImgPlus< T > img )
 		{
-			this.spot = spot;
+			this.roi = roi;
+			this.center = center;
 			this.img = img;
-			final SpotRoi roi = spot.getRoi();
-			x = roi.toPolygonX( img.averageScale( 0 ), 0, spot.getDoublePosition( 0 ), 1. );
-			y = roi.toPolygonY( img.averageScale( 1 ), 0, spot.getDoublePosition( 1 ), 1. );
+			x = roi.toPolygonX( img.averageScale( 0 ), 0, center.getDoublePosition( 0 ), 1. );
+			y = roi.toPolygonY( img.averageScale( 1 ), 0, center.getDoublePosition( 1 ), 1. );
 			final long minX = ( long ) Math.floor( Util.min( x ) );
 			final long maxX = ( long ) Math.ceil( Util.max( x ) );
 			final long minY = ( long ) Math.floor( Util.min( y ) );
@@ -209,7 +225,7 @@ public class SpotUtil
 			while ( cursor.hasNext() )
 			{
 				cursor.fwd();
-				if ( isInside( cursor, x, y ) )
+				if ( isInside( cursor, x, y, img ) )
 				{
 					hasNext = cursor.hasNext();
 					return;
@@ -218,8 +234,11 @@ public class SpotUtil
 			hasNext = false;
 		}
 
-		private static final boolean isInside( final Localizable localizable, final double[] x, final double[] y )
+		private static final boolean isInside( final Localizable localizable, final double[] x, final double[] y, final Interval bounds )
 		{
+			if ( !Intervals.contains( bounds, localizable ) )
+				return false;
+
 			// Taken from Imglib2-roi GeomMaths. No edge case.
 			final double xl = localizable.getDoublePosition( 0 );
 			final double yl = localizable.getDoublePosition( 1 );
@@ -246,7 +265,7 @@ public class SpotUtil
 		{
 			final IntervalView< T > view = Views.interval( img, interval );
 			cursor = view.localizingCursor();
-			ra = view.randomAccess( interval );
+			ra = img.randomAccess();
 			fetch();
 		}
 
@@ -291,7 +310,7 @@ public class SpotUtil
 		@Override
 		public Cursor< T > copyCursor()
 		{
-			return new MyCursor<>( spot, img );
+			return new MyCursor<>( roi, center, img );
 		}
 
 		@Override
