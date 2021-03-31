@@ -26,11 +26,13 @@ import ij.measure.ResultsTable;
 public class ExportableChartPanel extends ChartPanel
 {
 
+	private static final long serialVersionUID = 1L;
+
+	private static File currentDir;
+
 	/*
 	 * CONSTRUCTORS
 	 */
-
-	private static final long serialVersionUID = -6556930372813672992L;
 
 	public ExportableChartPanel( final JFreeChart chart )
 	{
@@ -145,6 +147,9 @@ public class ExportableChartPanel extends ChartPanel
 	@Override
 	public void doSaveAs()
 	{
+		if ( null == currentDir )
+			currentDir = getDefaultDirectoryForSaveAs();
+
 		final File file;
 		if ( IJ.isMacintosh() )
 		{
@@ -155,8 +160,8 @@ public class ExportableChartPanel extends ChartPanel
 			final Frame frame = ( Frame ) dialogParent;
 			final FileDialog dialog = new FileDialog( frame, "Export chart to PNG, PDF or SVG", FileDialog.SAVE );
 			String defaultDir = null;
-			if ( getDefaultDirectoryForSaveAs() != null )
-				defaultDir = getDefaultDirectoryForSaveAs().getPath();
+			if ( currentDir != null )
+				defaultDir = currentDir.getPath();
 			
 			dialog.setDirectory( defaultDir );
 			final FilenameFilter filter = new FilenameFilter()
@@ -174,11 +179,12 @@ public class ExportableChartPanel extends ChartPanel
 				return;
 
 			file = new File( dialog.getDirectory(), selectedFile );
+			currentDir = new File( dialog.getDirectory() );
 		}
 		else
 		{
 			final JFileChooser fileChooser = new JFileChooser();
-			fileChooser.setCurrentDirectory( getDefaultDirectoryForSaveAs() );
+			fileChooser.setCurrentDirectory( currentDir );
 			fileChooser.addChoosableFileFilter( new FileFilter()
 			{
 
@@ -229,6 +235,7 @@ public class ExportableChartPanel extends ChartPanel
 				return;
 
 			file = fileChooser.getSelectedFile();
+			currentDir = fileChooser.getCurrentDirectory();
 		}
 
 		if ( file.getPath().endsWith( ".png" ) )
