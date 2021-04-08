@@ -29,12 +29,26 @@ public class SpotGaussianFitterExample
 	{
 		UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
 		ImageJ.main( args );
-		final TmXmlReader reader = new TmXmlReader( new File( "samples/FakeTracks.xml" ) );
+		final TmXmlReader reader = new TmXmlReader( new File( "D:\\Projects\\TSabate\\Data\\TestGauss3D_02\\testimage_gauss_0.0000_poisson_false_0.00.trackmate.xml" ) );
 		final Model model = reader.getModel();
 		final ImagePlus imp = reader.readImage();
+		imp.show();
 		final Settings settings = reader.readSettings( imp );
+		final TrackMate trackmate = new TrackMate( model, settings );
+//		trackmate.setNumThreads( 1 );
+
+		final SelectionModel selectionModel = new SelectionModel( model );
+		final DisplaySettings ds = DisplaySettingsIO.readUserDefault();
+		final TrackMateWizardSequence sequence = new TrackMateWizardSequence( trackmate, selectionModel, ds );
+		sequence.setCurrent( "Actions" );
+		final JFrame frame = sequence.run( "Test Gauss-fitting action" );
+
+		frame.setIconImage( TRACKMATE_ICON.getImage() );
+		GuiUtils.positionWindow( frame, settings.imp.getWindow() );
+		frame.setVisible( true );
 
 		final SpotGaussianFitter fitter = new SpotGaussianFitter( model, settings, Logger.IJ_LOGGER );
+		fitter.setNumThreads( trackmate.getNumThreads() );
 		if ( !fitter.checkInput() || !fitter.process() )
 		{
 			System.err.println( fitter.getErrorMessage() );
@@ -43,18 +57,8 @@ public class SpotGaussianFitterExample
 
 		System.out.println( "Finished in " + fitter.getProcessingTime() + " ms." );
 
-		final SelectionModel selectionModel = new SelectionModel( model );
-		final DisplaySettings ds = DisplaySettingsIO.readUserDefault();
-
 		final HyperStackDisplayer view = new HyperStackDisplayer( model, selectionModel, imp, ds );
 		view.render();
 
-		final TrackMateWizardSequence sequence = new TrackMateWizardSequence( new TrackMate( model, settings ), selectionModel, ds );
-		sequence.setCurrent( "Actions" );
-		final JFrame frame = sequence.run( "Test Gauss-fitting action" );
-
-		frame.setIconImage( TRACKMATE_ICON.getImage() );
-		GuiUtils.positionWindow( frame, settings.imp.getWindow() );
-		frame.setVisible( true );
 	}
 }
