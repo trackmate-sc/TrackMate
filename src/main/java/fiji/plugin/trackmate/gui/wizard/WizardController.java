@@ -15,6 +15,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 
 import org.scijava.Cancelable;
 
@@ -56,11 +57,18 @@ public class WizardController
 			display( sequence.logDescriptor(), sequence.current(), Direction.TOP );
 			wizardPanel.btnNext.setEnabled( false );
 			wizardPanel.btnPrevious.setEnabled( false );
+			wizardPanel.btnDisplayConfig.setEnabled( false );
+			wizardPanel.btnCancel.setEnabled( false );
+			wizardPanel.btnSave.setEnabled( false );
+
 		}
 		else
 		{
 			sequence.current().targetPanel.setSize( sequence.logDescriptor().targetPanel.getSize() );
 			display( sequence.current(), sequence.logDescriptor(), Direction.BOTTOM );
+			wizardPanel.btnDisplayConfig.setEnabled( true );
+			wizardPanel.btnCancel.setEnabled( true );
+			wizardPanel.btnSave.setEnabled( true );
 		}
 	}
 
@@ -72,11 +80,19 @@ public class WizardController
 			display( sequence.configDescriptor(), sequence.current(), Direction.BOTTOM );
 			wizardPanel.btnNext.setEnabled( false );
 			wizardPanel.btnPrevious.setEnabled( false );
+			wizardPanel.btnLog.setEnabled( false );
+			wizardPanel.btnCancel.setEnabled( false );
+			wizardPanel.btnSave.setEnabled( false );
+
 		}
 		else
 		{
 			sequence.current().targetPanel.setSize( sequence.configDescriptor().targetPanel.getSize() );
 			display( sequence.current(), sequence.configDescriptor(), Direction.TOP );
+			wizardPanel.btnLog.setEnabled( true );
+			wizardPanel.btnCancel.setEnabled( true );
+			wizardPanel.btnSave.setEnabled( true );
+
 		}
 	}
 
@@ -162,6 +178,7 @@ public class WizardController
 				{
 					wizardPanel.btnCancel.setVisible( false);
 					wizardPanel.btnNext.setVisible( true );
+					wizardPanel.btnNext.requestFocusInWindow();
 					reenabler.reenable();
 				}
 			};
@@ -176,6 +193,7 @@ public class WizardController
 		descriptor.aboutToDisplayPanel();
 		wizardPanel.display( descriptor );
 		descriptor.displayingPanel();
+		SwingUtilities.invokeLater( () -> wizardPanel.btnNext.requestFocusInWindow() );
 	}
 
 	protected void save()

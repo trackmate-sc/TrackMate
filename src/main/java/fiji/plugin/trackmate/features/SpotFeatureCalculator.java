@@ -150,16 +150,17 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm imple
 
 		if ( doLogIt )
 		{
-			logger.setStatus( "Calculating " + toCompute.getNSpots( false ) + " spots features..." );
 			logger.log( "Computing spot features over "
 					+ ( ( nSimultaneousFrames > 1 ) ? ( nSimultaneousFrames + " frames" ) : "1 frame" )
 					+ " simultaneously and allocating "
 					+ ( ( threadsPerFrame > 1 ) ? ( threadsPerFrame + " threads" ) : "1 thread" )
 					+ " per frame.\n" );
+			logger.setStatus( "Calculating " + toCompute.getNSpots( false ) + " spots features..." );
 		}
 
 		final AtomicInteger progress = new AtomicInteger( 0 );
 		final List< Callable< Void > > tasks = new ArrayList<>( numFrames );
+		final int workToDo = numFrames * analyzerFactories.size() * settings.imp.getNChannels();
 		for ( int iFrame = 0; iFrame < numFrames; iFrame++ )
 		{
 			final int index = iFrame;
@@ -184,15 +185,12 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm imple
 							if ( analyzer instanceof MultiThreaded )
 								( ( MultiThreaded ) analyzer ).setNumThreads( threadsPerFrame );
 
-							if ( doLogIt )
-								logger.setStatus( factory.getName() + " - ch" + ( channel + 1 ) + " - frame " + ( frame + 1 ) );
-
 							analyzer.process( toCompute.iterable( frame, false ) );
 
+							logger.setProgress( progress.incrementAndGet() / ( double ) workToDo );
 						} // Finished looping over analyzers
 					} // Finished looping over channels
 
-					logger.setProgress( progress.incrementAndGet() / ( double ) numFrames );
 					return null;
 				}
 			};

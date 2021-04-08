@@ -15,6 +15,7 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
+import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 
 public class KalmanTrackerConfigPanel extends ConfigurationPanel
@@ -102,6 +103,11 @@ public class KalmanTrackerConfigPanel extends ConfigurationPanel
 		lblFrameUnits.setFont( FONT );
 		lblFrameUnits.setBounds( 219, 404, 51, 16 );
 		add( lblFrameUnits );
+
+		// Select text-fields content on focus.
+		GuiUtils.selectAllOnFocus( tfInitSearchRadius );
+		GuiUtils.selectAllOnFocus( tfMaxFrameGap );
+		GuiUtils.selectAllOnFocus( tfSearchRadius );
 	}
 
 	@Override

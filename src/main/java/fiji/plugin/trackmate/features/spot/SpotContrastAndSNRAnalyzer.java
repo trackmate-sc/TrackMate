@@ -12,6 +12,7 @@ import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.util.SpotNeighborhood;
 import fiji.plugin.trackmate.util.SpotNeighborhoodCursor;
+import fiji.plugin.trackmate.util.SpotUtil;
 import net.imagej.ImgPlus;
 import net.imglib2.IterableInterval;
 import net.imglib2.type.numeric.RealType;
@@ -84,7 +85,7 @@ public class SpotContrastAndSNRAnalyzer< T extends RealType< T > > extends Abstr
 			final double alpha = outterRadius / radius;
 			final SpotRoi outterRoi = roi.copy();
 			outterRoi.scale( alpha );
-			final IterableInterval< T > neighborhood = outterRoi.sample( spot, img );
+			final IterableInterval< T > neighborhood = SpotUtil.iterable( outterRoi, spot, img );
 			double outterSum = 0.;
 			for ( final T t : neighborhood )
 				outterSum += t.getRealDouble();

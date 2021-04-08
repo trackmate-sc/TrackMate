@@ -476,11 +476,21 @@ public class TMUtils
 		final ImgPlus< T > imgT = timeDim < 0
 				? img
 				: ImgPlusViews.hyperSlice( img, timeDim, frame );
+
 		final int channelDim = imgT.dimensionIndex( Axes.CHANNEL );
 		final ImgPlus< T > imgTC = channelDim < 0
 				? imgT
 				: ImgPlusViews.hyperSlice( imgT, channelDim, channel );
-		return imgTC;
+
+		// Squeeze Z dimension if its size is 1.
+		final int zDim = imgTC.dimensionIndex( Axes.Z );
+		final ImgPlus< T > imgTCZ;
+		if ( zDim >= 0 && imgTC.dimension( zDim ) <= 1 )
+			imgTCZ = ImgPlusViews.hyperSlice( imgTC, zDim, imgTC.min( zDim ) );
+		else
+			imgTCZ = imgTC;
+
+		return imgTCZ;
 	}
 
 	/**

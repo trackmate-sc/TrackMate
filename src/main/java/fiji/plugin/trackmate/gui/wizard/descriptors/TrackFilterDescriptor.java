@@ -1,6 +1,5 @@
 package fiji.plugin.trackmate.gui.wizard.descriptors;
 
-import java.awt.BorderLayout;
 import java.awt.Container;
 import java.util.List;
 
@@ -66,14 +65,11 @@ public class TrackFilterDescriptor extends WizardPanelDescriptor
 					final Logger logger = model.getLogger();
 
 					/*
-					 * Hack to show a message in the filter GUI panel.
+					 * Show and log to progress bar in the filter GUI panel.
 					 */
 
 					final FilterGuiPanel panel = ( FilterGuiPanel ) targetPanel;
-					final BorderLayout layout = ( BorderLayout ) panel.getLayout();
-					final JLabel labelTop = ( JLabel ) layout.getLayoutComponent( BorderLayout.NORTH );
-					final String originalText = labelTop.getText();
-					labelTop.setText( "  Please wait while computing track features..." );
+					panel.showProgressBar( true );
 
 					/*
 					 * We have some tracks so we need to compute spot features
@@ -82,15 +78,19 @@ public class TrackFilterDescriptor extends WizardPanelDescriptor
 					logger.log( "\n" );
 					// Calculate features
 					final long start = System.currentTimeMillis();
+					final Logger oldLogger = trackmate.getModel().getLogger();
+					trackmate.getModel().setLogger( panel.getLogger() );
 					trackmate.computeEdgeFeatures( true );
 					trackmate.computeTrackFeatures( true );
 					final long end = System.currentTimeMillis();
+					trackmate.getModel().setLogger( oldLogger );
+					if ( trackmate.isCanceled() )
+						logger.log( "Spot feature calculation canceled.\nSome spots will have missing feature values.\n" );
 					logger.log( String.format( "Calculating features done in %.1f s.\n", ( end - start ) / 1e3f ) );
-					labelTop.setText( originalText );
+					panel.showProgressBar( false );
 
 					// Refresh component.
-					final FilterGuiPanel component = ( FilterGuiPanel ) targetPanel;
-					component.refreshValues();
+					panel.refreshValues();
 					filterTracks();
 				}
 				finally

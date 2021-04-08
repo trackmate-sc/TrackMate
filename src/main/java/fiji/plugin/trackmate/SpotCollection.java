@@ -858,36 +858,15 @@ public class SpotCollection implements MultiThreaded
 	public void crop()
 	{
 		final Collection< Integer > frames = content.keySet();
-		final ExecutorService executors = Executors.newFixedThreadPool( numThreads );
 		for ( final Integer frame : frames )
 		{
-			final Runnable command = new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					final Set< Spot > fc = content.get( frame );
-					final List< Spot > toRemove = new ArrayList<>();
-					for ( final Spot spot : fc )
-						if ( !isVisible( spot ) )
-							toRemove.add( spot );
+			final Set< Spot > fc = content.get( frame );
+			final List< Spot > toRemove = new ArrayList<>();
+			for ( final Spot spot : fc )
+				if ( !isVisible( spot ) )
+					toRemove.add( spot );
 
-					fc.removeAll( toRemove );
-				}
-			};
-			executors.execute( command );
-		}
-
-		executors.shutdown();
-		try
-		{
-			final boolean ok = executors.awaitTermination( TIME_OUT_DELAY, TIME_OUT_UNITS );
-			if ( !ok )
-				System.err.println( "[SpotCollection.crop()] Timeout of " + TIME_OUT_DELAY + " " + TIME_OUT_UNITS + " reached while cropping." );
-		}
-		catch ( final InterruptedException e )
-		{
-			e.printStackTrace();
+			fc.removeAll( toRemove );
 		}
 	}
 

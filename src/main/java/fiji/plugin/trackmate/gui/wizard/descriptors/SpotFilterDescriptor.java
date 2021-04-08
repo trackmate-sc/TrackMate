@@ -1,11 +1,12 @@
 package fiji.plugin.trackmate.gui.wizard.descriptors;
 
-import java.awt.BorderLayout;
 import java.awt.Container;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.swing.JLabel;
+
+import org.scijava.Cancelable;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
@@ -103,14 +104,11 @@ public class SpotFilterDescriptor extends WizardPanelDescriptor
 					}
 
 					/*
-					 * Hack to show a message in the filter GUI panel.
+					 * Show and log to progress bar in the filter GUI panel.
 					 */
 
 					final FilterGuiPanel panel = ( FilterGuiPanel ) targetPanel;
-					final BorderLayout layout = ( BorderLayout ) panel.getLayout();
-					final JLabel labelTop = ( JLabel ) layout.getLayoutComponent( BorderLayout.NORTH );
-					final String originalText = labelTop.getText();
-					labelTop.setText( "  Please wait while computing spot features..." );
+					panel.showProgressBar( true );
 
 					/*
 					 * We have some spots so we need to compute spot features
@@ -119,14 +117,19 @@ public class SpotFilterDescriptor extends WizardPanelDescriptor
 					logger.log( "\nCalculating spot features...\n", Logger.BLUE_COLOR );
 					// Calculate features
 					final long start = System.currentTimeMillis();
+
+					final Logger oldLogger = trackmate.getModel().getLogger();
+					trackmate.getModel().setLogger( panel.getLogger() );
 					trackmate.computeSpotFeatures( true );
 					final long end = System.currentTimeMillis();
+					trackmate.getModel().setLogger( oldLogger );
+					if ( trackmate.isCanceled() )
+						logger.log( "Spot feature calculation canceled.\nSome spots will have missing feature values.\n" );
 					logger.log( String.format( "Calculating features done in %.1f s.\n", ( end - start ) / 1e3f ) );
-					labelTop.setText( originalText );
+					panel.showProgressBar( false );
 
 					// Refresh component.
-					final FilterGuiPanel component = ( FilterGuiPanel ) targetPanel;
-					component.refreshValues();
+					panel.refreshValues();
 					filterSpots();
 				}
 				finally
@@ -177,5 +180,11 @@ public class SpotFilterDescriptor extends WizardPanelDescriptor
 			final int nselected = model.getSpots().getNSpots( true );
 			logger.log( "Kept " + nselected + " spots out of " + ntotal + ".\n" );
 		}
+	}
+
+	@Override
+	public Cancelable getCancelable()
+	{
+		return trackmate;
 	}
 }

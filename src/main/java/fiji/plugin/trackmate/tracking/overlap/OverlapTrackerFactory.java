@@ -71,7 +71,7 @@ public class OverlapTrackerFactory implements SpotTrackerFactory
 			+ "<p> "
 			+ "<p> "
 			+ "The minimal IoU parameter sets a threshold below which links won't be created. The scale "
-			+ "factor allows for enlarging (>1) or shrinking (<1) the spot shapes before computing "
+			+ "factor allows for enlarging (&gt;1) or shrinking (&lt;1) the spot shapes before computing "
 			+ "their IoU. Two methods can be used to compute IoU: The <it>Fast</it> one approximates  "
 			+ "the spot shapes by their rectangular bounding-box. The <it>Precise</it> one uses the actual "
 			+ "spot polygon. "

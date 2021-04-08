@@ -274,7 +274,11 @@ public class SpotOverlay extends Roi
 			polygon.closePath();
 
 			if ( filled )
+			{
 				g2d.fill( polygon );
+				g2d.setColor( Color.BLACK );
+				g2d.draw( polygon );
+			}
 			else
 				g2d.draw( polygon );
 			textPos = ( int ) ( Arrays.stream( polygonX ).max().getAsDouble() - xs );
