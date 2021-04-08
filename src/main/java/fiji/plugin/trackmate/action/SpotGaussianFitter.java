@@ -192,6 +192,10 @@ public class SpotGaussianFitter extends MultiThreadedBenchmarkAlgorithm
 					}
 					points.put( spot, Point.wrap( pixelPos ) );
 				}
+				// Average typical sigmas.
+				for ( int d = 0; d < 3; d++ )
+					typicalSigmas[ d ] /= points.size();
+
 				estimator = new MLEllipticGaussianEstimator( typicalSigmas );
 				function = new EllipticGaussianOrtho();
 			}
