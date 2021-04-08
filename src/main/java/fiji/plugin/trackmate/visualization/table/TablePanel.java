@@ -340,7 +340,11 @@ public class TablePanel< O >
 
 	public void exportToCsv( final File file ) throws IOException
 	{
-		try (CSVWriter writer = new CSVWriter( new FileWriter( file ), CSVWriter.DEFAULT_SEPARATOR ))
+		try (CSVWriter writer = new CSVWriter( new FileWriter( file ),
+				CSVWriter.DEFAULT_SEPARATOR,
+				CSVWriter.DEFAULT_QUOTE_CHARACTER,
+				CSVWriter.DEFAULT_ESCAPE_CHARACTER,
+				CSVWriter.DEFAULT_LINE_END))
 		{
 			final int nCols = table.getColumnCount();
 
