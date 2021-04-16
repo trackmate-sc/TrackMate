@@ -29,13 +29,13 @@ public class SpotGaussianFitterExample
 	{
 		UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
 		ImageJ.main( args );
-		final TmXmlReader reader = new TmXmlReader( new File( "D:\\Projects\\TSabate\\Data\\TestGauss3D_02\\testimage_gauss_0.0000_poisson_false_0.00.trackmate.xml" ) );
+		final TmXmlReader reader = new TmXmlReader( new File( "D:\\Projects\\TSabate\\Data\\TestGauss3D_02\\testimage_gauss_0.0005_poisson_false_0.40.trackmate.xml" ) );
 		final Model model = reader.getModel();
 		final ImagePlus imp = reader.readImage();
 		imp.show();
 		final Settings settings = reader.readSettings( imp );
 		final TrackMate trackmate = new TrackMate( model, settings );
-//		trackmate.setNumThreads( 1 );
+		trackmate.setNumThreads( 1 );
 
 		final SelectionModel selectionModel = new SelectionModel( model );
 		final DisplaySettings ds = DisplaySettingsIO.readUserDefault();
