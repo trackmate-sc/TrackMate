@@ -79,4 +79,10 @@ public class ChooseDetectorDescriptor extends WizardPanelDescriptor
 			trackmate.getSettings().detectorSettings = defaultSettings;
 		}
 	}
+
+	@Override
+	public Runnable getBackwardRunnable()
+	{
+		return () -> trackmate.getModel().clearSpots( true );
+	}
 }
