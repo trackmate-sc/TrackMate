@@ -26,13 +26,11 @@ import net.imagej.ImgPlus;
 import net.imglib2.Localizable;
 import net.imglib2.Point;
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
-import net.imglib2.algorithm.localization.EllipticGaussianOrtho;
 import net.imglib2.algorithm.localization.FitFunction;
+import net.imglib2.algorithm.localization.FunctionFitter;
 import net.imglib2.algorithm.localization.Gaussian;
 import net.imglib2.algorithm.localization.LevenbergMarquardtSolver;
-import net.imglib2.algorithm.localization.MLEllipticGaussianEstimator;
 import net.imglib2.algorithm.localization.MLGaussianEstimator;
-import net.imglib2.algorithm.localization.PeakFitter;
 import net.imglib2.algorithm.localization.StartPointEstimator;
 import net.imglib2.type.numeric.RealType;
 
@@ -196,12 +194,13 @@ public class SpotGaussianFitter extends MultiThreadedBenchmarkAlgorithm
 				for ( int d = 0; d < 3; d++ )
 					typicalSigmas[ d ] /= points.size();
 
-				estimator = new MLEllipticGaussianEstimator( typicalSigmas );
-				function = new EllipticGaussianOrtho();
+				estimator = new MLGaussian3DEstimator( typicalSigmas );
+				function = new Gaussian3D();
 			}
 
+			final FunctionFitter solver = new LevenbergMarquardtSolver( 600, 1e-12, 1e-12 );
 			// Execute.
-			final PeakFitter< T > fitter = new PeakFitter< T >( img, points.values(), new LevenbergMarquardtSolver(), function, estimator );
+			final PeakFitter< T > fitter = new PeakFitter< T >( img, points.values(), solver, function, estimator );
 			fitter.setNumThreads( numThreads );
 			if ( !fitter.checkInput() || !fitter.process() )
 			{
@@ -223,7 +222,7 @@ public class SpotGaussianFitter extends MultiThreadedBenchmarkAlgorithm
 
 					spot.putFeature( Spot.POSITION_X, x0 * calibration[ 0 ] );
 					spot.putFeature( Spot.POSITION_Y, y0 * calibration[ 1 ] );
-					spot.putFeature( Spot.RADIUS, sigma * calibration[ 0 ] );
+					spot.putFeature( Spot.RADIUS, sigma * calibration[ 0 ] * Math.sqrt( 2 ) );
 				}
 			}
 			else
@@ -235,12 +234,12 @@ public class SpotGaussianFitter extends MultiThreadedBenchmarkAlgorithm
 					final double x0 = fitParam[ 0 ];
 					final double y0 = fitParam[ 1 ];
 					final double z0 = fitParam[ 2 ];
-					final double sigmaX = 1. / Math.sqrt( fitParam[ 4 ] );
+					final double sigmaX = fitParam[ 4 ];
 
 					spot.putFeature( Spot.POSITION_X, x0 * calibration[ 0 ] );
 					spot.putFeature( Spot.POSITION_Y, y0 * calibration[ 1 ] );
 					spot.putFeature( Spot.POSITION_Z, z0 * calibration[ 2 ] );
-					spot.putFeature( Spot.RADIUS, sigmaX * calibration[ 0 ] );
+					spot.putFeature( Spot.RADIUS, sigmaX * calibration[ 0 ] * Math.sqrt( 3 ) );
 				}
 			}
 			return true;
