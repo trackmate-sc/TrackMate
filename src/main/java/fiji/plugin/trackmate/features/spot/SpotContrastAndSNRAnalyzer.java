@@ -62,15 +62,22 @@ public class SpotContrastAndSNRAnalyzer< T extends RealType< T > > extends Indep
 	 */
 	private final double[] getContrastAndSNR( final Spot spot )
 	{
-		final double mean_in = spot.getFeature( SpotIntensityAnalyzerFactory.MEAN_INTENSITY );
-		final double std_in = spot.getFeature( SpotIntensityAnalyzerFactory.STANDARD_DEVIATION );
+		final Double meanF = spot.getFeature( SpotIntensityAnalyzerFactory.MEAN_INTENSITY );
+		final Double stdF = spot.getFeature( SpotIntensityAnalyzerFactory.STANDARD_DEVIATION );
+		final Double radF = spot.getFeature( Spot.RADIUS );
+		if ( meanF == null || stdF == null || radF == null )
+			return new double[] { Double.NaN, Double.NaN };
 
-		final double radius = spot.getFeature( Spot.RADIUS );
-		Spot largeSpot = new Spot( spot );
+		final double mean_in = meanF.doubleValue();
+		final double std_in = stdF.doubleValue();
+
+		final double radius = radF.doubleValue();
+		final Spot largeSpot = new Spot( spot );
 		largeSpot.putFeature( Spot.RADIUS, 2 * radius );
 
 		final SpotNeighborhood< T > neighborhood = new SpotNeighborhood<>( largeSpot, img );
-		if ( neighborhood.size() <= 1 ) { return new double[] { Double.NaN, Double.NaN }; }
+		if ( neighborhood.size() <= 1 )
+			return new double[] { Double.NaN, Double.NaN };
 
 		final double radius2 = radius * radius;
 		int n_out = 0; // inner number of pixels
