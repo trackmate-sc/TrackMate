@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.action;
+package fiji.plugin.trackmate.action.fit;
 
 import net.imglib2.algorithm.localization.FitFunction;
 

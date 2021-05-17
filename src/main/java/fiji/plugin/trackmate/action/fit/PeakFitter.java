@@ -25,7 +25,7 @@
  * #L%
  */
 
-package fiji.plugin.trackmate.action;
+package fiji.plugin.trackmate.action.fit;
 
 import java.util.Collection;
 import java.util.Map;

@@ -24,7 +24,7 @@
  * <http://www.gnu.org/licenses/gpl-2.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.action;
+package fiji.plugin.trackmate.action.fit;
 
 import net.imglib2.Localizable;
 import net.imglib2.algorithm.localization.Observation;
