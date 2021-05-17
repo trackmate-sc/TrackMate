@@ -45,11 +45,14 @@ public class SpotGaussianFitter extends MultiThreadedBenchmarkAlgorithm
 
 	private final Logger logger;
 
-	public SpotGaussianFitter( final Model model, final Settings settings, final Logger logger )
+	private final boolean fixRadius;
+
+	public SpotGaussianFitter( final Model model, final Settings settings, final Logger logger, final boolean fixRadius )
 	{
 		this.model = model;
 		this.settings = settings;
 		this.logger = logger;
+		this.fixRadius = fixRadius;
 	}
 
 	@SuppressWarnings( "unchecked" )
@@ -76,7 +79,7 @@ public class SpotGaussianFitter extends MultiThreadedBenchmarkAlgorithm
 			final int frame = frameSet.get( i );
 			@SuppressWarnings( "rawtypes" )
 			final ImgPlus imgCT = TMUtils.hyperSlice( img, channel, frame );
-			final MultiThreadedBenchmarkAlgorithm algo = spotSubLocalizer( imgCT, model.getSpots().iterable( frame, true ) );
+			final MultiThreadedBenchmarkAlgorithm algo = spotSubLocalizer( imgCT, model.getSpots().iterable( frame, true ), fixRadius );
 			algo.setNumThreads( numThreads );
 			if ( !algo.checkInput() || !algo.process() )
 			{
@@ -96,9 +99,9 @@ public class SpotGaussianFitter extends MultiThreadedBenchmarkAlgorithm
 		return true;
 	}
 
-	public static final < T extends RealType< T > > MultiThreadedBenchmarkAlgorithm spotSubLocalizer( final ImgPlus< T > img, final Iterable< Spot > spots )
+	public static final < T extends RealType< T > > MultiThreadedBenchmarkAlgorithm spotSubLocalizer( final ImgPlus< T > img, final Iterable< Spot > spots, final boolean fixRadius )
 	{
-		return new SingleFrameGaussLocalizer<>( img, spots );
+		return new SingleFrameGaussLocalizer<>( img, spots, fixRadius );
 	}
 
 	@Override
@@ -135,10 +138,13 @@ public class SpotGaussianFitter extends MultiThreadedBenchmarkAlgorithm
 
 		private final Iterable< Spot > spots;
 
-		public SingleFrameGaussLocalizer( final ImgPlus< T > img, final Iterable< Spot > spots )
+		private final boolean fixRadius;
+
+		public SingleFrameGaussLocalizer( final ImgPlus< T > img, final Iterable< Spot > spots, final boolean fixRadius )
 		{
 			this.img = img;
 			this.spots = spots;
+			this.fixRadius = fixRadius;
 		}
 
 		@Override
@@ -174,8 +180,16 @@ public class SpotGaussianFitter extends MultiThreadedBenchmarkAlgorithm
 					points.put( spot, Point.wrap( pixelPos ) );
 				}
 				final double typicalSigma = sumSigma / points.size();
-				estimator = new MLGaussianEstimator( typicalSigma, 2 );
-				function = new Gaussian();
+				if (fixRadius)
+				{
+					estimator = new MLGaussian2DFixedRadiusEstimator( typicalSigma );
+					function = new Gaussian2DFixedRadius();
+				}
+				else
+				{
+					estimator = new MLGaussianEstimator( typicalSigma, 2 );
+					function = new Gaussian();
+				}
 			}
 			else
 			{
@@ -194,11 +208,20 @@ public class SpotGaussianFitter extends MultiThreadedBenchmarkAlgorithm
 				for ( int d = 0; d < 3; d++ )
 					typicalSigmas[ d ] /= points.size();
 
-				estimator = new MLGaussian3DEstimator( typicalSigmas );
-				function = new Gaussian3D();
+				if ( fixRadius )
+				{
+					estimator = new MLGaussian3DFixedRadiusEstimator( typicalSigmas );
+					function = new Gaussian3DFixedRadius();
+				}
+				else
+				{
+					estimator = new MLGaussian3DEstimator( typicalSigmas );
+					function = new Gaussian3D();
+				}
 			}
 
-			final FunctionFitter solver = new LevenbergMarquardtSolver( 600, 1e-12, 1e-12 );
+			final FunctionFitter solver = new LevenbergMarquardtSolver();
+
 			// Execute.
 			final PeakFitter< T > fitter = new PeakFitter< T >( img, points.values(), solver, function, estimator );
 			fitter.setNumThreads( numThreads );
@@ -234,12 +257,15 @@ public class SpotGaussianFitter extends MultiThreadedBenchmarkAlgorithm
 					final double x0 = fitParam[ 0 ];
 					final double y0 = fitParam[ 1 ];
 					final double z0 = fitParam[ 2 ];
-					final double sigmaX = fitParam[ 4 ];
 
 					spot.putFeature( Spot.POSITION_X, x0 * calibration[ 0 ] );
 					spot.putFeature( Spot.POSITION_Y, y0 * calibration[ 1 ] );
 					spot.putFeature( Spot.POSITION_Z, z0 * calibration[ 2 ] );
-					spot.putFeature( Spot.RADIUS, sigmaX * calibration[ 0 ] * Math.sqrt( 3 ) );
+					if ( !fixRadius )
+					{
+						final double sigmaX = fitParam[ 4 ];
+						spot.putFeature( Spot.RADIUS, sigmaX * calibration[ 0 ] * Math.sqrt( 3 ) );
+					}
 				}
 			}
 			return true;
@@ -255,7 +281,7 @@ public class SpotGaussianFitter extends MultiThreadedBenchmarkAlgorithm
 			logger.log( "Refining the position of spots using gaussian fitting.\n" );
 			logger.log( "Fitting " + trackmate.getModel().getSpots().getNSpots( true ) + " visible spots using " + "threads.\n" );
 
-			final SpotGaussianFitter fitter = new SpotGaussianFitter( trackmate.getModel(), trackmate.getSettings(), logger );
+			final SpotGaussianFitter fitter = new SpotGaussianFitter( trackmate.getModel(), trackmate.getSettings(), logger, true );
 			fitter.setNumThreads( trackmate.getNumThreads() );
 			if ( !fitter.checkInput() || !fitter.process() )
 			{

@@ -48,7 +48,7 @@ public class SpotGaussianFitterRefine
 		System.out.println( String.format( "Crame-Rao bound: %.1f nm", crameRao ) );
 
 		System.out.println( "\nStarting fitting." );
-		final SpotGaussianFitter fitter = new SpotGaussianFitter( model, settings, Logger.IJ_LOGGER );
+		final SpotGaussianFitter fitter = new SpotGaussianFitter( model, settings, Logger.IJ_LOGGER, true );
 		if ( !fitter.checkInput() || !fitter.process() )
 		{
 			System.err.println( fitter.getErrorMessage() );
