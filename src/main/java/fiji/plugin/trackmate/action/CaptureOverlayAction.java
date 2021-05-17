@@ -16,6 +16,9 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.visualization.ViewUtils;
+import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.measure.Calibration;
@@ -43,6 +46,8 @@ public class CaptureOverlayAction extends AbstractTMAction
 
 	private static int lastFrame = -1;
 
+	private static boolean hideImage = false;
+
 	@Override
 	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame gui )
 	{
@@ -57,7 +62,7 @@ public class CaptureOverlayAction extends AbstractTMAction
 
 		if ( gui != null )
 		{
-			final CaptureOverlayPanel panel = new CaptureOverlayPanel( firstFrame, lastFrame );
+			final CaptureOverlayPanel panel = new CaptureOverlayPanel( firstFrame, lastFrame, hideImage );
 			final int userInput = JOptionPane.showConfirmDialog(
 					gui,
 					panel,
@@ -75,10 +80,31 @@ public class CaptureOverlayAction extends AbstractTMAction
 			lastFrame = Math.max( last, first );
 			firstFrame = Math.max( 1, firstFrame );
 			lastFrame = Math.min( imp.getNFrames(), lastFrame );
+			hideImage = panel.isHideImage();
 		}
 
-		final ImagePlus capture = capture( trackmate, firstFrame, lastFrame );
-		capture.show();
+		if ( hideImage )
+		{
+			// Make an empty image.
+			final ImagePlus imp2 = ViewUtils.makeEmptyImagePlus(
+					imp.getWidth(),
+					imp.getHeight(),
+					imp.getNSlices(),
+					imp.getNFrames(),
+					TMUtils.getSpatialCalibration( imp ) );
+			// Add overlay to it.
+			final HyperStackDisplayer displayer = new HyperStackDisplayer( trackmate.getModel(), new SelectionModel( trackmate.getModel() ), imp2, displaySettings );
+			displayer.render();
+			final ImagePlus capture = capture( imp2, firstFrame, lastFrame, trackmate.getModel().getLogger() );
+			imp2.close();
+			capture.show();
+		}
+		else
+		{
+			final ImagePlus capture = capture( trackmate, firstFrame, lastFrame );
+			capture.show();
+		}
+
 	}
 
 	/**

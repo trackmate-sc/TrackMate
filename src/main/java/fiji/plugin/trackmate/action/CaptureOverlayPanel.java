@@ -8,6 +8,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.text.NumberFormat;
 
+import javax.swing.JCheckBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -22,16 +23,19 @@ public class CaptureOverlayPanel extends JPanel
 
 	private int lastFrame;
 
-	public CaptureOverlayPanel( final int firstFrame, final int lastFrame )
+	private boolean hideImage;
+
+	public CaptureOverlayPanel( final int firstFrame, final int lastFrame, final boolean hideImage )
 	{
 		this.firstFrame = firstFrame;
 		this.lastFrame = lastFrame;
+		this.hideImage = hideImage;
 
 		final GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 0, 0, 0 };
-		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0 };
+		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0 };
 		gridBagLayout.columnWeights = new double[] { 1.0, 1.0, Double.MIN_VALUE };
-		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 1.0, Double.MIN_VALUE };
+		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE };
 		setLayout( gridBagLayout );
 
 		final JLabel lblFirstFrame = new JLabel( "First frame:" );
@@ -71,6 +75,23 @@ public class CaptureOverlayPanel extends JPanel
 		gbc_tftLast.gridy = 1;
 		add( tftLast, gbc_tftLast );
 
+		final JLabel lblNewLabel = new JLabel( "Hide image:" );
+		final GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+		gbc_lblNewLabel.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel.insets = new Insets( 0, 0, 5, 5 );
+		gbc_lblNewLabel.gridx = 0;
+		gbc_lblNewLabel.gridy = 2;
+		add( lblNewLabel, gbc_lblNewLabel );
+
+		final JCheckBox chckbxHideImage = new JCheckBox();
+		chckbxHideImage.setSelected( hideImage );
+		final GridBagConstraints gbc_chckbxHideImage = new GridBagConstraints();
+		gbc_chckbxHideImage.anchor = GridBagConstraints.WEST;
+		gbc_chckbxHideImage.insets = new Insets( 0, 0, 5, 0 );
+		gbc_chckbxHideImage.gridx = 1;
+		gbc_chckbxHideImage.gridy = 2;
+		add( chckbxHideImage, gbc_chckbxHideImage );
+
 		final FocusListener fl = new FocusAdapter()
 		{
 			@Override
@@ -91,6 +112,7 @@ public class CaptureOverlayPanel extends JPanel
 
 		tftFirst.addPropertyChangeListener( "value", ( e ) -> this.firstFrame = ( ( Number ) tftFirst.getValue() ).intValue() );
 		tftLast.addPropertyChangeListener( "value", ( e ) -> this.lastFrame = ( ( Number ) tftLast.getValue() ).intValue() );
+		chckbxHideImage.addActionListener( e -> this.hideImage = chckbxHideImage.isSelected() );
 	}
 
 	public int getFirstFrame()
@@ -101,6 +123,11 @@ public class CaptureOverlayPanel extends JPanel
 	public int getLastFrame()
 	{
 		return lastFrame;
+	}
+
+	public boolean isHideImage()
+	{
+		return hideImage;
 	}
 
 }
