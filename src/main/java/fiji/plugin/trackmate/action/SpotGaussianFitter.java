@@ -24,7 +24,6 @@ import fiji.plugin.trackmate.action.fit.Gaussian3DFixedRadius;
 import fiji.plugin.trackmate.action.fit.MLGaussian2DFixedRadiusEstimator;
 import fiji.plugin.trackmate.action.fit.MLGaussian3DEstimator;
 import fiji.plugin.trackmate.action.fit.MLGaussian3DFixedRadiusEstimator;
-import fiji.plugin.trackmate.action.fit.PeakFitter;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
@@ -38,6 +37,7 @@ import net.imglib2.algorithm.localization.FunctionFitter;
 import net.imglib2.algorithm.localization.Gaussian;
 import net.imglib2.algorithm.localization.LevenbergMarquardtSolver;
 import net.imglib2.algorithm.localization.MLGaussianEstimator;
+import net.imglib2.algorithm.localization.PeakFitter;
 import net.imglib2.algorithm.localization.StartPointEstimator;
 import net.imglib2.type.numeric.RealType;
 
@@ -288,7 +288,7 @@ public class SpotGaussianFitter extends MultiThreadedBenchmarkAlgorithm
 			logger.log( "Refining the position of spots using gaussian fitting.\n" );
 			logger.log( "Fitting " + trackmate.getModel().getSpots().getNSpots( true ) + " visible spots using " + "threads.\n" );
 
-			final SpotGaussianFitter fitter = new SpotGaussianFitter( trackmate.getModel(), trackmate.getSettings(), logger, true );
+			final SpotGaussianFitter fitter = new SpotGaussianFitter( trackmate.getModel(), trackmate.getSettings(), logger, false );
 			fitter.setNumThreads( trackmate.getNumThreads() );
 			if ( !fitter.checkInput() || !fitter.process() )
 			{
