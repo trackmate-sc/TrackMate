@@ -199,6 +199,7 @@ public class WizardController
 	protected void save()
 	{
 		final WizardPanelDescriptor saveDescriptor = sequence.save();
+		saveDescriptor.targetPanel.setSize( sequence.current().targetPanel.getSize() );
 		wizardPanel.btnSave.setVisible( false );
 		wizardPanel.btnPrevious.setVisible( false );
 		wizardPanel.btnDisplayConfig.setVisible( false );
@@ -206,10 +207,17 @@ public class WizardController
 		wizardPanel.btnNext.setVisible( false );
 		wizardPanel.btnResume.setVisible( true );
 
+		display( saveDescriptor, sequence.current(), Direction.BOTTOM );
 		new Thread( () -> {
+			try
+			{
+				Thread.sleep( 250 );
+			}
+			catch ( final InterruptedException e )
+			{
+				e.printStackTrace();
+			}
 			saveDescriptor.aboutToDisplayPanel();
-			saveDescriptor.targetPanel.setSize( sequence.current().targetPanel.getSize() );
-			display( saveDescriptor, sequence.current(), Direction.BOTTOM );
 			saveDescriptor.displayingPanel();
 		} ).start();
 	}
