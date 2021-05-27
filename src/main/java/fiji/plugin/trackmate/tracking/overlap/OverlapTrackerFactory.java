@@ -30,11 +30,15 @@ public class OverlapTrackerFactory implements SpotTrackerFactory
 	 */
 	public static final String KEY_SCALE_FACTOR = "SCALE_FACTOR";
 
+	public static final Double DEFAULT_SCALE_FACTOR = Double.valueOf( 1. );
+
 	/**
 	 * The key to the parameter that stores the minimal IoU below which links
 	 * are not created. Values are strictly positive {@link Double}s.
 	 */
 	public static final String KEY_MIN_IOU = "MIN_IOU";
+
+	public static final Double DEFAULT_MIN_IOU = Double.valueOf( 0.3 );
 
 	/**
 	 * The key to the parameter that stores how the IoU should be calculated.
@@ -159,8 +163,8 @@ public class OverlapTrackerFactory implements SpotTrackerFactory
 	{
 		final Map< String, Object > settings = new HashMap<>();
 		settings.put( KEY_IOU_CALCULATION, PRECISE_CALCULATION );
-		settings.put( KEY_SCALE_FACTOR, Double.valueOf( 1. ) );
-		settings.put( KEY_MIN_IOU, Double.valueOf( 0.3 ) );
+		settings.put( KEY_SCALE_FACTOR, DEFAULT_SCALE_FACTOR );
+		settings.put( KEY_MIN_IOU, DEFAULT_MIN_IOU );
 		return settings;
 	}
 
