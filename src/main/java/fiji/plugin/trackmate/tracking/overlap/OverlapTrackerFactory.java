@@ -1,5 +1,8 @@
 package fiji.plugin.trackmate.tracking.overlap;
 
+import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
+import static fiji.plugin.trackmate.io.IOUtils.readStringAttribute;
+import static fiji.plugin.trackmate.io.IOUtils.writeAttribute;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
 
 import java.util.HashMap;
@@ -130,13 +133,26 @@ public class OverlapTrackerFactory implements SpotTrackerFactory
 	@Override
 	public boolean marshall( final Map< String, Object > settings, final Element element )
 	{
-		return true;
+		boolean ok = true;
+		final StringBuilder str = new StringBuilder();
+
+		ok = ok & writeAttribute( settings, element, KEY_SCALE_FACTOR, Double.class, str );
+		ok = ok & writeAttribute( settings, element, KEY_MIN_IOU, Double.class, str );
+		ok = ok & writeAttribute( settings, element, KEY_IOU_CALCULATION, String.class, str );
+		return ok;
 	}
 
 	@Override
 	public boolean unmarshall( final Element element, final Map< String, Object > settings )
 	{
-		return true;
+		settings.clear();
+		final StringBuilder errorHolder = new StringBuilder();
+		boolean ok = true;
+
+		ok = ok & readDoubleAttribute( element, settings, KEY_SCALE_FACTOR, errorHolder );
+		ok = ok & readDoubleAttribute( element, settings, KEY_MIN_IOU, errorHolder );
+		ok = ok & readStringAttribute( element, settings, KEY_IOU_CALCULATION, errorHolder );
+		return ok;
 	}
 
 	@Override
