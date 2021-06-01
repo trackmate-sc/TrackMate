@@ -26,6 +26,8 @@ public class Icons
 
 	public static final ImageIcon EDGE_ICON_64x64;
 
+	public static final ImageIcon EDGE_ICON_16x16;
+
 	public static final ImageIcon TRACK_ICON_64x64;
 
 	public static final ImageIcon BRANCH_ICON_16x16;
@@ -54,6 +56,10 @@ public class Icons
 		final Image image6 = TRACKMATE_ICON.getImage();
 		final Image newimg6 = image6.getScaledInstance( 16, 16, java.awt.Image.SCALE_SMOOTH );
 		TRACKMATE_ICON_16x16 = new ImageIcon( newimg6 );
+
+		final Image image7 = EDGE_ICON.getImage();
+		final Image newimg7 = image7.getScaledInstance( 16, 16, java.awt.Image.SCALE_SMOOTH );
+		EDGE_ICON_16x16 = new ImageIcon( newimg7 );
 	}
 
 	public static final ImageIcon TRACK_TABLES_ICON = new ImageIcon( Icons.class.getResource( "images/table_multiple.png" ) );
