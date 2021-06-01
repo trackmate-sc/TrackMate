@@ -108,7 +108,7 @@ public class TrackMatePlugIn implements PlugIn
 	 * @param trackmate
 	 * @param selectionModel
 	 * @param displaySettings
-	 * @return
+	 * @return a new sequence.
 	 */
 	protected WizardSequence createSequence( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings )
 	{

@@ -97,8 +97,6 @@ public class SpotFitEllipseAnalyzer< T extends RealType< T > > extends AbstractS
 	 * pseudo-inverse. Otherwise we fail too many times because of singular
 	 * matrices.
 	 *
-	 * @param points
-	 *            n * 2 array of 2D coordinates.
 	 * @return
 	 *         <p>
 	 *         6-element array, {a b c d f g}, which are the algebraic

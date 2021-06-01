@@ -97,9 +97,6 @@ public class FeatureDisplaySelector
 		this.ds = displaySettings;
 	}
 
-	/**
-	 * @wbp.parser.entryPoint
-	 */
 	public JPanel createSelectorForSpots()
 	{
 		return createSelectorFor( TrackMateObject.SPOTS );

@@ -103,9 +103,6 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 	 * CONSTRUCTOR
 	 */
 
-	/**
-	 * @wbp.parser.constructor
-	 */
 	public ThresholdDetectorConfigurationPanel(
 			final Settings settings,
 			final Model model )

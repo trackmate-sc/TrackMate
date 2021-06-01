@@ -49,8 +49,8 @@ public class OverlapTrackerFactory implements SpotTrackerFactory
 
 	/**
 	 * The key to the parameter that stores scale factor parameter. The scale
-	 * factor allows for enlarging (>1) or shrinking (<1) the spot shapes before
-	 * computing their IoU. Values are strictly positive {@link Double}s.
+	 * factor allows for enlarging (&gt;1) or shrinking (&lt;1) the spot shapes
+	 * before computing their IoU. Values are strictly positive {@link Double}s.
 	 */
 	public static final String KEY_SCALE_FACTOR = "SCALE_FACTOR";
 
@@ -66,8 +66,8 @@ public class OverlapTrackerFactory implements SpotTrackerFactory
 
 	/**
 	 * The key to the parameter that stores how the IoU should be calculated.
-	 * There are two methods specified as strings: {@value #FAST_CALCULATION}
-	 * and {@value #PRECISE_CALCULATION}.
+	 * There are two methods specified as strings: <code>FAST_CALCULATION</code>
+	 * and <code>PRECISE_CALCULATION</code>.
 	 */
 	public static final String KEY_IOU_CALCULATION = "IOU_CALCULATION";
 
