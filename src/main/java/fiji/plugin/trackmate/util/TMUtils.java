@@ -3,6 +3,7 @@ package fiji.plugin.trackmate.util;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -685,7 +686,8 @@ public class TMUtils
 				&& null != settings.imp.getOriginalFileInfo()
 				&& null != settings.imp.getOriginalFileInfo().directory )
 		{
-			folder = new File( settings.imp.getOriginalFileInfo().directory );
+			final String directory = settings.imp.getOriginalFileInfo().directory;
+			folder = Paths.get( directory ).toAbsolutePath().toFile();
 			/*
 			 * Update the settings field with the image file location now,
 			 * because it's valid.

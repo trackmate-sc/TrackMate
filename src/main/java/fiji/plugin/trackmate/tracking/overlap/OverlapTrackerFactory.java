@@ -1,5 +1,8 @@
 package fiji.plugin.trackmate.tracking.overlap;
 
+import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
+import static fiji.plugin.trackmate.io.IOUtils.readStringAttribute;
+import static fiji.plugin.trackmate.io.IOUtils.writeAttribute;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
 
 import java.util.HashMap;
@@ -30,11 +33,15 @@ public class OverlapTrackerFactory implements SpotTrackerFactory
 	 */
 	public static final String KEY_SCALE_FACTOR = "SCALE_FACTOR";
 
+	public static final Double DEFAULT_SCALE_FACTOR = Double.valueOf( 1. );
+
 	/**
 	 * The key to the parameter that stores the minimal IoU below which links
 	 * are not created. Values are strictly positive {@link Double}s.
 	 */
 	public static final String KEY_MIN_IOU = "MIN_IOU";
+
+	public static final Double DEFAULT_MIN_IOU = Double.valueOf( 0.3 );
 
 	/**
 	 * The key to the parameter that stores how the IoU should be calculated.
@@ -126,13 +133,26 @@ public class OverlapTrackerFactory implements SpotTrackerFactory
 	@Override
 	public boolean marshall( final Map< String, Object > settings, final Element element )
 	{
-		return true;
+		boolean ok = true;
+		final StringBuilder str = new StringBuilder();
+
+		ok = ok & writeAttribute( settings, element, KEY_SCALE_FACTOR, Double.class, str );
+		ok = ok & writeAttribute( settings, element, KEY_MIN_IOU, Double.class, str );
+		ok = ok & writeAttribute( settings, element, KEY_IOU_CALCULATION, String.class, str );
+		return ok;
 	}
 
 	@Override
 	public boolean unmarshall( final Element element, final Map< String, Object > settings )
 	{
-		return true;
+		settings.clear();
+		final StringBuilder errorHolder = new StringBuilder();
+		boolean ok = true;
+
+		ok = ok & readDoubleAttribute( element, settings, KEY_SCALE_FACTOR, errorHolder );
+		ok = ok & readDoubleAttribute( element, settings, KEY_MIN_IOU, errorHolder );
+		ok = ok & readStringAttribute( element, settings, KEY_IOU_CALCULATION, errorHolder );
+		return ok;
 	}
 
 	@Override
@@ -159,8 +179,8 @@ public class OverlapTrackerFactory implements SpotTrackerFactory
 	{
 		final Map< String, Object > settings = new HashMap<>();
 		settings.put( KEY_IOU_CALCULATION, PRECISE_CALCULATION );
-		settings.put( KEY_SCALE_FACTOR, Double.valueOf( 1. ) );
-		settings.put( KEY_MIN_IOU, Double.valueOf( 0.3 ) );
+		settings.put( KEY_SCALE_FACTOR, DEFAULT_SCALE_FACTOR );
+		settings.put( KEY_MIN_IOU, DEFAULT_MIN_IOU );
 		return settings;
 	}
 

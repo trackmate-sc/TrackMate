@@ -25,7 +25,7 @@ public interface WizardSequence
 		final JFrame frame = new JFrame();
 		frame.getContentPane().add( controller.getWizardPanel() );
 		frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
-		frame.setSize( 350, 520 );
+		frame.setSize( 350, 560 );
 		frame.setTitle( title );
 		controller.init();
 		frame.addWindowListener( new WindowAdapter()

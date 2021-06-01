@@ -2,6 +2,8 @@ package fiji.plugin.trackmate.tracking.overlap;
 
 import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
 import static fiji.plugin.trackmate.gui.Fonts.FONT;
+import static fiji.plugin.trackmate.tracking.overlap.OverlapTrackerFactory.DEFAULT_MIN_IOU;
+import static fiji.plugin.trackmate.tracking.overlap.OverlapTrackerFactory.DEFAULT_SCALE_FACTOR;
 import static fiji.plugin.trackmate.tracking.overlap.OverlapTrackerFactory.KEY_IOU_CALCULATION;
 import static fiji.plugin.trackmate.tracking.overlap.OverlapTrackerFactory.KEY_MIN_IOU;
 import static fiji.plugin.trackmate.tracking.overlap.OverlapTrackerFactory.KEY_SCALE_FACTOR;
@@ -177,9 +179,14 @@ public class OverlapTrackerSettingsPanel extends ConfigurationPanel
 	@Override
 	public void setSettings( final Map< String, Object > settings )
 	{
-		ftfScaleFactor.setValue( settings.get( KEY_SCALE_FACTOR ) );
-		ftfMinIoU.setValue( settings.get( KEY_MIN_IOU ) );
-		final boolean isFast = ( ( String ) settings.get( KEY_IOU_CALCULATION ) ).equalsIgnoreCase( IoUCalculation.FAST.name() );
+		ftfScaleFactor.setValue( settings.get( KEY_SCALE_FACTOR ) == null ? DEFAULT_SCALE_FACTOR : settings.get( KEY_SCALE_FACTOR ) );
+		ftfMinIoU.setValue( settings.get( KEY_MIN_IOU ) == null ? DEFAULT_MIN_IOU :  settings.get( KEY_MIN_IOU ));
+		final Object obj = settings.get( KEY_IOU_CALCULATION );
+		final boolean isFast;
+		if ( obj != null )
+			isFast = ( ( String ) obj ).equalsIgnoreCase( IoUCalculation.FAST.name() );
+		else
+			isFast = false;
 		rdbtnFast.setSelected( isFast );
 		rdbtnPrecise.setSelected( !isFast );
 	}
