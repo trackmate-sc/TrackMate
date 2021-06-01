@@ -41,8 +41,6 @@ public interface TrackMateModelView
 	 * Refreshes the displayer display with current model. If the underlying
 	 * model was modified, or the display settings were changed, calling this
 	 * method should be enough to update the display with changes.
-	 *
-	 * @see #setDisplaySettings(String, Object)
 	 */
 	public void refresh();
 

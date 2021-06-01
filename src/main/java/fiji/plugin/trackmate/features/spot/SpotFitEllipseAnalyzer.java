@@ -109,11 +109,9 @@ public class SpotFitEllipseAnalyzer< T extends RealType< T > > extends AbstractS
 	 *         </p>
 	 *
 	 * @see
-	 *      <p>
 	 *      <a href=
-	 *      "http://www.mathworks.co.uk/matlabcentral/fileexchange/22684-ellipse-fit-direct-method"
-	 *      >MATLAB script</a>
-	 *      </p>
+	 *      "http://www.mathworks.co.uk/matlabcentral/fileexchange/22684-ellipse-fit-direct-method">MATLAB
+	 *      script</a>
 	 * @author Michael Doube
 	 */
 	private static double[] fitEllipse( final double[] x, final double[] y )

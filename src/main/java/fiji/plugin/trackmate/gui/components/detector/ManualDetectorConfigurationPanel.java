@@ -63,8 +63,6 @@ public class ManualDetectorConfigurationPanel extends ConfigurationPanel
 	/**
 	 * Creates a new {@link ManualDetectorConfigurationPanel}.
 	 * 
-	 * @param settings
-	 *
 	 * @param infoText
 	 *            the detector info text, will be displayed on the panel.
 	 * @param detectorName

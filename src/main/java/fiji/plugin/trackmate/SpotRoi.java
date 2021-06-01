@@ -69,7 +69,6 @@ public class SpotRoi
 	 *            the top-left X corner of the view in the image to paint.
 	 * @param magnification
 	 *            the magnification of the view.
-	 * @param magnification2
 	 * @return a new <code>int</code> array.
 	 */
 	public double[] toPolygonX( final double calibration, final double xcorner, final double spotXCenter, final double magnification )

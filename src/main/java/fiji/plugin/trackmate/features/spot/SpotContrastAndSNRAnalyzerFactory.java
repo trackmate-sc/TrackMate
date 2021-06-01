@@ -43,8 +43,8 @@ import net.imglib2.type.numeric.RealType;
 /**
  * A factory for {@link SpotContrastAndSNRAnalyzer}s. Because the analyzers of
  * this factory depends on some features defined in
- * {@link SpotIntensityAnalyzer}s, we use a higher priority, so that computation
- * are done after the aforementioned analyzer are done.
+ * {@link SpotIntensityMultiCAnalyzer}s, we use a higher priority, so that
+ * computation are done after the aforementioned analyzer are done.
  *
  * @author Jean- Yves Tinevez
  */

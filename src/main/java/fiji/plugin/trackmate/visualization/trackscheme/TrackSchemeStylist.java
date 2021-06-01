@@ -135,8 +135,8 @@ public class TrackSchemeStylist
 	 * Change the style of the edge cells to reflect the currently set color
 	 * generator.
 	 *
-	 * @param edgeMap
-	 *            the {@link mxCell} ordered by the track IDs they belong to.
+	 * @param edges
+	 *            the {@link mxCell}s.
 	 */
 	public synchronized void updateEdgeStyle( final Collection< mxCell > edges )
 	{

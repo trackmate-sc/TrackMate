@@ -157,7 +157,8 @@ public class FeatureUtils
 	 * @param model
 	 * @param settings
 	 * @param visibleOnly
-	 * @return
+	 * @return a new <code>double[]</code> array containing the numerical
+	 *         feature values.
 	 */
 	public static double[] collectFeatureValues(
 			final String featureKey,

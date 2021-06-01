@@ -627,7 +627,7 @@ public class MaskUtils
 	 * 
 	 * @see <a href=
 	 *      "https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm">Ramer–Douglas–Peucker
-	 *      Algorithm (Wikipedia)</a> <br>
+	 *      Algorithm (Wikipedia)</a>
 	 * @author Justin Wetherell <phishman3579@gmail.com>
 	 * @param list
 	 *            List of Double[] points (x,y)

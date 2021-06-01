@@ -147,7 +147,7 @@ public class DisplaySettings
 	 *
 	 * @param name
 	 *            the name for the copied render settings.
-	 * @return a new {@link RenderSettings} instance.
+	 * @return a new {@link DisplaySettings} instance.
 	 */
 	public DisplaySettings copy( final String name )
 	{

@@ -45,7 +45,6 @@ public class DetectorKeys
 	 * <ul>
 	 * <li> {@link LogDetector}
 	 * <li> {@link DogDetector}
-	 * <li> {@link DownsampleLogDetector}
 	 * </ul>
 	 */
 	public static final String KEY_TARGET_CHANNEL = "TARGET_CHANNEL";
@@ -61,7 +60,6 @@ public class DetectorKeys
 	 * <ul>
 	 * <li> {@link LogDetector}
 	 * <li> {@link DogDetector}
-	 * <li> {@link DownsampleLogDetector}
 	 * <li> {@link ManualDetectorFactory}
 	 * </ul>
 	 */
@@ -79,7 +77,6 @@ public class DetectorKeys
 	 * <ul>
 	 * <li> {@link LogDetector}
 	 * <li> {@link DogDetector}
-	 * <li> {@link DownsampleLogDetector}
 	 * </ul>
 	 */
 	public static final String KEY_THRESHOLD = "THRESHOLD";
@@ -92,7 +89,7 @@ public class DetectorKeys
 	 * applied to the source image prior to segmentation. Expected values are
 	 * {@link Integer}s greater than 1.
 	 * <p>
-	 * Currently used by {@link DownsampleLogDetector}
+	 * Currently note used.
 	 */
 	public static final String KEY_DOWNSAMPLE_FACTOR = "DOWNSAMPLE_FACTOR";
 

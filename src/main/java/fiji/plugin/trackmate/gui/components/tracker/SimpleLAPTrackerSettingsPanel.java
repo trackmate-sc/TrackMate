@@ -65,10 +65,9 @@ import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 
 /**
- * A simplified configuration panel for the
- * {@link fiji.plugin.trackmate.tracking.oldlap.LAPTracker}.
+ * A simplified configuration panel for the simple LAP tracker.
  * 
- * @author Jean-Yves Tinevez &lt;tinevez@pasteur.fr&gt; - 2010-2011
+ * @author Jean-Yves Tinevez - 2010-2011
  */
 public class SimpleLAPTrackerSettingsPanel extends ConfigurationPanel
 {

@@ -173,7 +173,8 @@ public class DetectionUtils
 	 * 
 	 * @param img
 	 *            the image.
-	 * @return
+	 * @return <code>true</code> if the image is 2D, regardless of time and
+	 *         channel.
 	 */
 	public static final boolean is2D( final ImgPlus< ? > img )
 	{

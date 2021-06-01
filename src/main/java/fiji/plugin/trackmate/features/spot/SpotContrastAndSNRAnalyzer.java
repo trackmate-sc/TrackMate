@@ -52,7 +52,8 @@ import net.imglib2.type.numeric.RealType;
  * <code>std_in</code> is the standard deviation computed within the spot.
  * <p>
  * <u>Important</u>: this analyzer relies on some results provided by the
- * {@link SpotIntensityAnalyzer} analyzer. Thus, it <b>must</b> be run after it.
+ * {@link SpotIntensityMultiCAnalyzer} analyzer. Thus, it <b>must</b> be run
+ * after it.
  * 
  * @author Jean-Yves Tinevez, 2011 - 2012. Revised December 2020.
  */
