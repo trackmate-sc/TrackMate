@@ -59,12 +59,11 @@ public class CloseGapsByLinearInterpolationAction extends AbstractTMAction
 
 	public static final String KEY = "CLOSE_GAPS_BY_LINEAR_INPERPOLATION";
 
-	public static final String INFO_TEXT = "<html>" 
+	public static final String INFO_TEXT = "<html>"
 			+ "This action closes gaps in tracks by introducing new spots. "
 			+ "The spots positions and size are calculated "
-			+ "using linear interpolation." 
+			+ "using linear interpolation."
 			+ "</html>";
-
 
 	@Override
 	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
@@ -75,70 +74,83 @@ public class CloseGapsByLinearInterpolationAction extends AbstractTMAction
 
 		boolean changed = true;
 
-		while ( changed )
+		model.beginUpdate();
+		try
 		{
-			changed = false;
 
-			// Got through all edges, check if the frame distance between spots
-			// is larger than 1
-			final Set< DefaultWeightedEdge > edges = model.getTrackModel().edgeSet();
-			for ( final DefaultWeightedEdge edge : edges )
+			while ( changed )
 			{
-				final Spot currentSpot = trackModel.getEdgeSource( edge );
-				final Spot nextSpot = trackModel.getEdgeTarget( edge );
+				changed = false;
 
-				final int currentFrame = currentSpot.getFeature( Spot.FRAME ).intValue();
-				final int nextFrame = nextSpot.getFeature( Spot.FRAME ).intValue();
-
-				if ( Math.abs( nextFrame - currentFrame ) > 1 )
+				/*
+				 * Got through all edges, check if the frame distance between
+				 * spots is larger than 1.
+				 */
+				final Set< DefaultWeightedEdge > edges = model.getTrackModel().edgeSet();
+				for ( final DefaultWeightedEdge edge : edges )
 				{
-					final int presign = nextFrame > currentFrame ? 1 : -1;
+					final Spot currentSpot = trackModel.getEdgeSource( edge );
+					final Spot nextSpot = trackModel.getEdgeTarget( edge );
 
-					model.beginUpdate();
+					final int currentFrame = currentSpot.getFeature( Spot.FRAME ).intValue();
+					final int nextFrame = nextSpot.getFeature( Spot.FRAME ).intValue();
 
-					final double[] currentPosition = new double[ 3 ];
-					final double[] nextPosition = new double[ 3 ];
-
-					nextSpot.localize( nextPosition );
-					currentSpot.localize( currentPosition );
-
-					model.removeEdge( currentSpot, nextSpot );
-
-					// create new spots in between; interpolate coordinates and
-					// some features
-					Spot formerSpot = currentSpot;
-					for ( int f = currentFrame + presign; ( f < nextFrame && presign == 1 ) 
-							|| ( f > nextFrame && presign == -1 ); f += presign )
+					if ( Math.abs( nextFrame - currentFrame ) > 1 )
 					{
-						final double weight = ( double ) ( nextFrame - f ) / ( nextFrame - currentFrame );
+						final int presign = nextFrame > currentFrame ? 1 : -1;
 
-						final double[] position = new double[ 3 ];
-						for ( int d = 0; d < currentSpot.numDimensions(); d++ )
+						final double[] currentPosition = new double[ 3 ];
+						final double[] nextPosition = new double[ 3 ];
+
+						nextSpot.localize( nextPosition );
+						currentSpot.localize( currentPosition );
+
+						model.removeEdge( currentSpot, nextSpot );
+
+						/*
+						 * Create new spots in between; interpolate coordinates
+						 * and some features.
+						 */
+						Spot formerSpot = currentSpot;
+						for ( int f = currentFrame + presign; ( f < nextFrame && presign == 1 )
+								|| ( f > nextFrame && presign == -1 ); f += presign )
 						{
-							position[ d ] = weight * currentPosition[ d ] + ( 1.0 - weight ) * nextPosition[ d ];
+							final double weight = ( double ) ( nextFrame - f ) / ( nextFrame - currentFrame );
+
+							final double[] position = new double[ 3 ];
+							for ( int d = 0; d < currentSpot.numDimensions(); d++ )
+							{
+								position[ d ] = weight * currentPosition[ d ] + ( 1.0 - weight ) * nextPosition[ d ];
+							}
+
+							final RealPoint rp = new RealPoint( position );
+
+							final Spot newSpot = new Spot( rp, 0, 0 );
+
+							// Set some properties of the new spot
+							interpolateFeature( newSpot, currentSpot, nextSpot, weight, Spot.RADIUS );
+							interpolateFeature( newSpot, currentSpot, nextSpot, weight, Spot.QUALITY );
+							interpolateFeature( newSpot, currentSpot, nextSpot, weight, Spot.POSITION_T );
+
+							model.addSpotTo( newSpot, f );
+							model.addEdge( formerSpot, newSpot, 1.0 );
+							formerSpot = newSpot;
 						}
+						model.addEdge( formerSpot, nextSpot, 1.0 );
 
-						final RealPoint rp = new RealPoint( position );
-
-						final Spot newSpot = new Spot( rp, 0, 0 );
-
-						// Set some properties of the new spot
-						interpolateFeature( newSpot, currentSpot, nextSpot, weight, Spot.RADIUS );
-						interpolateFeature( newSpot, currentSpot, nextSpot, weight, Spot.QUALITY );
-						interpolateFeature( newSpot, currentSpot, nextSpot, weight, Spot.POSITION_T );
-
-						model.addSpotTo( newSpot, f );
-						model.addEdge( formerSpot, newSpot, 1.0 );
-						formerSpot = newSpot;
+						/*
+						 * Restart search to prevent
+						 * ConcurrentModificationException.
+						 */
+						changed = true;
+						break;
 					}
-					model.addEdge( formerSpot, nextSpot, 1.0 );
-					model.endUpdate();
-
-					// Restart search to prevent ConcurrentModificationException
-					changed = true;
-					break;
 				}
 			}
+		}
+		finally
+		{
+			model.endUpdate();
 		}
 	}
 
@@ -149,7 +161,7 @@ public class CloseGapsByLinearInterpolationAction extends AbstractTMAction
 			targetSpot.getFeatures().remove( feature );
 		}
 
-		targetSpot.getFeatures().put( feature, 
+		targetSpot.getFeatures().put( feature,
 				weight * spot1.getFeature( feature ) + ( 1.0 - weight ) * spot2.getFeature( feature ) );
 	}
 
