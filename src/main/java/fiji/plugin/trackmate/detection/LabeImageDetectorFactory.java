@@ -68,7 +68,7 @@ public class LabeImageDetectorFactory< T extends RealType< T > & NativeType< T >
 
 	/** An html information text. */
 	public static final String INFO_TEXT = "<html>"
-			+ "This detector creates spots by by importing regions from a label image."
+			+ "This detector creates spots by importing regions from a label image."
 			+ "<p>"
 			+ "A label image is an image where the pixel values are integers. Each object "
 			+ "in a label image is represented by a single common pixel value (the label) "
