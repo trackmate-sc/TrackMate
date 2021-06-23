@@ -72,7 +72,7 @@ public abstract class AbstractFeatureGrapher
 
 	protected final DisplaySettings displaySettings;
 
-	private final Color bgColor = Color.LIGHT_GRAY;
+	private final Color bgColor = new Color( 220, 220, 220 );
 
 	private final Dimension xDimension;
 
