@@ -23,6 +23,7 @@ package fiji.plugin.trackmate.features;
 
 import static fiji.plugin.trackmate.gui.Icons.TRACK_SCHEME_ICON;
 
+import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
@@ -60,6 +61,8 @@ public abstract class AbstractFeatureGrapher
 	protected final Model model;
 
 	protected final DisplaySettings displaySettings;
+
+	protected final Color bgColor = Color.LIGHT_GRAY;
 
 	public AbstractFeatureGrapher( final String xFeature, final Set< String > yFeatures, final Model model, final DisplaySettings displaySettings )
 	{

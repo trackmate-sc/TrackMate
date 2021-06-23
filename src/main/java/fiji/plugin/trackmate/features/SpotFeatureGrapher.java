@@ -36,6 +36,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.chart.ui.RectangleInsets;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -120,6 +121,9 @@ public class SpotFeatureGrapher extends AbstractFeatureGrapher
 			final JFreeChart chart = ChartFactory.createXYLineChart( title, xAxisLabel, yAxisLabel, pointDataset, PlotOrientation.VERTICAL, true, true, false );
 			chart.getTitle().setFont( FONT );
 			chart.getLegend().setItemFont( SMALL_FONT );
+			chart.setBackgroundPaint( bgColor );
+			chart.setBorderVisible( false );
+			chart.getLegend().setBackgroundPaint( bgColor );
 
 			// The plot
 			final XYPlot plot = chart.getXYPlot();
@@ -130,6 +134,16 @@ public class SpotFeatureGrapher extends AbstractFeatureGrapher
 			plot.getRangeAxis().setTickLabelFont( SMALL_FONT );
 			plot.getDomainAxis().setLabelFont( FONT );
 			plot.getDomainAxis().setTickLabelFont( SMALL_FONT );
+			plot.setOutlineVisible( false );
+			plot.setDomainCrosshairVisible( false );
+			plot.setDomainGridlinesVisible( false );
+			plot.setRangeCrosshairVisible( false );
+			plot.setRangeGridlinesVisible( false );
+			plot.setBackgroundAlpha( 0f );
+
+			// Ticks. Fewer of them.
+			plot.getRangeAxis().setTickLabelInsets( new RectangleInsets( 20, 10, 20, 10 ) );
+			plot.getDomainAxis().setTickLabelInsets( new RectangleInsets( 10, 20, 10, 20 ) );
 
 			// Paint
 			pointRenderer.setUseOutlinePaint( true );
