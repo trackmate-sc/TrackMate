@@ -44,6 +44,7 @@ import javax.swing.ScrollPaneConstants;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
@@ -165,6 +166,9 @@ public abstract class AbstractFeatureGrapher
 			plot.setRangeCrosshairVisible( false );
 			plot.setRangeGridlinesVisible( false );
 			plot.setBackgroundAlpha( 0f );
+
+			// Plot range.
+			( ( NumberAxis ) plot.getRangeAxis() ).setAutoRangeIncludesZero( false );
 
 			// Ticks. Fewer of them.
 			plot.getRangeAxis().setTickLabelInsets( new RectangleInsets( 20, 10, 20, 10 ) );
