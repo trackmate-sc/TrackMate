@@ -31,6 +31,7 @@ import java.io.IOException;
 import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
 
 import org.jfree.chart.ChartPanel;
@@ -41,8 +42,8 @@ import org.jfree.data.xy.XYDataset;
 
 import com.itextpdf.text.DocumentException;
 
+import fiji.plugin.trackmate.gui.GuiUtils;
 import ij.IJ;
-import ij.measure.ResultsTable;
 
 public class ExportableChartPanel extends ChartPanel
 {
@@ -126,39 +127,43 @@ public class ExportableChartPanel extends ChartPanel
 			return;
 		}
 
-		final String xColumnName = plot.getDomainAxis().getLabel();
-
-		final ResultsTable table = new ResultsTable();
-		final int nPoints = plot.getDataset( 0 ).getItemCount( 0 );
-		for ( int k = 0; k < nPoints; k++ )
+		final int nSets = plot.getDatasetCount();
+		for ( int i = 0; i < nSets; i++ )
 		{
-			table.incrementCounter();
+			final XYDataset dataset = plot.getDataset( i );
+			if ( dataset instanceof XYEdgeSeriesCollection )
+				continue;
+			
+			final String xStr = plot.getDomainAxis().getLabel();
+			final String xLabel = labelFromStr( xStr );
+			final String xUnits = unitsFromStr( xStr );
+			final String yStr = plot.getRangeAxis().getLabel();
+			final String yLabel = labelFromStr( yStr );
+			final String yUnits = unitsFromStr( yStr );
 
-			final double xVal = plot.getDataset( 0 ).getXValue( 0, k );
-			table.addValue( xColumnName, xVal );
-
-			final int nSets = plot.getDatasetCount();
-			for ( int i = 0; i < nSets; i++ )
-			{
-
-				final XYDataset dataset = plot.getDataset( i );
-				if ( dataset instanceof XYEdgeSeriesCollection )
-					continue;
-
-				final int nSeries = dataset.getSeriesCount();
-				for ( int j = 0; j < nSeries; j++ )
-				{
-
-					@SuppressWarnings( "rawtypes" )
-					final Comparable seriesKey = dataset.getSeriesKey( j );
-					final String yColumnName = seriesKey.toString() + "(" + plot.getRangeAxis().getLabel() + ")";
-					final double yVal = dataset.getYValue( j, k );
-					table.addValue( yColumnName, yVal );
-				}
-
-			}
+			final ExportableChartValueTable table = new ExportableChartValueTable( dataset, xLabel, xUnits, yLabel, yUnits );
+			GuiUtils.positionWindow( table, SwingUtilities.getWindowAncestor( this ) );
+			table.setVisible( true );
 		}
-		table.show( getChart().getTitle().getText() );
+	}
+
+	private static final String unitsFromStr( final String str )
+	{
+		final int i1 = str.lastIndexOf( '(' );
+		final int i2 = str.lastIndexOf( ')' );
+		if ( i1 >= 0 && i2 >= 0 && i2 > ( i1 + 1 ) )
+			return str.substring( i1 + 1, i2 );
+		return str;
+	}
+
+	private static final String labelFromStr( final String str )
+	{
+		final int i = str.indexOf( '(' );
+		if ( i <= 0 )
+			return str;
+		if ( i > 1 )
+			return str.substring( 0, i - 1 );
+		return str.substring( 0, i );
 	}
 
 	/**
