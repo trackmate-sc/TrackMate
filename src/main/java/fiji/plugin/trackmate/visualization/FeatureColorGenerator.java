@@ -22,6 +22,7 @@
 package fiji.plugin.trackmate.visualization;
 
 import java.awt.Color;
+import java.util.function.Function;
 
 /**
  * Interface for color generator that can color objects based on a
@@ -30,7 +31,7 @@ import java.awt.Color;
  *
  * @param <K> the type of object to color.
  */
-public interface FeatureColorGenerator< K >
+public interface FeatureColorGenerator< K > extends Function< K, Color >
 {
 
 	/**
@@ -41,4 +42,11 @@ public interface FeatureColorGenerator< K >
 	 * @return a color for this object.
 	 */
 	public Color color( K obj );
+
+	@Override
+	default Color apply( final K obj )
+	{
+		return color( obj );
+	}
+
 }
