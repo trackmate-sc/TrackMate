@@ -27,6 +27,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.JFrame;
+
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 import org.scijava.util.AppUtils;
@@ -60,7 +62,9 @@ public class SpotFeatureGrapherExample
 			spots.add( it.next() );
 
 		final SpotFeatureGrapher grapher = new SpotFeatureGrapher( Spot.POSITION_X, Y, spots, model, DisplaySettings.defaultStyle().copy() );
-		grapher.render();
+		final JFrame frame = grapher.render();
+		frame.setLocationRelativeTo( null );
+		frame.setVisible( true );
 
 		final TrackIndexAnalyzer analyzer = new TrackIndexAnalyzer();
 		analyzer.process( model.getTrackModel().trackIDs( true ), model );

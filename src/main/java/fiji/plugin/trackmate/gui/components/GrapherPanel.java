@@ -31,9 +31,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 
@@ -43,6 +45,7 @@ import fiji.plugin.trackmate.features.EdgeFeatureGrapher;
 import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.features.SpotFeatureGrapher;
 import fiji.plugin.trackmate.features.TrackFeatureGrapher;
+import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 
@@ -177,7 +180,9 @@ public class GrapherPanel extends JPanel
 			spots.addAll( trackmate.getModel().getTrackModel().trackSpots( trackID ) );
 
 		final SpotFeatureGrapher grapher = new SpotFeatureGrapher( xFeature, yFeatures, spots, trackmate.getModel(), displaySettings );
-		grapher.render();
+		final JFrame frame = grapher.render();
+		GuiUtils.positionWindow( frame, SwingUtilities.getWindowAncestor( this ) );
+		frame.setVisible( true );
 	}
 
 	private void plotEdgeFeatures( final String xFeature, final Set< String > yFeatures )
@@ -187,15 +192,17 @@ public class GrapherPanel extends JPanel
 		for ( final Integer trackID : trackmate.getModel().getTrackModel().trackIDs( true ) )
 			edges.addAll( trackmate.getModel().getTrackModel().trackEdges( trackID ) );
 
-		// Prepare grapher
 		final EdgeFeatureGrapher grapher = new EdgeFeatureGrapher( xFeature, yFeatures, edges, trackmate.getModel(), displaySettings );
-		grapher.render();
+		final JFrame frame = grapher.render();
+		GuiUtils.positionWindow( frame, SwingUtilities.getWindowAncestor( this ) );
+		frame.setVisible( true );
 	}
 
 	private void plotTrackFeatures( final String xFeature, final Set< String > yFeatures )
 	{
-		// Prepare grapher
 		final TrackFeatureGrapher grapher = new TrackFeatureGrapher( xFeature, yFeatures, trackmate.getModel(), displaySettings );
-		grapher.render();
+		final JFrame frame = grapher.render();
+		GuiUtils.positionWindow( frame, SwingUtilities.getWindowAncestor( this ) );
+		frame.setVisible( true );
 	}
 }
