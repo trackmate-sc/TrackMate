@@ -172,6 +172,10 @@ public class TablePanel< O >
 		// Table column model.
 		final MyTableModel tableModel = new MyTableModel();
 
+		// Shall we skip the label column?
+		final boolean skipLabelColumn = labelGenerator == null;
+		final int labelColumnShift = skipLabelColumn ? 0 : 1;
+
 		final DefaultTableColumnModel tableColumnModel = new DefaultTableColumnModel();
 		this.table = new JTable( tableModel, tableColumnModel )
 		{
@@ -183,7 +187,7 @@ public class TablePanel< O >
 				final int column = convertColumnIndexToModel( viewcolumn );
 				// Only label and colors are editable.
 				return ( labelSetter != null && column == 0 )
-						|| ( colorSetter != null && column > 0 && features.get( column - 1 ).equals( manualColorFeature ) );
+						|| ( colorSetter != null && column >= labelColumnShift && features.get( column - labelColumnShift ).equals( manualColorFeature ) );
 			}
 		};
 		table.setColumnModel( tableColumnModel );
@@ -208,11 +212,14 @@ public class TablePanel< O >
 
 		int colIndex = 0;
 		// First column is label.
-		headerLine.add( "<html><b>Label<br> <br></html>" );
-		mapToTooltip.add( "Object name" );
+		if ( !skipLabelColumn )
+		{
+			headerLine.add( "<html><b>Label<br> <br></html>" );
+			mapToTooltip.add( "Object name" );
+			columnClasses.add( String.class );
+			tableColumnModel.addColumn( new TableColumn( colIndex++ ) );
+		}
 
-		columnClasses.add( String.class );
-		tableColumnModel.addColumn( new TableColumn( colIndex++ ) );
 		// Units for feature columns.
 		for ( final String feature : features )
 		{
@@ -241,7 +248,6 @@ public class TablePanel< O >
 			tableColumnModel.addColumn( new TableColumn( colIndex++ ) );
 		}
 
-
 		// Sorting.
 		final TableRowSorter< MyTableModel > sorter = new TableRowSorter<>( tableModel );
 		table.setRowSorter( sorter );
@@ -267,7 +273,7 @@ public class TablePanel< O >
 			column.setCellRenderer( cellRenderer );
 			if ( c == colorcolumn && null != colorSetter )
 				column.setCellEditor( new MyColorEditor( colorSetter ) );
-			else if ( c== 0 && null != labelSetter)
+			else if ( c == 0 && null != labelSetter )
 				column.setCellEditor( new MyLabelEditor() );
 		}
 
@@ -365,39 +371,70 @@ public class TablePanel< O >
 				CSVWriter.DEFAULT_SEPARATOR,
 				CSVWriter.DEFAULT_QUOTE_CHARACTER,
 				CSVWriter.DEFAULT_ESCAPE_CHARACTER,
-				CSVWriter.DEFAULT_LINE_END))
+				CSVWriter.DEFAULT_LINE_END ))
 		{
 			final int nCols = table.getColumnCount();
+			// Shall we skip the label column?
+			final boolean skipLabelColumn = labelGenerator == null;
+			final int labelColumnShift = skipLabelColumn ? 0 : 1;
+
+			final String[] content = new String[ nCols ];
 
 			/*
 			 * Header.
 			 */
 
-			final String[] content = new String[ nCols ];
+			/*
+			 * Determine we can skip 2nd or 3d line, if it's identical to the
+			 * 2nd one (happens when the names are repeated).
+			 */
+
+			boolean skipThirdLine = true;
+			boolean skipSecondLine = true;
+			for ( int i = labelColumnShift; i < content.length; i++ )
+			{
+				final String feature = features.get( i - labelColumnShift );
+				final String name = featureNames.get( features.get( i - labelColumnShift ) );
+				final String shortName = featureShortNames.get( features.get( i - labelColumnShift ) );
+				if ( !feature.equals( name ) )
+					skipSecondLine = false;
+				if ( !name.equals( shortName ) )
+					skipThirdLine = false;
+			}
 
 			// Header 1st line.
-			content[ 0 ] = "NAME";
-			for ( int i = 1; i < content.length; i++ )
-				content[ i ] = features.get( i - 1 );
+			if ( skipLabelColumn )
+				content[ 0 ] = "NAME";
+			for ( int i = labelColumnShift; i < content.length; i++ )
+				content[ i ] = features.get( i - labelColumnShift );
 			writer.writeNext( content );
 
 			// Header 2nd line.
-			content[ 0 ] = "";
-			for ( int i = 1; i < content.length; i++ )
-				content[ i ] = featureNames.get( features.get( i - 1 ) );
-			writer.writeNext( content );
+			if ( !skipSecondLine )
+			{
+				if ( skipLabelColumn )
+					content[ 0 ] = "";
+				for ( int i = labelColumnShift; i < content.length; i++ )
+					content[ i ] = featureNames.get( features.get( i - labelColumnShift ) );
+				writer.writeNext( content );
+			}
 
 			// Header 3rd line.
-			content[ 0 ] = "";
-			for ( int i = 1; i < content.length; i++ )
-				content[ i ] = featureShortNames.get( features.get( i - 1 ) );
-			writer.writeNext( content );
+			if ( !skipThirdLine )
+			{
+				if ( skipLabelColumn )
+					content[ 0 ] = "";
+				for ( int i = labelColumnShift; i < content.length; i++ )
+					content[ i ] = featureShortNames.get( features.get( i - labelColumnShift ) );
+				writer.writeNext( content );
+			}
 
 			// Header 4th line.
-			content[ 0 ] = "";
-			for ( int i = 1; i < content.length; i++ )
+			if ( skipLabelColumn )
+				content[ 0 ] = "";
+			for ( int i = labelColumnShift; i < content.length; i++ )
 			{
-				final String feature = features.get( i - 1 );
+				final String feature = features.get( i - labelColumnShift );
 				final String units = featureUnits.get( feature );
 				final String unitsStr = ( units == null || units.isEmpty() ) ? "" : "(" + units + ")";
 				content[ i ] = unitsStr;
@@ -493,11 +530,12 @@ public class TablePanel< O >
 			if ( null == o )
 				return null;
 
-			if ( columnIndex == 0 )
+			final int skipLabelColumn = labelGenerator == null ? 0 : 1;
+			if ( columnIndex == 0 && labelGenerator != null )
 				return labelGenerator.apply( o );
 			else
 			{
-				final String feature = features.get( columnIndex - 1 );
+				final String feature = features.get( columnIndex - skipLabelColumn );
 				final Double val = featureFun.apply( o, feature );
 
 				if ( feature.equals( manualColorFeature ) )
