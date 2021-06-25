@@ -184,9 +184,9 @@ public class GrapherPanel extends JPanel
 			spots.addAll( trackmate.getModel().getTrackModel().trackSpots( trackID ) );
 
 		final SpotFeatureGrapher grapher = new SpotFeatureGrapher(
+				spots,
 				xFeature,
 				yFeatures,
-				spots,
 				trackmate.getModel(),
 				selectionModel,
 				displaySettings );
@@ -202,7 +202,13 @@ public class GrapherPanel extends JPanel
 		for ( final Integer trackID : trackmate.getModel().getTrackModel().trackIDs( true ) )
 			edges.addAll( trackmate.getModel().getTrackModel().trackEdges( trackID ) );
 
-		final EdgeFeatureGrapher grapher = new EdgeFeatureGrapher( xFeature, yFeatures, edges, trackmate.getModel(), displaySettings );
+		final EdgeFeatureGrapher grapher = new EdgeFeatureGrapher(
+				edges,
+				xFeature,
+				yFeatures,
+				trackmate.getModel(),
+				selectionModel,
+				displaySettings );
 		final JFrame frame = grapher.render();
 		GuiUtils.positionWindow( frame, SwingUtilities.getWindowAncestor( this ) );
 		frame.setVisible( true );
@@ -210,7 +216,14 @@ public class GrapherPanel extends JPanel
 
 	private void plotTrackFeatures( final String xFeature, final List< String > yFeatures )
 	{
-		final TrackFeatureGrapher grapher = new TrackFeatureGrapher( xFeature, yFeatures, trackmate.getModel(), displaySettings );
+		final List< Integer > trackIDs = new ArrayList<>( trackmate.getModel().getTrackModel().unsortedTrackIDs( true ) );
+		final TrackFeatureGrapher grapher = new TrackFeatureGrapher(
+				trackIDs,
+				xFeature,
+				yFeatures,
+				trackmate.getModel(),
+				selectionModel,
+				displaySettings );
 		final JFrame frame = grapher.render();
 		GuiUtils.positionWindow( frame, SwingUtilities.getWindowAncestor( this ) );
 		frame.setVisible( true );

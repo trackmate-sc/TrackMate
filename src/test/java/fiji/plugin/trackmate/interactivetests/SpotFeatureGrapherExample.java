@@ -61,7 +61,13 @@ public class SpotFeatureGrapherExample
 		for ( final Iterator< Spot > it = model.getSpots().iterator( true ); it.hasNext(); )
 			spots.add( it.next() );
 
-		final SpotFeatureGrapher grapher = new SpotFeatureGrapher( Spot.POSITION_X, Y, spots, model, selectionModel, DisplaySettings.defaultStyle().copy() );
+		final SpotFeatureGrapher grapher = new SpotFeatureGrapher(
+				spots,
+				Spot.POSITION_X,
+				Y,
+				model,
+				selectionModel,
+				DisplaySettings.defaultStyle().copy() );
 		final JFrame frame = grapher.render();
 		frame.setLocationRelativeTo( null );
 		frame.setVisible( true );

@@ -470,7 +470,13 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 		if ( yFeatures.isEmpty() || spots.isEmpty() )
 			return;
 
-		final SpotFeatureGrapher grapher = new SpotFeatureGrapher( xFeature, yFeatures, spots, model, selectionModel, displaySettings );
+		final SpotFeatureGrapher grapher = new SpotFeatureGrapher(
+				spots,
+				xFeature,
+				yFeatures,
+				model,
+				selectionModel,
+				displaySettings );
 		grapher.render();
 	}
 

@@ -30,59 +30,57 @@ import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 
-public class SpotCollectionDataset extends ModelDataset implements XYDataset
+public class EdgeCollectionDataset extends ModelDataset
 {
 
 	private static final long serialVersionUID = 1L;
 
-	private final List< Spot > spots;
+	private final List< DefaultWeightedEdge > edges;
 
-	private final FeatureColorGenerator< Spot > spotColorGenerator;
+	private final FeatureColorGenerator< DefaultWeightedEdge > edgeColorGenerator;
 
 	private final Map< Integer, Set< DefaultWeightedEdge > > edgeMap;
 
-	public SpotCollectionDataset(
-			final Model model,
-			final SelectionModel selectionModel,
-			final DisplaySettings ds,
+	public EdgeCollectionDataset(
+			final List< DefaultWeightedEdge > edges,
 			final String xFeature,
 			final List< String > yFeatures,
-			final List< Spot > spots )
+			final Model model,
+			final SelectionModel selectionModel,
+			final DisplaySettings ds )
 	{
 		super( model, selectionModel, ds, xFeature, yFeatures );
-		this.spots = spots;
-		this.spotColorGenerator = FeatureUtils.createSpotColorGenerator( model, ds );
-		this.edgeMap = createEdgeMap( spots, model.getTrackModel() );
+		this.edges = edges;
+		this.edgeColorGenerator = FeatureUtils.createTrackColorGenerator( model, ds );
+		this.edgeMap = createEdgeMap( edges, model.getTrackModel() );
 	}
 
 	/**
 	 * Precompute the edges we will have to plot as lines.
 	 * 
-	 * @param spots
+	 * @param edges
 	 *            the spot collection.
 	 * @param trackModel
 	 *            the graph.
 	 * @return a new map.
 	 */
-	private static Map< Integer, Set< DefaultWeightedEdge > > createEdgeMap( final List< Spot > spots, final TrackModel trackModel )
+	private static Map< Integer, Set< DefaultWeightedEdge > > createEdgeMap( final List< DefaultWeightedEdge > edges, final TrackModel trackModel )
 	{
 		final Map< Integer, Set< DefaultWeightedEdge > > edgeMap = new HashMap<>();
-		for ( int i = 0; i < spots.size(); i++ )
+		for ( int i = 0; i < edges.size(); i++ )
 		{
-			final Spot source = spots.get( i );
-			final Set< DefaultWeightedEdge > edges = new HashSet<>();
-			for ( final Spot target : spots )
+			final Set< DefaultWeightedEdge > successors = new HashSet<>();
+			final DefaultWeightedEdge edge = edges.get( i );
+			final Spot target = trackModel.getEdgeTarget( edge );
+			for ( final DefaultWeightedEdge edgeCandidate : edges )
 			{
-				if ( source.getFeature( Spot.FRAME ).intValue() > target.getFeature( Spot.FRAME ).intValue() )
-					continue;
-
-				if ( !trackModel.containsEdge( source, target ) )
-					continue;
-
-				edges.add( trackModel.getEdge( source, target ) );
+				final Spot source = trackModel.getEdgeSource( edgeCandidate );
+				if (source == target)
+					successors.add( edgeCandidate );
+					
 			}
-			if ( !edges.isEmpty() )
-				edgeMap.put( Integer.valueOf( i ), edges );
+			if ( !successors.isEmpty() )
+				edgeMap.put( Integer.valueOf( i ), successors );
 		}
 		return edgeMap;
 	}
@@ -90,20 +88,21 @@ public class SpotCollectionDataset extends ModelDataset implements XYDataset
 	@Override
 	public int getItemCount( final int series )
 	{
-		return spots.size();
+		return edges.size();
 	}
 
 	@Override
 	public Number getX( final int series, final int item )
 	{
-		return spots.get( item ).getFeatures().get( xFeature );
+		return model.getFeatureModel().getEdgeFeature( edges.get( item ), xFeature );
 	}
 
 	@Override
 	public Number getY( final int series, final int item )
 	{
-		return spots.get( item ).getFeatures().get( yFeatures.get( series ) );
+		return model.getFeatureModel().getEdgeFeature( edges.get( item ), yFeatures.get( series ) );
 	}
+
 	@Override
 	public XYItemRenderer getRenderer()
 	{
@@ -135,22 +134,20 @@ public class SpotCollectionDataset extends ModelDataset implements XYDataset
 			final RectangleEdge yAxisLocation = plot.getRangeAxisEdge();
 			final PlotOrientation orientation = plot.getOrientation();
 			final String yFeature = yFeatures.get( series );
-			final Spot sourceSpot = spots.get( item );
+			final DefaultWeightedEdge sourceEdge = edges.get( item );
 			final Set< DefaultWeightedEdge > edges = edgeMap.get( Integer.valueOf( item ) );
-			for ( final DefaultWeightedEdge edge : edges )
+			for ( final DefaultWeightedEdge targetEdge : edges )
 			{
-				final Spot targetSpot = model.getTrackModel().getEdgeTarget( edge );
 
-				final Double x1 = targetSpot.getFeature( xFeature );
-				final Double y1 = targetSpot.getFeature( yFeature );
+				final Double x1 = model.getFeatureModel().getEdgeFeature( targetEdge, xFeature );
+				final Double y1 = model.getFeatureModel().getEdgeFeature( targetEdge, yFeature );
 				if ( x1 == null || y1 == null || x1.isNaN() || y1.isNaN() )
 					continue;
 
-				final Double x0 = sourceSpot.getFeature( xFeature );
-				final Double y0 = sourceSpot.getFeature( yFeature );
+				final Double x0 = model.getFeatureModel().getEdgeFeature( sourceEdge, xFeature );
+				final Double y0 = model.getFeatureModel().getEdgeFeature( sourceEdge, yFeature );
 				if ( x0 == null || y0 == null || x0.isNaN() || y0.isNaN() )
 					continue;
-
 
 				final double transX0 = domainAxis.valueToJava2D( x0, dataArea, xAxisLocation );
 				final double transY0 = rangeAxis.valueToJava2D( y0, dataArea, yAxisLocation );
@@ -174,17 +171,17 @@ public class SpotCollectionDataset extends ModelDataset implements XYDataset
 		@Override
 		public Paint getItemPaint( final int series, final int item )
 		{
-			final Spot spot = spots.get( item );
-			if ( selectionModel != null && selectionModel.getSpotSelection().contains( spot ) )
+			final DefaultWeightedEdge edge = edges.get( item );
+			if ( selectionModel != null && selectionModel.getEdgeSelection().contains( edge ) )
 				return ds.getHighlightColor();
-			return spotColorGenerator.color( spots.get( item ) );
+			return edgeColorGenerator.color( edges.get( item ) );
 		}
 
 		@Override
 		public Stroke getItemStroke( final int series, final int item )
 		{
-			final Spot spot = spots.get( item );
-			if ( selectionModel != null && selectionModel.getSpotSelection().contains( spot ) )
+			final DefaultWeightedEdge edge = edges.get( item );
+			if ( selectionModel != null && selectionModel.getEdgeSelection().contains( edge ) )
 				return selectionStroke;
 			return stroke;
 		}
