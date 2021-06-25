@@ -48,7 +48,6 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
-import fiji.plugin.trackmate.gui.components.FeaturePlotSelectionPanel;
 import fiji.plugin.trackmate.gui.components.FeaturePlotSelectionPanel.PlotAction;
 import fiji.plugin.trackmate.util.TMUtils;
 
@@ -57,8 +56,8 @@ import fiji.plugin.trackmate.util.TMUtils;
  * multiple Y keys from the same enum. This is intended as a GUI panel to
  * prepare for the plotting of data.
  * <p>
- * It has the same functionality that of {@link FeaturePlotSelectionPanel} but
- * has a more compact UI.
+ * It has the same functionality that of FeaturePlotSelectionPanel but has a
+ * more compact UI.
  *
  * @author Jean-Yves Tinevez - January 2011 - 2012
  */

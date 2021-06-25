@@ -55,7 +55,6 @@ import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import fiji.util.SplitString;
-import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij.Macro;

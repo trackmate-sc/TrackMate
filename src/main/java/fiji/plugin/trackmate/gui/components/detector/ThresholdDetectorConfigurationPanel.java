@@ -49,7 +49,6 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.detection.DetectionUtils;
-import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.detection.MaskUtils;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.detection.ThresholdDetectorFactory;
@@ -112,7 +111,7 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 
 	/**
 	 * Creates a new {@link ThresholdDetectorConfigurationPanel}, a GUI able to
-	 * configure settings suitable to {@link LogDetectorFactory} and derived
+	 * configure settings suitable to a LogDetectorFactory and derived
 	 * implementations.
 	 *
 	 * @param settings
