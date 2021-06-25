@@ -28,10 +28,10 @@ import java.awt.DisplayMode;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Point;
+import java.awt.Window;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
@@ -89,7 +89,7 @@ public class GuiUtils
 	/**
 	 * Positions a JFrame more or less cleverly next a {@link Component}.
 	 */
-	public static void positionWindow( final JFrame gui, final Component component )
+	public static void positionWindow( final Window gui, final Component component )
 	{
 
 		if ( null != component )
