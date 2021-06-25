@@ -265,10 +265,12 @@ public class SpotOverlay extends Roi
 		}
 
 		final SpotRoi roi = spot.getRoi();
-		final int textPos;
 		if ( !displaySettings.isSpotDisplayedAsRoi() || roi == null || roi.x.length < 2 )
 		{
 			final double apparentRadius = Math.sqrt( radius * radius - dz2 ) / calibration[ 0 ] * magnification;
+			final int textPos = ( int ) apparentRadius;
+			if ( displaySettings.isSpotShowName() )
+				drawSpotName( g2d, spot, xs, ys, textPos );
 			if ( filled )
 				g2d.fillOval(
 						( int ) Math.round( xs - apparentRadius ),
@@ -281,7 +283,6 @@ public class SpotOverlay extends Roi
 						( int ) Math.round( ys - apparentRadius ),
 						( int ) Math.round( 2 * apparentRadius ),
 						( int ) Math.round( 2 * apparentRadius ) );
-			textPos = ( int ) apparentRadius;
 		}
 		else
 		{
@@ -293,31 +294,35 @@ public class SpotOverlay extends Roi
 			for ( int i = 1; i < polygonX.length; ++i )
 				polygon.lineTo( polygonX[ i ], polygonY[ i ] );
 			polygon.closePath();
+			final int textPos = ( int ) ( Arrays.stream( polygonX ).max().getAsDouble() - xs );
 
 			if ( filled )
 			{
+				if ( displaySettings.isSpotShowName() )
+					drawSpotName( g2d, spot, xs, ys, textPos );
 				g2d.fill( polygon );
 				g2d.setColor( Color.BLACK );
 				g2d.draw( polygon );
 			}
 			else
+			{
+				if ( displaySettings.isSpotShowName() )
+					drawSpotName( g2d, spot, xs, ys, textPos );
 				g2d.draw( polygon );
-			textPos = ( int ) ( Arrays.stream( polygonX ).max().getAsDouble() - xs );
+			}
 		}
+	}
 
-		if ( displaySettings.isSpotShowName() )
-		{
-			final String str = spot.toString();
+	private final void drawSpotName( final Graphics2D g2d, final Spot spot, final double xs, final double ys, final int textPos )
+	{
+		final String str = spot.toString();
+		final int xindent = fm.stringWidth( str );
+		int xtext = ( int ) ( xs + textPos + 5 );
+		if ( xtext + xindent > imp.getWindow().getWidth() )
+			xtext = ( int ) ( xs - textPos - 5 - xindent );
 
-			final int xindent = fm.stringWidth( str );
-			int xtext = ( int ) ( xs + textPos + 5 );
-			if ( xtext + xindent > imp.getWindow().getWidth() )
-				xtext = ( int ) ( xs - textPos - 5 - xindent );
-
-			final int yindent = fm.getAscent() / 2;
-			final int ytext = ( int ) ys + yindent;
-
-			g2d.drawString( spot.toString(), xtext, ytext );
-		}
+		final int yindent = fm.getAscent() / 2;
+		final int ytext = ( int ) ys + yindent;
+		g2d.drawString( spot.toString(), xtext, ytext );
 	}
 }
