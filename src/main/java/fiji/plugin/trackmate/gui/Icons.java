@@ -83,6 +83,8 @@ public class Icons
 		EDGE_ICON_16x16 = new ImageIcon( newimg7 );
 	}
 
+	public static final ImageIcon SPOT_ICON_16x16 = new ImageIcon( Icons.class.getResource( "images/spot_icon_16x16.png" ) );
+
 	public static final ImageIcon TRACK_TABLES_ICON = new ImageIcon( Icons.class.getResource( "images/table_multiple.png" ) );
 
 	public static final ImageIcon SPOT_TABLE_ICON = new ImageIcon( Icons.class.getResource( "images/table.png" ) );

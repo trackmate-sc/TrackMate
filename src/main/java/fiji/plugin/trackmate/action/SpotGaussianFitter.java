@@ -364,7 +364,7 @@ public class SpotGaussianFitter extends MultiThreadedBenchmarkAlgorithm
 		@Override
 		public ImageIcon getIcon()
 		{
-			return Icons.SPOT_ICON_64x64;
+			return Icons.SPOT_ICON_16x16;
 		}
 
 		@Override
