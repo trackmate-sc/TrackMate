@@ -55,6 +55,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import com.itextpdf.text.Font;
 
@@ -193,7 +194,7 @@ public class DisplaySettingsPanel extends JPanel
 					public void visit( final FontElement element )
 					{
 						addToLayout(
-								linkedFontButton( element ),
+								linkedFontButton( element, SwingUtilities.getWindowAncestor( DisplaySettingsPanel.this ) ),
 								new JLabel( element.getLabel() ) );
 					}
 
