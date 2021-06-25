@@ -21,7 +21,7 @@
  */
 package fiji.plugin.trackmate.features;
 
-import java.util.Set;
+import java.util.List;
 
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -34,7 +34,11 @@ import fiji.plugin.trackmate.util.XYEdgeSeriesCollection;
 public class TrackFeatureGrapher extends AbstractFeatureGrapher
 {
 
-	public TrackFeatureGrapher( final String xFeature, final Set< String > yFeatures, final Model model, final DisplaySettings displaySettings )
+	public TrackFeatureGrapher(
+			final String xFeature,
+			final List< String > yFeatures,
+			final Model model,
+			final DisplaySettings displaySettings )
 	{
 		super(
 				model,
@@ -45,7 +49,6 @@ public class TrackFeatureGrapher extends AbstractFeatureGrapher
 				model.getFeatureModel().getTrackFeatureDimensions(),
 				model.getFeatureModel().getTrackFeatureNames() );
 	}
-
 
 	/**
 	 * @return a new dataset that contains the values, specified from the given

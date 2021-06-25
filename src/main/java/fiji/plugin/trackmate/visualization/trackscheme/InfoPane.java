@@ -39,7 +39,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.swing.AbstractListModel;
 import javax.swing.JLabel;
@@ -465,13 +464,13 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 	 * @param yFeatures
 	 *            the features to plot as Y axis.
 	 */
-	private void plotSelectionData( final String xFeature, final Set< String > yFeatures )
+	private void plotSelectionData( final String xFeature, final List< String > yFeatures )
 	{
-		final Set< Spot > spots = selectionModel.getSpotSelection();
+		final List< Spot > spots = new ArrayList<>( selectionModel.getSpotSelection() );
 		if ( yFeatures.isEmpty() || spots.isEmpty() )
 			return;
 
-		final SpotFeatureGrapher grapher = new SpotFeatureGrapher( xFeature, yFeatures, spots, model, displaySettings );
+		final SpotFeatureGrapher grapher = new SpotFeatureGrapher( xFeature, yFeatures, spots, model, selectionModel, displaySettings );
 		grapher.render();
 	}
 

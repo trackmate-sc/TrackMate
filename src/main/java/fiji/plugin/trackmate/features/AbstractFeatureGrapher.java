@@ -67,17 +67,17 @@ public abstract class AbstractFeatureGrapher
 
 	protected final String xFeature;
 
-	private final Set< String > yFeatures;
+	protected final List< String > yFeatures;
 
 	protected final Model model;
 
 	protected final DisplaySettings displaySettings;
 
-	private final Color bgColor = new Color( 220, 220, 220 );
+	protected final Color bgColor = new Color( 220, 220, 220 );
 
-	private final Dimension xDimension;
+	protected final Dimension xDimension;
 
-	private final Map< String, Dimension > yDimensions;
+	protected final Map< String, Dimension > yDimensions;
 
 	protected Map< String, String > featureNames;
 
@@ -85,7 +85,7 @@ public abstract class AbstractFeatureGrapher
 			final Model model,
 			final DisplaySettings displaySettings,
 			final String xFeature,
-			final Set< String > yFeatures,
+			final List< String > yFeatures,
 			final Dimension xDimension,
 			final Map< String, Dimension > yDimensions,
 			final Map< String, String > featureNames )
@@ -132,7 +132,7 @@ public abstract class AbstractFeatureGrapher
 			final XYSeriesCollection pointDataset = buildMainDataSet( featuresThisDimension );
 
 			// Point renderer
-			final XYLineAndShapeRenderer pointRenderer = new XYLineAndShapeRenderer();
+			final XYLineAndShapeRenderer pointRenderer = new XYLineAndShapeRenderer( false, true );
 
 			// Edge renderer
 			final XYEdgeRenderer edgeRenderer = new XYEdgeRenderer();
@@ -175,13 +175,13 @@ public abstract class AbstractFeatureGrapher
 			plot.getDomainAxis().setTickLabelInsets( new RectangleInsets( 10, 20, 10, 20 ) );
 
 			// Paint
-			pointRenderer.setUseOutlinePaint( true );
+//			pointRenderer.setUseOutlinePaint( true );
 			if ( edgeDataset != null )
 			{
 				final int nseries = edgeDataset.getSeriesCount();
 				for ( int i = 0; i < nseries; i++ )
 				{
-					pointRenderer.setSeriesOutlinePaint( i, Color.black );
+//					pointRenderer.setSeriesOutlinePaint( i, Color.black );
 					pointRenderer.setSeriesLinesVisible( i, false );
 					pointRenderer.setSeriesShape( i, DEFAULT_SHAPE, false );
 					pointRenderer.setSeriesPaint( i, colormap.getPaint( ( double ) i / nseries ), false );
@@ -212,7 +212,7 @@ public abstract class AbstractFeatureGrapher
 	 * 
 	 * @return a new JFrame, not shown yet.
 	 */
-	private final JFrame renderCharts( final List< ExportableChartPanel > chartPanels )
+	protected final JFrame renderCharts( final List< ExportableChartPanel > chartPanels )
 	{
 		// The Panel
 		final JPanel panel = new JPanel();
@@ -246,7 +246,7 @@ public abstract class AbstractFeatureGrapher
 	 * 
 	 * @return a new set.
 	 */
-	private final < K, V > Set< V > getUniqueValues( final Iterable< K > keys, final Map< K, V > map )
+	protected final < K, V > Set< V > getUniqueValues( final Iterable< K > keys, final Map< K, V > map )
 	{
 		final HashSet< V > mapping = new HashSet<>();
 		for ( final K key : keys )
@@ -267,7 +267,7 @@ public abstract class AbstractFeatureGrapher
 	 *            the map to search in
 	 * @return a new list.
 	 */
-	private final < K, V > List< K > getCommonKeys( final V targetValue, final Iterable< K > keys, final Map< K, V > map )
+	protected final < K, V > List< K > getCommonKeys( final V targetValue, final Iterable< K > keys, final Map< K, V > map )
 	{
 		final ArrayList< K > foundKeys = new ArrayList<>();
 		for ( final K key : keys )
@@ -285,7 +285,7 @@ public abstract class AbstractFeatureGrapher
 	 * @return the plot title.
 	 */
 
-	private final String buildPlotTitle( final Iterable< String > lYFeatures, final Map< String, String > featureNames )
+	protected final String buildPlotTitle( final Iterable< String > lYFeatures, final Map< String, String > featureNames )
 	{
 		final StringBuilder sb = new StringBuilder( "Plot of " );
 		final Iterator< String > it = lYFeatures.iterator();

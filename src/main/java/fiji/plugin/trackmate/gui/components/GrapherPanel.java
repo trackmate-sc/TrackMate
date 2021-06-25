@@ -39,6 +39,7 @@ import javax.swing.SwingUtilities;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 
+import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.EdgeFeatureGrapher;
@@ -70,13 +71,16 @@ public class GrapherPanel extends JPanel
 
 	private final DisplaySettings displaySettings;
 
+	private final SelectionModel selectionModel;
+
 	/*
 	 * CONSTRUCTOR
 	 */
 
-	public GrapherPanel( final TrackMate trackmate, final DisplaySettings displaySettings )
+	public GrapherPanel( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings )
 	{
 		this.trackmate = trackmate;
+		this.selectionModel = selectionModel;
 		this.displaySettings = displaySettings;
 
 		setLayout( new BorderLayout( 0, 0 ) );
@@ -172,20 +176,26 @@ public class GrapherPanel extends JPanel
 		panelTracks.add( trackFeatureSelectionPanel );
 	}
 
-	private void plotSpotFeatures( final String xFeature, final Set< String > yFeatures )
+	private void plotSpotFeatures( final String xFeature, final List< String > yFeatures )
 	{
 		// Collect only the spots that are in tracks
 		final List< Spot > spots = new ArrayList<>( trackmate.getModel().getSpots().getNSpots( true ) );
 		for ( final Integer trackID : trackmate.getModel().getTrackModel().trackIDs( true ) )
 			spots.addAll( trackmate.getModel().getTrackModel().trackSpots( trackID ) );
 
-		final SpotFeatureGrapher grapher = new SpotFeatureGrapher( xFeature, yFeatures, spots, trackmate.getModel(), displaySettings );
+		final SpotFeatureGrapher grapher = new SpotFeatureGrapher(
+				xFeature,
+				yFeatures,
+				spots,
+				trackmate.getModel(),
+				selectionModel,
+				displaySettings );
 		final JFrame frame = grapher.render();
 		GuiUtils.positionWindow( frame, SwingUtilities.getWindowAncestor( this ) );
 		frame.setVisible( true );
 	}
 
-	private void plotEdgeFeatures( final String xFeature, final Set< String > yFeatures )
+	private void plotEdgeFeatures( final String xFeature, final List< String > yFeatures )
 	{
 		// Collect edges in filtered tracks
 		final List< DefaultWeightedEdge > edges = new ArrayList<>();
@@ -198,7 +208,7 @@ public class GrapherPanel extends JPanel
 		frame.setVisible( true );
 	}
 
-	private void plotTrackFeatures( final String xFeature, final Set< String > yFeatures )
+	private void plotTrackFeatures( final String xFeature, final List< String > yFeatures )
 	{
 		final TrackFeatureGrapher grapher = new TrackFeatureGrapher( xFeature, yFeatures, trackmate.getModel(), displaySettings );
 		final JFrame frame = grapher.render();

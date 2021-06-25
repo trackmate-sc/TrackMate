@@ -22,7 +22,6 @@
 package fiji.plugin.trackmate.features;
 
 import java.util.List;
-import java.util.Set;
 
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -41,7 +40,7 @@ public class EdgeFeatureGrapher extends AbstractFeatureGrapher
 
 	public EdgeFeatureGrapher(
 			final String xFeature,
-			final Set< String > yFeatures,
+			final List< String > yFeatures,
 			final List< DefaultWeightedEdge > edges,
 			final Model model,
 			final DisplaySettings displaySettings )
