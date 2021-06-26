@@ -54,14 +54,6 @@ public abstract class ModelDataset extends AbstractDataset implements XYDataset
 		return yFeatures.size();
 	}
 
-	@Override
-	public String getSeriesKey( final int series )
-	{
-		if ( ( series < 0 ) || ( series >= getSeriesCount() ) )
-			throw new IllegalArgumentException( "Series index out of bounds" );
-		return model.getFeatureModel().getSpotFeatureShortNames().get( yFeatures.get( series ) );
-	}
-
 	@SuppressWarnings( "rawtypes" )
 	@Override
 	public int indexOf( final Comparable seriesKey )
@@ -83,13 +75,19 @@ public abstract class ModelDataset extends AbstractDataset implements XYDataset
 	@Override
 	public double getXValue( final int series, final int item )
 	{
-		return getX( series, item ).doubleValue();
+		final Number val = getX( series, item );
+		if ( val == null )
+			return Double.NaN;
+		return val.doubleValue();
 	}
 
 	@Override
 	public double getYValue( final int series, final int item )
 	{
-		return getY( series, item ).doubleValue();
+		final Number val = getY( series, item );
+		if ( val == null )
+			return Double.NaN;
+		return val.doubleValue();
 	}
 
 	public abstract XYItemRenderer getRenderer();
