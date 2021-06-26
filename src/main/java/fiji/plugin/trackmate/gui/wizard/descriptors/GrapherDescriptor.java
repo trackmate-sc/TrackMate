@@ -37,11 +37,4 @@ public class GrapherDescriptor extends WizardPanelDescriptor
 		super( KEY );
 		this.targetPanel = new GrapherPanel( trackmate, selectionModel, displaySettings );
 	}
-
-	@Override
-	public void aboutToDisplayPanel()
-	{
-		final GrapherPanel panel = ( GrapherPanel ) targetPanel;
-		panel.refresh();
-	}
 }

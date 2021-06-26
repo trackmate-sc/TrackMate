@@ -23,7 +23,6 @@ package fiji.plugin.trackmate.features;
 
 import static fiji.plugin.trackmate.gui.Fonts.FONT;
 import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
-import static fiji.plugin.trackmate.gui.Icons.TRACK_SCHEME_ICON;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -190,8 +189,6 @@ public abstract class AbstractFeatureGrapher
 
 		// The frame
 		final JFrame frame = new JFrame();
-		frame.setTitle( "Feature plot for Track scheme" );
-		frame.setIconImage( TRACK_SCHEME_ICON.getImage() );
 		frame.getContentPane().add( scrollPane );
 		frame.validate();
 		frame.setSize( new java.awt.Dimension( 520, 320 ) );
