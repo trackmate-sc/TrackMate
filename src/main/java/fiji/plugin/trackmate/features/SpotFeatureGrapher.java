@@ -62,8 +62,14 @@ public class SpotFeatureGrapher extends AbstractFeatureGrapher
 	}
 
 	@Override
-	protected ModelDataset buildMainDataSet( final Iterable< String > targetYFeatures )
+	protected ModelDataset buildMainDataSet( final List< String > targetYFeatures )
 	{
-		return new SpotCollectionDataset( model, selectionModel, ds, xFeature, yFeatures, spots );
+		return new SpotCollectionDataset(
+				model,
+				selectionModel,
+				ds,
+				xFeature,
+				targetYFeatures,
+				spots );
 	}
 }

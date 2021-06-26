@@ -42,12 +42,12 @@ public class EdgeCollectionDataset extends ModelDataset
 	private final Map< Integer, Set< DefaultWeightedEdge > > edgeMap;
 
 	public EdgeCollectionDataset(
-			final List< DefaultWeightedEdge > edges,
-			final String xFeature,
-			final List< String > yFeatures,
 			final Model model,
 			final SelectionModel selectionModel,
-			final DisplaySettings ds )
+			final DisplaySettings ds,
+			final String xFeature,
+			final List< String > yFeatures,
+			final List< DefaultWeightedEdge > edges )
 	{
 		super( model, selectionModel, ds, xFeature, yFeatures );
 		this.edges = edges;

@@ -37,7 +37,6 @@ public abstract class ModelDataset extends AbstractDataset implements XYDataset
 			final DisplaySettings ds,
 			final String xFeature,
 			final List< String > yFeatures )
-
 	{
 		this.model = model;
 		this.selectionModel = selectionModel;

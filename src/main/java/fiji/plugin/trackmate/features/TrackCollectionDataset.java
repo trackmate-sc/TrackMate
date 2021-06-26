@@ -24,12 +24,12 @@ public class TrackCollectionDataset extends ModelDataset
 	private final FeatureColorGenerator< Integer > trackColorGenerator;
 
 	public TrackCollectionDataset(
-			final List< Integer > trackIDs,
-			final String xFeature,
-			final List< String > yFeatures,
 			final Model model,
 			final SelectionModel selectionModel,
-			final DisplaySettings ds )
+			final DisplaySettings ds,
+			final String xFeature,
+			final List< String > yFeatures,
+			final List< Integer > trackIDs )
 	{
 		super( model, selectionModel, ds, xFeature, yFeatures );
 		this.trackIDs = trackIDs;

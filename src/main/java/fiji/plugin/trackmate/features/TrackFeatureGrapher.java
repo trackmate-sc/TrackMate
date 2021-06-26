@@ -61,8 +61,14 @@ public class TrackFeatureGrapher extends AbstractFeatureGrapher
 	}
 
 	@Override
-	protected ModelDataset buildMainDataSet( final Iterable< String > targetYFeatures )
+	protected ModelDataset buildMainDataSet( final List< String > targetYFeatures )
 	{
-		return new TrackCollectionDataset( trackIDs, xFeature, yFeatures, model, selectionModel, ds );
+		return new TrackCollectionDataset(
+				model,
+				selectionModel,
+				ds,
+				xFeature,
+				targetYFeatures,
+				trackIDs );
 	}
 }
