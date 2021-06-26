@@ -73,6 +73,11 @@ public class TrackCollectionDataset extends ModelDataset
 
 		private static final long serialVersionUID = 1L;
 
+		public MyXYItemRenderer()
+		{
+			super( false, true );
+		}
+
 		@Override
 		public Paint getItemPaint( final int series, final int item )
 		{
