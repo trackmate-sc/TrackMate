@@ -30,6 +30,10 @@ import javax.swing.JFrame;
 
 import org.scijava.util.VersionUtils;
 
+import fiji.plugin.trackmate.features.FeatureAnalyzer;
+import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
+import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactoryBase;
+import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.components.LogPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
@@ -158,6 +162,18 @@ public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 			settings.imp = ViewUtils.makeEmpytImagePlus( model );
 
 		/*
+		 * Declare the analyzers that are in the settings to the model. This is
+		 * required when we are loading a file that does not have the analyzer
+		 * presents at runtime declared in the settings section of the file.
+		 */
+		for ( final SpotAnalyzerFactoryBase< ? > analyzer : settings.getSpotAnalyzerFactories() )
+			declare( analyzer, model );
+		for ( final EdgeAnalyzer analyzer : settings.getEdgeAnalyzers() )
+			declare( analyzer, model );
+		for ( final TrackAnalyzer analyzer : settings.getTrackAnalyzers() )
+			declare( analyzer, model );
+
+		/*
 		 * Create TrackMate.
 		 */
 
@@ -215,6 +231,16 @@ public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 		}
 	}
 
+	private static final void declare( final FeatureAnalyzer analyzer, final Model model )
+	{
+		model.getFeatureModel().declareEdgeFeatures(
+				analyzer.getFeatures(),
+				analyzer.getFeatureNames(),
+				analyzer.getFeatureShortNames(),
+				analyzer.getFeatureDimensions(),
+				analyzer.getIsIntFeature() );
+	}
+
 	/*
 	 * HOOKS
 	 */
@@ -253,7 +279,7 @@ public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 		ImageJ.main( args );
 		final LoadTrackMatePlugIn plugIn = new LoadTrackMatePlugIn();
 //		plugIn.run( "samples/FakeTracks.xml" );
-//		plugIn.run( "samples/MAX_Merged.xml" );
-		plugIn.run( "" );
+		plugIn.run( "samples/MAX_Merged.xml" );
+//		plugIn.run( "" );
 	}
 }
