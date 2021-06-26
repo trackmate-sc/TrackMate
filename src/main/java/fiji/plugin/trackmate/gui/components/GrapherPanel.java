@@ -27,13 +27,16 @@ import static fiji.plugin.trackmate.gui.Icons.TRACK_ICON_64x64;
 
 import java.awt.BorderLayout;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -75,6 +78,14 @@ public class GrapherPanel extends JPanel
 	private final DisplaySettings displaySettings;
 
 	private final SelectionModel selectionModel;
+
+	private final JPanel panelSelection;
+
+	private final JRadioButton rdbtnAll;
+
+	private final JRadioButton rdbtnSelection;
+
+	private final JRadioButton rdbtnTracks;
 
 	/*
 	 * CONSTRUCTOR
@@ -136,6 +147,27 @@ public class GrapherPanel extends JPanel
 				trackFeatureNames,
 				( xKey, yKeys ) -> new Thread( () -> plotTrackFeatures( xKey, yKeys ) ).start() );
 		panelTracks.add( trackFeatureSelectionPanel );
+
+		panelSelection = new JPanel();
+		add( panelSelection, BorderLayout.SOUTH );
+
+		rdbtnAll = new JRadioButton( "All" );
+		rdbtnAll.setFont( rdbtnAll.getFont().deriveFont( rdbtnAll.getFont().getSize() - 2f ) );
+		panelSelection.add( rdbtnAll );
+
+		rdbtnSelection = new JRadioButton( "Selection" );
+		rdbtnSelection.setFont( rdbtnSelection.getFont().deriveFont( rdbtnSelection.getFont().getSize() - 2f ) );
+		panelSelection.add( rdbtnSelection );
+
+		rdbtnTracks = new JRadioButton( "Tracks of selection" );
+		rdbtnTracks.setFont( rdbtnTracks.getFont().deriveFont( rdbtnTracks.getFont().getSize() - 2f ) );
+		panelSelection.add( rdbtnTracks );
+
+		final ButtonGroup btngrp = new ButtonGroup();
+		btngrp.add( rdbtnAll );
+		btngrp.add( rdbtnSelection );
+		btngrp.add( rdbtnTracks );
+		rdbtnAll.setSelected( true );
 	}
 
 	private void plotSpotFeatures( final String xFeature, final List< String > yFeatures )
@@ -144,9 +176,24 @@ public class GrapherPanel extends JPanel
 		enabler.disable();
 		try
 		{
-			final List< Spot > spots = new ArrayList<>( trackmate.getModel().getSpots().getNSpots( true ) );
-			for ( final Integer trackID : trackmate.getModel().getTrackModel().trackIDs( true ) )
-				spots.addAll( trackmate.getModel().getTrackModel().trackSpots( trackID ) );
+			final List< Spot > spots;
+			if ( rdbtnAll.isSelected() )
+			{
+				spots = new ArrayList<>( trackmate.getModel().getSpots().getNSpots( true ) );
+				for ( final Integer trackID : trackmate.getModel().getTrackModel().trackIDs( true ) )
+					spots.addAll( trackmate.getModel().getTrackModel().trackSpots( trackID ) );
+			}
+			else if ( rdbtnSelection.isSelected() )
+			{
+				spots = new ArrayList<>( selectionModel.getSpotSelection() );
+			}
+			else
+			{
+				selectionModel.selectTrack(
+						selectionModel.getSpotSelection(),
+						selectionModel.getEdgeSelection(), 0 );
+				spots = new ArrayList<>( selectionModel.getSpotSelection() );
+			}
 
 			final SpotFeatureGrapher grapher = new SpotFeatureGrapher(
 					spots,
@@ -173,9 +220,24 @@ public class GrapherPanel extends JPanel
 		enabler.disable();
 		try
 		{
-			final List< DefaultWeightedEdge > edges = new ArrayList<>();
-			for ( final Integer trackID : trackmate.getModel().getTrackModel().trackIDs( true ) )
-				edges.addAll( trackmate.getModel().getTrackModel().trackEdges( trackID ) );
+			final List< DefaultWeightedEdge > edges;
+			if ( rdbtnAll.isSelected() )
+			{
+				edges = new ArrayList<>();
+				for ( final Integer trackID : trackmate.getModel().getTrackModel().trackIDs( true ) )
+					edges.addAll( trackmate.getModel().getTrackModel().trackEdges( trackID ) );
+			}
+			else if ( rdbtnSelection.isSelected() )
+			{
+				edges = new ArrayList<>( selectionModel.getEdgeSelection() );
+			}
+			else
+			{
+				selectionModel.selectTrack(
+						selectionModel.getSpotSelection(),
+						selectionModel.getEdgeSelection(), 0 );
+				edges = new ArrayList<>( selectionModel.getEdgeSelection() );
+			}
 
 			final EdgeFeatureGrapher grapher = new EdgeFeatureGrapher(
 					edges,
@@ -203,7 +265,21 @@ public class GrapherPanel extends JPanel
 		enabler.disable();
 		try
 		{
-			final List< Integer > trackIDs = new ArrayList<>( trackmate.getModel().getTrackModel().unsortedTrackIDs( true ) );
+			final List< Integer > trackIDs;
+			if ( rdbtnAll.isSelected() )
+			{
+				trackIDs = new ArrayList<>( trackmate.getModel().getTrackModel().unsortedTrackIDs( true ) );
+			}
+			else
+			{
+				final Set< Integer > set = new HashSet<>();
+				for ( final Spot spot : selectionModel.getSpotSelection() )
+					set.add( trackmate.getModel().getTrackModel().trackIDOf( spot ) );
+				for ( final DefaultWeightedEdge edge : selectionModel.getEdgeSelection() )
+					set.add( trackmate.getModel().getTrackModel().trackIDOf( edge ) );
+				trackIDs = new ArrayList< >( set );
+			}
+
 			final TrackFeatureGrapher grapher = new TrackFeatureGrapher(
 					trackIDs,
 					xFeature,
