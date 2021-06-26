@@ -101,7 +101,7 @@ public class TrackSchemeFrame extends JFrame
 		graphComponent = createGraphComponent();
 
 		// Add the info pane
-		infoPane = new InfoPane( trackScheme.getModel(), trackScheme.getSelectionModel(), displaySettings );
+		infoPane = new InfoPane( trackScheme.getModel(), trackScheme.getSelectionModel() );
 
 		// Add the graph outline
 		final mxGraphOutline graphOutline = new mxGraphOutline( graphComponent );
