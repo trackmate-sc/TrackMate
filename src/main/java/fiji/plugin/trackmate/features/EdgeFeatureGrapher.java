@@ -63,8 +63,14 @@ public class EdgeFeatureGrapher extends AbstractFeatureGrapher
 	}
 
 	@Override
-	protected ModelDataset buildMainDataSet( final Iterable< String > targetYFeatures )
+	protected ModelDataset buildMainDataSet( final List< String > targetYFeatures )
 	{
-		return new EdgeCollectionDataset( edges, xFeature, yFeatures, model, selectionModel, ds );
+		return new EdgeCollectionDataset(
+				model,
+				selectionModel,
+				ds,
+				xFeature,
+				targetYFeatures,
+				edges );
 	}
 }

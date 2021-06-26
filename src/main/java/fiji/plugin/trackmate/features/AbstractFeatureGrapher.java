@@ -157,7 +157,7 @@ public abstract class AbstractFeatureGrapher
 		return renderCharts( chartPanels );
 	}
 
-	protected abstract ModelDataset buildMainDataSet( final Iterable< String > targetYFeatures );
+	protected abstract ModelDataset buildMainDataSet( final List< String > targetYFeatures );
 
 	/*
 	 * UTILS
