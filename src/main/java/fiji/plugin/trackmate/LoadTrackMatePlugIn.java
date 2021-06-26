@@ -30,7 +30,6 @@ import javax.swing.JFrame;
 
 import org.scijava.util.VersionUtils;
 
-import fiji.plugin.trackmate.features.FeatureAnalyzer;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactoryBase;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
@@ -91,7 +90,8 @@ public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 				file = new File( parent2 != null ? parent2 : parent != null ? parent : folder, "TrackMateData.xml" );
 			}
 			final File tmpFile = IOUtils.askForFileForLoading( file, "Load a TrackMate XML file", null, logger );
-			if ( null == tmpFile ) { return; }
+			if ( null == tmpFile )
+				return;
 			file = tmpFile;
 		}
 		else
@@ -167,11 +167,27 @@ public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 		 * presents at runtime declared in the settings section of the file.
 		 */
 		for ( final SpotAnalyzerFactoryBase< ? > analyzer : settings.getSpotAnalyzerFactories() )
-			declare( analyzer, model );
+			model.getFeatureModel().declareSpotFeatures(
+					analyzer.getFeatures(),
+					analyzer.getFeatureNames(),
+					analyzer.getFeatureShortNames(),
+					analyzer.getFeatureDimensions(),
+					analyzer.getIsIntFeature() );
+
 		for ( final EdgeAnalyzer analyzer : settings.getEdgeAnalyzers() )
-			declare( analyzer, model );
+			model.getFeatureModel().declareEdgeFeatures(
+					analyzer.getFeatures(),
+					analyzer.getFeatureNames(),
+					analyzer.getFeatureShortNames(),
+					analyzer.getFeatureDimensions(),
+					analyzer.getIsIntFeature() );
 		for ( final TrackAnalyzer analyzer : settings.getTrackAnalyzers() )
-			declare( analyzer, model );
+			model.getFeatureModel().declareTrackFeatures(
+					analyzer.getFeatures(),
+					analyzer.getFeatureNames(),
+					analyzer.getFeatureShortNames(),
+					analyzer.getFeatureDimensions(),
+					analyzer.getIsIntFeature() );
 
 		/*
 		 * Create TrackMate.
@@ -197,10 +213,10 @@ public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 		// Main view.
 		final TrackMateModelView displayer = new HyperStackDisplayer( model, selectionModel, settings.imp, displaySettings );
 		displayer.render();
-		
+
 		// GUI state
 		String panelIdentifier = reader.getGUIState();
-		
+
 		if ( null == panelIdentifier )
 			panelIdentifier = ConfigureViewsDescriptor.KEY;
 
@@ -212,11 +228,11 @@ public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 		GuiUtils.positionWindow( frame, settings.imp.getWindow() );
 		frame.setVisible( true );
 
-		// Text		
+		// Text
 		final LogPanelDescriptor2 logDescriptor = ( LogPanelDescriptor2 ) sequence.logDescriptor();
 		final LogPanel logPanel = ( LogPanel ) logDescriptor.getPanelComponent();
 		final Logger logger2 = logPanel.getLogger();
-		
+
 		logger2.log( "Session log saved in the file:\n"
 				+ "--------------------\n"
 				+ logText
@@ -229,16 +245,6 @@ public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 			logger2.error( "Some errors occurred while reading file:\n" );
 			logger2.error( reader.getErrorMessage() );
 		}
-	}
-
-	private static final void declare( final FeatureAnalyzer analyzer, final Model model )
-	{
-		model.getFeatureModel().declareEdgeFeatures(
-				analyzer.getFeatures(),
-				analyzer.getFeatureNames(),
-				analyzer.getFeatureShortNames(),
-				analyzer.getFeatureDimensions(),
-				analyzer.getIsIntFeature() );
 	}
 
 	/*
