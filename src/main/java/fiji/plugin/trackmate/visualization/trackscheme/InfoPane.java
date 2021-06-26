@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.AbstractListModel;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
@@ -66,6 +67,8 @@ import fiji.plugin.trackmate.SelectionChangeListener;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.features.SpotFeatureGrapher;
+import fiji.plugin.trackmate.gui.GuiUtils;
+import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.util.OnRequestUpdater;
 import fiji.plugin.trackmate.util.OnRequestUpdater.Refreshable;
@@ -477,7 +480,10 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 				model,
 				selectionModel,
 				displaySettings );
-		grapher.render();
+		final JFrame frame = grapher.render();
+		frame.setIconImage( Icons.PLOT_ICON.getImage() );
+		GuiUtils.positionWindow( frame, SwingUtilities.getWindowAncestor( this ) );
+		frame.setVisible( true );
 	}
 
 	/*
