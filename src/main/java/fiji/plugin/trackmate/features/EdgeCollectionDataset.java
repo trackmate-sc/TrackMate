@@ -75,9 +75,9 @@ public class EdgeCollectionDataset extends ModelDataset
 			for ( final DefaultWeightedEdge edgeCandidate : edges )
 			{
 				final Spot source = trackModel.getEdgeSource( edgeCandidate );
-				if (source == target)
+				if ( source == target )
 					successors.add( edgeCandidate );
-					
+
 			}
 			if ( !successors.isEmpty() )
 				edgeMap.put( Integer.valueOf( i ), successors );
@@ -89,6 +89,14 @@ public class EdgeCollectionDataset extends ModelDataset
 	public int getItemCount( final int series )
 	{
 		return edges.size();
+	}
+
+	@Override
+	public String getSeriesKey( final int series )
+	{
+		if ( ( series < 0 ) || ( series >= getSeriesCount() ) )
+			throw new IllegalArgumentException( "Series index out of bounds" );
+		return model.getFeatureModel().getEdgeFeatureShortNames().get( yFeatures.get( series ) );
 	}
 
 	@Override

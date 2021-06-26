@@ -43,6 +43,14 @@ public class TrackCollectionDataset extends ModelDataset
 	}
 
 	@Override
+	public String getSeriesKey( final int series )
+	{
+		if ( ( series < 0 ) || ( series >= getSeriesCount() ) )
+			throw new IllegalArgumentException( "Series index out of bounds" );
+		return model.getFeatureModel().getTrackFeatureShortNames().get( yFeatures.get( series ) );
+	}
+
+	@Override
 	public Number getX( final int series, final int item )
 	{
 		return model.getFeatureModel().getTrackFeature( trackIDs.get( item ), xFeature );
