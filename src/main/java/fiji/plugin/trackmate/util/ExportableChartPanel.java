@@ -32,7 +32,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
-import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtils;
@@ -116,7 +116,7 @@ public class ExportableChartPanel extends ChartPanel
 		return menu;
 	}
 
-	public void createDataTable()
+	private void createDataTable()
 	{
 		XYPlot plot = null;
 		try
@@ -191,20 +191,10 @@ public class ExportableChartPanel extends ChartPanel
 
 			final Frame frame = ( Frame ) dialogParent;
 			final FileDialog dialog = new FileDialog( frame, "Export chart to PNG, PDF or SVG", FileDialog.SAVE );
-			String defaultDir = null;
-			if ( currentDir != null )
-				defaultDir = currentDir.getPath();
-			
-			dialog.setDirectory( defaultDir );
-			final FilenameFilter filter = new FilenameFilter()
-			{
-				@Override
-				public boolean accept( final File dir, final String name )
-				{
-					return name.endsWith( ".png" ) || name.endsWith( ".pdf" ) || name.endsWith( ".svg" );
-				}
-			};
+			final FilenameFilter filter = ( dir, name ) -> name.endsWith( ".png" ) || name.endsWith( ".pdf" ) || name.endsWith( ".svg" );
 			dialog.setFilenameFilter( filter );
+			dialog.setDirectory( currentDir.getAbsolutePath() );
+			dialog.setFile( new File( currentDir, getChart().getTitle().getText().replaceAll( "\\.+$", "" ) + ".pdf" ).getAbsolutePath() );
 			dialog.setVisible( true );
 			final String selectedFile = dialog.getFile();
 			if ( null == selectedFile )
@@ -216,52 +206,12 @@ public class ExportableChartPanel extends ChartPanel
 		else
 		{
 			final JFileChooser fileChooser = new JFileChooser();
+			fileChooser.setDialogTitle( "Export chart to PNG, PDF or SVG" );
 			fileChooser.setCurrentDirectory( currentDir );
-			fileChooser.addChoosableFileFilter( new FileFilter()
-			{
-
-				@Override
-				public String getDescription()
-				{
-					return "PNG Image File";
-				}
-
-				@Override
-				public boolean accept( final File f )
-				{
-					return f.getName().toLowerCase().endsWith( ".png" );
-				}
-			} );
-			fileChooser.addChoosableFileFilter( new FileFilter()
-			{
-
-				@Override
-				public String getDescription()
-				{
-					return "Portable Document File (PDF)";
-				}
-
-				@Override
-				public boolean accept( final File f )
-				{
-					return f.getName().toLowerCase().endsWith( ".pdf" );
-				}
-			} );
-			fileChooser.addChoosableFileFilter( new FileFilter()
-			{
-
-				@Override
-				public String getDescription()
-				{
-					return "Scalable Vector Graphics (SVG)";
-				}
-
-				@Override
-				public boolean accept( final File f )
-				{
-					return f.getName().toLowerCase().endsWith( ".svg" );
-				}
-			} );
+			fileChooser.addChoosableFileFilter( new FileNameExtensionFilter("PNG Image File", "png" ) );
+			fileChooser.addChoosableFileFilter( new FileNameExtensionFilter("Portable Document File (PDF)", "pdf" ) );
+			fileChooser.addChoosableFileFilter( new FileNameExtensionFilter( "Scalable Vector Graphics (SVG)", "svg" ) );
+			fileChooser.setSelectedFile( new File( currentDir, getChart().getTitle().getText().replaceAll( "\\.+$", "" ) + ".pdf" ) );
 			final int option = fileChooser.showSaveDialog( this );
 			if ( option != JFileChooser.APPROVE_OPTION )
 				return;
@@ -269,45 +219,20 @@ public class ExportableChartPanel extends ChartPanel
 			file = fileChooser.getSelectedFile();
 			currentDir = fileChooser.getCurrentDirectory();
 		}
-
-		if ( file.getPath().endsWith( ".png" ) )
+		try
 		{
-			try
-			{
+			if ( file.getPath().endsWith( ".png" ) )
 				ChartUtils.saveChartAsPNG( file, getChart(), getWidth(), getHeight() );
-			}
-			catch ( final IOException e )
-			{
-				e.printStackTrace();
-			}
-		}
-		else if ( file.getPath().endsWith( ".pdf" ) )
-		{
-			try
-			{
+			else if ( file.getPath().endsWith( ".pdf" ) )
 				ChartExporter.exportChartAsPDF( getChart(), getBounds(), file );
-			}
-			catch ( final DocumentException | IOException e )
-			{
-				e.printStackTrace();
-			}
-
-		}
-		else if ( file.getPath().endsWith( ".svg" ) )
-		{
-			try
-			{
+			else if ( file.getPath().endsWith( ".svg" ) )
 				ChartExporter.exportChartAsSVG( getChart(), getBounds(), file );
-			}
-			catch ( final IOException e )
-			{
-				e.printStackTrace();
-			}
+			else
+				IJ.error( "Invalid file extension.", "Please choose a filename with one of the 3 supported extension: .png, .pdf or .svg." );
 		}
-		else
+		catch ( final IOException | DocumentException e )
 		{
-			IJ.error( "Invalid file extension.", "Please choose a filename with one of the 3 supported extension: .png, .pdf or .svg." );
+			e.printStackTrace();
 		}
 	}
-
 }
