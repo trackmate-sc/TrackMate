@@ -41,7 +41,10 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JToggleButton;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import org.jfree.chart.renderer.xy.XYItemRenderer;
 
 import fiji.plugin.trackmate.features.ModelDataset;
 import fiji.plugin.trackmate.features.ModelDataset.DataItem;
@@ -86,6 +89,14 @@ public class ExportableChartValueTable extends JFrame
 		exportBtn.addActionListener( e -> exportToCsv() );
 		toolbar.add( exportBtn );
 		toolbar.add( Box.createHorizontalGlue() );
+
+		final JToggleButton tglColoring = new JToggleButton( "coloring" );
+		tglColoring.addActionListener( e -> {
+			table.setUseColoring( tglColoring.isSelected() );
+			repaint();
+		} );
+		toolbar.add( tglColoring );
+
 		mainPanel.add( toolbar, BorderLayout.NORTH );
 
 		getContentPane().add( mainPanel );
@@ -154,8 +165,10 @@ public class ExportableChartValueTable extends JFrame
 		final Function< DataItem, String > labelGenerator = row -> dataset.getItemLabel( row.item );
 		final BiConsumer< DataItem, String > labelSetter = ( row, label ) -> dataset.setItemLabel( row.item, label );
 
-		// Coloring. None for now.
-		final Supplier< FeatureColorGenerator< DataItem > > coloring = () -> ( row ) -> Color.WHITE;
+		// Coloring.
+		final XYItemRenderer renderer = dataset.getRenderer();
+		final Supplier< FeatureColorGenerator< DataItem > > coloring =
+				() -> ( row ) -> ( Color ) renderer.getItemPaint( 0, row.item );
 
 		// The table.
 		final TablePanel< DataItem > table = new TablePanel<>(
