@@ -151,7 +151,7 @@ public class ExportableChartValueTable extends JFrame
 		final BiFunction< TableRow, String, Double > featureFun = ( row, feature ) -> row.map.get( feature );
 
 		// Row names.
-		final Function< TableRow, String > labelGenerator = row -> row.label;
+		final Function< TableRow, String > labelGenerator = row -> dataset.getItemLabel( row.id );
 		final BiConsumer< TableRow, String > labelSetter = ( row, label ) -> dataset.setItemLabel( row.id, label );
 
 		// Coloring. None for now.
@@ -194,9 +194,8 @@ public class ExportableChartValueTable extends JFrame
 			final int nSeries = dataset.getSeriesCount();
 			for ( int j = 0; j < nItems; j++ )
 			{
-				final String label = dataset.getItemLabel( j );
 				final Double x = ( Double ) dataset.getX( 0, j );
-				final TableRow row = new TableRow( label, j );
+				final TableRow row = new TableRow( j );
 				row.map.put( xFeature, x );
 				for ( int i = 0; i < nSeries; i++ )
 				{
@@ -219,15 +218,12 @@ public class ExportableChartValueTable extends JFrame
 	private static final class TableRow
 	{
 
-		private final String label;
-
 		private final Map< String, Double > map = new HashMap<>();
 
 		private final int id;
 
-		public TableRow( final String label, final int id )
+		public TableRow( final int id )
 		{
-			this.label = label;
 			this.id = id;
 		}
 	}
