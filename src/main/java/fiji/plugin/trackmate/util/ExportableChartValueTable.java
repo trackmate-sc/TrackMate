@@ -65,7 +65,8 @@ public class ExportableChartValueTable extends JFrame
 
 	public ExportableChartValueTable(
 			final ModelDataset dataset,
-			final String xLabel,
+			final String xFeature,
+			final String xFeatureName,
 			final String xUnits,
 			final String tableTitle,
 			final String yUnits )
@@ -78,7 +79,7 @@ public class ExportableChartValueTable extends JFrame
 		mainPanel.setLayout( new BorderLayout() );
 
 		// Table.
-		this.table = createDatasetTable( dataset, xLabel, xUnits, yUnits );
+		this.table = createDatasetTable( dataset, xFeature, xFeatureName, xUnits, yUnits );
 		mainPanel.add( table.getPanel(), BorderLayout.CENTER );
 
 		// Tool bar.
@@ -131,11 +132,12 @@ public class ExportableChartValueTable extends JFrame
 		}
 	}
 
-	public static final TablePanel< DataItem >	createDatasetTable(
-					final ModelDataset dataset,
-					final String xFeature,
-					final String xUnits,
-					final String yUnits )
+	public static final TablePanel< DataItem > createDatasetTable(
+			final ModelDataset dataset,
+			final String xFeature,
+			final String xFeatureName,
+			final String xUnits,
+			final String yUnits )
 	{
 		final int nSeries = dataset.getSeriesCount();
 
@@ -146,7 +148,7 @@ public class ExportableChartValueTable extends JFrame
 		final Map< String, Boolean > isInts = new HashMap<>( nSeries + 1 );
 		final Map< String, String > infoTexts = new HashMap<>();
 		features.add( xFeature );
-		featureNames.put( xFeature, xFeature );
+		featureNames.put( xFeature, xFeatureName );
 		featureUnits.put( xFeature, xUnits );
 		isInts.put( xFeature, Boolean.FALSE );
 		for ( int i = 0; i < nSeries; i++ )

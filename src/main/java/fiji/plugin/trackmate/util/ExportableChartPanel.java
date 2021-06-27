@@ -38,7 +38,6 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.xy.XYDataset;
 
 import com.itextpdf.text.DocumentException;
 
@@ -132,16 +131,18 @@ public class ExportableChartPanel extends ChartPanel
 		final int nSets = plot.getDatasetCount();
 		for ( int i = 0; i < nSets; i++ )
 		{
-			final XYDataset dataset = plot.getDataset( i );
+			final ModelDataset dataset = ( ModelDataset ) plot.getDataset( i );
+			final String xFeature = dataset.getXFeature();
 			final String xStr = plot.getDomainAxis().getLabel();
-			final String xLabel = labelFromStr( xStr );
+			final String xFeatureName = labelFromStr( xStr );
 			final String xUnits = unitsFromStr( xStr );
 			final String tableTitle = plot.getChart().getTitle().getText();
 			final String yUnits = unitsFromStr( plot.getRangeAxis().getLabel() );
 
 			final ExportableChartValueTable table = new ExportableChartValueTable(
-					( ModelDataset ) dataset,
-					xLabel,
+					dataset,
+					xFeature,
+					xFeatureName,
 					xUnits,
 					tableTitle,
 					yUnits );

@@ -56,6 +56,11 @@ public abstract class ModelDataset extends AbstractDataset implements XYDataset,
 			featureNameMap.put( getSeriesKey( i ).toString(), Integer.valueOf( i ) );
 	}
 
+	public String getXFeature()
+	{
+		return xFeature;
+	}
+
 	@Override
 	public int getSeriesCount()
 	{

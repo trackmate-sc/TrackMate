@@ -96,7 +96,7 @@ public abstract class AbstractFeatureGrapher
 	public JFrame render()
 	{
 		// X label
-		final String xAxisLabel = xFeature + " (" + TMUtils.getUnitsFor( xDimension, spaceUnits, timeUnits ) + ")";
+		final String xAxisLabel = featureNames.get( xFeature ) + " (" + TMUtils.getUnitsFor( xDimension, spaceUnits, timeUnits ) + ")";
 
 		// Find how many different dimensions
 		final Set< Dimension > dimensions = getUniqueValues( yFeatures, yDimensions );
@@ -222,14 +222,13 @@ public abstract class AbstractFeatureGrapher
 	 *            the map to search in
 	 * @return a new list.
 	 */
-	private final < K, V > List< K > getCommonKeys( final V targetValue, final Iterable< K > keys, final Map< K, V > map )
+	private static final < K, V > List< K > getCommonKeys( final V targetValue, final Iterable< K > keys, final Map< K, V > map )
 	{
 		final ArrayList< K > foundKeys = new ArrayList<>();
 		for ( final K key : keys )
 		{
 			if ( map.get( key ).equals( targetValue ) )
 				foundKeys.add( key );
-
 		}
 		return foundKeys;
 	}
