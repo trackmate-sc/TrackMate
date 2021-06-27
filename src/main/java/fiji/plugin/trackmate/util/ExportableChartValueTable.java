@@ -74,6 +74,7 @@ public class ExportableChartValueTable extends JFrame
 		super( tableTitle );
 		setName( tableTitle );
 		setIconImage( Icons.PLOT_ICON.getImage() );
+		selectedFile = new File( new File( selectedFile ).getParent(), tableTitle.replaceAll( "\\.+$", "" ) + ".csv" ).getAbsolutePath();
 
 		final JPanel mainPanel = new JPanel();
 		mainPanel.setLayout( new BorderLayout() );
