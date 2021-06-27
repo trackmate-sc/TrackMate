@@ -28,9 +28,7 @@ import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -46,7 +44,7 @@ import javax.swing.JPanel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import fiji.plugin.trackmate.features.ModelDataset;
-import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
+import fiji.plugin.trackmate.features.ModelDataset.DataItem;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.util.FileChooser.DialogType;
 import fiji.plugin.trackmate.util.FileChooser.SelectionMode;
@@ -60,12 +58,17 @@ public class ExportableChartValueTable extends JFrame
 
 	public static String selectedFile = System.getProperty( "user.home" ) + File.separator + "export.csv";
 
-	private final TablePanel< TableRow > table;
+	private final TablePanel< DataItem > table;
 
-	public ExportableChartValueTable( final ModelDataset dataset, final String xLabel, final String xUnits, final String yLabel, final String yUnits )
+	public ExportableChartValueTable(
+			final ModelDataset dataset,
+			final String xLabel,
+			final String xUnits,
+			final String tableTitle,
+			final String yUnits )
 	{
-		super( yLabel );
-		setName( yLabel );
+		super( tableTitle );
+		setName( tableTitle );
 		setIconImage( Icons.PLOT_ICON.getImage() );
 
 		final JPanel mainPanel = new JPanel();
@@ -73,7 +76,6 @@ public class ExportableChartValueTable extends JFrame
 
 		// Table.
 		this.table = createDatasetTable( dataset, xLabel, xUnits, yUnits );
-
 		mainPanel.add( table.getPanel(), BorderLayout.CENTER );
 
 		// Tool bar.
@@ -118,11 +120,11 @@ public class ExportableChartValueTable extends JFrame
 		}
 	}
 
-	public static final TablePanel< TableRow > createDatasetTable(
-			final ModelDataset dataset,
-			final String xFeature,
-			final String xUnits,
-			final String yUnits )
+	public static final TablePanel< DataItem >	createDatasetTable(
+					final ModelDataset dataset,
+					final String xFeature,
+					final String xUnits,
+					final String yUnits )
 	{
 		final int nSeries = dataset.getSeriesCount();
 
@@ -145,86 +147,29 @@ public class ExportableChartValueTable extends JFrame
 			isInts.put( str, Boolean.FALSE );
 		}
 
-		// The rows.
-		final Iterable< TableRow > rows = toRows( dataset, xFeature );
 		// Map row and column (feature str) to value.
-		final BiFunction< TableRow, String, Double > featureFun = ( row, feature ) -> row.map.get( feature );
+		final BiFunction< DataItem, String, Double > featureFun = ( row, feature ) -> row.get( feature );
 
 		// Row names.
-		final Function< TableRow, String > labelGenerator = row -> dataset.getItemLabel( row.id );
-		final BiConsumer< TableRow, String > labelSetter = ( row, label ) -> dataset.setItemLabel( row.id, label );
+		final Function< DataItem, String > labelGenerator = row -> dataset.getItemLabel( row.item );
+		final BiConsumer< DataItem, String > labelSetter = ( row, label ) -> dataset.setItemLabel( row.item, label );
 
 		// Coloring. None for now.
-		final Supplier< FeatureColorGenerator< TableRow > > coloring = () -> ( row ) -> Color.WHITE;
-		final BiConsumer< TableRow, Color > colorSetter = null;
+		final Supplier< FeatureColorGenerator< DataItem > > coloring = () -> ( row ) -> Color.WHITE;
 
 		// The table.
-		final TablePanel< TableRow > table =
-				new TablePanel<>(
-						rows,
-						features,
-						featureFun,
-						featureNames,
-						featureNames,
-						featureUnits,
-						isInts,
-						infoTexts,
-						coloring,
-						labelGenerator,
-						labelSetter,
-						ManualSpotColorAnalyzerFactory.FEATURE,
-						colorSetter );
+		final TablePanel< DataItem > table = new TablePanel<>(
+				dataset,
+				features,
+				featureFun,
+				featureNames,
+				featureNames,
+				featureUnits,
+				isInts,
+				infoTexts,
+				coloring,
+				labelGenerator,
+				labelSetter );
 		return table;
-	}
-
-	private static Iterable< TableRow > toRows( final ModelDataset dataset, final String xFeature )
-	{
-		return new DatasetWrapper( dataset, xFeature );
-	}
-
-	private static final class DatasetWrapper implements Iterable< TableRow >
-	{
-
-		private final List< TableRow > list;
-
-		public DatasetWrapper( final ModelDataset dataset, final String xFeature )
-		{
-			final int nItems = dataset.getItemCount( 0 );
-			this.list = new ArrayList<>( nItems );
-			final int nSeries = dataset.getSeriesCount();
-			for ( int j = 0; j < nItems; j++ )
-			{
-				final Double x = ( Double ) dataset.getX( 0, j );
-				final TableRow row = new TableRow( j );
-				row.map.put( xFeature, x );
-				for ( int i = 0; i < nSeries; i++ )
-				{
-					final String seriesName = dataset.getSeriesKey( i ).toString();
-					final Double y = ( Double ) dataset.getY( i, j );
-					row.map.put( seriesName, y );
-				}
-				list.add( row );
-			}
-			list.sort( Comparator.comparingDouble( row -> row.map.get( xFeature ) ) );
-		}
-
-		@Override
-		public Iterator< TableRow > iterator()
-		{
-			return list.iterator();
-		}
-	}
-
-	private static final class TableRow
-	{
-
-		private final Map< String, Double > map = new HashMap<>();
-
-		private final int id;
-
-		public TableRow( final int id )
-		{
-			this.id = id;
-		}
 	}
 }
