@@ -23,11 +23,8 @@ package fiji.plugin.trackmate.features;
 
 import static fiji.plugin.trackmate.gui.Fonts.FONT;
 import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
-import static fiji.plugin.trackmate.gui.Icons.TRACK_SCHEME_ICON;
 
 import java.awt.Color;
-import java.awt.Shape;
-import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -47,31 +44,19 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.ui.RectangleInsets;
-import org.jfree.data.xy.XYSeriesCollection;
 
 import fiji.plugin.trackmate.Dimension;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.gui.displaysettings.Colormap;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.util.ExportableChartPanel;
 import fiji.plugin.trackmate.util.TMUtils;
-import fiji.plugin.trackmate.util.XYEdgeRenderer;
-import fiji.plugin.trackmate.util.XYEdgeSeriesCollection;
 
 public abstract class AbstractFeatureGrapher
 {
 
-	protected static final Shape DEFAULT_SHAPE = new Ellipse2D.Double( -3, -3, 6, 6 );
-
 	protected final String xFeature;
 
-	private final Set< String > yFeatures;
-
-	protected final Model model;
-
-	protected final DisplaySettings displaySettings;
+	protected final List< String > yFeatures;
 
 	private final Color bgColor = new Color( 220, 220, 220 );
 
@@ -79,24 +64,28 @@ public abstract class AbstractFeatureGrapher
 
 	private final Map< String, Dimension > yDimensions;
 
-	protected Map< String, String > featureNames;
+	private final Map< String, String > featureNames;
+
+	private final String spaceUnits;
+
+	private final String timeUnits;
 
 	public AbstractFeatureGrapher(
-			final Model model,
-			final DisplaySettings displaySettings,
 			final String xFeature,
-			final Set< String > yFeatures,
+			final List< String > yFeatures,
 			final Dimension xDimension,
 			final Map< String, Dimension > yDimensions,
-			final Map< String, String > featureNames )
+			final Map< String, String > featureNames,
+			final String spaceUnits,
+			final String timeUnits )
 	{
-		this.model = model;
-		this.displaySettings = displaySettings;
 		this.xFeature = xFeature;
 		this.yFeatures = yFeatures;
 		this.xDimension = xDimension;
 		this.yDimensions = yDimensions;
 		this.featureNames = featureNames;
+		this.spaceUnits = spaceUnits;
+		this.timeUnits = timeUnits;
 	}
 
 	/**
@@ -106,10 +95,8 @@ public abstract class AbstractFeatureGrapher
 	 */
 	public JFrame render()
 	{
-		final Colormap colormap = displaySettings.getColormap();
-
 		// X label
-		final String xAxisLabel = xFeature + " (" + TMUtils.getUnitsFor( xDimension, model.getSpaceUnits(), model.getTimeUnits() ) + ")";
+		final String xAxisLabel = featureNames.get( xFeature ) + " (" + TMUtils.getUnitsFor( xDimension, spaceUnits, timeUnits ) + ")";
 
 		// Find how many different dimensions
 		final Set< Dimension > dimensions = getUniqueValues( yFeatures, yDimensions );
@@ -120,7 +107,7 @@ public abstract class AbstractFeatureGrapher
 		{
 
 			// Y label
-			final String yAxisLabel = TMUtils.getUnitsFor( dimension, model.getSpaceUnits(), model.getTimeUnits() );
+			final String yAxisLabel = TMUtils.getUnitsFor( dimension, spaceUnits, timeUnits );
 
 			// Collect suitable feature for this dimension
 			final List< String > featuresThisDimension = getCommonKeys( dimension, yFeatures, yDimensions );
@@ -128,20 +115,12 @@ public abstract class AbstractFeatureGrapher
 			// Title
 			final String title = buildPlotTitle( featuresThisDimension, featureNames );
 
-			// Data-set for points (easy)
-			final XYSeriesCollection pointDataset = buildMainDataSet( featuresThisDimension );
-
-			// Point renderer
-			final XYLineAndShapeRenderer pointRenderer = new XYLineAndShapeRenderer();
-
-			// Edge renderer
-			final XYEdgeRenderer edgeRenderer = new XYEdgeRenderer();
-
-			// Data-set for edges
-			final XYEdgeSeriesCollection edgeDataset = buildConnectionDataSet( featuresThisDimension );
+			// Dataset.
+			final ModelDataset dataset = buildMainDataSet( featuresThisDimension );
+			final XYItemRenderer renderer = dataset.getRenderer();
 
 			// The chart
-			final JFreeChart chart = ChartFactory.createXYLineChart( title, xAxisLabel, yAxisLabel, pointDataset, PlotOrientation.VERTICAL, true, true, false );
+			final JFreeChart chart = ChartFactory.createXYLineChart( title, xAxisLabel, yAxisLabel, dataset, PlotOrientation.VERTICAL, true, true, false );
 			chart.getTitle().setFont( FONT );
 			chart.getLegend().setItemFont( SMALL_FONT );
 			chart.setBackgroundPaint( bgColor );
@@ -150,12 +129,7 @@ public abstract class AbstractFeatureGrapher
 
 			// The plot
 			final XYPlot plot = chart.getXYPlot();
-			if ( edgeDataset != null )
-			{
-				plot.setDataset( 1, edgeDataset );
-				plot.setRenderer( 1, edgeRenderer );
-			}
-			plot.setRenderer( 0, pointRenderer );
+			plot.setRenderer( renderer );
 			plot.getRangeAxis().setLabelFont( FONT );
 			plot.getRangeAxis().setTickLabelFont( SMALL_FONT );
 			plot.getDomainAxis().setLabelFont( FONT );
@@ -174,21 +148,6 @@ public abstract class AbstractFeatureGrapher
 			plot.getRangeAxis().setTickLabelInsets( new RectangleInsets( 20, 10, 20, 10 ) );
 			plot.getDomainAxis().setTickLabelInsets( new RectangleInsets( 10, 20, 10, 20 ) );
 
-			// Paint
-			pointRenderer.setUseOutlinePaint( true );
-			if ( edgeDataset != null )
-			{
-				final int nseries = edgeDataset.getSeriesCount();
-				for ( int i = 0; i < nseries; i++ )
-				{
-					pointRenderer.setSeriesOutlinePaint( i, Color.black );
-					pointRenderer.setSeriesLinesVisible( i, false );
-					pointRenderer.setSeriesShape( i, DEFAULT_SHAPE, false );
-					pointRenderer.setSeriesPaint( i, colormap.getPaint( ( double ) i / nseries ), false );
-					edgeRenderer.setSeriesPaint( i, colormap.getPaint( ( double ) i / nseries ), false );
-				}
-			}
-
 			// The panel
 			final ExportableChartPanel chartPanel = new ExportableChartPanel( chart );
 			chartPanel.setPreferredSize( new java.awt.Dimension( 500, 270 ) );
@@ -198,9 +157,7 @@ public abstract class AbstractFeatureGrapher
 		return renderCharts( chartPanels );
 	}
 
-	protected abstract XYSeriesCollection buildMainDataSet( final Iterable< String > targetYFeatures );
-
-	protected abstract XYEdgeSeriesCollection buildConnectionDataSet( final Iterable< String > targetYFeatures );
+	protected abstract ModelDataset buildMainDataSet( final List< String > targetYFeatures );
 
 	/*
 	 * UTILS
@@ -232,8 +189,6 @@ public abstract class AbstractFeatureGrapher
 
 		// The frame
 		final JFrame frame = new JFrame();
-		frame.setTitle( "Feature plot for Track scheme" );
-		frame.setIconImage( TRACK_SCHEME_ICON.getImage() );
 		frame.getContentPane().add( scrollPane );
 		frame.validate();
 		frame.setSize( new java.awt.Dimension( 520, 320 ) );
@@ -267,14 +222,13 @@ public abstract class AbstractFeatureGrapher
 	 *            the map to search in
 	 * @return a new list.
 	 */
-	private final < K, V > List< K > getCommonKeys( final V targetValue, final Iterable< K > keys, final Map< K, V > map )
+	private static final < K, V > List< K > getCommonKeys( final V targetValue, final Iterable< K > keys, final Map< K, V > map )
 	{
 		final ArrayList< K > foundKeys = new ArrayList<>();
 		for ( final K key : keys )
 		{
 			if ( map.get( key ).equals( targetValue ) )
 				foundKeys.add( key );
-
 		}
 		return foundKeys;
 	}
@@ -284,7 +238,6 @@ public abstract class AbstractFeatureGrapher
 	 * 
 	 * @return the plot title.
 	 */
-
 	private final String buildPlotTitle( final Iterable< String > lYFeatures, final Map< String, String > featureNames )
 	{
 		final StringBuilder sb = new StringBuilder( "Plot of " );

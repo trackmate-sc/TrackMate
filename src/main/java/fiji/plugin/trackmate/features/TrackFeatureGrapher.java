@@ -21,61 +21,54 @@
  */
 package fiji.plugin.trackmate.features;
 
-import java.util.Set;
+import java.util.List;
 
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
-
-import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.util.XYEdgeSeriesCollection;
 
 public class TrackFeatureGrapher extends AbstractFeatureGrapher
 {
 
-	public TrackFeatureGrapher( final String xFeature, final Set< String > yFeatures, final Model model, final DisplaySettings displaySettings )
+	private final List< Integer > trackIDs;
+
+	private final Model model;
+
+	private final SelectionModel selectionModel;
+
+	private final DisplaySettings ds;
+
+	public TrackFeatureGrapher(
+			final List< Integer > trackIDs,
+			final String xFeature,
+			final List< String > yFeatures,
+			final Model model,
+			final SelectionModel selectionModel,
+			final DisplaySettings displaySettings )
 	{
 		super(
-				model,
-				displaySettings,
 				xFeature,
 				yFeatures,
 				model.getFeatureModel().getTrackFeatureDimensions().get( xFeature ),
 				model.getFeatureModel().getTrackFeatureDimensions(),
-				model.getFeatureModel().getTrackFeatureNames() );
-	}
-
-
-	/**
-	 * @return a new dataset that contains the values, specified from the given
-	 *         feature, and extracted from all the visible tracks in the model.
-	 */
-	@Override
-	protected XYSeriesCollection buildMainDataSet( final Iterable< String > targetYFeatures )
-	{
-		final XYSeriesCollection dataset = new XYSeriesCollection();
-		final FeatureModel fm = model.getFeatureModel();
-		for ( final String feature : targetYFeatures )
-		{
-			final XYSeries series = new XYSeries( featureNames.get( feature ) );
-			for ( final Integer trackID : model.getTrackModel().trackIDs( true ) )
-			{
-				final Double x = fm.getTrackFeature( trackID, xFeature );
-				final Double y = fm.getTrackFeature( trackID, feature );
-				if ( null == x || null == y )
-					continue;
-
-				series.add( x.doubleValue(), y.doubleValue() );
-			}
-			dataset.addSeries( series );
-		}
-		return dataset;
+				model.getFeatureModel().getTrackFeatureNames(),
+				model.getSpaceUnits(),
+				model.getTimeUnits() );
+		this.trackIDs = trackIDs;
+		this.model = model;
+		this.selectionModel = selectionModel;
+		this.ds = displaySettings;
 	}
 
 	@Override
-	protected XYEdgeSeriesCollection buildConnectionDataSet( final Iterable< String > targetYFeatures )
+	protected ModelDataset buildMainDataSet( final List< String > targetYFeatures )
 	{
-		return null;
+		return new TrackCollectionDataset(
+				model,
+				selectionModel,
+				ds,
+				xFeature,
+				targetYFeatures,
+				trackIDs );
 	}
 }

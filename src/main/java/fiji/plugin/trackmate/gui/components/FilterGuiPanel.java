@@ -283,7 +283,7 @@ public class FilterGuiPanel extends JPanel implements ChangeListener
 	public void addFilterPanel( final FeatureFilter filter )
 	{
 		final Map< String, String > featureNames = collectFeatureKeys( target, model, settings );
-		final Function< String, double[] > valueCollector = ( featureKey ) -> collectFeatureValues( featureKey, target, model, settings, false );
+		final Function< String, double[] > valueCollector = ( featureKey ) -> collectFeatureValues( featureKey, target, model, false );
 		final FilterPanel tp = new FilterPanel( featureNames, valueCollector, filter );
 
 		tp.addChangeListener( this );

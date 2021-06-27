@@ -38,10 +38,10 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.xy.XYDataset;
 
 import com.itextpdf.text.DocumentException;
 
+import fiji.plugin.trackmate.features.ModelDataset;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import ij.IJ;
 
@@ -61,7 +61,8 @@ public class ExportableChartPanel extends ChartPanel
 		super( chart );
 	}
 
-	public ExportableChartPanel( final JFreeChart chart,
+	public ExportableChartPanel(
+			final JFreeChart chart,
 			final boolean properties,
 			final boolean save,
 			final boolean print,
@@ -130,18 +131,21 @@ public class ExportableChartPanel extends ChartPanel
 		final int nSets = plot.getDatasetCount();
 		for ( int i = 0; i < nSets; i++ )
 		{
-			final XYDataset dataset = plot.getDataset( i );
-			if ( dataset instanceof XYEdgeSeriesCollection )
-				continue;
-			
+			final ModelDataset dataset = ( ModelDataset ) plot.getDataset( i );
+			final String xFeature = dataset.getXFeature();
 			final String xStr = plot.getDomainAxis().getLabel();
-			final String xLabel = labelFromStr( xStr );
+			final String xFeatureName = labelFromStr( xStr );
 			final String xUnits = unitsFromStr( xStr );
-			final String yStr = plot.getRangeAxis().getLabel();
-			final String yLabel = labelFromStr( yStr );
-			final String yUnits = unitsFromStr( yStr );
+			final String tableTitle = plot.getChart().getTitle().getText();
+			final String yUnits = unitsFromStr( plot.getRangeAxis().getLabel() );
 
-			final ExportableChartValueTable table = new ExportableChartValueTable( dataset, xLabel, xUnits, yLabel, yUnits );
+			final ExportableChartValueTable table = new ExportableChartValueTable(
+					dataset,
+					xFeature,
+					xFeatureName,
+					xUnits,
+					tableTitle,
+					yUnits );
 			GuiUtils.positionWindow( table, SwingUtilities.getWindowAncestor( this ) );
 			table.setVisible( true );
 		}
@@ -153,6 +157,8 @@ public class ExportableChartPanel extends ChartPanel
 		final int i2 = str.lastIndexOf( ')' );
 		if ( i1 >= 0 && i2 >= 0 && i2 > ( i1 + 1 ) )
 			return str.substring( i1 + 1, i2 );
+		if ( i2 == i1 + 1 )
+			return "";
 		return str;
 	}
 

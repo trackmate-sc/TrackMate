@@ -44,7 +44,7 @@ public class InitFilterDescriptor extends WizardPanelDescriptor
 		super( KEY );
 		this.trackmate = trackmate;
 		final Function< String, double[] > valuesCollector = key -> FeatureUtils.collectFeatureValues(
-				Spot.QUALITY, TrackMateObject.SPOTS, trackmate.getModel(), trackmate.getSettings(), false );
+				Spot.QUALITY, TrackMateObject.SPOTS, trackmate.getModel(), false );
 		this.targetPanel = new InitFilterPanel( filter, valuesCollector );
 	}
 

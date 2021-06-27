@@ -136,7 +136,7 @@ public class FeatureDisplaySelector
 	{
 		final TrackMateObject type = getColorByType( target );
 		final String feature = getColorByFeature( target );
-		return FeatureUtils.autoMinMax( model, settings, type, feature );
+		return FeatureUtils.autoMinMax( model, type, feature );
 	}
 
 	/**

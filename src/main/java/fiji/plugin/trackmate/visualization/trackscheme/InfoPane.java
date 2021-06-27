@@ -39,7 +39,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.swing.AbstractListModel;
 import javax.swing.JLabel;
@@ -48,7 +47,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
@@ -66,8 +64,6 @@ import fiji.plugin.trackmate.SelectionChangeEvent;
 import fiji.plugin.trackmate.SelectionChangeListener;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.features.SpotFeatureGrapher;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.util.OnRequestUpdater;
 import fiji.plugin.trackmate.util.OnRequestUpdater.Refreshable;
 import fiji.plugin.trackmate.util.TMUtils;
@@ -99,8 +95,6 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 	/** The table headers, taken from spot feature names. */
 	private final String[] headers;
 
-	private final DisplaySettings displaySettings;
-
 	/*
 	 * CONSTRUCTOR
 	 */
@@ -115,11 +109,10 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 	 *            the {@link SelectionModel} from which we read what to show in
 	 *            the table.
 	 */
-	public InfoPane( final Model model, final SelectionModel selectionModel, final DisplaySettings displaySettings )
+	public InfoPane( final Model model, final SelectionModel selectionModel )
 	{
 		this.model = model;
 		this.selectionModel = selectionModel;
-		this.displaySettings = displaySettings;
 		final List< String > features = new ArrayList< >( model.getFeatureModel().getSpotFeatures() );
 		final Map< String, String > featureNames = model.getFeatureModel().getSpotFeatureShortNames();
 		final List< String > headerList = TMUtils.getArrayFromMaping( features, featureNames );
@@ -141,8 +134,10 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 				} );
 			}
 		} );
-		// Add a listener to ensure we remove this panel from the listener list
-		// of the model
+		/*
+		 * Add a listener to ensure we remove this panel from the listener list
+		 * of the model
+		 */
 		addAncestorListener( new AncestorListener()
 		{
 			@Override
@@ -171,14 +166,7 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 	public void selectionChanged( final SelectionChangeEvent event )
 	{
 		// Echo changed in a different thread for performance
-		SwingUtilities.invokeLater( new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				highlightSpots( selectionModel.getSpotSelection() );
-			}
-		} );
+		SwingUtilities.invokeLater( () -> highlightSpots( selectionModel.getSpotSelection() ) );
 	}
 
 	/**
@@ -228,9 +216,8 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 		for ( final Spot spot : sortedSpots )
 		{
 			if ( null == spot )
-			{
 				continue;
-			}
+
 			final Object[] columnData = new Object[ features.size() + 1 ];
 			columnData[ 0 ] = String.format( "%d", model.getTrackModel().trackIDOf( spot ) );
 			for ( int i = 1; i < columnData.length; i++ )
@@ -238,17 +225,11 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 				final String feature = features.get( i - 1 );
 				final Double feat = spot.getFeature( feature );
 				if ( null == feat )
-				{
 					columnData[ i ] = "";
-				}
 				else if ( model.getFeatureModel().getSpotFeatureIsInt().get( feature ).booleanValue() )
-				{
 					columnData[ i ] = "" + feat.intValue();
-				}
 				else
-				{
 					columnData[ i ] = String.format( "%.4g", feat.doubleValue() );
-				}
 			}
 			dm.addColumn( spot.toString(), columnData );
 		}
@@ -286,9 +267,8 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 			table.getColumnModel().getColumn( i ).setMinWidth( ( int ) ( 1.4d * fm.stringWidth( dm.getColumnName( i ) ) ) );
 		}
 		for ( final Component c : scrollTable.getColumnHeader().getComponents() )
-		{
 			c.setBackground( getBackground() );
-		}
+
 		scrollTable.getColumnHeader().setOpaque( false );
 		scrollTable.setVisible( true );
 		validate();
@@ -336,13 +316,9 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 			final Spot spot = spotArray[ i ];
 			final Integer trackID = model.getTrackModel().trackIDOf( spot );
 			if ( null == trackID )
-			{
 				lTable.addValue( spot.getName(), "None" );
-			}
 			else
-			{
 				lTable.addValue( spot.getName(), "" + trackID.intValue() );
-			}
 		}
 
 		/*
@@ -365,13 +341,9 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 				else
 				{
 					if ( fm.getSpotFeatureIsInt().get( feature ) )
-					{
 						lTable.addValue( spot.getName(), "" + val.intValue() );
-					}
 					else
-					{
 						lTable.addValue( spot.getName(), val.doubleValue() );
-					}
 				}
 			}
 		}
@@ -440,39 +412,8 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 		scrollTable.setOpaque( false );
 		scrollTable.getViewport().setOpaque( false );
 
-		final List< String > spotFeatures = new ArrayList<>( model.getFeatureModel().getSpotFeatures() );
-		final Map< String, String > spotFeatureNames = model.getFeatureModel().getSpotFeatureShortNames();
-		final SmallFeaturePlotSelectionPanel featureSelectionPanel = new SmallFeaturePlotSelectionPanel(
-				"T",
-				spotFeatures,
-				spotFeatureNames,
-				( xKey, yKeys ) -> new Thread( () -> plotSelectionData( xKey, yKeys ) ).start() );
-
-		final JSplitPane inner = new JSplitPane( JSplitPane.VERTICAL_SPLIT, scrollTable, featureSelectionPanel );
-		inner.setDividerLocation( 200 );
-		inner.setResizeWeight( 1.0d );
-		inner.setBorder( null );
 		setLayout( new BorderLayout() );
-		add( inner, BorderLayout.CENTER );
-	}
-
-	/**
-	 * Reads the content of the current spot selection and plot the selected
-	 * features in this {@link InfoPane} for the target spots.
-	 *
-	 * @param xFeature
-	 *            the feature to use as X axis.
-	 * @param yFeatures
-	 *            the features to plot as Y axis.
-	 */
-	private void plotSelectionData( final String xFeature, final Set< String > yFeatures )
-	{
-		final Set< Spot > spots = selectionModel.getSpotSelection();
-		if ( yFeatures.isEmpty() || spots.isEmpty() )
-			return;
-
-		final SpotFeatureGrapher grapher = new SpotFeatureGrapher( xFeature, yFeatures, spots, model, displaySettings );
-		grapher.render();
+		add( scrollTable, BorderLayout.CENTER );
 	}
 
 	/*

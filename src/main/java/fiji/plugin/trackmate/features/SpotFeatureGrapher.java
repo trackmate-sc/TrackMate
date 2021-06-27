@@ -21,127 +21,55 @@
  */
 package fiji.plugin.trackmate.features;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Set;
-
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
-import org.jgrapht.graph.DefaultWeightedEdge;
 
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.util.XYEdgeSeries;
-import fiji.plugin.trackmate.util.XYEdgeSeriesCollection;
 
 public class SpotFeatureGrapher extends AbstractFeatureGrapher
 {
 
-	private final Collection< Spot > spots;
+	private final List< Spot > spots;
 
-	public SpotFeatureGrapher( final String xFeature, final Set< String > yFeatures, final Collection< Spot > spots, final Model model, final DisplaySettings displaySettings )
+	private final SelectionModel selectionModel;
+
+	private final Model model;
+
+	private final DisplaySettings ds;
+
+	public SpotFeatureGrapher(
+			final List< Spot > spots,
+			final String xFeature,
+			final List< String > yFeatures,
+			final Model model,
+			final SelectionModel selectionModel,
+			final DisplaySettings displaySettings )
 	{
 		super(
-				model,
-				displaySettings,
 				xFeature,
 				yFeatures,
 				model.getFeatureModel().getSpotFeatureDimensions().get( xFeature ),
 				model.getFeatureModel().getSpotFeatureDimensions(),
-				model.getFeatureModel().getSpotFeatureNames() );
+				model.getFeatureModel().getSpotFeatureNames(),
+				model.getSpaceUnits(),
+				model.getTimeUnits() );
 		this.spots = spots;
+		this.model = model;
+		this.selectionModel = selectionModel;
+		this.ds = displaySettings;
 	}
 
-	/**
-	 * Returns a new dataset that contains the values, specified from the given
-	 * feature, and extracted from the spots given in constructor.
-	 * 
-	 * @return a new dataset.
-	 */
 	@Override
-	protected XYSeriesCollection buildMainDataSet( final Iterable< String > targetYFeatures )
+	protected ModelDataset buildMainDataSet( final List< String > targetYFeatures )
 	{
-		final XYSeriesCollection dataset = new XYSeriesCollection();
-		for ( final String feature : targetYFeatures )
-		{
-			final XYSeries series = new XYSeries( featureNames.get( feature ) );
-			for ( final Spot spot : spots )
-			{
-				final Double x = spot.getFeature( xFeature );
-				final Double y = spot.getFeature( feature );
-				if ( null == x || null == y )
-					continue;
-
-				series.add( x.doubleValue(), y.doubleValue() );
-			}
-			dataset.addSeries( series );
-		}
-		return dataset;
-	}
-
-	/**
-	 * Returns a new dataset that contains the values, specified from the given
-	 * feature, and extracted from all the given spots. The dataset returned is
-	 * a {@link XYEdgeSeriesCollection}, made to plot the lines between 2 points
-	 * representing 2 spots.
-	 * 
-	 * @return a new dataset.
-	 */
-	@Override
-	protected XYEdgeSeriesCollection buildConnectionDataSet( final Iterable< String > targetYFeatures )
-	{
-		// Collect edges
-		final List< DefaultWeightedEdge > edges = getInsideEdges( spots );
-
-		// Build dataset
-		final XYEdgeSeriesCollection edgeDataset = new XYEdgeSeriesCollection();
-		Double x0, x1, y0, y1;
-		XYEdgeSeries edgeSeries;
-		Spot source, target;
-		for ( final String yFeature : targetYFeatures )
-		{
-			edgeSeries = new XYEdgeSeries( featureNames.get( yFeature ) );
-			for ( final DefaultWeightedEdge edge : edges )
-			{
-				source = model.getTrackModel().getEdgeSource( edge );
-				target = model.getTrackModel().getEdgeTarget( edge );
-				x0 = source.getFeature( xFeature );
-				y0 = source.getFeature( yFeature );
-				x1 = target.getFeature( xFeature );
-				y1 = target.getFeature( yFeature );
-				if ( null == x0 || null == y0 || null == x1 || null == y1 )
-				{
-					continue;
-				}
-				edgeSeries.addEdge( x0.doubleValue(), y0.doubleValue(), x1.doubleValue(), y1.doubleValue() );
-			}
-			edgeDataset.addSeries( edgeSeries );
-		}
-		return edgeDataset;
-	}
-
-	/**
-	 * Returns the list of links that have their source and target in the given
-	 * spot list.
-	 * 
-	 * @return a new list.
-	 */
-	private final List< DefaultWeightedEdge > getInsideEdges( final Collection< Spot > spots )
-	{
-		final int nspots = spots.size();
-		final ArrayList< DefaultWeightedEdge > edges = new ArrayList<>( nspots );
-		final TrackModel trackModel = model.getTrackModel();
-		for ( final DefaultWeightedEdge edge : trackModel.edgeSet() )
-		{
-			final Spot source = trackModel.getEdgeSource( edge );
-			final Spot target = trackModel.getEdgeTarget( edge );
-			if ( spots.contains( source ) && spots.contains( target ) )
-				edges.add( edge );
-
-		}
-		return edges;
+		return new SpotCollectionDataset(
+				model,
+				selectionModel,
+				ds,
+				xFeature,
+				targetYFeatures,
+				spots );
 	}
 }

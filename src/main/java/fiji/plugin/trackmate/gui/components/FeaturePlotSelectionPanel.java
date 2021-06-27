@@ -32,10 +32,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Stack;
 
 import javax.swing.Box;
@@ -68,7 +66,7 @@ public class FeaturePlotSelectionPanel extends JPanel
 	 */
 	public static interface PlotAction
 	{
-		public void plot( String xKey, Set< String > yKeys );
+		public void plot( String xKey, List< String > yKeys );
 	}
 
 	private static final Dimension BUTTON_SIZE = new Dimension( 24, 24 );
@@ -183,7 +181,7 @@ public class FeaturePlotSelectionPanel extends JPanel
 		// Listener.
 		plotButton.addActionListener( e -> {
 			final String sKey = this.features.get( cmbboxXFeature.getSelectedIndex() );
-			final Set< String > yKeys = new HashSet<>( comboBoxes.size() );
+			final List< String > yKeys = new ArrayList<>( comboBoxes.size() );
 			for ( final JComboBox< String > box : comboBoxes )
 				yKeys.add( this.features.get( box.getSelectedIndex() ) );
 

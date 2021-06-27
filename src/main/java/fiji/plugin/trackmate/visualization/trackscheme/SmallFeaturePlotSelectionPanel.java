@@ -30,10 +30,9 @@ import static fiji.plugin.trackmate.gui.Icons.REMOVE_ICON;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Stack;
 
 import javax.swing.Box;
@@ -156,7 +155,7 @@ public class SmallFeaturePlotSelectionPanel extends JPanel
 		// Listener.
 		plotButton.addActionListener( e -> {
 			final String sKey = features.get( jComboBoxXFeature.getSelectedIndex() );
-			final Set< String > yKeys = new HashSet<>( comboBoxes.size() );
+			final List< String > yKeys = new ArrayList<>( comboBoxes.size() );
 			for ( final JComboBox< String > box : comboBoxes )
 				yKeys.add( features.get( box.getSelectedIndex() ) );
 			plotAction.plot( sKey, yKeys );
