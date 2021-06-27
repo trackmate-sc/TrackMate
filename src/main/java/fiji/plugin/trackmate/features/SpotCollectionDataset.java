@@ -116,13 +116,13 @@ public class SpotCollectionDataset extends ModelDataset implements XYDataset
 	@Override
 	public Number getX( final int series, final int item )
 	{
-		return spots.get( item ).getFeatures().get( xFeature );
+		return spots.get( item ).getFeature( xFeature );
 	}
 
 	@Override
 	public Number getY( final int series, final int item )
 	{
-		return spots.get( item ).getFeatures().get( yFeatures.get( series ) );
+		return spots.get( item ).getFeature( yFeatures.get( series ) );
 	}
 	@Override
 	public XYItemRenderer getRenderer()
