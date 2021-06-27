@@ -132,7 +132,7 @@ public class ExportableChartValueTable extends JFrame
 		}
 	}
 
-	public static final TablePanel< DataItem > createDatasetTable(
+	private static final TablePanel< DataItem > createDatasetTable(
 			final ModelDataset dataset,
 			final String xFeature,
 			final String xFeatureName,
