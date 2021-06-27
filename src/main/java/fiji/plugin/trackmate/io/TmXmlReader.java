@@ -128,12 +128,10 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.SpotRoi;
-import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
-import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactoryBase;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
@@ -147,7 +145,6 @@ import fiji.plugin.trackmate.providers.SpotMorphologyAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.providers.ViewProvider;
-import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewFactory;
@@ -441,16 +438,16 @@ public class TmXmlReader
 	 *
 	 * @param detectorProvider
 	 *            the detector provider, required to configure the settings with
-	 *            a correct {@link SpotDetectorFactory}. If <code>null</code>,
-	 *            will skip reading detector parameters.
+	 *            a correct <code>SpotDetectorFactory</code>. If
+	 *            <code>null</code>, will skip reading detector parameters.
 	 * @param trackerProvider
 	 *            the tracker provider, required to configure the settings with
-	 *            a correct {@link fiji.plugin.trackmate.tracking.SpotTracker}.
-	 *            If <code>null</code>, will skip reading tracker parameters.
+	 *            a correct SpotTracker. If <code>null</code>, will skip reading
+	 *            tracker parameters.
 	 * @param spotAnalyzerProvider
 	 *            the spot analyzer provider, required to instantiates the saved
-	 *            {@link SpotAnalyzerFactory}s. If <code>null</code>, will skip
-	 *            reading spot analyzers.
+	 *            <code>SpotAnalyzerFactory</code>s. If <code>null</code>, will
+	 *            skip reading spot analyzers.
 	 * @param edgeAnalyzerProvider
 	 *            the edge analyzer provider, required to instantiates the saved
 	 *            {@link EdgeAnalyzer}s. If <code>null</code>, will skip reading
@@ -760,7 +757,7 @@ public class TmXmlReader
 
 	/**
 	 * Update the given {@link Settings} object with the
-	 * {@link SpotDetectorFactory} and settings map fields named
+	 * <code>SpotDetectorFactory</code> and settings map fields named
 	 * {@link Settings#detectorFactory} and {@link Settings#detectorSettings}
 	 * read within the XML file this reader is initialized with.
 	 *
@@ -814,8 +811,8 @@ public class TmXmlReader
 	}
 
 	/**
-	 * Update the given {@link Settings} object with {@link SpotTracker} proper
-	 * settings map fields named {@link Settings#trackerSettings} and
+	 * Update the given {@link Settings} object with <code>SpotTracker</code>
+	 * proper settings map fields named {@link Settings#trackerSettings} and
 	 * {@link Settings#trackerFactory} read within the XML file this reader is
 	 * initialized with.
 	 * <p>

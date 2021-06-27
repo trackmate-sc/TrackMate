@@ -155,7 +155,6 @@ public class FeatureUtils
 	 * @param featureKey
 	 * @param target
 	 * @param model
-	 * @param settings
 	 * @param visibleOnly
 	 * @return a new <code>double[]</code> array containing the numerical
 	 *         feature values.
