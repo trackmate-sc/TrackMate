@@ -94,6 +94,18 @@ public class SpotCollectionDataset extends ModelDataset implements XYDataset
 	}
 
 	@Override
+	public String getItemLabel( final int item )
+	{
+		return spots.get( item ).getName();
+	}
+
+	@Override
+	public void setItemLabel( final int item, final String label )
+	{
+		spots.get( item ).setName( label );
+	}
+
+	@Override
 	public String getSeriesKey( final int series )
 	{
 		if ( ( series < 0 ) || ( series >= getSeriesCount() ) )

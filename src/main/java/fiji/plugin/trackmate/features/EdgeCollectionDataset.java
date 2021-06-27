@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import org.jfree.chart.LegendItem;
 import org.jfree.chart.axis.ValueAxis;
@@ -35,11 +36,14 @@ public class EdgeCollectionDataset extends ModelDataset
 
 	private static final long serialVersionUID = 1L;
 
+
 	private final List< DefaultWeightedEdge > edges;
 
 	private final FeatureColorGenerator< DefaultWeightedEdge > edgeColorGenerator;
 
 	private final Map< Integer, Set< DefaultWeightedEdge > > edgeMap;
+
+	private final Function< DefaultWeightedEdge, String > labelGenerator;
 
 	public EdgeCollectionDataset(
 			final Model model,
@@ -53,10 +57,12 @@ public class EdgeCollectionDataset extends ModelDataset
 		this.edges = edges;
 		this.edgeColorGenerator = FeatureUtils.createTrackColorGenerator( model, ds );
 		this.edgeMap = createEdgeMap( edges, model.getTrackModel() );
+		this.labelGenerator = edge -> String.format( "%s → %s",
+				model.getTrackModel().getEdgeSource( edge ).getName(), model.getTrackModel().getEdgeTarget( edge ).getName() );
 	}
 
 	/**
-	 * Precompute the edges we will have to plot as lines.
+	 * Pre-computes the edges we will have to plot as lines.
 	 * 
 	 * @param edges
 	 *            the spot collection.
@@ -116,6 +122,17 @@ public class EdgeCollectionDataset extends ModelDataset
 	{
 		return new MyXYItemRenderer();
 	}
+
+	@Override
+	public String getItemLabel( final int item )
+	{
+		final DefaultWeightedEdge edge = edges.get( item );
+		return labelGenerator.apply( edge );
+	}
+
+	@Override
+	public void setItemLabel( final int item, final String label )
+	{}
 
 	private final class MyXYItemRenderer extends XYLineAndShapeRenderer
 	{

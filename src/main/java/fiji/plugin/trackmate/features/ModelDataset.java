@@ -89,5 +89,9 @@ public abstract class ModelDataset extends AbstractDataset implements XYDataset
 		return val.doubleValue();
 	}
 
+	public abstract String getItemLabel( int item );
+
+	public abstract void setItemLabel( int item, String label );
+
 	public abstract XYItemRenderer getRenderer();
 }

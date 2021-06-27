@@ -43,6 +43,18 @@ public class TrackCollectionDataset extends ModelDataset
 	}
 
 	@Override
+	public String getItemLabel( final int item )
+	{
+		return model.getTrackModel().name( trackIDs.get( item ) );
+	}
+
+	@Override
+	public void setItemLabel( final int item, final String label )
+	{
+		model.getTrackModel().setName( trackIDs.get( item ), label );
+	}
+
+	@Override
 	public String getSeriesKey( final int series )
 	{
 		if ( ( series < 0 ) || ( series >= getSeriesCount() ) )
