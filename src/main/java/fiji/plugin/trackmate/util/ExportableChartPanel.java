@@ -136,15 +136,14 @@ public class ExportableChartPanel extends ChartPanel
 			final String xStr = plot.getDomainAxis().getLabel();
 			final String xLabel = labelFromStr( xStr );
 			final String xUnits = unitsFromStr( xStr );
-			final String yStr = plot.getRangeAxis().getLabel();
-			final String yLabel = labelFromStr( yStr );
-			final String yUnits = unitsFromStr( yStr );
+			final String tableTitle = plot.getChart().getTitle().getText();
+			final String yUnits = unitsFromStr( plot.getRangeAxis().getLabel() );
 
 			final ExportableChartValueTable table = new ExportableChartValueTable(
 					( ModelDataset ) dataset,
 					xLabel,
 					xUnits,
-					yLabel,
+					tableTitle,
 					yUnits );
 			GuiUtils.positionWindow( table, SwingUtilities.getWindowAncestor( this ) );
 			table.setVisible( true );
@@ -157,6 +156,8 @@ public class ExportableChartPanel extends ChartPanel
 		final int i2 = str.lastIndexOf( ')' );
 		if ( i1 >= 0 && i2 >= 0 && i2 > ( i1 + 1 ) )
 			return str.substring( i1 + 1, i2 );
+		if ( i2 == i1 + 1 )
+			return "";
 		return str;
 	}
 
