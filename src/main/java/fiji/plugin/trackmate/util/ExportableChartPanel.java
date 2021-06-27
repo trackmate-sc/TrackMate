@@ -42,6 +42,7 @@ import org.jfree.data.xy.XYDataset;
 
 import com.itextpdf.text.DocumentException;
 
+import fiji.plugin.trackmate.features.ModelDataset;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import ij.IJ;
 
@@ -61,7 +62,8 @@ public class ExportableChartPanel extends ChartPanel
 		super( chart );
 	}
 
-	public ExportableChartPanel( final JFreeChart chart,
+	public ExportableChartPanel(
+			final JFreeChart chart,
 			final boolean properties,
 			final boolean save,
 			final boolean print,
@@ -131,9 +133,6 @@ public class ExportableChartPanel extends ChartPanel
 		for ( int i = 0; i < nSets; i++ )
 		{
 			final XYDataset dataset = plot.getDataset( i );
-			if ( dataset instanceof XYEdgeSeriesCollection )
-				continue;
-			
 			final String xStr = plot.getDomainAxis().getLabel();
 			final String xLabel = labelFromStr( xStr );
 			final String xUnits = unitsFromStr( xStr );
@@ -141,7 +140,12 @@ public class ExportableChartPanel extends ChartPanel
 			final String yLabel = labelFromStr( yStr );
 			final String yUnits = unitsFromStr( yStr );
 
-			final ExportableChartValueTable table = new ExportableChartValueTable( dataset, xLabel, xUnits, yLabel, yUnits );
+			final ExportableChartValueTable table = new ExportableChartValueTable(
+					( ModelDataset ) dataset,
+					xLabel,
+					xUnits,
+					yLabel,
+					yUnits );
 			GuiUtils.positionWindow( table, SwingUtilities.getWindowAncestor( this ) );
 			table.setVisible( true );
 		}

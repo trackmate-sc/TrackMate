@@ -28,11 +28,11 @@ import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -45,8 +45,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import org.jfree.data.xy.XYDataset;
-
+import fiji.plugin.trackmate.features.ModelDataset;
 import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.util.FileChooser.DialogType;
@@ -63,7 +62,7 @@ public class ExportableChartValueTable extends JFrame
 
 	private final TablePanel< TableRow > table;
 
-	public ExportableChartValueTable( final XYDataset dataset, final String xLabel, final String xUnits, final String yLabel, final String yUnits )
+	public ExportableChartValueTable( final ModelDataset dataset, final String xLabel, final String xUnits, final String yLabel, final String yUnits )
 	{
 		super( yLabel );
 		setName( yLabel );
@@ -120,8 +119,8 @@ public class ExportableChartValueTable extends JFrame
 	}
 
 	public static final TablePanel< TableRow > createDatasetTable(
-			final XYDataset dataset,
-			final String xLabel,
+			final ModelDataset dataset,
+			final String xFeature,
 			final String xUnits,
 			final String yUnits )
 	{
@@ -133,10 +132,10 @@ public class ExportableChartValueTable extends JFrame
 		final Map< String, String > featureUnits = new HashMap<>( nSeries + 1 );
 		final Map< String, Boolean > isInts = new HashMap<>( nSeries + 1 );
 		final Map< String, String > infoTexts = new HashMap<>();
-		features.add( xLabel );
-		featureNames.put( xLabel, xLabel );
-		featureUnits.put( xLabel, xUnits );
-		isInts.put( xLabel, Boolean.FALSE );
+		features.add( xFeature );
+		featureNames.put( xFeature, xFeature );
+		featureUnits.put( xFeature, xUnits );
+		isInts.put( xFeature, Boolean.FALSE );
 		for ( int i = 0; i < nSeries; i++ )
 		{
 			final String str = dataset.getSeriesKey( i ).toString();
@@ -147,13 +146,13 @@ public class ExportableChartValueTable extends JFrame
 		}
 
 		// The rows.
-		final Iterable< TableRow > rows = toRows( dataset, xLabel );
+		final Iterable< TableRow > rows = toRows( dataset, xFeature );
 		// Map row and column (feature str) to value.
 		final BiFunction< TableRow, String, Double > featureFun = ( row, feature ) -> row.map.get( feature );
 
 		// Row names.
-		final Function< TableRow, String > labelGenerator = null; // Don't show label.
-		final BiConsumer< TableRow, String > labelSetter = null; // Do nothing.
+		final Function< TableRow, String > labelGenerator = row -> row.label;
+		final BiConsumer< TableRow, String > labelSetter = ( row, label ) -> dataset.setItemLabel( row.id, label );
 
 		// Coloring. None for now.
 		final Supplier< FeatureColorGenerator< TableRow > > coloring = () -> ( row ) -> Color.WHITE;
@@ -161,7 +160,7 @@ public class ExportableChartValueTable extends JFrame
 
 		// The table.
 		final TablePanel< TableRow > table =
-				new TablePanel< TableRow >(
+				new TablePanel<>(
 						rows,
 						features,
 						featureFun,
@@ -178,60 +177,58 @@ public class ExportableChartValueTable extends JFrame
 		return table;
 	}
 
-	private static Iterable< TableRow > toRows( final XYDataset dataset, final String xLabel )
+	private static Iterable< TableRow > toRows( final ModelDataset dataset, final String xFeature )
 	{
-		return new DatasetWrapper( dataset, xLabel );
+		return new DatasetWrapper( dataset, xFeature );
 	}
 
 	private static final class DatasetWrapper implements Iterable< TableRow >
 	{
 
-		private final TreeMap< Number, TableRow > map;
+		private final List< TableRow > list;
 
-		public DatasetWrapper( final XYDataset dataset, final String xLabel )
+		public DatasetWrapper( final ModelDataset dataset, final String xFeature )
 		{
-			// Sorted map of rows vs X value.
-			this.map = new TreeMap<>();
+			final int nItems = dataset.getItemCount( 0 );
+			this.list = new ArrayList<>( nItems );
 			final int nSeries = dataset.getSeriesCount();
-			for ( int i = 0; i < nSeries; i++ )
+			for ( int j = 0; j < nItems; j++ )
 			{
-				final int nItems = dataset.getItemCount( i );
-				for ( int j = 0; j < nItems; j++ )
+				final String label = dataset.getItemLabel( j );
+				final Double x = ( Double ) dataset.getX( 0, j );
+				final TableRow row = new TableRow( label, j );
+				row.map.put( xFeature, x );
+				for ( int i = 0; i < nSeries; i++ )
 				{
-					final Number x = dataset.getX( i, j );
-					TableRow row = map.get( x );
-					if ( row == null )
-					{
-						row = new TableRow( xLabel, x );
-						map.put( x, row );
-					}
-					row.put( dataset.getSeriesKey( i ).toString(), dataset.getY( i, j ) );
+					final String seriesName = dataset.getSeriesKey( i ).toString();
+					final Double y = ( Double ) dataset.getY( i, j );
+					row.map.put( seriesName, y );
 				}
+				list.add( row );
 			}
+			list.sort( Comparator.comparingDouble( row -> row.map.get( xFeature ) ) );
 		}
 
 		@Override
 		public Iterator< TableRow > iterator()
 		{
-			return map.values().iterator();
+			return list.iterator();
 		}
 	}
 
 	private static final class TableRow
 	{
 
-		private final Map< String, Double > map;
+		private final String label;
 
-		public TableRow( final String xLabel, final Number x )
-		{
-			this.map = new HashMap<>();
-			// Store the x value in the map.
-			map.put( xLabel, ( Double ) x );
-		}
+		private final Map< String, Double > map = new HashMap<>();
 
-		public void put( final String key, final Number y )
+		private final int id;
+
+		public TableRow( final String label, final int id )
 		{
-			map.put( key, ( Double ) y );
+			this.label = label;
+			this.id = id;
 		}
 	}
 }
