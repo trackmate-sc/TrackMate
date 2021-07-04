@@ -21,9 +21,6 @@
  */
 package fiji.plugin.trackmate.detection;
 
-import java.util.Map;
-
-import net.imagej.ImgPlus;
 import net.imglib2.Interval;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
@@ -42,8 +39,9 @@ public interface SpotGlobalDetectorFactory< T extends RealType< T > & NativeType
 
 	/**
 	 * Returns a new {@link SpotDetector} configured to operate on all the
-	 * time-points. This factory must be first given the {@link ImgPlus} and the
-	 * settings map, through the {@link #setTarget(ImgPlus, Map)} method.
+	 * time-points. This factory must be first given the <code>ImgPlus</code>
+	 * and the settings map, through the <code>#setTarget(ImgPlus, Map)</code>
+	 * method.
 	 *
 	 * @param interval
 	 *            the interval that determines the region in the source image to

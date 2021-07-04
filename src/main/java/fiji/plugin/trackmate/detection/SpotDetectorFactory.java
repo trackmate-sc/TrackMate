@@ -21,9 +21,6 @@
  */
 package fiji.plugin.trackmate.detection;
 
-import java.util.Map;
-
-import net.imagej.ImgPlus;
 import net.imglib2.Interval;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
@@ -33,7 +30,7 @@ import net.imglib2.type.numeric.RealType;
  * which we can therefore propose multithreading. *
  * <p>
  * These classes are able to configure a {@link SpotDetector} to operate on a
- * single time-point of the target {@link ImgPlus}.
+ * single time-point of the target <code>ImgPlus</code>.
  * 
  * @author Jean-Yves Tinevez
  *
@@ -44,8 +41,9 @@ public interface SpotDetectorFactory< T extends RealType< T > & NativeType< T > 
 
 	/**
 	 * Returns a new {@link SpotDetector} configured to operate on the given
-	 * target frame. This factory must be first given the {@link ImgPlus} and
-	 * the settings map, through the {@link #setTarget(ImgPlus, Map)} method.
+	 * target frame. This factory must be first given the <code>ImgPlus</code>
+	 * and the settings map, through the <code>#setTarget(ImgPlus, Map)</code>
+	 * method.
 	 *
 	 * @param interval
 	 *            the interval that determines the region in the source image to

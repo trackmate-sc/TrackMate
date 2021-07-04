@@ -27,7 +27,6 @@ import org.jdom2.Element;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.TrackMateModule;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import net.imagej.ImgPlus;
@@ -129,7 +128,7 @@ public interface SpotDetectorFactoryBase< T extends RealType< T > & NativeType< 
 
 	/**
 	 * Return <code>true</code> for the detectors that can provide a spot with a
-	 * 2D {@link SpotRoi} when they operate on 2D images.
+	 * 2D <code>SpotRoi</code> when they operate on 2D images.
 	 * <p>
 	 * This flag may be used by clients to exploit the fact that the spots
 	 * created with this detector will have a contour that can be used

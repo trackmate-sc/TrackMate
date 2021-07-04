@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
+
 import org.jgrapht.Graph;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.event.ConnectedComponentTraversalEvent;
@@ -40,7 +41,6 @@ import org.jgrapht.event.GraphEdgeChangeEvent;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.event.GraphVertexChangeEvent;
 import org.jgrapht.event.TraversalListener;
-import org.jgrapht.event.TraversalListenerAdapter;
 import org.jgrapht.event.VertexTraversalEvent;
 import org.jgrapht.graph.AsUnweightedGraph;
 import org.jgrapht.graph.DefaultListenableGraph;
@@ -50,6 +50,7 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.GraphIterator;
+
 import fiji.plugin.trackmate.graph.Function1;
 import fiji.plugin.trackmate.graph.SortedDepthFirstIterator;
 import fiji.plugin.trackmate.graph.TimeDirectedDepthFirstIterator;
@@ -1368,7 +1369,7 @@ public class TrackModel
 		public void remove()
 		{}
 		
-		public void setNameID( int nameID ) {
+		public void setNameID( final int nameID ) {
 			this.nameID = nameID;
 		}
 

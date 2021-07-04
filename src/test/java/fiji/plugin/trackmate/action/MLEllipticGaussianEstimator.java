@@ -22,15 +22,14 @@
 package fiji.plugin.trackmate.action;
 
 import net.imglib2.Localizable;
-import net.imglib2.algorithm.localization.EllipticGaussianOrtho;
 import net.imglib2.algorithm.localization.Observation;
 import net.imglib2.algorithm.localization.StartPointEstimator;
 import net.imglib2.util.Util;
 
 /**
  * An fit initializer suitable for the fitting of elliptic orthogonal gaussians
- * ({@link EllipticGaussianOrtho}, ellipse axes must be parallel to image axes)
- * functions on n-dimensional image data. It uses plain maximum-likelihood
+ * (<code>EllipticGaussianOrtho</code>, ellipse axes must be parallel to image
+ * axes) functions on n-dimensional image data. It uses plain maximum-likelihood
  * estimator for a normal distribution.
  * <p>
  * The problem dimensionality is specified at construction by the length of the
