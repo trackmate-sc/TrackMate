@@ -224,9 +224,9 @@ public class ExportableChartPanel extends ChartPanel
 			if ( file.getPath().endsWith( ".png" ) )
 				ChartUtils.saveChartAsPNG( file, getChart(), getWidth(), getHeight() );
 			else if ( file.getPath().endsWith( ".pdf" ) )
-				ChartExporter.exportChartAsPDF( this, file );
+				ChartExporter.exportChartAsPDF( file, getChart(), getWidth(), getHeight() );
 			else if ( file.getPath().endsWith( ".svg" ) )
-				ChartExporter.exportChartAsSVG( this, file );
+				ChartExporter.exportChartAsSVG( file, getChart(), getWidth(), getHeight() );
 			else
 				IJ.error( "Invalid file extension.", "Please choose a filename with one of the 3 supported extension: .png, .pdf or .svg." );
 		}

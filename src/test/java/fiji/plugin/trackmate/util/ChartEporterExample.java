@@ -107,8 +107,8 @@ public class ChartEporterExample
 		frame.setSize( new java.awt.Dimension( 520, 320 ) );
 		frame.setVisible( true );
 
-		ChartExporter.exportChartAsPDF( panel1, new File( "/Users/tinevez/Desktop/ExportTest1.pdf" ) );
-		ChartExporter.exportChartAsPDF( panel2, new File( "/Users/tinevez/Desktop/ExportTest2.pdf" ) );
+		ChartExporter.exportChartAsPDF( new File( "/Users/tinevez/Desktop/ExportTest1.pdf" ), panel1.getChart(), panel1.getWidth(), panel1.getHeight() );
+		ChartExporter.exportChartAsPDF( new File( "/Users/tinevez/Desktop/ExportTest2.pdf" ), panel2.getChart(), panel2.getWidth(), panel1.getHeight() );
 	}
 
 	public static void exportToSVG( final String[] args ) throws IOException, DocumentException
@@ -143,7 +143,7 @@ public class ChartEporterExample
 		frame.setSize( new java.awt.Dimension( 520, 320 ) );
 		frame.setVisible( true );
 
-		ChartExporter.exportChartAsSVG( panel1, new File( "/Users/tinevez/Desktop/ExportTest1.svg" ) );
-		ChartExporter.exportChartAsSVG( panel2, new File( "/Users/tinevez/Desktop/ExportTest2.svg" ) );
+		ChartExporter.exportChartAsSVG( new File( "/Users/tinevez/Desktop/ExportTest1.svg" ), panel1.getChart(), panel1.getWidth(), panel1.getHeight() );
+		ChartExporter.exportChartAsSVG( new File( "/Users/tinevez/Desktop/ExportTest2.svg" ), panel2.getChart(), panel2.getWidth(), panel1.getHeight() );
 	}
 }
