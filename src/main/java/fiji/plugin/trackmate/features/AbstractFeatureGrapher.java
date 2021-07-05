@@ -26,8 +26,8 @@ import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -203,7 +203,7 @@ public abstract class AbstractFeatureGrapher
 	 */
 	private final < K, V > Set< V > getUniqueValues( final Iterable< K > keys, final Map< K, V > map )
 	{
-		final HashSet< V > mapping = new HashSet<>();
+		final Set< V > mapping = new LinkedHashSet<>();
 		for ( final K key : keys )
 			mapping.add( map.get( key ) );
 
