@@ -61,8 +61,6 @@ import ij.gui.Toolbar;
 public class SpotEditTool extends AbstractTool implements MouseMotionListener, MouseListener, KeyListener, ToolWithOptions
 {
 
-	private static final boolean DEBUG = false;
-
 	private static final double COARSE_STEP = 2;
 
 	private static final double FINE_STEP = 0.2f;
@@ -136,13 +134,8 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	public static SpotEditTool getInstance()
 	{
 		if ( null == instance )
-		{
 			instance = new SpotEditTool();
-			if ( DEBUG )
-				System.out.println( "[SpotEditTool] Instantiating: " + instance );
-		}
-		if ( DEBUG )
-			System.out.println( "[SpotEditTool] Returning instance: " + instance );
+
 		return instance;
 	}
 
@@ -190,21 +183,10 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	 */
 	public void register( final ImagePlus lImp, final HyperStackDisplayer displayer )
 	{
-		if ( DEBUG )
-			System.out.println( "[SpotEditTool] Currently registered: " + displayers );
-
 		if ( displayers.containsKey( lImp ) )
-		{
 			unregisterTool( lImp );
-			if ( DEBUG )
-				System.out.println( "[SpotEditTool] De-registering " + lImp + " as tool listener." );
-		}
 
 		displayers.put( lImp, displayer );
-		if ( DEBUG )
-		{
-			System.out.println( "[SpotEditTool] Registering " + lImp + " and " + displayer + "." + " Currently registered: " + displayers );
-		}
 	}
 
 	/*
@@ -216,16 +198,6 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	{
 		final ImagePlus lImp = getImagePlus( e );
 		final HyperStackDisplayer displayer = displayers.get( lImp );
-		if ( DEBUG )
-		{
-			System.out.println( "[SpotEditTool] @mouseClicked" );
-			System.out.println( "[SpotEditTool] Got " + lImp + " as ImagePlus" );
-			System.out.println( "[SpotEditTool] Matching displayer: " + displayer );
-
-			for ( final MouseListener ml : lImp.getCanvas().getMouseListeners() )
-				System.out.println( "[SpotEditTool] mouse listener: " + ml );
-		}
-
 		if ( null == displayer )
 			return;
 
@@ -399,10 +371,6 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	@Override
 	public void keyPressed( final KeyEvent e )
 	{
-
-		if ( DEBUG )
-			System.out.println( "[SpotEditTool] keyPressed: " + e.getKeyChar() );
-
 		final ImagePlus lImp = getImagePlus( e );
 		if ( lImp == null )
 			return;
@@ -767,9 +735,6 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	@Override
 	public void keyReleased( final KeyEvent e )
 	{
-		if ( DEBUG )
-			System.out.println( "[SpotEditTool] keyReleased: " + e.getKeyChar() );
-
 		switch ( e.getKeyCode() )
 		{
 		case KeyEvent.VK_SPACE:
