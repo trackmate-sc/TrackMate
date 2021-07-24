@@ -170,6 +170,21 @@ public class GrapherPanel extends JPanel
 		rdbtnAll.setSelected( true );
 	}
 
+	public FeaturePlotSelectionPanel getSpotFeatureSelectionPanel()
+	{
+		return spotFeatureSelectionPanel;
+	}
+
+	public FeaturePlotSelectionPanel getEdgeFeatureSelectionPanel()
+	{
+		return edgeFeatureSelectionPanel;
+	}
+
+	public FeaturePlotSelectionPanel getTrackFeatureSelectionPanel()
+	{
+		return trackFeatureSelectionPanel;
+	}
+
 	private void plotSpotFeatures( final String xFeature, final List< String > yFeatures )
 	{
 		final EverythingDisablerAndReenabler enabler = new EverythingDisablerAndReenabler( this, new Class[] { JLabel.class } );

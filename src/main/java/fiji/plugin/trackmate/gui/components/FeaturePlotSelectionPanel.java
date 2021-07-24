@@ -81,9 +81,9 @@ public class FeaturePlotSelectionPanel extends JPanel
 
 	private final Stack< Component > struts = new Stack<>();
 
-	private final List< String > features;
+	private List< String > features;
 
-	private final Map< String, String > featureNames;
+	private Map< String, String > featureNames;
 
 	/*
 	 * CONSTRUCTOR
@@ -187,6 +187,27 @@ public class FeaturePlotSelectionPanel extends JPanel
 
 			plotAction.plot( sKey, yKeys );
 		} );
+	}
+
+	public void setFeatures( final Collection< String > features, final Map< String, String > featureNames )
+	{
+		this.features = new ArrayList<>( features );
+		this.featureNames = featureNames;
+		final Object previousKey = cmbboxXFeature.getSelectedItem();
+
+		final ComboBoxModel< String > cmbboxXFeatureModel = new DefaultComboBoxModel<>(
+				TMUtils.getArrayFromMaping( features, featureNames ).toArray( new String[] {} ) );
+		cmbboxXFeature.setModel( cmbboxXFeatureModel );
+		cmbboxXFeature.setSelectedItem( previousKey );
+
+		for ( final JComboBox< String > cb : comboBoxes )
+		{
+			final Object previousYKey = cb.getSelectedItem();
+			final ComboBoxModel< String > cmbboxYFeatureModel = new DefaultComboBoxModel<>(
+					TMUtils.getArrayFromMaping( features, featureNames ).toArray( new String[] {} ) );
+			cb.setModel( cmbboxYFeatureModel );
+			cb.setSelectedItem( previousYKey );
+		}
 	}
 
 	/*
