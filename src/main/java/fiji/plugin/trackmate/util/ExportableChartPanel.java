@@ -193,8 +193,8 @@ public class ExportableChartPanel extends ChartPanel
 			final FileDialog dialog = new FileDialog( frame, "Export chart to PNG, PDF or SVG", FileDialog.SAVE );
 			final FilenameFilter filter = ( dir, name ) -> name.endsWith( ".png" ) || name.endsWith( ".pdf" ) || name.endsWith( ".svg" );
 			dialog.setFilenameFilter( filter );
-			dialog.setDirectory( currentDir.getAbsolutePath() );
-			dialog.setFile( new File( currentDir, getChart().getTitle().getText().replaceAll( "\\.+$", "" ) + ".pdf" ).getAbsolutePath() );
+			dialog.setDirectory( currentDir == null ? null : currentDir.getAbsolutePath() );
+			dialog.setFile( getChart().getTitle().getText().replaceAll( "\\.+$", "" ) + ".pdf" );
 			dialog.setVisible( true );
 			final String selectedFile = dialog.getFile();
 			if ( null == selectedFile )
