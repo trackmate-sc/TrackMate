@@ -1139,6 +1139,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 		}
 		unlaidSpotColumn = maxLength;
 		gui.graphComponent.refresh();
+		gui.graphComponent.repaint();
 	}
 
 	public void captureUndecorated()
