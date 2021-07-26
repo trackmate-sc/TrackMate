@@ -83,7 +83,6 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 
 	private final DisplaySettings ds;
 
-
 	/*
 	 * CONSTRUCTOR
 	 */
@@ -541,8 +540,13 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 							@Override
 							public void actionPerformed( final ActionEvent arg0 )
 							{
-								final String newname = textArea.getText();
-								trackScheme.getModel().getTrackModel().setName( trackID, newname );
+								// Prevent setting the name of a track that has
+								// been deleted.
+								if ( trackScheme.getModel().getTrackModel().unsortedTrackIDs( false ).contains( trackID ) )
+								{
+									final String newname = textArea.getText();
+									trackScheme.getModel().getTrackModel().setName( trackID, newname );
+								}
 								scrollPane.remove( textArea );
 								ColumnHeader.this.remove( scrollPane );
 								TrackSchemeGraphComponent.this.repaint();
