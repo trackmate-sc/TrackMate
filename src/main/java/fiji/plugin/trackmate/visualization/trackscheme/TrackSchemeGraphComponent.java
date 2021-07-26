@@ -203,9 +203,10 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 							cell = null;
 						}
 
-						// Starts move if the cell under the mouse is movable
-						// and/or any
-						// cells of the selection are movable
+						/*
+						 * Starts move if the cell under the mouse is movable
+						 * and/or any cells of the selection are movable.
+						 */
 						if ( isMoveEnabled() && !e.isPopupTrigger() )
 						{
 							start( e );
@@ -269,11 +270,11 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 							{
 								if ( tmp == null && e.getButton() == MouseEvent.BUTTON1 )
 								{
-									lGraph.clearSelection(); // JYT I did this to
-									// keep selection
-									// even if we
-									// right-click
-									// elsewhere
+									lGraph.clearSelection();
+									/*
+									 * JYT I did this to keep selection even if
+									 * we right-click elsewhere
+									 */
 								}
 								else if ( lGraph.isSwimlane( tmp ) && graphComponent.getCanvas().hitSwimlaneContent( graphComponent, lGraph.getView().getState( tmp ), e.getX(), e.getY() ) )
 								{
@@ -487,7 +488,8 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 				@Override
 				public void mouseClicked( final MouseEvent event )
 				{
-					if ( !( event.getClickCount() == 2 ) ) { return; }
+					if ( !( event.getClickCount() == 2 ) )
+						return;
 
 					final int x = event.getPoint().x;
 					final float scale = ( float ) graph.getView().getScale();
