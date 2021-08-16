@@ -199,10 +199,21 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 		final BiConsumer< Spot, String > labelSetter = ( spot, label ) -> spot.setName( label );
 
 		/*
-		 * Feature provider. We add a fake one to show the spot track ID.
+		 * Feature provider. We add a fake one to show the spot ID.
+		 */
+		final String SPOT_ID = "ID";
+		features.add( 0, SPOT_ID );
+		featureNames.put( SPOT_ID, "Spot ID" );
+		featureShortNames.put( SPOT_ID, "Spot ID" );
+		featureUnits.put( SPOT_ID, "" );
+		isInts.put( SPOT_ID, Boolean.TRUE );
+		infoTexts.put( SPOT_ID, "The id of the spot." );
+
+		/*
+		 * Feature provider. We add a fake one to show the spot *track* ID.
 		 */
 		final String TRACK_ID = "TRACK_ID";
-		features.add( 0, TRACK_ID );
+		features.add( 1, TRACK_ID );
 		featureNames.put( TRACK_ID, "Track ID" );
 		featureShortNames.put( TRACK_ID, "Track ID" );
 		featureUnits.put( TRACK_ID, "" );
@@ -215,6 +226,9 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 				final Integer trackID = model.getTrackModel().trackIDOf( spot );
 				return trackID == null ? null : trackID.doubleValue();
 			}
+			else if ( feature.equals( SPOT_ID ) )
+				return ( double ) spot.ID();
+
 			return spot.getFeature( feature );
 		};
 
