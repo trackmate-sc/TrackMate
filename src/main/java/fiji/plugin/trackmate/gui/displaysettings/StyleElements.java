@@ -54,6 +54,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
+import javax.swing.JSpinner.DefaultEditor;
 import javax.swing.ListCellRenderer;
 import javax.swing.SpinnerListModel;
 import javax.swing.SwingConstants;
@@ -63,6 +64,7 @@ import javax.swing.border.EmptyBorder;
 import org.drjekyll.fontchooser.FontDialog;
 
 import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.gui.Fonts;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.components.CategoryJComboBox;
@@ -934,6 +936,8 @@ public class StyleElements
 	{
 		final SpinnerListModel model = new SpinnerListModel( element.getValues() );
 		final JSpinner spinner = new JSpinner( model );
+		spinner.setFont( Fonts.SMALL_FONT );
+		( ( DefaultEditor ) spinner.getEditor() ).getTextField().setEditable( false );
 		model.setValue( element.getValue() );
 		model.addChangeListener( e -> element.setValue( ( E ) model.getValue() ) );
 		element.onSet( e -> {
