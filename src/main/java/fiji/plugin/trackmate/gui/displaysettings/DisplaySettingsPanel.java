@@ -34,11 +34,11 @@ import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.label;
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedCheckBox;
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedColorButton;
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedColormapChooser;
+import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedComboBoxEnumSelector;
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedFeatureSelector;
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedFontButton;
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedFormattedTextField;
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedSliderPanel;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedSpinnerEnumSelector;
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.separator;
 
 import java.awt.GridBagConstraints;
@@ -178,7 +178,7 @@ public class DisplaySettingsPanel extends JPanel
 					public < E > void visit( final EnumElement< E > element )
 					{
 						addToLayout(
-								linkedSpinnerEnumSelector( element ),
+								linkedComboBoxEnumSelector( element ),
 								new JLabel( element.getLabel() ) );
 					}
 

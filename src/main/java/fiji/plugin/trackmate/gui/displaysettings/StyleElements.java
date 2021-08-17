@@ -42,6 +42,7 @@ import java.util.function.Supplier;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -945,6 +946,20 @@ public class StyleElements
 				model.setValue( e );
 		} );
 		return spinner;
+	}
+
+	@SuppressWarnings( "unchecked" )
+	public static < E > JComboBox< E > linkedComboBoxEnumSelector( final EnumElement< E > element )
+	{
+		final DefaultComboBoxModel< E > model = new DefaultComboBoxModel<>( element.values );
+		final JComboBox< E > cb = new JComboBox<>( model );
+		cb.setFont( Fonts.SMALL_FONT );
+		cb.addActionListener( e -> element.setValue( ( E ) model.getSelectedItem() ) );
+		element.onSet( e -> {
+			if ( e != model.getSelectedItem() )
+				model.setSelectedItem( e );
+		} );
+		return cb;
 	}
 
 	public static JFormattedTextField linkedFormattedTextField( final DoubleElement element )
