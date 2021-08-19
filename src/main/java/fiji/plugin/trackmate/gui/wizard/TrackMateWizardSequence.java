@@ -150,6 +150,12 @@ public class TrackMateWizardSequence implements WizardSequence
 	}
 
 	@Override
+	public void onClose()
+	{
+		trackmate.getModel().setLogger( Logger.IJ_LOGGER );
+	}
+
+	@Override
 	public WizardPanelDescriptor next()
 	{
 		if ( current == chooseDetectorDescriptor )
