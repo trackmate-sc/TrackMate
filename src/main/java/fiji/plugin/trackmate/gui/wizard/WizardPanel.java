@@ -36,6 +36,7 @@ import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.border.EmptyBorder;
 
+import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.wizard.TransitionAnimator.Direction;
 import net.imglib2.ui.PainterThread;
 import net.imglib2.ui.PainterThread.Paintable;
@@ -146,6 +147,8 @@ public class WizardPanel extends JPanel
 			add( label );
 			this.painterThread = new PainterThread( this );
 			painterThread.start();
+
+			GuiUtils.addOnClosingEvent( this, () -> animatorPanel.painterThread.interrupt() );
 		}
 
 		public void start( final WizardPanelDescriptor from, final WizardPanelDescriptor to, final Direction direction )

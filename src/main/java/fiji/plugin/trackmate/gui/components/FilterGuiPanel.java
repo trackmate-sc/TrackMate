@@ -60,6 +60,7 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.features.FeatureFilter;
+import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.util.OnRequestUpdater;
 
@@ -208,7 +209,9 @@ public class FilterGuiPanel extends JPanel implements ChangeListener
 
 		lblTop.setVisible( false ); // For now
 		logger = new ProgressBarLogger();
-
+		
+		// On close
+		GuiUtils.addOnClosingEvent( this, () -> updater.quit() );
 	}
 
 	/*
