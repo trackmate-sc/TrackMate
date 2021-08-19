@@ -36,8 +36,6 @@ import ij.gui.Roi;
 public class HyperStackDisplayer extends AbstractTrackMateModelView
 {
 
-	private static final boolean DEBUG = false;
-
 	protected final ImagePlus imp;
 
 	protected SpotOverlay spotOverlay;
@@ -117,8 +115,6 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 	@Override
 	public void modelChanged( final ModelChangeEvent event )
 	{
-		if ( DEBUG )
-			System.out.println( "[HyperStackDisplayer] Received model changed event ID: " + event.getEventID() + " from " + event.getSource() );
 		switch ( event.getEventID() )
 		{
 		case ModelChangeEvent.MODEL_MODIFIED:
