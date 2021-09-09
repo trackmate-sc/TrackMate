@@ -142,6 +142,10 @@
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
 		<!-- NB: Use ImgLib2 style code formatting (https://github.com/scijava/scijava-coding-style) -->
 		<scijava.coding-style>imglib2</scijava.coding-style>
+
+		<imglib2-ui.version>2.0.1</imglib2-ui.version>
+		<fontchooser.version>2.4</fontchooser.version>
+		<javaGeom.version>0.11.1</javaGeom.version>
 	</properties>
 
 	<repositories>
@@ -154,10 +158,6 @@
 	<dependencies>
 		<!-- Fiji dependencies -->
 		<dependency>
-			<groupId>net.imagej</groupId>
-			<artifactId>ij</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>fiji-lib</artifactId>
 		</dependency>
@@ -165,7 +165,11 @@
 		<!-- ImageJ dependencies -->
 		<dependency>
 			<groupId>net.imagej</groupId>
-			<artifactId>imagej-deprecated</artifactId>
+			<artifactId>ij</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.imagej</groupId>
+			<artifactId>imagej-common</artifactId>
 		</dependency>
 
 		<!-- ImgLib2 dependencies -->
@@ -187,11 +191,16 @@
 		</dependency>
 		<dependency>
 			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2-realtransform</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.imglib2</groupId>
 			<artifactId>imglib2-roi</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>sc.fiji</groupId>
-			<artifactId>bigdataviewer-core</artifactId>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2-ui</artifactId>
+			<version>${imglib2-ui.version}</version>
 		</dependency>
 
 		<!-- SciJava dependencies -->
@@ -205,17 +214,30 @@
 		</dependency>
 
 		<!-- Third party dependencies -->
+			
+		<dependency>
+			<groupId>com.github.vlsi.mxgraph</groupId>
+			<artifactId>jgraphx</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>com.itextpdf</groupId>
 			<artifactId>itextpdf</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>gov.nist.math</groupId>
 			<artifactId>jama</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.jgrapht</groupId>
-			<artifactId>jgrapht-core</artifactId>
+			<groupId>net.sf.trove4j</groupId>
+			<artifactId>trove4j</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.xmlgraphics</groupId>
@@ -226,8 +248,9 @@
 			<artifactId>batik-svggen</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.xmlgraphics</groupId>
-			<artifactId>batik-codec</artifactId>
+			<groupId>org.drjekyll</groupId>
+			<artifactId>fontchooser</artifactId>
+			<version>${fontchooser.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jdom</groupId>
@@ -238,26 +261,13 @@
 			<artifactId>jfreechart</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.github.vlsi.mxgraph</groupId>
-			<artifactId>jgraphx</artifactId>
-		</dependency>
-		<dependency>
-		    <groupId>org.drjekyll</groupId>
-		    <artifactId>fontchooser</artifactId>
-    		<version>2.4</version>
-		</dependency>
-		<dependency>
-			<groupId>com.opencsv</groupId>
-			<artifactId>opencsv</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
+			<groupId>org.jgrapht</groupId>
+			<artifactId>jgrapht-core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>math.geom2d</groupId>
 			<artifactId>javaGeom</artifactId>
-			<version>0.11.1</version>
+			<version>${javaGeom.version}</version>
 		</dependency>
 		
 		<!-- Test dependencies -->
