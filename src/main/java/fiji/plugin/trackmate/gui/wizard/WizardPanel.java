@@ -38,8 +38,8 @@ import javax.swing.border.EmptyBorder;
 
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.wizard.TransitionAnimator.Direction;
-import net.imglib2.ui.PainterThread;
-import net.imglib2.ui.PainterThread.Paintable;
+import fiji.plugin.trackmate.util.PainterThread;
+import fiji.plugin.trackmate.util.PainterThread.Paintable;
 
 public class WizardPanel extends JPanel
 {
