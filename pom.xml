@@ -143,7 +143,6 @@
 		<!-- NB: Use ImgLib2 style code formatting (https://github.com/scijava/scijava-coding-style) -->
 		<scijava.coding-style>imglib2</scijava.coding-style>
 
-		<imglib2-ui.version>2.0.1</imglib2-ui.version>
 		<fontchooser.version>2.4</fontchooser.version>
 		<javaGeom.version>0.11.1</javaGeom.version>
 	</properties>
@@ -196,11 +195,6 @@
 		<dependency>
 			<groupId>net.imglib2</groupId>
 			<artifactId>imglib2-roi</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.imglib2</groupId>
-			<artifactId>imglib2-ui</artifactId>
-			<version>${imglib2-ui.version}</version>
 		</dependency>
 
 		<!-- SciJava dependencies -->
