@@ -15,7 +15,7 @@
 
 	<name>TrackMate</name>
 	<description>TrackMate plugin for Fiji.</description>
-	<url>https://imagej.net/TrackMate</url>
+	<url>https://imagej.net/plugins/trackmate</url>
 	<inceptionYear>2010</inceptionYear>
 	<organization>
 		<name>Fiji</name>
@@ -33,7 +33,7 @@
 		<developer>
 			<id>tinevez</id>
 			<name>Jean-Yves Tinevez</name>
-			<url>https://imagej.net/User:JeanYvesTinevez</url>
+			<url>https://imagej.net/people/tinevez</url>
 			<roles>
 				<role>founder</role>
 				<role>lead</role>
@@ -47,7 +47,7 @@
 		<developer>
 			<id>ctrueden</id>
 			<name>Curtis Rueden</name>
-			<url>https://imagej.net/User:Rueden</url>
+			<url>https://imagej.net/people/ctrueden</url>
 			<roles>
 				<role>maintainer</role>
 			</roles>
@@ -56,57 +56,57 @@
 	<contributors>
 		<contributor>
 			<name>Nick Perry</name>
-			<url>https://imagej.net/User:NicholasPerry</url>
+			<url>https://imagej.net/people/nickp</url>
 			<roles><role>founder</role></roles>
 			<properties><id>nickp</id></properties>
 		</contributor>
 		<contributor>
 			<name>Johannes Schindelin</name>
-			<url>https://imagej.net/User:Schindelin</url>
+			<url>https://imagej.net/people/dscho</url>
 			<roles><role>founder</role></roles>
 			<properties><id>dscho</id></properties>
 		</contributor>
 		<contributor><name>Gary Baker</name></contributor>
 		<contributor>
 			<name>Albert Cardona</name>
-			<url>https://imagej.net/User:Albertcardona</url>
+			<url>https://imagej.net/people/acardona</url>
 			<properties><id>acardona</id></properties>
 		</contributor>
 		<contributor>
 			<name>Barry DeZonia</name>
-			<url>https://imagej.net/User:Bdezonia</url>
+			<url>https://imagej.net/people/bdezonia</url>
 			<properties><id>bdezonia</id></properties>
 		</contributor>
 		<contributor>
 			<name>Stefan Helfrich</name>
-			<url>https://imagej.net/User:Stelfrich</url>
+			<url>https://imagej.net/people/stelfrich</url>
 			<properties><id>stelfrich</id></properties>
 		</contributor>
 		<contributor>
 			<name>Mark Hiner</name>
-			<url>https://imagej.net/User:Hinerm</url>
+			<url>https://imagej.net/people/hinerm</url>
 			<properties><id>hinerm</id></properties>
 		</contributor>
 		<contributor>
 			<name>Hadrien Mary</name>
-			<url>https://imagej.net/User:Hadim</url>
+			<url>https://imagej.net/people/hadim</url>
 			<properties><id>hadim</id></properties>
 		</contributor>
 		<contributor>
 			<name>Tobias Pietzsch</name>
-			<url>https://imagej.net/User:Pietzsch</url>
+			<url>https://imagej.net/peoplel/pietzsch</url>
 			<properties><id>tpietzsch</id></properties>
 		</contributor>
 		<contributor><name>Barak Naveh</name></contributor>
 		<contributor><name>Chen Ye</name></contributor>
 		<contributor>
 			<name>Robert Haase</name>
-			<url>https://imagej.net/User:Haesleinhuepf</url>
+			<url>https://imagej.net/people/haesleinhuepf</url>
 			<properties><id>haesleinhuepf</id></properties>
 		</contributor>
 		<contributor>
 			<name>Jan Eglinger</name>
-			<url>https://imagej.net/User:Eglinger</url>
+			<url>https://imagej.net/people/imagejan</url>
 			<properties><id>imagejan</id></properties>
 		</contributor>
 	</contributors>
@@ -114,7 +114,7 @@
 	<mailingLists>
 		<mailingList>
 			<name>Image.sc Forum</name>
-			<archive>https://forum.image.sc/tags/fiji</archive>
+			<archive>https://forum.image.sc/tag/fiji</archive>
 		</mailingList>
 	</mailingLists>
 
