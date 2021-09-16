@@ -82,9 +82,12 @@ public class StartDialogDescriptor extends WizardPanelDescriptor
 		logger.log( welcomeMessage, Logger.BLUE_COLOR );
 		logger.log( "Please note that TrackMate is available through Fiji, and is based on a publication. "
 				+ "If you use it successfully for your research please be so kind to cite our work:\n" );
+		logger.log( "Ershov D, Phan M-S, Pylvänäinen JW, Rigaud SU, et al. 'Bringing TrackMate in the era of machine-learning and deep-learning.' "
+				+ "bioRxiv. 2021; doi:10.1101/2021.09.03.458852.\n", Logger.GREEN_COLOR );
+		logger.log( "https://www.biorxiv.org/content/10.1101/2021.09.03.458852v1\n", Logger.BLUE_COLOR );
+		logger.log( "and / or:\n" );
 		logger.log( "Tinevez, JY.; Perry, N. & Schindelin, J. et al. (2017), 'TrackMate: An open and extensible platform for single-particle tracking.', "
 				+ "Methods 115: 80-90, PMID 27713081.\n", Logger.GREEN_COLOR );
-		logger.log( "https://www.ncbi.nlm.nih.gov/pubmed/27713081\n", Logger.BLUE_COLOR );
 		logger.log( "https://www.sciencedirect.com/science/article/pii/S1046202316303346\n", Logger.BLUE_COLOR );
 		logger.log( "\nNumerical feature analyzers:\n", Logger.BLUE_COLOR );
 		logger.log( settings.toStringFeatureAnalyzersInfo() );
@@ -143,9 +146,9 @@ public class StartDialogDescriptor extends WizardPanelDescriptor
 					+ "and is based on a publication. If you use it successfully "
 					+ "for your research please be so kind to cite our work:"
 					+ "<p>"
-					+ "<b>Tinevez, JY.; Perry, N. & Schindelin, J. et al. (2017), "
-					+ "<i>TrackMate: An open and extensible platform for single-particle "
-					+ "tracking.</i></b> Methods 115: 80-90."
+					+ "<b>Ershov D, Phan M-S, Pylvänäinen JW, Rigaud SU, et al. (2021), "
+					+ "<i>Bringing TrackMate in the era of machine-learning and "
+					+ "deep-learning.</i></b> bioRxiv; doi:10.1101/2021.09.03.458852."
 					+ "</html>" );
 			lblCitation.setFont( SMALL_FONT );
 
@@ -158,7 +161,7 @@ public class StartDialogDescriptor extends WizardPanelDescriptor
 			add( lblCitation, gbcLblCitation );
 
 			final JLabel lblLinkPubMed = new JLabel( "<html>"
-					+ "<a href=https://www.ncbi.nlm.nih.gov/pubmed/27713081>on PubMed (PMID 27713081)</a></html>" );
+					+ "<a href=https://www.biorxiv.org/content/10.1101/2021.09.03.458852v1>on bioRxiv</a></html>" );
 			lblLinkPubMed.setFont( SMALL_FONT );
 			lblLinkPubMed.setCursor( new Cursor( Cursor.HAND_CURSOR ) );
 			lblLinkPubMed.addMouseListener( new MouseAdapter()
@@ -168,7 +171,7 @@ public class StartDialogDescriptor extends WizardPanelDescriptor
 				{
 					try
 					{
-						Desktop.getDesktop().browse( new URI( "https://www.ncbi.nlm.nih.gov/pubmed/27713081" ) );
+						Desktop.getDesktop().browse( new URI( "https://www.biorxiv.org/content/10.1101/2021.09.03.458852v1" ) );
 					}
 					catch ( URISyntaxException | IOException ex )
 					{
