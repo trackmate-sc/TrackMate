@@ -33,9 +33,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.scijava.Context;
@@ -70,15 +70,23 @@ public class TMUtils
 	 */
 
 	/**
-	 * Return a new map sorted by its values. Adapted from
-	 * http://stackoverflow.com
-	 * /questions/109383/how-to-sort-a-mapkey-value-on-the-values-in-java
+	 * Return a new map sorted by its values.
 	 */
 	public static < K, V extends Comparable< ? super V > > Map< K, V > sortByValue( final Map< K, V > map, final Comparator< V > comparator )
 	{
-		final List< Map.Entry< K, V > > list = new LinkedList< >( map.entrySet() );
-		Collections.sort( list, Comparator.comparing( Map.Entry::getValue ) );
+		final List< Map.Entry< K, V > > list = new ArrayList<>( map.entrySet() );
+		final Comparator< Map.Entry< K, V > > c = new Comparator< Map.Entry< K, V > >()
+		{
 
+			@Override
+			public int compare( final Entry< K, V > o1, final Entry< K, V > o2 )
+			{
+				final V val1 = o1.getValue();
+				final V val2 = o2.getValue();
+				return comparator.compare( val1, val2 );
+			}
+		};
+		Collections.sort( list, c );
 		final LinkedHashMap< K, V > result = new LinkedHashMap< >();
 		for ( final Map.Entry< K, V > entry : list )
 			result.put( entry.getKey(), entry.getValue() );
