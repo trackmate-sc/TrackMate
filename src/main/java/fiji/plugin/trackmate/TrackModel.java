@@ -41,6 +41,7 @@ import org.jgrapht.event.GraphEdgeChangeEvent;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.event.GraphVertexChangeEvent;
 import org.jgrapht.event.TraversalListener;
+import org.jgrapht.event.TraversalListenerAdapter;
 import org.jgrapht.event.VertexTraversalEvent;
 import org.jgrapht.graph.AsUnweightedGraph;
 import org.jgrapht.graph.DefaultListenableGraph;
@@ -89,7 +90,7 @@ public class TrackModel
 	 * It is the parent instance responsibility to clear this field when it is
 	 * fit to do so.
 	 */
-	final Set< DefaultWeightedEdge > edgesAdded = new HashSet< >();
+	final Set< DefaultWeightedEdge > edgesAdded = new HashSet<>();
 
 	/**
 	 * The edges that have removed from this model by
@@ -99,7 +100,7 @@ public class TrackModel
 	 * It is the parent instance responsibility to clear this field when it is
 	 * fit to do so.
 	 */
-	final Set< DefaultWeightedEdge > edgesRemoved = new HashSet< >();
+	final Set< DefaultWeightedEdge > edgesRemoved = new HashSet<>();
 
 	/**
 	 * The edges that have been modified in this model by changing its cost
@@ -109,7 +110,7 @@ public class TrackModel
 	 * It is the parent instance responsibility to clear this field when it is
 	 * fit to do so.
 	 */
-	final Set< DefaultWeightedEdge > edgesModified = new HashSet< >();
+	final Set< DefaultWeightedEdge > edgesModified = new HashSet<>();
 
 	/**
 	 * The track IDs that have been modified, updated or created, <b>solely</b>
@@ -121,7 +122,7 @@ public class TrackModel
 	 * It is the parent instance responsibility to clear this field when it is
 	 * fit to do so.
 	 */
-	final Set< Integer > tracksUpdated = new HashSet< >();
+	final Set< Integer > tracksUpdated = new HashSet<>();
 
 	private static final Boolean DEFAULT_VISIBILITY = Boolean.TRUE;
 
@@ -175,10 +176,9 @@ public class TrackModel
 	void setGraph( final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph )
 	{
 		if ( null != this.graph )
-		{
 			this.graph.removeGraphListener( mgl );
-		}
-		this.graph = new DefaultListenableGraph< >( graph );
+
+		this.graph = new DefaultListenableGraph<>( graph );
 		this.graph.addGraphListener( mgl );
 		init( graph );
 	}
@@ -218,10 +218,9 @@ public class TrackModel
 	{
 
 		if ( null != this.graph )
-		{
 			this.graph.removeGraphListener( mgl );
-		}
-		this.graph = new DefaultListenableGraph< >( lGraph );
+
+		this.graph = new DefaultListenableGraph<>( lGraph );
 		this.graph.addGraphListener( mgl );
 
 		edgesAdded.clear();
@@ -236,41 +235,36 @@ public class TrackModel
 
 		// Rebuild the id maps
 		IDcounter = 0;
-		vertexToID = new HashMap< >();
+		vertexToID = new HashMap<>();
 		int nameID;
 		int nameIDCounter = -1;
 		final int prefixLength = DefaultNameGenerator.DEFAULT_NAME_PREFIX.length();
-		final Pattern namePattern = Pattern.compile( "^" + DefaultNameGenerator.DEFAULT_NAME_PREFIX + "[0-9]+$" );		
+		final Pattern namePattern = Pattern.compile( "^" + DefaultNameGenerator.DEFAULT_NAME_PREFIX + "[0-9]+$" );
 		for ( final Integer id : trackSpots.keySet() )
 		{
 			for ( final Spot spot : trackSpots.get( id ) )
-			{
 				vertexToID.put( spot, id );
-			}
+
 			if ( id > IDcounter )
-			{
 				IDcounter = id;
-			}
-			// Update the nameIDCounter when the name matches the pattern "^Track_[0-9]+$", otherwise do nothing.
+
+			// Update the nameIDCounter when the name matches the pattern
+			// "^Track_[0-9]+$", otherwise do nothing.
 			if ( namePattern.matcher( name( id ) ).matches() )
 			{
 				nameID = Integer.parseInt( name( id ).substring( prefixLength ) );
 				if ( nameID > nameIDCounter )
-				{
 					nameIDCounter = nameID;
-				}				
 			}
 		}
 		IDcounter++;
 		( ( DefaultNameGenerator ) nameGenerator ).setNameID( ++nameIDCounter );
 
-		edgeToID = new HashMap< >();
+		edgeToID = new HashMap<>();
 		for ( final Integer id : trackEdges.keySet() )
 		{
 			for ( final DefaultWeightedEdge edge : trackEdges.get( id ) )
-			{
 				edgeToID.put( edge, id );
-			}
 		}
 
 	}
@@ -292,13 +286,11 @@ public class TrackModel
 	DefaultWeightedEdge addEdge( final Spot source, final Spot target, final double weight )
 	{
 		if ( !graph.containsVertex( source ) )
-		{
 			graph.addVertex( source );
-		}
+
 		if ( !graph.containsVertex( target ) )
-		{
 			graph.addVertex( target );
-		}
+
 		final DefaultWeightedEdge edge = graph.addEdge( source, target );
 		graph.setEdgeWeight( edge, weight );
 		return edge;
@@ -354,18 +346,14 @@ public class TrackModel
 	 */
 	public < V > SimpleDirectedWeightedGraph< V, DefaultWeightedEdge > copy( final Supplier< V > factory, final Function1< Spot, V > function, final Map< Spot, V > mappings )
 	{
-		final SimpleDirectedWeightedGraph< V, DefaultWeightedEdge > copy = new SimpleDirectedWeightedGraph< >( DefaultWeightedEdge.class );
+		final SimpleDirectedWeightedGraph< V, DefaultWeightedEdge > copy = new SimpleDirectedWeightedGraph<>( DefaultWeightedEdge.class );
 		final Set< Spot > spots = graph.vertexSet();
 		// To store mapping of old graph vs new graph
 		Map< Spot, V > map;
 		if ( null == mappings )
-		{
-			map = new HashMap< >( spots.size() );
-		}
+			map = new HashMap<>( spots.size() );
 		else
-		{
 			map = mappings;
-		}
 
 		// Generate new vertices
 		for ( final Spot spot : Collections.unmodifiableCollection( spots ) )
@@ -541,7 +529,7 @@ public class TrackModel
 		if ( !visibleOnly )
 			return ids;
 
-		final Set< Integer > vids = new LinkedHashSet< >( ids.size() );
+		final Set< Integer > vids = new LinkedHashSet<>( ids.size() );
 		for ( final Integer id : ids )
 			if ( visibility.get( id ) )
 				vids.add( id );
@@ -563,7 +551,7 @@ public class TrackModel
 		if ( !visibleOnly )
 			return visibility.keySet();
 
-		final Set< Integer > vids = new LinkedHashSet< >( visibility.size() );
+		final Set< Integer > vids = new LinkedHashSet<>( visibility.size() );
 		for ( final Integer id : visibility.keySet() )
 			if ( visibility.get( id ) )
 				vids.add( id );
@@ -623,10 +611,8 @@ public class TrackModel
 	public int nTracks( final boolean visibleOnly )
 	{
 		if ( !visibleOnly )
-		{
 			return connectedEdgeSets.size();
-		}
-		
+
 		int ntracks = 0;
 		for ( final Boolean visible : visibility.values() )
 			if ( visible )
@@ -675,13 +661,13 @@ public class TrackModel
 	 */
 	private void init( final Graph< Spot, DefaultWeightedEdge > lGraph )
 	{
-		vertexToID = new HashMap< >();
-		edgeToID = new HashMap< >();
+		vertexToID = new HashMap<>();
+		edgeToID = new HashMap<>();
 		IDcounter = 0;
-		visibility = new HashMap< >();
-		names = new HashMap< >();
-		connectedVertexSets = new HashMap< >();
-		connectedEdgeSets = new HashMap< >();
+		visibility = new HashMap<>();
+		names = new HashMap<>();
+		connectedVertexSets = new HashMap<>();
+		connectedEdgeSets = new HashMap<>();
 
 		edgesAdded.clear();
 		edgesModified.clear();
@@ -691,13 +677,11 @@ public class TrackModel
 		final Set< Spot > vertexSet = lGraph.vertexSet();
 		if ( vertexSet.size() > 0 )
 		{
-			final BreadthFirstIterator< Spot, DefaultWeightedEdge > i = new BreadthFirstIterator< >( lGraph );
+			final BreadthFirstIterator< Spot, DefaultWeightedEdge > i = new BreadthFirstIterator<>( lGraph );
 			i.addTraversalListener( new MyTraversalListener() );
 
 			while ( i.hasNext() )
-			{
 				i.next();
-			}
 		}
 	}
 
@@ -707,11 +691,12 @@ public class TrackModel
 
 	public String echo()
 	{
-		if ( null == connectedVertexSets ) { return "Uninitialized.\n"; }
+		if ( null == connectedVertexSets )
+			return "Uninitialized.\n";
 
 		final StringBuilder str = new StringBuilder();
 		final Set< Integer > vid = connectedVertexSets.keySet();
-		final HashSet< Integer > eid = new HashSet< >( connectedEdgeSets.keySet() );
+		final HashSet< Integer > eid = new HashSet<>( connectedEdgeSets.keySet() );
 
 		for ( final Integer id : vid )
 		{
@@ -719,13 +704,10 @@ public class TrackModel
 			str.append( " - " + connectedVertexSets.get( id ) + "\n" );
 			final Set< DefaultWeightedEdge > es = connectedEdgeSets.get( id );
 			if ( es == null )
-			{
 				str.append( " - no matching edges!\n" );
-			}
 			else
-			{
 				str.append( " - " + es + "\n" );
-			}
+
 			eid.remove( id );
 		}
 
@@ -769,7 +751,7 @@ public class TrackModel
 		if ( directed )
 			return new TimeDirectedDepthFirstIterator( graph, start );
 
-		return new DepthFirstIterator< >( graph, start );
+		return new DepthFirstIterator<>( graph, start );
 	}
 
 	/**
@@ -795,7 +777,7 @@ public class TrackModel
 		if ( directed )
 			return new TimeDirectedSortedDepthFirstIterator( graph, start, comparator );
 
-		return new SortedDepthFirstIterator< >( graph, start, comparator );
+		return new SortedDepthFirstIterator<>( graph, start, comparator );
 	}
 
 	public TimeDirectedNeighborIndex getDirectedNeighborIndex()
@@ -820,9 +802,11 @@ public class TrackModel
 	 */
 	public List< DefaultWeightedEdge > dijkstraShortestPath( final Spot source, final Spot target )
 	{
-		if ( null == graph ) { return null; }
-		final AsUnweightedGraph< Spot, DefaultWeightedEdge > unWeightedGrah = new AsUnweightedGraph< >( graph );
-		final DijkstraShortestPath< Spot, DefaultWeightedEdge > pathFinder = new DijkstraShortestPath< >( unWeightedGrah );
+		if ( null == graph )
+			return null;
+
+		final AsUnweightedGraph< Spot, DefaultWeightedEdge > unWeightedGrah = new AsUnweightedGraph<>( graph );
+		final DijkstraShortestPath< Spot, DefaultWeightedEdge > pathFinder = new DijkstraShortestPath<>( unWeightedGrah );
 		final List< DefaultWeightedEdge > path = pathFinder.getPath( source, target ).getEdgeList();
 		return path;
 	}
@@ -851,13 +835,11 @@ public class TrackModel
 			{
 				// Forget them
 				for ( final DefaultWeightedEdge e : currentConnectedEdgeSet )
-				{
 					edgeToID.remove( e );
-				}
+
 				for ( final Spot v : currentConnectedVertexSet )
-				{
 					vertexToID.remove( v );
-				}
+
 				return;
 			}
 			// Adds them
@@ -873,8 +855,8 @@ public class TrackModel
 		@Override
 		public void connectedComponentStarted( final ConnectedComponentTraversalEvent e )
 		{
-			currentConnectedVertexSet = new HashSet< >();
-			currentConnectedEdgeSet = new HashSet< >();
+			currentConnectedVertexSet = new HashSet<>();
+			currentConnectedEdgeSet = new HashSet<>();
 			ID = IDcounter++;
 		}
 
@@ -927,8 +909,8 @@ public class TrackModel
 	 * <ul>
 	 * <li>It ignores events triggered by spots being added or removed, because
 	 * they can't be triggered automatically, and are dealt with in the
-	 * {@link Model#addSpotTo(Spot, Integer)} and
-	 * {@link Model#removeSpot(Spot)} methods.
+	 * {@link Model#addSpotTo(Spot, Integer)} and {@link Model#removeSpot(Spot)}
+	 * methods.
 	 * <li>It catches all events triggered by a link being added or removed in
 	 * the graph, whether they are triggered manually through a call to a model
 	 * method such as {@link TrackModel#addEdge(Spot, Spot, double)}, or
@@ -949,7 +931,8 @@ public class TrackModel
 		@Override
 		public void vertexRemoved( final GraphVertexChangeEvent< Spot > event )
 		{
-			if ( null == connectedEdgeSets ) { return; }
+			if ( null == connectedEdgeSets )
+				return;
 
 			final Spot v = event.getVertex();
 			vertexToID.remove( v );
@@ -957,9 +940,11 @@ public class TrackModel
 			if ( id != null )
 			{
 				final Set< Spot > set = connectedVertexSets.get( id );
-				if ( null == set ) { return; // it was removed when removing the
-												// last edge of a track, most
-												// likely.
+				if ( null == set )
+				{
+					return; // it was removed when removing the
+							// last edge of a track, most
+							// likely.
 				}
 				set.remove( v );
 
@@ -1018,7 +1003,7 @@ public class TrackModel
 					// Edges:
 					final Set< DefaultWeightedEdge > ses = connectedEdgeSets.get( sid );
 					final Set< DefaultWeightedEdge > tes = connectedEdgeSets.get( tid );
-					final HashSet< DefaultWeightedEdge > nes = new HashSet< >( ses.size() + tes.size() + 1 );
+					final HashSet< DefaultWeightedEdge > nes = new HashSet<>( ses.size() + tes.size() + 1 );
 					nes.addAll( ses );
 					nes.addAll( tes );
 					nes.add( e );
@@ -1026,7 +1011,7 @@ public class TrackModel
 					// Vertices:
 					final Set< Spot > svs = connectedVertexSets.get( sid );
 					final Set< Spot > tvs = connectedVertexSets.get( tid );
-					final HashSet< Spot > nvs = new HashSet< >( ses.size() + tes.size() );
+					final HashSet< Spot > nvs = new HashSet<>( ses.size() + tes.size() );
 					nvs.addAll( svs );
 					nvs.addAll( tvs );
 
@@ -1041,9 +1026,7 @@ public class TrackModel
 							vertexToID.put( v, nid );
 						}
 						for ( final DefaultWeightedEdge te : tes )
-						{
 							edgeToID.put( te, nid );
-						}
 					}
 					else
 					{
@@ -1055,9 +1038,7 @@ public class TrackModel
 							vertexToID.put( v, nid );
 						}
 						for ( final DefaultWeightedEdge se : ses )
-						{
 							edgeToID.put( se, nid );
-						}
 					}
 					edgeToID.put( e, nid );
 					connectedVertexSets.put( nid, nvs );
@@ -1085,11 +1066,11 @@ public class TrackModel
 			{
 				// Case 4: the edge was added between two lonely vertices.
 				// Create a new set id from this
-				final HashSet< Spot > nvs = new HashSet< >( 2 );
+				final HashSet< Spot > nvs = new HashSet<>( 2 );
 				nvs.add( graph.getEdgeSource( e ) );
 				nvs.add( graph.getEdgeTarget( e ) );
 
-				final HashSet< DefaultWeightedEdge > nes = new HashSet< >( 1 );
+				final HashSet< DefaultWeightedEdge > nes = new HashSet<>( 1 );
 				nes.add( e );
 
 				final int nid = IDcounter++;
@@ -1148,13 +1129,18 @@ public class TrackModel
 
 			final DefaultWeightedEdge e = event.getEdge();
 			final Integer id = edgeToID.get( e );
-			if ( null == id ) { throw new RuntimeException( "Edge is unkown to this model: " + e ); }
+			if ( null == id )
+				throw new RuntimeException( "Edge is unkown to this model: " + e );
+
 			final Set< DefaultWeightedEdge > set = connectedEdgeSets.get( id );
-			if ( null == set ) { throw new RuntimeException( "Unknown set ID: " + id ); }
+			if ( null == set )
+				throw new RuntimeException( "Unknown set ID: " + id );
 
 			// Remove edge from set.
 			final boolean removed = set.remove( e );
-			if ( !removed ) { throw new RuntimeException( "Could not removed edge " + e + " from set with ID: " + id ); }
+			if ( !removed )
+				throw new RuntimeException( "Could not removed edge " + e + " from set with ID: " + id );
+
 			// Forget about edge.
 			edgeToID.remove( e );
 
@@ -1174,9 +1160,8 @@ public class TrackModel
 				final Set< Spot > vertexSet = connectedVertexSets.get( id );
 				// Forget the vertices were in a set
 				for ( final Spot spot : vertexSet )
-				{
 					vertexToID.remove( spot );
-				}
+
 				// Forget the vertex set
 				connectedVertexSets.remove( id );
 				/*
@@ -1193,12 +1178,12 @@ public class TrackModel
 				// So there are some edges remaining in the set.
 				// Look at the connected component of its source and target.
 				// Source
-				final HashSet< Spot > sourceVCS = new HashSet< >();
-				final HashSet< DefaultWeightedEdge > sourceECS = new HashSet< >();
+				final HashSet< Spot > sourceVCS = new HashSet<>();
+				final HashSet< DefaultWeightedEdge > sourceECS = new HashSet<>();
 				{
 					final Spot source = graph.getEdgeSource( e );
 					// Get its connected set
-					final BreadthFirstIterator< Spot, DefaultWeightedEdge > i = new BreadthFirstIterator< >( graph, source );
+					final BreadthFirstIterator< Spot, DefaultWeightedEdge > i = new BreadthFirstIterator<>( graph, source );
 					while ( i.hasNext() )
 					{
 						final Spot sv = i.next();
@@ -1207,12 +1192,12 @@ public class TrackModel
 					}
 				}
 				// Target
-				final HashSet< Spot > targetVCS = new HashSet< >();
-				final HashSet< DefaultWeightedEdge > targetECS = new HashSet< >();
+				final HashSet< Spot > targetVCS = new HashSet<>();
+				final HashSet< DefaultWeightedEdge > targetECS = new HashSet<>();
 				{
 					final Spot target = graph.getEdgeTarget( e );
 					// Get its connected set
-					final BreadthFirstIterator< Spot, DefaultWeightedEdge > i = new BreadthFirstIterator< >( graph, target );
+					final BreadthFirstIterator< Spot, DefaultWeightedEdge > i = new BreadthFirstIterator<>( graph, target );
 					while ( i.hasNext() )
 					{
 						final Spot sv = i.next();
@@ -1259,14 +1244,12 @@ public class TrackModel
 						connectedEdgeSets.put( newid, sourceECS ); // otherwise
 																	// forget it
 						for ( final DefaultWeightedEdge te : sourceECS )
-						{
 							edgeToID.put( te, newid );
-						}
+
 						connectedVertexSets.put( newid, sourceVCS );
 						for ( final Spot tv : sourceVCS )
-						{
 							vertexToID.put( tv, newid );
-						}
+
 						final Boolean targetVisibility = visibility.get( id );
 						visibility.put( newid, targetVisibility );
 						names.put( newid, nameGenerator.next() );
@@ -1303,14 +1286,12 @@ public class TrackModel
 							final int newid = IDcounter++;
 							connectedEdgeSets.put( newid, targetECS );
 							for ( final DefaultWeightedEdge te : targetECS )
-							{
 								edgeToID.put( te, newid );
-							}
+
 							connectedVertexSets.put( newid, targetVCS );
 							for ( final Spot v : targetVCS )
-							{
 								vertexToID.put( v, newid );
-							}
+
 							final Boolean targetVisibility = visibility.get( id );
 							visibility.put( newid, targetVisibility );
 							names.put( newid, nameGenerator.next() );
@@ -1351,6 +1332,7 @@ public class TrackModel
 	{
 
 		private static final String DEFAULT_NAME_PREFIX = "Track_";
+
 		private int nameID = 0;
 
 		@Override
@@ -1368,11 +1350,10 @@ public class TrackModel
 		@Override
 		public void remove()
 		{}
-		
-		public void setNameID( final int nameID ) {
+
+		public void setNameID( final int nameID )
+		{
 			this.nameID = nameID;
 		}
-
 	}
-
 }
