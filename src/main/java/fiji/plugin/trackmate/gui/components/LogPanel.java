@@ -140,6 +140,12 @@ public class LogPanel extends JPanel
 					}
 				} );
 			}
+			
+			@Override
+			public String toString()
+			{
+				return getTextContent();
+			}
 		};
 	}
 
