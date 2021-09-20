@@ -610,7 +610,7 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 	 */
 	public final static Comparator< Spot > nameComparator = new Comparator< Spot >()
 	{
-		private final AlphanumComparator comparator = AlphanumComparator.instance;
+		private final Comparator< String > comparator = AlphanumComparator.instance;
 
 		@Override
 		public int compare( final Spot o1, final Spot o2 )
