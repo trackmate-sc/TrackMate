@@ -177,6 +177,38 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 		return imp;
 	}
 
+	@Override
+	protected void registerTool( final ImageCanvas canvas )
+	{
+		/*
+		 * Double check! Since TrackMate v7 there the following bug:
+		 * 
+		 * Sometimes the listeners of this tool get added to the target image
+		 * canvas TWICE. This causes an unspeakable mess where all events are
+		 * triggered twice for e.g. a single click. For instance you cannot
+		 * shift-click on a spot to add it to the selection, because the event
+		 * is fired TWICE, which results in the spot being de-selected
+		 * immediately after being selected.
+		 * 
+		 * But the double registration seems to happen randomly. Sometimes the
+		 * listeners are added only once, *sometimes* (more often) twice.
+		 * 
+		 * To work around this mess, we overload the registerTool(ImageCanvas)
+		 * method and skip the registration if we find that the mouse listener
+		 * has already been added to the canvas. It fixes the issue, regardless
+		 * of the occurrence of the double call to this method or not.
+		 */
+
+		final MouseListener[] listeners = canvas.getMouseListeners();
+		for ( final MouseListener listener : listeners )
+		{
+			if ( listener == this.mouseProxy )
+				return;
+		}
+
+		super.registerTool( canvas );
+	}
+
 	/**
 	 * Register the given {@link HyperStackDisplayer}. If this method id not
 	 * called, the tool will not respond.
@@ -222,7 +254,6 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 		}
 		else
 		{
-
 			updateStatusBar( target, lImp.getCalibration().getUnits() );
 			final int addToSelectionMask = InputEvent.SHIFT_DOWN_MASK;
 			if ( ( e.getModifiersEx() & addToSelectionMask ) == addToSelectionMask )
@@ -559,7 +590,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 
 			// Store new value of radius for next spot creation.
 			previousRadius = newRadius;
-			
+
 			final SpotRoi roi = target.getRoi();
 			if ( null == roi )
 			{
