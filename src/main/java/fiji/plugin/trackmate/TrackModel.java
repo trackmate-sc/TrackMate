@@ -41,7 +41,6 @@ import org.jgrapht.event.GraphEdgeChangeEvent;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.event.GraphVertexChangeEvent;
 import org.jgrapht.event.TraversalListener;
-import org.jgrapht.event.TraversalListenerAdapter;
 import org.jgrapht.event.VertexTraversalEvent;
 import org.jgrapht.graph.AsUnweightedGraph;
 import org.jgrapht.graph.DefaultListenableGraph;
@@ -849,9 +848,6 @@ public class TrackModel
 			names.put( ID, nameGenerator.next() );
 		}
 
-		/**
-		 * @see TraversalListenerAdapter#connectedComponentStarted(ConnectedComponentTraversalEvent)
-		 */
 		@Override
 		public void connectedComponentStarted( final ConnectedComponentTraversalEvent e )
 		{
@@ -860,9 +856,6 @@ public class TrackModel
 			ID = IDcounter++;
 		}
 
-		/**
-		 * @see TraversalListenerAdapter#vertexTraversed(VertexTraversalEvent)
-		 */
 		@Override
 		public void vertexTraversed( final VertexTraversalEvent< Spot > event )
 		{
