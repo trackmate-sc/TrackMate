@@ -411,6 +411,8 @@ public class ConfigureViewsPanel extends JPanel
 		chkboxDisplayTracks.addActionListener( e -> ds.setTrackVisible( chkboxDisplayTracks.isSelected() ) );
 		chkboxFadeTracks.addActionListener( e -> ds.setFadeTracks( chkboxFadeTracks.isSelected() ) );
 		fadeTrackDepthModel.addChangeListener( e -> ds.setFadeTrackRange( fadeTrackDepthModel.getNumber().intValue() ) );
+		numberModelDrawingZDepth.addChangeListener( e -> ds.setZDrawingDepth( ( ( Number ) numberModelDrawingZDepth.getValue() ).doubleValue() ) );
+		chckbxLimitZDepth.addActionListener( e -> ds.setZDrawingDepthLimited( chckbxLimitZDepth.isSelected() ) );
 
 		/*
 		 * Set current values.
