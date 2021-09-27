@@ -1,136 +1,134 @@
-from ij import IJ, ImagePlus, ImageStack
-import fiji.plugin.trackmate.Settings as Settings
-import fiji.plugin.trackmate.Model as Model
-import fiji.plugin.trackmate.SelectionModel as SelectionModel
-import fiji.plugin.trackmate.TrackMate as TrackMate
-import fiji.plugin.trackmate.Logger as Logger
-import fiji.plugin.trackmate.detection.DetectorKeys as DetectorKeys
-import fiji.plugin.trackmate.detection.DogDetectorFactory as DogDetectorFactory
-import fiji.plugin.trackmate.tracking.sparselap.SparseLAPTrackerFactory as SparseLAPTrackerFactory
-import fiji.plugin.trackmate.tracking.LAPUtils as LAPUtils
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer as HyperStackDisplayer
-import fiji.plugin.trackmate.features.FeatureFilter as FeatureFilter
-import fiji.plugin.trackmate.features.FeatureAnalyzer as FeatureAnalyzer
-import fiji.plugin.trackmate.features.spot.SpotContrastAndSNRAnalyzerFactory as SpotContrastAndSNRAnalyzerFactory
-import fiji.plugin.trackmate.action.ExportStatsToIJAction as ExportStatsToIJAction
-import fiji.plugin.trackmate.io.TmXmlReader as TmXmlReader
-import fiji.plugin.trackmate.action.ExportTracksToXML as ExportTracksToXML
-import fiji.plugin.trackmate.io.TmXmlWriter as TmXmlWriter
-import fiji.plugin.trackmate.features.ModelFeatureUpdater as ModelFeatureUpdater
-import fiji.plugin.trackmate.features.SpotFeatureCalculator as SpotFeatureCalculator
-import fiji.plugin.trackmate.features.spot.SpotContrastAndSNRAnalyzer as SpotContrastAndSNRAnalyzer
-import fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory as SpotIntensityAnalyzerFactory
-import fiji.plugin.trackmate.features.track.TrackSpeedStatisticsAnalyzer as TrackSpeedStatisticsAnalyzer
-import fiji.plugin.trackmate.util.TMUtils as TMUtils
-  
-  
+import sys
+
+from ij import IJ
+from ij import WindowManager
+
+from fiji.plugin.trackmate import TrackMate
+from fiji.plugin.trackmate import Model
+from fiji.plugin.trackmate import SelectionModel
+from fiji.plugin.trackmate import Settings
+from fiji.plugin.trackmate import Logger
+from fiji.plugin.trackmate.detection import DogDetectorFactory
+from fiji.plugin.trackmate.tracking import LAPUtils
+from fiji.plugin.trackmate.tracking.sparselap import SparseLAPTrackerFactory
+from fiji.plugin.trackmate.gui.displaysettings import DisplaySettingsIO
+from fiji.plugin.trackmate.visualization.hyperstack import HyperStackDisplayer
+
+# We have to do the following to avoid errors with UTF8 chars generated in 
+# TrackMate that will mess with our Fiji Jython.
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
+
 # Get currently selected image
-#imp = WindowManager.getCurrentImage()
-imp = IJ.openImage('http://fiji.sc/samples/FakeTracks.tif')
-#imp.show()
-  
-  
+# imp = WindowManager.getCurrentImage()
+imp = IJ.openImage('https://fiji.sc/samples/FakeTracks.tif')
+imp.show()
+
+
 #-------------------------
 # Instantiate model object
 #-------------------------
-  
+
 model = Model()
-  
+
 # Set logger
 model.setLogger(Logger.IJ_LOGGER)
-  
+
 #------------------------
 # Prepare settings object
 #------------------------
-     
+
 settings = Settings()
-settings.setFrom(imp)
-     
+settings.setFrom( imp )
+
 # Configure detector
 settings.detectorFactory = DogDetectorFactory()
 settings.detectorSettings = {
-    DetectorKeys.KEY_DO_SUBPIXEL_LOCALIZATION : True,
-    DetectorKeys.KEY_RADIUS : 2.5,
-    DetectorKeys.KEY_TARGET_CHANNEL : 1,
-    DetectorKeys.KEY_THRESHOLD : 5.,
-    DetectorKeys.KEY_DO_MEDIAN_FILTERING : False,
-} 
-   
+    'DO_SUBPIXEL_LOCALIZATION' : True,
+    'RADIUS' : 2.5,
+    'TARGET_CHANNEL' : 1,
+    'THRESHOLD' : 5.,
+    'DO_MEDIAN_FILTERING' : False,
+}
+
 # Configure tracker
 settings.trackerFactory = SparseLAPTrackerFactory()
 settings.trackerSettings = LAPUtils.getDefaultLAPSettingsMap()
 settings.trackerSettings['LINKING_MAX_DISTANCE'] = 10.0
-settings.trackerSettings['GAP_CLOSING_MAX_DISTANCE']=10.0
-settings.trackerSettings['MAX_FRAME_GAP']= 3
-  
+settings.trackerSettings['GAP_CLOSING_MAX_DISTANCE'] = 10.0
+settings.trackerSettings['MAX_FRAME_GAP'] = 3
+
 # Add the analyzers for some spot features.
-# You need to configure TrackMate with analyzers that will generate 
-# the data you need. 
-# Here we just add two analyzers for spot, one that computes generic
-# pixel intensity statistics (mean, max, etc...) and one that computes
-# an estimate of each spot's SNR. 
-# The trick here is that the second one requires the first one to be in
-# place. Be aware of this kind of gotchas, and read the docs. 
-settings.addSpotAnalyzerFactory(SpotIntensityAnalyzerFactory())
-settings.addSpotAnalyzerFactory(SpotContrastAndSNRAnalyzerFactory())
-  
-# Add an analyzer for some track features, such as the track mean speed.
-settings.addTrackAnalyzer(TrackSpeedStatisticsAnalyzer())
-  
-settings.initialSpotFilterValue = 1
-  
+# Here we decide brutally to add all of them.
+settings.addAllAnalyzers()
+
+# We configure the initial filtering to discard spots 
+# with a quality lower than 1.
+settings.initialSpotFilterValue = 1.
+
 print(str(settings))
-     
+
 #----------------------
 # Instantiate trackmate
 #----------------------
-  
+
 trackmate = TrackMate(model, settings)
-     
+
 #------------
 # Execute all
 #------------
-  
-    
+
+
 ok = trackmate.checkInput()
 if not ok:
     sys.exit(str(trackmate.getErrorMessage()))
-    
+
 ok = trackmate.process()
 if not ok:
     sys.exit(str(trackmate.getErrorMessage()))
-    
-     
-     
+
+
+
 #----------------
 # Display results
 #----------------
-  
+
 model.getLogger().log('Found ' + str(model.getTrackModel().nTracks(True)) + ' tracks.')
-   
-selectionModel = SelectionModel(model)
-displayer =  HyperStackDisplayer(model, selectionModel, imp)
+
+# A selection.
+sm = SelectionModel( model )
+
+# Read the default display settings.
+ds = DisplaySettingsIO.readUserDefault()
+
+# The viewer.
+displayer =  HyperStackDisplayer( model, sm, imp, ds ) 
 displayer.render()
-displayer.refresh()
-  
+
 # The feature model, that stores edge and track features.
 fm = model.getFeatureModel()
-  
+
+# Iterate over all the tracks that are visible.
 for id in model.getTrackModel().trackIDs(True):
-  
+
     # Fetch the track feature from the feature model.
     v = fm.getTrackFeature(id, 'TRACK_MEAN_SPEED')
     model.getLogger().log('')
     model.getLogger().log('Track ' + str(id) + ': mean velocity = ' + str(v) + ' ' + model.getSpaceUnits() + '/' + model.getTimeUnits())
-      
+
+	# Get all the spots of the current track.
     track = model.getTrackModel().trackSpots(id)
     for spot in track:
         sid = spot.ID()
-        # Fetch spot features directly from spot. 
+        # Fetch spot features directly from spot.
+        # Note that for spots the feature values are not stored in the FeatureModel
+        # object, but in the Spot object directly. This is an exception; for tracks
+        # and edges, you have to query the feature model.
         x=spot.getFeature('POSITION_X')
         y=spot.getFeature('POSITION_Y')
         t=spot.getFeature('FRAME')
         q=spot.getFeature('QUALITY')
-        snr=spot.getFeature('SNR') 
-        mean=spot.getFeature('MEAN_INTENSITY')
+        snr=spot.getFeature('SNR_CH1')
+        mean=spot.getFeature('MEAN_INTENSITY_CH1')
         model.getLogger().log('\tspot ID = ' + str(sid) + ': x='+str(x)+', y='+str(y)+', t='+str(t)+', q='+str(q) + ', snr='+str(snr) + ', mean = ' + str(mean))
