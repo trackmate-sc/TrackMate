@@ -369,7 +369,7 @@ public class TablePanel< O >
 	{
 		try (CSVWriter writer = new CSVWriter( new FileWriter( file ),
 				CSVWriter.DEFAULT_SEPARATOR,
-				CSVWriter.DEFAULT_QUOTE_CHARACTER,
+				CSVWriter.NO_QUOTE_CHARACTER,
 				CSVWriter.DEFAULT_ESCAPE_CHARACTER,
 				CSVWriter.DEFAULT_LINE_END ))
 		{
@@ -385,8 +385,8 @@ public class TablePanel< O >
 			 */
 
 			/*
-			 * Determine we can skip 2nd or 3d line, if it's identical to the
-			 * 2nd one (happens when the names are repeated).
+			 * Determine whether we can skip 2nd or 3d line, if it's identical
+			 * to the 2nd one (happens when the names are repeated).
 			 */
 
 			boolean skipThirdLine = true;
@@ -403,8 +403,8 @@ public class TablePanel< O >
 			}
 
 			// Header 1st line.
-			if ( skipLabelColumn )
-				content[ 0 ] = "NAME";
+			if ( !skipLabelColumn )
+				content[ 0 ] = "LABEL";
 			for ( int i = labelColumnShift; i < content.length; i++ )
 				content[ i ] = features.get( i - labelColumnShift );
 			writer.writeNext( content );
@@ -412,8 +412,8 @@ public class TablePanel< O >
 			// Header 2nd line.
 			if ( !skipSecondLine )
 			{
-				if ( skipLabelColumn )
-					content[ 0 ] = "";
+				if ( !skipLabelColumn )
+					content[ 0 ] = "Label";
 				for ( int i = labelColumnShift; i < content.length; i++ )
 					content[ i ] = featureNames.get( features.get( i - labelColumnShift ) );
 				writer.writeNext( content );
@@ -422,15 +422,15 @@ public class TablePanel< O >
 			// Header 3rd line.
 			if ( !skipThirdLine )
 			{
-				if ( skipLabelColumn )
-					content[ 0 ] = "";
+				if ( !skipLabelColumn )
+					content[ 0 ] = "Label";
 				for ( int i = labelColumnShift; i < content.length; i++ )
 					content[ i ] = featureShortNames.get( features.get( i - labelColumnShift ) );
 				writer.writeNext( content );
 			}
 
 			// Header 4th line.
-			if ( skipLabelColumn )
+			if ( !skipLabelColumn )
 				content[ 0 ] = "";
 			for ( int i = labelColumnShift; i < content.length; i++ )
 			{
