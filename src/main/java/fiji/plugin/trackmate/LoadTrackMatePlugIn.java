@@ -36,7 +36,7 @@ import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.components.LogPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.gui.wizard.TrackMateWizardSequence;
+import fiji.plugin.trackmate.gui.wizard.WizardSequence;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ConfigureViewsDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.LogPanelDescriptor2;
 import fiji.plugin.trackmate.gui.wizard.descriptors.SomeDialogDescriptor;
@@ -49,17 +49,9 @@ import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
-import ij.plugin.PlugIn;
 
-public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
+public class LoadTrackMatePlugIn extends TrackMatePlugIn
 {
-
-	private static final String KEY = "LoadPlugin";
-
-	public LoadTrackMatePlugIn()
-	{
-		super( KEY, new LogPanel() );
-	}
 
 	/**
 	 * Loads a TrackMate file in the GUI.
@@ -79,6 +71,7 @@ public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 		GuiUtils.setSystemLookAndFeel();
 
 		final Logger logger = Logger.IJ_LOGGER; // logPanel.getLogger();
+		File file = SomeDialogDescriptor.file;
 		if ( null == filePath || filePath.length() == 0 )
 		{
 
@@ -193,7 +186,7 @@ public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 		 * Create TrackMate.
 		 */
 
-		final TrackMate trackmate = new TrackMate( model, settings );
+		final TrackMate trackmate = createTrackMate( model, settings );
 
 		// Hook actions
 		postRead( trackmate );
@@ -221,7 +214,7 @@ public class LoadTrackMatePlugIn extends SomeDialogDescriptor implements PlugIn
 			panelIdentifier = ConfigureViewsDescriptor.KEY;
 
 		// Wizard.
-		final TrackMateWizardSequence sequence = new TrackMateWizardSequence( trackmate, selectionModel, displaySettings );
+		final WizardSequence sequence = createSequence( trackmate, selectionModel, displaySettings );
 		sequence.setCurrent( panelIdentifier );
 		final JFrame frame = sequence.run( "TrackMate on " + settings.imp.getShortTitle() );
 		frame.setIconImage( TRACKMATE_ICON.getImage() );
