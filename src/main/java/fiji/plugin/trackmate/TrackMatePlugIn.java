@@ -52,7 +52,7 @@ public class TrackMatePlugIn implements PlugIn
 		if ( imagePath != null && imagePath.length() > 0 )
 		{
 			imp = IJ.openImage( imagePath );
-			if ( null == imp.getOriginalFileInfo() )
+			if ( imp == null || null == imp.getOriginalFileInfo() )
 			{
 				IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION, "Could not load image with path " + imagePath + "." );
 				return;
