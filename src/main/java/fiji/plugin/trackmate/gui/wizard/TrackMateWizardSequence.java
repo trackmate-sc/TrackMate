@@ -45,6 +45,7 @@ import fiji.plugin.trackmate.action.ExportStatsTablesAction;
 import fiji.plugin.trackmate.detection.ManualDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
 import fiji.plugin.trackmate.features.FeatureFilter;
+import fiji.plugin.trackmate.features.ModelFeatureUpdater;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.components.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.components.LogPanel;
@@ -120,6 +121,10 @@ public class TrackMateWizardSequence implements WizardSequence
 		this.displaySettings = displaySettings;
 		final Settings settings = trackmate.getSettings();
 		final Model model = trackmate.getModel();
+
+		// Listen to changes in the model and update features accordingly.
+		final ModelFeatureUpdater modelFeatureUpdater = new ModelFeatureUpdater( model, settings );
+		modelFeatureUpdater.setNumThreads( trackmate.getNumThreads() );
 
 		final LogPanel logPanel = new LogPanel();
 		final Logger logger = logPanel.getLogger();
