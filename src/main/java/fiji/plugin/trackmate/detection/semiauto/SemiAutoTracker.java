@@ -105,7 +105,7 @@ public class SemiAutoTracker< T extends RealType< T > & NativeType< T >> extends
 		final long y = Math.round( location[ 1 ] / dy );
 		final long z = Math.round( location[ 2 ] / dz );
 		final long r = ( long ) Math.ceil( neighborhoodFactor * radius / dx );
-		final long rz = ( long ) Math.ceil( neighborhoodFactor * radius / dz );
+		final long rz = ( long ) Math.abs( Math.ceil( neighborhoodFactor * radius / dz ) );
 
 		/*
 		 * Extract crop cube
@@ -115,21 +115,19 @@ public class SemiAutoTracker< T extends RealType< T > & NativeType< T >> extends
 
 		final long width = img.dimension( 0 );
 		final long height = img.dimension( 1 );
-		final long depth = img.dimension( 2 );
-
 		final long x0 = Math.max( 0, x - r );
 		final long y0 = Math.max( 0, y - r );
-		final long z0 = Math.max( 0, z - rz );
-
 		final long x1 = Math.min( width - 1, x + r );
 		final long y1 = Math.min( height - 1, y + r );
-		final long z1 = Math.min( depth - 1, z + rz );
 
-		long[] min;
-		long[] max;
-		if ( img.dimension( img.dimensionIndex( Axes.Z ) ) > 1 )
+		final long[] min;
+		final long[] max;
+		if ( img.dimensionIndex( Axes.Z ) >= 0 )
 		{
 			// 3D
+			final long depth = img.dimension( img.dimensionIndex( Axes.Z ) );
+			final long z0 = Math.max( 0, z - rz );
+			final long z1 = Math.min( depth - 1, z + rz );
 			min = new long[] { x0, y0, z0 };
 			max = new long[] { x1, y1, z1 };
 		}
@@ -151,13 +149,11 @@ public class SemiAutoTracker< T extends RealType< T > & NativeType< T >> extends
 		final SearchRegion< T > sn = new SearchRegion<>();
 		RandomAccessible< T > source = img;
 		if ( tindex >= 0 )
-		{
 			source = Views.hyperSlice( source, tindex, frame );
-		}
+
 		if ( cindex >= 0 )
-		{
 			source = Views.hyperSlice( source, cindex, targetChannel );
-		}
+
 		sn.source = source;
 		sn.transform = transform;
 		sn.interval = interval;
