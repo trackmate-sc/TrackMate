@@ -60,8 +60,6 @@ public class EdgeCollectionDataset extends ModelDataset
 
 	private final List< DefaultWeightedEdge > edges;
 
-	private final FeatureColorGenerator< DefaultWeightedEdge > edgeColorGenerator;
-
 	private final Map< Integer, Set< DefaultWeightedEdge > > edgeMap;
 
 	private final Function< DefaultWeightedEdge, String > labelGenerator;
@@ -76,7 +74,6 @@ public class EdgeCollectionDataset extends ModelDataset
 	{
 		super( model, selectionModel, ds, xFeature, yFeatures );
 		this.edges = edges;
-		this.edgeColorGenerator = FeatureUtils.createTrackColorGenerator( model, ds );
 		this.edgeMap = createEdgeMap( edges, model.getTrackModel() );
 		this.labelGenerator = edge -> String.format( "%s → %s",
 				model.getTrackModel().getEdgeSource( edge ).getName(), model.getTrackModel().getEdgeTarget( edge ).getName() );
@@ -220,6 +217,8 @@ public class EdgeCollectionDataset extends ModelDataset
 			final DefaultWeightedEdge edge = edges.get( item );
 			if ( selectionModel != null && selectionModel.getEdgeSelection().contains( edge ) )
 				return ds.getHighlightColor();
+
+			final FeatureColorGenerator< DefaultWeightedEdge > edgeColorGenerator = FeatureUtils.createTrackColorGenerator( model, ds );
 			return edgeColorGenerator.color( edges.get( item ) );
 		}
 

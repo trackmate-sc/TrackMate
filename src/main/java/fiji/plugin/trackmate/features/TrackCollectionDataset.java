@@ -42,8 +42,6 @@ public class TrackCollectionDataset extends ModelDataset
 
 	private final List< Integer > trackIDs;
 
-	private final FeatureColorGenerator< Integer > trackColorGenerator;
-
 	public TrackCollectionDataset(
 			final Model model,
 			final SelectionModel selectionModel,
@@ -54,7 +52,6 @@ public class TrackCollectionDataset extends ModelDataset
 	{
 		super( model, selectionModel, ds, xFeature, yFeatures );
 		this.trackIDs = trackIDs;
-		this.trackColorGenerator = FeatureUtils.createWholeTrackColorGenerator( model, ds );
 	}
 
 	@Override
@@ -117,6 +114,8 @@ public class TrackCollectionDataset extends ModelDataset
 			final Integer trackID = trackIDs.get( item );
 			if ( selectionModel != null && selectionModel.getSpotSelection().containsAll( model.getTrackModel().trackSpots( trackID ) ) )
 				return ds.getHighlightColor();
+
+			final FeatureColorGenerator< Integer > trackColorGenerator = FeatureUtils.createWholeTrackColorGenerator( model, ds );
 			return trackColorGenerator.color( trackIDs.get( item ) );
 		}
 

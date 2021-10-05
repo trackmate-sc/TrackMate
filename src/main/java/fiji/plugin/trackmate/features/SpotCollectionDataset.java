@@ -58,8 +58,6 @@ public class SpotCollectionDataset extends ModelDataset implements XYDataset
 
 	private final List< Spot > spots;
 
-	private final FeatureColorGenerator< Spot > spotColorGenerator;
-
 	private final Map< Integer, Set< DefaultWeightedEdge > > edgeMap;
 
 	public SpotCollectionDataset(
@@ -72,7 +70,6 @@ public class SpotCollectionDataset extends ModelDataset implements XYDataset
 	{
 		super( model, selectionModel, ds, xFeature, yFeatures );
 		this.spots = spots;
-		this.spotColorGenerator = FeatureUtils.createSpotColorGenerator( model, ds );
 		this.edgeMap = createEdgeMap( spots, model.getTrackModel() );
 	}
 
@@ -218,6 +215,8 @@ public class SpotCollectionDataset extends ModelDataset implements XYDataset
 			final Spot spot = spots.get( item );
 			if ( selectionModel != null && selectionModel.getSpotSelection().contains( spot ) )
 				return ds.getHighlightColor();
+
+			final FeatureColorGenerator< Spot > spotColorGenerator = FeatureUtils.createSpotColorGenerator( model, ds );
 			return spotColorGenerator.color( spots.get( item ) );
 		}
 

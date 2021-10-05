@@ -75,6 +75,14 @@ public abstract class ModelDataset extends AbstractDataset implements XYDataset,
 		this.featureNameMap = new HashMap<>();
 		for ( int i = 0; i < yFeatures.size(); i++ )
 			featureNameMap.put( getSeriesKey( i ).toString(), Integer.valueOf( i ) );
+
+		// Listen to selection changes.
+		if ( selectionModel != null )
+			selectionModel.addSelectionChangeListener( l -> fireDatasetChanged() );
+
+		// Listen to changes in display settings.
+		if ( ds != null )
+			ds.listeners().add( () -> fireDatasetChanged() );
 	}
 
 	public String getXFeature()
