@@ -160,7 +160,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 		cancelables.clear();
 
 		final Logger logger = model.getLogger();
-		final SpotFeatureCalculator calculator = new SpotFeatureCalculator( model, settings );
+		final SpotFeatureCalculator calculator = new SpotFeatureCalculator( model, settings, doLogIt );
 		cancelables.add( calculator );
 		calculator.setNumThreads( numThreads );
 		if ( calculator.checkInput() && calculator.process() )
@@ -201,7 +201,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 		cancelables.clear();
 
 		final Logger logger = model.getLogger();
-		final EdgeFeatureCalculator calculator = new EdgeFeatureCalculator( model, settings );
+		final EdgeFeatureCalculator calculator = new EdgeFeatureCalculator( model, settings, doLogIt );
 		cancelables.add( calculator );
 		calculator.setNumThreads( numThreads );
 		if ( !calculator.checkInput() || !calculator.process() )
@@ -235,7 +235,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 		cancelables.clear();
 
 		final Logger logger = model.getLogger();
-		final TrackFeatureCalculator calculator = new TrackFeatureCalculator( model, settings );
+		final TrackFeatureCalculator calculator = new TrackFeatureCalculator( model, settings, doLogIt );
 		cancelables.add( calculator );
 		calculator.setNumThreads( numThreads );
 		if ( calculator.checkInput() && calculator.process() )

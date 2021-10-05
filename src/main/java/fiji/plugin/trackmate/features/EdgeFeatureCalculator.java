@@ -55,10 +55,13 @@ public class EdgeFeatureCalculator extends MultiThreadedBenchmarkAlgorithm imple
 
 	private String cancelReason;
 
-	public EdgeFeatureCalculator( final Model model, final Settings settings )
+	private final boolean doLogIt;
+
+	public EdgeFeatureCalculator( final Model model, final Settings settings, final boolean doLogIt )
 	{
 		this.settings = settings;
 		this.model = model;
+		this.doLogIt = doLogIt;
 	}
 
 	/*
@@ -102,7 +105,7 @@ public class EdgeFeatureCalculator extends MultiThreadedBenchmarkAlgorithm imple
 		}
 
 		// Do it.
-		computeEdgeFeaturesAgent( model.getTrackModel().edgeSet(), settings.getEdgeAnalyzers(), true );
+		computeEdgeFeaturesAgent( model.getTrackModel().edgeSet(), settings.getEdgeAnalyzers(), doLogIt );
 
 		final long end = System.currentTimeMillis();
 		processingTime = end - start;

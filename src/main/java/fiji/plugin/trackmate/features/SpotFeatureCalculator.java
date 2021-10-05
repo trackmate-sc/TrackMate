@@ -66,10 +66,13 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm imple
 
 	private String cancelReason;
 
-	public SpotFeatureCalculator( final Model model, final Settings settings )
+	private final boolean doLogIt;
+
+	public SpotFeatureCalculator( final Model model, final Settings settings, final boolean doLogIt )
 	{
 		this.settings = settings;
 		this.model = model;
+		this.doLogIt = doLogIt;
 	}
 
 	/*
@@ -116,7 +119,7 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm imple
 		}
 
 		// Do it.
-		computeSpotFeaturesAgent( model.getSpots(), settings.getSpotAnalyzerFactories(), true );
+		computeSpotFeaturesAgent( model.getSpots(), settings.getSpotAnalyzerFactories(), doLogIt );
 		return true;
 	}
 
@@ -148,6 +151,7 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm imple
 		cancelReason = null;
 		final long start = System.currentTimeMillis();
 		final Logger logger = doLogIt ? model.getLogger() : Logger.VOID_LOGGER;
+
 
 		// Can't compute any spot feature without an image to compute on.
 		if ( settings.imp == null )
@@ -200,6 +204,7 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm imple
 							if ( isCanceled() )
 								return null;
 
+
 							@SuppressWarnings( "unchecked" )
 							final SpotAnalyzer< ? > analyzer = factory.getAnalyzer( img, frame, channel );
 							// Fine-tune multithreading if we can.
@@ -234,6 +239,7 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm imple
 		executorService.shutdown();
 		logger.setProgress( 1 );
 		logger.setStatus( "" );
+
 		final long end = System.currentTimeMillis();
 		processingTime = end - start;
 	}

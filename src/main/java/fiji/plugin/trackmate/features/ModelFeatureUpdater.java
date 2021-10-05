@@ -66,9 +66,11 @@ public class ModelFeatureUpdater implements ModelChangeListener, MultiThreaded
 	public ModelFeatureUpdater( final Model model, final Settings settings )
 	{
 		this.model = model;
-		this.spotFeatureCalculator = new SpotFeatureCalculator( model, settings );
-		this.edgeFeatureCalculator = new EdgeFeatureCalculator( model, settings );
-		this.trackFeatureCalculator = new TrackFeatureCalculator( model, settings );
+		// don't log feature computation for updates.
+		final boolean doLogIt = false;
+		this.spotFeatureCalculator = new SpotFeatureCalculator( model, settings, doLogIt );
+		this.edgeFeatureCalculator = new EdgeFeatureCalculator( model, settings, doLogIt );
+		this.trackFeatureCalculator = new TrackFeatureCalculator( model, settings, doLogIt );
 		model.addModelChangeListener( this );
 		setNumThreads();
 	}
@@ -81,7 +83,7 @@ public class ModelFeatureUpdater implements ModelChangeListener, MultiThreaded
 	public void modelChanged( final ModelChangeEvent event )
 	{
 		if ( event.getEventID() != ModelChangeEvent.MODEL_MODIFIED )
-		{ return; }
+			return;
 
 		// Build spot list
 		final ArrayList< Spot > spots = new ArrayList<>( event.getSpots().size() );

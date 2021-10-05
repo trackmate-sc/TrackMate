@@ -54,10 +54,13 @@ public class TrackFeatureCalculator extends MultiThreadedBenchmarkAlgorithm impl
 
 	private String cancelReason;
 
-	public TrackFeatureCalculator( final Model model, final Settings settings )
+	private final boolean doLogIt;
+
+	public TrackFeatureCalculator( final Model model, final Settings settings, final boolean doLogIt )
 	{
 		this.settings = settings;
 		this.model = model;
+		this.doLogIt = doLogIt;
 	}
 
 	/*
@@ -101,7 +104,7 @@ public class TrackFeatureCalculator extends MultiThreadedBenchmarkAlgorithm impl
 		}
 
 		// Do it.
-		computeTrackFeaturesAgent( model.getTrackModel().trackIDs( false ), settings.getTrackAnalyzers(), true );
+		computeTrackFeaturesAgent( model.getTrackModel().trackIDs( false ), settings.getTrackAnalyzers(), doLogIt );
 
 		final long end = System.currentTimeMillis();
 		processingTime = end - start;
