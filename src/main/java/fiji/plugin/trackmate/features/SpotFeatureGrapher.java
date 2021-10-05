@@ -39,13 +39,16 @@ public class SpotFeatureGrapher extends AbstractFeatureGrapher
 
 	private final DisplaySettings ds;
 
+	private final boolean addLines;
+
 	public SpotFeatureGrapher(
 			final List< Spot > spots,
 			final String xFeature,
 			final List< String > yFeatures,
 			final Model model,
 			final SelectionModel selectionModel,
-			final DisplaySettings displaySettings )
+			final DisplaySettings displaySettings,
+			final boolean addLines )
 	{
 		super(
 				xFeature,
@@ -59,6 +62,7 @@ public class SpotFeatureGrapher extends AbstractFeatureGrapher
 		this.model = model;
 		this.selectionModel = selectionModel;
 		this.ds = displaySettings;
+		this.addLines = addLines;
 	}
 
 	@Override
@@ -70,6 +74,7 @@ public class SpotFeatureGrapher extends AbstractFeatureGrapher
 				ds,
 				xFeature,
 				targetYFeatures,
-				spots );
+				spots,
+				addLines );
 	}
 }

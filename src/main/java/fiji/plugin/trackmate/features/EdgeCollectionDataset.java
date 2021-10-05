@@ -70,11 +70,12 @@ public class EdgeCollectionDataset extends ModelDataset
 			final DisplaySettings ds,
 			final String xFeature,
 			final List< String > yFeatures,
-			final List< DefaultWeightedEdge > edges )
+			final List< DefaultWeightedEdge > edges,
+			final boolean addLines )
 	{
 		super( model, selectionModel, ds, xFeature, yFeatures );
 		this.edges = edges;
-		this.edgeMap = createEdgeMap( edges, model.getTrackModel() );
+		this.edgeMap = addLines ? createEdgeMap( edges, model.getTrackModel() ) : null;
 		this.labelGenerator = edge -> String.format( "%s → %s",
 				model.getTrackModel().getEdgeSource( edge ).getName(), model.getTrackModel().getEdgeTarget( edge ).getName() );
 	}
@@ -170,7 +171,7 @@ public class EdgeCollectionDataset extends ModelDataset
 				final ValueAxis rangeAxis,
 				final Rectangle2D dataArea )
 		{
-			if ( !edgeMap.containsKey( Integer.valueOf( item ) ) )
+			if ( edgeMap == null || !edgeMap.containsKey( Integer.valueOf( item ) ) )
 				return;
 
 			final RectangleEdge xAxisLocation = plot.getDomainAxisEdge();

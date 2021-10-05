@@ -40,13 +40,16 @@ public class EdgeFeatureGrapher extends AbstractFeatureGrapher
 
 	private final DisplaySettings ds;
 
+	private final boolean addLines;
+
 	public EdgeFeatureGrapher(
 			final List< DefaultWeightedEdge > edges,
 			final String xFeature,
 			final List< String > yFeatures,
 			final Model model,
 			final SelectionModel selectionModel,
-			final DisplaySettings displaySettings )
+			final DisplaySettings displaySettings,
+			final boolean addLines )
 	{
 		super(
 				xFeature,
@@ -60,6 +63,7 @@ public class EdgeFeatureGrapher extends AbstractFeatureGrapher
 		this.model = model;
 		this.selectionModel = selectionModel;
 		this.ds = displaySettings;
+		this.addLines = addLines;
 	}
 
 	@Override
@@ -71,6 +75,7 @@ public class EdgeFeatureGrapher extends AbstractFeatureGrapher
 				ds,
 				xFeature,
 				targetYFeatures,
-				edges );
+				edges,
+				addLines );
 	}
 }

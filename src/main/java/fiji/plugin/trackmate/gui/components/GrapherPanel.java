@@ -32,11 +32,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -86,6 +89,8 @@ public class GrapherPanel extends JPanel
 	private final JRadioButton rdbtnSelection;
 
 	private final JRadioButton rdbtnTracks;
+
+	private final JCheckBox chkboxConnectDots;
 
 	/*
 	 * CONSTRUCTOR
@@ -149,6 +154,7 @@ public class GrapherPanel extends JPanel
 		panelTracks.add( trackFeatureSelectionPanel );
 
 		panelSelection = new JPanel();
+		panelSelection.setLayout( new BoxLayout( panelSelection, BoxLayout.LINE_AXIS ) );
 		add( panelSelection, BorderLayout.SOUTH );
 
 		rdbtnAll = new JRadioButton( "All" );
@@ -168,6 +174,13 @@ public class GrapherPanel extends JPanel
 		btngrp.add( rdbtnSelection );
 		btngrp.add( rdbtnTracks );
 		rdbtnAll.setSelected( true );
+
+		panelSelection.add( new JSeparator( SwingConstants.VERTICAL ) );
+
+		chkboxConnectDots = new JCheckBox( "Connect" );
+		chkboxConnectDots.setFont( chkboxConnectDots.getFont().deriveFont( chkboxConnectDots.getFont().getSize() - 2f ) );
+		chkboxConnectDots.setSelected( true );
+		panelSelection.add( chkboxConnectDots );
 	}
 
 	public FeaturePlotSelectionPanel getSpotFeatureSelectionPanel()
@@ -209,6 +222,7 @@ public class GrapherPanel extends JPanel
 						selectionModel.getEdgeSelection(), 0 );
 				spots = new ArrayList<>( selectionModel.getSpotSelection() );
 			}
+			final boolean addLines = chkboxConnectDots.isSelected();
 
 			final SpotFeatureGrapher grapher = new SpotFeatureGrapher(
 					spots,
@@ -216,7 +230,8 @@ public class GrapherPanel extends JPanel
 					yFeatures,
 					trackmate.getModel(),
 					selectionModel,
-					displaySettings );
+					displaySettings,
+					addLines );
 			final JFrame frame = grapher.render();
 			frame.setIconImage( Icons.PLOT_ICON.getImage() );
 			frame.setTitle( trackmate.getSettings().imp.getShortTitle() + " spot features" );
@@ -253,6 +268,7 @@ public class GrapherPanel extends JPanel
 						selectionModel.getEdgeSelection(), 0 );
 				edges = new ArrayList<>( selectionModel.getEdgeSelection() );
 			}
+			final boolean addLines = chkboxConnectDots.isSelected();
 
 			final EdgeFeatureGrapher grapher = new EdgeFeatureGrapher(
 					edges,
@@ -260,7 +276,8 @@ public class GrapherPanel extends JPanel
 					yFeatures,
 					trackmate.getModel(),
 					selectionModel,
-					displaySettings );
+					displaySettings,
+					addLines );
 			final JFrame frame = grapher.render();
 			frame.setIconImage( Icons.PLOT_ICON.getImage() );
 			frame.setTitle( trackmate.getSettings().imp.getShortTitle() + " edge features" );

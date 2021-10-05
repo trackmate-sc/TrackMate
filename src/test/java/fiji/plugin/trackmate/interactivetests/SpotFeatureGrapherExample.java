@@ -67,7 +67,8 @@ public class SpotFeatureGrapherExample
 				Y,
 				model,
 				selectionModel,
-				DisplaySettings.defaultStyle().copy() );
+				DisplaySettings.defaultStyle().copy(),
+				true );
 		final JFrame frame = grapher.render();
 		frame.setLocationRelativeTo( null );
 		frame.setVisible( true );

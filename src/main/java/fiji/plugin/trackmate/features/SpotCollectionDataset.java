@@ -66,11 +66,12 @@ public class SpotCollectionDataset extends ModelDataset implements XYDataset
 			final DisplaySettings ds,
 			final String xFeature,
 			final List< String > yFeatures,
-			final List< Spot > spots )
+			final List< Spot > spots,
+			final boolean addLines )
 	{
 		super( model, selectionModel, ds, xFeature, yFeatures );
 		this.spots = spots;
-		this.edgeMap = createEdgeMap( spots, model.getTrackModel() );
+		this.edgeMap = addLines ? createEdgeMap( spots, model.getTrackModel() ) : null;
 	}
 
 	/**
@@ -166,7 +167,7 @@ public class SpotCollectionDataset extends ModelDataset implements XYDataset
 				final ValueAxis rangeAxis,
 				final Rectangle2D dataArea )
 		{
-			if ( !edgeMap.containsKey( Integer.valueOf( item ) ) )
+			if ( edgeMap == null || !edgeMap.containsKey( Integer.valueOf( item ) ) )
 				return;
 
 			final RectangleEdge xAxisLocation = plot.getDomainAxisEdge();
