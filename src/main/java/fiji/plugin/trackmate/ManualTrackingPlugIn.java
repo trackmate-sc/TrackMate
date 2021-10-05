@@ -54,6 +54,18 @@ public class ManualTrackingPlugIn extends TrackMatePlugIn
 		return lSettings;
 	}
 
+	@Override
+	protected TrackMate createTrackMate( final Model model, final Settings settings )
+	{
+		final TrackMate trackmate = super.createTrackMate( model, settings );
+		// Trigger computation of features so that they analyzers are declared
+		// in the model.
+		trackmate.computeSpotFeatures( false );
+		trackmate.computeEdgeFeatures( false );
+		trackmate.computeTrackFeatures( false );
+		return trackmate;
+	}
+
 	public static void main( final String[] args )
 	{
 		ImageJ.main( args );
