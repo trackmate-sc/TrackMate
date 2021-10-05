@@ -37,6 +37,7 @@ import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
+import ij.Prefs;
 import ij.WindowManager;
 import ij.plugin.PlugIn;
 
@@ -167,7 +168,12 @@ public class TrackMatePlugIn implements PlugIn
 		final String timeUnits = settings.imp.getCalibration().getTimeUnit();
 		model.setPhysicalUnits( spaceUnits, timeUnits );
 
-		return new TrackMate( model, settings );
+		final TrackMate trackmate = new TrackMate( model, settings );
+
+		// Set the num of threads from IJ prefs.
+		trackmate.setNumThreads( Prefs.getThreads() );
+
+		return trackmate;
 	}
 
 	protected DisplaySettings createDisplaySettings()
