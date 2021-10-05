@@ -221,7 +221,8 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 			 */
 
 			final SearchRegion< T > sn = getNeighborhood( spot, frame );
-			if ( null == sn ) { return; }
+			if ( null == sn )
+				return;
 
 			final RandomAccessible< T > source = sn.source;
 			final Interval interval = sn.interval;
