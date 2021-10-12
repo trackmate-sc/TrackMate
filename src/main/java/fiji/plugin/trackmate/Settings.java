@@ -28,8 +28,6 @@ import java.util.List;
 import java.util.Map;
 
 import fiji.plugin.trackmate.detection.DetectionUtils;
-import fiji.plugin.trackmate.detection.DetectorKeys;
-import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
 import fiji.plugin.trackmate.features.FeatureAnalyzer;
 import fiji.plugin.trackmate.features.FeatureFilter;
@@ -42,7 +40,6 @@ import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
 import fiji.plugin.trackmate.providers.SpotMorphologyAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
-import fiji.plugin.trackmate.tracking.sparselap.SimpleSparseLAPTrackerFactory;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.io.FileInfo;
@@ -528,21 +525,6 @@ public class Settings
 		final List< String > trackAnalyzerKeys = trackAnalyzerProvider.getKeys();
 		for ( final String key : trackAnalyzerKeys )
 			addTrackAnalyzer( trackAnalyzerProvider.getFactory( key ) );
-	}
-
-	/**
-	 * Initialize the detection and tracking part with default parameters. These
-	 * parameters are not mean to be used for all cases and need to be tuned for
-	 * the actual tracking problem.
-	 */
-	public void defaultParameters()
-	{
-		this.detectorFactory = new LogDetectorFactory<>();
-		this.detectorSettings = detectorFactory.getDefaultSettings();
-		detectorSettings.put( DetectorKeys.KEY_RADIUS, 2.5 );
-		this.trackerFactory = new SimpleSparseLAPTrackerFactory();
-		this.trackerSettings = trackerFactory.getDefaultSettings();
-		this.initialSpotFilterValue = 20.;
 	}
 
 	/*
