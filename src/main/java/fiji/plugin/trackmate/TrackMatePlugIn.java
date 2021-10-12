@@ -146,9 +146,9 @@ public class TrackMatePlugIn implements PlugIn
 	 */
 	protected Settings createSettings( final ImagePlus imp )
 	{
-		final Settings ls = new Settings();
-		ls.setFrom( imp );
+		final Settings ls = new Settings( imp );
 		ls.addAllAnalyzers();
+
 		return ls;
 	}
 
