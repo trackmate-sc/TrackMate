@@ -225,6 +225,11 @@ public class TrackOverlay extends Roi
 					if ( !isOnClip( source, target, minx, miny, maxx, maxy, calibration ) )
 						continue;
 
+					final double zs = source.getFeature( Spot.POSITION_Z ).doubleValue();
+					final double zt = target.getFeature( Spot.POSITION_Z ).doubleValue();
+					if ( doLimitDrawingDepth && Math.abs( zs - zslice ) > drawingDepth && Math.abs( zt - zslice ) > drawingDepth )
+						continue;
+
 					g2d.setColor( colorGenerator.color( edge ) );
 					drawEdge( g2d, source, target, xcorner, ycorner, magnification, transparency );
 				}
