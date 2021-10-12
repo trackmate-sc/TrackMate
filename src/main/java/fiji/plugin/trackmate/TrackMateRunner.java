@@ -38,7 +38,6 @@ import javax.swing.JFrame;
 
 import fiji.plugin.trackmate.action.ExportTracksToXML;
 import fiji.plugin.trackmate.detection.DetectorKeys;
-import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.track.TrackBranchingAnalyzer;
 import fiji.plugin.trackmate.gui.GuiUtils;
@@ -49,12 +48,12 @@ import fiji.plugin.trackmate.gui.wizard.descriptors.ConfigureViewsDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.LogPanelDescriptor2;
 import fiji.plugin.trackmate.io.TmXmlWriter;
 import fiji.plugin.trackmate.tracking.TrackerKeys;
-import fiji.plugin.trackmate.tracking.sparselap.SimpleSparseLAPTrackerFactory;
 import fiji.plugin.trackmate.util.LogRecorder;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import fiji.util.SplitString;
+import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij.Macro;
@@ -313,14 +312,6 @@ public class TrackMateRunner extends TrackMatePlugIn
 				final Map< String, ValuePair< String, MacroArgumentConverter > > trackerParsers = prepareTrackerParsableArguments();
 				final Map< String, FilterGenerator > trackFiltersParsers = prepareTrackFiltersParsableArguments();
 
-				// Default detector.
-				settings.detectorFactory = new LogDetectorFactory< >();
-				settings.detectorSettings = settings.detectorFactory.getDefaultSettings();
-
-				// Default tracker.
-				settings.trackerFactory = new SimpleSparseLAPTrackerFactory();
-				settings.trackerSettings = settings.trackerFactory.getDefaultSettings();
-
 				/*
 				 * Detector parameters.
 				 */
@@ -538,14 +529,6 @@ public class TrackMateRunner extends TrackMatePlugIn
 			 */
 			super.run( arg );
 		}
-	}
-
-	@Override
-	protected Settings createSettings( final ImagePlus imp )
-	{
-		final Settings s = super.createSettings( imp );
-		s.addAllAnalyzers();
-		return s;
 	}
 
 	/**
