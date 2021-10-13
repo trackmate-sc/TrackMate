@@ -28,6 +28,7 @@ import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
 import fiji.plugin.trackmate.gui.components.ModuleChooserPanel;
 import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
+import fiji.plugin.trackmate.io.SettingsPersistence;
 import fiji.plugin.trackmate.providers.DetectorProvider;
 
 public class ChooseDetectorDescriptor extends WizardPanelDescriptor
@@ -99,6 +100,9 @@ public class ChooseDetectorDescriptor extends WizardPanelDescriptor
 			final Map< String, Object > defaultSettings = factory.getDefaultSettings();
 			trackmate.getSettings().detectorSettings = defaultSettings;
 		}
+
+		// Settings persistence.
+		SettingsPersistence.saveLastUsedSettings( trackmate.getSettings(), trackmate.getModel().getLogger() );
 	}
 
 	@Override

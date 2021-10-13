@@ -141,7 +141,9 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 		 * Read image.
 		 */
 
-		final ImagePlus imp = reader.readImage();
+		ImagePlus imp = reader.readImage();
+		if ( null == imp )
+			imp = ViewUtils.makeEmpytImagePlus( model );
 
 		/*
 		 * Read settings.
@@ -150,9 +152,6 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 		final Settings settings = reader.readSettings( imp );
 		if ( !reader.isReadingOk() )
 			logger.error( "Problem reading the settings:\n" + reader.getErrorMessage() );
-
-		if ( null == settings.imp )
-			settings.imp = ViewUtils.makeEmpytImagePlus( model );
 
 		/*
 		 * Declare the analyzers that are in the settings to the model. This is

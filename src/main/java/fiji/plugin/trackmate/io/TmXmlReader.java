@@ -470,8 +470,7 @@ public class TmXmlReader
 		if ( null == settingsElement )
 			return null;
 
-		final Settings settings = new Settings();
-		settings.imp = imp;
+		final Settings settings = new Settings( imp );
 
 		/*
 		 * Backward compatibility: for now we add all the analyzers we know of

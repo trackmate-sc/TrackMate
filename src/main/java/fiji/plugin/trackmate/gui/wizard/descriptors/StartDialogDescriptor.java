@@ -52,6 +52,7 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
+import fiji.plugin.trackmate.io.SettingsPersistence;
 import fiji.plugin.trackmate.util.TMUtils;
 import ij.ImagePlus;
 import ij.gui.Roi;
@@ -115,6 +116,9 @@ public class StartDialogDescriptor extends WizardPanelDescriptor
 		// Log
 		logger.log( "\nImage region of interest:\n", Logger.BLUE_COLOR );
 		logger.log( settings.toStringImageInfo() );
+
+		// Settings persistence.
+		SettingsPersistence.saveLastUsedSettings( settings, logger );
 	}
 
 	private static class RoiSettingsPanel extends JPanel

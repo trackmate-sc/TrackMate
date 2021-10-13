@@ -35,6 +35,7 @@ import fiji.plugin.trackmate.gui.components.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.components.FilterGuiPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
+import fiji.plugin.trackmate.io.SettingsPersistence;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
 
 public class TrackFilterDescriptor extends WizardPanelDescriptor
@@ -160,5 +161,8 @@ public class TrackFilterDescriptor extends WizardPanelDescriptor
 			final int nselected = model.getTrackModel().nTracks( true );
 			logger.log( "Kept " + nselected + " spots out of " + ntotal + ".\n" );
 		}
+
+		// Settings persistence.
+		SettingsPersistence.saveLastUsedSettings( trackmate.getSettings(), logger );
 	}
 }

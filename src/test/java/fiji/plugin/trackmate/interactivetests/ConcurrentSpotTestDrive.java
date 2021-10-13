@@ -21,6 +21,8 @@
  */
 package fiji.plugin.trackmate.interactivetests;
 
+import java.util.Iterator;
+
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
@@ -30,8 +32,6 @@ import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.providers.DetectorProvider;
 import ij.ImagePlus;
 import ij.gui.NewImage;
-
-import java.util.Iterator;
 
 public class ConcurrentSpotTestDrive {
 
@@ -55,8 +55,7 @@ public class ConcurrentSpotTestDrive {
 		// Run track mate on it
 
 		// Make settings
-		final Settings settings = new Settings();
-		settings.setFrom(imp);
+		final Settings settings = new Settings( imp );
 		final DetectorProvider provider = new DetectorProvider();
 		settings.detectorFactory = provider.getFactory( LogDetectorFactory.DETECTOR_KEY );
 		settings.detectorSettings = settings.detectorFactory.getDefaultSettings();

@@ -28,8 +28,6 @@ import java.util.List;
 import java.util.Map;
 
 import fiji.plugin.trackmate.detection.DetectionUtils;
-import fiji.plugin.trackmate.detection.DetectorKeys;
-import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
 import fiji.plugin.trackmate.features.FeatureAnalyzer;
 import fiji.plugin.trackmate.features.FeatureFilter;
@@ -42,7 +40,6 @@ import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
 import fiji.plugin.trackmate.providers.SpotMorphologyAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
-import fiji.plugin.trackmate.tracking.sparselap.SimpleSparseLAPTrackerFactory;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.io.FileInfo;
@@ -59,7 +56,27 @@ public class Settings
 	 * {@link fiji.plugin.trackmate.visualization.TrackMateModelView} as a GUI
 	 * target.
 	 */
-	public ImagePlus imp;
+	public final ImagePlus imp;
+
+	public double dt;
+
+	public double dx;
+
+	public double dy;
+
+	public double dz;
+
+	public int width;
+
+	public int height;
+
+	public int nslices;
+
+	public int nframes;
+
+	public String imageFolder;
+
+	public String imageFileName;
 
 	/**
 	 * The region of interest (ROI). This will be used to crop the image and to
@@ -109,28 +126,6 @@ public class Settings
 	 */
 	public int zend;
 
-	/** Target channel for detection, <b>1-based</b>. */
-	// public int detectionChannel = 1;
-	// Image info
-	public double dt = 1;
-
-	public double dx = 1;
-
-	public double dy = 1;
-
-	public double dz = 1;
-
-	public int width;
-
-	public int height;
-
-	public int nslices;
-
-	public int nframes;
-
-	public String imageFolder = "";
-
-	public String imageFileName = "";
 
 	/**
 	 * The name of the detector factory to use. It will be used to generate
@@ -202,16 +197,31 @@ public class Settings
 	protected List< TrackAnalyzer > trackAnalyzers = new ArrayList<>();
 
 	/*
-	 * METHODS
+	 * CONSTRUCTOR.
 	 */
 
-	public void setFrom( final ImagePlus imp )
+	public Settings()
 	{
-		// Source image
-		this.imp = imp;
+		this( null );
+	}
 
+	public Settings( final ImagePlus imp )
+	{
+		this.imp = imp;
 		if ( null == imp )
-			return; // we leave field default values
+		{
+			this.dx = 1.;
+			this.dy = 1.;
+			this.dz = 1.;
+			this.dt = 1.;
+			this.width = 0;
+			this.height = 0;
+			this.imageFileName = "";
+			this.imageFolder = "";
+			this.nframes = 0;
+			this.nslices = 0;
+			return;
+		}
 
 		// File info
 		final FileInfo fileInfo = imp.getOriginalFileInfo();
@@ -234,10 +244,8 @@ public class Settings
 		this.dx = imp.getCalibration().pixelWidth;
 		this.dy = imp.getCalibration().pixelHeight;
 		this.dz = imp.getCalibration().pixelDepth;
-		this.dt = imp.getCalibration().frameInterval;
-
-		if ( dt == 0 )
-			dt = 1.;
+		final double ldt = imp.getCalibration().frameInterval;
+		this.dt = ( ldt == 0 ) ? 1. : ldt;
 
 		// Crop cube
 		this.zstart = 0;
@@ -517,21 +525,6 @@ public class Settings
 		final List< String > trackAnalyzerKeys = trackAnalyzerProvider.getKeys();
 		for ( final String key : trackAnalyzerKeys )
 			addTrackAnalyzer( trackAnalyzerProvider.getFactory( key ) );
-	}
-
-	/**
-	 * Initialize the detection and tracking part with default parameters. These
-	 * parameters are not mean to be used for all cases and need to be tuned for
-	 * the actual tracking problem.
-	 */
-	public void defaultParameters()
-	{
-		this.detectorFactory = new LogDetectorFactory<>();
-		this.detectorSettings = detectorFactory.getDefaultSettings();
-		detectorSettings.put( DetectorKeys.KEY_RADIUS, 2.5 );
-		this.trackerFactory = new SimpleSparseLAPTrackerFactory();
-		this.trackerSettings = trackerFactory.getDefaultSettings();
-		this.initialSpotFilterValue = 20.;
 	}
 
 	/*

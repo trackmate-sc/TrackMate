@@ -26,6 +26,7 @@ import java.util.Map;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.components.ModuleChooserPanel;
 import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
+import fiji.plugin.trackmate.io.SettingsPersistence;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import fiji.plugin.trackmate.tracking.sparselap.SimpleSparseLAPTrackerFactory;
@@ -99,6 +100,9 @@ public class ChooseTrackerDescriptor extends WizardPanelDescriptor
 			final Map< String, Object > defaultSettings = factory.getDefaultSettings();
 			trackmate.getSettings().trackerSettings = defaultSettings;
 		}
+
+		// Settings persistence.
+		SettingsPersistence.saveLastUsedSettings( trackmate.getSettings(), trackmate.getModel().getLogger() );
 	}
 
 	@Override

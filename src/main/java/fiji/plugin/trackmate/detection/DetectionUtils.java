@@ -116,8 +116,7 @@ public class DetectionUtils
 				try
 				{
 
-					final Settings lSettings = new Settings();
-					lSettings.setFrom( settings.imp );
+					final Settings lSettings = new Settings( settings.imp );
 					lSettings.tstart = frame;
 					lSettings.tend = frame;
 					lSettings.roi = settings.roi;
