@@ -26,6 +26,7 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
+import fiji.plugin.trackmate.io.SettingsPersistence;
 import fiji.plugin.trackmate.util.TMUtils;
 
 public class SpotDetectorDescriptor extends WizardPanelDescriptor
@@ -55,5 +56,8 @@ public class SpotDetectorDescriptor extends WizardPanelDescriptor
 		logger.log( settings.detectorFactory.getName(), Logger.BLUE_COLOR );
 		logger.log( " with settings:\n" );
 		logger.log( TMUtils.echoMap( settings.detectorSettings, 2 ) + "\n" );
+
+		// Settings persistence.
+		SettingsPersistence.saveLastUsedSettings( settings, logger );
 	}
 }
