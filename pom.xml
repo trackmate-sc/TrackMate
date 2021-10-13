@@ -263,6 +263,10 @@
 			<artifactId>javaGeom</artifactId>
 			<version>${javaGeom.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math3</artifactId>
+		</dependency>
 		
 		<!-- Test dependencies -->
 		<dependency>
