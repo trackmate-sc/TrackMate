@@ -33,7 +33,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.action.fit.SpotGaussianFitter2D;
+import fiji.plugin.trackmate.action.fit.SpotFitterController;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.wizard.TrackMateWizardSequence;
@@ -52,7 +52,7 @@ public class SpotGaussianFitterExample
 		UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
 		ImageJ.main( args );
 //		final TmXmlReader reader = new TmXmlReader( new File( "samples/MAX_1.5x-timelqpe_2021-04-02-1.xml" ) );
-		final TmXmlReader reader = new TmXmlReader( new File( "samples/FakeTracks.xml" ) );
+		final TmXmlReader reader = new TmXmlReader( new File( "samples/FakeTracks-multiC.xml" ) );
 		final Model model = reader.getModel();
 		final ImagePlus imp = reader.readImage();
 		imp.show();
@@ -67,21 +67,14 @@ public class SpotGaussianFitterExample
 		displayer.render();
 
 		final TrackMateWizardSequence sequence = new TrackMateWizardSequence( trackmate, selectionModel, displaySettings );
-		sequence.setCurrent( "LogPanel" );
+		sequence.setCurrent( "ConfigureViews" );
 		final JFrame frame = sequence.run( "Test Gauss-fitting action" );
 		frame.setIconImage( TRACKMATE_ICON.getImage() );
 		GuiUtils.positionWindow( frame, settings.imp.getWindow() );
 		frame.setVisible( true );
 
-		// Perform fitting.
-		final SpotGaussianFitter2D< T > fitter = new SpotGaussianFitter2D<>( imp, 0 );
-		fitter.process( model.getSpots().iterable( true ), model.getLogger() );
-//		final Spot spot = model.getSpots().iterable( true ).iterator().next();
-//		fitter.fit( spot );
-
-		// Recompute features.
-		trackmate.computeSpotFeatures( true );
-		trackmate.computeEdgeFeatures( true );
-		trackmate.computeTrackFeatures( true );
+		// Launch fitting controller.
+		final SpotFitterController controller = new SpotFitterController( trackmate, selectionModel );
+		controller.show();
 	}
 }
