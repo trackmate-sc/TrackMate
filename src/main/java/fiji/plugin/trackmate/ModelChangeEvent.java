@@ -121,7 +121,7 @@ public class ModelChangeEvent extends EventObject {
 	private final HashMap<DefaultWeightedEdge, Integer> edgeFlags = new HashMap<>();
 	/** The event type for this instance. */
 	private final int eventID;
-	private Set<Integer> trackUpdated;
+	private Set< Integer > trackUpdated = new HashSet<>();
 
 	/**
 	 * Create a new event, reflecting a change in a {@link Model}.
