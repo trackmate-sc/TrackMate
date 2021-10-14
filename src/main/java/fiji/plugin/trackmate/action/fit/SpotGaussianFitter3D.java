@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.action.fit;
 
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresBuilder;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
@@ -74,19 +75,26 @@ public class SpotGaussianFitter3D extends AbstractSpotFitter
 				.maxEvaluations( 1000 )
 				.maxIterations( 1000 )
 				.build();
-		final LeastSquaresOptimizer.Optimum optimum = optimizer.optimize( lsq );
-		final RealVector fit = optimum.getPoint();
 
-		final double fitX = fit.getEntry( 0 ) * calibration[ 0 ];
-		final double fitY = fit.getEntry( 1 ) * calibration[ 1 ];
-		final double fitZ = fit.getEntry( 2 ) * calibration[ 2 ];
-		final double fitSigmaXY = 1. / Math.sqrt( 2. * fit.getEntry( 4 ) );
-		final double fitRadiusXY = fitSigmaXY * Math.sqrt( 2. ) * calibration[ 0 ];
+		try
+		{
+			final LeastSquaresOptimizer.Optimum optimum = optimizer.optimize( lsq );
+			final RealVector fit = optimum.getPoint();
 
-		spot.putFeature( Spot.POSITION_X, fitX );
-		spot.putFeature( Spot.POSITION_Y, fitY );
-		spot.putFeature( Spot.POSITION_Z, fitZ );
-		spot.putFeature( Spot.RADIUS, fitRadiusXY );
+			final double fitX = fit.getEntry( 0 ) * calibration[ 0 ];
+			final double fitY = fit.getEntry( 1 ) * calibration[ 1 ];
+			final double fitZ = fit.getEntry( 2 ) * calibration[ 2 ];
+			final double fitSigmaXY = 1. / Math.sqrt( 2. * fit.getEntry( 4 ) );
+			final double fitRadiusXY = fitSigmaXY * Math.sqrt( 2. ) * calibration[ 0 ];
+
+			spot.putFeature( Spot.POSITION_X, fitX );
+			spot.putFeature( Spot.POSITION_Y, fitY );
+			spot.putFeature( Spot.POSITION_Z, fitZ );
+			spot.putFeature( Spot.RADIUS, fitRadiusXY );
+		}
+		catch ( final TooManyEvaluationsException tme )
+		{}
+
 	}
 
 	/**
@@ -165,7 +173,7 @@ public class SpotGaussianFitter3D extends AbstractSpotFitter
 		public RealVector validate( final RealVector params )
 		{
 			params.setEntry( 3, Math.abs( params.getEntry( 3 ) ) );
-			final double bXY = Math.max( minBxy, Math.abs( params.getEntry( 4 ) ) ); 
+			final double bXY = Math.max( minBxy, Math.abs( params.getEntry( 4 ) ) );
 			params.setEntry( 4, bXY );
 			final double bZ = Math.max( minBz, Math.abs( params.getEntry( 5 ) ) );
 			params.setEntry( 5, bZ );

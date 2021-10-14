@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.action.fit;
 
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresBuilder;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
@@ -65,13 +66,19 @@ public class SpotGaussianFitter2DFixedRadius extends AbstractSpotFitter
 				.maxEvaluations( 1000 )
 				.maxIterations( 1000 )
 				.build();
-		final LeastSquaresOptimizer.Optimum optimum = optimizer.optimize( lsq );
-		final RealVector fit = optimum.getPoint();
 
-		final double fitX = fit.getEntry( 0 ) * calibration[ 0 ];
-		final double fitY = fit.getEntry( 1 ) * calibration[ 1 ];
-		spot.putFeature( Spot.POSITION_X, fitX );
-		spot.putFeature( Spot.POSITION_Y, fitY );
+		try
+		{
+			final LeastSquaresOptimizer.Optimum optimum = optimizer.optimize( lsq );
+			final RealVector fit = optimum.getPoint();
+
+			final double fitX = fit.getEntry( 0 ) * calibration[ 0 ];
+			final double fitY = fit.getEntry( 1 ) * calibration[ 1 ];
+			spot.putFeature( Spot.POSITION_X, fitX );
+			spot.putFeature( Spot.POSITION_Y, fitY );
+		}
+		catch ( final TooManyEvaluationsException tme )
+		{}
 	}
 
 	/**

@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.action.fit;
 
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresBuilder;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
@@ -67,17 +68,24 @@ public class SpotGaussianFitter2D extends AbstractSpotFitter
 				.maxEvaluations( 1000 )
 				.maxIterations( 1000 )
 				.build();
-		final LeastSquaresOptimizer.Optimum optimum = optimizer.optimize( lsq );
-		final RealVector fit = optimum.getPoint();
 
-		final double fitX = fit.getEntry( 0 ) * calibration[ 0 ];
-		final double fitY = fit.getEntry( 1 ) * calibration[ 1 ];
-		final double fitSigma = 1. / Math.sqrt( 2. * fit.getEntry( 3 ) );
-		final double fitRadius = fitSigma * Math.sqrt( 2. ) * calibration[ 0 ];
+		try
+		{
+			final LeastSquaresOptimizer.Optimum optimum = optimizer.optimize( lsq );
+			final RealVector fit = optimum.getPoint();
 
-		spot.putFeature( Spot.POSITION_X, fitX );
-		spot.putFeature( Spot.POSITION_Y, fitY );
-		spot.putFeature( Spot.RADIUS, fitRadius );
+			final double fitX = fit.getEntry( 0 ) * calibration[ 0 ];
+			final double fitY = fit.getEntry( 1 ) * calibration[ 1 ];
+			final double fitSigma = 1. / Math.sqrt( 2. * fit.getEntry( 3 ) );
+			final double fitRadius = fitSigma * Math.sqrt( 2. ) * calibration[ 0 ];
+
+			spot.putFeature( Spot.POSITION_X, fitX );
+			spot.putFeature( Spot.POSITION_Y, fitY );
+			spot.putFeature( Spot.RADIUS, fitRadius );
+		}
+		catch ( final TooManyEvaluationsException tme )
+		{}
+
 	}
 
 	/**
@@ -144,7 +152,7 @@ public class SpotGaussianFitter2D extends AbstractSpotFitter
 		{
 			params.setEntry( 2, Math.abs( params.getEntry( 2 ) ) );
 			final double b = Math.max( minB, Math.abs( params.getEntry( 3 ) ) );
-			params.setEntry( 3,  b );
+			params.setEntry( 3, b );
 			return params;
 		}
 	}
