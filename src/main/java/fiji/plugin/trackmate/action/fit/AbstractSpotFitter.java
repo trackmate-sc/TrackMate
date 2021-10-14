@@ -131,7 +131,7 @@ public abstract class AbstractSpotFitter implements SpotFitter
 		return processingTime;
 	}
 
-	protected static void clibBackground( final Observation obs )
+	protected static void clipBackground( final Observation obs )
 	{
 		// Remove background and clip to 0.
 		final double bg = Util.median( obs.values );

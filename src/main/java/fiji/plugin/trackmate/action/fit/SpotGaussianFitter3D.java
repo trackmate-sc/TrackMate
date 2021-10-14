@@ -55,7 +55,7 @@ public class SpotGaussianFitter3D extends AbstractSpotFitter
 						Math.round( z0 ) ),
 				new long[] { spanXY, spanXY, spanZ },
 				frame );
-		AbstractSpotFitter.clibBackground( obs );
+		clipBackground( obs );
 
 		final MyGaussian3D gauss = new MyGaussian3D( obs.pos );
 		final double bstartXY = 1 / ( 2 * pixelSigmaXY * pixelSigmaXY );

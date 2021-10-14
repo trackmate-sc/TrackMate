@@ -55,7 +55,7 @@ public class SpotGaussianFitter3DFixedRadius extends AbstractSpotFitter
 						Math.round( z0 ) ),
 				new long[] { spanXY, spanXY, spanZ },
 				frame );
-		AbstractSpotFitter.clibBackground( obs );
+		clipBackground( obs );
 
 		final double bXY = 1 / ( 2 * pixelSigmaXY * pixelSigmaXY );
 		final double bZ = 1 / ( 2 * pixelSigmaZ * pixelSigmaZ );

@@ -51,6 +51,7 @@ public class SpotGaussianFitter2D extends AbstractSpotFitter
 						Math.round( y0 ) ),
 				new long[] { span, span },
 				frame );
+		clipBackground( obs );
 
 		final MyGaussian2D gauss = new MyGaussian2D( obs.pos );
 		final double bstart = 1 / ( 2 * pixelSigma * pixelSigma );
