@@ -9,6 +9,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
@@ -76,6 +77,9 @@ public class SpotFitterController
 					trackmate.computeEdgeFeatures( true );
 					trackmate.computeTrackFeatures( true );
 					logger.log( "Undoing done.\n" );
+
+					// Notify changes happened.
+					trackmate.getModel().getModelChangeListener().forEach( l -> l.modelChanged( new ModelChangeEvent( this, ModelChangeEvent.MODEL_MODIFIED ) ) );
 				}
 				finally
 				{
@@ -113,7 +117,12 @@ public class SpotFitterController
 					}
 					else
 					{
-						fitter = null; // FIXME
+						if ( index == 0 )
+							fitter = new SpotGaussianFitter3D( imp, channel );
+						else if ( index == 1 )
+							fitter = new SpotGaussianFitter3DFixedRadius( imp, channel );
+						else
+							throw new IllegalArgumentException( "Index points to an unknown fit model: " + index );
 					}
 					fitter.setNumThreads( trackmate.getNumThreads() );
 
@@ -150,6 +159,9 @@ public class SpotFitterController
 					trackmate.computeSpotFeatures( true );
 					trackmate.computeEdgeFeatures( true );
 					trackmate.computeTrackFeatures( true );
+
+					// Notify changes happened.
+					trackmate.getModel().getModelChangeListener().forEach( l -> l.modelChanged( new ModelChangeEvent( this, ModelChangeEvent.MODEL_MODIFIED ) ) );
 				}
 				finally
 				{
@@ -186,7 +198,13 @@ public class SpotFitterController
 		}
 		else
 		{
-
+			docs.add(
+					"<html>Fit a 3D anisotropic Gaussian on each spot. The Z sigma can be different "
+							+ "from the sigmas in X and Y, which are forced to be identical. The radius of "
+							+ "the spot is set from the sigma in XY.</html>" );
+			docs.add(
+					"<html>Fit a 3D anisotropic Gaussian on each spot. We only allow X, Y, Z and the "
+							+ "amplitude to adjust in the fit. The spot radius is left unchanged.</html>" );
 		}
 		return docs;
 	}
@@ -201,7 +219,8 @@ public class SpotFitterController
 		}
 		else
 		{
-
+			fits.add( "Elliptical orthogonal Gaussian 3D" );
+			fits.add( "Gaussian 3D with fixed radius" );
 		}
 		return fits;
 	}
