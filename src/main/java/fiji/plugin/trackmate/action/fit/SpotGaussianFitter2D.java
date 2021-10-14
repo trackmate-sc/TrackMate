@@ -13,6 +13,7 @@ import org.apache.commons.math3.util.Pair;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.detection.DetectionUtils;
 import ij.ImagePlus;
 import net.imglib2.Point;
 import net.imglib2.util.Util;
@@ -26,6 +27,7 @@ public class SpotGaussianFitter2D extends AbstractSpotFitter
 	public SpotGaussianFitter2D( final ImagePlus imp, final int channel )
 	{
 		super( imp, channel );
+		assert DetectionUtils.is2D( imp );
 	}
 
 	@Override
