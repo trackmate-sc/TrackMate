@@ -57,9 +57,13 @@ public class SpotGaussianFitter3D extends AbstractSpotFitter
 				frame );
 		clipBackground( obs );
 
-		final MyGaussian3D gauss = new MyGaussian3D( obs.pos );
-		final double bstartXY = 1 / ( 2 * pixelSigmaXY * pixelSigmaXY );
-		final double bstartZ = 1 / ( 2 * pixelSigmaZ * pixelSigmaZ );
+		final double bstartXY = 1. / ( 2. * pixelSigmaXY * pixelSigmaXY );
+		final double maxSigmaXY = 2. * pixelSigmaXY;
+		final double minBxy = 1. / ( 2. * maxSigmaXY * maxSigmaXY );
+		final double bstartZ = 1. / ( 2. * pixelSigmaZ * pixelSigmaZ );
+		final double maxSigmaZ = 2. * pixelSigmaZ;
+		final double minBz = 1. / ( 2. * maxSigmaZ * maxSigmaZ );
+		final MyGaussian3D gauss = new MyGaussian3D( obs.pos, minBxy, minBz );
 		final double ampstart = Util.max( obs.values );
 		final LeastSquaresProblem lsq = new LeastSquaresBuilder()
 				.start( new double[] { x0, y0, z0, ampstart, bstartXY, bstartZ } )
@@ -102,9 +106,15 @@ public class SpotGaussianFitter3D extends AbstractSpotFitter
 
 		private final long[][] pos;
 
-		public MyGaussian3D( final long[][] pos )
+		private final double minBxy;
+
+		private final double minBz;
+
+		public MyGaussian3D( final long[][] pos, final double minBxy, final double minBz )
 		{
 			this.pos = pos;
+			this.minBxy = minBxy;
+			this.minBz = minBz;
 		}
 
 		@Override
@@ -155,8 +165,10 @@ public class SpotGaussianFitter3D extends AbstractSpotFitter
 		public RealVector validate( final RealVector params )
 		{
 			params.setEntry( 3, Math.abs( params.getEntry( 3 ) ) );
-			params.setEntry( 4, Math.abs( params.getEntry( 4 ) ) );
-			params.setEntry( 5, Math.abs( params.getEntry( 5 ) ) );
+			final double bXY = Math.max( minBxy, Math.abs( params.getEntry( 4 ) ) ); 
+			params.setEntry( 4, bXY );
+			final double bZ = Math.max( minBz, Math.abs( params.getEntry( 5 ) ) );
+			params.setEntry( 5, bZ );
 			return params;
 		}
 	}

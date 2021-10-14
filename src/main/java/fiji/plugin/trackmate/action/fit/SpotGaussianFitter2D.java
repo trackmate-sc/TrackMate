@@ -53,8 +53,10 @@ public class SpotGaussianFitter2D extends AbstractSpotFitter
 				frame );
 		clipBackground( obs );
 
-		final MyGaussian2D gauss = new MyGaussian2D( obs.pos );
-		final double bstart = 1 / ( 2 * pixelSigma * pixelSigma );
+		final double bstart = 1. / ( 2 * pixelSigma * pixelSigma );
+		final double maxSigma = 2. * pixelSigma;
+		final double minB = 1. / ( 2 * maxSigma * maxSigma );
+		final MyGaussian2D gauss = new MyGaussian2D( obs.pos, minB );
 		final double ampstart = Util.max( obs.values );
 		final LeastSquaresProblem lsq = new LeastSquaresBuilder()
 				.start( new double[] { x0, y0, ampstart, bstart } )
@@ -93,9 +95,12 @@ public class SpotGaussianFitter2D extends AbstractSpotFitter
 
 		private final long[][] pos;
 
-		public MyGaussian2D( final long[][] pos )
+		private final double minB;
+
+		public MyGaussian2D( final long[][] pos, final double minB )
 		{
 			this.pos = pos;
+			this.minB = minB;
 		}
 
 		@Override
@@ -138,7 +143,8 @@ public class SpotGaussianFitter2D extends AbstractSpotFitter
 		public RealVector validate( final RealVector params )
 		{
 			params.setEntry( 2, Math.abs( params.getEntry( 2 ) ) );
-			params.setEntry( 3, Math.abs( params.getEntry( 3 ) ) );
+			final double b = Math.max( minB, Math.abs( params.getEntry( 3 ) ) );
+			params.setEntry( 3,  b );
 			return params;
 		}
 	}
