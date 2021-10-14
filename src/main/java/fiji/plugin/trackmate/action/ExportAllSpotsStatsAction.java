@@ -59,7 +59,8 @@ public class ExportAllSpotsStatsAction extends AbstractTMAction
 		return new AllSpotsTableView( model, selectionModel, displaySettings );
 	}
 
-	@Plugin( type = TrackMateActionFactory.class )
+	// Invisible because called on the view config panel.
+	@Plugin( type = TrackMateActionFactory.class, visible = false )
 	public static class Factory implements TrackMateActionFactory
 	{
 
