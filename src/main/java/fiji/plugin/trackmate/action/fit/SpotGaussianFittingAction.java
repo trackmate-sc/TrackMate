@@ -18,7 +18,7 @@ public class SpotGaussianFittingAction extends AbstractTMAction
 	@Override
 	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final java.awt.Frame parent )
 	{
-		final SpotFitterController controller = new SpotFitterController( trackmate, selectionModel );
+		final SpotFitterController controller = new SpotFitterController( trackmate, selectionModel, logger );
 		controller.show();
 	}
 

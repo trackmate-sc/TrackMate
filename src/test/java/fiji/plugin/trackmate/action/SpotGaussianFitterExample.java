@@ -29,6 +29,7 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
@@ -52,7 +53,7 @@ public class SpotGaussianFitterExample
 		UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
 		ImageJ.main( args );
 //		final TmXmlReader reader = new TmXmlReader( new File( "samples/MAX_1.5x-timelqpe_2021-04-02-1.xml" ) );
-		final TmXmlReader reader = new TmXmlReader( new File( "samples/FakeTracks-multiC.xml" ) );
+		final TmXmlReader reader = new TmXmlReader( new File( "samples/FakeTracks.xml" ) );
 		final Model model = reader.getModel();
 		final ImagePlus imp = reader.readImage();
 		imp.show();
@@ -74,7 +75,7 @@ public class SpotGaussianFitterExample
 		frame.setVisible( true );
 
 		// Launch fitting controller.
-		final SpotFitterController controller = new SpotFitterController( trackmate, selectionModel );
+		final SpotFitterController controller = new SpotFitterController( trackmate, selectionModel, Logger.DEFAULT_LOGGER );
 		controller.show();
 	}
 }

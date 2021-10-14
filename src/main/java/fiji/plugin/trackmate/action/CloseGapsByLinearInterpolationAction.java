@@ -69,11 +69,10 @@ public class CloseGapsByLinearInterpolationAction extends AbstractTMAction
 	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
 	{
 		final Model model = trackmate.getModel();
-
 		final TrackModel trackModel = model.getTrackModel();
-
 		boolean changed = true;
 
+		logger.log( "Interpolating gaps.\n" );
 		model.beginUpdate();
 		try
 		{
@@ -105,13 +104,12 @@ public class CloseGapsByLinearInterpolationAction extends AbstractTMAction
 						nextSpot.localize( nextPosition );
 						currentSpot.localize( currentPosition );
 
-						model.removeEdge( currentSpot, nextSpot );
-
 						/*
 						 * Create new spots in between; interpolate coordinates
 						 * and some features.
 						 */
 						Spot formerSpot = currentSpot;
+						int nspots = 0;
 						for ( int f = currentFrame + presign; ( f < nextFrame && presign == 1 )
 								|| ( f > nextFrame && presign == -1 ); f += presign )
 						{
@@ -119,12 +117,9 @@ public class CloseGapsByLinearInterpolationAction extends AbstractTMAction
 
 							final double[] position = new double[ 3 ];
 							for ( int d = 0; d < currentSpot.numDimensions(); d++ )
-							{
 								position[ d ] = weight * currentPosition[ d ] + ( 1.0 - weight ) * nextPosition[ d ];
-							}
 
 							final RealPoint rp = new RealPoint( position );
-
 							final Spot newSpot = new Spot( rp, 0, 0 );
 
 							// Set some properties of the new spot
@@ -135,8 +130,11 @@ public class CloseGapsByLinearInterpolationAction extends AbstractTMAction
 							model.addSpotTo( newSpot, f );
 							model.addEdge( formerSpot, newSpot, 1.0 );
 							formerSpot = newSpot;
+							nspots++;
 						}
 						model.addEdge( formerSpot, nextSpot, 1.0 );
+						model.removeEdge( currentSpot, nextSpot );
+						logger.log( "Added " + nspots + " new spots between spots " + currentSpot + " and " + nextSpot + ".\n" );
 
 						/*
 						 * Restart search to prevent
@@ -152,6 +150,7 @@ public class CloseGapsByLinearInterpolationAction extends AbstractTMAction
 		{
 			model.endUpdate();
 		}
+		logger.log( "Finished.\n" );
 	}
 
 	private void interpolateFeature( final Spot targetSpot, final Spot spot1, final Spot spot2, final double weight, final String feature )

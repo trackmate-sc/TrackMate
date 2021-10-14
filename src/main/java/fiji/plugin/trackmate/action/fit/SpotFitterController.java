@@ -29,12 +29,15 @@ public class SpotFitterController
 
 	private final SpotFitterPanel gui;
 
+	private final Logger logger;
+
 	private final Map< Spot, double[] > undo;
 
-	public SpotFitterController( final TrackMate trackmate, final SelectionModel selectionModel )
+	public SpotFitterController( final TrackMate trackmate, final SelectionModel selectionModel, final Logger logger )
 	{
 		this.trackmate = trackmate;
 		this.selectionModel = selectionModel;
+		this.logger = logger;
 		this.undo = new HashMap<>();
 
 		final Settings settings = trackmate.getSettings();
@@ -57,7 +60,6 @@ public class SpotFitterController
 			{
 				try
 				{
-					final Logger logger = trackmate.getModel().getLogger();
 					logger.log( "Undoing last fit.\n" );
 					logger.setStatus( "Undoing" );
 
@@ -153,7 +155,7 @@ public class SpotFitterController
 					}
 
 					// Perform fit.
-					fitter.process( spots, trackmate.getModel().getLogger() );
+					fitter.process( spots, logger );
 
 					// Recompute features.
 					trackmate.computeSpotFeatures( true );
