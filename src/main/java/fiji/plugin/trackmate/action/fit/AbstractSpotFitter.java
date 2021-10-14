@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.action.fit;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -12,14 +13,18 @@ import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.util.TMUtils;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imglib2.Cursor;
 import net.imglib2.Point;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.img.Img;
+import net.imglib2.img.array.ArrayImg;
+import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.img.basictypeaccess.array.DoubleArray;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.util.Util;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
@@ -46,7 +51,6 @@ public abstract class AbstractSpotFitter implements SpotFitter
 	@SuppressWarnings( "unchecked" )
 	public AbstractSpotFitter( final ImagePlus imp, final int channel )
 	{
-		assert DetectionUtils.is2D( imp );
 		this.channel = channel;
 		this.img = TMUtils.rawWraps( imp );
 		this.calibration = TMUtils.getSpatialCalibration( imp );
@@ -192,6 +196,19 @@ public abstract class AbstractSpotFitter implements SpotFitter
 			for ( int d = 0; d < pos.length; d++ )
 				str.append( "\npos[" + d + "]: " + Util.printCoordinates( pos[ d ] ) );
 			return str.toString();
+		}
+
+		public Img< DoubleType > toImg()
+		{
+			final long[] dims = new long[ pos.length ];
+			for ( int d = 0; d < dims.length; d++ )
+			{
+				final long max = Arrays.stream( pos[ d ] ).max().getAsLong();
+				final long min = Arrays.stream( pos[ d ] ).min().getAsLong();
+				dims[ d ] = max - min + 1;
+			}
+			final ArrayImg< DoubleType, DoubleArray > img = ArrayImgs.doubles( values, dims );
+			return img;
 		}
 	}
 }
