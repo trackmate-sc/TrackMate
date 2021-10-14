@@ -116,13 +116,13 @@ public class CaptureOverlayAction extends AbstractTMAction
 			// Add overlay to it.
 			final HyperStackDisplayer displayer = new HyperStackDisplayer( trackmate.getModel(), new SelectionModel( trackmate.getModel() ), imp2, displaySettings );
 			displayer.render();
-			final ImagePlus capture = capture( imp2, firstFrame, lastFrame, trackmate.getModel().getLogger() );
+			final ImagePlus capture = capture( imp2, firstFrame, lastFrame, logger );
 			imp2.close();
 			capture.show();
 		}
 		else
 		{
-			final ImagePlus capture = capture( trackmate, firstFrame, lastFrame );
+			final ImagePlus capture = capture( trackmate, firstFrame, lastFrame, logger );
 			capture.show();
 		}
 
@@ -142,9 +142,8 @@ public class CaptureOverlayAction extends AbstractTMAction
 	 *            the last frame, inclusive, to capture.
 	 * @return a new ImagePlus.
 	 */
-	public static ImagePlus capture( final TrackMate trackmate, final int first, final int last )
+	public static ImagePlus capture( final TrackMate trackmate, final int first, final int last, final Logger logger )
 	{
-		final Logger logger = trackmate.getModel().getLogger();
 		final ImagePlus imp = trackmate.getSettings().imp;
 		return capture( imp, first, last, logger );
 	}
