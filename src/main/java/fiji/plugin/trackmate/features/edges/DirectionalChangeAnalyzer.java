@@ -99,13 +99,16 @@ public class DirectionalChangeAnalyzer extends AbstractEdgeAnalyzer
 		Spot predecessor = null;
 		for ( final DefaultWeightedEdge sourceEdge : sourceEdges )
 		{
-			predecessor = model.getTrackModel().getEdgeSource( sourceEdge );
-			if ( predecessor.equals( source ) )
-				predecessor = model.getTrackModel().getEdgeTarget( sourceEdge );
-			
-			if ( predecessor.diffTo( source, Spot.FRAME ) < 0. )
-				nPredecessors++;
+			Spot other = model.getTrackModel().getEdgeTarget( sourceEdge );
+			if ( other.equals( source ) )
+				other = model.getTrackModel().getEdgeSource( sourceEdge );
+
+			if ( other.diffTo( source, Spot.FRAME ) < 0. )
+			{
 				// This is a predecessor edge.
+				nPredecessors++;
+				predecessor = other;
+			}
 		}
 
 		/*
