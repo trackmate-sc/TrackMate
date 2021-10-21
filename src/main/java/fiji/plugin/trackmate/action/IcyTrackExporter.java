@@ -77,7 +77,9 @@ public class IcyTrackExporter extends AbstractTMAction
 		try
 		{
 			String filename = trackmate.getSettings().imageFileName;
-			filename = filename.substring( 0, filename.indexOf( "." ) );
+			final int dotLoca = filename.indexOf( "." );
+			if ( dotLoca > 0 )
+				filename = filename.substring( 0, dotLoca );
 			file = new File( folder.getPath() + File.separator + filename + "_Icy.xml" );
 		}
 		catch ( final NullPointerException npe )
