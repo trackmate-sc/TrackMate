@@ -39,8 +39,7 @@ if (dims[4] == 1):
 nChannels = imp.getNChannels()
 
 # Setup settings for TrackMate
-settings = Settings()
-settings.setFrom( imp )
+settings = Settings(imp)
 settings.dt = 0.05
 
 # Spot analyzer: we want the multi-C intensity analyzer.
