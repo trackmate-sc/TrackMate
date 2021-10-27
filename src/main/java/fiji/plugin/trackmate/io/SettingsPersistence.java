@@ -48,8 +48,9 @@ public class SettingsPersistence
 			return getDefaultSettings( imp );
 		}
 
-		final Settings settings = reader.readSettings( imp );
-		return settings;
+		final Settings settings = reader.readSettings( null );
+		final Settings newSettings = settings.copyOn( imp );
+		return newSettings;
 	}
 
 	public static final void saveLastUsedSettings( final Settings settings, final Logger logger )
