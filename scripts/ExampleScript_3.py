@@ -39,8 +39,7 @@ model.setLogger(Logger.IJ_LOGGER)
 # Prepare settings object
 #------------------------
 
-settings = Settings()
-settings.setFrom( imp )
+settings = Settings(imp)
 
 # Configure detector
 settings.detectorFactory = DogDetectorFactory()
