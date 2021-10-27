@@ -271,6 +271,39 @@ public class Settings
 		// The rest is left to the user
 	}
 
+	/**
+	 * Copy a settings objects based on this instance, but configured to run on
+	 * the specified image. Detector and tracker factories and settings are
+	 * copied, as well as filters, etc. The exception are analyzers: all the
+	 * analyzers that are found at runtime are added, regardless of the content
+	 * of the instance to copy.
+	 * 
+	 * @param newImp
+	 *            the image to copy the settings for.
+	 * @return a new settings object.
+	 */
+	public Settings copyOn( final ImagePlus newImp )
+	{
+		final Settings newSettings = new Settings( newImp );
+		newSettings.detectorFactory = detectorFactory.copy();
+		newSettings.detectorSettings = new HashMap< >( detectorSettings );
+		newSettings.trackerFactory = trackerFactory.copy();
+		newSettings.trackerSettings = new HashMap< >( trackerSettings );
+		newSettings.initialSpotFilterValue = initialSpotFilterValue;
+		
+		newSettings.spotFilters = new ArrayList<>( );
+		for ( final FeatureFilter filter : spotFilters )
+			newSettings.spotFilters.add( new FeatureFilter( filter.feature, filter.value, filter.isAbove ) );
+		
+		newSettings.trackFilters = new ArrayList<>( trackFilters );
+		for ( final FeatureFilter filter : trackFilters )
+			newSettings.trackFilters.add( new FeatureFilter( filter.feature, filter.value, filter.isAbove ) );
+		
+		// Exception: we add all analyzers, regardless of the persistence.
+		newSettings.addAllAnalyzers();
+		return newSettings;
+	}
+
 	/*
 	 * METHODS
 	 */
