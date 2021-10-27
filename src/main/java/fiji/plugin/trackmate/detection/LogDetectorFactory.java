@@ -264,4 +264,9 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 		return null;
 	}
 
+	@Override
+	public LogDetectorFactory< T > copy()
+	{
+		return new LogDetectorFactory< >();
+	}
 }

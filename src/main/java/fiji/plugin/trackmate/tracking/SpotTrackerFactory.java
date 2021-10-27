@@ -124,4 +124,11 @@ public interface SpotTrackerFactory extends TrackMateModule
 	 * @see #checkSettingsValidity(Map)
 	 */
 	public String getErrorMessage();
+
+	/**
+	 * Returns a copy the current instance.
+	 * 
+	 * @return a new instance of this tracker factory.
+	 */
+	public SpotTrackerFactory copy();
 }

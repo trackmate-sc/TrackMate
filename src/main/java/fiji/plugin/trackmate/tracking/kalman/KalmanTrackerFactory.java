@@ -207,4 +207,10 @@ public class KalmanTrackerFactory implements SpotTrackerFactory
 	{
 		return errorMessage;
 	}
+
+	@Override
+	public KalmanTrackerFactory copy()
+	{
+		return new KalmanTrackerFactory();
+	}
 }

@@ -157,4 +157,10 @@ public class NearestNeighborTrackerFactory implements SpotTrackerFactory
 	{
 		return errorMessage;
 	}
+
+	@Override
+	public NearestNeighborTrackerFactory copy()
+	{
+		return new NearestNeighborTrackerFactory();
+	}
 }

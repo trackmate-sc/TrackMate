@@ -226,4 +226,10 @@ public class ThresholdDetectorFactory< T extends RealType< T > & NativeType< T >
 	{
 		return null;
 	}
+
+	@Override
+	public ThresholdDetectorFactory< T > copy()
+	{
+		return new ThresholdDetectorFactory<>();
+	}
 }

@@ -25,10 +25,6 @@ import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DO_MEDIAN_FILTERI
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DO_SUBPIXEL_LOCALIZATION;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
-import net.imglib2.Interval;
-import net.imglib2.RandomAccessible;
-import net.imglib2.type.NativeType;
-import net.imglib2.type.numeric.RealType;
 
 import org.scijava.plugin.Plugin;
 
@@ -37,6 +33,10 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.components.detector.DogDetectorConfigurationPanel;
 import fiji.plugin.trackmate.util.TMUtils;
+import net.imglib2.Interval;
+import net.imglib2.RandomAccessible;
+import net.imglib2.type.NativeType;
+import net.imglib2.type.numeric.RealType;
 
 @Plugin( type = SpotDetectorFactory.class )
 public class DogDetectorFactory< T extends RealType< T > & NativeType< T >> extends LogDetectorFactory< T >
@@ -98,4 +98,9 @@ public class DogDetectorFactory< T extends RealType< T > & NativeType< T >> exte
 		return new DogDetectorConfigurationPanel( lSettings, model, DogDetectorFactory.THIS_INFO_TEXT, DogDetectorFactory.THIS_NAME );
 	}
 
+	@Override
+	public DogDetectorFactory< T > copy()
+	{
+		return new DogDetectorFactory<>();
+	}
 }

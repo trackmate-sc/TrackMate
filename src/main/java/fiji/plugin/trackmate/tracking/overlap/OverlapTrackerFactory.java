@@ -251,4 +251,10 @@ public class OverlapTrackerFactory implements SpotTrackerFactory
 	{
 		return errorMessage;
 	}
+
+	@Override
+	public OverlapTrackerFactory copy()
+	{
+		return new OverlapTrackerFactory();
+	}
 }

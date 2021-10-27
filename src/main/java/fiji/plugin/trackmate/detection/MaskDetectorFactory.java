@@ -187,4 +187,10 @@ public class MaskDetectorFactory< T extends RealType< T > & NativeType< T > > ex
 	{
 		return null;
 	}
+
+	@Override
+	public MaskDetectorFactory< T > copy()
+	{
+		return new MaskDetectorFactory<>();
+	}
 }

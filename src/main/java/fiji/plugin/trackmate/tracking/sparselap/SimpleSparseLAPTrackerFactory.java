@@ -67,4 +67,9 @@ public class SimpleSparseLAPTrackerFactory extends SparseLAPTrackerFactory
 		return new SimpleLAPTrackerSettingsPanel( getName(), THIS2_INFO_TEXT, spaceUnits );
 	}
 
+	@Override
+	public SimpleSparseLAPTrackerFactory copy()
+	{
+		return new SimpleSparseLAPTrackerFactory();
+	}
 }

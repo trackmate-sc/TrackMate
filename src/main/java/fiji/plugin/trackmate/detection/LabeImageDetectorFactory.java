@@ -215,4 +215,10 @@ public class LabeImageDetectorFactory< T extends RealType< T > & NativeType< T >
 	{
 		return null;
 	}
+
+	@Override
+	public LabeImageDetectorFactory< T > copy()
+	{
+		return new LabeImageDetectorFactory<>();
+	}
 }

@@ -143,4 +143,11 @@ public interface SpotDetectorFactoryBase< T extends RealType< T > & NativeType< 
 	{
 		return false;
 	}
+
+	/**
+	 * Returns a copy the current instance.
+	 * 
+	 * @return a new instance of this detector factory.
+	 */
+	public SpotDetectorFactoryBase< T > copy();
 }

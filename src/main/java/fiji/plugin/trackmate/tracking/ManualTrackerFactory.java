@@ -21,10 +21,6 @@
  */
 package fiji.plugin.trackmate.tracking;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
-
 import java.util.Map;
 
 import javax.swing.ImageIcon;
@@ -32,6 +28,10 @@ import javax.swing.ImageIcon;
 import org.jdom2.Element;
 import org.scijava.Priority;
 import org.scijava.plugin.Plugin;
+
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 
 @Plugin( type = SpotTrackerFactory.class, priority = Priority.HIGH )
 public class ManualTrackerFactory implements SpotTrackerFactory
@@ -117,4 +117,9 @@ public class ManualTrackerFactory implements SpotTrackerFactory
 		return errorMessage;
 	}
 
+	@Override
+	public ManualTrackerFactory copy()
+	{
+		return new ManualTrackerFactory();
+	}
 }

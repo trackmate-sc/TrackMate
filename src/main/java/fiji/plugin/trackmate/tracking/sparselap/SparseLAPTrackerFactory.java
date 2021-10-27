@@ -88,4 +88,9 @@ public class SparseLAPTrackerFactory extends LAPTrackerFactory
 		return new SparseLAPTracker( spots, settings );
 	}
 
+	@Override
+	public SparseLAPTrackerFactory copy()
+	{
+		return new SparseLAPTrackerFactory();
+	}
 }

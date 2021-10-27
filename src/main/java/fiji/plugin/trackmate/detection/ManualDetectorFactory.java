@@ -205,4 +205,10 @@ public class ManualDetectorFactory< T extends RealType< T > & NativeType< T > > 
 	{
 		return null;
 	}
+
+	@Override
+	public ManualDetectorFactory< T > copy()
+	{
+		return new ManualDetectorFactory<>();
+	}
 }
