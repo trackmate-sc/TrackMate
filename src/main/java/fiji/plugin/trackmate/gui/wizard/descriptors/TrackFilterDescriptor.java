@@ -126,7 +126,9 @@ public class TrackFilterDescriptor extends WizardPanelDescriptor
 	@Override
 	public void displayingPanel()
 	{
-		filterTracks();
+		final FilterGuiPanel component = ( FilterGuiPanel ) targetPanel;
+		trackmate.getSettings().setTrackFilters( component.getFeatureFilters() );
+		trackmate.execTrackFiltering( false );
 	}
 
 	@Override
