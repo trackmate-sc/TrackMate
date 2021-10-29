@@ -504,8 +504,11 @@ public class TmXmlWriter
 	protected Element echoImageInfo( final Settings settings )
 	{
 		final Element imEl = new Element( IMAGE_ELEMENT_KEY );
-		imEl.setAttribute( IMAGE_FILENAME_ATTRIBUTE_NAME, settings.imageFileName );
-		imEl.setAttribute( IMAGE_FOLDER_ATTRIBUTE_NAME, settings.imageFolder );
+
+		final String imFileName = ( settings.imageFileName == null ) ? "" : settings.imageFileName;
+		imEl.setAttribute( IMAGE_FILENAME_ATTRIBUTE_NAME, imFileName );
+		final String imFolder = ( settings.imageFolder == null ) ? "" : settings.imageFolder;
+		imEl.setAttribute( IMAGE_FOLDER_ATTRIBUTE_NAME, imFolder );
 		imEl.setAttribute( IMAGE_WIDTH_ATTRIBUTE_NAME, "" + settings.width );
 		imEl.setAttribute( IMAGE_HEIGHT_ATTRIBUTE_NAME, "" + settings.height );
 		imEl.setAttribute( IMAGE_NSLICES_ATTRIBUTE_NAME, "" + settings.nslices );
