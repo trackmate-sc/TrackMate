@@ -295,7 +295,7 @@ public class Settings
 		for ( final FeatureFilter filter : spotFilters )
 			newSettings.spotFilters.add( new FeatureFilter( filter.feature, filter.value, filter.isAbove ) );
 		
-		newSettings.trackFilters = new ArrayList<>( trackFilters );
+		newSettings.trackFilters = new ArrayList<>();
 		for ( final FeatureFilter filter : trackFilters )
 			newSettings.trackFilters.add( new FeatureFilter( filter.feature, filter.value, filter.isAbove ) );
 		
