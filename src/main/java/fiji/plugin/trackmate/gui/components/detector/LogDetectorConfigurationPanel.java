@@ -388,7 +388,7 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 			final double pw = calibration == null ? 1 : calibration.pixelWidth;
 			radius = Math.max( radius / pw, 1.5 ) * pw;
 		}
-		ftfDiameter.setText( "" + ( 2 * radius ) );
+		ftfDiameter.setValue( Double.valueOf( 2. * radius ) );
 		jCheckBoxMedianFilter.setSelected( ( Boolean ) settings.get( KEY_DO_MEDIAN_FILTERING ) );
 		ftfQualityThreshold.setText( "" + settings.get( KEY_THRESHOLD ) );
 		jCheckSubPixel.setSelected( ( Boolean ) settings.get( KEY_DO_SUBPIXEL_LOCALIZATION ) );
