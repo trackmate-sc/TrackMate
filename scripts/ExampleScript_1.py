@@ -45,8 +45,7 @@ model.setLogger(Logger.IJ_LOGGER)
 # Prepare settings object
 #------------------------
 
-settings = Settings()
-settings.setFrom(imp)
+settings = Settings(imp)
 
 # Configure detector - We use the Strings for the keys
 settings.detectorFactory = LogDetectorFactory()

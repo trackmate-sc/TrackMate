@@ -26,8 +26,7 @@ if (dims[4] == 1) {
 }
 
 // Setup settings for TrackMate
-settings = new Settings()
-settings.setFrom(imp)
+settings = new Settings(imp)
 settings.dt = 0.05
 
 settings.detectorFactory = new LogDetectorFactory()
