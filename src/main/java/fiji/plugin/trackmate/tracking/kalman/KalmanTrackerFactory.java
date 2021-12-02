@@ -73,7 +73,7 @@ public class KalmanTrackerFactory implements SpotTrackerFactory
 			+ "<p>"
 			+ "The first frames of a track are critical for this tracker to work properly: Tracks"
 			+ "are initiated by looking for close neighbors (again via the LAP tracker). "
-			+ "Spurious spots in the beginning of each track can confure the tracker."
+			+ "Spurious spots in the beginning of each track can confuse the tracker."
 			+ "<p>"
 			+ INFO_TEXT_PART2;
 
