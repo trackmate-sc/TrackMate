@@ -113,6 +113,7 @@ public class StartDialogDescriptor extends WizardPanelDescriptor
 		settings.zend = ( ( Number ) panel.tfZEnd.getValue() ).intValue();
 		settings.tstart = ( ( Number ) panel.tfTStart.getValue() ).intValue();
 		settings.tend = ( ( Number ) panel.tfTEnd.getValue() ).intValue();
+		settings.roi = settings.imp.getRoi();
 		// Log
 		logger.log( "\nImage region of interest:\n", Logger.BLUE_COLOR );
 		logger.log( settings.toStringImageInfo() );
