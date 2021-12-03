@@ -413,17 +413,17 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 				spots.setNumThreads( numThreads );
 				for ( int frame = settings.tstart; frame <= settings.tend; frame++ )
 				{
+					final List< Spot > spotsThisFrame = new ArrayList<>();
 					for ( final Spot spot : rawSpots.iterable( frame, false ) )
 					{
-						final List< Spot > spotsThisFrame = new ArrayList<>();
 						if ( settings.roi.contains(
 								( int ) Math.round( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ] ),
 								( int ) Math.round( spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) ) )
 						{
 							spotsThisFrame.add( spot );
 						}
-						spots.put( frame, spotsThisFrame );
 					}
+					spots.put( frame, spotsThisFrame );
 				}
 			}
 			else
