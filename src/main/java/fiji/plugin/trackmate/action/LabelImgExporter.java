@@ -499,12 +499,12 @@ public class LabelImgExporter extends AbstractTMAction
 	/**
 	 * Interface for classes that can 'write' a spot into a label image.
 	 */
-	private static interface SpotWriter
+	public static interface SpotWriter
 	{
 		public void write( Spot spot, int id );
 	}
 
-	private static final class SpotRoiWriter implements SpotWriter
+	public static final class SpotRoiWriter implements SpotWriter
 	{
 
 		private final ImgPlus< UnsignedShortType > img;
@@ -522,7 +522,7 @@ public class LabelImgExporter extends AbstractTMAction
 		}
 	}
 
-	private static final class SpotAsDotWriter implements SpotWriter
+	public static final class SpotAsDotWriter implements SpotWriter
 	{
 
 		private final double[] calibration;
