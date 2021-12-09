@@ -4,6 +4,8 @@ import static fiji.plugin.trackmate.gui.Icons.ISBI_ICON;
 
 import java.awt.Frame;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import javax.swing.ImageIcon;
 
@@ -11,6 +13,7 @@ import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.action.CTCExporter.ExportType;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
@@ -41,7 +44,11 @@ public class CTCExporterAction extends AbstractTMAction
 			defaultPath = imp.getOriginalFileInfo().directory;
 
 		dialog.addDirectoryField( "Export to", defaultPath );
-		dialog.addChoice( "Data is", new String[] { "Gold truth", "Silver truth", "Results" }, "Results" );
+		final String[] valuesStr = Arrays.stream( ExportType.values() )
+				.map( ExportType::toString )
+				.collect( Collectors.toList() )
+				.toArray( new String[] {} );
+		dialog.addChoice( "Data is", valuesStr, ExportType.RESULTS.toString() );
 		dialog.showDialog();
 
 		if ( dialog.wasCanceled() )
@@ -49,24 +56,10 @@ public class CTCExporterAction extends AbstractTMAction
 
 		final String exportRootFolder = dialog.getNextString();
 		final int choiceIndex = dialog.getNextChoiceIndex();
-		final String suffix;
-		switch ( choiceIndex )
-		{
-		case 0:
-		default:
-			suffix = "_GT";
-			break;
-		case 1:
-			suffix = "_ST";
-			break;
-		case 2:
-			suffix = "_RES";
-			break;
-		}
 
 		try
 		{
-			CTCExporter.exportAll( exportRootFolder, trackmate, suffix );
+			CTCExporter.exportAll( exportRootFolder, trackmate, ExportType.values()[ choiceIndex ] );
 		}
 		catch ( final IOException e )
 		{

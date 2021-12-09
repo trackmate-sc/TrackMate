@@ -55,20 +55,83 @@ import net.imglib2.util.Util;
 public class CTCExporter
 {
 
-	private static final String GOLD_TRUTH_SUFFIX = "_GT";
-
-	private static final String SILVER_TRUTH_SUFFIX = "_ST";
-
-	private static final String RESUTS_SUFFIX = "_RES";
-
 	private static final Function< Integer, String > nameGen = i -> String.format( "%02d", i );
 
-	public static void exportAll( final String exportRootFolder, final TrackMate trackmate, final String suffix ) throws IOException
+	public enum ExportType
+	{
+		GOLD_TRUTH( "Gold truth", "_GT" ),
+		SILVER_TRUTH( "Silver truth", "_ST" ),
+		RESULTS( "Results", "_RES" );
+
+		private final String label;
+
+		private final String suffix;
+
+		ExportType( final String label, final String suffix )
+		{
+			this.label = label;
+			this.suffix = suffix;
+		}
+
+		@Override
+		public String toString()
+		{
+			return label;
+		}
+
+		public String suffix()
+		{
+			return suffix;
+		}
+
+		public Path getTrackTextFilePath( final String exportRootFolder, final int saveId )
+		{
+			switch ( this )
+			{
+			case GOLD_TRUTH:
+			case SILVER_TRUTH:
+				return Paths.get( exportRootFolder, nameGen.apply( saveId ) + suffix, "TRA", "man_track.txt" );
+			case RESULTS:
+				return Paths.get( exportRootFolder, nameGen.apply( saveId ) + suffix, "res_track.txt" );
+			default:
+				throw new IllegalArgumentException( "Unknown export type: " + this );
+			}
+		}
+
+		public Path getTrackTifFilePath( final String exportRootFolder, final int saveId, final long frame, final int nFrames )
+		{
+			switch ( this )
+			{
+			case GOLD_TRUTH:
+			case SILVER_TRUTH:
+			{
+				final Function< Long, String > tifNameGen = nFrames > 999
+						? i -> String.format( "man_track%04d.tif", i )
+						: i -> String.format( "man_track%03d.tif", i );
+				final String name = tifNameGen.apply( frame );
+				return Paths.get( exportRootFolder, nameGen.apply( saveId ) + suffix, "TRA", name );
+			}
+			case RESULTS:
+			{
+				final Function< Long, String > tifNameGen = nFrames > 999
+						? i -> String.format( "mask%04d.tif", i )
+						: i -> String.format( "mask%03d.tif", i );
+				final String name = tifNameGen.apply( frame );
+				return Paths.get( exportRootFolder, nameGen.apply( saveId ) + suffix, name );
+			}
+			default:
+				throw new IllegalArgumentException( "Unknown export type: " + this );
+			}
+		}
+	}
+
+	public static void exportAll( final String exportRootFolder, final TrackMate trackmate, final ExportType exportType ) throws IOException
 	{
 		final int id = getAvailableDatasetID( exportRootFolder );
 		exportOriginalImageData( exportRootFolder, id, trackmate );
-		exportTrackingData( exportRootFolder, id, suffix, trackmate );
-		exportSegmentationData( exportRootFolder, id, suffix, trackmate );
+		exportTrackingData( exportRootFolder, id, exportType, trackmate );
+		if ( exportType != ExportType.RESULTS )
+			exportSegmentationData( exportRootFolder, id, exportType, trackmate );
 	}
 
 	/**
@@ -87,16 +150,16 @@ public class CTCExporter
 	{
 		int i = 1;
 		Path savePath1 = Paths.get( exportRootFolder, nameGen.apply( i ) );
-		Path savePath2 = Paths.get( exportRootFolder, nameGen.apply( i ) + GOLD_TRUTH_SUFFIX );
-		Path savePath3 = Paths.get( exportRootFolder, nameGen.apply( i ) + SILVER_TRUTH_SUFFIX );
-		Path savePath4 = Paths.get( exportRootFolder, nameGen.apply( i ) + RESUTS_SUFFIX );
+		Path savePath2 = Paths.get( exportRootFolder, nameGen.apply( i ) + ExportType.GOLD_TRUTH.suffix );
+		Path savePath3 = Paths.get( exportRootFolder, nameGen.apply( i ) + ExportType.SILVER_TRUTH.suffix );
+		Path savePath4 = Paths.get( exportRootFolder, nameGen.apply( i ) + ExportType.RESULTS.suffix );
 		while ( Files.exists( savePath1 ) || Files.exists( savePath2 ) || Files.exists( savePath3 ) || Files.exists( savePath4 ) )
 		{
 			i++;
 			savePath1 = Paths.get( exportRootFolder, nameGen.apply( i ) );
-			savePath2 = Paths.get( exportRootFolder, nameGen.apply( i ) + GOLD_TRUTH_SUFFIX );
-			savePath3 = Paths.get( exportRootFolder, nameGen.apply( i ) + SILVER_TRUTH_SUFFIX );
-			savePath4 = Paths.get( exportRootFolder, nameGen.apply( i ) + RESUTS_SUFFIX );
+			savePath2 = Paths.get( exportRootFolder, nameGen.apply( i ) + ExportType.GOLD_TRUTH.suffix );
+			savePath3 = Paths.get( exportRootFolder, nameGen.apply( i ) + ExportType.SILVER_TRUTH.suffix );
+			savePath4 = Paths.get( exportRootFolder, nameGen.apply( i ) + ExportType.RESULTS.suffix );
 		}
 		return i;
 	}
@@ -132,7 +195,7 @@ public class CTCExporter
 		}
 	}
 
-	public static void exportSegmentationData( final String exportRootFolder, final int saveId, final String suffix, final TrackMate trackmate ) throws IOException
+	public static void exportSegmentationData( final String exportRootFolder, final int saveId, final ExportType exportType, final TrackMate trackmate ) throws IOException
 	{
 		// Create image holder to write labels in.
 		final ImagePlus imp = trackmate.getSettings().imp;
@@ -174,7 +237,7 @@ public class CTCExporter
 		 * Now export the label image.
 		 */
 
-		final Path path = Paths.get( exportRootFolder, nameGen.apply( saveId ) + suffix, "SEG" );
+		final Path path = Paths.get( exportRootFolder, nameGen.apply( saveId ) + exportType.suffix(), "SEG" );
 		Files.createDirectories( path );
 		final int nFrames = imp.getNFrames();
 		final Function< Long, String > tifNameGen = nFrames > 999
@@ -188,12 +251,12 @@ public class CTCExporter
 			final String name = tifNameGen.apply( ( long ) frame );
 			final ImagePlus tp = ImageJFunctions.wrapUnsignedShort( imgCT, name );
 
-			final Path pathTif = Paths.get( exportRootFolder, nameGen.apply( saveId ) + suffix, "SEG", name );
+			final Path pathTif = Paths.get( exportRootFolder, nameGen.apply( saveId ) + exportType.suffix(), "SEG", name );
 			IJ.saveAsTiff( tp, pathTif.toString() );
 		}
 	}
 
-	public static void exportTrackingData( final String exportRootFolder, final int saveId, final String suffix, final TrackMate trackmate ) throws FileNotFoundException, IOException
+	public static void exportTrackingData( final String exportRootFolder, final int saveId, final ExportType exportType, final TrackMate trackmate ) throws FileNotFoundException, IOException
 	{
 		// What we need to decompose tracks in branches.
 		final Model model = trackmate.getModel();
@@ -233,7 +296,7 @@ public class CTCExporter
 		// Map of vertex to their ID in the file. Initially empty.
 		final Map< List< Spot >, Integer > branchID = new HashMap<>();
 
-		final Path path = Paths.get( exportRootFolder, nameGen.apply( saveId ) + suffix, "TRA", "man_track.txt" );
+		final Path path = exportType.getTrackTextFilePath( exportRootFolder, saveId );
 		Files.createDirectories( path.getParent() );
 		try (FileOutputStream fos = new FileOutputStream( path.toFile() );
 				BufferedWriter bw = new BufferedWriter( new OutputStreamWriter( fos ) ))
@@ -313,16 +376,12 @@ public class CTCExporter
 		 */
 
 		final int nFrames = imp.getNFrames();
-		final Function< Long, String > tifNameGen = nFrames > 999
-				? i -> String.format( "man_track%04d.tif", i )
-				: i -> String.format( "man_track%03d.tif", i );
 		for ( long frame = 0; frame < dims[ 3 ]; frame++ )
 		{
 			final ImgPlus< UnsignedShortType > imgCT = TMUtils.hyperSlice( labelImg, 0, frame );
-			final String name = tifNameGen.apply( frame );
+			final Path pathTif = exportType.getTrackTifFilePath( exportRootFolder, saveId, frame, nFrames );
+			final String name = pathTif.getFileName().toString();
 			final ImagePlus tp = ImageJFunctions.wrapUnsignedShort( imgCT, name );
-
-			final Path pathTif = Paths.get( exportRootFolder, nameGen.apply( saveId ) + suffix, "TRA", name );
 			IJ.saveAsTiff( tp, pathTif.toString() );
 		}
 	}
