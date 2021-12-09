@@ -19,6 +19,7 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
 
+import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
@@ -125,13 +126,15 @@ public class CTCExporter
 		}
 	}
 
-	public static void exportAll( final String exportRootFolder, final TrackMate trackmate, final ExportType exportType ) throws IOException
+	public static void exportAll( final String exportRootFolder, final TrackMate trackmate, final ExportType exportType, final Logger logger ) throws IOException
 	{
+		logger.log( "Exporting as CTC type: " + exportType.toString() + '\n' );
 		final int id = getAvailableDatasetID( exportRootFolder );
-		exportOriginalImageData( exportRootFolder, id, trackmate );
-		exportTrackingData( exportRootFolder, id, exportType, trackmate );
+		exportOriginalImageData( exportRootFolder, id, trackmate, logger );
+		exportTrackingData( exportRootFolder, id, exportType, trackmate, logger );
 		if ( exportType != ExportType.RESULTS )
-			exportSegmentationData( exportRootFolder, id, exportType, trackmate );
+			exportSegmentationData( exportRootFolder, id, exportType, trackmate, logger );
+		logger.log( "Export done.\n" );
 	}
 
 	/**
@@ -164,21 +167,27 @@ public class CTCExporter
 		return i;
 	}
 
-	public static void exportOriginalImageData( final String exportRootFolder, final int saveId, final TrackMate trackmate ) throws IOException
+	public static void exportOriginalImageData( final String exportRootFolder, final int saveId, final TrackMate trackmate, final Logger logger ) throws IOException
 	{
-		exportOriginalImageData( exportRootFolder, saveId, trackmate.getSettings().imp );
+		exportOriginalImageData( exportRootFolder, saveId, trackmate.getSettings().imp, logger );
 	}
 
-	public static void exportOriginalImageData( final String exportRootFolder, final int saveId, final ImagePlus imp ) throws IOException
+	public static void exportOriginalImageData( final String exportRootFolder, final int saveId, final ImagePlus imp, final Logger logger ) throws IOException
 	{
 		if ( imp == null )
 			return;
 
 		final Path savePath = Paths.get( exportRootFolder, String.format( "%02d", saveId ) );
 		if ( Files.exists( savePath ) )
-			throw new IOException( "Cannot save to " + savePath + ". Folder already exists." );
+		{
+			final String msg = "Cannot save to " + savePath + ". Folder already exists.";
+			logger.error( msg );
+			return;
+		}
 
 		Files.createDirectory( savePath );
+		logger.log( "Exporting original image to " + savePath.toString() );
+
 
 		final int nFrames = imp.getNFrames();
 		final String format = ( nFrames > 999 ) ? "t%04d.tif" : "t%03d.tif";
@@ -193,9 +202,10 @@ public class CTCExporter
 			final ImagePlus tp = duplicator.run( imp, firstC, lastC, firstZ, lastZ, frame + 1, frame + 1 );
 			IJ.saveAsTiff( tp, Paths.get( savePath.toString(), String.format( format, frame ) ).toString() );
 		}
+		logger.log( ". Done.\n" );
 	}
 
-	public static void exportSegmentationData( final String exportRootFolder, final int saveId, final ExportType exportType, final TrackMate trackmate ) throws IOException
+	public static void exportSegmentationData( final String exportRootFolder, final int saveId, final ExportType exportType, final TrackMate trackmate, final Logger logger ) throws IOException
 	{
 		// Create image holder to write labels in.
 		final ImagePlus imp = trackmate.getSettings().imp;
@@ -239,6 +249,8 @@ public class CTCExporter
 
 		final Path path = Paths.get( exportRootFolder, nameGen.apply( saveId ) + exportType.suffix(), "SEG" );
 		Files.createDirectories( path );
+		logger.log( "Exporting segmentation mask files to " + path.toString() );
+
 		final int nFrames = imp.getNFrames();
 		final Function< Long, String > tifNameGen = nFrames > 999
 				? i -> String.format( "man_seg%04d.tif", i )
@@ -254,9 +266,10 @@ public class CTCExporter
 			final Path pathTif = Paths.get( exportRootFolder, nameGen.apply( saveId ) + exportType.suffix(), "SEG", name );
 			IJ.saveAsTiff( tp, pathTif.toString() );
 		}
+		logger.log( ". Done.\n" );
 	}
 
-	public static void exportTrackingData( final String exportRootFolder, final int saveId, final ExportType exportType, final TrackMate trackmate ) throws FileNotFoundException, IOException
+	public static void exportTrackingData( final String exportRootFolder, final int saveId, final ExportType exportType, final TrackMate trackmate, final Logger logger ) throws FileNotFoundException, IOException
 	{
 		// What we need to decompose tracks in branches.
 		final Model model = trackmate.getModel();
@@ -265,7 +278,11 @@ public class CTCExporter
 
 		// Sanity check.
 		if ( !GraphUtils.isTree( trackModel, neighborIndex ) )
-			throw new IllegalArgumentException( "Cannot perform CTC export of tracks that have fusion events." );
+		{
+			final String msg = "Cannot perform CTC export of tracks that have fusion events.";
+			logger.error( msg );
+			return;
+		}
 
 		// Create image holder to write labels in.
 		final ImagePlus imp = trackmate.getSettings().imp;
@@ -298,6 +315,8 @@ public class CTCExporter
 
 		final Path path = exportType.getTrackTextFilePath( exportRootFolder, saveId );
 		Files.createDirectories( path.getParent() );
+		logger.log( "Exporting tracking text file to " + path.toString() );
+
 		try (FileOutputStream fos = new FileOutputStream( path.toFile() );
 				BufferedWriter bw = new BufferedWriter( new OutputStreamWriter( fos ) ))
 		{
@@ -370,12 +389,16 @@ public class CTCExporter
 				}
 			}
 		}
+		logger.log( ". Done.\n" );
 
 		/*
 		 * Now export the label image.
 		 */
 
 		final int nFrames = imp.getNFrames();
+		final Path pathTif0 = exportType.getTrackTifFilePath( exportRootFolder, saveId, 0, nFrames );
+		logger.log( "Exporting tracking mask files to " + pathTif0.getParent().toString() );
+
 		for ( long frame = 0; frame < dims[ 3 ]; frame++ )
 		{
 			final ImgPlus< UnsignedShortType > imgCT = TMUtils.hyperSlice( labelImg, 0, frame );
@@ -384,6 +407,7 @@ public class CTCExporter
 			final ImagePlus tp = ImageJFunctions.wrapUnsignedShort( imgCT, name );
 			IJ.saveAsTiff( tp, pathTif.toString() );
 		}
+		logger.log( ". Done.\n" );
 	}
 
 	/**

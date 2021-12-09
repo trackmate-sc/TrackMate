@@ -59,7 +59,7 @@ public class CTCExporterAction extends AbstractTMAction
 
 		try
 		{
-			CTCExporter.exportAll( exportRootFolder, trackmate, ExportType.values()[ choiceIndex ] );
+			CTCExporter.exportAll( exportRootFolder, trackmate, ExportType.values()[ choiceIndex ], logger );
 		}
 		catch ( final IOException e )
 		{
