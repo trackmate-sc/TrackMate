@@ -227,7 +227,7 @@ public class CTCExporter
 
 		// Configure the convex branch decomposition.
 		final boolean forbidMiddleLinks = true;
-		final boolean forbidGaps = false;
+		final boolean forbidGaps = true;
 		final AtomicInteger branchIDGen = new AtomicInteger( 1 );
 
 		// Map of vertex to their ID in the file. Initially empty.
