@@ -157,7 +157,7 @@ public class CTCExporter
 
 		// Write labels in.
 		final Model model = trackmate.getModel();
-		final AtomicInteger idGen = new AtomicInteger( 0 );
+		final AtomicInteger idGen = new AtomicInteger( 1 );
 		for ( int frame = 0; frame < dims[ 3 ]; frame++ )
 		{
 			final ImgPlus< UnsignedShortType > imgCT = TMUtils.hyperSlice( labelImg, 0, frame );
@@ -228,7 +228,7 @@ public class CTCExporter
 		// Configure the convex branch decomposition.
 		final boolean forbidMiddleLinks = true;
 		final boolean forbidGaps = false;
-		final AtomicInteger branchIDGen = new AtomicInteger( 0 );
+		final AtomicInteger branchIDGen = new AtomicInteger( 1 );
 
 		// Map of vertex to their ID in the file. Initially empty.
 		final Map< List< Spot >, Integer > branchID = new HashMap<>();
