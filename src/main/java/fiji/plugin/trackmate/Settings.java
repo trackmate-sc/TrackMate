@@ -285,10 +285,12 @@ public class Settings
 	public Settings copyOn( final ImagePlus newImp )
 	{
 		final Settings newSettings = new Settings( newImp );
-		newSettings.detectorFactory = detectorFactory.copy();
-		newSettings.detectorSettings = new HashMap< >( detectorSettings );
-		newSettings.trackerFactory = trackerFactory.copy();
-		newSettings.trackerSettings = new HashMap< >( trackerSettings );
+		if ( detectorFactory != null )
+			newSettings.detectorFactory = detectorFactory.copy();
+		newSettings.detectorSettings = new HashMap<>( detectorSettings );
+		if ( trackerFactory != null )
+			newSettings.trackerFactory = trackerFactory.copy();
+		newSettings.trackerSettings = new HashMap<>( trackerSettings );
 		newSettings.initialSpotFilterValue = initialSpotFilterValue;
 		
 		newSettings.spotFilters = new ArrayList<>( );
