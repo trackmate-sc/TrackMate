@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.action;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -30,6 +31,7 @@ import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition;
 import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition.TrackBranchDecomposition;
 import fiji.plugin.trackmate.graph.GraphUtils;
 import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
+import fiji.plugin.trackmate.io.TmXmlWriter;
 import fiji.plugin.trackmate.util.TMUtils;
 import ij.IJ;
 import ij.ImagePlus;
@@ -134,7 +136,29 @@ public class CTCExporter
 		exportTrackingData( exportRootFolder, id, exportType, trackmate, logger );
 		if ( exportType != ExportType.RESULTS )
 			exportSegmentationData( exportRootFolder, id, exportType, trackmate, logger );
+		else
+			exportSettingsFile( exportRootFolder, id, trackmate, logger );
 		logger.log( "Export done.\n" );
+	}
+
+	/**
+	 * Saves the settings part as XML for reference.
+	 * 
+	 * @param exportRootFolder
+	 * @param id
+	 * @param trackmate
+	 * @param logger
+	 */
+	public static void exportSettingsFile( final String exportRootFolder, final int saveId, final TrackMate trackmate, final Logger logger ) throws IOException
+	{
+		final Path path = ExportType.RESULTS.getTrackTextFilePath( exportRootFolder, saveId );
+		Files.createDirectories( path.getParent() );
+		final File settingsPath = new File( path.getParent().toFile(), "TrackMateSettings.xml" );
+		logger.log( "Exporting TrackMate settings file to " + settingsPath + '\n' );
+		final TmXmlWriter writer = new TmXmlWriter( settingsPath, logger );
+		writer.appendSettings( trackmate.getSettings() );
+		writer.writeToFile();
+		logger.log( "Done.\n" );
 	}
 
 	/**
