@@ -10,8 +10,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
@@ -229,6 +231,26 @@ public class CTCExporter
 		logger.log( ". Done.\n" );
 	}
 
+	/**
+	 * Writes the segmentation ground-truth files.
+	 * <p>
+	 * Only exports the spots that have a ROI, and write only the frames that
+	 * have at least one spot with a ROI.
+	 * 
+	 * @param exportRootFolder
+	 *            the root of the export folder.
+	 * @param saveId
+	 *            the id under which to save the data.
+	 * @param exportType
+	 *            the export type. Must be {@link ExportType#GOLD_TRUTH} or
+	 *            {@link ExportType#SILVER_TRUTH}.
+	 * @param trackmate
+	 *            the TrackMate object to export.
+	 * @param logger
+	 *            a {@link Logger} instance to report progress.
+	 * @throws IOException
+	 *             if a problem happens during writing.
+	 */
 	public static void exportSegmentationData( final String exportRootFolder, final int saveId, final ExportType exportType, final TrackMate trackmate, final Logger logger ) throws IOException
 	{
 		// Create image holder to write labels in.
@@ -255,6 +277,7 @@ public class CTCExporter
 		// Write labels in.
 		final Model model = trackmate.getModel();
 		final AtomicInteger idGen = new AtomicInteger( 1 );
+		final Set< Integer > framesToWrite = new HashSet<>();
 		for ( int frame = 0; frame < dims[ 3 ]; frame++ )
 		{
 			final ImgPlus< UnsignedShortType > imgCT = TMUtils.hyperSlice( labelImg, 0, frame );
@@ -262,8 +285,11 @@ public class CTCExporter
 
 			for ( final Spot spot : model.getSpots().iterable( frame, true ) )
 			{
+				if ( spot.getRoi() == null )
+					continue;
 				final int id = idGen.getAndIncrement();
 				spotWriter.write( spot, id );
+				framesToWrite.add( Integer.valueOf( frame ) );
 			}
 		}
 
@@ -281,7 +307,7 @@ public class CTCExporter
 				: i -> String.format( "man_seg%03d.tif", i );
 				
 		// Only save frames with spots in.
-		for ( final int frame : model.getSpots().keySet() )
+		for ( final int frame : framesToWrite )
 		{
 			final ImgPlus< UnsignedShortType > imgCT = TMUtils.hyperSlice( labelImg, 0, frame );
 			final String name = tifNameGen.apply( ( long ) frame );
