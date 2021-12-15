@@ -77,9 +77,9 @@ public class KalmanTrackerFactory implements SpotTrackerFactory
 			+ "<p>"
 			+ INFO_TEXT_PART2;
 
-	private static final String KEY = "KALMAN_TRACKER";
+	public static final String KEY = "KALMAN_TRACKER";
 
-	private static final String NAME = "Kalman tracker";
+	public static final String NAME = "Kalman tracker";
 
 	public static final String KEY_KALMAN_SEARCH_RADIUS = "KALMAN_SEARCH_RADIUS";
 
