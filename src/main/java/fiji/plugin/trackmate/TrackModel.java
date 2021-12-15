@@ -74,7 +74,7 @@ public class TrackModel
 	 * {@link #removeEdge(DefaultWeightedEdge)}, {@link #removeEdge(Spot, Spot)}
 	 * .
 	 */
-	private DefaultListenableGraph< Spot, DefaultWeightedEdge > graph;
+	DefaultListenableGraph< Spot, DefaultWeightedEdge > graph;
 
 	private final MyGraphListener mgl;
 
@@ -130,17 +130,17 @@ public class TrackModel
 
 	private int IDcounter = 0;
 
-	private Map< Integer, Set< DefaultWeightedEdge > > connectedEdgeSets;
+	Map< Integer, Set< DefaultWeightedEdge > > connectedEdgeSets;
 
 	Map< DefaultWeightedEdge, Integer > edgeToID;
 
-	private Map< Integer, Set< Spot > > connectedVertexSets;
+	Map< Integer, Set< Spot > > connectedVertexSets;
 
 	Map< Spot, Integer > vertexToID;
 
-	private Map< Integer, Boolean > visibility;
+	Map< Integer, Boolean > visibility;
 
-	private Map< Integer, String > names;
+	Map< Integer, String > names;
 
 	private final Iterator< String > nameGenerator = new DefaultNameGenerator();
 

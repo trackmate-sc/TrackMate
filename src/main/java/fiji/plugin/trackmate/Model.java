@@ -22,10 +22,12 @@
 package fiji.plugin.trackmate;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
@@ -758,6 +760,61 @@ public class Model
 		return oldvis;
 	}
 
+	/**
+	 * Returns a copy of this model.
+	 * <p>
+	 * The copy is made of the same spot objects but on a different graph, that
+	 * can be safely edited. The copy does not include the feature values for
+	 * edges and tracks, but the features are declared.
+	 * 
+	 * @return a new model.
+	 */
+	public Model copy()
+	{
+		final Model copy = new Model();
+
+		// Physical units.
+		copy.setPhysicalUnits( spaceUnits, timeUnits );
+
+		// Spots.
+		final SpotCollection spots2 = SpotCollection.fromCollection( spots.iterable( true ) );
+		copy.setSpots( spots2, false );
+
+		// Track model.
+		final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graphCopy = new SimpleWeightedGraph<>( DefaultWeightedEdge.class );
+		Graphs.addGraph( graphCopy, trackModel.graph );
+		copy.getTrackModel().from(
+				graphCopy,
+				new HashMap<>( trackModel.connectedVertexSets ),
+				new HashMap<>( trackModel.connectedEdgeSets ),
+				new HashMap<>( trackModel.visibility ),
+				new HashMap<>( trackModel.names ) );
+
+		// Feature model.
+		final FeatureModel fm2 = copy.getFeatureModel();
+		fm2.declareSpotFeatures(
+				featureModel.getSpotFeatures(),
+				featureModel.getSpotFeatureNames(),
+				featureModel.getSpotFeatureShortNames(),
+				featureModel.getSpotFeatureDimensions(),
+				featureModel.getSpotFeatureIsInt() );
+		fm2.declareEdgeFeatures(
+				featureModel.getEdgeFeatures(),
+				featureModel.getEdgeFeatureNames(),
+				featureModel.getEdgeFeatureShortNames(),
+				featureModel.getEdgeFeatureDimensions(),
+				featureModel.getEdgeFeatureIsInt() );
+		fm2.declareTrackFeatures(
+				featureModel.getTrackFeatures(),
+				featureModel.getTrackFeatureNames(),
+				featureModel.getTrackFeatureShortNames(),
+				featureModel.getTrackFeatureDimensions(),
+				featureModel.getTrackFeatureIsInt() );
+		
+		// Feature values are not copied.
+		return copy;
+	}
+
 	/*
 	 * PRIVATE METHODS
 	 */
@@ -899,7 +956,6 @@ public class Model
 			trackModel.tracksUpdated.clear();
 			eventCache.clear();
 		}
-
 	}
 
 }
