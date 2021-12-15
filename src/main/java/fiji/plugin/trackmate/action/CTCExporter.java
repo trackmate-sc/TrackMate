@@ -9,6 +9,7 @@ import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.function.Function;
 
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
 
@@ -26,6 +28,7 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.action.LabelImgExporter.SpotRoiWriter;
@@ -130,17 +133,18 @@ public class CTCExporter
 		}
 	}
 
-	public static void exportAll( final String exportRootFolder, final TrackMate trackmate, final ExportType exportType, final Logger logger ) throws IOException
+	public static String exportAll( final String exportRootFolder, final TrackMate trackmate, final ExportType exportType, final Logger logger ) throws IOException
 	{
 		logger.log( "Exporting as CTC type: " + exportType.toString() + '\n' );
 		final int id = getAvailableDatasetID( exportRootFolder );
 		exportOriginalImageData( exportRootFolder, id, trackmate, logger );
-		exportTrackingData( exportRootFolder, id, exportType, trackmate, logger );
+		final String resultsFolder = exportTrackingData( exportRootFolder, id, exportType, trackmate, logger );
 		if ( exportType != ExportType.RESULTS )
 			exportSegmentationData( exportRootFolder, id, exportType, trackmate, logger );
 		else
 			exportSettingsFile( exportRootFolder, id, trackmate, logger );
 		logger.log( "Export done.\n" );
+		return resultsFolder;
 	}
 
 	/**
@@ -319,19 +323,28 @@ public class CTCExporter
 		logger.log( ". Done.\n" );
 	}
 
-	public static void exportTrackingData( final String exportRootFolder, final int saveId, final ExportType exportType, final TrackMate trackmate, final Logger logger ) throws FileNotFoundException, IOException
+	public static String exportTrackingData( final String exportRootFolder, final int saveId, final ExportType exportType, final TrackMate trackmate, final Logger logger ) throws FileNotFoundException, IOException
 	{
+		/*
+		 * Check for future consistency errors. It is possible that 2 spots are
+		 * so close than the mask of one completely erase the other. This will
+		 * trigger an error in the CTC metrics calculation so we have to protect
+		 * ourselves from it. This solution consists in check whether that is
+		 * the case, and if yes, removing the erased spot from the smallest
+		 * track.
+		 */
+		final Model model2 = sanitizeAndCopy( trackmate.getModel() );
+
 		// What we need to decompose tracks in branches.
-		final Model model = trackmate.getModel();
-		final TrackModel trackModel = model.getTrackModel();
-		final TimeDirectedNeighborIndex neighborIndex = model.getTrackModel().getDirectedNeighborIndex();
+		final TrackModel trackModel = model2.getTrackModel();
+		final TimeDirectedNeighborIndex neighborIndex = model2.getTrackModel().getDirectedNeighborIndex();
 
 		// Sanity check.
 		if ( !GraphUtils.isTree( trackModel, neighborIndex ) )
 		{
 			final String msg = "Cannot perform CTC export of tracks that have fusion events.";
 			logger.error( msg );
-			return;
+			return null;
 		}
 
 		// Create image holder to write labels in.
@@ -458,6 +471,113 @@ public class CTCExporter
 			IJ.saveAsTiff( tp, pathTif.toString() );
 		}
 		logger.log( ". Done.\n" );
+
+		// Return the results folder.
+		return pathTif0.getParent().toString();
+	}
+
+	/**
+	 * Check for future consistency errors.
+	 * <p>
+	 * It is possible that 2 spots are so close than the mask of one completely
+	 * erase the other. This will trigger an error in the CTC metrics
+	 * calculation so we have to protect ourselves from it. This solution
+	 * consists in check whether that is the case, and if yes, removing the
+	 * erased spot from the smallest track.
+	 * <p>
+	 * This fix is approximate: the calculus for complete overlap assume the
+	 * spots are spherical with a fudge factor.
+	 */
+	private static final Model sanitizeAndCopy( final Model model )
+	{
+		final double fudgeFactor = 1.2; // 20%
+		final Model copy = model.copy();
+
+		final SpotCollection allSpots = copy.getSpots();
+		final TrackModel trackModel = copy.getTrackModel();
+		for ( final Integer frame : allSpots.keySet() )
+		{
+			final List< Spot > spots = new ArrayList<>();
+			allSpots.iterable( frame, true ).forEach( spots::add );
+			final int nSpots = spots.size();
+			for ( int i = 0; i < nSpots; i++ )
+			{
+				final Spot s1 = spots.get( i );
+				final double r1 = s1.getFeature( Spot.RADIUS ).doubleValue();
+				for ( int j = i + 1; j < nSpots; j++ )
+				{
+					final Spot s2 = spots.get( j );
+					final double r2 = s2.getFeature( Spot.RADIUS ).doubleValue();
+					final double d = Math.sqrt( s1.squareDistanceTo( s2 ) );
+					
+					if ( fudgeFactor * r1 > ( d + r2 ) || fudgeFactor * r2 > ( d + r1 ) )
+					{
+						// They overlap too much. We must fix this.
+						final Integer id1 = trackModel.trackIDOf( s1 );
+						final Set< Spot > track1 = trackModel.trackSpots( id1 );
+						if ( track1 == null )
+						{
+							try
+							{
+								model.removeSpot( s1 );
+							}
+							finally
+							{
+								model.endUpdate();
+							}
+							continue;
+						}
+						final int n1 = track1.size();
+
+						final Integer id2 = trackModel.trackIDOf( s2 );
+						final Set< Spot > track2 = trackModel.trackSpots( id2 );
+						if ( track2 == null )
+						{
+							try
+							{
+								model.removeSpot( s2 );
+							}
+							finally
+							{
+								model.endUpdate();
+							}
+							continue;
+						}
+						final int n2 = track2.size();
+
+						final Spot toRemove = ( n2 > n1 ) ? s1 : s2;
+
+						// To mend the edges later.
+						final List< Spot > sources = new ArrayList<>();
+						final List< Spot > targets = new ArrayList<>();
+						final Set< DefaultWeightedEdge > edges = trackModel.edgesOf( toRemove );
+						for ( final DefaultWeightedEdge edge : edges )
+						{
+							final Spot source = trackModel.getEdgeSource( edge );
+							if ( source == toRemove )
+								targets.add( trackModel.getEdgeTarget( edge ) );
+							else
+								sources.add( trackModel.getEdgeSource( edge ) );
+						}
+						
+						model.beginUpdate();
+						try
+						{
+							for ( final Spot source : sources )
+								for ( final Spot target : targets )
+									model.addEdge( source, target, -1. );
+
+							model.removeSpot( toRemove );
+						}
+						finally
+						{
+							model.endUpdate();
+						}
+					}
+				}
+			}
+		}
+		return copy;
 	}
 
 	/**
