@@ -151,9 +151,14 @@ public class CTCExporter
 	 * Saves the settings part as XML for reference.
 	 * 
 	 * @param exportRootFolder
-	 * @param id
+	 *            the root folder for exporting.
+	 * @param saveId
+	 *            the id of the save file (<code>exportRootFolder/01</code>,
+	 *            <code>exportRootFolder/02</code>, etc)
 	 * @param trackmate
+	 *            the trackmate to export.
 	 * @param logger
+	 *            a logger to report progress.
 	 */
 	public static void exportSettingsFile( final String exportRootFolder, final int saveId, final TrackMate trackmate, final Logger logger ) throws IOException
 	{
