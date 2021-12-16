@@ -130,119 +130,26 @@ public abstract class Logger extends PrintWriter
 	/**
 	 * This logger discard any message.
 	 */
-	public static final Logger VOID_LOGGER = new Logger()
-	{
-
-		@Override
-		public void setStatus( final String status )
-		{}
-
-		@Override
-		public void setProgress( final double val )
-		{}
-
-		@Override
-		public void log( final String message, final Color color )
-		{}
-
-		@Override
-		public void error( final String message )
-		{}
-	};
+	public static final Logger VOID_LOGGER = new VoidLogger();
 
 	/**
 	 * This {@link Logger} simply outputs to the standard output and standard
 	 * error. The {@link #setProgress(double)} method is ignored, the
 	 * {@link #setStatus(String)} is sent to the console.
 	 */
-	public static Logger DEFAULT_LOGGER = new Logger()
-	{
-
-		@Override
-		public void log( final String message, final Color color )
-		{
-			System.out.print( message );
-		}
-
-		@Override
-		public void error( final String message )
-		{
-			System.err.print( message );
-		}
-
-		@Override
-		public void setProgress( final double val )
-		{}
-
-		@Override
-		public void setStatus( final String status )
-		{
-			System.out.println( status );
-		}
-	};
+	public static Logger DEFAULT_LOGGER = new DefaultLogger();
 
 	/**
 	 * This {@link Logger} outputs to the ImageJ log window, and to the ImageJ
 	 * toolbar to report progress. Colors are ignored.
 	 */
-	public static Logger IJ_LOGGER = new Logger()
-	{
-
-		@Override
-		public void log( final String message, final Color color )
-		{
-			IJ.log( message );
-		}
-
-		@Override
-		public void error( final String message )
-		{
-			IJ.log( message );
-		}
-
-		@Override
-		public void setProgress( final double val )
-		{
-			IJ.showProgress( val );
-		}
-
-		@Override
-		public void setStatus( final String status )
-		{
-			IJ.showStatus( status );
-		}
-	};
+	public static final Logger IJ_LOGGER = new ImageJLogger();
 
 	/**
 	 * This {@link Logger} outputs everything to the ImageJ toolbar. This is not
 	 * optimal for long messages. Colors are ignored.
 	 */
-	public static Logger IJTOOLBAR_LOGGER = new Logger()
-	{
-		@Override
-		public void log( final String message, final Color color )
-		{
-			IJ.showStatus( message );
-		}
-
-		@Override
-		public void error( final String message )
-		{
-			IJ.showStatus( message );
-		}
-
-		@Override
-		public void setProgress( final double val )
-		{
-			IJ.showProgress( val );
-		}
-
-		@Override
-		public void setStatus( final String status )
-		{
-			IJ.showStatus( status );
-		}
-	};
+	public static final Logger IJTOOLBAR_LOGGER = new ImageJToolbarLogger();
 
 	/**
 	 * This {@link Logger} outputs to a StringBuilder given at construction.
@@ -357,7 +264,106 @@ public abstract class Logger extends PrintWriter
 		{
 			master.setStatus( status );
 		}
-
 	}
 
+	private static class ImageJLogger extends Logger
+	{
+
+		@Override
+		public void log( final String message, final Color color )
+		{
+			IJ.log( message );
+		}
+
+		@Override
+		public void error( final String message )
+		{
+			IJ.log( message );
+		}
+
+		@Override
+		public void setProgress( final double val )
+		{
+			IJ.showProgress( val );
+		}
+
+		@Override
+		public void setStatus( final String status )
+		{
+			IJ.showStatus( status );
+		}
+	}
+
+	private static class ImageJToolbarLogger extends Logger
+	{
+		@Override
+		public void log( final String message, final Color color )
+		{
+			IJ.showStatus( message );
+		}
+
+		@Override
+		public void error( final String message )
+		{
+			IJ.showStatus( message );
+		}
+
+		@Override
+		public void setProgress( final double val )
+		{
+			IJ.showProgress( val );
+		}
+
+		@Override
+		public void setStatus( final String status )
+		{
+			IJ.showStatus( status );
+		}
+	}
+
+	private static class VoidLogger extends Logger
+	{
+
+		@Override
+		public void setStatus( final String status )
+		{}
+
+		@Override
+		public void setProgress( final double val )
+		{}
+
+		@Override
+		public void log( final String message, final Color color )
+		{}
+
+		@Override
+		public void error( final String message )
+		{}
+	}
+
+	private static class DefaultLogger extends Logger
+	{
+
+		@Override
+		public void log( final String message, final Color color )
+		{
+			System.out.print( message );
+		}
+
+		@Override
+		public void error( final String message )
+		{
+			System.err.print( message );
+		}
+
+		@Override
+		public void setProgress( final double val )
+		{}
+
+		@Override
+		public void setStatus( final String status )
+		{
+			System.out.println( status );
+		}
+	}
 }
