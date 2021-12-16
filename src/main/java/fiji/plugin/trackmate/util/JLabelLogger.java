@@ -34,11 +34,11 @@ public class JLabelLogger extends JLabel
 
 	private static final long serialVersionUID = 1L;
 
-	private final MyLogger logger;
+	private final LoggerInJLabel logger;
 
 	public JLabelLogger()
 	{
-		this.logger = new MyLogger( this );
+		this.logger = new LoggerInJLabel( this );
 		setFont( SMALL_FONT );
 	}
 
@@ -51,14 +51,14 @@ public class JLabelLogger extends JLabel
 	 * INNER CLASS
 	 */
 
-	private class MyLogger extends Logger
+	private static class LoggerInJLabel extends Logger
 	{
 
-		private final JLabelLogger label;
+		private final JLabel label;
 
-		public MyLogger( final JLabelLogger logger )
+		public LoggerInJLabel( final JLabel label )
 		{
-			this.label = logger;
+			this.label = label;
 		}
 
 		@Override
@@ -84,6 +84,5 @@ public class JLabelLogger extends JLabel
 		{
 			log( status, Logger.BLUE_COLOR );
 		}
-
 	}
 }
