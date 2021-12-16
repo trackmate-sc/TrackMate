@@ -46,11 +46,14 @@ import fiji.plugin.trackmate.Logger;
 public class LogPanel extends JPanel
 {
 
+
 	private static final long serialVersionUID = 1L;
 
 	public static final String DESCRIPTOR = "LogPanel";
 
 	private final JTextPane textPane;
+
+	private final JProgressBar progressBar;
 
 	private final Logger logger;
 
@@ -67,7 +70,7 @@ public class LogPanel extends JPanel
 		this.add( panelProgressBar, BorderLayout.NORTH );
 		panelProgressBar.setPreferredSize( new java.awt.Dimension( 270, 32 ) );
 
-		final JProgressBar progressBar = new JProgressBar();
+		progressBar = new JProgressBar();
 		panelProgressBar.add( progressBar, BorderLayout.CENTER );
 		progressBar.setPreferredSize( new java.awt.Dimension( 270, 20 ) );
 		progressBar.setStringPainted( true );
@@ -83,70 +86,7 @@ public class LogPanel extends JPanel
 		scrollPane.setViewportView( textPane );
 		textPane.setBackground( this.getBackground() );
 
-		logger = new Logger()
-		{
-
-			@Override
-			public void error( final String message )
-			{
-				log( message, Logger.ERROR_COLOR );
-			}
-
-			@Override
-			public void log( final String message, final Color color )
-			{
-				SwingUtilities.invokeLater( new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						final StyleContext sc = StyleContext.getDefaultStyleContext();
-						final AttributeSet aset = sc.addAttribute( SimpleAttributeSet.EMPTY, StyleConstants.Foreground, color );
-						final int len = textPane.getDocument().getLength();
-						textPane.setCaretPosition( len );
-						textPane.setCharacterAttributes( aset, false );
-						textPane.replaceSelection( message );
-					}
-				} );
-			}
-
-			@Override
-			public void setStatus( final String status )
-			{
-				SwingUtilities.invokeLater( new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						progressBar.setString( status );
-					}
-				} );
-			}
-
-			@Override
-			public void setProgress( double val )
-			{
-				if ( val < 0 )
-					val = 0;
-				if ( val > 1 )
-					val = 1;
-				final int intVal = ( int ) ( val * 100 );
-				SwingUtilities.invokeLater( new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						progressBar.setValue( intVal );
-					}
-				} );
-			}
-			
-			@Override
-			public String toString()
-			{
-				return getTextContent();
-			}
-		};
+		logger = new LogPanelLogger();
 	}
 
 	/*
@@ -179,5 +119,70 @@ public class LogPanel extends JPanel
 	public void setTextContent( final String log )
 	{
 		textPane.setText( log );
+	}
+
+	private class LogPanelLogger extends Logger
+	{
+
+		@Override
+		public void error( final String message )
+		{
+			log( message, Logger.ERROR_COLOR );
+		}
+
+		@Override
+		public void log( final String message, final Color color )
+		{
+			SwingUtilities.invokeLater( new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					final StyleContext sc = StyleContext.getDefaultStyleContext();
+					final AttributeSet aset = sc.addAttribute( SimpleAttributeSet.EMPTY, StyleConstants.Foreground, color );
+					final int len = textPane.getDocument().getLength();
+					textPane.setCaretPosition( len );
+					textPane.setCharacterAttributes( aset, false );
+					textPane.replaceSelection( message );
+				}
+			} );
+		}
+
+		@Override
+		public void setStatus( final String status )
+		{
+			SwingUtilities.invokeLater( new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					progressBar.setString( status );
+				}
+			} );
+		}
+
+		@Override
+		public void setProgress( double val )
+		{
+			if ( val < 0 )
+				val = 0;
+			if ( val > 1 )
+				val = 1;
+			final int intVal = ( int ) ( val * 100 );
+			SwingUtilities.invokeLater( new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					progressBar.setValue( intVal );
+				}
+			} );
+		}
+
+		@Override
+		public String toString()
+		{
+			return getTextContent();
+		}
 	}
 }
