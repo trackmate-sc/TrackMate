@@ -46,7 +46,9 @@ public class ExecuteDetectionDescriptor extends WizardPanelDescriptor
 	{
 		return () -> {
 			final long start = System.currentTimeMillis();
-			trackmate.execDetection();
+			final boolean ok = trackmate.execDetection();
+			if ( !ok )
+				trackmate.getModel().getLogger().error( trackmate.getErrorMessage() + '\n' );
 			final long end = System.currentTimeMillis();
 			trackmate.getModel().getLogger().log( String.format( "Detection done in %.1f s.\n", ( end - start ) / 1e3f ) );
 		};
