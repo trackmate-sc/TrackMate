@@ -116,6 +116,11 @@ public class TMUtils
 				final Map< String, Object > submap = ( Map< String, Object > ) obj;
 				builder.append( echoMap( submap, indent + 2 ) );
 			}
+			else if ( obj instanceof Logger )
+			{
+				builder.append( obj.getClass().getSimpleName() );
+				builder.append( '\n' );
+			}
 			else
 			{
 				builder.append( obj.toString() );
