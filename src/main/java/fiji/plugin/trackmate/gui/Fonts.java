@@ -32,5 +32,7 @@ public class Fonts
 
 	public static final Font SMALL_FONT = FONT.deriveFont( 8 );
 
+	public static final Font SMALL_FONT_MONOSPACED = new Font( "Courier New", Font.PLAIN, 11 );
+
 	public static final Dimension TEXTFIELD_DIMENSION = new Dimension( 40, 18 );
 }
