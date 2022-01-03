@@ -482,6 +482,26 @@ public class CTCExporter
 	}
 
 	/**
+	 * Returns the folder in which the tracking data will be exported.
+	 * 
+	 * @param exportRootFolder
+	 *            the root folder to export in.
+	 * @param saveId
+	 *            the save id.
+	 * @param exportType
+	 *            the export type.
+	 * @param trackmate
+	 *            the TrackMate object to eport.
+	 * @return a path as a string.
+	 * @see #exportTrackingData(String, int, ExportType, TrackMate, Logger)
+	 */
+	public static final String getExportTrackingDataPath( final String exportRootFolder, final int saveId, final ExportType exportType, final TrackMate trackmate )
+	{
+		final Path pathTif0 = exportType.getTrackTifFilePath( exportRootFolder, saveId, 0, trackmate.getSettings().imp.getNFrames() );
+		return pathTif0.getParent().toString();
+	}
+
+	/**
 	 * Check for future consistency errors.
 	 * <p>
 	 * It is possible that 2 spots are so close than the mask of one completely
