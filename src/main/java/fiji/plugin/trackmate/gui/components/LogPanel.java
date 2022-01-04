@@ -46,7 +46,6 @@ import fiji.plugin.trackmate.Logger;
 public class LogPanel extends JPanel
 {
 
-
 	private static final long serialVersionUID = 1L;
 
 	public static final String DESCRIPTOR = "LogPanel";
@@ -92,6 +91,16 @@ public class LogPanel extends JPanel
 	/*
 	 * PUBLIC METHODS
 	 */
+
+	/**
+	 * Exposes the text pane in which the log is shown.
+	 * 
+	 * @return the text pane.
+	 */
+	public JTextPane getTextPane()
+	{
+		return textPane;
+	}
 
 	/**
 	 * @return a {@link Logger} object that will log all events to this log
