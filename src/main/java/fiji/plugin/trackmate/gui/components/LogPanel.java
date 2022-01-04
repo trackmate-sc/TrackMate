@@ -22,7 +22,6 @@
 package fiji.plugin.trackmate.gui.components;
 
 import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
-import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT_MONOSPACED;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -83,7 +82,7 @@ public class LogPanel extends JPanel
 
 		textPane = new JTextPane();
 		textPane.setEditable( true );
-		textPane.setFont( SMALL_FONT_MONOSPACED );
+		textPane.setFont( SMALL_FONT );
 		scrollPane.setViewportView( textPane );
 		textPane.setBackground( this.getBackground() );
 
