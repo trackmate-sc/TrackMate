@@ -390,7 +390,7 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 		}
 		ftfDiameter.setValue( Double.valueOf( 2. * radius ) );
 		jCheckBoxMedianFilter.setSelected( ( Boolean ) settings.get( KEY_DO_MEDIAN_FILTERING ) );
-		ftfQualityThreshold.setText( "" + settings.get( KEY_THRESHOLD ) );
+		ftfQualityThreshold.setValue( ( ( Number ) settings.get( KEY_THRESHOLD ) ).doubleValue() );
 		jCheckSubPixel.setSelected( ( Boolean ) settings.get( KEY_DO_SUBPIXEL_LOCALIZATION ) );
 	}
 
