@@ -714,7 +714,7 @@ public class TmXmlWriter
 				continue;
 
 			final String str;
-			if ( fm.getSpotFeatureIsInt().get( feature ).booleanValue() )
+			if ( fm.getSpotFeatureIsInt().getOrDefault( feature, Boolean.FALSE ).booleanValue() )
 				str = Integer.toString( val.intValue() );
 			else
 				str = val.toString();
