@@ -291,7 +291,8 @@ public class TrackModel
 			graph.addVertex( target );
 
 		final DefaultWeightedEdge edge = graph.addEdge( source, target );
-		graph.setEdgeWeight( edge, weight );
+		if ( edge != null )
+			graph.setEdgeWeight( edge, weight );
 		return edge;
 	}
 
