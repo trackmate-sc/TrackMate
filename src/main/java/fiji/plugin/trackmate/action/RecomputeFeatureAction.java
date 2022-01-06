@@ -33,6 +33,7 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 
@@ -97,8 +98,23 @@ public class RecomputeFeatureAction extends AbstractTMAction
 		final Model model = trackmate.getModel();
 		final Logger oldLogger = model.getLogger();
 		model.setLogger( logger );
-
 		final Settings settings = trackmate.getSettings();
+
+		/*
+		 * Reset the spot time position.
+		 */
+
+		double dt = 0.;
+		if ( null != settings && null != settings.imp && null != settings.imp.getCalibration() )
+			dt = settings.imp.getCalibration().frameInterval;
+		if ( dt <= 0. && settings != null )
+			dt = settings.dt;
+		if ( dt <= 0 )
+			dt = 1.;
+
+		settings.dt = dt;
+		for ( final Spot spot : model.getSpots().iterable( false ) )
+			spot.putFeature( Spot.POSITION_T, spot.getFeature( Spot.FRAME ).intValue() * dt );
 
 		/*
 		 * Configure settings object with spot, edge and track analyzers as
