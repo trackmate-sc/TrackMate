@@ -28,7 +28,6 @@ import java.awt.Frame;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Locale;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
@@ -177,31 +176,17 @@ public class FileChooser
 			/*
 			 * Try with a FilenameFilter (may silently fail).
 			 */
-			final AtomicBoolean workedWithFilenameFilter = new AtomicBoolean( false );
 			if ( fileFilter != null )
 			{
 				final FilenameFilter filenameFilter = new FilenameFilter()
 				{
-					private boolean firstTime = true;
-
 					@Override
 					public boolean accept( final File dir, final String name )
 					{
-						if ( firstTime )
-						{
-							workedWithFilenameFilter.set( true );
-							firstTime = false;
-						}
-
 						return fileFilter.accept( new File( dir, name ) );
 					}
 				};
 				fd.setFilenameFilter( filenameFilter );
-				fd.setVisible( true );
-			}
-			if ( fileFilter == null || ( isMac() && !workedWithFilenameFilter.get() ) )
-			{
-				fd.setFilenameFilter( null );
 				fd.setVisible( true );
 			}
 
