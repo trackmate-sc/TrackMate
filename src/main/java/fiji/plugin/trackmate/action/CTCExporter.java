@@ -135,6 +135,9 @@ public class CTCExporter
 
 	public static String exportAll( final String exportRootFolder, final TrackMate trackmate, final ExportType exportType, final Logger logger ) throws IOException
 	{
+		if ( !new File( exportRootFolder ).exists() )
+			new File( exportRootFolder ).mkdirs();
+
 		logger.log( "Exporting as CTC type: " + exportType.toString() + '\n' );
 		final int id = getAvailableDatasetID( exportRootFolder );
 		exportOriginalImageData( exportRootFolder, id, trackmate, logger );
@@ -440,7 +443,8 @@ public class CTCExporter
 					{
 						final DefaultEdge edge = branchGraph.incomingEdgesOf( current ).iterator().next();
 						final List< Spot > parent = Graphs.getOppositeVertex( branchGraph, edge, current );
-						parentID = branchID.get( parent );
+						final Integer obj = branchID.get( parent );
+						parentID = ( obj == null ) ? 0 : obj.intValue();
 					}
 
 					// Start and finish frame.
