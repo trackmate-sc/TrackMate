@@ -414,7 +414,11 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 				for ( int frame = settings.tstart; frame <= settings.tend; frame++ )
 				{
 					final List< Spot > spotsThisFrame = new ArrayList<>();
-					for ( final Spot spot : rawSpots.iterable( frame, false ) )
+					final Iterable< Spot > spotsIt = rawSpots.iterable( frame, false );
+					if ( spotsIt == null )
+						continue;
+
+					for ( final Spot spot : spotsIt )
 					{
 						if ( settings.roi.contains(
 								( int ) Math.round( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ] ),
