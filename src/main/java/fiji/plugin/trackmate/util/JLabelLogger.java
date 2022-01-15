@@ -26,6 +26,7 @@ import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
 import java.awt.Color;
 
 import javax.swing.JLabel;
+import javax.swing.SwingConstants;
 
 import fiji.plugin.trackmate.Logger;
 
@@ -39,6 +40,7 @@ public class JLabelLogger extends JLabel
 	public JLabelLogger()
 	{
 		this.logger = new LoggerInJLabel( this );
+		setHorizontalAlignment( SwingConstants.CENTER );
 		setFont( SMALL_FONT );
 	}
 
