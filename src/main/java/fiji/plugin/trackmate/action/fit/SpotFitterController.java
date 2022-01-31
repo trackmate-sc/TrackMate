@@ -125,7 +125,7 @@ public class SpotFitterController
 				{
 					final ImagePlus imp = trackmate.getSettings().imp;
 					// 1-based to 0-based.
-					final int channel = gui.getSelectedChannel();
+					final int channel = gui.getSelectedChannel() - 1;
 					final int index = gui.getSelectedFitIndex();
 					final SpotFitter fitter;
 					// Stupid and harsh:
