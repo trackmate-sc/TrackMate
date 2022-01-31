@@ -40,7 +40,7 @@ import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 public class ManualEdgeColorAnalyzer implements EdgeAnalyzer
 {
 
-	public static final String FEATURE = "MANUAL_EGE_COLOR";
+	public static final String FEATURE = "MANUAL_EDGE_COLOR";
 
 	public static final String KEY = "Manual edge color";
 
