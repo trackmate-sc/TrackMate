@@ -32,9 +32,16 @@ import java.util.Comparator;
 public class AlphanumComparator
 {
 
-	private static final Comparator< Object > raw = Comparator
-			.comparingInt( s -> Integer.parseInt( ( ( String ) s ).replaceAll( "\\D", "" ) ) )
-			.thenComparing( s -> ( ( String ) s ).replaceAll( "\\d", "" ) );
+	private static final Comparator< Object > raw = Comparator.comparingInt( s -> {
+		try
+		{
+			return Integer.parseInt( ( ( String ) s ).replaceAll( "\\D", "" ) );
+		}
+		catch ( final NumberFormatException nfe )
+		{
+			return Integer.MIN_VALUE;
+		}
+	} ).thenComparing( s -> ( ( String ) s ).replaceAll( "\\d", "" ) );
 
 	@SuppressWarnings( { "unchecked", "rawtypes" } )
 	public static final Comparator< String > instance = ( Comparator ) raw;
@@ -52,7 +59,9 @@ public class AlphanumComparator
 				"track_3",
 				"track_4",
 				"track_5",
-				"track_6"
+				"track_6",
+				"",
+				"a"
 		};
 		Arrays.sort( names, instance );
 		Arrays.stream( names ).forEach( System.out::println );
