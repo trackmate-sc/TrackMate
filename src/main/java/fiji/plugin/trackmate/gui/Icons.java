@@ -197,4 +197,6 @@ public class Icons
 
 	public static final ImageIcon SELECT_STYLE_ICON = new ImageIcon( Icons.class.getResource( "images/theme.png" ) );
 
+	public static final ImageIcon PENCIL_ICON = new ImageIcon( Icons.class.getResource( "images/pencil.png" ) );
+
 }
