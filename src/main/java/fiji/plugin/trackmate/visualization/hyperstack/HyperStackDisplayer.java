@@ -44,8 +44,6 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 
 	private SpotEditTool editTool;
 
-	private Roi initialROI;
-
 	public static final String KEY = "HYPERSTACKDISPLAYER";
 
 	/*
@@ -151,10 +149,6 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 	@Override
 	public void render()
 	{
-		initialROI = imp.getRoi();
-		if ( initialROI != null )
-			imp.killRoi();
-
 		clear();
 		imp.setOpenAsHyperStack( true );
 		if ( !imp.isVisible() )
@@ -183,10 +177,6 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 			imp.setOverlay( overlay );
 		}
 		overlay.clear();
-
-		if ( initialROI != null )
-			imp.getOverlay().add( initialROI );
-
 		refresh();
 	}
 
