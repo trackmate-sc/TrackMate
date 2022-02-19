@@ -54,13 +54,13 @@ import fiji.plugin.trackmate.io.IOUtils;
 public class ISBIChallengeExporter extends AbstractTMAction
 {
 
-	public static final String NAME = "Export to ISBI challenge format";
+	public static final String NAME = "Export to ISBI challenge file format";
 
 	public static final String KEY = "EXPORT_TO_ISBI_CHALLENGE_FORMAT";
 
 	public static final String INFO_TEXT = "<html>" +
 			"Export the current model content to a XML file following the " +
-			"ISBI 2012 particle tracking challenge format, as specified on " +
+			"ISBI 2012 single particle tracking challenge format, as specified on " +
 			"<a href='http://bioimageanalysis.org/track/'></a>. " +
 			"<p> " +
 			"Only tracks are exported. If there is no track, this action " +
@@ -70,6 +70,7 @@ public class ISBIChallengeExporter extends AbstractTMAction
 	@Override
 	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
 	{
+		logger.log( "Exporting tracks to ISBI challenge file format.\n" );
 		final Model model = trackmate.getModel();
 		File file;
 		final File folder = new File( System.getProperty( "user.dir" ) ).getParentFile().getParentFile();
@@ -83,7 +84,12 @@ public class ISBIChallengeExporter extends AbstractTMAction
 		{
 			file = new File( folder.getPath() + File.separator + "ISBIChallenge2012Result.xml" );
 		}
-		file = IOUtils.askForFileForSaving( file, parent, logger );
+		file = IOUtils.askForFileForSaving( file, parent );
+		if ( null == file )
+		{
+			logger.log( "Exporting to ISBI file format aborted.\n" );
+			return;
+		}
 
 		exportToFile( model, trackmate.getSettings(), file, logger );
 	}

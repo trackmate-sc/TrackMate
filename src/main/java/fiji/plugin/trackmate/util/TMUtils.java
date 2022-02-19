@@ -24,6 +24,7 @@ package fiji.plugin.trackmate.util;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 
 import java.io.File;
+import java.nio.file.FileSystems;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -715,7 +716,7 @@ public class TMUtils
 	 */
 	public static File proposeTrackMateSaveFile( final Settings settings, final Logger logger )
 	{
-		File folder, file;
+		File folder;
 		if ( null != settings.imp
 				&& null != settings.imp.getOriginalFileInfo()
 				&& null != settings.imp.getOriginalFileInfo().directory )
@@ -727,6 +728,11 @@ public class TMUtils
 			 * because it's valid.
 			 */
 			settings.imageFolder = settings.imp.getOriginalFileInfo().directory;
+		}
+		else if ( !settings.imageFolder.isEmpty()  )
+		{
+			final String absolutePath = FileSystems.getDefault().getPath( settings.imageFolder ).normalize().toAbsolutePath().toString();
+			folder = new File( absolutePath );
 		}
 		else
 		{
@@ -740,13 +746,27 @@ public class TMUtils
 					+ "To fix this, save the source image to a TIF file before saving the TrackMate session.\n" );
 			settings.imageFolder = "";
 		}
+
+		File file;
 		try
 		{
-			file = new File( folder.getPath() + File.separator + settings.imp.getShortTitle() + ".xml" );
+			file = new File( folder.getPath(), settings.imp.getShortTitle() + ".xml" );
 		}
 		catch ( final NullPointerException npe )
 		{
-			file = new File( folder.getPath() + File.separator + "TrackMateData.xml" );
+			if (settings.imageFileName.isEmpty())
+				file = new File( folder, "TrackMateData.xml" );
+			else
+			{
+				final String imName = settings.imageFileName;
+				final int i = imName.lastIndexOf( '.' );
+				String xmlName;
+				if (i<0)
+					xmlName = imName +".xml";
+				else
+					xmlName = imName.substring( 0, i ) +".xml";
+				file = new File( folder, xmlName );
+			}
 		}
 		return file;
 	}

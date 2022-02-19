@@ -131,9 +131,12 @@ public class ExportTracksToXML extends AbstractTMAction
 		{
 			file = new File( folder.getPath() + File.separator + "Tracks.xml" );
 		}
-		file = IOUtils.askForFileForSaving( file, parent, logger );
+		file = IOUtils.askForFileForSaving( file, parent );
 		if ( null == file )
-		{ return; }
+		{
+			logger.log( "Exporting to simple XML aborted.\n" );
+			return;
+		}
 
 		logger.log( "  Writing to file.\n" );
 		final Document document = new Document( root );

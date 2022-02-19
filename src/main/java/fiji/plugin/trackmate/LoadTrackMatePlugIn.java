@@ -39,8 +39,9 @@ import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.wizard.WizardSequence;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ConfigureViewsDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.LogPanelDescriptor2;
-import fiji.plugin.trackmate.gui.wizard.descriptors.SomeDialogDescriptor;
+import fiji.plugin.trackmate.gui.wizard.descriptors.StartDialogDescriptor;
 import fiji.plugin.trackmate.io.IOUtils;
+import fiji.plugin.trackmate.io.SettingsPersistence;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
@@ -70,22 +71,15 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 		 */
 		GuiUtils.setSystemLookAndFeel();
 
-		final Logger logger = Logger.IJ_LOGGER; // logPanel.getLogger();
-		File file = SomeDialogDescriptor.file;
+		final Logger logger = Logger.IJ_LOGGER;
+		File file;
 		if ( null == filePath || filePath.length() == 0 )
 		{
-
-			if ( null == file || file.length() == 0 )
-			{
-				final File folder = new File( System.getProperty( "user.dir" ) );
-				final File parent = folder.getParentFile();
-				final File parent2 = parent == null ? null : parent.getParentFile();
-				file = new File( parent2 != null ? parent2 : parent != null ? parent : folder, "TrackMateData.xml" );
-			}
-			final File tmpFile = IOUtils.askForFileForLoading( file, "Load a TrackMate XML file", null, logger );
-			if ( null == tmpFile )
+			final Settings lastUsedSettings = SettingsPersistence.readLastUsedSettings( null, logger );
+			file = TMUtils.proposeTrackMateSaveFile( lastUsedSettings, logger );
+			file = IOUtils.askForFileForLoading( file, "Load a TrackMate XML file", null, logger );
+			if ( null == file )
 				return;
-			file = tmpFile;
 		}
 		else
 		{
@@ -230,7 +224,19 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 				+ logText
 				+ "--------------------\n",
 				Color.GRAY );
+
 		logger2.log( "File loaded on " + TMUtils.getCurrentTimeString() + '\n', Logger.BLUE_COLOR );
+		final String welcomeMessage = TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION + '\n';
+		// Log GUI processing start
+		logger2.log( welcomeMessage, Logger.BLUE_COLOR );
+		logger2.log( "Please note that TrackMate is available through Fiji, and is based on a publication. "
+				+ "If you use it successfully for your research please be so kind to cite our work:\n" );
+		logger2.log( StartDialogDescriptor.PUB1_TXT + "\n", Logger.GREEN_COLOR );
+		logger2.log( StartDialogDescriptor.PUB1_URL + "\n", Logger.BLUE_COLOR );
+		logger2.log( "and / or:\n" );
+		logger2.log( "Tinevez, JY.; Perry, N. & Schindelin, J. et al. (2017), 'TrackMate: An open and extensible platform for single-particle tracking.', "
+				+ "Methods 115: 80-90, PMID 27713081.\n", Logger.GREEN_COLOR );
+		logger2.log( "https://www.sciencedirect.com/science/article/pii/S1046202316303346\n", Logger.BLUE_COLOR );
 
 		if ( !reader.isReadingOk() )
 		{
@@ -277,7 +283,8 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 		ImageJ.main( args );
 		final LoadTrackMatePlugIn plugIn = new LoadTrackMatePlugIn();
 //		plugIn.run( "samples/FakeTracks.xml" );
-		plugIn.run( "samples/MAX_Merged.xml" );
-//		plugIn.run( "" );
+//		plugIn.run( "samples/MAX_Merged.xml" );
+//		plugIn.run( "c:/Users/tinevez/Development/TrackMateWS/TrackMate-Cellpose/samples/R2_multiC.xml" );
+		plugIn.run( null );
 	}
 }

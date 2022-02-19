@@ -95,14 +95,11 @@ public class IOUtils
 	 *            the {@link Frame} to lock on this dialog. It can be
 	 *            <code>null</code>; in that case, native dialogs will not be
 	 *            used on Macs.
-	 * @param logger
-	 *            a {@link Logger} to report what is happening.
 	 * @return the selected file, or <code>null</code> if the user pressed the
 	 *         "cancel" button.
 	 */
-	public static File askForFileForSaving( File file, final Frame parent, final Logger logger )
+	public static File askForFileForSaving( final File file, final Frame parent )
 	{
-
 		if ( IJ.isMacintosh() && parent != null )
 		{
 			// use the native file dialog on the mac
@@ -110,25 +107,15 @@ public class IOUtils
 			dialog.setIconImage( TRACKMATE_ICON.getImage() );
 			dialog.setDirectory( file.getParent() );
 			dialog.setFile( file.getName() );
-			final FilenameFilter filter = new FilenameFilter()
-			{
-				@Override
-				public boolean accept( final File dir, final String name )
-				{
-					return name.endsWith( ".xml" );
-				}
-			};
+			final FilenameFilter filter = ( dir, name ) -> name.endsWith( ".xml" );
 			dialog.setFilenameFilter( filter );
 			dialog.setVisible( true );
 			String selectedFile = dialog.getFile();
 			if ( null == selectedFile )
-			{
-				logger.log( "Save data aborted.\n" );
 				return null;
-			}
 			if ( !selectedFile.endsWith( ".xml" ) )
 				selectedFile += ".xml";
-			file = new File( dialog.getDirectory(), selectedFile );
+			return new File( dialog.getDirectory(), selectedFile );
 		}
 		else
 		{
@@ -150,16 +137,10 @@ public class IOUtils
 
 			final int returnVal = fileChooser.showSaveDialog( parent );
 			if ( returnVal == JFileChooser.APPROVE_OPTION )
-			{
-				file = fileChooser.getSelectedFile();
-			}
-			else
-			{
-				logger.log( "Save data aborted.\n" );
-				return null;
-			}
+				return fileChooser.getSelectedFile();
+
+			return null;
 		}
-		return file;
 	}
 
 	/**

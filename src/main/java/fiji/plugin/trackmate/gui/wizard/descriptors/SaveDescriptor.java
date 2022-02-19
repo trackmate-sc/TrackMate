@@ -32,12 +32,13 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.components.LogPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
 import fiji.plugin.trackmate.gui.wizard.WizardSequence;
 import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.io.TmXmlWriter;
 import fiji.plugin.trackmate.util.TMUtils;
 
-public class SaveDescriptor extends SomeDialogDescriptor
+public class SaveDescriptor extends WizardPanelDescriptor
 {
 
 	private static final String KEY = "Saving";
@@ -50,7 +51,8 @@ public class SaveDescriptor extends SomeDialogDescriptor
 
 	public SaveDescriptor( final TrackMate trackmate, final DisplaySettings displaySettings, final WizardSequence sequence )
 	{
-		super( KEY, ( LogPanel ) sequence.logDescriptor().getPanelComponent() );
+		super( KEY );
+		this.targetPanel = sequence.logDescriptor().getPanelComponent();
 		this.trackmate = trackmate;
 		this.displaySettings = displaySettings;
 		this.sequence = sequence;
@@ -62,8 +64,7 @@ public class SaveDescriptor extends SomeDialogDescriptor
 		final LogPanel logPanel = ( LogPanel ) targetPanel;
 		final Logger logger = logPanel.getLogger();
 		logger.log( "Saving data...\n", Logger.BLUE_COLOR );
-		if ( null == file )
-			file = TMUtils.proposeTrackMateSaveFile( trackmate.getSettings(), logger );
+		File file = TMUtils.proposeTrackMateSaveFile( trackmate.getSettings(), logger );
 
 		/*
 		 * If we are to save tracks, we better ensures that track and edge
@@ -75,10 +76,12 @@ public class SaveDescriptor extends SomeDialogDescriptor
 			trackmate.computeTrackFeatures( true );
 		}
 
-		final File tmpFile = IOUtils.askForFileForSaving( file, ( Frame ) SwingUtilities.getWindowAncestor( logPanel ), logger );
-		if ( null == tmpFile )
+		file = IOUtils.askForFileForSaving( file, ( Frame ) SwingUtilities.getWindowAncestor( logPanel ) );
+		if ( file == null )
+		{
+			logger.log( "Saving aborted.\n" );
 			return;
-		file = tmpFile;
+		}
 
 		/*
 		 * Write model, settings and GUI state
