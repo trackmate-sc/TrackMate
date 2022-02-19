@@ -23,8 +23,10 @@ package fiji.plugin.trackmate.util;
 
 import java.awt.Component;
 import java.awt.Container;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Purpose: To recursively disable (and later re-enable) all components of a
@@ -45,7 +47,7 @@ final public class EverythingDisablerAndReenabler
 
 	final private Class< ? >[] componentClassesToBeIgnored;
 
-	final private List< Component > componentsToReenable = new ArrayList<>();
+	final private List< WeakReference< Component > > componentsToReenable = new ArrayList<>();
 
 	private boolean disableHasBeenCalled = false;
 	// Order is strictly upheld via IllegalStateException!
@@ -116,9 +118,8 @@ final public class EverythingDisablerAndReenabler
 		disableHasBeenCalled = false;
 
 		for ( int i = componentsToReenable.size() - 1; i >= 0; i-- )
-		{
-			componentsToReenable.get( i ).setEnabled( true );
-		}
+			Optional.ofNullable( componentsToReenable.get( i ).get() ).ifPresent( c -> c.setEnabled( true ) );
+
 		componentsToReenable.clear();
 	}
 
@@ -156,7 +157,7 @@ final public class EverythingDisablerAndReenabler
 					if ( !found && component.isEnabled() )
 					{
 						component.setEnabled( false );
-						componentsToReenable.add( component );
+						componentsToReenable.add( new WeakReference<>( component ) );
 					}
 				}
 			}
