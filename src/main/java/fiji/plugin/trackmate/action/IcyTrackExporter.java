@@ -53,7 +53,6 @@ public class IcyTrackExporter extends AbstractTMAction
 	@Override
 	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
 	{
-
 		logger.log( "Exporting tracks to Icy format.\n" );
 		final Model model = trackmate.getModel();
 		final int ntracks = model.getTrackModel().nTracks( true );
@@ -86,9 +85,12 @@ public class IcyTrackExporter extends AbstractTMAction
 		{
 			file = new File( folder.getPath() + File.separator + "IcyTracks.xml" );
 		}
-		file = IOUtils.askForFileForSaving( file, parent, logger );
+		file = IOUtils.askForFileForSaving( file, parent );
 		if ( null == file )
-		{ return; }
+		{
+			logger.log( "Exporting to Icy aborted.\n" );
+			return;
+		}
 
 		logger.log( "  Writing to file.\n" );
 

@@ -41,9 +41,9 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.gui.wizard.descriptors.SomeDialogDescriptor;
 import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.io.TmXmlReader;
+import fiji.plugin.trackmate.util.TMUtils;
 
 public class MergeFileAction extends AbstractTMAction
 {
@@ -68,7 +68,7 @@ public class MergeFileAction extends AbstractTMAction
 	@Override
 	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
 	{
-		File file = SomeDialogDescriptor.file;
+		File file = TMUtils.proposeTrackMateSaveFile( trackmate.getSettings(), logger );
 		if ( null == file )
 		{
 			final File folder = new File( System.getProperty( "user.dir" ) ).getParentFile().getParentFile();

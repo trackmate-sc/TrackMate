@@ -49,6 +49,8 @@ public class SettingsPersistence
 		}
 
 		final Settings settings = reader.readSettings( null );
+		if ( imp == null )
+			return settings;
 		final Settings newSettings = settings.copyOn( imp );
 		return newSettings;
 	}
