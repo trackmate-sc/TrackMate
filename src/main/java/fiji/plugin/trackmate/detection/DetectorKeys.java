@@ -69,6 +69,15 @@ public class DetectorKeys
 	public static final double DEFAULT_RADIUS = 5d;
 
 	/**
+	 * The key for the parameter that sets the target radius in the Z direction
+	 * for the detector. Expected values are {@link Double}s.
+	 */
+	public static final String KEY_RADIUS_Z = "RADIUS_Z";
+
+	/** A default value for the {@link #KEY_RADIUS_Z} parameter. */
+	public static final double DEFAULT_RADIUS_Z = 8.;
+
+	/**
 	 * The key identifying the parameter that sets the threshold for the LoG
 	 * detector. Spot found with a filtered value lowered than this threshold
 	 * will not be retained. Expected values are {@link Double}s.
@@ -111,6 +120,15 @@ public class DetectorKeys
 
 	/** A default value for the {@link #KEY_DO_MEDIAN_FILTERING} parameter. */
 	public static final boolean DEFAULT_DO_MEDIAN_FILTERING = false;
+
+	/**
+	 * The key for the parameter that states whether the quality values are
+	 * normalized from 0 to 1.
+	 */
+	public static final String KEY_NORMALIZE = "NORMALIZE";
+
+	/** A default value for the {@link #KEY_NORMALIZE} parameter. */
+	public static final boolean DEFAULT_NORMALIZE = false;
 
 	/**
 	 * The key identifying the parameter setting whether we use sub-pixel
