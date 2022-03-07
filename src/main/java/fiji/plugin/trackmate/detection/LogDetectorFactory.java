@@ -61,6 +61,7 @@ import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
+import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.view.Views;
@@ -106,10 +107,10 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 	}
 	
 	
-	protected RandomAccessible< T > prepareFrameImg( final int frame )
+	protected RandomAccessibleInterval< T > prepareFrameImg( final int frame )
 	{
 		final double[] calibration = TMUtils.getSpatialCalibration( img );
-		RandomAccessible< T > imFrame;
+		RandomAccessibleInterval< T > imFrame;
 		final int cDim = img.dimensionIndex( Axes.CHANNEL );
 		if ( cDim < 0 )
 		{
