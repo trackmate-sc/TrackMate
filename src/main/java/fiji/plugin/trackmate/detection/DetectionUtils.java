@@ -66,6 +66,7 @@ import net.imglib2.type.Type;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
+import net.imglib2.util.Util;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 
@@ -334,16 +335,16 @@ public class DetectionUtils
 		return medFilt.getResult();
 	}
 
-	public static final List< Spot > findLocalMaxima( final RandomAccessibleInterval< FloatType > source, final double threshold, final double[] calibration, final double radius, final boolean doSubPixelLocalization, final int numThreads )
+	public static final < T extends RealType< T > > List< Spot > findLocalMaxima( final RandomAccessibleInterval< T > source, final double threshold, final double[] calibration, final double radius, final boolean doSubPixelLocalization, final int numThreads )
 	{
 		/*
 		 * Find maxima.
 		 */
 
-		final FloatType val = new FloatType();
+		final T val = Util.getTypeFromInterval( source ).createVariable();
 		val.setReal( threshold );
-		final LocalNeighborhoodCheck< Point, FloatType > localNeighborhoodCheck = new LocalExtrema.MaximumCheck<>( val );
-		final IntervalView< FloatType > dogWithBorder = Views.interval( Views.extendMirrorSingle( source ), Intervals.expand( source, 1 ) );
+		final LocalNeighborhoodCheck< Point, T > localNeighborhoodCheck = new LocalExtrema.MaximumCheck<>( val );
+		final IntervalView< T > dogWithBorder = Views.interval( Views.extendMirrorSingle( source ), Intervals.expand( source, 1 ) );
 		final ExecutorService service = Executors.newFixedThreadPool( numThreads );
 		List< Point > peaks;
 		try
@@ -368,7 +369,7 @@ public class DetectionUtils
 			 * Sub-pixel localize them.
 			 */
 
-			final SubpixelLocalization< Point, FloatType > spl = new SubpixelLocalization<>( source.numDimensions() );
+			final SubpixelLocalization< Point, T > spl = new SubpixelLocalization<>( source.numDimensions() );
 			spl.setNumThreads( numThreads );
 			spl.setReturnInvalidPeaks( true );
 			spl.setCanMoveOutside( true );
@@ -377,7 +378,7 @@ public class DetectionUtils
 			final ArrayList< RefinedPeak< Point > > refined = spl.process( peaks, dogWithBorder, source );
 
 			spots = new ArrayList<>( refined.size() );
-			final RandomAccess< FloatType > ra = source.randomAccess();
+			final RandomAccess< T > ra = source.randomAccess();
 
 			/*
 			 * Deal with different dimensionality manually. Profound comment:
@@ -430,7 +431,7 @@ public class DetectionUtils
 		else
 		{
 			spots = new ArrayList<>( peaks.size() );
-			final RandomAccess< FloatType > ra = source.randomAccess();
+			final RandomAccess< T > ra = source.randomAccess();
 			if ( source.numDimensions() > 2 )
 			{ // 3D
 				for ( final Point peak : peaks )
