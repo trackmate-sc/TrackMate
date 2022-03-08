@@ -77,7 +77,7 @@ public class HessianDetector< T extends RealType< T > & NativeType< T > > implem
 			final boolean doSubPixelLocalization )
 	{
 		this.img = img;
-		this.interval = interval;
+		this.interval = DetectionUtils.squeeze( interval );
 		this.calibration = calibration;
 		this.radiusXY = radiusXY;
 		this.radiusZ = radiusZ;
@@ -116,12 +116,20 @@ public class HessianDetector< T extends RealType< T > & NativeType< T > > implem
 		final long start = System.currentTimeMillis();
 		try
 		{
+			// Compute Hessian.
 			final Img< DoubleType > det = computeHessianDeterminant();
 
+			// Normalize from 0 to 1.
 			if ( normalize )
 				DetectionUtils.normalize( det );
 
-			spots = DetectionUtils.findLocalMaxima( det, threshold, calibration, radiusXY, doSubPixelLocalization, numThreads );
+			// Translate back with respect to ROI.
+			final long[] minopposite = new long[ interval.numDimensions() ];
+			interval.min( minopposite );
+			final IntervalView< DoubleType > to = Views.translate( det, minopposite );
+
+			// Find spots.
+			spots = DetectionUtils.findLocalMaxima( to, threshold, calibration, radiusXY, doSubPixelLocalization, numThreads );
 		}
 		catch ( final IncompatibleTypeException | InterruptedException | ExecutionException e )
 		{
@@ -137,7 +145,8 @@ public class HessianDetector< T extends RealType< T > & NativeType< T > > implem
 
 	private final Img< DoubleType > computeHessianDeterminant() throws IncompatibleTypeException, InterruptedException, ExecutionException
 	{
-		final int n = img.numDimensions();
+		// Squeeze singleton dimensions
+		final int n = interval.numDimensions();
 
 		// Sigmas in pixel units.
 		final double[] radius = new double[] { radiusXY, radiusXY, radiusZ };
@@ -168,7 +177,8 @@ public class HessianDetector< T extends RealType< T > & NativeType< T > > implem
 		// Handle multithreading.
 		final ExecutorService es = Executors.newFixedThreadPool( numThreads );
 		// Hessian calculation.
-		HessianMatrix.calculateMatrix( img, gaussian,
+		final IntervalView< T > input = Views.zeroMin( Views.interval( img, interval ) );
+		HessianMatrix.calculateMatrix( input, gaussian,
 				gradient, hessian, new OutOfBoundsBorderFactory<>(), numThreads, es,
 				sigmas );
 
@@ -187,7 +197,7 @@ public class HessianDetector< T extends RealType< T > & NativeType< T > > implem
 				return det;
 			};
 		}
-		else
+		else // n == 3
 		{
 			detcalc = ( c ) -> {
 				final double a00 = c.get( 0 ).get();
