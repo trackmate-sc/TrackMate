@@ -117,25 +117,10 @@ public class HessianDetector< T extends RealType< T > & NativeType< T > > implem
 		try
 		{
 			final Img< DoubleType > det = computeHessianDeterminant();
+
 			if ( normalize )
-			{
-				// Min & Max.
-				double max = Double.NEGATIVE_INFINITY;
-				double min = Double.POSITIVE_INFINITY;
-				for ( final DoubleType d : det )
-				{
-					final double val = d.get();
-					if ( val > max )
-						max = val;
-					if ( val < min )
-						min = val;
-				}
-				for ( final DoubleType d : det )
-				{
-					final double val = d.get();
-					d.set( ( val - min ) / ( max - min ) );
-				}
-			}
+				DetectionUtils.normalize( det );
+
 			spots = DetectionUtils.findLocalMaxima( det, threshold, calibration, radiusXY, doSubPixelLocalization, numThreads );
 		}
 		catch ( final IncompatibleTypeException | InterruptedException | ExecutionException e )

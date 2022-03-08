@@ -509,4 +509,32 @@ public class DetectionUtils
 			singleChannel = ImgPlusViews.hyperSlice( singleTimePoint, singleTimePoint.dimensionIndex( Axes.CHANNEL ), channel );
 		return singleChannel;
 	}
+
+	/**
+	 * Normalize the pixel value of an image between 0 and 1.
+	 * 
+	 * @param <T>
+	 *            the type of pixels in the image. Must extend {@link RealType}.
+	 * @param input
+	 *            the input image (iterable).
+	 */
+	public static final < T extends RealType< T > > void normalize( final Iterable< T > input )
+	{
+		// Min & Max.
+		double max = Double.NEGATIVE_INFINITY;
+		double min = Double.POSITIVE_INFINITY;
+		for ( final T d : input )
+		{
+			final double val = d.getRealDouble();
+			if ( val > max )
+				max = val;
+			if ( val < min )
+				min = val;
+		}
+		for ( final T d : input )
+		{
+			final double val = d.getRealDouble();
+			d.setReal( ( val - min ) / ( max - min ) );
+		}
+	}
 }
