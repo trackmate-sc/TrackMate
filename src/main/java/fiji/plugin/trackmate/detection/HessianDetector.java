@@ -22,7 +22,7 @@ import net.imglib2.parallel.TaskExecutor;
 import net.imglib2.parallel.TaskExecutors;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.real.DoubleType;
+import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Util;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
@@ -117,7 +117,7 @@ public class HessianDetector< T extends RealType< T > & NativeType< T > > implem
 		try
 		{
 			// Compute Hessian.
-			final Img< DoubleType > det = computeHessianDeterminant();
+			final Img< FloatType > det = computeHessianDeterminant( new FloatType() );
 
 			// Normalize from 0 to 1.
 			if ( normalize )
@@ -126,7 +126,7 @@ public class HessianDetector< T extends RealType< T > & NativeType< T > > implem
 			// Translate back with respect to ROI.
 			final long[] minopposite = new long[ interval.numDimensions() ];
 			interval.min( minopposite );
-			final IntervalView< DoubleType > to = Views.translate( det, minopposite );
+			final IntervalView< FloatType > to = Views.translate( det, minopposite );
 
 			// Find spots.
 			spots = DetectionUtils.findLocalMaxima( to, threshold, calibration, radiusXY, doSubPixelLocalization, numThreads );
@@ -143,7 +143,7 @@ public class HessianDetector< T extends RealType< T > & NativeType< T > > implem
 		return true;
 	}
 
-	private final Img< DoubleType > computeHessianDeterminant() throws IncompatibleTypeException, InterruptedException, ExecutionException
+	private final < R extends RealType< R > & NativeType< R > > Img< R > computeHessianDeterminant( final R type ) throws IncompatibleTypeException, InterruptedException, ExecutionException
 	{
 		// Squeeze singleton dimensions
 		final int n = interval.numDimensions();
@@ -169,10 +169,10 @@ public class HessianDetector< T extends RealType< T > & NativeType< T > > implem
 		gradientDims[ n ] = n;
 		final Dimensions hessianDimensions = FinalDimensions.wrap( hessianDims );
 		final FinalDimensions gradientDimensions = FinalDimensions.wrap( gradientDims );
-		final ImgFactory< DoubleType > factory = Util.getArrayOrCellImgFactory( hessianDimensions, new DoubleType() );
-		final Img< DoubleType > hessian = factory.create( hessianDimensions );
-		final Img< DoubleType > gradient = factory.create( gradientDimensions );
-		final Img< DoubleType > gaussian = factory.create( interval );
+		final ImgFactory< R > factory = Util.getArrayOrCellImgFactory( hessianDimensions, type );
+		final Img< R > hessian = factory.create( hessianDimensions );
+		final Img< R > gradient = factory.create( gradientDimensions );
+		final Img< R > gaussian = factory.create( interval );
 
 		// Handle multithreading.
 		final ExecutorService es = Executors.newFixedThreadPool( numThreads );
@@ -183,16 +183,16 @@ public class HessianDetector< T extends RealType< T > & NativeType< T > > implem
 				sigmas );
 
 		// Normalize for pixel size.
-		final IntervalView< DoubleType > H = HessianMatrix.scaleHessianMatrix( hessian, sigmas );
+		final IntervalView< R > H = HessianMatrix.scaleHessianMatrix( hessian, sigmas );
 
 		// Compute determinant.
-		final ToDoubleFunction< RealComposite< DoubleType > > detcalc;
+		final ToDoubleFunction< RealComposite< R > > detcalc;
 		if ( n == 2 )
 		{
 			detcalc = ( c ) -> {
-				final double a00 = c.get( 0 ).get();
-				final double a01 = c.get( 1 ).get();
-				final double a11 = c.get( 2 ).get();
+				final double a00 = c.get( 0 ).getRealDouble();
+				final double a01 = c.get( 1 ).getRealDouble();
+				final double a11 = c.get( 2 ).getRealDouble();
 				final double det = a00 * a11 - a01 * a01;
 				return det;
 			};
@@ -200,12 +200,12 @@ public class HessianDetector< T extends RealType< T > & NativeType< T > > implem
 		else // n == 3
 		{
 			detcalc = ( c ) -> {
-				final double a00 = c.get( 0 ).get();
-				final double a01 = c.get( 1 ).get();
-				final double a02 = c.get( 2 ).get();
-				final double a11 = c.get( 3 ).get();
-				final double a12 = c.get( 4 ).get();
-				final double a22 = c.get( 5 ).get();
+				final double a00 = c.get( 0 ).getRealDouble();
+				final double a01 = c.get( 1 ).getRealDouble();
+				final double a02 = c.get( 2 ).getRealDouble();
+				final double a11 = c.get( 3 ).getRealDouble();
+				final double a12 = c.get( 4 ).getRealDouble();
+				final double a22 = c.get( 5 ).getRealDouble();
 
 				final double x = a11 * a22 - a12 * a12;
 				final double y = a01 * a22 - a02 * a12;
@@ -217,12 +217,12 @@ public class HessianDetector< T extends RealType< T > & NativeType< T > > implem
 			};
 		}
 
-		final CompositeIntervalView< DoubleType, RealComposite< DoubleType > > composite = Views.collapseReal( H );
-		final Img< DoubleType > det = factory.create( interval );
+		final CompositeIntervalView< R, RealComposite< R > > composite = Views.collapseReal( H );
+		final Img< R > det = factory.create( interval );
 
 		final TaskExecutor taskExecutor = TaskExecutors.forExecutorServiceAndNumTasks( es, numThreads );
 		LoopBuilder.setImages( composite, det ).multiThreaded( taskExecutor ).forEachPixel(
-				( c, d ) -> d.set( detcalc.applyAsDouble( c ) ) );
+				( c, d ) -> d.setReal( detcalc.applyAsDouble( c ) ) );
 
 		return det;
 	}
