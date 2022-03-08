@@ -106,6 +106,12 @@ public class HessianDetectorFactory< T extends RealType< T > & NativeType< T > >
 	}
 
 	@Override
+	public boolean forbidMultithreading()
+	{
+		return true;
+	}
+
+	@Override
 	public String getKey()
 	{
 		return DETECTOR_KEY;
