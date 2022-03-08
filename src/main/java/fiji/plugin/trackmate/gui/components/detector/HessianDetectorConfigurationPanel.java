@@ -53,7 +53,6 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.detection.HessianDetectorFactory;
-import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.util.JLabelLogger;
