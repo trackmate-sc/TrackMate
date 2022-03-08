@@ -554,13 +554,13 @@ public class TMUtils
 
 		// X, we must have it.
 		final int xindex = img.dimensionIndex( Axes.X );
-		min[ xindex ] = settings.xstart;
-		max[ xindex ] = settings.xend;
+		min[ xindex ] = settings.getXstart();
+		max[ xindex ] = settings.getXend();
 
 		// Y, we must have it.
 		final int yindex = img.dimensionIndex( Axes.Y );
-		min[ yindex ] = settings.ystart;
-		max[ yindex ] = settings.yend;
+		min[ yindex ] = settings.getYstart();
+		max[ yindex ] = settings.getYend();
 
 		// Z, we MIGHT have it.
 		final int zindex = img.dimensionIndex( Axes.Z );
@@ -635,13 +635,13 @@ public class TMUtils
 
 		// X, we must have it.
 		final int xindex = img.dimensionIndex( Axes.X );
-		min[ xindex ] = settings.xstart;
-		max[ xindex ] = settings.xend;
+		min[ xindex ] = settings.getXstart();
+		max[ xindex ] = settings.getXend();
 
 		// Y, we must have it.
 		final int yindex = img.dimensionIndex( Axes.Y );
-		min[ yindex ] = settings.ystart;
-		max[ yindex ] = settings.yend;
+		min[ yindex ] = settings.getYstart();
+		max[ yindex ] = settings.getYend();
 
 		// Z, we MIGHT have it.
 		final int zindex = img.dimensionIndex( Axes.Z );

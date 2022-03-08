@@ -21,7 +21,6 @@
  */
 package fiji.plugin.trackmate;
 
-import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -83,7 +82,7 @@ public class Settings
 	 * discard found spots outside the ROI. If <code>null</code>, the whole
 	 * image is considered.
 	 */
-	public Roi roi;
+	private Roi roi;
 
 	// Crop cube
 	/**
@@ -95,26 +94,6 @@ public class Settings
 	 * The time-frame index, <b>0-based</b>, of the last time-point to process.
 	 */
 	public int tend;
-
-	/**
-	 * The lowest pixel X position, <b>0-based</b>, of the volume to process.
-	 */
-	public int xstart;
-
-	/**
-	 * The highest pixel X position, <b>0-based</b>, of the volume to process.
-	 */
-	public int xend;
-
-	/**
-	 * The lowest pixel Y position, <b>0-based</b>, of the volume to process.
-	 */
-	public int ystart;
-
-	/**
-	 * The lowest pixel Y position, <b>0-based</b>, of the volume to process.
-	 */
-	public int yend;
 
 	/**
 	 * The lowest pixel Z position, <b>0-based</b>, of the volume to process.
@@ -252,23 +231,38 @@ public class Settings
 		this.zend = imp.getNSlices() - 1;
 		this.tstart = 0;
 		this.tend = imp.getNFrames() - 1;
-		this.roi = imp.getRoi();
-		if ( roi == null )
-		{
-			this.xstart = 0;
-			this.xend = width - 1;
-			this.ystart = 0;
-			this.yend = height - 1;
-		}
-		else
-		{
-			final Rectangle boundingRect = roi.getBounds();
-			this.xstart = boundingRect.x;
-			this.xend = boundingRect.width + boundingRect.x;
-			this.ystart = boundingRect.y;
-			this.yend = boundingRect.height + boundingRect.y;
-		}
+		setRoi( imp.getRoi() );
 		// The rest is left to the user
+	}
+
+	public Roi getRoi()
+	{
+		return roi;
+	}
+
+	public void setRoi( final Roi roi )
+	{
+		this.roi = roi;
+	}
+
+	public int getXstart()
+	{
+		return roi == null ? 0 : roi.getBounds().x;
+	}
+
+	public int getXend()
+	{
+		return roi == null ? width - 1 : roi.getBounds().x + roi.getBounds().width;
+	}
+
+	public int getYstart()
+	{
+		return roi == null ? 0 : roi.getBounds().y;
+	}
+
+	public int getYend()
+	{
+		return roi == null ? height - 1 : roi.getBounds().y + roi.getBounds().height;
 	}
 
 	/**
@@ -346,8 +340,8 @@ public class Settings
 		}
 
 		str.append( "Geometry:\n" );
-		str.append( String.format( "  X = %4d - %4d, dx = %g\n", xstart, xend, dx ) );
-		str.append( String.format( "  Y = %4d - %4d, dy = %g\n", ystart, yend, dy ) );
+		str.append( String.format( "  X = %4d - %4d, dx = %g\n", getXstart(), getXend(), dx ) );
+		str.append( String.format( "  Y = %4d - %4d, dy = %g\n", getYstart(), getYend(), dy ) );
 		str.append( String.format( "  Z = %4d - %4d, dz = %g\n", zstart, zend, dz ) );
 		str.append( String.format( "  T = %4d - %4d, dt = %g\n", tstart, tend, dt ) );
 

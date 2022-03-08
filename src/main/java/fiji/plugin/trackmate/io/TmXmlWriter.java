@@ -321,10 +321,10 @@ public class TmXmlWriter
 	private Element echoCropSettings( final Settings settings )
 	{
 		final Element settingsElement = new Element( CROP_ELEMENT_KEY );
-		settingsElement.setAttribute( CROP_XSTART_ATTRIBUTE_NAME, "" + settings.xstart );
-		settingsElement.setAttribute( CROP_XEND_ATTRIBUTE_NAME, "" + settings.xend );
-		settingsElement.setAttribute( CROP_YSTART_ATTRIBUTE_NAME, "" + settings.ystart );
-		settingsElement.setAttribute( CROP_YEND_ATTRIBUTE_NAME, "" + settings.yend );
+		settingsElement.setAttribute( CROP_XSTART_ATTRIBUTE_NAME, "" + settings.getXstart() );
+		settingsElement.setAttribute( CROP_XEND_ATTRIBUTE_NAME, "" + settings.getXend() );
+		settingsElement.setAttribute( CROP_YSTART_ATTRIBUTE_NAME, "" + settings.getYstart() );
+		settingsElement.setAttribute( CROP_YEND_ATTRIBUTE_NAME, "" + settings.getYend() );
 		settingsElement.setAttribute( CROP_ZSTART_ATTRIBUTE_NAME, "" + settings.zstart );
 		settingsElement.setAttribute( CROP_ZEND_ATTRIBUTE_NAME, "" + settings.zend );
 		settingsElement.setAttribute( CROP_TSTART_ATTRIBUTE_NAME, "" + settings.tstart );

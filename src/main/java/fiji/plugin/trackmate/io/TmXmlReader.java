@@ -31,10 +31,6 @@ import static fiji.plugin.trackmate.io.TmXmlKeys.ANALYZER_COLLECTION_ELEMENT_KEY
 import static fiji.plugin.trackmate.io.TmXmlKeys.CROP_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.CROP_TEND_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.io.TmXmlKeys.CROP_TSTART_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.CROP_XEND_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.CROP_XSTART_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.CROP_YEND_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.CROP_YSTART_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.io.TmXmlKeys.CROP_ZEND_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.io.TmXmlKeys.CROP_ZSTART_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.io.TmXmlKeys.DETECTOR_SETTINGS_ELEMENT_KEY;
@@ -728,10 +724,6 @@ public class TmXmlReader
 		final Element settingsEl = settingsElement.getChild( CROP_ELEMENT_KEY );
 		if ( null != settingsEl )
 		{
-			settings.xstart = readIntAttribute( settingsEl, CROP_XSTART_ATTRIBUTE_NAME, logger, 1 );
-			settings.xend = readIntAttribute( settingsEl, CROP_XEND_ATTRIBUTE_NAME, logger, 512 );
-			settings.ystart = readIntAttribute( settingsEl, CROP_YSTART_ATTRIBUTE_NAME, logger, 1 );
-			settings.yend = readIntAttribute( settingsEl, CROP_YEND_ATTRIBUTE_NAME, logger, 512 );
 			settings.zstart = readIntAttribute( settingsEl, CROP_ZSTART_ATTRIBUTE_NAME, logger, 1 );
 			settings.zend = readIntAttribute( settingsEl, CROP_ZEND_ATTRIBUTE_NAME, logger, 10 );
 			settings.tstart = readIntAttribute( settingsEl, CROP_TSTART_ATTRIBUTE_NAME, logger, 1 );

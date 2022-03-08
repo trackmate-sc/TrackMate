@@ -105,15 +105,11 @@ public class StartDialogDescriptor extends WizardPanelDescriptor
 	{
 		// Copy the values in the panel to the settings object.
 		final RoiSettingsPanel panel = ( RoiSettingsPanel ) targetPanel;
-		settings.xstart = ( ( Number ) panel.tfXStart.getValue() ).intValue();
-		settings.xend = ( ( Number ) panel.tfXEnd.getValue() ).intValue();
-		settings.ystart = ( ( Number ) panel.tfYStart.getValue() ).intValue();
-		settings.yend = ( ( Number ) panel.tfYEnd.getValue() ).intValue();
+		settings.setRoi( settings.imp.getRoi() );
 		settings.zstart = ( ( Number ) panel.tfZStart.getValue() ).intValue();
 		settings.zend = ( ( Number ) panel.tfZEnd.getValue() ).intValue();
 		settings.tstart = ( ( Number ) panel.tfTStart.getValue() ).intValue();
 		settings.tend = ( ( Number ) panel.tfTEnd.getValue() ).intValue();
-		settings.roi = settings.imp.getRoi();
 		// Log
 		logger.log( "\nImage region of interest:\n", Logger.BLUE_COLOR );
 		logger.log( settings.toStringImageInfo() );
@@ -353,7 +349,7 @@ public class StartDialogDescriptor extends WizardPanelDescriptor
 			add( lblCropSetting, gbcLabelCropSetting );
 
 			tfXStart = new JFormattedTextField( Integer.valueOf( 0 ) );
-			GuiUtils.selectAllOnFocus( tfXStart );
+			tfXStart.setEnabled( false );
 			tfXStart.setHorizontalAlignment( SwingConstants.CENTER );
 			tfXStart.setPreferredSize( TEXTFIELD_DIMENSION );
 			tfXStart.setFont( SMALL_FONT );
@@ -366,7 +362,7 @@ public class StartDialogDescriptor extends WizardPanelDescriptor
 			add( tfXStart, gbcTextFieldXStart );
 
 			tfXEnd = new JFormattedTextField( Integer.valueOf( 0 ) );
-			GuiUtils.selectAllOnFocus( tfXEnd );
+			tfXEnd.setEnabled( false );
 			tfXEnd.setHorizontalAlignment( SwingConstants.CENTER );
 			tfXEnd.setPreferredSize( TEXTFIELD_DIMENSION );
 			tfXEnd.setFont( SMALL_FONT );
@@ -413,7 +409,7 @@ public class StartDialogDescriptor extends WizardPanelDescriptor
 			add( jLabelTo3, gbcLabelTo3 );
 
 			tfYStart = new JFormattedTextField( Integer.valueOf( 0 ) );
-			GuiUtils.selectAllOnFocus( tfYStart );
+			tfYStart.setEnabled( false );
 			tfYStart.setHorizontalAlignment( SwingConstants.CENTER );
 			tfYStart.setPreferredSize( TEXTFIELD_DIMENSION );
 			tfYStart.setFont( SMALL_FONT );
@@ -443,7 +439,7 @@ public class StartDialogDescriptor extends WizardPanelDescriptor
 			add( jLabelZ, gbcLabelZ );
 
 			tfYEnd = new JFormattedTextField( Integer.valueOf( 0 ) );
-			GuiUtils.selectAllOnFocus( tfYEnd );
+			tfYEnd.setEnabled( false );
 			tfYEnd.setHorizontalAlignment( SwingConstants.CENTER );
 			tfYEnd.setPreferredSize( TEXTFIELD_DIMENSION );
 			tfYEnd.setFont( SMALL_FONT );
