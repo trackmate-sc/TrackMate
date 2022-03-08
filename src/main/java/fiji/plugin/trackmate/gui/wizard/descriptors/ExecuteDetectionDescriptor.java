@@ -23,6 +23,7 @@ package fiji.plugin.trackmate.gui.wizard.descriptors;
 
 import org.scijava.Cancelable;
 
+import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.components.LogPanel;
 import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
@@ -45,6 +46,11 @@ public class ExecuteDetectionDescriptor extends WizardPanelDescriptor
 	public Runnable getForwardRunnable()
 	{
 		return () -> {
+
+			// Read ROI from imp NOW.
+			final Settings settings = trackmate.getSettings();
+			settings.setRoi( settings.imp.getRoi() );
+			// Exec detection.
 			final long start = System.currentTimeMillis();
 			final boolean ok = trackmate.execDetection();
 			if ( !ok )

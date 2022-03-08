@@ -120,7 +120,7 @@ public class DetectionUtils
 					final Settings lSettings = new Settings( settings.imp );
 					lSettings.tstart = frame;
 					lSettings.tend = frame;
-					lSettings.roi = settings.roi;
+					settings.setRoi( settings.imp.getRoi() );
 
 					lSettings.detectorFactory = detectorFactory;
 					lSettings.detectorSettings = detectorSettings;
