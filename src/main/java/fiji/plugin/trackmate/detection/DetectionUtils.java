@@ -31,6 +31,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
+import org.scijava.thread.ThreadService;
+
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
@@ -38,6 +40,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.util.MedianFilter2D;
+import fiji.plugin.trackmate.util.TMUtils;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
@@ -335,7 +338,13 @@ public class DetectionUtils
 		return medFilt.getResult();
 	}
 
-	public static final < T extends RealType< T > > List< Spot > findLocalMaxima( final RandomAccessibleInterval< T > source, final double threshold, final double[] calibration, final double radius, final boolean doSubPixelLocalization, final int numThreads )
+	public static final < T extends RealType< T > > List< Spot > findLocalMaxima(
+			final RandomAccessibleInterval< T > source,
+			final double threshold,
+			final double[] calibration,
+			final double radius,
+			final boolean doSubPixelLocalization,
+			final int nTasks )
 	{
 		/*
 		 * Find maxima.
@@ -345,21 +354,30 @@ public class DetectionUtils
 		val.setReal( threshold );
 		final LocalNeighborhoodCheck< Point, T > localNeighborhoodCheck = new LocalExtrema.MaximumCheck<>( val );
 		final IntervalView< T > dogWithBorder = Views.interval( Views.extendMirrorSingle( source ), Intervals.expand( source, 1 ) );
-		final ExecutorService service = Executors.newFixedThreadPool( numThreads );
+		final ThreadService threadService = TMUtils.getContext().getService( ThreadService.class );
+		final ExecutorService es;
+		if ( threadService == null )
+			es = Executors.newCachedThreadPool();
+		else
+			es = threadService.getExecutorService();
 		List< Point > peaks;
 		try
 		{
-			peaks = LocalExtrema.findLocalExtrema( dogWithBorder, localNeighborhoodCheck, new RectangleShape( 1, true ), service, numThreads );
+			peaks = LocalExtrema.findLocalExtrema(
+					dogWithBorder,
+					localNeighborhoodCheck,
+					new RectangleShape( 1, true ),
+					es,
+					nTasks );
 		}
 		catch ( InterruptedException | ExecutionException e )
 		{
 			e.printStackTrace();
 			peaks = Collections.emptyList();
 		}
-		service.shutdown();
 
 		if ( peaks.isEmpty() )
-		{ return Collections.emptyList(); }
+			return Collections.emptyList();
 
 		final List< Spot > spots;
 		if ( doSubPixelLocalization )
@@ -370,7 +388,7 @@ public class DetectionUtils
 			 */
 
 			final SubpixelLocalization< Point, T > spl = new SubpixelLocalization<>( source.numDimensions() );
-			spl.setNumThreads( numThreads );
+			spl.setNumThreads( nTasks );
 			spl.setReturnInvalidPeaks( true );
 			spl.setCanMoveOutside( true );
 			spl.setAllowMaximaTolerance( true );
