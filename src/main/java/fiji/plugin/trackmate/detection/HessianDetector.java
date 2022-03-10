@@ -67,7 +67,7 @@ public class HessianDetector< T extends RealType< T > & NativeType< T > > implem
 
 	private long processingTime;
 
-	private int numThreads;
+	private int nTasks;
 
 	private final boolean normalize;
 
@@ -207,7 +207,7 @@ public class HessianDetector< T extends RealType< T > & NativeType< T > > implem
 			final IntervalView< FloatType > to = Views.translate( det, minopposite );
 
 			// Find spots.
-			return DetectionUtils.findLocalMaxima( to, threshold, calibration, radiusXY, doSubPixelLocalization, numThreads );
+			return DetectionUtils.findLocalMaxima( to, threshold, calibration, radiusXY, doSubPixelLocalization, nTasks );
 		}
 		catch ( final IncompatibleTypeException | InterruptedException | ExecutionException e )
 		{
@@ -251,7 +251,7 @@ public class HessianDetector< T extends RealType< T > & NativeType< T > > implem
 		// Hessian calculation.
 		final IntervalView< T > input = Views.zeroMin( Views.interval( img, crop ) );
 		HessianMatrix.calculateMatrix( input, gaussian,
-				gradient, hessian, new OutOfBoundsBorderFactory<>(), numThreads, es,
+				gradient, hessian, new OutOfBoundsBorderFactory<>(), nTasks, es,
 				sigmas );
 
 		// Normalize for pixel size.
@@ -292,7 +292,7 @@ public class HessianDetector< T extends RealType< T > & NativeType< T > > implem
 		final CompositeIntervalView< R, RealComposite< R > > composite = Views.collapseReal( H );
 		final Img< R > det = factory.create( crop );
 
-		final TaskExecutor taskExecutor = TaskExecutors.forExecutorServiceAndNumTasks( es, numThreads );
+		final TaskExecutor taskExecutor = TaskExecutors.forExecutorServiceAndNumTasks( es, nTasks );
 		LoopBuilder.setImages( composite, det ).multiThreaded( taskExecutor ).forEachPixel(
 				( c, d ) -> d.setReal( detcalc.applyAsDouble( c ) ) );
 
@@ -320,18 +320,18 @@ public class HessianDetector< T extends RealType< T > & NativeType< T > > implem
 	@Override
 	public void setNumThreads()
 	{
-		this.numThreads = Runtime.getRuntime().availableProcessors() / 2;
+		this.nTasks = Runtime.getRuntime().availableProcessors() / 2;
 	}
 
 	@Override
-	public void setNumThreads( final int numThreads )
+	public void setNumThreads( final int nTasks )
 	{
-		this.numThreads = numThreads;
+		this.nTasks = nTasks;
 	}
 
 	@Override
 	public int getNumThreads()
 	{
-		return numThreads;
+		return nTasks;
 	}
 }
