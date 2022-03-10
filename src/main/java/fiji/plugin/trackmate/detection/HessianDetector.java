@@ -1,14 +1,22 @@
 package fiji.plugin.trackmate.detection;
 
+import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.ToDoubleFunction;
 
+import org.scijava.thread.ThreadService;
+
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.util.TMUtils;
+import ij.gui.Roi;
+import ij.plugin.frame.RoiManager;
 import net.imglib2.Dimensions;
 import net.imglib2.FinalDimensions;
+import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.algorithm.MultiThreaded;
@@ -23,6 +31,7 @@ import net.imglib2.parallel.TaskExecutors;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.util.Intervals;
 import net.imglib2.util.Util;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
@@ -62,6 +71,8 @@ public class HessianDetector< T extends RealType< T > & NativeType< T > > implem
 
 	private final boolean normalize;
 
+	private final ExecutorService es;
+
 	/*
 	 * CONSTRUCTOR
 	 */
@@ -85,6 +96,12 @@ public class HessianDetector< T extends RealType< T > & NativeType< T > > implem
 		this.normalize = normalize;
 		this.doSubPixelLocalization = doSubPixelLocalization;
 		setNumThreads();
+		// Handle multithreading.
+		final ThreadService threadService = TMUtils.getContext().getService( ThreadService.class );
+		if ( threadService == null )
+			es = Executors.newCachedThreadPool();
+		else
+			es = threadService.getExecutorService();
 	}
 
 	/*
@@ -114,39 +131,96 @@ public class HessianDetector< T extends RealType< T > & NativeType< T > > implem
 		errorMessage = null;
 
 		final long start = System.currentTimeMillis();
+
+		final RoiManager roiManager = RoiManager.getInstance();
+		boolean ok = true;
+		if ( roiManager == null || roiManager.getCount() == 0 )
+		{
+			// Roi manager not shown or empty -> process all.
+			spots = processInterval( interval );
+			if ( spots == null )
+				ok = false;
+		}
+		else
+		{
+			// We have individual Rois -> process them one by one separately.
+			spots = new ArrayList<>();
+			for ( final Roi roi : roiManager.getRoisAsArray() )
+			{
+				// Create interval from ROI.
+				final Rectangle bounds = roi.getBounds();
+				final long[] max = new long[ img.numDimensions() ];
+				final long[] min = new long[ img.numDimensions() ];
+
+				min[ 0 ] = bounds.x;
+				max[ 0 ] = bounds.x + bounds.width;
+				min[ 1 ] = bounds.y;
+				max[ 1 ] = bounds.y + bounds.height;
+				if ( interval.numDimensions() > 2 )
+				{
+					min[ 2 ] = interval.min( 2 );
+					max[ 2 ] = interval.max( 2 );
+				}
+				final FinalInterval intervalroi = FinalInterval.wrap( min, max );
+				final FinalInterval intersect = Intervals.intersect( interval, intervalroi );
+
+				// Process interval.
+				final List< Spot > spotsThisRoi = processInterval( intersect );
+				if ( spotsThisRoi == null )
+				{
+					ok = false;
+					continue;
+				}
+
+				// Remove spots out of the Roi.
+				final ArrayList< Spot > prunedSpots = new ArrayList<>();
+				for ( final Spot spot : spotsThisRoi )
+				{
+					if ( roi.contains(
+							( int ) Math.round( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ] ),
+							( int ) Math.round( spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) ) )
+						prunedSpots.add( spot );
+				}
+				spots.addAll( prunedSpots );
+			}
+		}
+
+		final long end = System.currentTimeMillis();
+		this.processingTime = end - start;
+		return ok;
+	}
+
+	private final List< Spot > processInterval( final Interval crop )
+	{
 		try
 		{
 			// Compute Hessian.
-			final Img< FloatType > det = computeHessianDeterminant( new FloatType() );
+			final Img< FloatType > det = computeHessianDeterminant( crop, new FloatType() );
 
 			// Normalize from 0 to 1.
 			if ( normalize )
 				DetectionUtils.normalize( det );
 
 			// Translate back with respect to ROI.
-			final long[] minopposite = new long[ interval.numDimensions() ];
-			interval.min( minopposite );
+			final long[] minopposite = new long[ crop.numDimensions() ];
+			crop.min( minopposite );
 			final IntervalView< FloatType > to = Views.translate( det, minopposite );
 
 			// Find spots.
-			spots = DetectionUtils.findLocalMaxima( to, threshold, calibration, radiusXY, doSubPixelLocalization, numThreads );
+			return DetectionUtils.findLocalMaxima( to, threshold, calibration, radiusXY, doSubPixelLocalization, numThreads );
 		}
 		catch ( final IncompatibleTypeException | InterruptedException | ExecutionException e )
 		{
 			errorMessage = BASE_ERROR_MESSAGE + e.getMessage();
 			e.printStackTrace();
-			return false;
+			return null;
 		}
-
-		final long end = System.currentTimeMillis();
-		this.processingTime = end - start;
-		return true;
 	}
 
-	private final < R extends RealType< R > & NativeType< R > > Img< R > computeHessianDeterminant( final R type ) throws IncompatibleTypeException, InterruptedException, ExecutionException
+	private final < R extends RealType< R > & NativeType< R > > Img< R > computeHessianDeterminant( final Interval crop, final R type ) throws IncompatibleTypeException, InterruptedException, ExecutionException
 	{
 		// Squeeze singleton dimensions
-		final int n = interval.numDimensions();
+		final int n = crop.numDimensions();
 
 		// Sigmas in pixel units.
 		final double[] radius = new double[] { radiusXY, radiusXY, radiusZ };
@@ -162,8 +236,8 @@ public class HessianDetector< T extends RealType< T > & NativeType< T > > implem
 		final long[] hessianDims = new long[ n + 1 ];
 		for ( int d = 0; d < n; d++ )
 		{
-			hessianDims[ d ] = interval.dimension( d );
-			gradientDims[ d ] = interval.dimension( d );
+			hessianDims[ d ] = crop.dimension( d );
+			gradientDims[ d ] = crop.dimension( d );
 		}
 		hessianDims[ n ] = n * ( n + 1 ) / 2;
 		gradientDims[ n ] = n;
@@ -172,12 +246,10 @@ public class HessianDetector< T extends RealType< T > & NativeType< T > > implem
 		final ImgFactory< R > factory = Util.getArrayOrCellImgFactory( hessianDimensions, type );
 		final Img< R > hessian = factory.create( hessianDimensions );
 		final Img< R > gradient = factory.create( gradientDimensions );
-		final Img< R > gaussian = factory.create( interval );
+		final Img< R > gaussian = factory.create( crop );
 
-		// Handle multithreading.
-		final ExecutorService es = Executors.newFixedThreadPool( numThreads );
 		// Hessian calculation.
-		final IntervalView< T > input = Views.zeroMin( Views.interval( img, interval ) );
+		final IntervalView< T > input = Views.zeroMin( Views.interval( img, crop ) );
 		HessianMatrix.calculateMatrix( input, gaussian,
 				gradient, hessian, new OutOfBoundsBorderFactory<>(), numThreads, es,
 				sigmas );
@@ -218,7 +290,7 @@ public class HessianDetector< T extends RealType< T > & NativeType< T > > implem
 		}
 
 		final CompositeIntervalView< R, RealComposite< R > > composite = Views.collapseReal( H );
-		final Img< R > det = factory.create( interval );
+		final Img< R > det = factory.create( crop );
 
 		final TaskExecutor taskExecutor = TaskExecutors.forExecutorServiceAndNumTasks( es, numThreads );
 		LoopBuilder.setImages( composite, det ).multiThreaded( taskExecutor ).forEachPixel(
