@@ -163,6 +163,8 @@ public class HessianDetector< T extends RealType< T > & NativeType< T > > implem
 				}
 				final FinalInterval intervalroi = FinalInterval.wrap( min, max );
 				final FinalInterval intersect = Intervals.intersect( interval, intervalroi );
+				if ( Intervals.isEmpty( intersect ) )
+					continue;
 
 				// Process interval.
 				final List< Spot > spotsThisRoi = processInterval( intersect );
