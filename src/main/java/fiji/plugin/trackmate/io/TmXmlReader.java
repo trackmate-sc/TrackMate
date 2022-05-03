@@ -856,7 +856,15 @@ public class TmXmlReader
 		// All the hard work is delegated to the factory.
 		final boolean lOk = factory.unmarshall( element, ds );
 		if ( lOk )
+		{
 			settings.trackerSettings = ds;
+		}
+		else
+		{
+			logger.error( "Problem reading the tracker settings:\n" + factory.getErrorMessage() );
+			logger.error( "Subtituting default tracker settings.\n" );
+			settings.trackerSettings = factory.getDefaultSettings();
+		}
 	}
 
 	/**

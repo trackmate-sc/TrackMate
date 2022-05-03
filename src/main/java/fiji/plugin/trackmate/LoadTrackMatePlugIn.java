@@ -225,6 +225,16 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 				+ "--------------------\n",
 				Color.GRAY );
 
+		final String warning = reader.getErrorMessage();
+		if ( !warning.isEmpty() )
+		{
+			logger2.log( "Warnings occured during reading the file:\n"
+					+ "--------------------\n"
+					+ warning
+					+ "--------------------\n",
+					Color.ORANGE.darker() );
+		}
+
 		logger2.log( "File loaded on " + TMUtils.getCurrentTimeString() + '\n', Logger.BLUE_COLOR );
 		final String welcomeMessage = TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION + '\n';
 		// Log GUI processing start
@@ -282,9 +292,9 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 	{
 		ImageJ.main( args );
 		final LoadTrackMatePlugIn plugIn = new LoadTrackMatePlugIn();
-//		plugIn.run( "samples/FakeTracks.xml" );
+		plugIn.run( "samples/FakeTracks.xml" );
 //		plugIn.run( "samples/MAX_Merged.xml" );
 //		plugIn.run( "c:/Users/tinevez/Development/TrackMateWS/TrackMate-Cellpose/samples/R2_multiC.xml" );
-		plugIn.run( null );
+//		plugIn.run( "/Users/tinevez/Projects/CCarabana/Data/113B_Day3/DUP_C3-20210122_113B_N1BcatTOM_day3_region3_each10min_zoom08_40x_FINAL.xml" );
 	}
 }
