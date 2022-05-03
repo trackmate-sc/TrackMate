@@ -38,13 +38,13 @@ public class DetectorKeys
 	 * The key identifying the parameter setting the target channel for
 	 * detection in a possible multi-channel image. Channels are here
 	 * 1-numbered, meaning that "1" is the first available channel (and all
-	 * images have at least this channel). Expected valkues are {@link Integer}s
+	 * images have at least this channel). Expected values are {@link Integer}s
 	 * greater than 1.
 	 * <p>
 	 * Currently used by:
 	 * <ul>
-	 * <li> {@link LogDetector}
-	 * <li> {@link DogDetector}
+	 * <li>{@link LogDetector}
+	 * <li>{@link DogDetector}
 	 * </ul>
 	 */
 	public static final String KEY_TARGET_CHANNEL = "TARGET_CHANNEL";
