@@ -46,9 +46,10 @@ public class SpotShapeAnalyzerFactory< T extends RealType< T > & NativeType< T >
 	public static final String PERIMETER = "PERIMETER";
 	public static final String CIRCULARITY = "CIRCULARITY";
 	public static final String SOLIDITY = "SOLIDITY";
+	public static final String SHAPE_INDEX = "SHAPE_INDEX";
 
 	private static final List< String > FEATURES = Arrays.asList( new String[] {
-			AREA, PERIMETER, CIRCULARITY, SOLIDITY } );
+			AREA, PERIMETER, CIRCULARITY, SOLIDITY, SHAPE_INDEX } );
 	private static final Map< String, String > FEATURE_SHORTNAMES = new HashMap< >();
 	private static final Map< String, String > FEATURE_NAMES = new HashMap< >();
 	private static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< >();
@@ -59,23 +60,26 @@ public class SpotShapeAnalyzerFactory< T extends RealType< T > & NativeType< T >
 		FEATURE_SHORTNAMES.put( PERIMETER, "Perim." );
 		FEATURE_SHORTNAMES.put( CIRCULARITY, "Circ." );
 		FEATURE_SHORTNAMES.put( SOLIDITY, "Solidity" );
+		FEATURE_SHORTNAMES.put( SHAPE_INDEX, "Shape index" );
 
 		FEATURE_NAMES.put( AREA, "Area" );
 		FEATURE_NAMES.put( PERIMETER, "Perimeter" );
 		FEATURE_NAMES.put( CIRCULARITY, "Circularity" );
 		FEATURE_NAMES.put( SOLIDITY, "Solidity" );
+		FEATURE_NAMES.put( SHAPE_INDEX, "Shape index" );
 
 		FEATURE_DIMENSIONS.put( AREA, Dimension.AREA );
 		FEATURE_DIMENSIONS.put( PERIMETER, Dimension.LENGTH );
 		FEATURE_DIMENSIONS.put( CIRCULARITY, Dimension.NONE );
 		FEATURE_DIMENSIONS.put( SOLIDITY, Dimension.NONE );
+		FEATURE_DIMENSIONS.put( SHAPE_INDEX, Dimension.NONE );
 
 		FEATURE_ISINTS.put( AREA, Boolean.FALSE );
 		FEATURE_ISINTS.put( PERIMETER, Boolean.FALSE );
 		FEATURE_ISINTS.put( CIRCULARITY, Boolean.FALSE );
 		FEATURE_ISINTS.put( SOLIDITY, Boolean.FALSE );
+		FEATURE_ISINTS.put( SHAPE_INDEX, Boolean.FALSE );
 	}
-
 
 	@Override
 	public SpotAnalyzer< T > getAnalyzer( final ImgPlus< T > img, final int frame, final int channel )
