@@ -110,10 +110,12 @@ function [tracks, metadata] = importTrackMateTracks(file, clipz, scalet)
     for i = 1 : nTracks
        
         trackNode = trackNodes.item(i-1);
-        nSpots = str2double( trackNode.getAttribute('nSpots') );
-        A = NaN( nSpots, 4); % T, X, Y, Z
-        
         detectionNodes = trackNode.getElementsByTagName('detection');
+        
+        nSpots = str2double( trackNode.getAttribute('nSpots') );
+        nSpots = min( nSpots, detectionNodes.getLength() );
+        
+        A = NaN( nSpots, 4); % T, X, Y, Z
         
         for j = 1 : nSpots
             
