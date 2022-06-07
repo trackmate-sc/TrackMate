@@ -95,8 +95,8 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 	 */
 
 	/**
-	 * Creates a new {@link LogDetectorConfigurationPanel}, a GUI able to
-	 * configure settings suitable to {@link LogDetectorFactory} and derived
+	 * Creates a new {@code HessianDetectorConfigurationPanel}, a GUI able to
+	 * configure settings suitable to {@code HessianDetector} and derived
 	 * implementations.
 	 *
 	 * @param settings
