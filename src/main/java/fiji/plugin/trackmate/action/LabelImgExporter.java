@@ -136,6 +136,10 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            tracks will be painted. If <code>false</code>, spots not
 	 *            belonging to a track will be painted with a unique ID,
 	 *            different from the track IDs and different for each spot.
+	 * @param useSpotIDsAsLabels
+	 * 	          if <code>true</code>, the label mask images will contain 
+	 * 	          the spot ID. If <code>false</code>, the label mask images 
+	 * 	          will contain the track ID.
 	 *
 	 * @return a new {@link ImagePlus}.
 	 */
@@ -143,10 +147,10 @@ public class LabelImgExporter extends AbstractTMAction
 			final TrackMate trackmate,
 			final boolean exportSpotsAsDots,
 			final boolean exportTracksOnly,
-			final boolean useSpotIdsAsLabels
+			final boolean useSpotIDsAsLabels
 			)
 	{
-		return createLabelImagePlus( trackmate, exportSpotsAsDots, exportTracksOnly, useSpotIdsAsLabels, Logger.VOID_LOGGER );
+		return createLabelImagePlus( trackmate, exportSpotsAsDots, exportTracksOnly, useSpotIDsAsLabels, Logger.VOID_LOGGER );
 	}
 
 	/**
@@ -169,6 +173,10 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            tracks will be painted. If <code>false</code>, spots not
 	 *            belonging to a track will be painted with a unique ID,
 	 *            different from the track IDs and different for each spot.
+	 * @param useSpotIDsAsLabels
+	 * 	          if <code>true</code>, the label mask images will contain 
+	 * 	          the spot ID. If <code>false</code>, the label mask images 
+	 * 	          will contain the track ID.
 	 * @param logger
 	 *            a {@link Logger} instance, to report progress of the export
 	 *            process.
@@ -205,7 +213,11 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            tracks will be painted. If <code>false</code>, spots not
 	 *            belonging to a track will be painted with a unique ID,
 	 *            different from the track IDs and different for each spot.
-	 *
+	 * @param useSpotIDsAsLabels
+	 * 	          if <code>true</code>, the label mask images will contain 
+	 * 	          the spot ID. If <code>false</code>, the label mask images 
+	 * 	          will contain the track ID.
+	 * 
 	 * @return a new {@link ImagePlus}.
 	 */
 	public static final ImagePlus createLabelImagePlus(
@@ -239,6 +251,9 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            belonging to a track will be painted with a unique ID,
 	 *            different from the track IDs and different for each spot.
 	 * @param useSpotIDsAsLabels
+	 * 	          if <code>true</code>, the label mask images will contain 
+	 * 	          the spot ID. If <code>false</code>, the label mask images 
+	 * 	          will contain the track ID.
 	 * @param logger
 	 *            a {@link Logger} instance, to report progress of the export
 	 *            process.
@@ -287,7 +302,11 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            tracks will be painted. If <code>false</code>, spots not
 	 *            belonging to a track will be painted with a unique ID,
 	 *            different from the track IDs and different for each spot.
-	 *
+	 * @param useSpotIDsAsLabels
+	 * 	          if <code>true</code>, the label mask images will contain 
+	 * 	          the spot ID. If <code>false</code>, the label mask images 
+	 * 	          will contain the track ID.
+	 * 	          
 	 * @return a new {@link ImagePlus}.
 	 */
 	public static final ImagePlus createLabelImagePlus(
@@ -320,6 +339,10 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            tracks will be painted. If <code>false</code>, spots not
 	 *            belonging to a track will be painted with a unique ID,
 	 *            different from the track IDs and different for each spot.
+	 * @param useSpotIDsAsLabels
+	 * 	          if <code>true</code>, the label mask images will contain 
+	 * 	          the spot ID. If <code>false</code>, the label mask images 
+	 * 	          will contain the track ID.
 	 * @param logger
 	 *            a {@link Logger} instance, to report progress of the export
 	 *            process.
@@ -365,7 +388,11 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            tracks will be painted. If <code>false</code>, spots not
 	 *            belonging to a track will be painted with a unique ID,
 	 *            different from the track IDs and different for each spot.
-	 *
+	 * @param useSpotIDsAsLabels
+	 * 	          if <code>true</code>, the label mask images will contain 
+	 * 	          the spot ID. If <code>false</code>, the label mask images 
+	 * 	          will contain the track ID.
+	 * 	          
 	 * @return a new {@link Img}.
 	 */
 	public static final Img< UnsignedShortType > createLabelImg(
@@ -398,6 +425,10 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            tracks will be painted. If <code>false</code>, spots not
 	 *            belonging to a track will be painted with a unique ID,
 	 *            different from the track IDs and different for each spot.
+	 * @param useSpotIDsAsLabels
+	 * 	          if <code>true</code>, the label mask images will contain 
+	 * 	          the spot ID. If <code>false</code>, the label mask images 
+	 * 	          will contain the track ID.
 	 * @param logger
 	 *            a {@link Logger} instance, to report progress of the export
 	 *            process.
