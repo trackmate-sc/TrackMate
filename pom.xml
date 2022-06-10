@@ -11,7 +11,7 @@
 
 	<groupId>sc.fiji</groupId>
 	<artifactId>TrackMate</artifactId>
-	<version>7.7.1-SNAPSHOT</version>
+	<version>7.7.1</version>
 
 	<name>TrackMate</name>
 	<description>TrackMate plugin for Fiji.</description>
@@ -121,7 +121,7 @@
 	<scm>
 		<connection>scm:git:https://github.com/fiji/TrackMate</connection>
 		<developerConnection>scm:git:git@github.com:fiji/TrackMate</developerConnection>
-		<tag>HEAD</tag>
+		<tag>TrackMate-7.7.1</tag>
 		<url>https://github.com/fiji/TrackMate</url>
 	</scm>
 	<issueManagement>
