@@ -31,6 +31,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
+import org.scijava.thread.ThreadService;
+
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
@@ -38,6 +40,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.util.MedianFilter2D;
+import fiji.plugin.trackmate.util.TMUtils;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
@@ -66,6 +69,7 @@ import net.imglib2.type.Type;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
+import net.imglib2.util.Util;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 
@@ -119,7 +123,7 @@ public class DetectionUtils
 					final Settings lSettings = new Settings( settings.imp );
 					lSettings.tstart = frame;
 					lSettings.tend = frame;
-					lSettings.roi = settings.roi;
+					settings.setRoi( settings.imp.getRoi() );
 
 					lSettings.detectorFactory = detectorFactory;
 					lSettings.detectorSettings = detectorSettings;
@@ -334,31 +338,46 @@ public class DetectionUtils
 		return medFilt.getResult();
 	}
 
-	public static final List< Spot > findLocalMaxima( final RandomAccessibleInterval< FloatType > source, final double threshold, final double[] calibration, final double radius, final boolean doSubPixelLocalization, final int numThreads )
+	public static final < T extends RealType< T > > List< Spot > findLocalMaxima(
+			final RandomAccessibleInterval< T > source,
+			final double threshold,
+			final double[] calibration,
+			final double radius,
+			final boolean doSubPixelLocalization,
+			final int nTasks )
 	{
 		/*
 		 * Find maxima.
 		 */
 
-		final FloatType val = new FloatType();
+		final T val = Util.getTypeFromInterval( source ).createVariable();
 		val.setReal( threshold );
-		final LocalNeighborhoodCheck< Point, FloatType > localNeighborhoodCheck = new LocalExtrema.MaximumCheck<>( val );
-		final IntervalView< FloatType > dogWithBorder = Views.interval( Views.extendMirrorSingle( source ), Intervals.expand( source, 1 ) );
-		final ExecutorService service = Executors.newFixedThreadPool( numThreads );
+		final LocalNeighborhoodCheck< Point, T > localNeighborhoodCheck = new LocalExtrema.MaximumCheck<>( val );
+		final IntervalView< T > dogWithBorder = Views.interval( Views.extendMirrorSingle( source ), Intervals.expand( source, 1 ) );
+		final ThreadService threadService = TMUtils.getContext().getService( ThreadService.class );
+		final ExecutorService es;
+		if ( threadService == null )
+			es = Executors.newCachedThreadPool();
+		else
+			es = threadService.getExecutorService();
 		List< Point > peaks;
 		try
 		{
-			peaks = LocalExtrema.findLocalExtrema( dogWithBorder, localNeighborhoodCheck, new RectangleShape( 1, true ), service, numThreads );
+			peaks = LocalExtrema.findLocalExtrema(
+					dogWithBorder,
+					localNeighborhoodCheck,
+					new RectangleShape( 1, true ),
+					es,
+					nTasks );
 		}
 		catch ( InterruptedException | ExecutionException e )
 		{
 			e.printStackTrace();
 			peaks = Collections.emptyList();
 		}
-		service.shutdown();
 
 		if ( peaks.isEmpty() )
-		{ return Collections.emptyList(); }
+			return Collections.emptyList();
 
 		final List< Spot > spots;
 		if ( doSubPixelLocalization )
@@ -368,8 +387,8 @@ public class DetectionUtils
 			 * Sub-pixel localize them.
 			 */
 
-			final SubpixelLocalization< Point, FloatType > spl = new SubpixelLocalization<>( source.numDimensions() );
-			spl.setNumThreads( numThreads );
+			final SubpixelLocalization< Point, T > spl = new SubpixelLocalization<>( source.numDimensions() );
+			spl.setNumThreads( nTasks );
 			spl.setReturnInvalidPeaks( true );
 			spl.setCanMoveOutside( true );
 			spl.setAllowMaximaTolerance( true );
@@ -377,7 +396,7 @@ public class DetectionUtils
 			final ArrayList< RefinedPeak< Point > > refined = spl.process( peaks, dogWithBorder, source );
 
 			spots = new ArrayList<>( refined.size() );
-			final RandomAccess< FloatType > ra = source.randomAccess();
+			final RandomAccess< T > ra = source.randomAccess();
 
 			/*
 			 * Deal with different dimensionality manually. Profound comment:
@@ -430,7 +449,7 @@ public class DetectionUtils
 		else
 		{
 			spots = new ArrayList<>( peaks.size() );
-			final RandomAccess< FloatType > ra = source.randomAccess();
+			final RandomAccess< T > ra = source.randomAccess();
 			if ( source.numDimensions() > 2 )
 			{ // 3D
 				for ( final Point peak : peaks )
@@ -507,5 +526,33 @@ public class DetectionUtils
 		else
 			singleChannel = ImgPlusViews.hyperSlice( singleTimePoint, singleTimePoint.dimensionIndex( Axes.CHANNEL ), channel );
 		return singleChannel;
+	}
+
+	/**
+	 * Normalize the pixel value of an image between 0 and 1.
+	 * 
+	 * @param <T>
+	 *            the type of pixels in the image. Must extend {@link RealType}.
+	 * @param input
+	 *            the input image (iterable).
+	 */
+	public static final < T extends RealType< T > > void normalize( final Iterable< T > input )
+	{
+		// Min & Max.
+		double max = Double.NEGATIVE_INFINITY;
+		double min = Double.POSITIVE_INFINITY;
+		for ( final T d : input )
+		{
+			final double val = d.getRealDouble();
+			if ( val > max )
+				max = val;
+			if ( val < min )
+				min = val;
+		}
+		for ( final T d : input )
+		{
+			final double val = d.getRealDouble();
+			d.setReal( ( val - min ) / ( max - min ) );
+		}
 	}
 }

@@ -31,7 +31,9 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
+import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
@@ -133,6 +135,8 @@ public class LogPanel extends JPanel
 	private class LogPanelLogger extends Logger
 	{
 
+		protected static final int MAX_N_CHARS = 10_000;
+
 		@Override
 		public void error( final String message )
 		{
@@ -149,8 +153,24 @@ public class LogPanel extends JPanel
 				{
 					final StyleContext sc = StyleContext.getDefaultStyleContext();
 					final AttributeSet aset = sc.addAttribute( SimpleAttributeSet.EMPTY, StyleConstants.Foreground, color );
-					final int len = textPane.getDocument().getLength();
-					textPane.setCaretPosition( len );
+					final AbstractDocument doc = ( AbstractDocument ) textPane.getStyledDocument();
+					final int len = doc.getLength();
+					final int l = message.length();
+				
+
+					if ( len + l > MAX_N_CHARS )
+					{
+						final int delta = Math.max( 0, Math.min( l - 1, len + l - MAX_N_CHARS ) );
+						try
+						{
+							doc.remove( 0, delta );
+						}
+						catch ( final BadLocationException e )
+						{
+							e.printStackTrace();
+						}
+					}
+					textPane.setCaretPosition( doc.getLength() );
 					textPane.setCharacterAttributes( aset, false );
 					textPane.replaceSelection( message );
 				}

@@ -48,6 +48,7 @@ import fiji.plugin.trackmate.features.SpotFeatureCalculator;
 import fiji.plugin.trackmate.features.TrackFeatureCalculator;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.util.TMUtils;
+import ij.gui.Roi;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imglib2.Interval;
@@ -407,7 +408,8 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 			 * Filter out spots not in the ROI.
 			 */
 			final SpotCollection spots;
-			if ( settings.roi != null )
+			final Roi roi = settings.getRoi();
+			if ( roi != null )
 			{
 				spots = new SpotCollection();
 				spots.setNumThreads( numThreads );
@@ -420,7 +422,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 
 					for ( final Spot spot : spotsIt )
 					{
-						if ( settings.roi.contains(
+						if ( roi.contains(
 								( int ) Math.round( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ] ),
 								( int ) Math.round( spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) ) )
 						{
@@ -534,12 +536,13 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 						}
 
 						List< Spot > prunedSpots;
-						if ( settings.roi != null )
+						final Roi roi = settings.getRoi();
+						if ( roi != null )
 						{
 							prunedSpots = new ArrayList<>();
 							for ( final Spot spot : spotsThisFrame )
 							{
-								if ( settings.roi.contains(
+								if ( roi.contains(
 										( int ) Math.round( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ] ),
 										( int ) Math.round( spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) ) )
 									prunedSpots.add( spot );

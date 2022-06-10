@@ -21,20 +21,19 @@
  */
 package fiji.plugin.trackmate.detection;
 
-import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_DO_MEDIAN_FILTERING;
-import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_DO_SUBPIXEL_LOCALIZATION;
-import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_RADIUS;
-import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_TARGET_CHANNEL;
-import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_THRESHOLD;
+import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_NORMALIZE;
+import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_RADIUS_Z;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DO_MEDIAN_FILTERING;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DO_SUBPIXEL_LOCALIZATION;
+import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_NORMALIZE;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
+import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS_Z;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
 import static fiji.plugin.trackmate.io.IOUtils.readBooleanAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.readIntegerAttribute;
-import static fiji.plugin.trackmate.io.IOUtils.writeDoMedian;
+import static fiji.plugin.trackmate.io.IOUtils.writeAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.writeDoSubPixel;
 import static fiji.plugin.trackmate.io.IOUtils.writeRadius;
 import static fiji.plugin.trackmate.io.IOUtils.writeTargetChannel;
@@ -43,11 +42,8 @@ import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.swing.ImageIcon;
 
 import org.jdom2.Element;
 import org.scijava.plugin.Plugin;
@@ -55,111 +51,64 @@ import org.scijava.plugin.Plugin;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
-import fiji.plugin.trackmate.gui.components.detector.LogDetectorConfigurationPanel;
+import fiji.plugin.trackmate.gui.components.detector.HessianDetectorConfigurationPanel;
 import fiji.plugin.trackmate.util.TMUtils;
-import net.imagej.ImgPlus;
-import net.imagej.axis.Axes;
 import net.imglib2.Interval;
-import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.view.Views;
 
 @Plugin( type = SpotDetectorFactory.class )
-public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> implements SpotDetectorFactory< T >
+public class HessianDetectorFactory< T extends RealType< T > & NativeType< T > > extends LogDetectorFactory< T >
 {
 
-	/*
-	 * CONSTANTS
-	 */
+	public static final String DETECTOR_KEY = "HESSIAN_DETECTOR";
 
-	/** A string key identifying this factory. */
-	public static final String DETECTOR_KEY = "LOG_DETECTOR";
+	public static final String NAME = "Hessian detector";
 
-	/** The pretty name of the target detector. */
-	public static final String NAME = "LoG detector";
-
-	/** An html information text. */
-	public static final String INFO_TEXT = "<html>" + "This detector applies a LoG (Laplacian of Gaussian) filter <br>" + "to the image, with a sigma suited to the blob estimated size. <br>" + "Calculations are made in the Fourier space. The maxima in the <br>" + "filtered image are searched for, and maxima too close from each <br>" + "other are suppressed. A quadratic fitting scheme allows to do <br>" + "sub-pixel localization. " + "</html>";
-
-	/*
-	 * FIELDS
-	 */
-
-	/** The image to operate on. Multiple frames, single channel. */
-	protected ImgPlus< T > img;
-
-	protected Map< String, Object > settings;
-
-	protected String errorMessage;
-
-	/*
-	 * METHODS
-	 */
-
-	@Override
-	public boolean setTarget( final ImgPlus< T > img, final Map< String, Object > settings )
-	{
-		this.img = img;
-		this.settings = settings;
-		return checkSettings( settings );
-	}
-	
-	
-	protected RandomAccessibleInterval< T > prepareFrameImg( final int frame )
-	{
-		final double[] calibration = TMUtils.getSpatialCalibration( img );
-		RandomAccessibleInterval< T > imFrame;
-		final int cDim = img.dimensionIndex( Axes.CHANNEL );
-		if ( cDim < 0 )
-		{
-			imFrame = img;
-		}
-		else
-		{
-			// In ImgLib2, dimensions are 0-based.
-			final int channel = ( Integer ) settings.get( KEY_TARGET_CHANNEL ) - 1;
-			imFrame = Views.hyperSlice( img, cDim, channel );
-		}
-
-		int timeDim = img.dimensionIndex( Axes.TIME );
-		if ( timeDim >= 0 )
-		{
-			if ( cDim >= 0 && timeDim > cDim )
-				timeDim--;
-
-			imFrame = Views.hyperSlice( imFrame, timeDim, frame );
-		}
-
-		// In case we have a 1D image.
-		if ( img.dimension( 0 ) < 2 )
-		{ // Single column image, will be rotated internally.
-			calibration[ 0 ] = calibration[ 1 ]; // It gets NaN otherwise
-			calibration[ 1 ] = 1;
-			imFrame = Views.hyperSlice( imFrame, 0, 0 );
-		}
-		if ( img.dimension( 1 ) < 2 )
-		{ // Single line image
-			imFrame = Views.hyperSlice( imFrame, 1, 0 );
-		}
-
-		return imFrame;
-	}
+	public static final String INFO_TEXT = "<html>"
+			+ "This detector is based on computing the determinant of the <br>"
+			+ "Hessian matrix of the image to detector bright blobs.  "
+			+ "<p>"
+			+ "It can be configured with a different spots size in XY and Z. <br>"
+			+ "It can also return a normalized quality value, scaled from 0 <br>"
+			+ "to 1 for the spots of each time-point."
+			+ "<p>"
+			+ "As discussed in Mikolajczyk et al.(2005), this detector has <br>"
+			+ "a better edge response elimination than the LoG detector and is <br>"
+			+ "suitable for detect spots in images with many strong edges."
+			+ "</html>";
 
 	@Override
 	public SpotDetector< T > getDetector( final Interval interval, final int frame )
 	{
-		final double radius = ( Double ) settings.get( KEY_RADIUS );
-		final double threshold = ( Double ) settings.get( KEY_THRESHOLD );
-		final boolean doMedian = ( Boolean ) settings.get( KEY_DO_MEDIAN_FILTERING );
+		final double radiusXY = ( Double ) settings.get( KEY_RADIUS );
+		final double radiusZ = ( Double ) settings.get( KEY_RADIUS_Z );
+		final double thresholdQuality = ( Double ) settings.get( KEY_THRESHOLD );
 		final boolean doSubpixel = ( Boolean ) settings.get( KEY_DO_SUBPIXEL_LOCALIZATION );
-		final double[] calibration = TMUtils.getSpatialCalibration( img );
-		final RandomAccessible< T > imFrame = prepareFrameImg( frame );
+		final boolean normalize = ( Boolean ) settings.get( KEY_NORMALIZE );
 
-		final LogDetector< T > detector = new LogDetector<>( imFrame, interval, calibration, radius, threshold, doSubpixel, doMedian );
+		final double[] calibration = TMUtils.getSpatialCalibration( img );
+		final RandomAccessibleInterval< T > imFrame = prepareFrameImg( frame );
+
+		final HessianDetector< T > detector = new HessianDetector<>(
+				Views.extendMirrorDouble( imFrame ),
+				interval,
+				calibration,
+				radiusXY,
+				radiusZ,
+				thresholdQuality,
+				normalize,
+				doSubpixel );
 		detector.setNumThreads( 1 );
 		return detector;
+	}
+
+	@Override
+	public boolean forbidMultithreading()
+	{
+		return true;
 	}
 
 	@Override
@@ -169,32 +118,26 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 	}
 
 	@Override
-	public String getErrorMessage()
-	{
-		return errorMessage;
-	}
-
-	@Override
 	public boolean checkSettings( final Map< String, Object > lSettings )
 	{
 		boolean ok = true;
 		final StringBuilder errorHolder = new StringBuilder();
 		ok = ok & checkParameter( lSettings, KEY_TARGET_CHANNEL, Integer.class, errorHolder );
 		ok = ok & checkParameter( lSettings, KEY_RADIUS, Double.class, errorHolder );
+		ok = ok & checkParameter( lSettings, KEY_RADIUS_Z, Double.class, errorHolder );
 		ok = ok & checkParameter( lSettings, KEY_THRESHOLD, Double.class, errorHolder );
-		ok = ok & checkParameter( lSettings, KEY_DO_MEDIAN_FILTERING, Boolean.class, errorHolder );
 		ok = ok & checkParameter( lSettings, KEY_DO_SUBPIXEL_LOCALIZATION, Boolean.class, errorHolder );
+		ok = ok & checkParameter( lSettings, KEY_NORMALIZE, Boolean.class, errorHolder );
 		final List< String > mandatoryKeys = new ArrayList<>();
 		mandatoryKeys.add( KEY_TARGET_CHANNEL );
 		mandatoryKeys.add( KEY_RADIUS );
+		mandatoryKeys.add( KEY_RADIUS_Z );
 		mandatoryKeys.add( KEY_THRESHOLD );
-		mandatoryKeys.add( KEY_DO_MEDIAN_FILTERING );
 		mandatoryKeys.add( KEY_DO_SUBPIXEL_LOCALIZATION );
+		mandatoryKeys.add( KEY_NORMALIZE );
 		ok = ok & checkMapKeys( lSettings, mandatoryKeys, null, errorHolder );
 		if ( !ok )
-		{
 			errorMessage = errorHolder.toString();
-		}
 		return ok;
 	}
 
@@ -202,11 +145,14 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 	public boolean marshall( final Map< String, Object > lSettings, final Element element )
 	{
 		final StringBuilder errorHolder = new StringBuilder();
-		final boolean ok = writeTargetChannel( lSettings, element, errorHolder ) && writeRadius( lSettings, element, errorHolder ) && writeThreshold( lSettings, element, errorHolder ) && writeDoMedian( lSettings, element, errorHolder ) && writeDoSubPixel( lSettings, element, errorHolder );
+		final boolean ok = writeTargetChannel( lSettings, element, errorHolder )
+				&& writeRadius( lSettings, element, errorHolder )
+				&& writeAttribute( lSettings, element, KEY_RADIUS_Z, Double.class, errorHolder )
+				&& writeThreshold( lSettings, element, errorHolder )
+				&& writeAttribute( lSettings, element, KEY_NORMALIZE, Boolean.class, errorHolder )
+				&& writeDoSubPixel( lSettings, element, errorHolder );
 		if ( !ok )
-		{
 			errorMessage = errorHolder.toString();
-		}
 		return ok;
 	}
 
@@ -217,9 +163,10 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 		final StringBuilder errorHolder = new StringBuilder();
 		boolean ok = true;
 		ok = ok & readDoubleAttribute( element, lSettings, KEY_RADIUS, errorHolder );
+		ok = ok & readDoubleAttribute( element, lSettings, KEY_RADIUS_Z, errorHolder );
 		ok = ok & readDoubleAttribute( element, lSettings, KEY_THRESHOLD, errorHolder );
 		ok = ok & readBooleanAttribute( element, lSettings, KEY_DO_SUBPIXEL_LOCALIZATION, errorHolder );
-		ok = ok & readBooleanAttribute( element, lSettings, KEY_DO_MEDIAN_FILTERING, errorHolder );
+		ok = ok & readBooleanAttribute( element, lSettings, KEY_NORMALIZE, errorHolder );
 		ok = ok & readIntegerAttribute( element, lSettings, KEY_TARGET_CHANNEL, errorHolder );
 		if ( !ok )
 		{
@@ -232,7 +179,7 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 	@Override
 	public ConfigurationPanel getDetectorConfigurationPanel( final Settings lSettings, final Model model )
 	{
-		return new LogDetectorConfigurationPanel( lSettings, model, INFO_TEXT, NAME );
+		return new HessianDetectorConfigurationPanel( lSettings, model, INFO_TEXT, NAME );
 	}
 
 	@Override
@@ -250,24 +197,16 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 	@Override
 	public Map< String, Object > getDefaultSettings()
 	{
-		final Map< String, Object > lSettings = new HashMap<>();
-		lSettings.put( KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL );
-		lSettings.put( KEY_RADIUS, DEFAULT_RADIUS );
-		lSettings.put( KEY_THRESHOLD, DEFAULT_THRESHOLD );
-		lSettings.put( KEY_DO_MEDIAN_FILTERING, DEFAULT_DO_MEDIAN_FILTERING );
-		lSettings.put( KEY_DO_SUBPIXEL_LOCALIZATION, DEFAULT_DO_SUBPIXEL_LOCALIZATION );
+		final Map< String, Object > lSettings = super.getDefaultSettings();
+		lSettings.remove( KEY_DO_MEDIAN_FILTERING );
+		lSettings.put( KEY_RADIUS_Z, DEFAULT_RADIUS_Z );
+		lSettings.put( KEY_NORMALIZE, DEFAULT_NORMALIZE );
 		return lSettings;
 	}
 
 	@Override
-	public ImageIcon getIcon()
+	public HessianDetectorFactory< T > copy()
 	{
-		return null;
-	}
-
-	@Override
-	public LogDetectorFactory< T > copy()
-	{
-		return new LogDetectorFactory< >();
+		return new HessianDetectorFactory< >();
 	}
 }
