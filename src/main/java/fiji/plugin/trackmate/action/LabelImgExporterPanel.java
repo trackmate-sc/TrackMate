@@ -37,6 +37,9 @@ public class LabelImgExporterPanel extends JPanel
 
 	private final JCheckBox exportTracksOnly;
 
+	private final JCheckBox useSpotIdsAsLabels;
+
+
 	public LabelImgExporterPanel()
 	{
 		final GridBagLayout gridBagLayout = new GridBagLayout();
@@ -55,6 +58,9 @@ public class LabelImgExporterPanel extends JPanel
 		gbc.gridy++;
 		add( exportTracksOnly, gbc );
 
+		useSpotIdsAsLabels = new JCheckBox( "Use spots IDs as labels", false );
+		gbc.gridy++;
+		add( useSpotIdsAsLabels, gbc );
 	}
 
 	public boolean isExportSpotsAsDots()
@@ -65,5 +71,10 @@ public class LabelImgExporterPanel extends JPanel
 	public boolean isExportTracksOnly()
 	{
 		return exportTracksOnly.isSelected();
+	}
+
+	public boolean isUseSpotIDsAsLabels()
+	{
+		return useSpotIdsAsLabels.isSelected();
 	}
 }
