@@ -458,11 +458,17 @@ public class LabelImgExporter extends AbstractTMAction
 					if ( exportTracksOnly )
 						continue;
 
-					id = lonelySpotID.getAndIncrement();
+					if ( useSpotIDsAsLabels )
+						id = spot.ID() + 1;
+					else
+						id = lonelySpotID.getAndIncrement();
 				}
 				else
 				{
-					id = 1 + trackID.intValue();
+					if ( useSpotIDsAsLabels )
+						id = spot.ID() + 1;
+					else
+						id = 1 + trackID.intValue();
 				}
 
 				spotWriter.write( spot, id );
