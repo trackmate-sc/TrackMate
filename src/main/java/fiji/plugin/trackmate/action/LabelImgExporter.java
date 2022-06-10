@@ -83,6 +83,7 @@ public class LabelImgExporter extends AbstractTMAction
 
 		final boolean exportSpotsAsDots;
 		final boolean exportTracksOnly;
+		final boolean useSpotIDsAsLabels;
 		if ( gui != null )
 		{
 			final LabelImgExporterPanel panel = new LabelImgExporterPanel();
@@ -99,18 +100,20 @@ public class LabelImgExporter extends AbstractTMAction
 
 			exportSpotsAsDots = panel.isExportSpotsAsDots();
 			exportTracksOnly = panel.isExportTracksOnly();
+			useSpotIDsAsLabels =  panel.isUseSpotIDsAsLabels();;
 		}
 		else
 		{
 			exportSpotsAsDots = false;
 			exportTracksOnly = false;
+			useSpotIDsAsLabels = false;
 		}
 
 		/*
 		 * Generate label image.
 		 */
 
-		createLabelImagePlus( trackmate, exportSpotsAsDots, exportTracksOnly, logger ).show();
+		createLabelImagePlus( trackmate, exportSpotsAsDots, exportTracksOnly, useSpotIDsAsLabels ,logger ).show();
 	}
 
 	/**
@@ -133,15 +136,21 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            tracks will be painted. If <code>false</code>, spots not
 	 *            belonging to a track will be painted with a unique ID,
 	 *            different from the track IDs and different for each spot.
+	 * @param useSpotIDsAsLabels
+	 * 	          if <code>true</code>, the label mask images will contain 
+	 * 	          the spot ID. If <code>false</code>, the label mask images 
+	 * 	          will contain the track ID.
 	 *
 	 * @return a new {@link ImagePlus}.
 	 */
 	public static final ImagePlus createLabelImagePlus(
 			final TrackMate trackmate,
 			final boolean exportSpotsAsDots,
-			final boolean exportTracksOnly )
+			final boolean exportTracksOnly,
+			final boolean useSpotIDsAsLabels
+			)
 	{
-		return createLabelImagePlus( trackmate, exportSpotsAsDots, exportTracksOnly, Logger.VOID_LOGGER );
+		return createLabelImagePlus( trackmate, exportSpotsAsDots, exportTracksOnly, useSpotIDsAsLabels, Logger.VOID_LOGGER );
 	}
 
 	/**
@@ -164,6 +173,10 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            tracks will be painted. If <code>false</code>, spots not
 	 *            belonging to a track will be painted with a unique ID,
 	 *            different from the track IDs and different for each spot.
+	 * @param useSpotIDsAsLabels
+	 * 	          if <code>true</code>, the label mask images will contain 
+	 * 	          the spot ID. If <code>false</code>, the label mask images 
+	 * 	          will contain the track ID.
 	 * @param logger
 	 *            a {@link Logger} instance, to report progress of the export
 	 *            process.
@@ -174,9 +187,10 @@ public class LabelImgExporter extends AbstractTMAction
 			final TrackMate trackmate,
 			final boolean exportSpotsAsDots,
 			final boolean exportTracksOnly,
+			final boolean useSpotIDsAsLabels,
 			final Logger logger )
 	{
-		return createLabelImagePlus( trackmate.getModel(), trackmate.getSettings().imp, exportSpotsAsDots, exportTracksOnly, logger );
+		return createLabelImagePlus( trackmate.getModel(), trackmate.getSettings().imp, exportSpotsAsDots, exportTracksOnly, useSpotIDsAsLabels, logger );
 	}
 
 	/**
@@ -199,16 +213,21 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            tracks will be painted. If <code>false</code>, spots not
 	 *            belonging to a track will be painted with a unique ID,
 	 *            different from the track IDs and different for each spot.
-	 *
+	 * @param useSpotIDsAsLabels
+	 * 	          if <code>true</code>, the label mask images will contain 
+	 * 	          the spot ID. If <code>false</code>, the label mask images 
+	 * 	          will contain the track ID.
+	 * 
 	 * @return a new {@link ImagePlus}.
 	 */
 	public static final ImagePlus createLabelImagePlus(
 			final Model model,
 			final ImagePlus imp,
 			final boolean exportSpotsAsDots,
-			final boolean exportTracksOnly )
+			final boolean exportTracksOnly,
+			final boolean useSpotIDsAsLabels )
 	{
-		return createLabelImagePlus( model, imp, exportSpotsAsDots, exportTracksOnly, Logger.VOID_LOGGER );
+		return createLabelImagePlus( model, imp, exportSpotsAsDots, exportTracksOnly, useSpotIDsAsLabels, Logger.VOID_LOGGER );
 	}
 
 	/**
@@ -231,6 +250,10 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            tracks will be painted. If <code>false</code>, spots not
 	 *            belonging to a track will be painted with a unique ID,
 	 *            different from the track IDs and different for each spot.
+	 * @param useSpotIDsAsLabels
+	 * 	          if <code>true</code>, the label mask images will contain 
+	 * 	          the spot ID. If <code>false</code>, the label mask images 
+	 * 	          will contain the track ID.
 	 * @param logger
 	 *            a {@link Logger} instance, to report progress of the export
 	 *            process.
@@ -242,6 +265,7 @@ public class LabelImgExporter extends AbstractTMAction
 			final ImagePlus imp,
 			final boolean exportSpotsAsDots,
 			final boolean exportTracksOnly,
+			boolean useSpotIDsAsLabels,
 			final Logger logger )
 	{
 		final int[] dimensions = imp.getDimensions();
@@ -252,7 +276,7 @@ public class LabelImgExporter extends AbstractTMAction
 				imp.getCalibration().pixelDepth,
 				imp.getCalibration().frameInterval
 		};
-		final ImagePlus lblImp = createLabelImagePlus( model, dims, calibration, exportSpotsAsDots, exportTracksOnly, logger );
+		final ImagePlus lblImp = createLabelImagePlus( model, dims, calibration, exportSpotsAsDots, exportTracksOnly, useSpotIDsAsLabels, logger );
 		lblImp.setCalibration( imp.getCalibration().copy() );
 		lblImp.setTitle( "LblImg_" + imp.getTitle() );
 		return lblImp;
@@ -278,7 +302,11 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            tracks will be painted. If <code>false</code>, spots not
 	 *            belonging to a track will be painted with a unique ID,
 	 *            different from the track IDs and different for each spot.
-	 *
+	 * @param useSpotIDsAsLabels
+	 * 	          if <code>true</code>, the label mask images will contain 
+	 * 	          the spot ID. If <code>false</code>, the label mask images 
+	 * 	          will contain the track ID.
+	 * 	          
 	 * @return a new {@link ImagePlus}.
 	 */
 	public static final ImagePlus createLabelImagePlus(
@@ -286,9 +314,10 @@ public class LabelImgExporter extends AbstractTMAction
 			final int[] dimensions,
 			final double[] calibration,
 			final boolean exportSpotsAsDots,
-			final boolean exportTracksOnly )
+			final boolean exportTracksOnly,
+			final boolean useSpotIDsAsLabels)
 	{
-		return createLabelImagePlus( model, dimensions, calibration, exportSpotsAsDots, exportTracksOnly, Logger.VOID_LOGGER );
+		return createLabelImagePlus( model, dimensions, calibration, exportSpotsAsDots, exportTracksOnly, useSpotIDsAsLabels, Logger.VOID_LOGGER );
 	}
 
 	/**
@@ -310,6 +339,10 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            tracks will be painted. If <code>false</code>, spots not
 	 *            belonging to a track will be painted with a unique ID,
 	 *            different from the track IDs and different for each spot.
+	 * @param useSpotIDsAsLabels
+	 * 	          if <code>true</code>, the label mask images will contain 
+	 * 	          the spot ID. If <code>false</code>, the label mask images 
+	 * 	          will contain the track ID.
 	 * @param logger
 	 *            a {@link Logger} instance, to report progress of the export
 	 *            process.
@@ -322,13 +355,14 @@ public class LabelImgExporter extends AbstractTMAction
 			final double[] calibration,
 			final boolean exportSpotsAsDots,
 			final boolean exportTracksOnly,
+			final boolean useSpotIDsAsLabels,
 			final Logger logger )
 	{
 		final long[] dims = new long[ 4 ];
 		for ( int d = 0; d < dims.length; d++ )
 			dims[ d ] = dimensions[ d ];
 
-		final ImagePlus lblImp = ImageJFunctions.wrap( createLabelImg( model, dims, calibration, exportSpotsAsDots, exportTracksOnly, logger ), "LblImage" );
+		final ImagePlus lblImp = ImageJFunctions.wrap( createLabelImg( model, dims, calibration, exportSpotsAsDots, exportTracksOnly, useSpotIDsAsLabels, logger ), "LblImage" );
 		lblImp.setDimensions( 1, dimensions[ 2 ], dimensions[ 3 ] );
 		lblImp.setOpenAsHyperStack( true );
 		lblImp.resetDisplayRange();
@@ -354,7 +388,11 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            tracks will be painted. If <code>false</code>, spots not
 	 *            belonging to a track will be painted with a unique ID,
 	 *            different from the track IDs and different for each spot.
-	 *
+	 * @param useSpotIDsAsLabels
+	 * 	          if <code>true</code>, the label mask images will contain 
+	 * 	          the spot ID. If <code>false</code>, the label mask images 
+	 * 	          will contain the track ID.
+	 * 	          
 	 * @return a new {@link Img}.
 	 */
 	public static final Img< UnsignedShortType > createLabelImg(
@@ -362,9 +400,10 @@ public class LabelImgExporter extends AbstractTMAction
 			final long[] dimensions,
 			final double[] calibration,
 			final boolean exportSpotsAsDots,
-			final boolean exportTracksOnly )
+			final boolean exportTracksOnly,
+			final boolean useSpotIDsAsLabels)
 	{
-		return createLabelImg( model, dimensions, calibration, exportSpotsAsDots, exportTracksOnly, Logger.VOID_LOGGER );
+		return createLabelImg( model, dimensions, calibration, exportSpotsAsDots, exportTracksOnly, useSpotIDsAsLabels, Logger.VOID_LOGGER );
 	}
 
 	/**
@@ -386,6 +425,10 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            tracks will be painted. If <code>false</code>, spots not
 	 *            belonging to a track will be painted with a unique ID,
 	 *            different from the track IDs and different for each spot.
+	 * @param useSpotIDsAsLabels
+	 * 	          if <code>true</code>, the label mask images will contain 
+	 * 	          the spot ID. If <code>false</code>, the label mask images 
+	 * 	          will contain the track ID.
 	 * @param logger
 	 *            a {@link Logger} instance, to report progress of the export
 	 *            process.
@@ -398,6 +441,7 @@ public class LabelImgExporter extends AbstractTMAction
 			final double[] calibration,
 			final boolean exportSpotsAsDots,
 			final boolean exportTracksOnly,
+			final boolean useSpotIDsAsLabels,
 			final Logger logger )
 	{
 		/*
@@ -445,11 +489,17 @@ public class LabelImgExporter extends AbstractTMAction
 					if ( exportTracksOnly )
 						continue;
 
-					id = lonelySpotID.getAndIncrement();
+					if ( useSpotIDsAsLabels )
+						id = spot.ID() + 1;
+					else
+						id = lonelySpotID.getAndIncrement();
 				}
 				else
 				{
-					id = 1 + trackID.intValue();
+					if ( useSpotIDsAsLabels )
+						id = spot.ID() + 1;
+					else
+						id = 1 + trackID.intValue();
 				}
 
 				spotWriter.write( spot, id );
