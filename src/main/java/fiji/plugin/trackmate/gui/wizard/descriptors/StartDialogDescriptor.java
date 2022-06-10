@@ -63,11 +63,11 @@ public class StartDialogDescriptor extends WizardPanelDescriptor
 
 	private static final String KEY = "Start";
 
-	public static final String PUB1_URL = "https://doi.org/10.1101/2021.09.03.458852";
+	public static final String PUB1_URL = "https://doi.org/10.1038/s41592-022-01507-1";
 
-	public static final String PUB1_TXT = "Ershov D, Phan M-S, Pylvänäinen JW, Rigaud SU, et al. "
-			+ "'Bringing TrackMate in the era of machine-learning and deep-learning.'"
-			+ "bioRxiv. 2021; doi:10.1101/2021.09.03.458852";
+	public static final String PUB1_TXT = "Ershov, D., Phan, MS., Pylvänäinen, J.W., Rigaud S.U., et al. "
+			+ "TrackMate 7: integrating state-of-the-art segmentation algorithms into tracking pipelines. "
+			+ "Nat Methods (2022). https://doi.org/10.1038/s41592-022-01507-1";
 	
 	private final Settings settings;
 
@@ -153,9 +153,10 @@ public class StartDialogDescriptor extends WizardPanelDescriptor
 					+ "and is based on a publication. If you use it successfully "
 					+ "for your research please be so kind to cite our work:"
 					+ "<p>"
-					+ "<b>Ershov D, Phan M-S, Pylvänäinen JW, Rigaud SU, et al. (2021), "
-					+ "<i>Bringing TrackMate in the era of machine-learning and "
-					+ "deep-learning.</i></b> bioRxiv; doi:10.1101/2021.09.03.458852."
+					+ "<b>Ershov, D., Phan, MS., Pylvänäinen, J.W., Rigaud S.U. et al., "
+					+ "<i>TrackMate 7: integrating state-of-the-art segmentation "
+					+ "algorithms into tracking pipelines.</i></b> "
+					+ "Nat Methods (2022). https://doi.org/10.1038/s41592-022-01507-1"
 					+ "</html>" );
 			lblCitation.setFont( SMALL_FONT );
 
@@ -168,7 +169,7 @@ public class StartDialogDescriptor extends WizardPanelDescriptor
 			add( lblCitation, gbcLblCitation );
 
 			final JLabel lblLinkPubMed = new JLabel( "<html>"
-					+ "<a href=" + PUB1_URL + ">on bioRxiv</a></html>" );
+					+ "<a href=" + PUB1_URL + ">link to paper</a></html>" );
 			lblLinkPubMed.setFont( SMALL_FONT );
 			lblLinkPubMed.setCursor( new Cursor( Cursor.HAND_CURSOR ) );
 			lblLinkPubMed.addMouseListener( new MouseAdapter()
