@@ -199,4 +199,6 @@ public class Icons
 
 	public static final ImageIcon PENCIL_ICON = new ImageIcon( Icons.class.getResource( "images/pencil.png" ) );
 
+	public static final ImageIcon VECTOR_ICON = new ImageIcon( Icons.class.getResource( "images/vector.png" ) );
+
 }
