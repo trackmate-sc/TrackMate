@@ -691,8 +691,13 @@ public class TMUtils
 		}
 		else
 		{
-			intervalMin = min;
-			intervalMax = max;
+			intervalMin = new long[ min.length ];
+			intervalMax = new long[ min.length ];
+			for ( int d = 0; d < min.length; d++ )
+			{
+				intervalMin[ d ] = Math.max( 0l, min[ d ] );
+				intervalMax[ d ] = Math.min( img.max( d ), max[ d ] );
+			}
 		}
 		final FinalInterval interval = new FinalInterval( intervalMin, intervalMax );
 		return interval;
