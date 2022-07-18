@@ -592,16 +592,21 @@ public class TMUtils
 			{
 				if ( d != cindex )
 				{
-					min2[ d2 ] = min[ d ];
-					max2[ d2 ] = max[ d ];
+					min2[ d2 ] = Math.max( 0l, min[ d ] );
+					max2[ d2 ] = Math.min( img.max( d ), max[ d ] );
 					d2++;
 				}
 			}
 		}
 		else
 		{
-			max2 = max;
-			min2 = min;
+			min2 = new long[ min.length ];
+			max2 = new long[ min.length ];
+			for ( int d = 0; d < min.length; d++ )
+			{
+				min2[ d ] = Math.max( 0l, min[ d ] );
+				max2[ d ] = Math.min( img.max( d ), max[ d ] );
+			}
 		}
 
 		final FinalInterval interval = new FinalInterval( min2, max2 );
