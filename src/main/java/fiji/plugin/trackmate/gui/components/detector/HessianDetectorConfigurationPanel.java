@@ -123,7 +123,7 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		final GridBagConstraints gbcLabelPreTitle = new GridBagConstraints();
 		gbcLabelPreTitle.anchor = GridBagConstraints.NORTH;
 		gbcLabelPreTitle.fill = GridBagConstraints.HORIZONTAL;
-		gbcLabelPreTitle.insets = new Insets( 5, 5, 5, 0 );
+		gbcLabelPreTitle.insets = new Insets( 5, 5, 5, 5 );
 		gbcLabelPreTitle.gridwidth = 4;
 		gbcLabelPreTitle.gridx = 0;
 		gbcLabelPreTitle.gridy = 0;
@@ -135,7 +135,7 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		final GridBagConstraints gbcLabelSegmenterName = new GridBagConstraints();
 		gbcLabelSegmenterName.anchor = GridBagConstraints.NORTH;
 		gbcLabelSegmenterName.fill = GridBagConstraints.HORIZONTAL;
-		gbcLabelSegmenterName.insets = new Insets( 5, 5, 5, 0 );
+		gbcLabelSegmenterName.insets = new Insets( 5, 5, 5, 5 );
 		gbcLabelSegmenterName.gridwidth = 4;
 		gbcLabelSegmenterName.gridx = 0;
 		gbcLabelSegmenterName.gridy = 1;
@@ -146,7 +146,7 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		final JLabel jLabelHelpText = new JLabel();
 		final GridBagConstraints gbcLabelHelpText = new GridBagConstraints();
 		gbcLabelHelpText.fill = GridBagConstraints.BOTH;
-		gbcLabelHelpText.insets = new Insets( 5, 5, 5, 0 );
+		gbcLabelHelpText.insets = new Insets( 5, 5, 5, 5 );
 		gbcLabelHelpText.gridwidth = 4;
 		gbcLabelHelpText.gridx = 0;
 		gbcLabelHelpText.gridy = 2;
@@ -178,7 +178,7 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		final GridBagConstraints gbcLabelChannel = new GridBagConstraints();
 		gbcLabelChannel.anchor = GridBagConstraints.WEST;
 		gbcLabelChannel.fill = GridBagConstraints.VERTICAL;
-		gbcLabelChannel.insets = new Insets( 5, 5, 5, 0 );
+		gbcLabelChannel.insets = new Insets( 5, 5, 5, 5 );
 		gbcLabelChannel.gridx = 3;
 		gbcLabelChannel.gridy = 4;
 		add( labelChannel, gbcLabelChannel );
@@ -209,7 +209,7 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		final JLabel jLabelBlobDiameterUnit = new JLabel();
 		final GridBagConstraints gbcLabelBlobDiameterUnit = new GridBagConstraints();
 		gbcLabelBlobDiameterUnit.fill = GridBagConstraints.BOTH;
-		gbcLabelBlobDiameterUnit.insets = new Insets( 5, 5, 5, 0 );
+		gbcLabelBlobDiameterUnit.insets = new Insets( 5, 5, 5, 5 );
 		gbcLabelBlobDiameterUnit.gridx = 3;
 		gbcLabelBlobDiameterUnit.gridy = 5;
 		this.add( jLabelBlobDiameterUnit, gbcLabelBlobDiameterUnit );
@@ -240,7 +240,7 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		final JLabel jLabelBlobDiameterUnitZ = new JLabel( model.getSpaceUnits() );
 		jLabelBlobDiameterUnitZ.setFont( SMALL_FONT );
 		final GridBagConstraints gbcLabelBlobDiameterUnitZ = new GridBagConstraints();
-		gbcLabelBlobDiameterUnitZ.insets = new Insets( 5, 5, 5, 0 );
+		gbcLabelBlobDiameterUnitZ.insets = new Insets( 5, 5, 5, 5 );
 		gbcLabelBlobDiameterUnitZ.gridx = 3;
 		gbcLabelBlobDiameterUnitZ.gridy = 6;
 		add( jLabelBlobDiameterUnitZ, gbcLabelBlobDiameterUnitZ );
@@ -281,7 +281,7 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		final GridBagConstraints gbcCheckBoxNormalize = new GridBagConstraints();
 		gbcCheckBoxNormalize.anchor = GridBagConstraints.NORTH;
 		gbcCheckBoxNormalize.fill = GridBagConstraints.HORIZONTAL;
-		gbcCheckBoxNormalize.insets = new Insets( 5, 5, 5, 0 );
+		gbcCheckBoxNormalize.insets = new Insets( 5, 5, 5, 5 );
 		gbcCheckBoxNormalize.gridwidth = 2;
 		gbcCheckBoxNormalize.gridx = 2;
 		gbcCheckBoxNormalize.gridy = 8;
@@ -303,7 +303,7 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		final GridBagConstraints gbcCheckSubPixel = new GridBagConstraints();
 		gbcCheckSubPixel.anchor = GridBagConstraints.NORTH;
 		gbcCheckSubPixel.fill = GridBagConstraints.HORIZONTAL;
-		gbcCheckSubPixel.insets = new Insets( 5, 5, 5, 0 );
+		gbcCheckSubPixel.insets = new Insets( 5, 5, 5, 5 );
 		gbcCheckSubPixel.gridwidth = 2;
 		gbcCheckSubPixel.gridx = 2;
 		gbcCheckSubPixel.gridy = 9;
@@ -314,7 +314,7 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		btnPreview.setToolTipText( TOOLTIP_PREVIEW );
 		final GridBagConstraints gbcBtnPreview = new GridBagConstraints();
 		gbcBtnPreview.anchor = GridBagConstraints.NORTHEAST;
-		gbcBtnPreview.insets = new Insets( 5, 5, 5, 0 );
+		gbcBtnPreview.insets = new Insets( 5, 5, 5, 5 );
 		gbcBtnPreview.gridwidth = 3;
 		gbcBtnPreview.gridx = 1;
 		gbcBtnPreview.gridy = 11;
@@ -324,7 +324,7 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		final JLabelLogger labelLogger = new JLabelLogger();
 		labelLogger.setText( "   " );
 		final GridBagConstraints gbcLabelLogger = new GridBagConstraints();
-		gbcLabelLogger.insets = new Insets( 5, 5, 0, 0 );
+		gbcLabelLogger.insets = new Insets( 5, 5, 5, 5 );
 		gbcLabelLogger.fill = GridBagConstraints.BOTH;
 		gbcLabelLogger.gridwidth = 4;
 		gbcLabelLogger.gridx = 0;
