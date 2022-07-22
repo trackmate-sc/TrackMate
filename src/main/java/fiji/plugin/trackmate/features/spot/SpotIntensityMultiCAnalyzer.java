@@ -28,6 +28,8 @@ import static fiji.plugin.trackmate.features.spot.SpotIntensityMultiCAnalyzerFac
 import static fiji.plugin.trackmate.features.spot.SpotIntensityMultiCAnalyzerFactory.STD_INTENSITY;
 import static fiji.plugin.trackmate.features.spot.SpotIntensityMultiCAnalyzerFactory.TOTAL_INTENSITY;
 
+import org.scijava.util.DoubleArray;
+
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.util.SpotUtil;
 import fiji.plugin.trackmate.util.TMUtils;
@@ -53,18 +55,16 @@ public class SpotIntensityMultiCAnalyzer< T extends RealType< T > > extends Abst
 	public void process( final Spot spot )
 	{
 		final IterableInterval< T > neighborhood = SpotUtil.iterable( spot, imgCT );
-		final double[] intensities = new double[ ( int ) neighborhood.size() ];
-		int n = 0;
+		final DoubleArray intensities = new DoubleArray();
+			
 		for ( final T pixel : neighborhood )
-		{
-			final double val = pixel.getRealDouble();
-			intensities[ n++ ] = val;
-		}
-		Util.quicksort( intensities );
-		spot.putFeature( SpotIntensityMultiCAnalyzerFactory.makeFeatureKey( MEAN_INTENSITY, channel ), Double.valueOf( Util.average( intensities ) ) );
-		spot.putFeature( SpotIntensityMultiCAnalyzerFactory.makeFeatureKey( MEDIAN_INTENSITY, channel ), Double.valueOf( intensities[ intensities.length / 2 ] ) );
-		spot.putFeature( SpotIntensityMultiCAnalyzerFactory.makeFeatureKey( MIN_INTENSITY, channel ), Double.valueOf( intensities[ 0 ] ) );
-		spot.putFeature( SpotIntensityMultiCAnalyzerFactory.makeFeatureKey( MAX_INTENSITY, channel ), Double.valueOf( intensities[ intensities.length - 1 ] ) );
+			intensities.addValue( pixel.getRealDouble() );
+
+		Util.quicksort( intensities.getArray(), 0, intensities.size() - 1 );
+		spot.putFeature( SpotIntensityMultiCAnalyzerFactory.makeFeatureKey( MEAN_INTENSITY, channel ), Double.valueOf( TMUtils.average( intensities ) ) );
+		spot.putFeature( SpotIntensityMultiCAnalyzerFactory.makeFeatureKey( MEDIAN_INTENSITY, channel ), Double.valueOf( intensities.getArray()[ intensities.size() / 2 ] ) );
+		spot.putFeature( SpotIntensityMultiCAnalyzerFactory.makeFeatureKey( MIN_INTENSITY, channel ), Double.valueOf( intensities.getArray()[ 0 ] ) );
+		spot.putFeature( SpotIntensityMultiCAnalyzerFactory.makeFeatureKey( MAX_INTENSITY, channel ), Double.valueOf( intensities.getArray()[ intensities.size() - 1 ] ) );
 		spot.putFeature( SpotIntensityMultiCAnalyzerFactory.makeFeatureKey( TOTAL_INTENSITY, channel ), Double.valueOf( TMUtils.sum( intensities ) ) );
 		spot.putFeature( SpotIntensityMultiCAnalyzerFactory.makeFeatureKey( STD_INTENSITY, channel ), Double.valueOf( TMUtils.standardDeviation( intensities ) ) );
 	}

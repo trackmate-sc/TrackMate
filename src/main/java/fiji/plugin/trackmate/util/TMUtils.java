@@ -40,6 +40,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.scijava.Context;
+import org.scijava.util.DoubleArray;
 
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Logger;
@@ -799,9 +800,40 @@ public class TMUtils
 		return Math.sqrt( variance( data ) );
 	}
 
-	public static double sum( final double[] intensities )
+	public static double sum( final double[] data )
 	{
-		return Arrays.stream( intensities ).sum();
+		return Arrays.stream( data ).sum();
+	}
+
+	public static double average( final DoubleArray data )
+	{
+		return sum( data ) / data.size();
+	}
+
+	public static double sum( final DoubleArray data )
+	{
+		double sum = 0.;
+		for ( int i = 0; i < data.size(); i++ )
+			sum += data.getArray()[ i ];
+		return sum;
+	}
+
+	public static final double variance( final DoubleArray data )
+	{
+		final double mean = average( data );
+		double variance = 0;
+		for ( int i = 0; i < data.size(); i++ )
+		{
+			final double dx = data.getArray()[ i ] - mean;
+			variance += dx * dx;
+		}
+		variance /= ( data.size() - 1 );
+		return variance;
+	}
+
+	public static double standardDeviation( final DoubleArray data )
+	{
+		return Math.sqrt( variance( data ) );
 	}
 
 	private TMUtils()
