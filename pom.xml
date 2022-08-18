@@ -143,7 +143,7 @@
 		<!-- NB: Use ImgLib2 style code formatting (https://github.com/scijava/scijava-coding-style) -->
 		<scijava.coding-style>imglib2</scijava.coding-style>
 
-		<fontchooser.version>2.4</fontchooser.version>
+		<fontchooser.version>2.5.2</fontchooser.version>
 		<javaGeom.version>0.11.1</javaGeom.version>
 	</properties>
 
