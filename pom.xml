@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>31.1.0</version>
+		<version>32.0.0</version>
 		<relativePath />
 	</parent>
 
@@ -18,8 +18,8 @@
 	<url>https://imagej.net/plugins/trackmate</url>
 	<inceptionYear>2010</inceptionYear>
 	<organization>
-		<name>Fiji</name>
-		<url>https://fiji.sc/</url>
+		<name>TrackMate</name>
+		<url>https://github.com/trackmate-sc</url>
 	</organization>
 	<licenses>
 		<license>
@@ -114,45 +114,40 @@
 	<mailingLists>
 		<mailingList>
 			<name>Image.sc Forum</name>
-			<archive>https://forum.image.sc/tag/fiji</archive>
+			<archive>https://forum.image.sc/tag/trackmate</archive>
 		</mailingList>
 	</mailingLists>
 
 	<scm>
-		<connection>scm:git:https://github.com/fiji/TrackMate</connection>
-		<developerConnection>scm:git:git@github.com:fiji/TrackMate</developerConnection>
+		<connection>scm:git:https://github.com/trackmate-sc/TrackMate</connection>
+		<developerConnection>scm:git:git@github.com:trackmate-sc/TrackMate</developerConnection>
 		<tag>HEAD</tag>
-		<url>https://github.com/fiji/TrackMate</url>
+		<url>https://github.com/trackmate-sc/TrackMate</url>
 	</scm>
 	<issueManagement>
 		<system>GitHub Issues</system>
-		<url>https://github.com/fiji/TrackMate/issues</url>
+		<url>https://github.com/trackmate-sc/TrackMate/issues</url>
 	</issueManagement>
 	<ciManagement>
 		<system>GitHub Actions</system>
-		<url>https://github.com/fiji/TrackMate/actions</url>
+		<url>https://github.com/trackmate-sc/TrackMate</url>
 	</ciManagement>
 
 	<properties>
 		<package-name>fiji.plugin.trackmate</package-name>
 		<license.licenseName>gpl_v3</license.licenseName>
-		<license.copyrightOwners>Fiji developers.</license.copyrightOwners>
-		<license.projectName>Fiji distribution of ImageJ for the life sciences.</license.projectName>
+		<license.copyrightOwners>TrackMate developers.</license.copyrightOwners>
+		<license.projectName>TrackMate: your buddy for everyday tracking.</license.projectName>
+
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
+
 		<!-- NB: Use ImgLib2 style code formatting (https://github.com/scijava/scijava-coding-style) -->
 		<scijava.coding-style>imglib2</scijava.coding-style>
 
 		<fontchooser.version>2.4</fontchooser.version>
 		<javaGeom.version>0.11.1</javaGeom.version>
 	</properties>
-
-	<repositories>
-		<repository>
-			<id>scijava.public</id>
-			<url>https://maven.scijava.org/content/groups/public</url>
-		</repository>
-	</repositories>
 
 	<dependencies>
 		<!-- Fiji dependencies -->
@@ -207,8 +202,7 @@
 			<artifactId>scijava-listeners</artifactId>
 		</dependency>
 
-		<!-- Third party dependencies -->
-			
+		<!-- Other dependencies -->
 		<dependency>
 			<groupId>com.github.vlsi.mxgraph</groupId>
 			<artifactId>jgraphx</artifactId>
@@ -242,11 +236,6 @@
 			<artifactId>batik-svggen</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.drjekyll</groupId>
-			<artifactId>fontchooser</artifactId>
-			<version>${fontchooser.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.jdom</groupId>
 			<artifactId>jdom2</artifactId>
 		</dependency>
@@ -259,15 +248,20 @@
 			<artifactId>jgrapht-core</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math3</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>math.geom2d</groupId>
 			<artifactId>javaGeom</artifactId>
 			<version>${javaGeom.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-math3</artifactId>
+			<groupId>org.drjekyll</groupId>
+			<artifactId>fontchooser</artifactId>
+			<version>${fontchooser.version}</version>
 		</dependency>
-		
+
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -275,4 +269,11 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>scijava.public</id>
+			<url>https://maven.scijava.org/content/groups/public</url>
+		</repository>
+	</repositories>
 </project>
