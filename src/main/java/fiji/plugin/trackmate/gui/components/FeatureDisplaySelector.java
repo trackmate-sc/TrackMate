@@ -45,7 +45,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import javax.swing.Box;
@@ -59,8 +58,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
@@ -585,15 +582,7 @@ public class FeatureDisplaySelector
 
 	public static void main( final String[] args )
 	{
-		Locale.setDefault( Locale.ROOT );
-		try
-		{
-			UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
-		}
-		catch ( ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e )
-		{
-			e.printStackTrace();
-		}
+		GuiUtils.setSystemLookAndFeel();
 
 		final DisplaySettings ds = DisplaySettings.defaultStyle().copy();
 //		ds.listeners().add( () -> System.out.println( "\n" + new Date() + "\nDisplay settings changed:\n" + ds ) );

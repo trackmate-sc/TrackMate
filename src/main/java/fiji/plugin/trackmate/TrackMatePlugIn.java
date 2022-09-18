@@ -24,8 +24,6 @@ package fiji.plugin.trackmate;
 import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
 
 import javax.swing.JFrame;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
@@ -48,7 +46,7 @@ public class TrackMatePlugIn implements PlugIn
 	@Override
 	public void run( final String imagePath )
 	{
-		GuiUtils.setSystemLookAndFeel();
+//		GuiUtils.setSystemLookAndFeel();
 		final ImagePlus imp;
 		if ( imagePath != null && imagePath.length() > 0 )
 		{
@@ -183,9 +181,9 @@ public class TrackMatePlugIn implements PlugIn
 		return DisplaySettingsIO.readUserDefault().copy( "CurrentDisplaySettings" );
 	}
 
-	public static void main( final String[] args ) throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException
+	public static void main( final String[] args )
 	{
-		UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
+//		GuiUtils.setSystemLookAndFeel();
 		ImageJ.main( args );
 //		new TrackMatePlugIn().run( "samples/Stack.tif" );
 //		new TrackMatePlugIn().run( "samples/Merged.tif" );

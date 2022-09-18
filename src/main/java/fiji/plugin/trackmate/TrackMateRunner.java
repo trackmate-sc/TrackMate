@@ -204,7 +204,7 @@ public class TrackMateRunner extends TrackMatePlugIn
 	@Override
 	public void run( String arg )
 	{
-		GuiUtils.setSystemLookAndFeel();
+//		GuiUtils.setSystemLookAndFeel();
 		logger = new LogRecorder( Logger.IJ_LOGGER );
 
 

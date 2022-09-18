@@ -65,11 +65,7 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 	@Override
 	public void run( final String filePath )
 	{
-		/*
-		 * I can't stand the metal look. If this is a problem, contact me
-		 * (jeanyves.tinevez at gmail dot com)
-		 */
-		GuiUtils.setSystemLookAndFeel();
+//		GuiUtils.setSystemLookAndFeel();
 
 		final Logger logger = Logger.IJ_LOGGER;
 		File file;
