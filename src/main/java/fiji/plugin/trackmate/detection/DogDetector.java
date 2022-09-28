@@ -29,6 +29,7 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.dog.DifferenceOfGaussian;
 import net.imglib2.algorithm.gauss3.Gauss3;
 import net.imglib2.exception.IncompatibleTypeException;
+import net.imglib2.parallel.Parallelization;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
@@ -106,8 +107,10 @@ public class DogDetector< T extends RealType< T > & NativeType< T >> extends Log
 		final double[][] sigmas = DifferenceOfGaussian.computeSigmas( 0.5, 2, cal, sigma1, sigma2 );
 		try
 		{
-			Gauss3.gauss( sigmas[ 1 ], extended, dog2, numThreads );
-			Gauss3.gauss( sigmas[ 0 ], extended, dog, numThreads );
+			Parallelization.runWithNumThreads( numThreads, () -> {
+				Gauss3.gauss( sigmas[ 1 ], extended, dog2 );
+				Gauss3.gauss( sigmas[ 0 ], extended, dog );
+			} );
 		}
 		catch ( final IncompatibleTypeException e )
 		{
