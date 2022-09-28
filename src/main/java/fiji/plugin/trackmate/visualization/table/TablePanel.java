@@ -57,6 +57,7 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -576,7 +577,7 @@ public class TablePanel< O >
 
 		private static final long serialVersionUID = 1L;
 
-		private final FeatureColorGenerator< O > defaultColoring = o -> Color.WHITE;
+		private final FeatureColorGenerator< O > defaultColoring;
 
 		private final ColorIcon colorIcon;
 
@@ -588,6 +589,8 @@ public class TablePanel< O >
 			formatSymbols.setNaN( "NaN" );
 			nf.setDecimalFormatSymbols( formatSymbols );
 			colorIcon = new ColorIcon( new Color( 0 ) );
+			final Color bgColor = UIManager.getColor( "Table.background" );
+			defaultColoring = o -> bgColor;
 		}
 
 		@Override

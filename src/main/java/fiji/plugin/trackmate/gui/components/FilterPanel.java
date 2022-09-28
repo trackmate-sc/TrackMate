@@ -55,6 +55,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JRadioButton;
+import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -69,6 +70,7 @@ import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 
 import fiji.plugin.trackmate.features.FeatureFilter;
+import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.util.NumberParser;
 
@@ -86,7 +88,15 @@ public class FilterPanel extends javax.swing.JPanel
 
 	static final Font SMALL_FONT = FONT.deriveFont( 10f );
 
-	private static final Color annotationColor = new java.awt.Color( 252, 117, 0 );
+	private static final Color annotationColor;
+	static
+	{
+		final Color bgColor = UIManager.getColor( "Panel.background" );
+		final boolean bgIsDark = GuiUtils.colorDistance( Color.WHITE, bgColor ) > 0.5;
+		annotationColor = bgIsDark
+				? new java.awt.Color( 252, 117, 0 ).brighter()
+				: new java.awt.Color( 252, 117, 0 );
+	}
 
 	private static final long serialVersionUID = 1L;
 

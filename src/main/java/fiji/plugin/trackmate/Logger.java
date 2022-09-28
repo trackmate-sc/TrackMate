@@ -26,6 +26,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
 
+import javax.swing.UIManager;
+
+import fiji.plugin.trackmate.gui.GuiUtils;
 import ij.IJ;
 
 /**
@@ -73,13 +76,29 @@ public abstract class Logger extends PrintWriter
 		};
 	}
 
-	public static final Color NORMAL_COLOR = Color.BLACK;
+	/*
+	 * Colors. Adapt them to the current LAF.
+	 */
+	public static final Color NORMAL_COLOR;
+	public static final Color ERROR_COLOR;
+	public static final Color GREEN_COLOR;
+	public static final Color BLUE_COLOR;
+	static
+	{
+		NORMAL_COLOR = UIManager.getColor( "TextField.foreground" );
 
-	public static final Color ERROR_COLOR = new Color( 0.8f, 0, 0 );
-
-	public static final Color GREEN_COLOR = new Color( 0, 0.6f, 0 );
-
-	public static final Color BLUE_COLOR = new Color( 0, 0, 0.7f );
+		final Color bgColor = UIManager.getColor( "Panel.background" );
+		final boolean bgIsDark = GuiUtils.colorDistance( Color.WHITE, bgColor ) > 0.5;
+		BLUE_COLOR = bgIsDark
+				? new Color( 0.4f, 0.4f, 0.9f )
+				: new Color( 0, 0, 0.7f );
+		GREEN_COLOR = bgIsDark
+				? new Color( 0.4f, 0.9f, 0.4f )
+				: new Color( 0, 0.6f, 0 );
+		ERROR_COLOR = bgIsDark
+				? new Color( 0.8f, 0, 0 ).brighter()
+				: new Color( 0.8f, 0, 0 );
+	}
 
 	/**
 	 * Append the message to the logger, with the specified color.
