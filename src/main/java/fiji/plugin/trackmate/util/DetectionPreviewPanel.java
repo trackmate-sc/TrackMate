@@ -33,7 +33,7 @@ public class DetectionPreviewPanel extends JPanel
 
 	final QualityHistogramChart chart;
 
-	public DetectionPreviewPanel( final DoubleConsumer thresholdUpdater )
+	public DetectionPreviewPanel( final DoubleConsumer thresholdUpdater, final String axisLabel )
 	{
 		final GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWeights = new double[] { 1.0, 0.0 };
@@ -42,7 +42,7 @@ public class DetectionPreviewPanel extends JPanel
 
 		setLayout( gridBagLayout );
 
-		this.chart = new QualityHistogramChart( thresholdUpdater );
+		this.chart = new QualityHistogramChart( thresholdUpdater, axisLabel );
 		final GridBagConstraints gbcHistogram = new GridBagConstraints();
 		gbcHistogram.gridwidth = 2;
 		gbcHistogram.insets = new Insets( 0, 0, 5, 0 );

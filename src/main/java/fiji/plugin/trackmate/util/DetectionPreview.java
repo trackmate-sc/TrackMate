@@ -31,7 +31,26 @@ public class DetectionPreview
 			final Supplier< Integer > currentFrameSupplier,
 			final DoubleConsumer thresholdUpdater )
 	{
-		this.panel = new DetectionPreviewPanel( thresholdUpdater );
+		this(
+				model,
+				settings,
+				detectorFactory,
+				detectionSettingsSupplier,
+				currentFrameSupplier,
+				thresholdUpdater,
+				null );
+	}
+
+	public DetectionPreview(
+			final Model model,
+			final Settings settings,
+			final SpotDetectorFactoryBase< ? > detectorFactory,
+			final Supplier< Map< String, Object > > detectionSettingsSupplier,
+			final Supplier< Integer > currentFrameSupplier,
+			final DoubleConsumer thresholdUpdater,
+			final String axisLabel )
+	{
+		this.panel = new DetectionPreviewPanel( thresholdUpdater, axisLabel );
 		panel.btnPreview.addActionListener( l -> preview(
 				model,
 				settings,
@@ -39,6 +58,7 @@ public class DetectionPreview
 				detectionSettingsSupplier.get(),
 				currentFrameSupplier.get() ) );
 	}
+
 
 	public DetectionPreviewPanel getPanel()
 	{

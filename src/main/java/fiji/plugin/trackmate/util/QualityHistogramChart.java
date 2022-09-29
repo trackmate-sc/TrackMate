@@ -65,7 +65,7 @@ public class QualityHistogramChart extends JPanel
 	private final DoubleConsumer thresholdSetter;
 
 
-	public QualityHistogramChart( final DoubleConsumer thresholdSetter )
+	public QualityHistogramChart( final DoubleConsumer thresholdSetter, final String axisLabel )
 	{
 		this.thresholdSetter = thresholdSetter;
 		this.chart = ChartFactory.createHistogram( null, null, null, null, PlotOrientation.VERTICAL, false, false, false );
@@ -92,7 +92,7 @@ public class QualityHistogramChart extends JPanel
 		plot.getRangeAxis().setTickLabelsVisible( false );
 		plot.getRangeAxis().setLabelPaint( Logger.NORMAL_COLOR );
 		plot.getRangeAxis().setLabelFont( Fonts.SMALL_FONT );
-		plot.getRangeAxis().setLabel( "Quality histogram" );
+		plot.getRangeAxis().setLabel( ( axisLabel == null ) ? "Quality histogram" : axisLabel );
 		plot.getRangeAxis().setLabelInsets( new RectangleInsets( 0., 0., 0., 0. ) );
 		plot.getRangeAxis().setTickLabelInsets( new RectangleInsets( 0., 0., 0., 0. ) );
 		plot.getRangeAxis().setAxisLineVisible( false );
