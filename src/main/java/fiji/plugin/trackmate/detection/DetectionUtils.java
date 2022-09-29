@@ -108,8 +108,7 @@ public class DetectionUtils
 			final Map< String, Object > detectorSettings,
 			final int frame,
 			final Logger logger,
-			final Consumer< Boolean > buttonEnabler
-			)
+			final Consumer< Boolean > buttonEnabler )
 	{
 		buttonEnabler.accept( false );
 		new Thread( "TrackMate preview detection thread" )
@@ -154,7 +153,6 @@ public class DetectionUtils
 
 					// Generate event for listener to reflect changes.
 					model.setSpots( model.getSpots(), true );
-
 				}
 				catch ( final Exception e )
 				{
@@ -187,7 +185,7 @@ public class DetectionUtils
 
 	public static final boolean is2D( final ImagePlus imp )
 	{
-		return imp.getNSlices() <= 1;
+		return ( imp == null ) ? true : imp.getNSlices() <= 1;
 	}
 
 	/**
