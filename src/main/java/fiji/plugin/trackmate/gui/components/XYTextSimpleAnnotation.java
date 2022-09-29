@@ -49,9 +49,17 @@ public class XYTextSimpleAnnotation extends AbstractXYAnnotation
 
 	private final ChartPanel chartPanel;
 
+	private final boolean paintBackground;
+
 	public XYTextSimpleAnnotation( final ChartPanel chartPanel )
 	{
+		this( chartPanel, false );
+	}
+
+	public XYTextSimpleAnnotation( final ChartPanel chartPanel, final boolean paintBackground )
+	{
 		this.chartPanel = chartPanel;
+		this.paintBackground = paintBackground;
 	}
 
 	/*
@@ -71,7 +79,8 @@ public class XYTextSimpleAnnotation extends AbstractXYAnnotation
 
 		final Rectangle2D box = chartPanel.getScreenDataArea();
 		float sx = ( float ) plot.getDomainAxis().valueToJava2D( x, box, plot.getDomainAxisEdge() );
-		final float maxXLim = ( float ) box.getWidth() - g2.getFontMetrics().stringWidth( text );
+		final int stringWidth = g2.getFontMetrics().stringWidth( text );
+		final float maxXLim = ( float ) box.getWidth() - stringWidth;
 		if ( sx > maxXLim )
 			sx = maxXLim;
 		if ( sx < box.getMinX() )
@@ -80,6 +89,20 @@ public class XYTextSimpleAnnotation extends AbstractXYAnnotation
 		final float sy = ( float ) plot.getRangeAxis().valueToJava2D(
 				y, chartPanel.getScreenDataArea(), plot.getRangeAxisEdge() );
 		g2.setTransform( new AffineTransform() );
+
+		// Background.
+		if ( paintBackground )
+		{
+			g2.setColor( chartPanel.getBackground() );
+			final int height = g2.getFontMetrics().getHeight();
+			g2.fillRect(
+					( int ) ( sx - 0.1 * stringWidth ),
+					( int ) ( sy - 1.1 * height ),
+					( int ) ( 1.25 * stringWidth ),
+					( int ) ( 1.3 * height ) );
+		}
+
+		// Text.
 		g2.setColor( color );
 		g2.setFont( font );
 		g2.drawString( text, sx, sy );
