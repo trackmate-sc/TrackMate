@@ -23,8 +23,10 @@ package fiji.plugin.trackmate.gui;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.DisplayMode;
+import java.awt.Font;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Point;
@@ -35,13 +37,17 @@ import java.awt.event.FocusListener;
 import java.awt.event.WindowAdapter;
 
 import javax.swing.JComponent;
+import javax.swing.JEditorPane;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -273,5 +279,93 @@ public class GuiUtils
 				} );
 			}
 		} );
+	}
+
+	/**
+	 * Returns an editor pane suitable to display information about a TrackMate
+	 * module. It expects to receive HTML strings, including some links. The
+	 * links will be clickable and open the target URL in a browser. Nice for
+	 * documentation and links to papers.
+	 * 
+	 * @return a new {@link JEditorPane}.
+	 */
+	public static JEditorPane infoDisplay()
+	{
+		return infoDisplay( "" );
+	}
+
+	public static JEditorPane infoDisplay( final String html )
+	{
+		return infoDisplay( html, true );
+	}
+
+	/**
+	 * Returns an editor pane suitable to display information about a TrackMate
+	 * module. It expects to receive HTML strings, including some links. The
+	 * links will be clickable and open the target URL in a browser. Nice for
+	 * documentation and links to papers.
+	 * 
+	 * @param html
+	 *            the text to display.
+	 * @param justify
+	 *            if <code>true</code> the text will be justified.
+	 * 
+	 * @return a new {@link JEditorPane}.
+	 */
+	public static JEditorPane infoDisplay( final String html, final boolean justify )
+	{
+		final JEditorPane jep = new JEditorPane()
+		{
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void setText( final String t )
+			{
+				final String text = justify
+						? t.replace( "<br>", "" )
+								.replace( "<p>", "<p align=\"justify\">" )
+								.replace( "<html>", "<html><p align=\"justify\">" )
+						: t;
+				super.setText( text );
+			}
+		};
+		jep.putClientProperty( JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE );
+		jep.setContentType( "text/html" );
+		jep.setText( html );
+		jep.setEditable( false );
+		jep.setOpaque( false );
+		jep.setFont( Fonts.FONT.deriveFont( Font.ITALIC ) );
+		jep.addHyperlinkListener( new HyperlinkListener()
+		{
+			@Override
+			public void hyperlinkUpdate( final HyperlinkEvent hle )
+			{
+				if ( HyperlinkEvent.EventType.ACTIVATED.equals( hle.getEventType() ) )
+				{
+					System.out.println( hle.getURL() );
+					final Desktop desktop = Desktop.getDesktop();
+					try
+					{
+						desktop.browse( hle.getURL().toURI() );
+					}
+					catch ( final Exception ex )
+					{
+						ex.printStackTrace();
+					}
+				}
+			}
+		} );
+		return jep;
+	}
+
+	public static JScrollPane textInScrollPanel( final JComponent component )
+	{
+		final JScrollPane scrollPane = new JScrollPane( component,
+				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER );
+		scrollPane.setOpaque( false );
+		scrollPane.getViewport().setOpaque( false );
+		scrollPane.setBorder( null );
+		return scrollPane;
 	}
 }
