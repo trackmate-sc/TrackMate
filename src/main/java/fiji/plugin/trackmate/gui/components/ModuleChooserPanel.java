@@ -25,7 +25,6 @@ import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
 import static fiji.plugin.trackmate.gui.Fonts.FONT;
 
 import java.awt.Component;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -33,11 +32,13 @@ import java.awt.Insets;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComboBox;
+import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 
 import fiji.plugin.trackmate.TrackMateModule;
+import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.providers.AbstractProvider;
 
 public class ModuleChooserPanel< K extends TrackMateModule > extends JPanel
@@ -57,7 +58,7 @@ public class ModuleChooserPanel< K extends TrackMateModule > extends JPanel
 		gridBagLayout.columnWidths = new int[] { 430, 0 };
 		gridBagLayout.rowHeights = new int[] { 16, 27, 209, 0 };
 		gridBagLayout.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
-		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 1.0, Double.MIN_VALUE };
 		setLayout( gridBagLayout );
 
 		final JLabel lblHeader = new JLabel();
@@ -85,21 +86,17 @@ public class ModuleChooserPanel< K extends TrackMateModule > extends JPanel
 		this.add( cmbbox, gbcCmbbox );
 		cmbbox.setFont( FONT );
 
-		final JLabel lblInfo = new JLabel();
-		lblInfo.setFont( FONT.deriveFont( Font.ITALIC ) );
+		final JEditorPane info = GuiUtils.infoDisplay();
 		final GridBagConstraints gbcLblInfo = new GridBagConstraints();
 		gbcLblInfo.insets = new Insets( 5, 5, 5, 5 );
 		gbcLblInfo.fill = GridBagConstraints.BOTH;
 		gbcLblInfo.gridx = 0;
 		gbcLblInfo.gridy = 2;
-		this.add( lblInfo, gbcLblInfo );
+		this.add( GuiUtils.textInScrollPanel( info ), gbcLblInfo );
 
 		cmbbox.addActionListener( e -> {
 			final K factory = provider.getFactory( ( String ) cmbbox.getSelectedItem() );
-			lblInfo.setText( factory.getInfoText()
-					.replace( "<br>", "" )
-					.replace( "<p>", "<p align=\"justify\">" )
-					.replace( "<html>", "<html><p align=\"justify\">" ) );
+			info.setText( factory.getInfoText() );
 		} );
 
 		cmbbox.setSelectedItem( selectedKey );
