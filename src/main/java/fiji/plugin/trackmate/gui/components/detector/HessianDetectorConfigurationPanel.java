@@ -105,7 +105,8 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		gridBagLayout.rowWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 		setLayout( gridBagLayout );
 
-		final JLabel jLabelSegmenterName = new JLabel();
+		final JLabel jLabelSegmenterName = new JLabel( detectorName );
+		jLabelSegmenterName.setFont( BIG_FONT );
 		final GridBagConstraints gbcLabelSegmenterName = new GridBagConstraints();
 		gbcLabelSegmenterName.anchor = GridBagConstraints.NORTH;
 		gbcLabelSegmenterName.fill = GridBagConstraints.HORIZONTAL;
@@ -114,8 +115,6 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		gbcLabelSegmenterName.gridx = 0;
 		gbcLabelSegmenterName.gridy = 0;
 		this.add( jLabelSegmenterName, gbcLabelSegmenterName );
-		jLabelSegmenterName.setFont( BIG_FONT );
-		jLabelSegmenterName.setText( detectorName );
 
 		final GridBagConstraints gbcLabelHelpText = new GridBagConstraints();
 		gbcLabelHelpText.fill = GridBagConstraints.BOTH;

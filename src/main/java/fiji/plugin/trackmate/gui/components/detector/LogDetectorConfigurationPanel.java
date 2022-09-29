@@ -110,7 +110,7 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0 };
 		setLayout( gridBagLayout );
 
-		final JLabel jLabelSegmenterName = new JLabel( detectorName, JLabel.CENTER );
+		final JLabel jLabelSegmenterName = new JLabel( detectorName );
 		jLabelSegmenterName.setFont( BIG_FONT );
 		final GridBagConstraints gbcLabelSegmenterName = new GridBagConstraints();
 		gbcLabelSegmenterName.anchor = GridBagConstraints.CENTER;
