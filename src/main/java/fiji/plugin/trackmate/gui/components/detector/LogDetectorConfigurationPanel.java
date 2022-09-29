@@ -29,9 +29,7 @@ import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
 import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
 import static fiji.plugin.trackmate.gui.Fonts.FONT;
 import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
-import static fiji.plugin.trackmate.gui.Icons.PREVIEW_ICON;
 
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -40,22 +38,19 @@ import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 
-import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
-import fiji.plugin.trackmate.util.JLabelLogger;
+import fiji.plugin.trackmate.util.DetectionPreview;
 import ij.ImagePlus;
 import ij.measure.Calibration;
 
@@ -68,15 +63,6 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 {
 
 	private static final long serialVersionUID = 1L;
-
-	private static final String TOOLTIP_PREVIEW = "<html>"
-			+ "Preview the current settings on the current frame."
-			+ "<p>"
-			+ "Advice: change the settings until you get at least <br>"
-			+ "<b>all</b> the spots you want, and do not mind the <br>"
-			+ "spurious spots too much. You will get a chance to <br>"
-			+ "get rid of them later."
-			+ "</html>";
 
 	private static final NumberFormat FORMAT = new DecimalFormat( "#.###" );
 
@@ -119,44 +105,29 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 
 		this.setPreferredSize( new java.awt.Dimension( 300, 461 ) );
 		final GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWeights = new double[] { 0.0, 0.0, 1.0, 0.0 };
-		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0 };
+		gridBagLayout.columnWeights = new double[] { 1.0, 0.0, 1.0, 0.0 };
+		gridBagLayout.rowWeights = new double[] { 0., 1., 0., 0., 0., 0., 0., 0. };
+		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0 };
 		setLayout( gridBagLayout );
 
-		final JLabel jLabelPreTitle = new JLabel();
-		final GridBagConstraints gbcLabelPreTitle = new GridBagConstraints();
-		gbcLabelPreTitle.anchor = GridBagConstraints.NORTH;
-		gbcLabelPreTitle.fill = GridBagConstraints.HORIZONTAL;
-		gbcLabelPreTitle.insets = new Insets( 5, 5, 5, 5 );
-		gbcLabelPreTitle.gridwidth = 4;
-		gbcLabelPreTitle.gridx = 0;
-		gbcLabelPreTitle.gridy = 0;
-		this.add( jLabelPreTitle, gbcLabelPreTitle );
-		jLabelPreTitle.setText( "Settings for detector:" );
-		jLabelPreTitle.setFont( FONT );
-
-		final JLabel jLabelSegmenterName = new JLabel();
+		final JLabel jLabelSegmenterName = new JLabel( detectorName, JLabel.CENTER );
+		jLabelSegmenterName.setFont( BIG_FONT );
 		final GridBagConstraints gbcLabelSegmenterName = new GridBagConstraints();
-		gbcLabelSegmenterName.anchor = GridBagConstraints.NORTH;
-		gbcLabelSegmenterName.fill = GridBagConstraints.HORIZONTAL;
+		gbcLabelSegmenterName.anchor = GridBagConstraints.CENTER;
+		gbcLabelSegmenterName.fill = GridBagConstraints.BOTH;
 		gbcLabelSegmenterName.insets = new Insets( 5, 5, 5, 5 );
 		gbcLabelSegmenterName.gridwidth = 4;
 		gbcLabelSegmenterName.gridx = 0;
-		gbcLabelSegmenterName.gridy = 1;
+		gbcLabelSegmenterName.gridy = 0;
 		this.add( jLabelSegmenterName, gbcLabelSegmenterName );
-		jLabelSegmenterName.setFont( BIG_FONT );
-		jLabelSegmenterName.setText( detectorName );
 
-		final JLabel jLabelHelpText = new JLabel();
 		final GridBagConstraints gbcLabelHelpText = new GridBagConstraints();
 		gbcLabelHelpText.fill = GridBagConstraints.BOTH;
 		gbcLabelHelpText.insets = new Insets( 5, 5, 5, 5 );
 		gbcLabelHelpText.gridwidth = 4;
 		gbcLabelHelpText.gridx = 0;
-		gbcLabelHelpText.gridy = 2;
-		this.add( jLabelHelpText, gbcLabelHelpText );
-		jLabelHelpText.setFont( FONT.deriveFont( Font.ITALIC ) );
-		jLabelHelpText.setText( infoText.replace( "<br>", "" ).replace( "<p>", "<p align=\"justify\">" ).replace( "<html>", "<html><p align=\"justify\">" ) );
+		gbcLabelHelpText.gridy = 1;
+		this.add( GuiUtils.textInScrollPanel( GuiUtils.infoDisplay( infoText ) ), gbcLabelHelpText );
 
 		final JLabel lblSegmentInChannel = new JLabel( "Detect in channel:" );
 		lblSegmentInChannel.setFont( SMALL_FONT );
@@ -165,7 +136,7 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 		gbcSegmentInChannel.anchor = GridBagConstraints.EAST;
 		gbcSegmentInChannel.insets = new Insets( 5, 5, 5, 5 );
 		gbcSegmentInChannel.gridx = 0;
-		gbcSegmentInChannel.gridy = 4;
+		gbcSegmentInChannel.gridy = 2;
 		add( lblSegmentInChannel, gbcSegmentInChannel );
 
 		sliderChannel = new JSlider();
@@ -173,7 +144,7 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 		gbc_sliderChannel.fill = GridBagConstraints.BOTH;
 		gbc_sliderChannel.insets = new Insets( 5, 5, 5, 5 );
 		gbc_sliderChannel.gridx = 2;
-		gbc_sliderChannel.gridy = 4;
+		gbc_sliderChannel.gridy = 2;
 		add( sliderChannel, gbc_sliderChannel );
 
 		final JLabel labelChannel = new JLabel( "1" );
@@ -184,7 +155,7 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 		gbcLabelChannel.fill = GridBagConstraints.VERTICAL;
 		gbcLabelChannel.insets = new Insets( 5, 5, 5, 5 );
 		gbcLabelChannel.gridx = 3;
-		gbcLabelChannel.gridy = 4;
+		gbcLabelChannel.gridy = 2;
 		add( labelChannel, gbcLabelChannel );
 
 		final JLabel jLabelEstimDiameter = new JLabel();
@@ -193,7 +164,7 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 		gbc_jLabel2.insets = new Insets( 5, 5, 5, 5 );
 		gbc_jLabel2.gridwidth = 2;
 		gbc_jLabel2.gridx = 0;
-		gbc_jLabel2.gridy = 5;
+		gbc_jLabel2.gridy = 3;
 		this.add( jLabelEstimDiameter, gbc_jLabel2 );
 		jLabelEstimDiameter.setText( "Estimated object diameter:" );
 		jLabelEstimDiameter.setFont( SMALL_FONT );
@@ -206,7 +177,7 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 		gbcTextFieldBlobDiameter.fill = GridBagConstraints.HORIZONTAL;
 		gbcTextFieldBlobDiameter.insets = new Insets( 5, 5, 5, 5 );
 		gbcTextFieldBlobDiameter.gridx = 2;
-		gbcTextFieldBlobDiameter.gridy = 5;
+		gbcTextFieldBlobDiameter.gridy = 3;
 		this.add( ftfDiameter, gbcTextFieldBlobDiameter );
 		ftfDiameter.setFont( SMALL_FONT );
 
@@ -215,7 +186,7 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 		gbcLabelBlobDiameterUnit.fill = GridBagConstraints.BOTH;
 		gbcLabelBlobDiameterUnit.insets = new Insets( 5, 5, 5, 5 );
 		gbcLabelBlobDiameterUnit.gridx = 3;
-		gbcLabelBlobDiameterUnit.gridy = 5;
+		gbcLabelBlobDiameterUnit.gridy = 3;
 		this.add( jLabelBlobDiameterUnit, gbcLabelBlobDiameterUnit );
 		jLabelBlobDiameterUnit.setFont( SMALL_FONT );
 		jLabelBlobDiameterUnit.setText( model.getSpaceUnits() );
@@ -226,7 +197,7 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 		gbcLabelThreshold.insets = new Insets( 5, 5, 5, 5 );
 		gbcLabelThreshold.gridwidth = 2;
 		gbcLabelThreshold.gridx = 0;
-		gbcLabelThreshold.gridy = 6;
+		gbcLabelThreshold.gridy = 4;
 		this.add( jLabelThreshold, gbcLabelThreshold );
 		jLabelThreshold.setText( "Quality threshold:" );
 		jLabelThreshold.setFont( SMALL_FONT );
@@ -238,7 +209,7 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 		gbcTextFieldThreshold.fill = GridBagConstraints.BOTH;
 		gbcTextFieldThreshold.insets = new Insets( 5, 5, 5, 5 );
 		gbcTextFieldThreshold.gridx = 2;
-		gbcTextFieldThreshold.gridy = 6;
+		gbcTextFieldThreshold.gridy = 4;
 		this.add( ftfQualityThreshold, gbcTextFieldThreshold );
 		ftfQualityThreshold.setFont( SMALL_FONT );
 
@@ -249,7 +220,7 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 		gbcPreProcess.anchor = GridBagConstraints.EAST;
 		gbcPreProcess.insets = new Insets( 5, 5, 5, 5 );
 		gbcPreProcess.gridx = 0;
-		gbcPreProcess.gridy = 7;
+		gbcPreProcess.gridy = 5;
 		add( lblPreProcess, gbcPreProcess );
 
 		jCheckBoxMedianFilter = new JCheckBox();
@@ -259,7 +230,7 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 		gbcCheckBoxMedianFilter.insets = new Insets( 5, 5, 5, 5 );
 		gbcCheckBoxMedianFilter.gridwidth = 2;
 		gbcCheckBoxMedianFilter.gridx = 2;
-		gbcCheckBoxMedianFilter.gridy = 7;
+		gbcCheckBoxMedianFilter.gridy = 5;
 		this.add( jCheckBoxMedianFilter, gbcCheckBoxMedianFilter );
 		jCheckBoxMedianFilter.setFont( FONT );
 
@@ -270,7 +241,7 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 		gbcSubPixelLoc.gridwidth = 2;
 		gbcSubPixelLoc.insets = new Insets( 5, 5, 5, 5 );
 		gbcSubPixelLoc.gridx = 0;
-		gbcSubPixelLoc.gridy = 8;
+		gbcSubPixelLoc.gridy = 6;
 		add( lblSubPixelLoc, gbcSubPixelLoc );
 
 		// Add sub-pixel checkbox
@@ -281,31 +252,25 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 		gbcCheckSubPixel.insets = new Insets( 5, 5, 5, 5 );
 		gbcCheckSubPixel.gridwidth = 2;
 		gbcCheckSubPixel.gridx = 2;
-		gbcCheckSubPixel.gridy = 8;
+		gbcCheckSubPixel.gridy = 6;
 		this.add( jCheckSubPixel, gbcCheckSubPixel );
 		jCheckSubPixel.setFont( SMALL_FONT );
 
-		final JButton btnPreview = new JButton( "Preview", PREVIEW_ICON );
-		btnPreview.setToolTipText( TOOLTIP_PREVIEW );
-		final GridBagConstraints gbcBtnPreview = new GridBagConstraints();
-		gbcBtnPreview.anchor = GridBagConstraints.NORTHEAST;
-		gbcBtnPreview.insets = new Insets( 5, 5, 5, 5 );
-		gbcBtnPreview.gridwidth = 3;
-		gbcBtnPreview.gridx = 1;
-		gbcBtnPreview.gridy = 10;
-		this.add( btnPreview, gbcBtnPreview );
-		btnPreview.setFont( SMALL_FONT );
+		final DetectionPreview detectionPreview = new DetectionPreview(
+				model,
+				settings,
+				getDetectorFactory(),
+				() -> getSettings(),
+				() -> ( settings.imp.getFrame() - 1 ),
+				( threshold ) -> ftfQualityThreshold.setValue( Double.valueOf( threshold ) ) );
 
-		final JLabelLogger labelLogger = new JLabelLogger();
-		labelLogger.setText( "   " );
-		final GridBagConstraints gbcLabelLogger = new GridBagConstraints();
-		gbcLabelLogger.insets = new Insets( 5, 5, 5, 5 );
-		gbcLabelLogger.fill = GridBagConstraints.BOTH;
-		gbcLabelLogger.gridwidth = 4;
-		gbcLabelLogger.gridx = 0;
-		gbcLabelLogger.gridy = 11;
-		add( labelLogger, gbcLabelLogger );
-		final Logger localLogger = labelLogger.getLogger();
+		final GridBagConstraints gbcPreview = new GridBagConstraints();
+		gbcPreview.gridwidth = 5;
+		gbcPreview.insets = new Insets( 0, 0, 10, 0 );
+		gbcPreview.fill = GridBagConstraints.BOTH;
+		gbcPreview.gridx = 0;
+		gbcPreview.gridy = 7;
+		add( detectionPreview.getPanel(), gbcPreview );
 
 		/*
 		 * Deal with channels: the slider and channel labels are only visible if
@@ -334,14 +299,6 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 		 */
 
 		sliderChannel.addChangeListener( e -> labelChannel.setText( "" + sliderChannel.getValue() ) );
-		btnPreview.addActionListener( e -> DetectionUtils.preview(
-				model,
-				settings,
-				getDetectorFactory(),
-				getSettings(),
-				settings.imp.getFrame() - 1,
-				localLogger,
-				b -> btnPreview.setEnabled( b ) ) );
 		GuiUtils.selectAllOnFocus( ftfDiameter );
 		GuiUtils.selectAllOnFocus( ftfQualityThreshold );
 	}

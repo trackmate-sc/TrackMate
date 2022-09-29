@@ -26,7 +26,8 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.detection.DogDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 
-public class DogDetectorConfigurationPanel extends LogDetectorConfigurationPanel {
+public class DogDetectorConfigurationPanel extends LogDetectorConfigurationPanel
+{
 
 	private static final long serialVersionUID = 1L;
 

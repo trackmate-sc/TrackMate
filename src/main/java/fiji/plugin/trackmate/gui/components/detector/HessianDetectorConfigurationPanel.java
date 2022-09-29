@@ -30,9 +30,7 @@ import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
 import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
 import static fiji.plugin.trackmate.gui.Fonts.FONT;
 import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
-import static fiji.plugin.trackmate.gui.Icons.PREVIEW_ICON;
 
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -41,21 +39,18 @@ import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 
-import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.detection.HessianDetectorFactory;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
-import fiji.plugin.trackmate.util.JLabelLogger;
+import fiji.plugin.trackmate.util.DetectionPreview;
 
 /**
  * Configuration panel the Hessian detector.
@@ -66,15 +61,6 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 {
 
 	private static final long serialVersionUID = 1L;
-
-	private static final String TOOLTIP_PREVIEW = "<html>"
-			+ "Preview the current settings on the current frame."
-			+ "<p>"
-			+ "Advice: change the settings until you get at least <br>"
-			+ "<b>all</b> the spots you want, and do not mind the <br>"
-			+ "spurious spots too much. You will get a chance to <br>"
-			+ "get rid of them later."
-			+ "</html>";
 
 	private static final NumberFormat FORMAT = new DecimalFormat( "#.###" );
 
@@ -116,20 +102,8 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		this.setPreferredSize( new java.awt.Dimension( 300, 461 ) );
 		final GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWeights = new double[] { 0.0, 0.0, 1.0, 0.0 };
-		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0 };
+		gridBagLayout.rowWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 		setLayout( gridBagLayout );
-
-		final JLabel jLabelPreTitle = new JLabel();
-		final GridBagConstraints gbcLabelPreTitle = new GridBagConstraints();
-		gbcLabelPreTitle.anchor = GridBagConstraints.NORTH;
-		gbcLabelPreTitle.fill = GridBagConstraints.HORIZONTAL;
-		gbcLabelPreTitle.insets = new Insets( 5, 5, 5, 5 );
-		gbcLabelPreTitle.gridwidth = 4;
-		gbcLabelPreTitle.gridx = 0;
-		gbcLabelPreTitle.gridy = 0;
-		this.add( jLabelPreTitle, gbcLabelPreTitle );
-		jLabelPreTitle.setText( "Settings for detector:" );
-		jLabelPreTitle.setFont( FONT );
 
 		final JLabel jLabelSegmenterName = new JLabel();
 		final GridBagConstraints gbcLabelSegmenterName = new GridBagConstraints();
@@ -138,21 +112,18 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		gbcLabelSegmenterName.insets = new Insets( 5, 5, 5, 5 );
 		gbcLabelSegmenterName.gridwidth = 4;
 		gbcLabelSegmenterName.gridx = 0;
-		gbcLabelSegmenterName.gridy = 1;
+		gbcLabelSegmenterName.gridy = 0;
 		this.add( jLabelSegmenterName, gbcLabelSegmenterName );
 		jLabelSegmenterName.setFont( BIG_FONT );
 		jLabelSegmenterName.setText( detectorName );
 
-		final JLabel jLabelHelpText = new JLabel();
 		final GridBagConstraints gbcLabelHelpText = new GridBagConstraints();
 		gbcLabelHelpText.fill = GridBagConstraints.BOTH;
 		gbcLabelHelpText.insets = new Insets( 5, 5, 5, 5 );
 		gbcLabelHelpText.gridwidth = 4;
 		gbcLabelHelpText.gridx = 0;
-		gbcLabelHelpText.gridy = 2;
-		this.add( jLabelHelpText, gbcLabelHelpText );
-		jLabelHelpText.setFont( FONT.deriveFont( Font.ITALIC ) );
-		jLabelHelpText.setText( infoText.replace( "<br>", "" ).replace( "<p>", "<p align=\"justify\">" ).replace( "<html>", "<html><p align=\"justify\">" ) );
+		gbcLabelHelpText.gridy = 1;
+		this.add( GuiUtils.textInScrollPanel( GuiUtils.infoDisplay( infoText ) ), gbcLabelHelpText );
 
 		final JLabel lblSegmentInChannel = new JLabel( "Detect in channel:" );
 		lblSegmentInChannel.setFont( SMALL_FONT );
@@ -161,7 +132,7 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		gbcSegmentInChannel.anchor = GridBagConstraints.EAST;
 		gbcSegmentInChannel.insets = new Insets( 5, 5, 5, 5 );
 		gbcSegmentInChannel.gridx = 0;
-		gbcSegmentInChannel.gridy = 4;
+		gbcSegmentInChannel.gridy = 2;
 		add( lblSegmentInChannel, gbcSegmentInChannel );
 
 		sliderChannel = new JSlider();
@@ -169,7 +140,7 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		gbc_sliderChannel.fill = GridBagConstraints.BOTH;
 		gbc_sliderChannel.insets = new Insets( 5, 5, 5, 5 );
 		gbc_sliderChannel.gridx = 2;
-		gbc_sliderChannel.gridy = 4;
+		gbc_sliderChannel.gridy = 2;
 		add( sliderChannel, gbc_sliderChannel );
 
 		final JLabel labelChannel = new JLabel( "1" );
@@ -180,7 +151,7 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		gbcLabelChannel.fill = GridBagConstraints.VERTICAL;
 		gbcLabelChannel.insets = new Insets( 5, 5, 5, 5 );
 		gbcLabelChannel.gridx = 3;
-		gbcLabelChannel.gridy = 4;
+		gbcLabelChannel.gridy = 2;
 		add( labelChannel, gbcLabelChannel );
 
 		final JLabel jLabelEstimDiameter = new JLabel();
@@ -189,7 +160,7 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		gbc_jLabel2.insets = new Insets( 5, 5, 5, 5 );
 		gbc_jLabel2.gridwidth = 2;
 		gbc_jLabel2.gridx = 0;
-		gbc_jLabel2.gridy = 5;
+		gbc_jLabel2.gridy = 3;
 		this.add( jLabelEstimDiameter, gbc_jLabel2 );
 		jLabelEstimDiameter.setText( "Estimated object diameter in X & Y:" );
 		jLabelEstimDiameter.setFont( SMALL_FONT );
@@ -202,7 +173,7 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		gbcTextFieldBlobDiameter.fill = GridBagConstraints.HORIZONTAL;
 		gbcTextFieldBlobDiameter.insets = new Insets( 5, 5, 5, 5 );
 		gbcTextFieldBlobDiameter.gridx = 2;
-		gbcTextFieldBlobDiameter.gridy = 5;
+		gbcTextFieldBlobDiameter.gridy = 3;
 		this.add( ftfDiameter, gbcTextFieldBlobDiameter );
 		ftfDiameter.setFont( SMALL_FONT );
 
@@ -211,7 +182,7 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		gbcLabelBlobDiameterUnit.fill = GridBagConstraints.BOTH;
 		gbcLabelBlobDiameterUnit.insets = new Insets( 5, 5, 5, 5 );
 		gbcLabelBlobDiameterUnit.gridx = 3;
-		gbcLabelBlobDiameterUnit.gridy = 5;
+		gbcLabelBlobDiameterUnit.gridy = 3;
 		this.add( jLabelBlobDiameterUnit, gbcLabelBlobDiameterUnit );
 		jLabelBlobDiameterUnit.setFont( SMALL_FONT );
 		jLabelBlobDiameterUnit.setText( model.getSpaceUnits() );
@@ -223,7 +194,7 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		gbcLabelEstimDiameterZ.gridwidth = 2;
 		gbcLabelEstimDiameterZ.insets = new Insets( 5, 5, 5, 5 );
 		gbcLabelEstimDiameterZ.gridx = 0;
-		gbcLabelEstimDiameterZ.gridy = 6;
+		gbcLabelEstimDiameterZ.gridy = 4;
 		add( jLabelEstimDiameterZ, gbcLabelEstimDiameterZ );
 
 		ftfDiameterZ = new JFormattedTextField( FORMAT );
@@ -234,7 +205,7 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		gbcFtfDiameterZ.insets = new Insets( 5, 5, 5, 5 );
 		gbcFtfDiameterZ.fill = GridBagConstraints.HORIZONTAL;
 		gbcFtfDiameterZ.gridx = 2;
-		gbcFtfDiameterZ.gridy = 6;
+		gbcFtfDiameterZ.gridy = 4;
 		add( ftfDiameterZ, gbcFtfDiameterZ );
 
 		final JLabel jLabelBlobDiameterUnitZ = new JLabel( model.getSpaceUnits() );
@@ -242,7 +213,7 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		final GridBagConstraints gbcLabelBlobDiameterUnitZ = new GridBagConstraints();
 		gbcLabelBlobDiameterUnitZ.insets = new Insets( 5, 5, 5, 5 );
 		gbcLabelBlobDiameterUnitZ.gridx = 3;
-		gbcLabelBlobDiameterUnitZ.gridy = 6;
+		gbcLabelBlobDiameterUnitZ.gridy = 4;
 		add( jLabelBlobDiameterUnitZ, gbcLabelBlobDiameterUnitZ );
 
 		final JLabel jLabelThreshold = new JLabel();
@@ -252,7 +223,7 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		gbcLabelThreshold.insets = new Insets( 5, 5, 5, 5 );
 		gbcLabelThreshold.gridwidth = 2;
 		gbcLabelThreshold.gridx = 0;
-		gbcLabelThreshold.gridy = 7;
+		gbcLabelThreshold.gridy = 5;
 		this.add( jLabelThreshold, gbcLabelThreshold );
 		jLabelThreshold.setFont( SMALL_FONT );
 
@@ -263,7 +234,7 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		gbcTextFieldThreshold.fill = GridBagConstraints.BOTH;
 		gbcTextFieldThreshold.insets = new Insets( 5, 5, 5, 5 );
 		gbcTextFieldThreshold.gridx = 2;
-		gbcTextFieldThreshold.gridy = 7;
+		gbcTextFieldThreshold.gridy = 5;
 		this.add( ftfQualityThreshold, gbcTextFieldThreshold );
 		ftfQualityThreshold.setFont( SMALL_FONT );
 
@@ -274,7 +245,7 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		gbcPreProcess.anchor = GridBagConstraints.EAST;
 		gbcPreProcess.insets = new Insets( 5, 5, 5, 5 );
 		gbcPreProcess.gridx = 0;
-		gbcPreProcess.gridy = 8;
+		gbcPreProcess.gridy = 6;
 		add( lblNormalize, gbcPreProcess );
 
 		jCheckBoxNormalize = new JCheckBox();
@@ -284,7 +255,7 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		gbcCheckBoxNormalize.insets = new Insets( 5, 5, 5, 5 );
 		gbcCheckBoxNormalize.gridwidth = 2;
 		gbcCheckBoxNormalize.gridx = 2;
-		gbcCheckBoxNormalize.gridy = 8;
+		gbcCheckBoxNormalize.gridy = 6;
 		this.add( jCheckBoxNormalize, gbcCheckBoxNormalize );
 		jCheckBoxNormalize.setFont( FONT );
 
@@ -295,7 +266,7 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		gbcSubPixelLoc.gridwidth = 2;
 		gbcSubPixelLoc.insets = new Insets( 5, 5, 5, 5 );
 		gbcSubPixelLoc.gridx = 0;
-		gbcSubPixelLoc.gridy = 9;
+		gbcSubPixelLoc.gridy = 7;
 		add( lblSubPixelLoc, gbcSubPixelLoc );
 
 		// Add sub-pixel checkbox
@@ -306,31 +277,26 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		gbcCheckSubPixel.insets = new Insets( 5, 5, 5, 5 );
 		gbcCheckSubPixel.gridwidth = 2;
 		gbcCheckSubPixel.gridx = 2;
-		gbcCheckSubPixel.gridy = 9;
+		gbcCheckSubPixel.gridy = 7;
 		this.add( jCheckSubPixel, gbcCheckSubPixel );
 		jCheckSubPixel.setFont( SMALL_FONT );
 
-		final JButton btnPreview = new JButton( "Preview", PREVIEW_ICON );
-		btnPreview.setToolTipText( TOOLTIP_PREVIEW );
 		final GridBagConstraints gbcBtnPreview = new GridBagConstraints();
-		gbcBtnPreview.anchor = GridBagConstraints.NORTHEAST;
-		gbcBtnPreview.insets = new Insets( 5, 5, 5, 5 );
-		gbcBtnPreview.gridwidth = 3;
-		gbcBtnPreview.gridx = 1;
-		gbcBtnPreview.gridy = 11;
-		this.add( btnPreview, gbcBtnPreview );
-		btnPreview.setFont( SMALL_FONT );
+		gbcBtnPreview.fill = GridBagConstraints.BOTH;
+		gbcBtnPreview.insets = new Insets( 0, 0, 10, 0 );
+		gbcBtnPreview.gridwidth = 4;
+		gbcBtnPreview.gridx = 0;
+		gbcBtnPreview.gridy = 8;
 
-		final JLabelLogger labelLogger = new JLabelLogger();
-		labelLogger.setText( "   " );
-		final GridBagConstraints gbcLabelLogger = new GridBagConstraints();
-		gbcLabelLogger.insets = new Insets( 5, 5, 5, 5 );
-		gbcLabelLogger.fill = GridBagConstraints.BOTH;
-		gbcLabelLogger.gridwidth = 4;
-		gbcLabelLogger.gridx = 0;
-		gbcLabelLogger.gridy = 12;
-		add( labelLogger, gbcLabelLogger );
-		final Logger localLogger = labelLogger.getLogger();
+		final DetectionPreview detectionPreview = new DetectionPreview(
+				model,
+				settings,
+				new HessianDetectorFactory<>(),
+				() -> getSettings(),
+				() -> ( settings.imp.getFrame() - 1 ),
+				( threshold ) -> ftfQualityThreshold.setValue( Double.valueOf( threshold ) ) );
+
+		this.add( detectionPreview.getPanel(), gbcBtnPreview );
 
 		/*
 		 * Deal with channels: the slider and channel labels are only visible if
@@ -359,14 +325,6 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		 */
 
 		sliderChannel.addChangeListener( e -> labelChannel.setText( "" + sliderChannel.getValue() ) );
-		btnPreview.addActionListener( e -> DetectionUtils.preview(
-				model,
-				settings,
-				new HessianDetectorFactory<>(),
-				getSettings(),
-				settings.imp.getFrame() - 1,
-				localLogger,
-				b -> btnPreview.setEnabled( b ) ) );
 		GuiUtils.selectAllOnFocus( ftfDiameter );
 		GuiUtils.selectAllOnFocus( ftfDiameterZ );
 		GuiUtils.selectAllOnFocus( ftfQualityThreshold );
