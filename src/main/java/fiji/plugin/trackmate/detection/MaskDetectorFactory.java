@@ -75,6 +75,8 @@ public class MaskDetectorFactory< T extends RealType< T > & NativeType< T > > ex
 			+ "the (possibly simplified) contour of the region. In 3D, a spherical "
 			+ "spot is created for each region in its center, with a volume equal to the "
 			+ "region volume."
+			+ "<p>"
+			+ "The spot quality stores the object area or volume in pixels."
 			+ "</html>";
 
 	@Override

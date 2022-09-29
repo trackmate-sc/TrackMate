@@ -77,6 +77,8 @@ public class LabeImageDetectorFactory< T extends RealType< T > & NativeType< T >
 			+ "This detector reads such an image and create spots from each object. "
 			+ "In 2D the contour of a label is imported. In 3D, spherical spots "
 			+ "of the same volume that the label are created."
+			+ "<p>"
+			+ "The spot quality stores the object area or volume in pixels."
 			+ "</html>";
 
 	/*
