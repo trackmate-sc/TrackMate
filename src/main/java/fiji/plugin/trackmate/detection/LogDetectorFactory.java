@@ -81,7 +81,14 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 	public static final String NAME = "LoG detector";
 
 	/** An html information text. */
-	public static final String INFO_TEXT = "<html>" + "This detector applies a LoG (Laplacian of Gaussian) filter <br>" + "to the image, with a sigma suited to the blob estimated size. <br>" + "Calculations are made in the Fourier space. The maxima in the <br>" + "filtered image are searched for, and maxima too close from each <br>" + "other are suppressed. A quadratic fitting scheme allows to do <br>" + "sub-pixel localization. " + "</html>";
+	public static final String INFO_TEXT = "<html>"
+			+ "This detector applies a LoG (Laplacian of Gaussian) filter <br>"
+			+ "to the image, with a sigma suited to the blob estimated size. <br>"
+			+ "Calculations are made in the Fourier space. The maxima in the <br>"
+			+ "filtered image are searched for, and maxima too close from each <br>"
+			+ "other are suppressed. A quadratic fitting scheme allows to do <br>"
+			+ "sub-pixel localization. "
+			+ "</html>";
 
 	/*
 	 * FIELDS

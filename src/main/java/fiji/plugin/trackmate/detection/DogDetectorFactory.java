@@ -53,7 +53,15 @@ public class DogDetectorFactory< T extends RealType< T > & NativeType< T >> exte
 	public static final String THIS_NAME = "DoG detector";
 
 	/** An html information text. */
-	public static final String THIS_INFO_TEXT = "<html>" + "This segmenter is based on an approximation of the LoG operator <br> " + "by differences of gaussian (DoG). Computations are made in direct space. <br>" + "It is the quickest for small spot sizes (< ~5 pixels). " + "<p> " + "Spots found too close are suppressed. This segmenter can do sub-pixel <br>" + "localization of spots using a quadratic fitting scheme. It is based on <br>" + "the scale-space framework made by Stephan Preibisch for ImgLib. " + "</html>";
+	public static final String THIS_INFO_TEXT = "<html>"
+			+ "This detector is based on an approximation of the LoG operator <br> "
+			+ "by differences of Gaussian (DoG). Computations are made in direct space. <br>"
+			+ "It is the quickest for small spot sizes (< ~5 pixels). "
+			+ "<p> "
+			+ "Spots found too close are suppressed. This detector can do sub-pixel <br>"
+			+ "localization of spots using a quadratic fitting scheme. It is based on <br>"
+			+ "the scale-space framework made by Stephan Preibisch for ImgLib. "
+			+ "</html>";
 
 	/*
 	 * METHODS
