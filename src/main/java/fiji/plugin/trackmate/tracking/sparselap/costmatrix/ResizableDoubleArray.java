@@ -89,9 +89,9 @@ public class ResizableDoubleArray
 	}
 
 	/**
-	 * Returns <tt>true</tt> if this list contains no elements.
+	 * Returns {@code true} if this list contains no elements.
 	 * 
-	 * @return <tt>true</tt> if this list contains no elements
+	 * @return {@code true} if this list contains no elements
 	 */
 	public boolean isEmpty()
 	{
