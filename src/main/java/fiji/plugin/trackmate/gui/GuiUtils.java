@@ -342,7 +342,6 @@ public class GuiUtils
 			{
 				if ( HyperlinkEvent.EventType.ACTIVATED.equals( hle.getEventType() ) )
 				{
-					System.out.println( hle.getURL() );
 					final Desktop desktop = Desktop.getDesktop();
 					try
 					{
