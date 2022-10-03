@@ -219,14 +219,14 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 		chkboxSimplify.setText( "Simplify contours." );
 		chkboxSimplify.setFont( FONT );
 
-		final DetectionPreview detectionPreview = new DetectionPreview(
-				model,
-				settings,
-				getDetectorFactory(),
-				() -> getSettings(),
-				() -> ( imp.getFrame() - 1 ),
-				null,
-				DetectionUtils.is2D( settings.imp ) ? "Area histogram" : "Volume histogram" );
+		final DetectionPreview detectionPreview = DetectionPreview.create()
+				.model( model )
+				.settings( settings )
+				.detectorFactory( getDetectorFactory() )
+				.detectionSettingsSupplier( () -> getSettings() )
+				.thresholdUpdater( null )
+				.axisLabel( DetectionUtils.is2D( settings.imp ) ? "Area histogram" : "Volume histogram" )
+				.get();
 
 		final GridBagConstraints gbcBtnPreview = new GridBagConstraints();
 		gbcBtnPreview.fill = GridBagConstraints.BOTH;

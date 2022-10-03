@@ -287,14 +287,13 @@ public class HessianDetectorConfigurationPanel extends ConfigurationPanel
 		gbcBtnPreview.gridx = 0;
 		gbcBtnPreview.gridy = 8;
 
-		final DetectionPreview detectionPreview = new DetectionPreview(
-				model,
-				settings,
-				new HessianDetectorFactory<>(),
-				() -> getSettings(),
-				() -> ( settings.imp.getFrame() - 1 ),
-				( threshold ) -> ftfQualityThreshold.setValue( Double.valueOf( threshold ) ) );
-
+		final DetectionPreview detectionPreview = DetectionPreview.create()
+				.model( model )
+				.settings( settings )
+				.detectorFactory( new HessianDetectorFactory<>())
+				.detectionSettingsSupplier( () -> getSettings())
+				.thresholdTextField( ftfQualityThreshold )
+				.get();
 		this.add( detectionPreview.getPanel(), gbcBtnPreview );
 
 		/*

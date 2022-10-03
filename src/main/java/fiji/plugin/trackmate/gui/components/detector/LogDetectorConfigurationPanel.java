@@ -256,20 +256,20 @@ public class LogDetectorConfigurationPanel extends ConfigurationPanel
 		this.add( jCheckSubPixel, gbcCheckSubPixel );
 		jCheckSubPixel.setFont( SMALL_FONT );
 
-		final DetectionPreview detectionPreview = new DetectionPreview(
-				model,
-				settings,
-				getDetectorFactory(),
-				() -> getSettings(),
-				() -> ( settings.imp.getFrame() - 1 ),
-				( threshold ) -> ftfQualityThreshold.setValue( Double.valueOf( threshold ) ) );
-
 		final GridBagConstraints gbcPreview = new GridBagConstraints();
 		gbcPreview.gridwidth = 5;
 		gbcPreview.insets = new Insets( 0, 0, 10, 0 );
 		gbcPreview.fill = GridBagConstraints.BOTH;
 		gbcPreview.gridx = 0;
 		gbcPreview.gridy = 7;
+
+		final DetectionPreview detectionPreview = DetectionPreview.create()
+				.model( model )
+				.settings( settings )
+				.detectorFactory( getDetectorFactory() )
+				.detectionSettingsSupplier( () -> getSettings() )
+				.thresholdTextField( ftfQualityThreshold )
+				.get();
 		add( detectionPreview.getPanel(), gbcPreview );
 
 		/*
