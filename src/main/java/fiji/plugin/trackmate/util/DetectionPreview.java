@@ -258,7 +258,7 @@ public class DetectionPreview
 		 * <code>settings</code> field using:
 		 * 
 		 * <pre>
-		 * () -> ( settings.imp.getFrame() - 1 )
+		 * () -&gt; ( settings.imp.getFrame() - 1 )
 		 * </pre>
 		 * 
 		 * @param frameSupplier
@@ -313,9 +313,9 @@ public class DetectionPreview
 		 * Sets the {@link JFormattedTextField} to update when the user changes
 		 * the threshold value on the quality histogram.
 		 * 
-		 * @param thresholdUpdater
-		 *            the consumer function called with the threshold value sets
-		 *            by the user on the quality histogram
+		 * @param ftf
+		 *            the consumer formatted field that will be updated when the
+		 *            user sets the threshold value on the quality histogram.
 		 * @return this builder.
 		 * @see #thresholdUpdater
 		 */
