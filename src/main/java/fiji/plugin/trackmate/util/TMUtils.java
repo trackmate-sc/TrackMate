@@ -313,6 +313,9 @@ public class TMUtils
 	 */
 	private static final double[] getRange( final double[] data )
 	{
+		if ( data.length == 0 )
+			return new double[] { 1., 0., 1. };
+
 		final double min = Arrays.stream( data ).min().getAsDouble();
 		final double max = Arrays.stream( data ).max().getAsDouble();
 		return new double[] { ( max - min ), min, max };
