@@ -23,13 +23,13 @@ package fiji.plugin.trackmate.util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.function.DoubleConsumer;
 import java.util.function.Supplier;
 
 import javax.swing.JFormattedTextField;
 
+import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
@@ -40,13 +40,15 @@ import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
+import net.imglib2.util.Pair;
+import net.imglib2.util.ValuePair;
 
 public class DetectionPreview
 {
 
 	private final DetectionPreviewPanel panel;
 
-	private DetectionPreview(
+	protected DetectionPreview(
 			final Model model,
 			final Settings settings,
 			final SpotDetectorFactoryBase< ? > detectorFactory,
@@ -71,7 +73,12 @@ public class DetectionPreview
 		return panel;
 	}
 
-	private final void preview(
+	public Logger getLogger()
+	{
+		return panel.logger;
+	}
+
+	protected void preview(
 			final Model model,
 			final Settings settings,
 			final SpotDetectorFactoryBase< ? > detectorFactory,
@@ -87,78 +94,22 @@ public class DetectionPreview
 			{
 				try
 				{
-
-					// Configure local settings.
-					final Settings lSettings = new Settings( settings.imp );
-					lSettings.tstart = frame;
-					lSettings.tend = frame;
-					settings.setRoi( settings.imp.getRoi() );
-
-					lSettings.detectorFactory = detectorFactory;
-					lSettings.detectorSettings = new HashMap<>( detectorSettings );
-
-					/*
-					 * If we have a threshold parameter, we set it to 0, then we
-					 * will filter out with real value later.
-					 */
-					// Does this detector have a THRESHOLD parameter?
-					final boolean hasThreshold = ( thresholdKey != null ) && ( detectorSettings.containsKey( thresholdKey ) );
-					final double threshold;
-					if ( hasThreshold )
-					{
-						threshold = ( ( Double ) detectorSettings.get( thresholdKey ) ).doubleValue();
-						lSettings.detectorSettings.put( thresholdKey, Double.valueOf( Double.NEGATIVE_INFINITY ) );
-					}
-					else
-					{
-						threshold = Double.NaN;
-					}
-
-					// Execute preview.
-					final TrackMate trackmate = new TrackMate( lSettings );
-					trackmate.getModel().setLogger( panel.logger );
-
-					final boolean detectionOk = trackmate.execDetection();
-					if ( !detectionOk )
-					{
-						panel.logger.error( trackmate.getErrorMessage() );
+					// Run preview.
+					final Pair< Model, Double > out = runPreviewDetection(
+							settings,
+							frame,
+							detectorFactory,
+							detectorSettings,
+							thresholdKey );
+					if ( out == null )
 						return;
-					}
 
-					if ( hasThreshold )
-						// Filter by the initial threshold value.
-						trackmate.getModel().getSpots().filter( new FeatureFilter( Spot.QUALITY, threshold, true ) );
-					else
-						// Make them all visible.
-						trackmate.getModel().getSpots().setVisible( true );
-					panel.logger.log( "Found " + trackmate.getModel().getSpots().getNSpots( true ) + " spots." );
+					final Model sourceModel = out.getA();
+					final Double threshold = out.getB();
+					panel.logger.log( "Found " + sourceModel.getSpots().getNSpots( true ) + " spots." );
 
-					// Wrap new spots in a list.
-					final SpotCollection newspots = trackmate.getModel().getSpots();
-					final Iterator< Spot > it = newspots.iterator( frame, true );
-					final ArrayList< Spot > spotsToCopy = new ArrayList<>( newspots.getNSpots( frame, true ) );
-					while ( it.hasNext() )
-						spotsToCopy.add( it.next() );
-
-					if ( model != null )
-					{
-						// Pass new spot list to model.
-						model.getSpots().put( frame, spotsToCopy );
-						// Make them visible
-						for ( final Spot spot : spotsToCopy )
-							spot.putFeature( SpotCollection.VISIBILITY, SpotCollection.ONE );
-
-						// Generate event for listener to reflect changes.
-						model.setSpots( model.getSpots(), true );
-					}
-
-					// Update histogram if any.
-					if ( panel.chart != null )
-					{
-						final double[] values = FeatureUtils.collectFeatureValues(
-								Spot.QUALITY, TrackMateObject.SPOTS, trackmate.getModel(), false );
-						panel.chart.displayHistogram( values, threshold );
-					}
+					// Update target model.
+					updateModelAndHistogram( model, sourceModel, frame, threshold );
 				}
 				catch ( final Exception e )
 				{
@@ -171,6 +122,110 @@ public class DetectionPreview
 				}
 			}
 		}.start();
+	}
+
+	/**
+	 * Runs the preview with the specified parameters.
+	 * 
+	 * @param settings
+	 *            the settings object to use as preview. Will be used for its
+	 *            image and ROI fields.
+	 * @param frame
+	 *            the frame in which to perform the preview.
+	 * @param detectorFactory
+	 *            the detector to use for the preview.
+	 * @param detectorSettings
+	 *            suitable detection settings for the detector.
+	 * @param thresholdKey
+	 *            a key to a parameter that is used by the detector to threshold
+	 *            spots based on their quality. This will be used to configure
+	 *            the preview so that the generated histogram is interactive. If
+	 *            <code>null</code> or not used by the detector, this is simply
+	 *            ignored.
+	 * @return a pair of objects: A) The model that contains the results of the
+	 *         preview (normally, the visible spots in the specified frame). B)
+	 *         The threshold value in case the <code>thresholdKey</code>
+	 *         parameter is used. This threshold value is to be used with the
+	 *         {@link #updateModelAndHistogram(Model, Model, int, double)}
+	 *         method to properly display the quality histogram.
+	 */
+	protected Pair< Model, Double > runPreviewDetection(
+			final Settings settings,
+			final int frame,
+			final SpotDetectorFactoryBase< ? > detectorFactory,
+			final Map< String, Object > detectorSettings,
+			final String thresholdKey )
+	{
+		// Configure local settings.
+		final Settings lSettings = new Settings( settings.imp );
+		lSettings.tstart = frame;
+		lSettings.tend = frame;
+		settings.setRoi( settings.imp.getRoi() );
+
+		lSettings.detectorFactory = detectorFactory;
+		lSettings.detectorSettings = new HashMap<>( detectorSettings );
+
+		// Does this detector have a THRESHOLD parameter?
+		final boolean hasThreshold = ( thresholdKey != null ) && ( detectorSettings.containsKey( thresholdKey ) );
+		final double threshold;
+		if ( hasThreshold )
+		{
+			threshold = ( ( Double ) detectorSettings.get( thresholdKey ) ).doubleValue();
+			lSettings.detectorSettings.put( thresholdKey, Double.valueOf( Double.NEGATIVE_INFINITY ) );
+		}
+		else
+		{
+			threshold = Double.NaN;
+		}
+
+		// Execute preview.
+		final TrackMate trackmate = new TrackMate( lSettings );
+		trackmate.getModel().setLogger( panel.logger );
+
+		final boolean detectionOk = trackmate.execDetection();
+		if ( !detectionOk )
+		{
+			panel.logger.error( trackmate.getErrorMessage() );
+			return null;
+		}
+
+		if ( hasThreshold )
+			// Filter by the initial threshold value.
+			trackmate.getModel().getSpots().filter( new FeatureFilter( Spot.QUALITY, threshold, true ) );
+		else
+			// Make them all visible.
+			trackmate.getModel().getSpots().setVisible( true );
+
+		return new ValuePair< Model, Double >( trackmate.getModel(), Double.valueOf( threshold ) );
+	}
+
+	protected void updateModelAndHistogram( final Model targetModel, final Model sourceModel, final int frame, final double threshold )
+	{
+		final int nSpots = sourceModel.getSpots().getNSpots( frame, true );
+		final ArrayList< Spot > spotsToCopy = new ArrayList<>( nSpots );
+		final Iterable< Spot > it = sourceModel.getSpots().iterable( frame, true );
+		for ( final Spot spot : it )
+			spotsToCopy.add( spot );
+
+		if ( targetModel != null )
+		{
+			// Pass new spot list to model.
+			targetModel.getSpots().put( frame, spotsToCopy );
+			// Make them visible
+			for ( final Spot spot : spotsToCopy )
+				spot.putFeature( SpotCollection.VISIBILITY, SpotCollection.ONE );
+
+			// Generate event for listener to reflect changes.
+			targetModel.setSpots( targetModel.getSpots(), true );
+		}
+
+		// Update histogram if any.
+		if ( panel.chart != null )
+		{
+			final double[] values = FeatureUtils.collectFeatureValues(
+					Spot.QUALITY, TrackMateObject.SPOTS, sourceModel, false );
+			panel.chart.displayHistogram( values, threshold );
+		}
 	}
 
 	public static Builder create()
