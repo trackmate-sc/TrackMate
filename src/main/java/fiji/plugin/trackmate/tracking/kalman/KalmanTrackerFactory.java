@@ -117,7 +117,7 @@ public class KalmanTrackerFactory implements SpotTrackerFactory
 		final double maxSearchRadius = ( Double ) settings.get( KEY_KALMAN_SEARCH_RADIUS );
 		final int maxFrameGap = ( Integer ) settings.get( KEY_GAP_CLOSING_MAX_FRAME_GAP );
 		final double initialSearchRadius = ( Double ) settings.get( KEY_LINKING_MAX_DISTANCE );
-		return new KalmanTracker( spots, maxSearchRadius, maxFrameGap, initialSearchRadius );
+		return new KalmanTracker( spots, maxSearchRadius, maxFrameGap, initialSearchRadius, null );
 	}
 
 	@Override
