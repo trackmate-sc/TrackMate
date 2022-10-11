@@ -29,7 +29,6 @@ import static fiji.plugin.trackmate.io.IOUtils.unmarshallMap;
 import static fiji.plugin.trackmate.io.IOUtils.writeAttribute;
 import static fiji.plugin.trackmate.tracking.LAPUtils.XML_ELEMENT_NAME_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.LAPUtils.XML_ELEMENT_NAME_GAP_CLOSING;
-import static fiji.plugin.trackmate.tracking.LAPUtils.XML_ELEMENT_NAME_LINKING;
 import static fiji.plugin.trackmate.tracking.LAPUtils.XML_ELEMENT_NAME_MERGING;
 import static fiji.plugin.trackmate.tracking.LAPUtils.XML_ELEMENT_NAME_SPLITTING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_GAP_CLOSING;
@@ -41,8 +40,6 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_CUTOFF_PERCENTILE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_FRAME_GAP;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_FEATURE_PENALTIES;
@@ -61,12 +58,12 @@ import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.components.tracker.LAPTrackerSettingsPanel;
 
 /**
- * Base class for LAP-based trackers.
+ * Base class for trackers with split/merge actions.
  */
-public abstract class LAPTrackerFactory implements SpotTrackerFactory
+public abstract class SegmentTrackerFactory implements SpotTrackerFactory
 {
 
-	private String errorMessage;
+	protected String errorMessage;
 
 
 	@Override
@@ -84,22 +81,12 @@ public abstract class LAPTrackerFactory implements SpotTrackerFactory
 		return new LAPTrackerSettingsPanel( getName(), spaceUnits, features, featureNames );
 	}
 
+        
 	@Override
 	public boolean marshall( final Map< String, Object > settings, final Element element )
 	{
 		boolean ok = true;
 		final StringBuilder str = new StringBuilder();
-
-		// Linking
-		final Element linkingElement = new Element( XML_ELEMENT_NAME_LINKING );
-		ok = ok & writeAttribute( settings, linkingElement, KEY_LINKING_MAX_DISTANCE, Double.class, str );
-		// feature penalties
-		@SuppressWarnings( "unchecked" )
-		final Map< String, Double > lfpm = ( Map< String, Double > ) settings.get( KEY_LINKING_FEATURE_PENALTIES );
-		final Element lfpElement = new Element( XML_ELEMENT_NAME_FEATURE_PENALTIES );
-		marshallMap( lfpm, lfpElement );
-		linkingElement.addContent( lfpElement );
-		element.addContent( linkingElement );
 
 		// Gap closing
 		final Element gapClosingElement = new Element( XML_ELEMENT_NAME_GAP_CLOSING );
@@ -152,28 +139,6 @@ public abstract class LAPTrackerFactory implements SpotTrackerFactory
 		settings.clear();
 		final StringBuilder errorHolder = new StringBuilder();
 		boolean ok = true;
-
-		// Linking
-		final Element linkingElement = element.getChild( XML_ELEMENT_NAME_LINKING );
-		if ( null == linkingElement )
-		{
-			errorHolder.append( "Could not found the " + XML_ELEMENT_NAME_LINKING + " element in XML.\n" );
-			ok = false;
-
-		}
-		else
-		{
-
-			ok = ok & readDoubleAttribute( linkingElement, settings, KEY_LINKING_MAX_DISTANCE, errorHolder );
-			// feature penalties
-			final Map< String, Double > lfpMap = new HashMap< >();
-			final Element lfpElement = linkingElement.getChild( XML_ELEMENT_NAME_FEATURE_PENALTIES );
-			if ( null != lfpElement )
-			{
-				ok = ok & unmarshallMap( lfpElement, lfpMap, errorHolder );
-			}
-			settings.put( KEY_LINKING_FEATURE_PENALTIES, lfpMap );
-		}
 
 		// Gap closing
 		final Element gapClosingElement = element.getChild( XML_ELEMENT_NAME_GAP_CLOSING );
@@ -272,10 +237,6 @@ public abstract class LAPTrackerFactory implements SpotTrackerFactory
 
 		final StringBuilder str = new StringBuilder();
 
-		str.append( "  Linking conditions:\n" );
-		str.append( String.format( "    - max distance: %.1f\n", ( Double ) sm.get( KEY_LINKING_MAX_DISTANCE ) ) );
-		str.append( LAPUtils.echoFeaturePenalties( ( Map< String, Double > ) sm.get( KEY_LINKING_FEATURE_PENALTIES ) ) );
-
 		if ( ( Boolean ) sm.get( KEY_ALLOW_GAP_CLOSING ) )
 		{
 			str.append( "  Gap-closing conditions:\n" );
@@ -316,7 +277,7 @@ public abstract class LAPTrackerFactory implements SpotTrackerFactory
 	@Override
 	public Map< String, Object > getDefaultSettings()
 	{
-		return LAPUtils.getDefaultLAPSettingsMap();
+		return LAPUtils.getDefaultSegmentSettingsMap();
 	}
 
 	@Override

@@ -48,11 +48,11 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.tracking.sparselap.costfunction.CostFunction;
-import fiji.plugin.trackmate.tracking.sparselap.costfunction.FeaturePenaltyCostFunction;
-import fiji.plugin.trackmate.tracking.sparselap.costfunction.SquareDistCostFunction;
-import fiji.plugin.trackmate.tracking.sparselap.costmatrix.JaqamanLinkingCostMatrixCreator;
-import fiji.plugin.trackmate.tracking.sparselap.linker.JaqamanLinker;
+import fiji.plugin.trackmate.tracking.costfunction.CostFunction;
+import fiji.plugin.trackmate.tracking.costfunction.FeaturePenaltyCostFunction;
+import fiji.plugin.trackmate.tracking.costfunction.SquareDistCostFunction;
+import fiji.plugin.trackmate.tracking.costmatrix.JaqamanLinkingCostMatrixCreator;
+import fiji.plugin.trackmate.tracking.linker.JaqamanLinker;
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
 
 public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorithm implements SpotTracker, Cancelable

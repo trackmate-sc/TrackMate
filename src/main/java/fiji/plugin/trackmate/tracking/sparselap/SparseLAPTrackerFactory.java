@@ -22,18 +22,36 @@
 package fiji.plugin.trackmate.tracking.sparselap;
 
 import java.util.Map;
+import java.util.HashMap;
 
 import javax.swing.ImageIcon;
 
 import org.scijava.plugin.Plugin;
+import org.jdom2.Element;
+
+
+import static fiji.plugin.trackmate.io.IOUtils.marshallMap;
+import static fiji.plugin.trackmate.io.IOUtils.readBooleanAttribute;
+import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
+import static fiji.plugin.trackmate.io.IOUtils.readIntegerAttribute;
+import static fiji.plugin.trackmate.io.IOUtils.unmarshallMap;
+import static fiji.plugin.trackmate.io.IOUtils.writeAttribute;
 
 import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.tracking.LAPTrackerFactory;
+import fiji.plugin.trackmate.tracking.SegmentTrackerFactory;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
+import fiji.plugin.trackmate.tracking.LAPUtils;
+import static fiji.plugin.trackmate.tracking.LAPUtils.XML_ELEMENT_NAME_LINKING;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.LAPUtils.XML_ELEMENT_NAME_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_MAX_DISTANCE;
+
 
 @Plugin( type = SpotTrackerFactory.class )
-public class SparseLAPTrackerFactory extends LAPTrackerFactory
+public class SparseLAPTrackerFactory extends SegmentTrackerFactory
 {
 
 	public static final String THIS_TRACKER_KEY = "SPARSE_LAP_TRACKER";
@@ -93,4 +111,90 @@ public class SparseLAPTrackerFactory extends LAPTrackerFactory
 	{
 		return new SparseLAPTrackerFactory();
 	}
+        
+        public boolean marshall( final Map< String, Object > settings, final Element element )
+	{
+		boolean ok = true;
+		final StringBuilder str = new StringBuilder();
+
+		// Linking
+		final Element linkingElement = new Element( XML_ELEMENT_NAME_LINKING );
+		ok = ok & writeAttribute( settings, linkingElement, KEY_LINKING_MAX_DISTANCE, Double.class, str );
+		// feature penalties
+		@SuppressWarnings( "unchecked" )
+		final Map< String, Double > lfpm = ( Map< String, Double > ) settings.get( KEY_LINKING_FEATURE_PENALTIES );
+		final Element lfpElement = new Element( XML_ELEMENT_NAME_FEATURE_PENALTIES );
+		marshallMap( lfpm, lfpElement );
+		linkingElement.addContent( lfpElement );
+		element.addContent( linkingElement );
+                return (ok & super.marshall(settings, element));
+        }
+        
+        public boolean unmarshall( final Element element, final Map< String, Object > settings )
+	{
+            boolean ok = super.unmarshall(element, settings); // common parameters
+            final StringBuilder errorHolder = new StringBuilder();
+	
+	    // Linking
+	   final Element linkingElement = element.getChild( XML_ELEMENT_NAME_LINKING );
+	    if ( null == linkingElement )
+	    {
+			errorHolder.append( "Could not found the " + XML_ELEMENT_NAME_LINKING + " element in XML.\n" );
+			ok = false;
+
+	    }
+	    else
+	    {
+
+			ok = ok & readDoubleAttribute( linkingElement, settings, KEY_LINKING_MAX_DISTANCE, errorHolder );
+			// feature penalties
+			final Map< String, Double > lfpMap = new HashMap< >();
+			final Element lfpElement = linkingElement.getChild( XML_ELEMENT_NAME_FEATURE_PENALTIES );
+			if ( null != lfpElement )
+			{
+				ok = ok & unmarshallMap( lfpElement, lfpMap, errorHolder );
+			}
+			settings.put( KEY_LINKING_FEATURE_PENALTIES, lfpMap );
+		}
+
+		if ( !checkSettingsValidity( settings ) )
+		{
+			ok = false;
+			errorHolder.append( errorMessage ); // append validity check message
+		}
+
+		if ( !ok )
+		{
+			errorMessage = errorHolder.toString();
+		}
+		return ok ;
+
+	}
+        
+        @Override
+	public Map< String, Object > getDefaultSettings()
+	{
+            Map<String, Object> settings = LAPUtils.getDefaultSegmentSettingsMap();
+            // Linking
+            settings.put(KEY_LINKING_MAX_DISTANCE, DEFAULT_LINKING_MAX_DISTANCE);
+            settings.put(KEY_LINKING_FEATURE_PENALTIES, new HashMap<>(DEFAULT_LINKING_FEATURE_PENALTIES));
+            return settings;
+	}
+        
+        @Override
+	@SuppressWarnings( "unchecked" )
+	public String toString( final Map< String, Object > sm )
+	{
+		if ( !checkSettingsValidity( sm ) ) { return errorMessage; }
+
+		final StringBuilder str = new StringBuilder();
+
+		str.append( "  Linking conditions:\n" );
+		str.append( String.format( "    - max distance: %.1f\n", ( Double ) sm.get( KEY_LINKING_MAX_DISTANCE ) ) );
+		str.append( LAPUtils.echoFeaturePenalties( ( Map< String, Double > ) sm.get( KEY_LINKING_FEATURE_PENALTIES ) ) );
+
+		str.append( super.toString(sm) );
+		return str.toString();
+	}
+
 }

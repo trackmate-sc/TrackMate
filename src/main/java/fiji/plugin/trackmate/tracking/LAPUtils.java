@@ -133,11 +133,9 @@ public class LAPUtils {
 	 * 
 	 * @return a new map.
 	 */
-	public static final Map<String, Object> getDefaultLAPSettingsMap() {
+	public static final Map<String, Object> getDefaultSegmentSettingsMap() 
+        {
 		final Map<String, Object> settings = new HashMap<>();
-		// Linking
-		settings.put(KEY_LINKING_MAX_DISTANCE, DEFAULT_LINKING_MAX_DISTANCE);
-		settings.put(KEY_LINKING_FEATURE_PENALTIES, new HashMap<>(DEFAULT_LINKING_FEATURE_PENALTIES));
 		// Gap closing
 		settings.put(KEY_ALLOW_GAP_CLOSING, DEFAULT_ALLOW_GAP_CLOSING);
 		settings.put(KEY_GAP_CLOSING_MAX_FRAME_GAP, DEFAULT_GAP_CLOSING_MAX_FRAME_GAP);
@@ -158,7 +156,10 @@ public class LAPUtils {
 		// return
 		return settings;
 	}
-
+        
+    
+        
+       
 
 	public static String echoFeaturePenalties(final Map<String, Double> featurePenalties) {
 		String str = "";

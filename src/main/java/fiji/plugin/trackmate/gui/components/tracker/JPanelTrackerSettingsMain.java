@@ -37,6 +37,8 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_FEATURE_PEN
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_FEATURE_PENALTIES;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -48,6 +50,8 @@ import java.awt.event.MouseWheelListener;
 import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.Map;
+import java.util.HashMap;
+
 
 import javax.swing.JCheckBox;
 import javax.swing.JFormattedTextField;
@@ -387,7 +391,7 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel
 	 */
 	public Map< String, Object > getSettings()
 	{
-		final Map< String, Object > settings = LAPUtils.getDefaultLAPSettingsMap();
+		final Map< String, Object > settings = getDefaultLAPSettingsMap();
 
 		settings.put( KEY_LINKING_MAX_DISTANCE, ( ( Number ) txtfldLinkingMaxDistance.getValue() ).doubleValue() );
 		settings.put( KEY_LINKING_FEATURE_PENALTIES, panelLinkingFeatures.getFeaturePenalties() );
@@ -404,9 +408,18 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel
 		settings.put( KEY_ALLOW_TRACK_MERGING, chkboxAllowMerging.isSelected() );
 		settings.put( KEY_MERGING_MAX_DISTANCE, ( ( Number ) txtfldMergingMaxDistance.getValue() ).doubleValue() );
 		settings.put( KEY_MERGING_FEATURE_PENALTIES, panelMergingFeatures.getFeaturePenalties() );
-
+            
 		return settings;
 	}
+        
+        public static final Map<String, Object> getDefaultLAPSettingsMap() 
+        {
+            final Map<String, Object> settings = LAPUtils.getDefaultSegmentSettingsMap();
+            // Linking
+            settings.put(KEY_LINKING_MAX_DISTANCE, DEFAULT_LINKING_MAX_DISTANCE);
+            settings.put(KEY_LINKING_FEATURE_PENALTIES, new HashMap<>(DEFAULT_LINKING_FEATURE_PENALTIES));
+            return settings;
+        }
 
 	/*
 	 * PRIVATE METHODS
