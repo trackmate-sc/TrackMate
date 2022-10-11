@@ -367,7 +367,20 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 	{
 		features.put( feature, value );
 	}
-
+  
+        /**
+         * Copy the listed features of the spot src to the current spot
+         * 
+         */
+        public void copyFeatures(Spot src, final Map< String, Double > features)
+        {
+            if (null == features || features.isEmpty()) 
+                return;
+            
+            for (final String feat : features.keySet()) 
+                    putFeature(feat, src.getFeature(feat));
+        }
+        
 	/**
 	 * Returns the difference of the feature value for this spot with the one of
 	 * the specified spot. By construction, this operation is anti-symmetric (
