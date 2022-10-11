@@ -19,14 +19,14 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.tracking.sparselap.costmatrix;
+package fiji.plugin.trackmate.tracking.costmatrix;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import fiji.plugin.trackmate.tracking.sparselap.costfunction.CostFunction;
-import fiji.plugin.trackmate.tracking.sparselap.linker.SparseCostMatrix;
+import fiji.plugin.trackmate.tracking.costfunction.CostFunction;
+import fiji.plugin.trackmate.tracking.linker.SparseCostMatrix;
 
 /**
  * A {@link CostMatrixCreator} that can generate a cost matrix from a list of

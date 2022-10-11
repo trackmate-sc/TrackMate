@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.tracking.sparselap.costmatrix;
+package fiji.plugin.trackmate.tracking.costmatrix;
 
 import java.util.Arrays;
 

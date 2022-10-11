@@ -19,25 +19,31 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.tracking.sparselap.costfunction;
-
-import fiji.plugin.trackmate.Spot;
+package fiji.plugin.trackmate.tracking.costfunction;
 
 /**
- * A cost function that returns cost equal to the square distance. Suited to
- * Brownian motion.
- *
+ * Interface representing a function that can calculate the cost to link a
+ * source object to a target object.
+ * 
  * @author Jean-Yves Tinevez - 2014
- *
+ * 
+ * @param <K>
+ *            the type of the sources.
+ * @param <J>
+ *            the type of the targets.
  */
-public class SquareDistCostFunction implements CostFunction< Spot, Spot >
+public interface CostFunction< K, J >
 {
 
-	@Override
-	public double linkingCost( final Spot source, final Spot target )
-	{
-		final double d2 = source.squareDistanceTo( target );
-		return ( d2 == 0 ) ? Double.MIN_NORMAL : d2;
-	}
+	/**
+	 * Returns the cost to link two objects.
+	 * 
+	 * @param source
+	 *            the source object.
+	 * @param target
+	 *            the target object.
+	 * @return the cost as a double.
+	 */
+	public double linkingCost( K source, J target );
 
 }

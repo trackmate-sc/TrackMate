@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.tracking.sparselap.linker;
+package fiji.plugin.trackmate.tracking.linker;
 
 import java.util.Arrays;
 import java.util.Collections;

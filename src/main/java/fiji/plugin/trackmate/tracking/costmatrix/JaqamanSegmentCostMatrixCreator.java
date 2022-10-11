@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.tracking.sparselap.costmatrix;
+package fiji.plugin.trackmate.tracking.costmatrix;
 
 import static fiji.plugin.trackmate.tracking.LAPUtils.checkFeatureMap;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_GAP_CLOSING;
@@ -37,10 +37,10 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_MAX_DISTA
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.tracking.sparselap.costfunction.CostFunction;
-import fiji.plugin.trackmate.tracking.sparselap.costfunction.FeaturePenaltyCostFunction;
-import fiji.plugin.trackmate.tracking.sparselap.costfunction.SquareDistCostFunction;
-import fiji.plugin.trackmate.tracking.sparselap.linker.SparseCostMatrix;
+import fiji.plugin.trackmate.tracking.costfunction.CostFunction;
+import fiji.plugin.trackmate.tracking.costfunction.FeaturePenaltyCostFunction;
+import fiji.plugin.trackmate.tracking.costfunction.SquareDistCostFunction;
+import fiji.plugin.trackmate.tracking.linker.SparseCostMatrix;
 
 import java.util.ArrayList;
 import java.util.Collections;
