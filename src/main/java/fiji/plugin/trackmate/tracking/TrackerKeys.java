@@ -100,38 +100,21 @@ public class TrackerKeys
 	 * expected value must be a Double and should be expressed in physical
 	 * units.
 	 */
-	public static final String KEY_KALMING_INITIAL_SEARCH_RADIUS = "KALMING_INITIAL_SEARCH_RADIUS";
+	public static final String KEY_KALMAN_INITIAL_SEARCH_RADIUS = "KALMAN_INITIAL_SEARCH_RADIUS";
 
 	/** A default value for the {@value #KEY_INITIAL_SEARCH_RADIUS} parameter. */
-	public static final double DEFAULT_KALMING_INITIAL_SEARCH_RADIUS = 15.0;
+	public static final double DEFAULT_KALMAN_INITIAL_SEARCH_RADIUS = 15.0;
         
-        
-	public static final String KEY_KALMING_SEARCH_RADIUS = "KALMING_SEARCH_RADIUS";
+        /** Search radius for the Kalman tracker. */
+	public static final String KEY_KALMAN_SEARCH_RADIUS = "KALMAN_SEARCH_RADIUS";
 
 	/** A default value for the {@value #KEY_SEARCH_RADIUS} parameter. */
-	public static final double DEFAULT_KALMING_SEARCH_RADIUS = 20.0;
+	public static final double DEFAULT_KALMAN_SEARCH_RADIUS = 20.0;
         
-        public static final String KEY_KALMING_MAX_FRAME_GAP = "KALMING_MAX_FRAME_GAP";
+        public static final String KEY_KALMAN_MAX_FRAME_GAP = "KALMAN_MAX_FRAME_GAP";
 
 	/** A default value for the {@value #KEY_MAX_FRAME_GAP} parameter. */
-	public static final int DEFAULT_KALMING_MAX_FRAME_GAP = 2;
-        
-          
-	/**
-	 * Key for the parameter specifying the feature penalties when linking with Kalman filter
-	 * particles. Expected values should be a
-	 * <code>Map&lt;String, Double&gt;</code> where the map keys are spot
-	 * feature names.
-	 * 
-	 * @see fiji.plugin.trackmate.Spot#getFeature(String)
-	 */
-	public static final String KEY_KALMING_FEATURE_PENALTIES = "KALMING_FEATURE_PENALTIES";
-
-	/**
-	 * A default value for the {@value #KEY_KALMING_FEATURE_PENALTIES}
-	 * parameter.
-	 */
-	public static final Map< String, Double > DEFAULT_KALMING_FEATURE_PENALTIES = new HashMap< >();
+	public static final int DEFAULT_KALMAN_MAX_FRAME_GAP = 2;
         
 
 	/**

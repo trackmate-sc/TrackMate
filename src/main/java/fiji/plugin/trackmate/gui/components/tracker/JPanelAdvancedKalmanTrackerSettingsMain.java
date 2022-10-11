@@ -35,14 +35,14 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_FEATURE_PEN
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_MAX_DISTANCE;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMING_FEATURE_PENALTIES;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMING_INITIAL_SEARCH_RADIUS;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMING_SEARCH_RADIUS;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMING_MAX_FRAME_GAP;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_KALMING_INITIAL_SEARCH_RADIUS;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_KALMING_SEARCH_RADIUS;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_KALMING_MAX_FRAME_GAP;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_KALMING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_INITIAL_SEARCH_RADIUS;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_SEARCH_RADIUS;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_MAX_FRAME_GAP;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_KALMAN_INITIAL_SEARCH_RADIUS;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_KALMAN_SEARCH_RADIUS;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_KALMAN_MAX_FRAME_GAP;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_FEATURE_PENALTIES;
 import fiji.plugin.trackmate.tracking.LAPUtils;
 
 import java.awt.Component;
@@ -81,7 +81,7 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 
 	private final JPanelFeatureSelectionGui panelMergingFeatures;
 
-	private final JPanelFeatureSelectionGui panelKalmingFeatures;
+	private final JPanelFeatureSelectionGui panelKalmanFeatures;
 
 	private final JPanelFeatureSelectionGui panelSplittingFeatures;
 
@@ -220,9 +220,9 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 		this.add( scrpneLinkingFeatures, new GridBagConstraints( 0, ycur, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets( 0, 0, 0, 0 ), 0, 0 ) );
 		scrpneLinkingFeatures.setHorizontalScrollBarPolicy( ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER );
 		scrpneLinkingFeatures.setVerticalScrollBarPolicy( ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS );
-		panelKalmingFeatures = new JPanelFeatureSelectionGui();
-		panelKalmingFeatures.setDisplayFeatures( features, featureNames );
-		scrpneLinkingFeatures.setViewportView( panelKalmingFeatures );
+		panelKalmanFeatures = new JPanelFeatureSelectionGui();
+		panelKalmanFeatures.setDisplayFeatures( features, featureNames );
+		scrpneLinkingFeatures.setViewportView( panelKalmanFeatures );
 
 		// Gap closing
                 ycur++;
@@ -419,11 +419,11 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 	void echoSettings( final Map< String, Object > settings )
 	{
 
-		txtfldInitialSearchRadius.setValue( settings.get( KEY_KALMING_INITIAL_SEARCH_RADIUS ) );
-		txtfldSearchRadius.setValue( settings.get( KEY_KALMING_SEARCH_RADIUS ) );
-		txtfldMaxFrameGap.setValue( settings.get( KEY_KALMING_MAX_FRAME_GAP ) );
+		txtfldInitialSearchRadius.setValue( settings.get( KEY_KALMAN_INITIAL_SEARCH_RADIUS ) );
+		txtfldSearchRadius.setValue( settings.get( KEY_KALMAN_SEARCH_RADIUS ) );
+		txtfldMaxFrameGap.setValue( settings.get( KEY_KALMAN_MAX_FRAME_GAP ) );
 		
-                panelKalmingFeatures.setSelectedFeaturePenalties( ( Map< String, Double > ) settings.get( KEY_KALMING_FEATURE_PENALTIES ) );
+                panelKalmanFeatures.setSelectedFeaturePenalties( ( Map< String, Double > ) settings.get( KEY_LINKING_FEATURE_PENALTIES ) );
 
 		chkboxAllowGapClosing.setSelected( ( Boolean ) settings.get( KEY_ALLOW_GAP_CLOSING ) );
 		txtfldGapClosingMaxDistance.setValue( settings.get( KEY_GAP_CLOSING_MAX_DISTANCE ) );
@@ -462,11 +462,11 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 	{
 		final Map< String, Object > settings = getDefaultKalmanSettingsMap();
 
-		settings.put( KEY_KALMING_INITIAL_SEARCH_RADIUS, ( ( Number ) txtfldInitialSearchRadius.getValue() ).doubleValue() );
-		settings.put( KEY_KALMING_SEARCH_RADIUS, ( ( Number ) txtfldSearchRadius.getValue() ).doubleValue() );
-		settings.put( KEY_KALMING_MAX_FRAME_GAP, ( ( Number ) txtfldMaxFrameGap.getValue() ).intValue() );
+		settings.put( KEY_KALMAN_INITIAL_SEARCH_RADIUS, ( ( Number ) txtfldInitialSearchRadius.getValue() ).doubleValue() );
+		settings.put( KEY_KALMAN_SEARCH_RADIUS, ( ( Number ) txtfldSearchRadius.getValue() ).doubleValue() );
+		settings.put( KEY_KALMAN_MAX_FRAME_GAP, ( ( Number ) txtfldMaxFrameGap.getValue() ).intValue() );
 		
-                settings.put( KEY_KALMING_FEATURE_PENALTIES, panelKalmingFeatures.getFeaturePenalties() );
+                settings.put( KEY_LINKING_FEATURE_PENALTIES, panelKalmanFeatures.getFeaturePenalties() );
 
 		settings.put( KEY_ALLOW_GAP_CLOSING, chkboxAllowGapClosing.isSelected() );
 		settings.put( KEY_GAP_CLOSING_MAX_DISTANCE, ( ( Number ) txtfldGapClosingMaxDistance.getValue() ).doubleValue() );
@@ -487,10 +487,10 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
         public static final Map<String, Object> getDefaultKalmanSettingsMap() 
         {
             final Map<String, Object> settings = LAPUtils.getDefaultSegmentSettingsMap();
-            settings.put( KEY_KALMING_INITIAL_SEARCH_RADIUS, DEFAULT_KALMING_INITIAL_SEARCH_RADIUS); 
-            settings.put( KEY_KALMING_SEARCH_RADIUS, DEFAULT_KALMING_SEARCH_RADIUS); 
-            settings.put( KEY_KALMING_MAX_FRAME_GAP, DEFAULT_KALMING_MAX_FRAME_GAP); 
-            settings.put(KEY_KALMING_FEATURE_PENALTIES, new HashMap<>(DEFAULT_KALMING_FEATURE_PENALTIES));	
+            settings.put( KEY_KALMAN_INITIAL_SEARCH_RADIUS, DEFAULT_KALMAN_INITIAL_SEARCH_RADIUS); 
+            settings.put( KEY_KALMAN_SEARCH_RADIUS, DEFAULT_KALMAN_SEARCH_RADIUS); 
+            settings.put( KEY_KALMAN_MAX_FRAME_GAP, DEFAULT_KALMAN_MAX_FRAME_GAP); 
+            settings.put(KEY_LINKING_FEATURE_PENALTIES, new HashMap<>(DEFAULT_LINKING_FEATURE_PENALTIES));	
             return settings;
         }
 

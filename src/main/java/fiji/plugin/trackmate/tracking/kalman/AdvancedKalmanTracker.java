@@ -23,7 +23,6 @@ package fiji.plugin.trackmate.tracking.kalman;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -35,21 +34,22 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.tracking.costfunction.CostFunction;
 import fiji.plugin.trackmate.tracking.linker.SegmentTracker;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
 import static fiji.plugin.trackmate.tracking.LAPUtils.checkFeatureMap;
 
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_INITIAL_SEARCH_RADIUS;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_SEARCH_RADIUS;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_MAX_FRAME_GAP;
 
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMING_FEATURE_PENALTIES;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMING_INITIAL_SEARCH_RADIUS;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMING_SEARCH_RADIUS;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMING_MAX_FRAME_GAP;
-
-import net.imglib2.RealPoint;
 import net.imglib2.algorithm.Benchmark;
 
+/***
+ * @brief Kalman tracker with features cost and merging/splitting addition
+ * @author G. Letort (Pasteur)
+ */
 public class AdvancedKalmanTracker implements SpotTracker, Benchmark, Cancelable
 {
 
@@ -64,8 +64,6 @@ public class AdvancedKalmanTracker implements SpotTracker, Benchmark, Cancelable
 	private final SpotCollection spots;
 
         protected final Map< String, Object > settings;
-
-	private boolean savePredictions = false;
 
 	private SpotCollection predictionsCollection;
 
@@ -119,10 +117,10 @@ public class AdvancedKalmanTracker implements SpotTracker, Benchmark, Cancelable
                 final StringBuilder errorHolder = new StringBuilder();
                 // Prepare settings object
 		final Map< String, Object > kalSettings = new HashMap< >();
-		kalSettings.put( KEY_KALMING_SEARCH_RADIUS, settings.get( KEY_KALMING_SEARCH_RADIUS ) );
-		kalSettings.put( KEY_KALMING_INITIAL_SEARCH_RADIUS, settings.get( KEY_KALMING_INITIAL_SEARCH_RADIUS ) );
-		kalSettings.put( KEY_KALMING_MAX_FRAME_GAP, settings.get( KEY_KALMING_MAX_FRAME_GAP ) );
-                kalSettings.put( KEY_KALMING_FEATURE_PENALTIES, settings.get( KEY_KALMING_FEATURE_PENALTIES ) );
+		kalSettings.put( KEY_KALMAN_SEARCH_RADIUS, settings.get( KEY_KALMAN_SEARCH_RADIUS ) );
+		kalSettings.put( KEY_KALMAN_INITIAL_SEARCH_RADIUS, settings.get( KEY_KALMAN_INITIAL_SEARCH_RADIUS ) );
+		kalSettings.put( KEY_KALMAN_MAX_FRAME_GAP, settings.get( KEY_KALMAN_MAX_FRAME_GAP ) );
+                kalSettings.put( KEY_LINKING_FEATURE_PENALTIES, settings.get( KEY_LINKING_FEATURE_PENALTIES ) );
                 
                 // check parameters
 		if ( !checkSettingsValidity( kalSettings, errorHolder ) )
@@ -131,14 +129,13 @@ public class AdvancedKalmanTracker implements SpotTracker, Benchmark, Cancelable
 			return false;
 		}
                 
-                final double maxSearchRadius = ( Double ) kalSettings.get( KEY_KALMING_SEARCH_RADIUS ) ;
-		final double initialSearchRadius = ( Double ) kalSettings.get( KEY_KALMING_INITIAL_SEARCH_RADIUS ) ;
-		final int maxFrameGap = ( Integer ) kalSettings.get( KEY_KALMING_MAX_FRAME_GAP ) ;
-		final Map< String, Double > featurePenalties = ( Map< String, Double > ) kalSettings.get( KEY_KALMING_FEATURE_PENALTIES );
-            
+                final double maxSearchRadius = ( Double ) kalSettings.get( KEY_KALMAN_SEARCH_RADIUS ) ;
+		final double initialSearchRadius = ( Double ) kalSettings.get( KEY_KALMAN_INITIAL_SEARCH_RADIUS ) ;
+		final int maxFrameGap = ( Integer ) kalSettings.get( KEY_KALMAN_MAX_FRAME_GAP ) ;
+		final Map< String, Double > featurePenalties = ( Map< String, Double > ) kalSettings.get( KEY_LINKING_FEATURE_PENALTIES );            
 
 		/*
-		 * Outputs
+		 * 1. Apply Kalman with feature penalties.
 		 */
 
 		final KalmanTracker kalmanTracker = new KalmanTracker( spots, maxSearchRadius, maxFrameGap, initialSearchRadius, featurePenalties );		
@@ -169,29 +166,6 @@ public class AdvancedKalmanTracker implements SpotTracker, Benchmark, Cancelable
 		return errorMessage;
 	}
 
-	/**
-	 * Returns the saved predicted state as a {@link SpotCollection}.
-	 *
-	 * @return the predicted states.
-	 * @see #setSavePredictions(boolean)
-	 */
-	public SpotCollection getPredictions()
-	{
-		return predictionsCollection;
-	}
-
-	/**
-	 * Sets whether the tracker saves the predicted states.
-	 *
-	 * @param doSave
-	 *            if <code>true</code>, the predicted states will be saved.
-	 * @see #getPredictions()
-	 */
-	public void setSavePredictions( final boolean doSave )
-	{
-		this.savePredictions = doSave;
-	}
-
 	@Override
 	public void setNumThreads()
 	{}
@@ -216,50 +190,8 @@ public class AdvancedKalmanTracker implements SpotTracker, Benchmark, Cancelable
 	public void setLogger( final Logger logger )
 	{
 		this.logger = logger;
-	}
-
-	private static final class ComparableRealPoint extends RealPoint implements Comparable< ComparableRealPoint >
-	{
-		public ComparableRealPoint( final double[] A )
-		{
-			// Wrap array.
-			super( A, false );
-		}
-
-		/**
-		 * Sort based on X, Y, Z
-		 */
-		@Override
-		public int compareTo( final ComparableRealPoint o )
-		{
-			int i = 0;
-			while ( i < n )
-			{
-				if ( getDoublePosition( i ) != o.getDoublePosition( i ) ) { return ( int ) Math.signum( getDoublePosition( i ) - o.getDoublePosition( i ) ); }
-				i++;
-			}
-			return hashCode() - o.hashCode();
-		}
-	}
-
-	/**
-	 * Cost function that returns the square distance between a KF state and a
-	 * spots.
-	 */
-	private static final CostFunction< ComparableRealPoint, Spot > CF = new CostFunction< ComparableRealPoint, Spot >()
-	{
-
-		@Override
-		public double linkingCost( final ComparableRealPoint state, final Spot spot )
-		{
-			final double dx = state.getDoublePosition( 0 ) - spot.getDoublePosition( 0 );
-			final double dy = state.getDoublePosition( 1 ) - spot.getDoublePosition( 1 );
-			final double dz = state.getDoublePosition( 2 ) - spot.getDoublePosition( 2 );
-			return dx * dx + dy * dy + dz * dz + Double.MIN_NORMAL;
-			// So that it's never 0
-		}
-	};
-        
+        }
+	
          protected boolean checkSettingsValidity( final Map< String, Object > settings, final StringBuilder str )
 	{
           	if ( null == settings )
@@ -271,18 +203,18 @@ public class AdvancedKalmanTracker implements SpotTracker, Benchmark, Cancelable
 		boolean ok = true;
                 final StringBuilder errorHolder = new StringBuilder();
                 // Kalman
-		ok = ok & checkParameter( settings, KEY_KALMING_INITIAL_SEARCH_RADIUS, Double.class, errorHolder );
-		ok = ok & checkParameter( settings, KEY_KALMING_SEARCH_RADIUS, Double.class, errorHolder );
-                ok = ok & checkParameter( settings, KEY_KALMING_MAX_FRAME_GAP, Integer.class, errorHolder );
-                ok = ok & checkFeatureMap( settings, KEY_KALMING_FEATURE_PENALTIES, errorHolder );
+		ok = ok & checkParameter( settings, KEY_KALMAN_INITIAL_SEARCH_RADIUS, Double.class, errorHolder );
+		ok = ok & checkParameter( settings, KEY_KALMAN_SEARCH_RADIUS, Double.class, errorHolder );
+                ok = ok & checkParameter( settings, KEY_KALMAN_MAX_FRAME_GAP, Integer.class, errorHolder );
+                ok = ok & checkFeatureMap( settings, KEY_LINKING_FEATURE_PENALTIES, errorHolder );
 		// Check keys
 		final List< String > mandatoryKeys = new ArrayList<>();
-		mandatoryKeys.add(KEY_KALMING_SEARCH_RADIUS);
-		mandatoryKeys.add(KEY_KALMING_INITIAL_SEARCH_RADIUS);
-		mandatoryKeys.add(KEY_KALMING_MAX_FRAME_GAP);
+		mandatoryKeys.add(KEY_KALMAN_SEARCH_RADIUS);
+		mandatoryKeys.add(KEY_KALMAN_INITIAL_SEARCH_RADIUS);
+		mandatoryKeys.add(KEY_KALMAN_MAX_FRAME_GAP);
                 
                 final List< String > optionalKeys = new ArrayList<>();
-		optionalKeys.add(KEY_KALMING_FEATURE_PENALTIES);
+		optionalKeys.add(KEY_LINKING_FEATURE_PENALTIES);
         	ok = ok & checkMapKeys( settings, mandatoryKeys, optionalKeys, str );
         	return ok;
 	}

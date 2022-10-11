@@ -32,14 +32,14 @@ import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.tracking.SegmentTrackerFactory;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_KALMING_INITIAL_SEARCH_RADIUS;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_KALMING_SEARCH_RADIUS;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_KALMING_MAX_FRAME_GAP;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_KALMING_FEATURE_PENALTIES;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMING_FEATURE_PENALTIES;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMING_INITIAL_SEARCH_RADIUS;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMING_SEARCH_RADIUS;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMING_MAX_FRAME_GAP;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_KALMAN_INITIAL_SEARCH_RADIUS;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_KALMAN_SEARCH_RADIUS;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_KALMAN_MAX_FRAME_GAP;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_INITIAL_SEARCH_RADIUS;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_SEARCH_RADIUS;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_MAX_FRAME_GAP;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
@@ -73,6 +73,7 @@ public class AdvancedKalmanTrackerFactory extends SegmentTrackerFactory
 			+ "target spots, which makes this tracker suitable for Brownian motion.  <br> "
 			+ "Penalties can be set to favor linking between spots that have similar  <br> "
 			+ "features. "
+                        + "Then segments can be merged or splitted."
 			+ "<p>"
 			+ "Solving the LAP relies on the Jonker-Volgenant solver, and a sparse cost "
 			+ "matrix formulation, allowing it to handle very large problems. "
@@ -118,10 +119,10 @@ public class AdvancedKalmanTrackerFactory extends SegmentTrackerFactory
          public Map<String, Object> getDefaultSettings() 
         {
             Map<String, Object> settings = LAPUtils.getDefaultSegmentSettingsMap();
-            settings.put( KEY_KALMING_INITIAL_SEARCH_RADIUS, DEFAULT_KALMING_INITIAL_SEARCH_RADIUS); 
-            settings.put( KEY_KALMING_SEARCH_RADIUS, DEFAULT_KALMING_SEARCH_RADIUS); 
-            settings.put( KEY_KALMING_MAX_FRAME_GAP, DEFAULT_KALMING_MAX_FRAME_GAP); 
-            settings.put(KEY_KALMING_FEATURE_PENALTIES, new HashMap<>(DEFAULT_KALMING_FEATURE_PENALTIES));	
+            settings.put( KEY_KALMAN_INITIAL_SEARCH_RADIUS, DEFAULT_KALMAN_INITIAL_SEARCH_RADIUS); 
+            settings.put( KEY_KALMAN_SEARCH_RADIUS, DEFAULT_KALMAN_SEARCH_RADIUS); 
+            settings.put( KEY_KALMAN_MAX_FRAME_GAP, DEFAULT_KALMAN_MAX_FRAME_GAP); 
+            settings.put(KEY_LINKING_FEATURE_PENALTIES, new HashMap<>(DEFAULT_LINKING_FEATURE_PENALTIES));	
             return settings;
         }
          

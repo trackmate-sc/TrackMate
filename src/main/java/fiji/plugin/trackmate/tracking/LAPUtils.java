@@ -129,7 +129,7 @@ public class LAPUtils {
 
 	/**
 	 * Returns a new settings map filled with default values suitable for the
-	 * LAP trackers.
+	 * trajectory segments linking (gap/split/merge).
 	 * 
 	 * @return a new map.
 	 */
