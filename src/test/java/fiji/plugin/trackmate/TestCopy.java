@@ -42,7 +42,7 @@ public class TestCopy
 	{
 		UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
 		ImageJ.main( args );
-		
+
 		final String path = "samples/FakeTracks.xml";
 		final TmXmlReader reader = new TmXmlReader( new File( path ) );
 		if ( !reader.isReadingOk() )
@@ -50,7 +50,7 @@ public class TestCopy
 			System.err.println( reader.getErrorMessage() );
 			return;
 		}
-		
+
 		final Model model = reader.getModel();
 		final Model copy = model.copy();
 
@@ -59,10 +59,10 @@ public class TestCopy
 		final Settings settings = reader.readSettings( imp );
 
 		final SelectionModel selectionModel = new SelectionModel( copy );
-		final DisplaySettings ds= DisplaySettingsIO.readUserDefault();
+		final DisplaySettings ds = DisplaySettingsIO.readUserDefault();
 		final HyperStackDisplayer displayer = new HyperStackDisplayer( copy, selectionModel, imp, ds );
 		displayer.render();
-		
+
 		final TrackMateWizardSequence sequence = new TrackMateWizardSequence( new TrackMate( copy, settings ), selectionModel, ds );
 		sequence.setCurrent( "ConfigureViews" );
 		final JFrame frame = sequence.run( "Copy model" );

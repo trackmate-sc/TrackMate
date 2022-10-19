@@ -32,7 +32,6 @@ public class ResizableDoubleArray
 
 	public double[] data;
 
-
 	public int size;
 
 	/*
@@ -44,7 +43,6 @@ public class ResizableDoubleArray
 		this.data = data;
 		this.size = data.length;
 	}
-
 
 	public ResizableDoubleArray( final int initialCapacity )
 	{
@@ -68,9 +66,7 @@ public class ResizableDoubleArray
 	{
 		final int oldCapacity = data.length;
 		if ( size < oldCapacity )
-		{
 			data = Arrays.copyOf( data, size );
-		}
 	}
 
 	public void ensureCapacity( final int minCapacity )
@@ -81,9 +77,8 @@ public class ResizableDoubleArray
 			// The heuristics of ArrayList
 			int newCapacity = ( oldCapacity * 3 ) / 2 + 1;
 			if ( newCapacity < minCapacity )
-			{
 				newCapacity = minCapacity;
-			}
+
 			data = Arrays.copyOf( data, newCapacity );
 		}
 	}
@@ -108,13 +103,14 @@ public class ResizableDoubleArray
 	@Override
 	public String toString()
 	{
-		if ( isEmpty() ) { return "()"; }
+		if ( isEmpty() )
+			return "()";
+
 		final StringBuilder str = new StringBuilder();
 		str.append( '(' );
 		for ( int i = 0; i < size - 1; i++ )
-		{
 			str.append( data[ i ] + ", " );
-		}
+
 		str.append( data[ size - 1 ] + "), size = " + size );
 		return str.toString();
 	}

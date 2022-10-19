@@ -57,8 +57,8 @@ public class EdgeVelocityAnalyzerTest
 	@Before
 	public void setUp()
 	{
-		edgeV = new HashMap< >();
-		edgeD = new HashMap< >();
+		edgeV = new HashMap<>();
+		edgeD = new HashMap<>();
 
 		model = new Model();
 		model.beginUpdate();
@@ -134,7 +134,7 @@ public class EdgeVelocityAnalyzerTest
 			@Override
 			public void modelChanged( final ModelChangeEvent event )
 			{
-				final HashSet< DefaultWeightedEdge > edgesToUpdate = new HashSet< >();
+				final HashSet< DefaultWeightedEdge > edgesToUpdate = new HashSet<>();
 				for ( final DefaultWeightedEdge edge : event.getEdges() )
 				{
 					if ( event.getEdgeFlag( edge ) != ModelChangeEvent.FLAG_EDGE_REMOVED )
@@ -152,7 +152,7 @@ public class EdgeVelocityAnalyzerTest
 				{
 
 					// Get the all the edges of the track they belong to
-					final HashSet< DefaultWeightedEdge > globalEdgesToUpdate = new HashSet< >();
+					final HashSet< DefaultWeightedEdge > globalEdgesToUpdate = new HashSet<>();
 					for ( final DefaultWeightedEdge edge : edgesToUpdate )
 					{
 						final Integer motherTrackID = model.getTrackModel().trackIDOf( edge );

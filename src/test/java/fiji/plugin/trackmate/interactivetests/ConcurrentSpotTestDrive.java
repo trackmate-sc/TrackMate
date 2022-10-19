@@ -33,24 +33,27 @@ import fiji.plugin.trackmate.providers.DetectorProvider;
 import ij.ImagePlus;
 import ij.gui.NewImage;
 
-public class ConcurrentSpotTestDrive {
+public class ConcurrentSpotTestDrive
+{
 
-	public static void main(final String[] args) {
+	public static void main( final String[] args )
+	{
 
 		final int nFrames = 20;
 
 		final Model model = new Model();
 
 		// Create blank image
-		final ImagePlus imp = NewImage.createByteImage("Noise", 200, 200, nFrames, NewImage.FILL_BLACK);
+		final ImagePlus imp = NewImage.createByteImage( "Noise", 200, 200, nFrames, NewImage.FILL_BLACK );
 
 		// Add noise to it
-		for (int i = 0; i < imp.getStackSize(); i++) {
-			imp.getStack().getProcessor(i+1).noise(50);
+		for ( int i = 0; i < imp.getStackSize(); i++ )
+		{
+			imp.getStack().getProcessor( i + 1 ).noise( 50 );
 		}
 
 		// Setup calibration
-		imp.setDimensions(1, 1, nFrames);
+		imp.setDimensions( 1, 1, nFrames );
 
 		// Run track mate on it
 
@@ -61,30 +64,34 @@ public class ConcurrentSpotTestDrive {
 		settings.detectorSettings = settings.detectorFactory.getDefaultSettings();
 
 		// Execute detection
-		final TrackMate trackmate = new TrackMate(model, settings);
+		final TrackMate trackmate = new TrackMate( model, settings );
 		trackmate.execDetection();
 
 		// Retrieve spots
 		final SpotCollection spots = trackmate.getModel().getSpots();
 
 		// Parse spots and detect duplicate IDs
-		final int[] IDs = new int[Spot.IDcounter.get() + 1];
-		final Iterator<Spot> it = spots.iterator(false);
-		while(it.hasNext()) {
+		final int[] IDs = new int[ Spot.IDcounter.get() + 1 ];
+		final Iterator< Spot > it = spots.iterator( false );
+		while ( it.hasNext() )
+		{
 			final Spot si = it.next();
 			final int id = si.ID();
-			IDs[id]++;
+			IDs[ id ]++;
 		}
 
 		boolean ok = true;
-		for (int i = 0; i < IDs.length; i++) {
-			if (IDs[i] > 1) {
-				System.out.println("Found "+IDs[i]+" spots with the same ID = "+i);
+		for ( int i = 0; i < IDs.length; i++ )
+		{
+			if ( IDs[ i ] > 1 )
+			{
+				System.out.println( "Found " + IDs[ i ] + " spots with the same ID = " + i );
 				ok = false;
 			}
 		}
-		if (ok) {
-			System.out.println("No duplicate ID found.");
+		if ( ok )
+		{
+			System.out.println( "No duplicate ID found." );
 		}
 
 	}

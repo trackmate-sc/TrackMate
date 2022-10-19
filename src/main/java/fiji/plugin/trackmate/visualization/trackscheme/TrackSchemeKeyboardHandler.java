@@ -52,8 +52,7 @@ public class TrackSchemeKeyboardHandler
 	public void installKeyboardActions( final JComponent component )
 	{
 		final InputMap inputMap = getInputMap( JComponent.WHEN_FOCUSED );
-		SwingUtilities.replaceUIInputMap( component,
-				JComponent.WHEN_FOCUSED, inputMap );
+		SwingUtilities.replaceUIInputMap( component, JComponent.WHEN_FOCUSED, inputMap );
 		SwingUtilities.replaceUIActionMap( component, createActionMap() );
 	}
 
@@ -62,7 +61,7 @@ public class TrackSchemeKeyboardHandler
 		final InputMap map;
 		if ( condition == JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT )
 			map = ( InputMap ) UIManager.get( "ScrollPane.ancestorInputMap" );
-		else 
+		else
 			map = new InputMap();
 
 		map.put( KeyStroke.getKeyStroke( "F2" ), "edit" );

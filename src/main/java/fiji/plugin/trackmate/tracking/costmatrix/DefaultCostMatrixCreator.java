@@ -21,13 +21,12 @@
  */
 package fiji.plugin.trackmate.tracking.costmatrix;
 
-import fiji.plugin.trackmate.tracking.linker.SparseCostMatrix;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
+import fiji.plugin.trackmate.tracking.linker.SparseCostMatrix;
 import net.imglib2.util.Util;
 
 /**
@@ -94,8 +93,9 @@ public class DefaultCostMatrixCreator< K extends Comparable< K >, J extends Comp
 			errorMessage = BASE_ERROR_MESSAGE + "The row list is null or empty.";
 			return false;
 		}
-		if ( rows.size() != cols.size() ) {
-			errorMessage = BASE_ERROR_MESSAGE +"Row and column lists do not have the same number of elements. Found " + rows.size() + " and " + cols.size() + "." ;
+		if ( rows.size() != cols.size() )
+		{
+			errorMessage = BASE_ERROR_MESSAGE + "Row and column lists do not have the same number of elements. Found " + rows.size() + " and " + cols.size() + ".";
 			return false;
 		}
 		if ( rows.size() != costs.length )
@@ -119,12 +119,12 @@ public class DefaultCostMatrixCreator< K extends Comparable< K >, J extends Comp
 	@Override
 	public boolean process()
 	{
-		uniqueRows = new ArrayList< >( new HashSet< >( rows ) );
+		uniqueRows = new ArrayList<>( new HashSet<>( rows ) );
 		Collections.sort( uniqueRows );
-		uniqueCols = new ArrayList< >( new HashSet< >( cols ) );
+		uniqueCols = new ArrayList<>( new HashSet<>( cols ) );
 		Collections.sort( uniqueCols );
 
-		final List< Assignment > assignments = new ArrayList< >( costs.length );
+		final List< Assignment > assignments = new ArrayList<>( costs.length );
 		for ( int i = 0; i < costs.length; i++ )
 		{
 			final K rowObj = rows.get( i );
@@ -185,7 +185,9 @@ public class DefaultCostMatrixCreator< K extends Comparable< K >, J extends Comp
 
 	protected double computeAlternativeCosts()
 	{
-		if ( percentile == 1 ) { return alternativeCostFactor * Util.max( costs ); }
+		if ( percentile == 1 )
+			return alternativeCostFactor * Util.max( costs );
+
 		return alternativeCostFactor * Util.percentile( costs, percentile );
 	}
 
@@ -206,7 +208,6 @@ public class DefaultCostMatrixCreator< K extends Comparable< K >, J extends Comp
 	{
 		return uniqueCols;
 	}
-
 
 	@Override
 	public double getAlternativeCostForSource( final K source )
@@ -238,7 +239,9 @@ public class DefaultCostMatrixCreator< K extends Comparable< K >, J extends Comp
 		@Override
 		public int compareTo( final Assignment o )
 		{
-			if ( r == o.r ) { return c - o.c; }
+			if ( r == o.r )
+				return c - o.c;
+
 			return r - o.r;
 		}
 

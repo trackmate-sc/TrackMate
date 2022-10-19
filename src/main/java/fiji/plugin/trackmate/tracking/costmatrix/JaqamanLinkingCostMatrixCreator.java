@@ -38,7 +38,7 @@ import fiji.plugin.trackmate.tracking.linker.SparseCostMatrix;
  * @param <K>
  * @param <J>
  */
-public class JaqamanLinkingCostMatrixCreator< K extends Comparable< K >, J extends Comparable< J >> implements CostMatrixCreator< K, J >
+public class JaqamanLinkingCostMatrixCreator< K extends Comparable< K >, J extends Comparable< J > > implements CostMatrixCreator< K, J >
 {
 
 	private static final String BASE_ERROR_MSG = "[JaqamanLinkingCostMatrixCreator] ";
@@ -98,8 +98,8 @@ public class JaqamanLinkingCostMatrixCreator< K extends Comparable< K >, J exten
 	{
 		final long start = System.currentTimeMillis();
 
-		final List< K > accSources = new ArrayList< >();
-		final List< J > accTargets = new ArrayList< >();
+		final List< K > accSources = new ArrayList<>();
+		final List< J > accTargets = new ArrayList<>();
 		final ResizableDoubleArray costs = new ResizableDoubleArray();
 
 		for ( final K source : sources )
@@ -136,7 +136,7 @@ public class JaqamanLinkingCostMatrixCreator< K extends Comparable< K >, J exten
 		else
 		{
 
-			final DefaultCostMatrixCreator< K, J > cmCreator = new DefaultCostMatrixCreator< >( accSources, accTargets, costs.data, alternativeCostFactor, percentile );
+			final DefaultCostMatrixCreator< K, J > cmCreator = new DefaultCostMatrixCreator<>( accSources, accTargets, costs.data, alternativeCostFactor, percentile );
 			if ( !cmCreator.checkInput() || !cmCreator.process() )
 			{
 				errorMessage = cmCreator.getErrorMessage();
@@ -148,7 +148,6 @@ public class JaqamanLinkingCostMatrixCreator< K extends Comparable< K >, J exten
 			targetList = cmCreator.getTargetList();
 			alternativeCost = cmCreator.computeAlternativeCosts();
 		}
-
 
 		final long end = System.currentTimeMillis();
 		processingTime = end - start;

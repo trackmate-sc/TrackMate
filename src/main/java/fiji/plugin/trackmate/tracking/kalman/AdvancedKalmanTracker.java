@@ -63,7 +63,7 @@ public class AdvancedKalmanTracker implements SpotTracker, Benchmark, Cancelable
 
 	private final SpotCollection spots;
 
-        protected final Map< String, Object > settings;
+	protected final Map< String, Object > settings;
 
 	private SpotCollection predictionsCollection;
 
@@ -78,7 +78,8 @@ public class AdvancedKalmanTracker implements SpotTracker, Benchmark, Cancelable
 	 */
 
 	/**
-	 * @param spots the spots to track.
+	 * @param spots
+	 *            the spots to track.
 	 */
 	public AdvancedKalmanTracker( final SpotCollection spots, final Map< String, Object > settings )
 	{
@@ -109,54 +110,54 @@ public class AdvancedKalmanTracker implements SpotTracker, Benchmark, Cancelable
 
 		isCanceled = false;
 		cancelReason = null;
-                
-                /* 
-                * Parameters specifiques au Kalman
-                */
-                
-                final StringBuilder errorHolder = new StringBuilder();
-                // Prepare settings object
-		final Map< String, Object > kalSettings = new HashMap< >();
+
+		/*
+		 * Parameters specifiques au Kalman
+		 */
+
+		final StringBuilder errorHolder = new StringBuilder();
+		// Prepare settings object
+		final Map< String, Object > kalSettings = new HashMap<>();
 		kalSettings.put( KEY_KALMAN_SEARCH_RADIUS, settings.get( KEY_KALMAN_SEARCH_RADIUS ) );
 		kalSettings.put( KEY_KALMAN_INITIAL_SEARCH_RADIUS, settings.get( KEY_KALMAN_INITIAL_SEARCH_RADIUS ) );
 		kalSettings.put( KEY_KALMAN_MAX_FRAME_GAP, settings.get( KEY_KALMAN_MAX_FRAME_GAP ) );
-                kalSettings.put( KEY_LINKING_FEATURE_PENALTIES, settings.get( KEY_LINKING_FEATURE_PENALTIES ) );
-                
-                // check parameters
+		kalSettings.put( KEY_LINKING_FEATURE_PENALTIES, settings.get( KEY_LINKING_FEATURE_PENALTIES ) );
+
+		// check parameters
 		if ( !checkSettingsValidity( kalSettings, errorHolder ) )
 		{
 			errorMessage = BASE_ERROR_MSG + errorHolder.toString();
 			return false;
 		}
-                
-                final double maxSearchRadius = ( Double ) kalSettings.get( KEY_KALMAN_SEARCH_RADIUS ) ;
-		final double initialSearchRadius = ( Double ) kalSettings.get( KEY_KALMAN_INITIAL_SEARCH_RADIUS ) ;
-		final int maxFrameGap = ( Integer ) kalSettings.get( KEY_KALMAN_MAX_FRAME_GAP ) ;
-		final Map< String, Double > featurePenalties = ( Map< String, Double > ) kalSettings.get( KEY_LINKING_FEATURE_PENALTIES );            
+
+		final double maxSearchRadius = ( Double ) kalSettings.get( KEY_KALMAN_SEARCH_RADIUS );
+		final double initialSearchRadius = ( Double ) kalSettings.get( KEY_KALMAN_INITIAL_SEARCH_RADIUS );
+		final int maxFrameGap = ( Integer ) kalSettings.get( KEY_KALMAN_MAX_FRAME_GAP );
+		final Map< String, Double > featurePenalties = ( Map< String, Double > ) kalSettings.get( KEY_LINKING_FEATURE_PENALTIES );
 
 		/*
 		 * 1. Apply Kalman with feature penalties.
 		 */
 
-		final KalmanTracker kalmanTracker = new KalmanTracker( spots, maxSearchRadius, maxFrameGap, initialSearchRadius, featurePenalties );		
-                kalmanTracker.setLogger( logger );
+		final KalmanTracker kalmanTracker = new KalmanTracker( spots, maxSearchRadius, maxFrameGap, initialSearchRadius, featurePenalties );
+		kalmanTracker.setLogger( logger );
 		if ( !kalmanTracker.checkInput() || !kalmanTracker.process() )
 		{
 			errorMessage = kalmanTracker.getErrorMessage();
-                        return false;
+			return false;
 		}
-                
-                graph = kalmanTracker.getResult();
+
+		graph = kalmanTracker.getResult();
 		/*
 		 * 2. Gap-closing, merging and splitting.
 		 */
-                final SegmentTracker segmentLinker = new SegmentTracker( graph, settings, logger );
+		final SegmentTracker segmentLinker = new SegmentTracker( graph, settings, logger );
 		if ( !segmentLinker.checkInput() || !segmentLinker.process() )
 		{
 			errorMessage = segmentLinker.getErrorMessage();
 			return false;
 		}
-                
+
 		return true;
 	}
 
@@ -190,36 +191,34 @@ public class AdvancedKalmanTracker implements SpotTracker, Benchmark, Cancelable
 	public void setLogger( final Logger logger )
 	{
 		this.logger = logger;
-        }
-	
-         protected boolean checkSettingsValidity( final Map< String, Object > settings, final StringBuilder str )
+	}
+
+	protected boolean checkSettingsValidity( final Map< String, Object > settings, final StringBuilder str )
 	{
-          	if ( null == settings )
+		if ( null == settings )
 		{
 			str.append( "Settings map is null.\n" );
 			return false;
 		}
 
 		boolean ok = true;
-                final StringBuilder errorHolder = new StringBuilder();
-                // Kalman
+		final StringBuilder errorHolder = new StringBuilder();
+		// Kalman
 		ok = ok & checkParameter( settings, KEY_KALMAN_INITIAL_SEARCH_RADIUS, Double.class, errorHolder );
 		ok = ok & checkParameter( settings, KEY_KALMAN_SEARCH_RADIUS, Double.class, errorHolder );
-                ok = ok & checkParameter( settings, KEY_KALMAN_MAX_FRAME_GAP, Integer.class, errorHolder );
-                ok = ok & checkFeatureMap( settings, KEY_LINKING_FEATURE_PENALTIES, errorHolder );
+		ok = ok & checkParameter( settings, KEY_KALMAN_MAX_FRAME_GAP, Integer.class, errorHolder );
+		ok = ok & checkFeatureMap( settings, KEY_LINKING_FEATURE_PENALTIES, errorHolder );
 		// Check keys
 		final List< String > mandatoryKeys = new ArrayList<>();
-		mandatoryKeys.add(KEY_KALMAN_SEARCH_RADIUS);
-		mandatoryKeys.add(KEY_KALMAN_INITIAL_SEARCH_RADIUS);
-		mandatoryKeys.add(KEY_KALMAN_MAX_FRAME_GAP);
-                
-                final List< String > optionalKeys = new ArrayList<>();
-		optionalKeys.add(KEY_LINKING_FEATURE_PENALTIES);
-        	ok = ok & checkMapKeys( settings, mandatoryKeys, optionalKeys, str );
-        	return ok;
-	}
+		mandatoryKeys.add( KEY_KALMAN_SEARCH_RADIUS );
+		mandatoryKeys.add( KEY_KALMAN_INITIAL_SEARCH_RADIUS );
+		mandatoryKeys.add( KEY_KALMAN_MAX_FRAME_GAP );
 
-	
+		final List< String > optionalKeys = new ArrayList<>();
+		optionalKeys.add( KEY_LINKING_FEATURE_PENALTIES );
+		ok = ok & checkMapKeys( settings, mandatoryKeys, optionalKeys, str );
+		return ok;
+	}
 
 	// --- org.scijava.Cancelable methods ---
 

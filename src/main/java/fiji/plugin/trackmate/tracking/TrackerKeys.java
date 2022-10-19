@@ -93,29 +93,30 @@ public class TrackerKeys
 	 * A default value for the {@value #KEY_LINKING_FEATURE_PENALTIES}
 	 * parameter.
 	 */
-	public static final Map< String, Double > DEFAULT_LINKING_FEATURE_PENALTIES = new HashMap< >();
-        
-        /**
-	 * Key for the parameter specifying the initial search radius in Kalman trackers. The
-	 * expected value must be a Double and should be expressed in physical
-	 * units.
+	public static final Map< String, Double > DEFAULT_LINKING_FEATURE_PENALTIES = new HashMap<>();
+
+	/**
+	 * Key for the parameter specifying the initial search radius in Kalman
+	 * trackers. The expected value must be a Double and should be expressed in
+	 * physical units.
 	 */
 	public static final String KEY_KALMAN_INITIAL_SEARCH_RADIUS = "KALMAN_INITIAL_SEARCH_RADIUS";
 
-	/** A default value for the {@value #KEY_INITIAL_SEARCH_RADIUS} parameter. */
+	/**
+	 * A default value for the {@value #KEY_INITIAL_SEARCH_RADIUS} parameter.
+	 */
 	public static final double DEFAULT_KALMAN_INITIAL_SEARCH_RADIUS = 15.0;
-        
-        /** Search radius for the Kalman tracker. */
+
+	/** Search radius for the Kalman tracker. */
 	public static final String KEY_KALMAN_SEARCH_RADIUS = "KALMAN_SEARCH_RADIUS";
 
 	/** A default value for the {@value #KEY_SEARCH_RADIUS} parameter. */
 	public static final double DEFAULT_KALMAN_SEARCH_RADIUS = 20.0;
-        
-        public static final String KEY_KALMAN_MAX_FRAME_GAP = "KALMAN_MAX_FRAME_GAP";
+
+	public static final String KEY_KALMAN_MAX_FRAME_GAP = "KALMAN_MAX_FRAME_GAP";
 
 	/** A default value for the {@value #KEY_MAX_FRAME_GAP} parameter. */
 	public static final int DEFAULT_KALMAN_MAX_FRAME_GAP = 2;
-        
 
 	/**
 	 * Key for the parameter specifying whether we allow the detection of
@@ -167,7 +168,7 @@ public class TrackerKeys
 	 * A default value for the {@value #KEY_GAP_CLOSING_FEATURE_PENALTIES}
 	 * parameter.
 	 */
-	public static final Map< String, Double > DEFAULT_GAP_CLOSING_FEATURE_PENALTIES = new HashMap< >();
+	public static final Map< String, Double > DEFAULT_GAP_CLOSING_FEATURE_PENALTIES = new HashMap<>();
 
 	/**
 	 * Key for the parameter specifying whether we allow the detection of
@@ -203,7 +204,7 @@ public class TrackerKeys
 	 * A default value for the {@value #KEY_MERGING_FEATURE_PENALTIES}
 	 * parameter.
 	 */
-	public static final Map< String, Double > DEFAULT_MERGING_FEATURE_PENALTIES = new HashMap< >();
+	public static final Map< String, Double > DEFAULT_MERGING_FEATURE_PENALTIES = new HashMap<>();
 
 	/**
 	 * Key for the parameter specifying whether we allow the detection of
@@ -244,7 +245,7 @@ public class TrackerKeys
 	 * A default value for the {@value #KEY_SPLITTING_FEATURE_PENALTIES}
 	 * parameter.
 	 */
-	public static final Map< String, Double > DEFAULT_SPLITTING_FEATURE_PENALTIES = new HashMap< >();
+	public static final Map< String, Double > DEFAULT_SPLITTING_FEATURE_PENALTIES = new HashMap<>();
 
 	/**
 	 * Key for the parameter specifying the factor used to compute alternative

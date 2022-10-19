@@ -65,7 +65,6 @@ public abstract class SegmentTrackerFactory implements SpotTrackerFactory
 
 	protected String errorMessage;
 
-
 	@Override
 	public ImageIcon getIcon()
 	{
@@ -81,7 +80,6 @@ public abstract class SegmentTrackerFactory implements SpotTrackerFactory
 		return new LAPTrackerSettingsPanel( getName(), spaceUnits, features, featureNames );
 	}
 
-        
 	@Override
 	public boolean marshall( final Map< String, Object > settings, final Element element )
 	{
@@ -155,7 +153,7 @@ public abstract class SegmentTrackerFactory implements SpotTrackerFactory
 			ok = ok & readIntegerAttribute( gapClosingElement, settings, KEY_GAP_CLOSING_MAX_FRAME_GAP, errorHolder );
 			ok = ok & readDoubleAttribute( gapClosingElement, settings, KEY_GAP_CLOSING_MAX_DISTANCE, errorHolder );
 			// feature penalties
-			final Map< String, Double > gcfpm = new HashMap< >();
+			final Map< String, Double > gcfpm = new HashMap<>();
 			final Element gcfpElement = gapClosingElement.getChild( XML_ELEMENT_NAME_FEATURE_PENALTIES );
 			if ( null != gcfpElement )
 			{
@@ -178,7 +176,7 @@ public abstract class SegmentTrackerFactory implements SpotTrackerFactory
 			ok = ok & readBooleanAttribute( trackSplittingElement, settings, KEY_ALLOW_TRACK_SPLITTING, errorHolder );
 			ok = ok & readDoubleAttribute( trackSplittingElement, settings, KEY_SPLITTING_MAX_DISTANCE, errorHolder );
 			// feature penalties
-			final Map< String, Double > tsfpm = new HashMap< >();
+			final Map< String, Double > tsfpm = new HashMap<>();
 			final Element tsfpElement = trackSplittingElement.getChild( XML_ELEMENT_NAME_FEATURE_PENALTIES );
 			if ( null != tsfpElement )
 			{
@@ -201,7 +199,7 @@ public abstract class SegmentTrackerFactory implements SpotTrackerFactory
 			ok = ok & readBooleanAttribute( trackMergingElement, settings, KEY_ALLOW_TRACK_MERGING, errorHolder );
 			ok = ok & readDoubleAttribute( trackMergingElement, settings, KEY_MERGING_MAX_DISTANCE, errorHolder );
 			// feature penalties
-			final Map< String, Double > tmfpm = new HashMap< >();
+			final Map< String, Double > tmfpm = new HashMap<>();
 			final Element tmfpElement = trackMergingElement.getChild( XML_ELEMENT_NAME_FEATURE_PENALTIES );
 			if ( null != tmfpElement )
 			{
@@ -233,7 +231,8 @@ public abstract class SegmentTrackerFactory implements SpotTrackerFactory
 	@SuppressWarnings( "unchecked" )
 	public String toString( final Map< String, Object > sm )
 	{
-		if ( !checkSettingsValidity( sm ) ) { return errorMessage; }
+		if ( !checkSettingsValidity( sm ) )
+			return errorMessage;
 
 		final StringBuilder str = new StringBuilder();
 

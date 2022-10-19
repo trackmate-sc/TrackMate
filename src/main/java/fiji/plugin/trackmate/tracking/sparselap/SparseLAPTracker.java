@@ -124,7 +124,7 @@ public class SparseLAPTracker extends MultiThreadedBenchmarkAlgorithm implements
 			errorMessage = BASE_ERROR_MESSAGE + "The spot collection is empty.";
 			return false;
 		}
-		
+
 		/*
 		 * Process: 1. Frame to frame linking...
 		 */
@@ -132,7 +132,7 @@ public class SparseLAPTracker extends MultiThreadedBenchmarkAlgorithm implements
 		final long start = System.currentTimeMillis();
 
 		// Prepare settings object
-		final Map< String, Object > ftfSettings = new HashMap< >();
+		final Map< String, Object > ftfSettings = new HashMap<>();
 		ftfSettings.put( KEY_LINKING_MAX_DISTANCE, settings.get( KEY_LINKING_MAX_DISTANCE ) );
 		ftfSettings.put( KEY_ALTERNATIVE_LINKING_COST_FACTOR, settings.get( KEY_ALTERNATIVE_LINKING_COST_FACTOR ) );
 		ftfSettings.put( KEY_LINKING_FEATURE_PENALTIES, settings.get( KEY_LINKING_FEATURE_PENALTIES ) );
@@ -155,19 +155,18 @@ public class SparseLAPTracker extends MultiThreadedBenchmarkAlgorithm implements
 		/*
 		 * 2. Gap-closing, merging and splitting.
 		 */
-                final SegmentTracker segmentLinker = new SegmentTracker( graph, settings, logger );
+		final SegmentTracker segmentLinker = new SegmentTracker( graph, settings, logger );
 		if ( !segmentLinker.checkInput() || !segmentLinker.process() )
 		{
 			errorMessage = segmentLinker.getErrorMessage();
 			return false;
 		}
-                //graph = segmentLinker.getResult();
-                
+		// graph = segmentLinker.getResult();
+
 		logger.setStatus( "" );
 		logger.setProgress( 1d );
 		final long end = System.currentTimeMillis();
 		processingTime = end - start;
-
 
 		return true;
 	}
@@ -177,7 +176,6 @@ public class SparseLAPTracker extends MultiThreadedBenchmarkAlgorithm implements
 	{
 		this.logger = logger;
 	}
-
 
 	// --- org.scijava.Cancelable methods ---
 

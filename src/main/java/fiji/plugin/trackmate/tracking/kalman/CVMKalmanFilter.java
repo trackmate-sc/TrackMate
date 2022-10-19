@@ -199,7 +199,6 @@ public class CVMKalmanFilter
 		return Math.sqrt( ( P.get( 3, 3 ) + P.get( 4, 4 ) + P.get( 5, 5 ) ) / 3d );
 	}
 
-
 	/**
 	 * Returns the number of occlusion events that occurred since the
 	 * instantiation of this filter.

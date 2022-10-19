@@ -50,7 +50,6 @@ public class KalmanTrackerInteractiveTest3
 		tester.test( tester.createSingleLine() );
 	}
 
-
 	private Model test( final SpotCollection spots )
 	{
 		final double maxSearchRadius = 2 * WIDTH / NFRAMES; // small

@@ -30,169 +30,193 @@ import net.imglib2.outofbounds.Bounded;
 import net.imglib2.outofbounds.OutOfBounds;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
 
-public class SquareNeighborhoodCursor3x3<T> implements Cursor<T>, Bounded {
+public class SquareNeighborhoodCursor3x3< T > implements Cursor< T >, Bounded
+{
 
-	private final ExtendedRandomAccessibleInterval<T,RandomAccessibleInterval<T>> source;
+	private final ExtendedRandomAccessibleInterval< T, RandomAccessibleInterval< T > > source;
+
 	private final long[] center;
-	private final OutOfBounds<T> ra;
+
+	private final OutOfBounds< T > ra;
+
 	private int index = -1;
+
 	private boolean hasNext;
-	
+
 	/*
 	 * CONSTRUCTOR
 	 */
 
-	public SquareNeighborhoodCursor3x3(ExtendedRandomAccessibleInterval<T,RandomAccessibleInterval<T>> extendedSource,	long[] center) {
+	public SquareNeighborhoodCursor3x3( final ExtendedRandomAccessibleInterval< T, RandomAccessibleInterval< T > > extendedSource, final long[] center )
+	{
 		this.source = extendedSource;
 		this.center = center;
 		this.ra = extendedSource.randomAccess();
 		reset();
 	}
-	
+
 	/*
 	 * METHODS
 	 */
 
 	@Override
-	public void localize(float[] position) {
-		ra.localize(position);
+	public void localize( final float[] position )
+	{
+		ra.localize( position );
 	}
 
 	@Override
-	public void localize(double[] position) {
-		ra.localize(position);
+	public void localize( final double[] position )
+	{
+		ra.localize( position );
 	}
 
 	@Override
-	public float getFloatPosition(int d) {
-		return ra.getFloatPosition(d);
+	public float getFloatPosition( final int d )
+	{
+		return ra.getFloatPosition( d );
 	}
 
 	@Override
-	public double getDoublePosition(int d) {
-		return ra.getDoublePosition(d);
+	public double getDoublePosition( final int d )
+	{
+		return ra.getDoublePosition( d );
 	}
 
 	@Override
-	public int numDimensions() {
+	public int numDimensions()
+	{
 		return source.numDimensions();
 	}
 
 	@Override
-	public T get() {
+	public T get()
+	{
 		return ra.get();
 	}
 
 	@Override
-	public Sampler<T> copy() {
+	public Sampler< T > copy()
+	{
 		return ra.copy();
 	}
 
 	@Override
-	public void jumpFwd(long steps) {
-		for (int i = 0; i < steps; i++) {
+	public void jumpFwd( final long steps )
+	{
+		for ( int i = 0; i < steps; i++ )
 			fwd();
-		}
 	}
 
 	@Override
-	public void fwd() {
+	public void fwd()
+	{
 		index++;
-				
-		switch (index) {
+
+		switch ( index )
+		{
 		case 0:
 			// already in place
 			break;
-			
+
 		case 1:
-			ra.bck(1);
+			ra.bck( 1 );
 			break;
-			
+
 		case 2:
-			ra.bck(0);
+			ra.bck( 0 );
 			break;
-			
+
 		case 3:
-			ra.fwd(1);
+			ra.fwd( 1 );
 			break;
-			
+
 		case 4:
-			ra.fwd(1);
+			ra.fwd( 1 );
 			break;
-			
+
 		case 5:
-			ra.fwd(0);
+			ra.fwd( 0 );
 			break;
-			
+
 		case 6:
-			ra.fwd(0);
+			ra.fwd( 0 );
 			break;
-			
+
 		case 7:
-			ra.bck(1);
+			ra.bck( 1 );
 			break;
-			
+
 		case 8:
-			ra.bck(1);
+			ra.bck( 1 );
 			hasNext = false;
 			break;
 
 		default:
-			throw new NoSuchElementException("SquareNeighborhood3x3 exhausted");
+			throw new NoSuchElementException( "SquareNeighborhood3x3 exhausted" );
 		}
 	}
 
 	@Override
-	public void reset() {
+	public void reset()
+	{
 		index = -1;
 		hasNext = true;
-		ra.setPosition(center);
+		ra.setPosition( center );
 	}
 
 	@Override
-	public boolean hasNext() {
+	public boolean hasNext()
+	{
 		return hasNext;
 	}
 
 	@Override
-	public T next() {
+	public T next()
+	{
 		fwd();
 		return ra.get();
 	}
 
 	@Override
-	public void remove() {
-		throw new UnsupportedOperationException("remove() is not implemented for SquareNeighborhoodCursor");
+	public void remove()
+	{
+		throw new UnsupportedOperationException( "remove() is not implemented for SquareNeighborhoodCursor" );
 	}
 
 	@Override
-	public void localize(int[] position) {
-		ra.localize(position);
+	public void localize( final int[] position )
+	{
+		ra.localize( position );
 	}
 
 	@Override
-	public void localize(long[] position) {
-		ra.localize(position);
+	public void localize( final long[] position )
+	{
+		ra.localize( position );
 	}
 
 	@Override
-	public int getIntPosition(int d) {
-		return ra.getIntPosition(d);
+	public int getIntPosition( final int d )
+	{
+		return ra.getIntPosition( d );
 	}
 
 	@Override
-	public long getLongPosition(int d) {
-		return ra.getLongPosition(d);
+	public long getLongPosition( final int d )
+	{
+		return ra.getLongPosition( d );
 	}
 
 	@Override
-	public Cursor<T> copyCursor() {
-		return new SquareNeighborhoodCursor3x3<>(source, center);
+	public Cursor< T > copyCursor()
+	{
+		return new SquareNeighborhoodCursor3x3<>( source, center );
 	}
 
 	@Override
-	public boolean isOutOfBounds() {
+	public boolean isOutOfBounds()
+	{
 		return ra.isOutOfBounds();
 	}
-
 }

@@ -46,9 +46,9 @@ public class TimeDirectedNeighborIndex extends NeighborCache< Spot, DefaultWeigh
 	// ~ Instance fields
 	// --------------------------------------------------------
 
-	Map< Spot, Neighbors< Spot, DefaultWeightedEdge > > predecessorMap = new HashMap< >();
+	Map< Spot, Neighbors< Spot, DefaultWeightedEdge > > predecessorMap = new HashMap<>();
 
-	Map< Spot, Neighbors< Spot, DefaultWeightedEdge > > successorMap = new HashMap< >();
+	Map< Spot, Neighbors< Spot, DefaultWeightedEdge > > successorMap = new HashMap<>();
 
 	private final Graph< Spot, DefaultWeightedEdge > graph;
 
@@ -211,7 +211,7 @@ public class TimeDirectedNeighborIndex extends NeighborCache< Spot, DefaultWeigh
 		if ( neighbors == null )
 		{
 			final List< Spot > nl = Graphs.neighborListOf( graph, v );
-			final List< Spot > bnl = new ArrayList< >();
+			final List< Spot > bnl = new ArrayList<>();
 			final int ts = v.getFeature( Spot.FRAME ).intValue();
 			for ( final Spot spot : nl )
 			{
@@ -221,7 +221,7 @@ public class TimeDirectedNeighborIndex extends NeighborCache< Spot, DefaultWeigh
 					bnl.add( spot );
 				}
 			}
-			neighbors = new Neighbors< >( v, bnl );
+			neighbors = new Neighbors<>( v, bnl );
 			predecessorMap.put( v, neighbors );
 		}
 		return neighbors;
@@ -233,7 +233,7 @@ public class TimeDirectedNeighborIndex extends NeighborCache< Spot, DefaultWeigh
 		if ( neighbors == null )
 		{
 			final List< Spot > nl = Graphs.neighborListOf( graph, v );
-			final List< Spot > bnl = new ArrayList< >();
+			final List< Spot > bnl = new ArrayList<>();
 			final int ts = v.getFeature( Spot.FRAME ).intValue();
 			for ( final Spot spot : nl )
 			{
@@ -243,7 +243,7 @@ public class TimeDirectedNeighborIndex extends NeighborCache< Spot, DefaultWeigh
 					bnl.add( spot );
 				}
 			}
-			neighbors = new Neighbors< >( v, bnl );
+			neighbors = new Neighbors<>( v, bnl );
 			successorMap.put( v, neighbors );
 		}
 		return neighbors;
@@ -258,15 +258,12 @@ public class TimeDirectedNeighborIndex extends NeighborCache< Spot, DefaultWeigh
 	 */
 	static class Neighbors< V, E >
 	{
-		private final Map< V, ModifiableInteger > neighborCounts =
-				new LinkedHashMap< >();
+		private final Map< V, ModifiableInteger > neighborCounts = new LinkedHashMap<>();
 
-		private final Set< V > neighborSet =
-				Collections.unmodifiableSet(
-						neighborCounts.keySet() );
+		private final Set< V > neighborSet = Collections.unmodifiableSet( neighborCounts.keySet() );
 
 		/**
-		 * @param v  
+		 * @param v
 		 */
 		public Neighbors( final V v, final Collection< V > neighbors )
 		{
@@ -294,8 +291,10 @@ public class TimeDirectedNeighborIndex extends NeighborCache< Spot, DefaultWeigh
 		public void removeNeighbor( final V v )
 		{
 			final ModifiableInteger count = neighborCounts.get( v );
-			if ( count == null ) { throw new IllegalArgumentException(
-					"Attempting to remove a neighbor that wasn't present" ); }
+			if ( count == null )
+			{
+				throw new IllegalArgumentException( "Attempting to remove a neighbor that wasn't present" );
+			}
 
 			count.decrement();
 			if ( count.getValue() == 0 )
@@ -311,7 +310,7 @@ public class TimeDirectedNeighborIndex extends NeighborCache< Spot, DefaultWeigh
 
 		public List< V > getNeighborList()
 		{
-			final List< V > neighbors = new ArrayList< >();
+			final List< V > neighbors = new ArrayList<>();
 			for ( final Map.Entry< V, ModifiableInteger > entry : neighborCounts.entrySet() )
 			{
 				final V v = entry.getKey();

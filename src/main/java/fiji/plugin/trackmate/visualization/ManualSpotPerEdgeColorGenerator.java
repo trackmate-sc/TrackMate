@@ -63,7 +63,7 @@ public class ManualSpotPerEdgeColorGenerator implements FeatureColorGenerator< S
 		}
 		if ( edge == null )
 			return missingValueColor;
-		
+
 		return manualEdgeColorGenerator.color( edge );
 	}
 }

@@ -93,9 +93,9 @@ public class SparseCostMatrix
 	/**
 	 * Instantiate a new sparse cost matrix. The caller must provide 3 arrays:
 	 * <ol>
-	 * <li> <code>cc</code>, the <code>double[]</code> array containing all the
+	 * <li><code>cc</code>, the <code>double[]</code> array containing all the
 	 * non-infinite costs.
-	 * <li> <code>kk</code>, an <code>int[]</code> array of the same length that
+	 * <li><code>kk</code>, an <code>int[]</code> array of the same length that
 	 * <code>cc</code>, and that contains the columns of the cost.
 	 * </ol>
 	 * These two arrays must be arranged row by row, starting with the first
@@ -103,7 +103,7 @@ public class SparseCostMatrix
 	 * facilitate index search). Also, each row must have at least one
 	 * non-infinte cost. If not, an {@link IllegalArgumentException} is thrown.
 	 * <ol start="3">
-	 * <li> <code>number</code> an <code>int[]</code> array, with one element per
+	 * <li><code>number</code> an <code>int[]</code> array, with one element per
 	 * row, that contains the number of non infinite cost for a row.
 	 * </ol>
 	 * 
@@ -126,8 +126,9 @@ public class SparseCostMatrix
 		this.nCols = nCols;
 
 		// Check sizes
-		if (cc.length != kk.length) {
- throw new IllegalArgumentException( "Cost and column indices arrays must have the same length. Found " + cc.length + " and " + kk.length + "." );
+		if ( cc.length != kk.length )
+		{
+			throw new IllegalArgumentException( "Cost and column indices arrays must have the same length. Found " + cc.length + " and " + kk.length + "." );
 		}
 
 		this.cardinality = cc.length;
@@ -140,7 +141,10 @@ public class SparseCostMatrix
 		}
 		for ( int i = 1; i < nRows; i++ )
 		{
-			if ( number[ i ] == 0 ) { throw new IllegalArgumentException( "All the rows must have at least one cost. Row " + i + " have none." ); }
+			if ( number[ i ] == 0 )
+			{
+				throw new IllegalArgumentException( "All the rows must have at least one cost. Row " + i + " have none." );
+			}
 			start[ i ] = start[ i - 1 ] + number[ i - 1 ];
 		}
 
@@ -152,9 +156,15 @@ public class SparseCostMatrix
 			for ( int j = start[ i ]; j < start[ i ] + number[ i ]; j++ )
 			{
 				final int k = kk[ j ];
-				if ( k >= nCols ) { throw new IllegalArgumentException( "At line " + i + ", the column indices array contains a column index (" + k + ") that is larger than or equal to the declared number of column (" + nCols + ")." ); }
+				if ( k >= nCols )
+				{
+					throw new IllegalArgumentException( "At line " + i + ", the column indices array contains a column index (" + k + ") that is larger than or equal to the declared number of column (" + nCols + ")." );
+				}
 				colHistogram[ k ]++;
-				if ( k <= previousK ) { throw new IllegalArgumentException( "The column indices array must be sorted within each row. The column elements at line " + i + " are not properly sorted." ); }
+				if ( k <= previousK )
+				{
+					throw new IllegalArgumentException( "The column indices array must be sorted within each row. The column elements at line " + i + " are not properly sorted." );
+				}
 				previousK = k;
 			}
 		}
@@ -162,7 +172,10 @@ public class SparseCostMatrix
 		// Check that each column have at least one assignment
 		for ( int j = 0; j < colHistogram.length; j++ )
 		{
-			if ( colHistogram[ j ] == 0 ) { throw new IllegalArgumentException( "All the columns must have at least one cost. The column " + j + " has none." ); }
+			if ( colHistogram[ j ] == 0 )
+			{
+				throw new IllegalArgumentException( "All the columns must have at least one cost. The column " + j + " has none." );
+			}
 		}
 	}
 
@@ -335,7 +348,7 @@ public class SparseCostMatrix
 
 		return cm;
 	}
-	
+
 	/**
 	 * Returns the value stored by this matrix at the specified row and column.
 	 * If a value is not present in the sparse matrix, the specified missing
@@ -398,7 +411,10 @@ public class SparseCostMatrix
 	 */
 	public final SparseCostMatrix vcat( final SparseCostMatrix B )
 	{
-		if ( nCols != B.nCols ) { throw new IllegalArgumentException( "Matrices A & B do not have the same number of columns. Found " + nCols + " and " + B.nCols + " respectively." ); }
+		if ( nCols != B.nCols )
+		{
+			throw new IllegalArgumentException( "Matrices A & B do not have the same number of columns. Found " + nCols + " and " + B.nCols + " respectively." );
+		}
 
 		final double[] cc2 = new double[ cardinality + B.cardinality ];
 		final int[] kk2 = new int[ cardinality + B.cardinality ];
@@ -435,7 +451,10 @@ public class SparseCostMatrix
 	 */
 	public final SparseCostMatrix hcat( final SparseCostMatrix B )
 	{
-		if ( nRows != B.nRows ) { throw new IllegalArgumentException( "Matrices A & B do not have the same number of rows. Found " + nRows + " and " + B.nRows + " respectively." ); }
+		if ( nRows != B.nRows )
+		{
+			throw new IllegalArgumentException( "Matrices A & B do not have the same number of rows. Found " + nRows + " and " + B.nRows + " respectively." );
+		}
 
 		final double[] cc2 = new double[ cardinality + B.cardinality ];
 		final int[] kk2 = new int[ cardinality + B.cardinality ];
@@ -503,7 +522,7 @@ public class SparseCostMatrix
 		{
 			final int j = kk[ k ];
 			final double c = cc[ k ];
-			
+
 			// Determine whether we changed line.
 			if ( j <= previousJ || walked >= number[ currentLine ] )
 			{

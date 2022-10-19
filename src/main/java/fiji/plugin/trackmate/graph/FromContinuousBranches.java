@@ -21,17 +21,16 @@
  */
 package fiji.plugin.trackmate.graph;
 
-import fiji.plugin.trackmate.Spot;
-
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import net.imglib2.algorithm.Benchmark;
-import net.imglib2.algorithm.OutputAlgorithm;
-
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
+
+import fiji.plugin.trackmate.Spot;
+import net.imglib2.algorithm.Benchmark;
+import net.imglib2.algorithm.OutputAlgorithm;
 
 public class FromContinuousBranches implements OutputAlgorithm< SimpleWeightedGraph< Spot, DefaultWeightedEdge > >, Benchmark
 {
@@ -40,15 +39,15 @@ public class FromContinuousBranches implements OutputAlgorithm< SimpleWeightedGr
 
 	private long processingTime;
 
-	private final Collection< List< Spot >> branches;
+	private final Collection< List< Spot > > branches;
 
-	private final Collection< List< Spot >> links;
+	private final Collection< List< Spot > > links;
 
 	private String errorMessage;
 
 	private SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph;
 
-	public FromContinuousBranches( final Collection< List< Spot >> branches, final Collection< List< Spot >> links )
+	public FromContinuousBranches( final Collection< List< Spot > > branches, final Collection< List< Spot > > links )
 	{
 		this.branches = branches;
 		this.links = links;
@@ -149,9 +148,9 @@ public class FromContinuousBranches implements OutputAlgorithm< SimpleWeightedGr
 	{
 		for ( final List< Spot > branch : branches )
 		{
-			if ( branch.contains( spot ) ) { return true; }
+			if ( branch.contains( spot ) )
+				return true;
 		}
 		return false;
 	}
-
 }

@@ -38,19 +38,19 @@ public class GraphSegmentSplitter
 
 	private final List< Spot > segmentEnds;
 
-	private final List< List< Spot >> segmentMiddles;
+	private final List< List< Spot > > segmentMiddles;
 
 	public GraphSegmentSplitter( final Graph< Spot, DefaultWeightedEdge > graph, final boolean findMiddlePoints )
 	{
-		final ConnectivityInspector< Spot, DefaultWeightedEdge > connectivity = new ConnectivityInspector< >( graph );
-		final List< Set< Spot >> connectedSets = connectivity.connectedSets();
+		final ConnectivityInspector< Spot, DefaultWeightedEdge > connectivity = new ConnectivityInspector<>( graph );
+		final List< Set< Spot > > connectedSets = connectivity.connectedSets();
 		final Comparator< Spot > framecomparator = Spot.frameComparator;
 
-		segmentStarts = new ArrayList< >( connectedSets.size() );
-		segmentEnds = new ArrayList< >( connectedSets.size() );
+		segmentStarts = new ArrayList<>( connectedSets.size() );
+		segmentEnds = new ArrayList<>( connectedSets.size() );
 		if ( findMiddlePoints )
 		{
-			segmentMiddles = new ArrayList< >( connectedSets.size() );
+			segmentMiddles = new ArrayList<>( connectedSets.size() );
 		}
 		else
 		{
@@ -64,7 +64,7 @@ public class GraphSegmentSplitter
 				continue;
 			}
 
-			final List< Spot > list = new ArrayList< >( set );
+			final List< Spot > list = new ArrayList<>( set );
 			Collections.sort( list, framecomparator );
 
 			segmentEnds.add( list.remove( list.size() - 1 ) );
@@ -81,7 +81,7 @@ public class GraphSegmentSplitter
 		return segmentEnds;
 	}
 
-	public List< List< Spot >> getSegmentMiddles()
+	public List< List< Spot > > getSegmentMiddles()
 	{
 		return segmentMiddles;
 	}

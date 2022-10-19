@@ -36,7 +36,7 @@ import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 
-public class DogDetector< T extends RealType< T > & NativeType< T >> extends LogDetector< T >
+public class DogDetector< T extends RealType< T > & NativeType< T > > extends LogDetector< T >
 {
 
 	/*

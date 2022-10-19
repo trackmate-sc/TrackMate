@@ -113,7 +113,7 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 	{
 		this.model = model;
 		this.selectionModel = selectionModel;
-		final List< String > features = new ArrayList< >( model.getFeatureModel().getSpotFeatures() );
+		final List< String > features = new ArrayList<>( model.getFeatureModel().getSpotFeatures() );
 		final Map< String, String > featureNames = model.getFeatureModel().getSpotFeatureShortNames();
 		final List< String > headerList = TMUtils.getArrayFromMaping( features, featureNames );
 		headerList.add( 0, "Track ID" );
@@ -199,7 +199,7 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 		 * Sort using a list; TreeSet does not allow several identical frames,
 		 * which is likely to happen.
 		 */
-		final List< Spot > sortedSpots = new ArrayList< >( spotSelection );
+		final List< Spot > sortedSpots = new ArrayList<>( spotSelection );
 		Collections.sort( sortedSpots, Spot.frameComparator );
 
 		@SuppressWarnings( "serial" )
@@ -212,7 +212,7 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 			}
 		};
 
-		final List< String > features = new ArrayList< >( model.getFeatureModel().getSpotFeatures() );
+		final List< String > features = new ArrayList<>( model.getFeatureModel().getSpotFeatures() );
 		for ( final Spot spot : sortedSpots )
 		{
 			if ( null == spot )
@@ -299,7 +299,7 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 	{
 		final ResultsTable lTable = new ResultsTable();
 		final FeatureModel fm = model.getFeatureModel();
-		final List< String > features = new ArrayList< >( fm.getSpotFeatures() );
+		final List< String > features = new ArrayList<>( fm.getSpotFeatures() );
 
 		final int ncols = spotSelection.size();
 		final int nrows = headers.length;
@@ -401,7 +401,7 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 			}
 		} );
 
-		final JList< String > rowHeader = new JList< >( lm );
+		final JList< String > rowHeader = new JList<>( lm );
 		rowHeader.setFixedCellHeight( table.getRowHeight() );
 		rowHeader.setCellRenderer( new RowHeaderRenderer( table ) );
 		rowHeader.setBackground( getBackground() );
@@ -437,8 +437,7 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 		}
 
 		@Override
-		public Component getListCellRendererComponent( final JList< ? extends String > list, final String value,
-				final int index, final boolean isSelected, final boolean cellHasFocus )
+		public Component getListCellRendererComponent( final JList< ? extends String > list, final String value, final int index, final boolean isSelected, final boolean cellHasFocus )
 		{
 			setText( ( value == null ) ? "" : value );
 			return this;

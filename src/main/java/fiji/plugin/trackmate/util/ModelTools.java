@@ -165,8 +165,12 @@ public class ModelTools
 				final double t1 = fm.getEdgeFeature( e1, feature ).doubleValue();
 				final double t2 = fm.getEdgeFeature( e2, feature ).doubleValue();
 
-				if ( t1 < t2 ) { return -1; }
-				if ( t1 > t2 ) { return 1; }
+				if ( t1 < t2 )
+					return -1;
+
+				if ( t1 > t2 )
+					return 1;
+
 				return 0;
 			}
 		};
@@ -194,12 +198,15 @@ public class ModelTools
 				final double t1 = fm.getTrackFeature( e1, feature ).doubleValue();
 				final double t2 = fm.getTrackFeature( e2, feature ).doubleValue();
 
-				if ( t1 < t2 ) { return -1; }
-				if ( t1 > t2 ) { return 1; }
+				if ( t1 < t2 )
+					return -1;
+
+				if ( t1 > t2 )
+					return 1;
+
 				return 0;
 			}
 		};
 		return comparator;
 	}
-
 }

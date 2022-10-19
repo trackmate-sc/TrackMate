@@ -34,7 +34,7 @@ import net.imglib2.algorithm.OutputAlgorithm;
  * @author Jean-Yves Tinevez
  * 
  */
-public interface CostMatrixCreator< K extends Comparable< K >, J extends Comparable< J >> extends Benchmark, OutputAlgorithm< SparseCostMatrix >
+public interface CostMatrixCreator< K extends Comparable< K >, J extends Comparable< J > > extends Benchmark, OutputAlgorithm< SparseCostMatrix >
 {
 
 	/**

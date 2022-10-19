@@ -95,7 +95,8 @@ public class ManualTrackerFactory implements SpotTrackerFactory
 	@Override
 	public String toString( final Map< String, Object > sm )
 	{
-		if ( !checkSettingsValidity( sm ) ) { return errorMessage; }
+		if ( !checkSettingsValidity( sm ) )
+			return errorMessage;
 		return "  Manual tracking.\n";
 	}
 

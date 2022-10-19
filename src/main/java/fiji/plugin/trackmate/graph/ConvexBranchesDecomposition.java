@@ -170,13 +170,13 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 
 	private String errorMessage;
 
-	private Collection< List< Spot >> branches;
+	private Collection< List< Spot > > branches;
 
 	private Collection< List< Spot > > links;
 
-	private Map< Integer, Collection< List< Spot >>> branchesPerTrack;
+	private Map< Integer, Collection< List< Spot > > > branchesPerTrack;
 
-	private Map< Integer, Collection< List< Spot > >> linksPerTrack;
+	private Map< Integer, Collection< List< Spot > > > linksPerTrack;
 
 	private long processingTime;
 
@@ -261,7 +261,7 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 
 		branches = new ArrayList<>();
 		branchesPerTrack = new HashMap<>();
-		links = new ArrayList< >();
+		links = new ArrayList<>();
 		linksPerTrack = new HashMap<>();
 		for ( final Integer trackID : trackIDs )
 		{
@@ -309,7 +309,7 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 	{
 		final Set< Spot > allSpots = tm.trackSpots( trackID );
 		final Set< DefaultWeightedEdge > allEdges = tm.trackEdges( trackID );
-		final SimpleGraph< Spot, DefaultWeightedEdge > graph = new SimpleGraph< >( DefaultWeightedEdge.class );
+		final SimpleGraph< Spot, DefaultWeightedEdge > graph = new SimpleGraph<>( DefaultWeightedEdge.class );
 
 		for ( final Spot spot : allSpots )
 		{
@@ -320,7 +320,7 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 			graph.addEdge( tm.getEdgeSource( edge ), tm.getEdgeTarget( edge ) );
 		}
 
-		final Collection< List< Spot >> links = new HashSet< >();
+		final Collection< List< Spot > > links = new HashSet<>();
 		for ( final Spot spot : allSpots )
 		{
 			final Set< Spot > successors = neighborIndex.successorsOf( spot );
@@ -469,7 +469,7 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 		if ( forbidGaps )
 		{
 			final Set< DefaultWeightedEdge > newEdges = graph.edgeSet();
-			final Set< DefaultWeightedEdge > toRemove = new HashSet< >();
+			final Set< DefaultWeightedEdge > toRemove = new HashSet<>();
 			for ( final DefaultWeightedEdge edge : newEdges )
 			{
 				final Spot source = graph.getEdgeSource( edge );
@@ -491,13 +491,13 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 		 * Output
 		 */
 
-		final ConnectivityInspector< Spot, DefaultWeightedEdge > connectivity = new ConnectivityInspector< >( graph );
-		final List< Set< Spot >> connectedSets = connectivity.connectedSets();
-		final Collection< List< Spot >> branches = new HashSet< >( connectedSets.size() );
+		final ConnectivityInspector< Spot, DefaultWeightedEdge > connectivity = new ConnectivityInspector<>( graph );
+		final List< Set< Spot > > connectedSets = connectivity.connectedSets();
+		final Collection< List< Spot > > branches = new HashSet<>( connectedSets.size() );
 		final Comparator< Spot > comparator = Spot.frameComparator;
 		for ( final Set< Spot > set : connectedSets )
 		{
-			final List< Spot > branch = new ArrayList< >( set.size() );
+			final List< Spot > branch = new ArrayList<>( set.size() );
 			branch.addAll( set );
 			Collections.sort( branch, comparator );
 			branches.add( branch );
@@ -524,15 +524,15 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 	 */
 	public static final SimpleDirectedGraph< List< Spot >, DefaultEdge > buildBranchGraph( final TrackBranchDecomposition branchDecomposition )
 	{
-		final SimpleDirectedGraph< List< Spot >, DefaultEdge > branchGraph = new SimpleDirectedGraph< >( DefaultEdge.class );
+		final SimpleDirectedGraph< List< Spot >, DefaultEdge > branchGraph = new SimpleDirectedGraph<>( DefaultEdge.class );
 
-		final Collection< List< Spot >> branches = branchDecomposition.branches;
-		final Collection< List< Spot >> links = branchDecomposition.links;
+		final Collection< List< Spot > > branches = branchDecomposition.branches;
+		final Collection< List< Spot > > links = branchDecomposition.links;
 
 		// Map of the first spot of each branch.
-		final Map< Spot, List< Spot > > firstSpots = new HashMap< >( branches.size() );
+		final Map< Spot, List< Spot > > firstSpots = new HashMap<>( branches.size() );
 		// Map of the last spot of each branch.
-		final Map< Spot, List< Spot > > lastSpots = new HashMap< >( branches.size() );
+		final Map< Spot, List< Spot > > lastSpots = new HashMap<>( branches.size() );
 		for ( final List< Spot > branch : branches )
 		{
 			firstSpots.put( branch.get( 0 ), branch );
@@ -585,7 +585,7 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 
 	private static final List< Spot > makeLink( final Spot spotA, final Spot spotB )
 	{
-		final List< Spot > link = new ArrayList< >( 2 );
+		final List< Spot > link = new ArrayList<>( 2 );
 		link.add( spotA );
 		link.add( spotB );
 		return link;
@@ -606,7 +606,7 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 	 *
 	 * @return the collection of branches.
 	 */
-	public Collection< List< Spot >> getBranches()
+	public Collection< List< Spot > > getBranches()
 	{
 		return branches;
 	}
@@ -621,7 +621,7 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 	 *
 	 * @return a mapping of collections of branches.
 	 */
-	public Map< Integer, Collection< List< Spot >>> getBranchesPerTrack()
+	public Map< Integer, Collection< List< Spot > > > getBranchesPerTrack()
 	{
 		return branchesPerTrack;
 	}
@@ -639,7 +639,7 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 	 *
 	 * @return a collection of links as a 2-elements list.
 	 */
-	public Collection< List< Spot >> getLinks()
+	public Collection< List< Spot > > getLinks()
 	{
 		return links;
 	}
@@ -657,7 +657,7 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 	 *
 	 * @return the mapping of track IDs to the links.
 	 */
-	public Map< Integer, Collection< List< Spot >>> getLinksPerTrack()
+	public Map< Integer, Collection< List< Spot > > > getLinksPerTrack()
 	{
 		return linksPerTrack;
 	}
@@ -677,12 +677,12 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 		 * are ordered in the list by increasing frame number, and that two
 		 * consecutive spot are separated by exactly one frame.
 		 */
-		public Collection< List< Spot >> branches;
+		public Collection< List< Spot > > branches;
 
 		/**
 		 * Links, as a collection of 2-elements list.
 		 */
-		public Collection< List< Spot >> links;
+		public Collection< List< Spot > > links;
 
 		@Override
 		public String toString()

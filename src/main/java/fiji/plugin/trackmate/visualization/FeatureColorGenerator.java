@@ -25,11 +25,13 @@ import java.awt.Color;
 import java.util.function.Function;
 
 /**
- * Interface for color generator that can color objects based on a
- * feature identified by a String.
+ * Interface for color generator that can color objects based on a feature
+ * identified by a String.
+ * 
  * @author Jean-Yves Tinevez - 2013
  *
- * @param <K> the type of object to color.
+ * @param <K>
+ *            the type of object to color.
  */
 public interface FeatureColorGenerator< K > extends Function< K, Color >
 {

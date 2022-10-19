@@ -52,7 +52,8 @@ public class SpotGaussianFitterExample
 	{
 		UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
 		ImageJ.main( args );
-//		final TmXmlReader reader = new TmXmlReader( new File( "samples/MAX_1.5x-timelqpe_2021-04-02-1.xml" ) );
+		// final TmXmlReader reader = new TmXmlReader( new File(
+		// "samples/MAX_1.5x-timelqpe_2021-04-02-1.xml" ) );
 		final TmXmlReader reader = new TmXmlReader( new File( "samples/FakeTracks.xml" ) );
 		final Model model = reader.getModel();
 		final ImagePlus imp = reader.readImage();

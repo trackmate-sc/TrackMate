@@ -97,17 +97,11 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 	// ~ Instance fields
 	// --------------------------------------------------------
 
-	private final Deque< Object > stack = new ArrayDeque< >();
+	private final Deque< Object > stack = new ArrayDeque<>();
 
-	private final ConnectedComponentTraversalEvent ccFinishedEvent =
-			new ConnectedComponentTraversalEvent(
-					this,
-					ConnectedComponentTraversalEvent.CONNECTED_COMPONENT_FINISHED );
+	private final ConnectedComponentTraversalEvent ccFinishedEvent = new ConnectedComponentTraversalEvent( this, ConnectedComponentTraversalEvent.CONNECTED_COMPONENT_FINISHED );
 
-	private final ConnectedComponentTraversalEvent ccStartedEvent =
-			new ConnectedComponentTraversalEvent(
-					this,
-					ConnectedComponentTraversalEvent.CONNECTED_COMPONENT_STARTED );
+	private final ConnectedComponentTraversalEvent ccStartedEvent = new ConnectedComponentTraversalEvent( this, ConnectedComponentTraversalEvent.CONNECTED_COMPONENT_STARTED );
 
 	private Iterator< V > vertexIterator = null;
 
@@ -115,7 +109,7 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 	 * Stores the vertices that have been seen during iteration and (optionally)
 	 * some additional traversal info regarding each vertex.
 	 */
-	protected Map< V, VisitColor > seen = new HashMap< >();
+	protected Map< V, VisitColor > seen = new HashMap<>();
 
 	private V startVertex;
 
@@ -170,8 +164,7 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 		}
 		else
 		{
-			throw new IllegalArgumentException(
-					"graph must contain the start vertex" );
+			throw new IllegalArgumentException( "graph must contain the start vertex" );
 		}
 	}
 
@@ -277,10 +270,10 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 
 	private static < V, E > Specifics< V, E > createGraphSpecifics( final Graph< V, E > g )
 	{
-		if (g.getType().isDirected())
-			return new DirectedSpecifics< >( g );
+		if ( g.getType().isDirected() )
+			return new DirectedSpecifics<>( g );
 
-		return new UndirectedSpecifics< >( g );
+		return new UndirectedSpecifics<>( g );
 	}
 
 	/**
@@ -290,10 +283,10 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 	{
 
 		// Retrieve target vertices, and sort them in a list
-		final List< V > sortedChildren = new ArrayList< >();
+		final List< V > sortedChildren = new ArrayList<>();
 		// Keep a map of matching edges so that we can retrieve them in the same
 		// order
-		final Map< V, E > localEdges = new HashMap< >();
+		final Map< V, E > localEdges = new HashMap<>();
 
 		for ( final E edge : specifics.edgesOf( vertex ) )
 		{
@@ -340,7 +333,8 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 	{
 		for ( ;; )
 		{
-			if ( stack.isEmpty() ) { return true; }
+			if ( stack.isEmpty() )
+			{ return true; }
 			if ( stack.getLast() != SENTINEL )
 			{
 				// Found a non-sentinel.
@@ -359,7 +353,7 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 	}
 
 	/**
-	 * @param edge  
+	 * @param edge
 	 */
 	protected void encounterVertex( final V vertex, final E edge )
 	{
@@ -368,7 +362,7 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 	}
 
 	/**
-	 * @param edge  
+	 * @param edge
 	 */
 	protected void encounterVertexAgain( final V vertex, final E edge )
 	{

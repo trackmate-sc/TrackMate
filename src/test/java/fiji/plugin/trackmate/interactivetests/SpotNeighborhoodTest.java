@@ -41,9 +41,9 @@ public class SpotNeighborhoodTest
 
 		// 3D
 		final ArrayImg< UnsignedShortType, ShortArray > image = ArrayImgs.unsignedShorts( 100, 100, 100 );
-		final ImgPlus< UnsignedShortType > img = new ImgPlus< >( image );
+		final ImgPlus< UnsignedShortType > img = new ImgPlus<>( image );
 		final Spot spot = new Spot( 50d, 50d, 50d, 30d, -1d );
-		final SpotNeighborhood< UnsignedShortType > neighborhood = new SpotNeighborhood< >( spot, img );
+		final SpotNeighborhood< UnsignedShortType > neighborhood = new SpotNeighborhood<>( spot, img );
 		final SpotNeighborhoodCursor< UnsignedShortType > cursor = neighborhood.cursor();
 		while ( cursor.hasNext() )
 		{
@@ -54,9 +54,9 @@ public class SpotNeighborhoodTest
 
 		// 2D
 		final ArrayImg< UnsignedShortType, ShortArray > image2 = ArrayImgs.unsignedShorts( 100, 100 );
-		final ImgPlus< UnsignedShortType > img2 = new ImgPlus< >( image2 );
+		final ImgPlus< UnsignedShortType > img2 = new ImgPlus<>( image2 );
 		final Spot spot2 = new Spot( 50d, 50d, 0d, 30d, -1d );
-		final SpotNeighborhood< UnsignedShortType > neighborhood2 = new SpotNeighborhood< >( spot2, img2 );
+		final SpotNeighborhood< UnsignedShortType > neighborhood2 = new SpotNeighborhood<>( spot2, img2 );
 		final SpotNeighborhoodCursor< UnsignedShortType > cursor2 = neighborhood2.cursor();
 		while ( cursor2.hasNext() )
 		{

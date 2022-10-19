@@ -26,7 +26,6 @@ import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 public class TrackerProvider extends AbstractProvider< SpotTrackerFactory >
 {
 
-
 	public TrackerProvider()
 	{
 		super( SpotTrackerFactory.class );

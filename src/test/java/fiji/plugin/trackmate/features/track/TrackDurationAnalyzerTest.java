@@ -69,10 +69,10 @@ public class TrackDurationAnalyzerTest
 		try
 		{
 
-			expectedDuration = new HashMap< >( N_TRACKS );
-			expectedStart = new HashMap< >( N_TRACKS );
-			expectedStop = new HashMap< >( N_TRACKS );
-			expectedDisplacement = new HashMap< >( N_TRACKS );
+			expectedDuration = new HashMap<>( N_TRACKS );
+			expectedStart = new HashMap<>( N_TRACKS );
+			expectedStop = new HashMap<>( N_TRACKS );
+			expectedDisplacement = new HashMap<>( N_TRACKS );
 
 			for ( int i = 0; i < N_TRACKS; i++ )
 			{
@@ -83,7 +83,7 @@ public class TrackDurationAnalyzerTest
 				final int duration = stop - start;
 				final double displacement = ran.nextDouble();
 
-				final HashSet< Spot > track = new HashSet< >();
+				final HashSet< Spot > track = new HashSet<>();
 				for ( int j = start; j <= stop; j++ )
 				{
 					final Spot spot = new Spot( 0d, 0d, 0d, 1d, -1d );
@@ -136,7 +136,7 @@ public class TrackDurationAnalyzerTest
 	public final void testModelChanged()
 	{
 		// Copy old keys
-		final HashSet< Integer > oldKeys = new HashSet< >( model.getTrackModel().trackIDs( true ) );
+		final HashSet< Integer > oldKeys = new HashSet<>( model.getTrackModel().trackIDs( true ) );
 
 		// First analysis
 		final TestTrackDurationAnalyzer analyzer = new TestTrackDurationAnalyzer();
@@ -193,7 +193,7 @@ public class TrackDurationAnalyzerTest
 		// New change: graft a new spot on the first track - it should be
 		// re-analyzed
 		final Integer firstKey = oldKeys.iterator().next();
-		final TreeSet< Spot > sortedTrack = new TreeSet< >( Spot.frameComparator );
+		final TreeSet< Spot > sortedTrack = new TreeSet<>( Spot.frameComparator );
 		sortedTrack.addAll( model.getTrackModel().trackSpots( firstKey ) );
 		final Spot firstSpot = sortedTrack.first();
 		Spot newSpot = null;
@@ -235,7 +235,7 @@ public class TrackDurationAnalyzerTest
 	public final void testModelChanged2()
 	{
 		// Copy old keys
-		final HashSet< Integer > oldKeys = new HashSet< >( model.getTrackModel().trackIDs( true ) );
+		final HashSet< Integer > oldKeys = new HashSet<>( model.getTrackModel().trackIDs( true ) );
 
 		// First analysis
 		final TestTrackDurationAnalyzer analyzer = new TestTrackDurationAnalyzer();
@@ -265,7 +265,7 @@ public class TrackDurationAnalyzerTest
 
 		// Move the last spot of a track further in time to change duration and
 		// stop feature
-		final TreeSet< Spot > sortedTrack = new TreeSet< >( Spot.frameComparator );
+		final TreeSet< Spot > sortedTrack = new TreeSet<>( Spot.frameComparator );
 		sortedTrack.addAll( model.getTrackModel().trackSpots( aKey ) );
 		final Spot aspot = sortedTrack.last();
 
@@ -297,7 +297,7 @@ public class TrackDurationAnalyzerTest
 	public final void testModelChanged3()
 	{
 		// Copy old keys
-		final HashSet< Integer > oldKeys = new HashSet< >( model.getTrackModel().trackIDs( true ) );
+		final HashSet< Integer > oldKeys = new HashSet<>( model.getTrackModel().trackIDs( true ) );
 
 		// First analysis
 		final TestTrackDurationAnalyzer analyzer = new TestTrackDurationAnalyzer();
@@ -319,7 +319,7 @@ public class TrackDurationAnalyzerTest
 		model.addModelChangeListener( listener );
 
 		// Get its middle spot
-		final TreeSet< Spot > sortedTrack = new TreeSet< >( Spot.frameComparator );
+		final TreeSet< Spot > sortedTrack = new TreeSet<>( Spot.frameComparator );
 		sortedTrack.addAll( model.getTrackModel().trackSpots( key ) );
 		Spot aspot = null;
 		final Iterator< Spot > it = sortedTrack.iterator();

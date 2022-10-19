@@ -129,7 +129,6 @@ public class DisplaySettings
 
 	private final transient Listeners.List< UpdateListener > updateListeners;
 
-
 	public DisplaySettings()
 	{
 		this.updateListeners = new Listeners.SynchronizedList<>();

@@ -66,9 +66,9 @@ public class JLabelLogger extends JLabel
 		@Override
 		public void log( final String message, final Color color )
 		{
-			
+
 			final String msg;
-			if (null == message)
+			if ( null == message )
 				msg = "null"; // Help debug.
 			else if ( message.startsWith( "<html>" ) )
 				msg = message;

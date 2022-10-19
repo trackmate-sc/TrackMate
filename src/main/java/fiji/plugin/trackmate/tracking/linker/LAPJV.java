@@ -176,7 +176,8 @@ public class LAPJV implements OutputAlgorithm< int[] >, Benchmark
 			}
 		}
 
-		if ( f == 0 ) { return true; }
+		if ( f == 0 )
+			return true;
 
 		/*
 		 * Augmenting row reduction.
@@ -426,7 +427,10 @@ public class LAPJV implements OutputAlgorithm< int[] >, Benchmark
 
 	public String resultToString( final List< ? > rows, final List< ? > cols )
 	{
-		if ( null == output ) { return "Not solved yet. Process the algorithm prior to calling this method."; }
+		if ( null == output )
+		{
+			return "Not solved yet. Process the algorithm prior to calling this method.";
+		}
 
 		final String[] colNames = new String[ cm.nCols ];
 		// default names

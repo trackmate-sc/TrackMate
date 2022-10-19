@@ -54,12 +54,10 @@ import net.imglib2.algorithm.Benchmark;
 import fiji.plugin.trackmate.tracking.costmatrix.JaqamanSegmentCostMatrixCreator;
 import fiji.plugin.trackmate.tracking.linker.JaqamanLinker;
 
-
 /**
  * This class tracks deals with the second step of tracking according to the LAP
- * tracking framework formulated by Jaqaman, K. et al.
- * "Robust single-particle tracking in live-cell time-lapse sequences." Nature
- * Methods, 2008.
+ * tracking framework formulated by Jaqaman, K. et al. "Robust single-particle
+ * tracking in live-cell time-lapse sequences." Nature Methods, 2008.
  *
  * <p>
  * In this tracking framework, tracking is divided into two steps:
@@ -74,8 +72,10 @@ import fiji.plugin.trackmate.tracking.linker.JaqamanLinker;
  * matrix corresponding to the following events: Track segments can be:
  * <ul>
  * <li>Linked end-to-tail (gap closing)</li>
- * <li>Split (the start of one track is linked to the middle of another track)</li>
- * <li>Merged (the end of one track is linked to the middle of another track</li>
+ * <li>Split (the start of one track is linked to the middle of another
+ * track)</li>
+ * <li>Merged (the end of one track is linked to the middle of another
+ * track</li>
  * <li>Terminated (track ends)</li>
  * <li>Initiated (track starts)</li>
  * </ul>
@@ -111,14 +111,14 @@ public class SegmentTracker implements SpotTracker, Benchmark
 		setNumThreads();
 	}
 
-        public SegmentTracker( final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph, final Map< String, Object > fullsettings, final Logger logger  ) 
-        {
-            final SlaveLogger slLogger = new SlaveLogger( logger, 0.5, 0.5 );
-            this.logger = slLogger;
-            setNumThreads();
-            this.graph = graph;
-                	// Prepare settings object
-		final Map< String, Object > slSettings = new HashMap< >();
+	public SegmentTracker( final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph, final Map< String, Object > fullsettings, final Logger logger )
+	{
+		final SlaveLogger slLogger = new SlaveLogger( logger, 0.5, 0.5 );
+		this.logger = slLogger;
+		setNumThreads();
+		this.graph = graph;
+		// Prepare settings object
+		final Map< String, Object > slSettings = new HashMap<>();
 
 		slSettings.put( KEY_ALLOW_GAP_CLOSING, fullsettings.get( KEY_ALLOW_GAP_CLOSING ) );
 		slSettings.put( KEY_GAP_CLOSING_FEATURE_PENALTIES, fullsettings.get( KEY_GAP_CLOSING_FEATURE_PENALTIES ) );
@@ -135,10 +135,10 @@ public class SegmentTracker implements SpotTracker, Benchmark
 
 		slSettings.put( KEY_ALTERNATIVE_LINKING_COST_FACTOR, fullsettings.get( KEY_ALTERNATIVE_LINKING_COST_FACTOR ) );
 		slSettings.put( KEY_CUTOFF_PERCENTILE, fullsettings.get( KEY_CUTOFF_PERCENTILE ) );
-                
-                this.settings = slSettings;
-        }
-        
+
+		this.settings = slSettings;
+	}
+
 	@Override
 	public SimpleWeightedGraph< Spot, DefaultWeightedEdge > getResult()
 	{
@@ -195,7 +195,6 @@ public class SegmentTracker implements SpotTracker, Benchmark
 			return false;
 		}
 
-
 		/*
 		 * Create links in graph.
 		 */
@@ -239,8 +238,7 @@ public class SegmentTracker implements SpotTracker, Benchmark
 	{
 		this.logger = logger;
 	}
-        
-       
+
 	private static final boolean checkSettingsValidity( final Map< String, Object > settings, final StringBuilder str )
 	{
 		if ( null == settings )
@@ -249,8 +247,8 @@ public class SegmentTracker implements SpotTracker, Benchmark
 			return false;
 		}
 
-		boolean ok = true;                
-                // Gap-closing
+		boolean ok = true;
+		// Gap-closing
 		ok = ok & checkParameter( settings, KEY_ALLOW_GAP_CLOSING, Boolean.class, str );
 		ok = ok & checkParameter( settings, KEY_GAP_CLOSING_MAX_DISTANCE, Double.class, str );
 		ok = ok & checkParameter( settings, KEY_GAP_CLOSING_MAX_FRAME_GAP, Integer.class, str );
@@ -263,11 +261,11 @@ public class SegmentTracker implements SpotTracker, Benchmark
 		ok = ok & checkParameter( settings, KEY_ALLOW_TRACK_MERGING, Boolean.class, str );
 		ok = ok & checkParameter( settings, KEY_MERGING_MAX_DISTANCE, Double.class, str );
 		ok = ok & checkFeatureMap( settings, KEY_MERGING_FEATURE_PENALTIES, str );
-                // Others
+		// Others
 		ok = ok & checkParameter( settings, KEY_CUTOFF_PERCENTILE, Double.class, str );
 		ok = ok & checkParameter( settings, KEY_ALTERNATIVE_LINKING_COST_FACTOR, Double.class, str );
 
-                final List< String > mandatoryKeys = new ArrayList< >();
+		final List< String > mandatoryKeys = new ArrayList<>();
 		mandatoryKeys.add( KEY_ALLOW_GAP_CLOSING );
 		mandatoryKeys.add( KEY_GAP_CLOSING_MAX_DISTANCE );
 		mandatoryKeys.add( KEY_GAP_CLOSING_MAX_FRAME_GAP );
@@ -277,13 +275,13 @@ public class SegmentTracker implements SpotTracker, Benchmark
 		mandatoryKeys.add( KEY_MERGING_MAX_DISTANCE );
 		mandatoryKeys.add( KEY_ALTERNATIVE_LINKING_COST_FACTOR );
 		mandatoryKeys.add( KEY_CUTOFF_PERCENTILE );
-		final List< String > optionalKeys = new ArrayList< >();
+		final List< String > optionalKeys = new ArrayList<>();
 		optionalKeys.add( KEY_GAP_CLOSING_FEATURE_PENALTIES );
 		optionalKeys.add( KEY_SPLITTING_FEATURE_PENALTIES );
 		optionalKeys.add( KEY_MERGING_FEATURE_PENALTIES );
 		optionalKeys.add( KEY_BLOCKING_VALUE );
 		ok = ok & checkMapKeys( settings, mandatoryKeys, optionalKeys, str );
-		
+
 		return ok;
 	}
 
@@ -304,8 +302,5 @@ public class SegmentTracker implements SpotTracker, Benchmark
 	{
 		return numThreads;
 	}
-        
-       
-}
 
-                
+}

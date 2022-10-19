@@ -21,7 +21,6 @@
  */
 package fiji.plugin.trackmate.interactivetests;
 
-
 import java.util.Random;
 
 import net.imagej.ImgPlus;
@@ -37,9 +36,11 @@ import net.imglib2.view.Views;
 import fiji.plugin.trackmate.detection.DogDetector;
 import fiji.plugin.trackmate.util.TMUtils;
 
-public class DogDetectorPerformance {
+public class DogDetectorPerformance
+{
 
-	public static void main(final String[] args) throws IncompatibleTypeException {
+	public static void main( final String[] args ) throws IncompatibleTypeException
+	{
 		performance3D();
 	}
 
@@ -69,7 +70,7 @@ public class DogDetectorPerformance {
 
 			final RandomAccessible< UnsignedShortType > source = Views.extendMirrorSingle( img );
 			Gauss3.gauss( rad / Math.sqrt( 2 ), source, img );
-			final ImgPlus< UnsignedShortType > imgplus = new ImgPlus< >( img );
+			final ImgPlus< UnsignedShortType > imgplus = new ImgPlus<>( img );
 
 			{
 				for ( int i = 0; i < nwarmups; i++ )
@@ -117,7 +118,7 @@ public class DogDetectorPerformance {
 
 			final RandomAccessible< UnsignedShortType > source = Views.extendMirrorSingle( img );
 			Gauss3.gauss( rad / Math.sqrt( 2 ), source, img );
-			final ImgPlus< UnsignedShortType > imgplus = new ImgPlus< >( img );
+			final ImgPlus< UnsignedShortType > imgplus = new ImgPlus<>( img );
 
 			{
 				for ( int i = 0; i < nwarmups; i++ )
@@ -167,7 +168,7 @@ public class DogDetectorPerformance {
 
 			final RandomAccessible< UnsignedShortType > source = Views.extendMirrorSingle( img );
 			Gauss3.gauss( rad / Math.sqrt( 2 ), source, img );
-			final ImgPlus< UnsignedShortType > imgplus = new ImgPlus< >( img );
+			final ImgPlus< UnsignedShortType > imgplus = new ImgPlus<>( img );
 
 			{
 				for ( int i = 0; i < nwarmups; i++ )
@@ -215,7 +216,7 @@ public class DogDetectorPerformance {
 
 			final RandomAccessible< UnsignedShortType > source = Views.extendMirrorSingle( img );
 			Gauss3.gauss( rad / Math.sqrt( img.numDimensions() ), source, img );
-			final ImgPlus< UnsignedShortType > imgplus = new ImgPlus< >( img );
+			final ImgPlus< UnsignedShortType > imgplus = new ImgPlus<>( img );
 
 			{
 				for ( int i = 0; i < nwarmups; i++ )
@@ -233,11 +234,13 @@ public class DogDetectorPerformance {
 		}
 	}
 
-	private static final void execTest(final ImgPlus<UnsignedShortType> imgplus, final double rad) {
-		final DogDetector< UnsignedShortType > detector = new DogDetector< >( imgplus, imgplus, TMUtils.getSpatialCalibration( imgplus ), rad, 1, false, false );
-		detector.setNumThreads(1);
-		if (!detector.checkInput() || !detector.process()) {
-			System.out.println(detector.getErrorMessage());
+	private static final void execTest( final ImgPlus< UnsignedShortType > imgplus, final double rad )
+	{
+		final DogDetector< UnsignedShortType > detector = new DogDetector<>( imgplus, imgplus, TMUtils.getSpatialCalibration( imgplus ), rad, 1, false, false );
+		detector.setNumThreads( 1 );
+		if ( !detector.checkInput() || !detector.process() )
+		{
+			System.out.println( detector.getErrorMessage() );
 			return;
 		}
 		detector.getResult();

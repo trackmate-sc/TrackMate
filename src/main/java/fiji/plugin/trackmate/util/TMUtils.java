@@ -89,7 +89,7 @@ public class TMUtils
 			}
 		};
 		Collections.sort( list, c );
-		final LinkedHashMap< K, V > result = new LinkedHashMap< >();
+		final LinkedHashMap< K, V > result = new LinkedHashMap<>();
 		for ( final Map.Entry< K, V > entry : list )
 			result.put( entry.getKey(), entry.getValue() );
 		return result;
@@ -165,10 +165,10 @@ public class TMUtils
 	public static final < T > boolean checkMapKeys( final Map< T, ? > map, Collection< T > mandatoryKeys, Collection< T > optionalKeys, final StringBuilder errorHolder )
 	{
 		if ( null == optionalKeys )
-			optionalKeys = new ArrayList< >();
+			optionalKeys = new ArrayList<>();
 
 		if ( null == mandatoryKeys )
-			mandatoryKeys = new ArrayList< >();
+			mandatoryKeys = new ArrayList<>();
 
 		boolean ok = true;
 		final Set< T > keySet = map.keySet();
@@ -230,7 +230,7 @@ public class TMUtils
 	 */
 	public static final < J, K > List< K > getArrayFromMaping( final Collection< J > keys, final Map< J, K > mapping )
 	{
-		final List< K > names = new ArrayList< >( keys.size() );
+		final List< K > names = new ArrayList<>( keys.size() );
 		for ( final J key : keys )
 			names.add( mapping.get( key ) );
 		return names;
@@ -513,14 +513,10 @@ public class TMUtils
 	public static < T extends Type< T > > ImgPlus< T > hyperSlice( final ImgPlus< T > img, final long channel, final long frame )
 	{
 		final int timeDim = img.dimensionIndex( Axes.TIME );
-		final ImgPlus< T > imgT = timeDim < 0
-				? img
-				: ImgPlusViews.hyperSlice( img, timeDim, frame );
+		final ImgPlus< T > imgT = timeDim < 0 ? img : ImgPlusViews.hyperSlice( img, timeDim, frame );
 
 		final int channelDim = imgT.dimensionIndex( Axes.CHANNEL );
-		final ImgPlus< T > imgTC = channelDim < 0
-				? imgT
-				: ImgPlusViews.hyperSlice( imgT, channelDim, channel );
+		final ImgPlus< T > imgTC = channelDim < 0 ? imgT : ImgPlusViews.hyperSlice( imgT, channelDim, channel );
 
 		// Squeeze Z dimension if its size is 1.
 		final int zDim = imgTC.dimensionIndex( Axes.Z );
@@ -713,7 +709,8 @@ public class TMUtils
 	}
 
 	/** Obtains the SciJava {@link Context} in use by ImageJ. */
-	public static Context getContext() {
+	public static Context getContext()
+	{
 		return ( Context ) IJ.runPlugIn( "org.scijava.Context", "" );
 	}
 
@@ -731,9 +728,7 @@ public class TMUtils
 	public static File proposeTrackMateSaveFile( final Settings settings, final Logger logger )
 	{
 		File folder;
-		if ( null != settings.imp
-				&& null != settings.imp.getOriginalFileInfo()
-				&& null != settings.imp.getOriginalFileInfo().directory )
+		if ( null != settings.imp && null != settings.imp.getOriginalFileInfo() && null != settings.imp.getOriginalFileInfo().directory )
 		{
 			final String directory = settings.imp.getOriginalFileInfo().directory;
 			folder = Paths.get( directory ).toAbsolutePath().toFile();
@@ -743,7 +738,7 @@ public class TMUtils
 			 */
 			settings.imageFolder = settings.imp.getOriginalFileInfo().directory;
 		}
-		else if ( !settings.imageFolder.isEmpty()  )
+		else if ( !settings.imageFolder.isEmpty() )
 		{
 			final String absolutePath = FileSystems.getDefault().getPath( settings.imageFolder ).normalize().toAbsolutePath().toString();
 			folder = new File( absolutePath );
@@ -755,9 +750,7 @@ public class TMUtils
 			 * Warn the user that the file cannot be reloaded properly because
 			 * the source image does not match a file.
 			 */
-			logger.error( "Warning: The source image does not match a file on the system."
-					+ "TrackMate won't be able to reload it when opening this XML file.\n"
-					+ "To fix this, save the source image to a TIF file before saving the TrackMate session.\n" );
+			logger.error( "Warning: The source image does not match a file on the system." + "TrackMate won't be able to reload it when opening this XML file.\n" + "To fix this, save the source image to a TIF file before saving the TrackMate session.\n" );
 			settings.imageFolder = "";
 		}
 
@@ -768,17 +761,17 @@ public class TMUtils
 		}
 		catch ( final NullPointerException npe )
 		{
-			if (settings.imageFileName.isEmpty())
+			if ( settings.imageFileName.isEmpty() )
 				file = new File( folder, "TrackMateData.xml" );
 			else
 			{
 				final String imName = settings.imageFileName;
 				final int i = imName.lastIndexOf( '.' );
 				String xmlName;
-				if (i<0)
-					xmlName = imName +".xml";
+				if ( i < 0 )
+					xmlName = imName + ".xml";
 				else
-					xmlName = imName.substring( 0, i ) +".xml";
+					xmlName = imName.substring( 0, i ) + ".xml";
 				file = new File( folder, xmlName );
 			}
 		}

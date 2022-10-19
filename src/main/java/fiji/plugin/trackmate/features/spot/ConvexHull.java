@@ -108,6 +108,7 @@ public final class ConvexHull
 				return x == other.x && y == other.y;
 			}
 		}
+
 		@Override
 		public int compareTo( final Point other )
 		{

@@ -57,9 +57,9 @@ public class EdgeTargetAnalyzerTest
 	@Before
 	public void setUp()
 	{
-		edgeSource = new HashMap< >();
-		edgeTarget = new HashMap< >();
-		edgeCost = new HashMap< >();
+		edgeSource = new HashMap<>();
+		edgeTarget = new HashMap<>();
+		edgeCost = new HashMap<>();
 
 		model = new Model();
 		model.beginUpdate();
@@ -123,7 +123,7 @@ public class EdgeTargetAnalyzerTest
 			@Override
 			public void modelChanged( final ModelChangeEvent event )
 			{
-				final HashSet< DefaultWeightedEdge > edgesToUpdate = new HashSet< >();
+				final HashSet< DefaultWeightedEdge > edgesToUpdate = new HashSet<>();
 				for ( final DefaultWeightedEdge edge : event.getEdges() )
 				{
 					if ( event.getEdgeFlag( edge ) != ModelChangeEvent.FLAG_EDGE_REMOVED )
@@ -141,7 +141,7 @@ public class EdgeTargetAnalyzerTest
 				{
 
 					// Get the all the edges of the track they belong to
-					final HashSet< DefaultWeightedEdge > globalEdgesToUpdate = new HashSet< >();
+					final HashSet< DefaultWeightedEdge > globalEdgesToUpdate = new HashSet<>();
 					for ( final DefaultWeightedEdge edge : edgesToUpdate )
 					{
 						final Integer motherTrackID = model.getTrackModel().trackIDOf( edge );

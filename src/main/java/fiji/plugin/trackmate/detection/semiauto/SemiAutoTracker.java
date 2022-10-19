@@ -36,7 +36,7 @@ import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.view.Views;
 
-public class SemiAutoTracker< T extends RealType< T > & NativeType< T >> extends AbstractSemiAutoTracker< T >
+public class SemiAutoTracker< T extends RealType< T > & NativeType< T > > extends AbstractSemiAutoTracker< T >
 {
 
 	protected final ImgPlus< T > img;

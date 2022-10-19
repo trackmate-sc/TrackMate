@@ -39,7 +39,6 @@ public class LabelImgExporterPanel extends JPanel
 
 	private final JCheckBox useSpotIdsAsLabels;
 
-
 	public LabelImgExporterPanel()
 	{
 		final GridBagLayout gridBagLayout = new GridBagLayout();

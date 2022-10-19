@@ -38,6 +38,6 @@ public class CTCExporterTestDrive
 
 		final LoadTrackMatePlugIn plugin = new LoadTrackMatePlugIn();
 		plugin.run( "samples/ctc/01_label image_tracking.xml" );
-//		plugin.run( "samples/FakeTracks.xml" );
+		// plugin.run( "samples/FakeTracks.xml" );
 	}
 }

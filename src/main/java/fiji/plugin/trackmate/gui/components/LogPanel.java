@@ -156,7 +156,6 @@ public class LogPanel extends JPanel
 					final AbstractDocument doc = ( AbstractDocument ) textPane.getStyledDocument();
 					final int len = doc.getLength();
 					final int l = message.length();
-				
 
 					if ( len + l > MAX_N_CHARS )
 					{

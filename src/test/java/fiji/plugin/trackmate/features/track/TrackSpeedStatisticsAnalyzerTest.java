@@ -59,15 +59,15 @@ public class TrackSpeedStatisticsAnalyzerTest
 		model.beginUpdate();
 		try
 		{
-			expectedVmean = new HashMap< >( N_TRACKS );
-			expectedVmax = new HashMap< >( N_TRACKS );
+			expectedVmean = new HashMap<>( N_TRACKS );
+			expectedVmax = new HashMap<>( N_TRACKS );
 
 			// Linear movement
 			for ( int i = 1; i < N_TRACKS + 1; i++ )
 			{
 				Spot previous = null;
 
-				final HashSet< Spot > track = new HashSet< >();
+				final HashSet< Spot > track = new HashSet<>();
 				for ( int j = 0; j <= DEPTH; j++ )
 				{
 					// We use deterministic locations
@@ -123,7 +123,7 @@ public class TrackSpeedStatisticsAnalyzerTest
 
 			// Parabolic movement
 			Spot previous = null;
-			final HashSet< Spot > track = new HashSet< >();
+			final HashSet< Spot > track = new HashSet<>();
 			for ( int j = 0; j <= DEPTH; j++ )
 			{
 				// We use deterministic locations
@@ -172,7 +172,7 @@ public class TrackSpeedStatisticsAnalyzerTest
 	public final void testModelChanged()
 	{
 		// Copy old keys
-		final HashSet< Integer > oldKeys = new HashSet< >( model.getTrackModel().trackIDs( true ) );
+		final HashSet< Integer > oldKeys = new HashSet<>( model.getTrackModel().trackIDs( true ) );
 
 		// First analysis
 		final TestTrackSpeedStatisticsAnalyzer analyzer = new TestTrackSpeedStatisticsAnalyzer();
@@ -227,7 +227,7 @@ public class TrackSpeedStatisticsAnalyzerTest
 	public final void testModelChanged2()
 	{
 		// Copy old keys
-		final HashSet< Integer > oldKeys = new HashSet< >( model.getTrackModel().trackIDs( true ) );
+		final HashSet< Integer > oldKeys = new HashSet<>( model.getTrackModel().trackIDs( true ) );
 
 		// First analysis
 		final TestTrackSpeedStatisticsAnalyzer analyzer = new TestTrackSpeedStatisticsAnalyzer();
@@ -251,7 +251,7 @@ public class TrackSpeedStatisticsAnalyzerTest
 		// New change: remove the first spot on the first track - the new track
 		// emerging should be re-analyzed
 		final Integer firstKey = oldKeys.iterator().next();
-		final TreeSet< Spot > sortedTrack = new TreeSet< >( Spot.frameComparator );
+		final TreeSet< Spot > sortedTrack = new TreeSet<>( Spot.frameComparator );
 		sortedTrack.addAll( model.getTrackModel().trackSpots( firstKey ) );
 		final Iterator< Spot > it = sortedTrack.iterator();
 		final Spot firstSpot = it.next();
@@ -285,7 +285,7 @@ public class TrackSpeedStatisticsAnalyzerTest
 	public final void testModelChanged3()
 	{
 		// Copy old keys
-		final HashSet< Integer > oldKeys = new HashSet< >( model.getTrackModel().trackIDs( true ) );
+		final HashSet< Integer > oldKeys = new HashSet<>( model.getTrackModel().trackIDs( true ) );
 
 		// First analysis
 		final TestTrackSpeedStatisticsAnalyzer analyzer = new TestTrackSpeedStatisticsAnalyzer();
@@ -309,7 +309,7 @@ public class TrackSpeedStatisticsAnalyzerTest
 		// New change: we displace the last spot of first track, making the edge
 		// faster
 		final Integer firstKey = oldKeys.iterator().next();
-		final TreeSet< Spot > sortedTrack = new TreeSet< >( Spot.frameComparator );
+		final TreeSet< Spot > sortedTrack = new TreeSet<>( Spot.frameComparator );
 		sortedTrack.addAll( model.getTrackModel().trackSpots( firstKey ) );
 		final Iterator< Spot > it = sortedTrack.descendingIterator();
 		final Spot lastSpot = it.next();

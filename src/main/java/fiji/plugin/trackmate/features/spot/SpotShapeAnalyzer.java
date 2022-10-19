@@ -70,7 +70,7 @@ public class SpotShapeAnalyzer< T extends RealType< T > > extends AbstractSpotFe
 		final double circularity = 4. * Math.PI * ( area / ( perimeter * perimeter ) );
 		final double solidity = area / convexArea;
 		final double shapeIndex = ( area <= 0. ) ? Double.NaN : perimeter / Math.sqrt( area );
-		
+
 		spot.putFeature( SpotShapeAnalyzerFactory.AREA, area );
 		spot.putFeature( SpotShapeAnalyzerFactory.PERIMETER, perimeter );
 		spot.putFeature( SpotShapeAnalyzerFactory.CIRCULARITY, circularity );
