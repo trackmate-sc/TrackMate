@@ -22,8 +22,8 @@
 package fiji.plugin.trackmate.tracking.kalman;
 
 import static fiji.plugin.trackmate.tracking.LAPUtils.checkFeatureMap;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_INITIAL_SEARCH_RADIUS;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_MAX_FRAME_GAP;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_FRAME_GAP;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_SEARCH_RADIUS;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
@@ -116,8 +116,8 @@ public class AdvancedKalmanTracker implements SpotTracker, Benchmark, Cancelable
 		// Prepare settings object
 		final Map< String, Object > kalSettings = new HashMap<>();
 		kalSettings.put( KEY_KALMAN_SEARCH_RADIUS, settings.get( KEY_KALMAN_SEARCH_RADIUS ) );
-		kalSettings.put( KEY_KALMAN_INITIAL_SEARCH_RADIUS, settings.get( KEY_KALMAN_INITIAL_SEARCH_RADIUS ) );
-		kalSettings.put( KEY_KALMAN_MAX_FRAME_GAP, settings.get( KEY_KALMAN_MAX_FRAME_GAP ) );
+		kalSettings.put( KEY_LINKING_MAX_DISTANCE, settings.get( KEY_LINKING_MAX_DISTANCE ) );
+		kalSettings.put( KEY_GAP_CLOSING_MAX_FRAME_GAP, settings.get( KEY_GAP_CLOSING_MAX_FRAME_GAP ) );
 		kalSettings.put( KEY_LINKING_FEATURE_PENALTIES, settings.get( KEY_LINKING_FEATURE_PENALTIES ) );
 
 		// check parameters
@@ -128,8 +128,8 @@ public class AdvancedKalmanTracker implements SpotTracker, Benchmark, Cancelable
 		}
 
 		final double maxSearchRadius = ( Double ) kalSettings.get( KEY_KALMAN_SEARCH_RADIUS );
-		final double initialSearchRadius = ( Double ) kalSettings.get( KEY_KALMAN_INITIAL_SEARCH_RADIUS );
-		final int maxFrameGap = ( Integer ) kalSettings.get( KEY_KALMAN_MAX_FRAME_GAP );
+		final double initialSearchRadius = ( Double ) kalSettings.get( KEY_LINKING_MAX_DISTANCE );
+		final int maxFrameGap = ( Integer ) kalSettings.get( KEY_GAP_CLOSING_MAX_FRAME_GAP );
 		@SuppressWarnings( "unchecked" )
 		final Map< String, Double > featurePenalties = ( Map< String, Double > ) kalSettings.get( KEY_LINKING_FEATURE_PENALTIES );
 
@@ -204,15 +204,15 @@ public class AdvancedKalmanTracker implements SpotTracker, Benchmark, Cancelable
 		boolean ok = true;
 		final StringBuilder errorHolder = new StringBuilder();
 		// Kalman
-		ok = ok & checkParameter( settings, KEY_KALMAN_INITIAL_SEARCH_RADIUS, Double.class, errorHolder );
+		ok = ok & checkParameter( settings, KEY_LINKING_MAX_DISTANCE, Double.class, errorHolder );
 		ok = ok & checkParameter( settings, KEY_KALMAN_SEARCH_RADIUS, Double.class, errorHolder );
-		ok = ok & checkParameter( settings, KEY_KALMAN_MAX_FRAME_GAP, Integer.class, errorHolder );
+		ok = ok & checkParameter( settings, KEY_GAP_CLOSING_MAX_FRAME_GAP, Integer.class, errorHolder );
 		ok = ok & checkFeatureMap( settings, KEY_LINKING_FEATURE_PENALTIES, errorHolder );
 		// Check keys
 		final List< String > mandatoryKeys = new ArrayList<>();
 		mandatoryKeys.add( KEY_KALMAN_SEARCH_RADIUS );
-		mandatoryKeys.add( KEY_KALMAN_INITIAL_SEARCH_RADIUS );
-		mandatoryKeys.add( KEY_KALMAN_MAX_FRAME_GAP );
+		mandatoryKeys.add( KEY_LINKING_MAX_DISTANCE );
+		mandatoryKeys.add( KEY_GAP_CLOSING_MAX_FRAME_GAP );
 
 		final List< String > optionalKeys = new ArrayList<>();
 		optionalKeys.add( KEY_LINKING_FEATURE_PENALTIES );

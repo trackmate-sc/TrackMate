@@ -110,7 +110,7 @@ public class SparseLAPTrackerFactory extends SegmentTrackerFactory
 	}
         
         @Override
-		public boolean marshall( final Map< String, Object > settings, final Element element )
+	public boolean marshall( final Map< String, Object > settings, final Element element )
 	{
 		boolean ok = true;
 		final StringBuilder str = new StringBuilder();
