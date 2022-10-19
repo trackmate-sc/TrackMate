@@ -1,3 +1,4 @@
+package fiji.plugin.trackmate.tracking.linker;
 /*-
  * #%L
  * TrackMate: your buddy for everyday tracking.
@@ -19,11 +20,12 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.tracking.linker;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+
+import fiji.plugin.trackmate.tracking.linker.SparseCostMatrix;
 
 public class SparseCostMatrixTest
 {
