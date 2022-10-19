@@ -21,11 +21,6 @@
  */
 package fiji.plugin.trackmate.interactivetests;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.graph.GraphUtils;
-import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
-
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
@@ -33,14 +28,20 @@ import java.util.TreeSet;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.traverse.GraphIterator;
 
-public class Graph_Test
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.graph.GraphUtils;
+import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
+
+public class GraphTest
 {
 
 	public static void main( final String[] args )
 	{
 
 		final Model model = getExampleModel();
-		// TrackMateModel model = getComplicatedExample();
+//		final Model model = getComplicatedExample(); // not a tree, will fail.
+
 		countOverallLeaves( model );
 		pickLeavesOfOneTrack( model );
 
@@ -208,5 +209,4 @@ public class Graph_Test
 
 		return model;
 	}
-
 }

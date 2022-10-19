@@ -26,13 +26,13 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
-public class TrackLayout_Test
+public class TrackLayoutTest
 {
 
 	public static void main( final String[] args )
 	{
 
-		final Model model = Graph_Test.getExampleModel();
+		final Model model = GraphTest.getExampleModel();
 
 		final TrackScheme trackScheme = new TrackScheme( model, new SelectionModel( model ), DisplaySettings.defaultStyle().copy() );
 		trackScheme.render();
