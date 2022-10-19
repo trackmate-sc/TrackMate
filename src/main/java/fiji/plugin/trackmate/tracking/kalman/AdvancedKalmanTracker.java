@@ -21,6 +21,14 @@
  */
 package fiji.plugin.trackmate.tracking.kalman;
 
+import static fiji.plugin.trackmate.tracking.LAPUtils.checkFeatureMap;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_INITIAL_SEARCH_RADIUS;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_MAX_FRAME_GAP;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_SEARCH_RADIUS;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
+import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,15 +43,6 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.tracking.linker.SegmentTracker;
-import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
-import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
-import static fiji.plugin.trackmate.tracking.LAPUtils.checkFeatureMap;
-
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_INITIAL_SEARCH_RADIUS;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_SEARCH_RADIUS;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_MAX_FRAME_GAP;
-
 import net.imglib2.algorithm.Benchmark;
 
 /***
@@ -64,8 +63,6 @@ public class AdvancedKalmanTracker implements SpotTracker, Benchmark, Cancelable
 	private final SpotCollection spots;
 
 	protected final Map< String, Object > settings;
-
-	private SpotCollection predictionsCollection;
 
 	private long processingTime;
 
@@ -133,6 +130,7 @@ public class AdvancedKalmanTracker implements SpotTracker, Benchmark, Cancelable
 		final double maxSearchRadius = ( Double ) kalSettings.get( KEY_KALMAN_SEARCH_RADIUS );
 		final double initialSearchRadius = ( Double ) kalSettings.get( KEY_KALMAN_INITIAL_SEARCH_RADIUS );
 		final int maxFrameGap = ( Integer ) kalSettings.get( KEY_KALMAN_MAX_FRAME_GAP );
+		@SuppressWarnings( "unchecked" )
 		final Map< String, Double > featurePenalties = ( Map< String, Double > ) kalSettings.get( KEY_LINKING_FEATURE_PENALTIES );
 
 		/*

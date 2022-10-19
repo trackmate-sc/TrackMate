@@ -21,33 +21,30 @@
  */
 package fiji.plugin.trackmate.tracking.sparselap;
 
-import java.util.Map;
+import static fiji.plugin.trackmate.io.IOUtils.marshallMap;
+import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
+import static fiji.plugin.trackmate.io.IOUtils.unmarshallMap;
+import static fiji.plugin.trackmate.io.IOUtils.writeAttribute;
+import static fiji.plugin.trackmate.tracking.LAPUtils.XML_ELEMENT_NAME_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.LAPUtils.XML_ELEMENT_NAME_LINKING;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
+
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.ImageIcon;
 
-import org.scijava.plugin.Plugin;
 import org.jdom2.Element;
-
-
-import static fiji.plugin.trackmate.io.IOUtils.marshallMap;
-import static fiji.plugin.trackmate.io.IOUtils.readBooleanAttribute;
-import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
-import static fiji.plugin.trackmate.io.IOUtils.readIntegerAttribute;
-import static fiji.plugin.trackmate.io.IOUtils.unmarshallMap;
-import static fiji.plugin.trackmate.io.IOUtils.writeAttribute;
+import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.tracking.LAPUtils;
 import fiji.plugin.trackmate.tracking.SegmentTrackerFactory;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
-import fiji.plugin.trackmate.tracking.LAPUtils;
-import static fiji.plugin.trackmate.tracking.LAPUtils.XML_ELEMENT_NAME_LINKING;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
-import static fiji.plugin.trackmate.tracking.LAPUtils.XML_ELEMENT_NAME_FEATURE_PENALTIES;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_FEATURE_PENALTIES;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_MAX_DISTANCE;
 
 
 @Plugin( type = SpotTrackerFactory.class )
@@ -112,7 +109,8 @@ public class SparseLAPTrackerFactory extends SegmentTrackerFactory
 		return new SparseLAPTrackerFactory();
 	}
         
-        public boolean marshall( final Map< String, Object > settings, final Element element )
+        @Override
+		public boolean marshall( final Map< String, Object > settings, final Element element )
 	{
 		boolean ok = true;
 		final StringBuilder str = new StringBuilder();
@@ -130,7 +128,8 @@ public class SparseLAPTrackerFactory extends SegmentTrackerFactory
                 return (ok & super.marshall(settings, element));
         }
         
-        public boolean unmarshall( final Element element, final Map< String, Object > settings )
+        @Override
+		public boolean unmarshall( final Element element, final Map< String, Object > settings )
 	{
             boolean ok = super.unmarshall(element, settings); // common parameters
             final StringBuilder errorHolder = new StringBuilder();
@@ -174,7 +173,7 @@ public class SparseLAPTrackerFactory extends SegmentTrackerFactory
         @Override
 	public Map< String, Object > getDefaultSettings()
 	{
-            Map<String, Object> settings = LAPUtils.getDefaultSegmentSettingsMap();
+            final Map<String, Object> settings = LAPUtils.getDefaultSegmentSettingsMap();
             // Linking
             settings.put(KEY_LINKING_MAX_DISTANCE, DEFAULT_LINKING_MAX_DISTANCE);
             settings.put(KEY_LINKING_FEATURE_PENALTIES, new HashMap<>(DEFAULT_LINKING_FEATURE_PENALTIES));

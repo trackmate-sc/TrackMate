@@ -25,8 +25,6 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import fiji.plugin.trackmate.tracking.linker.SparseCostMatrix;
-
 public class SparseCostMatrixTest
 {
 
