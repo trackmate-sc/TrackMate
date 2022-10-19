@@ -156,6 +156,8 @@ public class AdvancedKalmanTracker implements SpotTracker, Benchmark, Cancelable
 			return false;
 		}
 
+		this.processingTime = System.currentTimeMillis() - start;
+
 		return true;
 	}
 
