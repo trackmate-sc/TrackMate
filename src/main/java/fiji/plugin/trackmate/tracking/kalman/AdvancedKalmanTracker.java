@@ -47,7 +47,7 @@ import net.imglib2.algorithm.Benchmark;
 
 /***
  * @brief Kalman tracker with features cost and merging/splitting addition
- * @author G. Letort (Pasteur)
+ * @author G. Letort (Institut Pasteur)
  */
 public class AdvancedKalmanTracker implements SpotTracker, Benchmark, Cancelable
 {
@@ -75,8 +75,8 @@ public class AdvancedKalmanTracker implements SpotTracker, Benchmark, Cancelable
 	 */
 
 	/**
-	 * @param spots
-	 *            the spots to track.
+	 * @param spots the spots to track.
+         * @param settings tracker specific settings list
 	 */
 	public AdvancedKalmanTracker( final SpotCollection spots, final Map< String, Object > settings )
 	{
@@ -113,30 +113,29 @@ public class AdvancedKalmanTracker implements SpotTracker, Benchmark, Cancelable
 		 */
 
 		final StringBuilder errorHolder = new StringBuilder();
-		// Prepare settings object
+		// Build settings for Kalman filter part
 		final Map< String, Object > kalSettings = new HashMap<>();
 		kalSettings.put( KEY_KALMAN_SEARCH_RADIUS, settings.get( KEY_KALMAN_SEARCH_RADIUS ) );
 		kalSettings.put( KEY_LINKING_MAX_DISTANCE, settings.get( KEY_LINKING_MAX_DISTANCE ) );
 		kalSettings.put( KEY_GAP_CLOSING_MAX_FRAME_GAP, settings.get( KEY_GAP_CLOSING_MAX_FRAME_GAP ) );
 		kalSettings.put( KEY_LINKING_FEATURE_PENALTIES, settings.get( KEY_LINKING_FEATURE_PENALTIES ) );
 
-		// check parameters
+		// check these parameters
 		if ( !checkSettingsValidity( kalSettings, errorHolder ) )
 		{
 			errorMessage = BASE_ERROR_MSG + errorHolder.toString();
 			return false;
 		}
 
-		final double maxSearchRadius = ( Double ) kalSettings.get( KEY_KALMAN_SEARCH_RADIUS );
+		/*
+		 * 1. Apply Kalman with feature penalties.
+		 */
+                final double maxSearchRadius = ( Double ) kalSettings.get( KEY_KALMAN_SEARCH_RADIUS );
 		final double initialSearchRadius = ( Double ) kalSettings.get( KEY_LINKING_MAX_DISTANCE );
 		final int maxFrameGap = ( Integer ) kalSettings.get( KEY_GAP_CLOSING_MAX_FRAME_GAP );
 		@SuppressWarnings( "unchecked" )
 		final Map< String, Double > featurePenalties = ( Map< String, Double > ) kalSettings.get( KEY_LINKING_FEATURE_PENALTIES );
-
-		/*
-		 * 1. Apply Kalman with feature penalties.
-		 */
-
+                
 		final KalmanTracker kalmanTracker = new KalmanTracker( spots, maxSearchRadius, maxFrameGap, initialSearchRadius, featurePenalties );
 		kalmanTracker.setLogger( logger );
 		if ( !kalmanTracker.checkInput() || !kalmanTracker.process() )
@@ -146,8 +145,9 @@ public class AdvancedKalmanTracker implements SpotTracker, Benchmark, Cancelable
 		}
 
 		graph = kalmanTracker.getResult();
-		/*
-		 * 2. Gap-closing, merging and splitting.
+		
+                /*
+		 * 2. Merging and splitting.
 		 */
 		final SegmentTracker segmentLinker = new SegmentTracker( graph, settings, logger );
 		if ( !segmentLinker.checkInput() || !segmentLinker.process() )

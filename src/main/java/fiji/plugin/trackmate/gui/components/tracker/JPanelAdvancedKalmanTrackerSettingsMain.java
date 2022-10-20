@@ -121,28 +121,29 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 		final GridBagLayout thisLayout = new GridBagLayout();
 		thisLayout.columnWidths = new int[] { 180, 50, 50 };
 		thisLayout.columnWeights = new double[] { 0.1, 0.8, 0.1 };
-		thisLayout.rowHeights = new int[] { 15, 20, 15, 15, 15, 15, 15, 95, 15, 15, 15, 15, 15, 95, 15, 15, 15, 15, 95, 15, 15, 15, 95, 15 };
-		thisLayout.rowWeights = new double[] { 0.0, 0.1, 0.1, 0.1, 0.0, 0.0, 0.25, 0.1, 0.0, 0.0, 0.0, 0.0, 0.25, 0.1, 0.0, 0.0, 0.0, 0.0, 0.25, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0 };
+		thisLayout.rowHeights = new int[] { 10, 10, 10, 15, 15, 15, 15, 15, 95, 10, 15, 15, 15, 15, 95, 10, 15, 15, 15, 15, 95, 15};
+		thisLayout.rowWeights = new double[] { 0.0, 0.15, 0.1, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.1, 0.01, 0.01, 0.01, 0.01, 0.01, 0.1, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.6 };
 		this.setLayout( thisLayout );
 
 		final JLabel jLabel1 = new JLabel();
-		this.add( jLabel1, new GridBagConstraints( 0, 0, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets( 10, 10, 0, 10 ), 0, 0 ) );
+		this.add( jLabel1, new GridBagConstraints( 0, 0, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets( 10, 10, 0, 0 ), 0, 0 ) );
 		jLabel1.setText( "Settings for tracker:" );
 		jLabel1.setFont( FONT );
 
 		final JLabel lblTrackerName = new JLabel();
-		this.add( lblTrackerName, new GridBagConstraints( 0, 1, 3, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, new Insets( 10, 20, 0, 0 ), 0, 0 ) );
+		this.add( lblTrackerName, new GridBagConstraints( 0, 1, 2, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets( 0, 0, 0, 0 ), 0, 0 ) );
 		lblTrackerName.setHorizontalTextPosition( SwingConstants.CENTER );
 		lblTrackerName.setHorizontalAlignment( SwingConstants.CENTER );
 		lblTrackerName.setFont( BIG_FONT );
 		lblTrackerName.setText( trackerName );
 
+                int ycur = 2;
 		final JLabel lbl2 = new JLabel();
-		this.add( lbl2, new GridBagConstraints( 0, 2, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets( 0, 10, 0, 10 ), 0, 0 ) );
+		this.add( lbl2, new GridBagConstraints( 0, ycur, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets( 0, 10, 0, 10 ), 0, 0 ) );
 		lbl2.setText( "Frame to frame linking:" );
 		lbl2.setFont( BIG_FONT.deriveFont( Font.BOLD ) );
 
-		int ycur = 3;
+                ycur++;
 		final JLabel lbl3 = new JLabel();
 		this.add( lbl3, new GridBagConstraints( 0, ycur, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 0, 10, 0, 10 ), 0, 0 ) );
 		lbl3.setText( "Initial search radius:" );
@@ -193,10 +194,10 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 		lblMaxFrameGapUnits.setFont( SMALL_FONT );
 		lblMaxFrameGapUnits.setText( spaceUnits );
 
-		ycur++;
+		ycur+=2;
 		final JLabel lbl4 = new JLabel();
 		this.add( lbl4, new GridBagConstraints( 0, ycur, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 0, 10, 0, 10 ), 0, 0 ) );
-		lbl4.setText( "Feature penalties" );
+		lbl4.setText( "Feature penalties:" );
 		lbl4.setFont( SMALL_FONT );
 
 		ycur++;
@@ -244,7 +245,7 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 		lblSplittingMaxDistanceUnit.setFont( SMALL_FONT );
 		lblSplittingMaxDistanceUnit.setText( spaceUnits );
 
-		ycur++;
+		ycur+=2;
 
 		lbl15 = new JLabel();
 		this.add( lbl15, new GridBagConstraints( 0, ycur, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 0, 10, 0, 10 ), 0, 0 ) );
@@ -300,7 +301,7 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 		lbl16.setText( "Feature penalties:" );
 		lbl16.setFont( SMALL_FONT );
 
-		ycur += 2;
+		ycur ++;
 		scrpneMergingFeatures = new JScrollPane();
 		final MouseWheelListener[] l3 = scrpneMergingFeatures.getMouseWheelListeners();
 		scrpneMergingFeatures.removeMouseWheelListener( l3[ 0 ] );

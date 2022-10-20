@@ -48,7 +48,7 @@ import java.util.Collection;
 
 /***
  * @brief Kalman Factory with features cost addition
- * @author G. Letort (Pasteur)
+ * @author G. Letort (Institut Pasteur)
  */
 @Plugin( type = SpotTrackerFactory.class )
 public class AdvancedKalmanTrackerFactory extends SegmentTrackerFactory
@@ -65,8 +65,9 @@ public class AdvancedKalmanTrackerFactory extends SegmentTrackerFactory
 			+ "Jaqaman <i> et al.</i>, 2008, Nature Methods. <br>"
 			+ "<p>"
 			+ "Tracking happens in 2 steps: First spots are linked from frame to frame to <br>"
-			+ "build track segments. These track segments are investigated in a second step <br>"
-			+ "for gap-closing (missing detection), splitting and merging events.  <br> "
+			+ "build track segments. There is a gap-closing option to bridge spots several frames away to account for missing detections. <br>"
+                        + " These track segments are investigated in a second step <br>"
+			+ "for splitting (division) and merging (fusion) events.  <br> "
 			+ "<p>" + "Linking costs are proportional to the square distance between source and  <br> "
 			+ "target spots, which makes this tracker suitable for Brownian motion.  <br> "
 			+ "Penalties can be set to favor linking between spots that have similar  <br> "
