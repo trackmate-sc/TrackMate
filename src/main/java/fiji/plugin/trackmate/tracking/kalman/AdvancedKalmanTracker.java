@@ -21,11 +21,11 @@
  */
 package fiji.plugin.trackmate.tracking.kalman;
 
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
-import static fiji.plugin.trackmate.tracking.jaqaman.LAPUtils.checkFeatureMap;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_FRAME_GAP;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_SEARCH_RADIUS;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.jaqaman.LAPUtils.checkFeatureMap;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
 
@@ -75,8 +75,10 @@ public class AdvancedKalmanTracker implements SpotTracker, Benchmark, Cancelable
 	 */
 
 	/**
-	 * @param spots the spots to track.
-         * @param settings tracker specific settings list
+	 * @param spots
+	 *            the spots to track.
+	 * @param settings
+	 *            tracker specific settings list
 	 */
 	public AdvancedKalmanTracker( final SpotCollection spots, final Map< String, Object > settings )
 	{
@@ -130,12 +132,12 @@ public class AdvancedKalmanTracker implements SpotTracker, Benchmark, Cancelable
 		/*
 		 * 1. Apply Kalman with feature penalties.
 		 */
-                final double maxSearchRadius = ( Double ) kalSettings.get( KEY_KALMAN_SEARCH_RADIUS );
+		final double maxSearchRadius = ( Double ) kalSettings.get( KEY_KALMAN_SEARCH_RADIUS );
 		final double initialSearchRadius = ( Double ) kalSettings.get( KEY_LINKING_MAX_DISTANCE );
 		final int maxFrameGap = ( Integer ) kalSettings.get( KEY_GAP_CLOSING_MAX_FRAME_GAP );
 		@SuppressWarnings( "unchecked" )
 		final Map< String, Double > featurePenalties = ( Map< String, Double > ) kalSettings.get( KEY_LINKING_FEATURE_PENALTIES );
-                
+
 		final KalmanTracker kalmanTracker = new KalmanTracker( spots, maxSearchRadius, maxFrameGap, initialSearchRadius, featurePenalties );
 		kalmanTracker.setLogger( logger );
 		if ( !kalmanTracker.checkInput() || !kalmanTracker.process() )
@@ -145,8 +147,8 @@ public class AdvancedKalmanTracker implements SpotTracker, Benchmark, Cancelable
 		}
 
 		graph = kalmanTracker.getResult();
-		
-                /*
+
+		/*
 		 * 2. Merging and splitting.
 		 */
 		final SegmentTracker segmentLinker = new SegmentTracker( graph, settings, logger );
