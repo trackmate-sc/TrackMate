@@ -112,6 +112,7 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 	public JPanelAdvancedKalmanTrackerSettingsMain( final String trackerName, final String spaceUnits, final Collection< String > features, final Map< String, String > featureNames )
 	{
 		final DecimalFormat decimalFormat = new DecimalFormat( "0.0" );
+		final DecimalFormat integerFormat = new DecimalFormat( "0" );
 
 		this.setPreferredSize( new Dimension( 280, 1000 ) );
 		final GridBagLayout thisLayout = new GridBagLayout();
@@ -179,16 +180,15 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 		lbl3c.setText( "Max Frame Gap:" );
 		lbl3c.setFont( SMALL_FONT );
 
-		txtfldMaxFrameGap = new JFormattedTextField( decimalFormat );
+		txtfldMaxFrameGap = new JFormattedTextField( integerFormat );
 		this.add( txtfldMaxFrameGap, new GridBagConstraints( 1, ycur, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 0, 0, 0, 0 ), 0, 0 ) );
 		txtfldMaxFrameGap.setFont( SMALL_FONT );
 		txtfldMaxFrameGap.setSize( TEXTFIELD_DIMENSION );
 		txtfldMaxFrameGap.setHorizontalAlignment( JFormattedTextField.CENTER );
 
-		lblMaxFrameGapUnits = new JLabel();
+		lblMaxFrameGapUnits = new JLabel( "frames" );
 		this.add( lblMaxFrameGapUnits, new GridBagConstraints( 2, 5, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets( 0, 5, 0, 0 ), 0, 0 ) );
 		lblMaxFrameGapUnits.setFont( SMALL_FONT );
-		lblMaxFrameGapUnits.setText( spaceUnits );
 
 		ycur += 2;
 		final JLabel lbl4 = new JLabel();
@@ -310,9 +310,12 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 
 		// Select text-fields content on focus.
 		GuiUtils.selectAllOnFocus( txtfldInitialSearchRadius );
+		GuiUtils.selectAllOnFocus( txtfldMaxFrameGap );
+		GuiUtils.selectAllOnFocus( txtfldSearchRadius );
 		GuiUtils.selectAllOnFocus( txtfldMergingMaxDistance );
 		GuiUtils.selectAllOnFocus( txtfldSplittingMaxDistance );
 
+		// Disable feature panels if corresponding event is unselected.
 		chkboxAllowSplitting.addActionListener( e -> setEnabled( new Component[] {
 				lbl10, txtfldSplittingMaxDistance, lblSplittingMaxDistanceUnit,
 				lbl15, scrpneSplittingFeatures, panelSplittingFeatures },
