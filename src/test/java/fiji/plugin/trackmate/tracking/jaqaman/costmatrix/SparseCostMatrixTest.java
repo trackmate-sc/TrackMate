@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.tracking.linker;
+package fiji.plugin.trackmate.tracking.jaqaman.costmatrix;
 /*-
  * #%L
  * TrackMate: your buddy for everyday tracking.
@@ -24,6 +24,8 @@ package fiji.plugin.trackmate.tracking.linker;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+
+import fiji.plugin.trackmate.tracking.jaqaman.costmatrix.SparseCostMatrix;
 
 public class SparseCostMatrixTest
 {

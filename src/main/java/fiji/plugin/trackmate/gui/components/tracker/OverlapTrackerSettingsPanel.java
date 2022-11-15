@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.tracking.overlap;
+package fiji.plugin.trackmate.gui.components.tracker;
 
 import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
 import static fiji.plugin.trackmate.gui.Fonts.FONT;
@@ -47,6 +47,8 @@ import javax.swing.SwingConstants;
 
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
+import fiji.plugin.trackmate.tracking.overlap.OverlapTracker;
+import fiji.plugin.trackmate.tracking.overlap.OverlapTrackerFactory;
 import fiji.plugin.trackmate.tracking.overlap.OverlapTracker.IoUCalculation;
 
 public class OverlapTrackerSettingsPanel extends ConfigurationPanel

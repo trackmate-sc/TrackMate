@@ -21,30 +21,29 @@
  */
 package fiji.plugin.trackmate.tracking.kalman;
 
-import java.util.Map;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_KALMAN_SEARCH_RADIUS;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_SEARCH_RADIUS;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
+
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.ImageIcon;
 
 import org.scijava.plugin.Plugin;
 
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.tracking.SegmentTrackerFactory;
-import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_MAX_DISTANCE;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_KALMAN_SEARCH_RADIUS;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_FEATURE_PENALTIES;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_SEARCH_RADIUS;
-
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.components.tracker.AdvancedKalmanTrackerSettingsPanel;
-
-import fiji.plugin.trackmate.tracking.LAPUtils;
-import java.util.Collection;
+import fiji.plugin.trackmate.tracking.SpotTracker;
+import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
+import fiji.plugin.trackmate.tracking.jaqaman.LAPUtils;
+import fiji.plugin.trackmate.tracking.jaqaman.SegmentTrackerFactory;
 
 /***
  * @brief Kalman Factory with features cost addition
@@ -66,13 +65,13 @@ public class AdvancedKalmanTrackerFactory extends SegmentTrackerFactory
 			+ "<p>"
 			+ "Tracking happens in 2 steps: First spots are linked from frame to frame to <br>"
 			+ "build track segments. There is a gap-closing option to bridge spots several frames away to account for missing detections. <br>"
-                        + " These track segments are investigated in a second step <br>"
+			+ " These track segments are investigated in a second step <br>"
 			+ "for splitting (division) and merging (fusion) events.  <br> "
 			+ "<p>" + "Linking costs are proportional to the square distance between source and  <br> "
 			+ "target spots, which makes this tracker suitable for Brownian motion.  <br> "
 			+ "Penalties can be set to favor linking between spots that have similar  <br> "
 			+ "features. "
-                        + "Then segments can be merged or splitted."
+			+ "Then segments can be merged or split."
 			+ "<p>"
 			+ "Solving the LAP relies on the Jonker-Volgenant solver, and a sparse cost "
 			+ "matrix formulation, allowing it to handle very large problems. "
@@ -113,18 +112,18 @@ public class AdvancedKalmanTrackerFactory extends SegmentTrackerFactory
 	{
 		return new AdvancedKalmanTrackerFactory();
 	}
-        
-        @Override
-         public Map<String, Object> getDefaultSettings() 
-        {
-            Map<String, Object> settings = LAPUtils.getDefaultSegmentSettingsMap();
-            settings.put( KEY_LINKING_MAX_DISTANCE, DEFAULT_LINKING_MAX_DISTANCE ); 
-            settings.put( KEY_KALMAN_SEARCH_RADIUS, DEFAULT_KALMAN_SEARCH_RADIUS ); 
-            settings.put( KEY_LINKING_FEATURE_PENALTIES, new HashMap<>(DEFAULT_LINKING_FEATURE_PENALTIES) );	
-            return settings;
-        }
-         
-        @Override
+
+	@Override
+	public Map< String, Object > getDefaultSettings()
+	{
+		final Map< String, Object > settings = LAPUtils.getDefaultSegmentSettingsMap();
+		settings.put( KEY_LINKING_MAX_DISTANCE, DEFAULT_LINKING_MAX_DISTANCE );
+		settings.put( KEY_KALMAN_SEARCH_RADIUS, DEFAULT_KALMAN_SEARCH_RADIUS );
+		settings.put( KEY_LINKING_FEATURE_PENALTIES, new HashMap<>( DEFAULT_LINKING_FEATURE_PENALTIES ) );
+		return settings;
+	}
+
+	@Override
 	public ConfigurationPanel getTrackerConfigurationPanel( final Model model )
 	{
 		final String spaceUnits = model.getSpaceUnits();

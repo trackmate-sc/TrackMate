@@ -64,7 +64,7 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
 import fiji.plugin.trackmate.gui.GuiUtils;
-import fiji.plugin.trackmate.tracking.LAPUtils;
+import fiji.plugin.trackmate.tracking.jaqaman.LAPUtils;
 
 public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 {

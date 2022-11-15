@@ -19,9 +19,8 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.tracking.linker;
+package fiji.plugin.trackmate.tracking.jaqaman;
 
-import static fiji.plugin.trackmate.tracking.LAPUtils.checkFeatureMap;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_GAP_CLOSING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_MERGING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_SPLITTING;
@@ -35,6 +34,7 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_FEATURE_PEN
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.jaqaman.LAPUtils.checkFeatureMap;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
 
@@ -50,7 +50,7 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Logger.SlaveLogger;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.tracking.costmatrix.JaqamanSegmentCostMatrixCreator;
+import fiji.plugin.trackmate.tracking.jaqaman.costmatrix.JaqamanSegmentCostMatrixCreator;
 import net.imglib2.algorithm.Benchmark;
 
 /**

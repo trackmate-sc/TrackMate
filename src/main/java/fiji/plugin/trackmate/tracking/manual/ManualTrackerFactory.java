@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.tracking;
+package fiji.plugin.trackmate.tracking.manual;
 
 import java.util.Map;
 
@@ -32,6 +32,8 @@ import org.scijava.plugin.Plugin;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
+import fiji.plugin.trackmate.tracking.SpotTracker;
+import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 
 @Plugin( type = SpotTrackerFactory.class, priority = Priority.HIGH )
 public class ManualTrackerFactory implements SpotTrackerFactory

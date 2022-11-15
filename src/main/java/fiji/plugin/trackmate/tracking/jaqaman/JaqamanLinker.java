@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.tracking.linker;
+package fiji.plugin.trackmate.tracking.jaqaman;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,7 +32,9 @@ import net.imglib2.algorithm.BenchmarkAlgorithm;
 import net.imglib2.algorithm.OutputAlgorithm;
 import net.imglib2.util.Util;
 import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.tracking.costmatrix.CostMatrixCreator;
+import fiji.plugin.trackmate.tracking.jaqaman.costmatrix.CostMatrixCreator;
+import fiji.plugin.trackmate.tracking.jaqaman.costmatrix.LAPJV;
+import fiji.plugin.trackmate.tracking.jaqaman.costmatrix.SparseCostMatrix;
 
 /**
  * Links two lists of objects based on the LAP framework described in Jaqaman

@@ -29,7 +29,7 @@ import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
 import fiji.plugin.trackmate.io.SettingsPersistence;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
-import fiji.plugin.trackmate.tracking.sparselap.SimpleSparseLAPTrackerFactory;
+import fiji.plugin.trackmate.tracking.jaqaman.SimpleSparseLAPTrackerFactory;
 
 public class ChooseTrackerDescriptor extends WizardPanelDescriptor
 {

@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.tracking.costfunction;
+package fiji.plugin.trackmate.tracking.jaqaman.costfunction;
 
 import java.util.Map;
 

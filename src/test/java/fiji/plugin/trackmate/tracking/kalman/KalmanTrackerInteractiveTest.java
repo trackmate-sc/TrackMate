@@ -37,7 +37,7 @@ import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.tracking.TrackerKeys;
-import fiji.plugin.trackmate.tracking.sparselap.SparseLAPFrameToFrameTracker;
+import fiji.plugin.trackmate.tracking.jaqaman.SparseLAPFrameToFrameTracker;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 import ij.ImageJ;

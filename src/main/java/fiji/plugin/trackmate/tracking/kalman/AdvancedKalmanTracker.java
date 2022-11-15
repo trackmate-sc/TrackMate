@@ -21,8 +21,8 @@
  */
 package fiji.plugin.trackmate.tracking.kalman;
 
-import static fiji.plugin.trackmate.tracking.LAPUtils.checkFeatureMap;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.jaqaman.LAPUtils.checkFeatureMap;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_FRAME_GAP;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_SEARCH_RADIUS;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
@@ -42,7 +42,7 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.tracking.linker.SegmentTracker;
+import fiji.plugin.trackmate.tracking.jaqaman.SegmentTracker;
 import net.imglib2.algorithm.Benchmark;
 
 /***

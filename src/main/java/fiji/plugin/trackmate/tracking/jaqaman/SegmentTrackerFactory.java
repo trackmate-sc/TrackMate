@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.tracking;
+package fiji.plugin.trackmate.tracking.jaqaman;
 
 import static fiji.plugin.trackmate.io.IOUtils.marshallMap;
 import static fiji.plugin.trackmate.io.IOUtils.readBooleanAttribute;
@@ -27,10 +27,6 @@ import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.readIntegerAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.unmarshallMap;
 import static fiji.plugin.trackmate.io.IOUtils.writeAttribute;
-import static fiji.plugin.trackmate.tracking.LAPUtils.XML_ELEMENT_NAME_FEATURE_PENALTIES;
-import static fiji.plugin.trackmate.tracking.LAPUtils.XML_ELEMENT_NAME_GAP_CLOSING;
-import static fiji.plugin.trackmate.tracking.LAPUtils.XML_ELEMENT_NAME_MERGING;
-import static fiji.plugin.trackmate.tracking.LAPUtils.XML_ELEMENT_NAME_SPLITTING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_GAP_CLOSING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_MERGING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_SPLITTING;
@@ -44,8 +40,11 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_FEATURE_PEN
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.jaqaman.LAPUtils.XML_ELEMENT_NAME_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.jaqaman.LAPUtils.XML_ELEMENT_NAME_GAP_CLOSING;
+import static fiji.plugin.trackmate.tracking.jaqaman.LAPUtils.XML_ELEMENT_NAME_MERGING;
+import static fiji.plugin.trackmate.tracking.jaqaman.LAPUtils.XML_ELEMENT_NAME_SPLITTING;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,9 +52,7 @@ import javax.swing.ImageIcon;
 
 import org.jdom2.Element;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
-import fiji.plugin.trackmate.gui.components.tracker.LAPTrackerSettingsPanel;
+import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 
 /**
  * Base class for trackers with split/merge actions.
@@ -71,15 +68,11 @@ public abstract class SegmentTrackerFactory implements SpotTrackerFactory
 		return null;
 	}
 
-	@Override
-	public ConfigurationPanel getTrackerConfigurationPanel( final Model model )
-	{
-		final String spaceUnits = model.getSpaceUnits();
-		final Collection< String > features = model.getFeatureModel().getSpotFeatures();
-		final Map< String, String > featureNames = model.getFeatureModel().getSpotFeatureNames();
-		return new LAPTrackerSettingsPanel( getName(), spaceUnits, features, featureNames );
-	}
-
+	/**
+	 * Marshall into the {@link Element} the settings in the {@link Map} that
+	 * relate to segment linking: gap-closing, merging segments, splitting
+	 * segments.
+	 */
 	@Override
 	public boolean marshall( final Map< String, Object > settings, final Element element )
 	{

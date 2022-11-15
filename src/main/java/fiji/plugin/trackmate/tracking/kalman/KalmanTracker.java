@@ -38,11 +38,11 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.tracking.costfunction.CostFunction;
-import fiji.plugin.trackmate.tracking.costfunction.FeaturePenaltyCostFunction;
-import fiji.plugin.trackmate.tracking.costfunction.SquareDistCostFunction;
-import fiji.plugin.trackmate.tracking.costmatrix.JaqamanLinkingCostMatrixCreator;
-import fiji.plugin.trackmate.tracking.linker.JaqamanLinker;
+import fiji.plugin.trackmate.tracking.jaqaman.JaqamanLinker;
+import fiji.plugin.trackmate.tracking.jaqaman.costfunction.CostFunction;
+import fiji.plugin.trackmate.tracking.jaqaman.costfunction.FeaturePenaltyCostFunction;
+import fiji.plugin.trackmate.tracking.jaqaman.costfunction.SquareDistCostFunction;
+import fiji.plugin.trackmate.tracking.jaqaman.costmatrix.JaqamanLinkingCostMatrixCreator;
 import net.imglib2.algorithm.Benchmark;
 
 public class KalmanTracker implements SpotTracker, Benchmark, Cancelable

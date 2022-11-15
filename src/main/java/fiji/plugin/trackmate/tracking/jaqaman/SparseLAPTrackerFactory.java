@@ -19,19 +19,20 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.tracking.sparselap;
+package fiji.plugin.trackmate.tracking.jaqaman;
 
 import static fiji.plugin.trackmate.io.IOUtils.marshallMap;
 import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.unmarshallMap;
 import static fiji.plugin.trackmate.io.IOUtils.writeAttribute;
-import static fiji.plugin.trackmate.tracking.LAPUtils.XML_ELEMENT_NAME_FEATURE_PENALTIES;
-import static fiji.plugin.trackmate.tracking.LAPUtils.XML_ELEMENT_NAME_LINKING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.jaqaman.LAPUtils.XML_ELEMENT_NAME_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.jaqaman.LAPUtils.XML_ELEMENT_NAME_LINKING;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,12 +41,12 @@ import javax.swing.ImageIcon;
 import org.jdom2.Element;
 import org.scijava.plugin.Plugin;
 
+import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.tracking.LAPUtils;
-import fiji.plugin.trackmate.tracking.SegmentTrackerFactory;
+import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
+import fiji.plugin.trackmate.gui.components.tracker.LAPTrackerSettingsPanel;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
-
 
 @Plugin( type = SpotTrackerFactory.class )
 public class SparseLAPTrackerFactory extends SegmentTrackerFactory
@@ -108,8 +109,8 @@ public class SparseLAPTrackerFactory extends SegmentTrackerFactory
 	{
 		return new SparseLAPTrackerFactory();
 	}
-        
-        @Override
+
+	@Override
 	public boolean marshall( final Map< String, Object > settings, final Element element )
 	{
 		boolean ok = true;
@@ -125,29 +126,29 @@ public class SparseLAPTrackerFactory extends SegmentTrackerFactory
 		marshallMap( lfpm, lfpElement );
 		linkingElement.addContent( lfpElement );
 		element.addContent( linkingElement );
-                return (ok & super.marshall(settings, element));
-        }
-        
-        @Override
-		public boolean unmarshall( final Element element, final Map< String, Object > settings )
+		return ( ok & super.marshall( settings, element ) );
+	}
+
+	@Override
+	public boolean unmarshall( final Element element, final Map< String, Object > settings )
 	{
-            boolean ok = super.unmarshall(element, settings); // common parameters
-            final StringBuilder errorHolder = new StringBuilder();
-	
-	    // Linking
-	   final Element linkingElement = element.getChild( XML_ELEMENT_NAME_LINKING );
-	    if ( null == linkingElement )
-	    {
+		boolean ok = super.unmarshall( element, settings ); // common parameters
+		final StringBuilder errorHolder = new StringBuilder();
+
+		// Linking
+		final Element linkingElement = element.getChild( XML_ELEMENT_NAME_LINKING );
+		if ( null == linkingElement )
+		{
 			errorHolder.append( "Could not found the " + XML_ELEMENT_NAME_LINKING + " element in XML.\n" );
 			ok = false;
 
-	    }
-	    else
-	    {
+		}
+		else
+		{
 
 			ok = ok & readDoubleAttribute( linkingElement, settings, KEY_LINKING_MAX_DISTANCE, errorHolder );
 			// feature penalties
-			final Map< String, Double > lfpMap = new HashMap< >();
+			final Map< String, Double > lfpMap = new HashMap<>();
 			final Element lfpElement = linkingElement.getChild( XML_ELEMENT_NAME_FEATURE_PENALTIES );
 			if ( null != lfpElement )
 			{
@@ -166,25 +167,26 @@ public class SparseLAPTrackerFactory extends SegmentTrackerFactory
 		{
 			errorMessage = errorHolder.toString();
 		}
-		return ok ;
+		return ok;
 
 	}
-        
-        @Override
+
+	@Override
 	public Map< String, Object > getDefaultSettings()
 	{
-            final Map<String, Object> settings = LAPUtils.getDefaultSegmentSettingsMap();
-            // Linking
-            settings.put(KEY_LINKING_MAX_DISTANCE, DEFAULT_LINKING_MAX_DISTANCE);
-            settings.put(KEY_LINKING_FEATURE_PENALTIES, new HashMap<>(DEFAULT_LINKING_FEATURE_PENALTIES));
-            return settings;
+		final Map< String, Object > settings = LAPUtils.getDefaultSegmentSettingsMap();
+		// Linking
+		settings.put( KEY_LINKING_MAX_DISTANCE, DEFAULT_LINKING_MAX_DISTANCE );
+		settings.put( KEY_LINKING_FEATURE_PENALTIES, new HashMap<>( DEFAULT_LINKING_FEATURE_PENALTIES ) );
+		return settings;
 	}
-        
-        @Override
+
+	@Override
 	@SuppressWarnings( "unchecked" )
 	public String toString( final Map< String, Object > sm )
 	{
-		if ( !checkSettingsValidity( sm ) ) { return errorMessage; }
+		if ( !checkSettingsValidity( sm ) )
+		{ return errorMessage; }
 
 		final StringBuilder str = new StringBuilder();
 
@@ -192,8 +194,17 @@ public class SparseLAPTrackerFactory extends SegmentTrackerFactory
 		str.append( String.format( "    - max distance: %.1f\n", ( Double ) sm.get( KEY_LINKING_MAX_DISTANCE ) ) );
 		str.append( LAPUtils.echoFeaturePenalties( ( Map< String, Double > ) sm.get( KEY_LINKING_FEATURE_PENALTIES ) ) );
 
-		str.append( super.toString(sm) );
+		str.append( super.toString( sm ) );
 		return str.toString();
+	}
+
+	@Override
+	public ConfigurationPanel getTrackerConfigurationPanel( final Model model )
+	{
+		final String spaceUnits = model.getSpaceUnits();
+		final Collection< String > features = model.getFeatureModel().getSpotFeatures();
+		final Map< String, String > featureNames = model.getFeatureModel().getSpotFeatureNames();
+		return new LAPTrackerSettingsPanel( getName(), spaceUnits, features, featureNames );
 	}
 
 }

@@ -19,9 +19,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.tracking.costmatrix;
-
-import fiji.plugin.trackmate.tracking.linker.SparseCostMatrix;
+package fiji.plugin.trackmate.tracking.jaqaman.costmatrix;
 
 import java.util.List;
 import net.imglib2.algorithm.Benchmark;

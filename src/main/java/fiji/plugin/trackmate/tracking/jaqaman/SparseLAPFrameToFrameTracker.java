@@ -19,12 +19,12 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.tracking.sparselap;
+package fiji.plugin.trackmate.tracking.jaqaman;
 
-import static fiji.plugin.trackmate.tracking.LAPUtils.checkFeatureMap;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALTERNATIVE_LINKING_COST_FACTOR;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.jaqaman.LAPUtils.checkFeatureMap;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
 
@@ -48,11 +48,10 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.tracking.costfunction.CostFunction;
-import fiji.plugin.trackmate.tracking.costfunction.FeaturePenaltyCostFunction;
-import fiji.plugin.trackmate.tracking.costfunction.SquareDistCostFunction;
-import fiji.plugin.trackmate.tracking.costmatrix.JaqamanLinkingCostMatrixCreator;
-import fiji.plugin.trackmate.tracking.linker.JaqamanLinker;
+import fiji.plugin.trackmate.tracking.jaqaman.costfunction.CostFunction;
+import fiji.plugin.trackmate.tracking.jaqaman.costfunction.FeaturePenaltyCostFunction;
+import fiji.plugin.trackmate.tracking.jaqaman.costfunction.SquareDistCostFunction;
+import fiji.plugin.trackmate.tracking.jaqaman.costmatrix.JaqamanLinkingCostMatrixCreator;
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
 
 public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorithm implements SpotTracker, Cancelable

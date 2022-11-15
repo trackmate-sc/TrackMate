@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.tracking.sparselap;
+package fiji.plugin.trackmate.tracking.jaqaman;
 
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALTERNATIVE_LINKING_COST_FACTOR;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
@@ -37,7 +37,6 @@ import fiji.plugin.trackmate.Logger.SlaveLogger;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.tracking.linker.SegmentTracker;
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
 
 public class SparseLAPTracker extends MultiThreadedBenchmarkAlgorithm implements SpotTracker, Cancelable

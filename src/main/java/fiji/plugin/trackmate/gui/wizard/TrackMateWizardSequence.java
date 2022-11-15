@@ -68,8 +68,8 @@ import fiji.plugin.trackmate.gui.wizard.descriptors.TrackFilterDescriptor;
 import fiji.plugin.trackmate.providers.ActionProvider;
 import fiji.plugin.trackmate.providers.DetectorProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
-import fiji.plugin.trackmate.tracking.ManualTrackerFactory;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
+import fiji.plugin.trackmate.tracking.manual.ManualTrackerFactory;
 import fiji.plugin.trackmate.visualization.trackscheme.SpotImageUpdater;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
