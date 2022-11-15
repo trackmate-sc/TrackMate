@@ -47,9 +47,8 @@ import javax.swing.SwingConstants;
 
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
-import fiji.plugin.trackmate.tracking.overlap.OverlapTracker;
-import fiji.plugin.trackmate.tracking.overlap.OverlapTrackerFactory;
 import fiji.plugin.trackmate.tracking.overlap.OverlapTracker.IoUCalculation;
+import fiji.plugin.trackmate.tracking.overlap.OverlapTrackerFactory;
 
 public class OverlapTrackerSettingsPanel extends ConfigurationPanel
 {

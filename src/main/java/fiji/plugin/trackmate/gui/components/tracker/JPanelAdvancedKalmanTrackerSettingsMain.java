@@ -25,20 +25,16 @@ import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
 import static fiji.plugin.trackmate.gui.Fonts.FONT;
 import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
 import static fiji.plugin.trackmate.gui.Fonts.TEXTFIELD_DIMENSION;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_MAX_DISTANCE;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_GAP_CLOSING_MAX_FRAME_GAP;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_KALMAN_SEARCH_RADIUS;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_GAP_CLOSING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_MERGING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_SPLITTING;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_FEATURE_PENALTIES;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_DISTANCE;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_FRAME_GAP;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_FRAME_GAP;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_SEARCH_RADIUS;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_FEATURE_PENALTIES;
@@ -121,7 +117,7 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 		final GridBagLayout thisLayout = new GridBagLayout();
 		thisLayout.columnWidths = new int[] { 180, 50, 50 };
 		thisLayout.columnWeights = new double[] { 0.1, 0.8, 0.1 };
-		thisLayout.rowHeights = new int[] { 10, 10, 10, 15, 15, 15, 15, 15, 95, 10, 15, 15, 15, 15, 95, 10, 15, 15, 15, 15, 95, 15};
+		thisLayout.rowHeights = new int[] { 10, 10, 10, 15, 15, 15, 15, 15, 95, 10, 15, 15, 15, 15, 95, 10, 15, 15, 15, 15, 95, 15 };
 		thisLayout.rowWeights = new double[] { 0.0, 0.15, 0.1, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.1, 0.01, 0.01, 0.01, 0.01, 0.01, 0.1, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.6 };
 		this.setLayout( thisLayout );
 
@@ -137,13 +133,13 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 		lblTrackerName.setFont( BIG_FONT );
 		lblTrackerName.setText( trackerName );
 
-                int ycur = 2;
+		int ycur = 2;
 		final JLabel lbl2 = new JLabel();
 		this.add( lbl2, new GridBagConstraints( 0, ycur, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets( 0, 10, 0, 10 ), 0, 0 ) );
 		lbl2.setText( "Frame to frame linking:" );
 		lbl2.setFont( BIG_FONT.deriveFont( Font.BOLD ) );
 
-                ycur++;
+		ycur++;
 		final JLabel lbl3 = new JLabel();
 		this.add( lbl3, new GridBagConstraints( 0, ycur, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 0, 10, 0, 10 ), 0, 0 ) );
 		lbl3.setText( "Initial search radius:" );
@@ -194,7 +190,7 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 		lblMaxFrameGapUnits.setFont( SMALL_FONT );
 		lblMaxFrameGapUnits.setText( spaceUnits );
 
-		ycur+=2;
+		ycur += 2;
 		final JLabel lbl4 = new JLabel();
 		this.add( lbl4, new GridBagConstraints( 0, ycur, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 0, 10, 0, 10 ), 0, 0 ) );
 		lbl4.setText( "Feature penalties:" );
@@ -245,7 +241,7 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 		lblSplittingMaxDistanceUnit.setFont( SMALL_FONT );
 		lblSplittingMaxDistanceUnit.setText( spaceUnits );
 
-		ycur+=2;
+		ycur += 2;
 
 		lbl15 = new JLabel();
 		this.add( lbl15, new GridBagConstraints( 0, ycur, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 0, 10, 0, 10 ), 0, 0 ) );
@@ -301,7 +297,7 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 		lbl16.setText( "Feature penalties:" );
 		lbl16.setFont( SMALL_FONT );
 
-		ycur ++;
+		ycur++;
 		scrpneMergingFeatures = new JScrollPane();
 		final MouseWheelListener[] l3 = scrpneMergingFeatures.getMouseWheelListeners();
 		scrpneMergingFeatures.removeMouseWheelListener( l3[ 0 ] );
@@ -336,10 +332,10 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 	void echoSettings( final Map< String, Object > settings )
 	{
 		txtfldInitialSearchRadius.setValue( settings.get( KEY_LINKING_MAX_DISTANCE ) );
-                if ( settings.get(KEY_KALMAN_SEARCH_RADIUS) == null )
-                    txtfldSearchRadius.setValue( DEFAULT_KALMAN_SEARCH_RADIUS );
-		else    
-                    txtfldSearchRadius.setValue( settings.get( KEY_KALMAN_SEARCH_RADIUS ) );
+		if ( settings.get( KEY_KALMAN_SEARCH_RADIUS ) == null )
+			txtfldSearchRadius.setValue( DEFAULT_KALMAN_SEARCH_RADIUS );
+		else
+			txtfldSearchRadius.setValue( settings.get( KEY_KALMAN_SEARCH_RADIUS ) );
 		txtfldMaxFrameGap.setValue( settings.get( KEY_GAP_CLOSING_MAX_FRAME_GAP ) );
 		panelKalmanFeatures.setSelectedFeaturePenalties( ( Map< String, Double > ) settings.get( KEY_LINKING_FEATURE_PENALTIES ) );
 
@@ -375,7 +371,7 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 		settings.put( KEY_LINKING_FEATURE_PENALTIES, panelKalmanFeatures.getFeaturePenalties() );
 
 		settings.put( KEY_ALLOW_GAP_CLOSING, false );
-		
+
 		settings.put( KEY_ALLOW_TRACK_SPLITTING, chkboxAllowSplitting.isSelected() );
 		settings.put( KEY_SPLITTING_MAX_DISTANCE, ( ( Number ) txtfldSplittingMaxDistance.getValue() ).doubleValue() );
 		settings.put( KEY_SPLITTING_FEATURE_PENALTIES, panelSplittingFeatures.getFeaturePenalties() );

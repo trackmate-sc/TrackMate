@@ -25,8 +25,6 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import fiji.plugin.trackmate.tracking.jaqaman.costmatrix.SparseCostMatrix;
-
 public class SparseCostMatrixTest
 {
 
