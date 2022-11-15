@@ -98,7 +98,7 @@ public class TrackerKeys
 	/** Search radius for the Kalman tracker. */
 	public static final String KEY_KALMAN_SEARCH_RADIUS = "KALMAN_SEARCH_RADIUS";
 
-	/** A default value for the {@value #KEY_SEARCH_RADIUS} parameter. */
+	/** A default value for the {@value #KEY_KALMAN_SEARCH_RADIUS} parameter. */
 	public static final double DEFAULT_KALMAN_SEARCH_RADIUS = 20.0;
 
 	/**

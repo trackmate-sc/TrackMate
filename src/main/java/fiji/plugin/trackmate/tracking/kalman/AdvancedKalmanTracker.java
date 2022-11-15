@@ -46,7 +46,9 @@ import fiji.plugin.trackmate.tracking.jaqaman.SegmentTracker;
 import net.imglib2.algorithm.Benchmark;
 
 /***
- * @brief Kalman tracker with features cost and merging/splitting addition
+ * Kalman tracker factory with features cost addition and segment splitting /
+ * merging.
+ * 
  * @author G. Letort (Institut Pasteur)
  */
 public class AdvancedKalmanTracker implements SpotTracker, Benchmark, Cancelable

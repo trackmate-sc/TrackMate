@@ -46,7 +46,9 @@ import fiji.plugin.trackmate.tracking.jaqaman.LAPUtils;
 import fiji.plugin.trackmate.tracking.jaqaman.SegmentTrackerFactory;
 
 /***
- * @brief Kalman Factory with features cost addition
+ * Kalman tracker factory with features cost addition and segment splitting /
+ * merging.
+ * 
  * @author G. Letort (Institut Pasteur)
  */
 @Plugin( type = SpotTrackerFactory.class )
