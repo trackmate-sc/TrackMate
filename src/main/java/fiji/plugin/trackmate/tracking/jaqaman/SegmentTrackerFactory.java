@@ -53,6 +53,18 @@ import javax.swing.ImageIcon;
 import org.jdom2.Element;
 
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_GAP_CLOSING;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_MERGING;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_SPLITTING;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALTERNATIVE_LINKING_COST_FACTOR;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_BLOCKING_VALUE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_CUTOFF_PERCENTILE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_FRAME_GAP;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_MAX_DISTANCE;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Base class for trackers with split/merge actions.
@@ -124,11 +136,9 @@ public abstract class SegmentTrackerFactory implements SpotTrackerFactory
 		return ok;
 	}
 
-	@Override
-	public boolean unmarshall( final Element element, final Map< String, Object > settings )
-	{
-		settings.clear();
-		final StringBuilder errorHolder = new StringBuilder();
+        public boolean unmarshallSegment( final Element element, final Map< String, Object > settings, final StringBuilder errorHolder )
+        {
+                settings.clear();
 		boolean ok = true;
 
 		// Gap closing
@@ -188,7 +198,6 @@ public abstract class SegmentTrackerFactory implements SpotTrackerFactory
 		}
 		else
 		{
-
 			ok = ok & readBooleanAttribute( trackMergingElement, settings, KEY_ALLOW_TRACK_MERGING, errorHolder );
 			ok = ok & readDoubleAttribute( trackMergingElement, settings, KEY_MERGING_MAX_DISTANCE, errorHolder );
 			// feature penalties
@@ -206,6 +215,14 @@ public abstract class SegmentTrackerFactory implements SpotTrackerFactory
 		ok = ok & readDoubleAttribute( element, settings, KEY_ALTERNATIVE_LINKING_COST_FACTOR, errorHolder );
 		ok = ok & readDoubleAttribute( element, settings, KEY_BLOCKING_VALUE, errorHolder );
 
+		return ok;
+        }
+        
+	@Override
+	public boolean unmarshall( final Element element, final Map< String, Object > settings )
+	{
+                StringBuilder errorHolder = new StringBuilder();
+                boolean ok = unmarshallSegment( element, settings, errorHolder );
 		if ( !checkSettingsValidity( settings ) )
 		{
 			ok = false;
@@ -282,7 +299,7 @@ public abstract class SegmentTrackerFactory implements SpotTrackerFactory
 		}
 
 		final StringBuilder str = new StringBuilder();
-		final boolean ok = LAPUtils.checkSettingsValidity( settings, str );
+		final boolean ok = LAPUtils.checkSettingsValidity( settings, str, false );
 		if ( !ok )
 		{
 			errorMessage = str.toString();

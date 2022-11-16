@@ -132,9 +132,9 @@ public class SparseLAPTrackerFactory extends SegmentTrackerFactory
 	@Override
 	public boolean unmarshall( final Element element, final Map< String, Object > settings )
 	{
-		boolean ok = super.unmarshall( element, settings ); // common parameters
-		final StringBuilder errorHolder = new StringBuilder();
-
+                final StringBuilder errorHolder = new StringBuilder();
+		boolean ok = unmarshallSegment( element, settings, errorHolder ); // common parameters
+		
 		// Linking
 		final Element linkingElement = element.getChild( XML_ELEMENT_NAME_LINKING );
 		if ( null == linkingElement )
@@ -179,6 +179,24 @@ public class SparseLAPTrackerFactory extends SegmentTrackerFactory
 		settings.put( KEY_LINKING_MAX_DISTANCE, DEFAULT_LINKING_MAX_DISTANCE );
 		settings.put( KEY_LINKING_FEATURE_PENALTIES, new HashMap<>( DEFAULT_LINKING_FEATURE_PENALTIES ) );
 		return settings;
+	}
+        
+        @Override
+	public boolean checkSettingsValidity( final Map< String, Object > settings )
+	{
+		if ( null == settings )
+		{
+			errorMessage = "Settings map is null.\n";
+			return false;
+		}
+
+		final StringBuilder str = new StringBuilder();
+		final boolean ok = LAPUtils.checkSettingsValidity( settings, str, true );
+		if ( !ok )
+		{
+			errorMessage = str.toString();
+		}
+		return ok;
 	}
 
 	@Override

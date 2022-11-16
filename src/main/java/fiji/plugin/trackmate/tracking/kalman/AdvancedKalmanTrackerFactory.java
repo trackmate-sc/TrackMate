@@ -40,10 +40,33 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.components.tracker.AdvancedKalmanTrackerSettingsPanel;
+import static fiji.plugin.trackmate.io.IOUtils.marshallMap;
+import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
+import static fiji.plugin.trackmate.io.IOUtils.readIntegerAttribute;
+import static fiji.plugin.trackmate.io.IOUtils.unmarshallMap;
+import static fiji.plugin.trackmate.io.IOUtils.writeAttribute;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_GAP_CLOSING;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_MERGING;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_SPLITTING;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALTERNATIVE_LINKING_COST_FACTOR;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_BLOCKING_VALUE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_CUTOFF_PERCENTILE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_FRAME_GAP;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_SEARCH_RADIUS;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_MAX_DISTANCE;
 import fiji.plugin.trackmate.tracking.jaqaman.LAPUtils;
+import static fiji.plugin.trackmate.tracking.jaqaman.LAPUtils.XML_ELEMENT_NAME_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.jaqaman.LAPUtils.XML_ELEMENT_NAME_LINKING;
 import fiji.plugin.trackmate.tracking.jaqaman.SegmentTrackerFactory;
+import java.util.ArrayList;
+import java.util.List;
+import org.jdom2.Element;
 
 /***
  * Kalman tracker factory with features cost addition and segment splitting /
@@ -126,6 +149,113 @@ public class AdvancedKalmanTrackerFactory extends SegmentTrackerFactory
 		settings.put( KEY_LINKING_FEATURE_PENALTIES, new HashMap<>( DEFAULT_LINKING_FEATURE_PENALTIES ) );
 		return settings;
 	}
+        
+        /**
+	 * Marshall into the {@link Element} the settings in the {@link Map} that
+	 * relate to segment linking: gap-closing, merging segments, splitting
+	 * segments.
+	 */
+	@Override
+	public boolean marshall( final Map< String, Object > settings, final Element element )
+	{
+		boolean ok = true;
+		final StringBuilder str = new StringBuilder();
+
+                ok = ok & writeAttribute( settings, element, KEY_KALMAN_SEARCH_RADIUS, Double.class, str );
+		// Linking
+		final Element linkingElement = new Element( XML_ELEMENT_NAME_LINKING );
+		ok = ok & writeAttribute( settings, linkingElement, KEY_LINKING_MAX_DISTANCE, Double.class, str );
+		// feature penalties
+		@SuppressWarnings( "unchecked" )
+		final Map< String, Double > lfpm = ( Map< String, Double > ) settings.get( KEY_LINKING_FEATURE_PENALTIES );
+		final Element lfpElement = new Element( XML_ELEMENT_NAME_FEATURE_PENALTIES );
+		marshallMap( lfpm, lfpElement );
+		linkingElement.addContent( lfpElement );
+		element.addContent( linkingElement );
+		return ( ok & super.marshall( settings, element ) );
+	}
+        
+        @Override
+	public boolean unmarshall( final Element element, final Map< String, Object > settings )
+	{
+                final StringBuilder errorHolder = new StringBuilder();
+		boolean ok = unmarshallSegment( element, settings, errorHolder ); // common parameters
+		
+                ok = ok & readDoubleAttribute( element, settings, KEY_KALMAN_SEARCH_RADIUS, errorHolder );
+                
+              // Linking
+		final Element linkingElement = element.getChild( XML_ELEMENT_NAME_LINKING );
+		if ( null == linkingElement )
+		{
+			errorHolder.append( "Could not found the " + XML_ELEMENT_NAME_LINKING + " element in XML.\n" );
+			ok = false;
+
+		}
+		else
+		{
+			ok = ok & readDoubleAttribute( linkingElement, settings, KEY_LINKING_MAX_DISTANCE, errorHolder );
+			// feature penalties
+			final Map< String, Double > lfpMap = new HashMap<>();
+			final Element lfpElement = linkingElement.getChild( XML_ELEMENT_NAME_FEATURE_PENALTIES );
+			if ( null != lfpElement )
+			{
+				ok = ok & unmarshallMap( lfpElement, lfpMap, errorHolder );
+			}
+			settings.put( KEY_LINKING_FEATURE_PENALTIES, lfpMap );
+		}
+                if ( !checkSettingsValidity( settings ) )
+		{
+			ok = false;
+			errorHolder.append( errorMessage ); // append validity check message
+                        
+               }
+
+		if ( !ok )
+		{
+			errorMessage = errorHolder.toString();
+		}
+		return ok;
+
+	}
+        
+        @Override
+	public boolean checkSettingsValidity( final Map< String, Object > settings )
+	{
+		if ( null == settings )
+		{
+			errorMessage = "Settings map is null.\n";
+			return false;
+		}
+
+		final StringBuilder str = new StringBuilder();
+		final boolean ok = LAPUtils.checkSettingsValidity( settings, str, true );
+		if ( !ok )
+		{
+			errorMessage = str.toString();
+		}
+		return ok;
+	}
+        
+        @Override
+	@SuppressWarnings( "unchecked" )
+	public String toString( final Map< String, Object > sm )
+	{
+		if ( !checkSettingsValidity( sm ) )
+		{ return errorMessage; }
+
+		final StringBuilder str = new StringBuilder();
+                final double maxSearchRadius = ( Double ) sm.get( KEY_KALMAN_SEARCH_RADIUS );
+		final double initialSearchRadius = ( Double ) sm.get( KEY_LINKING_MAX_DISTANCE );
+                
+                str.append( String.format( "  - initial search radius: %.1f\n", initialSearchRadius));
+		str.append( String.format( "  - search radius: %.1f\n", maxSearchRadius ) );
+		str.append( "  Linking conditions:\n" );
+               str.append( LAPUtils.echoFeaturePenalties( ( Map< String, Double > ) sm.get( KEY_LINKING_FEATURE_PENALTIES ) ) );
+
+		str.append( super.toString( sm ) );
+		return str.toString();
+	}
+
 
 	@Override
 	public ConfigurationPanel getTrackerConfigurationPanel( final Model model )
