@@ -347,7 +347,7 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 		panelSplittingFeatures.setSelectedFeaturePenalties( ( Map< String, Double > ) settings.get( KEY_SPLITTING_FEATURE_PENALTIES ) );
 
 		chkboxAllowMerging.setSelected( ( Boolean ) settings.get( KEY_ALLOW_TRACK_MERGING ) );
-		txtfldMergingMaxDistance.setValue( settings.get( KEY_SPLITTING_MAX_DISTANCE ) );
+		txtfldMergingMaxDistance.setValue( settings.get( KEY_MERGING_MAX_DISTANCE ) );
 		panelMergingFeatures.setSelectedFeaturePenalties( ( Map< String, Double > ) settings.get( KEY_MERGING_FEATURE_PENALTIES ) );
 
 		setEnabled( new Component[] {
