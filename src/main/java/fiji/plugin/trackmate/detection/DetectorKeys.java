@@ -58,9 +58,9 @@ public class DetectorKeys
 	 * <p>
 	 * Currently used by:
 	 * <ul>
-	 * <li> {@link LogDetector}
-	 * <li> {@link DogDetector}
-	 * <li> {@link ManualDetectorFactory}
+	 * <li>{@link LogDetector}
+	 * <li>{@link DogDetector}
+	 * <li>{@link ManualDetectorFactory}
 	 * </ul>
 	 */
 	public static final String KEY_RADIUS = "RADIUS";
@@ -84,8 +84,8 @@ public class DetectorKeys
 	 * <p>
 	 * Currently used by:
 	 * <ul>
-	 * <li> {@link LogDetector}
-	 * <li> {@link DogDetector}
+	 * <li>{@link LogDetector}
+	 * <li>{@link DogDetector}
 	 * </ul>
 	 */
 	public static final String KEY_THRESHOLD = "THRESHOLD";
@@ -112,8 +112,8 @@ public class DetectorKeys
 	 * <p>
 	 * Currently used by:
 	 * <ul>
-	 * <li> {@link LogDetector}
-	 * <li> {@link DogDetector}
+	 * <li>{@link LogDetector}
+	 * <li>{@link DogDetector}
 	 * </ul>
 	 */
 	public static final String KEY_DO_MEDIAN_FILTERING = "DO_MEDIAN_FILTERING";
@@ -136,13 +136,15 @@ public class DetectorKeys
 	 * <p>
 	 * Currently used by:
 	 * <ul>
-	 * <li> {@link LogDetector}
-	 * <li> {@link DogDetector}
+	 * <li>{@link LogDetector}
+	 * <li>{@link DogDetector}
 	 * </ul>
 	 */
 	public static final String KEY_DO_SUBPIXEL_LOCALIZATION = "DO_SUBPIXEL_LOCALIZATION";
 
-	/** A default value for the {@link #KEY_DO_SUBPIXEL_LOCALIZATION} parameter. */
+	/**
+	 * A default value for the {@link #KEY_DO_SUBPIXEL_LOCALIZATION} parameter.
+	 */
 	public static final boolean DEFAULT_DO_SUBPIXEL_LOCALIZATION = true;
 
 }

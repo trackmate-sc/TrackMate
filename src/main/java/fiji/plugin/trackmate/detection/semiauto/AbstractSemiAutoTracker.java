@@ -146,7 +146,7 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 	@Override
 	public boolean process()
 	{
-		final Set< Spot > spots = new HashSet< >( selectionModel.getSpotSelection() );
+		final Set< Spot > spots = new HashSet<>( selectionModel.getSpotSelection() );
 		if ( spots.isEmpty() )
 		{
 			errorMessage = BASE_ERROR_MESSAGE + "No spots in selection.\n";
@@ -391,7 +391,7 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 	 */
 	protected SpotDetector< T > createDetector( final RandomAccessible< T > img, final Interval interval, final double[] calibration, final double radius, final double quality )
 	{
-		final LogDetector< T > detector = new LogDetector< >( img, interval, calibration, radius, quality, true, false );
+		final LogDetector< T > detector = new LogDetector<>( img, interval, calibration, radius, quality, true, false );
 		detector.setNumThreads( 1 );
 		return detector;
 	}

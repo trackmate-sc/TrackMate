@@ -40,8 +40,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.scijava.util.IntArray;
 
 /**
- * Loat LUTS for {@link Colormap}. Code adapted from what we did in
- * Mastodon.
+ * Loat LUTS for {@link Colormap}. Code adapted from what we did in Mastodon.
  *
  * @author Jean-Yves Tinevez 2019
  */

@@ -21,7 +21,6 @@
  */
 package fiji.plugin.trackmate.gui.wizard;
 
-
 /**
  * Mother abstract class for animators that can animatethings. The time unit for
  * animation duration, start time and current time is not specified, for example
@@ -44,7 +43,9 @@ public class AbstractAnimator
 	/** Boolean flag stating whether the animation started. */
 	private boolean started;
 
-	/** Completion factor, ranging from 0 to 1. If >= 1, the animation is done. */
+	/**
+	 * Completion factor, ranging from 0 to 1. If >= 1, the animation is done.
+	 */
 	private double complete;
 
 	/**
@@ -62,7 +63,7 @@ public class AbstractAnimator
 	}
 
 	/**
-	 * Cosine shape acceleration/ deceleration curve  of linear [0,1]
+	 * Cosine shape acceleration/ deceleration curve of linear [0,1]
 	 */
 	private double cos( final double t )
 	{
@@ -70,15 +71,15 @@ public class AbstractAnimator
 	}
 
 	/**
-	 * Sets the current time for the animation.
-	 * The first call starts the animation.
+	 * Sets the current time for the animation. The first call starts the
+	 * animation.
 	 *
 	 * @param time
 	 *            current time (in time units)
 	 */
 	public void setTime( final long time )
 	{
-		if ( ! started )
+		if ( !started )
 		{
 			started = true;
 			startTime = time;

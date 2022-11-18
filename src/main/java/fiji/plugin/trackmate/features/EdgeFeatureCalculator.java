@@ -145,7 +145,7 @@ public class EdgeFeatureCalculator extends MultiThreadedBenchmarkAlgorithm imple
 		{
 			if ( isCanceled() )
 				return;
-			
+
 			if ( analyzer.isManualFeature() )
 			{
 				// Skip manual features.

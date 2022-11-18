@@ -21,9 +21,9 @@
  */
 package fiji.plugin.trackmate.tracking.sparselap;
 
-import fiji.plugin.trackmate.tracking.sparselap.costmatrix.DefaultCostMatrixCreator;
-import fiji.plugin.trackmate.tracking.sparselap.costmatrix.DefaultCostMatrixCreator.Assignment;
-import fiji.plugin.trackmate.tracking.sparselap.linker.JaqamanLinker;
+import fiji.plugin.trackmate.tracking.jaqaman.JaqamanLinker;
+import fiji.plugin.trackmate.tracking.jaqaman.costmatrix.DefaultCostMatrixCreator;
+import fiji.plugin.trackmate.tracking.jaqaman.costmatrix.DefaultCostMatrixCreator.Assignment;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,7 +46,7 @@ public class DefaultCostMatrixCreatorExample
 		final Random ran = new Random( seed );
 		System.out.println( "Random seed used: " + seed );
 		// Ensure we do not have duplicate assignments.
-		final HashSet< Assignment > assgns = new HashSet< >();
+		final HashSet< Assignment > assgns = new HashSet<>();
 		for ( int i = 0; i < nAssgn; i++ )
 		{
 			final int row = ran.nextInt( names.size() );
@@ -55,8 +55,8 @@ public class DefaultCostMatrixCreatorExample
 			assgns.add( new Assignment( row, col, cost ) );
 		}
 
-		final List< String > rows = new ArrayList< >( assgns.size() );
-		final List< String > cols = new ArrayList< >( assgns.size() );
+		final List< String > rows = new ArrayList<>( assgns.size() );
+		final List< String > cols = new ArrayList<>( assgns.size() );
 		final double[] costs = new double[ assgns.size() ];
 		final Iterator< Assignment > it = assgns.iterator();
 		for ( int i = 0; i < assgns.size(); i++ )
@@ -67,9 +67,9 @@ public class DefaultCostMatrixCreatorExample
 			costs[ i ] = next.getCost();
 		}
 
-		final DefaultCostMatrixCreator< String, String > creator = new DefaultCostMatrixCreator< >( rows, cols, costs, 1.09, 0.5 );
+		final DefaultCostMatrixCreator< String, String > creator = new DefaultCostMatrixCreator<>( rows, cols, costs, 1.09, 0.5 );
 
-		final JaqamanLinker< String, String > solver = new JaqamanLinker< >( creator );
+		final JaqamanLinker< String, String > solver = new JaqamanLinker<>( creator );
 		if ( !solver.checkInput() || !solver.process() )
 		{
 			System.err.println( solver.getErrorMessage() );

@@ -29,7 +29,7 @@ import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
 import fiji.plugin.trackmate.io.SettingsPersistence;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
-import fiji.plugin.trackmate.tracking.sparselap.SimpleSparseLAPTrackerFactory;
+import fiji.plugin.trackmate.tracking.jaqaman.SimpleSparseLAPTrackerFactory;
 
 public class ChooseTrackerDescriptor extends WizardPanelDescriptor
 {
@@ -60,7 +60,7 @@ public class ChooseTrackerDescriptor extends WizardPanelDescriptor
 			key = trackmate.getSettings().trackerFactory.getKey();
 
 		@SuppressWarnings( "unchecked" )
-		final ModuleChooserPanel< SpotTrackerFactory > component = (fiji.plugin.trackmate.gui.components.ModuleChooserPanel< SpotTrackerFactory > ) targetPanel;
+		final ModuleChooserPanel< SpotTrackerFactory > component = ( fiji.plugin.trackmate.gui.components.ModuleChooserPanel< SpotTrackerFactory > ) targetPanel;
 		component.setSelectedModuleKey( key );
 	}
 
@@ -75,7 +75,7 @@ public class ChooseTrackerDescriptor extends WizardPanelDescriptor
 	{
 		// Configure the detector provider with choice made in panel
 		@SuppressWarnings( "unchecked" )
-		final ModuleChooserPanel< SpotTrackerFactory > component = (fiji.plugin.trackmate.gui.components.ModuleChooserPanel< SpotTrackerFactory > ) targetPanel;
+		final ModuleChooserPanel< SpotTrackerFactory > component = ( fiji.plugin.trackmate.gui.components.ModuleChooserPanel< SpotTrackerFactory > ) targetPanel;
 		final String trackerKey = component.getSelectedModuleKey();
 
 		// Configure trackmate settings with selected detector
@@ -83,9 +83,7 @@ public class ChooseTrackerDescriptor extends WizardPanelDescriptor
 
 		if ( null == factory )
 		{
-			trackmate.getModel().getLogger().error( "[ChooseTrackerDescriptor] Cannot find tracker named "
-					+ trackerKey
-					+ " in current TrackMate modules." );
+			trackmate.getModel().getLogger().error( "[ChooseTrackerDescriptor] Cannot find tracker named " + trackerKey + " in current TrackMate modules." );
 			return;
 		}
 		trackmate.getSettings().trackerFactory = factory;

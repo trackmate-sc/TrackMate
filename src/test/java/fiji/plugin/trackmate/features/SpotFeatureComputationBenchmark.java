@@ -60,8 +60,7 @@ public class SpotFeatureComputationBenchmark
 
 		trackmate.setNumThreads( 1 );
 		model.setLogger( Logger.VOID_LOGGER );
-		
-		
+
 		final List< SpotAnalyzerFactoryBase< ? > > factories = new ArrayList<>();
 
 		final SpotAnalyzerProvider provider1 = new SpotAnalyzerProvider( 1 );
@@ -71,7 +70,6 @@ public class SpotFeatureComputationBenchmark
 		final SpotMorphologyAnalyzerProvider provider2 = new SpotMorphologyAnalyzerProvider( 1 );
 		for ( final String key : provider2.getVisibleKeys() )
 			factories.add( provider2.getFactory( key ) );
-		
 
 		for ( final SpotAnalyzerFactoryBase< ? > factory : factories )
 		{
@@ -82,13 +80,14 @@ public class SpotFeatureComputationBenchmark
 			final double[] durations = new double[ N_TESTS ];
 			for ( int i = 0; i < N_TESTS; i++ )
 			{
-//				System.out.println( "\nTest #" + ( i + 1 ) );
+				// System.out.println( "\nTest #" + ( i + 1 ) );
 				final long start = System.currentTimeMillis();
 				trackmate.computeSpotFeatures( false );
 				final long end = System.currentTimeMillis();
 				final double duration = ( end - start ) / 1000.;
 				durations[ i ] = duration;
-//				System.out.println( String.format( "  completed in %.1f s.", duration ) );
+				// System.out.println( String.format( " completed in %.1f s.",
+				// duration ) );
 			}
 			System.out.println( String.format( "Median over %d tests: %.3f s", N_TESTS, Util.median( durations ) ) );
 		}

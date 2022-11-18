@@ -65,7 +65,7 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 	public static AtomicInteger IDcounter = new AtomicInteger( -1 );
 
 	/** Store the individual features, and their values. */
-	private final ConcurrentHashMap< String, Double > features = new ConcurrentHashMap< >();
+	private final ConcurrentHashMap< String, Double > features = new ConcurrentHashMap<>();
 
 	/** A user-supplied name for this spot. */
 	private String name;
@@ -369,6 +369,19 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 	}
 
 	/**
+	 * Copy the listed features of the spot src to the current spot
+	 * 
+	 */
+	public void copyFeatures( Spot src, final Map< String, Double > features )
+	{
+		if ( null == features || features.isEmpty() )
+			return;
+
+		for ( final String feat : features.keySet() )
+			putFeature( feat, src.getFeature( feat ) );
+	}
+
+	/**
 	 * Returns the difference of the feature value for this spot with the one of
 	 * the specified spot. By construction, this operation is anti-symmetric (
 	 * <code>A.diffTo(B) = - B.diffTo(A)</code>).
@@ -416,7 +429,7 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 		final double b = s.getFeature( feature ).doubleValue();
 		if ( a == -b )
 			return 0d;
-		
+
 		return Math.abs( a - b ) / ( ( a + b ) / 2 );
 	}
 
@@ -476,19 +489,19 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 	 * {@link #POSITION_Z}, {@link #POSITION_Z}, {@link #RADIUS}, {@link #FRAME}
 	 * .
 	 */
-	public final static Collection< String > FEATURES = new ArrayList< >( 7 );
+	public final static Collection< String > FEATURES = new ArrayList<>( 7 );
 
 	/** The 7 privileged spot feature names. */
-	public final static Map< String, String > FEATURE_NAMES = new HashMap< >( 7 );
+	public final static Map< String, String > FEATURE_NAMES = new HashMap<>( 7 );
 
 	/** The 7 privileged spot feature short names. */
-	public final static Map< String, String > FEATURE_SHORT_NAMES = new HashMap< >( 7 );
+	public final static Map< String, String > FEATURE_SHORT_NAMES = new HashMap<>( 7 );
 
 	/** The 7 privileged spot feature dimensions. */
-	public final static Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< >( 7 );
+	public final static Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap<>( 7 );
 
 	/** The 7 privileged spot feature isInt flags. */
-	public final static Map< String, Boolean > IS_INT = new HashMap< >( 7 );
+	public final static Map< String, Boolean > IS_INT = new HashMap<>( 7 );
 
 	static
 	{

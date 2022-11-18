@@ -146,10 +146,10 @@ public class IcyTrackFormatWriter implements Algorithm, Benchmark
 		if ( null != description && !description.isEmpty() )
 			trackGroup.setAttribute( DESCRIPTION_ATTRIBUTE, description );
 
-		final Map< Spot, Integer > beginnings = new HashMap< >();
-		final Map< Spot, Integer > endings = new HashMap< >();
+		final Map< Spot, Integer > beginnings = new HashMap<>();
+		final Map< Spot, Integer > endings = new HashMap<>();
 
-		final Collection< List< Spot >> branches = splitter.getBranches();
+		final Collection< List< Spot > > branches = splitter.getBranches();
 		for ( final List< Spot > branch : branches )
 		{
 			final int branchID = branch.hashCode();
@@ -185,7 +185,7 @@ public class IcyTrackFormatWriter implements Algorithm, Benchmark
 		 */
 
 		final Element linklist = new Element( LINK_LIST );
-		final Collection< List< Spot >> links = splitter.getLinks();
+		final Collection< List< Spot > > links = splitter.getLinks();
 		for ( final List< Spot > link : links )
 		{
 			final Spot spotA = link.get( 0 );

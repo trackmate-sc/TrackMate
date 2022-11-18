@@ -115,7 +115,7 @@ public class AutoNamingPanel extends JPanel
 		/*
 		 * Listeners.
 		 */
-		
+
 		cmbboxRule.addActionListener( e -> lblRuleInfo.setText( ( ( AutoNamingRule ) cmbboxRule.getSelectedItem() ).getInfoText() ) );
 		cmbboxRule.setSelectedIndex( 0 );
 	}

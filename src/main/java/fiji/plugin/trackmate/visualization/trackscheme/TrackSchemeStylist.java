@@ -171,7 +171,7 @@ public class TrackSchemeStylist
 		fullStyle.put( mxConstants.STYLE_FONTFAMILY, font.getFamily() );
 		fullStyle.put( mxConstants.STYLE_FONTSIZE, "" + font.getSize() );
 		fullStyle.put( mxConstants.STYLE_FONTSTYLE, "" + font.getStyle() );
-		
+
 		final FeatureColorGenerator< Spot > spotColorGenerator = FeatureUtils.createSpotColorGenerator( model, displaySettings );
 		final Color missingValueColor = displaySettings.getMissingValueColor();
 

@@ -50,13 +50,12 @@ public class KalmanTrackerInteractiveTest3
 		tester.test( tester.createSingleLine() );
 	}
 
-
 	private Model test( final SpotCollection spots )
 	{
 		final double maxSearchRadius = 2 * WIDTH / NFRAMES; // small
 		final int maxFrameGap = 2;
 		final double initialSearchRadius = 2 * WIDTH / ( NFRAMES );
-		final KalmanTracker tracker = new KalmanTracker( spots, maxSearchRadius, maxFrameGap, initialSearchRadius );
+		final KalmanTracker tracker = new KalmanTracker( spots, maxSearchRadius, maxFrameGap, initialSearchRadius, null );
 		tracker.setLogger( Logger.DEFAULT_LOGGER );
 		if ( !tracker.checkInput() || !tracker.process() )
 			System.err.println( tracker.getErrorMessage() );

@@ -44,6 +44,8 @@ import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.components.tracker.KalmanTrackerConfigPanel;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_KALMAN_SEARCH_RADIUS;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_SEARCH_RADIUS;
 
 @Plugin( type = SpotTrackerFactory.class )
 public class KalmanTrackerFactory implements SpotTrackerFactory
@@ -81,10 +83,6 @@ public class KalmanTrackerFactory implements SpotTrackerFactory
 
 	public static final String NAME = "Kalman tracker";
 
-	public static final String KEY_KALMAN_SEARCH_RADIUS = "KALMAN_SEARCH_RADIUS";
-
-	private static final double DEFAULT_MAX_SEARCH_RADIUS = 10d;
-
 	private String errorMessage;
 
 	@Override
@@ -117,7 +115,7 @@ public class KalmanTrackerFactory implements SpotTrackerFactory
 		final double maxSearchRadius = ( Double ) settings.get( KEY_KALMAN_SEARCH_RADIUS );
 		final int maxFrameGap = ( Integer ) settings.get( KEY_GAP_CLOSING_MAX_FRAME_GAP );
 		final double initialSearchRadius = ( Double ) settings.get( KEY_LINKING_MAX_DISTANCE );
-		return new KalmanTracker( spots, maxSearchRadius, maxFrameGap, initialSearchRadius );
+		return new KalmanTracker( spots, maxSearchRadius, maxFrameGap, initialSearchRadius, null );
 	}
 
 	@Override
@@ -173,7 +171,7 @@ public class KalmanTrackerFactory implements SpotTrackerFactory
 	public Map< String, Object > getDefaultSettings()
 	{
 		final Map< String, Object > sm = new HashMap<>( 3 );
-		sm.put( KEY_KALMAN_SEARCH_RADIUS, DEFAULT_MAX_SEARCH_RADIUS );
+		sm.put( KEY_KALMAN_SEARCH_RADIUS, DEFAULT_KALMAN_SEARCH_RADIUS );
 		sm.put( KEY_LINKING_MAX_DISTANCE, DEFAULT_LINKING_MAX_DISTANCE );
 		sm.put( KEY_GAP_CLOSING_MAX_FRAME_GAP, DEFAULT_GAP_CLOSING_MAX_FRAME_GAP );
 		return sm;

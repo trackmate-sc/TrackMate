@@ -56,7 +56,7 @@ public class SpotIntensityMultiCAnalyzer< T extends RealType< T > > extends Abst
 	{
 		final IterableInterval< T > neighborhood = SpotUtil.iterable( spot, imgCT );
 		final DoubleArray intensities = new DoubleArray();
-			
+
 		for ( final T pixel : neighborhood )
 			intensities.addValue( pixel.getRealDouble() );
 

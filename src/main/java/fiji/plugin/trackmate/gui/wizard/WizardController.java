@@ -143,7 +143,7 @@ public class WizardController
 
 		current.aboutToHidePanel();
 		final WizardPanelDescriptor next = sequence.next();
-		if ( null == next)
+		if ( null == next )
 			return;
 
 		next.targetPanel.setSize( current.targetPanel.getSize() );
@@ -156,7 +156,7 @@ public class WizardController
 	protected void cancel()
 	{
 		final Cancelable cancelable = sequence.current().getCancelable();
-		if (null != cancelable)
+		if ( null != cancelable )
 			cancelable.cancel( "User pressed cancel button." );
 	}
 
@@ -174,8 +174,7 @@ public class WizardController
 		if ( null == runnable )
 			return;
 
-		final EverythingDisablerAndReenabler reenabler = new EverythingDisablerAndReenabler(
-				wizardPanel.panelButtons, new Class[] { JLabel.class } );
+		final EverythingDisablerAndReenabler reenabler = new EverythingDisablerAndReenabler( wizardPanel.panelButtons, new Class[] { JLabel.class } );
 		new Thread( "Wizard exec thread" )
 		{
 			@Override
@@ -197,7 +196,7 @@ public class WizardController
 				}
 				finally
 				{
-					wizardPanel.btnCancel.setVisible( false);
+					wizardPanel.btnCancel.setVisible( false );
 					wizardPanel.btnNext.setVisible( true );
 					wizardPanel.btnNext.requestFocusInWindow();
 					reenabler.reenable();

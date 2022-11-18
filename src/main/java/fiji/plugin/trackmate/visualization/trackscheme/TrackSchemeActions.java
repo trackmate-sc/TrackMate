@@ -324,48 +324,48 @@ public class TrackSchemeActions
 		@Override
 		public void actionPerformed( final ActionEvent e )
 		{
-				mxCell cell = null;
-				final JGraphXAdapter graph = graphComponent.getGraph();
-				final List< mxCell > vertices = getSelectionVertices( graph );
+			mxCell cell = null;
+			final JGraphXAdapter graph = graphComponent.getGraph();
+			final List< mxCell > vertices = getSelectionVertices( graph );
 
-				if ( !vertices.isEmpty() )
+			if ( !vertices.isEmpty() )
+			{
+				int maxFrame = Integer.MIN_VALUE;
+				for ( final mxCell mxCell : vertices )
+				{
+					final int frame = graph.getSpotFor( mxCell ).getFeature( Spot.FRAME ).intValue();
+					if ( frame > maxFrame )
+					{
+						maxFrame = frame;
+						cell = mxCell;
+					}
+				}
+			}
+			else
+			{
+				final List< mxCell > edges = getSelectionEdges( graph );
+				if ( !edges.isEmpty() )
 				{
 					int maxFrame = Integer.MIN_VALUE;
-					for ( final mxCell mxCell : vertices )
+					for ( final mxCell mxCell : edges )
 					{
-						final int frame = graph.getSpotFor( mxCell ).getFeature( Spot.FRAME ).intValue();
+						final mxICell target = mxCell.getTarget();
+						final int frame = graph.getSpotFor( target ).getFeature( Spot.FRAME ).intValue();
 						if ( frame > maxFrame )
 						{
 							maxFrame = frame;
 							cell = mxCell;
 						}
 					}
+					cell = edges.get( edges.size() - 1 );
 				}
 				else
 				{
-					final List< mxCell > edges = getSelectionEdges( graph );
-					if ( !edges.isEmpty() )
-					{
-						int maxFrame = Integer.MIN_VALUE;
-						for ( final mxCell mxCell : edges )
-						{
-							final mxICell target = mxCell.getTarget();
-							final int frame = graph.getSpotFor( target ).getFeature( Spot.FRAME ).intValue();
-							if ( frame > maxFrame )
-							{
-								maxFrame = frame;
-								cell = mxCell;
-							}
-						}
-						cell = edges.get( edges.size() - 1 );
-					}
-					else
-					{
-						return;
-					}
+					return;
 				}
-				graphComponent.scrollCellToVisible( cell, true );
 			}
+			graphComponent.scrollCellToVisible( cell, true );
+		}
 	}
 
 	public static class EditAction extends AbstractAction
@@ -384,7 +384,7 @@ public class TrackSchemeActions
 		@Override
 		public void actionPerformed( final ActionEvent e )
 		{
-				multiEditSpotName( graphComponent, e );
+			multiEditSpotName( graphComponent, e );
 		}
 
 		private void multiEditSpotName( final TrackSchemeGraphComponent lGraphComponent, final ActionEvent triggerEvent )
@@ -399,7 +399,8 @@ public class TrackSchemeActions
 			 */
 			final JGraphXAdapter graph = lGraphComponent.getGraph();
 			final List< mxCell > vertices = getSelectionVertices( graph );
-			if ( vertices.isEmpty() ) { return; }
+			if ( vertices.isEmpty() )
+			{ return; }
 
 			final Point mousePosition = lGraphComponent.getMousePosition();
 			final mxCell tc;
@@ -459,7 +460,7 @@ public class TrackSchemeActions
 	{
 		// Build selection categories
 		final Object[] selection = graph.getSelectionCells();
-		final ArrayList< mxCell > vertices = new ArrayList< >();
+		final ArrayList< mxCell > vertices = new ArrayList<>();
 		for ( final Object obj : selection )
 		{
 			final mxCell cell = ( mxCell ) obj;
@@ -473,7 +474,7 @@ public class TrackSchemeActions
 	{
 		// Build selection categories
 		final Object[] selection = graph.getSelectionCells();
-		final ArrayList< mxCell > edges = new ArrayList< >();
+		final ArrayList< mxCell > edges = new ArrayList<>();
 		for ( final Object obj : selection )
 		{
 			final mxCell cell = ( mxCell ) obj;

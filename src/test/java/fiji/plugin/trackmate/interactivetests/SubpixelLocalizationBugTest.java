@@ -48,7 +48,7 @@ public class SubpixelLocalizationBugTest
 	}
 
 	/**
-	 * @param args  
+	 * @param args
 	 */
 	public static void test2D( final String[] args )
 	{
@@ -57,7 +57,7 @@ public class SubpixelLocalizationBugTest
 		final double A = 128;
 		final double spot_sigma = 1.7;
 
-		final List< Point > peaks = new ArrayList< >( 11 );
+		final List< Point > peaks = new ArrayList<>( 11 );
 
 		for ( int j = 0; j < 1; j++ )
 		{
@@ -74,7 +74,7 @@ public class SubpixelLocalizationBugTest
 			peaks.add( pos );
 
 			final RectangleShape shape = new RectangleShape( ( int ) Math.ceil( 3 * spot_sigma ), false );
-			final RandomAccess< Neighborhood< FloatType >> nra = shape.neighborhoodsRandomAccessible( I ).randomAccess();
+			final RandomAccess< Neighborhood< FloatType > > nra = shape.neighborhoodsRandomAccessible( I ).randomAccess();
 			nra.setPosition( posi );
 			final Cursor< FloatType > cursor = nra.get().localizingCursor();
 			while ( cursor.hasNext() )
@@ -84,16 +84,16 @@ public class SubpixelLocalizationBugTest
 			}
 		}
 
-		final SubpixelLocalization< Point, FloatType > localizer = new SubpixelLocalization< >( I.numDimensions() );
+		final SubpixelLocalization< Point, FloatType > localizer = new SubpixelLocalization<>( I.numDimensions() );
 		localizer.setAllowMaximaTolerance( true );
 		localizer.setCanMoveOutside( true );
 		localizer.setMaxNumMoves( 10 );
 		localizer.setReturnInvalidPeaks( true );
 		localizer.setNumThreads( 1 );
 
-		final ArrayList< RefinedPeak< Point >> refined = localizer.process( peaks, I, I );
+		final ArrayList< RefinedPeak< Point > > refined = localizer.process( peaks, I, I );
 
-		final Comparator< RefinedPeak< Point >> c = new Comparator< RefinedPeak< Point > >()
+		final Comparator< RefinedPeak< Point > > c = new Comparator< RefinedPeak< Point > >()
 		{
 			@Override
 			public int compare( final RefinedPeak< Point > o1, final RefinedPeak< Point > o2 )
@@ -111,7 +111,7 @@ public class SubpixelLocalizationBugTest
 	}
 
 	/**
-	 * @param args  
+	 * @param args
 	 */
 	public static void test3D( final String[] args )
 	{
@@ -120,7 +120,7 @@ public class SubpixelLocalizationBugTest
 		final double A = 128;
 		final double spot_sigma = 1.7;
 
-		final List< Point > peaks = new ArrayList< >( 11 );
+		final List< Point > peaks = new ArrayList<>( 11 );
 
 		for ( int j = 0; j < 11; j++ )
 		{
@@ -139,7 +139,7 @@ public class SubpixelLocalizationBugTest
 			peaks.add( pos );
 
 			final RectangleShape shape = new RectangleShape( ( int ) Math.ceil( 3 * spot_sigma ), false );
-			final RandomAccess< Neighborhood< FloatType >> nra = shape.neighborhoodsRandomAccessible( I ).randomAccess();
+			final RandomAccess< Neighborhood< FloatType > > nra = shape.neighborhoodsRandomAccessible( I ).randomAccess();
 			nra.setPosition( posi );
 			final Cursor< FloatType > cursor = nra.get().localizingCursor();
 			while ( cursor.hasNext() )
@@ -149,16 +149,16 @@ public class SubpixelLocalizationBugTest
 			}
 		}
 
-		final SubpixelLocalization< Point, FloatType > localizer = new SubpixelLocalization< >( I.numDimensions() );
+		final SubpixelLocalization< Point, FloatType > localizer = new SubpixelLocalization<>( I.numDimensions() );
 		localizer.setAllowMaximaTolerance( true );
 		localizer.setCanMoveOutside( true );
 		localizer.setMaxNumMoves( 10 );
 		localizer.setReturnInvalidPeaks( true );
 		localizer.setNumThreads( 1 );
 
-		final ArrayList< RefinedPeak< Point >> refined = localizer.process( peaks, I, I );
+		final ArrayList< RefinedPeak< Point > > refined = localizer.process( peaks, I, I );
 
-		final Comparator< RefinedPeak< Point >> c = new Comparator< RefinedPeak< Point > >()
+		final Comparator< RefinedPeak< Point > > c = new Comparator< RefinedPeak< Point > >()
 		{
 			@Override
 			public int compare( final RefinedPeak< Point > o1, final RefinedPeak< Point > o2 )

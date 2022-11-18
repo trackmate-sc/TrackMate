@@ -152,13 +152,15 @@ public class DefaultFileFilter extends FileFilter
 		@Override
 		public boolean accept( final File file )
 		{
-			if ( file.isDirectory() ) { return true; }
+			if ( file.isDirectory() )
+				return true;
 
 			final String filename = file.toString().toLowerCase();
 
 			for ( int j = 0; j < imageFormats.length; j++ )
 			{
-				if ( filename.endsWith( "." + imageFormats[ j ].toLowerCase() ) ) { return true; }
+				if ( filename.endsWith( "." + imageFormats[ j ].toLowerCase() ) )
+					return true;
 			}
 
 			return false;
@@ -211,7 +213,8 @@ public class DefaultFileFilter extends FileFilter
 		@Override
 		public boolean accept( final File file )
 		{
-			if ( file.isDirectory() ) { return true; }
+			if ( file.isDirectory() )
+				return true;
 
 			final String filename = file.getName().toLowerCase();
 

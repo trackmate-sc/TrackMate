@@ -94,7 +94,6 @@ public class GraphUtils
 		for ( final Integer frame : frames )
 			strings.put( frame, new StringBuilder() );
 
-
 		final HashMap< Integer, StringBuilder > below = new HashMap<>( nframes );
 		for ( final Integer frame : frames )
 			below.put( frame, new StringBuilder() );

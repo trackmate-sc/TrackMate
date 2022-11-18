@@ -21,7 +21,6 @@
  */
 package fiji.plugin.trackmate.visualization;
 
-
 import java.awt.Color;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -42,7 +41,7 @@ public class ManualEdgeColorGenerator implements TrackColorGenerator
 	}
 
 	@Override
-	public Color color( final DefaultWeightedEdge  edge)
+	public Color color( final DefaultWeightedEdge edge )
 	{
 		final Double val = model.getFeatureModel().getEdgeFeature( edge, ManualEdgeColorAnalyzer.FEATURE );
 		if ( null == val )

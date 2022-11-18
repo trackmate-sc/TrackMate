@@ -57,6 +57,7 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.io.TmXmlReader;
+import fiji.plugin.trackmate.tracking.jaqaman.SparseLAPTracker;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
@@ -79,15 +80,15 @@ public class SparseLAPTrackerExample
 		settings.put( KEY_ALLOW_GAP_CLOSING, true );
 		settings.put( KEY_GAP_CLOSING_MAX_FRAME_GAP, DEFAULT_GAP_CLOSING_MAX_FRAME_GAP );
 		settings.put( KEY_GAP_CLOSING_MAX_DISTANCE, DEFAULT_GAP_CLOSING_MAX_DISTANCE );
-		settings.put( KEY_GAP_CLOSING_FEATURE_PENALTIES, new HashMap< >( DEFAULT_GAP_CLOSING_FEATURE_PENALTIES ) );
+		settings.put( KEY_GAP_CLOSING_FEATURE_PENALTIES, new HashMap<>( DEFAULT_GAP_CLOSING_FEATURE_PENALTIES ) );
 		// Track splitting
 		settings.put( KEY_ALLOW_TRACK_SPLITTING, true );
 		settings.put( KEY_SPLITTING_MAX_DISTANCE, DEFAULT_SPLITTING_MAX_DISTANCE );
-		settings.put( KEY_SPLITTING_FEATURE_PENALTIES, new HashMap< >( DEFAULT_SPLITTING_FEATURE_PENALTIES ) );
+		settings.put( KEY_SPLITTING_FEATURE_PENALTIES, new HashMap<>( DEFAULT_SPLITTING_FEATURE_PENALTIES ) );
 		// Track merging
 		settings.put( KEY_ALLOW_TRACK_MERGING, true );
 		settings.put( KEY_MERGING_MAX_DISTANCE, DEFAULT_MERGING_MAX_DISTANCE );
-		settings.put( KEY_MERGING_FEATURE_PENALTIES, new HashMap< >( DEFAULT_MERGING_FEATURE_PENALTIES ) );
+		settings.put( KEY_MERGING_FEATURE_PENALTIES, new HashMap<>( DEFAULT_MERGING_FEATURE_PENALTIES ) );
 		// Others
 		settings.put( KEY_ALTERNATIVE_LINKING_COST_FACTOR, DEFAULT_ALTERNATIVE_LINKING_COST_FACTOR );
 		settings.put( KEY_CUTOFF_PERCENTILE, DEFAULT_CUTOFF_PERCENTILE );

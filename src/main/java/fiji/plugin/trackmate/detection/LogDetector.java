@@ -42,7 +42,7 @@ import net.imglib2.util.Util;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 
-public class LogDetector< T extends RealType< T > & NativeType< T >> implements SpotDetector< T >, MultiThreaded
+public class LogDetector< T extends RealType< T > & NativeType< T > > implements SpotDetector< T >, MultiThreaded
 {
 
 	/*
@@ -141,7 +141,6 @@ public class LogDetector< T extends RealType< T > & NativeType< T >> implements 
 			}
 		}
 
-
 		// Squeeze singleton dimensions
 		int ndims = interval.numDimensions();
 		for ( int d = 0; d < interval.numDimensions(); d++ )
@@ -160,8 +159,8 @@ public class LogDetector< T extends RealType< T > & NativeType< T >> implements 
 		final ImgFactory< ComplexFloatType > imgFactory = Util.getArrayOrCellImgFactory( fftinterval, new ComplexFloatType() );
 		fftconv.setFFTImgFactory( imgFactory );
 
-		final ExecutorService service = Executors.newFixedThreadPool(numThreads);
-		fftconv.setExecutorService(service);
+		final ExecutorService service = Executors.newFixedThreadPool( numThreads );
+		fftconv.setExecutorService( service );
 
 		fftconv.convolve();
 		service.shutdown();

@@ -58,8 +58,8 @@ import net.imglib2.algorithm.Benchmark;
  * depending on the lane they belong to. Each lane's width and color is
  * available to other classes for further exploitation.
  *
- * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; - Mar 2011 - 2012 -
- *         2014
+ * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; - Mar 2011 -
+ *         2012 - 2014
  *
  */
 public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
@@ -111,7 +111,7 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 		 * part of a track), we retrieve the list of all cells.
 		 */
 		final Object[] objs = graphAdapter.getChildVertices( graphAdapter.getDefaultParent() );
-		final ArrayList< mxCell > lonelyCells = new ArrayList< >( objs.length );
+		final ArrayList< mxCell > lonelyCells = new ArrayList<>( objs.length );
 		for ( final Object obj : objs )
 		{
 			lonelyCells.add( ( mxCell ) obj );
@@ -163,7 +163,7 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 				component.columnTrackIDs[ trackIndex ] = trackID;
 
 				// Get first spot
-				final TreeSet< Spot > sortedTrack = new TreeSet< >( Spot.frameComparator );
+				final TreeSet< Spot > sortedTrack = new TreeSet<>( Spot.frameComparator );
 				sortedTrack.addAll( track );
 				final Spot first = sortedTrack.first();
 
@@ -230,7 +230,7 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 
 					final TrackBranchDecomposition branchDecomposition = ConvexBranchesDecomposition.processTrack( trackID, model.getTrackModel(), neighborCache, false, false );
 					final SimpleDirectedGraph< List< Spot >, DefaultEdge > branchGraph = ConvexBranchesDecomposition.buildBranchGraph( branchDecomposition );
-					final DepthFirstIterator< List< Spot >, DefaultEdge > depthFirstIterator = new DepthFirstIterator< >( branchGraph );
+					final DepthFirstIterator< List< Spot >, DefaultEdge > depthFirstIterator = new DepthFirstIterator<>( branchGraph );
 
 					while ( depthFirstIterator.hasNext() )
 					{
@@ -311,7 +311,7 @@ public class TrackSchemeGraphLayout extends mxGraphLayout implements Benchmark
 			}
 
 			// Before we leave, we regenerate the row length, for our brothers
-			rowLengths = new HashMap< >( columns.length );
+			rowLengths = new HashMap<>( columns.length );
 			for ( int i = 0; i < columns.length; i++ )
 			{
 				rowLengths.put( i, columns[ i ] );

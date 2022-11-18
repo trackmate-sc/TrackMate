@@ -60,8 +60,7 @@ public class OverlapTracker extends MultiThreadedBenchmarkAlgorithm implements S
 
 	public static enum IoUCalculation
 	{
-		FAST( "Fast", "IoU is calculated using the bounding box of the spot." ),
-		PRECISE( "Precise", "IoU is calculated over the shape of the spot ROI." );
+		FAST( "Fast", "IoU is calculated using the bounding box of the spot." ), PRECISE( "Precise", "IoU is calculated over the shape of the spot ROI." );
 
 		private final String str;
 
@@ -310,7 +309,7 @@ public class OverlapTracker extends MultiThreadedBenchmarkAlgorithm implements S
 		{
 			final double[] xcoords = roi.toPolygonX( 1., 0., xc, 1. );
 			final double[] ycoords = roi.toPolygonY( 1., 0., yc, 1. );
-			poly =  new SimplePolygon2D( xcoords, ycoords );
+			poly = new SimplePolygon2D( xcoords, ycoords );
 		}
 		return poly.transform( AffineTransform2D.createScaling( new Point2D( xc, yc ), scale, scale ) );
 	}
@@ -345,7 +344,6 @@ public class OverlapTracker extends MultiThreadedBenchmarkAlgorithm implements S
 		private final Map< Spot, Polygon2D > sourceGeometries;
 
 		private final double minIoU;
-
 
 		public FindBestSourceTask( final Spot target, final Polygon2D targetPoly, final Map< Spot, Polygon2D > sourceGeometries, final double minIoU )
 		{

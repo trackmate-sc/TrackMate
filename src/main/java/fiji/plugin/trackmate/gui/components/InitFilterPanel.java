@@ -58,7 +58,6 @@ public class InitFilterPanel extends JPanel
 
 	private double[] values;
 
-
 	/**
 	 * Default constructor, initialize component.
 	 *

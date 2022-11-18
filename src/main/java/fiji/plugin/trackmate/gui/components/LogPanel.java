@@ -156,15 +156,17 @@ public class LogPanel extends JPanel
 					final AbstractDocument doc = ( AbstractDocument ) textPane.getStyledDocument();
 					final int len = doc.getLength();
 					final int l = message.length();
-				
 
 					if ( len + l > MAX_N_CHARS )
 					{
 						final int delta = Math.max( 0, Math.min( l - 1, len + l - MAX_N_CHARS ) );
 						try
 						{
-							doc.remove( 0, delta );
-						}
+                                                        if ( len > 0 )
+                                                        {
+                                                            doc.remove( 0, delta );
+                                                        }
+                                                }
 						catch ( final BadLocationException e )
 						{
 							e.printStackTrace();

@@ -56,7 +56,7 @@ public class SpotCollectionTest
 	{
 
 		// Create a spot collection of 50 odd frame number, ranging from 1 to 99
-		frames = new ArrayList< >( 50 );
+		frames = new ArrayList<>( 50 );
 		sc = new SpotCollection();
 
 		for ( int i = 1; i < N_FRAMES * 2; i = i + 2 )
@@ -67,7 +67,7 @@ public class SpotCollectionTest
 
 			// For each frame, create 100 spots, with X, Y, Z, T and QUALITY
 			// linearly increasing
-			final HashSet< Spot > spots = new HashSet< >( 100 );
+			final HashSet< Spot > spots = new HashSet<>( 100 );
 			for ( int j = 0; j < N_SPOTS; j++ )
 			{
 				final Spot spot = new Spot( j, j, j, 1d, -1d );
@@ -312,7 +312,7 @@ public class SpotCollectionTest
 
 		// Mark 10 spots as visible in eaxh frame
 		final int N_MARKED_PER_FRAME = 10;
-		final List< Spot > markedSpots = new ArrayList< >( N_MARKED_PER_FRAME * N_FRAMES );
+		final List< Spot > markedSpots = new ArrayList<>( N_MARKED_PER_FRAME * N_FRAMES );
 		for ( final Integer frame : frames )
 		{
 			it = sc.iterator( frame, false );
@@ -361,7 +361,7 @@ public class SpotCollectionTest
 		// Mark 10 spots as visible
 		it = sc.iterator( targetFrame, false );
 		final int N_MARKED = 10;
-		final List< Spot > markedSpots = new ArrayList< >( N_MARKED );
+		final List< Spot > markedSpots = new ArrayList<>( N_MARKED );
 		for ( int i = 0; i < N_MARKED; i++ )
 		{
 			final Spot spot = it.next();
@@ -388,7 +388,7 @@ public class SpotCollectionTest
 		sc.filter( filter );
 		// Create a new frame content
 		final int N_SPOTS_TO_ADD = 20;
-		final HashSet< Spot > spots = new HashSet< >( N_SPOTS_TO_ADD );
+		final HashSet< Spot > spots = new HashSet<>( N_SPOTS_TO_ADD );
 		for ( int i = 0; i < N_SPOTS_TO_ADD; i++ )
 		{
 			spots.add( new Spot( -1d, -1d, -1d, 1d, -1d ) );
@@ -432,7 +432,7 @@ public class SpotCollectionTest
 
 		// Create a new frame content
 		final int N_SPOTS_TO_ADD = 20;
-		final HashSet< Spot > spots = new HashSet< >( N_SPOTS_TO_ADD );
+		final HashSet< Spot > spots = new HashSet<>( N_SPOTS_TO_ADD );
 		for ( int i = 0; i < N_SPOTS_TO_ADD; i++ )
 		{
 			spots.add( new Spot( -1d, -1d, -1d, 1d, -1d ) );
@@ -453,7 +453,7 @@ public class SpotCollectionTest
 
 		// Create a new frame content
 		final int N_SPOTS_TO_ADD = 20;
-		final HashSet< Spot > spots = new HashSet< >( N_SPOTS_TO_ADD );
+		final HashSet< Spot > spots = new HashSet<>( N_SPOTS_TO_ADD );
 		for ( int i = 0; i < N_SPOTS_TO_ADD; i++ )
 		{
 			spots.add( new Spot( -1d, -1d, -1d, 1d, -1d ) );

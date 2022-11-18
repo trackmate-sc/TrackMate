@@ -25,7 +25,7 @@ import fiji.plugin.trackmate.detection.ManualDetectorFactory;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.wizard.WizardSequence;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ConfigureViewsDescriptor;
-import fiji.plugin.trackmate.tracking.ManualTrackerFactory;
+import fiji.plugin.trackmate.tracking.manual.ManualTrackerFactory;
 import ij.ImageJ;
 import ij.ImagePlus;
 

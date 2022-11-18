@@ -74,8 +74,7 @@ public class CloseGapsByLinearInterpolationActionTest
 		// Check if positions were interpolated in the right way
 		final GraphIterator< Spot, DefaultWeightedEdge > spots = trackModel.getDepthFirstIterator( spot0, true );
 
-		final double[][] referencePositions = { { 0, 0 }, { 1, 1 }, { 2, 2 }, { 3, 3 }, { 4, 4 }, { 5, 5 }
-		};
+		final double[][] referencePositions = { { 0, 0 }, { 1, 1 }, { 2, 2 }, { 3, 3 }, { 4, 4 }, { 5, 5 } };
 
 		checkPositions( spots, referencePositions );
 	}
@@ -117,8 +116,7 @@ public class CloseGapsByLinearInterpolationActionTest
 		// Check if positions were interpolated in the right way
 		final GraphIterator< Spot, DefaultWeightedEdge > spots = trackModel.getDepthFirstIterator( spot0, true );
 
-		final double[][] referencePositions = { { 0, 0 }, { 1, 1 }, { 2, 2 }, { 4, 4 }, { 6, 6 }, { 8, 8 }, { 3, 3 }, { 4, 4 }, { 5, 5 }
-		};
+		final double[][] referencePositions = { { 0, 0 }, { 1, 1 }, { 2, 2 }, { 4, 4 }, { 6, 6 }, { 8, 8 }, { 3, 3 }, { 4, 4 }, { 5, 5 } };
 
 		checkPositions( spots, referencePositions );
 	}
@@ -160,8 +158,7 @@ public class CloseGapsByLinearInterpolationActionTest
 		// Check if positions were interpolated in the right way
 		final GraphIterator< Spot, DefaultWeightedEdge > spots = trackModel.getDepthFirstIterator( spot0, false );
 
-		final double[][] referencePositions = { { 0, 0 }, { 1, 1 }, { 2, 2 }, { 4, 4 }, { 6, 6 }, { 8, 8 }, { 3, 3 }, { 4, 4 }, { 5, 5 }
-		};
+		final double[][] referencePositions = { { 0, 0 }, { 1, 1 }, { 2, 2 }, { 4, 4 }, { 6, 6 }, { 8, 8 }, { 3, 3 }, { 4, 4 }, { 5, 5 } };
 
 		checkPositions( spots, referencePositions );
 	}

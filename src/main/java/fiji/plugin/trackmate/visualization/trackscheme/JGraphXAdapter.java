@@ -40,13 +40,13 @@ import fiji.plugin.trackmate.Spot;
 public class JGraphXAdapter extends mxGraph implements GraphListener< Spot, DefaultWeightedEdge >
 {
 
-	private final HashMap< Spot, mxCell > vertexToCellMap = new HashMap< >();
+	private final HashMap< Spot, mxCell > vertexToCellMap = new HashMap<>();
 
-	private final HashMap< DefaultWeightedEdge, mxCell > edgeToCellMap = new HashMap< >();
+	private final HashMap< DefaultWeightedEdge, mxCell > edgeToCellMap = new HashMap<>();
 
-	private final HashMap< mxCell, Spot > cellToVertexMap = new HashMap< >();
+	private final HashMap< mxCell, Spot > cellToVertexMap = new HashMap<>();
 
-	private final HashMap< mxCell, DefaultWeightedEdge > cellToEdgeMap = new HashMap< >();
+	private final HashMap< mxCell, DefaultWeightedEdge > cellToEdgeMap = new HashMap<>();
 
 	private final Model tmm;
 

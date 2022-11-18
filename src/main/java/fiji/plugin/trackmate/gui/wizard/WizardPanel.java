@@ -46,9 +46,11 @@ public class WizardPanel extends JPanel
 	private static final long serialVersionUID = 1L;
 
 	public static final Font FONT = new Font( "Arial", Font.PLAIN, 10 );
+
 	public static final Font BIG_FONT = new Font( "Arial", Font.PLAIN, 14 );
+
 	public static final Font SMALL_FONT = FONT.deriveFont( 8 );
-	
+
 	private final CardLayout cardLayout;
 
 	private final AnimatorPanel animatorPanel;
@@ -70,7 +72,6 @@ public class WizardPanel extends JPanel
 	final JButton btnResume;
 
 	final JPanel panelButtons;
-
 
 	public WizardPanel()
 	{
@@ -102,7 +103,7 @@ public class WizardPanel extends JPanel
 
 		btnNext = new JButton();
 		panelButtons.add( btnNext );
-		
+
 		this.btnCancel = new JButton();
 		panelButtons.add( btnCancel );
 

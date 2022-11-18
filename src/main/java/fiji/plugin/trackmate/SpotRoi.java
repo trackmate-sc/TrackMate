@@ -152,10 +152,10 @@ public class SpotRoi
 		final double yc = centroid[ 1 ];
 		final double[] xr = Arrays.stream( x ).map( x0 -> x0 - xc ).toArray();
 		final double[] yr = Arrays.stream( y ).map( y0 -> y0 - yc ).toArray();
-		
+
 		// Create roi.
 		final SpotRoi roi = new SpotRoi( xr, yr );
-		
+
 		// Create spot.
 		final double z = 0.;
 		final double r = roi.radius();

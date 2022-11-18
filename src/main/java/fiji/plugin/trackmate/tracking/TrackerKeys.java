@@ -93,7 +93,13 @@ public class TrackerKeys
 	 * A default value for the {@value #KEY_LINKING_FEATURE_PENALTIES}
 	 * parameter.
 	 */
-	public static final Map< String, Double > DEFAULT_LINKING_FEATURE_PENALTIES = new HashMap< >();
+	public static final Map< String, Double > DEFAULT_LINKING_FEATURE_PENALTIES = new HashMap<>();
+
+	/** Search radius for the Kalman tracker. */
+	public static final String KEY_KALMAN_SEARCH_RADIUS = "KALMAN_SEARCH_RADIUS";
+
+	/** A default value for the {@value #KEY_KALMAN_SEARCH_RADIUS} parameter. */
+	public static final double DEFAULT_KALMAN_SEARCH_RADIUS = 20.0;
 
 	/**
 	 * Key for the parameter specifying whether we allow the detection of
@@ -145,7 +151,7 @@ public class TrackerKeys
 	 * A default value for the {@value #KEY_GAP_CLOSING_FEATURE_PENALTIES}
 	 * parameter.
 	 */
-	public static final Map< String, Double > DEFAULT_GAP_CLOSING_FEATURE_PENALTIES = new HashMap< >();
+	public static final Map< String, Double > DEFAULT_GAP_CLOSING_FEATURE_PENALTIES = new HashMap<>();
 
 	/**
 	 * Key for the parameter specifying whether we allow the detection of
@@ -181,7 +187,7 @@ public class TrackerKeys
 	 * A default value for the {@value #KEY_MERGING_FEATURE_PENALTIES}
 	 * parameter.
 	 */
-	public static final Map< String, Double > DEFAULT_MERGING_FEATURE_PENALTIES = new HashMap< >();
+	public static final Map< String, Double > DEFAULT_MERGING_FEATURE_PENALTIES = new HashMap<>();
 
 	/**
 	 * Key for the parameter specifying whether we allow the detection of
@@ -222,7 +228,7 @@ public class TrackerKeys
 	 * A default value for the {@value #KEY_SPLITTING_FEATURE_PENALTIES}
 	 * parameter.
 	 */
-	public static final Map< String, Double > DEFAULT_SPLITTING_FEATURE_PENALTIES = new HashMap< >();
+	public static final Map< String, Double > DEFAULT_SPLITTING_FEATURE_PENALTIES = new HashMap<>();
 
 	/**
 	 * Key for the parameter specifying the factor used to compute alternative

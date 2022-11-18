@@ -41,5 +41,5 @@ import net.imglib2.type.numeric.RealType;
  * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; 2010 - 2012
  * 
  */
-public interface SpotDetector< T extends RealType< T > & NativeType< T >> extends OutputAlgorithm< List< Spot >>, Benchmark
+public interface SpotDetector< T extends RealType< T > & NativeType< T > > extends OutputAlgorithm< List< Spot > >, Benchmark
 {}

@@ -27,7 +27,7 @@ import java.io.IOException;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
-import fiji.plugin.trackmate.tracking.sparselap.SimpleSparseLAPTrackerFactory;
+import fiji.plugin.trackmate.tracking.jaqaman.SimpleSparseLAPTrackerFactory;
 import ij.ImagePlus;
 
 /**
@@ -83,4 +83,3 @@ public class SettingsPersistence
 		return settings;
 	}
 }
-

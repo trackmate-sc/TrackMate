@@ -25,6 +25,8 @@ import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
 import static fiji.plugin.trackmate.gui.Fonts.FONT;
 import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
 import static fiji.plugin.trackmate.gui.Fonts.TEXTFIELD_DIMENSION;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_GAP_CLOSING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_MERGING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_SPLITTING;
@@ -47,6 +49,7 @@ import java.awt.Insets;
 import java.awt.event.MouseWheelListener;
 import java.text.DecimalFormat;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JCheckBox;
@@ -57,7 +60,7 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
 import fiji.plugin.trackmate.gui.GuiUtils;
-import fiji.plugin.trackmate.tracking.LAPUtils;
+import fiji.plugin.trackmate.tracking.jaqaman.LAPUtils;
 
 public class JPanelTrackerSettingsMain extends javax.swing.JPanel
 {
@@ -324,20 +327,20 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel
 		GuiUtils.selectAllOnFocus( txtfldSplittingMaxDistance );
 
 		// Listeners.
-		chkboxAllowGapClosing.addActionListener( e -> setEnabled(
-				new Component[] { lbl6, txtfldGapClosingMaxDistance, lblGapClosingMaxDistanceUnit,
-						lbl7, txtfldGapClosingMaxFrameInterval, txtfldGapClosingMaxFrameInterval,
-						lbl8, scrpneGapClosingFeatures, panelGapClosing },
+		chkboxAllowGapClosing.addActionListener( e -> setEnabled( new Component[] {
+				lbl6, txtfldGapClosingMaxDistance, lblGapClosingMaxDistanceUnit,
+				lbl7, txtfldGapClosingMaxFrameInterval, txtfldGapClosingMaxFrameInterval,
+				lbl8, scrpneGapClosingFeatures, panelGapClosing },
 				chkboxAllowGapClosing.isSelected() ) );
 
-		chkboxAllowSplitting.addActionListener( e -> setEnabled(
-				new Component[] { lbl10, txtfldSplittingMaxDistance, lblSplittingMaxDistanceUnit,
-						lbl15, scrpneSplittingFeatures, panelSplittingFeatures },
+		chkboxAllowSplitting.addActionListener( e -> setEnabled( new Component[] {
+				lbl10, txtfldSplittingMaxDistance, lblSplittingMaxDistanceUnit,
+				lbl15, scrpneSplittingFeatures, panelSplittingFeatures },
 				chkboxAllowSplitting.isSelected() ) );
 
-		chkboxAllowMerging.addActionListener( e -> setEnabled(
-				new Component[] { lbl13, txtfldMergingMaxDistance, lblMergingMaxDistanceUnit,
-						lbl16, scrpneMergingFeatures, panelMergingFeatures },
+		chkboxAllowMerging.addActionListener( e -> setEnabled( new Component[] {
+				lbl13, txtfldMergingMaxDistance, lblMergingMaxDistanceUnit,
+				lbl16, scrpneMergingFeatures, panelMergingFeatures },
 				chkboxAllowMerging.isSelected() ) );
 	}
 
@@ -362,23 +365,23 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel
 		panelSplittingFeatures.setSelectedFeaturePenalties( ( Map< String, Double > ) settings.get( KEY_SPLITTING_FEATURE_PENALTIES ) );
 
 		chkboxAllowMerging.setSelected( ( Boolean ) settings.get( KEY_ALLOW_TRACK_MERGING ) );
-		txtfldMergingMaxDistance.setValue( settings.get( KEY_SPLITTING_MAX_DISTANCE ) );
+		txtfldMergingMaxDistance.setValue( settings.get( KEY_MERGING_MAX_DISTANCE ) );
 		panelMergingFeatures.setSelectedFeaturePenalties( ( Map< String, Double > ) settings.get( KEY_MERGING_FEATURE_PENALTIES ) );
 
-		setEnabled(
-				new Component[] { lbl6, txtfldGapClosingMaxDistance, lblGapClosingMaxDistanceUnit,
-						lbl7, txtfldGapClosingMaxFrameInterval, txtfldGapClosingMaxFrameInterval,
-						lbl8, scrpneGapClosingFeatures, panelGapClosing },
+		setEnabled( new Component[] {
+				lbl6, txtfldGapClosingMaxDistance, lblGapClosingMaxDistanceUnit,
+				lbl7, txtfldGapClosingMaxFrameInterval, txtfldGapClosingMaxFrameInterval,
+				lbl8, scrpneGapClosingFeatures, panelGapClosing },
 				chkboxAllowGapClosing.isSelected() );
 
-		setEnabled(
-				new Component[] { lbl10, txtfldSplittingMaxDistance, lblSplittingMaxDistanceUnit,
-						lbl15, scrpneSplittingFeatures, panelSplittingFeatures },
+		setEnabled( new Component[] {
+				lbl10, txtfldSplittingMaxDistance, lblSplittingMaxDistanceUnit,
+				lbl15, scrpneSplittingFeatures, panelSplittingFeatures },
 				chkboxAllowSplitting.isSelected() );
 
-		setEnabled(
-				new Component[] { lbl13, txtfldMergingMaxDistance, lblMergingMaxDistanceUnit,
-						lbl16, scrpneMergingFeatures, panelMergingFeatures },
+		setEnabled( new Component[] {
+				lbl13, txtfldMergingMaxDistance, lblMergingMaxDistanceUnit,
+				lbl16, scrpneMergingFeatures, panelMergingFeatures },
 				chkboxAllowMerging.isSelected() );
 	}
 
@@ -387,7 +390,7 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel
 	 */
 	public Map< String, Object > getSettings()
 	{
-		final Map< String, Object > settings = LAPUtils.getDefaultLAPSettingsMap();
+		final Map< String, Object > settings = getDefaultLAPSettingsMap();
 
 		settings.put( KEY_LINKING_MAX_DISTANCE, ( ( Number ) txtfldLinkingMaxDistance.getValue() ).doubleValue() );
 		settings.put( KEY_LINKING_FEATURE_PENALTIES, panelLinkingFeatures.getFeaturePenalties() );
@@ -405,6 +408,15 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel
 		settings.put( KEY_MERGING_MAX_DISTANCE, ( ( Number ) txtfldMergingMaxDistance.getValue() ).doubleValue() );
 		settings.put( KEY_MERGING_FEATURE_PENALTIES, panelMergingFeatures.getFeaturePenalties() );
 
+		return settings;
+	}
+
+	public static final Map< String, Object > getDefaultLAPSettingsMap()
+	{
+		final Map< String, Object > settings = LAPUtils.getDefaultSegmentSettingsMap();
+		// Linking
+		settings.put( KEY_LINKING_MAX_DISTANCE, DEFAULT_LINKING_MAX_DISTANCE );
+		settings.put( KEY_LINKING_FEATURE_PENALTIES, new HashMap<>( DEFAULT_LINKING_FEATURE_PENALTIES ) );
 		return settings;
 	}
 

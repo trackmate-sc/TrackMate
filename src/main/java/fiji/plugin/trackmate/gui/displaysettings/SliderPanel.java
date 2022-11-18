@@ -51,7 +51,8 @@ public class SliderPanel extends JPanel implements BoundedValue.UpdateListener
 	private final BoundedValue model;
 
 	/**
-	 * Create a {@link SliderPanel} to modify a given {@link BoundedValue value}.
+	 * Create a {@link SliderPanel} to modify a given {@link BoundedValue
+	 * value}.
 	 *
 	 * @param name
 	 *            label to show next to the slider.
@@ -113,7 +114,7 @@ public class SliderPanel extends JPanel implements BoundedValue.UpdateListener
 		final int value = model.getCurrentValue();
 		final int min = model.getRangeMin();
 		final int max = model.getRangeMax();
-		if (slider.getMaximum() != max || slider.getMinimum() != min)
+		if ( slider.getMaximum() != max || slider.getMinimum() != min )
 		{
 			slider.setMinimum( min );
 			slider.setMaximum( max );

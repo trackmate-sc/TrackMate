@@ -105,7 +105,6 @@ public class Settings
 	 */
 	public int zend;
 
-
 	/**
 	 * The name of the detector factory to use. It will be used to generate
 	 * {@link fiji.plugin.trackmate.detection.SpotDetector} for each target
@@ -286,15 +285,15 @@ public class Settings
 			newSettings.trackerFactory = trackerFactory.copy();
 		newSettings.trackerSettings = new HashMap<>( trackerSettings );
 		newSettings.initialSpotFilterValue = initialSpotFilterValue;
-		
-		newSettings.spotFilters = new ArrayList<>( );
+
+		newSettings.spotFilters = new ArrayList<>();
 		for ( final FeatureFilter filter : spotFilters )
 			newSettings.spotFilters.add( new FeatureFilter( filter.feature, filter.value, filter.isAbove ) );
-		
+
 		newSettings.trackFilters = new ArrayList<>();
 		for ( final FeatureFilter filter : trackFilters )
 			newSettings.trackFilters.add( new FeatureFilter( filter.feature, filter.value, filter.isAbove ) );
-		
+
 		// Exception: we add all analyzers, regardless of the persistence.
 		newSettings.addAllAnalyzers();
 		return newSettings;

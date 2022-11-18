@@ -21,7 +21,6 @@
  */
 package fiji.plugin.trackmate.gui.wizard.descriptors;
 
-
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
@@ -51,7 +50,7 @@ public class SpotDetectorDescriptor extends WizardPanelDescriptor
 	{
 		final ConfigurationPanel configurationPanel = ( ConfigurationPanel ) targetPanel;
 		settings.detectorSettings = configurationPanel.getSettings();
-		
+
 		logger.log( "\nConfigured detector " );
 		logger.log( settings.detectorFactory.getName(), Logger.BLUE_COLOR );
 		logger.log( " with settings:\n" );

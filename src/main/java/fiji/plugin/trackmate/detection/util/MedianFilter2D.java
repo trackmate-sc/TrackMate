@@ -52,7 +52,7 @@ import net.imglib2.view.Views;
  * @param <T>
  *            the type of the source image.
  */
-public class MedianFilter2D< T extends RealType< T > & NativeType< T >> extends BenchmarkAlgorithm implements OutputAlgorithm< Img< T >>
+public class MedianFilter2D< T extends RealType< T > & NativeType< T > > extends BenchmarkAlgorithm implements OutputAlgorithm< Img< T > >
 {
 	private static final String BASE_ERROR_MSG = "[MedianFiler2D] ";
 
@@ -128,7 +128,7 @@ public class MedianFilter2D< T extends RealType< T > & NativeType< T >> extends 
 
 		final RectangleShape shape = new RectangleShape( radius, false );
 		final NeighborhoodsAccessible< T > nracessible = shape.neighborhoodsRandomAccessible( Views.extendZero( in ) );
-		final RandomAccess< Neighborhood< T >> nra = nracessible.randomAccess( in );
+		final RandomAccess< Neighborhood< T > > nra = nracessible.randomAccess( in );
 
 		final int size = ( int ) nra.get().size();
 		final double[] values = new double[ size ];
