@@ -124,9 +124,9 @@ public abstract class SegmentTrackerFactory implements SpotTrackerFactory
 		return ok;
 	}
 
-        public boolean unmarshallSegment( final Element element, final Map< String, Object > settings, final StringBuilder errorHolder )
-        {
-                settings.clear();
+	public boolean unmarshallSegment( final Element element, final Map< String, Object > settings, final StringBuilder errorHolder )
+	{
+		settings.clear();
 		boolean ok = true;
 
 		// Gap closing
@@ -204,13 +204,13 @@ public abstract class SegmentTrackerFactory implements SpotTrackerFactory
 		ok = ok & readDoubleAttribute( element, settings, KEY_BLOCKING_VALUE, errorHolder );
 
 		return ok;
-        }
-        
+	}
+
 	@Override
 	public boolean unmarshall( final Element element, final Map< String, Object > settings )
 	{
-                final StringBuilder errorHolder = new StringBuilder();
-                boolean ok = unmarshallSegment( element, settings, errorHolder );
+		final StringBuilder errorHolder = new StringBuilder();
+		boolean ok = unmarshallSegment( element, settings, errorHolder );
 		if ( !checkSettingsValidity( settings ) )
 		{
 			ok = false;
