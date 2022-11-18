@@ -53,18 +53,6 @@ import javax.swing.ImageIcon;
 import org.jdom2.Element;
 
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_GAP_CLOSING;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_MERGING;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_SPLITTING;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALTERNATIVE_LINKING_COST_FACTOR;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_BLOCKING_VALUE;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_CUTOFF_PERCENTILE;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_DISTANCE;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_FRAME_GAP;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_MAX_DISTANCE;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_MAX_DISTANCE;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Base class for trackers with split/merge actions.
@@ -145,7 +133,7 @@ public abstract class SegmentTrackerFactory implements SpotTrackerFactory
 		final Element gapClosingElement = element.getChild( XML_ELEMENT_NAME_GAP_CLOSING );
 		if ( null == gapClosingElement )
 		{
-			errorHolder.append( "Could not found the " + XML_ELEMENT_NAME_GAP_CLOSING + " element in XML.\n" );
+			errorHolder.append( "Could not find the " + XML_ELEMENT_NAME_GAP_CLOSING + " element in XML.\n" );
 			ok = false;
 
 		}
@@ -221,7 +209,7 @@ public abstract class SegmentTrackerFactory implements SpotTrackerFactory
 	@Override
 	public boolean unmarshall( final Element element, final Map< String, Object > settings )
 	{
-                StringBuilder errorHolder = new StringBuilder();
+                final StringBuilder errorHolder = new StringBuilder();
                 boolean ok = unmarshallSegment( element, settings, errorHolder );
 		if ( !checkSettingsValidity( settings ) )
 		{
