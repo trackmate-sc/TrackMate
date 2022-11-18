@@ -53,7 +53,7 @@ import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 
 @Plugin( type = SpotDetectorFactory.class )
-public class LabeImageDetectorFactory< T extends RealType< T > & NativeType< T >> implements SpotDetectorFactory< T >
+public class LabelImageDetectorFactory< T extends RealType< T > & NativeType< T >> implements SpotDetectorFactory< T >
 {
 
 	/*
@@ -219,8 +219,8 @@ public class LabeImageDetectorFactory< T extends RealType< T > & NativeType< T >
 	}
 
 	@Override
-	public LabeImageDetectorFactory< T > copy()
+	public LabelImageDetectorFactory< T > copy()
 	{
-		return new LabeImageDetectorFactory<>();
+		return new LabelImageDetectorFactory<>();
 	}
 }

@@ -27,7 +27,7 @@ import java.util.Map;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.detection.LabeImageDetectorFactory;
+import fiji.plugin.trackmate.detection.LabelImageDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.detection.ThresholdDetectorFactory;
 
@@ -49,7 +49,7 @@ public class LabelImageDetectorConfigurationPanel extends ThresholdDetectorConfi
 			final Settings settings,
 			final Model model )
 	{
-		super( settings, model, LabeImageDetectorFactory.INFO_TEXT, LabeImageDetectorFactory.NAME );
+		super( settings, model, LabelImageDetectorFactory.INFO_TEXT, LabelImageDetectorFactory.NAME );
 		ftfIntensityThreshold.setVisible( false );
 		btnAutoThreshold.setVisible( false );
 		lblIntensityThreshold.setVisible( false );
@@ -82,6 +82,6 @@ public class LabelImageDetectorConfigurationPanel extends ThresholdDetectorConfi
 	@SuppressWarnings( "rawtypes" )
 	protected SpotDetectorFactory< ? > getDetectorFactory()
 	{
-		return new LabeImageDetectorFactory();
+		return new LabelImageDetectorFactory();
 	}
 }
