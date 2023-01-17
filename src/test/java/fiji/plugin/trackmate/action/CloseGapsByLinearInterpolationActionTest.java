@@ -27,6 +27,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.traverse.GraphIterator;
 import org.junit.Test;
 
+import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
@@ -68,7 +69,7 @@ public class CloseGapsByLinearInterpolationActionTest
 
 		// close gap
 		final CloseGapsByLinearInterpolation cgblia = new CloseGapsByLinearInterpolation();
-		cgblia.execute( trackmate, null );
+		cgblia.execute( trackmate, Logger.VOID_LOGGER );
 
 		final TrackModel trackModel = model.getTrackModel();
 
@@ -110,7 +111,7 @@ public class CloseGapsByLinearInterpolationActionTest
 
 		// close gaps
 		final CloseGapsByLinearInterpolation cgblia = new CloseGapsByLinearInterpolation();
-		cgblia.execute( trackmate, null );
+		cgblia.execute( trackmate, Logger.VOID_LOGGER );
 
 		final TrackModel trackModel = model.getTrackModel();
 
@@ -152,7 +153,7 @@ public class CloseGapsByLinearInterpolationActionTest
 
 		// close gaps
 		final CloseGapsByLinearInterpolation cgblia = new CloseGapsByLinearInterpolation();
-		cgblia.execute( trackmate, null );
+		cgblia.execute( trackmate, Logger.VOID_LOGGER );
 
 		final TrackModel trackModel = model.getTrackModel();
 
