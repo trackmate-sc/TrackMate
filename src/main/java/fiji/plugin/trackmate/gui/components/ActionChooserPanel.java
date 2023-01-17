@@ -25,6 +25,7 @@ import static fiji.plugin.trackmate.gui.Fonts.FONT;
 import static fiji.plugin.trackmate.gui.Icons.EXECUTE_ICON;
 
 import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -50,6 +51,9 @@ public class ActionChooserPanel extends ModuleChooserPanel< TrackMateActionFacto
 	public ActionChooserPanel( final ActionProvider actionProvider, final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings )
 	{
 		super( actionProvider, "action", CaptureOverlayAction.KEY );
+		
+		final GridBagLayout gridBagLayout = ( GridBagLayout ) getLayout();
+		gridBagLayout.rowHeights = new int[] { 16, 27, 209, 200 };
 
 		final LogPanel logPanel = new LogPanel();
 		final GridBagConstraints gbcLogPanel = new GridBagConstraints();
