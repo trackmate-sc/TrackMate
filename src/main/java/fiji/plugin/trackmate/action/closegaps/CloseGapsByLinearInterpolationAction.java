@@ -21,7 +21,7 @@
  */
 package fiji.plugin.trackmate.action.closegaps;
 
-import java.util.Set;
+import java.util.List;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 
@@ -30,7 +30,6 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
-import net.imglib2.RealPoint;
 
 /**
  * This action allows to close gaps in tracks by creating new intermediate spots
@@ -59,94 +58,34 @@ public class CloseGapsByLinearInterpolationAction implements GapClosingMethod
 	{
 		final Model model = trackmate.getModel();
 		final TrackModel trackModel = model.getTrackModel();
-		boolean changed = true;
 
 		model.beginUpdate();
 		try
 		{
-
-			while ( changed )
+			final List< DefaultWeightedEdge > gaps = GapClosingMethod.getAllGaps( model );
+			int progress = 0;
+			for ( final DefaultWeightedEdge gap : gaps )
 			{
-				changed = false;
-
-				/*
-				 * Got through all edges, check if the frame distance between
-				 * spots is larger than 1.
-				 */
-				final Set< DefaultWeightedEdge > edges = model.getTrackModel().edgeSet();
-				for ( final DefaultWeightedEdge edge : edges )
+				final List< Spot > spots = GapClosingMethod.interpolate( model, gap );
+				final Spot source = trackModel.getEdgeSource( gap );
+				Spot current = source;
+				for ( final Spot spot : spots )
 				{
-					final Spot currentSpot = trackModel.getEdgeSource( edge );
-					final Spot nextSpot = trackModel.getEdgeTarget( edge );
-
-					final int currentFrame = currentSpot.getFeature( Spot.FRAME ).intValue();
-					final int nextFrame = nextSpot.getFeature( Spot.FRAME ).intValue();
-
-					if ( Math.abs( nextFrame - currentFrame ) > 1 )
-					{
-						final int presign = nextFrame > currentFrame ? 1 : -1;
-
-						final double[] currentPosition = new double[ 3 ];
-						final double[] nextPosition = new double[ 3 ];
-
-						nextSpot.localize( nextPosition );
-						currentSpot.localize( currentPosition );
-
-						/*
-						 * Create new spots in between; interpolate coordinates
-						 * and some features.
-						 */
-						Spot formerSpot = currentSpot;
-						int nspots = 0;
-						for ( int f = currentFrame + presign; ( f < nextFrame && presign == 1 )
-								|| ( f > nextFrame && presign == -1 ); f += presign )
-						{
-							final double weight = ( double ) ( nextFrame - f ) / ( nextFrame - currentFrame );
-
-							final double[] position = new double[ 3 ];
-							for ( int d = 0; d < currentSpot.numDimensions(); d++ )
-								position[ d ] = weight * currentPosition[ d ] + ( 1.0 - weight ) * nextPosition[ d ];
-
-							final RealPoint rp = new RealPoint( position );
-							final Spot newSpot = new Spot( rp, 0, 0 );
-
-							// Set some properties of the new spot
-							interpolateFeature( newSpot, currentSpot, nextSpot, weight, Spot.RADIUS );
-							interpolateFeature( newSpot, currentSpot, nextSpot, weight, Spot.QUALITY );
-							interpolateFeature( newSpot, currentSpot, nextSpot, weight, Spot.POSITION_T );
-
-							model.addSpotTo( newSpot, f );
-							model.addEdge( formerSpot, newSpot, 1.0 );
-							formerSpot = newSpot;
-							nspots++;
-						}
-						model.addEdge( formerSpot, nextSpot, 1.0 );
-						model.removeEdge( currentSpot, nextSpot );
-						logger.log( "Added " + nspots + " new spots between spots " + currentSpot + " and " + nextSpot + ".\n" );
-
-						/*
-						 * Restart search to prevent
-						 * ConcurrentModificationException.
-						 */
-						changed = true;
-						break;
-					}
+					model.addSpotTo( spot, spot.getFeature( Spot.FRAME ).intValue() );
+					model.addEdge( current, spot, 1.0 );
+					current = spot;
 				}
+				final Spot target = trackModel.getEdgeTarget( gap );
+				model.addEdge( current, target, 1.0 );
+				model.removeEdge( source, target );
+				logger.log( "Added " + spots.size() + " new spots between spots " + source + " and " + target + ".\n" );
+				logger.setProgress( ( double ) ( progress++ ) / gaps.size() );
 			}
 		}
 		finally
 		{
 			model.endUpdate();
 		}
-	}
-
-	private void interpolateFeature( final Spot targetSpot, final Spot spot1, final Spot spot2, final double weight, final String feature )
-	{
-		if ( targetSpot.getFeatures().containsKey( feature ) )
-			targetSpot.getFeatures().remove( feature );
-
-		targetSpot.getFeatures().put( feature,
-				weight * spot1.getFeature( feature ) + ( 1.0 - weight ) * spot2.getFeature( feature ) );
 	}
 
 	@Override
