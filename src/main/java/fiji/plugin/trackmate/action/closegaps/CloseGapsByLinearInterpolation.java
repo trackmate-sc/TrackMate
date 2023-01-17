@@ -44,7 +44,7 @@ import fiji.plugin.trackmate.TrackModel;
  * Date: June 2016
  *
  */
-public class CloseGapsByLinearInterpolationAction implements GapClosingMethod
+public class CloseGapsByLinearInterpolation implements GapClosingMethod
 {
 
 	public static final String INFO_TEXT = "<html>This action allows to close gaps in tracks by intercalating "

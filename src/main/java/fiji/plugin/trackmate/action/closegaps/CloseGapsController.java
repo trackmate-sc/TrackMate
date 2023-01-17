@@ -26,7 +26,7 @@ public class CloseGapsController
 		this.logger = logger;
 
 		final Collection< GapClosingMethod > gapClosingMethods = new ArrayList<>( 1 );
-		gapClosingMethods.add( new CloseGapsByLinearInterpolationAction() );
+		gapClosingMethods.add( new CloseGapsByLinearInterpolation() );
 
 		this.gui = new CloseGapsPanel( gapClosingMethods );
 		gui.btnRun.addActionListener( e -> run( ( ( GapClosingMethod ) gui.cmbboxMethod.getSelectedItem() ) ) );
