@@ -64,7 +64,7 @@ public class CloseGapsController
 
 		final JFrame frame = new JFrame( "TrackMate gap-closing" );
 		frame.setIconImage( CloseGapsAction.ICON.getImage() );
-		frame.setSize( 500, 400 );
+		frame.setSize( 300, 500 );
 		frame.getContentPane().add( gui );
 		GuiUtils.positionWindow( frame, trackmate.getSettings().imp.getCanvas() );
 		frame.setVisible( true );
