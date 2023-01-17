@@ -21,6 +21,7 @@
  */
 package fiji.plugin.trackmate.action.closegaps;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -59,9 +60,20 @@ public class CloseGapsByDetection implements GapClosingMethod
 	public static final String NAME = "Close gaps by detection";
 
 	/**
-	 * Relative size of the seach radius, in spot radius units.
+	 * Relative size of the search radius, in spot radius units.
 	 */
-	private static final double SEARCH_RADIUS_FACTOR = 2.;
+	private final GapClosingParameter radiusFactor;
+
+	public CloseGapsByDetection()
+	{
+		this.radiusFactor = new GapClosingParameter( "Radius factor", 2., 0.1, 10. );
+	}
+
+	@Override
+	public List< GapClosingParameter > getParameters()
+	{
+		return Collections.singletonList( radiusFactor );
+	}
 
 	@Override
 	public void execute( final TrackMate trackmate, final Logger logger )
@@ -90,7 +102,10 @@ public class CloseGapsByDetection implements GapClosingMethod
 					final int t = spot.getFeature( Spot.FRAME ).intValue();
 
 					// Re-execute detection.
-					final Settings settings = GapClosingMethod.makeSettingsForRoiAround( spot, SEARCH_RADIUS_FACTOR, trackmate.getSettings() );
+					final Settings settings = GapClosingMethod.makeSettingsForRoiAround(
+							spot,
+							radiusFactor.value,
+							trackmate.getSettings() );
 					final TrackMate localTM = new TrackMate( settings );
 					localTM.getModel().setLogger( Logger.VOID_LOGGER );
 					localTM.setNumThreads( 1 );

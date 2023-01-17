@@ -22,6 +22,7 @@
 package fiji.plugin.trackmate.action.closegaps;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -40,6 +41,38 @@ import net.imglib2.RealPoint;
 
 public interface GapClosingMethod
 {
+
+	public static class GapClosingParameter
+	{
+
+		public final String name;
+
+		public double value;
+
+		public final double minValue;
+
+		public final double maxValue;
+
+		public GapClosingParameter( final String name, final double value, final double minValue, final double maxValue )
+		{
+			this.name = name;
+			this.value = value;
+			this.minValue = minValue;
+			this.maxValue = maxValue;
+		}
+	}
+
+	/**
+	 * Returns the list of parameters required to configure this method.
+	 * <p>
+	 * The list will be used to autogenerate a configuration panel.
+	 * 
+	 * @return a list of parameters.
+	 */
+	public default List< GapClosingParameter > getParameters()
+	{
+		return Collections.emptyList();
+	}
 
 	/**
 	 * Returns a html string containing a descriptive information about this
