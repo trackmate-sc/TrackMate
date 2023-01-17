@@ -29,9 +29,13 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
+import fiji.plugin.trackmate.detection.DetectionUtils;
+import fiji.plugin.trackmate.util.TMUtils;
+import ij.gui.Roi;
 import net.imglib2.RealPoint;
 
 public interface GapClosingMethod
@@ -149,5 +153,80 @@ public interface GapClosingMethod
 
 		targetSpot.getFeatures().put( feature,
 				weight * spot1.getFeature( feature ) + ( 1.0 - weight ) * spot2.getFeature( feature ) );
+	}
+
+	/**
+	 * Returns a new {@link Settings} object copied from the specified settings,
+	 * but configured with a small ROI centered on the specified spot, with a
+	 * radius proportional to the radius of the specified spot, and set to
+	 * operate only on the frame in which the specified spot it.
+	 * 
+	 * @param spot
+	 *            the spot to read the coordinates and the frame from.
+	 * @param neighborhoodFactor
+	 *            the ROI proportionality factor. The ROI radius will be equal
+	 *            to the spot radius times this factor.
+	 * @param settings
+	 *            a source settings to copy from. Its {@link Settings#imp} field
+	 *            must not be <code>null</code>.
+	 * @return a new {@link Settings} object.
+	 */
+	public static Settings makeSettingsForRoiAround( final Spot spot, final double neighborhoodFactor, final Settings settings )
+	{
+		// Extract scales.
+		final double[] cal = TMUtils.getSpatialCalibration( settings.imp );
+		final double dx = cal[ 0 ];
+		final double dy = cal[ 1 ];
+		final double dz = cal[ 2 ];
+
+		// Extract source coords.
+		final double[] location = new double[ 3 ];
+		spot.localize( location );
+		final double radius = spot.getFeature( Spot.RADIUS );
+
+		final long x = Math.round( location[ 0 ] / dx );
+		final long y = Math.round( location[ 1 ] / dy );
+		final long z = Math.round( location[ 2 ] / dz );
+		final long r = ( long ) Math.ceil( neighborhoodFactor * radius / dx );
+		final long rz = ( long ) Math.abs( Math.ceil( neighborhoodFactor * radius / dz ) );
+
+		// Extract crop cube
+		final long width = settings.imp.getWidth();
+		final long height = settings.imp.getHeight();
+		final long x0 = Math.max( 0, x - r );
+		final long y0 = Math.max( 0, y - r );
+		final long x1 = Math.min( width - 1, x + r );
+		final long y1 = Math.min( height - 1, y + r );
+
+		// Make a new settings with a smaller ROI.
+		final Settings settingsCopy = settings.copyOn( settings.imp );
+		settingsCopy.setRoi( new Roi( x0, y0, x1 - x0, y1 - y0 ) );
+		if ( !DetectionUtils.is2D( settings.imp ) )
+		{
+			// 3D
+			final long depth = settings.imp.getNSlices();
+			final long z0 = Math.max( 0, z - rz );
+			final long z1 = Math.min( depth - 1, z + rz );
+			settings.zstart = ( int ) z0;
+			settings.zend = ( int ) z1;
+		}
+		return settingsCopy;
+	}
+
+	public static int countMissingSpots( final List< DefaultWeightedEdge > gaps, final Model model )
+	{
+		final TrackModel trackModel = model.getTrackModel();
+		int nSpots = 0;
+		for ( final DefaultWeightedEdge gap : gaps )
+		{
+			final Spot source = trackModel.getEdgeSource( gap );
+			final int st = source.getFeature( Spot.FRAME ).intValue();
+
+			final Spot target = trackModel.getEdgeTarget( gap );
+			final int tt = target.getFeature( Spot.FRAME ).intValue();
+
+			nSpots += Math.abs( tt - st ) - 1;
+		}
+		return nSpots;
 	}
 }

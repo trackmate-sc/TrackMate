@@ -25,8 +25,9 @@ public class CloseGapsController
 		this.trackmate = trackmate;
 		this.logger = logger;
 
-		final Collection< GapClosingMethod > gapClosingMethods = new ArrayList<>( 1 );
+		final Collection< GapClosingMethod > gapClosingMethods = new ArrayList<>( 2 );
 		gapClosingMethods.add( new CloseGapsByLinearInterpolation() );
+		gapClosingMethods.add( new CloseGapsByDetection() );
 
 		this.gui = new CloseGapsPanel( gapClosingMethods );
 		gui.btnRun.addActionListener( e -> run( ( ( GapClosingMethod ) gui.cmbboxMethod.getSelectedItem() ) ) );
