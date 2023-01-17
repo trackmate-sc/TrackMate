@@ -19,31 +19,24 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.action;
+package fiji.plugin.trackmate.action.closegaps;
 
-import static fiji.plugin.trackmate.gui.Icons.ORANGE_ASTERISK_ICON;
-
-import java.awt.Frame;
 import java.util.Set;
 
-import javax.swing.ImageIcon;
-
 import org.jgrapht.graph.DefaultWeightedEdge;
-import org.scijava.plugin.Plugin;
 
+import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import net.imglib2.RealPoint;
 
 /**
  * This action allows to close gaps in tracks by creating new intermediate spots
  * which are located at interpolated positions. This is useful if you want to
  * measure signal intensity changing during time, even if the spot is not
- * visible. Thus, trackmate is utilisable for Fluorescence Recovery after
+ * visible. Thus, TrackMate is usable for Fluorescence Recovery after
  * Photobleaching (FRAP) analysis.
  *
  * Author: Robert Haase, Scientific Computing Facility, MPI-CBG,
@@ -52,27 +45,22 @@ import net.imglib2.RealPoint;
  * Date: June 2016
  *
  */
-public class CloseGapsByLinearInterpolationAction extends AbstractTMAction
+public class CloseGapsByLinearInterpolationAction implements GapClosingMethod
 {
 
-	public static final String NAME = "Close gaps by introducing new spots";
+	public static final String INFO_TEXT = "<html>This action allows to close gaps in tracks by intercalating "
+			+ "new spots in gaps which position is interpolated from the positions of the true spots "
+			+ "at the gap beginning and end. The image data is not used to adjust the position of spots.</html>";
 
-	public static final String KEY = "CLOSE_GAPS_BY_LINEAR_INPERPOLATION";
-
-	public static final String INFO_TEXT = "<html>"
-			+ "This action closes gaps in tracks by introducing new spots. "
-			+ "The spots positions and size are calculated "
-			+ "using linear interpolation."
-			+ "</html>";
+	public static final String NAME = "Close gaps by interpolating positions";
 
 	@Override
-	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
+	public void execute( final TrackMate trackmate, final Logger logger )
 	{
 		final Model model = trackmate.getModel();
 		final TrackModel trackModel = model.getTrackModel();
 		boolean changed = true;
 
-		logger.log( "Interpolating gaps.\n" );
 		model.beginUpdate();
 		try
 		{
@@ -150,52 +138,26 @@ public class CloseGapsByLinearInterpolationAction extends AbstractTMAction
 		{
 			model.endUpdate();
 		}
-		logger.log( "Finished.\n" );
 	}
 
 	private void interpolateFeature( final Spot targetSpot, final Spot spot1, final Spot spot2, final double weight, final String feature )
 	{
 		if ( targetSpot.getFeatures().containsKey( feature ) )
-		{
 			targetSpot.getFeatures().remove( feature );
-		}
 
 		targetSpot.getFeatures().put( feature,
 				weight * spot1.getFeature( feature ) + ( 1.0 - weight ) * spot2.getFeature( feature ) );
 	}
 
-	@Plugin( type = TrackMateActionFactory.class )
-	public static class Factory implements TrackMateActionFactory
+	@Override
+	public String getInfoText()
 	{
+		return INFO_TEXT;
+	}
 
-		@Override
-		public String getInfoText()
-		{
-			return INFO_TEXT;
-		}
-
-		@Override
-		public String getName()
-		{
-			return NAME;
-		}
-
-		@Override
-		public String getKey()
-		{
-			return KEY;
-		}
-
-		@Override
-		public ImageIcon getIcon()
-		{
-			return ORANGE_ASTERISK_ICON;
-		}
-
-		@Override
-		public TrackMateAction create()
-		{
-			return new CloseGapsByLinearInterpolationAction();
-		}
+	@Override
+	public String toString()
+	{
+		return NAME;
 	}
 }

@@ -31,6 +31,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
+import fiji.plugin.trackmate.action.closegaps.CloseGapsByLinearInterpolationAction;
 
 /**
  * Author: Robert Haase, Scientific Computing Facility, MPI-CBG,
@@ -67,7 +68,7 @@ public class CloseGapsByLinearInterpolationActionTest
 
 		// close gap
 		final CloseGapsByLinearInterpolationAction cgblia = new CloseGapsByLinearInterpolationAction();
-		cgblia.execute( trackmate, null, null, null );
+		cgblia.execute( trackmate, null );
 
 		final TrackModel trackModel = model.getTrackModel();
 
@@ -109,7 +110,7 @@ public class CloseGapsByLinearInterpolationActionTest
 
 		// close gaps
 		final CloseGapsByLinearInterpolationAction cgblia = new CloseGapsByLinearInterpolationAction();
-		cgblia.execute( trackmate, null, null, null );
+		cgblia.execute( trackmate, null );
 
 		final TrackModel trackModel = model.getTrackModel();
 
@@ -151,7 +152,7 @@ public class CloseGapsByLinearInterpolationActionTest
 
 		// close gaps
 		final CloseGapsByLinearInterpolationAction cgblia = new CloseGapsByLinearInterpolationAction();
-		cgblia.execute( trackmate, null, null, null );
+		cgblia.execute( trackmate, null );
 
 		final TrackModel trackModel = model.getTrackModel();
 
