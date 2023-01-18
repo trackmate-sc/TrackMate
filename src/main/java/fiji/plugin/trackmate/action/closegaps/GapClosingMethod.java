@@ -234,6 +234,11 @@ public interface GapClosingMethod
 		// Make a new settings with a smaller ROI.
 		final Settings settingsCopy = settings.copyOn( settings.imp );
 		settingsCopy.setRoi( new Roi( x0, y0, x1 - x0, y1 - y0 ) );
+		// Time.
+		final int t = spot.getFeature( Spot.FRAME ).intValue();
+		settingsCopy.tstart = t;
+		settingsCopy.tend = t;
+
 		if ( !DetectionUtils.is2D( settings.imp ) )
 		{
 			// 3D
