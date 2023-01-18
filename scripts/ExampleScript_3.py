@@ -9,8 +9,7 @@ from fiji.plugin.trackmate import SelectionModel
 from fiji.plugin.trackmate import Settings
 from fiji.plugin.trackmate import Logger
 from fiji.plugin.trackmate.detection import DogDetectorFactory
-from fiji.plugin.trackmate.tracking import LAPUtils
-from fiji.plugin.trackmate.tracking.sparselap import SparseLAPTrackerFactory
+from fiji.plugin.trackmate.tracking.jaqaman import SparseLAPTrackerFactory
 from fiji.plugin.trackmate.gui.displaysettings import DisplaySettingsIO
 from fiji.plugin.trackmate.visualization.hyperstack import HyperStackDisplayer
 
@@ -53,7 +52,7 @@ settings.detectorSettings = {
 
 # Configure tracker
 settings.trackerFactory = SparseLAPTrackerFactory()
-settings.trackerSettings = LAPUtils.getDefaultLAPSettingsMap()
+settings.trackerSettings = settings.trackerFactory.getDefaultSettings()
 settings.trackerSettings['LINKING_MAX_DISTANCE'] = 10.0
 settings.trackerSettings['GAP_CLOSING_MAX_DISTANCE'] = 10.0
 settings.trackerSettings['MAX_FRAME_GAP'] = 3

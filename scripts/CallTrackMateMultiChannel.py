@@ -10,21 +10,18 @@
 # analysis. It is derived from a Groovy script by Jan Eglinger, and uses
 # the ImageJ2 scripting framework to offer a basic UI / LCI interface 
 # for the user.
-#
-# You absolutely need the `TrackMate_extras-x.y.z.jar` to be in Fiji plugins
-# or jars folder for this to work. Check here to download it: 
-# https://imagej.net/TrackMate#Downloadable_jars
+
 
 import fiji.plugin.trackmate.Spot as Spot
+import fiji.plugin.trackmate.Spot.frameComparator as frameComparator
 import fiji.plugin.trackmate.Model as Model
 import fiji.plugin.trackmate.Settings as Settings
 import fiji.plugin.trackmate.TrackMate as TrackMate
 
 import fiji.plugin.trackmate.detection.LogDetectorFactory as LogDetectorFactory
 
-import fiji.plugin.trackmate.tracking.LAPUtils as LAPUtils
-import fiji.plugin.trackmate.tracking.sparselap.SparseLAPTrackerFactory as SparseLAPTrackerFactory
-import fiji.plugin.trackmate.extra.spotanalyzer.SpotMultiChannelIntensityAnalyzerFactory as SpotMultiChannelIntensityAnalyzerFactory
+import fiji.plugin.trackmate.tracking.jaqaman.SparseLAPTrackerFactory as SparseLAPTrackerFactory
+import fiji.plugin.trackmate.features.spot.SpotIntensityMultiCAnalyzerFactory as SpotIntensityMultiCAnalyzerFactory
 
 import ij. IJ as IJ
 import java.io.File as File
@@ -43,7 +40,7 @@ settings = Settings(imp)
 settings.dt = 0.05
 
 # Spot analyzer: we want the multi-C intensity analyzer.
-settings.addSpotAnalyzerFactory( SpotMultiChannelIntensityAnalyzerFactory() )
+settings.addSpotAnalyzerFactory( SpotIntensityMultiCAnalyzerFactory() )
 
 # Spot detector.
 settings.detectorFactory = LogDetectorFactory()
@@ -53,7 +50,7 @@ settings.detectorSettings['THRESHOLD'] = threshold
 
 # Spot tracker.
 settings.trackerFactory = SparseLAPTrackerFactory()
-settings.trackerSettings = LAPUtils.getDefaultLAPSettingsMap()
+settings.trackerSettings = settings.trackerFactory.getDefaultSettings()
 settings.trackerSettings['MAX_FRAME_GAP']  = frameGap
 settings.trackerSettings['LINKING_MAX_DISTANCE']  = linkingMax
 settings.trackerSettings['GAP_CLOSING_MAX_DISTANCE']  = closingMax
@@ -80,18 +77,16 @@ else:
 	tm = model.getTrackModel()
 	trackIDs = tm.trackIDs( True )
 	for trackID in trackIDs:
-		spots = tm.trackSpots( trackID )
-
-		# Let's sort them by frame.
-		ls = ArrayList( spots );
-		ls.sort( Spot.frameComparator )
 		
-		for spot in ls:
+		spots = tm.trackSpots( trackID )
+		# Sort spots by frame.
+		sorted_spots = sorted( spots, key=lambda s : s.getFeature(Spot.FRAME))
+		
+		for spot in sorted_spots:
 			values = [  spot.ID(), trackID, spot.getFeature('FRAME'), \
 				spot.getFeature('POSITION_X'), spot.getFeature('POSITION_Y'), spot.getFeature('POSITION_Z') ]
 			for i in range( nChannels ):
-				values.append( spot.getFeature( 'MEAN_INTENSITY%02d' % (i+1) ) )
+				values.append( spot.getFeature( 'MEAN_INTENSITY_CH%d' % (i+1) ) )
 				
 			IJ.log( rowStr % tuple( values ) ) 
 	
-

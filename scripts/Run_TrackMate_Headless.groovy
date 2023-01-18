@@ -13,8 +13,7 @@ import fiji.plugin.trackmate.TrackMate
 
 import fiji.plugin.trackmate.detection.LogDetectorFactory
 
-import fiji.plugin.trackmate.tracking.LAPUtils
-import fiji.plugin.trackmate.tracking.sparselap.SparseLAPTrackerFactory
+import fiji.plugin.trackmate.tracking.jaqaman.SparseLAPTrackerFactory
 
 import fiji.plugin.trackmate.action.ExportTracksToXML
 
@@ -38,7 +37,7 @@ settings.detectorSettings['THRESHOLD'] = threshold
 println settings.detectorSettings
 
 settings.trackerFactory = new SparseLAPTrackerFactory()
-settings.trackerSettings = LAPUtils.getDefaultLAPSettingsMap()
+settings.trackerSettings = settings.trackerFactory.getDefaultSettings()
 
 settings.trackerSettings['MAX_FRAME_GAP']  = frameGap
 settings.trackerSettings['LINKING_MAX_DISTANCE']  = linkingMax

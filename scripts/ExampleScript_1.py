@@ -9,8 +9,7 @@ from fiji.plugin.trackmate import TrackMate
 from fiji.plugin.trackmate import SelectionModel
 from fiji.plugin.trackmate import Logger
 from fiji.plugin.trackmate.detection import LogDetectorFactory
-from fiji.plugin.trackmate.tracking import LAPUtils
-from fiji.plugin.trackmate.tracking.sparselap import SparseLAPTrackerFactory
+from fiji.plugin.trackmate.tracking.jaqaman import SparseLAPTrackerFactory
 from fiji.plugin.trackmate.gui.displaysettings import DisplaySettingsIO
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer as HyperStackDisplayer
 import fiji.plugin.trackmate.features.FeatureFilter as FeatureFilter
@@ -63,7 +62,7 @@ settings.addSpotFilter(filter1)
 
 # Configure tracker - We want to allow merges and fusions
 settings.trackerFactory = SparseLAPTrackerFactory()
-settings.trackerSettings = LAPUtils.getDefaultLAPSettingsMap() # almost good enough
+settings.trackerSettings = settings.trackerFactory.getDefaultSettings() # almost good enough
 settings.trackerSettings['ALLOW_TRACK_SPLITTING'] = True
 settings.trackerSettings['ALLOW_TRACK_MERGING'] = True
 
