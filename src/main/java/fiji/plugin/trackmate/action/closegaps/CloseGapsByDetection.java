@@ -108,7 +108,7 @@ public class CloseGapsByDetection implements GapClosingMethod
 							trackmate.getSettings() );
 					final TrackMate localTM = new TrackMate( settings );
 					localTM.getModel().setLogger( Logger.VOID_LOGGER );
-					localTM.setNumThreads( 1 );
+					localTM.setNumThreads( trackmate.getNumThreads() );
 					if ( !localTM.execDetection() )
 					{
 						logger.error( "Error detecting spots around position " + Util.printCoordinates( source )
