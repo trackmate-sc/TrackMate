@@ -27,10 +27,12 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.traverse.GraphIterator;
 import org.junit.Test;
 
+import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
+import fiji.plugin.trackmate.action.closegaps.CloseGapsByLinearInterpolation;
 
 /**
  * Author: Robert Haase, Scientific Computing Facility, MPI-CBG,
@@ -66,8 +68,8 @@ public class CloseGapsByLinearInterpolationActionTest
 		model.endUpdate();
 
 		// close gap
-		final CloseGapsByLinearInterpolationAction cgblia = new CloseGapsByLinearInterpolationAction();
-		cgblia.execute( trackmate, null, null, null );
+		final CloseGapsByLinearInterpolation cgblia = new CloseGapsByLinearInterpolation();
+		cgblia.execute( trackmate, Logger.VOID_LOGGER );
 
 		final TrackModel trackModel = model.getTrackModel();
 
@@ -108,8 +110,8 @@ public class CloseGapsByLinearInterpolationActionTest
 		model.endUpdate();
 
 		// close gaps
-		final CloseGapsByLinearInterpolationAction cgblia = new CloseGapsByLinearInterpolationAction();
-		cgblia.execute( trackmate, null, null, null );
+		final CloseGapsByLinearInterpolation cgblia = new CloseGapsByLinearInterpolation();
+		cgblia.execute( trackmate, Logger.VOID_LOGGER );
 
 		final TrackModel trackModel = model.getTrackModel();
 
@@ -150,8 +152,8 @@ public class CloseGapsByLinearInterpolationActionTest
 		model.endUpdate();
 
 		// close gaps
-		final CloseGapsByLinearInterpolationAction cgblia = new CloseGapsByLinearInterpolationAction();
-		cgblia.execute( trackmate, null, null, null );
+		final CloseGapsByLinearInterpolation cgblia = new CloseGapsByLinearInterpolation();
+		cgblia.execute( trackmate, Logger.VOID_LOGGER );
 
 		final TrackModel trackModel = model.getTrackModel();
 

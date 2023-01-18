@@ -68,7 +68,7 @@ public class AutoNamingController
 			{
 				try
 				{
-					logger.log( "Applying nameing rule: " + autoNaming.toString() + ".\n" );
+					logger.log( "Applying naming rule: " + autoNaming.toString() + ".\n" );
 					logger.setStatus( "Spot auto-naming" );
 					AutoNamingPerformer.autoNameSpots( trackmate.getModel(), autoNaming );
 					trackmate.getModel().notifyFeaturesComputed();
