@@ -245,8 +245,8 @@ public interface GapClosingMethod
 			final long depth = settings.imp.getNSlices();
 			final long z0 = Math.max( 0, z - rz );
 			final long z1 = Math.min( depth - 1, z + rz );
-			settings.zstart = ( int ) z0;
-			settings.zend = ( int ) z1;
+			settingsCopy.zstart = ( int ) z0;
+			settingsCopy.zend = ( int ) z1;
 		}
 		return settingsCopy;
 	}
