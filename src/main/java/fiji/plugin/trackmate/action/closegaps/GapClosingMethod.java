@@ -106,17 +106,23 @@ public interface GapClosingMethod
 	{
 		final List< DefaultWeightedEdge > gaps = new ArrayList<>();
 		final TrackModel trackModel = model.getTrackModel();
-		final Set< DefaultWeightedEdge > edges = trackModel.edgeSet();
-		for ( final DefaultWeightedEdge edge : edges )
+		// Only inspect visible tracks.
+		for ( final Integer trackID : trackModel.trackIDs( true ) )
 		{
-			final Spot source = trackModel.getEdgeSource( edge );
-			final int st = source.getFeature( Spot.FRAME ).intValue();
-			final Spot target = trackModel.getEdgeTarget( edge );
-			final int tt = target.getFeature( Spot.FRAME ).intValue();
+			final Set< DefaultWeightedEdge > edges = trackModel.trackEdges( trackID );
+			for ( final DefaultWeightedEdge edge : edges )
+			{
+				final Spot source = trackModel.getEdgeSource( edge );
+				final int st = source.getFeature( Spot.FRAME ).intValue();
+				final Spot target = trackModel.getEdgeTarget( edge );
+				final int tt = target.getFeature( Spot.FRAME ).intValue();
 
-			if ( Math.abs( tt - st ) > 1 )
-				gaps.add( edge );
+				if ( Math.abs( tt - st ) > 1 )
+					gaps.add( edge );
+			}
+
 		}
+
 		return gaps;
 	}
 
