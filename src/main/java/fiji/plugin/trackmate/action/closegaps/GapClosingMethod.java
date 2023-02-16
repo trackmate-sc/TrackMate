@@ -22,6 +22,7 @@
 package fiji.plugin.trackmate.action.closegaps;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -131,8 +132,8 @@ public interface GapClosingMethod
 	 * position, radius, quality and time features of the source and target spot
 	 * of the specified edge.
 	 * <p>
-	 * The list is not empty only the edge bridges a gap, or if the source and
-	 * target spots are separated by strictly more than 1 frame.
+	 * The list is not empty only if the edge bridges a gap, or if the source
+	 * and target spots are separated by strictly more than 1 frame.
 	 * <p>
 	 * In the list, the spots are <b>not</b> added to the model and are <b>not
 	 * linked</b> be edges. The spots are added in time order, from the frame
@@ -257,20 +258,22 @@ public interface GapClosingMethod
 		return settingsCopy;
 	}
 
-	public static int countMissingSpots( final List< DefaultWeightedEdge > gaps, final Model model )
+	public static int countMissingSpots( final Collection< DefaultWeightedEdge > gaps, final Model model )
 	{
-		final TrackModel trackModel = model.getTrackModel();
 		int nSpots = 0;
 		for ( final DefaultWeightedEdge gap : gaps )
-		{
-			final Spot source = trackModel.getEdgeSource( gap );
-			final int st = source.getFeature( Spot.FRAME ).intValue();
-
-			final Spot target = trackModel.getEdgeTarget( gap );
-			final int tt = target.getFeature( Spot.FRAME ).intValue();
-
-			nSpots += Math.abs( tt - st ) - 1;
-		}
+			nSpots += countMissingSpots( gap, model );
 		return nSpots;
 	}
+
+	public static int countMissingSpots( final DefaultWeightedEdge gap, final Model model )
+	{
+		final TrackModel trackModel = model.getTrackModel();
+		final Spot source = trackModel.getEdgeSource( gap );
+		final int st = source.getFeature( Spot.FRAME ).intValue();
+		final Spot target = trackModel.getEdgeTarget( gap );
+		final int tt = target.getFeature( Spot.FRAME ).intValue();
+		return Math.abs( tt - st ) - 1;
+	}
+
 }
