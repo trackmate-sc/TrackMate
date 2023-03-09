@@ -72,7 +72,7 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 		if ( null == filePath || filePath.length() == 0 )
 		{
 			final Settings lastUsedSettings = SettingsPersistence.readLastUsedSettings( null, logger );
-			file = TMUtils.proposeTrackMateSaveFile( lastUsedSettings, logger );
+			file = TMUtils.proposeTrackMateSaveFile( lastUsedSettings, Logger.VOID_LOGGER );
 			file = IOUtils.askForFileForLoading( file, "Load a TrackMate XML file", null, logger );
 			if ( null == file )
 				return;
@@ -288,7 +288,8 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 	{
 		ImageJ.main( args );
 		final LoadTrackMatePlugIn plugIn = new LoadTrackMatePlugIn();
-		plugIn.run( "samples/FakeTracks.xml" );
+		plugIn.run( null );
+//		plugIn.run( "samples/FakeTracks.xml" );
 //		plugIn.run( "samples/MAX_Merged.xml" );
 //		plugIn.run( "c:/Users/tinevez/Development/TrackMateWS/TrackMate-Cellpose/samples/R2_multiC.xml" );
 //		plugIn.run( "/Users/tinevez/Projects/CCarabana/Data/113B_Day3/DUP_C3-20210122_113B_N1BcatTOM_day3_region3_each10min_zoom08_40x_FINAL.xml" );
