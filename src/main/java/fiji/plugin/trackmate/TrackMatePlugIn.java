@@ -25,12 +25,15 @@ import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
 
 import javax.swing.JFrame;
 
+import org.scijava.object.ObjectService;
+
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
 import fiji.plugin.trackmate.gui.wizard.TrackMateWizardSequence;
 import fiji.plugin.trackmate.gui.wizard.WizardSequence;
 import fiji.plugin.trackmate.io.SettingsPersistence;
+import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
@@ -169,6 +172,9 @@ public class TrackMatePlugIn implements PlugIn
 		model.setPhysicalUnits( spaceUnits, timeUnits );
 
 		final TrackMate trackmate = new TrackMate( model, settings );
+		ObjectService objectService = TMUtils.getContext().service( ObjectService.class );
+		if ( objectService != null )
+			objectService.addObject( trackmate );
 
 		// Set the num of threads from IJ prefs.
 		trackmate.setNumThreads( Prefs.getThreads() );
