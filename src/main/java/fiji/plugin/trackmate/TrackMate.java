@@ -578,6 +578,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 			final Future< Boolean > task = executorService.submit( callable );
 			tasks.add( task );
 		}
+		executorService.shutdown();
 		logger.setStatus( "Detection..." );
 		logger.setProgress( 0 );
 
