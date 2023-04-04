@@ -66,6 +66,7 @@ public class TMUtils
 {
 
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat( "EEE, d MMM yyyy HH:mm:ss" );
+	private static Context context;
 
 	/*
 	 * STATIC METHODS
@@ -711,7 +712,10 @@ public class TMUtils
 	/** Obtains the SciJava {@link Context} in use by ImageJ. */
 	public static Context getContext()
 	{
-		return ( Context ) IJ.runPlugIn( "org.scijava.Context", "" );
+		if (context == null) {
+			context = (Context) IJ.runPlugIn( "org.scijava.Context", "" );
+		}
+		return context;
 	}
 
 	/**
