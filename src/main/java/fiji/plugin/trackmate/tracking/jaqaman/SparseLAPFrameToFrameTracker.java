@@ -35,7 +35,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -52,6 +51,7 @@ import fiji.plugin.trackmate.tracking.jaqaman.costfunction.CostFunction;
 import fiji.plugin.trackmate.tracking.jaqaman.costfunction.FeaturePenaltyCostFunction;
 import fiji.plugin.trackmate.tracking.jaqaman.costfunction.SquareDistCostFunction;
 import fiji.plugin.trackmate.tracking.jaqaman.costmatrix.JaqamanLinkingCostMatrixCreator;
+import fiji.plugin.trackmate.util.Threads;
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
 
 public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorithm implements SpotTracker, Cancelable
@@ -175,7 +175,7 @@ public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorith
 		// Prepare workers.
 		final AtomicInteger progress = new AtomicInteger( 0 );
 		final AtomicBoolean ok = new AtomicBoolean( true );
-		final ExecutorService executors = Executors.newFixedThreadPool( numThreads );
+		final ExecutorService executors = Threads.newFixedThreadPool( numThreads );
 		final List< Future< Void > > futures = new ArrayList<>( framePairs.size() );
 		for ( final int[] framePair : framePairs )
 		{

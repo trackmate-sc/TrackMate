@@ -26,10 +26,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotRoi;
+import fiji.plugin.trackmate.util.Threads;
 import ij.ImagePlus;
 import ij.gui.PolygonRoi;
 import ij.measure.Measurements;
@@ -208,8 +207,8 @@ public class MaskUtils
 
 		// Get connected components.
 		final ExecutorService executorService = numThreads > 1
-				? Executors.newFixedThreadPool( numThreads )
-				: Executors.newSingleThreadExecutor();
+				? Threads.newFixedThreadPool( numThreads )
+				: Threads.newSingleThreadExecutor();
 
 		ConnectedComponents.labelAllConnectedComponents(
 				bitMask,

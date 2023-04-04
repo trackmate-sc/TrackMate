@@ -49,6 +49,7 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.detection.semiauto.SemiAutoTracker;
+import fiji.plugin.trackmate.util.Threads;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.tool.AbstractTool;
 import fiji.tool.ToolWithOptions;
@@ -280,51 +281,47 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	{
 		if ( null != roiedit )
 		{
-			new Thread( "SpotEditTool roiedit processing" )
+			Threads.run( "SpotEditTool roiedit processing", () ->
 			{
-				@Override
-				public void run()
+				roiedit.mouseReleased( e );
+				final ImagePlus lImp = getImagePlus( e );
+				final HyperStackDisplayer displayer = displayers.get( lImp );
+				final int frame = displayer.imp.getFrame() - 1;
+				final Model model = displayer.getModel();
+				final SelectionModel selectionModel = displayer.getSelectionModel();
+
+				final Iterator< Spot > it;
+				if ( IJ.shiftKeyDown() )
+					it = model.getSpots().iterator( true );
+				else
+					it = model.getSpots().iterator( frame, true );
+
+				final Collection< Spot > added = new ArrayList<>();
+				final double calibration[] = TMUtils.getSpatialCalibration( lImp );
+
+				while ( it.hasNext() )
 				{
-					roiedit.mouseReleased( e );
-					final ImagePlus lImp = getImagePlus( e );
-					final HyperStackDisplayer displayer = displayers.get( lImp );
-					final int frame = displayer.imp.getFrame() - 1;
-					final Model model = displayer.getModel();
-					final SelectionModel selectionModel = displayer.getSelectionModel();
+					final Spot spot = it.next();
+					final double x = spot.getFeature( Spot.POSITION_X );
+					final double y = spot.getFeature( Spot.POSITION_Y );
+					// In pixel units
+					final int xp = ( int ) ( x / calibration[ 0 ] + 0.5f );
+					final int yp = ( int ) ( y / calibration[ 1 ] + 0.5f );
 
-					final Iterator< Spot > it;
-					if ( IJ.shiftKeyDown() )
-						it = model.getSpots().iterator( true );
-					else
-						it = model.getSpots().iterator( frame, true );
-
-					final Collection< Spot > added = new ArrayList<>();
-					final double calibration[] = TMUtils.getSpatialCalibration( lImp );
-
-					while ( it.hasNext() )
-					{
-						final Spot spot = it.next();
-						final double x = spot.getFeature( Spot.POSITION_X );
-						final double y = spot.getFeature( Spot.POSITION_Y );
-						// In pixel units
-						final int xp = ( int ) ( x / calibration[ 0 ] + 0.5f );
-						final int yp = ( int ) ( y / calibration[ 1 ] + 0.5f );
-
-						if ( null != roiedit && roiedit.contains( xp, yp ) )
-							added.add( spot );
-					}
-
-					if ( !added.isEmpty() )
-					{
-						selectionModel.addSpotToSelection( added );
-						if ( added.size() == 1 )
-							logger.log( "Added one spot to selection.\n" );
-						else
-							logger.log( "Added " + added.size() + " spots to selection.\n" );
-					}
-					roiedit = null;
+					if ( null != roiedit && roiedit.contains( xp, yp ) )
+						added.add( spot );
 				}
-			}.start();
+
+				if ( !added.isEmpty() )
+				{
+					selectionModel.addSpotToSelection( added );
+					if ( added.size() == 1 )
+						logger.log( "Added one spot to selection.\n" );
+					else
+						logger.log( "Added " + added.size() + " spots to selection.\n" );
+				}
+				roiedit = null;
+			} );
 		}
 	}
 
@@ -817,16 +814,12 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 		final SemiAutoTracker autotracker = new SemiAutoTracker( model, selectionModel, lImp, logger );
 		autotracker.setParameters( params.qualityThreshold, params.distanceTolerance, params.nFrames );
 		autotracker.setNumThreads( 4 );
-		new Thread( "TrackMate semi-automated tracking thread" )
+		Threads.run( "TrackMate semi-automated tracking thread", () ->
 		{
-			@Override
-			public void run()
-			{
-				final boolean ok = autotracker.checkInput() && autotracker.process();
-				if ( !ok )
-					logger.error( autotracker.getErrorMessage() );
-			}
-		}.start();
+			final boolean ok = autotracker.checkInput() && autotracker.process();
+			if ( !ok )
+				logger.error( autotracker.getErrorMessage() );
+		} );
 	}
 
 	@Override

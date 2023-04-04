@@ -26,12 +26,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.ToDoubleFunction;
 
 import org.scijava.thread.ThreadService;
 
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.util.Threads;
 import fiji.plugin.trackmate.util.TMUtils;
 import ij.gui.Roi;
 import ij.plugin.frame.RoiManager;
@@ -120,7 +120,7 @@ public class HessianDetector< T extends RealType< T > & NativeType< T > > implem
 		// Handle multithreading.
 		final ThreadService threadService = TMUtils.getContext().getService( ThreadService.class );
 		if ( threadService == null )
-			es = Executors.newCachedThreadPool();
+			es = Threads.newCachedThreadPool();
 		else
 			es = threadService.getExecutorService();
 	}

@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -47,6 +46,7 @@ import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.SpotFeatureCalculator;
 import fiji.plugin.trackmate.features.TrackFeatureCalculator;
 import fiji.plugin.trackmate.tracking.SpotTracker;
+import fiji.plugin.trackmate.util.Threads;
 import fiji.plugin.trackmate.util.TMUtils;
 import ij.gui.Roi;
 import net.imagej.ImgPlus;
@@ -489,7 +489,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 				+ ( ( threadsPerFrame > 1 ) ? ( threadsPerFrame + " threads" ) : "1 thread" )
 				+ " per frame.\n" );
 
-		final ExecutorService executorService = Executors.newFixedThreadPool( nSimultaneousFrames );
+		final ExecutorService executorService = Threads.newFixedThreadPool( nSimultaneousFrames );
 		final List< Future< Boolean > > tasks = new ArrayList<>( numFrames );
 		for ( int i = settings.tstart; i <= settings.tend; i++ )
 		{

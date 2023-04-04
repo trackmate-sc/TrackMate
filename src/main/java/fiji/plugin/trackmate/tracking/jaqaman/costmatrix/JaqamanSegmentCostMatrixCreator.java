@@ -36,17 +36,18 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_MAX_DISTA
 import static fiji.plugin.trackmate.tracking.jaqaman.LAPUtils.checkFeatureMap;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
+
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.tracking.jaqaman.costfunction.CostFunction;
 import fiji.plugin.trackmate.tracking.jaqaman.costfunction.FeaturePenaltyCostFunction;
 import fiji.plugin.trackmate.tracking.jaqaman.costfunction.SquareDistCostFunction;
+import fiji.plugin.trackmate.util.Threads;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import net.imglib2.algorithm.MultiThreaded;
@@ -216,7 +217,7 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 		 * (gap-closing) then the segment middles (merging).
 		 */
 
-		final ExecutorService executorGCM = Executors.newFixedThreadPool( numThreads );
+		final ExecutorService executorGCM = Threads.newFixedThreadPool( numThreads );
 		for ( final Spot source : segmentEnds )
 		{
 			executorGCM.submit( new Runnable()
@@ -309,7 +310,7 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 		 */
 		if ( allowSplitting )
 		{
-			final ExecutorService executorS = Executors.newFixedThreadPool( numThreads );
+			final ExecutorService executorS = Threads.newFixedThreadPool( numThreads );
 			for ( final Spot source : allMiddles )
 			{
 				executorS.submit( new Runnable()

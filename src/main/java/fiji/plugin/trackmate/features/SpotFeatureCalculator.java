@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -41,6 +40,7 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactoryBase;
+import fiji.plugin.trackmate.util.Threads;
 import fiji.plugin.trackmate.util.TMUtils;
 import net.imagej.ImgPlus;
 import net.imglib2.algorithm.MultiThreaded;
@@ -223,7 +223,7 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm imple
 			tasks.add( frameTask );
 		}
 
-		final ExecutorService executorService = Executors.newFixedThreadPool( nSimultaneousFrames );
+		final ExecutorService executorService = Threads.newFixedThreadPool( nSimultaneousFrames );
 		List< Future< Void > > futures;
 		try
 		{

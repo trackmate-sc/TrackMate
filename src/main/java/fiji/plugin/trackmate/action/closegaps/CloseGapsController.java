@@ -31,6 +31,7 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
+import fiji.plugin.trackmate.util.Threads;
 
 public class CloseGapsController
 {
@@ -58,24 +59,20 @@ public class CloseGapsController
 	{
 		final EverythingDisablerAndReenabler disabler = new EverythingDisablerAndReenabler( gui, new Class[] { JLabel.class } );
 		disabler.disable();
-		new Thread( "TrackMateGapClosingThread" )
+		Threads.run( "TrackMateGapClosingThread", () ->
 		{
-			@Override
-			public void run()
+			try
 			{
-				try
-				{
-					logger.log( "Applying gap-closing method: " + gapClosingMethod.toString() + ".\n" );
-					logger.setStatus( "Gap-closing" );
-					gapClosingMethod.execute( trackmate, logger );
-					logger.log( "Gap-closing done.\n" );
-				}
-				finally
-				{
-					disabler.reenable();
-				}
+				logger.log( "Applying gap-closing method: " + gapClosingMethod.toString() + ".\n" );
+				logger.setStatus( "Gap-closing" );
+				gapClosingMethod.execute( trackmate, logger );
+				logger.log( "Gap-closing done.\n" );
 			}
-		}.start();
+			finally
+			{
+				disabler.reenable();
+			}
+		} );
 	}
 
 	public void show()

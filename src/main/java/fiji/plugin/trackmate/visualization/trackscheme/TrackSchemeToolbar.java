@@ -48,6 +48,7 @@ import javax.swing.JComboBox;
 import javax.swing.JToolBar;
 import javax.swing.SwingConstants;
 
+import fiji.plugin.trackmate.util.Threads;
 import fiji.plugin.trackmate.visualization.trackscheme.utils.SearchBar;
 
 public class TrackSchemeToolbar extends JToolBar
@@ -102,21 +103,17 @@ public class TrackSchemeToolbar extends JToolBar
 			@Override
 			public void actionPerformed( final ActionEvent e )
 			{
-				new Thread( "TrackScheme creating thumbnails thread" )
+				Threads.run( "TrackScheme creating thumbnails thread", () ->
 				{
-					@Override
-					public void run()
-					{
-						final boolean isEnabled = trackScheme.toggleThumbnail();
-						ImageIcon thumbnailIcon;
-						if ( !isEnabled )
-							thumbnailIcon = THUMBNAIL_OFF_ICON;
-						else
-							thumbnailIcon = THUMBNAIL_ON_ICON;
+					final boolean isEnabled = trackScheme.toggleThumbnail();
+					ImageIcon thumbnailIcon;
+					if ( !isEnabled )
+						thumbnailIcon = THUMBNAIL_OFF_ICON;
+					else
+						thumbnailIcon = THUMBNAIL_ON_ICON;
 
-						putValue( SMALL_ICON, thumbnailIcon );
-					}
-				}.start();
+					putValue( SMALL_ICON, thumbnailIcon );
+				} );
 			}
 		};
 		final JButton toggleThumbnailsButton = new JButton( toggleThumbnailAction );
@@ -235,15 +232,11 @@ public class TrackSchemeToolbar extends JToolBar
 				@Override
 				public void actionPerformed( final ActionEvent arg0 )
 				{
-					new Thread( "TrackScheme re-applying style thread" )
+					Threads.run( "TrackScheme re-applying style thread", () ->
 					{
-						@Override
-						public void run()
-						{
-							trackScheme.doTrackStyle();
-							trackScheme.refresh();
-						}
-					}.start();
+						trackScheme.doTrackStyle();
+						trackScheme.refresh();
+					} );
 				}
 			} );
 		}
@@ -262,16 +255,12 @@ public class TrackSchemeToolbar extends JToolBar
 				public void actionPerformed( final ActionEvent e )
 				{
 					final String selectedStyle = ( String ) selectStyleBox.getSelectedItem();
-					new Thread( "TrackScheme changing style thread" )
+					Threads.run( "TrackScheme changing style thread", () ->
 					{
-						@Override
-						public void run()
-						{
-							trackScheme.stylist.setStyle( selectedStyle );
-							trackScheme.doTrackStyle();
-							trackScheme.refresh();
-						}
-					}.start();
+						trackScheme.stylist.setStyle( selectedStyle );
+						trackScheme.doTrackStyle();
+						trackScheme.refresh();
+					} );
 				}
 			} );
 

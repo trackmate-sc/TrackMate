@@ -31,7 +31,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import javax.swing.ImageIcon;
@@ -45,6 +44,7 @@ import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.features.edges.DirectionalChangeAnalyzer;
+import fiji.plugin.trackmate.util.Threads;
 
 @Plugin( type = TrackAnalyzer.class, priority = Priority.LOW )
 public class TrackMotilityAnalyzer implements TrackAnalyzer
@@ -237,7 +237,7 @@ public class TrackMotilityAnalyzer implements TrackAnalyzer
 			tasks.add( task );
 		}
 
-		final ExecutorService executorService = Executors.newFixedThreadPool( numThreads );
+		final ExecutorService executorService = Threads.newFixedThreadPool( numThreads );
 		List< Future< Void > > futures;
 		try
 		{

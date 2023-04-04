@@ -52,6 +52,7 @@ import fiji.plugin.trackmate.detection.ThresholdDetectorFactory;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.util.DetectionPreview;
+import fiji.plugin.trackmate.util.Threads;
 import fiji.plugin.trackmate.util.TMUtils;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
@@ -266,29 +267,25 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 	private < T extends RealType< T > & NativeType< T > > void autoThreshold()
 	{
 		btnAutoThreshold.setEnabled( false );
-		new Thread( "TrackMate compute threshold thread" )
+		Threads.run( "TrackMate compute threshold thread", () ->
 		{
-			@Override
-			public void run()
+			try
 			{
-				try
-				{
-					@SuppressWarnings( "unchecked" )
-					final ImgPlus< T > img = TMUtils.rawWraps( settings.imp );
-					final int channel = ( ( Number ) sliderChannel.getValue() ).intValue() - 1;
-					final int frame = settings.imp.getT() - 1;
-					final RandomAccessibleInterval< T > imFrame = DetectionUtils.prepareFrameImg( img, channel, frame );
-					final Interval interval = DetectionUtils.squeeze( TMUtils.getInterval( img, settings ) );
-					final IntervalView< T > crop = Views.interval( imFrame, interval );
-					final double threshold = MaskUtils.otsuThreshold( crop );
-					SwingUtilities.invokeLater( () -> ftfIntensityThreshold.setValue( Double.valueOf( threshold ) ) );
-				}
-				finally
-				{
-					SwingUtilities.invokeLater( () -> btnAutoThreshold.setEnabled( true ) );
-				}
+				@SuppressWarnings( "unchecked" )
+				final ImgPlus< T > img = TMUtils.rawWraps( settings.imp );
+				final int channel = ( ( Number ) sliderChannel.getValue() ).intValue() - 1;
+				final int frame = settings.imp.getT() - 1;
+				final RandomAccessibleInterval< T > imFrame = DetectionUtils.prepareFrameImg( img, channel, frame );
+				final Interval interval = DetectionUtils.squeeze( TMUtils.getInterval( img, settings ) );
+				final IntervalView< T > crop = Views.interval( imFrame, interval );
+				final double threshold = MaskUtils.otsuThreshold( crop );
+				SwingUtilities.invokeLater( () -> ftfIntensityThreshold.setValue( Double.valueOf( threshold ) ) );
 			}
-		}.start();
+			finally
+			{
+				SwingUtilities.invokeLater( () -> btnAutoThreshold.setEnabled( true ) );
+			}
+		} );
 	}
 
 	@Override

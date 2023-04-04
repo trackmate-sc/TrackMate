@@ -70,6 +70,7 @@ import fiji.plugin.trackmate.providers.DetectorProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import fiji.plugin.trackmate.tracking.manual.ManualTrackerFactory;
+import fiji.plugin.trackmate.util.Threads;
 import fiji.plugin.trackmate.visualization.trackscheme.SpotImageUpdater;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
@@ -447,17 +448,13 @@ public class TrackMateWizardSequence implements WizardSequence
 		@Override
 		public void actionPerformed( final ActionEvent e )
 		{
-			new Thread( "Launching TrackScheme thread" )
+			Threads.run( "Launching TrackScheme thread", () ->
 			{
-				@Override
-				public void run()
-				{
-					final TrackScheme trackscheme = new TrackScheme( trackmate.getModel(), selectionModel, displaySettings );
-					final SpotImageUpdater thumbnailUpdater = new SpotImageUpdater( trackmate.getSettings() );
-					trackscheme.setSpotImageUpdater( thumbnailUpdater );
-					trackscheme.render();
-				}
-			}.start();
+				final TrackScheme trackscheme = new TrackScheme( trackmate.getModel(), selectionModel, displaySettings );
+				final SpotImageUpdater thumbnailUpdater = new SpotImageUpdater( trackmate.getSettings() );
+				trackscheme.setSpotImageUpdater( thumbnailUpdater );
+				trackscheme.render();
+			} );
 		}
 	}
 
@@ -497,19 +494,15 @@ public class TrackMateWizardSequence implements WizardSequence
 
 	private void showTables( final boolean showSpotTable )
 	{
-		new Thread( "TrackMate table thread." )
+		Threads.run( "TrackMate table thread.", () ->
 		{
-			@Override
-			public void run()
-			{
-				AbstractTMAction action;
-				if ( showSpotTable )
-					action = new ExportAllSpotsStatsAction();
-				else
-					action = new ExportStatsTablesAction();
+			AbstractTMAction action;
+			if ( showSpotTable )
+				action = new ExportAllSpotsStatsAction();
+			else
+				action = new ExportStatsTablesAction();
 
-				action.execute( trackmate, selectionModel, displaySettings, null );
-			}
-		}.start();
+			action.execute( trackmate, selectionModel, displaySettings, null );
+		} );
 	}
 }
