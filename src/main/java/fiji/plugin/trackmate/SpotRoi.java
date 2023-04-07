@@ -73,13 +73,13 @@ public class SpotRoi
 	 */
 	public double[] toPolygonX( final double calibration, final double xcorner, final double spotXCenter, final double magnification )
 	{
-		final double[] xp = new double[ x.length ];
-		for ( int i = 0; i < xp.length; i++ )
+		final double[] xPixelCoordinates = new double[ x.length ];
+		for ( int i = 0; i < xPixelCoordinates.length; i++ )
 		{
 			final double xc = ( spotXCenter + x[ i ] ) / calibration;
-			xp[ i ] = ( xc - xcorner ) * magnification;
+			xPixelCoordinates[ i ] = ( xc - xcorner ) * magnification;
 		}
-		return xp;
+		return xPixelCoordinates;
 	}
 
 	/**
@@ -97,13 +97,13 @@ public class SpotRoi
 	 */
 	public double[] toPolygonY( final double calibration, final double ycorner, final double spotYCenter, final double magnification )
 	{
-		final double[] yp = new double[ y.length ];
-		for ( int i = 0; i < yp.length; i++ )
+		final double[] yPixelCoordinates = new double[ y.length ];
+		for ( int i = 0; i < yPixelCoordinates.length; i++ )
 		{
 			final double yc = ( spotYCenter + y[ i ] ) / calibration;
-			yp[ i ] = ( yc - ycorner ) * magnification;
+			yPixelCoordinates[ i ] = ( yc - ycorner ) * magnification;
 		}
-		return yp;
+		return yPixelCoordinates;
 	}
 
 	public < T > IterableInterval< T > sample( final Spot spot, final ImgPlus< T > img )
