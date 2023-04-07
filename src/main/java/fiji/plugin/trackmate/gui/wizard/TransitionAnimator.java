@@ -24,7 +24,9 @@ package fiji.plugin.trackmate.gui.wizard;
 import java.awt.Component;
 import java.awt.image.BufferedImage;
 
+import fiji.plugin.trackmate.util.BottomToUp;
 import fiji.plugin.trackmate.util.ImageHelper;
+import fiji.plugin.trackmate.util.SideBySide;
 
 public class TransitionAnimator extends AbstractAnimator
 {
@@ -50,28 +52,25 @@ public class TransitionAnimator extends AbstractAnimator
 		{
 		default:
 		case LEFT:
-			combined = ImageHelper.combineImages(
+			SideBySide sideBySide = new SideBySide();
+			combined = SideBySide.combineImages(
 					ImageHelper.captureComponent( to ),
-					ImageHelper.captureComponent( from ),
-					ImageHelper.SIDE_BY_SIDE );
+					ImageHelper.captureComponent( from ));
 			break;
 		case RIGHT:
-			combined = ImageHelper.combineImages(
+			combined = SideBySide.combineImages(
 					ImageHelper.captureComponent( from ),
-					ImageHelper.captureComponent( to ),
-					ImageHelper.SIDE_BY_SIDE );
+					ImageHelper.captureComponent( to ));
 			break;
 		case BOTTOM:
-			combined = ImageHelper.combineImages(
+			combined = BottomToUp.combineImages(
 					ImageHelper.captureComponent( to ),
-					ImageHelper.captureComponent( from ),
-					ImageHelper.BOTTOM_TO_TOP );
+					ImageHelper.captureComponent( from ));
 			break;
 		case TOP:
-			combined = ImageHelper.combineImages(
+			combined = BottomToUp.combineImages(
 					ImageHelper.captureComponent( from ),
-					ImageHelper.captureComponent( to ),
-					ImageHelper.BOTTOM_TO_TOP );
+					ImageHelper.captureComponent( to ));
 			break;
 		}
 
