@@ -197,7 +197,7 @@ public class QualityHistogramChart extends JPanel
 	public void displayHistogram( final double[] values, final double threshold )
 	{
 		this.threshold = threshold;
-		this.autoThreshold = TMUtils.otsuThreshold( values );
+		this.autoThreshold = ThresholdUtils.otsuThreshold( values );
 		if ( values.length > 0 )
 		{
 			final int nBins = getNBins( values, 8, 100 );

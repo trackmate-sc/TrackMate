@@ -60,6 +60,7 @@ import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import fiji.plugin.trackmate.util.ThresholdUtils;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -351,7 +352,7 @@ public class FilterPanel extends javax.swing.JPanel
 		}
 		else
 		{
-			final int nBins = TMUtils.getNBins( values, 8, 100 );
+			final int nBins = ThresholdUtils.getNBins( values, 8, 100 );
 			dataset = new LogHistogramDataset();
 			if ( nBins > 1 )
 				dataset.addSeries( DATA_SERIES_NAME, values, nBins );
@@ -388,7 +389,7 @@ public class FilterPanel extends javax.swing.JPanel
 		}
 		else
 		{
-			final int nBins = TMUtils.getNBins( values, 8, 100 );
+			final int nBins = ThresholdUtils.getNBins( values, 8, 100 );
 			dataset = new LogHistogramDataset();
 
 			if ( nBins > 1 )
@@ -405,7 +406,7 @@ public class FilterPanel extends javax.swing.JPanel
 		final double[] values = valueCollector.apply( key );
 		if ( null != values && values.length > 0 )
 		{
-			threshold = TMUtils.otsuThreshold( values );
+			threshold = ThresholdUtils.otsuThreshold( values );
 			redrawThresholdMarker();
 		}
 	}
