@@ -227,33 +227,9 @@ public class KalmanTracker implements SpotTracker, Benchmark, Cancelable
 			// Use the spot in the next frame has measurements.
 			final List< Spot > measurements = generateSpotList( spots, frame );
 
-			/*
-			 * Predict for all Kalman filters, and use it to generate linking
-			 * candidates.
-			 */
 			final Map< Spot, CVMKalmanFilter > predictionMap = new HashMap<>( kalmanFiltersMap.size() );
-			for ( final CVMKalmanFilter kf : kalmanFiltersMap.keySet() )
-			{
-				final double[] X = kf.predict();
-				final Spot s = kalmanFiltersMap.get( kf );
-				final Spot predSpot = new Spot( X[ 0 ], X[ 1 ], X[ 2 ], s.getFeature( Spot.RADIUS ), s.getFeature( Spot.QUALITY ) );
-				// copy the necessary features of original spot to the predicted
-				// spot
-				if ( null != featurePenalties )
-					predSpot.copyFeatures( s, featurePenalties );
 
-				predictionMap.put( predSpot, kf );
-
-				if ( savePredictions )
-				{
-					final Spot pred = new Spot( X[ 0 ], X[ 1 ], X[ 2 ], s.getFeature( Spot.RADIUS ), s.getFeature( Spot.QUALITY ) );
-					pred.setName( "Pred_" + s.getName() );
-					pred.putFeature( Spot.RADIUS, s.getFeature( Spot.RADIUS ) );
-					predictionsCollection.add( predSpot, frame );
-				}
-
-			}
-			final List< Spot > predictions = new ArrayList<>( predictionMap.keySet() );
+			final List< Spot > predictions = computePredictionMap(kalmanFiltersMap,frame,predictionMap);
 
 			/*
 			 * The KF for which we could not find a measurement in the target
@@ -397,6 +373,31 @@ public class KalmanTracker implements SpotTracker, Benchmark, Cancelable
 		processingTime = end - start;
 
 		return true;
+	}
+
+	final List<Spot> computePredictionMap(Map< CVMKalmanFilter, Spot > kalmanFiltersMap, int frame, Map<Spot, CVMKalmanFilter> predictionMap){
+		for ( final CVMKalmanFilter kf : kalmanFiltersMap.keySet() )
+		{
+			final double[] X = kf.predict();
+			final Spot s = kalmanFiltersMap.get( kf );
+			final Spot predSpot = new Spot( X[ 0 ], X[ 1 ], X[ 2 ], s.getFeature( Spot.RADIUS ), s.getFeature( Spot.QUALITY ) );
+			// copy the necessary features of original spot to the predicted
+			// spot
+			if ( null != featurePenalties )
+				predSpot.copyFeatures( s, featurePenalties );
+
+			predictionMap.put( predSpot, kf );
+
+			if ( savePredictions )
+			{
+				final Spot pred = new Spot( X[ 0 ], X[ 1 ], X[ 2 ], s.getFeature( Spot.RADIUS ), s.getFeature( Spot.QUALITY ) );
+				pred.setName( "Pred_" + s.getName() );
+				pred.putFeature( Spot.RADIUS, s.getFeature( Spot.RADIUS ) );
+				predictionsCollection.add( predSpot, frame );
+			}
+
+		}
+		return (List<Spot>) predictionMap.keySet();
 	}
 
 	@Override
