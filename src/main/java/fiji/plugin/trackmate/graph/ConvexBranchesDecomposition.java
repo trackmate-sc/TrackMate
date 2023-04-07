@@ -335,7 +335,7 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 				boolean found = false;
 				for ( final Spot successor : successors )
 				{
-					if ( !forbidMiddleLinks && !found && successor.diffTo( spot, Spot.FRAME ) < 2 )
+					if(isSuccessorFound(forbidMiddleLinks,found,successor,spot))
 					{
 						found = true;
 					}
@@ -351,7 +351,7 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 				boolean found = false;
 				for ( final Spot predecessor : predecessors )
 				{
-					if ( !forbidMiddleLinks && !found && spot.diffTo( predecessor, Spot.FRAME ) < 2 )
+					if(isPredecessorFound(forbidMiddleLinks,found,spot,predecessor))
 					{
 						found = true;
 					}
@@ -380,7 +380,7 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 					boolean found = false;
 					for ( final Spot successor : successors )
 					{
-						if ( !forbidMiddleLinks && !found && successor.diffTo( spot, Spot.FRAME ) < 2 )
+						if (isSuccessorFound(forbidMiddleLinks,found,successor,spot) )
 						{
 							found = true;
 						}
@@ -410,7 +410,7 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 					boolean found = false;
 					for ( final Spot predecessor : predecessors )
 					{
-						if ( !forbidMiddleLinks && !found && spot.diffTo( predecessor, Spot.FRAME ) < 2 )
+						if ( isPredecessorFound(forbidMiddleLinks,found,spot,predecessor))
 						{
 							found = true;
 						}
@@ -431,7 +431,7 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 				boolean found = false;
 				for ( final Spot predecessor : predecessors )
 				{
-					if ( !forbidMiddleLinks && !found && spot.diffTo( predecessor, Spot.FRAME ) < 2 )
+					if ( isPredecessorFound(forbidMiddleLinks,found,spot,predecessor) )
 					{
 						found = true;
 					}
@@ -449,7 +449,7 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 				}
 				for ( final Spot successor : successors )
 				{
-					if ( !forbidMiddleLinks && !found && successor.diffTo( spot, Spot.FRAME ) < 2 )
+					if ( isSuccessorFound(forbidMiddleLinks,found,successor,spot) )
 					{
 						found = true;
 					}
@@ -507,6 +507,15 @@ public class ConvexBranchesDecomposition implements Algorithm, Benchmark
 		output.branches = branches;
 		output.links = links;
 		return output;
+
+	}
+
+	private static boolean isPredecessorFound(boolean forbidMiddleLinks, boolean found, Spot spot, Spot predecessor) {
+		return !forbidMiddleLinks && !found && spot.diffTo( predecessor, Spot.FRAME ) < 2;
+	}
+
+	private static boolean isSuccessorFound(boolean forbidMiddleLinks, boolean found, Spot successor, Spot spot) {
+		return !forbidMiddleLinks && !found && successor.diffTo( spot, Spot.FRAME ) < 2;
 
 	}
 
