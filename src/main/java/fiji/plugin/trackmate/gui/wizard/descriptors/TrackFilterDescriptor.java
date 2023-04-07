@@ -66,9 +66,10 @@ public class TrackFilterDescriptor extends WizardPanelDescriptor
 
 	private void filterTracks()
 	{
+		final Model model = trackmate.getModel();
 		final FilterGuiPanel component = ( FilterGuiPanel ) targetPanel;
 		trackmate.getSettings().setTrackFilters( component.getFeatureFilters() );
-		trackmate.execTrackFiltering( false );
+		model.execTrackFiltering(false,trackmate.getSettings());
 	}
 
 	@Override
@@ -126,9 +127,10 @@ public class TrackFilterDescriptor extends WizardPanelDescriptor
 	@Override
 	public void displayingPanel()
 	{
+		final Model model = trackmate.getModel();
 		final FilterGuiPanel component = ( FilterGuiPanel ) targetPanel;
 		trackmate.getSettings().setTrackFilters( component.getFeatureFilters() );
-		trackmate.execTrackFiltering( false );
+		model.execTrackFiltering(false,trackmate.getSettings());
 	}
 
 	@Override
@@ -140,7 +142,7 @@ public class TrackFilterDescriptor extends WizardPanelDescriptor
 		final FilterGuiPanel component = ( FilterGuiPanel ) targetPanel;
 		final List< FeatureFilter > featureFilters = component.getFeatureFilters();
 		trackmate.getSettings().setTrackFilters( featureFilters );
-		trackmate.execTrackFiltering( false );
+		model.execTrackFiltering(false,trackmate.getSettings());
 
 		final int ntotal = model.getTrackModel().nTracks( false );
 		if ( featureFilters == null || featureFilters.isEmpty() )

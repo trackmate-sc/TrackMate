@@ -689,56 +689,6 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 		return true;
 	}
 
-	public boolean execTrackFiltering( final boolean doLogIt )
-	{
-		// Cannot be canceled.
-
-		if ( doLogIt )
-		{
-			final Logger logger = model.getLogger();
-			logger.log( "Starting track filtering process.\n" );
-		}
-
-		model.beginUpdate();
-		try
-		{
-			for ( final Integer trackID : model.getTrackModel().trackIDs( false ) )
-			{
-				boolean trackIsOk = true;
-				for ( final FeatureFilter filter : settings.getTrackFilters() )
-				{
-					final Double tval = filter.value;
-					final Double val = model.getFeatureModel().getTrackFeature( trackID, filter.feature );
-					if ( null == val )
-						continue;
-
-					if ( filter.isAbove )
-					{
-						if ( val < tval )
-						{
-							trackIsOk = false;
-							break;
-						}
-					}
-					else
-					{
-						if ( val > tval )
-						{
-							trackIsOk = false;
-							break;
-						}
-					}
-				}
-				model.setTrackVisibility( trackID, trackIsOk );
-			}
-		}
-		finally
-		{
-			model.endUpdate();
-		}
-		return true;
-	}
-
 	@Override
 	public String toString()
 	{
@@ -814,7 +764,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 		if ( isCanceled() )
 			return true;
 
-		if ( !execTrackFiltering( true ) )
+		if ( !model.execTrackFiltering( true ,settings) )
 			return false;
 
 		return true;

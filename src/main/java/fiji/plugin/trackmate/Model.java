@@ -958,4 +958,55 @@ public class Model
 		}
 	}
 
+
+	public boolean execTrackFiltering( final boolean doLogIt, final Settings settings )
+	{
+		// Cannot be canceled.
+
+		if ( doLogIt )
+		{
+			final Logger logger = getLogger();
+			logger.log( "Starting track filtering process.\n" );
+		}
+
+		beginUpdate();
+		try
+		{
+			for ( final Integer trackID : getTrackModel().trackIDs( false ) )
+			{
+				boolean trackIsOk = true;
+				for ( final FeatureFilter filter : settings.getTrackFilters() )
+				{
+					final Double tval = filter.value;
+					final Double val = getFeatureModel().getTrackFeature( trackID, filter.feature );
+					if ( null == val )
+						continue;
+
+					if ( filter.isAbove )
+					{
+						if ( val < tval )
+						{
+							trackIsOk = false;
+							break;
+						}
+					}
+					else
+					{
+						if ( val > tval )
+						{
+							trackIsOk = false;
+							break;
+						}
+					}
+				}
+				setTrackVisibility( trackID, trackIsOk );
+			}
+		}
+		finally
+		{
+			endUpdate();
+		}
+		return true;
+	}
+
 }
