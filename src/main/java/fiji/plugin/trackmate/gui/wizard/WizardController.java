@@ -42,6 +42,7 @@ import org.scijava.Cancelable;
 
 import fiji.plugin.trackmate.gui.wizard.TransitionAnimator.Direction;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
+import fiji.plugin.trackmate.util.Threads;
 
 public class WizardController
 {
@@ -175,34 +176,30 @@ public class WizardController
 			return;
 
 		final EverythingDisablerAndReenabler reenabler = new EverythingDisablerAndReenabler( wizardPanel.panelButtons, new Class[] { JLabel.class } );
-		new Thread( "Wizard exec thread" )
+		Threads.run( "Wizard exec thread", () ->
 		{
-			@Override
-			public void run()
+			try
 			{
-				try
-				{
-					reenabler.disable();
-					// Wait for the animation to finish.
-					Thread.sleep( 200 );
-					wizardPanel.btnNext.setVisible( false );
-					wizardPanel.btnCancel.setVisible( true );
-					wizardPanel.btnCancel.setEnabled( true );
-					runnable.run();
-				}
-				catch ( final InterruptedException e )
-				{
-					e.printStackTrace();
-				}
-				finally
-				{
-					wizardPanel.btnCancel.setVisible( false );
-					wizardPanel.btnNext.setVisible( true );
-					wizardPanel.btnNext.requestFocusInWindow();
-					reenabler.reenable();
-				}
-			};
-		}.start();
+				reenabler.disable();
+				// Wait for the animation to finish.
+				Thread.sleep( 200 );
+				wizardPanel.btnNext.setVisible( false );
+				wizardPanel.btnCancel.setVisible( true );
+				wizardPanel.btnCancel.setEnabled( true );
+				runnable.run();
+			}
+			catch ( final InterruptedException e )
+			{
+				e.printStackTrace();
+			}
+			finally
+			{
+				wizardPanel.btnCancel.setVisible( false );
+				wizardPanel.btnNext.setVisible( true );
+				wizardPanel.btnNext.requestFocusInWindow();
+				reenabler.reenable();
+			}
+		} );
 	}
 
 	public void init()
@@ -228,7 +225,7 @@ public class WizardController
 		wizardPanel.btnResume.setVisible( true );
 
 		display( saveDescriptor, sequence.current(), Direction.BOTTOM );
-		new Thread( () -> {
+		Threads.run( () -> {
 			try
 			{
 				Thread.sleep( 250 );
@@ -239,7 +236,7 @@ public class WizardController
 			}
 			saveDescriptor.aboutToDisplayPanel();
 			saveDescriptor.displayingPanel();
-		} ).start();
+		} );
 	}
 
 	protected void resume()

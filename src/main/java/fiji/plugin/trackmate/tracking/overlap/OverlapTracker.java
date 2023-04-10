@@ -33,7 +33,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -46,6 +45,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.tracking.SpotTracker;
+import fiji.plugin.trackmate.util.Threads;
 import math.geom2d.AffineTransform2D;
 import math.geom2d.Point2D;
 import math.geom2d.conic.Circle2D;
@@ -206,7 +206,7 @@ public class OverlapTracker extends MultiThreadedBenchmarkAlgorithm implements S
 			if ( sourceGeometries.isEmpty() || targetGeometries.isEmpty() )
 				continue;
 
-			final ExecutorService executors = Executors.newFixedThreadPool( numThreads );
+			final ExecutorService executors = Threads.newFixedThreadPool( numThreads );
 			final List< Future< IoULink > > futures = new ArrayList<>();
 
 			// Submit work.

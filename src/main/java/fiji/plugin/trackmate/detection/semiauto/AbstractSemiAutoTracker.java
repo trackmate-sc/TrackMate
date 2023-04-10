@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import fiji.plugin.trackmate.Logger;
@@ -38,6 +37,7 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.detection.LogDetector;
 import fiji.plugin.trackmate.detection.SpotDetector;
+import fiji.plugin.trackmate.util.Threads;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.algorithm.Algorithm;
@@ -156,7 +156,7 @@ public abstract class AbstractSemiAutoTracker< T extends RealType< T > & NativeT
 
 		ok = true;
 		final int nThreads = Math.min( numThreads, spots.size() );
-		final ExecutorService executors = Executors.newFixedThreadPool( nThreads );
+		final ExecutorService executors = Threads.newFixedThreadPool( nThreads );
 		final List< Future< ? > > futures = new ArrayList<>( spots.size() );
 		for ( final Spot spot : spots )
 		{

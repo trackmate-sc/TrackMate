@@ -58,6 +58,7 @@ import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
+import fiji.plugin.trackmate.util.Threads;
 
 public class GrapherPanel extends JPanel
 {
@@ -126,7 +127,7 @@ public class GrapherPanel extends JPanel
 				"Mean intensity ch1",
 				spotFeatures,
 				spotFeatureNames,
-				( xKey, yKeys ) -> new Thread( () -> plotSpotFeatures( xKey, yKeys ) ).start() );
+				( xKey, yKeys ) -> Threads.run( () -> plotSpotFeatures( xKey, yKeys ) ) );
 		panelSpot.add( spotFeatureSelectionPanel );
 
 		// regen edge features
@@ -138,7 +139,7 @@ public class GrapherPanel extends JPanel
 				"Speed",
 				edgeFeatures,
 				edgeFeatureNames,
-				( xKey, yKeys ) -> new Thread( () -> plotEdgeFeatures( xKey, yKeys ) ).start() );
+				( xKey, yKeys ) -> Threads.run( () -> plotEdgeFeatures( xKey, yKeys ) ) );
 		panelEdges.add( edgeFeatureSelectionPanel );
 
 		// regen trak features
@@ -150,7 +151,7 @@ public class GrapherPanel extends JPanel
 				"Number of spots in track",
 				trackFeatures,
 				trackFeatureNames,
-				( xKey, yKeys ) -> new Thread( () -> plotTrackFeatures( xKey, yKeys ) ).start() );
+				( xKey, yKeys ) -> Threads.run( () -> plotTrackFeatures( xKey, yKeys ) ) );
 		panelTracks.add( trackFeatureSelectionPanel );
 
 		panelSelection = new JPanel();

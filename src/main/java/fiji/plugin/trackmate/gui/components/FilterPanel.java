@@ -40,7 +40,6 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -71,6 +70,7 @@ import org.jfree.chart.renderer.xy.XYBarRenderer;
 
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.gui.GuiUtils;
+import fiji.plugin.trackmate.util.Threads;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.util.NumberParser;
 
@@ -556,7 +556,7 @@ public class FilterPanel extends javax.swing.JPanel
 			if ( ex == null )
 			{
 				// Create new waiting line
-				ex = Executors.newSingleThreadScheduledExecutor();
+				ex = Threads.newSingleThreadScheduledExecutor();
 				future = ex.schedule( command, WAIT_DELAY, TimeUnit.SECONDS );
 			}
 			else

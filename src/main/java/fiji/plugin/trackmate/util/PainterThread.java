@@ -56,6 +56,7 @@ public class PainterThread extends Thread
 	public PainterThread( final ThreadGroup group, final String name, final Paintable paintable )
 	{
 		super( group, name );
+		setDaemon( true );
 		this.paintable = paintable;
 		this.pleaseRepaint = false;
 	}

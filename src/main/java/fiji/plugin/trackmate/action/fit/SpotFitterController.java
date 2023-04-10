@@ -39,6 +39,7 @@ import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
+import fiji.plugin.trackmate.util.Threads;
 import ij.ImagePlus;
 
 public class SpotFitterController
@@ -74,124 +75,116 @@ public class SpotFitterController
 	{
 		final EverythingDisablerAndReenabler disabler = new EverythingDisablerAndReenabler( gui, new Class[] { JLabel.class } );
 		disabler.disable();
-		new Thread( "SpotFitterControllerUndoThread" )
+		Threads.run( "SpotFitterControllerUndoThread", () ->
 		{
-			@Override
-			public void run()
+			try
 			{
-				try
-				{
-					logger.log( "Undoing last fit.\n" );
-					logger.setStatus( "Undoing" );
+				logger.log( "Undoing last fit.\n" );
+				logger.setStatus( "Undoing" );
 
-					int progress = 0;
-					for ( final Spot spot : undo.keySet() )
-					{
-						final double[] arr = undo.get( spot );
-						spot.putFeature( Spot.POSITION_X, arr[ 0 ] );
-						spot.putFeature( Spot.POSITION_Y, arr[ 1 ] );
-						spot.putFeature( Spot.POSITION_Z, arr[ 2 ] );
-						spot.putFeature( Spot.RADIUS, arr[ 3 ] );
-						logger.setProgress( ( double ) progress++ / undo.size() );
-					}
-					logger.setProgress( 0. );
-					// Recompute features.
-					trackmate.computeSpotFeatures( true );
-					trackmate.computeEdgeFeatures( true );
-					trackmate.computeTrackFeatures( true );
-					logger.log( "Undoing done.\n" );
-
-					// Notify changes happened.
-					trackmate.getModel().getModelChangeListener().forEach( l -> l.modelChanged( new ModelChangeEvent( this, ModelChangeEvent.MODEL_MODIFIED ) ) );
-				}
-				finally
+				int progress = 0;
+				for ( final Spot spot : undo.keySet() )
 				{
-					disabler.reenable();
+					final double[] arr = undo.get( spot );
+					spot.putFeature( Spot.POSITION_X, arr[ 0 ] );
+					spot.putFeature( Spot.POSITION_Y, arr[ 1 ] );
+					spot.putFeature( Spot.POSITION_Z, arr[ 2 ] );
+					spot.putFeature( Spot.RADIUS, arr[ 3 ] );
+					logger.setProgress( ( double ) progress++ / undo.size() );
 				}
+				logger.setProgress( 0. );
+				// Recompute features.
+				trackmate.computeSpotFeatures( true );
+				trackmate.computeEdgeFeatures( true );
+				trackmate.computeTrackFeatures( true );
+				logger.log( "Undoing done.\n" );
+
+				// Notify changes happened.
+				trackmate.getModel().getModelChangeListener().forEach( l -> l.modelChanged( new ModelChangeEvent( this, ModelChangeEvent.MODEL_MODIFIED ) ) );
 			}
-		}.start();
+			finally
+			{
+				disabler.reenable();
+			}
+		} );
 	}
 
 	private void fit()
 	{
 		final EverythingDisablerAndReenabler disabler = new EverythingDisablerAndReenabler( gui, new Class[] { JLabel.class } );
 		disabler.disable();
-		new Thread( "SpotFitterControllerFitterThread" )
+		Threads.run( "SpotFitterControllerFitterThread", () ->
 		{
-			@Override
-			public void run()
+			try
 			{
-				try
+				final ImagePlus imp = trackmate.getSettings().imp;
+				// 1-based to 0-based.
+				final int channel = gui.getSelectedChannel() - 1;
+				final int index = gui.getSelectedFitIndex();
+				final SpotFitter fitter;
+				// Stupid and harsh:
+				if ( DetectionUtils.is2D( imp ) )
 				{
-					final ImagePlus imp = trackmate.getSettings().imp;
-					// 1-based to 0-based.
-					final int channel = gui.getSelectedChannel() - 1;
-					final int index = gui.getSelectedFitIndex();
-					final SpotFitter fitter;
-					// Stupid and harsh:
-					if ( DetectionUtils.is2D( imp ) )
-					{
-						if ( index == 0 )
-							fitter = new SpotGaussianFitter2D( imp, channel );
-						else if ( index == 1 )
-							fitter = new SpotGaussianFitter2DFixedRadius( imp, channel );
-						else
-							throw new IllegalArgumentException( "Index points to an unknown fit model: " + index );
-					}
+					if ( index == 0 )
+						fitter = new SpotGaussianFitter2D( imp, channel );
+					else if ( index == 1 )
+						fitter = new SpotGaussianFitter2DFixedRadius( imp, channel );
 					else
-					{
-						if ( index == 0 )
-							fitter = new SpotGaussianFitter3D( imp, channel );
-						else if ( index == 1 )
-							fitter = new SpotGaussianFitter3DFixedRadius( imp, channel );
-						else
-							throw new IllegalArgumentException( "Index points to an unknown fit model: " + index );
-					}
-					fitter.setNumThreads( trackmate.getNumThreads() );
-
-					// Get spots to fit.
-					final Iterable< Spot > spots;
-					if ( gui.rdbtnAll.isSelected() )
-						spots = trackmate.getModel().getSpots().iterable( true );
-					else if ( gui.rdbtnSelection.isSelected() )
-						spots = selectionModel.getSpotSelection();
-					else
-					{
-						selectionModel.selectTrack(
-								selectionModel.getSpotSelection(),
-								selectionModel.getEdgeSelection(), 0 );
-						spots = selectionModel.getSpotSelection();
-					}
-
-					// Prepare the undo array.
-					undo.clear();
-					for ( final Spot spot : spots )
-					{
-						undo.put( spot, new double[] {
-								spot.getDoublePosition( 0 ),
-								spot.getDoublePosition( 1 ),
-								spot.getDoublePosition( 2 ),
-								spot.getFeature( Spot.RADIUS ).doubleValue()
-						} );
-					}
-
-					// Perform fit.
-					fitter.process( spots, logger );
-
-					// Recompute features.
-					trackmate.computeSpotFeatures( true );
-					trackmate.computeEdgeFeatures( true );
-					trackmate.computeTrackFeatures( true );
-
-					// Notify changes happened.
-					trackmate.getModel().getModelChangeListener().forEach( l -> l.modelChanged( new ModelChangeEvent( this, ModelChangeEvent.MODEL_MODIFIED ) ) );
+						throw new IllegalArgumentException( "Index points to an unknown fit model: " + index );
 				}
-				finally
+				else
 				{
-					disabler.reenable();
+					if ( index == 0 )
+						fitter = new SpotGaussianFitter3D( imp, channel );
+					else if ( index == 1 )
+						fitter = new SpotGaussianFitter3DFixedRadius( imp, channel );
+					else
+						throw new IllegalArgumentException( "Index points to an unknown fit model: " + index );
 				}
+				fitter.setNumThreads( trackmate.getNumThreads() );
+
+				// Get spots to fit.
+				final Iterable< Spot > spots;
+				if ( gui.rdbtnAll.isSelected() )
+					spots = trackmate.getModel().getSpots().iterable( true );
+				else if ( gui.rdbtnSelection.isSelected() )
+					spots = selectionModel.getSpotSelection();
+				else
+				{
+					selectionModel.selectTrack(
+							selectionModel.getSpotSelection(),
+							selectionModel.getEdgeSelection(), 0 );
+					spots = selectionModel.getSpotSelection();
+				}
+
+				// Prepare the undo array.
+				undo.clear();
+				for ( final Spot spot : spots )
+				{
+					undo.put( spot, new double[] {
+							spot.getDoublePosition( 0 ),
+							spot.getDoublePosition( 1 ),
+							spot.getDoublePosition( 2 ),
+							spot.getFeature( Spot.RADIUS ).doubleValue()
+					} );
+				}
+
+				// Perform fit.
+				fitter.process( spots, logger );
+
+				// Recompute features.
+				trackmate.computeSpotFeatures( true );
+				trackmate.computeEdgeFeatures( true );
+				trackmate.computeTrackFeatures( true );
+
+				// Notify changes happened.
+				trackmate.getModel().getModelChangeListener().forEach( l -> l.modelChanged( new ModelChangeEvent( this, ModelChangeEvent.MODEL_MODIFIED ) ) );
 			}
-		}.start();
+			finally
+			{
+				disabler.reenable();
+			}
+		} );
 	}
 
 	public void show()

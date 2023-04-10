@@ -33,7 +33,6 @@ import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -45,6 +44,7 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.tracking.SpotTracker;
+import fiji.plugin.trackmate.util.Threads;
 import fiji.plugin.trackmate.util.TMUtils;
 import net.imglib2.KDTree;
 import net.imglib2.RealPoint;
@@ -110,7 +110,7 @@ public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm impl
 
 		// Prepare executors.
 		final AtomicInteger progress = new AtomicInteger( 0 );
-		final ExecutorService executors = Executors.newFixedThreadPool( numThreads );
+		final ExecutorService executors = Threads.newFixedThreadPool( numThreads );
 		final List< Future< Void > > futures = new ArrayList<>( frames.size() );
 		for ( int i = frames.first(); i < frames.last(); i++ )
 		{

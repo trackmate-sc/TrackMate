@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 import org.scijava.thread.ThreadService;
@@ -40,6 +39,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.util.MedianFilter2D;
+import fiji.plugin.trackmate.util.Threads;
 import fiji.plugin.trackmate.util.TMUtils;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
@@ -111,60 +111,56 @@ public class DetectionUtils
 			final Consumer< Boolean > buttonEnabler )
 	{
 		buttonEnabler.accept( false );
-		new Thread( "TrackMate preview detection thread" )
+		Threads.run("TrackMate preview detection thread", () ->
 		{
-			@Override
-			public void run()
+			try
 			{
-				try
+
+				final Settings lSettings = new Settings( settings.imp );
+				lSettings.tstart = frame;
+				lSettings.tend = frame;
+				settings.setRoi( settings.imp.getRoi() );
+
+				lSettings.detectorFactory = detectorFactory;
+				lSettings.detectorSettings = detectorSettings;
+
+				final TrackMate trackmate = new TrackMate( lSettings );
+				trackmate.getModel().setLogger( logger );
+
+				final boolean detectionOk = trackmate.execDetection();
+				if ( !detectionOk )
 				{
-
-					final Settings lSettings = new Settings( settings.imp );
-					lSettings.tstart = frame;
-					lSettings.tend = frame;
-					settings.setRoi( settings.imp.getRoi() );
-
-					lSettings.detectorFactory = detectorFactory;
-					lSettings.detectorSettings = detectorSettings;
-
-					final TrackMate trackmate = new TrackMate( lSettings );
-					trackmate.getModel().setLogger( logger );
-
-					final boolean detectionOk = trackmate.execDetection();
-					if ( !detectionOk )
-					{
-						logger.error( trackmate.getErrorMessage() );
-						return;
-					}
-					logger.log( "Found " + trackmate.getModel().getSpots().getNSpots( false ) + " spots." );
-
-					// Wrap new spots in a list.
-					final SpotCollection newspots = trackmate.getModel().getSpots();
-					final Iterator< Spot > it = newspots.iterator( frame, false );
-					final ArrayList< Spot > spotsToCopy = new ArrayList<>( newspots.getNSpots( frame, false ) );
-					while ( it.hasNext() )
-						spotsToCopy.add( it.next() );
-
-					// Pass new spot list to model.
-					model.getSpots().put( frame, spotsToCopy );
-					// Make them visible
-					for ( final Spot spot : spotsToCopy )
-						spot.putFeature( SpotCollection.VISIBILITY, SpotCollection.ONE );
-
-					// Generate event for listener to reflect changes.
-					model.setSpots( model.getSpots(), true );
+					logger.error( trackmate.getErrorMessage() );
+					return;
 				}
-				catch ( final Exception e )
-				{
-					logger.error( e.getMessage() );
-					e.printStackTrace();
-				}
-				finally
-				{
-					buttonEnabler.accept( true );
-				}
+				logger.log( "Found " + trackmate.getModel().getSpots().getNSpots( false ) + " spots." );
+
+				// Wrap new spots in a list.
+				final SpotCollection newspots = trackmate.getModel().getSpots();
+				final Iterator< Spot > it = newspots.iterator( frame, false );
+				final ArrayList< Spot > spotsToCopy = new ArrayList<>( newspots.getNSpots( frame, false ) );
+				while ( it.hasNext() )
+					spotsToCopy.add( it.next() );
+
+				// Pass new spot list to model.
+				model.getSpots().put( frame, spotsToCopy );
+				// Make them visible
+				for ( final Spot spot : spotsToCopy )
+					spot.putFeature( SpotCollection.VISIBILITY, SpotCollection.ONE );
+
+				// Generate event for listener to reflect changes.
+				model.setSpots( model.getSpots(), true );
 			}
-		}.start();
+			catch ( final Exception e )
+			{
+				logger.error( e.getMessage() );
+				e.printStackTrace();
+			}
+			finally
+			{
+				buttonEnabler.accept( true );
+			}
+		} );
 	}
 
 	/**
@@ -355,7 +351,7 @@ public class DetectionUtils
 		final ThreadService threadService = TMUtils.getContext().getService( ThreadService.class );
 		final ExecutorService es;
 		if ( threadService == null )
-			es = Executors.newCachedThreadPool();
+			es = Threads.newCachedThreadPool();
 		else
 			es = threadService.getExecutorService();
 		List< Point > peaks;

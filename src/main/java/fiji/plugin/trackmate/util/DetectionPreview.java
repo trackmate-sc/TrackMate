@@ -87,41 +87,37 @@ public class DetectionPreview
 			final String thresholdKey )
 	{
 		panel.btnPreview.setEnabled( false );
-		new Thread( "TrackMate preview detection thread" )
+		Threads.run( "TrackMate preview detection thread", () ->
 		{
-			@Override
-			public void run()
+			try
 			{
-				try
-				{
-					// Run preview.
-					final Pair< Model, Double > out = runPreviewDetection(
-							settings,
-							frame,
-							detectorFactory,
-							detectorSettings,
-							thresholdKey );
-					if ( out == null )
-						return;
+				// Run preview.
+				final Pair< Model, Double > out = runPreviewDetection(
+						settings,
+						frame,
+						detectorFactory,
+						detectorSettings,
+						thresholdKey );
+				if ( out == null )
+					return;
 
-					final Model sourceModel = out.getA();
-					final Double threshold = out.getB();
-					panel.logger.log( "Found " + sourceModel.getSpots().getNSpots( true ) + " spots." );
+				final Model sourceModel = out.getA();
+				final Double threshold = out.getB();
+				panel.logger.log( "Found " + sourceModel.getSpots().getNSpots( true ) + " spots." );
 
-					// Update target model.
-					updateModelAndHistogram( model, sourceModel, frame, threshold );
-				}
-				catch ( final Exception e )
-				{
-					panel.logger.error( e.getMessage() );
-					e.printStackTrace();
-				}
-				finally
-				{
-					panel.btnPreview.setEnabled( true );
-				}
+				// Update target model.
+				updateModelAndHistogram( model, sourceModel, frame, threshold );
 			}
-		}.start();
+			catch ( final Exception e )
+			{
+				panel.logger.error( e.getMessage() );
+				e.printStackTrace();
+			}
+			finally
+			{
+				panel.btnPreview.setEnabled( true );
+			}
+		} );
 	}
 
 	/**

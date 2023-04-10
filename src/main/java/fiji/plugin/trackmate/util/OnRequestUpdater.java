@@ -87,6 +87,7 @@ public class OnRequestUpdater extends Thread
 		super( "OnRequestUpdater for " + refreshable.toString() );
 		this.refreshable = refreshable;
 		setPriority( Thread.NORM_PRIORITY );
+		setDaemon( true );
 		start();
 	}
 

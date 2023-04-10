@@ -42,6 +42,7 @@ import fiji.plugin.trackmate.action.TrackMateAction;
 import fiji.plugin.trackmate.action.TrackMateActionFactory;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.providers.ActionProvider;
+import fiji.plugin.trackmate.util.Threads;
 
 public class ActionChooserPanel extends ModuleChooserPanel< TrackMateActionFactory >
 {
@@ -79,36 +80,32 @@ public class ActionChooserPanel extends ModuleChooserPanel< TrackMateActionFacto
 			@Override
 			public void actionPerformed( final ActionEvent e )
 			{
-				new Thread( "TrackMate action thread" )
+				Threads.run( "TrackMate action thread", () ->
 				{
-					@Override
-					public void run()
+					try
 					{
-						try
+						executeButton.setEnabled( false );
+						final String actionKey = ActionChooserPanel.this.getSelectedModuleKey();
+						final TrackMateAction action = actionProvider.getFactory( actionKey ).create();
+						if ( null == action )
 						{
-							executeButton.setEnabled( false );
-							final String actionKey = ActionChooserPanel.this.getSelectedModuleKey();
-							final TrackMateAction action = actionProvider.getFactory( actionKey ).create();
-							if ( null == action )
-							{
-								logger.error( "Unknown action: " + actionKey + ".\n" );
-							}
-							else
-							{
-								action.setLogger( logger );
-								action.execute(
-										trackmate,
-										selectionModel,
-										displaySettings,
-										( JFrame ) SwingUtilities.getWindowAncestor( ActionChooserPanel.this ) );
-							}
+							logger.error( "Unknown action: " + actionKey + ".\n" );
 						}
-						finally
+						else
 						{
-							executeButton.setEnabled( true );
+							action.setLogger( logger );
+							action.execute(
+									trackmate,
+									selectionModel,
+									displaySettings,
+									( JFrame ) SwingUtilities.getWindowAncestor( ActionChooserPanel.this ) );
 						}
 					}
-				}.start();
+					finally
+					{
+						executeButton.setEnabled( true );
+					}
+				} );
 			}
 		} );
 	}

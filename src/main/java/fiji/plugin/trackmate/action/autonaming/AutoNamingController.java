@@ -32,6 +32,7 @@ import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
+import fiji.plugin.trackmate.util.Threads;
 
 public class AutoNamingController
 {
@@ -61,25 +62,21 @@ public class AutoNamingController
 	{
 		final EverythingDisablerAndReenabler disabler = new EverythingDisablerAndReenabler( gui, new Class[] { JLabel.class } );
 		disabler.disable();
-		new Thread( "TrackMateAutoNamingThread" )
+		Threads.run( "TrackMateAutoNamingThread", () ->
 		{
-			@Override
-			public void run()
+			try
 			{
-				try
-				{
-					logger.log( "Applying naming rule: " + autoNaming.toString() + ".\n" );
-					logger.setStatus( "Spot auto-naming" );
-					AutoNamingPerformer.autoNameSpots( trackmate.getModel(), autoNaming );
-					trackmate.getModel().notifyFeaturesComputed();
-					logger.log( "Spot auto-naming done.\n" );
-				}
-				finally
-				{
-					disabler.reenable();
-				}
+				logger.log( "Applying naming rule: " + autoNaming.toString() + ".\n" );
+				logger.setStatus( "Spot auto-naming" );
+				AutoNamingPerformer.autoNameSpots( trackmate.getModel(), autoNaming );
+				trackmate.getModel().notifyFeaturesComputed();
+				logger.log( "Spot auto-naming done.\n" );
 			}
-		}.start();
+			finally
+			{
+				disabler.reenable();
+			}
+		} );
 	}
 
 	public void show()

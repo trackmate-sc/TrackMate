@@ -24,9 +24,8 @@ package fiji.plugin.trackmate.detection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.util.Threads;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.algorithm.MultiThreaded;
@@ -159,7 +158,7 @@ public class LogDetector< T extends RealType< T > & NativeType< T > > implements
 		final ImgFactory< ComplexFloatType > imgFactory = Util.getArrayOrCellImgFactory( fftinterval, new ComplexFloatType() );
 		fftconv.setFFTImgFactory( imgFactory );
 
-		final ExecutorService service = Executors.newFixedThreadPool( numThreads );
+		final ExecutorService service = Threads.newFixedThreadPool( numThreads );
 		fftconv.setExecutorService( service );
 
 		fftconv.convolve();

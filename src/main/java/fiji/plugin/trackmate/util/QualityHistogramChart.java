@@ -33,7 +33,6 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Rectangle2D;
 import java.text.DecimalFormat;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -396,7 +395,7 @@ public class QualityHistogramChart extends JPanel
 			if ( ex == null )
 			{
 				// Create new waiting line
-				ex = Executors.newSingleThreadScheduledExecutor();
+				ex = Threads.newSingleThreadScheduledExecutor();
 				future = ex.schedule( command, WAIT_DELAY, TimeUnit.SECONDS );
 			}
 			else
