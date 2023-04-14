@@ -44,8 +44,8 @@ public class Demo3DMesh
 	public static void main( final String[] args )
 	{
 		ImageJ.main( args );
-		final ImgPlus< BitType > mask = loadTestMask2();
-//		final ImgPlus< BitType > mask = loadTestMask();
+//		final ImgPlus< BitType > mask = loadTestMask2();
+		final ImgPlus< BitType > mask = loadTestMask();
 
 		// Convert it to labeling.
 		final ImgLabeling< Integer, IntType > labeling = MaskUtils.toLabeling( mask, mask, 0.5, 1 );
@@ -88,10 +88,10 @@ public class Demo3DMesh
 			 */
 
 			// Intersection with a XY plane at a fixed Z position.
-			final int zslice = 20; // plan
+			final int zslice = 22; // plan
 			final double z = ( zslice ) * cal[ 2 ]; // um
 
-			final double[][] xy = intersect2( simplified, z );
+			final double[][] xy = MeshPlaneIntersection.intersect( simplified, z );
 			final float[] xRoi = new float[ xy[ 0 ].length ];
 			final float[] yRoi = new float[ xy[ 0 ].length ];
 			for ( int i = 0; i < xy[ 0 ].length; i++ )
