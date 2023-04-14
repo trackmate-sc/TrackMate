@@ -24,9 +24,6 @@ public class MeshPlaneIntersection
 		final Vertices vertices = mesh.vertices();
 		final Triangles triangles = mesh.triangles();
 
-		// Map of vertex id to list of faces they are in.
-		final TLongObjectHashMap< TLongArrayList > vertexList = new TLongObjectHashMap<>();
-
 		// Map of edge (va -> vb with always va < vb) to face pair (fa, fb).
 		// They are stored as a paired integers using Szudzik pairing.
 		// So it won't work if the index exceeds a few 100s of millions.
@@ -42,10 +39,6 @@ public class MeshPlaneIntersection
 			vs[ 1 ] = triangles.vertex1( face );
 			vs[ 2 ] = triangles.vertex2( face );
 			Arrays.sort( vs );
-
-			// Insert face into vertex list.
-			for ( final long v : vs )
-				insertFaceIntoVertexList( v, face, vertexList );
 
 			// Deal with the 3 edges.
 			insertEdge( vs[ 0 ], vs[ 1 ], face, edgeList, pairHolder );
@@ -71,7 +64,7 @@ public class MeshPlaneIntersection
 		/*
 		 * Find one edge that crosses the Z plane.
 		 */
-		
+
 		final TLongIterator edgeIt = edgeList.keySet().iterator();
 		long start = -1;
 		while ( edgeIt.hasNext() )
@@ -92,6 +85,10 @@ public class MeshPlaneIntersection
 			return null;
 		}
 
+		/*
+		 * Iterate from it, selecting faces that an edge that crosses the plane.
+		 */
+
 		final TDoubleArrayList intersectionX = new TDoubleArrayList();
 		final TDoubleArrayList intersectionY = new TDoubleArrayList();
 		long current = start;
@@ -106,13 +103,11 @@ public class MeshPlaneIntersection
 				break;
 
 			final long next = getNextEdge( mesh, edgeList, face, current, z, previousFace, edges, vs );
-			if ( next < 0 )
-				break;
-
 			visited.add( face );
 			previousFace = face;
 			current = next;
 		}
+
 		return new double[][] { intersectionX.toArray(), intersectionY.toArray() };
 	}
 
@@ -147,12 +142,12 @@ public class MeshPlaneIntersection
 		edges[ 2 ][ 1 ] = vs[ 2 ];
 		for ( final long[] edge : edges )
 		{
-			final long e = pair( edge[ 0 ], edge[ 1 ]);
-			if (  e == current )
+			final long e = pair( edge[ 0 ], edge[ 1 ] );
+			if ( e == current )
 				continue;
 
 			if ( testLineIntersectPlane( vertices, edge[ 0 ], edge[ 1 ], z ) )
-				return e;
+					return e;
 		}
 		return -1;
 
@@ -169,18 +164,25 @@ public class MeshPlaneIntersection
 		final double xt = vertices.x( tv );
 		final double yt = vertices.y( tv );
 		final double zt = vertices.z( tv );
+		double x;
+		double y;
 		if ( zs == zt )
 		{
-			cx.add( 0.5 * ( xs + xt ) );
-			cy.add( 0.5 * ( ys + yt ) );
+			x = 0.5 * ( xs + xt );
+			y = 0.5 * ( ys + yt );
 		}
 		else
 		{
 			final double t = ( z - zs ) / ( zt - zs );
-			cx.add( xs + t * ( xt - xs ) );
-			cy.add( ys + t * ( yt - ys ) );
+			x = xs + t * ( xt - xs );
+			y = ys + t * ( yt - ys );
 		}
+		final int np = cx.size();
+		if ( np > 1 && cx.getQuick( np - 1 ) == x && cy.getQuick( np - 1 ) == y )
+			return; // Don't add duplicate.
 
+		cx.add( x );
+		cy.add( y );
 	}
 
 	private static void insertEdge( final long va, final long vb, final long face, final TLongObjectHashMap< long[] > edgeList, final int[] pairHolder )

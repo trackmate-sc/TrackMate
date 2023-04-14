@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.mesh;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.util.Iterator;
 
@@ -66,7 +67,8 @@ public class Demo3DMesh
 			// To mesh.
 			final Mesh mesh = Meshes.marchingCubes( box );
 			final Mesh cleaned = Meshes.removeDuplicateVertices( mesh, 0 );
-			final Mesh simplified = Meshes.simplify( cleaned, 0.1f, 10 );
+//			final Mesh simplified = Meshes.simplify( cleaned, 0.25f, 10 );
+			final Mesh simplified = cleaned;
 
 			// Scale and offset with physical coordinates.
 			final double[] origin = region.minAsDoubleArray();
@@ -88,27 +90,34 @@ public class Demo3DMesh
 			 */
 
 			// Intersection with a XY plane at a fixed Z position.
-			final int zslice = 22; // plan
+			final int zslice = 16; // plan
 			final double z = ( zslice ) * cal[ 2 ]; // um
 
 			final double[][] xy = MeshPlaneIntersection.intersect( simplified, z );
-			final float[] xRoi = new float[ xy[ 0 ].length ];
-			final float[] yRoi = new float[ xy[ 0 ].length ];
-			for ( int i = 0; i < xy[ 0 ].length; i++ )
-			{
-				xRoi[ i ] = ( float ) ( xy[ 0 ][ i ] / cal[ 0 ] );
-				yRoi[ i ] = ( float ) ( xy[ 1 ][ i ] / cal[ 1 ] );
-			}
-			final PolygonRoi roi = new PolygonRoi( xRoi, yRoi, PolygonRoi.POLYGON );
-			Overlay overlay = out.getOverlay();
-			if ( overlay == null )
-			{
-				overlay = new Overlay();
-				out.setOverlay( overlay );
-			}
-			overlay.add( roi );
+			toOverlay( xy, out, cal );
 		}
 		System.out.println( "Done." );
+	}
+
+	private static void toOverlay( final double[][] xy, final ImagePlus out, final double[] cal )
+	{
+		final float[] xRoi = new float[ xy[ 0 ].length ];
+		final float[] yRoi = new float[ xy[ 0 ].length ];
+		for ( int i = 0; i < xy[ 0 ].length; i++ )
+		{
+			xRoi[ i ] = ( float ) ( xy[ 0 ][ i ] / cal[ 0 ] + 0.5 );
+			yRoi[ i ] = ( float ) ( xy[ 1 ][ i ] / cal[ 1 ] + 0.5 );
+		}
+		final PolygonRoi roi = new PolygonRoi( xRoi, yRoi, PolygonRoi.POLYGON );
+		roi.setStrokeWidth( 0.2 );
+		roi.setStrokeColor( Color.RED );
+		Overlay overlay = out.getOverlay();
+		if ( overlay == null )
+		{
+			overlay = new Overlay();
+			out.setOverlay( overlay );
+		}
+		overlay.add( roi );
 	}
 
 	@SuppressWarnings( "unused" )
