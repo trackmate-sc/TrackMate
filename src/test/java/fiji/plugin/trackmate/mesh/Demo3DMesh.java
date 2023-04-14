@@ -1,18 +1,14 @@
 package fiji.plugin.trackmate.mesh;
 
-import java.awt.geom.Point2D;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
-import com.itextpdf.text.pdf.codec.Base64;
 
 import fiji.plugin.trackmate.detection.MaskUtils;
 import fiji.plugin.trackmate.util.TMUtils;
+import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.list.linked.TLongLinkedList;
+import gnu.trove.procedure.TLongProcedure;
+import gnu.trove.set.hash.TLongHashSet;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
@@ -25,9 +21,9 @@ import net.imagej.mesh.Meshes;
 import net.imagej.mesh.Triangles;
 import net.imagej.mesh.Vertices;
 import net.imagej.mesh.io.stl.STLMeshIO;
-import net.imagej.mesh.nio.BufferMesh;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.RealTypeConverters;
+import net.imglib2.img.ImgView;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.img.display.imagej.ImgPlusViews;
 import net.imglib2.roi.labeling.ImgLabeling;
@@ -38,39 +34,26 @@ import net.imglib2.type.logic.BoolType;
 import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.IntType;
+import net.imglib2.util.Util;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 
 public class Demo3DMesh
 {
-	public static < T extends RealType< T > & NumericType< T > > void main( final String[] args ) throws IOException
+
+	public static void main( final String[] args )
 	{
-		final String filePath = "samples/mesh/CElegansMask3D.tif";
-
 		ImageJ.main( args );
-		final ImagePlus imp = IJ.openImage( filePath );
-		imp.show();
-
-		// To ImgLib2 boolean.
-
-		// First channel is the mask.
-		@SuppressWarnings( "unchecked" )
-		final ImgPlus< T > img = TMUtils.rawWraps( imp );
-		final ImgPlus< T > c1 = ImgPlusViews.hyperSlice( img, img.dimensionIndex( Axes.CHANNEL ), 0 );
-
-		// Take the first time-point
-		final ImgPlus< T > t1 = ImgPlusViews.hyperSlice( c1, c1.dimensionIndex( Axes.TIME ), 0 );
-
-		// Make it to boolean.
-		final RandomAccessibleInterval< BitType > mask = RealTypeConverters.convert( t1, new BitType() );
+		final ImgPlus< BitType > mask = loadTestMask2();
+//		final ImgPlus< BitType > mask = loadTestMask();
 
 		// Convert it to labeling.
 		final ImgLabeling< Integer, IntType > labeling = MaskUtils.toLabeling( mask, mask, 0.5, 1 );
-		ImageJFunctions.show( labeling.getSource(), "labeling" );
+		final ImagePlus out = ImageJFunctions.show( labeling.getIndexImg(), "labeling" );
 
 		// Iterate through all components.
 		final LabelRegions< Integer > regions = new LabelRegions< Integer >( labeling );
-		final double[] cal = TMUtils.getSpatialCalibration( img );
+		final double[] cal = TMUtils.getSpatialCalibration( mask );
 
 		// Parse regions to create polygons on boundaries.
 		final Iterator< LabelRegion< Integer > > iterator = regions.iterator();
@@ -82,13 +65,18 @@ public class Demo3DMesh
 
 			// To mesh.
 			final Mesh mesh = Meshes.marchingCubes( box );
+			final Mesh cleaned = Meshes.removeDuplicateVertices( mesh, 0 );
+			final Mesh simplified = Meshes.simplify( cleaned, 0.1f, 10 );
 
 			// Scale and offset with physical coordinates.
 			final double[] origin = region.minAsDoubleArray();
-			scale( mesh.vertices(), cal, origin );
+			scale( simplified.vertices(), cal, origin );
 
 			// Simplify.
-			final Mesh simplified = Meshes.simplify( mesh, 0.25f, 10f );
+			System.out.println( "Before cleaning: " + mesh.vertices().size() + " vertices and " + mesh.triangles().size() + " faces." );
+			System.out.println( "Before simplification: " + cleaned.vertices().size() + " vertices and " + cleaned.triangles().size() + " faces." );
+			System.out.println( "After simplification: " + simplified.vertices().size() + " vertices and " + simplified.triangles().size() + " faces." );
+			System.out.println();
 
 			/*
 			 * IO.
@@ -102,112 +90,174 @@ public class Demo3DMesh
 			// Intersection with a XY plane at a fixed Z position.
 			final int zslice = 20; // plan
 			final double z = ( zslice ) * cal[ 2 ]; // um
-			final Triangles triangles = simplified.triangles();
-			final Vertices vertices = simplified.vertices();
-			final List< double[] > polygon = new ArrayList<>();
-			for ( long i = 0; i < triangles.size(); i++ )
-			{
-				final long v0 = triangles.vertex0( i );
-				final double z0 = vertices.z( v0 );
-				final long v1 = triangles.vertex1( i );
-				final double z1 = vertices.z( v1 );
-				final long v2 = triangles.vertex2( i );
-				final double z2 = vertices.z( v2 );
 
-				if ( ( z0 <= z && z1 > z && z2 > z ) ||
-						( z1 <= z && z2 > z && z0 > z ) ||
-						( z2 <= z && z0 > z && z1 > z ) ||
-						( z0 >= z && z1 < z && z2 < z ) ||
-						( z1 >= z && z2 < z && z0 < z ) ||
-						( z2 >= z && z0 < z && z1 < z ) )
-				{
-					final double[] i1 = intersect( vertices, v0, v1, z );
-					final double[] i2 = intersect( vertices, v1, v2, z );
-					final double[] i3 = intersect( vertices, v2, v0, z );
-					polygon.add( i1 );
-					polygon.add( i2 );
-					polygon.add( i3 );
-				}
-			}
-
-			// Create a ROI to display.
-			final Set< Point2D > set = new HashSet<>();
-			for ( int i = 0; i < polygon.size(); i++ )
+			final double[][] xy = intersect2( simplified, z );
+			final float[] xRoi = new float[ xy[ 0 ].length ];
+			final float[] yRoi = new float[ xy[ 0 ].length ];
+			for ( int i = 0; i < xy[ 0 ].length; i++ )
 			{
-				final double[] point = polygon.get( i );
-				set.add( new Point2D.Double( point[ 0 ] / cal[ 1 ], point[ 1 ] / cal[ 1 ] ) );
-			}
-			final List< Point2D > list = new ArrayList<>( set );
-			final double mx = list.stream().mapToDouble( p -> p.getX() ).average().getAsDouble();
-			final double my = list.stream().mapToDouble( p -> p.getY() ).average().getAsDouble();
-			list.sort( new Comparator< Point2D >()
-			{
-
-				@Override
-				public int compare( final Point2D o1, final Point2D o2 )
-				{
-					final double angle1 = Math.atan2( o1.getY() - my, o1.getX() - mx );
-					final double angle2 = Math.atan2( o2.getY() - my, o2.getX() - mx );
-					return Double.compare( angle1, angle2 );
-				}
-			} );
-			final float[] xRoi = new float[ list.size() ];
-			final float[] yRoi = new float[ list.size() ];
-			for ( int i = 0; i < list.size(); i++ )
-			{
-				xRoi[ i ] = ( float ) list.get( i ).getX();
-				yRoi[ i ] = ( float ) list.get( i ).getY();
+				xRoi[ i ] = ( float ) ( xy[ 0 ][ i ] / cal[ 0 ] );
+				yRoi[ i ] = ( float ) ( xy[ 1 ][ i ] / cal[ 1 ] );
 			}
 			final PolygonRoi roi = new PolygonRoi( xRoi, yRoi, PolygonRoi.POLYGON );
-			Overlay overlay = imp.getOverlay();
+			Overlay overlay = out.getOverlay();
 			if ( overlay == null )
 			{
 				overlay = new Overlay();
-				imp.setOverlay( overlay );
+				out.setOverlay( overlay );
 			}
 			overlay.add( roi );
 		}
 		System.out.println( "Done." );
-
 	}
 
-	private static double[] intersect( final Vertices vertices, final long v1, final long v2, final double z )
+	@SuppressWarnings( "unused" )
+	private static < T extends RealType< T > & NumericType< T > > ImgPlus< BitType > loadTestMask2()
 	{
-		final double x1 = vertices.x( v1 );
-		final double y1 = vertices.y( v1 );
-		final double z1 = vertices.z( v1 );
-		final double x2 = vertices.x( v2 );
-		final double y2 = vertices.y( v2 );
-		final double z2 = vertices.z( v2 );
+		final String filePath = "samples/mesh/Cube.tif";
+		final ImagePlus imp = IJ.openImage( filePath );
+		@SuppressWarnings( "unchecked" )
+		final ImgPlus< T > img = TMUtils.rawWraps( imp );
+		final RandomAccessibleInterval< BitType > mask = RealTypeConverters.convert( img, new BitType() );
+		return new ImgPlus<>( ImgView.wrap( mask ), img );
+	}
 
-		final double t;
-		if ( z1 == z2 )
-			t = 0.5;
-		else
-			t = ( z - z1 ) / ( z2 - z1 );
-		final double x = x1 + t * ( x2 - x1 );
-		final double y = y1 + t * ( y2 - y1 );
-		return new double[] { x, y, z };
+	private static double[][] intersect2( final Mesh mesh, final double z )
+	{
+		final Triangles triangles = mesh.triangles();
+		final Vertices vertices = mesh.vertices();
+
+		// Find a line that intersects with z plane.
+		long[] start = null;
+		for ( long i = 0; i < triangles.size(); i++ )
+		{
+			final long v0 = triangles.vertex0( i );
+			final long v1 = triangles.vertex1( i );
+			final long v2 = triangles.vertex2( i );
+			if ( testLineIntersectPlane( vertices, v0, v1, z ) )
+			{
+				start = new long[] { v0, v1 };
+				break;
+			}
+			if ( testLineIntersectPlane( vertices, v0, v2, z ) )
+			{
+				start = new long[] { v0, v2 };
+				break;
+			}
+			if ( testLineIntersectPlane( vertices, v2, v1, z ) )
+			{
+				start = new long[] { v2, v1 };
+				break;
+			}
+		}
+		if ( start == null )
+		{
+			System.out.println( "No intersection with Z = " + z + " found." );
+			return null;
+		}
+		System.out.println( "Intersection with Z = " + z + ": " + Util.printCoordinates( start ) );
+
+		final TDoubleArrayList intersectionX = new TDoubleArrayList();
+		final TDoubleArrayList intersectionY = new TDoubleArrayList();
+		final TLongLinkedList queue = new TLongLinkedList();
+		final TLongHashSet visited = new TLongHashSet();
+		final TLongHashSet neighborVertices = new TLongHashSet( 12 );
+		final LineIntersectProcedure lineIntersectProcedure = new LineIntersectProcedure( vertices, z, queue, visited, intersectionX, intersectionY );
+		queue.add( start[ 0 ] );
+		while ( !queue.isEmpty() )
+		{
+			final long source = queue.removeAt( queue.size() - 1 );
+			if (visited.contains( source ))
+				continue;
+			visited.add( source );
+
+			// Search neighbors of the current one that intersect with the Z
+			// plane.
+			searchNeighbors( mesh, source, z, neighborVertices );
+
+			// Check if line connecting neighbors intersect plane.
+			lineIntersectProcedure.setSourceV( source );
+			neighborVertices.forEach( lineIntersectProcedure );
+		}
+		
+		return new double[][] { intersectionX.toArray(), intersectionY.toArray() };
+	}
+
+	/**
+	 * Finds the indices of the vertices that are connected to the vertex with
+	 * the specified index in the specified mesh, if they make a line that
+	 * crosses the Z plane at the specified position.
+	 * <p>
+	 * TODO This search is inefficient, and would benefit from having a data
+	 * structure that stores this info.
+	 * 
+	 * @param mesh
+	 *            the mesh.
+	 * @param v
+	 *            the index of the vertex to find the neighbors of.
+	 * @param neighbors
+	 *            an array in which to write the indices of the neighbors. Is
+	 *            reset by this method.
+	 */
+	private static void searchNeighbors( final Mesh mesh, final long v, final double z, final TLongHashSet neighbors )
+	{
+		neighbors.clear();
+		for ( long face = 0; face < mesh.triangles().size(); face++ )
+			testFace( mesh, face, v, z, neighbors );
+	}
+
+	/**
+	 * 
+	 * @param mesh
+	 *            the mesh to test.
+	 * @param face
+	 *            the index of the face to test.
+	 * @param v
+	 *            the index of the vertex we are searching.
+	 * @param z
+	 *            the z position an edge needs to cross.
+	 * @param neighbors
+	 *            the list of neighbors to add candidate to.
+	 */
+	private static final void testFace( final Mesh mesh, final long face, final long v, final double z, final TLongHashSet neighbors )
+	{
+		final Triangles triangles = mesh.triangles();
+		final Vertices vertices = mesh.vertices();
+		final long v0 = triangles.vertex0( face );
+		final long v1 = triangles.vertex1( face );
+		final long v2 = triangles.vertex2( face );
+		testFaceVertexIs( vertices, v, v0, v1, v2, z, neighbors );
+		testFaceVertexIs( vertices, v, v1, v0, v2, z, neighbors );
+		testFaceVertexIs( vertices, v, v2, v0, v1, z, neighbors );
+	}
+
+	private static void testFaceVertexIs( final Vertices vertices, final long searched, final long source, final long v1, final long v2, final double z, final TLongHashSet neighbors )
+	{
+		if ( source != searched )
+			return;
+
+		if ( testLineIntersectPlane( vertices, source, v1, z ) )
+			neighbors.add( v1 );
+		if ( testLineIntersectPlane( vertices, source, v2, z ) )
+			neighbors.add( v2 );
+	}
+
+	private static boolean testLineIntersectPlane( final Vertices vertices, final long source, final long target, final double z )
+	{
+		final double z0 = vertices.z( source );
+		final double z1 = vertices.z( target );
+		if ( ( z0 > z && z1 > z ) || ( z0 < z && z1 < z ) )
+			return false;
+		return true;
 	}
 
 	private static void testIO( final Mesh simplified, final int j )
 	{
 		final STLMeshIO meshIO = new STLMeshIO();
-
-		// Encode to string.
-		final String str = Base64.encodeBytes( meshIO.write( simplified ) );
-
-		// Decode to mesh.
-		final int nVertices = ( int ) simplified.vertices().size();
-		final int nTriangles = ( int ) simplified.triangles().size();
-		// We need to know N in advance. Save it in the XML?
-		final Mesh decoded = new BufferMesh( nVertices, nTriangles );
-		meshIO.read( decoded, Base64.decode( str ) );
-
 		// Serialize to disk.
 		try
 		{
-			meshIO.save( decoded, String.format( "samples/mesh/CElegansMask3D_%02d.stl", j ) );
+			meshIO.save( simplified, String.format( "samples/mesh/CElegansMask3D_%02d.stl", j ) );
 		}
 		catch ( final IOException e )
 		{
@@ -227,4 +277,99 @@ public class Demo3DMesh
 		}
 	}
 
+	/**
+	 * Procedure that adds the intersection of the line made by the source
+	 * vertex and target vertices iterated.
+	 * <p>
+	 * The intersection is added only if the target vertex has not been visited.
+	 * New targets are also added to the queue.
+	 */
+	private static final class LineIntersectProcedure implements TLongProcedure
+	{
+
+		private final Vertices vertices;
+
+		private long sv = -1;
+
+		private final double z;
+
+		private final TLongLinkedList queue;
+
+		private final TLongHashSet visited;
+
+		private final TDoubleArrayList intersectionX;
+
+		private final TDoubleArrayList intersectionY;
+
+		private double zs;
+
+		private double xs;
+
+		private double ys;
+
+		public LineIntersectProcedure(
+				final Vertices vertices,
+				final double z,
+				final TLongLinkedList queue,
+				final TLongHashSet visited,
+				final TDoubleArrayList intersectionX,
+				final TDoubleArrayList intersectionY )
+		{
+			this.vertices = vertices;
+			this.z = z;
+			this.queue = queue;
+			this.visited = visited;
+			this.intersectionX = intersectionX;
+			this.intersectionY = intersectionY;
+		}
+
+		public void setSourceV( final long sourceV )
+		{
+			this.sv = sourceV;
+			this.xs = vertices.x( sv );
+			this.ys = vertices.y( sv );
+			this.zs = vertices.z( sv );
+		}
+
+		@Override
+		public boolean execute( final long tv )
+		{
+			if ( !visited.contains( tv ) )
+			{
+				final double xt = vertices.x( tv );
+				final double yt = vertices.y( tv );
+				final double zt = vertices.z( tv );
+				if ( zs == zt )
+				{
+					intersectionX.add( 0.5 * ( xs + xt ) );
+					intersectionY.add( 0.5 * ( ys + yt ) );
+				}
+				else
+				{
+					final double t = ( z - zs ) / ( zt - zs );
+					intersectionX.add( xs + t * ( xt - xs ) );
+					intersectionY.add( ys + t * ( yt - ys ) );
+				}
+				queue.add( tv );
+			}
+			return true;
+		}
+	}
+
+	private static < T extends RealType< T > & NumericType< T > > ImgPlus< BitType > loadTestMask()
+	{
+		final String filePath = "samples/mesh/CElegansMask3D.tif";
+		final ImagePlus imp = IJ.openImage( filePath );
+
+		// First channel is the mask.
+		@SuppressWarnings( "unchecked" )
+		final ImgPlus< T > img = TMUtils.rawWraps( imp );
+		final ImgPlus< T > c1 = ImgPlusViews.hyperSlice( img, img.dimensionIndex( Axes.CHANNEL ), 0 );
+
+		// Take the first time-point
+		final ImgPlus< T > t1 = ImgPlusViews.hyperSlice( c1, c1.dimensionIndex( Axes.TIME ), 0 );
+		// Make it to boolean.
+		final RandomAccessibleInterval< BitType > mask = RealTypeConverters.convert( t1, new BitType() );
+		return new ImgPlus< BitType >( ImgView.wrap( mask ), t1 );
+	}
 }
