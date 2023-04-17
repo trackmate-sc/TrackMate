@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -110,20 +110,9 @@ public class ThresholdDetector< T extends RealType< T > & NativeType< T > > impl
 	public boolean process()
 	{
 		final long start = System.currentTimeMillis();
-		if ( input.numDimensions() == 2 )
+		if ( input.numDimensions() == 2 || input.numDimensions() == 3 )
 		{
-			/*
-			 * 2D: we compute and store the contour.
-			 */
 			spots = MaskUtils.fromThresholdWithROI( input, interval, calibration, threshold, simplify, numThreads, null );
-
-		}
-		else if ( input.numDimensions() == 3 )
-		{
-			/*
-			 * 3D: We create spots of the same volume that of the region.
-			 */
-			spots = MaskUtils.fromThreshold( input, interval, calibration, threshold, numThreads );
 		}
 		else
 		{
