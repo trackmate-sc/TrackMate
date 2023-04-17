@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -75,8 +75,8 @@ public class LabelImageDetectorFactory< T extends RealType< T > & NativeType< T 
 			+ "that is unique to the object."
 			+ "<p>"
 			+ "This detector reads such an image and create spots from each object. "
-			+ "In 2D the contour of a label is imported. In 3D, spherical spots "
-			+ "of the same volume that the label are created."
+			+ "In 2D the contour of a label is imported. In 3D, a mesh around the "
+			+ "label is imported."
 			+ "<p>"
 			+ "The spot quality stores the object area or volume in pixels."
 			+ "</html>";
@@ -103,7 +103,7 @@ public class LabelImageDetectorFactory< T extends RealType< T > & NativeType< T 
 		this.settings = settings;
 		return checkSettings( settings );
 	}
-	
+
 	@Override
 	public SpotDetector< T > getDetector( final Interval interval, final int frame )
 	{
