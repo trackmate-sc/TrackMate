@@ -88,8 +88,6 @@ public class Demo3DMesh
 				final double[] origin = region.minAsDoubleArray();
 				scale( emesh.vertices(), cal, origin );
 
-				// Simplify.
-
 				/*
 				 * IO.
 				 */
@@ -103,10 +101,8 @@ public class Demo3DMesh
 				final int zslice = 20; // plan
 				final double z = ( zslice ) * cal[ 2 ]; // um
 
-				MeshPlaneIntersection.intersect( emesh, z, cx, cy );
+				MeshPlaneIntersection.intersect2( emesh, z, cx, cy );
 				toOverlay( cx, cy, out, cal );
-
-				break; // DEBUg
 			}
 			System.out.println( "Done." );
 		}
