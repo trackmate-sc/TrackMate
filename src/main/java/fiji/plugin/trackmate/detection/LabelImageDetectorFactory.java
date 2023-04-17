@@ -66,8 +66,8 @@ public class LabelImageDetectorFactory< T extends RealType< T > & NativeType< T 
 			+ "that is unique to the object."
 			+ "<p>"
 			+ "This detector reads such an image and create spots from each object. "
-			+ "In 2D the contour of a label is imported. In 3D, spherical spots "
-			+ "of the same volume that the label are created."
+			+ "In 2D the contour of a label is imported. In 3D, a mesh around the "
+			+ "label is imported."
 			+ "<p>"
 			+ "The spot quality stores the object area or volume in pixels."
 			+ "</html>";
@@ -144,5 +144,4 @@ public class LabelImageDetectorFactory< T extends RealType< T > & NativeType< T 
 	{
 		return ThresholdDetectorFactory.ICON;
 	}
-
 }
