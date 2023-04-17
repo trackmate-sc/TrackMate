@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -72,9 +72,8 @@ public class MaskDetectorFactory< T extends RealType< T > & NativeType< T > > ex
 			+ "a value strictly larger than 0 are "
 			+ "considered as part of the foreground, "
 			+ "and used to build connected regions. In 2D, spots are created with "
-			+ "the (possibly simplified) contour of the region. In 3D, a spherical "
-			+ "spot is created for each region in its center, with a volume equal to the "
-			+ "region volume."
+			+ "the (possibly simplified) contour of the region. In 3D, a mesh is "
+			+ "created for each region."
 			+ "<p>"
 			+ "The spot quality stores the object area or volume in pixels."
 			+ "</html>";
