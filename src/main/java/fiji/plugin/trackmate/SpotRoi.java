@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -23,6 +23,7 @@ package fiji.plugin.trackmate;
 
 import java.util.Arrays;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import net.imagej.ImgPlus;
 import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccessibleInterval;
@@ -61,7 +62,7 @@ public class SpotRoi
 	/**
 	 * Returns a new <code>int</code> array containing the X pixel coordinates
 	 * to which to paint this polygon.
-	 * 
+	 *
 	 * @param calibration
 	 *            the pixel size in X, to convert physical coordinates to pixel
 	 *            coordinates.
@@ -85,7 +86,7 @@ public class SpotRoi
 	/**
 	 * Returns a new <code>int</code> array containing the Y pixel coordinates
 	 * to which to paint this polygon.
-	 * 
+	 *
 	 * @param calibration
 	 *            the pixel size in Y, to convert physical coordinates to pixel
 	 *            coordinates.
@@ -104,6 +105,49 @@ public class SpotRoi
 			yp[ i ] = ( yc - ycorner ) * magnification;
 		}
 		return yp;
+	}
+
+	/**
+	 * Writes the X AND Y pixel coordinates of the contour of the ROI inside a
+	 * double list, cleared first when this method is called. Similar to
+	 * {@link #toPolygonX(double, double, double, double)} and
+	 * {@link #toPolygonY(double, double, double, double)} but allocation-free.
+	 *
+	 * @param calibration
+	 *            the pixel sizes, to convert physical coordinates to pixel
+	 *            coordinates.
+	 * @param xcorner
+	 *            the top-left X corner of the view in the image to paint.
+	 * @param magnification
+	 *            the magnification of the view.
+	 * @param cx
+	 *            the list in which to write the contour X coordinates. First
+	 *            reset when called.
+	 * @param cy
+	 *            the list in which to write the contour Y coordinates. First
+	 *            reset when called.
+	 */
+	public void toPolygon(
+			final double calibration[],
+			final double xcorner,
+			final double ycorner,
+			final double spotXCenter,
+			final double spotYCenter,
+			final double magnification,
+			final TDoubleArrayList cx,
+			final TDoubleArrayList cy )
+	{
+		cx.resetQuick();
+		cy.resetQuick();
+		for ( int i = 0; i < x.length; i++ )
+		{
+			final double xc = ( spotXCenter + x[ i ] ) / calibration[ 0 ];
+			final double xp = ( xc - xcorner ) * magnification;
+			cx.add( xp );
+			final double yc = ( spotYCenter + y[ i ] ) / calibration[ 1 ];
+			final double yp = ( yc - ycorner ) * magnification;
+			cy.add( yp );
+		}
 	}
 
 	public < T > IterableInterval< T > sample( final Spot spot, final ImgPlus< T > img )
