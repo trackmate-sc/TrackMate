@@ -416,7 +416,7 @@ public class MaskUtils
 	 * @param <S>
 	 *            the type of the quality image. Must be real, scalar.
 	 * @param input
-	 *            the input image. Must be 2D.
+	 *            the input image. Can be 2D or 3D.
 	 * @param interval
 	 *            the interval in the input image to analyze.
 	 * @param calibration
