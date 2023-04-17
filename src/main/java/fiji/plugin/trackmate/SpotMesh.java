@@ -45,13 +45,13 @@ public class SpotMesh
 		final RealPoint center = Meshes.center( mesh );
 
 		// Shift mesh to (0, 0, 0).
-		final Vertices vertices = mesh.vertices();
-		final long nVertices = vertices.size();
-		for ( long i = 0; i < nVertices; i++ )
-			vertices.setPositionf( i,
-					vertices.xf( i ) - center.getFloatPosition( 0 ),
-					vertices.yf( i ) - center.getFloatPosition( 1 ),
-					vertices.zf( i ) - center.getFloatPosition( 2 ) );
+//		final Vertices vertices = mesh.vertices();
+//		final long nVertices = vertices.size();
+//		for ( long i = 0; i < nVertices; i++ )
+//			vertices.setPositionf( i,
+//					vertices.xf( i ) - center.getFloatPosition( 0 ),
+//					vertices.yf( i ) - center.getFloatPosition( 1 ),
+//					vertices.zf( i ) - center.getFloatPosition( 2 ) );
 
 		// Bounding box with respect to 0.
 		final float[] boundingBox = Meshes.boundingBox( mesh );
@@ -205,6 +205,10 @@ public class SpotMesh
 			return;
 		}
 
+		// Only one vertex is touching the plane -> no need to paint.
+		if ( z0 == z || z1 == z || z2 == z )
+			return;
+
 		addEdgeIntersectionToContour( vertices, v0, v1, z, cx, cy );
 		addEdgeIntersectionToContour( vertices, v0, v2, z, cx, cy );
 		addEdgeIntersectionToContour( vertices, v1, v2, z, cx, cy );
@@ -217,7 +221,7 @@ public class SpotMesh
 		cx.add( x0 );
 		cx.add( x1 );
 		final double y0 = vertices.y( v0 );
-		final double y1 = vertices.y( v0 );
+		final double y1 = vertices.y( v1 );
 		cy.add( y0 );
 		cy.add( y1 );
 	}
@@ -245,6 +249,33 @@ public class SpotMesh
 		final double y = ys + t * ( yt - ys );
 		cx.add( x );
 		cy.add( y );
+	}
+
+	@Override
+	public String toString()
+	{
+		final StringBuilder str = new StringBuilder( super.toString() );
+
+		str.append( "\nBounding-box" );
+		str.append( String.format( "\n%5s: %7.2f -> %7.2f", "X", boundingBox[ 0 ], boundingBox[ 3 ] ) );
+		str.append( String.format( "\n%5s: %7.2f -> %7.2f", "Y", boundingBox[ 1 ], boundingBox[ 4 ] ) );
+		str.append( String.format( "\n%5s: %7.2f -> %7.2f", "Z", boundingBox[ 2 ], boundingBox[ 5 ] ) );
+
+		final Vertices vertices = mesh.vertices();
+		final long nVertices = vertices.size();
+		str.append( "\nV (" + nVertices + "):" );
+		for ( long i = 0; i < nVertices; i++ )
+			str.append( String.format( "\n%5d: %7.2f %7.2f %7.2f",
+					i, vertices.x( i ), vertices.y( i ), vertices.z( i ) ) );
+
+		final Triangles triangles = mesh.triangles();
+		final long nTriangles = triangles.size();
+		str.append( "\nF (" + nTriangles + "):" );
+		for ( long i = 0; i < nTriangles; i++ )
+			str.append( String.format( "\n%5d: %5d %5d %5d",
+					i, triangles.vertex0( i ), triangles.vertex1( i ), triangles.vertex2( i ) ) );
+
+		return str.toString();
 	}
 
 	private static final double minZ( final Vertices vertices, final long v0, final long v1, final long v2 )
