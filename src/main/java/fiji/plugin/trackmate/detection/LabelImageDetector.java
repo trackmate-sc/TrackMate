@@ -137,7 +137,7 @@ public class LabelImageDetector< T extends RealType< T > & NativeType< T > > imp
 
 		final ImgLabeling< Integer, R > labeling = ImgLabeling.fromImageAndLabels( rai, indices );
 		if ( input.numDimensions() == 2 )
-			spots = MaskUtils.fromLabelingWithROI( labeling, interval, calibration, simplify, null );
+			spots = MaskUtils.from2DLabelingWithROI( labeling, interval, calibration, simplify, null );
 		else
 			spots = MaskUtils.fromLabeling( labeling, interval, calibration );
 	}
