@@ -51,7 +51,7 @@ public class PaintSpotMesh
 		final double x = spot.getFeature( Spot.POSITION_X );
 		final double y = spot.getFeature( Spot.POSITION_Y );
 		final double z = spot.getFeature( Spot.POSITION_Z );
-		final double dz = zslice - z;
+		final double dz = zslice;
 
 		final SpotMesh mesh = spot.getMesh();
 		if ( mesh.boundingBox[ 2 ] > dz || mesh.boundingBox[ 5 ] < dz )
@@ -70,8 +70,8 @@ public class PaintSpotMesh
 		for ( int i = 0; i < cx.size(); i++ )
 		{
 			// Pixel coords.
-			final double xc = ( x + cx.get( i ) ) / calibration[ 0 ] + 0.5;
-			final double yc = ( y + cy.get( i ) ) / calibration[ 1 ] + 0.5;
+			final double xc = ( cx.get( i ) ) / calibration[ 0 ] + 0.5;
+			final double yc = ( cy.get( i ) ) / calibration[ 1 ] + 0.5;
 			// Window coords.
 			cx.set( i, ( xc - xcorner ) * magnification );
 			cy.set( i, ( yc - ycorner ) * magnification );
