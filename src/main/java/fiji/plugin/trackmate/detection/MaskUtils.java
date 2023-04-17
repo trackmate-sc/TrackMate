@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -29,11 +29,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.SpotRoi;
 import ij.ImagePlus;
 import ij.gui.PolygonRoi;
 import ij.measure.Measurements;
 import ij.process.FloatPolygon;
+import net.imagej.mesh.Mesh;
+import net.imagej.mesh.Meshes;
+import net.imagej.mesh.Vertices;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
@@ -53,6 +57,7 @@ import net.imglib2.roi.labeling.LabelRegionCursor;
 import net.imglib2.roi.labeling.LabelRegions;
 import net.imglib2.type.BooleanType;
 import net.imglib2.type.logic.BitType;
+import net.imglib2.type.logic.BoolType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.RealType;
@@ -112,11 +117,11 @@ public class MaskUtils
 		int k, kStar; // k = the current threshold; kStar = optimal threshold
 		final int L = histogram.length; // The total intensity of the image
 		long N1, N; // N1 = # points with intensity <=k; N = total number of
-					// points
+		// points
 		long Sk; // The total intensity for all histogram points <=k
 		long S;
 		double BCV, BCVmax; // The current Between Class Variance and maximum
-							// BCV
+		// BCV
 		double num, denom; // temporary bookkeeping
 
 		// Initialize values:
@@ -145,15 +150,15 @@ public class MaskUtils
 			// precision and
 			// will prevent overflow in the case of large saturated images
 			denom = ( double ) ( N1 ) * ( N - N1 ); // Maximum value of denom is
-													// (N^2)/4 =
-													// approx. 3E10
+			// (N^2)/4 =
+			// approx. 3E10
 
 			if ( denom != 0 )
 			{
 				// Float here is to avoid loss of precision when dividing
 				num = ( ( double ) N1 / N ) * S - Sk; // Maximum value of num =
-														// 255*N =
-														// approx 8E7
+				// 255*N =
+				// approx 8E7
 				BCV = ( num * num ) / denom;
 			}
 			else
@@ -173,7 +178,7 @@ public class MaskUtils
 
 	/**
 	 * Creates a zero-min label image from a thresholded input image.
-	 * 
+	 *
 	 * @param <T>
 	 *            the type of the input image. Must be real, scalar.
 	 * @param input
@@ -209,7 +214,7 @@ public class MaskUtils
 		// Get connected components.
 		final ExecutorService executorService = numThreads > 1
 				? Executors.newFixedThreadPool( numThreads )
-				: Executors.newSingleThreadExecutor();
+						: Executors.newSingleThreadExecutor();
 
 		ConnectedComponents.labelAllConnectedComponents(
 				bitMask,
@@ -225,7 +230,7 @@ public class MaskUtils
 	 * Creates spots from a grayscale image, thresholded to create a mask. A
 	 * spot is created for each connected-component of the mask, with a size
 	 * that matches the mask size.
-	 * 
+	 *
 	 * @param <T>
 	 *            the type of the input image. Must be real, scalar.
 	 * @param input
@@ -257,7 +262,7 @@ public class MaskUtils
 
 	/**
 	 * Creates spots from a label image.
-	 * 
+	 *
 	 * @param <R>
 	 *            the type that backs-up the labeling.
 	 * @param labeling
@@ -306,7 +311,7 @@ public class MaskUtils
 					volume *= calibration[ d ];
 			final double radius = ( labeling.numDimensions() == 2 )
 					? Math.sqrt( volume / Math.PI )
-					: Math.pow( 3. * volume / ( 4. * Math.PI ), 1. / 3. );
+							: Math.pow( 3. * volume / ( 4. * Math.PI ), 1. / 3. );
 			final double quality = region.size();
 			spots.add( new Spot( x, y, z, radius, quality ) );
 		}
@@ -319,7 +324,7 @@ public class MaskUtils
 	 * spot is created for each connected-component of the mask, with a size
 	 * that matches the mask size. The quality of the spots is read from another
 	 * image, by taking the max pixel value of this image with the ROI.
-	 * 
+	 *
 	 * @param <T>
 	 *            the type of the input image. Must be real, scalar.
 	 * @param input
@@ -394,7 +399,7 @@ public class MaskUtils
 
 			final double radius = ( labeling.numDimensions() == 2 )
 					? Math.sqrt( volume / Math.PI )
-					: Math.pow( 3. * volume / ( 4. * Math.PI ), 1. / 3. );
+							: Math.pow( 3. * volume / ( 4. * Math.PI ), 1. / 3. );
 			spots.add( new Spot( x, y, z, radius, quality ) );
 		}
 
@@ -402,12 +407,12 @@ public class MaskUtils
 	}
 
 	/**
-	 * Creates spots <b>with their ROIs</b> from a <b>2D</b> grayscale image,
-	 * thresholded to create a mask. A spot is created for each
+	 * Creates spots <b>with their ROIs or meshes</b> from a <b>2D or 3D</b>
+	 * grayscale image, thresholded to create a mask. A spot is created for each
 	 * connected-component of the mask, with a size that matches the mask size.
 	 * The quality of the spots is read from another image, by taking the max
 	 * pixel value of this image with the ROI.
-	 * 
+	 *
 	 * @param <T>
 	 *            the type of the input image. Must be real, scalar.
 	 * @param <S>
@@ -438,19 +443,24 @@ public class MaskUtils
 			final int numThreads,
 			final RandomAccessibleInterval< S > qualityImage )
 	{
-		if ( input.numDimensions() != 2 )
-			throw new IllegalArgumentException( "Can only process 2D images with this method, but got " + input.numDimensions() + "D." );
-		
+
 		// Get labeling.
 		final ImgLabeling< Integer, IntType > labeling = toLabeling( input, interval, threshold, numThreads );
-		return fromLabelingWithROI( labeling, interval, calibration, simplify, qualityImage );
+
+		// Process it.
+		if ( input.numDimensions() == 2 )
+			return from2DLabelingWithROI( labeling, interval, calibration, simplify, qualityImage );
+		else if ( input.numDimensions() == 3 )
+			return from3DLabelingWithROI( labeling, interval, calibration, simplify, qualityImage );
+		else
+			throw new IllegalArgumentException( "Can only process 2D or 3D images with this method, but got " + labeling.numDimensions() + "D." );
 	}
 
 	/**
 	 * Creates spots <b>with ROIs</b> from a <b>2D</b> label image. The quality
-	 * value is read from a secondary image, byt taking the max value in each
+	 * value is read from a secondary image, by taking the max value in each
 	 * ROI.
-	 * 
+	 *
 	 * @param <R>
 	 *            the type that backs-up the labeling.
 	 * @param <S>
@@ -469,7 +479,7 @@ public class MaskUtils
 	 *            the image in which to read the quality value.
 	 * @return a list of spots, with ROI.
 	 */
-	public static < R extends IntegerType< R >, S extends NumericType< S > > List< Spot > fromLabelingWithROI(
+	public static < R extends IntegerType< R >, S extends NumericType< S > > List< Spot > from2DLabelingWithROI(
 			final ImgLabeling< Integer, R > labeling,
 			final Interval interval,
 			final double[] calibration,
@@ -500,7 +510,7 @@ public class MaskUtils
 		final List< Spot > spots = new ArrayList<>( polygons.size() );
 		final ImagePlus qualityImp = ( null == qualityImage )
 				? null
-				: ImageJFunctions.wrap( qualityImage, "QualityImage" );
+						: ImageJFunctions.wrap( qualityImage, "QualityImage" );
 
 		// Simplify them and compute a quality.
 		for ( final Polygon polygon : polygons )
@@ -540,6 +550,73 @@ public class MaskUtils
 			}
 
 			spots.add( SpotRoi.createSpot( xpoly, ypoly, quality ) );
+		}
+		return spots;
+	}
+
+	/**
+	 * Creates spots <b>with meshes</b> from a <b>3D</b> label image. The
+	 * quality value is read from a secondary image, by taking the max value in
+	 * each ROI.
+	 *
+	 * @param <R>
+	 *            the type that backs-up the labeling.
+	 * @param <S>
+	 *            the type of the quality image. Must be real, scalar.
+	 * @param labeling
+	 *            the labeling, must be zero-min and 3D.
+	 * @param interval
+	 *            the interval, used to reposition the spots from the zero-min
+	 *            labeling to the proper coordinates.
+	 * @param calibration
+	 *            the physical calibration.
+	 * @param simplify
+	 *            if <code>true</code> the meshes will be post-processed to be
+	 *            smoother and contain less points.
+	 * @param qualityImage
+	 *            the image in which to read the quality value.
+	 * @return a list of spots, with meshes.
+	 */
+	public static < R extends IntegerType< R >, S extends NumericType< S > > List< Spot > from3DLabelingWithROI(
+			final ImgLabeling< Integer, R > labeling,
+			final Interval interval,
+			final double[] calibration,
+			final boolean simplify,
+			final RandomAccessibleInterval< S > qualityImage )
+	{
+		if ( labeling.numDimensions() != 3 )
+			throw new IllegalArgumentException( "Can only process 3D images with this method, but got " + labeling.numDimensions() + "D." );
+
+
+		// Quality image.
+		final ImagePlus qualityImp = ( null == qualityImage )
+				? null
+						: ImageJFunctions.wrap( qualityImage, "QualityImage" );
+
+		// Parse regions to create meshes on label.
+		final LabelRegions< Integer > regions = new LabelRegions< Integer >( labeling );
+		final Iterator< LabelRegion< Integer > > iterator = regions.iterator();
+		final List< Spot > spots = new ArrayList<>( regions.getExistingLabels().size() );
+		while ( iterator.hasNext() )
+		{
+			final LabelRegion< Integer > region = iterator.next();
+
+			// To mesh.
+			final IntervalView< BoolType > box = Views.zeroMin( region );
+			final Mesh mesh = Meshes.marchingCubes( box );
+			final Mesh cleaned = Meshes.removeDuplicateVertices( mesh, 0 );
+			final Mesh simplified = simplify
+					? Meshes.simplify( cleaned, 0.25f, 10 )
+							: cleaned;
+			// PScale to physical coords.
+			final double[] origin = region.minAsDoubleArray();
+			scale( simplified.vertices(), calibration, origin );
+
+			// Measure quality.
+			// TODO Iterator over the mesh.
+			final double quality = -1;
+
+			spots.add( SpotMesh.createSpot( simplified, quality ) );
 		}
 		return spots;
 	}
@@ -624,7 +701,7 @@ public class MaskUtils
 	 * the number of points in a curve that is approximated by a series of
 	 * points.
 	 * <p>
-	 * 
+	 *
 	 * @see <a href=
 	 *      "https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm">Ramer–Douglas–Peucker
 	 *      Algorithm (Wikipedia)</a>
@@ -637,7 +714,7 @@ public class MaskUtils
 	 */
 	public static final List< double[] > douglasPeucker( final List< double[] > list, final double epsilon )
 	{
-		final List< double[] > resultList = new ArrayList< >();
+		final List< double[] > resultList = new ArrayList<>();
 		douglasPeucker( list, 0, list.size(), epsilon, resultList );
 		return resultList;
 	}
@@ -665,7 +742,7 @@ public class MaskUtils
 
 	/**
 	 * Start at 1.
-	 * 
+	 *
 	 * @return a new iterator that goes like 1, 2, 3, ...
 	 */
 	public static final Iterator< Integer > labelGenerator()
@@ -697,7 +774,7 @@ public class MaskUtils
 	 * Warning: cannot deal with holes, they are simply ignored.
 	 * <p>
 	 * Copied and adapted from ImageJ1 code by Wayne Rasband.
-	 * 
+	 *
 	 * @param <T>
 	 *            the type of the mask.
 	 * @param mask
@@ -1050,9 +1127,9 @@ public class MaskUtils
 			final int oSize = o.last - o.first;
 			if ( size <= o.reserved - o.last && oSize > first )
 			{ /*
-				 * We don't have enough space in our own array but in that of
-				 * 'o' so append our own data to that of 'o'
-				 */
+			 * We don't have enough space in our own array but in that of
+			 * 'o' so append our own data to that of 'o'
+			 */
 				System.arraycopy( x, first, o.x, o.last, size );
 				System.arraycopy( y, first, o.y, o.last, size );
 				x = o.x;
@@ -1137,6 +1214,18 @@ public class MaskUtils
 					res += "(" + x[ i ] + "," + y[ i ] + ")";
 			}
 			return res + "]";
+		}
+	}
+
+	private static void scale( final Vertices vertices, final double[] scale, final double[] origin )
+	{
+		final long nv = vertices.size();
+		for ( long i = 0; i < nv; i++ )
+		{
+			final double x = ( origin[ 0 ] + vertices.x( i ) ) * scale[ 0 ];
+			final double y = ( origin[ 1 ] + vertices.y( i ) ) * scale[ 1 ];
+			final double z = ( origin[ 2 ] + vertices.z( i ) ) * scale[ 2 ];
+			vertices.set( i, x, y, z );
 		}
 	}
 
