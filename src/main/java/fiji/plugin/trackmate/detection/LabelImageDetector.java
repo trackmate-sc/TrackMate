@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -112,9 +112,9 @@ public class LabelImageDetector< T extends RealType< T > & NativeType< T > > imp
 			final ImgFactory< IntType > factory = Util.getArrayOrCellImgFactory( interval, new IntType() );
 			final Img< IntType > img = factory.create( interval );
 			LoopBuilder
-					.setImages( Views.zeroMin( rai ), img )
-					.multiThreaded( false )
-					.forEachPixel( ( i, o ) -> o.setReal( i.getRealDouble() ) );
+			.setImages( Views.zeroMin( rai ), img )
+			.multiThreaded( false )
+			.forEachPixel( ( i, o ) -> o.setReal( i.getRealDouble() ) );
 			processIntegerImg( img );
 		}
 		final long end = System.currentTimeMillis();
@@ -138,6 +138,8 @@ public class LabelImageDetector< T extends RealType< T > & NativeType< T > > imp
 		final ImgLabeling< Integer, R > labeling = ImgLabeling.fromImageAndLabels( rai, indices );
 		if ( input.numDimensions() == 2 )
 			spots = MaskUtils.from2DLabelingWithROI( labeling, interval, calibration, simplify, null );
+		else if ( input.numDimensions() == 3 )
+			spots = MaskUtils.from3DLabelingWithROI( labeling, interval, calibration, simplify, null );
 		else
 			spots = MaskUtils.fromLabeling( labeling, interval, calibration );
 	}
