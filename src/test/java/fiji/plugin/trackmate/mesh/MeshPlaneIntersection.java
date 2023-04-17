@@ -178,6 +178,7 @@ public class MeshPlaneIntersection
 
 	}
 
+
 	private static void addEdgeToContour(
 			final Vertices vertices,
 			final Edges edges,
@@ -205,4 +206,79 @@ public class MeshPlaneIntersection
 		cx.add( x );
 		cy.add( y );
 	}
+
+	public static void intersect2( final Mesh mesh, final double z, final TDoubleArrayList cx, final TDoubleArrayList cy )
+	{
+		// Clear contour holders.
+		cx.resetQuick();
+		cy.resetQuick();
+
+		final Triangles triangles = mesh.triangles();
+		final Vertices vertices = mesh.vertices();
+		for ( long f = 0; f < triangles.size(); f++ )
+		{
+			final long v0 = triangles.vertex0( f );
+			final long v1 = triangles.vertex1( f );
+			final long v2 = triangles.vertex2( f );
+
+			final double minZ = minZ( vertices, v0, v1, v2 );
+			if ( minZ > z )
+				continue;
+			final double maxZ = maxZ( vertices, v0, v1, v2 );
+			if ( maxZ < z )
+				continue;
+
+			segmentIntersecting( vertices, v0, v1, v2, z, cx, cy );
+		}
+	}
+
+	/**
+	 * Intersection of a triangle with a Z plane.
+	 */
+	private static void segmentIntersecting( final Vertices vertices, final long v0, final long v1, final long v2, final double z, final TDoubleArrayList cx, final TDoubleArrayList cy )
+	{
+		addEdgeToContour( vertices, v0, v1, z, cx, cy );
+		addEdgeToContour( vertices, v0, v2, z, cx, cy );
+		addEdgeToContour( vertices, v1, v2, z, cx, cy );
+	}
+
+	private static void addEdgeToContour(
+			final Vertices vertices,
+			final long sv,
+			final long tv,
+			final double z,
+			final TDoubleArrayList cx,
+			final TDoubleArrayList cy )
+	{
+		final double zs = vertices.z( sv );
+		final double zt = vertices.z( tv );
+		if ( ( zs > z && zt > z ) || ( zs < z && zt < z ) )
+			return;
+
+		final double xs = vertices.x( sv );
+		final double ys = vertices.y( sv );
+		final double xt = vertices.x( tv );
+		final double yt = vertices.y( tv );
+		final double t = ( zs == zt )
+				? 0.5 : ( z - zs ) / ( zt - zs );
+		final double x = xs + t * ( xt - xs );
+		final double y = ys + t * ( yt - ys );
+		final int np = cx.size();
+		if ( np > 1 && cx.getQuick( np - 1 ) == x && cy.getQuick( np - 1 ) == y )
+			return; // Don't add duplicate.
+
+		cx.add( x );
+		cy.add( y );
+	}
+
+	private static final double minZ( final Vertices vertices, final long v0, final long v1, final long v2 )
+	{
+		return Math.min( vertices.z( v0 ), Math.min( vertices.z( v1 ), vertices.z( v2 ) ) );
+	}
+
+	private static final double maxZ( final Vertices vertices, final long v0, final long v1, final long v2 )
+	{
+		return Math.max( vertices.z( v0 ), Math.max( vertices.z( v1 ), vertices.z( v2 ) ) );
+	}
+
 }
