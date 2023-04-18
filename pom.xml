@@ -185,6 +185,11 @@
 			<groupId>net.imagej</groupId>
 			<artifactId>imagej-ops</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>sc.fiji</groupId>
+			<artifactId>bigvolumeviewer</artifactId>
+			<version>0.2.1-SNAPSHOT</version>
+		</dependency>
 
 		<!-- ImgLib2 dependencies -->
 		<dependency>
