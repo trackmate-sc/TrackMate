@@ -113,7 +113,7 @@ public class Demo3DMesh
 	}
 
 	@SuppressWarnings( "unused" )
-	private static Mesh debugMesh( final long[] min, final long[] max )
+	static Mesh debugMesh( final long[] min, final long[] max )
 	{
 		final NaiveDoubleMesh mesh = new NaiveDoubleMesh();
 		final net.imagej.mesh.naive.NaiveDoubleMesh.Vertices vertices = mesh.vertices();
@@ -234,8 +234,7 @@ public class Demo3DMesh
 		}
 	}
 
-	@SuppressWarnings( "unused" )
-	private static < T extends RealType< T > & NumericType< T > > ImgPlus< BitType > loadTestMask()
+	static < T extends RealType< T > & NumericType< T > > ImgPlus< BitType > loadTestMask()
 	{
 		final String filePath = "samples/mesh/CElegansMask3D.tif";
 		final ImagePlus imp = IJ.openImage( filePath );
@@ -252,8 +251,7 @@ public class Demo3DMesh
 		return new ImgPlus< BitType >( ImgView.wrap( mask ), t1 );
 	}
 
-	@SuppressWarnings( "unused" )
-	private static < T extends RealType< T > & NumericType< T > > ImgPlus< BitType > loadTestMask2()
+	static < T extends RealType< T > & NumericType< T > > ImgPlus< BitType > loadTestMask2()
 	{
 		final String filePath = "samples/mesh/Cube.tif";
 		final ImagePlus imp = IJ.openImage( filePath );
