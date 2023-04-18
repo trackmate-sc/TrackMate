@@ -42,6 +42,7 @@ public class MeshPlayground
 		final double[] cal = TMUtils.getSpatialCalibration( t1 );
 
 		final BvvSource source = BvvFunctions.show( c1, "t1",
+
 				Bvv.options()
 						.maxAllowedStepInVoxels( 0 )
 						.renderWidth( 1024 )
@@ -51,7 +52,6 @@ public class MeshPlayground
 
 		source.setDisplayRangeBounds( 0, 1024 );
 		source.setColor( new ARGBType( 0xaaffaa ) );
-
 
 		final List< StupidMesh > meshes = new ArrayList<>();
 		for ( int j = 1; j <= 3; ++j )
@@ -82,7 +82,6 @@ public class MeshPlayground
 
 		viewer.requestRepaint();
 	}
-
 
 	private static BufferMesh load( final String fn )
 	{
