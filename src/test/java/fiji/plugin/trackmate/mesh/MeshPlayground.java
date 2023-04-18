@@ -55,7 +55,7 @@ public class MeshPlayground
 
 
 		final List< StupidMesh > meshes = new ArrayList<>();
-		for ( int j = 1; j <= 3; ++j)
+		for ( int j = 1; j <= 3; ++j )
 		{
 			final String fn = String.format( "samples/mesh/CElegansMask3D_%02d.stl", j );
 			meshes.add( new StupidMesh( load( fn ) ) );
@@ -68,8 +68,8 @@ public class MeshPlayground
 			if ( showMeshes.get() )
 			{
 				final Matrix4f pvm = new Matrix4f( data.getPv() );
-				Matrix4f view = MatrixMath.affine( data.getRenderTransformWorldToScreen(), new Matrix4f() );
-				Matrix4f vm = MatrixMath.screen( data.getDCam(), data.getScreenWidth(), data.getScreenHeight(), new Matrix4f() ).mul( view );
+				final Matrix4f view = MatrixMath.affine( data.getRenderTransformWorldToScreen(), new Matrix4f() );
+				final Matrix4f vm = MatrixMath.screen( data.getDCam(), data.getScreenWidth(), data.getScreenHeight(), new Matrix4f() ).mul( view );
 				meshes.forEach( mesh -> mesh.draw( gl, pvm, vm, false ) );
 			}
 		} );
