@@ -22,7 +22,6 @@ import net.imagej.mesh.Vertices;
 import net.imagej.mesh.io.stl.STLMeshIO;
 import net.imagej.mesh.naive.NaiveDoubleMesh;
 import net.imagej.mesh.naive.NaiveDoubleMesh.Triangles;
-import net.imagej.mesh.nio.BufferMeshEdges;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.RealTypeConverters;
 import net.imglib2.img.ImgView;
@@ -80,18 +79,17 @@ public class Demo3DMesh
 //				final Mesh simplified = debugMesh( new long[] { 0, 0, 0 }, region.dimensionsAsLongArray() );
 
 				// Wrap as mesh with edges.
-				final BufferMeshEdges emesh = BufferMeshEdges.wrap( simplified, true );
-				System.out.println( "After simplification: " + emesh.vertices().size() + " vertices and " + simplified.triangles().size() + " faces." );
+				System.out.println( "After simplification: " + mesh.vertices().size() + " vertices and " + simplified.triangles().size() + " faces." );
 				System.out.println();
 
 				// Scale and offset with physical coordinates.
 				final double[] origin = region.minAsDoubleArray();
-				scale( emesh.vertices(), cal, origin );
+				scale( mesh.vertices(), cal, origin );
 
 				/*
 				 * IO.
 				 */
-				testIO( emesh, ++j );
+				testIO( mesh, ++j );
 
 				/*
 				 * Display.
@@ -101,7 +99,7 @@ public class Demo3DMesh
 				final int zslice = 20; // plan
 				final double z = ( zslice ) * cal[ 2 ]; // um
 
-				MeshPlaneIntersection.intersect2( emesh, z, cx, cy );
+//				MeshPlaneIntersection.intersect2( mesh, z, cx, cy );
 				toOverlay( cx, cy, out, cal );
 			}
 			System.out.println( "Done." );
