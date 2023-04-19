@@ -14,11 +14,14 @@ import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.array.TLongArrayList;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij.gui.NewImage;
 import net.imagej.mesh.Mesh;
+import net.imagej.mesh.Triangles;
 import net.imglib2.RandomAccess;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.iterator.LocalizingIntervalIterator;
@@ -26,6 +29,12 @@ import net.imglib2.type.numeric.RealType;
 
 public class DemoPixelIteration
 {
+
+	private static final boolean DEBUG = true;
+
+	private static final int DEBUG_Z = 16;
+
+	private static final int DEBUG_Y = 143;
 
 	public static class MeshIterator
 	{
@@ -68,58 +77,112 @@ public class DemoPixelIteration
 			}
 			final LocalizingIntervalIterator it = new LocalizingIntervalIterator( min, max );
 
+			// Array of x position of intersections.
 			final TDoubleArrayList xs = new TDoubleArrayList();
-			final double[] coords = new double[ 3 ];
+			// Array of triangle indices intersecting.
+			final TLongArrayList tl = new TLongArrayList();
+			// Array of triangle normals projected onto the X line.
+			final TDoubleArrayList nxs = new TDoubleArrayList();
+			// Array to store the 'inside' score.
+			final TIntArrayList insideScore = new TIntArrayList();
+
 			while ( it.hasNext() )
 			{
 				it.fwd();
 				ra.setPosition( it );
 
+				if ( DEBUG )
+				{
+					if ( it.getIntPosition( 2 ) != DEBUG_Z )
+						continue;
+					if ( it.getIntPosition( 1 ) != DEBUG_Y )
+						continue;
+				}
+
 				// Get all the X position where triangles cross the line.
 				final double y = it.getIntPosition( 1 ) * cal[ 1 ];
 				final double z = it.getIntPosition( 2 ) * cal[ 2 ];
-				getXIntersectingCoords( y, z, xs, coords );
+				getXIntersectingCoords( y, z, tl, xs );
 
 				// No intersection?
 				if ( xs.isEmpty() )
 					continue;
 
-				xs.sort();
-				final int xsSize = xs.size();
+				// Collect normals projection on the X line.
+				getNormalXProjection( tl, nxs );
 
-				final double firstIntersection = xs.min();
-				final double lastIntersection = xs.max();
-				for ( long ix = minX; ix <= maxX; ix++ )
+				// Sort by by X coordinate of intersections.
+				final int[] index = SortArrays.quicksort( xs );
+
+				// Sort normal array with the same order.
+				SortArrays.reorder( nxs, index );
+
+				if ( DEBUG )
 				{
-					final double x = ix * cal[ 0 ];
-					final boolean inside;
-					if ( x < firstIntersection || x > lastIntersection )
+					System.out.println();
+					System.out.println( "Before removing duplicates:" );
+					System.out.println( "XS: " + xs );
+					System.out.println( "NS: " + nxs );
+					System.out.println( "Normals running sum: " );
+					for ( int i = 0; i < nxs.size(); i++ )
+						System.out.print( "( " + i + " -> " + nxs.subList( 0, i + 1 ).sum() + "), " );
+					System.out.println();
+				}
+
+				// Merge duplicates.
+				final int maxIndex = removeDuplicate( xs, nxs );
+
+				if ( DEBUG )
+				{
+					System.out.println( "After removing duplicates:" );
+					System.out.println( "XS: " + xs.subList( 0, maxIndex ) );
+					System.out.println( "NS: " + nxs.subList( 0, maxIndex ) );
+				}
+
+				// DEBUG
+//				if ( maxIndex % 2 != 0 )
+//				{
+//					System.out.println( "XS: " + xs.subList( 0, maxIndex ) );
+//					System.out.println( "NS: " + nxs.subList( 0, maxIndex ) );
+//				}
+
+				// Iterate to build the inside score between each intersection.
+				insideScore.resetQuick();
+				insideScore.add( 0 );
+				for ( int i = 0; i < maxIndex; i++ )
+				{
+					final double n = nxs.getQuick( i );
+					final int prevScore = insideScore.getQuick( i );
+
+					// Weird case: the normal is orthogonal to X. Should not
+					// happen because we filtered out triangles parallel to the
+					// X axis.
+					if ( n == 0. )
 					{
-						inside = false;
+						insideScore.add( prevScore );
+						continue;
 					}
 					else
 					{
-						final int i = xs.binarySearch( x, 0, xsSize );
-						if ( i < 0 )
-						{
-							final int ip = -( i + 1 );
+						final int score = prevScore + ( ( n > 0 ) ? -1 : 1 );
+						insideScore.add( score );
+					}
+				}
 
-							// Below the first intersection or beyond the last.
-							if ( ip == 0 || ip == xs.size() )
-							{
-								inside = false;
-							}
-							else
-							{
-								// Between two intersections.
-								inside = ( ip % 2 ) != 0;
-							}
-						}
-						else
-						{
-							// On an intersection. We accept.
-							inside = true;
-						}
+				for ( long ix = minX; ix <= maxX; ix++ )
+				{
+					final double x = ix * cal[ 0 ];
+					final int i = xs.binarySearch( x, 0, maxIndex );
+					final boolean inside;
+					if ( i < 0 )
+					{
+						final int ip = -( i + 1 );
+						inside = insideScore.getQuick( ip ) > 0;
+					}
+					else
+					{
+						// On an intersection. We accept.
+						inside = true;
 					}
 					if ( inside )
 					{
@@ -130,24 +193,71 @@ public class DemoPixelIteration
 			}
 		}
 
-		private int removeDuplicate( final TDoubleArrayList ts )
+		private int removeDuplicate( final TDoubleArrayList ts, final TDoubleArrayList nxs )
 		{
-			// Sort it.
-			ts.sort();
-
 			if ( ts.size() < 2 )
 				return ts.size();
 
 			int j = 0;
+			double accum = 0.;
+			int nAccum = 0;
+			int nPos  = 0;
+			int nNeg  = 0;
+			final double maxN;
 			for ( int i = 0; i < ts.size() - 1; i++ )
 			{
-				if ( ts.get( i ) != ts.get( i + 1 ) )
+//				System.out.print( j + " -> " + i );
+				if ( ts.getQuick( i ) != ts.getQuick( i + 1 ) )
 				{
-					ts.set( j++, ts.get( i ) );
+					ts.setQuick( j, ts.getQuick( i ) );
+					if ( nAccum == 0 )
+					{
+						nxs.setQuick( j, nxs.getQuick( i ) );
+					}
+					else
+					{
+						// Average.
+						nxs.setQuick( j, accum / nAccum );
+						// Majority.
+//						final double vmaj;
+//						if ( nPos == nNeg )
+//							vmaj = 0.;
+//						else if ( nPos > nNeg )
+//							vmaj = 1.;
+//						else
+//							vmaj = -1.;
+//						nxs.setQuick( j, vmaj );
+					}
+					accum = 0.;
+					nAccum = 0;
+					nPos = 0;
+					nNeg = 0;
+					j++;
 				}
+				else
+				{
+					final double v = nxs.getQuick( i );
+					accum += v;
+					if ( v > 0 )
+						nPos++;
+					if ( v < 0 )
+						nNeg++;
+					nAccum++;
+//					System.out.print( ", " + accum );
+				}
+//				System.out.println();
 			}
 
-			ts.set( j++, ts.get( ts.size() - 1 ) );
+			ts.setQuick( j, ts.getQuick( ts.size() - 1 ) );
+			if ( nAccum == 0 )
+			{
+				nxs.setQuick( j, nxs.getQuick( ts.size() - 1 ) );
+			}
+			else
+			{
+				nxs.setQuick( j, accum / nAccum );
+			}
+			j++;
 			return j;
 		}
 
@@ -160,20 +270,33 @@ public class DemoPixelIteration
 		 *            the Y coordinate of the line origin.
 		 * @param z
 		 *            the Z coordinate of the line origin.
+		 * @param tl
+		 *            a holder for the triangle indices intersecting.
 		 * @param ts
 		 *            a holder for the resulting intersections X coordinate.
-		 * @param intersection
-		 *            a holder for intersection coordinates, messed with
-		 *            internally.
 		 */
-		private void getXIntersectingCoords( final double y, final double z, final TDoubleArrayList ts, final double[] intersection )
+		private void getXIntersectingCoords( final double y, final double z,
+				final TLongArrayList tl, final TDoubleArrayList ts )
 		{
+			final double[] intersection = new double[ 3 ];
+			tl.resetQuick();
 			ts.resetQuick();
+			// TODO optimize search of triangles with a data structure.
 			for ( long id = 0; id < mesh.triangles().size(); id++ )
 				if ( mollerTrumbore.rayIntersectsTriangle( id, 0, y, z, 1., 0, 0, intersection ) )
+				{
+					tl.add( id );
 					ts.add( intersection[ 0 ] );
+				}
 		}
 
+		private void getNormalXProjection( final TLongArrayList tl, final TDoubleArrayList nxs )
+		{
+			nxs.resetQuick();
+			final Triangles triangles = mesh.triangles();
+			for ( int id = 0; id < tl.size(); id++ )
+				nxs.add( triangles.nx( tl.getQuick( id ) ) );
+		}
 	}
 
 	@SuppressWarnings( "unchecked" )
@@ -204,7 +327,7 @@ public class DemoPixelIteration
 			settings.detectorFactory = new MaskDetectorFactory<>();
 			settings.detectorSettings = settings.detectorFactory.getDefaultSettings();
 			settings.detectorSettings.put( ThresholdDetectorFactory.KEY_SIMPLIFY_CONTOURS,
-					true );
+					false );
 
 			final TrackMate trackmate = new TrackMate( settings );
 			trackmate.setNumThreads( 4 );
@@ -216,6 +339,8 @@ public class DemoPixelIteration
 
 			final ImagePlus out = NewImage.createShortImage( "OUT", imp.getWidth(), imp.getHeight(), imp.getNSlices(), NewImage.FILL_BLACK );
 			out.show();
+			out.setSlice( DEBUG_Z + 1 );
+			out.resetDisplayRange();
 
 			final double[] cal = TMUtils.getSpatialCalibration( imp );
 			for ( final Spot spot : model.getSpots().iterable( true ) )
@@ -227,6 +352,8 @@ public class DemoPixelIteration
 			}
 
 			imp.show();
+			imp.setSlice( DEBUG_Z + 1 );
+			imp.resetDisplayRange();
 			final SelectionModel sm = new SelectionModel( model );
 			final DisplaySettings ds = DisplaySettingsIO.readUserDefault();
 			final HyperStackDisplayer view = new HyperStackDisplayer( model, sm, imp, ds );
