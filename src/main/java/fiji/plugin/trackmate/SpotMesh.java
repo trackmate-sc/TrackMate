@@ -71,13 +71,25 @@ public class SpotMesh
 		return spot;
 	}
 
-	private double radius()
+	/**
+	 * Returns the radius of the equivalent sphere with the same volume that of
+	 * the specified mesh.
+	 *
+	 * @return the radius in physical units.
+	 */
+	public static final double radius(final Mesh mesh)
 	{
-		return Math.pow( 3. * volume() / ( 4 * Math.PI ), 1. / 3. );
+		return Math.pow( 3. * volume(mesh) / ( 4 * Math.PI ), 1. / 3. );
 	}
 
-	private double volume()
+	/**
+	 * Returns the volume of the specified mesh.
+	 *
+	 * @return the volume in physical units.
+	 */
+	public static double volume( final Mesh mesh )
 	{
+
 		final Vertices vertices = mesh.vertices();
 		final Triangles triangles = mesh.triangles();
 		final long nTriangles = triangles.size();
@@ -108,6 +120,27 @@ public class SpotMesh
 			sum += ( 1. / 6. ) * ( -v321 + v231 + v312 - v132 - v213 + v123 );
 		}
 		return Math.abs( sum );
+	}
+
+	/**
+	 * Returns the radius of the equivalent sphere with the same volume that of
+	 * this mesh.
+	 *
+	 * @return the radius in physical units.
+	 */
+	public double radius()
+	{
+		return radius( mesh );
+	}
+
+	/**
+	 * Returns the volume of this mesh.
+	 *
+	 * @return the volume in physical units.
+	 */
+	public double volume()
+	{
+		return volume( mesh );
 	}
 
 	public void scale(final double alpha)
