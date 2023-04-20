@@ -1,12 +1,18 @@
-package fiji.plugin.trackmate.mesh;
+package fiji.plugin.trackmate.util.mesh;
 
 import net.imagej.mesh.Mesh;
 import net.imagej.mesh.Triangles;
 import net.imagej.mesh.Vertices;
 
 /**
- * Adapted from Wikipedia.
+ * Möller–Trumbore intersection algorithm.
+ * <p>
+ * This algorithm can efficiently tells whether a ray intersects with a triangle
+ * in a mesh. Adapted from Wikipedia.
  *
+ * @see <a
+ *      href="https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm"
+ *      Möller–Trumbore intersection algorithm on Wikipedia</a>.
  * @author Jean-Yves Tinevez
  *
  */
