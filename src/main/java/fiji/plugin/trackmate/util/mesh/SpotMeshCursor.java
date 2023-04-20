@@ -6,7 +6,6 @@ import net.imagej.mesh.Mesh;
 import net.imagej.mesh.Meshes;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
-import net.imglib2.Sampler;
 
 /**
  * A {@link Cursor} that iterates over the pixels inside a mesh.
@@ -247,7 +246,7 @@ public class SpotMeshCursor< T > implements Cursor< T >
 	}
 
 	@Override
-	public Sampler< T > copy()
+	public Cursor< T > copy()
 	{
 		return copyCursor();
 	}
