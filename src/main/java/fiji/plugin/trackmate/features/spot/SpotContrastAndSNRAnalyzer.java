@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -29,8 +29,7 @@ import static fiji.plugin.trackmate.features.spot.SpotIntensityMultiCAnalyzerFac
 import static fiji.plugin.trackmate.features.spot.SpotIntensityMultiCAnalyzerFactory.makeFeatureKey;
 
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotRoi;
-import fiji.plugin.trackmate.detection.DetectionUtils;
+import fiji.plugin.trackmate.SpotShape;
 import fiji.plugin.trackmate.util.SpotNeighborhood;
 import fiji.plugin.trackmate.util.SpotNeighborhoodCursor;
 import fiji.plugin.trackmate.util.SpotUtil;
@@ -54,7 +53,7 @@ import net.imglib2.type.numeric.RealType;
  * <u>Important</u>: this analyzer relies on some results provided by the
  * {@link SpotIntensityMultiCAnalyzer} analyzer. Thus, it <b>must</b> be run
  * after it.
- * 
+ *
  * @author Jean-Yves Tinevez, 2011 - 2012. Revised December 2020.
  */
 public class SpotContrastAndSNRAnalyzer< T extends RealType< T > > extends AbstractSpotFeatureAnalyzer< T >
@@ -72,7 +71,7 @@ public class SpotContrastAndSNRAnalyzer< T extends RealType< T > > extends Abstr
 
 	/**
 	 * Instantiates an analyzer for contrast and SNR.
-	 * 
+	 *
 	 * @param img
 	 *            the 2D or 3D image of the desired time-point and channel to
 	 *            operate on,
@@ -101,11 +100,12 @@ public class SpotContrastAndSNRAnalyzer< T extends RealType< T > > extends Abstr
 
 		// Operate on ROI only if we have one and the image is 2D.
 		final double meanOut;
-		final SpotRoi roi = spot.getRoi();
-		if ( null != roi && DetectionUtils.is2D( img ) )
+		final SpotShape shape = spot.getShape();
+		if ( null != shape )
 		{
+			// 2D or 3D cases are treated altogether.
 			final double alpha = outterRadius / radius;
-			final SpotRoi outterRoi = roi.copy();
+			final SpotShape outterRoi = shape.copy();
 			outterRoi.scale( alpha );
 			final IterableInterval< T > neighborhood = SpotUtil.iterable( outterRoi, spot, img );
 			double totalSum = 0.;
