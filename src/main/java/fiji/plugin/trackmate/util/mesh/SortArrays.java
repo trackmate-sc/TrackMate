@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.mesh;
+package fiji.plugin.trackmate.util.mesh;
 
 import java.util.BitSet;
 import java.util.Random;
@@ -6,7 +6,8 @@ import java.util.Random;
 import gnu.trove.list.array.TDoubleArrayList;
 
 /**
- * Utilities to sort an array and return the sorting index.
+ * Utilities to sort a Trove list and return the sorting index to sort other
+ * lists with.
  */
 public class SortArrays
 {
