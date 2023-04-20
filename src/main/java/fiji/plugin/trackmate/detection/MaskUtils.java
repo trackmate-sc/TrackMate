@@ -412,11 +412,11 @@ public class MaskUtils
 	 * @return a list of spots, with ROI.
 	 */
 	public static < T extends RealType< T >, S extends RealType< S > > List< Spot > fromMaskWithROI(
-			final RandomAccessible< T > input, 
-			final Interval interval, 
-			final double[] calibration, 
-			final boolean simplify, 
-			final int numThreads, 
+			final RandomAccessible< T > input,
+			final Interval interval,
+			final double[] calibration,
+			final boolean simplify,
+			final int numThreads,
 			final RandomAccessibleInterval< S > qualityImage )
 	{
 		final ImgLabeling< Integer, IntType > labeling = toLabeling(
