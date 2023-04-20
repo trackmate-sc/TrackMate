@@ -38,6 +38,7 @@ import ij.process.FloatPolygon;
 import net.imagej.mesh.Mesh;
 import net.imagej.mesh.Meshes;
 import net.imagej.mesh.Vertices;
+import net.imglib2.Cursor;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
@@ -51,6 +52,7 @@ import net.imglib2.histogram.Real1dBinMapper;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgFactory;
 import net.imglib2.img.display.imagej.ImageJFunctions;
+import net.imglib2.roi.Regions;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegion;
 import net.imglib2.roi.labeling.LabelRegionCursor;
@@ -434,7 +436,7 @@ public class MaskUtils
 	 *            the image in which to read the quality value.
 	 * @return a list of spots, with ROI.
 	 */
-	public static final < T extends RealType< T >, S extends NumericType< S > > List< Spot > fromThresholdWithROI(
+	public static final < T extends RealType< T >, S extends RealType< S > > List< Spot > fromThresholdWithROI(
 			final RandomAccessible< T > input,
 			final Interval interval,
 			final double[] calibration,
@@ -577,7 +579,7 @@ public class MaskUtils
 	 *            the image in which to read the quality value.
 	 * @return a list of spots, with meshes.
 	 */
-	public static < R extends IntegerType< R >, S extends NumericType< S > > List< Spot > from3DLabelingWithROI(
+	public static < R extends IntegerType< R >, S extends RealType< S > > List< Spot > from3DLabelingWithROI(
 			final ImgLabeling< Integer, R > labeling,
 			final Interval interval,
 			final double[] calibration,
@@ -586,12 +588,6 @@ public class MaskUtils
 	{
 		if ( labeling.numDimensions() != 3 )
 			throw new IllegalArgumentException( "Can only process 3D images with this method, but got " + labeling.numDimensions() + "D." );
-
-
-		// Quality image.
-		final ImagePlus qualityImp = ( null == qualityImage )
-				? null
-						: ImageJFunctions.wrap( qualityImage, "QualityImage" );
 
 		// Parse regions to create meshes on label.
 		final LabelRegions< Integer > regions = new LabelRegions< Integer >( labeling );
@@ -613,8 +609,24 @@ public class MaskUtils
 			scale( simplified.vertices(), calibration, origin );
 
 			// Measure quality.
-			// TODO Iterator over the mesh.
-			final double quality = -1;
+			final double quality;
+			if ( null == qualityImage )
+			{
+				quality = SpotMesh.volume( simplified );
+			}
+			else
+			{
+				double max = Double.NEGATIVE_INFINITY;
+				final Cursor< S > cursor = Regions.sample( region, qualityImage ).cursor();
+				while(cursor.hasNext())
+				{
+					cursor.fwd();
+					final double val = cursor.get().getRealDouble();
+					if ( val > max )
+						max = val;
+				}
+				quality = max;
+			}
 
 			spots.add( SpotMesh.createSpot( simplified, quality ) );
 		}
