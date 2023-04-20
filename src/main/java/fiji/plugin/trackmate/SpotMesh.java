@@ -5,9 +5,10 @@ import net.imagej.mesh.Mesh;
 import net.imagej.mesh.Meshes;
 import net.imagej.mesh.Triangles;
 import net.imagej.mesh.Vertices;
+import net.imagej.mesh.nio.BufferMesh;
 import net.imglib2.RealPoint;
 
-public class SpotMesh
+public class SpotMesh implements SpotShape
 {
 
 	/**
@@ -20,7 +21,7 @@ public class SpotMesh
 	/**
 	 * The bounding-box, <b>centered on (0,0,0)</b> of this object.
 	 */
-	public final float[] boundingBox;
+	public float[] boundingBox;
 
 	public SpotMesh( final Mesh mesh, final float[] boundingBox )
 	{
@@ -122,12 +123,7 @@ public class SpotMesh
 		return Math.abs( sum );
 	}
 
-	/**
-	 * Returns the radius of the equivalent sphere with the same volume that of
-	 * this mesh.
-	 *
-	 * @return the radius in physical units.
-	 */
+	@Override
 	public double radius()
 	{
 		return radius( mesh );
@@ -143,6 +139,13 @@ public class SpotMesh
 		return volume( mesh );
 	}
 
+	@Override
+	public double size()
+	{
+		return volume();
+	}
+
+	@Override
 	public void scale(final double alpha)
 	{
 		final Vertices vertices = mesh.vertices();
@@ -172,6 +175,7 @@ public class SpotMesh
 			final float za = ( float ) ( ra * Math.cos( theta ) );
 			vertices.setPositionf( v, xa, ya, za );
 		}
+		boundingBox = Meshes.boundingBox( mesh );
 	}
 
 	public void slice( final double z, final TDoubleArrayList cx, final TDoubleArrayList cy )
@@ -285,6 +289,14 @@ public class SpotMesh
 	}
 
 	@Override
+	public SpotMesh copy()
+	{
+		final BufferMesh meshCopy = new BufferMesh( ( int ) mesh.vertices().size(), ( int ) mesh.triangles().size() );
+		Meshes.copy( this.mesh, meshCopy );
+		return new SpotMesh( meshCopy, boundingBox.clone() );
+	}
+
+	@Override
 	public String toString()
 	{
 		final StringBuilder str = new StringBuilder( super.toString() );
@@ -320,5 +332,6 @@ public class SpotMesh
 	{
 		return Math.max( vertices.z( v0 ), Math.max( vertices.z( v1 ), vertices.z( v2 ) ) );
 	}
+
 
 }

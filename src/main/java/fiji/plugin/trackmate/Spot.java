@@ -250,6 +250,13 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 		this.mesh = null;
 	}
 
+	/**
+	 * Return the 2D polygonal shape of this spot. Might be <code>null</code> if
+	 * the spot has no shape information, or if it has but in 3D (in that case
+	 * the {@link #mesh} field won't be <code>null</code>).
+	 *
+	 * @return the spot roi. Can be <code>null</code>.
+	 */
 	public SpotRoi getRoi()
 	{
 		return roi;
@@ -261,8 +268,31 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 		this.mesh = mesh;
 	}
 
+	/**
+	 * Return the mesh shape of this spot. Might be <code>null</code> if the
+	 * spot has no shape information, or if it has but in 2D (in that case the
+	 * {@link #roi} field won't be <code>null</code>).
+	 *
+	 * @return the spot mesh. Can be <code>null</code>.
+	 */
 	public SpotMesh getMesh()
 	{
+		return mesh;
+	}
+
+	/**
+	 * Returns the shape field of this spot as a {@link SpotShape}.
+	 * <p>
+	 * If the spot has no shape information, this will return <code>null</code>.
+	 * If the image is 2D the shape returned will be a {@link SpotRoi}. In 3D it
+	 * will be a {@link SpotRoi}.
+	 *
+	 * @return the spot shape.
+	 */
+	public SpotShape getShape()
+	{
+		if ( roi != null )
+			return roi;
 		return mesh;
 	}
 
