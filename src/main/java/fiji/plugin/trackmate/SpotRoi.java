@@ -35,7 +35,7 @@ import net.imglib2.roi.geom.real.WritablePolygon2D;
 import net.imglib2.type.logic.BoolType;
 import net.imglib2.view.Views;
 
-public class SpotRoi
+public class SpotRoi implements SpotShape
 {
 
 	/**
@@ -54,6 +54,7 @@ public class SpotRoi
 		this.y = y;
 	}
 
+	@Override
 	public SpotRoi copy()
 	{
 		return new SpotRoi( x.clone(), y.clone() );
@@ -164,6 +165,7 @@ public class SpotRoi
 		return Regions.sample( region, Views.extendMirrorDouble( Views.dropSingletonDimensions( img ) ) );
 	}
 
+	@Override
 	public double radius()
 	{
 		return Math.sqrt( area() / Math.PI );
@@ -174,6 +176,13 @@ public class SpotRoi
 		return Math.abs( signedArea( x, y ) );
 	}
 
+	@Override
+	public double size()
+	{
+		return area();
+	}
+
+	@Override
 	public void scale( final double alpha )
 	{
 		for ( int i = 0; i < x.length; i++ )
