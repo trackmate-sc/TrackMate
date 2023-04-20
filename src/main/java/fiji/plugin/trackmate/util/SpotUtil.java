@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -24,8 +24,11 @@ package fiji.plugin.trackmate.util;
 import java.util.Iterator;
 
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.SpotRoi;
+import fiji.plugin.trackmate.SpotShape;
 import fiji.plugin.trackmate.detection.DetectionUtils;
+import fiji.plugin.trackmate.util.mesh.SpotMeshIterable;
 import net.imagej.ImgPlus;
 import net.imglib2.Cursor;
 import net.imglib2.FinalInterval;
@@ -34,6 +37,7 @@ import net.imglib2.IterableInterval;
 import net.imglib2.Localizable;
 import net.imglib2.RandomAccess;
 import net.imglib2.RealLocalizable;
+import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Intervals;
 import net.imglib2.util.Util;
@@ -42,6 +46,16 @@ import net.imglib2.view.Views;
 
 public class SpotUtil
 {
+
+	public static final < T extends RealType< T > > IterableInterval< T > iterable( final SpotShape shape, final RealLocalizable center, final ImgPlus< T > img )
+	{
+		if ( shape instanceof SpotRoi )
+			return iterable( ( SpotRoi ) shape, center, img );
+		else if ( shape instanceof SpotShape )
+			return iterable( ( SpotMesh ) shape, img );
+		else
+			throw new IllegalArgumentException( "Unsuitable shape for SpotShape: " + shape );
+	}
 
 	public static final < T extends RealType< T > > IterableInterval< T > iterable( final SpotRoi roi, final RealLocalizable center, final ImgPlus< T > img )
 	{
@@ -56,10 +70,16 @@ public class SpotUtil
 	{
 		// Prepare neighborhood
 		final SpotRoi roi = spot.getRoi();
+		final SpotMesh mesh = spot.getMesh();
 		if ( null != roi && DetectionUtils.is2D( img ) )
 		{
 			// Operate on ROI only if we have one and the image is 2D.
 			return iterable( roi, spot, img );
+		}
+		else if ( mesh != null )
+		{
+			// Operate on 3D if we have a mesh.
+			return iterable( mesh, img );
 		}
 		else
 		{
@@ -72,6 +92,12 @@ public class SpotUtil
 			else
 				return neighborhood;
 		}
+	}
+
+	public static < T extends NumericType< T > > IterableInterval< T > iterable( final SpotMesh mesh, final ImgPlus< T > img )
+	{
+		return new SpotMeshIterable< T >( Views.extendZero( img ),
+				mesh, TMUtils.getSpatialCalibration( img ) );
 	}
 
 	private static < T > IterableInterval< T > makeSinglePixelIterable( final RealLocalizable center, final ImgPlus< T > img )
