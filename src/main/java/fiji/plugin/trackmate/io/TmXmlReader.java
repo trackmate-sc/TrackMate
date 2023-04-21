@@ -156,6 +156,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import net.imagej.mesh.Mesh;
 import net.imagej.mesh.Meshes;
+import net.imagej.mesh.nio.BufferMesh;
 
 public class TmXmlReader
 {
@@ -956,7 +957,9 @@ public class TmXmlReader
 						// Deserialize mesh.
 						try
 						{
-							final Mesh mesh = PLY_MESH_IO.open( zipFile.getInputStream( entry ) );
+							final Mesh m = PLY_MESH_IO.open( zipFile.getInputStream( entry ) );
+							final BufferMesh mesh = new BufferMesh( ( int ) m.vertices().size(), ( int ) m.triangles().size() );
+							Meshes.calculateNormals( m, mesh );
 							final SpotMesh sm = new SpotMesh( mesh, Meshes.boundingBox( mesh ) );
 							spot.setMesh( sm );
 						}
