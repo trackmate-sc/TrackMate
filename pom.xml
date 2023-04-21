@@ -176,6 +176,7 @@
 		<dependency>
 			<groupId>net.imagej</groupId>
 			<artifactId>imagej-mesh-io</artifactId>
+			<version>0.1.3-SNAPSHOT</version>
 		</dependency>
 
 
