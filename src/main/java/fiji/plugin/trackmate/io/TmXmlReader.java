@@ -97,7 +97,6 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.XML_ATTRIBUTE_TRACKER_N
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -107,7 +106,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.zip.ZipEntry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 import org.jdom2.Attribute;
@@ -934,6 +935,56 @@ public class TmXmlReader
 			}
 			content.put( currentFrame, spotSet );
 		}
+
+		// Do we have a mesh file?
+		if ( meshFile.exists() )
+		{
+			// Matcher for zipped file name.
+			final String regex = "(\\d+)\\.ply";
+			final Pattern pattern = Pattern.compile(regex);
+			// Iterate through entries.
+			try (final ZipFile zipFile = new ZipFile( meshFile ))
+			{
+				zipFile.stream().forEach( entry -> {
+					final String name = entry.getName();
+					final Matcher matcher = pattern.matcher( name );
+					if ( matcher.matches() )
+					{
+						// Get corresponding spot.
+						final int id = Integer.parseInt( matcher.group( 1 ) );
+						final Spot spot = cache.get( id );
+						// Deserialize mesh.
+						try
+						{
+							final Mesh mesh = PLY_MESH_IO.open( zipFile.getInputStream( entry ) );
+							final SpotMesh sm = new SpotMesh( mesh, Meshes.boundingBox( mesh ) );
+							spot.setMesh( sm );
+						}
+						catch ( final IOException e )
+						{
+							ok = false;
+							logger.error( "Problem reading mesh for spot " + id + ":\n"
+									+ e.getMessage() + '\n' );
+							e.printStackTrace();
+						}
+					}
+
+				} );
+			}
+			catch ( final ZipException e )
+			{
+				ok = false;
+				logger.error( "Issues reading the mesh file:\n" + e.getMessage() + '\n' );
+				e.printStackTrace();
+			}
+			catch ( final IOException e )
+			{
+				ok = false;
+				logger.error( "Issues reading the mesh file:\n" + e.getMessage() + '\n' );
+				e.printStackTrace();
+			}
+		}
+
 		final SpotCollection allSpots = SpotCollection.fromMap( content );
 		return allSpots;
 	}
@@ -1178,28 +1229,6 @@ public class TmXmlReader
 			spot.setRoi( new SpotRoi( xrois, yrois ) );
 		}
 		removeAttributeFromName( atts, ROI_N_POINTS_ATTRIBUTE_NAME );
-
-		/*
-		 * Try to read mesh if any and if we did not find a ROI.
-		 */
-		if ( roiNPoints <= 2 && meshFile.exists() )
-		{
-			try (final ZipFile zipFile = new ZipFile( meshFile ))
-			{
-				final ZipEntry entry = zipFile.getEntry( ID + ".ply" );
-				if ( entry != null )
-				{
-					final InputStream is = zipFile.getInputStream( entry );
-					final Mesh mesh = PLY_MESH_IO.open( is );
-					final SpotMesh spotMesh = new SpotMesh( mesh, Meshes.boundingBox( mesh ) );
-					spot.setMesh( spotMesh );
-				}
-			}
-			catch ( final IOException e )
-			{
-				e.printStackTrace();
-			}
-		}
 
 		/*
 		 * Read all other attributes -> features.
