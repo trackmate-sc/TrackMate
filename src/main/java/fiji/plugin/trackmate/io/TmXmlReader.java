@@ -91,10 +91,13 @@ import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_FEATURES_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_FILTER_COLLECTION_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_ID_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_NAME_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.TmXmlWriter.MESH_FILE_EXTENSION;
+import static fiji.plugin.trackmate.io.TmXmlWriter.PLY_MESH_IO;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.XML_ATTRIBUTE_TRACKER_NAME;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -104,6 +107,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.jdom2.Attribute;
 import org.jdom2.DataConversionException;
@@ -123,6 +128,7 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
 import fiji.plugin.trackmate.features.FeatureFilter;
@@ -147,6 +153,8 @@ import fiji.plugin.trackmate.visualization.ViewFactory;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 import ij.IJ;
 import ij.ImagePlus;
+import net.imagej.mesh.Mesh;
+import net.imagej.mesh.Meshes;
 
 public class TmXmlReader
 {
@@ -179,6 +187,8 @@ public class TmXmlReader
 	 */
 	protected boolean ok = true;
 
+	private final File meshFile;
+
 	/*
 	 * CONSTRUCTORS
 	 */
@@ -189,6 +199,7 @@ public class TmXmlReader
 	public TmXmlReader( final File file )
 	{
 		this.file = file;
+		this.meshFile = new File( file.getAbsolutePath() + MESH_FILE_EXTENSION );
 		final SAXBuilder sb = new SAXBuilder();
 		Element r = null;
 		try
@@ -205,7 +216,7 @@ public class TmXmlReader
 		catch ( final IOException e )
 		{
 			logger.error( "Problem reading " + file.getName()
-					+ ".\nError message is:\n" + e.getLocalizedMessage() + '\n' );
+			+ ".\nError message is:\n" + e.getLocalizedMessage() + '\n' );
 			ok = false;
 		}
 		this.root = r;
@@ -371,7 +382,6 @@ public class TmXmlReader
 			ok = false;
 
 		// Track features
-
 		try
 		{
 			final Map< Integer, Map< String, Double > > savedFeatureMap = readTrackFeatures( modelElement );
@@ -911,7 +921,6 @@ public class TmXmlReader
 		final Map< Integer, Set< Spot > > content = new HashMap<>( frameContent.size() );
 		for ( final Element currentFrameContent : frameContent )
 		{
-
 			currentFrame = readIntAttribute( currentFrameContent, FRAME_ATTRIBUTE_NAME, logger );
 			final List< Element > spotContent = currentFrameContent.getChildren( SPOT_ELEMENT_KEY );
 			final Set< Spot > spotSet = new HashSet<>( spotContent.size() );
@@ -1167,6 +1176,28 @@ public class TmXmlReader
 			spot.setRoi( new SpotRoi( xrois, yrois ) );
 		}
 		removeAttributeFromName( atts, ROI_N_POINTS_ATTRIBUTE_NAME );
+
+		/*
+		 * Try to read mesh if any and if we did not find a ROI.
+		 */
+		if ( roiNPoints <= 2 && meshFile.exists() )
+		{
+			try (final ZipFile zipFile = new ZipFile( meshFile ))
+			{
+				final ZipEntry entry = zipFile.getEntry( ID + ".ply" );
+				if ( entry != null )
+				{
+					final InputStream is = zipFile.getInputStream( entry );
+					final Mesh mesh = PLY_MESH_IO.open( is );
+					final SpotMesh spotMesh = new SpotMesh( mesh, Meshes.boundingBox( mesh ) );
+					spot.setMesh( spotMesh );
+				}
+			}
+			catch ( final IOException e )
+			{
+				e.printStackTrace();
+			}
+		}
 
 		/*
 		 * Read all other attributes -> features.
