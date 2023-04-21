@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -104,6 +104,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.jdom2.Attribute;
 import org.jdom2.Document;
@@ -128,9 +130,20 @@ import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.procedure.TIntIntProcedure;
+import net.imagej.mesh.Mesh;
+import net.imagej.mesh.io.ply.PLYMeshIO;
 
 public class TmXmlWriter
 {
+
+	static final PLYMeshIO PLY_MESH_IO = new PLYMeshIO();
+
+	static final String MESH_FILE_EXTENSION = ".meshes";
+
+	/** Zip compression level (0-9) */
+	private static final int COMPRESSION_LEVEL = 5;
 
 	/*
 	 * FIELD
@@ -236,6 +249,8 @@ public class TmXmlWriter
 		modelElement.addContent( filteredTrackElement );
 
 		root.addContent( modelElement );
+
+		writeSpotMeshes( model.getSpots().iterable( false ) );
 	}
 
 	/**
@@ -695,11 +710,7 @@ public class TmXmlWriter
 		return analyzersElement;
 	}
 
-	/*
-	 * STATIC METHODS
-	 */
-
-	private static final Element marshalSpot( final Spot spot, final FeatureModel fm )
+	private final Element marshalSpot( final Spot spot, final FeatureModel fm )
 	{
 		final Collection< Attribute > attributes = new ArrayList<>();
 		final Attribute IDattribute = new Attribute( SPOT_ID_ATTRIBUTE_NAME, "" + spot.ID() );
@@ -738,8 +749,74 @@ public class TmXmlWriter
 			}
 			spotElement.setText( str.toString() );
 		}
-
 		spotElement.setAttributes( attributes );
 		return spotElement;
+	}
+
+	protected void writeSpotMeshes( final Iterable< Spot > spots )
+	{
+		// Only create the meshes file if at least one spot has a mesh.
+		boolean hasMesh = false;
+		for ( final Spot spot : spots )
+		{
+			if ( spot.getMesh() != null )
+			{
+				hasMesh = true;
+				break;
+			}
+		}
+		if ( !hasMesh )
+			return;
+
+		// Holder for map spot -> frame
+		final TIntIntHashMap frameMap = new TIntIntHashMap();
+
+		// Create zip output stream and write to it.
+		final File meshFile = new File( file.getAbsolutePath() + MESH_FILE_EXTENSION );
+		logger.log( "  Writing spot meshes to " + meshFile.getName() + "\n" );
+
+		try(final ZipOutputStream zos = new ZipOutputStream( new FileOutputStream( meshFile ) ))
+		{
+			zos.setMethod( ZipOutputStream.DEFLATED ) ;
+			zos.setLevel( COMPRESSION_LEVEL );
+
+			// Write spot meshes.
+			for ( final Spot spot : spots )
+			{
+				if (spot.getMesh()!=null)
+				{
+					final Mesh mesh = spot.getMesh().mesh;
+					final byte[] bs = PLY_MESH_IO.writeBinary( mesh );
+
+					final String entryName = spot.ID() + ".ply";
+					zos.putNextEntry( new ZipEntry( entryName  ) );
+					zos.write( bs );
+					zos.closeEntry();
+
+					frameMap.put( spot.ID(), spot.getFeature( Spot.FRAME ).intValue() );
+				}
+			}
+
+			// Write dict text file.
+			final StringBuilder str = new StringBuilder();
+			str.append( "frame,ID\n" );
+			frameMap.forEachEntry( new TIntIntProcedure()
+			{
+
+				@Override
+				public boolean execute( final int ID, final int t )
+				{
+					str.append( String.format( "%d,%d\n", t, ID ) );
+					return true;
+				}
+			});
+			zos.putNextEntry( new ZipEntry( "mesh-info.txt" ) );
+			zos.write( str.toString().getBytes() );
+		}
+		catch ( final IOException e )
+		{
+			logger.error( "Problem writing the mesh file:\n" + e.getMessage() );
+			e.printStackTrace();
+		}
 	}
 }
