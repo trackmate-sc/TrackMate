@@ -1,6 +1,18 @@
 package fiji.plugin.trackmate;
 
+import java.awt.geom.Point2D;
+import java.awt.geom.Point2D.Double;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
+
+import fiji.plugin.trackmate.util.mesh.MeshUtils;
+import fiji.plugin.trackmate.util.mesh.RayCastingX;
+import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.list.array.TLongArrayList;
+import gnu.trove.list.linked.TDoubleLinkedList;
+import gnu.trove.set.hash.TIntHashSet;
 import net.imagej.mesh.Mesh;
 import net.imagej.mesh.Meshes;
 import net.imagej.mesh.Triangles;
@@ -78,9 +90,9 @@ public class SpotMesh implements SpotShape
 	 *
 	 * @return the radius in physical units.
 	 */
-	public static final double radius(final Mesh mesh)
+	public static final double radius( final Mesh mesh )
 	{
-		return Math.pow( 3. * volume(mesh) / ( 4 * Math.PI ), 1. / 3. );
+		return Math.pow( 3. * volume( mesh ) / ( 4 * Math.PI ), 1. / 3. );
 	}
 
 	/**
@@ -146,7 +158,7 @@ public class SpotMesh implements SpotShape
 	}
 
 	@Override
-	public void scale(final double alpha)
+	public void scale( final double alpha )
 	{
 		final Vertices vertices = mesh.vertices();
 		final long nVertices = vertices.size();
@@ -165,7 +177,7 @@ public class SpotMesh implements SpotShape
 				vertices.setPositionf( v, 0f, 0f, ( float ) ( z * alpha ) );
 				continue;
 			}
-			final double r = Math.sqrt( x * x + y * y + z * z ) ;
+			final double r = Math.sqrt( x * x + y * y + z * z );
 			final double theta = Math.acos( z / r );
 			final double phi = Math.signum( y ) * Math.acos( x / Math.sqrt( x * x + y * y ) );
 
@@ -178,19 +190,212 @@ public class SpotMesh implements SpotShape
 		boundingBox = Meshes.boundingBox( mesh );
 	}
 
-	public void slice( final double z, final TDoubleArrayList cx, final TDoubleArrayList cy )
+	public List< TDoubleLinkedList[] > slice( final double z )
 	{
-		slice( mesh, z, cx, cy );
+		return slice2( mesh, z );
 	}
 
-	public static void slice( final Mesh mesh, final double z, final TDoubleArrayList cx, final TDoubleArrayList cy )
+	public static List< TDoubleLinkedList[] > slice2( final Mesh mesh, final double z )
 	{
-		// Clear contour holders.
-		cx.resetQuick();
-		cy.resetQuick();
+		final double resolution = 1; // FIXME.
 
 		final Triangles triangles = mesh.triangles();
 		final Vertices vertices = mesh.vertices();
+		final TLongArrayList intersecting = new TLongArrayList();
+		for ( long f = 0; f < triangles.size(); f++ )
+		{
+			final long v0 = triangles.vertex0( f );
+			final long v1 = triangles.vertex1( f );
+			final long v2 = triangles.vertex2( f );
+			final double minZ = minZ( vertices, v0, v1, v2 );
+			if ( minZ > z )
+				continue;
+			final double maxZ = maxZ( vertices, v0, v1, v2 );
+			if ( maxZ < z )
+				continue;
+
+			intersecting.add( f );
+		}
+
+		// Holder for ray-casting results.
+		final TDoubleArrayList xs = new TDoubleArrayList();
+		final TDoubleArrayList normals = new TDoubleArrayList();
+		final List< TDoubleLinkedList[] > contours = new ArrayList<>();
+
+		// Adding mesh entries and exits to contours.
+		final TDoubleLinkedList exits = new TDoubleLinkedList();
+		final TDoubleLinkedList entries = new TDoubleLinkedList();
+
+		// Set of contours that are still active (it is still ok to
+		// add points to them).
+		final TIntHashSet activeContours = new TIntHashSet(); // lol
+
+		// What contours to remove from the active set.
+		final TIntHashSet removeFromActive = new TIntHashSet();
+
+		final float[] bb = Meshes.boundingBox( mesh );
+		final RayCastingX ray = new RayCastingX( mesh );
+		for ( double y = bb[ 1 ]; y <= bb[ 4 ]; y += resolution )
+		{
+			ray.cast( y, z, xs, normals );
+			if ( xs.isEmpty() )
+				continue;
+
+			if ( contours.isEmpty() )
+			{
+				// Initializing.
+				for ( int i = 0; i < xs.size(); i++ )
+				{
+					final double x = xs.getQuick( i );
+					if ( normals.getQuick( i ) < 0. )
+					{
+						// Entry: new contour.
+						final TDoubleLinkedList cx = new TDoubleLinkedList();
+						final TDoubleLinkedList cy = new TDoubleLinkedList();
+						cx.add( x );
+						cy.add( y );
+						contours.add( new TDoubleLinkedList[] { cx, cy } );
+						activeContours.add( contours.size() - 1 );
+					}
+					else
+					{
+						// Exit: add it to the end of an existing one if we have
+						// it.
+						if ( contours.isEmpty() )
+						{
+							final TDoubleLinkedList cx = new TDoubleLinkedList();
+							final TDoubleLinkedList cy = new TDoubleLinkedList();
+							cx.add( x );
+							cy.add( y );
+							contours.add( new TDoubleLinkedList[] { cx, cy } );
+							activeContours.add( contours.size() - 1 );
+						}
+						else
+						{
+							final TDoubleLinkedList[] contour = contours.get( contours.size() - 1 );
+							contour[ 0 ].add( x );
+							contour[ 1 ].add( y );
+						}
+					}
+				}
+			}
+			else
+			{
+				// Find to what contour to add it. Criterion: nearest.
+
+				/*
+				 * It's a tracking problem. We want to link a set of X position
+				 * (mesh borders) to contour tails and heads. X positions that
+				 * are not matched indicate a new contour should be created.
+				 *
+				 * We assume that there is no global disappearance of mesh
+				 * entries. That is: there is not situation where all contours
+				 * suddenly stops and another entry and exits appear away.
+				 */
+
+				removeFromActive.clear();
+				removeFromActive.addAll( activeContours );
+
+				entries.clear();
+				exits.clear();
+				for ( int j = 0; j < xs.size(); j++ )
+				{
+					final double x = xs.get( j );
+					if ( normals.get( j ) < 0 )
+						entries.add( x );
+					else
+						exits.add( x );
+				}
+
+				// Find suitable entries for contours. We only iterate over
+				// active contours.
+				final TIntIterator it = activeContours.iterator();
+				while ( it.hasNext() )
+				{
+					final int i = it.next();
+					final TDoubleLinkedList cx = contours.get( i )[0];
+					final TDoubleLinkedList cy = contours.get( i )[1];
+
+					// Entries.
+					double minDist = java.lang.Double.POSITIVE_INFINITY;
+					int bestEntry = -1;
+					for ( int j = 0; j < entries.size(); j++ )
+					{
+						final double x = entries.get( j );
+						final double d = Math.abs( x - cx.get( 0 ) );
+						if ( d < minDist )
+						{
+							minDist = d;
+							bestEntry = j;
+						}
+					}
+					if ( bestEntry >= 0 )
+					{
+						cx.insert( 0, entries.get( bestEntry ) );
+						cy.insert( 0, y );
+						entries.removeAt( bestEntry );
+						removeFromActive.remove( i ); // mark contour as active.
+					}
+
+					// Exits.
+					minDist = java.lang.Double.POSITIVE_INFINITY;
+					int bestExit = -1;
+					for ( int j = 0; j < exits.size(); j++ )
+					{
+						final double x = exits.get( j );
+						final double d = Math.abs( x - cx.get( cx.size() - 1 ) );
+						if ( d < minDist )
+						{
+							minDist = d;
+							bestExit = j;
+						}
+					}
+					if ( bestExit >= 0 )
+					{
+						cx.add( exits.get( bestExit ) );
+						cy.add( y );
+						exits.removeAt( bestExit );
+						removeFromActive.remove( i ); // mark contour as active.
+					}
+				}
+
+				// Do we still have entries and exits without a contour?
+				if ( !entries.isEmpty() || !exits.isEmpty() )
+				{
+					// -> create one for them.
+					for ( int i = 0; i < Math.max( entries.size(), exits.size() ); i++ )
+					{
+						final TDoubleLinkedList cx = new TDoubleLinkedList();
+						final TDoubleLinkedList cy = new TDoubleLinkedList();
+						if ( i < entries.size() )
+						{
+							cx.add( entries.get( i ) );
+							cy.add( y );
+						}
+						if ( i < exits.size() )
+						{
+							cx.add( exits.get( i ) );
+							cy.add( y );
+						}
+						contours.add( new TDoubleLinkedList[] { cx, cy } );
+						activeContours.add( contours.size() - 1 );
+					}
+				}
+
+				// Do we have contours that did not receive a entry or an exit?
+				if ( !removeFromActive.isEmpty() )
+					activeContours.removeAll( removeFromActive );
+
+			}
+		}
+		return contours;
+	}
+
+	public static List< TDoubleLinkedList[] > slice( final Mesh mesh, final double z )
+	{
+		final Triangles triangles = mesh.triangles();
+		final Vertices vertices = mesh.vertices();
+		final TLongArrayList intersecting = new TLongArrayList();
 		for ( long f = 0; f < triangles.size(); f++ )
 		{
 			final long v0 = triangles.vertex0( f );
@@ -203,9 +408,206 @@ public class SpotMesh implements SpotShape
 			final double maxZ = maxZ( vertices, v0, v1, v2 );
 			if ( maxZ < z )
 				continue;
+			if ( minZ == maxZ )
+				continue; // parallel.
 
-			triangleIntersection( vertices, v0, v1, v2, z, cx, cy );
+			intersecting.add( f );
 		}
+
+		final ArrayDeque< Point2D.Double[] > segments = new ArrayDeque<>();
+		for ( int i = 0; i < intersecting.size(); i++ )
+		{
+			final long id = intersecting.getQuick( i );
+			final Point2D.Double[] endPoints = triangleIntersection( mesh, id, z );
+			if ( endPoints != null && endPoints[ 0 ] != null && endPoints[ 1 ] != null )
+			{
+				final Double a = endPoints[ 0 ];
+				final Double b = endPoints[ 1 ];
+				if ( a.x == b.x && a.y == b.y )
+					continue;
+
+				segments.add( endPoints );
+			}
+		}
+
+		final List< TDoubleLinkedList[] > contours = new ArrayList<>();
+		SEGMENT: while ( !segments.isEmpty() )
+		{
+			final Double[] segment = segments.pop();
+			final Double a = segment[ 0 ];
+			final Double b = segment[ 1 ];
+
+			// What contour does it belong to?
+			for ( final TDoubleLinkedList[] contour : contours )
+			{
+				final TDoubleLinkedList x = contour[ 0 ];
+				final TDoubleLinkedList y = contour[ 1 ];
+
+				// Test if connects to first point of the contour.
+				final double xstart = x.get( 0 );
+				final double ystart = y.get( 0 );
+				if ( a.x == xstart && a.y == ystart )
+				{
+					// Insert other extremity just before the first point.
+					x.insert( 0, b.x );
+					y.insert( 0, b.y );
+					continue SEGMENT;
+				}
+				else if ( b.x == xstart && b.y == ystart )
+				{
+					x.insert( 0, a.x );
+					y.insert( 0, a.y );
+					continue SEGMENT;
+				}
+
+				// Test if connects to first point of the contour.
+				final double xend = x.get( x.size() - 1 );
+				final double yend = y.get( y.size() - 1 );
+				if ( a.x == xend && a.y == yend )
+				{
+					// Add other extremity at the end.
+					x.add( b.x );
+					y.add( b.y );
+					continue SEGMENT;
+				}
+				else if ( b.x == xend && b.y == yend )
+				{
+					// Add other extremity at the end.
+					x.add( a.x );
+					y.add( a.y );
+					continue SEGMENT;
+				}
+			}
+
+			/*
+			 * It does not belong to a contour. Make a new one.
+			 */
+
+			final TDoubleLinkedList x = new TDoubleLinkedList();
+			final TDoubleLinkedList y = new TDoubleLinkedList();
+			x.add( a.x );
+			x.add( b.x );
+			y.add( a.y );
+			y.add( b.y );
+			contours.add( new TDoubleLinkedList[] { x, y } );
+		}
+
+		System.out.println( "Found " + contours.size() + " contours:" ); // DEBUG
+		for ( int i = 0; i < contours.size(); i++ )
+		{
+			System.out.println( "- Contour " + ( i + 1 ) ); // DEBUG
+			final TDoubleLinkedList[] contour = contours.get( i );
+			final TDoubleLinkedList x = contour[ 0 ];
+			for ( int j = 0; j < x.size(); j++ )
+				System.out.print( String.format( "%3.0f, ", x.get( j ) ) );
+			System.out.println();
+			final TDoubleLinkedList y = contour[ 1 ];
+			for ( int j = 0; j < y.size(); j++ )
+				System.out.print( String.format( "%3.0f, ", y.get( j ) ) );
+			System.out.println();
+		}
+
+		return contours;
+	}
+
+	private static Double[] triangleIntersection( final Mesh mesh, final long id, final double z )
+	{
+		final long v0 = mesh.triangles().vertex0( id );
+		final long v1 = mesh.triangles().vertex1( id );
+		final long v2 = mesh.triangles().vertex2( id );
+
+		final double x0 = mesh.vertices().x( v0 );
+		final double x1 = mesh.vertices().x( v1 );
+		final double x2 = mesh.vertices().x( v2 );
+		final double y0 = mesh.vertices().y( v0 );
+		final double y1 = mesh.vertices().y( v1 );
+		final double y2 = mesh.vertices().y( v2 );
+		final double z0 = mesh.vertices().z( v0 );
+		final double z1 = mesh.vertices().z( v1 );
+		final double z2 = mesh.vertices().z( v2 );
+
+		Double a = null;
+		Double b = null;
+
+		if ( z0 == z )
+			a = new Double( x0, y0 );
+
+		if ( z1 == z )
+		{
+			if ( a == null )
+			{
+				a = new Double( x1, y1 );
+			}
+			else
+			{
+				b = new Double( x1, y1 );
+				return new Double[] { a, b };
+			}
+		}
+		if ( z2 == z )
+		{
+			if ( a == null )
+			{
+				a = new Double( x2, y2 );
+			}
+			else
+			{
+				b = new Double( x2, y2 );
+				return new Double[] { a, b };
+			}
+		}
+
+		final Double p01 = edgeIntersection( x0, y0, z0, x1, y1, z1, z );
+		if ( p01 != null )
+		{
+			if ( a == null )
+			{
+				a = p01;
+			}
+			else
+			{
+				b = p01;
+				return new Double[] { a, b };
+			}
+		}
+
+		final Double p02 = edgeIntersection( x0, y0, z0, x2, y2, z2, z );
+		if ( p02 != null )
+		{
+			if ( a == null )
+			{
+				a = p02;
+			}
+			else
+			{
+				b = p02;
+				return new Double[] { a, b };
+			}
+		}
+
+		final Double p12 = edgeIntersection( x1, y1, z1, x2, y2, z2, z );
+		if ( p12 != null )
+		{
+			if ( a == null )
+			{
+				a = p12;
+			}
+			else
+			{
+				b = p12;
+				return new Double[] { a, b };
+			}
+		}
+
+//		throw new IllegalStateException( "Could not find an intersection for triangle " + id );
+
+		System.out.println(); // DEBUG
+		System.out.println( "Weird triangle: " + MeshUtils.triangleToString( mesh, id ) ); // DEBUG
+		final double minZ = minZ( mesh.vertices(), v0, v1, v2 );
+		final double maxZ = maxZ( mesh.vertices(), v0, v1, v2 );
+		System.out.println( "but minZ=" + minZ + " maxZ=" + maxZ + " and z=" + z + " - equal? " + ( minZ == maxZ ) ); // DEBUG
+
+		return null;
 	}
 
 	/**
@@ -261,6 +663,19 @@ public class SpotMesh implements SpotShape
 		final double y1 = vertices.y( v1 );
 		cy.add( y0 );
 		cy.add( y1 );
+	}
+
+	private static Double edgeIntersection( final double xs, final double ys, final double zs,
+			final double xt, final double yt, final double zt, final double z )
+	{
+		if ( ( zs > z && zt > z ) || ( zs < z && zt < z ) )
+			return null;
+
+		assert ( zs != zt );
+		final double t = ( z - zs ) / ( zt - zs );
+		final double x = xs + t * ( xt - xs );
+		final double y = ys + t * ( yt - ys );
+		return new Double( x, y );
 	}
 
 	private static void addEdgeIntersectionToContour(
@@ -333,5 +748,30 @@ public class SpotMesh implements SpotShape
 		return Math.max( vertices.z( v0 ), Math.max( vertices.z( v1 ), vertices.z( v2 ) ) );
 	}
 
+	private static final double minY( final Vertices vertices, final Triangles triangles, final long id )
+	{
+		final long v0 = triangles.vertex0( id );
+		final long v1 = triangles.vertex1( id );
+		final long v2 = triangles.vertex2( id );
+		return Math.min( vertices.y( v0 ), Math.min( vertices.y( v1 ), vertices.y( v2 ) ) );
+	}
+
+	private static final double maxY( final Vertices vertices, final Triangles triangles, final long id )
+	{
+		final long v0 = triangles.vertex0( id );
+		final long v1 = triangles.vertex1( id );
+		final long v2 = triangles.vertex2( id );
+		return Math.max( vertices.y( v0 ), Math.max( vertices.y( v1 ), vertices.y( v2 ) ) );
+	}
+
+	private static final double minY( final Vertices vertices, final long v0, final long v1, final long v2 )
+	{
+		return Math.min( vertices.y( v0 ), Math.min( vertices.y( v1 ), vertices.y( v2 ) ) );
+	}
+
+	private static final double maxY( final Vertices vertices, final long v0, final long v1, final long v2 )
+	{
+		return Math.max( vertices.y( v0 ), Math.max( vertices.y( v1 ), vertices.y( v2 ) ) );
+	}
 
 }
