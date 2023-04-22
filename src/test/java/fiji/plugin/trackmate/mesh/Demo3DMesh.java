@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.mesh;
 
 import java.awt.Color;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Iterator;
 
@@ -19,6 +20,7 @@ import net.imagej.axis.Axes;
 import net.imagej.mesh.Mesh;
 import net.imagej.mesh.Meshes;
 import net.imagej.mesh.Vertices;
+import net.imagej.mesh.io.ply.PLYMeshIO;
 import net.imagej.mesh.io.stl.STLMeshIO;
 import net.imagej.mesh.naive.NaiveDoubleMesh;
 import net.imagej.mesh.naive.NaiveDoubleMesh.Triangles;
@@ -79,17 +81,17 @@ public class Demo3DMesh
 //				final Mesh simplified = debugMesh( new long[] { 0, 0, 0 }, region.dimensionsAsLongArray() );
 
 				// Wrap as mesh with edges.
-				System.out.println( "After simplification: " + mesh.vertices().size() + " vertices and " + simplified.triangles().size() + " faces." );
+				System.out.println( "After simplification: " + simplified.vertices().size() + " vertices and " + simplified.triangles().size() + " faces." );
 				System.out.println();
 
 				// Scale and offset with physical coordinates.
 				final double[] origin = region.minAsDoubleArray();
-				scale( mesh.vertices(), cal, origin );
+				scale( simplified.vertices(), cal, origin );
 
 				/*
 				 * IO.
 				 */
-				testIO( mesh, ++j );
+				testIO( simplified, ++j );
 
 				/*
 				 * Display.
@@ -206,13 +208,22 @@ public class Demo3DMesh
 		overlay.add( roi );
 	}
 
-	private static void testIO( final Mesh simplified, final int j )
+	private static void testIO( final Mesh mesh, final int j )
 	{
-		final STLMeshIO meshIO = new STLMeshIO();
 		// Serialize to disk.
 		try
 		{
-			meshIO.save( simplified, String.format( "samples/mesh/CElegansMask3D_%02d.stl", j ) );
+			new STLMeshIO().save( mesh, String.format( "samples/mesh/io/STL_%02d.stl", j ) );
+
+			final PLYMeshIO plyio = new PLYMeshIO();
+			plyio.save( mesh, String.format( "samples/mesh/io/PLY_%02d.ply", j ) );
+			final byte[] bs = plyio.writeAscii( mesh );
+			final String str = new String( bs );
+			try (final FileWriter writer = new FileWriter(
+					String.format( "samples/mesh/io/PLYTEXT_%02d.txt", j ) ))
+			{
+				writer.write( str );
+			}
 		}
 		catch ( final IOException e )
 		{
