@@ -6,6 +6,7 @@ import java.awt.geom.Path2D;
 
 import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import gnu.trove.list.TDoubleList;
 import gnu.trove.list.array.TDoubleArrayList;
 
 /**
@@ -94,12 +95,12 @@ public class PaintSpotRoi
 		return textPos;
 	}
 
-	static final double max( final TDoubleArrayList l )
+	static final double max( final TDoubleList l )
 	{
 		double max = Double.NEGATIVE_INFINITY;
 		for ( int i = 0; i < l.size(); i++ )
 		{
-			final double v = l.getQuick( i );
+			final double v = l.get( i );
 			if ( v > max )
 				max = v;
 		}
