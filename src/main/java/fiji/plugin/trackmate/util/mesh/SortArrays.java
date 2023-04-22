@@ -1,9 +1,11 @@
 package fiji.plugin.trackmate.util.mesh;
 
 import java.util.BitSet;
+import java.util.Comparator;
 import java.util.Random;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.list.array.TLongArrayList;
 
 /**
  * Utilities to sort a Trove list and return the sorting index to sort other
@@ -108,6 +110,59 @@ public class SortArrays
 		index[ j ] = b;
 	}
 
+	/*
+	 * Sorting index arrays with a comparator.
+	 */
+
+	public static void quicksort( final TLongArrayList main, final Comparator< Long > c )
+	{
+		final int[] index = new int[ main.size() ];
+		for ( int i = 0; i < index.length; i++ )
+			index[ i ] = i;
+		quicksort( main, 0, main.size(), c );
+	}
+
+	private static void quicksort( final TLongArrayList a, final int left, final int right, final Comparator< Long > c )
+	{
+		if ( right <= left )
+			return;
+		final int i = partition( a, left, right, c );
+		quicksort( a, left, i - 1, c );
+		quicksort( a, i + 1, right, c );
+	}
+
+	// partition a[left] to a[right], assumes left < right
+	private static int partition( final TLongArrayList a,
+			final int left, final int right, final Comparator< Long > c )
+	{
+		int i = left - 1;
+		int j = right;
+		while ( true )
+		{
+			while ( less( a.getQuick( ++i ), a.getQuick( right ) ) );
+			while ( less( a.getQuick( right ), a.getQuick( --j ) ) )
+				if ( j == left )
+					break; // don't go out-of-bounds
+			if ( i >= j )
+				break; // check if pointers cross
+			exch( a, i, j ); // swap two elements into place
+		}
+		exch( a, i, right ); // swap with partition element
+		return i;
+	}
+
+	// exchange a[i] and a[j]
+	private static void exch( final TLongArrayList a, final int i, final int j )
+	{
+		final long swap = a.getQuick( i );
+		a.setQuick( i, a.getQuick( j ) );
+		a.setQuick( j, swap );
+	}
+
+	/*
+	 * Main.
+	 */
+
 	public static void main( final String[] args )
 	{
 		final Random ran = new Random( 1l );
@@ -140,5 +195,6 @@ public class SortArrays
 			System.out.print( String.format( ", %4.2f", copy.get( i ) ) );
 		System.out.println();
 	}
+
 
 }
