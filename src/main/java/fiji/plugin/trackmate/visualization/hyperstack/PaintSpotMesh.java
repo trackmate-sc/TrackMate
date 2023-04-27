@@ -1,17 +1,16 @@
 package fiji.plugin.trackmate.visualization.hyperstack;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
-import java.awt.geom.Path2D.Double;
 import java.util.List;
-import java.util.Random;
 
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import gnu.trove.list.linked.TDoubleLinkedList;
+import ij.gui.ImageCanvas;
+import net.imagej.mesh.ZSlicer;
+import net.imagej.mesh.ZSlicer.Contour;
 
 /**
  * Utility class to paint the {@link SpotMesh} component of spots.
@@ -19,40 +18,40 @@ import gnu.trove.list.linked.TDoubleLinkedList;
  * @author Jean-Yves Tinevez
  *
  */
-public class PaintSpotMesh
+public class PaintSpotMesh extends TrackMatePainter
 {
 
-	private final double[] calibration;
+	private final Path2D.Double polygon;
 
-	private final DisplaySettings displaySettings;
-
-	private final Double polygon;
-
-	public PaintSpotMesh( final double[] calibration, final DisplaySettings displaySettings )
+	public PaintSpotMesh( final ImageCanvas canvas, final double[] calibration, final DisplaySettings displaySettings )
 	{
-		this.calibration = calibration;
-		this.displaySettings = displaySettings;
+		super( canvas, calibration, displaySettings );
 		this.polygon = new Path2D.Double();
 	}
 
-	public int paint(
-			final Graphics2D g2d,
-			final Spot spot,
-			final double zslice,
-			final double xs,
-			final double ys,
-			final int xcorner,
-			final int ycorner,
-			final double magnification )
+	public int paint( final Graphics2D g2d, final Spot spot )
 	{
+		final SpotMesh sm = spot.getMesh();
+
+		// Don't paint if we are out of screen.
+		if ( toScreenX( sm.boundingBox[ 0 ] ) > canvas.getSrcRect().width )
+			return -1;
+		if ( toScreenX( sm.boundingBox[ 3 ] ) < 0 )
+			return -1;
+		if ( toScreenY( sm.boundingBox[ 1 ] ) > canvas.getSrcRect().height )
+			return -1;
+		if ( toScreenY( sm.boundingBox[ 4 ] ) < 0 )
+			return -1;
+
+		// Z plane does not cross bounding box.
 		final double x = spot.getFeature( Spot.POSITION_X );
 		final double y = spot.getFeature( Spot.POSITION_Y );
-		final double z = spot.getFeature( Spot.POSITION_Z );
-		final double dz = zslice;
-
-		final SpotMesh mesh = spot.getMesh();
-		if ( mesh.boundingBox[ 2 ] > dz || mesh.boundingBox[ 5 ] < dz )
+		final double xs = toScreenX( x );
+		final double ys = toScreenY( y );
+		final double dz = ( canvas.getImage().getSlice() - 1 ) * calibration[ 2 ];
+		if ( sm.boundingBox[ 2 ] > dz || sm.boundingBox[ 5 ] < dz )
 		{
+			final double magnification = canvas.getMagnification();
 			g2d.fillOval(
 					( int ) Math.round( xs - 2 * magnification ),
 					( int ) Math.round( ys - 2 * magnification ),
@@ -61,43 +60,29 @@ public class PaintSpotMesh
 			return -1;
 		}
 
-		// Slice.
-		final List< TDoubleLinkedList[] > contours = mesh.slice( dz );
-		for ( final TDoubleLinkedList[] contour : contours )
+		final List< Contour > contours = ZSlicer.slice( sm.mesh, dz );
+		double maxTextPos = Double.NEGATIVE_INFINITY;
+		for ( final Contour contour : contours )
 		{
-			final TDoubleLinkedList cxs = contour[ 0 ];
-			final TDoubleLinkedList cys = contour[ 1 ];
-			// Scale to screen coordinates.
-			for ( int i = 0; i < cxs.size(); i++ )
-			{
-				// Pixel coords.
-				final double xc = ( cxs.get( i ) ) / calibration[ 0 ] + 0.5;
-				final double yc = ( cys.get( i ) ) / calibration[ 1 ] + 0.5;
-				// Window coords.
-				cxs.set( i, ( xc - xcorner ) * magnification );
-				cys.set( i, ( yc - ycorner ) * magnification );
-			}
-		}
-
-		final Random ran = new Random( 1l );
-		g2d.setStroke( new BasicStroke( 2f ) );
-		for ( final TDoubleLinkedList[] contour : contours )
-		{
-			final TDoubleLinkedList cxs = contour[ 0 ];
-			final TDoubleLinkedList cys = contour[ 1 ];
-			if ( cxs.size() < 2 )
+			if ( contour.x.size() < 2 )
 				continue;
 
 			polygon.reset();
-			polygon.moveTo( cxs.get( 0 ), cys.get( 0 ) );
-			for ( int i = 1; i < cxs.size() - 1; i += 2 )
-				polygon.lineTo( cxs.get( i ), cys.get( i ) );
-			polygon.closePath();
+			final double x0 =toScreenX( contour.x.getQuick( 0 ) ); 
+			final double y0 =toScreenY( contour.y.getQuick( 0 ) );
+			polygon.moveTo( x0, y0 );
+			if ( x0 > maxTextPos )
+				maxTextPos = x0;
 
-			g2d.setColor( new Color(
-					0.5f * ( 1f + ran.nextFloat() ),
-					0.5f * ( 1f + ran.nextFloat() ),
-					0.5f * ( 1f + ran.nextFloat() ) ) );
+			for ( int i = 1; i < contour.x.size(); i++ )
+			{
+				final double xi = toScreenX( contour.x.getQuick( i ) );
+				final double yi = toScreenY( contour.y.getQuick( i ) );
+				polygon.lineTo( xi, yi );
+				if ( xi > maxTextPos )
+					maxTextPos = xi;
+			}
+			polygon.closePath();
 			if ( displaySettings.isSpotFilled() )
 			{
 				g2d.fill( polygon );
@@ -109,14 +94,6 @@ public class PaintSpotMesh
 				g2d.draw( polygon );
 			}
 		}
-
-		int textPos = -1;
-		for ( final TDoubleLinkedList[] contour : contours )
-		{
-			final TDoubleLinkedList cxs = contour[ 0 ];
-			textPos = Math.max( textPos, ( int ) ( PaintSpotRoi.max( cxs ) - xs ) );
-		}
-		return textPos;
+		return ( int ) ( maxTextPos - xs );
 	}
-
 }
