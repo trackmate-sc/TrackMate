@@ -34,11 +34,11 @@ public class PaintSpotMesh extends TrackMatePainter
 		final SpotMesh sm = spot.getMesh();
 
 		// Don't paint if we are out of screen.
-		if ( toScreenX( sm.boundingBox[ 0 ] ) > canvas.getSrcRect().width )
+		if ( toScreenX( sm.boundingBox[ 0 ] ) > canvas.getWidth() )
 			return -1;
 		if ( toScreenX( sm.boundingBox[ 3 ] ) < 0 )
 			return -1;
-		if ( toScreenY( sm.boundingBox[ 1 ] ) > canvas.getSrcRect().height )
+		if ( toScreenY( sm.boundingBox[ 1 ] ) > canvas.getHeight() )
 			return -1;
 		if ( toScreenY( sm.boundingBox[ 4 ] ) < 0 )
 			return -1;
