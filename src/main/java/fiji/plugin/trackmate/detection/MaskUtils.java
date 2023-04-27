@@ -40,6 +40,7 @@ import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 import net.imagej.mesh.Mesh;
+import net.imagej.mesh.MeshConnectedComponents;
 import net.imagej.mesh.Meshes;
 import net.imagej.mesh.Vertices;
 import net.imglib2.Cursor;
@@ -448,6 +449,9 @@ public class MaskUtils
 			final int numThreads,
 			final RandomAccessibleInterval< S > qualityImage )
 	{
+		if ( input.numDimensions() == 3 )
+			return from3DThresholdWithROI( input, interval, threshold, calibration, simplify, qualityImage );
+
 		// Get labeling.
 		final ImgLabeling< Integer, IntType > labeling = toLabeling( input, interval, threshold, numThreads );
 
@@ -458,6 +462,40 @@ public class MaskUtils
 			return from3DLabelingWithROI( labeling, interval, calibration, simplify, qualityImage );
 		else
 			throw new IllegalArgumentException( "Can only process 2D or 3D images with this method, but got " + labeling.numDimensions() + "D." );
+	}
+
+	private static < T extends RealType< T >, S extends RealType< S > > List< Spot > from3DThresholdWithROI(
+			final RandomAccessible< T > input,
+			final Interval interval,
+			final double threshold,
+			final double[] calibration,
+			final boolean simplify,
+			final RandomAccessibleInterval< S > qualityImage )
+	{
+		Mesh mesh = Meshes.marchingCubes( Views.interval( input, interval ), threshold );
+		mesh = Meshes.removeDuplicateVertices( mesh, 2 );
+		Meshes.scale( mesh, calibration );
+
+		final List< Spot > spots = new ArrayList<>();
+		for ( Mesh cc : MeshConnectedComponents.iterable( mesh ) )
+		{
+			if ( simplify && cc.triangles().size() > 200 )
+				cc = Meshes.simplify( cc, 0.1f, 10f );
+
+			final Spot spot = SpotMesh.createSpot( cc, 0. );
+			final double quality;
+			if ( qualityImage == null )
+			{
+				quality = spot.getMesh().volume();
+			}
+			else
+			{
+				quality = 1.; // TODO
+			}
+			spot.putFeature( Spot.QUALITY, quality );
+			spots.add( spot );
+		}
+		return spots;
 	}
 
 	/**
