@@ -91,7 +91,7 @@ public class SpotOverlay extends Roi
 		this.displaySettings = displaySettings;
 		this.paintSpotSphere = new PaintSpotSphere( calibration, displaySettings );
 		this.paintSpotRoi = new PaintSpotRoi( calibration, displaySettings );
-		this.paintSpotMesh = new PaintSpotMesh( calibration, displaySettings );
+		this.paintSpotMesh = new PaintSpotMesh( imp.getCanvas(), calibration, displaySettings );
 	}
 
 	/*
@@ -277,7 +277,7 @@ public class SpotOverlay extends Roi
 		}
 		else
 		{
-			textPos = paintSpotMesh.paint( g2d, spot, zslice, xs, ys, xcorner, ycorner, magnification );
+			textPos = paintSpotMesh.paint( g2d, spot );
 		}
 
 		if ( textPos >= 0 && displaySettings.isSpotShowName() )
