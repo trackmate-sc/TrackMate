@@ -19,9 +19,9 @@ import net.imagej.axis.Axes;
 import net.imagej.mesh.Mesh;
 import net.imagej.mesh.MeshConnectedComponents;
 import net.imagej.mesh.Meshes;
-import net.imagej.mesh.ZSlicer;
-import net.imagej.mesh.ZSlicer.Contour;
 import net.imagej.mesh.nio.BufferMesh;
+import net.imagej.mesh.zslicer.ZSlicer;
+import net.imagej.mesh.zslicer.ZSlicer.Contour;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Cast;
@@ -96,7 +96,8 @@ public class ZSlicerDemo
 				System.out.println( " # " + i + ": " + cc );
 //			new PLYMeshIO().save( cc, filePath + suffix + "-" + i + ".ply" );
 
-				final List< Contour > contours = ZSlicer.slice( cc, z );
+				final double tolerance = 1e-3 * pixelSizes[ 0 ];
+				final List< Contour > contours = ZSlicer.slice( cc, z, tolerance );
 				for ( final Contour contour : contours )
 				{
 //					final float[] xp = new float[ contour.x.size() ];
