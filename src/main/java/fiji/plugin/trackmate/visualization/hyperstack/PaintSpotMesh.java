@@ -1,6 +1,8 @@
 package fiji.plugin.trackmate.visualization.hyperstack;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
 import java.util.List;
@@ -9,8 +11,8 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import ij.gui.ImageCanvas;
-import net.imagej.mesh.ZSlicer;
-import net.imagej.mesh.ZSlicer.Contour;
+import net.imagej.mesh.zslicer.ZSlicer;
+import net.imagej.mesh.zslicer.ZSlicer.Contour;
 
 /**
  * Utility class to paint the {@link SpotMesh} component of spots.
@@ -60,7 +62,8 @@ public class PaintSpotMesh extends TrackMatePainter
 			return -1;
 		}
 
-		final List< Contour > contours = ZSlicer.slice( sm.mesh, dz );
+		final double tolerance = 1e-3 * calibration[ 0 ];
+		final List< Contour > contours = ZSlicer.slice( sm.mesh, dz, tolerance );
 		double maxTextPos = Double.NEGATIVE_INFINITY;
 		for ( final Contour contour : contours )
 		{
@@ -85,9 +88,12 @@ public class PaintSpotMesh extends TrackMatePainter
 			polygon.closePath();
 			if ( displaySettings.isSpotFilled() )
 			{
+				final Composite originalComposite = g2d.getComposite();
 				g2d.fill( polygon );
+				g2d.setComposite( AlphaComposite.getInstance( AlphaComposite.SRC_OVER, 1 ) );
 				g2d.setColor( Color.BLACK );
 				g2d.draw( polygon );
+				g2d.setComposite( originalComposite );
 			}
 			else
 			{
