@@ -476,17 +476,25 @@ public class MaskUtils
 		mesh = Meshes.removeDuplicateVertices( mesh, 2 );
 		Meshes.scale( mesh, calibration );
 
+		// Min volume below which we skip spot creation.
+		// Discard meshes below ~ volume of 10 pixels.
+		final double minVolume = 10. * calibration[ 0 ] * calibration[ 1 ] * calibration[ 2 ];
+
 		final List< Spot > spots = new ArrayList<>();
 		for ( Mesh cc : MeshConnectedComponents.iterable( mesh ) )
 		{
 			if ( simplify && cc.triangles().size() > 200 )
 				cc = Meshes.simplify( cc, 0.1f, 10f );
 
+			final double volume = Meshes.volume( cc );
+			if ( volume < minVolume )
+				continue;
+
 			final Spot spot = SpotMesh.createSpot( cc, 0. );
 			final double quality;
 			if ( qualityImage == null )
 			{
-				quality = spot.getMesh().volume();
+				quality = volume;
 			}
 			else
 			{
