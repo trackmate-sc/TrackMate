@@ -10,10 +10,11 @@ import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
+import ij.CompositeImage;
 import ij.ImageJ;
 import ij.ImagePlus;
-import net.imagej.mesh.zslicer.ZSlicer;
-import net.imagej.mesh.zslicer.ZSlicer.Contour;
+import net.imagej.mesh.ZSlicer;
+import net.imagej.mesh.ZSlicer.Contour;
 
 public class DebugZSlicer
 {
@@ -41,28 +42,22 @@ public class DebugZSlicer
 
 			final HyperStackDisplayer view = new HyperStackDisplayer( model, selection, imp, ds );
 			view.render();
+			imp.setDisplayMode( CompositeImage.GRAYSCALE );
 
 			final Spot spot = model.getSpots().iterable( true ).iterator().next();
-			final double z = 14.;
+			final double z = 21.;
 
 			imp.setZ( ( int ) Math.round( z / calibration[ 2 ] ) + 1 );
 
-			final double tolerance = 1e-3 * calibration[ 0 ];
-			final List< Contour > contours = ZSlicer.slice( spot.getMesh().mesh, z, tolerance );
+			final List< Contour > contours = ZSlicer.slice( spot.getMesh().mesh, z, calibration[ 2 ] );
 			System.out.println( "Found " + contours.size() + " contours." );
-			int i = 0;
 			for ( final Contour contour : contours )
-			{
-				System.out.println( "Contour " + ( ++i ) );
-				System.out.println( contour ); // DEBUG
-			}
-
+				System.out.println( contour );
 		}
 		catch ( final Exception e )
 		{
 			e.printStackTrace();
 		}
 	}
-
 }
 

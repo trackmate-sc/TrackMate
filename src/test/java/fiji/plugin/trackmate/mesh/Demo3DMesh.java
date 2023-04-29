@@ -4,22 +4,22 @@ import java.awt.Color;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 
 import fiji.plugin.trackmate.detection.MaskUtils;
 import fiji.plugin.trackmate.util.TMUtils;
-import gnu.trove.list.array.TDoubleArrayList;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij.gui.Overlay;
-import ij.gui.PointRoi;
 import ij.gui.PolygonRoi;
-import ij.gui.Roi;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.mesh.Mesh;
 import net.imagej.mesh.Meshes;
 import net.imagej.mesh.Vertices;
+import net.imagej.mesh.ZSlicer;
+import net.imagej.mesh.ZSlicer.Contour;
 import net.imagej.mesh.io.ply.PLYMeshIO;
 import net.imagej.mesh.io.stl.STLMeshIO;
 import net.imagej.mesh.naive.NaiveDoubleMesh;
@@ -55,14 +55,11 @@ public class Demo3DMesh
 			// Convert it to labeling.
 			final ImgLabeling< Integer, IntType > labeling = MaskUtils.toLabeling( mask, mask, 0.5, 1 );
 			final ImagePlus out = ImageJFunctions.show( labeling.getIndexImg(), "labeling" );
+			out.setDimensions( mask.dimensionIndex( Axes.CHANNEL ), mask.dimensionIndex( Axes.Z ), mask.dimensionIndex( Axes.TIME ) );
 
 			// Iterate through all components.
 			final LabelRegions< Integer > regions = new LabelRegions< Integer >( labeling );
 			final double[] cal = TMUtils.getSpatialCalibration( mask );
-
-			// Holder for the contour coords.
-			final TDoubleArrayList cx = new TDoubleArrayList();
-			final TDoubleArrayList cy = new TDoubleArrayList();
 
 			// Parse regions to create polygons on boundaries.
 			final Iterator< LabelRegion< Integer > > iterator = regions.iterator();
@@ -78,7 +75,6 @@ public class Demo3DMesh
 				final Mesh cleaned = Meshes.removeDuplicateVertices( mesh, 0 );
 				System.out.println( "Before simplification: " + cleaned.vertices().size() + " vertices and " + cleaned.triangles().size() + " faces." );
 				final Mesh simplified = Meshes.simplify( cleaned, 0.25f, 10 );
-//				final Mesh simplified = debugMesh( new long[] { 0, 0, 0 }, region.dimensionsAsLongArray() );
 
 				// Wrap as mesh with edges.
 				System.out.println( "After simplification: " + simplified.vertices().size() + " vertices and " + simplified.triangles().size() + " faces." );
@@ -98,11 +94,11 @@ public class Demo3DMesh
 				 */
 
 				// Intersection with a XY plane at a fixed Z position.
-				final int zslice = 20; // plan
-				final double z = ( zslice ) * cal[ 2 ]; // um
+				final int zslice = 22; // plan
+				final double z = ( zslice - 1 ) * cal[ 2 ]; // um
 
-//				MeshPlaneIntersection.intersect2( mesh, z, cx, cy );
-				toOverlay( cx, cy, out, cal );
+				final List< Contour > contours = ZSlicer.slice( simplified, z, cal[ 2 ] );
+				toOverlay( contours, out, cal );
 			}
 			System.out.println( "Done." );
 		}
@@ -172,40 +168,29 @@ public class Demo3DMesh
 		return mesh;
 	}
 
-	private static void toOverlay( final TDoubleArrayList cx, final TDoubleArrayList cy, final ImagePlus out, final double[] cal )
+	private static void toOverlay( final List< Contour > contours, final ImagePlus out, final double[] cal )
 	{
-		final int l = cx.size();
-		if ( l == 0 )
-			return;
-
-		final Roi roi;
-		if ( l == 1 )
-		{
-			roi = new PointRoi(
-					cx.get( 0 ) / cal[ 0 ] + 0.5,
-					cy.get( 0 ) / cal[ 1 ] + 0.5, null );
-		}
-		else
-		{
-			final float[] xRoi = new float[ l ];
-			final float[] yRoi = new float[ l ];
-			for ( int i = 0; i < l; i++ )
-			{
-				xRoi[ i ] = ( float ) ( cx.get( i ) / cal[ 0 ] + 0.5 );
-				yRoi[ i ] = ( float ) ( cy.get( i ) / cal[ 1 ] + 0.5 );
-			}
-			roi = new PolygonRoi( xRoi, yRoi, PolygonRoi.POLYGON );
-//			roi.setStrokeWidth( 0.2 );
-		}
-
-		roi.setStrokeColor( Color.RED );
 		Overlay overlay = out.getOverlay();
 		if ( overlay == null )
 		{
 			overlay = new Overlay();
 			out.setOverlay( overlay );
 		}
-		overlay.add( roi );
+
+		for ( final Contour contour : contours )
+		{
+			System.out.println( contour ); // DEBUG
+			final float[] xRoi = new float[ contour.size() ];
+			final float[] yRoi = new float[ contour.size() ];
+			for ( int i = 0; i < contour.size(); i++ )
+			{
+				xRoi[ i ] = ( float ) ( contour.x( i ) / cal[ 0 ] + 0.5 );
+				yRoi[ i ] = ( float ) ( contour.y( i ) / cal[ 1 ] + 0.5 );
+			}
+			final PolygonRoi roi = new PolygonRoi( xRoi, yRoi, PolygonRoi.POLYGON );
+			roi.setStrokeColor( contour.isInterior() ? Color.GREEN : Color.RED );
+			overlay.add( roi );
+		}
 	}
 
 	private static void testIO( final Mesh mesh, final int j )
