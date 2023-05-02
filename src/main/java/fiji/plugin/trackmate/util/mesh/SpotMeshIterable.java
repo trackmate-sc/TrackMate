@@ -86,7 +86,7 @@ public class SpotMeshIterable< T > implements IterableInterval< T >, Localizable
 	@Override
 	public Cursor< T > cursor()
 	{
-		return new SpotMeshCursor<>( img.randomAccess(), sm.mesh, calibration );
+		return new SpotMeshCursor<>( img.randomAccess(), sm, calibration );
 	}
 
 	@Override
