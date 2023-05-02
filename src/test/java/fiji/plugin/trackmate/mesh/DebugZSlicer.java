@@ -1,7 +1,6 @@
 package fiji.plugin.trackmate.mesh;
 
 import java.io.File;
-import java.util.List;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
@@ -13,8 +12,9 @@ import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.CompositeImage;
 import ij.ImageJ;
 import ij.ImagePlus;
-import net.imagej.mesh.ZSlicer;
-import net.imagej.mesh.ZSlicer.Contour;
+import net.imagej.mesh.alg.zslicer.Contour;
+import net.imagej.mesh.alg.zslicer.Slice;
+import net.imagej.mesh.alg.zslicer.ZSlicer;
 
 public class DebugZSlicer
 {
@@ -49,7 +49,7 @@ public class DebugZSlicer
 
 			imp.setZ( ( int ) Math.round( z / calibration[ 2 ] ) + 1 );
 
-			final List< Contour > contours = ZSlicer.slice( spot.getMesh().mesh, z, calibration[ 2 ] );
+			final Slice contours = ZSlicer.slice( spot.getMesh().mesh, z, calibration[ 2 ] );
 			System.out.println( "Found " + contours.size() + " contours." );
 			for ( final Contour contour : contours )
 				System.out.println( contour );
