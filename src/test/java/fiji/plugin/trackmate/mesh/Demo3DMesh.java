@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.List;
 
 import fiji.plugin.trackmate.detection.MaskUtils;
 import fiji.plugin.trackmate.util.TMUtils;
@@ -18,8 +17,9 @@ import net.imagej.axis.Axes;
 import net.imagej.mesh.Mesh;
 import net.imagej.mesh.Meshes;
 import net.imagej.mesh.Vertices;
-import net.imagej.mesh.ZSlicer;
-import net.imagej.mesh.ZSlicer.Contour;
+import net.imagej.mesh.alg.zslicer.Contour;
+import net.imagej.mesh.alg.zslicer.Slice;
+import net.imagej.mesh.alg.zslicer.ZSlicer;
 import net.imagej.mesh.io.ply.PLYMeshIO;
 import net.imagej.mesh.io.stl.STLMeshIO;
 import net.imagej.mesh.naive.NaiveDoubleMesh;
@@ -97,7 +97,7 @@ public class Demo3DMesh
 				final int zslice = 22; // plan
 				final double z = ( zslice - 1 ) * cal[ 2 ]; // um
 
-				final List< Contour > contours = ZSlicer.slice( simplified, z, cal[ 2 ] );
+				final Slice contours = ZSlicer.slice( simplified, z, cal[ 2 ] );
 				toOverlay( contours, out, cal );
 			}
 			System.out.println( "Done." );
@@ -168,7 +168,7 @@ public class Demo3DMesh
 		return mesh;
 	}
 
-	private static void toOverlay( final List< Contour > contours, final ImagePlus out, final double[] cal )
+	private static void toOverlay( final Slice contours, final ImagePlus out, final double[] cal )
 	{
 		Overlay overlay = out.getOverlay();
 		if ( overlay == null )
