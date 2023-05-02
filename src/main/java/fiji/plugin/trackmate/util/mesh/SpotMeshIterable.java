@@ -3,30 +3,33 @@ package fiji.plugin.trackmate.util.mesh;
 import java.util.Iterator;
 
 import fiji.plugin.trackmate.SpotMesh;
-import net.imagej.mesh.Meshes;
 import net.imglib2.Cursor;
 import net.imglib2.IterableInterval;
 import net.imglib2.Localizable;
 import net.imglib2.RandomAccessible;
-import net.imglib2.RealPoint;
+import net.imglib2.RealLocalizable;
 
 public class SpotMeshIterable< T > implements IterableInterval< T >, Localizable
 {
 
 	private final double[] calibration;
 
-	private final SpotMesh sm;
-
-	private final RealPoint center;
-
 	private final RandomAccessible< T > img;
 
-	public SpotMeshIterable( final RandomAccessible< T > img, final SpotMesh sm, final double[] calibration )
+	private final SpotMesh sm;
+
+	private final RealLocalizable center;
+
+	public SpotMeshIterable(
+			final RandomAccessible< T > img,
+			final SpotMesh sm,
+			final RealLocalizable center,
+			final double[] calibration )
 	{
 		this.img = img;
 		this.sm = sm;
+		this.center = center;
 		this.calibration = calibration;
-		this.center = Meshes.center( sm.mesh );
 	}
 
 	@Override
@@ -74,19 +77,19 @@ public class SpotMeshIterable< T > implements IterableInterval< T >, Localizable
 	@Override
 	public long min( final int d )
 	{
-		return Math.round( sm.boundingBox[ d ] / calibration[ d ] );
+		return Math.round( ( sm.boundingBox[ d ] + center.getFloatPosition( d ) ) / calibration[ d ] );
 	}
 
 	@Override
 	public long max( final int d )
 	{
-		return Math.round( sm.boundingBox[ 3 + d ] / calibration[ d ] );
+		return Math.round( ( sm.boundingBox[ 3 + d ] + center.getFloatPosition( d ) ) / calibration[ d ] );
 	}
 
 	@Override
 	public Cursor< T > cursor()
 	{
-		return new SpotMeshCursor<>( img.randomAccess(), sm, calibration );
+		return new SpotMeshCursor<>( img.randomAccess(), sm, center, calibration );
 	}
 
 	@Override
