@@ -6,14 +6,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotMesh;
 import gnu.trove.list.array.TDoubleArrayList;
 import net.imagej.mesh.Mesh;
 import net.imagej.mesh.alg.zslicer.RamerDouglasPeucker;
 import net.imagej.mesh.alg.zslicer.Slice;
 import net.imagej.mesh.alg.zslicer.ZSlicer;
+import net.imagej.mesh.obj.transform.TranslateMesh;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
+import net.imglib2.RealLocalizable;
 import net.imglib2.Sampler;
 
 /**
@@ -70,9 +73,24 @@ public class SpotMeshCursor< T > implements Cursor< T >
 
 	private final Mesh mesh;
 
-	public SpotMeshCursor( final RandomAccess< T > ra, final SpotMesh sm, final double[] cal )
+	public SpotMeshCursor( final RandomAccess< T > ra, final Spot spot, final double[] cal )
 	{
-		this( ra, sm.mesh, sm.boundingBox, cal );
+		this( ra, spot.getMesh(), spot, cal );
+	}
+
+	public SpotMeshCursor( final RandomAccess< T > ra, final SpotMesh sm, final RealLocalizable center, final double[] cal )
+	{
+		this(
+				ra,
+				TranslateMesh.translate( sm.mesh, center ),
+				new float[] {
+						sm.boundingBox[ 0 ] + center.getFloatPosition( 0 ),
+						sm.boundingBox[ 1 ] + center.getFloatPosition( 1 ),
+						sm.boundingBox[ 2 ] + center.getFloatPosition( 2 ),
+						sm.boundingBox[ 3 ] + center.getFloatPosition( 0 ),
+						sm.boundingBox[ 4 ] + center.getFloatPosition( 1 ),
+						sm.boundingBox[ 5 ] + center.getFloatPosition( 2 ) },
+				cal );
 	}
 
 	public SpotMeshCursor( final RandomAccess< T > ra, final Mesh mesh, final float[] boundingBox, final double[] cal )

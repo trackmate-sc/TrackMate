@@ -134,6 +134,7 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.procedure.TIntIntProcedure;
 import net.imagej.mesh.Mesh;
 import net.imagej.mesh.io.ply.PLYMeshIO;
+import net.imagej.mesh.obj.transform.TranslateMesh;
 
 public class TmXmlWriter
 {
@@ -775,21 +776,23 @@ public class TmXmlWriter
 		final File meshFile = new File( file.getAbsolutePath() + MESH_FILE_EXTENSION );
 		logger.log( "  Writing spot meshes to " + meshFile.getName() + "\n" );
 
-		try(final ZipOutputStream zos = new ZipOutputStream( new FileOutputStream( meshFile ) ))
+		try (final ZipOutputStream zos = new ZipOutputStream( new FileOutputStream( meshFile ) ))
 		{
-			zos.setMethod( ZipOutputStream.DEFLATED ) ;
+			zos.setMethod( ZipOutputStream.DEFLATED );
 			zos.setLevel( COMPRESSION_LEVEL );
 
 			// Write spot meshes.
 			for ( final Spot spot : spots )
 			{
-				if (spot.getMesh()!=null)
+				if ( spot.getMesh() != null )
 				{
+					// Save mesh in true coordinates.
 					final Mesh mesh = spot.getMesh().mesh;
-					final byte[] bs = PLY_MESH_IO.writeBinary( mesh );
+					final Mesh translated = TranslateMesh.translate( mesh, spot );
+					final byte[] bs = PLY_MESH_IO.writeBinary( translated );
 
 					final String entryName = spot.ID() + ".ply";
-					zos.putNextEntry( new ZipEntry( entryName  ) );
+					zos.putNextEntry( new ZipEntry( entryName ) );
 					zos.write( bs );
 					zos.closeEntry();
 
@@ -809,7 +812,7 @@ public class TmXmlWriter
 					str.append( String.format( "%d,%d\n", t, ID ) );
 					return true;
 				}
-			});
+			} );
 			zos.putNextEntry( new ZipEntry( "mesh-info.txt" ) );
 			zos.write( str.toString().getBytes() );
 		}
