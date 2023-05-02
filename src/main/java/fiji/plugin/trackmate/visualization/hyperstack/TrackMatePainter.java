@@ -1,5 +1,8 @@
 package fiji.plugin.trackmate.visualization.hyperstack;
 
+import java.awt.Graphics2D;
+
+import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import ij.ImagePlus;
 import ij.gui.ImageCanvas;
@@ -19,6 +22,8 @@ public abstract class TrackMatePainter
 		this.calibration = calibration;
 		this.displaySettings = displaySettings;
 	}
+
+	public abstract int paint( final Graphics2D g2d, final Spot spot );
 
 	protected ImageCanvas canvas()
 	{
@@ -85,4 +90,5 @@ public abstract class TrackMatePainter
 			return false;
 		return true;
 	}
+
 }

@@ -3,11 +3,14 @@ package fiji.plugin.trackmate.visualization.hyperstack;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
+import java.util.function.DoubleUnaryOperator;
 
+import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import gnu.trove.list.TDoubleList;
-import gnu.trove.list.array.TDoubleArrayList;
+import ij.ImagePlus;
+import ij.gui.ImageCanvas;
 
 /**
  * Utility class to paint the {@link SpotRoi} component of spots.
@@ -15,26 +18,15 @@ import gnu.trove.list.array.TDoubleArrayList;
  * @author Jean-Yves Tinevez
  *
  */
-public class PaintSpotRoi
+public class PaintSpotRoi extends TrackMatePainter
 {
-
-	private final double[] calibration;
-
-	private final DisplaySettings displaySettings;
 
 	private final java.awt.geom.Path2D.Double polygon;
 
-	private final TDoubleArrayList cx;
-
-	private final TDoubleArrayList cy;
-
-	public PaintSpotRoi( final double[] calibration, final DisplaySettings displaySettings )
+	public PaintSpotRoi( final ImagePlus imp, final double[] calibration, final DisplaySettings displaySettings )
 	{
-		this.calibration = calibration;
-		this.displaySettings = displaySettings;
+		super( imp, calibration, displaySettings );
 		this.polygon = new Path2D.Double();
-		this.cx = new TDoubleArrayList();
-		this.cy = new TDoubleArrayList();
 	}
 
 	/**
@@ -45,41 +37,17 @@ public class PaintSpotRoi
 	 *            the graphics object, configured to paint the spot with.
 	 * @param roi
 	 *            the spot roi.
-	 * @param x
-	 *            the X spot center in physical coordinates.
-	 * @param y
-	 *            the Y spot center in physical coordinates.
-	 * @param xcorner
-	 *            the X position of the displayed window.
-	 * @param ycorner
-	 *            the X position of the displayed window.
-	 * @param magnification
-	 *            the magnification of the displayed window.
 	 * @return the text position X indent in pixels to use to paint a string
 	 *         next to the painted contour.
 	 */
-	public int paint(
-			final Graphics2D g2d,
-			final SpotRoi roi,
-			final double x,
-			final double y,
-			final double xcorner,
-			final double ycorner,
-			final double magnification )
+	@Override
+	public int paint( final Graphics2D g2d, final Spot spot )
 	{
-		// In pixel units.
-		final double xp = x / calibration[ 0 ] + 0.5f;
-		// Scale to image zoom.
-		final double xs = ( xp - xcorner ) * magnification;
-		// Contour in pixel coordinates.
-		roi.toPolygon( calibration, xcorner, ycorner, x, y, magnification, cx, cy );
-		// The 0.5 is here so that we plot vertices at pixel centers.
-		polygon.reset();
-		polygon.moveTo( cx.get( 0 ), cy.get( 0 ) );
-		for ( int i = 1; i < cx.size(); ++i )
-			polygon.lineTo( cx.get( i ), cy.get( i ) );
-		polygon.closePath();
+		final ImageCanvas canvas = canvas();
+		if ( canvas == null )
+			return -1;
 
+		final double maxTextPos = toPolygon( spot, polygon, this::toScreenX, this::toScreenY );
 		if ( displaySettings.isSpotFilled() )
 		{
 			g2d.fill( polygon );
@@ -91,7 +59,8 @@ public class PaintSpotRoi
 			g2d.draw( polygon );
 		}
 
-		final int textPos = ( int ) ( max( cx ) - xs );
+		final double xs = toScreenX( spot.getDoublePosition( 0 ) );
+		final int textPos = ( int ) ( maxTextPos - xs );
 		return textPos;
 	}
 
@@ -105,5 +74,45 @@ public class PaintSpotRoi
 				max = v;
 		}
 		return max;
+	}
+
+	/**
+	 * Maps the coordinates of this contour to a Path2D polygon, and return the
+	 * max X coordinate of the produced shape.
+	 *
+	 * @param contour
+	 *            the contour to convert.
+	 * @param polygon
+	 *            the polygon to write. Reset by this call.
+	 * @param toScreenX
+	 *            a function to convert the X coordinate of this contour to
+	 *            screen coordinates.
+	 * @param toScreenY
+	 *            a function to convert the Y coordinate of this contour to
+	 *            screen coordinates.
+	 * @return the max X position in screen units of this shape.
+	 */
+	private static final double toPolygon( final Spot spot, final Path2D polygon, final DoubleUnaryOperator toScreenX, final DoubleUnaryOperator toScreenY )
+	{
+		final SpotRoi roi = spot.getRoi();
+		double maxTextPos = Double.NEGATIVE_INFINITY;
+		polygon.reset();
+		final double x0 = toScreenX.applyAsDouble( roi.x[ 0 ] + spot.getDoublePosition( 0 ) );
+		final double y0 = toScreenY.applyAsDouble( roi.y[ 0 ] + spot.getDoublePosition( 1 ) );
+		polygon.moveTo( x0, y0 );
+		if ( x0 > maxTextPos )
+			maxTextPos = x0;
+
+		for ( int i = 1; i < roi.x.length; i++ )
+		{
+			final double xi = toScreenX.applyAsDouble( roi.x[ i ] + spot.getDoublePosition( 0 ) );
+			final double yi = toScreenY.applyAsDouble( roi.y[ i ] + spot.getDoublePosition( 1 ) );
+			polygon.lineTo( xi, yi );
+
+			if ( xi > maxTextPos )
+				maxTextPos = xi;
+		}
+		polygon.closePath();
+		return maxTextPos;
 	}
 }
