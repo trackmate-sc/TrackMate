@@ -4,6 +4,8 @@ import java.awt.Graphics2D;
 
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import ij.ImagePlus;
+import ij.gui.ImageCanvas;
 
 /**
  * Utility class to paint the spots as little spheres.
@@ -11,34 +13,33 @@ import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
  * @author Jean-Yves Tinevez
  *
  */
-public class PaintSpotSphere
+public class PaintSpotSphere extends TrackMatePainter
 {
 
-	private final double[] calibration;
-
-	private final DisplaySettings displaySettings;
-
-	public PaintSpotSphere( final double[] calibration, final DisplaySettings displaySettings )
+	public PaintSpotSphere( final ImagePlus imp, final double[] calibration, final DisplaySettings displaySettings )
 	{
-		this.calibration = calibration;
-		this.displaySettings = displaySettings;
+		super( imp, calibration, displaySettings );
 	}
 
-	public int paint(
-			final Graphics2D g2d,
-			final Spot spot,
-			final double zslice,
-			final double xs,
-			final double ys,
-			final int xcorner,
-			final int ycorner,
-			final double magnification )
+	@Override
+	public int paint( final Graphics2D g2d, final Spot spot )
 	{
+		final ImageCanvas canvas = canvas();
+		if ( canvas == null )
+			return -1;
+
+		final double x = spot.getFeature( Spot.POSITION_X );
+		final double y = spot.getFeature( Spot.POSITION_Y );
 		final double z = spot.getFeature( Spot.POSITION_Z );
+		final double zslice = ( canvas.getImage().getSlice() - 1 ) * calibration[ 2 ];
 		final double dz = zslice - z;
 		final double dz2 = dz * dz;
 		final double radiusRatio = displaySettings.getSpotDisplayRadius();
 		final double radius = spot.getFeature( Spot.RADIUS ) * radiusRatio;
+
+		final double xs = toScreenX( x );
+		final double ys = toScreenY( y );
+		final double magnification = canvas.getMagnification();
 
 		if ( dz2 >= radius * radius )
 		{

@@ -34,6 +34,7 @@ public class PaintSpotMesh extends TrackMatePainter
 		this.polygon = new Path2D.Double();
 	}
 
+	@Override
 	public int paint( final Graphics2D g2d, final Spot spot )
 	{
 		final ImageCanvas canvas = canvas();
