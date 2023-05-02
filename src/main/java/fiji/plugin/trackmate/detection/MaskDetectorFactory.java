@@ -37,6 +37,8 @@ import fiji.plugin.trackmate.util.TMUtils;
 import net.imagej.ImgPlus;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
+import net.imglib2.converter.Converter;
+import net.imglib2.converter.Converters;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 
@@ -79,20 +81,42 @@ public class MaskDetectorFactory< T extends RealType< T > & NativeType< T > > ex
 	@Override
 	public SpotDetector< T > getDetector( final ImgPlus< T > img, final Map< String, Object > settings, final Interval interval, final int frame )
 	{
-		final double intensityThreshold = 0.;
 		final boolean simplifyContours = ( Boolean ) settings.get( KEY_SIMPLIFY_CONTOURS );
 		final double[] calibration = TMUtils.getSpatialCalibration( img );
 		final int channel = ( Integer ) settings.get( KEY_TARGET_CHANNEL ) - 1;
 		final RandomAccessible< T > imFrame = DetectionUtils.prepareFrameImg( img, channel, frame );
+		final RandomAccessible< T > mask = mask( imFrame );
+		final double intensityThreshold = 0.5;
 
 		final ThresholdDetector< T > detector = new ThresholdDetector<>(
-				imFrame,
+				mask,
 				interval,
 				calibration,
 				intensityThreshold,
 				simplifyContours );
 		detector.setNumThreads( 1 );
 		return detector;
+	}
+
+	/**
+	 * Return a view of the input image where all pixels with values strictly
+	 * larger than 0 are set to 1, and set to 0 otherwise.
+	 *
+	 * @param input
+	 *            the image to wrap.
+	 * @return a view of the image.
+	 */
+	protected RandomAccessible< T > mask( final RandomAccessible< T > input )
+	{
+		final Converter< T, T > c = new Converter< T, T >()
+		{
+			@Override
+			public void convert( final T input, final T output )
+			{
+				output.setReal( input.getRealDouble() > 0. ? 1. : 0. );
+			}
+		};
+		return Converters.convert( input, c, img.firstElement().createVariable() );
 	}
 
 	@Override
