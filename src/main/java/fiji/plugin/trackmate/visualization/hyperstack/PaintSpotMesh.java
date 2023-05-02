@@ -3,15 +3,16 @@ package fiji.plugin.trackmate.visualization.hyperstack;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
-import java.util.List;
 import java.util.function.DoubleUnaryOperator;
 
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import ij.gui.ImageCanvas;
-import net.imagej.mesh.ZSlicer;
-import net.imagej.mesh.ZSlicer.Contour;
+import net.imagej.mesh.alg.zslicer.Contour;
+import net.imagej.mesh.alg.zslicer.RamerDouglasPeucker;
+import net.imagej.mesh.alg.zslicer.Slice;
+import net.imagej.mesh.alg.zslicer.ZSlicer;
 
 /**
  * Utility class to paint the {@link SpotMesh} component of spots.
@@ -61,11 +62,12 @@ public class PaintSpotMesh extends TrackMatePainter
 			return -1;
 		}
 
-		final List< Contour > contours = ZSlicer.slice( sm.mesh, dz, calibration[ 2 ] );
-
+		final Slice slice = ZSlicer.slice( sm.mesh, dz, calibration[ 2 ] );
 		double maxTextPos = Double.NEGATIVE_INFINITY;
-		for ( final Contour contour : contours )
+		for ( final Contour c : slice )
 		{
+			final Contour contour = RamerDouglasPeucker.simplify( c, calibration[ 0 ] * 0.25 );
+
 			// Temporary set color by interior vs exterior.
 			if ( !contour.isInterior() )
 				g2d.setColor( Color.RED );
@@ -93,7 +95,7 @@ public class PaintSpotMesh extends TrackMatePainter
 	/**
 	 * Maps the coordinates of this contour to a Path2D polygon, and return the
 	 * max X coordinate of the produced shape.
-	 * 
+	 *
 	 * @param contour
 	 *            the contour to convert.
 	 * @param polygon
