@@ -1,9 +1,17 @@
 package fiji.plugin.trackmate.util.mesh;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import fiji.plugin.trackmate.SpotMesh;
 import gnu.trove.list.array.TDoubleArrayList;
 import net.imagej.mesh.Mesh;
-import net.imagej.mesh.Meshes;
+import net.imagej.mesh.alg.zslicer.RamerDouglasPeucker;
+import net.imagej.mesh.alg.zslicer.Slice;
+import net.imagej.mesh.alg.zslicer.ZSlicer;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
 import net.imglib2.Sampler;
@@ -28,59 +36,43 @@ public class SpotMeshCursor< T > implements Cursor< T >
 
 	private final float[] bb;
 
-	private final long minX;
+	private final int minX;
 
-	private final long maxX;
+	private final int maxX;
 
-	private final long minY;
+	private final int minY;
 
-	private final long maxY;
+	private final int maxY;
 
-	private final long minZ;
+	private final int minZ;
 
-	private final long maxZ;
+	private final int maxZ;
 
 	private final RandomAccess< T > ra;
 
 	private boolean hasNext;
 
-	private long iy;
+	private int iy;
 
-	private long iz;
+	private int iz;
 
-	private long ix;
-
-	/** Ray casting algorithm. */
-	private final RayCastingX rayCasting;
+	private int ix;
 
 	/**
 	 * List of resolved X positions where we enter / exit the mesh. Set by the
 	 * ray casting algorithm.
 	 */
-	private final TDoubleArrayList meshXs = new TDoubleArrayList();
+	private final TDoubleArrayList intersectionXs = new TDoubleArrayList();
 
-	/** List of normal X component where we enter / exit the mesh. */
-	private final TDoubleArrayList meshNs = new TDoubleArrayList();
+	private final Map< Integer, Slice > sliceMap;
 
-	/** X position of the next (forward in X) intersection with the mesh. */
-	private double nextXIntersection;
+	private Slice slice;
 
-	/** X component of the normal at the next intersection with the mesh. */
-	private double nextNormal;
-
-	/** Index of the next intersection in the {@link #meshXs} list. */
-	private int indexNextXIntersection;
-
-	private Mesh mesh;
+	private final Mesh mesh;
 
 	public SpotMeshCursor( final RandomAccess< T > ra, final SpotMesh sm, final double[] cal )
 	{
 		this( ra, sm.mesh, sm.boundingBox, cal );
-	}
-
-	public SpotMeshCursor( final RandomAccess< T > ra, final Mesh mesh, final double[] cal )
-	{
-		this( ra, mesh, Meshes.boundingBox( mesh ), cal );
 	}
 
 	public SpotMeshCursor( final RandomAccess< T > ra, final Mesh mesh, final float[] boundingBox, final double[] cal )
@@ -89,16 +81,16 @@ public class SpotMeshCursor< T > implements Cursor< T >
 		this.mesh = mesh;
 		this.cal = cal;
 		this.bb = boundingBox;
-		this.minX = Math.round( bb[ 0 ] / cal[ 0 ] );
-		this.maxX = Math.round( bb[ 3 ] / cal[ 0 ] );
-		this.minY = Math.round( bb[ 1 ] / cal[ 1 ] );
-		this.maxY = Math.round( bb[ 4 ] / cal[ 1 ] );
-		this.minZ = Math.round( bb[ 2 ] / cal[ 2 ] );
-		this.maxZ = Math.round( bb[ 5 ] / cal[ 2 ] );
-		this.rayCasting = new RayCastingX( mesh );
+		this.minX = ( int ) Math.floor( bb[ 0 ] / cal[ 0 ] );
+		this.maxX = ( int ) Math.ceil( bb[ 3 ] / cal[ 0 ] );
+		this.minY = ( int ) Math.floor( bb[ 1 ] / cal[ 1 ] );
+		this.maxY = ( int ) Math.ceil( bb[ 4 ] / cal[ 1 ] );
+		this.minZ = ( int ) Math.floor( bb[ 2 ] / cal[ 2 ] );
+		this.maxZ = ( int ) Math.ceil( bb[ 5 ] / cal[ 2 ] );
+
+		this.sliceMap = buildSliceMap( mesh, boundingBox, cal );
 		reset();
 	}
-
 
 	@Override
 	public void reset()
@@ -106,6 +98,7 @@ public class SpotMeshCursor< T > implements Cursor< T >
 		this.ix = maxX; // To force a new ray cast when we call fwd()
 		this.iy = minY - 1; // Then we will move to minY.
 		this.iz = minZ;
+		this.slice = sliceMap.get( iz );
 		this.hasNext = true;
 		preFetch();
 	}
@@ -140,21 +133,19 @@ public class SpotMeshCursor< T > implements Cursor< T >
 						iz++;
 						if ( iz > maxZ )
 							return; // Finished!
+						slice = sliceMap.get( iz );
 					}
+					if ( slice == null )
+						continue;
 
 					// New ray cast.
-					final double z = iz * cal[ 2 ];
 					final double y = iy * cal[ 1 ];
-					rayCasting.cast( y, z, meshXs, meshNs );
+					slice.xRayCast( y, intersectionXs, cal[ 1 ] );
 
 					// No intersection?
-					if ( !meshXs.isEmpty() )
-					{
-						this.indexNextXIntersection = 0;
-						this.nextXIntersection = meshXs.getQuick( 0 );
-						this.nextNormal = meshNs.getQuick( 0 );
+					if ( !intersectionXs.isEmpty() )
 						break;
-					}
+
 					// No intersection on this line, move to the next.
 				}
 			}
@@ -164,9 +155,9 @@ public class SpotMeshCursor< T > implements Cursor< T >
 			final double x = ix * cal[ 0 ];
 
 			// Special case: only one intersection.
-			if ( meshXs.size() == 1 )
+			if ( intersectionXs.size() == 1 )
 			{
-				if ( x == nextXIntersection )
+				if ( x == intersectionXs.getQuick( 0 ) )
 				{
 					hasNext = true;
 					return;
@@ -177,37 +168,20 @@ public class SpotMeshCursor< T > implements Cursor< T >
 				}
 			}
 
-			if ( x >= nextXIntersection )
+			final int i = intersectionXs.binarySearch( x );
+			if ( i >= 0 )
 			{
-				indexNextXIntersection++;
-				if ( indexNextXIntersection >= meshXs.size() )
-				{
-					final boolean inside = ( x == meshXs.get( meshXs.size() - 1 ) );
-					if ( inside )
-					{
-						hasNext = true;
-						return;
-					}
-				}
-				else
-				{
-					final boolean isEntry = ( nextNormal < 0. ) || ( ix == nextXIntersection );
-					nextXIntersection = meshXs.getQuick( indexNextXIntersection );
-					nextNormal = meshNs.getQuick( indexNextXIntersection );
-					if ( isEntry )
-					{
-						hasNext = true;
-						return;
-					}
-				}
+				// Fall on an intersection exactly.
+				hasNext = true;
+				return;
 			}
-			else
+			final int ip = -( i + 1 );
+			// Odd or even?
+			if ( ip % 2 != 0 )
 			{
-				if ( nextNormal > 0. )
-				{
-					hasNext = true;
-					return;
-				}
+				// Odd. We are inside.
+				hasNext = true;
+				return;
 			}
 
 			// Not inside, move to the next point.
@@ -262,6 +236,34 @@ public class SpotMeshCursor< T > implements Cursor< T >
 	public T get()
 	{
 		return ra.get();
+	}
+
+	private static final Map< Integer, Slice > buildSliceMap( final Mesh mesh, final float[] boundingBox, final double[] calibration )
+	{
+		// Pre-compute slices.
+		final int minZ = ( int ) Math.ceil( boundingBox[ 2 ] / calibration[ 2 ] );
+		final int maxZ = ( int ) Math.floor( boundingBox[ 5 ] / calibration[ 2 ] );
+		final double[] zs = new double[ maxZ - minZ + 1 ];
+		final List< Integer > sliceIndices = new ArrayList<>( zs.length );
+		for ( int i = 0; i < zs.length; i++ )
+		{
+			zs[ i ] = ( minZ + i ) * calibration[ 2 ]; // physical coords.
+			sliceIndices.add( minZ + i ); // pixel coordinates.
+		}
+		final List< Slice > slices = ZSlicer.slices( mesh, zs, calibration[ 2 ] );
+
+		// Simplify below /14th of a pixel.
+		final double epsilon = calibration[ 0 ] * 0.25;
+		final List< Slice > simplifiedSlices = slices.stream()
+				.map( s -> RamerDouglasPeucker.simplify( s, epsilon ) )
+				.collect( Collectors.toList() );
+
+		// Store in a map Z (integer) pos -> slice.
+		final Map< Integer, Slice > sliceMap = new HashMap<>();
+		for ( int i = 0; i < sliceIndices.size(); i++ )
+			sliceMap.put( sliceIndices.get( i ), simplifiedSlices.get( i ) );
+
+		return sliceMap;
 	}
 
 }
