@@ -156,6 +156,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import net.imagej.mesh.Mesh;
 import net.imagej.mesh.Meshes;
+import net.imagej.mesh.Vertices;
 import net.imagej.mesh.nio.BufferMesh;
 
 public class TmXmlReader
@@ -189,8 +190,6 @@ public class TmXmlReader
 	 */
 	protected boolean ok = true;
 
-	private final File meshFile;
-
 	/*
 	 * CONSTRUCTORS
 	 */
@@ -201,7 +200,6 @@ public class TmXmlReader
 	public TmXmlReader( final File file )
 	{
 		this.file = file;
-		this.meshFile = new File( file.getAbsolutePath() + MESH_FILE_EXTENSION );
 		final SAXBuilder sb = new SAXBuilder();
 		Element r = null;
 		try
@@ -936,6 +934,7 @@ public class TmXmlReader
 		}
 
 		// Do we have a mesh file?
+		final File meshFile = new File( file.getAbsolutePath() + MESH_FILE_EXTENSION );
 		if ( meshFile.exists() )
 		{
 			// Matcher for zipped file name.
@@ -958,7 +957,20 @@ public class TmXmlReader
 							final Mesh m = PLY_MESH_IO.open( zipFile.getInputStream( entry ) );
 							final BufferMesh mesh = new BufferMesh( ( int ) m.vertices().size(), ( int ) m.triangles().size() );
 							Meshes.calculateNormals( m, mesh );
-							final SpotMesh sm = new SpotMesh( mesh, Meshes.boundingBox( mesh ) );
+
+							// Shift mesh to (0, 0, 0).
+							final Vertices vertices = mesh.vertices();
+							final long nVertices = vertices.size();
+							for ( long i = 0; i < nVertices; i++ )
+								vertices.setPositionf( i,
+										vertices.xf( i ) - spot.getFloatPosition( 0 ),
+										vertices.yf( i ) - spot.getFloatPosition( 1 ),
+										vertices.zf( i ) - spot.getFloatPosition( 2 ) );
+
+							// Bounding box with respect to 0.
+							final float[] boundingBox = Meshes.boundingBox( mesh );
+
+							final SpotMesh sm = new SpotMesh( mesh, boundingBox );
 							spot.setMesh( sm );
 						}
 						catch ( final IOException e )
