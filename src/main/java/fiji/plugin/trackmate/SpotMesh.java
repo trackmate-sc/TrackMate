@@ -45,13 +45,13 @@ public class SpotMesh implements SpotShape
 		final RealPoint center = Meshes.center( mesh );
 
 		// Shift mesh to (0, 0, 0).
-//		final Vertices vertices = mesh.vertices();
-//		final long nVertices = vertices.size();
-//		for ( long i = 0; i < nVertices; i++ )
-//			vertices.setPositionf( i,
-//					vertices.xf( i ) - center.getFloatPosition( 0 ),
-//					vertices.yf( i ) - center.getFloatPosition( 1 ),
-//					vertices.zf( i ) - center.getFloatPosition( 2 ) );
+		final Vertices vertices = mesh.vertices();
+		final long nVertices = vertices.size();
+		for ( long i = 0; i < nVertices; i++ )
+			vertices.setPositionf( i,
+					vertices.xf( i ) - center.getFloatPosition( 0 ),
+					vertices.yf( i ) - center.getFloatPosition( 1 ),
+					vertices.zf( i ) - center.getFloatPosition( 2 ) );
 
 		// Bounding box with respect to 0.
 		final float[] boundingBox = Meshes.boundingBox( mesh );

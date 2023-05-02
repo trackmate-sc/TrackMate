@@ -8,11 +8,14 @@ import java.util.function.DoubleUnaryOperator;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import ij.ImagePlus;
 import ij.gui.ImageCanvas;
+import net.imagej.mesh.Mesh;
 import net.imagej.mesh.alg.zslicer.Contour;
 import net.imagej.mesh.alg.zslicer.RamerDouglasPeucker;
 import net.imagej.mesh.alg.zslicer.Slice;
 import net.imagej.mesh.alg.zslicer.ZSlicer;
+import net.imagej.mesh.obj.transform.TranslateMesh;
 
 /**
  * Utility class to paint the {@link SpotMesh} component of spots.
@@ -25,33 +28,38 @@ public class PaintSpotMesh extends TrackMatePainter
 
 	private final Path2D.Double polygon;
 
-	public PaintSpotMesh( final ImageCanvas canvas, final double[] calibration, final DisplaySettings displaySettings )
+	public PaintSpotMesh( final ImagePlus imp, final double[] calibration, final DisplaySettings displaySettings )
 	{
-		super( canvas, calibration, displaySettings );
+		super( imp, calibration, displaySettings );
 		this.polygon = new Path2D.Double();
 	}
 
 	public int paint( final Graphics2D g2d, final Spot spot )
 	{
+		final ImageCanvas canvas = canvas();
+		if ( canvas == null )
+			return -1;
+
 		final SpotMesh sm = spot.getMesh();
+		final double x = spot.getFeature( Spot.POSITION_X );
+		final double y = spot.getFeature( Spot.POSITION_Y );
 
 		// Don't paint if we are out of screen.
-		if ( toScreenX( sm.boundingBox[ 0 ] ) > canvas.getWidth() )
+		if ( toScreenX( sm.boundingBox[ 0 ] + x ) > canvas.getWidth() )
 			return -1;
-		if ( toScreenX( sm.boundingBox[ 3 ] ) < 0 )
+		if ( toScreenX( sm.boundingBox[ 3 ] + x ) < 0 )
 			return -1;
-		if ( toScreenY( sm.boundingBox[ 1 ] ) > canvas.getHeight() )
+		if ( toScreenY( sm.boundingBox[ 1 ] + y ) > canvas.getHeight() )
 			return -1;
-		if ( toScreenY( sm.boundingBox[ 4 ] ) < 0 )
+		if ( toScreenY( sm.boundingBox[ 4 ] + y ) < 0 )
 			return -1;
 
 		// Z plane does not cross bounding box.
-		final double x = spot.getFeature( Spot.POSITION_X );
-		final double y = spot.getFeature( Spot.POSITION_Y );
 		final double xs = toScreenX( x );
 		final double ys = toScreenY( y );
+		final double z = spot.getFeature( Spot.POSITION_Z );
 		final double dz = ( canvas.getImage().getSlice() - 1 ) * calibration[ 2 ];
-		if ( sm.boundingBox[ 2 ] > dz || sm.boundingBox[ 5 ] < dz )
+		if ( sm.boundingBox[ 2 ] + z > dz || sm.boundingBox[ 5 ] + z < dz )
 		{
 			final double magnification = canvas.getMagnification();
 			g2d.fillOval(
@@ -62,7 +70,8 @@ public class PaintSpotMesh extends TrackMatePainter
 			return -1;
 		}
 
-		final Slice slice = ZSlicer.slice( sm.mesh, dz, calibration[ 2 ] );
+		final Mesh translated = TranslateMesh.translate( sm.mesh, spot );
+		final Slice slice = ZSlicer.slice( translated, dz, calibration[ 2 ] );
 		double maxTextPos = Double.NEGATIVE_INFINITY;
 		for ( final Contour c : slice )
 		{
