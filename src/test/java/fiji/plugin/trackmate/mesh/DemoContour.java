@@ -4,8 +4,6 @@ import java.io.File;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
 import fiji.plugin.trackmate.io.TmXmlReader;
@@ -41,9 +39,5 @@ public class DemoContour
 		final DisplaySettings ds = DisplaySettingsIO.readUserDefault();
 		final HyperStackDisplayer view = new HyperStackDisplayer( model, selection, imp, ds );
 		view.render();
-
-		final Spot spot = model.getSpots().iterable( 0, true ).iterator().next();
-		final SpotMesh sm = spot.getMesh();
-		sm.slice( 12. );
 	}
 }
