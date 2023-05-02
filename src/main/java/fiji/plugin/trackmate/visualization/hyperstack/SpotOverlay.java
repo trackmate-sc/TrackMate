@@ -89,8 +89,8 @@ public class SpotOverlay extends Roi
 		this.imp = imp;
 		this.calibration = TMUtils.getSpatialCalibration( imp );
 		this.displaySettings = displaySettings;
-		this.paintSpotSphere = new PaintSpotSphere( calibration, displaySettings );
-		this.paintSpotRoi = new PaintSpotRoi( calibration, displaySettings );
+		this.paintSpotSphere = new PaintSpotSphere( imp, calibration, displaySettings );
+		this.paintSpotRoi = new PaintSpotRoi( imp, calibration, displaySettings );
 		this.paintSpotMesh = new PaintSpotMesh( imp, calibration, displaySettings );
 	}
 
@@ -262,29 +262,29 @@ public class SpotOverlay extends Roi
 		final double xs = ( xp - xcorner ) * magnification;
 		final double ys = ( yp - ycorner ) * magnification;
 
-		// Spot shape.
-		final SpotRoi roi = spot.getRoi();
-		final SpotMesh mesh = spot.getMesh();
-
-		final int textPos;
-		if ( !displaySettings.isSpotDisplayedAsRoi() || ( mesh == null && roi == null ) )
-		{
-			textPos = paintSpotSphere.paint( g2d, spot, zslice, xs, ys, xcorner, ycorner, magnification );
-		}
-		else if ( roi != null )
-		{
-			textPos = paintSpotRoi.paint( g2d, roi, xs, ys, xcorner, ycorner, magnification );
-		}
-		else
-		{
-			textPos = paintSpotMesh.paint( g2d, spot );
-		}
+		// Get a painter adequate for the spot and config we have.
+		final TrackMatePainter painter = getPainter( spot );
+		final int textPos = painter.paint( g2d, spot );
 
 		if ( textPos >= 0 && displaySettings.isSpotShowName() )
 		{
 			final int windowWidth = imp.getWindow().getWidth();
 			drawString( g2d, fm, windowWidth, spot.toString(), xs, ys, textPos );
 		}
+	}
+
+	private TrackMatePainter getPainter( final Spot spot )
+	{
+		final SpotRoi roi = spot.getRoi();
+		final SpotMesh mesh = spot.getMesh();
+
+		if ( !displaySettings.isSpotDisplayedAsRoi() || ( mesh == null && roi == null ) )
+			return paintSpotSphere;
+
+		if ( roi != null )
+			return paintSpotRoi;
+
+		return paintSpotMesh;
 	}
 
 	private static final void drawString(
