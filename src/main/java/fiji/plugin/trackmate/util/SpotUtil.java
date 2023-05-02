@@ -50,14 +50,14 @@ public class SpotUtil
 	public static final < T extends RealType< T > > IterableInterval< T > iterable( final SpotShape shape, final RealLocalizable center, final ImgPlus< T > img )
 	{
 		if ( shape instanceof SpotRoi )
-			return iterable( ( SpotRoi ) shape, center, img );
-		else if ( shape instanceof SpotShape )
-			return iterable( ( SpotMesh ) shape, img );
+			return iterableRoi( ( SpotRoi ) shape, center, img );
+		else if ( shape instanceof SpotMesh )
+			return iterableMesh( ( SpotMesh ) shape, center, img );
 		else
 			throw new IllegalArgumentException( "Unsuitable shape for SpotShape: " + shape );
 	}
 
-	public static final < T extends RealType< T > > IterableInterval< T > iterable( final SpotRoi roi, final RealLocalizable center, final ImgPlus< T > img )
+	public static final < T extends RealType< T > > IterableInterval< T > iterableRoi( final SpotRoi roi, final RealLocalizable center, final ImgPlus< T > img )
 	{
 		final SpotRoiIterable< T > neighborhood = new SpotRoiIterable<>( roi, center, img );
 		if ( neighborhood.dimension( 0 ) <= 1 && neighborhood.dimension( 1 ) <= 1 )
@@ -74,12 +74,12 @@ public class SpotUtil
 		if ( null != roi && DetectionUtils.is2D( img ) )
 		{
 			// Operate on ROI only if we have one and the image is 2D.
-			return iterable( roi, spot, img );
+			return iterableRoi( roi, spot, img );
 		}
 		else if ( mesh != null )
 		{
 			// Operate on 3D if we have a mesh.
-			return iterable( mesh, img );
+			return iterableMesh( mesh, spot, img );
 		}
 		else
 		{
@@ -94,10 +94,13 @@ public class SpotUtil
 		}
 	}
 
-	public static < T extends NumericType< T > > IterableInterval< T > iterable( final SpotMesh mesh, final ImgPlus< T > img )
+	public static < T extends NumericType< T > > IterableInterval< T > iterableMesh( final SpotMesh sm, final RealLocalizable center, final ImgPlus< T > img )
 	{
-		return new SpotMeshIterable< T >( Views.extendZero( img ),
-				mesh, TMUtils.getSpatialCalibration( img ) );
+		return new SpotMeshIterable< T >(
+				Views.extendZero( img ),
+				sm,
+				center,
+				TMUtils.getSpatialCalibration( img ) );
 	}
 
 	private static < T > IterableInterval< T > makeSinglePixelIterable( final RealLocalizable center, final ImgPlus< T > img )
