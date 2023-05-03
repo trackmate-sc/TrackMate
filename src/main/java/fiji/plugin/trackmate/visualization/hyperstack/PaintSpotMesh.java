@@ -2,6 +2,8 @@ package fiji.plugin.trackmate.visualization.hyperstack;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.util.function.DoubleUnaryOperator;
 
@@ -73,32 +75,33 @@ public class PaintSpotMesh extends TrackMatePainter
 
 		final Mesh translated = TranslateMesh.translate( sm.mesh, spot );
 		final Slice slice = ZSlicer.slice( translated, dz, calibration[ 2 ] );
-		double maxTextPos = Double.NEGATIVE_INFINITY;
+
+		// Convert to AWT shape. Only work in non-pathological cases, and
+		// because contours are sorted by decreasing area.
+		final Area shape = new Area();
 		for ( final Contour c : slice )
 		{
 			final Contour contour = RamerDouglasPeucker.simplify( c, calibration[ 0 ] * 0.25 );
+			toPolygon( contour, polygon, this::toScreenX, this::toScreenY );
 
-			// Temporary set color by interior vs exterior.
-			if ( !contour.isInterior() )
-				g2d.setColor( Color.RED );
+			if ( contour.isInterior() )
+				shape.add( new Area( polygon ) );
 			else
-				g2d.setColor( Color.GREEN );
-
-			final double textPos = toPolygon( contour, polygon, this::toScreenX, this::toScreenY );
-			if ( textPos > maxTextPos )
-				maxTextPos = textPos;
-
-			if ( displaySettings.isSpotFilled() )
-			{
-				g2d.fill( polygon );
-				g2d.setColor( Color.BLACK );
-				g2d.draw( polygon );
-			}
-			else
-			{
-				g2d.draw( polygon );
-			}
+				shape.subtract( new Area( polygon ) );
 		}
+
+		if ( displaySettings.isSpotFilled() )
+		{
+			g2d.fill( shape );
+			g2d.setColor( Color.BLACK );
+			g2d.draw( shape );
+		}
+		else
+		{
+			g2d.draw( shape );
+		}
+		final Rectangle bounds = shape.getBounds();
+		final int maxTextPos = bounds.x + bounds.width;
 		return ( int ) ( maxTextPos - xs );
 	}
 
