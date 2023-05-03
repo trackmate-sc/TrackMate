@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -81,13 +81,13 @@ public class Model
 	 */
 	private int updateLevel = 0;
 
-	private final HashSet< Spot > spotsAdded = new HashSet< >();
+	private final HashSet< Spot > spotsAdded = new HashSet<>();
 
-	private final HashSet< Spot > spotsRemoved = new HashSet< >();
+	private final HashSet< Spot > spotsRemoved = new HashSet<>();
 
-	private final HashSet< Spot > spotsMoved = new HashSet< >();
+	private final HashSet< Spot > spotsMoved = new HashSet<>();
 
-	private final HashSet< Spot > spotsUpdated = new HashSet< >();
+	private final HashSet< Spot > spotsUpdated = new HashSet<>();
 
 	/**
 	 * The event cache. During a transaction, some modifications might trigger
@@ -96,15 +96,15 @@ public class Model
 	 * the event ID in this cache in the meantime. The event cache contains only
 	 * the int IDs of the events listed in {@link ModelChangeEvent}, namely
 	 * <ul>
-	 * <li> {@link ModelChangeEvent#SPOTS_COMPUTED}
-	 * <li> {@link ModelChangeEvent#TRACKS_COMPUTED}
-	 * <li> {@link ModelChangeEvent#TRACKS_VISIBILITY_CHANGED}
+	 * <li>{@link ModelChangeEvent#SPOTS_COMPUTED}
+	 * <li>{@link ModelChangeEvent#TRACKS_COMPUTED}
+	 * <li>{@link ModelChangeEvent#TRACKS_VISIBILITY_CHANGED}
 	 * </ul>
 	 * The {@link ModelChangeEvent#MODEL_MODIFIED} cannot be cached this way,
 	 * for it needs to be configured with modification spot and edge targets, so
 	 * it uses a different system (see {@link #flushUpdate()}).
 	 */
-	private final HashSet< Integer > eventCache = new HashSet< >();
+	private final HashSet< Integer > eventCache = new HashSet<>();
 
 	// OTHERS
 
@@ -120,7 +120,7 @@ public class Model
 	/**
 	 * The list of listeners listening to model content change.
 	 */
-	Set< ModelChangeListener > modelChangeListeners = new LinkedHashSet< >();
+	Set< ModelChangeListener > modelChangeListeners = new LinkedHashSet<>();
 
 	/*
 	 * CONSTRUCTOR
@@ -154,7 +154,7 @@ public class Model
 	 * <p>
 	 * Subclassers can override this method to have the model work with their
 	 * own subclass of {@link FeatureModel}.
-	 * 
+	 *
 	 * @return a new instance of {@link FeatureModel}.
 	 */
 	protected FeatureModel createFeatureModel()
@@ -321,7 +321,7 @@ public class Model
 
 	/**
 	 * Returns the {@link TrackModel} that manages the tracks for this model.
-	 * 
+	 *
 	 * @return the track model.
 	 */
 	public TrackModel getTrackModel()
@@ -447,7 +447,7 @@ public class Model
 	/**
 	 * Set the logger that will receive the messages from the processes
 	 * occurring within this trackmate.
-	 * 
+	 *
 	 * @param logger
 	 *            the {@link Logger} to use.
 	 */
@@ -458,7 +458,7 @@ public class Model
 
 	/**
 	 * Return the logger currently set for this model.
-	 * 
+	 *
 	 * @return the {@link Logger} used.
 	 */
 	public Logger getLogger()
@@ -544,7 +544,7 @@ public class Model
 	 * 	model.endUpdate();
 	 * }
 	 * </pre>
-	 * 
+	 *
 	 * @param spotToAdd
 	 *            the spot to add.
 	 * @param toFrame
@@ -593,8 +593,9 @@ public class Model
 			if ( DEBUG )
 				System.out.println( "[TrackMateModel] Removing spot " + spotToRemove + " from frame " + fromFrame );
 
-			trackModel.removeSpot( spotToRemove ); 
-			// changes to edges will be caught automatically by the TrackGraphModel
+			trackModel.removeSpot( spotToRemove );
+			// changes to edges will be caught automatically by the
+			// TrackGraphModel
 			return spotToRemove;
 		}
 		if ( DEBUG )
@@ -626,7 +627,7 @@ public class Model
 	public synchronized void updateFeatures( final Spot spotToUpdate )
 	{
 		spotsUpdated.add( spotToUpdate ); // Enlist for feature update when
-											// transaction is marked as finished
+		// transaction is marked as finished
 		final Set< DefaultWeightedEdge > touchingEdges = trackModel.edgesOf( spotToUpdate );
 		if ( null != touchingEdges )
 		{
@@ -766,7 +767,7 @@ public class Model
 	 * The copy is made of the same spot objects but on a different graph, that
 	 * can be safely edited. The copy does not include the feature values for
 	 * edges and tracks, but the features are declared.
-	 * 
+	 *
 	 * @return a new model.
 	 */
 	public Model copy()
@@ -810,7 +811,7 @@ public class Model
 				featureModel.getTrackFeatureShortNames(),
 				featureModel.getTrackFeatureDimensions(),
 				featureModel.getTrackFeatureIsInt() );
-		
+
 		// Feature values are not copied.
 		return copy;
 	}
@@ -841,7 +842,7 @@ public class Model
 		final int nEdgesToSignal = trackModel.edgesAdded.size() + trackModel.edgesRemoved.size() + trackModel.edgesModified.size();
 
 		// Do we have tracks to update?
-		final HashSet< Integer > tracksToUpdate = new HashSet< >( trackModel.tracksUpdated );
+		final HashSet< Integer > tracksToUpdate = new HashSet<>( trackModel.tracksUpdated );
 
 		// We also want to update the tracks that have edges that were modified
 		for ( final DefaultWeightedEdge modifiedEdge : trackModel.edgesModified )
@@ -853,7 +854,7 @@ public class Model
 		final int nSpotsToUpdate = spotsAdded.size() + spotsMoved.size() + spotsUpdated.size();
 		if ( nSpotsToUpdate > 0 )
 		{
-			final HashSet< Spot > spotsToUpdate = new HashSet< >( nSpotsToUpdate );
+			final HashSet< Spot > spotsToUpdate = new HashSet<>( nSpotsToUpdate );
 			spotsToUpdate.addAll( spotsAdded );
 			spotsToUpdate.addAll( spotsMoved );
 			spotsToUpdate.addAll( spotsUpdated );
