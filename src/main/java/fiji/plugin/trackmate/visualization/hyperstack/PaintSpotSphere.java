@@ -5,7 +5,8 @@ import java.awt.Graphics2D;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import ij.ImagePlus;
-import ij.gui.ImageCanvas;
+import net.imglib2.RealInterval;
+import net.imglib2.util.Intervals;
 
 /**
  * Utility class to paint the spots as little spheres.
@@ -24,14 +25,13 @@ public class PaintSpotSphere extends TrackMatePainter
 	@Override
 	public int paint( final Graphics2D g2d, final Spot spot )
 	{
-		final ImageCanvas canvas = canvas();
-		if ( canvas == null )
+		if ( !intersect( boundingBox( spot ), spot ) )
 			return -1;
 
 		final double x = spot.getFeature( Spot.POSITION_X );
 		final double y = spot.getFeature( Spot.POSITION_Y );
 		final double z = spot.getFeature( Spot.POSITION_Z );
-		final double zslice = ( canvas.getImage().getSlice() - 1 ) * calibration[ 2 ];
+		final double zslice = ( imp.getSlice() - 1 ) * calibration[ 2 ];
 		final double dz = zslice - z;
 		final double dz2 = dz * dz;
 		final double radiusRatio = displaySettings.getSpotDisplayRadius();
@@ -39,15 +39,11 @@ public class PaintSpotSphere extends TrackMatePainter
 
 		final double xs = toScreenX( x );
 		final double ys = toScreenY( y );
-		final double magnification = canvas.getMagnification();
+		final double magnification = getMagnification();
 
 		if ( dz2 >= radius * radius )
 		{
-			g2d.fillOval(
-					( int ) Math.round( xs - 2 * magnification ),
-					( int ) Math.round( ys - 2 * magnification ),
-					( int ) Math.round( 4 * magnification ),
-					( int ) Math.round( 4 * magnification ) );
+			paintOutOfFocus( g2d, xs, ys );
 			return -1; // Do not paint spot name.
 		}
 
@@ -67,5 +63,11 @@ public class PaintSpotSphere extends TrackMatePainter
 
 		final int textPos = ( int ) apparentRadius;
 		return textPos;
+	}
+
+	private static final RealInterval boundingBox( final Spot spot )
+	{
+		final double r = spot.getFeature( Spot.RADIUS ).doubleValue();
+		return Intervals.createMinMaxReal( -r, -r, r, r );
 	}
 }

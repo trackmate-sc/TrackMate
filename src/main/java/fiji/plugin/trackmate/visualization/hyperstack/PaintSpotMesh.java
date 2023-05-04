@@ -11,13 +11,10 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import ij.ImagePlus;
-import ij.gui.ImageCanvas;
-import net.imagej.mesh.Mesh;
 import net.imagej.mesh.alg.zslicer.Contour;
 import net.imagej.mesh.alg.zslicer.RamerDouglasPeucker;
 import net.imagej.mesh.alg.zslicer.Slice;
-import net.imagej.mesh.alg.zslicer.ZSlicer;
-import net.imagej.mesh.obj.transform.TranslateMesh;
+import net.imglib2.RealLocalizable;
 
 /**
  * Utility class to paint the {@link SpotMesh} component of spots.
@@ -30,59 +27,53 @@ public class PaintSpotMesh extends TrackMatePainter
 
 	private final Path2D.Double polygon;
 
+	private final Area shape;
+
 	public PaintSpotMesh( final ImagePlus imp, final double[] calibration, final DisplaySettings displaySettings )
 	{
 		super( imp, calibration, displaySettings );
 		this.polygon = new Path2D.Double();
+		this.shape = new Area();
+
 	}
 
 	@Override
 	public int paint( final Graphics2D g2d, final Spot spot )
 	{
-		final ImageCanvas canvas = canvas();
-		if ( canvas == null )
-			return -1;
-
 		final SpotMesh sm = spot.getMesh();
-		final double x = spot.getFeature( Spot.POSITION_X );
-		final double y = spot.getFeature( Spot.POSITION_Y );
 
-		// Don't paint if we are out of screen.
-		if ( toScreenX( sm.boundingBox[ 0 ] + x ) > canvas.getWidth() )
-			return -1;
-		if ( toScreenX( sm.boundingBox[ 3 ] + x ) < 0 )
-			return -1;
-		if ( toScreenY( sm.boundingBox[ 1 ] + y ) > canvas.getHeight() )
-			return -1;
-		if ( toScreenY( sm.boundingBox[ 4 ] + y ) < 0 )
+		if ( !intersect( sm.boundingBox, spot ) )
 			return -1;
 
 		// Z plane does not cross bounding box.
+		final double x = spot.getFeature( Spot.POSITION_X );
+		final double y = spot.getFeature( Spot.POSITION_Y );
 		final double xs = toScreenX( x );
 		final double ys = toScreenY( y );
 		final double z = spot.getFeature( Spot.POSITION_Z );
-		final double dz = ( canvas.getImage().getSlice() - 1 ) * calibration[ 2 ];
-		if ( sm.boundingBox[ 2 ] + z > dz || sm.boundingBox[ 5 ] + z < dz )
+		final int zSlice = imp.getSlice() - 1;
+		final double dz = zSlice * calibration[ 2 ];
+		if ( sm.boundingBox.realMin( 2 ) + z > dz || sm.boundingBox.realMax( 2 ) + z < dz )
 		{
-			final double magnification = canvas.getMagnification();
-			g2d.fillOval(
-					( int ) Math.round( xs - 2 * magnification ),
-					( int ) Math.round( ys - 2 * magnification ),
-					( int ) Math.round( 4 * magnification ),
-					( int ) Math.round( 4 * magnification ) );
+			paintOutOfFocus( g2d, xs, ys );
 			return -1;
 		}
 
-		final Mesh translated = TranslateMesh.translate( sm.mesh, spot );
-		final Slice slice = ZSlicer.slice( translated, dz, calibration[ 2 ] );
-
 		// Convert to AWT shape. Only work in non-pathological cases, and
 		// because contours are sorted by decreasing area.
-		final Area shape = new Area();
+		final Slice slice = sm.getZSlice( zSlice, calibration[ 0 ], calibration[ 2 ] );
+		if ( slice == null )
+		{
+			paintOutOfFocus( g2d, xs, ys );
+			return -1;
+		}
+
+		// Should not be null.
+		shape.reset();
 		for ( final Contour c : slice )
 		{
 			final Contour contour = RamerDouglasPeucker.simplify( c, calibration[ 0 ] * 0.25 );
-			toPolygon( contour, polygon, this::toScreenX, this::toScreenY );
+			toPolygon( spot, contour, polygon, this::toScreenX, this::toScreenY );
 
 			if ( contour.isInterior() )
 				shape.add( new Area( polygon ) );
@@ -121,20 +112,20 @@ public class PaintSpotMesh extends TrackMatePainter
 	 *            screen coordinates.
 	 * @return the max X position in screen units of this shape.
 	 */
-	private static final double toPolygon( final Contour contour, final Path2D polygon, final DoubleUnaryOperator toScreenX, final DoubleUnaryOperator toScreenY )
+	private static final double toPolygon( final RealLocalizable center, final Contour contour, final Path2D polygon, final DoubleUnaryOperator toScreenX, final DoubleUnaryOperator toScreenY )
 	{
 		double maxTextPos = Double.NEGATIVE_INFINITY;
 		polygon.reset();
-		final double x0 = toScreenX.applyAsDouble( contour.x( 0 ) );
-		final double y0 = toScreenY.applyAsDouble( contour.y( 0 ) );
+		final double x0 = toScreenX.applyAsDouble( contour.x( 0 ) + center.getDoublePosition( 0 ) );
+		final double y0 = toScreenY.applyAsDouble( contour.y( 0 ) + center.getDoublePosition( 1 ) );
 		polygon.moveTo( x0, y0 );
 		if ( x0 > maxTextPos )
 			maxTextPos = x0;
 
 		for ( int i = 1; i < contour.size(); i++ )
 		{
-			final double xi = toScreenX.applyAsDouble( contour.x( i ) );
-			final double yi = toScreenY.applyAsDouble( contour.y( i ) );
+			final double xi = toScreenX.applyAsDouble( contour.x( i ) + center.getDoublePosition( 0 ) );
+			final double yi = toScreenY.applyAsDouble( contour.y( i ) + center.getDoublePosition( 1 ) );
 			polygon.lineTo( xi, yi );
 
 			if ( xi > maxTextPos )
