@@ -130,6 +130,7 @@ public class Model
 	{
 		featureModel = createFeatureModel();
 		trackModel = createTrackModel();
+		addModelChangeListener( new SpotMeshSliceCacheInvalidator() );
 	}
 
 	/*
@@ -959,4 +960,20 @@ public class Model
 		}
 	}
 
+	private static class SpotMeshSliceCacheInvalidator implements ModelChangeListener
+	{
+
+		@Override
+		public void modelChanged( final ModelChangeEvent event )
+		{
+			if ( event.getEventID() != ModelChangeEvent.MODEL_MODIFIED )
+				return;
+
+			event.getSpots()
+					.stream()
+					.filter( s -> event.getSpotFlag( s ) == ModelChangeEvent.FLAG_SPOT_MODIFIED )
+					.filter( s -> s.getMesh() != null )
+					.forEach( s -> s.getMesh().resetZSliceCache( s ) );
+		}
+	}
 }
