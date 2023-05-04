@@ -38,7 +38,7 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotRoi;
+import fiji.plugin.trackmate.SpotShape;
 import fiji.plugin.trackmate.detection.semiauto.SemiAutoTracker;
 import fiji.plugin.trackmate.util.ModelTools;
 import fiji.plugin.trackmate.util.TMUtils;
@@ -279,12 +279,13 @@ public class ModelEditActions
 			return;
 
 		final double radius = target.getFeature( Spot.RADIUS );
-		final int factor = ( increase ) ? 1 : -1;
+		final int factor = ( increase ) ? -1 : 1;
 		final double dx = imp.getCalibration().pixelWidth;
 
 		final double newRadius = ( fast )
 				? radius + factor * dx * COARSE_STEP
 				: radius + factor * dx * FINE_STEP;
+
 
 		if ( newRadius <= dx )
 			return;
@@ -292,16 +293,16 @@ public class ModelEditActions
 		// Store new value of radius for next spot creation.
 		previousRadius = newRadius;
 
-		final SpotRoi roi = target.getRoi();
-		if ( null == roi )
+		final SpotShape shape = target.getShape();
+		if ( null == shape )
 		{
 			target.putFeature( Spot.RADIUS, newRadius );
 		}
 		else
 		{
 			final double alpha = newRadius / radius;
-			roi.scale( alpha );
-			target.putFeature( Spot.RADIUS, roi.radius() );
+			shape.scale( alpha );
+			target.putFeature( Spot.RADIUS, shape.radius() );
 		}
 
 		model.beginUpdate();
