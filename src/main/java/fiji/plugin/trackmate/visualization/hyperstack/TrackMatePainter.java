@@ -6,6 +6,8 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import ij.ImagePlus;
 import ij.gui.ImageCanvas;
+import net.imglib2.RealInterval;
+import net.imglib2.RealLocalizable;
 
 public abstract class TrackMatePainter
 {
@@ -14,7 +16,7 @@ public abstract class TrackMatePainter
 
 	protected final DisplaySettings displaySettings;
 
-	private final ImagePlus imp;
+	protected final ImagePlus imp;
 
 	public TrackMatePainter( final ImagePlus imp, final double[] calibration, final DisplaySettings displaySettings )
 	{
@@ -25,9 +27,32 @@ public abstract class TrackMatePainter
 
 	public abstract int paint( final Graphics2D g2d, final Spot spot );
 
-	protected ImageCanvas canvas()
+	/**
+	 * Returns <code>true</code> if the specified bounding-box, shifted by the
+	 * Specified amount, intersects with the display window.
+	 *
+	 * @param boundingBox
+	 *            the bounding box, centered at (0,0), in physical coordinates.
+	 * @param center
+	 *            the center of the bounding-box, in physical coordinates.
+	 * @return
+	 */
+	protected boolean intersect( final RealInterval boundingBox, final RealLocalizable center )
 	{
-		return imp.getCanvas();
+		final ImageCanvas canvas = imp.getCanvas();
+		if ( canvas == null )
+			return false;
+
+		if ( toScreenX( boundingBox.realMin( 0 ) + center.getDoublePosition( 0 ) ) > canvas.getWidth() )
+			return false;
+		if ( toScreenX( boundingBox.realMax( 0 ) + center.getDoublePosition( 0 ) ) < 0 )
+			return false;
+		if ( toScreenY( boundingBox.realMin( 1 ) + center.getDoublePosition( 1 ) ) > canvas.getHeight() )
+			return false;
+		if ( toScreenY( boundingBox.realMax( 1 ) + center.getDoublePosition( 1 ) ) < 0 )
+			return false;
+		return true;
+
 	}
 
 	/**
@@ -38,9 +63,9 @@ public abstract class TrackMatePainter
 	 *            the X position to convert.
 	 * @return the screen X coordinate.
 	 */
-	public double toScreenX( final double x )
+	protected double toScreenX( final double x )
 	{
-		final ImageCanvas canvas = canvas();
+		final ImageCanvas canvas = imp.getCanvas();
 		if ( canvas == null )
 			return Double.NaN;
 
@@ -56,9 +81,9 @@ public abstract class TrackMatePainter
 	 *            the Y position to convert.
 	 * @return the screen Y coordinate.
 	 */
-	public double toScreenY( final double y )
+	protected double toScreenY( final double y )
 	{
-		final ImageCanvas canvas = canvas();
+		final ImageCanvas canvas = imp.getCanvas();
 		if ( canvas == null )
 			return Double.NaN;
 
@@ -66,29 +91,20 @@ public abstract class TrackMatePainter
 		return canvas.screenYD( yp );
 	}
 
-	/**
-	 * Returns <code>true</code> of the point with the specified coordinates in
-	 * physical units lays inside the painted window.
-	 *
-	 * @param x
-	 *            the X coordinate in physical unit.
-	 * @param y
-	 *            the Y coordinate in physical unit.
-	 * @return <code>true</code> if (x, y) is inside the painted window.
-	 */
-	public boolean isInside( final double x, final double y )
+	protected void paintOutOfFocus( final Graphics2D g2d, final double xs, final double ys )
 	{
-		final ImageCanvas canvas = canvas();
-		if ( canvas == null )
-			return false;
-
-		final double xs = toScreenX( x );
-		if ( xs < 0 || xs > canvas.getWidth() )
-			return false;
-		final double ys = toScreenY( y );
-		if ( ys < 0 || ys > canvas.getHeight() )
-			return false;
-		return true;
+		final double magnification = getMagnification();
+		g2d.fillOval(
+				( int ) Math.round( xs - 2 * magnification ),
+				( int ) Math.round( ys - 2 * magnification ),
+				( int ) Math.round( 4 * magnification ),
+				( int ) Math.round( 4 * magnification ) );
 	}
 
+	protected double getMagnification()
+	{
+		if ( imp.getCanvas() == null )
+			return 1.;
+		return imp.getCanvas().getMagnification();
+	}
 }
