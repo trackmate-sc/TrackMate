@@ -66,7 +66,7 @@ public class SpotMeshCursor< T > implements Cursor< T >
 		this.minY = ( int ) Math.floor( ( sm.boundingBox.realMin( 1 ) + sm.getDoublePosition( 1 ) ) / cal[ 1 ] );
 		this.maxY = ( int ) Math.ceil( ( sm.boundingBox.realMax( 1 ) + sm.getDoublePosition( 1 ) ) / cal[ 1 ] );
 		this.minZ = ( int ) Math.floor( ( sm.boundingBox.realMin( 2 ) + sm.getDoublePosition( 2 ) ) / cal[ 2 ] );
-		this.maxZ = ( int ) Math.ceil( ( sm.boundingBox.realMin( 2 ) + sm.getDoublePosition( 2 ) ) / cal[ 2 ] );
+		this.maxZ = ( int ) Math.ceil( ( sm.boundingBox.realMax( 2 ) + sm.getDoublePosition( 2 ) ) / cal[ 2 ] );
 		reset();
 	}
 
