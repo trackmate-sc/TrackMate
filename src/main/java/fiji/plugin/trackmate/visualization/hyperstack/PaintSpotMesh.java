@@ -12,7 +12,6 @@ import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import ij.ImagePlus;
 import net.imagej.mesh.alg.zslicer.Contour;
-import net.imagej.mesh.alg.zslicer.RamerDouglasPeucker;
 import net.imagej.mesh.alg.zslicer.Slice;
 import net.imglib2.RealLocalizable;
 
@@ -68,28 +67,30 @@ public class PaintSpotMesh extends TrackMatePainter
 			return -1;
 		}
 
-		// Should not be null.
-		shape.reset();
-		for ( final Contour c : slice )
-		{
-			final Contour contour = RamerDouglasPeucker.simplify( c, calibration[ 0 ] * 0.25 );
-			toPolygon( spot, contour, polygon, this::toScreenX, this::toScreenY );
-
-			if ( contour.isInterior() )
-				shape.add( new Area( polygon ) );
-			else
-				shape.subtract( new Area( polygon ) );
-		}
 
 		if ( displaySettings.isSpotFilled() )
 		{
+			// Should not be null.
+			shape.reset();
+			for ( final Contour c : slice )
+			{
+				toPolygon( spot, c, polygon, this::toScreenX, this::toScreenY );
+				if ( c.isInterior() )
+					shape.add( new Area( polygon ) );
+				else
+					shape.subtract( new Area( polygon ) );
+			}
 			g2d.fill( shape );
 			g2d.setColor( Color.BLACK );
 			g2d.draw( shape );
 		}
 		else
 		{
-			g2d.draw( shape );
+			for ( final Contour c : slice )
+			{
+				toPolygon( spot, c, polygon, this::toScreenX, this::toScreenY );
+				g2d.draw( polygon );
+			}
 		}
 		final Rectangle bounds = shape.getBounds();
 		final int maxTextPos = bounds.x + bounds.width;
