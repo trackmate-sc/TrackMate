@@ -10,7 +10,8 @@ import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import gnu.trove.list.TDoubleList;
 import ij.ImagePlus;
-import ij.gui.ImageCanvas;
+import net.imglib2.RealInterval;
+import net.imglib2.util.Intervals;
 
 /**
  * Utility class to paint the {@link SpotRoi} component of spots.
@@ -43,8 +44,7 @@ public class PaintSpotRoi extends TrackMatePainter
 	@Override
 	public int paint( final Graphics2D g2d, final Spot spot )
 	{
-		final ImageCanvas canvas = canvas();
-		if ( canvas == null )
+		if ( !intersect( boundingBox( spot.getRoi() ), spot ) )
 			return -1;
 
 		final double maxTextPos = toPolygon( spot, polygon, this::toScreenX, this::toScreenY );
@@ -62,6 +62,28 @@ public class PaintSpotRoi extends TrackMatePainter
 		final double xs = toScreenX( spot.getDoublePosition( 0 ) );
 		final int textPos = ( int ) ( maxTextPos - xs );
 		return textPos;
+	}
+
+	private static final RealInterval boundingBox( final SpotRoi roi )
+	{
+		double minX = roi.x[ 0 ];
+		double maxX = roi.x[ 0 ];
+		double minY = roi.y[ 0 ];
+		double maxY = roi.y[ 0 ];
+		for ( int i = 0; i < roi.x.length; i++ )
+		{
+			final double x = roi.x[ i ];
+			if ( x > maxX )
+				maxX = x;
+			if ( x < minX )
+				minX = x;
+			final double y = roi.y[ i ];
+			if ( y > maxY )
+				maxY = y;
+			if ( y < minY )
+				minY = y;
+		}
+		return Intervals.createMinMaxReal( minX, minY, maxX, maxY );
 	}
 
 	static final double max( final TDoubleList l )
