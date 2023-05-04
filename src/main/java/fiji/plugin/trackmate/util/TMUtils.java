@@ -57,7 +57,7 @@ import net.imglib2.Interval;
 import net.imglib2.img.ImagePlusAdapter;
 import net.imglib2.img.display.imagej.ImgPlusViews;
 import net.imglib2.type.Type;
-import net.imglib2.type.numeric.real.DoubleType;
+import net.imglib2.util.Cast;
 import net.imglib2.util.Util;
 
 /**
@@ -200,12 +200,9 @@ public class TMUtils
 	 *            the image plus to wrap.
 	 * @return the ImgPlus wrapping the input.
 	 */
-	@SuppressWarnings( "rawtypes" )
-	public static final ImgPlus rawWraps( final ImagePlus imp )
+	public static final < T > ImgPlus< T > rawWraps( final ImagePlus imp )
 	{
-		final ImgPlus< DoubleType > img = ImagePlusAdapter.wrapImgPlus( imp );
-		final ImgPlus raw = img;
-		return raw;
+		return Cast.unchecked( ImagePlusAdapter.wrapImgPlus( imp ) );
 	}
 
 	/**
