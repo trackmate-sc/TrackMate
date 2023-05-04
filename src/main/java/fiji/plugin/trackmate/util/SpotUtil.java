@@ -36,6 +36,7 @@ import net.imglib2.Interval;
 import net.imglib2.IterableInterval;
 import net.imglib2.Localizable;
 import net.imglib2.RandomAccess;
+import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealLocalizable;
 import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.RealType;
@@ -52,7 +53,7 @@ public class SpotUtil
 		if ( shape instanceof SpotRoi )
 			return iterableRoi( ( SpotRoi ) shape, center, img );
 		else if ( shape instanceof SpotMesh )
-			return iterableMesh( ( SpotMesh ) shape, center, img );
+			return iterableMesh( ( SpotMesh ) shape, img );
 		else
 			throw new IllegalArgumentException( "Unsuitable shape for SpotShape: " + shape );
 	}
@@ -79,7 +80,7 @@ public class SpotUtil
 		else if ( mesh != null )
 		{
 			// Operate on 3D if we have a mesh.
-			return iterableMesh( mesh, spot, img );
+			return iterableMesh( mesh, img );
 		}
 		else
 		{
@@ -94,13 +95,20 @@ public class SpotUtil
 		}
 	}
 
-	public static < T extends NumericType< T > > IterableInterval< T > iterableMesh( final SpotMesh sm, final RealLocalizable center, final ImgPlus< T > img )
+	public static < T extends NumericType< T > > IterableInterval< T > iterableMesh( final SpotMesh sm, final ImgPlus< T > img )
 	{
 		return new SpotMeshIterable< T >(
 				Views.extendZero( img ),
 				sm,
-				center,
 				TMUtils.getSpatialCalibration( img ) );
+	}
+
+	public static < T extends NumericType< T > > IterableInterval< T > iterableMesh( final SpotMesh sm, final RandomAccessibleInterval< T > img, final double[] calibration )
+	{
+		return new SpotMeshIterable< T >(
+				Views.extendZero( img ),
+				sm,
+				calibration );
 	}
 
 	private static < T > IterableInterval< T > makeSinglePixelIterable( final RealLocalizable center, final ImgPlus< T > img )
