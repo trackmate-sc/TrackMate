@@ -7,7 +7,6 @@ import net.imglib2.Cursor;
 import net.imglib2.IterableInterval;
 import net.imglib2.Localizable;
 import net.imglib2.RandomAccessible;
-import net.imglib2.RealLocalizable;
 
 public class SpotMeshIterable< T > implements IterableInterval< T >, Localizable
 {
@@ -18,17 +17,13 @@ public class SpotMeshIterable< T > implements IterableInterval< T >, Localizable
 
 	private final SpotMesh sm;
 
-	private final RealLocalizable center;
-
 	public SpotMeshIterable(
 			final RandomAccessible< T > img,
 			final SpotMesh sm,
-			final RealLocalizable center,
 			final double[] calibration )
 	{
 		this.img = img;
 		this.sm = sm;
-		this.center = center;
 		this.calibration = calibration;
 	}
 
@@ -41,7 +36,7 @@ public class SpotMeshIterable< T > implements IterableInterval< T >, Localizable
 	@Override
 	public long getLongPosition( final int d )
 	{
-		return Math.round( center.getDoublePosition( d ) / calibration[ d ] );
+		return Math.round( sm.getDoublePosition( d ) / calibration[ d ] );
 	}
 
 	@Override
@@ -77,13 +72,13 @@ public class SpotMeshIterable< T > implements IterableInterval< T >, Localizable
 	@Override
 	public long min( final int d )
 	{
-		return Math.round( ( sm.boundingBox.realMin( d ) + center.getFloatPosition( d ) ) / calibration[ d ] );
+		return Math.round( ( sm.boundingBox.realMin( d ) + sm.getFloatPosition( d ) ) / calibration[ d ] );
 	}
 
 	@Override
 	public long max( final int d )
 	{
-		return Math.round( ( sm.boundingBox.realMax( d ) + center.getFloatPosition( d ) ) / calibration[ d ] );
+		return Math.round( ( sm.boundingBox.realMax( d ) + sm.getFloatPosition( d ) ) / calibration[ d ] );
 	}
 
 	@Override
