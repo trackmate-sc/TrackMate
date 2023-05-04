@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -56,7 +56,7 @@ import net.imglib2.Interval;
 import net.imglib2.img.ImagePlusAdapter;
 import net.imglib2.img.display.imagej.ImgPlusViews;
 import net.imglib2.type.Type;
-import net.imglib2.type.numeric.real.DoubleType;
+import net.imglib2.util.Cast;
 import net.imglib2.util.Util;
 
 /**
@@ -135,16 +135,12 @@ public class TMUtils
 	}
 
 	/**
-	 * Wraps an IJ {@link ImagePlus} in an imglib2 {@link ImgPlus}, without
-	 * parameterized types. The only way I have found to beat javac constraints
-	 * on bounded multiple wildcard.
+	 * Wraps an IJ {@link ImagePlus} in an imglib2 {@link ImgPlus}, abinding to
+	 * a returned type.
 	 */
-	@SuppressWarnings( "rawtypes" )
-	public static final ImgPlus rawWraps( final ImagePlus imp )
+	public static final < T > ImgPlus< T > rawWraps( final ImagePlus imp )
 	{
-		final ImgPlus< DoubleType > img = ImagePlusAdapter.wrapImgPlus( imp );
-		final ImgPlus raw = img;
-		return raw;
+		return Cast.unchecked( ImagePlusAdapter.wrapImgPlus( imp ) );
 	}
 
 	/**
