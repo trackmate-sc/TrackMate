@@ -77,19 +77,19 @@ public class SpotMeshIterable< T > implements IterableInterval< T >, Localizable
 	@Override
 	public long min( final int d )
 	{
-		return Math.round( ( sm.boundingBox[ d ] + center.getFloatPosition( d ) ) / calibration[ d ] );
+		return Math.round( ( sm.boundingBox.realMin( d ) + center.getFloatPosition( d ) ) / calibration[ d ] );
 	}
 
 	@Override
 	public long max( final int d )
 	{
-		return Math.round( ( sm.boundingBox[ 3 + d ] + center.getFloatPosition( d ) ) / calibration[ d ] );
+		return Math.round( ( sm.boundingBox.realMax( d ) + center.getFloatPosition( d ) ) / calibration[ d ] );
 	}
 
 	@Override
 	public Cursor< T > cursor()
 	{
-		return new SpotMeshCursor<>( img.randomAccess(), sm, center, calibration );
+		return new SpotMeshCursor<>( img.randomAccess(), sm, calibration );
 	}
 
 	@Override
