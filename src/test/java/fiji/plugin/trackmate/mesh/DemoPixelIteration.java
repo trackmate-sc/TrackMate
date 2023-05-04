@@ -78,7 +78,7 @@ public class DemoPixelIteration
 			for ( final Spot spot : model.getSpots().iterable( true ) )
 			{
 				System.out.println( spot );
-				final Cursor< T > cursor = new SpotMeshCursor< T >( TMUtils.rawWraps( out ).randomAccess(), spot, cal );
+				final Cursor< T > cursor = new SpotMeshCursor< T >( TMUtils.rawWraps( out ).randomAccess(), spot.getMesh(), cal );
 				final RandomAccess< T > ra = TMUtils.rawWraps( imp ).randomAccess();
 				while ( cursor.hasNext() )
 				{
