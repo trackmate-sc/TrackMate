@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -159,17 +159,17 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	{
 		/*
 		 * Double check! Since TrackMate v7 there the following bug:
-		 * 
+		 *
 		 * Sometimes the listeners of this tool get added to the target image
 		 * canvas TWICE. This causes an unspeakable mess where all events are
 		 * triggered twice for e.g. a single click. For instance you cannot
 		 * shift-click on a spot to add it to the selection, because the event
 		 * is fired TWICE, which results in the spot being de-selected
 		 * immediately after being selected.
-		 * 
+		 *
 		 * But the double registration seems to happen randomly. Sometimes the
 		 * listeners are added only once, *sometimes* (more often) twice.
-		 * 
+		 *
 		 * To work around this mess, we overload the registerTool(ImageCanvas)
 		 * method and skip the registration if we find that the mouse listener
 		 * has already been added to the canvas. It fixes the issue, regardless
