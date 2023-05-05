@@ -91,11 +91,6 @@ public class SpotMesh implements SpotShape, RealLocalizable
 	public void resetZSliceCache( final RealLocalizable newPosition )
 	{
 		center.setPosition( newPosition );
-		if ( newPosition.getDoublePosition( 2 ) == center.getDoublePosition( 2 ) )
-		{
-			// No need to recompute the cache. Invariant by X and Y.
-			return;
-		}
 		sliceMap = null;
 	}
 
