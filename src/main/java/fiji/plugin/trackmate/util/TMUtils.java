@@ -485,6 +485,8 @@ public class TMUtils
 			return spaceUnits;
 		case AREA:
 			return spaceUnits + "^2";
+		case VOLUME:
+			return spaceUnits + "^3";
 		case QUALITY:
 			return "quality";
 		case COST:
