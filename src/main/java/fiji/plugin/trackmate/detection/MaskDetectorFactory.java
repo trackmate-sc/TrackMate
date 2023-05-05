@@ -87,6 +87,12 @@ public class MaskDetectorFactory< T extends RealType< T > & NativeType< T > > ex
 	}
 
 	@Override
+	public boolean has3Dsegmentation()
+	{
+		return true;
+	}
+
+	@Override
 	public SpotDetector< T > getDetector( final Interval interval, final int frame )
 	{
 		final boolean simplifyContours = ( Boolean ) settings.get( KEY_SIMPLIFY_CONTOURS );
