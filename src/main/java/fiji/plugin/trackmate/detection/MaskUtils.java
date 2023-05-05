@@ -71,15 +71,27 @@ import net.imglib2.view.Views;
 public class MaskUtils
 {
 
-	/**
-	 * Smoothing interval for ROIs.
-	 */
+	/** Smoothing interval for ROIs. */
 	private static final double SMOOTH_INTERVAL = 2.;
 
-	/**
-	 * Douglas-Peucker polygon simplification max distance.
-	 */
+	/** Douglas-Peucker polygon simplification max distance. */
 	private static final double DOUGLAS_PEUCKER_MAX_DISTANCE = 0.5;
+
+	/** Number of triangles below which not to simplify a mesh. */
+	private static final int MIN_N_TRIANGLES = 100;
+
+	/** Quadratic mesh decimation aggressiveness for simplification. */
+	private static final float SIMPLIFY_AGGRESSIVENESS = 10f;
+
+	/** Minimal volume, in pixels, below which we discard meshes. */
+	private static final double MIN_MESH_PIXEL_VOLUME = 15.;
+
+	/**
+	 * Precision for the vertex duplicate removal step. A value of 2 means that
+	 * the vertices with coordinates (in pixel units) equal up to the second
+	 * decimal will be considered duplicates and merged.
+	 */
+	private static final int VERTEX_DUPLICATE_REMOVAL_PRECISION = 2;
 
 	public static final < T extends RealType< T > > double otsuThreshold( final RandomAccessibleInterval< T > img )
 	{
@@ -595,46 +607,10 @@ public class MaskUtils
 		while ( iterator.hasNext() )
 		{
 			final LabelRegion< Integer > region = iterator.next();
-
-			// To mesh.
-			final IntervalView< BoolType > box = Views.zeroMin( region );
-			final Mesh mesh = Meshes.marchingCubes( box, 0.5 );
-			final Mesh cleaned = Meshes.removeDuplicateVertices( mesh, 2 );
-			final Mesh simplified = simplify
-					? Meshes.simplify( cleaned, 0.25f, 10 )
-							: cleaned;
-
-			// Remove meshes that are too small
-			final double volumeThreshold = 10. * calibration[ 0 ] * calibration[ 1 ] * calibration[ 2 ];
-			if ( SpotMesh.volume( mesh ) < volumeThreshold )
+			final Spot spot = regionToSpotMesh( region, simplify, calibration, qualityImage );
+			if ( spot == null )
 				continue;
 
-			// Scale to physical coords.
-			final double[] origin = region.minAsDoubleArray();
-			scale( simplified.vertices(), calibration, origin );
-
-			// Make spot with default quality.
-			final Spot spot = SpotMesh.createSpot( simplified, 0. );
-
-			// Measure quality.
-			final double quality;
-			if ( null == qualityImage )
-			{
-				quality = SpotMesh.volume( simplified );
-			}
-			else
-			{
-				final IterableInterval< S > iterable = SpotUtil.iterableMesh( spot.getMesh(), qualityImage, calibration );
-				double max = Double.NEGATIVE_INFINITY;
-				for ( final S s : iterable )
-				{
-					final double val = s.getRealDouble();
-					if ( val > max )
-						max = val;
-				}
-				quality = max;
-			}
-			spot.putFeature( Spot.QUALITY, Double.valueOf( quality ) );
 			spots.add( spot );
 		}
 		return spots;
@@ -726,7 +702,7 @@ public class MaskUtils
 	 *      Algorithm (Wikipedia)</a>
 	 * @author Justin Wetherell
 	 * @param list
-	 *            List of Double[] points (x,y)
+	 *            List of double[] points (x,y)
 	 * @param epsilon
 	 *            Distance dimension
 	 * @return Similar curve with fewer points
@@ -1248,4 +1224,96 @@ public class MaskUtils
 		}
 	}
 
+	/**
+	 * Returns a new {@link Spot} with a {@link SpotMesh} as shape, built from
+	 * the specified bit-mask.
+	 *
+	 * @param <S>
+	 *            the type of pixels in the quality image.
+	 * @param region
+	 *            the bit-mask to build the mesh from.
+	 * @param simplify
+	 *            if <code>true</code> the mesh will be simplified.
+	 * @param calibration
+	 *            the pixel size array, used to scale the mesh to physical
+	 *            coordinates.
+	 * @param qualityImage
+	 *            an image from which to read the quality value. If not
+	 *            <code>null</code>, the quality of the spot will be the max
+	 *            value of this image inside the mesh. If <code>null</code>, the
+	 *            quality will be the mesh volume.
+	 *
+	 * @return a new spot.
+	 */
+	private static < S extends RealType< S > > Spot regionToSpotMesh(
+			final RandomAccessibleInterval< BoolType > region,
+			final boolean simplify,
+			final double[] calibration,
+			final RandomAccessibleInterval< S > qualityImage )
+	{
+		// To mesh.
+		final IntervalView< BoolType > box = Views.zeroMin( region );
+		final Mesh mesh = Meshes.marchingCubes( box, 0.5 );
+		final Mesh cleaned = Meshes.removeDuplicateVertices( mesh, VERTEX_DUPLICATE_REMOVAL_PRECISION );
+		final Mesh simplified;
+		if (simplify)
+		{
+			// Dont't go below a certain number of triangles.
+			final int nTriangles = ( int ) cleaned.triangles().size();
+			if ( nTriangles < MIN_N_TRIANGLES )
+			{
+				simplified = cleaned;
+			}
+			else
+			{
+				// Crude heuristics.
+				final float targetRatio;
+				if ( nTriangles < 2 * MIN_N_TRIANGLES )
+					targetRatio = 0.5f;
+				else if ( nTriangles < 10_000 )
+					targetRatio = 0.2f;
+				else if ( nTriangles < 1_000_000 )
+					targetRatio = 0.1f;
+				else
+					targetRatio = 0.05f;
+				simplified = Meshes.simplify( cleaned, targetRatio, SIMPLIFY_AGGRESSIVENESS );
+			}
+		}
+		else
+		{
+			simplified =  cleaned;
+		}
+		// Remove meshes that are too small
+		final double volumeThreshold = MIN_MESH_PIXEL_VOLUME * calibration[ 0 ] * calibration[ 1 ] * calibration[ 2 ];
+		if ( SpotMesh.volume( mesh ) < volumeThreshold )
+			return null;
+
+		// Scale to physical coords.
+		final double[] origin = region.minAsDoubleArray();
+		scale( simplified.vertices(), calibration, origin );
+
+		// Make spot with default quality.
+		final Spot spot = SpotMesh.createSpot( simplified, 0. );
+
+		// Measure quality.
+		final double quality;
+		if ( null == qualityImage )
+		{
+			quality = SpotMesh.volume( simplified );
+		}
+		else
+		{
+			final IterableInterval< S > iterable = SpotUtil.iterableMesh( spot.getMesh(), qualityImage, calibration );
+			double max = Double.NEGATIVE_INFINITY;
+			for ( final S s : iterable )
+			{
+				final double val = s.getRealDouble();
+				if ( val > max )
+					max = val;
+			}
+			quality = max;
+		}
+		spot.putFeature( Spot.QUALITY, Double.valueOf( quality ) );
+		return spot;
+	}
 }
