@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -112,7 +112,7 @@ public interface SpotDetectorFactoryBase< T extends RealType< T > & NativeType< 
 	/**
 	 * Returns a new default settings map suitable for the target detector.
 	 * Settings are instantiated with default values.
-	 * 
+	 *
 	 * @return a new map.
 	 */
 	public Map< String, Object > getDefaultSettings();
@@ -132,10 +132,10 @@ public interface SpotDetectorFactoryBase< T extends RealType< T > & NativeType< 
 	 * <p>
 	 * This flag may be used by clients to exploit the fact that the spots
 	 * created with this detector will have a contour that can be used
-	 * <i>e.g.</i> to compute morphological features. The default is
+	 * <i>e.g.</i> to compute 2D morphological features. The default is
 	 * <code>false</code>, indicating that this detector provides spots as a X,
 	 * Y, Z, radius tuple.
-	 * 
+	 *
 	 * @return <code>true</code> if the spots created by this detector have a 2D
 	 *         contour.
 	 */
@@ -145,8 +145,26 @@ public interface SpotDetectorFactoryBase< T extends RealType< T > & NativeType< 
 	}
 
 	/**
+	 * Return <code>true</code> for the detectors that can provide a spot with a
+	 * 3D <code>SpotMesh</code> when they operate on 3D images.
+	 * <p>
+	 * This flag may be used by clients to exploit the fact that the spots
+	 * created with this detector will have a 3D mesh that can be used
+	 * <i>e.g.</i> to compute 3D morphological features. The default is
+	 * <code>false</code>, indicating that this detector provides spots as a X,
+	 * Y, Z, radius tuple.
+	 *
+	 * @return <code>true</code> if the spots created by this detector have a 2D
+	 *         contour.
+	 */
+	public default boolean has3Dsegmentation()
+	{
+		return false;
+	}
+
+	/**
 	 * Returns a copy the current instance.
-	 * 
+	 *
 	 * @return a new instance of this detector factory.
 	 */
 	public SpotDetectorFactoryBase< T > copy();
