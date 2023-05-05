@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -36,13 +36,13 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.features.FeatureFilter;
-import fiji.plugin.trackmate.features.spot.SpotMorphologyAnalyzerFactory;
+import fiji.plugin.trackmate.features.spot.Spot2DMorphologyAnalyzerFactory;
 import fiji.plugin.trackmate.gui.components.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.components.FilterGuiPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
 import fiji.plugin.trackmate.io.SettingsPersistence;
-import fiji.plugin.trackmate.providers.SpotMorphologyAnalyzerProvider;
+import fiji.plugin.trackmate.providers.Spot2DMorphologyAnalyzerProvider;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
 
 public class SpotFilterDescriptor extends WizardPanelDescriptor
@@ -106,15 +106,16 @@ public class SpotFilterDescriptor extends WizardPanelDescriptor
 					 * Should we add morphology feature analyzers?
 					 */
 
+					// 2D.
 					if ( trackmate.getSettings().detectorFactory != null
 							&& trackmate.getSettings().detectorFactory.has2Dsegmentation()
 							&& DetectionUtils.is2D( trackmate.getSettings().imp ) )
 					{
-						logger.log( "\nAdding morphology analyzers...\n", Logger.BLUE_COLOR );
+						logger.log( "\nAdding 2D morphology analyzers...\n", Logger.BLUE_COLOR );
 						final Settings settings = trackmate.getSettings();
-						final SpotMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider = new SpotMorphologyAnalyzerProvider( settings.imp.getNChannels() );
+						final Spot2DMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider = new Spot2DMorphologyAnalyzerProvider( settings.imp.getNChannels() );
 						@SuppressWarnings( "rawtypes" )
-						final List< SpotMorphologyAnalyzerFactory > factories = spotMorphologyAnalyzerProvider
+						final List< Spot2DMorphologyAnalyzerFactory > factories = spotMorphologyAnalyzerProvider
 								.getKeys()
 								.stream()
 								.map( key -> spotMorphologyAnalyzerProvider.getFactory( key ) )

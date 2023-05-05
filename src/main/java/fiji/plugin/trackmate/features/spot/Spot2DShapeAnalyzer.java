@@ -25,12 +25,12 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotRoi;
 import net.imglib2.type.numeric.RealType;
 
-public class SpotShapeAnalyzer< T extends RealType< T > > extends AbstractSpotFeatureAnalyzer< T >
+public class Spot2DShapeAnalyzer< T extends RealType< T > > extends AbstractSpotFeatureAnalyzer< T >
 {
 
 	private final boolean is2D;
 
-	public SpotShapeAnalyzer( final boolean is2D )
+	public Spot2DShapeAnalyzer( final boolean is2D )
 	{
 		this.is2D = is2D;
 	}
@@ -49,7 +49,7 @@ public class SpotShapeAnalyzer< T extends RealType< T > > extends AbstractSpotFe
 			{
 				area = roi.area();
 				perimeter = getLength( roi );
-				final SpotRoi convexHull = ConvexHull.convexHull( roi );
+				final SpotRoi convexHull = ConvexHull2D.convexHull( roi );
 				convexArea = convexHull.area();
 			}
 			else
@@ -71,11 +71,11 @@ public class SpotShapeAnalyzer< T extends RealType< T > > extends AbstractSpotFe
 		final double solidity = area / convexArea;
 		final double shapeIndex = ( area <= 0. ) ? Double.NaN : perimeter / Math.sqrt( area );
 
-		spot.putFeature( SpotShapeAnalyzerFactory.AREA, area );
-		spot.putFeature( SpotShapeAnalyzerFactory.PERIMETER, perimeter );
-		spot.putFeature( SpotShapeAnalyzerFactory.CIRCULARITY, circularity );
-		spot.putFeature( SpotShapeAnalyzerFactory.SOLIDITY, solidity );
-		spot.putFeature( SpotShapeAnalyzerFactory.SHAPE_INDEX, shapeIndex );
+		spot.putFeature( Spot2DShapeAnalyzerFactory.AREA, area );
+		spot.putFeature( Spot2DShapeAnalyzerFactory.PERIMETER, perimeter );
+		spot.putFeature( Spot2DShapeAnalyzerFactory.CIRCULARITY, circularity );
+		spot.putFeature( Spot2DShapeAnalyzerFactory.SOLIDITY, solidity );
+		spot.putFeature( Spot2DShapeAnalyzerFactory.SHAPE_INDEX, shapeIndex );
 	}
 
 	private static final double getLength( final SpotRoi roi )
