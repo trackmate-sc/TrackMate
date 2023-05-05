@@ -116,6 +116,12 @@ public class LabelImageDetectorFactory< T extends RealType< T > & NativeType< T 
 	}
 
 	@Override
+	public boolean has3Dsegmentation()
+	{
+		return true;
+	}
+
+	@Override
 	public String getKey()
 	{
 		return DETECTOR_KEY;
