@@ -144,7 +144,7 @@ import fiji.plugin.trackmate.gui.wizard.descriptors.ConfigureViewsDescriptor;
 import fiji.plugin.trackmate.providers.DetectorProvider;
 import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
 import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
-import fiji.plugin.trackmate.providers.SpotMorphologyAnalyzerProvider;
+import fiji.plugin.trackmate.providers.Spot2DMorphologyAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.providers.ViewProvider;
@@ -432,7 +432,7 @@ public class TmXmlReader
 				new SpotAnalyzerProvider( ( imp == null ) ? 1 : imp.getNChannels() ),
 				new EdgeAnalyzerProvider(),
 				new TrackAnalyzerProvider(),
-				new SpotMorphologyAnalyzerProvider( ( imp == null ) ? 1 : imp.getNChannels() ) );
+				new Spot2DMorphologyAnalyzerProvider( ( imp == null ) ? 1 : imp.getNChannels() ) );
 	}
 
 	/**
@@ -469,7 +469,7 @@ public class TmXmlReader
 			final SpotAnalyzerProvider spotAnalyzerProvider,
 			final EdgeAnalyzerProvider edgeAnalyzerProvider,
 			final TrackAnalyzerProvider trackAnalyzerProvider,
-			final SpotMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider )
+			final Spot2DMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider )
 	{
 		final Element settingsElement = root.getChild( SETTINGS_ELEMENT_KEY );
 		if ( null == settingsElement )
@@ -1352,7 +1352,7 @@ public class TmXmlReader
 			final SpotAnalyzerProvider spotAnalyzerProvider,
 			final EdgeAnalyzerProvider edgeAnalyzerProvider,
 			final TrackAnalyzerProvider trackAnalyzerProvider,
-			final SpotMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider )
+			final Spot2DMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider )
 	{
 
 		final Element analyzersEl = settingsElement.getChild( ANALYZER_COLLECTION_ELEMENT_KEY );

@@ -21,24 +21,24 @@
  */
 package fiji.plugin.trackmate.providers;
 
-import fiji.plugin.trackmate.features.spot.SpotMorphologyAnalyzerFactory;
+import fiji.plugin.trackmate.features.spot.Spot2DMorphologyAnalyzerFactory;
 
 @SuppressWarnings( "rawtypes" )
-public class SpotMorphologyAnalyzerProvider extends AbstractProvider< SpotMorphologyAnalyzerFactory >
+public class Spot2DMorphologyAnalyzerProvider extends AbstractProvider< Spot2DMorphologyAnalyzerFactory >
 {
 
 	private final int nChannels;
 
-	public SpotMorphologyAnalyzerProvider( final int nChannels )
+	public Spot2DMorphologyAnalyzerProvider( final int nChannels )
 	{
-		super( SpotMorphologyAnalyzerFactory.class );
+		super( Spot2DMorphologyAnalyzerFactory.class );
 		this.nChannels = nChannels;
 	}
 
 	@Override
-	public SpotMorphologyAnalyzerFactory getFactory( final String key )
+	public Spot2DMorphologyAnalyzerFactory getFactory( final String key )
 	{
-		final SpotMorphologyAnalyzerFactory factory = super.getFactory( key );
+		final Spot2DMorphologyAnalyzerFactory factory = super.getFactory( key );
 		if ( factory == null )
 			return null;
 
@@ -48,7 +48,7 @@ public class SpotMorphologyAnalyzerProvider extends AbstractProvider< SpotMorpho
 
 	public static void main( final String[] args )
 	{
-		final SpotMorphologyAnalyzerProvider provider = new SpotMorphologyAnalyzerProvider( 2 );
+		final Spot2DMorphologyAnalyzerProvider provider = new Spot2DMorphologyAnalyzerProvider( 2 );
 		System.out.println( provider.echo() );
 	}
 }
