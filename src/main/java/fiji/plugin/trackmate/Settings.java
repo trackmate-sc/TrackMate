@@ -35,8 +35,9 @@ import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactoryBase;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
+import fiji.plugin.trackmate.providers.Spot2DMorphologyAnalyzerProvider;
+import fiji.plugin.trackmate.providers.Spot3DMorphologyAnalyzerProvider;
 import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
-import fiji.plugin.trackmate.providers.SpotMorphologyAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import ij.ImagePlus;
@@ -532,24 +533,37 @@ public class Settings
 	 */
 	public void addAllAnalyzers()
 	{
+		// Base spot analyzers.
 		final SpotAnalyzerProvider spotAnalyzerProvider = new SpotAnalyzerProvider( imp == null ? 1 : imp.getNChannels() );
 		final List< String > spotAnalyzerKeys = spotAnalyzerProvider.getKeys();
 		for ( final String key : spotAnalyzerKeys )
 			addSpotAnalyzerFactory( spotAnalyzerProvider.getFactory( key ) );
 
+		// Shall we add 2D morphology analyzers?
 		if ( imp != null && DetectionUtils.is2D( imp ) && detectorFactory != null && detectorFactory.has2Dsegmentation() )
 		{
-			final SpotMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider = new SpotMorphologyAnalyzerProvider( imp.getNChannels() );
+			final Spot2DMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider = new Spot2DMorphologyAnalyzerProvider( imp.getNChannels() );
 			final List< String > spotMorphologyAnaylyzerKeys = spotMorphologyAnalyzerProvider.getKeys();
 			for ( final String key : spotMorphologyAnaylyzerKeys )
 				addSpotAnalyzerFactory( spotMorphologyAnalyzerProvider.getFactory( key ) );
 		}
 
+		// Shall we add 3D morphology analyzers?
+		if ( imp != null && !DetectionUtils.is2D( imp ) && detectorFactory != null && detectorFactory.has3Dsegmentation() )
+		{
+			final Spot3DMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider = new Spot3DMorphologyAnalyzerProvider( imp.getNChannels() );
+			final List< String > spotMorphologyAnaylyzerKeys = spotMorphologyAnalyzerProvider.getKeys();
+			for ( final String key : spotMorphologyAnaylyzerKeys )
+				addSpotAnalyzerFactory( spotMorphologyAnalyzerProvider.getFactory( key ) );
+		}
+
+		// Edge analyzers.
 		final EdgeAnalyzerProvider edgeAnalyzerProvider = new EdgeAnalyzerProvider();
 		final List< String > edgeAnalyzerKeys = edgeAnalyzerProvider.getKeys();
 		for ( final String key : edgeAnalyzerKeys )
 			addEdgeAnalyzer( edgeAnalyzerProvider.getFactory( key ) );
 
+		// Track analyzers.
 		final TrackAnalyzerProvider trackAnalyzerProvider = new TrackAnalyzerProvider();
 		final List< String > trackAnalyzerKeys = trackAnalyzerProvider.getKeys();
 		for ( final String key : trackAnalyzerKeys )

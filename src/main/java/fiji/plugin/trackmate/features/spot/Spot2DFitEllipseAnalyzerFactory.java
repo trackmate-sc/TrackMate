@@ -36,8 +36,8 @@ import net.imagej.ImgPlus;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 
-@Plugin( type = SpotMorphologyAnalyzerFactory.class )
-public class SpotFitEllipseAnalyzerFactory< T extends RealType< T > & NativeType< T > > implements SpotMorphologyAnalyzerFactory< T >
+@Plugin( type = Spot2DMorphologyAnalyzerFactory.class )
+public class Spot2DFitEllipseAnalyzerFactory< T extends RealType< T > & NativeType< T > > implements Spot2DMorphologyAnalyzerFactory< T >
 {
 
 	public static final String KEY = "Spot fit 2D ellipse";
@@ -94,7 +94,7 @@ public class SpotFitEllipseAnalyzerFactory< T extends RealType< T > & NativeType
 		if ( channel != 0 )
 			return SpotAnalyzer.dummyAnalyzer();
 
-		return new SpotFitEllipseAnalyzer<>( DetectionUtils.is2D( img ) );
+		return new Spot2DFitEllipseAnalyzer<>( DetectionUtils.is2D( img ) );
 	}
 
 	@Override
