@@ -57,7 +57,7 @@ public interface SpotDetectorFactoryBase< T extends RealType< T > & NativeType< 
 	 * <p>
 	 * This flag may be used by clients to exploit the fact that the spots
 	 * created with this detector will have a contour that can be used
-	 * <i>e.g.</i> to compute morphological features. The default is
+	 * <i>e.g.</i> to compute 2D morphological features. The default is
 	 * <code>false</code>, indicating that this detector provides spots as a X,
 	 * Y, Z, radius tuple.
 	 *
@@ -65,6 +65,24 @@ public interface SpotDetectorFactoryBase< T extends RealType< T > & NativeType< 
 	 *         contour.
 	 */
 	public default boolean has2Dsegmentation()
+	{
+		return false;
+	}
+
+	/**
+	 * Return <code>true</code> for the detectors that can provide a spot with a
+	 * 3D <code>SpotMesh</code> when they operate on 3D images.
+	 * <p>
+	 * This flag may be used by clients to exploit the fact that the spots
+	 * created with this detector will have a 3D mesh that can be used
+	 * <i>e.g.</i> to compute 3D morphological features. The default is
+	 * <code>false</code>, indicating that this detector provides spots as a X,
+	 * Y, Z, radius tuple.
+	 *
+	 * @return <code>true</code> if the spots created by this detector have a 3D
+	 *         mesh.
+	 */
+	public default boolean has3Dsegmentation()
 	{
 		return false;
 	}

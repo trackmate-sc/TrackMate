@@ -73,12 +73,6 @@ public class MaskDetectorFactory< T extends RealType< T > & NativeType< T > > ex
 	public static final String URL_DOC = "https://imagej.net/plugins/trackmate/detectors/trackmate-mask-detector";
 
 	@Override
-	public boolean has2Dsegmentation()
-	{
-		return true;
-	}
-
-	@Override
 	public SpotDetector< T > getDetector( final ImgPlus< T > img, final Map< String, Object > settings, final Interval interval, final int frame )
 	{
 		final boolean simplifyContours = ( Boolean ) settings.get( KEY_SIMPLIFY_CONTOURS );
@@ -116,19 +110,20 @@ public class MaskDetectorFactory< T extends RealType< T > & NativeType< T > > ex
 				output.setReal( input.getRealDouble() > 0. ? 1. : 0. );
 			}
 		};
-		return Converters.convert( input, c, img.firstElement().createVariable() );
+		return Converters.convert( input, c, input.getType() );
+	}
+
+
+	@Override
+	public ConfigurationPanel getDetectorConfigurationPanel( final Settings lSettings, final Model model )
+	{
+		return new MaskDetectorConfigurationPanel( lSettings, model );
 	}
 
 	@Override
 	public String getKey()
 	{
 		return DETECTOR_KEY;
-	}
-
-	@Override
-	public ConfigurationPanel getDetectorConfigurationPanel( final Settings lSettings, final Model model )
-	{
-		return new MaskDetectorConfigurationPanel( lSettings, model );
 	}
 
 	@Override

@@ -37,12 +37,14 @@ import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.spot.Spot2DMorphologyAnalyzerFactory;
+import fiji.plugin.trackmate.features.spot.Spot3DMorphologyAnalyzerFactory;
 import fiji.plugin.trackmate.gui.components.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.components.FilterGuiPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
 import fiji.plugin.trackmate.io.SettingsPersistence;
 import fiji.plugin.trackmate.providers.Spot2DMorphologyAnalyzerProvider;
+import fiji.plugin.trackmate.providers.Spot3DMorphologyAnalyzerProvider;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
 
 public class SpotFilterDescriptor extends WizardPanelDescriptor
@@ -116,6 +118,26 @@ public class SpotFilterDescriptor extends WizardPanelDescriptor
 						final Spot2DMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider = new Spot2DMorphologyAnalyzerProvider( settings.imp.getNChannels() );
 						@SuppressWarnings( "rawtypes" )
 						final List< Spot2DMorphologyAnalyzerFactory > factories = spotMorphologyAnalyzerProvider
+								.getKeys()
+								.stream()
+								.map( key -> spotMorphologyAnalyzerProvider.getFactory( key ) )
+								.collect( Collectors.toList() );
+						factories.forEach( settings::addSpotAnalyzerFactory );
+						final StringBuilder strb = new StringBuilder();
+						Settings.prettyPrintFeatureAnalyzer( factories, strb );
+						logger.log( strb.toString() );
+					}
+
+					// 3D.
+					if ( trackmate.getSettings().detectorFactory != null
+							&& trackmate.getSettings().detectorFactory.has3Dsegmentation()
+							&& !DetectionUtils.is2D( trackmate.getSettings().imp ) )
+					{
+						logger.log( "\nAdding 3D morphology analyzers...\n", Logger.BLUE_COLOR );
+						final Settings settings = trackmate.getSettings();
+						final Spot3DMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider = new Spot3DMorphologyAnalyzerProvider( settings.imp.getNChannels() );
+						@SuppressWarnings( "rawtypes" )
+						final List< Spot3DMorphologyAnalyzerFactory > factories = spotMorphologyAnalyzerProvider
 								.getKeys()
 								.stream()
 								.map( key -> spotMorphologyAnalyzerProvider.getFactory( key ) )
