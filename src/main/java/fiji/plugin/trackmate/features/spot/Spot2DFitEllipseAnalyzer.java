@@ -29,12 +29,12 @@ import fiji.plugin.trackmate.SpotRoi;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Util;
 
-public class SpotFitEllipseAnalyzer< T extends RealType< T > > extends AbstractSpotFeatureAnalyzer< T >
+public class Spot2DFitEllipseAnalyzer< T extends RealType< T > > extends AbstractSpotFeatureAnalyzer< T >
 {
 
 	private final boolean is2D;
 
-	public SpotFitEllipseAnalyzer( final boolean is2D )
+	public Spot2DFitEllipseAnalyzer( final boolean is2D )
 	{
 		this.is2D = is2D;
 	}
@@ -88,12 +88,12 @@ public class SpotFitEllipseAnalyzer< T extends RealType< T > > extends AbstractS
 			theta = Double.NaN;
 			aspectRatio = Double.NaN;
 		}
-		spot.putFeature( SpotFitEllipseAnalyzerFactory.X0, x0 );
-		spot.putFeature( SpotFitEllipseAnalyzerFactory.Y0, y0 );
-		spot.putFeature( SpotFitEllipseAnalyzerFactory.MAJOR, major );
-		spot.putFeature( SpotFitEllipseAnalyzerFactory.MINOR, minor );
-		spot.putFeature( SpotFitEllipseAnalyzerFactory.THETA, theta );
-		spot.putFeature( SpotFitEllipseAnalyzerFactory.ASPECTRATIO, aspectRatio );
+		spot.putFeature( Spot2DFitEllipseAnalyzerFactory.X0, x0 );
+		spot.putFeature( Spot2DFitEllipseAnalyzerFactory.Y0, y0 );
+		spot.putFeature( Spot2DFitEllipseAnalyzerFactory.MAJOR, major );
+		spot.putFeature( Spot2DFitEllipseAnalyzerFactory.MINOR, minor );
+		spot.putFeature( Spot2DFitEllipseAnalyzerFactory.THETA, theta );
+		spot.putFeature( Spot2DFitEllipseAnalyzerFactory.ASPECTRATIO, aspectRatio );
 	}
 
 	/**

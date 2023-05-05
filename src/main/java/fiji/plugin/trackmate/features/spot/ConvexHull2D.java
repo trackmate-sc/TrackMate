@@ -31,7 +31,7 @@ import fiji.plugin.trackmate.SpotRoi;
  * Adapted from a code by Kirill Artemov,
  * https://github.com/DoctorGester/cia-stats.
  */
-public final class ConvexHull
+public final class ConvexHull2D
 {
 
 	private static List< Point > makeHull( final List< Point > points )

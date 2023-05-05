@@ -32,7 +32,7 @@ import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactoryBase;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
-import fiji.plugin.trackmate.providers.SpotMorphologyAnalyzerProvider;
+import fiji.plugin.trackmate.providers.Spot2DMorphologyAnalyzerProvider;
 import ij.ImagePlus;
 import net.imglib2.util.Util;
 
@@ -67,7 +67,7 @@ public class SpotFeatureComputationBenchmark
 		for ( final String key : provider1.getVisibleKeys() )
 			factories.add( provider1.getFactory( key ) );
 
-		final SpotMorphologyAnalyzerProvider provider2 = new SpotMorphologyAnalyzerProvider( 1 );
+		final Spot2DMorphologyAnalyzerProvider provider2 = new Spot2DMorphologyAnalyzerProvider( 1 );
 		for ( final String key : provider2.getVisibleKeys() )
 			factories.add( provider2.getFactory( key ) );
 
