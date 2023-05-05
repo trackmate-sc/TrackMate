@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.util.SpotUtil;
 import fiji.plugin.trackmate.util.Threads;
@@ -39,9 +38,6 @@ import ij.process.FloatPolygon;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
-import net.imagej.mesh.Mesh;
-import net.imagej.mesh.Meshes;
-import net.imagej.mesh.Vertices;
 import net.imglib2.Interval;
 import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccess;
@@ -60,7 +56,6 @@ import net.imglib2.roi.labeling.LabelRegion;
 import net.imglib2.roi.labeling.LabelRegions;
 import net.imglib2.type.BooleanType;
 import net.imglib2.type.logic.BitType;
-import net.imglib2.type.logic.BoolType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.IntType;
@@ -71,14 +66,10 @@ import net.imglib2.view.Views;
 public class MaskUtils
 {
 
-	/**
-	 * Smoothing interval for ROIs.
-	 */
+	/** Smoothing interval for ROIs. */
 	private static final double SMOOTH_INTERVAL = 2.;
 
-	/**
-	 * Douglas-Peucker polygon simplification max distance.
-	 */
+	/** Douglas-Peucker polygon simplification max distance. */
 	private static final double DOUGLAS_PEUCKER_MAX_DISTANCE = 0.5;
 
 	public static final < T extends RealType< T > > double otsuThreshold( final RandomAccessibleInterval< T > img )
@@ -663,46 +654,10 @@ public class MaskUtils
 		while ( iterator.hasNext() )
 		{
 			final LabelRegion< Integer > region = iterator.next();
-
-			// To mesh.
-			final IntervalView< BoolType > box = Views.zeroMin( region );
-			final Mesh mesh = Meshes.marchingCubes( box, 0.5 );
-			final Mesh cleaned = Meshes.removeDuplicateVertices( mesh, 2 );
-			final Mesh simplified = simplify
-					? Meshes.simplify( cleaned, 0.25f, 10 )
-							: cleaned;
-
-			// Remove meshes that are too small
-			final double volumeThreshold = 10. * calibration[ 0 ] * calibration[ 1 ] * calibration[ 2 ];
-			if ( SpotMesh.volume( mesh ) < volumeThreshold )
+			final Spot spot = regionToSpotMesh( region, simplify, calibration, qualityImage );
+			if ( spot == null )
 				continue;
 
-			// Scale to physical coords.
-			final double[] origin = region.minAsDoubleArray();
-			scale( simplified.vertices(), calibration, origin );
-
-			// Make spot with default quality.
-			final Spot spot = SpotMesh.createSpot( simplified, 0. );
-
-			// Measure quality.
-			final double quality;
-			if ( null == qualityImage )
-			{
-				quality = SpotMesh.volume( simplified );
-			}
-			else
-			{
-				final IterableInterval< S > iterable = SpotUtil.iterableMesh( spot.getMesh(), qualityImage, calibration );
-				double max = Double.NEGATIVE_INFINITY;
-				for ( final S s : iterable )
-				{
-					final double val = s.getRealDouble();
-					if ( val > max )
-						max = val;
-				}
-				quality = max;
-			}
-			spot.putFeature( Spot.QUALITY, Double.valueOf( quality ) );
 			spots.add( spot );
 		}
 		return spots;
@@ -794,7 +749,7 @@ public class MaskUtils
 	 *      Algorithm (Wikipedia)</a>
 	 * @author Justin Wetherell
 	 * @param list
-	 *            List of Double[] points (x,y)
+	 *            List of double[] points (x,y)
 	 * @param epsilon
 	 *            Distance dimension
 	 * @return Similar curve with fewer points
@@ -1301,18 +1256,6 @@ public class MaskUtils
 					res += "(" + x[ i ] + "," + y[ i ] + ")";
 			}
 			return res + "]";
-		}
-	}
-
-	private static void scale( final Vertices vertices, final double[] scale, final double[] origin )
-	{
-		final long nv = vertices.size();
-		for ( long i = 0; i < nv; i++ )
-		{
-			final double x = ( origin[ 0 ] + vertices.x( i ) ) * scale[ 0 ];
-			final double y = ( origin[ 1 ] + vertices.y( i ) ) * scale[ 1 ];
-			final double z = ( origin[ 2 ] + vertices.z( i ) ) * scale[ 2 ];
-			vertices.set( i, x, y, z );
 		}
 	}
 }
