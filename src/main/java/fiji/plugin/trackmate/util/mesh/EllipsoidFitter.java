@@ -28,20 +28,30 @@ import net.imglib2.util.Util;
 public class EllipsoidFitter
 {
 
+	/**
+	 * The results of fitting an ellpsoid to a mesh or a collection of points.
+	 */
 	public static final class EllipsoidFit
 	{
+		/** The ellipsoid center. */
 		public final RealLocalizable center;
 
+		/** The eigenvector of the smallest axis of the ellipsoid. */
 		public final RealLocalizable ev1;
 
+		/** The eigenvector of the middle axis of the ellipsoid. */
 		public final RealLocalizable ev2;
 
+		/** The eigenvector of the largest axis of the ellipsoid. */
 		public final RealLocalizable ev3;
 
+		/** The radius of the smallest axis of the ellipsoid. */
 		public final double r1;
 
+		/** The radius of the middle axis of the ellipsoid. */
 		public final double r2;
 
+		/** The radius of the largest axis of the ellipsoid. */
 		public final double r3;
 
 		private EllipsoidFit( final RealLocalizable center,
@@ -75,17 +85,42 @@ public class EllipsoidFitter
 
 	private static final DefaultConvexHull3D cHull = new DefaultConvexHull3D();
 
+	/**
+	 * Fit an ellipsoid to the convex-Hull of a 3D mesh.
+	 * 
+	 * @param mesh
+	 *            the mesh to fit.
+	 * @return the fit results.
+	 */
 	public static final EllipsoidFit fit( final Mesh mesh )
 	{
 		final Mesh ch = cHull.calculate( mesh );
 		return fitOnConvexHull( ch );
 	}
 
+	/**
+	 * Fit an ellipsoid to a 3D mesh, assuming it is the convex-Hull.
+	 * 
+	 * @param mesh
+	 *            the convex-Hull of the mesh to fit.
+	 * @return the fit results.
+	 */
 	public static final EllipsoidFit fitOnConvexHull( final Mesh mesh )
 	{
 		return fit( mesh.vertices(), ( int ) mesh.vertices().size() );
 	}
 
+	/**
+	 * Fit an ellipsoid to a collection of 3D points.
+	 * 
+	 * @param points
+	 *            an iterable over the points to fit.
+	 * @param nPoints
+	 *            the number of points to include in the fit. The fit will
+	 *            consider at most the first nPoints of the iterable, or all the
+	 *            points in the iterable, whatever comes first.
+	 * @return the fit results.
+	 */
 	public static EllipsoidFit fit( final Iterable< ? extends RealLocalizable > points, final int nPoints )
 	{
 		final RealVector V = solve( points, nPoints );
@@ -187,7 +222,7 @@ public class EllipsoidFitter
 	 */
 	private static final RealVector solve( final Iterable< ? extends RealLocalizable > points, final int nPoints )
 	{
-		final RealMatrix M = new Array2DRowRealMatrix( nPoints, 9 );
+		final RealMatrix M0 = new Array2DRowRealMatrix( nPoints, 9 );
 		int i = 0;
 		for ( final RealLocalizable point : points )
 		{
@@ -203,20 +238,25 @@ public class EllipsoidFitter
 			final double xz = 2. * x * z;
 			final double yz = 2. * y * z;
 
-			M.setEntry( i, 0, xx );
-			M.setEntry( i, 1, yy );
-			M.setEntry( i, 2, zz );
-			M.setEntry( i, 3, xy );
-			M.setEntry( i, 4, xz );
-			M.setEntry( i, 5, yz );
-			M.setEntry( i, 6, 2. * x );
-			M.setEntry( i, 7, 2. * y );
-			M.setEntry( i, 8, 2. * z );
+			M0.setEntry( i, 0, xx );
+			M0.setEntry( i, 1, yy );
+			M0.setEntry( i, 2, zz );
+			M0.setEntry( i, 3, xy );
+			M0.setEntry( i, 4, xz );
+			M0.setEntry( i, 5, yz );
+			M0.setEntry( i, 6, 2. * x );
+			M0.setEntry( i, 7, 2. * y );
+			M0.setEntry( i, 8, 2. * z );
 
 			i++;
 			if ( i >= nPoints )
 				break;
 		}
+		final RealMatrix M;
+		if ( i == nPoints )
+			M = M0;
+		else
+			M = M0.getSubMatrix( 0, i, 0, 9 );
 
 		final RealMatrix M2 = M.transpose().multiply( M );
 
