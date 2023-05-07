@@ -13,6 +13,7 @@ import net.imagej.mesh.Mesh;
 import net.imagej.ops.geom.geom3d.DefaultConvexHull3D;
 import net.imglib2.RealLocalizable;
 import net.imglib2.RealPoint;
+import net.imglib2.util.Util;
 
 /**
  * Fit an ellipsoid to the convex-Hull of a 3D mesh.
@@ -58,6 +59,17 @@ public class EllipsoidFitter
 			this.r1 = r1;
 			this.r2 = r2;
 			this.r3 = r3;
+		}
+
+		@Override
+		public String toString()
+		{
+			final StringBuilder str = new StringBuilder( super.toString() );
+			str.append( "\n - center: " + Util.printCoordinates( center ) );
+			str.append( String.format( "\n - axis 1: radius = %.2f, vector = %s", r1, ev1 ) );
+			str.append( String.format( "\n - axis 2: radius = %.2f, vector = %s", r2, ev2 ) );
+			str.append( String.format( "\n - axis 3: radius = %.2f, vector = %s", r3, ev3 ) );
+			return str.toString();
 		}
 	}
 
