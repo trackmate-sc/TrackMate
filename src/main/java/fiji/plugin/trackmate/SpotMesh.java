@@ -50,7 +50,7 @@ public class SpotMesh extends SpotBase
 	 * 
 	 * @param quality
 	 * @param name
-	 * @param mesh
+	 * @param m
 	 */
 	public SpotMesh(
 			final Mesh m,
