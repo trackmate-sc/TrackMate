@@ -36,6 +36,7 @@ import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
 import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
@@ -396,7 +397,7 @@ public class FeatureUtils
 					final double z = ran.nextDouble();
 					final double r = ran.nextDouble();
 					final double q = ran.nextDouble();
-					final Spot spot = new Spot( x, y, z, r, q );
+					final Spot spot = new SpotBase( x, y, z, r, q );
 					DUMMY_MODEL.addSpotTo( spot, t );
 					if ( previous != null )
 						DUMMY_MODEL.addEdge( previous, spot, ran.nextDouble() );

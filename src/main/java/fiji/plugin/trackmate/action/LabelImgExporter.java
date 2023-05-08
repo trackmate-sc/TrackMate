@@ -41,7 +41,6 @@ import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.util.SpotUtil;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.GlasbeyLut;
 import ij.ImagePlus;
@@ -454,8 +453,7 @@ public class LabelImgExporter extends AbstractTMAction
 			final ImgPlus< FloatType > imgCT = TMUtils.hyperSlice( imgPlus, 0, frame );
 			final SpotWriter spotWriter = exportSpotsAsDots
 					? new SpotAsDotWriter<>( imgCT )
-					: new SpotRoiWriter<>( imgCT );
-			idGenerator.nextFrame();
+					: new SpotShapeWriter<>( imgCT );
 
 			for ( final Spot spot : model.getSpots().iterable( frame, true ) )
 			{
@@ -546,7 +544,7 @@ public class LabelImgExporter extends AbstractTMAction
 			final ImgPlus< T > imgCT = TMUtils.hyperSlice( imgPlus, 0, frame );
 			final SpotWriter spotWriter = exportSpotsAsDots
 					? new SpotAsDotWriter<>( imgCT )
-					: new SpotRoiWriter<>( imgCT );
+					: new SpotShapeWriter<>( imgCT );
 			idGenerator.nextFrame();
 
 			for ( final Spot spot : spots.iterable( frame, true ) )
@@ -604,12 +602,12 @@ public class LabelImgExporter extends AbstractTMAction
 		public void write( Spot spot, int id );
 	}
 
-	public static final class SpotRoiWriter< T extends RealType< T > > implements SpotWriter
+	public static final class SpotShapeWriter< T extends RealType< T > > implements SpotWriter
 	{
 
 		private final ImgPlus< T > img;
 
-		public SpotRoiWriter( final ImgPlus< T > img )
+		public SpotShapeWriter( final ImgPlus< T > img )
 		{
 			this.img = img;
 		}
@@ -617,7 +615,7 @@ public class LabelImgExporter extends AbstractTMAction
 		@Override
 		public void write( final Spot spot, final int id )
 		{
-			for ( final T pixel : SpotUtil.iterable( spot, img ) )
+			for ( final T pixel : spot.iterable( img ) )
 				pixel.setReal( id );
 		}
 	}

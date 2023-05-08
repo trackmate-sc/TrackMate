@@ -38,6 +38,7 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.util.MedianFilter2D;
@@ -435,7 +436,7 @@ public class DetectionUtils
 					final double x = refinedPeak.getDoublePosition( 0 ) * calibration[ 0 ];
 					final double y = refinedPeak.getDoublePosition( 1 ) * calibration[ 1 ];
 					final double z = refinedPeak.getDoublePosition( 2 ) * calibration[ 2 ];
-					final Spot spot = new Spot( x, y, z, radius, quality );
+					final Spot spot = new SpotBase( x, y, z, radius, quality );
 					spots.add( spot );
 				}
 			}
@@ -448,7 +449,7 @@ public class DetectionUtils
 					final double quality = ra.get().getRealDouble();
 					final double x = refinedPeak.getDoublePosition( 0 ) * calibration[ 0 ];
 					final double y = refinedPeak.getDoublePosition( 1 ) * calibration[ 1 ];
-					final Spot spot = new Spot( x, y, z, radius, quality );
+					final Spot spot = new SpotBase( x, y, z, radius, quality );
 					spots.add( spot );
 				}
 			}
@@ -461,7 +462,7 @@ public class DetectionUtils
 					ra.setPosition( refinedPeak.getOriginalPeak() );
 					final double quality = ra.get().getRealDouble();
 					final double x = refinedPeak.getDoublePosition( 0 ) * calibration[ 0 ];
-					final Spot spot = new Spot( x, y, z, radius, quality );
+					final Spot spot = new SpotBase( x, y, z, radius, quality );
 					spots.add( spot );
 				}
 
@@ -480,7 +481,7 @@ public class DetectionUtils
 					final double x = peak.getDoublePosition( 0 ) * calibration[ 0 ];
 					final double y = peak.getDoublePosition( 1 ) * calibration[ 1 ];
 					final double z = peak.getDoublePosition( 2 ) * calibration[ 2 ];
-					final Spot spot = new Spot( x, y, z, radius, quality );
+					final Spot spot = new SpotBase( x, y, z, radius, quality );
 					spots.add( spot );
 				}
 			}
@@ -493,7 +494,7 @@ public class DetectionUtils
 					final double quality = ra.get().getRealDouble();
 					final double x = peak.getDoublePosition( 0 ) * calibration[ 0 ];
 					final double y = peak.getDoublePosition( 1 ) * calibration[ 1 ];
-					final Spot spot = new Spot( x, y, z, radius, quality );
+					final Spot spot = new SpotBase( x, y, z, radius, quality );
 					spots.add( spot );
 				}
 			}
@@ -506,10 +507,9 @@ public class DetectionUtils
 					ra.setPosition( peak );
 					final double quality = ra.get().getRealDouble();
 					final double x = peak.getDoublePosition( 0 ) * calibration[ 0 ];
-					final Spot spot = new Spot( x, y, z, radius, quality );
+					final Spot spot = new SpotBase( x, y, z, radius, quality );
 					spots.add( spot );
 				}
-
 			}
 		}
 

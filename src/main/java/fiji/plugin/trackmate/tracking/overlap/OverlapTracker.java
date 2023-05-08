@@ -298,18 +298,18 @@ public class OverlapTracker extends MultiThreadedBenchmarkAlgorithm implements S
 	{
 		final double xc = spot.getDoublePosition( 0 );
 		final double yc = spot.getDoublePosition( 1 );
-		final SpotRoi roi = spot.getRoi();
 		final SimplePolygon2D poly;
-		if ( roi == null )
+		if ( spot instanceof SpotRoi )
 		{
-			final double radius = spot.getFeature( Spot.RADIUS ).doubleValue();
-			poly = new SimplePolygon2D( new Circle2D( xc, yc, radius ).asPolyline( 32 ) );
-		}
-		else
-		{
+			final SpotRoi roi = ( SpotRoi ) spot;
 			final double[] xcoords = roi.toPolygonX( 1., 0., xc, 1. );
 			final double[] ycoords = roi.toPolygonY( 1., 0., yc, 1. );
 			poly = new SimplePolygon2D( xcoords, ycoords );
+		}
+		else
+		{
+			final double radius = spot.getFeature( Spot.RADIUS ).doubleValue();
+			poly = new SimplePolygon2D( new Circle2D( xc, yc, radius ).asPolyline( 32 ) );
 		}
 		return poly.transform( AffineTransform2D.createScaling( new Point2D( xc, yc ), scale, scale ) );
 	}
@@ -318,19 +318,19 @@ public class OverlapTracker extends MultiThreadedBenchmarkAlgorithm implements S
 	{
 		final double xc = spot.getDoublePosition( 0 );
 		final double yc = spot.getDoublePosition( 1 );
-		final SpotRoi roi = spot.getRoi();
-		if ( roi == null )
+		if ( spot instanceof SpotRoi )
 		{
-			final double radius = spot.getFeature( Spot.RADIUS ).doubleValue() * scale;
-			return new Rectangle2D( xc - radius, yc - radius, 2 * radius, 2 * radius );
-		}
-		else
-		{
+			final SpotRoi roi = ( SpotRoi ) spot;
 			final double minX = Arrays.stream( roi.x ).min().getAsDouble() * scale;
 			final double maxX = Arrays.stream( roi.x ).max().getAsDouble() * scale;
 			final double minY = Arrays.stream( roi.y ).min().getAsDouble() * scale;
 			final double maxY = Arrays.stream( roi.y ).max().getAsDouble() * scale;
 			return new Rectangle2D( xc + minX, yc + minY, maxX - minX, maxY - minY );
+		}
+		else
+		{
+			final double radius = spot.getFeature( Spot.RADIUS ).doubleValue() * scale;
+			return new Rectangle2D( xc - radius, yc - radius, 2 * radius, 2 * radius );
 		}
 	}
 

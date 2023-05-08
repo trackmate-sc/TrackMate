@@ -27,10 +27,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.util.SpotNeighborhood;
+import fiji.plugin.trackmate.SpotBase;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
+import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccess;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
@@ -75,7 +76,7 @@ public class SpotIntensityAnalyzerTest
 
 		}
 
-		spot = new Spot( CENTER[ 0 ], CENTER[ 1 ], CENTER[ 2 ], RADIUS, -1d, "1" );
+		spot = new SpotBase( CENTER[ 0 ], CENTER[ 1 ], CENTER[ 2 ], RADIUS, -1d, "1" );
 	}
 
 	@Test
@@ -97,16 +98,12 @@ public class SpotIntensityAnalyzerTest
 		final SpotIntensityAnalyzerTest test = new SpotIntensityAnalyzerTest();
 		test.setUp();
 
-		final Spot tmpSpot = new Spot( CENTER[ 0 ], CENTER[ 1 ], CENTER[ 2 ], RADIUS, -1d );
-		final SpotNeighborhood< UnsignedShortType > disc = new SpotNeighborhood<>( tmpSpot, test.img2D );
+		final Spot tmpSpot = new SpotBase( CENTER[ 0 ], CENTER[ 1 ], CENTER[ 2 ], RADIUS, -1d );
+		final IterableInterval< UnsignedShortType > disc = tmpSpot.iterable( test.img2D );
 		for ( final UnsignedShortType pixel : disc )
-		{
 			pixel.set( 1500 );
-		}
 
 		ij.ImageJ.main( args );
 		net.imglib2.img.display.imagej.ImageJFunctions.show( test.img2D );
-
 	}
-
 }

@@ -128,6 +128,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.SpotRoi;
@@ -143,8 +144,8 @@ import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ConfigureViewsDescriptor;
 import fiji.plugin.trackmate.providers.DetectorProvider;
 import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
-import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
 import fiji.plugin.trackmate.providers.Spot2DMorphologyAnalyzerProvider;
+import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.providers.ViewProvider;
@@ -215,7 +216,7 @@ public class TmXmlReader
 		catch ( final IOException e )
 		{
 			logger.error( "Problem reading " + file.getName()
-			+ ".\nError message is:\n" + e.getLocalizedMessage() + '\n' );
+					+ ".\nError message is:\n" + e.getLocalizedMessage() + '\n' );
 			ok = false;
 		}
 		this.root = r;
@@ -940,7 +941,7 @@ public class TmXmlReader
 		{
 			// Matcher for zipped file name.
 			final String regex = "(\\d+)\\.ply";
-			final Pattern pattern = Pattern.compile(regex);
+			final Pattern pattern = Pattern.compile( regex );
 			// Iterate through entries.
 			try (final ZipFile zipFile = new ZipFile( meshFile ))
 			{
@@ -958,8 +959,13 @@ public class TmXmlReader
 							final Mesh m = PLY_MESH_IO.open( zipFile.getInputStream( entry ) );
 							final BufferMesh mesh = new BufferMesh( ( int ) m.vertices().size(), ( int ) m.triangles().size() );
 							Meshes.calculateNormals( m, mesh );
-							final SpotMesh sm = new SpotMesh( mesh );
-							spot.setMesh( sm );
+
+							// Create new spot in the mesh and replace it in the
+							// cache.
+							final SpotMesh spotMesh = new SpotMesh( id, mesh );
+							spotMesh.copyFeaturesFrom( spot );
+							spotMesh.setName( spot.getName() );
+							cache.put( id, spotMesh );
 						}
 						catch ( final IOException e )
 						{
@@ -1196,23 +1202,15 @@ public class TmXmlReader
 	{
 		// Read id.
 		final int ID = readIntAttribute( spotEl, SPOT_ID_ATTRIBUTE_NAME, logger );
-		final Spot spot = new Spot( ID );
-
+//		
 		final List< Attribute > atts = spotEl.getAttributes();
 		removeAttributeFromName( atts, SPOT_ID_ATTRIBUTE_NAME );
-
-		// Read name.
-		String name = spotEl.getAttributeValue( SPOT_NAME_ATTRIBUTE_NAME );
-		if ( null == name || name.equals( "" ) )
-			name = "ID" + ID;
-
-		spot.setName( name );
-		removeAttributeFromName( atts, SPOT_NAME_ATTRIBUTE_NAME );
 
 		/*
 		 * Try to read ROI if any.
 		 */
 		final int roiNPoints = readIntAttribute( spotEl, ROI_N_POINTS_ATTRIBUTE_NAME, Logger.VOID_LOGGER );
+		final Spot spot;
 		if ( roiNPoints > 2 )
 		{
 			final double[] xrois = new double[ roiNPoints ];
@@ -1227,9 +1225,21 @@ public class TmXmlReader
 				final double y = Double.parseDouble( vals[ index++ ] );
 				yrois[ i ] = y;
 			}
-			spot.setRoi( new SpotRoi( xrois, yrois ) );
+			spot = new SpotRoi( ID, xrois, yrois );
+		}
+		else
+		{
+			spot = new SpotBase( ID );
 		}
 		removeAttributeFromName( atts, ROI_N_POINTS_ATTRIBUTE_NAME );
+
+		// Read name.
+		String name = spotEl.getAttributeValue( SPOT_NAME_ATTRIBUTE_NAME );
+		if ( null == name || name.equals( "" ) )
+			name = "ID" + ID;
+
+		spot.setName( name );
+		removeAttributeFromName( atts, SPOT_NAME_ATTRIBUTE_NAME );
 
 		/*
 		 * Read all other attributes -> features.

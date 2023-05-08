@@ -69,7 +69,6 @@ public abstract class AbstractSpotFitter implements SpotFitter
 
 	private long processingTime = -1;
 
-	@SuppressWarnings( "unchecked" )
 	public AbstractSpotFitter( final ImagePlus imp, final int channel )
 	{
 		this.channel = channel;

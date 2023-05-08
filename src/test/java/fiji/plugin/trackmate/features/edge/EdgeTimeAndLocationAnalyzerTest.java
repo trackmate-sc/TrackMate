@@ -23,12 +23,6 @@ package fiji.plugin.trackmate.features.edge;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import fiji.plugin.trackmate.Dimension;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.ModelChangeEvent;
-import fiji.plugin.trackmate.ModelChangeListener;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -38,6 +32,14 @@ import java.util.Map;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.junit.Before;
 import org.junit.Test;
+
+import fiji.plugin.trackmate.Dimension;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.ModelChangeEvent;
+import fiji.plugin.trackmate.ModelChangeListener;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
+import fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer;
 
 public class EdgeTimeAndLocationAnalyzerTest
 {
@@ -75,7 +77,7 @@ public class EdgeTimeAndLocationAnalyzerTest
 
 				for ( int j = 0; j <= DEPTH; j++ )
 				{
-					final Spot spot = new Spot( i + j, i + j, i + j, 1d, -1d );
+					final Spot spot = new SpotBase( i + j, i + j, i + j, 1d, -1d );
 					spot.putFeature( Spot.POSITION_T, Double.valueOf( j ) );
 					model.addSpotTo( spot, j );
 					if ( null != previous )
