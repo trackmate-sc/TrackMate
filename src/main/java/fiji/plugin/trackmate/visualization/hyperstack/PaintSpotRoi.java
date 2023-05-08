@@ -35,8 +35,8 @@ public class PaintSpotRoi extends TrackMatePainter< SpotRoi >
 	 *
 	 * @param g2d
 	 *            the graphics object, configured to paint the spot with.
-	 * @param roi
-	 *            the spot roi.
+	 * @param spot
+	 *            the spot to paint.
 	 * @return the text position X indent in pixels to use to paint a string
 	 *         next to the painted contour.
 	 */
