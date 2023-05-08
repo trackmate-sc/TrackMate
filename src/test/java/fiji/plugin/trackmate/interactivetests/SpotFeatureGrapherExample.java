@@ -35,6 +35,7 @@ import org.scijava.util.AppUtils;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.SpotFeatureGrapher;
@@ -96,7 +97,7 @@ public class SpotFeatureGrapherExample
 			final double x = 100d + 100 * i / 100. * Math.cos( i / 100. * 5 * 2 * Math.PI );
 			final double y = 100d + 100 * i / 100. * Math.sin( i / 100. * 5 * 2 * Math.PI );
 			final double z = 0d;
-			final Spot spot = new Spot( x, y, z, 2d, -1d );
+			final Spot spot = new SpotBase( x, y, z, 2d, -1d );
 			spot.putFeature( Spot.POSITION_T, Double.valueOf( i ) );
 
 			spots.add( spot );

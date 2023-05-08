@@ -47,7 +47,7 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotShape;
+import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.detection.semiauto.SemiAutoTracker;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.tool.AbstractTool;
@@ -591,17 +591,8 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 			// Store new value of radius for next spot creation.
 			previousRadius = newRadius;
 
-			final SpotShape shape = target.getShape();
-			if ( null == shape )
-			{
-				target.putFeature( Spot.RADIUS, newRadius );
-			}
-			else
-			{
-				final double alpha = newRadius / radius;
-				shape.scale( alpha );
-				target.putFeature( Spot.RADIUS, shape.radius() );
-			}
+			final double alpha = newRadius / radius;
+			target.scale( alpha );
 
 			model.beginUpdate();
 			try
@@ -755,7 +746,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 			SwingUtilities.convertPointFromScreen( mouseLocation, canvas );
 		}
 		final double[] calibration = TMUtils.getSpatialCalibration( lImp );
-		return new Spot(
+		return new SpotBase(
 				( -0.5d + canvas.offScreenXD( mouseLocation.x ) ) * calibration[ 0 ],
 				( -0.5d + canvas.offScreenYD( mouseLocation.y ) ) * calibration[ 1 ],
 				( lImp.getSlice() - 1 ) * calibration[ 2 ],

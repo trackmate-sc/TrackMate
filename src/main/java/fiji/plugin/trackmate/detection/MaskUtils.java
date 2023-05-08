@@ -29,9 +29,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.SpotRoi;
-import fiji.plugin.trackmate.util.SpotUtil;
 import ij.ImagePlus;
 import ij.gui.PolygonRoi;
 import ij.measure.Measurements;
@@ -327,7 +327,7 @@ public class MaskUtils
 					? Math.sqrt( volume / Math.PI )
 							: Math.pow( 3. * volume / ( 4. * Math.PI ), 1. / 3. );
 			final double quality = region.size();
-			spots.add( new Spot( x, y, z, radius, quality ) );
+			spots.add( new SpotBase( x, y, z, radius, quality ) );
 		}
 
 		return spots;
@@ -414,7 +414,7 @@ public class MaskUtils
 			final double radius = ( labeling.numDimensions() == 2 )
 					? Math.sqrt( volume / Math.PI )
 							: Math.pow( 3. * volume / ( 4. * Math.PI ), 1. / 3. );
-			spots.add( new Spot( x, y, z, radius, quality ) );
+			spots.add( new SpotBase( x, y, z, radius, quality ) );
 		}
 
 		return spots;
@@ -1293,7 +1293,7 @@ public class MaskUtils
 		scale( simplified.vertices(), calibration, origin );
 
 		// Make spot with default quality.
-		final Spot spot = SpotMesh.createSpot( simplified, 0. );
+		final SpotMesh spot = new SpotMesh( simplified, 0. );
 
 		// Measure quality.
 		final double quality;
@@ -1303,7 +1303,7 @@ public class MaskUtils
 		}
 		else
 		{
-			final IterableInterval< S > iterable = SpotUtil.iterableMesh( spot.getMesh(), qualityImage, calibration );
+			final IterableInterval< S > iterable = spot.iterable( qualityImage, calibration );
 			double max = Double.NEGATIVE_INFINITY;
 			for ( final S s : iterable )
 			{

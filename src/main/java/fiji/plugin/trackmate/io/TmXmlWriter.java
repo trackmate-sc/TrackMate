@@ -121,6 +121,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
@@ -735,9 +736,9 @@ public class TmXmlWriter
 		}
 		final Element spotElement = new Element( SPOT_ELEMENT_KEY );
 
-		final SpotRoi roi = spot.getRoi();
-		if ( roi != null )
+		if ( spot instanceof SpotRoi )
 		{
+			final SpotRoi roi = ( SpotRoi ) spot;
 			final int nPoints = roi.x.length;
 			attributes.add( new Attribute( ROI_N_POINTS_ATTRIBUTE_NAME, Integer.toString( nPoints ) ) );
 			final StringBuilder str = new StringBuilder();
@@ -760,7 +761,7 @@ public class TmXmlWriter
 		boolean hasMesh = false;
 		for ( final Spot spot : spots )
 		{
-			if ( spot.getMesh() != null )
+			if ( spot instanceof SpotMesh )
 			{
 				hasMesh = true;
 				break;
@@ -784,10 +785,11 @@ public class TmXmlWriter
 			// Write spot meshes.
 			for ( final Spot spot : spots )
 			{
-				if ( spot.getMesh() != null )
+				if ( spot instanceof SpotMesh )
 				{
 					// Save mesh in true coordinates.
-					final Mesh mesh = spot.getMesh().mesh;
+					final SpotMesh sm = ( SpotMesh ) spot;
+					final Mesh mesh = sm.mesh;
 					final Mesh translated = TranslateMesh.translate( mesh, spot );
 					final byte[] bs = PLY_MESH_IO.writeBinary( translated );
 

@@ -45,7 +45,6 @@ public class SemiAutoTracker< T extends RealType< T > & NativeType< T > > extend
 
 	private final ImagePlus imp;
 
-	@SuppressWarnings( "unchecked" )
 	public SemiAutoTracker( final Model model, final SelectionModel selectionModel, final ImagePlus imp, final Logger logger )
 	{
 		super( model, selectionModel, logger );

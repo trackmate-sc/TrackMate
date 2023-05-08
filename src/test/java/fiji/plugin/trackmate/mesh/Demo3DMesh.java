@@ -234,7 +234,6 @@ public class Demo3DMesh
 		final ImagePlus imp = IJ.openImage( filePath );
 
 		// First channel is the mask.
-		@SuppressWarnings( "unchecked" )
 		final ImgPlus< T > img = TMUtils.rawWraps( imp );
 		final ImgPlus< T > c1 = ImgPlusViews.hyperSlice( img, img.dimensionIndex( Axes.CHANNEL ), 0 );
 
@@ -249,7 +248,6 @@ public class Demo3DMesh
 	{
 		final String filePath = "samples/mesh/Cube.tif";
 		final ImagePlus imp = IJ.openImage( filePath );
-		@SuppressWarnings( "unchecked" )
 		final ImgPlus< T > img = TMUtils.rawWraps( imp );
 		final RandomAccessibleInterval< BitType > mask = RealTypeConverters.convert( img, new BitType() );
 		return new ImgPlus<>( ImgView.wrap( mask ), img );

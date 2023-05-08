@@ -39,7 +39,6 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.util.SpotUtil;
 import fiji.plugin.trackmate.util.TMUtils;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
@@ -265,7 +264,7 @@ public class LabelImgExporter extends AbstractTMAction
 			final ImagePlus imp,
 			final boolean exportSpotsAsDots,
 			final boolean exportTracksOnly,
-			boolean useSpotIDsAsLabels,
+			final boolean useSpotIDsAsLabels,
 			final Logger logger )
 	{
 		final int[] dimensions = imp.getDimensions();
@@ -478,7 +477,7 @@ public class LabelImgExporter extends AbstractTMAction
 			final ImgPlus< UnsignedShortType > imgCT = TMUtils.hyperSlice( imgPlus, 0, frame );
 			final SpotWriter spotWriter = exportSpotsAsDots
 					? new SpotAsDotWriter( imgCT )
-					: new SpotRoiWriter( imgCT );
+					: new SpotShapeWriter( imgCT );
 
 			for ( final Spot spot : model.getSpots().iterable( frame, true ) )
 			{
@@ -554,12 +553,12 @@ public class LabelImgExporter extends AbstractTMAction
 		public void write( Spot spot, int id );
 	}
 
-	public static final class SpotRoiWriter implements SpotWriter
+	public static final class SpotShapeWriter implements SpotWriter
 	{
 
 		private final ImgPlus< UnsignedShortType > img;
 
-		public SpotRoiWriter( final ImgPlus< UnsignedShortType > img )
+		public SpotShapeWriter( final ImgPlus< UnsignedShortType > img )
 		{
 			this.img = img;
 		}
@@ -567,7 +566,7 @@ public class LabelImgExporter extends AbstractTMAction
 		@Override
 		public void write( final Spot spot, final int id )
 		{
-			for ( final UnsignedShortType pixel : SpotUtil.iterable( spot, img ) )
+			for ( final UnsignedShortType pixel : spot.iterable( img ) )
 				pixel.set( id );
 		}
 	}

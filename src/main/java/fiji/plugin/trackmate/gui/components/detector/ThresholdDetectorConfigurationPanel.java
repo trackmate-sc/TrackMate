@@ -273,7 +273,6 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 			{
 				try
 				{
-					@SuppressWarnings( "unchecked" )
 					final ImgPlus< T > img = TMUtils.rawWraps( settings.imp );
 					final int channel = ( ( Number ) sliderChannel.getValue() ).intValue() - 1;
 					final int frame = settings.imp.getT() - 1;
