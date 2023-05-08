@@ -14,8 +14,8 @@ public class Demo3DMeshTrackMate
 		{
 
 			ImageJ.main( args );
-			final String filePath = "samples/CElegans3D-smoothed-mask-orig.tif";
-//			final String filePath = "samples/Celegans-5pc-17timepoints.tif";
+//			final String filePath = "samples/CElegans3D-smoothed-mask-orig-t7.tif";
+			final String filePath = "samples/Celegans-5pc-17timepoints.tif";
 			final ImagePlus imp = IJ.openImage( filePath );
 			imp.show();
 
