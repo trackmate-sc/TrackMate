@@ -33,6 +33,7 @@ import net.imglib2.roi.geom.GeomMasks;
 import net.imglib2.roi.geom.real.WritablePolygon2D;
 import net.imglib2.type.logic.BoolType;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.util.Util;
 
 public class SpotRoi extends SpotBase
 {
@@ -86,6 +87,20 @@ public class SpotRoi extends SpotBase
 		final double r = getFeature( Spot.RADIUS );
 		final double quality = getFeature( Spot.QUALITY );
 		return new SpotRoi( xc, yc, zc, r, quality, getName(), x.clone(), y.clone() );
+	}
+
+	@Override
+	public double realMin( final int d )
+	{
+		final double[] arr = ( d == 0 ) ? x : y;
+		return getDoublePosition( d ) + Util.min( arr );
+	}
+
+	@Override
+	public double realMax( final int d )
+	{
+		final double[] arr = ( d == 0 ) ? x : y;
+		return getDoublePosition( d ) + Util.max( arr );
 	}
 
 	/**

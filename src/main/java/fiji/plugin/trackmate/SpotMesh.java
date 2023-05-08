@@ -117,6 +117,18 @@ public class SpotMesh extends SpotBase
 	}
 
 	@Override
+	public double realMax( final int d )
+	{
+		return getDoublePosition( d ) + boundingBox.realMax( d );
+	}
+
+	@Override
+	public double realMin( final int d )
+	{
+		return getDoublePosition( d ) + boundingBox.realMin( d );
+	}
+
+	@Override
 	public < T extends RealType< T > > IterableInterval< T > iterable( final RandomAccessible< T > ra, final double[] calibration )
 	{
 		return new SpotMeshIterable<>( ra, this, calibration );
