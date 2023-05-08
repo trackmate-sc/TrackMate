@@ -55,9 +55,9 @@ public class Spot3DShapeAnalyzer< T extends RealType< T > > extends AbstractSpot
 		double sphericity;
 		if ( is3D )
 		{
-			final SpotMesh sm = spot.getMesh();
-			if ( sm != null )
+			if ( spot instanceof SpotMesh )
 			{
+				final SpotMesh sm = ( SpotMesh ) spot;
 				final Mesh ch = convexHull.calculate( sm.mesh );
 				volume = sm.volume();
 				final double volumeCH = Meshes.volume( ch );

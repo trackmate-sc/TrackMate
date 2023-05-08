@@ -52,8 +52,8 @@ import fiji.plugin.trackmate.detection.ThresholdDetectorFactory;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.util.DetectionPreview;
-import fiji.plugin.trackmate.util.Threads;
 import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.util.Threads;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imglib2.Interval;
@@ -267,11 +267,9 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 	private < T extends RealType< T > & NativeType< T > > void autoThreshold()
 	{
 		btnAutoThreshold.setEnabled( false );
-		Threads.run( "TrackMate compute threshold thread", () ->
-		{
+		Threads.run( "TrackMate compute threshold thread", () -> {
 			try
 			{
-				@SuppressWarnings( "unchecked" )
 				final ImgPlus< T > img = TMUtils.rawWraps( settings.imp );
 				final int channel = ( ( Number ) sliderChannel.getValue() ).intValue() - 1;
 				final int frame = settings.imp.getT() - 1;
