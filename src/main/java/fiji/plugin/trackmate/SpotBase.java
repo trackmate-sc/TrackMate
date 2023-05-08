@@ -36,7 +36,7 @@ import net.imglib2.type.numeric.RealType;
 import net.imglib2.view.Views;
 
 /**
- * A {@link RealLocalizable} implementation of {@link SpotI}, used in TrackMate
+ * A {@link RealLocalizable} implementation of {@link Spot}, used in TrackMate
  * to represent a detection. This concrete implementation has the simplest
  * shape: a spot is a sphere of fixed radius.
  * <p>
@@ -172,7 +172,7 @@ public class SpotBase extends AbstractEuclideanSpace implements Spot
 	 * Creates a new spot, taking its location, its radius, its quality value
 	 * and its name from the specified spot.
 	 *
-	 * @param spot
+	 * @param oldSpot
 	 *            the spot to read from.
 	 */
 	public SpotBase( final Spot oldSpot )
