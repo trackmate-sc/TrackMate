@@ -409,7 +409,6 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 			break;
 		}
 		}
-
 	}
 
 	@Override
