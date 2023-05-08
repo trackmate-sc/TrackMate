@@ -24,32 +24,55 @@ package fiji.plugin.trackmate;
 import java.util.Arrays;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import net.imagej.ImgPlus;
 import net.imglib2.IterableInterval;
-import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.RandomAccessible;
 import net.imglib2.roi.IterableRegion;
 import net.imglib2.roi.Masks;
 import net.imglib2.roi.Regions;
 import net.imglib2.roi.geom.GeomMasks;
 import net.imglib2.roi.geom.real.WritablePolygon2D;
 import net.imglib2.type.logic.BoolType;
-import net.imglib2.view.Views;
+import net.imglib2.type.numeric.RealType;
 
-public class SpotRoi implements SpotShape
+public class SpotRoi extends SpotBase
 {
 
-	/**
-	 * Polygon points X coordinates, in physical units.
-	 */
+	/** Polygon points X coordinates, in physical units, centered (0,0). */
 	public final double[] x;
 
-	/**
-	 * Polygon points Y coordinates, in physical units.
-	 */
+	/** Polygon points Y coordinates, in physical units, centered (0,0). */
 	public final double[] y;
 
-	public SpotRoi( final double[] x, final double[] y )
+	public SpotRoi(
+			final double xc,
+			final double yc,
+			final double zc,
+			final double r,
+			final double quality,
+			final String name,
+			final double[] x,
+			final double[] y )
 	{
+		super( xc, yc, zc, r, quality, name );
+		this.x = x;
+		this.y = y;
+	}
+
+	/**
+	 * This constructor is only used for deserializing a model from a TrackMate
+	 * file. It messes with the ID of the spots and should be not used
+	 * otherwise.
+	 * 
+	 * @param ID
+	 * @param x
+	 * @param y
+	 */
+	public SpotRoi(
+			final int ID,
+			final double[] x,
+			final double[] y )
+	{
+		super( ID ); 
 		this.x = x;
 		this.y = y;
 	}
@@ -57,7 +80,12 @@ public class SpotRoi implements SpotShape
 	@Override
 	public SpotRoi copy()
 	{
-		return new SpotRoi( x.clone(), y.clone() );
+		final double xc = getDoublePosition( 0 );
+		final double yc = getDoublePosition( 1 );
+		final double zc = getDoublePosition( 2 );
+		final double r = getFeature( Spot.RADIUS );
+		final double quality = getFeature( Spot.QUALITY );
+		return new SpotRoi( xc, yc, zc, r, quality, getName(), x.clone(), y.clone() );
 	}
 
 	/**
@@ -150,36 +178,30 @@ public class SpotRoi implements SpotShape
 			cy.add( yp );
 		}
 	}
-
-	public < T > IterableInterval< T > sample( final Spot spot, final ImgPlus< T > img )
+	
+	@Override
+	public < T extends RealType< T > > IterableInterval< T > iterable( final RandomAccessible< T > ra, final double[] calibration )
 	{
-		return sample( spot.getDoublePosition( 0 ), spot.getDoublePosition( 1 ), img, img.averageScale( 0 ), img.averageScale( 1 ) );
-	}
-
-	public < T > IterableInterval< T > sample( final double spotXCenter, final double spotYCenter, final RandomAccessibleInterval< T > img, final double xScale, final double yScale )
-	{
-		final double[] xp = toPolygonX( xScale, 0, spotXCenter, 1. );
-		final double[] yp = toPolygonY( yScale, 0, spotYCenter, 1. );
+		final double[] xp = toPolygonX( calibration[ 0 ], 0, this.getDoublePosition( 0 ), 1. );
+		final double[] yp = toPolygonY( calibration[ 1 ], 0, this.getDoublePosition( 1 ), 1. );
 		final WritablePolygon2D polygon = GeomMasks.closedPolygon2D( xp, yp );
 		final IterableRegion< BoolType > region = Masks.toIterableRegion( polygon );
-		return Regions.sample( region, Views.extendMirrorDouble( Views.dropSingletonDimensions( img ) ) );
+		return Regions.sample( region, ra );
 	}
 
-	@Override
-	public double radius()
+	private static double radius( final double[] x, final double[] y )
 	{
-		return Math.sqrt( area() / Math.PI );
+		return Math.sqrt( area( x, y ) / Math.PI );
 	}
 
-	public double area()
+	private static double area( final double[] x, final double[] y )
 	{
 		return Math.abs( signedArea( x, y ) );
 	}
 
-	@Override
-	public double size()
+	public double area()
 	{
-		return area();
+		return area( x, y );
 	}
 
 	@Override
@@ -197,7 +219,7 @@ public class SpotRoi implements SpotShape
 		}
 	}
 
-	public static Spot createSpot( final double[] x, final double[] y, final double quality )
+	public static SpotRoi createSpot( final double[] x, final double[] y, final double quality )
 	{
 		// Put polygon coordinates with respect to centroid.
 		final double[] centroid = centroid( x, y );
@@ -206,15 +228,10 @@ public class SpotRoi implements SpotShape
 		final double[] xr = Arrays.stream( x ).map( x0 -> x0 - xc ).toArray();
 		final double[] yr = Arrays.stream( y ).map( y0 -> y0 - yc ).toArray();
 
-		// Create roi.
-		final SpotRoi roi = new SpotRoi( xr, yr );
-
 		// Create spot.
 		final double z = 0.;
-		final double r = roi.radius();
-		final Spot spot = new Spot( xc, yc, z, r, quality );
-		spot.setRoi( roi );
-		return spot;
+		final double r = radius( xr, yr );
+		return new SpotRoi( xc, yc, z, r, quality, null, xr, yr );
 	}
 
 	/*

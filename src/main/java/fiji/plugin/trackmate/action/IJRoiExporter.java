@@ -86,10 +86,10 @@ public class IJRoiExporter
 
 	public void export( final Spot spot )
 	{
-		final SpotRoi sroi = spot.getRoi();
 		final Roi roi;
-		if ( sroi != null )
+		if ( spot instanceof SpotRoi )
 		{
+			final SpotRoi sroi = ( SpotRoi ) spot;
 			final double[] xs = sroi.toPolygonX( dx, 0., spot.getDoublePosition( 0 ), 1. );
 			final double[] ys = sroi.toPolygonY( dy, 0., spot.getDoublePosition( 1 ), 1. );
 			final float[] xp = toFloat( xs );

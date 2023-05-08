@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import fiji.plugin.trackmate.util.mesh.SpotMeshIterable;
 import net.imagej.mesh.Mesh;
 import net.imagej.mesh.Meshes;
 import net.imagej.mesh.Triangles;
@@ -13,12 +14,15 @@ import net.imagej.mesh.alg.zslicer.RamerDouglasPeucker;
 import net.imagej.mesh.alg.zslicer.Slice;
 import net.imagej.mesh.alg.zslicer.ZSlicer;
 import net.imagej.mesh.nio.BufferMesh;
+import net.imglib2.IterableInterval;
+import net.imglib2.RandomAccessible;
 import net.imglib2.RealInterval;
 import net.imglib2.RealLocalizable;
 import net.imglib2.RealPoint;
+import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Intervals;
 
-public class SpotMesh implements SpotShape, RealLocalizable
+public class SpotMesh extends SpotBase
 {
 
 	/**
@@ -28,19 +32,38 @@ public class SpotMesh implements SpotShape, RealLocalizable
 	 */
 	public final Mesh mesh;
 
-
 	private Map< Integer, Slice > sliceMap;
-
-	/** The center of this object. */
-	private final RealPoint center;
 
 	/** The bounding-box, <b>centered on (0,0,0)</b> of this object. */
 	public RealInterval boundingBox;
 
-	public SpotMesh( final Mesh mesh )
+	public SpotMesh(
+			final Mesh mesh,
+			final double quality )
 	{
+		this( mesh, quality, null );
+	}
+
+	/**
+	 * Creates a new spot from the specified mesh. Its position and radius are
+	 * calculated from the mesh.
+	 * 
+	 * @param quality
+	 * @param name
+	 * @param mesh
+	 */
+	public SpotMesh(
+			final Mesh mesh,
+			final double quality,
+			final String name )
+	{
+		// Dummy coordinates and radius.
+		super( 0., 0., 0., 0., quality, name );
 		this.mesh = mesh;
-		this.center = Meshes.center( mesh );
+		final RealPoint center = Meshes.center( mesh );
+
+		// Reposition the spot.
+		setPosition( center );
 
 		// Shift mesh to (0, 0, 0).
 		final Vertices vertices = mesh.vertices();
@@ -50,8 +73,53 @@ public class SpotMesh implements SpotShape, RealLocalizable
 					vertices.xf( i ) - center.getFloatPosition( 0 ),
 					vertices.yf( i ) - center.getFloatPosition( 1 ),
 					vertices.zf( i ) - center.getFloatPosition( 2 ) );
+
+		// Compute radius.
+		final double r = radius( mesh );
+		putFeature( Spot.RADIUS, r );
+
 		// Bounding box, also centered on (0,0,0)
 		this.boundingBox = toRealInterval( Meshes.boundingBox( mesh ) );
+	}
+
+	/**
+	 * This constructor is only used for deserializing a model from a TrackMate
+	 * file. It messes with the ID of the spots and should be not used
+	 * otherwise.
+	 * 
+	 * @param ID
+	 * @param mesh
+	 */
+	public SpotMesh( final int ID, final BufferMesh mesh )
+	{
+		super( ID );
+		this.mesh = mesh;
+		final RealPoint center = Meshes.center( mesh );
+
+		// Reposition the spot.
+		setPosition( center );
+
+		// Shift mesh to (0, 0, 0).
+		final Vertices vertices = mesh.vertices();
+		final long nVertices = vertices.size();
+		for ( long i = 0; i < nVertices; i++ )
+			vertices.setPositionf( i,
+					vertices.xf( i ) - center.getFloatPosition( 0 ),
+					vertices.yf( i ) - center.getFloatPosition( 1 ),
+					vertices.zf( i ) - center.getFloatPosition( 2 ) );
+
+		// Compute radius.
+		final double r = radius( mesh );
+		putFeature( Spot.RADIUS, r );
+
+		// Bounding box, also centered on (0,0,0)
+		this.boundingBox = toRealInterval( Meshes.boundingBox( mesh ) );
+	}
+
+	@Override
+	public < T extends RealType< T > > IterableInterval< T > iterable( final RandomAccessible< T > ra, final double[] calibration )
+	{
+		return new SpotMeshIterable<>( ra, this, calibration );
 	}
 
 	/**
@@ -76,7 +144,7 @@ public class SpotMesh implements SpotShape, RealLocalizable
 	public Slice getZSlice( final int zSlice, final double xyScale, final double zScale )
 	{
 		if ( sliceMap == null )
-			sliceMap = buildSliceMap( mesh, boundingBox, center, xyScale, zScale );
+			sliceMap = buildSliceMap( mesh, boundingBox, this, xyScale, zScale );
 
 		return sliceMap.get( Integer.valueOf( zSlice ) );
 	}
@@ -84,13 +152,9 @@ public class SpotMesh implements SpotShape, RealLocalizable
 	/**
 	 * Invalidates the Z-slices cache. This will force its recomputation. To be
 	 * called after the spot has changed size or Z position.
-	 *
-	 * @param newPosition
-	 *            the new position of the spot.
 	 */
-	public void resetZSliceCache( final RealLocalizable newPosition )
+	public void resetZSliceCache()
 	{
-		center.setPosition( newPosition );
 		sliceMap = null;
 	}
 
@@ -145,7 +209,6 @@ public class SpotMesh implements SpotShape, RealLocalizable
 		return Math.abs( sum );
 	}
 
-	@Override
 	public double radius()
 	{
 		return radius( mesh );
@@ -159,12 +222,6 @@ public class SpotMesh implements SpotShape, RealLocalizable
 	public double volume()
 	{
 		return volume( mesh );
-	}
-
-	@Override
-	public double size()
-	{
-		return volume();
 	}
 
 	@Override
@@ -205,7 +262,7 @@ public class SpotMesh implements SpotShape, RealLocalizable
 	{
 		final BufferMesh meshCopy = new BufferMesh( ( int ) mesh.vertices().size(), ( int ) mesh.triangles().size() );
 		Meshes.copy( this.mesh, meshCopy );
-		return new SpotMesh( meshCopy );
+		return new SpotMesh( meshCopy, getFeature( Spot.QUALITY ), getName() );
 	}
 
 	@Override
@@ -306,25 +363,5 @@ public class SpotMesh implements SpotShape, RealLocalizable
 	private static final RealInterval toRealInterval( final float[] bb )
 	{
 		return Intervals.createMinMaxReal( bb[ 0 ], bb[ 1 ], bb[ 2 ], bb[ 3 ], bb[ 4 ], bb[ 5 ] );
-	}
-
-	public static Spot createSpot( final Mesh mesh, final double quality )
-	{
-		final SpotMesh sm = new SpotMesh( mesh );
-		final Spot spot = new Spot( sm.center, sm.radius(), quality );
-		spot.setMesh( sm );
-		return spot;
-	}
-
-	@Override
-	public int numDimensions()
-	{
-		return 3;
-	}
-
-	@Override
-	public double getDoublePosition( final int d )
-	{
-		return center.getDoublePosition( d );
 	}
 }

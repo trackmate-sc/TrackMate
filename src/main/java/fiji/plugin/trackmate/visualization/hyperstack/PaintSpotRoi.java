@@ -5,7 +5,6 @@ import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
 import java.util.function.DoubleUnaryOperator;
 
-import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import gnu.trove.list.TDoubleList;
@@ -19,7 +18,7 @@ import net.imglib2.util.Intervals;
  * @author Jean-Yves Tinevez
  *
  */
-public class PaintSpotRoi extends TrackMatePainter
+public class PaintSpotRoi extends TrackMatePainter< SpotRoi >
 {
 
 	private final java.awt.geom.Path2D.Double polygon;
@@ -42,9 +41,9 @@ public class PaintSpotRoi extends TrackMatePainter
 	 *         next to the painted contour.
 	 */
 	@Override
-	public int paint( final Graphics2D g2d, final Spot spot )
+	public int paint( final Graphics2D g2d, final SpotRoi spot )
 	{
-		if ( !intersect( boundingBox( spot.getRoi() ), spot ) )
+		if ( !intersect( boundingBox( spot ), spot ) )
 			return -1;
 
 		final double maxTextPos = toPolygon( spot, polygon, this::toScreenX, this::toScreenY );
@@ -114,21 +113,20 @@ public class PaintSpotRoi extends TrackMatePainter
 	 *            screen coordinates.
 	 * @return the max X position in screen units of this shape.
 	 */
-	private static final double toPolygon( final Spot spot, final Path2D polygon, final DoubleUnaryOperator toScreenX, final DoubleUnaryOperator toScreenY )
+	private static final double toPolygon( final SpotRoi roi, final Path2D polygon, final DoubleUnaryOperator toScreenX, final DoubleUnaryOperator toScreenY )
 	{
-		final SpotRoi roi = spot.getRoi();
 		double maxTextPos = Double.NEGATIVE_INFINITY;
 		polygon.reset();
-		final double x0 = toScreenX.applyAsDouble( roi.x[ 0 ] + spot.getDoublePosition( 0 ) );
-		final double y0 = toScreenY.applyAsDouble( roi.y[ 0 ] + spot.getDoublePosition( 1 ) );
+		final double x0 = toScreenX.applyAsDouble( roi.x[ 0 ] + roi.getDoublePosition( 0 ) );
+		final double y0 = toScreenY.applyAsDouble( roi.y[ 0 ] + roi.getDoublePosition( 1 ) );
 		polygon.moveTo( x0, y0 );
 		if ( x0 > maxTextPos )
 			maxTextPos = x0;
 
 		for ( int i = 1; i < roi.x.length; i++ )
 		{
-			final double xi = toScreenX.applyAsDouble( roi.x[ i ] + spot.getDoublePosition( 0 ) );
-			final double yi = toScreenY.applyAsDouble( roi.y[ i ] + spot.getDoublePosition( 1 ) );
+			final double xi = toScreenX.applyAsDouble( roi.x[ i ] + roi.getDoublePosition( 0 ) );
+			final double yi = toScreenY.applyAsDouble( roi.y[ i ] + roi.getDoublePosition( 1 ) );
 			polygon.lineTo( xi, yi );
 
 			if ( xi > maxTextPos )

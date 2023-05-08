@@ -9,7 +9,7 @@ import ij.gui.ImageCanvas;
 import net.imglib2.RealInterval;
 import net.imglib2.RealLocalizable;
 
-public abstract class TrackMatePainter
+public abstract class TrackMatePainter< T extends Spot >
 {
 
 	protected final double[] calibration;
@@ -25,7 +25,7 @@ public abstract class TrackMatePainter
 		this.displaySettings = displaySettings;
 	}
 
-	public abstract int paint( final Graphics2D g2d, final Spot spot );
+	public abstract int paint( final Graphics2D g2d, final T spot );
 
 	/**
 	 * Returns <code>true</code> if the specified bounding-box, shifted by the

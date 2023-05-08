@@ -263,7 +263,9 @@ public class SpotOverlay extends Roi
 		final double ys = ( yp - ycorner ) * magnification;
 
 		// Get a painter adequate for the spot and config we have.
+		@SuppressWarnings( "rawtypes" )
 		final TrackMatePainter painter = getPainter( spot );
+		@SuppressWarnings( "unchecked" )
 		final int textPos = painter.paint( g2d, spot );
 
 		if ( textPos >= 0 && displaySettings.isSpotShowName() )
@@ -273,18 +275,18 @@ public class SpotOverlay extends Roi
 		}
 	}
 
-	private TrackMatePainter getPainter( final Spot spot )
+	private TrackMatePainter< ? extends Spot > getPainter( final Spot spot )
 	{
-		final SpotRoi roi = spot.getRoi();
-		final SpotMesh mesh = spot.getMesh();
-
-		if ( !displaySettings.isSpotDisplayedAsRoi() || ( mesh == null && roi == null ) )
+		if ( !displaySettings.isSpotDisplayedAsRoi() )
 			return paintSpotSphere;
 
-		if ( roi != null )
+		if ( spot instanceof SpotRoi )
 			return paintSpotRoi;
 
-		return paintSpotMesh;
+		if ( spot instanceof SpotMesh )
+			return paintSpotMesh;
+
+		return paintSpotSphere;
 	}
 
 	private static final void drawString(

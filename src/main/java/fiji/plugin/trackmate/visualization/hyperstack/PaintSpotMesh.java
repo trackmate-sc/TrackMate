@@ -21,7 +21,7 @@ import net.imglib2.RealLocalizable;
  * @author Jean-Yves Tinevez
  *
  */
-public class PaintSpotMesh extends TrackMatePainter
+public class PaintSpotMesh extends TrackMatePainter< SpotMesh >
 {
 
 	private final Path2D.Double polygon;
@@ -37,11 +37,9 @@ public class PaintSpotMesh extends TrackMatePainter
 	}
 
 	@Override
-	public int paint( final Graphics2D g2d, final Spot spot )
+	public int paint( final Graphics2D g2d, final SpotMesh spot )
 	{
-		final SpotMesh sm = spot.getMesh();
-
-		if ( !intersect( sm.boundingBox, spot ) )
+		if ( !intersect( spot.boundingBox, spot ) )
 			return -1;
 
 		// Z plane does not cross bounding box.
@@ -52,7 +50,7 @@ public class PaintSpotMesh extends TrackMatePainter
 		final double z = spot.getFeature( Spot.POSITION_Z );
 		final int zSlice = imp.getSlice() - 1;
 		final double dz = zSlice * calibration[ 2 ];
-		if ( sm.boundingBox.realMin( 2 ) + z > dz || sm.boundingBox.realMax( 2 ) + z < dz )
+		if ( spot.boundingBox.realMin( 2 ) + z > dz || spot.boundingBox.realMax( 2 ) + z < dz )
 		{
 			paintOutOfFocus( g2d, xs, ys );
 			return -1;
@@ -60,7 +58,7 @@ public class PaintSpotMesh extends TrackMatePainter
 
 		// Convert to AWT shape. Only work in non-pathological cases, and
 		// because contours are sorted by decreasing area.
-		final Slice slice = sm.getZSlice( zSlice, calibration[ 0 ], calibration[ 2 ] );
+		final Slice slice = spot.getZSlice( zSlice, calibration[ 0 ], calibration[ 2 ] );
 		if ( slice == null )
 		{
 			paintOutOfFocus( g2d, xs, ys );

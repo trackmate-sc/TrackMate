@@ -5,6 +5,7 @@ import java.io.File;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.util.TMUtils;
@@ -49,7 +50,7 @@ public class DebugZSlicer
 
 			imp.setZ( ( int ) Math.round( z / calibration[ 2 ] ) + 1 );
 
-			final Slice contours = ZSlicer.slice( spot.getMesh().mesh, z, calibration[ 2 ] );
+			final Slice contours = ZSlicer.slice( ( ( SpotMesh ) spot ).mesh, z, calibration[ 2 ] );
 			System.out.println( "Found " + contours.size() + " contours." );
 			for ( final Contour contour : contours )
 				System.out.println( contour );

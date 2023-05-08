@@ -33,6 +33,7 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.detection.DetectionUtils;
@@ -173,7 +174,7 @@ public interface GapClosingMethod
 				position[ d ] = weight * sPos[ d ] + ( 1.0 - weight ) * tPos[ d ];
 
 			final RealPoint rp = new RealPoint( position );
-			final Spot newSpot = new Spot( rp, 0, 0 );
+			final Spot newSpot = new SpotBase( rp, 0, 0 );
 			newSpot.putFeature( Spot.FRAME, Double.valueOf( f ) );
 
 			// Set some properties of the new spot

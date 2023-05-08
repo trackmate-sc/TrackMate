@@ -972,8 +972,8 @@ public class Model
 			event.getSpots()
 					.stream()
 					.filter( s -> event.getSpotFlag( s ) == ModelChangeEvent.FLAG_SPOT_MODIFIED )
-					.filter( s -> s.getMesh() != null )
-					.forEach( s -> s.getMesh().resetZSliceCache( s ) );
+					.filter( s -> ( s instanceof SpotMesh ) )
+					.forEach( s -> ( ( SpotMesh ) s ).resetZSliceCache() );
 		}
 	}
 }
