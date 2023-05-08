@@ -17,6 +17,7 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotShape;
 import fiji.plugin.trackmate.detection.semiauto.SemiAutoTracker;
 import fiji.plugin.trackmate.util.ModelTools;
@@ -76,7 +77,7 @@ public class ModelEditActions
 			SwingUtilities.convertPointFromScreen( mouseLocation, canvas );
 		}
 		final double[] calibration = TMUtils.getSpatialCalibration( imp );
-		return new Spot(
+		return new SpotBase(
 				( -0.5 + canvas.offScreenXD( mouseLocation.x ) ) * calibration[ 0 ],
 				( -0.5 + canvas.offScreenYD( mouseLocation.y ) ) * calibration[ 1 ],
 				( imp.getSlice() - 1 ) * calibration[ 2 ],
