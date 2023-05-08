@@ -3,6 +3,7 @@ package fiji.plugin.trackmate.visualization.hyperstack;
 import java.awt.Graphics2D;
 
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import ij.ImagePlus;
 import net.imglib2.RealInterval;
@@ -14,7 +15,7 @@ import net.imglib2.util.Intervals;
  * @author Jean-Yves Tinevez
  *
  */
-public class PaintSpotSphere extends TrackMatePainter
+public class PaintSpotSphere extends TrackMatePainter< SpotBase >
 {
 
 	public PaintSpotSphere( final ImagePlus imp, final double[] calibration, final DisplaySettings displaySettings )
@@ -23,7 +24,7 @@ public class PaintSpotSphere extends TrackMatePainter
 	}
 
 	@Override
-	public int paint( final Graphics2D g2d, final Spot spot )
+	public int paint( final Graphics2D g2d, final SpotBase spot )
 	{
 		if ( !intersect( boundingBox( spot ), spot ) )
 			return -1;

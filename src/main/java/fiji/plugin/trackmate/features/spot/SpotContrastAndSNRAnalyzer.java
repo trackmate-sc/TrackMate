@@ -29,10 +29,6 @@ import static fiji.plugin.trackmate.features.spot.SpotIntensityMultiCAnalyzerFac
 import static fiji.plugin.trackmate.features.spot.SpotIntensityMultiCAnalyzerFactory.makeFeatureKey;
 
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotShape;
-import fiji.plugin.trackmate.util.SpotNeighborhood;
-import fiji.plugin.trackmate.util.SpotNeighborhoodCursor;
-import fiji.plugin.trackmate.util.SpotUtil;
 import net.imagej.ImgPlus;
 import net.imglib2.IterableInterval;
 import net.imglib2.type.numeric.RealType;
@@ -98,56 +94,18 @@ public class SpotContrastAndSNRAnalyzer< T extends RealType< T > > extends Abstr
 		final double radius = spot.getFeature( Spot.RADIUS );
 		final double outterRadius = 2. * radius;
 
-		// Operate on ROI only if we have one and the image is 2D.
-		final double meanOut;
-		final SpotShape shape = spot.getShape();
-		if ( null != shape )
-		{
-			// 2D or 3D cases are treated altogether.
-			final double alpha = outterRadius / radius;
-			final SpotShape outterRoi = shape.copy();
-			outterRoi.scale( alpha );
-			final IterableInterval< T > neighborhood = SpotUtil.iterable( outterRoi, spot, img );
-			double outterSum = 0.;
-			for ( final T t : neighborhood )
-				outterSum += t.getRealDouble();
+		final double alpha = outterRadius / radius;
+		final Spot outterRoi = spot.copy();
+		outterRoi.scale( alpha );
+		final IterableInterval< T > neighborhood = outterRoi.iterable( img );
+		double outterSum = 0.;
+		for ( final T t : neighborhood )
+			outterSum += t.getRealDouble();
 
-			final String sumFeature = makeFeatureKey( TOTAL_INTENSITY, channel );
-			final double innterSum = spot.getFeature( sumFeature );
-			outterSum -= innterSum;
-			meanOut = outterSum / ( outterRoi.size() - shape.size() );
-		}
-		else
-		{
-			// Otherwise default to circle / sphere.
-			final Spot largeSpot = new Spot( spot );
-			largeSpot.putFeature( Spot.RADIUS, outterRadius );
-			final SpotNeighborhood< T > neighborhood = new SpotNeighborhood<>( largeSpot, img );
-			if ( neighborhood.size() <= 1 )
-			{
-				spot.putFeature( makeFeatureKey( CONTRAST, channel ), Double.NaN );
-				spot.putFeature( makeFeatureKey( SNR, channel ), Double.NaN );
-				return;
-			}
-
-			final double radius2 = radius * radius;
-			int nOut = 0; // inner number of pixels
-			double sumOut = 0;
-
-			// Compute mean in the outer ring
-			final SpotNeighborhoodCursor< T > cursor = neighborhood.cursor();
-			while ( cursor.hasNext() )
-			{
-				cursor.fwd();
-				final double dist2 = cursor.getDistanceSquared();
-				if ( dist2 > radius2 )
-				{
-					nOut++;
-					sumOut += cursor.get().getRealDouble();
-				}
-			}
-			meanOut = sumOut / nOut;
-		}
+		final String sumFeature = makeFeatureKey( TOTAL_INTENSITY, channel );
+		final double innterSum = spot.getFeature( sumFeature );
+		outterSum -= innterSum;
+		final double meanOut = outterSum / ( neighborhood.size() - spot.iterable( img ).size() );
 
 		// Compute contrast
 		final double contrast = ( meanIn - meanOut ) / ( meanIn + meanOut );

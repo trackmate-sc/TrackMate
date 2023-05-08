@@ -27,6 +27,7 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
@@ -115,7 +116,13 @@ public class KalmanTrackerInteractiveTest3
 		double y = y0;
 		for ( int t = 0; t < NFRAMES; t++ )
 		{
-			final Spot spot = new Spot( x + ran.nextGaussian() * sigma, y + ran.nextGaussian() * sigma, 0, 2, 1, "S_" + t );
+			final Spot spot = new SpotBase(
+					x + ran.nextGaussian() * sigma,
+					y + ran.nextGaussian() * sigma,
+					0,
+					2,
+					1,
+					"S_" + t );
 			spots.add( spot, t );
 
 			x += vx0;
