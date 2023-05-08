@@ -23,39 +23,44 @@ package fiji.plugin.trackmate;
 
 import static fiji.plugin.trackmate.SpotCollection.VISIBILITY;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.google.common.collect.ImmutableMap;
+
 import fiji.plugin.trackmate.util.AlphanumComparator;
-import net.imglib2.AbstractEuclideanSpace;
+import fiji.plugin.trackmate.util.TMUtils;
+import net.imagej.ImgPlus;
+import net.imglib2.EuclideanSpace;
+import net.imglib2.IterableInterval;
+import net.imglib2.Localizable;
+import net.imglib2.RandomAccessible;
+import net.imglib2.RealInterval;
 import net.imglib2.RealLocalizable;
+import net.imglib2.RealPositionable;
+import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Util;
+import net.imglib2.view.Views;
 
 /**
- * A {@link RealLocalizable} implementation, used in TrackMate to represent a
- * detection.
+ * Interface for spots, used in TrackMate to represent a detection, or an object
+ * to be tracked.
  * <p>
- * On top of being a {@link RealLocalizable}, it can store additional numerical
- * named features, with a {@link Map}-like syntax. Constructors enforce the
- * specification of the spot location in 3D space (if Z is unused, put 0), the
- * spot radius, and the spot quality. This somewhat cumbersome syntax is made to
- * avoid any bad surprise with missing features in a subsequent use. The spot
- * temporal features ({@link #FRAME} and {@link #POSITION_T}) are set upon
- * adding to a {@link SpotCollection}.
+ * This interface privileges a map of String-&gt;Double organization of
+ * numerical feature, with the X, Y and Z coordinates stored in this map. This
+ * allows for default implementations for many of the {@link RealLocalizable}
+ * and {@link RealPositionable} methods of this interface.
  * <p>
- * Each spot received at creation a unique ID (as an <code>int</code>), used
- * later for saving, retrieving and loading. Interfering with this value will
- * predictively cause undesired behavior.
+ * They are mainly a 3D {@link RealLocalizable}, that store the object position
+ * in physical coordinates (um, mm, etc). 2D detections are treated by setting
+ * the Z coordinate to 0. Time is treated separately, as a feature.
  *
- * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; 2010, 2013
- *
+ * @author Jean-Yves Tinevez
  */
-public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Comparable< Spot >
+public interface Spot extends RealLocalizable, RealPositionable, RealInterval, Comparable< Spot >, EuclideanSpace
 {
 
 	/*
@@ -64,245 +69,68 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 
 	public static AtomicInteger IDcounter = new AtomicInteger( -1 );
 
-	/** Store the individual features, and their values. */
-	private final ConcurrentHashMap< String, Double > features = new ConcurrentHashMap<>();
-
-	/** A user-supplied name for this spot. */
-	private String name;
-
-	/** This spot ID. */
-	private final int ID;
-
-	/**
-	 * The polygon that represents the 2D roi around the spot. Can be
-	 * <code>null</code> if the spot does not contain 2D contour information or
-	 * has a 3D shape information as a mesh.
-	 */
-	private SpotRoi roi;
-
-	/**
-	 * The mesh that represents the 3D object around the spot. Can be
-	 * <code>null</code> of the spot does not contain 3D shape information or
-	 * has a 2D shape information as a contour.
-	 */
-	private SpotMesh mesh;
-
-	/*
-	 * CONSTRUCTORS
-	 */
-
-	/**
-	 * Creates a new spot.
-	 *
-	 * @param x
-	 *            the spot X coordinates, in image units.
-	 * @param y
-	 *            the spot Y coordinates, in image units.
-	 * @param z
-	 *            the spot Z coordinates, in image units.
-	 * @param radius
-	 *            the spot radius, in image units.
-	 * @param quality
-	 *            the spot quality.
-	 * @param name
-	 *            the spot name.
-	 */
-	public Spot( final double x, final double y, final double z, final double radius, final double quality, final String name )
-	{
-		super( 3 );
-		this.ID = IDcounter.incrementAndGet();
-		putFeature( POSITION_X, Double.valueOf( x ) );
-		putFeature( POSITION_Y, Double.valueOf( y ) );
-		putFeature( POSITION_Z, Double.valueOf( z ) );
-		putFeature( RADIUS, Double.valueOf( radius ) );
-		putFeature( QUALITY, Double.valueOf( quality ) );
-		if ( null == name )
-		{
-			this.name = "ID" + ID;
-		}
-		else
-		{
-			this.name = name;
-		}
-	}
-
-	/**
-	 * Creates a new spot, and gives it a default name.
-	 *
-	 * @param x
-	 *            the spot X coordinates, in image units.
-	 * @param y
-	 *            the spot Y coordinates, in image units.
-	 * @param z
-	 *            the spot Z coordinates, in image units.
-	 * @param radius
-	 *            the spot radius, in image units.
-	 * @param quality
-	 *            the spot quality.
-	 */
-	public Spot( final double x, final double y, final double z, final double radius, final double quality )
-	{
-		this( x, y, z, radius, quality, null );
-	}
-
-	/**
-	 * Creates a new spot, taking its 3D coordinates from a
-	 * {@link RealLocalizable}. The {@link RealLocalizable} must have at least 3
-	 * dimensions, and must return coordinates in image units.
-	 *
-	 * @param location
-	 *            the {@link RealLocalizable} that contains the spot locatiob.
-	 * @param radius
-	 *            the spot radius, in image units.
-	 * @param quality
-	 *            the spot quality.
-	 * @param name
-	 *            the spot name.
-	 */
-	public Spot( final RealLocalizable location, final double radius, final double quality, final String name )
-	{
-		this( location.getDoublePosition( 0 ), location.getDoublePosition( 1 ), location.getDoublePosition( 2 ), radius, quality, name );
-	}
-
-	/**
-	 * Creates a new spot, taking its 3D coordinates from a
-	 * {@link RealLocalizable}. The {@link RealLocalizable} must have at least 3
-	 * dimensions, and must return coordinates in image units. The spot will get
-	 * a default name.
-	 *
-	 * @param location
-	 *            the {@link RealLocalizable} that contains the spot locatiob.
-	 * @param radius
-	 *            the spot radius, in image units.
-	 * @param quality
-	 *            the spot quality.
-	 */
-	public Spot( final RealLocalizable location, final double radius, final double quality )
-	{
-		this( location, radius, quality, null );
-	}
-
-	/**
-	 * Creates a new spot, taking its location, its radius, its quality value
-	 * and its name from the specified spot.
-	 *
-	 * @param spot
-	 *            the spot to read from.
-	 */
-	public Spot( final Spot spot )
-	{
-		this( spot, spot.getFeature( RADIUS ), spot.getFeature( QUALITY ), spot.getName() );
-	}
-
-	/**
-	 * Blank constructor meant to be used when loading a spot collection from a
-	 * file. <b>Will</b> mess with the {@link #IDcounter} field, so this
-	 * constructor <u>should not be used for normal spot creation</u>.
-	 *
-	 * @param ID
-	 *            the spot ID to set
-	 */
-	public Spot( final int ID )
-	{
-		super( 3 );
-		this.ID = ID;
-		synchronized ( IDcounter )
-		{
-			if ( IDcounter.get() < ID )
-			{
-				IDcounter.set( ID );
-			}
-		}
-	}
-
 	/*
 	 * PUBLIC METHODS
 	 */
 
 	@Override
-	public int hashCode()
+	public default int compareTo( final Spot o )
 	{
-		return ID;
+		return ID() - o.ID();
 	}
 
-	@Override
-	public int compareTo( final Spot o )
-	{
-		return ID - o.ID;
-	}
-
-	@Override
-	public boolean equals( final Object other )
-	{
-		if ( other == null )
-			return false;
-		if ( other == this )
-			return true;
-		if ( !( other instanceof Spot ) )
-			return false;
-		final Spot os = ( Spot ) other;
-		return os.ID == this.ID;
-	}
-
-	public void setRoi( final SpotRoi roi )
-	{
-		this.roi = roi;
-		this.mesh = null;
-	}
 
 	/**
-	 * Return the 2D polygonal shape of this spot. Might be <code>null</code> if
-	 * the spot has no shape information, or if it has but in 3D (in that case
-	 * the {@link #mesh} field won't be <code>null</code>).
-	 *
-	 * @return the spot roi. Can be <code>null</code>.
+	 * Returns a copy of this spot. The class and all fields will be identical,
+	 * except for the {@link #ID()}.
+	 * 
+	 * @return a new spot.
 	 */
-	public SpotRoi getRoi()
-	{
-		return roi;
-	}
-
-	public void setMesh( final SpotMesh mesh )
-	{
-		this.roi = null;
-		this.mesh = mesh;
-	}
+	public Spot copy();
 
 	/**
-	 * Return the mesh shape of this spot. Might be <code>null</code> if the
-	 * spot has no shape information, or if it has but in 2D (in that case the
-	 * {@link #roi} field won't be <code>null</code>).
-	 *
-	 * @return the spot mesh. Can be <code>null</code>.
+	 * Scales the size of this spot by the specified ratio.
+	 * 
+	 * @param alpha
+	 *            the scale.
 	 */
-	public SpotMesh getMesh()
-	{
-		return mesh;
-	}
+	public void scale( double alpha );
 
 	/**
-	 * Returns the shape field of this spot as a {@link SpotShape}.
-	 * <p>
-	 * If the spot has no shape information, this will return <code>null</code>.
-	 * If the image is 2D the shape returned will be a {@link SpotRoi}. In 3D it
-	 * will be a {@link SpotRoi}.
-	 *
-	 * @return the spot shape.
+	 * Returns an iterable that will iterate over all the pixels contained in
+	 * this spot.
+	 * 
+	 * @param ra
+	 *            the {@link RandomAccessible} to iterate over.
+	 * @param calibration
+	 *            the pixel size array, use to map pixel integer coordinates to
+	 *            the spot physical coordinates.
+	 * @param <T>
+	 *            the type of pixels in the {@link RandomAccessible}.
+	 * @return an iterable.
+	 * @return
 	 */
-	public SpotShape getShape()
+	public < T extends RealType< T > > IterableInterval< T > iterable( RandomAccessible< T > ra, double calibration[] );
+
+	/**
+	 * Returns an iterable that will iterate over all the pixels contained in
+	 * this spot.
+	 * 
+	 * @param img
+	 *            the ImgPlus to iterate over.
+	 * @param <T>
+	 *            the type of pixels in the {@link RandomAccessible}.
+	 * @return an iterable.
+	 */
+	public default < T extends RealType< T > > IterableInterval< T > iterable( final ImgPlus< T > img )
 	{
-		if ( roi != null )
-			return roi;
-		return mesh;
+		return iterable( Views.extendMirrorSingle( img ), TMUtils.getSpatialCalibration( img ) );
 	}
 
 	/**
 	 * @return the name for this Spot.
 	 */
-	public String getName()
-	{
-		return this.name;
-	}
+	public String getName();
 
 	/**
 	 * Set the name of this Spot.
@@ -310,36 +138,24 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 	 * @param name
 	 *            the name to use.
 	 */
-	public void setName( final String name )
-	{
-		this.name = name;
-	}
+	public void setName( final String name );
 
-	public int ID()
-	{
-		return ID;
-	}
-
-	@Override
-	public String toString()
-	{
-		String str;
-		if ( null == name || name.equals( "" ) )
-			str = "ID" + ID;
-		else
-			str = name;
-		return str;
-	}
+	/**
+	 * Returns the unique ID of this spot. The ID is unique within a session.
+	 * 
+	 * @return the spot ID.
+	 */
+	public int ID();
 
 	/**
 	 * Return a string representation of this spot, with calculated features.
 	 *
 	 * @return a string representation of the spot.
 	 */
-	public String echo()
+	public default String echo()
 	{
 		final StringBuilder s = new StringBuilder();
-
+		final String name = getName();
 		// Name
 		if ( null == name )
 			s.append( "Spot: <no name>\n" );
@@ -355,6 +171,7 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 		s.append( "Position: " + Util.printCoordinates( coordinates ) + "\n" );
 
 		// Feature list
+		final Map< String, Double > features = getFeatures();
 		if ( null == features || features.size() < 1 )
 			s.append( "No features calculated\n" );
 		else
@@ -385,10 +202,7 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 	 *
 	 * @return a map of {@link String}s to {@link Double}s.
 	 */
-	public Map< String, Double > getFeatures()
-	{
-		return features;
-	}
+	public Map< String, Double > getFeatures();
 
 	/**
 	 * Returns the value corresponding to the specified spot feature.
@@ -398,10 +212,7 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 	 * @return the feature value, as a {@link Double}. Will be <code>null</code>
 	 *         if it has not been set.
 	 */
-	public Double getFeature( final String feature )
-	{
-		return features.get( feature );
-	}
+	public Double getFeature( final String feature );
 
 	/**
 	 * Stores the specified feature value for this spot.
@@ -412,22 +223,34 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 	 *            the value to store, as a {@link Double}. Using
 	 *            <code>null</code> will have unpredicted outcomes.
 	 */
-	public void putFeature( final String feature, final Double value )
-	{
-		features.put( feature, value );
-	}
+	public void putFeature( final String feature, final Double value );
 
 	/**
-	 * Copy the listed features of the spot src to the current spot
-	 *
+	 * Copy some of the features values of the specified spot to this spot.
+	 * 
+	 * @param src
+	 *            the spot to copy feature values from.
+	 * @param features
+	 *            the collection of feature keys to copy.
 	 */
-	public void copyFeatures( final Spot src, final Map< String, Double > features )
+	public default void copyFeaturesFrom( final Spot src, final Collection< String > features )
 	{
 		if ( null == features || features.isEmpty() )
 			return;
 
-		for ( final String feat : features.keySet() )
+		for ( final String feat : features )
 			putFeature( feat, src.getFeature( feat ) );
+	}
+
+	/**
+	 * Copy all the features value from the specified spot to this spot.
+	 * 
+	 * @param src
+	 *            the spot to copy feature values from.
+	 */
+	public default void copyFeaturesFrom( final Spot src )
+	{
+		copyFeaturesFrom( src, src.getFeatures().keySet() );
 	}
 
 	/**
@@ -444,9 +267,9 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 	 *            the name of the feature to use for calculation.
 	 * @return the difference in feature value.
 	 */
-	public double diffTo( final Spot s, final String feature )
+	public default double diffTo( final Spot s, final String feature )
 	{
-		final double f1 = features.get( feature ).doubleValue();
+		final double f1 = getFeature( feature ).doubleValue();
 		final double f2 = s.getFeature( feature ).doubleValue();
 		return f1 - f2;
 	}
@@ -472,9 +295,9 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 	 *            the name of the feature to use for calculation.
 	 * @return the absolute normalized difference feature value.
 	 */
-	public double normalizeDiffTo( final Spot s, final String feature )
+	public default double normalizeDiffTo( final Spot s, final String feature )
 	{
-		final double a = features.get( feature ).doubleValue();
+		final double a = getFeature( feature ).doubleValue();
 		final double b = s.getFeature( feature ).doubleValue();
 		if ( a == -b )
 			return 0d;
@@ -489,7 +312,7 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 	 *            the spot to compute the square distance to.
 	 * @return the square distance as a <code>double</code>.
 	 */
-	public double squareDistanceTo( final RealLocalizable s )
+	public default double squareDistanceTo( final RealLocalizable s )
 	{
 		double sumSquared = 0d;
 		for ( int d = 0; d < 3; d++ )
@@ -533,97 +356,232 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 	public final static String[] POSITION_FEATURES = new String[] { POSITION_X, POSITION_Y, POSITION_Z };
 
 	/**
-	 * The 7 privileged spot features that must be set by a spot detector:
+	 * The 8 privileged spot features that must be set by a spot detector:
 	 * {@link #QUALITY}, {@link #POSITION_X}, {@link #POSITION_Y},
-	 * {@link #POSITION_Z}, {@link #POSITION_Z}, {@link #RADIUS}, {@link #FRAME}
-	 * .
+	 * {@link #POSITION_Z}, {@link #POSITION_Z}, {@link #RADIUS},
+	 * {@link #FRAME}, {@link SpotCollection#VISIBILITY}.
 	 */
-	public final static Collection< String > FEATURES = new ArrayList<>( 7 );
+	public final static Collection< String > FEATURES = Arrays.asList( QUALITY,
+			POSITION_X, POSITION_Y, POSITION_Z, POSITION_T, FRAME, RADIUS, SpotCollection.VISIBILITY );
 
-	/** The 7 privileged spot feature names. */
-	public final static Map< String, String > FEATURE_NAMES = new HashMap<>( 7 );
+	/** The 8 privileged spot feature names. */
+	public final static Map< String, String > FEATURE_NAMES = ImmutableMap.of(
+			POSITION_X, "X",
+			POSITION_Y, "Y",
+			POSITION_Z, "Z",
+			POSITION_T, "T",
+			FRAME, "Frame",
+			RADIUS, "Radius",
+			QUALITY, "Quality",
+			VISIBILITY, "Visibility" );
 
-	/** The 7 privileged spot feature short names. */
-	public final static Map< String, String > FEATURE_SHORT_NAMES = new HashMap<>( 7 );
+	/** The 8 privileged spot feature short names. */
+	public final static Map< String, String > FEATURE_SHORT_NAMES = ImmutableMap.of(
+			POSITION_X, "X",
+			POSITION_Y, "Y",
+			POSITION_Z, "Z",
+			POSITION_T, "T",
+			FRAME, "Frame",
+			RADIUS, "R",
+			QUALITY, "Quality",
+			VISIBILITY, "Visibility" );
 
-	/** The 7 privileged spot feature dimensions. */
-	public final static Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap<>( 7 );
+	/** The 8 privileged spot feature dimensions. */
+	public final static Map< String, Dimension > FEATURE_DIMENSIONS = ImmutableMap.of(
+			POSITION_X, Dimension.POSITION,
+			POSITION_Y, Dimension.POSITION,
+			POSITION_Z, Dimension.POSITION,
+			POSITION_T, Dimension.TIME,
+			FRAME, Dimension.NONE,
+			RADIUS, Dimension.LENGTH,
+			QUALITY, Dimension.QUALITY,
+			VISIBILITY, Dimension.NONE );
 
-	/** The 7 privileged spot feature isInt flags. */
-	public final static Map< String, Boolean > IS_INT = new HashMap<>( 7 );
+	/** The 8 privileged spot feature isInt flags. */
+	public final static Map< String, Boolean > IS_INT = ImmutableMap.of(
+			POSITION_X, Boolean.FALSE,
+			POSITION_Y, Boolean.FALSE,
+			POSITION_Z, Boolean.FALSE,
+			POSITION_T, Boolean.FALSE,
+			FRAME, Boolean.TRUE,
+			RADIUS, Boolean.FALSE,
+			QUALITY, Boolean.FALSE,
+			VISIBILITY, Boolean.TRUE );
 
-	static
+	/*
+	 * REALPOSITIONABLE, REAlLOCALIZABLE
+	 */
+
+	@Override
+	default int numDimensions()
 	{
-		FEATURES.add( QUALITY );
-		FEATURES.add( POSITION_X );
-		FEATURES.add( POSITION_Y );
-		FEATURES.add( POSITION_Z );
-		FEATURES.add( POSITION_T );
-		FEATURES.add( FRAME );
-		FEATURES.add( RADIUS );
-		FEATURES.add( SpotCollection.VISIBILITY );
-
-		FEATURE_NAMES.put( POSITION_X, "X" );
-		FEATURE_NAMES.put( POSITION_Y, "Y" );
-		FEATURE_NAMES.put( POSITION_Z, "Z" );
-		FEATURE_NAMES.put( POSITION_T, "T" );
-		FEATURE_NAMES.put( FRAME, "Frame" );
-		FEATURE_NAMES.put( RADIUS, "Radius" );
-		FEATURE_NAMES.put( QUALITY, "Quality" );
-		FEATURE_NAMES.put( VISIBILITY, "Visibility" );
-
-		FEATURE_SHORT_NAMES.put( POSITION_X, "X" );
-		FEATURE_SHORT_NAMES.put( POSITION_Y, "Y" );
-		FEATURE_SHORT_NAMES.put( POSITION_Z, "Z" );
-		FEATURE_SHORT_NAMES.put( POSITION_T, "T" );
-		FEATURE_SHORT_NAMES.put( FRAME, "Frame" );
-		FEATURE_SHORT_NAMES.put( RADIUS, "R" );
-		FEATURE_SHORT_NAMES.put( QUALITY, "Quality" );
-		FEATURE_SHORT_NAMES.put( VISIBILITY, "Visibility" );
-
-		FEATURE_DIMENSIONS.put( POSITION_X, Dimension.POSITION );
-		FEATURE_DIMENSIONS.put( POSITION_Y, Dimension.POSITION );
-		FEATURE_DIMENSIONS.put( POSITION_Z, Dimension.POSITION );
-		FEATURE_DIMENSIONS.put( POSITION_T, Dimension.TIME );
-		FEATURE_DIMENSIONS.put( FRAME, Dimension.NONE );
-		FEATURE_DIMENSIONS.put( RADIUS, Dimension.LENGTH );
-		FEATURE_DIMENSIONS.put( QUALITY, Dimension.QUALITY );
-		FEATURE_DIMENSIONS.put( VISIBILITY, Dimension.NONE );
-
-		IS_INT.put( POSITION_X, Boolean.FALSE );
-		IS_INT.put( POSITION_Y, Boolean.FALSE );
-		IS_INT.put( POSITION_Z, Boolean.FALSE );
-		IS_INT.put( POSITION_T, Boolean.FALSE );
-		IS_INT.put( FRAME, Boolean.TRUE );
-		IS_INT.put( RADIUS, Boolean.FALSE );
-		IS_INT.put( QUALITY, Boolean.FALSE );
-		IS_INT.put( VISIBILITY, Boolean.TRUE );
+		return 3;
 	}
 
 	@Override
-	public void localize( final float[] position )
+	public default void move( final float distance, final int d )
 	{
-		assert ( position.length >= n );
-		for ( int d = 0; d < n; ++d )
+		putFeature( POSITION_FEATURES[d], getFeature( POSITION_FEATURES[d] + distance ) );
+	}
+
+	@Override
+	public default void move( final double distance, final int d )
+	{
+		putFeature( POSITION_FEATURES[d], getFeature( POSITION_FEATURES[d] + distance ) );
+	}
+
+	@Override
+	public default void move( final RealLocalizable distance )
+	{
+		for ( int d = 0; d < 3; d++ )
+			putFeature( POSITION_FEATURES[ d ], getFeature( POSITION_FEATURES[ d ] + distance ) );
+	}
+
+	@Override
+	public default void move( final float[] distance )
+	{
+		for ( int d = 0; d < 3; d++ )
+			putFeature( POSITION_FEATURES[ d ], getFeature( POSITION_FEATURES[ d ] + distance[ d ] ) );
+	}
+
+	@Override
+	public default void move( final double[] distance )
+	{
+		for ( int d = 0; d < 3; d++ )
+			putFeature( POSITION_FEATURES[ d ], getFeature( POSITION_FEATURES[ d ] + distance[ d ] ) );
+	}
+
+	@Override
+	public default void setPosition( final RealLocalizable position )
+	{
+		for ( int d = 0; d < 3; d++ )
+			putFeature( POSITION_FEATURES[ d ], position.getDoublePosition( d ) );
+	}
+
+	@Override
+	public default void setPosition( final float[] position )
+	{
+		for ( int d = 0; d < 3; d++ )
+			putFeature( POSITION_FEATURES[ d ], ( double ) position[ d ] );
+	}
+
+	@Override
+	public default void setPosition( final double[] position )
+	{
+		for ( int d = 0; d < 3; d++ )
+			putFeature( POSITION_FEATURES[ d ], position[ d ] );
+	}
+
+	@Override
+	public default void setPosition( final float position, final int d )
+	{
+		putFeature( POSITION_FEATURES[ d ], ( double ) position );
+	}
+
+	@Override
+	public default void setPosition( final double position, final int d )
+	{
+		putFeature( POSITION_FEATURES[ d ], position );
+	}
+
+	@Override
+	public default void fwd( final int d )
+	{
+		move( 1., d );
+	}
+
+	@Override
+	public default void bck( final int d )
+	{
+		move( -1., d );
+	}
+
+	@Override
+	public default void move( final int distance, final int d )
+	{
+		move( ( double ) distance, d );
+	}
+
+	@Override
+	public default void move( final long distance, final int d )
+	{
+		move( ( double ) distance, d );
+	}
+
+	@Override
+	public default void move( final Localizable distance )
+	{
+		move( ( RealLocalizable ) distance );
+	}
+
+	@Override
+	public default void move( final int[] distance )
+	{
+		for ( int d = 0; d < 3; d++ )
+			putFeature( POSITION_FEATURES[ d ], getFeature( POSITION_FEATURES[ d ] + distance[ d ] ) );
+	}
+
+	@Override
+	public default void move( final long[] distance )
+	{
+		for ( int d = 0; d < 3; d++ )
+			putFeature( POSITION_FEATURES[ d ], getFeature( POSITION_FEATURES[ d ] + distance[ d ] ) );
+	}
+
+	@Override
+	public default void setPosition( final Localizable position )
+	{
+		setPosition( ( RealLocalizable ) position );
+	}
+
+	@Override
+	public default void setPosition( final int[] position )
+	{
+		for ( int d = 0; d < 3; d++ )
+			putFeature( POSITION_FEATURES[ d ], ( double ) position[ d ] );
+	}
+
+	@Override
+	public default void setPosition( final long[] position )
+	{
+		for ( int d = 0; d < 3; d++ )
+			putFeature( POSITION_FEATURES[ d ], ( double ) position[ d ] );
+	}
+
+	@Override
+	public default void setPosition( final int position, final int d )
+	{
+		putFeature( POSITION_FEATURES[ d ], ( double ) position );
+	}
+
+	@Override
+	public default void setPosition( final long position, final int d )
+	{
+		putFeature( POSITION_FEATURES[ d ], ( double ) position );
+	}
+
+	@Override
+	public default void localize( final float[] position )
+	{
+		for ( int d = 0; d < 3; ++d )
 			position[ d ] = getFloatPosition( d );
 	}
 
 	@Override
-	public void localize( final double[] position )
+	public default void localize( final double[] position )
 	{
-		assert ( position.length >= n );
-		for ( int d = 0; d < n; ++d )
+		for ( int d = 0; d < 3; ++d )
 			position[ d ] = getDoublePosition( d );
 	}
 
 	@Override
-	public float getFloatPosition( final int d )
+	public default float getFloatPosition( final int d )
 	{
 		return ( float ) getDoublePosition( d );
 	}
 
 	@Override
-	public double getDoublePosition( final int d )
+	public default double getDoublePosition( final int d )
 	{
 		return getFeature( POSITION_FEATURES[ d ] );
 	}
@@ -641,7 +599,7 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 	 *            feature.
 	 * @return a new {@link Comparator}.
 	 */
-	public final static Comparator< Spot > featureComparator( final String feature )
+	public static Comparator< Spot > featureComparator( final String feature )
 	{
 		final Comparator< Spot > comparator = new Comparator< Spot >()
 		{

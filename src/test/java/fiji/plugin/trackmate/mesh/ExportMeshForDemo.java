@@ -48,9 +48,11 @@ public class ExportMeshForDemo
 				final int t = spot.getFeature( Spot.FRAME ).intValue();
 				final int id = spot.ID();
 				final String savePath = String.format( "%s/mesh_t%2d_id_%04d.stl", meshDir, t, id );
-				final SpotMesh mesh = spot.getMesh();
-				if ( mesh != null )
+				if ( spot instanceof SpotMesh )
+				{
+					final SpotMesh mesh = ( SpotMesh ) spot;
 					io.save( mesh.mesh, savePath );
+				}
 			}
 			System.out.println( "Export done." );
 		}

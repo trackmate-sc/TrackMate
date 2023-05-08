@@ -30,14 +30,18 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
+import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.SpotRoi;
-import fiji.plugin.trackmate.util.SpotUtil;
 import fiji.plugin.trackmate.util.Threads;
 import ij.gui.PolygonRoi;
 import ij.process.FloatPolygon;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
+import net.imagej.mesh.Mesh;
+import net.imagej.mesh.Meshes;
+import net.imagej.mesh.Vertices;
 import net.imglib2.Interval;
 import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccess;
@@ -57,6 +61,7 @@ import net.imglib2.roi.labeling.LabelRegionCursor;
 import net.imglib2.roi.labeling.LabelRegions;
 import net.imglib2.type.BooleanType;
 import net.imglib2.type.logic.BitType;
+import net.imglib2.type.logic.BoolType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.IntType;
@@ -307,7 +312,7 @@ public class MaskUtils
 					? Math.sqrt( volume / Math.PI )
 							: Math.pow( 3. * volume / ( 4. * Math.PI ), 1. / 3. );
 			final double quality = region.size();
-			spots.add( new Spot( x, y, z, radius, quality ) );
+			spots.add( new SpotBase( x, y, z, radius, quality ) );
 		}
 
 		return spots;
@@ -394,7 +399,7 @@ public class MaskUtils
 			final double radius = ( labeling.numDimensions() == 2 )
 					? Math.sqrt( volume / Math.PI )
 							: Math.pow( 3. * volume / ( 4. * Math.PI ), 1. / 3. );
-			spots.add( new Spot( x, y, z, radius, quality ) );
+			spots.add( new SpotBase( x, y, z, radius, quality ) );
 		}
 
 		return spots;
@@ -598,7 +603,7 @@ public class MaskUtils
 					final double[] cal = new double[] { calibration[ 0 ], calibration[ 1 ] };
 					final String[] units = new String[] { "unitX", "unitY" };
 					final ImgPlus< S > qualityImgPlus = new ImgPlus<>( ImgPlus.wrapToImg( qualityImage ), name, axes, cal, units );
-					final IterableInterval< S > iterable = SpotUtil.iterable( spot, qualityImgPlus );
+					final IterableInterval< S > iterable = spot.iterable( qualityImgPlus );
 					double max = Double.NEGATIVE_INFINITY;
 					for ( final S s : iterable )
 					{
@@ -1258,5 +1263,110 @@ public class MaskUtils
 			}
 			return res + "]";
 		}
+	}
+
+	private static void scale( final Vertices vertices, final double[] scale, final double[] origin )
+	{
+		final long nv = vertices.size();
+		for ( long i = 0; i < nv; i++ )
+		{
+			final double x = ( origin[ 0 ] + vertices.x( i ) ) * scale[ 0 ];
+			final double y = ( origin[ 1 ] + vertices.y( i ) ) * scale[ 1 ];
+			final double z = ( origin[ 2 ] + vertices.z( i ) ) * scale[ 2 ];
+			vertices.set( i, x, y, z );
+		}
+	}
+
+	/**
+	 * Returns a new {@link Spot} with a {@link SpotMesh} as shape, built from
+	 * the specified bit-mask.
+	 *
+	 * @param <S>
+	 *            the type of pixels in the quality image.
+	 * @param region
+	 *            the bit-mask to build the mesh from.
+	 * @param simplify
+	 *            if <code>true</code> the mesh will be simplified.
+	 * @param calibration
+	 *            the pixel size array, used to scale the mesh to physical
+	 *            coordinates.
+	 * @param qualityImage
+	 *            an image from which to read the quality value. If not
+	 *            <code>null</code>, the quality of the spot will be the max
+	 *            value of this image inside the mesh. If <code>null</code>, the
+	 *            quality will be the mesh volume.
+	 *
+	 * @return a new spot.
+	 */
+	private static < S extends RealType< S > > Spot regionToSpotMesh(
+			final RandomAccessibleInterval< BoolType > region,
+			final boolean simplify,
+			final double[] calibration,
+			final RandomAccessibleInterval< S > qualityImage )
+	{
+		// To mesh.
+		final IntervalView< BoolType > box = Views.zeroMin( region );
+		final Mesh mesh = Meshes.marchingCubes( box, 0.5 );
+		final Mesh cleaned = Meshes.removeDuplicateVertices( mesh, VERTEX_DUPLICATE_REMOVAL_PRECISION );
+		final Mesh simplified;
+		if (simplify)
+		{
+			// Dont't go below a certain number of triangles.
+			final int nTriangles = ( int ) cleaned.triangles().size();
+			if ( nTriangles < MIN_N_TRIANGLES )
+			{
+				simplified = cleaned;
+			}
+			else
+			{
+				// Crude heuristics.
+				final float targetRatio;
+				if ( nTriangles < 2 * MIN_N_TRIANGLES )
+					targetRatio = 0.5f;
+				else if ( nTriangles < 10_000 )
+					targetRatio = 0.2f;
+				else if ( nTriangles < 1_000_000 )
+					targetRatio = 0.1f;
+				else
+					targetRatio = 0.05f;
+				simplified = Meshes.simplify( cleaned, targetRatio, SIMPLIFY_AGGRESSIVENESS );
+			}
+		}
+		else
+		{
+			simplified =  cleaned;
+		}
+		// Remove meshes that are too small
+		final double volumeThreshold = MIN_MESH_PIXEL_VOLUME * calibration[ 0 ] * calibration[ 1 ] * calibration[ 2 ];
+		if ( SpotMesh.volume( mesh ) < volumeThreshold )
+			return null;
+
+		// Scale to physical coords.
+		final double[] origin = region.minAsDoubleArray();
+		scale( simplified.vertices(), calibration, origin );
+
+		// Make spot with default quality.
+		final SpotMesh spot = new SpotMesh( simplified, 0. );
+
+		// Measure quality.
+		final double quality;
+		if ( null == qualityImage )
+		{
+			quality = SpotMesh.volume( simplified );
+		}
+		else
+		{
+			final IterableInterval< S > iterable = spot.iterable( qualityImage, calibration );
+			double max = Double.NEGATIVE_INFINITY;
+			for ( final S s : iterable )
+			{
+				final double val = s.getRealDouble();
+				if ( val > max )
+					max = val;
+			}
+			quality = max;
+		}
+		spot.putFeature( Spot.QUALITY, Double.valueOf( quality ) );
+		return spot;
 	}
 }

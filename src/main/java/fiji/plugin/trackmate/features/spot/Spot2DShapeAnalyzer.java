@@ -44,9 +44,9 @@ public class Spot2DShapeAnalyzer< T extends RealType< T > > extends AbstractSpot
 
 		if ( is2D )
 		{
-			final SpotRoi roi = spot.getRoi();
-			if ( roi != null )
+			if ( spot instanceof SpotRoi )
 			{
+				final SpotRoi roi = ( SpotRoi ) spot;
 				area = roi.area();
 				perimeter = getLength( roi );
 				final SpotRoi convexHull = ConvexHull2D.convexHull( roi );

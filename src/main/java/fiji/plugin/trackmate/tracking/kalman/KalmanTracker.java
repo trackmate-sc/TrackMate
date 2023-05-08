@@ -36,6 +36,7 @@ import org.scijava.Cancelable;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.tracking.jaqaman.JaqamanLinker;
@@ -236,17 +237,17 @@ public class KalmanTracker implements SpotTracker, Benchmark, Cancelable
 			{
 				final double[] X = kf.predict();
 				final Spot s = kalmanFiltersMap.get( kf );
-				final Spot predSpot = new Spot( X[ 0 ], X[ 1 ], X[ 2 ], s.getFeature( Spot.RADIUS ), s.getFeature( Spot.QUALITY ) );
+				final Spot predSpot = new SpotBase( X[ 0 ], X[ 1 ], X[ 2 ], s.getFeature( Spot.RADIUS ), s.getFeature( Spot.QUALITY ) );
 				// copy the necessary features of original spot to the predicted
 				// spot
 				if ( null != featurePenalties )
-					predSpot.copyFeatures( s, featurePenalties );
+					predSpot.copyFeaturesFrom( s, featurePenalties.keySet() );
 
 				predictionMap.put( predSpot, kf );
 
 				if ( savePredictions )
 				{
-					final Spot pred = new Spot( X[ 0 ], X[ 1 ], X[ 2 ], s.getFeature( Spot.RADIUS ), s.getFeature( Spot.QUALITY ) );
+					final Spot pred = new SpotBase( X[ 0 ], X[ 1 ], X[ 2 ], s.getFeature( Spot.RADIUS ), s.getFeature( Spot.QUALITY ) );
 					pred.setName( "Pred_" + s.getName() );
 					pred.putFeature( Spot.RADIUS, s.getFeature( Spot.RADIUS ) );
 					predictionsCollection.add( predSpot, frame );
