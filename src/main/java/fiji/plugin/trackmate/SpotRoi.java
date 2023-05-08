@@ -75,7 +75,7 @@ public class SpotRoi extends SpotBase
 			final double[] x,
 			final double[] y )
 	{
-		super( ID );
+		super( ID ); 
 		this.x = x;
 		this.y = y;
 	}
