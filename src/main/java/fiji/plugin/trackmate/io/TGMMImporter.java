@@ -32,12 +32,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.imglib2.algorithm.Benchmark;
-import net.imglib2.algorithm.OutputAlgorithm;
-import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.util.LinAlgHelpers;
-import net.imglib2.util.Util;
-
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -50,7 +44,13 @@ import Jama.Matrix;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotCollection;
+import net.imglib2.algorithm.Benchmark;
+import net.imglib2.algorithm.OutputAlgorithm;
+import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.util.LinAlgHelpers;
+import net.imglib2.util.Util;
 
 public class TGMMImporter implements OutputAlgorithm< Model >, Benchmark
 {
@@ -377,7 +377,7 @@ public class TGMMImporter implements OutputAlgorithm< Model >, Benchmark
 						 * Make a spot and add it to this frame collection.
 						 */
 
-						final Spot spot = new Spot( mx, my, mz, radius, score, lineage + " (" + id + ")" );
+						final Spot spot = new SpotBase( mx, my, mz, radius, score, lineage + " (" + id + ")" );
 						spots.add( spot );
 						currentSpotID.put( Integer.valueOf( id ), spot );
 

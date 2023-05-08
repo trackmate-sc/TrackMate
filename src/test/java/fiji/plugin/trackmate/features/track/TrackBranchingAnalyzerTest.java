@@ -37,6 +37,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.ModelChangeListener;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
 
 public class TrackBranchingAnalyzerTest
 {
@@ -74,7 +75,7 @@ public class TrackBranchingAnalyzerTest
 				Spot previous = null;
 				for ( int j = 0; j < DEPTH; j++ )
 				{
-					final Spot spot = new Spot( 0d, 0d, 0d, 1d, -1d );
+					final Spot spot = new SpotBase( 0d, 0d, 0d, 1d, -1d );
 					model.addSpotTo( spot, j );
 					if ( null != previous )
 					{
@@ -93,7 +94,7 @@ public class TrackBranchingAnalyzerTest
 					{
 						continue;
 					}
-					final Spot spot = new Spot( 0d, 0d, 0d, 1d, -1d );
+					final Spot spot = new SpotBase( 0d, 0d, 0d, 1d, -1d );
 					model.addSpotTo( spot, j );
 					if ( null != previous )
 					{
@@ -109,7 +110,7 @@ public class TrackBranchingAnalyzerTest
 				split = null; // Store the spot at the branch split
 				for ( int j = 0; j < DEPTH; j++ )
 				{
-					final Spot spot = new Spot( 0d, 0d, 0d, 1d, -1d );
+					final Spot spot = new SpotBase( 0d, 0d, 0d, 1d, -1d );
 					if ( j == DEPTH / 2 )
 					{
 						split = spot;
@@ -129,7 +130,7 @@ public class TrackBranchingAnalyzerTest
 				previous = split;
 				for ( int j = DEPTH / 2 + 1; j < DEPTH; j++ )
 				{
-					final Spot spot = new Spot( 0d, 0d, 0d, 1d, -1d );
+					final Spot spot = new SpotBase( 0d, 0d, 0d, 1d, -1d );
 					model.addSpotTo( spot, j );
 					model.addEdge( previous, spot, 1 );
 					previous = spot;
@@ -143,7 +144,7 @@ public class TrackBranchingAnalyzerTest
 				Spot merge = null;
 				for ( int j = 0; j < DEPTH; j++ )
 				{
-					final Spot spot = new Spot( 0d, 0d, 0d, 1d, -1d );
+					final Spot spot = new SpotBase( 0d, 0d, 0d, 1d, -1d );
 					if ( j == DEPTH / 2 )
 					{
 						merge = spot;
@@ -158,7 +159,7 @@ public class TrackBranchingAnalyzerTest
 				previous = null;
 				for ( int j = 0; j < DEPTH / 2; j++ )
 				{
-					final Spot spot = new Spot( 0d, 0d, 0d, 1d, -1d );
+					final Spot spot = new SpotBase( 0d, 0d, 0d, 1d, -1d );
 					model.addSpotTo( spot, j );
 					if ( null != previous )
 					{
@@ -233,8 +234,8 @@ public class TrackBranchingAnalyzerTest
 		model.beginUpdate();
 		try
 		{
-			final Spot spot1 = model.addSpotTo( new Spot( 0d, 0d, 0d, 1d, -1d ), 0 );
-			final Spot spot2 = model.addSpotTo( new Spot( 0d, 0d, 0d, 1d, -1d ), 1 );
+			final Spot spot1 = model.addSpotTo( new SpotBase( 0d, 0d, 0d, 1d, -1d ), 0 );
+			final Spot spot2 = model.addSpotTo( new SpotBase( 0d, 0d, 0d, 1d, -1d ), 1 );
 			model.addEdge( spot1, spot2, 1 );
 
 		}
@@ -269,7 +270,7 @@ public class TrackBranchingAnalyzerTest
 		model.beginUpdate();
 		try
 		{
-			newSpot = model.addSpotTo( new Spot( 0d, 0d, 0d, 1d, -1d ), firstFrame + 1 );
+			newSpot = model.addSpotTo( new SpotBase( 0d, 0d, 0d, 1d, -1d ), firstFrame + 1 );
 			model.addEdge( lFirstSpot, newSpot, 1 );
 		}
 		finally

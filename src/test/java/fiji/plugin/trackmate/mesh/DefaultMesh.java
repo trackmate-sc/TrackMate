@@ -42,7 +42,7 @@ public class DefaultMesh
 		for ( final Spot spot : spots )
 		{
 			model.getSpots().add( spot, 0 );
-			System.out.println( spot.getMesh() );
+			System.out.println( spot );
 		}
 
 		final SelectionModel selectionModel = new SelectionModel( model );
@@ -65,7 +65,7 @@ public class DefaultMesh
 		final long[] min = new long[] { 2, 2, 2 };
 		final long[] max = new long[] { 20, 20, 20 };
 		final Mesh mesh = Demo3DMesh.debugMesh( min, max );
-		final Spot spot = SpotMesh.createSpot( mesh, 1. );
+		final Spot spot = new SpotMesh( mesh, 1. );
 
 		final Model model = new Model();
 		model.beginUpdate();

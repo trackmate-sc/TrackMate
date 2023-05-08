@@ -55,7 +55,6 @@ public class HessianDetectorTestDrive1
 		final ImagePlus imp = IJ.openImage( "samples/TSabateCell.tif" );
 		imp.show();
 
-		@SuppressWarnings( "unchecked" )
 		final ImgPlus< T > input = TMUtils.rawWraps( imp );
 		final double[] calibration = TMUtils.getSpatialCalibration( imp );
 		final double radiusXY = 0.6 / 2.; // um;

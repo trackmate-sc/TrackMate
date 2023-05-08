@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotRoi;
 
 /**
@@ -133,6 +134,11 @@ public final class ConvexHull2D
 			xhull[ i ] = hull.get( i ).x;
 			yhull[ i ] = hull.get( i ).y;
 		}
-		return new SpotRoi( xhull, yhull );
+		final double xc = roi.getDoublePosition( 0 );
+		final double yc = roi.getDoublePosition( 1 );
+		final double zc = roi.getDoublePosition( 2 );
+		final double r = roi.getFeature( Spot.RADIUS );
+		final double quality = roi.getFeature( Spot.QUALITY );
+		return new SpotRoi( xc, yc, zc, r, quality, roi.getName(), xhull, yhull );
 	}
 }

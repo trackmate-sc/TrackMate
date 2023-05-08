@@ -21,11 +21,10 @@
  */
 package fiji.plugin.trackmate.providers;
 
-import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.features.spot.Spot3DMorphologyAnalyzerFactory;
 
 /**
- * Provider for 3D morphology analyzers, working on {@link SpotMesh}.
+ * Provider for 3D morphology analyzers, working on <code>SpotMesh</code>.
  */
 @SuppressWarnings( "rawtypes" )
 public class Spot3DMorphologyAnalyzerProvider extends AbstractProvider< Spot3DMorphologyAnalyzerFactory >

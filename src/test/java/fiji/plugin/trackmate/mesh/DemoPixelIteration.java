@@ -12,7 +12,6 @@ import fiji.plugin.trackmate.detection.ThresholdDetectorFactory;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
 import fiji.plugin.trackmate.util.TMUtils;
-import fiji.plugin.trackmate.util.mesh.SpotMeshCursor;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
 import ij.ImageJ;
@@ -79,7 +78,7 @@ public class DemoPixelIteration
 			{
 				System.out.println( spot );
 				final ImgPlus< T > img = TMUtils.rawWraps( out );
-				final Cursor< T > cursor = new SpotMeshCursor< T >( img.randomAccess(), spot.getMesh(), cal );
+				final Cursor< T > cursor = spot.iterable( img, cal ).localizingCursor();
 				final RandomAccess< T > ra = img.randomAccess();
 				while ( cursor.hasNext() )
 				{

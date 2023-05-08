@@ -39,6 +39,7 @@ import org.scijava.plugin.Plugin;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.io.IOUtils;
@@ -117,7 +118,7 @@ public class MergeFileAction extends AbstractTMAction
 					 * An awkward way to avoid spot ID conflicts after loading
 					 * two files
 					 */
-					newSpot = new Spot( oldSpot );
+					newSpot = new SpotBase( oldSpot );
 					for ( final String feature : oldSpot.getFeatures().keySet() )
 						newSpot.putFeature( feature, oldSpot.getFeature( feature ) );
 

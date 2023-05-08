@@ -29,10 +29,6 @@ import static fiji.plugin.trackmate.features.spot.SpotIntensityMultiCAnalyzerFac
 import static fiji.plugin.trackmate.features.spot.SpotIntensityMultiCAnalyzerFactory.makeFeatureKey;
 
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotShape;
-import fiji.plugin.trackmate.util.SpotNeighborhood;
-import fiji.plugin.trackmate.util.SpotNeighborhoodCursor;
-import fiji.plugin.trackmate.util.SpotUtil;
 import net.imagej.ImgPlus;
 import net.imglib2.IterableInterval;
 import net.imglib2.type.numeric.RealType;
@@ -98,76 +94,32 @@ public class SpotContrastAndSNRAnalyzer< T extends RealType< T > > extends Abstr
 		final double radius = spot.getFeature( Spot.RADIUS );
 		final double outterRadius = 2. * radius;
 
-		// Operate on ROI only if we have one and the image is 2D.
-		final double meanOut;
-		final SpotShape shape = spot.getShape();
-		if ( null != shape )
+		final double alpha = outterRadius / radius;
+		final Spot outterRoi = spot.copy();
+		outterRoi.scale( alpha );
+		final IterableInterval< T > neighborhood = outterRoi.iterable( img );
+		double totalSum = 0.;
+		int nTotal = 0;
+		for ( final T t : neighborhood )
 		{
-			// 2D or 3D cases are treated altogether.
-			final double alpha = outterRadius / radius;
-			final SpotShape outterRoi = shape.copy();
-			outterRoi.scale( alpha );
-			final IterableInterval< T > neighborhood = SpotUtil.iterable( outterRoi, spot, img );
-			double totalSum = 0.;
-			int nTotal = 0; // Total number of non-NaN pixels
-
-			// Iterate over the big ROI.
-			for ( final T t : neighborhood )
-			{
-				final double val = t.getRealDouble();
-				if ( Double.isNaN( val ) )
-					continue;
-				nTotal++;
-				totalSum += val;
-			}
-			
-			// Sum intensity inside (over non-NaN pixels).
-			final String sumFeature = makeFeatureKey( TOTAL_INTENSITY, channel );
-			final double innerSum = spot.getFeature( sumFeature );
-
-			// Compute number of non-NaN pixels in the inner roi.
-			final int nInner = ( int ) ( innerSum / meanIn );
-
-			// Total number of non-NaN pixels in the outer roi.
-			final int nOut = nTotal - nInner;
-
-			final double outterSum = totalSum - innerSum;
-			meanOut = outterSum / nOut;
+			final double val = t.getRealDouble();
+			if ( Double.isNaN( val ) )
+				continue;
+			nTotal++;
+			totalSum += val;
 		}
-		else
-		{
-			// Otherwise default to circle / sphere.
-			final Spot largeSpot = new Spot( spot );
-			largeSpot.putFeature( Spot.RADIUS, outterRadius );
-			final SpotNeighborhood< T > neighborhood = new SpotNeighborhood<>( largeSpot, img );
-			if ( neighborhood.size() <= 1 )
-			{
-				spot.putFeature( makeFeatureKey( CONTRAST, channel ), Double.NaN );
-				spot.putFeature( makeFeatureKey( SNR, channel ), Double.NaN );
-				return;
-			}
 
-			final double radius2 = radius * radius;
-			int nOut = 0; // Outer number of non-NaN pixels.
-			double sumOut = 0;
+		final String sumFeature = makeFeatureKey( TOTAL_INTENSITY, channel );
+		final double innerSum = spot.getFeature( sumFeature );
 
-			// Compute mean in the outer ring
-			final SpotNeighborhoodCursor< T > cursor = neighborhood.cursor();
-			while ( cursor.hasNext() )
-			{
-				cursor.fwd();
-				final double dist2 = cursor.getDistanceSquared();
-				if ( dist2 > radius2 )
-				{
-					final double val = cursor.get().getRealDouble();
-					if ( Double.isNaN( val ) )
-						continue;
-					nOut++;
-					sumOut += val;
-				}
-			}
-			meanOut = sumOut / nOut;
-		}
+		// Compute number of non-NaN pixels in the inner roi.
+		final int nInner = ( int ) ( innerSum / meanIn );
+
+		// Total number of non-NaN pixels in the outer roi.
+		final int nOut = nTotal - nInner;
+
+		final double outterSum = totalSum - innerSum;
+		final double meanOut = outterSum / nOut;
 
 		// Compute contrast
 		final double contrast = ( meanIn - meanOut ) / ( meanIn + meanOut );
@@ -179,4 +131,3 @@ public class SpotContrastAndSNRAnalyzer< T extends RealType< T > > extends Abstr
 		spot.putFeature( makeFeatureKey( SNR, channel ), snr );
 	}
 }
-

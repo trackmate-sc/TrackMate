@@ -29,6 +29,7 @@ import org.jgrapht.traverse.GraphIterator;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.action.closegaps.CloseGapsByLinearInterpolation;
@@ -180,8 +181,7 @@ public class CloseGapsByLinearInterpolationActionTest
 
 	private Spot createSpot( final double x, final double y, final double z )
 	{
-		final Spot newSpot = new Spot( x, y, z, 1.0, 1.0 );
-
+		final Spot newSpot = new SpotBase( x, y, z, 1.0, 1.0 );
 		newSpot.getFeatures().put( Spot.POSITION_T, 1.0 );
 		return newSpot;
 	}

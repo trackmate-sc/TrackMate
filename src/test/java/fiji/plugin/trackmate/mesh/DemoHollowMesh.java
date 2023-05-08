@@ -4,11 +4,11 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.ThresholdDetectorFactory;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
-import fiji.plugin.trackmate.util.SpotUtil;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.ImageJ;
@@ -57,12 +57,12 @@ public class DemoHollowMesh
 		final double r1 = imp.getWidth() / 4.;
 		final double r2 = imp.getWidth() / 8.;
 		final double r3 = imp.getWidth() / 16.;
-		final Spot s1 = new Spot( center, r1, 1. );
-		final Spot s2 = new Spot( center, r2, 1. );
-		final Spot s3 = new Spot( center, r3, 1. );
-		SpotUtil.iterable( s1, img ).forEach( p -> p.setReal( 250. ) );
-		SpotUtil.iterable( s2, img ).forEach( p -> p.setZero() );
-		SpotUtil.iterable( s3, img ).forEach( p -> p.setReal( 250. ) );
+		final Spot s1 = new SpotBase( center, r1, 1. );
+		final Spot s2 = new SpotBase( center, r2, 1. );
+		final Spot s3 = new SpotBase( center, r3, 1. );
+		s1.iterable( img ).forEach( p -> p.setReal( 250. ) );
+		s2.iterable( img ).forEach( p -> p.setZero() );
+		s3.iterable( img ).forEach( p -> p.setReal( 250. ) );
 		return imp;
 	}
 }

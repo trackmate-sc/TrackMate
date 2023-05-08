@@ -51,9 +51,9 @@ public class Spot2DFitEllipseAnalyzer< T extends RealType< T > > extends Abstrac
 
 		if ( is2D )
 		{
-			final SpotRoi roi = spot.getRoi();
-			if ( roi != null )
+			if ( spot instanceof SpotRoi )
 			{
+				final SpotRoi roi = ( SpotRoi ) spot;
 				final double[] Q = fitEllipse( roi.x, roi.y );
 				final double[] A = quadraticToCartesian( Q );
 				x0 = A[ 0 ];
