@@ -207,4 +207,8 @@ public class Icons
 
 	public static final ImageIcon SEGMENTATION_EDITOR_ICON_64x64 = new ImageIcon( Icons.class.getResource( "images/Segmentation-editor-logo_v2-64px.png" ) );
 
+	public static final ImageIcon BULLET_GREEN_ICON = new ImageIcon( Icons.class.getResource( "images/bullet_green.png" ) );
+
+	public static final ImageIcon QUESTION_ICON = new ImageIcon( Icons.class.getResource( "images/help.png" ) );
+
 }
