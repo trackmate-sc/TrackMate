@@ -215,6 +215,10 @@
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-listeners</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>ui-behaviour</artifactId>
+		</dependency>
 
 		<!-- Other dependencies -->
 		<dependency>
