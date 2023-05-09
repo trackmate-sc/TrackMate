@@ -197,15 +197,17 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 
 				// Compute mean velocity "by hand".
 				final double meanV;
+                                double sum;
 				if ( branch.size() < 2 )
 				{
 					meanV = Double.NaN;
+                                        sum = 0;
 				}
 				else
 				{
 					final Iterator< Spot > it = branch.iterator();
 					Spot previous = it.next();
-					double sum = 0;
+					sum = 0;
 					while ( it.hasNext() )
 					{
 						final Spot next = it.next();
@@ -213,9 +215,12 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 						sum += dr;
 						previous = next;
 					}
-					meanV = sum / ( branch.size() - 1 );
+					meanV = sum / ( Double.valueOf( br.dt() ));
 				}
 				br.putFeature( MEAN_VELOCITY, Double.valueOf( meanV ) );
+                                
+                                // Distance traveled.
+				br.putFeature( TOTAL_DISTANCE, sum );
 
 				// Predecessors
 				final Set< DefaultEdge > incomingEdges = branchGraph.incomingEdgesOf( branch );
@@ -475,6 +480,7 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 	private static final String DELTA_T = "DELTA_T";
 	private static final String DISTANCE = "DISTANCE";
 	private static final String MEAN_VELOCITY = "MEAN_VELOCITY";
+        private static final String TOTAL_DISTANCE = "TOTAL_DISTANCE";
 	private static final String FIRST = "FIRST";
 	private static final String LAST = "LAST";
         // mean temporal distance between end of the branch and begin of successors branch
@@ -488,6 +494,7 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 			DELTA_T,
 			DISTANCE,
 			MEAN_VELOCITY,
+                        TOTAL_DISTANCE,
 			FIRST,
 			LAST,
                         MEAN_SUCCESSORS_DELAY,
@@ -529,6 +536,11 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 		BRANCH_FEATURES_SHORTNAMES.put( MEAN_VELOCITY, "Mean V" );
 		BRANCH_FEATURES_ISINTS.put( MEAN_VELOCITY, Boolean.FALSE );
 		BRANCH_FEATURES_DIMENSIONS.put( MEAN_VELOCITY, Dimension.VELOCITY );
+                
+                BRANCH_FEATURES_NAMES.put( TOTAL_DISTANCE, "Total distance" );
+		BRANCH_FEATURES_SHORTNAMES.put( TOTAL_DISTANCE, "Tot Dist" );
+		BRANCH_FEATURES_ISINTS.put( TOTAL_DISTANCE, Boolean.FALSE );
+		BRANCH_FEATURES_DIMENSIONS.put( TOTAL_DISTANCE, Dimension.LENGTH );
 
 		BRANCH_FEATURES_NAMES.put( FIRST, "First spot ID" );
 		BRANCH_FEATURES_SHORTNAMES.put( FIRST, "First ID" );
