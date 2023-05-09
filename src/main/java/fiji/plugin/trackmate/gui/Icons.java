@@ -201,4 +201,8 @@ public class Icons
 
 	public static final ImageIcon VECTOR_ICON = new ImageIcon( Icons.class.getResource( "images/vector.png" ) );
 
+	public static final ImageIcon BULLET_GREEN_ICON = new ImageIcon( Icons.class.getResource( "images/bullet_green.png" ) );
+
+	public static final ImageIcon QUESTION_ICON = new ImageIcon( Icons.class.getResource( "images/help.png" ) );
+
 }
