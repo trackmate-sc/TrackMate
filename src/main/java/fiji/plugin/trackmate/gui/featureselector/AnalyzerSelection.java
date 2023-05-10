@@ -11,10 +11,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.detection.DetectionUtils;
+import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
+import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.spot.SpotContrastAndSNRAnalyzerFactory;
+import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
 import fiji.plugin.trackmate.providers.Spot2DMorphologyAnalyzerProvider;
@@ -60,6 +66,90 @@ public class AnalyzerSelection
 			return Collections.emptyList();
 
 		return new ArrayList<>( map.keySet() );
+	}
+
+	public List< String > getSelectedAnalyzers( final TrackMateObject obj )
+	{
+		final Map< String, Boolean > map = allAnalyzers.get( obj );
+		if ( map == null )
+			return Collections.emptyList();
+
+		return map.entrySet()
+				.stream()
+				.filter( e -> e.getValue() )
+				.map( e -> e.getKey() )
+				.collect( Collectors.toList() );
+	}
+
+	/**
+	 * Configure the specified settings object so that it includes only all the
+	 * analyzers in this selection.
+	 * 
+	 * @param settings
+	 */
+	public void configure( final Settings settings )
+	{
+		settings.clearSpotAnalyzerFactories();
+		settings.clearEdgeAnalyzers();
+		settings.clearTrackAnalyzers();
+
+		final List< String > spotAnalyzers = getSelectedAnalyzers( SPOTS );
+
+		// Base spot analyzers.
+		final SpotAnalyzerProvider spotAnalyzerProvider = new SpotAnalyzerProvider( settings.imp == null
+				? 1 : settings.imp.getNChannels() );
+		for ( final String key : spotAnalyzers )
+		{
+			final SpotAnalyzerFactory< ? > factory = spotAnalyzerProvider.getFactory( key );
+			if ( factory != null )
+				settings.addSpotAnalyzerFactory( factory );
+		}
+
+		// Shall we add 2D morphology analyzers?
+		if ( settings.imp != null
+				&& DetectionUtils.is2D( settings.imp )
+				&& settings.detectorFactory != null
+				&& settings.detectorFactory.has2Dsegmentation() )
+		{
+			for ( final String key : spotAnalyzers )
+			{
+				final SpotAnalyzerFactory< ? > factory = spotAnalyzerProvider.getFactory( key );
+				if ( factory != null )
+					settings.addSpotAnalyzerFactory( factory );
+			}
+		}
+
+		// Shall we add 3D morphology analyzers?
+		if ( settings.imp != null
+				&& !DetectionUtils.is2D( settings.imp )
+				&& settings.detectorFactory != null
+				&& settings.detectorFactory.has3Dsegmentation() )
+		{
+			for ( final String key : spotAnalyzers )
+			{
+				final SpotAnalyzerFactory< ? > factory = spotAnalyzerProvider.getFactory( key );
+				if ( factory != null )
+					settings.addSpotAnalyzerFactory( factory );
+			}
+		}
+
+		// Edge analyzers.
+		final EdgeAnalyzerProvider edgeAnalyzerProvider = new EdgeAnalyzerProvider();
+		for ( final String key : getSelectedAnalyzers( EDGES ) )
+		{
+			final EdgeAnalyzer factory = edgeAnalyzerProvider.getFactory( key );
+			if ( factory != null )
+				settings.addEdgeAnalyzer( factory );
+		}
+
+		// Track analyzers.
+		final TrackAnalyzerProvider trackAnalyzerProvider = new TrackAnalyzerProvider();
+		for ( final String key : getSelectedAnalyzers( TRACKS ) )
+		{
+			final TrackAnalyzer factory = trackAnalyzerProvider.getFactory( key );
+			if ( factory != null )
+				settings.addTrackAnalyzer( factory );
+		}
 	}
 
 	/**
@@ -127,9 +217,10 @@ public class AnalyzerSelection
 		mergeWithDefault();
 	}
 
-	public static final String toName(final TrackMateObject obj)
+	public static final String toName( final TrackMateObject obj )
 	{
 		final String str = obj.toString();
 		return StringUtils.capitalize( str ).substring( 0, str.length() - 1 );
 	}
+
 }
