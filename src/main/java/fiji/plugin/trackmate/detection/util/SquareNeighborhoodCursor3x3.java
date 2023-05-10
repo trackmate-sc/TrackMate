@@ -25,7 +25,6 @@ import java.util.NoSuchElementException;
 
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.Sampler;
 import net.imglib2.outofbounds.Bounded;
 import net.imglib2.outofbounds.OutOfBounds;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
@@ -96,9 +95,9 @@ public class SquareNeighborhoodCursor3x3< T > implements Cursor< T >, Bounded
 	}
 
 	@Override
-	public Sampler< T > copy()
+	public Cursor< T > copy()
 	{
-		return ra.copy();
+		return new SquareNeighborhoodCursor3x3<>( source, center );
 	}
 
 	@Override
@@ -206,12 +205,6 @@ public class SquareNeighborhoodCursor3x3< T > implements Cursor< T >, Bounded
 	public long getLongPosition( final int d )
 	{
 		return ra.getLongPosition( d );
-	}
-
-	@Override
-	public Cursor< T > copyCursor()
-	{
-		return new SquareNeighborhoodCursor3x3<>( source, center );
 	}
 
 	@Override

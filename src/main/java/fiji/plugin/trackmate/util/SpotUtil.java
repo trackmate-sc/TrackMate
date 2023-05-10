@@ -34,7 +34,6 @@ import net.imglib2.IterableInterval;
 import net.imglib2.Localizable;
 import net.imglib2.RandomAccess;
 import net.imglib2.RealLocalizable;
-import net.imglib2.Sampler;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Intervals;
 import net.imglib2.util.Util;
@@ -324,15 +323,9 @@ public class SpotUtil
 		}
 
 		@Override
-		public Cursor< T > copyCursor()
+		public Cursor< T > copy()
 		{
 			return new MyCursor<>( roi, center, img );
-		}
-
-		@Override
-		public Sampler< T > copy()
-		{
-			return copyCursor();
 		}
 	}
 }
