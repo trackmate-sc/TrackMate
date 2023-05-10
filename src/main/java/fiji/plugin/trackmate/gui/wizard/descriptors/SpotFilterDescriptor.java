@@ -22,8 +22,8 @@
 package fiji.plugin.trackmate.gui.wizard.descriptors;
 
 import java.awt.Container;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.swing.JLabel;
 
@@ -41,6 +41,8 @@ import fiji.plugin.trackmate.features.spot.Spot3DMorphologyAnalyzerFactory;
 import fiji.plugin.trackmate.gui.components.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.components.FilterGuiPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
+import fiji.plugin.trackmate.gui.featureselector.AnalyzerSelection;
+import fiji.plugin.trackmate.gui.featureselector.AnalyzerSelectionIO;
 import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
 import fiji.plugin.trackmate.io.SettingsPersistence;
 import fiji.plugin.trackmate.providers.Spot2DMorphologyAnalyzerProvider;
@@ -113,19 +115,33 @@ public class SpotFilterDescriptor extends WizardPanelDescriptor
 							&& trackmate.getSettings().detectorFactory.has2Dsegmentation()
 							&& DetectionUtils.is2D( trackmate.getSettings().imp ) )
 					{
-						logger.log( "\nAdding 2D morphology analyzers...\n", Logger.BLUE_COLOR );
 						final Settings settings = trackmate.getSettings();
 						final Spot2DMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider = new Spot2DMorphologyAnalyzerProvider( settings.imp.getNChannels() );
-						@SuppressWarnings( "rawtypes" )
-						final List< Spot2DMorphologyAnalyzerFactory > factories = spotMorphologyAnalyzerProvider
-								.getKeys()
-								.stream()
-								.map( key -> spotMorphologyAnalyzerProvider.getFactory( key ) )
-								.collect( Collectors.toList() );
-						factories.forEach( settings::addSpotAnalyzerFactory );
-						final StringBuilder strb = new StringBuilder();
-						Settings.prettyPrintFeatureAnalyzer( factories, strb );
-						logger.log( strb.toString() );
+
+						final AnalyzerSelection analyzerSelection = AnalyzerSelectionIO.readUserDefault();
+						final List< Spot2DMorphologyAnalyzerFactory< ? > > factories = new ArrayList<>();
+
+						for ( final String key : analyzerSelection.getSelectedAnalyzers( TrackMateObject.SPOTS ) )
+						{
+							final Spot2DMorphologyAnalyzerFactory< ? > factory = spotMorphologyAnalyzerProvider.getFactory( key );
+							if ( factory != null )
+							{
+								settings.addSpotAnalyzerFactory( factory );
+								factories.add( factory );
+							}
+						}
+
+						if ( factories.isEmpty() )
+						{
+							logger.log( "\nNo 2D morphology analyzers to add.\n", Logger.BLUE_COLOR );
+						}
+						else
+						{
+							logger.log( "\nAdding 2D morphology analyzers...\n", Logger.BLUE_COLOR );
+							final StringBuilder strb = new StringBuilder();
+							Settings.prettyPrintFeatureAnalyzer( factories, strb );
+							logger.log( strb.toString() );
+						}
 					}
 
 					// 3D.
@@ -133,19 +149,33 @@ public class SpotFilterDescriptor extends WizardPanelDescriptor
 							&& trackmate.getSettings().detectorFactory.has3Dsegmentation()
 							&& !DetectionUtils.is2D( trackmate.getSettings().imp ) )
 					{
-						logger.log( "\nAdding 3D morphology analyzers...\n", Logger.BLUE_COLOR );
 						final Settings settings = trackmate.getSettings();
 						final Spot3DMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider = new Spot3DMorphologyAnalyzerProvider( settings.imp.getNChannels() );
-						@SuppressWarnings( "rawtypes" )
-						final List< Spot3DMorphologyAnalyzerFactory > factories = spotMorphologyAnalyzerProvider
-								.getKeys()
-								.stream()
-								.map( key -> spotMorphologyAnalyzerProvider.getFactory( key ) )
-								.collect( Collectors.toList() );
-						factories.forEach( settings::addSpotAnalyzerFactory );
-						final StringBuilder strb = new StringBuilder();
-						Settings.prettyPrintFeatureAnalyzer( factories, strb );
-						logger.log( strb.toString() );
+
+						final AnalyzerSelection analyzerSelection = AnalyzerSelectionIO.readUserDefault();
+						final List< Spot3DMorphologyAnalyzerFactory< ? > > factories = new ArrayList<>();
+
+						for ( final String key : analyzerSelection.getSelectedAnalyzers( TrackMateObject.SPOTS ) )
+						{
+							final Spot3DMorphologyAnalyzerFactory< ? > factory = spotMorphologyAnalyzerProvider.getFactory( key );
+							if ( factory != null )
+							{
+								settings.addSpotAnalyzerFactory( factory );
+								factories.add( factory );
+							}
+						}
+
+						if ( factories.isEmpty() )
+						{
+							logger.log( "\nNo 3D morphology analyzers to add.\n", Logger.BLUE_COLOR );
+						}
+						else
+						{
+							logger.log( "\nAdding 3D morphology analyzers...\n", Logger.BLUE_COLOR );
+							final StringBuilder strb = new StringBuilder();
+							Settings.prettyPrintFeatureAnalyzer( factories, strb );
+							logger.log( strb.toString() );
+						}
 					}
 
 					/*
