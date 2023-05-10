@@ -5,7 +5,17 @@ import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 
-public class AnalyzerSelector
+import org.scijava.command.Command;
+import org.scijava.plugin.Plugin;
+
+@Plugin( type = Command.class,
+		label = "Configure TrackMate feature analyzers...",
+		iconPath = "/icons/commands/information.png",
+		menuPath = "Edit >  Options > Configure TrackMate feature analyzers...",
+		description = "Shows a dialog that allows configuring what feature analyzers will be used "
+				+ "in the next TrackMate session." )
+
+public class AnalyzerSelector implements Command
 {
 
 	private final JDialog dialog;
@@ -28,8 +38,14 @@ public class AnalyzerSelector
 		return dialog;
 	}
 
+	@Override
+	public void run()
+	{
+		dialog.setVisible( true );
+	}
+
 	public static void main( final String[] args )
 	{
-		new AnalyzerSelector().getDialog().setVisible( true );
+		new AnalyzerSelector().run();
 	}
 }
