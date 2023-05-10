@@ -3,6 +3,9 @@ package fiji.plugin.trackmate.gui.featureselector;
 import static fiji.plugin.trackmate.gui.Icons.APPLY_ICON;
 import static fiji.plugin.trackmate.gui.Icons.RESET_ICON;
 import static fiji.plugin.trackmate.gui.Icons.REVERT_ICON;
+import static fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject.EDGES;
+import static fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject.SPOTS;
+import static fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject.TRACKS;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -12,7 +15,6 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +34,7 @@ import javax.swing.ScrollPaneConstants;
 
 import fiji.plugin.trackmate.features.FeatureAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactoryBase;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.providers.AbstractProvider;
 import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
@@ -39,12 +42,6 @@ import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 public class AnalyzerSelectorPanel extends JPanel
 {
 	private static final long serialVersionUID = 1L;
-
-	private static final String SPOT_ANALYZER_KEY = "Spot analyzers";
-
-	private static final String EDGE_ANALYZER_KEY = "Edge analyzers";
-
-	private static final String TRACK_ANALYZER_KEY = "Track analyzers";
 
 	private static final String APPLY_TOOLTIP = "<html>Save the current analyzer selection to the user default settings. "
 			+ "The selection be used in all the following TrackMate sessions.</html>";
@@ -135,21 +132,14 @@ public class AnalyzerSelectorPanel extends JPanel
 		// Feed the feature panel.
 		final FeatureTable.Tables aggregator = new FeatureTable.Tables();
 
-		// Aggregate all maps.
-		final Map< String, Map< String, Boolean > > allAnalyzers = new LinkedHashMap<>( 3 );
-		allAnalyzers.put( SPOT_ANALYZER_KEY, selection.spotAnalyzers );
-		allAnalyzers.put( EDGE_ANALYZER_KEY, selection.edgeAnalyzers );
-		allAnalyzers.put( TRACK_ANALYZER_KEY, selection.trackAnalyzers );
-		
 		// Providers to test presence of an analyzer and get info.
-		final Map< String, AbstractProvider< ? > > allProviders = new LinkedHashMap<>( 3 );
-		allProviders.put( SPOT_ANALYZER_KEY, new MySpotAnalyzerProvider() );
-		allProviders.put( EDGE_ANALYZER_KEY, new EdgeAnalyzerProvider() );
-		allProviders.put( TRACK_ANALYZER_KEY, new TrackAnalyzerProvider() );
+		final Map< TrackMateObject, AbstractProvider< ? > > allProviders = new LinkedHashMap<>( 3 );
+		allProviders.put( SPOTS, new MySpotAnalyzerProvider() );
+		allProviders.put( EDGES, new EdgeAnalyzerProvider() );
+		allProviders.put( TRACKS, new TrackAnalyzerProvider() );
 		
-		for ( final String target : allAnalyzers.keySet() )
+		for ( final TrackMateObject target : AnalyzerSelection.objs )
 		{
-			final Map< String, Boolean > analyzers = allAnalyzers.get( target );
 			@SuppressWarnings( "unchecked" )
 			final AbstractProvider< FeatureAnalyzer > provider = ( AbstractProvider< FeatureAnalyzer > ) allProviders.get( target );
 
@@ -157,7 +147,7 @@ public class AnalyzerSelectorPanel extends JPanel
 			final BoxLayout hpLayout = new BoxLayout( headerPanel, BoxLayout.LINE_AXIS );
 			headerPanel.setLayout( hpLayout );
 
-			final JLabel lbl = new JLabel( target );
+			final JLabel lbl = new JLabel( AnalyzerSelection.toName( target ) + " analyzers:" );
 			lbl.setFont( panelFeatures.getFont().deriveFont( Font.BOLD ) );
 			lbl.setAlignmentX( Component.LEFT_ALIGNMENT );
 
@@ -167,16 +157,15 @@ public class AnalyzerSelectorPanel extends JPanel
 			headerPanel.setAlignmentX( Component.LEFT_ALIGNMENT );
 			panelFeatures.add( Box.createVerticalStrut( 5 ) );
 
-			final List< String > featureSpecs = new ArrayList<>( analyzers.keySet() );
-
+			final List< String > analyzerKeys = selection.getKeys( target );
 			final Function< String, String > getName = k -> provider.getFactory( k ).getName();
-			final Predicate< String > isSelected = k -> analyzers.getOrDefault( k, true );
-			final BiConsumer< String, Boolean > setSelected = ( k, b ) -> analyzers.put( k, b );
+			final Predicate< String > isSelected = k -> selection.isSelected( target, k );
+			final BiConsumer< String, Boolean > setSelected = ( k, b ) -> selection.setSelected( target, k, b );
 			final Predicate< String > isAnalyzerPresent = k -> provider.getKeys().contains( k );
 			
 			final FeatureTable< List< String >, String > featureTable =
 					new FeatureTable<>(
-							featureSpecs,
+							analyzerKeys,
 							List::size,
 							List::get,
 							getName,

@@ -1,9 +1,21 @@
 package fiji.plugin.trackmate.gui.featureselector;
 
+import static fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject.EDGES;
+import static fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject.SPOTS;
+import static fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject.TRACKS;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.commons.lang3.StringUtils;
+
 import fiji.plugin.trackmate.features.spot.SpotContrastAndSNRAnalyzerFactory;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
 import fiji.plugin.trackmate.providers.Spot2DMorphologyAnalyzerProvider;
 import fiji.plugin.trackmate.providers.Spot3DMorphologyAnalyzerProvider;
@@ -13,28 +25,41 @@ import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 public class AnalyzerSelection
 {
 
-	final Map< String, Boolean > spotAnalyzers = new TreeMap<>();
+	static final List< TrackMateObject > objs = Arrays.asList( new TrackMateObject[] { SPOTS, EDGES, TRACKS } );
 
-	final Map< String, Boolean > edgeAnalyzers = new TreeMap<>();
-
-	final Map< String, Boolean > trackAnalyzers = new TreeMap<>();
+	private final Map< TrackMateObject, Map< String, Boolean > > allAnalyzers = new LinkedHashMap<>();
 
 	private AnalyzerSelection()
-	{}
-
-	public boolean isSpotAnalyzersSelected( final String key )
 	{
-		return spotAnalyzers.getOrDefault( key, false );
+		allAnalyzers.put( SPOTS, new TreeMap<>() );
+		allAnalyzers.put( EDGES, new TreeMap<>() );
+		allAnalyzers.put( TRACKS, new TreeMap<>() );
 	}
 
-	public boolean isEdgeAnalyzersSelected( final String key )
+	public boolean isSelected( final TrackMateObject obj, final String key )
 	{
-		return spotAnalyzers.getOrDefault( key, false );
+		final Map< String, Boolean > map = allAnalyzers.get( obj );
+		if ( map == null )
+			return false;
+		return map.getOrDefault( key, false );
 	}
 
-	public boolean isTrackAnalyzersSelected( final String key )
+	public void setSelected( final TrackMateObject obj, final String key, final boolean selected )
 	{
-		return spotAnalyzers.getOrDefault( key, false );
+		final Map< String, Boolean > map = allAnalyzers.get( obj );
+		if ( map == null )
+			return;
+
+		map.put( key, selected );
+	}
+
+	public List< String > getKeys( final TrackMateObject obj )
+	{
+		final Map< String, Boolean > map = allAnalyzers.get( obj );
+		if ( map == null )
+			return Collections.emptyList();
+
+		return new ArrayList<>( map.keySet() );
 	}
 
 	/**
@@ -44,31 +69,27 @@ public class AnalyzerSelection
 	public void mergeWithDefault()
 	{
 		final AnalyzerSelection df = defaultSelection();
-
-		for ( final String key : df.spotAnalyzers.keySet() )
-			spotAnalyzers.putIfAbsent( key, true );
-
-		for ( final String key : df.edgeAnalyzers.keySet() )
-			edgeAnalyzers.putIfAbsent( key, true );
-
-		for ( final String key : df.trackAnalyzers.keySet() )
-			trackAnalyzers.putIfAbsent( key, true );
+		for ( final TrackMateObject obj : objs )
+		{
+			final Map< String, Boolean > source = df.allAnalyzers.get( obj );
+			final Map< String, Boolean > target = allAnalyzers.get( obj );
+			for ( final String key : source.keySet() )
+				target.putIfAbsent( key, true );
+		}
 	}
 
 	@Override
 	public String toString()
 	{
 		final StringBuilder str = new StringBuilder( super.toString() );
-		str.append( "\nSpot analyzers:" );
-		for ( final String key : spotAnalyzers.keySet() )
-			str.append( String.format( "\n\t%25s \t-> %s", key, ( spotAnalyzers.get( key ).booleanValue() ? "selected" : "deselected" ) ) );
-		str.append( "\nEdge analyzers:" );
-		for ( final String key : edgeAnalyzers.keySet() )
-			str.append( String.format( "\n\t%25s \t-> %s", key, ( edgeAnalyzers.get( key ).booleanValue() ? "selected" : "deselected" ) ) );
-		str.append( "\nTrack analyzers:" );
-		for ( final String key : trackAnalyzers.keySet() )
-			str.append( String.format( "\n\t%25s \t-> %s", key, ( trackAnalyzers.get( key ).booleanValue() ? "selected" : "deselected" ) ) );
+		for ( final TrackMateObject obj : objs )
+		{
+			str.append( "\n" + toName( obj ) + " analyzers:" );
 
+			final Map< String, Boolean > map = allAnalyzers.get( obj );
+			for ( final String key : map.keySet() )
+				str.append( String.format( "\n\t%25s \t-> %s", key, ( map.get( key ).booleanValue() ? "selected" : "deselected" ) ) );
+		}
 		return str.toString();
 	}
 
@@ -77,34 +98,38 @@ public class AnalyzerSelection
 		final AnalyzerSelection fs = new AnalyzerSelection();
 
 		for ( final String key : new SpotAnalyzerProvider( 1 ).getVisibleKeys() )
-			fs.spotAnalyzers.put( key, true );
+			fs.setSelected( SPOTS, key, true );
 
 		for ( final String key : new Spot2DMorphologyAnalyzerProvider( 1 ).getKeys() )
-			fs.spotAnalyzers.put( key, true );
+			fs.setSelected( SPOTS, key, true );
 
 		for ( final String key : new Spot3DMorphologyAnalyzerProvider( 1 ).getKeys() )
-			fs.spotAnalyzers.put( key, true );
+			fs.setSelected( SPOTS, key, true );
 
 		for ( final String key : new EdgeAnalyzerProvider().getKeys() )
-			fs.edgeAnalyzers.put( key, true );
+			fs.setSelected( EDGES, key, true );
 
 		for ( final String key : new TrackAnalyzerProvider().getKeys() )
-			fs.trackAnalyzers.put( key, true );
+			fs.setSelected( TRACKS, key, true );
 
 		// Fine tune.
-		fs.spotAnalyzers.put( SpotContrastAndSNRAnalyzerFactory.KEY, false );
+		fs.setSelected( SPOTS, SpotContrastAndSNRAnalyzerFactory.KEY, false );
 
 		return fs;
 	}
 
 	public void set( final AnalyzerSelection o )
 	{
-		spotAnalyzers.clear();
-		spotAnalyzers.putAll( o.spotAnalyzers );
-		edgeAnalyzers.clear();
-		edgeAnalyzers.putAll( o.edgeAnalyzers );
-		trackAnalyzers.clear();
-		trackAnalyzers.putAll( o.trackAnalyzers );
+		allAnalyzers.clear();
+		for ( final TrackMateObject obj : objs )
+			allAnalyzers.put( obj, new TreeMap<>( o.allAnalyzers.get( obj ) ) );
+
 		mergeWithDefault();
+	}
+
+	public static final String toName(final TrackMateObject obj)
+	{
+		final String str = obj.toString();
+		return StringUtils.capitalize( str ).substring( 0, str.length() - 1 );
 	}
 }
