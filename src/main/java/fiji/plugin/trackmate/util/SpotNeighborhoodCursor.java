@@ -22,7 +22,6 @@
 package fiji.plugin.trackmate.util;
 
 import net.imglib2.Cursor;
-import net.imglib2.Sampler;
 import net.imglib2.type.numeric.RealType;
 
 public class SpotNeighborhoodCursor< T extends RealType< T > > implements Cursor< T >
@@ -160,7 +159,7 @@ public class SpotNeighborhoodCursor< T extends RealType< T > > implements Cursor
 	}
 
 	@Override
-	public Sampler< T > copy()
+	public Cursor< T > copy()
 	{
 		return cursor.copy();
 	}
@@ -224,11 +223,4 @@ public class SpotNeighborhoodCursor< T extends RealType< T > > implements Cursor
 	{
 		return cursor.getLongPosition( d );
 	}
-
-	@Override
-	public Cursor< T > copyCursor()
-	{
-		return cursor.copyCursor();
-	}
-
 }

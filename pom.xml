@@ -147,6 +147,7 @@
 
 		<fontchooser.version>2.5.2</fontchooser.version>
 		<javaGeom.version>0.11.1</javaGeom.version>
+		<imglib2.version>6.1.0</imglib2.version>
 	</properties>
 
 	<dependencies>
