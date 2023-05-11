@@ -661,7 +661,7 @@ public class MaskUtils
 		while ( iterator.hasNext() )
 		{
 			final LabelRegion< Integer > region = iterator.next();
-			final Spot spot = regionToSpotMesh( region, simplify, calibration, qualityImage );
+			final Spot spot = regionToSpotMesh( region, simplify, calibration, qualityImage, interval.minAsDoubleArray() );
 			if ( spot == null )
 				continue;
 
@@ -1296,6 +1296,8 @@ public class MaskUtils
 	 *            <code>null</code>, the quality of the spot will be the max
 	 *            value of this image inside the mesh. If <code>null</code>, the
 	 *            quality will be the mesh volume.
+	 * @param minInterval
+	 *            the origin in image coordinates of the ROI used for detection.
 	 *
 	 * @return a new spot.
 	 */
@@ -1303,7 +1305,8 @@ public class MaskUtils
 			final RandomAccessibleInterval< BoolType > region,
 			final boolean simplify,
 			final double[] calibration,
-			final RandomAccessibleInterval< S > qualityImage )
+			final RandomAccessibleInterval< S > qualityImage,
+			final double[] minInterval )
 	{
 		// To mesh.
 		final IntervalView< BoolType > box = Views.zeroMin( region );
@@ -1342,8 +1345,13 @@ public class MaskUtils
 		if ( SpotMesh.volume( mesh ) < volumeThreshold )
 			return null;
 
+		// Translate back to interval coords.
+
 		// Scale to physical coords.
-		final double[] origin = region.minAsDoubleArray();
+		final double[] originRegion = region.minAsDoubleArray();
+		final double[] origin = new double[3];
+		for ( int d = 0; d < 3; d++ )
+			origin[ d ] = originRegion[ d ] + minInterval[ d ];
 		scale( simplified.vertices(), calibration, origin );
 
 		// Make spot with default quality.
