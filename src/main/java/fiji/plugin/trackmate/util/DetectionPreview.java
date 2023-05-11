@@ -156,6 +156,8 @@ public class DetectionPreview
 		final Settings lSettings = new Settings( settings.imp );
 		lSettings.tstart = frame;
 		lSettings.tend = frame;
+		lSettings.zstart = settings.zstart;
+		lSettings.zend = settings.zend;
 		settings.setRoi( settings.imp.getRoi() );
 
 		lSettings.detectorFactory = detectorFactory;
