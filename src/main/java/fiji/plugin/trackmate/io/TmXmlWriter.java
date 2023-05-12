@@ -789,7 +789,7 @@ public class TmXmlWriter
 				{
 					// Save mesh in true coordinates.
 					final SpotMesh sm = ( SpotMesh ) spot;
-					final Mesh mesh = sm.mesh;
+					final Mesh mesh = sm.getMesh();
 					final Mesh translated = TranslateMesh.translate( mesh, spot );
 					final byte[] bs = PLY_MESH_IO.writeBinary( translated );
 

@@ -60,7 +60,7 @@ public class Spot3DFitEllipsoidAnalyzer< T extends RealType< T > > extends Abstr
 			if ( spot instanceof SpotMesh )
 			{
 				final SpotMesh sm = ( SpotMesh ) spot;
-				final EllipsoidFit fit = EllipsoidFitter.fit( sm.mesh );
+				final EllipsoidFit fit = EllipsoidFitter.fit( sm.getMesh() );
 				x0 = fit.center.getDoublePosition( 0 );
 				y0 = fit.center.getDoublePosition( 1 );
 				z0 = fit.center.getDoublePosition( 2 );

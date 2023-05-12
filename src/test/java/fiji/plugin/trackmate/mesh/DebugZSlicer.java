@@ -50,7 +50,7 @@ public class DebugZSlicer
 
 			imp.setZ( ( int ) Math.round( z / calibration[ 2 ] ) + 1 );
 
-			final Slice contours = ZSlicer.slice( ( ( SpotMesh ) spot ).mesh, z, calibration[ 2 ] );
+			final Slice contours = ZSlicer.slice( ( ( SpotMesh ) spot ).getMesh(), z, calibration[ 2 ] );
 			System.out.println( "Found " + contours.size() + " contours." );
 			for ( final Contour contour : contours )
 				System.out.println( contour );

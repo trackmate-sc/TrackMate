@@ -30,7 +30,7 @@ public class SpotMesh extends SpotBase
 	 * (0, 0, 0) and the true position of its vertices is obtained by adding the
 	 * spot center.
 	 */
-	public final Mesh mesh;
+	private final Mesh mesh;
 
 	private Map< Integer, Slice > sliceMap;
 
@@ -114,6 +114,18 @@ public class SpotMesh extends SpotBase
 
 		// Bounding box, also centered on (0,0,0)
 		this.boundingBox = toRealInterval( Meshes.boundingBox( mesh ) );
+	}
+
+	/**
+	 * Exposes the mesh object stores in this spot. The coordinates of the
+	 * vertices are relative to the spot center. That is: the coordinates are
+	 * centered on (0,0,0).
+	 * 
+	 * @return the mesh.
+	 */
+	public Mesh getMesh()
+	{
+		return mesh;
 	}
 
 	@Override

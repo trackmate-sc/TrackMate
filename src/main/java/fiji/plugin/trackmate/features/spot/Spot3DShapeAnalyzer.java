@@ -58,12 +58,12 @@ public class Spot3DShapeAnalyzer< T extends RealType< T > > extends AbstractSpot
 			if ( spot instanceof SpotMesh )
 			{
 				final SpotMesh sm = ( SpotMesh ) spot;
-				final Mesh ch = convexHull.calculate( sm.mesh );
+				final Mesh ch = convexHull.calculate( sm.getMesh() );
 				volume = sm.volume();
 				final double volumeCH = Meshes.volume( ch );
 				solidity = volume / volumeCH;
 
-				sa = surfaceArea.calculate( sm.mesh ).get();
+				sa = surfaceArea.calculate( sm.getMesh() ).get();
 				final double saCH = surfaceArea.calculate( ch ).get();
 				convexity = sa / saCH;
 
