@@ -28,7 +28,11 @@ import org.scijava.Cancelable;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
+import fiji.plugin.trackmate.features.FeatureUtils;
+import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.components.LogPanel;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
 
 public class ExecuteTrackingDescriptor extends WizardPanelDescriptor
@@ -38,11 +42,14 @@ public class ExecuteTrackingDescriptor extends WizardPanelDescriptor
 
 	private final TrackMate trackmate;
 
-	public ExecuteTrackingDescriptor( final TrackMate trackmate, final LogPanel logPanel )
+	private final DisplaySettings displaySettings;
+
+	public ExecuteTrackingDescriptor( final TrackMate trackmate, final LogPanel logPanel, final DisplaySettings displaySettings )
 	{
 		super( KEY );
 		this.trackmate = trackmate;
 		this.targetPanel = logPanel;
+		this.displaySettings = displaySettings;
 	}
 
 	@Override
@@ -66,6 +73,11 @@ public class ExecuteTrackingDescriptor extends WizardPanelDescriptor
 			logger.log( String.format( "  - avg size: %.1f spots.\n", stats.getAverage() ) );
 			logger.log( String.format( "  - min size: %d spots.\n", stats.getMin() ) );
 			logger.log( String.format( "  - max size: %d spots.\n", stats.getMax() ) );
+
+			// Possibly tweak display settings: color spots by track id.
+			if ( displaySettings.getSpotColorByType() == TrackMateObject.DEFAULT )
+				if ( displaySettings.getSpotColorByFeature().equals( FeatureUtils.USE_UNIFORM_COLOR_KEY ) )
+					displaySettings.setSpotColorBy( TrackMateObject.TRACKS, TrackIndexAnalyzer.TRACK_INDEX );
 		};
 	}
 
