@@ -42,6 +42,7 @@ import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.util.SpotUtil;
 import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.visualization.GlasbeyLut;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
@@ -354,8 +355,9 @@ public class LabelImgExporter extends AbstractTMAction
 
 		final ImagePlus lblImp = ImageJFunctions.wrap( createLabelImg( model, dims, calibration, exportSpotsAsDots, exportTracksOnly, labelIdPainting, logger ), "LblImage" );
 		lblImp.setDimensions( 1, dimensions[ 2 ], dimensions[ 3 ] );
+		lblImp.setLut( GlasbeyLut.toLUT() );
+		lblImp.setDisplayRange( 0, 255 );
 		lblImp.setOpenAsHyperStack( true );
-		lblImp.resetDisplayRange();
 		return lblImp;
 	}
 
