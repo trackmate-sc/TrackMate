@@ -24,7 +24,6 @@ package fiji.plugin.trackmate.tracking.overlap;
 import static fiji.plugin.trackmate.tracking.overlap.OverlapTrackerFactory.BASE_ERROR_MESSAGE;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -302,9 +301,8 @@ public class OverlapTracker extends MultiThreadedBenchmarkAlgorithm implements S
 		if ( spot instanceof SpotRoi )
 		{
 			final SpotRoi roi = ( SpotRoi ) spot;
-			final double[] xcoords = roi.toPolygonX( 1., 0., xc, 1. );
-			final double[] ycoords = roi.toPolygonY( 1., 0., yc, 1. );
-			poly = new SimplePolygon2D( xcoords, ycoords );
+			final double[][] out = roi.toArray( 0., 0., 1., 1. );
+			poly = new SimplePolygon2D( out[ 0 ], out[ 1 ] );
 		}
 		else
 		{
@@ -321,10 +319,10 @@ public class OverlapTracker extends MultiThreadedBenchmarkAlgorithm implements S
 		if ( spot instanceof SpotRoi )
 		{
 			final SpotRoi roi = ( SpotRoi ) spot;
-			final double minX = Arrays.stream( roi.x ).min().getAsDouble() * scale;
-			final double maxX = Arrays.stream( roi.x ).max().getAsDouble() * scale;
-			final double minY = Arrays.stream( roi.y ).min().getAsDouble() * scale;
-			final double maxY = Arrays.stream( roi.y ).max().getAsDouble() * scale;
+			final double minX = roi.realMin( 0 ) * scale;
+			final double maxX = roi.realMax( 0 ) * scale;
+			final double minY = roi.realMin( 1 ) * scale;
+			final double maxY = roi.realMax( 1 ) * scale;
 			return new Rectangle2D( xc + minX, yc + minY, maxX - minX, maxY - minY );
 		}
 		else

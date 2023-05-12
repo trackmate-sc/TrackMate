@@ -52,7 +52,31 @@ public abstract class TrackMatePainter< T extends Spot >
 		if ( toScreenY( boundingBox.realMax( 1 ) + center.getDoublePosition( 1 ) ) < 0 )
 			return false;
 		return true;
+	}
 
+	/**
+	 * Returns <code>true</code> if the specified bounding-box intersects with
+	 * the display window.
+	 *
+	 * @param boundingBox
+	 *            the bounding box, in physical coordinates.
+	 * @return
+	 */
+	protected boolean intersect( final RealInterval boundingBox )
+	{
+		final ImageCanvas canvas = imp.getCanvas();
+		if ( canvas == null )
+			return false;
+
+		if ( toScreenX( boundingBox.realMin( 0 ) ) > canvas.getWidth() )
+			return false;
+		if ( toScreenX( boundingBox.realMax( 0 ) ) < 0 )
+			return false;
+		if ( toScreenY( boundingBox.realMin( 1 ) ) > canvas.getHeight() )
+			return false;
+		if ( toScreenY( boundingBox.realMax( 1 ) ) < 0 )
+			return false;
+		return true;
 	}
 
 	/**
