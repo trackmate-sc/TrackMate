@@ -593,4 +593,18 @@ public class IOUtils
 		for ( final String key : map.keySet() )
 			element.setAttribute( key, map.get( key ).toString() );
 	}
+
+	/**
+	 * Possibly creates the whole directories needed to save a file with the
+	 * specified path.
+	 * 
+	 * @param path
+	 *            the path.
+	 * @return <code>true</code> if folders have actually been created.
+	 */
+	public static boolean mkdirs( final String path )
+	{
+		final File dir = new File( path ).getParentFile();
+		return dir == null ? false : dir.mkdirs();
+	}
 }
