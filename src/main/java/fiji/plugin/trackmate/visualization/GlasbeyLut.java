@@ -23,6 +23,8 @@ package fiji.plugin.trackmate.visualization;
 
 import java.awt.Color;
 
+import ij.process.LUT;
+
 public class GlasbeyLut
 {
 
@@ -301,4 +303,18 @@ public class GlasbeyLut
 		return colors[ index ];
 	}
 
+	public static LUT toLUT()
+	{
+		final byte[] r = new byte[ 256 ];
+		final byte[] g = new byte[ 256 ];
+		final byte[] b = new byte[ 256 ];
+		for ( int i = 1; i < 256; i++ )
+		{
+			final Color c = colors[ ( i - 1 + colors.length / 2 ) % colors.length ];
+			r[ i ] = ( byte ) ( ( 0xFF ) & c.getRed() );
+			g[ i ] = ( byte ) ( ( 0xFF ) & c.getGreen() );
+			b[ i ] = ( byte ) ( ( 0xFF ) & c.getBlue() );
+		}
+		return new LUT( r, g, b );
+	}
 }
