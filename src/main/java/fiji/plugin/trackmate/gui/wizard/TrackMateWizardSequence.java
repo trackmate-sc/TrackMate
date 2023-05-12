@@ -143,7 +143,7 @@ public class TrackMateWizardSequence implements WizardSequence
 		initFilterDescriptor = new InitFilterDescriptor( trackmate, initialFilter );
 		spotFilterDescriptor = new SpotFilterDescriptor( trackmate, spotFilters, featureSelector );
 		chooseTrackerDescriptor = new ChooseTrackerDescriptor( new TrackerProvider(), trackmate );
-		executeTrackingDescriptor = new ExecuteTrackingDescriptor( trackmate, logPanel );
+		executeTrackingDescriptor = new ExecuteTrackingDescriptor( trackmate, logPanel, displaySettings );
 		trackFilterDescriptor = new TrackFilterDescriptor( trackmate, trackFilters, featureSelector );
 		configureViewsDescriptor = new ConfigureViewsDescriptor( displaySettings, featureSelector, new LaunchTrackSchemeAction(), new ShowTrackTablesAction(), new ShowSpotTableAction(), model.getSpaceUnits() );
 		grapherDescriptor = new GrapherDescriptor( trackmate, selectionModel, displaySettings );
