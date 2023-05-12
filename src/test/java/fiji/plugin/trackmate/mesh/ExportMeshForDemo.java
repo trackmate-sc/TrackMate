@@ -51,7 +51,7 @@ public class ExportMeshForDemo
 				if ( spot instanceof SpotMesh )
 				{
 					final SpotMesh mesh = ( SpotMesh ) spot;
-					io.save( mesh.mesh, savePath );
+					io.save( mesh.getMesh(), savePath );
 				}
 			}
 			System.out.println( "Export done." );
