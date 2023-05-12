@@ -80,24 +80,19 @@ public class Spot2DShapeAnalyzer< T extends RealType< T > > extends AbstractSpot
 
 	private static final double getLength( final SpotRoi roi )
 	{
-		final double[] x = roi.x;
-		final double[] y = roi.y;
-		final int npoints = x.length;
-		if ( npoints < 2 )
+		final int nPoints = roi.nPoints();
+		if ( nPoints < 2 )
 			return 0;
 
 		double length = 0;
-		for ( int i = 0; i < npoints - 1; i++ )
+		int i;
+		int j;
+		for ( i = 0, j = nPoints - 1; i < nPoints; j = i++ )
 		{
-			final double dx = x[ i + 1 ] - x[ i ];
-			final double dy = y[ i + 1 ] - y[ i ];
+			final double dx = roi.x( i ) - roi.x( j );
+			final double dy = roi.y( i ) - roi.y( j );
 			length += Math.sqrt( dx * dx + dy * dy );
 		}
-
-		final double dx0 = x[ 0 ] - x[ npoints - 1 ];
-		final double dy0 = y[ 0 ] - y[ npoints - 1 ];
-		length += Math.sqrt( dx0 * dx0 + dy0 * dy0 );
-
 		return length;
 	}
 }

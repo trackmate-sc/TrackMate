@@ -122,9 +122,9 @@ public final class ConvexHull2D
 
 	public static SpotRoi convexHull( final SpotRoi roi )
 	{
-		final List< Point > points = new ArrayList<>( roi.x.length );
-		for ( int i = 0; i < roi.x.length; i++ )
-			points.add( new Point( roi.x[ i ], roi.y[ i ] ) );
+		final List< Point > points = new ArrayList<>( roi.nPoints() );
+		for ( int i = 0; i < roi.nPoints(); i++ )
+			points.add( new Point( roi.xr( i ), roi.yr( i ) ) );
 
 		final List< Point > hull = makeHull( points );
 		final double[] xhull = new double[ hull.size() ];
