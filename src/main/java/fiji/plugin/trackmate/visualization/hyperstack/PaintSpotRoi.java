@@ -9,8 +9,6 @@ import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import gnu.trove.list.TDoubleList;
 import ij.ImagePlus;
-import net.imglib2.RealInterval;
-import net.imglib2.util.Intervals;
 
 /**
  * Utility class to paint the {@link SpotRoi} component of spots.
@@ -43,7 +41,7 @@ public class PaintSpotRoi extends TrackMatePainter< SpotRoi >
 	@Override
 	public int paint( final Graphics2D g2d, final SpotRoi spot )
 	{
-		if ( !intersect( boundingBox( spot ), spot ) )
+		if ( !intersect( spot ) )
 			return -1;
 
 		final double maxTextPos = toPolygon( spot, polygon, this::toScreenX, this::toScreenY );
@@ -61,28 +59,6 @@ public class PaintSpotRoi extends TrackMatePainter< SpotRoi >
 		final double xs = toScreenX( spot.getDoublePosition( 0 ) );
 		final int textPos = ( int ) ( maxTextPos - xs );
 		return textPos;
-	}
-
-	private static final RealInterval boundingBox( final SpotRoi roi )
-	{
-		double minX = roi.x[ 0 ];
-		double maxX = roi.x[ 0 ];
-		double minY = roi.y[ 0 ];
-		double maxY = roi.y[ 0 ];
-		for ( int i = 0; i < roi.x.length; i++ )
-		{
-			final double x = roi.x[ i ];
-			if ( x > maxX )
-				maxX = x;
-			if ( x < minX )
-				minX = x;
-			final double y = roi.y[ i ];
-			if ( y > maxY )
-				maxY = y;
-			if ( y < minY )
-				minY = y;
-		}
-		return Intervals.createMinMaxReal( minX, minY, maxX, maxY );
 	}
 
 	static final double max( final TDoubleList l )
@@ -117,16 +93,16 @@ public class PaintSpotRoi extends TrackMatePainter< SpotRoi >
 	{
 		double maxTextPos = Double.NEGATIVE_INFINITY;
 		polygon.reset();
-		final double x0 = toScreenX.applyAsDouble( roi.x[ 0 ] + roi.getDoublePosition( 0 ) );
-		final double y0 = toScreenY.applyAsDouble( roi.y[ 0 ] + roi.getDoublePosition( 1 ) );
+		final double x0 = toScreenX.applyAsDouble( roi.x( 0 ) );
+		final double y0 = toScreenY.applyAsDouble( roi.y( 0 ) );
 		polygon.moveTo( x0, y0 );
 		if ( x0 > maxTextPos )
 			maxTextPos = x0;
 
-		for ( int i = 1; i < roi.x.length; i++ )
+		for ( int i = 1; i < roi.nPoints(); i++ )
 		{
-			final double xi = toScreenX.applyAsDouble( roi.x[ i ] + roi.getDoublePosition( 0 ) );
-			final double yi = toScreenY.applyAsDouble( roi.y[ i ] + roi.getDoublePosition( 1 ) );
+			final double xi = toScreenX.applyAsDouble( roi.x( i ) );
+			final double yi = toScreenY.applyAsDouble( roi.y( i ) );
 			polygon.lineTo( xi, yi );
 
 			if ( xi > maxTextPos )

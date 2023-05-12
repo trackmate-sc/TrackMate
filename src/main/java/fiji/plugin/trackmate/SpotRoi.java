@@ -39,10 +39,10 @@ public class SpotRoi extends SpotBase
 {
 
 	/** Polygon points X coordinates, in physical units, centered (0,0). */
-	public final double[] x;
+	private final double[] x;
 
 	/** Polygon points Y coordinates, in physical units, centered (0,0). */
-	public final double[] y;
+	private final double[] y;
 
 	public SpotRoi(
 			final double xc,
@@ -73,7 +73,7 @@ public class SpotRoi extends SpotBase
 			final double[] x,
 			final double[] y )
 	{
-		super( ID ); 
+		super( ID );
 		this.x = x;
 		this.y = y;
 	}
@@ -87,6 +87,63 @@ public class SpotRoi extends SpotBase
 		final double r = getFeature( Spot.RADIUS );
 		final double quality = getFeature( Spot.QUALITY );
 		return new SpotRoi( xc, yc, zc, r, quality, getName(), x.clone(), y.clone() );
+	}
+
+	/**
+	 * Returns the X coordinates of the ith vertex of the polygon, in physical
+	 * coordinates.
+	 * 
+	 * @param i
+	 *            the index of the vertex.
+	 * @return the vertex X position.
+	 */
+	public double x( final int i )
+	{
+		return x[ i ] + getDoublePosition( 0 );
+	}
+
+	/**
+	 * Returns the Y coordinates of the ith vertex of the polygon, in physical
+	 * coordinates.
+	 * 
+	 * @param i
+	 *            the index of the vertex.
+	 * @return the vertex Y position.
+	 */
+	public double y( final int i )
+	{
+		return y[ i ] + getDoublePosition( 1 );
+	}
+
+	/**
+	 * Returns the X coordinates of the ith vertex of the polygon, <i>relative
+	 * to the spot center</i>, in physical coordinates.
+	 * 
+	 * @param i
+	 *            the index of the vertex.
+	 * @return the vertex X position.
+	 */
+	public double xr( final int i )
+	{
+		return x[ i ];
+	}
+
+	/**
+	 * Returns the Y coordinates of the ith vertex of the polygon, <i>relative
+	 * to the spot center</i>, in physical coordinates.
+	 * 
+	 * @param i
+	 *            the index of the vertex.
+	 * @return the vertex Y position.
+	 */
+	public double yr( final int i )
+	{
+		return y[ i ];
+	}
+
+	public int nPoints()
+	{
+		return x.length;
 	}
 
 	@Override
@@ -104,102 +161,77 @@ public class SpotRoi extends SpotBase
 	}
 
 	/**
-	 * Returns a new <code>int</code> array containing the X pixel coordinates
-	 * to which to paint this polygon.
-	 *
-	 * @param calibration
-	 *            the pixel size in X, to convert physical coordinates to pixel
-	 *            coordinates.
-	 * @param xcorner
-	 *            the top-left X corner of the view in the image to paint.
-	 * @param magnification
-	 *            the magnification of the view.
-	 * @return a new <code>int</code> array.
-	 */
-	public double[] toPolygonX( final double calibration, final double xcorner, final double spotXCenter, final double magnification )
-	{
-		final double[] xp = new double[ x.length ];
-		for ( int i = 0; i < xp.length; i++ )
-		{
-			final double xc = ( spotXCenter + x[ i ] ) / calibration;
-			xp[ i ] = ( xc - xcorner ) * magnification;
-		}
-		return xp;
-	}
-
-	/**
-	 * Returns a new <code>int</code> array containing the Y pixel coordinates
-	 * to which to paint this polygon.
-	 *
-	 * @param calibration
-	 *            the pixel size in Y, to convert physical coordinates to pixel
-	 *            coordinates.
-	 * @param ycorner
-	 *            the top-left Y corner of the view in the image to paint.
-	 * @param magnification
-	 *            the magnification of the view.
-	 * @return a new <code>int</code> array.
-	 */
-	public double[] toPolygonY( final double calibration, final double ycorner, final double spotYCenter, final double magnification )
-	{
-		final double[] yp = new double[ y.length ];
-		for ( int i = 0; i < yp.length; i++ )
-		{
-			final double yc = ( spotYCenter + y[ i ] ) / calibration;
-			yp[ i ] = ( yc - ycorner ) * magnification;
-		}
-		return yp;
-	}
-
-	/**
-	 * Writes the X AND Y pixel coordinates of the contour of the ROI inside a
-	 * double list, cleared first when this method is called. Similar to
-	 * {@link #toPolygonX(double, double, double, double)} and
-	 * {@link #toPolygonY(double, double, double, double)} but allocation-free.
-	 *
-	 * @param calibration
-	 *            the pixel sizes, to convert physical coordinates to pixel
-	 *            coordinates.
-	 * @param xcorner
-	 *            the top-left X corner of the view in the image to paint.
-	 * @param magnification
-	 *            the magnification of the view.
+	 * Convenience method that returns the X and Y coordinates of the polygon on
+	 * this spot, possibly shifted and scale by a specified amount. Such that:
+	 * 
+	 * <pre>
+	 * xout = x * sx + cx
+	 * yout = y * sy + cy
+	 * </pre>
+	 * 
 	 * @param cx
-	 *            the list in which to write the contour X coordinates. First
-	 *            reset when called.
+	 *            the shift in X to apply after scaling coordinates.
 	 * @param cy
-	 *            the list in which to write the contour Y coordinates. First
-	 *            reset when called.
+	 *            the shift in Y to apply after scaling coordinates.
+	 * @param sx
+	 *            the scale to apply in X.
+	 * @param sy
+	 *            the scale to apply in Y.
+	 * @param xout
+	 *            a list in which to write resulting X coordinates. Reset by
+	 *            this call.
+	 * @param yout
+	 *            a list in which to write resulting Y coordinates. Reset by
+	 *            this call.
 	 */
-	public void toPolygon(
-			final double calibration[],
-			final double xcorner,
-			final double ycorner,
-			final double spotXCenter,
-			final double spotYCenter,
-			final double magnification,
-			final TDoubleArrayList cx,
-			final TDoubleArrayList cy )
+	public void toArray( final double cx, final double cy, final double sx, final double sy, final TDoubleArrayList xout, final TDoubleArrayList yout )
 	{
-		cx.resetQuick();
-		cy.resetQuick();
+		xout.resetQuick();
+		yout.resetQuick();
 		for ( int i = 0; i < x.length; i++ )
 		{
-			final double xc = ( spotXCenter + x[ i ] ) / calibration[ 0 ];
-			final double xp = ( xc - xcorner ) * magnification;
-			cx.add( xp );
-			final double yc = ( spotYCenter + y[ i ] ) / calibration[ 1 ];
-			final double yp = ( yc - ycorner ) * magnification;
-			cy.add( yp );
+			xout.add( x( i ) + sx + cx );
+			yout.add( y( i ) + sx + cy );
 		}
 	}
-	
+
+	/**
+	 * Convenience method that returns the X and Y coordinates of the polygon on
+	 * this spot, possibly shifted and scale by a specified amount. Such that:
+	 * 
+	 * <pre>
+	 * xout = x * sx + cx
+	 * yout = y * sy + cy
+	 * </pre>
+	 * 
+	 * @param cx
+	 *            the shift in X to apply after scaling coordinates.
+	 * @param cy
+	 *            the shift in Y to apply after scaling coordinates.
+	 * @param sx
+	 *            the scale to apply in X.
+	 * @param sy
+	 *            the scale to apply in Y.
+	 * @return a new 2D double array, with the array of X values as the first
+	 *         element, and the array of Y values as a second element.
+	 */
+	public double[][] toArray( final double cx, final double cy, final double sx, final double sy )
+	{
+		final double[] xout = new double[ x.length ];
+		final double[] yout = new double[ x.length ];
+		for ( int i = 0; i < x.length; i++ )
+		{
+			xout[ i ] = x( i ) * sx + cx;
+			yout[ i ] = y( i ) * sy + cy;
+		}
+		return new double[][] { xout, yout };
+	}
+
 	@Override
 	public < T extends RealType< T > > IterableInterval< T > iterable( final RandomAccessible< T > ra, final double[] calibration )
 	{
-		final double[] xp = toPolygonX( calibration[ 0 ], 0, this.getDoublePosition( 0 ), 1. );
-		final double[] yp = toPolygonY( calibration[ 1 ], 0, this.getDoublePosition( 1 ), 1. );
-		final WritablePolygon2D polygon = GeomMasks.closedPolygon2D( xp, yp );
+		final double[][] out = toArray( 0., 0., 1 / calibration[ 0 ], 1 / calibration[ 1 ] );
+		final WritablePolygon2D polygon = GeomMasks.closedPolygon2D( out[ 0 ], out[ 1 ] );
 		final IterableRegion< BoolType > region = Masks.toIterableRegion( polygon );
 		return Regions.sample( region, ra );
 	}
@@ -259,16 +291,14 @@ public class SpotRoi extends SpotBase
 		double ax = 0.0;
 		double ay = 0.0;
 		final int n = x.length;
-		for ( int i = 0; i < n - 1; i++ )
+		int i;
+		int j;
+		for ( i = 0, j = n - 1; i < n; j = i++ )
 		{
-			final double w = x[ i ] * y[ i + 1 ] - x[ i + 1 ] * y[ i ];
-			ax += ( x[ i ] + x[ i + 1 ] ) * w;
-			ay += ( y[ i ] + y[ i + 1 ] ) * w;
+			final double w = x[ j ] * y[ i ] - x[ i ] * y[ j ];
+			ax += ( x[ j ] + x[ i ] ) * w;
+			ay += ( y[ j ] + y[ i ] ) * w;
 		}
-
-		final double w0 = x[ n - 1 ] * y[ 0 ] - x[ 0 ] * y[ n - 1 ];
-		ax += ( x[ n - 1 ] + x[ 0 ] ) * w0;
-		ay += ( y[ n - 1 ] + y[ 0 ] ) * w0;
 		return new double[] { ax / 6. / area, ay / 6. / area };
 	}
 
@@ -276,9 +306,11 @@ public class SpotRoi extends SpotBase
 	{
 		final int n = x.length;
 		double a = 0.0;
-		for ( int i = 0; i < n - 1; i++ )
-			a += x[ i ] * y[ i + 1 ] - x[ i + 1 ] * y[ i ];
+		int i;
+		int j;
+		for ( i = 0, j = n - 1; i < n; j = i++ )
+			a += x[ j ] * y[ i ] - x[ i ] * y[ j ];
 
-		return ( a + x[ n - 1 ] * y[ 0 ] - x[ 0 ] * y[ n - 1 ] ) / 2.0;
+		return a / 2.;
 	}
 }
