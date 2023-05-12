@@ -739,14 +739,14 @@ public class TmXmlWriter
 		if ( spot instanceof SpotRoi )
 		{
 			final SpotRoi roi = ( SpotRoi ) spot;
-			final int nPoints = roi.x.length;
+			final int nPoints = roi.nPoints();
 			attributes.add( new Attribute( ROI_N_POINTS_ATTRIBUTE_NAME, Integer.toString( nPoints ) ) );
 			final StringBuilder str = new StringBuilder();
 			for ( int i = 0; i < nPoints; i++ )
 			{
-				str.append( Double.toString( roi.x[ i ] ) );
+				str.append( Double.toString( roi.xr( i ) ) );
 				str.append( ' ' );
-				str.append( Double.toString( roi.y[ i ] ) );
+				str.append( Double.toString( roi.yr( i ) ) );
 				str.append( ' ' );
 			}
 			spotElement.setText( str.toString() );

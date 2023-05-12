@@ -90,10 +90,9 @@ public class IJRoiExporter
 		if ( spot instanceof SpotRoi )
 		{
 			final SpotRoi sroi = ( SpotRoi ) spot;
-			final double[] xs = sroi.toPolygonX( dx, 0., spot.getDoublePosition( 0 ), 1. );
-			final double[] ys = sroi.toPolygonY( dy, 0., spot.getDoublePosition( 1 ), 1. );
-			final float[] xp = toFloat( xs );
-			final float[] yp = toFloat( ys );
+			final double[][] out = sroi.toArray( 0., 0., 1 / dx, 1 / dy );
+			final float[] xp = toFloat( out[ 0 ] );
+			final float[] yp = toFloat( out[ 1 ] );
 			roi = new PolygonRoi( xp, yp, PolygonRoi.POLYGON );
 		}
 		else
