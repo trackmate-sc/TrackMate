@@ -108,10 +108,8 @@ public class MeshSeriesExporter extends AbstractTMAction
 		final NavigableSet< Integer > frames = spots.keySet();
 		for ( final Integer frame : frames )
 		{
-			String fileName = folder.getName();
-			fileName = fileName.substring( 0, fileName.lastIndexOf( '.' ) ) + frame + ".ply";
+			final String fileName = folder.getName() + '_' + frame + ".ply";
 			final File targetFile = new File( folder, fileName );
-
 			final List< Mesh > meshes = new ArrayList<>();
 			for ( final Spot spot : spots.iterable( frame, true ) )
 			{
