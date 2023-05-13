@@ -110,16 +110,14 @@ public class ThresholdDetector< T extends RealType< T > & NativeType< T > > impl
 	public boolean process()
 	{
 		final long start = System.currentTimeMillis();
-		if ( input.numDimensions() == 2 || input.numDimensions() == 3 )
-		{
-			spots = MaskUtils.fromThresholdWithROI( input, interval, calibration, threshold, simplify, numThreads, null );
-		}
-		else
-		{
-			errorMessage = baseErrorMessage + "Required a 2D or 3D input, got " + input.numDimensions() + "D.";
-			return false;
-		}
-
+		spots = MaskUtils.fromThresholdWithROI(
+				input,
+				interval,
+				calibration,
+				threshold,
+				simplify,
+				numThreads,
+				null );
 		final long end = System.currentTimeMillis();
 		this.processingTime = end - start;
 
