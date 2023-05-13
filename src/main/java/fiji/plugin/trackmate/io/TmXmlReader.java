@@ -962,6 +962,11 @@ public class TmXmlReader
 							spotMesh.copyFeaturesFrom( spot );
 							spotMesh.setName( spot.getName() );
 							cache.put( id, spotMesh );
+
+							// And in the content.
+							final Set< Spot > spots = content.get( spot.getFeature( Spot.FRAME ).intValue() );
+							spots.remove( spot );
+							spots.add( spotMesh );
 						}
 						catch ( final IOException e )
 						{
