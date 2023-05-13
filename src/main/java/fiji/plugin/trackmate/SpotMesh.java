@@ -384,7 +384,7 @@ public class SpotMesh extends SpotBase
 		return sliceMap;
 	}
 
-	private static final RealInterval toRealInterval( final float[] bb )
+	public static final RealInterval toRealInterval( final float[] bb )
 	{
 		return Intervals.createMinMaxReal( bb[ 0 ], bb[ 1 ], bb[ 2 ], bb[ 3 ], bb[ 4 ], bb[ 5 ] );
 	}
