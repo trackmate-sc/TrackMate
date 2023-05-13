@@ -145,6 +145,7 @@ import fiji.plugin.trackmate.gui.wizard.descriptors.ConfigureViewsDescriptor;
 import fiji.plugin.trackmate.providers.DetectorProvider;
 import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
 import fiji.plugin.trackmate.providers.Spot2DMorphologyAnalyzerProvider;
+import fiji.plugin.trackmate.providers.Spot3DMorphologyAnalyzerProvider;
 import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
@@ -438,7 +439,8 @@ public class TmXmlReader
 				new SpotAnalyzerProvider( ( imp == null ) ? 1 : imp.getNChannels() ),
 				new EdgeAnalyzerProvider(),
 				new TrackAnalyzerProvider(),
-				new Spot2DMorphologyAnalyzerProvider( ( imp == null ) ? 1 : imp.getNChannels() ) );
+				new Spot2DMorphologyAnalyzerProvider( ( imp == null ) ? 1 : imp.getNChannels() ),
+				new Spot3DMorphologyAnalyzerProvider( ( imp == null ) ? 1 : imp.getNChannels() ) );
 	}
 
 	/**
@@ -470,11 +472,10 @@ public class TmXmlReader
 	 *            the track analyzer provider, required to instantiates the
 	 *            saved {@link TrackAnalyzer}s. If <code>null</code>, will skip
 	 *            reading track analyzers.
-	 * @param spotMorphologyAnalyzerProvider
-	 *            the spot morphology analyzer provider, required to instantiate
-	 *            the saved SpotMorphologyAnalyzers. If <code>null</code>, will
-	 *            skip reading spot morphology analyzers.
-	 * @return a new, configured {@link Settings} object.
+	 * @param spot2DMorphologyAnalyzerProvider
+	 *            the spot 2D morphology provider.
+	 * @param spot3DMorphologyAnalyzerProvider
+	 *            the spot 3D morphology provider.
 	 */
 	public Settings readSettings(
 			final ImagePlus imp,
@@ -483,7 +484,8 @@ public class TmXmlReader
 			final SpotAnalyzerProvider spotAnalyzerProvider,
 			final EdgeAnalyzerProvider edgeAnalyzerProvider,
 			final TrackAnalyzerProvider trackAnalyzerProvider,
-			final Spot2DMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider )
+			final Spot2DMorphologyAnalyzerProvider spot2DMorphologyAnalyzerProvider,
+			final Spot3DMorphologyAnalyzerProvider spot3DMorphologyAnalyzerProvider )
 	{
 		final Element settingsElement = root.getChild( SETTINGS_ELEMENT_KEY );
 		if ( null == settingsElement )
@@ -530,7 +532,8 @@ public class TmXmlReader
 				spotAnalyzerProvider,
 				edgeAnalyzerProvider,
 				trackAnalyzerProvider,
-				spotMorphologyAnalyzerProvider );
+				spot2DMorphologyAnalyzerProvider,
+				spot3DMorphologyAnalyzerProvider );
 
 		return settings;
 	}
@@ -1392,7 +1395,8 @@ public class TmXmlReader
 			final SpotAnalyzerProvider spotAnalyzerProvider,
 			final EdgeAnalyzerProvider edgeAnalyzerProvider,
 			final TrackAnalyzerProvider trackAnalyzerProvider,
-			final Spot2DMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider )
+			final Spot2DMorphologyAnalyzerProvider spot2DMorphologyAnalyzerProvider,
+			final Spot3DMorphologyAnalyzerProvider spot3DMorphologyAnalyzerProvider )
 	{
 
 		final Element analyzersEl = settingsElement.getChild( ANALYZER_COLLECTION_ELEMENT_KEY );
@@ -1443,11 +1447,15 @@ public class TmXmlReader
 							/*
 							 * Special case: if we cannot find a matching
 							 * analyzer for a declared factory, then we will try
-							 * to see whether it is a morphology spot analyzer,
-							 * that are treated separately. If it is not, we
-							 * give up.
+							 * to see whether it is a morphology spot analyzer
+							 * in 2D then in 3D, that are treated separately. If
+							 * it is not, we give up.
 							 */
-							spotAnalyzer = spotMorphologyAnalyzerProvider.getFactory( key );
+							spotAnalyzer = spot2DMorphologyAnalyzerProvider.getFactory( key );
+							if ( spotAnalyzer == null )
+							{
+								spotAnalyzer = spot3DMorphologyAnalyzerProvider.getFactory( key );
+							}
 						}
 
 						if ( null == spotAnalyzer )
