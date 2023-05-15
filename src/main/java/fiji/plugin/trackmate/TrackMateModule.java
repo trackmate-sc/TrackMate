@@ -115,4 +115,21 @@ public interface TrackMateModule extends SciJavaPlugin
 	{
 		return false;
 	}
+
+	/**
+	 * Returns a URL pointing to a webpage documenting this module. The URL is
+	 * returned as a string, containing the fully qualified URL to the help
+	 * page. For instance:
+	 * 
+	 * <pre>
+	 * https://imagej.net/plugins/trackmate/detectors/difference-of-gaussian
+	 * </pre>
+	 * 
+	 * @return this module documentation URL, or <code>null</code> if there is
+	 *         none.
+	 */
+	public default String getUrl()
+	{
+		return null;
+	}
 }
