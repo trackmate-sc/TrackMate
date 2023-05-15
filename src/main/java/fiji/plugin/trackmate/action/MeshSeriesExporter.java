@@ -79,7 +79,10 @@ public class MeshSeriesExporter extends AbstractTMAction
 		try
 		{
 			String filename = trackmate.getSettings().imageFileName;
-			filename = filename.substring( 0, filename.indexOf( "." ) );
+			int i = filename.indexOf( "." );
+			if ( i < 0 )
+				i = filename.length();
+			filename = filename.substring( 0, i );
 			file = new File( folder.getPath() + File.separator + filename + "-meshes.ply" );
 		}
 		catch ( final NullPointerException npe )
