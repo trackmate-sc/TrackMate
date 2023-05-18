@@ -174,6 +174,8 @@ public class OverlapTrackerFactory implements SpotTrackerFactory
 		ok = ok & readDoubleAttribute( element, settings, KEY_SCALE_FACTOR, errorHolder );
 		ok = ok & readDoubleAttribute( element, settings, KEY_MIN_IOU, errorHolder );
 		ok = ok & readStringAttribute( element, settings, KEY_IOU_CALCULATION, errorHolder );
+		if ( !ok )
+			errorMessage = "[" + getKey() + "] " + errorHolder.toString();
 		return ok;
 	}
 
