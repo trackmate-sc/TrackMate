@@ -27,7 +27,7 @@ import net.imglib2.type.numeric.RealType;
 
 /**
  * For detectors that process one time-point at a time, independently, and for
- * which we can therefore propose multithreading. *
+ * which we can therefore propose multithreading.
  * <p>
  * These classes are able to configure a {@link SpotDetector} to operate on a
  * single time-point of the target <code>ImgPlus</code>.
