@@ -1,18 +1,21 @@
 package fiji.plugin.trackmate.mesh;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.joml.Matrix4f;
+import org.scijava.ui.behaviour.io.InputTriggerConfig;
+import org.scijava.ui.behaviour.util.Actions;
+
 import bvv.util.Bvv;
 import bvv.util.BvvFunctions;
 import bvv.util.BvvSource;
 import fiji.plugin.trackmate.util.TMUtils;
 import ij.IJ;
 import ij.ImagePlus;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.mesh.Mesh;
@@ -20,29 +23,25 @@ import net.imagej.mesh.Meshes;
 import net.imagej.mesh.io.stl.STLMeshIO;
 import net.imagej.mesh.naive.NaiveDoubleMesh;
 import net.imagej.mesh.nio.BufferMesh;
-import net.imglib2.RealPoint;
 import net.imglib2.img.display.imagej.ImgPlusViews;
+import net.imglib2.type.Type;
 import net.imglib2.type.numeric.ARGBType;
-import net.imglib2.util.Util;
-import org.joml.Matrix4f;
-import org.scijava.ui.behaviour.io.InputTriggerConfig;
-import org.scijava.ui.behaviour.util.Actions;
 import tpietzsch.example2.VolumeViewerPanel;
 import tpietzsch.scene.mesh.StupidMesh;
 
 public class MeshPlayground
 {
-	public static void main( String[] args )
+	public static < T extends Type< T > > void main( final String[] args )
 	{
 		final String filePath = "samples/mesh/CElegansMask3D.tif";
 		final ImagePlus imp = IJ.openImage( filePath );
 
-		final ImgPlus img = TMUtils.rawWraps( imp );
-		final ImgPlus c1 = ImgPlusViews.hyperSlice( img, img.dimensionIndex( Axes.CHANNEL ), 1 );
-		final ImgPlus t1 = ImgPlusViews.hyperSlice( c1, c1.dimensionIndex( Axes.TIME ), 0 );
+		final ImgPlus< T > img = TMUtils.rawWraps( imp );
+		final ImgPlus< T > c1 = ImgPlusViews.hyperSlice( img, img.dimensionIndex( Axes.CHANNEL ), 1 );
+		final ImgPlus< T > t1 = ImgPlusViews.hyperSlice( c1, c1.dimensionIndex( Axes.TIME ), 0 );
 		final double[] cal = TMUtils.getSpatialCalibration( t1 );
 
-		BvvSource source = BvvFunctions.show( t1, "t1",
+		final BvvSource source = BvvFunctions.show( c1, "t1",
 				Bvv.options()
 						.maxAllowedStepInVoxels( 0 )
 						.renderWidth( 1024 )
@@ -57,7 +56,7 @@ public class MeshPlayground
 		final List< StupidMesh > meshes = new ArrayList<>();
 		for ( int j = 1; j <= 3; ++j)
 		{
-			String fn = String.format( "samples/mesh/CElegansMask3D_%02d.stl", j );
+			final String fn = String.format( "samples/mesh/CElegansMask3D_%02d.stl", j );
 			meshes.add( new StupidMesh( load( fn ) ) );
 		}
 
@@ -73,7 +72,7 @@ public class MeshPlayground
 			}
 		} );
 
-		Actions actions = new Actions( new InputTriggerConfig() );
+		final Actions actions = new Actions( new InputTriggerConfig() );
 		actions.install( source.getBvvHandle().getKeybindings(), "my-new-actions" );
 		actions.runnableAction( () -> {
 			showMeshes.set( !showMeshes.get() );
@@ -84,13 +83,13 @@ public class MeshPlayground
 	}
 
 
-	private static BufferMesh load( String fn )
+	private static BufferMesh load( final String fn )
 	{
 		BufferMesh mesh = null;
 		try
 		{
-			NaiveDoubleMesh nmesh = new NaiveDoubleMesh();
-			STLMeshIO meshIO = new STLMeshIO();
+			final NaiveDoubleMesh nmesh = new NaiveDoubleMesh();
+			final STLMeshIO meshIO = new STLMeshIO();
 			meshIO.read( nmesh, new File( fn ) );
 			mesh = calculateNormals(
 					nmesh
@@ -104,7 +103,7 @@ public class MeshPlayground
 		return mesh;
 	}
 
-	private static BufferMesh calculateNormals( Mesh mesh )
+	private static BufferMesh calculateNormals( final Mesh mesh )
 	{
 		final int nvertices = ( int ) mesh.vertices().size();
 		final int ntriangles = ( int ) mesh.triangles().size();
