@@ -1,19 +1,10 @@
 package fiji.plugin.trackmate.visualization.bvv;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import bvv.util.Bvv;
 import bvv.util.BvvFunctions;
 import bvv.util.BvvHandle;
 import bvv.util.BvvSource;
-import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotBase;
-import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.util.TMUtils;
 import ij.CompositeImage;
@@ -29,10 +20,23 @@ import net.imagej.mesh.obj.transform.TranslateMesh;
 import net.imglib2.img.display.imagej.ImgPlusViews;
 import net.imglib2.type.Type;
 import net.imglib2.type.numeric.ARGBType;
-import tpietzsch.scene.mesh.StupidMesh;
 
 public class BVVUtils
 {
+
+	public static final StupidMesh createMesh( final Spot spot )
+	{
+		if ( spot instanceof SpotMesh )
+		{
+			final SpotMesh sm = ( SpotMesh ) spot;
+			final Mesh mesh = TranslateMesh.translate( sm.getMesh(), spot );
+			final BufferMesh bm = new BufferMesh( ( int ) mesh.vertices().size(), ( int ) mesh.triangles().size() );
+			Meshes.copy( mesh, bm );
+			return new StupidMesh( bm );
+		}
+		System.out.println( "TODO: Deal with spherical spots" ); // DEBUG
+		return null;
+	}
 
 	public static final < T extends Type< T > > BvvHandle createViewer( final ImagePlus imp )
 	{
@@ -113,33 +117,5 @@ public class BVVUtils
 			bvvHandle = h;
 		}
 		return bvvHandle;
-	}
-
-	public static Map< Integer, Collection< StupidMesh > > createMesh( final Model model )
-	{
-		final Map< Integer, Collection< StupidMesh > > meshMap = new HashMap<>();
-		final SpotCollection spots = model.getSpots();
-		for ( final Integer frame : spots.keySet() )
-		{
-			final List< StupidMesh > meshes = new ArrayList<>();
-			for ( final Spot spot : spots.iterable( frame, true ) )
-			{
-				if ( spot instanceof SpotMesh )
-				{
-					final SpotMesh sm = ( SpotMesh ) spot;
-					final Mesh mesh = TranslateMesh.translate( sm.getMesh(), spot );
-					final BufferMesh bm = new BufferMesh( ( int ) mesh.vertices().size(), ( int ) mesh.triangles().size() );
-					Meshes.copy( mesh, bm );
-					meshes.add( new StupidMesh( bm ) );
-				}
-				else if ( spot instanceof SpotBase )
-				{
-					// TODO
-					System.out.println( "TODO: Deal with spherical spots" ); // DEBUG
-				}
-				meshMap.put( frame, meshes );
-			}
-		}
-		return meshMap;
 	}
 }
