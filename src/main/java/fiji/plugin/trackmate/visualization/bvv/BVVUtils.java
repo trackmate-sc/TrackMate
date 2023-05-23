@@ -34,8 +34,7 @@ public class BVVUtils
 			Meshes.copy( mesh, bm );
 			return new StupidMesh( bm );
 		}
-		System.out.println( "TODO: Deal with spherical spots" ); // DEBUG
-		return null;
+		return new StupidMesh( Icosahedron.sphere( spot ) );
 	}
 
 	public static final < T extends Type< T > > BvvHandle createViewer( final ImagePlus imp )
