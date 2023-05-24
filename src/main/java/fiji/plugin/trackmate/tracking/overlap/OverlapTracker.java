@@ -203,7 +203,11 @@ public class OverlapTracker extends MultiThreadedBenchmarkAlgorithm implements S
 			final Map< Spot, Polygon2D > targetGeometries = createGeometry( spots.iterable( targetFrame, true ), method, enlargeFactor );
 
 			if ( sourceGeometries.isEmpty() || targetGeometries.isEmpty() )
+			{
+				sourceGeometries = targetGeometries;
+				logger.setProgress( ( double ) progress++ / spots.keySet().size() );
 				continue;
+			}
 
 			final ExecutorService executors = Threads.newFixedThreadPool( numThreads );
 			final List< Future< IoULink > > futures = new ArrayList<>();
