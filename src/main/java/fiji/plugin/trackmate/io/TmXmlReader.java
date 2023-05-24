@@ -976,7 +976,7 @@ public class TmXmlReader
 							spots.remove( spot );
 							spots.add( spotMesh );
 						}
-						catch ( final IOException e )
+						catch ( final Exception e )
 						{
 							ok = false;
 							logger.error( "Problem reading mesh for spot " + id + ":\n"
