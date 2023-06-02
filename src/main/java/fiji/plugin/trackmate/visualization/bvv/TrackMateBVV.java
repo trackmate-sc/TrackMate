@@ -57,6 +57,7 @@ public class TrackMateBVV< T extends Type< T > > extends AbstractTrackMateModelV
 		it.forEach( s -> meshMap.computeIfAbsent( s, BVVUtils::createMesh ) );
 		updateColor();
 		displaySettings.listeners().add( this::updateColor );
+		selectionModel.addSelectionChangeListener( e -> refresh() );
 	}
 
 	@Override
@@ -72,7 +73,7 @@ public class TrackMateBVV< T extends Type< T > > extends AbstractTrackMateModelV
 
 				final int t = data.getTimepoint();
 				final Iterable< Spot > it = model.getSpots().iterable( t, true );
-				it.forEach( s -> meshMap.computeIfAbsent( s, BVVUtils::createMesh ).draw( gl, pvm, vm ) );
+				it.forEach( s -> meshMap.computeIfAbsent( s, BVVUtils::createMesh ).draw( gl, pvm, vm, selectionModel.getSpotSelection().contains( s ) ) );
 			}
 		} );
 	}
@@ -181,6 +182,7 @@ public class TrackMateBVV< T extends Type< T > > extends AbstractTrackMateModelV
 
 			final Color color = spotColorGenerator.color( entry.getKey() );
 			sm.setColor( color );
+			sm.setSelectionColor( displaySettings.getHighlightColor() );
 		}
 		refresh();
 	}
