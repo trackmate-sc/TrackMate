@@ -12,6 +12,7 @@ import javax.swing.JFrame;
 
 import org.joml.Matrix4f;
 
+import bdv.viewer.animate.TranslationAnimator;
 import bvv.util.BvvHandle;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
@@ -31,6 +32,8 @@ import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.ImageJ;
 import ij.ImagePlus;
+import net.imglib2.RealLocalizable;
+import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.Type;
 import tpietzsch.example2.VolumeViewerPanel;
 
@@ -91,8 +94,49 @@ public class TrackMateBVV< T extends Type< T > > extends AbstractTrackMateModelV
 	@Override
 	public void centerViewOn( final Spot spot )
 	{
-		// TODO Auto-generated method stub
+		if ( handle == null )
+			return;
 
+		final VolumeViewerPanel panel = handle.getViewerPanel();
+		panel.setTimepoint( spot.getFeature( Spot.FRAME ).intValue() );
+
+		final AffineTransform3D c = panel.state().getViewerTransform();
+		final double[] translation = getTranslation( c, spot, panel.getWidth(), panel.getHeight() );
+		if ( translation != null )
+		{
+			final TranslationAnimator animator = new TranslationAnimator( c, translation, 300 );
+			animator.setTime( System.currentTimeMillis() );
+			panel.setTransformAnimator( animator );
+		}
+	}
+
+	/**
+	 * Returns a translation vector that will put the specified position at the
+	 * center of the panel when used with a TranslationAnimator.
+	 * 
+	 * @param t
+	 *            the viewer panel current view transform.
+	 * @param target
+	 *            the position to focus on.
+	 * @param width
+	 *            the width of the panel.
+	 * @param height
+	 *            the height of the panel.
+	 * @return a new <code>double[]</code> array with 3 elements containing the
+	 *         translation to use.
+	 */
+	private static final double[] getTranslation( final AffineTransform3D t, final RealLocalizable target, final int width, final int height )
+	{
+		final double[] pos = new double[ 3 ];
+		final double[] vPos = new double[ 3 ];
+		target.localize( pos );
+		t.apply( pos, vPos );
+
+		final double dx = width / 2 - vPos[ 0 ] + t.get( 0, 3 );
+		final double dy = height / 2 - vPos[ 1 ] + t.get( 1, 3 );
+		final double dz = -vPos[ 2 ] + t.get( 2, 3 );
+
+		return new double[] { dx, dy, dz };
 	}
 
 	@Override
