@@ -43,6 +43,7 @@ import org.joml.Matrix4fc;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import net.imagej.mesh.nio.BufferMesh;
 import tpietzsch.backend.jogl.JoglGpuContext;
 import tpietzsch.shadergen.DefaultShader;
@@ -69,9 +70,13 @@ public class StupidMesh
 
 	private boolean initialized;
 
-	private Color color = Color.WHITE;
+	private Color color = DisplaySettings.defaultStyle().getSpotUniformColor();
 
 	private final float[] carr = new float[ 4 ];
+
+	private Color selectionColor = DisplaySettings.defaultStyle().getHighlightColor();
+
+	private final float[] scarr = new float[ 4 ];
 
 	private void init( final GL3 gl )
 	{
@@ -121,7 +126,13 @@ public class StupidMesh
 		this.color = color;
 	}
 
-	public void draw( final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm )
+	public void setSelectionColor( final Color selectionColor )
+	{
+		this.selectionColor = selectionColor;
+
+	}
+
+	public void draw( final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final boolean isSelected )
 	{
 		if ( !initialized )
 			init( gl );
@@ -134,6 +145,9 @@ public class StupidMesh
 		prog.getUniformMatrix3f( "itvm" ).set( itvm.get3x3( new Matrix3f() ) );
 		color.getComponents( carr );
 		prog.getUniform4f( "ObjectColor" ).set( carr[ 0 ], carr[ 1 ], carr[ 2 ], carr[ 3 ] );
+		prog.getUniform1f( "IsSelected" ).set( isSelected ? 1f : 0f );
+		selectionColor.getComponents( scarr );
+		prog.getUniform4f( "SelectionColor" ).set( scarr[ 0 ], scarr[ 1 ], scarr[ 2 ], scarr[ 3 ] );
 		prog.setUniforms( context );
 		prog.use( context );
 
