@@ -22,7 +22,6 @@ import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
 import fiji.plugin.trackmate.gui.wizard.TrackMateWizardSequence;
 import fiji.plugin.trackmate.gui.wizard.WizardSequence;
 import fiji.plugin.trackmate.io.TmXmlReader;
@@ -126,39 +125,40 @@ public class TrackMateBVV< T extends Type< T > > extends AbstractTrackMateModelV
 
 	public static < T extends Type< T > > void main( final String[] args )
 	{
-//		final String filePath = "samples/mesh/CElegansMask3D.tif";
-		final String filePath = "samples/CElegans3D-smoothed-mask-orig.xml";
-
-		ImageJ.main( args );
-		final TmXmlReader reader = new TmXmlReader( new File( filePath ) );
-		if ( !reader.isReadingOk() )
-		{
-			System.err.println( reader.getErrorMessage() );
-			return;
-		}
-		final ImagePlus imp = reader.readImage();
-		final Settings settings = reader.readSettings( imp );
-		imp.show();
-
-		final Model model = reader.getModel();
-		final SelectionModel selectionModel = new SelectionModel( model );
-		final DisplaySettings ds = DisplaySettingsIO.readUserDefault();
-		final TrackMate trackmate = new TrackMate( model, settings );
-
-		// Main view
-		final TrackMateModelView displayer = new HyperStackDisplayer( model, selectionModel, imp, ds );
-		displayer.render();
-
-		// Wizard.
-		final WizardSequence sequence = new TrackMateWizardSequence( trackmate, selectionModel, ds );
-		sequence.setCurrent( "ConfigureViews" );
-		final JFrame frame = sequence.run( "TrackMate on " + imp.getShortTitle() );
-		frame.setIconImage( TRACKMATE_ICON.getImage() );
-		GuiUtils.positionWindow( frame, settings.imp.getWindow() );
-		frame.setVisible( true );
-
 		try
 		{
+//		final String filePath = "samples/mesh/CElegansMask3D.tif";
+			final String filePath = "samples/CElegans3D-smoothed-mask-orig.xml";
+//			final String filePath = "../TrackMate-StarDist/samples/CTC-Fluo-N3DH-SIM-multiC.xml";
+
+			ImageJ.main( args );
+			final TmXmlReader reader = new TmXmlReader( new File( filePath ) );
+			if ( !reader.isReadingOk() )
+			{
+				System.err.println( reader.getErrorMessage() );
+				return;
+			}
+			final ImagePlus imp = reader.readImage();
+			final Settings settings = reader.readSettings( imp );
+			imp.show();
+
+			final Model model = reader.getModel();
+			final SelectionModel selectionModel = new SelectionModel( model );
+			final DisplaySettings ds = reader.getDisplaySettings();
+			final TrackMate trackmate = new TrackMate( model, settings );
+
+			// Main view
+			final TrackMateModelView displayer = new HyperStackDisplayer( model, selectionModel, imp, ds );
+			displayer.render();
+
+			// Wizard.
+			final WizardSequence sequence = new TrackMateWizardSequence( trackmate, selectionModel, ds );
+			sequence.setCurrent( "ConfigureViews" );
+			final JFrame frame = sequence.run( "TrackMate on " + imp.getShortTitle() );
+			frame.setIconImage( TRACKMATE_ICON.getImage() );
+			GuiUtils.positionWindow( frame, settings.imp.getWindow() );
+			frame.setVisible( true );
+
 			final TrackMateBVV< T > tbvv = new TrackMateBVV<>( model, selectionModel, imp, ds );
 			tbvv.render();
 		}
