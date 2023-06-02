@@ -4,6 +4,8 @@ in vec3 Normal;
 in vec3 FragPos;
 
 uniform vec4 ObjectColor;
+uniform float IsSelected;
+uniform vec4 SelectionColor;
 
 const vec3 lightColor1 = 0.5 * vec3(0.9, 0.9, 1);
 const vec3 lightDir1 = normalize(vec3(0, -0.2, -1));
@@ -35,7 +37,12 @@ void main()
 
 	vec3 l1 = phong( norm, viewDir, lightDir1, lightColor1, 32, 0.1 );
 	vec3 l2 = phong( norm, viewDir, lightDir2, lightColor2, 32, 0.5 );
+	
+	if (IsSelected > 0.5) {
+		fragColor = vec4( (ambient + l1 + l2), 1) * SelectionColor;
+    } else {
+		float it = dot(norm, viewDir);
+		fragColor = vec4( it * (ambient + l1 + l2), 1) * ObjectColor + (1-it) * vec4(1,1,1,1);
+    }
 
-	float it = dot(norm, viewDir);
-	fragColor = vec4( it * (ambient + l1 + l2), 1) * ObjectColor + (1-it) * vec4(1,1,1,1);
 }
