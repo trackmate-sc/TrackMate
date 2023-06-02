@@ -104,8 +104,26 @@ public class TrackMateBVV< T extends Type< T > > extends AbstractTrackMateModelV
 	@Override
 	public void modelChanged( final ModelChangeEvent event )
 	{
-		// TODO Auto-generated method stub
-
+		switch ( event.getEventID() )
+		{
+		case ModelChangeEvent.SPOTS_FILTERED:
+		case ModelChangeEvent.SPOTS_COMPUTED:
+		case ModelChangeEvent.TRACKS_VISIBILITY_CHANGED:
+		case ModelChangeEvent.TRACKS_COMPUTED:
+			refresh();
+			break;
+		case ModelChangeEvent.MODEL_MODIFIED:
+		{
+			for ( final Spot spot : event.getSpots() )
+			{
+				final StupidMesh mesh = BVVUtils.createMesh( spot );
+				meshMap.put( spot, mesh );
+			}
+			updateColor();
+			refresh();
+			break;
+		}
+		}
 	}
 
 	private void updateColor()
