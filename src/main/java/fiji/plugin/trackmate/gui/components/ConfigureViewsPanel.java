@@ -80,6 +80,7 @@ public class ConfigureViewsPanel extends JPanel
 			final DisplaySettings ds,
 			final FeatureDisplaySelector featureSelector,
 			final String spaceUnits,
+			final Action launchBVVAction,
 			final Action launchTrackSchemeAction,
 			final Action showTrackTablesAction,
 			final Action showSpotTableAction,
@@ -357,6 +358,11 @@ public class ConfigureViewsPanel extends JPanel
 
 		final JPanel panelButtons = new JPanel();
 		panelButtons.setLayout( new WrapLayout() );
+
+		// BVV button.
+		final JButton btnShowBVV = new JButton( launchBVVAction );
+		panelButtons.add( btnShowBVV );
+		btnShowBVV.setFont( FONT );
 
 		// TrackScheme button.
 		final JButton btnShowTrackScheme = new JButton( launchTrackSchemeAction );

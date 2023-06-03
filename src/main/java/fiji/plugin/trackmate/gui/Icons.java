@@ -211,4 +211,5 @@ public class Icons
 
 	public static final ImageIcon QUESTION_ICON = new ImageIcon( Icons.class.getResource( "images/help.png" ) );
 
+	public static final ImageIcon BVV_ICON = new ImageIcon( Icons.class.getResource( "images/TrackMateBVV-logo-16x16.png" ) );
 }
