@@ -21,6 +21,7 @@
  */
 package fiji.plugin.trackmate.gui.wizard;
 
+import static fiji.plugin.trackmate.gui.Icons.BVV_ICON;
 import static fiji.plugin.trackmate.gui.Icons.SPOT_TABLE_ICON;
 import static fiji.plugin.trackmate.gui.Icons.TRACK_SCHEME_ICON_16x16;
 import static fiji.plugin.trackmate.gui.Icons.TRACK_TABLES_ICON;
@@ -42,6 +43,7 @@ import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.action.AbstractTMAction;
 import fiji.plugin.trackmate.action.ExportAllSpotsStatsAction;
 import fiji.plugin.trackmate.action.ExportStatsTablesAction;
+import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.detection.ManualDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
 import fiji.plugin.trackmate.features.FeatureFilter;
@@ -73,8 +75,10 @@ import fiji.plugin.trackmate.tracking.SpotImageTrackerFactory;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import fiji.plugin.trackmate.tracking.manual.ManualTrackerFactory;
 import fiji.plugin.trackmate.util.Threads;
+import fiji.plugin.trackmate.visualization.bvv.TrackMateBVV;
 import fiji.plugin.trackmate.visualization.trackscheme.SpotImageUpdater;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
+import ij.ImagePlus;
 
 public class TrackMateWizardSequence implements WizardSequence
 {
@@ -150,6 +154,7 @@ public class TrackMateWizardSequence implements WizardSequence
 		configureViewsDescriptor = new ConfigureViewsDescriptor(
 				displaySettings,
 				featureSelector,
+				new LaunchBVVAction(),
 				new LaunchTrackSchemeAction(),
 				new ShowTrackTablesAction(),
 				new ShowSpotTableAction(),
@@ -451,6 +456,38 @@ public class TrackMateWizardSequence implements WizardSequence
 	private static final String SPOT_TABLE_BUTTON_TOOLTIP = "Export the features of all spots to ImageJ tables.";
 
 	private static final String TRACKSCHEME_BUTTON_TOOLTIP = "<html>Launch a new instance of TrackScheme.</html>";
+
+	private static final String BVV_BUTTON_TOOLTIP = "<html>Launch a new 3D viewer.</html>";
+
+	private class LaunchBVVAction extends AbstractAction
+	{
+		private static final long serialVersionUID = 1L;
+
+		private LaunchBVVAction()
+		{
+			super( "3D view", BVV_ICON );
+			putValue( SHORT_DESCRIPTION, BVV_BUTTON_TOOLTIP );
+			final ImagePlus imp = trackmate.getSettings().imp;
+			final boolean enabled = ( imp != null ) && !DetectionUtils.is2D( imp );
+			setEnabled( enabled );
+		}
+
+		@Override
+		public void actionPerformed( final ActionEvent e )
+		{
+			new Thread( "Launching BVV thread" )
+			{
+				@Override
+				public void run()
+				{
+					final Model model = trackmate.getModel();
+					final ImagePlus imp = trackmate.getSettings().imp;
+					if ( imp != null )
+						new TrackMateBVV<>( model, selectionModel, imp, displaySettings ).render();
+				}
+			}.start();
+		}
+	}
 
 	private class LaunchTrackSchemeAction extends AbstractAction
 	{
