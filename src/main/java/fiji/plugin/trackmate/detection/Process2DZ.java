@@ -1,16 +1,21 @@
 package fiji.plugin.trackmate.detection;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.action.LabelImgExporter;
 import fiji.plugin.trackmate.util.TMUtils;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
+import net.imagej.mesh.alg.TaubinSmoothing;
+import net.imagej.mesh.nio.BufferMesh;
+import net.imglib2.Interval;
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
 import net.imglib2.img.display.imagej.CalibrationUtils;
 import net.imglib2.img.display.imagej.ImageJFunctions;
@@ -46,9 +51,15 @@ public class Process2DZ< T extends RealType< T > & NativeType< T > >
 
 	private List< Spot > spots;
 
-	public Process2DZ( final ImgPlus< T > img, final Settings settings, final boolean simplifyMeshes )
+	private final Interval interval;
+
+	private final double[] calibration;
+
+	public Process2DZ( final ImgPlus< T > img, final Interval interval, final double[] calibration, final Settings settings, final boolean simplifyMeshes )
 	{
 		this.img = img;
+		this.interval = interval;
+		this.calibration = calibration;
 		this.settings = settings;
 		this.simplify = simplifyMeshes;
 	}
@@ -99,15 +110,26 @@ public class Process2DZ< T extends RealType< T > & NativeType< T > >
 		lblImp.setDimensions( lblImp.getNChannels(), lblImp.getNFrames(), lblImp.getNSlices() );
 		
 		// Convert labels to 3D meshes.
+		final double[] calibration = TMUtils.getSpatialCalibration( lblImp );
 		final ImgPlus< T > lblImg = TMUtils.rawWraps( lblImp );
-		final LabelImageDetector< T > detector = new LabelImageDetector<>( lblImg, lblImg, TMUtils.getSpatialCalibration( lblImp ), simplify );
+		final LabelImageDetector< T > detector = new LabelImageDetector<>( lblImg, lblImg, calibration, simplify );
 		if ( !detector.checkInput() || !detector.process() )
 		{
 			errorMessage = BASE_ERROR_MESSAGE + detector.getErrorMessage();
 			return false;
 		}
 		
-		this.spots = detector.getResult();
+		final List< Spot > results = detector.getResult();
+		spots = new ArrayList<>( results.size() );
+		for ( final Spot spot : results )
+		{
+			if ( !spot.getClass().isAssignableFrom( SpotMesh.class ) )
+				continue;
+			
+			final SpotMesh sm = ( SpotMesh ) spot;
+			final BufferMesh out = TaubinSmoothing.smooth( sm.getMesh() );
+			spots.add( new SpotMesh( out, spot.getFeature( Spot.QUALITY ) ) );
+		}
 		return true;
 	}
 
