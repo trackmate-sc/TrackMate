@@ -36,7 +36,7 @@ public class Process2DZ< T extends RealType< T > & NativeType< T > >
 		implements SpotDetector< T >
 {
 
-	private static final String BASE_ERROR_MESSAGE = "[Process3Das2DZ] ";
+	private static final String BASE_ERROR_MESSAGE = "[Process2DZ] ";
 
 	private final ImgPlus< T > img;
 
@@ -58,12 +58,12 @@ public class Process2DZ< T extends RealType< T > & NativeType< T > >
 	{
 		if ( img.dimensionIndex( Axes.Z ) < 0 || img.dimension( img.dimensionIndex( Axes.Z ) ) < 2 )
 		{
-			errorMessage = BASE_ERROR_MESSAGE + "Source image is not 3D.";
+			errorMessage = BASE_ERROR_MESSAGE + "Source image is not 3D.\n";
 			return false;
 		}
 		if ( img.dimensionIndex( Axes.TIME ) > 0 && img.dimension( img.dimensionIndex( Axes.TIME ) ) > 1 )
 		{
-			errorMessage = BASE_ERROR_MESSAGE + "Source image has more than one time-point.";
+			errorMessage = BASE_ERROR_MESSAGE + "Source image has more than one time-point.\n";
 			return false;
 		}
 		return true;
