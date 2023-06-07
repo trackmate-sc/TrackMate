@@ -422,34 +422,34 @@ public interface Spot extends RealLocalizable, RealPositionable, RealInterval, C
 	@Override
 	public default void move( final float distance, final int d )
 	{
-		putFeature( POSITION_FEATURES[d], getFeature( POSITION_FEATURES[d] + distance ) );
+		putFeature( POSITION_FEATURES[ d ], getFeature( POSITION_FEATURES[ d ] ) + distance );
 	}
 
 	@Override
 	public default void move( final double distance, final int d )
 	{
-		putFeature( POSITION_FEATURES[d], getFeature( POSITION_FEATURES[d] + distance ) );
+		putFeature( POSITION_FEATURES[ d ], getFeature( POSITION_FEATURES[ d ] ) + distance );
 	}
 
 	@Override
 	public default void move( final RealLocalizable distance )
 	{
 		for ( int d = 0; d < 3; d++ )
-			putFeature( POSITION_FEATURES[ d ], getFeature( POSITION_FEATURES[ d ] + distance ) );
+			putFeature( POSITION_FEATURES[ d ], getFeature( POSITION_FEATURES[ d ] ) + distance.getDoublePosition( d ) );
 	}
 
 	@Override
 	public default void move( final float[] distance )
 	{
 		for ( int d = 0; d < 3; d++ )
-			putFeature( POSITION_FEATURES[ d ], getFeature( POSITION_FEATURES[ d ] + distance[ d ] ) );
+			putFeature( POSITION_FEATURES[ d ], getFeature( POSITION_FEATURES[ d ] ) + distance[ d ] );
 	}
 
 	@Override
 	public default void move( final double[] distance )
 	{
 		for ( int d = 0; d < 3; d++ )
-			putFeature( POSITION_FEATURES[ d ], getFeature( POSITION_FEATURES[ d ] + distance[ d ] ) );
+			putFeature( POSITION_FEATURES[ d ], getFeature( POSITION_FEATURES[ d ] ) + distance[ d ] );
 	}
 
 	@Override
