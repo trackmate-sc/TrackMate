@@ -279,7 +279,7 @@ public class SpotMeshUtils
 	 *            image).
 	 * @return
 	 */
-	private static < S extends RealType< S > > Spot meshToSpotMesh(
+	public static < S extends RealType< S > > Spot meshToSpotMesh(
 			final Mesh mesh,
 			final boolean simplify,
 			final double[] calibration,
