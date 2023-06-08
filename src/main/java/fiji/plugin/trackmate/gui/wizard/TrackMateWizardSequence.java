@@ -26,6 +26,7 @@ import static fiji.plugin.trackmate.gui.Icons.SPOT_TABLE_ICON;
 import static fiji.plugin.trackmate.gui.Icons.TRACK_SCHEME_ICON_16x16;
 import static fiji.plugin.trackmate.gui.Icons.TRACK_TABLES_ICON;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -33,6 +34,9 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.AbstractAction;
+import javax.swing.JLabel;
+import javax.swing.JRootPane;
+import javax.swing.SwingUtilities;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
@@ -74,6 +78,7 @@ import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.tracking.SpotImageTrackerFactory;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import fiji.plugin.trackmate.tracking.manual.ManualTrackerFactory;
+import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
 import fiji.plugin.trackmate.util.Threads;
 import fiji.plugin.trackmate.visualization.bvv.TrackMateBVV;
 import fiji.plugin.trackmate.visualization.trackscheme.SpotImageUpdater;
@@ -480,10 +485,21 @@ public class TrackMateWizardSequence implements WizardSequence
 				@Override
 				public void run()
 				{
-					final Model model = trackmate.getModel();
-					final ImagePlus imp = trackmate.getSettings().imp;
-					if ( imp != null )
-						new TrackMateBVV<>( model, selectionModel, imp, displaySettings ).render();
+					final Component c = ( Component ) e.getSource();
+					final JRootPane parent = SwingUtilities.getRootPane( c );
+					final EverythingDisablerAndReenabler enabler = new EverythingDisablerAndReenabler( parent, new Class[] { JLabel.class } );
+					enabler.disable();
+					try
+					{
+						final Model model = trackmate.getModel();
+						final ImagePlus imp = trackmate.getSettings().imp;
+						if ( imp != null )
+							new TrackMateBVV<>( model, selectionModel, imp, displaySettings ).render();
+					}
+					finally
+					{
+						enabler.reenable();
+					}
 				}
 			}.start();
 		}
