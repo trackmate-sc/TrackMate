@@ -38,6 +38,7 @@ import javax.swing.JLabel;
 import javax.swing.JRootPane;
 import javax.swing.SwingUtilities;
 
+import bvv.util.BvvHandle;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
@@ -52,6 +53,7 @@ import fiji.plugin.trackmate.detection.ManualDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.ModelFeatureUpdater;
+import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.components.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.components.LogPanel;
@@ -494,7 +496,12 @@ public class TrackMateWizardSequence implements WizardSequence
 						final Model model = trackmate.getModel();
 						final ImagePlus imp = trackmate.getSettings().imp;
 						if ( imp != null )
-							new TrackMateBVV<>( model, selectionModel, imp, displaySettings ).render();
+						{
+							final TrackMateBVV< ? > tbvv = new TrackMateBVV<>( model, selectionModel, imp, displaySettings );
+							tbvv.render();
+							final BvvHandle bvvHandle = tbvv.getBvvHandle();
+							GuiUtils.positionWindow( SwingUtilities.getWindowAncestor( bvvHandle.getViewerPanel() ), c );
+						}
 					}
 					finally
 					{
