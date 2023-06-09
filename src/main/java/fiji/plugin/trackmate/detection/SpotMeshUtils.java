@@ -119,6 +119,10 @@ public class SpotMeshUtils
 			final RealInterval bbi = boundingBoxes.get( i );
 			final Mesh meshi = meshes.get( i );
 
+			/*
+			 * FIXME revise this. Improper and incorrect.
+			 */
+
 			// Can we put it inside another?
 			for ( int j = i + 1; j < meshes.size(); j++ )
 			{
@@ -143,7 +147,7 @@ public class SpotMeshUtils
 		final double[] origin = interval.minAsDoubleArray();
 		for ( final Mesh mesh : out )
 		{
-			final Spot spot = meshToSpotMesh(
+			final SpotMesh spot = meshToSpotMesh(
 					mesh,
 					simplify,
 					calibration,
@@ -279,7 +283,7 @@ public class SpotMeshUtils
 	 *            image).
 	 * @return
 	 */
-	public static < S extends RealType< S > > Spot meshToSpotMesh(
+	public static < S extends RealType< S > > SpotMesh meshToSpotMesh(
 			final Mesh mesh,
 			final boolean simplify,
 			final double[] calibration,
