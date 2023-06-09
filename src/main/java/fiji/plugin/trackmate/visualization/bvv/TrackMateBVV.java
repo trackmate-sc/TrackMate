@@ -60,6 +60,17 @@ public class TrackMateBVV< T extends Type< T > > extends AbstractTrackMateModelV
 		selectionModel.addSelectionChangeListener( e -> refresh() );
 	}
 
+	/**
+	 * Returns the {@link BvvHandle} that contains this view. Returns
+	 * <code>null</code> if this view has not been rendered yet.
+	 * 
+	 * @return the BVV handle, or <code>null</code>.
+	 */
+	public BvvHandle getBvvHandle()
+	{
+		return handle;
+	}
+
 	@Override
 	public void render()
 	{
