@@ -53,12 +53,17 @@ public class SpotMesh extends SpotBase
 	 * @param mesh
 	 */
 	public SpotMesh(
-			final Mesh mesh,
+			final Mesh m,
 			final double quality,
 			final String name )
 	{
 		// Dummy coordinates and radius.
 		super( 0., 0., 0., 0., quality, name );
+
+		// Compute triangles and vertices normals.
+		final BufferMesh mesh = new BufferMesh( ( int ) m.vertices().size(), ( int ) m.triangles().size() );
+		Meshes.calculateNormals( m, mesh );
+
 		this.mesh = mesh;
 		final RealPoint center = Meshes.center( mesh );
 
