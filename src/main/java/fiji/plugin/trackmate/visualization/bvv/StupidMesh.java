@@ -55,28 +55,25 @@ public class StupidMesh
 {
 	private final Shader prog;
 
+	private final BufferMesh mesh;
+
+	private boolean initialized;
+
 	private int vao;
 
-	private final BufferMesh mesh;
+	private final float[] carr = new float[ 4 ];
+
+	private final float[] scarr = new float[ 4 ];
 
 	public StupidMesh( final BufferMesh mesh )
 	{
 		this.mesh = mesh;
-
 		final Segment meshVp = new SegmentTemplate( StupidMesh.class, "mesh.vp" ).instantiate();
 		final Segment meshFp = new SegmentTemplate( StupidMesh.class, "mesh.fp" ).instantiate();
 		prog = new DefaultShader( meshVp.getCode(), meshFp.getCode() );
+		DisplaySettings.defaultStyle().getSpotUniformColor().getColorComponents( carr );
+		DisplaySettings.defaultStyle().getHighlightColor().getColorComponents( scarr );
 	}
-
-	private boolean initialized;
-
-	private Color color = DisplaySettings.defaultStyle().getSpotUniformColor();
-
-	private final float[] carr = new float[ 4 ];
-
-	private Color selectionColor = DisplaySettings.defaultStyle().getHighlightColor();
-
-	private final float[] scarr = new float[ 4 ];
 
 	private void init( final GL3 gl )
 	{
@@ -106,8 +103,6 @@ public class StupidMesh
 		gl.glBufferData( GL.GL_ELEMENT_ARRAY_BUFFER, indices.limit() * Integer.BYTES, indices, GL.GL_STATIC_DRAW );
 		gl.glBindBuffer( GL.GL_ELEMENT_ARRAY_BUFFER, 0 );
 
-
-
 		gl.glGenVertexArrays( 1, tmp, 0 );
 		vao = tmp[ 0 ];
 		gl.glBindVertexArray( vao );
@@ -123,13 +118,12 @@ public class StupidMesh
 
 	public void setColor( final Color color )
 	{
-		this.color = color;
+		color.getComponents( carr );
 	}
 
 	public void setSelectionColor( final Color selectionColor )
 	{
-		this.selectionColor = selectionColor;
-
+		selectionColor.getComponents( scarr );
 	}
 
 	public void draw( final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final boolean isSelected )
@@ -143,10 +137,8 @@ public class StupidMesh
 		prog.getUniformMatrix4f( "pvm" ).set( pvm );
 		prog.getUniformMatrix4f( "vm" ).set( vm );
 		prog.getUniformMatrix3f( "itvm" ).set( itvm.get3x3( new Matrix3f() ) );
-		color.getComponents( carr );
 		prog.getUniform4f( "ObjectColor" ).set( carr[ 0 ], carr[ 1 ], carr[ 2 ], carr[ 3 ] );
 		prog.getUniform1f( "IsSelected" ).set( isSelected ? 1f : 0f );
-		selectionColor.getComponents( scarr );
 		prog.getUniform4f( "SelectionColor" ).set( scarr[ 0 ], scarr[ 1 ], scarr[ 2 ], scarr[ 3 ] );
 		prog.setUniforms( context );
 		prog.use( context );
