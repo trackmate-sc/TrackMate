@@ -2,6 +2,7 @@ package fiji.plugin.trackmate.detection;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Settings;
@@ -63,8 +64,8 @@ public class Process2DZ< T extends RealType< T > & NativeType< T > >
 	 * Creates a new {@link Process2DZ} detector.
 	 * 
 	 * @param img
-	 *            the input data. Must be 3D and the 3 dimensions must be X, Y
-	 *            and Z.
+	 *            the input data. Must be 3D (plus possible channels) and the 3
+	 *            dimensions must be X, Y and Z.
 	 * @param interval
 	 *            the interval in the input data to process. Must have the same
 	 *            number of dimensions that the input data.
@@ -107,6 +108,11 @@ public class Process2DZ< T extends RealType< T > & NativeType< T > >
 	{
 		spots = null;
 
+		/*
+		 * Segment and track as a 2D+T image with the specified detector and
+		 * settings.
+		 */
+
 		// Make the final single T 3D image, a 2D + T image final by making Z->T
 		final IntervalView< T > cropped = Views.interval( img, interval );
 		final ImagePlus imp = ImageJFunctions.wrap( cropped, null );
@@ -131,6 +137,11 @@ public class Process2DZ< T extends RealType< T > & NativeType< T > >
 		// Get 2D+T masks
 		final ImagePlus lblImp = LabelImgExporter.createLabelImagePlus( trackmate, false, true, false );
 
+		/*
+		 * Exposes tracked labels as a 3D image and segment them again with
+		 * label image detector.
+		 */
+
 		// Back to a 3D single time-point image.
 		lblImp.setDimensions( lblImp.getNChannels(), lblImp.getNFrames(), lblImp.getNSlices() );
 
@@ -146,31 +157,29 @@ public class Process2DZ< T extends RealType< T > & NativeType< T > >
 		final List< Spot > results = detector.getResult();
 		spots = new ArrayList<>( results.size() );
 
+		// To read the label value (=trackID) later.
 		final RandomAccess< T > ra = lblImg.randomAccess();
 		final TrackModel tm = trackmate.getModel().getTrackModel();
 
 		for ( final Spot spot : results )
 		{
-			if ( !spot.getClass().isAssignableFrom( SpotMesh.class ) )
-				continue;
 
 			/*
 			 * Smooth spot?
 			 */
 
 			final Spot newSpot;
-			if ( simplify )
+			if ( !simplify || !spot.getClass().isAssignableFrom( SpotMesh.class ) )
 			{
-
+				newSpot = spot;
+			}
+			else
+			{
 				final SpotMesh sm = ( SpotMesh ) spot;
 				final BufferMesh out = TaubinSmoothing.smooth( TranslateMesh.translate( sm.getMesh(), sm ) );
 				newSpot = SpotMeshUtils.meshToSpotMesh( out, simplify, new double[] { 1., 1., 1. }, null, new double[] { 0., 0., 0. } );
 				if ( newSpot == null )
 					continue;
-			}
-			else
-			{
-				newSpot = spot;
 			}
 
 			/*
@@ -185,11 +194,20 @@ public class Process2DZ< T extends RealType< T > & NativeType< T > >
 			final int trackID = ( int ) ra.get().getRealDouble() - 1;
 
 			// Average quality from the corresponding track.
-			/*
-			 * FIXME: Does not work if zmin in the interval is not 0. Probably
-			 * because the spots do not 'touch' the right label.
-			 */
-			final double avgQuality = tm.trackSpots( trackID ).stream().mapToDouble( s -> s.getFeature( Spot.QUALITY ).doubleValue() ).average().getAsDouble();
+			final Set< Spot > trackSpots = tm.trackSpots( trackID );
+			final double avgQuality;
+			if ( trackSpots != null )
+			{
+				avgQuality = trackSpots.stream()
+						.mapToDouble( s -> s.getFeature( Spot.QUALITY ).doubleValue() )
+						.average()
+						.getAsDouble();
+			}
+			else
+			{
+				// default if something goes wrong.
+				avgQuality = spot.getFeature( Spot.QUALITY );
+			}
 
 			// Pass quality to new spot.
 			newSpot.putFeature( Spot.QUALITY, Double.valueOf( avgQuality ) );
