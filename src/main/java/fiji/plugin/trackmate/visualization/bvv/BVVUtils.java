@@ -53,6 +53,7 @@ public class BVVUtils
 							.renderWidth( 1024 )
 							.renderHeight( 1024 )
 							.preferredSize( 512, 512 )
+							.frameTitle( "3D view " + imp.getShortTitle() )
 							.sourceTransform( cal ) );
 			source.setDisplayRange( imp.getDisplayRangeMin(), imp.getDisplayRangeMax() );
 			if ( imp.getLuts().length > 0 )
@@ -80,6 +81,7 @@ public class BVVUtils
 									.renderWidth( 1024 )
 									.renderHeight( 1024 )
 									.preferredSize( 512, 512 )
+									.frameTitle( "3D view " + imp.getShortTitle() )
 									.sourceTransform( cal ) );
 					h = source.getBvvHandle();
 				}
