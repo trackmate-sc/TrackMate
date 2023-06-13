@@ -314,7 +314,7 @@ public class CTCExporter
 		for ( int frame = 0; frame < dims[ 3 ]; frame++ )
 		{
 			final ImgPlus< UnsignedShortType > imgCT = TMUtils.hyperSlice( labelImg, 0, frame );
-			final SpotRoiWriter spotWriter = new SpotRoiWriter( imgCT );
+			final SpotRoiWriter< UnsignedShortType > spotWriter = new SpotRoiWriter<>( imgCT );
 
 			for ( final Spot spot : model.getSpots().iterable( frame, true ) )
 			{
@@ -446,7 +446,7 @@ public class CTCExporter
 					{
 						final long frame = spot.getFeature( Spot.FRAME ).longValue();
 						final ImgPlus< UnsignedShortType > imgCT = TMUtils.hyperSlice( labelImg, 0, frame );
-						final SpotRoiWriter spotRoiWriter = new SpotRoiWriter( imgCT );
+						final SpotRoiWriter< UnsignedShortType > spotRoiWriter = new SpotRoiWriter<>( imgCT );
 						spotRoiWriter.write( spot, currentID );
 					}
 
