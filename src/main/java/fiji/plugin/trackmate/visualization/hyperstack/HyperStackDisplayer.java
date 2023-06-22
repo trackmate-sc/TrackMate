@@ -202,7 +202,7 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 		if ( !SpotEditTool.isLaunched() )
 			editTool.run( "" );
 
-		editTool.register( imp, this );
+		editTool.register( this );
 	}
 
 	@Override
