@@ -782,7 +782,9 @@ public class TrackModel
 
 	public TimeDirectedNeighborIndex getDirectedNeighborIndex()
 	{
-		return new TimeDirectedNeighborIndex( graph );
+		final TimeDirectedNeighborIndex index = new TimeDirectedNeighborIndex( graph );
+		graph.addGraphListener( index );
+		return index;
 	}
 
 	/**
