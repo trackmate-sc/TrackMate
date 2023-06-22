@@ -280,6 +280,44 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 		switch ( e.getKeyCode() )
 		{
 
+		// Track navigation actions.
+		case KeyEvent.VK_UP:
+		{
+			actions.navigateToParent();
+			e.consume();
+			break;
+		}
+		case KeyEvent.VK_DOWN:
+		{
+			actions.navigateToChild();
+			e.consume();
+			break;
+		}
+		case KeyEvent.VK_LEFT:
+		{
+			actions.navigateToPreviousSibling();
+			e.consume();
+			break;
+		}
+		case KeyEvent.VK_RIGHT:
+		{
+			actions.navigateToNextSibling();
+			e.consume();
+			break;
+		}
+		case KeyEvent.VK_PAGE_DOWN:
+		{
+			actions.navigateToNextTrack();
+			e.consume();
+			break;
+		}
+		case KeyEvent.VK_PAGE_UP:
+		{
+			actions.navigateToPreviousTrack();
+			e.consume();
+			break;
+		}
+		
 		// Delete currently edited spot
 		case KeyEvent.VK_DELETE:
 		{

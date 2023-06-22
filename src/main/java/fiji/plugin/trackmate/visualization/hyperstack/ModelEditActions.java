@@ -22,6 +22,7 @@ import fiji.plugin.trackmate.detection.semiauto.SemiAutoTracker;
 import fiji.plugin.trackmate.util.ModelTools;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.util.Threads;
+import fiji.plugin.trackmate.util.TrackNavigator;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
@@ -55,12 +56,15 @@ public class ModelEditActions
 
 	private FreehandRoi roiedit;
 
+	private final TrackNavigator trackNavigator;
+
 	public ModelEditActions( final ImagePlus imp, final Model model, final SelectionModel selectionModel, final Logger logger )
 	{
 		this.imp = imp;
 		this.model = model;
 		this.selectionModel = selectionModel;
 		this.logger = logger;
+		this.trackNavigator = new TrackNavigator( model, selectionModel );
 	}
 
 	private Spot makeSpot( Point mouseLocation )
@@ -496,5 +500,35 @@ public class ModelEditActions
 	public void selectTrack()
 	{
 		ModelTools.selectTrack( selectionModel );
+	}
+
+	public void navigateToChild()
+	{
+		trackNavigator.nextInTime();
+	}
+
+	public void navigateToParent()
+	{
+		trackNavigator.previousInTime();
+	}
+
+	public void navigateToNextSibling()
+	{
+		trackNavigator.nextSibling();
+	}
+
+	public void navigateToPreviousSibling()
+	{
+		trackNavigator.previousSibling();
+	}
+
+	public void navigateToNextTrack()
+	{
+		trackNavigator.nextTrack();
+	}
+
+	public void navigateToPreviousTrack()
+	{
+		trackNavigator.previousTrack();
 	}
 }
