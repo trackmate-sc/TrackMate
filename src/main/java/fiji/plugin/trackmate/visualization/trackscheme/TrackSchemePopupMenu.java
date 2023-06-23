@@ -193,6 +193,11 @@ public class TrackSchemePopupMenu extends JPopupMenu
 		trackScheme.removeSelectedCells();
 	}
 
+	private void removeLinks()
+	{
+		trackScheme.removeSelectedLinkCells();
+	}
+
 	/*
 	 * MENU COMPOSITION
 	 */
@@ -407,6 +412,16 @@ public class TrackSchemePopupMenu extends JPopupMenu
 				}
 			};
 			add( removeAction );
+			final Action removeLinkAction = new AbstractAction( "Remove only links" )
+			{
+				@Override
+				public void actionPerformed( final ActionEvent e )
+				{
+					removeLinks();
+				}
+			};
+			add( removeLinkAction );
+
 		}
 	}
 

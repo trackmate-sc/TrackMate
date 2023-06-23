@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -1270,6 +1271,30 @@ public class TrackScheme extends AbstractTrackMateModelView
 		try
 		{
 			graph.removeCells( graph.getSelectionCells() );
+			// Will be caught by the graph listeners
+		}
+		finally
+		{
+			graph.getModel().endUpdate();
+		}
+	}
+
+	public void removeSelectedLinkCells()
+	{
+		List< Object > edgeCells = new ArrayList<>();
+		for ( Object obj : graph.getSelectionCells() )
+		{
+			DefaultWeightedEdge e = graph.getEdgeFor( ( mxICell ) obj );
+			if ( e == null )
+				continue;
+
+			edgeCells.add( obj );
+		}
+		
+		graph.getModel().beginUpdate();
+		try
+		{
+			graph.removeCells( edgeCells.toArray() );
 			// Will be caught by the graph listeners
 		}
 		finally
