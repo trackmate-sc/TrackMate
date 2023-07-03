@@ -194,8 +194,9 @@ public class TrackMateBVV< T extends Type< T > > extends AbstractTrackMateModelV
 				continue;
 
 			final Color color = spotColorGenerator.color( entry.getKey() );
-			sm.setColor( color );
-			sm.setSelectionColor( displaySettings.getHighlightColor() );
+			float alpha = ( float ) displaySettings.getSpotTransparencyAlpha();
+			sm.setColor( color, alpha );
+			sm.setSelectionColor( displaySettings.getHighlightColor(), alpha );
 		}
 		refresh();
 	}
