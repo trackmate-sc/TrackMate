@@ -116,14 +116,16 @@ public class StupidMesh
 		gl.glBindVertexArray( 0 );
 	}
 
-	public void setColor( final Color color )
+	public void setColor( final Color color, float alpha )
 	{
 		color.getComponents( carr );
+		carr[ 3 ] = alpha;
 	}
 
-	public void setSelectionColor( final Color selectionColor )
+	public void setSelectionColor( final Color selectionColor, float alpha )
 	{
 		selectionColor.getComponents( scarr );
+		scarr[ 3 ] = alpha;
 	}
 
 	public void draw( final GL3 gl, final Matrix4fc pvm, final Matrix4fc vm, final boolean isSelected )
@@ -144,9 +146,9 @@ public class StupidMesh
 		prog.use( context );
 
 		gl.glBindVertexArray( vao );
-//		gl.glEnable( GL.GL_CULL_FACE );
-//		gl.glCullFace( GL.GL_BACK );
-//		gl.glFrontFace( GL.GL_CCW );
+		gl.glEnable( GL.GL_CULL_FACE );
+		gl.glCullFace( GL.GL_BACK );
+		gl.glFrontFace( GL.GL_CCW );
 		gl.glDrawElements( GL_TRIANGLES, ( int ) mesh.triangles().size() * 3, GL_UNSIGNED_INT, 0 );
 		gl.glBindVertexArray( 0 );
 	}

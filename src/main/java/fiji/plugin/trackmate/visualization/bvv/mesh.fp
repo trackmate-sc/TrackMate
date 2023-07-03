@@ -39,10 +39,10 @@ void main()
 	vec3 l2 = phong( norm, viewDir, lightDir2, lightColor2, 32, 0.5 );
 	
 	if (IsSelected > 0.5) {
-		fragColor = vec4( (ambient + l1 + l2), 1) * SelectionColor;
+		fragColor = vec4( (ambient + l1 + l2), SelectionColor[3]) * SelectionColor;
     } else {
 		float it = dot(norm, viewDir);
-		fragColor = vec4( it * (ambient + l1 + l2), 1) * ObjectColor + (1-it) * vec4(1,1,1,1);
+		fragColor = vec4( it * (ambient + l1 + l2), 1) * ObjectColor + (1-it) * vec4(1,1,1,ObjectColor[3]);
     }
 
 }
