@@ -10,10 +10,13 @@ import org.joml.Matrix4f;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Actions;
 
-import bvv.util.Bvv;
-import bvv.util.BvvFunctions;
-import bvv.util.BvvSource;
+import bvv.core.VolumeViewerPanel;
+import bvv.core.util.MatrixMath;
+import bvv.vistools.Bvv;
+import bvv.vistools.BvvFunctions;
+import bvv.vistools.BvvSource;
 import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.visualization.bvv.StupidMesh;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
@@ -26,8 +29,6 @@ import net.imagej.mesh.nio.BufferMesh;
 import net.imglib2.img.display.imagej.ImgPlusViews;
 import net.imglib2.type.Type;
 import net.imglib2.type.numeric.ARGBType;
-import tpietzsch.example2.VolumeViewerPanel;
-import tpietzsch.scene.mesh.StupidMesh;
 
 public class MeshPlayground
 {
@@ -67,8 +68,9 @@ public class MeshPlayground
 			if ( showMeshes.get() )
 			{
 				final Matrix4f pvm = new Matrix4f( data.getPv() );
-				final Matrix4f vm = new Matrix4f( data.getCamview() );
-				meshes.forEach( mesh -> mesh.draw( gl, pvm, vm ) );
+				Matrix4f view = MatrixMath.affine( data.getRenderTransformWorldToScreen(), new Matrix4f() );
+				Matrix4f vm = MatrixMath.screen( data.getDCam(), data.getScreenWidth(), data.getScreenHeight(), new Matrix4f() ).mul( view );
+				meshes.forEach( mesh -> mesh.draw( gl, pvm, vm, false ) );
 			}
 		} );
 

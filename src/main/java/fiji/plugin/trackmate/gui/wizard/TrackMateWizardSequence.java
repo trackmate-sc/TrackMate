@@ -38,7 +38,7 @@ import javax.swing.JLabel;
 import javax.swing.JRootPane;
 import javax.swing.SwingUtilities;
 
-import bvv.util.BvvHandle;
+import bvv.vistools.BvvHandle;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
