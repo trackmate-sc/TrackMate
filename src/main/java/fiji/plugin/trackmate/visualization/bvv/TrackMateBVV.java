@@ -13,7 +13,9 @@ import javax.swing.JFrame;
 import org.joml.Matrix4f;
 
 import bdv.viewer.animate.TranslationAnimator;
-import bvv.util.BvvHandle;
+import bvv.core.VolumeViewerPanel;
+import bvv.core.util.MatrixMath;
+import bvv.vistools.BvvHandle;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.SelectionModel;
@@ -35,7 +37,6 @@ import ij.ImagePlus;
 import net.imglib2.RealLocalizable;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.Type;
-import tpietzsch.example2.VolumeViewerPanel;
 
 public class TrackMateBVV< T extends Type< T > > extends AbstractTrackMateModelView
 {
@@ -80,7 +81,8 @@ public class TrackMateBVV< T extends Type< T > > extends AbstractTrackMateModelV
 			if ( displaySettings.isSpotVisible() )
 			{
 				final Matrix4f pvm = new Matrix4f( data.getPv() );
-				final Matrix4f vm = new Matrix4f( data.getCamview() );
+				Matrix4f view = MatrixMath.affine( data.getRenderTransformWorldToScreen(), new Matrix4f() );
+				Matrix4f vm = MatrixMath.screen( data.getDCam(), data.getScreenWidth(), data.getScreenHeight(), new Matrix4f() ).mul( view );
 
 				final int t = data.getTimepoint();
 				final Iterable< Spot > it = model.getSpots().iterable( t, true );

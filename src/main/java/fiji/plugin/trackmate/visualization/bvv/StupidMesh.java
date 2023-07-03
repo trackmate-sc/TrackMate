@@ -43,13 +43,13 @@ import org.joml.Matrix4fc;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 
+import bvv.core.backend.jogl.JoglGpuContext;
+import bvv.core.shadergen.DefaultShader;
+import bvv.core.shadergen.Shader;
+import bvv.core.shadergen.generate.Segment;
+import bvv.core.shadergen.generate.SegmentTemplate;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import net.imagej.mesh.nio.BufferMesh;
-import tpietzsch.backend.jogl.JoglGpuContext;
-import tpietzsch.shadergen.DefaultShader;
-import tpietzsch.shadergen.Shader;
-import tpietzsch.shadergen.generate.Segment;
-import tpietzsch.shadergen.generate.SegmentTemplate;
 
 public class StupidMesh
 {

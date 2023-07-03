@@ -1,9 +1,9 @@
 package fiji.plugin.trackmate.visualization.bvv;
 
-import bvv.util.Bvv;
-import bvv.util.BvvFunctions;
-import bvv.util.BvvHandle;
-import bvv.util.BvvSource;
+import bvv.vistools.Bvv;
+import bvv.vistools.BvvFunctions;
+import bvv.vistools.BvvHandle;
+import bvv.vistools.BvvSource;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.util.TMUtils;
