@@ -58,7 +58,12 @@ public class SpotIntensityMultiCAnalyzer< T extends RealType< T > > extends Abst
 		final DoubleArray intensities = new DoubleArray();
 
 		for ( final T pixel : neighborhood )
-			intensities.addValue( pixel.getRealDouble() );
+		{
+			final double val = pixel.getRealDouble();
+			if ( Double.isNaN( val ) )
+				continue;
+			intensities.addValue( val );
+		}
 
 		Util.quicksort( intensities.getArray(), 0, intensities.size() - 1 );
 		spot.putFeature( SpotIntensityMultiCAnalyzerFactory.makeFeatureKey( MEAN_INTENSITY, channel ), Double.valueOf( TMUtils.average( intensities ) ) );
