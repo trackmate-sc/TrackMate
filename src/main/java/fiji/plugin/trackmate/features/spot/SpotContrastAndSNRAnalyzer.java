@@ -110,7 +110,12 @@ public class SpotContrastAndSNRAnalyzer< T extends RealType< T > > extends Abstr
 			final IterableInterval< T > neighborhood = SpotUtil.iterable( outterRoi, spot, img );
 			double outterSum = 0.;
 			for ( final T t : neighborhood )
-				outterSum += t.getRealDouble();
+			{
+				final double val = t.getRealDouble();
+				if ( Double.isNaN( val ) )
+					continue;
+				outterSum += val;
+			}
 
 			final String sumFeature = makeFeatureKey( TOTAL_INTENSITY, channel );
 			final double innterSum = spot.getFeature( sumFeature );
@@ -143,7 +148,10 @@ public class SpotContrastAndSNRAnalyzer< T extends RealType< T > > extends Abstr
 				if ( dist2 > radius2 )
 				{
 					nOut++;
-					sumOut += cursor.get().getRealDouble();
+					final double val = cursor.get().getRealDouble();
+					if ( Double.isNaN( val ) )
+						continue;
+					sumOut += val;
 				}
 			}
 			meanOut = sumOut / nOut;
@@ -159,3 +167,4 @@ public class SpotContrastAndSNRAnalyzer< T extends RealType< T > > extends Abstr
 		spot.putFeature( makeFeatureKey( SNR, channel ), snr );
 	}
 }
+
