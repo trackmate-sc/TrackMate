@@ -60,58 +60,58 @@ public class CaptureOverlayPanel extends JPanel
 		setLayout( gridBagLayout );
 
 		final JLabel lblFirstFrame = new JLabel( "First frame:" );
-		final GridBagConstraints gbc_lblFirstFrame = new GridBagConstraints();
-		gbc_lblFirstFrame.anchor = GridBagConstraints.EAST;
-		gbc_lblFirstFrame.insets = new Insets( 0, 0, 5, 5 );
-		gbc_lblFirstFrame.gridx = 0;
-		gbc_lblFirstFrame.gridy = 0;
-		add( lblFirstFrame, gbc_lblFirstFrame );
+		final GridBagConstraints gbcLblFirstFrame = new GridBagConstraints();
+		gbcLblFirstFrame.anchor = GridBagConstraints.EAST;
+		gbcLblFirstFrame.insets = new Insets( 0, 0, 5, 5 );
+		gbcLblFirstFrame.gridx = 0;
+		gbcLblFirstFrame.gridy = 0;
+		add( lblFirstFrame, gbcLblFirstFrame );
 
 		final JFormattedTextField tftFirst = new JFormattedTextField( NumberFormat.getIntegerInstance() );
 		tftFirst.setValue( Integer.valueOf( firstFrame ) );
 		tftFirst.setColumns( 5 );
-		final GridBagConstraints gbc_tftFirst = new GridBagConstraints();
-		gbc_tftFirst.anchor = GridBagConstraints.NORTH;
-		gbc_tftFirst.insets = new Insets( 0, 0, 5, 0 );
-		gbc_tftFirst.fill = GridBagConstraints.HORIZONTAL;
-		gbc_tftFirst.gridx = 1;
-		gbc_tftFirst.gridy = 0;
-		add( tftFirst, gbc_tftFirst );
+		final GridBagConstraints gbcTftFirst = new GridBagConstraints();
+		gbcTftFirst.anchor = GridBagConstraints.NORTH;
+		gbcTftFirst.insets = new Insets( 0, 0, 5, 0 );
+		gbcTftFirst.fill = GridBagConstraints.HORIZONTAL;
+		gbcTftFirst.gridx = 1;
+		gbcTftFirst.gridy = 0;
+		add( tftFirst, gbcTftFirst );
 
 		final JLabel lblLastFrame = new JLabel( "Last frame:" );
-		final GridBagConstraints gbc_lblLastFrame = new GridBagConstraints();
-		gbc_lblLastFrame.anchor = GridBagConstraints.EAST;
-		gbc_lblLastFrame.insets = new Insets( 0, 0, 5, 5 );
-		gbc_lblLastFrame.gridx = 0;
-		gbc_lblLastFrame.gridy = 1;
-		add( lblLastFrame, gbc_lblLastFrame );
+		final GridBagConstraints gbcLblLastFrame = new GridBagConstraints();
+		gbcLblLastFrame.anchor = GridBagConstraints.EAST;
+		gbcLblLastFrame.insets = new Insets( 0, 0, 5, 5 );
+		gbcLblLastFrame.gridx = 0;
+		gbcLblLastFrame.gridy = 1;
+		add( lblLastFrame, gbcLblLastFrame );
 
 		final JFormattedTextField tftLast = new JFormattedTextField( NumberFormat.getIntegerInstance() );
 		tftLast.setValue( Integer.valueOf( lastFrame ) );
 		tftLast.setColumns( 5 );
-		final GridBagConstraints gbc_tftLast = new GridBagConstraints();
-		gbc_tftLast.insets = new Insets( 0, 0, 5, 0 );
-		gbc_tftLast.fill = GridBagConstraints.HORIZONTAL;
-		gbc_tftLast.gridx = 1;
-		gbc_tftLast.gridy = 1;
-		add( tftLast, gbc_tftLast );
+		final GridBagConstraints gbcTftLast = new GridBagConstraints();
+		gbcTftLast.insets = new Insets( 0, 0, 5, 0 );
+		gbcTftLast.fill = GridBagConstraints.HORIZONTAL;
+		gbcTftLast.gridx = 1;
+		gbcTftLast.gridy = 1;
+		add( tftLast, gbcTftLast );
 
 		final JLabel lblNewLabel = new JLabel( "Hide image:" );
-		final GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
-		gbc_lblNewLabel.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel.insets = new Insets( 0, 0, 5, 5 );
-		gbc_lblNewLabel.gridx = 0;
-		gbc_lblNewLabel.gridy = 2;
-		add( lblNewLabel, gbc_lblNewLabel );
+		final GridBagConstraints gbcLblNewLabel = new GridBagConstraints();
+		gbcLblNewLabel.anchor = GridBagConstraints.EAST;
+		gbcLblNewLabel.insets = new Insets( 0, 0, 5, 5 );
+		gbcLblNewLabel.gridx = 0;
+		gbcLblNewLabel.gridy = 2;
+		add( lblNewLabel, gbcLblNewLabel );
 
 		final JCheckBox chckbxHideImage = new JCheckBox();
 		chckbxHideImage.setSelected( hideImage );
-		final GridBagConstraints gbc_chckbxHideImage = new GridBagConstraints();
-		gbc_chckbxHideImage.anchor = GridBagConstraints.WEST;
-		gbc_chckbxHideImage.insets = new Insets( 0, 0, 5, 0 );
-		gbc_chckbxHideImage.gridx = 1;
-		gbc_chckbxHideImage.gridy = 2;
-		add( chckbxHideImage, gbc_chckbxHideImage );
+		final GridBagConstraints gbcChckbxHideImage = new GridBagConstraints();
+		gbcChckbxHideImage.anchor = GridBagConstraints.WEST;
+		gbcChckbxHideImage.insets = new Insets( 0, 0, 5, 0 );
+		gbcChckbxHideImage.gridx = 1;
+		gbcChckbxHideImage.gridy = 2;
+		add( chckbxHideImage, gbcChckbxHideImage );
 
 		final FocusListener fl = new FocusAdapter()
 		{
