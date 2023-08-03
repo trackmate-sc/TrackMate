@@ -44,6 +44,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.measure.Calibration;
 import ij.process.ColorProcessor;
+import ij.process.ImageProcessor;
 
 public class CaptureOverlayAction extends AbstractTMAction
 {
@@ -63,11 +64,14 @@ public class CaptureOverlayAction extends AbstractTMAction
 			"Also, make sure nothing is moved over the image while capturing. " +
 			"</html>";
 
+
 	private static int firstFrame = -1;
 
 	private static int lastFrame = -1;
 
 	private static boolean hideImage = false;
+
+	private static boolean whiteBackground = false;
 
 	@Override
 	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame gui )
@@ -83,7 +87,7 @@ public class CaptureOverlayAction extends AbstractTMAction
 
 		if ( gui != null )
 		{
-			final CaptureOverlayPanel panel = new CaptureOverlayPanel( firstFrame, lastFrame, hideImage );
+			final CaptureOverlayPanel panel = new CaptureOverlayPanel( firstFrame, lastFrame, hideImage, whiteBackground );
 			final int userInput = JOptionPane.showConfirmDialog(
 					gui,
 					panel,
@@ -102,6 +106,7 @@ public class CaptureOverlayAction extends AbstractTMAction
 			firstFrame = Math.max( 1, firstFrame );
 			lastFrame = Math.min( imp.getNFrames(), lastFrame );
 			hideImage = panel.isHideImage();
+			whiteBackground = panel.isWhiteBackground();
 		}
 
 		if ( hideImage )
@@ -113,6 +118,14 @@ public class CaptureOverlayAction extends AbstractTMAction
 					imp.getNSlices(),
 					imp.getNFrames(),
 					TMUtils.getSpatialCalibration( imp ) );
+			if ( whiteBackground )
+			{
+				ImageProcessor ip = imp2.getProcessor();
+				ip.invertLut();
+				if ( imp2.getStackSize() > 1 )
+					imp2.getStack().setColorModel( ip.getColorModel() );
+				imp2.updateAndRepaintWindow();
+			}
 			// Add overlay to it.
 			final HyperStackDisplayer displayer = new HyperStackDisplayer( trackmate.getModel(), new SelectionModel( trackmate.getModel() ), imp2, displaySettings );
 			displayer.render();

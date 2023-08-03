@@ -46,17 +46,20 @@ public class CaptureOverlayPanel extends JPanel
 
 	private boolean hideImage;
 
-	public CaptureOverlayPanel( final int firstFrame, final int lastFrame, final boolean hideImage )
+	private boolean whiteBackground;
+
+	public CaptureOverlayPanel( final int firstFrame, final int lastFrame, final boolean hideImage, boolean whiteBackground )
 	{
 		this.firstFrame = firstFrame;
 		this.lastFrame = lastFrame;
 		this.hideImage = hideImage;
+		this.whiteBackground = whiteBackground;
 
 		final GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 0, 0, 0 };
-		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0 };
+		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0, 0 };
 		gridBagLayout.columnWeights = new double[] { 1.0, 1.0, Double.MIN_VALUE };
-		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE };
+		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE };
 		setLayout( gridBagLayout );
 
 		final JLabel lblFirstFrame = new JLabel( "First frame:" );
@@ -96,13 +99,13 @@ public class CaptureOverlayPanel extends JPanel
 		gbcTftLast.gridy = 1;
 		add( tftLast, gbcTftLast );
 
-		final JLabel lblNewLabel = new JLabel( "Hide image:" );
-		final GridBagConstraints gbcLblNewLabel = new GridBagConstraints();
-		gbcLblNewLabel.anchor = GridBagConstraints.EAST;
-		gbcLblNewLabel.insets = new Insets( 0, 0, 5, 5 );
-		gbcLblNewLabel.gridx = 0;
-		gbcLblNewLabel.gridy = 2;
-		add( lblNewLabel, gbcLblNewLabel );
+		final JLabel lblHideImage = new JLabel( "Hide image:" );
+		final GridBagConstraints gbcLblHideImage = new GridBagConstraints();
+		gbcLblHideImage.anchor = GridBagConstraints.EAST;
+		gbcLblHideImage.insets = new Insets( 0, 0, 5, 5 );
+		gbcLblHideImage.gridx = 0;
+		gbcLblHideImage.gridy = 2;
+		add( lblHideImage, gbcLblHideImage );
 
 		final JCheckBox chckbxHideImage = new JCheckBox();
 		chckbxHideImage.setSelected( hideImage );
@@ -112,6 +115,25 @@ public class CaptureOverlayPanel extends JPanel
 		gbcChckbxHideImage.gridx = 1;
 		gbcChckbxHideImage.gridy = 2;
 		add( chckbxHideImage, gbcChckbxHideImage );
+
+		final JLabel lblWhiteBackground = new JLabel( "White background:" );
+		lblWhiteBackground.setEnabled( hideImage );
+		final GridBagConstraints gbcLblWhiteBackground = new GridBagConstraints();
+		gbcLblWhiteBackground.anchor = GridBagConstraints.EAST;
+		gbcLblWhiteBackground.insets = new Insets( 0, 0, 5, 5 );
+		gbcLblWhiteBackground.gridx = 0;
+		gbcLblWhiteBackground.gridy = 3;
+		add( lblWhiteBackground, gbcLblWhiteBackground );
+
+		final JCheckBox chckbxWhiteBackground = new JCheckBox();
+		chckbxWhiteBackground.setSelected( whiteBackground );
+		chckbxWhiteBackground.setEnabled( hideImage );
+		final GridBagConstraints gbcChckbxWhiteBackground = new GridBagConstraints();
+		gbcChckbxWhiteBackground.anchor = GridBagConstraints.WEST;
+		gbcChckbxWhiteBackground.insets = new Insets( 0, 0, 5, 0 );
+		gbcChckbxWhiteBackground.gridx = 1;
+		gbcChckbxWhiteBackground.gridy = 3;
+		add( chckbxWhiteBackground, gbcChckbxWhiteBackground );
 
 		final FocusListener fl = new FocusAdapter()
 		{
@@ -133,7 +155,12 @@ public class CaptureOverlayPanel extends JPanel
 
 		tftFirst.addPropertyChangeListener( "value", ( e ) -> this.firstFrame = ( ( Number ) tftFirst.getValue() ).intValue() );
 		tftLast.addPropertyChangeListener( "value", ( e ) -> this.lastFrame = ( ( Number ) tftLast.getValue() ).intValue() );
-		chckbxHideImage.addActionListener( e -> this.hideImage = chckbxHideImage.isSelected() );
+		chckbxHideImage.addActionListener( e -> {
+			this.hideImage = chckbxHideImage.isSelected();
+			chckbxWhiteBackground.setEnabled( this.hideImage );
+			lblWhiteBackground.setEnabled( this.hideImage );
+		} );
+		chckbxWhiteBackground.addActionListener( e -> this.whiteBackground = chckbxWhiteBackground.isSelected() );
 	}
 
 	public int getFirstFrame()
@@ -151,4 +178,8 @@ public class CaptureOverlayPanel extends JPanel
 		return hideImage;
 	}
 
+	public boolean isWhiteBackground()
+	{
+		return whiteBackground;
+	}
 }
