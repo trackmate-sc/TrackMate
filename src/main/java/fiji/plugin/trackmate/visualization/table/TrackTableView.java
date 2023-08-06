@@ -116,6 +116,14 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 		this.edgeTable = createEdgeTable( model, ds );
 		this.trackTable = createTrackTable( model, ds );
 
+		// Listeners.
+		spotTable.getTable().getSelectionModel().addListSelectionListener(
+				new SpotTableSelectionListener() );
+		edgeTable.getTable().getSelectionModel().addListSelectionListener(
+				new EdgeTableSelectionListener() );
+		trackTable.getTable().getSelectionModel().addListSelectionListener(
+				new TrackTableSelectionListener() );
+
 		// Tabbed pane.
 		final JTabbedPane tabbedPane = new JTabbedPane( JTabbedPane.LEFT );
 		tabbedPane.add( "Spots", spotTable.getPanel() );
@@ -209,7 +217,7 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 		}
 	}
 
-	private final TablePanel< Integer > createTrackTable( final Model model, final DisplaySettings ds )
+	public static final TablePanel< Integer > createTrackTable( final Model model, final DisplaySettings ds )
 	{
 		final List< Integer > objects = new ArrayList<>( model.getTrackModel().trackIDs( true ) );
 		final List< String > features = new ArrayList<>( model.getFeatureModel().getTrackFeatures() );
@@ -244,14 +252,10 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 						coloring,
 						labelGenerator,
 						labelSetter );
-
-		table.getTable().getSelectionModel().addListSelectionListener(
-				new TrackTableSelectionListener() );
-
 		return table;
 	}
 
-	private final TablePanel< DefaultWeightedEdge > createEdgeTable( final Model model, final DisplaySettings ds )
+	public static final TablePanel< DefaultWeightedEdge > createEdgeTable( final Model model, final DisplaySettings ds )
 	{
 		final List< DefaultWeightedEdge > objects = new ArrayList<>();
 		for ( final Integer trackID : model.getTrackModel().unsortedTrackIDs( true ) )
@@ -313,14 +317,10 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 						labelSetter,
 						ManualEdgeColorAnalyzer.FEATURE,
 						colorSetter );
-
-		table.getTable().getSelectionModel().addListSelectionListener(
-				new EdgeTableSelectionListener() );
-
 		return table;
 	}
 
-	private final TablePanel< Spot > createSpotTable( final Model model, final DisplaySettings ds )
+	public static final TablePanel< Spot > createSpotTable( final Model model, final DisplaySettings ds )
 	{
 		final List< Spot > objects = new ArrayList<>();
 		for ( final Integer trackID : model.getTrackModel().unsortedTrackIDs( true ) )
@@ -395,10 +395,6 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 						labelSetter,
 						ManualSpotColorAnalyzerFactory.FEATURE,
 						colorSetter );
-
-		table.getTable().getSelectionModel().addListSelectionListener(
-				new SpotTableSelectionListener() );
-
 		return table;
 	}
 
