@@ -88,7 +88,7 @@ public class SparseLAPOverlapTrackerFactory extends SegmentTrackerFactory
 	@Override
 	public SpotTracker create( final SpotCollection spots, final Map< String, Object > settings )
 	{
-		return new SparseLAPTracker( spots, settings );
+		return new SparseLAPOverlapTracker( spots, settings );
 	}
 
 	@Override
