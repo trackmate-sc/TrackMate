@@ -40,6 +40,7 @@ public class ConfigureViewsDescriptor extends WizardPanelDescriptor
 			final Action launchTrackSchemeAction,
 			final Action showTrackTablesAction,
 			final Action showSpotTableAction,
+			final Action launchLabkitAction,
 			final String spaceUnits )
 	{
 		super( KEY );
@@ -50,6 +51,7 @@ public class ConfigureViewsDescriptor extends WizardPanelDescriptor
 				launchBVVAction,
 				launchTrackSchemeAction,
 				showTrackTablesAction,
-				showSpotTableAction );
+				showSpotTableAction,
+				launchLabkitAction );
 	}
 }
