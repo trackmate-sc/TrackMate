@@ -13,9 +13,9 @@ import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.CompositeImage;
 import ij.ImageJ;
 import ij.ImagePlus;
-import net.imagej.mesh.alg.zslicer.Contour;
-import net.imagej.mesh.alg.zslicer.Slice;
-import net.imagej.mesh.alg.zslicer.ZSlicer;
+import net.imglib2.mesh.alg.zslicer.Contour;
+import net.imglib2.mesh.alg.zslicer.Slice;
+import net.imglib2.mesh.alg.zslicer.ZSlicer;
 
 public class DebugZSlicer
 {

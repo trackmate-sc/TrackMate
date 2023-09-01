@@ -11,9 +11,9 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import ij.ImagePlus;
-import net.imagej.mesh.alg.zslicer.Contour;
-import net.imagej.mesh.alg.zslicer.Slice;
 import net.imglib2.RealLocalizable;
+import net.imglib2.mesh.alg.zslicer.Contour;
+import net.imglib2.mesh.alg.zslicer.Slice;
 
 /**
  * Utility class to paint the {@link SpotMesh} component of spots.

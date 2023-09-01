@@ -7,16 +7,16 @@ import java.util.List;
 
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotMesh;
-import net.imagej.mesh.Mesh;
-import net.imagej.mesh.MeshConnectedComponents;
-import net.imagej.mesh.Meshes;
-import net.imagej.mesh.Vertices;
-import net.imagej.mesh.nio.BufferMesh;
 import net.imglib2.Interval;
 import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealInterval;
+import net.imglib2.mesh.Mesh;
+import net.imglib2.mesh.Meshes;
+import net.imglib2.mesh.Vertices;
+import net.imglib2.mesh.alg.MeshConnectedComponents;
+import net.imglib2.mesh.impl.nio.BufferMesh;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegion;
 import net.imglib2.roi.labeling.LabelRegions;
@@ -30,7 +30,7 @@ import net.imglib2.view.Views;
 /**
  * Utility classes to create 3D {@link fiji.plugin.trackmate.SpotMesh}es from
  * single time-point, single channel images.
- * 
+ *
  * @author Jean-Yves Tinevez, 2023
  */
 public class SpotMeshUtils
@@ -109,7 +109,7 @@ public class SpotMeshUtils
 		for ( final BufferMesh m : MeshConnectedComponents.iterable( bigMesh ) )
 		{
 			meshes.add( m );
-			boundingBoxes.add( SpotMesh.toRealInterval( Meshes.boundingBox( m ) ) );
+			boundingBoxes.add( Meshes.boundingBox( m ) );
 		}
 
 		// Merge if bb is included in one another.
@@ -262,7 +262,7 @@ public class SpotMeshUtils
 
 	/**
 	 * Creates a {@link SpotMesh} from a {@link Mesh}.
-	 * 
+	 *
 	 * @param <S>
 	 *            the type of the quality image.
 	 * @param mesh
@@ -294,7 +294,7 @@ public class SpotMeshUtils
 		if ( simplify )
 		{
 			// Dont't go below a certain number of triangles.
-			final int nTriangles = ( int ) mesh.triangles().size();
+			final int nTriangles = mesh.triangles().size();
 			if ( nTriangles < MIN_N_TRIANGLES )
 			{
 				simplified = mesh;

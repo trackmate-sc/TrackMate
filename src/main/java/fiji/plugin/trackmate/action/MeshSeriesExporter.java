@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -43,11 +43,11 @@ import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.io.IOUtils;
-import net.imagej.mesh.Mesh;
-import net.imagej.mesh.Meshes;
-import net.imagej.mesh.io.ply.PLYMeshIO;
-import net.imagej.mesh.nio.BufferMesh;
-import net.imagej.mesh.obj.transform.TranslateMesh;
+import net.imglib2.mesh.Mesh;
+import net.imglib2.mesh.Meshes;
+import net.imglib2.mesh.impl.nio.BufferMesh;
+import net.imglib2.mesh.io.ply.PLYMeshIO;
+import net.imglib2.mesh.view.TranslateMesh;
 
 public class MeshSeriesExporter extends AbstractTMAction
 {
@@ -105,8 +105,6 @@ public class MeshSeriesExporter extends AbstractTMAction
 		folderName = folderName.substring( 0, folderName.indexOf( "." ) );
 		final File folder = new File( folderName );
 		folder.mkdirs();
-		
-		final PLYMeshIO io = new PLYMeshIO();
 
 		final NavigableSet< Integer > frames = spots.keySet();
 		for ( final Integer frame : frames )
@@ -124,11 +122,11 @@ public class MeshSeriesExporter extends AbstractTMAction
 			}
 			logger.log( " - Found " + meshes.size() + " meshes in frame " + frame + "." );
 			final Mesh merged = Meshes.merge( meshes );
-			final BufferMesh mesh = new BufferMesh( ( int ) merged.vertices().size(), ( int ) merged.triangles().size() );
+			final BufferMesh mesh = new BufferMesh( merged.vertices().size(), merged.triangles().size() );
 			Meshes.calculateNormals( merged, mesh );
 			try
 			{
-				io.save( mesh, targetFile.getAbsolutePath() );
+				PLYMeshIO.save( mesh, targetFile.getAbsolutePath() );
 			}
 			catch ( final IOException e )
 			{

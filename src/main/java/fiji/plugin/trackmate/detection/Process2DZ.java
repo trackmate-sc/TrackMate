@@ -11,17 +11,18 @@ import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.action.LabelImgExporter;
+import fiji.plugin.trackmate.action.LabelImgExporter.LabelIdPainting;
 import fiji.plugin.trackmate.util.TMUtils;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
-import net.imagej.mesh.alg.TaubinSmoothing;
-import net.imagej.mesh.nio.BufferMesh;
-import net.imagej.mesh.obj.transform.TranslateMesh;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
 import net.imglib2.img.display.imagej.ImageJFunctions;
+import net.imglib2.mesh.alg.TaubinSmoothing;
+import net.imglib2.mesh.impl.nio.BufferMesh;
+import net.imglib2.mesh.view.TranslateMesh;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.view.IntervalView;
@@ -36,7 +37,7 @@ import net.imglib2.view.Views;
  * This is a convenience class, made to be used in specialized
  * {@link SpotDetectorFactory} with specific choices of detector and merging
  * strategy.
- * 
+ *
  * @author Jean-Yves Tinevez, 2023
  *
  * @param <T>
@@ -62,7 +63,7 @@ public class Process2DZ< T extends RealType< T > & NativeType< T > >
 
 	/**
 	 * Creates a new {@link Process2DZ} detector.
-	 * 
+	 *
 	 * @param img
 	 *            the input data. Must be 3D (plus possible channels) and the 3
 	 *            dimensions must be X, Y and Z.
@@ -135,7 +136,7 @@ public class Process2DZ< T extends RealType< T > & NativeType< T > >
 		}
 
 		// Get 2D+T masks
-		final ImagePlus lblImp = LabelImgExporter.createLabelImagePlus( trackmate, false, true, false );
+		final ImagePlus lblImp = LabelImgExporter.createLabelImagePlus( trackmate, false, true, LabelIdPainting.LABEL_IS_TRACK_ID );
 
 		/*
 		 * Exposes tracked labels as a 3D image and segment them again with

@@ -5,10 +5,10 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import fiji.plugin.trackmate.util.mesh.EllipsoidFitter;
-import fiji.plugin.trackmate.util.mesh.EllipsoidFitter.EllipsoidFit;
-import net.imagej.mesh.Mesh;
-import net.imagej.mesh.naive.NaiveDoubleMesh;
+import net.imglib2.mesh.Mesh;
+import net.imglib2.mesh.alg.EllipsoidFitter;
+import net.imglib2.mesh.alg.EllipsoidFitter.Ellipsoid;
+import net.imglib2.mesh.impl.naive.NaiveDoubleMesh;
 
 public class TestEllipsoidFit
 {
@@ -17,13 +17,13 @@ public class TestEllipsoidFit
 	public void testSimpleEllipsoids()
 	{
 		final double TOLERANCE = 1e-6;
-		
+
 		final double ra = 1.;
 		final double rb = 2.;
 		for ( double rc = 3.; rc < 10.; rc++ )
 		{
 			final Mesh mesh = generateEllipsoidMesh( ra, rb, rc, -1, -1 );
-			final EllipsoidFit fit = EllipsoidFitter.fit( mesh );
+			final Ellipsoid fit = EllipsoidFitter.fit( mesh );
 
 			final double[] arr = new double[ 3 ];
 

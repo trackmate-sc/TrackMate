@@ -1,18 +1,18 @@
 package fiji.plugin.trackmate.visualization.bvv;
 
 import fiji.plugin.trackmate.Spot;
-import net.imagej.mesh.Mesh;
-import net.imagej.mesh.Meshes;
-import net.imagej.mesh.Triangle;
-import net.imagej.mesh.naive.NaiveDoubleMesh;
-import net.imagej.mesh.nio.BufferMesh;
 import net.imglib2.RealLocalizable;
+import net.imglib2.mesh.Mesh;
+import net.imglib2.mesh.Meshes;
+import net.imglib2.mesh.Triangle;
+import net.imglib2.mesh.impl.naive.NaiveDoubleMesh;
+import net.imglib2.mesh.impl.nio.BufferMesh;
 
 /**
  * Icosahedron spheres.
  * <p>
  * Based on https://github.com/caosdoar/spheres
- * 
+ *
  * @author Jean-Yves Tinevez
  */
 public class Icosahedron
@@ -71,8 +71,8 @@ public class Icosahedron
 
 	public static final BufferMesh refine( final Mesh core )
 	{
-		final int nVerticesOut = ( int ) ( 6 * core.triangles().size() );
-		final int nTrianglesOut = ( int ) ( 4 * core.triangles().size() );
+		final int nVerticesOut = 6 * core.triangles().size();
+		final int nTrianglesOut = 4 * core.triangles().size();
 		final BufferMesh out = new BufferMesh( nVerticesOut, nTrianglesOut );
 
 		final double[] tmpIn = new double[ 3 ];
@@ -127,7 +127,7 @@ public class Icosahedron
 			mesh = refine( mesh );
 
 		scale( mesh, center, radius );
-		final BufferMesh out = new BufferMesh( ( int ) mesh.vertices().size(), ( int ) mesh.triangles().size() );
+		final BufferMesh out = new BufferMesh( mesh.vertices().size(), mesh.triangles().size() );
 		Meshes.calculateNormals( mesh, out );
 		return out;
 	}

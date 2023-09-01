@@ -6,21 +6,20 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import fiji.plugin.trackmate.util.mesh.SpotMeshIterable;
-import net.imagej.mesh.Mesh;
-import net.imagej.mesh.Meshes;
-import net.imagej.mesh.Triangles;
-import net.imagej.mesh.Vertices;
-import net.imagej.mesh.alg.zslicer.RamerDouglasPeucker;
-import net.imagej.mesh.alg.zslicer.Slice;
-import net.imagej.mesh.alg.zslicer.ZSlicer;
-import net.imagej.mesh.nio.BufferMesh;
 import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RealInterval;
 import net.imglib2.RealLocalizable;
 import net.imglib2.RealPoint;
+import net.imglib2.mesh.Mesh;
+import net.imglib2.mesh.Meshes;
+import net.imglib2.mesh.Triangles;
+import net.imglib2.mesh.Vertices;
+import net.imglib2.mesh.alg.zslicer.RamerDouglasPeucker;
+import net.imglib2.mesh.alg.zslicer.Slice;
+import net.imglib2.mesh.alg.zslicer.ZSlicer;
+import net.imglib2.mesh.impl.nio.BufferMesh;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.util.Intervals;
 
 public class SpotMesh extends SpotBase
 {
@@ -47,7 +46,7 @@ public class SpotMesh extends SpotBase
 	/**
 	 * Creates a new spot from the specified mesh. Its position and radius are
 	 * calculated from the mesh.
-	 * 
+	 *
 	 * @param quality
 	 * @param name
 	 * @param m
@@ -61,7 +60,7 @@ public class SpotMesh extends SpotBase
 		super( 0., 0., 0., 0., quality, name );
 
 		// Compute triangles and vertices normals.
-		final BufferMesh mesh = new BufferMesh( ( int ) m.vertices().size(), ( int ) m.triangles().size() );
+		final BufferMesh mesh = new BufferMesh( m.vertices().size(), m.triangles().size() );
 		Meshes.calculateNormals( m, mesh );
 
 		this.mesh = mesh;
@@ -84,14 +83,14 @@ public class SpotMesh extends SpotBase
 		putFeature( Spot.RADIUS, r );
 
 		// Bounding box, also centered on (0,0,0)
-		this.boundingBox = toRealInterval( Meshes.boundingBox( mesh ) );
+		this.boundingBox = Meshes.boundingBox( mesh );
 	}
 
 	/**
 	 * This constructor is only used for deserializing a model from a TrackMate
 	 * file. It messes with the ID of the spots and should be not used
 	 * otherwise.
-	 * 
+	 *
 	 * @param ID
 	 * @param mesh
 	 */
@@ -118,14 +117,14 @@ public class SpotMesh extends SpotBase
 		putFeature( Spot.RADIUS, r );
 
 		// Bounding box, also centered on (0,0,0)
-		this.boundingBox = toRealInterval( Meshes.boundingBox( mesh ) );
+		this.boundingBox = Meshes.boundingBox( mesh );
 	}
 
 	/**
 	 * Exposes the mesh object stores in this spot. The coordinates of the
 	 * vertices are relative to the spot center. That is: the coordinates are
 	 * centered on (0,0,0).
-	 * 
+	 *
 	 * @return the mesh.
 	 */
 	public Mesh getMesh()
@@ -283,13 +282,13 @@ public class SpotMesh extends SpotBase
 			final float za = ( float ) ( ra * Math.cos( theta ) );
 			vertices.setPositionf( v, xa, ya, za );
 		}
-		this.boundingBox = toRealInterval( Meshes.boundingBox( mesh ) );
+		this.boundingBox = Meshes.boundingBox( mesh );
 	}
 
 	@Override
 	public SpotMesh copy()
 	{
-		final BufferMesh meshCopy = new BufferMesh( ( int ) mesh.vertices().size(), ( int ) mesh.triangles().size() );
+		final BufferMesh meshCopy = new BufferMesh( mesh.vertices().size(), mesh.triangles().size() );
 		Meshes.copy( this.mesh, meshCopy );
 		return new SpotMesh( meshCopy, getFeature( Spot.QUALITY ), getName() );
 	}
@@ -387,10 +386,5 @@ public class SpotMesh extends SpotBase
 			sliceMap.put( Integer.valueOf( zSlices[ i ] ), simplifiedSlices.get( i ) );
 
 		return sliceMap;
-	}
-
-	public static final RealInterval toRealInterval( final float[] bb )
-	{
-		return Intervals.createMinMaxReal( bb[ 0 ], bb[ 1 ], bb[ 2 ], bb[ 3 ], bb[ 4 ], bb[ 5 ] );
 	}
 }

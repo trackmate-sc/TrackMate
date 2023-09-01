@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -49,7 +49,7 @@ import bvv.core.shadergen.Shader;
 import bvv.core.shadergen.generate.Segment;
 import bvv.core.shadergen.generate.SegmentTemplate;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import net.imagej.mesh.nio.BufferMesh;
+import net.imglib2.mesh.impl.nio.BufferMesh;
 
 public class StupidMesh
 {
@@ -116,13 +116,13 @@ public class StupidMesh
 		gl.glBindVertexArray( 0 );
 	}
 
-	public void setColor( final Color color, float alpha )
+	public void setColor( final Color color, final float alpha )
 	{
 		color.getComponents( carr );
 		carr[ 3 ] = alpha;
 	}
 
-	public void setSelectionColor( final Color selectionColor, float alpha )
+	public void setSelectionColor( final Color selectionColor, final float alpha )
 	{
 		selectionColor.getComponents( scarr );
 		scarr[ 3 ] = alpha;
@@ -149,7 +149,7 @@ public class StupidMesh
 		gl.glEnable( GL.GL_CULL_FACE );
 		gl.glCullFace( GL.GL_BACK );
 		gl.glFrontFace( GL.GL_CCW );
-		gl.glDrawElements( GL_TRIANGLES, ( int ) mesh.triangles().size() * 3, GL_UNSIGNED_INT, 0 );
+		gl.glDrawElements( GL_TRIANGLES, mesh.triangles().size() * 3, GL_UNSIGNED_INT, 0 );
 		gl.glBindVertexArray( 0 );
 	}
 }
