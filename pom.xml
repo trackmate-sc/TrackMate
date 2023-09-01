@@ -156,6 +156,11 @@
 			<groupId>sc.fiji</groupId>
 			<artifactId>fiji-lib</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>sc.fiji</groupId>
+			<artifactId>labkit-ui</artifactId>
+			<version>0.3.12-SNAPSHOT</version>
+		</dependency>
 
 		<!-- ImageJ dependencies -->
 		<dependency>
@@ -240,10 +245,10 @@
 			<groupId>com.github.vlsi.mxgraph</groupId>
 			<artifactId>jgraphx</artifactId>
 		</dependency>
-		<dependency>
+		<!--<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>com.itextpdf</groupId>
 			<artifactId>itextpdf</artifactId>
