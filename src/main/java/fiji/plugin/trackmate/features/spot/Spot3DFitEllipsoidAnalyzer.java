@@ -22,9 +22,9 @@ import static fiji.plugin.trackmate.features.spot.Spot3DFitEllipsoidAnalyzerFact
 
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotMesh;
-import fiji.plugin.trackmate.util.mesh.EllipsoidFitter;
-import fiji.plugin.trackmate.util.mesh.EllipsoidFitter.EllipsoidFit;
 import net.imglib2.RealLocalizable;
+import net.imglib2.mesh.alg.EllipsoidFitter;
+import net.imglib2.mesh.alg.EllipsoidFitter.EllipsoidFit;
 import net.imglib2.type.numeric.RealType;
 
 public class Spot3DFitEllipsoidAnalyzer< T extends RealType< T > > extends AbstractSpotFeatureAnalyzer< T >

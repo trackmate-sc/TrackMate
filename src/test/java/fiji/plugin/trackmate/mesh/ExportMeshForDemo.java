@@ -12,7 +12,7 @@ import fiji.plugin.trackmate.detection.MaskDetectorFactory;
 import fiji.plugin.trackmate.detection.ThresholdDetectorFactory;
 import ij.IJ;
 import ij.ImagePlus;
-import net.imagej.mesh.io.stl.STLMeshIO;
+import net.imglib2.mesh.io.stl.STLMeshIO;
 
 public class ExportMeshForDemo
 {
@@ -42,7 +42,6 @@ public class ExportMeshForDemo
 				if ( !file.isDirectory() )
 					file.delete();
 
-			final STLMeshIO io = new STLMeshIO();
 			for ( final Spot spot : spots.iterable( true ) )
 			{
 				final int t = spot.getFeature( Spot.FRAME ).intValue();
@@ -51,7 +50,7 @@ public class ExportMeshForDemo
 				if ( spot instanceof SpotMesh )
 				{
 					final SpotMesh mesh = ( SpotMesh ) spot;
-					io.save( mesh.getMesh(), savePath );
+					STLMeshIO.save( mesh.getMesh(), savePath );
 				}
 			}
 			System.out.println( "Export done." );

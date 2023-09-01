@@ -6,19 +6,18 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import fiji.plugin.trackmate.util.mesh.SpotMeshIterable;
-import net.imagej.mesh.Mesh;
-import net.imagej.mesh.Meshes;
-import net.imagej.mesh.Triangles;
-import net.imagej.mesh.Vertices;
-import net.imagej.mesh.alg.zslicer.RamerDouglasPeucker;
-import net.imagej.mesh.alg.zslicer.Slice;
-import net.imagej.mesh.alg.zslicer.ZSlicer;
-import net.imagej.mesh.nio.BufferMesh;
 import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RealInterval;
 import net.imglib2.RealLocalizable;
 import net.imglib2.RealPoint;
+import net.imglib2.mesh.Meshes;
+import net.imglib2.mesh.alg.zslicer.RamerDouglasPeucker;
+import net.imglib2.mesh.alg.zslicer.Slice;
+import net.imglib2.mesh.alg.zslicer.ZSlicer;
+import net.imglib2.mesh.obj.Mesh;
+import net.imglib2.mesh.obj.Vertices;
+import net.imglib2.mesh.obj.nio.BufferMesh;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Intervals;
 
@@ -207,7 +206,7 @@ public class SpotMesh extends SpotBase
 	{
 
 		final Vertices vertices = mesh.vertices();
-		final Triangles triangles = mesh.triangles();
+		final net.imglib2.mesh.obj.Triangles triangles = mesh.triangles();
 		final long nTriangles = triangles.size();
 		double sum = 0.;
 		for ( long t = 0; t < nTriangles; t++ )
@@ -311,7 +310,7 @@ public class SpotMesh extends SpotBase
 			str.append( String.format( "\n%5d: %7.2f %7.2f %7.2f",
 					i, vertices.x( i ), vertices.y( i ), vertices.z( i ) ) );
 
-		final Triangles triangles = mesh.triangles();
+		final net.imglib2.mesh.obj.Triangles triangles = mesh.triangles();
 		final long nTriangles = triangles.size();
 		str.append( "\nF (" + nTriangles + "):" );
 		for ( long i = 0; i < nTriangles; i++ )

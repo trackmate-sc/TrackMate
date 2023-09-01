@@ -5,10 +5,10 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import fiji.plugin.trackmate.util.mesh.EllipsoidFitter;
-import fiji.plugin.trackmate.util.mesh.EllipsoidFitter.EllipsoidFit;
-import net.imagej.mesh.Mesh;
-import net.imagej.mesh.naive.NaiveDoubleMesh;
+import net.imglib2.mesh.alg.EllipsoidFitter;
+import net.imglib2.mesh.alg.EllipsoidFitter.EllipsoidFit;
+import net.imglib2.mesh.obj.Mesh;
+import net.imglib2.mesh.obj.naive.NaiveDoubleMesh;
 
 public class TestEllipsoidFit
 {
