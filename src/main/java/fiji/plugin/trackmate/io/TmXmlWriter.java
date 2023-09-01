@@ -133,14 +133,12 @@ import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.procedure.TIntIntProcedure;
-import net.imagej.mesh.Mesh;
-import net.imagej.mesh.io.ply.PLYMeshIO;
-import net.imagej.mesh.obj.transform.TranslateMesh;
+import net.imglib2.mesh.Mesh;
+import net.imglib2.mesh.io.ply.PLYMeshIO;
+import net.imglib2.mesh.view.TranslateMesh;
 
 public class TmXmlWriter
 {
-
-	static final PLYMeshIO PLY_MESH_IO = new PLYMeshIO();
 
 	static final String MESH_FILE_EXTENSION = ".meshes";
 
@@ -791,7 +789,7 @@ public class TmXmlWriter
 					final SpotMesh sm = ( SpotMesh ) spot;
 					final Mesh mesh = sm.getMesh();
 					final Mesh translated = TranslateMesh.translate( mesh, spot );
-					final byte[] bs = PLY_MESH_IO.writeBinary( translated );
+					final byte[] bs = PLYMeshIO.writeBinary( translated );
 
 					final String entryName = spot.ID() + ".ply";
 					zos.putNextEntry( new ZipEntry( entryName ) );

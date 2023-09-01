@@ -92,7 +92,6 @@ import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_FILTER_COLLECTION_ELEMENT
 import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_ID_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_NAME_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.io.TmXmlWriter.MESH_FILE_EXTENSION;
-import static fiji.plugin.trackmate.io.TmXmlWriter.PLY_MESH_IO;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.XML_ATTRIBUTE_TRACKER_NAME;
 
 import java.io.File;
@@ -156,9 +155,10 @@ import fiji.plugin.trackmate.visualization.ViewFactory;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 import ij.IJ;
 import ij.ImagePlus;
-import net.imagej.mesh.Mesh;
-import net.imagej.mesh.Meshes;
-import net.imagej.mesh.nio.BufferMesh;
+import net.imglib2.mesh.Mesh;
+import net.imglib2.mesh.Meshes;
+import net.imglib2.mesh.impl.nio.BufferMesh;
+import net.imglib2.mesh.io.ply.PLYMeshIO;
 
 public class TmXmlReader
 {
@@ -964,8 +964,8 @@ public class TmXmlReader
 						// Deserialize mesh.
 						try
 						{
-							final Mesh m = PLY_MESH_IO.open( zipFile.getInputStream( entry ) );
-							final BufferMesh mesh = new BufferMesh( ( int ) m.vertices().size(), ( int ) m.triangles().size() );
+							final Mesh m = PLYMeshIO.open( zipFile.getInputStream( entry ) );
+							final BufferMesh mesh = new BufferMesh( m.vertices().size(), m.triangles().size() );
 							Meshes.calculateNormals( m, mesh );
 
 							// Create new spot in the mesh and replace it in the
@@ -1215,7 +1215,7 @@ public class TmXmlReader
 	{
 		// Read id.
 		final int ID = readIntAttribute( spotEl, SPOT_ID_ATTRIBUTE_NAME, logger );
-//		
+//
 		final List< Attribute > atts = spotEl.getAttributes();
 		removeAttributeFromName( atts, SPOT_ID_ATTRIBUTE_NAME );
 

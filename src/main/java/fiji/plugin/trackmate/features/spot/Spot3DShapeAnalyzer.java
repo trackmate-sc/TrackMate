@@ -23,10 +23,8 @@ package fiji.plugin.trackmate.features.spot;
 
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotMesh;
-import net.imagej.mesh.Mesh;
-import net.imagej.mesh.Meshes;
-import net.imagej.ops.geom.geom3d.DefaultConvexHull3D;
-import net.imagej.ops.geom.geom3d.DefaultSurfaceArea;
+import net.imglib2.mesh.alg.hull.ConvexHull;
+import net.imglib2.mesh.impl.naive.NaiveDoubleMesh;
 import net.imglib2.type.numeric.RealType;
 
 public class Spot3DShapeAnalyzer< T extends RealType< T > > extends AbstractSpotFeatureAnalyzer< T >
@@ -34,15 +32,9 @@ public class Spot3DShapeAnalyzer< T extends RealType< T > > extends AbstractSpot
 
 	private final boolean is3D;
 
-	private final DefaultConvexHull3D convexHull;
-
-	private final DefaultSurfaceArea surfaceArea;
-
 	public Spot3DShapeAnalyzer( final boolean is3D )
 	{
 		this.is3D = is3D;
-		this.convexHull = new DefaultConvexHull3D();
-		this.surfaceArea = new DefaultSurfaceArea();
 	}
 
 	@Override
@@ -58,13 +50,13 @@ public class Spot3DShapeAnalyzer< T extends RealType< T > > extends AbstractSpot
 			if ( spot instanceof SpotMesh )
 			{
 				final SpotMesh sm = ( SpotMesh ) spot;
-				final Mesh ch = convexHull.calculate( sm.getMesh() );
+				final NaiveDoubleMesh ch = ConvexHull.calculate( sm.getMesh() );
 				volume = sm.volume();
-				final double volumeCH = Meshes.volume( ch );
+				final double volumeCH = MeshShapeDescriptors.volume( ch );
 				solidity = volume / volumeCH;
 
-				sa = surfaceArea.calculate( sm.getMesh() ).get();
-				final double saCH = surfaceArea.calculate( ch ).get();
+				sa = MeshShapeDescriptors.surfaceArea( sm.getMesh() );
+				final double saCH = MeshShapeDescriptors.surfaceArea( ch );
 				convexity = sa / saCH;
 
 				final double sphereArea = Math.pow( Math.PI, 1. / 3. )

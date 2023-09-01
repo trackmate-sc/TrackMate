@@ -170,13 +170,8 @@
 			<artifactId>imagej-common</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>net.imagej</groupId>
-			<artifactId>imagej-mesh</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.imagej</groupId>
-			<artifactId>imagej-mesh-io</artifactId>
-			<version>0.1.3-SNAPSHOT</version>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2-mesh</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.imagej</groupId>
@@ -185,7 +180,6 @@
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigvolumeviewer</artifactId>
-			<version>0.3.1</version>
 		</dependency>
 		<dependency>
 	        <groupId>org.jogamp.jogl</groupId>
@@ -240,6 +234,10 @@
 		</dependency>
 
 		<!-- Other dependencies -->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>		
 		<dependency>
 			<groupId>com.github.vlsi.mxgraph</groupId>
 			<artifactId>jgraphx</artifactId>

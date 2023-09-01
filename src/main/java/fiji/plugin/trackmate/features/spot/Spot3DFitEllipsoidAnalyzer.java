@@ -22,9 +22,9 @@ import static fiji.plugin.trackmate.features.spot.Spot3DFitEllipsoidAnalyzerFact
 
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotMesh;
-import fiji.plugin.trackmate.util.mesh.EllipsoidFitter;
-import fiji.plugin.trackmate.util.mesh.EllipsoidFitter.EllipsoidFit;
 import net.imglib2.RealLocalizable;
+import net.imglib2.mesh.alg.EllipsoidFitter;
+import net.imglib2.mesh.alg.EllipsoidFitter.Ellipsoid;
 import net.imglib2.type.numeric.RealType;
 
 public class Spot3DFitEllipsoidAnalyzer< T extends RealType< T > > extends AbstractSpotFeatureAnalyzer< T >
@@ -60,7 +60,7 @@ public class Spot3DFitEllipsoidAnalyzer< T extends RealType< T > > extends Abstr
 			if ( spot instanceof SpotMesh )
 			{
 				final SpotMesh sm = ( SpotMesh ) spot;
-				final EllipsoidFit fit = EllipsoidFitter.fit( sm.getMesh() );
+				final Ellipsoid fit = EllipsoidFitter.fit( sm.getMesh() );
 				x0 = fit.center.getDoublePosition( 0 );
 				y0 = fit.center.getDoublePosition( 1 );
 				z0 = fit.center.getDoublePosition( 2 );
@@ -88,7 +88,7 @@ public class Spot3DFitEllipsoidAnalyzer< T extends RealType< T > > extends Abstr
 
 			}
 			else
-			{ 
+			{
 				// Assume plain sphere.
 				x0 = 0.;
 				y0 = 0.;
