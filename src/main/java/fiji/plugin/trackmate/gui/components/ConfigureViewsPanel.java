@@ -384,11 +384,15 @@ public class ConfigureViewsPanel extends JPanel
 			btnLabKit.setText( "Launch spot editor" );
 			btnLabKit.setIcon( Icons.PENCIL_ICON );
 			btnLabKit.setToolTipText( "<html>"
-					+ "Launch the Labkit editor to edit spot segmentation<br>"
-					+ "on the time-point currently displayed in the main<br>"
+					+ "Launch the Labkit editor to edit spot segmentation<br> "
+					+ "on the time-point currently displayed in the main<br> "
 					+ "view."
 					+ "<p>"
-					+ "Shift + click will launch the editor on all the<br>"
+					+ "If a ROI is present in the image, only the spots and the<br> "
+					+ "image in the ROI will be opened for edition in LabKit<br> "
+					+ "(this can speed up editing large images)."
+					+ "<p>"
+					+ "Shift + click will launch the editor on all the<br> "
 					+ "time-points in the movie.</html>" );
 			panelButtons.add( btnLabKit );
 		}
