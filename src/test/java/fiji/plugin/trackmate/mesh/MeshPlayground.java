@@ -21,12 +21,11 @@ import ij.IJ;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
-import net.imagej.mesh.Mesh;
-import net.imagej.mesh.Meshes;
-import net.imagej.mesh.io.stl.STLMeshIO;
-import net.imagej.mesh.naive.NaiveDoubleMesh;
-import net.imagej.mesh.nio.BufferMesh;
 import net.imglib2.img.display.imagej.ImgPlusViews;
+import net.imglib2.mesh.Meshes;
+import net.imglib2.mesh.obj.Mesh;
+import net.imglib2.mesh.obj.naive.NaiveDoubleMesh;
+import net.imglib2.mesh.obj.nio.BufferMesh;
 import net.imglib2.type.Type;
 import net.imglib2.type.numeric.ARGBType;
 
@@ -91,8 +90,7 @@ public class MeshPlayground
 		try
 		{
 			final NaiveDoubleMesh nmesh = new NaiveDoubleMesh();
-			final STLMeshIO meshIO = new STLMeshIO();
-			meshIO.read( nmesh, new File( fn ) );
+			net.imglib2.mesh.io.stl.STLMeshIO.read( nmesh, new File( fn ) );
 			mesh = calculateNormals(
 					nmesh
 //					Meshes.removeDuplicateVertices( nmesh, 5 )
