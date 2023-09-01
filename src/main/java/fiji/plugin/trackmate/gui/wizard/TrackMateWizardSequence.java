@@ -58,6 +58,7 @@ import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.components.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.components.LogPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.editor.LabkitLauncher;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ActionChooserDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ChooseDetectorDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ChooseTrackerDescriptor;
@@ -156,7 +157,7 @@ public class TrackMateWizardSequence implements WizardSequence
 		chooseTrackerDescriptor = new ChooseTrackerDescriptor( new TrackerProvider(), trackmate, displaySettings );
 		executeTrackingDescriptor = new ExecuteTrackingDescriptor( trackmate, logPanel, displaySettings );
 		trackFilterDescriptor = new TrackFilterDescriptor( trackmate, trackFilters, featureSelector );
-		configureViewsDescriptor = new ConfigureViewsDescriptor( displaySettings, featureSelector, new LaunchBVVAction(), new LaunchTrackSchemeAction(), new ShowTrackTablesAction(), new ShowSpotTableAction(), model.getSpaceUnits() );
+		configureViewsDescriptor = new ConfigureViewsDescriptor( displaySettings, featureSelector, new LaunchBVVAction(), new LaunchTrackSchemeAction(), new ShowTrackTablesAction(), new ShowSpotTableAction(), LabkitLauncher.getLaunchAction( trackmate ), model.getSpaceUnits() );
 		grapherDescriptor = new GrapherDescriptor( trackmate, selectionModel, displaySettings );
 		actionChooserDescriptor = new ActionChooserDescriptor( new ActionProvider(), trackmate, selectionModel, displaySettings );
 		saveDescriptor = new SaveDescriptor( trackmate, displaySettings, this );
@@ -185,7 +186,6 @@ public class TrackMateWizardSequence implements WizardSequence
 		return current;
 	}
 
-
 	@Override
 	public WizardPanelDescriptor previous()
 	{
@@ -210,7 +210,6 @@ public class TrackMateWizardSequence implements WizardSequence
 	{
 		return current;
 	}
-
 
 	@Override
 	public WizardPanelDescriptor logDescriptor()
