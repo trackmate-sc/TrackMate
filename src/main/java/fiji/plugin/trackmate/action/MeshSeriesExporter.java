@@ -43,11 +43,11 @@ import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.io.IOUtils;
-import net.imagej.mesh.Mesh;
-import net.imagej.mesh.Meshes;
-import net.imagej.mesh.io.ply.PLYMeshIO;
-import net.imagej.mesh.nio.BufferMesh;
-import net.imagej.mesh.obj.transform.TranslateMesh;
+import net.imglib2.mesh.Meshes;
+import net.imglib2.mesh.io.ply.PLYMeshIO;
+import net.imglib2.mesh.obj.Mesh;
+import net.imglib2.mesh.obj.nio.BufferMesh;
+import net.imglib2.mesh.obj.transform.TranslateMesh;
 
 public class MeshSeriesExporter extends AbstractTMAction
 {
@@ -106,8 +106,6 @@ public class MeshSeriesExporter extends AbstractTMAction
 		final File folder = new File( folderName );
 		folder.mkdirs();
 		
-		final PLYMeshIO io = new PLYMeshIO();
-
 		final NavigableSet< Integer > frames = spots.keySet();
 		for ( final Integer frame : frames )
 		{
@@ -128,7 +126,7 @@ public class MeshSeriesExporter extends AbstractTMAction
 			Meshes.calculateNormals( merged, mesh );
 			try
 			{
-				io.save( mesh, targetFile.getAbsolutePath() );
+				PLYMeshIO.save( mesh, targetFile.getAbsolutePath() );
 			}
 			catch ( final IOException e )
 			{

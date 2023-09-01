@@ -13,11 +13,11 @@ import ij.process.ImageProcessor;
 import ij.process.LUT;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
-import net.imagej.mesh.Mesh;
-import net.imagej.mesh.Meshes;
-import net.imagej.mesh.nio.BufferMesh;
-import net.imagej.mesh.obj.transform.TranslateMesh;
 import net.imglib2.img.display.imagej.ImgPlusViews;
+import net.imglib2.mesh.Meshes;
+import net.imglib2.mesh.obj.Mesh;
+import net.imglib2.mesh.obj.nio.BufferMesh;
+import net.imglib2.mesh.obj.transform.TranslateMesh;
 import net.imglib2.type.Type;
 import net.imglib2.type.numeric.ARGBType;
 
