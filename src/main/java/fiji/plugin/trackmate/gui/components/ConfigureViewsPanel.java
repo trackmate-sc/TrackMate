@@ -79,7 +79,8 @@ public class ConfigureViewsPanel extends JPanel
 			final String spaceUnits,
 			final Action launchTrackSchemeAction,
 			final Action showTrackTablesAction,
-			final Action showSpotTableAction )
+			final Action showSpotTableAction,
+			final Action launchLabKitAction )
 	{
 		this.setPreferredSize( new Dimension( 300, 521 ) );
 		this.setSize( 300, 500 );
@@ -363,6 +364,11 @@ public class ConfigureViewsPanel extends JPanel
 		final JButton btnShowSpotTable = new JButton( showSpotTableAction );
 		panelButtons.add( btnShowSpotTable );
 		btnShowSpotTable.setFont( FONT );
+		
+		// Labkit button.
+		final JButton btnLabKit = new JButton( launchLabKitAction );
+		panelButtons.add( btnLabKit );
+		btnLabKit.setFont( FONT );
 
 		final GridBagConstraints gbcPanelButtons = new GridBagConstraints();
 		gbcPanelButtons.gridwidth = 2;
