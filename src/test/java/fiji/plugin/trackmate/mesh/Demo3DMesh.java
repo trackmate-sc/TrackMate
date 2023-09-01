@@ -14,21 +14,20 @@ import ij.gui.Overlay;
 import ij.gui.PolygonRoi;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
-import net.imagej.mesh.Mesh;
-import net.imagej.mesh.Meshes;
-import net.imagej.mesh.Vertices;
-import net.imagej.mesh.alg.zslicer.Contour;
-import net.imagej.mesh.alg.zslicer.Slice;
-import net.imagej.mesh.alg.zslicer.ZSlicer;
-import net.imagej.mesh.io.ply.PLYMeshIO;
-import net.imagej.mesh.io.stl.STLMeshIO;
-import net.imagej.mesh.naive.NaiveDoubleMesh;
-import net.imagej.mesh.naive.NaiveDoubleMesh.Triangles;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.RealTypeConverters;
 import net.imglib2.img.ImgView;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.img.display.imagej.ImgPlusViews;
+import net.imglib2.mesh.Meshes;
+import net.imglib2.mesh.alg.zslicer.Contour;
+import net.imglib2.mesh.alg.zslicer.Slice;
+import net.imglib2.mesh.alg.zslicer.ZSlicer;
+import net.imglib2.mesh.io.ply.PLYMeshIO;
+import net.imglib2.mesh.io.stl.STLMeshIO;
+import net.imglib2.mesh.obj.Mesh;
+import net.imglib2.mesh.obj.Vertices;
+import net.imglib2.mesh.obj.naive.NaiveDoubleMesh;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegion;
 import net.imglib2.roi.labeling.LabelRegions;
@@ -112,8 +111,8 @@ public class Demo3DMesh
 	static Mesh debugMesh( final long[] min, final long[] max )
 	{
 		final NaiveDoubleMesh mesh = new NaiveDoubleMesh();
-		final net.imagej.mesh.naive.NaiveDoubleMesh.Vertices vertices = mesh.vertices();
-		final Triangles triangles = mesh.triangles();
+		final net.imglib2.mesh.obj.naive.NaiveDoubleMesh.Vertices vertices = mesh.vertices();
+		final net.imglib2.mesh.obj.naive.NaiveDoubleMesh.Triangles triangles = mesh.triangles();
 
 		// Coords as X Y Z
 
@@ -198,11 +197,10 @@ public class Demo3DMesh
 		// Serialize to disk.
 		try
 		{
-			new STLMeshIO().save( mesh, String.format( "samples/mesh/io/STL_%02d.stl", j ) );
+			STLMeshIO.save( mesh, String.format( "samples/mesh/io/STL_%02d.stl", j ) );
 
-			final PLYMeshIO plyio = new PLYMeshIO();
-			plyio.save( mesh, String.format( "samples/mesh/io/PLY_%02d.ply", j ) );
-			final byte[] bs = plyio.writeAscii( mesh );
+			PLYMeshIO.save( mesh, String.format( "samples/mesh/io/PLY_%02d.ply", j ) );
+			final byte[] bs = PLYMeshIO.writeAscii( mesh );
 			final String str = new String( bs );
 			try (final FileWriter writer = new FileWriter(
 					String.format( "samples/mesh/io/PLYTEXT_%02d.txt", j ) ))

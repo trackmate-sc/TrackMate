@@ -49,7 +49,7 @@ import bvv.core.shadergen.Shader;
 import bvv.core.shadergen.generate.Segment;
 import bvv.core.shadergen.generate.SegmentTemplate;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import net.imagej.mesh.nio.BufferMesh;
+import net.imglib2.mesh.obj.nio.BufferMesh;
 
 public class StupidMesh
 {
@@ -116,13 +116,13 @@ public class StupidMesh
 		gl.glBindVertexArray( 0 );
 	}
 
-	public void setColor( final Color color, float alpha )
+	public void setColor( final Color color, final float alpha )
 	{
 		color.getComponents( carr );
 		carr[ 3 ] = alpha;
 	}
 
-	public void setSelectionColor( final Color selectionColor, float alpha )
+	public void setSelectionColor( final Color selectionColor, final float alpha )
 	{
 		selectionColor.getComponents( scarr );
 		scarr[ 3 ] = alpha;
