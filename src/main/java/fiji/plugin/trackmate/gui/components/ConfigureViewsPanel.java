@@ -55,6 +55,7 @@ import fiji.plugin.trackmate.gui.displaysettings.ConfigTrackMateDisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackDisplayMode;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.UpdateListener;
+import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.util.WrapLayout;
 
 /**
@@ -369,11 +370,20 @@ public class ConfigureViewsPanel extends JPanel
 		btnShowSpotTable.setFont( FONT );
 		
 		// Labkit button.
-		final JButton btnLabKit = new JButton( launchLabKitAction );
-		btnLabKit.setFont( FONT );
-		btnLabKit.setText( "Launch spot editor" );
-		btnLabKit.setIcon( Icons.PENCIL_ICON );
-		panelButtons.add( btnLabKit );
+		// Is labkit available?
+		if ( TMUtils.isClassPresent( "sc.fiji.labkit.ui.LabkitFrame" ) )
+		{
+			System.out.println( "LabKit found." ); // DEBUG
+			final JButton btnLabKit = new JButton( launchLabKitAction );
+			btnLabKit.setFont( FONT );
+			btnLabKit.setText( "Launch spot editor" );
+			btnLabKit.setIcon( Icons.PENCIL_ICON );
+			panelButtons.add( btnLabKit );
+		}
+		else
+		{
+			System.out.println( "LabKit not found." ); // DEBUG
+		}
 
 		panelButtons.setSize( new Dimension( 300, 1 ) );
 		final GridBagConstraints gbcPanelButtons = new GridBagConstraints();
