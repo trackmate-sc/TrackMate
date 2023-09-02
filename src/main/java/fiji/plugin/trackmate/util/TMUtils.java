@@ -865,6 +865,30 @@ public class TMUtils
 		}
 	}
 
+	/**
+	 * Returns <code>true</code> if the class with the fully qualified name is
+	 * present at runtime. This is useful to detect whether a certain update
+	 * site has been activated in Fiji and to enable or disable component based
+	 * on this.
+	 * 
+	 * @param className
+	 *            the fully qualified class name, e.g.
+	 *            "sc.fiji.labkit.ui.LabkitFrame"
+	 * @return <code>true</code> if the the class with the specified name is
+	 *         present, false otherwise.
+	 */
+	public static boolean isClassPresent( final String className )
+	{
+		try
+		{
+			Class.forName( className, false, TMUtils.class.getClassLoader() );
+			return true;
+		}
+		catch ( final ClassNotFoundException e1 )
+		{}
+		return false;
+	}
+
 	private TMUtils()
 	{}
 }
