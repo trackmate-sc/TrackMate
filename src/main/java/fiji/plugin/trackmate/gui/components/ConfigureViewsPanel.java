@@ -50,10 +50,12 @@ import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
 import fiji.plugin.trackmate.gui.GuiUtils;
+import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.displaysettings.ConfigTrackMateDisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackDisplayMode;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.UpdateListener;
+import fiji.plugin.trackmate.util.WrapLayout;
 
 /**
  * A configuration panel used to tune the aspect of spots and tracks in multiple
@@ -328,7 +330,7 @@ public class ConfigureViewsPanel extends JPanel
 		final GridBagConstraints gbcPanelDrawingZDepth = new GridBagConstraints();
 		gbcPanelDrawingZDepth.gridwidth = 2;
 		gbcPanelDrawingZDepth.insets = new Insets( 0, 5, 5, 5 );
-		gbcPanelDrawingZDepth.fill = GridBagConstraints.BOTH;
+		gbcPanelDrawingZDepth.fill = GridBagConstraints.HORIZONTAL;
 		gbcPanelDrawingZDepth.gridx = 0;
 		gbcPanelDrawingZDepth.gridy = 5;
 		add( panelDrawingZDepth, gbcPanelDrawingZDepth );
@@ -351,6 +353,7 @@ public class ConfigureViewsPanel extends JPanel
 		 */
 
 		final JPanel panelButtons = new JPanel();
+		panelButtons.setLayout( new WrapLayout() );
 
 		// BVV button.
 		final JButton btnShowBVV = new JButton( launchBVVAction );
@@ -373,9 +376,12 @@ public class ConfigureViewsPanel extends JPanel
 		
 		// Labkit button.
 		final JButton btnLabKit = new JButton( launchLabKitAction );
-		panelButtons.add( btnLabKit );
 		btnLabKit.setFont( FONT );
+		btnLabKit.setText( "Launch spot editor" );
+		btnLabKit.setIcon( Icons.PENCIL_ICON );
+		panelButtons.add( btnLabKit );
 
+		panelButtons.setSize( new Dimension( 300, 1 ) );
 		final GridBagConstraints gbcPanelButtons = new GridBagConstraints();
 		gbcPanelButtons.gridwidth = 2;
 		gbcPanelButtons.anchor = GridBagConstraints.SOUTH;
@@ -383,6 +389,7 @@ public class ConfigureViewsPanel extends JPanel
 		gbcPanelButtons.gridx = 0;
 		gbcPanelButtons.gridy = 7;
 		add( panelButtons, gbcPanelButtons );
+		setSize( new Dimension( 300, 1 ) );
 
 		/*
 		 * Listeners & co.
