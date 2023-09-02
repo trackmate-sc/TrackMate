@@ -19,14 +19,12 @@ import org.scijava.ui.behaviour.util.AbstractNamedAction;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
-import fiji.plugin.trackmate.util.SpotUtil;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 import ij.ImagePlus;
@@ -426,7 +424,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 			for ( final Spot spot : spotsThisFrame )
 			{
 				final int index = spot.ID() + 1;
-				SpotUtil.iterable( spot, lblImgPlus ).forEach( p -> p.set( index ) );
+				spot.iterable( lblImgPlus ).forEach( p -> p.set( index ) );
 				spotLabels.put( index, spot );
 			}
 		}
@@ -445,7 +443,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 					continue;
 
 				final int index = spot.ID() + 1;
-				SpotUtil.iterable( spot, lblImgPlus ).forEach( p -> p.set( index ) );
+				spot.iterable( lblImgPlus ).forEach( p -> p.set( index ) );
 				spotLabels.put( index, spot );
 			}
 		}
@@ -453,32 +451,14 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 
 	private void boundingBox( final Spot spot, final long[] min, final long[] max )
 	{
-		final SpotRoi roi = spot.getRoi();
-		if ( roi == null )
-		{
-			final double cx = spot.getDoublePosition( 0 );
-			final double cy = spot.getDoublePosition( 1 );
-			final double r = spot.getFeature( Spot.RADIUS ).doubleValue();
-			min[ 0 ] = ( long ) Math.floor( ( cx - r ) / calibration[ 0 ] );
-			min[ 1 ] = ( long ) Math.floor( ( cy - r ) / calibration[ 1 ] );
-			max[ 0 ] = ( long ) Math.ceil( ( cx + r ) / calibration[ 0 ] );
-			max[ 1 ] = ( long ) Math.ceil( ( cy + r ) / calibration[ 1 ] );
-		}
-		else
-		{
-			final double[] x = roi.toPolygonX( calibration[ 0 ], 0, spot.getDoublePosition( 0 ), 1. );
-			final double[] y = roi.toPolygonY( calibration[ 1 ], 0, spot.getDoublePosition( 1 ), 1. );
-			min[ 0 ] = ( long ) Math.floor( Util.min( x ) );
-			min[ 1 ] = ( long ) Math.floor( Util.min( y ) );
-			max[ 0 ] = ( long ) Math.ceil( Util.max( x ) );
-			max[ 1 ] = ( long ) Math.ceil( Util.max( y ) );
-		}
-
-		min[ 0 ] = Math.max( 0, min[ 0 ] );
-		min[ 1 ] = Math.max( 0, min[ 1 ] );
 		final ImagePlus imp = trackmate.getSettings().imp;
-		max[ 0 ] = Math.min( imp.getWidth(), max[ 0 ] );
-		max[ 1 ] = Math.min( imp.getHeight(), max[ 1 ] );
+		final long[] maxImp = new long[] { imp.getWidth(), imp.getHeight(), imp.getNSlices() };
+		
+		for ( int d = 0; d < min.length; d++ )
+		{
+			min[ d ] = Math.max( 0, ( long ) Math.floor( spot.realMin( d ) / calibration[ d ] ) );
+			max[ d ] = Math.min( maxImp[ d ], ( long ) Math.ceil( spot.realMax( d ) / calibration[ d ] ) );
+		}
 	}
 
 	public static final AbstractNamedAction getLaunchAction( final TrackMate trackmate, final DisplaySettings ds )
