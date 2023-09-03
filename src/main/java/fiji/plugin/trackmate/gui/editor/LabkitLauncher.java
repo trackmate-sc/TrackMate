@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JRootPane;
 import javax.swing.SwingUtilities;
 
@@ -26,6 +27,7 @@ import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.detection.SpotMeshUtils;
 import fiji.plugin.trackmate.detection.SpotRoiUtils;
+import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
 import fiji.plugin.trackmate.util.TMUtils;
 import ij.ImagePlus;
@@ -116,8 +118,6 @@ public class LabkitLauncher
 	@SuppressWarnings( "unchecked" )
 	private void reimportData( final ImageLabelingModel lm, final int currentTimePoint )
 	{
-		final Model model = trackmate.getModel();
-		model.beginUpdate();
 		try
 		{
 			/*
@@ -128,69 +128,98 @@ public class LabkitLauncher
 			final RandomAccessibleInterval< UnsignedShortType > novelIndexImg = ( RandomAccessibleInterval< UnsignedShortType > ) labeling.getIndexImg();
 			final RandomAccessibleInterval< UnsignedShortType > previousIndexImg = ( RandomAccessibleInterval< UnsignedShortType > ) previousLabels.getIndexImg();
 
-			// Map of previous spots against their ID:
-			final SpotCollection spots = model.getSpots();
-			final Map< Integer, Spot > previousSpotIDs = new HashMap<>();
-			spots.iterable( currentTimePoint, true ).forEach( s -> previousSpotIDs.put( Integer.valueOf( s.ID() ), s ) );
-
-			/*
-			 * Get all the spots present in the new image. Because we specified
-			 * the novel label image as 'quality' image, they have a quality
-			 * value equal to the index in the label image (id+1).
-			 */
-			final List< Spot > novelSpots = getSpots( novelIndexImg );
-
-			/*
-			 * Map of novel spots against the ID taken from the index of the
-			 * novel label image. Normally, this index, and hence the novel id,
-			 * corresponds to the id of previous spots. If one of the novel spot
-			 * has an id we cannot find in the previous spot list, it means that
-			 * it is a new one.
-			 * 
-			 * Careful! The user might have created several connected components
-			 * with the same label in LabKit, which will result in having
-			 * several spots with the same quality value. We don't want to loose
-			 * them, so the map is that of a id to a list of spots.
-			 */
-			final Map< Integer, List< Spot > > novelSpotIDs = new HashMap<>();
-			novelSpots.forEach( s -> {
-				final int id = Integer.valueOf( s.getFeature( Spot.QUALITY ).intValue() - 1 );
-				final List< Spot > list = novelSpotIDs.computeIfAbsent( Integer.valueOf( id ), ( i ) -> new ArrayList<>() );
-				list.add( s );
-			} );
-
 			// Collect ids of spots that have been modified. id = index - 1
 			final Set< Integer > modifiedIDs = getModifiedIDs( novelIndexImg, previousIndexImg );
+			final int nModified = modifiedIDs.size();
 
-			// Update model for those spots.
-			for ( final int id : modifiedIDs )
+			if ( nModified == 0 )
+				return;
+
+			// Message the user.
+			final String msg =
+					"Commit the changes made to the\n"
+							+ "segmentation in frame " + ( currentTimePoint + 1 ) + "?";
+			final String title = "Commit edits to TrackMate";
+			final int returnedValue = JOptionPane.showConfirmDialog(
+					null,
+					msg,
+					title,
+					JOptionPane.YES_NO_OPTION,
+					JOptionPane.QUESTION_MESSAGE,
+					Icons.TRACKMATE_ICON );
+			if ( returnedValue != JOptionPane.YES_OPTION )
+				return;
+
+			final Model model = trackmate.getModel();
+			model.beginUpdate();
+			try
 			{
-				final Spot previousSpot = previousSpotIDs.get( Integer.valueOf( id ) );
-				final List< Spot > novelSpotList = novelSpotIDs.get( Integer.valueOf( id ) );
-				if ( previousSpot == null )
+				// Map of previous spots against their ID:
+				final SpotCollection spots = model.getSpots();
+				final Map< Integer, Spot > previousSpotIDs = new HashMap<>();
+				spots.iterable( currentTimePoint, true ).forEach( s -> previousSpotIDs.put( Integer.valueOf( s.ID() ), s ) );
+
+				/*
+				 * Get all the spots present in the new image. Because we
+				 * specified the novel label image as 'quality' image, they have
+				 * a quality value equal to the index in the label image (id+1).
+				 */
+				final List< Spot > novelSpots = getSpots( novelIndexImg );
+
+				/*
+				 * Map of novel spots against the ID taken from the index of the
+				 * novel label image. Normally, this index, and hence the novel
+				 * id, corresponds to the id of previous spots. If one of the
+				 * novel spot has an id we cannot find in the previous spot
+				 * list, it means that it is a new one.
+				 *
+				 * Careful! The user might have created several connected
+				 * components with the same label in LabKit, which will result
+				 * in having several spots with the same quality value. We don't
+				 * want to loose them, so the map is that of a id to a list of
+				 * spots.
+				 */
+				final Map< Integer, List< Spot > > novelSpotIDs = new HashMap<>();
+				novelSpots.forEach( s -> {
+					final int id = Integer.valueOf( s.getFeature( Spot.QUALITY ).intValue() - 1 );
+					final List< Spot > list = novelSpotIDs.computeIfAbsent( Integer.valueOf( id ), ( i ) -> new ArrayList<>() );
+					list.add( s );
+				} );
+
+				// Update model for those spots.
+				for ( final int id : modifiedIDs )
 				{
-					/*
-					 * A new one (possible several) I cannot find in the
-					 * previous list -> add as a new spot.
-					 */
-					addNewSpot( novelSpotList );
+					final Spot previousSpot = previousSpotIDs.get( Integer.valueOf( id ) );
+					final List< Spot > novelSpotList = novelSpotIDs.get( Integer.valueOf( id ) );
+					if ( previousSpot == null )
+					{
+						/*
+						 * A new one (possible several) I cannot find in the
+						 * previous list -> add as a new spot.
+						 */
+						addNewSpot( novelSpotList );
+					}
+					else if ( novelSpotList == null || novelSpotList.isEmpty() )
+					{
+						/*
+						 * One I add in the previous spot list, but that has
+						 * disappeared. Remove it.
+						 */
+						model.removeSpot( previousSpot );
+					}
+					else
+					{
+						/*
+						 * I know of them both. Treat the case as if the
+						 * previous spot was modified.
+						 */
+						modifySpot( novelSpotList, previousSpot );
+					}
 				}
-				else if ( novelSpotList == null || novelSpotList.isEmpty() )
-				{
-					/*
-					 * One I add in the previous spot list, but that has
-					 * disappeared. Remove it.
-					 */
-					model.removeSpot( previousSpot );
-				}
-				else
-				{
-					/*
-					 * I know of them both. Treat the case as if the previous
-					 * spot was modified.
-					 */
-					modifySpot( novelSpotList, previousSpot );
-				}
+			}
+			finally
+			{
+				model.endUpdate();
 			}
 		}
 		catch ( final Exception e )
@@ -199,7 +228,6 @@ public class LabkitLauncher
 		}
 		finally
 		{
-			model.endUpdate();
 			disabler.reenable();
 		}
 	}
@@ -257,7 +285,7 @@ public class LabkitLauncher
 		final HashSet< Spot > extraSpots = new HashSet<>( novelSpotList );
 		extraSpots.remove( mainNovelSpot );
 		int i = 1;
-		for ( final Spot s: extraSpots )
+		for ( final Spot s : extraSpots )
 		{
 			s.setName( previousSpot.getName() + "_" + i++ );
 			s.putFeature( Spot.POSITION_T, currentTimePoint * dt );
