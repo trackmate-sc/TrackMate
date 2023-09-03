@@ -85,7 +85,8 @@ public class LabkitLauncher
 		// Reslice for current time-point.
 		this.currentTimePoint = imp.getFrame() - 1;
 		final ImgPlus frame = ImgPlusViews.hyperSlice( src, timeAxis, currentTimePoint );
-		final DatasetInputImage input = new DatasetInputImage( frame );
+		final ImpBdvShowable showable = ImpBdvShowable.fromImp( frame, imp );
+		final DatasetInputImage input = new DatasetInputImage( frame, showable );
 
 		// Prepare label image.
 		final AxisType[] axes = new AxisType[] { Axes.X, Axes.Y, Axes.Z, };
