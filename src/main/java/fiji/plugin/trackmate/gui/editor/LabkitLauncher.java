@@ -57,7 +57,7 @@ public class LabkitLauncher
 
 	private final EverythingDisablerAndReenabler disabler;
 
-	private Labeling previousLabels;
+	private ImgPlus< UnsignedShortType > previousIndexImg;
 
 	private int currentTimePoint;
 
@@ -108,8 +108,7 @@ public class LabkitLauncher
 		model.imageLabelingModel().labeling().set( Labeling.fromImg( lblImgPlus ) );
 
 		// Store a copy.
-		final ImgPlus< UnsignedShortType > copy = lblImgPlus.copy();
-		this.previousLabels = Labeling.fromImg( copy );
+		this.previousIndexImg = lblImgPlus.copy();
 
 		// Show LabKit.
 		final LabkitFrame labkit = LabkitFrame.show( model, "Edit TrackMate data frame " + ( currentTimePoint + 1 ) );
@@ -127,10 +126,9 @@ public class LabkitLauncher
 			 */
 			final Labeling labeling = lm.labeling().get();
 			final RandomAccessibleInterval< UnsignedShortType > novelIndexImg = ( RandomAccessibleInterval< UnsignedShortType > ) labeling.getIndexImg();
-			final RandomAccessibleInterval< UnsignedShortType > previousIndexImg = ( RandomAccessibleInterval< UnsignedShortType > ) previousLabels.getIndexImg();
 
 			// Collect ids of spots that have been modified. id = index - 1
-			final Set< Integer > modifiedIDs = getModifiedIDs( novelIndexImg, previousIndexImg );
+			final Set< Integer > modifiedIDs = getModifiedIDs( novelIndexImg );
 			final int nModified = modifiedIDs.size();
 
 			if ( nModified == 0 )
@@ -303,7 +301,7 @@ public class LabkitLauncher
 		}
 	}
 
-	private static final Set< Integer > getModifiedIDs( final RandomAccessibleInterval< UnsignedShortType > novelIndexImg, final RandomAccessibleInterval< UnsignedShortType > previousIndexImg )
+	private final Set< Integer > getModifiedIDs( final RandomAccessibleInterval< UnsignedShortType > novelIndexImg )
 	{
 		final ConcurrentSkipListSet< Integer > modifiedIDs = new ConcurrentSkipListSet<>();
 		LoopBuilder.setImages( novelIndexImg, previousIndexImg )
