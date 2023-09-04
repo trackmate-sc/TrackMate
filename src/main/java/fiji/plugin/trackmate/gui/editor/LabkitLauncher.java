@@ -263,6 +263,7 @@ public class LabkitLauncher
 		// Add it properly.
 		mainNovelSpot.setName( previousSpot.getName() );
 		mainNovelSpot.putFeature( Spot.POSITION_T, currentTimePoint * dt );
+		mainNovelSpot.putFeature( Spot.QUALITY, -1. );
 		model.addSpotTo( mainNovelSpot, Integer.valueOf( currentTimePoint ) );
 		// Recreate links.
 		final Set< DefaultWeightedEdge > edges = model.getTrackModel().edgesOf( previousSpot );
@@ -288,6 +289,7 @@ public class LabkitLauncher
 		{
 			s.setName( previousSpot.getName() + "_" + i++ );
 			s.putFeature( Spot.POSITION_T, currentTimePoint * dt );
+			s.putFeature( Spot.QUALITY, -1. );
 			model.addSpotTo( s, Integer.valueOf( currentTimePoint ) );
 		}
 	}
@@ -297,6 +299,7 @@ public class LabkitLauncher
 		for ( final Spot spot : novelSpotList )
 		{
 			spot.putFeature( Spot.POSITION_T, currentTimePoint * dt );
+			spot.putFeature( Spot.QUALITY, -1. );
 			trackmate.getModel().addSpotTo( spot, Integer.valueOf( currentTimePoint ) );
 		}
 	}
