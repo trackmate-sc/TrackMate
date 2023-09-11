@@ -199,9 +199,10 @@ public class TMUtils
 	 *            the image plus to wrap.
 	 * @return the ImgPlus wrapping the input.
 	 */
+	@SuppressWarnings( "unchecked" )
 	public static final < T > ImgPlus< T > rawWraps( final ImagePlus imp )
 	{
-		return ImagePlusAdapter.wrapImgPlus( imp );
+		return ( ImgPlus< T > ) ImagePlusAdapter.wrapImgPlus( imp );
 	}
 
 	/**
