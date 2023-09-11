@@ -101,14 +101,15 @@ public interface Spot extends RealLocalizable, RealPositionable, RealInterval, C
 	 * this spot.
 	 * 
 	 * @param ra
-	 *            the {@link RandomAccessible} to iterate over.
+	 *            the {@link RandomAccessible} to iterate over. It's the caller
+	 *            responsibility to ensure that the {@link RandomAccessible} can
+	 *            return values over all the pixels in this spot.
 	 * @param calibration
 	 *            the pixel size array, use to map pixel integer coordinates to
 	 *            the spot physical coordinates.
 	 * @param <T>
 	 *            the type of pixels in the {@link RandomAccessible}.
 	 * @return an iterable.
-	 * @return
 	 */
 	public < T extends RealType< T > > IterableInterval< T > iterable( RandomAccessible< T > ra, double calibration[] );
 
