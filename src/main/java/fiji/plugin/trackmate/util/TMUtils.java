@@ -57,7 +57,6 @@ import net.imglib2.Interval;
 import net.imglib2.img.ImagePlusAdapter;
 import net.imglib2.img.display.imagej.ImgPlusViews;
 import net.imglib2.type.Type;
-import net.imglib2.util.Cast;
 import net.imglib2.util.Util;
 
 /**
@@ -176,7 +175,7 @@ public class TMUtils
 	 */
 	public static final < T > ImgPlus< T > rawWraps( final ImagePlus imp )
 	{
-		return Cast.unchecked( ImagePlusAdapter.wrapImgPlus( imp ) );
+		return ImagePlusAdapter.wrapImgPlus( imp );
 	}
 
 	/**
