@@ -95,16 +95,19 @@ public class AnalyzerSelection
 		settings.clearEdgeAnalyzers();
 		settings.clearTrackAnalyzers();
 
-		final List< String > spotAnalyzers = getSelectedAnalyzers( SPOTS );
+		final List< String > selectionSpotAnalyzers = getSelectedAnalyzers( SPOTS );
 
-		// Base spot analyzers.
+		// Base spot analyzers, in priority order.
 		final SpotAnalyzerProvider spotAnalyzerProvider = new SpotAnalyzerProvider( settings.imp == null
 				? 1 : settings.imp.getNChannels() );
-		for ( final String key : spotAnalyzers )
+		for ( final String key : spotAnalyzerProvider.getVisibleKeys() )
 		{
-			final SpotAnalyzerFactory< ? > factory = spotAnalyzerProvider.getFactory( key );
-			if ( factory != null )
-				settings.addSpotAnalyzerFactory( factory );
+			if ( selectionSpotAnalyzers.contains( key ) )
+			{
+				final SpotAnalyzerFactory< ? > factory = spotAnalyzerProvider.getFactory( key );
+				if ( factory != null )
+					settings.addSpotAnalyzerFactory( factory );
+			}
 		}
 
 		// Shall we add 2D morphology analyzers?
@@ -114,11 +117,14 @@ public class AnalyzerSelection
 				&& settings.detectorFactory.has2Dsegmentation() )
 		{
 			final Spot2DMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider = new Spot2DMorphologyAnalyzerProvider( settings.imp.getNChannels() );
-			for ( final String key : spotAnalyzers )
+			for ( final String key : spotMorphologyAnalyzerProvider.getVisibleKeys() )
 			{
-				final Spot2DMorphologyAnalyzerFactory< ? > factory = spotMorphologyAnalyzerProvider.getFactory( key );
-				if ( factory != null )
-					settings.addSpotAnalyzerFactory( factory );
+				if ( selectionSpotAnalyzers.contains( key ) )
+				{
+					final Spot2DMorphologyAnalyzerFactory< ? > factory = spotMorphologyAnalyzerProvider.getFactory( key );
+					if ( factory != null )
+						settings.addSpotAnalyzerFactory( factory );
+				}
 			}
 		}
 
@@ -129,30 +135,41 @@ public class AnalyzerSelection
 				&& settings.detectorFactory.has3Dsegmentation() )
 		{
 			final Spot3DMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider = new Spot3DMorphologyAnalyzerProvider( settings.imp.getNChannels() );
-			for ( final String key : spotAnalyzers )
+			for ( final String key : spotMorphologyAnalyzerProvider.getVisibleKeys() )
 			{
-				final Spot3DMorphologyAnalyzerFactory< ? > factory = spotMorphologyAnalyzerProvider.getFactory( key );
-				if ( factory != null )
-					settings.addSpotAnalyzerFactory( factory );
+				if ( selectionSpotAnalyzers.contains( key ) )
+				{
+					final Spot3DMorphologyAnalyzerFactory< ? > factory = spotMorphologyAnalyzerProvider.getFactory( key );
+					if ( factory != null )
+						settings.addSpotAnalyzerFactory( factory );
+				}
 			}
 		}
 
 		// Edge analyzers.
+		final List< String > selectedEdgeAnalyzers = getSelectedAnalyzers( EDGES );
 		final EdgeAnalyzerProvider edgeAnalyzerProvider = new EdgeAnalyzerProvider();
-		for ( final String key : getSelectedAnalyzers( EDGES ) )
+		for ( final String key : edgeAnalyzerProvider.getVisibleKeys() )
 		{
-			final EdgeAnalyzer factory = edgeAnalyzerProvider.getFactory( key );
-			if ( factory != null )
-				settings.addEdgeAnalyzer( factory );
+			if ( selectedEdgeAnalyzers.contains( key ) )
+			{
+				final EdgeAnalyzer factory = edgeAnalyzerProvider.getFactory( key );
+				if ( factory != null )
+					settings.addEdgeAnalyzer( factory );
+			}
 		}
 
 		// Track analyzers.
+		final List< String > selectedTrackAnalyzers = getSelectedAnalyzers( TRACKS );
 		final TrackAnalyzerProvider trackAnalyzerProvider = new TrackAnalyzerProvider();
-		for ( final String key : getSelectedAnalyzers( TRACKS ) )
+		for ( final String key : trackAnalyzerProvider.getVisibleKeys() )
 		{
-			final TrackAnalyzer factory = trackAnalyzerProvider.getFactory( key );
-			if ( factory != null )
-				settings.addTrackAnalyzer( factory );
+			if ( selectedTrackAnalyzers.contains( key ) )
+			{
+				final TrackAnalyzer factory = trackAnalyzerProvider.getFactory( key );
+				if ( factory != null )
+					settings.addTrackAnalyzer( factory );
+			}
 		}
 	}
 
