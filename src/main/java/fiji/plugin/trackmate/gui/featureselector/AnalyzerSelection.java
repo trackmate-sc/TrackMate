@@ -194,16 +194,16 @@ public class AnalyzerSelection
 		for ( final String key : new SpotAnalyzerProvider( 1 ).getVisibleKeys() )
 			fs.setSelected( SPOTS, key, true );
 
-		for ( final String key : new Spot2DMorphologyAnalyzerProvider( 1 ).getKeys() )
+		for ( final String key : new Spot2DMorphologyAnalyzerProvider( 1 ).getVisibleKeys() )
 			fs.setSelected( SPOTS, key, true );
 
-		for ( final String key : new Spot3DMorphologyAnalyzerProvider( 1 ).getKeys() )
+		for ( final String key : new Spot3DMorphologyAnalyzerProvider( 1 ).getVisibleKeys() )
 			fs.setSelected( SPOTS, key, true );
 
-		for ( final String key : new EdgeAnalyzerProvider().getKeys() )
+		for ( final String key : new EdgeAnalyzerProvider().getVisibleKeys() )
 			fs.setSelected( EDGES, key, true );
 
-		for ( final String key : new TrackAnalyzerProvider().getKeys() )
+		for ( final String key : new TrackAnalyzerProvider().getVisibleKeys() )
 			fs.setSelected( TRACKS, key, true );
 
 		// Fine tune.
