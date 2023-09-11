@@ -137,9 +137,10 @@ public class TMUtils
 	 * Wraps an IJ {@link ImagePlus} in an imglib2 {@link ImgPlus}, abinding to
 	 * a returned type.
 	 */
+	@SuppressWarnings( "unchecked" )
 	public static final < T > ImgPlus< T > rawWraps( final ImagePlus imp )
 	{
-		return ImagePlusAdapter.wrapImgPlus( imp );
+		return ( ImgPlus< T > ) ImagePlusAdapter.wrapImgPlus( imp );
 	}
 
 	/**
