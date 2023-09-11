@@ -18,6 +18,8 @@ import org.apache.commons.lang3.StringUtils;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
+import fiji.plugin.trackmate.features.spot.Spot2DMorphologyAnalyzerFactory;
+import fiji.plugin.trackmate.features.spot.Spot3DMorphologyAnalyzerFactory;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.spot.SpotContrastAndSNRAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
@@ -111,9 +113,10 @@ public class AnalyzerSelection
 				&& settings.detectorFactory != null
 				&& settings.detectorFactory.has2Dsegmentation() )
 		{
+			final Spot2DMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider = new Spot2DMorphologyAnalyzerProvider( settings.imp.getNChannels() );
 			for ( final String key : spotAnalyzers )
 			{
-				final SpotAnalyzerFactory< ? > factory = spotAnalyzerProvider.getFactory( key );
+				final Spot2DMorphologyAnalyzerFactory< ? > factory = spotMorphologyAnalyzerProvider.getFactory( key );
 				if ( factory != null )
 					settings.addSpotAnalyzerFactory( factory );
 			}
@@ -125,9 +128,10 @@ public class AnalyzerSelection
 				&& settings.detectorFactory != null
 				&& settings.detectorFactory.has3Dsegmentation() )
 		{
+			final Spot3DMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider = new Spot3DMorphologyAnalyzerProvider( settings.imp.getNChannels() );
 			for ( final String key : spotAnalyzers )
 			{
-				final SpotAnalyzerFactory< ? > factory = spotAnalyzerProvider.getFactory( key );
+				final Spot3DMorphologyAnalyzerFactory< ? > factory = spotMorphologyAnalyzerProvider.getFactory( key );
 				if ( factory != null )
 					settings.addSpotAnalyzerFactory( factory );
 			}
