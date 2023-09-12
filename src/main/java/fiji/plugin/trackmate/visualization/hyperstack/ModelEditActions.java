@@ -17,7 +17,7 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotShape;
+import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.detection.semiauto.SemiAutoTracker;
 import fiji.plugin.trackmate.util.ModelTools;
 import fiji.plugin.trackmate.util.TMUtils;
@@ -76,7 +76,7 @@ public class ModelEditActions
 			SwingUtilities.convertPointFromScreen( mouseLocation, canvas );
 		}
 		final double[] calibration = TMUtils.getSpatialCalibration( imp );
-		return new Spot(
+		return new SpotBase(
 				( -0.5 + canvas.offScreenXD( mouseLocation.x ) ) * calibration[ 0 ],
 				( -0.5 + canvas.offScreenYD( mouseLocation.y ) ) * calibration[ 1 ],
 				( imp.getSlice() - 1 ) * calibration[ 2 ],
@@ -265,24 +265,14 @@ public class ModelEditActions
 				? radius + factor * dx * COARSE_STEP
 				: radius + factor * dx * FINE_STEP;
 
-
 		if ( newRadius <= dx )
 			return;
 
 		// Store new value of radius for next spot creation.
 		previousRadius = newRadius;
 
-		final SpotShape shape = target.getShape();
-		if ( null == shape )
-		{
-			target.putFeature( Spot.RADIUS, newRadius );
-		}
-		else
-		{
-			final double alpha = newRadius / radius;
-			shape.scale( alpha );
-			target.putFeature( Spot.RADIUS, shape.radius() );
-		}
+		// Actually scale the spot.
+		target.scale( radius / newRadius );
 
 		model.beginUpdate();
 		try

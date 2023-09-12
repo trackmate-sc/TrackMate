@@ -21,12 +21,11 @@ import ij.IJ;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
-import net.imagej.mesh.Mesh;
-import net.imagej.mesh.Meshes;
-import net.imagej.mesh.io.stl.STLMeshIO;
-import net.imagej.mesh.naive.NaiveDoubleMesh;
-import net.imagej.mesh.nio.BufferMesh;
 import net.imglib2.img.display.imagej.ImgPlusViews;
+import net.imglib2.mesh.Meshes;
+import net.imglib2.mesh.obj.Mesh;
+import net.imglib2.mesh.obj.naive.NaiveDoubleMesh;
+import net.imglib2.mesh.obj.nio.BufferMesh;
 import net.imglib2.type.Type;
 import net.imglib2.type.numeric.ARGBType;
 
@@ -55,7 +54,7 @@ public class MeshPlayground
 
 
 		final List< StupidMesh > meshes = new ArrayList<>();
-		for ( int j = 1; j <= 3; ++j)
+		for ( int j = 1; j <= 3; ++j )
 		{
 			final String fn = String.format( "samples/mesh/CElegansMask3D_%02d.stl", j );
 			meshes.add( new StupidMesh( load( fn ) ) );
@@ -68,8 +67,8 @@ public class MeshPlayground
 			if ( showMeshes.get() )
 			{
 				final Matrix4f pvm = new Matrix4f( data.getPv() );
-				Matrix4f view = MatrixMath.affine( data.getRenderTransformWorldToScreen(), new Matrix4f() );
-				Matrix4f vm = MatrixMath.screen( data.getDCam(), data.getScreenWidth(), data.getScreenHeight(), new Matrix4f() ).mul( view );
+				final Matrix4f view = MatrixMath.affine( data.getRenderTransformWorldToScreen(), new Matrix4f() );
+				final Matrix4f vm = MatrixMath.screen( data.getDCam(), data.getScreenWidth(), data.getScreenHeight(), new Matrix4f() ).mul( view );
 				meshes.forEach( mesh -> mesh.draw( gl, pvm, vm, false ) );
 			}
 		} );
@@ -91,8 +90,7 @@ public class MeshPlayground
 		try
 		{
 			final NaiveDoubleMesh nmesh = new NaiveDoubleMesh();
-			final STLMeshIO meshIO = new STLMeshIO();
-			meshIO.read( nmesh, new File( fn ) );
+			net.imglib2.mesh.io.stl.STLMeshIO.read( nmesh, new File( fn ) );
 			mesh = calculateNormals(
 					nmesh
 //					Meshes.removeDuplicateVertices( nmesh, 5 )

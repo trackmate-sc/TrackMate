@@ -1,12 +1,12 @@
 package fiji.plugin.trackmate.visualization.bvv;
 
 import fiji.plugin.trackmate.Spot;
-import net.imagej.mesh.Mesh;
-import net.imagej.mesh.Meshes;
-import net.imagej.mesh.Triangle;
-import net.imagej.mesh.naive.NaiveDoubleMesh;
-import net.imagej.mesh.nio.BufferMesh;
 import net.imglib2.RealLocalizable;
+import net.imglib2.mesh.Meshes;
+import net.imglib2.mesh.obj.Mesh;
+import net.imglib2.mesh.obj.Triangle;
+import net.imglib2.mesh.obj.naive.NaiveDoubleMesh;
+import net.imglib2.mesh.obj.nio.BufferMesh;
 
 /**
  * Icosahedron spheres.

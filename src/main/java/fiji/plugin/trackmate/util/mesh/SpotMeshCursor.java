@@ -2,9 +2,9 @@ package fiji.plugin.trackmate.util.mesh;
 
 import fiji.plugin.trackmate.SpotMesh;
 import gnu.trove.list.array.TDoubleArrayList;
-import net.imagej.mesh.alg.zslicer.Slice;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
+import net.imglib2.mesh.alg.zslicer.Slice;
 
 /**
  * A {@link Cursor} that iterates over the pixels inside a mesh.
@@ -196,7 +196,7 @@ public class SpotMeshCursor< T > implements Cursor< T >
 	public Cursor< T > copyCursor()
 	{
 		return new SpotMeshCursor<>(
-				ra.copyRandomAccess(),
+				ra.copy(),
 				sm.copy(),
 				cal.clone() );
 	}
