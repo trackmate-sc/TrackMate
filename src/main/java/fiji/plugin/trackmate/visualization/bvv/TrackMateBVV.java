@@ -1,14 +1,9 @@
 package fiji.plugin.trackmate.visualization.bvv;
 
-import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
-
 import java.awt.Color;
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import javax.swing.JFrame;
 
 import org.joml.Matrix4f;
 
@@ -19,20 +14,11 @@ import bvv.vistools.BvvHandle;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.FeatureUtils;
-import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.gui.wizard.TrackMateWizardSequence;
-import fiji.plugin.trackmate.gui.wizard.WizardSequence;
-import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.visualization.AbstractTrackMateModelView;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
-import ij.ImageJ;
 import ij.ImagePlus;
 import net.imglib2.RealLocalizable;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -81,8 +67,8 @@ public class TrackMateBVV< T extends Type< T > > extends AbstractTrackMateModelV
 			if ( displaySettings.isSpotVisible() )
 			{
 				final Matrix4f pvm = new Matrix4f( data.getPv() );
-				Matrix4f view = MatrixMath.affine( data.getRenderTransformWorldToScreen(), new Matrix4f() );
-				Matrix4f vm = MatrixMath.screen( data.getDCam(), data.getScreenWidth(), data.getScreenHeight(), new Matrix4f() ).mul( view );
+				final Matrix4f view = MatrixMath.affine( data.getRenderTransformWorldToScreen(), new Matrix4f() );
+				final Matrix4f vm = MatrixMath.screen( data.getDCam(), data.getScreenWidth(), data.getScreenHeight(), new Matrix4f() ).mul( view );
 
 				final int t = data.getTimepoint();
 				final Iterable< Spot > it = model.getSpots().iterable( t, true );
@@ -194,55 +180,10 @@ public class TrackMateBVV< T extends Type< T > > extends AbstractTrackMateModelV
 				continue;
 
 			final Color color = spotColorGenerator.color( entry.getKey() );
-			float alpha = ( float ) displaySettings.getSpotTransparencyAlpha();
+			final float alpha = ( float ) displaySettings.getSpotTransparencyAlpha();
 			sm.setColor( color, alpha );
 			sm.setSelectionColor( displaySettings.getHighlightColor(), alpha );
 		}
 		refresh();
-	}
-
-	public static < T extends Type< T > > void main( final String[] args )
-	{
-		try
-		{
-//		final String filePath = "samples/mesh/CElegansMask3D.tif";
-			final String filePath = "samples/CElegans3D-smoothed-mask-orig.xml";
-//			final String filePath = "../TrackMate-StarDist/samples/CTC-Fluo-N3DH-SIM-multiC.xml";
-
-			ImageJ.main( args );
-			final TmXmlReader reader = new TmXmlReader( new File( filePath ) );
-			if ( !reader.isReadingOk() )
-			{
-				System.err.println( reader.getErrorMessage() );
-				return;
-			}
-			final ImagePlus imp = reader.readImage();
-			final Settings settings = reader.readSettings( imp );
-			imp.show();
-
-			final Model model = reader.getModel();
-			final SelectionModel selectionModel = new SelectionModel( model );
-			final DisplaySettings ds = reader.getDisplaySettings();
-			final TrackMate trackmate = new TrackMate( model, settings );
-
-			// Main view
-			final TrackMateModelView displayer = new HyperStackDisplayer( model, selectionModel, imp, ds );
-			displayer.render();
-
-			// Wizard.
-			final WizardSequence sequence = new TrackMateWizardSequence( trackmate, selectionModel, ds );
-			sequence.setCurrent( "ConfigureViews" );
-			final JFrame frame = sequence.run( "TrackMate on " + imp.getShortTitle() );
-			frame.setIconImage( TRACKMATE_ICON.getImage() );
-			GuiUtils.positionWindow( frame, settings.imp.getWindow() );
-			frame.setVisible( true );
-
-			final TrackMateBVV< T > tbvv = new TrackMateBVV<>( model, selectionModel, imp, ds );
-			tbvv.render();
-		}
-		catch ( final Exception e )
-		{
-			e.printStackTrace();
-		}
 	}
 }
