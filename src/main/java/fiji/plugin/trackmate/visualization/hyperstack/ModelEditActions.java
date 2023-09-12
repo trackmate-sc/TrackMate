@@ -286,20 +286,17 @@ public class ModelEditActions
 				? radius + factor * dx * COARSE_STEP
 				: radius + factor * dx * FINE_STEP;
 
-
 		if ( newRadius <= dx )
 			return;
 
 		// Store new value of radius for next spot creation.
 		previousRadius = newRadius;
 
+		// Actually scale the spot.
+		target.scale( radius / newRadius );
+
 		// Scale spot
 		target.putFeature( Spot.RADIUS, newRadius );
-		if ( !( target instanceof SpotBase ) )
-		{
-			final double alpha = newRadius / radius;
-			target.scale( alpha );
-		}
 
 		model.beginUpdate();
 		try
