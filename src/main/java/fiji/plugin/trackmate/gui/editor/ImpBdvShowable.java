@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.gui.editor;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -25,6 +26,7 @@ import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.NumericType;
 import sc.fiji.labkit.ui.bdv.BdvShowable;
+import sc.fiji.labkit.ui.inputimage.ImgPlusViewsOld;
 
 /**
  * A {@link BdvShowable} from a {@link ImgPlus}, but with channel colors, min &
@@ -41,7 +43,7 @@ public class ImpBdvShowable implements BdvShowable
 
 	public static < T extends NumericType< T > > ImpBdvShowable fromImp( final ImgPlus< T > frame, final ImagePlus imp )
 	{
-		return new ImpBdvShowable( frame, imp );
+		return new ImpBdvShowable( prepareImage( frame ), imp );
 	}
 
 	private final ImgPlus< ? extends NumericType< ? > > image;
@@ -173,5 +175,26 @@ public class ImpBdvShowable implements BdvShowable
 				setup.setDisplayRange( displayRangeMin, displayRangeMax );
 			}
 		}
+	}
+
+	private static ImgPlus< ? extends NumericType< ? > > prepareImage(
+			final ImgPlus< ? extends NumericType< ? > > image )
+	{
+		final List< AxisType > order = Arrays.asList( Axes.X, Axes.Y, Axes.Z, Axes.CHANNEL,
+				Axes.TIME );
+		return ImgPlusViewsOld.sortAxes( labelAxes( image ), order );
+	}
+
+	private static ImgPlus< ? extends NumericType< ? > > labelAxes(
+			final ImgPlus< ? extends NumericType< ? > > image )
+	{
+		if ( image.firstElement() instanceof ARGBType )
+			return ImgPlusViewsOld
+					.fixAxes( image, Arrays.asList( Axes.X, Axes.Y, Axes.Z, Axes.TIME ) );
+		if ( image.numDimensions() == 4 )
+			return ImgPlusViewsOld.fixAxes( image, Arrays
+					.asList( Axes.X, Axes.Y, Axes.Z, Axes.TIME, Axes.CHANNEL ) );
+		return ImgPlusViewsOld.fixAxes( image, Arrays.asList( Axes.X, Axes.Y, Axes.Z,
+				Axes.CHANNEL, Axes.TIME ) );
 	}
 }
