@@ -196,7 +196,7 @@ public class SpotMeshCursor< T > implements Cursor< T >
 	public Cursor< T > copyCursor()
 	{
 		return new SpotMeshCursor<>(
-				ra.copyRandomAccess(),
+				ra.copy(),
 				sm.copy(),
 				cal.clone() );
 	}
