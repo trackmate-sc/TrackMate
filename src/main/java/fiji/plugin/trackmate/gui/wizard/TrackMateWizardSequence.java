@@ -485,6 +485,10 @@ public class TrackMateWizardSequence implements WizardSequence
 							GuiUtils.positionWindow( SwingUtilities.getWindowAncestor( bvvHandle.getViewerPanel() ), c );
 						}
 					}
+					catch ( final Exception e )
+					{
+						e.printStackTrace();
+					}
 					finally
 					{
 						enabler.reenable();
