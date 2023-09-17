@@ -10,6 +10,7 @@ import bdv.viewer.DisplayMode;
 import bdv.viewer.SourceAndConverter;
 import bdv.viewer.SynchronizedViewerState;
 import bdv.viewer.ViewerState;
+import fiji.plugin.trackmate.util.TMUtils;
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
@@ -37,6 +38,36 @@ import sc.fiji.labkit.ui.inputimage.ImgPlusViewsOld;
 public class ImpBdvShowable implements BdvShowable
 {
 
+	/**
+	 * Returns a new {@link BdvShowable} that wraps the specified
+	 * {@link ImagePlus}. The LUT and display settings are read from the
+	 * {@link ImagePlus}.
+	 * 
+	 * @param <T>
+	 *            the pixel type.
+	 * @param imp
+	 *            the {@link ImagePlus} to wrap and read LUT and display
+	 *            settings from.
+	 * @return a new {@link BdvShowable}
+	 */
+	public static < T extends NumericType< T > > ImpBdvShowable fromImp( final ImagePlus imp )
+	{
+		final ImgPlus< T > src = TMUtils.rawWraps( imp );
+		return fromImp( src, imp );
+	}
+
+	/**
+	 * Returns a new {@link BdvShowable} for the specified image, but using the
+	 * LUT and display settings of the specified {@link ImagePlus}.
+	 * 
+	 * @param <T>
+	 *            the pixel type.
+	 * @param frame
+	 *            the image to wrap in a {@link BdvShowable}.
+	 * @param imp
+	 *            the {@link ImagePlus} to read LUT and display settings from.
+	 * @return a new {@link BdvShowable}
+	 */
 	public static < T extends NumericType< T > > ImpBdvShowable fromImp( final ImgPlus< T > frame, final ImagePlus imp )
 	{
 		return new ImpBdvShowable( BdvShowable.wrap( prepareImage( frame ) ), imp );
