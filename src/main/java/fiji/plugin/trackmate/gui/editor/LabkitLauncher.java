@@ -91,7 +91,10 @@ public class LabkitLauncher
 		final RandomAccessibleInterval< UnsignedShortType > previousIndexImg = copy( labeling.getIndexImg() );
 
 		// Show LabKit.
-		final LabkitFrame labkit = LabkitFrame.show( model, "Edit TrackMate data frame " + ( currentTimePoint + 1 ) );
+		String title = "Editing TrackMate data for " + imp.getShortTitle();
+		if ( singleTimePoint )
+			title += "at frame " + ( currentTimePoint + 1 );
+		final LabkitFrame labkit = LabkitFrame.show( model, title );
 
 		// Prepare re-importer.
 		final double dt = imp.getCalibration().frameInterval;
