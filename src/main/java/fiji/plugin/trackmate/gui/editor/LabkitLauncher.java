@@ -2,6 +2,8 @@ package fiji.plugin.trackmate.gui.editor;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JLabel;
@@ -16,23 +18,31 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.gui.Icons;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
 import fiji.plugin.trackmate.util.SpotUtil;
 import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
+import net.imglib2.img.ImgFactory;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImgPlusViews;
 import net.imglib2.loops.LoopBuilder;
+import net.imglib2.type.numeric.ARGBType;
+import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
+import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 import sc.fiji.labkit.ui.LabkitFrame;
 import sc.fiji.labkit.ui.inputimage.DatasetInputImage;
+import sc.fiji.labkit.ui.labeling.Label;
 import sc.fiji.labkit.ui.labeling.Labeling;
 import sc.fiji.labkit.ui.models.DefaultSegmentationModel;
 
@@ -47,9 +57,12 @@ public class LabkitLauncher
 
 	private int currentTimePoint;
 
-	public LabkitLauncher( final TrackMate trackmate, final EverythingDisablerAndReenabler disabler )
+	private final DisplaySettings ds;
+
+	public LabkitLauncher( final TrackMate trackmate, final DisplaySettings ds, final EverythingDisablerAndReenabler disabler )
 	{
 		this.trackmate = trackmate;
+		this.ds = ds;
 		this.disabler = disabler;
 		final ImagePlus imp = trackmate.getSettings().imp;
 		this.calibration = TMUtils.getSpatialCalibration( imp );
@@ -67,95 +80,110 @@ public class LabkitLauncher
 	{
 		final ImagePlus imp = trackmate.getSettings().imp;
 		final DatasetInputImage input = makeInput( imp, singleTimePoint );
-		final ImgPlus< UnsignedShortType > lblImgPlus = makeLblImage( imp, trackmate.getModel().getSpots(), singleTimePoint );
+		final Labeling labeling = makeLabeling( imp, trackmate.getModel().getSpots(), singleTimePoint );
 
 		// Make a labeling model from it.
 		final Context context = TMUtils.getContext();
 		final DefaultSegmentationModel model = new DefaultSegmentationModel( context, input );
-		model.imageLabelingModel().labeling().set( Labeling.fromImg( lblImgPlus ) );
+		model.imageLabelingModel().labeling().set( labeling );
 
 		// Store a copy.
-		final ImgPlus< UnsignedShortType > previousIndexImg = lblImgPlus.copy();
+		final RandomAccessibleInterval< UnsignedShortType > previousIndexImg = copy( labeling.getIndexImg() );
 
 		// Show LabKit.
 		final LabkitFrame labkit = LabkitFrame.show( model, "Edit TrackMate data frame " + ( currentTimePoint + 1 ) );
 
 		// Prepare re-importer.
 		final double dt = imp.getCalibration().frameInterval;
-		final LabkitImporter reimporter = new LabkitImporter( trackmate.getModel(), calibration, dt );
 		labkit.onCloseListeners().addListener( () -> {
-			try
-			{
-				@SuppressWarnings( "unchecked" )
-				final RandomAccessibleInterval< UnsignedShortType > indexImg = ( RandomAccessibleInterval< UnsignedShortType > ) model.imageLabelingModel().labeling().get().getIndexImg();
-
-				// Do we have something to reimport?
-				final AtomicBoolean modified = new AtomicBoolean( false );
-				LoopBuilder.setImages( previousIndexImg, indexImg )
-						.multiThreaded()
-						.forEachChunk( chunk -> {
-							if ( modified.get() )
-								return null;
-							chunk.forEachPixel( ( p1, p2 ) -> {
-								if ( p1.get() != p2.get() )
-								{
-									modified.set( true );
-									return;
-								}
-							} );
-							return null;
-						} );
-				if ( !modified.get() )
-					return;
-
-				// Message the user.
-				final String msg = ( currentTimePoint < 0 )
-						? "Commit the changes made to the\n"
-								+ "segmentation in whole movie?"
-						: "Commit the changes made to the\n"
-								+ "segmentation in frame " + ( currentTimePoint + 1 ) + "?";
-				final String title = "Commit edits to TrackMate";
-				final int returnedValue = JOptionPane.showConfirmDialog(
-						null,
-						msg,
-						title,
-						JOptionPane.YES_NO_OPTION,
-						JOptionPane.QUESTION_MESSAGE,
-						Icons.TRACKMATE_ICON );
-				if ( returnedValue != JOptionPane.YES_OPTION )
-					return;
-
-				final int timeDim = 2;
-				if ( currentTimePoint < 0 )
-				{
-					// All time-points.
-					final Logger log = Logger.IJ_LOGGER;
-					log.setStatus( "Re-importing from Labkit..." );
-					for ( int t = 0; t < imp.getNFrames(); t++ )
-					{
-						final RandomAccessibleInterval< UnsignedShortType > novelIndexImgThisFrame = Views.hyperSlice( indexImg, timeDim, t );
-						final RandomAccessibleInterval< UnsignedShortType > previousIndexImgThisFrame = Views.hyperSlice( previousIndexImg, timeDim, t );
-						reimporter.reimport( novelIndexImgThisFrame, previousIndexImgThisFrame, t );
-						log.setProgress( ++t / ( double ) imp.getNFrames() );
-					}
-					log.setStatus( "" );
-					log.setProgress( 0. );
-				}
-				else
-				{
-					// Only one.
-					reimporter.reimport( indexImg, previousIndexImg, currentTimePoint );
-				}
-			}
-			catch ( final Exception e )
-			{
-				e.printStackTrace();
-			}
-			finally
-			{
-				disabler.reenable();
-			}
+			@SuppressWarnings( "unchecked" )
+			final RandomAccessibleInterval< UnsignedShortType > indexImg = ( RandomAccessibleInterval< UnsignedShortType > ) model.imageLabelingModel().labeling().get().getIndexImg();
+			reimport( indexImg, previousIndexImg, dt );
 		} );
+	}
+
+	private void reimport( final RandomAccessibleInterval< UnsignedShortType > indexImg, final RandomAccessibleInterval< UnsignedShortType > previousIndexImg, final double dt )
+	{
+		try
+		{
+			// Do we have something to reimport?
+			final AtomicBoolean modified = new AtomicBoolean( false );
+			LoopBuilder.setImages( previousIndexImg, indexImg )
+					.multiThreaded()
+					.forEachChunk( chunk -> {
+						if ( modified.get() )
+							return null;
+						chunk.forEachPixel( ( p1, p2 ) -> {
+							if ( p1.get() != p2.get() )
+							{
+								modified.set( true );
+								return;
+							}
+						} );
+						return null;
+					} );
+			if ( !modified.get() )
+				return;
+
+			// Message the user.
+			final String msg = ( currentTimePoint < 0 )
+					? "Commit the changes made to the\n"
+							+ "segmentation in whole movie?"
+					: "Commit the changes made to the\n"
+							+ "segmentation in frame " + ( currentTimePoint + 1 ) + "?";
+			final String title = "Commit edits to TrackMate";
+			final int returnedValue = JOptionPane.showConfirmDialog(
+					null,
+					msg,
+					title,
+					JOptionPane.YES_NO_OPTION,
+					JOptionPane.QUESTION_MESSAGE,
+					Icons.TRACKMATE_ICON );
+			if ( returnedValue != JOptionPane.YES_OPTION )
+				return;
+
+			final LabkitImporter reimporter = new LabkitImporter( trackmate.getModel(), calibration, dt );
+			if ( currentTimePoint < 0 )
+			{
+				// All time-points.
+				final int timeDim = 2;
+				final long nTimepoints = indexImg.dimension( timeDim );
+				final Logger log = Logger.IJ_LOGGER;
+				log.setStatus( "Re-importing from Labkit..." );
+				for ( int t = 0; t < nTimepoints; t++ )
+				{
+					final RandomAccessibleInterval< UnsignedShortType > novelIndexImgThisFrame = Views.hyperSlice( indexImg, timeDim, t );
+					final RandomAccessibleInterval< UnsignedShortType > previousIndexImgThisFrame = Views.hyperSlice( previousIndexImg, timeDim, t );
+					reimporter.reimport( novelIndexImgThisFrame, previousIndexImgThisFrame, t );
+					log.setProgress( ++t / ( double ) nTimepoints );
+				}
+				log.setStatus( "" );
+				log.setProgress( 0. );
+			}
+			else
+			{
+				// Only one.
+				reimporter.reimport( indexImg, previousIndexImg, currentTimePoint );
+			}
+		}
+		catch ( final Exception e )
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			disabler.reenable();
+		}
+	}
+
+	private static Img< UnsignedShortType > copy( final RandomAccessibleInterval< ? extends IntegerType< ? > > in )
+	{
+		final ImgFactory< UnsignedShortType > factory = Util.getArrayOrCellImgFactory( in, new UnsignedShortType() );
+		final Img< UnsignedShortType > out = factory.create( in );
+		LoopBuilder.setImages( in, out )
+				.multiThreaded()
+				.forEachPixel( ( i, o ) -> o.set( i.getInteger() ) );
+		return out;
 	}
 
 	/**
@@ -197,7 +225,9 @@ public class LabkitLauncher
 	}
 
 	/**
-	 * Prepare the label image for annotation.
+	 * Prepare the label image for annotation. The labeling is created and each
+	 * of its labels receive the name and the color from the spot it is created
+	 * from.
 	 * 
 	 * @param imp
 	 *            the source image plus.
@@ -205,9 +235,9 @@ public class LabkitLauncher
 	 *            the spot collection.
 	 * @param singleTimePoint
 	 *            if <code>true</code> we only annotate one time-point.
-	 * @return a new {@link ImgPlus}.
+	 * @return a new {@link Labeling}.
 	 */
-	private ImgPlus< UnsignedShortType > makeLblImage( final ImagePlus imp, final SpotCollection spots, final boolean singleTimePoint )
+	private Labeling makeLabeling( final ImagePlus imp, final SpotCollection spots, final boolean singleTimePoint )
 	{
 		// Careful: Only works for 2D images! FIXME
 
@@ -241,30 +271,48 @@ public class LabkitLauncher
 		// Label image holder.
 		final ImgPlus< UnsignedShortType > lblImgPlus = new ImgPlus<>( lblImg, "LblImg", axes, calibration );
 
-		// Write spots in it with index = id + 1
+		// Write spots in it with index = id + 1 and build a map index -> spot.
+		final Map< Integer, Spot > spotIDs = new HashMap<>();
 		if ( singleTimePoint )
 		{
-			processFrame( lblImgPlus, spots, currentTimePoint );
+			processFrame( lblImgPlus, spots, currentTimePoint, spotIDs );
 		}
 		else
 		{
 			for ( int t = 0; t < imp.getNFrames(); t++ )
 			{
 				final ImgPlus< UnsignedShortType > lblImgPlusThisFrame = ImgPlusViews.hyperSlice( lblImgPlus, timeDim, t );
-				processFrame( lblImgPlusThisFrame, spots, t );
+				processFrame( lblImgPlusThisFrame, spots, t, spotIDs );
 			}
 		}
-		return lblImgPlus;
+		final Labeling labeling = Labeling.fromImg( lblImgPlus );
+
+		// Fine tune labels name and color.
+		final FeatureColorGenerator< Spot > colorGen = FeatureUtils.createSpotColorGenerator( trackmate.getModel(), ds );
+		for ( final Label label : labeling.getLabels() )
+		{
+			final String name = label.name();
+			final int index = Integer.parseInt( name );
+			final Spot spot = spotIDs.get( index );
+			label.setName( spot.getName() );
+			label.setColor( new ARGBType( colorGen.color( spot ).getRGB() ) );
+		}
+
+		return labeling;
 	}
 
-	private static final void processFrame( final ImgPlus< UnsignedShortType > lblImgPlus, final SpotCollection spots, final int t )
+	private static final void processFrame( final ImgPlus< UnsignedShortType > lblImgPlus, final SpotCollection spots, final int t, final Map< Integer, Spot > spotIDs )
 	{
 		final Iterable< Spot > spotsThisFrame = spots.iterable( t, true );
 		for ( final Spot spot : spotsThisFrame )
-			SpotUtil.iterable( spot, lblImgPlus ).forEach( p -> p.set( spot.ID() + 1 ) );
+		{
+			final int index = spot.ID() + 1;
+			SpotUtil.iterable( spot, lblImgPlus ).forEach( p -> p.set( index ) );
+			spotIDs.put( index, spot );
+		}
 	}
 
-	public static final AbstractNamedAction getLaunchAction( final TrackMate trackmate )
+	public static final AbstractNamedAction getLaunchAction( final TrackMate trackmate, final DisplaySettings ds )
 	{
 		return new AbstractNamedAction( "launch labkit editor" )
 		{
@@ -289,7 +337,7 @@ public class LabkitLauncher
 						disabler.disable();
 						try
 						{
-							final LabkitLauncher launcher = new LabkitLauncher( trackmate, disabler );
+							final LabkitLauncher launcher = new LabkitLauncher( trackmate, ds, disabler );
 							launcher.launch( singleTimepoint );
 						}
 						catch ( final Exception e )

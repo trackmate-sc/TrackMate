@@ -147,7 +147,14 @@ public class TrackMateWizardSequence implements WizardSequence
 		chooseTrackerDescriptor = new ChooseTrackerDescriptor( new TrackerProvider(), trackmate );
 		executeTrackingDescriptor = new ExecuteTrackingDescriptor( trackmate, logPanel );
 		trackFilterDescriptor = new TrackFilterDescriptor( trackmate, trackFilters, featureSelector );
-		configureViewsDescriptor = new ConfigureViewsDescriptor( displaySettings, featureSelector,  new LaunchTrackSchemeAction(), new ShowTrackTablesAction(), new ShowSpotTableAction(), LabkitLauncher.getLaunchAction( trackmate ), model.getSpaceUnits() );
+		configureViewsDescriptor = new ConfigureViewsDescriptor(
+				displaySettings,
+				featureSelector,
+				new LaunchTrackSchemeAction(),
+				new ShowTrackTablesAction(),
+				new ShowSpotTableAction(),
+				LabkitLauncher.getLaunchAction( trackmate, displaySettings ),
+				model.getSpaceUnits() );
 		grapherDescriptor = new GrapherDescriptor( trackmate, selectionModel, displaySettings );
 		actionChooserDescriptor = new ActionChooserDescriptor( new ActionProvider(), trackmate, selectionModel, displaySettings );
 		saveDescriptor = new SaveDescriptor( trackmate, displaySettings, this );
