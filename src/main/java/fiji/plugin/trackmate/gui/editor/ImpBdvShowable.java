@@ -2,12 +2,8 @@ package fiji.plugin.trackmate.gui.editor;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import bdv.tools.brightness.ConverterSetup;
-import bdv.util.AxisOrder;
-import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import bdv.util.BdvStackSource;
 import bdv.viewer.DisplayMode;
@@ -43,44 +39,32 @@ public class ImpBdvShowable implements BdvShowable
 
 	public static < T extends NumericType< T > > ImpBdvShowable fromImp( final ImgPlus< T > frame, final ImagePlus imp )
 	{
-		return new ImpBdvShowable( prepareImage( frame ), imp );
+		return new ImpBdvShowable( BdvShowable.wrap( prepareImage( frame ) ), imp );
 	}
 
-	private final ImgPlus< ? extends NumericType< ? > > image;
+	private final BdvShowable showable;
 
 	private final ImagePlus imp;
 
-	ImpBdvShowable( final ImgPlus< ? extends NumericType< ? > > image, final ImagePlus imp )
+	ImpBdvShowable( final BdvShowable showable, final ImagePlus imp )
 	{
-		this.image = image;
+		this.showable = showable;
 		this.imp = imp;
 	}
 
 	@Override
-	public Interval interval()
-	{
-		return image;
+	public Interval interval() {
+		return showable.interval();
 	}
 
 	@Override
-	public AffineTransform3D transformation()
-	{
-		final AffineTransform3D transform = new AffineTransform3D();
-		transform.set(
-				getCalibration( Axes.X ), 0, 0, 0,
-				0, getCalibration( Axes.Y ), 0, 0,
-				0, 0, getCalibration( Axes.Z ), 0 );
-		return transform;
+	public AffineTransform3D transformation() {
+		return showable.transformation();
 	}
 
 	@Override
-	public BdvStackSource< ? > show( final String title, final BdvOptions options )
-	{
-		final String name = image.getName();
-		final BdvOptions options1 = options.axisOrder( getAxisOrder() ).sourceTransform( transformation() );
-		final BdvStackSource< ? extends NumericType< ? > > stackSource = BdvFunctions.show( image, name == null
-				? title : name, options1 );
-
+	public BdvStackSource< ? > show( final String title, final BdvOptions options ) {
+		final BdvStackSource<?> stackSource = showable.show(title, options);
 		final List< ConverterSetup > converterSetups = stackSource.getConverterSetups();
 		final SynchronizedViewerState state = stackSource.getBdvHandle().getViewerPanel().state();
 
@@ -88,33 +72,6 @@ public class ImpBdvShowable implements BdvShowable
 		transferChannelSettings( converterSetups );
 		state.setDisplayMode( numActiveChannels > 1 ? DisplayMode.FUSED : DisplayMode.SINGLE );
 		return stackSource;
-	}
-
-	private AxisOrder getAxisOrder()
-	{
-		final String code = IntStream
-				.range( 0, image.numDimensions() )
-				.mapToObj( i -> image
-						.axis( i )
-						.type()
-						.getLabel().substring( 0, 1 ) )
-				.collect( Collectors.joining() );
-		try
-		{
-			return AxisOrder.valueOf( code );
-		}
-		catch ( final IllegalArgumentException e )
-		{
-			return AxisOrder.DEFAULT;
-		}
-	}
-
-	private double getCalibration( final AxisType axisType )
-	{
-		final int d = image.dimensionIndex( axisType );
-		if ( d == -1 )
-			return 1;
-		return image.axis( d ).averageScale( image.min( d ), image.max( d ) );
 	}
 
 	private int transferChannelVisibility( final ViewerState state )
