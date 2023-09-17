@@ -373,16 +373,18 @@ public class ConfigureViewsPanel extends JPanel
 		// Is labkit available?
 		if ( TMUtils.isClassPresent( "sc.fiji.labkit.ui.LabkitFrame" ) )
 		{
-			System.out.println( "LabKit found." ); // DEBUG
 			final JButton btnLabKit = new JButton( launchLabKitAction );
 			btnLabKit.setFont( FONT );
 			btnLabKit.setText( "Launch spot editor" );
 			btnLabKit.setIcon( Icons.PENCIL_ICON );
+			btnLabKit.setToolTipText( "<html>"
+					+ "Launch the Labkit editor to edit spot segmentation<br>"
+					+ "on the time-point currently displayed in the main<br>"
+					+ "view."
+					+ "<p>"
+					+ "Shift + click will launch the editor on all the<br>"
+					+ "time-points in the movie.</html>" );
 			panelButtons.add( btnLabKit );
-		}
-		else
-		{
-			System.out.println( "LabKit not found." ); // DEBUG
 		}
 
 		panelButtons.setSize( new Dimension( 300, 1 ) );
