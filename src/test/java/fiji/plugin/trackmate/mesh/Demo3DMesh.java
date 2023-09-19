@@ -26,7 +26,6 @@ import net.imglib2.mesh.alg.zslicer.Contour;
 import net.imglib2.mesh.alg.zslicer.Slice;
 import net.imglib2.mesh.alg.zslicer.ZSlicer;
 import net.imglib2.mesh.impl.naive.NaiveDoubleMesh;
-import net.imglib2.mesh.impl.naive.NaiveDoubleMesh.Triangles;
 import net.imglib2.mesh.io.ply.PLYMeshIO;
 import net.imglib2.mesh.io.stl.STLMeshIO;
 import net.imglib2.roi.labeling.ImgLabeling;
@@ -113,7 +112,7 @@ public class Demo3DMesh
 	{
 		final NaiveDoubleMesh mesh = new NaiveDoubleMesh();
 		final net.imglib2.mesh.impl.naive.NaiveDoubleMesh.Vertices vertices = mesh.vertices();
-		final Triangles triangles = mesh.triangles();
+		final net.imglib2.mesh.impl.naive.NaiveDoubleMesh.Triangles triangles = mesh.triangles();
 
 		// Coords as X Y Z
 
