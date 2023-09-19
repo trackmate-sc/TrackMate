@@ -49,7 +49,7 @@ import bvv.core.shadergen.Shader;
 import bvv.core.shadergen.generate.Segment;
 import bvv.core.shadergen.generate.SegmentTemplate;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import net.imglib2.mesh.obj.nio.BufferMesh;
+import net.imglib2.mesh.impl.nio.BufferMesh;
 
 public class StupidMesh
 {
@@ -149,7 +149,7 @@ public class StupidMesh
 		gl.glEnable( GL.GL_CULL_FACE );
 		gl.glCullFace( GL.GL_BACK );
 		gl.glFrontFace( GL.GL_CCW );
-		gl.glDrawElements( GL_TRIANGLES, ( int ) mesh.triangles().size() * 3, GL_UNSIGNED_INT, 0 );
+		gl.glDrawElements( GL_TRIANGLES, mesh.triangles().size() * 3, GL_UNSIGNED_INT, 0 );
 		gl.glBindVertexArray( 0 );
 	}
 }

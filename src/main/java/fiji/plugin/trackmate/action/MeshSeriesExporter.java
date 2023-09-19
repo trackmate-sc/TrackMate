@@ -43,11 +43,11 @@ import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.io.IOUtils;
+import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.Meshes;
+import net.imglib2.mesh.impl.nio.BufferMesh;
 import net.imglib2.mesh.io.ply.PLYMeshIO;
-import net.imglib2.mesh.obj.Mesh;
-import net.imglib2.mesh.obj.nio.BufferMesh;
-import net.imglib2.mesh.obj.transform.TranslateMesh;
+import net.imglib2.mesh.view.TranslateMesh;
 
 public class MeshSeriesExporter extends AbstractTMAction
 {
@@ -122,7 +122,7 @@ public class MeshSeriesExporter extends AbstractTMAction
 			}
 			logger.log( " - Found " + meshes.size() + " meshes in frame " + frame + "." );
 			final Mesh merged = Meshes.merge( meshes );
-			final BufferMesh mesh = new BufferMesh( ( int ) merged.vertices().size(), ( int ) merged.triangles().size() );
+			final BufferMesh mesh = new BufferMesh( merged.vertices().size(), merged.triangles().size() );
 			Meshes.calculateNormals( merged, mesh );
 			try
 			{

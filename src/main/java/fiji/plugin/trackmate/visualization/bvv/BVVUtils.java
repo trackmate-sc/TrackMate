@@ -14,10 +14,11 @@ import ij.process.LUT;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imglib2.img.display.imagej.ImgPlusViews;
+import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.Meshes;
-import net.imglib2.mesh.obj.Mesh;
-import net.imglib2.mesh.obj.nio.BufferMesh;
-import net.imglib2.mesh.obj.transform.TranslateMesh;
+import net.imglib2.mesh.impl.nio.BufferMesh;
+import net.imglib2.mesh.util.Icosahedron;
+import net.imglib2.mesh.view.TranslateMesh;
 import net.imglib2.type.Type;
 import net.imglib2.type.numeric.ARGBType;
 
@@ -30,11 +31,11 @@ public class BVVUtils
 		{
 			final SpotMesh sm = ( SpotMesh ) spot;
 			final Mesh mesh = TranslateMesh.translate( sm.getMesh(), spot );
-			final BufferMesh bm = new BufferMesh( ( int ) mesh.vertices().size(), ( int ) mesh.triangles().size() );
+			final BufferMesh bm = new BufferMesh( mesh.vertices().size(), mesh.triangles().size() );
 			Meshes.copy( mesh, bm );
 			return new StupidMesh( bm );
 		}
-		return new StupidMesh( Icosahedron.sphere( spot ) );
+		return new StupidMesh( Icosahedron.sphere( spot, spot.getFeature( Spot.RADIUS ).doubleValue() ) );
 	}
 
 	public static final < T extends Type< T > > BvvHandle createViewer( final ImagePlus imp )

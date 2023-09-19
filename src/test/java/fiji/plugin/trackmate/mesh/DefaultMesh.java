@@ -17,7 +17,7 @@ import ij.measure.Calibration;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.mesh.obj.Mesh;
+import net.imglib2.mesh.Mesh;
 import net.imglib2.type.logic.BitType;
 
 public class DefaultMesh
