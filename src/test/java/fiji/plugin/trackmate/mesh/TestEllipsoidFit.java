@@ -5,10 +5,10 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.alg.EllipsoidFitter;
-import net.imglib2.mesh.alg.EllipsoidFitter.EllipsoidFit;
-import net.imglib2.mesh.obj.Mesh;
-import net.imglib2.mesh.obj.naive.NaiveDoubleMesh;
+import net.imglib2.mesh.alg.EllipsoidFitter.Ellipsoid;
+import net.imglib2.mesh.impl.naive.NaiveDoubleMesh;
 
 public class TestEllipsoidFit
 {
@@ -23,7 +23,7 @@ public class TestEllipsoidFit
 		for ( double rc = 3.; rc < 10.; rc++ )
 		{
 			final Mesh mesh = generateEllipsoidMesh( ra, rb, rc, -1, -1 );
-			final EllipsoidFit fit = EllipsoidFitter.fit( mesh );
+			final Ellipsoid fit = EllipsoidFitter.fit( mesh );
 
 			final double[] arr = new double[ 3 ];
 

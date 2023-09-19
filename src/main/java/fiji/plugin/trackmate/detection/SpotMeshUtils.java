@@ -12,11 +12,12 @@ import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealInterval;
+import net.imglib2.mesh.Mesh;
+import net.imglib2.mesh.MeshStats;
 import net.imglib2.mesh.Meshes;
+import net.imglib2.mesh.Vertices;
 import net.imglib2.mesh.alg.MeshConnectedComponents;
-import net.imglib2.mesh.obj.Mesh;
-import net.imglib2.mesh.obj.Vertices;
-import net.imglib2.mesh.obj.nio.BufferMesh;
+import net.imglib2.mesh.impl.nio.BufferMesh;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegion;
 import net.imglib2.roi.labeling.LabelRegions;
@@ -294,7 +295,7 @@ public class SpotMeshUtils
 		if ( simplify )
 		{
 			// Dont't go below a certain number of triangles.
-			final int nTriangles = ( int ) mesh.triangles().size();
+			final int nTriangles = mesh.triangles().size();
 			if ( nTriangles < MIN_N_TRIANGLES )
 			{
 				simplified = mesh;
@@ -320,7 +321,7 @@ public class SpotMeshUtils
 		}
 		// Remove meshes that are too small
 		final double volumeThreshold = MIN_MESH_PIXEL_VOLUME * calibration[ 0 ] * calibration[ 1 ] * calibration[ 2 ];
-		if ( SpotMesh.volume( simplified ) < volumeThreshold )
+		if ( MeshStats.volume( simplified ) < volumeThreshold )
 			return null;
 
 		// Translate back to interval coords & scale to physical coords.
@@ -333,7 +334,7 @@ public class SpotMeshUtils
 		final double quality;
 		if ( null == qualityImage )
 		{
-			quality = SpotMesh.volume( simplified );
+			quality = MeshStats.volume( simplified );
 		}
 		else
 		{

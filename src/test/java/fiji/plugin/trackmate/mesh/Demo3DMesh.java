@@ -19,15 +19,15 @@ import net.imglib2.converter.RealTypeConverters;
 import net.imglib2.img.ImgView;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.img.display.imagej.ImgPlusViews;
+import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.Meshes;
+import net.imglib2.mesh.Vertices;
 import net.imglib2.mesh.alg.zslicer.Contour;
 import net.imglib2.mesh.alg.zslicer.Slice;
 import net.imglib2.mesh.alg.zslicer.ZSlicer;
+import net.imglib2.mesh.impl.naive.NaiveDoubleMesh;
 import net.imglib2.mesh.io.ply.PLYMeshIO;
 import net.imglib2.mesh.io.stl.STLMeshIO;
-import net.imglib2.mesh.obj.Mesh;
-import net.imglib2.mesh.obj.Vertices;
-import net.imglib2.mesh.obj.naive.NaiveDoubleMesh;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegion;
 import net.imglib2.roi.labeling.LabelRegions;
@@ -111,8 +111,8 @@ public class Demo3DMesh
 	static Mesh debugMesh( final long[] min, final long[] max )
 	{
 		final NaiveDoubleMesh mesh = new NaiveDoubleMesh();
-		final net.imglib2.mesh.obj.naive.NaiveDoubleMesh.Vertices vertices = mesh.vertices();
-		final net.imglib2.mesh.obj.naive.NaiveDoubleMesh.Triangles triangles = mesh.triangles();
+		final net.imglib2.mesh.impl.naive.NaiveDoubleMesh.Vertices vertices = mesh.vertices();
+		final net.imglib2.mesh.impl.naive.NaiveDoubleMesh.Triangles triangles = mesh.triangles();
 
 		// Coords as X Y Z
 

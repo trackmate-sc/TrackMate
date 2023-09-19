@@ -155,10 +155,10 @@ import fiji.plugin.trackmate.visualization.ViewFactory;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 import ij.IJ;
 import ij.ImagePlus;
+import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.Meshes;
+import net.imglib2.mesh.impl.nio.BufferMesh;
 import net.imglib2.mesh.io.ply.PLYMeshIO;
-import net.imglib2.mesh.obj.Mesh;
-import net.imglib2.mesh.obj.nio.BufferMesh;
 
 public class TmXmlReader
 {
@@ -963,7 +963,7 @@ public class TmXmlReader
 						try
 						{
 							final Mesh m = PLYMeshIO.open( zipFile.getInputStream( entry ) );
-							final BufferMesh mesh = new BufferMesh( ( int ) m.vertices().size(), ( int ) m.triangles().size() );
+							final BufferMesh mesh = new BufferMesh( m.vertices().size(), m.triangles().size() );
 							Meshes.calculateNormals( m, mesh );
 
 							// Create new spot in the mesh and replace it in the

@@ -22,10 +22,10 @@ import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imglib2.img.display.imagej.ImgPlusViews;
+import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.Meshes;
-import net.imglib2.mesh.obj.Mesh;
-import net.imglib2.mesh.obj.naive.NaiveDoubleMesh;
-import net.imglib2.mesh.obj.nio.BufferMesh;
+import net.imglib2.mesh.impl.naive.NaiveDoubleMesh;
+import net.imglib2.mesh.impl.nio.BufferMesh;
 import net.imglib2.type.Type;
 import net.imglib2.type.numeric.ARGBType;
 
@@ -105,8 +105,8 @@ public class MeshPlayground
 
 	private static BufferMesh calculateNormals( final Mesh mesh )
 	{
-		final int nvertices = ( int ) mesh.vertices().size();
-		final int ntriangles = ( int ) mesh.triangles().size();
+		final int nvertices = mesh.vertices().size();
+		final int ntriangles = mesh.triangles().size();
 		final BufferMesh bufferMesh = new BufferMesh( nvertices, ntriangles, true );
 		Meshes.calculateNormals( mesh, bufferMesh );
 		return bufferMesh;

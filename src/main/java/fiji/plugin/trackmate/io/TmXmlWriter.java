@@ -133,9 +133,9 @@ import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.procedure.TIntIntProcedure;
+import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.io.ply.PLYMeshIO;
-import net.imglib2.mesh.obj.Mesh;
-import net.imglib2.mesh.obj.transform.TranslateMesh;
+import net.imglib2.mesh.view.TranslateMesh;
 
 public class TmXmlWriter
 {
