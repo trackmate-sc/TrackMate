@@ -35,13 +35,18 @@ import ij.ImagePlus;
 
 public class TrackMatePluginTest {
 
+	static
+	{
+		net.imagej.patcher.LegacyInjector.preinit();
+	}
+
 	@Test
 	public void testTrackMateRegistration() {
-		TestTrackMatePlugin testPlugin = new TestTrackMatePlugin();
+		final TestTrackMatePlugin testPlugin = new TestTrackMatePlugin();
 		testPlugin.setUp();
-		ObjectService objectService = testPlugin.getLocalContext().service(ObjectService.class);
+		final ObjectService objectService = testPlugin.getLocalContext().service(ObjectService.class);
 		
-		List<TrackMate> trackMateInstances = objectService.getObjects(TrackMate.class);
+		final List<TrackMate> trackMateInstances = objectService.getObjects(TrackMate.class);
 		assertTrue(trackMateInstances.size() == 1);
 		assertTrue(trackMateInstances.get(0) instanceof TrackMate);
 	}
@@ -50,10 +55,10 @@ public class TrackMatePluginTest {
 
 		@SuppressWarnings("unused")
 		public void setUp() {
-			ImagePlus imp = IJ.createImage("Test Image", 256, 256, 10, 8);
-			Settings settings = createSettings(imp);
-			Model model = createModel(imp);
-			TrackMate trackMate = createTrackMate(model, settings);
+			final ImagePlus imp = IJ.createImage("Test Image", 256, 256, 10, 8);
+			final Settings settings = createSettings(imp);
+			final Model model = createModel(imp);
+			final TrackMate trackMate = createTrackMate(model, settings);
 		}
 
 		public Context getLocalContext() {
