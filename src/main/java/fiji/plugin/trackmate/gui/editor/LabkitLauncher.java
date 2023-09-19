@@ -18,6 +18,7 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
@@ -58,6 +59,8 @@ public class LabkitLauncher
 
 	private final DisplaySettings ds;
 
+	private final boolean is3D;
+
 	public LabkitLauncher( final TrackMate trackmate, final DisplaySettings ds, final EverythingDisablerAndReenabler disabler )
 	{
 		this.trackmate = trackmate;
@@ -65,6 +68,7 @@ public class LabkitLauncher
 		this.disabler = disabler;
 		final ImagePlus imp = trackmate.getSettings().imp;
 		this.calibration = TMUtils.getSpatialCalibration( imp );
+		this.is3D = !DetectionUtils.is2D( imp );
 	}
 
 	/**
@@ -241,20 +245,28 @@ public class LabkitLauncher
 	private Labeling makeLabeling( final ImagePlus imp, final SpotCollection spots, final boolean singleTimePoint )
 	{
 		// Axes.
-		final AxisType[] axes = ( singleTimePoint )
-				? new AxisType[] { Axes.X, Axes.Y, Axes.Z }
-				: new AxisType[] { Axes.X, Axes.Y, Axes.Z, Axes.TIME };
+		final AxisType[] axes = ( is3D )
+				? ( singleTimePoint )
+						? new AxisType[] { Axes.X, Axes.Y, Axes.Z }
+						: new AxisType[] { Axes.X, Axes.Y, Axes.Z, Axes.TIME }
+				: ( singleTimePoint )
+						? new AxisType[] { Axes.X, Axes.Y }
+						: new AxisType[] { Axes.X, Axes.Y, Axes.TIME };
 
 		// N dimensions.
-		final int nDims = singleTimePoint ? 3 : 4;
+		final int nDims = is3D
+				? singleTimePoint ? 3 : 4
+				: singleTimePoint ? 2 : 3;
 
 		// Dimensions.
 		final long[] dims = new long[ nDims ];
-		dims[ 0 ] = imp.getWidth();
-		dims[ 1 ] = imp.getHeight();
-		dims[ 2 ] = imp.getNSlices();
+		int dim = 0;
+		dims[ dim++ ] = imp.getWidth();
+		dims[ dim++ ] = imp.getHeight();
+		if ( is3D )
+			dims[ dim++ ] = imp.getNSlices();
 		if ( !singleTimePoint )
-			dims[ 3 ] = imp.getNFrames();
+			dims[ dim++ ] = imp.getNFrames();
 
 		// Raw image.
 		final Img< UnsignedShortType > lblImg = ArrayImgs.unsignedShorts( dims );
@@ -262,10 +274,13 @@ public class LabkitLauncher
 		// Calibration.
 		final double[] c = TMUtils.getSpatialCalibration( imp );
 		final double[] calibration = new double[ nDims ];
-		for ( int i = 0; i < c.length; i++ )
-			calibration[ i ] = c[ i ];
+		dim = 0;
+		calibration[ dim++ ] = c[ 0 ];
+		calibration[ dim++ ] = c[ 1 ];
+		if ( is3D )
+			calibration[ dim++ ] = c[ 2 ];
 		if ( !singleTimePoint )
-			calibration[ 3 ] = 1.;
+			calibration[ dim++ ] = 1.;
 
 		// Label image holder.
 		final ImgPlus< UnsignedShortType > lblImgPlus = new ImgPlus<>( lblImg, "LblImg", axes, calibration );
@@ -278,9 +293,10 @@ public class LabkitLauncher
 		}
 		else
 		{
+			final int timeDim = lblImgPlus.dimensionIndex( Axes.TIME );
 			for ( int t = 0; t < imp.getNFrames(); t++ )
 			{
-				final ImgPlus< UnsignedShortType > lblImgPlusThisFrame = ImgPlusViews.hyperSlice( lblImgPlus, 3, t );
+				final ImgPlus< UnsignedShortType > lblImgPlusThisFrame = ImgPlusViews.hyperSlice( lblImgPlus, timeDim, t );
 				processFrame( lblImgPlusThisFrame, spots, t, spotIDs );
 			}
 		}
