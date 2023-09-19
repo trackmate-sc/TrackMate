@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.gui.editor;
 
+import java.awt.Color;
 import java.util.Arrays;
 import java.util.List;
 
@@ -99,9 +100,9 @@ public class ImpBdvShowable implements BdvShowable
 		final List< ConverterSetup > converterSetups = stackSource.getConverterSetups();
 		final SynchronizedViewerState state = stackSource.getBdvHandle().getViewerPanel().state();
 
-		final int numActiveChannels = transferChannelVisibility( state );
+		transferChannelVisibility( state );
 		transferChannelSettings( converterSetups );
-		state.setDisplayMode( numActiveChannels > 1 ? DisplayMode.FUSED : DisplayMode.SINGLE );
+		state.setDisplayMode( DisplayMode.FUSED );
 		return stackSource;
 	}
 
@@ -147,6 +148,8 @@ public class ImpBdvShowable implements BdvShowable
 				final ConverterSetup setup = converterSetups.get( c );
 				if ( transferColor )
 					setup.setColor( new ARGBType( lut.getRGB( 255 ) ) );
+				else
+					setup.setColor( new ARGBType( Color.WHITE.getRGB() ) );
 				setup.setDisplayRange( lut.min, lut.max );
 			}
 		}
