@@ -23,6 +23,7 @@ package fiji.plugin.trackmate.features.spot;
 
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotMesh;
+import net.imglib2.mesh.MeshStats;
 import net.imglib2.mesh.alg.hull.ConvexHull;
 import net.imglib2.mesh.impl.naive.NaiveDoubleMesh;
 import net.imglib2.type.numeric.RealType;
@@ -52,11 +53,11 @@ public class Spot3DShapeAnalyzer< T extends RealType< T > > extends AbstractSpot
 				final SpotMesh sm = ( SpotMesh ) spot;
 				final NaiveDoubleMesh ch = ConvexHull.calculate( sm.getMesh() );
 				volume = sm.volume();
-				final double volumeCH = MeshShapeDescriptors.volume( ch );
+				final double volumeCH = MeshStats.volume( ch );
 				solidity = volume / volumeCH;
 
-				sa = MeshShapeDescriptors.surfaceArea( sm.getMesh() );
-				final double saCH = MeshShapeDescriptors.surfaceArea( ch );
+				sa = MeshStats.surfaceArea( sm.getMesh() );
+				final double saCH = MeshStats.surfaceArea( ch );
 				convexity = sa / saCH;
 
 				final double sphereArea = Math.pow( Math.PI, 1. / 3. )

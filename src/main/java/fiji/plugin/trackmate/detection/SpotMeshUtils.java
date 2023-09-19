@@ -13,6 +13,7 @@ import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.mesh.Mesh;
+import net.imglib2.mesh.MeshStats;
 import net.imglib2.mesh.Meshes;
 import net.imglib2.mesh.Vertices;
 import net.imglib2.mesh.alg.MeshConnectedComponents;
@@ -320,7 +321,7 @@ public class SpotMeshUtils
 		}
 		// Remove meshes that are too small
 		final double volumeThreshold = MIN_MESH_PIXEL_VOLUME * calibration[ 0 ] * calibration[ 1 ] * calibration[ 2 ];
-		if ( SpotMesh.volume( simplified ) < volumeThreshold )
+		if ( MeshStats.volume( simplified ) < volumeThreshold )
 			return null;
 
 		// Translate back to interval coords & scale to physical coords.
@@ -333,7 +334,7 @@ public class SpotMeshUtils
 		final double quality;
 		if ( null == qualityImage )
 		{
-			quality = SpotMesh.volume( simplified );
+			quality = MeshStats.volume( simplified );
 		}
 		else
 		{

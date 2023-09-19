@@ -17,6 +17,7 @@ import net.imglib2.img.display.imagej.ImgPlusViews;
 import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.Meshes;
 import net.imglib2.mesh.impl.nio.BufferMesh;
+import net.imglib2.mesh.util.Icosahedron;
 import net.imglib2.mesh.view.TranslateMesh;
 import net.imglib2.type.Type;
 import net.imglib2.type.numeric.ARGBType;
@@ -34,7 +35,7 @@ public class BVVUtils
 			Meshes.copy( mesh, bm );
 			return new StupidMesh( bm );
 		}
-		return new StupidMesh( Icosahedron.sphere( spot ) );
+		return new StupidMesh( Icosahedron.sphere( spot, spot.getFeature( Spot.RADIUS ).doubleValue() ) );
 	}
 
 	public static final < T extends Type< T > > BvvHandle createViewer( final ImagePlus imp )

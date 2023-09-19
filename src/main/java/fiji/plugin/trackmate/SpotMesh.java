@@ -12,8 +12,8 @@ import net.imglib2.RealInterval;
 import net.imglib2.RealLocalizable;
 import net.imglib2.RealPoint;
 import net.imglib2.mesh.Mesh;
+import net.imglib2.mesh.MeshStats;
 import net.imglib2.mesh.Meshes;
-import net.imglib2.mesh.Triangles;
 import net.imglib2.mesh.Vertices;
 import net.imglib2.mesh.alg.zslicer.RamerDouglasPeucker;
 import net.imglib2.mesh.alg.zslicer.Slice;
@@ -194,47 +194,7 @@ public class SpotMesh extends SpotBase
 	 */
 	public static final double radius( final Mesh mesh )
 	{
-		return Math.pow( 3. * volume( mesh ) / ( 4 * Math.PI ), 1. / 3. );
-	}
-
-	/**
-	 * Returns the volume of the specified mesh.
-	 *
-	 * @return the volume in physical units.
-	 */
-	public static double volume( final Mesh mesh )
-	{
-
-		final Vertices vertices = mesh.vertices();
-		final Triangles triangles = mesh.triangles();
-		final long nTriangles = triangles.size();
-		double sum = 0.;
-		for ( long t = 0; t < nTriangles; t++ )
-		{
-			final long v1 = triangles.vertex0( t );
-			final long v2 = triangles.vertex1( t );
-			final long v3 = triangles.vertex2( t );
-
-			final double x1 = vertices.x( v1 );
-			final double y1 = vertices.y( v1 );
-			final double z1 = vertices.z( v1 );
-			final double x2 = vertices.x( v2 );
-			final double y2 = vertices.y( v2 );
-			final double z2 = vertices.z( v2 );
-			final double x3 = vertices.x( v3 );
-			final double y3 = vertices.y( v3 );
-			final double z3 = vertices.z( v3 );
-
-			final double v321 = x3 * y2 * z1;
-			final double v231 = x2 * y3 * z1;
-			final double v312 = x3 * y1 * z2;
-			final double v132 = x1 * y3 * z2;
-			final double v213 = x2 * y1 * z3;
-			final double v123 = x1 * y2 * z3;
-
-			sum += ( 1. / 6. ) * ( -v321 + v231 + v312 - v132 - v213 + v123 );
-		}
-		return Math.abs( sum );
+		return Math.pow( 3. * MeshStats.volume( mesh ) / ( 4 * Math.PI ), 1. / 3. );
 	}
 
 	public double radius()
@@ -249,13 +209,13 @@ public class SpotMesh extends SpotBase
 	 */
 	public double volume()
 	{
-		return volume( mesh );
+		return MeshStats.volume( mesh );
 	}
 
 	@Override
 	public void scale( final double alpha )
 	{
-		final Vertices vertices = mesh.vertices();
+		final net.imglib2.mesh.Vertices vertices = mesh.vertices();
 		final long nVertices = vertices.size();
 		for ( int v = 0; v < nVertices; v++ )
 		{
@@ -303,14 +263,14 @@ public class SpotMesh extends SpotBase
 		str.append( String.format( "\n%5s: %7.2f -> %7.2f", "Y", boundingBox.realMin( 1 ), boundingBox.realMax( 1 ) ) );
 		str.append( String.format( "\n%5s: %7.2f -> %7.2f", "Z", boundingBox.realMin( 2 ), boundingBox.realMax( 2 ) ) );
 
-		final Vertices vertices = mesh.vertices();
+		final net.imglib2.mesh.Vertices vertices = mesh.vertices();
 		final long nVertices = vertices.size();
 		str.append( "\nV (" + nVertices + "):" );
 		for ( long i = 0; i < nVertices; i++ )
 			str.append( String.format( "\n%5d: %7.2f %7.2f %7.2f",
 					i, vertices.x( i ), vertices.y( i ), vertices.z( i ) ) );
 
-		final Triangles triangles = mesh.triangles();
+		final net.imglib2.mesh.Triangles triangles = mesh.triangles();
 		final long nTriangles = triangles.size();
 		str.append( "\nF (" + nTriangles + "):" );
 		for ( long i = 0; i < nTriangles; i++ )
