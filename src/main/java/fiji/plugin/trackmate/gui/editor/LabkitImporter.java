@@ -18,14 +18,15 @@ import fiji.plugin.trackmate.detection.MaskUtils;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.loops.LoopBuilder;
 import net.imglib2.roi.labeling.ImgLabeling;
-import net.imglib2.type.numeric.integer.UnsignedShortType;
+import net.imglib2.type.NativeType;
+import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.view.Views;
 
 /**
  * Re-import the edited segmentation made in Labkit into the TrackMate model it
  * started from.
  */
-public class LabkitImporter
+public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 {
 
 	private final Model model;
@@ -80,8 +81,8 @@ public class LabkitImporter
 	 *            index image.
 	 */
 	public void reimport(
-			final RandomAccessibleInterval< UnsignedShortType > novelIndexImg,
-			final RandomAccessibleInterval< UnsignedShortType > previousIndexImg,
+			final RandomAccessibleInterval< T > novelIndexImg,
+			final RandomAccessibleInterval< T > previousIndexImg,
 			final int currentTimePoint )
 	{
 
@@ -235,15 +236,15 @@ public class LabkitImporter
 	}
 
 	private final Set< Integer > getModifiedIDs(
-			final RandomAccessibleInterval< UnsignedShortType > novelIndexImg,
-			final RandomAccessibleInterval< UnsignedShortType > previousIndexImg )
+			final RandomAccessibleInterval< T > novelIndexImg,
+			final RandomAccessibleInterval< T > previousIndexImg )
 	{
 		final ConcurrentSkipListSet< Integer > modifiedIDs = new ConcurrentSkipListSet<>();
 		LoopBuilder.setImages( novelIndexImg, previousIndexImg )
 				.multiThreaded( false )
 				.forEachPixel( ( c, p ) -> {
-					final int ci = c.get();
-					final int pi = p.get();
+					final int ci = c.getInteger();
+					final int pi = p.getInteger();
 					if ( ci == 0 && pi == 0 )
 						return;
 					if ( ci != pi )
@@ -256,7 +257,7 @@ public class LabkitImporter
 		return modifiedIDs;
 	}
 
-	private List< Spot > getSpots( final RandomAccessibleInterval< UnsignedShortType > rai )
+	private List< Spot > getSpots( final RandomAccessibleInterval< T > rai )
 	{
 		// Get all labels.
 		final AtomicInteger max = new AtomicInteger( 0 );
