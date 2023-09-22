@@ -35,9 +35,10 @@ import net.imglib2.img.ImgFactory;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImgPlusViews;
 import net.imglib2.loops.LoopBuilder;
+import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.IntegerType;
-import net.imglib2.type.numeric.integer.UnsignedShortType;
+import net.imglib2.type.numeric.integer.UnsignedIntType;
 import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 import sc.fiji.labkit.ui.LabkitFrame;
@@ -46,7 +47,7 @@ import sc.fiji.labkit.ui.labeling.Label;
 import sc.fiji.labkit.ui.labeling.Labeling;
 import sc.fiji.labkit.ui.models.DefaultSegmentationModel;
 
-public class LabkitLauncher
+public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 {
 
 	private final double[] calibration;
@@ -91,7 +92,8 @@ public class LabkitLauncher
 		model.imageLabelingModel().labeling().set( labeling );
 
 		// Store a copy.
-		final RandomAccessibleInterval< UnsignedShortType > previousIndexImg = copy( labeling.getIndexImg() );
+		@SuppressWarnings( "unchecked" )
+		final RandomAccessibleInterval< T > previousIndexImg = copy( ( RandomAccessibleInterval< T > ) labeling.getIndexImg() );
 
 		// Show LabKit.
 		String title = "Editing TrackMate data for " + imp.getShortTitle();
@@ -103,12 +105,12 @@ public class LabkitLauncher
 		final double dt = imp.getCalibration().frameInterval;
 		labkit.onCloseListeners().addListener( () -> {
 			@SuppressWarnings( "unchecked" )
-			final RandomAccessibleInterval< UnsignedShortType > indexImg = ( RandomAccessibleInterval< UnsignedShortType > ) model.imageLabelingModel().labeling().get().getIndexImg();			
+			final RandomAccessibleInterval< T > indexImg = ( RandomAccessibleInterval< T > ) model.imageLabelingModel().labeling().get().getIndexImg();
 			reimport( indexImg, previousIndexImg, dt );
 		} );
 	}
 
-	private void reimport( final RandomAccessibleInterval< UnsignedShortType > indexImg, final RandomAccessibleInterval< UnsignedShortType > previousIndexImg, final double dt )
+	private void reimport( final RandomAccessibleInterval< T > indexImg, final RandomAccessibleInterval< T > previousIndexImg, final double dt )
 	{
 		try
 		{
@@ -120,7 +122,7 @@ public class LabkitLauncher
 						if ( modified.get() )
 							return null;
 						chunk.forEachPixel( ( p1, p2 ) -> {
-							if ( p1.get() != p2.get() )
+							if ( p1.getInteger() != p2.getInteger() )
 							{
 								modified.set( true );
 								return;
@@ -148,7 +150,7 @@ public class LabkitLauncher
 			if ( returnedValue != JOptionPane.YES_OPTION )
 				return;
 
-			final LabkitImporter reimporter = new LabkitImporter( trackmate.getModel(), calibration, dt );
+			final LabkitImporter< T > reimporter = new LabkitImporter<>( trackmate.getModel(), calibration, dt );
 			if ( currentTimePoint < 0 )
 			{
 				// All time-points.
@@ -157,8 +159,8 @@ public class LabkitLauncher
 				log.setStatus( "Re-importing from Labkit..." );
 				for ( int t = 0; t < nTimepoints; t++ )
 				{
-					final RandomAccessibleInterval< UnsignedShortType > novelIndexImgThisFrame = Views.hyperSlice( indexImg, 3, t );
-					final RandomAccessibleInterval< UnsignedShortType > previousIndexImgThisFrame = Views.hyperSlice( previousIndexImg, 3, t );
+					final RandomAccessibleInterval< T > novelIndexImgThisFrame = Views.hyperSlice( indexImg, 3, t );
+					final RandomAccessibleInterval< T > previousIndexImgThisFrame = Views.hyperSlice( previousIndexImg, 3, t );
 					reimporter.reimport( novelIndexImgThisFrame, previousIndexImgThisFrame, t );
 					log.setProgress( ++t / ( double ) nTimepoints );
 				}
@@ -181,13 +183,13 @@ public class LabkitLauncher
 		}
 	}
 
-	private static Img< UnsignedShortType > copy( final RandomAccessibleInterval< ? extends IntegerType< ? > > in )
+	private Img< T > copy( final RandomAccessibleInterval< T > in )
 	{
-		final ImgFactory< UnsignedShortType > factory = Util.getArrayOrCellImgFactory( in, new UnsignedShortType() );
-		final Img< UnsignedShortType > out = factory.create( in );
+		final ImgFactory< T > factory = Util.getArrayOrCellImgFactory( in, Util.getTypeFromInterval( in ) );
+		final Img< T > out = factory.create( in );
 		LoopBuilder.setImages( in, out )
 				.multiThreaded()
-				.forEachPixel( ( i, o ) -> o.set( i.getInteger() ) );
+				.forEachPixel( ( i, o ) -> o.setInteger( i.getInteger() ) );
 		return out;
 	}
 
@@ -269,7 +271,7 @@ public class LabkitLauncher
 			dims[ dim++ ] = imp.getNFrames();
 
 		// Raw image.
-		final Img< UnsignedShortType > lblImg = ArrayImgs.unsignedShorts( dims );
+		final Img< UnsignedIntType > lblImg = ArrayImgs.unsignedInts( dims );
 
 		// Calibration.
 		final double[] c = TMUtils.getSpatialCalibration( imp );
@@ -283,7 +285,7 @@ public class LabkitLauncher
 			calibration[ dim++ ] = 1.;
 
 		// Label image holder.
-		final ImgPlus< UnsignedShortType > lblImgPlus = new ImgPlus<>( lblImg, "LblImg", axes, calibration );
+		final ImgPlus< UnsignedIntType > lblImgPlus = new ImgPlus<>( lblImg, "LblImg", axes, calibration );
 
 		// Write spots in it with index = id + 1 and build a map index -> spot.
 		final Map< Integer, Spot > spotIDs = new HashMap<>();
@@ -296,7 +298,7 @@ public class LabkitLauncher
 			final int timeDim = lblImgPlus.dimensionIndex( Axes.TIME );
 			for ( int t = 0; t < imp.getNFrames(); t++ )
 			{
-				final ImgPlus< UnsignedShortType > lblImgPlusThisFrame = ImgPlusViews.hyperSlice( lblImgPlus, timeDim, t );
+				final ImgPlus< UnsignedIntType > lblImgPlusThisFrame = ImgPlusViews.hyperSlice( lblImgPlus, timeDim, t );
 				processFrame( lblImgPlusThisFrame, spots, t, spotIDs );
 			}
 		}
@@ -309,6 +311,11 @@ public class LabkitLauncher
 			final String name = label.name();
 			final int index = Integer.parseInt( name );
 			final Spot spot = spotIDs.get( index );
+			if ( spot == null )
+			{
+				System.out.println( "Spot is null for index " + index + "!!" ); // DEBUG
+				continue;
+			}
 			label.setName( spot.getName() );
 			label.setColor( new ARGBType( colorGen.color( spot ).getRGB() ) );
 		}
@@ -316,7 +323,7 @@ public class LabkitLauncher
 		return labeling;
 	}
 
-	private static final void processFrame( final ImgPlus< UnsignedShortType > lblImgPlus, final SpotCollection spots, final int t, final Map< Integer, Spot > spotIDs )
+	private static final void processFrame( final ImgPlus< UnsignedIntType > lblImgPlus, final SpotCollection spots, final int t, final Map< Integer, Spot > spotIDs )
 	{
 		final Iterable< Spot > spotsThisFrame = spots.iterable( t, true );
 		for ( final Spot spot : spotsThisFrame )
@@ -352,6 +359,7 @@ public class LabkitLauncher
 						disabler.disable();
 						try
 						{
+							@SuppressWarnings( "rawtypes" )
 							final LabkitLauncher launcher = new LabkitLauncher( trackmate, ds, disabler );
 							launcher.launch( singleTimepoint );
 						}
