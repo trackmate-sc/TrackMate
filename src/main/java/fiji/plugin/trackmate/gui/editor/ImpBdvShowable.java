@@ -3,8 +3,12 @@ package fiji.plugin.trackmate.gui.editor;
 import java.awt.Color;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import bdv.tools.brightness.ConverterSetup;
+import bdv.util.AxisOrder;
+import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import bdv.util.BdvStackSource;
 import bdv.viewer.DisplayMode;
@@ -23,6 +27,7 @@ import net.imglib2.Interval;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.NumericType;
+import net.imglib2.view.Views;
 import sc.fiji.labkit.ui.bdv.BdvShowable;
 import sc.fiji.labkit.ui.inputimage.ImgPlusViewsOld;
 
@@ -54,6 +59,8 @@ public class ImpBdvShowable implements BdvShowable
 	public static < T extends NumericType< T > > ImpBdvShowable fromImp( final ImagePlus imp )
 	{
 		final ImgPlus< T > src = TMUtils.rawWraps( imp );
+		if ( src.dimensionIndex( Axes.CHANNEL ) < 0 )
+			Views.addDimension( src );
 		return fromImp( src, imp );
 	}
 
@@ -71,32 +78,44 @@ public class ImpBdvShowable implements BdvShowable
 	 */
 	public static < T extends NumericType< T > > ImpBdvShowable fromImp( final ImgPlus< T > frame, final ImagePlus imp )
 	{
-		return new ImpBdvShowable( BdvShowable.wrap( prepareImage( frame ) ), imp );
+		return new ImpBdvShowable( prepareImage( frame ), imp );
 	}
-
-	private final BdvShowable showable;
 
 	private final ImagePlus imp;
 
-	ImpBdvShowable( final BdvShowable showable, final ImagePlus imp )
+	private final ImgPlus< ? extends NumericType< ? > > image;
+
+	ImpBdvShowable( final ImgPlus< ? extends NumericType< ? > > image, final ImagePlus imp )
 	{
-		this.showable = showable;
+		this.image = image;
 		this.imp = imp;
 	}
 
 	@Override
-	public Interval interval() {
-		return showable.interval();
+	public Interval interval()
+	{
+		return image;
 	}
 
 	@Override
-	public AffineTransform3D transformation() {
-		return showable.transformation();
+	public AffineTransform3D transformation()
+	{
+		final AffineTransform3D transform = new AffineTransform3D();
+		transform.set(
+				getCalibration( Axes.X ), 0, 0, 0,
+				0, getCalibration( Axes.Y ), 0, 0,
+				0, 0, getCalibration( Axes.Z ), 0 );
+		return transform;
 	}
 
 	@Override
-	public BdvStackSource< ? > show( final String title, final BdvOptions options ) {
-		final BdvStackSource<?> stackSource = showable.show(title, options);
+	public BdvStackSource< ? > show( final String title, final BdvOptions options )
+	{
+		final String name = image.getName();
+		final BdvOptions options1 = options.axisOrder( getAxisOrder() ).sourceTransform( transformation() );
+		final BdvStackSource< ? extends NumericType< ? > > stackSource = BdvFunctions.show( image, name == null
+				? title : name, options1 );
+
 		final List< ConverterSetup > converterSetups = stackSource.getConverterSetups();
 		final SynchronizedViewerState state = stackSource.getBdvHandle().getViewerPanel().state();
 
@@ -187,5 +206,32 @@ public class ImpBdvShowable implements BdvShowable
 					.asList( Axes.X, Axes.Y, Axes.Z, Axes.TIME, Axes.CHANNEL ) );
 		return ImgPlusViewsOld.fixAxes( image, Arrays.asList( Axes.X, Axes.Y, Axes.Z,
 				Axes.CHANNEL, Axes.TIME ) );
+	}
+
+	private double getCalibration( final AxisType axisType )
+	{
+		final int d = image.dimensionIndex( axisType );
+		if ( d == -1 )
+			return 1;
+		return image.axis( d ).averageScale( image.min( d ), image.max( d ) );
+	}
+
+	private AxisOrder getAxisOrder()
+	{
+		final String code = IntStream
+				.range( 0, image.numDimensions() )
+				.mapToObj( i -> image
+						.axis( i )
+						.type()
+						.getLabel().substring( 0, 1 ) )
+				.collect( Collectors.joining() );
+		try
+		{
+			return AxisOrder.valueOf( code );
+		}
+		catch ( final IllegalArgumentException e )
+		{
+			return AxisOrder.DEFAULT;
+		}
 	}
 }
