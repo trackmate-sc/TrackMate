@@ -357,6 +357,7 @@ public class LabkitLauncher
 						}
 						catch ( final Exception e )
 						{
+							disabler.reenable();
 							e.printStackTrace();
 						}
 					};
