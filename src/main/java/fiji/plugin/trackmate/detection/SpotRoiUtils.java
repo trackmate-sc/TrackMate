@@ -185,7 +185,7 @@ public class SpotRoiUtils
 			}
 			else
 			{
-				final IterableInterval< S > iterable = spot.iterable( qualityImage, calibration );
+				final IterableInterval< S > iterable = spot.iterable( Views.extendZero( qualityImage ), calibration );
 				double max = Double.NEGATIVE_INFINITY;
 				for ( final S s : iterable )
 				{
