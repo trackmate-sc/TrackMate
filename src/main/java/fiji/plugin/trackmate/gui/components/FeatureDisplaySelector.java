@@ -76,6 +76,7 @@ public class FeatureDisplaySelector
 
 	private static final List< String > FEATURES_WITHOUT_MIN_MAX = Arrays.asList( new String[] {
 			FeatureUtils.USE_UNIFORM_COLOR_KEY,
+			FeatureUtils.USE_RANDOM_COLOR_KEY,
 			TrackIndexAnalyzer.TRACK_INDEX,
 			ManualEdgeColorAnalyzer.FEATURE,
 			ManualSpotColorAnalyzerFactory.FEATURE

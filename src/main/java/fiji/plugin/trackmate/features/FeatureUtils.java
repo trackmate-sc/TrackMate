@@ -41,6 +41,7 @@ import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
 import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactoryBase;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
+import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
@@ -51,6 +52,7 @@ import fiji.plugin.trackmate.visualization.ManualSpotPerEdgeColorGenerator;
 import fiji.plugin.trackmate.visualization.PerEdgeFeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.PerSpotFeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.PerTrackFeatureColorGenerator;
+import fiji.plugin.trackmate.visualization.RandomSpotColorGenerator;
 import fiji.plugin.trackmate.visualization.SpotColorGenerator;
 import fiji.plugin.trackmate.visualization.SpotColorGeneratorPerEdgeFeature;
 import fiji.plugin.trackmate.visualization.SpotColorGeneratorPerTrackFeature;
@@ -64,6 +66,10 @@ public class FeatureUtils
 	private static final String USE_UNIFORM_COLOR_NAME = "Uniform color";
 
 	public static final String USE_UNIFORM_COLOR_KEY = "UNIFORM_COLOR";
+
+	private static final String USE_RANDOM_COLOR_NAME = "Random color";
+
+	public static final String USE_RANDOM_COLOR_KEY = "RANDOM_COLOR";
 
 	public static final Map< String, String > collectFeatureKeys( final TrackMateObject target, final Model model, final Settings settings )
 	{
@@ -131,6 +137,7 @@ public class FeatureUtils
 		case DEFAULT:
 		{
 			inverseMap.put( USE_UNIFORM_COLOR_NAME, USE_UNIFORM_COLOR_KEY );
+			inverseMap.put( USE_RANDOM_COLOR_NAME, USE_RANDOM_COLOR_KEY );
 			break;
 		}
 
@@ -218,7 +225,14 @@ public class FeatureUtils
 		switch ( displaySettings.getSpotColorByType() )
 		{
 		case DEFAULT:
-			return new UniformSpotColorGenerator( displaySettings.getSpotUniformColor() );
+			switch ( displaySettings.getSpotColorByFeature() )
+			{
+			case FeatureUtils.USE_RANDOM_COLOR_KEY:
+				return new RandomSpotColorGenerator();
+			default:
+			case FeatureUtils.USE_UNIFORM_COLOR_KEY:
+				return new UniformSpotColorGenerator( displaySettings.getSpotUniformColor() );
+			}
 
 		case EDGES:
 
@@ -267,7 +281,21 @@ public class FeatureUtils
 		switch ( displaySettings.getTrackColorByType() )
 		{
 		case DEFAULT:
-			return new UniformTrackColorGenerator( displaySettings.getTrackUniformColor() );
+			switch ( displaySettings.getTrackColorByFeature() )
+			{
+			case FeatureUtils.USE_RANDOM_COLOR_KEY:
+				return new PerTrackFeatureColorGenerator(
+						model,
+						TrackIndexAnalyzer.TRACK_INDEX,
+						displaySettings.getMissingValueColor(),
+						displaySettings.getUndefinedValueColor(),
+						displaySettings.getColormap(),
+						displaySettings.getTrackMin(),
+						displaySettings.getTrackMax() );
+			default:
+			case FeatureUtils.USE_UNIFORM_COLOR_KEY:
+				return new UniformTrackColorGenerator( displaySettings.getTrackUniformColor() );
+			}
 
 		case EDGES:
 
