@@ -270,9 +270,6 @@ public class CategoryJComboBox< K, V > extends JComboBox< Object >
 		im.put( KeyStroke.getKeyStroke( KeyEvent.VK_KP_DOWN, 0 ), "selectNext" );
 	}
 
-	/**
-	 * Demo
-	 */
 	public static void main( final String[] args )
 	{
 		//

@@ -86,11 +86,20 @@ public class KalmanTracker implements SpotTracker, Benchmark, Cancelable
 	 */
 
 	/**
+	 * Creates a new Kalman tracker.
+	 * 
 	 * @param spots
 	 *            the spots to track.
 	 * @param maxSearchRadius
+	 *            the maximal search radius to continue a track, in physical
+	 *            units.
 	 * @param maxFrameGap
+	 *            the max frame gap when detections are missing, after which a
+	 *            track will be stopped.
 	 * @param initialSearchRadius
+	 *            the initial search radius to nucleate new tracks.
+	 * @param featurePenalties
+	 *            the feature penalties.
 	 */
 	public KalmanTracker( final SpotCollection spots, final double maxSearchRadius, final int maxFrameGap, final double initialSearchRadius, final Map< String, Double > featurePenalties )
 	{

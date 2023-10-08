@@ -62,7 +62,10 @@ public class InitFilterPanel extends JPanel
 	 * Default constructor, initialize component.
 	 *
 	 * @param filter
+	 *            the filter to initialize the panel with.
 	 * @param valueCollector
+	 *            a function that can return the value collection of a specified
+	 *            feature.
 	 */
 	public InitFilterPanel( final FeatureFilter filter, final Function< String, double[] > valueCollector )
 	{
@@ -135,7 +138,9 @@ public class InitFilterPanel extends JPanel
 	}
 
 	/**
-	 * Return the feature threshold on quality set by this panel.
+	 * Returns the feature threshold on quality set by this panel.
+	 * 
+	 * @return the feature threshold.
 	 */
 	public FeatureFilter getFeatureThreshold()
 	{

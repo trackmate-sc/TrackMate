@@ -43,6 +43,7 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_CUTOFF_PERCENTILE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_FRAME_GAP;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_SEARCH_RADIUS;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_FEATURE_PENALTIES;
@@ -74,7 +75,6 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
 import fiji.plugin.trackmate.Spot;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_SEARCH_RADIUS;
 
 public class LAPUtils
 {
@@ -183,8 +183,7 @@ public class LAPUtils
 	}
 
 	/**
-	 * Compute the cost to link two spots, in the default way for the TrackMate
-	 * trackmate.
+	 * Computes the cost to link two spots, in the default way for TrackMate.
 	 * <p>
 	 * This cost is calculated as follow:
 	 * <ul>
@@ -209,6 +208,19 @@ public class LAPUtils
 	 * For instance: if 2 spots differ by twice the value in a feature which is
 	 * in the penalty map with a factor of 1, they will <i>look</i> as if they
 	 * were twice as far.
+	 * 
+	 * @param s0
+	 *            the source spot.
+	 * @param s1
+	 *            the target spot.
+	 * @param distanceCutOff
+	 *            the distance cutoff.
+	 * @param blockingValue
+	 *            the blocking value.
+	 * @param featurePenalties
+	 *            the feature penalties, as a map of feature keys to penalty
+	 *            weight.
+	 * @return the linking cost.
 	 */
 	public static final double computeLinkingCostFor( final Spot s0, final Spot s1, final double distanceCutOff, final double blockingValue, final Map< String, Double > featurePenalties )
 	{
@@ -233,18 +245,25 @@ public class LAPUtils
 	}
 
 	/**
-	 * @return true if the settings map can be used with the LAP trackers. We do
-	 *         not check that all the spot features used in penalties are indeed
-	 *         found in all spots, because if such a feature is absent from one
-	 *         spot, the LAP trackers simply ignores the penalty and does not
-	 *         generate an error.
+	 * Returns <code>true</code> if the settings map can be used with the LAP
+	 * trackers. We do not check that all the spot features used in penalties
+	 * are indeed found in all spots, because if such a feature is absent from
+	 * one spot, the LAP trackers simply ignores the penalty and does not
+	 * generate an error.
+	 * 
 	 * @param settings
 	 *            the map to test.
+	 * @param linking
+	 *            if <code>true</code> will also test for the presence of the
+	 *            frame-to-frame linking keys. If <code>false</code> will only
+	 *            test for the segment linking keys.
 	 * @param errorHolder
 	 *            a {@link StringBuilder} that will contain an error message if
 	 *            the check is not successful.
+	 * @return <code>true</code> if the settings map can be used with the LAP
+	 *         trackers.
 	 */
-	public static final boolean checkSettingsValidity( final Map< String, Object > settings, final StringBuilder errorHolder, boolean linking )
+	public static final boolean checkSettingsValidity( final Map< String, Object > settings, final StringBuilder errorHolder, final boolean linking )
 	{
 		if ( null == settings )
 		{

@@ -298,12 +298,14 @@ public class MaskUtils
 
 	/**
 	 * Creates spots by thresholding a grayscale image. A spot is created for
-	 * each connected-component object in the thresholded input, with a size that
-	 * matches the mask size. The quality of the spots is read from another
+	 * each connected-component object in the thresholded input, with a size
+	 * that matches the mask size. The quality of the spots is read from another
 	 * image, by taking the max pixel value of this image with the ROI.
 	 *
 	 * @param <T>
-	 *            the type of the input image. Must be real, scalar.
+	 *            the pixel type of the input image. Must be real, scalar.
+	 * @param <R>
+	 *            the pixel type of the quality image. Must be real, scalar.
 	 * @param input
 	 *            the input image.
 	 * @param interval

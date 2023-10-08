@@ -237,10 +237,6 @@ public class SpotOverlay extends Roi
 		g2d.setFont( originalFont );
 	}
 
-	/**
-	 * @param g2d
-	 * @param frame
-	 */
 	protected void drawExtraLayer( final Graphics2D g2d, final int frame )
 	{}
 

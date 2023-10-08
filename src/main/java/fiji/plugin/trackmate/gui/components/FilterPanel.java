@@ -70,8 +70,8 @@ import org.jfree.chart.renderer.xy.XYBarRenderer;
 
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.gui.GuiUtils;
-import fiji.plugin.trackmate.util.Threads;
 import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.util.Threads;
 import fiji.util.NumberParser;
 
 /**
@@ -307,10 +307,13 @@ public class FilterPanel extends javax.swing.JPanel
 	}
 
 	/**
-	 * Add an {@link ChangeListener} to this panel. The {@link ChangeListener}
+	 * Adds a {@link ChangeListener} to this panel. The {@link ChangeListener}
 	 * will be notified when a change happens to the threshold displayed by this
 	 * panel, whether due to the slider being move, the auto-threshold button
 	 * being pressed, or the combo-box selection being changed.
+	 * 
+	 * @param listener
+	 *            the listener to add.
 	 */
 	public void addChangeListener( final ChangeListener listener )
 	{
@@ -318,8 +321,10 @@ public class FilterPanel extends javax.swing.JPanel
 	}
 
 	/**
-	 * Remove an ChangeListener.
+	 * Removes a ChangeListener.
 	 *
+	 * @param listener
+	 *            the listener to remove.
 	 * @return true if the listener was in listener collection of this instance.
 	 */
 	public boolean removeChangeListener( final ChangeListener listener )

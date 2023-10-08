@@ -184,6 +184,8 @@ public class CTCExporter
 	 *            the trackmate to export.
 	 * @param logger
 	 *            a logger to report progress.
+	 * @throws IOException
+	 *             if there's any problem writing.
 	 */
 	public static void exportSettingsFile( final String exportRootFolder, final int saveId, final TrackMate trackmate, final Logger logger ) throws IOException
 	{
