@@ -15,7 +15,6 @@ import net.imglib2.RealInterval;
 import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.MeshStats;
 import net.imglib2.mesh.Meshes;
-import net.imglib2.mesh.Vertices;
 import net.imglib2.mesh.alg.MeshConnectedComponents;
 import net.imglib2.mesh.impl.nio.BufferMesh;
 import net.imglib2.roi.labeling.ImgLabeling;
@@ -325,7 +324,7 @@ public class SpotMeshUtils
 			return null;
 
 		// Translate back to interval coords & scale to physical coords.
-		scale( simplified.vertices(), calibration, origin );
+		Meshes.translateScale( simplified, calibration, origin );
 
 		// Make spot with default quality.
 		final SpotMesh spot = new SpotMesh( simplified, 0. );
@@ -350,17 +349,5 @@ public class SpotMeshUtils
 		}
 		spot.putFeature( Spot.QUALITY, Double.valueOf( quality ) );
 		return spot;
-	}
-
-	private static void scale( final Vertices vertices, final double[] scale, final double[] origin )
-	{
-		final long nv = vertices.size();
-		for ( long i = 0; i < nv; i++ )
-		{
-			final double x = ( origin[ 0 ] + vertices.x( i ) ) * scale[ 0 ];
-			final double y = ( origin[ 1 ] + vertices.y( i ) ) * scale[ 1 ];
-			final double z = ( origin[ 2 ] + vertices.z( i ) ) * scale[ 2 ];
-			vertices.set( i, x, y, z );
-		}
 	}
 }
