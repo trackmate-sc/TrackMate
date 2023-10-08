@@ -324,7 +324,7 @@ public class SpotMeshUtils
 			return null;
 
 		// Translate back to interval coords & scale to physical coords.
-		Meshes.translateScale( simplified, calibration, origin );
+		Meshes.translateScale( simplified, origin, calibration );
 
 		// Make spot with default quality.
 		final SpotMesh spot = new SpotMesh( simplified, 0. );
