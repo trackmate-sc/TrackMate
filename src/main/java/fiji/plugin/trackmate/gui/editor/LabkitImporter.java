@@ -41,9 +41,6 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 	 * 
 	 * @param model
 	 *            the model to add, remove or edit spots in.
-	 * @param currentTimePoint
-	 *            the time-point used for editing. If negative, then all the
-	 *            time-points in the input movie will be processed.
 	 * @param calibration
 	 *            the spatial calibration array: <code>[dx, dy dz]</code>.
 	 * @param dt

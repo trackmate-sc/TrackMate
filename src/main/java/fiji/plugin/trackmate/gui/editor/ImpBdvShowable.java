@@ -32,8 +32,8 @@ import sc.fiji.labkit.ui.bdv.BdvShowable;
 import sc.fiji.labkit.ui.inputimage.ImgPlusViewsOld;
 
 /**
- * A {@link BdvShowable} from a {@link ImgPlus}, but with channel colors, min &
- * max, channel visibility and display mode taken from a specified
+ * A {@link BdvShowable} from a {@link ImgPlus}, but with channel colors, min
+ * and max, channel visibility and display mode taken from a specified
  * {@link ImagePlus}.
  * <p>
  * Adapted from Matthias Arzt' ImgPlusBdvShowable, reusing code I made for
