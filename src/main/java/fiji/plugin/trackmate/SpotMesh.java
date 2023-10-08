@@ -84,7 +84,7 @@ public class SpotMesh extends SpotBase
 		putFeature( Spot.RADIUS, r );
 
 		// Bounding box, also centered on (0,0,0)
-		this.boundingBox = toRealInterval( Meshes.boundingBox( mesh ) );
+		this.boundingBox = Meshes.boundingBox( mesh );
 	}
 
 	/**
@@ -118,7 +118,7 @@ public class SpotMesh extends SpotBase
 		putFeature( Spot.RADIUS, r );
 
 		// Bounding box, also centered on (0,0,0)
-		this.boundingBox = toRealInterval( Meshes.boundingBox( mesh ) );
+		this.boundingBox = Meshes.boundingBox( mesh );
 	}
 
 	/**
@@ -243,7 +243,7 @@ public class SpotMesh extends SpotBase
 			final float za = ( float ) ( ra * Math.cos( theta ) );
 			vertices.setPositionf( v, xa, ya, za );
 		}
-		this.boundingBox = toRealInterval( Meshes.boundingBox( mesh ) );
+		this.boundingBox = Meshes.boundingBox( mesh );
 	}
 
 	@Override
