@@ -81,6 +81,9 @@ public class OnRequestUpdater extends Thread
 
 	/**
 	 * Constructor autostarts thread
+	 * 
+	 * @param refreshable
+	 *            the refreshable to update.
 	 */
 	public OnRequestUpdater( final Refreshable refreshable )
 	{

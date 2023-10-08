@@ -40,8 +40,8 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactoryBase;
-import fiji.plugin.trackmate.util.Threads;
 import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.util.Threads;
 import net.imagej.ImgPlus;
 import net.imglib2.algorithm.MultiThreaded;
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
@@ -127,6 +127,11 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm imple
 	 * Calculates all the spot features configured in the {@link Settings}
 	 * object, but only for the spots in the specified collection. Features are
 	 * calculated for each spot, using their location, and the raw image.
+	 * 
+	 * @param toCompute
+	 *            the spot collection.
+	 * @param doLogIt
+	 *            if <code>true</code> the computation will be logged.
 	 */
 	public void computeSpotFeatures( final SpotCollection toCompute, final boolean doLogIt )
 	{

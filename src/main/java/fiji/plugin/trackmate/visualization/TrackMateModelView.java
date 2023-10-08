@@ -51,11 +51,16 @@ public interface TrackMateModelView
 
 	/**
 	 * Centers the view on the given spot.
+	 * 
+	 * @param spot
+	 *            the spot to center the view on.
 	 */
 	public void centerViewOn( final Spot spot );
 
 	/**
 	 * Returns the model displayed in this view.
+	 * 
+	 * @return the model.
 	 */
 	public Model getModel();
 

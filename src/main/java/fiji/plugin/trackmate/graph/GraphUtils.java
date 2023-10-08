@@ -85,6 +85,10 @@ public class GraphUtils
 	}
 
 	/**
+	 * Pretty-prints a model.
+	 * 
+	 * @param model
+	 *            the model.
 	 * @return a pretty-print string representation of a {@link TrackModel}, as
 	 *         long it is a tree (each spot must not have more than one
 	 *         predecessor).
@@ -421,8 +425,14 @@ public class GraphUtils
 	}
 
 	/**
-	 * @return true only if the given model is a tree; that is: every spot has
-	 *         one or less predecessors.
+	 * Returns the siblings of a spot. That is: all the spots that have the same
+	 * predecessor.
+	 * 
+	 * @param cache
+	 *            a neighbor cache.
+	 * @param spot
+	 *            the spot to inspect.
+	 * @return a new set made of the spot siblings. Includes the spot.
 	 */
 	public static final Set< Spot > getSibblings( final NeighborCache< Spot, DefaultWeightedEdge > cache, final Spot spot )
 	{

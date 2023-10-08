@@ -53,6 +53,7 @@ public interface SpotAnalyzerFactoryBase< T extends RealType< T > & NativeType< 
 	 *            the target frame to operate on.
 	 * @param channel
 	 *            the target channel to operate on.
+	 * @return a new spot analyzer.
 	 */
 	public SpotAnalyzer< T > getAnalyzer( ImgPlus< T > img, int frame, int channel );
 

@@ -37,7 +37,9 @@ public interface WizardSequence
 
 	/**
 	 * Launches the wizard to play this sequence.
-	 * 
+	 *
+	 * @param title
+	 *            the title of the frame in which the wizard is displayed.
 	 * @return the {@link JFrame} in which the wizard is displayed.
 	 */
 	public default JFrame run( final String title )

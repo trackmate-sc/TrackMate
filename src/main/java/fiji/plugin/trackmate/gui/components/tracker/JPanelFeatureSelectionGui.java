@@ -86,6 +86,11 @@ public class JPanelFeatureSelectionGui extends javax.swing.JPanel
 	/**
 	 * Set the features and their names that should be presented by this GUI.
 	 * The user will be allowed to choose amongst the given features.
+	 * 
+	 * @param features
+	 *            the features to add in the GUI.
+	 * @param featureNames
+	 *            the feature names that will be displayed.
 	 */
 	public void setDisplayFeatures( final Collection< String > features, final Map< String, String > featureNames )
 	{

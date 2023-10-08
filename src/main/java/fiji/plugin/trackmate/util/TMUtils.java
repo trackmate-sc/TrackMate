@@ -45,10 +45,9 @@ import org.scijava.util.DoubleArray;
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.detection.DetectionUtils;
+import fiji.plugin.trackmate.Spot;
 import ij.IJ;
 import ij.ImagePlus;
-import ij.gui.Roi;
 import net.imagej.ImgPlus;
 import net.imagej.ImgPlusMetadata;
 import net.imagej.axis.Axes;
@@ -60,7 +59,7 @@ import net.imglib2.type.Type;
 import net.imglib2.util.Util;
 
 /**
- * List of static utilities for {@link fiji.plugin.trackmate.TrackMate}.
+ * List of static utilities for TrackMate.
  */
 public class TMUtils
 {
@@ -74,42 +73,17 @@ public class TMUtils
 	 */
 
 	/**
-	 * Returns an {@link Interval} that corresponds to the ROI in the specified
-	 * image.
-	 * <p>
-	 * If the image has no ROI, the interval returned is <code>null</code>. For
-	 * 3D images the interval extends over all Z. The interval does not include
-	 * the time dimension nor the channel dimension. It is 2D for 2D images, and
-	 * 3D for 3D images regardless of the presence of C and T.
+	 * Returns a new map sorted by its values.
 	 *
-	 * @param imp
-	 *            the image.
-	 * @return a new interval, or <code>null</code> if the image has no ROI.
-	 */
-	public static Interval createROIInterval( final ImagePlus imp )
-	{
-		final Roi roi = imp.getRoi();
-		if ( roi == null )
-			return null;
-
-		final boolean is3D = !DetectionUtils.is2D( imp );
-		final long[] min = new long[ is3D ? 3 : 2 ];
-		final long[] max = new long[ min.length ];
-
-		min[ 0 ] = roi.getBounds().x;
-		max[ 0 ] = roi.getBounds().x + roi.getBounds().width - 1;
-		min[ 1 ] = roi.getBounds().y;
-		max[ 1 ] = roi.getBounds().y + roi.getBounds().height - 1;
-		if ( is3D )
-		{
-			min[ 2 ] = 0;
-			max[ 2 ] = imp.getNSlices();
-		}
-		return new FinalInterval( min, max );
-	}
-
-	/**
-	 * Return a new map sorted by its values.
+	 * @param <K>
+	 *            the type of keys in the map.
+	 * @param <V>
+	 *            the type of values in the map.
+	 * @param map
+	 *            the map.
+	 * @param comparator
+	 *            a comparator to sort based on values.
+	 * @return a new map, with entries sorted by values.
 	 */
 	public static < K, V extends Comparable< ? super V > > Map< K, V > sortByValue( final Map< K, V > map, final Comparator< V > comparator )
 	{
@@ -133,7 +107,13 @@ public class TMUtils
 	}
 
 	/**
-	 * Generate a string representation of a map, typically a settings map.
+	 * Generates a string representation of a map, typically a settings map.
+	 *
+	 * @param map
+	 *            the map.
+	 * @param indent
+	 *            the indent size to use.
+	 * @return a representation of the map.
 	 */
 	public static final String echoMap( final Map< String, Object > map, final int indent )
 	{
@@ -170,8 +150,14 @@ public class TMUtils
 	}
 
 	/**
-	 * Wraps an IJ {@link ImagePlus} in an imglib2 {@link ImgPlus}, abinding to
-	 * a returned type.
+	 * Wraps an IJ {@link ImagePlus} in an imglib2 {@link ImgPlus}, abiding to a
+	 * returned type.
+	 *
+	 * @param <T>
+	 *            the pixel type in the returned image.
+	 * @param imp
+	 *            the {@link ImagePlus} to wrap.
+	 * @return a wrapped {@link ImgPlus}.
 	 */
 	@SuppressWarnings( "unchecked" )
 	public static final < T > ImgPlus< T > rawWraps( final ImagePlus imp )
@@ -195,6 +181,8 @@ public class TMUtils
 	 *            will be appended with an error message.
 	 * @return if all mandatory keys are found in the map, and possibly some
 	 *         optional ones, but no others.
+	 * @param <T>
+	 *            the type of keys.
 	 */
 	public static final < T > boolean checkMapKeys( final Map< T, ? > map, Collection< T > mandatoryKeys, Collection< T > optionalKeys, final StringBuilder errorHolder )
 	{
@@ -290,6 +278,16 @@ public class TMUtils
 	/**
 	 * Returns the mapping in a map that is targeted by a list of keys, in the
 	 * order given in the list.
+	 *
+	 * @param <J>
+	 *            the type of keys in the collection and the map.
+	 * @param <K>
+	 *            the type of values in the map.
+	 * @param keys
+	 *            the collection of keys.
+	 * @param mapping
+	 *            the mapping.
+	 * @return a new list of values.
 	 */
 	public static final < J, K > List< K > getArrayFromMaping( final Collection< J > keys, final Map< J, K > mapping )
 	{
@@ -304,9 +302,13 @@ public class TMUtils
 	 */
 
 	/**
-	 * Return the xyz calibration stored in an {@link ImgPlusMetadata} in a
+	 * Returns the xyz calibration stored in an {@link ImgPlusMetadata} in a
 	 * 3-elements double array. Calibration is ordered as X, Y, Z. If one axis
 	 * is not found, then the calibration for this axis takes the value of 1.
+	 *
+	 * @param img
+	 *            the image metadata object.
+	 * @return a new <code>double</code> array.
 	 */
 	public static final double[] getSpatialCalibration( final ImgPlusMetadata img )
 	{
@@ -338,10 +340,15 @@ public class TMUtils
 	/**
 	 * Returns an estimate of the <code>p</code>th percentile of the values in
 	 * the <code>values</code> array. Taken from commons-math.
+	 *
+	 * @param values
+	 *            the values.
+	 * @param p
+	 *            the percentile.
+	 * @return the percentile of the values.
 	 */
 	public static final double getPercentile( final double[] values, final double p )
 	{
-
 		final int size = values.length;
 		if ( ( p > 1 ) || ( p <= 0 ) )
 			throw new IllegalArgumentException( "invalid quantile value: " + p );
@@ -382,6 +389,22 @@ public class TMUtils
 		final double min = Arrays.stream( data ).min().getAsDouble();
 		final double max = Arrays.stream( data ).max().getAsDouble();
 		return new double[] { ( max - min ), min, max };
+	}
+
+	/**
+	 * Stores the x, y, z coordinates of the specified spot in the first 3
+	 * elements of the specified double array.
+	 *
+	 * @param spot
+	 *            the spot.
+	 * @param coords
+	 *            the array to write coordinates to.
+	 */
+	public static final void localize( final Spot spot, final double[] coords )
+	{
+		coords[ 0 ] = spot.getFeature( Spot.POSITION_X ).doubleValue();
+		coords[ 1 ] = spot.getFeature( Spot.POSITION_Y ).doubleValue();
+		coords[ 2 ] = spot.getFeature( Spot.POSITION_Z ).doubleValue();
 	}
 
 	/**
@@ -449,8 +472,12 @@ public class TMUtils
 	}
 
 	/**
-	 * Return a threshold for the given data, using an Otsu histogram
+	 * Returns a threshold for the given data, using an Otsu histogram
 	 * thresholding method.
+	 *
+	 * @param data
+	 *            the data.
+	 * @return the Otsu threshold.
 	 */
 	public static final double otsuThreshold( final double[] data )
 	{
@@ -458,8 +485,14 @@ public class TMUtils
 	}
 
 	/**
-	 * Return a threshold for the given data, using an Otsu histogram
+	 * Returns a threshold for the given data, using an Otsu histogram
 	 * thresholding method with a given bin number.
+	 *
+	 * @param data
+	 *            the data.
+	 * @param the
+	 *            desired number of bins in the histogram.
+	 * @return the Otsu thresold.
 	 */
 	private static final double otsuThreshold( final double[] data, final int nBins )
 	{
@@ -526,9 +559,17 @@ public class TMUtils
 	}
 
 	/**
-	 * Return a String unit for the given dimension. When suitable, the unit is
+	 * Returns a String unit for the given dimension. When suitable, the unit is
 	 * taken from the settings field, which contains the spatial and time units.
 	 * Otherwise, default units are used.
+	 *
+	 * @param dimension
+	 *            the dimension.
+	 * @param spaceUnits
+	 *            the space units.
+	 * @param timeUnits
+	 *            the time units.
+	 * @return the units for the specified dimension.
 	 */
 	public static final String getUnitsFor( final Dimension dimension, final String spaceUnits, final String timeUnits )
 	{
@@ -770,7 +811,11 @@ public class TMUtils
 		return interval;
 	}
 
-	/** Obtains the SciJava {@link Context} in use by ImageJ. */
+	/**
+	 * Obtains the SciJava {@link Context} in use by ImageJ.
+	 *
+	 * @return the context.
+	 */
 	public static Context getContext()
 	{
 		final Context localContext = context;

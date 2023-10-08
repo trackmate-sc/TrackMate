@@ -298,6 +298,8 @@ public class DetectionUtils
 	 * @return a new float Img. Careful: even if the specified interval does not
 	 *         start at (0, 0), the new image will have its first pixel at
 	 *         coordinates (0, 0).
+	 * @param <T>
+	 *            the pixel type of the input image.
 	 */
 	public static final < T extends RealType< T > > Img< FloatType > copyToFloatImg( final RandomAccessible< T > img, final Interval interval, final ImgFactory< FloatType > factory )
 	{
@@ -350,7 +352,14 @@ public class DetectionUtils
 	}
 
 	/**
-	 * Apply a simple 3x3 median filter to the target image.
+	 * Applies a simple 3x3 median filter to the target image.
+	 * 
+	 * @param <R>
+	 *            the pixel type in the image.
+	 * @param image
+	 *            the image to filter.
+	 * @return the filtered image, as a new image, or <code>null</code> if there
+	 *         was a problem during processing.
 	 */
 	public static final < R extends RealType< R > & NativeType< R > > Img< R > applyMedianFilter( final RandomAccessibleInterval< R > image )
 	{

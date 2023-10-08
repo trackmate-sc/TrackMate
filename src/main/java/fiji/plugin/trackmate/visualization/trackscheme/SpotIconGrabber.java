@@ -74,6 +74,7 @@ public class SpotIconGrabber< T extends RealType< T > >
 	 *            a factor that determines the size of the thumbnail. The
 	 *            thumbnail will have a size equal to the spot diameter times
 	 *            this radius.
+	 * @return a Base64 representation of the spot image.
 	 */
 	public String getImageString( final Spot spot, final double radiusFactor )
 	{

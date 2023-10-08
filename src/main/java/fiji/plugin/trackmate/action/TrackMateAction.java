@@ -54,6 +54,9 @@ public interface TrackMateAction
 
 	/**
 	 * Sets the logger that will receive logs when this action is executed.
+	 * 
+	 * @param logger
+	 *            the logger.
 	 */
 	public void setLogger( Logger logger );
 }
