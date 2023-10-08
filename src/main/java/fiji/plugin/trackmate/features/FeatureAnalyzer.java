@@ -32,21 +32,29 @@ public interface FeatureAnalyzer extends TrackMateModule
 
 	/**
 	 * Returns the list of features this analyzer can compute.
+	 * 
+	 * @return the list of features.
 	 */
 	public List< String > getFeatures();
 
 	/**
 	 * Returns the map of short names for any feature the analyzer can compute.
+	 * 
+	 * @return the map of feature short names.
 	 */
 	public Map< String, String > getFeatureShortNames();
 
 	/**
 	 * Returns the map of names for any feature this analyzer can compute.
+	 * 
+	 * @return the map of feature names.
 	 */
 	public Map< String, String > getFeatureNames();
 
 	/**
 	 * Returns the map of feature dimension this analyzer can compute.
+	 * 
+	 * @return the map of feature dimension.
 	 */
 	public Map< String, Dimension > getFeatureDimensions();
 
@@ -54,6 +62,8 @@ public interface FeatureAnalyzer extends TrackMateModule
 	 * Returns the map that states whether the key feature is a feature that
 	 * returns integers. If <code>true</code>, then special treatment is applied
 	 * when saving/loading, etc. for clarity and precision.
+	 * 
+	 * @return the map.
 	 */
 	public Map< String, Boolean > getIsIntFeature();
 

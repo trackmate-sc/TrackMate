@@ -116,8 +116,10 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	}
 
 	/**
-	 * Return the singleton instance for this tool. If it was not previously
+	 * Returns the singleton instance for this tool. If it was not previously
 	 * instantiated, this calls instantiates it.
+	 * 
+	 * @return the instance.
 	 */
 	public static SpotEditTool getInstance()
 	{
@@ -128,7 +130,11 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	}
 
 	/**
-	 * Return true if the tool is currently present in ImageJ toolbar.
+	 * Returns <code>true</code> if the tool is currently present in ImageJ
+	 * toolbar.
+	 * 
+	 * @return <code>true</code> if the tool is currently present in ImageJ
+	 *         toolbar.
 	 */
 	public static boolean isLaunched()
 	{
@@ -187,8 +193,11 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	}
 
 	/**
-	 * Register the given {@link HyperStackDisplayer}. If this method id not
+	 * Registers the given {@link HyperStackDisplayer}. If this method is not
 	 * called, the tool will not respond.
+	 * 
+	 * @param displayer
+	 *            the displayer to register.
 	 */
 	public void register( final HyperStackDisplayer displayer )
 	{

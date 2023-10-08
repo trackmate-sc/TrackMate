@@ -106,8 +106,10 @@ public class GuiUtils
 	 * https://stackoverflow.com/questions/4593469/java-how-to-convert-rgb-color-to-cie-lab
 	 * 
 	 * @param a
+	 *            the first color.
 	 * @param b
-	 * @return
+	 *            the second color.
+	 * @return the distance between the two colors.
 	 */
 	public static double colorDistance( final Color a, final Color b )
 	{
@@ -164,7 +166,12 @@ public class GuiUtils
 	}
 
 	/**
-	 * Positions a JFrame more or less cleverly next a {@link Component}.
+	 * Positions a window more or less cleverly next a {@link Component}.
+	 * 
+	 * @param gui
+	 *            the window to position.
+	 * @param component
+	 *            the component to position the window with respect to.
 	 */
 	public static void positionWindow( final Window gui, final Component component )
 	{

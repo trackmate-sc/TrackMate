@@ -235,9 +235,12 @@ public class Spot2DFitEllipseAnalyzer< T extends RealType< T > > extends Abstrac
 	}
 
 	/**
-	 * Computes the Moore–Penrose pseudoinverse using the SVD method.
-	 *
-	 * Modified version of the original implementation by Kim van der Linde.
+	 * Computes the Moore–Penrose pseudoinverse using the SVD method. Modified
+	 * version of the original implementation by Kim van der Linde.
+	 * 
+	 * @param x
+	 *            the matrix.
+	 * @return the pseudo-inverse as a new matrix.
 	 */
 	public static Matrix pinv( final Matrix x )
 	{

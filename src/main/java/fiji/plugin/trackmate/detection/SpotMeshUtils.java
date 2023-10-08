@@ -281,7 +281,7 @@ public class SpotMeshUtils
 	 *            used to put back the mesh coordinates with respect to the
 	 *            initial source image (same referential that for the quality
 	 *            image).
-	 * @return
+	 * @return a new spot.
 	 */
 	public static < S extends RealType< S > > SpotMesh meshToSpotMesh(
 			final Mesh mesh,

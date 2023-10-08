@@ -88,6 +88,7 @@ public class AnalyzerSelection
 	 * analyzers in this selection.
 	 * 
 	 * @param settings
+	 *            the settings to configure.
 	 */
 	public void configure( final Settings settings )
 	{

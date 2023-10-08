@@ -101,7 +101,7 @@ public class SparseCostMatrix
 	 * These two arrays must be arranged row by row, starting with the first
 	 * one. And in each row, the columns must be sorted in increasing order (to
 	 * facilitate index search). Also, each row must have at least one
-	 * non-infinte cost. If not, an {@link IllegalArgumentException} is thrown.
+	 * non-infinite cost. If not, an {@link IllegalArgumentException} is thrown.
 	 * <ol start="3">
 	 * <li><code>number</code> an <code>int[]</code> array, with one element per
 	 * row, that contains the number of non infinite cost for a row.
@@ -113,6 +113,8 @@ public class SparseCostMatrix
 	 *            the column index of each cost.
 	 * @param number
 	 *            the number of element for each row.
+	 * @param nCols
+	 *            the number of columns in the cost matrix.
 	 * @throws IllegalArgumentException
 	 *             if the cost and column arrays are not of the same size, if
 	 *             the column array is not sorted row by row, of if one row has

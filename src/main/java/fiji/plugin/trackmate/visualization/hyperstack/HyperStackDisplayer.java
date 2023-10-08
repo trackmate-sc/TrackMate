@@ -77,7 +77,7 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 	 * the spots.
 	 * 
 	 * @param displaySettings
-	 *
+	 *            the display settings.
 	 * @return the spot overlay
 	 */
 	protected SpotOverlay createSpotOverlay( final DisplaySettings displaySettings )
@@ -90,7 +90,7 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 	 * the spots.
 	 * 
 	 * @param displaySettings
-	 *
+	 *            the display settings.
 	 * @return the track overlay
 	 */
 	protected TrackOverlay createTrackOverlay( final DisplaySettings displaySettings )

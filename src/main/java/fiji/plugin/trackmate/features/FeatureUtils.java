@@ -158,12 +158,18 @@ public class FeatureUtils
 	}
 
 	/**
-	 * Missing or undefined values are not included.
+	 * Collect feature values from the specified model. Missing or undefined
+	 * values are not included.
 	 *
 	 * @param featureKey
+	 *            the key of the feature to collect values from.
 	 * @param target
+	 *            the type of object the feature is defined for.
 	 * @param model
+	 *            the model to read from.
 	 * @param visibleOnly
+	 *            if <code>true</code> feature values will be collected only
+	 *            from the objects marked as visible.
 	 * @return a new <code>double[]</code> array containing the numerical
 	 *         feature values.
 	 */

@@ -294,6 +294,14 @@ public class IOUtils
 	 * Read and return an integer attribute from a JDom {@link Element}, and
 	 * substitute a default value of 0 if the attribute is not found or of the
 	 * wrong type.
+	 * 
+	 * @param element
+	 *            the element to read from.
+	 * @param name
+	 *            the name of the integer attribute.
+	 * @param logger
+	 *            error messages will be logged via this logger.
+	 * @return the <code>int</code> value.
 	 */
 	public static final int readIntAttribute( final Element element, final String name, final Logger logger )
 	{
@@ -474,6 +482,12 @@ public class IOUtils
 	 * are <b>added</b> to the specified map. If a value is found not to be a
 	 * double, an error is returned.
 	 *
+	 * @param element
+	 *            the element to unmarshall.
+	 * @param map
+	 *            the map the unmarshalled info will be added to.
+	 * @param errorHolder
+	 *            error messages will be appended to this buffer.
 	 * @return <code>true</code> if all values were found and mapped as doubles,
 	 *         <code>false</code> otherwise and the error holder is updated.
 	 */
@@ -545,6 +559,8 @@ public class IOUtils
 	 *            the key to the parameter value in the map
 	 * @param expectedClass
 	 *            the expected class for the value
+	 * @param errorHolder
+	 *            a buffer to append possible errors to.
 	 * @return <code>true</code> if the parameter was found, of the right class,
 	 *         and was successfully added to the element, <code>false</code> if
 	 *         not, and updated the specified error holder.
@@ -572,6 +588,11 @@ public class IOUtils
 	/**
 	 * Stores the given mapping in a given JDom element, using attributes in a
 	 * KEY="VALUE" fashion.
+	 * 
+	 * @param map
+	 *            the map.
+	 * @param element
+	 *            the element to write the map into.
 	 */
 	public static void marshallMap( final Map< String, Double > map, final Element element )
 	{

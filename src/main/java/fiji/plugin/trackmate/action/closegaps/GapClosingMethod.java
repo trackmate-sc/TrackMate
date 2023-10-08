@@ -88,7 +88,9 @@ public interface GapClosingMethod
 	 * Performs the gap closing.
 	 * 
 	 * @param trackmate
+	 *            the trackmate instance to operate on.
 	 * @param logger
+	 *            a logger instance to echoes the gap-closing process.
 	 */
 	public void execute( TrackMate trackmate, Logger logger );
 

@@ -67,8 +67,11 @@ public class SpotRoi extends SpotBase
 	 * otherwise.
 	 * 
 	 * @param ID
+	 *            the ID to use when creating the spot.
 	 * @param x
+	 *            the spot contour X coordinates.
 	 * @param y
+	 *            the spot contour Y coordinates.
 	 */
 	public SpotRoi(
 			final int ID,

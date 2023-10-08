@@ -49,8 +49,11 @@ public class SpotMesh extends SpotBase
 	 * calculated from the mesh.
 	 * 
 	 * @param quality
+	 *            the spot quality.
 	 * @param name
+	 *            the spot name.
 	 * @param m
+	 *            the mesh to create the spot from.
 	 */
 	public SpotMesh(
 			final Mesh m,
@@ -93,7 +96,9 @@ public class SpotMesh extends SpotBase
 	 * otherwise.
 	 * 
 	 * @param ID
+	 *            the ID to create the spot with.
 	 * @param mesh
+	 *            the mesh used to create the spot.
 	 */
 	public SpotMesh( final int ID, final BufferMesh mesh )
 	{
@@ -190,7 +195,9 @@ public class SpotMesh extends SpotBase
 	/**
 	 * Returns the radius of the equivalent sphere with the same volume that of
 	 * the specified mesh.
-	 *
+	 * 
+	 * @param mesh
+	 *            the mesh.
 	 * @return the radius in physical units.
 	 */
 	public static final double radius( final Mesh mesh )
