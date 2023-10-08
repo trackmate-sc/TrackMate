@@ -71,8 +71,8 @@ public interface SpotDetectorFactoryBase< T extends RealType< T > & NativeType< 
 	}
 
 	/**
-	 * Return <code>true</code> for the detectors that can provide a spot with a
-	 * 3D <code>SpotMesh</code> when they operate on 3D images.
+	 * Returns <code>true</code> for the detectors that can provide a spot with
+	 * a 3D <code>SpotMesh</code> when they operate on 3D images.
 	 * <p>
 	 * This flag may be used by clients to exploit the fact that the spots
 	 * created with this detector will have a 3D mesh that can be used

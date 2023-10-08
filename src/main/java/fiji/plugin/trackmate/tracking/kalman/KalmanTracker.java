@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -86,19 +86,20 @@ public class KalmanTracker implements SpotTracker, Benchmark, Cancelable
 	 */
 
 	/**
-	 * Create a new Kalman tracker.
-	 *
+	 * Creates a new Kalman tracker.
+	 * 
 	 * @param spots
 	 *            the spots to track.
 	 * @param maxSearchRadius
-	 *            the maximum search radius when growing a track.
+	 *            the maximal search radius to continue a track, in physical
+	 *            units.
 	 * @param maxFrameGap
-	 *            the maximum frame gap to bridge.
+	 *            the max frame gap when detections are missing, after which a
+	 *            track will be stopped.
 	 * @param initialSearchRadius
-	 *            the initial search radius to create a track.
+	 *            the initial search radius to nucleate new tracks.
 	 * @param featurePenalties
-	 *            feature penalties to use in the cost function. Can be
-	 *            <code>null</code>.
+	 *            the feature penalties.
 	 */
 	public KalmanTracker( final SpotCollection spots, final double maxSearchRadius, final int maxFrameGap, final double initialSearchRadius, final Map< String, Double > featurePenalties )
 	{

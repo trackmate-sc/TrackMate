@@ -2,18 +2,18 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -306,18 +306,17 @@ public class IOUtils
 	}
 
 	/**
-	 * Reads and return an integer attribute from a JDom {@link Element}, and
+	 * Read and return an integer attribute from a JDom {@link Element}, and
 	 * substitute a default value of 0 if the attribute is not found or of the
 	 * wrong type.
-	 *
+	 * 
 	 * @param element
-	 *            the JDom element to read from.
+	 *            the element to read from.
 	 * @param name
-	 *            the name of the attribute to read.
+	 *            the name of the integer attribute.
 	 * @param logger
-	 *            a {@link Logger} to report errors to.
-	 * @return the integer value of the attribute, or 0 if not found or of the
-	 *         wrong type.
+	 *            error messages will be logged via this logger.
+	 * @return the <code>int</code> value.
 	 */
 	public static final int readIntAttribute( final Element element, final String name, final Logger logger )
 	{
@@ -499,12 +498,11 @@ public class IOUtils
 	 * double, an error is returned.
 	 *
 	 * @param element
-	 *            the JDom element to read from.
+	 *            the element to unmarshall.
 	 * @param map
-	 *            the map to populate.
+	 *            the map the unmarshalled info will be added to.
 	 * @param errorHolder
-	 *            a string builder to append error messages to if something goes
-	 *            wrong.
+	 *            error messages will be appended to this buffer.
 	 * @return <code>true</code> if all values were found and mapped as doubles,
 	 *         <code>false</code> otherwise and the error holder is updated.
 	 */
@@ -564,7 +562,7 @@ public class IOUtils
 	}
 
 	/**
-	 * Adds a parameter attribute to the given element, taken from the given
+	 * Add a parameter attribute to the given element, taken from the given
 	 * settings map. Basic checks are made to ensure that the parameter value
 	 * can be found and is of the right class.
 	 *
@@ -577,8 +575,7 @@ public class IOUtils
 	 * @param expectedClass
 	 *            the expected class for the value
 	 * @param errorHolder
-	 *            a string builder to append error messages to if something goes
-	 *            wrong.
+	 *            a buffer to append possible errors to.
 	 * @return <code>true</code> if the parameter was found, of the right class,
 	 *         and was successfully added to the element, <code>false</code> if
 	 *         not, and updated the specified error holder.
@@ -606,11 +603,11 @@ public class IOUtils
 	/**
 	 * Stores the given mapping in a given JDom element, using attributes in a
 	 * KEY="VALUE" fashion.
-	 *
+	 * 
 	 * @param map
-	 *            the map to marshall.
+	 *            the map.
 	 * @param element
-	 *            the JDom element to update.
+	 *            the element to write the map into.
 	 */
 	public static void marshallMap( final Map< String, Double > map, final Element element )
 	{

@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -118,8 +118,8 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	/**
 	 * Returns the singleton instance for this tool. If it was not previously
 	 * instantiated, this calls instantiates it.
-	 *
-	 * @return the singleton instance of this tool.
+	 * 
+	 * @return the instance.
 	 */
 	public static SpotEditTool getInstance()
 	{
@@ -130,9 +130,11 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	}
 
 	/**
-	 * Returns true if the tool is currently present in ImageJ toolbar.
-	 *
-	 * @return true if the tool is launched.
+	 * Returns <code>true</code> if the tool is currently present in ImageJ
+	 * toolbar.
+	 * 
+	 * @return <code>true</code> if the tool is currently present in ImageJ
+	 *         toolbar.
 	 */
 	public static boolean isLaunched()
 	{
@@ -191,11 +193,11 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	}
 
 	/**
-	 * Registers the given {@link HyperStackDisplayer}. If this method id not
+	 * Registers the given {@link HyperStackDisplayer}. If this method is not
 	 * called, the tool will not respond.
-	 *
+	 * 
 	 * @param displayer
-	 *            the displayer to register
+	 *            the displayer to register.
 	 */
 	public void register( final HyperStackDisplayer displayer )
 	{
@@ -324,7 +326,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 			e.consume();
 			break;
 		}
-
+		
 		// Delete currently edited spot
 		case KeyEvent.VK_DELETE:
 		{

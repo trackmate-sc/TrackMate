@@ -2,18 +2,18 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -163,17 +163,18 @@ public class FeatureUtils
 	}
 
 	/**
-	 * Collects all defined feature values for the given feature key and object
-	 * type. Missing or undefined values are not included.
+	 * Collect feature values from the specified model. Missing or undefined
+	 * values are not included.
 	 *
 	 * @param featureKey
-	 *            the feature key to collect values for.
+	 *            the key of the feature to collect values from.
 	 * @param target
-	 *            the TrackMate object type.
+	 *            the type of object the feature is defined for.
 	 * @param model
-	 *            the TrackMate model.
+	 *            the model to read from.
 	 * @param visibleOnly
-	 *            if true, only values for visible objects are collected.
+	 *            if <code>true</code> feature values will be collected only
+	 *            from the objects marked as visible.
 	 * @return a new <code>double[]</code> array containing the numerical
 	 *         feature values.
 	 */

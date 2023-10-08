@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -168,7 +168,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 		final String title = "TrackScheme";
 		gui.setTitle( title );
 		gui.setSize( DEFAULT_SIZE );
-
+		
 		displaySettings.listeners().add( () -> doTrackStyle() );
 		gui.addWindowListener( new WindowAdapter()
 		{
@@ -198,8 +198,10 @@ public class TrackScheme extends AbstractTrackMateModelView
 	}
 
 	/**
-	 * @return the column index that is the first one after all the track
-	 *         columns.
+	 * Returns the column index that is the first one after all the track
+	 * columns.
+	 * 
+	 * @return the column index.
 	 */
 	public int getUnlaidSpotColumn()
 	{
@@ -208,10 +210,9 @@ public class TrackScheme extends AbstractTrackMateModelView
 
 	/**
 	 * Returns the first free column for the target row.
-	 *
+	 * 
 	 * @param frame
-	 *            the target row.
-	 *
+	 *            the row.
 	 * @return the first free column for the target row.
 	 */
 	public int getNextFreeColumn( final int frame )
@@ -226,8 +227,8 @@ public class TrackScheme extends AbstractTrackMateModelView
 
 	/**
 	 * Returns the GUI frame controlled by this class.
-	 *
-	 * @return the GUI frame.
+	 * 
+	 * @return the GUI.
 	 */
 	public TrackSchemeFrame getGUI()
 	{
@@ -237,8 +238,8 @@ public class TrackScheme extends AbstractTrackMateModelView
 	/**
 	 * Returns the {@link JGraphXAdapter} that serves as a model for the graph
 	 * displayed in this frame.
-	 *
-	 * @return the graph adapter.
+	 * 
+	 * @return the adapter.
 	 */
 	public JGraphXAdapter getGraph()
 	{
@@ -247,7 +248,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 
 	/**
 	 * Returns the graph layout in charge of arranging the cells on the graph.
-	 *
+	 * 
 	 * @return the graph layout.
 	 */
 	public TrackSchemeGraphLayout getGraphLayout()
@@ -1301,7 +1302,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 
 			edgeCells.add( obj );
 		}
-
+		
 		graph.getModel().beginUpdate();
 		try
 		{

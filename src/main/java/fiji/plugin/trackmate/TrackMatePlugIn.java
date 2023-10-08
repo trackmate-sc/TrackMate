@@ -2,18 +2,18 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -130,11 +130,11 @@ public class TrackMatePlugIn implements PlugIn
 	 * launched by this plugin.
 	 *
 	 * @param trackmate
-	 *            the {@link TrackMate} instance to use.
+	 *            the TrackMate instance.
 	 * @param selectionModel
-	 *            the {@link SelectionModel} to use.
+	 *            the selection model.
 	 * @param displaySettings
-	 *            the {@link DisplaySettings} to use.
+	 *            the display settings.
 	 * @return a new sequence.
 	 */
 	protected WizardSequence createSequence( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings )
@@ -148,7 +148,7 @@ public class TrackMatePlugIn implements PlugIn
 	 * {@link TrackMate} instance.
 	 *
 	 * @param imp
-	 *            the {@link ImagePlus} to operate on.
+	 *            the image the tracking data will be created on.
 	 * @return a new {@link Model} instance.
 	 */
 	protected Model createModel( final ImagePlus imp )
@@ -183,11 +183,11 @@ public class TrackMatePlugIn implements PlugIn
 	/**
 	 * Hook for subclassers: <br>
 	 * Creates the TrackMate instance that will be controlled in the GUI.
-	 *
+	 * 
 	 * @param model
-	 *            the model to use.
+	 *            the model to create the TrackMate instance with.
 	 * @param settings
-	 *            the settings to use.
+	 *            the settings to create the TrackMate instance with.
 	 * @return a new {@link TrackMate} instance.
 	 */
 	protected TrackMate createTrackMate( final Model model, final Settings settings )

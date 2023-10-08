@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -68,9 +68,9 @@ import net.imglib2.algorithm.MultiThreaded;
  * non-infinite costs.
  * <li>Costs are based on square distance +/- feature penalties.
  * </ul>
- *
+ * 
  * @author Jean-Yves Tinevez - 2014
- *
+ * 
  */
 public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot, Spot >, MultiThreaded
 {
@@ -100,9 +100,11 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 	 * segment linking cost matrix.
 	 *
 	 * @param graph
-	 *            the track segment graph.
+	 *            the graph from which connected components (segments) will be
+	 *            extracted.
 	 * @param settings
-	 *            the settings map.
+	 *            the settings for the cost matrix, as map containing the
+	 *            Jaqaman LAP keys.
 	 */
 	public JaqamanSegmentCostMatrixCreator( final Graph< Spot, DefaultWeightedEdge > graph, final Map< String, Object > settings )
 	{

@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -154,7 +154,7 @@ public class CaptureOverlayAction extends AbstractTMAction
 	 * @param last
 	 *            the last frame, inclusive, to capture.
 	 * @param logger
-	 *            a {@link Logger} to report capture progress.
+	 *            a logger instance to echo capture progress.
 	 * @return a new ImagePlus.
 	 */
 	public static ImagePlus capture( final TrackMate trackmate, final int first, final int last, final Logger logger )

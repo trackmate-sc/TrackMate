@@ -2,18 +2,18 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -45,10 +45,9 @@ import org.scijava.util.DoubleArray;
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.detection.DetectionUtils;
+import fiji.plugin.trackmate.Spot;
 import ij.IJ;
 import ij.ImagePlus;
-import ij.gui.Roi;
 import net.imagej.ImgPlus;
 import net.imagej.ImgPlusMetadata;
 import net.imagej.axis.Axes;
@@ -60,7 +59,7 @@ import net.imglib2.type.Type;
 import net.imglib2.util.Util;
 
 /**
- * List of static utilities for {@link fiji.plugin.trackmate.TrackMate}.
+ * List of static utilities for TrackMate.
  */
 public class TMUtils
 {
@@ -74,55 +73,17 @@ public class TMUtils
 	 */
 
 	/**
-	 * Returns an {@link Interval} that corresponds to the ROI in the specified
-	 * image.
-	 * <p>
-	 * If the image has no ROI, the interval returned is <code>null</code>. For
-	 * 3D images the interval extends over all Z. The interval does not include
-	 * the time dimension nor the channel dimension. It is 2D for 2D images, and
-	 * 3D for 3D images regardless of the presence of C and T.
-	 *
-	 * @param imp
-	 *            the image.
-	 * @return a new interval, or <code>null</code> if the image has no ROI.
-	 */
-	public static Interval createROIInterval( final ImagePlus imp )
-	{
-		final Roi roi = imp.getRoi();
-		if ( roi == null )
-			return null;
-
-		final boolean is3D = !DetectionUtils.is2D( imp );
-		final long[] min = new long[ is3D ? 3 : 2 ];
-		final long[] max = new long[ min.length ];
-
-		min[ 0 ] = roi.getBounds().x;
-		max[ 0 ] = roi.getBounds().x + roi.getBounds().width - 1;
-		min[ 1 ] = roi.getBounds().y;
-		max[ 1 ] = roi.getBounds().y + roi.getBounds().height - 1;
-		if ( is3D )
-		{
-			min[ 2 ] = 0;
-			max[ 2 ] = imp.getNSlices();
-		}
-		return new FinalInterval( min, max );
-	}
-
-	/**
 	 * Returns a new map sorted by its values.
-	 * <p>
-	 * The returned map is a {@link LinkedHashMap}, which preserves the
-	 * ordering.
 	 *
-	 * @param map
-	 *            the map to sort.
-	 * @param comparator
-	 *            the comparator to use to sort the values.
-	 * @return a new map sorted by its values.
 	 * @param <K>
-	 *            the key type.
+	 *            the type of keys in the map.
 	 * @param <V>
-	 *            the value type.
+	 *            the type of values in the map.
+	 * @param map
+	 *            the map.
+	 * @param comparator
+	 *            a comparator to sort based on values.
+	 * @return a new map, with entries sorted by values.
 	 */
 	public static < K, V extends Comparable< ? super V > > Map< K, V > sortByValue( final Map< K, V > map, final Comparator< V > comparator )
 	{
@@ -147,14 +108,12 @@ public class TMUtils
 
 	/**
 	 * Generates a string representation of a map, typically a settings map.
-	 * <p>
-	 * This method is recursive, and will indent sub-maps.
 	 *
 	 * @param map
-	 *            the map to represent as a string.
+	 *            the map.
 	 * @param indent
-	 *            the indentation level.
-	 * @return a string representation of the map.
+	 *            the indent size to use.
+	 * @return a representation of the map.
 	 */
 	public static final String echoMap( final Map< String, Object > map, final int indent )
 	{
@@ -191,13 +150,14 @@ public class TMUtils
 	}
 
 	/**
-	 * Wraps an IJ {@link ImagePlus} in an imglib2 {@link ImgPlus}, without
-	 * parameterized types. The only way I have found to beat javac constraints
-	 * on bounded multiple wildcard.
+	 * Wraps an IJ {@link ImagePlus} in an imglib2 {@link ImgPlus}, abiding to a
+	 * returned type.
 	 *
+	 * @param <T>
+	 *            the pixel type in the returned image.
 	 * @param imp
-	 *            the image plus to wrap.
-	 * @return the ImgPlus wrapping the input.
+	 *            the {@link ImagePlus} to wrap.
+	 * @return a wrapped {@link ImgPlus}.
 	 */
 	@SuppressWarnings( "unchecked" )
 	public static final < T > ImgPlus< T > rawWraps( final ImagePlus imp )
@@ -206,7 +166,7 @@ public class TMUtils
 	}
 
 	/**
-	 * Checks that the given map has all some keys. Two String collection allows
+	 * Check that the given map has all some keys. Two String collection allows
 	 * specifying that some keys are mandatory, other are optional.
 	 *
 	 * @param map
@@ -219,10 +179,10 @@ public class TMUtils
 	 *            be <code>null</code>.
 	 * @param errorHolder
 	 *            will be appended with an error message.
-	 * @param <T>
-	 *            the type of the keys.
 	 * @return if all mandatory keys are found in the map, and possibly some
 	 *         optional ones, but no others.
+	 * @param <T>
+	 *            the type of keys.
 	 */
 	public static final < T > boolean checkMapKeys( final Map< T, ? > map, Collection< T > mandatoryKeys, Collection< T > optionalKeys, final StringBuilder errorHolder )
 	{
@@ -317,18 +277,17 @@ public class TMUtils
 
 	/**
 	 * Returns the mapping in a map that is targeted by a list of keys, in the
-	 * order given by iterating over the key collection.
+	 * order given in the list.
 	 *
+	 * @param <J>
+	 *            the type of keys in the collection and the map.
+	 * @param <K>
+	 *            the type of values in the map.
 	 * @param keys
-	 *            the keys.
+	 *            the collection of keys.
 	 * @param mapping
 	 *            the mapping.
-	 * @param <J>
-	 *            the key type.
-	 * @param <K>
-	 *            the value type.
-	 * @return the list of values mapped to the keys.
-	 *
+	 * @return a new list of values.
 	 */
 	public static final < J, K > List< K > getArrayFromMaping( final Collection< J > keys, final Map< J, K > mapping )
 	{
@@ -348,9 +307,8 @@ public class TMUtils
 	 * is not found, then the calibration for this axis takes the value of 1.
 	 *
 	 * @param img
-	 *            the image plus metadata.
-	 * @return a 3-elements double array with the spatial calibration in X, Y,
-	 *         Z.
+	 *            the image metadata object.
+	 * @return a new <code>double</code> array.
 	 */
 	public static final double[] getSpatialCalibration( final ImgPlusMetadata img )
 	{
@@ -384,14 +342,13 @@ public class TMUtils
 	 * the <code>values</code> array. Taken from commons-math.
 	 *
 	 * @param values
-	 *            the values to compute the percentile from.
+	 *            the values.
 	 * @param p
-	 *            the percentile to compute, between 0 and 1.
-	 * @return the pth percentile.
+	 *            the percentile.
+	 * @return the percentile of the values.
 	 */
 	public static final double getPercentile( final double[] values, final double p )
 	{
-
 		final int size = values.length;
 		if ( ( p > 1 ) || ( p <= 0 ) )
 			throw new IllegalArgumentException( "invalid quantile value: " + p );
@@ -432,6 +389,22 @@ public class TMUtils
 		final double min = Arrays.stream( data ).min().getAsDouble();
 		final double max = Arrays.stream( data ).max().getAsDouble();
 		return new double[] { ( max - min ), min, max };
+	}
+
+	/**
+	 * Stores the x, y, z coordinates of the specified spot in the first 3
+	 * elements of the specified double array.
+	 *
+	 * @param spot
+	 *            the spot.
+	 * @param coords
+	 *            the array to write coordinates to.
+	 */
+	public static final void localize( final Spot spot, final double[] coords )
+	{
+		coords[ 0 ] = spot.getFeature( Spot.POSITION_X ).doubleValue();
+		coords[ 1 ] = spot.getFeature( Spot.POSITION_Y ).doubleValue();
+		coords[ 2 ] = spot.getFeature( Spot.POSITION_Z ).doubleValue();
 	}
 
 	/**
@@ -503,8 +476,8 @@ public class TMUtils
 	 * thresholding method.
 	 *
 	 * @param data
-	 *            the data to threshold.
-	 * @return the threshold value.
+	 *            the data.
+	 * @return the Otsu threshold.
 	 */
 	public static final double otsuThreshold( final double[] data )
 	{
@@ -516,10 +489,10 @@ public class TMUtils
 	 * thresholding method with a given bin number.
 	 *
 	 * @param data
-	 *            the data to threshold.
-	 * @param nBins
-	 *            the number of bins to use for the histogram.
-	 * @return the threshold value.
+	 *            the data.
+	 * @param the
+	 *            desired number of bins in the histogram.
+	 * @return the Otsu thresold.
 	 */
 	private static final double otsuThreshold( final double[] data, final int nBins )
 	{
@@ -591,12 +564,12 @@ public class TMUtils
 	 * Otherwise, default units are used.
 	 *
 	 * @param dimension
-	 *            the dimension to get the unit for.
+	 *            the dimension.
 	 * @param spaceUnits
-	 *            the spatial units to use for space-related dimensions.
+	 *            the space units.
 	 * @param timeUnits
-	 *            the time units to use for time-related dimensions.
-	 * @return a String representing the unit for the given dimension.
+	 *            the time units.
+	 * @return the units for the specified dimension.
 	 */
 	public static final String getUnitsFor( final Dimension dimension, final String spaceUnits, final String timeUnits )
 	{
@@ -839,9 +812,9 @@ public class TMUtils
 	}
 
 	/**
-	 * Obtains and cache the SciJava {@link Context} in use by ImageJ.
+	 * Obtains the SciJava {@link Context} in use by ImageJ.
 	 *
-	 * @return the SciJava context
+	 * @return the context.
 	 */
 	public static Context getContext()
 	{
@@ -979,9 +952,6 @@ public class TMUtils
 	 * Returns a string of the name of the image without the extension, with the
 	 * full path
 	 *
-	 * @param settings
-	 *            the settings object from which to read the image folder and
-	 *            image file name.
 	 * @return full name of the image without the extension
 	 */
 	public static String getImagePathWithoutExtension( final Settings settings )

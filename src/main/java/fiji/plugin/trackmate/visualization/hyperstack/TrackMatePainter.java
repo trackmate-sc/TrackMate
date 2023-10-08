@@ -35,7 +35,7 @@ public abstract class TrackMatePainter< T extends Spot >
 	 *            the bounding box, centered at (0,0), in physical coordinates.
 	 * @param center
 	 *            the center of the bounding-box, in physical coordinates.
-	 * @return
+	 * @return if the specified bounding-box intersects with the display window.
 	 */
 	protected boolean intersect( final RealInterval boundingBox, final RealLocalizable center )
 	{
@@ -60,7 +60,8 @@ public abstract class TrackMatePainter< T extends Spot >
 	 *
 	 * @param boundingBox
 	 *            the bounding box, in physical coordinates.
-	 * @return
+	 * @return <code>true</code> if the specified bounding-box intersects with
+	 *         the display window.
 	 */
 	protected boolean intersect( final RealInterval boundingBox )
 	{

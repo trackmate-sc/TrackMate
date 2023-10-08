@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -77,7 +77,7 @@ public class SliderPanelDouble extends JPanel implements BoundedValueDouble.Upda
 	 * @param model
 	 *            the value that is modified.
 	 * @param spinnerStepSize
-	 *            the step size of the spinner.
+	 *            the steps size for the spinner created.
 	 */
 	public SliderPanelDouble(
 			final String name,

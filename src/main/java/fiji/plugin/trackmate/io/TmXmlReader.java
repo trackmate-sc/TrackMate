@@ -2,18 +2,18 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -196,8 +196,8 @@ public class TmXmlReader
 	 */
 
 	/**
-	 * Initialize this reader to read the specified file.
-	 *
+	 * Initializes this reader to read the file given in argument.
+	 * 
 	 * @param file
 	 *            the file to read.
 	 */
@@ -233,8 +233,8 @@ public class TmXmlReader
 	/**
 	 * Returns the log text saved in the file, or <code>null</code> if log text
 	 * was not saved.
-	 *
-	 * @return the saved log text.
+	 * 
+	 * @return the log.
 	 */
 	public String getLog()
 	{
@@ -450,8 +450,7 @@ public class TmXmlReader
 	 * file.
 	 *
 	 * @param imp
-	 *            the image to create the settings for, may be
-	 *            <code>null</code>.
+	 *            the image to store in the new Settings object.
 	 * @param detectorProvider
 	 *            the detector provider, required to configure the settings with
 	 *            a correct <code>SpotDetectorFactory</code>. If
@@ -476,6 +475,7 @@ public class TmXmlReader
 	 *            the spot 2D morphology provider.
 	 * @param spot3DMorphologyAnalyzerProvider
 	 *            the spot 3D morphology provider.
+	 * @return a new Settings object.
 	 */
 	public Settings readSettings(
 			final ImagePlus imp,
@@ -540,8 +540,8 @@ public class TmXmlReader
 
 	/**
 	 * Returns the version string stored in the file.
-	 *
-	 * @return the version string.
+	 * 
+	 * @return the version string stored in the file.
 	 */
 	public String getVersion()
 	{
@@ -1018,15 +1018,16 @@ public class TmXmlReader
 	}
 
 	/**
-	 * Loads the tracks, the track features and the ID of the filtered tracks
+	 * Load the tracks, the track features and the ID of the filtered tracks
 	 * into the model specified. The track collection element is expected to be
 	 * found as a child of the specified element.
 	 *
 	 * @param modelElement
-	 *            the xml element containing the track collection data.
+	 *            the element to read from.
 	 * @param model
-	 *            the model to populate with tracks.
-	 * @return true if reading tracks was successful, false otherwise.
+	 *            the model to add to.
+	 * @return <code>true</code> if reading tracks was successful,
+	 *         <code>false</code> otherwise.
 	 */
 	protected boolean readTracks( final Element modelElement, final Model model )
 	{

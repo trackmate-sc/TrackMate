@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -75,10 +75,9 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 	/**
 	 * Hook for subclassers. Instantiate here the overlay you want to use for
 	 * the spots.
-	 *
+	 * 
 	 * @param displaySettings
-	 *            the display settings to use in the overlay.
-	 *
+	 *            the display settings.
 	 * @return the spot overlay
 	 */
 	protected SpotOverlay createSpotOverlay( final DisplaySettings displaySettings )
@@ -89,10 +88,9 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 	/**
 	 * Hook for subclassers. Instantiate here the overlay you want to use for
 	 * the spots.
-	 *
+	 * 
 	 * @param displaySettings
-	 *            the display settings to use in the overlay.
-	 *
+	 *            the display settings.
 	 * @return the track overlay
 	 */
 	protected TrackOverlay createTrackOverlay( final DisplaySettings displaySettings )

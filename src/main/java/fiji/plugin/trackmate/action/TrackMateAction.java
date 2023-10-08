@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -54,9 +54,9 @@ public interface TrackMateAction
 
 	/**
 	 * Sets the logger that will receive logs when this action is executed.
-	 *
+	 * 
 	 * @param logger
-	 *            the logger to use.
+	 *            the logger.
 	 */
 	public void setLogger( Logger logger );
 }

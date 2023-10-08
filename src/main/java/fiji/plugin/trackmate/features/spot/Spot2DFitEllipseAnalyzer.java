@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -235,13 +235,12 @@ public class Spot2DFitEllipseAnalyzer< T extends RealType< T > > extends Abstrac
 	}
 
 	/**
-	 * Computes the Moore–Penrose pseudoinverse using the SVD method.
-	 *
-	 * Modified version of the original implementation by Kim van der Linde.
-	 *
+	 * Computes the Moore–Penrose pseudoinverse using the SVD method. Modified
+	 * version of the original implementation by Kim van der Linde.
+	 * 
 	 * @param x
-	 *            the input matrix
-	 * @return the pseudoinverse of the input matrix
+	 *            the matrix.
+	 * @return the pseudo-inverse as a new matrix.
 	 */
 	public static Matrix pinv( final Matrix x )
 	{

@@ -2,18 +2,18 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -32,6 +32,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.Supplier;
 
+import org.jgrapht.alg.util.NeighborCache;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 import org.jgrapht.graph.SimpleWeightedGraph;
@@ -48,10 +49,6 @@ public class GraphUtils
 	 *
 	 * @param directedGraph
 	 *            the {@link SimpleDirectedWeightedGraph} to be converted
-	 * @param <V>
-	 *            the vertex type.
-	 * @param <E>
-	 *            the edge type.
 	 * @return a {@link SimpleWeightedGraph} with the same vertices and edges as
 	 *         the input graph, but with undirected edges and the maximum weight
 	 *         between any two vertices
@@ -88,12 +85,13 @@ public class GraphUtils
 	}
 
 	/**
-	 * Returns a pretty-print string representation of a {@link TrackModel}, as
-	 * long it is a tree (each spot must not have more than one predecessor).
-	 *
+	 * Pretty-prints a model.
+	 * 
 	 * @param model
-	 *            the track model to represent as a string.
-	 * @return a string representation of the given track model.
+	 *            the model.
+	 * @return a pretty-print string representation of a {@link TrackModel}, as
+	 *         long it is a tree (each spot must not have more than one
+	 *         predecessor).
 	 * @throws IllegalArgumentException
 	 *             if the given graph is not a tree.
 	 */
@@ -425,4 +423,25 @@ public class GraphUtils
 		Arrays.fill( chars, c );
 		return chars;
 	}
+
+	/**
+	 * Returns the siblings of a spot. That is: all the spots that have the same
+	 * predecessor.
+	 * 
+	 * @param cache
+	 *            a neighbor cache.
+	 * @param spot
+	 *            the spot to inspect.
+	 * @return a new set made of the spot siblings. Includes the spot.
+	 */
+	public static final Set< Spot > getSibblings( final NeighborCache< Spot, DefaultWeightedEdge > cache, final Spot spot )
+	{
+		final HashSet< Spot > sibblings = new HashSet<>();
+		final Set< Spot > predecessors = cache.predecessorsOf( spot );
+		for ( final Spot predecessor : predecessors )
+			sibblings.addAll( cache.successorsOf( predecessor ) );
+
+		return sibblings;
+	}
+
 }

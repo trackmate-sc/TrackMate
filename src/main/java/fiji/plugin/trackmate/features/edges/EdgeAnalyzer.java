@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -35,7 +35,7 @@ import net.imglib2.algorithm.MultiThreaded;
  * edge of a TrackMate model. An edge, or a link, is the single link that exists
  * between two spots after tracking.
  *
- * @author Jean-Yves Tinevez
+ * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt;
  */
 public interface EdgeAnalyzer extends Benchmark, FeatureAnalyzer, MultiThreaded
 {
@@ -66,8 +66,8 @@ public interface EdgeAnalyzer extends Benchmark, FeatureAnalyzer, MultiThreaded
 	 * <p>
 	 * Example of non-local edge feature: the local curvature of the trajectory,
 	 * which depends on the neighbor edges.
-	 *
-	 * @return true if this is a local edge analyzer.
+	 * 
+	 * @return whether this analyzer is a local analyzer.
 	 */
 	public boolean isLocal();
 

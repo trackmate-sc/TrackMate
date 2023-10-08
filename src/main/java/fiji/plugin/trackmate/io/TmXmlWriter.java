@@ -2,18 +2,18 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -176,7 +176,7 @@ public class TmXmlWriter
 	 * @param file
 	 *            the xml file to write to, will be overwritten.
 	 * @param logger
-	 *            the logger to use to report progress and write errors.
+	 *            a logger instance to log writing progress and errors.
 	 */
 	public TmXmlWriter( final File file, final Logger logger )
 	{
@@ -193,13 +193,15 @@ public class TmXmlWriter
 	/**
 	 * Writes the document to the file. Content must be appended first.
 	 *
+	 * @throws FileNotFoundException
+	 *             if the file exists but is a directory rather than a regular
+	 *             file, does not exist but cannot be created, or cannot be
+	 *             opened for any other reason.
+	 * @throws IOException
+	 *             if there's any problem writing.
 	 * @see #appendLog(String)
 	 * @see #appendModel(Model)
 	 * @see #appendSettings(Settings)
-	 * @throws FileNotFoundException
-	 *             if the file cannot be created or opened.
-	 * @throws IOException
-	 *             if an I/O error occurs.
 	 */
 	public void writeToFile() throws FileNotFoundException, IOException
 	{

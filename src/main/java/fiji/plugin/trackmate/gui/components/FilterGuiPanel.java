@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -105,10 +105,10 @@ public class FilterGuiPanel extends JPanel implements ChangeListener
 	 * CONSTRUCTOR
 	 */
 
-	public FilterGuiPanel(
-			final Model model,
-			final Settings settings,
-			final TrackMateObject target,
+	public FilterGuiPanel( 
+			final Model model, 
+			final Settings settings, 
+			final TrackMateObject target, 
 			final List< FeatureFilter > filters,
 			final String defaultFeature,
 			final FeatureDisplaySelector featureSelector )
@@ -184,11 +184,11 @@ public class FilterGuiPanel extends JPanel implements ChangeListener
 		lblInfo = new JLabel();
 		lblInfo.setFont( SMALL_FONT );
 		buttonsPanel.add( lblInfo );
-
+		
 		/*
 		 * Color for spots.
 		 */
-
+		
 		final JPanel coloringPanel = featureSelector.createSelectorFor( target );
 		coloringPanel.setBorder( BorderFactory.createEmptyBorder( 5, 5, 5, 5 ) );
 		bottomPanel.add( coloringPanel, BorderLayout.CENTER );
@@ -209,7 +209,7 @@ public class FilterGuiPanel extends JPanel implements ChangeListener
 
 		lblTop.setVisible( false ); // For now
 		logger = new ProgressBarLogger();
-
+		
 		// On close
 		GuiUtils.addOnClosingEvent( this, () -> updater.quit() );
 	}
@@ -238,9 +238,9 @@ public class FilterGuiPanel extends JPanel implements ChangeListener
 	}
 
 	/**
-	 * Returns the thresholds currently set by this GUI.
-	 *
-	 * @return the thresholds.
+	 * Returns the filters currently set by this GUI.
+	 * 
+	 * @return the list of filters.
 	 */
 	public List< FeatureFilter > getFeatureFilters()
 	{
@@ -252,7 +252,7 @@ public class FilterGuiPanel extends JPanel implements ChangeListener
 	 * will be notified when a change happens to the thresholds displayed by
 	 * this panel, whether due to the slider being move, the auto-threshold
 	 * button being pressed, or the combo-box selection being changed.
-	 *
+	 * 
 	 * @param listener
 	 *            the listener to add.
 	 */
@@ -266,7 +266,8 @@ public class FilterGuiPanel extends JPanel implements ChangeListener
 	 *
 	 * @param listener
 	 *            the listener to remove.
-	 * @return true if the listener was in listener collection of this instance.
+	 * @return <code>true</code> if the listener was in listener collection of
+	 *         this instance.
 	 */
 	public boolean removeChangeListener( final ChangeListener listener )
 	{

@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -127,11 +127,11 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm imple
 	 * Calculates all the spot features configured in the {@link Settings}
 	 * object, but only for the spots in the specified collection. Features are
 	 * calculated for each spot, using their location, and the raw image.
-	 *
+	 * 
 	 * @param toCompute
-	 *            the spots to compute features for.
+	 *            the spot collection.
 	 * @param doLogIt
-	 *            whether we should report progress to model's logger.
+	 *            if <code>true</code> the computation will be logged.
 	 */
 	public void computeSpotFeatures( final SpotCollection toCompute, final boolean doLogIt )
 	{

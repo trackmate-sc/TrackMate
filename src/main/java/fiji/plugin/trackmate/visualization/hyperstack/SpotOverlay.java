@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -237,15 +237,6 @@ public class SpotOverlay extends Roi
 		g2d.setFont( originalFont );
 	}
 
-	/**
-	 * Draws an extra layer on top of the spots. The default implementation does
-	 * nothing.
-	 *
-	 * @param g2d
-	 *            the graphics device.
-	 * @param frame
-	 *            the frame currently drawn.
-	 */
 	protected void drawExtraLayer( final Graphics2D g2d, final int frame )
 	{}
 
