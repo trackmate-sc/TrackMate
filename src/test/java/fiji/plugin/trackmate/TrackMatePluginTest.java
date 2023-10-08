@@ -26,19 +26,9 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 
 import org.junit.Test;
-import org.scijava.Context;
 import org.scijava.object.ObjectService;
 
-import fiji.plugin.trackmate.util.TMUtils;
-import ij.IJ;
-import ij.ImagePlus;
-
 public class TrackMatePluginTest {
-
-	static
-	{
-		net.imagej.patcher.LegacyInjector.preinit();
-	}
 
 	@Test
 	public void testTrackMateRegistration() {
@@ -49,21 +39,5 @@ public class TrackMatePluginTest {
 		final List<TrackMate> trackMateInstances = objectService.getObjects(TrackMate.class);
 		assertTrue(trackMateInstances.size() == 1);
 		assertTrue(trackMateInstances.get(0) instanceof TrackMate);
-	}
-
-	private class TestTrackMatePlugin extends TrackMatePlugIn {
-
-		@SuppressWarnings("unused")
-		public void setUp() {
-			final ImagePlus imp = IJ.createImage("Test Image", 256, 256, 10, 8);
-			final Settings settings = createSettings(imp);
-			final Model model = createModel(imp);
-			final TrackMate trackMate = createTrackMate(model, settings);
-		}
-
-		public Context getLocalContext() {
-			return TMUtils.getContext();
-		}
-
 	}
 }
