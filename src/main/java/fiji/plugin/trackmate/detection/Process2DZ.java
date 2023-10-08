@@ -40,6 +40,7 @@ import net.imglib2.view.Views;
  * @author Jean-Yves Tinevez, 2023
  *
  * @param <T>
+ *            the pixel type in the image processed.
  */
 public class Process2DZ< T extends RealType< T > & NativeType< T > >
 		extends MultiThreadedBenchmarkAlgorithm

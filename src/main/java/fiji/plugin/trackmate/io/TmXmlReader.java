@@ -196,7 +196,10 @@ public class TmXmlReader
 	 */
 
 	/**
-	 * Initialize this reader to read the file given in argument.
+	 * Initializes this reader to read the file given in argument.
+	 * 
+	 * @param file
+	 *            the file to read.
 	 */
 	public TmXmlReader( final File file )
 	{
@@ -230,6 +233,8 @@ public class TmXmlReader
 	/**
 	 * Returns the log text saved in the file, or <code>null</code> if log text
 	 * was not saved.
+	 * 
+	 * @return the log.
 	 */
 	public String getLog()
 	{
@@ -445,7 +450,7 @@ public class TmXmlReader
 	 * file.
 	 *
 	 * @param imp
-	 *
+	 *            the image to store in the new Settings object.
 	 * @param detectorProvider
 	 *            the detector provider, required to configure the settings with
 	 *            a correct <code>SpotDetectorFactory</code>. If
@@ -470,6 +475,7 @@ public class TmXmlReader
 	 *            the spot 2D morphology provider.
 	 * @param spot3DMorphologyAnalyzerProvider
 	 *            the spot 3D morphology provider.
+	 * @return a new Settings object.
 	 */
 	public Settings readSettings(
 			final ImagePlus imp,
@@ -534,6 +540,8 @@ public class TmXmlReader
 
 	/**
 	 * Returns the version string stored in the file.
+	 * 
+	 * @return the version string stored in the file.
 	 */
 	public String getVersion()
 	{
@@ -1012,7 +1020,12 @@ public class TmXmlReader
 	 * into the model specified. The track collection element is expected to be
 	 * found as a child of the specified element.
 	 *
-	 * @return true if reading tracks was successful, false otherwise.
+	 * @param modelElement
+	 *            the element to read from.
+	 * @param model
+	 *            the model to add to.
+	 * @return <code>true</code> if reading tracks was successful,
+	 *         <code>false</code> otherwise.
 	 */
 	protected boolean readTracks( final Element modelElement, final Model model )
 	{

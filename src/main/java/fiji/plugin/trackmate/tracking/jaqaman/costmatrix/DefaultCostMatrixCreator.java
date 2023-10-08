@@ -35,6 +35,9 @@ import net.imglib2.util.Util;
  * @author Jean-Yves Tinevez - 2014
  * 
  * @param <K>
+ *            the type of sources.
+ * @param <J>
+ *            the type of targets.
  */
 public class DefaultCostMatrixCreator< K extends Comparable< K >, J extends Comparable< J > > implements CostMatrixCreator< K, J >
 {

@@ -138,9 +138,15 @@ public class FeatureDisplaySelector
 	}
 
 	/**
-	 * Return a {@link CategoryJComboBox} that lets a user select among all
-	 * available features in TrackMate.
+	 * Returns a {@link CategoryJComboBox} that lets a user select among all
+	 * available features in TrackMate. The features are read from the model and
+	 * settings, and the model is listened to so that the combo-box is updated
+	 * when new features are added to the model.
 	 *
+	 * @param model
+	 *            the model to read existing features from.
+	 * @param settings
+	 *            the settings to read configured features from.
 	 * @return a new {@link CategoryJComboBox}.
 	 */
 	public static final CategoryJComboBox< TrackMateObject, String > createComboBoxSelector( final Model model, final Settings settings )

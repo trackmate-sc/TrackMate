@@ -69,13 +69,15 @@ public class SliderPanelDouble extends JPanel implements BoundedValueDouble.Upda
 	}
 
 	/**
-	 * Create a {@link SliderPanelDouble} to modify a given {@link BoundedValueDouble value}.
+	 * Create a {@link SliderPanelDouble} to modify a given
+	 * {@link BoundedValueDouble value}.
 	 *
 	 * @param name
 	 *            label to show next to the slider.
 	 * @param model
 	 *            the value that is modified.
 	 * @param spinnerStepSize
+	 *            the steps size for the spinner created.
 	 */
 	public SliderPanelDouble(
 			final String name,
