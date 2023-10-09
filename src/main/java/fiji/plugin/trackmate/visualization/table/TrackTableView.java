@@ -83,8 +83,6 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 
 	private static final String KEY = "TRACK_TABLES";
 
-	private String selectedFile = System.getProperty( "user.home" ) + File.separator + "tracks.csv";
-
 	private final Model model;
 
 	private final TablePanel< Spot > spotTable;
@@ -97,13 +95,15 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 
 	private final SelectionModel selectionModel;
 
-	public TrackTableView( final Model model, final SelectionModel selectionModel, final DisplaySettings ds, final String imageFileName )
+	private String imagePath;
+
+	public TrackTableView( final Model model, final SelectionModel selectionModel, final DisplaySettings ds, final String imagePath )
 	{
 		super( "Track tables" );
+		this.imagePath = imagePath;
 		setIconImage( TRACKMATE_ICON.getImage() );
 		this.model = model;
 		this.selectionModel = selectionModel;
-		this.selectedFile = imageFileName + "_tracks.csv";
 
 		/*
 		 * GUI.
@@ -180,16 +180,24 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 
 	private void exportToCsv( final int index )
 	{
+		final int lastIndexOf = imagePath.lastIndexOf( '_' );
+		if ( lastIndexOf > 0 )
+			imagePath = imagePath.substring( 0, lastIndexOf );
+
 		final TablePanel< ? > table;
+		String selectedFile;
 		switch ( index )
 		{
 		case 0:
+			selectedFile = imagePath + "_spots.csv";
 			table = spotTable;
 			break;
 		case 1:
+			selectedFile = imagePath + "_edges.csv";
 			table = edgeTable;
 			break;
 		case 2:
+			selectedFile = imagePath + "_tracks.csv";
 			table = trackTable;
 			break;
 		default:
@@ -216,6 +224,7 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 			model.getLogger().error( "Problem exporting to file "
 					+ file + "\n" + e.getMessage() );
 		}
+		imagePath = selectedFile;
 	}
 
 	public static final TablePanel< Integer > createTrackTable( final Model model, final DisplaySettings ds )

@@ -77,7 +77,7 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 
 	private static final String KEY = "SPOT_TABLE";
 
-	private String selectedFile = System.getProperty( "user.home" ) + File.separator + "branchs.csv";
+	private String selectedFile = System.getProperty( "user.home" ) + File.separator + "branches.csv";
 
 	private final Model model;
 
@@ -88,7 +88,7 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 		super( "Branch table" );
 		setIconImage( TRACKMATE_ICON.getImage() );
 		this.model = model;
-		this.selectedFile = imageFileName + "_branchs.csv";
+		this.selectedFile = imageFileName + "_branches.csv";
 
 		/*
 		 * GUI.
