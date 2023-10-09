@@ -33,6 +33,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.table.AllSpotsTableView;
 
 public class ExportAllSpotsStatsAction extends AbstractTMAction
@@ -51,7 +52,7 @@ public class ExportAllSpotsStatsAction extends AbstractTMAction
 	@Override
 	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
 	{
-		createSpotsTable( trackmate.getModel(), selectionModel, displaySettings, trackmate.getSettings().getFileNameWithoutExtension() ).render();
+		createSpotsTable( trackmate.getModel(), selectionModel, displaySettings, TMUtils.getImagePathWithoutExtension( trackmate.getSettings() ) ).render();
 	}
 
 	public static final AllSpotsTableView createSpotsTable( final Model model, final SelectionModel selectionModel, final DisplaySettings displaySettings, final String imageFileName )

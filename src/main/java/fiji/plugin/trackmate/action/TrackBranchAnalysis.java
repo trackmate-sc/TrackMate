@@ -33,6 +33,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.table.BranchTableView;
 
 public class TrackBranchAnalysis extends AbstractTMAction
@@ -55,7 +56,7 @@ public class TrackBranchAnalysis extends AbstractTMAction
 	@Override
 	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
 	{
-		createBranchTable( trackmate.getModel(), selectionModel, trackmate.getSettings().getFileNameWithoutExtension() ).render();
+		createBranchTable( trackmate.getModel(), selectionModel, TMUtils.getImagePathWithoutExtension( trackmate.getSettings() ) ).render();
 	}
 
 	public static final BranchTableView createBranchTable( final Model model, final SelectionModel selectionModel, final String imageFileName )
