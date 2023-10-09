@@ -302,15 +302,17 @@ public class Settings
 	/*
 	 * METHODS
 	 */
-        
-        /**
-         * Returns a string of the name of the image without the extension, with the full path
-         * @return full name of the image without the extension
-         */
-        public String getFileNameWithoutExtension()
-        {
-            return imageFolder+imageFileName.substring(0, imageFileName.lastIndexOf("."));
-        }
+
+	/**
+	 * Returns a string of the name of the image without the extension, with the
+	 * full path
+	 * 
+	 * @return full name of the image without the extension
+	 */
+	public String getFileNameWithoutExtension()
+	{
+		return imageFolder + imageFileName.substring( 0, imageFileName.lastIndexOf( "." ) );
+	}
 
 	/**
 	 * Returns a string description of the target image.

@@ -51,7 +51,7 @@ public class ExportAllSpotsStatsAction extends AbstractTMAction
 	@Override
 	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
 	{
-            	createSpotsTable( trackmate.getModel(), selectionModel, displaySettings, trackmate.getSettings().getFileNameWithoutExtension() ).render();
+		createSpotsTable( trackmate.getModel(), selectionModel, displaySettings, trackmate.getSettings().getFileNameWithoutExtension() ).render();
 	}
 
 	public static final AllSpotsTableView createSpotsTable( final Model model, final SelectionModel selectionModel, final DisplaySettings displaySettings, final String imageFileName )

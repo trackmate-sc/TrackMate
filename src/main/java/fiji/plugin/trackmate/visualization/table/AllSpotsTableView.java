@@ -78,7 +78,7 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 
 	private static final String KEY = "SPOT_TABLE";
 
-	private String selectedFile =  System.getProperty( "user.home" ) + File.separator + "spots.csv";
+	private String selectedFile = System.getProperty( "user.home" ) + File.separator + "spots.csv";
 
 	private final Model model;
 
@@ -94,7 +94,8 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 		setIconImage( TRACKMATE_ICON.getImage() );
 		this.model = model;
 		this.selectionModel = selectionModel;
-                this.selectedFile = imageFileName+"_spots.csv";
+		this.selectedFile = imageFileName + "_spots.csv";
+
 		/*
 		 * GUI.
 		 */
@@ -154,7 +155,7 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 
 	public void exportToCsv()
 	{
-            
+
 		final File file = FileChooser.chooseFile(
 				this,
 				selectedFile,
@@ -220,7 +221,7 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 		featureUnits.put( TRACK_ID, "" );
 		isInts.put( TRACK_ID, Boolean.TRUE );
 		infoTexts.put( TRACK_ID, "The id of the track this spot belongs to." );
-		
+
 		final BiFunction< Spot, String, Double > featureFun = ( spot, feature ) -> {
 			if ( feature.equals( TRACK_ID ) )
 			{
@@ -238,7 +239,7 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 
 		final BiConsumer< Spot, Color > colorSetter =
 				( spot, color ) -> spot.putFeature( ManualSpotColorAnalyzerFactory.FEATURE, Double.valueOf( color.getRGB() ) );
-				
+
 		final TablePanel< Spot > table =
 				new TablePanel<>(
 						model.getSpots().iterable( true ),

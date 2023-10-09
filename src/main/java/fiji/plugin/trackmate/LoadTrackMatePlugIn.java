@@ -292,6 +292,6 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 //		plugIn.run( "samples/FakeTracks.xml" );
 //		plugIn.run( "samples/MAX_Merged.xml" );
 //		plugIn.run( "c:/Users/tinevez/Development/TrackMateWS/TrackMate-Cellpose/samples/R2_multiC.xml" );
-//		plugIn.run( "/Users/tinevez/Projects/CCarabana/Data/113B_Day3/DUP_C3-20210122_113B_N1BcatTOM_day3_region3_each10min_zoom08_40x_FINAL.xml" );
+//		plugIn.run( "/Users/tinevez/Desktop/230901_DeltaRcsB-ZipA-mCh_timestep5min_Stage9_reg/230901_DeltaRcsB-ZipA-mCh_timestep5min_Stage9_reg_merge65.xml" );
 	}
 }

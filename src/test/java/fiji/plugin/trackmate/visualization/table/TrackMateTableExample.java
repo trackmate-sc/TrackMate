@@ -45,7 +45,7 @@ public class TrackMateTableExample
 		final SelectionModel selectionModel = new SelectionModel( model );
 		final DisplaySettings ds = reader.getDisplaySettings();
 		model.getSpots().iterable( 1, true ).forEach( selectionModel::addSpotToSelection );
-                final String exportFile = System.getProperty( "user.home" ) + File.separator + "test";
+		final String exportFile = System.getProperty( "user.home" ) + File.separator + "test";
 
 		new TrackTableView( model, selectionModel, ds, exportFile ).render();
 	}

@@ -103,8 +103,7 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 		setIconImage( TRACKMATE_ICON.getImage() );
 		this.model = model;
 		this.selectionModel = selectionModel;
-                this.selectedFile = imageFileName+"_tracks.csv";
-		
+		this.selectedFile = imageFileName + "_tracks.csv";
 
 		/*
 		 * GUI.
@@ -179,7 +178,7 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 		} );
 	}
 
-	private  void exportToCsv( final int index )
+	private void exportToCsv( final int index )
 	{
 		final TablePanel< ? > table;
 		switch ( index )
@@ -196,7 +195,7 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 		default:
 			throw new IllegalArgumentException( "Unknown table with index " + index );
 		}
-		
+
 		final File file = FileChooser.chooseFile(
 				this,
 				selectedFile,
@@ -371,7 +370,7 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 				return trackID == null ? null : trackID.doubleValue();
 			}
 			else if ( feature.equals( SPOT_ID ) )
-				return ( double ) spot.ID(); 
+				return ( double ) spot.ID();
 
 			return spot.getFeature( feature );
 		};
