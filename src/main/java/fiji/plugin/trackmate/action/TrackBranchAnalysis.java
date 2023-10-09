@@ -55,12 +55,12 @@ public class TrackBranchAnalysis extends AbstractTMAction
 	@Override
 	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
 	{
-		createBranchTable( trackmate.getModel(), selectionModel ).render();
+		createBranchTable( trackmate.getModel(), selectionModel, trackmate.getSettings().getFileNameWithoutExtension()  ).render();
 	}
 
-	public static final BranchTableView createBranchTable( final Model model, final SelectionModel selectionModel )
+	public static final BranchTableView createBranchTable( final Model model, final SelectionModel selectionModel, final String imageFileName )
 	{
-		return new BranchTableView( model, selectionModel );
+		return new BranchTableView( model, selectionModel, imageFileName );
 	}
 	
 	@Plugin( type = TrackMateActionFactory.class, enabled = true )

@@ -83,7 +83,7 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 
 	private static final String KEY = "TRACK_TABLES";
 
-	public static String selectedFile = System.getProperty( "user.home" ) + File.separator + "export.csv";
+	private String selectedFile = System.getProperty( "user.home" ) + File.separator + "tracks.csv";
 
 	private final Model model;
 
@@ -97,12 +97,14 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 
 	private final SelectionModel selectionModel;
 
-	public TrackTableView( final Model model, final SelectionModel selectionModel, final DisplaySettings ds )
+	public TrackTableView( final Model model, final SelectionModel selectionModel, final DisplaySettings ds, final String imageFileName )
 	{
 		super( "Track tables" );
 		setIconImage( TRACKMATE_ICON.getImage() );
 		this.model = model;
 		this.selectionModel = selectionModel;
+                this.selectedFile = imageFileName+"_tracks.csv";
+		
 
 		/*
 		 * GUI.

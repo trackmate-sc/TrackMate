@@ -57,12 +57,12 @@ public class ExportStatsTablesAction extends AbstractTMAction
 	@Override
 	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
 	{
-		createTrackTables( trackmate.getModel(), selectionModel, displaySettings ).render();
+		createTrackTables( trackmate.getModel(), selectionModel, displaySettings, trackmate.getSettings().getFileNameWithoutExtension()  ).render();
 	}
 
-	public static TrackTableView createTrackTables( final Model model, final SelectionModel selectionModel, final DisplaySettings displaySettings )
+	public static TrackTableView createTrackTables( final Model model, final SelectionModel selectionModel, final DisplaySettings displaySettings, final String imageFileName )
 	{
-		return new TrackTableView( model, selectionModel, displaySettings );
+		return new TrackTableView( model, selectionModel, displaySettings, imageFileName );
 	}
 
 	// Invisible because called on the view config panel.

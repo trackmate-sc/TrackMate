@@ -78,7 +78,7 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 
 	private static final String KEY = "SPOT_TABLE";
 
-	public static String selectedFile = TrackTableView.selectedFile;
+	private String selectedFile =  System.getProperty( "user.home" ) + File.separator + "spots.csv";
 
 	private final Model model;
 
@@ -88,13 +88,13 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 
 	private final SelectionModel selectionModel;
 
-	public AllSpotsTableView( final Model model, final SelectionModel selectionModel, final DisplaySettings ds )
+	public AllSpotsTableView( final Model model, final SelectionModel selectionModel, final DisplaySettings ds, final String imageFileName )
 	{
 		super( "All spots table" );
 		setIconImage( TRACKMATE_ICON.getImage() );
 		this.model = model;
 		this.selectionModel = selectionModel;
-
+                this.selectedFile = imageFileName+"_spots.csv";
 		/*
 		 * GUI.
 		 */
@@ -154,6 +154,7 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 
 	public void exportToCsv()
 	{
+            
 		final File file = FileChooser.chooseFile(
 				this,
 				selectedFile,
