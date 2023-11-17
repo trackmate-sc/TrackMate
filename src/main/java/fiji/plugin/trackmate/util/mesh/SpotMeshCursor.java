@@ -4,6 +4,7 @@ import fiji.plugin.trackmate.SpotMesh;
 import gnu.trove.list.array.TDoubleArrayList;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
+import net.imglib2.RealInterval;
 import net.imglib2.mesh.alg.zslicer.Slice;
 
 /**
@@ -61,12 +62,13 @@ public class SpotMeshCursor< T > implements Cursor< T >
 		this.ra = ra;
 		this.sm = sm;
 		this.cal = cal;
-		this.minX = ( int ) Math.floor( ( sm.boundingBox.realMin( 0 ) + sm.getDoublePosition( 0 ) ) / cal[ 0 ] );
-		this.maxX = ( int ) Math.ceil( ( sm.boundingBox.realMax( 0 ) + sm.getDoublePosition( 0 ) ) / cal[ 0 ] );
-		this.minY = ( int ) Math.floor( ( sm.boundingBox.realMin( 1 ) + sm.getDoublePosition( 1 ) ) / cal[ 1 ] );
-		this.maxY = ( int ) Math.ceil( ( sm.boundingBox.realMax( 1 ) + sm.getDoublePosition( 1 ) ) / cal[ 1 ] );
-		this.minZ = ( int ) Math.floor( ( sm.boundingBox.realMin( 2 ) + sm.getDoublePosition( 2 ) ) / cal[ 2 ] );
-		this.maxZ = ( int ) Math.ceil( ( sm.boundingBox.realMax( 2 ) + sm.getDoublePosition( 2 ) ) / cal[ 2 ] );
+		final RealInterval bb = sm.getBoundingBox();
+		this.minX = ( int ) Math.floor( ( bb.realMin( 0 ) + sm.getDoublePosition( 0 ) ) / cal[ 0 ] );
+		this.maxX = ( int ) Math.ceil( ( bb.realMax( 0 ) + sm.getDoublePosition( 0 ) ) / cal[ 0 ] );
+		this.minY = ( int ) Math.floor( ( bb.realMin( 1 ) + sm.getDoublePosition( 1 ) ) / cal[ 1 ] );
+		this.maxY = ( int ) Math.ceil( ( bb.realMax( 1 ) + sm.getDoublePosition( 1 ) ) / cal[ 1 ] );
+		this.minZ = ( int ) Math.floor( ( bb.realMin( 2 ) + sm.getDoublePosition( 2 ) ) / cal[ 2 ] );
+		this.maxZ = ( int ) Math.ceil( ( bb.realMax( 2 ) + sm.getDoublePosition( 2 ) ) / cal[ 2 ] );
 		reset();
 	}
 
