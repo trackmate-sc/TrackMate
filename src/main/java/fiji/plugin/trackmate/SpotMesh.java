@@ -145,7 +145,7 @@ public class SpotMesh extends SpotBase
 	 *
 	 * @return the mesh.
 	 */
-	public Mesh getMesh()
+	public BufferMesh getMesh()
 	{
 		return mesh;
 	}
