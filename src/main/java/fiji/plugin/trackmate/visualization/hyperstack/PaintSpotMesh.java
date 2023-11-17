@@ -11,6 +11,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import ij.ImagePlus;
+import net.imglib2.RealInterval;
 import net.imglib2.RealLocalizable;
 import net.imglib2.mesh.alg.zslicer.Contour;
 import net.imglib2.mesh.alg.zslicer.Slice;
@@ -39,7 +40,8 @@ public class PaintSpotMesh extends TrackMatePainter< SpotMesh >
 	@Override
 	public int paint( final Graphics2D g2d, final SpotMesh spot )
 	{
-		if ( !intersect( spot.boundingBox, spot ) )
+		final RealInterval bb = spot.getBoundingBox();
+		if ( !intersect( bb, spot ) )
 			return -1;
 
 		// Z plane does not cross bounding box.
@@ -50,7 +52,7 @@ public class PaintSpotMesh extends TrackMatePainter< SpotMesh >
 		final double z = spot.getFeature( Spot.POSITION_Z );
 		final int zSlice = imp.getSlice() - 1;
 		final double dz = zSlice * calibration[ 2 ];
-		if ( spot.boundingBox.realMin( 2 ) + z > dz || spot.boundingBox.realMax( 2 ) + z < dz )
+		if ( bb.realMin( 2 ) + z > dz || bb.realMax( 2 ) + z < dz )
 		{
 			paintOutOfFocus( g2d, xs, ys );
 			return -1;

@@ -29,12 +29,12 @@ public class SpotMesh extends SpotBase
 	 * (0, 0, 0) and the true position of its vertices is obtained by adding the
 	 * spot center.
 	 */
-	private final Mesh mesh;
+	private BufferMesh mesh;
 
 	private Map< Integer, Slice > sliceMap;
 
 	/** The bounding-box, <b>centered on (0,0,0)</b> of this object. */
-	public RealInterval boundingBox;
+	private RealInterval boundingBox;
 
 	public SpotMesh(
 			final Mesh mesh,
@@ -61,19 +61,24 @@ public class SpotMesh extends SpotBase
 	{
 		// Dummy coordinates and radius.
 		super( 0., 0., 0., 0., quality, name );
+		setMesh( m );
+	}
 
-		// Compute triangles and vertices normals.
+	public void setMesh( final Mesh m )
+	{
+		// Store a copy in a Buffer mesh.
 		final BufferMesh mesh = new BufferMesh( m.vertices().size(), m.triangles().size() );
 		Meshes.calculateNormals( m, mesh );
-
 		this.mesh = mesh;
+
+		// Compute new true center.
 		final RealPoint center = Meshes.center( mesh );
 
 		// Reposition the spot.
 		setPosition( center );
 
 		// Shift mesh to (0, 0, 0).
-		final Vertices vertices = mesh.vertices();
+		final net.imglib2.mesh.Vertices vertices = mesh.vertices();
 		final long nVertices = vertices.size();
 		for ( long i = 0; i < nVertices; i++ )
 			vertices.setPositionf( i,
@@ -87,6 +92,14 @@ public class SpotMesh extends SpotBase
 
 		// Bounding box, also centered on (0,0,0)
 		this.boundingBox = Meshes.boundingBox( mesh );
+
+		// Slice cache.
+		resetZSliceCache();
+	}
+
+	public RealInterval getBoundingBox()
+	{
+		return boundingBox;
 	}
 
 	/**
