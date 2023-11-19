@@ -25,7 +25,7 @@ public class MeshSmootherAction extends AbstractTMAction
 	@Override
 	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
 	{
-		final MeshSmoother smoother = new MeshSmoother( trackmate.getModel().getSpots().iterable( true ), logger );
+		final MeshSmoother smoother = new MeshSmoother( logger );
 
 		final MeshSmootherModel model = new MeshSmootherModel();
 		final MeshSmootherPanel panel = new MeshSmootherPanel( model );
@@ -36,7 +36,12 @@ public class MeshSmootherAction extends AbstractTMAction
 				try
 				{
 					enabler.disable();
-					smoother.smooth( model.getNIters(), model.getMu(), model.getLambda(), model.getWeightType() );
+					smoother.smooth(
+							trackmate.getModel().getSpots().iterable( true ),
+							model.getNIters(),
+							model.getMu(),
+							model.getLambda(),
+							model.getWeightType() );
 					// Trigger refresh.
 					trackmate.getModel().getModelChangeListener().forEach( l -> l.modelChanged( new ModelChangeEvent( this, ModelChangeEvent.SPOTS_COMPUTED ) ) );
 				}
