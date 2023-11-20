@@ -65,13 +65,13 @@ public class MeshSmoother implements MultiThreaded
 		return modifiedSpots;
 	}
 
-	public List< Spot > smooth(
-			final Iterable< Spot > spots,
-			final int nIters,
-			final double mu,
-			final double lambda,
-			final TaubinWeightType weightType )
+	public List< Spot > smooth( final MeshSmootherModel smootherModel, final Iterable< Spot > spots )
 	{
+		final double mu = smootherModel.getMu();
+		final double lambda = smootherModel.getLambda();
+		final int nIters = smootherModel.getNIters();
+		final TaubinWeightType weightType = smootherModel.getWeightType();
+
 		final int nSpots = count( spots );
 		logger.setStatus( "Taubin smoothing" );
 		logger.log( "Started Taubin smoothing over " + nSpots + " spots with parameters:\n" );
