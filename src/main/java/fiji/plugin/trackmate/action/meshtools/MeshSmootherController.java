@@ -33,11 +33,10 @@ public class MeshSmootherController
 		this.model = model;
 		this.selectionModel = selectionModel;
 		this.logger = logger;
-		final MeshSmootherModel smootherModel = new MeshSmootherModel();
-		this.gui = new MeshSmootherPanel( smootherModel );
+		this.gui = new MeshSmootherPanel();
 		this.smoother = new MeshSmoother( logger );
 
-		gui.btnRun.addActionListener( e -> run( smootherModel ) );
+		gui.btnRun.addActionListener( e -> run( gui.getModel() ) );
 		gui.btnUndo.addActionListener( e -> undo() );
 	}
 

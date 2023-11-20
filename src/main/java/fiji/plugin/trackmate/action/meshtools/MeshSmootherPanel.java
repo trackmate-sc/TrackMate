@@ -17,8 +17,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTabbedPane;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import fiji.plugin.trackmate.gui.displaysettings.SliderPanel;
 import fiji.plugin.trackmate.gui.displaysettings.SliderPanelDouble;
@@ -43,17 +41,34 @@ public class MeshSmootherPanel extends JPanel
 
 	final JRadioButton rdbtnAll;
 
-	public MeshSmootherPanel( final MeshSmootherModel model )
-	{
-		final BoundedDoubleElement smoothing = StyleElements.boundedDoubleElement( "Smoothing (%)", 0., 100., () -> model.getMu() * 100., v -> model.setSmoothing( v / 100. ) );
-		final IntElement nIters1 = StyleElements.intElement( "N iterations", 1, 50, model::getNIters, model::setNIters );
-		final BoundedDoubleElement mu = StyleElements.boundedDoubleElement( "µ", 0., 1., model::getMu, model::setMu );
-		final BoundedDoubleElement lambda = StyleElements.boundedDoubleElement( "-λ", 0., 1., () -> -model.getLambda(), l -> model.setLambda( -l ) );
-		final EnumElement< TaubinWeightType > weightType = StyleElements.enumElement( "weight type", TaubinWeightType.values(), model::getWeightType, model::setWeightType );
-		final IntElement nIters2 = StyleElements.intElement( "N iterations", 1, 50, model::getNIters, model::setNIters );
+	private final MeshSmootherModel modelBasic;
 
-		final List< StyleElement > simpleElements = Arrays.asList( smoothing, nIters1 );
-		final List< StyleElement > advancedElements = Arrays.asList( mu, lambda, nIters2, weightType );
+	private final MeshSmootherModel modelSimple;
+
+	private final MeshSmootherModel modelAdvanced;
+
+	private final JTabbedPane mainPanel;
+
+	public MeshSmootherPanel()
+	{
+		this.modelBasic = new MeshSmootherModel();
+		modelBasic.setMu( 1. );
+		modelBasic.setLambda( 0. );
+		modelBasic.setWeightType( TaubinWeightType.NAIVE );
+		final IntElement nItersBasic = StyleElements.intElement( "N iterations", 1, 50, modelBasic::getNIters, modelBasic::setNIters );
+		final List< StyleElement > superSimpleElements = Arrays.asList( nItersBasic );
+
+		this.modelSimple = new MeshSmootherModel();
+		final BoundedDoubleElement smoothing = StyleElements.boundedDoubleElement( "Smoothing (%)", 0., 100., () -> modelSimple.getMu() * 100., v -> modelSimple.setSmoothing( v / 100. ) );
+		final IntElement nItersSimple = StyleElements.intElement( "N iterations", 1, 50, modelSimple::getNIters, modelSimple::setNIters );
+		final List< StyleElement > simpleElements = Arrays.asList( smoothing, nItersSimple );
+
+		this.modelAdvanced = new MeshSmootherModel();
+		final BoundedDoubleElement mu = StyleElements.boundedDoubleElement( "µ", 0., 1., modelAdvanced::getMu, modelAdvanced::setMu );
+		final BoundedDoubleElement lambda = StyleElements.boundedDoubleElement( "-λ", 0., 1., () -> -modelAdvanced.getLambda(), l -> modelAdvanced.setLambda( -l ) );
+		final EnumElement< TaubinWeightType > weightType = StyleElements.enumElement( "weight type", TaubinWeightType.values(), modelAdvanced::getWeightType, modelAdvanced::setWeightType );
+		final IntElement nItersAdvanced = StyleElements.intElement( "N iterations", 1, 50, modelAdvanced::getNIters, modelAdvanced::setNIters );
+		final List< StyleElement > advancedElements = Arrays.asList( mu, lambda, nItersAdvanced, weightType );
 
 		setLayout( new BorderLayout( 0, 0 ) );
 
@@ -89,8 +104,15 @@ public class MeshSmootherPanel extends JPanel
 		this.btnRun = new JButton( "Run" );
 		buttonPanel.add( btnRun );
 
-		final JTabbedPane mainPanel = new JTabbedPane( JTabbedPane.TOP );
+		this.mainPanel = new JTabbedPane( JTabbedPane.TOP );
 		add( mainPanel, BorderLayout.CENTER );
+
+		final JPanel panelSuperSimple = new JPanel();
+		panelSuperSimple.setOpaque( false );
+		panelSuperSimple.setBorder( BorderFactory.createEmptyBorder( 5, 5, 5, 5 ) );
+		final MyStyleElementVisitors superSimplePanelVisitor = new MyStyleElementVisitors( panelSuperSimple );
+		superSimpleElements.forEach( el -> el.accept( superSimplePanelVisitor ) );
+		mainPanel.addTab( "Basic", null, panelSuperSimple, null );
 
 		final JPanel panelSimple = new JPanel();
 		panelSimple.setOpaque( false );
@@ -110,30 +132,20 @@ public class MeshSmootherPanel extends JPanel
 		buttonGroup.add( rdbtnAll );
 		buttonGroup.add( rdbtnSelection );
 		rdbtnSelection.setSelected( true );
+	}
 
-		mainPanel.addChangeListener( new ChangeListener()
+	public MeshSmootherModel getModel()
+	{
+		switch ( mainPanel.getSelectedIndex() )
 		{
-
-			@Override
-			public void stateChanged( final ChangeEvent e )
-			{
-				if ( mainPanel.getSelectedIndex() == 0 )
-				{
-					// Simple.
-					model.setSmoothing( smoothing.get() );
-					model.setNIters( nIters1.get() );
-					model.setWeightType( TaubinWeightType.NAIVE );
-				}
-				else
-				{
-					// Advanced.
-					model.setMu( mu.get() );
-					model.setLambda( lambda.get() );
-					model.setNIters( nIters2.get() );
-					model.setWeightType( weightType.getValue() );
-				}
-			}
-		} );
+		case 0:
+			return modelBasic;
+		case 1:
+			return modelSimple;
+		case 2:
+			return modelAdvanced;
+		}
+		throw new IllegalStateException( "Cannot handle mesh smoothing settings type number " + ( mainPanel.getSelectedIndex() ) );
 	}
 
 	private static class MyStyleElementVisitors implements StyleElementVisitor
@@ -210,7 +222,7 @@ public class MeshSmootherPanel extends JPanel
 
 	public static void main( final String[] args )
 	{
-		final MeshSmootherPanel panel = new MeshSmootherPanel( new MeshSmootherModel() );
+		final MeshSmootherPanel panel = new MeshSmootherPanel();
 
 		final JFrame frame = new JFrame( "Smoothing params" );
 		frame.getContentPane().add( panel );
