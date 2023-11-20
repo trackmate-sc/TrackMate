@@ -65,4 +65,15 @@ public class MeshSmootherModel
 		setMu( Math.max( 0, Math.min( 0.97, smoothing ) ) );
 		setLambda( -mu - 0.03 );
 	}
+
+	@Override
+	public String toString()
+	{
+		final StringBuilder str = new StringBuilder( super.toString() + '\n' );
+		str.append( String.format( " - %s: %.2f\n", "µ", mu ) );
+		str.append( String.format( " - %s: %.2f\n", "λ", lambda ) );
+		str.append( String.format( " - %s: %d\n", "N iterations", nIters ) );
+		str.append( String.format( " - %s: %s\n", "weights", weightType ) );
+		return str.toString();
+	}
 }
