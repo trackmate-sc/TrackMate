@@ -1,25 +1,18 @@
 package fiji.plugin.trackmate.action.meshtools;
 
 import java.awt.Frame;
-import java.util.Collection;
 
 import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
 
 import org.scijava.plugin.Plugin;
 
-import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.action.AbstractTMAction;
 import fiji.plugin.trackmate.action.TrackMateAction;
 import fiji.plugin.trackmate.action.TrackMateActionFactory;
-import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
 
 public class MeshSmootherAction extends AbstractTMAction
 {
@@ -27,65 +20,8 @@ public class MeshSmootherAction extends AbstractTMAction
 	@Override
 	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
 	{
-		final MeshSmoother smoother = new MeshSmoother( logger );
-
-		final MeshSmootherModel model = new MeshSmootherModel();
-		final MeshSmootherPanel panel = new MeshSmootherPanel( model );
-
-		panel.btnRun.addActionListener( e -> {
-			new Thread( () -> {
-				final EverythingDisablerAndReenabler enabler = new EverythingDisablerAndReenabler( panel, new Class[] { JLabel.class } );
-				try
-				{
-					enabler.disable();
-					final Collection< Spot > modifiedSpots = smoother.smooth(
-							trackmate.getModel().getSpots().iterable( true ),
-							model.getNIters(),
-							model.getMu(),
-							model.getLambda(),
-							model.getWeightType() );
-					// Trigger refresh.
-					final ModelChangeEvent event = new ModelChangeEvent( this, ModelChangeEvent.MODEL_MODIFIED );
-					event.addAllSpots( modifiedSpots );
-					modifiedSpots.forEach( s -> event.putSpotFlag( s, ModelChangeEvent.FLAG_SPOT_MODIFIED ) );
-					trackmate.getModel().getModelChangeListener().forEach( l -> l.modelChanged( event ) );
-				}
-				catch ( final Exception err )
-				{
-					err.printStackTrace();
-				}
-				finally
-				{
-					enabler.reenable();
-				}
-			}, "TrackMate mesh smoother" ).start();
-		} );
-
-		panel.btnUndo.addActionListener( e -> {
-			new Thread( () -> {
-				final EverythingDisablerAndReenabler enabler = new EverythingDisablerAndReenabler( panel, new Class[] { JLabel.class } );
-				try
-				{
-					enabler.disable();
-					final Collection< Spot > modifiedSpots = smoother.undo();
-					// Trigger refresh.
-					final ModelChangeEvent event = new ModelChangeEvent( this, ModelChangeEvent.MODEL_MODIFIED );
-					event.addAllSpots( modifiedSpots );
-					modifiedSpots.forEach( s -> event.putSpotFlag( s, ModelChangeEvent.FLAG_SPOT_MODIFIED ) );
-					trackmate.getModel().getModelChangeListener().forEach( l -> l.modelChanged( event ) );
-				}
-				finally
-				{
-					enabler.reenable();
-				}
-			}, "TrackMate mesh smoother" ).start();
-		} );
-
-		final JFrame frame = new JFrame( "Smoothing params" );
-		frame.getContentPane().add( panel );
-		frame.setSize( 400, 300 );
-		GuiUtils.positionWindow( frame, parent );
-		frame.setVisible( true );
+		final MeshSmootherController controller = new MeshSmootherController( trackmate.getModel(), selectionModel, logger );
+		controller.show( parent );
 	}
 
 	@Plugin( type = TrackMateActionFactory.class )
