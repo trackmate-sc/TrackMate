@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.action.meshtools;
 
 import java.awt.Frame;
+import java.util.Collection;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -10,6 +11,7 @@ import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.action.AbstractTMAction;
 import fiji.plugin.trackmate.action.TrackMateAction;
@@ -36,14 +38,21 @@ public class MeshSmootherAction extends AbstractTMAction
 				try
 				{
 					enabler.disable();
-					smoother.smooth(
+					final Collection< Spot > modifiedSpots = smoother.smooth(
 							trackmate.getModel().getSpots().iterable( true ),
 							model.getNIters(),
 							model.getMu(),
 							model.getLambda(),
 							model.getWeightType() );
 					// Trigger refresh.
-					trackmate.getModel().getModelChangeListener().forEach( l -> l.modelChanged( new ModelChangeEvent( this, ModelChangeEvent.SPOTS_COMPUTED ) ) );
+					final ModelChangeEvent event = new ModelChangeEvent( this, ModelChangeEvent.MODEL_MODIFIED );
+					event.addAllSpots( modifiedSpots );
+					modifiedSpots.forEach( s -> event.putSpotFlag( s, ModelChangeEvent.FLAG_SPOT_MODIFIED ) );
+					trackmate.getModel().getModelChangeListener().forEach( l -> l.modelChanged( event ) );
+				}
+				catch ( final Exception err )
+				{
+					err.printStackTrace();
 				}
 				finally
 				{
@@ -58,9 +67,12 @@ public class MeshSmootherAction extends AbstractTMAction
 				try
 				{
 					enabler.disable();
-					smoother.undo();
+					final Collection< Spot > modifiedSpots = smoother.undo();
 					// Trigger refresh.
-					trackmate.getModel().getModelChangeListener().forEach( l -> l.modelChanged( new ModelChangeEvent( this, ModelChangeEvent.SPOTS_COMPUTED ) ) );
+					final ModelChangeEvent event = new ModelChangeEvent( this, ModelChangeEvent.MODEL_MODIFIED );
+					event.addAllSpots( modifiedSpots );
+					modifiedSpots.forEach( s -> event.putSpotFlag( s, ModelChangeEvent.FLAG_SPOT_MODIFIED ) );
+					trackmate.getModel().getModelChangeListener().forEach( l -> l.modelChanged( event ) );
 				}
 				finally
 				{

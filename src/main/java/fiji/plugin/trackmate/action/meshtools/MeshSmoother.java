@@ -1,9 +1,12 @@
 package fiji.plugin.trackmate.action.meshtools;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import fiji.plugin.trackmate.Logger;
@@ -19,6 +22,10 @@ import net.imglib2.util.ValuePair;
 
 public class MeshSmoother implements MultiThreaded
 {
+
+	private static final long TIME_OUT_DELAY = 2;
+
+	private static final TimeUnit TIME_OUT_UNITS = TimeUnit.HOURS;
 
 	/** Stores initial position and mesh of the spot. */
 
@@ -37,25 +44,28 @@ public class MeshSmoother implements MultiThreaded
 	}
 
 
-	public void undo()
+	public List< Spot > undo()
 	{
 		logger.setStatus( "Undoing mesh smoothing" );
 		final Set< SpotMesh > keys = undoMap.keySet();
 		final int nSpots = keys.size();
 		int i = 0;
 		logger.log( "Undoing mesh smoothing for " + nSpots + " spots.\n" );
+		final List< Spot > modifiedSpots = new ArrayList<>();
 		for ( final SpotMesh sm : keys )
 		{
 			final ValuePair< BufferMesh, double[] > old = undoMap.get( sm );
 			sm.setMesh( old.getA() );
 			sm.setPosition( old.getB() );
+			modifiedSpots.add( sm );
 			logger.setProgress( ( double ) ( ++i ) / nSpots );
 		}
 		logger.setStatus( "" );
 		logger.log( "Done.\n" );
+		return modifiedSpots;
 	}
 
-	public void smooth(
+	public List< Spot > smooth(
 			final Iterable< Spot > spots,
 			final int nIters,
 			final double mu,
@@ -65,24 +75,44 @@ public class MeshSmoother implements MultiThreaded
 		final int nSpots = count( spots );
 		logger.setStatus( "Taubin smoothing" );
 		logger.log( "Started Taubin smoothing over " + nSpots + " spots with parameters:\n" );
-		logger.log( String.format( " - %14s: %5.2f\n", "µ", mu ) );
-		logger.log( String.format( " - %14s: %5.2f\n", "λ", lambda ) );
-		logger.log( String.format( " - %14s: %5d\n", "N iterations", nIters ) );
-		logger.log( String.format( " - %14s: %s\n", "weights", weightType ) );
+		logger.log( String.format( " - %s: %.2f\n", "µ", mu ) );
+		logger.log( String.format( " - %s: %.2f\n", "λ", lambda ) );
+		logger.log( String.format( " - %s: %d\n", "N iterations", nIters ) );
+		logger.log( String.format( " - %s: %s\n", "weights", weightType ) );
 
 		final AtomicInteger ai = new AtomicInteger( 0 );
 		final ExecutorService executors = Threads.newFixedThreadPool( numThreads );
+		final List< Spot > modifiedSpots = new ArrayList<>();
 		for ( final Spot spot : spots )
 		{
 			if ( SpotMesh.class.isInstance( spot ) )
 			{
 				final SpotMesh sm = ( SpotMesh ) spot;
 				executors.execute( process( sm, nIters, mu, lambda, weightType, ai, nSpots ) );
+				modifiedSpots.add( sm );
 			}
 		}
 
-		logger.setStatus( "" );
-		logger.log( "Done.\n" );
+		executors.shutdown();
+		try
+		{
+			final boolean ok = executors.awaitTermination( TIME_OUT_DELAY, TIME_OUT_UNITS );
+			if ( !ok )
+				logger.error( "Timeout of " + TIME_OUT_DELAY + " " + TIME_OUT_UNITS + " reached while smoothing.\n" );
+
+			logger.log( "Done.\n" );
+		}
+		catch ( final InterruptedException e )
+		{
+			logger.error( e.getMessage() );
+			e.printStackTrace();
+		}
+		finally
+		{
+			logger.setProgress( 1 );
+			logger.setStatus( "" );
+		}
+		return modifiedSpots;
 	}
 
 	private static final int count( final Iterable< Spot > spots )
