@@ -20,6 +20,8 @@ import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import fiji.plugin.trackmate.gui.displaysettings.SliderPanel;
+import fiji.plugin.trackmate.gui.displaysettings.SliderPanelDouble;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.BoundedDoubleElement;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.EnumElement;
@@ -60,6 +62,7 @@ public class MeshSmootherPanel extends JPanel
 		bottomPanel.setLayout( new BoxLayout( bottomPanel, BoxLayout.Y_AXIS ) );
 
 		final JPanel selectionPanel = new JPanel();
+		selectionPanel.setBorder( BorderFactory.createEmptyBorder( 5, 5, 5, 5 ) );
 		bottomPanel.add( selectionPanel );
 		selectionPanel.setLayout( new BoxLayout( selectionPanel, BoxLayout.X_AXIS ) );
 
@@ -90,12 +93,14 @@ public class MeshSmootherPanel extends JPanel
 		add( mainPanel, BorderLayout.CENTER );
 
 		final JPanel panelSimple = new JPanel();
+		panelSimple.setOpaque( false );
 		panelSimple.setBorder( BorderFactory.createEmptyBorder( 5, 5, 5, 5 ) );
 		final MyStyleElementVisitors simplePanelVisitor = new MyStyleElementVisitors( panelSimple );
 		simpleElements.forEach( el -> el.accept( simplePanelVisitor ) );
 		mainPanel.addTab( "Simple", null, panelSimple, null );
 
 		final JPanel panelAdvanced = new JPanel();
+		panelAdvanced.setOpaque( false );
 		panelAdvanced.setBorder( BorderFactory.createEmptyBorder( 5, 5, 5, 5 ) );
 		final MyStyleElementVisitors advancedPanelVisitor = new MyStyleElementVisitors( panelAdvanced );
 		advancedElements.forEach( el -> el.accept( advancedPanelVisitor ) );
@@ -176,7 +181,9 @@ public class MeshSmootherPanel extends JPanel
 			lbl.setFont( getFont().deriveFont( getFont().getSize2D() - 1f ) );
 			panel.add( lbl, gbcs );
 			gbcs.gridx++;
-			panel.add( StyleElements.linkedSliderPanel( el, 3 ), gbcs );
+			final SliderPanelDouble sliderPanel = StyleElements.linkedSliderPanel( el, 3 );
+			sliderPanel.setOpaque( false );
+			panel.add( sliderPanel, gbcs );
 			gbcs.gridy++;
 		}
 
@@ -189,7 +196,9 @@ public class MeshSmootherPanel extends JPanel
 			lbl.setFont( getFont().deriveFont( getFont().getSize2D() - 1f ) );
 			panel.add( lbl, gbcs );
 			gbcs.gridx++;
-			panel.add( StyleElements.linkedSliderPanel( el, 3 ), gbcs );
+			final SliderPanel sliderPanel = StyleElements.linkedSliderPanel( el, 3 );
+			sliderPanel.setOpaque( false );
+			panel.add( sliderPanel, gbcs );
 			gbcs.gridy++;
 		}
 
