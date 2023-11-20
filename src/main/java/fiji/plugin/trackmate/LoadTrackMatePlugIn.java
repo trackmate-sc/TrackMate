@@ -53,6 +53,7 @@ import ij.ImagePlus;
 
 public class LoadTrackMatePlugIn extends TrackMatePlugIn
 {
+	private String pluginTitle = TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION;
 
 	/**
 	 * Loads a TrackMate file in the GUI.
@@ -82,13 +83,13 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 			file = new File( filePath );
 			if ( !file.exists() )
 			{
-				IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION,
+				IJ.error( pluginTitle,
 						"Could not find file with path " + filePath + "." );
 				return;
 			}
 			if ( !file.canRead() )
 			{
-				IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION,
+				IJ.error( pluginTitle,
 						"Could not read file with path " + filePath + "." );
 				return;
 			}
@@ -98,7 +99,7 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 		final TmXmlReader reader = createReader( file );
 		if ( !reader.isReadingOk() )
 		{
-			IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION, reader.getErrorMessage() );
+			IJ.error( pluginTitle, reader.getErrorMessage() );
 			return;
 		}
 
@@ -232,7 +233,7 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 		}
 
 		logger2.log( "File loaded on " + TMUtils.getCurrentTimeString() + '\n', Logger.BLUE_COLOR );
-		final String welcomeMessage = TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION + '\n';
+		final String welcomeMessage = pluginTitle + '\n';
 		// Log GUI processing start
 		logger2.log( welcomeMessage, Logger.BLUE_COLOR );
 		logger2.log( "Please note that TrackMate is available through Fiji, and is based on a publication. "
