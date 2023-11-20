@@ -12,6 +12,7 @@ import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.gui.GuiUtils;
+import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
 
 public class MeshSmootherController
@@ -45,6 +46,7 @@ public class MeshSmootherController
 		final JFrame frame = new JFrame( "Smoothing params" );
 		frame.getContentPane().add( gui );
 		frame.setSize( 400, 300 );
+		frame.setIconImage( Icons.TRACKMATE_ICON.getImage() );
 		GuiUtils.positionWindow( frame, parent );
 		frame.setVisible( true );
 	}
