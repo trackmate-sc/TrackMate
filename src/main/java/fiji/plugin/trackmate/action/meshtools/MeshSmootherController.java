@@ -26,19 +26,19 @@ public class MeshSmootherController
 
 	private final MeshSmoother smoother;
 
+	private final Logger logger;
+
 	public MeshSmootherController( final Model model, final SelectionModel selectionModel, final Logger logger )
 	{
 		this.model = model;
 		this.selectionModel = selectionModel;
+		this.logger = logger;
 		final MeshSmootherModel smootherModel = new MeshSmootherModel();
 		this.gui = new MeshSmootherPanel( smootherModel );
 		this.smoother = new MeshSmoother( logger );
 
-
 		gui.btnRun.addActionListener( e -> run( smootherModel ) );
-
 		gui.btnUndo.addActionListener( e -> undo() );
-
 	}
 
 	public void show( final Component parent )
@@ -97,9 +97,11 @@ public class MeshSmootherController
 
 	private void fireEvent( final Collection< Spot > modifiedSpots )
 	{
+		logger.log( "Updating spot features and meshes.\n" );
 		final ModelChangeEvent event = new ModelChangeEvent( this, ModelChangeEvent.MODEL_MODIFIED );
 		event.addAllSpots( modifiedSpots );
 		modifiedSpots.forEach( s -> event.putSpotFlag( s, ModelChangeEvent.FLAG_SPOT_MODIFIED ) );
 		model.getModelChangeListener().forEach( l -> l.modelChanged( event ) );
+		logger.log( "Done.\n" );
 	}
 }
