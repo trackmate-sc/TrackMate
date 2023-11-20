@@ -47,6 +47,7 @@ import javax.swing.SwingConstants;
 
 import com.mxgraph.canvas.mxGraphics2DCanvas;
 import com.mxgraph.model.mxCell;
+import com.mxgraph.swing.handler.mxMovePreview;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.swing.handler.mxGraphHandler;
 import com.mxgraph.swing.view.mxCellEditor;
@@ -55,6 +56,7 @@ import com.mxgraph.util.mxEvent;
 import com.mxgraph.util.mxEventObject;
 import com.mxgraph.util.mxEventSource.mxIEventListener;
 import com.mxgraph.util.mxPoint;
+import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxGraphView;
@@ -190,7 +192,7 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			@Override
 			public void mousePressed( final MouseEvent e )
 			{
-				if ( graphComponent.isEnabled() && isEnabled() && !e.isConsumed() && !graphComponent.isForceMarqueeEvent( e ) )
+				if (shouldStartMove(e, graphComponent))
 				{
 					cell = graphComponent.getCellAt( e.getX(), e.getY(), false );
 					initialCell = cell;
@@ -219,13 +221,13 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			@Override
 			public void mouseReleased( final MouseEvent e )
 			{
-				if ( graphComponent.isEnabled() && isEnabled() && !e.isConsumed() )
+				if (shouldProcessInput(e, graphComponent))
 				{
 					final mxGraph lGraph = graphComponent.getGraph();
 					double dx = 0;
 					double dy = 0;
 
-					if ( first != null && ( cellBounds != null || movePreview.isActive() ) )
+					if (shouldProcessCellBounds(first, cellBounds, movePreview))
 					{
 						final double scale = lGraph.getView().getScale();
 						final mxPoint trans = lGraph.getView().getTranslate();
@@ -339,6 +341,18 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			}
 
 		};
+	}
+
+	private boolean shouldStartMove(MouseEvent e, mxGraphComponent graphComponent) {
+		return graphComponent.isEnabled() && isEnabled() && !e.isConsumed() && !graphComponent.isForceMarqueeEvent(e);
+	}
+
+	private boolean shouldProcessInput(MouseEvent e, mxGraphComponent graphComponent) {
+		return graphComponent.isEnabled() && isEnabled() && !e.isConsumed();
+	}
+
+	private boolean shouldProcessCellBounds(Point first, mxRectangle cellBounds, mxMovePreview movePreview) {
+		return first != null && (cellBounds != null || movePreview.isActive());
 	}
 
 	/**
