@@ -1,7 +1,6 @@
 package fiji.plugin.trackmate.action.meshtools;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -11,10 +10,12 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -36,6 +37,10 @@ public class MeshSmootherPanel extends JPanel
 
 	final JButton btnUndo;
 
+	final JRadioButton rdbtnSelection;
+
+	final JRadioButton rdbtnAll;
+
 	public MeshSmootherPanel( final MeshSmootherModel model )
 	{
 		final BoundedDoubleElement smoothing = StyleElements.boundedDoubleElement( "Smoothing (%)", 0., 100., () -> model.getMu() * 100., v -> model.setSmoothing( v / 100. ) );
@@ -50,15 +55,33 @@ public class MeshSmootherPanel extends JPanel
 
 		setLayout( new BorderLayout( 0, 0 ) );
 
+		final JPanel bottomPanel = new JPanel();
+		add( bottomPanel, BorderLayout.SOUTH );
+		bottomPanel.setLayout( new BoxLayout( bottomPanel, BoxLayout.Y_AXIS ) );
+
+		final JPanel selectionPanel = new JPanel();
+		bottomPanel.add( selectionPanel );
+		selectionPanel.setLayout( new BoxLayout( selectionPanel, BoxLayout.X_AXIS ) );
+
+		final JLabel lblRunOn = new JLabel( "Run on:" );
+		selectionPanel.add( lblRunOn );
+
+		selectionPanel.add( Box.createHorizontalGlue() );
+
+		rdbtnSelection = new JRadioButton( "selection only" );
+		selectionPanel.add( rdbtnSelection );
+
+		rdbtnAll = new JRadioButton( "all visible spots" );
+		selectionPanel.add( rdbtnAll );
+
 		final JPanel buttonPanel = new JPanel();
-		add( buttonPanel, BorderLayout.SOUTH );
+		bottomPanel.add( buttonPanel );
 		buttonPanel.setLayout( new BoxLayout( buttonPanel, BoxLayout.X_AXIS ) );
 
 		this.btnUndo = new JButton( "Undo" );
 		buttonPanel.add( btnUndo );
 
-		final Component horizontalGlue = Box.createHorizontalGlue();
-		buttonPanel.add( horizontalGlue );
+		buttonPanel.add( Box.createHorizontalGlue() );
 
 		this.btnRun = new JButton( "Run" );
 		buttonPanel.add( btnRun );
@@ -77,6 +100,11 @@ public class MeshSmootherPanel extends JPanel
 		final MyStyleElementVisitors advancedPanelVisitor = new MyStyleElementVisitors( panelAdvanced );
 		advancedElements.forEach( el -> el.accept( advancedPanelVisitor ) );
 		mainPanel.addTab( "Advanced", null, panelAdvanced, null );
+
+		final ButtonGroup buttonGroup = new ButtonGroup();
+		buttonGroup.add( rdbtnAll );
+		buttonGroup.add( rdbtnSelection );
+		rdbtnSelection.setSelected( true );
 
 		mainPanel.addChangeListener( new ChangeListener()
 		{
