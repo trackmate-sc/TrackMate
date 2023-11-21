@@ -102,72 +102,56 @@ public class MaskUtils
 		return val.getRealDouble();
 	}
 
-	public static final long getThreshold( final Histogram1d< ? > hist )
-	{
-		final long[] histogram = hist.toLongArray();
+	public static final long getThreshold(final Histogram1d<?> histogram) {
+		final long[] intensityHistogram = histogram.toLongArray();
 		// Otsu's threshold algorithm
 		// C++ code by Jordan Bevik <Jordan.Bevic@qtiworld.com>
 		// ported to ImageJ plugin by G.Landini
-		int k, kStar; // k = the current threshold; kStar = optimal threshold
-		final int L = histogram.length; // The total intensity of the image
-		long N1, N; // N1 = # points with intensity <=k; N = total number of
-					// points
-		long Sk; // The total intensity for all histogram points <=k
-		long S;
-		double BCV, BCVmax; // The current Between Class Variance and maximum
-							// BCV
-		double num, denom; // temporary bookkeeping
+		int currentThreshold, optimalThreshold; // currentThreshold = the current threshold; optimalThreshold = optimal threshold
+		final int totalIntensity = intensityHistogram.length; // The total intensity of the image
+		long pointsBelowThreshold, totalPoints; // pointsBelowThreshold = # points with intensity <= currentThreshold; totalPoints = total number of points
+		long totalIntensityBelowThreshold; // The total intensity for all histogram points <= currentThreshold
+		long totalIntensityOverall;
+		double betweenClassVariance, maxBetweenClassVariance; // The current Between Class Variance and maximum BCV
+		double numerator, denominator; // temporary bookkeeping
 
 		// Initialize values:
-		S = 0;
-		N = 0;
-		for ( k = 0; k < L; k++ )
-		{
-			S += k * histogram[ k ]; // Total histogram intensity
-			N += histogram[ k ]; // Total number of data points
+		totalIntensityOverall = 0;
+		totalPoints = 0;
+		for (currentThreshold = 0; currentThreshold < totalIntensity; currentThreshold++) {
+			totalIntensityOverall += currentThreshold * intensityHistogram[currentThreshold]; // Total histogram intensity
+			totalPoints += intensityHistogram[currentThreshold]; // Total number of data points
 		}
 
-		Sk = 0;
-		N1 = histogram[ 0 ]; // The entry for zero intensity
-		BCV = 0;
-		BCVmax = 0;
-		kStar = 0;
+		totalIntensityBelowThreshold = 0;
+		pointsBelowThreshold = intensityHistogram[0]; // The entry for zero intensity
+		betweenClassVariance = 0;
+		maxBetweenClassVariance = 0;
+		optimalThreshold = 0;
 
 		// Look at each possible threshold value,
 		// calculate the between-class variance, and decide if it's a max
-		for ( k = 1; k < L - 1; k++ )
-		{ // No need to check endpoints k = 0 or k = L-1
-			Sk += k * histogram[ k ];
-			N1 += histogram[ k ];
+		for (currentThreshold = 1; currentThreshold < totalIntensity - 1; currentThreshold++) {
+			totalIntensityBelowThreshold += currentThreshold * intensityHistogram[currentThreshold];
+			pointsBelowThreshold += intensityHistogram[currentThreshold];
 
-			// The float casting here is to avoid compiler warning about loss of
-			// precision and
-			// will prevent overflow in the case of large saturated images
-			denom = ( double ) ( N1 ) * ( N - N1 ); // Maximum value of denom is
-													// (N^2)/4 =
-													// approx. 3E10
+			denominator = (double) (pointsBelowThreshold) * (totalPoints - pointsBelowThreshold);
 
-			if ( denom != 0 )
-			{
-				// Float here is to avoid loss of precision when dividing
-				num = ( ( double ) N1 / N ) * S - Sk; // Maximum value of num =
-														// 255*N =
-														// approx 8E7
-				BCV = ( num * num ) / denom;
+			if (denominator != 0) {
+				numerator = ((double) pointsBelowThreshold / totalPoints) * totalIntensityOverall - totalIntensityBelowThreshold;
+				betweenClassVariance = (numerator * numerator) / denominator;
+			} else {
+				betweenClassVariance = 0;
 			}
-			else
-				BCV = 0;
 
-			if ( BCV >= BCVmax )
-			{ // Assign the best threshold found so far
-				BCVmax = BCV;
-				kStar = k;
+			if (betweenClassVariance >= maxBetweenClassVariance) {
+				maxBetweenClassVariance = betweenClassVariance;
+				optimalThreshold = currentThreshold;
 			}
 		}
-		// kStar += 1; // Use QTI convention that intensity -> 1 if intensity >=
-		// k
-		// (the algorithm was developed for I-> 1 if I <= k.)
-		return kStar;
+		// optimalThreshold += 1; // Use QTI convention that intensity -> 1 if intensity >= optimalThreshold
+		// (the algorithm was developed for I-> 1 if I <= optimalThreshold.)
+		return optimalThreshold;
 	}
 
 	/**
