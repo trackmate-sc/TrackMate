@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -21,408 +21,333 @@
  */
 package fiji.plugin.trackmate.visualization.trackscheme;
 
-import java.awt.Color;
-import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.util.ArrayList;
-import java.util.EventObject;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.JColorChooser;
-import javax.swing.JPopupMenu;
-import javax.swing.SwingUtilities;
-
-import org.jgrapht.graph.DefaultWeightedEdge;
-
 import com.mxgraph.model.mxCell;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxEvent;
 import com.mxgraph.util.mxEventObject;
 import com.mxgraph.util.mxEventSource.mxIEventListener;
-
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
 import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
+import org.jgrapht.graph.DefaultWeightedEdge;
 
-public class TrackSchemePopupMenu extends JPopupMenu
-{
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.EventObject;
 
-	private static final long serialVersionUID = -1L;
+public class TrackSchemePopupMenu extends JPopupMenu {
 
-	/**
-	 * The cell where the right-click was made, <code>null</code> if the
-	 * right-click is made out of a cell.
-	 */
-	private final Object cell;
+    private static final long serialVersionUID = -1L;
+    private static Color previousColor = Color.RED;
+    /**
+     * The cell where the right-click was made, <code>null</code> if the
+     * right-click is made out of a cell.
+     */
+    private final Object cell;
+    /**
+     * The TrackScheme instance.
+     */
+    private final TrackScheme trackScheme;
+    /**
+     * The right-click location.
+     */
+    private final Point point;
+    private JGraphXAdapter jGraphXAdapter;
 
-	/** The TrackScheme instance. */
-	private final TrackScheme trackScheme;
+    public TrackSchemePopupMenu(final TrackScheme trackScheme, final Object cell, final Point point) {
+        this.trackScheme = trackScheme;
+        this.cell = cell;
+        this.point = point;
+        init();
+    }
 
-	/** The right-click location. */
-	private final Point point;
+    /*
+     * ACTIONS
+     */
 
-	private static Color previousColor = Color.RED;
+    private void manualColorEdges(final ArrayList<mxCell> edges) {
+        for (final mxCell mxCell : edges) {
+            final DefaultWeightedEdge edge = trackScheme.getGraph().getEdgeFor(mxCell);
+            final Double value = Double.valueOf(previousColor.getRGB());
+            trackScheme.getModel().getFeatureModel().putEdgeFeature(edge, ManualEdgeColorAnalyzer.FEATURE, value);
+        }
+    }
 
-	public TrackSchemePopupMenu( final TrackScheme trackScheme, final Object cell, final Point point )
-	{
-		this.trackScheme = trackScheme;
-		this.cell = cell;
-		this.point = point;
-		init();
-	}
+    private void manualColorVertices(final ArrayList<mxCell> vertices) {
+        for (final mxCell mxCell : vertices) {
+            final Spot spot = trackScheme.getGraph().getSpotFor(mxCell);
+            final Double value = Double.valueOf(previousColor.getRGB());
+            spot.putFeature(ManualSpotColorAnalyzerFactory.FEATURE, value);
+        }
+    }
 
-	/*
-	 * ACTIONS
-	 */
+    private void selectWholeTrack(final ArrayList<mxCell> vertices, final ArrayList<mxCell> edges) {
+        jGraphXAdapter = new JGraphXAdapter(trackScheme.getModel(), trackScheme.getSelectionModel());
+        jGraphXAdapter.selectTrack(vertices, edges, 0);
+    }
 
-	private void manualColorEdges( final ArrayList< mxCell > edges )
-	{
-		for ( final mxCell mxCell : edges )
-		{
-			final DefaultWeightedEdge edge = trackScheme.getGraph().getEdgeFor( mxCell );
-			final Double value = Double.valueOf( previousColor.getRGB() );
-			trackScheme.getModel().getFeatureModel().putEdgeFeature( edge, ManualEdgeColorAnalyzer.FEATURE, value );
-		}
-	}
+    private void selectTrackDownwards(final ArrayList<mxCell> vertices, final ArrayList<mxCell> edges) {
+        jGraphXAdapter = new JGraphXAdapter(trackScheme.getModel(), trackScheme.getSelectionModel());
+        jGraphXAdapter.selectTrack(vertices, edges, -1);
+    }
 
-	private void manualColorVertices( final ArrayList< mxCell > vertices )
-	{
-		for ( final mxCell mxCell : vertices )
-		{
-			final Spot spot = trackScheme.getGraph().getSpotFor( mxCell );
-			final Double value = Double.valueOf( previousColor.getRGB() );
-			spot.putFeature( ManualSpotColorAnalyzerFactory.FEATURE, value );
-		}
-	}
+    private void selectTrackUpwards(final ArrayList<mxCell> vertices, final ArrayList<mxCell> edges) {
+        jGraphXAdapter = new JGraphXAdapter(trackScheme.getModel(), trackScheme.getSelectionModel());
+        jGraphXAdapter.selectTrack(vertices, edges, 1);
+    }
 
-	private void selectWholeTrack( final ArrayList< mxCell > vertices, final ArrayList< mxCell > edges )
-	{
-		trackScheme.selectTrack( vertices, edges, 0 );
-	}
+    private void editSpotName() {
+        trackScheme.getGUI().graphComponent.startEditingAtCell(cell);
+    }
 
-	private void selectTrackDownwards( final ArrayList< mxCell > vertices, final ArrayList< mxCell > edges )
-	{
-		trackScheme.selectTrack( vertices, edges, -1 );
-	}
+    @SuppressWarnings("unused")
+    private void toggleBranchFolding() {
+        Object parent;
+        if (trackScheme.getGraph().isCellFoldable(cell, true)) {
+            parent = cell;
+        } else {
+            parent = trackScheme.getGraph().getModel().getParent(cell);
+        }
+        trackScheme.getGraph().foldCells(!trackScheme.getGraph().isCellCollapsed(parent), false, new Object[]{parent});
+    }
 
-	private void selectTrackUpwards( final ArrayList< mxCell > vertices, final ArrayList< mxCell > edges )
-	{
-		trackScheme.selectTrack( vertices, edges, 1 );
-	}
+    private void multiEditSpotName(final ArrayList<mxCell> vertices, final EventObject triggerEvent) {
+        /*
+         * We want to display the editing window in the cell that is the closer
+         * to where the user clicked. That is not perfect, because we can
+         * imagine the click is made for from the selected cells, and that the
+         * editing window will not even be displayed on the screen. No idea for
+         * that yet, because JGraphX is expecting to receive a cell as location
+         * for the editing window.
+         */
+        final mxCell tc = getClosestCell(vertices);
+        vertices.remove(tc);
+        final mxGraphComponent graphComponent = trackScheme.getGUI().graphComponent;
+        graphComponent.startEditingAtCell(tc, triggerEvent);
+        graphComponent.addListener(mxEvent.LABEL_CHANGED, new mxIEventListener() {
 
-	private void editSpotName()
-	{
-		trackScheme.getGUI().graphComponent.startEditingAtCell( cell );
-	}
+            @Override
+            public void invoke(final Object sender, final mxEventObject evt) {
+                for (final mxCell lCell : vertices) {
+                    lCell.setValue(tc.getValue());
+                    trackScheme.getGraph().getSpotFor(lCell).setName(tc.getValue().toString());
+                }
+                graphComponent.refresh();
+                graphComponent.removeListener(this);
+            }
+        });
+    }
 
-	@SuppressWarnings( "unused" )
-	private void toggleBranchFolding()
-	{
-		Object parent;
-		if ( trackScheme.getGraph().isCellFoldable( cell, true ) )
-		{
-			parent = cell;
-		}
-		else
-		{
-			parent = trackScheme.getGraph().getModel().getParent( cell );
-		}
-		trackScheme.getGraph().foldCells( !trackScheme.getGraph().isCellCollapsed( parent ), false, new Object[] { parent } );
-	}
+    /**
+     * Return, from the given list of cell, the one which is the closer to the
+     * {@link #point} of this instance.
+     */
+    private mxCell getClosestCell(final Iterable<mxCell> vertices) {
+        double min_dist = Double.POSITIVE_INFINITY;
+        mxCell target_cell = null;
+        for (final mxCell lCell : vertices) {
+            final Point location = lCell.getGeometry().getPoint();
+            final double dist = location.distanceSq(point);
+            if (dist < min_dist) {
+                min_dist = dist;
+                target_cell = lCell;
+            }
+        }
+        return target_cell;
+    }
 
-	private void multiEditSpotName( final ArrayList< mxCell > vertices, final EventObject triggerEvent )
-	{
-		/*
-		 * We want to display the editing window in the cell that is the closer
-		 * to where the user clicked. That is not perfect, because we can
-		 * imagine the click is made for from the selected cells, and that the
-		 * editing window will not even be displayed on the screen. No idea for
-		 * that yet, because JGraphX is expecting to receive a cell as location
-		 * for the editing window.
-		 */
-		final mxCell tc = getClosestCell( vertices );
-		vertices.remove( tc );
-		final mxGraphComponent graphComponent = trackScheme.getGUI().graphComponent;
-		graphComponent.startEditingAtCell( tc, triggerEvent );
-		graphComponent.addListener( mxEvent.LABEL_CHANGED, new mxIEventListener()
-		{
+    private void linkSpots() {
+        trackScheme.linkSpots();
+    }
 
-			@Override
-			public void invoke( final Object sender, final mxEventObject evt )
-			{
-				for ( final mxCell lCell : vertices )
-				{
-					lCell.setValue( tc.getValue() );
-					trackScheme.getGraph().getSpotFor( lCell ).setName( tc.getValue().toString() );
-				}
-				graphComponent.refresh();
-				graphComponent.removeListener( this );
-			}
-		} );
-	}
+    private void remove() {
+        trackScheme.removeSelectedCells();
+    }
 
-	/**
-	 * Return, from the given list of cell, the one which is the closer to the
-	 * {@link #point} of this instance.
-	 */
-	private mxCell getClosestCell( final Iterable< mxCell > vertices )
-	{
-		double min_dist = Double.POSITIVE_INFINITY;
-		mxCell target_cell = null;
-		for ( final mxCell lCell : vertices )
-		{
-			final Point location = lCell.getGeometry().getPoint();
-			final double dist = location.distanceSq( point );
-			if ( dist < min_dist )
-			{
-				min_dist = dist;
-				target_cell = lCell;
-			}
-		}
-		return target_cell;
-	}
+    private void removeLinks() {
+        trackScheme.removeSelectedLinkCells();
+    }
 
-	private void linkSpots()
-	{
-		trackScheme.linkSpots();
-	}
+    /*
+     * MENU COMPOSITION
+     */
 
-	private void remove()
-	{
-		trackScheme.removeSelectedCells();
-	}
+    @SuppressWarnings("serial")
+    private void init() {
 
-	private void removeLinks()
-	{
-		trackScheme.removeSelectedLinkCells();
-	}
+        // Build selection categories
+        final Object[] selection = trackScheme.getGraph().getSelectionCells();
+        final ArrayList<mxCell> vertices = new ArrayList<>();
+        final ArrayList<mxCell> edges = new ArrayList<>();
+        for (final Object obj : selection) {
+            final mxCell lCell = (mxCell) obj;
+            if (lCell.isVertex())
+                vertices.add(lCell);
+            else if (lCell.isEdge())
+                edges.add(lCell);
+        }
 
-	/*
-	 * MENU COMPOSITION
-	 */
+        // Select whole tracks
+        if (vertices.size() > 0 || edges.size() > 0) {
 
-	@SuppressWarnings( "serial" )
-	private void init()
-	{
+            add(new AbstractAction("Select whole track") {
+                @Override
+                public void actionPerformed(final ActionEvent e) {
+                    selectWholeTrack(vertices, edges);
+                }
+            });
 
-		// Build selection categories
-		final Object[] selection = trackScheme.getGraph().getSelectionCells();
-		final ArrayList< mxCell > vertices = new ArrayList<>();
-		final ArrayList< mxCell > edges = new ArrayList<>();
-		for ( final Object obj : selection )
-		{
-			final mxCell lCell = ( mxCell ) obj;
-			if ( lCell.isVertex() )
-				vertices.add( lCell );
-			else if ( lCell.isEdge() )
-				edges.add( lCell );
-		}
+            add(new AbstractAction("Select track downwards") {
+                @Override
+                public void actionPerformed(final ActionEvent e) {
+                    selectTrackDownwards(vertices, edges);
+                }
+            });
 
-		// Select whole tracks
-		if ( vertices.size() > 0 || edges.size() > 0 )
-		{
+            add(new AbstractAction("Select track upwards") {
+                @Override
+                public void actionPerformed(final ActionEvent e) {
+                    selectTrackUpwards(vertices, edges);
+                }
+            });
+        }
 
-			add( new AbstractAction( "Select whole track" )
-			{
-				@Override
-				public void actionPerformed( final ActionEvent e )
-				{
-					selectWholeTrack( vertices, edges );
-				}
-			} );
+        if (cell != null) {
+            // Edit
+            add(new AbstractAction("Edit spot name") {
+                @Override
+                public void actionPerformed(final ActionEvent e) {
+                    editSpotName();
+                }
+            });
 
-			add( new AbstractAction( "Select track downwards" )
-			{
-				@Override
-				public void actionPerformed( final ActionEvent e )
-				{
-					selectTrackDownwards( vertices, edges );
-				}
-			} );
+        } else {
 
-			add( new AbstractAction( "Select track upwards" )
-			{
-				@Override
-				public void actionPerformed( final ActionEvent e )
-				{
-					selectTrackUpwards( vertices, edges );
-				}
-			} );
-		}
+            if (vertices.size() > 1) {
 
-		if ( cell != null )
-		{
-			// Edit
-			add( new AbstractAction( "Edit spot name" )
-			{
-				@Override
-				public void actionPerformed( final ActionEvent e )
-				{
-					editSpotName();
-				}
-			} );
+                // Multi edit
+                add(new AbstractAction("Edit " + vertices.size() + " spot names") {
+                    @Override
+                    public void actionPerformed(final ActionEvent e) {
+                        multiEditSpotName(vertices, e);
+                    }
+                });
+            }
 
-		}
-		else
-		{
+            // Link
+            final Action linkAction = new AbstractAction("Link " + trackScheme.getSelectionModel().getSpotSelection().size() + " spots") {
+                @Override
+                public void actionPerformed(final ActionEvent e) {
+                    linkSpots();
+                }
+            };
+            if (trackScheme.getSelectionModel().getSpotSelection().size() > 1) {
+                add(linkAction);
+            }
+        }
 
-			if ( vertices.size() > 1 )
-			{
+        /*
+         * Edges and spot manual coloring
+         */
 
-				// Multi edit
-				add( new AbstractAction( "Edit " + vertices.size() + " spot names" )
-				{
-					@Override
-					public void actionPerformed( final ActionEvent e )
-					{
-						multiEditSpotName( vertices, e );
-					}
-				} );
-			}
+        if (edges.size() > 0 || vertices.size() > 0) {
+            addSeparator();
+        }
 
-			// Link
-			final Action linkAction = new AbstractAction( "Link " + trackScheme.getSelectionModel().getSpotSelection().size() + " spots" )
-			{
-				@Override
-				public void actionPerformed( final ActionEvent e )
-				{
-					linkSpots();
-				}
-			};
-			if ( trackScheme.getSelectionModel().getSpotSelection().size() > 1 )
-			{
-				add( linkAction );
-			}
-		}
+        if (vertices.size() > 0) {
+            final String str = "Manual color for " + (vertices.size() == 1 ? " one spot" : vertices.size() + " spots");
+            add(new AbstractAction(str) {
+                @Override
+                public void actionPerformed(final ActionEvent e) {
+                    previousColor = JColorChooser.showDialog(trackScheme.getGUI(), "Choose Color", previousColor);
+                    manualColorVertices(vertices);
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            trackScheme.doTrackStyle();
+                        }
+                    });
+                }
+            });
+        }
 
-		/*
-		 * Edges and spot manual coloring
-		 */
+        if (edges.size() > 0) {
+            final String str = "Manual color for " + (edges.size() == 1 ? " one edge" : edges.size() + " edges");
+            add(new AbstractAction(str) {
+                @Override
+                public void actionPerformed(final ActionEvent e) {
+                    previousColor = JColorChooser.showDialog(trackScheme.getGUI(), "Choose Color", previousColor);
+                    manualColorEdges(edges);
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            trackScheme.doTrackStyle();
+                        }
+                    });
+                }
+            });
+        }
 
-		if ( edges.size() > 0 || vertices.size() > 0 )
-		{
-			addSeparator();
-		}
+        if (edges.size() > 0 && vertices.size() > 0) {
+            final String str = "Manual color for " + (vertices.size() == 1 ? " one spot and " : vertices.size() + " spots and ") + (edges.size() == 1 ? " one edge" : edges.size() + " edges");
+            add(new AbstractAction(str) {
+                @Override
+                public void actionPerformed(final ActionEvent e) {
+                    previousColor = JColorChooser.showDialog(trackScheme.getGUI(), "Choose Color", previousColor);
+                    manualColorVertices(vertices);
+                    manualColorEdges(edges);
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            trackScheme.doTrackStyle();
+                        }
+                    });
+                }
+            });
+        }
 
-		if ( vertices.size() > 0 )
-		{
-			final String str = "Manual color for " + ( vertices.size() == 1 ? " one spot" : vertices.size() + " spots" );
-			add( new AbstractAction( str )
-			{
-				@Override
-				public void actionPerformed( final ActionEvent e )
-				{
-					previousColor = JColorChooser.showDialog( trackScheme.getGUI(), "Choose Color", previousColor );
-					manualColorVertices( vertices );
-					SwingUtilities.invokeLater( new Runnable()
-					{
-						@Override
-						public void run()
-						{
-							trackScheme.doTrackStyle();
-						}
-					} );
-				}
-			} );
-		}
+        add(new AbstractAction("Clear manual color of selection") {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                for (final mxCell mxCell : vertices) {
+                    final Spot spot = trackScheme.getGraph().getSpotFor(mxCell);
+                    spot.getFeatures().remove(ManualSpotColorAnalyzerFactory.FEATURE);
+                }
+                for (final mxCell mxCell : edges) {
+                    final DefaultWeightedEdge edge = trackScheme.getGraph().getEdgeFor(mxCell);
+                    trackScheme.getModel().getFeatureModel().removeEdgeFeature(edge, ManualEdgeColorAnalyzer.FEATURE);
+                }
 
-		if ( edges.size() > 0 )
-		{
-			final String str = "Manual color for " + ( edges.size() == 1 ? " one edge" : edges.size() + " edges" );
-			add( new AbstractAction( str )
-			{
-				@Override
-				public void actionPerformed( final ActionEvent e )
-				{
-					previousColor = JColorChooser.showDialog( trackScheme.getGUI(), "Choose Color", previousColor );
-					manualColorEdges( edges );
-					SwingUtilities.invokeLater( new Runnable()
-					{
-						@Override
-						public void run()
-						{
-							trackScheme.doTrackStyle();
-						}
-					} );
-				}
-			} );
-		}
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        trackScheme.doTrackStyle();
+                    }
+                });
+            }
+        });
 
-		if ( edges.size() > 0 && vertices.size() > 0 )
-		{
-			final String str = "Manual color for " + ( vertices.size() == 1 ? " one spot and " : vertices.size() + " spots and " ) + ( edges.size() == 1 ? " one edge" : edges.size() + " edges" );
-			add( new AbstractAction( str )
-			{
-				@Override
-				public void actionPerformed( final ActionEvent e )
-				{
-					previousColor = JColorChooser.showDialog( trackScheme.getGUI(), "Choose Color", previousColor );
-					manualColorVertices( vertices );
-					manualColorEdges( edges );
-					SwingUtilities.invokeLater( new Runnable()
-					{
-						@Override
-						public void run()
-						{
-							trackScheme.doTrackStyle();
-						}
-					} );
-				}
-			} );
-		}
+        // Remove
+        if (selection.length > 0) {
+            addSeparator();
+            final Action removeAction = new AbstractAction("Remove spots and links") {
+                @Override
+                public void actionPerformed(final ActionEvent e) {
+                    remove();
+                }
+            };
+            add(removeAction);
+            final Action removeLinkAction = new AbstractAction("Remove only links") {
+                @Override
+                public void actionPerformed(final ActionEvent e) {
+                    removeLinks();
+                }
+            };
+            add(removeLinkAction);
 
-		add( new AbstractAction( "Clear manual color of selection" )
-		{
-			@Override
-			public void actionPerformed( final ActionEvent e )
-			{
-				for ( final mxCell mxCell : vertices )
-				{
-					final Spot spot = trackScheme.getGraph().getSpotFor( mxCell );
-					spot.getFeatures().remove( ManualSpotColorAnalyzerFactory.FEATURE );
-				}
-				for ( final mxCell mxCell : edges )
-				{
-					final DefaultWeightedEdge edge = trackScheme.getGraph().getEdgeFor( mxCell );
-					trackScheme.getModel().getFeatureModel().removeEdgeFeature( edge, ManualEdgeColorAnalyzer.FEATURE );
-				}
-
-				SwingUtilities.invokeLater( new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						trackScheme.doTrackStyle();
-					}
-				} );
-			}
-		} );
-
-		// Remove
-		if ( selection.length > 0 )
-		{
-			addSeparator();
-			final Action removeAction = new AbstractAction( "Remove spots and links" )
-			{
-				@Override
-				public void actionPerformed( final ActionEvent e )
-				{
-					remove();
-				}
-			};
-			add( removeAction );
-			final Action removeLinkAction = new AbstractAction( "Remove only links" )
-			{
-				@Override
-				public void actionPerformed( final ActionEvent e )
-				{
-					removeLinks();
-				}
-			};
-			add( removeLinkAction );
-
-		}
-	}
+        }
+    }
 
 }
