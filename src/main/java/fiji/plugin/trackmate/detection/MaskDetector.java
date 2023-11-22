@@ -39,9 +39,10 @@ public class MaskDetector< T extends RealType< T > & NativeType< T > > extends T
 			final RandomAccessible< T > input,
 			final Interval interval,
 			final double[] calibration,
-			final boolean simplify )
+			final boolean simplify,
+			final double smoothingScale )
 	{
-		super( input, interval, calibration, Double.NaN, simplify );
+		super( input, interval, calibration, Double.NaN, simplify, smoothingScale );
 		baseErrorMessage = BASE_ERROR_MESSAGE;
 	}
 
@@ -55,6 +56,7 @@ public class MaskDetector< T extends RealType< T > & NativeType< T > > extends T
 				interval,
 				calibration,
 				simplify,
+				smoothingScale,
 				numThreads,
 				null );
 		final long end = System.currentTimeMillis();

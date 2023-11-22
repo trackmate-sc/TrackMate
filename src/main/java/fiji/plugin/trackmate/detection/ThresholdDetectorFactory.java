@@ -81,6 +81,14 @@ public class ThresholdDetectorFactory< T extends RealType< T > & NativeType< T >
 
 	public static final String KEY_SIMPLIFY_CONTOURS = "SIMPLIFY_CONTOURS";
 
+	/**
+	 * If strictly larger than 0, the mask will be smoothed before creating the
+	 * mesh, resulting in smoother meshes. The scale value sets the (Gaussian)
+	 * filter radius and is specified in physical units. If 0 or lower than 0,
+	 * no smoothing is applied.
+	 */
+	public static final String KEY_SMOOTHING_SCALE = "SMOOTHING_SCALE";
+
 	public static final String KEY_INTENSITY_THRESHOLD = "INTENSITY_THRESHOLD";
 
 	/*
@@ -111,6 +119,7 @@ public class ThresholdDetectorFactory< T extends RealType< T > & NativeType< T >
 	{
 		final double intensityThreshold = ( Double ) settings.get( KEY_INTENSITY_THRESHOLD );
 		final boolean simplifyContours = ( Boolean ) settings.get( KEY_SIMPLIFY_CONTOURS );
+		final double smoothingScale = ( Double ) settings.get( KEY_SMOOTHING_SCALE );
 		final double[] calibration = TMUtils.getSpatialCalibration( img );
 		final int channel = ( Integer ) settings.get( KEY_TARGET_CHANNEL ) - 1;
 		final RandomAccessible< T > imFrame = DetectionUtils.prepareFrameImg( img, channel, frame );
@@ -120,7 +129,8 @@ public class ThresholdDetectorFactory< T extends RealType< T > & NativeType< T >
 				interval,
 				calibration,
 				intensityThreshold,
-				simplifyContours );
+				simplifyContours,
+				smoothingScale );
 		detector.setNumThreads( 1 );
 		return detector;
 	}
@@ -225,6 +235,7 @@ public class ThresholdDetectorFactory< T extends RealType< T > & NativeType< T >
 		lSettings.put( KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL );
 		lSettings.put( KEY_INTENSITY_THRESHOLD, 0. );
 		lSettings.put( KEY_SIMPLIFY_CONTOURS, true );
+		lSettings.put( KEY_SMOOTHING_SCALE, -1. );
 		return lSettings;
 	}
 

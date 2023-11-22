@@ -96,18 +96,19 @@ public class MaskDetectorFactory< T extends RealType< T > & NativeType< T > > ex
 	public SpotDetector< T > getDetector( final Interval interval, final int frame )
 	{
 		final boolean simplifyContours = ( Boolean ) settings.get( KEY_SIMPLIFY_CONTOURS );
+		final double smoothingScale = ( Double ) settings.get( KEY_SMOOTHING_SCALE );
 		final double[] calibration = TMUtils.getSpatialCalibration( img );
 		final int channel = ( Integer ) settings.get( KEY_TARGET_CHANNEL ) - 1;
 		final RandomAccessible< T > imFrame = DetectionUtils.prepareFrameImg( img, channel, frame );
 		final RandomAccessible< T > mask = mask( imFrame );
-		final double intensityThreshold = 0.5;
 
-		final ThresholdDetector< T > detector = new ThresholdDetector<>(
+		final MaskDetector< T > detector = new MaskDetector<>(
 				mask,
 				interval,
 				calibration,
-				intensityThreshold,
-				simplifyContours );
+				simplifyContours,
+				smoothingScale );
+
 		detector.setNumThreads( 1 );
 		return detector;
 	}
@@ -210,6 +211,7 @@ public class MaskDetectorFactory< T extends RealType< T > & NativeType< T > > ex
 		final Map< String, Object > lSettings = new HashMap<>();
 		lSettings.put( KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL );
 		lSettings.put( KEY_SIMPLIFY_CONTOURS, true );
+		lSettings.put( KEY_SMOOTHING_SCALE, -1. );
 		return lSettings;
 	}
 

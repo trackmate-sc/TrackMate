@@ -61,10 +61,16 @@ public class ThresholdDetector< T extends RealType< T > & NativeType< T > > impl
 
 	protected final double threshold;
 
-	/**
-	 * If <code>true</code>, the contours will be smoothed and simplified.
-	 */
+	/** If <code>true</code>, the contours will be simplified. */
 	protected final boolean simplify;
+
+	/**
+	 * If strictly larger than 0, the mask will be smoothed before creating the
+	 * mesh, resulting in smoother meshes. The scale value sets the (Gaussian)
+	 * filter radius and is specified in physical units. If 0 or lower than 0,
+	 * no smoothing is applied.
+	 */
+	protected final double smoothingScale;
 
 	/*
 	 * CONSTRUCTORS
@@ -75,9 +81,11 @@ public class ThresholdDetector< T extends RealType< T > & NativeType< T > > impl
 			final Interval interval,
 			final double[] calibration,
 			final double threshold,
-			final boolean simplify )
+			final boolean simplify,
+			final double smoothingScale )
 	{
 		this.input = input;
+		this.smoothingScale = smoothingScale;
 		this.interval = DetectionUtils.squeeze( interval );
 		this.calibration = calibration;
 		this.threshold = threshold;

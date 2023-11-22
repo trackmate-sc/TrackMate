@@ -24,6 +24,7 @@ package fiji.plugin.trackmate.detection;
 import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.ThresholdDetectorFactory.KEY_SIMPLIFY_CONTOURS;
+import static fiji.plugin.trackmate.detection.ThresholdDetectorFactory.KEY_SMOOTHING_SCALE;
 import static fiji.plugin.trackmate.io.IOUtils.readBooleanAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.readIntegerAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.writeAttribute;
@@ -108,6 +109,7 @@ public class LabelImageDetectorFactory< T extends RealType< T > & NativeType< T 
 	public SpotDetector< T > getDetector( final Interval interval, final int frame )
 	{
 		final boolean simplifyContours = ( Boolean ) settings.get( KEY_SIMPLIFY_CONTOURS );
+		final double smoothingScale = ( Double ) settings.get( KEY_SMOOTHING_SCALE );
 		final double[] calibration = TMUtils.getSpatialCalibration( img );
 		final int channel = ( Integer ) settings.get( KEY_TARGET_CHANNEL ) - 1;
 		final RandomAccessible< T > imFrame = DetectionUtils.prepareFrameImg( img, channel, frame );
@@ -116,7 +118,8 @@ public class LabelImageDetectorFactory< T extends RealType< T > & NativeType< T 
 				imFrame,
 				interval,
 				calibration,
-				simplifyContours );
+				simplifyContours,
+				smoothingScale );
 		return detector;
 	}
 
