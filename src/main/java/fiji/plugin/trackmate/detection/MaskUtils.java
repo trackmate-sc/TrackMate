@@ -410,6 +410,11 @@ public class MaskUtils
 	 *            smoother and contain less points.
 	 * @param numThreads
 	 *            how many threads to use for multithreaded computation.
+	 * @param smoothingScale
+	 *            if strictly larger than 0, the mask will be smoothed before
+	 *            creating the mesh, resulting in smoother meshes. The scale
+	 *            value sets the (Gaussian) filter radius and is specified in
+	 *            physical units. If 0 or lower than 0, no smoothing is applied.
 	 * @param qualityImage
 	 *            the image in which to read the quality value.
 	 * @return a list of spots, with ROI.
@@ -419,6 +424,7 @@ public class MaskUtils
 			final Interval interval, 
 			final double[] calibration, 
 			final boolean simplify, 
+			final double smoothingScale,
 			final int numThreads, 
 			final RandomAccessibleInterval< S > qualityImage )
 	{
@@ -443,6 +449,7 @@ public class MaskUtils
 					interval,
 					calibration,
 					simplify,
+					smoothingScale,
 					qualityImage );
 		}
 		else
