@@ -61,6 +61,8 @@ public class Process2DZ< T extends RealType< T > & NativeType< T > >
 
 	private List< Spot > spots;
 
+	private final double smoothingScale;
+
 	/**
 	 * Creates a new {@link Process2DZ} detector.
 	 * 
@@ -84,13 +86,15 @@ public class Process2DZ< T extends RealType< T > & NativeType< T > >
 			final Interval interval,
 			final double[] calibration,
 			final Settings settings,
-			final boolean simplifyMeshes )
+			final boolean simplifyMeshes,
+			final double smoothingScale )
 	{
 		this.img = img;
 		this.interval = interval;
 		this.calibration = calibration;
 		this.settings = settings;
 		this.simplify = simplifyMeshes;
+		this.smoothingScale = smoothingScale;
 	}
 
 	@Override
@@ -148,7 +152,12 @@ public class Process2DZ< T extends RealType< T > & NativeType< T > >
 
 		// Convert labels to 3D meshes.
 		final ImgPlus< T > lblImg = TMUtils.rawWraps( lblImp );
-		final LabelImageDetector< T > detector = new LabelImageDetector<>( lblImg, lblImg, calibration, simplify );
+		final LabelImageDetector< T > detector = new LabelImageDetector<>(
+				lblImg,
+				lblImg,
+				calibration,
+				simplify,
+				smoothingScale );
 		if ( !detector.checkInput() || !detector.process() )
 		{
 			errorMessage = BASE_ERROR_MESSAGE + detector.getErrorMessage();
