@@ -14,8 +14,9 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
+import net.imglib2.algorithm.MultiThreaded;
 
-public class MeshSmootherController
+public class MeshSmootherController implements MultiThreaded
 {
 
 	private final Model model;
@@ -102,5 +103,23 @@ public class MeshSmootherController
 		modifiedSpots.forEach( s -> event.putSpotFlag( s, ModelChangeEvent.FLAG_SPOT_MODIFIED ) );
 		model.getModelChangeListener().forEach( l -> l.modelChanged( event ) );
 		logger.log( "Done.\n" );
+	}
+
+	@Override
+	public void setNumThreads()
+	{
+		smoother.setNumThreads();
+	}
+
+	@Override
+	public void setNumThreads( final int numThreads )
+	{
+		smoother.setNumThreads( numThreads );
+	}
+
+	@Override
+	public int getNumThreads()
+	{
+		return smoother.getNumThreads();
 	}
 }
