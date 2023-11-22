@@ -34,7 +34,7 @@ public class DefaultMesh
 				img.dimensionIndex( Axes.TIME ) );
 		final double[] calibration = new double[] { 1., 1., 1. };
 
-		final ThresholdDetector< BitType > detector = new ThresholdDetector< BitType >( img, img, calibration, 0, false );
+		final ThresholdDetector< BitType > detector = new ThresholdDetector< BitType >( img, img, calibration, 0, false, -1. );
 		detector.process();
 		final List< Spot > spots = detector.getResult();
 

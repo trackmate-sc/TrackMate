@@ -73,6 +73,8 @@ public class LabelImageDetector< T extends RealType< T > & NativeType< T > > imp
 	 */
 	protected final boolean simplify;
 
+	private final double smoothingScale;
+
 	/*
 	 * CONSTRUCTORS
 	 */
@@ -81,12 +83,14 @@ public class LabelImageDetector< T extends RealType< T > & NativeType< T > > imp
 			final RandomAccessible< T > input,
 			final Interval interval,
 			final double[] calibration,
-			final boolean simplify )
+			final boolean simplify,
+			final double smoothingScale )
 	{
 		this.input = input;
 		this.interval = DetectionUtils.squeeze( interval );
 		this.calibration = calibration;
 		this.simplify = simplify;
+		this.smoothingScale = smoothingScale;
 	}
 
 	@Override
@@ -150,6 +154,7 @@ public class LabelImageDetector< T extends RealType< T > & NativeType< T > > imp
 					interval,
 					calibration,
 					simplify,
+					smoothingScale,
 					null );
 		}
 		else
