@@ -21,6 +21,7 @@ public class MeshSmootherAction extends AbstractTMAction
 	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
 	{
 		final MeshSmootherController controller = new MeshSmootherController( trackmate.getModel(), selectionModel, logger );
+		controller.setNumThreads( trackmate.getNumThreads() );
 		controller.show( parent );
 	}
 
