@@ -12,6 +12,8 @@ import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealInterval;
+import net.imglib2.algorithm.gauss3.Gauss3;
+import net.imglib2.img.Img;
 import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.MeshStats;
 import net.imglib2.mesh.Meshes;
@@ -23,8 +25,9 @@ import net.imglib2.roi.labeling.LabelRegions;
 import net.imglib2.type.logic.BoolType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
-import net.imglib2.view.IntervalView;
+import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 
 /**
@@ -180,6 +183,11 @@ public class SpotMeshUtils
 	 *            smoother and contain less points.
 	 * @param qualityImage
 	 *            the image in which to read the quality value.
+	 * @param smoothingScale
+	 *            if strictly larger than 0, the mask will be smoothed before
+	 *            creating the mesh, resulting in smoother meshes. The scale
+	 *            value sets the (Gaussian) filter radius and is specified in
+	 *            physical units. If 0 or lower than 0, no smoothing is applied.
 	 * @return a list of spots, with meshes.
 	 */
 	public static < R extends IntegerType< R >, S extends RealType< S > > List< Spot > from3DLabelingWithROI(
@@ -187,6 +195,7 @@ public class SpotMeshUtils
 			final Interval interval,
 			final double[] calibration,
 			final boolean simplify,
+			final double smoothingScale,
 			final RandomAccessibleInterval< S > qualityImage )
 	{
 		if ( labeling.numDimensions() != 3 )
@@ -204,7 +213,8 @@ public class SpotMeshUtils
 					simplify,
 					calibration,
 					qualityImage,
-					interval.minAsDoubleArray() );
+					interval.minAsDoubleArray(),
+					smoothingScale );
 			if ( spot == null )
 				continue;
 
@@ -233,6 +243,11 @@ public class SpotMeshUtils
 	 *            quality will be the mesh volume.
 	 * @param minInterval
 	 *            the origin in image coordinates of the ROI used for detection.
+	 * @param smoothingScale
+	 *            if strictly larger than 0, the mask will be smoothed before
+	 *            creating the mesh, resulting in smoother meshes. The scale
+	 *            value sets the (Gaussian) filter radius and is specified in
+	 *            physical units. If 0 or lower than 0, no smoothing is applied.
 	 *
 	 * @return a new spot.
 	 */
@@ -241,16 +256,41 @@ public class SpotMeshUtils
 			final boolean simplify,
 			final double[] calibration,
 			final RandomAccessibleInterval< S > qualityImage,
-			final double[] minInterval )
+			final double[] minInterval,
+			final double smoothingScale )
 	{
+		final RandomAccessibleInterval< BoolType > box = Views.zeroMin( region );
+		final Mesh mesh;
+
+		// Possibly filter.
+		final long[] borders;
+		if ( smoothingScale > 0 )
+		{
+			final double[] sigmas = new double[ 3 ];
+			for ( int d = 0; d < 3; d++ )
+				sigmas[ d ] = smoothingScale / Math.sqrt( 3. ) / calibration[ d ];
+
+			// Increase the output size.
+			final int[] halfkernelsizes = Gauss3.halfkernelsizes( sigmas );;
+			borders = Arrays.stream( halfkernelsizes ).asLongStream().toArray();
+			final Interval outputSize = Intervals.expand( box, borders );
+			final Img< FloatType > img = Util.getArrayOrCellImgFactory( outputSize, new FloatType() ).create( outputSize );
+			final RandomAccessibleInterval< FloatType > filtered = Views.translateInverse( img, borders );
+			Gauss3.gauss( sigmas, box, filtered );
+			mesh = Meshes.marchingCubes( img, 0.5 );
+		}
+		else
+		{
+			mesh = Meshes.marchingCubes( box );
+			borders = new long[] { 0, 0, 0 };
+		}
+
 		// To mesh.
-		final IntervalView< BoolType > box = Views.zeroMin( region );
-		final Mesh mesh = Meshes.marchingCubes( box, 0.5 );
 		final Mesh cleaned = Meshes.removeDuplicateVertices( mesh, VERTEX_DUPLICATE_REMOVAL_PRECISION );
 		// Shift coords.
 		final double[] origin = region.minAsDoubleArray();
 		for ( int d = 0; d < 3; d++ )
-			origin[ d ] += minInterval[ d ];
+			origin[ d ] += minInterval[ d ] - borders[ d ];
 		// To spot.
 		return meshToSpotMesh(
 				cleaned,
