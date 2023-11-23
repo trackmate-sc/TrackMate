@@ -22,11 +22,11 @@ public class PanelSmoothContour extends JPanel
 
 	private double scale;
 
-	private double previousValue;
-
 	private final SliderPanelDouble sliderPanel;
 
 	private final JCheckBox chckbxSmooth;
+
+	private final BoundedDoubleElement scaleEl;
 
 	public PanelSmoothContour( final double scale, final String units )
 	{
@@ -40,7 +40,7 @@ public class PanelSmoothContour extends JPanel
 
 		final DoubleSupplier getter = () -> getScale();
 		final Consumer< Double > setter = v -> setScalePrivate( v );
-		final BoundedDoubleElement scaleEl = StyleElements.boundedDoubleElement( "scale", 0., 20., getter, setter );
+		scaleEl = StyleElements.boundedDoubleElement( "scale", 0., 20., getter, setter );
 		sliderPanel = StyleElements.linkedSliderPanel( scaleEl, 2 );
 		sliderPanel.setFont( SMALL_FONT );
 
@@ -48,24 +48,18 @@ public class PanelSmoothContour extends JPanel
 		add( Box.createHorizontalStrut( 5 ) );
 		final JLabel lblUnits = new JLabel( units );
 		lblUnits.setFont( SMALL_FONT );
-		
-		chckbxSmooth.addActionListener( e -> refresh() );
-		refresh();
+		add( lblUnits );
+
+		chckbxSmooth.addActionListener( e -> sliderPanel.setEnabled( chckbxSmooth.isSelected() ) );
+		setOnOff();
+		if ( scale > 0. )
+			scaleEl.set( scale );
 	}
 
-	private void refresh()
+	private void setOnOff()
 	{
-		final boolean selected = chckbxSmooth.isSelected();
-		if ( !selected )
-		{
-			previousValue = this.scale;
-			this.scale = -.1;
-		}
-		else
-		{
-			this.scale = previousValue;
-		}
-		sliderPanel.setEnabled( selected );
+		chckbxSmooth.setSelected( scale > 0. );
+		sliderPanel.setEnabled( scale > 0. );
 	}
 
 	private void setScalePrivate( final double scale )
@@ -76,11 +70,15 @@ public class PanelSmoothContour extends JPanel
 	public void setScale( final double scale )
 	{
 		setScalePrivate( scale );
-		refresh();
+		setOnOff();
+		scaleEl.getValue().setCurrentValue( scale );
+		sliderPanel.update();
 	}
 
 	public double getScale()
 	{
-		return scale;
+		if ( chckbxSmooth.isSelected() )
+			return scale;
+		return -1.;
 	}
 }
