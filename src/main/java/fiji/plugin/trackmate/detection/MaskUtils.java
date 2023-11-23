@@ -34,6 +34,7 @@ import net.imglib2.Interval;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.algorithm.gauss3.Gauss3;
 import net.imglib2.algorithm.labeling.ConnectedComponents;
 import net.imglib2.algorithm.labeling.ConnectedComponents.StructuringElement;
 import net.imglib2.converter.Converter;
@@ -42,14 +43,17 @@ import net.imglib2.histogram.Histogram1d;
 import net.imglib2.histogram.Real1dBinMapper;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgFactory;
+import net.imglib2.parallel.Parallelization;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegion;
 import net.imglib2.roi.labeling.LabelRegions;
+import net.imglib2.type.NativeType;
 import net.imglib2.type.logic.BitType;
 import net.imglib2.type.logic.BoolType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.IntType;
+import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Util;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
@@ -170,20 +174,17 @@ public class MaskUtils
 	 * @return a new label image.
 	 */
 	public static final < T extends RealType< T > > ImgLabeling< Integer, IntType > toLabeling(
-			final RandomAccessible< T > input,
-			final Interval interval,
+			final RandomAccessibleInterval< T > input,
 			final double threshold,
 			final int numThreads )
 	{
-		// Crop.
-		final IntervalView< T > crop = Views.interval( input, interval );
-		final IntervalView< T > in = Views.zeroMin( crop );
+		// To mask.
 		final Converter< T, BitType > converter = ( a, b ) -> b.set( a.getRealDouble() > threshold );
-		final RandomAccessible< BitType > bitMask = Converters.convertRAI( in, converter, new BitType() );
+		final RandomAccessible< BitType > bitMask = Converters.convertRAI( input, converter, new BitType() );
 
 		// Prepare output.
-		final ImgFactory< IntType > factory = Util.getArrayOrCellImgFactory( in, new IntType() );
-		final Img< IntType > out = factory.create( in );
+		final ImgFactory< IntType > factory = Util.getArrayOrCellImgFactory( input, new IntType() );
+		final Img< IntType > out = factory.create( input );
 		final ImgLabeling< Integer, IntType > labeling = new ImgLabeling<>( out );
 
 		// Structuring element.
@@ -230,8 +231,17 @@ public class MaskUtils
 			final double threshold,
 			final int numThreads )
 	{
+		/*
+		 * Crop.
+		 */
+		final IntervalView< T > crop = Views.interval( input, interval );
+		final IntervalView< T > in = Views.zeroMin( crop );
+
 		// Get labeling from mask.
-		final ImgLabeling< Integer, IntType > labeling = toLabeling( input, interval, threshold, numThreads );
+		final ImgLabeling< Integer, IntType > labeling = toLabeling(
+				in,
+				threshold,
+				numThreads );
 		return fromLabeling(
 				labeling,
 				interval,
@@ -329,8 +339,15 @@ public class MaskUtils
 			final int numThreads,
 			final RandomAccessibleInterval< R > qualityImage )
 	{
+		// Crop.
+		final IntervalView< T > crop = Views.interval( input, interval );
+		final IntervalView< T > in = Views.zeroMin( crop );
+
 		// Get labeling from mask.
-		final ImgLabeling< Integer, IntType > labeling = toLabeling( input, interval, threshold, numThreads );
+		final ImgLabeling< Integer, IntType > labeling = toLabeling(
+				in,
+				threshold,
+				numThreads );
 
 		// Crop of the quality image.
 		final IntervalView< R > cropQuality = Views.interval( qualityImage, interval );
@@ -419,7 +436,7 @@ public class MaskUtils
 	 *            the image in which to read the quality value.
 	 * @return a list of spots, with ROI.
 	 */
-	public static < T extends RealType< T >, S extends RealType< S > > List< Spot > fromMaskWithROI(
+	public static < T extends RealType< T > & NativeType< T >, S extends RealType< S > > List< Spot > fromMaskWithROI(
 			final RandomAccessible< T > input, 
 			final Interval interval, 
 			final double[] calibration, 
@@ -428,34 +445,16 @@ public class MaskUtils
 			final int numThreads, 
 			final RandomAccessibleInterval< S > qualityImage )
 	{
-		final ImgLabeling< Integer, IntType > labeling = toLabeling(
+		final double threshold = 0.5;
+		return fromThresholdWithROI(
 				input,
 				interval,
-				.5,
-				numThreads );
-		if ( input.numDimensions() == 2 )
-		{
-			return SpotRoiUtils.from2DLabelingWithROI(
-					labeling,
-					interval,
-					calibration,
-					simplify,
-					qualityImage );
-		}
-		else if ( input.numDimensions() == 3 )
-		{
-			return SpotMeshUtils.from3DLabelingWithROI(
-					labeling,
-					interval,
-					calibration,
-					simplify,
-					smoothingScale,
-					qualityImage );
-		}
-		else
-		{
-			throw new IllegalArgumentException( "Can only process 2D or 3D images with this method, but got " + input.numDimensions() + "D." );
-		}
+				calibration,
+				threshold,
+				simplify,
+				smoothingScale,
+				numThreads,
+				qualityImage );
 	}
 
 	/**
@@ -479,35 +478,64 @@ public class MaskUtils
 	 * @param simplify
 	 *            if <code>true</code> the polygon will be post-processed to be
 	 *            smoother and contain less points.
+	 * @param smoothingScale
+	 *            if strictly larger than 0, the input will be smoothed before
+	 *            creating the contour, resulting in smoother contours. The
+	 *            scale value sets the (Gaussian) filter radius and is specified
+	 *            in physical units. If 0 or lower than 0, no smoothing is
+	 *            applied.
 	 * @param numThreads
 	 *            how many threads to use for multithreaded computation.
 	 * @param qualityImage
 	 *            the image in which to read the quality value.
 	 * @return a list of spots, with ROI.
 	 */
-	public static final < T extends RealType< T >, S extends RealType< S > > List< Spot > fromThresholdWithROI(
+	@SuppressWarnings( "unchecked" )
+	public static final < T extends RealType< T > & NativeType< T >, S extends RealType< S > > List< Spot > fromThresholdWithROI(
 			final RandomAccessible< T > input,
 			final Interval interval,
 			final double[] calibration,
 			final double threshold,
 			final boolean simplify,
+			final double smoothingScale,
 			final int numThreads,
 			final RandomAccessibleInterval< S > qualityImage )
 	{
+		/*
+		 * Crop.
+		 */
+		final IntervalView< T > crop = Views.interval( input, interval );
+		final IntervalView< T > in = Views.zeroMin( crop );
+
+		/*
+		 * Possibly filter.
+		 */
+		final RandomAccessibleInterval< T > filtered;
+		if ( smoothingScale > 0. )
+		{
+			final double[] sigmas = new double[ in.numDimensions() ];
+			for ( int d = 0; d < sigmas.length; d++ )
+				sigmas[ d ] = smoothingScale / Math.sqrt( in.numDimensions() ) / calibration[ d ];
+
+			filtered = ( RandomAccessibleInterval< T > ) Util.getArrayOrCellImgFactory( in, new FloatType() ).create( in );
+			Parallelization.runWithNumThreads( numThreads,
+					() -> Gauss3.gauss( sigmas, Views.extendMirrorDouble( in ), filtered ) );
+		}
+		else
+		{
+			filtered = in;
+		}
+
 		if ( input.numDimensions() == 2 )
 		{
 			/*
 			 * In 2D: Threshold, make a labeling, then create contours.
 			 */
-			final ImgLabeling< Integer, IntType > labeling = toLabeling(
-					input,
-					interval,
-					threshold,
-					numThreads );
-			return SpotRoiUtils.from2DLabelingWithROI(
-					labeling,
-					interval,
+			return SpotRoiUtils.from2DThresholdWithROI(
+					filtered,
+					interval.minAsDoubleArray(),
 					calibration,
+					threshold,
 					simplify,
 					qualityImage );
 		}
@@ -520,8 +548,8 @@ public class MaskUtils
 			 * version of marching-cubes to have nice, smooth meshes.
 			 */
 			return SpotMeshUtils.from3DThresholdWithROI(
-					input,
-					interval,
+					filtered,
+					interval.minAsDoubleArray(),
 					calibration,
 					threshold,
 					simplify,

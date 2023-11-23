@@ -52,7 +52,7 @@ public class Demo3DMesh
 			final ImgPlus< BitType > mask = loadTestMask();
 
 			// Convert it to labeling.
-			final ImgLabeling< Integer, IntType > labeling = MaskUtils.toLabeling( mask, mask, 0.5, 1 );
+			final ImgLabeling< Integer, IntType > labeling = MaskUtils.toLabeling( mask, 0.5, 1 );
 			final ImagePlus out = ImageJFunctions.show( labeling.getIndexImg(), "labeling" );
 			out.setDimensions( mask.dimensionIndex( Axes.CHANNEL ), mask.dimensionIndex( Axes.Z ), mask.dimensionIndex( Axes.TIME ) );
 

@@ -11,16 +11,25 @@ import ij.ImagePlus;
 import ij.gui.PolygonRoi;
 import ij.measure.Measurements;
 import ij.process.FloatPolygon;
-import net.imglib2.Interval;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.algorithm.gauss3.Gauss3;
+import net.imglib2.converter.Converter;
+import net.imglib2.converter.Converters;
+import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegion;
 import net.imglib2.roi.labeling.LabelRegions;
 import net.imglib2.type.BooleanType;
+import net.imglib2.type.NativeType;
+import net.imglib2.type.logic.BoolType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.NumericType;
+import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.integer.IntType;
+import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 
 /**
@@ -38,6 +47,27 @@ public class SpotRoiUtils
 	/** Douglas-Peucker polygon simplification max distance. */
 	private static final double DOUGLAS_PEUCKER_MAX_DISTANCE = 0.5;
 
+	public static < T extends RealType< T > & NativeType< T >, S extends NumericType< S > > List< Spot > from2DThresholdWithROI(
+			final RandomAccessibleInterval< T > input,
+			final double[] origin,
+			final double[] calibration,
+			final double threshold,
+			final boolean simplify,
+			final RandomAccessibleInterval< S > qualityImage )
+	{
+		final ImgLabeling< Integer, IntType > labeling = MaskUtils.toLabeling(
+				input,
+				threshold,
+				1 );
+		return from2DLabelingWithROI(
+				labeling,
+				origin,
+				calibration,
+				simplify,
+				-1.,
+				qualityImage );
+	}
+
 	/**
 	 * Creates spots <b>with ROIs</b> from a <b>2D</b> label image. The quality
 	 * value is read from a secondary image, by taking the max value in each
@@ -49,23 +79,30 @@ public class SpotRoiUtils
 	 *            the type of the quality image. Must be real, scalar.
 	 * @param labeling
 	 *            the labeling, must be zero-min and 2D..
-	 * @param interval
-	 *            the interval, used to reposition the spots from the zero-min
+	 * @param origin
+	 *            the origin (min pos) of the interval the labeling was
+	 *            generated from, used to reposition the spots from the zero-min
 	 *            labeling to the proper coordinates.
 	 * @param calibration
 	 *            the physical calibration.
 	 * @param simplify
 	 *            if <code>true</code> the polygon will be post-processed to be
 	 *            smoother and contain less points.
+	 * @param smoothingScale
+	 *            if strictly larger than 0, the mask will be smoothed before
+	 *            creating the mesh, resulting in smoother meshes. The scale
+	 *            value sets the (Gaussian) filter radius and is specified in
+	 *            physical units. If 0 or lower than 0, no smoothing is applied.
 	 * @param qualityImage
 	 *            the image in which to read the quality value.
 	 * @return a list of spots, with ROI.
 	 */
 	public static < R extends IntegerType< R >, S extends NumericType< S > > List< Spot > from2DLabelingWithROI(
 			final ImgLabeling< Integer, R > labeling,
-			final Interval interval,
+			final double[] origin,
 			final double[] calibration,
 			final boolean simplify,
+			final double smoothingScale,
 			final RandomAccessibleInterval< S > qualityImage )
 	{
 		if ( labeling.numDimensions() != 2 )
@@ -73,17 +110,41 @@ public class SpotRoiUtils
 
 		final LabelRegions< Integer > regions = new LabelRegions< Integer >( labeling );
 
+		final double[] sigmas = new double[ 2 ];
+		for ( int d = 0; d < sigmas.length; d++ )
+			sigmas[ d ] = smoothingScale / Math.sqrt( 2. ) / calibration[ d ];
+
+		
 		// Parse regions to create polygons on boundaries.
 		final List< Polygon > polygons = new ArrayList<>( regions.getExistingLabels().size() );
 		final Iterator< LabelRegion< Integer > > iterator = regions.iterator();
 		while ( iterator.hasNext() )
 		{
 			final LabelRegion< Integer > region = iterator.next();
+
+			// Possibly smooth labels.
+			final RandomAccessibleInterval< BoolType > mask;
+			if (smoothingScale > 0.)
+			{
+				// Filter.
+				final Img< FloatType > filtered = Util.getArrayOrCellImgFactory( region, new FloatType() ).create( region );
+				Gauss3.gauss( sigmas, region, filtered );
+
+				// To mask.
+				final double threshold = 0.5;
+				final Converter< FloatType, BoolType > converter = ( a, b ) -> b.set( a.getRealDouble() > threshold );
+				mask = Converters.convertRAI( filtered, converter, new BoolType() );
+			}
+			else
+			{
+				mask = region;
+			}
+			
 			// Analyze in zero-min region.
-			final List< Polygon > pp = maskToPolygons( Views.zeroMin( region ) );
+			final List< Polygon > pp = maskToPolygons( Views.zeroMin( mask ) );
 			// Translate back to interval coords.
 			for ( final Polygon polygon : pp )
-				polygon.translate( ( int ) region.min( 0 ), ( int ) region.min( 1 ) );
+				polygon.translate( ( int ) mask.min( 0 ), ( int ) mask.min( 1 ) );
 
 			polygons.addAll( pp );
 		}
@@ -127,8 +188,8 @@ public class SpotRoiUtils
 			final double[] ypoly = new double[ fPolygon.npoints ];
 			for ( int i = 0; i < fPolygon.npoints; i++ )
 			{
-				xpoly[ i ] = calibration[ 0 ] * ( interval.min( 0 ) + fPolygon.xpoints[ i ] - 0.5 );
-				ypoly[ i ] = calibration[ 1 ] * ( interval.min( 1 ) + fPolygon.ypoints[ i ] - 0.5 );
+				xpoly[ i ] = calibration[ 0 ] * ( origin[ 0 ] + fPolygon.xpoints[ i ] - 0.5 );
+				ypoly[ i ] = calibration[ 1 ] * ( origin[ 1 ] + fPolygon.ypoints[ i ] - 0.5 );
 			}
 
 			spots.add( SpotRoi.createSpot( xpoly, ypoly, quality ) );
