@@ -9,7 +9,6 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotMesh;
 import net.imglib2.Interval;
 import net.imglib2.IterableInterval;
-import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.algorithm.gauss3.Gauss3;
@@ -22,6 +21,7 @@ import net.imglib2.mesh.impl.nio.BufferMesh;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegion;
 import net.imglib2.roi.labeling.LabelRegions;
+import net.imglib2.type.NativeType;
 import net.imglib2.type.logic.BoolType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
@@ -74,8 +74,10 @@ public class SpotMeshUtils
 	 *            the type of the quality image. Must be real, scalar.
 	 * @param input
 	 *            the source image, must be zero-min and 3D.
-	 * @param interval
-	 *            the interval in which to segment spots.
+	 * @param origin
+	 *            the origin (min pos) of the interval the labeling was
+	 *            generated from, used to reposition the spots from the zero-min
+	 *            labeling to the proper coordinates.
 	 * @param calibration
 	 *            the physical calibration.
 	 * @param threshold
@@ -83,13 +85,19 @@ public class SpotMeshUtils
 	 * @param simplify
 	 *            if <code>true</code> the meshes will be post-processed to be
 	 *            smoother and contain less points.
+	 * @param smoothingScale
+	 *            if strictly larger than 0, the input will be smoothed before
+	 *            creating the contour, resulting in smoother contours. The
+	 *            scale value sets the (Gaussian) filter radius and is specified
+	 *            in physical units. If 0 or lower than 0, no smoothing is
+	 *            applied.
 	 * @param qualityImage
 	 *            the image in which to read the quality value.
 	 * @return a list of spots, with meshes.
 	 */
-	public static < T extends RealType< T >, S extends RealType< S > > List< Spot > from3DThresholdWithROI(
-			final RandomAccessible< T > input,
-			final Interval interval,
+	public static < T extends RealType< T > & NativeType< T >, S extends RealType< S > > List< Spot > from3DThresholdWithROI(
+			final RandomAccessibleInterval< T > input,
+			final double[] origin,
 			final double[] calibration,
 			final double threshold,
 			final boolean simplify,
@@ -98,12 +106,8 @@ public class SpotMeshUtils
 		if ( input.numDimensions() != 3 )
 			throw new IllegalArgumentException( "Can only process 3D images with this method, but got " + input.numDimensions() + "D." );
 
-		// Crop.
-		final RandomAccessibleInterval< T > crop = Views.interval( input, interval );
-		final RandomAccessibleInterval< T > in = Views.zeroMin( crop );
-
 		// Get big mesh.
-		final Mesh mc = Meshes.marchingCubes( in, threshold );
+		final Mesh mc = Meshes.marchingCubes( input, threshold );
 		final Mesh bigMesh = Meshes.removeDuplicateVertices( mc, VERTEX_DUPLICATE_REMOVAL_PRECISION );
 
 		// Split into connected components.
@@ -147,7 +151,6 @@ public class SpotMeshUtils
 
 		// Create spot from merged meshes.
 		final List< Spot > spots = new ArrayList<>( out.size() );
-		final double[] origin = interval.minAsDoubleArray();
 		for ( final Mesh mesh : out )
 		{
 			final SpotMesh spot = meshToSpotMesh(
@@ -163,9 +166,9 @@ public class SpotMeshUtils
 	}
 
 	/**
-	 * Creates spots <b>with meshes</b> from a <b>3D</b> label image. The
-	 * quality value is read from a secondary image, by taking the max value in
-	 * each ROI.
+	 * Creates spots <b>with meshes</b> from a <b>3D</b> label image. The labels
+	 * are possibly smoothed before creating the mesh. The quality value is read
+	 * from a secondary image, by taking the max value in each ROI.
 	 *
 	 * @param <R>
 	 *            the type that backs-up the labeling.
@@ -179,15 +182,15 @@ public class SpotMeshUtils
 	 * @param calibration
 	 *            the physical calibration.
 	 * @param simplify
-	 *            if <code>true</code> the meshes will be post-processed to be
-	 *            smoother and contain less points.
-	 * @param qualityImage
-	 *            the image in which to read the quality value.
+	 *            if <code>true</code> the meshes will be post-processed to
+	 *            contain less verrtices.
 	 * @param smoothingScale
 	 *            if strictly larger than 0, the mask will be smoothed before
 	 *            creating the mesh, resulting in smoother meshes. The scale
 	 *            value sets the (Gaussian) filter radius and is specified in
 	 *            physical units. If 0 or lower than 0, no smoothing is applied.
+	 * @param qualityImage
+	 *            the image in which to read the quality value.
 	 * @return a list of spots, with meshes.
 	 */
 	public static < R extends IntegerType< R >, S extends RealType< S > > List< Spot > from3DLabelingWithROI(
@@ -212,9 +215,9 @@ public class SpotMeshUtils
 					region,
 					simplify,
 					calibration,
-					qualityImage,
+					smoothingScale,
 					interval.minAsDoubleArray(),
-					smoothingScale );
+					qualityImage );
 			if ( spot == null )
 				continue;
 
@@ -255,9 +258,9 @@ public class SpotMeshUtils
 			final RandomAccessibleInterval< BoolType > region,
 			final boolean simplify,
 			final double[] calibration,
-			final RandomAccessibleInterval< S > qualityImage,
+			final double smoothingScale,
 			final double[] minInterval,
-			final double smoothingScale )
+			final RandomAccessibleInterval< S > qualityImage )
 	{
 		final RandomAccessibleInterval< BoolType > box = Views.zeroMin( region );
 		final Mesh mesh;
@@ -276,7 +279,7 @@ public class SpotMeshUtils
 			final Interval outputSize = Intervals.expand( box, borders );
 			final Img< FloatType > img = Util.getArrayOrCellImgFactory( outputSize, new FloatType() ).create( outputSize );
 			final RandomAccessibleInterval< FloatType > filtered = Views.translateInverse( img, borders );
-			Gauss3.gauss( sigmas, box, filtered );
+			Gauss3.gauss( sigmas, Views.extendZero( box ), filtered );
 			mesh = Meshes.marchingCubes( img, 0.5 );
 		}
 		else
