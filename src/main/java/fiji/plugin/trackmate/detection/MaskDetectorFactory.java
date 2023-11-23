@@ -24,10 +24,12 @@ package fiji.plugin.trackmate.detection;
 import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.io.IOUtils.readBooleanAttribute;
+import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.readIntegerAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.writeAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.writeTargetChannel;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
+import static fiji.plugin.trackmate.util.TMUtils.checkOptionalParameter;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
 
 import java.util.ArrayList;
@@ -147,10 +149,13 @@ public class MaskDetectorFactory< T extends RealType< T > & NativeType< T > > ex
 		final StringBuilder errorHolder = new StringBuilder();
 		ok = ok & checkParameter( lSettings, KEY_TARGET_CHANNEL, Integer.class, errorHolder );
 		ok = ok & checkParameter( lSettings, KEY_SIMPLIFY_CONTOURS, Boolean.class, errorHolder );
+		ok = ok & checkOptionalParameter( lSettings, KEY_SMOOTHING_SCALE, Double.class, errorHolder );
 		final List< String > mandatoryKeys = new ArrayList<>();
 		mandatoryKeys.add( KEY_TARGET_CHANNEL );
 		mandatoryKeys.add( KEY_SIMPLIFY_CONTOURS );
-		ok = ok & checkMapKeys( lSettings, mandatoryKeys, null, errorHolder );
+		final List< String > optionalKeys = new ArrayList<>();
+		optionalKeys.add( KEY_SMOOTHING_SCALE );
+		ok = ok & checkMapKeys( lSettings, mandatoryKeys, optionalKeys, errorHolder );
 		if ( !ok )
 		{
 			errorMessage = errorHolder.toString();
@@ -163,7 +168,8 @@ public class MaskDetectorFactory< T extends RealType< T > & NativeType< T > > ex
 	{
 		final StringBuilder errorHolder = new StringBuilder();
 		final boolean ok = writeTargetChannel( lSettings, element, errorHolder )
-				&& writeAttribute( lSettings, element, KEY_SIMPLIFY_CONTOURS, Boolean.class, errorHolder );
+				&& writeAttribute( lSettings, element, KEY_SIMPLIFY_CONTOURS, Boolean.class, errorHolder )
+				&& writeAttribute( lSettings, element, KEY_SMOOTHING_SCALE, Double.class, errorHolder );
 
 		if ( !ok )
 			errorMessage = errorHolder.toString();
@@ -179,6 +185,7 @@ public class MaskDetectorFactory< T extends RealType< T > & NativeType< T > > ex
 		boolean ok = true;
 		ok = ok & readIntegerAttribute( element, lSettings, KEY_TARGET_CHANNEL, errorHolder );
 		ok = ok & readBooleanAttribute( element, lSettings, KEY_SIMPLIFY_CONTOURS, errorHolder );
+		ok = ok & readDoubleAttribute( element, lSettings, KEY_SMOOTHING_SCALE, errorHolder );
 		if ( !ok )
 		{
 			errorMessage = errorHolder.toString();
