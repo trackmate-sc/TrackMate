@@ -245,8 +245,39 @@ public class TMUtils
 	}
 
 	/**
-	 * Check the presence and the validity of a key in a map, and test it is of
-	 * the desired class.
+	 * Check the optional presence and the validity of a key in a map, and test
+	 * it is of the desired class. If the key is not present, this method
+	 * returns <code>true</code>. If it is present, it tests the value is of the
+	 * right class.
+	 *
+	 * @param map
+	 *            the map to inspect.
+	 * @param key
+	 *            the key to find.
+	 * @param expectedClass
+	 *            the expected class of the target value .
+	 * @param errorHolder
+	 *            will be appended with an error message.
+	 * @return true if the key is not found in the map, or if it is found, and
+	 *         map a value of the desired class.
+	 */
+	public static final boolean checkOptionalParameter( final Map< String, Object > map, final String key, final Class< ? > expectedClass, final StringBuilder errorHolder )
+	{
+		final Object obj = map.get( key );
+		if ( null == obj )
+			return true;
+
+		if ( !expectedClass.isInstance( obj ) )
+		{
+			errorHolder.append( "Value for parameter " + key + " is not of the right class. Expected " + expectedClass.getName() + ", got " + obj.getClass().getName() + ".\n" );
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Check the mandatory presence and the validity of a key in a map, and test
+	 * its value is of the desired class.
 	 *
 	 * @param map
 	 *            the map to inspect.
@@ -267,12 +298,7 @@ public class TMUtils
 			errorHolder.append( "Parameter " + key + " could not be found in settings map, or is null.\n" );
 			return false;
 		}
-		if ( !expectedClass.isInstance( obj ) )
-		{
-			errorHolder.append( "Value for parameter " + key + " is not of the right class. Expected " + expectedClass.getName() + ", got " + obj.getClass().getName() + ".\n" );
-			return false;
-		}
-		return true;
+		return checkOptionalParameter( map, key, expectedClass, errorHolder );
 	}
 
 	/**
