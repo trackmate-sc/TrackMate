@@ -24,6 +24,8 @@ package fiji.plugin.trackmate.gui.displaysettings;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -101,6 +103,22 @@ public class SliderPanel extends JPanel implements BoundedValue.UpdateListener
 		add( slider, BorderLayout.CENTER );
 		add( spinner, BorderLayout.EAST );
 
+		final MouseWheelListener mouseWheelListener = new MouseWheelListener()
+		{
+
+			@Override
+			public void mouseWheelMoved( final MouseWheelEvent e )
+			{
+				if ( !slider.isEnabled() )
+					return;
+				final int notches = e.getWheelRotation();
+				final int step = notches < 0 ? 1 : -1;
+				slider.setValue( slider.getValue() + step );
+			}
+		};
+		slider.addMouseWheelListener( mouseWheelListener );
+		spinner.addMouseWheelListener( mouseWheelListener );
+
 		this.model = model;
 		model.setUpdateListener( this );
 	}
@@ -108,6 +126,14 @@ public class SliderPanel extends JPanel implements BoundedValue.UpdateListener
 	public void setNumColummns( final int cols )
 	{
 		( ( JSpinner.NumberEditor ) spinner.getEditor() ).getTextField().setColumns( cols );
+	}
+
+	@Override
+	public void setEnabled( final boolean enabled )
+	{
+		spinner.setEnabled( enabled );
+		slider.setEnabled( enabled );
+		super.setEnabled( enabled );
 	}
 
 	@Override
