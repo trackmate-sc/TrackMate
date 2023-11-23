@@ -124,6 +124,7 @@ public class ThresholdDetector< T extends RealType< T > & NativeType< T > > impl
 				calibration,
 				threshold,
 				simplify,
+				smoothingScale,
 				numThreads,
 				null );
 		final long end = System.currentTimeMillis();

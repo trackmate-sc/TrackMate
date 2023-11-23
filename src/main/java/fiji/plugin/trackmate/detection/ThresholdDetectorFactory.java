@@ -95,7 +95,7 @@ public class ThresholdDetectorFactory< T extends RealType< T > & NativeType< T >
 	{
 		final double intensityThreshold = ( Double ) settings.get( KEY_INTENSITY_THRESHOLD );
 		final boolean simplifyContours = ( Boolean ) settings.get( KEY_SIMPLIFY_CONTOURS );
-		final double smoothingScale = ( Double ) settings.get( KEY_SMOOTHING_SCALE );
+		final double smoothingScale = ( Double ) settings.getOrDefault( KEY_SMOOTHING_SCALE, -1. );
 		final double[] calibration = TMUtils.getSpatialCalibration( img );
 		final int channel = ( Integer ) settings.get( KEY_TARGET_CHANNEL ) - 1;
 		final RandomAccessible< T > imFrame = DetectionUtils.prepareFrameImg( img, channel, frame );

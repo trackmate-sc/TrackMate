@@ -325,13 +325,20 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 		return lSettings;
 	}
 
-	@Override
-	public void setSettings( final Map< String, Object > settings )
+	protected void setSettingsNonIntensity( final Map< String, Object > settings )
 	{
 		sliderChannel.setValue( ( Integer ) settings.get( KEY_TARGET_CHANNEL ) );
 		chkboxSimplify.setSelected( ( Boolean ) settings.get( ThresholdDetectorFactory.KEY_SIMPLIFY_CONTOURS ) );
+		final Object scaleObj = settings.get( KEY_SMOOTHING_SCALE );
+		final double scale = scaleObj == null ? -1. : ( ( Number ) scaleObj ).doubleValue();
+		smoothingPanel.setScale( scale );
+	}
 
-		final Double intensityThreshold = Double.valueOf( ( Double ) settings.get( ThresholdDetectorFactory.KEY_INTENSITY_THRESHOLD ) );
+	@Override
+	public void setSettings( final Map< String, Object > settings )
+	{
+		setSettingsNonIntensity( settings );
+		final Double intensityThreshold = Double.valueOf( ( Double ) settings.get( KEY_INTENSITY_THRESHOLD ) );
 		if ( intensityThreshold == null || intensityThreshold == 0. )
 			autoThreshold();
 		else
