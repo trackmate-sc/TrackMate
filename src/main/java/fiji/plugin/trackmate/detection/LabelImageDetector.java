@@ -144,9 +144,10 @@ public class LabelImageDetector< T extends RealType< T > & NativeType< T > > imp
 		{
 			spots = SpotRoiUtils.from2DLabelingWithROI(
 					labeling,
-					interval,
+					interval.minAsDoubleArray(),
 					calibration,
 					simplify,
+					smoothingScale,
 					null );
 		}
 		else if ( input.numDimensions() == 3 )

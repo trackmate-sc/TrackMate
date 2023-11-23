@@ -30,6 +30,7 @@ import static fiji.plugin.trackmate.io.IOUtils.readIntegerAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.writeAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.writeTargetChannel;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
+import static fiji.plugin.trackmate.util.TMUtils.checkOptionalParameter;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
 
 import java.util.ArrayList;
@@ -154,14 +155,16 @@ public class LabelImageDetectorFactory< T extends RealType< T > & NativeType< T 
 		final StringBuilder errorHolder = new StringBuilder();
 		ok = ok & checkParameter( lSettings, KEY_TARGET_CHANNEL, Integer.class, errorHolder );
 		ok = ok & checkParameter( lSettings, KEY_SIMPLIFY_CONTOURS, Boolean.class, errorHolder );
+		ok = ok & checkOptionalParameter( lSettings, KEY_SMOOTHING_SCALE, Double.class, errorHolder );
 		final List< String > mandatoryKeys = new ArrayList<>();
 		mandatoryKeys.add( KEY_TARGET_CHANNEL );
 		mandatoryKeys.add( KEY_SIMPLIFY_CONTOURS );
-		ok = ok & checkMapKeys( lSettings, mandatoryKeys, null, errorHolder );
+		final List< String > optionalKeys = new ArrayList<>();
+		optionalKeys.add( KEY_SMOOTHING_SCALE );
+		ok = ok & checkMapKeys( lSettings, mandatoryKeys, optionalKeys, errorHolder );
 		if ( !ok )
-		{
 			errorMessage = errorHolder.toString();
-		}
+
 		return ok;
 	}
 
@@ -218,6 +221,7 @@ public class LabelImageDetectorFactory< T extends RealType< T > & NativeType< T 
 		final Map< String, Object > lSettings = new HashMap<>();
 		lSettings.put( KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL );
 		lSettings.put( KEY_SIMPLIFY_CONTOURS, true );
+		lSettings.put( KEY_SMOOTHING_SCALE, -1. );
 		return lSettings;
 	}
 
