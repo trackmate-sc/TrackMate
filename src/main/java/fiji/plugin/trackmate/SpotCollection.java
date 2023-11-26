@@ -313,7 +313,7 @@ public class SpotCollection implements MultiThreaded
 							final double tval = featureFilter.value;
 							final boolean isAbove = featureFilter.isAbove;
 
-							if ( null == val || isAbove && val.compareTo( tval ) < 0 || !isAbove && val.compareTo( tval ) > 0 )
+							if (isSpotVisible(val, tval, isAbove))
 							{
 								shouldNotBeVisible = true;
 								break;
@@ -338,6 +338,10 @@ public class SpotCollection implements MultiThreaded
 		{
 			e.printStackTrace();
 		}
+	}
+
+	private boolean isSpotVisible(Double val, double tval, boolean isAbove){
+		return (null == val || isAbove && val.compareTo( tval ) < 0 || !isAbove && val.compareTo( tval ) > 0);
 	}
 
 	/**
