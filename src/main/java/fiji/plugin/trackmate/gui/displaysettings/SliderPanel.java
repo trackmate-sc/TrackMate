@@ -24,6 +24,7 @@ package fiji.plugin.trackmate.gui.displaysettings;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
@@ -35,6 +36,8 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import fiji.plugin.trackmate.gui.GuiUtils;
 
 /**
  * A {@link JSlider} with a {@link JSpinner} next to it, both modifying the same
@@ -134,6 +137,12 @@ public class SliderPanel extends JPanel implements BoundedValue.UpdateListener
 		spinner.setEnabled( enabled );
 		slider.setEnabled( enabled );
 		super.setEnabled( enabled );
+	}
+
+	@Override
+	public void setFont( final Font font )
+	{
+		GuiUtils.setFont( this, font );
 	}
 
 	@Override
