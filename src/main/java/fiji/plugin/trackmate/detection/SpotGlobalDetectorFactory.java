@@ -21,6 +21,7 @@
  */
 package fiji.plugin.trackmate.detection;
 
+import fiji.plugin.trackmate.util.TMUtils;
 import net.imglib2.Interval;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
@@ -46,11 +47,13 @@ public interface SpotGlobalDetectorFactory< T extends RealType< T > & NativeType
 	 *
 	 * @param interval
 	 *            the interval that determines the region in the source image to
-	 *            operate on. This must <b>not</b> have a dimension for time
-	 *            (<i>e.g.</i> if the source image is 2D+T (3D), then the
-	 *            interval must be 2D; if the source image is 3D without time,
-	 *            then the interval must be 3D).
+	 *            operate on. This <b>must</b> have a dimension for time, but
+	 *            not for channels (<i>e.g.</i> if the source image is 2D+T
+	 *            (3D), then the interval must be 3D; if the source image is 3D
+	 *            without time, then the interval must be 4D).
 	 * @return a new detector.
+	 * @see TMUtils#getIntervalWithTime(net.imagej.ImgPlus,
+	 *      fiji.plugin.trackmate.Settings)
 	 */
 	public SpotGlobalDetector< T > getDetector( final Interval interval );
 
