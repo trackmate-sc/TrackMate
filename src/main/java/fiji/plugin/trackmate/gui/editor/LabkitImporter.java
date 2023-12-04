@@ -288,7 +288,7 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 		{
 			return SpotMeshUtils.from3DLabelingWithROI(
 					labeling,
-					labeling,
+					labeling.minAsDoubleArray(),
 					calibration,
 					simplify,
 					smoothingScale,
