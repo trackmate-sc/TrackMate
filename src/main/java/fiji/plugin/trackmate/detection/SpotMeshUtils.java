@@ -176,8 +176,9 @@ public class SpotMeshUtils
 	 *            the type of the quality image. Must be real, scalar.
 	 * @param labeling
 	 *            the labeling, must be zero-min and 3D.
-	 * @param interval
-	 *            the interval, used to reposition the spots from the zero-min
+	 * @param origin
+	 *            the origin (min pos) of the interval the labeling was
+	 *            generated from, used to reposition the spots from the zero-min
 	 *            labeling to the proper coordinates.
 	 * @param calibration
 	 *            the physical calibration.
@@ -195,7 +196,7 @@ public class SpotMeshUtils
 	 */
 	public static < R extends IntegerType< R >, S extends RealType< S > > List< Spot > from3DLabelingWithROI(
 			final ImgLabeling< Integer, R > labeling,
-			final Interval interval,
+			final double[] origin,
 			final double[] calibration,
 			final boolean simplify,
 			final double smoothingScale,
@@ -216,7 +217,7 @@ public class SpotMeshUtils
 					simplify,
 					calibration,
 					smoothingScale,
-					interval.minAsDoubleArray(),
+					origin,
 					qualityImage );
 			if ( spot == null )
 				continue;
