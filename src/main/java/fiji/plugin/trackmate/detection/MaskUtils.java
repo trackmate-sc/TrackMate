@@ -243,7 +243,7 @@ public class MaskUtils
 				numThreads );
 		return fromLabeling(
 				labeling,
-				interval,
+				interval.minAsDoubleArray(),
 				calibration );
 	}
 
@@ -254,8 +254,9 @@ public class MaskUtils
 	 *            the type that backs-up the labeling.
 	 * @param labeling
 	 *            the labeling, must be zero-min.
-	 * @param interval
-	 *            the interval, used to reposition the spots from the zero-min
+	 * @param origin
+	 *            the origin (min pos) of the interval the labeling was
+	 *            generated from, used to reposition the spots from the zero-min
 	 *            labeling to the proper coordinates.
 	 * @param calibration
 	 *            the physical calibration.
@@ -263,7 +264,7 @@ public class MaskUtils
 	 */
 	public static < R extends IntegerType< R > > List< Spot > fromLabeling(
 			final ImgLabeling< Integer, R > labeling,
-			final Interval interval,
+			final double[] origin,
 			final double[] calibration )
 	{
 		// Parse each component.
@@ -288,9 +289,9 @@ public class MaskUtils
 			for ( int d = 0; d < pos.length; d++ )
 				pos[ d ] = sum[ d ] / ( double ) region.size();
 
-			final double x = calibration[ 0 ] * ( interval.min( 0 ) + pos[ 0 ] );
-			final double y = calibration[ 1 ] * ( interval.min( 1 ) + pos[ 1 ] );
-			final double z = calibration[ 2 ] * ( interval.min( 2 ) + pos[ 2 ] );
+			final double x = calibration[ 0 ] * ( origin[ 0 ] + pos[ 0 ] );
+			final double y = calibration[ 1 ] * ( origin[ 1 ] + pos[ 1 ] );
+			final double z = calibration[ 2 ] * ( origin[ 2 ] + pos[ 2 ] );
 
 			double volume = region.size();
 			for ( int d = 0; d < calibration.length; d++ )
