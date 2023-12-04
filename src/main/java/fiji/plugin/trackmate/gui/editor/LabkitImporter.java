@@ -77,11 +77,15 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 	 * @param currentTimePoint
 	 *            the time-point in the TrackMate model that corresponds to the
 	 *            index image.
+	 * @param smoothingScale
+	 *            the smoothing scale, in physical unit, to use for smoothing
+	 *            the masks when re-importing them into TrackMate.
 	 */
 	public void reimport(
 			final RandomAccessibleInterval< T > novelIndexImg,
 			final RandomAccessibleInterval< T > previousIndexImg,
-			final int currentTimePoint )
+			final int currentTimePoint,
+			final double smoothingScale )
 	{
 
 		// Collect ids of spots that have been modified. id = index - 1
@@ -104,7 +108,7 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 			 * the novel label image as 'quality' image, they have a quality
 			 * value equal to the index in the label image (id+1).
 			 */
-			final List< Spot > novelSpots = getSpots( novelIndexImg );
+			final List< Spot > novelSpots = getSpots( novelIndexImg, smoothingScale );
 
 			/*
 			 * Map of novel spots against the ID taken from the index of the
@@ -255,7 +259,7 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 		return modifiedIDs;
 	}
 
-	private List< Spot > getSpots( final RandomAccessibleInterval< T > rai )
+	private List< Spot > getSpots( final RandomAccessibleInterval< T > rai, final double smoothingScale )
 	{
 		// Get all labels.
 		final AtomicInteger max = new AtomicInteger( 0 );
@@ -274,9 +278,10 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 		{
 			return SpotRoiUtils.from2DLabelingWithROI(
 					labeling,
-					labeling,
+					labeling.minAsDoubleArray(),
 					calibration,
 					simplify,
+					smoothingScale,
 					rai );
 		}
 		else
@@ -286,6 +291,7 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 					labeling,
 					calibration,
 					simplify,
+					smoothingScale,
 					rai );
 		}
 	}

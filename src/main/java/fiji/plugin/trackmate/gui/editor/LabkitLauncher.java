@@ -110,7 +110,10 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 		} );
 	}
 
-	private void reimport( final RandomAccessibleInterval< T > indexImg, final RandomAccessibleInterval< T > previousIndexImg, final double dt )
+	private void reimport(
+			final RandomAccessibleInterval< T > indexImg,
+			final RandomAccessibleInterval< T > previousIndexImg,
+			final double dt )
 	{
 		try
 		{
@@ -134,6 +137,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 				return;
 
 			// Message the user.
+			final double smoothingScale = -1; // TODO
 			final String msg = ( currentTimePoint < 0 )
 					? "Commit the changes made to the\n"
 							+ "segmentation in whole movie?"
@@ -161,7 +165,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 				{
 					final RandomAccessibleInterval< T > novelIndexImgThisFrame = Views.hyperSlice( indexImg, 3, t );
 					final RandomAccessibleInterval< T > previousIndexImgThisFrame = Views.hyperSlice( previousIndexImg, 3, t );
-					reimporter.reimport( novelIndexImgThisFrame, previousIndexImgThisFrame, t );
+					reimporter.reimport( novelIndexImgThisFrame, previousIndexImgThisFrame, t, smoothingScale );
 					log.setProgress( ++t / ( double ) nTimepoints );
 				}
 				log.setStatus( "" );
@@ -170,7 +174,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 			else
 			{
 				// Only one.
-				reimporter.reimport( indexImg, previousIndexImg, currentTimePoint );
+				reimporter.reimport( indexImg, previousIndexImg, currentTimePoint, smoothingScale );
 			}
 		}
 		catch ( final Exception e )
