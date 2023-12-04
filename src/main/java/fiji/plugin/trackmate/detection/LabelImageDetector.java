@@ -152,7 +152,7 @@ public class LabelImageDetector< T extends RealType< T > & NativeType< T > > imp
 		{
 			spots = SpotMeshUtils.from3DLabelingWithROI(
 					labeling,
-					interval,
+					interval.minAsDoubleArray(),
 					calibration,
 					simplify,
 					smoothingScale,
@@ -162,7 +162,7 @@ public class LabelImageDetector< T extends RealType< T > & NativeType< T > > imp
 		{
 			spots = MaskUtils.fromLabeling(
 					labeling,
-					interval,
+					interval.minAsDoubleArray(),
 					calibration );
 		}
 	}
