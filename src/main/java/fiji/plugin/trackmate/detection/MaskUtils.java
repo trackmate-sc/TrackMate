@@ -489,7 +489,7 @@ public class MaskUtils
 	 *            the image in which to read the quality value.
 	 * @return a list of spots, with ROI.
 	 */
-	@SuppressWarnings( "unchecked" )
+	@SuppressWarnings( { "unchecked", "rawtypes" } )
 	public static final < T extends RealType< T > & NativeType< T >, S extends RealType< S > > List< Spot > fromThresholdWithROI(
 			final RandomAccessible< T > input,
 			final Interval interval,
@@ -516,7 +516,7 @@ public class MaskUtils
 			for ( int d = 0; d < sigmas.length; d++ )
 				sigmas[ d ] = smoothingScale / Math.sqrt( in.numDimensions() ) / calibration[ d ];
 
-			filtered = ( RandomAccessibleInterval< T > ) Util.getArrayOrCellImgFactory( in, new FloatType() ).create( in );
+			filtered = ( RandomAccessibleInterval ) Util.getArrayOrCellImgFactory( in, new FloatType() ).create( in );
 			Parallelization.runWithNumThreads( numThreads,
 					() -> Gauss3.gauss( sigmas, Views.extendMirrorDouble( in ), filtered ) );
 		}
