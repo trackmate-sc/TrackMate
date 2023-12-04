@@ -23,7 +23,6 @@ import net.imglib2.type.BooleanType;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.logic.BoolType;
 import net.imglib2.type.numeric.IntegerType;
-import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.real.FloatType;
@@ -45,7 +44,7 @@ public class SpotRoiUtils
 	/** Douglas-Peucker polygon simplification max distance. */
 	private static final double DOUGLAS_PEUCKER_MAX_DISTANCE = 0.5;
 
-	public static < T extends RealType< T > & NativeType< T >, S extends NumericType< S > > List< Spot > from2DThresholdWithROI(
+	public static < T extends RealType< T > & NativeType< T >, S extends RealType< S > > List< Spot > from2DThresholdWithROI(
 			final RandomAccessibleInterval< T > input,
 			final double[] origin,
 			final double[] calibration,
@@ -76,7 +75,7 @@ public class SpotRoiUtils
 	 * @param <S>
 	 *            the type of the quality image. Must be real, scalar.
 	 * @param labeling
-	 *            the labeling, must be zero-min and 2D..
+	 *            the labeling, must be zero-min and 2D.
 	 * @param origin
 	 *            the origin (min pos) of the interval the labeling was
 	 *            generated from, used to reposition the spots from the zero-min
@@ -165,7 +164,7 @@ public class SpotRoiUtils
 			// Don't include ROIs that have been shrunk to < 1 pixel.
 			if ( fRoi.getNCoordinates() < 3 || fRoi.getStatistics().area <= 0. )
 				continue;
-			
+
 			// Create spot without quality value yet.
 			final Polygon fPolygon = fRoi.getPolygon();
 			final double[] xpoly = new double[ fPolygon.npoints ];
