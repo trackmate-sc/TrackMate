@@ -243,8 +243,9 @@ public class Process2DZ< T extends RealType< T > & NativeType< T > >
 			newSpot.putFeature( Spot.QUALITY, Double.valueOf( avgQuality ) );
 
 			// Shift them by interval min.
-			for ( int d = 0; d < 3; d++ )
-				newSpot.move( interval.min( d ) * calibration[ d ], d );
+			newSpot.move( interval.min( img.dimensionIndex( Axes.X ) ) * calibration[ 0 ], 0 );
+			newSpot.move( interval.min( img.dimensionIndex( Axes.Y ) ) * calibration[ 1 ], 1 );
+			newSpot.move( interval.min( img.dimensionIndex( Axes.Z ) ) * calibration[ 2 ], 2 );
 
 			spots.add( newSpot );
 		}
