@@ -14,9 +14,9 @@ import fiji.plugin.trackmate.action.LabelImgExporter;
 import fiji.plugin.trackmate.util.TMUtils;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccess;
-import net.imglib2.RandomAccessible;
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.mesh.alg.TaubinSmoothing;
@@ -49,7 +49,7 @@ public class Process2DZ< T extends RealType< T > & NativeType< T > >
 
 	private static final String BASE_ERROR_MESSAGE = "[Process2DZ] ";
 
-	private final RandomAccessible< T > img;
+	private final ImgPlus< T > img;
 
 	private final Interval interval;
 
@@ -67,8 +67,8 @@ public class Process2DZ< T extends RealType< T > & NativeType< T > >
 	 * Creates a new {@link Process2DZ} detector.
 	 * 
 	 * @param img
-	 *            the input data. Must be 3D (plus possible channels) and the 3
-	 *            dimensions must be X, Y and Z.
+	 *            the input data. Must be 3D or 4D (3D plus possibly channels)
+	 *            and the 3 spatial dimensions must be X, Y and Z.
 	 * @param interval
 	 *            the interval in the input data to process. Must have the same
 	 *            number of dimensions that the input data.
@@ -76,13 +76,16 @@ public class Process2DZ< T extends RealType< T > & NativeType< T > >
 	 *            the pixel size array.
 	 * @param settings
 	 *            a TrackMate settings object, configured to operate on the
-	 *            (cropped) input data as if it was a 2D+T image.
+	 *            (cropped) input data as if it was a 2D(+C)+T image.
 	 * @param simplifyMeshes
 	 *            whether or not to smooth and simplify meshes resulting from
 	 *            merging the 2D contours.
+	 * @param smoothingScale
+	 *            if positive, will smooth the 3D mask by a gaussian of
+	 *            specified sigma to yield smooth meshes.
 	 */
 	public Process2DZ(
-			final RandomAccessible< T > img,
+			final ImgPlus< T > img,
 			final Interval interval,
 			final double[] calibration,
 			final Settings settings,
@@ -100,9 +103,25 @@ public class Process2DZ< T extends RealType< T > & NativeType< T > >
 	@Override
 	public boolean checkInput()
 	{
-		if ( img.numDimensions() != 3 )
+		if ( !( img.numDimensions() == 3 || img.numDimensions() == 4 ) )
 		{
-			errorMessage = BASE_ERROR_MESSAGE + "Source image is not 3D.\n";
+			errorMessage = BASE_ERROR_MESSAGE + "Source image is not 3D or 4D, but " + img.numDimensions() + "D.\n";
+			return false;
+		}
+		if ( img.dimensionIndex( Axes.TIME ) >= 0 )
+		{
+			errorMessage = BASE_ERROR_MESSAGE + "Source image has a time dimension, but should not.\n";
+			return false;
+		}
+		if ( img.dimensionIndex( Axes.Z ) < 0 )
+		{
+			errorMessage = BASE_ERROR_MESSAGE + "Source image does not have a Z dimension.\n";
+			return false;
+		}
+		if ( interval.numDimensions() != img.numDimensions() )
+		{
+			errorMessage = BASE_ERROR_MESSAGE + "Provided interval does not have the same dimensionality that of the source image. "
+					+ "Interval is " + interval.numDimensions() + "D and the image is " + img.numDimensions() + "D.\n";
 			return false;
 		}
 		return true;
@@ -121,8 +140,9 @@ public class Process2DZ< T extends RealType< T > & NativeType< T > >
 		// Make the final single T 3D image, a 2D + T image final by making Z->T
 		final IntervalView< T > cropped = Views.interval( img, interval );
 		final ImagePlus imp = ImageJFunctions.wrap( cropped, null );
-		final int nFrames = ( int ) interval.dimension( 2 );
-		final int nChannels = ( interval.numDimensions() > 3 ) ? ( int ) interval.dimension( 3 ) : 1;
+		final int nFrames = ( int ) interval.dimension( img.dimensionIndex( Axes.Z ) );
+		final int cDim = img.dimensionIndex( Axes.CHANNEL );
+		final int nChannels = cDim < 0 ? 1 : ( int ) interval.dimension( cDim );
 		imp.setDimensions( nChannels, 1, nFrames );
 		imp.getCalibration().pixelWidth = calibration[ 0 ];
 		imp.getCalibration().pixelHeight = calibration[ 1 ];
