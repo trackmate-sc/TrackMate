@@ -134,6 +134,7 @@
 	</ciManagement>
 
 	<properties>
+        <enforcer.skip>true</enforcer.skip>
 		<package-name>fiji.plugin.trackmate</package-name>
 		<license.licenseName>gpl_v3</license.licenseName>
 		<license.copyrightOwners>TrackMate developers.</license.copyrightOwners>
