@@ -196,16 +196,6 @@ public class SliderPanelDouble extends JPanel implements BoundedValueDouble.Upda
 	}
 
 	@Override
-	public void setFont( final Font font )
-	{
-		super.setFont( font );
-		if ( spinner != null )
-			spinner.setFont( font );
-		if ( slider != null )
-			slider.setFont( font );
-	}
-
-	@Override
 	public void setToolTipText( final String text )
 	{
 		super.setToolTipText( text );
