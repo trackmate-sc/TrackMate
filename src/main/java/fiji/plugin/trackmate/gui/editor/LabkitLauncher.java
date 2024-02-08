@@ -74,7 +74,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 
 	/**
 	 * Launches the Labkit editor.
-	 * 
+	 *
 	 * @param singleTimePoint
 	 *            if <code>true</code>, will launch the editor using only the
 	 *            time-point currently displayed in the main view. Otherwise,
@@ -138,11 +138,15 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 
 			// Message the user.
 			final double smoothingScale = -1; // TODO
-			final String msg = ( currentTimePoint < 0 )
+			final long nTimepoints = indexImg.dimension( 3 );
+			final String msg = ( nTimepoints <= 1 )
 					? "Commit the changes made to the\n"
-							+ "segmentation in whole movie?"
-					: "Commit the changes made to the\n"
-							+ "segmentation in frame " + ( currentTimePoint + 1 ) + "?";
+							+ "segmentation in the image?"
+					: ( currentTimePoint < 0 )
+							? "Commit the changes made to the\n"
+									+ "segmentation in whole movie?"
+							: "Commit the changes made to the\n"
+									+ "segmentation in frame " + ( currentTimePoint + 1 ) + "?";
 			final String title = "Commit edits to TrackMate";
 			final int returnedValue = JOptionPane.showConfirmDialog(
 					null,
@@ -155,10 +159,9 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 				return;
 
 			final LabkitImporter< T > reimporter = new LabkitImporter<>( trackmate.getModel(), calibration, dt );
-			if ( currentTimePoint < 0 )
+			if ( currentTimePoint < 0 && nTimepoints > 1 )
 			{
 				// All time-points.
-				final long nTimepoints = indexImg.dimension( 3 );
 				final Logger log = Logger.IJ_LOGGER;
 				log.setStatus( "Re-importing from Labkit..." );
 				for ( int t = 0; t < nTimepoints; t++ )
@@ -174,7 +177,8 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 			else
 			{
 				// Only one.
-				reimporter.reimport( indexImg, previousIndexImg, currentTimePoint, smoothingScale );
+				final int localT = Math.max( 0, currentTimePoint );
+				reimporter.reimport( indexImg, previousIndexImg, localT, smoothingScale );
 			}
 		}
 		catch ( final Exception e )
@@ -200,7 +204,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 	/**
 	 * Creates a new {@link DatasetInputImage} from the specified
 	 * {@link ImagePlus}. The embedded label image is empty.
-	 * 
+	 *
 	 * @param imp
 	 *            the input {@link ImagePlus}.
 	 * @param singleTimePoint
@@ -219,10 +223,10 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 		// Possibly reslice for current time-point.
 		final ImpBdvShowable showable;
 		final ImgPlus inputImg;
-		if ( singleTimePoint )
+		final int timeAxis = src.dimensionIndex( Axes.TIME );
+		if ( singleTimePoint && timeAxis >= 0 )
 		{
 			this.currentTimePoint = imp.getFrame() - 1;
-			final int timeAxis = src.dimensionIndex( Axes.TIME );
 			inputImg = ImgPlusViews.hyperSlice( src, timeAxis, currentTimePoint );
 			showable = ImpBdvShowable.fromImp( inputImg, imp );
 		}
@@ -239,7 +243,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 	 * Prepare the label image for annotation. The labeling is created and each
 	 * of its labels receive the name and the color from the spot it is created
 	 * from.
-	 * 
+	 *
 	 * @param imp
 	 *            the source image plus.
 	 * @param spots
