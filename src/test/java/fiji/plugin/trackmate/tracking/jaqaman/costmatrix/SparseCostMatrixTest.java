@@ -78,4 +78,23 @@ public class SparseCostMatrixTest
 		}
 	}
 
+	@Test
+    public void test_valid_assignment_cost() {
+        // Create a SparseCostMatrix object with sample data
+        double[] cc = {1.0, 2.0, 3.0, 4.0};
+        int[] kk = {0, 1, 2, 3};
+        int[] number = {2, 2};
+        int nCols = 4;
+        SparseCostMatrix matrix = new SparseCostMatrix(cc, kk, number, nCols);
+
+        // Creating a valid assignment
+        int[] rowAssignment = {1, 3};
+
+        // Calculating the total assignment cost
+        double totalCost = matrix.totalAssignmentCost(rowAssignment);
+
+        // Assert that if total cost is correct
+        assertEquals(6.0, totalCost, 0.0001);
+    }
+
 }

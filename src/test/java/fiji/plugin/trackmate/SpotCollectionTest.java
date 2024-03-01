@@ -424,26 +424,26 @@ public class SpotCollectionTest
 		}
 	}
 
-	@Test
-	public void testFirstKey()
-	{
-		// First key should be frame 1
-		assertEquals( frames.get( 0 ), sc.firstKey() );
-
-		// Create a new frame content
-		final int N_SPOTS_TO_ADD = 20;
-		final HashSet< Spot > spots = new HashSet<>( N_SPOTS_TO_ADD );
-		for ( int i = 0; i < N_SPOTS_TO_ADD; i++ )
+		@Test
+		public void testFirstKey()
 		{
-			spots.add( new Spot( -1d, -1d, -1d, 1d, -1d ) );
-		}
-		// Add it to a new frame
-		final int targetFrame = -1;
-		sc.put( targetFrame, spots );
+			// First key should be frame 1
+			assertEquals( frames.get( 0 ), sc.firstKey() );
 
-		// First key should be new frame
-		assertEquals( targetFrame, sc.firstKey().longValue() );
-	}
+			// Create a new frame content
+			final int N_SPOTS_TO_ADD = 20;
+			final HashSet< Spot > spots = new HashSet<>( N_SPOTS_TO_ADD );
+			for ( int i = 0; i < N_SPOTS_TO_ADD; i++ )
+			{
+				spots.add( new Spot( -1d, -1d, -1d, 1d, -1d ) );
+			}
+			// Add it to a new frame
+			final int targetFrame = -1;
+			sc.put( targetFrame, spots );
+
+			// First key should be new frame
+			assertEquals( targetFrame, sc.firstKey().longValue() );
+		}
 
 	@Test
 	public void testLastKey()

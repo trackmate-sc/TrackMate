@@ -113,7 +113,7 @@ public class SortedDepthFirstIteratorTest
 	public final void testBehavior()
 	{
 
-		// Sort names
+		// Sort names+
 		final String[] expectedSortedNames = names.clone();
 		final Comparator< String > alphabeticalOrder = new Comparator< String >()
 		{
