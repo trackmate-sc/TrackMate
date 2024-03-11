@@ -37,7 +37,7 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 
 	/**
 	 * Creates a new re-importer.
-	 * 
+	 *
 	 * @param model
 	 *            the model to add, remove or edit spots in.
 	 * @param calibration
@@ -65,7 +65,7 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 	 * <p>
 	 * To properly detect modifications, the indices in the label images must
 	 * correspond to the spot ID + 1 (<code>index = id + 1</code>).
-	 * 
+	 *
 	 * @param novelIndexImg
 	 *            the new index image of the labeling model, that represents the
 	 *            TrackMate model in the specified time-point after
@@ -135,12 +135,13 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 					 * A new one (possible several) I cannot find in the
 					 * previous list -> add as a new spot.
 					 */
-					addNewSpot( novelSpotList, currentTimePoint );
+					if ( novelSpotList != null )
+						addNewSpot( novelSpotList, currentTimePoint );
 				}
 				else if ( novelSpotList == null || novelSpotList.isEmpty() )
 				{
 					/*
-					 * One I add in the previous spot list, but that has
+					 * One I had in the previous spot list, but that has
 					 * disappeared. Remove it.
 					 */
 					model.removeSpot( previousSpot );
