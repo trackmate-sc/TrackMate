@@ -333,7 +333,9 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 
 	private static final void processFrame( final ImgPlus< UnsignedIntType > lblImgPlus, final SpotCollection spots, final int t, final Map< Integer, Spot > spotIDs )
 	{
-		final Iterable< Spot > spotsThisFrame = spots.iterable( t, true );
+		// If we have a single timepoint, don't use -1 to retrieve spots.
+		final int lt = t < 0 ? 0 : t;
+		final Iterable< Spot > spotsThisFrame = spots.iterable( lt, true );
 		for ( final Spot spot : spotsThisFrame )
 		{
 			final int index = spot.ID() + 1;
