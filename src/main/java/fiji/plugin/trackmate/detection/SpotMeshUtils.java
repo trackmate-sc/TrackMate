@@ -106,12 +106,6 @@ public class SpotMeshUtils
 	 * @param simplify
 	 *            if <code>true</code> the meshes will be post-processed to be
 	 *            smoother and contain less points.
-	 * @param smoothingScale
-	 *            if strictly larger than 0, the input will be smoothed before
-	 *            creating the contour, resulting in smoother contours. The
-	 *            scale value sets the (Gaussian) filter radius and is specified
-	 *            in physical units. If 0 or lower than 0, no smoothing is
-	 *            applied.
 	 * @param qualityImage
 	 *            the image in which to read the quality value.
 	 * @return a list of spots, with meshes.

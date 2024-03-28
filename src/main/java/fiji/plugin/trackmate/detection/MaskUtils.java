@@ -165,8 +165,6 @@ public class MaskUtils
 	 *            the type of the input image. Must be real, scalar.
 	 * @param input
 	 *            the input image.
-	 * @param interval
-	 *            the interval in the input image to analyze.
 	 * @param threshold
 	 *            the threshold to apply to the input image.
 	 * @param numThreads
