@@ -189,15 +189,23 @@
 			<artifactId>bigvolumeviewer</artifactId>
 		</dependency>
 		<dependency>
-	        <groupId>org.jogamp.jogl</groupId>
-	        <artifactId>jogl-all-main</artifactId>
-	        <version>2.3.2</version>
-	    </dependency>
-	    <dependency>
-	        <groupId>org.jogamp.gluegen</groupId>
-	        <artifactId>gluegen-rt-main</artifactId>
-	        <version>2.3.2</version>
-	    </dependency>			
+			<groupId>org.jogamp.jogl</groupId>
+			<artifactId>jogl-all</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jogamp.gluegen</groupId>
+			<artifactId>gluegen-rt</artifactId>
+		</dependency>			
+		<dependency>
+			<groupId>org.jogamp.gluegen</groupId>
+			<artifactId>gluegen-rt</artifactId>
+			<classifier>${scijava.natives.classifier.gluegen}</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.jogamp.jogl</groupId>
+			<artifactId>jogl-all</artifactId>
+			<classifier>${scijava.natives.classifier.jogl}</classifier>
+		</dependency>
 
 
 		<!-- ImgLib2 dependencies -->
