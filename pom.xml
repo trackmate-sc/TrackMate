@@ -148,7 +148,8 @@
 
 		<fontchooser.version>2.5.2</fontchooser.version>
 		<javaGeom.version>0.11.1</javaGeom.version>
-		<imglib2.version>6.1.0</imglib2.version>
+		<imglib2-mesh.version>1.0.0</imglib2-mesh.version>
+		<bigvolumeviewer.version>0.3.1</bigvolumeviewer.version>
 	</properties>
 
 	<dependencies>
@@ -160,7 +161,6 @@
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>labkit-ui</artifactId>
-			<version>0.3.12-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<groupId>net.imagej</groupId>
@@ -181,7 +181,7 @@
 		<dependency>
 			<groupId>net.imglib2</groupId>
 			<artifactId>imglib2-mesh</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
+			<version>${imglib2-mesh.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.imagej</groupId>
@@ -190,18 +190,26 @@
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigvolumeviewer</artifactId>
-			<version>0.3.1</version>
+			<version>${bigvolumeviewer.version}</version>
 		</dependency>
 		<dependency>
-	        <groupId>org.jogamp.jogl</groupId>
-	        <artifactId>jogl-all-main</artifactId>
-	        <version>2.3.2</version>
-	    </dependency>
-	    <dependency>
-	        <groupId>org.jogamp.gluegen</groupId>
-	        <artifactId>gluegen-rt-main</artifactId>
-	        <version>2.3.2</version>
-	    </dependency>			
+			<groupId>org.jogamp.jogl</groupId>
+			<artifactId>jogl-all</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jogamp.gluegen</groupId>
+			<artifactId>gluegen-rt</artifactId>
+		</dependency>			
+		<dependency>
+			<groupId>org.jogamp.gluegen</groupId>
+			<artifactId>gluegen-rt</artifactId>
+			<classifier>${scijava.natives.classifier.gluegen}</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.jogamp.jogl</groupId>
+			<artifactId>jogl-all</artifactId>
+			<classifier>${scijava.natives.classifier.jogl}</classifier>
+		</dependency>
 
 		<!-- ImgLib2 dependencies -->
 		<dependency>
