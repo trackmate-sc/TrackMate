@@ -30,6 +30,8 @@ import org.scijava.object.ObjectService;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
+import fiji.plugin.trackmate.gui.featureselector.AnalyzerSelection;
+import fiji.plugin.trackmate.gui.featureselector.AnalyzerSelectionIO;
 import fiji.plugin.trackmate.gui.wizard.TrackMateWizardSequence;
 import fiji.plugin.trackmate.gui.wizard.WizardSequence;
 import fiji.plugin.trackmate.io.SettingsPersistence;
@@ -109,8 +111,11 @@ public class TrackMatePlugIn implements PlugIn
 	 * launched by this plugin.
 	 * 
 	 * @param trackmate
+	 *            the TrackMate instance.
 	 * @param selectionModel
+	 *            the selection model.
 	 * @param displaySettings
+	 *            the display settings.
 	 * @return a new sequence.
 	 */
 	protected WizardSequence createSequence( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings )
@@ -124,7 +129,7 @@ public class TrackMatePlugIn implements PlugIn
 	 * {@link TrackMate} instance.
 	 * 
 	 * @param imp
-	 *
+	 *            the image the tracking data will be created on.
 	 * @return a new {@link Model} instance.
 	 */
 	protected Model createModel( final ImagePlus imp )
@@ -149,16 +154,21 @@ public class TrackMatePlugIn implements PlugIn
 	protected Settings createSettings( final ImagePlus imp )
 	{
 		// Persistence.
-		final Settings ls = SettingsPersistence.readLastUsedSettings( imp, Logger.DEFAULT_LOGGER );
-		// Force adding analyzers found at runtime
-		ls.addAllAnalyzers();
-		return ls;
+		final Settings settings = SettingsPersistence.readLastUsedSettings( imp, Logger.DEFAULT_LOGGER );
+		// Add the analyzers configured by the user.
+		final AnalyzerSelection analyzerSelection = AnalyzerSelectionIO.readUserDefault();
+		analyzerSelection.configure( settings );
+		return settings;
 	}
 
 	/**
 	 * Hook for subclassers: <br>
 	 * Creates the TrackMate instance that will be controlled in the GUI.
-	 *
+	 * 
+	 * @param model
+	 *            the model to create the TrackMate instance with.
+	 * @param settings
+	 *            the settings to create the TrackMate instance with.
 	 * @return a new {@link TrackMate} instance.
 	 */
 	protected TrackMate createTrackMate( final Model model, final Settings settings )
@@ -172,7 +182,9 @@ public class TrackMatePlugIn implements PlugIn
 		model.setPhysicalUnits( spaceUnits, timeUnits );
 
 		final TrackMate trackmate = new TrackMate( model, settings );
-		ObjectService objectService = TMUtils.getContext().service( ObjectService.class );
+
+		// Register it to the object service.
+		final ObjectService objectService = TMUtils.getContext().service( ObjectService.class );
 		if ( objectService != null )
 			objectService.addObject( trackmate );
 

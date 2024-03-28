@@ -56,7 +56,6 @@ import net.imglib2.Interval;
 import net.imglib2.img.ImagePlusAdapter;
 import net.imglib2.img.display.imagej.ImgPlusViews;
 import net.imglib2.type.Type;
-import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.util.Util;
 
 /**
@@ -74,7 +73,17 @@ public class TMUtils
 	 */
 
 	/**
-	 * Return a new map sorted by its values.
+	 * Returns a new map sorted by its values.
+	 * 
+	 * @param <K>
+	 *            the type of keys in the map.
+	 * @param <V>
+	 *            the type of values in the map.
+	 * @param map
+	 *            the map.
+	 * @param comparator
+	 *            a comparator to sort based on values.
+	 * @return a new map, with entries sorted by values.
 	 */
 	public static < K, V extends Comparable< ? super V > > Map< K, V > sortByValue( final Map< K, V > map, final Comparator< V > comparator )
 	{
@@ -98,7 +107,13 @@ public class TMUtils
 	}
 
 	/**
-	 * Generate a string representation of a map, typically a settings map.
+	 * Generates a string representation of a map, typically a settings map.
+	 * 
+	 * @param map
+	 *            the map.
+	 * @param indent
+	 *            the indent size to use.
+	 * @return a representation of the map.
 	 */
 	public static final String echoMap( final Map< String, Object > map, final int indent )
 	{
@@ -135,16 +150,19 @@ public class TMUtils
 	}
 
 	/**
-	 * Wraps an IJ {@link ImagePlus} in an imglib2 {@link ImgPlus}, without
-	 * parameterized types. The only way I have found to beat javac constraints
-	 * on bounded multiple wildcard.
+	 * Wraps an IJ {@link ImagePlus} in an imglib2 {@link ImgPlus}, abiding to a
+	 * returned type.
+	 * 
+	 * @param <T>
+	 *            the pixel type in the returned image.
+	 * @param imp
+	 *            the {@link ImagePlus} to wrap.
+	 * @return a wrapped {@link ImgPlus}.
 	 */
-	@SuppressWarnings( "rawtypes" )
-	public static final ImgPlus rawWraps( final ImagePlus imp )
+	@SuppressWarnings( "unchecked" )
+	public static final < T > ImgPlus< T > rawWraps( final ImagePlus imp )
 	{
-		final ImgPlus< DoubleType > img = ImagePlusAdapter.wrapImgPlus( imp );
-		final ImgPlus raw = img;
-		return raw;
+		return ( ImgPlus< T > ) ImagePlusAdapter.wrapImgPlus( imp );
 	}
 
 	/**
@@ -163,6 +181,8 @@ public class TMUtils
 	 *            will be appended with an error message.
 	 * @return if all mandatory keys are found in the map, and possibly some
 	 *         optional ones, but no others.
+	 * @param <T>
+	 *            the type of keys.
 	 */
 	public static final < T > boolean checkMapKeys( final Map< T, ? > map, Collection< T > mandatoryKeys, Collection< T > optionalKeys, final StringBuilder errorHolder )
 	{
@@ -196,8 +216,39 @@ public class TMUtils
 	}
 
 	/**
-	 * Check the presence and the validity of a key in a map, and test it is of
-	 * the desired class.
+	 * Check the optional presence and the validity of a key in a map, and test
+	 * it is of the desired class. If the key is not present, this method
+	 * returns <code>true</code>. If it is present, it tests the value is of the
+	 * right class.
+	 *
+	 * @param map
+	 *            the map to inspect.
+	 * @param key
+	 *            the key to find.
+	 * @param expectedClass
+	 *            the expected class of the target value .
+	 * @param errorHolder
+	 *            will be appended with an error message.
+	 * @return true if the key is not found in the map, or if it is found, and
+	 *         map a value of the desired class.
+	 */
+	public static final boolean checkOptionalParameter( final Map< String, Object > map, final String key, final Class< ? > expectedClass, final StringBuilder errorHolder )
+	{
+		final Object obj = map.get( key );
+		if ( null == obj )
+			return true;
+
+		if ( !expectedClass.isInstance( obj ) )
+		{
+			errorHolder.append( "Value for parameter " + key + " is not of the right class. Expected " + expectedClass.getName() + ", got " + obj.getClass().getName() + ".\n" );
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Check the mandatory presence and the validity of a key in a map, and test
+	 * its value is of the desired class.
 	 *
 	 * @param map
 	 *            the map to inspect.
@@ -218,17 +269,22 @@ public class TMUtils
 			errorHolder.append( "Parameter " + key + " could not be found in settings map, or is null.\n" );
 			return false;
 		}
-		if ( !expectedClass.isInstance( obj ) )
-		{
-			errorHolder.append( "Value for parameter " + key + " is not of the right class. Expected " + expectedClass.getName() + ", got " + obj.getClass().getName() + ".\n" );
-			return false;
-		}
-		return true;
+		return checkOptionalParameter( map, key, expectedClass, errorHolder );
 	}
 
 	/**
 	 * Returns the mapping in a map that is targeted by a list of keys, in the
 	 * order given in the list.
+	 * 
+	 * @param <J>
+	 *            the type of keys in the collection and the map.
+	 * @param <K>
+	 *            the type of values in the map.
+	 * @param keys
+	 *            the collection of keys.
+	 * @param mapping
+	 *            the mapping.
+	 * @return a new list of values.
 	 */
 	public static final < J, K > List< K > getArrayFromMaping( final Collection< J > keys, final Map< J, K > mapping )
 	{
@@ -243,9 +299,13 @@ public class TMUtils
 	 */
 
 	/**
-	 * Return the xyz calibration stored in an {@link ImgPlusMetadata} in a
+	 * Returns the xyz calibration stored in an {@link ImgPlusMetadata} in a
 	 * 3-elements double array. Calibration is ordered as X, Y, Z. If one axis
 	 * is not found, then the calibration for this axis takes the value of 1.
+	 * 
+	 * @param img
+	 *            the image metadata object.
+	 * @return a new <code>double</code> array.
 	 */
 	public static final double[] getSpatialCalibration( final ImgPlusMetadata img )
 	{
@@ -277,10 +337,15 @@ public class TMUtils
 	/**
 	 * Returns an estimate of the <code>p</code>th percentile of the values in
 	 * the <code>values</code> array. Taken from commons-math.
+	 * 
+	 * @param values
+	 *            the values.
+	 * @param p
+	 *            the percentile.
+	 * @return the percentile of the values.
 	 */
 	public static final double getPercentile( final double[] values, final double p )
 	{
-
 		final int size = values.length;
 		if ( ( p > 1 ) || ( p <= 0 ) )
 			throw new IllegalArgumentException( "invalid quantile value: " + p );
@@ -324,8 +389,13 @@ public class TMUtils
 	}
 
 	/**
-	 * Store the x, y, z coordinates of the specified spot in the first 3
+	 * Stores the x, y, z coordinates of the specified spot in the first 3
 	 * elements of the specified double array.
+	 * 
+	 * @param spot
+	 *            the spot.
+	 * @param coords
+	 *            the array to write coordinates to.
 	 */
 	public static final void localize( final Spot spot, final double[] coords )
 	{
@@ -335,10 +405,18 @@ public class TMUtils
 	}
 
 	/**
-	 * Return the optimal bin number for a histogram of the data given in array,
-	 * using the Freedman and Diaconis rule (bin_space = 2*IQR/n^(1/3)). It is
-	 * ensured that the bin number returned is not smaller and no bigger than
-	 * the bounds given in argument.
+	 * Returns the optimal bin number for a histogram of the data given in
+	 * array, using the Freedman and Diaconis rule (bin_space = 2*IQR/n^(1/3)).
+	 * It is ensured that the bin number returned is not smaller and no bigger
+	 * than the bounds given in argument.
+	 * 
+	 * @param values
+	 *            the values.
+	 * @param minBinNumber
+	 *            a minimal number of bins.
+	 * @param maxBinNumber
+	 *            a maximal number of bins.
+	 * @return a number of bins.
 	 */
 	public static final int getNBins( final double[] values, final int minBinNumber, final int maxBinNumber )
 	{
@@ -391,8 +469,12 @@ public class TMUtils
 	}
 
 	/**
-	 * Return a threshold for the given data, using an Otsu histogram
+	 * Returns a threshold for the given data, using an Otsu histogram
 	 * thresholding method.
+	 * 
+	 * @param data
+	 *            the data.
+	 * @return the Otsu threshold.
 	 */
 	public static final double otsuThreshold( final double[] data )
 	{
@@ -400,8 +482,14 @@ public class TMUtils
 	}
 
 	/**
-	 * Return a threshold for the given data, using an Otsu histogram
+	 * Returns a threshold for the given data, using an Otsu histogram
 	 * thresholding method with a given bin number.
+	 * 
+	 * @param data
+	 *            the data.
+	 * @param the
+	 *            desired number of bins in the histogram.
+	 * @return the Otsu thresold.
 	 */
 	private static final double otsuThreshold( final double[] data, final int nBins )
 	{
@@ -468,9 +556,17 @@ public class TMUtils
 	}
 
 	/**
-	 * Return a String unit for the given dimension. When suitable, the unit is
+	 * Returns a String unit for the given dimension. When suitable, the unit is
 	 * taken from the settings field, which contains the spatial and time units.
 	 * Otherwise, default units are used.
+	 * 
+	 * @param dimension
+	 *            the dimension.
+	 * @param spaceUnits
+	 *            the space units.
+	 * @param timeUnits
+	 *            the time units.
+	 * @return the units for the specified dimension.
 	 */
 	public static final String getUnitsFor( final Dimension dimension, final String spaceUnits, final String timeUnits )
 	{
@@ -489,6 +585,8 @@ public class TMUtils
 			return spaceUnits;
 		case AREA:
 			return spaceUnits + "^2";
+		case VOLUME:
+			return spaceUnits + "^3";
 		case QUALITY:
 			return "quality";
 		case COST:
@@ -710,7 +808,11 @@ public class TMUtils
 		return interval;
 	}
 
-	/** Obtains the SciJava {@link Context} in use by ImageJ. */
+	/**
+	 * Obtains the SciJava {@link Context} in use by ImageJ.
+	 * 
+	 * @return the context.
+	 */
 	public static Context getContext()
 	{
 		final Context localContext = context;
@@ -867,6 +969,30 @@ public class TMUtils
 		{
 			return imageFolder + File.separator + "TrackMate";
 		}
+	}
+
+	/**
+	 * Returns <code>true</code> if the class with the fully qualified name is
+	 * present at runtime. This is useful to detect whether a certain update
+	 * site has been activated in Fiji and to enable or disable component based
+	 * on this.
+	 * 
+	 * @param className
+	 *            the fully qualified class name, e.g.
+	 *            "sc.fiji.labkit.ui.LabkitFrame"
+	 * @return <code>true</code> if the the class with the specified name is
+	 *         present, false otherwise.
+	 */
+	public static boolean isClassPresent( final String className )
+	{
+		try
+		{
+			Class.forName( className, false, TMUtils.class.getClassLoader() );
+			return true;
+		}
+		catch ( final ClassNotFoundException e1 )
+		{}
+		return false;
 	}
 
 	private TMUtils()

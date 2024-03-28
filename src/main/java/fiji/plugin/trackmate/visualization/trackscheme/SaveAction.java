@@ -81,6 +81,13 @@ public class SaveAction extends AbstractAction
 	 * Saves XML+PNG format.
 	 * 
 	 * @param frame
+	 *            the TrackScheme frame to capture.
+	 * @param filename
+	 *            the file to save to.
+	 * @param bg
+	 *            the color of the background in the exported image.
+	 * @throws IOException
+	 *             if an error happens while writing.
 	 */
 	protected void saveXmlPng( final TrackSchemeFrame frame, final String filename, final Color bg ) throws IOException
 	{

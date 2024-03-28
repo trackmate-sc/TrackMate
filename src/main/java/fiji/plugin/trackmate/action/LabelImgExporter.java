@@ -39,8 +39,8 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.util.SpotUtil;
 import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.visualization.GlasbeyLut;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
@@ -267,7 +267,7 @@ public class LabelImgExporter extends AbstractTMAction
 			final ImagePlus imp,
 			final boolean exportSpotsAsDots,
 			final boolean exportTracksOnly,
-			boolean useSpotIDsAsLabels,
+			final boolean useSpotIDsAsLabels,
 			final Logger logger )
 	{
 		final int[] dimensions = imp.getDimensions();
@@ -296,6 +296,9 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            the desired dimensions of the output image (width, height,
 	 *            nZSlices, nFrames) as a 4 element int array. Spots outside
 	 *            these dimensions are ignored.
+	 * @param calibration
+	 *            the pixel size to map physical spot coordinates to pixel
+	 *            coordinates.
 	 * @param exportSpotsAsDots
 	 *            if <code>true</code>, spots will be painted as single dots
 	 *            instead of ellipsoids.
@@ -305,10 +308,10 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            belonging to a track will be painted with a unique ID,
 	 *            different from the track IDs and different for each spot.
 	 * @param useSpotIDsAsLabels
-	 * 	          if <code>true</code>, the label mask images will contain 
-	 * 	          the spot ID. If <code>false</code>, the label mask images 
-	 * 	          will contain the track ID.
-	 * 	          
+	 *            if <code>true</code>, the label mask images will contain the
+	 *            spot ID. If <code>false</code>, the label mask images will
+	 *            contain the track ID.
+	 * 
 	 * @return a new {@link ImagePlus}.
 	 */
 	public static final ImagePlus createLabelImagePlus(
@@ -333,6 +336,9 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            the desired dimensions of the output image (width, height,
 	 *            nZSlices, nFrames) as a 4 element int array. Spots outside
 	 *            these dimensions are ignored.
+	 * @param calibration
+	 *            the pixel size to map physical spot coordinates to pixel
+	 *            coordinates.
 	 * @param exportSpotsAsDots
 	 *            if <code>true</code>, spots will be painted as single dots
 	 *            instead of ellipsoids.
@@ -342,9 +348,9 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            belonging to a track will be painted with a unique ID,
 	 *            different from the track IDs and different for each spot.
 	 * @param useSpotIDsAsLabels
-	 * 	          if <code>true</code>, the label mask images will contain 
-	 * 	          the spot ID. If <code>false</code>, the label mask images 
-	 * 	          will contain the track ID.
+	 *            if <code>true</code>, the label mask images will contain the
+	 *            spot ID. If <code>false</code>, the label mask images will
+	 *            contain the track ID.
 	 * @param logger
 	 *            a {@link Logger} instance, to report progress of the export
 	 *            process.
@@ -366,8 +372,9 @@ public class LabelImgExporter extends AbstractTMAction
 
 		final ImagePlus lblImp = ImageJFunctions.wrap( createLabelImg( model, dims, calibration, exportSpotsAsDots, exportTracksOnly, useSpotIDsAsLabels, logger ), "LblImage" );
 		lblImp.setDimensions( 1, dimensions[ 2 ], dimensions[ 3 ] );
+		lblImp.setLut( GlasbeyLut.toLUT() );
+		lblImp.setDisplayRange( 0, 255 );
 		lblImp.setOpenAsHyperStack( true );
-		lblImp.resetDisplayRange();
 		return lblImp;
 	}
 
@@ -382,6 +389,9 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            the desired dimensions of the output image (width, height,
 	 *            nZSlices, nFrames) as a 4 element int array. Spots outside
 	 *            these dimensions are ignored.
+	 * @param calibration
+	 *            the pixel size to map physical spot coordinates to pixel
+	 *            coordinates.
 	 * @param exportSpotsAsDots
 	 *            if <code>true</code>, spots will be painted as single dots
 	 *            instead of ellipsoids.
@@ -391,10 +401,10 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            belonging to a track will be painted with a unique ID,
 	 *            different from the track IDs and different for each spot.
 	 * @param useSpotIDsAsLabels
-	 * 	          if <code>true</code>, the label mask images will contain 
-	 * 	          the spot ID. If <code>false</code>, the label mask images 
-	 * 	          will contain the track ID.
-	 * 	          
+	 *            if <code>true</code>, the label mask images will contain the
+	 *            spot ID. If <code>false</code>, the label mask images will
+	 *            contain the track ID.
+	 * 
 	 * @return a new {@link Img}.
 	 */
 	public static final Img< FloatType > createLabelImg(
@@ -419,6 +429,9 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            the desired dimensions of the output image (width, height,
 	 *            nZSlices, nFrames) as a 4 element int array. Spots outside
 	 *            these dimensions are ignored.
+	 * @param calibration
+	 *            the pixel size to map physical spot coordinates to pixel
+	 *            coordinates.
 	 * @param exportSpotsAsDots
 	 *            if <code>true</code>, spots will be painted as single dots
 	 *            instead of ellipsoids.
@@ -428,9 +441,9 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            belonging to a track will be painted with a unique ID,
 	 *            different from the track IDs and different for each spot.
 	 * @param useSpotIDsAsLabels
-	 * 	          if <code>true</code>, the label mask images will contain 
-	 * 	          the spot ID. If <code>false</code>, the label mask images 
-	 * 	          will contain the track ID.
+	 *            if <code>true</code>, the label mask images will contain the
+	 *            spot ID. If <code>false</code>, the label mask images will
+	 *            contain the track ID.
 	 * @param logger
 	 *            a {@link Logger} instance, to report progress of the export
 	 *            process.
@@ -480,7 +493,7 @@ public class LabelImgExporter extends AbstractTMAction
 			final ImgPlus< FloatType > imgCT = TMUtils.hyperSlice( imgPlus, 0, frame );
 			final SpotWriter spotWriter = exportSpotsAsDots
 					? new SpotAsDotWriter<>( imgCT )
-					: new SpotRoiWriter<>( imgCT );
+					: new SpotShapeWriter<>( imgCT );
 
 			for ( final Spot spot : model.getSpots().iterable( frame, true ) )
 			{
@@ -556,12 +569,12 @@ public class LabelImgExporter extends AbstractTMAction
 		public void write( Spot spot, int id );
 	}
 
-	public static final class SpotRoiWriter< T extends RealType< T > > implements SpotWriter
+	public static final class SpotShapeWriter< T extends RealType< T > > implements SpotWriter
 	{
 
 		private final ImgPlus< T > img;
 
-		public SpotRoiWriter( final ImgPlus< T > img )
+		public SpotShapeWriter( final ImgPlus< T > img )
 		{
 			this.img = img;
 		}
@@ -569,7 +582,7 @@ public class LabelImgExporter extends AbstractTMAction
 		@Override
 		public void write( final Spot spot, final int id )
 		{
-			for ( final T pixel : SpotUtil.iterable( spot, img ) )
+			for ( final T pixel : spot.iterable( img ) )
 				pixel.setReal( id );
 		}
 	}

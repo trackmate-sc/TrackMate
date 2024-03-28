@@ -36,6 +36,7 @@ import org.scijava.Cancelable;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.tracking.jaqaman.JaqamanLinker;
@@ -85,11 +86,20 @@ public class KalmanTracker implements SpotTracker, Benchmark, Cancelable
 	 */
 
 	/**
+	 * Creates a new Kalman tracker.
+	 * 
 	 * @param spots
 	 *            the spots to track.
 	 * @param maxSearchRadius
+	 *            the maximal search radius to continue a track, in physical
+	 *            units.
 	 * @param maxFrameGap
+	 *            the max frame gap when detections are missing, after which a
+	 *            track will be stopped.
 	 * @param initialSearchRadius
+	 *            the initial search radius to nucleate new tracks.
+	 * @param featurePenalties
+	 *            the feature penalties.
 	 */
 	public KalmanTracker( final SpotCollection spots, final double maxSearchRadius, final int maxFrameGap, final double initialSearchRadius, final Map< String, Double > featurePenalties )
 	{
@@ -236,17 +246,17 @@ public class KalmanTracker implements SpotTracker, Benchmark, Cancelable
 			{
 				final double[] X = kf.predict();
 				final Spot s = kalmanFiltersMap.get( kf );
-				final Spot predSpot = new Spot( X[ 0 ], X[ 1 ], X[ 2 ], s.getFeature( Spot.RADIUS ), s.getFeature( Spot.QUALITY ) );
+				final Spot predSpot = new SpotBase( X[ 0 ], X[ 1 ], X[ 2 ], s.getFeature( Spot.RADIUS ), s.getFeature( Spot.QUALITY ) );
 				// copy the necessary features of original spot to the predicted
 				// spot
 				if ( null != featurePenalties )
-					predSpot.copyFeatures( s, featurePenalties );
+					predSpot.copyFeaturesFrom( s, featurePenalties.keySet() );
 
 				predictionMap.put( predSpot, kf );
 
 				if ( savePredictions )
 				{
-					final Spot pred = new Spot( X[ 0 ], X[ 1 ], X[ 2 ], s.getFeature( Spot.RADIUS ), s.getFeature( Spot.QUALITY ) );
+					final Spot pred = new SpotBase( X[ 0 ], X[ 1 ], X[ 2 ], s.getFeature( Spot.RADIUS ), s.getFeature( Spot.QUALITY ) );
 					pred.setName( "Pred_" + s.getName() );
 					pred.putFeature( Spot.RADIUS, s.getFeature( Spot.RADIUS ) );
 					predictionsCollection.add( predSpot, frame );

@@ -19,36 +19,32 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.providers;
+package fiji.plugin.trackmate.mesh;
 
-import fiji.plugin.trackmate.features.spot.SpotMorphologyAnalyzerFactory;
+import fiji.plugin.trackmate.TrackMatePlugIn;
+import ij.IJ;
+import ij.ImageJ;
+import ij.ImagePlus;
 
-@SuppressWarnings( "rawtypes" )
-public class SpotMorphologyAnalyzerProvider extends AbstractProvider< SpotMorphologyAnalyzerFactory >
+public class Demo3DMeshTrackMate
 {
-
-	private final int nChannels;
-
-	public SpotMorphologyAnalyzerProvider( final int nChannels )
-	{
-		super( SpotMorphologyAnalyzerFactory.class );
-		this.nChannels = nChannels;
-	}
-
-	@Override
-	public SpotMorphologyAnalyzerFactory getFactory( final String key )
-	{
-		final SpotMorphologyAnalyzerFactory factory = super.getFactory( key );
-		if ( factory == null )
-			return null;
-
-		factory.setNChannels( nChannels );
-		return factory;
-	}
 
 	public static void main( final String[] args )
 	{
-		final SpotMorphologyAnalyzerProvider provider = new SpotMorphologyAnalyzerProvider( 2 );
-		System.out.println( provider.echo() );
+		try
+		{
+
+			ImageJ.main( args );
+//			final String filePath = "samples/CElegans3D-smoothed-mask-orig-t7.tif";
+			final String filePath = "samples/Celegans-5pc-17timepoints.tif";
+			final ImagePlus imp = IJ.openImage( filePath );
+			imp.show();
+
+			new TrackMatePlugIn().run( null );
+		}
+		catch ( final Exception e )
+		{
+			e.printStackTrace();
+		}
 	}
 }

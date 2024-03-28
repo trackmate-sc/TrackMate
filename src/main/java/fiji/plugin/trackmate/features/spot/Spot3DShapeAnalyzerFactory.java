@@ -36,56 +36,50 @@ import net.imagej.ImgPlus;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 
-@Plugin( type = SpotMorphologyAnalyzerFactory.class )
-public class SpotFitEllipseAnalyzerFactory< T extends RealType< T > & NativeType< T > > implements SpotMorphologyAnalyzerFactory< T >
+@Plugin( type = Spot3DMorphologyAnalyzerFactory.class )
+public class Spot3DShapeAnalyzerFactory< T extends RealType< T > & NativeType< T > > implements Spot3DMorphologyAnalyzerFactory< T >
 {
 
-	public static final String KEY = "Spot fit 2D ellipse";
-	
-	public static final String X0 = "ELLIPSE_X0";
-	public static final String Y0 = "ELLIPSE_Y0";
-	public static final String MAJOR = "ELLIPSE_MAJOR";
-	public static final String MINOR = "ELLIPSE_MINOR";
-	public static final String THETA = "ELLIPSE_THETA";
-	public static final String ASPECTRATIO = "ELLIPSE_ASPECTRATIO";
-	
+	public static final String KEY = "Spot 3D shape descriptors";
+
+	public static final String VOLUME = "VOLUME";
+	public static final String SURFACE_AREA = "SURFACE_AREA";
+	public static final String SPHERICITY = "SPHERICITY";
+	public static final String SOLIDITY = "SOLIDITY";
+	public static final String CONVEXITY = "CONVEXITY";
+
 	private static final List< String > FEATURES = Arrays.asList( new String[] {
-			X0, Y0, MAJOR, MINOR, THETA, ASPECTRATIO } );
+			VOLUME, SURFACE_AREA, SPHERICITY, SOLIDITY, CONVEXITY } );
 	private static final Map< String, String > FEATURE_SHORTNAMES = new HashMap< >();
 	private static final Map< String, String > FEATURE_NAMES = new HashMap< >();
 	private static final Map< String, Dimension > FEATURE_DIMENSIONS = new HashMap< >();
 	private static final Map< String, Boolean > FEATURE_ISINTS = new HashMap< >();
 	static
 	{
-		FEATURE_SHORTNAMES.put( X0, "El. x0" );
-		FEATURE_SHORTNAMES.put( Y0, "El. y0" );
-		FEATURE_SHORTNAMES.put( MAJOR, "El. long axis" );
-		FEATURE_SHORTNAMES.put( MINOR, "El. sh. axis" );
-		FEATURE_SHORTNAMES.put( THETA, "El. angle" );
-		FEATURE_SHORTNAMES.put( ASPECTRATIO, "El. a.r." );
+		FEATURE_SHORTNAMES.put( VOLUME, "Volume" );
+		FEATURE_SHORTNAMES.put( SURFACE_AREA, "Surf. area" );
+		FEATURE_SHORTNAMES.put( SPHERICITY, "Sphericity" );
+		FEATURE_SHORTNAMES.put( CONVEXITY, "Conv." );
+		FEATURE_SHORTNAMES.put( SOLIDITY, "Solidity" );
 
-		FEATURE_NAMES.put( X0, "Ellipse center x0" );
-		FEATURE_NAMES.put( Y0, "Ellipse center y0" );
-		FEATURE_NAMES.put( MAJOR, "Ellipse long axis" );
-		FEATURE_NAMES.put( MINOR, "Ellipse short axis" );
-		FEATURE_NAMES.put( THETA, "Ellipse angle" );
-		FEATURE_NAMES.put( ASPECTRATIO, "Ellipse aspect ratio" );
+		FEATURE_NAMES.put( VOLUME, "Volume" );
+		FEATURE_NAMES.put( SURFACE_AREA, "Surface area" );
+		FEATURE_NAMES.put( SPHERICITY, "Sphericity" );
+		FEATURE_NAMES.put( CONVEXITY, "Convexity" );
+		FEATURE_NAMES.put( SOLIDITY, "Solidity" );
 
-		FEATURE_DIMENSIONS.put( X0, Dimension.LENGTH );
-		FEATURE_DIMENSIONS.put( Y0, Dimension.LENGTH );
-		FEATURE_DIMENSIONS.put( MAJOR, Dimension.LENGTH );
-		FEATURE_DIMENSIONS.put( MINOR, Dimension.LENGTH );
-		FEATURE_DIMENSIONS.put( THETA, Dimension.ANGLE );
-		FEATURE_DIMENSIONS.put( ASPECTRATIO, Dimension.NONE );
+		FEATURE_DIMENSIONS.put( SURFACE_AREA, Dimension.AREA );
+		FEATURE_DIMENSIONS.put( VOLUME, Dimension.VOLUME );
+		FEATURE_DIMENSIONS.put( SPHERICITY, Dimension.NONE );
+		FEATURE_DIMENSIONS.put( CONVEXITY, Dimension.NONE );
+		FEATURE_DIMENSIONS.put( SOLIDITY, Dimension.NONE );
 
-		FEATURE_ISINTS.put( X0, Boolean.FALSE );
-		FEATURE_ISINTS.put( Y0, Boolean.FALSE );
-		FEATURE_ISINTS.put( MAJOR, Boolean.FALSE );
-		FEATURE_ISINTS.put( MINOR, Boolean.FALSE );
-		FEATURE_ISINTS.put( THETA, Boolean.FALSE );
-		FEATURE_ISINTS.put( ASPECTRATIO, Boolean.FALSE );
+		FEATURE_ISINTS.put( VOLUME, Boolean.FALSE );
+		FEATURE_ISINTS.put( SURFACE_AREA, Boolean.FALSE );
+		FEATURE_ISINTS.put( SPHERICITY, Boolean.FALSE );
+		FEATURE_ISINTS.put( CONVEXITY, Boolean.FALSE );
+		FEATURE_ISINTS.put( SOLIDITY, Boolean.FALSE );
 	}
-
 
 	@Override
 	public SpotAnalyzer< T > getAnalyzer( final ImgPlus< T > img, final int frame, final int channel )
@@ -94,7 +88,7 @@ public class SpotFitEllipseAnalyzerFactory< T extends RealType< T > & NativeType
 		if ( channel != 0 )
 			return SpotAnalyzer.dummyAnalyzer();
 
-		return new SpotFitEllipseAnalyzer<>( DetectionUtils.is2D( img ) );
+		return new Spot3DShapeAnalyzer<>( !DetectionUtils.is2D( img ) );
 	}
 
 	@Override

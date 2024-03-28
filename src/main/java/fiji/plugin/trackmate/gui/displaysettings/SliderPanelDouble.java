@@ -23,8 +23,11 @@ package fiji.plugin.trackmate.gui.displaysettings;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -35,6 +38,8 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import fiji.plugin.trackmate.gui.GuiUtils;
 
 /**
  * A {@link JSlider} with a {@link JSpinner} next to it, both modifying the same
@@ -66,13 +71,15 @@ public class SliderPanelDouble extends JPanel implements BoundedValueDouble.Upda
 	}
 
 	/**
-	 * Create a {@link SliderPanelDouble} to modify a given {@link BoundedValueDouble value}.
+	 * Create a {@link SliderPanelDouble} to modify a given
+	 * {@link BoundedValueDouble value}.
 	 *
 	 * @param name
 	 *            label to show next to the slider.
 	 * @param model
 	 *            the value that is modified.
 	 * @param spinnerStepSize
+	 *            the steps size for the spinner created.
 	 */
 	public SliderPanelDouble(
 			final String name,
@@ -129,6 +136,22 @@ public class SliderPanelDouble extends JPanel implements BoundedValueDouble.Upda
 		add( slider, BorderLayout.CENTER );
 		add( spinner, BorderLayout.EAST );
 
+		final MouseWheelListener mouseWheelListener = new MouseWheelListener()
+		{
+
+			@Override
+			public void mouseWheelMoved( final MouseWheelEvent e )
+			{
+				if ( !slider.isEnabled() )
+					return;
+				final int notches = e.getWheelRotation();
+				final int step = notches < 0 ? 1 : -1;
+				slider.setValue( slider.getValue() + step );
+			}
+		};
+		slider.addMouseWheelListener( mouseWheelListener );
+		spinner.addMouseWheelListener( mouseWheelListener );
+
 		this.model = model;
 		model.setUpdateListener( this );
 	}
@@ -150,6 +173,20 @@ public class SliderPanelDouble extends JPanel implements BoundedValueDouble.Upda
 	public void setNumColummns( final int cols )
 	{
 		( ( JSpinner.NumberEditor ) spinner.getEditor() ).getTextField().setColumns( cols );
+	}
+
+	@Override
+	public void setEnabled( final boolean enabled )
+	{
+		spinner.setEnabled( enabled );
+		slider.setEnabled( enabled );
+		super.setEnabled( enabled );
+	}
+
+	@Override
+	public void setFont( final Font font )
+	{
+		GuiUtils.setFont( this, font );
 	}
 
 	@Override

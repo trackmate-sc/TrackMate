@@ -21,10 +21,12 @@
  */
 package fiji.plugin.trackmate.gui.wizard;
 
+import static fiji.plugin.trackmate.gui.Icons.BVV_ICON;
 import static fiji.plugin.trackmate.gui.Icons.SPOT_TABLE_ICON;
 import static fiji.plugin.trackmate.gui.Icons.TRACK_SCHEME_ICON_16x16;
 import static fiji.plugin.trackmate.gui.Icons.TRACK_TABLES_ICON;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -32,7 +34,11 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.AbstractAction;
+import javax.swing.JLabel;
+import javax.swing.JRootPane;
+import javax.swing.SwingUtilities;
 
+import bvv.vistools.BvvHandle;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
@@ -42,14 +48,17 @@ import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.action.AbstractTMAction;
 import fiji.plugin.trackmate.action.ExportAllSpotsStatsAction;
 import fiji.plugin.trackmate.action.ExportStatsTablesAction;
+import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.detection.ManualDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.ModelFeatureUpdater;
+import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.components.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.components.LogPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.editor.LabkitLauncher;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ActionChooserDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ChooseDetectorDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ChooseTrackerDescriptor;
@@ -70,9 +79,12 @@ import fiji.plugin.trackmate.providers.DetectorProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import fiji.plugin.trackmate.tracking.manual.ManualTrackerFactory;
+import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
 import fiji.plugin.trackmate.util.Threads;
+import fiji.plugin.trackmate.visualization.bvv.TrackMateBVV;
 import fiji.plugin.trackmate.visualization.trackscheme.SpotImageUpdater;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
+import ij.ImagePlus;
 
 public class TrackMateWizardSequence implements WizardSequence
 {
@@ -142,10 +154,18 @@ public class TrackMateWizardSequence implements WizardSequence
 		executeDetectionDescriptor = new ExecuteDetectionDescriptor( trackmate, logPanel );
 		initFilterDescriptor = new InitFilterDescriptor( trackmate, initialFilter );
 		spotFilterDescriptor = new SpotFilterDescriptor( trackmate, spotFilters, featureSelector );
-		chooseTrackerDescriptor = new ChooseTrackerDescriptor( new TrackerProvider(), trackmate );
-		executeTrackingDescriptor = new ExecuteTrackingDescriptor( trackmate, logPanel );
+		chooseTrackerDescriptor = new ChooseTrackerDescriptor( new TrackerProvider(), trackmate, displaySettings );
+		executeTrackingDescriptor = new ExecuteTrackingDescriptor( trackmate, logPanel, displaySettings );
 		trackFilterDescriptor = new TrackFilterDescriptor( trackmate, trackFilters, featureSelector );
-		configureViewsDescriptor = new ConfigureViewsDescriptor( displaySettings, featureSelector, new LaunchTrackSchemeAction(), new ShowTrackTablesAction(), new ShowSpotTableAction(), model.getSpaceUnits() );
+		configureViewsDescriptor = new ConfigureViewsDescriptor(
+				displaySettings,
+				featureSelector,
+				new LaunchBVVAction(),
+				new LaunchTrackSchemeAction(),
+				new ShowTrackTablesAction(),
+				new ShowSpotTableAction(),
+				LabkitLauncher.getLaunchAction( trackmate, displaySettings ),
+				model.getSpaceUnits() );
 		grapherDescriptor = new GrapherDescriptor( trackmate, selectionModel, displaySettings );
 		actionChooserDescriptor = new ActionChooserDescriptor( new ActionProvider(), trackmate, selectionModel, displaySettings );
 		saveDescriptor = new SaveDescriptor( trackmate, displaySettings, this );
@@ -174,7 +194,6 @@ public class TrackMateWizardSequence implements WizardSequence
 		return current;
 	}
 
-
 	@Override
 	public WizardPanelDescriptor previous()
 	{
@@ -199,7 +218,6 @@ public class TrackMateWizardSequence implements WizardSequence
 	{
 		return current;
 	}
-
 
 	@Override
 	public WizardPanelDescriptor logDescriptor()
@@ -422,7 +440,7 @@ public class TrackMateWizardSequence implements WizardSequence
 		previous.put( configDescriptor, chooseTrackerDescriptor );
 		previous.put( executeTrackingDescriptor, configDescriptor );
 		previous.put( trackFilterDescriptor, configDescriptor );
-		
+
 		return configDescriptor;
 	}
 
@@ -434,6 +452,58 @@ public class TrackMateWizardSequence implements WizardSequence
 	private static final String SPOT_TABLE_BUTTON_TOOLTIP = "Export the features of all spots to ImageJ tables.";
 
 	private static final String TRACKSCHEME_BUTTON_TOOLTIP = "<html>Launch a new instance of TrackScheme.</html>";
+
+	private static final String BVV_BUTTON_TOOLTIP = "<html>Launch a new 3D viewer.</html>";
+
+	private class LaunchBVVAction extends AbstractAction
+	{
+		private static final long serialVersionUID = 1L;
+
+		private LaunchBVVAction()
+		{
+			super( "3D view", BVV_ICON );
+			putValue( SHORT_DESCRIPTION, BVV_BUTTON_TOOLTIP );
+			final ImagePlus imp = trackmate.getSettings().imp;
+			final boolean enabled = ( imp != null ) && !DetectionUtils.is2D( imp );
+			setEnabled( enabled );
+		}
+
+		@Override
+		public void actionPerformed( final ActionEvent e )
+		{
+			new Thread( "Launching BVV thread" )
+			{
+				@Override
+				public void run()
+				{
+					final Component c = ( Component ) e.getSource();
+					final JRootPane parent = SwingUtilities.getRootPane( c );
+					final EverythingDisablerAndReenabler enabler = new EverythingDisablerAndReenabler( parent, new Class[] { JLabel.class } );
+					enabler.disable();
+					try
+					{
+						final Model model = trackmate.getModel();
+						final ImagePlus imp = trackmate.getSettings().imp;
+						if ( imp != null )
+						{
+							final TrackMateBVV< ? > tbvv = new TrackMateBVV<>( model, selectionModel, imp, displaySettings );
+							tbvv.render();
+							final BvvHandle bvvHandle = tbvv.getBvvHandle();
+							GuiUtils.positionWindow( SwingUtilities.getWindowAncestor( bvvHandle.getViewerPanel() ), c );
+						}
+					}
+					catch ( final Exception e )
+					{
+						e.printStackTrace();
+					}
+					finally
+					{
+						enabler.reenable();
+					}
+				}
+			}.start();
+		}
+	}
 
 	private class LaunchTrackSchemeAction extends AbstractAction
 	{

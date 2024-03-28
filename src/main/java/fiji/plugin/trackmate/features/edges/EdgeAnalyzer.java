@@ -66,6 +66,8 @@ public interface EdgeAnalyzer extends Benchmark, FeatureAnalyzer, MultiThreaded
 	 * <p>
 	 * Example of non-local edge feature: the local curvature of the trajectory,
 	 * which depends on the neighbor edges.
+	 * 
+	 * @return whether this analyzer is a local analyzer.
 	 */
 	public boolean isLocal();
 

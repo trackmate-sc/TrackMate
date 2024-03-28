@@ -30,6 +30,7 @@ import org.jgrapht.traverse.GraphIterator;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.graph.GraphUtils;
 import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
 
@@ -103,22 +104,22 @@ public class GraphTest
 
 		// Create spots
 
-		final Spot root = new Spot( 3d, 0d, 0d, 1d, -1d, "Zygote" );
+		final Spot root = new SpotBase( 3d, 0d, 0d, 1d, -1d, "Zygote" );
 
-		final Spot AB = new Spot( 0d, 1d, 0d, 1d, -1d, "AB" );
-		final Spot P1 = new Spot( 3d, 1d, 0d, 1d, -1d, "P1" );
+		final Spot AB = new SpotBase( 0d, 1d, 0d, 1d, -1d, "AB" );
+		final Spot P1 = new SpotBase( 3d, 1d, 0d, 1d, -1d, "P1" );
 
-		final Spot P2 = new Spot( 4d, 2d, 0d, 1d, -1d, "P2" );
-		final Spot EMS = new Spot( 2d, 2d, 0d, 1d, -1d, "EMS" );
+		final Spot P2 = new SpotBase( 4d, 2d, 0d, 1d, -1d, "P2" );
+		final Spot EMS = new SpotBase( 2d, 2d, 0d, 1d, -1d, "EMS" );
 
-		final Spot P3 = new Spot( 5d, 3d, 0d, 1d, -1d, "P3" );
-		final Spot C = new Spot( 3d, 3d, 0d, 1d, -1d, "C" );
-		final Spot E = new Spot( 1d, 3d, 0d, 1d, -1d, "E" );
-		final Spot MS = new Spot( 2d, 3d, 0d, 1d, -1d, "MS" );
-		final Spot AB3 = new Spot( 0d, 3d, 0d, 1d, -1d, "AB" );
+		final Spot P3 = new SpotBase( 5d, 3d, 0d, 1d, -1d, "P3" );
+		final Spot C = new SpotBase( 3d, 3d, 0d, 1d, -1d, "C" );
+		final Spot E = new SpotBase( 1d, 3d, 0d, 1d, -1d, "E" );
+		final Spot MS = new SpotBase( 2d, 3d, 0d, 1d, -1d, "MS" );
+		final Spot AB3 = new SpotBase( 0d, 3d, 0d, 1d, -1d, "AB" );
 
-		final Spot D = new Spot( 4d, 4d, 0d, 1d, -1d, "D" );
-		final Spot P4 = new Spot( 5d, 4d, 0d, 1d, -1d, "P4" );
+		final Spot D = new SpotBase( 4d, 4d, 0d, 1d, -1d, "D" );
+		final Spot P4 = new SpotBase( 5d, 4d, 0d, 1d, -1d, "P4" );
 
 		// Add them to the graph
 
@@ -194,9 +195,9 @@ public class GraphTest
 		try
 		{
 			// new spots
-			final Spot Q1 = model.addSpotTo( new Spot( 0d, 0d, 0d, 1d, -1d, "Q1" ), 0 );
-			final Spot Q2 = model.addSpotTo( new Spot( 0d, 0d, 0d, 1d, -1d, "Q2" ), 1 );
-			final Spot Q3 = model.addSpotTo( new Spot( 0d, 0d, 0d, 1d, -1d, "Q3" ), 2 );
+			final Spot Q1 = model.addSpotTo( new SpotBase( 0d, 0d, 0d, 1d, -1d, "Q1" ), 0 );
+			final Spot Q2 = model.addSpotTo( new SpotBase( 0d, 0d, 0d, 1d, -1d, "Q2" ), 1 );
+			final Spot Q3 = model.addSpotTo( new SpotBase( 0d, 0d, 0d, 1d, -1d, "Q3" ), 2 );
 			// new links
 			model.addEdge( Q1, Q2, -1 );
 			model.addEdge( Q2, Q3, -1 );

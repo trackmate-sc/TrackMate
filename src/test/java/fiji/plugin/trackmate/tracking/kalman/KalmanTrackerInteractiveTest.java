@@ -32,6 +32,7 @@ import java.util.Random;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
@@ -237,7 +238,7 @@ public class KalmanTrackerInteractiveTest
 		{
 			for ( int k = 0; k < y.length; k++ )
 			{
-				final Spot spot = new Spot( x[ k ] + ran.nextGaussian() * WIDTH / 100, y[ k ] + ran.nextGaussian() * WIDTH / 100, 0, 2, k, "T_" + k + "_S_" + t );
+				final Spot spot = new SpotBase( x[ k ] + ran.nextGaussian() * WIDTH / 100, y[ k ] + ran.nextGaussian() * WIDTH / 100, 0, 2, k, "T_" + k + "_S_" + t );
 				spots.add( spot, t );
 
 				x[ k ] += vx0[ k ];
@@ -274,7 +275,13 @@ public class KalmanTrackerInteractiveTest
 		{
 			for ( int k = 0; k < y.length; k++ )
 			{
-				final Spot spot = new Spot( x[ k ] + ran.nextGaussian() * WIDTH / 200, y[ k ] + ran.nextGaussian() * WIDTH / 200, 0, 2, k, "T_" + k + "_S_" + t );
+				final Spot spot = new SpotBase(
+						x[ k ] + ran.nextGaussian() * WIDTH / 200,
+						y[ k ] + ran.nextGaussian() * WIDTH / 200,
+						0,
+						2,
+						k,
+						"T_" + k + "_S_" + t );
 				spots.add( spot, t );
 
 				x[ k ] += vx0[ k ];

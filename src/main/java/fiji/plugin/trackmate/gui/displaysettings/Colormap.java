@@ -160,6 +160,15 @@ public class Colormap implements PaintScale, Serializable
 	/**
 	 * Create a paint scale with given lower and upper bound, and a specified
 	 * default color.
+	 * 
+	 * @param name
+	 *            the name of the colormap.
+	 * @param lowerBound
+	 *            the lower bound.
+	 * @param upperBound
+	 *            the upper bound.
+	 * @param defaultColor
+	 *            a default color.
 	 */
 	public Colormap( final String name, final double lowerBound, final double upperBound, final Color defaultColor )
 	{
@@ -172,6 +181,13 @@ public class Colormap implements PaintScale, Serializable
 	/**
 	 * Create a paint scale with a given lower and upper bound and a default
 	 * black color.
+	 * 
+	 * @param name
+	 *            the name of the colormap.
+	 * @param lowerBound
+	 *            the lower bound.
+	 * @param upperBound
+	 *            the upper bound.
 	 */
 	public Colormap( final String name, final double lowerBound, final double upperBound )
 	{
@@ -181,6 +197,9 @@ public class Colormap implements PaintScale, Serializable
 	/**
 	 * Create a paint scale with a lower bound of 0, an upper bound of 1 and a
 	 * default black color.
+	 * 
+	 * @param name
+	 *            the colormap name.
 	 */
 	public Colormap( final String name )
 	{
@@ -201,6 +220,11 @@ public class Colormap implements PaintScale, Serializable
 	 * by <code>value</code>. If <code>value</code> is greater than the upper
 	 * bound or lower than the lower bound set at construction, this call will
 	 * be ignored.
+	 * 
+	 * @param value
+	 *            the value at which to add the color.
+	 * @param color
+	 *            the color.
 	 */
 	public void add( final double value, final Color color )
 	{
