@@ -978,6 +978,8 @@ public class TMUtils
 	 * Returns a string of the name of the image without the extension, with the
 	 * full path
 	 *
+	 * @param settings
+	 *            A {@link Settings} object referencing the image
 	 * @return full name of the image without the extension
 	 */
 	public static String getImagePathWithoutExtension( final Settings settings )
