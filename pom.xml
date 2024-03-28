@@ -161,6 +161,12 @@
 			<groupId>sc.fiji</groupId>
 			<artifactId>labkit-ui</artifactId>
 			<version>0.3.12-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>net.imagej</groupId>
+					<artifactId>imagej-legacy</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- ImageJ dependencies -->
