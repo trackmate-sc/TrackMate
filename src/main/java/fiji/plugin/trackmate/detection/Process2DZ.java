@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.scijava.Cancelable;
+
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
@@ -66,7 +68,7 @@ import net.imglib2.view.Views;
  */
 public class Process2DZ< T extends RealType< T > & NativeType< T > >
 		extends MultiThreadedBenchmarkAlgorithm
-		implements SpotDetector< T >
+		implements SpotDetector< T >, Cancelable
 {
 
 	private static final String BASE_ERROR_MESSAGE = "[Process2DZ] ";
@@ -84,6 +86,12 @@ public class Process2DZ< T extends RealType< T > & NativeType< T > >
 	private List< Spot > spots;
 
 	private final double smoothingScale;
+
+	private boolean isCanceled;
+
+	private String cancelReason;
+
+	private TrackMate trackmate;
 
 	/**
 	 * Creates a new {@link Process2DZ} detector.
@@ -152,6 +160,8 @@ public class Process2DZ< T extends RealType< T > & NativeType< T > >
 	@Override
 	public boolean process()
 	{
+		isCanceled = false;
+		cancelReason = null;
 		spots = null;
 
 		/*
@@ -172,7 +182,7 @@ public class Process2DZ< T extends RealType< T > & NativeType< T > >
 
 		// Execute segmentation and tracking.
 		final Settings settingsFrame = settings.copyOn( imp );
-		final TrackMate trackmate = new TrackMate( settingsFrame );
+		this.trackmate = new TrackMate( settingsFrame );
 		trackmate.setNumThreads( numThreads );
 		trackmate.getModel().setLogger( Logger.VOID_LOGGER );
 		if ( !trackmate.checkInput() || !trackmate.process() )
@@ -278,5 +288,28 @@ public class Process2DZ< T extends RealType< T > & NativeType< T > >
 	public List< Spot > getResult()
 	{
 		return spots;
+	}
+
+	// --- org.scijava.Cancelable methods ---
+
+	@Override
+	public boolean isCanceled()
+	{
+		return isCanceled;
+	}
+
+	@Override
+	public void cancel( final String reason )
+	{
+		isCanceled = true;
+		cancelReason = reason;
+		if ( trackmate != null )
+			trackmate.cancel( reason );
+	}
+
+	@Override
+	public String getCancelReason()
+	{
+		return cancelReason;
 	}
 }
