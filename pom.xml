@@ -159,6 +159,12 @@
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>labkit-ui</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>net.imagej</groupId>
+					<artifactId>imagej-legacy</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- ImageJ dependencies -->
