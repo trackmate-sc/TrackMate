@@ -48,6 +48,8 @@ public class DetectionPreview
 
 	private final DetectionPreviewPanel panel;
 
+	private TrackMate trackmate;
+
 	protected DetectionPreview(
 			final Model model,
 			final Settings settings,
@@ -66,6 +68,7 @@ public class DetectionPreview
 				detectionSettingsSupplier.get(),
 				currentFrameSupplier.get(),
 				thresholdKey ) );
+		panel.btnCancel.addActionListener( l -> cancel() );
 	}
 
 	public DetectionPreviewPanel getPanel()
@@ -86,7 +89,9 @@ public class DetectionPreview
 			final int frame,
 			final String thresholdKey )
 	{
-		panel.btnPreview.setEnabled( false );
+		panel.btnPreview.setVisible( false );
+		panel.btnCancel.setVisible( true );
+		panel.btnCancel.setEnabled( true );
 		Threads.run( "TrackMate preview detection thread", () ->
 		{
 			try
@@ -115,7 +120,8 @@ public class DetectionPreview
 			}
 			finally
 			{
-				panel.btnPreview.setEnabled( true );
+				panel.btnPreview.setVisible( true );
+				panel.btnCancel.setVisible( false );
 			}
 		} );
 	}
@@ -161,38 +167,53 @@ public class DetectionPreview
 		lSettings.detectorFactory = detectorFactory;
 		lSettings.detectorSettings = new HashMap<>( detectorSettings );
 
-		// Does this detector have a THRESHOLD parameter?
-		final boolean hasThreshold = ( thresholdKey != null ) && ( detectorSettings.containsKey( thresholdKey ) );
-		final double threshold;
-		if ( hasThreshold )
+		this.trackmate = new TrackMate( lSettings );
+
+		try
 		{
-			threshold = ( ( Double ) detectorSettings.get( thresholdKey ) ).doubleValue();
-			lSettings.detectorSettings.put( thresholdKey, Double.valueOf( Double.NEGATIVE_INFINITY ) );
+			// Does this detector have a THRESHOLD parameter?
+			final boolean hasThreshold = ( thresholdKey != null ) && ( detectorSettings.containsKey( thresholdKey ) );
+			final double threshold;
+			if ( hasThreshold )
+			{
+				threshold = ( ( Double ) detectorSettings.get( thresholdKey ) ).doubleValue();
+				lSettings.detectorSettings.put( thresholdKey, Double.valueOf( Double.NEGATIVE_INFINITY ) );
+			}
+			else
+			{
+				threshold = Double.NaN;
+			}
+
+			// Execute preview.
+			trackmate.getModel().setLogger( panel.logger );
+
+			final boolean detectionOk = trackmate.execDetection();
+			if ( !detectionOk )
+			{
+				panel.logger.error( trackmate.getErrorMessage() );
+				return null;
+			}
+
+			if ( hasThreshold )
+				// Filter by the initial threshold value.
+				trackmate.getModel().getSpots().filter( new FeatureFilter( Spot.QUALITY, threshold, true ) );
+			else
+				// Make them all visible.
+				trackmate.getModel().getSpots().setVisible( true );
+
+			return new ValuePair< Model, Double >( trackmate.getModel(), Double.valueOf( threshold ) );
 		}
-		else
+		finally
 		{
-			threshold = Double.NaN;
+			this.trackmate = null;
 		}
+	}
 
-		// Execute preview.
-		final TrackMate trackmate = new TrackMate( lSettings );
-		trackmate.getModel().setLogger( panel.logger );
-
-		final boolean detectionOk = trackmate.execDetection();
-		if ( !detectionOk )
-		{
-			panel.logger.error( trackmate.getErrorMessage() );
-			return null;
-		}
-
-		if ( hasThreshold )
-			// Filter by the initial threshold value.
-			trackmate.getModel().getSpots().filter( new FeatureFilter( Spot.QUALITY, threshold, true ) );
-		else
-			// Make them all visible.
-			trackmate.getModel().getSpots().setVisible( true );
-
-		return new ValuePair< Model, Double >( trackmate.getModel(), Double.valueOf( threshold ) );
+	private void cancel()
+	{
+		panel.btnCancel.setEnabled( false );
+		if ( null != trackmate )
+			trackmate.cancel( "User canceled preview" );
 	}
 
 	protected void updateModelAndHistogram( final Model targetModel, final Model sourceModel, final int frame, final double threshold )
