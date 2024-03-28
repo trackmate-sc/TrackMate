@@ -22,6 +22,7 @@
 package fiji.plugin.trackmate.util;
 
 import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
+import static fiji.plugin.trackmate.gui.Icons.CANCEL_ICON;
 import static fiji.plugin.trackmate.gui.Icons.PREVIEW_ICON;
 
 import java.awt.GridBagConstraints;
@@ -48,11 +49,18 @@ public class DetectionPreviewPanel extends JPanel
 			+ "get rid of them later."
 			+ "</html>";
 
+	private static final String TOOLTIP_CANCEL = "<html>"
+			+ "Cancel the current preview."
+			+ "</html>";
+
 	final Logger logger;
 
 	final JButton btnPreview;
 
+	final JButton btnCancel;
+
 	final QualityHistogramChart chart;
+
 
 	public DetectionPreviewPanel( final DoubleConsumer thresholdUpdater, final String axisLabel )
 	{
@@ -84,12 +92,21 @@ public class DetectionPreviewPanel extends JPanel
 
 		this.btnPreview = new JButton( "Preview", PREVIEW_ICON );
 		btnPreview.setToolTipText( TOOLTIP_PREVIEW );
+		btnPreview.setFont( SMALL_FONT );
+		this.btnCancel = new JButton( "Cancel", CANCEL_ICON );
+		btnCancel.setToolTipText( TOOLTIP_CANCEL );
+		btnCancel.setVisible( false );
+		btnCancel.setFont( SMALL_FONT );
+
+		final JPanel btnPanel = new JPanel();
+		btnPanel.add( btnPreview );
+		btnPanel.add( btnCancel );
+
 		final GridBagConstraints gbcBtnPreview = new GridBagConstraints();
 		gbcBtnPreview.anchor = GridBagConstraints.NORTHEAST;
 		gbcBtnPreview.insets = new Insets( 5, 5, 0, 0 );
 		gbcBtnPreview.gridx = 1;
 		gbcBtnPreview.gridy = 1;
-		this.add( btnPreview, gbcBtnPreview );
-		btnPreview.setFont( SMALL_FONT );
+		this.add( btnPanel, gbcBtnPreview );
 	}
 }
