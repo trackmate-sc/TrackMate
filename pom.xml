@@ -147,7 +147,17 @@
 
 		<fontchooser.version>2.5.2</fontchooser.version>
 		<javaGeom.version>0.11.1</javaGeom.version>
-		<imglib2.version>6.1.0</imglib2.version>
+
+		<imglib2.version>7.0.0-SNAPSHOT</imglib2.version>
+		<imglib2-realtransform.version>4.0.3-SNAPSHOT</imglib2-realtransform.version>
+		<imglib2-roi.version>0.15.0-SNAPSHOT</imglib2-roi.version>
+		<imglib2-cache.version>1.0.0-beta-18-SNAPSHOT</imglib2-cache.version>
+		<imglib2-algorithm.version>0.14.1-SNAPSHOT</imglib2-algorithm.version>
+		<bigdataviewer-core.version>10.4.15-SNAPSHOT</bigdataviewer-core.version>
+		<bigdataviewer-vistools.version>1.0.0-beta-35-SNAPSHOT</bigdataviewer-vistools.version>
+		<imagej-common.version>2.0.6-SNAPSHOT</imagej-common.version>
+		<enforcer.skip>true</enforcer.skip>
+
 	</properties>
 
 	<dependencies>
