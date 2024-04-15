@@ -26,9 +26,9 @@ import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.unmarshallMap;
 import static fiji.plugin.trackmate.io.IOUtils.writeAttribute;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_FEATURE_PENALTIES;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_MIN_IOU;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MIN_IOU;
 import static fiji.plugin.trackmate.tracking.jaqaman.LAPUtils.XML_ELEMENT_NAME_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.jaqaman.LAPUtils.XML_ELEMENT_NAME_LINKING;
 
@@ -105,7 +105,7 @@ public class SparseLAPOverlapTrackerFactory extends SegmentTrackerFactory
 
 		// Linking
 		final Element linkingElement = new Element( XML_ELEMENT_NAME_LINKING );
-		ok = ok & writeAttribute( settings, linkingElement, KEY_LINKING_MAX_DISTANCE, Double.class, str );
+		ok = ok & writeAttribute( settings, linkingElement, KEY_LINKING_MIN_IOU, Double.class, str );
 		// feature penalties
 		@SuppressWarnings( "unchecked" )
 		final Map< String, Double > lfpm = ( Map< String, Double > ) settings.get( KEY_LINKING_FEATURE_PENALTIES );
@@ -133,7 +133,7 @@ public class SparseLAPOverlapTrackerFactory extends SegmentTrackerFactory
 		else
 		{
 
-			ok = ok & readDoubleAttribute( linkingElement, settings, KEY_LINKING_MAX_DISTANCE, errorHolder );
+			ok = ok & readDoubleAttribute( linkingElement, settings, KEY_LINKING_MIN_IOU, errorHolder );
 			// feature penalties
 			final Map< String, Double > lfpMap = new HashMap<>();
 			final Element lfpElement = linkingElement.getChild( XML_ELEMENT_NAME_FEATURE_PENALTIES );
@@ -163,7 +163,7 @@ public class SparseLAPOverlapTrackerFactory extends SegmentTrackerFactory
 	{
 		final Map< String, Object > settings = LAPUtils.getDefaultSegmentSettingsMap();
 		// Linking
-		settings.put( KEY_LINKING_MAX_DISTANCE, DEFAULT_LINKING_MAX_DISTANCE );
+		settings.put( KEY_LINKING_MIN_IOU, DEFAULT_LINKING_MIN_IOU );
 		settings.put( KEY_LINKING_FEATURE_PENALTIES, new HashMap<>( DEFAULT_LINKING_FEATURE_PENALTIES ) );
 		return settings;
 	}

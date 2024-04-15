@@ -260,4 +260,13 @@ public class TrackerKeys
 
 	/** A default value for the {@value #KEY_BLOCKING_VALUE} parameter. */
 	public static final double DEFAULT_BLOCKING_VALUE = Double.POSITIVE_INFINITY;
+
+	/**
+	 * Key for the parameter specifying the minimum linking IoU. The
+	 * expected value must be a Double.
+	 */
+	public static final String KEY_LINKING_MIN_IOU = "LINKING_MIN_IOU";
+
+	/** A default value for the {@value #KEY_LINKING_MIN_IOU} parameter. */
+	public static final double DEFAULT_LINKING_MIN_IOU = 0.5;
 }

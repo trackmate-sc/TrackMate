@@ -66,9 +66,9 @@ public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorith
 
 	protected final Map< String, Object > settings;
 
-	private boolean isCanceled;
+	protected boolean isCanceled;
 
-	private String cancelReason;
+	protected String cancelReason;
 
 	/*
 	 * CONSTRUCTOR

@@ -23,7 +23,7 @@ package fiji.plugin.trackmate.tracking.jaqaman;
 
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALTERNATIVE_LINKING_COST_FACTOR;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MIN_IOU;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -132,7 +132,7 @@ public class SparseLAPOverlapTracker extends MultiThreadedBenchmarkAlgorithm imp
 
 		// Prepare settings object
 		final Map< String, Object > ftfSettings = new HashMap<>();
-		ftfSettings.put( KEY_LINKING_MAX_DISTANCE, settings.get( KEY_LINKING_MAX_DISTANCE ) );
+		ftfSettings.put( KEY_LINKING_MIN_IOU, settings.get( KEY_LINKING_MIN_IOU ) );
 		ftfSettings.put( KEY_ALTERNATIVE_LINKING_COST_FACTOR, settings.get( KEY_ALTERNATIVE_LINKING_COST_FACTOR ) );
 		ftfSettings.put( KEY_LINKING_FEATURE_PENALTIES, settings.get( KEY_LINKING_FEATURE_PENALTIES ) );
 
