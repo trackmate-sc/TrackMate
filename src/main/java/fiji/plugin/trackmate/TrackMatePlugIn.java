@@ -195,6 +195,6 @@ public class TrackMatePlugIn implements PlugIn
 //		new TrackMatePlugIn().run( "samples/Merged.tif" );
 		new TrackMatePlugIn().run( "samples/MAX_Merged.tif" );
 //		new TrackMatePlugIn().run( "samples/Mask.tif" );
-// 		new TrackMatePlugIn().run( "samples/FakeTracks.tif" );
+//		new TrackMatePlugIn().run( "samples/FakeTracks.tif" );
 	}
 }
