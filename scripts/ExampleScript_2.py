@@ -57,8 +57,8 @@ model = reader.getModel()
 # A selection.
 sm = SelectionModel( model )
 
-# Read the default display settings.
-ds = DisplaySettingsIO.readUserDefault()
+# Read the display settings that was saved in the file.
+ds = reader.getDisplaySettings()
 
 # The viewer.
 displayer =  HyperStackDisplayer( model, sm, ds ) 
