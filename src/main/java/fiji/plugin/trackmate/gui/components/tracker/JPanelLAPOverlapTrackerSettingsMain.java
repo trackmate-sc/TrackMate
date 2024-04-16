@@ -31,11 +31,15 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_GAP_CLOSING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_MERGING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_SPLITTING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MIN_IOU;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_FRAME_GAP;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MIN_IOU;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_MIN_IOU;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_FEATURE_PENALTIES;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_MIN_IOU;
+
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -64,6 +68,8 @@ public class JPanelLAPOverlapTrackerSettingsMain extends javax.swing.JPanel
 
 	private static final long serialVersionUID = -1L;
 
+	private final JFormattedTextField txtfldSplittingMinIOU;
+
 	private final JCheckBox chkboxAllowSplitting;
 
 	private final JPanelFeatureSelectionGui panelGapClosing;
@@ -76,9 +82,13 @@ public class JPanelLAPOverlapTrackerSettingsMain extends javax.swing.JPanel
 
 	private final JScrollPane scrpneMergingFeatures;
 
+	private final JFormattedTextField txtfldMergingMinIOU;
+
 	private final JCheckBox chkboxAllowMerging;
 
 	private final JScrollPane scrpneSplittingFeatures;
+
+	private final JFormattedTextField txtfldGapClosingMinIOU;
 
 	private final JScrollPane scrpneGapClosingFeatures;
 
@@ -86,15 +96,21 @@ public class JPanelLAPOverlapTrackerSettingsMain extends javax.swing.JPanel
 
 	private final JCheckBox chkboxAllowGapClosing;
 
+	private final JFormattedTextField txtfldLinkingMinIOU;
+
+	private final JLabel lbl6;
+
 	private final JLabel lbl7;
 
 	private final JLabel lbl8;
 
+	private final JLabel lbl10;
+
+	private final JLabel lbl13;
+
 	private final JLabel lbl15;
 
 	private final JLabel lbl16;
-
-	private final JFormattedTextField txtfldLinkingMinIOU;
 
 
 	public JPanelLAPOverlapTrackerSettingsMain( final String trackerName, final String spaceUnits, final Collection< String > features, final Map< String, String > featureNames )
@@ -164,6 +180,17 @@ public class JPanelLAPOverlapTrackerSettingsMain extends javax.swing.JPanel
 		chkboxAllowGapClosing.setText( "Allow gap closing" );
 		chkboxAllowGapClosing.setFont( SMALL_FONT );
 
+		lbl6 = new JLabel();
+		this.add( lbl6, new GridBagConstraints( 0, 9, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 0, 10, 0, 10 ), 0, 0 ) );
+		lbl6.setText( "Min IoU:" );
+		lbl6.setFont( SMALL_FONT );
+
+		txtfldGapClosingMinIOU = new JFormattedTextField( decimalFormat );
+		this.add( txtfldGapClosingMinIOU, new GridBagConstraints( 1, 9, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 0, 0, 0, 0 ), 0, 0 ) );
+		txtfldGapClosingMinIOU.setSize( TEXTFIELD_DIMENSION );
+		txtfldGapClosingMinIOU.setFont( SMALL_FONT );
+		txtfldGapClosingMinIOU.setHorizontalAlignment( JFormattedTextField.CENTER );
+
 		lbl7 = new JLabel();
 		this.add( lbl7, new GridBagConstraints( 0, 10, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets( 0, 10, 0, 10 ), 0, 0 ) );
 		lbl7.setText( "Max frame gap:" );
@@ -202,6 +229,17 @@ public class JPanelLAPOverlapTrackerSettingsMain extends javax.swing.JPanel
 		chkboxAllowSplitting.setText( "Allow track segment splitting" );
 		chkboxAllowSplitting.setFont( SMALL_FONT );
 
+		lbl10 = new JLabel();
+		this.add( lbl10, new GridBagConstraints( 0, 15, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 0, 10, 0, 0 ), 0, 0 ) );
+		lbl10.setText( "Max distance:" );
+		lbl10.setFont( SMALL_FONT );
+
+		txtfldSplittingMinIOU = new JFormattedTextField( decimalFormat );
+		this.add( txtfldSplittingMinIOU, new GridBagConstraints( 1, 15, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 0, 0, 0, 0 ), 0, 0 ) );
+		txtfldSplittingMinIOU.setSize( TEXTFIELD_DIMENSION );
+		txtfldSplittingMinIOU.setFont( SMALL_FONT );
+		txtfldSplittingMinIOU.setHorizontalAlignment( JFormattedTextField.CENTER );
+
 		lbl15 = new JLabel();
 		this.add( lbl15, new GridBagConstraints( 0, 17, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 0, 10, 0, 10 ), 0, 0 ) );
 		lbl15.setText( "Feature penalties:" );
@@ -229,6 +267,17 @@ public class JPanelLAPOverlapTrackerSettingsMain extends javax.swing.JPanel
 		chkboxAllowMerging.setText( "Allow track segment merging" );
 		chkboxAllowMerging.setFont( SMALL_FONT );
 
+		lbl13 = new JLabel();
+		this.add( lbl13, new GridBagConstraints( 0, 21, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets( 0, 10, 0, 0 ), 0, 0 ) );
+		lbl13.setText( "Min IoU:" );
+		lbl13.setFont( SMALL_FONT );
+
+		txtfldMergingMinIOU = new JFormattedTextField( decimalFormat );
+		this.add( txtfldMergingMinIOU, new GridBagConstraints( 1, 21, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 0, 0, 0, 0 ), 0, 0 ) );
+		txtfldMergingMinIOU.setSize( TEXTFIELD_DIMENSION );
+		txtfldMergingMinIOU.setFont( SMALL_FONT );
+		txtfldMergingMinIOU.setHorizontalAlignment( JFormattedTextField.CENTER );
+
 		lbl16 = new JLabel();
 		this.add( lbl16, new GridBagConstraints( 0, 23, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 0, 10, 0, 10 ), 0, 0 ) );
 		lbl16.setText( "Feature penalties:" );
@@ -245,20 +294,26 @@ public class JPanelLAPOverlapTrackerSettingsMain extends javax.swing.JPanel
 		scrpneMergingFeatures.setViewportView( panelMergingFeatures );
 
 		// Select text-fields content on focus.
+		GuiUtils.selectAllOnFocus( txtfldGapClosingMinIOU );
 		GuiUtils.selectAllOnFocus( txtfldGapClosingMaxFrameInterval );
 		GuiUtils.selectAllOnFocus( txtfldLinkingMinIOU );
+		GuiUtils.selectAllOnFocus( txtfldMergingMinIOU );
+		GuiUtils.selectAllOnFocus( txtfldSplittingMinIOU );
 
 		// Listeners.
 		chkboxAllowGapClosing.addActionListener( e -> setEnabled( new Component[] {
+				lbl6, txtfldGapClosingMinIOU,
 				lbl7, txtfldGapClosingMaxFrameInterval, txtfldGapClosingMaxFrameInterval,
 				lbl8, scrpneGapClosingFeatures, panelGapClosing },
 				chkboxAllowGapClosing.isSelected() ) );
 
 		chkboxAllowSplitting.addActionListener( e -> setEnabled( new Component[] {
+				lbl10, txtfldSplittingMinIOU,
 				lbl15, scrpneSplittingFeatures, panelSplittingFeatures },
 				chkboxAllowSplitting.isSelected() ) );
 
 		chkboxAllowMerging.addActionListener( e -> setEnabled( new Component[] {
+				lbl13, txtfldMergingMinIOU,
 				lbl16, scrpneMergingFeatures, panelMergingFeatures },
 				chkboxAllowMerging.isSelected() ) );
 	}
@@ -274,25 +329,31 @@ public class JPanelLAPOverlapTrackerSettingsMain extends javax.swing.JPanel
 		panelLinkingFeatures.setSelectedFeaturePenalties( ( Map< String, Double > ) settings.get( KEY_LINKING_FEATURE_PENALTIES ) );
 
 		chkboxAllowGapClosing.setSelected( ( Boolean ) settings.get( KEY_ALLOW_GAP_CLOSING ) );
+		txtfldGapClosingMinIOU.setValue( settings.get( KEY_GAP_CLOSING_MIN_IOU ) );
 		txtfldGapClosingMaxFrameInterval.setValue( settings.get( KEY_GAP_CLOSING_MAX_FRAME_GAP ) );
 		panelGapClosing.setSelectedFeaturePenalties( ( Map< String, Double > ) settings.get( KEY_GAP_CLOSING_FEATURE_PENALTIES ) );
 
 		chkboxAllowSplitting.setSelected( ( Boolean ) settings.get( KEY_ALLOW_TRACK_SPLITTING ) );
+		txtfldSplittingMinIOU.setValue( settings.get( KEY_SPLITTING_MIN_IOU ) );
 		panelSplittingFeatures.setSelectedFeaturePenalties( ( Map< String, Double > ) settings.get( KEY_SPLITTING_FEATURE_PENALTIES ) );
 
 		chkboxAllowMerging.setSelected( ( Boolean ) settings.get( KEY_ALLOW_TRACK_MERGING ) );
+		txtfldMergingMinIOU.setValue( settings.get( KEY_MERGING_MIN_IOU ) );
 		panelMergingFeatures.setSelectedFeaturePenalties( ( Map< String, Double > ) settings.get( KEY_MERGING_FEATURE_PENALTIES ) );
 
 		setEnabled( new Component[] {
+				lbl6, txtfldGapClosingMinIOU,
 				lbl7, txtfldGapClosingMaxFrameInterval, txtfldGapClosingMaxFrameInterval,
 				lbl8, scrpneGapClosingFeatures, panelGapClosing },
 				chkboxAllowGapClosing.isSelected() );
 
 		setEnabled( new Component[] {
+				lbl10, txtfldSplittingMinIOU,
 				lbl15, scrpneSplittingFeatures, panelSplittingFeatures },
 				chkboxAllowSplitting.isSelected() );
 
 		setEnabled( new Component[] {
+				lbl13, txtfldMergingMinIOU, 
 				lbl16, scrpneMergingFeatures, panelMergingFeatures },
 				chkboxAllowMerging.isSelected() );
 	}
@@ -308,13 +369,16 @@ public class JPanelLAPOverlapTrackerSettingsMain extends javax.swing.JPanel
 		settings.put( KEY_LINKING_FEATURE_PENALTIES, panelLinkingFeatures.getFeaturePenalties() );
 
 		settings.put( KEY_ALLOW_GAP_CLOSING, chkboxAllowGapClosing.isSelected() );
+		settings.put( KEY_GAP_CLOSING_MIN_IOU, ( ( Number ) txtfldGapClosingMinIOU.getValue() ).doubleValue() );
 		settings.put( KEY_GAP_CLOSING_MAX_FRAME_GAP, ( ( Number ) txtfldGapClosingMaxFrameInterval.getValue() ).intValue() );
 		settings.put( KEY_GAP_CLOSING_FEATURE_PENALTIES, panelGapClosing.getFeaturePenalties() );
 
 		settings.put( KEY_ALLOW_TRACK_SPLITTING, chkboxAllowSplitting.isSelected() );
+		settings.put( KEY_SPLITTING_MIN_IOU, ( ( Number ) txtfldSplittingMinIOU.getValue() ).doubleValue() );
 		settings.put( KEY_SPLITTING_FEATURE_PENALTIES, panelSplittingFeatures.getFeaturePenalties() );
 
 		settings.put( KEY_ALLOW_TRACK_MERGING, chkboxAllowMerging.isSelected() );
+		settings.put( KEY_MERGING_MIN_IOU, ( ( Number ) txtfldMergingMinIOU.getValue() ).doubleValue() );
 		settings.put( KEY_MERGING_FEATURE_PENALTIES, panelMergingFeatures.getFeaturePenalties() );
 
 		return settings;
