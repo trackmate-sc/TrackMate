@@ -56,7 +56,7 @@ import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
 
 public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorithm implements SpotTracker, Cancelable
 {
-	private final static String BASE_ERROR_MESSAGE = "[SparseLAPFrameToFrameTracker] ";
+	protected final static String BASE_ERROR_MESSAGE = "[SparseLAPFrameToFrameTracker] ";
 
 	protected SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph;
 

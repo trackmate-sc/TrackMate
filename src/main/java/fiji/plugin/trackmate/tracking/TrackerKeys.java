@@ -268,5 +268,5 @@ public class TrackerKeys
 	public static final String KEY_LINKING_MIN_IOU = "LINKING_MIN_IOU";
 
 	/** A default value for the {@value #KEY_LINKING_MIN_IOU} parameter. */
-	public static final double DEFAULT_LINKING_MIN_IOU = 0.5;
+	public static final double DEFAULT_LINKING_MIN_IOU = 0.0;
 }
