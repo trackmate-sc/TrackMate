@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2023 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -77,17 +77,18 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 
 	private static final String KEY = "SPOT_TABLE";
 
-	public static String selectedFile = TrackTableView.selectedFile;
+	private String selectedFile = System.getProperty( "user.home" ) + File.separator + "branches.csv";
 
 	private final Model model;
 
 	private final TablePanel< Branch > branchTable;
 
-	public BranchTableView( final Model model, final SelectionModel selectionModel )
+	public BranchTableView( final Model model, final SelectionModel selectionModel, final String imageFileName )
 	{
 		super( "Branch table" );
 		setIconImage( TRACKMATE_ICON.getImage() );
 		this.model = model;
+		this.selectedFile = imageFileName + "_branches.csv";
 
 		/*
 		 * GUI.
@@ -197,11 +198,11 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 
 				// Compute mean velocity "by hand".
 				final double meanV;
-                                double sum;
+				double sum;
 				if ( branch.size() < 2 )
 				{
 					meanV = Double.NaN;
-                                        sum = 0;
+					sum = 0;
 				}
 				else
 				{
@@ -215,11 +216,11 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 						sum += dr;
 						previous = next;
 					}
-					meanV = sum / ( Double.valueOf( br.dt() ));
+					meanV = sum / ( Double.valueOf( br.dt() ) );
 				}
 				br.putFeature( MEAN_VELOCITY, Double.valueOf( meanV ) );
-                                
-                                // Distance traveled.
+
+				// Distance traveled.
 				br.putFeature( TOTAL_DISTANCE, sum );
 
 				// Predecessors
@@ -249,36 +250,36 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 				final Set< List< Spot > > succs = successorMap.get( br );
 				final Set< Branch > succBrs = new HashSet<>( succs.size() );
 				double meanDeltaTSucc = 0;
-                                for ( final List< Spot > branch : succs )
+				for ( final List< Spot > branch : succs )
 				{
 					final Branch succBr = branchMap.get( branch );
-                                        // temporal distance with successor (if there are gaps)
-                                        meanDeltaTSucc += succBr.first.diffTo(br.last, Spot.POSITION_T);
+					// temporal distance with successor (if there are gaps)
+					meanDeltaTSucc += succBr.first.diffTo( br.last, Spot.POSITION_T );
 					succBrs.add( succBr );
 				}
 				br.successors = succBrs;
 				br.putFeature( N_SUCCESSORS, Double.valueOf( succBrs.size() ) );
-                                 if ( br.getFeature(N_SUCCESSORS) > 0 )
-                                    br.putFeature( MEAN_SUCCESSORS_DELAY, meanDeltaTSucc/br.getFeature(N_SUCCESSORS) );
-                                else
-                                    br.putFeature( MEAN_SUCCESSORS_DELAY, 0.0 );
+				if ( br.getFeature( N_SUCCESSORS ) > 0 )
+					br.putFeature( MEAN_SUCCESSORS_DELAY, meanDeltaTSucc / br.getFeature( N_SUCCESSORS ) );
+				else
+					br.putFeature( MEAN_SUCCESSORS_DELAY, 0.0 );
 
 				final Set< List< Spot > > preds = predecessorMap.get( br );
 				final Set< Branch > predBrs = new HashSet<>( preds.size() );
-                                double meanDeltaTPred = 0;
+				double meanDeltaTPred = 0;
 				for ( final List< Spot > branch : preds )
 				{
 					final Branch predBr = branchMap.get( branch );
-                                        // temporal distance with predecessor (if there are gaps)
-                                        meanDeltaTPred += br.first.diffTo(predBr.last, Spot.POSITION_T);
+					// temporal distance with predecessor (if there are gaps)
+					meanDeltaTPred += br.first.diffTo( predBr.last, Spot.POSITION_T );
 					predBrs.add( predBr );
 				}
 				br.predecessors = predBrs;
 				br.putFeature( N_PREDECESSORS, Double.valueOf( predBrs.size() ) );
-                                if ( br.getFeature(N_PREDECESSORS) > 0 )
-                                    br.putFeature( MEAN_PREDECESSORS_DELAY, meanDeltaTPred/br.getFeature(N_PREDECESSORS) );
-                                else
-                                    br.putFeature( MEAN_PREDECESSORS_DELAY, 0.0 );
+				if ( br.getFeature( N_PREDECESSORS ) > 0 )
+					br.putFeature( MEAN_PREDECESSORS_DELAY, meanDeltaTPred / br.getFeature( N_PREDECESSORS ) );
+				else
+					br.putFeature( MEAN_PREDECESSORS_DELAY, 0.0 );
 			}
 
 			brs.addAll( successorMap.keySet() );
@@ -475,18 +476,35 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 	}
 
 	private static final String TRACK_ID = "TRACK_ID";
+
 	private static final String N_PREDECESSORS = "N_PREDECESSORS";
+
 	private static final String N_SUCCESSORS = "N_SUCCESSORS";
+
 	private static final String DELTA_T = "DELTA_T";
+
 	private static final String DISTANCE = "DISTANCE";
+
 	private static final String MEAN_VELOCITY = "MEAN_VELOCITY";
-        private static final String TOTAL_DISTANCE = "TOTAL_DISTANCE";
+
+	private static final String TOTAL_DISTANCE = "TOTAL_DISTANCE";
+
 	private static final String FIRST = "FIRST";
+
 	private static final String LAST = "LAST";
-        // mean temporal distance between end of the branch and begin of successors branch
-        private static final String MEAN_SUCCESSORS_DELAY = "MEAN_SUCCESSORS_DELAY";
-        // mean temporal distance between begin of branch and end of predecessors branch
-        private static final String MEAN_PREDECESSORS_DELAY = "MEAN_PREDECESSORS_DELAY";
+
+	/**
+	 * Mean temporal distance between end of the branch and begin of successors
+	 * branch.
+	 */
+	private static final String MEAN_SUCCESSORS_DELAY = "MEAN_SUCCESSORS_DELAY";
+
+	/**
+	 * Mean temporal distance between begin of branch and end of predecessors
+	 * branch.
+	 */
+	private static final String MEAN_PREDECESSORS_DELAY = "MEAN_PREDECESSORS_DELAY";
+
 	private static final List< String > BRANCH_FEATURES = Arrays.asList( new String[] {
 			TRACK_ID,
 			N_PREDECESSORS,
@@ -494,16 +512,19 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 			DELTA_T,
 			DISTANCE,
 			MEAN_VELOCITY,
-                        TOTAL_DISTANCE,
+			TOTAL_DISTANCE,
 			FIRST,
 			LAST,
-                        MEAN_SUCCESSORS_DELAY,
-                        MEAN_PREDECESSORS_DELAY
+			MEAN_SUCCESSORS_DELAY,
+			MEAN_PREDECESSORS_DELAY
 	} );
 
 	private static final Map< String, String > BRANCH_FEATURES_NAMES = new HashMap<>();
+
 	private static final Map< String, String > BRANCH_FEATURES_SHORTNAMES = new HashMap<>();
+
 	private static final Map< String, Boolean > BRANCH_FEATURES_ISINTS = new HashMap<>();
+
 	private static final Map< String, Dimension > BRANCH_FEATURES_DIMENSIONS = new HashMap<>();
 	static
 	{
@@ -536,8 +557,8 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 		BRANCH_FEATURES_SHORTNAMES.put( MEAN_VELOCITY, "Mean V" );
 		BRANCH_FEATURES_ISINTS.put( MEAN_VELOCITY, Boolean.FALSE );
 		BRANCH_FEATURES_DIMENSIONS.put( MEAN_VELOCITY, Dimension.VELOCITY );
-                
-                BRANCH_FEATURES_NAMES.put( TOTAL_DISTANCE, "Total distance" );
+
+		BRANCH_FEATURES_NAMES.put( TOTAL_DISTANCE, "Total distance" );
 		BRANCH_FEATURES_SHORTNAMES.put( TOTAL_DISTANCE, "Tot Dist" );
 		BRANCH_FEATURES_ISINTS.put( TOTAL_DISTANCE, Boolean.FALSE );
 		BRANCH_FEATURES_DIMENSIONS.put( TOTAL_DISTANCE, Dimension.LENGTH );
@@ -551,15 +572,17 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 		BRANCH_FEATURES_SHORTNAMES.put( LAST, "Last ID" );
 		BRANCH_FEATURES_ISINTS.put( LAST, Boolean.TRUE );
 		BRANCH_FEATURES_DIMENSIONS.put( LAST, Dimension.NONE );
-                
-                 // Mean duration between end of the branch and begin of successors branch
-                BRANCH_FEATURES_NAMES.put( MEAN_SUCCESSORS_DELAY, "Mean successors delay" );
+
+		// Mean duration between end of the branch and begin of successors
+		// branch
+		BRANCH_FEATURES_NAMES.put( MEAN_SUCCESSORS_DELAY, "Mean successors delay" );
 		BRANCH_FEATURES_SHORTNAMES.put( MEAN_SUCCESSORS_DELAY, "Succ Delay" );
 		BRANCH_FEATURES_ISINTS.put( MEAN_SUCCESSORS_DELAY, Boolean.FALSE );
 		BRANCH_FEATURES_DIMENSIONS.put( MEAN_SUCCESSORS_DELAY, Dimension.TIME );
-               
-                 // Mean duration between begin of the branch and end of predecessors branch
-                BRANCH_FEATURES_NAMES.put( MEAN_PREDECESSORS_DELAY, "Mean predecessors delay" );
+
+		// Mean duration between begin of the branch and end of predecessors
+		// branch
+		BRANCH_FEATURES_NAMES.put( MEAN_PREDECESSORS_DELAY, "Mean predecessors delay" );
 		BRANCH_FEATURES_SHORTNAMES.put( MEAN_PREDECESSORS_DELAY, "Pred Delay" );
 		BRANCH_FEATURES_ISINTS.put( MEAN_PREDECESSORS_DELAY, Boolean.FALSE );
 		BRANCH_FEATURES_DIMENSIONS.put( MEAN_PREDECESSORS_DELAY, Dimension.TIME );

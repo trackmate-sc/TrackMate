@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2023 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -78,7 +78,7 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 
 	private static final String KEY = "SPOT_TABLE";
 
-	public static String selectedFile = TrackTableView.selectedFile;
+	private String selectedFile;
 
 	private final Model model;
 
@@ -88,12 +88,13 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 
 	private final SelectionModel selectionModel;
 
-	public AllSpotsTableView( final Model model, final SelectionModel selectionModel, final DisplaySettings ds )
+	public AllSpotsTableView( final Model model, final SelectionModel selectionModel, final DisplaySettings ds, final String imageFileName )
 	{
 		super( "All spots table" );
 		setIconImage( TRACKMATE_ICON.getImage() );
 		this.model = model;
 		this.selectionModel = selectionModel;
+		this.selectedFile = imageFileName + "_allspots.csv";
 
 		/*
 		 * GUI.
@@ -154,6 +155,7 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 
 	public void exportToCsv()
 	{
+
 		final File file = FileChooser.chooseFile(
 				this,
 				selectedFile,
@@ -219,7 +221,7 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 		featureUnits.put( TRACK_ID, "" );
 		isInts.put( TRACK_ID, Boolean.TRUE );
 		infoTexts.put( TRACK_ID, "The id of the track this spot belongs to." );
-		
+
 		final BiFunction< Spot, String, Double > featureFun = ( spot, feature ) -> {
 			if ( feature.equals( TRACK_ID ) )
 			{
@@ -237,7 +239,7 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 
 		final BiConsumer< Spot, Color > colorSetter =
 				( spot, color ) -> spot.putFeature( ManualSpotColorAnalyzerFactory.FEATURE, Double.valueOf( color.getRGB() ) );
-				
+
 		final TablePanel< Spot > table =
 				new TablePanel<>(
 						model.getSpots().iterable( true ),

@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2023 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -108,14 +108,31 @@ public class SpotContrastAndSNRAnalyzer< T extends RealType< T > > extends Abstr
 			final SpotRoi outterRoi = roi.copy();
 			outterRoi.scale( alpha );
 			final IterableInterval< T > neighborhood = SpotUtil.iterable( outterRoi, spot, img );
-			double outterSum = 0.;
-			for ( final T t : neighborhood )
-				outterSum += t.getRealDouble();
+			double totalSum = 0.;
+			int nTotal = 0; // Total number of non-NaN pixels
 
+			// Iterate over the big ROI.
+			for ( final T t : neighborhood )
+			{
+				final double val = t.getRealDouble();
+				if ( Double.isNaN( val ) )
+					continue;
+				nTotal++;
+				totalSum += val;
+			}
+			
+			// Sum intensity inside (over non-NaN pixels).
 			final String sumFeature = makeFeatureKey( TOTAL_INTENSITY, channel );
-			final double innterSum = spot.getFeature( sumFeature );
-			outterSum -= innterSum;
-			meanOut = outterSum / ( outterRoi.area() - roi.area() );
+			final double innerSum = spot.getFeature( sumFeature );
+
+			// Compute number of non-NaN pixels in the inner roi.
+			final int nInner = ( int ) ( innerSum / meanIn );
+
+			// Total number of non-NaN pixels in the outer roi.
+			final int nOut = nTotal - nInner;
+
+			final double outterSum = totalSum - innerSum;
+			meanOut = outterSum / nOut;
 		}
 		else
 		{
@@ -131,7 +148,7 @@ public class SpotContrastAndSNRAnalyzer< T extends RealType< T > > extends Abstr
 			}
 
 			final double radius2 = radius * radius;
-			int nOut = 0; // inner number of pixels
+			int nOut = 0; // Outer number of non-NaN pixels.
 			double sumOut = 0;
 
 			// Compute mean in the outer ring
@@ -142,8 +159,11 @@ public class SpotContrastAndSNRAnalyzer< T extends RealType< T > > extends Abstr
 				final double dist2 = cursor.getDistanceSquared();
 				if ( dist2 > radius2 )
 				{
+					final double val = cursor.get().getRealDouble();
+					if ( Double.isNaN( val ) )
+						continue;
 					nOut++;
-					sumOut += cursor.get().getRealDouble();
+					sumOut += val;
 				}
 			}
 			meanOut = sumOut / nOut;
@@ -159,3 +179,4 @@ public class SpotContrastAndSNRAnalyzer< T extends RealType< T > > extends Abstr
 		spot.putFeature( makeFeatureKey( SNR, channel ), snr );
 	}
 }
+

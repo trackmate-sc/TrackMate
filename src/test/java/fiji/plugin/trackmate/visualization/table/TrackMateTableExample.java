@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2023 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -45,7 +45,8 @@ public class TrackMateTableExample
 		final SelectionModel selectionModel = new SelectionModel( model );
 		final DisplaySettings ds = reader.getDisplaySettings();
 		model.getSpots().iterable( 1, true ).forEach( selectionModel::addSpotToSelection );
+		final String exportFile = System.getProperty( "user.home" ) + File.separator + "test";
 
-		new TrackTableView( model, selectionModel, ds ).render();
+		new TrackTableView( model, selectionModel, ds, exportFile ).render();
 	}
 }

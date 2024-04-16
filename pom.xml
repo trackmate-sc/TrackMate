@@ -5,13 +5,13 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>34.1.0</version>
+		<version>37.0.0</version>
 		<relativePath />
 	</parent>
 
 	<groupId>sc.fiji</groupId>
 	<artifactId>TrackMate</artifactId>
-	<version>7.11.2-SNAPSHOT</version>
+	<version>7.12.2-SNAPSHOT</version>
 
 	<name>TrackMate</name>
 	<description>TrackMate plugin for Fiji.</description>

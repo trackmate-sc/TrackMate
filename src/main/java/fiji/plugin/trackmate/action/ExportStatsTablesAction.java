@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2023 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -33,6 +33,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.table.TrackTableView;
 
 public class ExportStatsTablesAction extends AbstractTMAction
@@ -57,12 +58,12 @@ public class ExportStatsTablesAction extends AbstractTMAction
 	@Override
 	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
 	{
-		createTrackTables( trackmate.getModel(), selectionModel, displaySettings ).render();
+		createTrackTables( trackmate.getModel(), selectionModel, displaySettings, TMUtils.getImagePathWithoutExtension( trackmate.getSettings() ) ).render();
 	}
 
-	public static TrackTableView createTrackTables( final Model model, final SelectionModel selectionModel, final DisplaySettings displaySettings )
+	public static TrackTableView createTrackTables( final Model model, final SelectionModel selectionModel, final DisplaySettings displaySettings, final String imageFileName )
 	{
-		return new TrackTableView( model, selectionModel, displaySettings );
+		return new TrackTableView( model, selectionModel, displaySettings, imageFileName );
 	}
 
 	// Invisible because called on the view config panel.

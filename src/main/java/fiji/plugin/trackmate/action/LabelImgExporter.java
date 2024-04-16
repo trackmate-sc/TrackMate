@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2023 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -50,7 +50,9 @@ import net.imglib2.FinalDimensions;
 import net.imglib2.RandomAccess;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
+import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
+import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 
@@ -395,7 +397,7 @@ public class LabelImgExporter extends AbstractTMAction
 	 * 	          
 	 * @return a new {@link Img}.
 	 */
-	public static final Img< UnsignedShortType > createLabelImg(
+	public static final Img< FloatType > createLabelImg(
 			final Model model,
 			final long[] dimensions,
 			final double[] calibration,
@@ -435,7 +437,7 @@ public class LabelImgExporter extends AbstractTMAction
 	 *
 	 * @return a new {@link Img}.
 	 */
-	public static final Img< UnsignedShortType > createLabelImg(
+	public static final Img< FloatType > createLabelImg(
 			final Model model,
 			final long[] dimensions,
 			final double[] calibration,
@@ -448,13 +450,13 @@ public class LabelImgExporter extends AbstractTMAction
 		 * Create target image.
 		 */
 		final Dimensions targetSize = FinalDimensions.wrap( dimensions );
-		final Img< UnsignedShortType > lblImg = Util.getArrayOrCellImgFactory( targetSize, new UnsignedShortType() ).create( targetSize );
+		final Img< FloatType > lblImg = Util.getArrayOrCellImgFactory( targetSize, new FloatType() ).create( targetSize );
 		final AxisType[] axes = new AxisType[] {
 				Axes.X,
 				Axes.Y,
 				Axes.Z,
 				Axes.TIME };
-		final ImgPlus< UnsignedShortType > imgPlus = new ImgPlus<>( lblImg, "LblImg", axes, calibration );
+		final ImgPlus< FloatType > imgPlus = new ImgPlus<>( lblImg, "LblImg", axes, calibration );
 
 		/*
 		 * Determine the starting id for spots not in tracks.
@@ -475,10 +477,10 @@ public class LabelImgExporter extends AbstractTMAction
 		logger.log( "Writing label image.\n" );
 		for ( int frame = 0; frame < dimensions[ 3 ]; frame++ )
 		{
-			final ImgPlus< UnsignedShortType > imgCT = TMUtils.hyperSlice( imgPlus, 0, frame );
+			final ImgPlus< FloatType > imgCT = TMUtils.hyperSlice( imgPlus, 0, frame );
 			final SpotWriter spotWriter = exportSpotsAsDots
-					? new SpotAsDotWriter( imgCT )
-					: new SpotRoiWriter( imgCT );
+					? new SpotAsDotWriter<>( imgCT )
+					: new SpotRoiWriter<>( imgCT );
 
 			for ( final Spot spot : model.getSpots().iterable( frame, true ) )
 			{
@@ -554,12 +556,12 @@ public class LabelImgExporter extends AbstractTMAction
 		public void write( Spot spot, int id );
 	}
 
-	public static final class SpotRoiWriter implements SpotWriter
+	public static final class SpotRoiWriter< T extends RealType< T > > implements SpotWriter
 	{
 
-		private final ImgPlus< UnsignedShortType > img;
+		private final ImgPlus< T > img;
 
-		public SpotRoiWriter( final ImgPlus< UnsignedShortType > img )
+		public SpotRoiWriter( final ImgPlus< T > img )
 		{
 			this.img = img;
 		}
@@ -567,21 +569,21 @@ public class LabelImgExporter extends AbstractTMAction
 		@Override
 		public void write( final Spot spot, final int id )
 		{
-			for ( final UnsignedShortType pixel : SpotUtil.iterable( spot, img ) )
-				pixel.set( id );
+			for ( final T pixel : SpotUtil.iterable( spot, img ) )
+				pixel.setReal( id );
 		}
 	}
 
-	public static final class SpotAsDotWriter implements SpotWriter
+	public static final class SpotAsDotWriter< T extends RealType< T > > implements SpotWriter
 	{
 
 		private final double[] calibration;
 
 		private final long[] center;
 
-		private final RandomAccess< UnsignedShortType > ra;
+		private final RandomAccess< T > ra;
 
-		public SpotAsDotWriter( final ImgPlus< UnsignedShortType > img )
+		public SpotAsDotWriter( final ImgPlus< T > img )
 		{
 			this.calibration = TMUtils.getSpatialCalibration( img );
 			this.center = new long[ img.numDimensions() ];
@@ -595,7 +597,7 @@ public class LabelImgExporter extends AbstractTMAction
 				center[ d ] = Math.round( spot.getFeature( Spot.POSITION_FEATURES[ d ] ).doubleValue() / calibration[ d ] );
 
 			ra.setPosition( center );
-			ra.get().set( id );
+			ra.get().setReal( id );
 		}
 	}
 }

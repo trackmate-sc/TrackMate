@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2023 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -76,6 +76,7 @@ public class FeatureDisplaySelector
 
 	private static final List< String > FEATURES_WITHOUT_MIN_MAX = Arrays.asList( new String[] {
 			FeatureUtils.USE_UNIFORM_COLOR_KEY,
+			FeatureUtils.USE_RANDOM_COLOR_KEY,
 			TrackIndexAnalyzer.TRACK_INDEX,
 			ManualEdgeColorAnalyzer.FEATURE,
 			ManualSpotColorAnalyzerFactory.FEATURE

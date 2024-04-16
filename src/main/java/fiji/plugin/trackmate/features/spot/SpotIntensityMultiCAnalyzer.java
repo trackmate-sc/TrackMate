@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2023 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -58,14 +58,43 @@ public class SpotIntensityMultiCAnalyzer< T extends RealType< T > > extends Abst
 		final DoubleArray intensities = new DoubleArray();
 
 		for ( final T pixel : neighborhood )
-			intensities.addValue( pixel.getRealDouble() );
+		{
+			final double val = pixel.getRealDouble();
+			if ( Double.isNaN( val ) )
+				continue;
+			intensities.addValue( val );
+		}
 
-		Util.quicksort( intensities.getArray(), 0, intensities.size() - 1 );
-		spot.putFeature( SpotIntensityMultiCAnalyzerFactory.makeFeatureKey( MEAN_INTENSITY, channel ), Double.valueOf( TMUtils.average( intensities ) ) );
-		spot.putFeature( SpotIntensityMultiCAnalyzerFactory.makeFeatureKey( MEDIAN_INTENSITY, channel ), Double.valueOf( intensities.getArray()[ intensities.size() / 2 ] ) );
-		spot.putFeature( SpotIntensityMultiCAnalyzerFactory.makeFeatureKey( MIN_INTENSITY, channel ), Double.valueOf( intensities.getArray()[ 0 ] ) );
-		spot.putFeature( SpotIntensityMultiCAnalyzerFactory.makeFeatureKey( MAX_INTENSITY, channel ), Double.valueOf( intensities.getArray()[ intensities.size() - 1 ] ) );
-		spot.putFeature( SpotIntensityMultiCAnalyzerFactory.makeFeatureKey( TOTAL_INTENSITY, channel ), Double.valueOf( TMUtils.sum( intensities ) ) );
-		spot.putFeature( SpotIntensityMultiCAnalyzerFactory.makeFeatureKey( STD_INTENSITY, channel ), Double.valueOf( TMUtils.standardDeviation( intensities ) ) );
+		final double mean;
+		final double median;
+		final double max;
+		final double min;
+		final double sum;
+		final double std;
+		if ( intensities.isEmpty() )
+		{
+			mean = Double.NaN;
+			median = Double.NaN;
+			max = Double.NaN;
+			min = Double.NaN;
+			sum = Double.NaN;
+			std = Double.NaN;
+		}
+		else
+		{
+			Util.quicksort( intensities.getArray(), 0, intensities.size() - 1 );
+			mean = Double.valueOf( TMUtils.average( intensities ) );
+			median = Double.valueOf( intensities.getArray()[ intensities.size() / 2 ] );
+			min = Double.valueOf( intensities.getArray()[ 0 ] );
+			max = Double.valueOf( intensities.getArray()[ intensities.size() - 1 ] );
+			sum = Double.valueOf( TMUtils.sum( intensities ) );
+			std = Double.valueOf( TMUtils.standardDeviation( intensities ) );
+		}
+		spot.putFeature( SpotIntensityMultiCAnalyzerFactory.makeFeatureKey( MEAN_INTENSITY, channel ), mean );
+		spot.putFeature( SpotIntensityMultiCAnalyzerFactory.makeFeatureKey( MEDIAN_INTENSITY, channel ), median );
+		spot.putFeature( SpotIntensityMultiCAnalyzerFactory.makeFeatureKey( MIN_INTENSITY, channel ), min );
+		spot.putFeature( SpotIntensityMultiCAnalyzerFactory.makeFeatureKey( MAX_INTENSITY, channel ), max );
+		spot.putFeature( SpotIntensityMultiCAnalyzerFactory.makeFeatureKey( TOTAL_INTENSITY, channel ), sum );
+		spot.putFeature( SpotIntensityMultiCAnalyzerFactory.makeFeatureKey( STD_INTENSITY, channel ), std );
 	}
 }

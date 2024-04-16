@@ -120,3 +120,8 @@ and so that end-users can use them to perform their own research. We will
 support you if need help to reuse it.
 
 For details, please see http://fiji.sc/TrackMate
+
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=trackmate-sc/TrackMate&type=Date)](https://star-history.com/#trackmate-sc/TrackMate&Date)

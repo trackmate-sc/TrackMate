@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2023 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -83,8 +83,6 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 
 	private static final String KEY = "TRACK_TABLES";
 
-	public static String selectedFile = System.getProperty( "user.home" ) + File.separator + "export.csv";
-
 	private final Model model;
 
 	private final TablePanel< Spot > spotTable;
@@ -97,9 +95,12 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 
 	private final SelectionModel selectionModel;
 
-	public TrackTableView( final Model model, final SelectionModel selectionModel, final DisplaySettings ds )
+	private String imagePath;
+
+	public TrackTableView( final Model model, final SelectionModel selectionModel, final DisplaySettings ds, final String imagePath )
 	{
 		super( "Track tables" );
+		this.imagePath = imagePath;
 		setIconImage( TRACKMATE_ICON.getImage() );
 		this.model = model;
 		this.selectionModel = selectionModel;
@@ -177,24 +178,32 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 		} );
 	}
 
-	private  void exportToCsv( final int index )
+	private void exportToCsv( final int index )
 	{
+		final int lastIndexOf = imagePath.lastIndexOf( '_' );
+		if ( lastIndexOf > 0 )
+			imagePath = imagePath.substring( 0, lastIndexOf );
+
 		final TablePanel< ? > table;
+		String selectedFile;
 		switch ( index )
 		{
 		case 0:
+			selectedFile = imagePath + "_spots.csv";
 			table = spotTable;
 			break;
 		case 1:
+			selectedFile = imagePath + "_edges.csv";
 			table = edgeTable;
 			break;
 		case 2:
+			selectedFile = imagePath + "_tracks.csv";
 			table = trackTable;
 			break;
 		default:
 			throw new IllegalArgumentException( "Unknown table with index " + index );
 		}
-		
+
 		final File file = FileChooser.chooseFile(
 				this,
 				selectedFile,
@@ -215,6 +224,7 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 			model.getLogger().error( "Problem exporting to file "
 					+ file + "\n" + e.getMessage() );
 		}
+		imagePath = selectedFile;
 	}
 
 	public static final TablePanel< Integer > createTrackTable( final Model model, final DisplaySettings ds )
@@ -369,7 +379,7 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 				return trackID == null ? null : trackID.doubleValue();
 			}
 			else if ( feature.equals( SPOT_ID ) )
-				return ( double ) spot.ID(); 
+				return ( double ) spot.ID();
 
 			return spot.getFeature( feature );
 		};

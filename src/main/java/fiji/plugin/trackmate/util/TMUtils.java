@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2023 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -66,6 +66,7 @@ public class TMUtils
 {
 
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat( "EEE, d MMM yyyy HH:mm:ss" );
+
 	private static Context context;
 
 	/*
@@ -713,12 +714,12 @@ public class TMUtils
 	public static Context getContext()
 	{
 		final Context localContext = context;
-		if (localContext != null)
+		if ( localContext != null )
 			return localContext;
-		
-		synchronized (TMUtils.class)
+
+		synchronized ( TMUtils.class )
 		{
-			if (context == null)
+			if ( context == null )
 				context = ( Context ) IJ.runPlugIn( "org.scijava.Context", "" );
 			return context;
 		}
@@ -840,6 +841,32 @@ public class TMUtils
 	public static double standardDeviation( final DoubleArray data )
 	{
 		return Math.sqrt( variance( data ) );
+	}
+
+	/**
+	 * Returns a string of the name of the image without the extension, with the
+	 * full path
+	 * 
+	 * @return full name of the image without the extension
+	 */
+	public static String getImagePathWithoutExtension( final Settings settings )
+	{
+		final String imageFolder = ( settings.imageFolder == null )
+				? System.getProperty( "user.home" )
+				: settings.imageFolder;
+
+		final String imageFileName = settings.imageFileName;
+		if ( imageFileName != null )
+		{
+			final int lastIndexOf = imageFileName.lastIndexOf( "." );
+			if ( lastIndexOf > 0 )
+				return imageFolder + imageFileName.substring( 0, imageFileName.lastIndexOf( "." ) );
+			return imageFolder + imageFileName;
+		}
+		else
+		{
+			return imageFolder + File.separator + "TrackMate";
+		}
 	}
 
 	private TMUtils()

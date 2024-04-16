@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2023 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -33,6 +33,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.table.BranchTableView;
 
 public class TrackBranchAnalysis extends AbstractTMAction
@@ -55,14 +56,14 @@ public class TrackBranchAnalysis extends AbstractTMAction
 	@Override
 	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
 	{
-		createBranchTable( trackmate.getModel(), selectionModel ).render();
+		createBranchTable( trackmate.getModel(), selectionModel, TMUtils.getImagePathWithoutExtension( trackmate.getSettings() ) ).render();
 	}
 
-	public static final BranchTableView createBranchTable( final Model model, final SelectionModel selectionModel )
+	public static final BranchTableView createBranchTable( final Model model, final SelectionModel selectionModel, final String imageFileName )
 	{
-		return new BranchTableView( model, selectionModel );
+		return new BranchTableView( model, selectionModel, imageFileName );
 	}
-	
+
 	@Plugin( type = TrackMateActionFactory.class, enabled = true )
 	public static class Factory implements TrackMateActionFactory
 	{

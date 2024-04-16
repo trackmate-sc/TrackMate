@@ -19,19 +19,19 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.gui.wizard.descriptors;
+package fiji.plugin.trackmate.visualization;
 
-import fiji.plugin.trackmate.gui.components.LogPanel;
-import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
+import java.awt.Color;
 
-public class LogPanelDescriptor2 extends WizardPanelDescriptor
+import fiji.plugin.trackmate.Spot;
+
+public class RandomSpotColorGenerator implements FeatureColorGenerator< Spot >
 {
 
-	public static final String KEY = "LogPanel";
-
-	public LogPanelDescriptor2( final LogPanel logPanel )
+	@Override
+	public Color color( final Spot spot )
 	{
-		super( KEY );
-		this.targetPanel = logPanel;
+		final int i = spot.ID() % GlasbeyLut.colors.length;
+		return GlasbeyLut.colors[ i ];
 	}
 }

@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2023 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -26,7 +26,7 @@ import java.awt.Color;
 public class GlasbeyLut
 {
 
-	private static final Color[] colors = new Color[] {
+	public static final Color[] colors = new Color[] {
 			new Color( 255, 255, 255 ),
 			new Color( 20, 20, 255 ),
 			new Color( 255, 20, 20 ),
