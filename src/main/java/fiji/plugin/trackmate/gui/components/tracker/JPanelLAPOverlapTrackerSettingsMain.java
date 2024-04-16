@@ -144,7 +144,7 @@ public class JPanelLAPOverlapTrackerSettingsMain extends javax.swing.JPanel
 
 		final JLabel lbl3 = new JLabel();
 		this.add( lbl3, new GridBagConstraints( 0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 0, 10, 0, 10 ), 0, 0 ) );
-		lbl3.setText( "Min IOU:" );
+		lbl3.setText( "Min IoU:" );
 		lbl3.setFont( SMALL_FONT );
 
 		txtfldLinkingMinIOU = new JFormattedTextField( decimalFormat );
@@ -231,7 +231,7 @@ public class JPanelLAPOverlapTrackerSettingsMain extends javax.swing.JPanel
 
 		lbl10 = new JLabel();
 		this.add( lbl10, new GridBagConstraints( 0, 15, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 0, 10, 0, 0 ), 0, 0 ) );
-		lbl10.setText( "Max distance:" );
+		lbl10.setText( "Min IoU:" );
 		lbl10.setFont( SMALL_FONT );
 
 		txtfldSplittingMinIOU = new JFormattedTextField( decimalFormat );

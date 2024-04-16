@@ -29,11 +29,14 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_BLOCKING_VALUE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_CUTOFF_PERCENTILE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_GAP_CLOSING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_GAP_CLOSING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_GAP_CLOSING_MIN_IOU;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_GAP_CLOSING_MAX_FRAME_GAP;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_MERGING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_MERGING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_MERGING_MIN_IOU;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_SPLITTING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_SPLITTING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_SPLITTING_MIN_IOU;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_GAP_CLOSING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_MERGING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_SPLITTING;
@@ -42,13 +45,17 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_BLOCKING_VALUE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_CUTOFF_PERCENTILE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MIN_IOU;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_FRAME_GAP;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MIN_IOU;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_MIN_IOU;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_MIN_IOU;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
 
@@ -148,14 +155,17 @@ public class LAPUtils
 		settings.put( KEY_ALLOW_GAP_CLOSING, DEFAULT_ALLOW_GAP_CLOSING );
 		settings.put( KEY_GAP_CLOSING_MAX_FRAME_GAP, DEFAULT_GAP_CLOSING_MAX_FRAME_GAP );
 		settings.put( KEY_GAP_CLOSING_MAX_DISTANCE, DEFAULT_GAP_CLOSING_MAX_DISTANCE );
+		settings.put( KEY_GAP_CLOSING_MIN_IOU, DEFAULT_GAP_CLOSING_MIN_IOU );
 		settings.put( KEY_GAP_CLOSING_FEATURE_PENALTIES, new HashMap<>( DEFAULT_GAP_CLOSING_FEATURE_PENALTIES ) );
 		// Track splitting
 		settings.put( KEY_ALLOW_TRACK_SPLITTING, DEFAULT_ALLOW_TRACK_SPLITTING );
 		settings.put( KEY_SPLITTING_MAX_DISTANCE, DEFAULT_SPLITTING_MAX_DISTANCE );
+		settings.put( KEY_SPLITTING_MIN_IOU, DEFAULT_SPLITTING_MIN_IOU );
 		settings.put( KEY_SPLITTING_FEATURE_PENALTIES, new HashMap<>( DEFAULT_SPLITTING_FEATURE_PENALTIES ) );
 		// Track merging
 		settings.put( KEY_ALLOW_TRACK_MERGING, DEFAULT_ALLOW_TRACK_MERGING );
 		settings.put( KEY_MERGING_MAX_DISTANCE, DEFAULT_MERGING_MAX_DISTANCE );
+		settings.put( KEY_MERGING_MIN_IOU, DEFAULT_MERGING_MIN_IOU );
 		settings.put( KEY_MERGING_FEATURE_PENALTIES, new HashMap<>( DEFAULT_MERGING_FEATURE_PENALTIES ) );
 		// Others
 		settings.put( KEY_BLOCKING_VALUE, DEFAULT_BLOCKING_VALUE );
@@ -257,20 +267,24 @@ public class LAPUtils
                 if (linking)
                 {
                     ok = ok & checkParameter( settings, KEY_LINKING_MAX_DISTANCE, Double.class, errorHolder );
+                    ok = ok & checkParameter( settings, KEY_LINKING_MIN_IOU, Double.class, errorHolder );
                     ok = ok & checkFeatureMap( settings, KEY_LINKING_FEATURE_PENALTIES, errorHolder );
                 }
                 // Gap-closing
 		ok = ok & checkParameter( settings, KEY_ALLOW_GAP_CLOSING, Boolean.class, errorHolder );
 		ok = ok & checkParameter( settings, KEY_GAP_CLOSING_MAX_DISTANCE, Double.class, errorHolder );
+		ok = ok & checkParameter( settings, KEY_GAP_CLOSING_MIN_IOU, Double.class, errorHolder );
 		ok = ok & checkParameter( settings, KEY_GAP_CLOSING_MAX_FRAME_GAP, Integer.class, errorHolder );
 		ok = ok & checkFeatureMap( settings, KEY_GAP_CLOSING_FEATURE_PENALTIES, errorHolder );
 		// Splitting
 		ok = ok & checkParameter( settings, KEY_ALLOW_TRACK_SPLITTING, Boolean.class, errorHolder );
 		ok = ok & checkParameter( settings, KEY_SPLITTING_MAX_DISTANCE, Double.class, errorHolder );
+		ok = ok & checkParameter( settings, KEY_SPLITTING_MIN_IOU, Double.class, errorHolder );
 		ok = ok & checkFeatureMap( settings, KEY_SPLITTING_FEATURE_PENALTIES, errorHolder );
 		// Merging
 		ok = ok & checkParameter( settings, KEY_ALLOW_TRACK_MERGING, Boolean.class, errorHolder );
 		ok = ok & checkParameter( settings, KEY_MERGING_MAX_DISTANCE, Double.class, errorHolder );
+		ok = ok & checkParameter( settings, KEY_MERGING_MIN_IOU, Double.class, errorHolder );
 		ok = ok & checkFeatureMap( settings, KEY_MERGING_FEATURE_PENALTIES, errorHolder );
 		// Others
 		ok = ok & checkParameter( settings, KEY_CUTOFF_PERCENTILE, Double.class, errorHolder );
@@ -282,14 +296,18 @@ public class LAPUtils
 		if ( linking )
                 {
                     mandatoryKeys.add( KEY_LINKING_MAX_DISTANCE );
+                    mandatoryKeys.add( KEY_LINKING_MIN_IOU );
                 }
                 mandatoryKeys.add( KEY_ALLOW_GAP_CLOSING );
 		mandatoryKeys.add( KEY_GAP_CLOSING_MAX_DISTANCE );
+		mandatoryKeys.add( KEY_GAP_CLOSING_MIN_IOU );
 		mandatoryKeys.add( KEY_GAP_CLOSING_MAX_FRAME_GAP );
 		mandatoryKeys.add( KEY_ALLOW_TRACK_SPLITTING );
 		mandatoryKeys.add( KEY_SPLITTING_MAX_DISTANCE );
+		mandatoryKeys.add( KEY_SPLITTING_MIN_IOU );
 		mandatoryKeys.add( KEY_ALLOW_TRACK_MERGING );
 		mandatoryKeys.add( KEY_MERGING_MAX_DISTANCE );
+		mandatoryKeys.add( KEY_MERGING_MIN_IOU );
 		mandatoryKeys.add( KEY_ALTERNATIVE_LINKING_COST_FACTOR );
 		mandatoryKeys.add( KEY_CUTOFF_PERCENTILE );
 		mandatoryKeys.add( KEY_BLOCKING_VALUE );
