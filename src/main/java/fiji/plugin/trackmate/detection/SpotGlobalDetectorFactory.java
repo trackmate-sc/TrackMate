@@ -21,7 +21,6 @@
  */
 package fiji.plugin.trackmate.detection;
 
-import fiji.plugin.trackmate.util.TMUtils;
 import net.imglib2.Interval;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
