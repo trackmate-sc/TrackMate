@@ -11,6 +11,9 @@ from fiji.plugin.trackmate import Logger
 from fiji.plugin.trackmate.detection import LogDetectorFactory
 from fiji.plugin.trackmate.tracking.jaqaman import SparseLAPTrackerFactory
 from fiji.plugin.trackmate.gui.displaysettings import DisplaySettingsIO
+from fiji.plugin.trackmate.gui.displaysettings.DisplaySettings import TrackMateObject
+from fiji.plugin.trackmate.features.track import TrackIndexAnalyzer
+
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer as HyperStackDisplayer
 import fiji.plugin.trackmate.features.FeatureFilter as FeatureFilter
 
@@ -105,6 +108,9 @@ selectionModel = SelectionModel( model )
 
 # Read the default display settings.
 ds = DisplaySettingsIO.readUserDefault()
+# Color by tracks.
+ds.setTrackColorBy( TrackMateObject.TRACKS, TrackIndexAnalyzer.TRACK_INDEX )
+ds.setSpotColorBy( TrackMateObject.TRACKS, TrackIndexAnalyzer.TRACK_INDEX )
 
 displayer =  HyperStackDisplayer( model, selectionModel, imp, ds )
 displayer.render()

@@ -25,6 +25,12 @@ imp = IJ.openImage('https://fiji.sc/samples/FakeTracks.tif')
 imp.show()
 
 
+# This script demonstrates how to query the data model for specific
+# numerical values: how to get the position of a spot in a script, 
+# how to get the content of a track, etc. In this script, we just 
+# output some values to the IJ log window.
+
+
 #-------------------------
 # Instantiate model object
 #-------------------------
