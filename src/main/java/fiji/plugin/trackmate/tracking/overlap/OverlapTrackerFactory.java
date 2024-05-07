@@ -106,8 +106,9 @@ public class OverlapTrackerFactory implements SpotTrackerFactory
 			+ "spot polygon. "
 			+ "<p> "
 			+ "<p> "
-			+ "Careful: this tracker is only suited to 2D images. It treats all the spots "
-			+ "as 2D objects. The Z dimension is ignored. "
+			+ "This tracker works in 2D and 3D. However in 3D, the IoU is computed from the "
+			+ "bounding-boxes regardless of the choice of the IoU computation method. "
+			+ "The <it>Precise</it> method is not implemented."
 			+ "</html>";
 
 	private String errorMessage;

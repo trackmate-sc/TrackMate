@@ -38,9 +38,11 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.util.SpotUtil;
 import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.visualization.GlasbeyLut;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
@@ -62,12 +64,11 @@ public class LabelImgExporter extends AbstractTMAction
 	public static final String INFO_TEXT = "<html>"
 			+ "This action creates a label image from the tracking results. "
 			+ "<p> "
-			+ "A new 16-bit image is generated, of same dimension and size that "
-			+ "of the input image. The label image has one channel, with black baground (0 value) "
+			+ "A new 32-bit image is generated, of same dimension and size that "
+			+ "of the input image. The label image has one channel, with black background (0 value) "
 			+ "everywhere, except where there are spots. Each spot is painted with "
-			+ "a uniform integer value equal to the trackID it belongs to. "
-			+ "Spots that do not belong to tracks are painted with a unique integer "
-			+ "larger than the last trackID in the dataset. "
+			+ "a uniform integer value, configurable to be the spot ID, the ID of the "
+			+ "track it belongs to, or a simple index, unique to the frame or to the movie. "
 			+ "<p> "
 			+ "Only visible spots are painted. "
 			+ "</html>";
@@ -85,7 +86,7 @@ public class LabelImgExporter extends AbstractTMAction
 
 		final boolean exportSpotsAsDots;
 		final boolean exportTracksOnly;
-		final boolean useSpotIDsAsLabels;
+		final LabelIdPainting labelIdPainting;
 		if ( gui != null )
 		{
 			final LabelImgExporterPanel panel = new LabelImgExporterPanel();
@@ -102,20 +103,20 @@ public class LabelImgExporter extends AbstractTMAction
 
 			exportSpotsAsDots = panel.isExportSpotsAsDots();
 			exportTracksOnly = panel.isExportTracksOnly();
-			useSpotIDsAsLabels =  panel.isUseSpotIDsAsLabels();;
+			labelIdPainting = panel.labelIdPainting();
 		}
 		else
 		{
 			exportSpotsAsDots = false;
 			exportTracksOnly = false;
-			useSpotIDsAsLabels = false;
+			labelIdPainting = LabelIdPainting.LABEL_IS_INDEX_MOVIE_UNIQUE;
 		}
 
 		/*
 		 * Generate label image.
 		 */
 
-		createLabelImagePlus( trackmate, exportSpotsAsDots, exportTracksOnly, useSpotIDsAsLabels ,logger ).show();
+		createLabelImagePlus( trackmate, exportSpotsAsDots, exportTracksOnly, labelIdPainting, logger ).show();
 	}
 
 	/**
@@ -131,17 +132,15 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            of this input image, except for the number of channels, which
 	 *            will be 1.
 	 * @param exportSpotsAsDots
-	 *            if <code>true</code>, spots will be painted as single dots
-	 *            instead of ellipsoids.
+	 *            if <code>true</code>, spots will be painted as single dots. If
+	 *            <code>false</code> they will be painted with their shape.
 	 * @param exportTracksOnly
 	 *            if <code>true</code>, only the spots belonging to visible
 	 *            tracks will be painted. If <code>false</code>, spots not
 	 *            belonging to a track will be painted with a unique ID,
 	 *            different from the track IDs and different for each spot.
-	 * @param useSpotIDsAsLabels
-	 * 	          if <code>true</code>, the label mask images will contain 
-	 * 	          the spot ID. If <code>false</code>, the label mask images 
-	 * 	          will contain the track ID.
+	 * @param labeIdPainting
+	 *            specifies how to paint the label ID of spots.
 	 *
 	 * @return a new {@link ImagePlus}.
 	 */
@@ -149,10 +148,10 @@ public class LabelImgExporter extends AbstractTMAction
 			final TrackMate trackmate,
 			final boolean exportSpotsAsDots,
 			final boolean exportTracksOnly,
-			final boolean useSpotIDsAsLabels
+			final LabelIdPainting labeIdPainting
 			)
 	{
-		return createLabelImagePlus( trackmate, exportSpotsAsDots, exportTracksOnly, useSpotIDsAsLabels, Logger.VOID_LOGGER );
+		return createLabelImagePlus( trackmate, exportSpotsAsDots, exportTracksOnly, labeIdPainting, Logger.VOID_LOGGER );
 	}
 
 	/**
@@ -175,10 +174,8 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            tracks will be painted. If <code>false</code>, spots not
 	 *            belonging to a track will be painted with a unique ID,
 	 *            different from the track IDs and different for each spot.
-	 * @param useSpotIDsAsLabels
-	 * 	          if <code>true</code>, the label mask images will contain 
-	 * 	          the spot ID. If <code>false</code>, the label mask images 
-	 * 	          will contain the track ID.
+	 * @param labelIdPainting
+	 *            specifies how to paint the label ID of spots.
 	 * @param logger
 	 *            a {@link Logger} instance, to report progress of the export
 	 *            process.
@@ -189,10 +186,10 @@ public class LabelImgExporter extends AbstractTMAction
 			final TrackMate trackmate,
 			final boolean exportSpotsAsDots,
 			final boolean exportTracksOnly,
-			final boolean useSpotIDsAsLabels,
+			final LabelIdPainting labelIdPainting,
 			final Logger logger )
 	{
-		return createLabelImagePlus( trackmate.getModel(), trackmate.getSettings().imp, exportSpotsAsDots, exportTracksOnly, useSpotIDsAsLabels, logger );
+		return createLabelImagePlus( trackmate.getModel(), trackmate.getSettings().imp, exportSpotsAsDots, exportTracksOnly, labelIdPainting, logger );
 	}
 
 	/**
@@ -215,10 +212,8 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            tracks will be painted. If <code>false</code>, spots not
 	 *            belonging to a track will be painted with a unique ID,
 	 *            different from the track IDs and different for each spot.
-	 * @param useSpotIDsAsLabels
-	 * 	          if <code>true</code>, the label mask images will contain 
-	 * 	          the spot ID. If <code>false</code>, the label mask images 
-	 * 	          will contain the track ID.
+	 * @param labelIdPainting
+	 *            specifies how to paint the label ID of spots.
 	 * 
 	 * @return a new {@link ImagePlus}.
 	 */
@@ -227,9 +222,9 @@ public class LabelImgExporter extends AbstractTMAction
 			final ImagePlus imp,
 			final boolean exportSpotsAsDots,
 			final boolean exportTracksOnly,
-			final boolean useSpotIDsAsLabels )
+			final LabelIdPainting labelIdPainting )
 	{
-		return createLabelImagePlus( model, imp, exportSpotsAsDots, exportTracksOnly, useSpotIDsAsLabels, Logger.VOID_LOGGER );
+		return createLabelImagePlus( model, imp, exportSpotsAsDots, exportTracksOnly, labelIdPainting, Logger.VOID_LOGGER );
 	}
 
 	/**
@@ -252,10 +247,8 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            tracks will be painted. If <code>false</code>, spots not
 	 *            belonging to a track will be painted with a unique ID,
 	 *            different from the track IDs and different for each spot.
-	 * @param useSpotIDsAsLabels
-	 * 	          if <code>true</code>, the label mask images will contain 
-	 * 	          the spot ID. If <code>false</code>, the label mask images 
-	 * 	          will contain the track ID.
+	 * @param labelIdPainting
+	 *            specifies how to paint the label ID of spots.
 	 * @param logger
 	 *            a {@link Logger} instance, to report progress of the export
 	 *            process.
@@ -267,7 +260,7 @@ public class LabelImgExporter extends AbstractTMAction
 			final ImagePlus imp,
 			final boolean exportSpotsAsDots,
 			final boolean exportTracksOnly,
-			boolean useSpotIDsAsLabels,
+			final LabelIdPainting labelIdPainting,
 			final Logger logger )
 	{
 		final int[] dimensions = imp.getDimensions();
@@ -278,7 +271,7 @@ public class LabelImgExporter extends AbstractTMAction
 				imp.getCalibration().pixelDepth,
 				imp.getCalibration().frameInterval
 		};
-		final ImagePlus lblImp = createLabelImagePlus( model, dims, calibration, exportSpotsAsDots, exportTracksOnly, useSpotIDsAsLabels, logger );
+		final ImagePlus lblImp = createLabelImagePlus( model, dims, calibration, exportSpotsAsDots, exportTracksOnly, labelIdPainting, logger );
 		lblImp.setCalibration( imp.getCalibration().copy() );
 		lblImp.setTitle( "LblImg_" + imp.getTitle() );
 		return lblImp;
@@ -304,11 +297,9 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            tracks will be painted. If <code>false</code>, spots not
 	 *            belonging to a track will be painted with a unique ID,
 	 *            different from the track IDs and different for each spot.
-	 * @param useSpotIDsAsLabels
-	 * 	          if <code>true</code>, the label mask images will contain 
-	 * 	          the spot ID. If <code>false</code>, the label mask images 
-	 * 	          will contain the track ID.
-	 * 	          
+	 * @param labelIdPainting
+	 *            specifies how to paint the label ID of spots.
+	 * 
 	 * @return a new {@link ImagePlus}.
 	 */
 	public static final ImagePlus createLabelImagePlus(
@@ -317,9 +308,9 @@ public class LabelImgExporter extends AbstractTMAction
 			final double[] calibration,
 			final boolean exportSpotsAsDots,
 			final boolean exportTracksOnly,
-			final boolean useSpotIDsAsLabels)
+			final LabelIdPainting labelIdPainting )
 	{
-		return createLabelImagePlus( model, dimensions, calibration, exportSpotsAsDots, exportTracksOnly, useSpotIDsAsLabels, Logger.VOID_LOGGER );
+		return createLabelImagePlus( model, dimensions, calibration, exportSpotsAsDots, exportTracksOnly, labelIdPainting, Logger.VOID_LOGGER );
 	}
 
 	/**
@@ -341,10 +332,8 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            tracks will be painted. If <code>false</code>, spots not
 	 *            belonging to a track will be painted with a unique ID,
 	 *            different from the track IDs and different for each spot.
-	 * @param useSpotIDsAsLabels
-	 * 	          if <code>true</code>, the label mask images will contain 
-	 * 	          the spot ID. If <code>false</code>, the label mask images 
-	 * 	          will contain the track ID.
+	 * @param labelIdPainting
+	 *            specifies how to paint the label ID of spots.
 	 * @param logger
 	 *            a {@link Logger} instance, to report progress of the export
 	 *            process.
@@ -357,17 +346,18 @@ public class LabelImgExporter extends AbstractTMAction
 			final double[] calibration,
 			final boolean exportSpotsAsDots,
 			final boolean exportTracksOnly,
-			final boolean useSpotIDsAsLabels,
+			final LabelIdPainting labelIdPainting,
 			final Logger logger )
 	{
 		final long[] dims = new long[ 4 ];
 		for ( int d = 0; d < dims.length; d++ )
 			dims[ d ] = dimensions[ d ];
 
-		final ImagePlus lblImp = ImageJFunctions.wrap( createLabelImg( model, dims, calibration, exportSpotsAsDots, exportTracksOnly, useSpotIDsAsLabels, logger ), "LblImage" );
+		final ImagePlus lblImp = ImageJFunctions.wrap( createLabelImg( model, dims, calibration, exportSpotsAsDots, exportTracksOnly, labelIdPainting, logger ), "LblImage" );
 		lblImp.setDimensions( 1, dimensions[ 2 ], dimensions[ 3 ] );
+		lblImp.setLut( GlasbeyLut.toLUT() );
+		lblImp.setDisplayRange( 0, 255 );
 		lblImp.setOpenAsHyperStack( true );
-		lblImp.resetDisplayRange();
 		return lblImp;
 	}
 
@@ -390,11 +380,9 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            tracks will be painted. If <code>false</code>, spots not
 	 *            belonging to a track will be painted with a unique ID,
 	 *            different from the track IDs and different for each spot.
-	 * @param useSpotIDsAsLabels
-	 * 	          if <code>true</code>, the label mask images will contain 
-	 * 	          the spot ID. If <code>false</code>, the label mask images 
-	 * 	          will contain the track ID.
-	 * 	          
+	 * @param labelIdPainting
+	 *            specifies how to paint the label ID of spots.
+	 * 
 	 * @return a new {@link Img}.
 	 */
 	public static final Img< FloatType > createLabelImg(
@@ -403,9 +391,9 @@ public class LabelImgExporter extends AbstractTMAction
 			final double[] calibration,
 			final boolean exportSpotsAsDots,
 			final boolean exportTracksOnly,
-			final boolean useSpotIDsAsLabels)
+			final LabelIdPainting labelIdPainting )
 	{
-		return createLabelImg( model, dimensions, calibration, exportSpotsAsDots, exportTracksOnly, useSpotIDsAsLabels, Logger.VOID_LOGGER );
+		return createLabelImg( model, dimensions, calibration, exportSpotsAsDots, exportTracksOnly, labelIdPainting, Logger.VOID_LOGGER );
 	}
 
 	/**
@@ -427,10 +415,8 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            tracks will be painted. If <code>false</code>, spots not
 	 *            belonging to a track will be painted with a unique ID,
 	 *            different from the track IDs and different for each spot.
-	 * @param useSpotIDsAsLabels
-	 * 	          if <code>true</code>, the label mask images will contain 
-	 * 	          the spot ID. If <code>false</code>, the label mask images 
-	 * 	          will contain the track ID.
+	 * @param labelIdPainting
+	 *            specifies how to paint the label ID of spots.
 	 * @param logger
 	 *            a {@link Logger} instance, to report progress of the export
 	 *            process.
@@ -443,7 +429,7 @@ public class LabelImgExporter extends AbstractTMAction
 			final double[] calibration,
 			final boolean exportSpotsAsDots,
 			final boolean exportTracksOnly,
-			final boolean useSpotIDsAsLabels,
+			final LabelIdPainting labelIdPainting,
 			final Logger logger )
 	{
 		/*
@@ -459,16 +445,10 @@ public class LabelImgExporter extends AbstractTMAction
 		final ImgPlus< FloatType > imgPlus = new ImgPlus<>( lblImg, "LblImg", axes, calibration );
 
 		/*
-		 * Determine the starting id for spots not in tracks.
+		 * How to assign an ID to spots.
 		 */
 
-		int maxTrackID = -1;
-		final Set< Integer > trackIDs = model.getTrackModel().trackIDs( false );
-		if ( null != trackIDs )
-			for ( final Integer trackID : trackIDs )
-				if ( trackID > maxTrackID )
-					maxTrackID = trackID.intValue();
-		final AtomicInteger lonelySpotID = new AtomicInteger( maxTrackID + 2 );
+		final IdGenerator idGenerator = labelIdPainting.idGenerator( model.getTrackModel(), exportTracksOnly );
 
 		/*
 		 * Frame by frame iteration.
@@ -481,29 +461,11 @@ public class LabelImgExporter extends AbstractTMAction
 			final SpotWriter spotWriter = exportSpotsAsDots
 					? new SpotAsDotWriter<>( imgCT )
 					: new SpotRoiWriter<>( imgCT );
+			idGenerator.nextFrame();
 
 			for ( final Spot spot : model.getSpots().iterable( frame, true ) )
 			{
-				final int id;
-				final Integer trackID = model.getTrackModel().trackIDOf( spot );
-				if ( null == trackID || !model.getTrackModel().isVisible( trackID ) )
-				{
-					if ( exportTracksOnly )
-						continue;
-
-					if ( useSpotIDsAsLabels )
-						id = spot.ID() + 1;
-					else
-						id = lonelySpotID.getAndIncrement();
-				}
-				else
-				{
-					if ( useSpotIDsAsLabels )
-						id = spot.ID() + 1;
-					else
-						id = 1 + trackID.intValue();
-				}
-
+				final int id = idGenerator.id( spot );
 				spotWriter.write( spot, id );
 			}
 			logger.setProgress( ( double ) ( 1 + frame ) / dimensions[ 3 ] );
@@ -598,6 +560,178 @@ public class LabelImgExporter extends AbstractTMAction
 
 			ra.setPosition( center );
 			ra.get().setReal( id );
+		}
+	}
+
+	/**
+	 * Specifies how spots will be labeled in the exported label image.
+	 */
+	public static enum LabelIdPainting
+	{
+
+		LABEL_IS_TRACK_ID( "Track ID",
+				"The spot label is the ID of the track it belongs to, plus one (+1). "
+				+ "Spots that do not belong to tracks are painted with a unique integer "
+				+ "larger than the last trackID in the dataset." ),
+		LABEL_IS_SPOT_ID( "Spot ID",
+				"The spot label is the spot ID, plus one (+1)." ),
+		LABEL_IS_INDEX( "Index unique in frame",
+				"The spot label is an index starting from 1. "
+				+ "It is unique within a frame, "
+				+ "but can be repeated across frames." ),
+		LABEL_IS_INDEX_MOVIE_UNIQUE( "Unique index",
+				"The spot label is an index starting from 1. "
+				+ "It is unique within the whole movie." );
+
+		private final String info;
+
+		private final String methodName;
+
+		private LabelIdPainting( final String methodName, final String info )
+		{
+			this.methodName = methodName;
+			this.info = info;
+		}
+
+		@Override
+		public String toString()
+		{
+			return methodName;
+		}
+
+		public String getInfo()
+		{
+			return info;
+		}
+
+		public IdGenerator idGenerator( final TrackModel tm, final boolean visibleTracksOnly)
+		{
+			switch ( this )
+			{
+			case LABEL_IS_INDEX:
+				return new SpotIndexGeneratorUniqueInFrame( tm, visibleTracksOnly );
+			case LABEL_IS_INDEX_MOVIE_UNIQUE:
+				return new SpotIndexGeneratorUniqueInMovie( tm, visibleTracksOnly );
+			case LABEL_IS_SPOT_ID:
+				return new SpotIdGenerator( tm, visibleTracksOnly );
+			case LABEL_IS_TRACK_ID:
+				return new TrackIdGenerator( tm, visibleTracksOnly );
+			default:
+				throw new IllegalArgumentException( "Unknown painting id mode: " + this );
+			}
+		}
+	}
+
+	private static interface IdGenerator
+	{
+		public int id( Spot spot );
+
+		public default void nextFrame()
+		{};
+	}
+
+	private static abstract class AbstractIdGenerator implements IdGenerator
+	{
+		protected final TrackModel tm;
+
+		protected final boolean visibleTracksOnly;
+
+		public AbstractIdGenerator( final TrackModel tm, final boolean visibleTracksOnly )
+		{
+			this.tm = tm;
+			this.visibleTracksOnly = visibleTracksOnly;
+		}
+	}
+
+	private static class TrackIdGenerator extends AbstractIdGenerator
+	{
+
+		private final AtomicInteger lonelySpotID;
+
+		public TrackIdGenerator( final TrackModel tm, final boolean visibleTracksOnly )
+		{
+			super( tm, visibleTracksOnly );
+			int maxTrackID = -1;
+			final Set< Integer > trackIDs = tm.trackIDs( false );
+			if ( null != trackIDs )
+				for ( final Integer trackID : trackIDs )
+					if ( trackID > maxTrackID )
+						maxTrackID = trackID.intValue();
+			this.lonelySpotID = new AtomicInteger( maxTrackID + 2 );
+		}
+
+		@Override
+		public int id( final Spot spot )
+		{
+			final Integer trackID = tm.trackIDOf( spot );
+			if ( null == trackID || !tm.isVisible( trackID ) )
+			{
+				if ( visibleTracksOnly )
+					return -1;
+				return lonelySpotID.getAndIncrement();
+			}
+			return trackID + 1;
+		}
+	}
+
+	private static class SpotIdGenerator extends AbstractIdGenerator
+	{
+
+		public SpotIdGenerator( final TrackModel tm, final boolean visibleTracksOnly )
+		{
+			super( tm, visibleTracksOnly );
+		}
+
+		@Override
+		public int id( final Spot spot )
+		{
+			final Integer trackID = tm.trackIDOf( spot );
+			if ( null == trackID || !tm.isVisible( trackID ) )
+			{
+				if ( visibleTracksOnly )
+					return -1;
+			}
+			return spot.ID() + 1;
+		}
+	}
+
+	private static class SpotIndexGeneratorUniqueInMovie extends AbstractIdGenerator
+	{
+
+		protected final AtomicInteger index;
+
+		public SpotIndexGeneratorUniqueInMovie( final TrackModel tm, final boolean visibleTracksOnly )
+		{
+			super( tm, visibleTracksOnly );
+			this.index = new AtomicInteger( 0 );
+		}
+
+		@Override
+		public int id( final Spot spot )
+		{
+			final Integer trackID = tm.trackIDOf( spot );
+			if ( null == trackID || !tm.isVisible( trackID ) )
+			{
+				if ( visibleTracksOnly )
+					return -1;
+			}
+			return index.incrementAndGet();
+		}
+	}
+
+
+	private static class SpotIndexGeneratorUniqueInFrame extends SpotIndexGeneratorUniqueInMovie
+	{
+
+		public SpotIndexGeneratorUniqueInFrame( final TrackModel tm, final boolean visibleTracksOnly )
+		{
+			super( tm, visibleTracksOnly );
+		}
+
+		@Override
+		public void nextFrame()
+		{
+			index.set( 0 );
 		}
 	}
 }
