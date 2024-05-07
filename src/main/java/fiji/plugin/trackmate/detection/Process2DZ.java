@@ -34,6 +34,7 @@ import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.action.LabelImgExporter;
+import fiji.plugin.trackmate.action.LabelImgExporter.LabelIdPainting;
 import fiji.plugin.trackmate.util.TMUtils;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
@@ -191,7 +192,7 @@ public class Process2DZ< T extends RealType< T > & NativeType< T > >
 		}
 
 		// Get 2D+T masks
-		final ImagePlus lblImp = LabelImgExporter.createLabelImagePlus( trackmate, false, true, false );
+		final ImagePlus lblImp = LabelImgExporter.createLabelImagePlus( trackmate, false, true, LabelIdPainting.LABEL_IS_TRACK_ID );
 
 		/*
 		 * Exposes tracked labels as a 3D image and segment them again with
