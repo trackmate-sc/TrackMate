@@ -1,4 +1,4 @@
-function [ spotTable, spotIDMap ] = trackmateSpots(filePath, featureList)
+function [ spotTable, spotIDMap, rois ] = trackmateSpots(filePath, featureList)
 %%TRACKMATESPOTS Import spots from a TrackMate data file.
 %
 %   S = TRACKMATESPOTS(file_path) imports the spots contained in the
@@ -81,6 +81,7 @@ function [ spotTable, spotIDMap ] = trackmateSpots(filePath, featureList)
     TRACKMATE_ELEMENT           = 'TrackMate';
     SPOT_ID_ATTRIBUTE           = 'ID';
     SPOT_NAME_ATTRIBUTE         = 'name';
+    ROI_N_POINTS_ATTTRIBUTE     = 'ROI_N_POINTS';
 
     %% Open file.
 
@@ -123,6 +124,7 @@ function [ spotTable, spotIDMap ] = trackmateSpots(filePath, featureList)
     ID          = NaN( nSpots, 1 );
     name        = cell( nSpots, 1);
     features    = NaN( nSpots, n_features );
+    rois        = cell( nSpots, 1);
 
     % Read all spot nodes.
     for i = 1 : nSpots
@@ -131,6 +133,17 @@ function [ spotTable, spotIDMap ] = trackmateSpots(filePath, featureList)
         name{ i }   = char( node.getAttribute( SPOT_NAME_ATTRIBUTE ) );
         for j = 1 : n_features
            features( i, j ) = str2double( node.getAttribute( featureList{ j } ) ); 
+        end
+        
+        % Read ROI coords if it's there.
+        if nargout >= 3
+            coords_str = node.getTextContent();
+            if ~isempty( coords_str )
+                A = sscanf(string(coords_str),'%f');
+                n_points = numel(A) / 2;
+                A = reshape( A, 2, n_points )';
+                rois{i} = A;
+            end
         end
     end
     
@@ -158,6 +171,9 @@ function [ spotTable, spotIDMap ] = trackmateSpots(filePath, featureList)
             vUnits{ k }         = '';
         elseif strcmp( SPOT_NAME_ATTRIBUTE, vn )
             vDescriptions{ k }  = 'Spot name';
+            vUnits{ k }         = '';
+        elseif strcmp( ROI_N_POINTS_ATTTRIBUTE, vn )
+            vDescriptions{ k }  = 'ROI N points';
             vUnits{ k }         = '';
         else
             vDescriptions{ k }  = fs( vn ).name;
