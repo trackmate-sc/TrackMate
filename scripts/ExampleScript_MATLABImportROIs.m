@@ -16,10 +16,19 @@ close all
 clear 
 clc
 
-% Where are the files?
-root_folder = '/Users/tinevez/Google Drive/TrackMate/Applications/MATLABimport/';
+% Where to store the files?
+root_folder = '.';
 % TrackMate file.
 file_path = fullfile( root_folder, 'MAX_Merged.xml' );
+if ~exist( file_path, 'file' )
+    % Download and uncompress the files.
+    url = 'https://samples.fiji.sc/tutorials/MATLABtuto.zip';
+    zip_file_path = fullfile( root_folder, 'MATLABtuto.zip' );
+    fprintf( 'Downloading tutorial files from %s\n', url )
+    websave( zip_file_path, url );
+    fprintf( 'Saved to %s\n', zip_file_path )
+    unzip( zip_file_path, root_folder )
+end
 
 % Read tracks.
 [S, idmap, rois] = trackmateSpots( file_path );
