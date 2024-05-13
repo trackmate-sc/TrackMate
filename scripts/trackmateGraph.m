@@ -1,4 +1,4 @@
-function G = trackmateGraph(filePath, spotFeatureList, edgeFeatureList, verbose)
+function [G, rois] = trackmateGraph(filePath, spotFeatureList, edgeFeatureList, verbose)
 %%TRACKMATEGRAPH Import a TrackMate data file as a MATLAB directed graph.
 %
 %   G = TRACKMATEGRAPH(file_path) imports the TrackMate data stored in the
@@ -12,6 +12,9 @@ function G = trackmateGraph(filePath, spotFeatureList, edgeFeatureList, verbose)
 %
 %   G = TRACKMATEGRAPH(file_path, sfl, efl, true) generates output in the
 %   command window that log the current import progress.
+%
+%   [ G, rois ] = TRACKMATEGRAPH( ... ) also returns rois, a cell array
+%   containing the 2D polygons of each spot, if there is one.
 %
 % INPUT:
 %
@@ -38,6 +41,12 @@ function G = trackmateGraph(filePath, spotFeatureList, edgeFeatureList, verbose)
 %   feature values. The G.Edges.EndNodes N x 2 matrix lists the source and
 %   target nodes row number in the G.Nodes table.
 %
+%   The 'rois' output (2nd output) is a cell array. The ith element is a
+%   Nx2 array that contains the polygon vertices coordinates (X, Y) for the
+%   spot in the ith line of the Nodes table. These coordinates are
+%   respective to the (POSITION_X, POSITION_Y) spot center. If a spot does
+%   not have a ROI, the cell is empty.
+%
 % EXAMPLE:
 %
 %   >> G = trackmateGraph(file_path, [], [], true);
@@ -49,7 +58,7 @@ function G = trackmateGraph(filePath, spotFeatureList, edgeFeatureList, verbose)
 %   >> axis equal
 
 % __
-% Jean-Yves Tinevez - 2016
+% Jean-Yves Tinevez - 2016 - 2024
 
 
     %% Constants definition.
@@ -76,7 +85,12 @@ function G = trackmateGraph(filePath, spotFeatureList, edgeFeatureList, verbose)
         tic
     end
     
-    [ spotTable, spotIDMap ] = trackmateSpots(filePath, spotFeatureList);
+    if nargout >= 2 
+        [ spotTable, spotIDMap, rois ] = trackmateSpots(filePath, spotFeatureList);
+    else
+        [ spotTable, spotIDMap ] = trackmateSpots(filePath, spotFeatureList);
+    end
+    
     
     if verbose
         fprintf('Done in %.1f s.\n', toc)
