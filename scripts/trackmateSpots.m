@@ -13,6 +13,9 @@ function [ spotTable, spotIDMap, rois ] = trackmateSpots(filePath, featureList)
 %   spot ID to row number in the table. idMap is such that idMap(10) the
 %   row at which the spot with ID 10 is listed.
 %
+%   [ S, idMap, rois ] = TRACKMATESPOTS( ... ) also returns rois, a cell
+%   array containing the 2D polygons of each spot, if there is one. 
+%
 % INPUT:
 %
 %   file_path must be a path to a TrackMate file, containing the whole
@@ -29,9 +32,15 @@ function [ spotTable, spotIDMap, rois ] = trackmateSpots(filePath, featureList)
 %
 % OUTPUT:
 %
-%   The output is a MATLAB table with at least two columns, ID (the spot
-%   ID) and name (the spot name). Extra features listed in the specified
-%   feature_list input appear as supplemental column.
+%   The first output is a MATLAB table with at least two columns, ID (the
+%   spot ID) and name (the spot name). Extra features listed in the
+%   specified feature_list input appear as supplemental column.
+%
+%   The 'rois' output (3rd output) is a cell array. The ith element is a
+%   Nx2 array that contains the polygon vertices coordinates (X, Y) for the
+%   spot in the ith line of the table S. These coordinates are respective
+%   to the (POSITION_X, POSITION_Y) spot center. If a spot does not have a
+%   ROI, the cell is empty.
 %
 % EXAMPLES:
 %
@@ -71,7 +80,7 @@ function [ spotTable, spotIDMap, rois ] = trackmateSpots(filePath, featureList)
 
 
 % __
-% Jean-Yves Tinevez - 2016
+% Jean-Yves Tinevez - 2016 - 2024
 
     %% Import the XPath classes.
     import javax.xml.xpath.*
