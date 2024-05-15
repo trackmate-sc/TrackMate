@@ -19,6 +19,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+// modified by Lorenzo Pedrolli, 2024
 package fiji.plugin.trackmate.tracking;
 
 import java.util.HashMap;
@@ -100,6 +101,10 @@ public class TrackerKeys
 
 	/** A default value for the {@value #KEY_KALMAN_SEARCH_RADIUS} parameter. */
 	public static final double DEFAULT_KALMAN_SEARCH_RADIUS = 20.0;
+
+	// New key for expected movement
+    public static final String KEY_EXPECTED_MOVEMENT = "EXPECTED_MOVEMENT";
+	public static final double[] DEFAULT_EXPECTED_MOVEMENT = {0.0, 0.0, 0.0};
 
 	/**
 	 * Key for the parameter specifying whether we allow the detection of

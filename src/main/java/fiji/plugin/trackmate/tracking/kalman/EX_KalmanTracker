@@ -1,5 +1,24 @@
-// modified by Lorenzo Pedrolli, 2024
-
+/*-
+ * #%L
+ * TrackMate: your buddy for everyday tracking.
+ * %%
+ * Copyright (C) 2010 - 2024 TrackMate developers.
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/gpl-3.0.html>.
+ * #L%
+ */
 package fiji.plugin.trackmate.tracking.kalman;
 
 import java.util.ArrayList;
@@ -61,8 +80,6 @@ public class KalmanTracker implements SpotTracker, Benchmark, Cancelable
 
 	private String cancelReason;
 
-	private final double[] expectedMovement;
-
 	/*
 	 * CONSTRUCTOR
 	 */
@@ -73,16 +90,14 @@ public class KalmanTracker implements SpotTracker, Benchmark, Cancelable
 	 * @param maxSearchRadius
 	 * @param maxFrameGap
 	 * @param initialSearchRadius
-	 * 
-	 * @param expectedMovement
 	 */
-	public KalmanTracker(final SpotCollection spots, final double maxSearchRadius, final int maxFrameGap, final double initialSearchRadius, final Map<String, Double> featurePenalties, final double[] expectedMovement) {
+	public EX_KalmanTracker( final SpotCollection spots, final double maxSearchRadius, final int maxFrameGap, final double initialSearchRadius, final Map< String, Double > featurePenalties )
+	{
 		this.spots = spots;
 		this.maxSearchRadius = maxSearchRadius;
 		this.maxFrameGap = maxFrameGap;
 		this.initialSearchRadius = initialSearchRadius;
 		this.featurePenalties = featurePenalties;
-		this.expectedMovement = expectedMovement; // Store the expected movement array
 	}
 
 	/*
@@ -305,7 +320,8 @@ public class KalmanTracker implements SpotTracker, Benchmark, Cancelable
 			 * target spots to predictions. Nucleating new KF from nearest
 			 * neighbor only comes second.
 			 */
-			if (!previousOrphanSpots.isEmpty() && !orphanSpots.isEmpty()) {
+			if ( !previousOrphanSpots.isEmpty() && !orphanSpots.isEmpty() )
+			{
 
 				/*
 				 * We now deal with orphans of the previous frame. We try to
@@ -313,63 +329,47 @@ public class KalmanTracker implements SpotTracker, Benchmark, Cancelable
 				 * already part of a link created via KF. That is: the orphan
 				 * spots of this frame.
 				 */
-			
-				// Translate orphan spots by expected movement
-				Collection<Spot> translatedOrphanSpots = new ArrayList<>();
-				Map<Spot, Spot> originalToTranslatedSpotMap = new HashMap<>();
-				for (Spot spot : previousOrphanSpots) {
-					Spot translatedSpot = new Spot(spot);
-					// Copy all features
-					for (String feature : spot.getFeatures().keySet()) {
-						translatedSpot.putFeature(feature, spot.getFeature(feature));
-					}
-					translatedSpot.putFeature("POSITION_X", spot.getDoublePosition(0) + expectedMovement[0]);
-					translatedSpot.putFeature("POSITION_Y", spot.getDoublePosition(1) + expectedMovement[1]);
-					translatedSpot.putFeature("POSITION_Z", spot.getDoublePosition(2) + expectedMovement[2]);
 
-					translatedOrphanSpots.add(translatedSpot);
-					originalToTranslatedSpotMap.put(translatedSpot, spot); // Keep track of original spots
-				}
-			
-				final JaqamanLinkingCostMatrixCreator<Spot, Spot> ic = new JaqamanLinkingCostMatrixCreator<>(
-						translatedOrphanSpots,
+				final JaqamanLinkingCostMatrixCreator< Spot, Spot > ic = new JaqamanLinkingCostMatrixCreator<>(
+						previousOrphanSpots,
 						orphanSpots,
 						nucleatingCostFunction,
 						maxInitialCost,
 						ALTERNATIVE_COST_FACTOR,
-						PERCENTILE);
-				final JaqamanLinker<Spot, Spot> newLinker = new JaqamanLinker<>(ic);
-				if (!newLinker.checkInput() || !newLinker.process()) {
-					errorMessage = BASE_ERROR_MSG + "Error linking spots from frame " + (frame - 1) + " to frame " + frame + ": " + newLinker.getErrorMessage();
+						PERCENTILE );
+				final JaqamanLinker< Spot, Spot > newLinker = new JaqamanLinker<>( ic );
+				if ( !newLinker.checkInput() || !newLinker.process() )
+				{
+					errorMessage = BASE_ERROR_MSG + "Error linking spots from frame " + ( frame - 1 ) + " to frame " + frame + ": " + newLinker.getErrorMessage();
 					return false;
 				}
-				final Map<Spot, Spot> newAssignments = newLinker.getResult();
-				final Map<Spot, Double> assignmentCosts = newLinker.getAssignmentCosts();
-			
+				final Map< Spot, Spot > newAssignments = newLinker.getResult();
+				final Map< Spot, Double > assignmentCosts = newLinker.getAssignmentCosts();
+
 				// Build links and new KFs from these links.
-				for (final Spot translatedSource : newAssignments.keySet()) {
-					final Spot target = newAssignments.get(translatedSource);
-					final Spot originalSource = originalToTranslatedSpotMap.get(translatedSource);
-			
+				for ( final Spot source : newAssignments.keySet() )
+				{
+					final Spot target = newAssignments.get( source );
+
 					// Remove from orphan collection.
-					orphanSpots.remove(target);
-			
+					orphanSpots.remove( target );
+
 					// Derive initial state and create Kalman filter.
-					final double[] XP = estimateInitialState(originalSource, target);
-					final CVMKalmanFilter kt = new CVMKalmanFilter(XP, Double.MIN_NORMAL, positionProcessStd, velocityProcessStd, positionMeasurementStd);
+					final double[] XP = estimateInitialState( source, target );
+					final CVMKalmanFilter kt = new CVMKalmanFilter( XP, Double.MIN_NORMAL, positionProcessStd, velocityProcessStd, positionMeasurementStd );
 					// We trust the initial state a lot.
-			
+
 					// Store filter and source
-					kalmanFiltersMap.put(kt, target);
-			
+					kalmanFiltersMap.put( kt, target );
+
 					// Add edge to the graph.
-					graph.addVertex(originalSource);
-					graph.addVertex(target);
-					final DefaultWeightedEdge edge = graph.addEdge(originalSource, target);
-					final double cost = assignmentCosts.get(translatedSource);
-					graph.setEdgeWeight(edge, cost);
+					graph.addVertex( source );
+					graph.addVertex( target );
+					final DefaultWeightedEdge edge = graph.addEdge( source, target );
+					final double cost = assignmentCosts.get( source );
+					graph.setEdgeWeight( edge, cost );
 				}
-			}			
+			}
 			previousOrphanSpots = orphanSpots;
 
 			// Deal with childless KFs.

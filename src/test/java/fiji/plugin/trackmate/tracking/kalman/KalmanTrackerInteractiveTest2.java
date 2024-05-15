@@ -54,7 +54,7 @@ public class KalmanTrackerInteractiveTest2
 		final SpotCollection spots = model.getSpots();
 
 		final ImagePlus imp = reader.readImage();
-		final KalmanTracker tracker = new KalmanTracker( spots, 15d, 2, 15d, null );
+		final KalmanTracker tracker = new KalmanTracker( spots, 15d, 2, 15d, null , null);
 		tracker.setLogger( Logger.DEFAULT_LOGGER );
 		if ( !tracker.checkInput() || !tracker.process() )
 		{

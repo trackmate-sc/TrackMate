@@ -10,11 +10,11 @@
 	</parent>
 
 	<groupId>sc.fiji</groupId>
-	<artifactId>LP_TrackMate</artifactId>
-	<version>Test_1</version>
+	<artifactId>TrackMate</artifactId>
+	<version>7.12.2-SNAPSHOT</version>
 
-	<name>LP_TrackMate</name>
-	<description>LP Modified TrackMate plugin for Fiji.</description>
+	<name>TrackMate</name>
+	<description>TrackMate plugin for Fiji.</description>
 	<url>https://imagej.net/plugins/trackmate</url>
 	<inceptionYear>2010</inceptionYear>
 	<organization>

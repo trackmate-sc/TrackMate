@@ -21,6 +21,7 @@
  */
 package fiji.plugin.trackmate.tracking.kalman;
 
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_EXPECTED_MOVEMENT;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_FRAME_GAP;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_SEARCH_RADIUS;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
@@ -135,12 +136,13 @@ public class AdvancedKalmanTracker implements SpotTracker, Benchmark, Cancelable
 		 * 1. Apply Kalman with feature penalties.
 		 */
 		final double maxSearchRadius = ( Double ) kalSettings.get( KEY_KALMAN_SEARCH_RADIUS );
+		final double[] expectedMovement = ( double[] ) kalSettings.get( KEY_EXPECTED_MOVEMENT );
 		final double initialSearchRadius = ( Double ) kalSettings.get( KEY_LINKING_MAX_DISTANCE );
 		final int maxFrameGap = ( Integer ) kalSettings.get( KEY_GAP_CLOSING_MAX_FRAME_GAP );
 		@SuppressWarnings( "unchecked" )
 		final Map< String, Double > featurePenalties = ( Map< String, Double > ) kalSettings.get( KEY_LINKING_FEATURE_PENALTIES );
 
-		final KalmanTracker kalmanTracker = new KalmanTracker( spots, maxSearchRadius, maxFrameGap, initialSearchRadius, featurePenalties );
+		final KalmanTracker kalmanTracker = new KalmanTracker( spots, maxSearchRadius, maxFrameGap, initialSearchRadius, featurePenalties , expectedMovement);
 		kalmanTracker.setLogger( logger );
 		if ( !kalmanTracker.checkInput() || !kalmanTracker.process() )
 		{
@@ -212,6 +214,7 @@ public class AdvancedKalmanTracker implements SpotTracker, Benchmark, Cancelable
 		ok = ok & checkParameter( settings, KEY_KALMAN_SEARCH_RADIUS, Double.class, errorHolder );
 		ok = ok & checkParameter( settings, KEY_GAP_CLOSING_MAX_FRAME_GAP, Integer.class, errorHolder );
 		ok = ok & checkFeatureMap( settings, KEY_LINKING_FEATURE_PENALTIES, errorHolder );
+		ok = ok & checkParameter( settings, KEY_EXPECTED_MOVEMENT, double[].class, errorHolder );
 		// Check keys
 		final List< String > mandatoryKeys = new ArrayList<>();
 		mandatoryKeys.add( KEY_KALMAN_SEARCH_RADIUS );

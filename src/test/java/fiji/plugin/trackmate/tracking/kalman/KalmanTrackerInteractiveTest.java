@@ -170,7 +170,7 @@ public class KalmanTrackerInteractiveTest
 		final double maxSearchRadius = 2 * WIDTH / NFRAMES; // small
 		final int maxFrameGap = 2;
 		final double initialSearchRadius = 2 * WIDTH / ( NFRAMES );
-		final KalmanTracker tracker = new KalmanTracker( spots, maxSearchRadius, maxFrameGap, initialSearchRadius, null );
+		final KalmanTracker tracker = new KalmanTracker( spots, maxSearchRadius, maxFrameGap, initialSearchRadius, null , null);
 
 		if ( !tracker.checkInput() || !tracker.process() )
 			System.err.println( tracker.getErrorMessage() );
