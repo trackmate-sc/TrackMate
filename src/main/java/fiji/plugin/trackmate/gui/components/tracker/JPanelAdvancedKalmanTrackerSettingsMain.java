@@ -50,6 +50,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.MouseWheelListener;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -122,6 +124,7 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 	// Add these fields in the class
 	private final JLabel lblExpectedMovement;
 	private final JTextField txtfldExpectedMovement;
+	private final JLabel lblExpectedMovementUnits;
 
 	public JPanelAdvancedKalmanTrackerSettingsMain( final String trackerName, final String spaceUnits, final Collection< String > features, final Map< String, String > featureNames )
 	{
@@ -194,19 +197,25 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 		lblExpectedMovement.setText("Expected movement (X,Y,Z):");
 		lblExpectedMovement.setFont(SMALL_FONT);
 	
-		txtfldExpectedMovement = new JTextField("0,0,0");
+		txtfldExpectedMovement = new JTextField();
 		this.add(txtfldExpectedMovement, new GridBagConstraints(1, ycur, 2, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
 		txtfldExpectedMovement.setFont(SMALL_FONT);
-		txtfldSearchRadius.setSize( TEXTFIELD_DIMENSION );
+		txtfldExpectedMovement.setSize( TEXTFIELD_DIMENSION );
 		txtfldExpectedMovement.setHorizontalAlignment(JTextField.CENTER);
+
+		lblExpectedMovementUnits = new JLabel();
+		this.add( lblExpectedMovementUnits, new GridBagConstraints( 2, ycur, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets( 0, 5, 0, 0 ), 0, 0 ) );
+		lblExpectedMovementUnits.setFont( SMALL_FONT );
+		lblExpectedMovementUnits.setText( spaceUnits );
 	
-		// Adding input validation
 		txtfldExpectedMovement.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
-				if (!validateExpectedMovementInput(txtfldExpectedMovement.getText())) {
-					JOptionPane.showMessageDialog(null, "Invalid input. Please enter a comma-separated list of three numbers (e.g., '1.0,0.0,0.0').", "Invalid Input", JOptionPane.ERROR_MESSAGE);
-					//txtfldExpectedMovement.setText("0,0,0");
+				try {
+					parseExpectedMovement(txtfldExpectedMovement.getText());
+				} catch (IllegalArgumentException ex) {
+					JOptionPane.showMessageDialog(null, ex.getMessage(), "Invalid Input", JOptionPane.ERROR_MESSAGE);
+					txtfldExpectedMovement.setText("0.0,0.0,0.0"); // Reset to default or handle as necessary
 				}
 			}
 		});
@@ -368,66 +377,69 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 	 * PUBLIC METHODS
 	 */
 
-	 @SuppressWarnings("unchecked")
-	 void echoSettings(final Map<String, Object> settings) {
-		 txtfldInitialSearchRadius.setValue(settings.get(KEY_LINKING_MAX_DISTANCE));
-		 if (settings.get(KEY_KALMAN_SEARCH_RADIUS) == null)
-			 txtfldSearchRadius.setValue(DEFAULT_KALMAN_SEARCH_RADIUS);
-		 else
-			 txtfldSearchRadius.setValue(settings.get(KEY_KALMAN_SEARCH_RADIUS));
-		 txtfldMaxFrameGap.setValue(settings.get(KEY_GAP_CLOSING_MAX_FRAME_GAP));
-		 panelKalmanFeatures.setSelectedFeaturePenalties((Map<String, Double>) settings.get(KEY_LINKING_FEATURE_PENALTIES));
-	 
-		 chkboxAllowSplitting.setSelected((Boolean) settings.get(KEY_ALLOW_TRACK_SPLITTING));
-		 txtfldSplittingMaxDistance.setValue(settings.get(KEY_SPLITTING_MAX_DISTANCE));
-		 panelSplittingFeatures.setSelectedFeaturePenalties((Map<String, Double>) settings.get(KEY_SPLITTING_FEATURE_PENALTIES));
-	 
-		 chkboxAllowMerging.setSelected((Boolean) settings.get(KEY_ALLOW_TRACK_MERGING));
-		 txtfldMergingMaxDistance.setValue(settings.get(KEY_MERGING_MAX_DISTANCE));
-		 panelMergingFeatures.setSelectedFeaturePenalties((Map<String, Double>) settings.get(KEY_MERGING_FEATURE_PENALTIES));
-	 
-		 // Echo expected movement
-		 double[] expectedMovement = (double[]) settings.get(KEY_EXPECTED_MOVEMENT);
-		 txtfldExpectedMovement.setText(String.format("%.1f,%.1f,%.1f", expectedMovement[0], expectedMovement[1], expectedMovement[2]));
-	 
-		 setEnabled(new Component[]{
-				 lbl10, txtfldSplittingMaxDistance, lblSplittingMaxDistanceUnit,
-				 lbl15, scrpneSplittingFeatures, panelSplittingFeatures},
-				 chkboxAllowSplitting.isSelected());
-	 
-		 setEnabled(new Component[]{
-				 lbl13, txtfldMergingMaxDistance, lblMergingMaxDistanceUnit,
-				 lbl16, scrpneMergingFeatures, panelMergingFeatures},
-				 chkboxAllowMerging.isSelected());
-	 }
+	@SuppressWarnings("unchecked")
+	void echoSettings(final Map<String, Object> settings) {
+		txtfldInitialSearchRadius.setValue(settings.get(KEY_LINKING_MAX_DISTANCE));
+		if (settings.get(KEY_KALMAN_SEARCH_RADIUS) == null)
+			txtfldSearchRadius.setValue(DEFAULT_KALMAN_SEARCH_RADIUS);
+		else
+			txtfldSearchRadius.setValue(settings.get(KEY_KALMAN_SEARCH_RADIUS));
+		txtfldMaxFrameGap.setValue(settings.get(KEY_GAP_CLOSING_MAX_FRAME_GAP));
+		panelKalmanFeatures.setSelectedFeaturePenalties((Map<String, Double>) settings.get(KEY_LINKING_FEATURE_PENALTIES));
+	
+		chkboxAllowSplitting.setSelected((Boolean) settings.get(KEY_ALLOW_TRACK_SPLITTING));
+		txtfldSplittingMaxDistance.setValue(settings.get(KEY_SPLITTING_MAX_DISTANCE));
+		panelSplittingFeatures.setSelectedFeaturePenalties((Map<String, Double>) settings.get(KEY_SPLITTING_FEATURE_PENALTIES));
+	
+		chkboxAllowMerging.setSelected((Boolean) settings.get(KEY_ALLOW_TRACK_MERGING));
+		txtfldMergingMaxDistance.setValue(settings.get(KEY_MERGING_MAX_DISTANCE));
+		panelMergingFeatures.setSelectedFeaturePenalties((Map<String, Double>) settings.get(KEY_MERGING_FEATURE_PENALTIES));
+	
+		// Echo expected movement
+		double[] expectedMovement = (double[]) settings.get(KEY_EXPECTED_MOVEMENT);
+		txtfldExpectedMovement.setText(String.format(Locale.US,"%.1f,%.1f,%.1f", 
+			expectedMovement[0], expectedMovement[1], expectedMovement[2]));
+	
+		setEnabled(new Component[]{
+				lbl10, txtfldSplittingMaxDistance, lblSplittingMaxDistanceUnit,
+				lbl15, scrpneSplittingFeatures, panelSplittingFeatures},
+				chkboxAllowSplitting.isSelected());
+	
+		setEnabled(new Component[]{
+				lbl13, txtfldMergingMaxDistance, lblMergingMaxDistanceUnit,
+				lbl16, scrpneMergingFeatures, panelMergingFeatures},
+				chkboxAllowMerging.isSelected());
+	}
+	
+
 
 	/**
 	 * @return a new settings {@link Map} with values taken from this panel.
 	 */
-	public Map< String, Object > getSettings()
-	{
-		final Map< String, Object > settings = getDefaultKalmanSettingsMap();
-
-		settings.put( KEY_LINKING_MAX_DISTANCE, ( ( Number ) txtfldInitialSearchRadius.getValue() ).doubleValue() );
-		settings.put( KEY_KALMAN_SEARCH_RADIUS, ( ( Number ) txtfldSearchRadius.getValue() ).doubleValue() );
-		settings.put( KEY_GAP_CLOSING_MAX_FRAME_GAP, ( ( Number ) txtfldMaxFrameGap.getValue() ).intValue() );
-		settings.put( KEY_LINKING_FEATURE_PENALTIES, panelKalmanFeatures.getFeaturePenalties() );
-
-		settings.put( KEY_ALLOW_GAP_CLOSING, false );
-
-		settings.put( KEY_ALLOW_TRACK_SPLITTING, chkboxAllowSplitting.isSelected() );
-		settings.put( KEY_SPLITTING_MAX_DISTANCE, ( ( Number ) txtfldSplittingMaxDistance.getValue() ).doubleValue() );
-		settings.put( KEY_SPLITTING_FEATURE_PENALTIES, panelSplittingFeatures.getFeaturePenalties() );
-
-		settings.put( KEY_ALLOW_TRACK_MERGING, chkboxAllowMerging.isSelected() );
-		settings.put( KEY_MERGING_MAX_DISTANCE, ( ( Number ) txtfldMergingMaxDistance.getValue() ).doubleValue() );
-		settings.put( KEY_MERGING_FEATURE_PENALTIES, panelMergingFeatures.getFeaturePenalties() );
-
+	public Map<String, Object> getSettings() {
+		final Map<String, Object> settings = getDefaultKalmanSettingsMap();
+	
+		settings.put(KEY_LINKING_MAX_DISTANCE, ((Number) txtfldInitialSearchRadius.getValue()).doubleValue());
+		settings.put(KEY_KALMAN_SEARCH_RADIUS, ((Number) txtfldSearchRadius.getValue()).doubleValue());
+		settings.put(KEY_GAP_CLOSING_MAX_FRAME_GAP, ((Number) txtfldMaxFrameGap.getValue()).intValue());
+		settings.put(KEY_LINKING_FEATURE_PENALTIES, panelKalmanFeatures.getFeaturePenalties());
+	
+		settings.put(KEY_ALLOW_GAP_CLOSING, false);
+	
+		settings.put(KEY_ALLOW_TRACK_SPLITTING, chkboxAllowSplitting.isSelected());
+		settings.put(KEY_SPLITTING_MAX_DISTANCE, ((Number) txtfldSplittingMaxDistance.getValue()).doubleValue());
+		settings.put(KEY_SPLITTING_FEATURE_PENALTIES, panelSplittingFeatures.getFeaturePenalties());
+	
+		settings.put(KEY_ALLOW_TRACK_MERGING, chkboxAllowMerging.isSelected());
+		settings.put(KEY_MERGING_MAX_DISTANCE, ((Number) txtfldMergingMaxDistance.getValue()).doubleValue());
+		settings.put(KEY_MERGING_FEATURE_PENALTIES, panelMergingFeatures.getFeaturePenalties());
+	
 		// Save expected movement
 		settings.put(KEY_EXPECTED_MOVEMENT, parseExpectedMovement(txtfldExpectedMovement.getText()));
-
+	
 		return settings;
 	}
+	
 
 	public static final Map< String, Object > getDefaultKalmanSettingsMap()
 	{
@@ -443,31 +455,26 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 	 * PRIVATE METHODS
 	 */
 
-	// Add this method in the class for input validation
-	private boolean validateExpectedMovementInput(String input) {
-		String[] parts = input.split(",");
-		if (parts.length != 3) return false;
+
+	// Parse the expected movement from the text field
+	private double[] parseExpectedMovement(String text) {
+		String[] parts = text.split("[,;]"); // Allow both comma and semicolon as separators
+		if (parts.length != 3) {
+			throw new IllegalArgumentException("Input must be a comma-separated list of three numbers.");
+		}
+	
+		double[] result = new double[3];
 		try {
-			for (String part : parts) {
-				Double.parseDouble(part.trim());
+			for (int i = 0; i < parts.length; i++) {
+				result[i] = Double.parseDouble(parts[i]);
 			}
 		} catch (NumberFormatException e) {
-			return false;
-		}
-		return true;
-	}
-
-	// Add this method to parse the expected movement from the text field
-	private double[] parseExpectedMovement(String text) {
-		String[] parts = text.split(",");
-		double[] result = new double[3];
-		for (int i = 0; i < parts.length; i++) {
-			result[i] = Double.parseDouble(parts[i].trim());
+			throw new IllegalArgumentException("Input must be a comma-separated list of three valid numbers.", e);
 		}
 		return result;
 	}
-
-
+	
+	
 	private void setEnabled( final Component[] components, final boolean enable )
 	{
 		for ( final Component component : components )

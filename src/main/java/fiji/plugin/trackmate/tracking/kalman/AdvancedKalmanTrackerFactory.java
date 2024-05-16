@@ -220,9 +220,9 @@ public class AdvancedKalmanTrackerFactory extends SegmentTrackerFactory
         final double initialSearchRadius = ( Double ) sm.get( KEY_LINKING_MAX_DISTANCE );
         final double[] expectedMovement = (double[]) sm.get(KEY_EXPECTED_MOVEMENT);
 
-        str.append( String.format( "  - initial search radius: %.1f\n", initialSearchRadius ) );
-        str.append( String.format( "  - search radius: %.1f\n", maxSearchRadius ) );
-        str.append( String.format( "  - expected movement: [%.1f, %.1f, %.1f]\n", expectedMovement[0], expectedMovement[1], expectedMovement[2] ) );
+        str.append( String.format( "  - initial search radius: %g\n", initialSearchRadius ) );
+        str.append( String.format( "  - search radius: %g\n", maxSearchRadius ) );
+        str.append( String.format( "  - expected movement: [%g, %g, %g]\n", expectedMovement[0], expectedMovement[1], expectedMovement[2] ) );
         str.append( "  Linking conditions:\n" );
         str.append( LAPUtils.echoFeaturePenalties( ( Map< String, Double > ) sm.get( KEY_LINKING_FEATURE_PENALTIES ) ) );
 

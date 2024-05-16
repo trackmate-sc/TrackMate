@@ -124,6 +124,7 @@ public class AdvancedKalmanTracker implements SpotTracker, Benchmark, Cancelable
 		kalSettings.put( KEY_LINKING_MAX_DISTANCE, settings.get( KEY_LINKING_MAX_DISTANCE ) );
 		kalSettings.put( KEY_GAP_CLOSING_MAX_FRAME_GAP, settings.get( KEY_GAP_CLOSING_MAX_FRAME_GAP ) );
 		kalSettings.put( KEY_LINKING_FEATURE_PENALTIES, settings.get( KEY_LINKING_FEATURE_PENALTIES ) );
+		kalSettings.put( KEY_EXPECTED_MOVEMENT, settings.get( KEY_EXPECTED_MOVEMENT ) );
 
 		// check these parameters
 		if ( !checkSettingsValidity( kalSettings, errorHolder ) )
@@ -220,6 +221,7 @@ public class AdvancedKalmanTracker implements SpotTracker, Benchmark, Cancelable
 		mandatoryKeys.add( KEY_KALMAN_SEARCH_RADIUS );
 		mandatoryKeys.add( KEY_LINKING_MAX_DISTANCE );
 		mandatoryKeys.add( KEY_GAP_CLOSING_MAX_FRAME_GAP );
+		mandatoryKeys.add( KEY_EXPECTED_MOVEMENT );
 
 		final List< String > optionalKeys = new ArrayList<>();
 		optionalKeys.add( KEY_LINKING_FEATURE_PENALTIES );
