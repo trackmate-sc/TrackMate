@@ -50,8 +50,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.MouseWheelListener;
 import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.util.Locale;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -194,10 +192,10 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 		ycur++;
 		lblExpectedMovement = new JLabel();
 		this.add(lblExpectedMovement, new GridBagConstraints(0, ycur, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 10, 0, 10), 0, 0));
-		lblExpectedMovement.setText("Expected movement (X,Y,Z):");
+		lblExpectedMovement.setText("Expected movement ( X;Y;Z ):");
 		lblExpectedMovement.setFont(SMALL_FONT);
 	
-		txtfldExpectedMovement = new JTextField();
+		txtfldExpectedMovement = new JTextField("0;0;0");
 		this.add(txtfldExpectedMovement, new GridBagConstraints(1, ycur, 2, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
 		txtfldExpectedMovement.setFont(SMALL_FONT);
 		txtfldExpectedMovement.setSize( TEXTFIELD_DIMENSION );
@@ -215,7 +213,7 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 					parseExpectedMovement(txtfldExpectedMovement.getText());
 				} catch (IllegalArgumentException ex) {
 					JOptionPane.showMessageDialog(null, ex.getMessage(), "Invalid Input", JOptionPane.ERROR_MESSAGE);
-					txtfldExpectedMovement.setText("0.0,0.0,0.0"); // Reset to default or handle as necessary
+					txtfldExpectedMovement.setText("0;0;0"); // Reset to default or handle as necessary
 				}
 			}
 		});
@@ -397,7 +395,7 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 	
 		// Echo expected movement
 		double[] expectedMovement = (double[]) settings.get(KEY_EXPECTED_MOVEMENT);
-		txtfldExpectedMovement.setText(String.format(Locale.US,"%.1f,%.1f,%.1f", 
+		txtfldExpectedMovement.setText(String.format("%g;%g;%g", 
 			expectedMovement[0], expectedMovement[1], expectedMovement[2]));
 	
 		setEnabled(new Component[]{
@@ -458,9 +456,9 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 
 	// Parse the expected movement from the text field
 	private double[] parseExpectedMovement(String text) {
-		String[] parts = text.split("[,;]"); // Allow both comma and semicolon as separators
+		String[] parts = text.split(";"); // Allow semicolon as separator
 		if (parts.length != 3) {
-			throw new IllegalArgumentException("Input must be a comma-separated list of three numbers.");
+			throw new IllegalArgumentException("Input must be a semicolon-separated list of three numbers.");
 		}
 	
 		double[] result = new double[3];
@@ -469,7 +467,7 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 				result[i] = Double.parseDouble(parts[i]);
 			}
 		} catch (NumberFormatException e) {
-			throw new IllegalArgumentException("Input must be a comma-separated list of three valid numbers.", e);
+			throw new IllegalArgumentException("Input must be a semicolon-separated list of three valid numbers.", e);
 		}
 		return result;
 	}
@@ -481,3 +479,4 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 			component.setEnabled( enable );
 	}
 }
+

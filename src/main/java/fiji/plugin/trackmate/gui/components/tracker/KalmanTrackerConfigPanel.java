@@ -70,7 +70,7 @@ public class KalmanTrackerConfigPanel extends ConfigurationPanel {
         lblMaxFrameGap.setBounds(6, 404, 173, 16);
         add(lblMaxFrameGap);
 
-        final JLabel lblExpectedMovement = new JLabel("Expected movement X,Y,Z:"); // New label
+        final JLabel lblExpectedMovement = new JLabel("Expected movement ( X;Y;Z ):"); // New label
         lblExpectedMovement.setFont(FONT);
         lblExpectedMovement.setBounds(6, 432, 250, 16); // Adjust position as needed
         add(lblExpectedMovement);
@@ -96,7 +96,7 @@ public class KalmanTrackerConfigPanel extends ConfigurationPanel {
         add(tfMaxFrameGap);
         tfMaxFrameGap.setSize(TEXTFIELD_DIMENSION);
 
-        tfExpectedMovement = new JTextField("0,0,0"); // Initialize with default value
+        tfExpectedMovement = new JTextField("0;0;0"); // Initialize with default value
         tfExpectedMovement.setHorizontalAlignment(SwingConstants.CENTER);
         tfExpectedMovement.setFont(FONT);
         tfExpectedMovement.setBounds(167, 432, 100, 28); // Adjust position as needed
@@ -107,8 +107,8 @@ public class KalmanTrackerConfigPanel extends ConfigurationPanel {
             @Override
             public void focusLost(FocusEvent e) {
                 if (!validateExpectedMovementInput(tfExpectedMovement.getText())) {
-                    JOptionPane.showMessageDialog(null, "Invalid input. Please enter a comma-separated list of three numbers (e.g., '1.0,0.0,0.0').", "Invalid Input", JOptionPane.ERROR_MESSAGE);
-                    tfExpectedMovement.setText("0,0,0");
+                    JOptionPane.showMessageDialog(null, "Invalid input. Please enter a comma-separated list of three numbers (e.g., '123;0;0').", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+                    tfExpectedMovement.setText("0;0;0");
                 }
             }
         });
@@ -136,7 +136,7 @@ public class KalmanTrackerConfigPanel extends ConfigurationPanel {
     }
 
     private boolean validateExpectedMovementInput(String input) {
-        String[] parts = input.split(",");
+        String[] parts = input.split(";");
         if (parts.length != 3)
             return false;
         try {
@@ -155,7 +155,7 @@ public class KalmanTrackerConfigPanel extends ConfigurationPanel {
         tfSearchRadius.setValue(settings.get(KEY_KALMAN_SEARCH_RADIUS));
         tfMaxFrameGap.setValue(settings.get(KEY_GAP_CLOSING_MAX_FRAME_GAP));
         double[] expectedMovementArray = (double[]) settings.get(KEY_EXPECTED_MOVEMENT);
-        tfExpectedMovement.setText(expectedMovementArray[0] + "," + expectedMovementArray[1] + "," + expectedMovementArray[2]);
+        tfExpectedMovement.setText(expectedMovementArray[0] + ";" + expectedMovementArray[1] + ";" + expectedMovementArray[2]);
     }
 
     @Override
