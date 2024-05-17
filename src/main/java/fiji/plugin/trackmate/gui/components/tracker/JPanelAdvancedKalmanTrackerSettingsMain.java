@@ -395,7 +395,7 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 	
 		// Echo expected movement
 		double[] expectedMovement = (double[]) settings.get(KEY_EXPECTED_MOVEMENT);
-		txtfldExpectedMovement.setText(String.format("%g;%g;%g", 
+		txtfldExpectedMovement.setText(String.format("%.1f;%.1f;%.1f", 
 			expectedMovement[0], expectedMovement[1], expectedMovement[2]));
 	
 		setEnabled(new Component[]{
