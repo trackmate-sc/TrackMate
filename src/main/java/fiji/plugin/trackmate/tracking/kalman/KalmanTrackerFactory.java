@@ -140,10 +140,10 @@ public class KalmanTrackerFactory implements SpotTrackerFactory {
         final double[] expectedMovement = (double[]) settings.get(KEY_EXPECTED_MOVEMENT);
         final StringBuilder str = new StringBuilder();
 
-        str.append(String.format("  - initial search radius: %g\n", initialSearchRadius));
-        str.append(String.format("  - max search radius: %g\n", maxSearchRadius));
+        str.append(String.format("  - initial search radius: %.1f\n", initialSearchRadius));
+        str.append(String.format("  - max search radius: %.1f\n", maxSearchRadius));
         str.append(String.format("  - max frame gap: %d\n", maxFrameGap));
-        str.append(String.format("  - expected movement: [%g, %g, %g]\n", expectedMovement[0], expectedMovement[1], expectedMovement[2]));
+        str.append(String.format("  - expected movement: [%.1f; %.1f; %g]\n", expectedMovement[0], expectedMovement[1], expectedMovement[2]));
 
         return str.toString();
     }
@@ -192,7 +192,7 @@ public class KalmanTrackerFactory implements SpotTrackerFactory {
     private boolean readDoubleArrayAttribute(Element element, Map<String, Object> settings, String key, StringBuilder errorHolder) {
         try {
             String str = element.getAttributeValue(key);
-            String[] values = str.split(",");
+            String[] values = str.split(";");
             double[] array = new double[values.length];
             for (int i = 0; i < values.length; i++) {
                 array[i] = Double.parseDouble(values[i]);
