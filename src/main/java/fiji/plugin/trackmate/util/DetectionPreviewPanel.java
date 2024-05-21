@@ -25,6 +25,7 @@ import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
 import static fiji.plugin.trackmate.gui.Icons.CANCEL_ICON;
 import static fiji.plugin.trackmate.gui.Icons.PREVIEW_ICON;
 
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -108,5 +109,7 @@ public class DetectionPreviewPanel extends JPanel
 		gbcBtnPreview.gridx = 1;
 		gbcBtnPreview.gridy = 1;
 		this.add( btnPanel, gbcBtnPreview );
+
+		setPreferredSize( new Dimension( 240, 100 ) );
 	}
 }
