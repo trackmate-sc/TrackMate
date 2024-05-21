@@ -72,9 +72,20 @@ public class SliderPanel extends JPanel implements BoundedValue.UpdateListener
 		setLayout( new BorderLayout( 10, 10 ) );
 		setPreferredSize( PANEL_SIZE );
 
-		slider = new JSlider( SwingConstants.HORIZONTAL, model.getRangeMin(), model.getRangeMax(), model.getCurrentValue() );
+		final int imin = model.getRangeMin();
+		final int imax = model.getRangeMax();
+		int ivalue = model.getCurrentValue();
+		ivalue = Math.max( imin, ivalue );
+		ivalue = Math.min( imax, ivalue );
+		slider = new JSlider( SwingConstants.HORIZONTAL, imin, imax, ivalue );
+
 		spinner = new JSpinner();
-		spinner.setModel( new SpinnerNumberModel( model.getCurrentValue(), model.getRangeMin(), model.getRangeMax(), spinnerStepSize ) );
+		final double min = model.getRangeMin();
+		final double max = model.getRangeMax();
+		double value = model.getCurrentValue();
+		value = Math.min( max, value );
+		value = Math.max( min, value );
+		spinner.setModel( new SpinnerNumberModel( value, min, max, spinnerStepSize ) );
 
 		slider.addChangeListener( new ChangeListener()
 		{
