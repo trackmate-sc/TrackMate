@@ -31,7 +31,6 @@ import static fiji.plugin.trackmate.features.spot.SpotIntensityMultiCAnalyzerFac
 import org.scijava.util.DoubleArray;
 
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.util.SpotUtil;
 import fiji.plugin.trackmate.util.TMUtils;
 import net.imagej.ImgPlus;
 import net.imglib2.IterableInterval;
@@ -54,7 +53,7 @@ public class SpotIntensityMultiCAnalyzer< T extends RealType< T > > extends Abst
 	@Override
 	public void process( final Spot spot )
 	{
-		final IterableInterval< T > neighborhood = SpotUtil.iterable( spot, imgCT );
+		final IterableInterval< T > neighborhood = spot.iterable( imgCT );
 		final DoubleArray intensities = new DoubleArray();
 
 		for ( final T pixel : neighborhood )

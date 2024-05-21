@@ -132,7 +132,9 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 	 *            the graph to be iterated.
 	 * @param startVertex
 	 *            the vertex iteration to be started.
-	 *
+	 * @param comparator
+	 *            used to compare the several children of a vertex, and
+	 *            specifies in what order they are iterated.
 	 * @throws IllegalArgumentException
 	 *             if <code>g==null</code> or does not contain
 	 *             <code>startVertex</code>
@@ -276,7 +278,7 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 		return new UndirectedSpecifics<>( g );
 	}
 
-	/**
+	/*
 	 * This is where we add the multiple children in proper sorted order.
 	 */
 	protected void addUnseenChildrenOf( final V vertex )
@@ -352,18 +354,12 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 		}
 	}
 
-	/**
-	 * @param edge
-	 */
 	protected void encounterVertex( final V vertex, final E edge )
 	{
 		seen.put( vertex, VisitColor.WHITE );
 		stack.addLast( vertex );
 	}
 
-	/**
-	 * @param edge
-	 */
 	protected void encounterVertexAgain( final V vertex, final E edge )
 	{
 		final VisitColor color = seen.get( vertex );

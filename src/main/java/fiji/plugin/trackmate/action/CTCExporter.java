@@ -50,9 +50,10 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
-import fiji.plugin.trackmate.action.LabelImgExporter.SpotRoiWriter;
+import fiji.plugin.trackmate.action.LabelImgExporter.SpotShapeWriter;
 import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition;
 import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition.TrackBranchDecomposition;
 import fiji.plugin.trackmate.graph.GraphUtils;
@@ -183,6 +184,8 @@ public class CTCExporter
 	 *            the trackmate to export.
 	 * @param logger
 	 *            a logger to report progress.
+	 * @throws IOException
+	 *             if there's any problem writing.
 	 */
 	public static void exportSettingsFile( final String exportRootFolder, final int saveId, final TrackMate trackmate, final Logger logger ) throws IOException
 	{
@@ -314,15 +317,16 @@ public class CTCExporter
 		for ( int frame = 0; frame < dims[ 3 ]; frame++ )
 		{
 			final ImgPlus< UnsignedShortType > imgCT = TMUtils.hyperSlice( labelImg, 0, frame );
-			final SpotRoiWriter< UnsignedShortType > spotWriter = new SpotRoiWriter<>( imgCT );
+			final SpotShapeWriter< UnsignedShortType > spotWriter = new SpotShapeWriter<>( imgCT );
 
 			for ( final Spot spot : model.getSpots().iterable( frame, true ) )
 			{
-				if ( spot.getRoi() == null )
-					continue;
-				final int id = idGen.getAndIncrement();
-				spotWriter.write( spot, id );
-				framesToWrite.add( Integer.valueOf( frame ) );
+				if ( spot instanceof SpotRoi )
+				{
+					final int id = idGen.getAndIncrement();
+					spotWriter.write( spot, id );
+					framesToWrite.add( Integer.valueOf( frame ) );
+				}
 			}
 		}
 
@@ -409,8 +413,8 @@ public class CTCExporter
 		Files.createDirectories( path.getParent() );
 		logger.log( "Exporting tracking text file to " + path.toString() );
 
-		try (FileOutputStream fos = new FileOutputStream( path.toFile() );
-				BufferedWriter bw = new BufferedWriter( new OutputStreamWriter( fos ) ))
+		try (final FileOutputStream fos = new FileOutputStream( path.toFile() );
+				final BufferedWriter bw = new BufferedWriter( new OutputStreamWriter( fos ) ))
 		{
 
 			for ( final Integer trackID : trackModel.trackIDs( true ) )
@@ -446,7 +450,7 @@ public class CTCExporter
 					{
 						final long frame = spot.getFeature( Spot.FRAME ).longValue();
 						final ImgPlus< UnsignedShortType > imgCT = TMUtils.hyperSlice( labelImg, 0, frame );
-						final SpotRoiWriter< UnsignedShortType > spotRoiWriter = new SpotRoiWriter<>( imgCT );
+						final SpotShapeWriter< UnsignedShortType > spotRoiWriter = new SpotShapeWriter<>( imgCT );
 						spotRoiWriter.write( spot, currentID );
 					}
 

@@ -57,6 +57,8 @@ public class SpotImageUpdater
 	 * is stored for subsequent calls of this method. So it is a good idea to
 	 * group calls to this method for spots that belong to the same frame.
 	 *
+	 * @param spot
+	 *            the spot.
 	 * @param radiusFactor
 	 *            a factor that determines the size of the thumbnail. The
 	 *            thumbnail will have a size equal to the spot diameter times

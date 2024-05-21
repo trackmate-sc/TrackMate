@@ -23,7 +23,6 @@ package fiji.plugin.trackmate.gui.wizard.descriptors;
 
 import java.awt.Container;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.swing.JLabel;
 
@@ -34,15 +33,14 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.features.FeatureFilter;
-import fiji.plugin.trackmate.features.spot.SpotMorphologyAnalyzerFactory;
 import fiji.plugin.trackmate.gui.components.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.components.FilterGuiPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
+import fiji.plugin.trackmate.gui.featureselector.AnalyzerSelection;
+import fiji.plugin.trackmate.gui.featureselector.AnalyzerSelectionIO;
 import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
 import fiji.plugin.trackmate.io.SettingsPersistence;
-import fiji.plugin.trackmate.providers.SpotMorphologyAnalyzerProvider;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
 
 public class SpotFilterDescriptor extends WizardPanelDescriptor
@@ -103,27 +101,17 @@ public class SpotFilterDescriptor extends WizardPanelDescriptor
 					logger.log( String.format( "Retained %d spots out of %d.\n", nselected, ntotal ) );
 
 					/*
-					 * Should we add morphology feature analyzers?
+					 * Add analyzers in the user selection and possible the
+					 * morphology ones in 2D or 3D.
 					 */
 
-					if ( trackmate.getSettings().detectorFactory != null
-							&& trackmate.getSettings().detectorFactory.has2Dsegmentation()
-							&& DetectionUtils.is2D( trackmate.getSettings().imp ) )
-					{
-						logger.log( "\nAdding morphology analyzers...\n", Logger.BLUE_COLOR );
-						final Settings settings = trackmate.getSettings();
-						final SpotMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider = new SpotMorphologyAnalyzerProvider( settings.imp.getNChannels() );
-						@SuppressWarnings( "rawtypes" )
-						final List< SpotMorphologyAnalyzerFactory > factories = spotMorphologyAnalyzerProvider
-								.getKeys()
-								.stream()
-								.map( key -> spotMorphologyAnalyzerProvider.getFactory( key ) )
-								.collect( Collectors.toList() );
-						factories.forEach( settings::addSpotAnalyzerFactory );
-						final StringBuilder strb = new StringBuilder();
-						Settings.prettyPrintFeatureAnalyzer( factories, strb );
-						logger.log( strb.toString() );
-					}
+					final AnalyzerSelection analyzerSelection = AnalyzerSelectionIO.readUserDefault();
+					final Settings settings = trackmate.getSettings();
+					analyzerSelection.configure( settings );
+					logger.log( "\nAdding the following spot feature analyzers...\n", Logger.BLUE_COLOR );
+					final StringBuilder strb = new StringBuilder();
+					Settings.prettyPrintFeatureAnalyzer( settings.getSpotAnalyzerFactories(), strb );
+					logger.log( strb.toString() );
 
 					/*
 					 * Show and log to progress bar in the filter GUI panel.

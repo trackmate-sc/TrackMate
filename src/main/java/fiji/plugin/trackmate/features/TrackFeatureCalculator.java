@@ -114,6 +114,11 @@ public class TrackFeatureCalculator extends MultiThreadedBenchmarkAlgorithm impl
 	/**
 	 * Calculates all the track features configured in the {@link Settings}
 	 * object for the specified tracks.
+	 * 
+	 * @param trackIDs
+	 *            the IDs of the track to compute the features of.
+	 * @param doLogIt
+	 *            if <code>true</code> the computation will be logged.
 	 */
 	public void computeTrackFeatures( final Collection< Integer > trackIDs, final boolean doLogIt )
 	{

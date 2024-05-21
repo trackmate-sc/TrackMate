@@ -198,8 +198,10 @@ public class TrackScheme extends AbstractTrackMateModelView
 	}
 
 	/**
-	 * @return the column index that is the first one after all the track
-	 *         columns.
+	 * Returns the column index that is the first one after all the track
+	 * columns.
+	 * 
+	 * @return the column index.
 	 */
 	public int getUnlaidSpotColumn()
 	{
@@ -207,6 +209,10 @@ public class TrackScheme extends AbstractTrackMateModelView
 	}
 
 	/**
+	 * Returns the first free column for the target row.
+	 * 
+	 * @param frame
+	 *            the row.
 	 * @return the first free column for the target row.
 	 */
 	public int getNextFreeColumn( final int frame )
@@ -221,6 +227,8 @@ public class TrackScheme extends AbstractTrackMateModelView
 
 	/**
 	 * Returns the GUI frame controlled by this class.
+	 * 
+	 * @return the GUI.
 	 */
 	public TrackSchemeFrame getGUI()
 	{
@@ -230,6 +238,8 @@ public class TrackScheme extends AbstractTrackMateModelView
 	/**
 	 * Returns the {@link JGraphXAdapter} that serves as a model for the graph
 	 * displayed in this frame.
+	 * 
+	 * @return the adapter.
 	 */
 	public JGraphXAdapter getGraph()
 	{
@@ -238,6 +248,8 @@ public class TrackScheme extends AbstractTrackMateModelView
 
 	/**
 	 * Returns the graph layout in charge of arranging the cells on the graph.
+	 * 
+	 * @return the graph layout.
 	 */
 	public TrackSchemeGraphLayout getGraphLayout()
 	{
@@ -1281,10 +1293,10 @@ public class TrackScheme extends AbstractTrackMateModelView
 
 	public void removeSelectedLinkCells()
 	{
-		List< Object > edgeCells = new ArrayList<>();
-		for ( Object obj : graph.getSelectionCells() )
+		final List< Object > edgeCells = new ArrayList<>();
+		for ( final Object obj : graph.getSelectionCells() )
 		{
-			DefaultWeightedEdge e = graph.getEdgeFor( ( mxICell ) obj );
+			final DefaultWeightedEdge e = graph.getEdgeFor( ( mxICell ) obj );
 			if ( e == null )
 				continue;
 

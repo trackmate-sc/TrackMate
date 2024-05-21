@@ -22,114 +22,238 @@
 package fiji.plugin.trackmate;
 
 import java.util.Arrays;
+import java.util.Iterator;
 
-import net.imagej.ImgPlus;
+import gnu.trove.list.array.TDoubleArrayList;
+import net.imglib2.Cursor;
+import net.imglib2.FinalInterval;
 import net.imglib2.IterableInterval;
-import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.roi.IterableRegion;
-import net.imglib2.roi.Masks;
-import net.imglib2.roi.Regions;
-import net.imglib2.roi.geom.GeomMasks;
-import net.imglib2.roi.geom.real.WritablePolygon2D;
-import net.imglib2.type.logic.BoolType;
+import net.imglib2.Localizable;
+import net.imglib2.RandomAccess;
+import net.imglib2.RandomAccessible;
+import net.imglib2.type.numeric.RealType;
+import net.imglib2.util.Intervals;
+import net.imglib2.util.Util;
+import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 
-public class SpotRoi
+public class SpotRoi extends SpotBase
 {
 
-	/**
-	 * Polygon points X coordinates, in physical units.
-	 */
-	public final double[] x;
+	/** Polygon points X coordinates, in physical units, centered (0,0). */
+	private final double[] x;
 
-	/**
-	 * Polygon points Y coordinates, in physical units.
-	 */
-	public final double[] y;
+	/** Polygon points Y coordinates, in physical units, centered (0,0). */
+	private final double[] y;
 
-	public SpotRoi( final double[] x, final double[] y )
+	public SpotRoi(
+			final double xc,
+			final double yc,
+			final double zc,
+			final double r,
+			final double quality,
+			final String name,
+			final double[] x,
+			final double[] y )
 	{
+		super( xc, yc, zc, r, quality, name );
 		this.x = x;
 		this.y = y;
 	}
 
+	/**
+	 * This constructor is only used for deserializing a model from a TrackMate
+	 * file. It messes with the ID of the spots and should be not used
+	 * otherwise.
+	 * 
+	 * @param ID
+	 *            the ID to use when creating the spot.
+	 * @param x
+	 *            the spot contour X coordinates.
+	 * @param y
+	 *            the spot contour Y coordinates.
+	 */
+	public SpotRoi(
+			final int ID,
+			final double[] x,
+			final double[] y )
+	{
+		super( ID ); 
+		this.x = x;
+		this.y = y;
+	}
+
+	@Override
 	public SpotRoi copy()
 	{
-		return new SpotRoi( x.clone(), y.clone() );
+		final double xc = getDoublePosition( 0 );
+		final double yc = getDoublePosition( 1 );
+		final double zc = getDoublePosition( 2 );
+		final double r = getFeature( Spot.RADIUS );
+		final double quality = getFeature( Spot.QUALITY );
+		return new SpotRoi( xc, yc, zc, r, quality, getName(), x.clone(), y.clone() );
 	}
 
 	/**
-	 * Returns a new <code>int</code> array containing the X pixel coordinates
-	 * to which to paint this polygon.
+	 * Returns the X coordinates of the ith vertex of the polygon, in physical
+	 * coordinates.
 	 * 
-	 * @param calibration
-	 *            the pixel size in X, to convert physical coordinates to pixel
-	 *            coordinates.
-	 * @param xcorner
-	 *            the top-left X corner of the view in the image to paint.
-	 * @param magnification
-	 *            the magnification of the view.
-	 * @return a new <code>int</code> array.
+	 * @param i
+	 *            the index of the vertex.
+	 * @return the vertex X position.
 	 */
-	public double[] toPolygonX( final double calibration, final double xcorner, final double spotXCenter, final double magnification )
+	public double x( final int i )
 	{
-		final double[] xp = new double[ x.length ];
-		for ( int i = 0; i < xp.length; i++ )
-		{
-			final double xc = ( spotXCenter + x[ i ] ) / calibration;
-			xp[ i ] = ( xc - xcorner ) * magnification;
-		}
-		return xp;
+		return x[ i ] + getDoublePosition( 0 );
 	}
 
 	/**
-	 * Returns a new <code>int</code> array containing the Y pixel coordinates
-	 * to which to paint this polygon.
+	 * Returns the Y coordinates of the ith vertex of the polygon, in physical
+	 * coordinates.
 	 * 
-	 * @param calibration
-	 *            the pixel size in Y, to convert physical coordinates to pixel
-	 *            coordinates.
-	 * @param ycorner
-	 *            the top-left Y corner of the view in the image to paint.
-	 * @param magnification
-	 *            the magnification of the view.
-	 * @return a new <code>int</code> array.
+	 * @param i
+	 *            the index of the vertex.
+	 * @return the vertex Y position.
 	 */
-	public double[] toPolygonY( final double calibration, final double ycorner, final double spotYCenter, final double magnification )
+	public double y( final int i )
 	{
-		final double[] yp = new double[ y.length ];
-		for ( int i = 0; i < yp.length; i++ )
+		return y[ i ] + getDoublePosition( 1 );
+	}
+
+	/**
+	 * Returns the X coordinates of the ith vertex of the polygon, <i>relative
+	 * to the spot center</i>, in physical coordinates.
+	 * 
+	 * @param i
+	 *            the index of the vertex.
+	 * @return the vertex X position.
+	 */
+	public double xr( final int i )
+	{
+		return x[ i ];
+	}
+
+	/**
+	 * Returns the Y coordinates of the ith vertex of the polygon, <i>relative
+	 * to the spot center</i>, in physical coordinates.
+	 * 
+	 * @param i
+	 *            the index of the vertex.
+	 * @return the vertex Y position.
+	 */
+	public double yr( final int i )
+	{
+		return y[ i ];
+	}
+
+	public int nPoints()
+	{
+		return x.length;
+	}
+
+	@Override
+	public double realMin( final int d )
+	{
+		final double[] arr = ( d == 0 ) ? x : y;
+		return getDoublePosition( d ) + Util.min( arr );
+	}
+
+	@Override
+	public double realMax( final int d )
+	{
+		final double[] arr = ( d == 0 ) ? x : y;
+		return getDoublePosition( d ) + Util.max( arr );
+	}
+
+	/**
+	 * Convenience method that returns the X and Y coordinates of the polygon on
+	 * this spot, possibly shifted and scale by a specified amount. Such that:
+	 * 
+	 * <pre>
+	 * xout = x * sx + cx
+	 * yout = y * sy + cy
+	 * </pre>
+	 * 
+	 * @param cx
+	 *            the shift in X to apply after scaling coordinates.
+	 * @param cy
+	 *            the shift in Y to apply after scaling coordinates.
+	 * @param sx
+	 *            the scale to apply in X.
+	 * @param sy
+	 *            the scale to apply in Y.
+	 * @param xout
+	 *            a list in which to write resulting X coordinates. Reset by
+	 *            this call.
+	 * @param yout
+	 *            a list in which to write resulting Y coordinates. Reset by
+	 *            this call.
+	 */
+	public void toArray( final double cx, final double cy, final double sx, final double sy, final TDoubleArrayList xout, final TDoubleArrayList yout )
+	{
+		xout.resetQuick();
+		yout.resetQuick();
+		for ( int i = 0; i < x.length; i++ )
 		{
-			final double yc = ( spotYCenter + y[ i ] ) / calibration;
-			yp[ i ] = ( yc - ycorner ) * magnification;
+			xout.add( x( i ) + sx + cx );
+			yout.add( y( i ) + sx + cy );
 		}
-		return yp;
 	}
 
-	public < T > IterableInterval< T > sample( final Spot spot, final ImgPlus< T > img )
+	/**
+	 * Convenience method that returns the X and Y coordinates of the polygon on
+	 * this spot, possibly shifted and scale by a specified amount. Such that:
+	 * 
+	 * <pre>
+	 * xout = x * sx + cx
+	 * yout = y * sy + cy
+	 * </pre>
+	 * 
+	 * @param cx
+	 *            the shift in X to apply after scaling coordinates.
+	 * @param cy
+	 *            the shift in Y to apply after scaling coordinates.
+	 * @param sx
+	 *            the scale to apply in X.
+	 * @param sy
+	 *            the scale to apply in Y.
+	 * @return a new 2D double array, with the array of X values as the first
+	 *         element, and the array of Y values as a second element.
+	 */
+	public double[][] toArray( final double cx, final double cy, final double sx, final double sy )
 	{
-		return sample( spot.getDoublePosition( 0 ), spot.getDoublePosition( 1 ), img, img.averageScale( 0 ), img.averageScale( 1 ) );
+		final double[] xout = new double[ x.length ];
+		final double[] yout = new double[ x.length ];
+		for ( int i = 0; i < x.length; i++ )
+		{
+			xout[ i ] = x( i ) * sx + cx;
+			yout[ i ] = y( i ) * sy + cy;
+		}
+		return new double[][] { xout, yout };
 	}
 
-	public < T > IterableInterval< T > sample( final double spotXCenter, final double spotYCenter, final RandomAccessibleInterval< T > img, final double xScale, final double yScale )
+	@Override
+	public < T extends RealType< T > > IterableInterval< T > iterable( final RandomAccessible< T > ra, final double[] calibration )
 	{
-		final double[] xp = toPolygonX( xScale, 0, spotXCenter, 1. );
-		final double[] yp = toPolygonY( yScale, 0, spotYCenter, 1. );
-		final WritablePolygon2D polygon = GeomMasks.closedPolygon2D( xp, yp );
-		final IterableRegion< BoolType > region = Masks.toIterableRegion( polygon );
-		return Regions.sample( region, Views.extendMirrorDouble( Views.dropSingletonDimensions( img ) ) );
+		return new SpotRoiIterable<>( this, ra, calibration );
 	}
 
-	public double radius()
+	private static double radius( final double[] x, final double[] y )
 	{
-		return Math.sqrt( area() / Math.PI );
+		return Math.sqrt( area( x, y ) / Math.PI );
 	}
 
-	public double area()
+	private static double area( final double[] x, final double[] y )
 	{
 		return Math.abs( signedArea( x, y ) );
 	}
 
+	public double area()
+	{
+		return area( x, y );
+	}
+
+	@Override
 	public void scale( final double alpha )
 	{
 		for ( int i = 0; i < x.length; i++ )
@@ -144,7 +268,7 @@ public class SpotRoi
 		}
 	}
 
-	public static Spot createSpot( final double[] x, final double[] y, final double quality )
+	public static SpotRoi createSpot( final double[] x, final double[] y, final double quality )
 	{
 		// Put polygon coordinates with respect to centroid.
 		final double[] centroid = centroid( x, y );
@@ -153,15 +277,10 @@ public class SpotRoi
 		final double[] xr = Arrays.stream( x ).map( x0 -> x0 - xc ).toArray();
 		final double[] yr = Arrays.stream( y ).map( y0 -> y0 - yc ).toArray();
 
-		// Create roi.
-		final SpotRoi roi = new SpotRoi( xr, yr );
-
 		// Create spot.
 		final double z = 0.;
-		final double r = roi.radius();
-		final Spot spot = new Spot( xc, yc, z, r, quality );
-		spot.setRoi( roi );
-		return spot;
+		final double r = radius( xr, yr );
+		return new SpotRoi( xc, yc, z, r, quality, null, xr, yr );
 	}
 
 	/*
@@ -174,16 +293,14 @@ public class SpotRoi
 		double ax = 0.0;
 		double ay = 0.0;
 		final int n = x.length;
-		for ( int i = 0; i < n - 1; i++ )
+		int i;
+		int j;
+		for ( i = 0, j = n - 1; i < n; j = i++ )
 		{
-			final double w = x[ i ] * y[ i + 1 ] - x[ i + 1 ] * y[ i ];
-			ax += ( x[ i ] + x[ i + 1 ] ) * w;
-			ay += ( y[ i ] + y[ i + 1 ] ) * w;
+			final double w = x[ j ] * y[ i ] - x[ i ] * y[ j ];
+			ax += ( x[ j ] + x[ i ] ) * w;
+			ay += ( y[ j ] + y[ i ] ) * w;
 		}
-
-		final double w0 = x[ n - 1 ] * y[ 0 ] - x[ 0 ] * y[ n - 1 ];
-		ax += ( x[ n - 1 ] + x[ 0 ] ) * w0;
-		ay += ( y[ n - 1 ] + y[ 0 ] ) * w0;
 		return new double[] { ax / 6. / area, ay / 6. / area };
 	}
 
@@ -191,9 +308,261 @@ public class SpotRoi
 	{
 		final int n = x.length;
 		double a = 0.0;
-		for ( int i = 0; i < n - 1; i++ )
-			a += x[ i ] * y[ i + 1 ] - x[ i + 1 ] * y[ i ];
+		int i;
+		int j;
+		for ( i = 0, j = n - 1; i < n; j = i++ )
+			a += x[ j ] * y[ i ] - x[ i ] * y[ j ];
 
-		return ( a + x[ n - 1 ] * y[ 0 ] - x[ 0 ] * y[ n - 1 ] ) / 2.0;
+		return a / 2.;
+	}
+
+	/*
+	 * ITERABLE and ITERATOR.
+	 */
+
+	private static final class SpotRoiIterable< T extends RealType< T > > implements IterableInterval< T >
+	{
+
+		private final FinalInterval interval;
+
+		/** Polygon X coords in pixel units. */
+		private final double[] x;
+
+		/** Polygon Y coords in pixel units. */
+		private final double[] y;
+
+		private final RandomAccessible< T > ra;
+
+		public SpotRoiIterable( final SpotRoi roi, final RandomAccessible< T > ra, final double[] calibration )
+		{
+			this.ra = ra;
+			final double[][] xy = roi.toArray( 0., 0., 1 / calibration[ 0 ], 1 / calibration[ 1 ] );
+			this.x = xy[ 0 ];
+			this.y = xy[ 1 ];
+			final long minX = ( long ) Math.floor( Util.min( x ) );
+			final long maxX = ( long ) Math.ceil( Util.max( x ) );
+			final long minY = ( long ) Math.floor( Util.min( y ) );
+			final long maxY = ( long ) Math.ceil( Util.max( y ) );
+			interval = Intervals.createMinMax( minX, minY, maxX, maxY );
+		}
+
+		@Override
+		public long size()
+		{
+			int n = 0;
+			final Cursor< T > cursor = cursor();
+			while ( cursor.hasNext() )
+			{
+				cursor.fwd();
+				n++;
+			}
+			return n;
+		}
+
+		@Override
+		public T firstElement()
+		{
+			return cursor().next();
+		}
+
+		@Override
+		public Object iterationOrder()
+		{
+			return this;
+		}
+
+		@Override
+		public double realMin( final int d )
+		{
+			return interval.realMin( d );
+		}
+
+		@Override
+		public double realMax( final int d )
+		{
+			return interval.realMax( d );
+		}
+
+		@Override
+		public int numDimensions()
+		{
+			return 2;
+		}
+
+		@Override
+		public long min( final int d )
+		{
+			return interval.min( d );
+		}
+
+		@Override
+		public long max( final int d )
+		{
+			return interval.max( d );
+		}
+
+		@Override
+		public Cursor< T > cursor()
+		{
+			return new MyCursor< T >( x, y, ra );
+		}
+
+		@Override
+		public Cursor< T > localizingCursor()
+		{
+			return cursor();
+		}
+
+		@Override
+		public Iterator< T > iterator()
+		{
+			return cursor();
+		}
+	}
+
+	/**
+	 * Iterates inside a close polygon given by X & Y in pixel coordinates.
+	 * 
+	 * @param <T>
+	 *            the type of pixel in the image.
+	 */
+	private static final class MyCursor< T extends RealType< T > > implements Cursor< T >
+	{
+
+		private final FinalInterval interval;
+
+		private Cursor< T > cursor;
+
+		private final double[] x;
+
+		private final double[] y;
+
+		private boolean hasNext;
+
+		private final RandomAccessible< T > rae;
+
+		private RandomAccess< T > ra;
+
+		public MyCursor( final double[] x, final double[] y, final RandomAccessible< T > rae )
+		{
+			this.x = x;
+			this.y = y;
+			this.rae = rae;
+			final long minX = ( long ) Math.floor( Util.min( x ) );
+			final long maxX = ( long ) Math.ceil( Util.max( x ) );
+			final long minY = ( long ) Math.floor( Util.min( y ) );
+			final long maxY = ( long ) Math.ceil( Util.max( y ) );
+			interval = Intervals.createMinMax( minX, minY, maxX, maxY );
+			reset();
+		}
+
+		@Override
+		public T get()
+		{
+			return ra.get();
+		}
+
+		@Override
+		public void fwd()
+		{
+			ra.setPosition( cursor );
+			fetch();
+		}
+
+		private void fetch()
+		{
+			while ( cursor.hasNext() )
+			{
+				cursor.fwd();
+				if ( isInside( cursor, x, y ) )
+				{
+					hasNext = cursor.hasNext();
+					return;
+				}
+			}
+			hasNext = false;
+		}
+
+		private static final boolean isInside( final Localizable localizable, final double[] x, final double[] y )
+		{
+			// Taken from Imglib2-roi GeomMaths. No edge case.
+			final double xl = localizable.getDoublePosition( 0 );
+			final double yl = localizable.getDoublePosition( 1 );
+
+			int i;
+			int j;
+			boolean inside = false;
+			for ( i = 0, j = x.length - 1; i < x.length; j = i++ )
+			{
+				final double xj = x[ j ];
+				final double yj = y[ j ];
+
+				final double xi = x[ i ];
+				final double yi = y[ i ];
+
+				if ( ( yi > yl ) != ( yj > yl ) && ( xl < ( xj - xi ) * ( yl - yi ) / ( yj - yi ) + xi ) )
+					inside = !inside;
+			}
+			return inside;
+		}
+
+		@Override
+		public void reset()
+		{
+			final IntervalView< T > view = Views.interval( rae, interval );
+			cursor = view.localizingCursor();
+			ra = rae.randomAccess( interval );
+			fetch();
+		}
+
+		@Override
+		public double getDoublePosition( final int d )
+		{
+			return ra.getDoublePosition( d );
+		}
+
+		@Override
+		public int numDimensions()
+		{
+			return 2;
+		}
+
+		@Override
+		public void jumpFwd( final long steps )
+		{
+			for ( int i = 0; i < steps; i++ )
+				fwd();
+		}
+
+		@Override
+		public boolean hasNext()
+		{
+			return hasNext;
+		}
+
+		@Override
+		public T next()
+		{
+			fwd();
+			return get();
+		}
+
+		@Override
+		public long getLongPosition( final int d )
+		{
+			return ra.getLongPosition( d );
+		}
+
+		@Override
+		public Cursor< T > copy()
+		{
+			return new MyCursor<>( x, y, rae );
+		}
+
+		@Override
+		public Cursor< T > copyCursor()
+		{
+			return copy();
+		}
 	}
 }

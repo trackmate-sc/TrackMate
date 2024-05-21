@@ -104,6 +104,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.jdom2.Attribute;
 import org.jdom2.Document;
@@ -119,6 +121,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
@@ -128,9 +131,19 @@ import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.procedure.TIntIntProcedure;
+import net.imglib2.mesh.Mesh;
+import net.imglib2.mesh.io.ply.PLYMeshIO;
+import net.imglib2.mesh.view.TranslateMesh;
 
 public class TmXmlWriter
 {
+
+	static final String MESH_FILE_EXTENSION = ".meshes";
+
+	/** Zip compression level (0-9) */
+	private static final int COMPRESSION_LEVEL = 5;
 
 	/*
 	 * FIELD
@@ -162,6 +175,8 @@ public class TmXmlWriter
 	 *
 	 * @param file
 	 *            the xml file to write to, will be overwritten.
+	 * @param logger
+	 *            a logger instance to log writing progress and errors.
 	 */
 	public TmXmlWriter( final File file, final Logger logger )
 	{
@@ -178,6 +193,12 @@ public class TmXmlWriter
 	/**
 	 * Writes the document to the file. Content must be appended first.
 	 *
+	 * @throws FileNotFoundException
+	 *             if the file exists but is a directory rather than a regular
+	 *             file, does not exist but cannot be created, or cannot be
+	 *             opened for any other reason.
+	 * @throws IOException
+	 *             if there's any problem writing.
 	 * @see #appendLog(String)
 	 * @see #appendModel(Model)
 	 * @see #appendSettings(Settings)
@@ -236,6 +257,8 @@ public class TmXmlWriter
 		modelElement.addContent( filteredTrackElement );
 
 		root.addContent( modelElement );
+
+		writeSpotMeshes( model.getSpots().iterable( false ) );
 	}
 
 	/**
@@ -695,11 +718,7 @@ public class TmXmlWriter
 		return analyzersElement;
 	}
 
-	/*
-	 * STATIC METHODS
-	 */
-
-	private static final Element marshalSpot( final Spot spot, final FeatureModel fm )
+	private final Element marshalSpot( final Spot spot, final FeatureModel fm )
 	{
 		final Collection< Attribute > attributes = new ArrayList<>();
 		final Attribute IDattribute = new Attribute( SPOT_ID_ATTRIBUTE_NAME, "" + spot.ID() );
@@ -723,23 +742,92 @@ public class TmXmlWriter
 		}
 		final Element spotElement = new Element( SPOT_ELEMENT_KEY );
 
-		final SpotRoi roi = spot.getRoi();
-		if ( roi != null )
+		if ( spot instanceof SpotRoi )
 		{
-			final int nPoints = roi.x.length;
+			final SpotRoi roi = ( SpotRoi ) spot;
+			final int nPoints = roi.nPoints();
 			attributes.add( new Attribute( ROI_N_POINTS_ATTRIBUTE_NAME, Integer.toString( nPoints ) ) );
 			final StringBuilder str = new StringBuilder();
 			for ( int i = 0; i < nPoints; i++ )
 			{
-				str.append( Double.toString( roi.x[ i ] ) );
+				str.append( Double.toString( roi.xr( i ) ) );
 				str.append( ' ' );
-				str.append( Double.toString( roi.y[ i ] ) );
+				str.append( Double.toString( roi.yr( i ) ) );
 				str.append( ' ' );
 			}
 			spotElement.setText( str.toString() );
 		}
-
 		spotElement.setAttributes( attributes );
 		return spotElement;
+	}
+
+	protected void writeSpotMeshes( final Iterable< Spot > spots )
+	{
+		// Only create the meshes file if at least one spot has a mesh.
+		boolean hasMesh = false;
+		for ( final Spot spot : spots )
+		{
+			if ( spot instanceof SpotMesh )
+			{
+				hasMesh = true;
+				break;
+			}
+		}
+		if ( !hasMesh )
+			return;
+
+		// Holder for map spot -> frame
+		final TIntIntHashMap frameMap = new TIntIntHashMap();
+
+		// Create zip output stream and write to it.
+		final File meshFile = new File( file.getAbsolutePath() + MESH_FILE_EXTENSION );
+		logger.log( "  Writing spot meshes to " + meshFile.getName() + "\n" );
+
+		try (final ZipOutputStream zos = new ZipOutputStream( new FileOutputStream( meshFile ) ))
+		{
+			zos.setMethod( ZipOutputStream.DEFLATED );
+			zos.setLevel( COMPRESSION_LEVEL );
+
+			// Write spot meshes.
+			for ( final Spot spot : spots )
+			{
+				if ( spot instanceof SpotMesh )
+				{
+					// Save mesh in true coordinates.
+					final SpotMesh sm = ( SpotMesh ) spot;
+					final Mesh mesh = sm.getMesh();
+					final Mesh translated = TranslateMesh.translate( mesh, spot );
+					final byte[] bs = PLYMeshIO.writeBinary( translated );
+
+					final String entryName = spot.ID() + ".ply";
+					zos.putNextEntry( new ZipEntry( entryName ) );
+					zos.write( bs );
+					zos.closeEntry();
+
+					frameMap.put( spot.ID(), spot.getFeature( Spot.FRAME ).intValue() );
+				}
+			}
+
+			// Write dict text file.
+			final StringBuilder str = new StringBuilder();
+			str.append( "frame,ID\n" );
+			frameMap.forEachEntry( new TIntIntProcedure()
+			{
+
+				@Override
+				public boolean execute( final int ID, final int t )
+				{
+					str.append( String.format( "%d,%d\n", t, ID ) );
+					return true;
+				}
+			} );
+			zos.putNextEntry( new ZipEntry( "mesh-info.txt" ) );
+			zos.write( str.toString().getBytes() );
+		}
+		catch ( final IOException e )
+		{
+			logger.error( "Problem writing the mesh file:\n" + e.getMessage() );
+			e.printStackTrace();
+		}
 	}
 }

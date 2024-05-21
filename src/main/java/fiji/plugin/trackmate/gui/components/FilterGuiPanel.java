@@ -238,7 +238,9 @@ public class FilterGuiPanel extends JPanel implements ChangeListener
 	}
 
 	/**
-	 * Returns the thresholds currently set by this GUI.
+	 * Returns the filters currently set by this GUI.
+	 * 
+	 * @return the list of filters.
 	 */
 	public List< FeatureFilter > getFeatureFilters()
 	{
@@ -246,10 +248,13 @@ public class FilterGuiPanel extends JPanel implements ChangeListener
 	}
 
 	/**
-	 * Add an {@link ChangeListener} to this panel. The {@link ChangeListener}
+	 * Adds a {@link ChangeListener} to this panel. The {@link ChangeListener}
 	 * will be notified when a change happens to the thresholds displayed by
 	 * this panel, whether due to the slider being move, the auto-threshold
 	 * button being pressed, or the combo-box selection being changed.
+	 * 
+	 * @param listener
+	 *            the listener to add.
 	 */
 	public void addChangeListener( final ChangeListener listener )
 	{
@@ -257,9 +262,12 @@ public class FilterGuiPanel extends JPanel implements ChangeListener
 	}
 
 	/**
-	 * Remove a ChangeListener from this panel.
+	 * Removes a ChangeListener from this panel.
 	 *
-	 * @return true if the listener was in listener collection of this instance.
+	 * @param listener
+	 *            the listener to remove.
+	 * @return <code>true</code> if the listener was in listener collection of
+	 *         this instance.
 	 */
 	public boolean removeChangeListener( final ChangeListener listener )
 	{

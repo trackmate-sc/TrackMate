@@ -36,6 +36,7 @@ import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
 import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
@@ -157,12 +158,18 @@ public class FeatureUtils
 	}
 
 	/**
-	 * Missing or undefined values are not included.
+	 * Collect feature values from the specified model. Missing or undefined
+	 * values are not included.
 	 *
 	 * @param featureKey
+	 *            the key of the feature to collect values from.
 	 * @param target
+	 *            the type of object the feature is defined for.
 	 * @param model
+	 *            the model to read from.
 	 * @param visibleOnly
+	 *            if <code>true</code> feature values will be collected only
+	 *            from the objects marked as visible.
 	 * @return a new <code>double[]</code> array containing the numerical
 	 *         feature values.
 	 */
@@ -383,7 +390,7 @@ public class FeatureUtils
 					final double z = ran.nextDouble();
 					final double r = ran.nextDouble();
 					final double q = ran.nextDouble();
-					final Spot spot = new Spot( x, y, z, r, q );
+					final Spot spot = new SpotBase( x, y, z, r, q );
 					DUMMY_MODEL.addSpotTo( spot, t );
 					if ( previous != null )
 						DUMMY_MODEL.addEdge( previous, spot, ran.nextDouble() );

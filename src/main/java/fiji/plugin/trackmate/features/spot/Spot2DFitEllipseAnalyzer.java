@@ -27,14 +27,13 @@ import Jama.SingularValueDecomposition;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotRoi;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.util.Util;
 
-public class SpotFitEllipseAnalyzer< T extends RealType< T > > extends AbstractSpotFeatureAnalyzer< T >
+public class Spot2DFitEllipseAnalyzer< T extends RealType< T > > extends AbstractSpotFeatureAnalyzer< T >
 {
 
 	private final boolean is2D;
 
-	public SpotFitEllipseAnalyzer( final boolean is2D )
+	public Spot2DFitEllipseAnalyzer( final boolean is2D )
 	{
 		this.is2D = is2D;
 	}
@@ -51,13 +50,13 @@ public class SpotFitEllipseAnalyzer< T extends RealType< T > > extends AbstractS
 
 		if ( is2D )
 		{
-			final SpotRoi roi = spot.getRoi();
-			if ( roi != null )
+			if ( spot instanceof SpotRoi )
 			{
-				final double[] Q = fitEllipse( roi.x, roi.y );
+				final SpotRoi roi = ( SpotRoi ) spot;
+				final double[] Q = fitEllipse( roi );
 				final double[] A = quadraticToCartesian( Q );
-				x0 = A[ 0 ];
-				y0 = A[ 1 ];
+				x0 = A[ 0 ] - roi.getDoublePosition( 0 );
+				y0 = A[ 1 ] - roi.getDoublePosition( 1 );
 				major = A[ 2 ];
 				minor = A[ 3 ];
 				theta = A[ 4 ];
@@ -83,12 +82,12 @@ public class SpotFitEllipseAnalyzer< T extends RealType< T > > extends AbstractS
 			theta = Double.NaN;
 			aspectRatio = Double.NaN;
 		}
-		spot.putFeature( SpotFitEllipseAnalyzerFactory.X0, x0 );
-		spot.putFeature( SpotFitEllipseAnalyzerFactory.Y0, y0 );
-		spot.putFeature( SpotFitEllipseAnalyzerFactory.MAJOR, major );
-		spot.putFeature( SpotFitEllipseAnalyzerFactory.MINOR, minor );
-		spot.putFeature( SpotFitEllipseAnalyzerFactory.THETA, theta );
-		spot.putFeature( SpotFitEllipseAnalyzerFactory.ASPECTRATIO, aspectRatio );
+		spot.putFeature( Spot2DFitEllipseAnalyzerFactory.X0, x0 );
+		spot.putFeature( Spot2DFitEllipseAnalyzerFactory.Y0, y0 );
+		spot.putFeature( Spot2DFitEllipseAnalyzerFactory.MAJOR, major );
+		spot.putFeature( Spot2DFitEllipseAnalyzerFactory.MINOR, minor );
+		spot.putFeature( Spot2DFitEllipseAnalyzerFactory.THETA, theta );
+		spot.putFeature( Spot2DFitEllipseAnalyzerFactory.ASPECTRATIO, aspectRatio );
 	}
 
 	/**
@@ -112,17 +111,17 @@ public class SpotFitEllipseAnalyzer< T extends RealType< T > > extends AbstractS
 	 *      script</a>
 	 * @author Michael Doube
 	 */
-	private static double[] fitEllipse( final double[] x, final double[] y )
+	private static double[] fitEllipse( final SpotRoi roi )
 	{
-		final int nPoints = x.length;
-		final double[] centroid = getCentroid( x, y );
-		final double xC = centroid[ 0 ];
-		final double yC = centroid[ 1 ];
+		final double xC = roi.getDoublePosition( 0 );
+		final double yC = roi.getDoublePosition( 1 );
+
+		final int nPoints = roi.nPoints();
 		final double[][] d1 = new double[ nPoints ][ 3 ];
 		for ( int i = 0; i < nPoints; i++ )
 		{
-			final double xixC = x[ i ] - xC;
-			final double yiyC = y[ i ] - yC;
+			final double xixC = roi.xr( i );
+			final double yiyC = roi.yr( i );
 			d1[ i ][ 0 ] = xixC * xixC;
 			d1[ i ][ 1 ] = xixC * yiyC;
 			d1[ i ][ 2 ] = yiyC * yiyC;
@@ -131,8 +130,8 @@ public class SpotFitEllipseAnalyzer< T extends RealType< T > > extends AbstractS
 		final double[][] d2 = new double[ nPoints ][ 3 ];
 		for ( int i = 0; i < nPoints; i++ )
 		{
-			d2[ i ][ 0 ] = x[ i ] - xC;
-			d2[ i ][ 1 ] = y[ i ] - yC;
+			d2[ i ][ 0 ] = roi.xr( i );
+			d2[ i ][ 1 ] = roi.yr( i );
 			d2[ i ][ 2 ] = 1;
 		}
 		final Matrix D2 = new Matrix( d2 );
@@ -182,17 +181,12 @@ public class SpotFitEllipseAnalyzer< T extends RealType< T > > extends AbstractS
 		return A.getColumnPackedCopy();
 	}
 
-	private static double[] getCentroid( final double[] x, final double[] y )
-	{
-		return new double[] { Util.average( x ), Util.average( y ) };
-	}
-
 	/**
 	 * Convert to cartesian coordnates for the ellipse. Return [ x0 y0 a b theta
 	 * ]. We always have a > b. theta in radians measure the angle of the
 	 * ellipse long axis with the x axis, in radians, and positive means
 	 * counter-clockwise.
-	 * 
+	 *
 	 * Formulas from
 	 * https://en.wikipedia.org/wiki/Ellipse#In_Cartesian_coordinates
 	 */
@@ -241,9 +235,12 @@ public class SpotFitEllipseAnalyzer< T extends RealType< T > > extends AbstractS
 	}
 
 	/**
-	 * Computes the Moore–Penrose pseudoinverse using the SVD method.
-	 *
-	 * Modified version of the original implementation by Kim van der Linde.
+	 * Computes the Moore–Penrose pseudoinverse using the SVD method. Modified
+	 * version of the original implementation by Kim van der Linde.
+	 * 
+	 * @param x
+	 *            the matrix.
+	 * @return the pseudo-inverse as a new matrix.
 	 */
 	public static Matrix pinv( final Matrix x )
 	{
