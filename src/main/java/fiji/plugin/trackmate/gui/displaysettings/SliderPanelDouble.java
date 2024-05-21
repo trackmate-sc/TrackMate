@@ -90,13 +90,21 @@ public class SliderPanelDouble extends JPanel implements BoundedValueDouble.Upda
 		setLayout( new BorderLayout( 10, 10 ) );
 		setPreferredSize( SliderPanel.PANEL_SIZE );
 
+		final int imin = 0;
+		final int imax = sliderLength;
+		int ivalue = toSlider( model.getCurrentValue() );
+		ivalue = Math.max( imin, ivalue );
+		ivalue = Math.min( imax, ivalue );
+		slider = new JSlider( SwingConstants.HORIZONTAL, imin, imax, ivalue );
+
+		spinner = new JSpinner();
 		dmin = model.getRangeMin();
 		dmax = model.getRangeMax();
-		final double val = Math.min( Math.max( model.getCurrentValue(), dmin ), dmax );
 
-		slider = new JSlider( SwingConstants.HORIZONTAL, 0, sliderLength, toSlider( val ) );
-		spinner = new JSpinner();
-		spinner.setModel( new SpinnerNumberModel( val, dmin, dmax, spinnerStepSize ) );
+		double value = model.getCurrentValue();
+		value = Math.min( dmax, value );
+		value = Math.max( dmin, value );
+		spinner.setModel( new SpinnerNumberModel( value, dmin, dmax, spinnerStepSize ) );
 
 		slider.addChangeListener( new ChangeListener()
 		{
