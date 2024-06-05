@@ -45,7 +45,6 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.util.Threads;
-import fiji.plugin.trackmate.util.TMUtils;
 import net.imglib2.KDTree;
 import net.imglib2.RealPoint;
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
@@ -142,7 +141,7 @@ public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm impl
 					{
 						final double[] coords = new double[ 3 ];
 						final Spot spot = targetIt.next();
-						TMUtils.localize( spot, coords );
+						spot.localize( coords );
 						targetCoords.add( new RealPoint( coords ) );
 						targetNodes.add( new FlagNode<>( spot ) );
 					}
@@ -159,7 +158,7 @@ public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm impl
 					{
 						final Spot source = sourceIt.next();
 						final double[] coords = new double[ 3 ];
-						TMUtils.localize( source, coords );
+						source.localize( coords );
 						final RealPoint sourceCoords = new RealPoint( coords );
 						search.search( sourceCoords );
 

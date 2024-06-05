@@ -45,7 +45,6 @@ import org.scijava.util.DoubleArray;
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.Spot;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
@@ -324,21 +323,18 @@ public class TMUtils
 	}
 
 	/**
-	 * Store the x, y, z coordinates of the specified spot in the first 3
-	 * elements of the specified double array.
-	 */
-	public static final void localize( final Spot spot, final double[] coords )
-	{
-		coords[ 0 ] = spot.getFeature( Spot.POSITION_X ).doubleValue();
-		coords[ 1 ] = spot.getFeature( Spot.POSITION_Y ).doubleValue();
-		coords[ 2 ] = spot.getFeature( Spot.POSITION_Z ).doubleValue();
-	}
-
-	/**
-	 * Return the optimal bin number for a histogram of the data given in array,
-	 * using the Freedman and Diaconis rule (bin_space = 2*IQR/n^(1/3)). It is
-	 * ensured that the bin number returned is not smaller and no bigger than
-	 * the bounds given in argument.
+	 * Returns the optimal bin number for a histogram of the data given in
+	 * array, using the Freedman and Diaconis rule (bin_space = 2*IQR/n^(1/3)).
+	 * It is ensured that the bin number returned is not smaller and no bigger
+	 * than the bounds given in argument.
+	 * 
+	 * @param values
+	 *            the values.
+	 * @param minBinNumber
+	 *            a minimal number of bins.
+	 * @param maxBinNumber
+	 *            a maximal number of bins.
+	 * @return a number of bins.
 	 */
 	public static final int getNBins( final double[] values, final int minBinNumber, final int maxBinNumber )
 	{
