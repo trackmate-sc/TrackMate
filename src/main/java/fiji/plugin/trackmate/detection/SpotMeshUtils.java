@@ -28,6 +28,7 @@ import java.util.List;
 
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotMesh;
+import net.imglib2.Cursor;
 import net.imglib2.Interval;
 import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccessibleInterval;
@@ -227,6 +228,21 @@ public class SpotMeshUtils
 		while ( iterator.hasNext() )
 		{
 			final LabelRegion< Integer > region = iterator.next();
+			// Detect iteration issues.
+			final RandomAccessibleInterval< BoolType > box = Views.zeroMin( region );
+			final Cursor< BoolType > c = Views.iterable( box ).cursor();
+			try
+			{
+				while ( c.hasNext() )
+					c.next().get();
+			}
+			catch ( final ArrayIndexOutOfBoundsException e )
+			{
+				System.out.println( "Could not iterate over the regions " + region ); // DEBUG
+				System.out.println( Util.printCoordinates( c ) ); // DEBUG
+				continue;
+			}
+
 			final Spot spot = regionToSpotMesh(
 					region,
 					simplify,
