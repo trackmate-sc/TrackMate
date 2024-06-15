@@ -64,8 +64,6 @@ public class ExampleCellposeCLI
 		useGPU.set();
 		inputFolder.set( System.getProperty( "user.home" ) + File.separator + "Desktop" );
 
-		final String str = cli.command();
-		System.out.println( str ); // DEBUG
-
+		System.out.println( CommandBuilder.build( cli ) ); // DEBUG
 	}
 }

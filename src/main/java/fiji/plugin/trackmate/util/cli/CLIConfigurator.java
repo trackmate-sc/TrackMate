@@ -5,12 +5,15 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import fiji.plugin.trackmate.util.CommandBuilder;
-
 public class CLIConfigurator
 {
 
 	private final List< Argument< ? > > arguments = new ArrayList<>();
+
+	public List< Argument< ? > > getArguments()
+	{
+		return arguments;
+	}
 
 	public interface ArgumentVisitor
 	{
@@ -456,19 +459,5 @@ public class CLIConfigurator
 		}
 
 		public abstract void accept( final ArgumentVisitor visitor );
-	}
-
-	public String command()
-	{
-
-		// TODO all the parts from the command itself.
-
-		/*
-		 * The arguments.
-		 */
-
-		final CommandBuilder commandBuilder = new CommandBuilder();
-		arguments.forEach( arg -> arg.accept( commandBuilder ) );
-		return commandBuilder.toString();
 	}
 }

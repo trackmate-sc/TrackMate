@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.util;
+package fiji.plugin.trackmate.util.cli;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +17,9 @@ public class CommandBuilder implements ArgumentVisitor
 {
 
 	private final List< String > tokens = new ArrayList<>();
+
+	protected CommandBuilder()
+	{}
 
 	@Override
 	public String toString()
@@ -130,5 +133,12 @@ public class CommandBuilder implements ArgumentVisitor
 
 		tokens.add( arg.getArgument() );
 		tokens.add( arg.getValue() );
+	}
+
+	public static List< String > build( final CLIConfigurator cli )
+	{
+		final CommandBuilder cb = new CommandBuilder();
+		cli.getArguments().forEach( arg -> arg.accept( cb ) );
+		return cb.tokens;
 	}
 }
