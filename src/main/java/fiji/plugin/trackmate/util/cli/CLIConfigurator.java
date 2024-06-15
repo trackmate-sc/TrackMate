@@ -5,126 +5,10 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import fiji.plugin.trackmate.util.CommandBuilder;
+
 public class CLIConfigurator
 {
-
-	public class CommandBuilder implements ArgumentVisitor
-	{
-
-		private final List< String > tokens = new ArrayList<>();
-
-		@Override
-		public String toString()
-		{
-			return StringUtils.join( tokens, " " );
-		}
-
-		private void check( final Argument< ? > arg )
-		{
-			if ( arg.argument == null )
-				throw new IllegalArgumentException( "Incorrect configuration for argument '" + arg.name
-						+ "'. The command argument is not set." );
-		}
-
-		@Override
-		public void visit( final Flag flag )
-		{
-			check( flag );
-			if (flag.set)
-				tokens.add( flag.argument );
-		}
-
-		@Override
-		public void visit( final IntArgument arg )
-		{
-			check( arg );
-			// Is it required and we have not set it? -> error
-			if ( arg.required && arg.value == Integer.MIN_VALUE )
-				throw new IllegalArgumentException( "Required argument '" + arg.name + "' is not set." );
-
-			// Is not set and we don't have a default value? -> skip
-			if ( arg.value == Integer.MIN_VALUE && arg.defaultValue == Integer.MIN_VALUE )
-				return;
-			
-			// We have a default or a value.
-			final int val = ( arg.value == Integer.MIN_VALUE )
-					? arg.defaultValue
-					: arg.value;
-
-			// Test for min & max
-			if ( arg.min != Integer.MIN_VALUE && ( val < arg.min ) )
-				throw new IllegalArgumentException( "Value " + val + " for argument '" + arg.name + "' is smaller than the min: " + arg.min );
-			if ( arg.max != Integer.MAX_VALUE && ( val > arg.max ) )
-				throw new IllegalArgumentException( "Value " + val + " for argument '" + arg.name + "' is larger than the max: " + arg.max );
-
-			tokens.add( arg.argument );
-			tokens.add( "" + val );
-		}
-
-		@Override
-		public void visit( final DoubleArgument arg )
-		{
-			check( arg );
-			// Is it required and we have not set it? -> error
-			if ( arg.required && Double.isNaN( arg.value ) )
-				throw new IllegalArgumentException( "Required argument '" + arg.name + "' is not set." );
-
-			// Is not set and we don't have a default value? -> skip
-			if ( Double.isNaN( arg.value ) && Double.isNaN( arg.defaultValue ) )
-				return;
-
-			// We have a default or a value.
-			final double val = ( Double.isNaN( arg.value ) )
-					? arg.defaultValue
-					: arg.value;
-
-			// Test for min & max
-			if ( !Double.isNaN( arg.min ) && ( val < arg.min ) )
-				throw new IllegalArgumentException( "Value " + val + " for argument '" + arg.name + "' is smaller than the min: " + arg.min );
-			if ( !Double.isNaN( arg.max ) && ( val > arg.max ) )
-				throw new IllegalArgumentException( "Value " + val + " for argument '" + arg.name + "' is larger than the max: " + arg.max );
-
-			tokens.add( arg.argument );
-			tokens.add( "" + Double.toString( val ) );
-		}
-
-		@Override
-		public void visit( final StringArgument arg )
-		{
-			check( arg );
-			// Is it required and we have not set it? -> error
-			if ( arg.required && arg.value == null )
-				throw new IllegalArgumentException( "Required argument '" + arg.name + "' is not set." );
-
-			// Is not set and we don't have a default value? -> skip
-			if ( arg.value == null && arg.defaultValue == null )
-				return;
-
-			// We have a default or a value.
-			final String val = ( arg.value == null )
-					? arg.defaultValue
-					: arg.value;
-
-			tokens.add( arg.argument );
-			tokens.add( "" + val );
-		}
-
-		@Override
-		public void visit( final ChoiceArgument arg )
-		{
-			check( arg );
-			// Is it required and we have not set it? -> error
-			if ( arg.required && arg.selected < 0 )
-				throw new IllegalArgumentException( "Required argument '" + arg.name + "' is not set." );
-
-			// Is not set? -> skip
-			if ( arg.selected < 0 )
-				return;
-
-			tokens.add( arg.argument );
-			tokens.add( arg.choices.get( arg.selected ) );
-		}
-	}
 
 	private final List< Argument< ? > > arguments = new ArrayList<>();
 
@@ -206,6 +90,11 @@ public class CLIConfigurator
 			this.set = set;
 		}
 
+		public boolean isSet()
+		{
+			return set;
+		}
+
 		@Override
 		public void accept( final ArgumentVisitor visitor )
 		{
@@ -231,15 +120,35 @@ public class CLIConfigurator
 			return this;
 		}
 
+		public void set( final String value )
+		{
+			this.value = value;
+		}
+
+		public boolean isSet()
+		{
+			return value != null;
+		}
+
+		public boolean hasDefaultValue()
+		{
+			return defaultValue != null;
+		}
+
+		public String getValue()
+		{
+			return value;
+		}
+
+		public String getDefaultValue()
+		{
+			return defaultValue;
+		}
+
 		@Override
 		public void accept( final ArgumentVisitor visitor )
 		{
 			visitor.visit( this );
-		}
-
-		public void set( final String value )
-		{
-			this.value = value;
 		}
 	}
 
@@ -290,6 +199,46 @@ public class CLIConfigurator
 		public void set( final int value )
 		{
 			this.value = value;
+		}
+
+		public boolean isSet()
+		{
+			return value != Integer.MIN_VALUE;
+		}
+
+		public boolean hasDefaultValue()
+		{
+			return defaultValue != Integer.MIN_VALUE;
+		}
+
+		public int getDefaultValue()
+		{
+			return defaultValue;
+		}
+
+		public int getValue()
+		{
+			return value;
+		}
+
+		public int getMin()
+		{
+			return min;
+		}
+
+		public boolean isMinSet()
+		{
+			return min != Integer.MIN_VALUE;
+		}
+
+		public int getMax()
+		{
+			return max;
+		}
+
+		public boolean isMaxSet()
+		{
+			return max != Integer.MAX_VALUE;
 		}
 
 		@Override
@@ -345,6 +294,46 @@ public class CLIConfigurator
 			this.value = value;
 		}
 
+		public boolean isSet()
+		{
+			return !Double.isNaN( value );
+		}
+
+		public boolean hasDefaultValue()
+		{
+			return !Double.isNaN( defaultValue );
+		}
+
+		public double getDefaultValue()
+		{
+			return defaultValue;
+		}
+
+		public double getValue()
+		{
+			return value;
+		}
+
+		public double getMax()
+		{
+			return max;
+		}
+
+		public double getMin()
+		{
+			return min;
+		}
+
+		public boolean isMinSet()
+		{
+			return !Double.isNaN( min );
+		}
+
+		public boolean isMaxSet()
+		{
+			return !Double.isNaN( max );
+		}
+
 		@Override
 		public void accept( final ArgumentVisitor visitor )
 		{
@@ -384,6 +373,16 @@ public class CLIConfigurator
 			this.selected = selected;
 		}
 
+		public boolean isSet()
+		{
+			return selected > 0;
+		}
+
+		public String getValue()
+		{
+			return choices.get( selected );
+		}
+
 		@Override
 		public void accept( final ArgumentVisitor visitor )
 		{
@@ -405,6 +404,11 @@ public class CLIConfigurator
 		{
 			this.required = required;
 			return ( T ) this;
+		}
+
+		public boolean isRequired()
+		{
+			return required;
 		}
 	}
 
@@ -434,6 +438,21 @@ public class CLIConfigurator
 		{
 			this.help = help;
 			return ( T ) this;
+		}
+
+		public String getName()
+		{
+			return name;
+		}
+
+		public String getHelp()
+		{
+			return help;
+		}
+
+		public String getArgument()
+		{
+			return argument;
 		}
 
 		public abstract void accept( final ArgumentVisitor visitor );
