@@ -12,6 +12,7 @@ import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedText
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.listElement;
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.stringElement;
 
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -25,6 +26,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
@@ -54,7 +56,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 
 	private final GridBagConstraints c;
 
-	private CliGuiBuilder()
+	private CliGuiBuilder( final String executable )
 	{
 		this.panel = new JPanel();
 		final GridBagLayout layout = new GridBagLayout();
@@ -67,6 +69,16 @@ public class CliGuiBuilder implements ArgumentVisitor
 		c.gridx = 0;
 		c.gridy = 0;
 
+		final PathArgument executablePath = new PathArgument()
+				.help( "Path to executable" )
+				.name( "Path to executable" );
+		executablePath.set( executable );
+		visit( executablePath );
+
+		panel.add( Box.createVerticalStrut( 10 ), c );
+		final JSeparator separator = new JSeparator( JSeparator.HORIZONTAL );
+		separator.setMinimumSize( new Dimension( 10, 10 ) );
+		addToLayout( null, separator );
 	}
 
 	@Override
@@ -280,10 +292,35 @@ public class CliGuiBuilder implements ArgumentVisitor
 		}
 	}
 
+	private void addToLayout( final String help, final JComponent comp )
+	{
+		c.gridx = 0;
+		c.gridwidth = 3;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets( 5, 0, 5, 0 );
+		panel.add( comp, c );
+
+		c.gridx = 0;
+		c.gridy++;
+
+		if ( help != null )
+			comp.setToolTipText( help );
+	}
+
+
+	private void addLastRow()
+	{
+		c.gridx = 0;
+		c.gridy++;
+		c.weighty = 1.;
+		panel.add( new JLabel(), c );
+	}
+
 	public static JPanel build( final CLIConfigurator cli )
 	{
-		final CliGuiBuilder builder = new CliGuiBuilder();
+		final CliGuiBuilder builder = new CliGuiBuilder( cli.getExecutable() );
 		cli.getArguments().forEach( arg -> arg.accept( builder ) );
+		builder.addLastRow();
 		return builder.panel;
 	}
 }

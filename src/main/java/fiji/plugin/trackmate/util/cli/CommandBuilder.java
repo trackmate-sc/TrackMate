@@ -20,8 +20,10 @@ public class CommandBuilder implements ArgumentVisitor
 
 	private final List< String > tokens = new ArrayList<>();
 
-	protected CommandBuilder()
-	{}
+	protected CommandBuilder( final String executablePath )
+	{
+		tokens.add( executablePath );
+	}
 
 	@Override
 	public String toString()
@@ -150,7 +152,9 @@ public class CommandBuilder implements ArgumentVisitor
 
 	public static List< String > build( final CLIConfigurator cli )
 	{
-		final CommandBuilder cb = new CommandBuilder();
+		if ( cli.getExecutable() == null )
+			throw new IllegalArgumentException( "Executable path is not set." );
+		final CommandBuilder cb = new CommandBuilder( cli.getExecutable() );
 		cli.getArguments().forEach( arg -> arg.accept( cb ) );
 		return cb.tokens;
 	}

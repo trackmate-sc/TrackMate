@@ -19,6 +19,7 @@ public class ExampleCellposeCLI
 		final int nbChannels = 3;
 
 		final CLIConfigurator cli = new CLIConfigurator();
+		cli.executablePath( "/opt/anaconda3/envs/cellpose/bin/python" );
 
 		final ChoiceArgument ptm = cli.addChoiceArgument()
 				.name( "Pretrained model" )

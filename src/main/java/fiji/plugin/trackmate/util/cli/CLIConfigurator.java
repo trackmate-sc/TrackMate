@@ -10,9 +10,16 @@ public class CLIConfigurator
 
 	private final List< Argument< ? > > arguments = new ArrayList<>();
 
+	private String executable;
+
 	public List< Argument< ? > > getArguments()
 	{
 		return arguments;
+	}
+
+	public String getExecutable()
+	{
+		return executable;
 	}
 
 	public interface ArgumentVisitor
@@ -88,6 +95,11 @@ public class CLIConfigurator
 		final ChoiceArgument choiceArgument = new ChoiceArgument();
 		arguments.add( choiceArgument );
 		return choiceArgument;
+	}
+
+	public void executablePath( final String executable )
+	{
+		this.executable = executable;
 	}
 
 	public static class Flag extends Argument< Flag >
