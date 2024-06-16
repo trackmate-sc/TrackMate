@@ -76,6 +76,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 		final JCheckBox checkbox = linkedCheckBox( element, "" );
 		checkbox.setHorizontalAlignment( SwingConstants.LEADING );
 		addToLayout(
+				flag.getHelp(),
 				new JLabel( element.getLabel() ),
 				checkbox );
 	}
@@ -98,6 +99,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 			numberOfColumns = tfCols;
 		}
 		addToLayout(
+				arg.getHelp(),
 				new JLabel( element.getLabel() ),
 				linkedSliderPanel( element, numberOfColumns ),
 				arg.getUnits() );
@@ -111,6 +113,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 			final BoundedDoubleElement element = boundedDoubleElement( arg.getName(),
 					arg.getMin(), arg.getMax(), arg::getValue, arg::set );
 			addToLayout(
+					arg.getHelp(),
 					new JLabel( element.getLabel() ),
 					linkedSliderPanel( element, tfCols, 0.1 ),
 					arg.getUnits() );
@@ -119,6 +122,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 		{
 			final DoubleElement element = doubleElement( arg.getName(), arg::getValue, arg::set );
 			addToLayout(
+					arg.getHelp(),
 					new JLabel( element.getLabel() ),
 					linkedFormattedTextField( element ),
 					arg.getUnits() );
@@ -130,6 +134,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 	{
 		final StringElement element = stringElement( arg.getName(), arg::getValue, arg::set );
 		addToLayoutTwoLines(
+				arg.getHelp(),
 				new JLabel( element.getLabel() ),
 				linkedTextField( element ) );
 	}
@@ -139,6 +144,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 	{
 		final StringElement element = stringElement( arg.getName(), arg::getValue, arg::set );
 		addToPathLayout(
+				arg.getHelp(),
 				new JLabel( element.getLabel() ),
 				linkedTextField( element ) );
 	}
@@ -148,12 +154,13 @@ public class CliGuiBuilder implements ArgumentVisitor
 	{
 		final ListElement< String > element = listElement( arg.getName(), arg.getChoices(), arg::getValue, arg::set );
 		addToLayout(
+				arg.getHelp(),
 				new JLabel( element.getLabel() ),
 				linkedComboBoxSelector( element ),
 				arg.getUnits() );
 	}
 
-	private void addToLayoutTwoLines( final JLabel lbl, final JComponent comp )
+	private void addToLayoutTwoLines( final String help, final JLabel lbl, final JComponent comp )
 	{
 		lbl.setText( lbl.getText() + " " );
 		lbl.setFont( Fonts.SMALL_FONT );
@@ -165,9 +172,15 @@ public class CliGuiBuilder implements ArgumentVisitor
 		c.insets = new Insets( 0, 0, 5, 0 );
 		panel.add( comp, c );
 		c.gridy++;
+
+		if ( help != null )
+		{
+			lbl.setToolTipText( help );
+			comp.setToolTipText( help );
+		}
 	}
 
-	private void addToPathLayout( final JLabel lbl, final JTextField tf )
+	private void addToPathLayout( final String help, final JLabel lbl, final JTextField tf )
 	{
 		final JPanel p = new JPanel();
 		final BoxLayout bl = new BoxLayout( p, BoxLayout.LINE_AXIS );
@@ -197,9 +210,16 @@ public class CliGuiBuilder implements ArgumentVisitor
 		c.insets = new Insets( 0, 0, 5, 0 );
 		panel.add( tf, c );
 		c.gridy++;
+
+		if ( help != null )
+		{
+			lbl.setToolTipText( help );
+			tf.setToolTipText( help );
+			browseButton.setToolTipText( help );
+		}
 	}
 
-	private void addToLayout( final JLabel lbl, final JComponent comp )
+	private void addToLayout( final String help, final JLabel lbl, final JComponent comp )
 	{
 		lbl.setText( lbl.getText() + " " );
 		lbl.setFont( Fonts.SMALL_FONT );
@@ -216,13 +236,19 @@ public class CliGuiBuilder implements ArgumentVisitor
 		c.gridx = 0;
 		c.gridy++;
 		c.insets = new Insets( 5, 0, 5, 0 );
+
+		if ( help != null )
+		{
+			lbl.setToolTipText( help );
+			comp.setToolTipText( help );
+		}
 	}
 
-	private void addToLayout( final JLabel lbl, final JComponent comp, final String units )
+	private void addToLayout( final String help, final JLabel lbl, final JComponent comp, final String units )
 	{
 		if ( units == null )
 		{
-			addToLayout( lbl, comp );
+			addToLayout( help, lbl, comp );
 			return;
 		}
 
@@ -245,6 +271,13 @@ public class CliGuiBuilder implements ArgumentVisitor
 
 		c.gridx = 0;
 		c.gridy++;
+
+		if ( help != null )
+		{
+			lbl.setToolTipText( help );
+			comp.setToolTipText( help );
+			lblUnits.setText( help );
+		}
 	}
 
 	public static JPanel build( final CLIConfigurator cli )
