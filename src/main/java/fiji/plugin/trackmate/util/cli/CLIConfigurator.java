@@ -159,6 +159,15 @@ public class CLIConfigurator
 		{
 			visitor.visit( this );
 		}
+
+		@Override
+		public String toString()
+		{
+			final String str = super.toString();
+			return str
+					+ " - value: " + isSet() + "\n"
+					+ " - default value: " + getDefaultValue() + "\n";
+		}
 	}
 
 	/**
@@ -238,6 +247,19 @@ public class CLIConfigurator
 		{
 			if ( !String.class.isInstance( val ) )
 				throw new IllegalArgumentException( "Argument '" + name + "' expects a String. Got " + val.getClass().getSimpleName() );
+		}
+
+		@Override
+		public String toString()
+		{
+			final String str = super.toString();
+			return str
+					+ " - value: " + getValue() + "\n"
+					+ " - has default value: " + hasDefaultValue() + "\n"
+					+ ( hasDefaultValue()
+							? " - default value: " + getDefaultValue() + "\n"
+							: "" )
+					+ " - units: " + getUnits() + "\n";
 		}
 	}
 
@@ -352,6 +374,29 @@ public class CLIConfigurator
 			visitor.visit( this );
 		}
 
+		@Override
+		public String toString()
+		{
+			final String str = super.toString();
+			return str
+					+ " - is set: " + isSet() + "\n"
+					+ ( isSet()
+							? " - value: " + getValue() + "\n"
+							: "" )
+					+ " - has default value: " + hasDefaultValue() + "\n"
+					+ ( hasDefaultValue()
+							? " - default value: " + getDefaultValue() + "\n"
+							: "" )
+					+ " - units: " + getUnits() + "\n"
+					+ " - has min: " + isMinSet() + "\n"
+					+ ( isMinSet()
+							? " - min: " + getMin() + "\n"
+							: "" )
+					+ " - has max: " + isMaxSet() + "\n"
+					+ ( isMaxSet()
+							? " - max: " + getMax() + "\n"
+							: "" );
+		}
 	}
 
 	public static class DoubleArgument extends ValueArgument< DoubleArgument >
@@ -461,6 +506,30 @@ public class CLIConfigurator
 		{
 			visitor.visit( this );
 		}
+
+		@Override
+		public String toString()
+		{
+			final String str = super.toString();
+			return str
+					+ " - is set: " + isSet() + "\n"
+					+ ( isSet()
+							? " - value: " + getValue() + "\n"
+							: "" )
+					+ " - has default value: " + hasDefaultValue() + "\n"
+					+ ( hasDefaultValue()
+							? " - default value: " + getDefaultValue() + "\n"
+							: "" )
+					+ " - units: " + getUnits() + "\n"
+					+ " - has min: " + isMinSet() + "\n"
+					+ ( isMinSet()
+							? " - min: " + getMin() + "\n"
+							: "" )
+					+ " - has max: " + isMaxSet() + "\n"
+					+ ( isMaxSet()
+							? " - max: " + getMax() + "\n"
+							: "" );
+		}
 	}
 
 	public static class ChoiceArgument extends ValueArgument< ChoiceArgument >
@@ -532,6 +601,11 @@ public class CLIConfigurator
 			return choices.get( selected );
 		}
 
+		public String getDefaultValue()
+		{
+			return choices.get( defaultChoice );
+		}
+
 		public List< String > getChoices()
 		{
 			return choices;
@@ -555,6 +629,23 @@ public class CLIConfigurator
 		{
 			visitor.visit( this );
 		}
+
+		@Override
+		public String toString()
+		{
+			final String str = super.toString();
+			return str
+					+ " - choices: " + getChoices() + "\n"
+					+ " - is set: " + isSet() + "\n"
+					+ ( isSet()
+							? " - value: " + getValue() + "\n"
+							: "" )
+					+ " - has default value: " + hasDefaultValue() + "\n"
+					+ ( hasDefaultValue()
+							? " - default value: " + getDefaultValue() + "\n"
+							: "" )
+					+ " - units: " + getUnits() + "\n";
+		}
 	}
 
 	/**
@@ -570,7 +661,7 @@ public class CLIConfigurator
 		 * Arguments flagged as not required, but without default value, will be
 		 * prompted to the user.
 		 */
-		protected boolean required = false;
+		private boolean required = false;
 
 		private String units;
 
@@ -594,6 +685,15 @@ public class CLIConfigurator
 		public String getUnits()
 		{
 			return units;
+		}
+
+		@Override
+		public String toString()
+		{
+			final String str = super.toString();
+			return str
+					+ " - required: " + isRequired() + "\n"
+					+ " - units: " + getUnits() + "\n";
 		}
 	}
 
@@ -673,8 +773,8 @@ public class CLIConfigurator
 		@Override
 		public String toString()
 		{
-			return this.getClass().getSimpleName() + "\n"
-					+ " - name: " + getName() + "\n"
+			return this.getClass().getSimpleName()
+					+ " (" + getName() + ")\n"
 					+ " - help: " + getHelp() + "\n"
 					+ " - key: " + getKey() + "\n";
 		}
@@ -727,6 +827,12 @@ public class CLIConfigurator
 		}
 	}
 
+	/**
+	 * Mother class for command arguments. Typically in the command line they
+	 * appear after the executable name with '--something'.
+	 *
+	 * @param <T>
+	 */
 	@SuppressWarnings( "unchecked" )
 	public static abstract class Argument< T extends Argument< T > > extends Command< T >
 	{
@@ -764,5 +870,25 @@ public class CLIConfigurator
 		{
 			return visible;
 		}
+
+		@Override
+		public String toString()
+		{
+			final String str = super.toString();
+			return str
+					+ " - argument: " + getArgument() + "\n"
+					+ " - visible: " + isVisible() + "\n";
+		}
+	}
+
+	@Override
+	public String toString()
+	{
+		final StringBuilder str = new StringBuilder();
+		str.append( super.toString() + "\n" );
+		str.append( executable.toString() );
+		arguments.forEach( str::append );
+		return str.toString();
+
 	}
 }

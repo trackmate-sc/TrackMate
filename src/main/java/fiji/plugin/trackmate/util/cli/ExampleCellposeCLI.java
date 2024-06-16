@@ -128,6 +128,12 @@ public class ExampleCellposeCLI
 				.set();
 
 		/*
+		 * Config content
+		 */
+
+		System.out.println( cli );
+
+		/*
 		 * Set values & create command line.
 		 */
 
