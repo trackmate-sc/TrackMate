@@ -59,24 +59,46 @@ public class ExampleCellposeCLI
 		final PathArgument inputFolder = cli.addPathArgument()
 				.name( "Input image folder path" )
 				.argument( "--dir" )
+				.visible( false )
 				.required( true );
+
+		cli.addFlag()
+				.name( "Verbose output." )
+				.argument( "--verbose" )
+				.visible( false )
+				.set();
+
+		cli.addFlag()
+				.name( "Export to PNGs" )
+				.help( "Export results as PNG." )
+				.argument( "--save_png" )
+				.visible( false )
+				.set();
+
+		cli.addFlag()
+				.name( "No exporting of Numpy files" )
+				.help( "If set, do not save Numpy files." )
+				.argument( "--no_npy" )
+				.visible( false )
+				.set();
 
 		/*
 		 * Set values & create command line.
 		 */
 
 		ptm.set( "cyto2" );
-//		ptm.set( 1 );
 		c1.set( 1 );
 		c2.set( 2 );
 		cellDiameter.set( 30. );
 		useGPU.set();
 		inputFolder.set( System.getProperty( "user.home" ) + File.separator + "Desktop" );
-		System.out.println( CommandBuilder.build( cli ) ); // DEBUG
+		System.out.println( CommandBuilder.build( cli ) );
 
 		/*
 		 * Create GUI.
 		 */
+
+		// Extra parameters for the UI.
 
 		final JPanel panel = CliGuiBuilder.build( cli );
 		final JFrame frame = new JFrame( "Test CLI GUI" );

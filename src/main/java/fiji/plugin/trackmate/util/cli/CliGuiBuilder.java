@@ -39,6 +39,7 @@ import fiji.plugin.trackmate.gui.displaysettings.StyleElements.ListElement;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.StringElement;
 import fiji.plugin.trackmate.util.FileChooser;
 import fiji.plugin.trackmate.util.FileChooser.DialogType;
+import fiji.plugin.trackmate.util.cli.CLIConfigurator.Argument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.ArgumentVisitor;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.ChoiceArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.DoubleArgument;
@@ -307,7 +308,6 @@ public class CliGuiBuilder implements ArgumentVisitor
 			comp.setToolTipText( help );
 	}
 
-
 	private void addLastRow()
 	{
 		c.gridx = 0;
@@ -319,7 +319,9 @@ public class CliGuiBuilder implements ArgumentVisitor
 	public static JPanel build( final CLIConfigurator cli )
 	{
 		final CliGuiBuilder builder = new CliGuiBuilder( cli.getExecutable() );
-		cli.getArguments().forEach( arg -> arg.accept( builder ) );
+		cli.getArguments().stream()
+				.filter( Argument::isVisible )
+				.forEach( arg -> arg.accept( builder ) );
 		builder.addLastRow();
 		return builder.panel;
 	}

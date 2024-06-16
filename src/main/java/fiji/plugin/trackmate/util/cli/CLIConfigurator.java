@@ -484,6 +484,8 @@ public class CLIConfigurator
 
 		protected String argument;
 
+		private boolean visible = true;
+
 		public T argument( final String argument )
 		{
 			this.argument = argument;
@@ -515,6 +517,25 @@ public class CLIConfigurator
 		public String getArgument()
 		{
 			return argument;
+		}
+
+		/**
+		 * If <code>false</code>, this argument won't be shown in UIs. It will
+		 * be used for the command line builder nonetheless.
+		 *
+		 * @param visible
+		 *            whether this argument should be visible in the UI or not.
+		 * @return the argument.
+		 */
+		public T visible( final boolean visible )
+		{
+			this.visible = visible;
+			return ( T ) this;
+		}
+
+		public boolean isVisible()
+		{
+			return visible;
 		}
 
 		public abstract void accept( final ArgumentVisitor visitor );
