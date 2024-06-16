@@ -15,12 +15,17 @@ import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.stringElem
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.io.File;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import fiji.plugin.trackmate.gui.Fonts;
@@ -30,11 +35,14 @@ import fiji.plugin.trackmate.gui.displaysettings.StyleElements.DoubleElement;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.IntElement;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.ListElement;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.StringElement;
+import fiji.plugin.trackmate.util.FileChooser;
+import fiji.plugin.trackmate.util.FileChooser.DialogType;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.ArgumentVisitor;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.ChoiceArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.DoubleArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.Flag;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.IntArgument;
+import fiji.plugin.trackmate.util.cli.CLIConfigurator.PathArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.StringArgument;
 
 public class CliGuiBuilder implements ArgumentVisitor
@@ -127,6 +135,15 @@ public class CliGuiBuilder implements ArgumentVisitor
 	}
 
 	@Override
+	public void visit( final PathArgument arg )
+	{
+		final StringElement element = stringElement( arg.getName(), arg::getValue, arg::set );
+		addToPathLayout(
+				new JLabel( element.getLabel() ),
+				linkedTextField( element ) );
+	}
+
+	@Override
 	public void visit( final ChoiceArgument arg )
 	{
 		final ListElement< String > element = listElement( arg.getName(), arg.getChoices(), arg::getValue, arg::set );
@@ -147,6 +164,38 @@ public class CliGuiBuilder implements ArgumentVisitor
 		c.anchor = GridBagConstraints.LINE_START;
 		c.insets = new Insets( 0, 0, 5, 0 );
 		panel.add( comp, c );
+		c.gridy++;
+	}
+
+	private void addToPathLayout( final JLabel lbl, final JTextField tf )
+	{
+		final JPanel p = new JPanel();
+		final BoxLayout bl = new BoxLayout( p, BoxLayout.LINE_AXIS );
+		p.setLayout( bl );
+
+		lbl.setText( lbl.getText() + " " );
+		lbl.setFont( Fonts.SMALL_FONT );
+
+		final JButton browseButton = new JButton( "browse" );
+		browseButton.setFont( Fonts.SMALL_FONT );
+		browseButton.addActionListener( e -> {
+			final File file = FileChooser.chooseFile( p, tf.getText(), DialogType.LOAD );
+			if ( file == null )
+				return;
+			tf.setText( file.getAbsolutePath() );
+		} );
+
+		p.add( lbl );
+		p.add( Box.createHorizontalGlue() );
+		p.add( browseButton );
+
+		c.insets = new Insets( 5, 0, 0, 0 );
+		c.gridwidth = 3;
+		panel.add( p, c );
+		c.gridy++;
+		c.anchor = GridBagConstraints.LINE_START;
+		c.insets = new Insets( 0, 0, 5, 0 );
+		panel.add( tf, c );
 		c.gridy++;
 	}
 

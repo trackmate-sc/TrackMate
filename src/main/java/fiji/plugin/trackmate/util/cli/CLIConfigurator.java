@@ -41,41 +41,53 @@ public class CLIConfigurator
 		{
 			throw new UnsupportedOperationException();
 		}
+
+		public default void visit( final PathArgument pathArgument )
+		{
+			throw new UnsupportedOperationException();
+		}
 	}
 
 	public Flag addFlag()
 	{
-		final Flag flagAdder = new Flag();
-		arguments.add( flagAdder );
-		return flagAdder;
+		final Flag flag = new Flag();
+		arguments.add( flag );
+		return flag;
 	}
 
 	public StringArgument addStringArgument()
 	{
-		final StringArgument stringArgumentAdder = new StringArgument();
-		arguments.add( stringArgumentAdder );
-		return stringArgumentAdder;
+		final StringArgument stringArgument = new StringArgument();
+		arguments.add( stringArgument );
+		return stringArgument;
+	}
+
+	public PathArgument addPathArgument()
+	{
+		final PathArgument pathArgument = new PathArgument();
+		arguments.add( pathArgument );
+		return pathArgument;
 	}
 
 	public IntArgument addIntArgument()
 	{
-		final IntArgument intArgumentAdder = new IntArgument();
-		arguments.add( intArgumentAdder );
-		return intArgumentAdder;
+		final IntArgument intArgument = new IntArgument();
+		arguments.add( intArgument );
+		return intArgument;
 	}
 
 	public DoubleArgument addDoubleArgument()
 	{
-		final DoubleArgument doubleArgumentAdder = new DoubleArgument();
-		arguments.add( doubleArgumentAdder );
-		return doubleArgumentAdder;
+		final DoubleArgument doubleArgument = new DoubleArgument();
+		arguments.add( doubleArgument );
+		return doubleArgument;
 	}
 
 	public ChoiceArgument addChoiceArgument()
 	{
-		final ChoiceArgument choiceArgumentAdder = new ChoiceArgument();
-		arguments.add( choiceArgumentAdder );
-		return choiceArgumentAdder;
+		final ChoiceArgument choiceArgument = new ChoiceArgument();
+		arguments.add( choiceArgument );
+		return choiceArgument;
 	}
 
 	public static class Flag extends Argument< Flag >
@@ -105,7 +117,29 @@ public class CLIConfigurator
 		}
 	}
 
-	public static class StringArgument extends ValueArgument< StringArgument >
+	/**
+	 * Specialization of {@link StringArgument} to be used in a GUI.
+	 */
+	public static class PathArgument extends AbstractStringArgument< PathArgument >
+	{
+
+		@Override
+		public void accept( final ArgumentVisitor visitor )
+		{
+			visitor.visit( this );
+		}
+	}
+
+	public static class StringArgument extends AbstractStringArgument< StringArgument >
+	{
+		@Override
+		public void accept( final ArgumentVisitor visitor )
+		{
+			visitor.visit( this );
+		}
+	}
+
+	public static abstract class AbstractStringArgument< T extends AbstractStringArgument< T > > extends ValueArgument< T >
 	{
 
 		/**
@@ -117,10 +151,11 @@ public class CLIConfigurator
 
 		private String value = null;
 
-		public StringArgument defaultValue( final String defaultValue )
+		@SuppressWarnings( "unchecked" )
+		public T defaultValue( final String defaultValue )
 		{
 			this.defaultValue = defaultValue;
-			return this;
+			return ( T ) this;
 		}
 
 		public void set( final String value )
@@ -146,12 +181,6 @@ public class CLIConfigurator
 		public String getDefaultValue()
 		{
 			return defaultValue;
-		}
-
-		@Override
-		public void accept( final ArgumentVisitor visitor )
-		{
-			visitor.visit( this );
 		}
 	}
 

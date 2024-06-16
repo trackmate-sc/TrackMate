@@ -5,12 +5,14 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import fiji.plugin.trackmate.util.cli.CLIConfigurator.AbstractStringArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.Argument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.ArgumentVisitor;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.ChoiceArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.DoubleArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.Flag;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.IntArgument;
+import fiji.plugin.trackmate.util.cli.CLIConfigurator.PathArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.StringArgument;
 
 public class CommandBuilder implements ArgumentVisitor
@@ -53,7 +55,7 @@ public class CommandBuilder implements ArgumentVisitor
 		// Is not set and we don't have a default value? -> skip
 		if ( !arg.isSet() && !arg.hasDefaultValue() )
 			return;
-		
+
 		// We have a default or a value.
 		final int val = ( !arg.isSet() )
 				? arg.getDefaultValue()
@@ -98,8 +100,7 @@ public class CommandBuilder implements ArgumentVisitor
 		tokens.add( "" + Double.toString( val ) );
 	}
 
-	@Override
-	public void visit( final StringArgument arg )
+	private void visitString( final AbstractStringArgument< ? > arg )
 	{
 		check( arg );
 		// Is it required and we have not set it? -> error
@@ -117,6 +118,18 @@ public class CommandBuilder implements ArgumentVisitor
 
 		tokens.add( arg.getArgument() );
 		tokens.add( "" + val );
+	}
+
+	@Override
+	public void visit( final StringArgument stringArgument )
+	{
+		visitString( stringArgument );
+	}
+
+	@Override
+	public void visit( final PathArgument pathArgument )
+	{
+		visitString( pathArgument );
 	}
 
 	@Override

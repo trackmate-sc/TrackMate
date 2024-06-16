@@ -9,7 +9,7 @@ import fiji.plugin.trackmate.util.cli.CLIConfigurator.ChoiceArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.DoubleArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.Flag;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.IntArgument;
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.StringArgument;
+import fiji.plugin.trackmate.util.cli.CLIConfigurator.PathArgument;
 
 public class ExampleCellposeCLI
 {
@@ -55,7 +55,7 @@ public class ExampleCellposeCLI
 				.help( "If set, the GPU wil be used for computation." )
 				.argument( "--use_gpu" );
 
-		final StringArgument inputFolder = cli.addStringArgument()
+		final PathArgument inputFolder = cli.addPathArgument()
 				.name( "Input image folder path" )
 				.argument( "--dir" )
 				.required( true );
