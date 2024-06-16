@@ -17,15 +17,19 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -47,6 +51,7 @@ import fiji.plugin.trackmate.util.cli.CLIConfigurator.ExecutablePath;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.Flag;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.IntArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.PathArgument;
+import fiji.plugin.trackmate.util.cli.CLIConfigurator.SelectableArguments;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.StringArgument;
 
 public class CliGuiBuilder implements ArgumentVisitor
@@ -57,6 +62,16 @@ public class CliGuiBuilder implements ArgumentVisitor
 	private final JPanel panel;
 
 	private final GridBagConstraints c;
+
+	private ButtonGroup currentButtonGroup;
+
+	private int topInset = 5;
+
+	private int bottomInset = 5;
+
+	private boolean selectedInCurrent = false;
+
+	private SelectableArguments selectable;
 
 	private CliGuiBuilder( final ExecutablePath executableArg )
 	{
@@ -74,14 +89,40 @@ public class CliGuiBuilder implements ArgumentVisitor
 		visit( executableArg );
 	}
 
+	private void setCurrentButtonGroup( final ButtonGroup buttonGroup )
+	{
+		if ( buttonGroup == null || ( this.currentButtonGroup != buttonGroup ) )
+		{
+			topInset = 5;
+			bottomInset = 5;
+		}
+		else
+		{
+			topInset = 0;
+			bottomInset = 0;
+		}
+		this.currentButtonGroup = buttonGroup;
+	}
+
+	private void setCurrentSelected( final boolean selectedInCurrent )
+	{
+		this.selectedInCurrent = selectedInCurrent;
+	}
+
+	private void setCurrentSelectable( final SelectableArguments selectable )
+	{
+		this.selectable = selectable;
+	}
+
 	@Override
 	public void visit( final ExecutablePath arg )
 	{
 		final StringElement element = stringElement( arg.getName(), arg::getValue, arg::set );
-		addToPathLayout(
+		addPathToLayout(
 				arg.getHelp(),
 				new JLabel( element.getLabel() ),
-				linkedTextField( element ) );
+				linkedTextField( element ),
+				null );
 
 		panel.add( Box.createVerticalStrut( 10 ), c );
 		final JSeparator separator = new JSeparator( JSeparator.HORIZONTAL );
@@ -98,7 +139,8 @@ public class CliGuiBuilder implements ArgumentVisitor
 		addToLayout(
 				flag.getHelp(),
 				new JLabel( element.getLabel() ),
-				checkbox );
+				checkbox,
+				flag );
 	}
 
 	@Override
@@ -122,7 +164,8 @@ public class CliGuiBuilder implements ArgumentVisitor
 				arg.getHelp(),
 				new JLabel( element.getLabel() ),
 				linkedSliderPanel( element, numberOfColumns ),
-				arg.getUnits() );
+				arg.getUnits(),
+				arg );
 	}
 
 	@Override
@@ -136,7 +179,8 @@ public class CliGuiBuilder implements ArgumentVisitor
 					arg.getHelp(),
 					new JLabel( element.getLabel() ),
 					linkedSliderPanel( element, tfCols, 0.1 ),
-					arg.getUnits() );
+					arg.getUnits(),
+					arg );
 		}
 		else
 		{
@@ -145,7 +189,8 @@ public class CliGuiBuilder implements ArgumentVisitor
 					arg.getHelp(),
 					new JLabel( element.getLabel() ),
 					linkedFormattedTextField( element ),
-					arg.getUnits() );
+					arg.getUnits(),
+					arg );
 		}
 	}
 
@@ -156,17 +201,19 @@ public class CliGuiBuilder implements ArgumentVisitor
 		addToLayoutTwoLines(
 				arg.getHelp(),
 				new JLabel( element.getLabel() ),
-				linkedTextField( element ) );
+				linkedTextField( element ),
+				arg );
 	}
 
 	@Override
 	public void visit( final PathArgument arg )
 	{
 		final StringElement element = stringElement( arg.getName(), arg::getValue, arg::set );
-		addToPathLayout(
+		addPathToLayout(
 				arg.getHelp(),
 				new JLabel( element.getLabel() ),
-				linkedTextField( element ) );
+				linkedTextField( element ),
+				arg );
 	}
 
 	@Override
@@ -177,16 +224,40 @@ public class CliGuiBuilder implements ArgumentVisitor
 				arg.getHelp(),
 				new JLabel( element.getLabel() ),
 				linkedComboBoxSelector( element ),
-				arg.getUnits() );
+				arg.getUnits(),
+				arg );
 	}
 
-	private void addToLayoutTwoLines( final String help, final JLabel lbl, final JComponent comp )
+	private void addToLayoutTwoLines( final String help, final JLabel lbl, final JComponent comp, final Argument< ? > arg )
 	{
 		lbl.setText( lbl.getText() + " " );
 		lbl.setFont( Fonts.SMALL_FONT );
+		final JComponent item;
+		if ( currentButtonGroup != null )
+		{
+			final JRadioButton rdbtn = new JRadioButton();
+			currentButtonGroup.add( rdbtn );
+			final SelectableArguments localSelectable = selectable;
+			rdbtn.addItemListener( e -> {
+				comp.setEnabled( rdbtn.isSelected() );
+				if ( rdbtn.isSelected() )
+					localSelectable.select( arg );
+			} );
+			rdbtn.setSelected( selectedInCurrent );
+			comp.setEnabled( rdbtn.isSelected() );
+			item = new JPanel();
+			item.setLayout( new BoxLayout( item, BoxLayout.LINE_AXIS ) );
+			item.add( rdbtn );
+			item.add( Box.createHorizontalGlue() );
+			item.add( lbl );
+		}
+		else
+		{
+			item = lbl;
+		}
 		c.insets = new Insets( 5, 0, 0, 0 );
 		c.gridwidth = 3;
-		panel.add( lbl, c );
+		panel.add( item, c );
 		c.gridy++;
 		c.anchor = GridBagConstraints.LINE_START;
 		c.insets = new Insets( 0, 0, 5, 0 );
@@ -200,7 +271,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 		}
 	}
 
-	private void addToPathLayout( final String help, final JLabel lbl, final JTextField tf )
+	private void addPathToLayout( final String help, final JLabel lbl, final JTextField tf, final Argument< ? > arg )
 	{
 		final JPanel p = new JPanel();
 		final BoxLayout bl = new BoxLayout( p, BoxLayout.LINE_AXIS );
@@ -218,16 +289,33 @@ public class CliGuiBuilder implements ArgumentVisitor
 			tf.setText( file.getAbsolutePath() );
 		} );
 
+		if ( currentButtonGroup != null )
+		{
+			final JRadioButton rdbtn = new JRadioButton();
+			currentButtonGroup.add( rdbtn );
+			final SelectableArguments localSelectable = selectable;
+			rdbtn.addItemListener( e -> {
+				tf.setEnabled( rdbtn.isSelected() );
+				browseButton.setEnabled( rdbtn.isSelected() );
+				if ( rdbtn.isSelected() )
+					localSelectable.select( arg );
+			} );
+
+			rdbtn.setSelected( selectedInCurrent );
+			tf.setEnabled( rdbtn.isSelected() );
+			browseButton.setEnabled( rdbtn.isSelected() );
+			p.add( rdbtn );
+		}
 		p.add( lbl );
 		p.add( Box.createHorizontalGlue() );
 		p.add( browseButton );
 
-		c.insets = new Insets( 5, 0, 0, 0 );
+		c.insets = new Insets( topInset, 0, 0, 0 );
 		c.gridwidth = 3;
 		panel.add( p, c );
 		c.gridy++;
 		c.anchor = GridBagConstraints.LINE_START;
-		c.insets = new Insets( 0, 0, 5, 0 );
+		c.insets = new Insets( 0, 0, bottomInset, 0 );
 		panel.add( tf, c );
 		c.gridy++;
 
@@ -239,14 +327,39 @@ public class CliGuiBuilder implements ArgumentVisitor
 		}
 	}
 
-	private void addToLayout( final String help, final JLabel lbl, final JComponent comp )
+	private void addToLayout( final String help, final JLabel lbl, final JComponent comp, final Argument< ? > arg )
 	{
 		lbl.setText( lbl.getText() + " " );
 		lbl.setFont( Fonts.SMALL_FONT );
 		lbl.setHorizontalAlignment( JLabel.RIGHT );
+
+		final JComponent header;
+		if ( currentButtonGroup != null )
+		{
+			final JRadioButton rdbtn = new JRadioButton();
+			currentButtonGroup.add( rdbtn );
+			final SelectableArguments localSelectable = selectable;
+			rdbtn.addItemListener( e -> {
+				comp.setEnabled( rdbtn.isSelected() );
+				if ( rdbtn.isSelected() )
+					localSelectable.select( arg );
+			} );
+			rdbtn.setSelected( selectedInCurrent );
+			comp.setEnabled( rdbtn.isSelected() );
+			header = new JPanel();
+			header.setLayout( new BoxLayout( header, BoxLayout.LINE_AXIS ) );
+			header.add( rdbtn );
+			header.add( Box.createHorizontalGlue() );
+			header.add( lbl );
+		}
+		else
+		{
+			header = lbl;
+		}
+
 		c.gridwidth = 1;
 		c.anchor = GridBagConstraints.LINE_END;
-		panel.add( lbl, c );
+		panel.add( header, c );
 
 		c.gridx++;
 		c.gridwidth = 2;
@@ -255,7 +368,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 
 		c.gridx = 0;
 		c.gridy++;
-		c.insets = new Insets( 5, 0, 5, 0 );
+		c.insets = new Insets( topInset, 0, bottomInset, 0 );
 
 		if ( help != null )
 		{
@@ -264,20 +377,39 @@ public class CliGuiBuilder implements ArgumentVisitor
 		}
 	}
 
-	private void addToLayout( final String help, final JLabel lbl, final JComponent comp, final String units )
+	private void addToLayout( final String help, final JLabel lbl, final JComponent comp, final String units, final Argument< ? > arg )
 	{
 		if ( units == null )
 		{
-			addToLayout( help, lbl, comp );
+			addToLayout( help, lbl, comp, arg );
 			return;
 		}
 
 		lbl.setText( lbl.getText() + " " );
 		lbl.setFont( Fonts.SMALL_FONT );
 		lbl.setHorizontalAlignment( JLabel.RIGHT );
+
+		final JComponent header;
+		if ( currentButtonGroup != null )
+		{
+			final JRadioButton rdbtn = new JRadioButton();
+			currentButtonGroup.add( rdbtn );
+			rdbtn.addItemListener( e -> comp.setEnabled( rdbtn.isSelected() ) );
+			rdbtn.setSelected( selectedInCurrent );
+			header = new JPanel();
+			header.setLayout( new BoxLayout( header, BoxLayout.LINE_AXIS ) );
+			header.add( rdbtn );
+			header.add( Box.createHorizontalGlue() );
+			header.add( lbl );
+		}
+		else
+		{
+			header = lbl;
+		}
+
 		c.gridwidth = 1;
 		c.anchor = GridBagConstraints.LINE_END;
-		panel.add( lbl, c );
+		panel.add( header, c );
 
 		c.gridx++;
 		c.anchor = GridBagConstraints.LINE_START;
@@ -286,7 +418,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 		final JLabel lblUnits = new JLabel( " " + units );
 		lblUnits.setFont( Fonts.SMALL_FONT );
 		c.gridx++;
-		c.insets = new Insets( 5, 0, 5, 0 );
+		c.insets = new Insets( topInset, 0, bottomInset, 0 );
 		panel.add( lblUnits, c );
 
 		c.gridx = 0;
@@ -302,11 +434,29 @@ public class CliGuiBuilder implements ArgumentVisitor
 
 	private void addToLayout( final String help, final JComponent comp )
 	{
+		final JComponent header;
+		if ( currentButtonGroup != null )
+		{
+			final JRadioButton rdbtn = new JRadioButton();
+			currentButtonGroup.add( rdbtn );
+			rdbtn.addItemListener( e -> comp.setEnabled( rdbtn.isSelected() ) );
+			rdbtn.setSelected( selectedInCurrent );
+			header = new JPanel();
+			header.setLayout( new BoxLayout( header, BoxLayout.LINE_AXIS ) );
+			header.add( rdbtn );
+			header.add( Box.createHorizontalGlue() );
+			header.add( comp );
+		}
+		else
+		{
+			header = comp;
+		}
+
 		c.gridx = 0;
 		c.gridwidth = 3;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets( 5, 0, 5, 0 );
-		panel.add( comp, c );
+		c.insets = new Insets( topInset, 0, bottomInset, 0 );
+		panel.add( header, c );
 
 		c.gridx = 0;
 		c.gridy++;
@@ -326,9 +476,44 @@ public class CliGuiBuilder implements ArgumentVisitor
 	public static JPanel build( final CLIConfigurator cli )
 	{
 		final CliGuiBuilder builder = new CliGuiBuilder( cli.getExecutableArg() );
-		cli.getArguments().stream()
-				.filter( Argument::isVisible )
-				.forEach( arg -> arg.accept( builder ) );
+
+		// Map a selectable group to a button group in the GUI
+		final Map< SelectableArguments, ButtonGroup > buttonGroups = new HashMap<>();
+
+		// Iterate over arguments, taking care of selectable group.
+		for ( final Argument< ? > arg : cli.getArguments() )
+		{
+			if ( !arg.isVisible() )
+				continue;
+
+			/*
+			 * Assume we are not in a selectable group. In the case the current
+			 * button group is null and we won't be adding a radio button.
+			 */
+			builder.setCurrentButtonGroup( null );
+			builder.setCurrentSelected( false );
+			builder.setCurrentSelectable( null );
+			for ( final SelectableArguments selectable : cli.getSelectables() )
+			{
+				if ( selectable.getArguments().contains( arg ) )
+				{
+					// We are in a selectable group. We will add a radio button
+					// to the current button group.
+					final ButtonGroup buttonGroup = buttonGroups.computeIfAbsent( selectable, k -> new ButtonGroup() );
+					builder.setCurrentButtonGroup( buttonGroup );
+					builder.setCurrentSelectable( selectable );
+					if ( selectable.getSelection().equals( arg ) )
+					{
+						// We are the selected one.
+						builder.setCurrentSelected( true );
+					}
+
+					break;
+				}
+			}
+			arg.accept( builder );
+		}
+
 		builder.addLastRow();
 		return builder.panel;
 	}

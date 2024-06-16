@@ -1,7 +1,9 @@
 package fiji.plugin.trackmate.util.cli;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -12,9 +14,24 @@ public class CLIConfigurator
 
 	private final ExecutablePath executable = new ExecutablePath();
 
+	private final List< SelectableArguments > selectables = new ArrayList<>();
+
 	public List< Argument< ? > > getArguments()
 	{
 		return arguments;
+	}
+
+	public List< SelectableArguments > getSelectables()
+	{
+		return selectables;
+	}
+
+	public List< Argument< ? > > getSelectedArguments()
+	{
+		final List< Argument< ? > > selectedArguments = new ArrayList<>( arguments );
+		for ( final SelectableArguments selectable : selectables )
+			selectable.filter( selectedArguments );
+		return selectedArguments;
 	}
 
 	/**
@@ -23,6 +40,75 @@ public class CLIConfigurator
 	public ExecutablePath getExecutableArg()
 	{
 		return executable;
+	}
+
+	/**
+	 * Creates a 'one or the other' relationships. The arguments that will be
+	 * passed to the {@link SelectableArguments} will be flagged as as not to be
+	 * used concurrently in the same command. This will be used when creating
+	 * UIs.
+	 *
+	 * @return
+	 */
+	public SelectableArguments addSelectableArguments()
+	{
+		final SelectableArguments sa = new SelectableArguments();
+		selectables.add( sa );
+		return sa;
+	}
+
+	public static class SelectableArguments
+	{
+
+		private final List< Argument< ? > > args = new ArrayList<>();
+
+		private int selected = 0;
+
+		public SelectableArguments add( final Argument< ? > arg )
+		{
+			if ( !args.contains( arg ) )
+				args.add( arg );
+			return this;
+		}
+
+		private void filter( final List< Argument< ? > > arguments )
+		{
+			final Set< Argument< ? > > toRemove = new HashSet<>();
+			for ( final Argument< ? > arg : arguments )
+			{
+				if ( !args.contains( arg ) )
+					continue; // Unknown of this selectable, keep it.
+
+				if ( arg.equals( getSelection() ) )
+					continue; // The one selected, keep it.
+
+				// Not selected, remove it.
+				toRemove.add( arg );
+			}
+
+			arguments.removeAll( toRemove );
+		}
+
+		public void select( final Argument< ? > arg )
+		{
+			final int sel = args.indexOf( arg );
+			if ( sel < 0 )
+				throw new IllegalArgumentException( "Unknown argument '" + arg.getName() + "' for this selectable." );
+			this.selected = sel;
+		}
+
+		public Argument< ? > getSelection()
+		{
+			return args.get( selected );
+		}
+
+		/**
+		 * Exposes all members of the selectable.
+		 */
+		public List< Argument< ? > > getArguments()
+		{
+			return args;
+		}
 	}
 
 	public interface ArgumentVisitor

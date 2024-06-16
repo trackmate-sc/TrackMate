@@ -69,6 +69,19 @@ public class ExampleCellposeCLI
 				.key( KEY_CELLPOSE_MODEL )
 				.defaultValue( DEFAULT_CELLPOSE_MODEL );
 
+		final PathArgument cm = cli.addPathArgument()
+				.name( "Path to a custom model" )
+				.argument( "--pretrained_model" ) // same for pretrained model
+				.required( false )
+				.key( KEY_CELLPOSE_CUSTOM_MODEL_FILEPATH )
+				.defaultValue( DEFAULT_CELLPOSE_CUSTOM_MODEL_FILEPATH );
+
+		// State that we can set one or the other.
+		cli.addSelectableArguments()
+				.add( ptm )
+				.add( cm )
+				.select( ptm );
+
 		final IntArgument c1 = cli.addIntArgument()
 				.name( "Channel to segment" )
 				.argument( "--chan" )
@@ -128,28 +141,20 @@ public class ExampleCellposeCLI
 				.set();
 
 		/*
-		 * Config content
-		 */
-
-		System.out.println( cli );
-
-		/*
 		 * Set values & create command line.
 		 */
 
 		ptm.set( "cyto2" );
+		cm.set( "/path/to/custom/model" );
 		c1.set( 1 );
 		c2.set( 2 );
 		cellDiameter.set( 30. );
 		useGPU.set();
 		inputFolder.set( System.getProperty( "user.home" ) + File.separator + "Desktop" );
-		System.out.println( CommandBuilder.build( cli ) );
 
 		/*
 		 * Create GUI.
 		 */
-
-		System.out.println( cli.getExecutableArg() ); // DEBUG
 
 		final JPanel panel = CliGuiBuilder.build( cli );
 		final JFrame frame = new JFrame( "Test CLI GUI" );
@@ -166,5 +171,18 @@ public class ExampleCellposeCLI
 		frame.pack();
 		frame.setLocationRelativeTo( null );
 		frame.setVisible( true );
+
+		/*
+		 * Output.
+		 */
+
+		System.out.println();
+		System.out.println( "All arguments:" );
+		cli.getArguments().forEach( System.out::println );
+
+		System.out.println();
+		System.out.println( "Selected arguments:" );
+		cli.getSelectedArguments().forEach( System.out::println );
+
 	}
 }

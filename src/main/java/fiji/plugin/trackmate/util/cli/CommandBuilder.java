@@ -162,7 +162,7 @@ public class CommandBuilder implements ArgumentVisitor
 	public static List< String > build( final CLIConfigurator cli )
 	{
 		final CommandBuilder cb = new CommandBuilder( cli.getExecutableArg() );
-		cli.getArguments().forEach( arg -> arg.accept( cb ) );
+		cli.getSelectedArguments().forEach( arg -> arg.accept( cb ) );
 		return cb.tokens;
 	}
 }
