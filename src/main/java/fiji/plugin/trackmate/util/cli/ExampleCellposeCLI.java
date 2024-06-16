@@ -2,6 +2,9 @@ package fiji.plugin.trackmate.util.cli;
 
 import java.io.File;
 
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.ChoiceArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.DoubleArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.Flag;
@@ -56,6 +59,10 @@ public class ExampleCellposeCLI
 				.argument( "--dir" )
 				.required( true );
 
+		/*
+		 * Set values & create command line.
+		 */
+
 		ptm.set( "cyto2" );
 //		ptm.set( 1 );
 		c1.set( 1 );
@@ -63,7 +70,17 @@ public class ExampleCellposeCLI
 		cellDiameter.set( 30. );
 		useGPU.set();
 		inputFolder.set( System.getProperty( "user.home" ) + File.separator + "Desktop" );
-
 		System.out.println( CommandBuilder.build( cli ) ); // DEBUG
+
+		/*
+		 * Create GUI.
+		 */
+
+		final JPanel panel = CliGuiBuilder.build( cli );
+		final JFrame frame = new JFrame( "Test CLI GUI" );
+		frame.getContentPane().add( panel );
+		frame.pack();
+		frame.setLocationRelativeTo( null );
+		frame.setVisible( true );
 	}
 }
