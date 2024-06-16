@@ -3,20 +3,16 @@ package fiji.plugin.trackmate.util.cli;
 import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 
-import java.awt.BorderLayout;
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import org.apache.commons.lang3.StringUtils;
 
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.ChoiceArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.DoubleArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.Flag;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.IntArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.PathArgument;
+import fiji.plugin.trackmate.util.cli.CLIConfigurator.SelectableArguments;
 
 public class ExampleCellposeCLI
 {
@@ -31,7 +27,7 @@ public class ExampleCellposeCLI
 
 	private static final String KEY_CELLPOSE_CUSTOM_MODEL_FILEPATH = "CELLPOSE_MODEL_FILEPATH";
 
-	private static final String DEFAULT_CELLPOSE_CUSTOM_MODEL_FILEPATH = "";
+	private static final String DEFAULT_CELLPOSE_CUSTOM_MODEL_FILEPATH = System.getProperty( "user.home" );
 
 	private static final String KEY_OPTIONAL_CHANNEL_2 = "OPTIONAL_CHANNEL_2";
 
@@ -77,10 +73,9 @@ public class ExampleCellposeCLI
 				.defaultValue( DEFAULT_CELLPOSE_CUSTOM_MODEL_FILEPATH );
 
 		// State that we can set one or the other.
-		cli.addSelectableArguments()
+		final SelectableArguments selectable = cli.addSelectableArguments()
 				.add( ptm )
-				.add( cm )
-				.select( ptm );
+				.add( cm );
 
 		final IntArgument c1 = cli.addIntArgument()
 				.name( "Channel to segment" )
@@ -145,44 +140,50 @@ public class ExampleCellposeCLI
 		 */
 
 		ptm.set( "cyto2" );
-		cm.set( "/path/to/custom/model" );
-		c1.set( 1 );
+//		cm.set( "/path/to/custom/model" );
+		c1.set( 3 );
 		c2.set( 2 );
-		cellDiameter.set( 30. );
+		cellDiameter.set( 40. );
 		useGPU.set();
 		inputFolder.set( System.getProperty( "user.home" ) + File.separator + "Desktop" );
+		selectable.select( cm );
+
+
+		// Will generate an error if the required args are not set and have no
+		// default.
+		System.out.println( StringUtils.join( CommandBuilder.build( cli ), " " ) );
 
 		/*
 		 * Create GUI.
 		 */
 
-		final JPanel panel = CliGuiBuilder.build( cli );
-		final JFrame frame = new JFrame( "Test CLI GUI" );
-		frame.getContentPane().add( panel, BorderLayout.CENTER );
-		final JButton btn = new JButton( "test" );
-		final Map< String, Object > map = new HashMap<>();
-		btn.addActionListener( e -> {
-			System.out.println( "---" );
-			System.out.println( CommandBuilder.build( cli ) );
-			TrackMateSettingsBuilder.toTrackMateSettings( cli, map );
-			System.out.println( map );
-		} );
-		frame.getContentPane().add( btn, BorderLayout.SOUTH );
-		frame.pack();
-		frame.setLocationRelativeTo( null );
-		frame.setVisible( true );
+//		final JPanel panel = CliGuiBuilder.build( cli );
+//		final JFrame frame = new JFrame( "Test CLI GUI" );
+//		frame.getContentPane().add( panel, BorderLayout.CENTER );
+//		final JButton btn = new JButton( "test" );
+//		final Map< String, Object > map = new HashMap<>();
+//		btn.addActionListener( e -> {
+//			System.out.println( "---" );
+//			System.out.println( CommandBuilder.build( cli ) );
+//			TrackMateSettingsBuilder.toTrackMateSettings( cli, map );
+//			System.out.println( map );
+//		} );
+//		frame.getContentPane().add( btn, BorderLayout.SOUTH );
+//		frame.pack();
+//		frame.setLocationRelativeTo( null );
+//		frame.setVisible( true );
 
 		/*
 		 * Output.
 		 */
 
-		System.out.println();
-		System.out.println( "All arguments:" );
-		cli.getArguments().forEach( System.out::println );
-
-		System.out.println();
-		System.out.println( "Selected arguments:" );
-		cli.getSelectedArguments().forEach( System.out::println );
+//		System.out.println();
+//		System.out.println( "All arguments:" );
+//		cli.getArguments().forEach( System.out::println );
+//
+//		System.out.println();
+//		System.out.println( "Selected arguments:" );
+//		cli.getSelectedArguments().forEach( System.out::println );
 
 	}
 }

@@ -51,7 +51,12 @@ public class CommandBuilder implements ArgumentVisitor
 	public void visit( final Flag flag )
 	{
 		check( flag );
+		final boolean val;
 		if ( flag.isSet() )
+			val = flag.getValue();
+		else
+			val = flag.getDefaultValue();
+		if ( val )
 			tokens.add( flag.getArgument() );
 	}
 

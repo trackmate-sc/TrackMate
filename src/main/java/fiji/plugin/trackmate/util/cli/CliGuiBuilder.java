@@ -26,6 +26,7 @@ import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -133,7 +134,9 @@ public class CliGuiBuilder implements ArgumentVisitor
 	@Override
 	public void visit( final Flag flag )
 	{
-		final BooleanElement element = booleanElement( flag.getName(), flag::isSet, flag::set );
+		final BooleanElement element = booleanElement( flag.getName(), flag::getValue, flag::set );
+		if ( !flag.isSet() )
+			element.set( flag.getDefaultValue() );
 		final JCheckBox checkbox = linkedCheckBox( element, "" );
 		checkbox.setHorizontalAlignment( SwingConstants.LEADING );
 		addToLayout(
@@ -175,6 +178,10 @@ public class CliGuiBuilder implements ArgumentVisitor
 		{
 			final BoundedDoubleElement element = boundedDoubleElement( arg.getName(),
 					arg.getMin(), arg.getMax(), arg::getValue, arg::set );
+			if ( arg.isSet() )
+				element.set( arg.getValue() );
+			else if ( arg.hasDefaultValue() )
+				element.set( arg.getDefaultValue() );
 			addToLayout(
 					arg.getHelp(),
 					new JLabel( element.getLabel() ),
@@ -185,6 +192,10 @@ public class CliGuiBuilder implements ArgumentVisitor
 		else
 		{
 			final DoubleElement element = doubleElement( arg.getName(), arg::getValue, arg::set );
+			if ( arg.isSet() )
+				element.set( arg.getValue() );
+			else if ( arg.hasDefaultValue() )
+				element.set( arg.getDefaultValue() );
 			addToLayout(
 					arg.getHelp(),
 					new JLabel( element.getLabel() ),
@@ -209,6 +220,10 @@ public class CliGuiBuilder implements ArgumentVisitor
 	public void visit( final PathArgument arg )
 	{
 		final StringElement element = stringElement( arg.getName(), arg::getValue, arg::set );
+		if ( arg.isSet() )
+			element.set( arg.getValue() );
+		else if ( arg.hasDefaultValue() )
+			element.set( arg.getDefaultValue() );
 		addPathToLayout(
 				arg.getHelp(),
 				new JLabel( element.getLabel() ),
@@ -220,10 +235,15 @@ public class CliGuiBuilder implements ArgumentVisitor
 	public void visit( final ChoiceArgument arg )
 	{
 		final ListElement< String > element = listElement( arg.getName(), arg.getChoices(), arg::getValue, arg::set );
+		final JComboBox< String > comboBox = linkedComboBoxSelector( element );
+		if ( arg.isSet() )
+			comboBox.setSelectedItem( arg.getValue() );
+		else if ( arg.hasDefaultValue() )
+			comboBox.setSelectedItem( arg.getDefaultValue() );
 		addToLayout(
 				arg.getHelp(),
 				new JLabel( element.getLabel() ),
-				linkedComboBoxSelector( element ),
+				comboBox,
 				arg.getUnits(),
 				arg );
 	}
