@@ -194,18 +194,27 @@ public class CLIConfigurator
 	public static class Flag extends Argument< Flag >
 	{
 
-		private boolean set = false;
+		private boolean value = false;
 
 		private boolean defaultValue;
 
+		private boolean set = false;
+
 		public void set()
 		{
+			this.value = true;
 			this.set = true;
 		}
 
 		public void set( final boolean set )
 		{
-			this.set = set;
+			this.value = set;
+			this.set = true;
+		}
+
+		public boolean getValue()
+		{
+			return value;
 		}
 
 		public boolean isSet()
@@ -227,7 +236,7 @@ public class CLIConfigurator
 		@Override
 		public Object getValueObject()
 		{
-			return Boolean.valueOf( set );
+			return Boolean.valueOf( value );
 		}
 
 		@Override
@@ -251,7 +260,10 @@ public class CLIConfigurator
 		{
 			final String str = super.toString();
 			return str
-					+ " - value: " + isSet() + "\n"
+					+ " - is set: " + isSet() + "\n"
+					+ ( isSet()
+							? " - value: " + getValue() + "\n"
+							: "" )
 					+ " - default value: " + getDefaultValue() + "\n";
 		}
 	}
