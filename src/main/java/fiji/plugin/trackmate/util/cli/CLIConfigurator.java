@@ -10,14 +10,17 @@ public class CLIConfigurator
 
 	private final List< Argument< ? > > arguments = new ArrayList<>();
 
-	private String executable;
+	private final ExecutablePath executable = new ExecutablePath();
 
 	public List< Argument< ? > > getArguments()
 	{
 		return arguments;
 	}
 
-	public String getExecutable()
+	/**
+	 * Exposes the executable path argument.
+	 */
+	public ExecutablePath getExecutableArg()
 	{
 		return executable;
 	}
@@ -50,6 +53,11 @@ public class CLIConfigurator
 		}
 
 		public default void visit( final PathArgument pathArgument )
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		public default void visit( final ExecutablePath executablePath )
 		{
 			throw new UnsupportedOperationException();
 		}
@@ -97,15 +105,12 @@ public class CLIConfigurator
 		return choiceArgument;
 	}
 
-	public void executablePath( final String executable )
-	{
-		this.executable = executable;
-	}
-
 	public static class Flag extends Argument< Flag >
 	{
 
 		private boolean set = false;
+
+		private boolean defaultValue;
 
 		public void set()
 		{
@@ -120,6 +125,33 @@ public class CLIConfigurator
 		public boolean isSet()
 		{
 			return set;
+		}
+
+		public Flag defaultValue( final boolean defaultValue )
+		{
+			this.defaultValue = defaultValue;
+			return this;
+		}
+
+		public boolean getDefaultValue()
+		{
+			return defaultValue;
+		}
+
+		@Override
+		public Object getValueObject()
+		{
+			return Boolean.valueOf( set );
+		}
+
+		@Override
+		public void setValueObject( final Object val )
+		{
+			if ( !Boolean.class.isInstance( val ) )
+				throw new IllegalArgumentException( "Argument '" + name + "' expects boolean. Got " + val.getClass().getSimpleName() );
+
+			final boolean v = ( ( Boolean ) val );
+			set( v );
 		}
 
 		@Override
@@ -193,6 +225,19 @@ public class CLIConfigurator
 		public String getDefaultValue()
 		{
 			return defaultValue;
+		}
+
+		@Override
+		public Object getValueObject()
+		{
+			return value;
+		}
+
+		@Override
+		public void setValueObject( final Object val )
+		{
+			if ( !String.class.isInstance( val ) )
+				throw new IllegalArgumentException( "Argument '" + name + "' expects a String. Got " + val.getClass().getSimpleName() );
 		}
 	}
 
@@ -286,10 +331,27 @@ public class CLIConfigurator
 		}
 
 		@Override
+		public Object getValueObject()
+		{
+			return Integer.valueOf( value );
+		}
+
+		@Override
+		public void setValueObject( final Object val )
+		{
+			if ( !Number.class.isInstance( val ) )
+				throw new IllegalArgumentException( "Argument '" + name + "' expects a Number. Got " + val.getClass().getSimpleName() );
+
+			final int v = ( ( Number ) val ).intValue();
+			set( v );
+		}
+
+		@Override
 		public void accept( final ArgumentVisitor visitor )
 		{
 			visitor.visit( this );
 		}
+
 	}
 
 	public static class DoubleArgument extends ValueArgument< DoubleArgument >
@@ -379,6 +441,22 @@ public class CLIConfigurator
 		}
 
 		@Override
+		public Object getValueObject()
+		{
+			return Double.valueOf( value );
+		}
+
+		@Override
+		public void setValueObject( final Object val )
+		{
+			if ( !Number.class.isInstance( val ) )
+				throw new IllegalArgumentException( "Argument '" + name + "' expects a Number. Got " + val.getClass().getSimpleName() );
+
+			final double v = ( ( Number ) val ).doubleValue();
+			set( v );
+		}
+
+		@Override
 		public void accept( final ArgumentVisitor visitor )
 		{
 			visitor.visit( this );
@@ -391,6 +469,8 @@ public class CLIConfigurator
 		private final List< String > choices = new ArrayList<>();
 
 		private int selected = -1;
+
+		private int defaultChoice = -1;
 
 		public ChoiceArgument addChoice( final String choice )
 		{
@@ -417,6 +497,31 @@ public class CLIConfigurator
 			this.selected = selected;
 		}
 
+		public ChoiceArgument defaultValue( final String defaultChoice )
+		{
+			final int sel = choices.indexOf( defaultChoice );
+			if ( sel < 0 )
+				throw new IllegalArgumentException( "Unknown selection '" + defaultChoice + "' for parameter '"
+						+ name + "'. Must be one of " + StringUtils.join( choices, ", " ) + "." );
+			this.defaultChoice = sel;
+			return this;
+		}
+
+		public ChoiceArgument defaultValue( final int selected )
+		{
+			if ( selected < 0 || selected >= choices.size() )
+				throw new IllegalArgumentException( "Invalid index for selection of parameter '"
+						+ name + "'. Must be in scale " + 0 + " to " + ( choices.size() - 1 ) + " in "
+						+ StringUtils.join( choices, ", " ) + "." );
+			this.defaultChoice = selected;
+			return this;
+		}
+
+		public boolean hasDefaultValue()
+		{
+			return defaultChoice >= 0;
+		}
+
 		public boolean isSet()
 		{
 			return selected > 0;
@@ -433,12 +538,30 @@ public class CLIConfigurator
 		}
 
 		@Override
+		public Object getValueObject()
+		{
+			return getValue();
+		}
+
+		@Override
+		public void setValueObject( final Object val )
+		{
+			if ( !String.class.isInstance( val ) )
+				throw new IllegalArgumentException( "Argument '" + name + "' expects a String. Got " + val.getClass().getSimpleName() );
+		}
+
+		@Override
 		public void accept( final ArgumentVisitor visitor )
 		{
 			visitor.visit( this );
 		}
 	}
 
+	/**
+	 * Base class for arguments that accept a value after the switch.
+	 *
+	 * @param <T>
+	 */
 	@SuppressWarnings( "unchecked" )
 	public static abstract class ValueArgument< T extends ValueArgument< T > > extends Argument< T >
 	{
@@ -474,23 +597,20 @@ public class CLIConfigurator
 		}
 	}
 
+	/**
+	 * Mother class for executable and argument objects.
+	 *
+	 * @param <T>
+	 */
 	@SuppressWarnings( "unchecked" )
-	public static abstract class Argument< T extends Argument< T > >
+	public static abstract class Command< T extends Command< T > >
 	{
 
 		protected String name;
 
 		protected String help;
 
-		protected String argument;
-
-		private boolean visible = true;
-
-		public T argument( final String argument )
-		{
-			this.argument = argument;
-			return ( T ) this;
-		}
+		private String key;
 
 		public T name( final String name )
 		{
@@ -504,6 +624,19 @@ public class CLIConfigurator
 			return ( T ) this;
 		}
 
+		/**
+		 * For TrackMate settings de/serialization.
+		 *
+		 * @param key
+		 * @return
+		 */
+		public T key( final String key )
+		{
+
+			this.key = key;
+			return ( T ) this;
+		}
+
 		public String getName()
 		{
 			return name;
@@ -512,6 +645,100 @@ public class CLIConfigurator
 		public String getHelp()
 		{
 			return help;
+		}
+
+		public String getKey()
+		{
+			return key;
+		}
+
+		/**
+		 * Returns the value of this argument as a Java object that can be
+		 * serialized in a TrackMate settings map.
+		 *
+		 * @return
+		 */
+		public abstract Object getValueObject();
+
+		/**
+		 * Sets the value of this argument from a Java object. It must be of the
+		 * right class.
+		 *
+		 * @param val
+		 */
+		public abstract void setValueObject( Object val );
+
+		public abstract void accept( final ArgumentVisitor visitor );
+
+		@Override
+		public String toString()
+		{
+			return this.getClass().getSimpleName() + "\n"
+					+ " - name: " + getName() + "\n"
+					+ " - help: " + getHelp() + "\n"
+					+ " - key: " + getKey() + "\n";
+		}
+	}
+
+	public static class ExecutablePath extends Command< ExecutablePath >
+	{
+
+		private String value = null;
+
+		public void set( final String value )
+		{
+			this.value = value;
+		}
+
+		public boolean isSet()
+		{
+			return value != null;
+		}
+
+		public String getValue()
+		{
+			return value;
+		}
+
+		@Override
+		public Object getValueObject()
+		{
+			return value;
+		}
+
+		@Override
+		public void setValueObject( final Object val )
+		{
+			if ( !String.class.isInstance( val ) )
+				throw new IllegalArgumentException( "Executable '" + name + "' expects a String. Got " + val.getClass().getSimpleName() );
+		}
+
+		@Override
+		public void accept( final ArgumentVisitor visitor )
+		{
+			visitor.visit( this );
+		}
+
+		@Override
+		public String toString()
+		{
+			final String str = super.toString();
+			return str + " - value: " + getValue() + "\n";
+		}
+	}
+
+	@SuppressWarnings( "unchecked" )
+	public static abstract class Argument< T extends Argument< T > > extends Command< T >
+	{
+
+		protected String argument;
+
+		private boolean visible = true;
+
+		public T argument( final String argument )
+		{
+			this.argument = argument;
+			return ( T ) this;
 		}
 
 		public String getArgument()
@@ -537,7 +764,5 @@ public class CLIConfigurator
 		{
 			return visible;
 		}
-
-		public abstract void accept( final ArgumentVisitor visitor );
 	}
 }

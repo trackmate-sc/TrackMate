@@ -43,6 +43,7 @@ import fiji.plugin.trackmate.util.cli.CLIConfigurator.Argument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.ArgumentVisitor;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.ChoiceArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.DoubleArgument;
+import fiji.plugin.trackmate.util.cli.CLIConfigurator.ExecutablePath;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.Flag;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.IntArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.PathArgument;
@@ -57,7 +58,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 
 	private final GridBagConstraints c;
 
-	private CliGuiBuilder( final String executable )
+	private CliGuiBuilder( final ExecutablePath executableArg )
 	{
 		this.panel = new JPanel();
 		final GridBagLayout layout = new GridBagLayout();
@@ -70,11 +71,17 @@ public class CliGuiBuilder implements ArgumentVisitor
 		c.gridx = 0;
 		c.gridy = 0;
 
-		final PathArgument executablePath = new PathArgument()
-				.help( "Path to executable" )
-				.name( "Path to executable" );
-		executablePath.set( executable );
-		visit( executablePath );
+		visit( executableArg );
+	}
+
+	@Override
+	public void visit( final ExecutablePath arg )
+	{
+		final StringElement element = stringElement( arg.getName(), arg::getValue, arg::set );
+		addToPathLayout(
+				arg.getHelp(),
+				new JLabel( element.getLabel() ),
+				linkedTextField( element ) );
 
 		panel.add( Box.createVerticalStrut( 10 ), c );
 		final JSeparator separator = new JSeparator( JSeparator.HORIZONTAL );
@@ -318,7 +325,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 
 	public static JPanel build( final CLIConfigurator cli )
 	{
-		final CliGuiBuilder builder = new CliGuiBuilder( cli.getExecutable() );
+		final CliGuiBuilder builder = new CliGuiBuilder( cli.getExecutableArg() );
 		cli.getArguments().stream()
 				.filter( Argument::isVisible )
 				.forEach( arg -> arg.accept( builder ) );
