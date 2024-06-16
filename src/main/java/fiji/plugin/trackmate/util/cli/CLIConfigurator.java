@@ -398,6 +398,7 @@ public class CLIConfigurator
 		}
 	}
 
+	@SuppressWarnings( "unchecked" )
 	public static abstract class ValueArgument< T extends ValueArgument< T > > extends Argument< T >
 	{
 
@@ -407,7 +408,8 @@ public class CLIConfigurator
 		 */
 		protected boolean required = false;
 
-		@SuppressWarnings( "unchecked" )
+		private String units;
+
 		public T required( final boolean required )
 		{
 			this.required = required;
@@ -417,6 +419,17 @@ public class CLIConfigurator
 		public boolean isRequired()
 		{
 			return required;
+		}
+
+		public T units( final String units )
+		{
+			this.units = units;
+			return ( T ) this;
+		}
+
+		public String getUnits()
+		{
+			return units;
 		}
 	}
 

@@ -48,7 +48,10 @@ public class CliGuiBuilder implements ArgumentVisitor
 
 	private CliGuiBuilder()
 	{
-		this.panel = new JPanel( new GridBagLayout() );
+		this.panel = new JPanel();
+		final GridBagLayout layout = new GridBagLayout();
+		layout.columnWeights = new double[] { 0., 1., 0. };
+		panel.setLayout( layout );
 		panel.setBorder( BorderFactory.createEmptyBorder( 5, 5, 5, 5 ) );
 		this.c = new GridBagConstraints();
 		c.fill = GridBagConstraints.HORIZONTAL;
@@ -88,7 +91,8 @@ public class CliGuiBuilder implements ArgumentVisitor
 		}
 		addToLayout(
 				new JLabel( element.getLabel() ),
-				linkedSliderPanel( element, numberOfColumns ) );
+				linkedSliderPanel( element, numberOfColumns ),
+				arg.getUnits() );
 	}
 
 	@Override
@@ -100,14 +104,16 @@ public class CliGuiBuilder implements ArgumentVisitor
 					arg.getMin(), arg.getMax(), arg::getValue, arg::set );
 			addToLayout(
 					new JLabel( element.getLabel() ),
-					linkedSliderPanel( element, tfCols, 0.1 ) );
+					linkedSliderPanel( element, tfCols, 0.1 ),
+					arg.getUnits() );
 		}
 		else
 		{
 			final DoubleElement element = doubleElement( arg.getName(), arg::getValue, arg::set );
 			addToLayout(
 					new JLabel( element.getLabel() ),
-					linkedFormattedTextField( element ) );
+					linkedFormattedTextField( element ),
+					arg.getUnits() );
 		}
 	}
 
@@ -126,15 +132,16 @@ public class CliGuiBuilder implements ArgumentVisitor
 		final ListElement< String > element = listElement( arg.getName(), arg.getChoices(), arg::getValue, arg::set );
 		addToLayout(
 				new JLabel( element.getLabel() ),
-				linkedComboBoxSelector( element ) );
+				linkedComboBoxSelector( element ),
+				arg.getUnits() );
 	}
 
 	private void addToLayoutTwoLines( final JLabel lbl, final JComponent comp )
 	{
-		lbl.setText( lbl.getText() + ": " );
+		lbl.setText( lbl.getText() + " " );
 		lbl.setFont( Fonts.SMALL_FONT );
 		c.insets = new Insets( 5, 0, 0, 0 );
-		c.gridwidth = 2;
+		c.gridwidth = 3;
 		panel.add( lbl, c );
 		c.gridy++;
 		c.anchor = GridBagConstraints.LINE_START;
@@ -145,7 +152,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 
 	private void addToLayout( final JLabel lbl, final JComponent comp )
 	{
-		lbl.setText( lbl.getText() + ": " );
+		lbl.setText( lbl.getText() + " " );
 		lbl.setFont( Fonts.SMALL_FONT );
 		lbl.setHorizontalAlignment( JLabel.RIGHT );
 		c.gridwidth = 1;
@@ -153,14 +160,42 @@ public class CliGuiBuilder implements ArgumentVisitor
 		panel.add( lbl, c );
 
 		c.gridx++;
-		c.weightx = 1.0;
+		c.gridwidth = 2;
 		c.anchor = GridBagConstraints.LINE_START;
 		panel.add( comp, c );
 
-		c.weightx = 0.0;
 		c.gridx = 0;
 		c.gridy++;
 		c.insets = new Insets( 5, 0, 5, 0 );
+	}
+
+	private void addToLayout( final JLabel lbl, final JComponent comp, final String units )
+	{
+		if ( units == null )
+		{
+			addToLayout( lbl, comp );
+			return;
+		}
+
+		lbl.setText( lbl.getText() + " " );
+		lbl.setFont( Fonts.SMALL_FONT );
+		lbl.setHorizontalAlignment( JLabel.RIGHT );
+		c.gridwidth = 1;
+		c.anchor = GridBagConstraints.LINE_END;
+		panel.add( lbl, c );
+
+		c.gridx++;
+		c.anchor = GridBagConstraints.LINE_START;
+		panel.add( comp, c );
+
+		final JLabel lblUnits = new JLabel( " " + units );
+		lblUnits.setFont( Fonts.SMALL_FONT );
+		c.gridx++;
+		c.insets = new Insets( 5, 0, 5, 0 );
+		panel.add( lblUnits, c );
+
+		c.gridx = 0;
+		c.gridy++;
 	}
 
 	public static JPanel build( final CLIConfigurator cli )

@@ -47,7 +47,8 @@ public class ExampleCellposeCLI
 		final DoubleArgument cellDiameter = cli.addDoubleArgument()
 				.name( "Cell diameter" )
 				.argument( "--diameter" )
-				.min( 0. );
+				.min( 0. )
+				.units( "µm" );
 
 		final Flag useGPU = cli.addFlag()
 				.name( "Use GPU" )
