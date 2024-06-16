@@ -182,7 +182,7 @@ public class CLIConfigurator
 
 		/**
 		 * Defines the min.
-		 * 
+		 *
 		 * @param min,
 		 *            inclusive.
 		 * @return the argument.
@@ -384,6 +384,11 @@ public class CLIConfigurator
 		public String getValue()
 		{
 			return choices.get( selected );
+		}
+
+		public List< String > getChoices()
+		{
+			return choices;
 		}
 
 		@Override
