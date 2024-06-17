@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.util.cli.cellpose;
 
+import static fiji.plugin.trackmate.detection.ThresholdDetectorFactory.KEY_SIMPLIFY_CONTOURS;
+
 import java.awt.BorderLayout;
 import java.io.File;
 import java.util.HashMap;
@@ -11,6 +13,8 @@ import javax.swing.JPanel;
 
 import org.apache.commons.lang3.StringUtils;
 
+import fiji.plugin.trackmate.gui.displaysettings.StyleElements;
+import fiji.plugin.trackmate.gui.displaysettings.StyleElements.BooleanElement;
 import fiji.plugin.trackmate.util.cli.CliGuiBuilder;
 import fiji.plugin.trackmate.util.cli.CommandBuilder;
 import fiji.plugin.trackmate.util.cli.TrackMateSettingsBuilder;
@@ -45,15 +49,25 @@ public class ExampleCellposeCLI
 		 * Create GUI.
 		 */
 
-		final JPanel panel = CliGuiBuilder.build( cli );
+		// Common settings map.
+		final Map< String, Object > map = new HashMap<>();
+
+		// The panel will show the CLI elements plus elements specific to
+		// TrackMate.
+
+		final BooleanElement simplyContourEl = StyleElements.booleanElement( KEY_SIMPLIFY_CONTOURS,
+				() -> ( ( Boolean ) map.getOrDefault( KEY_SIMPLIFY_CONTOURS, true ) ),
+				b -> map.put( KEY_SIMPLIFY_CONTOURS, b ) );
+
+		final JPanel panel = CliGuiBuilder.build( cli, simplyContourEl );
+
 		final JFrame frame = new JFrame( "Test CLI GUI" );
 		frame.getContentPane().add( panel, BorderLayout.CENTER );
 		final JButton btn = new JButton( "test" );
-		final Map< String, Object > map = new HashMap<>();
 		btn.addActionListener( e -> {
 			System.out.println( "---" );
 			System.out.println( CommandBuilder.build( cli ) );
-			TrackMateSettingsBuilder.toTrackMateSettings( cli, map );
+			TrackMateSettingsBuilder.toTrackMateSettings( map, cli, simplyContourEl );
 			System.out.println( map );
 		} );
 		frame.getContentPane().add( btn, BorderLayout.SOUTH );
