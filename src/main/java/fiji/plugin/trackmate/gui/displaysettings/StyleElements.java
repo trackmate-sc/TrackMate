@@ -31,7 +31,9 @@ import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -1131,9 +1133,23 @@ public class StyleElements
 		final JFormattedTextField ftf = new JFormattedTextField( format );
 		ftf.setHorizontalAlignment( JFormattedTextField.RIGHT );
 		ftf.setValue( Double.valueOf( element.get() ) );
-		GuiUtils.selectAllOnFocus( ftf );
 
 		ftf.addActionListener( e -> element.set( ( ( Number ) ftf.getValue() ).doubleValue() ) );
+		ftf.addFocusListener( new FocusAdapter()
+		{
+			@Override
+			public void focusLost( final java.awt.event.FocusEvent e )
+			{
+				try
+				{
+					ftf.commitEdit();
+					element.set( ( ( Number ) ftf.getValue() ).doubleValue() );
+				}
+				catch ( final ParseException e1 )
+				{}
+			}
+		} );
+		GuiUtils.selectAllOnFocus( ftf );
 		element.onSet( d -> {
 			if ( d != ( ( Number ) ftf.getValue() ).doubleValue() )
 				ftf.setValue( Double.valueOf( element.value ) );
