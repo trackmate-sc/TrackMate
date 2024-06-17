@@ -16,6 +16,10 @@ public class CLIConfigurator
 
 	protected final List< SelectableArguments > selectables = new ArrayList<>();
 
+	/*
+	 * GETTERS
+	 */
+
 	public List< Argument< ? > > getArguments()
 	{
 		return arguments;
@@ -33,6 +37,137 @@ public class CLIConfigurator
 			selectable.filter( selectedArguments );
 		return selectedArguments;
 	}
+
+	/*
+	 * EXECUTABLE.
+	 */
+
+	/**
+	 * Exposes the executable path argument.
+	 */
+	public ExecutablePath getExecutableArg()
+	{
+		return executable;
+	}
+
+	/*
+	 * SELECTABLE ARGUMENT GROUPS.
+	 */
+
+	/**
+	 * Creates a 'one or the other' relationships. The arguments that will be
+	 * passed to the {@link SelectableArguments} will be flagged as as not to be
+	 * used concurrently in the same command. This will be used when creating
+	 * UIs.
+	 *
+	 * @return
+	 */
+	protected SelectableArguments addSelectableArguments()
+	{
+		final SelectableArguments sa = new SelectableArguments();
+		selectables.add( sa );
+		return sa;
+	}
+
+	public static class SelectableArguments
+	{
+
+		private final List< Argument< ? > > args = new ArrayList<>();
+
+		private int selected = 0;
+
+		public SelectableArguments add( final Argument< ? > arg )
+		{
+			if ( !args.contains( arg ) )
+				args.add( arg );
+			return this;
+		}
+
+		private void filter( final List< Argument< ? > > arguments )
+		{
+			final Set< Argument< ? > > toRemove = new HashSet<>();
+			for ( final Argument< ? > arg : arguments )
+			{
+				if ( !args.contains( arg ) )
+					continue; // Unknown of this selectable, keep it.
+
+				if ( arg.equals( getSelection() ) )
+					continue; // The one selected, keep it.
+
+				// Not selected, remove it.
+				toRemove.add( arg );
+			}
+
+			arguments.removeAll( toRemove );
+		}
+
+		public void select( final Argument< ? > arg )
+		{
+			final int sel = args.indexOf( arg );
+			if ( sel < 0 )
+				throw new IllegalArgumentException( "Unknown argument '" + arg.getName() + "' for this selectable." );
+			this.selected = sel;
+		}
+
+		public Argument< ? > getSelection()
+		{
+			return args.get( selected );
+		}
+
+		/**
+		 * Exposes all members of the selectable.
+		 */
+		public List< Argument< ? > > getArguments()
+		{
+			return args;
+		}
+	}
+
+	/*
+	 * VISITOR INTERFACE.
+	 */
+
+	public interface ArgumentVisitor
+	{
+		public default void visit( final Flag flag )
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		public default void visit( final StringArgument stringArgument )
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		public default void visit( final DoubleArgument doubleArgument )
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		public default void visit( final IntArgument intArgument )
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		public default void visit( final ChoiceArgument choiceArgument )
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		public default void visit( final PathArgument pathArgument )
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		public default void visit( final ExecutablePath executablePath )
+		{
+			throw new UnsupportedOperationException();
+		}
+	}
+
+	/*
+	 * ADDER CLASSES.
+	 */
 
 	@SuppressWarnings( "unchecked" )
 	private abstract class Adder< A extends ValueArgument< A, O >, T extends Adder< A, T, O >, O >
@@ -125,7 +260,7 @@ public class CLIConfigurator
 		}
 	}
 
-	public class IntAdder extends BoundedAdder< IntArgument, IntAdder, Integer >
+	protected class IntAdder extends BoundedAdder< IntArgument, IntAdder, Integer >
 	{
 		@Override
 		public IntArgument get()
@@ -146,7 +281,7 @@ public class CLIConfigurator
 		}
 	}
 
-	public class DoubleAdder extends BoundedAdder< DoubleArgument, DoubleAdder, Double >
+	protected class DoubleAdder extends BoundedAdder< DoubleArgument, DoubleAdder, Double >
 	{
 
 		private DoubleAdder()
@@ -171,7 +306,7 @@ public class CLIConfigurator
 		}
 	}
 
-	public class FlagAdder extends Adder< Flag, FlagAdder, Boolean >
+	protected class FlagAdder extends Adder< Flag, FlagAdder, Boolean >
 	{
 
 		private FlagAdder()
@@ -194,7 +329,7 @@ public class CLIConfigurator
 		}
 	}
 
-	public class StringAdder extends Adder< StringArgument, StringAdder, String >
+	protected class StringAdder extends Adder< StringArgument, StringAdder, String >
 	{
 
 		private StringAdder()
@@ -217,7 +352,7 @@ public class CLIConfigurator
 		}
 	}
 
-	public class PathAdder extends Adder< PathArgument, PathAdder, String >
+	protected class PathAdder extends Adder< PathArgument, PathAdder, String >
 	{
 
 		private PathAdder()
@@ -240,7 +375,7 @@ public class CLIConfigurator
 		}
 	}
 
-	public class ChoiceAdder extends Adder< ChoiceArgument, ChoiceAdder, String >
+	protected class ChoiceAdder extends Adder< ChoiceArgument, ChoiceAdder, String >
 	{
 
 		private ChoiceAdder()
@@ -293,120 +428,9 @@ public class CLIConfigurator
 		}
 	}
 
-	/**
-	 * Exposes the executable path argument.
+	/*
+	 * ADDER METHODS.
 	 */
-	public ExecutablePath getExecutableArg()
-	{
-		return executable;
-	}
-
-	/**
-	 * Creates a 'one or the other' relationships. The arguments that will be
-	 * passed to the {@link SelectableArguments} will be flagged as as not to be
-	 * used concurrently in the same command. This will be used when creating
-	 * UIs.
-	 *
-	 * @return
-	 */
-	protected SelectableArguments addSelectableArguments()
-	{
-		final SelectableArguments sa = new SelectableArguments();
-		selectables.add( sa );
-		return sa;
-	}
-
-	public static class SelectableArguments
-	{
-
-		private final List< Argument< ? > > args = new ArrayList<>();
-
-		private int selected = 0;
-
-		public SelectableArguments add( final Argument< ? > arg )
-		{
-			if ( !args.contains( arg ) )
-				args.add( arg );
-			return this;
-		}
-
-		private void filter( final List< Argument< ? > > arguments )
-		{
-			final Set< Argument< ? > > toRemove = new HashSet<>();
-			for ( final Argument< ? > arg : arguments )
-			{
-				if ( !args.contains( arg ) )
-					continue; // Unknown of this selectable, keep it.
-
-				if ( arg.equals( getSelection() ) )
-					continue; // The one selected, keep it.
-
-				// Not selected, remove it.
-				toRemove.add( arg );
-			}
-
-			arguments.removeAll( toRemove );
-		}
-
-		public void select( final Argument< ? > arg )
-		{
-			final int sel = args.indexOf( arg );
-			if ( sel < 0 )
-				throw new IllegalArgumentException( "Unknown argument '" + arg.getName() + "' for this selectable." );
-			this.selected = sel;
-		}
-
-		public Argument< ? > getSelection()
-		{
-			return args.get( selected );
-		}
-
-		/**
-		 * Exposes all members of the selectable.
-		 */
-		public List< Argument< ? > > getArguments()
-		{
-			return args;
-		}
-	}
-
-	public interface ArgumentVisitor
-	{
-		public default void visit( final Flag flag )
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		public default void visit( final StringArgument stringArgument )
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		public default void visit( final DoubleArgument doubleArgument )
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		public default void visit( final IntArgument intArgument )
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		public default void visit( final ChoiceArgument choiceArgument )
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		public default void visit( final PathArgument pathArgument )
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		public default void visit( final ExecutablePath executablePath )
-		{
-			throw new UnsupportedOperationException();
-		}
-	}
 
 	protected FlagAdder addFlag()
 	{
@@ -437,6 +461,10 @@ public class CLIConfigurator
 	{
 		return new ChoiceAdder();
 	}
+
+	/*
+	 * ARGUMENT CLASSES.
+	 */
 
 	public static class Flag extends ValueArgument< Flag, Boolean >
 	{
