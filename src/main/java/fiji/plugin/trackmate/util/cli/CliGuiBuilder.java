@@ -153,7 +153,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 				arg.getMin(), arg.getMax(), arg::getValue, arg::set );
 
 		final int numberOfColumns;
-		if ( arg.isMinSet() && arg.isMinSet() )
+		if ( arg.hasMin() && arg.hasMin() )
 		{
 			final int largest = Math.max( Math.abs( arg.getMin() ), Math.abs( arg.getMax() ) );
 			final String numberString = String.valueOf( largest );
@@ -174,7 +174,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 	@Override
 	public void visit( final DoubleArgument arg )
 	{
-		if ( arg.isMinSet() && arg.isMaxSet() )
+		if ( arg.hasMin() && arg.hasMax() )
 		{
 			final BoundedDoubleElement element = boundedDoubleElement( arg.getName(),
 					arg.getMin(), arg.getMax(), arg::getValue, arg::set );

@@ -10,11 +10,11 @@ import org.apache.commons.lang3.StringUtils;
 public class CLIConfigurator
 {
 
-	private final List< Argument< ? > > arguments = new ArrayList<>();
+	protected final List< Argument< ? > > arguments = new ArrayList<>();
 
-	private final ExecutablePath executable = new ExecutablePath();
+	protected final ExecutablePath executable = new ExecutablePath();
 
-	private final List< SelectableArguments > selectables = new ArrayList<>();
+	protected final List< SelectableArguments > selectables = new ArrayList<>();
 
 	public List< Argument< ? > > getArguments()
 	{
@@ -34,6 +34,265 @@ public class CLIConfigurator
 		return selectedArguments;
 	}
 
+	@SuppressWarnings( "unchecked" )
+	private abstract class Adder< A extends ValueArgument< A, O >, T extends Adder< A, T, O >, O >
+	{
+
+		protected String name;
+
+		protected String help;
+
+		protected String key;
+
+		protected boolean required;
+
+		protected String units;
+
+		protected O defaultValue;
+
+		protected String argument;
+
+		protected boolean visible = true; // by default
+
+		public T argument( final String argument )
+		{
+			this.argument = argument;
+			return ( T ) this;
+		}
+
+		public T visible( final boolean visible )
+		{
+			this.visible = visible;
+			return ( T ) this;
+		}
+
+		public T name( final String name )
+		{
+			this.name = name;
+			return ( T ) this;
+		}
+
+		public T help( final String help )
+		{
+			this.help = help;
+			return ( T ) this;
+		}
+
+		public T key( final String key )
+		{
+			this.key = key;
+			return ( T ) this;
+		}
+
+		public T required( final boolean required )
+		{
+			this.required = required;
+			return ( T ) this;
+		}
+
+		public T units( final String units )
+		{
+			this.units = units;
+			return ( T ) this;
+		}
+
+		public T defaultValue( final O defaultValue )
+		{
+			this.defaultValue = defaultValue;
+			return ( T ) this;
+		}
+
+		public abstract A get();
+	}
+
+	@SuppressWarnings( "unchecked" )
+	private abstract class BoundedAdder< A extends BoundedValueArgument< A, O >, T extends BoundedAdder< A, T, O >, O > extends Adder< A, T, O >
+	{
+		protected O min;
+
+		protected O max;
+
+		public T min( final O min )
+		{
+			this.min = min;
+			return ( T ) this;
+		}
+
+		public T max( final O max )
+		{
+			this.max = max;
+			return ( T ) this;
+		}
+	}
+
+	public class IntAdder extends BoundedAdder< IntArgument, IntAdder, Integer >
+	{
+		@Override
+		public IntArgument get()
+		{
+			final IntArgument arg = new IntArgument()
+					.name( name )
+					.help( help )
+					.argument( argument )
+					.defaultValue( defaultValue )
+					.max( max )
+					.min( min )
+					.required( required )
+					.units( units )
+					.visible( visible )
+					.key( key );
+			CLIConfigurator.this.arguments.add( arg );
+			return arg;
+		}
+	}
+
+	public class DoubleAdder extends BoundedAdder< DoubleArgument, DoubleAdder, Double >
+	{
+
+		private DoubleAdder()
+		{}
+
+		@Override
+		public DoubleArgument get()
+		{
+			final DoubleArgument arg = new DoubleArgument()
+					.name( name )
+					.help( help )
+					.argument( argument )
+					.defaultValue( defaultValue )
+					.max( max )
+					.min( min )
+					.required( required )
+					.units( units )
+					.visible( visible )
+					.key( key );
+			CLIConfigurator.this.arguments.add( arg );
+			return arg;
+		}
+	}
+
+	public class FlagAdder extends Adder< Flag, FlagAdder, Boolean >
+	{
+
+		private FlagAdder()
+		{}
+
+		@Override
+		public Flag get()
+		{
+			final Flag arg = new Flag()
+					.name( name )
+					.help( help )
+					.argument( argument )
+					.defaultValue( defaultValue )
+					.required( required )
+					.units( units )
+					.visible( visible )
+					.key( key );
+			CLIConfigurator.this.arguments.add( arg );
+			return arg;
+		}
+	}
+
+	public class StringAdder extends Adder< StringArgument, StringAdder, String >
+	{
+
+		private StringAdder()
+		{}
+
+		@Override
+		public StringArgument get()
+		{
+			final StringArgument arg = new StringArgument()
+					.name( name )
+					.help( help )
+					.argument( argument )
+					.defaultValue( defaultValue )
+					.required( required )
+					.units( units )
+					.visible( visible )
+					.key( key );
+			CLIConfigurator.this.arguments.add( arg );
+			return arg;
+		}
+	}
+
+	public class PathAdder extends Adder< PathArgument, PathAdder, String >
+	{
+
+		private PathAdder()
+		{}
+
+		@Override
+		public PathArgument get()
+		{
+			final PathArgument arg = new PathArgument()
+					.name( name )
+					.help( help )
+					.argument( argument )
+					.defaultValue( defaultValue )
+					.required( required )
+					.units( units )
+					.visible( visible )
+					.key( key );
+			CLIConfigurator.this.arguments.add( arg );
+			return arg;
+		}
+	}
+
+	public class ChoiceAdder extends Adder< ChoiceArgument, ChoiceAdder, String >
+	{
+
+		private ChoiceAdder()
+		{}
+
+		private final List< String > choices = new ArrayList<>();
+
+		public ChoiceAdder addChoice( final String choice )
+		{
+			if ( !choices.contains( choice ) )
+				choices.add( choice );
+			return this;
+		}
+
+		@Override
+		public ChoiceAdder defaultValue( final String defaultChoice )
+		{
+			final int sel = choices.indexOf( defaultChoice );
+			if ( sel < 0 )
+				throw new IllegalArgumentException( "Unknown selection '" + defaultChoice + "' for parameter '"
+						+ name + "'. Must be one of " + StringUtils.join( choices, ", " ) + "." );
+			return super.defaultValue( defaultChoice );
+		}
+
+		public void defaultValue( final int selected )
+		{
+			if ( selected < 0 || selected >= choices.size() )
+				throw new IllegalArgumentException( "Invalid index for selection of parameter '"
+						+ name + "'. Must be in scale " + 0 + " to " + ( choices.size() - 1 ) + " in "
+						+ StringUtils.join( choices, ", " ) + "." );
+			defaultValue( choices.get( selected ) );
+		}
+
+		@Override
+		public ChoiceArgument get()
+		{
+			final ChoiceArgument arg = new ChoiceArgument()
+					.name( name )
+					.help( help )
+					.argument( argument )
+					.required( required )
+					.units( units )
+					.visible( visible )
+					.key( key );
+			for ( final String choice : choices )
+				arg.addChoice( choice );
+			arg.defaultValue( defaultValue );
+			CLIConfigurator.this.arguments.add( arg );
+			return arg;
+		}
+	}
+
 	/**
 	 * Exposes the executable path argument.
 	 */
@@ -50,7 +309,7 @@ public class CLIConfigurator
 	 *
 	 * @return
 	 */
-	public SelectableArguments addSelectableArguments()
+	protected SelectableArguments addSelectableArguments()
 	{
 		final SelectableArguments sa = new SelectableArguments();
 		selectables.add( sa );
@@ -149,104 +408,44 @@ public class CLIConfigurator
 		}
 	}
 
-	public Flag addFlag()
+	protected FlagAdder addFlag()
 	{
-		final Flag flag = new Flag();
-		arguments.add( flag );
-		return flag;
+		return new FlagAdder();
 	}
 
-	public StringArgument addStringArgument()
+	protected StringAdder addStringArgument()
 	{
-		final StringArgument stringArgument = new StringArgument();
-		arguments.add( stringArgument );
-		return stringArgument;
+		return new StringAdder();
 	}
 
-	public PathArgument addPathArgument()
+	protected PathAdder addPathArgument()
 	{
-		final PathArgument pathArgument = new PathArgument();
-		arguments.add( pathArgument );
-		return pathArgument;
+		return new PathAdder();
 	}
 
-	public IntArgument addIntArgument()
+	protected IntAdder addIntArgument()
 	{
-		final IntArgument intArgument = new IntArgument();
-		arguments.add( intArgument );
-		return intArgument;
+		return new IntAdder();
 	}
 
-	public DoubleArgument addDoubleArgument()
+	protected DoubleAdder addDoubleArgument()
 	{
-		final DoubleArgument doubleArgument = new DoubleArgument();
-		arguments.add( doubleArgument );
-		return doubleArgument;
+		return new DoubleAdder();
 	}
 
-	public ChoiceArgument addChoiceArgument()
+	protected ChoiceAdder addChoiceArgument()
 	{
-		final ChoiceArgument choiceArgument = new ChoiceArgument();
-		arguments.add( choiceArgument );
-		return choiceArgument;
+		return new ChoiceAdder();
 	}
 
-	public static class Flag extends Argument< Flag >
+	public static class Flag extends ValueArgument< Flag, Boolean >
 	{
-
-		private boolean value = false;
-
-		private boolean defaultValue;
-
-		private boolean set = false;
+		private Flag()
+		{}
 
 		public void set()
 		{
-			this.value = true;
-			this.set = true;
-		}
-
-		public void set( final boolean set )
-		{
-			this.value = set;
-			this.set = true;
-		}
-
-		public boolean getValue()
-		{
-			return value;
-		}
-
-		public boolean isSet()
-		{
-			return set;
-		}
-
-		public Flag defaultValue( final boolean defaultValue )
-		{
-			this.defaultValue = defaultValue;
-			return this;
-		}
-
-		public boolean getDefaultValue()
-		{
-			return defaultValue;
-		}
-
-		@Override
-		public Object getValueObject()
-		{
-			return Boolean.valueOf( value );
-		}
-
-		@Override
-		public void setValueObject( final Object val )
-		{
-			if ( !Boolean.class.isInstance( val ) )
-				throw new IllegalArgumentException( "Argument '" + name + "' expects boolean. Got " + val.getClass().getSimpleName() );
-
-			final boolean v = ( ( Boolean ) val );
-			set( v );
+			set( true );
 		}
 
 		@Override
@@ -256,15 +455,13 @@ public class CLIConfigurator
 		}
 
 		@Override
-		public String toString()
+		public void setValueObject( final Object val )
 		{
-			final String str = super.toString();
-			return str
-					+ " - is set: " + isSet() + "\n"
-					+ ( isSet()
-							? " - value: " + getValue() + "\n"
-							: "" )
-					+ " - default value: " + getDefaultValue() + "\n";
+			if ( !Boolean.class.isInstance( val ) )
+				throw new IllegalArgumentException( "Argument '" + name + "' expects Boolean. Got " + val.getClass().getSimpleName() );
+
+			final Boolean v = ( ( Boolean ) val );
+			set( v );
 		}
 	}
 
@@ -273,6 +470,8 @@ public class CLIConfigurator
 	 */
 	public static class PathArgument extends AbstractStringArgument< PathArgument >
 	{
+		private PathArgument()
+		{}
 
 		@Override
 		public void accept( final ArgumentVisitor visitor )
@@ -283,6 +482,9 @@ public class CLIConfigurator
 
 	public static class StringArgument extends AbstractStringArgument< StringArgument >
 	{
+		private StringArgument()
+		{}
+
 		@Override
 		public void accept( final ArgumentVisitor visitor )
 		{
@@ -290,181 +492,24 @@ public class CLIConfigurator
 		}
 	}
 
-	public static abstract class AbstractStringArgument< T extends AbstractStringArgument< T > > extends ValueArgument< T >
+	public static abstract class AbstractStringArgument< T extends AbstractStringArgument< T > > extends ValueArgument< T, String >
 	{
-
-		/**
-		 * If this is not <code>null</code>, the argument will be added to the
-		 * command with the default value, even if the user does not explicitly
-		 * call the argument. This emulates Python argparse.ArgumentParser.
-		 */
-		private String defaultValue = null;
-
-		private String value = null;
-
-		@SuppressWarnings( "unchecked" )
-		public T defaultValue( final String defaultValue )
-		{
-			this.defaultValue = defaultValue;
-			return ( T ) this;
-		}
-
-		public void set( final String value )
-		{
-			this.value = value;
-		}
-
-		public boolean isSet()
-		{
-			return value != null;
-		}
-
-		public boolean hasDefaultValue()
-		{
-			return defaultValue != null;
-		}
-
-		public String getValue()
-		{
-			return value;
-		}
-
-		public String getDefaultValue()
-		{
-			return defaultValue;
-		}
-
-		@Override
-		public Object getValueObject()
-		{
-			return value;
-		}
 
 		@Override
 		public void setValueObject( final Object val )
 		{
 			if ( !String.class.isInstance( val ) )
-				throw new IllegalArgumentException( "Argument '" + name + "' expects a String. Got " + val.getClass().getSimpleName() );
-		}
+				throw new IllegalArgumentException( "Argument '" + name + "' expects String. Got " + val.getClass().getSimpleName() );
 
-		@Override
-		public String toString()
-		{
-			final String str = super.toString();
-			return str
-					+ " - value: " + getValue() + "\n"
-					+ " - has default value: " + hasDefaultValue() + "\n"
-					+ ( hasDefaultValue()
-							? " - default value: " + getDefaultValue() + "\n"
-							: "" )
-					+ " - units: " + getUnits() + "\n";
+			final String v = ( ( String ) val );
+			set( v );
 		}
 	}
 
-	public static class IntArgument extends ValueArgument< IntArgument >
+	public static class IntArgument extends BoundedValueArgument< IntArgument, Integer >
 	{
-
-		/**
-		 * If this is not <code>Integer.MIN_VALUE</code>, the argument will be
-		 * added to the command with the default value, even if the user does
-		 * not explicitly call the argument. This emulates Python
-		 * argparse.ArgumentParser.
-		 */
-		private int defaultValue = Integer.MIN_VALUE;
-
-		/** Considered set if different from <code>Integer.MIN_VALUE</code>. */
-		private int min = Integer.MIN_VALUE;
-
-		/** Considered set if different from <code>Integer.MAX_VALUE</code>. */
-		private int max = Integer.MAX_VALUE;
-
-		private int value = Integer.MIN_VALUE; // unset value
-
-		public IntArgument defaultValue( final int defaultValue )
-		{
-			this.defaultValue = defaultValue;
-			return this;
-		}
-
-		/**
-		 * Defines the min.
-		 *
-		 * @param min,
-		 *            inclusive.
-		 * @return the argument.
-		 */
-		public IntArgument min( final int min )
-		{
-			this.min = min;
-			return this;
-		}
-
-		public IntArgument max( final int max )
-		{
-			this.max = max;
-			return this;
-		}
-
-		public void set( final int value )
-		{
-			this.value = value;
-		}
-
-		public boolean isSet()
-		{
-			return value != Integer.MIN_VALUE;
-		}
-
-		public boolean hasDefaultValue()
-		{
-			return defaultValue != Integer.MIN_VALUE;
-		}
-
-		public int getDefaultValue()
-		{
-			return defaultValue;
-		}
-
-		public int getValue()
-		{
-			return value;
-		}
-
-		public int getMin()
-		{
-			return min;
-		}
-
-		public boolean isMinSet()
-		{
-			return min != Integer.MIN_VALUE;
-		}
-
-		public int getMax()
-		{
-			return max;
-		}
-
-		public boolean isMaxSet()
-		{
-			return max != Integer.MAX_VALUE;
-		}
-
-		@Override
-		public Object getValueObject()
-		{
-			return Integer.valueOf( value );
-		}
-
-		@Override
-		public void setValueObject( final Object val )
-		{
-			if ( !Number.class.isInstance( val ) )
-				throw new IllegalArgumentException( "Argument '" + name + "' expects a Number. Got " + val.getClass().getSimpleName() );
-
-			final int v = ( ( Number ) val ).intValue();
-			set( v );
-		}
+		private IntArgument()
+		{}
 
 		@Override
 		public void accept( final ArgumentVisitor visitor )
@@ -473,132 +518,18 @@ public class CLIConfigurator
 		}
 
 		@Override
-		public String toString()
+		public void setValueObject( final Object val )
 		{
-			final String str = super.toString();
-			return str
-					+ " - is set: " + isSet() + "\n"
-					+ ( isSet()
-							? " - value: " + getValue() + "\n"
-							: "" )
-					+ " - has default value: " + hasDefaultValue() + "\n"
-					+ ( hasDefaultValue()
-							? " - default value: " + getDefaultValue() + "\n"
-							: "" )
-					+ " - units: " + getUnits() + "\n"
-					+ " - has min: " + isMinSet() + "\n"
-					+ ( isMinSet()
-							? " - min: " + getMin() + "\n"
-							: "" )
-					+ " - has max: " + isMaxSet() + "\n"
-					+ ( isMaxSet()
-							? " - max: " + getMax() + "\n"
-							: "" );
+			if ( !Integer.class.isInstance( val ) )
+				throw new IllegalArgumentException( "Argument '" + name + "' expects Integer. Got " + val.getClass().getSimpleName() );
+
+			final Integer v = ( ( Integer ) val );
+			set( v );
 		}
 	}
 
-	public static class DoubleArgument extends ValueArgument< DoubleArgument >
+	public static class DoubleArgument extends BoundedValueArgument< DoubleArgument, Double >
 	{
-
-		/**
-		 * If this is not <code>Double.NaN</code>, the argument will be added to
-		 * the command with the default value, even if the user does not
-		 * explicitly call the argument. This emulates Python
-		 * argparse.ArgumentParser.
-		 */
-		private double defaultValue = Double.NaN;
-
-		/**
-		 * Considered set if different from <code>Double.NaN</code>.
-		 */
-		private double min = Double.NaN;
-
-		/**
-		 * Considered set if different from <code>Double.NaN</code>.
-		 */
-		private double max = Double.NaN;
-
-		private double value = Double.NaN;
-
-		public DoubleArgument defaultValue( final double defaultValue )
-		{
-			this.defaultValue = defaultValue;
-			return this;
-		}
-
-		public DoubleArgument min( final double min )
-		{
-			this.min = min;
-			return this;
-		}
-
-		public DoubleArgument max( final double max )
-		{
-			this.max = max;
-			return this;
-		}
-
-		public void set( final double value )
-		{
-			this.value = value;
-		}
-
-		public boolean isSet()
-		{
-			return !Double.isNaN( value );
-		}
-
-		public boolean hasDefaultValue()
-		{
-			return !Double.isNaN( defaultValue );
-		}
-
-		public double getDefaultValue()
-		{
-			return defaultValue;
-		}
-
-		public double getValue()
-		{
-			return value;
-		}
-
-		public double getMax()
-		{
-			return max;
-		}
-
-		public double getMin()
-		{
-			return min;
-		}
-
-		public boolean isMinSet()
-		{
-			return !Double.isNaN( min );
-		}
-
-		public boolean isMaxSet()
-		{
-			return !Double.isNaN( max );
-		}
-
-		@Override
-		public Object getValueObject()
-		{
-			return Double.valueOf( value );
-		}
-
-		@Override
-		public void setValueObject( final Object val )
-		{
-			if ( !Number.class.isInstance( val ) )
-				throw new IllegalArgumentException( "Argument '" + name + "' expects a Number. Got " + val.getClass().getSimpleName() );
-
-			final double v = ( ( Number ) val ).doubleValue();
-			set( v );
-		}
-
 		@Override
 		public void accept( final ArgumentVisitor visitor )
 		{
@@ -606,53 +537,39 @@ public class CLIConfigurator
 		}
 
 		@Override
-		public String toString()
+		public void setValueObject( final Object val )
 		{
-			final String str = super.toString();
-			return str
-					+ " - is set: " + isSet() + "\n"
-					+ ( isSet()
-							? " - value: " + getValue() + "\n"
-							: "" )
-					+ " - has default value: " + hasDefaultValue() + "\n"
-					+ ( hasDefaultValue()
-							? " - default value: " + getDefaultValue() + "\n"
-							: "" )
-					+ " - units: " + getUnits() + "\n"
-					+ " - has min: " + isMinSet() + "\n"
-					+ ( isMinSet()
-							? " - min: " + getMin() + "\n"
-							: "" )
-					+ " - has max: " + isMaxSet() + "\n"
-					+ ( isMaxSet()
-							? " - max: " + getMax() + "\n"
-							: "" );
+			if ( !Double.class.isInstance( val ) )
+				throw new IllegalArgumentException( "Argument '" + name + "' expects Double. Got " + val.getClass().getSimpleName() );
+
+			final Double v = ( ( Double ) val );
+			set( v );
 		}
 	}
 
-	public static class ChoiceArgument extends ValueArgument< ChoiceArgument >
+	public static class ChoiceArgument extends AbstractStringArgument< ChoiceArgument >
 	{
 
 		private final List< String > choices = new ArrayList<>();
 
-		private int selected = -1;
+		private ChoiceArgument()
+		{}
 
-		private int defaultChoice = -1;
-
-		public ChoiceArgument addChoice( final String choice )
+		ChoiceArgument addChoice( final String choice )
 		{
 			if ( !choices.contains( choice ) )
 				choices.add( choice );
 			return this;
 		}
 
+		@Override
 		public void set( final String choice )
 		{
 			final int sel = choices.indexOf( choice );
 			if ( sel < 0 )
 				throw new IllegalArgumentException( "Unknown selection '" + choice + "' for parameter '"
 						+ name + "'. Must be one of " + StringUtils.join( choices, ", " ) + "." );
-			this.selected = sel;
+			super.set( choice );
 		}
 
 		public void set( final int selected )
@@ -661,65 +578,33 @@ public class CLIConfigurator
 				throw new IllegalArgumentException( "Invalid index for selection of parameter '"
 						+ name + "'. Must be in scale " + 0 + " to " + ( choices.size() - 1 ) + " in "
 						+ StringUtils.join( choices, ", " ) + "." );
-			this.selected = selected;
+			super.set( choices.get( selected ) );
 		}
 
-		public ChoiceArgument defaultValue( final String defaultChoice )
+		@Override
+		ChoiceArgument defaultValue( final String defaultChoice )
 		{
 			final int sel = choices.indexOf( defaultChoice );
 			if ( sel < 0 )
 				throw new IllegalArgumentException( "Unknown selection '" + defaultChoice + "' for parameter '"
 						+ name + "'. Must be one of " + StringUtils.join( choices, ", " ) + "." );
-			this.defaultChoice = sel;
+			super.defaultValue( defaultChoice );
 			return this;
 		}
 
-		public ChoiceArgument defaultValue( final int selected )
+		ChoiceArgument defaultValue( final int selected )
 		{
 			if ( selected < 0 || selected >= choices.size() )
 				throw new IllegalArgumentException( "Invalid index for selection of parameter '"
 						+ name + "'. Must be in scale " + 0 + " to " + ( choices.size() - 1 ) + " in "
 						+ StringUtils.join( choices, ", " ) + "." );
-			this.defaultChoice = selected;
+			super.defaultValue( choices.get( selected ) );
 			return this;
-		}
-
-		public boolean hasDefaultValue()
-		{
-			return defaultChoice >= 0;
-		}
-
-		public boolean isSet()
-		{
-			return selected > 0;
-		}
-
-		public String getValue()
-		{
-			return choices.get( selected );
-		}
-
-		public String getDefaultValue()
-		{
-			return choices.get( defaultChoice );
 		}
 
 		public List< String > getChoices()
 		{
 			return choices;
-		}
-
-		@Override
-		public Object getValueObject()
-		{
-			return getValue();
-		}
-
-		@Override
-		public void setValueObject( final Object val )
-		{
-			if ( !String.class.isInstance( val ) )
-				throw new IllegalArgumentException( "Argument '" + name + "' expects a String. Got " + val.getClass().getSimpleName() );
 		}
 
 		@Override
@@ -733,16 +618,7 @@ public class CLIConfigurator
 		{
 			final String str = super.toString();
 			return str
-					+ " - choices: " + getChoices() + "\n"
-					+ " - is set: " + isSet() + "\n"
-					+ ( isSet()
-							? " - value: " + getValue() + "\n"
-							: "" )
-					+ " - has default value: " + hasDefaultValue() + "\n"
-					+ ( hasDefaultValue()
-							? " - default value: " + getDefaultValue() + "\n"
-							: "" )
-					+ " - units: " + getUnits() + "\n";
+					+ " - choices: " + getChoices() + "\n";
 		}
 	}
 
@@ -752,8 +628,12 @@ public class CLIConfigurator
 	 * @param <T>
 	 */
 	@SuppressWarnings( "unchecked" )
-	public static abstract class ValueArgument< T extends ValueArgument< T > > extends Argument< T >
+	public static abstract class ValueArgument< T extends ValueArgument< T, O >, O > extends Argument< T >
 	{
+
+		private O value;
+
+		private O defaultValue;
 
 		/**
 		 * Arguments flagged as not required, but without default value, will be
@@ -763,7 +643,7 @@ public class CLIConfigurator
 
 		private String units;
 
-		public T required( final boolean required )
+		T required( final boolean required )
 		{
 			this.required = required;
 			return ( T ) this;
@@ -774,7 +654,7 @@ public class CLIConfigurator
 			return required;
 		}
 
-		public T units( final String units )
+		T units( final String units )
 		{
 			this.units = units;
 			return ( T ) this;
@@ -785,13 +665,117 @@ public class CLIConfigurator
 			return units;
 		}
 
+		T defaultValue( final O defaultValue )
+		{
+			this.defaultValue = defaultValue;
+			return ( T ) this;
+		}
+
+		public O getDefaultValue()
+		{
+			return defaultValue;
+		}
+
+		public boolean hasDefaultValue()
+		{
+			return defaultValue != null;
+		}
+
+		public void set( final O value )
+		{
+			this.value = value;
+		}
+
+		public O getValue()
+		{
+			return value;
+		}
+
+		public boolean isSet()
+		{
+			return value != null;
+		}
+
+		@Override
+		public Object getValueObject()
+		{
+			return getValue();
+		}
+
 		@Override
 		public String toString()
 		{
 			final String str = super.toString();
 			return str
+					+ " - is set: " + isSet() + "\n"
+					+ ( isSet()
+							? " - value: " + getValue() + "\n"
+							: "" )
+					+ " - has default value: " + hasDefaultValue() + "\n"
+					+ ( hasDefaultValue()
+							? " - default value: " + getDefaultValue() + "\n"
+							: "" )
 					+ " - required: " + isRequired() + "\n"
 					+ " - units: " + getUnits() + "\n";
+		}
+	}
+
+	@SuppressWarnings( "unchecked" )
+	public static abstract class BoundedValueArgument< T extends BoundedValueArgument< T, O >, O > extends ValueArgument< T, O >
+	{
+
+		private BoundedValueArgument()
+		{}
+
+		private O min;
+
+		private O max;
+
+		T min( final O min )
+		{
+			this.min = min;
+			return ( T ) this;
+		}
+
+		public O getMax()
+		{
+			return max;
+		}
+
+		T max( final O max )
+		{
+			this.max = max;
+			return ( T ) this;
+		}
+
+		public O getMin()
+		{
+			return min;
+		}
+
+		public boolean hasMin()
+		{
+			return min != null;
+		}
+
+		public boolean hasMax()
+		{
+			return max != null;
+		}
+
+		@Override
+		public String toString()
+		{
+			final String str = super.toString();
+			return str
+					+ " - has min: " + hasMin() + "\n"
+					+ ( hasMin()
+							? " - min: " + getMin() + "\n"
+							: "" )
+					+ " - has max: " + hasMax() + "\n"
+					+ ( hasMax()
+							? " - max: " + getMax() + "\n"
+							: "" );
 		}
 	}
 
@@ -810,13 +794,13 @@ public class CLIConfigurator
 
 		private String key;
 
-		public T name( final String name )
+		T name( final String name )
 		{
 			this.name = name;
 			return ( T ) this;
 		}
 
-		public T help( final String help )
+		T help( final String help )
 		{
 			this.help = help;
 			return ( T ) this;
@@ -828,7 +812,7 @@ public class CLIConfigurator
 		 * @param key
 		 * @return
 		 */
-		public T key( final String key )
+		T key( final String key )
 		{
 
 			this.key = key;
@@ -850,22 +834,6 @@ public class CLIConfigurator
 			return key;
 		}
 
-		/**
-		 * Returns the value of this argument as a Java object that can be
-		 * serialized in a TrackMate settings map.
-		 *
-		 * @return
-		 */
-		public abstract Object getValueObject();
-
-		/**
-		 * Sets the value of this argument from a Java object. It must be of the
-		 * right class.
-		 *
-		 * @param val
-		 */
-		public abstract void setValueObject( Object val );
-
 		public abstract void accept( final ArgumentVisitor visitor );
 
 		@Override
@@ -876,6 +844,10 @@ public class CLIConfigurator
 					+ " - help: " + getHelp() + "\n"
 					+ " - key: " + getKey() + "\n";
 		}
+
+		public abstract void setValueObject( Object val );
+
+		public abstract Object getValueObject();
 	}
 
 	public static class ExecutablePath extends Command< ExecutablePath >
@@ -899,16 +871,21 @@ public class CLIConfigurator
 		}
 
 		@Override
-		public Object getValueObject()
+		public ExecutablePath name( final String name )
 		{
-			return value;
+			return super.name( name );
 		}
 
 		@Override
-		public void setValueObject( final Object val )
+		public ExecutablePath help( final String help )
 		{
-			if ( !String.class.isInstance( val ) )
-				throw new IllegalArgumentException( "Executable '" + name + "' expects a String. Got " + val.getClass().getSimpleName() );
+			return super.help( help );
+		}
+
+		@Override
+		public ExecutablePath key( final String key )
+		{
+			return super.key( key );
 		}
 
 		@Override
@@ -923,6 +900,22 @@ public class CLIConfigurator
 			final String str = super.toString();
 			return str + " - value: " + getValue() + "\n";
 		}
+
+		@Override
+		public void setValueObject( final Object val )
+		{
+			if ( !String.class.isInstance( val ) )
+				throw new IllegalArgumentException( "Argument '" + name + "' expects String. Got " + val.getClass().getSimpleName() );
+
+			final String v = ( ( String ) val );
+			set( v );
+		}
+
+		@Override
+		public Object getValueObject()
+		{
+			return getValue();
+		}
 	}
 
 	/**
@@ -935,11 +928,11 @@ public class CLIConfigurator
 	public static abstract class Argument< T extends Argument< T > > extends Command< T >
 	{
 
-		protected String argument;
+		private String argument;
 
 		private boolean visible = true;
 
-		public T argument( final String argument )
+		T argument( final String argument )
 		{
 			this.argument = argument;
 			return ( T ) this;
@@ -958,7 +951,7 @@ public class CLIConfigurator
 		 *            whether this argument should be visible in the UI or not.
 		 * @return the argument.
 		 */
-		public T visible( final boolean visible )
+		T visible( final boolean visible )
 		{
 			this.visible = visible;
 			return ( T ) this;
