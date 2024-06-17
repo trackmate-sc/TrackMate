@@ -24,6 +24,9 @@ package fiji.plugin.trackmate.gui.displaysettings;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -79,6 +82,25 @@ public class SliderPanel extends JPanel implements BoundedValue.UpdateListener
 			}
 		} );
 
+		final MouseWheelListener mwl = new MouseWheelListener()
+		{
+
+			@Override
+			public void mouseWheelMoved( final MouseWheelEvent e )
+			{
+				final int notches = e.getWheelRotation();
+				int value = slider.getValue();
+				value -= notches * spinnerStepSize;
+				if ( value < slider.getMinimum() )
+					value = slider.getMinimum();
+				else if ( value > slider.getMaximum() )
+					value = slider.getMaximum();
+				slider.setValue( value );
+			}
+		};
+		slider.addMouseWheelListener( mwl );
+		spinner.addMouseWheelListener( mwl );
+
 		spinner.addChangeListener( new ChangeListener()
 		{
 			@Override
@@ -106,6 +128,16 @@ public class SliderPanel extends JPanel implements BoundedValue.UpdateListener
 	public void setNumColummns( final int cols )
 	{
 		( ( JSpinner.NumberEditor ) spinner.getEditor() ).getTextField().setColumns( cols );
+	}
+
+	@Override
+	public void setFont( final Font font )
+	{
+		super.setFont( font );
+		if ( spinner != null )
+			spinner.setFont( font );
+		if ( slider != null )
+			slider.setFont( font );
 	}
 
 	@Override
