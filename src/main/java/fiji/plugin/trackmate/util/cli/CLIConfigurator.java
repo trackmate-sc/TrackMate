@@ -1,9 +1,12 @@
 package fiji.plugin.trackmate.util.cli;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -15,6 +18,8 @@ public class CLIConfigurator
 	protected final ExecutablePath executable = new ExecutablePath();
 
 	protected final List< SelectableArguments > selectables = new ArrayList<>();
+
+	protected final Map< Argument< ? >, Function< Object, String > > translators = new HashMap<>();
 
 	/*
 	 * GETTERS
@@ -48,6 +53,15 @@ public class CLIConfigurator
 	public ExecutablePath getExecutableArg()
 	{
 		return executable;
+	}
+
+	/*
+	 * VALUE TRANSLATOR.
+	 */
+
+	protected void setTranslator( final Argument< ? > arg, final Function< Object, String > translator )
+	{
+		translators.put( arg, translator );
 	}
 
 	/*
@@ -607,6 +621,11 @@ public class CLIConfigurator
 						+ name + "'. Must be in scale " + 0 + " to " + ( choices.size() - 1 ) + " in "
 						+ StringUtils.join( choices, ", " ) + "." );
 			super.set( choices.get( selected ) );
+		}
+
+		public int getSelectedIndex()
+		{
+			return choices.indexOf( getValue() );
 		}
 
 		@Override

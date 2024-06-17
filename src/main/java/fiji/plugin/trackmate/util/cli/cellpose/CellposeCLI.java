@@ -109,6 +109,9 @@ public class CellposeCLI extends CLIConfigurator
 		choiceAdder.defaultValue( DEFAULT_OPTIONAL_CHANNEL_2 );
 		this.secondChannel = choiceAdder.get();
 
+		// We will need to translate the output of this arg into "0", "1", etc.
+		setTranslator( secondChannel, v -> "" + secondChannel.getSelectedIndex() );
+
 		this.cellDiameter = addDoubleArgument()
 				.name( "Cell diameter" )
 				.argument( "--diameter" )

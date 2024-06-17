@@ -2,6 +2,8 @@ package fiji.plugin.trackmate.util.cli;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -21,8 +23,11 @@ public class CommandBuilder implements ArgumentVisitor
 
 	private final List< String > tokens = new ArrayList<>();
 
-	protected CommandBuilder( final ExecutablePath executableArg )
+	private final Map< Argument< ? >, Function< Object, String > > translators;
+
+	protected CommandBuilder( final ExecutablePath executableArg, final Map< Argument< ? >, Function< Object, String > > translators )
 	{
+		this.translators = translators;
 		visit( executableArg );
 	}
 
@@ -84,7 +89,7 @@ public class CommandBuilder implements ArgumentVisitor
 			throw new IllegalArgumentException( "Value " + val + " for argument '" + arg.getName() + "' is larger than the max: " + arg.getMax() );
 
 		tokens.add( arg.getArgument() );
-		tokens.add( "" + val );
+		tokens.add( translators.getOrDefault( arg, v -> "" + v ).apply( val ) );
 	}
 
 	@Override
@@ -113,7 +118,7 @@ public class CommandBuilder implements ArgumentVisitor
 					+ "' is larger than the max: " + arg.getMax() );
 
 		tokens.add( arg.getArgument() );
-		tokens.add( "" + Double.toString( val ) );
+		tokens.add( translators.getOrDefault( arg, v -> "" + v ).apply( val ) );
 	}
 
 	private void visitString( final AbstractStringArgument< ? > arg )
@@ -133,7 +138,7 @@ public class CommandBuilder implements ArgumentVisitor
 				: arg.getValue();
 
 		tokens.add( arg.getArgument() );
-		tokens.add( "" + val );
+		tokens.add( translators.getOrDefault( arg, v -> "" + v ).apply( val ) );
 	}
 
 	@Override
@@ -161,12 +166,12 @@ public class CommandBuilder implements ArgumentVisitor
 			return;
 
 		tokens.add( arg.getArgument() );
-		tokens.add( arg.getValue() );
+		tokens.add( translators.getOrDefault( arg, v -> "" + v ).apply( arg.getDefaultValue() ) );
 	}
 
 	public static List< String > build( final CLIConfigurator cli )
 	{
-		final CommandBuilder cb = new CommandBuilder( cli.getExecutableArg() );
+		final CommandBuilder cb = new CommandBuilder( cli.getExecutableArg(), cli.translators );
 		cli.getSelectedArguments().forEach( arg -> arg.accept( cb ) );
 		return cb.tokens;
 	}
