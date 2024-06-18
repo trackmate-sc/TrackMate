@@ -37,6 +37,7 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
@@ -53,7 +54,6 @@ import net.imglib2.RandomAccess;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Util;
 import net.imglib2.view.Views;
@@ -121,8 +121,7 @@ public class LabelImgExporter extends AbstractTMAction
 
 	/**
 	 * Creates a new label {@link ImagePlus} where the spots of the specified
-	 * model are painted as ellipsoids taken from their shape, with their track
-	 * ID as pixel value.
+	 * model are painted with their shape, with their track ID as pixel value.
 	 *
 	 * @param trackmate
 	 *            the trackmate instance from which we takes the spots to paint.
@@ -156,8 +155,7 @@ public class LabelImgExporter extends AbstractTMAction
 
 	/**
 	 * Creates a new label {@link ImagePlus} where the spots of the specified
-	 * model are painted as ellipsoids taken from their shape, with their track
-	 * ID as pixel value.
+	 * model are painted with their shape, with their track ID as pixel value.
 	 *
 	 * @param trackmate
 	 *            the trackmate instance from which we takes the spots to paint.
@@ -168,7 +166,7 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            will be 1.
 	 * @param exportSpotsAsDots
 	 *            if <code>true</code>, spots will be painted as single dots
-	 *            instead of ellipsoids.
+	 *            instead their shape.
 	 * @param exportTracksOnly
 	 *            if <code>true</code>, only the spots belonging to visible
 	 *            tracks will be painted. If <code>false</code>, spots not
@@ -194,8 +192,7 @@ public class LabelImgExporter extends AbstractTMAction
 
 	/**
 	 * Creates a new label {@link ImagePlus} where the spots of the specified
-	 * model are painted as ellipsoids taken from their shape, with their track
-	 * ID as pixel value.
+	 * model are painted with their shape, with their track ID as pixel value.
 	 *
 	 * @param model
 	 *            the model from which we takes the spots to paint.
@@ -206,7 +203,7 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            1.
 	 * @param exportSpotsAsDots
 	 *            if <code>true</code>, spots will be painted as single dots
-	 *            instead of ellipsoids.
+	 *            instead their shape.
 	 * @param exportTracksOnly
 	 *            if <code>true</code>, only the spots belonging to visible
 	 *            tracks will be painted. If <code>false</code>, spots not
@@ -229,8 +226,7 @@ public class LabelImgExporter extends AbstractTMAction
 
 	/**
 	 * Creates a new label {@link ImagePlus} where the spots of the specified
-	 * model are painted as ellipsoids taken from their shape, with their track
-	 * ID as pixel value.
+	 * model are painted with their shape, with their track ID as pixel value.
 	 *
 	 * @param model
 	 *            the model from which we takes the spots to paint.
@@ -241,7 +237,7 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            1.
 	 * @param exportSpotsAsDots
 	 *            if <code>true</code>, spots will be painted as single dots
-	 *            instead of ellipsoids.
+	 *            instead their shape.
 	 * @param exportTracksOnly
 	 *            if <code>true</code>, only the spots belonging to visible
 	 *            tracks will be painted. If <code>false</code>, spots not
@@ -280,18 +276,17 @@ public class LabelImgExporter extends AbstractTMAction
 
 	/**
 	 * Creates a new label {@link ImagePlus} where the spots of the specified
-	 * model are painted as ellipsoids taken from their shape, with their track
-	 * ID as pixel value.
+	 * model are painted with their shape, with their track ID as pixel value.
 	 *
 	 * @param model
 	 *            the model from which we takes the spots to paint.
 	 * @param dimensions
 	 *            the desired dimensions of the output image (width, height,
-	 *            nZSlices, nFrames) as a 4 element int array. Spots outside
+	 *            nZSlices, nFrames) as a 4 element long array. Spots outside
 	 *            these dimensions are ignored.
 	 * @param exportSpotsAsDots
 	 *            if <code>true</code>, spots will be painted as single dots
-	 *            instead of ellipsoids.
+	 *            instead their shape.
 	 * @param exportTracksOnly
 	 *            if <code>true</code>, only the spots belonging to visible
 	 *            tracks will be painted. If <code>false</code>, spots not
@@ -315,8 +310,7 @@ public class LabelImgExporter extends AbstractTMAction
 
 	/**
 	 * Creates a new label {@link ImagePlus} where the spots of the specified
-	 * model are painted as ellipsoids taken from their shape, with their track
-	 * ID as pixel value.
+	 * model are painted with their shape, with their track ID as pixel value.
 	 *
 	 * @param model
 	 *            the model from which we takes the spots to paint.
@@ -326,7 +320,7 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            these dimensions are ignored.
 	 * @param exportSpotsAsDots
 	 *            if <code>true</code>, spots will be painted as single dots
-	 *            instead of ellipsoids.
+	 *            instead their shape.
 	 * @param exportTracksOnly
 	 *            if <code>true</code>, only the spots belonging to visible
 	 *            tracks will be painted. If <code>false</code>, spots not
@@ -362,19 +356,19 @@ public class LabelImgExporter extends AbstractTMAction
 	}
 
 	/**
-	 * Creates a new label {@link Img} of {@link UnsignedShortType} where the
-	 * spots of the specified model are painted as ellipsoids taken from their
-	 * shape, with their track ID as pixel value.
+	 * Creates a new label {@link Img} of {@link FloatType} where the spots of
+	 * the specified model are painted with their shape, with their track ID as
+	 * pixel value.
 	 *
 	 * @param model
 	 *            the model from which we takes the spots to paint.
 	 * @param dimensions
 	 *            the desired dimensions of the output image (width, height,
-	 *            nZSlices, nFrames) as a 4 element int array. Spots outside
+	 *            nZSlices, nFrames) as a 4 element long array. Spots outside
 	 *            these dimensions are ignored.
 	 * @param exportSpotsAsDots
 	 *            if <code>true</code>, spots will be painted as single dots
-	 *            instead of ellipsoids.
+	 *            instead their shape.
 	 * @param exportTracksOnly
 	 *            if <code>true</code>, only the spots belonging to visible
 	 *            tracks will be painted. If <code>false</code>, spots not
@@ -397,19 +391,18 @@ public class LabelImgExporter extends AbstractTMAction
 	}
 
 	/**
-	 * Creates a new label {@link Img} of {@link UnsignedShortType} where the
-	 * spots of the specified model are painted as ellipsoids taken from their
-	 * shape, with their track ID as pixel value.
+	 * Creates a new label {@link Img} of {@link FloatType} where the spots of
+	 * the specified model are painted with their shape, with an ID pixel value.
 	 *
 	 * @param model
 	 *            the model from which we takes the spots to paint.
 	 * @param dimensions
 	 *            the desired dimensions of the output image (width, height,
-	 *            nZSlices, nFrames) as a 4 element int array. Spots outside
+	 *            nZSlices, nFrames) as a 4 element long array. Spots outside
 	 *            these dimensions are ignored.
 	 * @param exportSpotsAsDots
 	 *            if <code>true</code>, spots will be painted as single dots
-	 *            instead of ellipsoids.
+	 *            instead their shape.
 	 * @param exportTracksOnly
 	 *            if <code>true</code>, only the spots belonging to visible
 	 *            tracks will be painted. If <code>false</code>, spots not
@@ -473,6 +466,97 @@ public class LabelImgExporter extends AbstractTMAction
 		logger.log( "Done.\n" );
 
 		return lblImg;
+	}
+
+
+	/**
+	 * Creates a new label {@link ImgPlus} of {@link FloatType} where the spots
+	 * are painted with an ID. All visible spots are painted, whether they are
+	 * in a track or not.
+	 * 
+	 * @param spots
+	 *            the spots to paint.
+	 * @param dimensions
+	 *            the desired dimensions of the output image (width, height,
+	 *            nZSlices, nFrames) as a 4 element long array. Spots outside
+	 *            these dimensions are ignored.
+	 * @param exportSpotsAsDots
+	 *            if <code>true</code>, spots will be painted as single dots
+	 *            instead of their shape.
+	 * @param labelIdPainting
+	 *            specifies how to paint the label ID of spots. The
+	 *            {@link LabelIdPainting#LABEL_IS_TRACK_ID} is not supported and
+	 *            defaults to {@link LabelIdPainting#LABEL_IS_SPOT_ID}.
+	 * @param logger
+	 *            a {@link Logger} instance, to report progress of the export
+	 *            process.
+	 *
+	 * @return a new {@link ImgPlus}.
+	 */
+	public static ImgPlus< FloatType > createLabelImg(
+			final SpotCollection spots,
+			final long[] dimensions,
+			final double[] calibration,
+			final boolean exportSpotsAsDots,
+			final LabelIdPainting labelIdPainting,
+			final Logger logger )
+	{
+		/*
+		 * Create target image.
+		 */
+		final Dimensions targetSize = FinalDimensions.wrap( dimensions );
+		final Img< FloatType > lblImg = Util.getArrayOrCellImgFactory( targetSize, new FloatType() ).create( targetSize );
+		final AxisType[] axes = new AxisType[] {
+				Axes.X,
+				Axes.Y,
+				Axes.Z,
+				Axes.TIME };
+		final ImgPlus< FloatType > imgPlus = new ImgPlus<>( lblImg, "LblImg", axes, calibration );
+
+		/*
+		 * How to assign an ID to spots.
+		 */
+
+		final IdGenerator idGenerator;
+		switch ( labelIdPainting )
+		{
+		case LABEL_IS_INDEX:
+			idGenerator = new SpotIndexGeneratorUniqueInFrame( null, false );
+			break;
+		case LABEL_IS_INDEX_MOVIE_UNIQUE:
+			idGenerator = new SpotIndexGeneratorUniqueInMovie( null, false );
+			break;
+		case LABEL_IS_SPOT_ID:
+		case LABEL_IS_TRACK_ID:
+			idGenerator = new SpotIdGenerator( null, false );
+			break;
+		default:
+			throw new IllegalArgumentException( "Unknown painting method: " + labelIdPainting );
+		}
+
+		/*
+		 * Frame by frame iteration.
+		 */
+
+		logger.log( "Writing label image.\n" );
+		for ( int frame = 0; frame < dimensions[ 3 ]; frame++ )
+		{
+			final ImgPlus< FloatType > imgCT = TMUtils.hyperSlice( imgPlus, 0, frame );
+			final SpotWriter spotWriter = exportSpotsAsDots
+					? new SpotAsDotWriter<>( imgCT )
+					: new SpotRoiWriter<>( imgCT );
+			idGenerator.nextFrame();
+
+			for ( final Spot spot : spots.iterable( frame, true ) )
+			{
+				final int id = idGenerator.id( spot );
+				spotWriter.write( spot, id );
+			}
+			logger.setProgress( ( double ) ( 1 + frame ) / dimensions[ 3 ] );
+		}
+		logger.log( "Done.\n" );
+
+		return imgPlus;
 	}
 
 	@Plugin( type = TrackMateActionFactory.class )
@@ -685,11 +769,14 @@ public class LabelImgExporter extends AbstractTMAction
 		@Override
 		public int id( final Spot spot )
 		{
-			final Integer trackID = tm.trackIDOf( spot );
-			if ( null == trackID || !tm.isVisible( trackID ) )
+			if ( tm != null )
 			{
-				if ( visibleTracksOnly )
-					return -1;
+				final Integer trackID = tm.trackIDOf( spot );
+				if ( null == trackID || !tm.isVisible( trackID ) )
+				{
+					if ( visibleTracksOnly )
+						return -1;
+				}
 			}
 			return spot.ID() + 1;
 		}
@@ -709,11 +796,14 @@ public class LabelImgExporter extends AbstractTMAction
 		@Override
 		public int id( final Spot spot )
 		{
-			final Integer trackID = tm.trackIDOf( spot );
-			if ( null == trackID || !tm.isVisible( trackID ) )
+			if ( tm != null )
 			{
-				if ( visibleTracksOnly )
-					return -1;
+				final Integer trackID = tm.trackIDOf( spot );
+				if ( null == trackID || !tm.isVisible( trackID ) )
+				{
+					if ( visibleTracksOnly )
+						return -1;
+				}
 			}
 			return index.incrementAndGet();
 		}
