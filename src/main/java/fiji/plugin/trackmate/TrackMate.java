@@ -45,9 +45,10 @@ import fiji.plugin.trackmate.features.EdgeFeatureCalculator;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.SpotFeatureCalculator;
 import fiji.plugin.trackmate.features.TrackFeatureCalculator;
+import fiji.plugin.trackmate.tracking.SpotImageTrackerFactory;
 import fiji.plugin.trackmate.tracking.SpotTracker;
-import fiji.plugin.trackmate.util.Threads;
 import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.util.Threads;
 import ij.gui.Roi;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
@@ -286,10 +287,21 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 			return true; // Not an error.
 		}
 
-		final SpotTracker tracker = settings.trackerFactory.create( model.getSpots(), settings.trackerSettings );
+		// Deal with trackers vs image trackers.
+		final SpotTracker tracker;
+		if ( SpotImageTrackerFactory.class.isInstance( settings.trackerFactory ) )
+		{
+			final SpotImageTrackerFactory f = ( SpotImageTrackerFactory ) settings.trackerFactory;
+			tracker = f.create( model.getSpots(), settings.trackerSettings, settings.imp );
+		}
+		else
+		{
+			tracker = settings.trackerFactory.create( model.getSpots(), settings.trackerSettings );
+		}
+
 		if ( tracker == null )
 		{
-			logger.log( "Tracker return by factory is null. Skipping tracking.\n" );
+			logger.log( "Tracker returned by factory is null. Skipping tracking.\n" );
 			return true; // Not an error.
 		}
 
