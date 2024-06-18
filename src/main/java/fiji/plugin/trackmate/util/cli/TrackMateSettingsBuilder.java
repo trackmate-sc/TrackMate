@@ -99,7 +99,7 @@ public class TrackMateSettingsBuilder
 	 * @param elements
 	 *            the extra parameters as StyleElements.
 	 */
-	public static void toTrackMateSettings( final Map< String, Object > settings, final CLIConfigurator cli, final StyleElement elements )
+	public static void toTrackMateSettings( final Map< String, Object > settings, final CLIConfigurator cli, final StyleElement... elements )
 	{
 		toMap( cli.getExecutableArg(), settings );
 		cli.getArguments().forEach( arg -> toMap( arg, settings ) );
