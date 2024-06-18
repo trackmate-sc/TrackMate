@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.util.cli;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -414,13 +415,13 @@ public class CLIConfigurator
 			return super.defaultValue( defaultChoice );
 		}
 
-		public void defaultValue( final int selected )
+		public ChoiceAdder defaultValue( final int selected )
 		{
 			if ( selected < 0 || selected >= choices.size() )
 				throw new IllegalArgumentException( "Invalid index for selection of parameter '"
 						+ name + "'. Must be in scale " + 0 + " to " + ( choices.size() - 1 ) + " in "
 						+ StringUtils.join( choices, ", " ) + "." );
-			defaultValue( choices.get( selected ) );
+			return defaultValue( choices.get( selected ) );
 		}
 
 		@Override
@@ -1028,5 +1029,37 @@ public class CLIConfigurator
 		arguments.forEach( str::append );
 		return str.toString();
 
+	}
+
+	public String check()
+	{
+		if ( !executable.isSet() )
+		{
+			return "Executable path is not set.\n" ;
+		}
+		else
+		{
+			final String path = executable.getValue();
+			final File file = new File(path);
+			if ( !file.exists() )
+				return "Executable path " + path + " does not exist.\n";
+			if ( !file.canExecute() )
+				return "Executable " + path + " cannot be run.\n";
+		}
+
+		final StringBuilder str = new StringBuilder();
+		for ( final Argument< ? > arg : getSelectedArguments() )
+		{
+			if ( arg.getArgument() == null )
+				str.append( "Argument '" + arg.getName() + "' does not define the argument switch.\n" );
+
+			if ( ValueArgument.class.isInstance( arg ) )
+			{
+				final ValueArgument< ?, ? > varg = ( ValueArgument< ?, ? > ) arg;
+				if ( varg.isRequired() && !varg.isSet() && !varg.hasDefaultValue() )
+						str.append( "Argument '" + arg.getName() + "' is required but is not set and does not define a default value.\n" );
+			}
+		}
+		return str.length() == 0 ? null : str.toString();
 	}
 }
