@@ -29,13 +29,16 @@ import java.awt.DisplayMode;
 import java.awt.Font;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.Window;
 import java.awt.color.ColorSpace;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.WindowAdapter;
+import java.net.URL;
 
+import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JOptionPane;
@@ -367,4 +370,30 @@ public class GuiUtils
 		scrollPane.setBorder( null );
 		return scrollPane;
 	}
+
+	public static final ImageIcon scaleImage( final ImageIcon icon, final int w, final int h )
+	{
+		int nw = icon.getIconWidth();
+		int nh = icon.getIconHeight();
+
+		if ( icon.getIconWidth() > w )
+		{
+			nw = w;
+			nh = ( nw * icon.getIconHeight() ) / icon.getIconWidth();
+		}
+
+		if ( nh > h )
+		{
+			nh = h;
+			nw = ( icon.getIconWidth() * nh ) / icon.getIconHeight();
+		}
+
+		return new ImageIcon( icon.getImage().getScaledInstance( nw, nh, Image.SCALE_DEFAULT ) );
+	}
+
+	public static URL getResource( final String name, final Class< ? > clazz )
+	{
+		return clazz.getClassLoader().getResource( name );
+	}
+
 }
