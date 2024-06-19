@@ -458,6 +458,7 @@ public class StyleElements
 		{
 			if ( get() != value )
 				value = get();
+			onSet.forEach( c -> c.accept( get() ) );
 		}
 	}
 
