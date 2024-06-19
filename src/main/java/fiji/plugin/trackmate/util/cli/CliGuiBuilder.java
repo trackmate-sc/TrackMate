@@ -19,8 +19,10 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.BorderFactory;
@@ -71,7 +73,7 @@ public class CliGuiBuilder implements ArgumentVisitor, StyleElementVisitor
 
 	private static final int tfCols = 4;
 
-	private final JPanel panel;
+	private final CliConfigPanel panel;
 
 	private final GridBagConstraints c;
 
@@ -85,9 +87,11 @@ public class CliGuiBuilder implements ArgumentVisitor, StyleElementVisitor
 
 	private SelectableArguments selectable;
 
+	private final List< StyleElement > elements = new ArrayList<>();
+
 	private CliGuiBuilder( final ExecutablePath executableArg )
 	{
-		this.panel = new JPanel();
+		this.panel = new CliConfigPanel();
 		final GridBagLayout layout = new GridBagLayout();
 		layout.columnWeights = new double[] { 0., 1., 0. };
 		panel.setLayout( layout );
@@ -134,6 +138,7 @@ public class CliGuiBuilder implements ArgumentVisitor, StyleElementVisitor
 	public void visit( final ExecutablePath arg )
 	{
 		final StringElement element = stringElement( arg.getName(), arg::getValue, arg::set );
+		elements.add( element );
 		addPathToLayout(
 				arg.getHelp(),
 				new JLabel( element.getLabel() ),
@@ -150,6 +155,7 @@ public class CliGuiBuilder implements ArgumentVisitor, StyleElementVisitor
 	public void visit( final Flag flag )
 	{
 		final BooleanElement element = booleanElement( flag.getName(), flag::getValue, flag::set );
+		elements.add( element );
 		if ( !flag.isSet() )
 			element.set( flag.getDefaultValue() );
 		final JCheckBox checkbox = linkedCheckBox( element, "" );
@@ -166,6 +172,7 @@ public class CliGuiBuilder implements ArgumentVisitor, StyleElementVisitor
 	{
 		final IntElement element = intElement( arg.getName(),
 				arg.getMin(), arg.getMax(), arg::getValue, arg::set );
+		elements.add( element );
 
 		final int numberOfColumns;
 		if ( arg.hasMin() && arg.hasMin() )
@@ -193,6 +200,7 @@ public class CliGuiBuilder implements ArgumentVisitor, StyleElementVisitor
 		{
 			final BoundedDoubleElement element = boundedDoubleElement( arg.getName(),
 					arg.getMin(), arg.getMax(), arg::getValue, arg::set );
+			elements.add( element );
 			if ( arg.isSet() )
 				element.set( arg.getValue() );
 			else if ( arg.hasDefaultValue() )
@@ -207,6 +215,7 @@ public class CliGuiBuilder implements ArgumentVisitor, StyleElementVisitor
 		else
 		{
 			final DoubleElement element = doubleElement( arg.getName(), arg::getValue, arg::set );
+			elements.add( element );
 			if ( arg.isSet() )
 				element.set( arg.getValue() );
 			else if ( arg.hasDefaultValue() )
@@ -224,6 +233,7 @@ public class CliGuiBuilder implements ArgumentVisitor, StyleElementVisitor
 	public void visit( final StringArgument arg )
 	{
 		final StringElement element = stringElement( arg.getName(), arg::getValue, arg::set );
+		elements.add( element );
 		addToLayoutTwoLines(
 				arg.getHelp(),
 				new JLabel( element.getLabel() ),
@@ -235,6 +245,7 @@ public class CliGuiBuilder implements ArgumentVisitor, StyleElementVisitor
 	public void visit( final PathArgument arg )
 	{
 		final StringElement element = stringElement( arg.getName(), arg::getValue, arg::set );
+		elements.add( element );
 		if ( arg.isSet() )
 			element.set( arg.getValue() );
 		else if ( arg.hasDefaultValue() )
@@ -250,6 +261,7 @@ public class CliGuiBuilder implements ArgumentVisitor, StyleElementVisitor
 	public void visit( final ChoiceArgument arg )
 	{
 		final ListElement< String > element = listElement( arg.getName(), arg.getChoices(), arg::getValue, arg::set );
+		elements.add( element );
 		final JComboBox< String > comboBox = linkedComboBoxSelector( element );
 		if ( arg.isSet() )
 			comboBox.setSelectedItem( arg.getValue() );
@@ -626,7 +638,7 @@ public class CliGuiBuilder implements ArgumentVisitor, StyleElementVisitor
 		panel.add( new JLabel(), c );
 	}
 
-	public static JPanel build( final CLIConfigurator cli, final StyleElement... els )
+	public static CliConfigPanel build( final CLIConfigurator cli, final StyleElement... els )
 	{
 		final CliGuiBuilder builder = new CliGuiBuilder( cli.getExecutableArg() );
 
@@ -676,6 +688,7 @@ public class CliGuiBuilder implements ArgumentVisitor, StyleElementVisitor
 		 */
 
 		Arrays.asList( els ).forEach( e -> e.accept( builder ) );
+		Arrays.asList( els ).forEach( e -> builder.elements.add( e ) );
 
 		/*
 		 * Last row.
@@ -684,4 +697,17 @@ public class CliGuiBuilder implements ArgumentVisitor, StyleElementVisitor
 		builder.addLastRow();
 		return builder.panel;
 	}
+
+
+	public class CliConfigPanel extends JPanel
+	{
+
+		private static final long serialVersionUID = 1L;
+
+		public void refresh()
+		{
+			elements.forEach( e -> e.update() );
+		}
+	}
+
 }
