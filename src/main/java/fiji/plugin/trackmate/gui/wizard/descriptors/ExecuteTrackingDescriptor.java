@@ -50,7 +50,9 @@ public class ExecuteTrackingDescriptor extends WizardPanelDescriptor
 	{
 		return () -> {
 			final long start = System.currentTimeMillis();
-			trackmate.execTracking();
+			final boolean ok = trackmate.execTracking();
+			if ( !ok )
+				trackmate.getModel().getLogger().error( trackmate.getErrorMessage() + '\n' );
 			final long end = System.currentTimeMillis();
 
 			final Logger logger = trackmate.getModel().getLogger();
