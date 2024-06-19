@@ -11,6 +11,7 @@ import fiji.plugin.trackmate.util.cli.CLIConfigurator.AbstractStringArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.Argument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.ArgumentVisitor;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.ChoiceArgument;
+import fiji.plugin.trackmate.util.cli.CLIConfigurator.Command;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.DoubleArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.ExecutablePath;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.Flag;
@@ -23,9 +24,9 @@ public class CommandBuilder implements ArgumentVisitor
 
 	private final List< String > tokens = new ArrayList<>();
 
-	private final Map< Argument< ? >, Function< Object, String > > translators;
+	private final Map< Command< ? >, Function< Object, String > > translators;
 
-	protected CommandBuilder( final ExecutablePath executableArg, final Map< Argument< ? >, Function< Object, String > > translators )
+	protected CommandBuilder( final ExecutablePath executableArg, final Map< Command< ? >, Function< Object, String > > translators )
 	{
 		this.translators = translators;
 		visit( executableArg );
@@ -49,7 +50,7 @@ public class CommandBuilder implements ArgumentVisitor
 	{
 		if ( executablePath.getValue() == null )
 			throw new IllegalArgumentException( "Executable path is not set." );
-		tokens.add( executablePath.getValue() );
+		tokens.add( translators.getOrDefault( executablePath, v -> "" + v ).apply( executablePath.getValue() ) );
 	}
 
 	@Override
@@ -166,7 +167,7 @@ public class CommandBuilder implements ArgumentVisitor
 			return;
 
 		tokens.add( arg.getArgument() );
-		tokens.add( translators.getOrDefault( arg, v -> "" + v ).apply( arg.getDefaultValue() ) );
+		tokens.add( translators.getOrDefault( arg, v -> "" + v ).apply( arg.getValue() ) );
 	}
 
 	public static List< String > build( final CLIConfigurator cli )

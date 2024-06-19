@@ -20,7 +20,7 @@ public class CLIConfigurator
 
 	protected final List< SelectableArguments > selectables = new ArrayList<>();
 
-	protected final Map< Argument< ? >, Function< Object, String > > translators = new HashMap<>();
+	protected final Map< Command< ? >, Function< Object, String > > translators = new HashMap<>();
 
 	/*
 	 * GETTERS
@@ -60,7 +60,7 @@ public class CLIConfigurator
 	 * VALUE TRANSLATOR.
 	 */
 
-	protected void setTranslator( final Argument< ? > arg, final Function< Object, String > translator )
+	protected void setTranslator( final Command< ? > arg, final Function< Object, String > translator )
 	{
 		translators.put( arg, translator );
 	}
