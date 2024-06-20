@@ -53,6 +53,7 @@ import net.imglib2.FinalDimensions;
 import net.imglib2.RandomAccess;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
+import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Util;
@@ -493,25 +494,26 @@ public class LabelImgExporter extends AbstractTMAction
 	 *
 	 * @return a new {@link ImgPlus}.
 	 */
-	public static ImgPlus< FloatType > createLabelImg(
+	public static < T extends RealType< T > & NativeType< T > > ImgPlus< T > createLabelImg(
 			final SpotCollection spots,
 			final long[] dimensions,
 			final double[] calibration,
 			final boolean exportSpotsAsDots,
 			final LabelIdPainting labelIdPainting,
+			final T outputType,
 			final Logger logger )
 	{
 		/*
 		 * Create target image.
 		 */
 		final Dimensions targetSize = FinalDimensions.wrap( dimensions );
-		final Img< FloatType > lblImg = Util.getArrayOrCellImgFactory( targetSize, new FloatType() ).create( targetSize );
+		final Img< T > lblImg = Util.getArrayOrCellImgFactory( targetSize, outputType ).create( targetSize );
 		final AxisType[] axes = new AxisType[] {
 				Axes.X,
 				Axes.Y,
 				Axes.Z,
 				Axes.TIME };
-		final ImgPlus< FloatType > imgPlus = new ImgPlus<>( lblImg, "LblImg", axes, calibration );
+		final ImgPlus< T > imgPlus = new ImgPlus<>( lblImg, "LblImg", axes, calibration );
 
 		/*
 		 * How to assign an ID to spots.
@@ -541,7 +543,7 @@ public class LabelImgExporter extends AbstractTMAction
 		logger.log( "Writing label image.\n" );
 		for ( int frame = 0; frame < dimensions[ 3 ]; frame++ )
 		{
-			final ImgPlus< FloatType > imgCT = TMUtils.hyperSlice( imgPlus, 0, frame );
+			final ImgPlus< T > imgCT = TMUtils.hyperSlice( imgPlus, 0, frame );
 			final SpotWriter spotWriter = exportSpotsAsDots
 					? new SpotAsDotWriter<>( imgCT )
 					: new SpotRoiWriter<>( imgCT );
