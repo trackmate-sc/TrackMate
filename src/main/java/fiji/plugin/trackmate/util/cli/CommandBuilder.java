@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.util.cli;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -24,9 +25,9 @@ public class CommandBuilder implements ArgumentVisitor
 
 	private final List< String > tokens = new ArrayList<>();
 
-	private final Map< Command< ? >, Function< Object, String > > translators;
+	private final Map< Command< ? >, Function< Object, List< String > > > translators;
 
-	protected CommandBuilder( final ExecutablePath executableArg, final Map< Command< ? >, Function< Object, String > > translators )
+	protected CommandBuilder( final ExecutablePath executableArg, final Map< Command< ? >, Function< Object, List< String > > > translators )
 	{
 		this.translators = translators;
 		visit( executableArg );
@@ -50,7 +51,7 @@ public class CommandBuilder implements ArgumentVisitor
 	{
 		if ( executablePath.getValue() == null )
 			throw new IllegalArgumentException( "Executable path is not set." );
-		tokens.add( translators.getOrDefault( executablePath, v -> "" + v ).apply( executablePath.getValue() ) );
+		tokens.addAll( translators.getOrDefault( executablePath, v -> Collections.singletonList( "" + v ) ).apply( executablePath.getValue() ) );
 	}
 
 	@Override
@@ -90,7 +91,7 @@ public class CommandBuilder implements ArgumentVisitor
 			throw new IllegalArgumentException( "Value " + val + " for argument '" + arg.getName() + "' is larger than the max: " + arg.getMax() );
 
 		tokens.add( arg.getArgument() );
-		tokens.add( translators.getOrDefault( arg, v -> "" + v ).apply( val ) );
+		tokens.addAll( translators.getOrDefault( arg, v -> Collections.singletonList( "" + v ) ).apply( val ) );
 	}
 
 	@Override
@@ -119,7 +120,7 @@ public class CommandBuilder implements ArgumentVisitor
 					+ "' is larger than the max: " + arg.getMax() );
 
 		tokens.add( arg.getArgument() );
-		tokens.add( translators.getOrDefault( arg, v -> "" + v ).apply( val ) );
+		tokens.addAll( translators.getOrDefault( arg, v -> Collections.singletonList( "" + v ) ).apply( val ) );
 	}
 
 	private void visitString( final AbstractStringArgument< ? > arg )
@@ -139,7 +140,7 @@ public class CommandBuilder implements ArgumentVisitor
 				: arg.getValue();
 
 		tokens.add( arg.getArgument() );
-		tokens.add( translators.getOrDefault( arg, v -> "" + v ).apply( val ) );
+		tokens.addAll( translators.getOrDefault( arg, v -> Collections.singletonList( "" + v ) ).apply( val ) );
 	}
 
 	@Override
@@ -167,7 +168,7 @@ public class CommandBuilder implements ArgumentVisitor
 			return;
 
 		tokens.add( arg.getArgument() );
-		tokens.add( translators.getOrDefault( arg, v -> "" + v ).apply( arg.getValue() ) );
+		tokens.addAll( translators.getOrDefault( arg, v -> Collections.singletonList( "" + v ) ).apply( arg.getValue() ) );
 	}
 
 	public static List< String > build( final CLIConfigurator cli )
