@@ -64,7 +64,11 @@ public class CommandBuilder implements ArgumentVisitor
 		else
 			val = flag.getDefaultValue();
 		if ( val )
+		{
 			tokens.add( flag.getArgument() );
+			tokens.addAll( translators.getOrDefault( flag, v -> Collections.singletonList( "" + v ) ).apply( val ) );
+		}
+
 	}
 
 	@Override
