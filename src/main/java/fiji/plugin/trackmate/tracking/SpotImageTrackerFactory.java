@@ -23,7 +23,9 @@ package fiji.plugin.trackmate.tracking;
 
 import java.util.Map;
 
+import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import ij.ImagePlus;
 
 /**
@@ -49,6 +51,24 @@ public interface SpotImageTrackerFactory extends SpotTrackerFactory
 
 	@Override
 	default SpotTracker create( final SpotCollection spots, final Map< String, Object > settings )
+	{
+		throw new UnsupportedOperationException( "Operation not supported for spot image trackers." );
+	}
+
+	/**
+	 * Returns a new GUI panel able to configure the settings suitable for the
+	 * target tracker identified by the key parameter.
+	 *
+	 * @param model
+	 *            the model that will be modified by the target tracker.
+	 * @param imp
+	 *            the input image.
+	 * @return a new configuration panel.
+	 */
+	public ConfigurationPanel getTrackerConfigurationPanel( final Model model, final ImagePlus imp );
+
+	@Override
+	default ConfigurationPanel getTrackerConfigurationPanel( final Model model )
 	{
 		throw new UnsupportedOperationException( "Operation not supported for spot image trackers." );
 	}

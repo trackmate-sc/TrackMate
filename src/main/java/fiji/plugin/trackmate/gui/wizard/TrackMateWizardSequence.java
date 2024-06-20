@@ -68,6 +68,7 @@ import fiji.plugin.trackmate.gui.wizard.descriptors.TrackFilterDescriptor;
 import fiji.plugin.trackmate.providers.ActionProvider;
 import fiji.plugin.trackmate.providers.DetectorProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
+import fiji.plugin.trackmate.tracking.SpotImageTrackerFactory;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import fiji.plugin.trackmate.tracking.manual.ManualTrackerFactory;
 import fiji.plugin.trackmate.util.Threads;
@@ -411,7 +412,17 @@ public class TrackMateWizardSequence implements WizardSequence
 			defaultSettings.put( skey, previousValue );
 		}
 
-		final ConfigurationPanel trackerConfigurationPanel = trackerFactory.getTrackerConfigurationPanel( trackmate.getModel() );
+		final ConfigurationPanel trackerConfigurationPanel;
+		if (trackerFactory instanceof SpotImageTrackerFactory)
+		{
+			trackerConfigurationPanel = ((SpotImageTrackerFactory)trackerFactory).getTrackerConfigurationPanel(  
+					trackmate.getModel(),  trackmate.getSettings().imp );
+		}
+		else
+		{
+			trackerConfigurationPanel= trackerFactory.getTrackerConfigurationPanel( 
+					trackmate.getModel() );
+		}
 		trackerConfigurationPanel.setSettings( defaultSettings );
 		trackmate.getSettings().trackerSettings = defaultSettings;
 		final SpotTrackerDescriptor configDescriptor = new SpotTrackerDescriptor( trackmate.getSettings(), trackerConfigurationPanel, trackmate.getModel().getLogger() );
