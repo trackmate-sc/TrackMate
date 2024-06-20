@@ -290,24 +290,6 @@ public class IOUtils
 		return file;
 	}
 
-	public static boolean readAttribute(
-			final Element element,
-			final String name,
-			final Class< ? > clazz,
-			final Map< String, Object > map,
-			final StringBuilder errorHolder )
-	{
-		if ( clazz == Double.class )
-			return readDoubleAttribute( element, map, name, errorHolder );
-		else if ( clazz == Integer.class )
-			return readIntegerAttribute( element, map, name, errorHolder );
-		else if ( clazz == String.class )
-			return readStringAttribute( element, map, name, errorHolder );
-
-		errorHolder.append( "Do not know how to unmarshall object of class " + clazz.getSimpleName() );
-		return false;
-	}
-
 	/**
 	 * Read and return an integer attribute from a JDom {@link Element}, and
 	 * substitute a default value of 0 if the attribute is not found or of the
