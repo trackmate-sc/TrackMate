@@ -17,13 +17,12 @@ import fiji.plugin.trackmate.util.cli.CLIConfigurator.Command;
 public class TrackMateSettingsBuilder
 {
 
-
-	private static class MyStyleElementVisitor implements StyleElementVisitor
+	private static class StyleElementToMapVisitor implements StyleElementVisitor
 	{
 
 		private final Map< String, Object > settings;
 
-		public MyStyleElementVisitor( final Map< String, Object > settings )
+		public StyleElementToMapVisitor( final Map< String, Object > settings )
 		{
 			this.settings = settings;
 		}
@@ -72,6 +71,67 @@ public class TrackMateSettingsBuilder
 
 	}
 
+	private static class MapToStyleElementVisitor implements StyleElementVisitor
+	{
+
+		private final Map< String, Object > settings;
+
+		public MapToStyleElementVisitor( final Map< String, Object > settings )
+		{
+			this.settings = settings;
+		}
+
+		@Override
+		public void visit( final BooleanElement el )
+		{
+			el.set( ( boolean ) settings.get( el.getLabel() ) );
+			el.update();
+		}
+
+		@Override
+		public void visit( final BoundedDoubleElement el )
+		{
+			el.set( ( double ) settings.get( el.getLabel() ) );
+			el.update();
+		}
+
+		@Override
+		public void visit( final DoubleElement el )
+		{
+			el.set( ( double ) settings.get( el.getLabel() ) );
+			el.update();
+		}
+
+		@SuppressWarnings( "unchecked" )
+		@Override
+		public < E > void visit( final EnumElement< E > el )
+		{
+			el.setValue( ( E ) settings.get( el.getLabel() ) );
+			el.update();
+		}
+
+		@Override
+		public void visit( final FeatureElement el )
+		{
+			el.setValue( el.getType(), ( String ) settings.get( el.getLabel() ) );
+			el.update();
+		}
+
+		@Override
+		public void visit( final IntElement el )
+		{
+			el.set( ( int ) settings.get( el.getLabel() ) );
+			el.update();
+		}
+
+		@Override
+		public void visit( final StringElement el )
+		{
+			el.set( ( String ) settings.get( el.getLabel() ) );
+			el.update();
+		}
+	}
+
 	private TrackMateSettingsBuilder()
 	{}
 
@@ -103,7 +163,8 @@ public class TrackMateSettingsBuilder
 	{
 		toMap( cli.getExecutableArg(), settings );
 		cli.getArguments().forEach( arg -> toMap( arg, settings ) );
-		Arrays.asList( elements ).forEach( el -> el.accept( new MyStyleElementVisitor( settings ) ) );
+		final StyleElementToMapVisitor visitor = new StyleElementToMapVisitor( settings );
+		Arrays.asList( elements ).forEach( el -> el.accept( visitor ) );
 	}
 
 	/**
@@ -115,10 +176,14 @@ public class TrackMateSettingsBuilder
 	 *            the map to read parameters from.
 	 * @param cli
 	 *            the CLI config to write parameters into.
+	 * @param elements
+	 *            the extra parameters as StyleElements.
 	 */
-	public static final void fromTrackMateSettings( final Map< String, Object > settings, final CLIConfigurator cli )
+	public static final void fromTrackMateSettings( final Map< String, Object > settings, final CLIConfigurator cli, final StyleElement... elements )
 	{
 		fromMap( settings, cli.getExecutableArg() );
 		cli.getArguments().forEach( arg -> fromMap( settings, arg ) );
+		final MapToStyleElementVisitor visitor = new MapToStyleElementVisitor( settings );
+		Arrays.asList( elements ).forEach( el -> el.accept( visitor ) );
 	}
 }
