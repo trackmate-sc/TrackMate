@@ -2,6 +2,7 @@ package fiji.plugin.trackmate.util.cli;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -205,7 +206,7 @@ public abstract class CLIConfigurator
 	 */
 
 	@SuppressWarnings( "unchecked" )
-	private abstract class Adder< A extends ValueArgument< A, O >, T extends Adder< A, T, O >, O >
+	abstract class Adder< A extends ValueArgument< A, O >, T extends Adder< A, T, O >, O >
 	{
 
 		protected String name;
@@ -223,6 +224,8 @@ public abstract class CLIConfigurator
 		protected String argument;
 
 		protected boolean visible = true; // by default
+
+		protected boolean inCLI = true; // by default
 
 		public T argument( final String argument )
 		{
@@ -272,6 +275,12 @@ public abstract class CLIConfigurator
 			return ( T ) this;
 		}
 
+		public T inCLI( final boolean inCLI )
+		{
+			this.inCLI = inCLI;
+			return ( T ) this;
+		}
+
 		public abstract A get();
 	}
 
@@ -310,6 +319,7 @@ public abstract class CLIConfigurator
 					.required( required )
 					.units( units )
 					.visible( visible )
+					.inCLI( inCLI )
 					.key( key );
 			CLIConfigurator.this.arguments.add( arg );
 			return arg;
@@ -335,6 +345,7 @@ public abstract class CLIConfigurator
 					.required( required )
 					.units( units )
 					.visible( visible )
+					.inCLI( inCLI )
 					.key( key );
 			CLIConfigurator.this.arguments.add( arg );
 			return arg;
@@ -358,6 +369,7 @@ public abstract class CLIConfigurator
 					.required( required )
 					.units( units )
 					.visible( visible )
+					.inCLI( inCLI )
 					.key( key );
 			CLIConfigurator.this.arguments.add( arg );
 			return arg;
@@ -381,6 +393,7 @@ public abstract class CLIConfigurator
 					.required( required )
 					.units( units )
 					.visible( visible )
+					.inCLI( inCLI )
 					.key( key );
 			CLIConfigurator.this.arguments.add( arg );
 			return arg;
@@ -404,6 +417,7 @@ public abstract class CLIConfigurator
 					.required( required )
 					.units( units )
 					.visible( visible )
+					.inCLI( inCLI )
 					.key( key );
 			CLIConfigurator.this.arguments.add( arg );
 			return arg;
@@ -422,6 +436,13 @@ public abstract class CLIConfigurator
 		{
 			if ( !choices.contains( choice ) )
 				choices.add( choice );
+			return this;
+		}
+
+		public Adder< ChoiceArgument, ChoiceAdder, String > addChoiceAll( final Collection< String > c )
+		{
+			for ( final String in : c )
+				addChoice( in );
 			return this;
 		}
 
@@ -454,6 +475,7 @@ public abstract class CLIConfigurator
 					.required( required )
 					.units( units )
 					.visible( visible )
+					.inCLI( inCLI )
 					.key( key );
 			for ( final String choice : choices )
 				arg.addChoice( choice );
@@ -869,11 +891,34 @@ public abstract class CLIConfigurator
 	public static abstract class Command< T extends Command< T > >
 	{
 
+		protected boolean visible = true;
+
 		protected String name;
 
 		protected String help;
 
 		private String key;
+
+		/**
+		 * If <code>false</code>, this argument won't be shown in UIs. It will
+		 * be used for the command line builder nonetheless.
+		 *
+		 * @param visible
+		 *            whether this argument should be visible in the UI or not.
+		 *            By default: <code>true</code>.
+		 * @see CliGuiBuilder
+		 * @return the argument.
+		 */
+		T visible( final boolean visible )
+		{
+			this.visible = visible;
+			return ( T ) this;
+		}
+
+		public boolean isVisible()
+		{
+			return visible;
+		}
 
 		T name( final String name )
 		{
@@ -1030,8 +1075,6 @@ public abstract class CLIConfigurator
 
 		private String argument;
 
-		private boolean visible = true;
-
 		private boolean inCLI = true;
 
 		T argument( final String argument )
@@ -1043,27 +1086,6 @@ public abstract class CLIConfigurator
 		public String getArgument()
 		{
 			return argument;
-		}
-
-		/**
-		 * If <code>false</code>, this argument won't be shown in UIs. It will
-		 * be used for the command line builder nonetheless.
-		 *
-		 * @param visible
-		 *            whether this argument should be visible in the UI or not.
-		 *            By default: <code>true</code>.
-		 * @see CliGuiBuilder
-		 * @return the argument.
-		 */
-		T visible( final boolean visible )
-		{
-			this.visible = visible;
-			return ( T ) this;
-		}
-
-		public boolean isVisible()
-		{
-			return visible;
 		}
 		
 		/**
@@ -1109,7 +1131,7 @@ public abstract class CLIConfigurator
 
 	}
 
-	public String check()
+	protected String checkExecutable()
 	{
 		if ( !executable.isSet() )
 		{
@@ -1124,7 +1146,11 @@ public abstract class CLIConfigurator
 			if ( !file.canExecute() )
 				return "Executable " + path + " cannot be run.\n";
 		}
+		return null;
+	}
 
+	protected String checkArguments()
+	{
 		final StringBuilder str = new StringBuilder();
 		for ( final Argument< ? > arg : getSelectedArguments() )
 		{
@@ -1135,9 +1161,17 @@ public abstract class CLIConfigurator
 			{
 				final ValueArgument< ?, ? > varg = ( ValueArgument< ?, ? > ) arg;
 				if ( varg.isRequired() && !varg.isSet() && !varg.hasDefaultValue() )
-						str.append( "Argument '" + arg.getName() + "' is required but is not set and does not define a default value.\n" );
+					str.append( "Argument '" + arg.getName() + "' is required but is not set and does not define a default value.\n" );
 			}
 		}
 		return str.length() == 0 ? null : str.toString();
+	}
+
+	public String check()
+	{
+		final String out = checkExecutable();
+		if ( out != null )
+			return out;
+		return checkArguments();
 	}
 }
