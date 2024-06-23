@@ -93,7 +93,10 @@ public class CLIUtils
 				{
 					final String str = matcher2.group( 1 ).trim();
 					if ( str.length() > 2 )
-						logger.setStatus( str );
+						logger.setStatus( str
+								.replaceAll( "\\[INFO\\]", "" )
+								.replaceAll( "INFO:", "" )
+								.replaceAll( "INFO", "" ) );
 				}
 				else if ( !line.trim().isEmpty() )
 				{
