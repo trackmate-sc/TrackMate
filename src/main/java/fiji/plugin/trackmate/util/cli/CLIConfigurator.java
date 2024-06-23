@@ -2,6 +2,7 @@ package fiji.plugin.trackmate.util.cli;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class CLIConfigurator
+public abstract class CLIConfigurator
 {
 
 	protected final List< Argument< ? > > arguments = new ArrayList<>();
@@ -26,16 +27,35 @@ public class CLIConfigurator
 	 * GETTERS
 	 */
 
+	/**
+	 * Returns the list of arguments in this CLI config. All arguments are
+	 * present, regardless of whether they are in {@link SelectableArguments}.
+	 * 
+	 * @return the list of arguments.
+	 */
 	public List< Argument< ? > > getArguments()
 	{
-		return arguments;
+		return Collections.unmodifiableList( arguments );
 	}
 
+	/**
+	 * Returns the list of {@link SelectableArguments} in this CLI config.
+	 * 
+	 * @return the list of {@link SelectableArguments}.
+	 */
 	public List< SelectableArguments > getSelectables()
 	{
-		return selectables;
+		return Collections.unmodifiableList( selectables );
 	}
 
+	/**
+	 * Returns the list of arguments set in this CLI config. The list contains
+	 * only the arguments that are selected if they are in a
+	 * {@link SelectableArguments}, and those who are not in a
+	 * {@link SelectableArguments}.
+	 * 
+	 * @return the selected arguments.
+	 */
 	public List< Argument< ? > > getSelectedArguments()
 	{
 		final List< Argument< ? > > selectedArguments = new ArrayList<>( arguments );
@@ -476,6 +496,19 @@ public class CLIConfigurator
 	{
 		return new ChoiceAdder();
 	}
+	
+	/**
+	 * Adds an extra argument, defined by other means than the adder methods.
+	 * 
+	 * @param extraArg
+	 *            the argument to add to this CLI config.
+	 * @return the argument
+	 */
+	protected < T extends Argument< ? > > T addExtraArgument( final T extraArg )
+	{
+		this.arguments.add( extraArg );
+		return extraArg;
+	}
 
 	/*
 	 * ARGUMENT CLASSES.
@@ -483,7 +516,7 @@ public class CLIConfigurator
 
 	public static class Flag extends ValueArgument< Flag, Boolean >
 	{
-		private Flag()
+		Flag()
 		{}
 
 		public void set()
@@ -551,7 +584,7 @@ public class CLIConfigurator
 
 	public static class IntArgument extends BoundedValueArgument< IntArgument, Integer >
 	{
-		private IntArgument()
+		IntArgument()
 		{}
 
 		@Override
@@ -855,10 +888,14 @@ public class CLIConfigurator
 		}
 
 		/**
-		 * For TrackMate settings de/serialization.
+		 * Sets the String key to use in TrackMate settings map
+		 * de/serialization.
 		 *
 		 * @param key
-		 * @return
+		 *            the key to use. By default: the {@link #name} of this
+		 *            argument.
+		 * @return the argument.
+		 * @see TrackMateSettingsBuilder
 		 */
 		T key( final String key )
 		{
@@ -879,7 +916,7 @@ public class CLIConfigurator
 
 		public String getKey()
 		{
-			return key;
+			return ( key == null ) ? getName() : key;
 		}
 
 		public abstract void accept( final ArgumentVisitor visitor );
@@ -893,8 +930,23 @@ public class CLIConfigurator
 					+ " - key: " + getKey() + "\n";
 		}
 
+		/**
+		 * Sets the value of this argument via the specified object. This is
+		 * used when deserializing TrackMate settings map.
+		 * 
+		 * @param val
+		 *            the object to set the value from
+		 * @see TrackMateSettingsBuilder
+		 */
 		public abstract void setValueObject( Object val );
 
+		/**
+		 * Returns an object built from the value of this argument, if it has
+		 * one. This is used in TrackMate settings map serialization.
+		 * 
+		 * @return the value object.
+		 * @see TrackMateSettingsBuilder
+		 */
 		public abstract Object getValueObject();
 	}
 
@@ -980,6 +1032,8 @@ public class CLIConfigurator
 
 		private boolean visible = true;
 
+		private boolean inCLI = true;
+
 		T argument( final String argument )
 		{
 			this.argument = argument;
@@ -997,6 +1051,8 @@ public class CLIConfigurator
 		 *
 		 * @param visible
 		 *            whether this argument should be visible in the UI or not.
+		 *            By default: <code>true</code>.
+		 * @see CliGuiBuilder
 		 * @return the argument.
 		 */
 		T visible( final boolean visible )
@@ -1008,6 +1064,28 @@ public class CLIConfigurator
 		public boolean isVisible()
 		{
 			return visible;
+		}
+		
+		/**
+		 * If <code>false</code>, this argument won't be used in the command
+		 * line generator. This is useful to add extra parameters to the GUI
+		 * that are required by TrackMate but not by the CLI tool.
+		 * 
+		 * @param inCLI
+		 *            whether this argument should be used when generating
+		 *            commands. By default: <code>true</code>.
+		 * @see CommandBuilder
+		 * @return the argument.
+		 */
+		T inCLI( final boolean inCLI )
+		{
+			this.inCLI = inCLI;
+			return ( T ) this;
+		}
+
+		public boolean isInCLI()
+		{
+			return inCLI;
 		}
 
 		@Override
@@ -1050,7 +1128,7 @@ public class CLIConfigurator
 		final StringBuilder str = new StringBuilder();
 		for ( final Argument< ? > arg : getSelectedArguments() )
 		{
-			if ( arg.getArgument() == null )
+			if ( arg.isInCLI() && arg.getArgument() == null )
 				str.append( "Argument '" + arg.getName() + "' does not define the argument switch.\n" );
 
 			if ( ValueArgument.class.isInstance( arg ) )

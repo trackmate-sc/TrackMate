@@ -5,9 +5,7 @@ import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.boundedDou
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.doubleElement;
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.intElement;
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedCheckBox;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedComboBoxEnumSelector;
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedComboBoxSelector;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedFeatureSelector;
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedFormattedTextField;
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedSliderPanel;
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedTextField;
@@ -20,7 +18,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,18 +37,12 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-import com.itextpdf.text.Font;
-
 import fiji.plugin.trackmate.gui.Fonts;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.BooleanElement;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.BoundedDoubleElement;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.DoubleElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.EnumElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.FeatureElement;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.IntElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.LabelElement;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.ListElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.Separator;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.StringElement;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.StyleElement;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.StyleElementVisitor;
@@ -273,117 +264,6 @@ public class CliGuiBuilder implements ArgumentVisitor, StyleElementVisitor
 				comboBox,
 				arg.getUnits(),
 				arg );
-	}
-
-	/*
-	 * STYLE ELEMENT VISITOR.
-	 */
-
-	private static final String properCase( final String str )
-	{
-		final String str2 = str.replaceAll( "_", " " );
-		final String firstChar = str2.substring( 0, 1 ).toUpperCase();
-		final String restOfString = str2.substring( 1 ).toLowerCase();
-		return firstChar + restOfString;
-	}
-
-	@Override
-	public void visit( final BooleanElement element )
-	{
-		final JCheckBox checkbox = linkedCheckBox( element, "" );
-		checkbox.setHorizontalAlignment( SwingConstants.LEADING );
-		addToLayout(
-				null,
-				new JLabel( properCase( element.getLabel() ) ),
-				checkbox,
-				null );
-	}
-
-	@Override
-	public void visit( final BoundedDoubleElement element )
-	{
-		addToLayout(
-				null,
-				new JLabel( properCase( element.getLabel() ) ),
-				linkedSliderPanel( element, tfCols, 0.1 ),
-				null );
-	}
-
-	@Override
-	public void visit( final DoubleElement element )
-	{
-		addToLayout(
-				null,
-				new JLabel( properCase( element.getLabel() ) ),
-				linkedFormattedTextField( element ),
-				null );
-	}
-
-	@Override
-	public < E > void visit( final EnumElement< E > element )
-	{
-		addToLayout(
-				null,
-				new JLabel( properCase( element.getLabel() ) ),
-				linkedComboBoxEnumSelector( element ),
-				null );
-	}
-
-	@Override
-	public void visit( final FeatureElement element )
-	{
-		addToLayout(
-				null,
-				new JLabel( properCase( element.getLabel() ) ),
-				linkedFeatureSelector( element ),
-				null );
-	}
-
-	@Override
-	public void visit( final IntElement element )
-	{
-		addToLayout(
-				null,
-				new JLabel( properCase( element.getLabel() ) ),
-				linkedSliderPanel( element, tfCols ),
-				null );
-	}
-
-	@Override
-	public void visit( final LabelElement element )
-	{
-		final JLabel label = new JLabel( properCase( element.getLabel() ) );
-		label.setFont( panel.getFont().deriveFont( Font.BOLD ).deriveFont( panel.getFont().getSize() + 2f ) );
-		addToLayout( null, label );
-	}
-
-	@Override
-	public < E > void visit( final ListElement< E > element )
-	{
-		addToLayout(
-				null,
-				new JLabel( properCase( element.getLabel() ) ),
-				linkedComboBoxSelector( element ),
-				null );
-	}
-
-	@Override
-	public void visit( final Separator element )
-	{
-		panel.add( Box.createVerticalStrut( 10 ), c );
-		final JSeparator separator = new JSeparator( JSeparator.HORIZONTAL );
-		separator.setMinimumSize( new Dimension( 10, 10 ) );
-		addToLayout( null, separator );
-	}
-
-	@Override
-	public void visit( final StringElement element )
-	{
-		addToLayoutTwoLines(
-				null,
-				new JLabel( properCase( element.getLabel() ) ),
-				linkedTextField( element ),
-				null );
 	}
 
 	/*
@@ -638,7 +518,7 @@ public class CliGuiBuilder implements ArgumentVisitor, StyleElementVisitor
 		panel.add( new JLabel(), c );
 	}
 
-	public static CliConfigPanel build( final CLIConfigurator cli, final StyleElement... els )
+	public static CliConfigPanel build( final CLIConfigurator cli )
 	{
 		final CliGuiBuilder builder = new CliGuiBuilder( cli.getExecutableArg() );
 
@@ -682,13 +562,6 @@ public class CliGuiBuilder implements ArgumentVisitor, StyleElementVisitor
 			}
 			arg.accept( builder );
 		}
-
-		/*
-		 * Extra arguments.
-		 */
-
-		Arrays.asList( els ).forEach( e -> e.accept( builder ) );
-		Arrays.asList( els ).forEach( e -> builder.elements.add( e ) );
 
 		/*
 		 * Last row.

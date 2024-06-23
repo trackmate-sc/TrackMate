@@ -41,7 +41,7 @@ public class CommandBuilder implements ArgumentVisitor
 
 	private void check( final Argument< ? > arg )
 	{
-		if ( arg.getArgument() == null )
+		if ( arg.isInCLI() && arg.getArgument() == null )
 			throw new IllegalArgumentException( "Incorrect configuration for argument '" + arg.getName()
 					+ "'. The command argument is not set." );
 	}
@@ -178,7 +178,10 @@ public class CommandBuilder implements ArgumentVisitor
 	public static List< String > build( final CLIConfigurator cli )
 	{
 		final CommandBuilder cb = new CommandBuilder( cli.getExecutableArg(), cli.translators );
-		cli.getSelectedArguments().forEach( arg -> arg.accept( cb ) );
+		cli.getSelectedArguments()
+				.stream()
+				.filter( a -> a.isInCLI() )
+				.forEach( arg -> arg.accept( cb ) );
 		return cb.tokens;
 	}
 }
