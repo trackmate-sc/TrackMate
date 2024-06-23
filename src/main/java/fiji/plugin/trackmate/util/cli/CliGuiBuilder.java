@@ -51,6 +51,7 @@ import fiji.plugin.trackmate.util.FileChooser.DialogType;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.Argument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.ArgumentVisitor;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.ChoiceArgument;
+import fiji.plugin.trackmate.util.cli.CLIConfigurator.Command;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.DoubleArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.ExecutablePath;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.Flag;
@@ -80,7 +81,7 @@ public class CliGuiBuilder implements ArgumentVisitor, StyleElementVisitor
 
 	private final List< StyleElement > elements = new ArrayList<>();
 
-	private CliGuiBuilder( final ExecutablePath executableArg )
+	private CliGuiBuilder()
 	{
 		this.panel = new CliConfigPanel();
 		final GridBagLayout layout = new GridBagLayout();
@@ -92,9 +93,6 @@ public class CliGuiBuilder implements ArgumentVisitor, StyleElementVisitor
 		c.gridwidth = 1;
 		c.gridx = 0;
 		c.gridy = 0;
-
-		if ( executableArg.isVisible() )
-			visit( executableArg );
 	}
 
 	private void setCurrentButtonGroup( final ButtonGroup buttonGroup )
@@ -521,7 +519,7 @@ public class CliGuiBuilder implements ArgumentVisitor, StyleElementVisitor
 
 	public static CliConfigPanel build( final CLIConfigurator cli )
 	{
-		final CliGuiBuilder builder = new CliGuiBuilder( cli.getExecutableArg() );
+		final CliGuiBuilder builder = new CliGuiBuilder();
 
 		/*
 		 * Iterate over CLI arguments.
@@ -531,7 +529,7 @@ public class CliGuiBuilder implements ArgumentVisitor, StyleElementVisitor
 		final Map< SelectableArguments, ButtonGroup > buttonGroups = new HashMap<>();
 
 		// Iterate over arguments, taking care of selectable group.
-		for ( final Argument< ? > arg : cli.getArguments() )
+		for ( final Command< ? > arg : cli.getArguments() )
 		{
 			if ( !arg.isVisible() )
 				continue;
@@ -583,5 +581,4 @@ public class CliGuiBuilder implements ArgumentVisitor, StyleElementVisitor
 			elements.forEach( e -> e.update() );
 		}
 	}
-
 }

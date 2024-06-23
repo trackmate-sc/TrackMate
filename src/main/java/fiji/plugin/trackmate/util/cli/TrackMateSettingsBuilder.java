@@ -36,7 +36,7 @@ public class TrackMateSettingsBuilder
 	 */
 	public static void toTrackMateSettings( final Map< String, Object > settings, final CLIConfigurator cli )
 	{
-		toMap( cli.getExecutableArg(), settings );
+		toMap( cli.getCommandArg(), settings );
 		cli.getArguments().forEach( arg -> toMap( arg, settings ) );
 	}
 
@@ -52,7 +52,7 @@ public class TrackMateSettingsBuilder
 	 */
 	public static final void fromTrackMateSettings( final Map< String, Object > settings, final CLIConfigurator cli )
 	{
-		fromMap( settings, cli.getExecutableArg() );
+		fromMap( settings, cli.getCommandArg() );
 		cli.getArguments().forEach( arg -> fromMap( settings, arg ) );
 	}
 }

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class CondaCLIConfigurator extends CLIConfigurator
+public abstract class CondaCLIConfigurator extends CLIConfigurator
 {
 
 	public static final String KEY_CONDA_ENV = "CONDA_ENV";
@@ -28,12 +28,11 @@ public class CondaCLIConfigurator extends CLIConfigurator
 				.inCLI( false )
 				.get();
 
-		// Don't show the executable arg in the UI: must be set by subclass, and
-		// only conda env required configurating.
-		getExecutableArg().visible( false );
+		// Add it first to the list of arguments
+		this.arguments.add( condaEnv );
 
 		// Add the translator to make a proper cmd line calling conda first.
-		setTranslator( getExecutableArg(), s -> {
+		setTranslator( condaEnv, s -> {
 			final String executableName = ( String ) s;
 			// Split by spaces
 			final String[] split = executableName.split( " " );
@@ -46,14 +45,18 @@ public class CondaCLIConfigurator extends CLIConfigurator
 		} );
 	}
 
-	public ChoiceArgument getCondaEnv()
+	@Override
+	public Command< ? > getCommandArg()
 	{
 		return condaEnv;
 	}
 
-	@Override
-	public String check()
-	{
-		return checkArguments();
-	}
+	/**
+	 * Returns the command that must be run in the configured conda environment.
+	 * In case the command is made of several tokens, they can be returned
+	 * separated by space (as in a normal command line).
+	 *
+	 * @return the command for this tool.
+	 */
+	protected abstract String getCommand();
 }

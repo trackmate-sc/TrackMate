@@ -1,6 +1,5 @@
 package fiji.plugin.trackmate.util.cli;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -18,8 +17,6 @@ public abstract class CLIConfigurator
 
 	protected final List< Argument< ? > > arguments = new ArrayList<>();
 
-	protected final ExecutablePath executable = new ExecutablePath();
-
 	protected final List< SelectableArguments > selectables = new ArrayList<>();
 
 	protected final Map< Command< ? >, Function< Object, List< String > > > translators = new HashMap<>();
@@ -29,19 +26,21 @@ public abstract class CLIConfigurator
 	 */
 
 	/**
-	 * Returns the list of arguments in this CLI config. All arguments are
-	 * present, regardless of whether they are in {@link SelectableArguments}.
-	 * 
+	 * Returns the list of arguments (plus the command) in this CLI config. All
+	 * arguments are present, regardless of whether they are in
+	 * {@link SelectableArguments}, {@link Argument#visible} or not,
+	 * {@link Argument#inCLI} or not.
+	 *
 	 * @return the list of arguments.
 	 */
-	public List< Argument< ? > > getArguments()
+	public List< Command< ? > > getArguments()
 	{
 		return Collections.unmodifiableList( arguments );
 	}
 
 	/**
 	 * Returns the list of {@link SelectableArguments} in this CLI config.
-	 * 
+	 *
 	 * @return the list of {@link SelectableArguments}.
 	 */
 	public List< SelectableArguments > getSelectables()
@@ -54,7 +53,7 @@ public abstract class CLIConfigurator
 	 * only the arguments that are selected if they are in a
 	 * {@link SelectableArguments}, and those who are not in a
 	 * {@link SelectableArguments}.
-	 * 
+	 *
 	 * @return the selected arguments.
 	 */
 	public List< Argument< ? > > getSelectedArguments()
@@ -63,18 +62,6 @@ public abstract class CLIConfigurator
 		for ( final SelectableArguments selectable : selectables )
 			selectable.filter( selectedArguments );
 		return selectedArguments;
-	}
-
-	/*
-	 * EXECUTABLE.
-	 */
-
-	/**
-	 * Exposes the executable path argument.
-	 */
-	public ExecutablePath getExecutableArg()
-	{
-		return executable;
 	}
 
 	/*
@@ -518,10 +505,10 @@ public abstract class CLIConfigurator
 	{
 		return new ChoiceAdder();
 	}
-	
+
 	/**
 	 * Adds an extra argument, defined by other means than the adder methods.
-	 * 
+	 *
 	 * @param extraArg
 	 *            the argument to add to this CLI config.
 	 * @return the argument
@@ -978,7 +965,7 @@ public abstract class CLIConfigurator
 		/**
 		 * Sets the value of this argument via the specified object. This is
 		 * used when deserializing TrackMate settings map.
-		 * 
+		 *
 		 * @param val
 		 *            the object to set the value from
 		 * @see TrackMateSettingsBuilder
@@ -988,14 +975,14 @@ public abstract class CLIConfigurator
 		/**
 		 * Returns an object built from the value of this argument, if it has
 		 * one. This is used in TrackMate settings map serialization.
-		 * 
+		 *
 		 * @return the value object.
 		 * @see TrackMateSettingsBuilder
 		 */
 		public abstract Object getValueObject();
 	}
 
-	public static class ExecutablePath extends Command< ExecutablePath >
+	public static class ExecutablePath extends Argument< ExecutablePath >
 	{
 
 		private String value = null;
@@ -1087,12 +1074,12 @@ public abstract class CLIConfigurator
 		{
 			return argument;
 		}
-		
+
 		/**
 		 * If <code>false</code>, this argument won't be used in the command
 		 * line generator. This is useful to add extra parameters to the GUI
 		 * that are required by TrackMate but not by the CLI tool.
-		 * 
+		 *
 		 * @param inCLI
 		 *            whether this argument should be used when generating
 		 *            commands. By default: <code>true</code>.
@@ -1125,31 +1112,11 @@ public abstract class CLIConfigurator
 	{
 		final StringBuilder str = new StringBuilder();
 		str.append( super.toString() + "\n" );
-		str.append( executable.toString() );
 		arguments.forEach( str::append );
 		return str.toString();
-
 	}
 
-	protected String checkExecutable()
-	{
-		if ( !executable.isSet() )
-		{
-			return "Executable path is not set.\n" ;
-		}
-		else
-		{
-			final String path = executable.getValue();
-			final File file = new File(path);
-			if ( !file.exists() )
-				return "Executable path " + path + " does not exist.\n";
-			if ( !file.canExecute() )
-				return "Executable " + path + " cannot be run.\n";
-		}
-		return null;
-	}
-
-	protected String checkArguments()
+	public String check()
 	{
 		final StringBuilder str = new StringBuilder();
 		for ( final Argument< ? > arg : getSelectedArguments() )
@@ -1167,11 +1134,10 @@ public abstract class CLIConfigurator
 		return str.length() == 0 ? null : str.toString();
 	}
 
-	public String check()
-	{
-		final String out = checkExecutable();
-		if ( out != null )
-			return out;
-		return checkArguments();
-	}
+	/**
+	 * Returns the command object of this tool.
+	 *
+	 * @return the command object.
+	 */
+	public abstract Command< ? > getCommandArg();
 }

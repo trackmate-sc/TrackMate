@@ -27,10 +27,9 @@ public class CommandBuilder implements ArgumentVisitor
 
 	private final Map< Command< ? >, Function< Object, List< String > > > translators;
 
-	protected CommandBuilder( final ExecutablePath executableArg, final Map< Command< ? >, Function< Object, List< String > > > translators )
+	protected CommandBuilder( final Map< Command< ? >, Function< Object, List< String > > > translators )
 	{
 		this.translators = translators;
-		visit( executableArg );
 	}
 
 	@Override
@@ -177,7 +176,7 @@ public class CommandBuilder implements ArgumentVisitor
 
 	public static List< String > build( final CLIConfigurator cli )
 	{
-		final CommandBuilder cb = new CommandBuilder( cli.getExecutableArg(), cli.translators );
+		final CommandBuilder cb = new CommandBuilder( cli.translators );
 		cli.getSelectedArguments()
 				.stream()
 				.filter( a -> a.isInCLI() )
