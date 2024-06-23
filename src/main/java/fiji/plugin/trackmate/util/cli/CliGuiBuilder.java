@@ -93,7 +93,8 @@ public class CliGuiBuilder implements ArgumentVisitor, StyleElementVisitor
 		c.gridx = 0;
 		c.gridy = 0;
 
-		visit( executableArg );
+		if ( executableArg.isVisible() )
+			visit( executableArg );
 	}
 
 	private void setCurrentButtonGroup( final ButtonGroup buttonGroup )
