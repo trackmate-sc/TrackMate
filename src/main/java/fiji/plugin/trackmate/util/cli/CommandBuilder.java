@@ -13,6 +13,7 @@ import fiji.plugin.trackmate.util.cli.CLIConfigurator.Argument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.ArgumentVisitor;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.ChoiceArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.Command;
+import fiji.plugin.trackmate.util.cli.CLIConfigurator.CondaEnvironmentCommand;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.DoubleArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.ExecutablePath;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.Flag;
@@ -51,6 +52,14 @@ public class CommandBuilder implements ArgumentVisitor
 		if ( executablePath.getValue() == null )
 			throw new IllegalArgumentException( "Executable path is not set." );
 		tokens.addAll( translators.getOrDefault( executablePath, v -> Collections.singletonList( "" + v ) ).apply( executablePath.getValue() ) );
+	}
+
+	@Override
+	public void visit( final CondaEnvironmentCommand condaEnv )
+	{
+		if ( condaEnv.getValue() == null )
+			throw new IllegalArgumentException( "Conda environment is not set." );
+		tokens.addAll( translators.getOrDefault( condaEnv, v -> Collections.singletonList( "" + v ) ).apply( condaEnv.getValue() ) );
 	}
 
 	@Override
@@ -177,6 +186,7 @@ public class CommandBuilder implements ArgumentVisitor
 	public static List< String > build( final CLIConfigurator cli )
 	{
 		final CommandBuilder cb = new CommandBuilder( cli.translators );
+		cli.getCommandArg().accept( cb );
 		cli.getSelectedArguments()
 				.stream()
 				.filter( a -> a.isInCLI() )

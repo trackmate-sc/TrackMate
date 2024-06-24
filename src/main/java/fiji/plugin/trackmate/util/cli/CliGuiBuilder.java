@@ -45,13 +45,13 @@ import fiji.plugin.trackmate.gui.displaysettings.StyleElements.IntElement;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.ListElement;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.StringElement;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.StyleElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.StyleElementVisitor;
 import fiji.plugin.trackmate.util.FileChooser;
 import fiji.plugin.trackmate.util.FileChooser.DialogType;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.Argument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.ArgumentVisitor;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.ChoiceArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.Command;
+import fiji.plugin.trackmate.util.cli.CLIConfigurator.CondaEnvironmentCommand;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.DoubleArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.ExecutablePath;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.Flag;
@@ -60,7 +60,7 @@ import fiji.plugin.trackmate.util.cli.CLIConfigurator.PathArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.SelectableArguments;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.StringArgument;
 
-public class CliGuiBuilder implements ArgumentVisitor, StyleElementVisitor
+public class CliGuiBuilder implements ArgumentVisitor
 {
 
 	private static final int tfCols = 4;
@@ -263,6 +263,23 @@ public class CliGuiBuilder implements ArgumentVisitor, StyleElementVisitor
 				comboBox,
 				arg.getUnits(),
 				arg );
+	}
+
+	@Override
+	public void visit( final CondaEnvironmentCommand arg )
+	{
+		final ListElement< String > element = listElement( arg.getName(), arg.getEnvironment(), arg::getValue, arg::set );
+		elements.add( element );
+		final JComboBox< String > comboBox = linkedComboBoxSelector( element );
+		if ( arg.isSet() )
+			comboBox.setSelectedItem( arg.getValue() );
+		else
+			comboBox.setSelectedItem( 0 );
+		addToLayout(
+				arg.getHelp(),
+				new JLabel( element.getLabel() ),
+				comboBox,
+				null );
 	}
 
 	/*
@@ -520,6 +537,7 @@ public class CliGuiBuilder implements ArgumentVisitor, StyleElementVisitor
 	public static CliConfigPanel build( final CLIConfigurator cli )
 	{
 		final CliGuiBuilder builder = new CliGuiBuilder();
+		cli.getCommandArg().accept( builder );
 
 		/*
 		 * Iterate over CLI arguments.

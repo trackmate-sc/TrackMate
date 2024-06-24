@@ -186,6 +186,11 @@ public abstract class CLIConfigurator
 		{
 			throw new UnsupportedOperationException();
 		}
+
+		public default void visit( final CondaEnvironmentCommand condaEnvironmentCommand )
+		{
+			throw new UnsupportedOperationException();
+		}
 	}
 
 	/*
@@ -982,7 +987,91 @@ public abstract class CLIConfigurator
 		public abstract Object getValueObject();
 	}
 
-	public static class ExecutablePath extends Argument< ExecutablePath >
+	public static class CondaEnvironmentCommand extends Command< CondaEnvironmentCommand >
+	{
+
+		private final List< String > envs = new ArrayList<>();
+
+		private String value;
+
+		protected CondaEnvironmentCommand()
+		{
+			name( "Conda environment" );
+			help( "The conda environment in which the tool is configured." );
+		}
+
+		protected CondaEnvironmentCommand addEnvironment( final String env )
+		{
+			if ( !envs.contains( env ) )
+				envs.add( env );
+			return this;
+		}
+
+		public String getValue()
+		{
+			return value;
+		}
+
+		public void set( final String env )
+		{
+			final int sel = envs.indexOf( env );
+			if ( sel < 0 )
+				throw new IllegalArgumentException( "Unknown conda environment '" + env +
+						"'. Must be one of " + StringUtils.join( envs, ", " ) + "." );
+			this.value = env;
+		}
+		
+		public void set( final int selected )
+		{
+			if ( selected < 0 || selected >= envs.size() )
+				throw new IllegalArgumentException( "Invalid index for selection of conda environment. "
+						+ "Must be in scale " + 0 + " to " + ( envs.size() - 1 ) + " in "
+						+ StringUtils.join( envs, ", " ) + "." );
+			set( envs.get( selected ) );
+		}
+
+		public boolean isSet()
+		{
+			return value != null;
+		}
+
+		public List< String > getEnvironment()
+		{
+			return envs;
+		}
+
+		@Override
+		public void accept( final ArgumentVisitor visitor )
+		{
+			visitor.visit( this );
+		}
+
+		@Override
+		public String toString()
+		{
+			final String str = super.toString();
+			return str
+					+ " - envs: " + getEnvironment() + "\n";
+		}
+
+		@Override
+		public void setValueObject( final Object val )
+		{
+			if ( !String.class.isInstance( val ) )
+				throw new IllegalArgumentException( "Argument '" + name + "' expects String. Got " + val.getClass().getSimpleName() );
+
+			final String v = ( ( String ) val );
+			set( v );
+		}
+
+		@Override
+		public Object getValueObject()
+		{
+			return getValue();
+		}
+	}
+
+	public static class ExecutablePath extends Command< ExecutablePath >
 	{
 
 		private String value = null;
