@@ -2,71 +2,61 @@ package fiji.plugin.trackmate.util.cli;
 
 import java.awt.Color;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.input.TailerListenerAdapter;
+import org.scijava.prefs.PrefService;
 
 import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.util.TMUtils;
+import ij.IJ;
 
 public class CLIUtils
 
 {
 
+	public static final String CONDA_PATH_PREF_KEY = "trackmate.conda.path";
+
 	public static String CONDA_COMMAND = "conda";
 
-	public static List< String > getEnvList()
+	public static Map< String, String > getEnvMap()
 	{
-		final List< String > envs = new ArrayList<>();
+		// Create a map to store the environment names and paths
+		final Map< String, String > envMap = new HashMap<>();
 		try
 		{
-			// Create tmp files.
-			final Path maskTmpFolder = Files.createTempDirectory( "CLIUtils_" );
-			final File outputFile = maskTmpFolder.resolve( "output.txt" ).toFile();
-			final File errorFile = maskTmpFolder.resolve( "error.txt" ).toFile();
-			final List< String > cmd = Arrays.asList( "cmd.exe", "/c", CONDA_COMMAND, "env", "list" );
-			final ProcessBuilder pb = new ProcessBuilder( cmd );
-			pb.redirectOutput( ProcessBuilder.Redirect.appendTo( outputFile ) );
-			pb.redirectError( ProcessBuilder.Redirect.appendTo( errorFile ) );
-			final Process process = pb.start();
-			final int exitValue = process.waitFor();
-			if ( exitValue == 0 )
+			final Process process = Runtime.getRuntime().exec( getCondaPath() + " env list" );
+			final BufferedReader reader = new BufferedReader( new InputStreamReader( process.getInputStream() ) );
+
+			// Read each line of output and extract the environment name and
+			// path
+			String line;
+			while ( ( line = reader.readLine() ) != null )
 			{
-				String line;
-				try (BufferedReader reader = new BufferedReader( new FileReader( outputFile ) ))
+				line = line.trim();
+				if ( line.isEmpty() || line.startsWith( "#" ) || line.startsWith( "Name" ) )
+					continue;
+
+				final String[] parts = line.split( "\\s+" );
+				if ( parts.length >= 2 )
 				{
-					while ( ( line = reader.readLine() ) != null )
-					{
-						if ( !line.startsWith( "#" ) )
-						{ // skip lines that start with #
-							final int indexOfFirstSpace = line.indexOf( ' ' );
-							if ( indexOfFirstSpace != -1 )
-							{ // check if there is a space in the line
-								final String firstColumn = line.substring( 0, indexOfFirstSpace );
-								envs.add( firstColumn );
-							}
-						}
-					}
-				}
-			}
-			else
-			{
-				String line;
-				try (BufferedReader reader = new BufferedReader( new FileReader( errorFile ) ))
-				{
-					while ( ( line = reader.readLine() ) != null )
-						System.err.println( line );
+					final String envName = parts[ 0 ];
+					final String envPath = parts[ 1 ] + "/bin/python";
+					envMap.put( envName, envPath );
 				}
 			}
 		}
@@ -74,11 +64,68 @@ public class CLIUtils
 		{
 			e.printStackTrace();
 		}
-		catch ( final InterruptedException e )
+		return envMap;
+	}
+
+	public static List< String > getEnvList()
+	{
+		final List< String > l = new ArrayList<>( getEnvMap().keySet() );
+		l.sort( null );
+		return l;
+	}
+
+	public static String getCondaPath()
+	{
+		final PrefService prefs = TMUtils.getContext().getService( PrefService.class );
+		String findPath;
+		try
 		{
-			e.printStackTrace();
+			findPath = CLIUtils.findDefaultCondaPath();
 		}
-		return envs;
+		catch ( final IllegalArgumentException e )
+		{
+			findPath = "/usr/local/opt/micromamba/bin/micromamba";
+		}
+		return prefs.get( CLIUtils.class, CLIUtils.CONDA_PATH_PREF_KEY, findPath );
+	}
+
+	public static String findDefaultCondaPath() throws IllegalArgumentException
+	{
+		final String username = System.getProperty( "user.name" );
+		final String prefix = IJ.isMacOSX()
+				? "/Users/"
+				: "/home/";
+		final String anaconda1 = prefix + username + "/anaconda3/bin/conda";
+		final String anaconda2 = "/opt/anaconda3/bin/conda";
+		final String miniconda1 = prefix + username + "/miniconda3/bin/conda";
+		final String miniconda2 = "/opt/miniconda3/bin/conda";
+		final String mamba1 = prefix + username + "/mamba/bin/mamba";
+		final String mamba2 = "/opt/mamba/bin/mamba";
+		final String micromamba1 = prefix + username + ( IJ.isMacOSX()
+				? "/Library/micromamba/bin/micromamba"
+				: "/.local/share/micromamba/bin/micromamba" );
+		final String micromamba2 = "/usr/local/micromamba/bin/micromamba";
+		final String micromamba3 = "/usr/local/opt/micromamba/bin/micromamba";
+		final String micromamba4 = "/opt/micromamba/bin/micromamba";
+		final String[] toTest = new String[] {
+				anaconda1,
+				anaconda2,
+				miniconda1,
+				miniconda2,
+				mamba1,
+				mamba2,
+				micromamba1,
+				micromamba2,
+				micromamba3,
+				micromamba4
+		};
+		for ( final String str : toTest )
+		{
+			final Path path = Paths.get( str );
+			if ( Files.isExecutable( path ) )
+				return str;
+		}
+		throw new IllegalArgumentException( "Could not find a conda executable I know of, within: " + Arrays.asList( toTest ) );
 	}
 
 	/**
@@ -172,6 +219,9 @@ public class CLIUtils
 
 	public static void main( final String[] args )
 	{
-		System.out.println( getEnvList() );
+		System.out.println( "Conda path: " + findDefaultCondaPath() );
+		System.out.println( "Known environments: " + getEnvList() );
+		System.out.println( "Paths:" );
+		getEnvMap().forEach( ( k, v ) -> System.out.println( k + " -> " + v ) );
 	}
 }
