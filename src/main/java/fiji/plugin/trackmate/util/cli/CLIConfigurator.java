@@ -1093,19 +1093,19 @@ public abstract class CLIConfigurator
 		}
 
 		@Override
-		public ExecutablePath name( final String name )
+		protected ExecutablePath name( final String name )
 		{
 			return super.name( name );
 		}
 
 		@Override
-		public ExecutablePath help( final String help )
+		protected ExecutablePath help( final String help )
 		{
 			return super.help( help );
 		}
 
 		@Override
-		public ExecutablePath key( final String key )
+		protected ExecutablePath key( final String key )
 		{
 			return super.key( key );
 		}
