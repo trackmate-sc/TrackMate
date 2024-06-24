@@ -198,7 +198,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 			addToLayout(
 					arg.getHelp(),
 					new JLabel( element.getLabel() ),
-					linkedSliderPanel( element, tfCols, 0.1 ),
+					linkedSliderPanel( element, tfCols, arg.getMax() / 50 ),
 					arg.getUnits(),
 					arg );
 		}
