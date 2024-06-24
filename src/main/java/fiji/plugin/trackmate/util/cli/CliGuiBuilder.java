@@ -489,7 +489,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 		{
 			lbl.setToolTipText( help );
 			comp.setToolTipText( help );
-			lblUnits.setText( help );
+			lblUnits.setToolTipText( help );
 		}
 	}
 
