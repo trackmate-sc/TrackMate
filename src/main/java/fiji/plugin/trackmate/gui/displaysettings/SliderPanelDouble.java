@@ -23,8 +23,11 @@ package fiji.plugin.trackmate.gui.displaysettings;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -109,6 +112,25 @@ public class SliderPanelDouble extends JPanel implements BoundedValueDouble.Upda
 			}
 		} );
 
+		final MouseWheelListener mwl = new MouseWheelListener()
+		{
+
+			@Override
+			public void mouseWheelMoved( final MouseWheelEvent e )
+			{
+				final int notches = e.getWheelRotation();
+				double value = ( ( Number ) spinner.getValue() ).doubleValue();
+				value -= notches * spinnerStepSize;
+				if ( value < dmin )
+					value = dmin;
+				else if ( value > dmax )
+					value = dmax;
+				spinner.setValue( value );
+			}
+		};
+		slider.addMouseWheelListener( mwl );
+		spinner.addMouseWheelListener( mwl );
+
 		spinner.addChangeListener( new ChangeListener()
 		{
 			@Override
@@ -150,6 +172,26 @@ public class SliderPanelDouble extends JPanel implements BoundedValueDouble.Upda
 	public void setNumColummns( final int cols )
 	{
 		( ( JSpinner.NumberEditor ) spinner.getEditor() ).getTextField().setColumns( cols );
+	}
+
+	@Override
+	public void setFont( final Font font )
+	{
+		super.setFont( font );
+		if ( spinner != null )
+			spinner.setFont( font );
+		if ( slider != null )
+			slider.setFont( font );
+	}
+
+	@Override
+	public void setToolTipText( final String text )
+	{
+		super.setToolTipText( text );
+		if ( spinner != null )
+			spinner.setToolTipText( text );
+		if ( slider != null )
+			slider.setToolTipText( text );
 	}
 
 	@Override
