@@ -141,6 +141,16 @@ public class SliderPanel extends JPanel implements BoundedValue.UpdateListener
 	}
 
 	@Override
+	public void setToolTipText( final String text )
+	{
+		super.setToolTipText( text );
+		if ( spinner != null )
+			spinner.setToolTipText( text );
+		if ( slider != null )
+			slider.setToolTipText( text );
+	}
+
+	@Override
 	public void update()
 	{
 		final int value = model.getCurrentValue();
