@@ -1061,7 +1061,8 @@ public abstract class CLIConfigurator
 				throw new IllegalArgumentException( "Argument '" + name + "' expects String. Got " + val.getClass().getSimpleName() );
 
 			final String v = ( ( String ) val );
-			set( v );
+			if ( envs.contains( v ) )
+				set( v );
 		}
 
 		@Override
