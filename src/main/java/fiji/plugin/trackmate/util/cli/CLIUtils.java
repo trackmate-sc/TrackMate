@@ -31,15 +31,18 @@ public class CLIUtils
 
 	public static final String CONDA_PATH_PREF_KEY = "trackmate.conda.path";
 
-	public static String CONDA_COMMAND = "conda";
-
 	public static Map< String, String > getEnvMap()
 	{
 		// Create a map to store the environment names and paths
 		final Map< String, String > envMap = new HashMap<>();
 		try
 		{
-			final Process process = Runtime.getRuntime().exec( getCondaPath() + " env list" );
+			final ProcessBuilder pb;
+			if ( IJ.isWindows() )
+				pb = new ProcessBuilder( Arrays.asList( "cmd.exe", "/c", "conda", "env", "list" ) );
+			else
+				pb = new ProcessBuilder( Arrays.asList( getCondaPath(), "env", "list" ) );
+			final Process process = pb.start();
 			final BufferedReader reader = new BufferedReader( new InputStreamReader( process.getInputStream() ) );
 
 			// Read each line of output and extract the environment name and
@@ -76,6 +79,9 @@ public class CLIUtils
 
 	public static String getCondaPath()
 	{
+		if ( IJ.isWindows() )
+			return "conda";
+
 		final PrefService prefs = TMUtils.getContext().getService( PrefService.class );
 		String findPath;
 		try
