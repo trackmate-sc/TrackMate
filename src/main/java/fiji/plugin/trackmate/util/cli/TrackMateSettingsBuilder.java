@@ -31,8 +31,6 @@ public class TrackMateSettingsBuilder
 	 *            the map to serialize settings to.
 	 * @param cli
 	 *            the CLI config.
-	 * @param elements
-	 *            the extra parameters as StyleElements.
 	 */
 	public static void toTrackMateSettings( final Map< String, Object > settings, final CLIConfigurator cli )
 	{
