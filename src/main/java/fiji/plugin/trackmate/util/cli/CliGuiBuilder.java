@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -59,6 +60,7 @@ import fiji.plugin.trackmate.util.cli.CLIConfigurator.IntArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.PathArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.SelectableArguments;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.StringArgument;
+import fiji.plugin.trackmate.util.cli.CLIConfigurator.ValueArgument;
 
 public class CliGuiBuilder implements ArgumentVisitor
 {
@@ -537,6 +539,26 @@ public class CliGuiBuilder implements ArgumentVisitor
 
 	public static CliConfigPanel build( final CLIConfigurator cli )
 	{
+		/*
+		 * Check that the visible arguments are all set.
+		 */
+		
+		final List< Command< ? > > all = new ArrayList<>( cli.getArguments() );
+		all.add( cli.getCommandArg() );
+		final List< Command< ? > > valueNotSet = all.stream()
+				.filter( Command::isVisible )
+				.filter( ValueArgument.class::isInstance )
+				.filter( arg -> !arg.isSet() )
+				.collect( Collectors.toList() );
+		if ( !valueNotSet.isEmpty() )
+			throw new IllegalArgumentException( "The GUI builder requires all arguments and commands "
+					+ "to have a value set. The following miss one: " +
+					( valueNotSet.stream().map( arg -> arg.getName() ).collect( Collectors.toList() ) ) );
+
+		/*
+		 * Create the builder.
+		 */
+		
 		final CliGuiBuilder builder = new CliGuiBuilder();
 		cli.getCommandArg().accept( builder );
 
