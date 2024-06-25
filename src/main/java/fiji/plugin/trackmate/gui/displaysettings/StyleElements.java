@@ -1163,9 +1163,17 @@ public class StyleElements
 	{
 		final JTextField tf = new JTextField( element.get() );
 		tf.setHorizontalAlignment( JFormattedTextField.LEFT );
-		GuiUtils.selectAllOnFocus( tf );
 
 		tf.addActionListener( e -> element.set( tf.getText() ) );
+		GuiUtils.selectAllOnFocus( tf );
+		tf.addFocusListener( new FocusAdapter()
+		{
+			@Override
+			public void focusLost( final java.awt.event.FocusEvent e )
+			{
+				element.set( tf.getText() );
+			}
+		} );
 		element.onSet( d -> {
 			if ( d != ( tf.getText() ) )
 				tf.setText( element.value );
