@@ -346,6 +346,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 			if ( file == null )
 				return;
 			tf.setText( file.getAbsolutePath() );
+			tf.postActionEvent();
 		} );
 
 		if ( currentButtonGroup != null )
