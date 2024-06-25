@@ -786,6 +786,7 @@ public abstract class CLIConfigurator
 			return value;
 		}
 
+		@Override
 		public boolean isSet()
 		{
 			return value != null;
@@ -958,6 +959,8 @@ public abstract class CLIConfigurator
 
 		public abstract void accept( final ArgumentVisitor visitor );
 
+		public abstract boolean isSet();
+
 		@Override
 		public String toString()
 		{
@@ -1030,12 +1033,13 @@ public abstract class CLIConfigurator
 			set( envs.get( selected ) );
 		}
 
+		@Override
 		public boolean isSet()
 		{
 			return value != null;
 		}
 
-		public List< String > getEnvironment()
+		public List< String > getEnvironment() // TODO rename
 		{
 			return envs;
 		}
@@ -1082,6 +1086,7 @@ public abstract class CLIConfigurator
 			this.value = value;
 		}
 
+		@Override
 		public boolean isSet()
 		{
 			return value != null;
