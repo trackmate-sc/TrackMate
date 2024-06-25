@@ -339,7 +339,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 			arg.set( arg.getDefaultValue() );
 		}
 
-		final ListElement< String > element = listElement( arg.getName(), arg.getEnvironment(), arg::getValue, arg::set );
+		final ListElement< String > element = listElement( arg.getName(), arg.getEnvironments(), arg::getValue, arg::set );
 		elements.add( element );
 		final JComboBox< String > comboBox = linkedComboBoxSelector( element );
 		comboBox.setSelectedItem( arg.getValue() );

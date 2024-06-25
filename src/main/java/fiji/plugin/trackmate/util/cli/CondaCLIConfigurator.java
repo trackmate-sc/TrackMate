@@ -25,8 +25,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-
 import ij.IJ;
 
 public abstract class CondaCLIConfigurator extends CLIConfigurator
@@ -60,21 +58,22 @@ public abstract class CondaCLIConfigurator extends CLIConfigurator
 		{
 			final int sel = envs.indexOf( env );
 			if ( sel < 0 )
-				throw new IllegalArgumentException( "Unknown conda environment '" + env +
-						"'. Must be one of " + StringUtils.join( envs, ", " ) + "." );
+			{
+				super.set( envs.get( 0 ) );
+				return;
+			}
 			super.set( env );
 		}
 
 		public void set( final int selected )
 		{
 			if ( selected < 0 || selected >= envs.size() )
-				throw new IllegalArgumentException( "Invalid index for selection of conda environment. "
-						+ "Must be in scale " + 0 + " to " + ( envs.size() - 1 ) + " in "
-						+ StringUtils.join( envs, ", " ) + "." );
-			set( envs.get( selected ) );
+				set( envs.get( 0 ) );
+			else
+				set( envs.get( selected ) );
 		}
 
-		public List< String > getEnvironment() // TODO rename
+		public List< String > getEnvironments()
 		{
 			return envs;
 		}
@@ -104,7 +103,7 @@ public abstract class CondaCLIConfigurator extends CLIConfigurator
 			final String condaPath = CLIUtils.getCondaPath();
 			// Conda and executable stuff.
 			final String envname = ( String ) s;
-			if (IJ.isWindows())
+			if ( IJ.isWindows() )
 			{
 				/*
 				 * In Windows: Launch a shell, change the conda environment,
