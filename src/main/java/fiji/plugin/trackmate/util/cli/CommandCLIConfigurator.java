@@ -32,6 +32,34 @@ public abstract class CommandCLIConfigurator extends CLIConfigurator
 
 	protected final ExecutablePath executable;
 
+	public static class ExecutablePath extends AbstractStringArgument< ExecutablePath >
+	{
+
+		@Override
+		public ExecutablePath name( final String name )
+		{
+			return super.name( name );
+		}
+
+		@Override
+		public ExecutablePath help( final String help )
+		{
+			return super.help( help );
+		}
+
+		@Override
+		public ExecutablePath key( final String key )
+		{
+			return super.key( key );
+		}
+
+		@Override
+		public void accept( final ArgumentVisitor visitor )
+		{
+			visitor.visit( this );
+		}
+	}
+
 	protected CommandCLIConfigurator()
 	{
 		this.executable = new ExecutablePath();

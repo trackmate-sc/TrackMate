@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import ij.IJ;
 
 public abstract class CondaCLIConfigurator extends CLIConfigurator
@@ -33,6 +35,56 @@ public abstract class CondaCLIConfigurator extends CLIConfigurator
 	public static final String KEY_CONDA_ENV = "CONDA_ENV";
 
 	private final CondaEnvironmentCommand condaEnv;
+
+	public static class CondaEnvironmentCommand extends AbstractStringArgument< CondaEnvironmentCommand >
+	{
+
+		private final List< String > envs = new ArrayList<>();
+
+		protected CondaEnvironmentCommand()
+		{
+			name( "Conda environment" );
+			help( "The conda environment in which the tool is configured." );
+			key( KEY_CONDA_ENV );
+		}
+
+		protected CondaEnvironmentCommand addEnvironment( final String env )
+		{
+			if ( !envs.contains( env ) )
+				envs.add( env );
+			return this;
+		}
+
+		@Override
+		public void set( final String env )
+		{
+			final int sel = envs.indexOf( env );
+			if ( sel < 0 )
+				throw new IllegalArgumentException( "Unknown conda environment '" + env +
+						"'. Must be one of " + StringUtils.join( envs, ", " ) + "." );
+			super.set( env );
+		}
+
+		public void set( final int selected )
+		{
+			if ( selected < 0 || selected >= envs.size() )
+				throw new IllegalArgumentException( "Invalid index for selection of conda environment. "
+						+ "Must be in scale " + 0 + " to " + ( envs.size() - 1 ) + " in "
+						+ StringUtils.join( envs, ", " ) + "." );
+			set( envs.get( selected ) );
+		}
+
+		public List< String > getEnvironment() // TODO rename
+		{
+			return envs;
+		}
+
+		@Override
+		public void accept( final ArgumentVisitor visitor )
+		{
+			visitor.visit( this );
+		}
+	}
 
 	protected CondaCLIConfigurator()
 	{
@@ -87,7 +139,7 @@ public abstract class CondaCLIConfigurator extends CLIConfigurator
 	}
 
 	@Override
-	public Command< ? > getCommandArg()
+	public CondaEnvironmentCommand getCommandArg()
 	{
 		return condaEnv;
 	}

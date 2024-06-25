@@ -33,14 +33,17 @@ import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
 
+import fiji.plugin.trackmate.util.cli.CommandCLIConfigurator.ExecutablePath;
+import fiji.plugin.trackmate.util.cli.CondaCLIConfigurator.CondaEnvironmentCommand;
+
 public abstract class CLIConfigurator
 {
 
-	protected final List< Argument< ? > > arguments = new ArrayList<>();
+	protected final List< Argument< ?, ? > > arguments = new ArrayList<>();
 
 	protected final List< SelectableArguments > selectables = new ArrayList<>();
 
-	protected final Map< Command< ? >, Function< Object, List< String > > > translators = new HashMap<>();
+	protected final Map< Argument< ?, ? >, Function< Object, List< String > > > translators = new HashMap<>();
 
 	/*
 	 * GETTERS
@@ -54,7 +57,7 @@ public abstract class CLIConfigurator
 	 *
 	 * @return the list of arguments.
 	 */
-	public List< Command< ? > > getArguments()
+	public List< Argument< ?, ? > > getArguments()
 	{
 		return Collections.unmodifiableList( arguments );
 	}
@@ -77,9 +80,9 @@ public abstract class CLIConfigurator
 	 *
 	 * @return the selected arguments.
 	 */
-	public List< Argument< ? > > getSelectedArguments()
+	public List< Argument< ?, ? > > getSelectedArguments()
 	{
-		final List< Argument< ? > > selectedArguments = new ArrayList<>( arguments );
+		final List< Argument< ?, ? > > selectedArguments = new ArrayList<>( arguments );
 		for ( final SelectableArguments selectable : selectables )
 			selectable.filter( selectedArguments );
 		return selectedArguments;
@@ -89,7 +92,7 @@ public abstract class CLIConfigurator
 	 * VALUE TRANSLATOR.
 	 */
 
-	protected void setTranslator( final Command< ? > arg, final Function< Object, List< String > > translator )
+	protected void setTranslator( final Argument< ?, ? > arg, final Function< Object, List< String > > translator )
 	{
 		translators.put( arg, translator );
 	}
@@ -116,21 +119,21 @@ public abstract class CLIConfigurator
 	public static class SelectableArguments
 	{
 
-		private final List< Argument< ? > > args = new ArrayList<>();
+		private final List< Argument< ?, ? > > args = new ArrayList<>();
 
 		private int selected = 0;
 
-		public SelectableArguments add( final Argument< ? > arg )
+		public SelectableArguments add( final Argument< ?, ? > arg )
 		{
 			if ( !args.contains( arg ) )
 				args.add( arg );
 			return this;
 		}
 
-		private void filter( final List< Argument< ? > > arguments )
+		private void filter( final List< Argument< ?, ? > > arguments )
 		{
-			final Set< Argument< ? > > toRemove = new HashSet<>();
-			for ( final Argument< ? > arg : arguments )
+			final Set< Argument< ?, ? > > toRemove = new HashSet<>();
+			for ( final Argument< ?, ? > arg : arguments )
 			{
 				if ( !args.contains( arg ) )
 					continue; // Unknown of this selectable, keep it.
@@ -145,7 +148,7 @@ public abstract class CLIConfigurator
 			arguments.removeAll( toRemove );
 		}
 
-		public void select( final Argument< ? > arg )
+		public void select( final Argument< ?, ? > arg )
 		{
 			final int sel = args.indexOf( arg );
 			if ( sel < 0 )
@@ -153,7 +156,7 @@ public abstract class CLIConfigurator
 			this.selected = sel;
 		}
 
-		public Argument< ? > getSelection()
+		public Argument< ?, ? > getSelection()
 		{
 			return args.get( selected );
 		}
@@ -161,7 +164,7 @@ public abstract class CLIConfigurator
 		/**
 		 * Exposes all members of the selectable.
 		 */
-		public List< Argument< ? > > getArguments()
+		public List< Argument< ?, ? > > getArguments()
 		{
 			return args;
 		}
@@ -219,7 +222,7 @@ public abstract class CLIConfigurator
 	 */
 
 	@SuppressWarnings( "unchecked" )
-	abstract class Adder< A extends ValueArgument< A, O >, T extends Adder< A, T, O >, O >
+	abstract class Adder< A extends Argument< A, O >, T extends Adder< A, T, O >, O >
 	{
 
 		protected String name;
@@ -539,7 +542,7 @@ public abstract class CLIConfigurator
 	 *            the argument to add to this CLI config.
 	 * @return the argument
 	 */
-	protected < T extends Argument< ? > > T addExtraArgument( final T extraArg )
+	protected < T extends Argument< ?, ? > > T addExtraArgument( final T extraArg )
 	{
 		this.arguments.add( extraArg );
 		return extraArg;
@@ -549,7 +552,7 @@ public abstract class CLIConfigurator
 	 * ARGUMENT CLASSES.
 	 */
 
-	public static class Flag extends ValueArgument< Flag, Boolean >
+	public static class Flag extends Argument< Flag, Boolean >
 	{
 		Flag()
 		{}
@@ -603,7 +606,7 @@ public abstract class CLIConfigurator
 		}
 	}
 
-	public static abstract class AbstractStringArgument< T extends AbstractStringArgument< T > > extends ValueArgument< T, String >
+	public static abstract class AbstractStringArgument< T extends AbstractStringArgument< T > > extends Argument< T, String >
 	{
 
 		@Override
@@ -738,14 +741,100 @@ public abstract class CLIConfigurator
 		}
 	}
 
+	@SuppressWarnings( "unchecked" )
+	public static abstract class BoundedValueArgument< T extends BoundedValueArgument< T, O >, O > extends Argument< T, O >
+	{
+
+		private BoundedValueArgument()
+		{}
+
+		private O min;
+
+		private O max;
+
+		T min( final O min )
+		{
+			this.min = min;
+			return ( T ) this;
+		}
+
+		public O getMax()
+		{
+			return max;
+		}
+
+		T max( final O max )
+		{
+			this.max = max;
+			return ( T ) this;
+		}
+
+		public O getMin()
+		{
+			return min;
+		}
+
+		public boolean hasMin()
+		{
+			return min != null;
+		}
+
+		public boolean hasMax()
+		{
+			return max != null;
+		}
+
+		@Override
+		public String toString()
+		{
+			final String str = super.toString();
+			return str
+					+ " - has min: " + hasMin() + "\n"
+					+ ( hasMin()
+							? " - min: " + getMin() + "\n"
+							: "" )
+					+ " - has max: " + hasMax() + "\n"
+					+ ( hasMax()
+							? " - max: " + getMax() + "\n"
+							: "" );
+		}
+	}
+
 	/**
-	 * Base class for arguments that accept a value after the switch.
+	 * Mother class for command arguments. Typically in the command line they
+	 * appear after the executable name with '--something'.
 	 *
 	 * @param <T>
+	 *            the implementing type of the argument.
+	 * @param <O>
+	 *            the type of value this argument accepts.
 	 */
 	@SuppressWarnings( "unchecked" )
-	public static abstract class ValueArgument< T extends ValueArgument< T, O >, O > extends Argument< T >
+	public static abstract class Argument< T extends Argument< T, O >, O >
 	{
+
+		protected boolean visible = true;
+
+		protected String name;
+
+		protected String help;
+
+		private String key;
+
+		private String argument;
+
+		private boolean inCLI = true;
+
+		T argument( final String argument )
+		{
+			this.argument = argument;
+			return ( T ) this;
+		}
+
+		public String getArgument()
+		{
+			return argument;
+		}
 
 		private O value;
 
@@ -807,111 +896,48 @@ public abstract class CLIConfigurator
 			return value;
 		}
 
-		@Override
 		public boolean isSet()
 		{
 			return value != null;
 		}
 
-		@Override
 		public Object getValueObject()
 		{
 			return getValue();
 		}
 
-		@Override
-		public String toString()
+
+		/**
+		 * Sets the value of this argument via the specified object. This is
+		 * used when deserializing TrackMate settings map.
+		 *
+		 * @param val
+		 *            the object to set the value from
+		 * @see TrackMateSettingsBuilder
+		 */
+		public abstract void setValueObject( Object val );
+
+		/**
+		 * If <code>false</code>, this argument won't be used in the command
+		 * line generator. This is useful to add extra parameters to the GUI
+		 * that are required by TrackMate but not by the CLI tool.
+		 *
+		 * @param inCLI
+		 *            whether this argument should be used when generating
+		 *            commands. By default: <code>true</code>.
+		 * @see CommandBuilder
+		 * @return the argument.
+		 */
+		T inCLI( final boolean inCLI )
 		{
-			final String str = super.toString();
-			return str
-					+ " - is set: " + isSet() + "\n"
-					+ ( isSet()
-							? " - value: " + getValue() + "\n"
-							: "" )
-					+ " - has default value: " + hasDefaultValue() + "\n"
-					+ ( hasDefaultValue()
-							? " - default value: " + getDefaultValue() + "\n"
-							: "" )
-					+ " - required: " + isRequired() + "\n"
-					+ " - units: " + getUnits() + "\n";
-		}
-	}
-
-	@SuppressWarnings( "unchecked" )
-	public static abstract class BoundedValueArgument< T extends BoundedValueArgument< T, O >, O > extends ValueArgument< T, O >
-	{
-
-		private BoundedValueArgument()
-		{}
-
-		private O min;
-
-		private O max;
-
-		T min( final O min )
-		{
-			this.min = min;
+			this.inCLI = inCLI;
 			return ( T ) this;
 		}
 
-		public O getMax()
+		public boolean isInCLI()
 		{
-			return max;
+			return inCLI;
 		}
-
-		T max( final O max )
-		{
-			this.max = max;
-			return ( T ) this;
-		}
-
-		public O getMin()
-		{
-			return min;
-		}
-
-		public boolean hasMin()
-		{
-			return min != null;
-		}
-
-		public boolean hasMax()
-		{
-			return max != null;
-		}
-
-		@Override
-		public String toString()
-		{
-			final String str = super.toString();
-			return str
-					+ " - has min: " + hasMin() + "\n"
-					+ ( hasMin()
-							? " - min: " + getMin() + "\n"
-							: "" )
-					+ " - has max: " + hasMax() + "\n"
-					+ ( hasMax()
-							? " - max: " + getMax() + "\n"
-							: "" );
-		}
-	}
-
-	/**
-	 * Mother class for executable and argument objects.
-	 *
-	 * @param <T>
-	 */
-	@SuppressWarnings( "unchecked" )
-	public static abstract class Command< T extends Command< T > >
-	{
-
-		protected boolean visible = true;
-
-		protected String name;
-
-		protected String help;
-
-		private String key;
 
 		/**
 		 * If <code>false</code>, this argument won't be shown in UIs. It will
@@ -980,246 +1006,25 @@ public abstract class CLIConfigurator
 
 		public abstract void accept( final ArgumentVisitor visitor );
 
-		public abstract boolean isSet();
-
 		@Override
 		public String toString()
 		{
 			return this.getClass().getSimpleName()
 					+ " (" + getName() + ")\n"
 					+ " - help: " + getHelp() + "\n"
-					+ " - key: " + getKey() + "\n";
-		}
-
-		/**
-		 * Sets the value of this argument via the specified object. This is
-		 * used when deserializing TrackMate settings map.
-		 *
-		 * @param val
-		 *            the object to set the value from
-		 * @see TrackMateSettingsBuilder
-		 */
-		public abstract void setValueObject( Object val );
-
-		/**
-		 * Returns an object built from the value of this argument, if it has
-		 * one. This is used in TrackMate settings map serialization.
-		 *
-		 * @return the value object.
-		 * @see TrackMateSettingsBuilder
-		 */
-		public abstract Object getValueObject();
-	}
-
-	public static class CondaEnvironmentCommand extends Command< CondaEnvironmentCommand >
-	{
-
-		private final List< String > envs = new ArrayList<>();
-
-		private String value;
-
-		protected CondaEnvironmentCommand()
-		{
-			name( "Conda environment" );
-			help( "The conda environment in which the tool is configured." );
-		}
-
-		protected CondaEnvironmentCommand addEnvironment( final String env )
-		{
-			if ( !envs.contains( env ) )
-				envs.add( env );
-			return this;
-		}
-
-		public String getValue()
-		{
-			return value;
-		}
-
-		public void set( final String env )
-		{
-			final int sel = envs.indexOf( env );
-			if ( sel < 0 )
-				throw new IllegalArgumentException( "Unknown conda environment '" + env +
-						"'. Must be one of " + StringUtils.join( envs, ", " ) + "." );
-			this.value = env;
-		}
-		
-		public void set( final int selected )
-		{
-			if ( selected < 0 || selected >= envs.size() )
-				throw new IllegalArgumentException( "Invalid index for selection of conda environment. "
-						+ "Must be in scale " + 0 + " to " + ( envs.size() - 1 ) + " in "
-						+ StringUtils.join( envs, ", " ) + "." );
-			set( envs.get( selected ) );
-		}
-
-		@Override
-		public boolean isSet()
-		{
-			return value != null;
-		}
-
-		public List< String > getEnvironment() // TODO rename
-		{
-			return envs;
-		}
-
-		@Override
-		public void accept( final ArgumentVisitor visitor )
-		{
-			visitor.visit( this );
-		}
-
-		@Override
-		public String toString()
-		{
-			final String str = super.toString();
-			return str
-					+ " - envs: " + getEnvironment() + "\n";
-		}
-
-		@Override
-		public void setValueObject( final Object val )
-		{
-			if ( !String.class.isInstance( val ) )
-				throw new IllegalArgumentException( "Argument '" + name + "' expects String. Got " + val.getClass().getSimpleName() );
-
-			final String v = ( ( String ) val );
-			if ( envs.contains( v ) )
-				set( v );
-		}
-
-		@Override
-		public Object getValueObject()
-		{
-			return getValue();
-		}
-	}
-
-	public static class ExecutablePath extends Command< ExecutablePath >
-	{
-
-		private String value = null;
-
-		public void set( final String value )
-		{
-			this.value = value;
-		}
-
-		@Override
-		public boolean isSet()
-		{
-			return value != null;
-		}
-
-		public String getValue()
-		{
-			return value;
-		}
-
-		@Override
-		public ExecutablePath name( final String name )
-		{
-			return super.name( name );
-		}
-
-		@Override
-		public ExecutablePath help( final String help )
-		{
-			return super.help( help );
-		}
-
-		@Override
-		public ExecutablePath key( final String key )
-		{
-			return super.key( key );
-		}
-
-		@Override
-		public void accept( final ArgumentVisitor visitor )
-		{
-			visitor.visit( this );
-		}
-
-		@Override
-		public String toString()
-		{
-			final String str = super.toString();
-			return str + " - value: " + getValue() + "\n";
-		}
-
-		@Override
-		public void setValueObject( final Object val )
-		{
-			if ( !String.class.isInstance( val ) )
-				throw new IllegalArgumentException( "Argument '" + name + "' expects String. Got " + val.getClass().getSimpleName() );
-
-			final String v = ( ( String ) val );
-			set( v );
-		}
-
-		@Override
-		public Object getValueObject()
-		{
-			return getValue();
-		}
-	}
-
-	/**
-	 * Mother class for command arguments. Typically in the command line they
-	 * appear after the executable name with '--something'.
-	 *
-	 * @param <T>
-	 */
-	@SuppressWarnings( "unchecked" )
-	public static abstract class Argument< T extends Argument< T > > extends Command< T >
-	{
-
-		private String argument;
-
-		private boolean inCLI = true;
-
-		T argument( final String argument )
-		{
-			this.argument = argument;
-			return ( T ) this;
-		}
-
-		public String getArgument()
-		{
-			return argument;
-		}
-
-		/**
-		 * If <code>false</code>, this argument won't be used in the command
-		 * line generator. This is useful to add extra parameters to the GUI
-		 * that are required by TrackMate but not by the CLI tool.
-		 *
-		 * @param inCLI
-		 *            whether this argument should be used when generating
-		 *            commands. By default: <code>true</code>.
-		 * @see CommandBuilder
-		 * @return the argument.
-		 */
-		T inCLI( final boolean inCLI )
-		{
-			this.inCLI = inCLI;
-			return ( T ) this;
-		}
-
-		public boolean isInCLI()
-		{
-			return inCLI;
-		}
-
-		@Override
-		public String toString()
-		{
-			final String str = super.toString();
-			return str
+					+ " - key: " + getKey() + "\n"
 					+ " - argument: " + getArgument() + "\n"
-					+ " - visible: " + isVisible() + "\n";
+					+ " - visible: " + isVisible() + "\n"
+					+ " - is set: " + isSet() + "\n"
+					+ ( isSet()
+							? " - value: " + getValue() + "\n"
+							: "" )
+					+ " - has default value: " + hasDefaultValue() + "\n"
+					+ ( hasDefaultValue()
+							? " - default value: " + getDefaultValue() + "\n"
+							: "" )
+					+ " - required: " + isRequired() + "\n"
+					+ " - units: " + getUnits() + "\n";
 		}
 	}
 
@@ -1235,17 +1040,13 @@ public abstract class CLIConfigurator
 	public String check()
 	{
 		final StringBuilder str = new StringBuilder();
-		for ( final Argument< ? > arg : getSelectedArguments() )
+		for ( final Argument< ?, ? > arg : getSelectedArguments() )
 		{
 			if ( arg.isInCLI() && arg.getArgument() == null )
 				str.append( "Argument '" + arg.getName() + "' does not define the argument switch.\n" );
 
-			if ( ValueArgument.class.isInstance( arg ) )
-			{
-				final ValueArgument< ?, ? > varg = ( ValueArgument< ?, ? > ) arg;
-				if ( varg.isRequired() && !varg.isSet() && !varg.hasDefaultValue() )
-					str.append( "Argument '" + arg.getName() + "' is required but is not set and does not define a default value.\n" );
-			}
+			if ( arg.isRequired() && !arg.isSet() && !arg.hasDefaultValue() )
+				str.append( "Argument '" + arg.getName() + "' is required but is not set and does not define a default value.\n" );
 		}
 		return str.length() == 0 ? null : str.toString();
 	}
@@ -1253,7 +1054,7 @@ public abstract class CLIConfigurator
 	/**
 	 * Returns the command object of this tool.
 	 *
-	 * @return the command object.
+	 * @return the command object, as an argument.
 	 */
-	public abstract Command< ? > getCommandArg();
+	public abstract Argument< ?, ? > getCommandArg();
 }

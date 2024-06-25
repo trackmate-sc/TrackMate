@@ -23,7 +23,7 @@ package fiji.plugin.trackmate.util.cli;
 
 import java.util.Map;
 
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.Command;
+import fiji.plugin.trackmate.util.cli.CLIConfigurator.Argument;
 
 public class TrackMateSettingsBuilder
 {
@@ -31,13 +31,13 @@ public class TrackMateSettingsBuilder
 	private TrackMateSettingsBuilder()
 	{}
 
-	private static void toMap( final Command< ? > arg, final Map< String, Object > settings )
+	private static void toMap( final Argument< ?, ? > arg, final Map< String, Object > settings )
 	{
 		if ( arg.getKey() != null )
 			settings.put( arg.getKey(), arg.getValueObject() );
 	}
 
-	private static void fromMap( final Map< String, Object > settings, final Command< ? > arg )
+	private static void fromMap( final Map< String, Object > settings, final Argument< ?, ? > arg )
 	{
 		final Object val = settings.get( arg.getKey() );
 		if ( val != null )

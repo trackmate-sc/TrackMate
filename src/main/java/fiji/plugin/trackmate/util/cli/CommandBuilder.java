@@ -33,23 +33,22 @@ import fiji.plugin.trackmate.util.cli.CLIConfigurator.AbstractStringArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.Argument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.ArgumentVisitor;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.ChoiceArgument;
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.Command;
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.CondaEnvironmentCommand;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.DoubleArgument;
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.ExecutablePath;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.Flag;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.IntArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.PathArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.StringArgument;
+import fiji.plugin.trackmate.util.cli.CommandCLIConfigurator.ExecutablePath;
+import fiji.plugin.trackmate.util.cli.CondaCLIConfigurator.CondaEnvironmentCommand;
 
 public class CommandBuilder implements ArgumentVisitor
 {
 
 	private final List< String > tokens = new ArrayList<>();
 
-	private final Map< Command< ? >, Function< Object, List< String > > > translators;
+	private final Map< Argument< ?, ? >, Function< Object, List< String > > > translators;
 
-	protected CommandBuilder( final Map< Command< ? >, Function< Object, List< String > > > translators )
+	protected CommandBuilder( final Map< Argument< ?, ? >, Function< Object, List< String > > > translators )
 	{
 		this.translators = translators;
 	}
@@ -60,7 +59,7 @@ public class CommandBuilder implements ArgumentVisitor
 		return StringUtils.join( tokens, " " );
 	}
 
-	private void check( final Argument< ? > arg )
+	private void check( final Argument< ?, ? > arg )
 	{
 		if ( arg.isInCLI() && arg.getArgument() == null )
 			throw new IllegalArgumentException( "Incorrect configuration for argument '" + arg.getName()

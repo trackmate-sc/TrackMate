@@ -42,7 +42,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -72,16 +71,14 @@ import fiji.plugin.trackmate.util.FileChooser.DialogType;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.Argument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.ArgumentVisitor;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.ChoiceArgument;
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.Command;
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.CondaEnvironmentCommand;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.DoubleArgument;
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.ExecutablePath;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.Flag;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.IntArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.PathArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.SelectableArguments;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.StringArgument;
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.ValueArgument;
+import fiji.plugin.trackmate.util.cli.CommandCLIConfigurator.ExecutablePath;
+import fiji.plugin.trackmate.util.cli.CondaCLIConfigurator.CondaEnvironmentCommand;
 
 public class CliGuiBuilder implements ArgumentVisitor
 {
@@ -150,6 +147,14 @@ public class CliGuiBuilder implements ArgumentVisitor
 	@Override
 	public void visit( final ExecutablePath arg )
 	{
+		if ( !arg.isSet() )
+		{
+			if ( !arg.hasDefaultValue() )
+				throw new IllegalArgumentException( "The GUI builder requires all arguments and commands "
+						+ "to have a value or a default value. The argument '" + arg.getName() + "' misses both." );
+			arg.set( arg.getDefaultValue() );
+		}
+
 		final StringElement element = stringElement( arg.getName(), arg::getValue, arg::set );
 		elements.add( element );
 		addPathToLayout(
@@ -167,10 +172,16 @@ public class CliGuiBuilder implements ArgumentVisitor
 	@Override
 	public void visit( final Flag flag )
 	{
+		if ( !flag.isSet() )
+		{
+			if ( !flag.hasDefaultValue() )
+				throw new IllegalArgumentException( "The GUI builder requires all arguments and commands "
+						+ "to have a value or a default value. The argument '" + flag.getName() + "' misses both." );
+			flag.set( flag.getDefaultValue() );
+		}
+
 		final BooleanElement element = booleanElement( flag.getName(), flag::getValue, flag::set );
 		elements.add( element );
-		if ( !flag.isSet() )
-			element.set( flag.getDefaultValue() );
 		final JCheckBox checkbox = linkedCheckBox( element, "" );
 		checkbox.setHorizontalAlignment( SwingConstants.LEADING );
 		addToLayout(
@@ -183,6 +194,14 @@ public class CliGuiBuilder implements ArgumentVisitor
 	@Override
 	public void visit( final IntArgument arg )
 	{
+		if ( !arg.isSet() )
+		{
+			if ( !arg.hasDefaultValue() )
+				throw new IllegalArgumentException( "The GUI builder requires all arguments and commands "
+						+ "to have a value or a default value. The argument '" + arg.getName() + "' misses both." );
+			arg.set( arg.getDefaultValue() );
+		}
+
 		final IntElement element = intElement( arg.getName(),
 				arg.getMin(), arg.getMax(), arg::getValue, arg::set );
 		elements.add( element );
@@ -209,15 +228,19 @@ public class CliGuiBuilder implements ArgumentVisitor
 	@Override
 	public void visit( final DoubleArgument arg )
 	{
+		if ( !arg.isSet() )
+		{
+			if ( !arg.hasDefaultValue() )
+				throw new IllegalArgumentException( "The GUI builder requires all arguments and commands "
+						+ "to have a value or a default value. The argument '" + arg.getName() + "' misses both." );
+			arg.set( arg.getDefaultValue() );
+		}
+
 		if ( arg.hasMin() && arg.hasMax() )
 		{
 			final BoundedDoubleElement element = boundedDoubleElement( arg.getName(),
 					arg.getMin(), arg.getMax(), arg::getValue, arg::set );
 			elements.add( element );
-			if ( arg.isSet() )
-				element.set( arg.getValue() );
-			else if ( arg.hasDefaultValue() )
-				element.set( arg.getDefaultValue() );
 			addToLayout(
 					arg.getHelp(),
 					new JLabel( element.getLabel() ),
@@ -245,6 +268,14 @@ public class CliGuiBuilder implements ArgumentVisitor
 	@Override
 	public void visit( final StringArgument arg )
 	{
+		if ( !arg.isSet() )
+		{
+			if ( !arg.hasDefaultValue() )
+				throw new IllegalArgumentException( "The GUI builder requires all arguments and commands "
+						+ "to have a value or a default value. The argument '" + arg.getName() + "' misses both." );
+			arg.set( arg.getDefaultValue() );
+		}
+
 		final StringElement element = stringElement( arg.getName(), arg::getValue, arg::set );
 		elements.add( element );
 		addToLayoutTwoLines(
@@ -257,12 +288,16 @@ public class CliGuiBuilder implements ArgumentVisitor
 	@Override
 	public void visit( final PathArgument arg )
 	{
+		if ( !arg.isSet() )
+		{
+			if ( !arg.hasDefaultValue() )
+				throw new IllegalArgumentException( "The GUI builder requires all arguments and commands "
+						+ "to have a value or a default value. The argument '" + arg.getName() + "' misses both." );
+			arg.set( arg.getDefaultValue() );
+		}
+
 		final StringElement element = stringElement( arg.getName(), arg::getValue, arg::set );
 		elements.add( element );
-		if ( arg.isSet() )
-			element.set( arg.getValue() );
-		else if ( arg.hasDefaultValue() )
-			element.set( arg.getDefaultValue() );
 		addPathToLayout(
 				arg.getHelp(),
 				new JLabel( element.getLabel() ),
@@ -273,13 +308,18 @@ public class CliGuiBuilder implements ArgumentVisitor
 	@Override
 	public void visit( final ChoiceArgument arg )
 	{
+		if ( !arg.isSet() )
+		{
+			if ( !arg.hasDefaultValue() )
+				throw new IllegalArgumentException( "The GUI builder requires all arguments and commands "
+						+ "to have a value or a default value. The argument '" + arg.getName() + "' misses both." );
+			arg.set( arg.getDefaultValue() );
+		}
+
 		final ListElement< String > element = listElement( arg.getName(), arg.getChoices(), arg::getValue, arg::set );
 		elements.add( element );
 		final JComboBox< String > comboBox = linkedComboBoxSelector( element );
-		if ( arg.isSet() )
-			comboBox.setSelectedItem( arg.getValue() );
-		else if ( arg.hasDefaultValue() )
-			comboBox.setSelectedItem( arg.getDefaultValue() );
+		comboBox.setSelectedItem( arg.getValue() );
 		addToLayout(
 				arg.getHelp(),
 				new JLabel( element.getLabel() ),
@@ -291,13 +331,18 @@ public class CliGuiBuilder implements ArgumentVisitor
 	@Override
 	public void visit( final CondaEnvironmentCommand arg )
 	{
+		if ( !arg.isSet() )
+		{
+			if ( !arg.hasDefaultValue() )
+				throw new IllegalArgumentException( "The GUI builder requires all arguments and commands "
+						+ "to have a value or a default value. The argument '" + arg.getName() + "' misses both." );
+			arg.set( arg.getDefaultValue() );
+		}
+
 		final ListElement< String > element = listElement( arg.getName(), arg.getEnvironment(), arg::getValue, arg::set );
 		elements.add( element );
 		final JComboBox< String > comboBox = linkedComboBoxSelector( element );
-		if ( arg.isSet() )
-			comboBox.setSelectedItem( arg.getValue() );
-		else
-			comboBox.setSelectedItem( 0 );
+		comboBox.setSelectedItem( arg.getValue() );
 		addToLayout(
 				arg.getHelp(),
 				new JLabel( element.getLabel() ),
@@ -309,7 +354,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 	 * UI STUFF.
 	 */
 
-	private void addToLayoutTwoLines( final String help, final JLabel lbl, final JComponent comp, final Argument< ? > arg )
+	private void addToLayoutTwoLines( final String help, final JLabel lbl, final JComponent comp, final Argument< ?, ? > arg )
 	{
 		lbl.setText( lbl.getText() + " " );
 		lbl.setFont( Fonts.SMALL_FONT );
@@ -353,7 +398,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 		}
 	}
 
-	private void addPathToLayout( final String help, final JLabel lbl, final JTextField tf, final Argument< ? > arg )
+	private void addPathToLayout( final String help, final JLabel lbl, final JTextField tf, final Argument< ?, ? > arg )
 	{
 		final JPanel p = new JPanel();
 		final BoxLayout bl = new BoxLayout( p, BoxLayout.LINE_AXIS );
@@ -410,7 +455,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 		}
 	}
 
-	private void addToLayout( final String help, final JLabel lbl, final JComponent comp, final Argument< ? > arg )
+	private void addToLayout( final String help, final JLabel lbl, final JComponent comp, final Argument< ?, ? > arg )
 	{
 		lbl.setText( lbl.getText() + " " );
 		lbl.setFont( Fonts.SMALL_FONT );
@@ -461,7 +506,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 		}
 	}
 
-	private void addToLayout( final String help, final JLabel lbl, final JComponent comp, final String units, final Argument< ? > arg )
+	private void addToLayout( final String help, final JLabel lbl, final JComponent comp, final String units, final Argument< ?, ? > arg )
 	{
 		if ( units == null )
 		{
@@ -561,25 +606,9 @@ public class CliGuiBuilder implements ArgumentVisitor
 	public static CliConfigPanel build( final CLIConfigurator cli )
 	{
 		/*
-		 * Check that the visible arguments are all set.
-		 */
-		
-		final List< Command< ? > > all = new ArrayList<>( cli.getArguments() );
-		all.add( cli.getCommandArg() );
-		final List< Command< ? > > valueNotSet = all.stream()
-				.filter( Command::isVisible )
-				.filter( ValueArgument.class::isInstance )
-				.filter( arg -> !arg.isSet() )
-				.collect( Collectors.toList() );
-		if ( !valueNotSet.isEmpty() )
-			throw new IllegalArgumentException( "The GUI builder requires all arguments and commands "
-					+ "to have a value set. The following miss one: " +
-					( valueNotSet.stream().map( arg -> arg.getName() ).collect( Collectors.toList() ) ) );
-
-		/*
 		 * Create the builder.
 		 */
-		
+
 		final CliGuiBuilder builder = new CliGuiBuilder();
 		cli.getCommandArg().accept( builder );
 
@@ -591,7 +620,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 		final Map< SelectableArguments, ButtonGroup > buttonGroups = new HashMap<>();
 
 		// Iterate over arguments, taking care of selectable group.
-		for ( final Command< ? > arg : cli.getArguments() )
+		for ( final Argument< ?, ? > arg : cli.getArguments() )
 		{
 			if ( !arg.isVisible() )
 				continue;
@@ -631,7 +660,6 @@ public class CliGuiBuilder implements ArgumentVisitor
 		builder.addLastRow();
 		return builder.panel;
 	}
-
 
 	public class CliConfigPanel extends JPanel
 	{
