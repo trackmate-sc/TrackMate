@@ -121,6 +121,8 @@ public abstract class CLIConfigurator
 
 		private final List< Argument< ?, ? > > args = new ArrayList<>();
 
+		private String key;
+
 		private int selected = 0;
 
 		public SelectableArguments add( final Argument< ?, ? > arg )
@@ -128,6 +130,17 @@ public abstract class CLIConfigurator
 			if ( !args.contains( arg ) )
 				args.add( arg );
 			return this;
+		}
+
+		public SelectableArguments key( final String key )
+		{
+			this.key = key;
+			return this;
+		}
+
+		public String getKey()
+		{
+			return key;
 		}
 
 		private void filter( final List< Argument< ?, ? > > arguments )
@@ -152,8 +165,25 @@ public abstract class CLIConfigurator
 		{
 			final int sel = args.indexOf( arg );
 			if ( sel < 0 )
-				throw new IllegalArgumentException( "Unknown argument '" + arg.getName() + "' for this selectable." );
+			{
+				this.selected = 0;
+				return;
+			}
 			this.selected = sel;
+		}
+
+		public void select( final String key )
+		{
+			for ( int i = 0; i < args.size(); i++ )
+			{
+				if ( args.get( i ).getKey().equals( key ) )
+				{
+					this.selected = i;
+					return;
+				}
+			}
+			this.selected = 0;
+
 		}
 
 		public Argument< ?, ? > getSelection()
