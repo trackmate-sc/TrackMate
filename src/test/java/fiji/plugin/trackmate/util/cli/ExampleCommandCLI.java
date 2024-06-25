@@ -22,7 +22,7 @@ public class ExampleCommandCLI extends CommandCLIConfigurator
 		/*
 		 * The executable that will be called by the TrackMate module.
 		 * 
-		 * CLI configs that inherit from '>CommandCLIConfigurator' are all based
+		 * CLI configs that inherit from 'CommandCLIConfigurator' are all based
 		 * on an actual executable, that is a file with exec rights somewhere on
 		 * the user computer. They need to set it themselves, so the config part
 		 * only specifies the name, the help and the key of this command.
@@ -45,13 +45,12 @@ public class ExampleCommandCLI extends CommandCLIConfigurator
 		 * is what is passed to it before the value.
 		 * 
 		 * This example argument is not required, but has a default value of 1.
-		 * The default value is used to initialize the UI widgets, but also in
-		 * the command line. If an argument is not required, is not set, but has
-		 * a default value, then the argument will appear in the command line
-		 * with this default value.
+		 * The default value is used only in the command line. If an argument is
+		 * not required, is not set, but has a default value, then the argument
+		 * will appear in the command line with this default value.
 		 * 
 		 * Adding arguments is done via 'adder' methods, that are only visible
-		 * in inhering class. The 'get()' method of the adder returns the
+		 * in inhering classes. The 'get()' method of the adder returns the
 		 * created argument. It also adds it to the inner parts of the mother
 		 * class, so that it is handled automatically when creating a GUI or a
 		 * command line. But it is a good idea to expose it in this concrete
