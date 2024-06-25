@@ -168,9 +168,20 @@ public class ExampleCommandCLI extends CommandCLIConfigurator
 		 * Make a UI that configures the CLI.
 		 */
 
-		// The UI cannot be created without a value or at least a default value.
-		cli.time().set( 5. );
+		// The UI cannot be created wit arguments that do not have a value. This
+		// will generate an error:
+		try
+		{
+			CliGuiBuilder.build( cli );
+		}
+		catch ( final IllegalArgumentException e )
+		{
+			System.err.println( e.getMessage() );
+		}
 
+		cli.time().set( 5. );
+		cli.nThreads().set( 2 );
+		// This should be ok now.
 		final CliConfigPanel panel = CliGuiBuilder.build( cli );
 		final JFrame frame = new JFrame( "Demo CLI tool" );
 		frame.getContentPane().add( panel, BorderLayout.CENTER );
@@ -182,5 +193,4 @@ public class ExampleCommandCLI extends CommandCLIConfigurator
 		frame.setVisible( true );
 		frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
 	}
-
 }
