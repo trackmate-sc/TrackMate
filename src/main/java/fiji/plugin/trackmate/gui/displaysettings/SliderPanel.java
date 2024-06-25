@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -24,6 +24,9 @@ package fiji.plugin.trackmate.gui.displaysettings;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -42,7 +45,7 @@ public class SliderPanel extends JPanel implements BoundedValue.UpdateListener
 {
 	private static final long serialVersionUID = 6444334522127424416L;
 
-	public static final Dimension PANEL_SIZE = new Dimension( 100, 20 );
+	public static final Dimension PANEL_SIZE = new Dimension( 150, 20 );
 
 	private final JSlider slider;
 
@@ -79,6 +82,25 @@ public class SliderPanel extends JPanel implements BoundedValue.UpdateListener
 			}
 		} );
 
+		final MouseWheelListener mwl = new MouseWheelListener()
+		{
+
+			@Override
+			public void mouseWheelMoved( final MouseWheelEvent e )
+			{
+				final int notches = e.getWheelRotation();
+				int value = slider.getValue();
+				value -= notches * spinnerStepSize;
+				if ( value < slider.getMinimum() )
+					value = slider.getMinimum();
+				else if ( value > slider.getMaximum() )
+					value = slider.getMaximum();
+				slider.setValue( value );
+			}
+		};
+		slider.addMouseWheelListener( mwl );
+		spinner.addMouseWheelListener( mwl );
+
 		spinner.addChangeListener( new ChangeListener()
 		{
 			@Override
@@ -106,6 +128,26 @@ public class SliderPanel extends JPanel implements BoundedValue.UpdateListener
 	public void setNumColummns( final int cols )
 	{
 		( ( JSpinner.NumberEditor ) spinner.getEditor() ).getTextField().setColumns( cols );
+	}
+
+	@Override
+	public void setFont( final Font font )
+	{
+		super.setFont( font );
+		if ( spinner != null )
+			spinner.setFont( font );
+		if ( slider != null )
+			slider.setFont( font );
+	}
+
+	@Override
+	public void setToolTipText( final String text )
+	{
+		super.setToolTipText( text );
+		if ( spinner != null )
+			spinner.setToolTipText( text );
+		if ( slider != null )
+			slider.setToolTipText( text );
 	}
 
 	@Override

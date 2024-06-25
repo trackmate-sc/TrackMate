@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -29,15 +29,24 @@ import java.awt.DisplayMode;
 import java.awt.Font;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.Window;
 import java.awt.color.ColorSpace;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 
+import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -104,7 +113,7 @@ public class GuiUtils
 	 * https://stackoverflow.com/questions/9018016/how-to-compare-two-colors-for-similarity-difference
 	 * and
 	 * https://stackoverflow.com/questions/4593469/java-how-to-convert-rgb-color-to-cie-lab
-	 * 
+	 *
 	 * @param a
 	 * @param b
 	 * @return
@@ -286,7 +295,7 @@ public class GuiUtils
 	 * module. It expects to receive HTML strings, including some links. The
 	 * links will be clickable and open the target URL in a browser. Nice for
 	 * documentation and links to papers.
-	 * 
+	 *
 	 * @return a new {@link JEditorPane}.
 	 */
 	public static JEditorPane infoDisplay()
@@ -304,12 +313,12 @@ public class GuiUtils
 	 * module. It expects to receive HTML strings, including some links. The
 	 * links will be clickable and open the target URL in a browser. Nice for
 	 * documentation and links to papers.
-	 * 
+	 *
 	 * @param html
 	 *            the text to display.
 	 * @param justify
 	 *            if <code>true</code> the text will be justified.
-	 * 
+	 *
 	 * @return a new {@link JEditorPane}.
 	 */
 	public static JEditorPane infoDisplay( final String html, final boolean justify )
@@ -366,5 +375,62 @@ public class GuiUtils
 		scrollPane.getViewport().setOpaque( false );
 		scrollPane.setBorder( null );
 		return scrollPane;
+	}
+
+	public static final ImageIcon scaleImage( final ImageIcon icon, final int w, final int h )
+	{
+		int nw = icon.getIconWidth();
+		int nh = icon.getIconHeight();
+
+		if ( icon.getIconWidth() > w )
+		{
+			nw = w;
+			nh = ( nw * icon.getIconHeight() ) / icon.getIconWidth();
+		}
+
+		if ( nh > h )
+		{
+			nh = h;
+			nw = ( icon.getIconWidth() * nh ) / icon.getIconHeight();
+		}
+
+		return new ImageIcon( icon.getImage().getScaledInstance( nw, nh, Image.SCALE_DEFAULT ) );
+	}
+
+	public static URL getResource( final String name, final Class< ? > clazz )
+	{
+		return clazz.getClassLoader().getResource( name );
+	}
+
+	public static MouseListener createURLMouseListener( final JLabel label, final String url, final String text )
+	{
+		return new MouseAdapter()
+		{
+
+			@Override
+			public void mouseClicked( final java.awt.event.MouseEvent e )
+			{
+				try
+				{
+					Desktop.getDesktop().browse( new URI( url ) );
+				}
+				catch ( URISyntaxException | IOException ex )
+				{
+					ex.printStackTrace();
+				}
+			}
+
+			@Override
+			public void mouseExited( final java.awt.event.MouseEvent e )
+			{
+				label.setText( text );
+			}
+
+			@Override
+			public void mouseEntered( final java.awt.event.MouseEvent e )
+			{
+				label.setText( "<html><a href=''>" + url + "</a></html>" );
+			}
+		};
 	}
 }

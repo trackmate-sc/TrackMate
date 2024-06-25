@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -31,8 +31,12 @@ import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Vector;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
@@ -56,6 +60,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JSpinner.DefaultEditor;
+import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 import javax.swing.SpinnerListModel;
 import javax.swing.SpinnerNumberModel;
@@ -85,6 +90,25 @@ public class StyleElements
 	public static LabelElement label( final String label )
 	{
 		return new LabelElement( label );
+	}
+
+	public static StringElement stringElement( final String label, final Supplier< String > get, final Consumer< String > set )
+	{
+		return new StringElement( label )
+		{
+
+			@Override
+			public String get()
+			{
+				return get.get();
+			}
+
+			@Override
+			public void set( final String s )
+			{
+				set.accept( s );
+			}
+		};
 	}
 
 	public static BooleanElement booleanElement( final String label, final BooleanSupplier get, final Consumer< Boolean > set )
@@ -215,6 +239,25 @@ public class StyleElements
 		};
 	}
 
+	public static < E > ListElement< E > listElement( final String label, final List< E > values, final Supplier< E > get, final Consumer< E > set )
+	{
+		return new ListElement< E >( label, values )
+		{
+
+			@Override
+			public E getValue()
+			{
+				return get.get();
+			}
+
+			@Override
+			public void setValue( final E e )
+			{
+				set.accept( e );
+			}
+		};
+	}
+
 	public static FeatureElement featureElement( final String label, final Supplier< TrackMateObject > typeGet, final Supplier< String > featureGet, final BiConsumer< TrackMateObject, String > set )
 	{
 		return new FeatureElement( label )
@@ -320,6 +363,15 @@ public class StyleElements
 			throw new UnsupportedOperationException();
 		}
 
+		public default void visit( final StringElement stringElement )
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		public default < E > void visit( final ListElement< E > listElement )
+		{
+			throw new UnsupportedOperationException();
+		}
 	}
 
 	/*
@@ -366,6 +418,50 @@ public class StyleElements
 		}
 	}
 
+	public static abstract class StringElement implements StyleElement
+	{
+
+		private final ArrayList< Consumer< String > > onSet = new ArrayList<>();
+
+		private final String label;
+
+		private String value;
+
+		public StringElement( final String label )
+		{
+			this.label = label;
+			this.value = "";
+		}
+
+		public String getLabel()
+		{
+			return label;
+		}
+
+		@Override
+		public void accept( final StyleElementVisitor visitor )
+		{
+			visitor.visit( this );
+		}
+
+		public abstract String get();
+
+		public abstract void set( String s );
+
+		public void onSet( final Consumer< String > set )
+		{
+			onSet.add( set );
+		}
+
+		@Override
+		public void update()
+		{
+			if ( get() != value )
+				value = get();
+			onSet.forEach( c -> c.accept( get() ) );
+		}
+	}
+
 	public static abstract class EnumElement< E > implements StyleElement
 	{
 		private final ArrayList< Consumer< E > > onSet = new ArrayList<>();
@@ -407,6 +503,52 @@ public class StyleElements
 		public abstract void setValue( E e );
 
 		public E[] getValues()
+		{
+			return values;
+		}
+	}
+
+	public static abstract class ListElement< E > implements StyleElement
+	{
+		private final ArrayList< Consumer< E > > onSet = new ArrayList<>();
+
+		private final String label;
+
+		private final List< E > values;
+
+		public ListElement( final String label, final List< E > values )
+		{
+			this.label = label;
+			this.values = values;
+		}
+
+		public String getLabel()
+		{
+			return label;
+		}
+
+		@Override
+		public void accept( final StyleElementVisitor visitor )
+		{
+			visitor.visit( this );
+		}
+
+		public void onSet( final Consumer< E > set )
+		{
+			onSet.add( set );
+		}
+
+		@Override
+		public void update()
+		{
+			onSet.forEach( c -> c.accept( getValue() ) );
+		}
+
+		public abstract E getValue();
+
+		public abstract void setValue( E e );
+
+		public List< E > getValues()
 		{
 			return values;
 		}
@@ -973,20 +1115,71 @@ public class StyleElements
 		return cb;
 	}
 
+	@SuppressWarnings( "unchecked" )
+	public static < E > JComboBox< E > linkedComboBoxSelector( final ListElement< E > element )
+	{
+		final DefaultComboBoxModel< E > model = new DefaultComboBoxModel<>( new Vector<>( element.values ) );
+		final JComboBox< E > cb = new JComboBox<>( model );
+		cb.setFont( Fonts.SMALL_FONT );
+		cb.addActionListener( e -> element.setValue( ( E ) model.getSelectedItem() ) );
+		element.onSet( e -> {
+			if ( e != model.getSelectedItem() )
+				model.setSelectedItem( e );
+		} );
+		return cb;
+	}
+
 	public static JFormattedTextField linkedFormattedTextField( final DoubleElement element )
 	{
 		final JFormattedTextField ftf = new JFormattedTextField( format );
 		ftf.setHorizontalAlignment( JFormattedTextField.RIGHT );
 		ftf.setValue( Double.valueOf( element.get() ) );
-		GuiUtils.selectAllOnFocus( ftf );
 
 		ftf.addActionListener( e -> element.set( ( ( Number ) ftf.getValue() ).doubleValue() ) );
+		ftf.addFocusListener( new FocusAdapter()
+		{
+			@Override
+			public void focusLost( final java.awt.event.FocusEvent e )
+			{
+				try
+				{
+					ftf.commitEdit();
+					element.set( ( ( Number ) ftf.getValue() ).doubleValue() );
+				}
+				catch ( final ParseException e1 )
+				{}
+			}
+		} );
+		GuiUtils.selectAllOnFocus( ftf );
 		element.onSet( d -> {
 			if ( d != ( ( Number ) ftf.getValue() ).doubleValue() )
 				ftf.setValue( Double.valueOf( element.value ) );
 		} );
 
 		return ftf;
+	}
+
+	public static JTextField linkedTextField( final StringElement element )
+	{
+		final JTextField tf = new JTextField( element.get() );
+		tf.setHorizontalAlignment( JFormattedTextField.LEFT );
+
+		tf.addActionListener( e -> element.set( tf.getText() ) );
+		GuiUtils.selectAllOnFocus( tf );
+		tf.addFocusListener( new FocusAdapter()
+		{
+			@Override
+			public void focusLost( final java.awt.event.FocusEvent e )
+			{
+				element.set( tf.getText() );
+			}
+		} );
+		element.onSet( d -> {
+			if ( d != ( tf.getText() ) )
+				tf.setText( element.value );
+		} );
+
+		return tf;
 	}
 
 	public static JButton linkedFontButton( final FontElement element, final Window parent )

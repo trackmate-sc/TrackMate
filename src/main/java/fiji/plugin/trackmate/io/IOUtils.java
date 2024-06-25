@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -52,7 +52,7 @@ import ij.IJ;
 
 /**
  * A collection of static utilities for the input/output of xml files.
- * 
+ *
  * @author Jean-Yves Tinevez
  *
  */
@@ -223,7 +223,7 @@ public class IOUtils
 
 	/**
 	 * Prompts the user for a target folder.
-	 * 
+	 *
 	 * @param file
 	 *            a default file, will be used to display a default choice in
 	 *            the file chooser.
@@ -536,7 +536,7 @@ public class IOUtils
 	 * Add a parameter attribute to the given element, taken from the given
 	 * settings map. Basic checks are made to ensure that the parameter value
 	 * can be found and is of the right class.
-	 * 
+	 *
 	 * @param settings
 	 *            the map to take the parameter value from
 	 * @param element

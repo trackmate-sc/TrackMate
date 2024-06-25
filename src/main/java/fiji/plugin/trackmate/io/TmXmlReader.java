@@ -864,7 +864,7 @@ public class TmXmlReader
 		else
 		{
 			logger.error( "Problem reading the tracker settings:\n" + factory.getErrorMessage() );
-			logger.error( "Subtituting default tracker settings.\n" );
+			logger.error( "Substituting default tracker settings.\n" );
 			settings.trackerSettings = factory.getDefaultSettings();
 		}
 	}
