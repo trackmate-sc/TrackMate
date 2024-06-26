@@ -161,6 +161,11 @@ public abstract class CLIConfigurator
 			arguments.removeAll( toRemove );
 		}
 
+		public void select( final int selection )
+		{
+			this.selected = Math.max( 0, Math.min( args.size() - 1, selection ) );
+		}
+
 		public void select( final Argument< ?, ? > arg )
 		{
 			final int sel = args.indexOf( arg );
@@ -183,12 +188,16 @@ public abstract class CLIConfigurator
 				}
 			}
 			this.selected = 0;
-
 		}
 
 		public Argument< ?, ? > getSelection()
 		{
 			return args.get( selected );
+		}
+
+		public int getSelected()
+		{
+			return selected;
 		}
 
 		/**

@@ -1,5 +1,5 @@
 /*-
- * #%L
+f * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
  * Copyright (C) 2010 - 2024 TrackMate developers.
@@ -37,12 +37,19 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.IntSupplier;
 
+import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -59,6 +66,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import fiji.plugin.trackmate.gui.Fonts;
+import fiji.plugin.trackmate.gui.displaysettings.BoundedValue;
+import fiji.plugin.trackmate.gui.displaysettings.BoundedValue.UpdateListener;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.BooleanElement;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.BoundedDoubleElement;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.DoubleElement;
@@ -89,17 +98,13 @@ public class CliGuiBuilder implements ArgumentVisitor
 
 	private final GridBagConstraints c;
 
-	private ButtonGroup currentButtonGroup;
-
 	private int topInset = 5;
 
 	private int bottomInset = 5;
 
-	private boolean selectedInCurrent = false;
-
-	private SelectableArguments selectable;
-
 	private final List< StyleElement > elements = new ArrayList<>();
+
+	private JRadioButton rdbtn;
 
 	private CliGuiBuilder()
 	{
@@ -115,9 +120,10 @@ public class CliGuiBuilder implements ArgumentVisitor
 		c.gridy = 0;
 	}
 
-	private void setCurrentButtonGroup( final ButtonGroup buttonGroup )
+
+	private void setCurrentRadioButton( final JRadioButton radioButton )
 	{
-		if ( buttonGroup == null || ( this.currentButtonGroup != buttonGroup ) )
+		if ( radioButton == null || ( this.rdbtn != radioButton ) )
 		{
 			topInset = 5;
 			bottomInset = 5;
@@ -127,17 +133,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 			topInset = 0;
 			bottomInset = 0;
 		}
-		this.currentButtonGroup = buttonGroup;
-	}
-
-	private void setCurrentSelected( final boolean selectedInCurrent )
-	{
-		this.selectedInCurrent = selectedInCurrent;
-	}
-
-	private void setCurrentSelectable( final SelectableArguments selectable )
-	{
-		this.selectable = selectable;
+		this.rdbtn = radioButton;
 	}
 
 	/*
@@ -360,17 +356,10 @@ public class CliGuiBuilder implements ArgumentVisitor
 		lbl.setFont( Fonts.SMALL_FONT );
 		comp.setFont( Fonts.SMALL_FONT );
 		final JComponent item;
-		if ( currentButtonGroup != null )
+		if ( rdbtn != null )
 		{
-			final JRadioButton rdbtn = new JRadioButton();
-			currentButtonGroup.add( rdbtn );
-			final SelectableArguments localSelectable = selectable;
-			rdbtn.addItemListener( e -> {
-				comp.setEnabled( rdbtn.isSelected() );
-				if ( rdbtn.isSelected() )
-					localSelectable.select( arg );
-			} );
-			rdbtn.setSelected( selectedInCurrent );
+			final JRadioButton btn = rdbtn;
+			rdbtn.addItemListener( e -> comp.setEnabled( btn.isSelected() ) );
 			comp.setEnabled( rdbtn.isSelected() );
 			item = new JPanel();
 			item.setLayout( new BoxLayout( item, BoxLayout.LINE_AXIS ) );
@@ -417,19 +406,14 @@ public class CliGuiBuilder implements ArgumentVisitor
 			tf.postActionEvent();
 		} );
 
-		if ( currentButtonGroup != null )
+		if ( rdbtn != null )
 		{
-			final JRadioButton rdbtn = new JRadioButton();
-			currentButtonGroup.add( rdbtn );
-			final SelectableArguments localSelectable = selectable;
+			final JRadioButton btn = rdbtn;
 			rdbtn.addItemListener( e -> {
-				tf.setEnabled( rdbtn.isSelected() );
-				browseButton.setEnabled( rdbtn.isSelected() );
-				if ( rdbtn.isSelected() )
-					localSelectable.select( arg );
+				tf.setEnabled( btn.isSelected() );
+				browseButton.setEnabled( btn.isSelected() );
 			} );
 
-			rdbtn.setSelected( selectedInCurrent );
 			tf.setEnabled( rdbtn.isSelected() );
 			browseButton.setEnabled( rdbtn.isSelected() );
 			p.add( rdbtn );
@@ -463,17 +447,10 @@ public class CliGuiBuilder implements ArgumentVisitor
 		comp.setFont( Fonts.SMALL_FONT );
 
 		final JComponent header;
-		if ( arg != null && currentButtonGroup != null )
+		if ( arg != null && rdbtn != null )
 		{
-			final JRadioButton rdbtn = new JRadioButton();
-			currentButtonGroup.add( rdbtn );
-			final SelectableArguments localSelectable = selectable;
-			rdbtn.addItemListener( e -> {
-				comp.setEnabled( rdbtn.isSelected() );
-				if ( rdbtn.isSelected() )
-					localSelectable.select( arg );
-			} );
-			rdbtn.setSelected( selectedInCurrent );
+			final JRadioButton btn = rdbtn;
+			rdbtn.addItemListener( e -> comp.setEnabled( btn.isSelected() ) );
 			comp.setEnabled( rdbtn.isSelected() );
 			header = new JPanel();
 			header.setLayout( new BoxLayout( header, BoxLayout.LINE_AXIS ) );
@@ -520,12 +497,10 @@ public class CliGuiBuilder implements ArgumentVisitor
 		comp.setFont( Fonts.SMALL_FONT );
 
 		final JComponent header;
-		if ( currentButtonGroup != null )
+		if ( rdbtn != null )
 		{
-			final JRadioButton rdbtn = new JRadioButton();
-			currentButtonGroup.add( rdbtn );
-			rdbtn.addItemListener( e -> comp.setEnabled( rdbtn.isSelected() ) );
-			rdbtn.setSelected( selectedInCurrent );
+			final JRadioButton btn = rdbtn;
+			rdbtn.addItemListener( e -> comp.setEnabled( btn.isSelected() ) );
 			header = new JPanel();
 			header.setLayout( new BoxLayout( header, BoxLayout.LINE_AXIS ) );
 			header.add( rdbtn );
@@ -565,12 +540,10 @@ public class CliGuiBuilder implements ArgumentVisitor
 	private void addToLayout( final String help, final JComponent comp )
 	{
 		final JComponent header;
-		if ( currentButtonGroup != null )
+		if ( rdbtn != null )
 		{
-			final JRadioButton rdbtn = new JRadioButton();
-			currentButtonGroup.add( rdbtn );
-			rdbtn.addItemListener( e -> comp.setEnabled( rdbtn.isSelected() ) );
-			rdbtn.setSelected( selectedInCurrent );
+			final JRadioButton btn = rdbtn;
+			rdbtn.addItemListener( e -> comp.setEnabled( btn.isSelected() ) );
 			header = new JPanel();
 			header.setLayout( new BoxLayout( header, BoxLayout.LINE_AXIS ) );
 			header.add( rdbtn );
@@ -615,9 +588,30 @@ public class CliGuiBuilder implements ArgumentVisitor
 		/*
 		 * Iterate over CLI arguments.
 		 */
-
+		
 		// Map a selectable group to a button group in the GUI
-		final Map< SelectableArguments, ButtonGroup > buttonGroups = new HashMap<>();
+		final Map< Argument< ?, ? >, JRadioButton > buttons = new HashMap<>();
+		for ( final SelectableArguments selectable : cli.getSelectables() )
+		{
+			final List< Argument< ?, ? > > args = selectable.getArguments();
+			final int nItems = args.size();
+			final String label = selectable.getKey();
+			final IntSupplier get = selectable::getSelected;
+			final Consumer< Integer > set = selectable::select;
+			final IntElement element = intElement( label, 0, nItems - 1, get, set );
+			builder.elements.add( element );
+			final ButtonGroup buttonGroup = linkedButtonGroup( element );
+			// Link radio buttons to arguments.
+			final Enumeration< AbstractButton > enumeration = buttonGroup.getElements();
+			final Iterator< Argument< ?, ? > > it = args.iterator();
+			while ( enumeration.hasMoreElements() )
+			{
+				final JRadioButton btn = ( JRadioButton ) enumeration.nextElement();
+				final Argument< ?, ? > arg = it.next();
+				buttons.put( arg, btn );
+				btn.setSelected( selectable.getSelection().equals( arg ) );
+			}
+		}
 
 		// Iterate over arguments, taking care of selectable group.
 		for ( final Argument< ?, ? > arg : cli.getArguments() )
@@ -625,31 +619,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 			if ( !arg.isVisible() )
 				continue;
 
-			/*
-			 * Assume we are not in a selectable group. In the case the current
-			 * button group is null and we won't be adding a radio button.
-			 */
-			builder.setCurrentButtonGroup( null );
-			builder.setCurrentSelected( false );
-			builder.setCurrentSelectable( null );
-			for ( final SelectableArguments selectable : cli.getSelectables() )
-			{
-				if ( selectable.getArguments().contains( arg ) )
-				{
-					// We are in a selectable group. We will add a radio button
-					// to the current button group.
-					final ButtonGroup buttonGroup = buttonGroups.computeIfAbsent( selectable, k -> new ButtonGroup() );
-					builder.setCurrentButtonGroup( buttonGroup );
-					builder.setCurrentSelectable( selectable );
-					if ( selectable.getSelection().equals( arg ) )
-					{
-						// We are the selected one.
-						builder.setCurrentSelected( true );
-					}
-
-					break;
-				}
-			}
+			builder.setCurrentRadioButton( buttons.get( arg ) );
 			arg.accept( builder );
 		}
 
@@ -659,6 +629,41 @@ public class CliGuiBuilder implements ArgumentVisitor
 
 		builder.addLastRow();
 		return builder.panel;
+	}
+
+	private static ButtonGroup linkedButtonGroup( final IntElement element )
+	{
+		final BoundedValue value = element.getValue();
+		final ButtonGroup buttonGroup = new ButtonGroup();
+		final List< JRadioButton > buttons = new ArrayList<>();
+		for ( int i = 0; i <= value.getRangeMax(); i++ )
+		{
+			final JRadioButton btn = new JRadioButton();
+			buttons.add( btn );
+			final int selected = i;
+			btn.addItemListener( new ItemListener()
+			{
+				
+				@Override
+				public void itemStateChanged( final ItemEvent e )
+				{
+					if (btn.isSelected())
+						element.set( selected );
+				}
+			} );
+			buttonGroup.add( btn );
+		}
+		element.getValue().setUpdateListener( new UpdateListener()
+		{
+
+			@Override
+			public void update()
+			{
+				final int selected = element.get();
+				buttons.get( selected ).setSelected( true );
+			}
+		} );
+		return buttonGroup;
 	}
 
 	public class CliConfigPanel extends JPanel
