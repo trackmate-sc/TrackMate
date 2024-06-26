@@ -34,6 +34,57 @@ public abstract class CondaCLIConfigurator extends CLIConfigurator
 
 	private final CondaEnvironmentCommand condaEnv;
 
+	public static class CondaEnvironmentCommand extends AbstractStringArgument< CondaEnvironmentCommand >
+	{
+
+		private final List< String > envs = new ArrayList<>();
+
+		protected CondaEnvironmentCommand()
+		{
+			name( "Conda environment" );
+			help( "The conda environment in which the tool is configured." );
+			key( KEY_CONDA_ENV );
+		}
+
+		protected CondaEnvironmentCommand addEnvironment( final String env )
+		{
+			if ( !envs.contains( env ) )
+				envs.add( env );
+			return this;
+		}
+
+		@Override
+		public void set( final String env )
+		{
+			final int sel = envs.indexOf( env );
+			if ( sel < 0 )
+			{
+				super.set( envs.get( 0 ) );
+				return;
+			}
+			super.set( env );
+		}
+
+		public void set( final int selected )
+		{
+			if ( selected < 0 || selected >= envs.size() )
+				set( envs.get( 0 ) );
+			else
+				set( envs.get( selected ) );
+		}
+
+		public List< String > getEnvironments()
+		{
+			return envs;
+		}
+
+		@Override
+		public void accept( final ArgumentVisitor visitor )
+		{
+			visitor.visit( this );
+		}
+	}
+
 	protected CondaCLIConfigurator()
 	{
 		super();
@@ -52,7 +103,7 @@ public abstract class CondaCLIConfigurator extends CLIConfigurator
 			final String condaPath = CLIUtils.getCondaPath();
 			// Conda and executable stuff.
 			final String envname = ( String ) s;
-			if (IJ.isWindows())
+			if ( IJ.isWindows() )
 			{
 				/*
 				 * In Windows: Launch a shell, change the conda environment,
@@ -87,7 +138,7 @@ public abstract class CondaCLIConfigurator extends CLIConfigurator
 	}
 
 	@Override
-	public Command< ? > getCommandArg()
+	public CondaEnvironmentCommand getCommandArg()
 	{
 		return condaEnv;
 	}

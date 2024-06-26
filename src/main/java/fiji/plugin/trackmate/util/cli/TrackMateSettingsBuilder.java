@@ -23,7 +23,8 @@ package fiji.plugin.trackmate.util.cli;
 
 import java.util.Map;
 
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.Command;
+import fiji.plugin.trackmate.util.cli.CLIConfigurator.Argument;
+import fiji.plugin.trackmate.util.cli.CLIConfigurator.SelectableArguments;
 
 public class TrackMateSettingsBuilder
 {
@@ -31,17 +32,30 @@ public class TrackMateSettingsBuilder
 	private TrackMateSettingsBuilder()
 	{}
 
-	private static void toMap( final Command< ? > arg, final Map< String, Object > settings )
+	private static void toMap( final Argument< ?, ? > arg, final Map< String, Object > settings )
 	{
 		if ( arg.getKey() != null )
 			settings.put( arg.getKey(), arg.getValueObject() );
 	}
 
-	private static void fromMap( final Map< String, Object > settings, final Command< ? > arg )
+	private static void toMap( final SelectableArguments selectable, final Map< String, Object > settings )
+	{
+		if ( selectable.getKey() != null )
+			settings.put( selectable.getKey(), selectable.getSelection().getKey() );
+	}
+
+	private static void fromMap( final Map< String, Object > settings, final Argument< ?, ? > arg )
 	{
 		final Object val = settings.get( arg.getKey() );
 		if ( val != null )
 			arg.setValueObject( val );
+	}
+
+	private static void fromMap( final Map< String, Object > settings, final SelectableArguments selectable )
+	{
+		final Object val = settings.get( selectable.getKey() );
+		if ( val != null )
+			selectable.select( ( String ) val );
 	}
 
 	/**
@@ -57,6 +71,7 @@ public class TrackMateSettingsBuilder
 	{
 		toMap( cli.getCommandArg(), settings );
 		cli.getArguments().forEach( arg -> toMap( arg, settings ) );
+		cli.getSelectables().forEach( selectable -> toMap( selectable, settings ) );
 	}
 
 	/**
@@ -73,5 +88,6 @@ public class TrackMateSettingsBuilder
 	{
 		fromMap( settings, cli.getCommandArg() );
 		cli.getArguments().forEach( arg -> fromMap( settings, arg ) );
+		cli.getSelectables().forEach( selectable -> fromMap( settings, selectable ) );
 	}
 }

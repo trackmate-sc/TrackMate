@@ -1,5 +1,5 @@
 /*-
- * #%L
+f * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
  * Copyright (C) 2010 - 2024 TrackMate developers.
@@ -37,13 +37,19 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.function.Consumer;
+import java.util.function.IntSupplier;
 
+import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -60,6 +66,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import fiji.plugin.trackmate.gui.Fonts;
+import fiji.plugin.trackmate.gui.displaysettings.BoundedValue;
+import fiji.plugin.trackmate.gui.displaysettings.BoundedValue.UpdateListener;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.BooleanElement;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.BoundedDoubleElement;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.DoubleElement;
@@ -72,16 +80,14 @@ import fiji.plugin.trackmate.util.FileChooser.DialogType;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.Argument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.ArgumentVisitor;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.ChoiceArgument;
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.Command;
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.CondaEnvironmentCommand;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.DoubleArgument;
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.ExecutablePath;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.Flag;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.IntArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.PathArgument;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.SelectableArguments;
 import fiji.plugin.trackmate.util.cli.CLIConfigurator.StringArgument;
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.ValueArgument;
+import fiji.plugin.trackmate.util.cli.CommandCLIConfigurator.ExecutablePath;
+import fiji.plugin.trackmate.util.cli.CondaCLIConfigurator.CondaEnvironmentCommand;
 
 public class CliGuiBuilder implements ArgumentVisitor
 {
@@ -92,17 +98,13 @@ public class CliGuiBuilder implements ArgumentVisitor
 
 	private final GridBagConstraints c;
 
-	private ButtonGroup currentButtonGroup;
-
 	private int topInset = 5;
 
 	private int bottomInset = 5;
 
-	private boolean selectedInCurrent = false;
-
-	private SelectableArguments selectable;
-
 	private final List< StyleElement > elements = new ArrayList<>();
+
+	private JRadioButton rdbtn;
 
 	private CliGuiBuilder()
 	{
@@ -118,9 +120,10 @@ public class CliGuiBuilder implements ArgumentVisitor
 		c.gridy = 0;
 	}
 
-	private void setCurrentButtonGroup( final ButtonGroup buttonGroup )
+
+	private void setCurrentRadioButton( final JRadioButton radioButton )
 	{
-		if ( buttonGroup == null || ( this.currentButtonGroup != buttonGroup ) )
+		if ( radioButton == null || ( this.rdbtn != radioButton ) )
 		{
 			topInset = 5;
 			bottomInset = 5;
@@ -130,17 +133,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 			topInset = 0;
 			bottomInset = 0;
 		}
-		this.currentButtonGroup = buttonGroup;
-	}
-
-	private void setCurrentSelected( final boolean selectedInCurrent )
-	{
-		this.selectedInCurrent = selectedInCurrent;
-	}
-
-	private void setCurrentSelectable( final SelectableArguments selectable )
-	{
-		this.selectable = selectable;
+		this.rdbtn = radioButton;
 	}
 
 	/*
@@ -150,6 +143,14 @@ public class CliGuiBuilder implements ArgumentVisitor
 	@Override
 	public void visit( final ExecutablePath arg )
 	{
+		if ( !arg.isSet() )
+		{
+			if ( !arg.hasDefaultValue() )
+				throw new IllegalArgumentException( "The GUI builder requires all arguments and commands "
+						+ "to have a value or a default value. The argument '" + arg.getName() + "' misses both." );
+			arg.set( arg.getDefaultValue() );
+		}
+
 		final StringElement element = stringElement( arg.getName(), arg::getValue, arg::set );
 		elements.add( element );
 		addPathToLayout(
@@ -167,10 +168,16 @@ public class CliGuiBuilder implements ArgumentVisitor
 	@Override
 	public void visit( final Flag flag )
 	{
+		if ( !flag.isSet() )
+		{
+			if ( !flag.hasDefaultValue() )
+				throw new IllegalArgumentException( "The GUI builder requires all arguments and commands "
+						+ "to have a value or a default value. The argument '" + flag.getName() + "' misses both." );
+			flag.set( flag.getDefaultValue() );
+		}
+
 		final BooleanElement element = booleanElement( flag.getName(), flag::getValue, flag::set );
 		elements.add( element );
-		if ( !flag.isSet() )
-			element.set( flag.getDefaultValue() );
 		final JCheckBox checkbox = linkedCheckBox( element, "" );
 		checkbox.setHorizontalAlignment( SwingConstants.LEADING );
 		addToLayout(
@@ -183,6 +190,14 @@ public class CliGuiBuilder implements ArgumentVisitor
 	@Override
 	public void visit( final IntArgument arg )
 	{
+		if ( !arg.isSet() )
+		{
+			if ( !arg.hasDefaultValue() )
+				throw new IllegalArgumentException( "The GUI builder requires all arguments and commands "
+						+ "to have a value or a default value. The argument '" + arg.getName() + "' misses both." );
+			arg.set( arg.getDefaultValue() );
+		}
+
 		final IntElement element = intElement( arg.getName(),
 				arg.getMin(), arg.getMax(), arg::getValue, arg::set );
 		elements.add( element );
@@ -209,15 +224,19 @@ public class CliGuiBuilder implements ArgumentVisitor
 	@Override
 	public void visit( final DoubleArgument arg )
 	{
+		if ( !arg.isSet() )
+		{
+			if ( !arg.hasDefaultValue() )
+				throw new IllegalArgumentException( "The GUI builder requires all arguments and commands "
+						+ "to have a value or a default value. The argument '" + arg.getName() + "' misses both." );
+			arg.set( arg.getDefaultValue() );
+		}
+
 		if ( arg.hasMin() && arg.hasMax() )
 		{
 			final BoundedDoubleElement element = boundedDoubleElement( arg.getName(),
 					arg.getMin(), arg.getMax(), arg::getValue, arg::set );
 			elements.add( element );
-			if ( arg.isSet() )
-				element.set( arg.getValue() );
-			else if ( arg.hasDefaultValue() )
-				element.set( arg.getDefaultValue() );
 			addToLayout(
 					arg.getHelp(),
 					new JLabel( element.getLabel() ),
@@ -245,6 +264,14 @@ public class CliGuiBuilder implements ArgumentVisitor
 	@Override
 	public void visit( final StringArgument arg )
 	{
+		if ( !arg.isSet() )
+		{
+			if ( !arg.hasDefaultValue() )
+				throw new IllegalArgumentException( "The GUI builder requires all arguments and commands "
+						+ "to have a value or a default value. The argument '" + arg.getName() + "' misses both." );
+			arg.set( arg.getDefaultValue() );
+		}
+
 		final StringElement element = stringElement( arg.getName(), arg::getValue, arg::set );
 		elements.add( element );
 		addToLayoutTwoLines(
@@ -257,12 +284,16 @@ public class CliGuiBuilder implements ArgumentVisitor
 	@Override
 	public void visit( final PathArgument arg )
 	{
+		if ( !arg.isSet() )
+		{
+			if ( !arg.hasDefaultValue() )
+				throw new IllegalArgumentException( "The GUI builder requires all arguments and commands "
+						+ "to have a value or a default value. The argument '" + arg.getName() + "' misses both." );
+			arg.set( arg.getDefaultValue() );
+		}
+
 		final StringElement element = stringElement( arg.getName(), arg::getValue, arg::set );
 		elements.add( element );
-		if ( arg.isSet() )
-			element.set( arg.getValue() );
-		else if ( arg.hasDefaultValue() )
-			element.set( arg.getDefaultValue() );
 		addPathToLayout(
 				arg.getHelp(),
 				new JLabel( element.getLabel() ),
@@ -273,13 +304,18 @@ public class CliGuiBuilder implements ArgumentVisitor
 	@Override
 	public void visit( final ChoiceArgument arg )
 	{
+		if ( !arg.isSet() )
+		{
+			if ( !arg.hasDefaultValue() )
+				throw new IllegalArgumentException( "The GUI builder requires all arguments and commands "
+						+ "to have a value or a default value. The argument '" + arg.getName() + "' misses both." );
+			arg.set( arg.getDefaultValue() );
+		}
+
 		final ListElement< String > element = listElement( arg.getName(), arg.getChoices(), arg::getValue, arg::set );
 		elements.add( element );
 		final JComboBox< String > comboBox = linkedComboBoxSelector( element );
-		if ( arg.isSet() )
-			comboBox.setSelectedItem( arg.getValue() );
-		else if ( arg.hasDefaultValue() )
-			comboBox.setSelectedItem( arg.getDefaultValue() );
+		comboBox.setSelectedItem( arg.getValue() );
 		addToLayout(
 				arg.getHelp(),
 				new JLabel( element.getLabel() ),
@@ -291,13 +327,18 @@ public class CliGuiBuilder implements ArgumentVisitor
 	@Override
 	public void visit( final CondaEnvironmentCommand arg )
 	{
-		final ListElement< String > element = listElement( arg.getName(), arg.getEnvironment(), arg::getValue, arg::set );
+		if ( !arg.isSet() )
+		{
+			if ( !arg.hasDefaultValue() )
+				throw new IllegalArgumentException( "The GUI builder requires all arguments and commands "
+						+ "to have a value or a default value. The argument '" + arg.getName() + "' misses both." );
+			arg.set( arg.getDefaultValue() );
+		}
+
+		final ListElement< String > element = listElement( arg.getName(), arg.getEnvironments(), arg::getValue, arg::set );
 		elements.add( element );
 		final JComboBox< String > comboBox = linkedComboBoxSelector( element );
-		if ( arg.isSet() )
-			comboBox.setSelectedItem( arg.getValue() );
-		else
-			comboBox.setSelectedItem( 0 );
+		comboBox.setSelectedItem( arg.getValue() );
 		addToLayout(
 				arg.getHelp(),
 				new JLabel( element.getLabel() ),
@@ -309,23 +350,16 @@ public class CliGuiBuilder implements ArgumentVisitor
 	 * UI STUFF.
 	 */
 
-	private void addToLayoutTwoLines( final String help, final JLabel lbl, final JComponent comp, final Argument< ? > arg )
+	private void addToLayoutTwoLines( final String help, final JLabel lbl, final JComponent comp, final Argument< ?, ? > arg )
 	{
 		lbl.setText( lbl.getText() + " " );
 		lbl.setFont( Fonts.SMALL_FONT );
 		comp.setFont( Fonts.SMALL_FONT );
 		final JComponent item;
-		if ( currentButtonGroup != null )
+		if ( rdbtn != null )
 		{
-			final JRadioButton rdbtn = new JRadioButton();
-			currentButtonGroup.add( rdbtn );
-			final SelectableArguments localSelectable = selectable;
-			rdbtn.addItemListener( e -> {
-				comp.setEnabled( rdbtn.isSelected() );
-				if ( rdbtn.isSelected() )
-					localSelectable.select( arg );
-			} );
-			rdbtn.setSelected( selectedInCurrent );
+			final JRadioButton btn = rdbtn;
+			rdbtn.addItemListener( e -> comp.setEnabled( btn.isSelected() ) );
 			comp.setEnabled( rdbtn.isSelected() );
 			item = new JPanel();
 			item.setLayout( new BoxLayout( item, BoxLayout.LINE_AXIS ) );
@@ -353,7 +387,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 		}
 	}
 
-	private void addPathToLayout( final String help, final JLabel lbl, final JTextField tf, final Argument< ? > arg )
+	private void addPathToLayout( final String help, final JLabel lbl, final JTextField tf, final Argument< ?, ? > arg )
 	{
 		final JPanel p = new JPanel();
 		final BoxLayout bl = new BoxLayout( p, BoxLayout.LINE_AXIS );
@@ -372,19 +406,14 @@ public class CliGuiBuilder implements ArgumentVisitor
 			tf.postActionEvent();
 		} );
 
-		if ( currentButtonGroup != null )
+		if ( rdbtn != null )
 		{
-			final JRadioButton rdbtn = new JRadioButton();
-			currentButtonGroup.add( rdbtn );
-			final SelectableArguments localSelectable = selectable;
+			final JRadioButton btn = rdbtn;
 			rdbtn.addItemListener( e -> {
-				tf.setEnabled( rdbtn.isSelected() );
-				browseButton.setEnabled( rdbtn.isSelected() );
-				if ( rdbtn.isSelected() )
-					localSelectable.select( arg );
+				tf.setEnabled( btn.isSelected() );
+				browseButton.setEnabled( btn.isSelected() );
 			} );
 
-			rdbtn.setSelected( selectedInCurrent );
 			tf.setEnabled( rdbtn.isSelected() );
 			browseButton.setEnabled( rdbtn.isSelected() );
 			p.add( rdbtn );
@@ -410,7 +439,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 		}
 	}
 
-	private void addToLayout( final String help, final JLabel lbl, final JComponent comp, final Argument< ? > arg )
+	private void addToLayout( final String help, final JLabel lbl, final JComponent comp, final Argument< ?, ? > arg )
 	{
 		lbl.setText( lbl.getText() + " " );
 		lbl.setFont( Fonts.SMALL_FONT );
@@ -418,17 +447,10 @@ public class CliGuiBuilder implements ArgumentVisitor
 		comp.setFont( Fonts.SMALL_FONT );
 
 		final JComponent header;
-		if ( arg != null && currentButtonGroup != null )
+		if ( arg != null && rdbtn != null )
 		{
-			final JRadioButton rdbtn = new JRadioButton();
-			currentButtonGroup.add( rdbtn );
-			final SelectableArguments localSelectable = selectable;
-			rdbtn.addItemListener( e -> {
-				comp.setEnabled( rdbtn.isSelected() );
-				if ( rdbtn.isSelected() )
-					localSelectable.select( arg );
-			} );
-			rdbtn.setSelected( selectedInCurrent );
+			final JRadioButton btn = rdbtn;
+			rdbtn.addItemListener( e -> comp.setEnabled( btn.isSelected() ) );
 			comp.setEnabled( rdbtn.isSelected() );
 			header = new JPanel();
 			header.setLayout( new BoxLayout( header, BoxLayout.LINE_AXIS ) );
@@ -461,7 +483,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 		}
 	}
 
-	private void addToLayout( final String help, final JLabel lbl, final JComponent comp, final String units, final Argument< ? > arg )
+	private void addToLayout( final String help, final JLabel lbl, final JComponent comp, final String units, final Argument< ?, ? > arg )
 	{
 		if ( units == null )
 		{
@@ -475,12 +497,10 @@ public class CliGuiBuilder implements ArgumentVisitor
 		comp.setFont( Fonts.SMALL_FONT );
 
 		final JComponent header;
-		if ( currentButtonGroup != null )
+		if ( rdbtn != null )
 		{
-			final JRadioButton rdbtn = new JRadioButton();
-			currentButtonGroup.add( rdbtn );
-			rdbtn.addItemListener( e -> comp.setEnabled( rdbtn.isSelected() ) );
-			rdbtn.setSelected( selectedInCurrent );
+			final JRadioButton btn = rdbtn;
+			rdbtn.addItemListener( e -> comp.setEnabled( btn.isSelected() ) );
 			header = new JPanel();
 			header.setLayout( new BoxLayout( header, BoxLayout.LINE_AXIS ) );
 			header.add( rdbtn );
@@ -520,12 +540,10 @@ public class CliGuiBuilder implements ArgumentVisitor
 	private void addToLayout( final String help, final JComponent comp )
 	{
 		final JComponent header;
-		if ( currentButtonGroup != null )
+		if ( rdbtn != null )
 		{
-			final JRadioButton rdbtn = new JRadioButton();
-			currentButtonGroup.add( rdbtn );
-			rdbtn.addItemListener( e -> comp.setEnabled( rdbtn.isSelected() ) );
-			rdbtn.setSelected( selectedInCurrent );
+			final JRadioButton btn = rdbtn;
+			rdbtn.addItemListener( e -> comp.setEnabled( btn.isSelected() ) );
 			header = new JPanel();
 			header.setLayout( new BoxLayout( header, BoxLayout.LINE_AXIS ) );
 			header.add( rdbtn );
@@ -561,66 +579,47 @@ public class CliGuiBuilder implements ArgumentVisitor
 	public static CliConfigPanel build( final CLIConfigurator cli )
 	{
 		/*
-		 * Check that the visible arguments are all set.
-		 */
-		
-		final List< Command< ? > > all = new ArrayList<>( cli.getArguments() );
-		all.add( cli.getCommandArg() );
-		final List< Command< ? > > valueNotSet = all.stream()
-				.filter( Command::isVisible )
-				.filter( ValueArgument.class::isInstance )
-				.filter( arg -> !arg.isSet() )
-				.collect( Collectors.toList() );
-		if ( !valueNotSet.isEmpty() )
-			throw new IllegalArgumentException( "The GUI builder requires all arguments and commands "
-					+ "to have a value set. The following miss one: " +
-					( valueNotSet.stream().map( arg -> arg.getName() ).collect( Collectors.toList() ) ) );
-
-		/*
 		 * Create the builder.
 		 */
-		
+
 		final CliGuiBuilder builder = new CliGuiBuilder();
 		cli.getCommandArg().accept( builder );
 
 		/*
 		 * Iterate over CLI arguments.
 		 */
-
+		
 		// Map a selectable group to a button group in the GUI
-		final Map< SelectableArguments, ButtonGroup > buttonGroups = new HashMap<>();
+		final Map< Argument< ?, ? >, JRadioButton > buttons = new HashMap<>();
+		for ( final SelectableArguments selectable : cli.getSelectables() )
+		{
+			final List< Argument< ?, ? > > args = selectable.getArguments();
+			final int nItems = args.size();
+			final String label = selectable.getKey();
+			final IntSupplier get = selectable::getSelected;
+			final Consumer< Integer > set = selectable::select;
+			final IntElement element = intElement( label, 0, nItems - 1, get, set );
+			builder.elements.add( element );
+			final ButtonGroup buttonGroup = linkedButtonGroup( element );
+			// Link radio buttons to arguments.
+			final Enumeration< AbstractButton > enumeration = buttonGroup.getElements();
+			final Iterator< Argument< ?, ? > > it = args.iterator();
+			while ( enumeration.hasMoreElements() )
+			{
+				final JRadioButton btn = ( JRadioButton ) enumeration.nextElement();
+				final Argument< ?, ? > arg = it.next();
+				buttons.put( arg, btn );
+				btn.setSelected( selectable.getSelection().equals( arg ) );
+			}
+		}
 
 		// Iterate over arguments, taking care of selectable group.
-		for ( final Command< ? > arg : cli.getArguments() )
+		for ( final Argument< ?, ? > arg : cli.getArguments() )
 		{
 			if ( !arg.isVisible() )
 				continue;
 
-			/*
-			 * Assume we are not in a selectable group. In the case the current
-			 * button group is null and we won't be adding a radio button.
-			 */
-			builder.setCurrentButtonGroup( null );
-			builder.setCurrentSelected( false );
-			builder.setCurrentSelectable( null );
-			for ( final SelectableArguments selectable : cli.getSelectables() )
-			{
-				if ( selectable.getArguments().contains( arg ) )
-				{
-					// We are in a selectable group. We will add a radio button
-					// to the current button group.
-					final ButtonGroup buttonGroup = buttonGroups.computeIfAbsent( selectable, k -> new ButtonGroup() );
-					builder.setCurrentButtonGroup( buttonGroup );
-					builder.setCurrentSelectable( selectable );
-					if ( selectable.getSelection().equals( arg ) )
-					{
-						// We are the selected one.
-						builder.setCurrentSelected( true );
-					}
-
-					break;
-				}
-			}
+			builder.setCurrentRadioButton( buttons.get( arg ) );
 			arg.accept( builder );
 		}
 
@@ -632,6 +631,40 @@ public class CliGuiBuilder implements ArgumentVisitor
 		return builder.panel;
 	}
 
+	private static ButtonGroup linkedButtonGroup( final IntElement element )
+	{
+		final BoundedValue value = element.getValue();
+		final ButtonGroup buttonGroup = new ButtonGroup();
+		final List< JRadioButton > buttons = new ArrayList<>();
+		for ( int i = 0; i <= value.getRangeMax(); i++ )
+		{
+			final JRadioButton btn = new JRadioButton();
+			buttons.add( btn );
+			final int selected = i;
+			btn.addItemListener( new ItemListener()
+			{
+				
+				@Override
+				public void itemStateChanged( final ItemEvent e )
+				{
+					if (btn.isSelected())
+						element.set( selected );
+				}
+			} );
+			buttonGroup.add( btn );
+		}
+		element.getValue().setUpdateListener( new UpdateListener()
+		{
+
+			@Override
+			public void update()
+			{
+				final int selected = element.get();
+				buttons.get( selected ).setSelected( true );
+			}
+		} );
+		return buttonGroup;
+	}
 
 	public class CliConfigPanel extends JPanel
 	{
