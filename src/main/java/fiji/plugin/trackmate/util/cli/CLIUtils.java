@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -33,6 +33,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,50 +53,51 @@ public class CLIUtils
 
 	public static final String CONDA_PATH_PREF_KEY = "trackmate.conda.path";
 
-	public static Map< String, String > getEnvMap()
+	public static Map< String, String > getEnvMap() throws IOException
 	{
 		// Create a map to store the environment names and paths
 		final Map< String, String > envMap = new HashMap<>();
-		try
-		{
-			final ProcessBuilder pb;
-			if ( IJ.isWindows() )
-				pb = new ProcessBuilder( Arrays.asList( "cmd.exe", "/c", "conda", "env", "list" ) );
-			else
-				pb = new ProcessBuilder( Arrays.asList( getCondaPath(), "env", "list" ) );
-			final Process process = pb.start();
-			final BufferedReader reader = new BufferedReader( new InputStreamReader( process.getInputStream() ) );
+		final ProcessBuilder pb;
+		if ( IJ.isWindows() )
+			pb = new ProcessBuilder( Arrays.asList( "cmd.exe", "/c", "conda", "env", "list" ) );
+		else
+			pb = new ProcessBuilder( Arrays.asList( getCondaPath(), "env", "list" ) );
+		final Process process = pb.start();
+		final BufferedReader reader = new BufferedReader( new InputStreamReader( process.getInputStream() ) );
 
-			// Read each line of output and extract the environment name and
-			// path
-			String line;
-			while ( ( line = reader.readLine() ) != null )
+		// Read each line of output and extract the environment name and
+		// path
+		String line;
+		while ( ( line = reader.readLine() ) != null )
+		{
+			line = line.trim();
+			if ( line.isEmpty() || line.startsWith( "#" ) || line.startsWith( "Name" ) )
+				continue;
+
+			final String[] parts = line.split( "\\s+" );
+			if ( parts.length >= 2 )
 			{
-				line = line.trim();
-				if ( line.isEmpty() || line.startsWith( "#" ) || line.startsWith( "Name" ) )
-					continue;
-
-				final String[] parts = line.split( "\\s+" );
-				if ( parts.length >= 2 )
-				{
-					final String envName = parts[ 0 ];
-					final String envPath = parts[ 1 ] + "/bin/python";
-					envMap.put( envName, envPath );
-				}
+				final String envName = parts[ 0 ];
+				final String envPath = parts[ 1 ] + "/bin/python";
+				envMap.put( envName, envPath );
 			}
-		}
-		catch ( final IOException e )
-		{
-			e.printStackTrace();
 		}
 		return envMap;
 	}
 
 	public static List< String > getEnvList()
 	{
-		final List< String > l = new ArrayList<>( getEnvMap().keySet() );
-		l.sort( null );
-		return l;
+		try
+		{
+			final List< String > l = new ArrayList<>( getEnvMap().keySet() );
+			l.sort( null );
+			return l;
+		}
+		catch ( final IOException e )
+		{
+			e.printStackTrace();
+		}
+		return Collections.emptyList();
 	}
 
 	public static String getCondaPath()
@@ -158,7 +160,7 @@ public class CLIUtils
 	/**
 	 * Add a hook to delete the content of given path when Fiji quits. Taken
 	 * from https://stackoverflow.com/a/20280989/201698
-	 * 
+	 *
 	 * @param path
 	 */
 	public static void recursiveDeleteOnShutdownHook( final Path path )
@@ -244,7 +246,7 @@ public class CLIUtils
 		}
 	}
 
-	public static void main( final String[] args )
+	public static void main( final String[] args ) throws IOException
 	{
 		System.out.println( "Conda path: " + findDefaultCondaPath() );
 		System.out.println( "Known environments: " + getEnvList() );

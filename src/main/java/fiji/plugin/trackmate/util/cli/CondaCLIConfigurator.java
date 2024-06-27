@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -21,6 +21,7 @@
  */
 package fiji.plugin.trackmate.util.cli;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -121,13 +122,22 @@ public abstract class CondaCLIConfigurator extends CLIConfigurator
 				 * retrieve what is the path of the Python executable of this
 				 * env, and runs the tool as a module. It won't work if the tool
 				 * cannot be run as a module. No escape yet.
-				 * 
+				 *
 				 * Unsure whether this works in Linux.
 				 */
-				final String pythonPath = CLIUtils.getEnvMap().get( envname );
+				try
+				{
+					final String pythonPath = CLIUtils.getEnvMap().get( envname );
+					cmd.add( pythonPath );
+					cmd.add( "-m" );
+				}
+				catch ( final IOException e )
+				{
+					System.err.println( "Could not find the conda executable or change the conda environment.\n"
+							+ "Please configure the path to your conda executable in Edit > Options > Configure TrackMate Conda path..." );
+					e.printStackTrace();
+				}
 
-				cmd.add( pythonPath );
-				cmd.add( "-m" );
 			}
 			// Split by spaces
 			final String executableCommand = getCommand();
