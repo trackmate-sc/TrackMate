@@ -26,14 +26,18 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotRoi;
+import fiji.plugin.trackmate.util.SpotUtil;
 import fiji.plugin.trackmate.util.Threads;
-import ij.ImagePlus;
 import ij.gui.PolygonRoi;
-import ij.measure.Measurements;
 import ij.process.FloatPolygon;
+import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
 import net.imglib2.Interval;
+import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
@@ -45,7 +49,6 @@ import net.imglib2.histogram.Histogram1d;
 import net.imglib2.histogram.Real1dBinMapper;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgFactory;
-import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegion;
 import net.imglib2.roi.labeling.LabelRegionCursor;
@@ -53,7 +56,6 @@ import net.imglib2.roi.labeling.LabelRegions;
 import net.imglib2.type.BooleanType;
 import net.imglib2.type.logic.BitType;
 import net.imglib2.type.numeric.IntegerType;
-import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.util.Util;
@@ -428,7 +430,7 @@ public class MaskUtils
 	 *            the image in which to read the quality value.
 	 * @return a list of spots, with ROI.
 	 */
-	public static final < T extends RealType< T >, S extends NumericType< S > > List< Spot > fromThresholdWithROI(
+	public static final < T extends RealType< T >, S extends RealType< S > > List< Spot > fromThresholdWithROI(
 			final RandomAccessible< T > input,
 			final Interval interval,
 			final double[] calibration,
@@ -447,7 +449,7 @@ public class MaskUtils
 
 	/**
 	 * Creates spots <b>with ROIs</b> from a <b>2D</b> label image. The quality
-	 * value is read from a secondary image, byt taking the max value in each
+	 * value is read from a secondary image, by taking the max value in each
 	 * ROI.
 	 * 
 	 * @param <R>
@@ -468,7 +470,7 @@ public class MaskUtils
 	 *            the image in which to read the quality value.
 	 * @return a list of spots, with ROI.
 	 */
-	public static < R extends IntegerType< R >, S extends NumericType< S > > List< Spot > fromLabelingWithROI(
+	public static < R extends IntegerType< R >, S extends RealType< S > > List< Spot > fromLabelingWithROI(
 			final ImgLabeling< Integer, R > labeling,
 			final Interval interval,
 			final double[] calibration,
@@ -497,9 +499,6 @@ public class MaskUtils
 
 		// Quality image.
 		final List< Spot > spots = new ArrayList<>( polygons.size() );
-		final ImagePlus qualityImp = ( null == qualityImage )
-				? null
-				: ImageJFunctions.wrap( qualityImage, "QualityImage" );
 
 		// Simplify them and compute a quality.
 		for ( final Polygon polygon : polygons )
@@ -517,18 +516,6 @@ public class MaskUtils
 			if ( fRoi.getNCoordinates() < 3 || fRoi.getStatistics().area <= 0. )
 				continue;
 
-			// Measure quality.
-			final double quality;
-			if ( null == qualityImp )
-			{
-				quality = fRoi.getStatistics().area;
-			}
-			else
-			{
-				qualityImp.setRoi( fRoi );
-				quality = qualityImp.getStatistics( Measurements.MIN_MAX ).max;
-			}
-
 			final Polygon fPolygon = fRoi.getPolygon();
 			final double[] xpoly = new double[ fPolygon.npoints ];
 			final double[] ypoly = new double[ fPolygon.npoints ];
@@ -538,7 +525,33 @@ public class MaskUtils
 				ypoly[ i ] = calibration[ 1 ] * ( interval.min( 1 ) + fPolygon.ypoints[ i ] - 0.5 );
 			}
 
-			spots.add( SpotRoi.createSpot( xpoly, ypoly, quality ) );
+			final Spot spot = SpotRoi.createSpot( xpoly, ypoly, -1. );
+
+			// Measure quality.
+			final double quality;
+			if ( null == qualityImage )
+			{
+				quality = fRoi.getStatistics().area;
+			}
+			else
+			{
+				final String name = "QualityImage";
+				final AxisType[] axes = new AxisType[] { Axes.X, Axes.Y };
+				final double[] cal = new double[] { calibration[ 0 ], calibration[ 1 ] };
+				final String[] units = new String[] { "unitX", "unitY" };
+				final ImgPlus< S > qualityImgPlus = new ImgPlus<>( ImgPlus.wrapToImg( qualityImage ), name, axes, cal, units );
+				final IterableInterval< S > iterable = SpotUtil.iterable( spot, qualityImgPlus );
+				double max = Double.NEGATIVE_INFINITY;
+				for ( final S s : iterable )
+				{
+					final double val = s.getRealDouble();
+					if ( val > max )
+						max = val;
+				}
+				quality = max;
+			}
+			spot.putFeature( Spot.QUALITY, quality );
+			spots.add( spot );
 		}
 		return spots;
 	}
