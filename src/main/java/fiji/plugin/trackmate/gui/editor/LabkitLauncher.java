@@ -20,6 +20,7 @@ import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.detection.MaskUtils;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
+import fiji.plugin.trackmate.util.SpotUtil;
 import fiji.plugin.trackmate.util.TMUtils;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
@@ -93,7 +94,7 @@ public class LabkitLauncher
 		// Write spots in it.
 		final Iterable< Spot > spotsThisFrame = trackmate.getModel().getSpots().iterable( currentTimePoint, true );
 		for ( final Spot spot : spotsThisFrame )
-			spot.iterable( lblImgPlus ).forEach( p -> p.set( spot.ID() + 1 ) );
+			SpotUtil.iterable( spot, lblImgPlus ).forEach( p -> p.set( spot.ID() + 1 ) );
 
 		// Labeling model.
 		final DefaultSegmentationModel model = new DefaultSegmentationModel( context, input );
@@ -158,7 +159,15 @@ public class LabkitLauncher
 		final boolean simplify = true;
 		final int numThreads = 1;
 		final RandomAccessibleInterval< UnsignedByteType > qualityImage = null;
-		final List< Spot > spots = MaskUtils.fromMaskWithROI( region, region, calibration, simplify, numThreads, qualityImage );
+		final double threshold = 0.5;
+		final List< Spot > spots = MaskUtils.fromThresholdWithROI(
+				region,
+				region,
+				calibration,
+				threshold,
+				simplify,
+				numThreads,
+				qualityImage );
 
 		// Time position.
 		for ( final Spot s : spots )
@@ -231,7 +240,15 @@ public class LabkitLauncher
 
 		// Slice by time.
 		final RandomAccessibleInterval< BitType > region = labeling.getRegion( label );
-		final List< Spot > spots = MaskUtils.fromMaskWithROI( region, region, calibration, simplify, numThreads, qualityImage );
+		final double threshold = 0.5;
+		final List< Spot > spots = MaskUtils.fromThresholdWithROI(
+				region,
+				region,
+				calibration,
+				threshold,
+				simplify,
+				numThreads,
+				qualityImage );
 		for ( final Spot spot : spots )
 		{
 			spot.putFeature( Spot.POSITION_T, currentTimePoint * dt );
