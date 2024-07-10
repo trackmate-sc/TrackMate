@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -936,7 +936,7 @@ public class TmXmlReader
 	 */
 	protected boolean readTracks( final Element modelElement, final Model model )
 	{
-
+		boolean ok = true;
 		final Element allTracksElement = modelElement.getChild( TRACK_COLLECTION_ELEMENT_KEY );
 		final List< Element > trackElements = allTracksElement.getChildren( TRACK_ELEMENT_KEY );
 
@@ -984,19 +984,22 @@ public class TmXmlReader
 				// Error check
 				if ( null == sourceSpot )
 				{
-					logger.error( "Unknown spot ID: " + sourceID + "\n" );
-					return false;
+					logger.error( "Unknown spot ID: " + sourceID + " - skipping edge " + sourceID + " → " + targetID + ".\n" );
+					ok = false;
+					continue;
 				}
 				if ( null == targetSpot )
 				{
-					logger.error( "Unknown spot ID: " + targetID + "\n" );
-					return false;
+					logger.error( "Unknown spot ID: " + targetID + " - skipping edge " + sourceID + " → " + targetID + ".\n" );
+					ok = false;
+					continue;
 				}
 
 				if ( sourceSpot.equals( targetSpot ) )
 				{
 					logger.error( "Bad link for track " + trackID + ". Source = Target with ID: " + sourceID + "\n" );
-					return false;
+					ok = false;
+					continue;
 				}
 
 				/*
@@ -1015,7 +1018,8 @@ public class TmXmlReader
 				if ( edge == null )
 				{
 					logger.error( "Bad edge found for track " + trackID + "\n" );
-					return false;
+					ok = false;
+					continue;
 				}
 
 				graph.setEdgeWeight( edge, weight );
@@ -1064,7 +1068,7 @@ public class TmXmlReader
 		 */
 		model.getTrackModel().from( graph, connectedVertexSet, connectedEdgeSet, visibility, savedTrackNames );
 
-		return true;
+		return ok;
 	}
 
 	/**
