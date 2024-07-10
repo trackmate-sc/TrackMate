@@ -113,79 +113,86 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 
 	private void reimport( final RandomAccessibleInterval< T > indexImg, final RandomAccessibleInterval< T > previousIndexImg, final double dt )
 	{
-		try
+		new Thread( "TrackMate-LabKit-Importer-thread" )
 		{
-			// Do we have something to reimport?
-			final AtomicBoolean modified = new AtomicBoolean( false );
-			LoopBuilder.setImages( previousIndexImg, indexImg )
-					.multiThreaded()
-					.forEachChunk( chunk -> {
-						if ( modified.get() )
-							return null;
-						chunk.forEachPixel( ( p1, p2 ) -> {
-							if ( p1.getInteger() != p2.getInteger() )
-							{
-								modified.set( true );
-								return;
-							}
-						} );
-						return null;
-					} );
-			if ( !modified.get() )
-				return;
-
-			// Message the user.
-			final long nTimepoints = indexImg.dimension( 3 );
-			final String msg = ( nTimepoints <= 1 )
-					? "Commit the changes made to the\n"
-							+ "segmentation in the image?"
-					: ( currentTimePoint < 0 )
-							? "Commit the changes made to the\n"
-									+ "segmentation in whole movie?"
-							: "Commit the changes made to the\n"
-									+ "segmentation in frame " + ( currentTimePoint + 1 ) + "?";
-			final String title = "Commit edits to TrackMate";
-			final int returnedValue = JOptionPane.showConfirmDialog(
-					null,
-					msg,
-					title,
-					JOptionPane.YES_NO_OPTION,
-					JOptionPane.QUESTION_MESSAGE,
-					Icons.TRACKMATE_ICON );
-			if ( returnedValue != JOptionPane.YES_OPTION )
-				return;
-
-			final LabkitImporter< T > reimporter = new LabkitImporter<>( trackmate.getModel(), calibration, dt );
-			if ( currentTimePoint < 0 && nTimepoints > 1 )
+			@Override
+			public void run()
 			{
-				// All time-points.
-				final Logger log = Logger.IJ_LOGGER;
-				log.setStatus( "Re-importing from Labkit..." );
-				for ( int t = 0; t < nTimepoints; t++ )
+				try
 				{
-					final RandomAccessibleInterval< T > novelIndexImgThisFrame = Views.hyperSlice( indexImg, 3, t );
-					final RandomAccessibleInterval< T > previousIndexImgThisFrame = Views.hyperSlice( previousIndexImg, 3, t );
-					reimporter.reimport( novelIndexImgThisFrame, previousIndexImgThisFrame, t );
-					log.setProgress( ++t / ( double ) nTimepoints );
+					// Do we have something to reimport?
+					final AtomicBoolean modified = new AtomicBoolean( false );
+					LoopBuilder.setImages( previousIndexImg, indexImg )
+							.multiThreaded()
+							.forEachChunk( chunk -> {
+								if ( modified.get() )
+									return null;
+								chunk.forEachPixel( ( p1, p2 ) -> {
+									if ( p1.getInteger() != p2.getInteger() )
+									{
+										modified.set( true );
+										return;
+									}
+								} );
+								return null;
+							} );
+					if ( !modified.get() )
+						return;
+
+					// Message the user.
+					final long nTimepoints = indexImg.dimension( 3 );
+					final String msg = ( nTimepoints <= 1 )
+							? "Commit the changes made to the\n"
+									+ "segmentation in the image?"
+							: ( currentTimePoint < 0 )
+									? "Commit the changes made to the\n"
+											+ "segmentation in whole movie?"
+									: "Commit the changes made to the\n"
+											+ "segmentation in frame " + ( currentTimePoint + 1 ) + "?";
+					final String title = "Commit edits to TrackMate";
+					final int returnedValue = JOptionPane.showConfirmDialog(
+							null,
+							msg,
+							title,
+							JOptionPane.YES_NO_OPTION,
+							JOptionPane.QUESTION_MESSAGE,
+							Icons.TRACKMATE_ICON );
+					if ( returnedValue != JOptionPane.YES_OPTION )
+						return;
+
+					final LabkitImporter< T > reimporter = new LabkitImporter<>( trackmate.getModel(), calibration, dt );
+					if ( currentTimePoint < 0 && nTimepoints > 1 )
+					{
+						// All time-points.
+						final Logger log = Logger.IJ_LOGGER;
+						log.setStatus( "Re-importing from Labkit..." );
+						for ( int t = 0; t < nTimepoints; t++ )
+						{
+							final RandomAccessibleInterval< T > novelIndexImgThisFrame = Views.hyperSlice( indexImg, 3, t );
+							final RandomAccessibleInterval< T > previousIndexImgThisFrame = Views.hyperSlice( previousIndexImg, 3, t );
+							reimporter.reimport( novelIndexImgThisFrame, previousIndexImgThisFrame, t );
+							log.setProgress( ++t / ( double ) nTimepoints );
+						}
+						log.setStatus( "" );
+						log.setProgress( 0. );
+					}
+					else
+					{
+						// Only one.
+						final int localT = Math.max( 0, currentTimePoint );
+						reimporter.reimport( indexImg, previousIndexImg, localT );
+					}
 				}
-				log.setStatus( "" );
-				log.setProgress( 0. );
+				catch ( final Exception e )
+				{
+					e.printStackTrace();
+				}
+				finally
+				{
+					disabler.reenable();
+				}
 			}
-			else
-			{
-				// Only one.
-				final int localT = Math.max( 0, currentTimePoint );
-				reimporter.reimport( indexImg, previousIndexImg, localT );
-			}
-		}
-		catch ( final Exception e )
-		{
-			e.printStackTrace();
-		}
-		finally
-		{
-			disabler.reenable();
-		}
+		}.start();
 	}
 
 	private Img< T > copy( final RandomAccessibleInterval< T > in )
