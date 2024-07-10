@@ -1,7 +1,6 @@
 package fiji.plugin.trackmate.gui.editor;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -11,16 +10,11 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
-import org.scijava.util.IntArray;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.detection.MaskUtils;
-import fiji.plugin.trackmate.util.SpotUtil;
-import net.imagej.ImgPlus;
-import net.imagej.axis.Axes;
-import net.imagej.axis.AxisType;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.loops.LoopBuilder;
 import net.imglib2.roi.labeling.ImgLabeling;
@@ -274,37 +268,13 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 			indices.add( Integer.valueOf( i + 1 ) );
 
 		final ImgLabeling< Integer, ? > labeling = ImgLabeling.fromImageAndLabels( rai, indices );
-		final boolean simplify = true;
+		final boolean simplify = false; // needed to properly read label values.
 		final List< Spot > spots = MaskUtils.fromLabelingWithROI(
 				labeling,
 				labeling,
 				calibration,
 				simplify,
-				null );
-
-		/*
-		 * Read the label from the index image and store it in the quality
-		 * feature. To ensure we don't have weirdness with the non
-		 * convex-objects we iterate through all pixels and take the median.
-		 */
-
-		final String name = "LabelImgPlus";
-		final boolean is3D = rai.numDimensions() == 3;
-		final AxisType[] axes = ( is3D ) ? new AxisType[] { Axes.X, Axes.Y, Axes.Z } : new AxisType[] { Axes.X, Axes.Y };
-		final double[] cal = ( is3D ) ? new double[] { calibration[ 0 ], calibration[ 1 ], calibration[ 2 ] } : new double[] { calibration[ 0 ], calibration[ 1 ] };
-		final String[] units = ( is3D ) ? new String[] { "unitX", "unitY", "unitZ" } : new String[] { "unitX", "unitY" };
-		final ImgPlus< T > labelImgPlus = new ImgPlus<>( ImgPlus.wrapToImg( rai ), name, axes, cal, units );
-
-		final IntArray arr = new IntArray();
-		for ( final Spot spot : spots )
-		{
-			arr.clear();
-			SpotUtil.iterable( spot, labelImgPlus ).forEach( p -> arr.addValue( p.getInteger() ) );
-			Arrays.sort( arr.getArray(), 0, arr.size() );
-			final int label = arr.getValue( arr.size() / 2 );
-			spot.putFeature( Spot.QUALITY, Double.valueOf( label ) );
-		}
-
+				rai );
 		return spots;
 	}
 }
