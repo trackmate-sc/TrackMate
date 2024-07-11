@@ -35,6 +35,8 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 
 	private final double dt;
 
+	private final boolean simplify;
+
 	/**
 	 * Creates a new re-importer.
 	 *
@@ -44,15 +46,21 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 	 *            the spatial calibration array: <code>[dx, dy dz]</code>.
 	 * @param dt
 	 *            the frame interval.
+	 * @param simplifyContours
+	 *            if <code>true</code> the contours of the spots imported and
+	 *            modified will be simplified. If <code>false</code> their
+	 *            contour will follow pixel edges.
 	 */
 	public LabkitImporter(
 			final Model model,
 			final double[] calibration,
-			final double dt )
+			final double dt,
+			final boolean simplifyContours )
 	{
 		this.model = model;
 		this.calibration = calibration;
 		this.dt = dt;
+		this.simplify = simplifyContours;
 	}
 
 	/**
@@ -249,7 +257,6 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 			indices.add( Integer.valueOf( i + 1 ) );
 
 		final ImgLabeling< Integer, ? > labeling = ImgLabeling.fromImageAndLabels( rai, indices );
-		final boolean simplify = false; // needed to properly read label values.
 		final Map< Integer, List< Spot > > spots = MaskUtils.fromLabelingWithROIMap(
 				labeling,
 				labeling,

@@ -6,9 +6,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JRootPane;
+import javax.swing.JSeparator;
 import javax.swing.SwingUtilities;
 
 import org.scijava.Context;
@@ -63,6 +65,10 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 
 	private final boolean is3D;
 
+	private final boolean isSingleTimePoint;
+
+	private static boolean simplify = true;
+
 	public LabkitLauncher( final TrackMate trackmate, final DisplaySettings ds, final EverythingDisablerAndReenabler disabler )
 	{
 		this.trackmate = trackmate;
@@ -71,6 +77,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 		final ImagePlus imp = trackmate.getSettings().imp;
 		this.calibration = TMUtils.getSpatialCalibration( imp );
 		this.is3D = !DetectionUtils.is2D( imp );
+		this.isSingleTimePoint = imp.getNFrames() <= 1;
 	}
 
 	/**
@@ -140,8 +147,12 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 						return;
 
 					// Message the user.
-					final long nTimepoints = indexImg.dimension( 3 );
-					final String msg = ( nTimepoints <= 1 )
+					// Axes.
+					final int timeDim = ( isSingleTimePoint )
+							? -1
+							: ( is3D ) ? 3 : 2;
+					final long nTimepoints = ( timeDim < 0 ) ? 0 : indexImg.dimension( timeDim );
+					final String msg = ( isSingleTimePoint )
 							? "Commit the changes made to the\n"
 									+ "segmentation in the image?"
 							: ( currentTimePoint < 0 )
@@ -150,9 +161,12 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 									: "Commit the changes made to the\n"
 											+ "segmentation in frame " + ( currentTimePoint + 1 ) + "?";
 					final String title = "Commit edits to TrackMate";
+					final JCheckBox chkbox = new JCheckBox( "Simplify the contours of modified spots" );
+					chkbox.setSelected( simplify );
+					final Object[] objs = new Object[] { msg, new JSeparator(), chkbox };
 					final int returnedValue = JOptionPane.showConfirmDialog(
 							null,
-							msg,
+							objs,
 							title,
 							JOptionPane.YES_NO_OPTION,
 							JOptionPane.QUESTION_MESSAGE,
@@ -160,7 +174,8 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 					if ( returnedValue != JOptionPane.YES_OPTION )
 						return;
 
-					final LabkitImporter< T > reimporter = new LabkitImporter<>( trackmate.getModel(), calibration, dt );
+					simplify = chkbox.isSelected();
+					final LabkitImporter< T > reimporter = new LabkitImporter<>( trackmate.getModel(), calibration, dt, simplify );
 					if ( currentTimePoint < 0 && nTimepoints > 1 )
 					{
 						// All time-points.
