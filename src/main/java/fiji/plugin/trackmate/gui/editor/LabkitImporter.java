@@ -97,36 +97,17 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 			spots.iterable( currentTimePoint, true ).forEach( s -> previousSpotIDs.put( Integer.valueOf( s.ID() ), s ) );
 
 			/*
-			 * Get all the spots present in the new image. Because we specified
-			 * the novel label image as 'quality' image, they have a quality
-			 * value equal to the index in the label image (id+1).
+			 * Get all the spots present in the new image, as a map against the
+			 * label in the novel index image. This label value corresponds to
+			 * the ids of the spots in the previous index image (label = id+1).
 			 */
-			final List< Spot > novelSpots = getSpots( novelIndexImg );
-
-			/*
-			 * Map of novel spots against the ID taken from the index of the
-			 * novel label image. Normally, this index, and hence the novel id,
-			 * corresponds to the id of previous spots. If one of the novel spot
-			 * has an id we cannot find in the previous spot list, it means that
-			 * it is a new one.
-			 *
-			 * Careful! The user might have created several connected components
-			 * with the same label in LabKit, which will result in having
-			 * several spots with the same quality value. We don't want to loose
-			 * them, so the map is that of a id to a list of spots.
-			 */
-			final Map< Integer, List< Spot > > novelSpotIDs = new HashMap<>();
-			novelSpots.forEach( s -> {
-				final int id = Integer.valueOf( s.getFeature( Spot.QUALITY ).intValue() - 1 );
-				final List< Spot > list = novelSpotIDs.computeIfAbsent( Integer.valueOf( id ), ( i ) -> new ArrayList<>() );
-				list.add( s );
-			} );
+			final Map< Integer, List< Spot > > novelSpots = getSpots( novelIndexImg );
 
 			// Update model for those spots.
 			for ( final int id : modifiedIDs )
 			{
 				final Spot previousSpot = previousSpotIDs.get( Integer.valueOf( id ) );
-				final List< Spot > novelSpotList = novelSpotIDs.get( Integer.valueOf( id ) );
+				final List< Spot > novelSpotList = novelSpots.get( Integer.valueOf( id ) + 1 );
 				if ( previousSpot == null )
 				{
 					/*
@@ -254,7 +235,7 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 		return modifiedIDs;
 	}
 
-	private List< Spot > getSpots( final RandomAccessibleInterval< T > rai )
+	private Map< Integer, List< Spot > > getSpots( final RandomAccessibleInterval< T > rai )
 	{
 		// Get all labels.
 		final AtomicInteger max = new AtomicInteger( 0 );
@@ -269,7 +250,7 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 
 		final ImgLabeling< Integer, ? > labeling = ImgLabeling.fromImageAndLabels( rai, indices );
 		final boolean simplify = false; // needed to properly read label values.
-		final List< Spot > spots = MaskUtils.fromLabelingWithROI(
+		final Map< Integer, List< Spot > > spots = MaskUtils.fromLabelingWithROIMap(
 				labeling,
 				labeling,
 				calibration,
