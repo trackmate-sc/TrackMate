@@ -19,10 +19,12 @@ import fiji.plugin.trackmate.util.TMUtils;
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.gui.Roi;
 import ij.process.LUT;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
+import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
@@ -58,6 +60,7 @@ public class ImpBdvShowable implements BdvShowable
 	 */
 	public static < T extends NumericType< T > > ImpBdvShowable fromImp( final ImagePlus imp )
 	{
+		@SuppressWarnings( "unchecked" )
 		final ImgPlus< T > src = TMUtils.rawWraps( imp );
 		if ( src.dimensionIndex( Axes.CHANNEL ) < 0 )
 			Views.addDimension( src );
@@ -85,16 +88,33 @@ public class ImpBdvShowable implements BdvShowable
 
 	private final ImgPlus< ? extends NumericType< ? > > image;
 
+	private Interval interval;
+
 	ImpBdvShowable( final ImgPlus< ? extends NumericType< ? > > image, final ImagePlus imp )
 	{
 		this.image = image;
 		this.imp = imp;
+		final Roi roi = imp.getRoi();
+		if ( roi == null )
+		{
+			this.interval = image;
+		}
+		else
+		{
+			final long[] min = image.minAsLongArray();
+			final long[] max = image.maxAsLongArray();
+			min[ 0 ] = roi.getBounds().x;
+			min[ 1 ] = roi.getBounds().y;
+			max[ 0 ] = roi.getBounds().x + roi.getBounds().width;
+			max[ 1 ] = roi.getBounds().y + roi.getBounds().height;
+			this.interval = new FinalInterval( min, max );
+		}
 	}
 
 	@Override
 	public Interval interval()
 	{
-		return image;
+		return interval;
 	}
 
 	@Override

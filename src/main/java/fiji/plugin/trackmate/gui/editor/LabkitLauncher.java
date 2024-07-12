@@ -19,6 +19,7 @@ import org.scijava.ui.behaviour.util.AbstractNamedAction;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.features.FeatureUtils;
@@ -29,12 +30,15 @@ import fiji.plugin.trackmate.util.SpotUtil;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 import ij.ImagePlus;
+import ij.gui.Roi;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
+import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgFactory;
+import net.imglib2.img.ImgView;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImgPlusViews;
 import net.imglib2.loops.LoopBuilder;
@@ -42,6 +46,7 @@ import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.integer.UnsignedIntType;
+import net.imglib2.util.Intervals;
 import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 import sc.fiji.labkit.ui.LabkitFrame;
@@ -147,11 +152,6 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 						return;
 
 					// Message the user.
-					// Axes.
-					final int timeDim = ( isSingleTimePoint )
-							? -1
-							: ( is3D ) ? 3 : 2;
-					final long nTimepoints = ( timeDim < 0 ) ? 0 : indexImg.dimension( timeDim );
 					final String msg = ( isSingleTimePoint )
 							? "Commit the changes made to the\n"
 									+ "segmentation in the image?"
@@ -176,6 +176,15 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 
 					simplify = chkbox.isSelected();
 					final LabkitImporter< T > reimporter = new LabkitImporter<>( trackmate.getModel(), calibration, dt, simplify );
+
+					// Possibly determine the number of time-points to parse.
+					final int timeDim = ( isSingleTimePoint )
+							? -1
+							: ( is3D ) ? 3 : 2;
+					final long nTimepoints = ( timeDim < 0 )
+							? 0
+							: indexImg.numDimensions() > timeDim ? indexImg.dimension( timeDim ) : 0;
+
 					if ( currentTimePoint < 0 && nTimepoints > 1 )
 					{
 						// All time-points.
@@ -183,10 +192,10 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 						log.setStatus( "Re-importing from Labkit..." );
 						for ( int t = 0; t < nTimepoints; t++ )
 						{
-							final RandomAccessibleInterval< T > novelIndexImgThisFrame = Views.hyperSlice( indexImg, 3, t );
-							final RandomAccessibleInterval< T > previousIndexImgThisFrame = Views.hyperSlice( previousIndexImg, 3, t );
+							final RandomAccessibleInterval< T > novelIndexImgThisFrame = Views.hyperSlice( indexImg, timeDim, t );
+							final RandomAccessibleInterval< T > previousIndexImgThisFrame = Views.hyperSlice( previousIndexImg, timeDim, t );
 							reimporter.reimport( novelIndexImgThisFrame, previousIndexImgThisFrame, t );
-							log.setProgress( ++t / ( double ) nTimepoints );
+							log.setProgress( t / ( double ) nTimepoints );
 						}
 						log.setStatus( "" );
 						log.setProgress( 0. );
@@ -239,6 +248,25 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 	private final DatasetInputImage makeInput( final ImagePlus imp, final boolean singleTimePoint )
 	{
 		final ImgPlus src = TMUtils.rawWraps( imp );
+		// Crop if we have a ROI.
+		final Roi roi = imp.getRoi();
+		final RandomAccessibleInterval crop;
+		if ( roi != null )
+		{
+			final long[] min = src.minAsLongArray();
+			final long[] max = src.maxAsLongArray();
+			min[ 0 ] = roi.getBounds().x;
+			min[ 1 ] = roi.getBounds().y;
+			max[ 0 ] = roi.getBounds().x + roi.getBounds().width - 1;
+			max[ 1 ] = roi.getBounds().y + roi.getBounds().height - 1;
+			crop = Views.interval( src, min, max );
+		}
+		else
+		{
+			crop = src;
+		}
+		final ImgPlus srcCropped = new ImgPlus<>( ImgView.wrap( crop ), src );
+
 		// Possibly reslice for current time-point.
 		final ImpBdvShowable showable;
 		final ImgPlus inputImg;
@@ -246,14 +274,14 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 		if ( singleTimePoint && timeAxis >= 0 )
 		{
 			this.currentTimePoint = imp.getFrame() - 1;
-			inputImg = ImgPlusViews.hyperSlice( src, timeAxis, currentTimePoint );
+			inputImg = ImgPlusViews.hyperSlice( srcCropped, timeAxis, currentTimePoint );
 			showable = ImpBdvShowable.fromImp( inputImg, imp );
 		}
 		else
 		{
 			this.currentTimePoint = -1;
-			showable = ImpBdvShowable.fromImp( imp );
-			inputImg = src;
+			inputImg = srcCropped;
+			showable = ImpBdvShowable.fromImp( inputImg, imp );
 		}
 		return new DatasetInputImage( inputImg, showable );
 	}
@@ -297,8 +325,29 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 		if ( !singleTimePoint )
 			dims[ dim++ ] = imp.getNFrames();
 
+		// Possibly crop.
+		final Roi roi = imp.getRoi();
+		final long[] origin;
+		if ( roi != null )
+		{
+			dims[ 0 ] = roi.getBounds().width + 1;
+			dims[ 1 ] = roi.getBounds().height + 1;
+			origin = new long[ dims.length ];
+			origin[ 0 ] = roi.getBounds().x;
+			origin[ 1 ] = roi.getBounds().y;
+		}
+		else
+		{
+			origin = null;
+		}
+
 		// Raw image.
-		final Img< UnsignedIntType > lblImg = ArrayImgs.unsignedInts( dims );
+		Img< UnsignedIntType > lblImg = ArrayImgs.unsignedInts( dims );
+		if ( origin != null )
+		{
+			final RandomAccessibleInterval< UnsignedIntType > translated = Views.translate( lblImg, origin );
+			lblImg = ImgView.wrap( translated );
+		}
 
 		// Calibration.
 		final double[] c = TMUtils.getSpatialCalibration( imp );
@@ -318,7 +367,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 		final Map< Integer, Spot > spotIDs = new HashMap<>();
 		if ( singleTimePoint )
 		{
-			processFrame( lblImgPlus, spots, currentTimePoint, spotIDs );
+			processFrame( lblImgPlus, spots, currentTimePoint, spotIDs, origin );
 		}
 		else
 		{
@@ -326,7 +375,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 			for ( int t = 0; t < imp.getNFrames(); t++ )
 			{
 				final ImgPlus< UnsignedIntType > lblImgPlusThisFrame = ImgPlusViews.hyperSlice( lblImgPlus, timeDim, t );
-				processFrame( lblImgPlusThisFrame, spots, t, spotIDs );
+				processFrame( lblImgPlusThisFrame, spots, t, spotIDs, origin );
 			}
 		}
 		final Labeling labeling = Labeling.fromImg( lblImgPlus );
@@ -350,16 +399,67 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 		return labeling;
 	}
 
-	private static final void processFrame( final ImgPlus< UnsignedIntType > lblImgPlus, final SpotCollection spots, final int t, final Map< Integer, Spot > spotIDs )
+	private final void processFrame(
+			final ImgPlus< UnsignedIntType > lblImgPlus,
+			final SpotCollection spots,
+			final int t,
+			final Map< Integer, Spot > spotIDs,
+			final long[] origin )
 	{
 		// If we have a single timepoint, don't use -1 to retrieve spots.
 		final int lt = t < 0 ? 0 : t;
 		final Iterable< Spot > spotsThisFrame = spots.iterable( lt, true );
-		for ( final Spot spot : spotsThisFrame )
+		if ( null == origin )
 		{
-			final int index = spot.ID() + 1;
-			SpotUtil.iterable( spot, lblImgPlus ).forEach( p -> p.set( index ) );
-			spotIDs.put( index, spot );
+			for ( final Spot spot : spotsThisFrame )
+			{
+				final int index = spot.ID() + 1;
+				SpotUtil.iterable( spot, lblImgPlus ).forEach( p -> p.set( index ) );
+				spotIDs.put( index, spot );
+			}
+		}
+		else
+		{
+			final long[] min = new long[ 2 ];
+			final long[] max = new long[ 2 ];
+			final FinalInterval spotBB = FinalInterval.wrap( min, max );
+			final FinalInterval imgBB = Intervals.createMinSize( origin[ 0 ], origin[ 1 ], lblImgPlus.dimension( 0 ), lblImgPlus.dimension( 1 ) );
+			for ( final Spot spot : spotsThisFrame )
+			{
+				boundingBox( spot, min, max );
+				// Inside? We skip if we touch the border.
+				final boolean isInside = Intervals.contains( imgBB, spotBB );
+				if ( !isInside )
+					continue;
+
+				final int index = spot.ID() + 1;
+				SpotUtil.iterable( spot, lblImgPlus ).forEach( p -> p.set( index ) );
+				spotIDs.put( index, spot );
+			}
+		}
+	}
+
+	private void boundingBox( final Spot spot, final long[] min, final long[] max )
+	{
+		final SpotRoi roi = spot.getRoi();
+		if ( roi == null )
+		{
+			final double cx = spot.getDoublePosition( 0 );
+			final double cy = spot.getDoublePosition( 1 );
+			final double r = spot.getFeature( Spot.RADIUS ).doubleValue();
+			min[ 0 ] = ( long ) Math.floor( ( cx - r ) / calibration[ 0 ] );
+			min[ 1 ] = ( long ) Math.floor( ( cy - r ) / calibration[ 1 ] );
+			max[ 0 ] = ( long ) Math.ceil( ( cx + r ) / calibration[ 0 ] );
+			max[ 1 ] = ( long ) Math.ceil( ( cy + r ) / calibration[ 1 ] );
+		}
+		else
+		{
+			final double[] x = roi.toPolygonX( calibration[ 0 ], 0, spot.getDoublePosition( 0 ), 1. );
+			final double[] y = roi.toPolygonY( calibration[ 1 ], 0, spot.getDoublePosition( 1 ), 1. );
+			min[ 0 ] = ( long ) Math.floor( Util.min( x ) );
+			min[ 1 ] = ( long ) Math.floor( Util.min( y ) );
+			max[ 0 ] = ( long ) Math.ceil( Util.max( x ) );
+			max[ 1 ] = ( long ) Math.ceil( Util.max( y ) );
 		}
 	}
 

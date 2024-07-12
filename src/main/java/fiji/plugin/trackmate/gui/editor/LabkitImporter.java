@@ -259,7 +259,7 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 		final ImgLabeling< Integer, ? > labeling = ImgLabeling.fromImageAndLabels( rai, indices );
 		final Map< Integer, List< Spot > > spots = MaskUtils.fromLabelingWithROIMap(
 				labeling,
-				labeling,
+				Views.zeroMin( labeling ),
 				calibration,
 				simplify,
 				rai );
