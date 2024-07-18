@@ -1,7 +1,6 @@
 package fiji.plugin.trackmate.gui.editor;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +12,6 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.detection.MaskUtils;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.loops.LoopBuilder;
@@ -84,11 +82,15 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 	 * @param currentTimePoint
 	 *            the time-point in the TrackMate model that corresponds to the
 	 *            index image.
+	 * @param the
+	 *            map of spots (vs their ID) that were written in the previous
+	 *            index image.
 	 */
 	public void reimport(
 			final RandomAccessibleInterval< T > novelIndexImg,
 			final RandomAccessibleInterval< T > previousIndexImg,
-			final int currentTimePoint )
+			final int currentTimePoint,
+			final Map< Integer, Spot > previousSpotIDs )
 	{
 		// Collect ids of spots that have been modified. id = index - 1
 		final Set< Integer > modifiedIDs = getModifiedIDs( novelIndexImg, previousIndexImg );
@@ -99,11 +101,6 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 		model.beginUpdate();
 		try
 		{
-			// Map of previous spots against their ID:
-			final SpotCollection spots = model.getSpots();
-			final Map< Integer, Spot > previousSpotIDs = new HashMap<>();
-			spots.iterable( currentTimePoint, true ).forEach( s -> previousSpotIDs.put( Integer.valueOf( s.ID() ), s ) );
-
 			/*
 			 * Get all the spots present in the new image, as a map against the
 			 * label in the novel index image. This label value corresponds to

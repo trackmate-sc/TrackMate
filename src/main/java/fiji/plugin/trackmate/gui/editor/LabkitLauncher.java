@@ -47,7 +47,9 @@ import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.integer.UnsignedIntType;
 import net.imglib2.util.Intervals;
+import net.imglib2.util.Pair;
 import net.imglib2.util.Util;
+import net.imglib2.util.ValuePair;
 import net.imglib2.view.Views;
 import sc.fiji.labkit.ui.LabkitFrame;
 import sc.fiji.labkit.ui.inputimage.DatasetInputImage;
@@ -97,7 +99,9 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 	{
 		final ImagePlus imp = trackmate.getSettings().imp;
 		final DatasetInputImage input = makeInput( imp, singleTimePoint );
-		final Labeling labeling = makeLabeling( imp, trackmate.getModel().getSpots(), singleTimePoint );
+		final Pair< Labeling, Map< Integer, Spot > > pair = makeLabeling( imp, trackmate.getModel().getSpots(), singleTimePoint );
+		final Labeling labeling = pair.getA();
+		final Map< Integer, Spot > spotIDs = pair.getB();
 
 		// Make a labeling model from it.
 		final Context context = TMUtils.getContext();
@@ -119,11 +123,15 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 		labkit.onCloseListeners().addListener( () -> {
 			@SuppressWarnings( "unchecked" )
 			final RandomAccessibleInterval< T > indexImg = ( RandomAccessibleInterval< T > ) model.imageLabelingModel().labeling().get().getIndexImg();
-			reimport( indexImg, previousIndexImg, dt );
+			reimport( indexImg, previousIndexImg, spotIDs, dt );
 		} );
 	}
 
-	private void reimport( final RandomAccessibleInterval< T > indexImg, final RandomAccessibleInterval< T > previousIndexImg, final double dt )
+	private void reimport(
+			final RandomAccessibleInterval< T > indexImg,
+			final RandomAccessibleInterval< T > previousIndexImg,
+			final Map< Integer, Spot > spotIDs,
+			final double dt )
 	{
 		new Thread( "TrackMate-LabKit-Importer-thread" )
 		{
@@ -194,7 +202,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 						{
 							final RandomAccessibleInterval< T > novelIndexImgThisFrame = Views.hyperSlice( indexImg, timeDim, t );
 							final RandomAccessibleInterval< T > previousIndexImgThisFrame = Views.hyperSlice( previousIndexImg, timeDim, t );
-							reimporter.reimport( novelIndexImgThisFrame, previousIndexImgThisFrame, t );
+							reimporter.reimport( novelIndexImgThisFrame, previousIndexImgThisFrame, t, spotIDs );
 							log.setProgress( t / ( double ) nTimepoints );
 						}
 						log.setStatus( "" );
@@ -204,7 +212,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 					{
 						// Only one.
 						final int localT = Math.max( 0, currentTimePoint );
-						reimporter.reimport( indexImg, previousIndexImg, localT );
+						reimporter.reimport( indexImg, previousIndexImg, localT, spotIDs );
 					}
 				}
 				catch ( final Exception e )
@@ -291,7 +299,8 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 	/**
 	 * Prepare the label image for annotation. The labeling is created and each
 	 * of its labels receive the name and the color from the spot it is created
-	 * from.
+	 * from. Only the spots fully included in the bounding box of the ROI of the
+	 * source image are written in the labeling.
 	 *
 	 * @param imp
 	 *            the source image plus.
@@ -299,9 +308,10 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 	 *            the spot collection.
 	 * @param singleTimePoint
 	 *            if <code>true</code> we only annotate one time-point.
-	 * @return a new {@link Labeling}.
+	 * @return the pair of: A. a new {@link Labeling}, B. the map of spots that
+	 *         were written in the labeling.
 	 */
-	private Labeling makeLabeling( final ImagePlus imp, final SpotCollection spots, final boolean singleTimePoint )
+	private Pair< Labeling, Map< Integer, Spot > > makeLabeling( final ImagePlus imp, final SpotCollection spots, final boolean singleTimePoint )
 	{
 		// Axes.
 		final AxisType[] axes = ( is3D )
@@ -398,7 +408,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 			label.setColor( new ARGBType( colorGen.color( spot ).getRGB() ) );
 		}
 
-		return labeling;
+		return new ValuePair<>( labeling, spotIDs );
 	}
 
 	private final void processFrame(
