@@ -257,8 +257,10 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 			final long[] max = src.maxAsLongArray();
 			min[ 0 ] = roi.getBounds().x;
 			min[ 1 ] = roi.getBounds().y;
-			max[ 0 ] = roi.getBounds().x + roi.getBounds().width - 1;
-			max[ 1 ] = roi.getBounds().y + roi.getBounds().height - 1;
+			max[ 0 ] = roi.getBounds().x + roi.getBounds().width;
+			max[ 1 ] = roi.getBounds().y + roi.getBounds().height;
+//			max[ 0 ] = roi.getBounds().x + roi.getBounds().width - 1;
+//			max[ 1 ] = roi.getBounds().y + roi.getBounds().height - 1;
 			crop = Views.interval( src, min, max );
 		}
 		else
@@ -461,6 +463,12 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 			max[ 0 ] = ( long ) Math.ceil( Util.max( x ) );
 			max[ 1 ] = ( long ) Math.ceil( Util.max( y ) );
 		}
+
+		min[ 0 ] = Math.max( 0, min[ 0 ] );
+		min[ 1 ] = Math.max( 0, min[ 1 ] );
+		final ImagePlus imp = trackmate.getSettings().imp;
+		max[ 0 ] = Math.min( imp.getWidth(), max[ 0 ] );
+		max[ 1 ] = Math.min( imp.getHeight(), max[ 1 ] );
 	}
 
 	public static final AbstractNamedAction getLaunchAction( final TrackMate trackmate, final DisplaySettings ds )
