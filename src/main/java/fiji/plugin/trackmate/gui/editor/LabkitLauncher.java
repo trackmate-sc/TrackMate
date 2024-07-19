@@ -51,7 +51,6 @@ import net.imglib2.util.Pair;
 import net.imglib2.util.Util;
 import net.imglib2.util.ValuePair;
 import net.imglib2.view.Views;
-import sc.fiji.labkit.ui.LabkitFrame;
 import sc.fiji.labkit.ui.inputimage.DatasetInputImage;
 import sc.fiji.labkit.ui.labeling.Label;
 import sc.fiji.labkit.ui.labeling.Labeling;
@@ -116,7 +115,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 		String title = "Editing TrackMate data for " + imp.getShortTitle();
 		if ( singleTimePoint )
 			title += "at frame " + ( currentTimePoint + 1 );
-		final LabkitFrame labkit = LabkitFrame.show( model, title );
+		final TrackMateLabkitFrame labkit = TrackMateLabkitFrame.show( model, title );
 
 		// Prepare re-importer.
 		final double dt = imp.getCalibration().frameInterval;
