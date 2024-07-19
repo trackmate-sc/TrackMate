@@ -83,18 +83,18 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 	 *            the time-point in the TrackMate model that corresponds to the
 	 *            index image.
 	 * @param the
-	 *            map of spots (vs their ID) that were written in the previous
-	 *            index image.
+	 *            map of spots (vs the label value in the previous labeling)
+	 *            that were written in the previous index image.
 	 */
 	public void reimport(
 			final RandomAccessibleInterval< T > novelIndexImg,
 			final RandomAccessibleInterval< T > previousIndexImg,
 			final int currentTimePoint,
-			final Map< Integer, Spot > previousSpotIDs )
+			final Map< Integer, Spot > previousSpotLabels )
 	{
-		// Collect ids of spots that have been modified. id = index - 1
-		final Set< Integer > modifiedIDs = getModifiedIDs( novelIndexImg, previousIndexImg );
-		final int nModified = modifiedIDs.size();
+		// Collect labels corresponding to spots that have been modified.
+		final Set< Integer > modifiedLabels = getModifiedLabels( novelIndexImg, previousIndexImg );
+		final int nModified = modifiedLabels.size();
 		if ( nModified == 0 )
 			return;
 
@@ -103,16 +103,15 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 		{
 			/*
 			 * Get all the spots present in the new image, as a map against the
-			 * label in the novel index image. This label value corresponds to
-			 * the ids of the spots in the previous index image (label = id+1).
+			 * label in the novel index image.
 			 */
 			final Map< Integer, List< Spot > > novelSpots = getSpots( novelIndexImg );
 
 			// Update model for those spots.
-			for ( final int id : modifiedIDs )
+			for ( final int labelValue : modifiedLabels )
 			{
-				final Spot previousSpot = previousSpotIDs.get( Integer.valueOf( id ) );
-				final List< Spot > novelSpotList = novelSpots.get( Integer.valueOf( id ) + 1 );
+				final Spot previousSpot = previousSpotLabels.get( labelValue );
+				final List< Spot > novelSpotList = novelSpots.get( labelValue );
 				if ( previousSpot == null )
 				{
 					/*
@@ -218,7 +217,7 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 		}
 	}
 
-	private final Set< Integer > getModifiedIDs(
+	private final Set< Integer > getModifiedLabels(
 			final RandomAccessibleInterval< T > novelIndexImg,
 			final RandomAccessibleInterval< T > previousIndexImg )
 	{
@@ -232,8 +231,8 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 						return;
 					if ( ci != pi )
 					{
-						modifiedIDs.add( Integer.valueOf( pi - 1 ) );
-						modifiedIDs.add( Integer.valueOf( ci - 1 ) );
+						modifiedIDs.add( Integer.valueOf( pi ) );
+						modifiedIDs.add( Integer.valueOf( ci ) );
 					}
 				} );
 		modifiedIDs.remove( Integer.valueOf( -1 ) );

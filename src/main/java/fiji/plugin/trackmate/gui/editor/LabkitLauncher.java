@@ -100,7 +100,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 		final DatasetInputImage input = makeInput( imp, singleTimePoint );
 		final Pair< Labeling, Map< Integer, Spot > > pair = makeLabeling( imp, trackmate.getModel().getSpots(), singleTimePoint );
 		final Labeling labeling = pair.getA();
-		final Map< Integer, Spot > spotIDs = pair.getB();
+		final Map< Integer, Spot > spotLabels = pair.getB();
 
 		// Make a labeling model from it.
 		final Context context = TMUtils.getContext();
@@ -122,14 +122,14 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 		labkit.onCloseListeners().addListener( () -> {
 			@SuppressWarnings( "unchecked" )
 			final RandomAccessibleInterval< T > indexImg = ( RandomAccessibleInterval< T > ) model.imageLabelingModel().labeling().get().getIndexImg();
-			reimport( indexImg, previousIndexImg, spotIDs, dt );
+			reimport( indexImg, previousIndexImg, spotLabels, dt );
 		} );
 	}
 
 	private void reimport(
 			final RandomAccessibleInterval< T > indexImg,
 			final RandomAccessibleInterval< T > previousIndexImg,
-			final Map< Integer, Spot > spotIDs,
+			final Map< Integer, Spot > spotLabels,
 			final double dt )
 	{
 		new Thread( "TrackMate-LabKit-Importer-thread" )
@@ -201,7 +201,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 						{
 							final RandomAccessibleInterval< T > novelIndexImgThisFrame = Views.hyperSlice( indexImg, timeDim, t );
 							final RandomAccessibleInterval< T > previousIndexImgThisFrame = Views.hyperSlice( previousIndexImg, timeDim, t );
-							reimporter.reimport( novelIndexImgThisFrame, previousIndexImgThisFrame, t, spotIDs );
+							reimporter.reimport( novelIndexImgThisFrame, previousIndexImgThisFrame, t, spotLabels );
 							log.setProgress( t / ( double ) nTimepoints );
 						}
 						log.setStatus( "" );
@@ -211,7 +211,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 					{
 						// Only one.
 						final int localT = Math.max( 0, currentTimePoint );
-						reimporter.reimport( indexImg, previousIndexImg, localT, spotIDs );
+						reimporter.reimport( indexImg, previousIndexImg, localT, spotLabels );
 					}
 				}
 				catch ( final Exception e )
@@ -308,7 +308,8 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 	 * @param singleTimePoint
 	 *            if <code>true</code> we only annotate one time-point.
 	 * @return the pair of: A. a new {@link Labeling}, B. the map of spots that
-	 *         were written in the labeling.
+	 *         were written in the labeling. The keys are the label value in the
+	 *         labeling.
 	 */
 	private Pair< Labeling, Map< Integer, Spot > > makeLabeling( final ImagePlus imp, final SpotCollection spots, final boolean singleTimePoint )
 	{
@@ -375,10 +376,10 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 		final ImgPlus< UnsignedIntType > lblImgPlus = new ImgPlus<>( lblImg, "LblImg", axes, calibration );
 
 		// Write spots in it with index = id + 1 and build a map index -> spot.
-		final Map< Integer, Spot > spotIDs = new HashMap<>();
+		final Map< Integer, Spot > spotLabels = new HashMap<>();
 		if ( singleTimePoint )
 		{
-			processFrame( lblImgPlus, spots, currentTimePoint, spotIDs, origin );
+			processFrame( lblImgPlus, spots, currentTimePoint, spotLabels, origin );
 		}
 		else
 		{
@@ -386,7 +387,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 			for ( int t = 0; t < imp.getNFrames(); t++ )
 			{
 				final ImgPlus< UnsignedIntType > lblImgPlusThisFrame = ImgPlusViews.hyperSlice( lblImgPlus, timeDim, t );
-				processFrame( lblImgPlusThisFrame, spots, t, spotIDs, origin );
+				processFrame( lblImgPlusThisFrame, spots, t, spotLabels, origin );
 			}
 		}
 		final Labeling labeling = Labeling.fromImg( lblImgPlus );
@@ -396,25 +397,25 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 		for ( final Label label : labeling.getLabels() )
 		{
 			final String name = label.name();
-			final int index = Integer.parseInt( name );
-			final Spot spot = spotIDs.get( index );
+			final int labelVal = Integer.parseInt( name );
+			final Spot spot = spotLabels.get( labelVal );
 			if ( spot == null )
 			{
-				System.out.println( "Spot is null for index " + index + "!!" ); // DEBUG
+				System.out.println( "Spot is null for label " + labelVal + "!!" ); // DEBUG
 				continue;
 			}
 			label.setName( spot.getName() );
 			label.setColor( new ARGBType( colorGen.color( spot ).getRGB() ) );
 		}
 
-		return new ValuePair<>( labeling, spotIDs );
+		return new ValuePair<>( labeling, spotLabels );
 	}
 
 	private final void processFrame(
 			final ImgPlus< UnsignedIntType > lblImgPlus,
 			final SpotCollection spots,
 			final int t,
-			final Map< Integer, Spot > spotIDs,
+			final Map< Integer, Spot > spotLabels,
 			final long[] origin )
 	{
 		// If we have a single timepoint, don't use -1 to retrieve spots.
@@ -426,7 +427,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 			{
 				final int index = spot.ID() + 1;
 				SpotUtil.iterable( spot, lblImgPlus ).forEach( p -> p.set( index ) );
-				spotIDs.put( index, spot );
+				spotLabels.put( index, spot );
 			}
 		}
 		else
@@ -445,7 +446,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 
 				final int index = spot.ID() + 1;
 				SpotUtil.iterable( spot, lblImgPlus ).forEach( p -> p.set( index ) );
-				spotIDs.put( index, spot );
+				spotLabels.put( index, spot );
 			}
 		}
 	}
