@@ -199,9 +199,18 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 						log.setStatus( "Re-importing from Labkit..." );
 						for ( int t = 0; t < nTimepoints; t++ )
 						{
+							// The spots of this time-point:
+							final Map< Integer, Spot > spotLabelsThisFrame = new HashMap<>();
+							for ( final Integer label : spotLabels.keySet() )
+							{
+								final Spot spot = spotLabels.get( label );
+								if ( spot.getFeature( Spot.FRAME ).intValue() == t )
+									spotLabelsThisFrame.put( label, spot );
+							}
+
 							final RandomAccessibleInterval< T > novelIndexImgThisFrame = Views.hyperSlice( indexImg, timeDim, t );
 							final RandomAccessibleInterval< T > previousIndexImgThisFrame = Views.hyperSlice( previousIndexImg, timeDim, t );
-							reimporter.reimport( novelIndexImgThisFrame, previousIndexImgThisFrame, t, spotLabels );
+							reimporter.reimport( novelIndexImgThisFrame, previousIndexImgThisFrame, t, spotLabelsThisFrame );
 							log.setProgress( t / ( double ) nTimepoints );
 						}
 						log.setStatus( "" );
