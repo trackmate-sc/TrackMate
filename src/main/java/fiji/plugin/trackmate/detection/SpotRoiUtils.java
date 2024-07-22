@@ -23,31 +23,29 @@ package fiji.plugin.trackmate.detection;
 
 import java.awt.Polygon;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotRoi;
 import ij.gui.PolygonRoi;
 import ij.process.FloatPolygon;
+import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
 import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.algorithm.gauss3.Gauss3;
-import net.imglib2.converter.Converter;
-import net.imglib2.converter.Converters;
-import net.imglib2.img.Img;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegion;
 import net.imglib2.roi.labeling.LabelRegions;
 import net.imglib2.type.BooleanType;
 import net.imglib2.type.NativeType;
-import net.imglib2.type.logic.BoolType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.IntType;
-import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 
 /**
@@ -123,102 +121,141 @@ public class SpotRoiUtils
 			final double smoothingScale,
 			final RandomAccessibleInterval< S > qualityImage )
 	{
+		final Map< Integer, List< Spot > > map = from2DLabelingWithROIMap( labeling, origin, calibration, simplify, qualityImage );
+		final List< Spot > spots = new ArrayList<>();
+		for ( final List< Spot > s : map.values() )
+			spots.addAll( s );
+		
+		return spots;
+	}
+
+	/**
+	 * Creates spots <b>with ROIs</b> from a <b>2D</b> label image. The quality
+	 * value is read from a secondary image, by taking the max value in each
+	 * ROI.
+	 * <p>
+	 * The spots are returned in a map, where the key is the integer value of
+	 * the label they correspond to in the label image. Because one spot
+	 * corresponds to one connected component in the label image, there might be
+	 * several spots for a label, hence the values of the map are list of spots.
+	 * 
+	 * @param <R>
+	 *            the type that backs-up the labeling.
+	 * @param <S>
+	 *            the type of the quality image. Must be real, scalar.
+	 * @param labeling
+	 *            the labeling, must be zero-min and 2D..
+	 * @param origin
+	 *            the origin (min pos) of the interval the labeling was
+	 *            generated from, used to reposition the spots from the zero-min
+	 *            labeling to the proper coordinates.
+	 * @param calibration
+	 *            the physical calibration.
+	 * @param simplify
+	 *            if <code>true</code> the polygon will be post-processed to be
+	 *            smoother and contain less points.
+	 * @param qualityImage
+	 *            the image in which to read the quality value.
+	 * @return a map linking the label integer value to the list of spots, with
+	 *         ROI, it corresponds to.
+	 */
+	public static < R extends IntegerType< R >, S extends RealType< S > > Map< Integer, List< Spot > > from2DLabelingWithROIMap(
+			final ImgLabeling< Integer, R > labeling,
+			final double[] origin,
+			final double[] calibration,
+			final boolean simplify,
+			final RandomAccessibleInterval< S > qualityImage )
+	{
 		if ( labeling.numDimensions() != 2 )
 			throw new IllegalArgumentException( "Can only process 2D images with this method, but got " + labeling.numDimensions() + "D." );
 
 		final LabelRegions< Integer > regions = new LabelRegions< Integer >( labeling );
 
-		final double[] sigmas = new double[ 2 ];
-		for ( int d = 0; d < sigmas.length; d++ )
-			sigmas[ d ] = smoothingScale / Math.sqrt( 2. ) / calibration[ d ];
-
-		
-		// Parse regions to create polygons on boundaries.
-		final List< Polygon > polygons = new ArrayList<>( regions.getExistingLabels().size() );
+		/*
+		 * Map of label in the label image to a collection of polygons around
+		 * this label. Because 1 polygon correspond to 1 connected component,
+		 * there might be several polygons for a label.
+		 */
+		final Map< Integer, List< Polygon > > polygonsMap = new HashMap<>( regions.getExistingLabels().size() );
 		final Iterator< LabelRegion< Integer > > iterator = regions.iterator();
+		// Parse regions to create polygons on boundaries.
 		while ( iterator.hasNext() )
 		{
 			final LabelRegion< Integer > region = iterator.next();
-
-			// Possibly smooth labels.
-			final RandomAccessibleInterval< BoolType > mask;
-			if (smoothingScale > 0.)
-			{
-				// Filter.
-				final Img< FloatType > filtered = Util.getArrayOrCellImgFactory( region, new FloatType() ).create( region );
-				Gauss3.gauss( sigmas, region, filtered );
-
-				// To mask.
-				final double threshold = 0.5;
-				final Converter< FloatType, BoolType > converter = ( a, b ) -> b.set( a.getRealDouble() > threshold );
-				mask = Converters.convertRAI( filtered, converter, new BoolType() );
-			}
-			else
-			{
-				mask = region;
-			}
-			
 			// Analyze in zero-min region.
-			final List< Polygon > pp = maskToPolygons( Views.zeroMin( mask ) );
+			final List< Polygon > pp = maskToPolygons( Views.zeroMin( region ) );
 			// Translate back to interval coords.
 			for ( final Polygon polygon : pp )
-				polygon.translate( ( int ) mask.min( 0 ), ( int ) mask.min( 1 ) );
+				polygon.translate( ( int ) region.min( 0 ), ( int ) region.min( 1 ) );
 
-			polygons.addAll( pp );
+			final Integer label = region.getLabel();
+			polygonsMap.put( label, pp );
 		}
 
-		// Quality image.
-		final List< Spot > spots = new ArrayList<>( polygons.size() );
+		// Storage for results.
+		final Map< Integer, List< Spot > > output = new HashMap<>( polygonsMap.size() );
 
 		// Simplify them and compute a quality.
-		for ( final Polygon polygon : polygons )
+		for ( final Integer label : polygonsMap.keySet() )
 		{
-			final PolygonRoi roi = new PolygonRoi( polygon, PolygonRoi.POLYGON );
+			final List< Spot > spots = new ArrayList<>( polygonsMap.size() );
+			output.put( label, spots );
 
-			// Create Spot ROI.
-			final PolygonRoi fRoi;
-			if ( simplify )
-				fRoi = simplify( roi, SMOOTH_INTERVAL, DOUGLAS_PEUCKER_MAX_DISTANCE );
-			else
-				fRoi = roi;
-
-			// Don't include ROIs that have been shrunk to < 1 pixel.
-			if ( fRoi.getNCoordinates() < 3 || fRoi.getStatistics().area <= 0. )
-				continue;
-
-			// Create spot without quality value yet.
-			final Polygon fPolygon = fRoi.getPolygon();
-			final double[] xpoly = new double[ fPolygon.npoints ];
-			final double[] ypoly = new double[ fPolygon.npoints ];
-			for ( int i = 0; i < fPolygon.npoints; i++ )
+			final List< Polygon > polygons = polygonsMap.get( label );
+			for ( final Polygon polygon : polygons )
 			{
-				xpoly[ i ] = calibration[ 0 ] * ( origin[ 0 ] + fPolygon.xpoints[ i ] - 0.5 );
-				ypoly[ i ] = calibration[ 1 ] * ( origin[ 1 ] + fPolygon.ypoints[ i ] - 0.5 );
-			}
-			final SpotRoi spot = SpotRoi.createSpot( xpoly, ypoly, -1. );
+				final PolygonRoi roi = new PolygonRoi( polygon, PolygonRoi.POLYGON );
 
-			// Measure quality.
-			final double quality;
-			if ( null == qualityImage )
-			{
-				quality = fRoi.getStatistics().area;
-			}
-			else
-			{
-				final IterableInterval< S > iterable = spot.iterable( Views.extendZero( qualityImage ), calibration );
-				double max = Double.NEGATIVE_INFINITY;
-				for ( final S s : iterable )
+				// Create Spot ROI.
+				final PolygonRoi fRoi;
+				if ( simplify )
+					fRoi = simplify( roi, SMOOTH_INTERVAL, DOUGLAS_PEUCKER_MAX_DISTANCE );
+				else
+					fRoi = roi;
+
+				// Don't include ROIs that have been shrunk to < 1 pixel.
+				if ( fRoi.getNCoordinates() < 3 || fRoi.getStatistics().area <= 0. )
+					continue;
+
+				final Polygon fPolygon = fRoi.getPolygon();
+				final double[] xpoly = new double[ fPolygon.npoints ];
+				final double[] ypoly = new double[ fPolygon.npoints ];
+				for ( int i = 0; i < fPolygon.npoints; i++ )
 				{
-					final double val = s.getRealDouble();
-					if ( val > max )
-						max = val;
+					xpoly[ i ] = calibration[ 0 ] * ( origin[ 0 ] + fPolygon.xpoints[ i ] - 0.5 );
+					ypoly[ i ] = calibration[ 1 ] * ( origin[ 1 ] + fPolygon.ypoints[ i ] - 0.5 );
 				}
-				quality = max;
+
+				final Spot spot = SpotRoi.createSpot( xpoly, ypoly, -1. );
+
+				// Measure quality.
+				final double quality;
+				if ( null == qualityImage )
+				{
+					quality = fRoi.getStatistics().area;
+				}
+				else
+				{
+					final String name = "QualityImage";
+					final AxisType[] axes = new AxisType[] { Axes.X, Axes.Y };
+					final double[] cal = new double[] { calibration[ 0 ], calibration[ 1 ] };
+					final String[] units = new String[] { "unitX", "unitY" };
+					final ImgPlus< S > qualityImgPlus = new ImgPlus<>( ImgPlus.wrapToImg( qualityImage ), name, axes, cal, units );
+					final IterableInterval< S > iterable = spot.iterable( qualityImgPlus );
+					double max = Double.NEGATIVE_INFINITY;
+					for ( final S s : iterable )
+					{
+						final double val = s.getRealDouble();
+						if ( val > max )
+							max = val;
+					}
+					quality = max;
+				}
+				spot.putFeature( Spot.QUALITY, quality );
+				spots.add( spot );
 			}
-			spot.putFeature( Spot.QUALITY, quality );
-			spots.add( spot );
 		}
-		return spots;
+		return output;
 	}
 
 	private static final double distanceSquaredBetweenPoints( final double vx, final double vy, final double wx, final double wy )
