@@ -81,7 +81,6 @@ public class ImpBdvShowable implements BdvShowable
 	 */
 	public static < T extends NumericType< T > > ImpBdvShowable fromImp( final ImagePlus imp )
 	{
-		@SuppressWarnings( "unchecked" )
 		final ImgPlus< T > src = TMUtils.rawWraps( imp );
 		if ( src.dimensionIndex( Axes.CHANNEL ) < 0 )
 			Views.addDimension( src );
