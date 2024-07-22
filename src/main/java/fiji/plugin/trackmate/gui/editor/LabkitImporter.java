@@ -34,6 +34,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.detection.SpotRoiUtils;
+import ij.IJ;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.loops.LoopBuilder;
 import net.imglib2.roi.labeling.ImgLabeling;
@@ -47,6 +48,8 @@ import net.imglib2.view.Views;
  */
 public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 {
+
+	private static final boolean DEBUG = false;
 
 	private final Model model;
 
@@ -148,6 +151,7 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 					 * One I had in the previous spot list, but that has
 					 * disappeared. Remove it.
 					 */
+					IJ.log( " - Removed spot " + str( previousSpot ) );
 					model.removeSpot( previousSpot );
 				}
 				else
@@ -212,6 +216,9 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 			else
 				throw new IllegalArgumentException( "The edge of a spot does not have the spot as source or target?!?" );
 		}
+		if ( DEBUG )
+			IJ.log( " - Modified spot " + str( previousSpot ) + " -> " + str( mainNovelSpot ) );
+
 		model.removeSpot( previousSpot );
 
 		// Deal with the other ones.
@@ -225,6 +232,9 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 			s.putFeature( Spot.POSITION_T, currentTimePoint * dt );
 			s.putFeature( Spot.QUALITY, -1. );
 			model.addSpotTo( s, Integer.valueOf( currentTimePoint ) );
+
+			if ( DEBUG )
+				IJ.log( " - Added spot " + str( s ) );
 		}
 	}
 
@@ -235,6 +245,9 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 			spot.putFeature( Spot.POSITION_T, currentTimePoint * dt );
 			spot.putFeature( Spot.QUALITY, -1. );
 			model.addSpotTo( spot, Integer.valueOf( currentTimePoint ) );
+
+			if ( DEBUG )
+				IJ.log( " - Added spot " + str( spot ) );
 		}
 	}
 
@@ -276,10 +289,25 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 		final ImgLabeling< Integer, ? > labeling = ImgLabeling.fromImageAndLabels( rai, indices );
 		final Map< Integer, List< Spot > > spots = SpotRoiUtils.from2DLabelingWithROIMap(
 				labeling,
-				labeling.minAsDoubleArray(),
+				new double[] { 0., 0. },
 				calibration,
 				simplify,
 				rai );
 		return spots;
+	}
+
+	private static final String str( final Spot spot )
+	{
+		return spot.ID() + " (" +
+				roundToN( spot.getDoublePosition( 0 ), 1 ) + ", " +
+				roundToN( spot.getDoublePosition( 1 ), 1 ) + ", " +
+				roundToN( spot.getDoublePosition( 2 ), 1 ) + ") " +
+				"@ t=" + spot.getFeature( Spot.FRAME ).intValue();
+	}
+
+	private static double roundToN( final double num, final int n )
+	{
+		final double scale = Math.pow( 10, n );
+		return Math.round( num * scale ) / scale;
 	}
 }
