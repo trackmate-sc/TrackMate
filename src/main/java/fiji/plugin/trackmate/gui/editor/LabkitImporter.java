@@ -33,7 +33,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.detection.MaskUtils;
+import fiji.plugin.trackmate.detection.SpotRoiUtils;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.loops.LoopBuilder;
 import net.imglib2.roi.labeling.ImgLabeling;
@@ -274,9 +274,9 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 			indices.add( Integer.valueOf( i + 1 ) );
 
 		final ImgLabeling< Integer, ? > labeling = ImgLabeling.fromImageAndLabels( rai, indices );
-		final Map< Integer, List< Spot > > spots = MaskUtils.from2DLabelingWithROIMap(
+		final Map< Integer, List< Spot > > spots = SpotRoiUtils.from2DLabelingWithROIMap(
 				labeling,
-				Views.zeroMin( labeling ),
+				labeling.minAsDoubleArray(),
 				calibration,
 				simplify,
 				rai );
