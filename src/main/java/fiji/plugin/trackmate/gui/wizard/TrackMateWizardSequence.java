@@ -396,7 +396,7 @@ public class TrackMateWizardSequence implements WizardSequence
 		 * Special case: are we dealing with the manual tracker? If yes, no
 		 * config, no detection.
 		 */
-		if ( trackerFactory.getKey().equals( ManualTrackerFactory.TRACKER_KEY ) )
+		if ( trackerFactory == null || trackerFactory.getKey().equals( ManualTrackerFactory.TRACKER_KEY ) )
 		{
 			// Position sequence next and previous.
 			next.put( chooseTrackerDescriptor, trackFilterDescriptor );
