@@ -23,8 +23,11 @@ package fiji.plugin.trackmate.detection;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotMesh;
@@ -183,7 +186,7 @@ public class SpotMeshUtils
 	/**
 	 * Creates spots <b>with meshes</b> from a <b>3D</b> label image. The labels
 	 * are possibly smoothed before creating the mesh. The quality value is read
-	 * from a secondary image, by taking the max value in each ROI.
+	 * from a secondary image, by taking the max value inside the mesh.
 	 *
 	 * @param <R>
 	 *            the type that backs-up the labeling.
@@ -217,13 +220,64 @@ public class SpotMeshUtils
 			final double smoothingScale,
 			final RandomAccessibleInterval< S > qualityImage )
 	{
+		final Map< Integer, List< Spot > > map = from3DLabelingWithROIMap( labeling, origin, calibration, simplify, smoothingScale, qualityImage );
+		final List< Spot > spots = new ArrayList<>();
+		for ( final List< Spot > s : map.values() )
+			spots.addAll( s );
+
+		return spots;
+	}
+
+	/**
+	 * Creates spots <b>with meshes</b> from a <b>3D</b> label image. The labels
+	 * are possibly smoothed before creating the mesh. The quality value is read
+	 * from a secondary image, by taking the max value inside the mesh.
+	 * <p>
+	 * The spots are returned in a map, where the key is the integer value of
+	 * the label they correspond to in the label image. In 3D, there is one spot
+	 * per label, even for disconnected components, so the lists are made of one
+	 * element for now.
+	 *
+	 * @param <R>
+	 *            the type that backs-up the labeling.
+	 * @param <S>
+	 *            the type of the quality image. Must be real, scalar.
+	 * @param labeling
+	 *            the labeling, must be zero-min and 3D.
+	 * @param origin
+	 *            the origin (min pos) of the interval the labeling was
+	 *            generated from, used to reposition the spots from the zero-min
+	 *            labeling to the proper coordinates.
+	 * @param calibration
+	 *            the physical calibration.
+	 * @param simplify
+	 *            if <code>true</code> the meshes will be post-processed to
+	 *            contain less verrtices.
+	 * @param smoothingScale
+	 *            if strictly larger than 0, the mask will be smoothed before
+	 *            creating the mesh, resulting in smoother meshes. The scale
+	 *            value sets the (Gaussian) filter radius and is specified in
+	 *            physical units. If 0 or lower than 0, no smoothing is applied.
+	 * @param qualityImage
+	 *            the image in which to read the quality value.
+	 * @return a map linking the label integer value to the list of spots, with
+	 *         meshes, it corresponds to.
+	 */
+	public static < R extends IntegerType< R >, S extends RealType< S > > Map< Integer, List< Spot > > from3DLabelingWithROIMap(
+			final ImgLabeling< Integer, R > labeling,
+			final double[] origin,
+			final double[] calibration,
+			final boolean simplify,
+			final double smoothingScale,
+			final RandomAccessibleInterval< S > qualityImage )
+	{
 		if ( labeling.numDimensions() != 3 )
 			throw new IllegalArgumentException( "Can only process 3D images with this method, but got " + labeling.numDimensions() + "D." );
 
 		// Parse regions to create meshes on label.
 		final LabelRegions< Integer > regions = new LabelRegions< Integer >( labeling );
 		final Iterator< LabelRegion< Integer > > iterator = regions.iterator();
-		final List< Spot > spots = new ArrayList<>( regions.getExistingLabels().size() );
+		final Map< Integer, List< Spot > > spots = new HashMap<>( regions.getExistingLabels().size() );
 		while ( iterator.hasNext() )
 		{
 			final LabelRegion< Integer > region = iterator.next();
@@ -237,7 +291,7 @@ public class SpotMeshUtils
 			if ( spot == null )
 				continue;
 
-			spots.add( spot );
+			spots.put( region.getLabel(), Collections.singletonList( spot ) );
 		}
 		return spots;
 	}
