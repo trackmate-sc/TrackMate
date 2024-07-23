@@ -33,6 +33,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.detection.SpotMeshUtils;
 import fiji.plugin.trackmate.detection.SpotRoiUtils;
 import ij.IJ;
 import net.imglib2.RandomAccessibleInterval;
@@ -287,13 +288,24 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 			indices.add( Integer.valueOf( i + 1 ) );
 
 		final ImgLabeling< Integer, ? > labeling = ImgLabeling.fromImageAndLabels( rai, indices );
-		final Map< Integer, List< Spot > > spots = SpotRoiUtils.from2DLabelingWithROIMap(
-				labeling,
-				new double[] { 0., 0. },
-				calibration,
-				simplify,
-				rai );
-		return spots;
+
+		final boolean is3D = rai.numDimensions() > 2;
+		final double smoothingScale = -1.; // TODO
+		if ( is3D )
+			return SpotMeshUtils.from3DLabelingWithROIMap(
+					labeling,
+					new double[] { 0., 0., 0. },
+					calibration,
+					simplify,
+					smoothingScale,
+					rai );
+		else
+			return SpotRoiUtils.from2DLabelingWithROIMap(
+					labeling,
+					new double[] { 0., 0. },
+					calibration,
+					simplify,
+					rai );
 	}
 
 	private static final String str( final Spot spot )
