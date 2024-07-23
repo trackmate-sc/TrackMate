@@ -305,6 +305,7 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 					new double[] { 0., 0. },
 					calibration,
 					simplify,
+					smoothingScale,
 					rai );
 	}
 

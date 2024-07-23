@@ -121,7 +121,13 @@ public class SpotRoiUtils
 			final double smoothingScale,
 			final RandomAccessibleInterval< S > qualityImage )
 	{
-		final Map< Integer, List< Spot > > map = from2DLabelingWithROIMap( labeling, origin, calibration, simplify, qualityImage );
+		final Map< Integer, List< Spot > > map = from2DLabelingWithROIMap(
+				labeling,
+				origin,
+				calibration,
+				simplify,
+				smoothingScale,
+				qualityImage );
 		final List< Spot > spots = new ArrayList<>();
 		for ( final List< Spot > s : map.values() )
 			spots.addAll( s );
@@ -144,7 +150,7 @@ public class SpotRoiUtils
 	 * @param <S>
 	 *            the type of the quality image. Must be real, scalar.
 	 * @param labeling
-	 *            the labeling, must be zero-min and 2D..
+	 *            the labeling, must be zero-min and 2D.
 	 * @param origin
 	 *            the origin (min pos) of the interval the labeling was
 	 *            generated from, used to reposition the spots from the zero-min
@@ -154,6 +160,11 @@ public class SpotRoiUtils
 	 * @param simplify
 	 *            if <code>true</code> the polygon will be post-processed to be
 	 *            smoother and contain less points.
+	 * @param smoothingScale
+	 *            if strictly larger than 0, the mask will be smoothed before
+	 *            creating the mesh, resulting in smoother meshes. The scale
+	 *            value sets the (Gaussian) filter radius and is specified in
+	 *            physical units. If 0 or lower than 0, no smoothing is applied.
 	 * @param qualityImage
 	 *            the image in which to read the quality value.
 	 * @return a map linking the label integer value to the list of spots, with
@@ -164,6 +175,7 @@ public class SpotRoiUtils
 			final double[] origin,
 			final double[] calibration,
 			final boolean simplify,
+			final double smoothingScale,
 			final RandomAccessibleInterval< S > qualityImage )
 	{
 		if ( labeling.numDimensions() != 2 )
