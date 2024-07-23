@@ -50,7 +50,6 @@ import net.imglib2.roi.labeling.LabelRegions;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.logic.BitType;
 import net.imglib2.type.logic.BoolType;
-import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.real.FloatType;
@@ -201,109 +200,6 @@ public class MaskUtils
 				executorService );
 		executorService.shutdown();
 		return labeling;
-	}
-
-	/**
-	 * Creates spots from a grayscale image, thresholded to create a mask. A
-	 * spot is created for each connected-component of the mask, with a size
-	 * that matches the mask size.
-	 *
-	 * @param <T>
-	 *            the type of the input image. Must be real, scalar.
-	 * @param input
-	 *            the input image.
-	 * @param interval
-	 *            the interval in the input image to analyze.
-	 * @param calibration
-	 *            the physical calibration.
-	 * @param threshold
-	 *            the threshold to apply to the input image.
-	 * @param numThreads
-	 *            how many threads to use for multithreaded computation.
-	 * @return a list of spots, without ROI.
-	 */
-	public static < T extends RealType< T > > List< Spot > fromThreshold(
-			final RandomAccessible< T > input,
-			final Interval interval,
-			final double[] calibration,
-			final double threshold,
-			final int numThreads )
-	{
-		/*
-		 * Crop.
-		 */
-		final IntervalView< T > crop = Views.interval( input, interval );
-		final IntervalView< T > in = Views.zeroMin( crop );
-
-		// Get labeling from mask.
-		final ImgLabeling< Integer, IntType > labeling = toLabeling(
-				in,
-				threshold,
-				numThreads );
-		return fromLabeling(
-				labeling,
-				interval.minAsDoubleArray(),
-				calibration );
-	}
-
-	/**
-	 * Creates spots from a label image.
-	 *
-	 * @param <R>
-	 *            the type that backs-up the labeling.
-	 * @param labeling
-	 *            the labeling, must be zero-min.
-	 * @param origin
-	 *            the origin (min pos) of the interval the labeling was
-	 *            generated from, used to reposition the spots from the zero-min
-	 *            labeling to the proper coordinates.
-	 * @param calibration
-	 *            the physical calibration.
-	 * @return a list of spots, without ROI.
-	 */
-	public static < R extends IntegerType< R > > List< Spot > fromLabeling(
-			final ImgLabeling< Integer, R > labeling,
-			final double[] origin,
-			final double[] calibration )
-	{
-		// Parse each component.
-		final LabelRegions< Integer > regions = new LabelRegions<>( labeling );
-		final Iterator< LabelRegion< Integer > > iterator = regions.iterator();
-		final List< Spot > spots = new ArrayList<>( regions.getExistingLabels().size() );
-		while ( iterator.hasNext() )
-		{
-			final LabelRegion< Integer > region = iterator.next();
-			final Cursor< BoolType > cursor = region.localizingCursor();
-			final int[] cursorPos = new int[ labeling.numDimensions() ];
-			final long[] sum = new long[ 3 ];
-			while ( cursor.hasNext() )
-			{
-				cursor.fwd();
-				cursor.localize( cursorPos );
-				for ( int d = 0; d < sum.length; d++ )
-					sum[ d ] += cursorPos[ d ];
-			}
-
-			final double[] pos = new double[ 3 ];
-			for ( int d = 0; d < pos.length; d++ )
-				pos[ d ] = sum[ d ] / ( double ) region.size();
-
-			final double x = calibration[ 0 ] * ( origin[ 0 ] + pos[ 0 ] );
-			final double y = calibration[ 1 ] * ( origin[ 1 ] + pos[ 1 ] );
-			final double z = calibration[ 2 ] * ( origin[ 2 ] + pos[ 2 ] );
-
-			double volume = region.size();
-			for ( int d = 0; d < calibration.length; d++ )
-				if ( calibration[ d ] > 0 )
-					volume *= calibration[ d ];
-			final double radius = ( labeling.numDimensions() == 2 )
-					? Math.sqrt( volume / Math.PI )
-					: Math.pow( 3. * volume / ( 4. * Math.PI ), 1. / 3. );
-			final double quality = region.size();
-			spots.add( new SpotBase( x, y, z, radius, quality ) );
-		}
-
-		return spots;
 	}
 
 	/**

@@ -160,10 +160,9 @@ public class LabelImageDetector< T extends RealType< T > & NativeType< T > > imp
 		}
 		else
 		{
-			spots = MaskUtils.fromLabeling(
-					labeling,
-					interval.minAsDoubleArray(),
-					calibration );
+			throw new IllegalArgumentException( BASE_ERROR_MESSAGE + "Can only process 2D or 3D images. Got a "
+					+ input.numDimensions() + "D image over: "
+					+ Util.printInterval( interval ) );
 		}
 	}
 
