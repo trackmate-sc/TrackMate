@@ -133,7 +133,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 		// Show LabKit.
 		String title = "Editing TrackMate data for " + imp.getShortTitle();
 		if ( singleTimePoint )
-			title += "at frame " + ( currentTimePoint + 1 );
+			title += " at frame " + ( currentTimePoint + 1 );
 		final TrackMateLabkitFrame labkit = TrackMateLabkitFrame.show( model, title );
 
 		// Prepare re-importer.
