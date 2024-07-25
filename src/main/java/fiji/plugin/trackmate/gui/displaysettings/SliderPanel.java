@@ -37,6 +37,8 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import fiji.plugin.trackmate.gui.GuiUtils;
+
 /**
  * A {@link JSlider} with a {@link JSpinner} next to it, both modifying the same
  * {@link BoundedValue value}.
@@ -61,6 +63,8 @@ public class SliderPanel extends JPanel implements BoundedValue.UpdateListener
 	 *            label to show next to the slider.
 	 * @param model
 	 *            the value that is modified.
+	 * @param spinnerStepSize
+	 *            the step size in the spinner to create.
 	 */
 	public SliderPanel( final String name, final BoundedValue model, final int spinnerStepSize )
 	{
@@ -68,9 +72,20 @@ public class SliderPanel extends JPanel implements BoundedValue.UpdateListener
 		setLayout( new BorderLayout( 10, 10 ) );
 		setPreferredSize( PANEL_SIZE );
 
-		slider = new JSlider( SwingConstants.HORIZONTAL, model.getRangeMin(), model.getRangeMax(), model.getCurrentValue() );
+		final int imin = model.getRangeMin();
+		final int imax = model.getRangeMax();
+		int ivalue = model.getCurrentValue();
+		ivalue = Math.max( imin, ivalue );
+		ivalue = Math.min( imax, ivalue );
+		slider = new JSlider( SwingConstants.HORIZONTAL, imin, imax, ivalue );
+
 		spinner = new JSpinner();
-		spinner.setModel( new SpinnerNumberModel( model.getCurrentValue(), model.getRangeMin(), model.getRangeMax(), spinnerStepSize ) );
+		final double min = model.getRangeMin();
+		final double max = model.getRangeMax();
+		double value = model.getCurrentValue();
+		value = Math.min( max, value );
+		value = Math.max( min, value );
+		spinner.setModel( new SpinnerNumberModel( value, min, max, spinnerStepSize ) );
 
 		slider.addChangeListener( new ChangeListener()
 		{
@@ -121,6 +136,22 @@ public class SliderPanel extends JPanel implements BoundedValue.UpdateListener
 		add( slider, BorderLayout.CENTER );
 		add( spinner, BorderLayout.EAST );
 
+		final MouseWheelListener mouseWheelListener = new MouseWheelListener()
+		{
+
+			@Override
+			public void mouseWheelMoved( final MouseWheelEvent e )
+			{
+				if ( !slider.isEnabled() )
+					return;
+				final int notches = e.getWheelRotation();
+				final int step = notches < 0 ? 1 : -1;
+				slider.setValue( slider.getValue() + step );
+			}
+		};
+		slider.addMouseWheelListener( mouseWheelListener );
+		spinner.addMouseWheelListener( mouseWheelListener );
+
 		this.model = model;
 		model.setUpdateListener( this );
 	}
@@ -131,16 +162,6 @@ public class SliderPanel extends JPanel implements BoundedValue.UpdateListener
 	}
 
 	@Override
-	public void setFont( final Font font )
-	{
-		super.setFont( font );
-		if ( spinner != null )
-			spinner.setFont( font );
-		if ( slider != null )
-			slider.setFont( font );
-	}
-
-	@Override
 	public void setToolTipText( final String text )
 	{
 		super.setToolTipText( text );
@@ -148,6 +169,20 @@ public class SliderPanel extends JPanel implements BoundedValue.UpdateListener
 			spinner.setToolTipText( text );
 		if ( slider != null )
 			slider.setToolTipText( text );
+	}
+
+	@Override
+	public void setEnabled( final boolean enabled )
+	{
+		spinner.setEnabled( enabled );
+		slider.setEnabled( enabled );
+		super.setEnabled( enabled );
+	}
+
+	@Override
+	public void setFont( final Font font )
+	{
+		GuiUtils.setFont( this, font );
 	}
 
 	@Override

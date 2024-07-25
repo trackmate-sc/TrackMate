@@ -56,14 +56,18 @@ public interface SpotTrackerFactory extends TrackMateModule
 	public ConfigurationPanel getTrackerConfigurationPanel( final Model model );
 
 	/**
-	 * Marshalls a settings map to a JDom element, ready for saving to XML. The
+	 * Marshals a settings map to a JDom element, ready for saving to XML. The
 	 * element is <b>updated</b> with new attributes.
 	 * <p>
 	 * Only parameters specific to the concrete tracker factory are marshalled.
 	 * The element also always receive an attribute named
 	 * {@value TrackerKeys#XML_ATTRIBUTE_TRACKER_NAME} that saves the target
 	 * {@link SpotTracker} key.
-	 *
+	 * 
+	 * @param settings
+	 *            the settings map to marshal.
+	 * @param element
+	 *            the element to marshal to.
 	 * @return true if marshalling was successful. If not, check
 	 *         {@link #getErrorMessage()}
 	 */
@@ -109,7 +113,9 @@ public interface SpotTrackerFactory extends TrackMateModule
 	 * validity check is strict: we check that all needed parameters are here
 	 * and are of the right class, and that there is no extra unwanted
 	 * parameters.
-	 *
+	 * 
+	 * @param settings
+	 *            the settings map.
 	 * @return true if the settings map can be used with the target factory. If
 	 *         not, check {@link #getErrorMessage()}
 	 */

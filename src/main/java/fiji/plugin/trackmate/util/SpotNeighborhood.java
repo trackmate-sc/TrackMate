@@ -22,10 +22,10 @@
 package fiji.plugin.trackmate.util;
 
 import fiji.plugin.trackmate.Spot;
-import net.imagej.ImgPlus;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.Positionable;
+import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealPositionable;
 import net.imglib2.algorithm.neighborhood.Neighborhood;
@@ -35,6 +35,7 @@ import net.imglib2.algorithm.region.localneighborhood.EllipsoidNeighborhood;
 import net.imglib2.algorithm.region.localneighborhood.RectangleNeighborhoodGPL;
 import net.imglib2.outofbounds.OutOfBoundsMirrorExpWindowingFactory;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.view.Views;
 
 public class SpotNeighborhood< T extends RealType< T > > implements Neighborhood< T >
 {
@@ -53,18 +54,22 @@ public class SpotNeighborhood< T extends RealType< T > > implements Neighborhood
 	 * CONSTRUCTOR
 	 */
 
-	public SpotNeighborhood( final Spot spot, final ImgPlus< T > img )
+	public SpotNeighborhood( final Spot spot, final RandomAccessible< T > ra, final double[] calibration )
 	{
-		this.calibration = TMUtils.getSpatialCalibration( img );
-		// Center
-		this.center = new long[ img.numDimensions() ];
+		this.calibration = calibration;
+		// Center, span and interval.
+		this.center = new long[ ra.numDimensions() ];
+		final long[] span = new long[ ra.numDimensions() ];
+		final long[] min = new long[ra.numDimensions()];
+		final long[] max = new long[ ra.numDimensions() ];
 		for ( int d = 0; d < center.length; d++ )
-			center[ d ] = Math.round( spot.getFeature( Spot.POSITION_FEATURES[ d ] ).doubleValue() / calibration[ d ] );
-
-		// Span
-		final long[] span = new long[ img.numDimensions() ];
-		for ( int d = 0; d < span.length; d++ )
+		{
+			center[ d ] = Math.round( spot.getDoublePosition( d ) / calibration[ d ] );
 			span[ d ] = Math.round( spot.getFeature( Spot.RADIUS ) / calibration[ d ] );
+			min[d] = center[d] - span[d];
+			max[d] = center[d] + span[d];
+		}
+		final FinalInterval interval = new FinalInterval( min, max );
 
 		// Neighborhood
 
@@ -74,28 +79,26 @@ public class SpotNeighborhood< T extends RealType< T > > implements Neighborhood
 		 * have to test pedantically.
 		 */
 
+		final RandomAccessibleInterval< T > rai = Views.interval( ra, interval );
 		final OutOfBoundsMirrorExpWindowingFactory< T, RandomAccessibleInterval< T > > oob = new OutOfBoundsMirrorExpWindowingFactory<>();
-		if ( img.numDimensions() == 2 && img.dimension( 0 ) < 2 || img.dimension( 1 ) < 2 )
+		if ( ra.numDimensions() == 1 )
 		{
-			if ( img.dimension( 0 ) < 2 )
-				span[ 0 ] = 0;
-			else
-				span[ 1 ] = 0;
-			this.neighborhood = new RectangleNeighborhoodGPL<>( img, oob );
+			span[ 0 ] = 0;
+			this.neighborhood = new RectangleNeighborhoodGPL<>( rai, oob );
 			neighborhood.setPosition( center );
 			neighborhood.setSpan( span );
 		}
-		else if ( img.numDimensions() == 2 )
+		else if ( ra.numDimensions() == 2 )
 		{
-			this.neighborhood = new EllipseNeighborhood<>( img, center, span, oob );
+			this.neighborhood = new EllipseNeighborhood<>( rai, center, span, oob );
 		}
-		else if ( img.numDimensions() == 3 )
+		else if ( ra.numDimensions() == 3 )
 		{
-			this.neighborhood = new EllipsoidNeighborhood<>( img, center, span, oob );
+			this.neighborhood = new EllipsoidNeighborhood<>( rai, center, span, oob );
 		}
 		else
 		{
-			throw new IllegalArgumentException( "Source input must be 1D, 2D or 3D, got nDims = " + img.numDimensions() );
+			throw new IllegalArgumentException( "Source input must be 1D, 2D or 3D, got nDims = " + ra.numDimensions() );
 		}
 	}
 

@@ -19,21 +19,25 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.graph;
+package fiji.plugin.trackmate;
 
-/**
- * Interface for function that can build a human-readable string representation
- * of an object
- * 
- * @author JeanYves
- *
- */
-public interface StringFormater< V >
-{
+import org.scijava.Context;
 
-	/**
-	 * Convert the given instance to a string representation.
-	 */
-	public String toString( V instance );
+import fiji.plugin.trackmate.util.TMUtils;
+import ij.IJ;
+import ij.ImagePlus;
 
+class TestTrackMatePlugin extends TrackMatePlugIn {
+
+	@SuppressWarnings("unused")
+	public void setUp() {
+		final ImagePlus imp = IJ.createImage("Test Image", 256, 256, 10, 8);
+		final Settings settings = createSettings(imp);
+		final Model model = createModel(imp);
+		final TrackMate trackMate = createTrackMate(model, settings);
+	}
+
+	public Context getLocalContext() {
+		return TMUtils.getContext();
+	}
 }

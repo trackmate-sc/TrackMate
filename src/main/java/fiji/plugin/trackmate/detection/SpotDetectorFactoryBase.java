@@ -65,11 +65,12 @@ public interface SpotDetectorFactoryBase< T extends RealType< T > & NativeType< 
 	 * @see #setTarget(ImgPlus, Map)
 	 * @see #marshall(Map, Element)
 	 * @see #unmarshall(Element, Map)
+	 * @return an error message.
 	 */
 	public String getErrorMessage();
 
 	/**
-	 * Marshalls a settings map to a JDom element, ready for saving to XML. The
+	 * Marshals a settings map to a JDom element, ready for saving to XML. The
 	 * element is <b>updated</b> with new attributes.
 	 * <p>
 	 * Only parameters specific to the specific detector factory are marshalled.
@@ -77,13 +78,18 @@ public interface SpotDetectorFactoryBase< T extends RealType< T > & NativeType< 
 	 * {@value DetectorKeys#XML_ATTRIBUTE_DETECTOR_NAME} that saves the target
 	 * {@link SpotDetectorFactory} key.
 	 *
+	 * @param settings
+	 *            the settings map to marshal.
+	 * @param element
+	 *            the element to marshal to.
 	 * @return <code>true</code> if marshalling was successful. If not, check
 	 *         {@link #getErrorMessage()}
+	 * 
 	 */
 	public boolean marshall( final Map< String, Object > settings, final Element element );
 
 	/**
-	 * Un-marshalls a JDom element to update a settings map.
+	 * Un-marshals a JDom element to update a settings map.
 	 *
 	 * @param element
 	 *            the JDom element to read from.
@@ -106,19 +112,20 @@ public interface SpotDetectorFactoryBase< T extends RealType< T > & NativeType< 
 	 * @param model
 	 *            the current model, used to get info to display on the GUI
 	 *            panel.
+	 * @return a new configuration panel.
 	 */
 	public ConfigurationPanel getDetectorConfigurationPanel( final Settings settings, final Model model );
 
 	/**
 	 * Returns a new default settings map suitable for the target detector.
 	 * Settings are instantiated with default values.
-	 * 
+	 *
 	 * @return a new map.
 	 */
 	public Map< String, Object > getDefaultSettings();
 
 	/**
-	 * Check that the given settings map is suitable for target detector.
+	 * Checks that the given settings map is suitable for target detector.
 	 *
 	 * @param settings
 	 *            the map to test.
@@ -127,15 +134,15 @@ public interface SpotDetectorFactoryBase< T extends RealType< T > & NativeType< 
 	public boolean checkSettings( final Map< String, Object > settings );
 
 	/**
-	 * Return <code>true</code> for the detectors that can provide a spot with a
-	 * 2D <code>SpotRoi</code> when they operate on 2D images.
+	 * Returns <code>true</code> for the detectors that can provide a spot with
+	 * a 2D <code>SpotRoi</code> when they operate on 2D images.
 	 * <p>
 	 * This flag may be used by clients to exploit the fact that the spots
 	 * created with this detector will have a contour that can be used
-	 * <i>e.g.</i> to compute morphological features. The default is
+	 * <i>e.g.</i> to compute 2D morphological features. The default is
 	 * <code>false</code>, indicating that this detector provides spots as a X,
 	 * Y, Z, radius tuple.
-	 * 
+	 *
 	 * @return <code>true</code> if the spots created by this detector have a 2D
 	 *         contour.
 	 */
@@ -145,8 +152,26 @@ public interface SpotDetectorFactoryBase< T extends RealType< T > & NativeType< 
 	}
 
 	/**
+	 * Returns <code>true</code> for the detectors that can provide a spot with
+	 * a 3D <code>SpotMesh</code> when they operate on 3D images.
+	 * <p>
+	 * This flag may be used by clients to exploit the fact that the spots
+	 * created with this detector will have a 3D mesh that can be used
+	 * <i>e.g.</i> to compute 3D morphological features. The default is
+	 * <code>false</code>, indicating that this detector provides spots as a X,
+	 * Y, Z, radius tuple.
+	 *
+	 * @return <code>true</code> if the spots created by this detector have a 2D
+	 *         contour.
+	 */
+	public default boolean has3Dsegmentation()
+	{
+		return false;
+	}
+
+	/**
 	 * Returns a copy the current instance.
-	 * 
+	 *
 	 * @return a new instance of this detector factory.
 	 */
 	public SpotDetectorFactoryBase< T > copy();

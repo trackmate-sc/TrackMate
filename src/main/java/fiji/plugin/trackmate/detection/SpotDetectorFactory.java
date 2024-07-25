@@ -27,7 +27,7 @@ import net.imglib2.type.numeric.RealType;
 
 /**
  * For detectors that process one time-point at a time, independently, and for
- * which we can therefore propose multithreading. *
+ * which we can therefore propose multithreading.
  * <p>
  * These classes are able to configure a {@link SpotDetector} to operate on a
  * single time-point of the target <code>ImgPlus</code>.
@@ -35,6 +35,7 @@ import net.imglib2.type.numeric.RealType;
  * @author Jean-Yves Tinevez
  *
  * @param <T>
+ *            the pixel type in the image processed by the detector.
  */
 public interface SpotDetectorFactory< T extends RealType< T > & NativeType< T > > extends SpotDetectorFactoryBase< T >
 {
@@ -53,6 +54,7 @@ public interface SpotDetectorFactory< T extends RealType< T > & NativeType< T > 
 	 *            then the interval must be 3D).
 	 * @param frame
 	 *            the frame index in the source image to operate on
+	 * @return a new detector.
 	 */
 	public SpotDetector< T > getDetector( final Interval interval, int frame );
 }

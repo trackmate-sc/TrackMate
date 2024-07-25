@@ -22,6 +22,9 @@
 package fiji.plugin.trackmate.gui.components.detector;
 
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
+import static fiji.plugin.trackmate.detection.ThresholdDetectorFactory.KEY_INTENSITY_THRESHOLD;
+import static fiji.plugin.trackmate.detection.ThresholdDetectorFactory.KEY_SIMPLIFY_CONTOURS;
+import static fiji.plugin.trackmate.detection.ThresholdDetectorFactory.KEY_SMOOTHING_SCALE;
 import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
 import static fiji.plugin.trackmate.gui.Fonts.FONT;
 import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
@@ -51,9 +54,10 @@ import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.detection.ThresholdDetectorFactory;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
+import fiji.plugin.trackmate.gui.components.PanelSmoothContour;
 import fiji.plugin.trackmate.util.DetectionPreview;
-import fiji.plugin.trackmate.util.Threads;
 import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.util.Threads;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imglib2.Interval;
@@ -86,6 +90,8 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 	protected final JButton btnAutoThreshold;
 
 	protected final JLabel lblIntensityThreshold;
+
+	protected final PanelSmoothContour smoothingPanel;
 
 	/*
 	 * CONSTRUCTOR
@@ -126,10 +132,10 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 
 		setPreferredSize( new Dimension( 300, 511 ) );
 		final GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 47 };
+		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 47 };
 		gridBagLayout.columnWidths = new int[] { 0, 0, 20 };
 		gridBagLayout.columnWeights = new double[] { 0.0, 1.0, 0.0 };
-		gridBagLayout.rowWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, };
+		gridBagLayout.rowWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 		setLayout( gridBagLayout );
 
 		final JLabel jLabelDetectorName = new JLabel( detectorName, JLabel.CENTER );
@@ -220,6 +226,16 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 		chkboxSimplify.setText( "Simplify contours." );
 		chkboxSimplify.setFont( FONT );
 
+		smoothingPanel = new PanelSmoothContour( -1., model.getSpaceUnits() );
+		final GridBagConstraints gbSmoothPanel = new GridBagConstraints();
+		gbSmoothPanel.anchor = GridBagConstraints.NORTHWEST;
+		gbSmoothPanel.insets = new Insets( 5, 5, 5, 5 );
+		gbSmoothPanel.gridwidth = 3;
+		gbSmoothPanel.gridx = 0;
+		gbSmoothPanel.gridy = 6;
+		gbSmoothPanel.fill = GridBagConstraints.HORIZONTAL;
+		this.add( smoothingPanel, gbSmoothPanel );
+
 		final DetectionPreview detectionPreview = DetectionPreview.create()
 				.model( model )
 				.settings( settings )
@@ -234,7 +250,7 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 		gbcBtnPreview.insets = new Insets( 5, 5, 5, 5 );
 		gbcBtnPreview.gridwidth = 3;
 		gbcBtnPreview.gridx = 0;
-		gbcBtnPreview.gridy = 7;
+		gbcBtnPreview.gridy = 8;
 		this.add( detectionPreview.getPanel(), gbcBtnPreview );
 
 		/*
@@ -267,11 +283,9 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 	private < T extends RealType< T > & NativeType< T > > void autoThreshold()
 	{
 		btnAutoThreshold.setEnabled( false );
-		Threads.run( "TrackMate compute threshold thread", () ->
-		{
+		Threads.run( "TrackMate compute threshold thread", () -> {
 			try
 			{
-				@SuppressWarnings( "unchecked" )
 				final ImgPlus< T > img = TMUtils.rawWraps( settings.imp );
 				final int channel = ( ( Number ) sliderChannel.getValue() ).intValue() - 1;
 				final int frame = settings.imp.getT() - 1;
@@ -294,21 +308,30 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 		final int targetChannel = sliderChannel.getValue();
 		final boolean simplify = chkboxSimplify.isSelected();
 		final double intensityThreshold = ( ( Number ) ftfIntensityThreshold.getValue() ).doubleValue();
+		final double scale = smoothingPanel.getScale();
 
 		final HashMap< String, Object > lSettings = new HashMap<>( 3 );
 		lSettings.put( KEY_TARGET_CHANNEL, targetChannel );
-		lSettings.put( ThresholdDetectorFactory.KEY_INTENSITY_THRESHOLD, intensityThreshold );
-		lSettings.put( ThresholdDetectorFactory.KEY_SIMPLIFY_CONTOURS, simplify );
+		lSettings.put( KEY_INTENSITY_THRESHOLD, intensityThreshold );
+		lSettings.put( KEY_SIMPLIFY_CONTOURS, simplify );
+		lSettings.put( KEY_SMOOTHING_SCALE, scale );
 		return lSettings;
+	}
+
+	protected void setSettingsNonIntensity( final Map< String, Object > settings )
+	{
+		sliderChannel.setValue( ( Integer ) settings.get( KEY_TARGET_CHANNEL ) );
+		chkboxSimplify.setSelected( ( Boolean ) settings.get( ThresholdDetectorFactory.KEY_SIMPLIFY_CONTOURS ) );
+		final Object scaleObj = settings.get( KEY_SMOOTHING_SCALE );
+		final double scale = scaleObj == null ? -1. : ( ( Number ) scaleObj ).doubleValue();
+		smoothingPanel.setScale( scale );
 	}
 
 	@Override
 	public void setSettings( final Map< String, Object > settings )
 	{
-		sliderChannel.setValue( ( Integer ) settings.get( KEY_TARGET_CHANNEL ) );
-		chkboxSimplify.setSelected( ( Boolean ) settings.get( ThresholdDetectorFactory.KEY_SIMPLIFY_CONTOURS ) );
-
-		final Double intensityThreshold = Double.valueOf( ( Double ) settings.get( ThresholdDetectorFactory.KEY_INTENSITY_THRESHOLD ) );
+		setSettingsNonIntensity( settings );
+		final Double intensityThreshold = Double.valueOf( ( Double ) settings.get( KEY_INTENSITY_THRESHOLD ) );
 		if ( intensityThreshold == null || intensityThreshold == 0. )
 			autoThreshold();
 		else

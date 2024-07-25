@@ -24,11 +24,13 @@ package fiji.plugin.trackmate.detection;
 import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.ThresholdDetectorFactory.KEY_SIMPLIFY_CONTOURS;
+import static fiji.plugin.trackmate.detection.ThresholdDetectorFactory.KEY_SMOOTHING_SCALE;
 import static fiji.plugin.trackmate.io.IOUtils.readBooleanAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.readIntegerAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.writeAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.writeTargetChannel;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
+import static fiji.plugin.trackmate.util.TMUtils.checkOptionalParameter;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
 
 import java.util.ArrayList;
@@ -75,8 +77,8 @@ public class LabelImageDetectorFactory< T extends RealType< T > & NativeType< T 
 			+ "that is unique to the object."
 			+ "<p>"
 			+ "This detector reads such an image and create spots from each object. "
-			+ "In 2D the contour of a label is imported. In 3D, spherical spots "
-			+ "of the same volume that the label are created."
+			+ "In 2D the contour of a label is imported. In 3D, a mesh around the "
+			+ "label is imported."
 			+ "<p>"
 			+ "The spot quality stores the object area or volume in pixels."
 			+ "</html>";
@@ -103,11 +105,12 @@ public class LabelImageDetectorFactory< T extends RealType< T > & NativeType< T 
 		this.settings = settings;
 		return checkSettings( settings );
 	}
-	
+
 	@Override
 	public SpotDetector< T > getDetector( final Interval interval, final int frame )
 	{
 		final boolean simplifyContours = ( Boolean ) settings.get( KEY_SIMPLIFY_CONTOURS );
+		final double smoothingScale = ( Double ) settings.get( KEY_SMOOTHING_SCALE );
 		final double[] calibration = TMUtils.getSpatialCalibration( img );
 		final int channel = ( Integer ) settings.get( KEY_TARGET_CHANNEL ) - 1;
 		final RandomAccessible< T > imFrame = DetectionUtils.prepareFrameImg( img, channel, frame );
@@ -116,12 +119,19 @@ public class LabelImageDetectorFactory< T extends RealType< T > & NativeType< T 
 				imFrame,
 				interval,
 				calibration,
-				simplifyContours );
+				simplifyContours,
+				smoothingScale );
 		return detector;
 	}
 
 	@Override
 	public boolean has2Dsegmentation()
+	{
+		return true;
+	}
+
+	@Override
+	public boolean has3Dsegmentation()
 	{
 		return true;
 	}
@@ -145,14 +155,16 @@ public class LabelImageDetectorFactory< T extends RealType< T > & NativeType< T 
 		final StringBuilder errorHolder = new StringBuilder();
 		ok = ok & checkParameter( lSettings, KEY_TARGET_CHANNEL, Integer.class, errorHolder );
 		ok = ok & checkParameter( lSettings, KEY_SIMPLIFY_CONTOURS, Boolean.class, errorHolder );
+		ok = ok & checkOptionalParameter( lSettings, KEY_SMOOTHING_SCALE, Double.class, errorHolder );
 		final List< String > mandatoryKeys = new ArrayList<>();
 		mandatoryKeys.add( KEY_TARGET_CHANNEL );
 		mandatoryKeys.add( KEY_SIMPLIFY_CONTOURS );
-		ok = ok & checkMapKeys( lSettings, mandatoryKeys, null, errorHolder );
+		final List< String > optionalKeys = new ArrayList<>();
+		optionalKeys.add( KEY_SMOOTHING_SCALE );
+		ok = ok & checkMapKeys( lSettings, mandatoryKeys, optionalKeys, errorHolder );
 		if ( !ok )
-		{
 			errorMessage = errorHolder.toString();
-		}
+
 		return ok;
 	}
 
@@ -209,6 +221,7 @@ public class LabelImageDetectorFactory< T extends RealType< T > & NativeType< T 
 		final Map< String, Object > lSettings = new HashMap<>();
 		lSettings.put( KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL );
 		lSettings.put( KEY_SIMPLIFY_CONTOURS, true );
+		lSettings.put( KEY_SMOOTHING_SCALE, -1. );
 		return lSettings;
 	}
 

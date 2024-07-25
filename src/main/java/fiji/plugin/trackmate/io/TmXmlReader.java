@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -91,6 +91,7 @@ import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_FEATURES_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_FILTER_COLLECTION_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_ID_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_NAME_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.TmXmlWriter.MESH_FILE_EXTENSION;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.XML_ATTRIBUTE_TRACKER_NAME;
 
 import java.io.File;
@@ -104,6 +105,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
 
 import org.jdom2.Attribute;
 import org.jdom2.DataConversionException;
@@ -122,7 +127,9 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
 import fiji.plugin.trackmate.features.FeatureFilter;
@@ -136,8 +143,9 @@ import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ConfigureViewsDescriptor;
 import fiji.plugin.trackmate.providers.DetectorProvider;
 import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
+import fiji.plugin.trackmate.providers.Spot2DMorphologyAnalyzerProvider;
+import fiji.plugin.trackmate.providers.Spot3DMorphologyAnalyzerProvider;
 import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
-import fiji.plugin.trackmate.providers.SpotMorphologyAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.providers.ViewProvider;
@@ -147,6 +155,10 @@ import fiji.plugin.trackmate.visualization.ViewFactory;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 import ij.IJ;
 import ij.ImagePlus;
+import net.imglib2.mesh.Mesh;
+import net.imglib2.mesh.Meshes;
+import net.imglib2.mesh.impl.nio.BufferMesh;
+import net.imglib2.mesh.io.ply.PLYMeshIO;
 
 public class TmXmlReader
 {
@@ -184,7 +196,10 @@ public class TmXmlReader
 	 */
 
 	/**
-	 * Initialize this reader to read the file given in argument.
+	 * Initializes this reader to read the file given in argument.
+	 * 
+	 * @param file
+	 *            the file to read.
 	 */
 	public TmXmlReader( final File file )
 	{
@@ -218,6 +233,8 @@ public class TmXmlReader
 	/**
 	 * Returns the log text saved in the file, or <code>null</code> if log text
 	 * was not saved.
+	 * 
+	 * @return the log.
 	 */
 	public String getLog()
 	{
@@ -371,7 +388,6 @@ public class TmXmlReader
 			ok = false;
 
 		// Track features
-
 		try
 		{
 			final Map< Integer, Map< String, Double > > savedFeatureMap = readTrackFeatures( modelElement );
@@ -423,7 +439,8 @@ public class TmXmlReader
 				new SpotAnalyzerProvider( ( imp == null ) ? 1 : imp.getNChannels() ),
 				new EdgeAnalyzerProvider(),
 				new TrackAnalyzerProvider(),
-				new SpotMorphologyAnalyzerProvider( ( imp == null ) ? 1 : imp.getNChannels() ) );
+				new Spot2DMorphologyAnalyzerProvider( ( imp == null ) ? 1 : imp.getNChannels() ),
+				new Spot3DMorphologyAnalyzerProvider( ( imp == null ) ? 1 : imp.getNChannels() ) );
 	}
 
 	/**
@@ -433,7 +450,7 @@ public class TmXmlReader
 	 * file.
 	 *
 	 * @param imp
-	 *
+	 *            the image to store in the new Settings object.
 	 * @param detectorProvider
 	 *            the detector provider, required to configure the settings with
 	 *            a correct <code>SpotDetectorFactory</code>. If
@@ -454,6 +471,11 @@ public class TmXmlReader
 	 *            the track analyzer provider, required to instantiates the
 	 *            saved {@link TrackAnalyzer}s. If <code>null</code>, will skip
 	 *            reading track analyzers.
+	 * @param spot2DMorphologyAnalyzerProvider
+	 *            the spot 2D morphology provider.
+	 * @param spot3DMorphologyAnalyzerProvider
+	 *            the spot 3D morphology provider.
+	 * @return a new Settings object.
 	 */
 	public Settings readSettings(
 			final ImagePlus imp,
@@ -462,7 +484,8 @@ public class TmXmlReader
 			final SpotAnalyzerProvider spotAnalyzerProvider,
 			final EdgeAnalyzerProvider edgeAnalyzerProvider,
 			final TrackAnalyzerProvider trackAnalyzerProvider,
-			final SpotMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider )
+			final Spot2DMorphologyAnalyzerProvider spot2DMorphologyAnalyzerProvider,
+			final Spot3DMorphologyAnalyzerProvider spot3DMorphologyAnalyzerProvider )
 	{
 		final Element settingsElement = root.getChild( SETTINGS_ELEMENT_KEY );
 		if ( null == settingsElement )
@@ -509,13 +532,16 @@ public class TmXmlReader
 				spotAnalyzerProvider,
 				edgeAnalyzerProvider,
 				trackAnalyzerProvider,
-				spotMorphologyAnalyzerProvider );
+				spot2DMorphologyAnalyzerProvider,
+				spot3DMorphologyAnalyzerProvider );
 
 		return settings;
 	}
 
 	/**
 	 * Returns the version string stored in the file.
+	 * 
+	 * @return the version string stored in the file.
 	 */
 	public String getVersion()
 	{
@@ -911,7 +937,6 @@ public class TmXmlReader
 		final Map< Integer, Set< Spot > > content = new HashMap<>( frameContent.size() );
 		for ( final Element currentFrameContent : frameContent )
 		{
-
 			currentFrame = readIntAttribute( currentFrameContent, FRAME_ATTRIBUTE_NAME, logger );
 			final List< Element > spotContent = currentFrameContent.getChildren( SPOT_ELEMENT_KEY );
 			final Set< Spot > spotSet = new HashSet<>( spotContent.size() );
@@ -923,6 +948,69 @@ public class TmXmlReader
 			}
 			content.put( currentFrame, spotSet );
 		}
+
+		// Do we have a mesh file?
+		final File meshFile = new File( file.getAbsolutePath() + MESH_FILE_EXTENSION );
+		if ( meshFile.exists() )
+		{
+			// Matcher for zipped file name.
+			final String regex = "(\\d+)\\.ply";
+			final Pattern pattern = Pattern.compile( regex );
+			// Iterate through entries.
+			try (final ZipFile zipFile = new ZipFile( meshFile ))
+			{
+				zipFile.stream().forEach( entry -> {
+					final String name = entry.getName();
+					final Matcher matcher = pattern.matcher( name );
+					if ( matcher.matches() )
+					{
+						// Get corresponding spot.
+						final int id = Integer.parseInt( matcher.group( 1 ) );
+						final Spot spot = cache.get( id );
+						// Deserialize mesh.
+						try
+						{
+							final Mesh m = PLYMeshIO.open( zipFile.getInputStream( entry ) );
+							final BufferMesh mesh = new BufferMesh( m.vertices().size(), m.triangles().size() );
+							Meshes.calculateNormals( m, mesh );
+
+							// Create new spot in the mesh and replace it in the
+							// cache.
+							final SpotMesh spotMesh = new SpotMesh( id, mesh );
+							spotMesh.copyFeaturesFrom( spot );
+							spotMesh.setName( spot.getName() );
+							cache.put( id, spotMesh );
+
+							// And in the content.
+							final Set< Spot > spots = content.get( spot.getFeature( Spot.FRAME ).intValue() );
+							spots.remove( spot );
+							spots.add( spotMesh );
+						}
+						catch ( final Exception e )
+						{
+							ok = false;
+							logger.error( "Problem reading mesh for spot " + id + ":\n"
+									+ e.getMessage() + '\n' );
+							e.printStackTrace();
+						}
+					}
+
+				} );
+			}
+			catch ( final ZipException e )
+			{
+				ok = false;
+				logger.error( "Issues reading the mesh file:\n" + e.getMessage() + '\n' );
+				e.printStackTrace();
+			}
+			catch ( final IOException e )
+			{
+				ok = false;
+				logger.error( "Issues reading the mesh file:\n" + e.getMessage() + '\n' );
+				e.printStackTrace();
+			}
+		}
+
 		final SpotCollection allSpots = SpotCollection.fromMap( content );
 		return allSpots;
 	}
@@ -932,7 +1020,12 @@ public class TmXmlReader
 	 * into the model specified. The track collection element is expected to be
 	 * found as a child of the specified element.
 	 *
-	 * @return true if reading tracks was successful, false otherwise.
+	 * @param modelElement
+	 *            the element to read from.
+	 * @param model
+	 *            the model to add to.
+	 * @return <code>true</code> if reading tracks was successful,
+	 *         <code>false</code> otherwise.
 	 */
 	protected boolean readTracks( final Element modelElement, final Model model )
 	{
@@ -1133,23 +1226,15 @@ public class TmXmlReader
 	{
 		// Read id.
 		final int ID = readIntAttribute( spotEl, SPOT_ID_ATTRIBUTE_NAME, logger );
-		final Spot spot = new Spot( ID );
-
+//		
 		final List< Attribute > atts = spotEl.getAttributes();
 		removeAttributeFromName( atts, SPOT_ID_ATTRIBUTE_NAME );
-
-		// Read name.
-		String name = spotEl.getAttributeValue( SPOT_NAME_ATTRIBUTE_NAME );
-		if ( null == name || name.equals( "" ) )
-			name = "ID" + ID;
-
-		spot.setName( name );
-		removeAttributeFromName( atts, SPOT_NAME_ATTRIBUTE_NAME );
 
 		/*
 		 * Try to read ROI if any.
 		 */
 		final int roiNPoints = readIntAttribute( spotEl, ROI_N_POINTS_ATTRIBUTE_NAME, Logger.VOID_LOGGER );
+		final Spot spot;
 		if ( roiNPoints > 2 )
 		{
 			final double[] xrois = new double[ roiNPoints ];
@@ -1164,9 +1249,21 @@ public class TmXmlReader
 				final double y = Double.parseDouble( vals[ index++ ] );
 				yrois[ i ] = y;
 			}
-			spot.setRoi( new SpotRoi( xrois, yrois ) );
+			spot = new SpotRoi( ID, xrois, yrois );
+		}
+		else
+		{
+			spot = new SpotBase( ID );
 		}
 		removeAttributeFromName( atts, ROI_N_POINTS_ATTRIBUTE_NAME );
+
+		// Read name.
+		String name = spotEl.getAttributeValue( SPOT_NAME_ATTRIBUTE_NAME );
+		if ( null == name || name.equals( "" ) )
+			name = "ID" + ID;
+
+		spot.setName( name );
+		removeAttributeFromName( atts, SPOT_NAME_ATTRIBUTE_NAME );
 
 		/*
 		 * Read all other attributes -> features.
@@ -1297,7 +1394,8 @@ public class TmXmlReader
 			final SpotAnalyzerProvider spotAnalyzerProvider,
 			final EdgeAnalyzerProvider edgeAnalyzerProvider,
 			final TrackAnalyzerProvider trackAnalyzerProvider,
-			final SpotMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider )
+			final Spot2DMorphologyAnalyzerProvider spot2DMorphologyAnalyzerProvider,
+			final Spot3DMorphologyAnalyzerProvider spot3DMorphologyAnalyzerProvider )
 	{
 
 		final Element analyzersEl = settingsElement.getChild( ANALYZER_COLLECTION_ELEMENT_KEY );
@@ -1348,11 +1446,15 @@ public class TmXmlReader
 							/*
 							 * Special case: if we cannot find a matching
 							 * analyzer for a declared factory, then we will try
-							 * to see whether it is a morphology spot analyzer,
-							 * that are treated separately. If it is not, we
-							 * give up.
+							 * to see whether it is a morphology spot analyzer
+							 * in 2D then in 3D, that are treated separately. If
+							 * it is not, we give up.
 							 */
-							spotAnalyzer = spotMorphologyAnalyzerProvider.getFactory( key );
+							spotAnalyzer = spot2DMorphologyAnalyzerProvider.getFactory( key );
+							if ( spotAnalyzer == null )
+							{
+								spotAnalyzer = spot3DMorphologyAnalyzerProvider.getFactory( key );
+							}
 						}
 
 						if ( null == spotAnalyzer )
