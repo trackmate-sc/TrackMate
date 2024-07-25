@@ -745,7 +745,7 @@ public class TMUtils
 			 */
 			settings.imageFolder = settings.imp.getOriginalFileInfo().directory;
 		}
-		else if ( !settings.imageFolder.isEmpty() )
+		else if ( null != settings.imageFolder && !settings.imageFolder.isEmpty() )
 		{
 			final String absolutePath = FileSystems.getDefault().getPath( settings.imageFolder ).normalize().toAbsolutePath().toString();
 			folder = new File( absolutePath );
