@@ -22,14 +22,17 @@
 package fiji.plugin.trackmate.util;
 
 import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
+import static fiji.plugin.trackmate.gui.Icons.CANCEL_ICON;
 import static fiji.plugin.trackmate.gui.Icons.PREVIEW_ICON;
 
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.util.function.DoubleConsumer;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import fiji.plugin.trackmate.Logger;
@@ -48,20 +51,29 @@ public class DetectionPreviewPanel extends JPanel
 			+ "get rid of them later."
 			+ "</html>";
 
+	private static final String TOOLTIP_CANCEL = "<html>"
+			+ "Cancel the current preview."
+			+ "</html>";
+
 	final Logger logger;
 
 	final JButton btnPreview;
 
+	final JButton btnCancel;
+
 	final QualityHistogramChart chart;
+
 
 	public DetectionPreviewPanel( final DoubleConsumer thresholdUpdater, final String axisLabel )
 	{
 		final GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWeights = new double[] { 1.0, 0.0 };
-		gridBagLayout.rowWeights = new double[] { 0., 0. };
-		gridBagLayout.rowHeights = new int[] { 120, 20 };
+		gridBagLayout.rowWeights = new double[] { 1., 0., 0. };
+		gridBagLayout.rowHeights = new int[] { 0, 120, 20 };
 
 		setLayout( gridBagLayout );
+
+		add( new JLabel() );
 
 		this.chart = new QualityHistogramChart( thresholdUpdater, axisLabel );
 		final GridBagConstraints gbcHistogram = new GridBagConstraints();
@@ -69,7 +81,7 @@ public class DetectionPreviewPanel extends JPanel
 		gbcHistogram.insets = new Insets( 0, 0, 5, 0 );
 		gbcHistogram.fill = GridBagConstraints.BOTH;
 		gbcHistogram.gridx = 0;
-		gbcHistogram.gridy = 0;
+		gbcHistogram.gridy = 1;
 		add( chart, gbcHistogram );
 
 		final JLabelLogger labelLogger = new JLabelLogger();
@@ -78,18 +90,29 @@ public class DetectionPreviewPanel extends JPanel
 		gbcLabelLogger.insets = new Insets( 5, 5, 0, 5 );
 		gbcLabelLogger.fill = GridBagConstraints.BOTH;
 		gbcLabelLogger.gridx = 0;
-		gbcLabelLogger.gridy = 1;
+		gbcLabelLogger.gridy = 2;
 		add( labelLogger, gbcLabelLogger );
 		this.logger = labelLogger.getLogger();
 
 		this.btnPreview = new JButton( "Preview", PREVIEW_ICON );
 		btnPreview.setToolTipText( TOOLTIP_PREVIEW );
+		btnPreview.setFont( SMALL_FONT );
+		this.btnCancel = new JButton( "Cancel", CANCEL_ICON );
+		btnCancel.setToolTipText( TOOLTIP_CANCEL );
+		btnCancel.setVisible( false );
+		btnCancel.setFont( SMALL_FONT );
+
+		final JPanel btnPanel = new JPanel();
+		btnPanel.add( btnPreview );
+		btnPanel.add( btnCancel );
+
 		final GridBagConstraints gbcBtnPreview = new GridBagConstraints();
 		gbcBtnPreview.anchor = GridBagConstraints.NORTHEAST;
 		gbcBtnPreview.insets = new Insets( 5, 5, 0, 0 );
 		gbcBtnPreview.gridx = 1;
-		gbcBtnPreview.gridy = 1;
-		this.add( btnPreview, gbcBtnPreview );
-		btnPreview.setFont( SMALL_FONT );
+		gbcBtnPreview.gridy = 2;
+		this.add( btnPanel, gbcBtnPreview );
+
+		setPreferredSize( new Dimension( 240, 100 ) );
 	}
 }
