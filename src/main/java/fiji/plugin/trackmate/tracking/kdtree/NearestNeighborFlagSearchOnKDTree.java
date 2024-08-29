@@ -28,6 +28,8 @@ import net.imglib2.RealLocalizable;
 import net.imglib2.Sampler;
 import net.imglib2.neighborsearch.NearestNeighborSearch;
 
+
+// TODO: revise for new KDTree implementation, where KDTreeNode are reusable proxies.
 public class NearestNeighborFlagSearchOnKDTree< T > implements NearestNeighborSearch< FlagNode< T > >
 {
 
@@ -78,8 +80,8 @@ public class NearestNeighborFlagSearchOnKDTree< T > implements NearestNeighborSe
 		final boolean leftIsNearBranch = axisDiff < 0;
 
 		// search the near branch
-		final KDTreeNode< FlagNode< T > > nearChild = leftIsNearBranch ? current.left : current.right;
-		final KDTreeNode< FlagNode< T > > awayChild = leftIsNearBranch ? current.right : current.left;
+		final KDTreeNode< FlagNode< T > > nearChild = leftIsNearBranch ? current.left() : current.right();
+		final KDTreeNode< FlagNode< T > > awayChild = leftIsNearBranch ? current.right() : current.left();
 		if ( nearChild != null )
 			searchNode( nearChild );
 

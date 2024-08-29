@@ -33,6 +33,7 @@ import ij.ImagePlus;
 import ij.gui.PolygonRoi;
 import ij.measure.Measurements;
 import ij.process.FloatPolygon;
+import net.imglib2.Cursor;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
@@ -280,7 +281,7 @@ public class MaskUtils
 		while ( iterator.hasNext() )
 		{
 			final LabelRegion< Integer > region = iterator.next();
-			final LabelRegionCursor cursor = region.localizingCursor();
+			final Cursor< Void > cursor = region.inside().localizingCursor();
 			final int[] cursorPos = new int[ labeling.numDimensions() ];
 			final long[] sum = new long[ 3 ];
 			while ( cursor.hasNext() )
@@ -358,7 +359,7 @@ public class MaskUtils
 		while ( iterator.hasNext() )
 		{
 			final LabelRegion< Integer > region = iterator.next();
-			final LabelRegionCursor cursor = region.localizingCursor();
+			final Cursor< Void > cursor = region.inside().localizingCursor();
 			final int[] cursorPos = new int[ labeling.numDimensions() ];
 			final long[] sum = new long[ 3 ];
 			double quality = Double.NEGATIVE_INFINITY;
