@@ -100,6 +100,13 @@ public class TrackerKeys
 
 	/** A default value for the {@value #KEY_KALMAN_SEARCH_RADIUS} parameter. */
 	public static final double DEFAULT_KALMAN_SEARCH_RADIUS = 20.0;
+	
+	/** Search radius for the Kalman tracker - Fast Flow. */
+	public static final String KEY_EXPECTED_MOVEMENT = "EXPECTED_MOVEMENT";
+	
+	/** A default value for the {@value #KEY_EXPECTED_MOVEMENT} parameter. */
+	public static final double[] DEFAULT_EXPECTED_MOVEMENT = {0.0, 0.0, 0.0};
+	
 
 	/**
 	 * Key for the parameter specifying whether we allow the detection of
