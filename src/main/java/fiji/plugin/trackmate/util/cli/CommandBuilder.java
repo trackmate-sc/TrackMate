@@ -91,12 +91,22 @@ public class CommandBuilder implements ArgumentVisitor
 			val = flag.getValue();
 		else
 			val = flag.getDefaultValue();
-		if ( val )
-		{
-			tokens.add( flag.getArgument() );
-			tokens.addAll( translators.getOrDefault( flag, v -> Collections.singletonList( "" + v ) ).apply( val ) );
-		}
 
+		// Deal with flag that have a '=' vs switches.
+		final String a = flag.getArgument();
+		final List< String > vals = translators.getOrDefault( flag, v -> Collections.singletonList( "" + v ) ).apply( val );
+		if ( a.endsWith( "=" ) )
+		{
+			tokens.add( a + String.join( ",", vals ) );
+		}
+		else
+		{
+			if ( val )
+			{
+				tokens.add( a );
+				tokens.addAll( vals );
+			}
+		}
 	}
 
 	@Override
@@ -122,8 +132,19 @@ public class CommandBuilder implements ArgumentVisitor
 		if ( arg.getMax() != Integer.MAX_VALUE && ( val > arg.getMax() ) )
 			throw new IllegalArgumentException( "Value " + val + " for argument '" + arg.getName() + "' is larger than the max: " + arg.getMax() );
 
-		tokens.add( arg.getArgument() );
-		tokens.addAll( translators.getOrDefault( arg, v -> Collections.singletonList( "" + v ) ).apply( val ) );
+		final String a = arg.getArgument();
+		final List< String > vals = translators.getOrDefault( arg, v -> Collections.singletonList( "" + v ) ).apply( val );
+		// Does the switch ends in '='?
+		if ( a.endsWith( "=" ) )
+		{
+			// Concatenante with no space.
+			tokens.add( a + String.join( ",", vals ) );
+		}
+		else
+		{
+			tokens.add( a );
+			tokens.addAll( vals );
+		}
 	}
 
 	@Override
@@ -151,8 +172,19 @@ public class CommandBuilder implements ArgumentVisitor
 			throw new IllegalArgumentException( "Value " + val + " for argument '" + arg.getName()
 					+ "' is larger than the max: " + arg.getMax() );
 
-		tokens.add( arg.getArgument() );
-		tokens.addAll( translators.getOrDefault( arg, v -> Collections.singletonList( "" + v ) ).apply( val ) );
+		final String a = arg.getArgument();
+		final List< String > vals = translators.getOrDefault( arg, v -> Collections.singletonList( "" + v ) ).apply( val );
+		// Does the switch ends in '='?
+		if ( a.endsWith( "=" ) )
+		{
+			// Concatenante with no space.
+			tokens.add( a + String.join( ",", vals ) );
+		}
+		else
+		{
+			tokens.add( a );
+			tokens.addAll( vals );
+		}
 	}
 
 	private void visitString( final AbstractStringArgument< ? > arg )
@@ -171,8 +203,19 @@ public class CommandBuilder implements ArgumentVisitor
 				? arg.getDefaultValue()
 				: arg.getValue();
 
-		tokens.add( arg.getArgument() );
-		tokens.addAll( translators.getOrDefault( arg, v -> Collections.singletonList( "" + v ) ).apply( val ) );
+		final String a = arg.getArgument();
+		final List< String > vals = translators.getOrDefault( arg, v -> Collections.singletonList( "" + v ) ).apply( val );
+		// Does the switch ends in '='?
+		if ( a.endsWith( "=" ) )
+		{
+			// Concatenante with no space.
+			tokens.add( a + String.join( ",", vals ) );
+		}
+		else
+		{
+			tokens.add( a );
+			tokens.addAll( vals );
+		}
 	}
 
 	@Override
@@ -198,9 +241,20 @@ public class CommandBuilder implements ArgumentVisitor
 		// Is not set? -> skip
 		if ( !arg.isSet() )
 			return;
-
-		tokens.add( arg.getArgument() );
-		tokens.addAll( translators.getOrDefault( arg, v -> Collections.singletonList( "" + v ) ).apply( arg.getValue() ) );
+		
+		final String a = arg.getArgument();
+		final List<String> vals = translators.getOrDefault( arg, v -> Collections.singletonList( "" + v ) ).apply( arg.getValue() );
+		// Does the switch ends in '='? 
+		if ( a.endsWith( "=" ) )
+		{
+			// Concatenante with no space.
+			tokens.add( a + String.join( ",", vals ) );
+		}
+		else
+		{
+			tokens.add( a );
+			tokens.addAll( vals );
+		}
 	}
 
 	public static List< String > build( final CLIConfigurator cli )
