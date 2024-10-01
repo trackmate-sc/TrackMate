@@ -33,7 +33,7 @@ public abstract class CondaCLIConfigurator extends CLIConfigurator
 
 	public static final String KEY_CONDA_ENV = "CONDA_ENV";
 
-	private final CondaEnvironmentCommand condaEnv;
+	protected final CondaEnvironmentCommand condaEnv;
 
 	public static class CondaEnvironmentCommand extends AbstractStringArgument< CondaEnvironmentCommand >
 	{
