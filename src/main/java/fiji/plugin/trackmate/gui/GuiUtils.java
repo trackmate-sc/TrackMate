@@ -400,7 +400,7 @@ public class GuiUtils
 			nw = ( icon.getIconWidth() * nh ) / icon.getIconHeight();
 		}
 
-		return new ImageIcon( icon.getImage().getScaledInstance( nw, nh, Image.SCALE_DEFAULT ) );
+		return new ImageIcon( icon.getImage().getScaledInstance( nw, nh, Image.SCALE_SMOOTH ) );
 	}
 
 	public static URL getResource( final String name, final Class< ? > clazz )
