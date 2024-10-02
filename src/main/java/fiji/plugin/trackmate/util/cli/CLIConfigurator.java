@@ -181,7 +181,7 @@ public abstract class CLIConfigurator
 		{
 			for ( int i = 0; i < args.size(); i++ )
 			{
-				if ( args.get( i ).getKey().equals( key ) )
+				if ( key.equals( args.get( i ).getKey() ) )
 				{
 					this.selected = i;
 					return;
@@ -1040,7 +1040,7 @@ public abstract class CLIConfigurator
 
 		public String getKey()
 		{
-			return ( key == null ) ? getName() : key;
+			return key;
 		}
 
 		public abstract void accept( final ArgumentVisitor visitor );
