@@ -177,7 +177,8 @@ public class DetectionPreview
 			if ( hasThreshold )
 			{
 				threshold = ( ( Double ) detectorSettings.get( thresholdKey ) ).doubleValue();
-				lSettings.detectorSettings.put( thresholdKey, Double.valueOf( Double.NEGATIVE_INFINITY ) );
+//				lSettings.detectorSettings.put( thresholdKey, Double.valueOf( Double.NEGATIVE_INFINITY ) );
+				lSettings.detectorSettings.put( thresholdKey, Double.valueOf( 0. ) );
 			}
 			else
 			{
