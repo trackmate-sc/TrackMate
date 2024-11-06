@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -37,17 +37,19 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 import org.jgrapht.graph.SimpleWeightedGraph;
 import org.scijava.Cancelable;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.graph.GraphUtils;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.util.Threads;
 import net.imglib2.KDTree;
-import net.imglib2.RealPoint;
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
+import net.imglib2.neighborsearch.KNearestNeighborSearchOnKDTree;
 
 public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm implements SpotTracker, Cancelable
 {
@@ -62,7 +64,7 @@ public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm impl
 
 	protected Logger logger = Logger.VOID_LOGGER;
 
-	protected SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph;
+	protected SimpleDirectedWeightedGraph< Spot, DefaultWeightedEdge > graph;
 
 	private boolean isCanceled;
 
@@ -134,55 +136,62 @@ public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm impl
 						return null;
 					}
 
-					final List< RealPoint > targetCoords = new ArrayList<>( nTargetSpots );
-					final List< FlagNode< Spot > > targetNodes = new ArrayList<>( nTargetSpots );
-					final Iterator< Spot > targetIt = spots.iterator( targetFrame, true );
-					while ( targetIt.hasNext() )
-					{
-						final double[] coords = new double[ 3 ];
-						final Spot spot = targetIt.next();
-						spot.localize( coords );
-						targetCoords.add( new RealPoint( coords ) );
-						targetNodes.add( new FlagNode<>( spot ) );
-					}
-
-					final KDTree< FlagNode< Spot > > tree = new KDTree<>( targetNodes, targetCoords );
-					final NearestNeighborFlagSearchOnKDTree< Spot > search = new NearestNeighborFlagSearchOnKDTree<>( tree );
+					/*
+					 * Create kD-Tree and NN search.
+					 */
+					final Iterable< Spot > targetSpots = spots.iterable( targetFrame, true );
+					final KDTree< Spot > tree = new KDTree< Spot >( nTargetSpots, targetSpots, targetSpots );
+					final KNearestNeighborSearchOnKDTree< Spot > search = new KNearestNeighborSearchOnKDTree<>( tree, nTargetSpots );
 
 					/*
 					 * For each spot in the source frame, find its nearest
 					 * neighbor in the target frame.
 					 */
 					final Iterator< Spot > sourceIt = spots.iterator( sourceFrame, true );
-					while ( sourceIt.hasNext() )
+					SOURCE: while ( sourceIt.hasNext() )
 					{
 						final Spot source = sourceIt.next();
-						final double[] coords = new double[ 3 ];
-						source.localize( coords );
-						final RealPoint sourceCoords = new RealPoint( coords );
-						search.search( sourceCoords );
-
-						final double squareDist = search.getSquareDistance();
-						final FlagNode< Spot > targetNode = search.getSampler().get();
+						search.search( source );
 
 						/*
-						 * The closest we could find is too far. We skip this
-						 * source spot and do not create a link
+						 * Loop over target spots in nearest neighbor order.
 						 */
-						if ( squareDist > maxDistSquare )
-							continue;
-
-						/*
-						 * Everything is ok. This node is free and below max
-						 * dist. We create a link and mark this node as
-						 * assigned.
-						 */
-
-						targetNode.setVisited( true );
-						synchronized ( graph )
+						int iNeighbor = -1;
+						TARGET: while ( ++iNeighbor < nTargetSpots )
 						{
-							final DefaultWeightedEdge edge = graph.addEdge( source, targetNode.getValue() );
-							graph.setEdgeWeight( edge, squareDist );
+							/*
+							 * Is the closest we could find too far? If yes, we
+							 * skip this source spot and do not create a link.
+							 */
+							final double squareDist = search.getSquareDistance( iNeighbor );
+							if ( squareDist > maxDistSquare )
+								continue SOURCE;
+
+							/*
+							 * Is the closest one already taken? Has it already
+							 * an incoming edge?
+							 */
+							final Spot target = search.getSampler( iNeighbor ).get();
+							if ( graph.inDegreeOf( target ) > 0 )
+							{
+								/*
+								 * In that case we need to test the next nearest
+								 * neighbor (next target spot).
+								 */
+								continue TARGET;
+							}
+
+							/*
+							 * Everything is ok. This node is free and below max
+							 * dist. We create a link and loop to the next
+							 * source spot.
+							 */
+							synchronized ( graph )
+							{
+								final DefaultWeightedEdge edge = graph.addEdge( source, target );
+								graph.setEdgeWeight( edge, squareDist );
+							}
+							break TARGET;
 						}
 					}
 					logger.setProgress( progress.incrementAndGet() / ( double ) frames.size() );
@@ -222,12 +231,12 @@ public class NearestNeighborTracker extends MultiThreadedBenchmarkAlgorithm impl
 	@Override
 	public SimpleWeightedGraph< Spot, DefaultWeightedEdge > getResult()
 	{
-		return graph;
+		return GraphUtils.convertToSimpleWeightedGraph( graph );
 	}
 
 	public void reset()
 	{
-		graph = new SimpleWeightedGraph<>( DefaultWeightedEdge.class );
+		graph = new SimpleDirectedWeightedGraph<>( DefaultWeightedEdge.class );
 		final Iterator< Spot > it = spots.iterator( true );
 		while ( it.hasNext() )
 			graph.addVertex( it.next() );
