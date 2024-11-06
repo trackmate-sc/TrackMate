@@ -256,7 +256,7 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 	{
 		// Get all labels.
 		final AtomicInteger max = new AtomicInteger( 0 );
-		Views.iterable( rai ).forEach( p -> {
+		rai.forEach( p -> {
 			final int val = p.getInteger();
 			if ( val != 0 && val > max.get() )
 				max.set( val );

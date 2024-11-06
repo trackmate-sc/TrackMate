@@ -237,7 +237,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 
 	private Img< T > copy( final RandomAccessibleInterval< T > in )
 	{
-		final ImgFactory< T > factory = Util.getArrayOrCellImgFactory( in, Util.getTypeFromInterval( in ) );
+		final ImgFactory< T > factory = Util.getArrayOrCellImgFactory( in, in.getType() );
 		final Img< T > out = factory.create( in );
 		LoopBuilder.setImages( in, out )
 				.multiThreaded()

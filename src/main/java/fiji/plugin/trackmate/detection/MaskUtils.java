@@ -81,13 +81,13 @@ public class MaskUtils
 	public static final < T extends RealType< T > > double otsuThreshold( final RandomAccessibleInterval< T > img )
 	{
 		// Min & max
-		final T t = Util.getTypeFromInterval( img );
+		final T t = img.getType();
 		final T max = t.createVariable();
 		max.setReal( Double.NEGATIVE_INFINITY );
 		final T min = t.createVariable();
 		min.setReal( Double.POSITIVE_INFINITY );
 
-		for ( final T pixel : Views.iterable( img ) )
+		for ( final T pixel : img )
 		{
 			if ( pixel.compareTo( min ) < 0 )
 				min.set( pixel );
@@ -98,7 +98,7 @@ public class MaskUtils
 
 		// Histogram.
 		final Real1dBinMapper< T > mapper = new Real1dBinMapper<>( min.getRealDouble(), max.getRealDouble(), 256, false );
-		final Histogram1d< T > histogram = new Histogram1d<>( Views.iterable( img ), mapper );
+		final Histogram1d< T > histogram = new Histogram1d<>( img, mapper );
 
 		// Threshold.
 		final long k = getThreshold( histogram );

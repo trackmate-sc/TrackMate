@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -23,7 +23,6 @@ package fiji.plugin.trackmate.detection;
 
 import net.imglib2.Cursor;
 import net.imglib2.Interval;
-import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.dog.DifferenceOfGaussian;
@@ -117,10 +116,8 @@ public class DogDetector< T extends RealType< T > & NativeType< T > > extends Lo
 			e.printStackTrace();
 		}
 
-		final IterableInterval< FloatType > dogIterable = Views.iterable( dog );
-		final IterableInterval< FloatType > tmpIterable = Views.iterable( dog2 );
-		final Cursor< FloatType > dogCursor = dogIterable.cursor();
-		final Cursor< FloatType > tmpCursor = tmpIterable.cursor();
+		final Cursor< FloatType > dogCursor = dog.cursor();
+		final Cursor< FloatType > tmpCursor = dog2.cursor();
 		while ( dogCursor.hasNext() )
 			dogCursor.next().sub( tmpCursor.next() );
 
