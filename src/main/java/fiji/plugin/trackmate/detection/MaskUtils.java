@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -38,6 +38,7 @@ import ij.process.FloatPolygon;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
+import net.imglib2.Cursor;
 import net.imglib2.Interval;
 import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccess;
@@ -53,10 +54,10 @@ import net.imglib2.img.Img;
 import net.imglib2.img.ImgFactory;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegion;
-import net.imglib2.roi.labeling.LabelRegionCursor;
 import net.imglib2.roi.labeling.LabelRegions;
 import net.imglib2.type.BooleanType;
 import net.imglib2.type.logic.BitType;
+import net.imglib2.type.logic.BoolType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.IntType;
@@ -176,7 +177,7 @@ public class MaskUtils
 
 	/**
 	 * Creates a zero-min label image from a thresholded input image.
-	 * 
+	 *
 	 * @param <T>
 	 *            the type of the input image. Must be real, scalar.
 	 * @param input
@@ -228,7 +229,7 @@ public class MaskUtils
 	 * Creates spots from a grayscale image, thresholded to create a mask. A
 	 * spot is created for each connected-component of the mask, with a size
 	 * that matches the mask size.
-	 * 
+	 *
 	 * @param <T>
 	 *            the type of the input image. Must be real, scalar.
 	 * @param input
@@ -260,7 +261,7 @@ public class MaskUtils
 
 	/**
 	 * Creates spots from a label image.
-	 * 
+	 *
 	 * @param <R>
 	 *            the type that backs-up the labeling.
 	 * @param labeling
@@ -284,7 +285,7 @@ public class MaskUtils
 		while ( iterator.hasNext() )
 		{
 			final LabelRegion< Integer > region = iterator.next();
-			final LabelRegionCursor cursor = region.localizingCursor();
+			final Cursor< BoolType > cursor = region.localizingCursor();
 			final int[] cursorPos = new int[ labeling.numDimensions() ];
 			final long[] sum = new long[ 3 ];
 			while ( cursor.hasNext() )
@@ -322,7 +323,7 @@ public class MaskUtils
 	 * spot is created for each connected-component of the mask, with a size
 	 * that matches the mask size. The quality of the spots is read from another
 	 * image, by taking the max pixel value of this image with the ROI.
-	 * 
+	 *
 	 * @param <T>
 	 *            the type of the input image. Must be real, scalar.
 	 * @param input
@@ -362,7 +363,7 @@ public class MaskUtils
 		while ( iterator.hasNext() )
 		{
 			final LabelRegion< Integer > region = iterator.next();
-			final LabelRegionCursor cursor = region.localizingCursor();
+			final Cursor< BoolType > cursor = region.localizingCursor();
 			final int[] cursorPos = new int[ labeling.numDimensions() ];
 			final long[] sum = new long[ 3 ];
 			double quality = Double.NEGATIVE_INFINITY;
@@ -410,7 +411,7 @@ public class MaskUtils
 	 * connected-component of the mask, with a size that matches the mask size.
 	 * The quality of the spots is read from another image, by taking the max
 	 * pixel value of this image with the ROI.
-	 * 
+	 *
 	 * @param <T>
 	 *            the type of the input image. Must be real, scalar.
 	 * @param <S>
@@ -453,7 +454,7 @@ public class MaskUtils
 	 * Creates spots <b>with ROIs</b> from a <b>2D</b> label image. The quality
 	 * value is read from a secondary image, by taking the max value in each
 	 * ROI.
-	 * 
+	 *
 	 * @param <R>
 	 *            the type that backs-up the labeling.
 	 * @param <S>
@@ -483,7 +484,7 @@ public class MaskUtils
 		final List<Spot> spots = new ArrayList<>();
 		for ( final List< Spot > s : map.values() )
 			spots.addAll( s );
-		
+
 		return spots;
 	}
 
@@ -496,7 +497,7 @@ public class MaskUtils
 	 * the label they correspond to in the label image. Because one spot
 	 * corresponds to one connected component in the label image, there might be
 	 * several spots for a label, hence the values of the map are list of spots.
-	 * 
+	 *
 	 * @param <R>
 	 *            the type that backs-up the labeling.
 	 * @param <S>
@@ -558,7 +559,7 @@ public class MaskUtils
 		{
 			final List< Spot > spots = new ArrayList<>( polygonsMap.size() );
 			output.put( label, spots );
-			
+
 			final List< Polygon > polygons = polygonsMap.get( label );
 			for ( final Polygon polygon : polygons )
 			{
@@ -696,7 +697,7 @@ public class MaskUtils
 	 * the number of points in a curve that is approximated by a series of
 	 * points.
 	 * <p>
-	 * 
+	 *
 	 * @see <a href=
 	 *      "https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm">Ramer–Douglas–Peucker
 	 *      Algorithm (Wikipedia)</a>
@@ -737,7 +738,7 @@ public class MaskUtils
 
 	/**
 	 * Start at 1.
-	 * 
+	 *
 	 * @return a new iterator that goes like 1, 2, 3, ...
 	 */
 	public static final Iterator< Integer > labelGenerator()
@@ -769,7 +770,7 @@ public class MaskUtils
 	 * Warning: cannot deal with holes, they are simply ignored.
 	 * <p>
 	 * Copied and adapted from ImageJ1 code by Wayne Rasband.
-	 * 
+	 *
 	 * @param <T>
 	 *            the type of the mask.
 	 * @param mask
