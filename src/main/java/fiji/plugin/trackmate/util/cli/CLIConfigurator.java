@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -36,6 +36,14 @@ import org.apache.commons.lang3.StringUtils;
 import fiji.plugin.trackmate.util.cli.CommandCLIConfigurator.ExecutablePath;
 import fiji.plugin.trackmate.util.cli.CondaCLIConfigurator.CondaEnvironmentCommand;
 
+/**
+ * Base class for CLI configurator tools. The implementation of a CLI
+ * configurator is made by subclassing this class (or one of its specialization)
+ * and specifying arguments for the CLI component with the <code>addXYX()</code>
+ * builders.
+ *
+ * @author Jean-Yves Tinevez
+ */
 public abstract class CLIConfigurator
 {
 
@@ -282,60 +290,133 @@ public abstract class CLIConfigurator
 
 		protected boolean inCLI = true; // by default
 
+		/**
+		 * Specifies the argument to use in the CLI.
+		 *
+		 * @param argument
+		 *            the command line argument.
+		 * @return this adder.
+		 */
 		public T argument( final String argument )
 		{
 			this.argument = argument;
 			return ( T ) this;
 		}
 
+		/**
+		 * Specifies whether this argument will be visible in user interfaces
+		 * generated from the configurator.
+		 *
+		 * @param visible
+		 *            UI visibility.
+		 * @return this adder.
+		 */
 		public T visible( final boolean visible )
 		{
 			this.visible = visible;
 			return ( T ) this;
 		}
 
+		/**
+		 * Specifies a user-friendly name for the argument.
+		 *
+		 * @param name
+		 *            the argument name.
+		 * @return this adder.
+		 */
 		public T name( final String name )
 		{
 			this.name = name;
 			return ( T ) this;
 		}
 
+		/**
+		 * Specifies a help text for the argument.
+		 *
+		 * @param help
+		 *            the help text.
+		 * @return this adder.
+		 */
 		public T help( final String help )
 		{
 			this.help = help;
 			return ( T ) this;
 		}
 
+		/**
+		 * Specifies the key to use to serialize this argument in TrackMate XML
+		 * file. If <code>null</code>, the argument will not be serialized.
+		 *
+		 * @param key
+		 *            the argument key.
+		 * @return this adder.
+		 */
 		public T key( final String key )
 		{
 			this.key = key;
 			return ( T ) this;
 		}
 
+		/**
+		 * Specifies whether this argument is required in the CLI. If
+		 * <code>true</code>, if not set and if there are no default value, an
+		 * error will be thrown.
+		 *
+		 * @param required
+		 *            whether this argument is required.
+		 * @return this adder.
+		 */
 		public T required( final boolean required )
 		{
 			this.required = required;
 			return ( T ) this;
 		}
 
+		/**
+		 * Specifies units for values accepted by this argument.
+		 *
+		 * @param units
+		 *            argument value units.
+		 * @return this adder.
+		 */
 		public T units( final String units )
 		{
 			this.units = units;
 			return ( T ) this;
 		}
 
+		/**
+		 * Specifies a default value for this argument. If the argument is not
+		 * set, it will appear in the command line with this default value.
+		 *
+		 * @param defaultValue
+		 *            the argument default value.
+		 * @return this adder.
+		 */
 		public T defaultValue( final O defaultValue )
 		{
 			this.defaultValue = defaultValue;
 			return ( T ) this;
 		}
 
+		/**
+		 * Specifies whether this argument will appear in the command line.
+		 *
+		 * @param inCLI
+		 *            appears in the command line.
+		 * @return this adder.
+		 */
 		public T inCLI( final boolean inCLI )
 		{
 			this.inCLI = inCLI;
 			return ( T ) this;
 		}
 
+		/**
+		 * Returns the argument created by this builder.
+		 *
+		 * @return the argument.
+		 */
 		public abstract A get();
 	}
 
@@ -346,12 +427,28 @@ public abstract class CLIConfigurator
 
 		protected O max;
 
+		/**
+		 * Specifies a min for the values accepted by this argument. If the user
+		 * sets a value below this min value, an error is thrown.
+		 *
+		 * @param min
+		 *            the min value.
+		 * @return this adder.
+		 */
 		public T min( final O min )
 		{
 			this.min = min;
 			return ( T ) this;
 		}
 
+		/**
+		 * Specifies a max for the values accepted by this argument. If the user
+		 * sets a value above this max value, an error is thrown.
+		 *
+		 * @param max
+		 *            the max value.
+		 * @return this adder.
+		 */
 		public T max( final O max )
 		{
 			this.max = max;
@@ -487,6 +584,14 @@ public abstract class CLIConfigurator
 
 		private final List< String > choices = new ArrayList<>();
 
+		/**
+		 * Adds a selectable item for this choice argument. The user will be
+		 * able to select from the list of choices added by this method.
+		 *
+		 * @param choice
+		 *            the choice to add.
+		 * @return this adder.
+		 */
 		public ChoiceAdder addChoice( final String choice )
 		{
 			if ( !choices.contains( choice ) )
@@ -494,6 +599,14 @@ public abstract class CLIConfigurator
 			return this;
 		}
 
+		/**
+		 * Adds the specified items for this choice argument. The user will be
+		 * able to select from the list of choices added by this method.
+		 *
+		 * @param c
+		 *            the choices to add.
+		 * @return this adder.
+		 */
 		public Adder< ChoiceArgument, ChoiceAdder, String > addChoiceAll( final Collection< String > c )
 		{
 			for ( final String in : c )
@@ -501,6 +614,17 @@ public abstract class CLIConfigurator
 			return this;
 		}
 
+		/**
+		 * Specifies a default value for this argument. If the argument is not
+		 * set, it will appear in the command line with this default value.
+		 * <p>
+		 * The value specified must belong to the list of choices set with
+		 * {@link #addChoice(String)} or {@link #addChoiceAll(Collection)}.
+		 *
+		 * @param defaultChoice
+		 *            the argument default value.
+		 * @return this adder.
+		 */
 		@Override
 		public ChoiceAdder defaultValue( final String defaultChoice )
 		{
@@ -511,6 +635,16 @@ public abstract class CLIConfigurator
 			return super.defaultValue( defaultChoice );
 		}
 
+		/**
+		 * Specifies a default value for this argument, by selecting the
+		 * possible value in order or addition. If the argument is not set, it
+		 * will appear in the command line with this default value.
+		 *
+		 * @param selected
+		 *            the index of the default value in the list of possible
+		 *            choices.
+		 * @return this adder.
+		 */
 		public ChoiceAdder defaultValue( final int selected )
 		{
 			if ( selected < 0 || selected >= choices.size() )
@@ -544,31 +678,73 @@ public abstract class CLIConfigurator
 	 * ADDER METHODS.
 	 */
 
+	/**
+	 * Adds a boolean flag argument to the CLI, via a builder.
+	 * <p>
+	 * In the CLI tools we have been trying to implement, they exist in two
+	 * flavors, that are both supported.
+	 *
+	 * If the argument starts with a double-dash <code>--</code>, as in Python
+	 * argparse syntax, then it is understood that setting this flag to true
+	 * makes it appear in the CLI. For instance: <code>--use-gpu</code>.
+	 *
+	 * If the arguments ends with a '=' sign (e.g. <code>"save_txt="</code>),
+	 * then it expects to receive a 'true' or 'false' value.
+	 *
+	 * @return a new flag argument builder.
+	 */
 	protected FlagAdder addFlag()
 	{
 		return new FlagAdder();
 	}
 
+	/**
+	 * Adds a string argument to the CLI, via a builder.
+	 *
+	 * @return new string argument builder.
+	 */
 	protected StringAdder addStringArgument()
 	{
 		return new StringAdder();
 	}
 
+	/**
+	 * Adds a path argument to the CLI, via a builder.
+	 *
+	 * @return new path argument builder.
+	 */
 	protected PathAdder addPathArgument()
 	{
 		return new PathAdder();
 	}
 
+	/**
+	 * Adds a integer argument to the CLI, via a builder.
+	 *
+	 * @return new integer argument builder.
+	 */
 	protected IntAdder addIntArgument()
 	{
 		return new IntAdder();
 	}
 
+	/**
+	 * Adds a double argument to the CLI, via a builder.
+	 *
+	 * @return new double argument builder.
+	 */
 	protected DoubleAdder addDoubleArgument()
 	{
 		return new DoubleAdder();
 	}
 
+	/**
+	 * Adds a choice argument to the CLI, via a builder. Such arguments can
+	 * accept a series of discrete values (specified by addChoice() method in
+	 * the builder).
+	 *
+	 * @return new choice argument builder.
+	 */
 	protected ChoiceAdder addChoiceArgument()
 	{
 		return new ChoiceAdder();
@@ -596,6 +772,9 @@ public abstract class CLIConfigurator
 		Flag()
 		{}
 
+		/**
+		 * Sets this flag argument to <code>true</code>.
+		 */
 		public void set()
 		{
 			set( true );
@@ -708,7 +887,7 @@ public abstract class CLIConfigurator
 		private ChoiceArgument()
 		{}
 
-		ChoiceArgument addChoice( final String choice )
+		private ChoiceArgument addChoice( final String choice )
 		{
 			if ( !choices.contains( choice ) )
 				choices.add( choice );
