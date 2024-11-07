@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -43,6 +43,7 @@ import net.miginfocom.swing.MigLayout;
 import sc.fiji.labkit.ui.BasicLabelingComponent;
 import sc.fiji.labkit.ui.DefaultExtensible;
 import sc.fiji.labkit.ui.MenuBar;
+import sc.fiji.labkit.ui.SegmentationComponent;
 import sc.fiji.labkit.ui.actions.AddLabelingIoAction;
 import sc.fiji.labkit.ui.actions.LabelEditAction;
 import sc.fiji.labkit.ui.actions.LabelingIoAction;
@@ -58,6 +59,10 @@ import sc.fiji.labkit.ui.panel.LabelPanel;
 import sc.fiji.labkit.ui.segmentation.PredictionLayer;
 
 /**
+ * This class is copy/pasted and adapted from {@link SegmentationComponent} to
+ * control what is shown in the TrackMate UI. This could be revised to avoid
+ * class duplication.
+ *
  * {@link SegmentationComponent} is the central Labkit UI component. Provides UI
  * to display and modify a {@link SegmentationModel}.
  * <p>

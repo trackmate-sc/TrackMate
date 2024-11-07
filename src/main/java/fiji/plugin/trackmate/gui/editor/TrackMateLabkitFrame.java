@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -42,6 +42,7 @@ import io.scif.services.DatasetIOService;
 import net.imagej.Dataset;
 import sc.fiji.labkit.pixel_classification.utils.SingletonContext;
 import sc.fiji.labkit.ui.InitialLabeling;
+import sc.fiji.labkit.ui.LabkitFrame;
 import sc.fiji.labkit.ui.inputimage.DatasetInputImage;
 import sc.fiji.labkit.ui.inputimage.InputImage;
 import sc.fiji.labkit.ui.models.DefaultSegmentationModel;
@@ -49,10 +50,13 @@ import sc.fiji.labkit.ui.models.SegmentationModel;
 import sc.fiji.labkit.ui.utils.Notifier;
 
 /**
+ * This class is copied and adapted from {@link LabkitFrame}.
+ * <p>
  * The main Labkit window. (This window allows to segment a single image. It has
  * to be distinguished from the LabkitProjectFrame, which allows to operation on
- * multiple images.) The window only contains a {@link SegmentationComponent}
- * and shows the associated main menu.
+ * multiple images.) The window only contains a
+ * {@link TrackMateLabKitSegmentationComponent} and shows the associated main
+ * menu.
  *
  * @author Matthias Arzt
  */

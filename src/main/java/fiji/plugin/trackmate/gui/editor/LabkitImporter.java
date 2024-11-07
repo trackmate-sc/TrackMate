@@ -85,8 +85,8 @@ public class LabkitImporter< T extends IntegerType< T > & NativeType< T > >
 	 * @param currentTimePoint
 	 *            the time-point in the TrackMate model that corresponds to the
 	 *            index image.
-	 * @param the
-	 *            map of spots (vs the label value in the previous labeling)
+	 * @param previousSpotLabels
+	 *            the map of spots (vs the label value in the previous labeling)
 	 *            that were written in the previous index image.
 	 */
 	public void reimport(
