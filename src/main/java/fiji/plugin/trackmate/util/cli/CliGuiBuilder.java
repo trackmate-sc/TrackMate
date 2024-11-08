@@ -393,6 +393,8 @@ public class CliGuiBuilder implements ArgumentVisitor
 		final BoxLayout bl = new BoxLayout( p, BoxLayout.LINE_AXIS );
 		p.setLayout( bl );
 
+		tf.setColumns( 10 ); // Avoid long paths deforming new panels.
+
 		lbl.setText( lbl.getText() + " " );
 		lbl.setFont( Fonts.SMALL_FONT );
 		tf.setFont( Fonts.SMALL_FONT );

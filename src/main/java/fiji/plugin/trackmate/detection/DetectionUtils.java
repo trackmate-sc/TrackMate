@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -39,8 +39,8 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.util.MedianFilter2D;
-import fiji.plugin.trackmate.util.Threads;
 import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.util.Threads;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
@@ -69,7 +69,6 @@ import net.imglib2.type.Type;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
-import net.imglib2.util.Util;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 
@@ -82,7 +81,7 @@ public class DetectionUtils
 	 * This method returns immediately and execute the detection in a separate
 	 * thread. It executes the detection in one frame only and writes the
 	 * results in the specified model object.
-	 * 
+	 *
 	 * @param model
 	 *            the model to write detection results in.
 	 * @param settings
@@ -167,7 +166,7 @@ public class DetectionUtils
 	 * Returns <code>true</code> if the specified image is 2D. It can have
 	 * multiple channels and multiple time-points; this method only looks at
 	 * whether several Z-slices can be found.
-	 * 
+	 *
 	 * @param img
 	 *            the image.
 	 * @return <code>true</code> if the image is 2D, regardless of time and
@@ -189,7 +188,7 @@ public class DetectionUtils
 	 * radius specified <b>using calibrated units</b>. The specified calibration
 	 * is used to determine the dimensionality of the kernel and to map it on a
 	 * pixel grid.
-	 * 
+	 *
 	 * @param radius
 	 *            the blob radius (in image unit).
 	 * @param nDims
@@ -277,7 +276,7 @@ public class DetectionUtils
 		final RandomAccess< T > in = Views.zeroMin( Views.interval( img, interval ) ).randomAccess();
 		final Cursor< FloatType > out = output.cursor();
 		final RealFloatConverter< T > c = new RealFloatConverter<>();
-		
+
 		while ( out.hasNext() )
 		{
 			out.fwd();
@@ -344,7 +343,7 @@ public class DetectionUtils
 		 * Find maxima.
 		 */
 
-		final T val = Util.getTypeFromInterval( source ).createVariable();
+		final T val = source.getType().createVariable();
 		val.setReal( threshold );
 		final LocalNeighborhoodCheck< Point, T > localNeighborhoodCheck = new LocalExtrema.MaximumCheck<>( val );
 		final IntervalView< T > dogWithBorder = Views.interval( Views.extendMirrorSingle( source ), Intervals.expand( source, 1 ) );
@@ -492,7 +491,7 @@ public class DetectionUtils
 	/**
 	 * Return a view of the specified input image, at the specified channel
 	 * (0-based) and the specified frame (0-based too).
-	 * 
+	 *
 	 * @param <T>
 	 *            the type of the input image.
 	 * @param img
@@ -524,7 +523,7 @@ public class DetectionUtils
 
 	/**
 	 * Normalize the pixel value of an image between 0 and 1.
-	 * 
+	 *
 	 * @param <T>
 	 *            the type of pixels in the image. Must extend {@link RealType}.
 	 * @param input

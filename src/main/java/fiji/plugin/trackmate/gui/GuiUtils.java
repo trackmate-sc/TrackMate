@@ -87,6 +87,12 @@ public class GuiUtils
 		tf.addFocusListener( selectAllFocusListener );
 	}
 
+	public static final void setFont( final JComponent panel, final Font font )
+	{
+		for ( final Component c : panel.getComponents() )
+			c.setFont( font );
+	}
+
 	/**
 	 * Returns the black color or white color depending on the specified
 	 * background color, to ensure proper readability of the text on said
@@ -394,7 +400,7 @@ public class GuiUtils
 			nw = ( icon.getIconWidth() * nh ) / icon.getIconHeight();
 		}
 
-		return new ImageIcon( icon.getImage().getScaledInstance( nw, nh, Image.SCALE_DEFAULT ) );
+		return new ImageIcon( icon.getImage().getScaledInstance( nw, nh, Image.SCALE_SMOOTH ) );
 	}
 
 	public static URL getResource( final String name, final Class< ? > clazz )

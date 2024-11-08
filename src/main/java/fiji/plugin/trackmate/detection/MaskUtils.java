@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -23,18 +23,24 @@ package fiji.plugin.trackmate.detection;
 
 import java.awt.Polygon;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
+
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotRoi;
+import fiji.plugin.trackmate.util.SpotUtil;
 import fiji.plugin.trackmate.util.Threads;
-import ij.ImagePlus;
 import ij.gui.PolygonRoi;
-import ij.measure.Measurements;
 import ij.process.FloatPolygon;
+import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
 import net.imglib2.Cursor;
 import net.imglib2.Interval;
+import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
@@ -46,15 +52,13 @@ import net.imglib2.histogram.Histogram1d;
 import net.imglib2.histogram.Real1dBinMapper;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgFactory;
-import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegion;
-import net.imglib2.roi.labeling.LabelRegionCursor;
 import net.imglib2.roi.labeling.LabelRegions;
 import net.imglib2.type.BooleanType;
 import net.imglib2.type.logic.BitType;
+import net.imglib2.type.logic.BoolType;
 import net.imglib2.type.numeric.IntegerType;
-import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.util.Util;
@@ -77,13 +81,13 @@ public class MaskUtils
 	public static final < T extends RealType< T > > double otsuThreshold( final RandomAccessibleInterval< T > img )
 	{
 		// Min & max
-		final T t = Util.getTypeFromInterval( img );
+		final T t = img.getType();
 		final T max = t.createVariable();
 		max.setReal( Double.NEGATIVE_INFINITY );
 		final T min = t.createVariable();
 		min.setReal( Double.POSITIVE_INFINITY );
 
-		for ( final T pixel : Views.iterable( img ) )
+		for ( final T pixel : img )
 		{
 			if ( pixel.compareTo( min ) < 0 )
 				min.set( pixel );
@@ -94,7 +98,7 @@ public class MaskUtils
 
 		// Histogram.
 		final Real1dBinMapper< T > mapper = new Real1dBinMapper<>( min.getRealDouble(), max.getRealDouble(), 256, false );
-		final Histogram1d< T > histogram = new Histogram1d<>( Views.iterable( img ), mapper );
+		final Histogram1d< T > histogram = new Histogram1d<>( img, mapper );
 
 		// Threshold.
 		final long k = getThreshold( histogram );
@@ -173,7 +177,7 @@ public class MaskUtils
 
 	/**
 	 * Creates a zero-min label image from a thresholded input image.
-	 * 
+	 *
 	 * @param <T>
 	 *            the type of the input image. Must be real, scalar.
 	 * @param input
@@ -225,7 +229,7 @@ public class MaskUtils
 	 * Creates spots from a grayscale image, thresholded to create a mask. A
 	 * spot is created for each connected-component of the mask, with a size
 	 * that matches the mask size.
-	 * 
+	 *
 	 * @param <T>
 	 *            the type of the input image. Must be real, scalar.
 	 * @param input
@@ -257,7 +261,7 @@ public class MaskUtils
 
 	/**
 	 * Creates spots from a label image.
-	 * 
+	 *
 	 * @param <R>
 	 *            the type that backs-up the labeling.
 	 * @param labeling
@@ -281,7 +285,7 @@ public class MaskUtils
 		while ( iterator.hasNext() )
 		{
 			final LabelRegion< Integer > region = iterator.next();
-			final Cursor< Void > cursor = region.inside().localizingCursor();
+			final Cursor< BoolType > cursor = region.localizingCursor();
 			final int[] cursorPos = new int[ labeling.numDimensions() ];
 			final long[] sum = new long[ 3 ];
 			while ( cursor.hasNext() )
@@ -319,7 +323,7 @@ public class MaskUtils
 	 * spot is created for each connected-component of the mask, with a size
 	 * that matches the mask size. The quality of the spots is read from another
 	 * image, by taking the max pixel value of this image with the ROI.
-	 * 
+	 *
 	 * @param <T>
 	 *            the type of the input image. Must be real, scalar.
 	 * @param input
@@ -359,7 +363,7 @@ public class MaskUtils
 		while ( iterator.hasNext() )
 		{
 			final LabelRegion< Integer > region = iterator.next();
-			final Cursor< Void > cursor = region.inside().localizingCursor();
+			final Cursor< BoolType > cursor = region.localizingCursor();
 			final int[] cursorPos = new int[ labeling.numDimensions() ];
 			final long[] sum = new long[ 3 ];
 			double quality = Double.NEGATIVE_INFINITY;
@@ -407,7 +411,7 @@ public class MaskUtils
 	 * connected-component of the mask, with a size that matches the mask size.
 	 * The quality of the spots is read from another image, by taking the max
 	 * pixel value of this image with the ROI.
-	 * 
+	 *
 	 * @param <T>
 	 *            the type of the input image. Must be real, scalar.
 	 * @param <S>
@@ -429,7 +433,7 @@ public class MaskUtils
 	 *            the image in which to read the quality value.
 	 * @return a list of spots, with ROI.
 	 */
-	public static final < T extends RealType< T >, S extends NumericType< S > > List< Spot > fromThresholdWithROI(
+	public static final < T extends RealType< T >, S extends RealType< S > > List< Spot > fromThresholdWithROI(
 			final RandomAccessible< T > input,
 			final Interval interval,
 			final double[] calibration,
@@ -440,7 +444,7 @@ public class MaskUtils
 	{
 		if ( input.numDimensions() != 2 )
 			throw new IllegalArgumentException( "Can only process 2D images with this method, but got " + input.numDimensions() + "D." );
-		
+
 		// Get labeling.
 		final ImgLabeling< Integer, IntType > labeling = toLabeling( input, interval, threshold, numThreads );
 		return fromLabelingWithROI( labeling, interval, calibration, simplify, qualityImage );
@@ -448,9 +452,9 @@ public class MaskUtils
 
 	/**
 	 * Creates spots <b>with ROIs</b> from a <b>2D</b> label image. The quality
-	 * value is read from a secondary image, byt taking the max value in each
+	 * value is read from a secondary image, by taking the max value in each
 	 * ROI.
-	 * 
+	 *
 	 * @param <R>
 	 *            the type that backs-up the labeling.
 	 * @param <S>
@@ -469,7 +473,51 @@ public class MaskUtils
 	 *            the image in which to read the quality value.
 	 * @return a list of spots, with ROI.
 	 */
-	public static < R extends IntegerType< R >, S extends NumericType< S > > List< Spot > fromLabelingWithROI(
+	public static < R extends IntegerType< R >, S extends RealType< S > > List< Spot > fromLabelingWithROI(
+			final ImgLabeling< Integer, R > labeling,
+			final Interval interval,
+			final double[] calibration,
+			final boolean simplify,
+			final RandomAccessibleInterval< S > qualityImage )
+	{
+		final Map< Integer, List< Spot > > map = fromLabelingWithROIMap( labeling, interval, calibration, simplify, qualityImage );
+		final List<Spot> spots = new ArrayList<>();
+		for ( final List< Spot > s : map.values() )
+			spots.addAll( s );
+
+		return spots;
+	}
+
+	/**
+	 * Creates spots <b>with ROIs</b> from a <b>2D</b> label image. The quality
+	 * value is read from a secondary image, by taking the max value in each
+	 * ROI.
+	 * <p>
+	 * The spots are returned in a map, where the key is the integer value of
+	 * the label they correspond to in the label image. Because one spot
+	 * corresponds to one connected component in the label image, there might be
+	 * several spots for a label, hence the values of the map are list of spots.
+	 *
+	 * @param <R>
+	 *            the type that backs-up the labeling.
+	 * @param <S>
+	 *            the type of the quality image. Must be real, scalar.
+	 * @param labeling
+	 *            the labeling, must be zero-min and 2D..
+	 * @param interval
+	 *            the interval, used to reposition the spots from the zero-min
+	 *            labeling to the proper coordinates.
+	 * @param calibration
+	 *            the physical calibration.
+	 * @param simplify
+	 *            if <code>true</code> the polygon will be post-processed to be
+	 *            smoother and contain less points.
+	 * @param qualityImage
+	 *            the image in which to read the quality value.
+	 * @return a map linking the label integer value to the list of spots, with
+	 *         ROI, it corresponds to.
+	 */
+	public static < R extends IntegerType< R >, S extends RealType< S > > Map< Integer, List< Spot > > fromLabelingWithROIMap(
 			final ImgLabeling< Integer, R > labeling,
 			final Interval interval,
 			final double[] calibration,
@@ -481,9 +529,14 @@ public class MaskUtils
 
 		final LabelRegions< Integer > regions = new LabelRegions< Integer >( labeling );
 
-		// Parse regions to create polygons on boundaries.
-		final List< Polygon > polygons = new ArrayList<>( regions.getExistingLabels().size() );
+		/*
+		 * Map of label in the label image to a collection of polygons around
+		 * this label. Because 1 polygon correspond to 1 connected component,
+		 * there might be several polygons for a label.
+		 */
+		final Map< Integer, List< Polygon > > polygonsMap = new HashMap<>( regions.getExistingLabels().size() );
 		final Iterator< LabelRegion< Integer > > iterator = regions.iterator();
+		// Parse regions to create polygons on boundaries.
 		while ( iterator.hasNext() )
 		{
 			final LabelRegion< Integer > region = iterator.next();
@@ -493,55 +546,75 @@ public class MaskUtils
 			for ( final Polygon polygon : pp )
 				polygon.translate( ( int ) region.min( 0 ), ( int ) region.min( 1 ) );
 
-			polygons.addAll( pp );
+			final Integer label = region.getLabel();
+			polygonsMap.put( label, pp );
 		}
 
-		// Quality image.
-		final List< Spot > spots = new ArrayList<>( polygons.size() );
-		final ImagePlus qualityImp = ( null == qualityImage )
-				? null
-				: ImageJFunctions.wrap( qualityImage, "QualityImage" );
+
+		// Storage for results.
+		final Map< Integer, List< Spot > > output = new HashMap<>( polygonsMap.size() );
 
 		// Simplify them and compute a quality.
-		for ( final Polygon polygon : polygons )
+		for ( final Integer label : polygonsMap.keySet() )
 		{
-			final PolygonRoi roi = new PolygonRoi( polygon, PolygonRoi.POLYGON );
+			final List< Spot > spots = new ArrayList<>( polygonsMap.size() );
+			output.put( label, spots );
 
-			// Create Spot ROI.
-			final PolygonRoi fRoi;
-			if ( simplify )
-				fRoi = simplify( roi, SMOOTH_INTERVAL, DOUGLAS_PEUCKER_MAX_DISTANCE );
-			else
-				fRoi = roi;
-
-			// Don't include ROIs that have been shrunk to < 1 pixel.
-			if ( fRoi.getNCoordinates() < 3 || fRoi.getStatistics().area <= 0. )
-				continue;
-
-			// Measure quality.
-			final double quality;
-			if ( null == qualityImp )
+			final List< Polygon > polygons = polygonsMap.get( label );
+			for ( final Polygon polygon : polygons )
 			{
-				quality = fRoi.getStatistics().area;
-			}
-			else
-			{
-				qualityImp.setRoi( fRoi );
-				quality = qualityImp.getStatistics( Measurements.MIN_MAX ).max;
-			}
+				final PolygonRoi roi = new PolygonRoi( polygon, PolygonRoi.POLYGON );
 
-			final Polygon fPolygon = fRoi.getPolygon();
-			final double[] xpoly = new double[ fPolygon.npoints ];
-			final double[] ypoly = new double[ fPolygon.npoints ];
-			for ( int i = 0; i < fPolygon.npoints; i++ )
-			{
-				xpoly[ i ] = calibration[ 0 ] * ( interval.min( 0 ) + fPolygon.xpoints[ i ] - 0.5 );
-				ypoly[ i ] = calibration[ 1 ] * ( interval.min( 1 ) + fPolygon.ypoints[ i ] - 0.5 );
-			}
+				// Create Spot ROI.
+				final PolygonRoi fRoi;
+				if ( simplify )
+					fRoi = simplify( roi, SMOOTH_INTERVAL, DOUGLAS_PEUCKER_MAX_DISTANCE );
+				else
+					fRoi = roi;
 
-			spots.add( SpotRoi.createSpot( xpoly, ypoly, quality ) );
+				// Don't include ROIs that have been shrunk to < 1 pixel.
+				if ( fRoi.getNCoordinates() < 3 || fRoi.getStatistics().area <= 0. )
+					continue;
+
+				final Polygon fPolygon = fRoi.getPolygon();
+				final double[] xpoly = new double[ fPolygon.npoints ];
+				final double[] ypoly = new double[ fPolygon.npoints ];
+				for ( int i = 0; i < fPolygon.npoints; i++ )
+				{
+					xpoly[ i ] = calibration[ 0 ] * ( interval.min( 0 ) + fPolygon.xpoints[ i ] - 0.5 );
+					ypoly[ i ] = calibration[ 1 ] * ( interval.min( 1 ) + fPolygon.ypoints[ i ] - 0.5 );
+				}
+
+				final Spot spot = SpotRoi.createSpot( xpoly, ypoly, -1. );
+
+				// Measure quality.
+				final double quality;
+				if ( null == qualityImage )
+				{
+					quality = fRoi.getStatistics().area;
+				}
+				else
+				{
+					final String name = "QualityImage";
+					final AxisType[] axes = new AxisType[] { Axes.X, Axes.Y };
+					final double[] cal = new double[] { calibration[ 0 ], calibration[ 1 ] };
+					final String[] units = new String[] { "unitX", "unitY" };
+					final ImgPlus< S > qualityImgPlus = new ImgPlus<>( ImgPlus.wrapToImg( qualityImage ), name, axes, cal, units );
+					final IterableInterval< S > iterable = SpotUtil.iterable( spot, qualityImgPlus );
+					double max = Double.NEGATIVE_INFINITY;
+					for ( final S s : iterable )
+					{
+						final double val = s.getRealDouble();
+						if ( val > max )
+							max = val;
+					}
+					quality = max;
+				}
+				spot.putFeature( Spot.QUALITY, quality );
+				spots.add( spot );
+			}
 		}
-		return spots;
+		return output;
 	}
 
 	private static final double distanceSquaredBetweenPoints( final double vx, final double vy, final double wx, final double wy )
@@ -624,7 +697,7 @@ public class MaskUtils
 	 * the number of points in a curve that is approximated by a series of
 	 * points.
 	 * <p>
-	 * 
+	 *
 	 * @see <a href=
 	 *      "https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm">Ramer–Douglas–Peucker
 	 *      Algorithm (Wikipedia)</a>
@@ -637,7 +710,7 @@ public class MaskUtils
 	 */
 	public static final List< double[] > douglasPeucker( final List< double[] > list, final double epsilon )
 	{
-		final List< double[] > resultList = new ArrayList< >();
+		final List< double[] > resultList = new ArrayList<>();
 		douglasPeucker( list, 0, list.size(), epsilon, resultList );
 		return resultList;
 	}
@@ -665,7 +738,7 @@ public class MaskUtils
 
 	/**
 	 * Start at 1.
-	 * 
+	 *
 	 * @return a new iterator that goes like 1, 2, 3, ...
 	 */
 	public static final Iterator< Integer > labelGenerator()
@@ -697,7 +770,7 @@ public class MaskUtils
 	 * Warning: cannot deal with holes, they are simply ignored.
 	 * <p>
 	 * Copied and adapted from ImageJ1 code by Wayne Rasband.
-	 * 
+	 *
 	 * @param <T>
 	 *            the type of the mask.
 	 * @param mask
