@@ -21,10 +21,7 @@
  */
 package fiji.plugin.trackmate.action.autonaming;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -66,94 +63,67 @@ public class DefaultAutoNamingRule implements AutoNamingRule
 				: trackName;
 		root.setName( rootName );
 	}
-
 	@Override
-	public void nameBranches( final Spot mother, final Collection< Spot > siblings )
-	{
-
+	public void nameBranches(final Spot mother, final Collection<Spot> siblings) {
 		// Sort siblings by their X position.
-		final List< Spot > spots = new ArrayList<>( siblings );
-		spots.sort( Comparator.comparing( s -> s.getDoublePosition( 0 ) ) );
+		final List<Spot> spots = sortSiblingsByXPosition(siblings);
 
 		// Predecessor name.
 		final String motherName = mother.getName();
-		final String[] tokens = motherName.split( Pattern.quote( suffixSeparator ) );
+		final String[] tokens = motherName.split(Pattern.quote(suffixSeparator));
 
 		// Find in what token the branch suffix is stored.
-		int branchTokenIndex = -1;
-		for ( int i = 0; i < tokens.length; i++ )
-		{
-			final String token = tokens[ i ];
-			final Matcher matcher = branchPattern.matcher( token );
-			if ( matcher.matches() )
-			{
-				branchTokenIndex = i;
-				break;
-			}
-		}
+		int branchTokenIndex = findBranchTokenIndex(tokens);
 
-		if ( branchTokenIndex < 0 )
-		{
-			/*
-			 * Could not find it. Maybe because the mother comes from the root
-			 * branch. In that case we add the suffix separator and a new char
-			 * for the branch.
-			 */
-			if ( !incrementSuffix )
-			{
-				// There won't be a '.23' at the end.
-				char bname = 'a';
-				for ( final Spot spot : spots )
-				{
-					spot.setName( motherName + suffixSeparator + bname );
-					bname += 1;
-				}
-			}
-			else
-			{
-				// There is a '.23' at then end.
-				char bname = 'a';
-				for ( final Spot spot : spots )
-				{
-					final String[] newTokens = new String[ tokens.length + 1 ];
-					for ( int i = 0; i < tokens.length; i++ )
-						newTokens[ i ] = tokens[ i ];
-					newTokens[ tokens.length - 1 ] = "" + bname;
-					newTokens[ tokens.length ] = "1"; // restart
-					final String branchName = String.join( suffixSeparator, newTokens );
-					spot.setName( branchName );
-					bname += 1;
-				}
-			}
+		if (branchTokenIndex < 0) {
+			// Could not find branch token; add new branch suffix.
+			addNewBranchSuffix(motherName, spots);
 			return;
 		}
 
-		/*
-		 * A branch char combination already exists. We add to it.
-		 */
+		// Add a new branch name for each sibling.
+		addBranchNames(tokens, spots, branchTokenIndex);
+	}
+
+	private List<Spot> sortSiblingsByXPosition(final Collection<Spot> siblings) {
+		final List<Spot> spots = new ArrayList<>(siblings);
+		spots.sort(Comparator.comparing(s -> s.getDoublePosition(0)));
+		return spots;
+	}
+
+	private int findBranchTokenIndex(final String[] tokens) {
+		for (int i = 0; i < tokens.length; i++) {
+			final String token = tokens[i];
+			final Matcher matcher = branchPattern.matcher(token);
+			if (matcher.matches()) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	private void addNewBranchSuffix(final String motherName, final List<Spot> spots) {
 		char bname = 'a';
-		for ( final Spot spot : spots )
-		{
-			// Copy.
-			final String[] newTokens = new String[ tokens.length ];
-			for ( int i = 0; i < tokens.length; i++ )
-				newTokens[ i ] = tokens[ i ];
-			// Edit.
-			if ( !incrementSuffix )
-			{
-				newTokens[ newTokens.length - 1 ] += branchSeparator + bname;
-			}
-			else
-			{
-				newTokens[ newTokens.length - 2 ] += branchSeparator + bname;
-				newTokens[ newTokens.length - 1 ] = "1"; // restart
-			}
-			final String branchName = String.join( suffixSeparator, newTokens );
-			spot.setName( branchName );
+		for (final Spot spot : spots) {
+			spot.setName(motherName + suffixSeparator + bname);
 			bname += 1;
 		}
 	}
 
+	private void addBranchNames(final String[] tokens, final List<Spot> spots, final int branchTokenIndex) {
+		char bname = 'a';
+		for (final Spot spot : spots) {
+			final String[] newTokens = Arrays.copyOf(tokens, tokens.length);
+			if (!incrementSuffix) {
+				newTokens[newTokens.length - 1] += branchSeparator + bname;
+			} else {
+				newTokens[newTokens.length - 2] += branchSeparator + bname;
+				newTokens[newTokens.length - 1] = "1"; // Restart.
+			}
+			spot.setName(String.join(suffixSeparator, newTokens));
+			bname += 1;
+		}
+	}
 	@Override
 	public void nameSpot( final Spot current, final Spot predecessor )
 	{

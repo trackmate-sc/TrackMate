@@ -1,9 +1,6 @@
 package fiji.plugin.trackmate.action;
-
 import fiji.plugin.trackmate.Logger;
-
 public abstract class AbstractTMAction implements TrackMateAction {
-
 	protected Logger logger = Logger.VOID_LOGGER;
 	private static final String INFO_TEXT = "<html>"
 			+ "Rename individual spots based on auto-naming rules. "
@@ -27,3 +24,9 @@ public abstract class AbstractTMAction implements TrackMateAction {
 		this.logger = logger;
 	}
 }
+
+
+
+
+
+
