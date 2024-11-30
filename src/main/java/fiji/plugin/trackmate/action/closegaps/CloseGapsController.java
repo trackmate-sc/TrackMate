@@ -50,7 +50,8 @@ public class CloseGapsController {
 			return;
 
 		final JFrame frame = new JFrame("TrackMate gap-closing");
-		frame.setIconImage(CloseGapsAction.ICON.getImage());
+		// Access the ICON through the Factory class
+		frame.setIconImage(new CloseGapsAction.Factory().getIcon().getImage());
 		frame.setSize(300, 500);
 		frame.getContentPane().add(gui);
 		GuiUtils.positionWindow(frame, trackmate.getSettings().imp.getCanvas());
