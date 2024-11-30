@@ -30,19 +30,16 @@ public class AutoNamingAction extends AbstractTMAction implements TrackMateActio
 
 		@Override
 		public String getInfoText() {
-			// Static method from AbstractTMAction.
 			return AbstractTMAction.getInfoText();
 		}
 
 		@Override
 		public String getName() {
-			// Static method from AbstractTMAction.
 			return AbstractTMAction.getName();
 		}
 
 		@Override
 		public String getKey() {
-			// Static method from AbstractTMAction.
 			return AbstractTMAction.getKey();
 		}
 
