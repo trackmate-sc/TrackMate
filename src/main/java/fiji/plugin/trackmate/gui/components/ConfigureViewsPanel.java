@@ -335,7 +335,10 @@ public class ConfigureViewsPanel extends JPanel
 		chckbxLimitZDepth.setFont( SMALL_FONT );
 		panelDrawingZDepth.add( chckbxLimitZDepth );
 
-		final SpinnerNumberModel numberModelDrawingZDepth = new SpinnerNumberModel( ds.getZDrawingDepth(), 0.5, 5000., 0.5 );
+		final double minZDrawingDepth = 0.5;
+		final double maxZDrawingDepth = 5000.;
+		final double zDrawingDepth = Math.min( Math.max( ds.getZDrawingDepth(), minZDrawingDepth ), maxZDrawingDepth );
+		final SpinnerNumberModel numberModelDrawingZDepth = new SpinnerNumberModel( zDrawingDepth, minZDrawingDepth, maxZDrawingDepth, 0.5 );
 		final JSpinner spinnerDrawingZDepth = new JSpinner( numberModelDrawingZDepth );
 		spinnerDrawingZDepth.setFont( SMALL_FONT );
 		panelDrawingZDepth.add( spinnerDrawingZDepth );
