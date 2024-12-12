@@ -50,10 +50,13 @@ import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
 import fiji.plugin.trackmate.gui.GuiUtils;
+import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.displaysettings.ConfigTrackMateDisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackDisplayMode;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.UpdateListener;
+import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.util.WrapLayout;
 
 /**
  * A configuration panel used to tune the aspect of spots and tracks in multiple
@@ -79,7 +82,8 @@ public class ConfigureViewsPanel extends JPanel
 			final String spaceUnits,
 			final Action launchTrackSchemeAction,
 			final Action showTrackTablesAction,
-			final Action showSpotTableAction )
+			final Action showSpotTableAction,
+			final Action launchLabKitAction )
 	{
 		this.setPreferredSize( new Dimension( 300, 521 ) );
 		this.setSize( 300, 500 );
@@ -326,7 +330,7 @@ public class ConfigureViewsPanel extends JPanel
 		final GridBagConstraints gbcPanelDrawingZDepth = new GridBagConstraints();
 		gbcPanelDrawingZDepth.gridwidth = 2;
 		gbcPanelDrawingZDepth.insets = new Insets( 0, 5, 5, 5 );
-		gbcPanelDrawingZDepth.fill = GridBagConstraints.BOTH;
+		gbcPanelDrawingZDepth.fill = GridBagConstraints.HORIZONTAL;
 		gbcPanelDrawingZDepth.gridx = 0;
 		gbcPanelDrawingZDepth.gridy = 5;
 		add( panelDrawingZDepth, gbcPanelDrawingZDepth );
@@ -352,6 +356,7 @@ public class ConfigureViewsPanel extends JPanel
 		 */
 
 		final JPanel panelButtons = new JPanel();
+		panelButtons.setLayout( new WrapLayout() );
 
 		// TrackScheme button.
 		final JButton btnShowTrackScheme = new JButton( launchTrackSchemeAction );
@@ -366,7 +371,26 @@ public class ConfigureViewsPanel extends JPanel
 		final JButton btnShowSpotTable = new JButton( showSpotTableAction );
 		panelButtons.add( btnShowSpotTable );
 		btnShowSpotTable.setFont( FONT );
+		
+		// Labkit button.
+		// Is labkit available?
+		if ( TMUtils.isClassPresent( "sc.fiji.labkit.ui.LabkitFrame" ) )
+		{
+			final JButton btnLabKit = new JButton( launchLabKitAction );
+			btnLabKit.setFont( FONT );
+			btnLabKit.setText( "Launch spot editor" );
+			btnLabKit.setIcon( Icons.PENCIL_ICON );
+			btnLabKit.setToolTipText( "<html>"
+					+ "Launch the Labkit editor to edit spot segmentation<br>"
+					+ "on the time-point currently displayed in the main<br>"
+					+ "view."
+					+ "<p>"
+					+ "Shift + click will launch the editor on all the<br>"
+					+ "time-points in the movie.</html>" );
+			panelButtons.add( btnLabKit );
+		}
 
+		panelButtons.setSize( new Dimension( 300, 1 ) );
 		final GridBagConstraints gbcPanelButtons = new GridBagConstraints();
 		gbcPanelButtons.gridwidth = 2;
 		gbcPanelButtons.anchor = GridBagConstraints.SOUTH;
@@ -374,6 +398,7 @@ public class ConfigureViewsPanel extends JPanel
 		gbcPanelButtons.gridx = 0;
 		gbcPanelButtons.gridy = 7;
 		add( panelButtons, gbcPanelButtons );
+		setSize( new Dimension( 300, 1 ) );
 
 		/*
 		 * Listeners & co.

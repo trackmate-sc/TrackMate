@@ -24,6 +24,7 @@ package fiji.plugin.trackmate;
 import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.io.File;
 
 import javax.swing.JFrame;
@@ -65,8 +66,6 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 	@Override
 	public void run( final String filePath )
 	{
-//		GuiUtils.setSystemLookAndFeel();
-
 		final Logger logger = Logger.IJ_LOGGER;
 		File file;
 		if ( null == filePath || filePath.length() == 0 )
@@ -215,6 +214,8 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 		frame.setIconImage( TRACKMATE_ICON.getImage() );
 		GuiUtils.positionWindow( frame, settings.imp.getWindow() );
 		frame.setVisible( true );
+		final Dimension size = frame.getSize();
+		frame.setSize( size.width, size.height + 1 );
 
 		// Text
 		final LogPanelDescriptor2 logDescriptor = ( LogPanelDescriptor2 ) sequence.logDescriptor();
@@ -230,7 +231,7 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 		final String warning = reader.getErrorMessage();
 		if ( !warning.isEmpty() )
 		{
-			logger2.log( "Warnings occured during reading the file:\n"
+			logger2.log( "Warnings occurred during reading the file:\n"
 					+ "--------------------\n"
 					+ warning
 					+ "--------------------\n",
@@ -292,11 +293,12 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 
 	public static void main( final String[] args )
 	{
+		GuiUtils.setSystemLookAndFeel();
 		ImageJ.main( args );
 		final LoadTrackMatePlugIn plugIn = new LoadTrackMatePlugIn();
-		plugIn.run( null );
+//		plugIn.run( null );
 //		plugIn.run( "samples/FakeTracks.xml" );
-//		plugIn.run( "samples/MAX_Merged.xml" );
+		plugIn.run( "samples/MAX_Merged.xml" );
 //		plugIn.run( "c:/Users/tinevez/Development/TrackMateWS/TrackMate-Cellpose/samples/R2_multiC.xml" );
 //		plugIn.run( "/Users/tinevez/Desktop/230901_DeltaRcsB-ZipA-mCh_timestep5min_Stage9_reg/230901_DeltaRcsB-ZipA-mCh_timestep5min_Stage9_reg_merge65.xml" );
 	}

@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -35,12 +35,54 @@ import java.util.function.Supplier;
 import org.jgrapht.alg.util.NeighborCache;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
+import org.jgrapht.graph.SimpleWeightedGraph;
 
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackModel;
 
 public class GraphUtils
 {
+
+	/**
+	 * Converts a {@link SimpleDirectedWeightedGraph} to a
+	 * {@link SimpleWeightedGraph}.
+	 *
+	 * @param directedGraph
+	 *            the {@link SimpleDirectedWeightedGraph} to be converted
+	 * @return a {@link SimpleWeightedGraph} with the same vertices and edges as
+	 *         the input graph, but with undirected edges and the maximum weight
+	 *         between any two vertices
+	 */
+	public static < V, E > SimpleWeightedGraph< V, E > convertToSimpleWeightedGraph( final SimpleDirectedWeightedGraph< V, E > directedGraph )
+	{
+		@SuppressWarnings( "unchecked" )
+		final Class< E > edgeClass = ( Class< E > ) directedGraph.getEdgeSupplier().get().getClass();
+		final SimpleWeightedGraph< V, E > undirectedGraph = new SimpleWeightedGraph< V, E >( edgeClass );
+
+		// Add vertices from the directed graph
+		for ( final V vertex : directedGraph.vertexSet() )
+			undirectedGraph.addVertex( vertex );
+
+		// Add edges from the directed graph
+		for ( final E edge : directedGraph.edgeSet() )
+		{
+			final V source = directedGraph.getEdgeSource( edge );
+			final V target = directedGraph.getEdgeTarget( edge );
+			final double weight = directedGraph.getEdgeWeight( edge );
+
+			if ( undirectedGraph.containsEdge( source, target ) )
+			{
+				final double existingWeight = undirectedGraph.getEdgeWeight( undirectedGraph.getEdge( source, target ) );
+				undirectedGraph.setEdgeWeight( undirectedGraph.getEdge( source, target ), Math.max( existingWeight, weight ) );
+			}
+			else
+			{
+				final E newEdge = undirectedGraph.addEdge( source, target );
+				undirectedGraph.setEdgeWeight( newEdge, weight );
+			}
+		}
+		return undirectedGraph;
+	}
 
 	/**
 	 * @return a pretty-print string representation of a {@link TrackModel}, as
@@ -312,7 +354,7 @@ public class GraphUtils
 		 * Find root spots & first spots Roots are spots without any ancestors.
 		 * There might be more than one per track. First spots are the first
 		 * root found in a track. There is only one per track.
-		 * 
+		 *
 		 * By the way we compute the largest spot name
 		 */
 

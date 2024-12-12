@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -37,6 +37,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -58,6 +59,20 @@ import ij.IJ;
  */
 public class IOUtils
 {
+
+	private static final Pattern ILLEGAL_XML_CHARS = Pattern.compile(
+			"[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F-\\x84\\x86-\\x9F\\uD800-\\uDFFF\\uFDD0-\\uFDEF\\uFFFE\\uFFFF\\u2FFFE\\u2FFFF\\u3FFFE\\u3FFFF\\u4FFFE\\u4FFFF\\u5FFFE\\u5FFFF\\u6FFFE\\u6FFFF\\u7FFFE\\u7FFFF\\u8FFFE\\u8FFFF\\u9FFFE\\u9FFFF\\uAFFFE\\uAFFFF\\uBFFFE\\uBFFFF\\uCFFFE\\uCFFFF\\uDFFFE\\uDFFFF\\uEFFFE\\uEFFFF\\uFFFFE\\uFFFFF\\u10FFFE\\u10FFFF]" );
+
+	private static final Pattern ILLEGAL_SURROGATE_PAIRS = Pattern.compile(
+			"[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF])[\uDC00-\uDFFF]" );
+
+	public static String cleanInvalidXmlChars( final String input )
+	{
+		if ( input == null )
+			return null;
+		final String cleaned = ILLEGAL_XML_CHARS.matcher( input ).replaceAll( "" );
+		return ILLEGAL_SURROGATE_PAIRS.matcher( cleaned ).replaceAll( "" );
+	}
 
 	public static final boolean canReadFile( final String path, final StringBuilder errorHolder )
 	{

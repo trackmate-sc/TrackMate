@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -50,19 +50,23 @@ public class NearestNeighborTrackerFactory implements SpotTrackerFactory
 	public static final String NAME = "Nearest-neighbor tracker";
 
 	public static final String INFO_TEXT = "<html>"
-			+ "This tracker is the most simple one, and is based on nearest neighbor <br>"
-			+ "search. The spots in the target frame are searched for the nearest neighbor <br> "
-			+ "of each spot in the source frame. If the spots found are closer than the <br>"
-			+ "maximal allowed distance, a link between the two is created. <br>"
+			+ "This tracker is the most simple one, and is based on nearest neighbor "
+			+ "search. "
 			+ "<p>"
-			+ "The nearest neighbor search relies upon the KD-tree technique implemented <br>"
-			+ "in imglib by Johannes Schindelin and friends. This ensure a very efficient "
-			+ "tracking and makes this tracker suitable for situation where a huge number <br>"
-			+ "of particles are to be tracked over a very large number of frames. However, <br>"
-			+ "because of the naiveness of its principles, it can result in pathological <br>"
-			+ "tracks. It can only do frame-to-frame linking; there cannot be any track <br>"
+			+ "For each pair of consecutive frames <i>t1</i> and <i>t2</i>, it iterates through all "
+			+ "spots in frame <i>t1</i>. For each source spot in <i>t1</i>, it searches for the nearest target spot "
+			+ "in frame <i>t2</i>. If it is not already connected to a spot in frame <i>t1</i>, and is "
+			+ "within the maximal linking distance, a link between the two spots is created. <br>"
+			+ "<p>"
+			+ "The nearest neighbor search relies upon the KD-tree technique implemented "
+			+ "in imglib2. This ensure a very efficient "
+			+ "tracking and makes this tracker suitable for situation where a huge number "
+			+ "of particles are to be tracked over a very large number of frames. However, "
+			+ "because of the naiveness of its principles, it can result in pathological "
+			+ "tracks. It can only do frame-to-frame linking; there cannot be any track "
 			+ "merging or splitting, and gaps will not be closed. Also, the end results are non-"
-			+ "deterministic."
+			+ "deterministic, as the links created depend in the order in which the source spots "
+			+ "are iterated."
 			+ " </html>";
 
 	private String errorMessage;

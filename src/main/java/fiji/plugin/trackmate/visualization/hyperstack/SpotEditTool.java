@@ -355,7 +355,6 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 		case KeyEvent.VK_SPACE:
 		{
 			actions.startMoveSpot();
-			e.consume();
 			break;
 
 		}

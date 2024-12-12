@@ -107,6 +107,12 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 	public TrackMate( final Settings settings )
 	{
 		this( new Model(), settings );
+		if ( settings.imp != null && settings.imp.getCalibration() != null )
+		{
+			final String spaceUnits = settings.imp.getCalibration().getXUnit();
+			final String timeUnits = settings.imp.getCalibration().getTimeUnit();
+			model.setPhysicalUnits( spaceUnits, timeUnits );
+		}
 	}
 
 	public TrackMate( final Model model, final Settings settings )
