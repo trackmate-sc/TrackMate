@@ -21,6 +21,9 @@
  */
 package fiji.plugin.trackmate.features;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 /**
  * A helper class to store a feature filter. It is just made of 3 public fields.
  * <p>
@@ -53,6 +56,33 @@ public class FeatureFilter
 			str += " < ";
 		str += "" + value;
 		return str;
+	}
+
+	@Override
+	public boolean equals( final Object obj )
+	{
+		if ( obj == null )
+			return false;
+		if ( obj == this )
+			return true;
+		if ( obj.getClass() != getClass() )
+			return false;
+		final FeatureFilter other = ( FeatureFilter ) obj;
+		return new EqualsBuilder()
+				.append( feature, other.feature )
+				.append( value, other.value )
+				.append( isAbove, other.isAbove )
+				.isEquals();
+	}
+
+	@Override
+	public int hashCode()
+	{
+		return new HashCodeBuilder( 17, 37 )
+				.append( feature )
+				.append( value )
+				.append( isAbove )
+				.toHashCode();
 	}
 
 }
