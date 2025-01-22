@@ -22,6 +22,8 @@
 package fiji.plugin.trackmate.util.cli;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 
 import javax.swing.JLabel;
@@ -61,22 +63,40 @@ public class CondaPathConfigCommand implements Command
 
 		String condaPath = prefs.get( CLIUtils.class, CLIUtils.CONDA_PATH_PREF_KEY, findPath );
 
+		final Path path = Paths.get( condaPath );
+		final Path parent = path.getParent();
+		final Path parentOfParent = ( parent != null ) ? parent.getParent() : null;
+		final String defaultValue = "/usr/local/opt/micromamba/";
+
+		String condaRootPrefix = ( parentOfParent != null ) ? parentOfParent.toString() : defaultValue;
+		condaRootPrefix = prefs.get( CLIUtils.class, CLIUtils.CONDA_ROOT_PREFIX_KEY, condaRootPrefix );
+
 		final GenericDialogPlus dialog = new GenericDialogPlus( "TrackMate Conda path" );
 		final JLabel lbl = dialog.addImage( GuiUtils.scaleImage( Icons.TRACKMATE_ICON, 64, 64 ) );
 		lbl.setText( "TrackMate Conda path" );
 		lbl.setFont( Fonts.BIG_FONT );
 		dialog.addMessage(
 				"Browse to the conda (or mamba, micromaba, ...) executable \n"
-				+ "to use in the TrackMate modules that rely on Conda." );
+						+ "to use in the TrackMate modules that rely on Conda." );
 		dialog.addMessage( "Conda executable path:" );
 		dialog.addFileField( "", condaPath, 40 );
+		dialog.addMessage( ""
+				+ "Browse to the conda root prefix. This is the content of \n"
+				+ "'MAMBA_ROOT_PREFIX' or 'CONDA_ROOT_PREFIX' environment \n"
+				+ "variable, and points to the root directory of the conda, \n"
+				+ "mamba or micromamba installation." );
+		dialog.addMessage( "Conda executable path:" );
+		dialog.addFileField( "", condaRootPrefix, 40 );
+
 		dialog.showDialog();
 
 		if ( dialog.wasCanceled() )
 			return;
 
 		condaPath = dialog.getNextString();
+		condaRootPrefix = dialog.getNextString();
 		prefs.put( CLIUtils.class, CLIUtils.CONDA_PATH_PREF_KEY, condaPath );
+		prefs.put( CLIUtils.class, CLIUtils.CONDA_ROOT_PREFIX_KEY, condaRootPrefix );
 		test();
 	}
 
@@ -96,10 +116,17 @@ public class CondaPathConfigCommand implements Command
 					+ "Error message:\n "
 					+ e.getMessage() );
 		}
+		catch ( final Exception e )
+		{
+			IJ.error( "Error when running Conda.\n"
+					+ "Error message:\n "
+					+ e.getMessage() );
+		}
 	}
 
 	public static void main( final String[] args )
 	{
 		TMUtils.getContext().getService( CommandService.class ).run( CondaPathConfigCommand.class, false );
+//		new CondaPathConfigCommand().test();
 	}
 }

@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
@@ -48,30 +49,51 @@ import fiji.plugin.trackmate.util.TMUtils;
 import ij.IJ;
 
 public class CLIUtils
-
 {
 
 	public static final String CONDA_PATH_PREF_KEY = "trackmate.conda.path";
 
-	public static Map< String, String > getEnvMap() throws IOException
+	public static final String CONDA_ROOT_PREFIX_KEY = "trackmate.conda.root.prefix";
+
+	public static Map< String, String > getEnvMap() throws Exception
 	{
 		// Create a map to store the environment names and paths
 		final Map< String, String > envMap = new HashMap<>();
+
+		// Prepare the command and environment variables.
+		// Command
 		final ProcessBuilder pb;
 		if ( IJ.isWindows() )
 			pb = new ProcessBuilder( Arrays.asList( "cmd.exe", "/c", "conda", "env", "list" ) );
 		else
 			pb = new ProcessBuilder( Arrays.asList( getCondaPath(), "env", "list" ) );
+		// Env variables.
+		final Map< String, String > env = new HashMap<>();
+		final String condaRootPrefix = getCondaRootPrefix();
+		env.put( "MAMBA_ROOT_PREFIX", condaRootPrefix );
+		env.put( "CONDA_ROOT_PREFIX", condaRootPrefix );
+		pb.environment().putAll( env );
+		// Run and collect output.
 		final Process process = pb.start();
-		final BufferedReader reader = new BufferedReader( new InputStreamReader( process.getInputStream() ) );
+		final BufferedReader stdOutput = new BufferedReader( new InputStreamReader( process.getInputStream() ) );
+		final BufferedReader stdError = new BufferedReader( new InputStreamReader( process.getErrorStream() ) );
 
-		// Read each line of output and extract the environment name and
-		// path
+		/*
+		 * Did we have an error? Read the error from the command
+		 */
+		String s;
+		String errorOutput = "";
+		while ( ( s = stdError.readLine() ) != null )
+			errorOutput += ( s + '\n' );
+		if ( !errorOutput.isEmpty() )
+			throw new Exception( "Could not retrieve environment map properly:\n" + errorOutput );
+
 		String line;
-		while ( ( line = reader.readLine() ) != null )
+		while ( ( line = stdOutput.readLine() ) != null )
 		{
 			line = line.trim();
-			if ( line.isEmpty() || line.startsWith( "#" ) || line.startsWith( "Name" ) )
+			line = line.replaceAll( "\\*", "" );
+			if ( line.isEmpty() || line.startsWith( "#" ) || line.startsWith( "Name" ) || line.startsWith( "──────" ) )
 				continue;
 
 			final String[] parts = line.split( "\\s+" );
@@ -79,6 +101,22 @@ public class CLIUtils
 			{
 				final String envName = parts[ 0 ];
 				final String envPath = parts[ 1 ] + "/bin/python";
+				envMap.put( envName, envPath );
+			}
+			else if ( parts.length == 1 )
+			{
+				/*
+				 * When we don't have the right configuration, sometimes the
+				 * list returns the path to the envs but not the name. We try
+				 * then to extract the name from the path.
+				 */
+
+				final String envRoot = parts[ 0 ];
+				if ( !isValidPath( envRoot ) )
+					continue;
+				final Path path = Paths.get( envRoot );
+				final String envName = path.getFileName().toString();
+				final String envPath = envRoot + "/bin/python";
 				envMap.put( envName, envPath );
 			}
 		}
@@ -93,7 +131,7 @@ public class CLIUtils
 			l.sort( null );
 			return l;
 		}
-		catch ( final IOException e )
+		catch ( final Exception e )
 		{
 			e.printStackTrace();
 		}
@@ -116,6 +154,13 @@ public class CLIUtils
 			findPath = "/usr/local/opt/micromamba/bin/micromamba";
 		}
 		return prefs.get( CLIUtils.class, CLIUtils.CONDA_PATH_PREF_KEY, findPath );
+	}
+
+	public static String getCondaRootPrefix()
+	{
+		final PrefService prefs = TMUtils.getContext().getService( PrefService.class );
+		final String findPath = "/usr/local/opt/micromamba";
+		return prefs.get( CLIUtils.class, CLIUtils.CONDA_ROOT_PREFIX_KEY, findPath );
 	}
 
 	public static String findDefaultCondaPath() throws IllegalArgumentException
@@ -246,7 +291,34 @@ public class CLIUtils
 		}
 	}
 
-	public static void main( final String[] args ) throws IOException
+	public static boolean isValidPath( final String pathString )
+	{
+		try
+		{
+			// Convert the string to a Path object
+			final Path path = Paths.get( pathString );
+
+			// Check for basic path characteristics
+			if ( !pathString.contains( "/" ) && !pathString.contains( "\\" ) )
+				return false;
+
+			// Check for illegal characters (Windows-specific example)
+			if ( System.getProperty( "os.name" ).toLowerCase().contains( "win" ) )
+			{
+				final Pattern illegalCharsPattern = Pattern.compile( "[<>:*?\"|]" );
+				if ( illegalCharsPattern.matcher( pathString ).find() )
+					return false;
+			}
+
+			return Files.exists( path );
+		}
+		catch ( final InvalidPathException e )
+		{
+			return false;
+		}
+	}
+
+	public static void main( final String[] args ) throws Exception
 	{
 		System.out.println( "Conda path: " + findDefaultCondaPath() );
 		System.out.println( "Known environments: " + getEnvList() );

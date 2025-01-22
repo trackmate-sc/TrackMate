@@ -63,6 +63,11 @@ public abstract class CondaExecutableCLIConfigurator extends CondaCLIConfigurato
 							+ "Please configure the path to your conda executable in Edit > Options > Configure TrackMate Conda path..." );
 					e.printStackTrace();
 				}
+				catch ( final Exception e )
+				{
+					System.err.println( "Error running the conda executable:\n" );
+					e.printStackTrace();
+				}
 			}
 			return null;
 		} );
