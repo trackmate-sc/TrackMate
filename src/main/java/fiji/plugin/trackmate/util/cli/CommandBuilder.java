@@ -104,7 +104,12 @@ public class CommandBuilder implements ArgumentVisitor
 			if ( val )
 			{
 				tokens.add( a );
-				tokens.addAll( vals );
+				/*
+				 * Only add values after token if they have been explicitely
+				 * translated.
+				 */
+				if ( translators.containsKey( flag ) )
+					tokens.addAll( vals );
 			}
 		}
 	}
