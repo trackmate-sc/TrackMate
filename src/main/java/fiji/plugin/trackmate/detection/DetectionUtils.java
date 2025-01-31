@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.scijava.thread.ThreadService;
 
@@ -63,6 +64,8 @@ import net.imglib2.img.array.ArrayCursor;
 import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.basictypeaccess.array.FloatArray;
+import net.imglib2.img.display.imagej.CalibrationUtils;
+import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.img.display.imagej.ImgPlusViews;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.Type;
@@ -548,4 +551,117 @@ public class DetectionUtils
 			d.setReal( ( val - min ) / ( max - min ) );
 		}
 	}
+
+	/**
+	 * Properly wraps an {@link ImgPlus} in a {@link ImagePlus}, ensuring that
+	 * the dimensionality and the calibration of the output matches the input.
+	 * 
+	 * @param img
+	 *            the image to wrap.
+	 */
+	public static < T extends RealType< T > & NativeType< T > > ImagePlus wrap( final ImgPlus< T > img )
+	{
+		final ImagePlus imp2 = ImageJFunctions.wrap( img, img.getName() );
+		CalibrationUtils.copyCalibrationToImagePlus( img, imp2 );
+
+		// Fix dimensionality
+		final int zIndex = img.dimensionIndex( Axes.Z );
+		final int cIndex = img.dimensionIndex( Axes.CHANNEL );
+		final int tIndex = img.dimensionIndex( Axes.TIME );
+		imp2.setDimensions(
+				cIndex < 0 ? 1 : ( int ) img.dimension( cIndex ),
+				zIndex < 0 ? 1 : ( int ) img.dimension( zIndex ),
+				tIndex < 0 ? 1 : ( int ) img.dimension( tIndex ) );
+		return imp2;
+	}
+
+	/**
+	 * Splits the input image in a list of {@link ImagePlus}, one per
+	 * time-point. If the input includes several channels, they are all included
+	 * in the new image, and put as the last dimension.
+	 * 
+	 * @param <T>
+	 *            the type of the pixel in the input image.
+	 * @param img
+	 *            the input image.
+	 * @param interval
+	 *            the interval to crop the output in the input image. Must not
+	 *            have a dimension for channels. Can be 2D or 3D to accommodate
+	 *            the input image. If the interval contains time (min T and max
+	 *            T to export), it must be in the last dimension of the
+	 *            interval.
+	 * @param nameGen
+	 *            a generator for the name of the output ImagePlus.
+	 * @return a new list of ImagePlus.
+	 */
+	public static final < T extends RealType< T > & NativeType< T > > List< ImagePlus > splitSingleTimePoints(
+			final ImgPlus< T > img,
+			final Interval interval,
+			final Function< Long, String > nameGen )
+	{
+		final int zIndex = img.dimensionIndex( Axes.Z );
+		final int cIndex = img.dimensionIndex( Axes.CHANNEL );
+		final Interval cropInterval;
+		if ( zIndex < 0 )
+		{
+			// 2D
+			if ( cIndex < 0 )
+				cropInterval = Intervals.createMinMax(
+						interval.min( 0 ), interval.min( 1 ),
+						interval.max( 0 ), interval.max( 1 ) );
+			else
+				// Include all channels
+				cropInterval = Intervals.createMinMax(
+						interval.min( 0 ), interval.min( 1 ), img.min( cIndex ),
+						interval.max( 0 ), interval.max( 1 ), img.max( cIndex ) );
+		}
+		else
+		{
+			if ( cIndex < 0 )
+				cropInterval = Intervals.createMinMax(
+						interval.min( 0 ), interval.min( 1 ), interval.min( 2 ),
+						interval.max( 0 ), interval.max( 1 ), interval.max( 2 ) );
+			else
+				cropInterval = Intervals.createMinMax(
+						interval.min( 0 ), interval.min( 1 ), interval.min( 2 ), img.min( cIndex ),
+						interval.max( 0 ), interval.max( 1 ), interval.max( 2 ), img.max( cIndex ) );
+		}
+
+		final List< ImagePlus > imps = new ArrayList<>();
+		final int timeIndex = img.dimensionIndex( Axes.TIME );
+		if ( timeIndex < 0 )
+		{
+			// No time.
+			final IntervalView< T > crop = Views.interval( img, cropInterval );
+			final String name = nameGen.apply( 0l ) + ".tif";
+			imps.add( ImageJFunctions.wrap( crop, name ) );
+		}
+		else
+		{
+			// In the interval, time is always the last.
+			final long minT = interval.min( interval.numDimensions() - 1 );
+			final long maxT = interval.max( interval.numDimensions() - 1 );
+			for ( long t = minT; t <= maxT; t++ )
+			{
+				final ImgPlus< T > tpTCZ = ImgPlusViews.hyperSlice( img, timeIndex, t );
+
+				// Put if necessary the channel axis as the last one (CellPose
+				// format)
+				final int chanDim = tpTCZ.dimensionIndex( Axes.CHANNEL );
+				ImgPlus< T > tp = tpTCZ;
+				if ( chanDim > 1 )
+				{
+					tp = ImgPlusViews.moveAxis( tpTCZ, chanDim, tpTCZ.numDimensions() - 1 );
+				}
+				// possibly 2D or 3D with or without channel.
+				final IntervalView< T > crop = Views.interval( tp, cropInterval );
+				final String name = nameGen.apply( t ) + ".tif";
+				imps.add( ImageJFunctions.wrap( crop, name ) );
+			}
+		}
+		return imps;
+	}
+
+	public static final Function< Long, String > nameGen = ( frame ) -> String.format( "img-t%d", frame );
+
 }
