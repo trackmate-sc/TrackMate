@@ -134,7 +134,7 @@ public class CommandBuilder implements ArgumentVisitor
 		// Test for min & max
 		if ( arg.hasMin() && ( val < arg.getMin() ) )
 			throw new IllegalArgumentException( "Value " + val + " for argument '" + arg.getName() + "' is smaller than the min: " + arg.getMin() );
-		if ( arg.getMax() != Integer.MAX_VALUE && ( val > arg.getMax() ) )
+		if ( arg.hasMax() && arg.getMax() != Integer.MAX_VALUE && ( val > arg.getMax() ) )
 			throw new IllegalArgumentException( "Value " + val + " for argument '" + arg.getName() + "' is larger than the max: " + arg.getMax() );
 
 		final String a = arg.getArgument();
