@@ -584,6 +584,8 @@ public abstract class CLIConfigurator
 
 		private final List< String > choices = new ArrayList<>();
 
+		private final List< String > mappeds = new ArrayList<>();
+
 		/**
 		 * Adds a selectable item for this choice argument. The user will be
 		 * able to select from the list of choices added by this method.
@@ -594,8 +596,37 @@ public abstract class CLIConfigurator
 		 */
 		public ChoiceAdder addChoice( final String choice )
 		{
+			return addChoice( choice, choice );
+		}
+
+		/**
+		 * Adds a selectable item for this choice argument. The user will be
+		 * able to select from the list of choices added by this method. In the
+		 * command line, this choice will be mapped to the specified string.
+		 * <p>
+		 * Example:
+		 *
+		 * <pre>
+		 * addChoice( "Bacteria phase contrast", "bact_phase_omni" )
+		 * </pre>
+		 *
+		 * will display <i>Bacteria phase contrast</i> in the UI and results in
+		 * using <i>bact_phase_omni</i> in the generated command line.
+		 *
+		 * @param choice
+		 *            the choice to add.
+		 * @param mapped
+		 *            the string the choice will be mapped in the command line
+		 *            argument.
+		 * @return this adder.
+		 */
+		public ChoiceAdder addChoice( final String choice, final String mapped )
+		{
 			if ( !choices.contains( choice ) )
+			{
 				choices.add( choice );
+				mappeds.add( mapped );
+			}
 			return this;
 		}
 
@@ -666,8 +697,9 @@ public abstract class CLIConfigurator
 					.visible( visible )
 					.inCLI( inCLI )
 					.key( key );
-			for ( final String choice : choices )
-				arg.addChoice( choice );
+			for ( int i = 0; i < choices.size(); i++ )
+				arg.addChoice( choices.get( i ), mappeds.get( i ) );
+
 			arg.defaultValue( defaultValue );
 			CLIConfigurator.this.arguments.add( arg );
 			return arg;
@@ -884,14 +916,34 @@ public abstract class CLIConfigurator
 
 		private final List< String > choices = new ArrayList<>();
 
+		private final List< String > mappeds = new ArrayList<>();
+
+		private final int selectedIndex = -1;
+
 		private ChoiceArgument()
 		{}
 
-		private ChoiceArgument addChoice( final String choice )
+		private ChoiceArgument addChoice( final String choice, final String mapped )
 		{
 			if ( !choices.contains( choice ) )
+			{
 				choices.add( choice );
+				mappeds.add( mapped );
+			}
 			return this;
+		}
+
+		@Override
+		public String getValue()
+		{
+			final int index = getSelectedIndex();
+			return mappeds.get( index );
+		}
+
+		private int getSelectedIndex()
+		{
+			final String choice = super.getValue();
+			return choices.indexOf( choice );
 		}
 
 		@Override
@@ -911,11 +963,6 @@ public abstract class CLIConfigurator
 						+ name + "'. Must be in scale " + 0 + " to " + ( choices.size() - 1 ) + " in "
 						+ StringUtils.join( choices, ", " ) + "." );
 			super.set( choices.get( selected ) );
-		}
-
-		public int getSelectedIndex()
-		{
-			return choices.indexOf( getValue() );
 		}
 
 		@Override
