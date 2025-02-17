@@ -45,6 +45,8 @@ public abstract class CondaCLIConfigurator extends CLIConfigurator
 			name( "Conda environment" );
 			help( "The conda environment in which the tool is configured." );
 			key( KEY_CONDA_ENV );
+			defaultValue( "base" );
+			required( true );
 		}
 
 		protected CondaEnvironmentCommand addEnvironment( final String env )
