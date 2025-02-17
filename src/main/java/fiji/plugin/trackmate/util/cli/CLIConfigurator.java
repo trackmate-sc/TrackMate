@@ -918,8 +918,6 @@ public abstract class CLIConfigurator
 
 		private final List< String > mappeds = new ArrayList<>();
 
-		private final int selectedIndex = -1;
-
 		private ChoiceArgument()
 		{}
 
