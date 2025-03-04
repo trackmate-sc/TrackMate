@@ -135,6 +135,8 @@ public class Icons
 
 	public static final ImageIcon BIN_ICON = new ImageIcon( Icons.class.getResource( "images/bin_empty.png" ) );
 
+	public static final ImageIcon BIN_CLOSED_ICON = new ImageIcon( Icons.class.getResource( "images/bin_closed.png" ) );
+
 	public static final ImageIcon CAMERA_ICON = new ImageIcon( Icons.class.getResource( "images/camera_go.png" ) );
 
 	public static final ImageIcon APPLY_ICON = new ImageIcon( Icons.class.getResource( "images/page_save.png" ) );
