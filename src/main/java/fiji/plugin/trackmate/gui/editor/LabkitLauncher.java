@@ -492,7 +492,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 
 	public static final AbstractNamedAction getLaunchAction( final TrackMate trackmate, final DisplaySettings ds )
 	{
-		return new AbstractNamedAction( "launch labkit editor" )
+		final AbstractNamedAction action = new AbstractNamedAction( "launch labkit editor" )
 		{
 
 			private static final long serialVersionUID = 1L;
@@ -528,5 +528,9 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 				}.start();
 			}
 		};
+		final boolean is2D = DetectionUtils.is2D( trackmate.getSettings().imp );
+		if ( !is2D )
+			action.setEnabled( false );
+		return action;
 	}
 }
