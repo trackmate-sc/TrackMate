@@ -8,12 +8,12 @@ f * #%L
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -33,6 +33,7 @@ import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedText
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.listElement;
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.stringElement;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -327,6 +328,22 @@ public class CliGuiBuilder implements ArgumentVisitor
 	@Override
 	public void visit( final CondaEnvironmentCommand arg )
 	{
+		if ( arg.getEnvironments().isEmpty() )
+		{
+			// No environment found. Tell the user.
+			final JLabel lbl = new JLabel( "<html>There was an error retrieving the "
+					+ "list of conda environments. "
+					+ "<p>"
+					+ "Did you configure Conda for TrackMate? "
+					+ "<p>"
+					+ "(Edit > Options > Configure TrackMate Conda path...)</html>" );
+			lbl.setFont( Fonts.SMALL_FONT );
+			lbl.setForeground( Color.RED );
+			lbl.setPreferredSize( new Dimension( 200, 40 ) );
+			addToLayout( arg.getHelp(), lbl );
+			return;
+		}
+
 		if ( !arg.isSet() )
 		{
 			if ( !arg.hasDefaultValue() )
@@ -590,7 +607,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 		/*
 		 * Iterate over CLI arguments.
 		 */
-		
+
 		// Map a selectable group to a button group in the GUI
 		final Map< Argument< ?, ? >, JRadioButton > buttons = new HashMap<>();
 		for ( final SelectableArguments selectable : cli.getSelectables() )
@@ -645,7 +662,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 			final int selected = i;
 			btn.addItemListener( new ItemListener()
 			{
-				
+
 				@Override
 				public void itemStateChanged( final ItemEvent e )
 				{
