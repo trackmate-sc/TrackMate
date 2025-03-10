@@ -106,10 +106,22 @@ public class TrackMateRunner extends TrackMatePlugIn
 	private static final String ARG_MAX_DISTANCE = "max_distance";
 
 	/**
+	 * The macro parameter to set what is the minimal frame-to-frame linking
+	 * IoU. Accept double values.
+	 */
+	private static final String ARG_MIN_IOU = "min_iou";
+
+	/**
 	 * The macro parameter to set what is the maximal gap-closing distance.
 	 * Accept double values in physical units.
 	 */
 	private static final String ARG_MAX_GAP_DISTANCE = "max_gap_distance";
+
+	/**
+	 * The macro parameter to set what is the minimal gap-closing IoU.
+	 * Accept double values.
+	 */
+	private static final String ARG_MIN_GAP_IOU = "min_gap_iou";
 
 	/**
 	 * The macro parameter to set what is the maximal acceptable frame gap when
@@ -184,7 +196,9 @@ public class TrackMateRunner extends TrackMatePlugIn
 		SUPPORTED_ARGS.add( ARG_INPUT_IMAGE_NAME );
 		SUPPORTED_ARGS.add( ARG_INPUT_IMAGE_PATH );
 		SUPPORTED_ARGS.add( ARG_MAX_DISTANCE );
+		SUPPORTED_ARGS.add( ARG_MIN_IOU );
 		SUPPORTED_ARGS.add( ARG_MAX_GAP_DISTANCE );
+		SUPPORTED_ARGS.add( ARG_MIN_GAP_IOU );
 		SUPPORTED_ARGS.add( ARG_MAX_GAP_FRAMES );
 		SUPPORTED_ARGS.add( ARG_MEDIAN );
 		SUPPORTED_ARGS.add( ARG_SAVE_TO );
@@ -594,10 +608,20 @@ public class TrackMateRunner extends TrackMatePlugIn
 				new ValuePair< >( TrackerKeys.KEY_LINKING_MAX_DISTANCE, doubleConverter );
 		parsers.put( ARG_MAX_DISTANCE, maxDistancePair );
 
+		// Min linking IoU.
+		final ValuePair< String, MacroArgumentConverter > minIouPair =
+				new ValuePair< >( TrackerKeys.KEY_LINKING_MIN_IOU, doubleConverter );
+		parsers.put( ARG_MIN_IOU, minIouPair );
+
 		// Max gap distance.
 		final ValuePair< String, MacroArgumentConverter > maxGapDistancePair =
 				new ValuePair< >( TrackerKeys.KEY_GAP_CLOSING_MAX_DISTANCE, doubleConverter );
 		parsers.put( ARG_MAX_GAP_DISTANCE, maxGapDistancePair );
+
+		// Min gap IoU.
+		final ValuePair< String, MacroArgumentConverter > minGapIoUPair =
+				new ValuePair< >( TrackerKeys.KEY_GAP_CLOSING_MIN_IOU, doubleConverter );
+		parsers.put( ARG_MIN_GAP_IOU, minGapIoUPair );
 
 		// Target channel.
 		final ValuePair< String, MacroArgumentConverter > maxGapFramesPair =
