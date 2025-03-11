@@ -59,6 +59,8 @@ import sc.fiji.labkit.ui.models.DefaultSegmentationModel;
 public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 {
 
+	private static final boolean ENABLE_SPOT_EDITOR = true;
+
 	private final double[] calibration;
 
 	private final TrackMate trackmate;
@@ -492,7 +494,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 
 	public static final AbstractNamedAction getLaunchAction( final TrackMate trackmate, final DisplaySettings ds )
 	{
-		return new AbstractNamedAction( "launch labkit editor" )
+		final AbstractNamedAction action = new AbstractNamedAction( "launch labkit editor" )
 		{
 
 			private static final long serialVersionUID = 1L;
@@ -528,5 +530,12 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 				}.start();
 			}
 		};
+		// Disable if the image is not 2D.
+		if ( !DetectionUtils.is2D( trackmate.getSettings().imp ) )
+			action.setEnabled( false );
+		else
+			action.setEnabled( ENABLE_SPOT_EDITOR );
+
+		return action;
 	}
 }
