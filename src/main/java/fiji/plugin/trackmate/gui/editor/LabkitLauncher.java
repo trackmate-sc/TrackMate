@@ -59,7 +59,7 @@ import sc.fiji.labkit.ui.models.DefaultSegmentationModel;
 public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 {
 
-	private static final boolean ENABLE_SPOT_EDITOR = true;
+	private static final boolean ENABLE_SPOT_EDITOR = false;
 
 	private final double[] calibration;
 
