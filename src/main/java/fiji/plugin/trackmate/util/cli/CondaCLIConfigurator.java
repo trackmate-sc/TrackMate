@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -59,6 +59,11 @@ public abstract class CondaCLIConfigurator extends CLIConfigurator
 		@Override
 		public void set( final String env )
 		{
+			if ( envs.isEmpty() )
+			{
+				System.err.println( "The list of conda environments is empty." );
+				return;
+			}
 			final int sel = envs.indexOf( env );
 			if ( sel < 0 )
 			{
@@ -70,6 +75,12 @@ public abstract class CondaCLIConfigurator extends CLIConfigurator
 
 		public void set( final int selected )
 		{
+			if ( envs.isEmpty() )
+			{
+				System.err.println( "The list of conda environments is empty." );
+				return;
+			}
+
 			if ( selected < 0 || selected >= envs.size() )
 				set( envs.get( 0 ) );
 			else
@@ -94,7 +105,19 @@ public abstract class CondaCLIConfigurator extends CLIConfigurator
 
 		// Make a UI-only arg configuring the conda env.
 		// Default is last one (base is not interesting as a default).
-		final List< String > envList = CLIUtils.getEnvList();
+		final List< String > envList = new ArrayList<>();
+		try
+		{
+			final List< String > l = CLIUtils.getEnvList();
+			envList.addAll( l );
+		}
+		catch ( final Exception e )
+		{
+			// Do nothing. The list of envs will be empty.
+			System.err.println( "There was an error retrieving the list of conda environments.\n"
+					+ "Did you configure Conda for TrackMate? (Edit >  Options > Configure TrackMate Conda path...)" );
+			e.printStackTrace();
+		}
 		this.condaEnv = new CondaEnvironmentCommand();
 		envList.forEach( condaEnv::addEnvironment );
 		condaEnv.key( KEY_CONDA_ENV );
