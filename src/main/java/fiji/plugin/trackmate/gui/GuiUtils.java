@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -57,7 +57,11 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
+import javax.swing.text.JTextComponent;
 
+import org.scijava.prefs.PrefService;
+
+import fiji.plugin.trackmate.util.TMUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.measure.Calibration;
@@ -438,5 +442,65 @@ public class GuiUtils
 				label.setText( "<html><a href=''>" + url + "</a></html>" );
 			}
 		};
+	}
+
+	/**
+	 * Methods to decide what should be the default value shown in a text-field,
+	 * in a manner convenient to users.
+	 * <p>
+	 * This method is meant to be used with text fields shown in the TrackMate
+	 * wizard GUI. Very often these text-fields will store paths that are seldom
+	 * modified from one run of a detector or a tracker to another. For
+	 * instance, it can be the path to a Python executable in the conda
+	 * environment where the python tool used in the TrackMate detector is, or
+	 * the path to a custom model in a deep-learning tool.
+	 * <p>
+	 * These paths are stored and retrieved when the user uses TrackMate with
+	 * the same detector or tracker. But they are lost as soon as another
+	 * detector or tracker is chosen. This is not so great, because it takes
+	 * time configuring them again, and TrackMate was used to quickly juggle
+	 * between modules.
+	 * <p>
+	 * So this method tries to set a default value for text field in a
+	 * convenient manner:
+	 * <ul>
+	 * <li>check the specified <i>actualValue</i>.
+	 * <li>if this value is <code>null</code> or equal to the
+	 * <i>defaultValue</i>, retrieve the value stored in the Prefs system, and
+	 * set it to the text-field.
+	 * <li>if the Prefs value is not set, use the <i>defaultValue</i>.
+	 * <li>in all other cases, use the <i>actualValue</i>.
+	 * </ul>
+	 *
+	 * @param tf
+	 *            the text field to set.
+	 * @param actualValue
+	 *            the value possible stored by the previous use of the module in
+	 *            TrackMate.
+	 * @param defaultValue
+	 *            the default value, used when TrackMate has never run the
+	 *            module before.
+	 * @param prefKey
+	 *            a key to save the last valid value set by the user with
+	 *            SciJava Prefs system.
+	 * @param klass
+	 *            the class to which the pref key is associated.
+	 */
+	public static void setTextFieldDefaultOrPrefs(
+			final JTextComponent tf,
+			final String actualValue,
+			final String defaultValue,
+			final String prefKey,
+			final Class< ? > klass )
+	{
+		if ( actualValue == null || actualValue.equals( defaultValue ) )
+		{
+			// Try to see if we have something useful stored in the Prefs.
+			final PrefService prefService = TMUtils.getContext().getService( PrefService.class );
+			final String val = prefService.get( klass, prefKey, defaultValue );
+			tf.setText( val );
+			return;
+		}
+		tf.setText( actualValue );
 	}
 }
