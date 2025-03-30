@@ -178,53 +178,108 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 		} );
 	}
 
-	private void exportToCsv( final int index )
-	{
-		final int lastIndexOf = imagePath.lastIndexOf( '_' );
-		if ( lastIndexOf > 0 )
-			imagePath = imagePath.substring( 0, lastIndexOf );
+//	private void exportToCsv( final int index )
+//	{
+//		final int lastIndexOf = imagePath.lastIndexOf( '_' );
+//		if ( lastIndexOf > 0 )
+//			imagePath = imagePath.substring( 0, lastIndexOf );
+//
+//		final TablePanel< ? > table;
+//		String selectedFile;
+//		switch ( index )
+//		{
+//		case 0:
+//			selectedFile = imagePath + "_spots.csv";
+//			table = spotTable;
+//			break;
+//		case 1:
+//			selectedFile = imagePath + "_edges.csv";
+//			table = edgeTable;
+//			break;
+//		case 2:
+//			selectedFile = imagePath + "_tracks.csv";
+//			table = trackTable;
+//			break;
+//		default:
+//			throw new IllegalArgumentException( "Unknown table with index " + index );
+//		}
+//
+//		final File file = FileChooser.chooseFile(
+//				this,
+//				selectedFile,
+//				new FileNameExtensionFilter( "CSV files", "csv" ),
+//				"Export table to CSV",
+//				DialogType.SAVE,
+//				SelectionMode.FILES_ONLY );
+//		if ( null == file )
+//			return;
+//
+//		selectedFile = file.getAbsolutePath();
+//		try
+//		{
+//			table.exportToCsv( file );
+//		}
+//		catch ( final IOException e )
+//		{
+//			model.getLogger().error( "Problem exporting to file "
+//					+ file + "\n" + e.getMessage() );
+//		}
+//		imagePath = selectedFile;
+//	}
 
-		final TablePanel< ? > table;
-		String selectedFile;
-		switch ( index )
-		{
-		case 0:
-			selectedFile = imagePath + "_spots.csv";
-			table = spotTable;
-			break;
-		case 1:
-			selectedFile = imagePath + "_edges.csv";
-			table = edgeTable;
-			break;
-		case 2:
-			selectedFile = imagePath + "_tracks.csv";
-			table = trackTable;
-			break;
-		default:
-			throw new IllegalArgumentException( "Unknown table with index " + index );
+	private void exportToCsv(final int tabIndex) {
+		// Strip any existing suffix from the image path
+		final int lastSuffixIndex = imagePath.lastIndexOf('_');
+		final String baseFilePath = (lastSuffixIndex > 0)
+				? imagePath.substring(0, lastSuffixIndex)
+				: imagePath;
+
+		// Use clear variable names to explain what each tab index represents
+		final boolean isSpotTab = tabIndex == 0;
+		final boolean isEdgeTab = tabIndex == 1;
+		final boolean isTrackTab = tabIndex == 2;
+
+		// Select the appropriate table and filename based on tab type
+		final TablePanel<?> tableToExport;
+		String exportFilename;
+
+		if (isSpotTab) {
+			exportFilename = baseFilePath + "_spots.csv";
+			tableToExport = spotTable;
+		} else if (isEdgeTab) {
+			exportFilename = baseFilePath + "_edges.csv";
+			tableToExport = edgeTable;
+		} else if (isTrackTab) {
+			exportFilename = baseFilePath + "_tracks.csv";
+			tableToExport = trackTable;
+		} else {
+			throw new IllegalArgumentException("Unknown table with index " + tabIndex);
 		}
 
+		// Show file chooser dialog
 		final File file = FileChooser.chooseFile(
 				this,
-				selectedFile,
-				new FileNameExtensionFilter( "CSV files", "csv" ),
+				exportFilename,
+				new FileNameExtensionFilter("CSV files", "csv"),
 				"Export table to CSV",
 				DialogType.SAVE,
-				SelectionMode.FILES_ONLY );
-		if ( null == file )
+				SelectionMode.FILES_ONLY);
+
+		if (file == null)
 			return;
 
-		selectedFile = file.getAbsolutePath();
-		try
-		{
-			table.exportToCsv( file );
+		// Export the data
+		final String selectedFilePath = file.getAbsolutePath();
+		try {
+			tableToExport.exportToCsv(file);
 		}
-		catch ( final IOException e )
-		{
-			model.getLogger().error( "Problem exporting to file "
-					+ file + "\n" + e.getMessage() );
+		catch (final IOException e) {
+			model.getLogger().error("Problem exporting to file "
+					+ file + "\n" + e.getMessage());
 		}
-		imagePath = selectedFile;
+
+		// Update the image path for next export
+		imagePath = selectedFilePath;
 	}
 
 	public static final TablePanel< Integer > createTrackTable( final Model model, final DisplaySettings ds )

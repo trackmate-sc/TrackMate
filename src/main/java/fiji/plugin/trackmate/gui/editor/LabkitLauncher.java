@@ -111,8 +111,9 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 
 		// Store a copy.
 		@SuppressWarnings( "unchecked" )
-		final RandomAccessibleInterval< T > previousIndexImg = copy( ( RandomAccessibleInterval< T > ) labeling.getIndexImg() );
 
+//		final RandomAccessibleInterval< T > previousIndexImg = copy( ( RandomAccessibleInterval< T > ) labeling.getIndexImg() );
+		final RandomAccessibleInterval<T> previousIndexImg = ImgCopyUtils.copy((RandomAccessibleInterval<T>) labeling.getIndexImg());
 		// Show LabKit.
 		String title = "Editing TrackMate data for " + imp.getShortTitle();
 		if ( singleTimePoint )
@@ -163,12 +164,12 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 					// Message the user.
 					final String msg = ( isSingleTimePoint )
 							? "Commit the changes made to the\n"
-									+ "segmentation in the image?"
+							+ "segmentation in the image?"
 							: ( currentTimePoint < 0 )
-									? "Commit the changes made to the\n"
-											+ "segmentation in whole movie?"
-									: "Commit the changes made to the\n"
-											+ "segmentation in frame " + ( currentTimePoint + 1 ) + "?";
+							? "Commit the changes made to the\n"
+							+ "segmentation in whole movie?"
+							: "Commit the changes made to the\n"
+							+ "segmentation in frame " + ( currentTimePoint + 1 ) + "?";
 					final String title = "Commit edits to TrackMate";
 					final JCheckBox chkbox = new JCheckBox( "Simplify the contours of modified spots" );
 					chkbox.setSelected( simplify );
@@ -237,15 +238,16 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 		}.start();
 	}
 
-	private Img< T > copy( final RandomAccessibleInterval< T > in )
-	{
-		final ImgFactory< T > factory = Util.getArrayOrCellImgFactory( in, in.getType() );
-		final Img< T > out = factory.create( in );
-		LoopBuilder.setImages( in, out )
-				.multiThreaded()
-				.forEachPixel( ( i, o ) -> o.setInteger( i.getInteger() ) );
-		return out;
-	}
+//	private Img< T > copy( final RandomAccessibleInterval< T > in )
+//	{
+//		final ImgFactory< T > factory = Util.getArrayOrCellImgFactory( in, in.getType() );
+//		final Img< T > out = factory.create( in );
+//		LoopBuilder.setImages( in, out )
+//				.multiThreaded()
+//				.forEachPixel( ( i, o ) -> o.setInteger( i.getInteger() ) );
+//		return out;
+//	}
+
 
 	/**
 	 * Creates a new {@link DatasetInputImage} from the specified
@@ -327,11 +329,11 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 		// Axes.
 		final AxisType[] axes = ( is3D )
 				? ( singleTimePoint )
-						? new AxisType[] { Axes.X, Axes.Y, Axes.Z }
-						: new AxisType[] { Axes.X, Axes.Y, Axes.Z, Axes.TIME }
+				? new AxisType[] { Axes.X, Axes.Y, Axes.Z }
+				: new AxisType[] { Axes.X, Axes.Y, Axes.Z, Axes.TIME }
 				: ( singleTimePoint )
-						? new AxisType[] { Axes.X, Axes.Y }
-						: new AxisType[] { Axes.X, Axes.Y, Axes.TIME };
+				? new AxisType[] { Axes.X, Axes.Y }
+				: new AxisType[] { Axes.X, Axes.Y, Axes.TIME };
 
 		// N dimensions.
 		final int nDims = is3D

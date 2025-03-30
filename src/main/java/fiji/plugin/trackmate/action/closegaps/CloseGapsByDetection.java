@@ -102,7 +102,9 @@ public class CloseGapsByDetection implements GapClosingMethod
 			final ArrayDeque< DefaultWeightedEdge > gaps = new ArrayDeque<>( GapClosingMethod.getAllGaps( model ) );
 
 			int progress = 0;
-			final int nTasks = GapClosingMethod.countMissingSpots( gaps, model );
+			//final int nTasks = GapClosingMethod.countMissingSpots( gaps, model );
+
+			final int nTasks = CloseGapsByLinearInterpolation.countMissingSpots(gaps, model);
 
 			while ( !gaps.isEmpty() )
 			{

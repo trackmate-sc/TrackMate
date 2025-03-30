@@ -260,20 +260,24 @@ public interface GapClosingMethod
 
 	public static int countMissingSpots( final Collection< DefaultWeightedEdge > gaps, final Model model )
 	{
-		int nSpots = 0;
-		for ( final DefaultWeightedEdge gap : gaps )
-			nSpots += countMissingSpots( gap, model );
-		return nSpots;
+        return CloseGapsByLinearInterpolation.countMissingSpots(gaps, model);
+
+//		int nSpots = 0;
+//		for ( final DefaultWeightedEdge gap : gaps )
+//			nSpots += countMissingSpots( gap, model );
+//		return nSpots;
 	}
 
 	public static int countMissingSpots( final DefaultWeightedEdge gap, final Model model )
 	{
-		final TrackModel trackModel = model.getTrackModel();
-		final Spot source = trackModel.getEdgeSource( gap );
-		final int st = source.getFeature( Spot.FRAME ).intValue();
-		final Spot target = trackModel.getEdgeTarget( gap );
-		final int tt = target.getFeature( Spot.FRAME ).intValue();
-		return Math.abs( tt - st ) - 1;
+        return CloseGapsByLinearInterpolation.countMissingSpots(gap, model);
+
+//		final TrackModel trackModel = model.getTrackModel();
+//		final Spot source = trackModel.getEdgeSource( gap );
+//		final int st = source.getFeature( Spot.FRAME ).intValue();
+//		final Spot target = trackModel.getEdgeTarget( gap );
+//		final int tt = target.getFeature( Spot.FRAME ).intValue();
+//		return Math.abs( tt - st ) - 1;
 	}
 
 }

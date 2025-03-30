@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackModel;
 
-public class DefaultAutoNamingRule implements AutoNamingRule
+public class DefaultAutoNamingRule extends AbstractAutoNamingRule
 {
 
 	private final String suffixSeparator;
@@ -58,8 +58,10 @@ public class DefaultAutoNamingRule implements AutoNamingRule
 	@Override
 	public void nameRoot( final Spot root, final TrackModel model )
 	{
-		final Integer id = model.trackIDOf( root );
-		final String trackName = model.name( id );
+//		final Integer id = model.trackIDOf( root );
+//		final String trackName = model.name( id );
+
+		final String trackName = getTrackName(root, model);
 
 		final String rootName = ( incrementSuffix )
 				? trackName + suffixSeparator + "1"
@@ -172,12 +174,14 @@ public class DefaultAutoNamingRule implements AutoNamingRule
 			}
 			catch ( final NumberFormatException e )
 			{
-				AutoNamingRule.super.nameSpot( current, predecessor );
+//				AutoNamingRule.super.nameSpot( current, predecessor );
+				super.nameSpot(current, predecessor);
 			}
 		}
 		else
 		{
-			AutoNamingRule.super.nameSpot( current, predecessor );
+//			AutoNamingRule.super.nameSpot( current, predecessor );
+			super.nameSpot(current, predecessor);
 		}
 	}
 

@@ -30,6 +30,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
+import java.util.Collection;
 
 /**
  * This action allows to close gaps in tracks by creating new intermediate spots
@@ -98,5 +99,35 @@ public class CloseGapsByLinearInterpolation implements GapClosingMethod
 	public String toString()
 	{
 		return NAME;
+	}
+
+	/**
+	 * Counts the total number of missing spots across multiple gaps.
+	 *
+	 * @param gaps the collection of gaps to count
+	 * @param model the model
+	 * @return the total number of missing spots
+	 */
+	public static int countMissingSpots(final Collection<DefaultWeightedEdge> gaps, final Model model) {
+		int nSpots = 0;
+		for (final DefaultWeightedEdge gap : gaps)
+			nSpots += countMissingSpots(gap, model);
+		return nSpots;
+	}
+
+	/**
+	 * Counts the number of missing spots in a single gap.
+	 *
+	 * @param gap the gap to count
+	 * @param model the model
+	 * @return the number of missing spots
+	 */
+	public static int countMissingSpots(final DefaultWeightedEdge gap, final Model model) {
+		final TrackModel trackModel = model.getTrackModel();
+		final Spot source = trackModel.getEdgeSource(gap);
+		final int st = source.getFeature(Spot.FRAME).intValue();
+		final Spot target = trackModel.getEdgeTarget(gap);
+		final int tt = target.getFeature(Spot.FRAME).intValue();
+		return Math.abs(tt - st) - 1;
 	}
 }

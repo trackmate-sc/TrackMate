@@ -84,7 +84,7 @@ public class TablePanel< O >
 
 	private final List< Class< ? > > columnClasses;
 
-	private final List< String > mapToTooltip;
+	private final List< String > columnTooltips;
 
 	private final Function< O, String > labelGenerator;
 
@@ -168,7 +168,7 @@ public class TablePanel< O >
 		this.labelGenerator = labelGenerator;
 		this.labelSetter = labelSetter;
 		this.columnClasses = new ArrayList<>();
-		this.mapToTooltip = new ArrayList<>();
+		this.columnTooltips = new ArrayList<>();
 
 		// Table column model.
 		final MyTableModel tableModel = new MyTableModel();
@@ -201,53 +201,55 @@ public class TablePanel< O >
 		table.getSelectionModel().setSelectionMode( ListSelectionModel.MULTIPLE_INTERVAL_SELECTION );
 		table.setGridColor( table.getTableHeader().getBackground() );
 
-		// Class of columns.
-		columnClasses.clear();
-		// Last line of header is for units.
-		final List< String > headerLine = new ArrayList<>();
-		// Map from column index to tooltip strings.
-		mapToTooltip.clear();
-
-		// Provide tooltips on the fly.
-		table.getTableHeader().addMouseMotionListener( new MyTableToolTipProvider() );
-
-		int colIndex = 0;
-		// First column is label.
-		if ( !skipLabelColumn )
-		{
-			headerLine.add( "<html><b>Label<br> <br></html>" );
-			mapToTooltip.add( "Object name" );
-			columnClasses.add( String.class );
-			tableColumnModel.addColumn( new TableColumn( colIndex++ ) );
-		}
-
-		// Units for feature columns.
-		for ( final String feature : features )
-		{
-			final Class< ? > pclass;
-			if ( feature.equals( manualColorFeature ) )
-				pclass = Color.class;
-			else if ( isInts.get( feature ) )
-				pclass = Integer.class;
-			else
-				pclass = Double.class;
-			columnClasses.add( pclass );
-
-			String tooltipStr = "<html>" + featureNames.get( feature );
-			final String infoText = infoTexts.get( feature );
-			if ( infoText != null )
-				tooltipStr += "<p>" + infoText + "</p>";
-			tooltipStr += "</html>";
-			mapToTooltip.add( tooltipStr );
-			final String units = featureUnits.get( feature );
-
-			String headerStr = "<html><center><b>"
-					+ featureShortNames.get( feature )
-					+ "</b><br>";
-			headerStr += ( units == null || units.isEmpty() ) ? "<br> </html>" : "(" + units + ")</html>";
-			headerLine.add( headerStr );
-			tableColumnModel.addColumn( new TableColumn( colIndex++ ) );
-		}
+//		// Class of columns.
+//		columnClasses.clear();
+//		// Last line of header is for units.
+//		final List< String > headerLine = new ArrayList<>();
+//		// Map from column index to tooltip strings.
+//		columnTooltips.clear();
+//
+//		// Provide tooltips on the fly.
+//		table.getTableHeader().addMouseMotionListener( new MyTableToolTipProvider() );
+//
+//		int colIndex = 0;
+//		// First column is label.
+//		if ( !skipLabelColumn )
+//		{
+//			headerLine.add( "<html><b>Label<br> <br></html>" );
+//			columnTooltips.add( "Object name" );
+//			columnClasses.add( String.class );
+//			tableColumnModel.addColumn( new TableColumn( colIndex++ ) );
+//		}
+//
+//		// Units for feature columns.
+//		for ( final String feature : features )
+//		{
+//			final Class< ? > pclass;
+//			if ( feature.equals( manualColorFeature ) )
+//				pclass = Color.class;
+//			else if ( isInts.get( feature ) )
+//				pclass = Integer.class;
+//			else
+//				pclass = Double.class;
+//			columnClasses.add( pclass );
+//
+//			String tooltipStr = "<html>" + featureNames.get( feature );
+//			final String infoText = infoTexts.get( feature );
+//			if ( infoText != null )
+//				tooltipStr += "<p>" + infoText + "</p>";
+//			tooltipStr += "</html>";
+//			columnTooltips.add( tooltipStr );
+//			final String units = featureUnits.get( feature );
+//
+//			String headerStr = "<html><center><b>"
+//					+ featureShortNames.get( feature )
+//					+ "</b><br>";
+//			headerStr += ( units == null || units.isEmpty() ) ? "<br> </html>" : "(" + units + ")</html>";
+//			headerLine.add( headerStr );
+//			tableColumnModel.addColumn( new TableColumn( colIndex++ ) );
+//		}
+		// Initialize table columns with headers and tooltips
+		final List<String> headerLine = initializeTableColumns(tableColumnModel, skipLabelColumn, isInts, infoTexts);
 
 		// Sorting.
 		final TableRowSorter< MyTableModel > sorter = new TableRowSorter<>( tableModel );
@@ -304,6 +306,68 @@ public class TablePanel< O >
 		( ( MyTableModel ) table.getModel() ).fireTableDataChanged();
 	}
 
+	/**
+	 * Initialize table columns with appropriate headers and tooltips
+	 */
+
+	private List<String> initializeTableColumns(final DefaultTableColumnModel tableColumnModel, final boolean skipLabelColumn, final Map<String, Boolean> isInts,
+										final Map<String, String> infoTexts) {
+		// Class of columns.
+		columnClasses.clear();
+		// Last line of header is for units.
+		final List< String > headerLine = new ArrayList<>();
+		// Map from column index to tooltip strings.
+		columnTooltips.clear();
+
+		// Provide tooltips on the fly.
+		table.getTableHeader().addMouseMotionListener( new MyTableToolTipProvider() );
+
+		int colIndex = 0;
+		// First column is label.
+		if ( !skipLabelColumn )
+		{
+			headerLine.add( "<html><b>Label<br> <br></html>" );
+			columnTooltips.add( "Object name" );
+			columnClasses.add( String.class );
+			tableColumnModel.addColumn( new TableColumn( colIndex++ ) );
+		}
+
+		// Units for feature columns.
+		for ( final String feature : features )
+		{
+			final Class< ? > pclass;
+			if ( feature.equals( manualColorFeature ) )
+				pclass = Color.class;
+			else if ( isInts.get( feature ) )
+				pclass = Integer.class;
+			else
+				pclass = Double.class;
+			columnClasses.add( pclass );
+
+			String tooltipStr = "<html>" + featureNames.get( feature );
+			final String infoText = infoTexts.get( feature );
+			if ( infoText != null )
+				tooltipStr += "<p>" + infoText + "</p>";
+			tooltipStr += "</html>";
+			columnTooltips.add( tooltipStr );
+			final String units = featureUnits.get( feature );
+
+			String headerStr = "<html><center><b>"
+					+ featureShortNames.get( feature )
+					+ "</b><br>";
+			headerStr += ( units == null || units.isEmpty() ) ? "<br> </html>" : "(" + units + ")</html>";
+			headerLine.add( headerStr );
+			tableColumnModel.addColumn( new TableColumn( colIndex++ ) );
+		}
+
+		return headerLine;
+
+		// Pass last line to column headers and set cell renderer.
+//		for (int c = 0; c < tableColumnModel.getColumnCount(); c++) {
+//			final TableColumn column = tableColumnModel.getColumn(c);
+//			column.setHeaderValue(headerLine.get(c));
+//		}
+	}
 	/**
 	 * The panel in which the table is displayed. This is the component to add
 	 * to client UI.
@@ -491,9 +555,9 @@ public class TablePanel< O >
 			final int vColIndex = table.convertColumnIndexToModel( col );
 			if ( vColIndex != previousCol )
 			{
-				if ( vColIndex >= 0 && vColIndex < mapToTooltip.size() )
+				if ( vColIndex >= 0 && vColIndex < columnTooltips.size() )
 				{
-					table.getTableHeader().setToolTipText( mapToTooltip.get( vColIndex ) );
+					table.getTableHeader().setToolTipText( columnTooltips.get( vColIndex ) );
 					previousCol = vColIndex;
 				}
 				else
@@ -734,3 +798,5 @@ public class TablePanel< O >
 		}
 	}
 }
+
+
