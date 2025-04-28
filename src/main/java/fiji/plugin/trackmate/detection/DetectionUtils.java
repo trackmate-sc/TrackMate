@@ -43,6 +43,7 @@ import fiji.plugin.trackmate.detection.util.MedianFilter2D;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.util.Threads;
 import ij.ImagePlus;
+import ij.gui.Roi;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imglib2.Cursor;
@@ -77,6 +78,91 @@ import net.imglib2.view.Views;
 
 public class DetectionUtils
 {
+
+	/**
+	 * Filters out the specified {@link SpotCollection} so that only the spots
+	 * that are in the ROI specified in the {@link Settings} input are present
+	 * in the returned {@link SpotCollection}. If not Roi is specified, the
+	 * return collection is the input collection.
+	 *
+	 * @param input
+	 *            the spot collection to filter.
+	 * @param settings
+	 *            the TrackMate settings.
+	 * @param numThreads
+	 *            a number of threads to use for computation in the new
+	 *            {@link SpotCollection}.
+	 * @return a new {@link SpotCollection} or the input collection.
+	 */
+	public static final SpotCollection filterROI( final SpotCollection input, final Settings settings, final int numThreads )
+	{
+		final double[] calibration = TMUtils.getSpatialCalibration( settings.imp );
+		final SpotCollection spots;
+		final Roi roi = settings.getRoi();
+		if ( roi != null )
+		{
+			spots = new SpotCollection();
+			spots.setNumThreads( numThreads );
+			for ( int frame = settings.tstart; frame <= settings.tend; frame++ )
+			{
+				final List< Spot > spotsThisFrame = new ArrayList<>();
+				final Iterable< Spot > spotsIt = input.iterable( frame, false );
+				if ( spotsIt == null )
+					continue;
+
+				for ( final Spot spot : spotsIt )
+				{
+					if ( roi.contains(
+							( int ) Math.round( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ] ),
+							( int ) Math.round( spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) ) )
+					{
+						spotsThisFrame.add( spot );
+					}
+				}
+				spots.put( frame, spotsThisFrame );
+			}
+		}
+		else
+		{
+			spots = input;
+		}
+		return spots;
+	}
+
+	/**
+	 * Filters out the specified spots so that only the spots that are in the
+	 * ROI specified in the {@link Settings} input are present in the returned
+	 * list. If not Roi is specified, the return collection is the input
+	 * collection.
+	 *
+	 * @param input
+	 *            the spot collection to filter.
+	 * @param settings
+	 *            the TrackMate settings.
+	 * @return a new list or the input collection.
+	 */
+	public static final List< Spot > filterROI( final List< Spot > input, final Settings settings )
+	{
+		final double[] calibration = TMUtils.getSpatialCalibration( settings.imp );
+		final Roi roi = settings.getRoi();
+		List< Spot > prunedSpots;
+		if ( roi != null )
+		{
+			prunedSpots = new ArrayList<>();
+			for ( final Spot spot : input )
+			{
+				if ( roi.contains(
+						( int ) Math.round( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ] ),
+						( int ) Math.round( spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) ) )
+					prunedSpots.add( spot );
+			}
+		}
+		else
+		{
+			prunedSpots = input;
+		}
+		return prunedSpots;
+	}
 
 	/**
 	 * Preview a detection results.
@@ -555,7 +641,7 @@ public class DetectionUtils
 	/**
 	 * Properly wraps an {@link ImgPlus} in a {@link ImagePlus}, ensuring that
 	 * the dimensionality and the calibration of the output matches the input.
-	 * 
+	 *
 	 * @param img
 	 *            the image to wrap.
 	 */
@@ -579,7 +665,7 @@ public class DetectionUtils
 	 * Splits the input image in a list of {@link ImagePlus}, one per
 	 * time-point. If the input includes several channels, they are all included
 	 * in the new image, and put as the last dimension.
-	 * 
+	 *
 	 * @param <T>
 	 *            the type of the pixel in the input image.
 	 * @param img

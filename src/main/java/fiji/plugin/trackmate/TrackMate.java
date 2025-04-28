@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -35,6 +35,7 @@ import org.scijava.Cancelable;
 import org.scijava.Named;
 import org.scijava.util.VersionUtils;
 
+import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.detection.ManualDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetector;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
@@ -49,7 +50,6 @@ import fiji.plugin.trackmate.tracking.SpotImageTrackerFactory;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.util.Threads;
-import ij.gui.Roi;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imglib2.Interval;
@@ -389,8 +389,8 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 			return processGlobal( ( SpotGlobalDetectorFactory ) factory, img, logger );
 		}
 		else if ( factory instanceof SpotDetectorFactory )
-		{ 
-			return processFrameByFrame( ( SpotDetectorFactory ) factory, img, logger ); 
+		{
+			return processFrameByFrame( ( SpotDetectorFactory ) factory, img, logger );
 		}
 
 		errorMessage = "Don't know how to handle detector factory of type: " + factory.getClass();
@@ -401,9 +401,6 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 	private boolean processGlobal( final SpotGlobalDetectorFactory factory, final ImgPlus img, final Logger logger )
 	{
 		final Interval interval = TMUtils.getIntervalWithTime( img, settings );
-
-		// To translate spots, later
-		final double[] calibration = TMUtils.getSpatialCalibration( settings.imp );
 
 		final SpotGlobalDetector< ? > detector = factory.getDetector( interval );
 		if ( detector instanceof MultiThreaded )
@@ -425,35 +422,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 			/*
 			 * Filter out spots not in the ROI.
 			 */
-			final SpotCollection spots;
-			final Roi roi = settings.getRoi();
-			if ( roi != null )
-			{
-				spots = new SpotCollection();
-				spots.setNumThreads( numThreads );
-				for ( int frame = settings.tstart; frame <= settings.tend; frame++ )
-				{
-					final List< Spot > spotsThisFrame = new ArrayList<>();
-					final Iterable< Spot > spotsIt = rawSpots.iterable( frame, false );
-					if ( spotsIt == null )
-						continue;
-
-					for ( final Spot spot : spotsIt )
-					{
-						if ( roi.contains(
-								( int ) Math.round( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ] ),
-								( int ) Math.round( spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) ) )
-						{
-							spotsThisFrame.add( spot );
-						}
-					}
-					spots.put( frame, spotsThisFrame );
-				}
-			}
-			else
-			{
-				spots = rawSpots;
-			}
+			final SpotCollection spots = DetectionUtils.filterROI( rawSpots, settings, numThreads );
 
 			// Add detection feature other than position
 			for ( final Spot spot : spots.iterable( false ) )
@@ -487,8 +456,6 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 		// To report progress
 		final AtomicInteger spotFound = new AtomicInteger( 0 );
 		final AtomicInteger progress = new AtomicInteger( 0 );
-		// To translate spots, later
-		final double[] calibration = TMUtils.getSpatialCalibration( settings.imp );
 
 		/*
 		 * Fine tune multi-threading: If we have 10 threads and 15 frames to
@@ -553,23 +520,9 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 							}
 						}
 
-						List< Spot > prunedSpots;
-						final Roi roi = settings.getRoi();
-						if ( roi != null )
-						{
-							prunedSpots = new ArrayList<>();
-							for ( final Spot spot : spotsThisFrame )
-							{
-								if ( roi.contains(
-										( int ) Math.round( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ] ),
-										( int ) Math.round( spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) ) )
-									prunedSpots.add( spot );
-							}
-						}
-						else
-						{
-							prunedSpots = spotsThisFrame;
-						}
+						// Filter spots.
+						final List< Spot > prunedSpots = DetectionUtils.filterROI( spotsThisFrame, settings );
+
 						// Add detection feature other than position
 						for ( final Spot spot : prunedSpots )
 						{
