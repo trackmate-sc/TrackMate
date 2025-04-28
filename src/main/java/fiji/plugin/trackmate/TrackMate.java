@@ -42,6 +42,9 @@ import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
 import fiji.plugin.trackmate.detection.SpotGlobalDetector;
 import fiji.plugin.trackmate.detection.SpotGlobalDetectorFactory;
+import fiji.plugin.trackmate.detection.onestep.SpotDetectorTracker;
+import fiji.plugin.trackmate.detection.onestep.SpotDetectorTrackerFactory;
+import fiji.plugin.trackmate.detection.onestep.SpotDetectorTrackerOutput;
 import fiji.plugin.trackmate.features.EdgeFeatureCalculator;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.SpotFeatureCalculator;
@@ -380,11 +383,15 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 		}
 
 		/*
-		 * Separate frame-by-frame or global detection depending on the factory
-		 * type.
+		 * Separate frame-by-frame, global detection or one-step tracking
+		 * depending on the factory type.
 		 */
 
-		if ( factory instanceof SpotGlobalDetectorFactory )
+		if ( factory instanceof SpotDetectorTrackerFactory )
+		{
+			return processDetectionTracking( ( SpotDetectorTrackerFactory ) factory, img, logger );
+		}
+		else if ( factory instanceof SpotGlobalDetectorFactory )
 		{
 			return processGlobal( ( SpotGlobalDetectorFactory ) factory, img, logger );
 		}
@@ -395,6 +402,43 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 
 		errorMessage = "Don't know how to handle detector factory of type: " + factory.getClass();
 		return false;
+	}
+
+	@SuppressWarnings( "rawtypes" )
+	private boolean processDetectionTracking( final SpotDetectorTrackerFactory factory, final ImgPlus img, final Logger logger )
+	{
+		final Interval interval = TMUtils.getIntervalWithTime( img, settings );
+
+		final SpotDetectorTracker< ? > detectorTracker = factory.getDetectorTracker( interval );
+		if ( detectorTracker instanceof MultiThreaded )
+		{
+			final MultiThreaded md = detectorTracker;
+			md.setNumThreads( numThreads );
+		}
+
+		if ( detectorTracker instanceof Cancelable )
+			cancelables.add( ( Cancelable ) detectorTracker );
+
+		// Execute detection
+		logger.setStatus( "Detection & Tracking..." );
+		if ( detectorTracker.checkInput() && detectorTracker.process() )
+		{
+			final SpotDetectorTrackerOutput results = detectorTracker.getResult();
+
+			model.setSpots( results.getSpots(), true );
+			model.setTracks( results.getGraph(), true );
+			logger.setStatus( "" );
+			if ( isCanceled() )
+				logger.log( "Tracking canceled. Reason:\n" + getCancelReason() + "\n" );
+		}
+		else
+		{
+			// Fail: exit and report error.
+			errorMessage = detectorTracker.getErrorMessage();
+			return false;
+		}
+
+		return true;
 	}
 
 	@SuppressWarnings( "rawtypes" )

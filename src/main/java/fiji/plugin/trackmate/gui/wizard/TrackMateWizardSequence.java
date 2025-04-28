@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -44,6 +44,7 @@ import fiji.plugin.trackmate.action.ExportAllSpotsStatsAction;
 import fiji.plugin.trackmate.action.ExportStatsTablesAction;
 import fiji.plugin.trackmate.detection.ManualDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
+import fiji.plugin.trackmate.detection.onestep.SpotDetectorTrackerFactory;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.ModelFeatureUpdater;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
@@ -179,6 +180,18 @@ public class TrackMateWizardSequence implements WizardSequence
 		if ( current == chooseTrackerDescriptor )
 			getTrackerConfigDescriptor();
 
+		if ( current == executeDetectionDescriptor )
+		{
+			// Are we running a detector-tracker algo?
+			final SpotDetectorFactoryBase< ? > detectorFactory = trackmate.getSettings().detectorFactory;
+			if ( detectorFactory != null && detectorFactory instanceof SpotDetectorTrackerFactory )
+			{
+				// Jump to track filter step.
+				current = trackFilterDescriptor;
+				return current;
+			}
+		}
+
 		current = next.get( current );
 		return current;
 	}
@@ -187,7 +200,20 @@ public class TrackMateWizardSequence implements WizardSequence
 	public WizardPanelDescriptor previous()
 	{
 		if ( current == trackFilterDescriptor )
-			getTrackerConfigDescriptor();
+		{
+			// Were we running a detector-tracker algo?
+			final SpotDetectorFactoryBase< ? > detectorFactory = trackmate.getSettings().detectorFactory;
+			if ( detectorFactory != null && detectorFactory instanceof SpotDetectorTrackerFactory )
+			{
+				// Jump back to detector-tracker config step.
+				current = getDetectorConfigDescriptor();
+				return current;
+			}
+			else
+			{
+				getTrackerConfigDescriptor();
+			}
+		}
 
 		if ( current == spotFilterDescriptor )
 			getDetectorConfigDescriptor();
@@ -421,12 +447,12 @@ public class TrackMateWizardSequence implements WizardSequence
 		final ConfigurationPanel trackerConfigurationPanel;
 		if (trackerFactory instanceof SpotImageTrackerFactory)
 		{
-			trackerConfigurationPanel = ((SpotImageTrackerFactory)trackerFactory).getTrackerConfigurationPanel(  
+			trackerConfigurationPanel = ((SpotImageTrackerFactory)trackerFactory).getTrackerConfigurationPanel(
 					trackmate.getModel(),  trackmate.getSettings().imp );
 		}
 		else
 		{
-			trackerConfigurationPanel= trackerFactory.getTrackerConfigurationPanel( 
+			trackerConfigurationPanel= trackerFactory.getTrackerConfigurationPanel(
 					trackmate.getModel() );
 		}
 		trackerConfigurationPanel.setSettings( defaultSettings );
@@ -439,7 +465,7 @@ public class TrackMateWizardSequence implements WizardSequence
 		previous.put( configDescriptor, chooseTrackerDescriptor );
 		previous.put( executeTrackingDescriptor, configDescriptor );
 		previous.put( trackFilterDescriptor, configDescriptor );
-		
+
 		return configDescriptor;
 	}
 
