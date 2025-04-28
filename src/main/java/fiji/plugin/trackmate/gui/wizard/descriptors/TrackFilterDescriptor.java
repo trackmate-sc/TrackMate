@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -107,7 +107,7 @@ public class TrackFilterDescriptor extends WizardPanelDescriptor
 					final long end = System.currentTimeMillis();
 					trackmate.getModel().setLogger( oldLogger );
 					if ( trackmate.isCanceled() )
-						logger.log( "Spot feature calculation canceled.\nSome spots will have missing feature values.\n" );
+						logger.log( "Track feature calculation canceled.\nSome tracks will have missing feature values.\n" );
 					logger.log( String.format( "Calculating features done in %.1f s.\n", ( end - start ) / 1e3f ) );
 					panel.showProgressBar( false );
 
