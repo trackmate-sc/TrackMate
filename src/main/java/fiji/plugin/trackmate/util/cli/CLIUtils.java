@@ -85,8 +85,11 @@ public class CLIUtils
 				+ "python -c import_" + moduleName + ";"
 				+ "print(" + moduleName + ".__version__)";
 		final List< String > tokens = preparePythonCommand( envName, cmd );
-		final ListIterator< String > it = tokens.listIterator();
+		if ( tokens.isEmpty() )
+			return null;
+
 		// Put back the space in the token.
+		final ListIterator< String > it = tokens.listIterator();
 		while ( it.hasNext() )
 		{
 			final String token = it.next();
@@ -108,23 +111,44 @@ public class CLIUtils
 					new InputStreamReader( process.getInputStream() ) );
 
 			// Return the last line of output.
-			String line, prevLine = null;
+			String line;
+			String prevLine = null;
+			final StringBuffer errorMsg = new StringBuffer();
 			while ( ( line = reader.readLine() ) != null )
+			{
 				prevLine = line;
+				errorMsg.append( '\n' + line );
+			}
 
 			final int exitCode = process.waitFor();
 			if ( exitCode == 0 )
 				return prevLine;
 			else
-				return null;
+			{
+				throw new Exception( "Error running the command '" + moduleName
+						+ "' in environment '" + envName + "'" + errorMsg );
+			}
 		}
-		catch ( final IOException | InterruptedException e )
+		catch ( final Exception e )
 		{
 			e.printStackTrace();
+			return null;
 		}
-		return null;
 	}
 
+	/**
+	 * Generates the list of tokens to be used with {@link ProcessBuilder} to
+	 * run a Python command.
+	 *
+	 * @param envName
+	 *            the name of the conda environment in which the command is
+	 *            installed.
+	 * @param cmdName
+	 *            the name of the command to run.
+	 * @return a list of tokens to use with {@link ProcessBuilder}. The list is
+	 *         empty if there is an error with the conda environment or with the
+	 *         command.
+	 */
 	public static List< String > preparePythonCommand( final String envName, final String cmdName )
 	{
 		final List< String > cmd = new ArrayList<>();
@@ -145,6 +169,9 @@ public class CLIUtils
 			try
 			{
 				final String pythonPath = CLIUtils.getEnvMap().get( envName );
+				if ( pythonPath == null )
+					throw new Exception( "Unknown conda environment: " + envName );
+
 				final int i = pythonPath.lastIndexOf( "python" );
 				final String binPath = pythonPath.substring( 0, i );
 				final String executablePath = binPath + cmdName;
@@ -160,7 +187,7 @@ public class CLIUtils
 			}
 			catch ( final Exception e )
 			{
-				System.err.println( "Error running the conda executable:\n" );
+				System.err.println( "Error running the conda executable:" );
 				e.printStackTrace();
 			}
 		}
