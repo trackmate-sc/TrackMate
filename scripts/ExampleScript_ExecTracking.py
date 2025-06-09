@@ -35,12 +35,10 @@ imp.show()
 # Some of the parameters we configure below need to have
 # a reference to the model at creation. So we create an
 # empty model now.
-
 model = Model()
 
 # Send all messages to ImageJ log window.
 model.setLogger(Logger.IJ_LOGGER)
-
 
 
 #------------------------
@@ -73,9 +71,20 @@ settings.trackerSettings['ALLOW_TRACK_MERGING'] = True
 # yield numerical features for the results, such as speed, mean intensity etc.
 settings.addAllAnalyzers()
 
+# The line above is VERY IMPORTANT if you want to filter spots or tracks.
+# By default the TrackMate settings do not include feature analyzers, and the 
+# objects you will get from tracking will only include the very minimal 
+# feature set needed for TrackMate to operate. This might be advantageous
+# if you want to go fast. If you want however to compute specific features and / or
+# filter spots based on these filters, you need to explicitely include the corresponding
+# analyzer into the settings object. Filtering will not work without that. For instance,
+# if you try for  to filter spots with a feature that was not calculated by an analyzer,
+# you will have 0 spots after filtering.
+# With `settings.addAllAnalyzers()` we simply add all the analyzers that TrackMate 
+# can find. Since they are relatively fast, this is a convenient method.
+
 # Configure track filters - We want to get rid of the two immobile spots at
 # the bottom right of the image. Track displacement must be above 10 pixels.
-
 filter2 = FeatureFilter('TRACK_DISPLACEMENT', 10, True)
 settings.addTrackFilter(filter2)
 
