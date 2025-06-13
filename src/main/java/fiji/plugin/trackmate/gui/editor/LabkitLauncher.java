@@ -25,6 +25,7 @@ import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.editor.labkit.TMLabKitFrame;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
 import fiji.plugin.trackmate.util.SpotUtil;
 import fiji.plugin.trackmate.util.TMUtils;
@@ -117,11 +118,16 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 		String title = "Editing TrackMate data for " + imp.getShortTitle();
 		if ( singleTimePoint )
 			title += "at frame " + ( currentTimePoint + 1 );
-		final TrackMateLabkitFrame labkit = TrackMateLabkitFrame.show( model, title );
+
+		// final LabkitFrame labkit = LabkitFrame.show( model, title );
+		final TMLabKitFrame labkit = new TMLabKitFrame( model, title );
+		labkit.setLocationRelativeTo( imp.getWindow() );
+		labkit.setVisible( true );
 
 		// Prepare re-importer.
 		final double dt = imp.getCalibration().frameInterval;
 		labkit.onCloseListeners().addListener( () -> {
+			System.out.println( "TROLOLO" ); // DEBUG
 			@SuppressWarnings( "unchecked" )
 			final RandomAccessibleInterval< T > indexImg = ( RandomAccessibleInterval< T > ) model.imageLabelingModel().labeling().get().getIndexImg();
 			reimport( indexImg, previousIndexImg, spotLabels, dt );
@@ -265,45 +271,48 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 	@SuppressWarnings( { "rawtypes", "unchecked" } )
 	private final DatasetInputImage makeInput( final ImagePlus imp, final boolean singleTimePoint )
 	{
-		final ImgPlus src = TMUtils.rawWraps( imp );
-		// Crop if we have a ROI.
-		final Roi roi = imp.getRoi();
-		final RandomAccessibleInterval crop;
-		if ( roi != null )
-		{
-			final long[] min = src.minAsLongArray();
-			final long[] max = src.maxAsLongArray();
-			min[ 0 ] = roi.getBounds().x;
-			min[ 1 ] = roi.getBounds().y;
-//			max[ 0 ] = roi.getBounds().x + roi.getBounds().width;
-//			max[ 1 ] = roi.getBounds().y + roi.getBounds().height;
-			max[ 0 ] = roi.getBounds().x + roi.getBounds().width - 1;
-			max[ 1 ] = roi.getBounds().y + roi.getBounds().height - 1;
-			crop = Views.interval( src, min, max );
-		}
-		else
-		{
-			crop = src;
-		}
-		final ImgPlus srcCropped = new ImgPlus<>( ImgView.wrap( crop ), src );
+		final ImgPlus all = TMUtils.rawWraps( imp );
+		final int timeAxis = all.dimensionIndex( Axes.TIME );
 
-		// Possibly reslice for current time-point.
-		final ImpBdvShowable showable;
-		final ImgPlus inputImg;
-		final int timeAxis = src.dimensionIndex( Axes.TIME );
+		ImgPlus view;
 		if ( singleTimePoint && timeAxis >= 0 )
 		{
 			this.currentTimePoint = imp.getFrame() - 1;
-			inputImg = ImgPlusViews.hyperSlice( srcCropped, timeAxis, currentTimePoint );
-			showable = ImpBdvShowable.fromImp( inputImg, imp );
+			view = ImgPlusViews.hyperSlice( all, timeAxis, currentTimePoint );
 		}
 		else
 		{
 			this.currentTimePoint = -1;
-			inputImg = srcCropped;
-			showable = ImpBdvShowable.fromImp( inputImg, imp );
+			view = all;
 		}
-		return new DatasetInputImage( inputImg, showable );
+
+		// Crop if we have a ROI.
+		final Roi roi = imp.getRoi();
+		final ImgPlus fov;
+		if ( roi != null )
+		{
+			final long[] min = view.minAsLongArray();
+			final long[] max = view.maxAsLongArray();
+			final int xAxis = view.dimensionIndex( Axes.X );
+			final int yAxis = view.dimensionIndex( Axes.Y );
+			min[ xAxis ] = roi.getBounds().x;
+			min[ yAxis ] = roi.getBounds().y;
+			max[ xAxis ] = roi.getBounds().x + roi.getBounds().width;
+			max[ yAxis ] = roi.getBounds().y + roi.getBounds().height;
+			final RandomAccessibleInterval crop = Views.interval( view, min, max );
+			// FIXME: bug if we go to max height with a crop
+			fov = ImgPlus.wrapRAI( crop );
+			for ( int d = 0; d < view.numDimensions(); d++ )
+			{
+				fov.setAxis( view.axis( d ), d );
+			}
+		}
+		else
+		{
+			fov = view;
+		}
+		final ImpBdvShowable showable = ImpBdvShowable.fromImp( fov, imp );
+		return new DatasetInputImage( fov, showable );
 	}
 
 	/**

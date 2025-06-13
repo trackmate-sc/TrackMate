@@ -11,7 +11,6 @@ import bdv.util.AxisOrder;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import bdv.util.BdvStackSource;
-import bdv.viewer.DisplayMode;
 import bdv.viewer.SourceAndConverter;
 import bdv.viewer.SynchronizedViewerState;
 import bdv.viewer.ViewerState;
@@ -19,12 +18,10 @@ import fiji.plugin.trackmate.util.TMUtils;
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
-import ij.gui.Roi;
 import ij.process.LUT;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
-import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
@@ -50,7 +47,7 @@ public class ImpBdvShowable implements BdvShowable
 	 * Returns a new {@link BdvShowable} that wraps the specified
 	 * {@link ImagePlus}. The LUT and display settings are read from the
 	 * {@link ImagePlus}.
-	 * 
+	 *
 	 * @param <T>
 	 *            the pixel type.
 	 * @param imp
@@ -70,7 +67,7 @@ public class ImpBdvShowable implements BdvShowable
 	/**
 	 * Returns a new {@link BdvShowable} for the specified image, but using the
 	 * LUT and display settings of the specified {@link ImagePlus}.
-	 * 
+	 *
 	 * @param <T>
 	 *            the pixel type.
 	 * @param frame
@@ -88,33 +85,16 @@ public class ImpBdvShowable implements BdvShowable
 
 	private final ImgPlus< ? extends NumericType< ? > > image;
 
-	private Interval interval;
-
 	ImpBdvShowable( final ImgPlus< ? extends NumericType< ? > > image, final ImagePlus imp )
 	{
 		this.image = image;
 		this.imp = imp;
-		final Roi roi = imp.getRoi();
-		if ( roi == null )
-		{
-			this.interval = image;
-		}
-		else
-		{
-			final long[] min = image.minAsLongArray();
-			final long[] max = image.maxAsLongArray();
-			min[ 0 ] = roi.getBounds().x;
-			min[ 1 ] = roi.getBounds().y;
-			max[ 0 ] = roi.getBounds().x + roi.getBounds().width;
-			max[ 1 ] = roi.getBounds().y + roi.getBounds().height;
-			this.interval = new FinalInterval( min, max );
-		}
 	}
 
 	@Override
 	public Interval interval()
 	{
-		return interval;
+		return image;
 	}
 
 	@Override
@@ -132,44 +112,34 @@ public class ImpBdvShowable implements BdvShowable
 	public BdvStackSource< ? > show( final String title, final BdvOptions options )
 	{
 		final String name = image.getName();
-		final BdvOptions options1 = options.axisOrder( getAxisOrder() ).sourceTransform( transformation() );
-		final BdvStackSource< ? extends NumericType< ? > > stackSource = BdvFunctions.show( image, name == null
-				? title : name, options1 );
+		final BdvOptions options1 = options
+				.axisOrder( getAxisOrder() )
+				.sourceTransform( transformation() );
+		final BdvStackSource< ? extends NumericType< ? > > stackSource = BdvFunctions.show( image,
+				name == null ? title : name, options1 );
 
 		final List< ConverterSetup > converterSetups = stackSource.getConverterSetups();
 		final SynchronizedViewerState state = stackSource.getBdvHandle().getViewerPanel().state();
-
-		transferChannelVisibility( state );
 		transferChannelSettings( converterSetups );
-		state.setDisplayMode( DisplayMode.FUSED );
+		transferChannelVisibility( state );
 		return stackSource;
 	}
 
-	private int transferChannelVisibility( final ViewerState state )
+	private void transferChannelVisibility( final ViewerState state )
 	{
 		final int nChannels = imp.getNChannels();
 		final CompositeImage ci = imp.isComposite() ? ( CompositeImage ) imp : null;
 		final List< SourceAndConverter< ? > > sources = state.getSources();
-		if ( ci != null && ci.getCompositeMode() == IJ.COMPOSITE )
+		if ( ci != null )
 		{
 			final boolean[] activeChannels = ci.getActiveChannels();
-			int numActiveChannels = 0;
 			for ( int i = 0; i < Math.min( activeChannels.length, nChannels ); ++i )
 			{
 				final SourceAndConverter< ? > source = sources.get( i );
 				state.setSourceActive( source, activeChannels[ i ] );
-				state.setCurrentSource( source );
-				numActiveChannels += activeChannels[ i ] ? 1 : 0;
+				if ( activeChannels[ i ] )
+					state.setCurrentSource( source );
 			}
-			return numActiveChannels;
-		}
-		else
-		{
-			final int activeChannel = imp.getChannel() - 1;
-			for ( int i = 0; i < nChannels; ++i )
-				state.setSourceActive( sources.get( i ), i == activeChannel );
-			state.setCurrentSource( sources.get( activeChannel ) );
-			return 1;
 		}
 	}
 
