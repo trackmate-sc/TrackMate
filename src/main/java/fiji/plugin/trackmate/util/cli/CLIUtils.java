@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -55,6 +56,143 @@ public class CLIUtils
 	public static final String CONDA_ROOT_PREFIX_KEY = "trackmate.conda.root.prefix";
 
 	private static Map< String, String > envMap;
+
+	/**
+	 * Returns the version of a Python module.
+	 *
+	 * The version is returned as a string, as if the command
+	 *
+	 * <pre>
+	 * python -c import moduleName;
+	 * print(moduleName.__version__)
+	 * </pre>
+	 *
+	 * was run.
+	 *
+	 * @param envName
+	 *            the name of the conda environment in which the module is
+	 *            installed
+	 * @param moduleName
+	 *            the name of the module
+	 * @return the version of the module as a string, or <code>null</code> if
+	 *         the module name does nor exist or if the conda environment does
+	 *         not exist.
+	 */
+	public static String getModuleVersion( final String envName, final String moduleName )
+	{
+		// We protect the space between 'import' and the command with a _
+		final String cmd = ""
+				+ "python -c import_" + moduleName + ";"
+				+ "print(" + moduleName + ".__version__)";
+		final List< String > tokens = preparePythonCommand( envName, cmd );
+		if ( tokens.isEmpty() )
+			return null;
+
+		// Put back the space in the token.
+		final ListIterator< String > it = tokens.listIterator();
+		while ( it.hasNext() )
+		{
+			final String token = it.next();
+			it.set( token.replace( '_', ' ' ) );
+		}
+		final ProcessBuilder pb = new ProcessBuilder( tokens );
+		// Env variables.
+		final Map< String, String > env = new HashMap<>();
+		final String condaRootPrefix = getCondaRootPrefix();
+		env.put( "MAMBA_ROOT_PREFIX", condaRootPrefix );
+		env.put( "CONDA_ROOT_PREFIX", condaRootPrefix );
+		pb.environment().putAll( env );
+		pb.redirectErrorStream( true );
+
+		try
+		{
+			final Process process = pb.start();
+			final BufferedReader reader = new BufferedReader(
+					new InputStreamReader( process.getInputStream() ) );
+
+			// Return the last line of output.
+			String line;
+			String prevLine = null;
+			final StringBuffer errorMsg = new StringBuffer();
+			while ( ( line = reader.readLine() ) != null )
+			{
+				prevLine = line;
+				errorMsg.append( '\n' + line );
+			}
+
+			final int exitCode = process.waitFor();
+			if ( exitCode == 0 )
+				return prevLine;
+			else
+			{
+				throw new Exception( "Error running the command '" + moduleName
+						+ "' in environment '" + envName + "'" + errorMsg );
+			}
+		}
+		catch ( final Exception e )
+		{
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	/**
+	 * Generates the list of tokens to be used with {@link ProcessBuilder} to
+	 * run a Python command.
+	 *
+	 * @param envName
+	 *            the name of the conda environment in which the command is
+	 *            installed.
+	 * @param cmdName
+	 *            the name of the command to run.
+	 * @return a list of tokens to use with {@link ProcessBuilder}. The list is
+	 *         empty if there is an error with the conda environment or with the
+	 *         command.
+	 */
+	public static List< String > preparePythonCommand( final String envName, final String cmdName )
+	{
+		final List< String > cmd = new ArrayList<>();
+		final String condaPath = getCondaPath();
+		// Conda and executable stuff.
+		if ( IJ.isWindows() )
+		{
+			cmd.addAll( Arrays.asList( "cmd.exe", "/c" ) );
+			cmd.addAll( Arrays.asList( condaPath, "activate", envName ) );
+			cmd.add( "&" );
+			// Split by spaces
+			final String[] split = cmdName.split( " " );
+			cmd.addAll( Arrays.asList( split ) );
+			return cmd;
+		}
+		else
+		{
+			try
+			{
+				final String pythonPath = CLIUtils.getEnvMap().get( envName );
+				if ( pythonPath == null )
+					throw new Exception( "Unknown conda environment: " + envName );
+
+				final int i = pythonPath.lastIndexOf( "python" );
+				final String binPath = pythonPath.substring( 0, i );
+				final String executablePath = binPath + cmdName;
+				final String[] split = executablePath.split( " " );
+				cmd.addAll( Arrays.asList( split ) );
+				return cmd;
+			}
+			catch ( final IOException e )
+			{
+				System.err.println( "Could not find the conda executable or change the conda environment.\n"
+						+ "Please configure the path to your conda executable in Edit > Options > Configure TrackMate Conda path..." );
+				e.printStackTrace();
+			}
+			catch ( final Exception e )
+			{
+				System.err.println( "Error running the conda executable:" );
+				e.printStackTrace();
+			}
+		}
+		return cmd;
+	}
 
 	public static Map< String, String > getEnvMap() throws IOException
 	{
@@ -183,6 +321,7 @@ public class CLIUtils
 		final String micromamba2 = "/usr/local/micromamba/bin/micromamba";
 		final String micromamba3 = "/usr/local/opt/micromamba/bin/micromamba";
 		final String micromamba4 = "/opt/micromamba/bin/micromamba";
+		final String micromamba5 = prefix + username + "/mambaforge/condabin/mamba";
 		final String[] toTest = new String[] {
 				anaconda1,
 				anaconda2,
@@ -193,7 +332,8 @@ public class CLIUtils
 				micromamba1,
 				micromamba2,
 				micromamba3,
-				micromamba4
+				micromamba4,
+				micromamba5
 		};
 		for ( final String str : toTest )
 		{
@@ -326,5 +466,14 @@ public class CLIUtils
 		System.out.println( "Known environments: " + getEnvList() );
 		System.out.println( "Paths:" );
 		getEnvMap().forEach( ( k, v ) -> System.out.println( k + " -> " + v ) );
+
+		System.out.println();
+		System.out.println( "Testing versions" );
+
+		System.out.println( "1 - " + getModuleVersion( "cellpose3", "cellpose" ) );
+		System.out.println( "2 - " + getModuleVersion( "cellpose", "cellpose" ) );
+		System.out.println( "3 - " + getModuleVersion( "cellpose", "cellposebloat" ) );
+		System.out.println( "4 - " + getModuleVersion( "cellposebarf", "cellpose" ) );
+
 	}
 }
