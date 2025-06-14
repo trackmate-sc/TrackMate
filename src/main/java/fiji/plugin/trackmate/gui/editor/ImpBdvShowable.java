@@ -122,6 +122,7 @@ public class ImpBdvShowable implements BdvShowable
 		final SynchronizedViewerState state = stackSource.getBdvHandle().getViewerPanel().state();
 		transferChannelSettings( converterSetups );
 		transferChannelVisibility( state );
+
 		return stackSource;
 	}
 

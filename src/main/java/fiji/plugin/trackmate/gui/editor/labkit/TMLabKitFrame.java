@@ -9,8 +9,8 @@ import javax.swing.JSplitPane;
 
 import bdv.viewer.ViewerPanel;
 import fiji.plugin.trackmate.gui.Icons;
-import sc.fiji.labkit.ui.models.DefaultSegmentationModel;
 import sc.fiji.labkit.ui.models.ImageLabelingModel;
+import sc.fiji.labkit.ui.models.SegmentationModel;
 import sc.fiji.labkit.ui.utils.Notifier;
 
 public class TMLabKitFrame extends JFrame
@@ -19,7 +19,7 @@ public class TMLabKitFrame extends JFrame
 	private static final long serialVersionUID = 1L;
 	private final Notifier onCloseListeners = new Notifier();
 
-	public TMLabKitFrame( final DefaultSegmentationModel model, final String title )
+	public TMLabKitFrame( final SegmentationModel model, final String title )
 	{
 		setIconImage( Icons.TRACKMATE_ICON.getImage() );
 		setSize( 1000, 800 );

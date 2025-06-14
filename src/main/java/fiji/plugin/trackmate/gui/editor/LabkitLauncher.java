@@ -25,6 +25,7 @@ import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.editor.labkit.TMDefaultSegmentationModel;
 import fiji.plugin.trackmate.gui.editor.labkit.TMLabKitFrame;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
 import fiji.plugin.trackmate.util.SpotUtil;
@@ -34,6 +35,7 @@ import ij.ImagePlus;
 import ij.gui.Roi;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
+import net.imagej.axis.Axis;
 import net.imagej.axis.AxisType;
 import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessibleInterval;
@@ -55,7 +57,7 @@ import net.imglib2.view.Views;
 import sc.fiji.labkit.ui.inputimage.DatasetInputImage;
 import sc.fiji.labkit.ui.labeling.Label;
 import sc.fiji.labkit.ui.labeling.Labeling;
-import sc.fiji.labkit.ui.models.DefaultSegmentationModel;
+import sc.fiji.labkit.ui.models.SegmentationModel;
 
 public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 {
@@ -107,7 +109,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 
 		// Make a labeling model from it.
 		final Context context = TMUtils.getContext();
-		final DefaultSegmentationModel model = new DefaultSegmentationModel( context, input );
+		final SegmentationModel model = new TMDefaultSegmentationModel( context, input );
 		model.imageLabelingModel().labeling().set( labeling );
 
 		// Store a copy.
@@ -127,7 +129,6 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 		// Prepare re-importer.
 		final double dt = imp.getCalibration().frameInterval;
 		labkit.onCloseListeners().addListener( () -> {
-			System.out.println( "TROLOLO" ); // DEBUG
 			@SuppressWarnings( "unchecked" )
 			final RandomAccessibleInterval< T > indexImg = ( RandomAccessibleInterval< T > ) model.imageLabelingModel().labeling().get().getIndexImg();
 			reimport( indexImg, previousIndexImg, spotLabels, dt );
@@ -304,6 +305,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 			fov = ImgPlus.wrapRAI( crop );
 			for ( int d = 0; d < view.numDimensions(); d++ )
 			{
+				final Axis axis = view.axis( d );
 				fov.setAxis( view.axis( d ), d );
 			}
 		}

@@ -36,7 +36,7 @@ public class TMLabelPanel extends JPanel
 
 	private final LabelingModel model;
 
-	private ViewerPanel viewer;
+	private final ViewerPanel viewer;
 
 	public TMLabelPanel( final LabelingModel model, final ViewerPanel viewerPanel )
 	{
@@ -53,6 +53,7 @@ public class TMLabelPanel extends JPanel
 				final Label l = list.getSelectedValue();
 				if ( l != null )
 				{
+					model.selectedLabel().set( l );
 					localizeLabel( l );
 				}
 			}
@@ -74,18 +75,6 @@ public class TMLabelPanel extends JPanel
 		interval = Intervals.expand( interval, Math.max( interval.dimension( 1 ), 20 ), 1 );
 		model.transformationModel().transformToShowInterval( interval, model
 				.labelTransformation() );
-
-		// TODO Can we get animation to work?
-//		final AffineTransform3D c = new AffineTransform3D();
-//		viewer.state().getViewerTransform( c );
-//		final double cX = viewer.getDisplayComponent().getWidth() / 2.0;
-//		final double cY = viewer.getDisplayComponent().getHeight() / 2.0;
-//		c.set( c.get( 0, 3 ) - cX, 0, 3 );
-//		c.set( c.get( 1, 3 ) - cY, 1, 3 );
-//		model.selectedLabel().set( label );
-//		viewer.setTransformAnimator( new SimilarityTransformAnimator( c, model
-//				.labelTransformation(), cX, cY, 300 ) );
-
 	}
 
 	private static Interval getBoundingBox( final IterableRegion< BitType > region )
