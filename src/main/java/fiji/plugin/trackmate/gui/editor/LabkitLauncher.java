@@ -2,6 +2,7 @@ package fiji.plugin.trackmate.gui.editor;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -17,6 +18,8 @@ import org.scijava.Context;
 import org.scijava.ui.behaviour.util.AbstractNamedAction;
 
 import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.SpotRoi;
@@ -27,6 +30,7 @@ import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.editor.labkit.TMDefaultSegmentationModel;
 import fiji.plugin.trackmate.gui.editor.labkit.TMLabKitFrame;
+import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
 import fiji.plugin.trackmate.util.SpotUtil;
 import fiji.plugin.trackmate.util.TMUtils;
@@ -35,7 +39,6 @@ import ij.ImagePlus;
 import ij.gui.Roi;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
-import net.imagej.axis.Axis;
 import net.imagej.axis.AxisType;
 import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessibleInterval;
@@ -303,11 +306,6 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 			final RandomAccessibleInterval crop = Views.interval( view, min, max );
 			// FIXME: bug if we go to max height with a crop
 			fov = ImgPlus.wrapRAI( crop );
-			for ( int d = 0; d < view.numDimensions(); d++ )
-			{
-				final Axis axis = view.axis( d );
-				fov.setAxis( view.axis( d ), d );
-			}
 		}
 		else
 		{
@@ -548,5 +546,25 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 			action.setEnabled( ENABLE_SPOT_EDITOR );
 
 		return action;
+	}
+
+	public static void main( final String[] args )
+	{
+		final String filename = "FakeTracks-rescaled.xml";
+		final TmXmlReader reader = new TmXmlReader( new File( filename ) );
+		if ( !reader.isReadingOk() )
+		{
+			System.out.println( reader.getErrorMessage() );
+			return;
+		}
+		final Model model = reader.getModel();
+		final ImagePlus image = reader.readImage();
+		final Settings settings = reader.readSettings( image );
+		final DisplaySettings ds = reader.getDisplaySettings();
+		final TrackMate trackmate = new TrackMate( model, settings );
+
+		final EverythingDisablerAndReenabler disabler = null;
+		final LabkitLauncher< ? > launcher = new LabkitLauncher<>( trackmate, ds, disabler );
+		launcher.launch( true );
 	}
 }
