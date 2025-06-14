@@ -1,11 +1,11 @@
 package fiji.plugin.trackmate.gui.editor.labkit;
 
 import bdv.viewer.ViewerPanel;
-import bdv.viewer.animate.SimilarityTransformAnimator;
 import net.imglib2.Interval;
 import net.imglib2.realtransform.AffineTransform3D;
 import sc.fiji.labkit.pixel_classification.RevampUtils;
 import sc.fiji.labkit.ui.models.TransformationModel;
+import sc.fiji.labkit.ui.utils.BdvUtils;
 
 public class TMTransformationModel extends TransformationModel
 {
@@ -60,7 +60,8 @@ public class TMTransformationModel extends TransformationModel
 		t.concatenate( sourceTransform.inverse() );
 
 		// Run
-		viewerPanel.setTransformAnimator( new SimilarityTransformAnimator( c, t, cX, cY, 300 ) );
+		BdvUtils.resetView( viewerPanel, interval, sourceTransform );
+//		viewerPanel.setTransformAnimator( new SimilarityTransformAnimator( c, t, cX, cY, 300 ) ); // FIXME
 	}
 
 	private static AffineTransform3D calculateScreenTransform( final Interval interval, final int width, final int height )
