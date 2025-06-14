@@ -29,7 +29,7 @@ public class TMLabKitFrame extends JFrame
 		final BasicLabelingComponent mainPanel = new BasicLabelingComponent( this, imageLabelingModel );
 
 		final ViewerPanel viewerPanel = mainPanel.getViewerPanel();
-		final TMLabelPanel labelPanel = new TMLabelPanel( imageLabelingModel, viewerPanel );
+		final TMLabelPanel labelPanel = new TMLabelPanel( imageLabelingModel );
 
 		add( initGui( mainPanel, labelPanel ) );
 
