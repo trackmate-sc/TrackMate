@@ -74,12 +74,15 @@ public class TMLabelPanel extends JPanel
 		// Redraw the list when the selected label is changed elsewhere.
 		model.selectedLabel().notifier().addListener( list::repaint );
 
+		// The list
 		final JScrollPane scrollPane = new JScrollPane( list );
 		list.setOpaque( false );
 		scrollPane.setOpaque( false );
 		scrollPane.getViewport().setOpaque( false );
 		scrollPane.setBorder( null );
 		add( scrollPane, BorderLayout.CENTER );
+
+		// The add label button
 		add( initializeAddLabelButton(), BorderLayout.SOUTH );
 
 		setPreferredSize( new Dimension( 150, 150 ) );
