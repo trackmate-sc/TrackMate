@@ -433,8 +433,8 @@ public class TMLabKitModel implements SegmentationModel
 
 		min[ 0 ] = Math.max( 0, min[ 0 ] );
 		min[ 1 ] = Math.max( 0, min[ 1 ] );
-		final long width = img.dimension( img.dimensionIndex( Axes.X ) );
-		final long height = img.dimension( img.dimensionIndex( Axes.Y ) );
+		final long width = img.min( img.dimensionIndex( Axes.X ) ) + img.dimension( img.dimensionIndex( Axes.X ) );
+		final long height = img.min( img.dimensionIndex( Axes.Y ) ) + img.dimension( img.dimensionIndex( Axes.Y ) );
 		max[ 0 ] = Math.min( width, max[ 0 ] );
 		max[ 1 ] = Math.min( height, max[ 1 ] );
 	}
