@@ -14,53 +14,34 @@ import javax.swing.JRootPane;
 import javax.swing.JSeparator;
 import javax.swing.SwingUtilities;
 
-import org.scijava.Context;
 import org.scijava.ui.behaviour.util.AbstractNamedAction;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.DetectionUtils;
-import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.gui.editor.labkit.TMDefaultSegmentationModel;
 import fiji.plugin.trackmate.gui.editor.labkit.TMLabKitFrame;
+import fiji.plugin.trackmate.gui.editor.labkit.TMLabKitModel;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
-import fiji.plugin.trackmate.util.SpotUtil;
 import fiji.plugin.trackmate.util.TMUtils;
-import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 import ij.ImagePlus;
 import ij.gui.Roi;
-import net.imagej.ImgPlus;
-import net.imagej.axis.Axes;
-import net.imagej.axis.AxisType;
 import net.imglib2.FinalInterval;
+import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgFactory;
-import net.imglib2.img.ImgView;
-import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.img.display.imagej.ImgPlusViews;
 import net.imglib2.loops.LoopBuilder;
 import net.imglib2.type.NativeType;
-import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.IntegerType;
-import net.imglib2.type.numeric.integer.UnsignedIntType;
-import net.imglib2.util.Intervals;
-import net.imglib2.util.Pair;
 import net.imglib2.util.Util;
-import net.imglib2.util.ValuePair;
 import net.imglib2.view.Views;
-import sc.fiji.labkit.ui.inputimage.DatasetInputImage;
-import sc.fiji.labkit.ui.labeling.Label;
 import sc.fiji.labkit.ui.labeling.Labeling;
-import sc.fiji.labkit.ui.models.SegmentationModel;
 
 public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 {
@@ -72,8 +53,6 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 	private final TrackMate trackmate;
 
 	private final EverythingDisablerAndReenabler disabler;
-
-	private int currentTimePoint;
 
 	private final DisplaySettings ds;
 
@@ -105,43 +84,71 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 	protected void launch( final boolean singleTimePoint )
 	{
 		final ImagePlus imp = trackmate.getSettings().imp;
-		final DatasetInputImage input = makeInput( imp, singleTimePoint );
-		final Pair< Labeling, Map< Integer, Spot > > pair = makeLabeling( imp, trackmate.getModel().getSpots(), singleTimePoint );
-		final Labeling labeling = pair.getA();
-		final Map< Integer, Spot > spotLabels = pair.getB();
+		int timepoint;
+		if ( !singleTimePoint )
+			timepoint = -1;
+		else
+			timepoint = imp.getT() - 1;
+		final Model trackmateModel = trackmate.getModel();
+		final Interval interval = createROIInterval( imp );
+		final TMLabKitModel model = TMLabKitModel.createModel(
+				imp,
+				trackmateModel,
+				ds,
+				interval,
+				timepoint );
 
-		// Make a labeling model from it.
-		final Context context = TMUtils.getContext();
-		final SegmentationModel model = new TMDefaultSegmentationModel( context, input );
-		model.imageLabelingModel().labeling().set( labeling );
-
-		// Store a copy.
+		// Store a copy of the labeling index image.
+		final Labeling labeling = model.imageLabelingModel().labeling().get();
 		@SuppressWarnings( "unchecked" )
 		final RandomAccessibleInterval< T > previousIndexImg = copy( ( RandomAccessibleInterval< T > ) labeling.getIndexImg() );
 
 		// Show LabKit.
 		String title = "Editing TrackMate data for " + imp.getShortTitle();
 		if ( singleTimePoint )
-			title += "at frame " + ( currentTimePoint + 1 );
+			title += "at frame " + ( timepoint + 1 );
 
-		// final LabkitFrame labkit = LabkitFrame.show( model, title );
 		final TMLabKitFrame labkit = new TMLabKitFrame( model, title );
 		labkit.setLocationRelativeTo( imp.getWindow() );
 		labkit.setVisible( true );
 
 		// Prepare re-importer.
+		final Map< Integer, Spot > spotLabels = model.getLabelMap();
 		final double dt = imp.getCalibration().frameInterval;
 		labkit.onCloseListeners().addListener( () -> {
 			@SuppressWarnings( "unchecked" )
 			final RandomAccessibleInterval< T > indexImg = ( RandomAccessibleInterval< T > ) model.imageLabelingModel().labeling().get().getIndexImg();
-			reimport( indexImg, previousIndexImg, spotLabels, dt );
+			reimport( indexImg, previousIndexImg, spotLabels, timepoint, dt );
 		} );
+	}
+
+	private static Interval createROIInterval( final ImagePlus imp )
+	{
+		final Roi roi = imp.getRoi();
+		if ( roi == null )
+			return null;
+
+		final boolean is3D = !DetectionUtils.is2D( imp );
+		final long[] min = new long[ is3D ? 3 : 2 ];
+		final long[] max = new long[ min.length ];
+
+		min[ 0 ] = roi.getBounds().x;
+		max[ 0 ] = roi.getBounds().x + roi.getBounds().width - 1;
+		min[ 1 ] = roi.getBounds().y;
+		max[ 1 ] = roi.getBounds().y + roi.getBounds().height - 1;
+		if ( is3D )
+		{
+			min[ 2 ] = 0;
+			max[ 2 ] = imp.getNSlices();
+		}
+		return new FinalInterval( min, max );
 	}
 
 	private void reimport(
 			final RandomAccessibleInterval< T > indexImg,
 			final RandomAccessibleInterval< T > previousIndexImg,
 			final Map< Integer, Spot > spotLabels,
+			final int timepoint,
 			final double dt )
 	{
 		new Thread( "TrackMate-LabKit-Importer-thread" )
@@ -174,11 +181,11 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 					final String msg = ( isSingleTimePoint )
 							? "Commit the changes made to the\n"
 									+ "segmentation in the image?"
-							: ( currentTimePoint < 0 )
+							: ( timepoint < 0 )
 									? "Commit the changes made to the\n"
 											+ "segmentation in whole movie?"
 									: "Commit the changes made to the\n"
-											+ "segmentation in frame " + ( currentTimePoint + 1 ) + "?";
+											+ "segmentation in frame " + ( timepoint + 1 ) + "?";
 					final String title = "Commit edits to TrackMate";
 					final JCheckBox chkbox = new JCheckBox( "Simplify the contours of modified spots" );
 					chkbox.setSelected( simplify );
@@ -204,7 +211,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 							? 0
 							: indexImg.numDimensions() > timeDim ? indexImg.dimension( timeDim ) : 0;
 
-					if ( currentTimePoint < 0 && nTimepoints > 1 )
+					if ( timepoint < 0 && nTimepoints > 1 )
 					{
 						// All time-points.
 						final Logger log = Logger.IJ_LOGGER;
@@ -231,7 +238,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 					else
 					{
 						// Only one.
-						final int localT = Math.max( 0, currentTimePoint );
+						final int localT = Math.max( 0, timepoint );
 						reimporter.reimport( indexImg, previousIndexImg, localT, spotLabels );
 					}
 				}
@@ -255,250 +262,6 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 				.multiThreaded()
 				.forEachPixel( ( i, o ) -> o.setInteger( i.getInteger() ) );
 		return out;
-	}
-
-	/**
-	 * Creates a new {@link DatasetInputImage} from the specified
-	 * {@link ImagePlus}. The embedded label image is empty.
-	 *
-	 * @param imp
-	 *            the input {@link ImagePlus}.
-	 * @param singleTimePoint
-	 *            if <code>true</code>, then the dataset will be created only
-	 *            for the time-point currently displayed in the
-	 *            {@link ImagePlus}. This time-point is then stored in the
-	 *            {@link #currentTimePoint} field. If <code>false</code>, the
-	 *            dataset is created for the whole movie and the
-	 *            {@link #currentTimePoint} takes the value -1.
-	 * @return a new {@link DatasetInputImage}.
-	 */
-	@SuppressWarnings( { "rawtypes", "unchecked" } )
-	private final DatasetInputImage makeInput( final ImagePlus imp, final boolean singleTimePoint )
-	{
-		final ImgPlus all = TMUtils.rawWraps( imp );
-		final int timeAxis = all.dimensionIndex( Axes.TIME );
-
-		ImgPlus view;
-		if ( singleTimePoint && timeAxis >= 0 )
-		{
-			this.currentTimePoint = imp.getFrame() - 1;
-			view = ImgPlusViews.hyperSlice( all, timeAxis, currentTimePoint );
-		}
-		else
-		{
-			this.currentTimePoint = -1;
-			view = all;
-		}
-
-		// Crop if we have a ROI.
-		final Roi roi = imp.getRoi();
-		final ImgPlus fov;
-		if ( roi != null )
-		{
-			final long[] min = view.minAsLongArray();
-			final long[] max = view.maxAsLongArray();
-			final int xAxis = view.dimensionIndex( Axes.X );
-			final int yAxis = view.dimensionIndex( Axes.Y );
-			min[ xAxis ] = roi.getBounds().x;
-			min[ yAxis ] = roi.getBounds().y;
-			max[ xAxis ] = roi.getBounds().x + roi.getBounds().width;
-			max[ yAxis ] = roi.getBounds().y + roi.getBounds().height;
-			final RandomAccessibleInterval crop = Views.interval( view, min, max );
-			// FIXME: bug if we go to max height with a crop
-			fov = ImgPlus.wrapRAI( crop );
-		}
-		else
-		{
-			fov = view;
-		}
-		final ImpBdvShowable showable = ImpBdvShowable.fromImp( fov, imp );
-		return new DatasetInputImage( fov, showable );
-	}
-
-	/**
-	 * Prepare the label image for annotation. The labeling is created and each
-	 * of its labels receive the name and the color from the spot it is created
-	 * from. Only the spots fully included in the bounding box of the ROI of the
-	 * source image are written in the labeling.
-	 *
-	 * @param imp
-	 *            the source image plus.
-	 * @param spots
-	 *            the spot collection.
-	 * @param singleTimePoint
-	 *            if <code>true</code> we only annotate one time-point.
-	 * @return the pair of: A. a new {@link Labeling}, B. the map of spots that
-	 *         were written in the labeling. The keys are the label value in the
-	 *         labeling.
-	 */
-	private Pair< Labeling, Map< Integer, Spot > > makeLabeling( final ImagePlus imp, final SpotCollection spots, final boolean singleTimePoint )
-	{
-		// Axes.
-		final AxisType[] axes = ( is3D )
-				? ( singleTimePoint )
-						? new AxisType[] { Axes.X, Axes.Y, Axes.Z }
-						: new AxisType[] { Axes.X, Axes.Y, Axes.Z, Axes.TIME }
-				: ( singleTimePoint )
-						? new AxisType[] { Axes.X, Axes.Y }
-						: new AxisType[] { Axes.X, Axes.Y, Axes.TIME };
-
-		// N dimensions.
-		final int nDims = is3D
-				? singleTimePoint ? 3 : 4
-				: singleTimePoint ? 2 : 3;
-
-		// Dimensions.
-		final long[] dims = new long[ nDims ];
-		int dim = 0;
-		dims[ dim++ ] = imp.getWidth();
-		dims[ dim++ ] = imp.getHeight();
-		if ( is3D )
-			dims[ dim++ ] = imp.getNSlices();
-		if ( !singleTimePoint )
-			dims[ dim++ ] = imp.getNFrames();
-
-		// Possibly crop.
-		final Roi roi = imp.getRoi();
-		final long[] origin;
-		if ( roi != null )
-		{
-			dims[ 0 ] = roi.getBounds().width + 1;
-			dims[ 1 ] = roi.getBounds().height + 1;
-			origin = new long[ dims.length ];
-			origin[ 0 ] = roi.getBounds().x;
-			origin[ 1 ] = roi.getBounds().y;
-		}
-		else
-		{
-			origin = null;
-		}
-
-		// Raw image.
-		Img< UnsignedIntType > lblImg = ArrayImgs.unsignedInts( dims );
-		if ( origin != null )
-		{
-			final RandomAccessibleInterval< UnsignedIntType > translated = Views.translate( lblImg, origin );
-			lblImg = ImgView.wrap( translated );
-		}
-
-		// Calibration.
-		final double[] c = TMUtils.getSpatialCalibration( imp );
-		final double[] calibration = new double[ nDims ];
-		dim = 0;
-		calibration[ dim++ ] = c[ 0 ];
-		calibration[ dim++ ] = c[ 1 ];
-		if ( is3D )
-			calibration[ dim++ ] = c[ 2 ];
-		if ( !singleTimePoint )
-			calibration[ dim++ ] = 1.;
-
-		// Label image holder.
-		final ImgPlus< UnsignedIntType > lblImgPlus = new ImgPlus<>( lblImg, "LblImg", axes, calibration );
-
-		// Write spots in it with index = id + 1 and build a map index -> spot.
-		final Map< Integer, Spot > spotLabels = new HashMap<>();
-		if ( singleTimePoint )
-		{
-			processFrame( lblImgPlus, spots, currentTimePoint, spotLabels, origin );
-		}
-		else
-		{
-			final int timeDim = lblImgPlus.dimensionIndex( Axes.TIME );
-			for ( int t = 0; t < imp.getNFrames(); t++ )
-			{
-				final ImgPlus< UnsignedIntType > lblImgPlusThisFrame = ImgPlusViews.hyperSlice( lblImgPlus, timeDim, t );
-				processFrame( lblImgPlusThisFrame, spots, t, spotLabels, origin );
-			}
-		}
-		final Labeling labeling = Labeling.fromImg( lblImgPlus );
-
-		// Fine tune labels name and color.
-		final FeatureColorGenerator< Spot > colorGen = FeatureUtils.createSpotColorGenerator( trackmate.getModel(), ds );
-		for ( final Label label : labeling.getLabels() )
-		{
-			final String name = label.name();
-			final int labelVal = Integer.parseInt( name );
-			final Spot spot = spotLabels.get( labelVal );
-			if ( spot == null )
-			{
-				System.out.println( "Spot is null for label " + labelVal + "!!" ); // DEBUG
-				continue;
-			}
-			label.setName( spot.getName() );
-			label.setColor( new ARGBType( colorGen.color( spot ).getRGB() ) );
-		}
-
-		return new ValuePair<>( labeling, spotLabels );
-	}
-
-	private final void processFrame(
-			final ImgPlus< UnsignedIntType > lblImgPlus,
-			final SpotCollection spots,
-			final int t,
-			final Map< Integer, Spot > spotLabels,
-			final long[] origin )
-	{
-		// If we have a single timepoint, don't use -1 to retrieve spots.
-		final int lt = t < 0 ? 0 : t;
-		final Iterable< Spot > spotsThisFrame = spots.iterable( lt, true );
-		if ( null == origin )
-		{
-			for ( final Spot spot : spotsThisFrame )
-			{
-				final int index = spot.ID() + 1;
-				SpotUtil.iterable( spot, lblImgPlus ).forEach( p -> p.set( index ) );
-				spotLabels.put( index, spot );
-			}
-		}
-		else
-		{
-			final long[] min = new long[ 2 ];
-			final long[] max = new long[ 2 ];
-			final FinalInterval spotBB = FinalInterval.wrap( min, max );
-			final FinalInterval imgBB = Intervals.createMinSize( origin[ 0 ], origin[ 1 ], lblImgPlus.dimension( 0 ), lblImgPlus.dimension( 1 ) );
-			for ( final Spot spot : spotsThisFrame )
-			{
-				boundingBox( spot, min, max );
-				// Inside? We skip if we touch the border.
-				final boolean isInside = Intervals.contains( imgBB, spotBB );
-				if ( !isInside )
-					continue;
-
-				final int index = spot.ID() + 1;
-				SpotUtil.iterable( spot, lblImgPlus ).forEach( p -> p.set( index ) );
-				spotLabels.put( index, spot );
-			}
-		}
-	}
-
-	private void boundingBox( final Spot spot, final long[] min, final long[] max )
-	{
-		final SpotRoi roi = spot.getRoi();
-		if ( roi == null )
-		{
-			final double cx = spot.getDoublePosition( 0 );
-			final double cy = spot.getDoublePosition( 1 );
-			final double r = spot.getFeature( Spot.RADIUS ).doubleValue();
-			min[ 0 ] = ( long ) Math.floor( ( cx - r ) / calibration[ 0 ] );
-			min[ 1 ] = ( long ) Math.floor( ( cy - r ) / calibration[ 1 ] );
-			max[ 0 ] = ( long ) Math.ceil( ( cx + r ) / calibration[ 0 ] );
-			max[ 1 ] = ( long ) Math.ceil( ( cy + r ) / calibration[ 1 ] );
-		}
-		else
-		{
-			final double[] x = roi.toPolygonX( calibration[ 0 ], 0, spot.getDoublePosition( 0 ), 1. );
-			final double[] y = roi.toPolygonY( calibration[ 1 ], 0, spot.getDoublePosition( 1 ), 1. );
-			min[ 0 ] = ( long ) Math.floor( Util.min( x ) );
-			min[ 1 ] = ( long ) Math.floor( Util.min( y ) );
-			max[ 0 ] = ( long ) Math.ceil( Util.max( x ) );
-			max[ 1 ] = ( long ) Math.ceil( Util.max( y ) );
-		}
-
-		min[ 0 ] = Math.max( 0, min[ 0 ] );
-		min[ 1 ] = Math.max( 0, min[ 1 ] );
-		final ImagePlus imp = trackmate.getSettings().imp;
-		max[ 0 ] = Math.min( imp.getWidth(), max[ 0 ] );
-		max[ 1 ] = Math.min( imp.getHeight(), max[ 1 ] );
 	}
 
 	public static final AbstractNamedAction getLaunchAction( final TrackMate trackmate, final DisplaySettings ds )
@@ -550,7 +313,9 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 
 	public static void main( final String[] args )
 	{
-		final String filename = "FakeTracks-rescaled.xml";
+//		final String filename = "FakeTracks-rescaled.xml";
+		final String filename = "/Users/tinevez/Desktop/2-Generate a tracking ground truth/results/gmanina_movie_frames_8_20-GT.xml";
+
 		final TmXmlReader reader = new TmXmlReader( new File( filename ) );
 		if ( !reader.isReadingOk() )
 		{
