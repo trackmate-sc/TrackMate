@@ -1,32 +1,3 @@
-/*-
- * #%L
- * The Labkit image segmentation tool for Fiji.
- * %%
- * Copyright (C) 2017 - 2024 Matthias Arzt
- * %%
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- * #L%
- */
-
 package fiji.plugin.trackmate.gui.editor.labkit;
 
 import java.awt.Adjustable;
@@ -45,9 +16,9 @@ import bdv.util.BdvHandlePanel;
 import bdv.util.BdvOptions;
 import bdv.util.BdvStackSource;
 import bdv.viewer.DisplayMode;
-import bdv.viewer.ViewerPanel;
 import net.miginfocom.swing.MigLayout;
 import sc.fiji.labkit.ui.ActionsAndBehaviours;
+import sc.fiji.labkit.ui.BasicLabelingComponent;
 import sc.fiji.labkit.ui.bdv.BdvAutoContrast;
 import sc.fiji.labkit.ui.bdv.BdvLayer;
 import sc.fiji.labkit.ui.brush.ChangeLabel;
@@ -61,10 +32,9 @@ import sc.fiji.labkit.ui.models.ImageLabelingModel;
 import sc.fiji.labkit.ui.panel.LabelToolsPanel;
 
 /**
- * A swing UI component that shows a Big Data Viewer panel and a tool bar for
- * label editing.
+ * A copy of {@link BasicLabelingComponent} to enable using custom components.
  */
-public class BasicLabelingComponent extends JPanel implements AutoCloseable
+public class TMBasicLabelingComponent extends JPanel implements AutoCloseable
 {
 
 	private static final long serialVersionUID = 1L;
@@ -75,13 +45,13 @@ public class BasicLabelingComponent extends JPanel implements AutoCloseable
 
 	private final JFrame dialogBoxOwner;
 
-	private ActionsAndBehaviours actionsAndBehaviours;
+	private final ActionsAndBehaviours actionsAndBehaviours;
 
-	private ImageLabelingModel model;
+	private final ImageLabelingModel model;
 
 	private JSlider zSlider;
 
-	public BasicLabelingComponent( final JFrame dialogBoxOwner,
+	public TMBasicLabelingComponent( final JFrame dialogBoxOwner,
 			final ImageLabelingModel model )
 	{
 		this.model = model;
@@ -93,11 +63,6 @@ public class BasicLabelingComponent extends JPanel implements AutoCloseable
 		initLabelsLayer();
 		initPanel();
 		this.model.transformationModel().initialize( bdvHandle.getViewerPanel() );
-	}
-
-	public ViewerPanel getViewerPanel()
-	{
-		return bdvHandle.getBdvHandle().getViewerPanel();
 	}
 
 	private void initBdv( final boolean is2D )
@@ -135,7 +100,7 @@ public class BasicLabelingComponent extends JPanel implements AutoCloseable
 
 	public Holder< BdvStackSource< ? > > addBdvLayer( final BdvLayer layer )
 	{
-		return new BdvLayerLink( layer, bdvHandle );
+		return new TMBdvLayerLink( layer, bdvHandle );
 	}
 
 	private JPanel initToolsPanel()
@@ -176,5 +141,4 @@ public class BasicLabelingComponent extends JPanel implements AutoCloseable
 		final SplitPanel splitPanel = bdvHandle.getSplitPanel();
 		splitPanel.setCollapsed( !splitPanel.isCollapsed() );
 	}
-
 }

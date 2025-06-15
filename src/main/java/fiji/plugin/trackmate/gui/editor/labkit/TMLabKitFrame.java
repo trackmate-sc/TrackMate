@@ -1,23 +1,35 @@
 package fiji.plugin.trackmate.gui.editor.labkit;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Arrays;
 
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.UIManager;
 
 import fiji.plugin.trackmate.gui.Icons;
-import sc.fiji.labkit.ui.BasicLabelingComponent;
+import net.imglib2.Dimensions;
+import net.imglib2.util.Intervals;
+import net.miginfocom.swing.MigLayout;
 import sc.fiji.labkit.ui.models.ImageLabelingModel;
 import sc.fiji.labkit.ui.models.SegmentationModel;
 import sc.fiji.labkit.ui.panel.GuiUtils;
-import sc.fiji.labkit.ui.panel.ImageInfoPanel;
 import sc.fiji.labkit.ui.utils.Notifier;
 
+/**
+ * A custom LabKit frame, simplified compared to the main LabKit frame. <> This
+ * UI is made to deal with the TrackMate LabKit model, where there is one label
+ * per spots created. Because there can be many spots, we want to use a more
+ * lightweight UI for the label side bar.
+ */
 public class TMLabKitFrame extends JFrame
 {
 
@@ -33,11 +45,11 @@ public class TMLabKitFrame extends JFrame
 		final ImageLabelingModel imageLabelingModel = model.imageLabelingModel();
 
 		// Main central panel.
-		final BasicLabelingComponent mainPanel = new BasicLabelingComponent( this, imageLabelingModel );
+		final TMBasicLabelingComponent mainPanel = new TMBasicLabelingComponent( this, imageLabelingModel );
 
 		// Left side bar.
 		final JPanel leftPanel = new JPanel( new BorderLayout( 5, 5 ) );
-		final JPanel imageInfoPanel = ImageInfoPanel.newFramedImageInfoPanel( imageLabelingModel, mainPanel );
+		final JPanel imageInfoPanel = newFramedImageInfoPanel( imageLabelingModel, mainPanel );
 		imageInfoPanel.getComponents()[ 1 ].setBackground( UIManager.getColor( "Panel.background" ) );
 		final JPanel labelInfoPanel = GuiUtils.createCheckboxGroupedPanel(
 				imageLabelingModel.labelingVisibility(),
@@ -59,6 +71,40 @@ public class TMLabKitFrame extends JFrame
 				onCloseListeners.notifyListeners();
 			}
 		} );
+	}
+
+	private static JPanel newFramedImageInfoPanel(
+			final ImageLabelingModel imageLabelingModel,
+			final TMBasicLabelingComponent labelingComponent )
+	{
+		return GuiUtils.createCheckboxGroupedPanel( imageLabelingModel
+				.imageVisibility(), "Image",
+				createDimensionsInfo( imageLabelingModel
+						.labeling().get(), labelingComponent ) );
+	}
+
+	private static JComponent createDimensionsInfo( final Dimensions interval,
+			final TMBasicLabelingComponent labelingComponent )
+	{
+		final Color background = UIManager.getColor( "List.background" );
+		final JPanel panel = new JPanel();
+		panel.setLayout( new MigLayout( "insets 8, gap 8", "10[grow][grow]", "" ) );
+		panel.setBackground( background );
+		final JLabel label = new JLabel( "Dimensions: " + Arrays.toString( Intervals
+				.dimensionsAsLongArray( interval ) ) );
+		panel.add( label, "grow, span, wrap" );
+		if ( labelingComponent != null )
+		{
+			final JButton button = new JButton( "auto contrast" );
+			button.setFocusable( false );
+			button.addActionListener( ignore -> labelingComponent.autoContrast() );
+			panel.add( button, "grow" );
+			final JButton settingsButton = new JButton( "settings" );
+			settingsButton.setFocusable( false );
+			settingsButton.addActionListener( ignore -> labelingComponent.toggleContrastSettings() );
+			panel.add( settingsButton, "grow, wrap" );
+		}
+		return panel;
 	}
 
 	private JSplitPane initGui( final JPanel mainPanel, final JPanel labelPanel )
