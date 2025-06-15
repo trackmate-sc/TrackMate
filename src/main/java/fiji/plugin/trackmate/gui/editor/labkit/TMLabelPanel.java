@@ -7,6 +7,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,6 +43,8 @@ import sc.fiji.labkit.ui.models.LabelingModel;
 public class TMLabelPanel extends JPanel
 {
 
+	public static final int CELL_HEIGHT = 30;
+
 	private final LabelingModel model;
 
 	private final MyListModel listModel;
@@ -71,8 +74,20 @@ public class TMLabelPanel extends JPanel
 			}
 		} );
 
-		// Redraw the list when the selected label is changed elsewhere.
-		model.selectedLabel().notifier().addListener( list::repaint );
+		// Redraw and scroll the list when the selected label is changed
+		// elsewhere.
+		model.selectedLabel().notifier().addListener( () -> {
+			final Label label = model.selectedLabel().get();
+			final int i = model.labeling().get().getLabels().indexOf( label );
+			if ( i < 0 )
+				return;
+			final int w = getWidth();
+			final int h = CELL_HEIGHT;
+			final int y = h * i;
+			final Rectangle rectangle = new Rectangle( 0, y, w, h );
+			list.scrollRectToVisible( rectangle );
+			list.repaint();
+		} );
 
 		// The list
 		final JScrollPane scrollPane = new JScrollPane( list );
@@ -155,7 +170,7 @@ public class TMLabelPanel extends JPanel
 			final Font smallerFont = getFont().deriveFont( getFont().getSize() - 4f );
 			setFont( smallerFont );
 			this.preferredSize = super.getPreferredSize();
-			preferredSize.height += 30;
+			preferredSize.height = CELL_HEIGHT;
 			this.bg = UIManager.getColor( "Panel.background" );
 			final Border black = BorderFactory.createLineBorder( bg, 4, true );
 			final Border white = BorderFactory.createLineBorder( Color.BLACK, 4, true );
