@@ -43,7 +43,7 @@ public class TMBdvLayerLink implements Holder< BdvStackSource< ? > >
 		bdvSource = showable1 != null ? showable1.show( layer.title(), options ) : null;
 		image.notifier().addWeakListener( onImageChanged );
 		layer.listeners().addWeakListener( onRequestRepaint );
-		layer.visibility().notifier().addWeakListener( onVisibilityChanged );
+		layer.visibility().notifier().addListener( onVisibilityChanged );
 	}
 
 	private void onImageChanged()
