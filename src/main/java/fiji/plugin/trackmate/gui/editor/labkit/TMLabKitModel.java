@@ -184,7 +184,7 @@ public class TMLabKitModel implements SegmentationModel
 	 * @return a new {@link DatasetInputImage}.
 	 */
 	@SuppressWarnings( { "rawtypes", "unchecked" } )
-	private final static DatasetInputImage makeInput(
+	final static DatasetInputImage makeInput(
 			final ImagePlus imp,
 			final Interval interval,
 			final int timepoint )
