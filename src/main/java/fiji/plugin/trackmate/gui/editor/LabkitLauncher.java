@@ -2,12 +2,15 @@ package fiji.plugin.trackmate.gui.editor;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JCheckBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JRootPane;
@@ -22,6 +25,7 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.DetectionUtils;
+import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.editor.labkit.TMLabKitFrame;
@@ -42,6 +46,7 @@ import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 import sc.fiji.labkit.ui.labeling.Labeling;
+import sc.fiji.labkit.ui.utils.Notifier;
 
 public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 {
@@ -62,6 +67,8 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 
 	private static boolean simplify = true;
 
+	private final Notifier onCloseListeners = new Notifier();
+
 	public LabkitLauncher( final TrackMate trackmate, final DisplaySettings ds, final EverythingDisablerAndReenabler disabler )
 	{
 		this.trackmate = trackmate;
@@ -80,8 +87,9 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 	 *            if <code>true</code>, will launch the editor using only the
 	 *            time-point currently displayed in the main view. Otherwise,
 	 *            will edit all time-points.
+	 * @return
 	 */
-	protected void launch( final boolean singleTimePoint )
+	protected TMLabKitFrame launch( final boolean singleTimePoint )
 	{
 		final ImagePlus imp = trackmate.getSettings().imp;
 		int timepoint;
@@ -103,23 +111,41 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 		@SuppressWarnings( "unchecked" )
 		final RandomAccessibleInterval< T > previousIndexImg = copy( ( RandomAccessibleInterval< T > ) labeling.getIndexImg() );
 
-		// Show LabKit.
-		String title = "Editing TrackMate data for " + imp.getShortTitle();
-		if ( singleTimePoint )
-			title += "at frame " + ( timepoint + 1 );
-
-		final TMLabKitFrame labkit = new TMLabKitFrame( model, title );
+		final TMLabKitFrame labkit = new TMLabKitFrame( model );
 		labkit.setLocationRelativeTo( imp.getWindow() );
-		labkit.setVisible( true );
+		labkit.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
+
+		// Notify our listeners when the window is closed.
+		labkit.addWindowListener( new WindowAdapter()
+		{
+			@Override
+			public void windowClosed( final WindowEvent e )
+			{
+				onCloseListeners.notifyListeners();
+			}
+		} );
 
 		// Prepare re-importer.
 		final Map< Integer, Spot > spotLabels = model.getLabelMap();
 		final double dt = imp.getCalibration().frameInterval;
-		labkit.onCloseListeners().addListener( () -> {
+		onCloseListeners.addListener( () -> {
 			@SuppressWarnings( "unchecked" )
 			final RandomAccessibleInterval< T > indexImg = ( RandomAccessibleInterval< T > ) model.imageLabelingModel().labeling().get().getIndexImg();
 			reimport( indexImg, previousIndexImg, spotLabels, timepoint, dt );
 		} );
+
+		// Title
+		String title = "Editing TrackMate data for " + imp.getShortTitle();
+		if ( singleTimePoint )
+			title += "at frame " + ( timepoint + 1 );
+
+		// Show
+		labkit.setIconImage( Icons.TRACKMATE_ICON.getImage() );
+		labkit.setSize( 1000, 800 );
+		GuiUtils.positionWindow( labkit, imp.getWindow() );
+		labkit.setTitle( title );
+		labkit.setVisible( true );
+		return labkit;
 	}
 
 	private static Interval createROIInterval( final ImagePlus imp )
@@ -248,7 +274,8 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 				}
 				finally
 				{
-					disabler.reenable();
+					if ( disabler != null )
+						disabler.reenable();
 				}
 			}
 		}.start();
@@ -313,8 +340,8 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 
 	public static void main( final String[] args )
 	{
-//		final String filename = "FakeTracks-rescaled.xml";
-		final String filename = "/Users/tinevez/Desktop/2-Generate a tracking ground truth/results/gmanina_movie_frames_8_20-GT.xml";
+		final String filename = "samples/FakeTracks.xml";
+//		final String filename = "/Users/tinevez/Desktop/2-Generate a tracking ground truth/results/gmanina_movie_frames_8_20-GT.xml";
 
 		final TmXmlReader reader = new TmXmlReader( new File( filename ) );
 		if ( !reader.isReadingOk() )
@@ -330,6 +357,7 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 
 		final EverythingDisablerAndReenabler disabler = null;
 		final LabkitLauncher< ? > launcher = new LabkitLauncher<>( trackmate, ds, disabler );
-		launcher.launch( true );
+		final TMLabKitFrame frame = launcher.launch( true );
+		frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
 	}
 }

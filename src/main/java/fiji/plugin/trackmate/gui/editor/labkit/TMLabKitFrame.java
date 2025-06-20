@@ -1,12 +1,12 @@
 package fiji.plugin.trackmate.gui.editor.labkit;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.Arrays;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -15,60 +15,59 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.UIManager;
 
-import fiji.plugin.trackmate.gui.Icons;
 import net.imglib2.Dimensions;
 import net.imglib2.util.Intervals;
 import net.miginfocom.swing.MigLayout;
 import sc.fiji.labkit.ui.models.ImageLabelingModel;
 import sc.fiji.labkit.ui.models.SegmentationModel;
 import sc.fiji.labkit.ui.panel.GuiUtils;
-import sc.fiji.labkit.ui.utils.Notifier;
 
 /**
- * A custom LabKit frame, simplified compared to the main LabKit frame. <> This
- * UI is made to deal with the TrackMate LabKit model, where there is one label
- * per spots created. Because there can be many spots, we want to use a more
- * lightweight UI for the label side bar.
+ * A custom LabKit frame, simplified compared to the main LabKit frame.
+ * <p>
+ * This UI is made to deal with the TrackMate LabKit model, where there is one
+ * label per spots created. Because there can be many spots, we want to use a
+ * more lightweight UI for the label side bar.
  */
 public class TMLabKitFrame extends JFrame
 {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Notifier onCloseListeners = new Notifier();
-
-	public TMLabKitFrame( final SegmentationModel model, final String title )
+	public TMLabKitFrame( final SegmentationModel model )
 	{
-		setIconImage( Icons.TRACKMATE_ICON.getImage() );
-		setSize( 1000, 800 );
-		setTitle( title );
 		final ImageLabelingModel imageLabelingModel = model.imageLabelingModel();
 
 		// Main central panel.
 		final TMBasicLabelingComponent mainPanel = new TMBasicLabelingComponent( this, imageLabelingModel );
 
 		// Left side bar.
-		final JPanel leftPanel = new JPanel( new BorderLayout( 5, 5 ) );
+		final JPanel leftPanel = new JPanel();
+		final BoxLayout layout = new BoxLayout( leftPanel, BoxLayout.PAGE_AXIS );
+		leftPanel.setLayout( layout );
+
+		// Image info
 		final JPanel imageInfoPanel = newFramedImageInfoPanel( imageLabelingModel, mainPanel );
 		imageInfoPanel.getComponents()[ 1 ].setBackground( UIManager.getColor( "Panel.background" ) );
+		leftPanel.add( imageInfoPanel );
+
+		// Label list.
 		final JPanel labelInfoPanel = GuiUtils.createCheckboxGroupedPanel(
 				imageLabelingModel.labelingVisibility(),
 				"Spots",
 				new TMLabelPanel( imageLabelingModel ) );
-		leftPanel.add( labelInfoPanel, BorderLayout.CENTER );
-		leftPanel.add( imageInfoPanel, BorderLayout.NORTH );
+		leftPanel.add( labelInfoPanel );
 
+		// Add to frame.
 		add( initGui( mainPanel, leftPanel ) );
 
-		setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
+		// Shutdown BDV when closing.
 		addWindowListener( new WindowAdapter()
 		{
-
 			@Override
-			public void windowClosed( final WindowEvent e )
+			public void windowClosing( final java.awt.event.WindowEvent e )
 			{
 				mainPanel.close();
-				onCloseListeners.notifyListeners();
 			}
 		} );
 	}
@@ -77,10 +76,12 @@ public class TMLabKitFrame extends JFrame
 			final ImageLabelingModel imageLabelingModel,
 			final TMBasicLabelingComponent labelingComponent )
 	{
-		return GuiUtils.createCheckboxGroupedPanel( imageLabelingModel
+		final JPanel info = GuiUtils.createCheckboxGroupedPanel( imageLabelingModel
 				.imageVisibility(), "Image",
 				createDimensionsInfo( imageLabelingModel
 						.labeling().get(), labelingComponent ) );
+		info.setMaximumSize( new Dimension( 1000, 200 ) );
+		return info;
 	}
 
 	private static JComponent createDimensionsInfo( final Dimensions interval,
@@ -115,10 +116,5 @@ public class TMLabKitFrame extends JFrame
 		panel.setRightComponent( mainPanel );
 		panel.setBorder( BorderFactory.createEmptyBorder() );
 		return panel;
-	}
-
-	public Notifier onCloseListeners()
-	{
-		return onCloseListeners;
 	}
 }
