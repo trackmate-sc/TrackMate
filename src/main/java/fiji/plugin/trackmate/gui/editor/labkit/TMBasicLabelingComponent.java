@@ -2,6 +2,7 @@ package fiji.plugin.trackmate.gui.editor.labkit;
 
 import java.awt.Adjustable;
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -20,6 +21,7 @@ import bdv.util.BdvHandlePanel;
 import bdv.util.BdvOptions;
 import bdv.util.BdvStackSource;
 import bdv.viewer.DisplayMode;
+import fiji.plugin.trackmate.detection.DetectionUtils;
 import net.miginfocom.swing.MigLayout;
 import sc.fiji.labkit.ui.ActionsAndBehaviours;
 import sc.fiji.labkit.ui.BasicLabelingComponent;
@@ -129,16 +131,21 @@ public class TMBasicLabelingComponent extends JPanel implements AutoCloseable
 
 	private JPanel initToolsPanel()
 	{
-		final PlanarModeController planarModeController = new PlanarModeController(
-				bdvHandle, model, zSlider );
-		final LabelBrushController brushController = new LabelBrushController(
-				bdvHandle, model, actionsAndBehaviours );
-		final FloodFillController floodFillController = new FloodFillController(
-				bdvHandle, model, actionsAndBehaviours );
-		final SelectLabelController selectLabelController =
-				new SelectLabelController( bdvHandle, model, actionsAndBehaviours );
-		final JPanel toolsPanel = new LabelToolsPanel( brushController,
-				floodFillController, selectLabelController, planarModeController );
+		final PlanarModeController planarModeController = new PlanarModeController( bdvHandle, model, zSlider );
+		final LabelBrushController brushController = new LabelBrushController( bdvHandle, model, actionsAndBehaviours );
+		final FloodFillController floodFillController = new FloodFillController( bdvHandle, model, actionsAndBehaviours );
+		final SelectLabelController selectLabelController = new SelectLabelController( bdvHandle, model, actionsAndBehaviours );
+
+		final JPanel toolsPanel = new LabelToolsPanel( brushController, floodFillController, selectLabelController, planarModeController );
+		// Hide the zSlider toggle button if we are 2D
+		final boolean is2D = DetectionUtils.is2D( model.imageForSegmentation().get() );
+		if ( is2D )
+		{
+			zSlider.setVisible( false );
+			final Component c = toolsPanel.getComponent( toolsPanel.getComponentCount() - 1 );
+			toolsPanel.remove( c );
+		}
+
 		actionsAndBehaviours.addAction( new ChangeLabel( model ) );
 		return toolsPanel;
 	}
