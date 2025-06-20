@@ -2,11 +2,15 @@ package fiji.plugin.trackmate.gui.editor.labkit;
 
 import java.awt.Adjustable;
 import java.awt.BorderLayout;
+import java.awt.Window;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Collection;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.SwingUtilities;
 
 import org.scijava.ui.behaviour.util.AbstractNamedAction;
 
@@ -63,6 +67,26 @@ public class TMBasicLabelingComponent extends JPanel implements AutoCloseable
 		initLabelsLayer();
 		initPanel();
 		this.model.transformationModel().initialize( bdvHandle.getViewerPanel() );
+	}
+
+	// Give focus to BDV when activated
+	@Override
+	public void addNotify()
+	{
+		super.addNotify();
+		final Window window = SwingUtilities.getWindowAncestor( this );
+		if ( window != null )
+		{
+			window.addWindowListener( new WindowAdapter()
+			{
+				@Override
+				public void windowActivated( final WindowEvent e )
+				{
+					// Request focus for the panel when the window is activated
+					bdvHandle.getViewerPanel().requestFocusInWindow();
+				}
+			} );
+		}
 	}
 
 	private void initBdv( final boolean is2D )
