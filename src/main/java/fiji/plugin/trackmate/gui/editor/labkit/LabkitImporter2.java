@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.gui.editor.labkit;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -16,6 +17,7 @@ import ij.IJ;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.loops.LoopBuilder;
 import net.imglib2.roi.IterableRegion;
+import net.imglib2.roi.labeling.LabelingMapping;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.logic.BitType;
 import net.imglib2.type.numeric.IntegerType;
@@ -76,10 +78,9 @@ public class LabkitImporter2< T extends IntegerType< T > & NativeType< T > >
 	 * To properly detect modifications, the indices in the label images must
 	 * correspond to the spot ID + 1 (<code>index = id + 1</code>).
 	 *
-	 * @param labelingThisFrame
-	 *            the new index image of the labeling model, that represents the
-	 *            TrackMate model in the specified time-point after
-	 *            modification.
+	 * @param labeling
+	 *            the labeling, that represents the TrackMate model in the
+	 *            specified time-point after modification.
 	 * @param previousIndexImg
 	 *            the previous index image, that represents the TrackMate model
 	 *            before modification.
@@ -91,16 +92,27 @@ public class LabkitImporter2< T extends IntegerType< T > & NativeType< T > >
 	 *            that were written in the previous index image.
 	 */
 	public void reimport(
-			final Labeling labelingThisFrame,
+			final Labeling labeling,
 			final RandomAccessibleInterval< T > previousIndexImg,
 			final int currentTimePoint,
 			final Map< Label, Spot > spotLabels )
 	{
 		// Collect labels corresponding to spots that have been modified.
-		final Set< Integer > modifiedLabels = getModifiedIndices( labelingThisFrame, previousIndexImg );
-		final int nModified = modifiedLabels.size();
+		final Set< Integer > modifiedIndices = getModifiedIndices( labeling, previousIndexImg );
+		final int nModified = modifiedIndices.size();
 		if ( nModified == 0 )
 			return;
+
+		final LabelingMapping< Label > mapping = labeling.getType().getMapping();
+		final List< Label > modifiedLabels = new ArrayList<>();
+		for ( final Integer id : modifiedIndices )
+			modifiedLabels.addAll( mapping.labelsAtIndex( id ) );
+
+		System.out.println( "Modified indices: " + modifiedIndices ); // DEBUG
+		System.out.println( "Corresponding modified labels:" ); // DEBUG
+		modifiedLabels.forEach( l -> System.out.println( " - " + l.name() ) );
+		System.out.println( "Corresponding modified spots:" ); // DEBUG
+		modifiedLabels.forEach( l -> System.out.println( " - " + spotLabels.get( l ) ) );
 
 		model.beginUpdate();
 		try
@@ -109,47 +121,52 @@ public class LabkitImporter2< T extends IntegerType< T > & NativeType< T > >
 			 * Get all the spots present in the new image, as a map against the
 			 * label in the novel index image.
 			 */
-			final Map< Label, List< Spot > > novelSpots = getSpots( labelingThisFrame );
+			final Map< Label, List< Spot > > novelSpots = getSpots( labeling );
 
 			System.out.println( "New spots for timepoint " + +currentTimePoint + ":" ); // DEBUG
 			for ( final Label label : novelSpots.keySet() )
 			{
-				System.out.println( " - Label: " + label ); // DEBUG
-				novelSpots.get( label ).forEach( s -> System.out.println( "    - " + str( s ) ) ); // DEBUG
+				System.out.println( " - Label: " + label.name() ); // DEBUG
+				final List< Spot > spots = novelSpots.get( label );
+				for ( final Spot spot : spots )
+				{
+					spot.putFeature( Spot.FRAME, Double.valueOf( currentTimePoint ) );
+					System.out.println( "    - " + str( spot ) );
+				}
 			}
 
-//			// Update model for those spots.
-//			for ( final int labelValue : modifiedLabels )
-//			{
-//				final Spot previousSpot = spotLabels.get( labelValue );
-//				final List< Spot > novelSpotList = novelSpots.get( labelValue );
-//				if ( previousSpot == null )
-//				{
-//					/*
-//					 * A new one (possible several) I cannot find in the
-//					 * previous list -> add as a new spot.
-//					 */
-//					if ( novelSpotList != null )
-//						addNewSpot( novelSpotList, currentTimePoint );
-//				}
-//				else if ( novelSpotList == null || novelSpotList.isEmpty() )
-//				{
-//					/*
-//					 * One I had in the previous spot list, but that has
-//					 * disappeared. Remove it.
-//					 */
-//					IJ.log( " - Removed spot " + str( previousSpot ) );
-//					model.removeSpot( previousSpot );
-//				}
-//				else
-//				{
-//					/*
-//					 * I know of them both. Treat the case as if the previous
-//					 * spot was modified.
-//					 */
-//					modifySpot( novelSpotList, previousSpot, currentTimePoint );
-//				}
-//			}
+			// Update model for those spots.
+			for ( final Label label : modifiedLabels )
+			{
+				final Spot previousSpot = spotLabels.get( label );
+				final List< Spot > novelSpotList = novelSpots.get( label );
+				if ( previousSpot == null )
+				{
+					/*
+					 * A new one (possible several) I cannot find in the
+					 * previous list -> add as a new spot.
+					 */
+					if ( novelSpotList != null )
+						addNewSpot( novelSpotList, currentTimePoint );
+				}
+				else if ( novelSpotList == null || novelSpotList.isEmpty() )
+				{
+					/*
+					 * One I had in the previous spot list, but that has
+					 * disappeared. Remove it.
+					 */
+					IJ.log( " - Removed spot " + str( previousSpot ) );
+					model.removeSpot( previousSpot );
+				}
+				else
+				{
+					/*
+					 * I know of them both. Treat the case as if the previous
+					 * spot was modified.
+					 */
+					modifySpot( novelSpotList, previousSpot, currentTimePoint );
+				}
+			}
 		}
 		finally
 		{

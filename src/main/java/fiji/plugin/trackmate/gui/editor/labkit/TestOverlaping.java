@@ -193,6 +193,7 @@ public class TestOverlaping
 		final RandomAccessibleInterval< UnsignedIntType > previousIndexImg = copy( ( RandomAccessibleInterval ) labeling.getIndexImg() );
 
 		onCloseListeners.addListener( () -> {
+			System.out.println( "REIMPORTING" ); // DEBUG
 			reimport( imp, labeling, previousIndexImg, spotLabels, timepoint, model );
 		} );
 
@@ -208,7 +209,7 @@ public class TestOverlaping
 		// Programmatically modify the labeling.
 		final Label label = labeling.getLabels().get( 0 );
 		Views
-				.interval( labeling, Intervals.createMinSize( 10, 100, 10, 10 ) )
+				.interval( labeling, Intervals.createMinSize( 10, 90, 11, 11 ) )
 				.forEach( p -> p.add( label ) );
 		labkit.dispose();
 	}
@@ -335,6 +336,9 @@ public class TestOverlaping
 //					if ( disabler != null )
 //						disabler.reenable();
 				}
+				System.out.println( "Resulting TrackMate model:" ); // DEBUG
+				System.out.println( model.getSpots() ); // DEBUG
+
 			}
 		}.start();
 
