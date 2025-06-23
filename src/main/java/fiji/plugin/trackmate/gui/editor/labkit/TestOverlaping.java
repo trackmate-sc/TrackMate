@@ -1,13 +1,18 @@
 package fiji.plugin.trackmate.gui.editor.labkit;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JFrame;
 
 import org.scijava.Context;
 
+import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
@@ -33,9 +38,10 @@ import net.imglib2.Interval;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
-import net.imglib2.img.ImgView;
+import net.imglib2.img.ImgFactory;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImgPlusViews;
+import net.imglib2.loops.LoopBuilder;
 import net.imglib2.roi.labeling.LabelingType;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedIntType;
@@ -46,11 +52,16 @@ import net.imglib2.view.Views;
 import sc.fiji.labkit.ui.inputimage.DatasetInputImage;
 import sc.fiji.labkit.ui.labeling.Label;
 import sc.fiji.labkit.ui.labeling.Labeling;
+import sc.fiji.labkit.ui.labeling.Labelings;
 import sc.fiji.labkit.ui.models.DefaultSegmentationModel;
+import sc.fiji.labkit.ui.utils.Notifier;
 
 public class TestOverlaping
 {
 
+	private static boolean simplify = true;
+
+	@SuppressWarnings( "unused" )
 	public static void main( final String[] args )
 	{
 		final String filename = "/Users/tinevez/Library/CloudStorage/GoogleDrive-jeanyves.tinevez@gmail.com/My Drive/TrackMate/v8/DevSamples/TestOverlapingSpots.xml";
@@ -112,13 +123,7 @@ public class TestOverlaping
 		}
 
 		// Raw image.
-		Img< UnsignedIntType > lblImg = ArrayImgs.unsignedInts( dims );
-		if ( origin != null )
-		{
-			final RandomAccessibleInterval< UnsignedIntType > translated = Views.translate( lblImg, origin );
-			lblImg = ImgView.wrap( translated );
-		}
-
+		final Img< UnsignedIntType > lblImg = ArrayImgs.unsignedInts( dims );
 		// Calibration.
 		final double[] c = TMUtils.getSpatialCalibration( imp );
 		final double[] calibration = new double[ nDims ];
@@ -147,7 +152,7 @@ public class TestOverlaping
 		final Map< Label, Spot > spotLabels = new HashMap<>();
 		if ( singleTimePoint )
 		{
-			processFrame( lblImgPlus, spots, timepoint, spotLabels, origin, labeling, colorGen );
+			processFrame( labeling, lblImgPlus, spots, timepoint, origin, colorGen, spotLabels );
 		}
 		else
 		{
@@ -156,7 +161,7 @@ public class TestOverlaping
 			{
 				final ImgPlus< UnsignedIntType > lblImgPlusThisFrame = ImgPlusViews.hyperSlice( lblImgPlus, timeDim, t );
 				final IntervalView< LabelingType< Label > > labelingThisFrame = Views.hyperSlice( labeling, timeDim, t );
-				processFrame( lblImgPlusThisFrame, spots, t, spotLabels, origin, labelingThisFrame, colorGen );
+				processFrame( labeling, lblImgPlusThisFrame, spots, t, origin, colorGen, spotLabels );
 			}
 		}
 
@@ -167,9 +172,30 @@ public class TestOverlaping
 		final DefaultSegmentationModel lbModel = new DefaultSegmentationModel( context, input );
 		lbModel.imageLabelingModel().labeling().set( labeling );
 
+		// Create the UI for editing.
 		final TMLabKitFrame labkit = new TMLabKitFrame( lbModel );
 		labkit.setLocationRelativeTo( imp.getWindow() );
 		labkit.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
+
+		// Notify our listeners when the window is closed.
+		final Notifier onCloseListeners = new Notifier();
+		labkit.addWindowListener( new WindowAdapter()
+		{
+			@Override
+			public void windowClosed( final WindowEvent e )
+			{
+				onCloseListeners.notifyListeners();
+			}
+		} );
+
+		// Make a copy of the initial index image
+		@SuppressWarnings( { "rawtypes", "unchecked" } )
+		final RandomAccessibleInterval< UnsignedIntType > previousIndexImg = copy( ( RandomAccessibleInterval ) labeling.getIndexImg() );
+
+		onCloseListeners.addListener( () -> {
+			reimport( imp, labeling, previousIndexImg, spotLabels, timepoint, model );
+		} );
+
 
 		// Show
 		labkit.setIconImage( Icons.TRACKMATE_ICON.getImage() );
@@ -177,16 +203,164 @@ public class TestOverlaping
 		GuiUtils.positionWindow( labkit, imp.getWindow() );
 		labkit.setTitle( "Test overlaping" );
 		labkit.setVisible( true );
+
+		// DEBUG
+		// Programmatically modify the labeling.
+		final Label label = labeling.getLabels().get( 0 );
+		Views
+				.interval( labeling, Intervals.createMinSize( 10, 100, 10, 10 ) )
+				.forEach( p -> p.add( label ) );
+		labkit.dispose();
 	}
 
+	private static void reimport(
+			final ImagePlus imp,
+			final Labeling labeling,
+			final RandomAccessibleInterval< UnsignedIntType > previousIndexImg,
+			final Map< Label, Spot > spotLabels,
+			final int timepoint,
+			final Model model )
+	{
+		final double dt = imp.getCalibration().frameInterval;
+		final boolean isSingleTimePoint = imp.getNFrames() <= 1;
+		final boolean is3D = !DetectionUtils.is2D( imp );
+
+		@SuppressWarnings( "unchecked" )
+		final RandomAccessibleInterval< UnsignedIntType > indexImg = ( RandomAccessibleInterval< UnsignedIntType > ) labeling.getIndexImg();
+		new Thread( "TrackMate-LabKit-Importer-thread" )
+		{
+			@Override
+			public void run()
+			{
+				try
+				{
+					// Do we have something to reimport?
+					final AtomicBoolean modified = new AtomicBoolean( false );
+					LoopBuilder.setImages( previousIndexImg, indexImg )
+							.multiThreaded()
+							.forEachChunk( chunk -> {
+								if ( modified.get() )
+									return null;
+								chunk.forEachPixel( ( p1, p2 ) -> {
+									if ( p1.getInteger() != p2.getInteger() )
+									{
+										modified.set( true );
+										return;
+									}
+								} );
+								return null;
+							} );
+					if ( !modified.get() )
+					{
+						System.out.println( "No change detected." ); // DEBUG
+						return;
+					}
+					System.out.println( "Change detected." ); // DEBUG
+
+					// Message the user.
+					final String msg = ( isSingleTimePoint )
+							? "Commit the changes made to the\n"
+									+ "segmentation in the image?"
+							: ( timepoint < 0 )
+									? "Commit the changes made to the\n"
+											+ "segmentation in whole movie?"
+									: "Commit the changes made to the\n"
+											+ "segmentation in frame " + ( timepoint + 1 ) + "?";
+//					final String title = "Commit edits to TrackMate";
+//					final JCheckBox chkbox = new JCheckBox( "Simplify the contours of modified spots" );
+//					chkbox.setSelected( simplify );
+//					final Object[] objs = new Object[] { msg, new JSeparator(), chkbox };
+//					final int returnedValue = JOptionPane.showConfirmDialog(
+//							null,
+//							objs,
+//							title,
+//							JOptionPane.YES_NO_OPTION,
+//							JOptionPane.QUESTION_MESSAGE,
+//							Icons.TRACKMATE_ICON );
+//					if ( returnedValue != JOptionPane.YES_OPTION )
+//						return;
+//
+//					simplify = chkbox.isSelected();
+					simplify = true;
+					final double[] calibration = TMUtils.getSpatialCalibration( imp );
+					final LabkitImporter2< UnsignedIntType > reimporter = new LabkitImporter2<>( model, calibration, dt, simplify );
+
+					// Possibly determine the number of time-points to parse.
+					final int timeDim = ( isSingleTimePoint )
+							? -1
+							: ( is3D ) ? 3 : 2;
+					final long nTimepoints = ( timeDim < 0 )
+							? 0
+							: indexImg.numDimensions() > timeDim ? indexImg.dimension( timeDim ) : 0;
+
+					if ( timepoint < 0 && nTimepoints > 1 )
+					{
+						// All time-points.
+						final List< Labeling > slices = Labelings.slices( labeling );
+						final Logger log = Logger.IJ_LOGGER;
+						log.setStatus( "Re-importing from Labkit..." );
+						for ( int t = 0; t < nTimepoints; t++ )
+						{
+							// The spots of this time-point:
+							final Map< Label, Spot > spotLabelsThisFrame = new HashMap<>();
+							for ( final Label label : spotLabels.keySet() )
+							{
+								final Spot spot = spotLabels.get( label );
+								if ( spot.getFeature( Spot.FRAME ).intValue() == t )
+									spotLabelsThisFrame.put( label, spot );
+							}
+
+							final Labeling labelingThisFrame = slices.get( t );
+							final RandomAccessibleInterval< UnsignedIntType > previousIndexImgThisFrame = Views.hyperSlice( previousIndexImg, timeDim, t );
+							reimporter.reimport( labelingThisFrame, previousIndexImgThisFrame, t, spotLabelsThisFrame );
+							log.setProgress( t / ( double ) nTimepoints );
+						}
+						log.setStatus( "" );
+						log.setProgress( 0. );
+					}
+					else
+					{
+						// Only one.
+						final int localT = Math.max( 0, timepoint );
+						reimporter.reimport( labeling, previousIndexImg, localT, spotLabels );
+					}
+
+				}
+				catch ( final Exception e )
+				{
+					e.printStackTrace();
+				}
+				finally
+				{
+//					if ( disabler != null )
+//						disabler.reenable();
+				}
+			}
+		}.start();
+
+	}
+
+
+	/**
+	 *
+	 * @param labeling
+	 * @param lblImgPlus
+	 *            used as a dummy calibrated image to iterate properly over spot
+	 *            coordinates.
+	 * @param spots
+	 * @param t
+	 * @param origin
+	 * @param colorGen
+	 * @param spotLabels
+	 */
 	private static void processFrame(
+			final Labeling labeling,
 			final ImgPlus< UnsignedIntType > lblImgPlus,
 			final SpotCollection spots,
 			final int t,
-			final Map< Label, Spot > spotLabels,
 			final long[] origin,
-			final RandomAccessibleInterval< LabelingType< Label > > labeling,
-			final FeatureColorGenerator< Spot > colorGen)
+			final FeatureColorGenerator< Spot > colorGen,
+			final Map< Label, Spot > spotLabels )
 	{
 		final RandomAccess< LabelingType< Label > > ra = labeling.randomAccess();
 
@@ -197,7 +371,8 @@ public class TestOverlaping
 		{
 			for ( final Spot spot : spotsThisFrame )
 			{
-				final Label label = new Label( spot.getName(), new ARGBType( colorGen.color( spot ).getRGB() ) );
+				final Label label = labeling.addLabel( spot.getName() );
+				label.setColor( new ARGBType( colorGen.color( spot ).getRGB() ) );
 				final Cursor< UnsignedIntType > c = SpotUtil.iterable( spot, lblImgPlus ).localizingCursor();
 				while ( c.hasNext() )
 				{
@@ -235,7 +410,7 @@ public class TestOverlaping
 		}
 	}
 
-	private static void boundingBox( final Spot spot, final ImgPlus< UnsignedIntType > img, final long[] min, final long[] max )
+	private static final void boundingBox( final Spot spot, final ImgPlus< UnsignedIntType > img, final long[] min, final long[] max )
 	{
 		final double[] calibration = TMUtils.getSpatialCalibration( img );
 		final SpotRoi roi = spot.getRoi();
@@ -266,4 +441,15 @@ public class TestOverlaping
 		max[ 0 ] = Math.min( width, max[ 0 ] );
 		max[ 1 ] = Math.min( height, max[ 1 ] );
 	}
+
+	private static final Img< UnsignedIntType > copy( final RandomAccessibleInterval< UnsignedIntType > in )
+	{
+		final ImgFactory< UnsignedIntType > factory = Util.getArrayOrCellImgFactory( in, in.getType() );
+		final Img< UnsignedIntType > out = factory.create( in );
+		LoopBuilder.setImages( in, out )
+				.multiThreaded()
+				.forEachPixel( ( i, o ) -> o.setInteger( i.getInteger() ) );
+		return out;
+	}
+
 }
