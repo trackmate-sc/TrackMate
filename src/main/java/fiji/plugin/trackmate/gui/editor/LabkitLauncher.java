@@ -99,12 +99,13 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 			timepoint = imp.getT() - 1;
 		final Model trackmateModel = trackmate.getModel();
 		final Interval interval = createROIInterval( imp );
-		final TMLabKitModel model = TMLabKitModel.createModel(
-				imp,
-				trackmateModel,
-				ds,
-				interval,
-				timepoint );
+		final TMLabKitModel model = null; // FIXME
+//				TMLabKitModel.createModel(
+//				imp,
+//				trackmateModel,
+//				ds,
+//				interval,
+//				timepoint );
 
 		// Store a copy of the labeling index image.
 		final Labeling labeling = model.imageLabelingModel().labeling().get();
@@ -126,7 +127,8 @@ public class LabkitLauncher< T extends IntegerType< T > & NativeType< T > >
 		} );
 
 		// Prepare re-importer.
-		final Map< Integer, Spot > spotLabels = model.getLabelMap();
+		final Map< Integer, Spot > spotLabels = null; // FIXME
+		// model.getLabelMap();
 		final double dt = imp.getCalibration().frameInterval;
 		onCloseListeners.addListener( () -> {
 			@SuppressWarnings( "unchecked" )

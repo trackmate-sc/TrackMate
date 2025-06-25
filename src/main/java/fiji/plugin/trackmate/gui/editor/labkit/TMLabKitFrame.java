@@ -9,6 +9,7 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Arrays;
 
 import javax.swing.BorderFactory;
@@ -31,6 +32,7 @@ import net.miginfocom.swing.MigLayout;
 import sc.fiji.labkit.ui.models.ImageLabelingModel;
 import sc.fiji.labkit.ui.models.SegmentationModel;
 import sc.fiji.labkit.ui.panel.GuiUtils;
+import sc.fiji.labkit.ui.utils.Notifier;
 
 /**
  * A custom LabKit frame, simplified compared to the main LabKit frame.
@@ -43,6 +45,8 @@ public class TMLabKitFrame extends JFrame
 {
 
 	private static final long serialVersionUID = 1L;
+
+	private final Notifier onCloseListeners = new Notifier();
 
 	public TMLabKitFrame( final SegmentationModel model )
 	{
@@ -76,15 +80,19 @@ public class TMLabKitFrame extends JFrame
 		// Add to frame.
 		add( initGui( mainPanel, leftPanel ) );
 
-		// Shutdown BDV when closing, give it the focus when activated.
 		addWindowListener( new WindowAdapter()
 		{
 			@Override
-			public void windowClosing( final java.awt.event.WindowEvent e )
+			public void windowClosed( final WindowEvent e )
 			{
-				mainPanel.close();
+				onCloseListeners.notifyListeners();
 			}
 		} );
+	}
+
+	public Notifier onCloseListeners()
+	{
+		return onCloseListeners;
 	}
 
 	private static JPanel createTrackMatePanel()

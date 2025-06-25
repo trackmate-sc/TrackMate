@@ -1,6 +1,5 @@
 package fiji.plugin.trackmate.gui.editor.labkit;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,13 +22,15 @@ import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
+import net.imglib2.Cursor;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
+import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
-import net.imglib2.img.ImgView;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImgPlusViews;
+import net.imglib2.roi.labeling.LabelingType;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.IntegerType;
@@ -57,76 +58,11 @@ public class TMLabKitModel implements SegmentationModel
 
 	private final TMImageLabelingModel imageLabelingModel;
 
-	private final Map< Integer, Spot > spotLabels;
 
-	/**
-	 * Creates a new LabKit model where labels are read from a TrackMate
-	 * {@link SpotCollection}.
-	 *
-	 * @param imp
-	 *            the source image for the model.
-	 * @param trackmateModel
-	 *            the TrackMate model to read the spots from.
-	 * @param ds
-	 *            the {@link DisplaySettings} to use for spot coloring. Can be
-	 *            <code>null</code>, in that case the spots are colored
-	 *            randomly.
-	 * @param interval
-	 *            the interval in the input to include in the model.The interval
-	 *            must only include spatial axes (not the channel axis, not the
-	 *            time axis). The input image will be cropped from the interval,
-	 *            and only the spots that are fully included in the interval
-	 *            will be included. If <code>null</code>, the whole input is
-	 *            used.
-	 * @param timepoint
-	 *            the time-point to extract the data from. If strictly negative,
-	 *            all the frames of the source image and all the spots in the
-	 *            collection will be included in the model. If positive or 0,
-	 *            the model will only contain data from the specified
-	 *            time-point.
-	 * @return a new {@link TMLabKitModel}.
-	 */
-	public static final TMLabKitModel createModel(
-			final ImagePlus imp,
-			final Model trackmateModel,
-			final DisplaySettings ds,
-			final Interval interval,
-			final int timepoint )
-	{
-		// Image component
-		final DatasetInputImage input = makeInput( imp, interval, timepoint );
-		// Labeling component
-		final Pair< Labeling, Map< Integer, Spot > > pair = makeLabeling( imp, trackmateModel, ds, interval, timepoint );
-		final Labeling labeling = pair.getA();
-		final Map< Integer, Spot > spotLabels = pair.getB();
-		// Make the model.
-		final Context context = TMUtils.getContext();
-		final TMLabKitModel model = new TMLabKitModel( context, input, spotLabels );
-		model.imageLabelingModel().labeling().set( labeling );
-
-		return model;
-	}
-
-	protected TMLabKitModel( final Context context, final InputImage inputImage, final Map< Integer, Spot > spotLabels )
+	protected TMLabKitModel( final Context context, final InputImage inputImage )
 	{
 		this.context = context;
-		this.spotLabels = spotLabels;
 		this.imageLabelingModel = new TMImageLabelingModel( inputImage );
-	}
-
-	/**
-	 * Returns a mapping from label indices in the labeling image to the
-	 * corresponding spots that were used to create labels.
-	 * <p>
-	 * This map is static, unmutable, and stores the mapping at the time of the
-	 * model creation. Edits made subsequently to the model are not reflected in
-	 * this map.
-	 *
-	 * @return the mapping.
-	 */
-	public Map< Integer, Spot > getLabelMap()
-	{
-		return Collections.unmodifiableMap( spotLabels );
 	}
 
 	@Override
@@ -166,8 +102,63 @@ public class TMLabKitModel implements SegmentationModel
 	}
 
 	/**
+	 * Creates a LabKit {@link TMLabKitModel} from the specified TrackMate
+	 * model.
+	 * <p>
+	 * Only 2D is supported for now. If this method is called with a 3D input,
+	 * an exception is thrown.
+	 *
+	 * @param model
+	 *            the model to read the spots from.
+	 * @param imp
+	 *            the image the model was created on. This is used to get the
+	 *            dimensionality for the labeling, the calibration, etc.
+	 * @param interval
+	 *            the interval in the source image to restrict the import. Only
+	 *            the first 2 dimensions of the interval are used (X&Y). The
+	 *            returned output will have the size of this interval. Only the
+	 *            spots that are fully within this interval are imported. If
+	 *            <code>null</code>, all the spots are imported and the output
+	 *            has the size of the input image.
+	 * @param displaySettings
+	 *            a {@link DisplaySettings} to create the spot colors from. If
+	 *            <code>null</code>, spots are colored randomly.
+	 * @param timepoint
+	 *            the time-point to import. If negative, all time-points will be
+	 *            imported.
+	 * @param context
+	 *            the {@link Context} to use to create the model.
+	 * @return a new {@link TMLabKitModel}. Will be 2D (X&Y), and possibly 3D
+	 *         (with time) if all time-points are imported. Its XY size will be
+	 *         the size of the specified interval (or the size of the input
+	 *         image if the interval is null).
+	 * @throws UnsupportedOperationException
+	 *             if this method is called with a 3D input.
+	 */
+	public final static TMLabKitModel create(
+			final Model model,
+			final ImagePlus imp,
+			final Interval interval,
+			final DisplaySettings displaySettings,
+			final int timepoint,
+			final Context context )
+	{
+		// Create the labeling.
+		final Pair< Labeling, Map< Label, Spot > > out = createLabeling( model, imp, interval, displaySettings, timepoint );
+		final Labeling labeling = out.getA();
+		final Map< Label, Spot > mapping = out.getB();
+		// Create the image dataset.
+		final DatasetInputImage input = makeInput( imp, interval, timepoint );
+		// Make the model.
+		final TMLabKitModel lbModel = new TMLabKitModel( context, input );
+		lbModel.imageLabelingModel().labeling().set( labeling );
+		lbModel.imageLabelingModel().mapping().set( mapping );
+		return lbModel;
+	}
+
+	/**
 	 * Creates a new {@link DatasetInputImage} from the specified
-	 * {@link ImagePlus}. The embedded label image is empty.
+	 * {@link ImagePlus}. The embedded label image is not set.
 	 *
 	 * @param imp
 	 *            the input {@link ImagePlus}.
@@ -184,7 +175,7 @@ public class TMLabKitModel implements SegmentationModel
 	 * @return a new {@link DatasetInputImage}.
 	 */
 	@SuppressWarnings( { "rawtypes", "unchecked" } )
-	final static DatasetInputImage makeInput(
+	public final static DatasetInputImage makeInput(
 			final ImagePlus imp,
 			final Interval interval,
 			final int timepoint )
@@ -234,31 +225,41 @@ public class TMLabKitModel implements SegmentationModel
 	}
 
 	/**
-	 * Prepare the label image for annotation. The labeling is created and each
-	 * of its labels receive the name and the color from the spot it is created
-	 * from. Only the spots fully included in specified interval are written in
-	 * the labeling.
+	 * Creates a LabKit {@link Labeling} from the specified TrackMate model.
+	 * <p>
+	 * Only 2D is supported for now. If this method is called with a 3D input,
+	 * an exception is thrown.
 	 *
+	 * @param model
+	 *            the model to read the spots from.
 	 * @param imp
-	 *            the source image plus.
-	 * @param trackmateModel
-	 *            the TrackMate model to read the spots from.
+	 *            the image the model was created on. This is used to get the
+	 *            dimensionality for the labeling, the calibration, etc.
+	 * @param interval
+	 *            the interval in the source image to restrict the import. Only
+	 *            the first 2 dimensions of the interval are used (X&Y). The
+	 *            returned labeling will have the size of this interval. Only
+	 *            the spots that are fully within this interval are imported. If
+	 *            <code>null</code>, all the spots are imported and the labeling
+	 *            has the size of the input image.
 	 * @param displaySettings
-	 *            the {@link DisplaySettings} to use for spot coloring. Can be
-	 *            <code>null</code>, in that case the spots are colored
-	 *            randomly.
+	 *            a {@link DisplaySettings} to create the spot colors from. If
+	 *            <code>null</code>, spots are colored randomly.
 	 * @param timepoint
-	 *            the time-point to extract to create the labeling. If strictly
-	 *            negative, all time-points will be imported.
-	 * @return the pair of: A. a new {@link Labeling}, B. the map of spots that
-	 *         were written in the labeling. The keys are the label value in the
-	 *         labeling.
+	 *            the time-point to import. If negative, all time-points will be
+	 *            imported.
+	 * @return a new {@link Labeling} and the a mapping of labels to spots. Will
+	 *         be 2D (X&Y), and possibly 3D (with time) if all time-points are
+	 *         imported. Its XY size will be the size of the specified interval
+	 *         (or the size of the input image if the interval is null).
+	 * @throws UnsupportedOperationException
+	 *             if this method is called with a 3D input.
 	 */
-	private static Pair< Labeling, Map< Integer, Spot > > makeLabeling(
+	public static final Pair< Labeling, Map< Label, Spot > > createLabeling(
+			final Model model,
 			final ImagePlus imp,
-			final Model trackmateModel,
-			final DisplaySettings displaySettings,
 			final Interval interval,
+			final DisplaySettings displaySettings,
 			final int timepoint )
 	{
 		final boolean is3D = !DetectionUtils.is2D( imp );
@@ -272,6 +273,10 @@ public class TMLabKitModel implements SegmentationModel
 				: ( singleTimePoint )
 						? new AxisType[] { Axes.X, Axes.Y }
 						: new AxisType[] { Axes.X, Axes.Y, Axes.TIME };
+
+		// For now: 2D only.
+		if ( is3D )
+			throw new UnsupportedOperationException( "Using LabKit with TrackMate is only supported for 2D for now." );
 
 		// N dimensions.
 		final int nDims = is3D
@@ -304,13 +309,7 @@ public class TMLabKitModel implements SegmentationModel
 		}
 
 		// Raw image.
-		Img< UnsignedIntType > lblImg = ArrayImgs.unsignedInts( dims );
-		if ( origin != null )
-		{
-			final RandomAccessibleInterval< UnsignedIntType > translated = Views.translate( lblImg, origin );
-			lblImg = ImgView.wrap( translated );
-		}
-
+		final Img< UnsignedIntType > lblImg = ArrayImgs.unsignedInts( dims );
 		// Calibration.
 		final double[] c = TMUtils.getSpatialCalibration( imp );
 		final double[] calibration = new double[ nDims ];
@@ -324,13 +323,22 @@ public class TMLabKitModel implements SegmentationModel
 
 		// Label image holder.
 		final ImgPlus< UnsignedIntType > lblImgPlus = new ImgPlus<>( lblImg, "LblImg", axes, calibration );
+		final Labeling labeling = Labeling.fromImg( lblImgPlus );
+
+		// Labels color to match TrackMate display.
+		final DisplaySettings defaultStyle = DisplaySettings.defaultStyle().copy();
+		defaultStyle.setSpotColorBy( TrackMateObject.SPOTS, FeatureUtils.USE_RANDOM_COLOR_KEY );
+		final DisplaySettings ds = ( displaySettings == null )
+				? defaultStyle
+				: displaySettings;
+		final FeatureColorGenerator< Spot > colorGen = FeatureUtils.createSpotColorGenerator( model, ds );
 
 		// Write spots in it with index = id + 1 and build a map index -> spot.
-		final SpotCollection spots = trackmateModel.getSpots();
-		final Map< Integer, Spot > spotLabels = new HashMap<>();
+		final SpotCollection spots = model.getSpots();
+		final Map< Label, Spot > spotLabels = new HashMap<>();
 		if ( singleTimePoint )
 		{
-			processFrame( lblImgPlus, spots, timepoint, spotLabels, origin );
+			processFrame( labeling, lblImgPlus, spots, timepoint, origin, colorGen, spotLabels );
 		}
 		else
 		{
@@ -338,52 +346,65 @@ public class TMLabKitModel implements SegmentationModel
 			for ( int t = 0; t < imp.getNFrames(); t++ )
 			{
 				final ImgPlus< UnsignedIntType > lblImgPlusThisFrame = ImgPlusViews.hyperSlice( lblImgPlus, timeDim, t );
-				processFrame( lblImgPlusThisFrame, spots, t, spotLabels, origin );
+				processFrame( labeling, lblImgPlusThisFrame, spots, t, origin, colorGen, spotLabels );
 			}
 		}
-		final Labeling labeling = Labeling.fromImg( lblImgPlus );
-
-		// Fine tune labels name and color.
-		final DisplaySettings defaultStyle = DisplaySettings.defaultStyle().copy();
-		defaultStyle.setSpotColorBy( TrackMateObject.SPOTS, FeatureUtils.USE_RANDOM_COLOR_KEY );
-		final DisplaySettings ds = ( displaySettings == null )
-				? defaultStyle
-				: displaySettings;
-		final FeatureColorGenerator< Spot > colorGen = FeatureUtils.createSpotColorGenerator( trackmateModel, ds );
-		for ( final Label label : labeling.getLabels() )
-		{
-			final String name = label.name();
-			final int labelVal = Integer.parseInt( name );
-			final Spot spot = spotLabels.get( labelVal );
-			if ( spot == null )
-			{
-				System.out.println( "Spot is null for label " + labelVal + "!!" ); // DEBUG
-				continue;
-			}
-			label.setName( spot.getName() );
-			label.setColor( new ARGBType( colorGen.color( spot ).getRGB() ) );
-		}
-
-		return new ValuePair<>( labeling, spotLabels );
+		return new ValuePair< Labeling, Map< Label, Spot > >( labeling, spotLabels );
 	}
 
-	private static final void processFrame(
+	/**
+	 * Adds the spots of a {@link SpotCollection} to the provided
+	 * {@link Labeling}.
+	 * <p>
+	 *
+	 * @param labeling
+	 *            the labeling to write to. One {@link Label} is created per
+	 *            spot, with the name taken from the spot name, and the color
+	 *            taken from the specified color generator.
+	 * @param lblImgPlus
+	 *            used as a dummy calibrated image to iterate properly over spot
+	 *            coordinates.
+	 * @param spots
+	 *            the {@link SpotCollection} to read the spot from.
+	 * @param t
+	 *            the time-point to import the spot from. If negative, all
+	 *            time-points will be imported.
+	 * @param origin
+	 *            the coordinates of the origin of the interval to import.
+	 * @param colorGen
+	 *            the spot color generator.
+	 * @param spotLabels
+	 *            a map that links the created labels to the spots imported.
+	 *            This map is being written by this method.
+	 */
+	private static void processFrame(
+			final Labeling labeling,
 			final ImgPlus< UnsignedIntType > lblImgPlus,
 			final SpotCollection spots,
 			final int t,
-			final Map< Integer, Spot > spotLabels,
-			final long[] origin )
+			final long[] origin,
+			final FeatureColorGenerator< Spot > colorGen,
+			final Map< Label, Spot > spotLabels )
 	{
-		// If we have a single timepoint, don't use -1 to retrieve spots.
+
+		// If we have a single time-point, don't use -1 to retrieve spots.
 		final int lt = t < 0 ? 0 : t;
 		final Iterable< Spot > spotsThisFrame = spots.iterable( lt, true );
 		if ( null == origin )
 		{
+			final RandomAccess< LabelingType< Label > > ra = labeling.randomAccess();
 			for ( final Spot spot : spotsThisFrame )
 			{
-				final int index = spot.ID() + 1;
-				SpotUtil.iterable( spot, lblImgPlus ).forEach( p -> p.set( index ) );
-				spotLabels.put( index, spot );
+				final Label label = labeling.addLabel( spot.getName() );
+				label.setColor( new ARGBType( colorGen.color( spot ).getRGB() ) );
+				final Cursor< UnsignedIntType > c = SpotUtil.iterable( spot, lblImgPlus ).localizingCursor();
+				while ( c.hasNext() )
+				{
+					c.fwd();
+					ra.setPosition( c );
+					ra.get().add( label );
+				}
+				spotLabels.put( label, spot );
 			}
 		}
 		else
@@ -392,6 +413,7 @@ public class TMLabKitModel implements SegmentationModel
 			final long[] max = new long[ 2 ];
 			final FinalInterval spotBB = FinalInterval.wrap( min, max );
 			final FinalInterval imgBB = Intervals.createMinSize( origin[ 0 ], origin[ 1 ], lblImgPlus.dimension( 0 ), lblImgPlus.dimension( 1 ) );
+			final RandomAccess< LabelingType< Label > > ra = labeling.randomAccess();
 			for ( final Spot spot : spotsThisFrame )
 			{
 				boundingBox( spot, lblImgPlus, min, max );
@@ -400,14 +422,20 @@ public class TMLabKitModel implements SegmentationModel
 				if ( !isInside )
 					continue;
 
-				final int index = spot.ID() + 1;
-				SpotUtil.iterable( spot, lblImgPlus ).forEach( p -> p.set( index ) );
-				spotLabels.put( index, spot );
+				final Label label = new Label( spot.getName(), new ARGBType( colorGen.color( spot ).getRGB() ) );
+				final Cursor< UnsignedIntType > c = SpotUtil.iterable( spot, lblImgPlus ).localizingCursor();
+				while ( c.hasNext() )
+				{
+					c.fwd();
+					ra.setPosition( c );
+					ra.get().add( label );
+				}
+				spotLabels.put( label, spot );
 			}
 		}
 	}
 
-	private static void boundingBox( final Spot spot, final ImgPlus< UnsignedIntType > img, final long[] min, final long[] max )
+	private static final void boundingBox( final Spot spot, final ImgPlus< UnsignedIntType > img, final long[] min, final long[] max )
 	{
 		final double[] calibration = TMUtils.getSpatialCalibration( img );
 		final SpotRoi roi = spot.getRoi();
@@ -438,4 +466,5 @@ public class TMLabKitModel implements SegmentationModel
 		max[ 0 ] = Math.min( width, max[ 0 ] );
 		max[ 1 ] = Math.min( height, max[ 1 ] );
 	}
+
 }
