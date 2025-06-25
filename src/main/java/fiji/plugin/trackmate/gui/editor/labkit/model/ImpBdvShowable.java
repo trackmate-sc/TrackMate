@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.gui.editor;
+package fiji.plugin.trackmate.gui.editor.labkit.model;
 
 import java.awt.Color;
 import java.util.Arrays;

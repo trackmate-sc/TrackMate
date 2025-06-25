@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.gui.editor.labkit;
+package fiji.plugin.trackmate.gui.editor.labkit.model;
 
 import bdv.viewer.ViewerPanel;
 import net.imglib2.Interval;

@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.gui.editor.labkit;
+package fiji.plugin.trackmate.gui.editor.labkit.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,25 +10,29 @@ import java.util.concurrent.ConcurrentSkipListSet;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 
+import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.detection.MaskUtils;
 import ij.IJ;
+import net.imagej.axis.Axes;
+import net.imagej.axis.CalibratedAxis;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.loops.LoopBuilder;
 import net.imglib2.roi.IterableRegion;
 import net.imglib2.roi.labeling.LabelingMapping;
-import net.imglib2.type.NativeType;
 import net.imglib2.type.logic.BitType;
-import net.imglib2.type.numeric.IntegerType;
+import net.imglib2.type.numeric.integer.UnsignedIntType;
+import net.imglib2.view.Views;
 import sc.fiji.labkit.ui.labeling.Label;
 import sc.fiji.labkit.ui.labeling.Labeling;
+import sc.fiji.labkit.ui.labeling.Labelings;
 
 /**
  * Re-import the edited segmentation made in Labkit into the TrackMate model it
  * started from.
  */
-public class LabkitImporter2< T extends IntegerType< T > & NativeType< T > >
+public class LabkitImporter2
 {
 
 	private static final boolean DEBUG = false;
@@ -39,32 +43,133 @@ public class LabkitImporter2< T extends IntegerType< T > & NativeType< T > >
 
 	private final double dt;
 
-	private final boolean simplify;
+	private final Labeling labeling;
+
+	private final RandomAccessibleInterval< UnsignedIntType > previousIndexImg;
+
+	private final Map< Label, Spot > initialMapping;
+
+	private final int targetTimePoint;
+
+	private final boolean simplifyContours;
+
+	public static Builder create()
+	{
+		return new Builder();
+	}
 
 	/**
 	 * Creates a new re-importer.
 	 *
 	 * @param model
 	 *            the model to add, remove or edit spots in.
-	 * @param calibration
-	 *            the spatial calibration array: <code>[dx, dy dz]</code>.
-	 * @param dt
-	 *            the frame interval.
+	 * @param targetTimePoint
+	 *            the time-point to import. If negative, all time-points will be
+	 *            imported.
+	 * @param initialMapping
+	 *            mapping of labels to spots in the initial label image (prior
+	 *            to modification).
+	 * @param initialIndexImg
+	 *            the initial label image (prior to modification).
+	 * @param labeling
+	 *            the current labeling (after modification).
 	 * @param simplifyContours
 	 *            if <code>true</code> the contours of the spots imported and
 	 *            modified will be simplified. If <code>false</code> their
 	 *            contour will follow pixel edges.
+	 * @param calibration
+	 *            the spatial calibration array: <code>[dx, dy dz]</code>.
+	 * @param dt
+	 *            the frame interval.
 	 */
-	public LabkitImporter2(
+	private LabkitImporter2(
 			final Model model,
+			final Labeling labeling,
+			final RandomAccessibleInterval< UnsignedIntType > initialIndexImg,
+			final Map< Label, Spot > initialMapping,
+			final int targetTimePoint,
+			final boolean simplifyContours,
 			final double[] calibration,
-			final double dt,
-			final boolean simplifyContours )
+			final double dt )
 	{
 		this.model = model;
+		this.labeling = labeling;
+		this.previousIndexImg = initialIndexImg;
+		this.initialMapping = initialMapping;
+		this.targetTimePoint = targetTimePoint;
+		this.simplifyContours = simplifyContours;
 		this.calibration = calibration;
 		this.dt = dt;
-		this.simplify = simplifyContours;
+	}
+
+	/**
+	 * Returns <code>true</code> if changes have been made in the labeling
+	 * compared to the initial index image and initial spot labels.
+	 *
+	 * @return <code>true</code> if changes are detected.
+	 */
+	public boolean hasChanges()
+	{
+		@SuppressWarnings( "unchecked" )
+		final RandomAccessibleInterval< UnsignedIntType > indexImg = ( RandomAccessibleInterval< UnsignedIntType > ) labeling.getIndexImg();
+		return TMLabKitUtils.isDifferent( previousIndexImg, indexImg );
+	}
+
+	/**
+	 * Performs the import of modifications into the TrackMate model.
+	 */
+	public void run()
+	{
+		// Check dimensionality.
+		boolean isSingleTimePoint = true;
+		boolean is3D = false;
+		for ( final CalibratedAxis axis : labeling.axes() )
+		{
+			if ( axis.type().equals( Axes.TIME ) )
+				isSingleTimePoint = false;
+			if ( axis.type().equals( Axes.Z ) )
+				is3D = true;
+		}
+
+		// Possibly determine the number of time-points to parse.
+		final int timeDim = ( isSingleTimePoint )
+				? -1
+				: ( is3D ) ? 3 : 2;
+		final long nTimepoints = ( timeDim < 0 )
+				? 0
+				: labeling.numDimensions() > timeDim ? labeling.dimension( timeDim ) : 0;
+
+		if ( targetTimePoint < 0 && nTimepoints > 1 )
+		{
+			// All time-points.
+			final List< Labeling > slices = Labelings.slices( labeling );
+			final Logger log = Logger.IJ_LOGGER;
+			log.setStatus( "Re-importing from Labkit..." );
+			for ( int t = 0; t < nTimepoints; t++ )
+			{
+				// The spots of this time-point:
+				final Map< Label, Spot > spotLabelsThisFrame = new HashMap<>();
+				for ( final Label label : initialMapping.keySet() )
+				{
+					final Spot spot = initialMapping.get( label );
+					if ( spot.getFeature( Spot.FRAME ).intValue() == t )
+						spotLabelsThisFrame.put( label, spot );
+				}
+
+				final Labeling labelingThisFrame = slices.get( t );
+				final RandomAccessibleInterval< UnsignedIntType > previousIndexImgThisFrame = Views.hyperSlice( previousIndexImg, timeDim, t );
+				reimport( labelingThisFrame, previousIndexImgThisFrame, t, spotLabelsThisFrame, simplifyContours );
+				log.setProgress( t / ( double ) nTimepoints );
+			}
+			log.setStatus( "" );
+			log.setProgress( 0. );
+		}
+		else
+		{
+			// Only one.
+			final int localT = Math.max( 0, targetTimePoint );
+			reimport( labeling, previousIndexImg, localT, initialMapping, simplifyContours );
+		}
 	}
 
 	/**
@@ -74,9 +179,6 @@ public class LabkitImporter2< T extends IntegerType< T > & NativeType< T > >
 	 * The index image after modification is compared with the original one, and
 	 * modifications are detected. Spots corresponding to modifications are
 	 * added, removed or edited in the TrackMate model.
-	 * <p>
-	 * To properly detect modifications, the indices in the label images must
-	 * correspond to the spot ID + 1 (<code>index = id + 1</code>).
 	 *
 	 * @param labeling
 	 *            the labeling, that represents the TrackMate model in the
@@ -90,12 +192,13 @@ public class LabkitImporter2< T extends IntegerType< T > & NativeType< T > >
 	 * @param spotLabels
 	 *            the map of spots (vs the label value in the previous labeling)
 	 *            that were written in the previous index image.
+	 * @param simplifyContours
 	 */
-	public void reimport(
+	private void reimport(
 			final Labeling labeling,
-			final RandomAccessibleInterval< T > previousIndexImg,
+			final RandomAccessibleInterval< UnsignedIntType > previousIndexImg,
 			final int currentTimePoint,
-			final Map< Label, Spot > spotLabels )
+			final Map< Label, Spot > spotLabels, final boolean simplifyContours )
 	{
 		// Collect labels corresponding to spots that have been modified.
 		final Set< Integer > modifiedIndices = getModifiedIndices( labeling, previousIndexImg );
@@ -121,7 +224,7 @@ public class LabkitImporter2< T extends IntegerType< T > & NativeType< T > >
 			 * Get all the spots present in the new image, as a map against the
 			 * label in the novel index image.
 			 */
-			final Map< Label, List< Spot > > novelSpots = getSpots( labeling );
+			final Map< Label, List< Spot > > novelSpots = getSpots( labeling, simplifyContours );
 
 			System.out.println( "New spots for timepoint " + +currentTimePoint + ":" ); // DEBUG
 			for ( final Label label : novelSpots.keySet() )
@@ -257,7 +360,7 @@ public class LabkitImporter2< T extends IntegerType< T > & NativeType< T > >
 
 	private final Set< Integer > getModifiedIndices(
 			final Labeling labelingThisFrame,
-			final RandomAccessibleInterval< T > previousIndexImg )
+			final RandomAccessibleInterval< UnsignedIntType > previousIndexImg )
 	{
 		final ConcurrentSkipListSet< Integer > modifiedIDs = new ConcurrentSkipListSet<>();
 		LoopBuilder.setImages( labelingThisFrame, previousIndexImg )
@@ -277,7 +380,7 @@ public class LabkitImporter2< T extends IntegerType< T > & NativeType< T > >
 		return modifiedIDs;
 	}
 
-	private Map< Label, List< Spot > > getSpots( final Labeling labeling )
+	private Map< Label, List< Spot > > getSpots( final Labeling labeling, final boolean simplifyContours )
 	{
 		final List< Label > labels = labeling.getLabels();
 		final Map< Label, List< Spot > > spots = new HashMap<>();
@@ -287,7 +390,7 @@ public class LabkitImporter2< T extends IntegerType< T > & NativeType< T > >
 		for ( final Label label : labels )
 		{
 			final IterableRegion< BitType > region = regions.get( label );
-			final List< Spot > spotsForLabel = MaskUtils.fromThresholdWithROI( region, region, calibration, threshold, simplify, numThreads, null );
+			final List< Spot > spotsForLabel = MaskUtils.fromThresholdWithROI( region, region, calibration, threshold, simplifyContours, numThreads, null );
 			spots.put( label, spotsForLabel );
 		}
 		return spots;
@@ -299,12 +402,93 @@ public class LabkitImporter2< T extends IntegerType< T > & NativeType< T > >
 				roundToN( spot.getDoublePosition( 0 ), 1 ) + ", " +
 				roundToN( spot.getDoublePosition( 1 ), 1 ) + ", " +
 				roundToN( spot.getDoublePosition( 2 ), 1 ) + ") " +
-				"@ t=" + spot.getFeature( Spot.FRAME ).intValue();
+				"@ t=" + spot.getFeature( Spot.FRAME );
 	}
 
 	private static double roundToN( final double num, final int n )
 	{
 		final double scale = Math.pow( 10, n );
 		return Math.round( num * scale ) / scale;
+	}
+
+	public static class Builder
+	{
+
+		private Model model;
+
+		private double[] calibration;
+
+		private double dt;
+
+		private Labeling labeling;
+
+		private RandomAccessibleInterval< UnsignedIntType > initialIndexImg;
+
+		private int targetTimePoint;
+
+		private Map< Label, Spot > initialMapping;
+
+		private boolean simplifyContours;
+
+		public LabkitImporter2 get()
+		{
+			return new LabkitImporter2(
+					model,
+					labeling,
+					initialIndexImg,
+					initialMapping,
+					targetTimePoint,
+					simplifyContours,
+					calibration,
+					dt );
+		}
+
+		public Builder initialMapping( final Map< Label, Spot > initialMapping )
+		{
+			this.initialMapping = initialMapping;
+			return this;
+		}
+
+		public Builder initialIndexImg( final RandomAccessibleInterval< UnsignedIntType > previousIndexImg )
+		{
+			this.initialIndexImg = previousIndexImg;
+			return this;
+		}
+
+		public Builder targetTimePoint( final int targetTimePoint )
+		{
+			this.targetTimePoint = targetTimePoint;
+			return this;
+		}
+
+		public Builder labeling( final Labeling labeling )
+		{
+			this.labeling = labeling;
+			return this;
+		}
+
+		public Builder trackmateModel( final Model model )
+		{
+			this.model = model;
+			return this;
+		}
+
+		public Builder calibration( final double[] calibration )
+		{
+			this.calibration = calibration;
+			return this;
+		}
+
+		public Builder frameInterval( final double dt )
+		{
+			this.dt = dt;
+			return this;
+		}
+
+		public Builder simplifyContours( final boolean simplifyContours )
+		{
+			this.simplifyContours = simplifyContours;
+			return this;
+		}
 	}
 }

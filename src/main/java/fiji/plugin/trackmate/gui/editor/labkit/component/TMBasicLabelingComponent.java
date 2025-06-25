@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.gui.editor.labkit;
+package fiji.plugin.trackmate.gui.editor.labkit.component;
 
 import java.awt.Adjustable;
 import java.awt.BorderLayout;

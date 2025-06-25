@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.gui.editor.labkit;
+package fiji.plugin.trackmate.gui.editor.labkit.model;
 
 import java.util.HashMap;
 import java.util.List;
@@ -9,12 +9,10 @@ import org.scijava.Context;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
-import fiji.plugin.trackmate.gui.editor.ImpBdvShowable;
 import fiji.plugin.trackmate.util.SpotUtil;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
@@ -28,6 +26,7 @@ import net.imglib2.Interval;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
+import net.imglib2.img.ImgView;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImgPlusViews;
 import net.imglib2.roi.labeling.LabelingType;
@@ -38,7 +37,6 @@ import net.imglib2.type.numeric.integer.UnsignedIntType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.util.Pair;
-import net.imglib2.util.Util;
 import net.imglib2.util.ValuePair;
 import net.imglib2.view.Views;
 import sc.fiji.labkit.ui.inputimage.DatasetInputImage;
@@ -58,11 +56,23 @@ public class TMLabKitModel implements SegmentationModel
 
 	private final TMImageLabelingModel imageLabelingModel;
 
+	private final Model model;
 
-	protected TMLabKitModel( final Context context, final InputImage inputImage )
+	private final double dt;
+
+	private final double[] calibration;
+
+	protected TMLabKitModel(
+			final Context context,
+			final Model model,
+			final InputImage inputImage,
+			final ImagePlus imp )
 	{
 		this.context = context;
+		this.model = model;
 		this.imageLabelingModel = new TMImageLabelingModel( inputImage );
+		this.dt = imp.getCalibration().frameInterval;
+		this.calibration = TMUtils.getSpatialCalibration( imp );
 	}
 
 	@Override
@@ -146,14 +156,51 @@ public class TMLabKitModel implements SegmentationModel
 		// Create the labeling.
 		final Pair< Labeling, Map< Label, Spot > > out = createLabeling( model, imp, interval, displaySettings, timepoint );
 		final Labeling labeling = out.getA();
-		final Map< Label, Spot > mapping = out.getB();
+		final Map< Label, Spot > initialMapping = out.getB();
 		// Create the image dataset.
 		final DatasetInputImage input = makeInput( imp, interval, timepoint );
 		// Make the model.
-		final TMLabKitModel lbModel = new TMLabKitModel( context, input );
+		final TMLabKitModel lbModel = new TMLabKitModel( context, model, input, imp );
 		lbModel.imageLabelingModel().labeling().set( labeling );
-		lbModel.imageLabelingModel().mapping().set( mapping );
+		// Store info about what the labeling is when we created it (before modif)
+		@SuppressWarnings( "unchecked" )
+		final RandomAccessibleInterval< UnsignedIntType > initialIndexImg = TMLabKitUtils.copy( ( RandomAccessibleInterval< UnsignedIntType > ) labeling.getIndexImg() );
+		lbModel.imageLabelingModel().setInitialState( initialMapping, initialIndexImg );
 		return lbModel;
+	}
+
+	/**
+	 * Returns <code>true</code> if changes have been made in the labeling
+	 * compared to its initial state.
+	 *
+	 * @return <code>true</code> if changes are detected.
+	 */
+	public boolean hasChanges()
+	{
+		final Labeling labeling = imageLabelingModel.labeling().get();
+		@SuppressWarnings( "unchecked" )
+		final RandomAccessibleInterval< UnsignedIntType > indexImg = ( RandomAccessibleInterval< UnsignedIntType > ) labeling.getIndexImg();
+		final RandomAccessibleInterval< UnsignedIntType > initialIndexImg = imageLabelingModel.initialIndexImg();
+		return TMLabKitUtils.isDifferent( initialIndexImg, indexImg );
+	}
+
+	public void updateTrackMateModel( final boolean simplifyContours, final int timepoint )
+	{
+		final Labeling labeling = imageLabelingModel().labeling().get();
+		final Map< Label, Spot > initialMapping = imageLabelingModel().initialMapping();
+		final RandomAccessibleInterval< UnsignedIntType > initialIndexImg = imageLabelingModel().initialIndexImg();
+
+		LabkitImporter2.create()
+				.trackmateModel( model )
+				.labeling( labeling )
+				.initialIndexImg( initialIndexImg )
+				.initialMapping( initialMapping )
+				.targetTimePoint( timepoint )
+				.calibration( calibration )
+				.frameInterval( dt )
+				.simplifyContours( simplifyContours )
+				.get()
+				.run();
 	}
 
 	/**
@@ -175,7 +222,7 @@ public class TMLabKitModel implements SegmentationModel
 	 * @return a new {@link DatasetInputImage}.
 	 */
 	@SuppressWarnings( { "rawtypes", "unchecked" } )
-	public final static DatasetInputImage makeInput(
+	private final static DatasetInputImage makeInput(
 			final ImagePlus imp,
 			final Interval interval,
 			final int timepoint )
@@ -255,7 +302,7 @@ public class TMLabKitModel implements SegmentationModel
 	 * @throws UnsupportedOperationException
 	 *             if this method is called with a 3D input.
 	 */
-	public static final Pair< Labeling, Map< Label, Spot > > createLabeling(
+	private static final Pair< Labeling, Map< Label, Spot > > createLabeling(
 			final Model model,
 			final ImagePlus imp,
 			final Interval interval,
@@ -309,7 +356,13 @@ public class TMLabKitModel implements SegmentationModel
 		}
 
 		// Raw image.
-		final Img< UnsignedIntType > lblImg = ArrayImgs.unsignedInts( dims );
+		Img< UnsignedIntType > lblImg = ArrayImgs.unsignedInts( dims );
+		if ( origin != null )
+		{
+			final RandomAccessibleInterval< UnsignedIntType > translated = Views.translate( lblImg, origin );
+			lblImg = ImgView.wrap( translated );
+		}
+
 		// Calibration.
 		final double[] c = TMUtils.getSpatialCalibration( imp );
 		final double[] calibration = new double[ nDims ];
@@ -416,7 +469,7 @@ public class TMLabKitModel implements SegmentationModel
 			final RandomAccess< LabelingType< Label > > ra = labeling.randomAccess();
 			for ( final Spot spot : spotsThisFrame )
 			{
-				boundingBox( spot, lblImgPlus, min, max );
+				TMLabKitUtils.boundingBox( spot, lblImgPlus, min, max );
 				// Inside? We skip if we touch the border.
 				final boolean isInside = Intervals.contains( imgBB, spotBB );
 				if ( !isInside )
@@ -434,37 +487,4 @@ public class TMLabKitModel implements SegmentationModel
 			}
 		}
 	}
-
-	private static final void boundingBox( final Spot spot, final ImgPlus< UnsignedIntType > img, final long[] min, final long[] max )
-	{
-		final double[] calibration = TMUtils.getSpatialCalibration( img );
-		final SpotRoi roi = spot.getRoi();
-		if ( roi == null )
-		{
-			final double cx = spot.getDoublePosition( 0 );
-			final double cy = spot.getDoublePosition( 1 );
-			final double r = spot.getFeature( Spot.RADIUS ).doubleValue();
-			min[ 0 ] = ( long ) Math.floor( ( cx - r ) / calibration[ 0 ] );
-			min[ 1 ] = ( long ) Math.floor( ( cy - r ) / calibration[ 1 ] );
-			max[ 0 ] = ( long ) Math.ceil( ( cx + r ) / calibration[ 0 ] );
-			max[ 1 ] = ( long ) Math.ceil( ( cy + r ) / calibration[ 1 ] );
-		}
-		else
-		{
-			final double[] x = roi.toPolygonX( calibration[ 0 ], 0, spot.getDoublePosition( 0 ), 1. );
-			final double[] y = roi.toPolygonY( calibration[ 1 ], 0, spot.getDoublePosition( 1 ), 1. );
-			min[ 0 ] = ( long ) Math.floor( Util.min( x ) );
-			min[ 1 ] = ( long ) Math.floor( Util.min( y ) );
-			max[ 0 ] = ( long ) Math.ceil( Util.max( x ) );
-			max[ 1 ] = ( long ) Math.ceil( Util.max( y ) );
-		}
-
-		min[ 0 ] = Math.max( 0, min[ 0 ] );
-		min[ 1 ] = Math.max( 0, min[ 1 ] );
-		final long width = img.min( img.dimensionIndex( Axes.X ) ) + img.dimension( img.dimensionIndex( Axes.X ) );
-		final long height = img.min( img.dimensionIndex( Axes.Y ) ) + img.dimension( img.dimensionIndex( Axes.Y ) );
-		max[ 0 ] = Math.min( width, max[ 0 ] );
-		max[ 1 ] = Math.min( height, max[ 1 ] );
-	}
-
 }
