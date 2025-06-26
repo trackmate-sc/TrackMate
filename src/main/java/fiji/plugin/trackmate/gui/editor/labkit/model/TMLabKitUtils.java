@@ -1,5 +1,8 @@
 package fiji.plugin.trackmate.gui.editor.labkit.model;
 
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import fiji.plugin.trackmate.Spot;
@@ -7,15 +10,29 @@ import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.util.TMUtils;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
+import net.imagej.axis.CalibratedAxis;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgFactory;
 import net.imglib2.loops.LoopBuilder;
 import net.imglib2.type.numeric.integer.UnsignedIntType;
 import net.imglib2.util.Util;
+import sc.fiji.labkit.ui.labeling.Labeling;
 
 public class TMLabKitUtils
 {
+
+	static final int timeAxis( final Labeling labeling )
+	{
+		final List< CalibratedAxis > axes = labeling.axes();
+		for ( int d = 0; d < axes.size(); d++ )
+		{
+			final CalibratedAxis axis = axes.get( d );
+			if (axis.type().equals( Axes.TIME ))
+				return d;
+		}
+		return -1;
+	}
 
 	static final void boundingBox( final Spot spot, final ImgPlus< UnsignedIntType > img, final long[] min, final long[] max )
 	{
@@ -79,5 +96,27 @@ public class TMLabKitUtils
 					return null;
 				} );
 		return modified.get();
+	}
+
+	static final Set< Integer > getModifiedIndices(
+			final RandomAccessibleInterval< UnsignedIntType > img1,
+			final RandomAccessibleInterval< UnsignedIntType > img2 )
+	{
+		final ConcurrentSkipListSet< Integer > modifiedIDs = new ConcurrentSkipListSet<>();
+		LoopBuilder.setImages( img1, img2 )
+				.multiThreaded( false )
+				.forEachPixel( ( c, p ) -> {
+					final int ci = c.getInteger();
+					final int pi = p.getInteger();
+					if ( ci == 0 && pi == 0 )
+						return;
+					if ( ci != pi )
+					{
+						modifiedIDs.add( Integer.valueOf( pi ) );
+						modifiedIDs.add( Integer.valueOf( ci ) );
+					}
+				} );
+		modifiedIDs.remove( Integer.valueOf( 0 ) );
+		return modifiedIDs;
 	}
 }
