@@ -475,7 +475,8 @@ public class TMLabKitModel implements SegmentationModel
 				if ( !isInside )
 					continue;
 
-				final Label label = new Label( spot.getName(), new ARGBType( colorGen.color( spot ).getRGB() ) );
+				final Label label = labeling.addLabel( spot.getName() );
+				label.setColor( new ARGBType( colorGen.color( spot ).getRGB() ) );
 				final Cursor< UnsignedIntType > c = SpotUtil.iterable( spot, lblImgPlus ).localizingCursor();
 				while ( c.hasNext() )
 				{
