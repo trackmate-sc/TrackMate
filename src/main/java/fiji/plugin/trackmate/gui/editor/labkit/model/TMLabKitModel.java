@@ -192,7 +192,7 @@ public class TMLabKitModel implements SegmentationModel
 		final Map< Label, Spot > initialMapping = imageLabelingModel().initialMapping();
 		final RandomAccessibleInterval< UnsignedIntType > initialIndexImg = imageLabelingModel().initialIndexImg();
 
-		LabkitImporter2.create()
+		LabkitImporter.create()
 				.trackmateModel( model )
 				.labeling( labeling )
 				.initialIndexImg( initialIndexImg )

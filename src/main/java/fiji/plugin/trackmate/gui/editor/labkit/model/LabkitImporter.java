@@ -28,7 +28,7 @@ import sc.fiji.labkit.ui.labeling.Labeling;
  * Re-import the edited segmentation made in Labkit into the TrackMate model it
  * started from.
  */
-public class LabkitImporter2
+public class LabkitImporter
 {
 
 	private static final boolean DEBUG = true;
@@ -78,7 +78,7 @@ public class LabkitImporter2
 	 * @param dt
 	 *            the frame interval.
 	 */
-	private LabkitImporter2(
+	private LabkitImporter(
 			final Model model,
 			final Labeling labeling,
 			final RandomAccessibleInterval< UnsignedIntType > initialIndexImg,
@@ -399,9 +399,9 @@ public class LabkitImporter2
 
 		private boolean simplifyContours;
 
-		public LabkitImporter2 get()
+		public LabkitImporter get()
 		{
-			return new LabkitImporter2(
+			return new LabkitImporter(
 					model,
 					labeling,
 					initialIndexImg,
