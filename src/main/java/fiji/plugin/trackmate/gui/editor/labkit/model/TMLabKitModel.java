@@ -395,12 +395,8 @@ public class TMLabKitModel implements SegmentationModel
 		}
 		else
 		{
-			final int timeDim = lblImgPlus.dimensionIndex( Axes.TIME );
 			for ( int t = 0; t < imp.getNFrames(); t++ )
-			{
-				final ImgPlus< UnsignedIntType > lblImgPlusThisFrame = ImgPlusViews.hyperSlice( lblImgPlus, timeDim, t );
-				processFrame( labeling, lblImgPlusThisFrame, spots, t, origin, colorGen, spotLabels );
-			}
+				processFrame( labeling, lblImgPlus, spots, t, origin, colorGen, spotLabels );
 		}
 		return new ValuePair< Labeling, Map< Label, Spot > >( labeling, spotLabels );
 	}
@@ -434,23 +430,35 @@ public class TMLabKitModel implements SegmentationModel
 			final Labeling labeling,
 			final ImgPlus< UnsignedIntType > lblImgPlus,
 			final SpotCollection spots,
-			final int t,
+			final int timepoint,
 			final long[] origin,
 			final FeatureColorGenerator< Spot > colorGen,
 			final Map< Label, Spot > spotLabels )
 	{
 
-		// If we have a single time-point, don't use -1 to retrieve spots.
-		final int lt = t < 0 ? 0 : t;
-		final Iterable< Spot > spotsThisFrame = spots.iterable( lt, true );
+		// If we have time, reslice.
+		final int timeDim = lblImgPlus.dimensionIndex( Axes.TIME );
+		final RandomAccess< LabelingType< Label > > ra;
+		final ImgPlus< UnsignedIntType > img;
+		if ( timeDim < 0 )
+		{
+			ra = labeling.randomAccess();
+			img = lblImgPlus;
+		}
+		else
+		{
+			ra = Views.hyperSlice( labeling, timeDim, timepoint ).randomAccess();
+			img = ImgPlusViews.hyperSlice( lblImgPlus, timeDim, timepoint );
+		}
+
+		final Iterable< Spot > spotsThisFrame = spots.iterable( timepoint, true );
 		if ( null == origin )
 		{
-			final RandomAccess< LabelingType< Label > > ra = labeling.randomAccess();
 			for ( final Spot spot : spotsThisFrame )
 			{
 				final Label label = labeling.addLabel( spot.getName() );
 				label.setColor( new ARGBType( colorGen.color( spot ).getRGB() ) );
-				final Cursor< UnsignedIntType > c = SpotUtil.iterable( spot, lblImgPlus ).localizingCursor();
+				final Cursor< UnsignedIntType > c = SpotUtil.iterable( spot, img ).localizingCursor();
 				while ( c.hasNext() )
 				{
 					c.fwd();
@@ -465,11 +473,10 @@ public class TMLabKitModel implements SegmentationModel
 			final long[] min = new long[ 2 ];
 			final long[] max = new long[ 2 ];
 			final FinalInterval spotBB = FinalInterval.wrap( min, max );
-			final FinalInterval imgBB = Intervals.createMinSize( origin[ 0 ], origin[ 1 ], lblImgPlus.dimension( 0 ), lblImgPlus.dimension( 1 ) );
-			final RandomAccess< LabelingType< Label > > ra = labeling.randomAccess();
+			final FinalInterval imgBB = Intervals.createMinSize( origin[ 0 ], origin[ 1 ], img.dimension( 0 ), img.dimension( 1 ) );
 			for ( final Spot spot : spotsThisFrame )
 			{
-				TMLabKitUtils.boundingBox( spot, lblImgPlus, min, max );
+				TMLabKitUtils.boundingBox( spot, img, min, max );
 				// Inside? We skip if we touch the border.
 				final boolean isInside = Intervals.contains( imgBB, spotBB );
 				if ( !isInside )
@@ -477,7 +484,7 @@ public class TMLabKitModel implements SegmentationModel
 
 				final Label label = labeling.addLabel( spot.getName() );
 				label.setColor( new ARGBType( colorGen.color( spot ).getRGB() ) );
-				final Cursor< UnsignedIntType > c = SpotUtil.iterable( spot, lblImgPlus ).localizingCursor();
+				final Cursor< UnsignedIntType > c = SpotUtil.iterable( spot, img ).localizingCursor();
 				while ( c.hasNext() )
 				{
 					c.fwd();
