@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.gui.editor.labkit.model;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
+import net.imagej.axis.CalibratedAxis;
 import net.imglib2.Cursor;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
@@ -377,6 +379,9 @@ public class TMLabKitModel implements SegmentationModel
 		// Label image holder.
 		final ImgPlus< UnsignedIntType > lblImgPlus = new ImgPlus<>( lblImg, "LblImg", axes, calibration );
 		final Labeling labeling = Labeling.fromImg( lblImgPlus );
+		final CalibratedAxis[] caxes = new CalibratedAxis[ axes.length ];
+		lblImgPlus.axes( caxes );
+		labeling.setAxes( Arrays.asList( caxes ) );
 
 		// Labels color to match TrackMate display.
 		final DisplaySettings defaultStyle = DisplaySettings.defaultStyle().copy();
