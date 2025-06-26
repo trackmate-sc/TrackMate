@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.util.Arrays;
 
 import javax.swing.BorderFactory;
@@ -25,6 +26,18 @@ import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
+import org.scijava.ui.behaviour.io.InputTriggerConfig;
+import org.scijava.ui.behaviour.util.Actions;
+import org.scijava.ui.behaviour.util.InputActionBindings;
+
+import bdv.BigDataViewerActions;
+import bdv.tools.PreferencesDialog;
+import bdv.ui.appearance.AppearanceManager;
+import bdv.ui.appearance.AppearanceSettingsPage;
+import bdv.ui.keymap.Keymap;
+import bdv.ui.keymap.KeymapManager;
+import bdv.ui.keymap.KeymapSettingsPage;
+import bdv.util.BdvOptions;
 import fiji.plugin.trackmate.gui.Icons;
 import net.imglib2.Dimensions;
 import net.imglib2.util.Intervals;
@@ -46,14 +59,47 @@ public class TMLabKitFrame extends JFrame
 
 	private static final long serialVersionUID = 1L;
 
+	private static final String KEY_CONFIG_CONTEXT = "TrackMate LabKit";
+
 	private final Notifier onCloseListeners = new Notifier();
 
 	public TMLabKitFrame( final SegmentationModel model )
 	{
 		final ImageLabelingModel imageLabelingModel = model.imageLabelingModel();
 
+		final InputActionBindings keybindings = new InputActionBindings();
+//		final TriggerBehaviourBindings triggerbindings = new TriggerBehaviourBindings();
+		SwingUtilities.replaceUIActionMap( getRootPane(), keybindings.getConcatenatedActionMap() );
+		SwingUtilities.replaceUIInputMap( getRootPane(), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, keybindings.getConcatenatedInputMap() );
+
+		final KeymapManager keymapManager = new KeymapManager( KEYMAP_HOME );
+		final AppearanceManager appearanceManager = new AppearanceManager( KEYMAP_HOME );
+		final Keymap keymap = keymapManager.getForwardSelectedKeymap();
+		final InputTriggerConfig inputTriggerConfig = keymap.getConfig();
+
+		final PreferencesDialog preferencesDialog = new PreferencesDialog( this, keymap, new String[] { KEY_CONFIG_CONTEXT } );
+		preferencesDialog.addPage( new AppearanceSettingsPage( "Appearance", appearanceManager ) );
+		preferencesDialog.addPage( new KeymapSettingsPage( "Keymap", keymapManager, keymapManager.getCommandDescriptions() ) );
+		appearanceManager.appearance().updateListeners().add( this::repaint );
+		SwingUtilities.invokeLater( () -> appearanceManager.updateLookAndFeel() );
+
+		final Actions myActions = new Actions( inputTriggerConfig, "myActions" );
+		myActions.install( keybindings, "myActions" );
+
+		keymap.updateListeners().add( () -> {
+			myActions.updateKeyConfig( keymap.getConfig() );
+		} );
+
 		// Main central panel.
-		final TMBasicLabelingComponent mainPanel = new TMBasicLabelingComponent( this, imageLabelingModel );
+		final BdvOptions options = BdvOptions.options()
+				.inputTriggerConfig( inputTriggerConfig )
+				.keymapManager( new KeymapManager( KEYMAP_HOME ) );
+		if ( imageLabelingModel.spatialDimensions().numDimensions() < 3 )
+			options.is2D();
+
+		final TMBasicLabelingComponent mainPanel = new TMBasicLabelingComponent( this, imageLabelingModel, options );
+
+		BigDataViewerActions.toggleDialogAction( myActions, preferencesDialog, PREFERENCES_DIALOG, PREFERENCES_DIALOG_KEYS );
 
 		// Left side bar.
 		final JPanel leftPanel = new JPanel();
@@ -182,4 +228,39 @@ public class TMLabKitFrame extends JFrame
 		panel.setBorder( BorderFactory.createEmptyBorder() );
 		return panel;
 	}
+
+	public static final String BRIGHTNESS_SETTINGS = "brightness settings";
+	public static final String VISIBILITY_AND_GROUPING = "visibility and grouping";
+	public static final String SHOW_HELP = "help";
+	public static final String CROP = "crop";
+	public static final String MANUAL_TRANSFORM = "toggle manual transformation";
+	public static final String SAVE_SETTINGS = "save settings";
+	public static final String LOAD_SETTINGS = "load settings";
+	public static final String EXPAND_CARDS = "expand and focus cards panel";
+	public static final String COLLAPSE_CARDS = "collapse cards panel";
+	public static final String RECORD_MOVIE = "record movie";
+	public static final String RECORD_MAX_PROJECTION_MOVIE = "record max projection movie";
+	public static final String SET_BOOKMARK = "set bookmark";
+	public static final String GO_TO_BOOKMARK = "go to bookmark";
+	public static final String GO_TO_BOOKMARK_ROTATION = "go to bookmark rotation";
+	public static final String PREFERENCES_DIALOG = "Preferences";
+
+	public static final String[] BRIGHTNESS_SETTINGS_KEYS         = new String[] { "S" };
+	public static final String[] VISIBILITY_AND_GROUPING_KEYS     = new String[] { "F6" };
+	public static final String[] SHOW_HELP_KEYS                   = new String[] { "F1", "H" };
+	public static final String[] CROP_KEYS                        = new String[] { "F9" };
+	public static final String[] MANUAL_TRANSFORM_KEYS            = new String[] { "T" };
+	public static final String[] SAVE_SETTINGS_KEYS               = new String[] { "F11" };
+	public static final String[] LOAD_SETTINGS_KEYS               = new String[] { "F12" };
+	public static final String[] EXPAND_CARDS_KEYS                = new String[] { "P" };
+	public static final String[] COLLAPSE_CARDS_KEYS              = new String[] { "shift P", "shift ESCAPE" };
+	public static final String[] RECORD_MOVIE_KEYS                = new String[] { "F10" };
+	public static final String[] RECORD_MAX_PROJECTION_MOVIE_KEYS = new String[] { "F8" };
+	public static final String[] SET_BOOKMARK_KEYS                = new String[] { "shift B" };
+	public static final String[] GO_TO_BOOKMARK_KEYS              = new String[] { "B" };
+	public static final String[] GO_TO_BOOKMARK_ROTATION_KEYS     = new String[] { "O" };
+	public static final String[] PREFERENCES_DIALOG_KEYS          = new String[] { "meta COMMA", "ctrl COMMA" };
+
+	private static final String KEYMAP_HOME = new File( new File( System.getProperty( "user.home" ), ".trackmate" ), "editor" ).getAbsolutePath();
+
 }

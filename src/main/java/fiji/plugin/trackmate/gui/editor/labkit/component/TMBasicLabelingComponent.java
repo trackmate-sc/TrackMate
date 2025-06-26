@@ -4,13 +4,16 @@ import java.awt.Adjustable;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Window;
+import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Collection;
 
+import javax.swing.Action;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
 import org.scijava.ui.behaviour.util.AbstractNamedAction;
@@ -35,6 +38,7 @@ import sc.fiji.labkit.ui.brush.SelectLabelController;
 import sc.fiji.labkit.ui.labeling.LabelsLayer;
 import sc.fiji.labkit.ui.models.Holder;
 import sc.fiji.labkit.ui.models.ImageLabelingModel;
+import sc.fiji.labkit.ui.models.TransformationModel;
 import sc.fiji.labkit.ui.panel.LabelToolsPanel;
 
 /**
@@ -42,6 +46,29 @@ import sc.fiji.labkit.ui.panel.LabelToolsPanel;
  */
 public class TMBasicLabelingComponent extends JPanel implements AutoCloseable
 {
+
+	private static class MyResetViewAction extends AbstractNamedAction
+	{
+
+		private final ImageLabelingModel model;
+
+		public MyResetViewAction( final ImageLabelingModel model )
+		{
+			super( "Reset View" );
+			this.model = model;
+			putValue( Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke( "shift R" ) );
+		}
+
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public void actionPerformed( final ActionEvent arg0 )
+		{
+			final TransformationModel transformationModel = model.transformationModel();
+			transformationModel.transformToShowInterval( model.labeling().get()
+					.interval(), model.labelTransformation() );
+		}
+	}
 
 	private static final long serialVersionUID = 1L;
 
@@ -57,18 +84,22 @@ public class TMBasicLabelingComponent extends JPanel implements AutoCloseable
 
 	private JSlider zSlider;
 
-	public TMBasicLabelingComponent( final JFrame dialogBoxOwner,
-			final ImageLabelingModel model )
+	public TMBasicLabelingComponent(
+			final JFrame dialogBoxOwner,
+			final ImageLabelingModel model,
+			final BdvOptions options )
 	{
 		this.model = model;
 		this.dialogBoxOwner = dialogBoxOwner;
 
-		initBdv( model.spatialDimensions().numDimensions() < 3 );
+		initBdv( options );
 		actionsAndBehaviours = new ActionsAndBehaviours( bdvHandle );
 		this.imageSource = initImageLayer();
 		initLabelsLayer();
 		initPanel();
 		this.model.transformationModel().initialize( bdvHandle.getViewerPanel() );
+
+		actionsAndBehaviours.addAction( new MyResetViewAction( model ) );
 	}
 
 	// Give focus to BDV when activated
@@ -91,13 +122,15 @@ public class TMBasicLabelingComponent extends JPanel implements AutoCloseable
 		}
 	}
 
-	private void initBdv( final boolean is2D )
+	private void initBdv( final BdvOptions options )
 	{
-		final BdvOptions options = BdvOptions.options();
-		if ( is2D )
-			options.is2D();
 		bdvHandle = new BdvHandlePanel( dialogBoxOwner, options );
 		bdvHandle.getViewerPanel().setDisplayMode( DisplayMode.FUSED );
+	}
+
+	public BdvHandle getBdvHandle()
+	{
+		return bdvHandle;
 	}
 
 	private void initPanel()
