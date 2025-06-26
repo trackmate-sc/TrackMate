@@ -146,6 +146,14 @@ public class TMBasicLabelingComponent extends JPanel implements AutoCloseable
 			toolsPanel.remove( c );
 		}
 
+		// To edit TrackMate spots, the overlapping mode is always enabled.
+		floodFillController.setOverlapping( true );
+		brushController.setOverlapping( true );
+		// Remove the checkbox from the option panel
+		final JPanel c = ( JPanel ) toolsPanel.getComponent( toolsPanel.getComponentCount() - 1 );
+		// The overlapping mode toggle button
+		c.remove( c.getComponent( 0 ) );
+
 		actionsAndBehaviours.addAction( new ChangeLabel( model ) );
 		return toolsPanel;
 	}
