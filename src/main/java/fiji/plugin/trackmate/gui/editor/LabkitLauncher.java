@@ -2,6 +2,7 @@ package fiji.plugin.trackmate.gui.editor;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
+import java.io.File;
 
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
@@ -15,6 +16,7 @@ import org.scijava.Context;
 import org.scijava.ui.behaviour.util.AbstractNamedAction;
 
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.gui.GuiUtils;
@@ -22,6 +24,7 @@ import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame;
 import fiji.plugin.trackmate.gui.editor.labkit.model.TMLabKitModel;
+import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.ViewUtils;
@@ -176,5 +179,24 @@ public class LabkitLauncher
 		else
 			action.setEnabled( ENABLE_SPOT_EDITOR );
 		return action;
+	}
+
+	public static void main( final String[] args )
+	{
+		final String filename = "samples/MAX_Merged.xml";
+		final TmXmlReader reader = new TmXmlReader( new File( filename ) );
+		if ( !reader.isReadingOk() )
+		{
+			System.out.println( reader.getErrorMessage() );
+			return;
+		}
+
+		final Model model = reader.getModel();
+		final ImagePlus imp = reader.readImage();
+		final Settings settings = reader.readSettings( imp );
+		final DisplaySettings ds = reader.getDisplaySettings();
+		final TrackMate trackmate = new TrackMate( model, settings );
+
+		LabkitLauncher.launch( trackmate, ds, 0 );
 	}
 }
