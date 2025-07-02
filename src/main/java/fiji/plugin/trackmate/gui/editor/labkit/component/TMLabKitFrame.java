@@ -26,20 +26,13 @@ import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-import org.scijava.plugin.Plugin;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
-import org.scijava.ui.behaviour.io.gui.CommandDescriptionProvider;
 import org.scijava.ui.behaviour.io.gui.CommandDescriptionProvider.Scope;
-import org.scijava.ui.behaviour.io.gui.CommandDescriptions;
 import org.scijava.ui.behaviour.util.Actions;
 import org.scijava.ui.behaviour.util.InputActionBindings;
 
-import bdv.BigDataViewerActions;
-import bdv.tools.PreferencesDialog;
 import bdv.ui.appearance.AppearanceManager;
 import bdv.ui.keymap.Keymap;
-import bdv.ui.keymap.KeymapManager;
-import bdv.ui.keymap.KeymapSettingsPage;
 import bdv.util.BdvOptions;
 import fiji.plugin.trackmate.gui.Icons;
 import net.imglib2.Dimensions;
@@ -74,43 +67,23 @@ public class TMLabKitFrame extends JFrame
 	{
 		final ImageLabelingModel imageLabelingModel = model.imageLabelingModel();
 
-		final InputActionBindings keybindings = new InputActionBindings();
-//		final TriggerBehaviourBindings triggerbindings = new TriggerBehaviourBindings();
-		SwingUtilities.replaceUIActionMap( getRootPane(), keybindings.getConcatenatedActionMap() );
-		SwingUtilities.replaceUIInputMap( getRootPane(), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, keybindings.getConcatenatedInputMap() );
-
 		final TMKeymapManager keymapManager = new TMKeymapManager();
 		final AppearanceManager appearanceManager = new AppearanceManager( KEYMAP_HOME );
 		final Keymap keymap = keymapManager.getForwardSelectedKeymap();
 		final InputTriggerConfig inputTriggerConfig = keymap.getConfig();
 
-		final PreferencesDialog preferencesDialog = new PreferencesDialog( this, keymap, new String[] { KEY_CONFIG_CONTEXT } );
-		fiji.plugin.trackmate.gui.GuiUtils.positionWindow( preferencesDialog, this );
-		SwingUtilities.replaceUIActionMap( preferencesDialog.getRootPane(), keybindings.getConcatenatedActionMap() );
-		SwingUtilities.replaceUIInputMap( preferencesDialog.getRootPane(), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, keybindings.getConcatenatedInputMap() );
-
-//		preferencesDialog.addPage( new AppearanceSettingsPage( "Appearance", appearanceManager ) );
-		preferencesDialog.addPage( new KeymapSettingsPage( "Keymap", keymapManager, keymapManager.getCommandDescriptions() ) );
-		appearanceManager.appearance().updateListeners().add( this::repaint );
-		SwingUtilities.invokeLater( () -> appearanceManager.updateLookAndFeel() );
-
-		final Actions myActions = new Actions( inputTriggerConfig, KEY_CONFIG_CONTEXT );
-		myActions.install( keybindings, "trackmate-labkit-actions" );
-
-		keymap.updateListeners().add( () -> {
-			myActions.updateKeyConfig( keymap.getConfig() );
-		} );
+		final InputActionBindings keybindings = new InputActionBindings();
+//		final TriggerBehaviourBindings triggerbindings = new TriggerBehaviourBindings();
+		SwingUtilities.replaceUIActionMap( getRootPane(), keybindings.getConcatenatedActionMap() );
+		SwingUtilities.replaceUIInputMap( getRootPane(), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, keybindings.getConcatenatedInputMap() );
 
 		// Main central panel.
 		final BdvOptions options = BdvOptions.options()
 				.inputTriggerConfig( inputTriggerConfig )
-				.keymapManager( new KeymapManager( KEYMAP_HOME ) );
+				.keymapManager( keymapManager );
 		if ( imageLabelingModel.spatialDimensions().numDimensions() < 3 )
 			options.is2D();
-
 		final TMBasicLabelingComponent mainPanel = new TMBasicLabelingComponent( this, imageLabelingModel, options );
-
-		BigDataViewerActions.toggleDialogAction( myActions, preferencesDialog, TOGGLE_PREFERENCES_DIALOG, TOGGLE_PREFERENCES_DIALOG_KEYS );
 
 		// Left side bar.
 		final JPanel leftPanel = new JPanel();
@@ -133,6 +106,19 @@ public class TMLabKitFrame extends JFrame
 				"Spots",
 				new TMLabelPanel( imageLabelingModel ) );
 		leftPanel.add( labelInfoPanel );
+
+		// Actions and Behaviors instances
+		final Actions myActions = new Actions( inputTriggerConfig, KEY_CONFIG_CONTEXT );
+		myActions.install( keybindings, "trackmate-labkit-actions" );
+
+		// Install our actions
+		TMLabKitActions.install(
+				myActions,
+				mainPanel.getBdvHandle().getViewerPanel(),
+				this,
+				keybindings,
+				keymapManager,
+				appearanceManager );
 
 		// Add to frame.
 		add( initGui( mainPanel, leftPanel ) );
@@ -244,25 +230,4 @@ public class TMLabKitFrame extends JFrame
 	 * Key bindings and command descriptions.
 	 */
 
-	private static final String TOGGLE_PREFERENCES_DIALOG = "preferences";
-	private static final String CLOSE_PREFERENCES_DIALOG = "close dialog window";
-
-	private static final String[] TOGGLE_PREFERENCES_DIALOG_KEYS = new String[] { "ctrl COMMA" };
-	private static final String[] CLOSE_PREFERENCES_DIALOG_KEYS = new String[] { "ESCAPE" };
-
-	@Plugin( type = CommandDescriptionProvider.class )
-	public static class Descriptions extends CommandDescriptionProvider
-	{
-		public Descriptions()
-		{
-			super( KEY_CONFIG_SCOPE, KEY_CONFIG_CONTEXT );
-		}
-
-		@Override
-		public void getCommandDescriptions( final CommandDescriptions descriptions )
-		{
-			descriptions.add( TOGGLE_PREFERENCES_DIALOG, TOGGLE_PREFERENCES_DIALOG_KEYS, "Toggle the Preferences dialog." );
-			descriptions.add( CLOSE_PREFERENCES_DIALOG, CLOSE_PREFERENCES_DIALOG_KEYS, "Close the Preferences dialog." );
-		}
-	}
 }
