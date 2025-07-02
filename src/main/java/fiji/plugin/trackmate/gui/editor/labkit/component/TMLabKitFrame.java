@@ -29,7 +29,9 @@ import javax.swing.UIManager;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.io.gui.CommandDescriptionProvider.Scope;
 import org.scijava.ui.behaviour.util.Actions;
+import org.scijava.ui.behaviour.util.Behaviours;
 import org.scijava.ui.behaviour.util.InputActionBindings;
+import org.scijava.ui.behaviour.util.TriggerBehaviourBindings;
 
 import bdv.ui.appearance.AppearanceManager;
 import bdv.ui.keymap.Keymap;
@@ -72,11 +74,6 @@ public class TMLabKitFrame extends JFrame
 		final Keymap keymap = keymapManager.getForwardSelectedKeymap();
 		final InputTriggerConfig inputTriggerConfig = keymap.getConfig();
 
-		final InputActionBindings keybindings = new InputActionBindings();
-//		final TriggerBehaviourBindings triggerbindings = new TriggerBehaviourBindings();
-		SwingUtilities.replaceUIActionMap( getRootPane(), keybindings.getConcatenatedActionMap() );
-		SwingUtilities.replaceUIInputMap( getRootPane(), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, keybindings.getConcatenatedInputMap() );
-
 		// Main central panel.
 		final BdvOptions options = BdvOptions.options()
 				.inputTriggerConfig( inputTriggerConfig )
@@ -107,9 +104,22 @@ public class TMLabKitFrame extends JFrame
 				new TMLabelPanel( imageLabelingModel ) );
 		leftPanel.add( labelInfoPanel );
 
-		// Actions and Behaviors instances
+		// Actions instance
+		final InputActionBindings keybindings = mainPanel.getBdvHandle().getKeybindings();
+		SwingUtilities.replaceUIActionMap( getRootPane(), keybindings.getConcatenatedActionMap() );
+		SwingUtilities.replaceUIInputMap( getRootPane(), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, keybindings.getConcatenatedInputMap() );
 		final Actions myActions = new Actions( inputTriggerConfig, KEY_CONFIG_CONTEXT );
 		myActions.install( keybindings, "trackmate-labkit-actions" );
+
+		// Behaviours instance
+		final TriggerBehaviourBindings triggerbindings = mainPanel.getBdvHandle().getTriggerbindings();
+		final Behaviours myBehaviours = new Behaviours( inputTriggerConfig, KEY_CONFIG_CONTEXT );
+		myBehaviours.install( triggerbindings, "trackmate-labkit-actions" );
+
+		keymap.updateListeners().add( () -> {
+			myActions.updateKeyConfig( keymap.getConfig() );
+			myBehaviours.updateKeyConfig( keymap.getConfig() );
+		} );
 
 		// Install our actions
 		TMLabKitActions.install(
@@ -119,6 +129,7 @@ public class TMLabKitFrame extends JFrame
 				keybindings,
 				keymapManager,
 				appearanceManager );
+		mainPanel.install( myActions, myBehaviours );
 
 		// Add to frame.
 		add( initGui( mainPanel, leftPanel ) );
