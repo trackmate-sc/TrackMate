@@ -37,11 +37,11 @@ import bdv.ui.appearance.AppearanceManager;
 import bdv.ui.keymap.Keymap;
 import bdv.util.BdvOptions;
 import fiji.plugin.trackmate.gui.Icons;
+import fiji.plugin.trackmate.gui.editor.labkit.model.TMLabKitModel;
 import net.imglib2.Dimensions;
 import net.imglib2.util.Intervals;
 import net.miginfocom.swing.MigLayout;
 import sc.fiji.labkit.ui.models.ImageLabelingModel;
-import sc.fiji.labkit.ui.models.SegmentationModel;
 import sc.fiji.labkit.ui.panel.GuiUtils;
 import sc.fiji.labkit.ui.utils.Notifier;
 
@@ -65,7 +65,7 @@ public class TMLabKitFrame extends JFrame
 
 	private final Notifier onCloseListeners = new Notifier();
 
-	public TMLabKitFrame( final SegmentationModel model )
+	public TMLabKitFrame( final TMLabKitModel model )
 	{
 		final ImageLabelingModel imageLabelingModel = model.imageLabelingModel();
 
@@ -124,7 +124,7 @@ public class TMLabKitFrame extends JFrame
 		// Install our actions
 		TMLabKitActions.install(
 				myActions,
-				mainPanel.getBdvHandle().getViewerPanel(),
+				model,
 				this,
 				keybindings,
 				keymapManager,
@@ -187,7 +187,7 @@ public class TMLabKitFrame extends JFrame
 				if ( window != null )
 					window.dispose();
 			}
-        } );
+		} );
 		return button;
 	}
 

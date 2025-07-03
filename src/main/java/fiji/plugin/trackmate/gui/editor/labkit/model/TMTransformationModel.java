@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.gui.editor.labkit.model;
 
+import bdv.tools.InitializeViewerState;
 import bdv.util.Affine3DHelpers;
 import bdv.viewer.ViewerPanel;
 import bdv.viewer.ViewerState;
@@ -30,8 +31,7 @@ public class TMTransformationModel extends TransformationModel
 	}
 
 	@Override
-	public void transformToShowInterval( Interval interval,
-			final AffineTransform3D sourceTransform )
+	public void transformToShowInterval( Interval interval, final AffineTransform3D sourceTransform )
 	{
 		if ( viewerPanel == null )
 			return;
@@ -54,8 +54,24 @@ public class TMTransformationModel extends TransformationModel
 		viewerPanel.setTransformAnimator( new SimilarityTransformAnimator( c, t, cX, cY, 300 ) );
 	}
 
-	private static AffineTransform3D calculateCurrentTransform(
-			final ViewerState state, final double cX, final double cY )
+	public void resetView()
+	{
+		final int width = viewerPanel.getWidth();
+		final int height = viewerPanel.getHeight();
+		final double cX = width / 2.;
+		final double cY = height / 2.;
+
+		// Source
+		final AffineTransform3D c = calculateCurrentTransform( viewerPanel.state(), cX, cY );
+		final AffineTransform3D t = InitializeViewerState.initTransform( width, height, false, viewerPanel.state() );
+		t.set( t.get( 0, 3 ) - cX, 0, 3 );
+		t.set( t.get( 1, 3 ) - cY, 1, 3 );
+
+		// Run
+		viewerPanel.setTransformAnimator( new SimilarityTransformAnimator( c, t, cX, cY, 300 ) ); // FIXME
+	}
+
+	private static AffineTransform3D calculateCurrentTransform( final ViewerState state, final double cX, final double cY )
 	{
 		final AffineTransform3D c = new AffineTransform3D();
 		state.getViewerTransform( c );

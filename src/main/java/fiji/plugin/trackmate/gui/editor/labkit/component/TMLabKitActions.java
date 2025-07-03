@@ -3,38 +3,31 @@ package fiji.plugin.trackmate.gui.editor.labkit.component;
 import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.KEY_CONFIG_CONTEXT;
 import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.KEY_CONFIG_SCOPE;
 
-import java.awt.event.ActionEvent;
-
-import javax.swing.Action;
 import javax.swing.JComponent;
-import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
 import org.scijava.plugin.Plugin;
 import org.scijava.ui.behaviour.io.gui.CommandDescriptionProvider;
 import org.scijava.ui.behaviour.io.gui.CommandDescriptions;
-import org.scijava.ui.behaviour.util.AbstractNamedAction;
 import org.scijava.ui.behaviour.util.Actions;
 import org.scijava.ui.behaviour.util.InputActionBindings;
 
 import bdv.BigDataViewerActions;
-import bdv.tools.InitializeViewerState;
 import bdv.tools.PreferencesDialog;
 import bdv.ui.appearance.AppearanceManager;
 import bdv.ui.appearance.AppearanceSettingsPage;
 import bdv.ui.keymap.Keymap;
 import bdv.ui.keymap.KeymapManager;
 import bdv.ui.keymap.KeymapSettingsPage;
-import bdv.viewer.ViewerPanel;
-import bdv.viewer.animate.SimilarityTransformAnimator;
-import net.imglib2.realtransform.AffineTransform3D;
+import fiji.plugin.trackmate.gui.editor.labkit.model.TMLabKitModel;
+import fiji.plugin.trackmate.gui.editor.labkit.model.TMTransformationModel;
 
 public class TMLabKitActions
 {
 
 	public static void install(
 			final Actions actions,
-			final ViewerPanel viewerPanel,
+			final TMLabKitModel model,
 			final TMLabKitFrame frame,
 			final InputActionBindings keybindings,
 			final KeymapManager keymapManager,
@@ -61,45 +54,8 @@ public class TMLabKitActions
 		 * View actions
 		 */
 
-		actions.namedAction( new MyResetViewAction( viewerPanel ), RESET_VIEW_KEYS );
-	}
-
-	private static class MyResetViewAction extends AbstractNamedAction
-	{
-
-		private final ViewerPanel viewerPanel;
-
-		public MyResetViewAction( final ViewerPanel viewerPanel )
-		{
-			super( RESET_VIEW );
-			this.viewerPanel = viewerPanel;
-			putValue( Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke( "shift R" ) );
-		}
-
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public void actionPerformed( final ActionEvent arg0 )
-		{
-			final int width = viewerPanel.getWidth();
-			final int height = viewerPanel.getHeight();
-			final double cX = width / 2.;
-			final double cY = height / 2.;
-
-			// Source
-			final AffineTransform3D c = new AffineTransform3D();
-			viewerPanel.state().getViewerTransform( c );
-			c.set( c.get( 0, 3 ) - cX, 0, 3 );
-			c.set( c.get( 1, 3 ) - cY, 1, 3 );
-
-			// Target
-			final AffineTransform3D t = InitializeViewerState.initTransform( width, height, false, viewerPanel.state() );
-			t.set( t.get( 0, 3 ) - cX, 0, 3 );
-			t.set( t.get( 1, 3 ) - cY, 1, 3 );
-
-			// Run
-			viewerPanel.setTransformAnimator( new SimilarityTransformAnimator( c, t, cX, cY, 300 ) ); // FIXME
-		}
+		final TMTransformationModel transformationModel = ( TMTransformationModel ) model.imageLabelingModel().transformationModel();
+		actions.runnableAction( () -> transformationModel.resetView(), RESET_VIEW, RESET_VIEW_KEYS );
 	}
 
 	private static final String TOGGLE_PREFERENCES_DIALOG = "preferences";
@@ -126,5 +82,4 @@ public class TMLabKitActions
 			descriptions.add( RESET_VIEW, RESET_VIEW_KEYS, "Reset the view." );
 		}
 	}
-
 }
