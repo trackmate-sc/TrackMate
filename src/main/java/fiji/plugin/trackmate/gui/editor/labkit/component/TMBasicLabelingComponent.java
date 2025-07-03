@@ -199,23 +199,30 @@ public class TMBasicLabelingComponent extends JPanel implements AutoCloseable
 
 		private static final long serialVersionUID = 1L;
 
-		private static final String CHANGE_LABEL = "next label";
+		private static final String NEXT_LABEL = "next label";
+		private static final String PREVIOUS_LABEL = "previous label";
 
-		private static final String[] CHANGE_LABEL_KEYS = new String[] { "N" };
+		private static final String[] NEXT_LABEL_KEYS = new String[] { "N" };
+		private static final String[] PREVIOUS_LABEL_KEYS = new String[] { "P" };
 
 		private final LabelingModel model;
 
-		public MyChangeLabelAction( final LabelingModel model )
+		private final boolean next;
+
+		public MyChangeLabelAction( final LabelingModel model, final boolean next )
 		{
-			super( CHANGE_LABEL );
+			super( next ? NEXT_LABEL : PREVIOUS_LABEL );
 			this.model = model;
+			this.next = next;
 		}
 
 		@Override
 		public void actionPerformed( final ActionEvent actionEvent )
 		{
 			final List< Label > labels = model.labeling().get().getLabels();
-			final Label nextLabel = next( labels, model.selectedLabel().get() );
+			final Label nextLabel = next
+					? next( labels, model.selectedLabel().get() )
+					: previous( labels, model.selectedLabel().get() );
 			if ( nextLabel != null )
 				model.selectedLabel().set( nextLabel );
 		}
@@ -230,9 +237,20 @@ public class TMBasicLabelingComponent extends JPanel implements AutoCloseable
 			return labels.get( index );
 		}
 
+		private Label previous( final List< Label > labels, final Label currentLabel )
+		{
+			if ( labels.isEmpty() )
+				return null;
+			int index = labels.indexOf( currentLabel ) - 1;
+			if ( index < 0 )
+				index = labels.size() - 1;
+			return labels.get( index );
+		}
+
 		public static void install( final Actions actions, final LabelingModel model )
 		{
-			actions.namedAction( new MyChangeLabelAction( model ), CHANGE_LABEL_KEYS );
+			actions.namedAction( new MyChangeLabelAction( model, true ), NEXT_LABEL_KEYS );
+			actions.namedAction( new MyChangeLabelAction( model, false ), PREVIOUS_LABEL_KEYS );
 		}
 
 		@Plugin( type = CommandDescriptionProvider.class )
@@ -246,7 +264,8 @@ public class TMBasicLabelingComponent extends JPanel implements AutoCloseable
 			@Override
 			public void getCommandDescriptions( final CommandDescriptions descriptions )
 			{
-				descriptions.add( CHANGE_LABEL, CHANGE_LABEL_KEYS, "Select the next label in the list." );
+				descriptions.add( NEXT_LABEL, NEXT_LABEL_KEYS, "Select the next label in the list." );
+				descriptions.add( PREVIOUS_LABEL, PREVIOUS_LABEL_KEYS, "Select the previous label in the list." );
 			}
 		}
 	}
