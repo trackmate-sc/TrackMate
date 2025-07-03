@@ -13,6 +13,7 @@ import org.scijava.ui.behaviour.util.Actions;
 import org.scijava.ui.behaviour.util.InputActionBindings;
 
 import bdv.BigDataViewerActions;
+import bdv.KeyConfigContexts;
 import bdv.tools.PreferencesDialog;
 import bdv.ui.appearance.AppearanceManager;
 import bdv.ui.appearance.AppearanceSettingsPage;
@@ -21,6 +22,7 @@ import bdv.ui.keymap.KeymapManager;
 import bdv.ui.keymap.KeymapSettingsPage;
 import fiji.plugin.trackmate.gui.editor.labkit.model.TMLabKitModel;
 import fiji.plugin.trackmate.gui.editor.labkit.model.TMTransformationModel;
+
 
 public class TMLabKitActions
 {
@@ -39,7 +41,7 @@ public class TMLabKitActions
 		 * Configure preferences dialog.
 		 */
 
-		final PreferencesDialog preferencesDialog = new PreferencesDialog( frame, keymap, new String[] { KEY_CONFIG_CONTEXT } );
+		final PreferencesDialog preferencesDialog = new PreferencesDialog( frame, keymap, new String[] { KEY_CONFIG_CONTEXT, KeyConfigContexts.BIGDATAVIEWER } );
 		fiji.plugin.trackmate.gui.GuiUtils.positionWindow( preferencesDialog, frame );
 		SwingUtilities.replaceUIActionMap( preferencesDialog.getRootPane(), keybindings.getConcatenatedActionMap() );
 		SwingUtilities.replaceUIInputMap( preferencesDialog.getRootPane(), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, keybindings.getConcatenatedInputMap() );

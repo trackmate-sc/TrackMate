@@ -18,18 +18,23 @@ import javax.swing.JSlider;
 import javax.swing.SwingUtilities;
 
 import org.scijava.plugin.Plugin;
+import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.io.gui.CommandDescriptionProvider;
 import org.scijava.ui.behaviour.io.gui.CommandDescriptions;
 import org.scijava.ui.behaviour.util.AbstractNamedAction;
 import org.scijava.ui.behaviour.util.Actions;
 import org.scijava.ui.behaviour.util.Behaviours;
+import org.scijava.ui.behaviour.util.InputActionBindings;
 
+import bdv.ui.keymap.Keymap;
 import bdv.ui.splitpanel.SplitPanel;
 import bdv.util.BdvHandle;
 import bdv.util.BdvHandlePanel;
 import bdv.util.BdvOptions;
 import bdv.util.BdvStackSource;
 import bdv.viewer.DisplayMode;
+import bdv.viewer.NavigationActions;
+import bdv.viewer.ViewerPanel;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import net.miginfocom.swing.MigLayout;
 import sc.fiji.labkit.ui.BasicLabelingComponent;
@@ -104,7 +109,24 @@ public class TMBasicLabelingComponent extends JPanel implements AutoCloseable
 	private void initBdv( final BdvOptions options )
 	{
 		bdvHandle = new BdvHandlePanel( dialogBoxOwner, options );
-		bdvHandle.getViewerPanel().setDisplayMode( DisplayMode.FUSED );
+		final ViewerPanel viewer = bdvHandle.getViewerPanel();
+		viewer.setDisplayMode( DisplayMode.FUSED );
+
+		/*
+		 * Re-add the navigation actions, but make them listen to updates in the
+		 * keymap. Otherwise the BDV handle only receives the new key bindings
+		 * after restart.
+		 */
+		final InputTriggerConfig inputTriggerConfig = bdvHandle.getViewerPanel().getInputTriggerConfig();
+		final Actions navigationActions = new Actions( inputTriggerConfig, "bdv", "navigation" );
+		final InputActionBindings keybindings = bdvHandle.getKeybindings();
+		navigationActions.install( keybindings, "navigation" );
+		NavigationActions.install( navigationActions, viewer, options.values.is2D() );
+
+		final Keymap keymap = bdvHandle.getKeymapManager().getForwardSelectedKeymap();
+		keymap.updateListeners().add( () -> {
+			navigationActions.updateKeyConfig( keymap.getConfig() );
+		} );
 	}
 
 	public BdvHandle getBdvHandle()
