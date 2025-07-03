@@ -77,7 +77,8 @@ public class TMLabKitFrame extends JFrame
 		// Main central panel.
 		final BdvOptions options = BdvOptions.options()
 				.inputTriggerConfig( inputTriggerConfig )
-				.keymapManager( keymapManager );
+				.keymapManager( keymapManager )
+				.appearanceManager( appearanceManager );
 		if ( imageLabelingModel.spatialDimensions().numDimensions() < 3 )
 			options.is2D();
 		final TMBasicLabelingComponent mainPanel = new TMBasicLabelingComponent( this, imageLabelingModel, options );
