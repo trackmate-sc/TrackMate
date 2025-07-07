@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -30,6 +30,7 @@ import javax.swing.SwingUtilities;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.TrackMatePlugIn;
 import fiji.plugin.trackmate.gui.components.LogPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
@@ -64,7 +65,12 @@ public class SaveDescriptor extends WizardPanelDescriptor
 		final LogPanel logPanel = ( LogPanel ) targetPanel;
 		final Logger logger = logPanel.getLogger();
 		logger.log( "Saving data...\n", Logger.BLUE_COLOR );
-		File file = TMUtils.proposeTrackMateSaveFile( trackmate.getSettings(), logger );
+		File file;
+
+		if ( TrackMatePlugIn.lastLoadedFile != null && TrackMatePlugIn.lastLoadedFile.exists() )
+			file = TrackMatePlugIn.lastLoadedFile;
+		else
+			file = TMUtils.proposeTrackMateSaveFile( trackmate.getSettings(), logger );
 
 		/*
 		 * If we are to save tracks, we better ensures that track and edge
@@ -82,6 +88,7 @@ public class SaveDescriptor extends WizardPanelDescriptor
 			logger.log( "Saving aborted.\n" );
 			return;
 		}
+		TrackMatePlugIn.lastLoadedFile = file;
 
 		/*
 		 * Write model, settings and GUI state

@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -22,6 +22,8 @@
 package fiji.plugin.trackmate;
 
 import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
+
+import java.io.File;
 
 import javax.swing.JFrame;
 
@@ -46,9 +48,14 @@ import ij.plugin.PlugIn;
 public class TrackMatePlugIn implements PlugIn
 {
 
+	public static File lastLoadedFile;
+
 	@Override
 	public void run( final String imagePath )
 	{
+		// We start anew. Let's clear the last loaded path.
+		lastLoadedFile = null;
+
 //		GuiUtils.setSystemLookAndFeel();
 		final ImagePlus imp;
 		if ( imagePath != null && imagePath.length() > 0 )
@@ -107,7 +114,7 @@ public class TrackMatePlugIn implements PlugIn
 	 * Hook for subclassers: <br>
 	 * Will create and position the sequence that will be played by the wizard
 	 * launched by this plugin.
-	 * 
+	 *
 	 * @param trackmate
 	 * @param selectionModel
 	 * @param displaySettings
@@ -122,7 +129,7 @@ public class TrackMatePlugIn implements PlugIn
 	 * Hook for subclassers: <br>
 	 * Creates the {@link Model} instance that will be used to store data in the
 	 * {@link TrackMate} instance.
-	 * 
+	 *
 	 * @param imp
 	 *
 	 * @return a new {@link Model} instance.
@@ -172,7 +179,7 @@ public class TrackMatePlugIn implements PlugIn
 		model.setPhysicalUnits( spaceUnits, timeUnits );
 
 		final TrackMate trackmate = new TrackMate( model, settings );
-		ObjectService objectService = TMUtils.getContext().service( ObjectService.class );
+		final ObjectService objectService = TMUtils.getContext().service( ObjectService.class );
 		if ( objectService != null )
 			objectService.addObject( trackmate );
 
