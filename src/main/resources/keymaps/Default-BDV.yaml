@@ -30,11 +30,11 @@
 - !mapping
   action: expand and focus cards panel
   contexts: [bdv]
-  triggers: [P]
+  triggers: [C]
 - !mapping
   action: collapse cards panel
   contexts: [bdv]
-  triggers: [shift ESCAPE, shift P]
+  triggers: [shift ESCAPE, shift C]
 - !mapping
   action: record movie
   contexts: [bdv]
