@@ -1,11 +1,15 @@
 package fiji.plugin.trackmate.gui.editor.labkit.model;
 
+import bdv.tools.InitializeViewerState;
+import bdv.util.Affine3DHelpers;
 import bdv.viewer.ViewerPanel;
+import bdv.viewer.ViewerState;
+import bdv.viewer.animate.SimilarityTransformAnimator;
 import net.imglib2.Interval;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.util.LinAlgHelpers;
 import sc.fiji.labkit.pixel_classification.RevampUtils;
 import sc.fiji.labkit.ui.models.TransformationModel;
-import sc.fiji.labkit.ui.utils.BdvUtils;
 
 public class TMTransformationModel extends TransformationModel
 {
@@ -27,8 +31,7 @@ public class TMTransformationModel extends TransformationModel
 	}
 
 	@Override
-	public void transformToShowInterval( Interval interval,
-			final AffineTransform3D sourceTransform )
+	public void transformToShowInterval( Interval interval, final AffineTransform3D sourceTransform )
 	{
 		if ( viewerPanel == null )
 			return;
@@ -43,56 +46,96 @@ public class TMTransformationModel extends TransformationModel
 
 		final int width = viewerPanel.getWidth();
 		final int height = viewerPanel.getHeight();
-
-		// Source
-		final AffineTransform3D c = new AffineTransform3D();
-		viewerPanel.state().getViewerTransform( c );
 		final double cX = width / 2.;
 		final double cY = height / 2.;
-		c.set( c.get( 0, 3 ) - cX, 0, 3 );
-		c.set( c.get( 1, 3 ) - cY, 1, 3 );
 
-		// Target
-		final AffineTransform3D t = new AffineTransform3D();
+		final AffineTransform3D c = calculateCurrentTransform( viewerPanel.state(), cX, cY );
+		final AffineTransform3D t = calculateTargetTransform( interval, sourceTransform, cX, cY );
+		viewerPanel.setTransformAnimator( new SimilarityTransformAnimator( c, t, cX, cY, 300 ) );
+	}
 
-		final AffineTransform3D m = calculateScreenTransform( interval, width, height );
-		t.concatenate( m );
-		t.concatenate( sourceTransform.inverse() );
+	public void resetView()
+	{
+		final int width = viewerPanel.getWidth();
+		final int height = viewerPanel.getHeight();
+		final double cX = width / 2.;
+		final double cY = height / 2.;
+
+		// Source
+		final AffineTransform3D c = calculateCurrentTransform( viewerPanel.state(), cX, cY );
+		final AffineTransform3D t = InitializeViewerState.initTransform( width, height, false, viewerPanel.state() );
+		t.set( t.get( 0, 3 ) - cX, 0, 3 );
+		t.set( t.get( 1, 3 ) - cY, 1, 3 );
 
 		// Run
-		BdvUtils.resetView( viewerPanel, interval, sourceTransform );
-//		viewerPanel.setTransformAnimator( new SimilarityTransformAnimator( c, t, cX, cY, 300 ) ); // FIXME
+		viewerPanel.setTransformAnimator( new SimilarityTransformAnimator( c, t, cX, cY, 300 ) ); // FIXME
 	}
 
-	private static AffineTransform3D calculateScreenTransform( final Interval interval, final int width, final int height )
+	private static AffineTransform3D calculateCurrentTransform( final ViewerState state, final double cX, final double cY )
 	{
-		final double[] screenSize = { width, height };
-		final double scale = getScaleFactor( screenSize, interval );
-		final double[] translate = getTranslation( interval, scale );
-		final AffineTransform3D transform = new AffineTransform3D();
-		transform.scale( scale );
-		transform.translate( translate );
-		return transform;
+		final AffineTransform3D c = new AffineTransform3D();
+		state.getViewerTransform( c );
+		c.set( c.get( 0, 3 ) - cX, 0, 3 );
+		c.set( c.get( 1, 3 ) - cY, 1, 3 );
+		return c;
 	}
 
-	private static double[] getTranslation( final Interval interval, final double labelScale )
+	private static AffineTransform3D calculateTargetTransform(
+			final Interval interval,
+			final AffineTransform3D sourceTransform,
+			final double cX, final double cY )
 	{
-		final double[] translate = new double[ 3 ];
-		final int nd = Math.min( translate.length, interval.numDimensions() );
-		for ( int i = 0; i < nd; i++ )
-			translate[ i ] = -( interval.min( i ) + interval.max( i ) ) * labelScale;
-		return translate;
-	}
+		final double sX0 = interval.min( 0 );
+		final double sX1 = interval.max( 0 );
+		final double sY0 = interval.min( 1 );
+		final double sY1 = interval.max( 1 );
+		final double sX = ( sX0 + sX1 ) / 2;
+		final double sY = ( sY0 + sY1 ) / 2;
+		final double sZ = 0; // 2D only
 
-	private static double getScaleFactor( final double[] screenSize, final Interval interval )
-	{
-		double minScale = Double.POSITIVE_INFINITY;
-		for ( int i = 0; i < 2; i++ )
-		{
-			final double scale = screenSize[ i ] / interval.dimension( i );
-			if ( scale < minScale )
-				minScale = scale;
-		}
-		return minScale;
+		final double[][] m = new double[ 3 ][ 4 ];
+
+		// rotation
+		final double[] qSource = new double[ 4 ];
+		final double[] qViewer = new double[ 4 ];
+		Affine3DHelpers.extractApproximateRotationAffine( sourceTransform, qSource, 2 );
+		LinAlgHelpers.quaternionInvert( qSource, qViewer );
+		LinAlgHelpers.quaternionToR( qViewer, m );
+
+		// translation
+		final double[] centerSource = new double[] { sX, sY, sZ };
+		final double[] centerGlobal = new double[ 3 ];
+		final double[] translation = new double[ 3 ];
+		sourceTransform.apply( centerSource, centerGlobal );
+		LinAlgHelpers.quaternionApply( qViewer, centerGlobal, translation );
+		LinAlgHelpers.scale( translation, -1, translation );
+		LinAlgHelpers.setCol( 3, translation, m );
+
+		final AffineTransform3D t = new AffineTransform3D();
+		t.set( m );
+
+		// scale
+		final double[] pSource = new double[] { sX1 + 0.5, sY1 + 0.5, sZ };
+		final double[] pGlobal = new double[ 3 ];
+		final double[] pScreen = new double[ 3 ];
+		sourceTransform.apply( pSource, pGlobal );
+		t.apply( pGlobal, pScreen );
+		final double scaleX = cX / pScreen[ 0 ];
+		final double scaleY = cY / pScreen[ 1 ];
+		final double scale;
+		final boolean zoomedIn = true;
+		if ( zoomedIn )
+			scale = Math.max( scaleX, scaleY );
+		else
+			scale = Math.min( scaleX, scaleY );
+		t.scale( scale );
+
+		// window center offset
+		t.set( t.get( 0, 3 ) + cX - 0.5, 0, 3 );
+		t.set( t.get( 1, 3 ) + cY - 0.5, 1, 3 );
+
+		t.set( t.get( 0, 3 ) - cX, 0, 3 );
+		t.set( t.get( 1, 3 ) - cY, 1, 3 );
+		return t;
 	}
 }

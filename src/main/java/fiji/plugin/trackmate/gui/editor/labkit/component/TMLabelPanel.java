@@ -8,6 +8,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.event.MouseAdapter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,6 +23,7 @@ import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
@@ -66,16 +68,28 @@ public class TMLabelPanel extends JPanel
 				{
 					// Select the label.
 					model.selectedLabel().set( l );
-					// Zoom in the label
-					localizeLabel( l );
 					// Repaint the list.
 					list.repaint();
 				}
 			}
 		} );
+		list.addMouseListener( new MouseAdapter()
+		{
+			@Override
+			public void mouseClicked( final java.awt.event.MouseEvent e )
+			{
+				if ( SwingUtilities.isLeftMouseButton( e ) && e.isShiftDown() )
+				{
+					final int index = list.locationToIndex( e.getPoint() );
+					list.setSelectedIndex( index );
+					e.consume();
+					final Label label = list.getModel().getElementAt( index );
+					localizeLabel( label );
+				}
+			}
+		} );
 
-		// Redraw and scroll the list when the selected label is changed
-		// elsewhere.
+		// Redraw and scroll the list when the selected label is changed elsewhere.
 		model.selectedLabel().notifier().addListener( () -> {
 			final Label label = model.selectedLabel().get();
 			final int i = model.labeling().get().getLabels().indexOf( label );
@@ -126,8 +140,8 @@ public class TMLabelPanel extends JPanel
 			return;
 		interval = Intervals.expand( interval, Math.max( interval.dimension( 0 ), 20 ), 0 );
 		interval = Intervals.expand( interval, Math.max( interval.dimension( 1 ), 20 ), 1 );
-		model.transformationModel().transformToShowInterval( interval, model
-				.labelTransformation() );
+
+		model.transformationModel().transformToShowInterval( interval, model.labelTransformation() );
 	}
 
 	private static Interval getBoundingBox( final IterableRegion< BitType > region )

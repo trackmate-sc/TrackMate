@@ -8,8 +8,14 @@ import java.awt.Image;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusListener;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.util.Arrays;
 
 import javax.swing.BorderFactory;
@@ -25,12 +31,24 @@ import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
+import org.scijava.ui.behaviour.MouseAndKeyHandler;
+import org.scijava.ui.behaviour.io.InputTriggerConfig;
+import org.scijava.ui.behaviour.io.gui.CommandDescriptionProvider.Scope;
+import org.scijava.ui.behaviour.util.Actions;
+import org.scijava.ui.behaviour.util.Behaviours;
+import org.scijava.ui.behaviour.util.InputActionBindings;
+import org.scijava.ui.behaviour.util.TriggerBehaviourBindings;
+
+import bdv.ui.appearance.AppearanceManager;
+import bdv.ui.keymap.Keymap;
+import bdv.ui.keymap.KeymapManager;
+import bdv.util.BdvOptions;
 import fiji.plugin.trackmate.gui.Icons;
+import fiji.plugin.trackmate.gui.editor.labkit.model.TMLabKitModel;
 import net.imglib2.Dimensions;
 import net.imglib2.util.Intervals;
 import net.miginfocom.swing.MigLayout;
 import sc.fiji.labkit.ui.models.ImageLabelingModel;
-import sc.fiji.labkit.ui.models.SegmentationModel;
 import sc.fiji.labkit.ui.panel.GuiUtils;
 import sc.fiji.labkit.ui.utils.Notifier;
 
@@ -46,14 +64,39 @@ public class TMLabKitFrame extends JFrame
 
 	private static final long serialVersionUID = 1L;
 
+	static final String KEYMAP_HOME = new File( new File( System.getProperty( "user.home" ), ".trackmate" ), "editor" ).getAbsolutePath();
+
+	static final String KEY_CONFIG_CONTEXT = "trackmate-labkit";
+
+	static final Scope KEY_CONFIG_SCOPE = new Scope( KEY_CONFIG_CONTEXT );
+
 	private final Notifier onCloseListeners = new Notifier();
 
-	public TMLabKitFrame( final SegmentationModel model )
+	public TMLabKitFrame( final TMLabKitModel model )
 	{
 		final ImageLabelingModel imageLabelingModel = model.imageLabelingModel();
 
-		// Main central panel.
-		final TMBasicLabelingComponent mainPanel = new TMBasicLabelingComponent( this, imageLabelingModel );
+		/*
+		 * Here we create a specific config for BDV, so that we can use a custom
+		 * keymap selected not to interfere with the TrackMate-Labkit keymap. I
+		 * could not find a way to update the BDV keymap dynamically (the
+		 * Actions instances are private, so I could not add a listener to it).
+		 * So the only solution is to initialize the BDV window with a custom
+		 * keymap, configured rationally, and leave it as is.
+		 */
+		final AppearanceManager appearanceManager = new AppearanceManager( KEYMAP_HOME );
+		final KeymapManager bdvKeymapManager = new KeymapManager();
+		final Keymap bdvKeymap = bdvKeymapManager.getForwardSelectedKeymap();
+		bdvKeymap.set( TMKeymapManager.loadBDVKeymap() );
+		final BdvOptions options = BdvOptions.options()
+				.inputTriggerConfig( bdvKeymap.getConfig() )
+				.keymapManager( bdvKeymapManager )
+				.appearanceManager( appearanceManager );
+		if ( imageLabelingModel.spatialDimensions().numDimensions() < 3 )
+			options.is2D();
+
+		// Main central panel, config specific for BDV.
+		final TMBasicLabelingComponent mainPanel = new TMBasicLabelingComponent( this, imageLabelingModel, options );
 
 		// Left side bar.
 		final JPanel leftPanel = new JPanel();
@@ -76,6 +119,52 @@ public class TMLabKitFrame extends JFrame
 				"Spots",
 				new TMLabelPanel( imageLabelingModel ) );
 		leftPanel.add( labelInfoPanel );
+
+		/*
+		 * Now we deal with the keymap specific to TrackMate-Labkit. We also add
+		 * these actions to the BDV panel.
+		 */
+
+		// Bindings
+		final InputActionBindings keybindings = new InputActionBindings();
+		final TriggerBehaviourBindings triggerbindings = new TriggerBehaviourBindings();
+		SwingUtilities.replaceUIActionMap( getRootPane(), keybindings.getConcatenatedActionMap() );
+		SwingUtilities.replaceUIInputMap( getRootPane(), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, keybindings.getConcatenatedInputMap() );
+		final MouseAndKeyHandler mouseAndKeyHandler = new MouseAndKeyHandler();
+		mouseAndKeyHandler.setInputMap( triggerbindings.getConcatenatedInputTriggerMap() );
+		mouseAndKeyHandler.setBehaviourMap( triggerbindings.getConcatenatedBehaviourMap() );
+		addHandler( mouseAndKeyHandler );
+
+		final TMKeymapManager keymapManager = new TMKeymapManager();
+		final InputTriggerConfig inputTriggerConfig = keymapManager.getForwardSelectedKeymap().getConfig();
+
+		// Actions instance
+		final Actions myActions = new Actions( inputTriggerConfig, KEY_CONFIG_CONTEXT );
+		myActions.install( keybindings, "trackmate-labkit-actions" );
+		myActions.install( mainPanel.getBdvHandle().getKeybindings(), "trackmate-labkit-actions" );
+
+		// Behaviours instance
+		final Behaviours myBehaviours = new Behaviours( inputTriggerConfig, KEY_CONFIG_CONTEXT );
+		myBehaviours.install( triggerbindings, "trackmate-labkit-actions" );
+		myBehaviours.install( mainPanel.getBdvHandle().getTriggerbindings(), "trackmate-labkit-actions" );
+
+		final Keymap keymap = keymapManager.getForwardSelectedKeymap();
+		keymap.updateListeners().add( () -> {
+			myActions.updateKeyConfig( keymap.getConfig() );
+			myBehaviours.updateKeyConfig( keymap.getConfig() );
+		} );
+		myActions.updateKeyConfig( keymap.getConfig() );
+		myBehaviours.updateKeyConfig( keymap.getConfig() );
+
+		// Install our actions
+		TMLabKitActions.install(
+				myActions,
+				model,
+				this,
+				keybindings,
+				keymapManager,
+				appearanceManager );
+		mainPanel.install( myActions, myBehaviours );
 
 		// Add to frame.
 		add( initGui( mainPanel, leftPanel ) );
@@ -133,7 +222,7 @@ public class TMLabKitFrame extends JFrame
 				if ( window != null )
 					window.dispose();
 			}
-        } );
+		} );
 		return button;
 	}
 
@@ -181,5 +270,23 @@ public class TMLabKitFrame extends JFrame
 		panel.setRightComponent( mainPanel );
 		panel.setBorder( BorderFactory.createEmptyBorder() );
 		return panel;
+	}
+
+	public void addHandler( final Object h )
+	{
+		if ( h instanceof KeyListener )
+			addKeyListener( ( KeyListener ) h );
+
+		if ( h instanceof MouseMotionListener )
+			addMouseMotionListener( ( MouseMotionListener ) h );
+
+		if ( h instanceof MouseListener )
+			addMouseListener( ( MouseListener ) h );
+
+		if ( h instanceof MouseWheelListener )
+			addMouseWheelListener( ( MouseWheelListener ) h );
+
+		if ( h instanceof FocusListener )
+			addFocusListener( ( FocusListener ) h );
 	}
 }
