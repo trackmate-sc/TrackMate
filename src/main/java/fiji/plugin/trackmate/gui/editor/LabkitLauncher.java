@@ -70,7 +70,7 @@ public class LabkitLauncher
 		labkit.setIconImage( Icons.TRACKMATE_ICON.getImage() );
 		labkit.setSize( 1000, 800 );
 		GuiUtils.positionWindow( labkit, imp.getWindow() );
-		labkit.setTitle( "Test overlaping" );
+		labkit.setTitle( "TrackMate editor on " + imp.getShortTitle() );
 		labkit.setVisible( true );
 	}
 
