@@ -29,6 +29,9 @@
 
 package fiji.plugin.trackmate.gui.editor.labkit.component;
 
+import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.KEY_CONFIG_CONTEXT;
+import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.KEY_CONFIG_SCOPE;
+
 import java.awt.Color;
 import java.awt.Insets;
 import java.awt.event.ItemEvent;
@@ -37,14 +40,16 @@ import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JToggleButton;
-import javax.swing.KeyStroke;
 
-import org.scijava.ui.behaviour.util.RunnableAction;
+import org.apache.commons.lang3.function.BooleanConsumer;
+import org.scijava.plugin.Plugin;
+import org.scijava.ui.behaviour.io.gui.CommandDescriptionProvider;
+import org.scijava.ui.behaviour.io.gui.CommandDescriptions;
+import org.scijava.ui.behaviour.util.Actions;
 
 import net.miginfocom.swing.MigLayout;
 import sc.fiji.labkit.ui.brush.PlanarModeController;
@@ -66,31 +71,32 @@ public class TMLabelToolsPanel extends JPanel
 			"<small>Keyboard shortcuts:<br>" +
 			"- <b>Left Click</b> on the image and drag, to rotate the image.<br>" +
 			"- <b>Right Click</b> on the image, to move around.<br>" +
-			"- <b>Ctrl + Shift + Mouse Wheel</b> to zoom in and out.<br>" +
-			"- <b>Mouse Wheel</b> only, to scroll through a 3d image.<br>" +
-			"- Press <b>Ctrl + G</b> to deactivate drawing tools and activate this mode.</small></html>";
+			"- <b>Ctrl + Shift + Mouse Wheel</b> or <b>+ / -</b> to zoom in and out.<br>" +
+			"- <b>← / →</b> or <b>F / G</b> to move through time.<br>" +
+			"- <b>Shift + R</b> to reset the view." +
+			 "</small></html>";
 
-	private static final String DRAW_TOOL_TIP = "<html><b>Draw</b><br>" +
+	private static final String DRAW_TOOL_TIP = "<html><b>Add</b><br>" +
 			"<small>Keyboard shortcuts:<br>" +
-			"- Hold down the <b>D</b> key and <b>Left Click</b> on the image to draw.<br>" +
+			"- Hold down the <b>A</b> key and <b>Left Click</b> on the image to draw the selected label.<br>" +
+			"- Hold down the <b>A</b> key and use the <b>Mouse Wheel</b> to change the brush diameter.<br>" +
+			"</small></html>";
+
+	private static final String ERASE_TOOL_TIP = "<html><b>Delete</b><br>" +
+			"<small>Keyboard shortcuts:<br>" +
+			"- Hold down the <b>D</b> key and <b>Left Click</b> on the image to delete the selected label.<br>" +
 			"- Hold down the <b>D</b> key and use the <b>Mouse Wheel</b> to change the brush diameter.<br>" +
-			"- Or press <b>Ctrl + D</b> to activate the drawing tool.</small></html>";
-
-	private static final String ERASE_TOOL_TIP = "<html><b>Erase</b><br>" +
-			"<small>Keyboard shortcuts:<br>" +
-			"- Hold down the <b>E</b> key and <b>Left Click</b> on the image to erase.<br>" +
-			"- Hold down the <b>E</b> key and use the <b>Mouse Wheel</b> to change the brush diameter.<br>" +
-			"- Or press <b>Ctrl + E</b> to activate the eraser tool.</small></html>";
+			"</small></html>";
 
 	private static final String FLOOD_FILL_TOOL_TIP = "<html><b>Flood Fill</b><br>" +
 			"<small>Keyboard shortcuts:<br>" +
-			"- Hold down the <b>F</b> key and <b>Left Click</b> on the image to flood fill.<br>" +
-			"- Or press <b>Ctrl + F</b> to activate the flood fill tool.</small></html>";
+			"- Hold down the <b>Q</b> key and <b>Left Click</b> on the image to flood fill with the selected label.<br>" +
+			"</small></html>";
 
 	private static final String FLOOD_ERASE_TOOL_TIP = "<html><b>Remove Connected Component</b><br>" +
 			"<small>Keyboard shortcuts:<br>" +
 			"- Hold down the <b>R</b> key and <b>Left Click</b> on the image to remove connected component.<br>" +
-			"- Or press <b>Ctrl + R</b> to activate the remove connected component tool.</small></html>";
+			"</small></html>";
 
 	private static final String SELECT_LABEL_TOOL_TIP = "<html><b>Select Label</b><br>" +
 			"<small>Keyboard shortcuts:<br>" +
@@ -110,6 +116,18 @@ public class TMLabelToolsPanel extends JPanel
 	private final ButtonGroup group = new ButtonGroup();
 
 	private Mode mode = ignore -> {};
+
+	private JToggleButton moveBtn;
+
+	private JToggleButton drawBtn;
+
+	private JToggleButton floodFillBtn;
+
+	private JToggleButton eraseBtn;
+
+	private JToggleButton floodEraseBtn;
+
+	private JToggleButton selectLabelBtn;
 
 	public TMLabelToolsPanel(
 			final TMLabelBrushController brushController,
@@ -145,23 +163,12 @@ public class TMLabelToolsPanel extends JPanel
 
 	private void initActionButtons()
 	{
-		final JToggleButton moveBtn = addActionButton( MOVE_TOOL_TIP, ignore -> {}, false,
-				"/images/move.png", "MOVE_TOOL", "ctrl G" );
-		addActionButton( DRAW_TOOL_TIP,
-				brushController::setBrushActive, true,
-				"/images/draw.png", "DRAW_TOOL", "ctrl D" );
-		addActionButton( FLOOD_FILL_TOOL_TIP,
-				floodFillController::setFloodFillActive, false,
-				"/images/fill.png", "FILL_TOOL", "ctrl F" );
-		addActionButton( ERASE_TOOL_TIP,
-				brushController::setEraserActive, true,
-				"/images/erase.png", "ERASE_TOOL", "ctrl E" );
-		addActionButton( FLOOD_ERASE_TOOL_TIP,
-				floodFillController::setRemoveBlobActive, false,
-				"/images/flooderase.png", "FLOOD_ERASE_TOOL", "ctrl R" );
-		addActionButton( SELECT_LABEL_TOOL_TIP,
-				selectLabelController::setActive, false,
-				"/images/pipette.png" );
+		this.moveBtn = addActionButton( MOVE_TOOL_TIP, ignore -> {}, false, "/images/move.png" );
+		this.drawBtn = addActionButton( DRAW_TOOL_TIP, brushController::setBrushActive, true, "/images/draw.png" );
+		this.floodFillBtn = addActionButton( FLOOD_FILL_TOOL_TIP, floodFillController::setFloodFillActive, false, "/images/fill.png" );
+		this.eraseBtn = addActionButton( ERASE_TOOL_TIP, brushController::setEraserActive, true, "/images/erase.png" );
+		this.floodEraseBtn = addActionButton( FLOOD_ERASE_TOOL_TIP, floodFillController::setRemoveBlobActive, false, "/images/flooderase.png" );
+		this.selectLabelBtn = addActionButton( SELECT_LABEL_TOOL_TIP, selectLabelController::setActive, false, "/images/pipette.png" );
 		moveBtn.doClick();
 	}
 
@@ -197,18 +204,7 @@ public class TMLabelToolsPanel extends JPanel
 		return button;
 	}
 
-	private JToggleButton addActionButton( final String toolTipText, final Mode mode, final boolean visibility,
-			final String iconPath, final String activationKey, final String key )
-	{
-		final JToggleButton button = addActionButton( toolTipText, mode, visibility, iconPath );
-		button.getInputMap( JComponent.WHEN_IN_FOCUSED_WINDOW ).put( KeyStroke.getKeyStroke( key ),
-				activationKey );
-		button.getActionMap().put( activationKey, new RunnableAction( activationKey, button::doClick ) );
-		return button;
-	}
-
-	private JToggleButton addActionButton( final String toolTipText, final Mode mode, final boolean visibility,
-			final String iconPath )
+	private JToggleButton addActionButton( final String toolTipText, final Mode mode, final boolean visibility, final String iconPath )
 	{
 		final JToggleButton button = new JToggleButton();
 		button.setIcon( getIcon( iconPath ) );
@@ -286,5 +282,70 @@ public class TMLabelToolsPanel extends JPanel
 	{
 
 		void setActive( boolean active );
+	}
+
+	public void install( final Actions actions )
+	{
+		final Mode panActive = createMode( ignore -> {}, moveBtn );
+		final Mode brushActive = createMode( brushController::setBrushActive, drawBtn );
+		final Mode eraserActive = createMode( brushController::setEraserActive, eraseBtn );
+		final Mode floodFillActive = createMode( floodFillController::setFloodFillActive, floodFillBtn );
+		final Mode fillEraseActive = createMode( floodFillController::setRemoveBlobActive, floodEraseBtn );
+		final Mode selectLabelActive = createMode( selectLabelController::setActive, selectLabelBtn );
+
+		actions.runnableAction( () -> setMode( panActive ), SELECT_PAN_TOOL, SELECT_PAN_TOOL_KEYS );
+		actions.runnableAction( () -> setMode( brushActive ), SELECT_DRAW_TOOL, SELECT_DRAW_TOOL_KEYS );
+		actions.runnableAction( () -> setMode( eraserActive ), SELECT_ERASE_TOOL, SELECT_ERASE_TOOL_KEYS );
+		actions.runnableAction( () -> setMode( floodFillActive ), SELECT_FLOOD_FILL_TOOL, SELECT_FLOOD_FILL_TOOL_KEYS );
+		actions.runnableAction( () -> setMode( fillEraseActive ), SELECT_ERASE_FILL_TOOL, SELECT_ERASE_FILL_TOOL_KEYS );
+		actions.runnableAction( () -> setMode( selectLabelActive ), SELECT_LABEL_TOOL, SELECT_LABEL_KEYS );
+	}
+
+	private Mode createMode( final BooleanConsumer runnable, final JToggleButton btn )
+	{
+		return new Mode()
+		{
+			@Override
+			public void setActive( final boolean active )
+			{
+				runnable.accept( active );
+				btn.setSelected( active );
+			}
+		};
+	}
+
+	private static final String SELECT_PAN_TOOL = "pan tool";
+	private static final String SELECT_DRAW_TOOL = "paint tool";
+	private static final String SELECT_FLOOD_FILL_TOOL = "flood fill tool";
+	private static final String SELECT_ERASE_TOOL = "erase tool";
+	private static final String SELECT_ERASE_FILL_TOOL = "erase fill tool";
+	private static final String SELECT_LABEL_TOOL = "select label tool";
+
+	private static final String[] SELECT_PAN_TOOL_KEYS = new String[] { "F1" };
+	private static final String[] SELECT_DRAW_TOOL_KEYS = new String[] { "F2" };
+	private static final String[] SELECT_FLOOD_FILL_TOOL_KEYS = new String[] { "F3" };
+	private static final String[] SELECT_ERASE_TOOL_KEYS = new String[] { "F4" };
+	private static final String[] SELECT_ERASE_FILL_TOOL_KEYS = new String[] { "F5" };
+	private static final String[] SELECT_LABEL_KEYS = new String[] { "F6" };
+
+	@Plugin( type = CommandDescriptionProvider.class )
+	public static class Descriptions extends CommandDescriptionProvider
+	{
+
+		public Descriptions()
+		{
+			super( KEY_CONFIG_SCOPE, KEY_CONFIG_CONTEXT );
+		}
+
+		@Override
+		public void getCommandDescriptions( final CommandDescriptions descriptions )
+		{
+			descriptions.add( SELECT_PAN_TOOL, SELECT_PAN_TOOL_KEYS, "Make the pan tool active." );
+			descriptions.add( SELECT_DRAW_TOOL, SELECT_DRAW_TOOL_KEYS, "Make the draw tool active." );
+			descriptions.add( SELECT_FLOOD_FILL_TOOL, SELECT_FLOOD_FILL_TOOL_KEYS, "Make the flood fill tool active." );
+			descriptions.add( SELECT_ERASE_TOOL, SELECT_ERASE_TOOL_KEYS, "Make the erase tool active." );
+			descriptions.add( SELECT_ERASE_FILL_TOOL, SELECT_ERASE_FILL_TOOL_KEYS, "Make the erase fill tool active." );
+			descriptions.add( SELECT_LABEL_TOOL, SELECT_LABEL_KEYS, "Make the select label tool active." );
+		}
 	}
 }

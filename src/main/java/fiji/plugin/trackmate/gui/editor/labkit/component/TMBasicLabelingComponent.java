@@ -71,6 +71,8 @@ public class TMBasicLabelingComponent extends JPanel implements AutoCloseable
 
 	private TMSelectLabelController selectLabelController;
 
+	private TMLabelToolsPanel toolsPanel;
+
 	public TMBasicLabelingComponent(
 			final JFrame dialogBoxOwner,
 			final ImageLabelingModel model,
@@ -170,7 +172,7 @@ public class TMBasicLabelingComponent extends JPanel implements AutoCloseable
 		this.floodFillController = new TMFloodFillController( bdvHandle, model );
 		this.selectLabelController = new TMSelectLabelController( bdvHandle, model );
 
-		final JPanel toolsPanel = new TMLabelToolsPanel( brushController, floodFillController, selectLabelController, planarModeController );
+		this.toolsPanel = new TMLabelToolsPanel( brushController, floodFillController, selectLabelController, planarModeController );
 		// Hide the zSlider toggle button if we are 2D
 		final boolean is2D = DetectionUtils.is2D( model.imageForSegmentation().get() );
 		if ( is2D )
@@ -193,6 +195,7 @@ public class TMBasicLabelingComponent extends JPanel implements AutoCloseable
 
 	public void install( final Actions actions, final Behaviours behaviours )
 	{
+		toolsPanel.install( actions );
 		brushController.install( behaviours );
 		floodFillController.install( behaviours );
 		selectLabelController.install( behaviours );
