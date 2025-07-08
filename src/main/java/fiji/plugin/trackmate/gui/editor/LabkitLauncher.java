@@ -41,7 +41,7 @@ public class LabkitLauncher
 
 	private static boolean simplify = true;
 
-	public static final void launch( final TrackMate trackmate, final DisplaySettings displaySettings, final int timepoint )
+	public static final TMLabKitFrame launch( final TrackMate trackmate, final DisplaySettings displaySettings, final int timepoint )
 	{
 		// Input model.
 		final Model model = trackmate.getModel();
@@ -72,6 +72,7 @@ public class LabkitLauncher
 		GuiUtils.positionWindow( labkit, imp.getWindow() );
 		labkit.setTitle( "TrackMate editor on " + imp.getShortTitle() );
 		labkit.setVisible( true );
+		return labkit;
 	}
 
 	private static void reimport( final TMLabKitModel lbModel, final int timepoint )
@@ -148,26 +149,28 @@ public class LabkitLauncher
 
 					public void run()
 					{
-						// Is shift pressed?
-						final int mod = ae.getModifiers();
-						final boolean shiftPressed = ( mod & ActionEvent.SHIFT_MASK ) > 0;
-						final boolean singleTimepoint = !shiftPressed;
-						final ImagePlus imp = trackmate.getSettings().imp;
-						int timepoint;
-						if ( imp == null )
-							timepoint = -1;
-						else
-							timepoint = singleTimepoint ? imp.getFrame() - 1 : -1;
-
 						final JRootPane parent = SwingUtilities.getRootPane( ( Component ) ae.getSource() );
 						final EverythingDisablerAndReenabler disabler = new EverythingDisablerAndReenabler( parent, new Class[] { JLabel.class } );
 						disabler.disable();
 						try
 						{
-							LabkitLauncher.launch( trackmate, ds, timepoint );
+							// Is shift pressed?
+							final int mod = ae.getModifiers();
+							final boolean shiftPressed = ( mod & ActionEvent.SHIFT_MASK ) > 0;
+							final boolean singleTimepoint = !shiftPressed;
+							final ImagePlus imp = trackmate.getSettings().imp;
+							int timepoint;
+							if ( imp == null )
+								timepoint = -1;
+							else
+								timepoint = singleTimepoint ? imp.getFrame() - 1 : -1;
+
+							final TMLabKitFrame labKitFrame = LabkitLauncher.launch( trackmate, ds, timepoint );
+							labKitFrame.onCloseListeners().addListener( disabler::reenable );
 						}
-						finally
+						catch ( final Exception e )
 						{
+							e.printStackTrace();
 							disabler.reenable();
 						}
 					};
