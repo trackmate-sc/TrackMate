@@ -427,10 +427,10 @@ public class TMLabelBrushController
 	private static final String CHANGE_BRUSH_RADIUS = "change brush radius";
 	private static final String MOVE_BRUSH = "move brush";
 
-	private static final String[] PAINT_KEYS = new String[] { "D button1", "SPACE button1" };
-	private static final String[] ERASE_KEYS = new String[] { "E button1", "SPACE button2", "SPACE button3" };
-	private static final String[] CHANGE_BRUSH_RADIUS_KEYS =  new String[] { "D scroll", "E scroll", "SPACE scroll"};
-	private static final String[] MOVE_BRUSH_KEYS =  new String[] { "E", "D", "SPACE"};
+	private static final String[] PAINT_KEYS = new String[] { "A button1", "SPACE button1" };
+	private static final String[] ERASE_KEYS = new String[] { "D button1", "SPACE button2", "SPACE button3" };
+	private static final String[] CHANGE_BRUSH_RADIUS_KEYS =  new String[] { "A scroll", "D scroll", "SPACE scroll"};
+	private static final String[] MOVE_BRUSH_KEYS =  new String[] { "A", "D", "SPACE"};
 
 
 	@Plugin( type = CommandDescriptionProvider.class )

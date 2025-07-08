@@ -14,19 +14,19 @@
 - !mapping
   action: crop
   contexts: [bdv]
-  triggers: [F9]
+  triggers: [not mapped]
 - !mapping
   action: toggle manual transformation
   contexts: [bdv]
-  triggers: [ctrl T]
+  triggers: [not mapped]
 - !mapping
   action: save settings
   contexts: [bdv]
-  triggers: [F11]
+  triggers: [not mapped]
 - !mapping
   action: load settings
   contexts: [bdv]
-  triggers: [F12]
+  triggers: [not mapped]
 - !mapping
   action: expand and focus cards panel
   contexts: [bdv]
@@ -154,11 +154,11 @@
 - !mapping
   action: next timepoint
   contexts: [bdv]
-  triggers: [CLOSE_BRACKET, M]
+  triggers: [CLOSE_BRACKET, G, RIGHT]
 - !mapping
   action: previous timepoint
   contexts: [bdv]
-  triggers: [OPEN_BRACKET, N]
+  triggers: [OPEN_BRACKET, F, LEFT]
 - !mapping
   action: align XY plane
   contexts: [bdv]
@@ -214,27 +214,27 @@
 - !mapping
   action: rotate left
   contexts: [bdv]
-  triggers: [LEFT]
+  triggers: [not mapped]
 - !mapping
   action: rotate right
   contexts: [bdv]
-  triggers: [RIGHT]
+  triggers: [not mapped]
 - !mapping
   action: zoom in
   contexts: [bdv]
-  triggers: [UP]
+  triggers: [ADD, EQUALS]
 - !mapping
   action: zoom out
   contexts: [bdv]
-  triggers: [DOWN]
+  triggers: [SUBTRACT, MINUS]
 - !mapping
   action: forward z
   contexts: [bdv]
-  triggers: [COMMA]
+  triggers: [UP]
 - !mapping
   action: backward z
   contexts: [bdv]
-  triggers: [PERIOD]
+  triggers: [DOWN]
 - !mapping
   action: drag rotate fast
   contexts: [bdv]
@@ -254,19 +254,19 @@
 - !mapping
   action: zoom in fast
   contexts: [bdv]
-  triggers: [shift UP]
+  triggers: [shift ADD, shift EQUALS]
 - !mapping
   action: zoom out fast
   contexts: [bdv]
-  triggers: [shift DOWN]
+  triggers: [shift SUBTRACT, shift MINUS]
 - !mapping
   action: forward z fast
   contexts: [bdv]
-  triggers: [shift COMMA]
+  triggers: [shift UP]
 - !mapping
   action: backward z fast
   contexts: [bdv]
-  triggers: [shift PERIOD]
+  triggers: [shift DOWN]
 - !mapping
   action: drag rotate slow
   contexts: [bdv]
@@ -286,19 +286,19 @@
 - !mapping
   action: zoom in slow
   contexts: [bdv]
-  triggers: [ctrl UP]
+  triggers: [ctrl ADD, ctrl EQUALS]
 - !mapping
   action: zoom out slow
   contexts: [bdv]
-  triggers: [ctrl DOWN]
+  triggers: [ctrl SUBTRACT, ctrl MINUS]
 - !mapping
   action: forward z slow
   contexts: [bdv]
-  triggers: [ctrl COMMA]
+  triggers: [ctrl UP]
 - !mapping
   action: backward z slow
   contexts: [bdv]
-  triggers: [ctrl PERIOD]
+  triggers: [ctrl DOWN]
 - !mapping
   action: 2d drag translate
   contexts: [bdv]
@@ -334,19 +334,19 @@
 - !mapping
   action: 2d rotate left
   contexts: [bdv]
-  triggers: [LEFT]
+  triggers: [not mapped]
 - !mapping
   action: 2d rotate right
   contexts: [bdv]
-  triggers: [RIGHT]
+  triggers: [not mapped]
 - !mapping
   action: 2d zoom in
   contexts: [bdv]
-  triggers: [UP]
+  triggers: [ADD, EQUALS]
 - !mapping
   action: 2d zoom out
   contexts: [bdv]
-  triggers: [DOWN]
+  triggers: [SUBTRACT, MINUS]
 - !mapping
   action: 2d rotate left fast
   contexts: [bdv]
@@ -358,11 +358,11 @@
 - !mapping
   action: 2d zoom in fast
   contexts: [bdv]
-  triggers: [shift UP]
+  triggers: [shift ADD, shift EQUALS]
 - !mapping
   action: 2d zoom out fast
   contexts: [bdv]
-  triggers: [shift DOWN]
+  triggers: [shift SUBTRACT, shift MINUS]
 - !mapping
   action: 2d rotate left slow
   contexts: [bdv]
@@ -374,11 +374,11 @@
 - !mapping
   action: 2d zoom in slow
   contexts: [bdv]
-  triggers: [ctrl UP]
+  triggers: [ctrl ADD, ctrl EQUALS]
 - !mapping
   action: 2d zoom out slow
   contexts: [bdv]
-  triggers: [ctrl DOWN]
+  triggers: [ctrl SUBTRACT, ctrl MINUS]
 - !mapping
   action: 2d scroll rotate
   contexts: [bdv]
