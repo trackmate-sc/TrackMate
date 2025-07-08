@@ -4,17 +4,22 @@ import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.KE
 import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.KEY_CONFIG_SCOPE;
 
 import java.awt.Cursor;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import javax.swing.Timer;
+
 import org.scijava.plugin.Plugin;
 import org.scijava.ui.behaviour.DragBehaviour;
 import org.scijava.ui.behaviour.ScrollBehaviour;
 import org.scijava.ui.behaviour.io.gui.CommandDescriptionProvider;
 import org.scijava.ui.behaviour.io.gui.CommandDescriptions;
+import org.scijava.ui.behaviour.util.AbstractNamedAction;
+import org.scijava.ui.behaviour.util.Actions;
 import org.scijava.ui.behaviour.util.Behaviours;
 
 import bdv.util.Affine3DHelpers;
@@ -383,6 +388,44 @@ public class TMLabelBrushController
 		}
 	}
 
+	private class ChangeBrushRadiusAction extends AbstractNamedAction
+	{
+
+		private static final long serialVersionUID = 1L;
+
+		private final double distance;
+
+		private final Timer timer = new Timer( 1000, event -> {
+			brushCursor.setVisible( false );
+			viewer.setCursor( Cursor.getPredefinedCursor( Cursor.DEFAULT_CURSOR ) );
+			triggerBrushOverlayRepaint();
+		} );
+
+		public ChangeBrushRadiusAction( final String name, final double distance )
+		{
+			super( name );
+			this.distance = distance;
+			timer.setRepeats( false );
+		}
+
+		@Override
+		public void actionPerformed( final ActionEvent e )
+		{
+			setBrushDiameter( Math.min( Math.max( 1, brushDiameter + distance ), 50 ) );
+
+			// Show the brush at mouse location
+			final int x = viewer.getDisplay().getMousePosition().x;
+			final int y = viewer.getDisplay().getMousePosition().y;
+			brushCursor.setPosition( x, y );
+			brushCursor.setVisible( true );
+			viewer.setCursor( Cursor.getPredefinedCursor( Cursor.CROSSHAIR_CURSOR ) );
+			triggerBrushOverlayRepaint();
+
+			// Hide the brush after 1s
+			timer.restart();
+		}
+	}
+
 	private class MoveBrush implements DragBehaviour
 	{
 
@@ -414,8 +457,12 @@ public class TMLabelBrushController
 		}
 	}
 
-	public void install( final Behaviours behaviors )
+	public void install( final Actions actions, final Behaviours behaviors )
 	{
+		actions.namedAction( new ChangeBrushRadiusAction( INCREASE_BRUSH_RADIUS, 1. ), INCREASE_BRUSH_RADIUS_KEYS );
+		actions.namedAction( new ChangeBrushRadiusAction( DECREASE_BRUSH_RADIUS, -1. ), DECREASE_BRUSH_RADIUS_KEYS );
+		actions.namedAction( new ChangeBrushRadiusAction(INCREASE_BRUSH_RADIUS_FAST, 5.), INCREASE_BRUSH_RADIUS_FAST_KEYS );
+		actions.namedAction( new ChangeBrushRadiusAction( DECREASE_BRUSH_RADIUS_FAST, -5. ), DECREASE_BRUSH_RADIUS_FAST_KEYS );
 		behaviors.behaviour( paintBehaviour, PAINT, PAINT_KEYS );
 		behaviors.behaviour( eraseBehaviour, ERASE, ERASE_KEYS );
 		behaviors.behaviour( new ChangeBrushRadius(), CHANGE_BRUSH_RADIUS, CHANGE_BRUSH_RADIUS_KEYS );
@@ -426,12 +473,19 @@ public class TMLabelBrushController
 	private static final String ERASE = "erase";
 	private static final String CHANGE_BRUSH_RADIUS = "change brush radius";
 	private static final String MOVE_BRUSH = "move brush";
+	private static final String INCREASE_BRUSH_RADIUS = "increase brush radius";
+	private static final String DECREASE_BRUSH_RADIUS = "decrease brush radius";
+	private static final String INCREASE_BRUSH_RADIUS_FAST = "increase brush radius fast";
+	private static final String DECREASE_BRUSH_RADIUS_FAST = "decrease brush radius fast";
 
 	private static final String[] PAINT_KEYS = new String[] { "A button1", "SPACE button1" };
 	private static final String[] ERASE_KEYS = new String[] { "D button1", "SPACE button2", "SPACE button3" };
 	private static final String[] CHANGE_BRUSH_RADIUS_KEYS =  new String[] { "A scroll", "D scroll", "SPACE scroll"};
 	private static final String[] MOVE_BRUSH_KEYS =  new String[] { "A", "D", "SPACE"};
-
+	private static final String[] INCREASE_BRUSH_RADIUS_KEYS = new String[] { "E" };
+	private static final String[] DECREASE_BRUSH_RADIUS_KEYS = new String[] { "Q" };
+	private static final String[] INCREASE_BRUSH_RADIUS_FAST_KEYS = new String[] { "shift E" };
+	private static final String[] DECREASE_BRUSH_RADIUS_FAST_KEYS = new String[] { "shift Q" };
 
 	@Plugin( type = CommandDescriptionProvider.class )
 	public static class Descriptions extends CommandDescriptionProvider
@@ -448,6 +502,10 @@ public class TMLabelBrushController
 			descriptions.add( ERASE, ERASE_KEYS, "Erase the currently selected label at the mouse position." );
 			descriptions.add( CHANGE_BRUSH_RADIUS, CHANGE_BRUSH_RADIUS_KEYS, "Change the brush radius." );
 			descriptions.add( MOVE_BRUSH, MOVE_BRUSH_KEYS, "Move the brush." );
+			descriptions.add( INCREASE_BRUSH_RADIUS, INCREASE_BRUSH_RADIUS_KEYS, "Increase the brush radius." );
+			descriptions.add( DECREASE_BRUSH_RADIUS, DECREASE_BRUSH_RADIUS_KEYS, "Decrease the brush radius." );
+			descriptions.add( INCREASE_BRUSH_RADIUS_FAST, INCREASE_BRUSH_RADIUS_FAST_KEYS, "Increase the brush radius fast." );
+			descriptions.add( DECREASE_BRUSH_RADIUS_FAST, DECREASE_BRUSH_RADIUS_FAST_KEYS, "Decrease the brush radius fast." );
 		}
 	}
 }

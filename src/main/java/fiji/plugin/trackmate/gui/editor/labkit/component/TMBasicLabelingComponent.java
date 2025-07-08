@@ -196,7 +196,7 @@ public class TMBasicLabelingComponent extends JPanel implements AutoCloseable
 	public void install( final Actions actions, final Behaviours behaviours )
 	{
 		toolsPanel.install( actions );
-		brushController.install( behaviours );
+		brushController.install( actions, behaviours );
 		floodFillController.install( behaviours );
 		selectLabelController.install( behaviours );
 		MyChangeLabelAction.install( actions, model );

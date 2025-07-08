@@ -368,8 +368,8 @@ public class TMFloodFillController
 	private static final String FLOOD_FILL = "flood fill";
 	private static final String FLOOD_CLEAR = "flood clear";
 
-	private static final String[] FLOOD_FILL_KEYS = new String[] { "Q button1" };
-	private static final String[] FLOOD_CLEAR_KEYS = new String[] { "R button1", "Q button2", "Q button3" };
+	private static final String[] FLOOD_FILL_KEYS = new String[] { "L button1" };
+	private static final String[] FLOOD_CLEAR_KEYS = new String[] { "R button1", "L button2", "L button3" };
 
 
 	@Plugin( type = CommandDescriptionProvider.class )

@@ -71,7 +71,7 @@ public class TMLabelToolsPanel extends JPanel
 			"<small>Keyboard shortcuts:<br>" +
 			"- <b>Left Click</b> on the image and drag, to rotate the image.<br>" +
 			"- <b>Right Click</b> on the image, to move around.<br>" +
-			"- <b>Ctrl + Shift + Mouse Wheel</b> or <b>+ / -</b> to zoom in and out.<br>" +
+			"- <b>Mouse Wheel</b> or <b>+ / -</b> to zoom in and out.<br>" +
 			"- <b>← / →</b> or <b>F / G</b> to move through time.<br>" +
 			"- <b>Shift + R</b> to reset the view." +
 			 "</small></html>";
@@ -80,6 +80,7 @@ public class TMLabelToolsPanel extends JPanel
 			"<small>Keyboard shortcuts:<br>" +
 			"- Hold down the <b>A</b> key and <b>Left Click</b> on the image to draw the selected label.<br>" +
 			"- Hold down the <b>A</b> key and use the <b>Mouse Wheel</b> to change the brush diameter.<br>" +
+			"- You can also change the brush diameter with the <b>Q /E</b> (shift to go faster).<br>" +
 			"</small></html>";
 
 	private static final String ERASE_TOOL_TIP = "<html><b>Delete</b><br>" +
@@ -90,7 +91,7 @@ public class TMLabelToolsPanel extends JPanel
 
 	private static final String FLOOD_FILL_TOOL_TIP = "<html><b>Flood Fill</b><br>" +
 			"<small>Keyboard shortcuts:<br>" +
-			"- Hold down the <b>Q</b> key and <b>Left Click</b> on the image to flood fill with the selected label.<br>" +
+			"- Hold down the <b>L</b> key and <b>Left Click</b> on the image to flood fill with the selected label.<br>" +
 			"</small></html>";
 
 	private static final String FLOOD_ERASE_TOOL_TIP = "<html><b>Remove Connected Component</b><br>" +
