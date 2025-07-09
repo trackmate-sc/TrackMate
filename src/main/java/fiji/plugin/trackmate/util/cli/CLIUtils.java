@@ -93,7 +93,7 @@ public class CLIUtils
 		while ( it.hasNext() )
 		{
 			final String token = it.next();
-			it.set( token.replace( '_', ' ' ) );
+			it.set( token.replace( "t_", "t " ) );
 		}
 		final ProcessBuilder pb = new ProcessBuilder( tokens );
 		// Env variables.
@@ -462,7 +462,7 @@ public class CLIUtils
 
 	public static void main( final String[] args ) throws Exception
 	{
-		System.out.println( "Conda path: " + findDefaultCondaPath() );
+		System.out.println( "Conda path: " + getCondaPath() );
 		System.out.println( "Known environments: " + getEnvList() );
 		System.out.println( "Paths:" );
 		getEnvMap().forEach( ( k, v ) -> System.out.println( k + " -> " + v ) );
@@ -470,7 +470,7 @@ public class CLIUtils
 		System.out.println();
 		System.out.println( "Testing versions" );
 
-		System.out.println( "1 - " + getModuleVersion( "cellpose3", "cellpose" ) );
+		System.out.println( "1 - " + getModuleVersion( "trackastra", "trackastra" ) );
 		System.out.println( "2 - " + getModuleVersion( "cellpose", "cellpose" ) );
 		System.out.println( "3 - " + getModuleVersion( "cellpose", "cellposebloat" ) );
 		System.out.println( "4 - " + getModuleVersion( "cellposebarf", "cellpose" ) );
