@@ -447,12 +447,12 @@ public class TMLabKitModel implements SegmentationModel
 		final ImgPlus< UnsignedIntType > img;
 		if ( timeDim < 0 )
 		{
-			ra = Views.extendMirrorSingle( labeling ).randomAccess();
+			ra = labeling.randomAccess();
 			img = lblImgPlus;
 		}
 		else
 		{
-			ra = Views.extendMirrorSingle( Views.hyperSlice( labeling, timeDim, timepoint ) ).randomAccess();
+			ra = Views.hyperSlice( labeling, timeDim, timepoint ).randomAccess();
 			img = ImgPlusViews.hyperSlice( lblImgPlus, timeDim, timepoint );
 		}
 
@@ -467,6 +467,8 @@ public class TMLabKitModel implements SegmentationModel
 				while ( c.hasNext() )
 				{
 					c.fwd();
+					if ( !Intervals.contains( img, c ) )
+						continue;
 					ra.setPosition( c );
 					ra.get().add( label );
 				}
@@ -493,6 +495,8 @@ public class TMLabKitModel implements SegmentationModel
 				while ( c.hasNext() )
 				{
 					c.fwd();
+					if ( !Intervals.contains( img, c ) )
+						continue;
 					ra.setPosition( c );
 					ra.get().add( label );
 				}
