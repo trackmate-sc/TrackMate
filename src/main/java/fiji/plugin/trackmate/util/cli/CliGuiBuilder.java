@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
@@ -313,10 +314,16 @@ public class CliGuiBuilder implements ArgumentVisitor
 			arg.set( arg.getDefaultValue() );
 		}
 
-		final ListElement< String > element = listElement( arg.getName(), arg.getChoices(), arg::getValue, arg::set );
+		final List< String > displays = arg.getDisplays();
+		final Supplier< String > supplier = () -> {
+			return displays.get( arg.getSelectedIndex() );
+		};
+		final Consumer< String > consumer = ( s ) -> arg.set( displays.indexOf( s ) );
+
+		final ListElement< String > element = listElement( arg.getName(), displays, supplier, consumer );
 		elements.add( element );
 		final JComboBox< String > comboBox = linkedComboBoxSelector( element );
-		comboBox.setSelectedItem( arg.getValue() );
+		comboBox.setSelectedIndex( arg.getSelectedIndex() );
 		addToLayout(
 				arg.getHelp(),
 				new JLabel( element.getLabel() ),

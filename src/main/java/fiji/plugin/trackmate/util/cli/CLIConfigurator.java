@@ -911,37 +911,60 @@ public abstract class CLIConfigurator
 		}
 	}
 
-	public static class ChoiceArgument extends AbstractStringArgument< ChoiceArgument >
+	public static class ChoiceArgument extends Argument< ChoiceArgument, String >
 	{
 
 		private final List< String > choices = new ArrayList<>();
 
-		private final List< String > mappeds = new ArrayList<>();
+		private final List< String > displays = new ArrayList<>();
+
+		private int selected = -1; // -1 means no selection.;
 
 		private ChoiceArgument()
 		{}
 
-		private ChoiceArgument addChoice( final String choice, final String mapped )
+		private ChoiceArgument addChoice( final String choice, final String displayed )
 		{
 			if ( !choices.contains( choice ) )
 			{
 				choices.add( choice );
-				mappeds.add( mapped );
+				displays.add( displayed );
 			}
 			return this;
+		}
+
+		/**
+		 * The list of the display strings corresponding to the possible
+		 * choices.
+		 *
+		 * @return The list of the display strings.
+		 */
+		public List< String > getDisplays()
+		{
+			return displays;
+		}
+
+		@Override
+		public void accept( final ArgumentVisitor visitor )
+		{
+			visitor.visit( this );
+		}
+
+		@Override
+		public boolean isSet()
+		{
+			return selected >= 0;
 		}
 
 		@Override
 		public String getValue()
 		{
-			final int index = getSelectedIndex();
-			return mappeds.get( index );
+			return choices.get( selected );
 		}
 
-		private int getSelectedIndex()
+		public int getSelectedIndex()
 		{
-			final String choice = super.getValue();
-			return choices.indexOf( choice );
+			return selected;
 		}
 
 		@Override
@@ -949,9 +972,9 @@ public abstract class CLIConfigurator
 		{
 			final int sel = choices.indexOf( choice );
 			if ( sel < 0 )
-				throw new IllegalArgumentException( "Unknown selection '" + choice + "' for parameter '"
+				throw new IllegalArgumentException( "Unknown selection '" + choices + "' for parameter '"
 						+ name + "'. Must be one of " + StringUtils.join( choices, ", " ) + "." );
-			super.set( choice );
+			this.selected = sel;
 		}
 
 		public void set( final int selected )
@@ -960,7 +983,17 @@ public abstract class CLIConfigurator
 				throw new IllegalArgumentException( "Invalid index for selection of parameter '"
 						+ name + "'. Must be in scale " + 0 + " to " + ( choices.size() - 1 ) + " in "
 						+ StringUtils.join( choices, ", " ) + "." );
-			super.set( choices.get( selected ) );
+			this.selected = selected;
+		}
+
+		@Override
+		public void setValueObject( final Object val )
+		{
+			if ( !String.class.isInstance( val ) )
+				throw new IllegalArgumentException( "Argument '" + name + "' expects String. Got " + val.getClass().getSimpleName() );
+
+			final String v = ( ( String ) val );
+			set( v );
 		}
 
 		@Override
@@ -984,24 +1017,16 @@ public abstract class CLIConfigurator
 			return this;
 		}
 
-		public List< String > getChoices()
-		{
-			return choices;
-		}
-
-		@Override
-		public void accept( final ArgumentVisitor visitor )
-		{
-			visitor.visit( this );
-		}
-
 		@Override
 		public String toString()
 		{
 			final String str = super.toString();
 			return str
-					+ " - choices: " + getChoices() + "\n";
+					+ " - choices: " + choices + "\n"
+					+ " - display strings: " + displays + "\n";
 		}
+
+
 	}
 
 	@SuppressWarnings( "unchecked" )
