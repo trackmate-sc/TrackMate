@@ -190,4 +190,29 @@ public abstract class CondaCLIConfigurator extends CLIConfigurator
 	 * @return the command for this tool.
 	 */
 	protected abstract String getCommand();
+
+	/**
+	 * Returns the version of the Python tool that this configurator is
+	 * configured for. This method assumes that the module has the same name
+	 * that the CLI command used to run it.
+	 *
+	 * @return the version string or <code>null</code> if the version could not
+	 *         be determined or if the command does not run on Python.
+	 */
+	public String getVersion()
+	{
+		return getVersion( getCommandArg().getValue() );
+	}
+
+	/**
+	 * Returns the version of the Python tool that this configurator is
+	 * configured for.
+	 *
+	 * @return the version string or <code>null</code> if the version could not
+	 *         be determined or if the command does not run on Python.
+	 */
+	public String getVersion( final String moduleName )
+	{
+		return CLIUtils.getModuleVersion( condaEnv.getValue(), moduleName );
+	}
 }
