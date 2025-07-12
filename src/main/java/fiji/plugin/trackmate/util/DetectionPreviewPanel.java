@@ -22,6 +22,7 @@
 package fiji.plugin.trackmate.util;
 
 import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
+import static fiji.plugin.trackmate.gui.Icons.BIN_ICON;
 import static fiji.plugin.trackmate.gui.Icons.CANCEL_ICON;
 import static fiji.plugin.trackmate.gui.Icons.PREVIEW_ICON;
 
@@ -62,6 +63,8 @@ public class DetectionPreviewPanel extends JPanel
 
 	final JButton btnCancel;
 
+	final JButton btnClear;
+
 	final QualityHistogramChart chart;
 
 	public DetectionPreviewPanel( final DoubleConsumer thresholdUpdater, final String axisLabel )
@@ -98,8 +101,13 @@ public class DetectionPreviewPanel extends JPanel
 		btnCancel.setToolTipText( TOOLTIP_CANCEL );
 		btnCancel.setVisible( false );
 		btnCancel.setFont( SMALL_FONT );
+		this.btnClear = new JButton( "Clear", BIN_ICON );
+		btnClear.setToolTipText( "Clear the histogram." );
+		btnClear.setFont( SMALL_FONT );
+		btnClear.setVisible( false );
 
 		final JPanel btnPanel = new JPanel();
+		btnPanel.add( btnClear );
 		btnPanel.add( btnPreview );
 		btnPanel.add( btnCancel );
 

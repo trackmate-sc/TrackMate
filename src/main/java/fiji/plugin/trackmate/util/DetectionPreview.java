@@ -69,6 +69,7 @@ public class DetectionPreview
 				currentFrameSupplier.get(),
 				thresholdKey ) );
 		panel.btnCancel.addActionListener( l -> cancel() );
+		panel.btnClear.addActionListener( l -> clearHistogram() );
 	}
 
 	public DetectionPreviewPanel getPanel()
@@ -112,6 +113,7 @@ public class DetectionPreview
 
 				// Update target model.
 				updateModelAndHistogram( model, sourceModel, frame, threshold );
+				panel.btnClear.setVisible( true );
 			}
 			catch ( final Exception e )
 			{
@@ -219,6 +221,13 @@ public class DetectionPreview
 		panel.btnCancel.setEnabled( false );
 		if ( null != trackmate )
 			trackmate.cancel( "User canceled preview" );
+	}
+
+	private void clearHistogram()
+	{
+		panel.chart.displayHistogram( new double[] {} );
+		panel.btnClear.setVisible( false );
+		panel.logger.log( "" );
 	}
 
 	protected void updateModelAndHistogram( final Model targetModel, final Model sourceModel, final int frame, final double threshold )
