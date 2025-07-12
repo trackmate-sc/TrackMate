@@ -78,7 +78,7 @@ public class DetectionPreviewPanel extends JPanel
 		gbcHistogram.insets = new Insets( 0, 0, 5, 0 );
 		gbcHistogram.fill = GridBagConstraints.BOTH;
 		gbcHistogram.gridx = 0;
-		gbcHistogram.gridy = 1;
+		gbcHistogram.gridy = 0;
 		add( chart, gbcHistogram );
 
 		final JLabelLogger labelLogger = new JLabelLogger();
@@ -87,7 +87,7 @@ public class DetectionPreviewPanel extends JPanel
 		gbcLabelLogger.insets = new Insets( 5, 5, 0, 5 );
 		gbcLabelLogger.fill = GridBagConstraints.BOTH;
 		gbcLabelLogger.gridx = 0;
-		gbcLabelLogger.gridy = 2;
+		gbcLabelLogger.gridy = 1;
 		add( labelLogger, gbcLabelLogger );
 		this.logger = labelLogger.getLogger();
 
@@ -107,7 +107,7 @@ public class DetectionPreviewPanel extends JPanel
 		gbcBtnPreview.anchor = GridBagConstraints.NORTHEAST;
 		gbcBtnPreview.insets = new Insets( 5, 5, 0, 0 );
 		gbcBtnPreview.gridx = 1;
-		gbcBtnPreview.gridy = 2;
+		gbcBtnPreview.gridy = 1;
 		this.add( btnPanel, gbcBtnPreview );
 	}
 
