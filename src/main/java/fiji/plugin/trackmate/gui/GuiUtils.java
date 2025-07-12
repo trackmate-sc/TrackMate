@@ -175,13 +175,6 @@ public class GuiUtils
 		return fromCIEXYZ( xyz );
 	}
 
-	public static final Color invert( final Color color )
-	{
-		return new Color( 255 - color.getRed(),
-				255 - color.getGreen(),
-				255 - color.getBlue() );
-	}
-
 	/**
 	 * Positions a JFrame more or less cleverly next a {@link Component}.
 	 */

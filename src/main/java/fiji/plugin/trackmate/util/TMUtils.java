@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -45,8 +45,10 @@ import org.scijava.util.DoubleArray;
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.detection.DetectionUtils;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.gui.Roi;
 import net.imagej.ImgPlus;
 import net.imagej.ImgPlusMetadata;
 import net.imagej.axis.Axes;
@@ -71,6 +73,41 @@ public class TMUtils
 	/*
 	 * STATIC METHODS
 	 */
+
+	/**
+	 * Returns an {@link Interval} that corresponds to the ROI in the specified
+	 * image.
+	 * <p>
+	 * If the image has no ROI, the interval returned is <code>null</code>. For
+	 * 3D images the interval extends over all Z. The interval does not include
+	 * the time dimension nor the channel dimension. It is 2D for 2D images, and
+	 * 3D for 3D images regardless of the presence of C and T.
+	 *
+	 * @param imp
+	 *            the image.
+	 * @return a new interval, or <code>null</code> if the image has no ROI.
+	 */
+	public static Interval createROIInterval( final ImagePlus imp )
+	{
+		final Roi roi = imp.getRoi();
+		if ( roi == null )
+			return null;
+
+		final boolean is3D = !DetectionUtils.is2D( imp );
+		final long[] min = new long[ is3D ? 3 : 2 ];
+		final long[] max = new long[ min.length ];
+
+		min[ 0 ] = roi.getBounds().x;
+		max[ 0 ] = roi.getBounds().x + roi.getBounds().width - 1;
+		min[ 1 ] = roi.getBounds().y;
+		max[ 1 ] = roi.getBounds().y + roi.getBounds().height - 1;
+		if ( is3D )
+		{
+			min[ 2 ] = 0;
+			max[ 2 ] = imp.getNSlices();
+		}
+		return new FinalInterval( min, max );
+	}
 
 	/**
 	 * Return a new map sorted by its values.
@@ -870,7 +907,7 @@ public class TMUtils
 	 * present at runtime. This is useful to detect whether a certain update
 	 * site has been activated in Fiji and to enable or disable component based
 	 * on this.
-	 * 
+	 *
 	 * @param className
 	 *            the fully qualified class name, e.g.
 	 *            "sc.fiji.labkit.ui.LabkitFrame"
