@@ -102,7 +102,7 @@ public class DetectionPreviewPanel extends JPanel
 		btnCancel.setVisible( false );
 		btnCancel.setFont( SMALL_FONT );
 		this.btnClear = new JButton( "Clear", BIN_ICON );
-		btnClear.setToolTipText( "Clear the histogram." );
+		btnClear.setToolTipText( "<html>Clear the preview results <br>at the current frame.</html>" );
 		btnClear.setFont( SMALL_FONT );
 		btnClear.setVisible( false );
 
