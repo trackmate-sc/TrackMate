@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -112,8 +112,8 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 		this.settings = settings;
 		return checkSettings( settings );
 	}
-	
-	
+
+
 	protected RandomAccessibleInterval< T > prepareFrameImg( final int frame )
 	{
 		final double[] calibration = TMUtils.getSpatialCalibration( img );
@@ -198,10 +198,9 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 		mandatoryKeys.add( KEY_DO_MEDIAN_FILTERING );
 		mandatoryKeys.add( KEY_DO_SUBPIXEL_LOCALIZATION );
 		ok = ok & checkMapKeys( lSettings, mandatoryKeys, null, errorHolder );
+
 		if ( !ok )
-		{
 			errorMessage = errorHolder.toString();
-		}
 		return ok;
 	}
 
@@ -209,11 +208,14 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T >> impl
 	public boolean marshall( final Map< String, Object > lSettings, final Element element )
 	{
 		final StringBuilder errorHolder = new StringBuilder();
-		final boolean ok = writeTargetChannel( lSettings, element, errorHolder ) && writeRadius( lSettings, element, errorHolder ) && writeThreshold( lSettings, element, errorHolder ) && writeDoMedian( lSettings, element, errorHolder ) && writeDoSubPixel( lSettings, element, errorHolder );
+		final boolean ok = writeTargetChannel( lSettings, element, errorHolder )
+				&& writeRadius( lSettings, element, errorHolder )
+				&& writeThreshold( lSettings, element, errorHolder )
+				&& writeDoMedian( lSettings, element, errorHolder )
+				&& writeDoSubPixel( lSettings, element, errorHolder );
+
 		if ( !ok )
-		{
 			errorMessage = errorHolder.toString();
-		}
 		return ok;
 	}
 
