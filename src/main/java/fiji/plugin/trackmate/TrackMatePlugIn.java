@@ -53,61 +53,73 @@ public class TrackMatePlugIn implements PlugIn
 	@Override
 	public void run( final String imagePath )
 	{
-		// We start anew. Let's clear the last loaded path.
-		lastLoadedFile = null;
-
-//		GuiUtils.setSystemLookAndFeel();
-		final ImagePlus imp;
-		if ( imagePath != null && imagePath.length() > 0 )
+		try
 		{
-			imp = IJ.openImage( imagePath );
-			if ( imp == null || null == imp.getOriginalFileInfo() )
+			// We start anew. Let's clear the last loaded path.
+			lastLoadedFile = null;
+
+			// GuiUtils.setSystemLookAndFeel();
+			final ImagePlus imp;
+			if ( imagePath != null && imagePath.length() > 0 )
 			{
-				IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION, "Could not load image with path " + imagePath + "." );
-				return;
+				imp = IJ.openImage( imagePath );
+				if ( imp == null || null == imp.getOriginalFileInfo() )
+				{
+					IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION, "Could not load image with path " + imagePath + "." );
+					return;
+				}
 			}
+			else
+			{
+				imp = WindowManager.getCurrentImage();
+				if ( null == imp )
+				{
+					IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION,
+							"Please open an image before running TrackMate." );
+					return;
+				}
+				else if ( imp.getType() == ImagePlus.COLOR_RGB )
+				{
+					IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION,
+							"TrackMate does not work on RGB images." );
+					return;
+				}
+			}
+
+			imp.setOpenAsHyperStack( true );
+			imp.setDisplayMode( IJ.COMPOSITE );
+			if ( !imp.isVisible() )
+				imp.show();
+
+			GuiUtils.userCheckImpDimensions( imp );
+
+			// Main objects.
+			final Settings settings = createSettings( imp );
+			final Model model = createModel( imp );
+			final TrackMate trackmate = createTrackMate( model, settings );
+			final SelectionModel selectionModel = new SelectionModel( model );
+			final DisplaySettings displaySettings = createDisplaySettings();
+
+			// Main view.
+			final TrackMateModelView displayer = new HyperStackDisplayer( model, selectionModel, imp, displaySettings );
+			displayer.render();
+
+			// Wizard.
+			final WizardSequence sequence = createSequence( trackmate, selectionModel, displaySettings );
+			final JFrame frame = sequence.run( "TrackMate on " + imp.getShortTitle() );
+			frame.setIconImage( TRACKMATE_ICON.getImage() );
+			GuiUtils.positionWindow( frame, imp.getWindow() );
+			frame.setVisible( true );
 		}
-		else
+		catch ( final Exception e )
 		{
-			imp = WindowManager.getCurrentImage();
-			if ( null == imp )
-			{
-				IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION,
-						"Please open an image before running TrackMate." );
-				return;
-			}
-			else if ( imp.getType() == ImagePlus.COLOR_RGB )
-			{
-				IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION,
-						"TrackMate does not work on RGB images." );
-				return;
-			}
+			e.printStackTrace();
+			String msg = e.getMessage();
+			if ( msg == null || msg.isEmpty() )
+				msg = e.getClass() + "\n" + e.getStackTrace()[ 0 ].toString();
+			IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION, "An unexpected error occurred:\n" + msg );
+			return;
 		}
-
-		imp.setOpenAsHyperStack( true );
-		imp.setDisplayMode( IJ.COMPOSITE );
-		if ( !imp.isVisible() )
-			imp.show();
-
-		GuiUtils.userCheckImpDimensions( imp );
-
-		// Main objects.
-		final Settings settings = createSettings( imp );
-		final Model model = createModel( imp );
-		final TrackMate trackmate = createTrackMate( model, settings );
-		final SelectionModel selectionModel = new SelectionModel( model );
-		final DisplaySettings displaySettings = createDisplaySettings();
-
-		// Main view.
-		final TrackMateModelView displayer = new HyperStackDisplayer( model, selectionModel, imp, displaySettings );
-		displayer.render();
-
-		// Wizard.
-		final WizardSequence sequence = createSequence( trackmate, selectionModel, displaySettings );
-		final JFrame frame = sequence.run( "TrackMate on " + imp.getShortTitle() );
-		frame.setIconImage( TRACKMATE_ICON.getImage() );
-		GuiUtils.positionWindow( frame, imp.getWindow() );
-		frame.setVisible( true );
 	}
 
 	/**
