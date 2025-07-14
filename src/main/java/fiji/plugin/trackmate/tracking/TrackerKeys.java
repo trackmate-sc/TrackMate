@@ -260,4 +260,51 @@ public class TrackerKeys
 
 	/** A default value for the {@value #KEY_BLOCKING_VALUE} parameter. */
 	public static final double DEFAULT_BLOCKING_VALUE = Double.POSITIVE_INFINITY;
+
+	/**
+	 * Key for the parameter specifying the minimum linking IoU. The
+	 * expected value must be a Double.
+	 */
+	public static final String KEY_LINKING_MIN_IOU = "LINKING_MIN_IOU";
+
+	/** A default value for the {@value #KEY_LINKING_MIN_IOU} parameter. */
+	public static final double DEFAULT_LINKING_MIN_IOU = 0.0;
+
+	/**
+	 * Key for the parameter specifying the min gap-closing IoU. Expected
+	 * values are {@link Double}s. If two spots, candidate for a gap-closing 
+	 * event, are found separated by a IoU smaller than this parameter value, 
+	 * gap-closing will not occur.
+	 */
+	public static final String KEY_GAP_CLOSING_MIN_IOU = "GAP_CLOSING_MIN_IOU";
+
+	/**
+	 * A default value for the {@value #KEY_GAP_CLOSING_MIN_IOU} parameter.
+	 */
+	public static final double DEFAULT_GAP_CLOSING_MIN_IOU = 0.0;
+
+	/**
+	 * Key for the parameter specifying the min merging IoU. Expected
+	 * values are {@link Double}s. If two spots, candidate for a merging 
+	 * event, are found separated by an IoU smaller than this parameter 
+	 * value, track merging will not occur.
+	 */
+	public static final String KEY_MERGING_MIN_IOU = "MERGING_MIN_IOU";
+
+	/** A default value for the {@value #KEY_MERGING_MIN_IOU} parameter. */
+	public static final double DEFAULT_MERGING_MIN_IOU = 0.0;
+
+	/**
+	 * Key for the parameter specifying the min splitting IoU. Expected
+	 * values are {@link Double}s. If two spots, candidate for a merging event, 
+	 * are found separated by an IoU smaller than this parameter value, 
+	 * track splitting will not occur.
+	 */
+	public static final String KEY_SPLITTING_MIN_IOU = "SPLITTING_MIN_IOU";
+
+	/**
+	 * A default value for the {@link #KEY_SPLITTING_MIN_IOU} parameter.
+	 */
+	public static final double DEFAULT_SPLITTING_MIN_IOU = 0.0;
+
 }

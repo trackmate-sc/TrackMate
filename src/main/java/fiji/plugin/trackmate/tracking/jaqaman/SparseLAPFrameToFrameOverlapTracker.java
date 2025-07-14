@@ -1,29 +1,8 @@
-/*-
- * #%L
- * TrackMate: your buddy for everyday tracking.
- * %%
- * Copyright (C) 2010 - 2024 TrackMate developers.
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package fiji.plugin.trackmate.tracking.jaqaman;
 
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALTERNATIVE_LINKING_COST_FACTOR;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MIN_IOU;
 import static fiji.plugin.trackmate.tracking.jaqaman.LAPUtils.checkFeatureMap;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
@@ -38,65 +17,35 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
-import org.scijava.Cancelable;
 
-import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.tracking.jaqaman.costfunction.CostFunction;
-import fiji.plugin.trackmate.tracking.jaqaman.costfunction.FeaturePenaltyCostFunction;
-import fiji.plugin.trackmate.tracking.jaqaman.costfunction.SquareDistCostFunction;
-import fiji.plugin.trackmate.tracking.jaqaman.costmatrix.JaqamanLinkingCostMatrixCreator;
+import fiji.plugin.trackmate.tracking.jaqaman.costfunction.OverlapFeaturePenaltyCostFunction;
+import fiji.plugin.trackmate.tracking.jaqaman.costfunction.OverlapCostFunction;
 import fiji.plugin.trackmate.util.Threads;
-import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
+import fiji.plugin.trackmate.tracking.jaqaman.costmatrix.JaqamanLinkingCostMatrixCreator;
 
-public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorithm implements SpotTracker, Cancelable
+public class SparseLAPFrameToFrameOverlapTracker extends SparseLAPFrameToFrameTracker 
 {
-	protected final static String BASE_ERROR_MESSAGE = "[SparseLAPFrameToFrameTracker] ";
-
-	protected SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph;
-
-	protected Logger logger = Logger.VOID_LOGGER;
-
-	protected final SpotCollection spots;
-
-	protected final Map< String, Object > settings;
-
-	protected boolean isCanceled;
-
-	protected String cancelReason;
 
 	/*
 	 * CONSTRUCTOR
 	 */
-
-	public SparseLAPFrameToFrameTracker( final SpotCollection spots, final Map< String, Object > settings )
+	
+	
+	public SparseLAPFrameToFrameOverlapTracker( final SpotCollection spots, final Map< String, Object > settings )
 	{
-		this.spots = spots;
-		this.settings = settings;
+		super(spots, settings);
 	}
 
 	/*
 	 * METHODS
 	 */
 
-	@Override
-	public SimpleWeightedGraph< Spot, DefaultWeightedEdge > getResult()
-	{
-		return graph;
-	}
-
-	@Override
-	public boolean checkInput()
-	{
-		return true;
-	}
-
-	@Override
+	 @Override
 	public boolean process()
 	{
 		isCanceled = false;
@@ -165,8 +114,8 @@ public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorith
 		@SuppressWarnings( "unchecked" )
 		final Map< String, Double > featurePenalties = ( Map< String, Double > ) settings.get( KEY_LINKING_FEATURE_PENALTIES );
 		final CostFunction< Spot, Spot > costFunction = getCostFunction( featurePenalties );
-		final Double maxDist = ( Double ) settings.get( KEY_LINKING_MAX_DISTANCE );
-		final double costThreshold = maxDist * maxDist;
+		final Double minIOU = ( Double ) settings.get( KEY_LINKING_MIN_IOU );
+		final double costThreshold = 1 - minIOU;
 		final double alternativeCostFactor = ( Double ) settings.get( KEY_ALTERNATIVE_LINKING_COST_FACTOR );
 
 		// Instantiate graph
@@ -277,15 +226,9 @@ public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorith
 	protected CostFunction< Spot, Spot > getCostFunction( final Map< String, Double > featurePenalties )
 	{
 		if ( null == featurePenalties || featurePenalties.isEmpty() )
-			return new SquareDistCostFunction();
+			return new OverlapCostFunction();
 
-		return new FeaturePenaltyCostFunction( featurePenalties );
-	}
-
-	@Override
-	public void setLogger( final Logger logger )
-	{
-		this.logger = logger;
+		return new OverlapFeaturePenaltyCostFunction( featurePenalties );
 	}
 
 	protected boolean checkSettingsValidity( final Map< String, Object > settings, final StringBuilder str )
@@ -298,40 +241,19 @@ public class SparseLAPFrameToFrameTracker extends MultiThreadedBenchmarkAlgorith
 
 		boolean ok = true;
 		// Linking
-		ok = ok & checkParameter( settings, KEY_LINKING_MAX_DISTANCE, Double.class, str );
+		ok = ok & checkParameter( settings, KEY_LINKING_MIN_IOU, Double.class, str );
 		ok = ok & checkFeatureMap( settings, KEY_LINKING_FEATURE_PENALTIES, str );
 		// Others
 		ok = ok & checkParameter( settings, KEY_ALTERNATIVE_LINKING_COST_FACTOR, Double.class, str );
 
 		// Check keys
 		final List< String > mandatoryKeys = new ArrayList<>();
-		mandatoryKeys.add( KEY_LINKING_MAX_DISTANCE );
+		mandatoryKeys.add( KEY_LINKING_MIN_IOU );
 		mandatoryKeys.add( KEY_ALTERNATIVE_LINKING_COST_FACTOR );
 		final List< String > optionalKeys = new ArrayList<>();
 		optionalKeys.add( KEY_LINKING_FEATURE_PENALTIES );
 		ok = ok & checkMapKeys( settings, mandatoryKeys, optionalKeys, str );
 
 		return ok;
-	}
-
-	// --- org.scijava.Cancelable methods ---
-
-	@Override
-	public boolean isCanceled()
-	{
-		return isCanceled;
-	}
-
-	@Override
-	public void cancel( final String reason )
-	{
-		isCanceled = true;
-		cancelReason = reason;
-	}
-
-	@Override
-	public String getCancelReason()
-	{
-		return cancelReason;
 	}
 }
