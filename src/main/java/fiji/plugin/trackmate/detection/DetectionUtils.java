@@ -510,17 +510,19 @@ public class DetectionUtils
 			final int channel,
 			final int frame )
 	{
+		final int tDim = img.dimensionIndex( Axes.TIME );
 		final ImgPlus< T > singleTimePoint;
-		if ( img.dimensionIndex( Axes.TIME ) < 0 )
+		if ( tDim < 0 )
 			singleTimePoint = img;
 		else
-			singleTimePoint = ImgPlusViews.hyperSlice( img, img.dimensionIndex( Axes.TIME ), frame );
+			singleTimePoint = ImgPlusViews.hyperSlice( img, tDim, frame );
 
+		final int cDim = singleTimePoint.dimensionIndex( Axes.CHANNEL );
 		final ImgPlus< T > singleChannel;
-		if ( singleTimePoint.dimensionIndex( Axes.CHANNEL ) < 0 )
+		if ( cDim < 0 )
 			singleChannel = singleTimePoint;
 		else
-			singleChannel = ImgPlusViews.hyperSlice( singleTimePoint, singleTimePoint.dimensionIndex( Axes.CHANNEL ), channel );
+			singleChannel = ImgPlusViews.hyperSlice( singleTimePoint, cDim, channel );
 		return singleChannel;
 	}
 
@@ -555,7 +557,7 @@ public class DetectionUtils
 	/**
 	 * Properly wraps an {@link ImgPlus} in a {@link ImagePlus}, ensuring that
 	 * the dimensionality and the calibration of the output matches the input.
-	 * 
+	 *
 	 * @param img
 	 *            the image to wrap.
 	 */
@@ -579,7 +581,7 @@ public class DetectionUtils
 	 * Splits the input image in a list of {@link ImagePlus}, one per
 	 * time-point. If the input includes several channels, they are all included
 	 * in the new image, and put as the last dimension.
-	 * 
+	 *
 	 * @param <T>
 	 *            the type of the pixel in the input image.
 	 * @param img
