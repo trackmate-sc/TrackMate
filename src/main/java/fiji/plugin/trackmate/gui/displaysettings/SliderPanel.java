@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -71,9 +71,9 @@ public class SliderPanel extends JPanel implements BoundedValue.UpdateListener
 		slider = new JSlider( SwingConstants.HORIZONTAL, model.getRangeMin(), model.getRangeMax(), model.getCurrentValue() );
 		spinner = new JSpinner();
 
-		final double min = model.getRangeMin();
-		final double max = model.getRangeMax();
-		final double val = Math.max( Math.min( model.getCurrentValue(), max ), min );
+		final int min = model.getRangeMin();
+		final int max = model.getRangeMax();
+		final int val = Math.max( Math.min( model.getCurrentValue(), max ), min );
 		spinner.setModel( new SpinnerNumberModel( val, min, max, spinnerStepSize ) );
 
 		slider.addChangeListener( new ChangeListener()
