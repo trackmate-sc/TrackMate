@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -29,17 +29,17 @@ import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
 
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.AbstractStringArgument;
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.Argument;
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.ArgumentVisitor;
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.ChoiceArgument;
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.DoubleArgument;
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.Flag;
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.IntArgument;
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.PathArgument;
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.StringArgument;
 import fiji.plugin.trackmate.util.cli.CommandCLIConfigurator.ExecutablePath;
 import fiji.plugin.trackmate.util.cli.CondaCLIConfigurator.CondaEnvironmentCommand;
+import fiji.plugin.trackmate.util.cli.Configurator.AbstractStringArgument;
+import fiji.plugin.trackmate.util.cli.Configurator.Argument;
+import fiji.plugin.trackmate.util.cli.Configurator.ArgumentVisitor;
+import fiji.plugin.trackmate.util.cli.Configurator.ChoiceArgument;
+import fiji.plugin.trackmate.util.cli.Configurator.DoubleArgument;
+import fiji.plugin.trackmate.util.cli.Configurator.Flag;
+import fiji.plugin.trackmate.util.cli.Configurator.IntArgument;
+import fiji.plugin.trackmate.util.cli.Configurator.PathArgument;
+import fiji.plugin.trackmate.util.cli.Configurator.StringArgument;
 
 public class CommandBuilder implements ArgumentVisitor
 {
@@ -246,10 +246,10 @@ public class CommandBuilder implements ArgumentVisitor
 		// Is not set? -> skip
 		if ( !arg.isSet() )
 			return;
-		
+
 		final String a = arg.getArgument();
 		final List<String> vals = translators.getOrDefault( arg, v -> Collections.singletonList( "" + v ) ).apply( arg.getValue() );
-		// Does the switch ends in '='? 
+		// Does the switch ends in '='?
 		if ( a.endsWith( "=" ) )
 		{
 			// Concatenante with no space.
@@ -264,7 +264,7 @@ public class CommandBuilder implements ArgumentVisitor
 
 	public static List< String > build( final CLIConfigurator cli )
 	{
-		final CommandBuilder cb = new CommandBuilder( cli.translators );
+		final CommandBuilder cb = new CommandBuilder( cli.cliTranslators );
 		cli.getCommandArg().accept( cb );
 		cli.getSelectedArguments()
 				.stream()

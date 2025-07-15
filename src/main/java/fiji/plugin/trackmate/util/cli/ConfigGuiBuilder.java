@@ -48,6 +48,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
+import java.util.function.Function;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
@@ -79,24 +82,24 @@ import fiji.plugin.trackmate.gui.displaysettings.StyleElements.StringElement;
 import fiji.plugin.trackmate.gui.displaysettings.StyleElements.StyleElement;
 import fiji.plugin.trackmate.util.FileChooser;
 import fiji.plugin.trackmate.util.FileChooser.DialogType;
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.Argument;
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.ArgumentVisitor;
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.ChoiceArgument;
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.DoubleArgument;
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.Flag;
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.IntArgument;
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.PathArgument;
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.SelectableArguments;
-import fiji.plugin.trackmate.util.cli.CLIConfigurator.StringArgument;
 import fiji.plugin.trackmate.util.cli.CommandCLIConfigurator.ExecutablePath;
 import fiji.plugin.trackmate.util.cli.CondaCLIConfigurator.CondaEnvironmentCommand;
+import fiji.plugin.trackmate.util.cli.Configurator.Argument;
+import fiji.plugin.trackmate.util.cli.Configurator.ArgumentVisitor;
+import fiji.plugin.trackmate.util.cli.Configurator.ChoiceArgument;
+import fiji.plugin.trackmate.util.cli.Configurator.DoubleArgument;
+import fiji.plugin.trackmate.util.cli.Configurator.Flag;
+import fiji.plugin.trackmate.util.cli.Configurator.IntArgument;
+import fiji.plugin.trackmate.util.cli.Configurator.PathArgument;
+import fiji.plugin.trackmate.util.cli.Configurator.SelectableArguments;
+import fiji.plugin.trackmate.util.cli.Configurator.StringArgument;
 
-public class CliGuiBuilder implements ArgumentVisitor
+public class ConfigGuiBuilder implements ArgumentVisitor
 {
 
 	private static final int tfCols = 4;
 
-	private final CliConfigPanel panel;
+	private final ConfigPanel panel;
 
 	private final GridBagConstraints c;
 
@@ -108,9 +111,17 @@ public class CliGuiBuilder implements ArgumentVisitor
 
 	private JRadioButton rdbtn;
 
-	private CliGuiBuilder()
+	private final Map< Argument< ?, ? >, Function< ?, ? > > forwardUITranslators;
+
+	private final Map< Argument< ?, ? >, Function< ?, ? > > backwardUITranslators;
+
+	private ConfigGuiBuilder(
+			final Map< Argument< ?, ? >, Function< ?, ? > > forwardUITranslators,
+			final Map< Argument< ?, ? >, Function< ?, ? > > backwardUITranslators )
 	{
-		this.panel = new CliConfigPanel();
+		this.forwardUITranslators = forwardUITranslators;
+		this.backwardUITranslators = backwardUITranslators;
+		this.panel = new ConfigPanel();
 		final GridBagLayout layout = new GridBagLayout();
 		layout.columnWeights = new double[] { 0., 1., 0. };
 		panel.setLayout( layout );
@@ -200,14 +211,29 @@ public class CliGuiBuilder implements ArgumentVisitor
 			arg.set( arg.getDefaultValue() );
 		}
 
-		final IntElement element = intElement( arg.getName(),
-				arg.getMin(), arg.getMax(), arg::getValue, arg::set );
+		// Translate
+		@SuppressWarnings( "unchecked" )
+		final Function< Integer, Integer > forward = ( Function< Integer, Integer > ) forwardUITranslators.getOrDefault( arg, v -> v );
+		@SuppressWarnings( "unchecked" )
+		final Function< Integer, Integer > backward = ( Function< Integer, Integer > ) backwardUITranslators.getOrDefault( arg, v -> v );
+		final IntSupplier valueGetter = () -> {
+			final int value = arg.getValue();
+			return forward.apply( value );
+		};
+		final Consumer< Integer > valueSetter = ( v ) -> {
+			final int value = backward.apply( v );
+			arg.set( value );
+		};
+		final int min = forward.apply( arg.getMin() );
+		final int max = forward.apply( arg.getMax() );
+
+		final IntElement element = intElement( arg.getName(), min, max, valueGetter, valueSetter );
 		elements.add( element );
 
 		final int numberOfColumns;
 		if ( arg.hasMin() && arg.hasMin() )
 		{
-			final int largest = Math.max( Math.abs( arg.getMin() ), Math.abs( arg.getMax() ) );
+			final int largest = Math.max( Math.abs( min ), Math.abs( max ) );
 			final String numberString = String.valueOf( largest );
 			numberOfColumns = numberString.length() + 1;
 		}
@@ -234,10 +260,26 @@ public class CliGuiBuilder implements ArgumentVisitor
 			arg.set( arg.getDefaultValue() );
 		}
 
+		// Translate
+		@SuppressWarnings( "unchecked" )
+		final Function< Double, Double > forward = ( Function< Double, Double > ) forwardUITranslators.getOrDefault( arg, v -> v );
+		@SuppressWarnings( "unchecked" )
+		final Function< Double, Double > backward = ( Function< Double, Double > ) backwardUITranslators.getOrDefault( arg, v -> v );
+		final DoubleSupplier valueGetter = () -> {
+			final double value = arg.getValue();
+			return forward.apply( value );
+		};
+		final Consumer< Double > valueSetter = ( v ) -> {
+			final double value = backward.apply( v );
+			arg.set( value );
+		};
+
 		if ( arg.hasMin() && arg.hasMax() )
 		{
+			final double min = forward.apply( arg.getMin() );
+			final double max = forward.apply( arg.getMax() );
 			final BoundedDoubleElement element = boundedDoubleElement( arg.getName(),
-					arg.getMin(), arg.getMax(), arg::getValue, arg::set );
+					min, max, valueGetter, valueSetter );
 			elements.add( element );
 			addToLayout(
 					arg.getHelp(),
@@ -248,12 +290,12 @@ public class CliGuiBuilder implements ArgumentVisitor
 		}
 		else
 		{
-			final DoubleElement element = doubleElement( arg.getName(), arg::getValue, arg::set );
+			final DoubleElement element = doubleElement( arg.getName(), valueGetter, valueSetter );
 			elements.add( element );
 			if ( arg.isSet() )
-				element.set( arg.getValue() );
+				element.set( forward.apply( arg.getValue() ) );
 			else if ( arg.hasDefaultValue() )
-				element.set( arg.getDefaultValue() );
+				element.set( forward.apply( arg.getDefaultValue() ) );
 			addToLayout(
 					arg.getHelp(),
 					new JLabel( element.getLabel() ),
@@ -274,7 +316,21 @@ public class CliGuiBuilder implements ArgumentVisitor
 			arg.set( arg.getDefaultValue() );
 		}
 
-		final StringElement element = stringElement( arg.getName(), arg::getValue, arg::set );
+		// Translate
+		@SuppressWarnings( "unchecked" )
+		final Function< String, String > forward = ( Function< String, String > ) forwardUITranslators.getOrDefault( arg, v -> v );
+		@SuppressWarnings( "unchecked" )
+		final Function< String, String > backward = ( Function< String, String > ) backwardUITranslators.getOrDefault( arg, v -> v );
+		final Supplier< String > valueGetter = () -> {
+			final String value = arg.getValue();
+			return forward.apply( value );
+		};
+		final Consumer< String > valueSetter = ( v ) -> {
+			final String value = backward.apply( v );
+			arg.set( value );
+		};
+
+		final StringElement element = stringElement( arg.getName(), valueGetter, valueSetter );
 		elements.add( element );
 		addToLayoutTwoLines(
 				arg.getHelp(),
@@ -294,7 +350,21 @@ public class CliGuiBuilder implements ArgumentVisitor
 			arg.set( arg.getDefaultValue() );
 		}
 
-		final StringElement element = stringElement( arg.getName(), arg::getValue, arg::set );
+		// Translate
+		@SuppressWarnings( "unchecked" )
+		final Function< String, String > forward = ( Function< String, String > ) forwardUITranslators.getOrDefault( arg, v -> v );
+		@SuppressWarnings( "unchecked" )
+		final Function< String, String > backward = ( Function< String, String > ) backwardUITranslators.getOrDefault( arg, v -> v );
+		final Supplier< String > valueGetter = () -> {
+			final String value = arg.getValue();
+			return forward.apply( value );
+		};
+		final Consumer< String > valueSetter = ( v ) -> {
+			final String value = backward.apply( v );
+			arg.set( value );
+		};
+
+		final StringElement element = stringElement( arg.getName(), valueGetter, valueSetter );
 		elements.add( element );
 		addPathToLayout(
 				arg.getHelp(),
@@ -602,22 +672,35 @@ public class CliGuiBuilder implements ArgumentVisitor
 		panel.add( new JLabel(), c );
 	}
 
-	public static CliConfigPanel build( final CLIConfigurator cli )
+	public static ConfigPanel build( final CLIConfigurator cli )
+	{
+		final ConfigGuiBuilder builder = createBuilder( cli );
+		cli.getCommandArg().accept( builder );
+		return build( cli, builder );
+	}
+
+	public static ConfigPanel build( final Configurator config )
+	{
+		final ConfigGuiBuilder builder = createBuilder( config );
+		return build( config, builder );
+	}
+
+	private static ConfigGuiBuilder createBuilder( final Configurator config )
+	{
+		return new ConfigGuiBuilder(
+				config.forwardUITranslators,
+				config.backwardUITranslators );
+	}
+
+	private static ConfigPanel build( final Configurator config, final ConfigGuiBuilder builder )
 	{
 		/*
-		 * Create the builder.
-		 */
-
-		final CliGuiBuilder builder = new CliGuiBuilder();
-		cli.getCommandArg().accept( builder );
-
-		/*
-		 * Iterate over CLI arguments.
+		 * Iterate over arguments.
 		 */
 
 		// Map a selectable group to a button group in the GUI
 		final Map< Argument< ?, ? >, JRadioButton > buttons = new HashMap<>();
-		for ( final SelectableArguments selectable : cli.getSelectables() )
+		for ( final SelectableArguments selectable : config.getSelectables() )
 		{
 			final List< Argument< ?, ? > > args = selectable.getArguments();
 			final int nItems = args.size();
@@ -640,7 +723,7 @@ public class CliGuiBuilder implements ArgumentVisitor
 		}
 
 		// Iterate over arguments, taking care of selectable group.
-		for ( final Argument< ?, ? > arg : cli.getArguments() )
+		for ( final Argument< ?, ? > arg : config.getArguments() )
 		{
 			if ( !arg.isVisible() )
 				continue;
@@ -692,14 +775,21 @@ public class CliGuiBuilder implements ArgumentVisitor
 		return buttonGroup;
 	}
 
-	public class CliConfigPanel extends JPanel
+	public class ConfigPanel extends JPanel
 	{
 
 		private static final long serialVersionUID = 1L;
 
+		private final DoubleConsumer tresholdUpdater = null;
+
 		public void refresh()
 		{
 			elements.forEach( e -> e.update() );
+		}
+
+		public DoubleConsumer getThresholdUpdater()
+		{
+			return tresholdUpdater;
 		}
 	}
 }

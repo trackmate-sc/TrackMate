@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -27,27 +27,29 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 
-import fiji.plugin.trackmate.util.cli.CliGuiBuilder.CliConfigPanel;
+import fiji.plugin.trackmate.util.cli.ConfigGuiBuilder.ConfigPanel;
 
 public class ExampleCommandCLI extends CommandCLIConfigurator
 {
 
 	private final IntArgument nThreads;
 
-	private final DoubleArgument diameter;
+	private final DoubleArgument radius;
 
 	private final DoubleArgument time;
+
+	private final DoubleArgument weight;
 
 	public ExampleCommandCLI()
 	{
 		/*
 		 * The executable that will be called by the TrackMate module.
-		 * 
+		 *
 		 * CLI configs that inherit from 'CommandCLIConfigurator' are all based
 		 * on an actual executable, that is a file with exec rights somewhere on
 		 * the user computer. They need to set it themselves, so the config part
 		 * only specifies the name, the help and the key of this command.
-		 * 
+		 *
 		 * The help and name will be used in the UI.
 		 */
 		executable
@@ -58,18 +60,18 @@ public class ExampleCommandCLI extends CommandCLIConfigurator
 		/*
 		 * In this example we will assume that the tool we want to run accepts a
 		 * few arguments.
-		 * 
+		 *
 		 * The first one is the <code>--nThreads</code> argument, that accept
 		 * integer larger than 1 and smaller than 24.
-		 * 
+		 *
 		 * The 'argument()' part must be something the tool can understand. This
 		 * is what is passed to it before the value.
-		 * 
+		 *
 		 * This example argument is not required, but has a default value of 1.
 		 * The default value is used only in the command line. If an argument is
 		 * not required, is not set, but has a default value, then the argument
 		 * will appear in the command line with this default value.
-		 * 
+		 *
 		 * Adding arguments is done via 'adder' methods, that are only visible
 		 * in inhering classes. The 'get()' method of the adder returns the
 		 * created argument. It also adds it to the inner parts of the mother
@@ -88,22 +90,32 @@ public class ExampleCommandCLI extends CommandCLIConfigurator
 				.get();
 
 		/*
-		 * The second argument is a double. It is required, which means that an
-		 * error will be thrown when making a command line from this config if
-		 * the user forgot to set a value. It also has a unit, which is only
+		 * The second argument is a double. It also has a unit, which is only
 		 * used in the UI.
-		 * 
+		 *
+		 * Additionally, the value is stored as a radius, but displayed as a
+		 * diameter, with values being converted on the fly.
+		 *
 		 * Because it does not specify a min or a max, any numerical value can
 		 * be entered in the GUI. The implementation will have to add an extra
 		 * check to verify consistency of values.
+		 *
+		 * With this, the radius will have the default value of 5, and a
+		 * diameter of 10 µm will be displayed in the UI.
 		 */
-		this.diameter = addDoubleArgument()
-				.argument( "--diameter" )
-				.name( "Diameter" )
-				.help( "The diameter of objects to process." )
-				.key( "DIAMETER" )
-				.defaultValue( 1.5 )
-				.units( "microns" )
+		this.radius = CommonTrackMateArguments.addDiameter( this, "µm" );
+
+		/*
+		 * The third argument is a double. It is required, which means that an
+		 * error will be thrown when making a command line from this config if
+		 * the user forgot to set a value.
+		 */
+		this.weight = addDoubleArgument()
+				.argument( "--weight" )
+				.name( "Weight" )
+				.key( "WEIGHT" )
+				.defaultValue( 70. )
+				.units( "kg" )
 				.required( true ) // required flag
 				.get();
 
@@ -127,9 +139,14 @@ public class ExampleCommandCLI extends CommandCLIConfigurator
 		return nThreads;
 	}
 
-	public DoubleArgument diameter()
+	public DoubleArgument radius()
 	{
-		return diameter;
+		return radius;
+	}
+
+	public DoubleArgument weight()
+	{
+		return weight;
 	}
 
 	public DoubleArgument time()
@@ -152,16 +169,17 @@ public class ExampleCommandCLI extends CommandCLIConfigurator
 		 */
 
 		/*
-		 * Will generate an error because 'diameter' is required and not set.
-		 * 
-		 * The argument 'nThreads' is not set either, but it has a default value
-		 * and is not required -> no error, the command line will use the
-		 * default value.
-		 * 
+		 * Will generate an error because 'weight' is required and not set.
+		 *
+		 * The argument 'nThreads' is not set, but it has a default value and is
+		 * not required -> no error, the command line will use the default
+		 * value.
+		 *
 		 * The argument 'time' is not set either, does not have a default, but
 		 * it is not required -> no error, the command line will just miss the
 		 * 'time' argument.
 		 */
+		System.out.println( "First attempt with the command line:" );
 		try
 		{
 			final List< String > cmd = CommandBuilder.build( cli );
@@ -169,11 +187,13 @@ public class ExampleCommandCLI extends CommandCLIConfigurator
 		}
 		catch ( final IllegalArgumentException e )
 		{
+			System.err.println( "Could not generate the command line:" );
 			System.err.println( e.getMessage() );
 		}
 
-		// Set the diameter. Now it should be ok.
-		cli.diameter().set( 2.5 );
+		// Set the weight. Now it should be ok.
+		System.out.println( "\nSecond attempt with the command line, after setting the weight:" );
+		cli.weight().set( 50. );
 		try
 		{
 			final List< String > cmd = CommandBuilder.build( cli );
@@ -181,6 +201,7 @@ public class ExampleCommandCLI extends CommandCLIConfigurator
 		}
 		catch ( final IllegalArgumentException e )
 		{
+			System.err.println( "Could not generate the command line:" );
 			System.err.println( e.getMessage() );
 		}
 
@@ -190,19 +211,22 @@ public class ExampleCommandCLI extends CommandCLIConfigurator
 
 		// The UI cannot be created wit arguments that do not have a value. This
 		// will generate an error:
+		System.out.println( "\nFirst attempt with the UI generator:" );
 		try
 		{
-			CliGuiBuilder.build( cli );
+			ConfigGuiBuilder.build( cli );
 		}
 		catch ( final IllegalArgumentException e )
 		{
+			System.err.println( "Could not generate the UI:" );
 			System.err.println( e.getMessage() );
 		}
 
+		System.out.println( "\nSecond attempt with the UI generator:" );
 		cli.time().set( 5. );
 		cli.nThreads().set( 2 );
 		// This should be ok now.
-		final CliConfigPanel panel = CliGuiBuilder.build( cli );
+		final ConfigPanel panel = ConfigGuiBuilder.build( cli );
 		final JFrame frame = new JFrame( "Demo CLI tool" );
 		frame.getContentPane().add( panel, BorderLayout.CENTER );
 		final JButton btn = new JButton( "echo" );
