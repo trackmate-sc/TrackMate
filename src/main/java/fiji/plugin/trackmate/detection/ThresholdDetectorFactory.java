@@ -23,22 +23,10 @@ package fiji.plugin.trackmate.detection;
 
 import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
-import static fiji.plugin.trackmate.io.IOUtils.readBooleanAttribute;
-import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
-import static fiji.plugin.trackmate.io.IOUtils.readIntegerAttribute;
-import static fiji.plugin.trackmate.io.IOUtils.writeAttribute;
-import static fiji.plugin.trackmate.io.IOUtils.writeTargetChannel;
-import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
-import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import javax.swing.ImageIcon;
-
-import org.jdom2.Element;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
@@ -87,30 +75,11 @@ public class ThresholdDetectorFactory< T extends RealType< T > & NativeType< T >
 	public static final String KEY_INTENSITY_THRESHOLD = "INTENSITY_THRESHOLD";
 
 	/*
-	 * FIELDS
-	 */
-
-	/** The image to operate on. Multiple frames, multiple channels. */
-	protected ImgPlus< T > img;
-
-	protected Map< String, Object > settings;
-
-	protected String errorMessage;
-
-	/*
 	 * METHODS
 	 */
 
 	@Override
-	public boolean setTarget( final ImgPlus< T > img, final Map< String, Object > settings )
-	{
-		this.img = img;
-		this.settings = settings;
-		return checkSettings( settings );
-	}
-
-	@Override
-	public SpotDetector< T > getDetector( final Interval interval, final int frame )
+	public SpotDetector< T > getDetector( final ImgPlus< T > img, final Map< String, Object > settings, final Interval interval, final int frame )
 	{
 		final double intensityThreshold = ( Double ) settings.get( KEY_INTENSITY_THRESHOLD );
 		final boolean simplifyContours = ( Boolean ) settings.get( KEY_SIMPLIFY_CONTOURS );
@@ -141,63 +110,6 @@ public class ThresholdDetectorFactory< T extends RealType< T > & NativeType< T >
 	}
 
 	@Override
-	public String getErrorMessage()
-	{
-		return errorMessage;
-	}
-
-	@Override
-	public boolean checkSettings( final Map< String, Object > lSettings )
-	{
-		boolean ok = true;
-		final StringBuilder errorHolder = new StringBuilder();
-		ok = ok & checkParameter( lSettings, KEY_TARGET_CHANNEL, Integer.class, errorHolder );
-		ok = ok & checkParameter( lSettings, KEY_INTENSITY_THRESHOLD, Double.class, errorHolder );
-		ok = ok & checkParameter( lSettings, KEY_SIMPLIFY_CONTOURS, Boolean.class, errorHolder );
-		final List< String > mandatoryKeys = new ArrayList<>();
-		mandatoryKeys.add( KEY_TARGET_CHANNEL );
-		mandatoryKeys.add( KEY_INTENSITY_THRESHOLD );
-		mandatoryKeys.add( KEY_SIMPLIFY_CONTOURS );
-		ok = ok & checkMapKeys( lSettings, mandatoryKeys, null, errorHolder );
-		if ( !ok )
-		{
-			errorMessage = errorHolder.toString();
-		}
-		return ok;
-	}
-
-	@Override
-	public boolean marshall( final Map< String, Object > lSettings, final Element element )
-	{
-		final StringBuilder errorHolder = new StringBuilder();
-		final boolean ok = writeTargetChannel( lSettings, element, errorHolder )
-				&& writeAttribute( lSettings, element, KEY_INTENSITY_THRESHOLD, Double.class, errorHolder )
-				&& writeAttribute( lSettings, element, KEY_SIMPLIFY_CONTOURS, Boolean.class, errorHolder );
-
-		if ( !ok )
-			errorMessage = errorHolder.toString();
-
-		return ok;
-	}
-
-	@Override
-	public boolean unmarshall( final Element element, final Map< String, Object > lSettings )
-	{
-		lSettings.clear();
-		final StringBuilder errorHolder = new StringBuilder();
-		boolean ok = true;
-		ok = ok & readIntegerAttribute( element, lSettings, KEY_TARGET_CHANNEL, errorHolder );
-		ok = ok & readDoubleAttribute( element, lSettings, KEY_INTENSITY_THRESHOLD, errorHolder );
-		ok = ok & readBooleanAttribute( element, lSettings, KEY_SIMPLIFY_CONTOURS, errorHolder );
-		if ( !ok )
-		{
-			errorMessage = errorHolder.toString();
-			return false;
-		}
-		return checkSettings( lSettings );
-	}
-
-	@Override
 	public ConfigurationPanel getDetectorConfigurationPanel( final Settings lSettings, final Model model )
 	{
 		return new ThresholdDetectorConfigurationPanel( lSettings, model );
@@ -216,6 +128,12 @@ public class ThresholdDetectorFactory< T extends RealType< T > & NativeType< T >
 	}
 
 	@Override
+	public String getUrl()
+	{
+		return URL_DOC;
+	}
+
+	@Override
 	public Map< String, Object > getDefaultSettings()
 	{
 		final Map< String, Object > lSettings = new HashMap<>();
@@ -223,23 +141,5 @@ public class ThresholdDetectorFactory< T extends RealType< T > & NativeType< T >
 		lSettings.put( KEY_INTENSITY_THRESHOLD, 0. );
 		lSettings.put( KEY_SIMPLIFY_CONTOURS, true );
 		return lSettings;
-	}
-
-	@Override
-	public ImageIcon getIcon()
-	{
-		return null;
-	}
-
-	@Override
-	public ThresholdDetectorFactory< T > copy()
-	{
-		return new ThresholdDetectorFactory<>();
-	}
-
-	@Override
-	public String getUrl()
-	{
-		return URL_DOC;
 	}
 }

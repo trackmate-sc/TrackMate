@@ -24,7 +24,10 @@ package fiji.plugin.trackmate.detection;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DO_MEDIAN_FILTERING;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DO_SUBPIXEL_LOCALIZATION;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
+import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
+
+import java.util.Map;
 
 import org.scijava.plugin.Plugin;
 
@@ -33,6 +36,7 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.components.detector.DogDetectorConfigurationPanel;
 import fiji.plugin.trackmate.util.TMUtils;
+import net.imagej.ImgPlus;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.type.NativeType;
@@ -70,15 +74,16 @@ public class DogDetectorFactory< T extends RealType< T > & NativeType< T >> exte
 	 */
 
 	@Override
-	public SpotDetector< T > getDetector( final Interval interval, final int frame )
+	public SpotDetector< T > getDetector( final ImgPlus< T > img, final Map< String, Object > settings, final Interval interval, final int frame )
 	{
 		final double radius = ( Double ) settings.get( KEY_RADIUS );
 		final double threshold = ( Double ) settings.get( KEY_THRESHOLD );
 		final boolean doMedian = ( Boolean ) settings.get( KEY_DO_MEDIAN_FILTERING );
 		final boolean doSubpixel = ( Boolean ) settings.get( KEY_DO_SUBPIXEL_LOCALIZATION );
 		final double[] calibration = TMUtils.getSpatialCalibration( img );
+		final int channel = ( Integer ) settings.get( KEY_TARGET_CHANNEL ) - 1;
+		final RandomAccessible< T > imFrame = DetectionUtils.prepareFrameImg( img, channel, frame );
 
-		final RandomAccessible< T > imFrame = prepareFrameImg( frame );
 		final DogDetector< T > detector = new DogDetector<>( imFrame, interval, calibration, radius, threshold, doSubpixel, doMedian );
 		detector.setNumThreads( 1 );
 		return detector;
@@ -103,20 +108,14 @@ public class DogDetectorFactory< T extends RealType< T > & NativeType< T >> exte
 	}
 
 	@Override
-	public ConfigurationPanel getDetectorConfigurationPanel( final Settings lSettings, final Model model )
-	{
-		return new DogDetectorConfigurationPanel( lSettings, model, DogDetectorFactory.THIS_INFO_TEXT, DogDetectorFactory.THIS_NAME );
-	}
-
-	@Override
-	public DogDetectorFactory< T > copy()
-	{
-		return new DogDetectorFactory<>();
-	}
-
-	@Override
 	public String getUrl()
 	{
 		return URL_DOC;
+	}
+
+	@Override
+	public ConfigurationPanel getDetectorConfigurationPanel( final Settings lSettings, final Model model )
+	{
+		return new DogDetectorConfigurationPanel( lSettings, model, DogDetectorFactory.THIS_INFO_TEXT, DogDetectorFactory.THIS_NAME );
 	}
 }
