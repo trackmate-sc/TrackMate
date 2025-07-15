@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -41,6 +41,8 @@ public class SimpleSparseLAPTrackerFactory extends SparseLAPTrackerFactory
 			+ "a distance and time condition. Track splitting and merging are not allowed, resulting <br>"
 			+ "in having non-branching tracks."
 			+ " </html>";
+
+	public static final String DOC_URL = "https://imagej.net/plugins/trackmate/trackers/lap-trackers";
 
 	@Override
 	public String getKey()
@@ -71,5 +73,11 @@ public class SimpleSparseLAPTrackerFactory extends SparseLAPTrackerFactory
 	public SimpleSparseLAPTrackerFactory copy()
 	{
 		return new SimpleSparseLAPTrackerFactory();
+	}
+
+	@Override
+	public String getUrl()
+	{
+		return DOC_URL;
 	}
 }

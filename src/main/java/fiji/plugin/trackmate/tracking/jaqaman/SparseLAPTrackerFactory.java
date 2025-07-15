@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -73,6 +73,8 @@ public class SparseLAPTrackerFactory extends SegmentTrackerFactory
 			+ "Solving the LAP relies on the Jonker-Volgenant solver, and a sparse cost "
 			+ "matrix formulation, allowing it to handle very large problems. "
 			+ "</html>";
+
+	public static final String DOC_URL = "https://imagej.net/plugins/trackmate/trackers/lap-trackers";
 
 	@Override
 	public String getInfoText()
@@ -134,7 +136,7 @@ public class SparseLAPTrackerFactory extends SegmentTrackerFactory
 	{
                 final StringBuilder errorHolder = new StringBuilder();
 		boolean ok = unmarshallSegment( element, settings, errorHolder ); // common parameters
-		
+
 		// Linking
 		final Element linkingElement = element.getChild( XML_ELEMENT_NAME_LINKING );
 		if ( null == linkingElement )
@@ -180,7 +182,7 @@ public class SparseLAPTrackerFactory extends SegmentTrackerFactory
 		settings.put( KEY_LINKING_FEATURE_PENALTIES, new HashMap<>( DEFAULT_LINKING_FEATURE_PENALTIES ) );
 		return settings;
 	}
-        
+
         @Override
 	public boolean checkSettingsValidity( final Map< String, Object > settings )
 	{
@@ -225,4 +227,9 @@ public class SparseLAPTrackerFactory extends SegmentTrackerFactory
 		return new LAPTrackerSettingsPanel( getName(), spaceUnits, features, featureNames );
 	}
 
+	@Override
+	public String getUrl()
+	{
+		return DOC_URL;
+	}
 }
