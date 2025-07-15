@@ -30,47 +30,21 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMateModule;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
-import net.imagej.ImgPlus;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 
 /**
  * Mother interface for detector factories. It is also responsible for
  * loading/saving the detector parameters from/to XML, and of generating a
- * suitable configuration panel for GUI interaction.
+ * suitable configuration panel for GUI interaction. Several methods have
+ * default implementations that cover most use cases, but subclasses are free to
+ * override them if needed.
  */
 public interface SpotDetectorFactoryBase< T extends RealType< T > & NativeType< T > > extends TrackMateModule
 {
 
 	/**
-	 * Configure this factory to operate on the given source image (possibly
-	 * 5D), with the given settings map.
-	 * <p>
-	 * Also checks the validity of the given settings map for this factory. If
-	 * check fails, return <code>false</code>, an error message can be obtained
-	 * through {@link #getErrorMessage()}.
-	 *
-	 * @param img
-	 *            the {@link ImgPlus} to operate on, possible 5D.
-	 * @param settings
-	 *            the settings map, must be suitable for this detector factory.
-	 * @return <code>false</code> is the given settings map is not suitable for
-	 *         this detector factory.
-	 * @see SpotDetectorFactory#getErrorMessage()
-	 */
-	public boolean setTarget( final ImgPlus< T > img, final Map< String, Object > settings );
-
-	/**
-	 * Returns a meaningful error message for the last action on this factory.
-	 *
-	 * @see #setTarget(ImgPlus, Map)
-	 * @see #marshall(Map, Element)
-	 * @see #unmarshall(Element, Map)
-	 */
-	public String getErrorMessage();
-
-	/**
-	 * Marshalls a settings map to a JDom element, ready for saving to XML. The
+	 * Marshals a settings map to a JDom element, ready for saving to XML. The
 	 * element is <b>updated</b> with new attributes.
 	 * <p>
 	 * Only parameters specific to the specific detector factory are marshalled.
@@ -78,13 +52,25 @@ public interface SpotDetectorFactoryBase< T extends RealType< T > & NativeType< 
 	 * {@value DetectorKeys#XML_ATTRIBUTE_DETECTOR_NAME} that saves the target
 	 * {@link SpotDetectorFactory} key.
 	 *
-	 * @return <code>true</code> if marshalling was successful. If not, check
-	 *         {@link #getErrorMessage()}
+	 * @return an error message if marshaling was unsuccessful. If successful,
+	 *         returns <code>null</code>.
 	 */
-	public boolean marshall( final Map< String, Object > settings, final Element element );
+	public default String marshal( final Map< String, Object > settings, final Element element )
+	{
+		for ( final Map.Entry< String, Object > entry : settings.entrySet() )
+		{
+			final String key = entry.getKey();
+			final Object value = entry.getValue();
+			if ( null == value )
+				return "No value set for parameter " + key;
+
+			element.setAttribute( key, value.toString() );
+		}
+		return null;
+	}
 
 	/**
-	 * Un-marshalls a JDom element to update a settings map.
+	 * Un-marshals a JDom element to update a settings map.
 	 *
 	 * @param element
 	 *            the JDom element to read from.
@@ -92,10 +78,23 @@ public interface SpotDetectorFactoryBase< T extends RealType< T > & NativeType< 
 	 *            the map to update. Is cleared prior to updating, so that it
 	 *            contains only the parameters specific to the target detector
 	 *            factory.
-	 * @return <code>true</code> if un-marshalling was successful. If not, check
-	 *         {@link #getErrorMessage()}
+	 * @return an error message if un-marshaling was unsuccessful. If
+	 *         successful, returns <code>null</code>.
 	 */
-	public boolean unmarshall( final Element element, final Map< String, Object > settings );
+	public default String unmarshal( final Element element, final Map< String, Object > settings )
+	{
+		settings.clear();
+		for ( final Object key : element.getAttributes() )
+		{
+			final String keyString = ( ( org.jdom2.Attribute ) key ).getName();
+			final String value = element.getAttributeValue( keyString );
+			if ( null == value )
+				return "No value set for parameter " + keyString;
+
+			settings.put( keyString, value );
+		}
+		return null;
+	}
 
 	/**
 	 * Returns a new GUI panel able to configure the settings suitable for this
@@ -123,9 +122,25 @@ public interface SpotDetectorFactoryBase< T extends RealType< T > & NativeType< 
 	 *
 	 * @param settings
 	 *            the map to test.
-	 * @return <code>true</code> if the settings map is valid.
+	 * @@return an error message if the settings are unsuitable. Otherwise
+	 *          returns <code>null</code>.
 	 */
-	public boolean checkSettings( final Map< String, Object > settings );
+	public default String checkSettings( final Map< String, Object > settings )
+	{
+		// Test against the class specified in the default settings.
+		final Map< String, Object > defaultSettings = getDefaultSettings();
+		for ( final String key : defaultSettings.keySet() )
+		{
+			if ( !settings.containsKey( key ) )
+				return "Missing setting: " + key + ". This is required by the detector.";
+
+			final Object value = settings.get( key );
+			final Class< ? > expectedType = defaultSettings.get( key ).getClass();
+			if ( !expectedType.isInstance( value ) )
+				return "Setting " + key + " is of type " + value.getClass().getSimpleName() + ", but expected type is " + expectedType.getSimpleName() + ".";
+		}
+		return null;
+	}
 
 	/**
 	 * Return <code>true</code> for the detectors that can provide a spot with a

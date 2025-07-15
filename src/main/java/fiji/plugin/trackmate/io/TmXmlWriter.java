@@ -346,9 +346,9 @@ public class TmXmlWriter
 		// Marshal the rest.
 		if ( null != settings.detectorFactory )
 		{
-			final boolean ok = settings.detectorFactory.marshall( settings.detectorSettings, el );
-			if ( !ok )
-				logger.error( settings.detectorFactory.getErrorMessage() );
+			final String errorMessage = settings.detectorFactory.marshal( settings.detectorSettings, el );
+			if ( errorMessage != null )
+				logger.error( errorMessage );
 			else
 				logger.log( "  Added detector settings.\n" );
 		}
