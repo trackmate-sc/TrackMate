@@ -24,12 +24,11 @@ import net.imglib2.RealPoint;
 import net.imglib2.roi.labeling.LabelingType;
 import net.imglib2.view.Views;
 import sc.fiji.labkit.ui.brush.BdvMouseBehaviourUtils;
-import sc.fiji.labkit.ui.brush.SelectLabelController;
 import sc.fiji.labkit.ui.labeling.Label;
 import sc.fiji.labkit.ui.models.ImageLabelingModel;
 
 /**
- * Copied from {@link SelectLabelController}.
+ * Copied from SelectLabelController
  */
 public class TMSelectLabelController
 {

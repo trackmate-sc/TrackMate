@@ -40,7 +40,6 @@ import net.imglib2.util.LinAlgHelpers;
 import net.imglib2.view.Views;
 import sc.fiji.labkit.ui.brush.BdvMouseBehaviourUtils;
 import sc.fiji.labkit.ui.brush.BrushCursor;
-import sc.fiji.labkit.ui.brush.LabelBrushController;
 import sc.fiji.labkit.ui.brush.neighborhood.Ellipsoid;
 import sc.fiji.labkit.ui.brush.neighborhood.RealPoints;
 import sc.fiji.labkit.ui.labeling.Label;
@@ -49,7 +48,7 @@ import sc.fiji.labkit.ui.panel.GuiUtils;
 import sc.fiji.labkit.ui.utils.Notifier;
 
 /**
- * Copied from {@link LabelBrushController} to use configurable keybindings.
+ * Copied from LabelBrushController to use configurable keybindings.
  */
 public class TMLabelBrushController
 {

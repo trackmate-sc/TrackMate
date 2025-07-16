@@ -122,8 +122,8 @@ public interface SpotDetectorFactoryBase< T extends RealType< T > & NativeType< 
 	 *
 	 * @param settings
 	 *            the map to test.
-	 * @@return an error message if the settings are unsuitable. Otherwise
-	 *          returns <code>null</code>.
+	 * @return an error message if the settings are unsuitable. Otherwise
+	 *         returns <code>null</code>.
 	 */
 	public default String checkSettings( final Map< String, Object > settings )
 	{
