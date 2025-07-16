@@ -39,6 +39,7 @@ import org.scijava.plugin.Plugin;
 import fiji.plugin.trackmate.detection.LogDetectorFactory.LogDetectorCLI;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.util.cli.Configurator;
+import fiji.plugin.trackmate.util.cli.HasInteractivePreview;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imglib2.Interval;
@@ -109,11 +110,12 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T > > imp
 	}
 
 	/**
-	 * Specifies what are the parameters of the {@link LogDetector}.
+	 * Specifies what are the parameters of the {@link LogDetector} and
+	 * DogDetector.
 	 *
 	 * @author Jean-Yves Tinevez
 	 */
-	public static class LogDetectorCLI extends Configurator
+	public static class LogDetectorCLI extends Configurator implements HasInteractivePreview
 	{
 
 		public LogDetectorCLI( final int nChannels, final String units )
@@ -123,7 +125,12 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T > > imp
 			addThreshold( this );
 			addMedianFiltering( this );
 			addSubpixelLocalization( this );
+		}
 
+		@Override
+		public String getPreviewArgumentKey()
+		{
+			return DetectorKeys.KEY_THRESHOLD;
 		}
 	}
 }

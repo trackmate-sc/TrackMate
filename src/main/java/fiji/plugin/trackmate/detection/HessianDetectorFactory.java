@@ -23,7 +23,6 @@ package fiji.plugin.trackmate.detection;
 
 import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_NORMALIZE;
 import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_RADIUS_Z;
-import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DO_MEDIAN_FILTERING;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DO_SUBPIXEL_LOCALIZATION;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_NORMALIZE;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
@@ -35,11 +34,8 @@ import java.util.Map;
 
 import org.scijava.plugin.Plugin;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
-import fiji.plugin.trackmate.gui.components.detector.HessianDetectorConfigurationPanel;
 import fiji.plugin.trackmate.util.TMUtils;
+import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
@@ -106,12 +102,6 @@ public class HessianDetectorFactory< T extends RealType< T > & NativeType< T > >
 	}
 
 	@Override
-	public ConfigurationPanel getDetectorConfigurationPanel( final Settings lSettings, final Model model )
-	{
-		return new HessianDetectorConfigurationPanel( lSettings, model, INFO_TEXT, NAME );
-	}
-
-	@Override
 	public String getInfoText()
 	{
 		return INFO_TEXT;
@@ -124,12 +114,45 @@ public class HessianDetectorFactory< T extends RealType< T > & NativeType< T > >
 	}
 
 	@Override
-	public Map< String, Object > getDefaultSettings()
+	public HessianDetectorCLI getConfigurator( final ImagePlus imp )
 	{
-		final Map< String, Object > lSettings = super.getDefaultSettings();
-		lSettings.remove( KEY_DO_MEDIAN_FILTERING );
-		lSettings.put( KEY_RADIUS_Z, DEFAULT_RADIUS_Z );
-		lSettings.put( KEY_NORMALIZE, DEFAULT_NORMALIZE );
-		return lSettings;
+		final int nChannels = ( imp == null ) ? 1 : imp.getNChannels();
+		final String units = ( imp == null ) ? "no image" : imp.getCalibration().getUnit();
+		return new HessianDetectorCLI( nChannels, units );
+	}
+
+	/**
+	 * Specifies what are the parameters of the {@link LogDetector}.
+	 *
+	 * @author Jean-Yves Tinevez
+	 */
+	public static class HessianDetectorCLI extends LogDetectorCLI
+	{
+
+		public HessianDetectorCLI( final int nChannels, final String units )
+		{
+			super( nChannels, units );
+			// Diameter in Z
+			final DoubleArgument diameterZ = addDoubleArgument()
+					.key( KEY_RADIUS_Z )
+					.name( "Diameter along Z" )
+					.units( units )
+					.defaultValue( DEFAULT_RADIUS_Z )
+					.help( "The diameter of the objects to detect along the Z axis." )
+					.get();
+			// Convert to diameter for display purposes.
+			setDisplayTranslator( diameterZ, r -> r * 2., d -> d / 2. );
+			// Change order
+			arguments.remove( diameterZ );
+			arguments.add( 2, diameterZ );
+			// Normalize quality values
+			addFlag()
+					.key( KEY_NORMALIZE )
+					.name( "Normalize quality values" )
+					.defaultValue( DEFAULT_NORMALIZE )
+					.help( "If true, the quality value of each spot is normalized to be between 0 and 1, "
+							+ "where 1 is the best quality in the time-point." )
+					.get();
+		}
 	}
 }

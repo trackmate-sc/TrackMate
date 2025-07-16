@@ -31,10 +31,6 @@ import java.util.Map;
 
 import org.scijava.plugin.Plugin;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
-import fiji.plugin.trackmate.gui.components.detector.DogDetectorConfigurationPanel;
 import fiji.plugin.trackmate.util.TMUtils;
 import net.imagej.ImgPlus;
 import net.imglib2.Interval;
@@ -45,10 +41,6 @@ import net.imglib2.type.numeric.RealType;
 @Plugin( type = SpotDetectorFactory.class )
 public class DogDetectorFactory< T extends RealType< T > & NativeType< T >> extends LogDetectorFactory< T >
 {
-
-	/*
-	 * CONSTANTS
-	 */
 
 	/** A string key identifying this factory. */
 	public static final String THIS_DETECTOR_KEY = "DOG_DETECTOR";
@@ -68,10 +60,6 @@ public class DogDetectorFactory< T extends RealType< T > & NativeType< T >> exte
 			+ "</html>";
 
 	public static final String URL_DOC = "https://imagej.net/plugins/trackmate/detectors/difference-of-gaussian";
-
-	/*
-	 * METHODS
-	 */
 
 	@Override
 	public SpotDetector< T > getDetector( final ImgPlus< T > img, final Map< String, Object > settings, final Interval interval, final int frame )
@@ -111,11 +99,5 @@ public class DogDetectorFactory< T extends RealType< T > & NativeType< T >> exte
 	public String getUrl()
 	{
 		return URL_DOC;
-	}
-
-	@Override
-	public ConfigurationPanel getDetectorConfigurationPanel( final Settings lSettings, final Model model )
-	{
-		return new DogDetectorConfigurationPanel( lSettings, model, DogDetectorFactory.THIS_INFO_TEXT, DogDetectorFactory.THIS_NAME );
 	}
 }
