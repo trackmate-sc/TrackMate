@@ -6,6 +6,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.DoubleConsumer;
 import java.util.function.Supplier;
 
 import javax.swing.BorderFactory;
@@ -23,6 +24,10 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
+import fiji.plugin.trackmate.gui.displaysettings.StyleElements.BoundedDoubleElement;
+import fiji.plugin.trackmate.gui.displaysettings.StyleElements.DoubleElement;
+import fiji.plugin.trackmate.gui.displaysettings.StyleElements.IntElement;
+import fiji.plugin.trackmate.gui.displaysettings.StyleElements.StyleElement;
 import fiji.plugin.trackmate.util.DetectionPreview;
 import fiji.plugin.trackmate.util.DetectionPreview.Builder;
 import fiji.plugin.trackmate.util.DetectionPreviewPanel;
@@ -94,28 +99,6 @@ public class GenericDetectionConfigurationPanel extends ConfigurationPanel
 	}
 
 	/**
-	 * Creates a {@link DetectionPreview.Builder} for this configuration panel.
-	 * Can be overridden by subclasses to customize the preview creation.
-	 *
-	 * @param model
-	 * @param settings
-	 * @param factorySupplier
-	 * @return a new {@link DetectionPreview.Builder}.
-	 */
-	protected Builder createDetectionPreviewBuilder(
-			final Model model,
-			final Settings settings,
-			final Supplier< SpotDetectorFactoryBase< ? > > factorySupplier )
-	{
-		return DetectionPreview.create()
-				.model( model )
-				.settings( settings )
-				.detectorFactory( factorySupplier.get() )
-				.detectionSettingsSupplier( () -> getSettings() )
-				.thresholdUpdater( mainPanel.getThresholdUpdater() );
-	}
-
-	/**
 	 * Creates a basic {@link DetectionPreview}. Can be overridden by subclasses
 	 *
 	 * @param model
@@ -127,7 +110,54 @@ public class GenericDetectionConfigurationPanel extends ConfigurationPanel
 			final Settings settings,
 			final Supplier< SpotDetectorFactoryBase< ? > > factorySupplier )
 	{
-		return createDetectionPreviewBuilder( model, settings, factorySupplier ).get();
+		final Builder builder = DetectionPreview.create()
+				.model( model )
+				.settings( settings )
+				.detectorFactory( factorySupplier.get() )
+				.detectionSettingsSupplier( () -> getSettings() );
+		if ( config instanceof HasInteractivePreview )
+		{
+			final HasInteractivePreview hasPreview = ( HasInteractivePreview ) config;
+
+			final String key = hasPreview.getPreviewArgumentKey();
+			builder.thresholdKey( key );
+
+			if ( key != null )
+			{
+				final DoubleConsumer thresholdUpdater;
+				final StyleElement element = mainPanel.elements.get( key );
+				if ( element instanceof DoubleElement )
+				{
+					thresholdUpdater = t -> {
+						( ( DoubleElement ) element ).set( t );
+						mainPanel.refresh();
+					};
+				}
+				else if ( element instanceof BoundedDoubleElement )
+				{
+					thresholdUpdater = t -> {
+						( ( BoundedDoubleElement ) element ).set( t );
+						mainPanel.refresh();
+					};
+				}
+				else if ( element instanceof IntElement )
+				{
+					final IntElement el = ( IntElement ) element ;
+					thresholdUpdater = t -> {
+						el.set( ( int ) t );
+						mainPanel.refresh();
+					};
+				}
+				else
+				{
+					throw new IllegalStateException( "Cannot create interactive thresholding preview for arguments that map of an element of class: " + element.getClass().getDeclaringClass() );
+				}
+				builder.thresholdUpdater( thresholdUpdater );
+			}
+
+			builder.axisLabel( hasPreview.getPreviewAxisLabel() );
+		}
+		return builder.get();
 	}
 
 	@Override

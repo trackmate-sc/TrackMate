@@ -45,10 +45,10 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
 import java.util.function.Function;
 import java.util.function.IntSupplier;
@@ -107,10 +107,6 @@ public class ConfigGuiBuilder implements ArgumentVisitor
 
 	private int bottomInset = 5;
 
-	private final List< StyleElement > elements = new ArrayList<>();
-
-	private JRadioButton rdbtn;
-
 	private final Map< Argument< ?, ? >, Function< ?, ? > > forwardUITranslators;
 
 	private final Map< Argument< ?, ? >, Function< ?, ? > > backwardUITranslators;
@@ -136,7 +132,7 @@ public class ConfigGuiBuilder implements ArgumentVisitor
 
 	private void setCurrentRadioButton( final JRadioButton radioButton )
 	{
-		if ( radioButton == null || ( this.rdbtn != radioButton ) )
+		if ( radioButton == null || ( panel.rdbtn != radioButton ) )
 		{
 			topInset = 5;
 			bottomInset = 5;
@@ -146,7 +142,7 @@ public class ConfigGuiBuilder implements ArgumentVisitor
 			topInset = 0;
 			bottomInset = 0;
 		}
-		this.rdbtn = radioButton;
+		panel.rdbtn = radioButton;
 	}
 
 	/*
@@ -165,7 +161,7 @@ public class ConfigGuiBuilder implements ArgumentVisitor
 		}
 
 		final StringElement element = stringElement( arg.getName(), arg::getValue, arg::set );
-		elements.add( element );
+		panel.elements.put( arg.getKey(), element );
 		addPathToLayout(
 				arg.getHelp(),
 				new JLabel( element.getLabel() ),
@@ -190,7 +186,7 @@ public class ConfigGuiBuilder implements ArgumentVisitor
 		}
 
 		final BooleanElement element = booleanElement( flag.getName(), flag::getValue, flag::set );
-		elements.add( element );
+		panel.elements.put( flag.getKey(), element );
 		final JCheckBox checkbox = linkedCheckBox( element, "" );
 		checkbox.setHorizontalAlignment( SwingConstants.LEADING );
 		addToLayout(
@@ -228,7 +224,7 @@ public class ConfigGuiBuilder implements ArgumentVisitor
 		final int max = forward.apply( arg.getMax() );
 
 		final IntElement element = intElement( arg.getName(), min, max, valueGetter, valueSetter );
-		elements.add( element );
+		panel.elements.put( arg.getKey(), element );
 
 		final int numberOfColumns;
 		if ( arg.hasMin() && arg.hasMin() )
@@ -280,7 +276,7 @@ public class ConfigGuiBuilder implements ArgumentVisitor
 			final double max = forward.apply( arg.getMax() );
 			final BoundedDoubleElement element = boundedDoubleElement( arg.getName(),
 					min, max, valueGetter, valueSetter );
-			elements.add( element );
+			panel.elements.put( arg.getKey(), element );
 			addToLayout(
 					arg.getHelp(),
 					new JLabel( element.getLabel() ),
@@ -291,7 +287,7 @@ public class ConfigGuiBuilder implements ArgumentVisitor
 		else
 		{
 			final DoubleElement element = doubleElement( arg.getName(), valueGetter, valueSetter );
-			elements.add( element );
+			panel.elements.put( arg.getKey(), element );
 			if ( arg.isSet() )
 				element.set( forward.apply( arg.getValue() ) );
 			else if ( arg.hasDefaultValue() )
@@ -331,7 +327,7 @@ public class ConfigGuiBuilder implements ArgumentVisitor
 		};
 
 		final StringElement element = stringElement( arg.getName(), valueGetter, valueSetter );
-		elements.add( element );
+		panel.elements.put( arg.getKey(), element );
 		addToLayoutTwoLines(
 				arg.getHelp(),
 				new JLabel( element.getLabel() ),
@@ -365,7 +361,7 @@ public class ConfigGuiBuilder implements ArgumentVisitor
 		};
 
 		final StringElement element = stringElement( arg.getName(), valueGetter, valueSetter );
-		elements.add( element );
+		panel.elements.put( arg.getKey(), element );
 		addPathToLayout(
 				arg.getHelp(),
 				new JLabel( element.getLabel() ),
@@ -391,7 +387,7 @@ public class ConfigGuiBuilder implements ArgumentVisitor
 		final Consumer< String > consumer = ( s ) -> arg.set( displays.indexOf( s ) );
 
 		final ListElement< String > element = listElement( arg.getName(), displays, supplier, consumer );
-		elements.add( element );
+		panel.elements.put( arg.getKey(), element );
 		final JComboBox< String > comboBox = linkedComboBoxSelector( element );
 		comboBox.setSelectedIndex( arg.getSelectedIndex() );
 		addToLayout(
@@ -430,7 +426,7 @@ public class ConfigGuiBuilder implements ArgumentVisitor
 		}
 
 		final ListElement< String > element = listElement( arg.getName(), arg.getEnvironments(), arg::getValue, arg::set );
-		elements.add( element );
+		panel.elements.put( arg.getKey(), element );
 		final JComboBox< String > comboBox = linkedComboBoxSelector( element );
 		comboBox.setSelectedItem( arg.getValue() );
 		addToLayout(
@@ -450,14 +446,14 @@ public class ConfigGuiBuilder implements ArgumentVisitor
 		lbl.setFont( Fonts.SMALL_FONT );
 		comp.setFont( Fonts.SMALL_FONT );
 		final JComponent item;
-		if ( rdbtn != null )
+		if ( panel.rdbtn != null )
 		{
-			final JRadioButton btn = rdbtn;
-			rdbtn.addItemListener( e -> comp.setEnabled( btn.isSelected() ) );
-			comp.setEnabled( rdbtn.isSelected() );
+			final JRadioButton btn = panel.rdbtn;
+			btn.addItemListener( e -> comp.setEnabled( btn.isSelected() ) );
+			comp.setEnabled( btn.isSelected() );
 			item = new JPanel();
 			item.setLayout( new BoxLayout( item, BoxLayout.LINE_AXIS ) );
-			item.add( rdbtn );
+			item.add( btn );
 			item.add( Box.createHorizontalGlue() );
 			item.add( lbl );
 		}
@@ -502,17 +498,17 @@ public class ConfigGuiBuilder implements ArgumentVisitor
 			tf.postActionEvent();
 		} );
 
-		if ( rdbtn != null )
+		if ( panel.rdbtn != null )
 		{
-			final JRadioButton btn = rdbtn;
-			rdbtn.addItemListener( e -> {
+			final JRadioButton btn = panel.rdbtn;
+			btn.addItemListener( e -> {
 				tf.setEnabled( btn.isSelected() );
 				browseButton.setEnabled( btn.isSelected() );
 			} );
 
-			tf.setEnabled( rdbtn.isSelected() );
-			browseButton.setEnabled( rdbtn.isSelected() );
-			p.add( rdbtn );
+			tf.setEnabled( btn.isSelected() );
+			browseButton.setEnabled( btn.isSelected() );
+			p.add( btn );
 		}
 		p.add( lbl );
 		p.add( Box.createHorizontalGlue() );
@@ -543,14 +539,14 @@ public class ConfigGuiBuilder implements ArgumentVisitor
 		comp.setFont( Fonts.SMALL_FONT );
 
 		final JComponent header;
-		if ( arg != null && rdbtn != null )
+		if ( arg != null && panel.rdbtn != null )
 		{
-			final JRadioButton btn = rdbtn;
-			rdbtn.addItemListener( e -> comp.setEnabled( btn.isSelected() ) );
-			comp.setEnabled( rdbtn.isSelected() );
+			final JRadioButton btn = panel.rdbtn;
+			btn.addItemListener( e -> comp.setEnabled( btn.isSelected() ) );
+			comp.setEnabled( btn.isSelected() );
 			header = new JPanel();
 			header.setLayout( new BoxLayout( header, BoxLayout.LINE_AXIS ) );
-			header.add( rdbtn );
+			header.add( btn );
 			header.add( Box.createHorizontalGlue() );
 			header.add( lbl );
 		}
@@ -593,13 +589,13 @@ public class ConfigGuiBuilder implements ArgumentVisitor
 		comp.setFont( Fonts.SMALL_FONT );
 
 		final JComponent header;
-		if ( rdbtn != null )
+		if ( panel.rdbtn != null )
 		{
-			final JRadioButton btn = rdbtn;
-			rdbtn.addItemListener( e -> comp.setEnabled( btn.isSelected() ) );
+			final JRadioButton btn = panel.rdbtn;
+			btn.addItemListener( e -> comp.setEnabled( btn.isSelected() ) );
 			header = new JPanel();
 			header.setLayout( new BoxLayout( header, BoxLayout.LINE_AXIS ) );
-			header.add( rdbtn );
+			header.add( btn );
 			header.add( Box.createHorizontalGlue() );
 			header.add( lbl );
 		}
@@ -636,13 +632,13 @@ public class ConfigGuiBuilder implements ArgumentVisitor
 	private void addToLayout( final String help, final JComponent comp )
 	{
 		final JComponent header;
-		if ( rdbtn != null )
+		if ( panel.rdbtn != null )
 		{
-			final JRadioButton btn = rdbtn;
-			rdbtn.addItemListener( e -> comp.setEnabled( btn.isSelected() ) );
+			final JRadioButton btn = panel.rdbtn;
+			btn.addItemListener( e -> comp.setEnabled( btn.isSelected() ) );
 			header = new JPanel();
 			header.setLayout( new BoxLayout( header, BoxLayout.LINE_AXIS ) );
-			header.add( rdbtn );
+			header.add( btn );
 			header.add( Box.createHorizontalGlue() );
 			header.add( comp );
 		}
@@ -708,7 +704,7 @@ public class ConfigGuiBuilder implements ArgumentVisitor
 			final IntSupplier get = selectable::getSelected;
 			final Consumer< Integer > set = selectable::select;
 			final IntElement element = intElement( label, 0, nItems - 1, get, set );
-			builder.elements.add( element );
+			builder.panel.elements.put( selectable.getKey(), element );
 			final ButtonGroup buttonGroup = linkedButtonGroup( element );
 			// Link radio buttons to arguments.
 			final Enumeration< AbstractButton > enumeration = buttonGroup.getElements();
@@ -778,18 +774,19 @@ public class ConfigGuiBuilder implements ArgumentVisitor
 	public class ConfigPanel extends JPanel
 	{
 
-		private static final long serialVersionUID = 1L;
+		/**
+		 * Map of StyleElements that are created by this builder. The keys are
+		 * the corresponding argument keys.
+		 */
+		final Map< String, StyleElement > elements = new LinkedHashMap<>();
 
-		private final DoubleConsumer tresholdUpdater = null;
+		private JRadioButton rdbtn;
+
+		private static final long serialVersionUID = 1L;
 
 		public void refresh()
 		{
-			elements.forEach( e -> e.update() );
-		}
-
-		public DoubleConsumer getThresholdUpdater()
-		{
-			return tresholdUpdater;
+			elements.values().forEach( e -> e.update() );
 		}
 	}
 }
