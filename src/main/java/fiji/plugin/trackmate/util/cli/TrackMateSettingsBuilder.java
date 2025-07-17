@@ -77,22 +77,6 @@ public class TrackMateSettingsBuilder
 	}
 
 	/**
-	 * Serializes the parameters stored in a TrackMate map to a CLI config
-	 * object. The parameters in the map unknown to the CLI config are simply
-	 * ignored.
-	 *
-	 * @param settings
-	 *            the map to read parameters from.
-	 * @param cli
-	 *            the CLI config to write parameters into.
-	 */
-	public static final void fromTrackMateSettings( final Map< String, Object > settings, final CLIConfigurator cli )
-	{
-		fromMap( settings, cli.getCommandArg() );
-		fromTrackMateSettings( settings, ( Configurator ) cli );
-	}
-
-	/**
 	 * Serializes the parameters stored in a TrackMate map to a config object.
 	 * The parameters in the map unknown to the config are simply ignored.
 	 *
@@ -103,6 +87,8 @@ public class TrackMateSettingsBuilder
 	 */
 	public static final void fromTrackMateSettings( final Map< String, Object > settings, final Configurator config )
 	{
+		if ( config instanceof CLIConfigurator )
+			fromMap( settings, ( ( CLIConfigurator ) config ).getCommandArg() );
 		config.getArguments().forEach( arg -> fromMap( settings, arg ) );
 		config.getSelectables().forEach( selectable -> fromMap( settings, selectable ) );
 	}
