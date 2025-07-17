@@ -95,8 +95,16 @@ public class ChooseDetectorDescriptor extends WizardPanelDescriptor
 		final Map< String, Object > currentSettings = trackmate.getSettings().detectorSettings;
 		if ( factory.checkSettings( currentSettings ) != null )
 		{
-			final Map< String, Object > defaultSettings = factory.getDefaultSettings();
-			trackmate.getSettings().detectorSettings = defaultSettings;
+			final String error = factory.checkSettings( currentSettings );
+			if ( error == null )
+			{
+				trackmate.getSettings().detectorSettings = currentSettings;
+			}
+			else
+			{
+				final Map< String, Object > defaultSettings = factory.getDefaultSettings();
+				trackmate.getSettings().detectorSettings = defaultSettings;
+			}
 		}
 
 		// Settings persistence.
