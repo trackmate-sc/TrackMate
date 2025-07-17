@@ -94,8 +94,8 @@ public class TrackMateSettingsBuilder
 	}
 
 	/**
-	 * Returns a map containing the default settings of the specified CLI
-	 * configurator. The map will contain the keys of all arguments and
+	 * Returns a map containing the default settings of the specified
+	 * Configurator. The map will contain the keys of all arguments and
 	 * selectable arguments, and their default values.
 	 *
 	 * @param config
@@ -105,6 +105,14 @@ public class TrackMateSettingsBuilder
 	public static final Map< String, Object > getDefaultSettings( final Configurator config )
     {
 		final Map< String, Object > settings = new LinkedHashMap< String, Object >();
+
+		if ( config instanceof CLIConfigurator )
+		{
+			final Argument< ?, ? > commandArg = ( ( CLIConfigurator ) config ).getCommandArg();
+			if ( commandArg.getKey() != null && commandArg.hasDefaultValue() )
+				settings.put( commandArg.getKey(), commandArg.getDefaultValue() );
+		}
+
 		config.arguments.forEach( arg -> {
 			final String key = arg.getKey();
 			if ( key == null )
