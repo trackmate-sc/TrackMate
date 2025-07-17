@@ -24,6 +24,8 @@ package fiji.plugin.trackmate.detection;
 import java.lang.reflect.Constructor;
 import java.util.Map;
 
+import org.jdom2.Attribute;
+import org.jdom2.DataConversionException;
 import org.jdom2.Element;
 
 import fiji.plugin.trackmate.Model;
@@ -83,15 +85,65 @@ public interface SpotDetectorFactoryBase< T extends RealType< T > & NativeType< 
 	 */
 	public default String unmarshal( final Element element, final Map< String, Object > settings )
 	{
+		// We get the class of the attribute to unmarshal from the default map.
+		final Map< String, Object > defaultSettings = getDefaultSettings();
+
 		settings.clear();
 		for ( final Object key : element.getAttributes() )
 		{
 			final String keyString = ( ( org.jdom2.Attribute ) key ).getName();
-			final String value = element.getAttributeValue( keyString );
-			if ( null == value )
-				return "No value set for parameter " + keyString;
+			if ( DetectorKeys.XML_ATTRIBUTE_DETECTOR_NAME.equals( keyString ) )
+			{
+				// This is the name of the detector, we skip it.
+				continue;
+			}
 
-			settings.put( keyString, value );
+			if ( !defaultSettings.containsKey( keyString ) )
+				return "When unmarshalling: Unknown parameter " + keyString + " in factory " + getName();
+
+			final Attribute att = element.getAttribute( keyString );
+			if ( null == att )
+				return "When unmarshalling: No value set for parameter " + keyString + " in factory " + getName();
+
+			// Expected class
+			final Class< ? > klass = defaultSettings.get( keyString ).getClass();
+			try
+			{
+				final Object value;
+				if ( klass == String.class )
+				{
+					value = att.getValue();
+				}
+				else if ( klass == Integer.class )
+				{
+					value = att.getIntValue();
+				}
+				else if ( klass == Double.class )
+				{
+					value = att.getDoubleValue();
+				}
+				else if ( klass == Float.class )
+				{
+					value = att.getFloatValue();
+				}
+				else if ( klass == Long.class )
+				{
+					value = att.getLongValue();
+				}
+				else if ( klass == Boolean.class )
+				{
+					value = att.getBooleanValue();
+				}
+				else
+				{
+					return "When unmarshalling: Unsupported type " + klass.getSimpleName() + " for parameter " + keyString + " in factory " + getName();
+				}
+				settings.put( keyString, value );
+			}
+			catch ( final DataConversionException e )
+			{
+				return "When unmarshalling: Cannot parse value '" + att.getValue() + "' for parameter " + keyString + " in factory " + getName() + ".";
+			}
 		}
 		return null;
 	}
