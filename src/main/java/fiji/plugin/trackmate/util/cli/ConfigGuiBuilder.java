@@ -668,16 +668,12 @@ public class ConfigGuiBuilder implements ArgumentVisitor
 		panel.add( new JLabel(), c );
 	}
 
-	public static ConfigPanel build( final CLIConfigurator cli )
-	{
-		final ConfigGuiBuilder builder = createBuilder( cli );
-		cli.getCommandArg().accept( builder );
-		return build( cli, builder );
-	}
-
 	public static ConfigPanel build( final Configurator config )
 	{
 		final ConfigGuiBuilder builder = createBuilder( config );
+		// Could we make something more elegant than this?
+		if ( config instanceof CLIConfigurator )
+			( ( CLIConfigurator ) config ).getCommandArg().accept( builder );
 		return build( config, builder );
 	}
 

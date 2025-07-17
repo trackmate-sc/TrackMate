@@ -60,21 +60,6 @@ public class TrackMateSettingsBuilder
 	}
 
 	/**
-	 * Serializes the specified CLI config and extra parameters to a TrackMate
-	 * settings map.
-	 *
-	 * @param settings
-	 *            the map to serialize settings to.
-	 * @param cli
-	 *            the CLI config.
-	 */
-	public static void toTrackMateSettings( final Map< String, Object > settings, final CLIConfigurator cli )
-	{
-		toMap( cli.getCommandArg(), settings );
-		toTrackMateSettings( settings, ( Configurator ) cli );
-	}
-
-	/**
 	 * Serializes the specified config and extra parameters to a TrackMate
 	 * settings map.
 	 *
@@ -85,10 +70,11 @@ public class TrackMateSettingsBuilder
 	 */
 	public static void toTrackMateSettings( final Map< String, Object > settings, final Configurator config )
 	{
+		if ( config instanceof CLIConfigurator )
+			toMap( ( ( CLIConfigurator ) config ).getCommandArg(), settings );
 		config.getArguments().forEach( arg -> toMap( arg, settings ) );
 		config.getSelectables().forEach( selectable -> toMap( selectable, settings ) );
 	}
-
 
 	/**
 	 * Serializes the parameters stored in a TrackMate map to a CLI config
