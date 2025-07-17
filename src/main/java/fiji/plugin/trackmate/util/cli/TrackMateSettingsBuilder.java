@@ -119,7 +119,7 @@ public class TrackMateSettingsBuilder
 				return;
 
 			if ( !arg.hasDefaultValue() )
-				throw new IllegalArgumentException( "The argument '" + key + "' in the configurator " + config + " has no default value, which is required." );
+				throw new IllegalArgumentException( "The argument '" + key + "' in the configurator " + config.getClass().getSimpleName() + " has no default value, which is required." );
 			settings.put( key, arg.getDefaultValue() );
 		} );
 		config.selectables.forEach( sel -> {

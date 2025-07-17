@@ -973,8 +973,8 @@ public abstract class Configurator
 		{
 			final int sel = choices.indexOf( choice );
 			if ( sel < 0 )
-				throw new IllegalArgumentException( "Unknown selection '" + choices + "' for parameter '"
-						+ name + "'. Must be one of " + StringUtils.join( choices, ", " ) + "." );
+				throw new IllegalArgumentException( "Unknown selection '" + choice + "' for parameter '"
+						+ name + "'. Must be one of: [ " + StringUtils.join( choices, ", " ) + " ]." );
 			this.selected = sel;
 		}
 
