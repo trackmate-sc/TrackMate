@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -52,8 +52,8 @@ import fiji.plugin.trackmate.detection.ThresholdDetectorFactory;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.util.DetectionPreview;
-import fiji.plugin.trackmate.util.Threads;
 import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.util.Threads;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imglib2.Interval;
@@ -65,7 +65,7 @@ import net.imglib2.view.Views;
 
 /**
  * Configuration panel for spot detectors based on thresholding operations.
- * 
+ *
  * @author Jean-Yves Tinevez, 2020
  */
 public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
@@ -126,10 +126,10 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 
 		setPreferredSize( new Dimension( 300, 511 ) );
 		final GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 47 };
+		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 150 };
 		gridBagLayout.columnWidths = new int[] { 0, 0, 20 };
 		gridBagLayout.columnWeights = new double[] { 0.0, 1.0, 0.0 };
-		gridBagLayout.rowWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, };
+		gridBagLayout.rowWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.1 };
 		setLayout( gridBagLayout );
 
 		final JLabel jLabelDetectorName = new JLabel( detectorName, JLabel.CENTER );
@@ -320,7 +320,7 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 	 * configuration panels configures. The new instance will in turn be used
 	 * for the preview mechanism. Therefore, classes extending this class are
 	 * advised to return a suitable implementation of the factory.
-	 * 
+	 *
 	 * @return a new {@link SpotDetectorFactory}.
 	 */
 	@SuppressWarnings( "rawtypes" )
