@@ -8,7 +8,10 @@ import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.util.cli.Configurator;
 import fiji.plugin.trackmate.util.cli.GenericDetectionConfigurationPanel;
 import fiji.plugin.trackmate.util.cli.TrackMateSettingsBuilder;
+import fiji.plugin.trackmate.visualization.ViewUtils;
 import ij.ImagePlus;
+import net.imagej.ImgPlus;
+import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 
@@ -29,11 +32,8 @@ public interface SpotDetectorFactoryGenericConfig< T extends RealType< T > & Nat
 {
 
 	/**
-	 * Creates a new configurator for this detector factory, which can be used
-	 * to configure the detector parameters.
-	 * <p>
-	 * Warning: the input image may be <code>null</code>. This is useful to
-	 * generate the map of default settings.
+	 * Creates a new configurator for this detector factory, based on the
+	 * specified image.
 	 *
 	 * @param imp
 	 *            the input image to configure the detector for.
@@ -41,10 +41,39 @@ public interface SpotDetectorFactoryGenericConfig< T extends RealType< T > & Nat
 	 */
 	public C getConfigurator( ImagePlus imp );
 
+	/**
+	 * Creates a new configurator for this detector factory, based on the
+	 * specified image.
+	 *
+	 * @param img
+	 *            the input image to configure the detector for.
+	 * @return a new {@link Configurator}.
+	 */
+	public default C getConfigurator( final ImgPlus< ? > img )
+	{
+		@SuppressWarnings( { "unchecked", "rawtypes" } )
+		final ImagePlus imp = ImageJFunctions.wrap( ( ImgPlus ) img, "wrapped" );
+		return getConfigurator( imp );
+	}
+
+	/**
+	 * Creates a new configurator for this detector factory.
+	 *
+	 * @return a new {@link Configurator}.
+	 */
+	public default C getConfigurator()
+	{
+		final int  nZ = 2; // Force 3D
+		final int nT = 2; // Force timelapse
+		final double[] calibration = new double[] { 1., 1., 1. };
+		final ImagePlus imp = ViewUtils.makeEmptyImagePlus( 32, 32, nZ, nT, calibration );
+		return getConfigurator( imp );
+	}
+
 	@Override
 	public default Map< String, Object > getDefaultSettings()
 	{
-		return TrackMateSettingsBuilder.getDefaultSettings( getConfigurator( null ) );
+		return TrackMateSettingsBuilder.getDefaultSettings( getConfigurator() );
 	}
 
 	@Override
