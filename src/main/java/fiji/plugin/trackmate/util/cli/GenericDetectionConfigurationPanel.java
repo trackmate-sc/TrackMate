@@ -166,11 +166,18 @@ public class GenericDetectionConfigurationPanel extends ConfigurationPanel
 		try
 		{
 			TrackMateSettingsBuilder.fromTrackMateSettings( settings, config );
-			mainPanel.refresh();
+		}
+		catch ( final IllegalArgumentException e )
+		{
+			// Incompatible settings, we keep the defaults.
 		}
 		catch ( final Exception e )
 		{
 			e.printStackTrace();
+		}
+		finally
+		{
+			mainPanel.refresh();
 		}
 	}
 
