@@ -25,12 +25,16 @@ import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
 import static fiji.plugin.trackmate.gui.Fonts.FONT;
 
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
@@ -135,15 +139,66 @@ public class ModuleChooserPanel< K extends TrackMateModule > extends JPanel
 
 		private static final long serialVersionUID = 1L;
 
+		private final int fixedHeight;
+
+		public MyListCellRenderer()
+		{
+			final JLabel label = new JLabel( "Sample Text" );
+			this.fixedHeight = label.getPreferredSize().height;
+		}
+
 		@Override
 		public Component getListCellRendererComponent( final JList< ? > list, final Object value, final int index, final boolean isSelected, final boolean cellHasFocus )
 		{
 			final JLabel lbl = ( JLabel ) super.getListCellRendererComponent( list, value, index, isSelected, cellHasFocus );
 			final String key = ( String ) value;
 			final K factory = provider.getFactory( key );
-			lbl.setIcon( factory.getIcon() );
+			final ImageIcon icon = factory.getIcon();
+			if ( icon != null )
+				lbl.setIcon( new CroppedIcon( icon, fixedHeight ) );
 			lbl.setText( factory.getName() );
+			lbl.setPreferredSize( new Dimension( getPreferredSize().width, fixedHeight ) );
 			return lbl;
+		}
+	}
+
+	/**
+	 * Displays the icon in the center of the label, cropped to a fixed height.
+	 */
+	private static class CroppedIcon implements Icon
+	{
+		private final Icon icon;
+
+		private final int height;
+
+		public CroppedIcon( final Icon icon, final int height )
+		{
+			this.icon = icon;
+			this.height = height;
+		}
+
+		@Override
+		public void paintIcon( final Component c, final Graphics g, final int x, final int y )
+		{
+			final int iconWidth = icon.getIconWidth();
+			final int iconHeight = icon.getIconHeight();
+
+			// With 1 pixel padding top and bottom
+			final int cropY = ( iconHeight - height + 2 ) / 2;
+			final int cropHeight = height - 1;
+			g.drawImage( ( ( ImageIcon ) icon ).getImage(), x, y + 1, x + iconWidth, y + cropHeight, 0, cropY, iconWidth, cropY + cropHeight, null );
+		}
+
+		@Override
+		public int getIconWidth()
+		{
+			return icon.getIconWidth();
+		}
+
+		@Override
+		public int getIconHeight()
+		{
+			return height;
 		}
 	}
 }
