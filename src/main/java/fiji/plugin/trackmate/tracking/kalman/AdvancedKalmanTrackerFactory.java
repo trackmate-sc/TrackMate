@@ -38,6 +38,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.ImageIcon;
+
 import org.jdom2.Element;
 import org.scijava.plugin.Plugin;
 
@@ -102,6 +104,12 @@ public class AdvancedKalmanTrackerFactory extends SegmentTrackerFactory
 	public String getName()
 	{
 		return THIS_NAME;
+	}
+
+	@Override
+	public ImageIcon getIcon()
+	{
+		return KalmanTrackerFactory.ICON;
 	}
 
 	@Override

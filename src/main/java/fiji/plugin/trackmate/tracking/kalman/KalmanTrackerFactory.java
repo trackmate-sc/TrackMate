@@ -37,6 +37,7 @@ import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.components.tracker.KalmanTrackerConfigPanel;
 import fiji.plugin.trackmate.tracking.SpotTracker;
@@ -80,6 +81,8 @@ public class KalmanTrackerFactory implements SpotTrackerFactory
 
 	public static final String NAME = "Kalman tracker";
 
+	public static final ImageIcon ICON = new ImageIcon( Icons.class.getResource( "images/KalmanTracker-icon-64px.png" ) );
+
 	@Override
 	public String getInfoText()
 	{
@@ -89,7 +92,7 @@ public class KalmanTrackerFactory implements SpotTrackerFactory
 	@Override
 	public ImageIcon getIcon()
 	{
-		return null;
+		return ICON;
 	}
 
 	@Override
