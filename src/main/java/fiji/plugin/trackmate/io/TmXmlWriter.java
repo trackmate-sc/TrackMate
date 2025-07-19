@@ -369,9 +369,9 @@ public class TmXmlWriter
 		// Marshal the rest.
 		if ( null != settings.trackerFactory )
 		{
-			final boolean ok = settings.trackerFactory.marshall( settings.trackerSettings, el );
-			if ( !ok )
-				logger.error( settings.trackerFactory.getErrorMessage() );
+			final String error = settings.trackerFactory.marshal( settings.trackerSettings, el );
+			if ( error != null )
+				logger.error( error );
 			else
 				logger.log( "  Added tracker settings.\n" );
 		}

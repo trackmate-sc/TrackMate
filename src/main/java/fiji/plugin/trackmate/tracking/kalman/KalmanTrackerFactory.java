@@ -21,23 +21,18 @@
  */
 package fiji.plugin.trackmate.tracking.kalman;
 
-import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
-import static fiji.plugin.trackmate.io.IOUtils.readIntegerAttribute;
-import static fiji.plugin.trackmate.io.IOUtils.writeAttribute;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_GAP_CLOSING_MAX_FRAME_GAP;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_KALMAN_SEARCH_RADIUS;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_FRAME_GAP;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_SEARCH_RADIUS;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
-import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.ImageIcon;
 
-import org.jdom2.Element;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
@@ -85,8 +80,6 @@ public class KalmanTrackerFactory implements SpotTrackerFactory
 
 	public static final String NAME = "Kalman tracker";
 
-	private String errorMessage;
-
 	@Override
 	public String getInfoText()
 	{
@@ -112,6 +105,12 @@ public class KalmanTrackerFactory implements SpotTrackerFactory
 	}
 
 	@Override
+	public String getUrl()
+	{
+		return DOC_URL;
+	}
+
+	@Override
 	public SpotTracker create( final SpotCollection spots, final Map< String, Object > settings )
 	{
 		final double maxSearchRadius = ( Double ) settings.get( KEY_KALMAN_SEARCH_RADIUS );
@@ -128,34 +127,11 @@ public class KalmanTrackerFactory implements SpotTrackerFactory
 	}
 
 	@Override
-	public boolean marshall( final Map< String, Object > settings, final Element element )
-	{
-		boolean ok = true;
-		final StringBuilder str = new StringBuilder();
-
-		ok = ok & writeAttribute( settings, element, KEY_LINKING_MAX_DISTANCE, Double.class, str );
-		ok = ok & writeAttribute( settings, element, KEY_KALMAN_SEARCH_RADIUS, Double.class, str );
-		ok = ok & writeAttribute( settings, element, KEY_GAP_CLOSING_MAX_FRAME_GAP, Integer.class, str );
-		return ok;
-	}
-
-	@Override
-	public boolean unmarshall( final Element element, final Map< String, Object > settings )
-	{
-		settings.clear();
-		final StringBuilder errorHolder = new StringBuilder();
-		boolean ok = true;
-
-		ok = ok & readDoubleAttribute( element, settings, KEY_LINKING_MAX_DISTANCE, errorHolder );
-		ok = ok & readDoubleAttribute( element, settings, KEY_KALMAN_SEARCH_RADIUS, errorHolder );
-		ok = ok & readIntegerAttribute( element, settings, KEY_GAP_CLOSING_MAX_FRAME_GAP, errorHolder );
-		return ok;
-	}
-
-	@Override
 	public String toString( final Map< String, Object > settings )
 	{
-		if ( !checkSettingsValidity( settings ) ) { return errorMessage; }
+		final String error = checkSettings( settings );
+		if ( error != null )
+			return error;
 
 		final double maxSearchRadius = ( Double ) settings.get( KEY_KALMAN_SEARCH_RADIUS );
 		final int maxFrameGap = ( Integer ) settings.get( KEY_GAP_CLOSING_MAX_FRAME_GAP );
@@ -177,46 +153,5 @@ public class KalmanTrackerFactory implements SpotTrackerFactory
 		sm.put( KEY_LINKING_MAX_DISTANCE, DEFAULT_LINKING_MAX_DISTANCE );
 		sm.put( KEY_GAP_CLOSING_MAX_FRAME_GAP, DEFAULT_GAP_CLOSING_MAX_FRAME_GAP );
 		return sm;
-	}
-
-	@Override
-	public boolean checkSettingsValidity( final Map< String, Object > settings )
-	{
-		if ( null == settings )
-		{
-			errorMessage = "Settings map is null.\n";
-			return false;
-		}
-
-		boolean ok = true;
-		final StringBuilder str = new StringBuilder();
-
-		ok = ok & checkParameter( settings, KEY_LINKING_MAX_DISTANCE, Double.class, str );
-		ok = ok & checkParameter( settings, KEY_KALMAN_SEARCH_RADIUS, Double.class, str );
-		ok = ok & checkParameter( settings, KEY_GAP_CLOSING_MAX_FRAME_GAP, Integer.class, str );
-
-		if ( !ok )
-		{
-			errorMessage = str.toString();
-		}
-		return ok;
-	}
-
-	@Override
-	public String getErrorMessage()
-	{
-		return errorMessage;
-	}
-
-	@Override
-	public KalmanTrackerFactory copy()
-	{
-		return new KalmanTrackerFactory();
-	}
-
-	@Override
-	public String getUrl()
-	{
-		return DOC_URL;
 	}
 }

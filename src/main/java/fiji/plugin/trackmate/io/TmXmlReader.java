@@ -797,7 +797,7 @@ public class TmXmlReader
 
 		final Map< String, Object > ds = new HashMap<>();
 		final String errorMessage = factory.unmarshal( element, ds );
-		ok = errorMessage != null;
+		ok = ( errorMessage == null );
 
 		settings.detectorSettings = ds;
 		if ( !ok )
@@ -857,16 +857,17 @@ public class TmXmlReader
 		settings.trackerFactory = factory;
 
 		// All the hard work is delegated to the factory.
-		final boolean lOk = factory.unmarshall( element, ds );
-		if ( lOk )
+		final String error = factory.unmarshal( element, ds );
+		if ( error == null )
 		{
 			settings.trackerSettings = ds;
 		}
 		else
 		{
-			logger.error( "Problem reading the tracker settings:\n" + factory.getErrorMessage() );
+			logger.error( "Problem reading the tracker settings:\n" + error );
 			logger.error( "Substituting default tracker settings.\n" );
 			settings.trackerSettings = factory.getDefaultSettings();
+			this.ok = false;
 		}
 	}
 

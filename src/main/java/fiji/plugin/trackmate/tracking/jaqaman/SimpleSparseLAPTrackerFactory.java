@@ -70,12 +70,6 @@ public class SimpleSparseLAPTrackerFactory extends SparseLAPTrackerFactory
 	}
 
 	@Override
-	public SimpleSparseLAPTrackerFactory copy()
-	{
-		return new SimpleSparseLAPTrackerFactory();
-	}
-
-	@Override
 	public String getUrl()
 	{
 		return DOC_URL;

@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -48,8 +48,6 @@ import static fiji.plugin.trackmate.tracking.jaqaman.LAPUtils.XML_ELEMENT_NAME_S
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.ImageIcon;
-
 import org.jdom2.Element;
 
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
@@ -60,21 +58,13 @@ import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 public abstract class SegmentTrackerFactory implements SpotTrackerFactory
 {
 
-	protected String errorMessage;
-
-	@Override
-	public ImageIcon getIcon()
-	{
-		return null;
-	}
-
 	/**
 	 * Marshall into the {@link Element} the settings in the {@link Map} that
 	 * relate to segment linking: gap-closing, merging segments, splitting
 	 * segments.
 	 */
 	@Override
-	public boolean marshall( final Map< String, Object > settings, final Element element )
+	public String marshal( final Map< String, Object > settings, final Element element )
 	{
 		boolean ok = true;
 		final StringBuilder str = new StringBuilder();
@@ -121,7 +111,9 @@ public abstract class SegmentTrackerFactory implements SpotTrackerFactory
 		ok = ok & writeAttribute( settings, element, KEY_ALTERNATIVE_LINKING_COST_FACTOR, Double.class, str );
 		ok = ok & writeAttribute( settings, element, KEY_BLOCKING_VALUE, Double.class, str );
 
-		return ok;
+		if ( !ok )
+			return str.toString();
+		return null;
 	}
 
 	public boolean unmarshallSegment( final Element element, final Map< String, Object > settings, final StringBuilder errorHolder )
@@ -135,11 +127,9 @@ public abstract class SegmentTrackerFactory implements SpotTrackerFactory
 		{
 			errorHolder.append( "Could not find the " + XML_ELEMENT_NAME_GAP_CLOSING + " element in XML.\n" );
 			ok = false;
-
 		}
 		else
 		{
-
 			ok = ok & readBooleanAttribute( gapClosingElement, settings, KEY_ALLOW_GAP_CLOSING, errorHolder );
 			ok = ok & readIntegerAttribute( gapClosingElement, settings, KEY_GAP_CLOSING_MAX_FRAME_GAP, errorHolder );
 			ok = ok & readDoubleAttribute( gapClosingElement, settings, KEY_GAP_CLOSING_MAX_DISTANCE, errorHolder );
@@ -159,11 +149,9 @@ public abstract class SegmentTrackerFactory implements SpotTrackerFactory
 		{
 			errorHolder.append( "Could not found the " + XML_ELEMENT_NAME_SPLITTING + " element in XML.\n" );
 			ok = false;
-
 		}
 		else
 		{
-
 			ok = ok & readBooleanAttribute( trackSplittingElement, settings, KEY_ALLOW_TRACK_SPLITTING, errorHolder );
 			ok = ok & readDoubleAttribute( trackSplittingElement, settings, KEY_SPLITTING_MAX_DISTANCE, errorHolder );
 			// feature penalties
@@ -182,7 +170,6 @@ public abstract class SegmentTrackerFactory implements SpotTrackerFactory
 		{
 			errorHolder.append( "Could not found the " + XML_ELEMENT_NAME_MERGING + " element in XML.\n" );
 			ok = false;
-
 		}
 		else
 		{
@@ -207,33 +194,29 @@ public abstract class SegmentTrackerFactory implements SpotTrackerFactory
 	}
 
 	@Override
-	public boolean unmarshall( final Element element, final Map< String, Object > settings )
+	public String unmarshal( final Element element, final Map< String, Object > settings )
 	{
 		final StringBuilder errorHolder = new StringBuilder();
-		boolean ok = unmarshallSegment( element, settings, errorHolder );
-		if ( !checkSettingsValidity( settings ) )
-		{
-			ok = false;
-			errorHolder.append( errorMessage ); // append validity check message
-		}
-
+		final boolean ok = unmarshallSegment( element, settings, errorHolder );
 		if ( !ok )
-		{
-			errorMessage = errorHolder.toString();
-		}
-		return ok;
+			return errorHolder.toString();
 
+		final String error = checkSettings( settings );
+		if ( null != error )
+			return error;
+
+		return null;
 	}
 
 	@Override
 	@SuppressWarnings( "unchecked" )
 	public String toString( final Map< String, Object > sm )
 	{
-		if ( !checkSettingsValidity( sm ) )
-			return errorMessage;
+		final String error = checkSettings( sm );
+		if ( null != error )
+			return error;
 
 		final StringBuilder str = new StringBuilder();
-
 		if ( ( Boolean ) sm.get( KEY_ALLOW_GAP_CLOSING ) )
 		{
 			str.append( "  Gap-closing conditions:\n" );
@@ -278,27 +261,16 @@ public abstract class SegmentTrackerFactory implements SpotTrackerFactory
 	}
 
 	@Override
-	public boolean checkSettingsValidity( final Map< String, Object > settings )
+	public String checkSettings( final Map< String, Object > settings )
 	{
 		if ( null == settings )
-		{
-			errorMessage = "Settings map is null.\n";
-			return false;
-		}
+			return "Settings map is null.\n";
 
 		final StringBuilder str = new StringBuilder();
 		final boolean ok = LAPUtils.checkSettingsValidity( settings, str, false );
 		if ( !ok )
-		{
-			errorMessage = str.toString();
-		}
-		return ok;
-	}
+			return str.toString();
 
-	@Override
-	public String getErrorMessage()
-	{
-		return errorMessage;
+		return null;
 	}
-
 }

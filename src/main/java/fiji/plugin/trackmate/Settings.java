@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -270,7 +270,7 @@ public class Settings
 	 * copied, as well as filters, etc. The exception are analyzers: all the
 	 * analyzers that are found at runtime are added, regardless of the content
 	 * of the instance to copy.
-	 * 
+	 *
 	 * @param newImp
 	 *            the image to copy the settings for.
 	 * @return a new settings object.
@@ -507,9 +507,10 @@ public class Settings
 			errorMessage = "The tracker factory is null.\n";
 			return false;
 		}
-		if ( !trackerFactory.checkSettingsValidity( trackerSettings ) )
+		final String error = trackerFactory.checkSettings( trackerSettings );
+		if ( error != null )
 		{
-			errorMessage = "The tracker has invalid input:\n" + trackerFactory.getErrorMessage();
+			errorMessage = "The tracker has invalid input:\n" + error;
 			return false;
 		}
 		return true;

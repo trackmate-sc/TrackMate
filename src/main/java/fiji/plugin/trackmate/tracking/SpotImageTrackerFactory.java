@@ -72,7 +72,4 @@ public interface SpotImageTrackerFactory extends SpotTrackerFactory
 	{
 		throw new UnsupportedOperationException( "Operation not supported for spot image trackers." );
 	}
-
-	@Override
-	public SpotImageTrackerFactory copy();
 }
