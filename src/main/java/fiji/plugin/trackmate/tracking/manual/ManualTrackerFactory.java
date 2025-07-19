@@ -23,11 +23,14 @@ package fiji.plugin.trackmate.tracking.manual;
 
 import java.util.Map;
 
+import javax.swing.ImageIcon;
+
 import org.scijava.Priority;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.detection.ManualDetectorFactory;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
@@ -63,6 +66,12 @@ public class ManualTrackerFactory implements SpotTrackerFactory
 	}
 
 	@Override
+	public ImageIcon getIcon()
+	{
+		return ManualDetectorFactory.ICON;
+	}
+
+	@Override
 	public SpotTracker create( final SpotCollection spots, final Map< String, Object > settings )
 	{
 		return null;
@@ -70,6 +79,12 @@ public class ManualTrackerFactory implements SpotTrackerFactory
 
 	@Override
 	public ConfigurationPanel getTrackerConfigurationPanel( final Model model )
+	{
+		return null;
+	}
+
+	@Override
+	public String checkSettings( final Map< String, Object > settings )
 	{
 		return null;
 	}
