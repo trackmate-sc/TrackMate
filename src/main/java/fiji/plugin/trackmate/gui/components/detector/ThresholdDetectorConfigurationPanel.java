@@ -95,7 +95,7 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 			final Settings settings,
 			final Model model )
 	{
-		this( settings, model, ThresholdDetectorFactory.INFO_TEXT, ThresholdDetectorFactory.NAME );
+		this( settings, model, ThresholdDetectorFactory.INFO_TEXT, ThresholdDetectorFactory.NAME, ThresholdDetectorFactory.URL_DOC );
 	}
 
 	/**
@@ -119,7 +119,8 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 			final Settings settings,
 			final Model model,
 			final String infoText,
-			final String detectorName )
+			final String detectorName,
+			final String docUrl )
 	{
 		this.settings = settings;
 		final ImagePlus imp = settings.imp;
@@ -132,10 +133,10 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 		gridBagLayout.rowWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.1 };
 		setLayout( gridBagLayout );
 
-		final JLabel jLabelDetectorName = new JLabel( detectorName, JLabel.CENTER );
+		final JLabel jLabelDetectorName = new JLabel( detectorName, ThresholdDetectorFactory.ICON, JLabel.CENTER );
 		jLabelDetectorName.setFont( BIG_FONT );
 		final GridBagConstraints gbclblSegmenterName = new GridBagConstraints();
-		gbclblSegmenterName.anchor = GridBagConstraints.NORTHWEST;
+		gbclblSegmenterName.anchor = GridBagConstraints.CENTER;
 		gbclblSegmenterName.insets = new Insets( 5, 5, 5, 5 );
 		gbclblSegmenterName.gridwidth = 3;
 		gbclblSegmenterName.gridx = 0;
@@ -149,7 +150,13 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 		gbcLblHelpText.gridwidth = 3;
 		gbcLblHelpText.gridx = 0;
 		gbcLblHelpText.gridy = 1;
-		this.add( GuiUtils.textInScrollPanel( GuiUtils.infoDisplay( infoText ) ), gbcLblHelpText );
+		this.add( GuiUtils.textInScrollPanel( GuiUtils.infoDisplay(
+				infoText.replace( "</html>", "")
+						+ "<p>Online documentation: <br/>"
+						+ "<a href='" + docUrl + "'>"
+						+ docUrl
+						+ "</a></html>"
+				) ), gbcLblHelpText );
 
 		final JLabel labelChannel = new JLabel( "1" );
 		labelChannel.setHorizontalAlignment( SwingConstants.CENTER );

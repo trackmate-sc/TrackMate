@@ -27,10 +27,13 @@ import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.ImageIcon;
+
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.components.detector.ThresholdDetectorConfigurationPanel;
 import fiji.plugin.trackmate.util.TMUtils;
@@ -69,6 +72,8 @@ public class ThresholdDetectorFactory< T extends RealType< T > & NativeType< T >
 			+ "</html>";
 
 	public static final String URL_DOC = "https://imagej.net/plugins/trackmate/detectors/trackmate-thresholding-detector";
+
+	public static final ImageIcon ICON = new ImageIcon( Icons.class.getResource( "images/LabelImageDetector-icon-64px.png" ) );
 
 	public static final String KEY_SIMPLIFY_CONTOURS = "SIMPLIFY_CONTOURS";
 
@@ -131,6 +136,12 @@ public class ThresholdDetectorFactory< T extends RealType< T > & NativeType< T >
 	public String getUrl()
 	{
 		return URL_DOC;
+	}
+
+	@Override
+	public ImageIcon getIcon()
+	{
+		return ICON;
 	}
 
 	@Override

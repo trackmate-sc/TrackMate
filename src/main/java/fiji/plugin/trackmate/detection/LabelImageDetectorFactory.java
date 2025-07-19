@@ -28,6 +28,8 @@ import static fiji.plugin.trackmate.detection.ThresholdDetectorFactory.KEY_SIMPL
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.ImageIcon;
+
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
@@ -42,7 +44,7 @@ import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 
 @Plugin( type = SpotDetectorFactory.class )
-public class LabelImageDetectorFactory< T extends RealType< T > & NativeType< T >> implements SpotDetectorFactory< T >
+public class LabelImageDetectorFactory< T extends RealType< T > & NativeType< T > > implements SpotDetectorFactory< T >
 {
 
 	/*
@@ -93,6 +95,21 @@ public class LabelImageDetectorFactory< T extends RealType< T > & NativeType< T 
 	}
 
 	@Override
+	public Map< String, Object > getDefaultSettings()
+	{
+		final Map< String, Object > lSettings = new HashMap<>();
+		lSettings.put( KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL );
+		lSettings.put( KEY_SIMPLIFY_CONTOURS, true );
+		return lSettings;
+	}
+
+	@Override
+	public ConfigurationPanel getDetectorConfigurationPanel( final Settings lSettings, final Model model )
+	{
+		return new LabelImageDetectorConfigurationPanel( lSettings, model );
+	}
+
+	@Override
 	public boolean has2Dsegmentation()
 	{
 		return true;
@@ -102,12 +119,6 @@ public class LabelImageDetectorFactory< T extends RealType< T > & NativeType< T 
 	public String getKey()
 	{
 		return DETECTOR_KEY;
-	}
-
-	@Override
-	public ConfigurationPanel getDetectorConfigurationPanel( final Settings lSettings, final Model model )
-	{
-		return new LabelImageDetectorConfigurationPanel( lSettings, model );
 	}
 
 	@Override
@@ -129,11 +140,9 @@ public class LabelImageDetectorFactory< T extends RealType< T > & NativeType< T 
 	}
 
 	@Override
-	public Map< String, Object > getDefaultSettings()
+	public ImageIcon getIcon()
 	{
-		final Map< String, Object > lSettings = new HashMap<>();
-		lSettings.put( KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL );
-		lSettings.put( KEY_SIMPLIFY_CONTOURS, true );
-		return lSettings;
+		return ThresholdDetectorFactory.ICON;
 	}
+
 }

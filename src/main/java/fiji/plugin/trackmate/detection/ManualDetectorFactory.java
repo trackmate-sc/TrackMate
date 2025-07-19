@@ -29,11 +29,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.ImageIcon;
+
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.components.detector.ManualDetectorConfigurationPanel;
 import net.imagej.ImgPlus;
@@ -51,13 +54,22 @@ public class ManualDetectorFactory< T extends RealType< T > & NativeType< T > > 
 
 	public static final String INFO_TEXT = "<html>"
 			+ "Selecting this will skip the automatic detection phase, and jump directly <br>"
-			+ "to manual segmentation. A default spot size will be asked for. "
+			+ "to manual segmentation. A default spot size will be used. "
 			+ "</html>";
+
+	public static final ImageIcon ICON = new ImageIcon( Icons.class.getResource( "images/ManualEditor-icon-64px.png" ) );
 
 	@Override
 	public boolean has2Dsegmentation()
 	{
 		return true;
+	}
+
+
+	@Override
+	public ConfigurationPanel getDetectorConfigurationPanel( final Settings settings, final Model model )
+	{
+		return new ManualDetectorConfigurationPanel( INFO_TEXT, NAME );
 	}
 
 	@Override
@@ -111,12 +123,6 @@ public class ManualDetectorFactory< T extends RealType< T > & NativeType< T > > 
 	}
 
 	@Override
-	public ConfigurationPanel getDetectorConfigurationPanel( final Settings settings, final Model model )
-	{
-		return new ManualDetectorConfigurationPanel( INFO_TEXT, NAME );
-	}
-
-	@Override
 	public String getInfoText()
 	{
 		return INFO_TEXT;
@@ -126,6 +132,12 @@ public class ManualDetectorFactory< T extends RealType< T > & NativeType< T > > 
 	public String getName()
 	{
 		return NAME;
+	}
+
+	@Override
+	public ImageIcon getIcon()
+	{
+		return ICON;
 	}
 
 	@Override

@@ -34,9 +34,12 @@ import static fiji.plugin.trackmate.util.cli.CommonTrackMateArguments.addThresho
 
 import java.util.Map;
 
+import javax.swing.ImageIcon;
+
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.detection.LogDetectorFactory.LogDetectorCLI;
+import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.util.cli.Configurator;
 import fiji.plugin.trackmate.util.cli.HasInteractivePreview;
@@ -66,6 +69,8 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T > > imp
 			+ "other are suppressed. A quadratic fitting scheme allows to do <br>"
 			+ "sub-pixel localization. "
 			+ "</html>";
+
+	public static final ImageIcon ICON = new ImageIcon( Icons.class.getResource( "images/LoG-icon-64px.png" ) );
 
 	@Override
 	public SpotDetector< T > getDetector( final ImgPlus< T > img, final Map< String, Object > settings, final Interval interval, final int frame )
@@ -99,6 +104,12 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T > > imp
 	public String getName()
 	{
 		return NAME;
+	}
+
+	@Override
+	public ImageIcon getIcon()
+	{
+		return ICON;
 	}
 
 	@Override

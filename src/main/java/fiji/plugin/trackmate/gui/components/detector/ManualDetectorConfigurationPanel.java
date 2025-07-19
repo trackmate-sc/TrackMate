@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -40,11 +40,12 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
+import fiji.plugin.trackmate.detection.ManualDetectorFactory;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 
 /**
  * Configuration panel for spot detectors based on LoG detector.
- * 
+ *
  * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; 2010 - 2014
  */
 public class ManualDetectorConfigurationPanel extends ConfigurationPanel
@@ -62,7 +63,7 @@ public class ManualDetectorConfigurationPanel extends ConfigurationPanel
 
 	/**
 	 * Creates a new {@link ManualDetectorConfigurationPanel}.
-	 * 
+	 *
 	 * @param infoText
 	 *            the detector info text, will be displayed on the panel.
 	 * @param detectorName
@@ -88,7 +89,7 @@ public class ManualDetectorConfigurationPanel extends ConfigurationPanel
 		jLabelPreTitle.setText( "Settings for detector:" );
 		jLabelPreTitle.setFont( FONT );
 
-		final JLabel jLabelSegmenterName = new JLabel();
+		final JLabel jLabelSegmenterName = new JLabel( detectorName, ManualDetectorFactory.ICON, JLabel.CENTER );
 		final GridBagConstraints gbcLabelSegmenterName = new GridBagConstraints();
 		gbcLabelSegmenterName.anchor = GridBagConstraints.NORTH;
 		gbcLabelSegmenterName.fill = GridBagConstraints.HORIZONTAL;
@@ -98,7 +99,6 @@ public class ManualDetectorConfigurationPanel extends ConfigurationPanel
 		gbcLabelSegmenterName.gridy = 1;
 		this.add( jLabelSegmenterName, gbcLabelSegmenterName );
 		jLabelSegmenterName.setFont( BIG_FONT );
-		jLabelSegmenterName.setText( detectorName );
 
 		final JLabel jLabelHelpText = new JLabel();
 		final GridBagConstraints gbcLabelHelpText = new GridBagConstraints();
