@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -22,7 +22,6 @@
 package fiji.plugin.trackmate.gui.components.tracker;
 
 import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
-import static fiji.plugin.trackmate.gui.Fonts.FONT;
 import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
 import static fiji.plugin.trackmate.gui.Fonts.TEXTFIELD_DIMENSION;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_KALMAN_SEARCH_RADIUS;
@@ -41,7 +40,6 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_FEATURE_P
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_SPLITTING_MAX_DISTANCE;
 
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -61,6 +59,7 @@ import javax.swing.SwingConstants;
 
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.tracking.jaqaman.LAPUtils;
+import fiji.plugin.trackmate.tracking.kalman.KalmanTrackerFactory;
 
 public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 {
@@ -114,25 +113,15 @@ public class JPanelAdvancedKalmanTrackerSettingsMain extends javax.swing.JPanel
 		final DecimalFormat decimalFormat = new DecimalFormat( "0.0" );
 		final DecimalFormat integerFormat = new DecimalFormat( "0" );
 
-		this.setPreferredSize( new Dimension( 280, 1000 ) );
 		final GridBagLayout thisLayout = new GridBagLayout();
 		thisLayout.columnWidths = new int[] { 180, 50, 50 };
 		thisLayout.columnWeights = new double[] { 0.1, 0.8, 0.1 };
-		thisLayout.rowHeights = new int[] { 10, 10, 10, 15, 15, 15, 15, 15, 95, 10, 15, 15, 15, 15, 95, 10, 15, 15, 15, 15, 95, 15 };
-		thisLayout.rowWeights = new double[] { 0.0, 0.15, 0.1, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.1, 0.01, 0.01, 0.01, 0.01, 0.01, 0.1, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.6 };
+		thisLayout.rowHeights = new int[] { 0, 80, 0, 0, 0, 0, 0, 0, 95, 0, 0, 0, 0, 0, 95, 0, 0, 0, 0, 0, 95 };
 		this.setLayout( thisLayout );
 
-		final JLabel jLabel1 = new JLabel();
-		this.add( jLabel1, new GridBagConstraints( 0, 0, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets( 10, 10, 0, 0 ), 0, 0 ) );
-		jLabel1.setText( "Settings for tracker:" );
-		jLabel1.setFont( FONT );
-
-		final JLabel lblTrackerName = new JLabel();
+		final JLabel lblTrackerName = new JLabel( trackerName, KalmanTrackerFactory.ICON, SwingConstants.CENTER );
 		this.add( lblTrackerName, new GridBagConstraints( 0, 1, 2, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets( 0, 0, 0, 0 ), 0, 0 ) );
-		lblTrackerName.setHorizontalTextPosition( SwingConstants.CENTER );
-		lblTrackerName.setHorizontalAlignment( SwingConstants.CENTER );
 		lblTrackerName.setFont( BIG_FONT );
-		lblTrackerName.setText( trackerName );
 
 		int ycur = 2;
 		final JLabel lbl2 = new JLabel();

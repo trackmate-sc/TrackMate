@@ -120,38 +120,53 @@ public class WizardController
 
 	protected synchronized void previous()
 	{
-		final WizardPanelDescriptor current = sequence.current();
-		if ( current == null )
-			return;
+		try
+		{
+			final WizardPanelDescriptor current = sequence.current();
+			if ( current == null )
+				return;
 
-		current.aboutToHidePanel();
-		final WizardPanelDescriptor back = sequence.previous();
-		if ( null == back )
-			return;
+			current.aboutToHidePanel();
+			final WizardPanelDescriptor back = sequence.previous();
+			if ( null == back )
+				return;
 
-		back.targetPanel.setSize( current.targetPanel.getSize() );
-		back.aboutToDisplayPanel();
-		display( back, current, Direction.LEFT );
-		back.displayingPanel();
-		exec( back.getBackwardRunnable() );
+			back.targetPanel.setSize( current.targetPanel.getSize() );
+			back.aboutToDisplayPanel();
+			display( back, current, Direction.LEFT );
+			back.displayingPanel();
+			exec( back.getBackwardRunnable() );
+		}
+		catch ( final Exception e )
+		{
+			e.printStackTrace();
+		}
 	}
 
 	protected synchronized void next()
 	{
-		final WizardPanelDescriptor current = sequence.current();
-		if ( current == null )
-			return;
+		try
+		{
 
-		current.aboutToHidePanel();
-		final WizardPanelDescriptor next = sequence.next();
-		if ( null == next )
-			return;
+			final WizardPanelDescriptor current = sequence.current();
+			if ( current == null )
+				return;
 
-		next.targetPanel.setSize( current.targetPanel.getSize() );
-		next.aboutToDisplayPanel();
-		display( next, current, Direction.RIGHT );
-		next.displayingPanel();
-		exec( next.getForwardRunnable() );
+			current.aboutToHidePanel();
+			final WizardPanelDescriptor next = sequence.next();
+			if ( null == next )
+				return;
+
+			next.targetPanel.setSize( current.targetPanel.getSize() );
+			next.aboutToDisplayPanel();
+			display( next, current, Direction.RIGHT );
+			next.displayingPanel();
+			exec( next.getForwardRunnable() );
+		}
+		catch ( final Exception e )
+		{
+			e.printStackTrace();
+		}
 	}
 
 	protected void cancel()
@@ -176,8 +191,7 @@ public class WizardController
 			return;
 
 		final EverythingDisablerAndReenabler reenabler = new EverythingDisablerAndReenabler( wizardPanel.panelButtons, new Class[] { JLabel.class } );
-		Threads.run( "Wizard exec thread", () ->
-		{
+		Threads.run( "Wizard exec thread", () -> {
 			try
 			{
 				reenabler.disable();

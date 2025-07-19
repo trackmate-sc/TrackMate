@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -23,21 +23,26 @@ package fiji.plugin.trackmate.gui.components.tracker;
 
 import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
 import static fiji.plugin.trackmate.gui.Fonts.FONT;
-import static fiji.plugin.trackmate.gui.Fonts.TEXTFIELD_DIMENSION;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_FRAME_GAP;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_SEARCH_RADIUS;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
 
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.Box;
+import javax.swing.JEditorPane;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
+import fiji.plugin.trackmate.tracking.kalman.KalmanTrackerFactory;
 
 public class KalmanTrackerConfigPanel extends ConfigurationPanel
 {
@@ -51,79 +56,110 @@ public class KalmanTrackerConfigPanel extends ConfigurationPanel
 
 	public KalmanTrackerConfigPanel( final String trackerName, final String infoText, final String spaceUnits )
 	{
-		setLayout( null );
+		setLayout( new GridBagLayout() );
+		final GridBagConstraints gbc = new GridBagConstraints();
+		gbc.insets = new Insets( 5, 5, 5, 5 );
+		gbc.fill = GridBagConstraints.HORIZONTAL;
 
-		final JLabel lbl1 = new JLabel( "Settings for tracker:" );
-		lbl1.setBounds( 6, 6, 288, 16 );
-		lbl1.setFont( FONT );
-		add( lbl1 );
-
-		final JLabel lblTrackerName = new JLabel( trackerName );
+		// Tracker Name
+		final JLabel lblTrackerName = new JLabel( trackerName, KalmanTrackerFactory.ICON, SwingConstants.CENTER );
 		lblTrackerName.setFont( BIG_FONT );
-		lblTrackerName.setHorizontalAlignment( SwingConstants.CENTER );
-		lblTrackerName.setBounds( 6, 34, 288, 32 );
-		add( lblTrackerName );
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		gbc.gridwidth = 3;
+		gbc.anchor = GridBagConstraints.CENTER;
+		add( lblTrackerName, gbc );
 
-		final JLabel lblTrackerDescription = new JLabel( "<tracker description>" );
+		// Tracker Description
+		final JEditorPane lblTrackerDescription = GuiUtils.infoDisplay(
+				infoText.replace( "</html>", "" )
+						+ "<p>Online documentation: <br/>"
+						+ "<a href='" + KalmanTrackerFactory.DOC_URL + "'>"
+						+ KalmanTrackerFactory.DOC_URL
+						+ "</a></html>",
+				true );
 		lblTrackerDescription.setFont( FONT.deriveFont( Font.ITALIC ) );
-		lblTrackerDescription.setVerticalAlignment( SwingConstants.TOP );
-		lblTrackerDescription.setBounds( 6, 81, 288, 175 );
-		lblTrackerDescription.setText( infoText
-				.replace( "<br>", "" )
-				.replace( "<p>", "<p align=\"justify\">" )
-				.replace( "<html>", "<html><p align=\"justify\">" ) );
-		add( lblTrackerDescription );
+		gbc.gridy = 1;
+		gbc.gridwidth = 3;
+		gbc.weighty = 1.;
+		gbc.anchor = GridBagConstraints.NORTH;
+		add( lblTrackerDescription, gbc );
+
+		// Initial Search Radius Panel
+		gbc.gridy = 2;
+		gbc.gridwidth = 1;
+		gbc.weighty = 0.;
+		gbc.anchor = GridBagConstraints.WEST;
 
 		final JLabel lblInitSearchRadius = new JLabel( "Initial search radius:" );
 		lblInitSearchRadius.setFont( FONT );
-		lblInitSearchRadius.setBounds( 6, 348, 173, 16 );
-		add( lblInitSearchRadius );
-
-		final JLabel lblSearchRadius = new JLabel( "Search radius:" );
-		lblSearchRadius.setFont( FONT );
-		lblSearchRadius.setBounds( 6, 376, 173, 16 );
-		add( lblSearchRadius );
-
-		final JLabel lblMaxFrameGap = new JLabel( "Max frame gap:" );
-		lblMaxFrameGap.setFont( FONT );
-		lblMaxFrameGap.setBounds( 6, 404, 173, 16 );
-		add( lblMaxFrameGap );
+		gbc.gridx = 0;
+		add( lblInitSearchRadius, gbc );
 
 		tfInitSearchRadius = new JFormattedTextField( 15. );
 		tfInitSearchRadius.setHorizontalAlignment( SwingConstants.CENTER );
 		tfInitSearchRadius.setFont( FONT );
-		tfInitSearchRadius.setBounds( 167, 348, 60, 28 );
-		add( tfInitSearchRadius );
-		tfInitSearchRadius.setSize( TEXTFIELD_DIMENSION );
+		gbc.gridx = 1;
+		gbc.weightx = 1.0;
+		add( tfInitSearchRadius, gbc );
+
+		final JLabel lblSpaceUnits1 = new JLabel( spaceUnits );
+		lblSpaceUnits1.setFont( FONT );
+		gbc.gridx = 2;
+		gbc.weightx = 0.0;
+		add( lblSpaceUnits1, gbc );
+
+		// Search Radius Panel
+		gbc.gridy = 3;
+		gbc.gridx = 0;
+		gbc.weightx = 0.0;
+
+		final JLabel lblSearchRadius = new JLabel( "Search radius:" );
+		lblSearchRadius.setFont( FONT );
+		add( lblSearchRadius, gbc );
 
 		tfSearchRadius = new JFormattedTextField( 15. );
 		tfSearchRadius.setHorizontalAlignment( SwingConstants.CENTER );
 		tfSearchRadius.setFont( FONT );
-		tfSearchRadius.setBounds( 167, 376, 60, 28 );
-		add( tfSearchRadius );
-		tfSearchRadius.setSize( TEXTFIELD_DIMENSION );
+		gbc.gridx = 1;
+		gbc.weightx = 1.0;
+		add( tfSearchRadius, gbc );
+
+		final JLabel lblSpaceUnits2 = new JLabel( spaceUnits );
+		lblSpaceUnits2.setFont( FONT );
+		gbc.gridx = 2;
+		gbc.weightx = 0.0;
+		add( lblSpaceUnits2, gbc );
+
+		// Max Frame Gap Panel
+		gbc.gridy = 4;
+		gbc.gridx = 0;
+		gbc.weightx = 0.0;
+
+		final JLabel lblMaxFrameGap = new JLabel( "Max frame gap:" );
+		lblMaxFrameGap.setFont( FONT );
+		add( lblMaxFrameGap, gbc );
 
 		tfMaxFrameGap = new JFormattedTextField( 2 );
 		tfMaxFrameGap.setHorizontalAlignment( SwingConstants.CENTER );
 		tfMaxFrameGap.setFont( FONT );
-		tfMaxFrameGap.setBounds( 167, 404, 60, 28 );
-		add( tfMaxFrameGap );
-		tfMaxFrameGap.setSize( TEXTFIELD_DIMENSION );
-
-		final JLabel lblSpaceUnits1 = new JLabel( spaceUnits );
-		lblSpaceUnits1.setFont( FONT );
-		lblSpaceUnits1.setBounds( 219, 348, 51, 16 );
-		add( lblSpaceUnits1 );
-
-		final JLabel lblSpaceUnits2 = new JLabel( spaceUnits );
-		lblSpaceUnits2.setFont( FONT );
-		lblSpaceUnits2.setBounds( 219, 376, 51, 16 );
-		add( lblSpaceUnits2 );
+		gbc.gridx = 1;
+		gbc.weightx = 1.0;
+		add( tfMaxFrameGap, gbc );
 
 		final JLabel lblFrameUnits = new JLabel( "frames" );
 		lblFrameUnits.setFont( FONT );
-		lblFrameUnits.setBounds( 219, 404, 51, 16 );
-		add( lblFrameUnits );
+		gbc.gridx = 2;
+		gbc.weightx = 0.0;
+		add( lblFrameUnits, gbc );
+
+		// Add vertical space at the bottom
+		gbc.gridy = 5;
+		gbc.gridx = 0;
+		gbc.gridwidth = 3;
+		gbc.weighty = 1.0;
+		gbc.fill = GridBagConstraints.VERTICAL;
+		add( Box.createVerticalStrut( 80 ), gbc );
 
 		// Select text-fields content on focus.
 		GuiUtils.selectAllOnFocus( tfInitSearchRadius );

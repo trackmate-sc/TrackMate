@@ -7,14 +7,13 @@ import bdv.util.BdvOptions;
 import bdv.util.BdvStackSource;
 import net.imglib2.Interval;
 import sc.fiji.labkit.ui.bdv.BdvLayer;
-import sc.fiji.labkit.ui.bdv.BdvLayerLink;
 import sc.fiji.labkit.ui.bdv.BdvShowable;
 import sc.fiji.labkit.ui.models.Holder;
 import sc.fiji.labkit.ui.utils.Notifier;
 
 /**
- * Cope of the {@link BdvLayerLink} to avoid the shift-1 shortcut in BDV
- * toggling ALL the channels.
+ * Cope of the BdvLayerLink to avoid the shift-1 shortcut in BDV toggling ALL
+ * the channels.
  */
 public class TMBdvLayerLink implements Holder< BdvStackSource< ? > >
 {

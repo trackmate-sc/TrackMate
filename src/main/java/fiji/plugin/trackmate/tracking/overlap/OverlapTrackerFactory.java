@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -21,21 +21,16 @@
  */
 package fiji.plugin.trackmate.tracking.overlap;
 
-import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
-import static fiji.plugin.trackmate.io.IOUtils.readStringAttribute;
-import static fiji.plugin.trackmate.io.IOUtils.writeAttribute;
-import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
-
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.ImageIcon;
 
-import org.jdom2.Element;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.components.tracker.OverlapTrackerSettingsPanel;
 import fiji.plugin.trackmate.tracking.SpotTracker;
@@ -74,14 +69,14 @@ public class OverlapTrackerFactory implements SpotTrackerFactory
 
 	/**
 	 * Value for the fast IoU calculation method.
-	 * 
+	 *
 	 * @see #KEY_IOU_CALCULATION
 	 */
 	public static final String FAST_CALCULATION = IoUCalculation.FAST.name();
 
 	/**
 	 * Value for the precise IoU calculation method.
-	 * 
+	 *
 	 * @see #KEY_IOU_CALCULATION
 	 */
 	public static final String PRECISE_CALCULATION = IoUCalculation.PRECISE.name();
@@ -111,7 +106,9 @@ public class OverlapTrackerFactory implements SpotTrackerFactory
 			+ "The <it>Precise</it> method is not implemented."
 			+ "</html>";
 
-	private String errorMessage;
+	public static final String DOC_URL = "https://imagej.net/plugins/trackmate/trackers/overlap-tracker";
+
+	public static final ImageIcon ICON = new ImageIcon( Icons.class.getResource( "images/OverlapTracker-icon-64px.png" ) );
 
 	@Override
 	public String getKey()
@@ -132,9 +129,15 @@ public class OverlapTrackerFactory implements SpotTrackerFactory
 	}
 
 	@Override
+	public String getUrl()
+	{
+		return DOC_URL;
+	}
+
+	@Override
 	public ImageIcon getIcon()
 	{
-		return null;
+		return ICON;
 	}
 
 	@Override
@@ -154,35 +157,11 @@ public class OverlapTrackerFactory implements SpotTrackerFactory
 	}
 
 	@Override
-	public boolean marshall( final Map< String, Object > settings, final Element element )
-	{
-		boolean ok = true;
-		final StringBuilder str = new StringBuilder();
-
-		ok = ok & writeAttribute( settings, element, KEY_SCALE_FACTOR, Double.class, str );
-		ok = ok & writeAttribute( settings, element, KEY_MIN_IOU, Double.class, str );
-		ok = ok & writeAttribute( settings, element, KEY_IOU_CALCULATION, String.class, str );
-		return ok;
-	}
-
-	@Override
-	public boolean unmarshall( final Element element, final Map< String, Object > settings )
-	{
-		settings.clear();
-		final StringBuilder errorHolder = new StringBuilder();
-		boolean ok = true;
-
-		ok = ok & readDoubleAttribute( element, settings, KEY_SCALE_FACTOR, errorHolder );
-		ok = ok & readDoubleAttribute( element, settings, KEY_MIN_IOU, errorHolder );
-		ok = ok & readStringAttribute( element, settings, KEY_IOU_CALCULATION, errorHolder );
-		return ok;
-	}
-
-	@Override
 	public String toString( final Map< String, Object > settings )
 	{
-		if ( !checkSettingsValidity( settings ) )
-			return errorMessage;
+		final String error = checkSettings( settings );
+		if ( null != error )
+			return BASE_ERROR_MESSAGE + error;
 
 		final double scale = ( Double ) settings.get( KEY_SCALE_FACTOR );
 		final double minIoU = ( Double ) settings.get( KEY_MIN_IOU );
@@ -205,58 +184,5 @@ public class OverlapTrackerFactory implements SpotTrackerFactory
 		settings.put( KEY_SCALE_FACTOR, DEFAULT_SCALE_FACTOR );
 		settings.put( KEY_MIN_IOU, DEFAULT_MIN_IOU );
 		return settings;
-	}
-
-	@Override
-	public boolean checkSettingsValidity( final Map< String, Object > settings )
-	{
-		if ( null == settings )
-		{
-			errorMessage = BASE_ERROR_MESSAGE + "Settings map is null.\n";
-			return false;
-		}
-
-		boolean ok = true;
-		final StringBuilder str = new StringBuilder();
-		ok = ok & checkParameter( settings, KEY_SCALE_FACTOR, Double.class, str );
-		ok = ok & checkParameter( settings, KEY_MIN_IOU, Double.class, str );
-		ok = ok & checkParameter( settings, KEY_IOU_CALCULATION, String.class, str );
-		if ( !ok )
-		{
-			errorMessage = str.toString();
-			return false;
-
-		}
-		final double scale = ( ( Double ) settings.get( KEY_SCALE_FACTOR ) ).doubleValue();
-		if ( scale <= 0 )
-		{
-			errorMessage = BASE_ERROR_MESSAGE + "Scale factor must be strictly positive, was " + scale;
-			return false;
-		}
-
-		String methodStr = "";
-		try
-		{
-			methodStr = ( String ) settings.get( KEY_IOU_CALCULATION );
-			IoUCalculation.valueOf( methodStr );
-		}
-		catch ( final IllegalArgumentException e )
-		{
-			errorMessage = BASE_ERROR_MESSAGE + "Unknown IoU calculation method: " + methodStr;
-			return false;
-		}
-		return true;
-	}
-
-	@Override
-	public String getErrorMessage()
-	{
-		return errorMessage;
-	}
-
-	@Override
-	public OverlapTrackerFactory copy()
-	{
-		return new OverlapTrackerFactory();
 	}
 }

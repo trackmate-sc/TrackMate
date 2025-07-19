@@ -53,7 +53,8 @@ public class TMKeymapManager extends KeymapManager
 	}
 
 	/**
-	 * Overloaded, so that we can restrict the scope to TrackMate-LabKit & BDV.
+	 * Overloaded, so that we can restrict the scope to TrackMate-LabKit and
+	 * BDV.
 	 */
 	@Override
 	public synchronized void discoverCommandDescriptions()

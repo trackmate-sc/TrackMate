@@ -40,12 +40,11 @@ import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.Views;
 import sc.fiji.labkit.ui.brush.BdvMouseBehaviourUtils;
-import sc.fiji.labkit.ui.brush.FloodFillController;
 import sc.fiji.labkit.ui.labeling.Label;
 import sc.fiji.labkit.ui.models.LabelingModel;
 
 /**
- * Copied from {@link FloodFillController}
+ * Copied from FloodFillController
  */
 public class TMFloodFillController
 {

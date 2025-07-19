@@ -39,6 +39,7 @@ import javax.swing.SwingConstants;
 
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
+import fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTrackerFactory;
 
 public class NearestNeighborTrackerSettingsPanel extends ConfigurationPanel
 {
@@ -81,12 +82,12 @@ public class NearestNeighborTrackerSettingsPanel extends ConfigurationPanel
 
 		final GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 164, 40, 54, 0 };
-		gridBagLayout.rowHeights = new int[] { 30, 40, 225, 30, 60 };
+		gridBagLayout.rowHeights = new int[] { 0, 40, 225, 30, 60 };
 		gridBagLayout.columnWeights = new double[] { 1.0, 0.0, 0.0, Double.MIN_VALUE };
 		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE };
 		setLayout( gridBagLayout );
 
-		final JLabel lblSettingsForTracker = new JLabel( "Settings for tracker:" );
+		final JLabel lblSettingsForTracker = new JLabel();
 		lblSettingsForTracker.setFont( FONT );
 		final GridBagConstraints gbcLblSettingsForTracker = new GridBagConstraints();
 		gbcLblSettingsForTracker.fill = GridBagConstraints.BOTH;
@@ -96,9 +97,8 @@ public class NearestNeighborTrackerSettingsPanel extends ConfigurationPanel
 		gbcLblSettingsForTracker.gridy = 0;
 		add( lblSettingsForTracker, gbcLblSettingsForTracker );
 
-		final JLabel labelTracker = new JLabel( trackerName );
+		final JLabel labelTracker = new JLabel( trackerName, NearestNeighborTrackerFactory.ICON, SwingConstants.CENTER );
 		labelTracker.setFont( BIG_FONT );
-		labelTracker.setHorizontalAlignment( SwingConstants.CENTER );
 		final GridBagConstraints gbcLabelTracker = new GridBagConstraints();
 		gbcLabelTracker.fill = GridBagConstraints.BOTH;
 		gbcLabelTracker.insets = new Insets( 0, 0, 5, 0 );

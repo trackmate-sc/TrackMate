@@ -37,7 +37,6 @@ import bdv.viewer.NavigationActions;
 import bdv.viewer.ViewerPanel;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import net.miginfocom.swing.MigLayout;
-import sc.fiji.labkit.ui.BasicLabelingComponent;
 import sc.fiji.labkit.ui.bdv.BdvAutoContrast;
 import sc.fiji.labkit.ui.bdv.BdvLayer;
 import sc.fiji.labkit.ui.brush.PlanarModeController;
@@ -48,7 +47,7 @@ import sc.fiji.labkit.ui.models.ImageLabelingModel;
 import sc.fiji.labkit.ui.models.LabelingModel;
 
 /**
- * A copy of {@link BasicLabelingComponent} to enable using custom components.
+ * A copy of BasicLabelingComponent to enable using custom components.
  */
 public class TMBasicLabelingComponent extends JPanel implements AutoCloseable
 {

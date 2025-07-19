@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -67,12 +67,12 @@ public class OverlapTrackerSettingsPanel extends ConfigurationPanel
 	{
 		final GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 164, 59, 0 };
-		gridBagLayout.rowHeights = new int[] { 20, 20, 225, 0, 0, 20, 0 };
+		gridBagLayout.rowHeights = new int[] { 0, 20, 225, 0, 0, 20, 0 };
 		gridBagLayout.columnWeights = new double[] { 1.0, 0.0, Double.MIN_VALUE };
 		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
 		setLayout( gridBagLayout );
 
-		final JLabel lblSettingsForTracker = new JLabel( "Settings for tracker:" );
+		final JLabel lblSettingsForTracker = new JLabel();
 		lblSettingsForTracker.setFont( FONT );
 		final GridBagConstraints gbc_lblSettingsForTracker = new GridBagConstraints();
 		gbc_lblSettingsForTracker.fill = GridBagConstraints.BOTH;
@@ -82,9 +82,8 @@ public class OverlapTrackerSettingsPanel extends ConfigurationPanel
 		gbc_lblSettingsForTracker.gridy = 0;
 		add( lblSettingsForTracker, gbc_lblSettingsForTracker );
 
-		final JLabel labelTracker = new JLabel( OverlapTrackerFactory.TRACKER_NAME );
+		final JLabel labelTracker = new JLabel( OverlapTrackerFactory.TRACKER_NAME, OverlapTrackerFactory.ICON, SwingConstants.CENTER );
 		labelTracker.setFont( BIG_FONT );
-		labelTracker.setHorizontalAlignment( SwingConstants.CENTER );
 		final GridBagConstraints gbc_labelTracker = new GridBagConstraints();
 		gbc_labelTracker.fill = GridBagConstraints.BOTH;
 		gbc_labelTracker.insets = new Insets( 5, 5, 5, 5 );

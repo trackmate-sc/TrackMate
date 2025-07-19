@@ -21,81 +21,22 @@
  */
 package fiji.plugin.trackmate.detection;
 
-import java.lang.reflect.Constructor;
-import java.util.Map;
-
-import org.jdom2.Element;
-
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.TrackMateModule;
+import fiji.plugin.trackmate.TrackMateFactoryBase;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
-import net.imagej.ImgPlus;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 
 /**
  * Mother interface for detector factories. It is also responsible for
  * loading/saving the detector parameters from/to XML, and of generating a
- * suitable configuration panel for GUI interaction.
+ * suitable configuration panel for GUI interaction. Several methods have
+ * default implementations that cover most use cases, but subclasses are free to
+ * override them if needed.
  */
-public interface SpotDetectorFactoryBase< T extends RealType< T > & NativeType< T > > extends TrackMateModule
+public interface SpotDetectorFactoryBase< T extends RealType< T > & NativeType< T > > extends TrackMateFactoryBase< SpotDetectorFactoryBase< T > >
 {
-
-	/**
-	 * Configure this factory to operate on the given source image (possibly
-	 * 5D), with the given settings map.
-	 * <p>
-	 * Also checks the validity of the given settings map for this factory. If
-	 * check fails, return <code>false</code>, an error message can be obtained
-	 * through {@link #getErrorMessage()}.
-	 *
-	 * @param img
-	 *            the {@link ImgPlus} to operate on, possible 5D.
-	 * @param settings
-	 *            the settings map, must be suitable for this detector factory.
-	 * @return <code>false</code> is the given settings map is not suitable for
-	 *         this detector factory.
-	 * @see SpotDetectorFactory#getErrorMessage()
-	 */
-	public boolean setTarget( final ImgPlus< T > img, final Map< String, Object > settings );
-
-	/**
-	 * Returns a meaningful error message for the last action on this factory.
-	 *
-	 * @see #setTarget(ImgPlus, Map)
-	 * @see #marshall(Map, Element)
-	 * @see #unmarshall(Element, Map)
-	 */
-	public String getErrorMessage();
-
-	/**
-	 * Marshalls a settings map to a JDom element, ready for saving to XML. The
-	 * element is <b>updated</b> with new attributes.
-	 * <p>
-	 * Only parameters specific to the specific detector factory are marshalled.
-	 * The element also always receive an attribute named
-	 * {@value DetectorKeys#XML_ATTRIBUTE_DETECTOR_NAME} that saves the target
-	 * {@link SpotDetectorFactory} key.
-	 *
-	 * @return <code>true</code> if marshalling was successful. If not, check
-	 *         {@link #getErrorMessage()}
-	 */
-	public boolean marshall( final Map< String, Object > settings, final Element element );
-
-	/**
-	 * Un-marshalls a JDom element to update a settings map.
-	 *
-	 * @param element
-	 *            the JDom element to read from.
-	 * @param settings
-	 *            the map to update. Is cleared prior to updating, so that it
-	 *            contains only the parameters specific to the target detector
-	 *            factory.
-	 * @return <code>true</code> if un-marshalling was successful. If not, check
-	 *         {@link #getErrorMessage()}
-	 */
-	public boolean unmarshall( final Element element, final Map< String, Object > settings );
 
 	/**
 	 * Returns a new GUI panel able to configure the settings suitable for this
@@ -109,23 +50,6 @@ public interface SpotDetectorFactoryBase< T extends RealType< T > & NativeType< 
 	 *            panel.
 	 */
 	public ConfigurationPanel getDetectorConfigurationPanel( final Settings settings, final Model model );
-
-	/**
-	 * Returns a new default settings map suitable for the target detector.
-	 * Settings are instantiated with default values.
-	 *
-	 * @return a new map.
-	 */
-	public Map< String, Object > getDefaultSettings();
-
-	/**
-	 * Check that the given settings map is suitable for target detector.
-	 *
-	 * @param settings
-	 *            the map to test.
-	 * @return <code>true</code> if the settings map is valid.
-	 */
-	public boolean checkSettings( final Map< String, Object > settings );
 
 	/**
 	 * Return <code>true</code> for the detectors that can provide a spot with a
@@ -143,28 +67,5 @@ public interface SpotDetectorFactoryBase< T extends RealType< T > & NativeType< 
 	public default boolean has2Dsegmentation()
 	{
 		return false;
-	}
-
-	/**
-	 * Returns a copy the current instance.
-	 *
-	 * @return a new instance of this detector factory.
-	 */
-	public default SpotDetectorFactoryBase< T > copy()
-	{
-		// We use reflection for this.
-		try
-		{
-			final Class< ? > clazz = this.getClass();
-			final Constructor< ? > constructor = clazz.getDeclaredConstructor();
-			@SuppressWarnings( "unchecked" )
-			final SpotDetectorFactoryBase< T > copy = ( SpotDetectorFactoryBase< T > ) constructor.newInstance();
-			return copy;
-		}
-		catch ( final ReflectiveOperationException e )
-		{
-			e.printStackTrace();
-			throw new RuntimeException( "Could not copy the factory: " + e.getMessage(), e );
-		}
 	}
 }

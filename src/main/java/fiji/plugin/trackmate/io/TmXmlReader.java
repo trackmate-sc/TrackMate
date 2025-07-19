@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -796,11 +796,12 @@ public class TmXmlReader
 		settings.detectorFactory = factory;
 
 		final Map< String, Object > ds = new HashMap<>();
-		ok = factory.unmarshall( element, ds );
+		final String errorMessage = factory.unmarshal( element, ds );
+		ok = ( errorMessage == null );
 
 		settings.detectorSettings = ds;
 		if ( !ok )
-			logger.error( factory.getErrorMessage() );
+			logger.error( errorMessage );
 	}
 
 	/**
@@ -856,16 +857,17 @@ public class TmXmlReader
 		settings.trackerFactory = factory;
 
 		// All the hard work is delegated to the factory.
-		final boolean lOk = factory.unmarshall( element, ds );
-		if ( lOk )
+		final String error = factory.unmarshal( element, ds );
+		if ( error == null )
 		{
 			settings.trackerSettings = ds;
 		}
 		else
 		{
-			logger.error( "Problem reading the tracker settings:\n" + factory.getErrorMessage() );
+			logger.error( "Problem reading the tracker settings:\n" + error );
 			logger.error( "Substituting default tracker settings.\n" );
 			settings.trackerSettings = factory.getDefaultSettings();
+			this.ok = false;
 		}
 	}
 

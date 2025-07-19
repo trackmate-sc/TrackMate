@@ -147,7 +147,8 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 
 		if ( settings == null )
 		{
-			logger.error( "Problem reading the settings:\n" + "The file did not contain a settings element. Using default values." );
+			logger.error( "Problem reading the settings:\n"
+					+ "The file did not contain a settings element. Using default values." );
 			settings = new Settings( imp );
 		}
 

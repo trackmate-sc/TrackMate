@@ -127,7 +127,7 @@ public class TMLabKitModel implements SegmentationModel
 	 *            dimensionality for the labeling, the calibration, etc.
 	 * @param interval
 	 *            the interval in the source image to restrict the import. Only
-	 *            the first 2 dimensions of the interval are used (X&Y). The
+	 *            the first 2 dimensions of the interval are used (X and Y). The
 	 *            returned output will have the size of this interval. Only the
 	 *            spots that are fully within this interval are imported. If
 	 *            <code>null</code>, all the spots are imported and the output
@@ -140,9 +140,9 @@ public class TMLabKitModel implements SegmentationModel
 	 *            imported.
 	 * @param context
 	 *            the {@link Context} to use to create the model.
-	 * @return a new {@link TMLabKitModel}. Will be 2D (X&Y), and possibly 3D
-	 *         (with time) if all time-points are imported. Its XY size will be
-	 *         the size of the specified interval (or the size of the input
+	 * @return a new {@link TMLabKitModel}. Will be 2D (X and Y), and possibly
+	 *         3D (with time) if all time-points are imported. Its XY size will
+	 *         be the size of the specified interval (or the size of the input
 	 *         image if the interval is null).
 	 * @throws UnsupportedOperationException
 	 *             if this method is called with a 3D input.

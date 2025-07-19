@@ -27,7 +27,7 @@ public abstract class CondaExecutableCLIConfigurator extends CondaCLIConfigurato
 		super();
 
 		// Add the translator to make a proper cmd line calling conda first.
-		setTranslator( condaEnv, s -> {
+		setCommandTranslator( condaEnv, s -> {
 			final List< String > cmd = new ArrayList<>();
 			final String condaPath = CLIUtils.getCondaPath();
 			// Conda and executable stuff.
