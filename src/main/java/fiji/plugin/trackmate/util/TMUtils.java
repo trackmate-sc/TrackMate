@@ -232,6 +232,35 @@ public class TMUtils
 	}
 
 	/**
+	 * Default implementation for checking the validity of a settings map.
+	 * <p>
+	 * We simply check it against the default settings map, verifying that a
+	 * parameter is present, and that it is of the expected type.
+	 *
+	 * @param settings
+	 *            the map to test.
+	 * @param defaultSettings
+	 *            the default settings map to test against.
+	 * @return an error message if the settings are unsuitable. Otherwise
+	 *         returns <code>null</code>.
+	 */
+	public static final String checkSettings( final Map< String, Object > settings, final Map< String, Object > defaultSettings )
+	{
+		// Test against the class specified in the default settings.
+		for ( final String key : defaultSettings.keySet() )
+		{
+			if ( !settings.containsKey( key ) )
+				return "Missing setting: " + key + ". This is required by the detector.";
+
+			final Object value = settings.get( key );
+			final Class< ? > expectedType = defaultSettings.get( key ).getClass();
+			if ( !expectedType.isInstance( value ) )
+				return "Setting " + key + " is of type " + value.getClass().getSimpleName() + ", but expected type is " + expectedType.getSimpleName() + ".";
+		}
+		return null;
+	}
+
+	/**
 	 * Check the presence and the validity of a key in a map, and test it is of
 	 * the desired class.
 	 *
