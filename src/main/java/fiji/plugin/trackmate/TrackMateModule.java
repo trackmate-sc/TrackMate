@@ -62,7 +62,7 @@ import org.scijava.plugin.SciJavaPlugin;
  * actions that provide general use actions for TrackMate from the GUI.
  * </ul>
  *
- * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; 2014
+ * @author Jean-Yves Tinevez - 2014
  *
  */
 public interface TrackMateModule extends SciJavaPlugin
@@ -123,11 +123,11 @@ public interface TrackMateModule extends SciJavaPlugin
 	 * Returns a URL pointing to a webpage documenting this module. The URL is
 	 * returned as a string, containing the fully qualified URL to the help
 	 * page. For instance:
-	 * 
+	 *
 	 * <pre>
 	 * https://imagej.net/plugins/trackmate/detectors/difference-of-gaussian
 	 * </pre>
-	 * 
+	 *
 	 * @return this module documentation URL, or <code>null</code> if there is
 	 *         none.
 	 */
