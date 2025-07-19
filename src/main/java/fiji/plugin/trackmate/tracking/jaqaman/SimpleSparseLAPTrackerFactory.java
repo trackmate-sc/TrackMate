@@ -21,9 +21,12 @@
  */
 package fiji.plugin.trackmate.tracking.jaqaman;
 
+import javax.swing.ImageIcon;
+
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.components.tracker.SimpleLAPTrackerSettingsPanel;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
@@ -44,6 +47,8 @@ public class SimpleSparseLAPTrackerFactory extends SparseLAPTrackerFactory
 
 	public static final String DOC_URL = "https://imagej.net/plugins/trackmate/trackers/lap-trackers";
 
+	public static final ImageIcon ICON = new ImageIcon( Icons.class.getResource( "images/SimpleLAPtracker-icon-64px.png" ) );
+
 	@Override
 	public String getKey()
 	{
@@ -63,15 +68,21 @@ public class SimpleSparseLAPTrackerFactory extends SparseLAPTrackerFactory
 	}
 
 	@Override
-	public ConfigurationPanel getTrackerConfigurationPanel( final Model model )
+	public ImageIcon getIcon()
 	{
-		final String spaceUnits = model.getSpaceUnits();
-		return new SimpleLAPTrackerSettingsPanel( getName(), THIS2_INFO_TEXT, spaceUnits );
+		return ICON;
 	}
 
 	@Override
 	public String getUrl()
 	{
 		return DOC_URL;
+	}
+
+	@Override
+	public ConfigurationPanel getTrackerConfigurationPanel( final Model model )
+	{
+		final String spaceUnits = model.getSpaceUnits();
+		return new SimpleLAPTrackerSettingsPanel( getName(), THIS2_INFO_TEXT, spaceUnits );
 	}
 }

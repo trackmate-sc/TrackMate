@@ -36,11 +36,14 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.ImageIcon;
+
 import org.jdom2.Element;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.components.tracker.LAPTrackerSettingsPanel;
 import fiji.plugin.trackmate.tracking.SpotTracker;
@@ -74,6 +77,8 @@ public class SparseLAPTrackerFactory extends SegmentTrackerFactory
 
 	public static final String DOC_URL = "https://imagej.net/plugins/trackmate/trackers/lap-trackers";
 
+	public static final ImageIcon ICON = new ImageIcon( Icons.class.getResource( "images/LAPtracker-icon-64px.png" ) );
+
 	@Override
 	public String getInfoText()
 	{
@@ -90,6 +95,12 @@ public class SparseLAPTrackerFactory extends SegmentTrackerFactory
 	public String getName()
 	{
 		return THIS_NAME;
+	}
+
+	@Override
+	public ImageIcon getIcon()
+	{
+		return ICON;
 	}
 
 	@Override
