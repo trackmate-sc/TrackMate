@@ -27,11 +27,14 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANC
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.ImageIcon;
+
 import org.scijava.Priority;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.components.tracker.NearestNeighborTrackerSettingsPanel;
 import fiji.plugin.trackmate.tracking.SpotTracker;
@@ -66,6 +69,8 @@ public class NearestNeighborTrackerFactory implements SpotTrackerFactory
 
 	public static final String DOC_URL = "https://imagej.net/plugins/trackmate/trackers/nearest-neighbor-tracker";
 
+	public static final ImageIcon ICON = new ImageIcon( Icons.class.getResource( "images/NNTracker-icon-64px.png" ) );
+
 	@Override
 	public String getInfoText()
 	{
@@ -88,6 +93,12 @@ public class NearestNeighborTrackerFactory implements SpotTrackerFactory
 	public String getUrl()
 	{
 		return DOC_URL;
+	}
+
+	@Override
+	public ImageIcon getIcon()
+	{
+		return ICON;
 	}
 
 	@Override

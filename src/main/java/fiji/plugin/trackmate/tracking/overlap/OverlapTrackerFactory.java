@@ -24,10 +24,13 @@ package fiji.plugin.trackmate.tracking.overlap;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.ImageIcon;
+
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.components.tracker.OverlapTrackerSettingsPanel;
 import fiji.plugin.trackmate.tracking.SpotTracker;
@@ -105,6 +108,8 @@ public class OverlapTrackerFactory implements SpotTrackerFactory
 
 	public static final String DOC_URL = "https://imagej.net/plugins/trackmate/trackers/overlap-tracker";
 
+	public static final ImageIcon ICON = new ImageIcon( Icons.class.getResource( "images/OverlapTracker-icon-64px.png" ) );
+
 	@Override
 	public String getKey()
 	{
@@ -127,6 +132,12 @@ public class OverlapTrackerFactory implements SpotTrackerFactory
 	public String getUrl()
 	{
 		return DOC_URL;
+	}
+
+	@Override
+	public ImageIcon getIcon()
+	{
+		return ICON;
 	}
 
 	@Override
