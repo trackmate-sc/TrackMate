@@ -69,7 +69,7 @@ public class NearestNeighborTrackerFactory implements SpotTrackerFactory
 
 	public static final String DOC_URL = "https://imagej.net/plugins/trackmate/trackers/nearest-neighbor-tracker";
 
-	public static final ImageIcon ICON = new ImageIcon( Icons.class.getResource( "images/NNTracker-icon-64px.png" ) );
+	public static final ImageIcon ICON = new ImageIcon( Icons.class.getResource( "images/NNtracker-icon-64px.png" ) );
 
 	@Override
 	public String getInfoText()
