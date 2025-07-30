@@ -218,7 +218,8 @@ public class CommandBuilder implements ArgumentVisitor
 		}
 		else
 		{
-			tokens.add( a );
+			if ( !a.isEmpty() )
+				tokens.add( a );
 			tokens.addAll( vals );
 		}
 	}
