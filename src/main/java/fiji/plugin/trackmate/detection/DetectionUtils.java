@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -184,6 +185,30 @@ public class DetectionUtils
 	public static final boolean is2D( final ImagePlus imp )
 	{
 		return ( imp == null ) ? true : imp.getNSlices() <= 1;
+	}
+
+	public static final boolean is2D( final Model model )
+	{
+		final AtomicBoolean is2dFlag = new AtomicBoolean( true );
+		model.getSpots().iterable( true ).forEach( spot -> {
+			final double z = spot.getDoublePosition( 2 );
+			// check with tolerance
+			if ( Math.abs( z ) > 1e-10 )
+			{
+				is2dFlag.set( false );
+				return;
+			}
+		} );
+		return is2dFlag.get();
+	}
+
+	public static final boolean is2D( final TrackMate trackmate )
+	{
+		final ImagePlus imp = trackmate.getSettings().imp;
+		if ( null == imp )
+			return is2D( trackmate.getModel() );
+		else
+			return is2D( imp );
 	}
 
 	/**
