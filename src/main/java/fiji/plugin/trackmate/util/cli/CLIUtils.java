@@ -23,6 +23,7 @@ package fiji.plugin.trackmate.util.cli;
 
 import java.awt.Color;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.FileVisitResult;
@@ -32,6 +33,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -41,6 +43,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.input.Tailer;
 import org.apache.commons.io.input.TailerListenerAdapter;
 import org.scijava.prefs.PrefService;
 
@@ -56,6 +59,144 @@ public class CLIUtils
 	public static final String CONDA_ROOT_PREFIX_KEY = "trackmate.conda.root.prefix";
 
 	private static Map< String, String > envMap;
+
+	/**
+	 * Creates and start a process that runs the command specified in the CLI.
+	 *
+	 * @param cli
+	 *            the CLI configurator that specifies the command to run.
+	 * @param logFile
+	 *            the file to which the process output is appended.
+	 * @return the process that runs the command specified in the CLI.
+	 * @throws IOException
+	 *             if there is an error creating the process.
+	 */
+	public static final Process createProcess( final CLIConfigurator cli, final File logFile ) throws IOException
+	{
+		final List< String > cmd = CommandBuilder.build( cli );
+		final ProcessBuilder pb = new ProcessBuilder( cmd );
+		pb.redirectOutput( ProcessBuilder.Redirect.appendTo( logFile ) );
+		pb.redirectError( ProcessBuilder.Redirect.appendTo( logFile ) );
+		return pb.start();
+	}
+
+	/**
+	 * Creates and starts a process that runs the command specified in the CLI,
+	 * and redirects the process output to the logger.
+	 * <p>
+	 * This method handles the process output by appending it to a log file and
+	 * redirecting it to the logger. It also catches exceptions when launching
+	 * the process and redirect errors to the logger.
+	 *
+	 * @param cli
+	 *            the CLI configurator that specifies the command to run.
+	 * @param logger
+	 *            the logger to which the process output is redirected.
+	 * @param logFile
+	 *            the file to which the process output is appended.
+	 * @return the process that runs the command specified in the CLI, or
+	 *         <code>null</code> if there was an error creating the process.
+	 */
+	public static final Process createAndHandleProcess( final CLIConfigurator cli, final Logger logger, final File logFile )
+	{
+		// Appends process output to the log file, and redirects to the logger.
+		final Tailer tailer = Tailer.builder()
+				.setFile( logFile )
+				.setTailerListener( new LoggerTailerListener( logger ) )
+				.setDelayDuration( Duration.ofMillis( 200 ) )
+				.setTailFromEnd( true )
+				.get();
+
+		final String executableName = cli.getClass().getSimpleName();
+		try
+		{
+			final List< String > cmd = CommandBuilder.build( cli );
+			logger.setStatus( "Running " + executableName );
+			logger.log( "Running " + executableName + " with args:\n" );
+			cmd.forEach( t -> {
+				if ( t.contains( File.separator ) )
+					logger.log( t + ' ' );
+				else
+					logger.log( t + ' ', Logger.GREEN_COLOR.darker() );
+			} );
+			logger.log( "\n" );
+
+			final Process process = createProcess( cli, logFile );
+			return process;
+		}
+		catch ( final IOException e )
+		{
+			final String msg = e.getMessage();
+			String errorMessage;
+			if ( msg.matches( ".+error=13.+" ) )
+			{
+				errorMessage = "Problem running " + executableName + ":\n"
+						+ "The executable does not have the file permission to run.\n";
+			}
+			else
+			{
+				errorMessage = "Problem running " + executableName + ":\n" + e.getMessage();
+			}
+			try
+			{
+				errorMessage = errorMessage + '\n' + new String( Files.readAllBytes( logFile.toPath() ) );
+			}
+			catch ( final IOException e1 )
+			{}
+			e.printStackTrace();
+			logger.error( errorMessage );
+		}
+		catch ( final Exception e )
+		{
+			String errorMessage = "Problem running " + executableName + ":\n" + e.getMessage();
+			try
+			{
+				errorMessage = errorMessage + '\n' + new String( Files.readAllBytes( logFile.toPath() ) );
+			}
+			catch ( final IOException e1 )
+			{}
+			e.printStackTrace();
+			logger.error( errorMessage );
+		}
+		finally
+		{
+			tailer.close();
+		}
+		return null;
+	}
+
+	/**
+	 * Creates and executes the process that runs the command specified in the
+	 * CLI.
+	 *
+	 * @param cli
+	 *            the CLI configurator that specifies the command to run.
+	 * @param logger
+	 *            the logger to which the process output is redirected.
+	 * @param logFile
+	 *            the file to which the process output is appended.
+	 * @return <code>true</code> if the process exited with code 0,
+	 *         <code>false</code> otherwise.
+	 */
+	public static boolean execute( final CLIConfigurator cli, final Logger logger, final File logFile )
+	{
+
+		final Process process = createAndHandleProcess( cli, logger, logFile );
+		if ( process == null )
+			return false;
+
+		try
+		{
+			final int returnValue = process.waitFor();
+			return returnValue == 0;
+		}
+		catch ( final InterruptedException e )
+		{
+			logger.error( "Process interrupted: " + e.getMessage() );
+			e.printStackTrace();
+		}
+		return false;
+	}
 
 	/**
 	 * Returns the version of a Python module.
