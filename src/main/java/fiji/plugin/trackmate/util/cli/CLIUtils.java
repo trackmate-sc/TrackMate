@@ -265,10 +265,8 @@ public class CLIUtils
 			if ( exitCode == 0 )
 				return prevLine;
 			else
-			{
 				throw new Exception( "Error running the command '" + moduleName
 						+ "' in environment '" + envName + "'" + errorMsg );
-			}
 		}
 		catch ( final Exception e )
 		{
@@ -293,44 +291,30 @@ public class CLIUtils
 	public static List< String > preparePythonCommand( final String envName, final String cmdName )
 	{
 		final List< String > cmd = new ArrayList<>();
-		final String condaPath = getCondaPath();
 		// Conda and executable stuff.
-		if ( IJ.isWindows() )
+		try
 		{
-			cmd.addAll( Arrays.asList( "cmd.exe", "/c" ) );
-			cmd.addAll( Arrays.asList( condaPath, "activate", envName ) );
-			cmd.add( "&" );
-			// Split by spaces
-			final String[] split = cmdName.split( " " );
+			final String pythonPath = CLIUtils.getEnvMap().get( envName );
+			if ( pythonPath == null )
+				throw new Exception( "Unknown conda environment: " + envName );
+
+			final int i = pythonPath.lastIndexOf( "python" );
+			final String binPath = pythonPath.substring( 0, i );
+			final String executablePath = binPath + cmdName;
+			final String[] split = executablePath.split( " " );
 			cmd.addAll( Arrays.asList( split ) );
 			return cmd;
 		}
-		else
+		catch ( final IOException e )
 		{
-			try
-			{
-				final String pythonPath = CLIUtils.getEnvMap().get( envName );
-				if ( pythonPath == null )
-					throw new Exception( "Unknown conda environment: " + envName );
-
-				final int i = pythonPath.lastIndexOf( "python" );
-				final String binPath = pythonPath.substring( 0, i );
-				final String executablePath = binPath + cmdName;
-				final String[] split = executablePath.split( " " );
-				cmd.addAll( Arrays.asList( split ) );
-				return cmd;
-			}
-			catch ( final IOException e )
-			{
-				System.err.println( "Could not find the conda executable or change the conda environment.\n"
-						+ "Please configure the path to your conda executable in Edit > Options > Configure TrackMate Conda path..." );
-				e.printStackTrace();
-			}
-			catch ( final Exception e )
-			{
-				System.err.println( "Error running the conda executable:" );
-				e.printStackTrace();
-			}
+			System.err.println( "Could not find the conda executable or change the conda environment.\n"
+					+ "Please configure the path to your conda executable in Edit > Options > Configure TrackMate Conda path..." );
+			e.printStackTrace();
+		}
+		catch ( final Exception e )
+		{
+			System.err.println( "Error running the conda executable:" );
+			e.printStackTrace();
 		}
 		return cmd;
 	}
@@ -343,14 +327,9 @@ public class CLIUtils
 			{
 				if ( envMap == null )
 				{
-
 					// Prepare the command and environment variables.
 					// Command
-					final ProcessBuilder pb;
-					if ( IJ.isWindows() )
-						pb = new ProcessBuilder( Arrays.asList( "cmd.exe", "/c", "conda", "env", "list" ) );
-					else
-						pb = new ProcessBuilder( Arrays.asList( getCondaPath(), "env", "list" ) );
+					final ProcessBuilder pb = new ProcessBuilder( Arrays.asList( getCondaPath(), "env", "list" ) );
 					// Env variables.
 					final Map< String, String > env = new HashMap<>();
 					final String condaRootPrefix = getCondaRootPrefix();
@@ -399,7 +378,9 @@ public class CLIUtils
 
 							final String envRoot = parts[ 0 ];
 							if ( !isValidPath( envRoot ) )
+							{
 								continue;
+							}
 							final Path path = Paths.get( envRoot );
 							final String envName = path.getFileName().toString();
 							final String envPath = envRoot + "/bin/python";
@@ -421,9 +402,6 @@ public class CLIUtils
 
 	public static String getCondaPath()
 	{
-		if ( IJ.isWindows() )
-			return "conda";
-
 		final PrefService prefs = TMUtils.getContext().getService( PrefService.class );
 		String findPath;
 		try
@@ -615,6 +593,5 @@ public class CLIUtils
 		System.out.println( "2 - " + getModuleVersion( "cellpose", "cellpose" ) );
 		System.out.println( "3 - " + getModuleVersion( "cellpose", "cellposebloat" ) );
 		System.out.println( "4 - " + getModuleVersion( "cellposebarf", "cellpose" ) );
-
 	}
 }
