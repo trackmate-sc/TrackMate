@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -22,6 +22,7 @@
 package fiji.plugin.trackmate.gui.displaysettings;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -43,6 +44,9 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 
 public class DisplaySettingsIO
 {
@@ -58,7 +62,7 @@ public class DisplaySettingsIO
 	{
 		return getGson().toJson( ds );
 	}
-	
+
 	public static DisplaySettings fromJson( final String str )
 	{
 		final DisplaySettings ds = ( str == null || str.isEmpty() ) ? readUserDefault() : getGson().fromJson( str, DisplaySettings.class );
@@ -80,6 +84,7 @@ public class DisplaySettingsIO
 		final GsonBuilder builder = new GsonBuilder();
 		builder.registerTypeAdapter( Colormap.class, new ColormapSerializer() );
 		builder.registerTypeAdapter( Color.class, new ColorSerializer() );
+		builder.registerTypeAdapter( Font.class, new FontTypeAdapter() );
 		return builder.setPrettyPrinting().create();
 	}
 
@@ -132,6 +137,60 @@ public class DisplaySettingsIO
 		return DisplaySettings.defaultStyle().copy();
 	}
 
+	/**
+	 * This is now recommended to use Java version &gt; 8, which is the future
+	 * for Fiji.
+	 * <p>
+	 * Java 9+ introduced the module system which restricts reflective access
+	 * between modules The java.desktop module (which contains java.awt.Font)
+	 * doesn't open its packages to unnamed modules by default Gson uses
+	 * reflection to access private fields, which is now blocked by the module
+	 * system.
+	 */
+	private static class FontTypeAdapter extends TypeAdapter< Font >
+	{
+		@Override
+		public void write( final JsonWriter out, final Font value ) throws IOException
+		{
+			out.beginObject();
+			out.name( "name" ).value( value.getName() );
+			out.name( "style" ).value( value.getStyle() );
+			out.name( "size" ).value( value.getSize() );
+			out.endObject();
+		}
+
+		@Override
+		public Font read( final JsonReader in ) throws IOException
+		{
+			String name = null;
+			int style = Font.PLAIN;
+			int size = 12;
+
+			in.beginObject();
+			while ( in.hasNext() )
+			{
+				final String fieldName = in.nextName();
+				switch ( fieldName )
+				{
+				case "name":
+					name = in.nextString();
+					break;
+				case "style":
+					style = in.nextInt();
+					break;
+				case "size":
+					size = in.nextInt();
+					break;
+				default:
+					in.skipValue(); // Skip unknown fields
+				}
+			}
+			in.endObject();
+
+			return new Font( name, style, size );
+		}
+	}
+
 	private static final class ColormapSerializer implements JsonSerializer< Colormap >, JsonDeserializer< Colormap >
 	{
 
@@ -182,7 +241,9 @@ public class DisplaySettingsIO
 
 				final int[] rgba = new int[ 4 ];
 				for ( int i = 0; i < rgba.length; i++ )
+				{
 					rgba[ i ] = Integer.parseInt( split[ i ].trim() );
+				}
 
 				return new Color( rgba[ 0 ], rgba[ 1 ], rgba[ 2 ], rgba[ 3 ] );
 			}
