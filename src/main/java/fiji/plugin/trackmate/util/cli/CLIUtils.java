@@ -509,7 +509,8 @@ public class CLIUtils
 
 	public static class LoggerTailerListener extends TailerListenerAdapter
 	{
-		private final Logger logger;
+
+		protected final Logger logger;
 
 		public Color COLOR = Logger.BLUE_COLOR.darker();
 
@@ -523,8 +524,10 @@ public class CLIUtils
 		}
 
 		@Override
-		public void handle( final String line )
+		public void handle( final String rawLine )
 		{
+			final String line = cleanLine( rawLine );
+
 			// Do we have percentage?
 			final Matcher matcher = PERCENTAGE_PATTERN.matcher( line );
 			if ( matcher.matches() )
@@ -549,6 +552,20 @@ public class CLIUtils
 					logger.log( " - " + line + '\n', COLOR );
 				}
 			}
+		}
+
+		protected String cleanLine( final String line )
+		{
+			// Remove ANSI escape sequences
+			String cleaned = line.replaceAll( "\u001B\\[[;\\d]*[A-Za-z]", "" );
+			// Remove carriage returns and other control characters
+			cleaned = cleaned.replaceAll( "[\r\n\t]", " " );
+			// Remove non-printable ASCII characters
+			cleaned = cleaned.replaceAll( "[^\\x20-\\x7E]", "" );
+			// Collapse multiple spaces
+			cleaned = cleaned.replaceAll( "\\s+", " " );
+			// Trim whitespace
+			return cleaned.trim();
 		}
 	}
 

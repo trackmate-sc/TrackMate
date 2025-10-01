@@ -47,6 +47,8 @@ public class CommonTrackMateArguments
 	/**
 	 * Creates an argument used to specify on what channel in the input image to
 	 * operate on and add it to the given configurator.
+	 * <p>
+	 * The channel index is 1-based.
 	 *
 	 * @param nChannels
 	 *            how many channels in the input image.
