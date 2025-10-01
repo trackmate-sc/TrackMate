@@ -202,7 +202,6 @@ public class TrackSchemePopupMenu extends JPopupMenu
 	 * MENU COMPOSITION
 	 */
 
-	@SuppressWarnings( "serial" )
 	private void init()
 	{
 

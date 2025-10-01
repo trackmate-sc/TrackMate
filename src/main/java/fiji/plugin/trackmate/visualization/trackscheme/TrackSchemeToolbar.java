@@ -65,7 +65,6 @@ public class TrackSchemeToolbar extends JToolBar
 		init();
 	}
 
-	@SuppressWarnings( "serial" )
 	private void init()
 	{
 
