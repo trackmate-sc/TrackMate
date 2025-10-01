@@ -67,7 +67,7 @@ public class LabkitLauncher
 		labkit.onCloseListeners().addListener( () -> reimport( lbModel, timepoint ) );
 
 		// Show the UI.
-		labkit.setIconImage( Icons.TRACKMATE_ICON.getImage() );
+		labkit.setIconImage( Icons.SEGMENTATION_EDITOR_ICON.getImage() );
 		labkit.setSize( 1000, 800 );
 		GuiUtils.positionWindow( labkit, imp.getWindow() );
 		labkit.setTitle( "TrackMate editor on " + imp.getShortTitle() );
@@ -116,7 +116,7 @@ public class LabkitLauncher
 							title,
 							JOptionPane.YES_NO_OPTION,
 							JOptionPane.QUESTION_MESSAGE,
-							Icons.TRACKMATE_ICON );
+							Icons.SEGMENTATION_EDITOR_ICON_64x64 );
 					if ( returnedValue != JOptionPane.YES_OPTION )
 						return;
 					simplify = chkbox.isSelected();

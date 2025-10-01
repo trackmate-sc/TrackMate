@@ -379,7 +379,7 @@ public class ConfigureViewsPanel extends JPanel
 			final JButton btnLabKit = new JButton( launchLabKitAction );
 			btnLabKit.setFont( FONT );
 			btnLabKit.setText( "Launch spot editor" );
-			btnLabKit.setIcon( Icons.PENCIL_ICON );
+			btnLabKit.setIcon( GuiUtils.scaleImage( Icons.SEGMENTATION_EDITOR_ICON_64x64, 16, 16 ) );
 			btnLabKit.setToolTipText( "<html>"
 					+ "Launch the Labkit editor to edit spot segmentation<br>"
 					+ "on the time-point currently displayed in the main<br>"
