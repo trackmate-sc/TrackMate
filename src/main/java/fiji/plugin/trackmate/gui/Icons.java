@@ -203,8 +203,8 @@ public class Icons
 
 	public static final ImageIcon VECTOR_ICON = new ImageIcon( Icons.class.getResource( "images/vector.png" ) );
 
-	public static final ImageIcon SEGMENTATION_EDITOR_ICON = new ImageIcon( Icons.class.getResource( "images/Segmentation-editor-logo.png" ) );
+	public static final ImageIcon SEGMENTATION_EDITOR_ICON = new ImageIcon( Icons.class.getResource( "images/Segmentation-editor-logo_v2.png" ) );
 
-	public static final ImageIcon SEGMENTATION_EDITOR_ICON_64x64 = new ImageIcon( Icons.class.getResource( "images/Segmentation-editor-logo-64px.png" ) );
+	public static final ImageIcon SEGMENTATION_EDITOR_ICON_64x64 = new ImageIcon( Icons.class.getResource( "images/Segmentation-editor-logo_v2-64px.png" ) );
 
 }
