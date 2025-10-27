@@ -353,7 +353,7 @@ public class DetectionUtils
 
 	/**
 	 * Applies a simple 3x3 median filter to the target image.
-	 * 
+	 *
 	 * @param <R>
 	 *            the pixel type in the image.
 	 * @param image
@@ -594,6 +594,10 @@ public class DetectionUtils
 	 *
 	 * @param img
 	 *            the image to wrap.
+	 * @return a new ImagePlus.
+	 * @param <T>
+	 *            the type of pixels in the image. Must extend {@link RealType}
+	 *            and {@link NativeType}.
 	 */
 	public static < T extends RealType< T > & NativeType< T > > ImagePlus wrap( final ImgPlus< T > img )
 	{
@@ -630,11 +634,11 @@ public class DetectionUtils
 	 * @param c
 	 *            the channel to extract (0-based). If negative, all channels
 	 *            are included.
-	 * @param nameGen
+	 * @param namegen
 	 *            a generator for the name of the output ImagePlus.
 	 * @return a new list of ImagePlus.
 	 */
-	public static < T extends RealType< T > & NativeType< T > > List< ImagePlus > splitSingleTimePoints( final ImgPlus< T > img, final Interval interval, final int c, final Function< Long, String > namegen2 )
+	public static < T extends RealType< T > & NativeType< T > > List< ImagePlus > splitSingleTimePoints( final ImgPlus< T > img, final Interval interval, final int c, final Function< Long, String > namegen )
 	{
 		final int zIndex = img.dimensionIndex( Axes.Z );
 		final int cIndex = img.dimensionIndex( Axes.CHANNEL );

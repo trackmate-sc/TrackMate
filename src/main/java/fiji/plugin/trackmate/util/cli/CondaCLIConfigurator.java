@@ -208,6 +208,8 @@ public abstract class CondaCLIConfigurator extends CLIConfigurator
 	 * Returns the version of the Python tool that this configurator is
 	 * configured for.
 	 *
+	 * @param moduleName
+	 *            the name of the module to get the version for.
 	 * @return the version string or <code>null</code> if the version could not
 	 *         be determined or if the command does not run on Python.
 	 */

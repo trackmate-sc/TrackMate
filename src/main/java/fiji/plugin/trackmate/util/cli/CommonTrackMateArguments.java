@@ -50,9 +50,11 @@ public class CommonTrackMateArguments
 	 * <p>
 	 * The channel index is 1-based.
 	 *
+	 * @param config
+	 *            the configurator to which to add the argument.
 	 * @param nChannels
 	 *            how many channels in the input image.
-	 * @return
+	 * @return the integer target channel argument.
 	 */
 	public static IntArgument addTargetChannel( final Configurator config, final int nChannels )
 	{
@@ -110,6 +112,7 @@ public class CommonTrackMateArguments
 	 *            the config to which to add the argument.
 	 * @param units
 	 *            the units of the diameter to display.
+	 * @return the diameter double argument.
 	 */
 	public static DoubleArgument addDiameter( final Configurator config, final String units )
 	{

@@ -120,6 +120,8 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 	 *            the detector info text, will be displayed on the panel.
 	 * @param detectorName
 	 *            the detector name, will be displayed on the panel.
+	 * @param docUrl
+	 *            the documentation URL, will be displayed on the panel.
 	 */
 	protected ThresholdDetectorConfigurationPanel(
 			final Settings settings,
