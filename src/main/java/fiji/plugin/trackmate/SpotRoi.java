@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -65,7 +65,7 @@ public class SpotRoi extends SpotBase
 	 * This constructor is only used for deserializing a model from a TrackMate
 	 * file. It messes with the ID of the spots and should be not used
 	 * otherwise.
-	 * 
+	 *
 	 * @param ID
 	 *            the ID to use when creating the spot.
 	 * @param x
@@ -78,7 +78,7 @@ public class SpotRoi extends SpotBase
 			final double[] x,
 			final double[] y )
 	{
-		super( ID ); 
+		super( ID );
 		this.x = x;
 		this.y = y;
 	}
@@ -97,7 +97,7 @@ public class SpotRoi extends SpotBase
 	/**
 	 * Returns the X coordinates of the ith vertex of the polygon, in physical
 	 * coordinates.
-	 * 
+	 *
 	 * @param i
 	 *            the index of the vertex.
 	 * @return the vertex X position.
@@ -110,7 +110,7 @@ public class SpotRoi extends SpotBase
 	/**
 	 * Returns the Y coordinates of the ith vertex of the polygon, in physical
 	 * coordinates.
-	 * 
+	 *
 	 * @param i
 	 *            the index of the vertex.
 	 * @return the vertex Y position.
@@ -123,7 +123,7 @@ public class SpotRoi extends SpotBase
 	/**
 	 * Returns the X coordinates of the ith vertex of the polygon, <i>relative
 	 * to the spot center</i>, in physical coordinates.
-	 * 
+	 *
 	 * @param i
 	 *            the index of the vertex.
 	 * @return the vertex X position.
@@ -136,7 +136,7 @@ public class SpotRoi extends SpotBase
 	/**
 	 * Returns the Y coordinates of the ith vertex of the polygon, <i>relative
 	 * to the spot center</i>, in physical coordinates.
-	 * 
+	 *
 	 * @param i
 	 *            the index of the vertex.
 	 * @return the vertex Y position.
@@ -154,6 +154,8 @@ public class SpotRoi extends SpotBase
 	@Override
 	public double realMin( final int d )
 	{
+		if ( d > 1 )
+			return 0;
 		final double[] arr = ( d == 0 ) ? x : y;
 		return getDoublePosition( d ) + Util.min( arr );
 	}
@@ -161,6 +163,8 @@ public class SpotRoi extends SpotBase
 	@Override
 	public double realMax( final int d )
 	{
+		if ( d > 1 )
+			return 0;
 		final double[] arr = ( d == 0 ) ? x : y;
 		return getDoublePosition( d ) + Util.max( arr );
 	}
@@ -168,12 +172,12 @@ public class SpotRoi extends SpotBase
 	/**
 	 * Convenience method that returns the X and Y coordinates of the polygon on
 	 * this spot, possibly shifted and scale by a specified amount. Such that:
-	 * 
+	 *
 	 * <pre>
 	 * xout = x * sx + cx
 	 * yout = y * sy + cy
 	 * </pre>
-	 * 
+	 *
 	 * @param cx
 	 *            the shift in X to apply after scaling coordinates.
 	 * @param cy
@@ -203,12 +207,12 @@ public class SpotRoi extends SpotBase
 	/**
 	 * Convenience method that returns the X and Y coordinates of the polygon on
 	 * this spot, possibly shifted and scale by a specified amount. Such that:
-	 * 
+	 *
 	 * <pre>
 	 * xout = x * sx + cx
 	 * yout = y * sy + cy
 	 * </pre>
-	 * 
+	 *
 	 * @param cx
 	 *            the shift in X to apply after scaling coordinates.
 	 * @param cy
@@ -422,7 +426,7 @@ public class SpotRoi extends SpotBase
 
 	/**
 	 * Iterates inside a close polygon given by X & Y in pixel coordinates.
-	 * 
+	 *
 	 * @param <T>
 	 *            the type of pixel in the image.
 	 */
