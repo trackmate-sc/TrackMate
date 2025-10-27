@@ -35,7 +35,6 @@ import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
-import fiji.plugin.trackmate.util.SpotUtil;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 import ij.ImagePlus;
@@ -489,7 +488,7 @@ public class TMLabKitModel implements SegmentationModel
 			{
 				final Label label = labeling.addLabel( spot.getName() );
 				label.setColor( new ARGBType( colorGen.color( spot ).getRGB() ) );
-				final Cursor< UnsignedIntType > c = SpotUtil.iterable( spot, img ).localizingCursor();
+				final Cursor< UnsignedIntType > c = spot.iterable( img ).localizingCursor();
 				while ( c.hasNext() )
 				{
 					c.fwd();
@@ -526,7 +525,7 @@ public class TMLabKitModel implements SegmentationModel
 
 				final Label label = labeling.addLabel( spot.getName() );
 				label.setColor( new ARGBType( colorGen.color( spot ).getRGB() ) );
-				final Cursor< UnsignedIntType > c = SpotUtil.iterable( spot, img ).localizingCursor();
+				final Cursor< UnsignedIntType > c = spot.iterable( img ).localizingCursor();
 				while ( c.hasNext() )
 				{
 					c.fwd();
