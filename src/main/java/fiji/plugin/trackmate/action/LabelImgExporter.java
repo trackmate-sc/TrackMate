@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -211,7 +211,7 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            different from the track IDs and different for each spot.
 	 * @param labelIdPainting
 	 *            specifies how to paint the label ID of spots.
-	 * 
+	 *
 	 * @return a new {@link ImagePlus}.
 	 */
 	public static final ImagePlus createLabelImagePlus(
@@ -297,7 +297,7 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            different from the track IDs and different for each spot.
 	 * @param labelIdPainting
 	 *            specifies how to paint the label ID of spots.
-	 * 
+	 *
 	 * @return a new {@link ImagePlus}.
 	 */
 	public static final ImagePlus createLabelImagePlus(
@@ -385,7 +385,7 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            different from the track IDs and different for each spot.
 	 * @param labelIdPainting
 	 *            specifies how to paint the label ID of spots.
-	 * 
+	 *
 	 * @return a new {@link Img}.
 	 */
 	public static final Img< FloatType > createLabelImg(
@@ -484,13 +484,16 @@ public class LabelImgExporter extends AbstractTMAction
 	 * Creates a new label {@link ImgPlus} of {@link FloatType} where the spots
 	 * are painted with an ID. All visible spots are painted, whether they are
 	 * in a track or not.
-	 * 
+	 *
 	 * @param spots
 	 *            the spots to paint.
 	 * @param dimensions
 	 *            the desired dimensions of the output image (width, height,
 	 *            nZSlices, nFrames) as a 4 element long array. Spots outside
 	 *            these dimensions are ignored.
+	 * @param calibration
+	 *            the pixel size to map physical spot coordinates to pixel
+	 *            coordinates.
 	 * @param exportSpotsAsDots
 	 *            if <code>true</code>, spots will be painted as single dots. If
 	 *            <code>false</code> they will be painted with their shape.
@@ -498,11 +501,14 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            specifies how to paint the label ID of spots. The
 	 *            {@link LabelIdPainting#LABEL_IS_TRACK_ID} is not supported and
 	 *            defaults to {@link LabelIdPainting#LABEL_IS_SPOT_ID}.
+	 * @param outputType
+	 *            the pixel type of the output image.
 	 * @param logger
 	 *            a {@link Logger} instance, to report progress of the export
 	 *            process.
-	 *
 	 * @return a new {@link ImgPlus}.
+	 * @param <T>
+	 *            the pixel type.
 	 */
 	public static < T extends RealType< T > & NativeType< T > > ImgPlus< T > createLabelImg(
 			final SpotCollection spots,

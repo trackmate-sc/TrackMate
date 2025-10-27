@@ -1,24 +1,3 @@
-/*-
- * #%L
- * TrackMate: your buddy for everyday tracking.
- * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 package fiji.plugin.trackmate.util.cli;
 
 import java.awt.BorderLayout;
@@ -65,16 +44,15 @@ public class GenericDetectionConfigurationPanel extends GenericConfigurationPane
 	}
 
 	/**
-	 * Creates a basic {@link DetectionPreview}. Can be overridden by
-	 * subclasses.
+	 * Creates a basic {@link DetectionPreview}. Can be overridden by subclasses
 	 *
 	 * @param model
-	 *            the model to populate the preview with.
+	 *            the model to update with the previewed spots.
 	 * @param settings
-	 *            the settings to use to configure the preview.
+	 *            the settings to use to run the detection.
 	 * @param factorySupplier
-	 *            a supplier for the detector factory to use in the preview.
-	 * @return a new {@link DetectionPreview}.
+	 *            a supplier for the detector factory.
+	 * @return the detection preview object.
 	 */
 	protected DetectionPreview getDetectionPreview(
 			final Model model,

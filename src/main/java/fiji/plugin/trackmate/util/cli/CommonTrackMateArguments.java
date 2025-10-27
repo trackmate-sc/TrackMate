@@ -2,18 +2,18 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -54,7 +54,7 @@ public class CommonTrackMateArguments
 	 *            the configurator to which to add the argument.
 	 * @param nChannels
 	 *            how many channels in the input image.
-	 * @return the created argument.
+	 * @return the integer target channel argument.
 	 */
 	public static IntArgument addTargetChannel( final Configurator config, final int nChannels )
 	{
@@ -112,7 +112,7 @@ public class CommonTrackMateArguments
 	 *            the config to which to add the argument.
 	 * @param units
 	 *            the units of the diameter to display.
-	 * @return the created argument.
+	 * @return the diameter double argument.
 	 */
 	public static DoubleArgument addDiameter( final Configurator config, final String units )
 	{
