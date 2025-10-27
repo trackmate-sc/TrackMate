@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -78,7 +78,7 @@ public class SpotRoi extends SpotBase
 			final double[] x,
 			final double[] y )
 	{
-		super( ID ); 
+		super( ID );
 		this.x = x;
 		this.y = y;
 	}
@@ -154,6 +154,8 @@ public class SpotRoi extends SpotBase
 	@Override
 	public double realMin( final int d )
 	{
+		if ( d > 1 )
+			return 0;
 		final double[] arr = ( d == 0 ) ? x : y;
 		return getDoublePosition( d ) + Util.min( arr );
 	}
@@ -161,6 +163,8 @@ public class SpotRoi extends SpotBase
 	@Override
 	public double realMax( final int d )
 	{
+		if ( d > 1 )
+			return 0;
 		final double[] arr = ( d == 0 ) ? x : y;
 		return getDoublePosition( d ) + Util.max( arr );
 	}
@@ -422,7 +426,7 @@ public class SpotRoi extends SpotBase
 
 	/**
 	 * Iterates inside a close polygon given by X & Y in pixel coordinates.
-	 * 
+	 *
 	 * @param <T>
 	 *            the type of pixel in the image.
 	 */
