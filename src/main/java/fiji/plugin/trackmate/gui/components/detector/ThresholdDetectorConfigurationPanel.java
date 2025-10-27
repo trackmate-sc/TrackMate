@@ -135,10 +135,10 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 
 		setPreferredSize( new Dimension( 300, 511 ) );
 		final GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 47 };
+		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 150 };
 		gridBagLayout.columnWidths = new int[] { 0, 0, 20 };
 		gridBagLayout.columnWeights = new double[] { 0.0, 1.0, 0.0 };
-		gridBagLayout.rowWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+		gridBagLayout.rowWeights = new double[] { 0., 1., 0., 0., 0., 0., 0., 0.1 };
 		setLayout( gridBagLayout );
 
 		final JLabel jLabelDetectorName = new JLabel( detectorName, ThresholdDetectorFactory.ICON, JLabel.CENTER );
