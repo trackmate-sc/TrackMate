@@ -522,11 +522,17 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 						if ( column == 0 )
 							cwidth += xcs;
 
+						// Get sensible bounds for the editor
+						final Rectangle paintBounds = getVisibleRect();
+						final int minx = Math.max( xc - cwidth, paintBounds.x );
+						final int maxx = Math.min( xc, paintBounds.x + paintBounds.width );
+						cwidth = Math.min( cwidth, maxx - minx );
+
 						final JScrollPane scrollPane = new JScrollPane();
 						scrollPane.getViewport().setOpaque( false );
 						scrollPane.setVisible( false );
 						scrollPane.setOpaque( false );
-						scrollPane.setBounds( xc - cwidth, 0, cwidth, ycs );
+						scrollPane.setBounds( minx, 0, maxx - minx, ycs );
 						scrollPane.setVisible( true );
 
 						// Creates the plain text editor
@@ -535,7 +541,9 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 						textArea.setOpaque( true );
 						textArea.setBackground( ds.getTrackSchemeBackgroundColor1() );
 						textArea.setHorizontalAlignment( SwingConstants.CENTER );
-						textArea.setFont( ds.getFont().deriveFont( 12 * scale ).deriveFont( Font.BOLD ) );
+						float fontScale = ( float ) ( 12 * Math.min( 1d, scale ) );
+						fontScale = Math.max( fontScale, 4f );
+						textArea.setFont( ds.getFont().deriveFont( fontScale ).deriveFont( Font.BOLD ) );
 						textArea.addActionListener( new ActionListener()
 						{
 							// Get track name and pass it to model
