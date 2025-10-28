@@ -604,7 +604,8 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			final Graphics2D g2d = ( Graphics2D ) g;
 			final double scale = graph.getView().getScale();
 
-			final float fontScale = ( float ) ( 12 * Math.min( 1d, scale ) );
+			float fontScale = ( float ) ( 12 * Math.min( 1d, scale ) );
+			fontScale = Math.max( fontScale, 4f );
 			g.setFont( ds.getFont().deriveFont( fontScale ) );
 			g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 			final Rectangle paintBounds = g.getClipBounds();
@@ -695,7 +696,8 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			final Graphics2D g2d = ( Graphics2D ) g;
 			final double scale = graph.getView().getScale();
 
-			final float fontScale = ( float ) ( 12 * Math.min( 1d, scale ) );
+			float fontScale = ( float ) ( 12 * Math.min( 1d, scale ) );
+			fontScale = Math.max( fontScale, 4f );
 			g.setFont( ds.getFont().deriveFont( fontScale ) );
 			g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, ds.getUseAntialiasing() ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
 			final Rectangle paintBounds = g.getClipBounds();
