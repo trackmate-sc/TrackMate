@@ -625,7 +625,7 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			{
 				for ( int i = 0; i < columnWidths.length; i++ )
 				{
-					final double minx = x;
+					final double minx = i == 0 ? 0 : x;
 					final int cw = columnWidths[ i ];
 					final double maxx = x + cw * xcs;
 					x += cw * xcs;
