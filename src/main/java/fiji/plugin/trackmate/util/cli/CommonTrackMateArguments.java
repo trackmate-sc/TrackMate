@@ -32,6 +32,7 @@ import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
 import static fiji.plugin.trackmate.detection.ThresholdDetectorFactory.KEY_SIMPLIFY_CONTOURS;
+import static fiji.plugin.trackmate.detection.ThresholdDetectorFactory.KEY_SMOOTHING_SCALE;
 
 import fiji.plugin.trackmate.util.cli.Configurator.DoubleArgument;
 import fiji.plugin.trackmate.util.cli.Configurator.Flag;
@@ -168,5 +169,20 @@ public class CommonTrackMateArguments
 				.get();
 		flag.set( DEFAULT_DO_MEDIAN_FILTERING );
 		return flag;
+	}
+
+	public static DoubleArgument addSmoothingScale( final Configurator config, final String units )
+	{
+		final DoubleArgument smothingScale = config.addDoubleArgument()
+				.key( KEY_SMOOTHING_SCALE )
+				.units( units )
+				.name( "Smooth" )
+				.help( "Object smoothing. If 0 or lower, no smoothing is applied." )
+				.visible( true )
+				.defaultValue( 0. )
+				.min( 0. )
+				.max( 20. )
+				.get();
+		return smothingScale;
 	}
 }
