@@ -5,6 +5,17 @@ import appose
 def process(img, axes):
 
     io.logger_setup()
+
+    # Monkey-patch the size_model_path function to handle missing size models
+    original_size_model_path = models.size_model_path    
+    def patched_size_model_path(model_type):
+        try:
+            return original_size_model_path(model_type)
+        except FileNotFoundError:
+            # Return None if size model not found
+            return None
+    models.size_model_path = patched_size_model_path
+
     model = models.Cellpose(model_type='${--pretrained_model}', gpu=${--use_gpu})
 
     # Transpose so that T is first axis and C is the second axis.
