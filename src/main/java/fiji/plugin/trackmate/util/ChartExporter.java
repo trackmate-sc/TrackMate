@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -34,6 +34,8 @@ import java.io.Writer;
 import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
 import org.jfree.chart.JFreeChart;
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Document;
 
 import com.itextpdf.awt.PdfGraphics2D;
 import com.itextpdf.text.DocumentException;
@@ -43,7 +45,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 /**
  * A collection of static utilities made to export a JPanel to various scalable
  * file format.
- * 
+ *
  * @author Jean-Yves Tinevez, 2011 - 2021
  */
 public class ChartExporter
@@ -51,7 +53,7 @@ public class ChartExporter
 
 	/**
 	 * Export a JFreeChart to SVG.
-	 * 
+	 *
 	 * @param svgFile
 	 *            the target svg file.
 	 * @param chart
@@ -66,8 +68,8 @@ public class ChartExporter
 	public static void exportChartAsSVG( final File svgFile, final JFreeChart chart, final int width, final int height ) throws UnsupportedEncodingException, IOException
 	{
 		// Get a DOMImplementation and create an XML document
-		final org.w3c.dom.DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
-		final org.w3c.dom.Document document = domImpl.createDocument( null, "svg", null );
+		DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
+		Document document = domImpl.createDocument( null, "svg", null );
 
 		// Create an instance of the SVG Generator
 		final SVGGraphics2D svgGenerator = new SVGGraphics2D( document );
@@ -84,7 +86,7 @@ public class ChartExporter
 
 	/**
 	 * Export a JFreeChart to PDF.
-	 * 
+	 *
 	 * @param pdfFile
 	 *            the target pdf file.
 	 * @param chart
