@@ -148,6 +148,8 @@
 
 		<fontchooser.version>2.5.2</fontchooser.version>
 		<javaGeom.version>0.11.1</javaGeom.version>
+		<appose.version>0.9.0</appose.version>
+		<imglib2-appose.version>0.4.0</imglib2-appose.version>
 
 	    <!-- TrackMate >=9 requires Java 21 -->			
 	    <scijava.jvm.version>21</scijava.jvm.version>
@@ -160,12 +162,12 @@
 		<dependency>
 			<groupId>org.apposed</groupId>
 			<artifactId>appose</artifactId>
-			<version>0.8.0</version>
+			<version>${appose.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.imglib2</groupId>
 			<artifactId>imglib2-appose</artifactId>
-			<version>0.4.0</version>
+			<version>${imglib2-appose.version}</version>
 		</dependency>
 
 		<!-- Fiji dependencies -->
