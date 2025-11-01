@@ -174,7 +174,13 @@ public class ApposeDetector< T extends RealType< T > & NativeType< T > > impleme
 			env = Appose
 					.pixi()
 					.content( envContent )
-					.logDebug()
+					.subscribeProgress( ( msg, cur, max ) ->
+					{
+						logger.log( msg );
+						logger.setProgress( ( double ) cur / max );
+					})
+					.subscribeOutput( logger::log )
+					.subscribeError( logger::error )
 					.build();
 		}
 		catch ( final IOException e )
