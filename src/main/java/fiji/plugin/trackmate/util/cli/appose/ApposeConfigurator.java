@@ -8,12 +8,12 @@ public abstract class ApposeConfigurator extends Configurator
 {
 
 	/**
-	 * Returns the Mamba YML environemnt file that can install the tool we want
-	 * to run.
+	 * Returns the environment file config (e.g. environment.yml or pixi.toml)
+	 * that can install the tool we want to run.
 	 *
-	 * @return the Mamba YML environment file content.
+	 * @return the environment file content.
 	 */
-	protected abstract String getMambaYML();
+	protected abstract String getEnvConfig();
 
 	/**
 	 * Returns the script template associated with this Appose tool.

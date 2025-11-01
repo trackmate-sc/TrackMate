@@ -220,7 +220,7 @@ public class StarDistAppose extends ApposeConfigurator
 	}
 
 	@Override
-	protected String getMambaYML()
+	protected String getEnvConfig()
 	{
 		return "name: stardist3d-trackmate\n"
 				+ "channels:\n"

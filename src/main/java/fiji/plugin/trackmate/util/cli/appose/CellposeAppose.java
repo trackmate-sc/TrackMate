@@ -169,7 +169,7 @@ public class CellposeAppose extends ApposeConfigurator
 	}
 
 	@Override
-	protected String getMambaYML()
+	protected String getEnvConfig()
 	{
 		return "name: cellpose3-trackmate\n"
 				+ "channels:\n"

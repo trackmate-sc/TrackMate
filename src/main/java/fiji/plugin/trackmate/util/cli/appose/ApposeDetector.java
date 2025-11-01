@@ -104,10 +104,10 @@ public class ApposeDetector< T extends RealType< T > & NativeType< T > > impleme
 		logger.log( configurator.getClass().getSimpleName() + '\n', Logger.GREEN_COLOR );
 		logger.log( "This machine: " + System.getProperty( "os.name" ) + " / " + System.getProperty( "os.arch" ) + '\n' );
 
-		// The mamba environment spec.
-		final String yamlContent = configurator.getMambaYML();
-		logger.log( "Mamba env:\n" );
-		logger.log( indent( yamlContent ) + "\n\n", Logger.BLUE_COLOR );
+		// The environment spec (e.g. environment.yml or pixi.toml).
+		final String envContent = configurator.getEnvConfig();
+		logger.log( "Env file content:\n" );
+		logger.log( indent( envContent ) + "\n\n", Logger.BLUE_COLOR );
 
 		// Get the script
 		final String script = configurator.makeScript();
@@ -168,18 +168,18 @@ public class ApposeDetector< T extends RealType< T > & NativeType< T > > impleme
 		inputs.put( "axes", axesOrder );
 
 		// Create or retrieve the environment.
-		Environment env = null;
+		Environment env;
 		try
 		{
 			env = Appose
-					.mamba()
-					.content( yamlContent )
+					.pixi()
+					.content( envContent )
 					.logDebug()
 					.build();
 		}
 		catch ( final IOException e )
 		{
-			errorMessage = getBaseErrorMessage() + "Failed to create Appose mamba environment: " + e.getMessage() + '\n';
+			errorMessage = getBaseErrorMessage() + "Failed to create Appose environment: " + e.getMessage() + '\n';
 			e.printStackTrace();
 			return false;
 		}
