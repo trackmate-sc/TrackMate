@@ -148,10 +148,8 @@ def process(img, axes, model_name, prob_thresh, nms_thresh, normalize_input, tar
             if x_axis is not None and x_axis < frame.ndim: zoom_factors[x_axis] = scale_xy
 
             task.update(f"Scaling volume with factors: {zoom_factors}")
-            # TEMPORARY: Disable zoom to test if it's causing the hang
-            # frame_scaled = zoom(frame, zoom_factors, order=1)  # Linear interpolation
-            frame_scaled = frame  # NO ZOOM FOR NOW
-            task.update(f"Scaled shape: {frame.shape} -> {frame_scaled.shape} (ZOOM DISABLED)")
+            frame_scaled = zoom(frame, zoom_factors, order=1)  # Linear interpolation
+            task.update(f"Scaled shape: {frame.shape} -> {frame_scaled.shape}")
 
             # Normalize if requested
             if normalize_input:
@@ -183,12 +181,10 @@ def process(img, axes, model_name, prob_thresh, nms_thresh, normalize_input, tar
 
             # Scale labels back to original size
             task.update("Unscaling labels back to original shape...")
-            # TEMPORARY: No unscaling since we disabled zoom
-            # inverse_zoom = [1.0/z for z in zoom_factors]
-            # labels_original = zoom(labels.astype(np.float32), inverse_zoom, order=0)  # Nearest neighbor
-            # labels_original = labels_original.astype(labels.dtype)
-            labels_original = labels  # NO UNZOOM FOR NOW
-            task.update("Done unscaling (ZOOM DISABLED).")
+            inverse_zoom = [1.0/z for z in zoom_factors]
+            labels_original = zoom(labels.astype(np.float32), inverse_zoom, order=0)  # Nearest neighbor
+            labels_original = labels_original.astype(labels.dtype)
+            task.update("Done unscaling.")
 
             all_labels.append(labels_original)
             task.update(f"Timepoint {t+1}: detected {labels_original.max()} objects")
@@ -234,10 +230,8 @@ def process(img, axes, model_name, prob_thresh, nms_thresh, normalize_input, tar
         if x_axis is not None and x_axis < img.ndim: zoom_factors[x_axis] = scale_xy
 
         task.update(f"Scaling volume with factors: {zoom_factors}")
-        # TEMPORARY: Disable zoom to test if it's causing the hang
-        # img_scaled = zoom(img, zoom_factors, order=1)  # Linear interpolation
-        img_scaled = img  # NO ZOOM FOR NOW
-        task.update(f"Scaled shape: {img.shape} -> {img_scaled.shape} (ZOOM DISABLED)")
+        img_scaled = zoom(img, zoom_factors, order=1)  # Linear interpolation
+        task.update(f"Scaled shape: {img.shape} -> {img_scaled.shape}")
 
         # Normalize if requested
         if normalize_input:
@@ -258,11 +252,9 @@ def process(img, axes, model_name, prob_thresh, nms_thresh, normalize_input, tar
         )
 
         # Scale labels back to original size
-        # TEMPORARY: No unscaling since we disabled zoom
-        # inverse_zoom = [1.0/z for z in zoom_factors]
-        # masks = zoom(labels.astype(np.float32), inverse_zoom, order=0)  # Nearest neighbor
-        # masks = masks.astype(labels.dtype)
-        masks = labels  # NO UNZOOM FOR NOW
+        inverse_zoom = [1.0/z for z in zoom_factors]
+        masks = zoom(labels.astype(np.float32), inverse_zoom, order=0)  # Nearest neighbor
+        masks = masks.astype(labels.dtype)
 
         task.update(f"Detected {masks.max()} objects")
         task.update(f"Mask shape: {masks.shape}")
