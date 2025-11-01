@@ -5,6 +5,8 @@ import appose
 from pathlib import Path
 from scipy.ndimage import zoom
 
+task = globals().get("task", appose.python_worker.Task())
+
 # Model expected nucleus sizes (in pixels)
 MODEL_SIZES = {
     'confocal': {'xy': 39, 'z': 7},
