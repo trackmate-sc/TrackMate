@@ -222,19 +222,106 @@ public class StarDistAppose extends ApposeConfigurator
 	@Override
 	protected String getEnvConfig()
 	{
-		return "name: stardist3d-trackmate\n"
-				+ "channels:\n"
-				+ "  - conda-forge\n"
-				+ "dependencies:\n"
-				+ "  - python=3.10\n"
-				+ "  - numpy<2\n"
-				+ "  - scipy\n"
-				+ "  - pip\n"
-				+ "  - pip:\n"
-				+ "    - stardist==0.9.1\n"
-				+ "    - csbdeep\n"
-				+ "    - tensorflow==2.10.1\n"
-				+ "    - appose\n";
+		return
+			"""
+			[workspace]
+			name = "trackmate-stardist3d"
+			version = "0.0.0.dev0"
+			description = "TrackMate spot detector using StarDist3D."
+			authors = ["Curtis Rueden", "Carlos Garcia", "Jean-Yves Tinevez"]
+			channels = ["conda-forge"]
+			platforms = ["osx-arm64", "osx-64", "linux-64", "win-64"]
+
+			[dependencies]
+			python = "==3.10"
+			numpy = "<2"
+			scipy = "*"
+			pip = "*"
+
+			[pypi-dependencies]
+			stardist = "==0.9.1"
+			csbdeep = "*"
+			ndv = { extras = ["qt"] }
+			pygfx = "<0.13.0"
+
+			[target.osx-64.dependencies]
+			python = "*"
+
+			[target.osx-arm64.dependencies]
+			python = "*"
+
+			# PyPI deps common per-OS:
+			[target.win-64.pypi-dependencies]
+			tensorflow = "==2.10.1"
+
+			[target.linux-64.pypi-dependencies]
+			tensorflow = "==2.10.1"
+
+			[target.osx-64.pypi-dependencies]
+			tensorflow = "*"                 # latest CPU TF for Intel mac
+
+			[target.osx-arm64.pypi-dependencies]
+			tensorflow-macos = "*"           # latest TF for Apple Silicon
+			tensorflow-metal = "*"           # Metal plugin
+
+			# ---------------- Macos no metal - ONLY APPLE SILICON ----------------
+			[feature.nometal]
+			channels = ["conda-forge"]
+
+			[feature.nometal.target.osx-arm64.pypi-dependencies]
+			tensorflow = "*"
+
+			# ---------------- CUDA feature (Windows/Linux only) ----------------
+			[feature.cuda]
+			channels = ["nvidia", "conda-forge"]   # optional; inherits from workspace
+
+			[feature.cuda.target.win-64.dependencies]
+			cudatoolkit = "11.2.*"
+			cudnn       = "8.1.*"
+
+			[feature.cuda.target.linux-64.dependencies]
+			cudatoolkit = "11.2.*"
+			cudnn       = "8.1.*"
+
+			# Activation only when the 'cuda' feature is part of the active environment:
+			[feature.cuda.target.win-64.activation.env]
+			PATH = "%CONDA_PREFIX%\\\\Library\\\\bin;%PATH%"
+
+			[feature.cuda.target.linux-64.activation.env]
+			LD_LIBRARY_PATH = "$CONDA_PREFIX/lib:${LD_LIBRARY_PATH:-}"
+
+			# Dev feature
+			[feature.dev.dependencies]
+			pytest = "*"
+			ruff   = "*"
+
+			[feature.dev.pypi-dependencies]
+			build = "*"
+			validate-pyproject = { extras = ["all"] }
+
+			# ---------------- TASKS (cmd holds the whole command line) ---------------- #
+			[tasks]
+			# Main application
+			start = "python src/main.py"
+
+			# Development tasks
+			lint = "ruff check --fix && ruff format"
+			test = "pytest -v -p no:faulthandler tests"
+			validate = "validate-pyproject pyproject.toml"
+			dist = "python -m build"
+
+			# Combined tasks
+			check = {depends-on = ["validate", "lint"]}
+
+			# ---------------- ENVIRONMENTS ---------------- #
+
+			[environments]
+			default = { solve-group = "default" }
+			cuda    = { features = ["cuda"], solve-group = "default" }
+			nometal = { features = ["nometal"], solve-group = "default" }
+			dev     = { features = ["dev"],  solve-group = "default" }
+			cuda-dev= { features = ["cuda","dev"], solve-group = "default" }
+			""";
 	}
 
 	/**
