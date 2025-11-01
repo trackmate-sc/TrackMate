@@ -4,8 +4,31 @@ import numpy as np
 import appose
 from pathlib import Path
 from scipy.ndimage import zoom
+import tensorflow as tf
 
 task = globals().get("task", appose.python_worker.Task())
+
+# Configure TensorFlow to use GPU
+task.update(f"TensorFlow version: {tf.__version__}")
+gpu_devices = tf.config.list_physical_devices('GPU')
+if gpu_devices:
+    task.update(f"GPU devices available: {len(gpu_devices)}")
+    for dev in gpu_devices:
+        task.update(f"  - {dev.name}: {dev.device_type}")
+
+    # Enable GPU memory growth to avoid OOM
+    try:
+        for gpu in gpu_devices:
+            tf.config.experimental.set_memory_growth(gpu, True)
+        task.update("Enabled GPU memory growth")
+    except Exception as e:
+        task.update(f"Could not set memory growth: {e}")
+
+    # Set visible devices to ensure GPU is used
+    tf.config.set_visible_devices(gpu_devices, 'GPU')
+    task.update("Set GPU as visible device")
+else:
+    task.update("No GPU devices found - running on CPU")
 
 # Model expected nucleus sizes (in pixels)
 MODEL_SIZES = {
@@ -80,6 +103,7 @@ def process(img, axes, model_name, prob_thresh, nms_thresh, normalize_input, tar
         # Load the model once
         task.update(f"Loading StarDist model: {model_name}")
         # Models are in the starfun3d/models directory
+        # FIXME Put them in the right place! Download them?
         model_path = Path.home() / "code" / "trackmate" / "starfun3d" / "models" / model_name
         if not model_path.exists():
             # Fallback to models in current directory
@@ -89,49 +113,82 @@ def process(img, axes, model_name, prob_thresh, nms_thresh, normalize_input, tar
         # Process each timepoint
         all_labels = []
         for t in range(num_timepoints):
-            task.update(f"Processing timepoint {t+1}/{num_timepoints}")
+            task.update(f"Processing timepoint {t+1}/{num_timepoints}", t, num_timepoints)
 
             # Extract single timepoint
             frame = np.take(img, t, axis=t_axis)
 
             # Scale the volume to match model expectations
-            # Determine which axes are Z, Y, X
-            z_axis, y_axis, x_axis = None, None, None
-            for name, idx in axes.items():
-                if name == 'Z': z_axis = idx
-                elif name == 'Y': y_axis = idx
-                elif name == 'X': x_axis = idx
-                elif name == 'Time' and idx <= t_axis:
-                    # Adjust for removed time dimension
-                    if z_axis is not None and z_axis > idx: z_axis -= 1
-                    if y_axis is not None and y_axis > idx: y_axis -= 1
-                    if x_axis is not None and x_axis > idx: x_axis -= 1
+            # Determine which axes are Z, Y, X in the ORIGINAL axes dict
+            # Then adjust for removed dimensions (Channel was removed earlier, Time is removed now)
+            z_axis_orig = axes.get('Z')
+            y_axis_orig = axes.get('Y')
+            x_axis_orig = axes.get('X')
+
+            # Adjust indices for removed Channel dimension (if it existed and was before this axis)
+            c_axis = axes.get('Channel')
+            z_axis = z_axis_orig
+            y_axis = y_axis_orig
+            x_axis = x_axis_orig
+
+            if c_axis is not None:
+                if z_axis is not None and z_axis > c_axis: z_axis -= 1
+                if y_axis is not None and y_axis > c_axis: y_axis -= 1
+                if x_axis is not None and x_axis > c_axis: x_axis -= 1
+
+            # Adjust indices for removed Time dimension
+            if z_axis is not None and z_axis > t_axis: z_axis -= 1
+            if y_axis is not None and y_axis > t_axis: y_axis -= 1
+            if x_axis is not None and x_axis > t_axis: x_axis -= 1
 
             # Build zoom factors for each dimension
             zoom_factors = [1.0] * frame.ndim
-            if z_axis is not None: zoom_factors[z_axis] = scale_z
-            if y_axis is not None: zoom_factors[y_axis] = scale_xy
-            if x_axis is not None: zoom_factors[x_axis] = scale_xy
+            if z_axis is not None and z_axis < frame.ndim: zoom_factors[z_axis] = scale_z
+            if y_axis is not None and y_axis < frame.ndim: zoom_factors[y_axis] = scale_xy
+            if x_axis is not None and x_axis < frame.ndim: zoom_factors[x_axis] = scale_xy
 
             task.update(f"Scaling volume with factors: {zoom_factors}")
-            frame_scaled = zoom(frame, zoom_factors, order=1)  # Linear interpolation
-            task.update(f"Scaled shape: {frame.shape} -> {frame_scaled.shape}")
+            # TEMPORARY: Disable zoom to test if it's causing the hang
+            # frame_scaled = zoom(frame, zoom_factors, order=1)  # Linear interpolation
+            frame_scaled = frame  # NO ZOOM FOR NOW
+            task.update(f"Scaled shape: {frame.shape} -> {frame_scaled.shape} (ZOOM DISABLED)")
 
             # Normalize if requested
             if normalize_input:
+                task.update(f"Normalizing input (dtype: {frame_scaled.dtype})...")
                 frame_scaled = normalize(frame_scaled, 1, 99.8)
+                task.update(f"After normalization (dtype: {frame_scaled.dtype})...")
+
+            # Ensure float32 for TensorFlow
+            if frame_scaled.dtype != np.float32:
+                task.update(f"Converting to float32 from {frame_scaled.dtype}")
+                frame_scaled = frame_scaled.astype(np.float32)
 
             # Predict
+            import time
+            task.update(f"About to run inference...")
+            task.update(f"  Volume shape: {frame_scaled.shape}")
+            task.update(f"  Volume dtype: {frame_scaled.dtype}")
+            task.update(f"  Volume range: [{frame_scaled.min():.3f}, {frame_scaled.max():.3f}]")
+            task.update(f"  Volume size: {frame_scaled.nbytes / 1024 / 1024:.2f} MB")
+            task.update(f"Starting inference now...")
+            start_time = time.time()
             labels, details = model.predict_instances(
                 frame_scaled,
                 prob_thresh=prob_thresh,
                 nms_thresh=nms_thresh
             )
+            elapsed = time.time() - start_time
+            task.update(f"Inference complete in {elapsed:.2f}s.")
 
             # Scale labels back to original size
-            inverse_zoom = [1.0/z for z in zoom_factors]
-            labels_original = zoom(labels.astype(np.float32), inverse_zoom, order=0)  # Nearest neighbor
-            labels_original = labels_original.astype(labels.dtype)
+            task.update("Unscaling labels back to original shape...")
+            # TEMPORARY: No unscaling since we disabled zoom
+            # inverse_zoom = [1.0/z for z in zoom_factors]
+            # labels_original = zoom(labels.astype(np.float32), inverse_zoom, order=0)  # Nearest neighbor
+            # labels_original = labels_original.astype(labels.dtype)
+            labels_original = labels  # NO UNZOOM FOR NOW
+            task.update("Done unscaling (ZOOM DISABLED).")
 
             all_labels.append(labels_original)
             task.update(f"Timepoint {t+1}: detected {labels_original.max()} objects")
@@ -142,7 +199,7 @@ def process(img, axes, model_name, prob_thresh, nms_thresh, normalize_input, tar
 
     else:
         # Single timepoint - process directly
-        task.update(f"Processing single 3D volume")
+        task.update("Processing single 3D volume")
         task.update(f"Loading StarDist model: {model_name}")
 
         # Models are in the starfun3d/models directory
@@ -153,26 +210,45 @@ def process(img, axes, model_name, prob_thresh, nms_thresh, normalize_input, tar
         model = StarDist3D(None, name=model_name, basedir=model_path.parent)
 
         # Scale the volume to match model expectations
-        # Determine which axes are Z, Y, X
-        z_axis, y_axis, x_axis = None, None, None
-        for name, idx in axes.items():
-            if name == 'Z': z_axis = idx
-            elif name == 'Y': y_axis = idx
-            elif name == 'X': x_axis = idx
+        # Determine which axes are Z, Y, X in the ORIGINAL axes dict
+        # Adjust for removed Channel dimension (if it existed)
+        z_axis_orig = axes.get('Z')
+        y_axis_orig = axes.get('Y')
+        x_axis_orig = axes.get('X')
+
+        # Adjust indices for removed Channel dimension (if it existed and was before this axis)
+        c_axis = axes.get('Channel')
+        z_axis = z_axis_orig
+        y_axis = y_axis_orig
+        x_axis = x_axis_orig
+
+        if c_axis is not None:
+            if z_axis is not None and z_axis > c_axis: z_axis -= 1
+            if y_axis is not None and y_axis > c_axis: y_axis -= 1
+            if x_axis is not None and x_axis > c_axis: x_axis -= 1
 
         # Build zoom factors for each dimension
         zoom_factors = [1.0] * img.ndim
-        if z_axis is not None: zoom_factors[z_axis] = scale_z
-        if y_axis is not None: zoom_factors[y_axis] = scale_xy
-        if x_axis is not None: zoom_factors[x_axis] = scale_xy
+        if z_axis is not None and z_axis < img.ndim: zoom_factors[z_axis] = scale_z
+        if y_axis is not None and y_axis < img.ndim: zoom_factors[y_axis] = scale_xy
+        if x_axis is not None and x_axis < img.ndim: zoom_factors[x_axis] = scale_xy
 
         task.update(f"Scaling volume with factors: {zoom_factors}")
-        img_scaled = zoom(img, zoom_factors, order=1)  # Linear interpolation
-        task.update(f"Scaled shape: {img.shape} -> {img_scaled.shape}")
+        # TEMPORARY: Disable zoom to test if it's causing the hang
+        # img_scaled = zoom(img, zoom_factors, order=1)  # Linear interpolation
+        img_scaled = img  # NO ZOOM FOR NOW
+        task.update(f"Scaled shape: {img.shape} -> {img_scaled.shape} (ZOOM DISABLED)")
 
         # Normalize if requested
         if normalize_input:
+            task.update(f"Normalizing input (dtype: {img_scaled.dtype})...")
             img_scaled = normalize(img_scaled, 1, 99.8)
+            task.update(f"After normalization (dtype: {img_scaled.dtype})...")
+
+        # Ensure float32 for TensorFlow
+        if img_scaled.dtype != np.float32:
+            task.update(f"Converting to float32 from {img_scaled.dtype}")
+            img_scaled = img_scaled.astype(np.float32)
 
         # Predict
         labels, details = model.predict_instances(
@@ -182,9 +258,11 @@ def process(img, axes, model_name, prob_thresh, nms_thresh, normalize_input, tar
         )
 
         # Scale labels back to original size
-        inverse_zoom = [1.0/z for z in zoom_factors]
-        masks = zoom(labels.astype(np.float32), inverse_zoom, order=0)  # Nearest neighbor
-        masks = masks.astype(labels.dtype)
+        # TEMPORARY: No unscaling since we disabled zoom
+        # inverse_zoom = [1.0/z for z in zoom_factors]
+        # masks = zoom(labels.astype(np.float32), inverse_zoom, order=0)  # Nearest neighbor
+        # masks = masks.astype(labels.dtype)
+        masks = labels  # NO UNZOOM FOR NOW
 
         task.update(f"Detected {masks.max()} objects")
         task.update(f"Mask shape: {masks.shape}")
@@ -196,8 +274,12 @@ def process(img, axes, model_name, prob_thresh, nms_thresh, normalize_input, tar
 model_name = "${--model}"
 custom_model = "${--custom_model}"
 
-# Use custom model if provided, otherwise use pretrained
-if custom_model and custom_model.strip():
+# Check if custom_model was actually substituted (not still a template variable)
+# If it starts with "${", it means it wasn't selected/substituted
+custom_model_selected = custom_model and not custom_model.startswith("${")
+
+# Use custom model if provided and selected, otherwise use pretrained
+if custom_model_selected and custom_model.strip():
     model_path = Path(custom_model)
     if not model_path.exists():
         raise FileNotFoundError(f"Custom model path does not exist: {custom_model}")
@@ -209,7 +291,7 @@ else:
 
 prob_thresh = float("${--prob_thresh}")
 nms_thresh = float("${--nms_thresh}")
-normalize_input = "${--normalize}" == "True"
+normalize_input = "${--normalize}".lower() == "true"  # Case-insensitive boolean check
 target_channel = int("${TARGET_CHANNEL}")
 expected_diameter_xy = float("${--diameter_xy}")
 expected_diameter_z = float("${--diameter_z}")

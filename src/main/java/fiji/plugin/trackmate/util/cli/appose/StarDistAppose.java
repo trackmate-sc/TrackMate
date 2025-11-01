@@ -2,6 +2,7 @@ package fiji.plugin.trackmate.util.cli.appose;
 
 import java.util.function.Function;
 
+import fiji.plugin.trackmate.detection.DetectorKeys;
 import fiji.plugin.trackmate.util.cli.CommonTrackMateArguments;
 
 /**
@@ -38,6 +39,14 @@ public class StarDistAppose extends ApposeConfigurator
 
 	public StarDistAppose( final int nChannels, final String units, final double pixelSize, final double pixelDepth )
 	{
+		// TODO FIXME
+		//  Download selected pretrained model on demand:
+		//  - https://zenodo.org/records/10518151/files/model_confocal.zip
+		//  - https://zenodo.org/records/10518151/files/model_sospim.zip
+		//  - https://zenodo.org/records/10518151/files/model_spinning.zip
+		//  See:
+		//  https://github.com/imagej/imagej-tensorflow/blob/d7b200fdd3d1f18ae3b70fe0c55088a5f62febaf/src/main/java/net/imagej/tensorflow/DefaultTensorFlowService.java#L380-L414
+
 		// The pretrained model list.
 		this.modelChoice = addChoiceArgument()
 				.name( "Pretrained model" )
@@ -60,8 +69,19 @@ public class StarDistAppose extends ApposeConfigurator
 				.key( KEY_STARDIST_CUSTOM_MODEL_PATH )
 				.get();
 
-		// Target channel
-		this.targetChannel = CommonTrackMateArguments.addTargetChannel( this, nChannels );
+		// Target channel - define locally so we can set argument for template substitution
+		this.targetChannel = addIntArgument()
+				.key( DetectorKeys.KEY_TARGET_CHANNEL )
+				.argument( "TARGET_CHANNEL" )
+				.defaultValue( DetectorKeys.DEFAULT_TARGET_CHANNEL )
+				.name( "Target channel" )
+				.help( "Index of the channel to process." )
+				.inCLI( false )
+				.visible( true )
+				.min( 1 ) // 1-based
+				.max( Integer.valueOf( nChannels ) )
+				.get();
+		this.targetChannel.set( DetectorKeys.DEFAULT_TARGET_CHANNEL );
 
 		// Expected nucleus diameter in XY
 		this.diameterXY = addDoubleArgument()
@@ -96,7 +116,7 @@ public class StarDistAppose extends ApposeConfigurator
 		// Pixel size XY - not visible to user, just passed to Python
 		this.pixelSizeXY = addDoubleArgument()
 				.key( KEY_PIXEL_SIZE_XY )
-				.argument( "${PIXEL_SIZE_XY}" )
+				.argument( "PIXEL_SIZE_XY" )
 				.defaultValue( pixelSize )
 				.visible( false )
 				.inCLI( false )
@@ -106,7 +126,7 @@ public class StarDistAppose extends ApposeConfigurator
 		// Pixel size Z - not visible to user, just passed to Python
 		this.pixelSizeZ = addDoubleArgument()
 				.key( KEY_PIXEL_SIZE_Z )
-				.argument( "${PIXEL_SIZE_Z}" )
+				.argument( "PIXEL_SIZE_Z" )
 				.defaultValue( pixelDepth )
 				.visible( false )
 				.inCLI( false )
@@ -239,6 +259,7 @@ public class StarDistAppose extends ApposeConfigurator
 			pip = "*"
 
 			[pypi-dependencies]
+			appose = "==0.7.2"
 			stardist = "==0.9.1"
 			csbdeep = "*"
 			ndv = { extras = ["qt"] }
@@ -375,6 +396,7 @@ public class StarDistAppose extends ApposeConfigurator
 		stardist.probThreshold.set( 0.5 );
 		stardist.nmsThreshold.set( 0.4 );
 		stardist.normalizeInput.set( true );
+		// Note: pixelSizeXY and pixelSizeZ are already set in constructor
 
 		System.out.println( stardist.makeScript() ); // DEBUG
 	}
