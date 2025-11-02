@@ -23,10 +23,10 @@ package fiji.plugin.trackmate.features.track;
 
 import java.util.Collection;
 
-import net.imglib2.algorithm.Benchmark;
-import net.imglib2.algorithm.MultiThreaded;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.features.FeatureAnalyzer;
+import net.imglib2.algorithm.Benchmark;
+import net.imglib2.algorithm.MultiThreaded;
 
 /**
  * Mother interface for the classes that can compute the feature of tracks.
@@ -80,6 +80,8 @@ public interface TrackAnalyzer extends Benchmark, FeatureAnalyzer, MultiThreaded
 	 * <p>
 	 * Example of a non-local track feature: the rank of the track sorted by its
 	 * number of spots, compared to other tracks.
+	 * 
+	 * @return whether this analyzer is a local analyzer.
 	 */
 	public boolean isLocal();
 

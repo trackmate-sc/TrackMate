@@ -164,7 +164,8 @@ public class LabkitImporter
 			for ( final Label label : modifiedLabels )
 			{
 				final IterableRegion< BitType > region = regions.get( label );
-				final List< Spot > spots = MaskUtils.fromThresholdWithROI( region, region, calibration, threshold, simplifyContours, numThreads, null );
+				final double smoothingScale = -1.; // no smoothing
+				final List< Spot > spots = MaskUtils.fromThresholdWithROI( region, region, calibration, threshold, simplifyContours, smoothingScale, numThreads, null );
 				map.put( label, spots );
 			}
 			allModifiedSpots.put( lt, map );
@@ -179,7 +180,8 @@ public class LabkitImporter
 				for ( long t = minT; t <= maxT; t++ )
 				{
 					final IntervalView< BitType > slice = Views.hyperSlice( region, timeAxis, t );
-					final List< Spot > spots = MaskUtils.fromThresholdWithROI( slice, slice, calibration, threshold, simplifyContours, numThreads, null );
+					final double smoothingScale = -1.; // no smoothing
+					final List< Spot > spots = MaskUtils.fromThresholdWithROI( slice, slice, calibration, threshold, simplifyContours, smoothingScale, numThreads, null );
 
 					Map< Label, List< Spot > > map = allModifiedSpots.get( Integer.valueOf( ( int ) t ) );
 					if ( map == null )

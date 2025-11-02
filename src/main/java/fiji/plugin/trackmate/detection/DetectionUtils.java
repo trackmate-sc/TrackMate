@@ -38,6 +38,7 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.util.MedianFilter2D;
@@ -297,6 +298,8 @@ public class DetectionUtils
 	 * @return a new float Img. Careful: even if the specified interval does not
 	 *         start at (0, 0), the new image will have its first pixel at
 	 *         coordinates (0, 0).
+	 * @param <T>
+	 *            the pixel type of the input image.
 	 */
 	public static final < T extends RealType< T > > Img< FloatType > copyToFloatImg( final RandomAccessible< T > img, final Interval interval, final ImgFactory< FloatType > factory )
 	{
@@ -349,7 +352,14 @@ public class DetectionUtils
 	}
 
 	/**
-	 * Apply a simple 3x3 median filter to the target image.
+	 * Applies a simple 3x3 median filter to the target image.
+	 *
+	 * @param <R>
+	 *            the pixel type in the image.
+	 * @param image
+	 *            the image to filter.
+	 * @return the filtered image, as a new image, or <code>null</code> if there
+	 *         was a problem during processing.
 	 */
 	public static final < R extends RealType< R > & NativeType< R > > Img< R > applyMedianFilter( final RandomAccessibleInterval< R > image )
 	{
@@ -435,7 +445,7 @@ public class DetectionUtils
 					final double x = refinedPeak.getDoublePosition( 0 ) * calibration[ 0 ];
 					final double y = refinedPeak.getDoublePosition( 1 ) * calibration[ 1 ];
 					final double z = refinedPeak.getDoublePosition( 2 ) * calibration[ 2 ];
-					final Spot spot = new Spot( x, y, z, radius, quality );
+					final Spot spot = new SpotBase( x, y, z, radius, quality );
 					spots.add( spot );
 				}
 			}
@@ -448,7 +458,7 @@ public class DetectionUtils
 					final double quality = ra.get().getRealDouble();
 					final double x = refinedPeak.getDoublePosition( 0 ) * calibration[ 0 ];
 					final double y = refinedPeak.getDoublePosition( 1 ) * calibration[ 1 ];
-					final Spot spot = new Spot( x, y, z, radius, quality );
+					final Spot spot = new SpotBase( x, y, z, radius, quality );
 					spots.add( spot );
 				}
 			}
@@ -461,7 +471,7 @@ public class DetectionUtils
 					ra.setPosition( refinedPeak.getOriginalPeak() );
 					final double quality = ra.get().getRealDouble();
 					final double x = refinedPeak.getDoublePosition( 0 ) * calibration[ 0 ];
-					final Spot spot = new Spot( x, y, z, radius, quality );
+					final Spot spot = new SpotBase( x, y, z, radius, quality );
 					spots.add( spot );
 				}
 
@@ -480,7 +490,7 @@ public class DetectionUtils
 					final double x = peak.getDoublePosition( 0 ) * calibration[ 0 ];
 					final double y = peak.getDoublePosition( 1 ) * calibration[ 1 ];
 					final double z = peak.getDoublePosition( 2 ) * calibration[ 2 ];
-					final Spot spot = new Spot( x, y, z, radius, quality );
+					final Spot spot = new SpotBase( x, y, z, radius, quality );
 					spots.add( spot );
 				}
 			}
@@ -493,7 +503,7 @@ public class DetectionUtils
 					final double quality = ra.get().getRealDouble();
 					final double x = peak.getDoublePosition( 0 ) * calibration[ 0 ];
 					final double y = peak.getDoublePosition( 1 ) * calibration[ 1 ];
-					final Spot spot = new Spot( x, y, z, radius, quality );
+					final Spot spot = new SpotBase( x, y, z, radius, quality );
 					spots.add( spot );
 				}
 			}
@@ -506,10 +516,9 @@ public class DetectionUtils
 					ra.setPosition( peak );
 					final double quality = ra.get().getRealDouble();
 					final double x = peak.getDoublePosition( 0 ) * calibration[ 0 ];
-					final Spot spot = new Spot( x, y, z, radius, quality );
+					final Spot spot = new SpotBase( x, y, z, radius, quality );
 					spots.add( spot );
 				}
-
 			}
 		}
 
@@ -585,6 +594,10 @@ public class DetectionUtils
 	 *
 	 * @param img
 	 *            the image to wrap.
+	 * @return a new ImagePlus.
+	 * @param <T>
+	 *            the type of pixels in the image. Must extend {@link RealType}
+	 *            and {@link NativeType}.
 	 */
 	public static < T extends RealType< T > & NativeType< T > > ImagePlus wrap( final ImgPlus< T > img )
 	{
@@ -621,11 +634,11 @@ public class DetectionUtils
 	 * @param c
 	 *            the channel to extract (0-based). If negative, all channels
 	 *            are included.
-	 * @param nameGen
+	 * @param namegen
 	 *            a generator for the name of the output ImagePlus.
 	 * @return a new list of ImagePlus.
 	 */
-	public static < T extends RealType< T > & NativeType< T > > List< ImagePlus > splitSingleTimePoints( final ImgPlus< T > img, final Interval interval, final int c, final Function< Long, String > namegen2 )
+	public static < T extends RealType< T > & NativeType< T > > List< ImagePlus > splitSingleTimePoints( final ImgPlus< T > img, final Interval interval, final int c, final Function< Long, String > namegen )
 	{
 		final int zIndex = img.dimensionIndex( Axes.Z );
 		final int cIndex = img.dimensionIndex( Axes.CHANNEL );

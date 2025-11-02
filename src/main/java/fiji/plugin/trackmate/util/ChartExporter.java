@@ -61,7 +61,7 @@ public class ChartExporter
 	 * @param height
 	 *            the height of the panel the chart is painted in.
 	 * @throws UnsupportedEncodingException
-	 * @throws IOException
+	 *             If the UTF-8 encoding is not supported.
 	 */
 	public static void exportChartAsSVG( final File svgFile, final JFreeChart chart, final int width, final int height ) throws UnsupportedEncodingException, IOException
 	{

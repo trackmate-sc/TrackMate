@@ -99,7 +99,9 @@ public class TrackSchemeKeyboardHandler
 	}
 
 	/**
-	 * Return the mapping between JTree's input map and JGraph's actions.
+	 * Returns the mapping between JTree's input map and JGraph's actions.
+	 * 
+	 * @return the action map.
 	 */
 	protected ActionMap createActionMap()
 	{

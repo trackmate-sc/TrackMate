@@ -1,4 +1,25 @@
 package fiji.plugin.trackmate.gui.editor.labkit.model;
+/*-
+ * #%L
+ * TrackMate: your buddy for everyday tracking.
+ * %%
+ * Copyright (C) 2010 - 2024 TrackMate developers.
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/gpl-3.0.html>.
+ * #L%
+ */
 
 import java.awt.Color;
 import java.util.Arrays;
@@ -57,7 +78,6 @@ public class ImpBdvShowable implements BdvShowable
 	 */
 	public static < T extends NumericType< T > > ImpBdvShowable fromImp( final ImagePlus imp )
 	{
-		@SuppressWarnings( "unchecked" )
 		final ImgPlus< T > src = TMUtils.rawWraps( imp );
 		if ( src.dimensionIndex( Axes.CHANNEL ) < 0 )
 			Views.addDimension( src );

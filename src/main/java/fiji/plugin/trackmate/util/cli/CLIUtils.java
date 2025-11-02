@@ -468,6 +468,7 @@ public class CLIUtils
 	 * from https://stackoverflow.com/a/20280989/201698
 	 *
 	 * @param path
+	 *            the path to delete on shutdown.
 	 */
 	public static void recursiveDeleteOnShutdownHook( final Path path )
 	{

@@ -24,7 +24,10 @@ package fiji.plugin.trackmate.gui.wizard.descriptors;
 import java.util.Map;
 
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.gui.components.ModuleChooserPanel;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
 import fiji.plugin.trackmate.io.SettingsPersistence;
 import fiji.plugin.trackmate.providers.TrackerProvider;
@@ -40,11 +43,17 @@ public class ChooseTrackerDescriptor extends WizardPanelDescriptor
 
 	private final TrackerProvider trackerProvider;
 
-	public ChooseTrackerDescriptor( final TrackerProvider trackerProvider, final TrackMate trackmate )
+	private final DisplaySettings displaySettings;
+
+	public ChooseTrackerDescriptor(
+			final TrackerProvider trackerProvider,
+			final TrackMate trackmate,
+			final DisplaySettings displaySettings )
 	{
 		super( KEY );
 		this.trackmate = trackmate;
 		this.trackerProvider = trackerProvider;
+		this.displaySettings = displaySettings;
 
 		String selectedTracker = SimpleSparseLAPTrackerFactory.THIS2_TRACKER_KEY; // default
 		if ( null != trackmate.getSettings().trackerFactory )
@@ -106,7 +115,12 @@ public class ChooseTrackerDescriptor extends WizardPanelDescriptor
 	@Override
 	public Runnable getBackwardRunnable()
 	{
-		// Delete tracks.
-		return () -> trackmate.getModel().clearTracks( true );
+		// Delete tracks and put back default coloring if needed.
+		return () -> {
+			if ( displaySettings.getSpotColorByType() == TrackMateObject.TRACKS
+					|| displaySettings.getSpotColorByType() == TrackMateObject.EDGES )
+				displaySettings.setSpotColorBy( TrackMateObject.DEFAULT, FeatureUtils.USE_UNIFORM_COLOR_KEY );
+			trackmate.getModel().clearTracks( true );
+		};
 	}
 }

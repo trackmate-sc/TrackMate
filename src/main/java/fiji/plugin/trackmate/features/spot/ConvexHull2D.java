@@ -25,13 +25,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotRoi;
 
 /**
  * Adapted from a code by Kirill Artemov,
  * https://github.com/DoctorGester/cia-stats.
  */
-public final class ConvexHull
+public final class ConvexHull2D
 {
 
 	private static List< Point > makeHull( final List< Point > points )
@@ -121,9 +122,9 @@ public final class ConvexHull
 
 	public static SpotRoi convexHull( final SpotRoi roi )
 	{
-		final List< Point > points = new ArrayList<>( roi.x.length );
-		for ( int i = 0; i < roi.x.length; i++ )
-			points.add( new Point( roi.x[ i ], roi.y[ i ] ) );
+		final List< Point > points = new ArrayList<>( roi.nPoints() );
+		for ( int i = 0; i < roi.nPoints(); i++ )
+			points.add( new Point( roi.xr( i ), roi.yr( i ) ) );
 
 		final List< Point > hull = makeHull( points );
 		final double[] xhull = new double[ hull.size() ];
@@ -133,6 +134,11 @@ public final class ConvexHull
 			xhull[ i ] = hull.get( i ).x;
 			yhull[ i ] = hull.get( i ).y;
 		}
-		return new SpotRoi( xhull, yhull );
+		final double xc = roi.getDoublePosition( 0 );
+		final double yc = roi.getDoublePosition( 1 );
+		final double zc = roi.getDoublePosition( 2 );
+		final double r = roi.getFeature( Spot.RADIUS );
+		final double quality = roi.getFeature( Spot.QUALITY );
+		return new SpotRoi( xc, yc, zc, r, quality, roi.getName(), xhull, yhull );
 	}
 }

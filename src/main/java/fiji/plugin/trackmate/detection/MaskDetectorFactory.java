@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -37,6 +37,8 @@ import fiji.plugin.trackmate.util.TMUtils;
 import net.imagej.ImgPlus;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
+import net.imglib2.converter.Converter;
+import net.imglib2.converter.Converters;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 
@@ -62,9 +64,8 @@ public class MaskDetectorFactory< T extends RealType< T > & NativeType< T > > ex
 			+ "a value strictly larger than 0 are "
 			+ "considered as part of the foreground, "
 			+ "and used to build connected regions. In 2D, spots are created with "
-			+ "the (possibly simplified) contour of the region. In 3D, a spherical "
-			+ "spot is created for each region in its center, with a volume equal to the "
-			+ "region volume."
+			+ "the (possibly simplified) contour of the region. In 3D, a mesh is "
+			+ "created for each region."
 			+ "<p>"
 			+ "The spot quality stores the object area or volume in pixels."
 			+ "</html>";
@@ -72,40 +73,58 @@ public class MaskDetectorFactory< T extends RealType< T > & NativeType< T > > ex
 	public static final String URL_DOC = "https://imagej.net/plugins/trackmate/detectors/trackmate-mask-detector";
 
 	@Override
-	public boolean has2Dsegmentation()
-	{
-		return true;
-	}
-
-	@Override
 	public SpotDetector< T > getDetector( final ImgPlus< T > img, final Map< String, Object > settings, final Interval interval, final int frame )
 	{
-		final double intensityThreshold = 0.;
 		final boolean simplifyContours = ( Boolean ) settings.get( KEY_SIMPLIFY_CONTOURS );
+		final double smoothingScale = ( Double ) settings.get( KEY_SMOOTHING_SCALE );
 		final double[] calibration = TMUtils.getSpatialCalibration( img );
 		final int channel = ( Integer ) settings.get( KEY_TARGET_CHANNEL ) - 1;
 		final RandomAccessible< T > imFrame = DetectionUtils.prepareFrameImg( img, channel, frame );
+		final RandomAccessible< T > mask = mask( imFrame );
 
-		final ThresholdDetector< T > detector = new ThresholdDetector<>(
-				imFrame,
+		final MaskDetector< T > detector = new MaskDetector<>(
+				mask,
 				interval,
 				calibration,
-				intensityThreshold,
-				simplifyContours );
+				simplifyContours,
+				smoothingScale );
+
 		detector.setNumThreads( 1 );
 		return detector;
+	}
+
+	/**
+	 * Return a view of the input image where all pixels with values strictly
+	 * larger than 0 are set to 1, and set to 0 otherwise.
+	 *
+	 * @param input
+	 *            the image to wrap.
+	 * @return a view of the image.
+	 */
+	protected RandomAccessible< T > mask( final RandomAccessible< T > input )
+	{
+		final Converter< T, T > c = new Converter< T, T >()
+		{
+			@Override
+			public void convert( final T input, final T output )
+			{
+				output.setReal( input.getRealDouble() > 0. ? 1. : 0. );
+			}
+		};
+		return Converters.convert( input, c, input.getType() );
+	}
+
+
+	@Override
+	public ConfigurationPanel getDetectorConfigurationPanel( final Settings lSettings, final Model model )
+	{
+		return new MaskDetectorConfigurationPanel( lSettings, model );
 	}
 
 	@Override
 	public String getKey()
 	{
 		return DETECTOR_KEY;
-	}
-
-	@Override
-	public ConfigurationPanel getDetectorConfigurationPanel( final Settings lSettings, final Model model )
-	{
-		return new MaskDetectorConfigurationPanel( lSettings, model );
 	}
 
 	@Override
@@ -132,6 +151,7 @@ public class MaskDetectorFactory< T extends RealType< T > & NativeType< T > > ex
 		final Map< String, Object > lSettings = new HashMap<>();
 		lSettings.put( KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL );
 		lSettings.put( KEY_SIMPLIFY_CONTOURS, true );
+		lSettings.put( KEY_SMOOTHING_SCALE, -1. );
 		return lSettings;
 	}
 }

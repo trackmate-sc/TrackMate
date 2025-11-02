@@ -52,5 +52,4 @@ public interface SpotTrackerFactory extends TrackMateFactoryBase< SpotTrackerFac
 	 * @return a new configuration panel.
 	 */
 	public ConfigurationPanel getTrackerConfigurationPanel( final Model model );
-
 }

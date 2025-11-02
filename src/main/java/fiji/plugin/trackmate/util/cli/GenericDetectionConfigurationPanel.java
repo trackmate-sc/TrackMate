@@ -47,8 +47,12 @@ public class GenericDetectionConfigurationPanel extends GenericConfigurationPane
 	 * Creates a basic {@link DetectionPreview}. Can be overridden by subclasses
 	 *
 	 * @param model
+	 *            the model to update with the previewed spots.
 	 * @param settings
-	 * @return
+	 *            the settings to use to run the detection.
+	 * @param factorySupplier
+	 *            a supplier for the detector factory.
+	 * @return the detection preview object.
 	 */
 	protected DetectionPreview getDetectionPreview(
 			final Model model,

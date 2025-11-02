@@ -6,10 +6,10 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.util.TMUtils;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
 import net.imagej.axis.CalibratedAxis;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
@@ -36,34 +36,22 @@ public class TMLabKitUtils
 
 	static final void boundingBox( final Spot spot, final ImgPlus< UnsignedIntType > img, final long[] min, final long[] max )
 	{
+		final double[] rmin = spot.minAsDoubleArray();
+		final double[] rmax = spot.maxAsDoubleArray();
 		final double[] calibration = TMUtils.getSpatialCalibration( img );
-		final SpotRoi roi = spot.getRoi();
-		if ( roi == null )
-		{
-			final double cx = spot.getDoublePosition( 0 );
-			final double cy = spot.getDoublePosition( 1 );
-			final double r = spot.getFeature( Spot.RADIUS ).doubleValue();
-			min[ 0 ] = ( long ) Math.floor( ( cx - r ) / calibration[ 0 ] );
-			min[ 1 ] = ( long ) Math.floor( ( cy - r ) / calibration[ 1 ] );
-			max[ 0 ] = ( long ) Math.ceil( ( cx + r ) / calibration[ 0 ] );
-			max[ 1 ] = ( long ) Math.ceil( ( cy + r ) / calibration[ 1 ] );
-		}
-		else
-		{
-			final double[] x = roi.toPolygonX( calibration[ 0 ], 0, spot.getDoublePosition( 0 ), 1. );
-			final double[] y = roi.toPolygonY( calibration[ 1 ], 0, spot.getDoublePosition( 1 ), 1. );
-			min[ 0 ] = ( long ) Math.floor( Util.min( x ) );
-			min[ 1 ] = ( long ) Math.floor( Util.min( y ) );
-			max[ 0 ] = ( long ) Math.ceil( Util.max( x ) );
-			max[ 1 ] = ( long ) Math.ceil( Util.max( y ) );
-		}
 
-		min[ 0 ] = Math.max( 0, min[ 0 ] );
-		min[ 1 ] = Math.max( 0, min[ 1 ] );
-		final long width = img.min( img.dimensionIndex( Axes.X ) ) + img.dimension( img.dimensionIndex( Axes.X ) );
-		final long height = img.min( img.dimensionIndex( Axes.Y ) ) + img.dimension( img.dimensionIndex( Axes.Y ) );
-		max[ 0 ] = Math.min( width, max[ 0 ] );
-		max[ 1 ] = Math.min( height, max[ 1 ] );
+		final AxisType[] axes = new AxisType[] { Axes.X, Axes.Y, Axes.Z };
+		for ( int d = 0; d < max.length; d++ )
+		{
+			min[ d ] = Math.round( rmin[ d ] / calibration[ d ] );
+			min[ d ] = Math.max( 0, min[ d ] );
+
+			max[ d ] = Math.round( rmax[ d ] / calibration[ d ] );
+			final AxisType axis = axes[ d ];
+			final int axisDim = img.dimensionIndex( axis );
+			final long imgMax = img.min( axisDim ) + img.dimension( axisDim );
+			max[ d ] = Math.min( imgMax, max[ d ] );
+		}
 	}
 
 	static final Img< UnsignedIntType > copy( final RandomAccessibleInterval< UnsignedIntType > in )

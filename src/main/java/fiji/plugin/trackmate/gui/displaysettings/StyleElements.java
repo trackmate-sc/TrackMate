@@ -1113,6 +1113,7 @@ public class StyleElements
 			if ( e != model.getSelectedItem() )
 				model.setSelectedItem( e );
 		} );
+		cb.setSelectedItem( element.getValue() );
 		return cb;
 	}
 

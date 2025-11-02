@@ -36,6 +36,7 @@ public class ConfigureViewsDescriptor extends WizardPanelDescriptor
 	public ConfigureViewsDescriptor(
 			final DisplaySettings ds,
 			final FeatureDisplaySelector featureSelector,
+			final Action launchBVVAction,
 			final Action launchTrackSchemeAction,
 			final Action showTrackTablesAction,
 			final Action showSpotTableAction,
@@ -44,9 +45,10 @@ public class ConfigureViewsDescriptor extends WizardPanelDescriptor
 	{
 		super( KEY );
 		this.targetPanel = new ConfigureViewsPanel(
-				ds, 
-				featureSelector, 
+				ds,
+				featureSelector,
 				spaceUnits,
+				launchBVVAction,
 				launchTrackSchemeAction,
 				showTrackTablesAction,
 				showSpotTableAction,

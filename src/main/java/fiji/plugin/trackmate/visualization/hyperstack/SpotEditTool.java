@@ -116,8 +116,10 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	}
 
 	/**
-	 * Return the singleton instance for this tool. If it was not previously
+	 * Returns the singleton instance for this tool. If it was not previously
 	 * instantiated, this calls instantiates it.
+	 * 
+	 * @return the instance.
 	 */
 	public static SpotEditTool getInstance()
 	{
@@ -128,7 +130,11 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	}
 
 	/**
-	 * Return true if the tool is currently present in ImageJ toolbar.
+	 * Returns <code>true</code> if the tool is currently present in ImageJ
+	 * toolbar.
+	 * 
+	 * @return <code>true</code> if the tool is currently present in ImageJ
+	 *         toolbar.
 	 */
 	public static boolean isLaunched()
 	{
@@ -159,17 +165,17 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	{
 		/*
 		 * Double check! Since TrackMate v7 there the following bug:
-		 * 
+		 *
 		 * Sometimes the listeners of this tool get added to the target image
 		 * canvas TWICE. This causes an unspeakable mess where all events are
 		 * triggered twice for e.g. a single click. For instance you cannot
 		 * shift-click on a spot to add it to the selection, because the event
 		 * is fired TWICE, which results in the spot being de-selected
 		 * immediately after being selected.
-		 * 
+		 *
 		 * But the double registration seems to happen randomly. Sometimes the
 		 * listeners are added only once, *sometimes* (more often) twice.
-		 * 
+		 *
 		 * To work around this mess, we overload the registerTool(ImageCanvas)
 		 * method and skip the registration if we find that the mouse listener
 		 * has already been added to the canvas. It fixes the issue, regardless
@@ -187,8 +193,11 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	}
 
 	/**
-	 * Register the given {@link HyperStackDisplayer}. If this method id not
+	 * Registers the given {@link HyperStackDisplayer}. If this method is not
 	 * called, the tool will not respond.
+	 * 
+	 * @param displayer
+	 *            the displayer to register.
 	 */
 	public void register( final HyperStackDisplayer displayer )
 	{
@@ -402,7 +411,6 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 			break;
 		}
 		}
-
 	}
 
 	@Override

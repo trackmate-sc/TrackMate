@@ -25,12 +25,12 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotRoi;
 import net.imglib2.type.numeric.RealType;
 
-public class SpotShapeAnalyzer< T extends RealType< T > > extends AbstractSpotFeatureAnalyzer< T >
+public class Spot2DShapeAnalyzer< T extends RealType< T > > extends AbstractSpotFeatureAnalyzer< T >
 {
 
 	private final boolean is2D;
 
-	public SpotShapeAnalyzer( final boolean is2D )
+	public Spot2DShapeAnalyzer( final boolean is2D )
 	{
 		this.is2D = is2D;
 	}
@@ -44,12 +44,12 @@ public class SpotShapeAnalyzer< T extends RealType< T > > extends AbstractSpotFe
 
 		if ( is2D )
 		{
-			final SpotRoi roi = spot.getRoi();
-			if ( roi != null )
+			if ( spot instanceof SpotRoi )
 			{
+				final SpotRoi roi = ( SpotRoi ) spot;
 				area = roi.area();
 				perimeter = getLength( roi );
-				final SpotRoi convexHull = ConvexHull.convexHull( roi );
+				final SpotRoi convexHull = ConvexHull2D.convexHull( roi );
 				convexArea = convexHull.area();
 			}
 			else
@@ -71,33 +71,28 @@ public class SpotShapeAnalyzer< T extends RealType< T > > extends AbstractSpotFe
 		final double solidity = area / convexArea;
 		final double shapeIndex = ( area <= 0. ) ? Double.NaN : perimeter / Math.sqrt( area );
 
-		spot.putFeature( SpotShapeAnalyzerFactory.AREA, area );
-		spot.putFeature( SpotShapeAnalyzerFactory.PERIMETER, perimeter );
-		spot.putFeature( SpotShapeAnalyzerFactory.CIRCULARITY, circularity );
-		spot.putFeature( SpotShapeAnalyzerFactory.SOLIDITY, solidity );
-		spot.putFeature( SpotShapeAnalyzerFactory.SHAPE_INDEX, shapeIndex );
+		spot.putFeature( Spot2DShapeAnalyzerFactory.AREA, area );
+		spot.putFeature( Spot2DShapeAnalyzerFactory.PERIMETER, perimeter );
+		spot.putFeature( Spot2DShapeAnalyzerFactory.CIRCULARITY, circularity );
+		spot.putFeature( Spot2DShapeAnalyzerFactory.SOLIDITY, solidity );
+		spot.putFeature( Spot2DShapeAnalyzerFactory.SHAPE_INDEX, shapeIndex );
 	}
 
 	private static final double getLength( final SpotRoi roi )
 	{
-		final double[] x = roi.x;
-		final double[] y = roi.y;
-		final int npoints = x.length;
-		if ( npoints < 2 )
+		final int nPoints = roi.nPoints();
+		if ( nPoints < 2 )
 			return 0;
 
 		double length = 0;
-		for ( int i = 0; i < npoints - 1; i++ )
+		int i;
+		int j;
+		for ( i = 0, j = nPoints - 1; i < nPoints; j = i++ )
 		{
-			final double dx = x[ i + 1 ] - x[ i ];
-			final double dy = y[ i + 1 ] - y[ i ];
+			final double dx = roi.x( i ) - roi.x( j );
+			final double dy = roi.y( i ) - roi.y( j );
 			length += Math.sqrt( dx * dx + dy * dy );
 		}
-
-		final double dx0 = x[ 0 ] - x[ npoints - 1 ];
-		final double dy0 = y[ 0 ] - y[ npoints - 1 ];
-		length += Math.sqrt( dx0 * dx0 + dy0 * dy0 );
-
 		return length;
 	}
 }

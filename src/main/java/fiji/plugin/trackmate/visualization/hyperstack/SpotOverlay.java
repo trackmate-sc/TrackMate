@@ -32,15 +32,14 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Path2D;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
@@ -73,6 +72,12 @@ public class SpotOverlay extends Roi
 
 	protected final Model model;
 
+	private final PaintSpotRoi paintSpotRoi;
+
+	private final PaintSpotSphere paintSpotSphere;
+
+	private final PaintSpotMesh paintSpotMesh;
+
 	/*
 	 * CONSTRUCTOR
 	 */
@@ -84,6 +89,9 @@ public class SpotOverlay extends Roi
 		this.imp = imp;
 		this.calibration = TMUtils.getSpatialCalibration( imp );
 		this.displaySettings = displaySettings;
+		this.paintSpotSphere = new PaintSpotSphere( imp, calibration, displaySettings );
+		this.paintSpotRoi = new PaintSpotRoi( imp, calibration, displaySettings );
+		this.paintSpotMesh = new PaintSpotMesh( imp, calibration, displaySettings );
 	}
 
 	/*
@@ -132,7 +140,7 @@ public class SpotOverlay extends Roi
 
 		g2d.setStroke( new BasicStroke( ( float ) displaySettings.getLineThickness() ) );
 
-		if ( selectionOnly && null != spotSelection)
+		if ( selectionOnly && null != spotSelection )
 		{
 			// Track display mode only displays selection.
 			for ( final Spot spot : spotSelection )
@@ -229,10 +237,6 @@ public class SpotOverlay extends Roi
 		g2d.setFont( originalFont );
 	}
 
-	/**
-	 * @param g2d
-	 * @param frame
-	 */
 	protected void drawExtraLayer( final Graphics2D g2d, final int frame )
 	{}
 
@@ -243,86 +247,60 @@ public class SpotOverlay extends Roi
 
 	protected void drawSpot( final Graphics2D g2d, final Spot spot, final double zslice, final int xcorner, final int ycorner, final double magnification, final boolean filled )
 	{
+		// Spot center in pixel coords.
 		final double x = spot.getFeature( Spot.POSITION_X );
 		final double y = spot.getFeature( Spot.POSITION_Y );
-		final double z = spot.getFeature( Spot.POSITION_Z );
-		final double dz2 = ( z - zslice ) * ( z - zslice );
-		final double radiusRatio = displaySettings.getSpotDisplayRadius();
-		final double radius = spot.getFeature( Spot.RADIUS ) * radiusRatio;
-		// In pixel units
+		// Pixel coords.
 		final double xp = x / calibration[ 0 ] + 0.5f;
 		final double yp = y / calibration[ 1 ] + 0.5f;
-		// so that spot centers are displayed on the pixel centers.
-
-		// Scale to image zoom
+		// 0.5, so that spot centers are displayed on the pixel centers.
+		// Display window coordinates.
 		final double xs = ( xp - xcorner ) * magnification;
 		final double ys = ( yp - ycorner ) * magnification;
 
-		if ( dz2 >= radius * radius )
-		{
-			g2d.fillOval( ( int ) Math.round( xs - 2 * magnification ), ( int ) Math.round( ys - 2 * magnification ), ( int ) Math.round( 4 * magnification ), ( int ) Math.round( 4 * magnification ) );
-			return;
-		}
+		// Get a painter adequate for the spot and config we have.
+		@SuppressWarnings( "rawtypes" )
+		final TrackMatePainter painter = getPainter( spot );
+		@SuppressWarnings( "unchecked" )
+		final int textPos = painter.paint( g2d, spot );
 
-		final SpotRoi roi = spot.getRoi();
-		if ( !displaySettings.isSpotDisplayedAsRoi() || roi == null || roi.x.length < 2 )
+		if ( textPos >= 0 && displaySettings.isSpotShowName() )
 		{
-			final double apparentRadius = Math.sqrt( radius * radius - dz2 ) / calibration[ 0 ] * magnification;
-			final int textPos = ( int ) apparentRadius;
-			if ( displaySettings.isSpotShowName() )
-				drawSpotName( g2d, spot, xs, ys, textPos );
-			if ( filled )
-				g2d.fillOval(
-						( int ) Math.round( xs - apparentRadius ),
-						( int ) Math.round( ys - apparentRadius ),
-						( int ) Math.round( 2 * apparentRadius ),
-						( int ) Math.round( 2 * apparentRadius ) );
-			else
-				g2d.drawOval(
-						( int ) Math.round( xs - apparentRadius ),
-						( int ) Math.round( ys - apparentRadius ),
-						( int ) Math.round( 2 * apparentRadius ),
-						( int ) Math.round( 2 * apparentRadius ) );
-		}
-		else
-		{
-			final double[] polygonX = roi.toPolygonX( calibration[ 0 ], xcorner - 0.5, x, magnification );
-			final double[] polygonY = roi.toPolygonY( calibration[ 1 ], ycorner - 0.5, y, magnification );
-			// The 0.5 is here so that we plot vertices at pixel centers.
-			final Path2D polygon = new Path2D.Double();
-			polygon.moveTo( polygonX[ 0 ], polygonY[ 0 ] );
-			for ( int i = 1; i < polygonX.length; ++i )
-				polygon.lineTo( polygonX[ i ], polygonY[ i ] );
-			polygon.closePath();
-			final int textPos = ( int ) ( Arrays.stream( polygonX ).max().getAsDouble() - xs );
-
-			if ( filled )
-			{
-				if ( displaySettings.isSpotShowName() )
-					drawSpotName( g2d, spot, xs, ys, textPos );
-				g2d.fill( polygon );
-				g2d.setColor( Color.BLACK );
-				g2d.draw( polygon );
-			}
-			else
-			{
-				if ( displaySettings.isSpotShowName() )
-					drawSpotName( g2d, spot, xs, ys, textPos );
-				g2d.draw( polygon );
-			}
+			final int windowWidth = imp.getWindow().getWidth();
+			drawString( g2d, fm, windowWidth, spot.toString(), xs, ys, textPos );
 		}
 	}
 
-	private final void drawSpotName( final Graphics2D g2d, final Spot spot, final double xs, final double ys, final int textPos )
+	private TrackMatePainter< ? extends Spot > getPainter( final Spot spot )
 	{
-		final String str = spot.toString();
+		if ( !displaySettings.isSpotDisplayedAsRoi() )
+			return paintSpotSphere;
+
+		if ( spot instanceof SpotRoi )
+			return paintSpotRoi;
+
+		if ( spot instanceof SpotMesh )
+			return paintSpotMesh;
+
+		return paintSpotSphere;
+	}
+
+	private static final void drawString(
+			final Graphics2D g2d,
+			final FontMetrics fm,
+			final int windowWidth,
+			final String str,
+			final double xs,
+			final double ys,
+			final int textPos )
+	{
 		final int xindent = fm.stringWidth( str );
 		int xtext = ( int ) ( xs + textPos + 5 );
-		if ( xtext + xindent > imp.getWindow().getWidth() )
+		if ( xtext + xindent > windowWidth )
 			xtext = ( int ) ( xs - textPos - 5 - xindent );
 
 		final int yindent = fm.getAscent() / 2;
 		final int ytext = ( int ) ys + yindent;
-		g2d.drawString( spot.toString(), xtext, ytext );
+		g2d.drawString( str, xtext, ytext );
 	}
 }

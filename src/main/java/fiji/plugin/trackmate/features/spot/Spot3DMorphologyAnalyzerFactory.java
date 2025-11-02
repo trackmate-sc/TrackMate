@@ -19,17 +19,16 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.graph;
+package fiji.plugin.trackmate.features.spot;
+
+import net.imglib2.type.NativeType;
+import net.imglib2.type.numeric.RealType;
 
 /**
- * Interface for functions that return a new object, computed from two input
- * arguments.
- * 
- * @author Jean-Yves Tinevez
+ * Special interface for spot analyzers that can compute feature values based on
+ * the 3D mesh building the 3D shape of spots.
+ *
+ * @author Jean-Yves Tinevez - 2023
  */
-public interface OutputFunction< E >
-{
-
-	public E compute( E input1, E input2 );
-
-}
+public interface Spot3DMorphologyAnalyzerFactory< T extends RealType< T > & NativeType< T > > extends SpotAnalyzerFactoryBase< T >
+{}
