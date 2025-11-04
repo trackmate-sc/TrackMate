@@ -394,14 +394,15 @@ public class TMLabKitModel implements SegmentationModel
 		// Write spots in it with index = id + 1 and build a map index -> spot.
 		final SpotCollection spots = model.getSpots();
 		final Map< Label, Spot > spotLabels = new HashMap<>();
+		final long[] sourceImgMax = new long[] { imp.getWidth() - 1, imp.getHeight() - 1 };
 		if ( singleTimePoint )
 		{
-			processFrame( labeling, lblImgPlus, spots, timepoint, origin, colorGen, spotLabels );
+			processFrame( labeling, lblImgPlus, spots, timepoint, origin, colorGen, spotLabels, sourceImgMax );
 		}
 		else
 		{
 			for ( int t = 0; t < imp.getNFrames(); t++ )
-				processFrame( labeling, lblImgPlus, spots, t, origin, colorGen, spotLabels );
+				processFrame( labeling, lblImgPlus, spots, t, origin, colorGen, spotLabels, sourceImgMax );
 		}
 		return new ValuePair< Labeling, Map< Label, Spot > >( labeling, spotLabels );
 	}
@@ -430,6 +431,9 @@ public class TMLabKitModel implements SegmentationModel
 	 * @param spotLabels
 	 *            a map that links the created labels to the spots imported.
 	 *            This map is being written by this method.
+	 * @param sourceImgMax
+	 *            the width and height of the full image, to check whether the interval is
+	 *            exactly at the border of the image. In that case we should import spots touching the border.
 	 */
 	private static void processFrame(
 			final Labeling labeling,
@@ -438,7 +442,8 @@ public class TMLabKitModel implements SegmentationModel
 			final int timepoint,
 			final long[] origin,
 			final FeatureColorGenerator< Spot > colorGen,
-			final Map< Label, Spot > spotLabels )
+			final Map< Label, Spot > spotLabels,
+			final long[] sourceImgMax )
 	{
 
 		// If we have time, reslice.
@@ -477,10 +482,19 @@ public class TMLabKitModel implements SegmentationModel
 		}
 		else
 		{
+			final long[] intervalMax = new long[ 2 ];
+			img.max( intervalMax );
+			// Are we touching the border of the source image?
+			for ( int d = 0; d < 2; d++ )
+			{
+				if ( sourceImgMax[ d ] == intervalMax[ d ] )
+					intervalMax[ d ]++;
+			}
+			final FinalInterval imgBB = Intervals.createMinMax( origin[ 0 ], origin[ 1 ], intervalMax[ 0 ], intervalMax[ 1 ] );
+
 			final long[] min = new long[ 2 ];
 			final long[] max = new long[ 2 ];
 			final FinalInterval spotBB = FinalInterval.wrap( min, max );
-			final FinalInterval imgBB = Intervals.createMinSize( origin[ 0 ], origin[ 1 ], img.dimension( 0 ), img.dimension( 1 ) );
 			for ( final Spot spot : spotsThisFrame )
 			{
 				TMLabKitUtils.boundingBox( spot, img, min, max );
