@@ -8,20 +8,21 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
+ * License along with this program. If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
 package fiji.plugin.trackmate.util;
 
 import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
+import static fiji.plugin.trackmate.gui.Icons.BIN_ICON;
 import static fiji.plugin.trackmate.gui.Icons.CANCEL_ICON;
 import static fiji.plugin.trackmate.gui.Icons.PREVIEW_ICON;
 
@@ -32,7 +33,6 @@ import java.awt.Insets;
 import java.util.function.DoubleConsumer;
 
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import fiji.plugin.trackmate.Logger;
@@ -55,25 +55,25 @@ public class DetectionPreviewPanel extends JPanel
 			+ "Cancel the current preview."
 			+ "</html>";
 
+	private static final int MAX_HEIGHT = 150;
+
 	final Logger logger;
 
 	final JButton btnPreview;
 
 	final JButton btnCancel;
 
-	final QualityHistogramChart chart;
+	final JButton btnClear;
 
+	final QualityHistogramChart chart;
 
 	public DetectionPreviewPanel( final DoubleConsumer thresholdUpdater, final String axisLabel )
 	{
 		final GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWeights = new double[] { 1.0, 0.0 };
-		gridBagLayout.rowWeights = new double[] { 1., 0., 0. };
-		gridBagLayout.rowHeights = new int[] { 0, 120, 20 };
+		gridBagLayout.rowWeights = new double[] { 1., 0. };
 
 		setLayout( gridBagLayout );
-
-		add( new JLabel() );
 
 		this.chart = new QualityHistogramChart( thresholdUpdater, axisLabel );
 		final GridBagConstraints gbcHistogram = new GridBagConstraints();
@@ -81,16 +81,16 @@ public class DetectionPreviewPanel extends JPanel
 		gbcHistogram.insets = new Insets( 0, 0, 5, 0 );
 		gbcHistogram.fill = GridBagConstraints.BOTH;
 		gbcHistogram.gridx = 0;
-		gbcHistogram.gridy = 1;
+		gbcHistogram.gridy = 0;
 		add( chart, gbcHistogram );
 
 		final JLabelLogger labelLogger = new JLabelLogger();
-		labelLogger.setText( "   " );
+		labelLogger.setText( " " );
 		final GridBagConstraints gbcLabelLogger = new GridBagConstraints();
 		gbcLabelLogger.insets = new Insets( 5, 5, 0, 5 );
 		gbcLabelLogger.fill = GridBagConstraints.BOTH;
 		gbcLabelLogger.gridx = 0;
-		gbcLabelLogger.gridy = 2;
+		gbcLabelLogger.gridy = 1;
 		add( labelLogger, gbcLabelLogger );
 		this.logger = labelLogger.getLogger();
 
@@ -101,8 +101,13 @@ public class DetectionPreviewPanel extends JPanel
 		btnCancel.setToolTipText( TOOLTIP_CANCEL );
 		btnCancel.setVisible( false );
 		btnCancel.setFont( SMALL_FONT );
+		this.btnClear = new JButton( "Clear", BIN_ICON );
+		btnClear.setToolTipText( "<html>Clear the preview results <br>at the current frame.</html>" );
+		btnClear.setFont( SMALL_FONT );
+		btnClear.setVisible( false );
 
 		final JPanel btnPanel = new JPanel();
+		btnPanel.add( btnClear );
 		btnPanel.add( btnPreview );
 		btnPanel.add( btnCancel );
 
@@ -110,9 +115,31 @@ public class DetectionPreviewPanel extends JPanel
 		gbcBtnPreview.anchor = GridBagConstraints.NORTHEAST;
 		gbcBtnPreview.insets = new Insets( 5, 5, 0, 0 );
 		gbcBtnPreview.gridx = 1;
-		gbcBtnPreview.gridy = 2;
+		gbcBtnPreview.gridy = 1;
 		this.add( btnPanel, gbcBtnPreview );
+	}
 
-		setPreferredSize( new Dimension( 240, 100 ) );
+	@Override
+	public Dimension getPreferredSize()
+	{
+		final Dimension preferredSize = super.getPreferredSize();
+
+		// Ensure minimum width for usability
+		if ( preferredSize.width < 240 )
+			preferredSize.width = 240;
+
+		// Constrain height to maximum
+		if ( preferredSize.height > MAX_HEIGHT )
+			preferredSize.height = MAX_HEIGHT;
+
+		return preferredSize;
+	}
+
+	@Override
+	public Dimension getMaximumSize()
+	{
+		final Dimension maxSize = super.getMaximumSize();
+		maxSize.height = MAX_HEIGHT;
+		return maxSize;
 	}
 }

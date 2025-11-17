@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -52,6 +52,8 @@ public class TrackBranchAnalysis extends AbstractTMAction
 	private static final String KEY = "TRACK_BRANCH_ANALYSIS";
 
 	private static final String NAME = "Branch hierarchy analysis";
+
+	public static final String DOC_URL = "https://imagej.net/plugins/trackmate/actions/branch-hierarchy-analysis";
 
 	@Override
 	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
@@ -96,6 +98,12 @@ public class TrackBranchAnalysis extends AbstractTMAction
 		public ImageIcon getIcon()
 		{
 			return BRANCH_ICON_16x16;
+		}
+
+		@Override
+		public String getUrl()
+		{
+			return DOC_URL;
 		}
 	}
 }

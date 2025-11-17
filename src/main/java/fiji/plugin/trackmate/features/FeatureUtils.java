@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -70,6 +70,10 @@ public class FeatureUtils
 	private static final String USE_RANDOM_COLOR_NAME = "Random color";
 
 	public static final String USE_RANDOM_COLOR_KEY = "RANDOM_COLOR";
+
+	public static final String USE_TRACK_INDEX_COLOR_KEY = "TRACK_INDEX";
+
+	private static final String USE_TRACK_INDEX_COLOR_NAME = "Track index color";
 
 	public static final Map< String, String > collectFeatureKeys( final TrackMateObject target, final Model model, final Settings settings )
 	{
@@ -138,6 +142,7 @@ public class FeatureUtils
 		{
 			inverseMap.put( USE_UNIFORM_COLOR_NAME, USE_UNIFORM_COLOR_KEY );
 			inverseMap.put( USE_RANDOM_COLOR_NAME, USE_RANDOM_COLOR_KEY );
+			inverseMap.put( USE_TRACK_INDEX_COLOR_NAME, USE_TRACK_INDEX_COLOR_KEY );
 			break;
 		}
 
@@ -229,6 +234,14 @@ public class FeatureUtils
 			{
 			case FeatureUtils.USE_RANDOM_COLOR_KEY:
 				return new RandomSpotColorGenerator();
+			case FeatureUtils.USE_TRACK_INDEX_COLOR_KEY:
+				return new SpotColorGeneratorPerTrackFeature(
+						model,
+						TrackIndexAnalyzer.TRACK_INDEX,
+						displaySettings.getMissingValueColor(),
+						displaySettings.getUndefinedValueColor(),
+						displaySettings.getColormap(),
+						0., 1. );
 			default:
 			case FeatureUtils.USE_UNIFORM_COLOR_KEY:
 				return new UniformSpotColorGenerator( displaySettings.getSpotUniformColor() );

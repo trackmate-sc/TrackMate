@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -35,7 +35,7 @@ import org.scijava.plugin.SciJavaPlugin;
  * <pre>
  * &#64;Plugin( type = SpotAnalyzerFactory.class, priority = Priority.LOW, visible = false )
  * </pre>
- * 
+ *
  * This will have a
  * {@link fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory} module
  * registered in TrackMate. It will be given a priority of 1 (0 is the default),
@@ -61,8 +61,8 @@ import org.scijava.plugin.SciJavaPlugin;
  * <li>{@link fiji.plugin.trackmate.action.TrackMateActionFactory}: generates
  * actions that provide general use actions for TrackMate from the GUI.
  * </ul>
- * 
- * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; 2014
+ *
+ * @author Jean-Yves Tinevez - 2014
  *
  */
 public interface TrackMateModule extends SciJavaPlugin
@@ -81,7 +81,10 @@ public interface TrackMateModule extends SciJavaPlugin
 	 *
 	 * @return the icon. Returns <code>null</code> to be safely ignored.
 	 */
-	public ImageIcon getIcon();
+	public default ImageIcon getIcon()
+	{
+		return null;
+	}
 
 	/**
 	 * Returns a unique identifier of this module.
@@ -108,11 +111,28 @@ public interface TrackMateModule extends SciJavaPlugin
 	 * <p>
 	 * If <code>false</code> (the default), the multi-threading will be decided
 	 * by TrackMate.
-	 * 
+	 *
 	 * @return whether to forbid running this module concurrently
 	 */
 	public default boolean forbidMultithreading()
 	{
 		return false;
+	}
+
+	/**
+	 * Returns a URL pointing to a webpage documenting this module. The URL is
+	 * returned as a string, containing the fully qualified URL to the help
+	 * page. For instance:
+	 *
+	 * <pre>
+	 * https://imagej.net/plugins/trackmate/detectors/difference-of-gaussian
+	 * </pre>
+	 *
+	 * @return this module documentation URL, or <code>null</code> if there is
+	 *         none.
+	 */
+	public default String getUrl()
+	{
+		return null;
 	}
 }

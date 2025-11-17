@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -30,9 +30,11 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.FeatureFilter;
+import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.features.track.TrackBranchingAnalyzer;
 import fiji.plugin.trackmate.gui.components.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.components.FilterGuiPanel;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
 import fiji.plugin.trackmate.io.SettingsPersistence;
@@ -45,13 +47,17 @@ public class TrackFilterDescriptor extends WizardPanelDescriptor
 
 	private final TrackMate trackmate;
 
+	private final DisplaySettings displaySettings;
+
 	public TrackFilterDescriptor(
 			final TrackMate trackmate,
 			final List< FeatureFilter > filters,
-			final FeatureDisplaySelector featureSelector )
+			final FeatureDisplaySelector featureSelector,
+			final DisplaySettings displaySettings )
 	{
 		super( KEY );
 		this.trackmate = trackmate;
+		this.displaySettings = displaySettings;
 		final FilterGuiPanel component = new FilterGuiPanel(
 				trackmate.getModel(),
 				trackmate.getSettings(),
@@ -110,6 +116,9 @@ public class TrackFilterDescriptor extends WizardPanelDescriptor
 						logger.log( "Spot feature calculation canceled.\nSome spots will have missing feature values.\n" );
 					logger.log( String.format( "Calculating features done in %.1f s.\n", ( end - start ) / 1e3f ) );
 					panel.showProgressBar( false );
+
+					// Default color spots by track index.
+					displaySettings.setSpotColorBy( TrackMateObject.TRACKS, FeatureUtils.USE_TRACK_INDEX_COLOR_KEY );
 
 					// Refresh component.
 					panel.refreshValues();

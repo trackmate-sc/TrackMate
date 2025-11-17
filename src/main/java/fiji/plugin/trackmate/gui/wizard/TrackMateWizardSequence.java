@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -146,7 +146,7 @@ public class TrackMateWizardSequence implements WizardSequence
 		spotFilterDescriptor = new SpotFilterDescriptor( trackmate, spotFilters, featureSelector );
 		chooseTrackerDescriptor = new ChooseTrackerDescriptor( new TrackerProvider(), trackmate );
 		executeTrackingDescriptor = new ExecuteTrackingDescriptor( trackmate, logPanel );
-		trackFilterDescriptor = new TrackFilterDescriptor( trackmate, trackFilters, featureSelector );
+		trackFilterDescriptor = new TrackFilterDescriptor( trackmate, trackFilters, featureSelector, displaySettings );
 		configureViewsDescriptor = new ConfigureViewsDescriptor(
 				displaySettings,
 				featureSelector,
@@ -421,12 +421,12 @@ public class TrackMateWizardSequence implements WizardSequence
 		final ConfigurationPanel trackerConfigurationPanel;
 		if (trackerFactory instanceof SpotImageTrackerFactory)
 		{
-			trackerConfigurationPanel = ((SpotImageTrackerFactory)trackerFactory).getTrackerConfigurationPanel(  
+			trackerConfigurationPanel = ((SpotImageTrackerFactory)trackerFactory).getTrackerConfigurationPanel(
 					trackmate.getModel(),  trackmate.getSettings().imp );
 		}
 		else
 		{
-			trackerConfigurationPanel= trackerFactory.getTrackerConfigurationPanel( 
+			trackerConfigurationPanel= trackerFactory.getTrackerConfigurationPanel(
 					trackmate.getModel() );
 		}
 		trackerConfigurationPanel.setSettings( defaultSettings );
@@ -439,7 +439,7 @@ public class TrackMateWizardSequence implements WizardSequence
 		previous.put( configDescriptor, chooseTrackerDescriptor );
 		previous.put( executeTrackingDescriptor, configDescriptor );
 		previous.put( trackFilterDescriptor, configDescriptor );
-		
+
 		return configDescriptor;
 	}
 

@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -184,6 +185,30 @@ public class DetectionUtils
 	public static final boolean is2D( final ImagePlus imp )
 	{
 		return ( imp == null ) ? true : imp.getNSlices() <= 1;
+	}
+
+	public static final boolean is2D( final Model model )
+	{
+		final AtomicBoolean is2dFlag = new AtomicBoolean( true );
+		model.getSpots().iterable( true ).forEach( spot -> {
+			final double z = spot.getDoublePosition( 2 );
+			// check with tolerance
+			if ( Math.abs( z ) > 1e-10 )
+			{
+				is2dFlag.set( false );
+				return;
+			}
+		} );
+		return is2dFlag.get();
+	}
+
+	public static final boolean is2D( final TrackMate trackmate )
+	{
+		final ImagePlus imp = trackmate.getSettings().imp;
+		if ( null == imp )
+			return is2D( trackmate.getModel() );
+		else
+			return is2D( imp );
 	}
 
 	/**
@@ -510,17 +535,19 @@ public class DetectionUtils
 			final int channel,
 			final int frame )
 	{
+		final int tDim = img.dimensionIndex( Axes.TIME );
 		final ImgPlus< T > singleTimePoint;
-		if ( img.dimensionIndex( Axes.TIME ) < 0 )
+		if ( tDim < 0 )
 			singleTimePoint = img;
 		else
-			singleTimePoint = ImgPlusViews.hyperSlice( img, img.dimensionIndex( Axes.TIME ), frame );
+			singleTimePoint = ImgPlusViews.hyperSlice( img, tDim, frame );
 
+		final int cDim = singleTimePoint.dimensionIndex( Axes.CHANNEL );
 		final ImgPlus< T > singleChannel;
-		if ( singleTimePoint.dimensionIndex( Axes.CHANNEL ) < 0 )
+		if ( cDim < 0 )
 			singleChannel = singleTimePoint;
 		else
-			singleChannel = ImgPlusViews.hyperSlice( singleTimePoint, singleTimePoint.dimensionIndex( Axes.CHANNEL ), channel );
+			singleChannel = ImgPlusViews.hyperSlice( singleTimePoint, cDim, channel );
 		return singleChannel;
 	}
 
@@ -555,7 +582,7 @@ public class DetectionUtils
 	/**
 	 * Properly wraps an {@link ImgPlus} in a {@link ImagePlus}, ensuring that
 	 * the dimensionality and the calibration of the output matches the input.
-	 * 
+	 *
 	 * @param img
 	 *            the image to wrap.
 	 */
@@ -577,9 +604,10 @@ public class DetectionUtils
 
 	/**
 	 * Splits the input image in a list of {@link ImagePlus}, one per
-	 * time-point. If the input includes several channels, they are all included
-	 * in the new image, and put as the last dimension.
-	 * 
+	 * time-point, including only one channel (or all channels if <code>c</code>
+	 * is negative). If the input includes several channels, they are all
+	 * included in the new image, and put as the last dimension.
+	 *
 	 * @param <T>
 	 *            the type of the pixel in the input image.
 	 * @param img
@@ -590,14 +618,14 @@ public class DetectionUtils
 	 *            the input image. If the interval contains time (min T and max
 	 *            T to export), it must be in the last dimension of the
 	 *            interval.
+	 * @param c
+	 *            the channel to extract (0-based). If negative, all channels
+	 *            are included.
 	 * @param nameGen
 	 *            a generator for the name of the output ImagePlus.
 	 * @return a new list of ImagePlus.
 	 */
-	public static final < T extends RealType< T > & NativeType< T > > List< ImagePlus > splitSingleTimePoints(
-			final ImgPlus< T > img,
-			final Interval interval,
-			final Function< Long, String > nameGen )
+	public static < T extends RealType< T > & NativeType< T > > List< ImagePlus > splitSingleTimePoints( final ImgPlus< T > img, final Interval interval, final int c, final Function< Long, String > namegen2 )
 	{
 		final int zIndex = img.dimensionIndex( Axes.Z );
 		final int cIndex = img.dimensionIndex( Axes.CHANNEL );
@@ -606,25 +634,52 @@ public class DetectionUtils
 		{
 			// 2D
 			if ( cIndex < 0 )
+			{
 				cropInterval = Intervals.createMinMax(
 						interval.min( 0 ), interval.min( 1 ),
 						interval.max( 0 ), interval.max( 1 ) );
-			else
-				// Include all channels
-				cropInterval = Intervals.createMinMax(
-						interval.min( 0 ), interval.min( 1 ), img.min( cIndex ),
-						interval.max( 0 ), interval.max( 1 ), img.max( cIndex ) );
+			}
+			else // 2D + C
+			{
+				if ( c < 0 )
+				{
+					// Include all channels
+					cropInterval = Intervals.createMinMax(
+							interval.min( 0 ), interval.min( 1 ), img.min( cIndex ),
+							interval.max( 0 ), interval.max( 1 ), img.max( cIndex ) );
+				}
+				else
+				{
+					// Include specified channel only
+					cropInterval = Intervals.createMinMax(
+							interval.min( 0 ), interval.min( 1 ), c,
+							interval.max( 0 ), interval.max( 1 ), c );
+				}
+			}
 		}
 		else
 		{
 			if ( cIndex < 0 )
+			{
 				cropInterval = Intervals.createMinMax(
 						interval.min( 0 ), interval.min( 1 ), interval.min( 2 ),
 						interval.max( 0 ), interval.max( 1 ), interval.max( 2 ) );
+			}
 			else
-				cropInterval = Intervals.createMinMax(
-						interval.min( 0 ), interval.min( 1 ), interval.min( 2 ), img.min( cIndex ),
-						interval.max( 0 ), interval.max( 1 ), interval.max( 2 ), img.max( cIndex ) );
+			{
+				if ( c < 0 )
+				{
+					cropInterval = Intervals.createMinMax(
+							interval.min( 0 ), interval.min( 1 ), interval.min( 2 ), img.min( cIndex ),
+							interval.max( 0 ), interval.max( 1 ), interval.max( 2 ), img.max( cIndex ) );
+				}
+				else
+				{
+					cropInterval = Intervals.createMinMax(
+							interval.min( 0 ), interval.min( 1 ), interval.min( 2 ), c,
+							interval.max( 0 ), interval.max( 1 ), interval.max( 2 ), c );
+				}
+			}
 		}
 
 		final List< ImagePlus > imps = new ArrayList<>();
@@ -645,8 +700,7 @@ public class DetectionUtils
 			{
 				final ImgPlus< T > tpTCZ = ImgPlusViews.hyperSlice( img, timeIndex, t );
 
-				// Put if necessary the channel axis as the last one (CellPose
-				// format)
+				// Put if necessary the channel axis as the last one (cellpose format)
 				final int chanDim = tpTCZ.dimensionIndex( Axes.CHANNEL );
 				ImgPlus< T > tp = tpTCZ;
 				if ( chanDim > 1 )
@@ -660,6 +714,33 @@ public class DetectionUtils
 			}
 		}
 		return imps;
+	}
+
+	/**
+	 * Splits the input image in a list of {@link ImagePlus}, one per
+	 * time-point. If the input includes several channels, they are all included
+	 * in the new image, and put as the last dimension.
+	 *
+	 * @param <T>
+	 *            the type of the pixel in the input image.
+	 * @param img
+	 *            the input image.
+	 * @param interval
+	 *            the interval to crop the output in the input image. Must not
+	 *            have a dimension for channels. Can be 2D or 3D to accommodate
+	 *            the input image. If the interval contains time (min T and max
+	 *            T to export), it must be in the last dimension of the
+	 *            interval.
+	 * @param nameGen
+	 *            a generator for the name of the output ImagePlus.
+	 * @return a new list of ImagePlus.
+	 */
+	public static final < T extends RealType< T > & NativeType< T > > List< ImagePlus > splitSingleTimePoints(
+			final ImgPlus< T > img,
+			final Interval interval,
+			final Function< Long, String > nameGen )
+	{
+		return splitSingleTimePoints( img, interval, -1, nameGen );
 	}
 
 	public static final Function< Long, String > nameGen = ( frame ) -> String.format( "img-t%d", frame );

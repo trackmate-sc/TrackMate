@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -21,9 +21,12 @@
  */
 package fiji.plugin.trackmate.tracking.jaqaman;
 
+import javax.swing.ImageIcon;
+
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.components.tracker.SimpleLAPTrackerSettingsPanel;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
@@ -41,6 +44,10 @@ public class SimpleSparseLAPTrackerFactory extends SparseLAPTrackerFactory
 			+ "a distance and time condition. Track splitting and merging are not allowed, resulting <br>"
 			+ "in having non-branching tracks."
 			+ " </html>";
+
+	public static final String DOC_URL = "https://imagej.net/plugins/trackmate/trackers/lap-trackers";
+
+	public static final ImageIcon ICON = new ImageIcon( Icons.class.getResource( "images/SimpleLAPtracker-icon-64px.png" ) );
 
 	@Override
 	public String getKey()
@@ -61,15 +68,21 @@ public class SimpleSparseLAPTrackerFactory extends SparseLAPTrackerFactory
 	}
 
 	@Override
+	public ImageIcon getIcon()
+	{
+		return ICON;
+	}
+
+	@Override
+	public String getUrl()
+	{
+		return DOC_URL;
+	}
+
+	@Override
 	public ConfigurationPanel getTrackerConfigurationPanel( final Model model )
 	{
 		final String spaceUnits = model.getSpaceUnits();
 		return new SimpleLAPTrackerSettingsPanel( getName(), THIS2_INFO_TEXT, spaceUnits );
-	}
-
-	@Override
-	public SimpleSparseLAPTrackerFactory copy()
-	{
-		return new SimpleSparseLAPTrackerFactory();
 	}
 }

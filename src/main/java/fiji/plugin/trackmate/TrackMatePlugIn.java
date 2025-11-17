@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -22,6 +22,8 @@
 package fiji.plugin.trackmate;
 
 import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
+
+import java.io.File;
 
 import javax.swing.JFrame;
 
@@ -46,68 +48,85 @@ import ij.plugin.PlugIn;
 public class TrackMatePlugIn implements PlugIn
 {
 
+	public static File lastLoadedFile;
+
 	@Override
 	public void run( final String imagePath )
 	{
-//		GuiUtils.setSystemLookAndFeel();
-		final ImagePlus imp;
-		if ( imagePath != null && imagePath.length() > 0 )
+		try
 		{
-			imp = IJ.openImage( imagePath );
-			if ( imp == null || null == imp.getOriginalFileInfo() )
+			// We start anew. Let's clear the last loaded path.
+			lastLoadedFile = null;
+
+			// GuiUtils.setSystemLookAndFeel();
+			final ImagePlus imp;
+			if ( imagePath != null && imagePath.length() > 0 )
 			{
-				IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION, "Could not load image with path " + imagePath + "." );
-				return;
+				imp = IJ.openImage( imagePath );
+				if ( imp == null || null == imp.getOriginalFileInfo() )
+				{
+					IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION, "Could not load image with path " + imagePath + "." );
+					return;
+				}
 			}
+			else
+			{
+				imp = WindowManager.getCurrentImage();
+				if ( null == imp )
+				{
+					IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION,
+							"Please open an image before running TrackMate." );
+					return;
+				}
+				else if ( imp.getType() == ImagePlus.COLOR_RGB )
+				{
+					IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION,
+							"TrackMate does not work on RGB images." );
+					return;
+				}
+			}
+
+			imp.setOpenAsHyperStack( true );
+			imp.setDisplayMode( IJ.COMPOSITE );
+			if ( !imp.isVisible() )
+				imp.show();
+
+			GuiUtils.userCheckImpDimensions( imp );
+
+			// Main objects.
+			final Settings settings = createSettings( imp );
+			final Model model = createModel( imp );
+			final TrackMate trackmate = createTrackMate( model, settings );
+			final SelectionModel selectionModel = new SelectionModel( model );
+			final DisplaySettings displaySettings = createDisplaySettings();
+
+			// Main view.
+			final TrackMateModelView displayer = new HyperStackDisplayer( model, selectionModel, imp, displaySettings );
+			displayer.render();
+
+			// Wizard.
+			final WizardSequence sequence = createSequence( trackmate, selectionModel, displaySettings );
+			final JFrame frame = sequence.run( "TrackMate on " + imp.getShortTitle() );
+			frame.setIconImage( TRACKMATE_ICON.getImage() );
+			GuiUtils.positionWindow( frame, imp.getWindow() );
+			frame.setVisible( true );
 		}
-		else
+		catch ( final Exception e )
 		{
-			imp = WindowManager.getCurrentImage();
-			if ( null == imp )
-			{
-				IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION,
-						"Please open an image before running TrackMate." );
-				return;
-			}
-			else if ( imp.getType() == ImagePlus.COLOR_RGB )
-			{
-				IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION,
-						"TrackMate does not work on RGB images." );
-				return;
-			}
+			e.printStackTrace();
+			String msg = e.getMessage();
+			if ( msg == null || msg.isEmpty() )
+				msg = e.getClass() + "\n" + e.getStackTrace()[ 0 ].toString();
+			IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION, "An unexpected error occurred:\n" + msg );
+			return;
 		}
-
-		imp.setOpenAsHyperStack( true );
-		imp.setDisplayMode( IJ.COMPOSITE );
-		if ( !imp.isVisible() )
-			imp.show();
-
-		GuiUtils.userCheckImpDimensions( imp );
-
-		// Main objects.
-		final Settings settings = createSettings( imp );
-		final Model model = createModel( imp );
-		final TrackMate trackmate = createTrackMate( model, settings );
-		final SelectionModel selectionModel = new SelectionModel( model );
-		final DisplaySettings displaySettings = createDisplaySettings();
-
-		// Main view.
-		final TrackMateModelView displayer = new HyperStackDisplayer( model, selectionModel, imp, displaySettings );
-		displayer.render();
-
-		// Wizard.
-		final WizardSequence sequence = createSequence( trackmate, selectionModel, displaySettings );
-		final JFrame frame = sequence.run( "TrackMate on " + imp.getShortTitle() );
-		frame.setIconImage( TRACKMATE_ICON.getImage() );
-		GuiUtils.positionWindow( frame, imp.getWindow() );
-		frame.setVisible( true );
 	}
 
 	/**
 	 * Hook for subclassers: <br>
 	 * Will create and position the sequence that will be played by the wizard
 	 * launched by this plugin.
-	 * 
+	 *
 	 * @param trackmate
 	 * @param selectionModel
 	 * @param displaySettings
@@ -122,7 +141,7 @@ public class TrackMatePlugIn implements PlugIn
 	 * Hook for subclassers: <br>
 	 * Creates the {@link Model} instance that will be used to store data in the
 	 * {@link TrackMate} instance.
-	 * 
+	 *
 	 * @param imp
 	 *
 	 * @return a new {@link Model} instance.
@@ -172,7 +191,7 @@ public class TrackMatePlugIn implements PlugIn
 		model.setPhysicalUnits( spaceUnits, timeUnits );
 
 		final TrackMate trackmate = new TrackMate( model, settings );
-		ObjectService objectService = TMUtils.getContext().service( ObjectService.class );
+		final ObjectService objectService = TMUtils.getContext().service( ObjectService.class );
 		if ( objectService != null )
 			objectService.addObject( trackmate );
 

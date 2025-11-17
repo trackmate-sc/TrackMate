@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -58,19 +58,17 @@ import net.imglib2.algorithm.Benchmark;
 import net.imglib2.algorithm.MultiThreaded;
 
 /**
+ * Core class of TrackMate. Performs the whole tracking process, from detection
+ * to tracking, filtering and feature calculation.
  * <p>
- * The TrackMate_ class runs on the currently active time-lapse image (2D or 3D)
- * and both identifies and tracks bright spots over time.
- * </p>
- *
- * <p>
- * <b>Required input:</b> A 2D or 3D time-lapse image with bright blobs.
- * </p>
+ * Takes the specified {@link Settings} object, which contains all the tracking
+ * configuration, execute tracking, and stores tracking results in the specified
+ * {@link Model} object.
  *
  * @author Nicholas Perry
  * @author Johannes Schindelin
  * @author Jean-Yves Tinevez - Institut Pasteur - July 2010 - 2018, revised in
- *         2021
+ *         2021, 2025
  */
 public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Cancelable
 {
@@ -338,7 +336,7 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 	 *
 	 * @return true if the whole detection step has executed correctly.
 	 */
-	@SuppressWarnings( { "rawtypes", "unchecked" } )
+	@SuppressWarnings( "rawtypes" )
 	public boolean execDetection()
 	{
 		isCanceled = false;
@@ -373,12 +371,6 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 		 */
 		final ImgPlus img = TMUtils.rawWraps( settings.imp );
 
-		if ( !factory.setTarget( img, settings.detectorSettings ) )
-		{
-			errorMessage = factory.getErrorMessage();
-			return false;
-		}
-
 		/*
 		 * Separate frame-by-frame or global detection depending on the factory
 		 * type.
@@ -389,8 +381,8 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 			return processGlobal( ( SpotGlobalDetectorFactory ) factory, img, logger );
 		}
 		else if ( factory instanceof SpotDetectorFactory )
-		{ 
-			return processFrameByFrame( ( SpotDetectorFactory ) factory, img, logger ); 
+		{
+			return processFrameByFrame( ( SpotDetectorFactory ) factory, img, logger );
 		}
 
 		errorMessage = "Don't know how to handle detector factory of type: " + factory.getClass();
@@ -405,7 +397,9 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 		// To translate spots, later
 		final double[] calibration = TMUtils.getSpatialCalibration( settings.imp );
 
-		final SpotGlobalDetector< ? > detector = factory.getDetector( interval );
+		@SuppressWarnings( "unchecked" )
+		final SpotGlobalDetector< ? > detector = factory.getDetector( img, settings.detectorSettings, interval );
+		detector.setLogger( logger );
 		if ( detector instanceof MultiThreaded )
 		{
 			final MultiThreaded md = ( MultiThreaded ) detector;
@@ -522,7 +516,8 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm, Named, Ca
 						return Boolean.TRUE; // ok to be canceled.
 
 					// Yield detector for target frame
-					final SpotDetector< ? > detector = factory.getDetector( interval, frame );
+					@SuppressWarnings( "unchecked" )
+					final SpotDetector< ? > detector = factory.getDetector( img, settings.detectorSettings, interval, frame );
 					if ( detector instanceof MultiThreaded )
 					{
 						final MultiThreaded md = ( MultiThreaded ) detector;

@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -43,6 +43,7 @@ import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.components.tracker.LAPTrackerSettingsPanel;
 import fiji.plugin.trackmate.tracking.SpotTracker;
@@ -74,16 +75,14 @@ public class SparseLAPTrackerFactory extends SegmentTrackerFactory
 			+ "matrix formulation, allowing it to handle very large problems. "
 			+ "</html>";
 
+	public static final String DOC_URL = "https://imagej.net/plugins/trackmate/trackers/lap-trackers";
+
+	public static final ImageIcon ICON = new ImageIcon( Icons.class.getResource( "images/LAPtracker-icon-64px.png" ) );
+
 	@Override
 	public String getInfoText()
 	{
 		return THIS_INFO_TEXT;
-	}
-
-	@Override
-	public ImageIcon getIcon()
-	{
-		return null;
 	}
 
 	@Override
@@ -99,19 +98,19 @@ public class SparseLAPTrackerFactory extends SegmentTrackerFactory
 	}
 
 	@Override
+	public ImageIcon getIcon()
+	{
+		return ICON;
+	}
+
+	@Override
 	public SpotTracker create( final SpotCollection spots, final Map< String, Object > settings )
 	{
 		return new SparseLAPTracker( spots, settings );
 	}
 
 	@Override
-	public SparseLAPTrackerFactory copy()
-	{
-		return new SparseLAPTrackerFactory();
-	}
-
-	@Override
-	public boolean marshall( final Map< String, Object > settings, final Element element )
+	public String marshal( final Map< String, Object > settings, final Element element )
 	{
 		boolean ok = true;
 		final StringBuilder str = new StringBuilder();
@@ -126,26 +125,28 @@ public class SparseLAPTrackerFactory extends SegmentTrackerFactory
 		marshallMap( lfpm, lfpElement );
 		linkingElement.addContent( lfpElement );
 		element.addContent( linkingElement );
-		return ( ok & super.marshall( settings, element ) );
+
+		if ( !ok )
+			return str.toString();
+
+		return super.marshal( settings, element );
 	}
 
 	@Override
-	public boolean unmarshall( final Element element, final Map< String, Object > settings )
+	public String unmarshal( final Element element, final Map< String, Object > settings )
 	{
-                final StringBuilder errorHolder = new StringBuilder();
-		boolean ok = unmarshallSegment( element, settings, errorHolder ); // common parameters
-		
+		final StringBuilder errorHolder = new StringBuilder();
+		boolean ok = unmarshallSegment( element, settings, errorHolder ); // common
+
 		// Linking
 		final Element linkingElement = element.getChild( XML_ELEMENT_NAME_LINKING );
 		if ( null == linkingElement )
 		{
 			errorHolder.append( "Could not found the " + XML_ELEMENT_NAME_LINKING + " element in XML.\n" );
 			ok = false;
-
 		}
 		else
 		{
-
 			ok = ok & readDoubleAttribute( linkingElement, settings, KEY_LINKING_MAX_DISTANCE, errorHolder );
 			// feature penalties
 			final Map< String, Double > lfpMap = new HashMap<>();
@@ -157,18 +158,17 @@ public class SparseLAPTrackerFactory extends SegmentTrackerFactory
 			settings.put( KEY_LINKING_FEATURE_PENALTIES, lfpMap );
 		}
 
-		if ( !checkSettingsValidity( settings ) )
+		final String error = checkSettings( settings );
+		if ( null != error )
 		{
 			ok = false;
-			errorHolder.append( errorMessage ); // append validity check message
+			errorHolder.append( error );
 		}
 
 		if ( !ok )
-		{
-			errorMessage = errorHolder.toString();
-		}
-		return ok;
+			return errorHolder.toString();
 
+		return null;
 	}
 
 	@Override
@@ -180,31 +180,27 @@ public class SparseLAPTrackerFactory extends SegmentTrackerFactory
 		settings.put( KEY_LINKING_FEATURE_PENALTIES, new HashMap<>( DEFAULT_LINKING_FEATURE_PENALTIES ) );
 		return settings;
 	}
-        
-        @Override
-	public boolean checkSettingsValidity( final Map< String, Object > settings )
+
+	@Override
+	public String checkSettings( final Map< String, Object > settings )
 	{
 		if ( null == settings )
-		{
-			errorMessage = "Settings map is null.\n";
-			return false;
-		}
+			return "Settings map is null.\n";
 
 		final StringBuilder str = new StringBuilder();
-		final boolean ok = LAPUtils.checkSettingsValidity( settings, str, true );
-		if ( !ok )
-		{
-			errorMessage = str.toString();
-		}
-		return ok;
+		if ( !LAPUtils.checkSettingsValidity( settings, str, true ) )
+			return str.toString();
+
+		return null;
 	}
 
 	@Override
 	@SuppressWarnings( "unchecked" )
 	public String toString( final Map< String, Object > sm )
 	{
-		if ( !checkSettingsValidity( sm ) )
-		{ return errorMessage; }
+		final String error = checkSettings( sm );
+		if ( null != error )
+			return error;
 
 		final StringBuilder str = new StringBuilder();
 
@@ -225,4 +221,9 @@ public class SparseLAPTrackerFactory extends SegmentTrackerFactory
 		return new LAPTrackerSettingsPanel( getName(), spaceUnits, features, featureNames );
 	}
 
+	@Override
+	public String getUrl()
+	{
+		return DOC_URL;
+	}
 }

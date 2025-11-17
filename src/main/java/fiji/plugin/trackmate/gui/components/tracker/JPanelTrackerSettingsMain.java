@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -22,7 +22,6 @@
 package fiji.plugin.trackmate.gui.components.tracker;
 
 import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
-import static fiji.plugin.trackmate.gui.Fonts.FONT;
 import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
 import static fiji.plugin.trackmate.gui.Fonts.TEXTFIELD_DIMENSION;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_FEATURE_PENALTIES;
@@ -61,6 +60,7 @@ import javax.swing.SwingConstants;
 
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.tracking.jaqaman.LAPUtils;
+import fiji.plugin.trackmate.tracking.jaqaman.SparseLAPTrackerFactory;
 
 public class JPanelTrackerSettingsMain extends javax.swing.JPanel
 {
@@ -127,21 +127,16 @@ public class JPanelTrackerSettingsMain extends javax.swing.JPanel
 		final GridBagLayout thisLayout = new GridBagLayout();
 		thisLayout.columnWidths = new int[] { 180, 50, 50 };
 		thisLayout.columnWeights = new double[] { 0.1, 0.8, 0.1 };
-		thisLayout.rowHeights = new int[] { 15, 20, 0, 15, 10, 15, 95, 15, 15, 15, 15, 15, 95, 15, 15, 15, 15, 15, 95, 15, 15, 15, 15, 15, 95 };
+		thisLayout.rowHeights = new int[] { 0, 20, 0, 15, 10, 15, 95, 15, 15, 15, 15, 15, 95, 15, 15, 15, 15, 15, 95, 15, 15, 15, 15, 15, 95 };
 		thisLayout.rowWeights = new double[] { 0.0, 0.1, 0.25, 0.1, 0.0, 0.0, 0.25, 0.1, 0.0, 0.0, 0.0, 0.0, 0.25, 0.1, 0.0, 0.0, 0.0, 0.0, 0.25, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0 };
 		this.setLayout( thisLayout );
 
 		final JLabel jLabel1 = new JLabel();
 		this.add( jLabel1, new GridBagConstraints( 0, 0, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets( 10, 10, 0, 10 ), 0, 0 ) );
-		jLabel1.setText( "Settings for tracker:" );
-		jLabel1.setFont( FONT );
 
-		final JLabel lblTrackerName = new JLabel();
-		this.add( lblTrackerName, new GridBagConstraints( 0, 1, 3, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, new Insets( 10, 20, 0, 0 ), 0, 0 ) );
-		lblTrackerName.setHorizontalTextPosition( SwingConstants.CENTER );
-		lblTrackerName.setHorizontalAlignment( SwingConstants.CENTER );
+		final JLabel lblTrackerName = new JLabel( trackerName, SparseLAPTrackerFactory.ICON, SwingConstants.CENTER );
+		this.add( lblTrackerName, new GridBagConstraints( 0, 1, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets( 10, 20, 0, 0 ), 0, 0 ) );
 		lblTrackerName.setFont( BIG_FONT );
-		lblTrackerName.setText( trackerName );
 
 		final JLabel lbl2 = new JLabel();
 		this.add( lbl2, new GridBagConstraints( 0, 3, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets( 0, 10, 0, 10 ), 0, 0 ) );

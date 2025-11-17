@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -63,10 +63,11 @@ import javax.swing.SwingConstants;
 
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
+import fiji.plugin.trackmate.tracking.jaqaman.SimpleSparseLAPTrackerFactory;
 
 /**
  * A simplified configuration panel for the simple LAP tracker.
- * 
+ *
  * @author Jean-Yves Tinevez - 2010-2011
  */
 public class SimpleLAPTrackerSettingsPanel extends ConfigurationPanel
@@ -87,7 +88,7 @@ public class SimpleLAPTrackerSettingsPanel extends ConfigurationPanel
 		this.setPreferredSize( new java.awt.Dimension( 300, 500 ) );
 		final GridBagLayout thisLayout = new GridBagLayout();
 		thisLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 };
-		thisLayout.rowHeights = new int[] { 31, 50, 119, 7, 50, 50, 50, 50 };
+		thisLayout.rowHeights = new int[] { 0, 50, 119, 7, 50, 50, 50, 50 };
 		thisLayout.columnWeights = new double[] { 0.0, 0.0, 0.1 };
 		thisLayout.columnWidths = new int[] { 203, 42, 7 };
 		this.setLayout( thisLayout );
@@ -95,14 +96,10 @@ public class SimpleLAPTrackerSettingsPanel extends ConfigurationPanel
 		final JLabel lbl1 = new JLabel();
 		this.add( lbl1, new GridBagConstraints( 0, 0, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets( 0, 10, 0, 10 ), 0, 0 ) );
 		lbl1.setFont( FONT );
-		lbl1.setText( "Settings for tracker:" );
 
-		final JLabel lblTrackerName = new JLabel();
-		this.add( lblTrackerName, new GridBagConstraints( 0, 1, 3, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, new Insets( 10, 20, 0, 0 ), 0, 0 ) );
-		lblTrackerName.setHorizontalTextPosition( SwingConstants.CENTER );
-		lblTrackerName.setHorizontalAlignment( SwingConstants.CENTER );
+		final JLabel lblTrackerName = new JLabel( trackerName, SimpleSparseLAPTrackerFactory.ICON, SwingConstants.CENTER );
+		this.add( lblTrackerName, new GridBagConstraints( 0, 1, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets( 10, 20, 0, 0 ), 0, 0 ) );
 		lblTrackerName.setFont( BIG_FONT );
-		lblTrackerName.setText( trackerName );
 
 		final JLabel lblTrackerDescription = new JLabel();
 		this.add( lblTrackerDescription, new GridBagConstraints( 0, 2, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets( 10, 10, 10, 10 ), 0, 0 ) );

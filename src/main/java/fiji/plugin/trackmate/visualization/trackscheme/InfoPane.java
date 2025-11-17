@@ -202,7 +202,6 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 		final List< Spot > sortedSpots = new ArrayList<>( spotSelection );
 		Collections.sort( sortedSpots, Spot.frameComparator );
 
-		@SuppressWarnings( "serial" )
 		final DefaultTableModel dm = new DefaultTableModel()
 		{ // Un-editable model
 			@Override
@@ -236,7 +235,6 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 		table.setModel( dm );
 
 		// Tune look
-		@SuppressWarnings( "serial" )
 		final DefaultTableCellRenderer headerRenderer = new DefaultTableCellRenderer()
 		{
 			@Override
@@ -354,7 +352,6 @@ public class InfoPane extends JPanel implements SelectionChangeListener
 	private void init()
 	{
 
-		@SuppressWarnings( "serial" )
 		final AbstractListModel< String > lm = new AbstractListModel< String >()
 		{
 			@Override

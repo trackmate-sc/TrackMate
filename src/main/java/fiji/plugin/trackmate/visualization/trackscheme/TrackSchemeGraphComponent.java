@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -522,11 +522,17 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 						if ( column == 0 )
 							cwidth += xcs;
 
+						// Get sensible bounds for the editor
+						final Rectangle paintBounds = getVisibleRect();
+						final int minx = Math.max( xc - cwidth, paintBounds.x );
+						final int maxx = Math.min( xc, paintBounds.x + paintBounds.width );
+						cwidth = Math.min( cwidth, maxx - minx );
+
 						final JScrollPane scrollPane = new JScrollPane();
 						scrollPane.getViewport().setOpaque( false );
 						scrollPane.setVisible( false );
 						scrollPane.setOpaque( false );
-						scrollPane.setBounds( xc - cwidth, 0, cwidth, ycs );
+						scrollPane.setBounds( minx, 0, maxx - minx, ycs );
 						scrollPane.setVisible( true );
 
 						// Creates the plain text editor
@@ -535,7 +541,9 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 						textArea.setOpaque( true );
 						textArea.setBackground( ds.getTrackSchemeBackgroundColor1() );
 						textArea.setHorizontalAlignment( SwingConstants.CENTER );
-						textArea.setFont( ds.getFont().deriveFont( 12 * scale ).deriveFont( Font.BOLD ) );
+						float fontScale = ( float ) ( 12 * Math.min( 1d, scale ) );
+						fontScale = Math.max( fontScale, 4f );
+						textArea.setFont( ds.getFont().deriveFont( fontScale ).deriveFont( Font.BOLD ) );
 						textArea.addActionListener( new ActionListener()
 						{
 							// Get track name and pass it to model
@@ -604,7 +612,8 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			final Graphics2D g2d = ( Graphics2D ) g;
 			final double scale = graph.getView().getScale();
 
-			final float fontScale = ( float ) ( 12 * Math.min( 1d, scale ) );
+			float fontScale = ( float ) ( 12 * Math.min( 1d, scale ) );
+			fontScale = Math.max( fontScale, 4f );
 			g.setFont( ds.getFont().deriveFont( fontScale ) );
 			g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 			final Rectangle paintBounds = g.getClipBounds();
@@ -624,19 +633,29 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			{
 				for ( int i = 0; i < columnWidths.length; i++ )
 				{
+					final double minx = i == 0 ? 0 : x;
 					final int cw = columnWidths[ i ];
+					final double maxx = x + cw * xcs;
+					x += cw * xcs;
+
+					// x is at the right edge of the previous column.
+					if ( minx > paintBounds.x + paintBounds.width || maxx < paintBounds.x )
+						continue;
+
 					String columnName = trackScheme.getModel().getTrackModel().name( columnTrackIDs[ i ] );
 					if ( null == columnName )
 						columnName = "Name not set";
 
-					g.setColor( ds.getTrackSchemeForegroundColor() );
-					// Special case column 1.
-					if ( i == 0 )
-						g.drawString( columnName, 20, ( int ) ( ycs / 2d ) );
-					else
-						g.drawString( columnName, ( int ) ( x + 20d ), ( int ) ( ycs / 2d ) );
+					final double xstr1 = Math.max( minx, paintBounds.x );
+					final double xstr2 = Math.min( maxx, paintBounds.x + paintBounds.width );
+					final int stringWidth = g.getFontMetrics().stringWidth( columnName );
+					double xstr = ( xstr1 + xstr2 - stringWidth ) / 2.;
+					xstr = Math.max( minx + 5, xstr );
+					xstr = Math.min( maxx - stringWidth - 5, xstr );
 
-					x += cw * xcs;
+					g.setColor( ds.getTrackSchemeForegroundColor() );
+					g.drawString( columnName, ( int ) xstr, ( int ) ( ycs / 2. ) );
+
 					g.setColor( ds.getTrackSchemeDecorationColor() );
 					g.drawLine( ( int ) x, 0, ( int ) x, ( int ) ycs );
 				}
@@ -685,7 +704,8 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 			final Graphics2D g2d = ( Graphics2D ) g;
 			final double scale = graph.getView().getScale();
 
-			final float fontScale = ( float ) ( 12 * Math.min( 1d, scale ) );
+			float fontScale = ( float ) ( 12 * Math.min( 1d, scale ) );
+			fontScale = Math.max( fontScale, 4f );
 			g.setFont( ds.getFont().deriveFont( fontScale ) );
 			g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, ds.getUseAntialiasing() ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
 			final Rectangle paintBounds = g.getClipBounds();

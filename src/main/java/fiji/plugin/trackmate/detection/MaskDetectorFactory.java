@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -23,21 +23,10 @@ package fiji.plugin.trackmate.detection;
 
 import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
-import static fiji.plugin.trackmate.io.IOUtils.readBooleanAttribute;
-import static fiji.plugin.trackmate.io.IOUtils.readIntegerAttribute;
-import static fiji.plugin.trackmate.io.IOUtils.writeAttribute;
-import static fiji.plugin.trackmate.io.IOUtils.writeTargetChannel;
-import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
-import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import javax.swing.ImageIcon;
-
-import org.jdom2.Element;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
@@ -45,6 +34,7 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.components.detector.MaskDetectorConfigurationPanel;
 import fiji.plugin.trackmate.util.TMUtils;
+import net.imagej.ImgPlus;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.type.NativeType;
@@ -79,6 +69,8 @@ public class MaskDetectorFactory< T extends RealType< T > & NativeType< T > > ex
 			+ "The spot quality stores the object area or volume in pixels."
 			+ "</html>";
 
+	public static final String URL_DOC = "https://imagej.net/plugins/trackmate/detectors/trackmate-mask-detector";
+
 	@Override
 	public boolean has2Dsegmentation()
 	{
@@ -86,7 +78,7 @@ public class MaskDetectorFactory< T extends RealType< T > & NativeType< T > > ex
 	}
 
 	@Override
-	public SpotDetector< T > getDetector( final Interval interval, final int frame )
+	public SpotDetector< T > getDetector( final ImgPlus< T > img, final Map< String, Object > settings, final Interval interval, final int frame )
 	{
 		final double intensityThreshold = 0.;
 		final boolean simplifyContours = ( Boolean ) settings.get( KEY_SIMPLIFY_CONTOURS );
@@ -111,53 +103,6 @@ public class MaskDetectorFactory< T extends RealType< T > & NativeType< T > > ex
 	}
 
 	@Override
-	public boolean checkSettings( final Map< String, Object > lSettings )
-	{
-		boolean ok = true;
-		final StringBuilder errorHolder = new StringBuilder();
-		ok = ok & checkParameter( lSettings, KEY_TARGET_CHANNEL, Integer.class, errorHolder );
-		ok = ok & checkParameter( lSettings, KEY_SIMPLIFY_CONTOURS, Boolean.class, errorHolder );
-		final List< String > mandatoryKeys = new ArrayList<>();
-		mandatoryKeys.add( KEY_TARGET_CHANNEL );
-		mandatoryKeys.add( KEY_SIMPLIFY_CONTOURS );
-		ok = ok & checkMapKeys( lSettings, mandatoryKeys, null, errorHolder );
-		if ( !ok )
-		{
-			errorMessage = errorHolder.toString();
-		}
-		return ok;
-	}
-
-	@Override
-	public boolean marshall( final Map< String, Object > lSettings, final Element element )
-	{
-		final StringBuilder errorHolder = new StringBuilder();
-		final boolean ok = writeTargetChannel( lSettings, element, errorHolder )
-				&& writeAttribute( lSettings, element, KEY_SIMPLIFY_CONTOURS, Boolean.class, errorHolder );
-
-		if ( !ok )
-			errorMessage = errorHolder.toString();
-
-		return ok;
-	}
-
-	@Override
-	public boolean unmarshall( final Element element, final Map< String, Object > lSettings )
-	{
-		lSettings.clear();
-		final StringBuilder errorHolder = new StringBuilder();
-		boolean ok = true;
-		ok = ok & readIntegerAttribute( element, lSettings, KEY_TARGET_CHANNEL, errorHolder );
-		ok = ok & readBooleanAttribute( element, lSettings, KEY_SIMPLIFY_CONTOURS, errorHolder );
-		if ( !ok )
-		{
-			errorMessage = errorHolder.toString();
-			return false;
-		}
-		return checkSettings( lSettings );
-	}
-
-	@Override
 	public ConfigurationPanel getDetectorConfigurationPanel( final Settings lSettings, final Model model )
 	{
 		return new MaskDetectorConfigurationPanel( lSettings, model );
@@ -176,23 +121,17 @@ public class MaskDetectorFactory< T extends RealType< T > & NativeType< T > > ex
 	}
 
 	@Override
+	public String getUrl()
+	{
+		return URL_DOC;
+	}
+
+	@Override
 	public Map< String, Object > getDefaultSettings()
 	{
 		final Map< String, Object > lSettings = new HashMap<>();
 		lSettings.put( KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL );
 		lSettings.put( KEY_SIMPLIFY_CONTOURS, true );
 		return lSettings;
-	}
-
-	@Override
-	public ImageIcon getIcon()
-	{
-		return null;
-	}
-
-	@Override
-	public MaskDetectorFactory< T > copy()
-	{
-		return new MaskDetectorFactory<>();
 	}
 }

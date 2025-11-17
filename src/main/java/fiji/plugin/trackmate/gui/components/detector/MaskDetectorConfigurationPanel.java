@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -33,7 +33,7 @@ import fiji.plugin.trackmate.detection.ThresholdDetectorFactory;
 
 /**
  * Configuration panel for spot detectors based on thresholding operations.
- * 
+ *
  * @author Jean-Yves Tinevez, 2020
  */
 public class MaskDetectorConfigurationPanel extends ThresholdDetectorConfigurationPanel
@@ -49,7 +49,7 @@ public class MaskDetectorConfigurationPanel extends ThresholdDetectorConfigurati
 			final Settings settings,
 			final Model model )
 	{
-		super( settings, model, MaskDetectorFactory.INFO_TEXT, MaskDetectorFactory.NAME );
+		super( settings, model, MaskDetectorFactory.INFO_TEXT, MaskDetectorFactory.NAME, MaskDetectorFactory.URL_DOC );
 		ftfIntensityThreshold.setVisible( false );
 		btnAutoThreshold.setVisible( false );
 		lblIntensityThreshold.setVisible( false );
@@ -75,7 +75,7 @@ public class MaskDetectorConfigurationPanel extends ThresholdDetectorConfigurati
 	 * configuration panels configures. The new instance will in turn be used
 	 * for the preview mechanism. Therefore, classes extending this class are
 	 * advised to return a suitable implementation of the factory.
-	 * 
+	 *
 	 * @return a new {@link SpotDetectorFactory}.
 	 */
 	@Override

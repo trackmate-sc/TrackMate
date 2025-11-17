@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -69,6 +69,7 @@ public class DetectionPreview
 				currentFrameSupplier.get(),
 				thresholdKey ) );
 		panel.btnCancel.addActionListener( l -> cancel() );
+		panel.btnClear.addActionListener( l -> clearModelAndHistogram( model, currentFrameSupplier.get(), () -> settings.imp.repaintWindow() ) );
 	}
 
 	public DetectionPreviewPanel getPanel()
@@ -112,6 +113,7 @@ public class DetectionPreview
 
 				// Update target model.
 				updateModelAndHistogram( model, sourceModel, frame, threshold );
+				panel.btnClear.setVisible( true );
 			}
 			catch ( final Exception e )
 			{
@@ -128,7 +130,7 @@ public class DetectionPreview
 
 	/**
 	 * Runs the preview with the specified parameters.
-	 * 
+	 *
 	 * @param settings
 	 *            the settings object to use as preview. Will be used for its
 	 *            image and ROI fields.
@@ -158,6 +160,10 @@ public class DetectionPreview
 			final Map< String, Object > detectorSettings,
 			final String thresholdKey )
 	{
+		// Clear the chart panel.
+		if ( panel.chart != null )
+			panel.chart.displayHistogram( new double[] {} );
+
 		// Configure local settings.
 		final Settings lSettings = new Settings( settings.imp );
 		lSettings.tstart = frame;
@@ -215,6 +221,14 @@ public class DetectionPreview
 		panel.btnCancel.setEnabled( false );
 		if ( null != trackmate )
 			trackmate.cancel( "User canceled preview" );
+	}
+
+	protected void clearModelAndHistogram( final Model targetModel, final int frame, final Runnable refresher )
+	{
+		targetModel.getSpots().put( frame, new ArrayList<>() );
+		refresher.run();
+		panel.chart.displayHistogram( new double[] {} );
+		panel.logger.log( "" );
 	}
 
 	protected void updateModelAndHistogram( final Model targetModel, final Model sourceModel, final int frame, final double threshold )
@@ -278,7 +292,7 @@ public class DetectionPreview
 		 * The <code>spots</code> field of the specified model will be updated
 		 * with the spots found by the preview action and the model will be
 		 * notified.
-		 * 
+		 *
 		 * @param model
 		 *            the model to update. If <code>null</code>, the preview
 		 *            will run but won't update a model.
@@ -296,7 +310,7 @@ public class DetectionPreview
 		 * Only the {@link Settings#imp} field and the ROI methods will be used
 		 * to generate the preview. {@link Settings#imp} cannot be
 		 * <code>null</code>.
-		 * 
+		 *
 		 * @param settings
 		 *            the settings to use. Cannot be <code>null</code>.
 		 * @return this builder.
@@ -310,7 +324,7 @@ public class DetectionPreview
 		/**
 		 * Sets the detector factory to use for the preview. Can be different
 		 * from the one stored in the {@link #settings(Settings)}.
-		 * 
+		 *
 		 * @param detectorFactory
 		 *            the detector factory to use for the preview. Cannot be
 		 *            <code>null</code>.
@@ -329,11 +343,11 @@ public class DetectionPreview
 		 * <p>
 		 * By default, the current frame is read from the image in the
 		 * <code>settings</code> field using:
-		 * 
+		 *
 		 * <pre>
 		 * () -&gt; ( settings.imp.getFrame() - 1 )
 		 * </pre>
-		 * 
+		 *
 		 * @param frameSupplier
 		 *            the frame supplier function. Cannot be <code>null</code>.
 		 *            Must return a valid frame number.
@@ -349,7 +363,7 @@ public class DetectionPreview
 		 * Sets the supplier function that will return the detector settings to
 		 * use for the preview. This function is called when the user pressed
 		 * the 'preview' button on the preview panel.
-		 * 
+		 *
 		 * @param detectionSettingsSupplier
 		 *            the supplier function that will return the detector
 		 *            settings to use for the preview. Cannot be
@@ -368,7 +382,7 @@ public class DetectionPreview
 		 * Sets the consumer function that will be called with the threshold
 		 * value sets by the user on the quality histogram. Setting it to
 		 * <code>null</code> makes the histogram non-interactive.
-		 * 
+		 *
 		 * @param thresholdUpdater
 		 *            the consumer function called with the threshold value sets
 		 *            by the user on the quality histogram. If <code>null</code>
@@ -385,7 +399,7 @@ public class DetectionPreview
 		/**
 		 * Sets the {@link JFormattedTextField} to update when the user changes
 		 * the threshold value on the quality histogram.
-		 * 
+		 *
 		 * @param ftf
 		 *            the consumer formatted field that will be updated when the
 		 *            user sets the threshold value on the quality histogram.
@@ -403,7 +417,7 @@ public class DetectionPreview
 		/**
 		 * Sets the axis label to appear on the histogram. By default: 'Quality
 		 * histogram'.
-		 * 
+		 *
 		 * @param axisLabel
 		 *            the axis label to appear on the histogram
 		 * @return this builder.
@@ -425,7 +439,7 @@ public class DetectionPreview
 		 * another value for detectors that threshold quality using another
 		 * parameter. If the key does not exist in the detector settings, this
 		 * is simply ignored.
-		 * 
+		 *
 		 * @param thresholdKey
 		 *            the parameter key to use for thresholding.
 		 * @return this builder.

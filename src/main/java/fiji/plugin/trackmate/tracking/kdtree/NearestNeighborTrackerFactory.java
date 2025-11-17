@@ -21,8 +21,6 @@
  */
 package fiji.plugin.trackmate.tracking.kdtree;
 
-import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
-import static fiji.plugin.trackmate.io.IOUtils.writeAttribute;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
 
@@ -31,12 +29,12 @@ import java.util.Map;
 
 import javax.swing.ImageIcon;
 
-import org.jdom2.Element;
 import org.scijava.Priority;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.components.tracker.NearestNeighborTrackerSettingsPanel;
 import fiji.plugin.trackmate.tracking.SpotTracker;
@@ -69,18 +67,14 @@ public class NearestNeighborTrackerFactory implements SpotTrackerFactory
 			+ "are iterated."
 			+ " </html>";
 
-	private String errorMessage;
+	public static final String DOC_URL = "https://imagej.net/plugins/trackmate/trackers/nearest-neighbor-tracker";
+
+	public static final ImageIcon ICON = new ImageIcon( Icons.class.getResource( "images/NNtracker-icon-64px.png" ) );
 
 	@Override
 	public String getInfoText()
 	{
 		return INFO_TEXT;
-	}
-
-	@Override
-	public ImageIcon getIcon()
-	{
-		return null;
 	}
 
 	@Override
@@ -93,6 +87,18 @@ public class NearestNeighborTrackerFactory implements SpotTrackerFactory
 	public String getName()
 	{
 		return NAME;
+	}
+
+	@Override
+	public String getUrl()
+	{
+		return DOC_URL;
+	}
+
+	@Override
+	public ImageIcon getIcon()
+	{
+		return ICON;
 	}
 
 	@Override
@@ -109,29 +115,6 @@ public class NearestNeighborTrackerFactory implements SpotTrackerFactory
 	}
 
 	@Override
-	public boolean marshall( final Map< String, Object > settings, final Element element )
-	{
-		final StringBuilder str = new StringBuilder();
-		final boolean ok = writeAttribute( settings, element, KEY_LINKING_MAX_DISTANCE, Double.class, str );
-		if ( !ok )
-			errorMessage = str.toString();
-
-		return ok;
-	}
-
-	@Override
-	public boolean unmarshall( final Element element, final Map< String, Object > settings )
-	{
-		settings.clear();
-		final StringBuilder errorHolder = new StringBuilder();
-		final boolean ok = readDoubleAttribute( element, settings, KEY_LINKING_MAX_DISTANCE, errorHolder );
-		if ( !ok )
-			errorMessage = errorHolder.toString();
-
-		return ok;
-	}
-
-	@Override
 	public String toString( final Map< String, Object > sm )
 	{
 		return String.format( "  Max distance: %.1f\n", ( Double ) sm.get( KEY_LINKING_MAX_DISTANCE ) );
@@ -143,28 +126,5 @@ public class NearestNeighborTrackerFactory implements SpotTrackerFactory
 		final Map< String, Object > settings = new HashMap<>();
 		settings.put( KEY_LINKING_MAX_DISTANCE, DEFAULT_LINKING_MAX_DISTANCE );
 		return settings;
-	}
-
-	@Override
-	public boolean checkSettingsValidity( final Map< String, Object > settings )
-	{
-		final StringBuilder str = new StringBuilder();
-		final boolean ok = NearestNeighborTracker.checkInput( settings, str );
-		if ( !ok )
-			errorMessage = str.toString();
-
-		return ok;
-	}
-
-	@Override
-	public String getErrorMessage()
-	{
-		return errorMessage;
-	}
-
-	@Override
-	public NearestNeighborTrackerFactory copy()
-	{
-		return new NearestNeighborTrackerFactory();
 	}
 }
