@@ -32,7 +32,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.Supplier;
 
-import org.jgrapht.alg.util.NeighborCache;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 import org.jgrapht.graph.SimpleWeightedGraph;
@@ -419,19 +418,4 @@ public class GraphUtils
 		Arrays.fill( chars, c );
 		return chars;
 	}
-
-	/**
-	 * @return true only if the given model is a tree; that is: every spot has
-	 *         one or less predecessors.
-	 */
-	public static final Set< Spot > getSibblings( final NeighborCache< Spot, DefaultWeightedEdge > cache, final Spot spot )
-	{
-		final HashSet< Spot > sibblings = new HashSet<>();
-		final Set< Spot > predecessors = cache.predecessorsOf( spot );
-		for ( final Spot predecessor : predecessors )
-			sibblings.addAll( cache.successorsOf( predecessor ) );
-
-		return sibblings;
-	}
-
 }
