@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -116,8 +116,10 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	}
 
 	/**
-	 * Return the singleton instance for this tool. If it was not previously
+	 * Returns the singleton instance for this tool. If it was not previously
 	 * instantiated, this calls instantiates it.
+	 *
+	 * @return the singleton instance of this tool.
 	 */
 	public static SpotEditTool getInstance()
 	{
@@ -128,7 +130,9 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	}
 
 	/**
-	 * Return true if the tool is currently present in ImageJ toolbar.
+	 * Returns true if the tool is currently present in ImageJ toolbar.
+	 *
+	 * @return true if the tool is launched.
 	 */
 	public static boolean isLaunched()
 	{
@@ -159,17 +163,17 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	{
 		/*
 		 * Double check! Since TrackMate v7 there the following bug:
-		 * 
+		 *
 		 * Sometimes the listeners of this tool get added to the target image
 		 * canvas TWICE. This causes an unspeakable mess where all events are
 		 * triggered twice for e.g. a single click. For instance you cannot
 		 * shift-click on a spot to add it to the selection, because the event
 		 * is fired TWICE, which results in the spot being de-selected
 		 * immediately after being selected.
-		 * 
+		 *
 		 * But the double registration seems to happen randomly. Sometimes the
 		 * listeners are added only once, *sometimes* (more often) twice.
-		 * 
+		 *
 		 * To work around this mess, we overload the registerTool(ImageCanvas)
 		 * method and skip the registration if we find that the mouse listener
 		 * has already been added to the canvas. It fixes the issue, regardless
@@ -187,8 +191,11 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	}
 
 	/**
-	 * Register the given {@link HyperStackDisplayer}. If this method id not
+	 * Registers the given {@link HyperStackDisplayer}. If this method id not
 	 * called, the tool will not respond.
+	 *
+	 * @param displayer
+	 *            the displayer to register
 	 */
 	public void register( final HyperStackDisplayer displayer )
 	{
@@ -317,7 +324,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 			e.consume();
 			break;
 		}
-		
+
 		// Delete currently edited spot
 		case KeyEvent.VK_DELETE:
 		{

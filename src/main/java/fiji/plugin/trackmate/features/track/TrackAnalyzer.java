@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -23,10 +23,10 @@ package fiji.plugin.trackmate.features.track;
 
 import java.util.Collection;
 
-import net.imglib2.algorithm.Benchmark;
-import net.imglib2.algorithm.MultiThreaded;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.features.FeatureAnalyzer;
+import net.imglib2.algorithm.Benchmark;
+import net.imglib2.algorithm.MultiThreaded;
 
 /**
  * Mother interface for the classes that can compute the feature of tracks.
@@ -80,6 +80,8 @@ public interface TrackAnalyzer extends Benchmark, FeatureAnalyzer, MultiThreaded
 	 * <p>
 	 * Example of a non-local track feature: the rank of the track sorted by its
 	 * number of spots, compared to other tracks.
+	 *
+	 * @return true if this is a local track analyzer.
 	 */
 	public boolean isLocal();
 

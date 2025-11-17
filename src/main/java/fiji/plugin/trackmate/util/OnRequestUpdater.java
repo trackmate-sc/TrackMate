@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -68,9 +68,9 @@ package fiji.plugin.trackmate.util;
  * not optimal, and that for general heavy use refreshing, another solution must
  * be sought. In the meantime, it is recommended that this class is used for
  * simple purpose.
- * 
+ *
  * @author Albert Cardona
- * 
+ *
  */
 public class OnRequestUpdater extends Thread
 {
@@ -81,6 +81,9 @@ public class OnRequestUpdater extends Thread
 
 	/**
 	 * Constructor autostarts thread
+	 *
+	 * @param refreshable
+	 *            the refreshable target
 	 */
 	public OnRequestUpdater( final Refreshable refreshable )
 	{

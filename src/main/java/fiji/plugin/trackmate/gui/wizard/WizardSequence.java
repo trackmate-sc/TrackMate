@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -37,7 +37,9 @@ public interface WizardSequence
 
 	/**
 	 * Launches the wizard to play this sequence.
-	 * 
+	 *
+	 * @param title
+	 *            the title to show in the wizard window.
 	 * @return the {@link JFrame} in which the wizard is displayed.
 	 */
 	public default JFrame run( final String title )
@@ -92,7 +94,7 @@ public interface WizardSequence
 	/**
 	 * Returns the descriptor in charge of logging events. It can be accessed
 	 * out of the normal sequence by a special button in the wizard.
-	 * 
+	 *
 	 * @return the descriptor in charge of logging events.
 	 */
 	public WizardPanelDescriptor logDescriptor();
@@ -100,7 +102,7 @@ public interface WizardSequence
 	/**
 	 * Returns the descriptor in charge of configure the views. It can be
 	 * accessed out of the normal sequence by a special button in the wizard.
-	 * 
+	 *
 	 * @return the descriptor in charge of configuring the views.
 	 */
 	public WizardPanelDescriptor configDescriptor();
@@ -125,7 +127,7 @@ public interface WizardSequence
 
 	/**
 	 * Returns the panel in charge of saving the data.
-	 * 
+	 *
 	 * @return the panel in charge of saving the data.
 	 */
 	public WizardPanelDescriptor save();
@@ -134,7 +136,7 @@ public interface WizardSequence
 	 * Position the sequence so that its current descriptor is the one with the
 	 * specified identifier. If the identifier is unknown to the sequence, do
 	 * nothing.
-	 * 
+	 *
 	 * @param panelIdentifier
 	 *            the descriptor identifier.
 	 */

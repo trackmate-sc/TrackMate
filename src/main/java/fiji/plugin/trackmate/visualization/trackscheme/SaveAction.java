@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -79,8 +79,15 @@ public class SaveAction extends AbstractAction
 
 	/**
 	 * Saves XML+PNG format.
-	 * 
+	 *
 	 * @param frame
+	 *            the TrackScheme frame to capture from.
+	 * @param filename
+	 *            the file to save to.
+	 * @param bg
+	 *            the background color, or null for transparent.
+	 * @throws IOException
+	 *             if something goes wrong when writing the file.
 	 */
 	protected void saveXmlPng( final TrackSchemeFrame frame, final String filename, final Color bg ) throws IOException
 	{

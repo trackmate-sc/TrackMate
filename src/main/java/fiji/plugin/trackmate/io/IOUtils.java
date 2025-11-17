@@ -306,9 +306,18 @@ public class IOUtils
 	}
 
 	/**
-	 * Read and return an integer attribute from a JDom {@link Element}, and
+	 * Reads and return an integer attribute from a JDom {@link Element}, and
 	 * substitute a default value of 0 if the attribute is not found or of the
 	 * wrong type.
+	 *
+	 * @param element
+	 *            the JDom element to read from.
+	 * @param name
+	 *            the name of the attribute to read.
+	 * @param logger
+	 *            a {@link Logger} to report errors to.
+	 * @return the integer value of the attribute, or 0 if not found or of the
+	 *         wrong type.
 	 */
 	public static final int readIntAttribute( final Element element, final String name, final Logger logger )
 	{
@@ -489,6 +498,13 @@ public class IOUtils
 	 * are <b>added</b> to the specified map. If a value is found not to be a
 	 * double, an error is returned.
 	 *
+	 * @param element
+	 *            the JDom element to read from.
+	 * @param map
+	 *            the map to populate.
+	 * @param errorHolder
+	 *            a string builder to append error messages to if something goes
+	 *            wrong.
 	 * @return <code>true</code> if all values were found and mapped as doubles,
 	 *         <code>false</code> otherwise and the error holder is updated.
 	 */
@@ -548,7 +564,7 @@ public class IOUtils
 	}
 
 	/**
-	 * Add a parameter attribute to the given element, taken from the given
+	 * Adds a parameter attribute to the given element, taken from the given
 	 * settings map. Basic checks are made to ensure that the parameter value
 	 * can be found and is of the right class.
 	 *
@@ -560,6 +576,9 @@ public class IOUtils
 	 *            the key to the parameter value in the map
 	 * @param expectedClass
 	 *            the expected class for the value
+	 * @param errorHolder
+	 *            a string builder to append error messages to if something goes
+	 *            wrong.
 	 * @return <code>true</code> if the parameter was found, of the right class,
 	 *         and was successfully added to the element, <code>false</code> if
 	 *         not, and updated the specified error holder.
@@ -587,6 +606,11 @@ public class IOUtils
 	/**
 	 * Stores the given mapping in a given JDom element, using attributes in a
 	 * KEY="VALUE" fashion.
+	 *
+	 * @param map
+	 *            the map to marshall.
+	 * @param element
+	 *            the JDom element to update.
 	 */
 	public static void marshallMap( final Map< String, Double > map, final Element element )
 	{

@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -105,10 +105,10 @@ public class FilterGuiPanel extends JPanel implements ChangeListener
 	 * CONSTRUCTOR
 	 */
 
-	public FilterGuiPanel( 
-			final Model model, 
-			final Settings settings, 
-			final TrackMateObject target, 
+	public FilterGuiPanel(
+			final Model model,
+			final Settings settings,
+			final TrackMateObject target,
 			final List< FeatureFilter > filters,
 			final String defaultFeature,
 			final FeatureDisplaySelector featureSelector )
@@ -184,11 +184,11 @@ public class FilterGuiPanel extends JPanel implements ChangeListener
 		lblInfo = new JLabel();
 		lblInfo.setFont( SMALL_FONT );
 		buttonsPanel.add( lblInfo );
-		
+
 		/*
 		 * Color for spots.
 		 */
-		
+
 		final JPanel coloringPanel = featureSelector.createSelectorFor( target );
 		coloringPanel.setBorder( BorderFactory.createEmptyBorder( 5, 5, 5, 5 ) );
 		bottomPanel.add( coloringPanel, BorderLayout.CENTER );
@@ -209,7 +209,7 @@ public class FilterGuiPanel extends JPanel implements ChangeListener
 
 		lblTop.setVisible( false ); // For now
 		logger = new ProgressBarLogger();
-		
+
 		// On close
 		GuiUtils.addOnClosingEvent( this, () -> updater.quit() );
 	}
@@ -239,6 +239,8 @@ public class FilterGuiPanel extends JPanel implements ChangeListener
 
 	/**
 	 * Returns the thresholds currently set by this GUI.
+	 *
+	 * @return the thresholds.
 	 */
 	public List< FeatureFilter > getFeatureFilters()
 	{
@@ -246,10 +248,13 @@ public class FilterGuiPanel extends JPanel implements ChangeListener
 	}
 
 	/**
-	 * Add an {@link ChangeListener} to this panel. The {@link ChangeListener}
+	 * Adds a {@link ChangeListener} to this panel. The {@link ChangeListener}
 	 * will be notified when a change happens to the thresholds displayed by
 	 * this panel, whether due to the slider being move, the auto-threshold
 	 * button being pressed, or the combo-box selection being changed.
+	 *
+	 * @param listener
+	 *            the listener to add.
 	 */
 	public void addChangeListener( final ChangeListener listener )
 	{
@@ -257,8 +262,10 @@ public class FilterGuiPanel extends JPanel implements ChangeListener
 	}
 
 	/**
-	 * Remove a ChangeListener from this panel.
+	 * Removes a ChangeListener from this panel.
 	 *
+	 * @param listener
+	 *            the listener to remove.
 	 * @return true if the listener was in listener collection of this instance.
 	 */
 	public boolean removeChangeListener( final ChangeListener listener )

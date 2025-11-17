@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -168,7 +168,7 @@ public class TrackScheme extends AbstractTrackMateModelView
 		final String title = "TrackScheme";
 		gui.setTitle( title );
 		gui.setSize( DEFAULT_SIZE );
-		
+
 		displaySettings.listeners().add( () -> doTrackStyle() );
 		gui.addWindowListener( new WindowAdapter()
 		{
@@ -207,6 +207,11 @@ public class TrackScheme extends AbstractTrackMateModelView
 	}
 
 	/**
+	 * Returns the first free column for the target row.
+	 *
+	 * @param frame
+	 *            the target row.
+	 *
 	 * @return the first free column for the target row.
 	 */
 	public int getNextFreeColumn( final int frame )
@@ -221,6 +226,8 @@ public class TrackScheme extends AbstractTrackMateModelView
 
 	/**
 	 * Returns the GUI frame controlled by this class.
+	 *
+	 * @return the GUI frame.
 	 */
 	public TrackSchemeFrame getGUI()
 	{
@@ -230,6 +237,8 @@ public class TrackScheme extends AbstractTrackMateModelView
 	/**
 	 * Returns the {@link JGraphXAdapter} that serves as a model for the graph
 	 * displayed in this frame.
+	 *
+	 * @return the graph adapter.
 	 */
 	public JGraphXAdapter getGraph()
 	{
@@ -238,6 +247,8 @@ public class TrackScheme extends AbstractTrackMateModelView
 
 	/**
 	 * Returns the graph layout in charge of arranging the cells on the graph.
+	 *
+	 * @return the graph layout.
 	 */
 	public TrackSchemeGraphLayout getGraphLayout()
 	{
@@ -1281,16 +1292,16 @@ public class TrackScheme extends AbstractTrackMateModelView
 
 	public void removeSelectedLinkCells()
 	{
-		List< Object > edgeCells = new ArrayList<>();
-		for ( Object obj : graph.getSelectionCells() )
+		final List< Object > edgeCells = new ArrayList<>();
+		for ( final Object obj : graph.getSelectionCells() )
 		{
-			DefaultWeightedEdge e = graph.getEdgeFor( ( mxICell ) obj );
+			final DefaultWeightedEdge e = graph.getEdgeFor( ( mxICell ) obj );
 			if ( e == null )
 				continue;
 
 			edgeCells.add( obj );
 		}
-		
+
 		graph.getModel().beginUpdate();
 		try
 		{

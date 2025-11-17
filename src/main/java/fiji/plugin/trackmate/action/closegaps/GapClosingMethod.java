@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -67,7 +67,7 @@ public interface GapClosingMethod
 	 * Returns the list of parameters required to configure this method.
 	 * <p>
 	 * The list will be used to autogenerate a configuration panel.
-	 * 
+	 *
 	 * @return a list of parameters.
 	 */
 	public default List< GapClosingParameter > getParameters()
@@ -85,9 +85,11 @@ public interface GapClosingMethod
 
 	/**
 	 * Performs the gap closing.
-	 * 
+	 *
 	 * @param trackmate
+	 *            the TrackMate instance to operate on.
 	 * @param logger
+	 *            a logger to log messages to.
 	 */
 	public void execute( TrackMate trackmate, Logger logger );
 
@@ -98,7 +100,7 @@ public interface GapClosingMethod
 	 * frames within a track. Gaps are returned as a list of edges. Each edge in
 	 * this list has a source spot and a target spot separated by strictly more
 	 * than 1 frame.
-	 * 
+	 *
 	 * @param model
 	 *            the model to search for gaps.
 	 * @return a list of edges corresponding to gaps.
@@ -139,7 +141,7 @@ public interface GapClosingMethod
 	 * linked</b> be edges. The spots are added in time order, from the frame
 	 * just after the source spot, to the frame just before the target spot. The
 	 * source and target spot are not in the list.
-	 * 
+	 *
 	 * @param model
 	 *            the model.
 	 * @param edge
@@ -159,7 +161,7 @@ public interface GapClosingMethod
 		final double[] tPos = new double[ 3 ];
 		target.localize( tPos );
 		final int tt = target.getFeature( Spot.FRAME ).intValue();
-		
+
 		final List< Spot > interpolatedSpots = new ArrayList<>( Math.abs( tt - st ) - 1 );
 
 		final int presign = tt > st ? 1 : -1;
@@ -200,7 +202,7 @@ public interface GapClosingMethod
 	 * but configured with a small ROI centered on the specified spot, with a
 	 * radius proportional to the radius of the specified spot, and set to
 	 * operate only on the frame in which the specified spot it.
-	 * 
+	 *
 	 * @param spot
 	 *            the spot to read the coordinates and the frame from.
 	 * @param neighborhoodFactor

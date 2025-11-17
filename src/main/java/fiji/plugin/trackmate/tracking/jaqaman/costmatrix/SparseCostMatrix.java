@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -47,7 +47,7 @@ import java.util.List;
  * Volgenant paper: <code>Volgenant. Linear and semi-assignment problems: A core
  * oriented approach. Computers &amp; Operations Research (1996) vol. 23 (10) pp.
  * 917-932</code>
- * 
+ *
  * @author Jean-Yves Tinevez - 2014
  */
 public class SparseCostMatrix
@@ -106,13 +106,15 @@ public class SparseCostMatrix
 	 * <li><code>number</code> an <code>int[]</code> array, with one element per
 	 * row, that contains the number of non infinite cost for a row.
 	 * </ol>
-	 * 
+	 *
 	 * @param cc
 	 *            the cost array.
 	 * @param kk
 	 *            the column index of each cost.
 	 * @param number
 	 *            the number of element for each row.
+	 * @param nCols
+	 *            the number of columns in the matrix.
 	 * @throws IllegalArgumentException
 	 *             if the cost and column arrays are not of the same size, if
 	 *             the column array is not sorted row by row, of if one row has
@@ -304,7 +306,7 @@ public class SparseCostMatrix
 	 * Computes the total cost for an assignment specified by row. It is
 	 * supposed that row <code>i</code> is assigned to column
 	 * <code>rowAssignment[i]</code>.
-	 * 
+	 *
 	 * @param rowAssignment
 	 *            the assignment, specified by row.
 	 * @return the total cost for this assignment.
@@ -325,7 +327,7 @@ public class SparseCostMatrix
 	 * Creates and returns a new <code>double[][]</code> matrix representing a
 	 * non-sparse version of this cost matrix. Missing costs are replace by
 	 * {@link Double#MAX_VALUE}.
-	 * 
+	 *
 	 * @return a new <code>double[][]</code>
 	 */
 	public double[][] toFullMatrix()
@@ -353,7 +355,7 @@ public class SparseCostMatrix
 	 * Returns the value stored by this matrix at the specified row and column.
 	 * If a value is not present in the sparse matrix, the specified missing
 	 * value is returned.
-	 * 
+	 *
 	 * @param i
 	 *            the row.
 	 * @param j
@@ -374,7 +376,7 @@ public class SparseCostMatrix
 
 	/**
 	 * Exposes the array of all the non-infinite costs.
-	 * 
+	 *
 	 * @return the costs.
 	 */
 	public double[] getCosts()
@@ -395,14 +397,14 @@ public class SparseCostMatrix
 	/**
 	 * Returns the vertical concatenation of this matrix with the specified one.
 	 * So that if this matrix is A and the specified matrix is B, you get
-	 * 
+	 *
 	 * <pre>
 	 * -----
 	 * | A |
 	 * | B |
 	 * -----
 	 * </pre>
-	 * 
+	 *
 	 * @param B
 	 *            the matrix to concatenate this matrix with
 	 * @return a new sparse matrix.
@@ -436,13 +438,13 @@ public class SparseCostMatrix
 	/**
 	 * Returns the horizontal concatenation of this matrix with the specified
 	 * one. So that if this matrix is A and the specified matrix is B, you get
-	 * 
+	 *
 	 * <pre>
 	 * -------
 	 * | A B |
 	 * -------
 	 * </pre>
-	 * 
+	 *
 	 * @param B
 	 *            the matrix to concatenate this matrix with
 	 * @return a new sparse matrix.
@@ -491,7 +493,7 @@ public class SparseCostMatrix
 
 	/**
 	 * Returns the transpose of this matrix.
-	 * 
+	 *
 	 * @return a new sparse matrix.
 	 */
 	public final SparseCostMatrix transpose()
@@ -554,7 +556,7 @@ public class SparseCostMatrix
 	/**
 	 * Replace all the non-infinite values of this matrix by the specified
 	 * value.
-	 * 
+	 *
 	 * @param value
 	 *            the value to write in this matrix.
 	 */

@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -28,7 +28,7 @@ import javax.swing.JPanel;
 
 /**
  * The mother class for all the configuration panels.
- * 
+ *
  * @author Jean-Yves Tinevez
  *
  */
@@ -45,11 +45,16 @@ public abstract class ConfigurationPanel extends JPanel
 	public final ActionEvent PREVIEW_BUTTON_PUSHED = new ActionEvent( this, 0, "PreviewButtonPushed" );
 
 	/**
-	 * Echo the parameters of the given settings on this panel.
+	 * Echoes the parameters of the given settings on this panel.
+	 *
+	 * @param settings
+	 *            the settings map to use to set the values of this panel.
 	 */
 	public abstract void setSettings( final Map< String, Object > settings );
 
 	/**
+	 * Collects the current values of this panel into a settings map.
+	 *
 	 * @return a new settings map object with its values set by this panel.
 	 */
 	public abstract Map< String, Object > getSettings();

@@ -184,7 +184,10 @@ public class TmXmlReader
 	 */
 
 	/**
-	 * Initialize this reader to read the file given in argument.
+	 * Initialize this reader to read the specified file.
+	 *
+	 * @param file
+	 *            the file to read.
 	 */
 	public TmXmlReader( final File file )
 	{
@@ -218,6 +221,8 @@ public class TmXmlReader
 	/**
 	 * Returns the log text saved in the file, or <code>null</code> if log text
 	 * was not saved.
+	 *
+	 * @return the saved log text.
 	 */
 	public String getLog()
 	{
@@ -433,7 +438,8 @@ public class TmXmlReader
 	 * file.
 	 *
 	 * @param imp
-	 *
+	 *            the image to create the settings for, may be
+	 *            <code>null</code>.
 	 * @param detectorProvider
 	 *            the detector provider, required to configure the settings with
 	 *            a correct <code>SpotDetectorFactory</code>. If
@@ -454,6 +460,11 @@ public class TmXmlReader
 	 *            the track analyzer provider, required to instantiates the
 	 *            saved {@link TrackAnalyzer}s. If <code>null</code>, will skip
 	 *            reading track analyzers.
+	 * @param spotMorphologyAnalyzerProvider
+	 *            the spot morphology analyzer provider, required to instantiate
+	 *            the saved SpotMorphologyAnalyzers. If <code>null</code>, will
+	 *            skip reading spot morphology analyzers.
+	 * @return a new, configured {@link Settings} object.
 	 */
 	public Settings readSettings(
 			final ImagePlus imp,
@@ -516,6 +527,8 @@ public class TmXmlReader
 
 	/**
 	 * Returns the version string stored in the file.
+	 *
+	 * @return the version string.
 	 */
 	public String getVersion()
 	{
@@ -930,10 +943,14 @@ public class TmXmlReader
 	}
 
 	/**
-	 * Load the tracks, the track features and the ID of the filtered tracks
+	 * Loads the tracks, the track features and the ID of the filtered tracks
 	 * into the model specified. The track collection element is expected to be
 	 * found as a child of the specified element.
 	 *
+	 * @param modelElement
+	 *            the xml element containing the track collection data.
+	 * @param model
+	 *            the model to populate with tracks.
 	 * @return true if reading tracks was successful, false otherwise.
 	 */
 	protected boolean readTracks( final Element modelElement, final Model model )

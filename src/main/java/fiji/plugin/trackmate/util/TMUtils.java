@@ -110,7 +110,20 @@ public class TMUtils
 	}
 
 	/**
-	 * Return a new map sorted by its values.
+	 * Returns a new map sorted by its values.
+	 * <p>
+	 * The returned map is a {@link LinkedHashMap}, which preserves the
+	 * ordering.
+	 *
+	 * @param map
+	 *            the map to sort.
+	 * @param comparator
+	 *            the comparator to use to sort the values.
+	 * @return a new map sorted by its values.
+	 * @param <K>
+	 *            the key type.
+	 * @param <V>
+	 *            the value type.
 	 */
 	public static < K, V extends Comparable< ? super V > > Map< K, V > sortByValue( final Map< K, V > map, final Comparator< V > comparator )
 	{
@@ -134,7 +147,15 @@ public class TMUtils
 	}
 
 	/**
-	 * Generate a string representation of a map, typically a settings map.
+	 * Generates a string representation of a map, typically a settings map.
+	 * <p>
+	 * This method is recursive, and will indent sub-maps.
+	 *
+	 * @param map
+	 *            the map to represent as a string.
+	 * @param indent
+	 *            the indentation level.
+	 * @return a string representation of the map.
 	 */
 	public static final String echoMap( final Map< String, Object > map, final int indent )
 	{
@@ -174,6 +195,10 @@ public class TMUtils
 	 * Wraps an IJ {@link ImagePlus} in an imglib2 {@link ImgPlus}, without
 	 * parameterized types. The only way I have found to beat javac constraints
 	 * on bounded multiple wildcard.
+	 *
+	 * @param imp
+	 *            the image plus to wrap.
+	 * @return the ImgPlus wrapping the input.
 	 */
 	@SuppressWarnings( "rawtypes" )
 	public static final ImgPlus rawWraps( final ImagePlus imp )
@@ -184,7 +209,7 @@ public class TMUtils
 	}
 
 	/**
-	 * Check that the given map has all some keys. Two String collection allows
+	 * Checks that the given map has all some keys. Two String collection allows
 	 * specifying that some keys are mandatory, other are optional.
 	 *
 	 * @param map
@@ -197,6 +222,8 @@ public class TMUtils
 	 *            be <code>null</code>.
 	 * @param errorHolder
 	 *            will be appended with an error message.
+	 * @param <T>
+	 *            the type of the keys.
 	 * @return if all mandatory keys are found in the map, and possibly some
 	 *         optional ones, but no others.
 	 */
@@ -293,7 +320,18 @@ public class TMUtils
 
 	/**
 	 * Returns the mapping in a map that is targeted by a list of keys, in the
-	 * order given in the list.
+	 * order given by iterating over the key collection.
+	 *
+	 * @param keys
+	 *            the keys.
+	 * @param mapping
+	 *            the mapping.
+	 * @param <J>
+	 *            the key type.
+	 * @param <K>
+	 *            the value type.
+	 * @return the list of values mapped to the keys.
+	 *
 	 */
 	public static final < J, K > List< K > getArrayFromMaping( final Collection< J > keys, final Map< J, K > mapping )
 	{
@@ -308,9 +346,14 @@ public class TMUtils
 	 */
 
 	/**
-	 * Return the xyz calibration stored in an {@link ImgPlusMetadata} in a
+	 * Returns the xyz calibration stored in an {@link ImgPlusMetadata} in a
 	 * 3-elements double array. Calibration is ordered as X, Y, Z. If one axis
 	 * is not found, then the calibration for this axis takes the value of 1.
+	 *
+	 * @param img
+	 *            the image plus metadata.
+	 * @return a 3-elements double array with the spatial calibration in X, Y,
+	 *         Z.
 	 */
 	public static final double[] getSpatialCalibration( final ImgPlusMetadata img )
 	{
@@ -342,6 +385,12 @@ public class TMUtils
 	/**
 	 * Returns an estimate of the <code>p</code>th percentile of the values in
 	 * the <code>values</code> array. Taken from commons-math.
+	 *
+	 * @param values
+	 *            the values to compute the percentile from.
+	 * @param p
+	 *            the percentile to compute, between 0 and 1.
+	 * @return the pth percentile.
 	 */
 	public static final double getPercentile( final double[] values, final double p )
 	{
@@ -453,8 +502,12 @@ public class TMUtils
 	}
 
 	/**
-	 * Return a threshold for the given data, using an Otsu histogram
+	 * Returns a threshold for the given data, using an Otsu histogram
 	 * thresholding method.
+	 *
+	 * @param data
+	 *            the data to threshold.
+	 * @return the threshold value.
 	 */
 	public static final double otsuThreshold( final double[] data )
 	{
@@ -462,8 +515,14 @@ public class TMUtils
 	}
 
 	/**
-	 * Return a threshold for the given data, using an Otsu histogram
+	 * Returns a threshold for the given data, using an Otsu histogram
 	 * thresholding method with a given bin number.
+	 *
+	 * @param data
+	 *            the data to threshold.
+	 * @param nBins
+	 *            the number of bins to use for the histogram.
+	 * @return the threshold value.
 	 */
 	private static final double otsuThreshold( final double[] data, final int nBins )
 	{
@@ -530,9 +589,17 @@ public class TMUtils
 	}
 
 	/**
-	 * Return a String unit for the given dimension. When suitable, the unit is
+	 * Returns a String unit for the given dimension. When suitable, the unit is
 	 * taken from the settings field, which contains the spatial and time units.
 	 * Otherwise, default units are used.
+	 *
+	 * @param dimension
+	 *            the dimension to get the unit for.
+	 * @param spaceUnits
+	 *            the spatial units to use for space-related dimensions.
+	 * @param timeUnits
+	 *            the time units to use for time-related dimensions.
+	 * @return a String representing the unit for the given dimension.
 	 */
 	public static final String getUnitsFor( final Dimension dimension, final String spaceUnits, final String timeUnits )
 	{
@@ -772,7 +839,11 @@ public class TMUtils
 		return interval;
 	}
 
-	/** Obtains the SciJava {@link Context} in use by ImageJ. */
+	/**
+	 * Obtains and cache the SciJava {@link Context} in use by ImageJ.
+	 *
+	 * @return the SciJava context
+	 */
 	public static Context getContext()
 	{
 		final Context localContext = context;
@@ -909,6 +980,9 @@ public class TMUtils
 	 * Returns a string of the name of the image without the extension, with the
 	 * full path
 	 *
+	 * @param settings
+	 *            the settings object from which to read the image folder and
+	 *            image file name.
 	 * @return full name of the image without the extension
 	 */
 	public static String getImagePathWithoutExtension( final Settings settings )

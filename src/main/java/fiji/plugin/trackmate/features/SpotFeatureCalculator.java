@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -40,8 +40,8 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactoryBase;
-import fiji.plugin.trackmate.util.Threads;
 import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.util.Threads;
 import net.imagej.ImgPlus;
 import net.imglib2.algorithm.MultiThreaded;
 import net.imglib2.algorithm.MultiThreadedBenchmarkAlgorithm;
@@ -127,6 +127,11 @@ public class SpotFeatureCalculator extends MultiThreadedBenchmarkAlgorithm imple
 	 * Calculates all the spot features configured in the {@link Settings}
 	 * object, but only for the spots in the specified collection. Features are
 	 * calculated for each spot, using their location, and the raw image.
+	 *
+	 * @param toCompute
+	 *            the spots to compute features for.
+	 * @param doLogIt
+	 *            whether we should report progress to model's logger.
 	 */
 	public void computeSpotFeatures( final SpotCollection toCompute, final boolean doLogIt )
 	{

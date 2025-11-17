@@ -294,6 +294,8 @@ public class DetectionUtils
 	 *            the interval in the source image to copy.
 	 * @param factory
 	 *            a factory used to build the float image.
+	 * @param <T>
+	 *            the pixel type of the source image.
 	 * @return a new float Img. Careful: even if the specified interval does not
 	 *         start at (0, 0), the new image will have its first pixel at
 	 *         coordinates (0, 0).
@@ -349,13 +351,19 @@ public class DetectionUtils
 	}
 
 	/**
-	 * Apply a simple 3x3 median filter to the target image.
+	 * Applies a simple 3x3 median filter to the target image.
+	 *
+	 * @param image
+	 *            the input image.
+	 * @param <R>
+	 *            the pixel type of the input and output images.
+	 * @return a new image, or <code>null</code> if the filtering failed.
 	 */
 	public static final < R extends RealType< R > & NativeType< R > > Img< R > applyMedianFilter( final RandomAccessibleInterval< R > image )
 	{
 		final MedianFilter2D< R > medFilt = new MedianFilter2D<>( image, 1 );
 		if ( !medFilt.checkInput() || !medFilt.process() )
-		{ return null; }
+			return null;
 		return medFilt.getResult();
 	}
 
@@ -585,6 +593,9 @@ public class DetectionUtils
 	 *
 	 * @param img
 	 *            the image to wrap.
+	 * @param <T>
+	 *            the type of pixel in the input image.
+	 * @return a new ImagePlus.
 	 */
 	public static < T extends RealType< T > & NativeType< T > > ImagePlus wrap( final ImgPlus< T > img )
 	{
@@ -621,11 +632,11 @@ public class DetectionUtils
 	 * @param c
 	 *            the channel to extract (0-based). If negative, all channels
 	 *            are included.
-	 * @param nameGen
+	 * @param namegen
 	 *            a generator for the name of the output ImagePlus.
 	 * @return a new list of ImagePlus.
 	 */
-	public static < T extends RealType< T > & NativeType< T > > List< ImagePlus > splitSingleTimePoints( final ImgPlus< T > img, final Interval interval, final int c, final Function< Long, String > namegen2 )
+	public static < T extends RealType< T > & NativeType< T > > List< ImagePlus > splitSingleTimePoints( final ImgPlus< T > img, final Interval interval, final int c, final Function< Long, String > namegen )
 	{
 		final int zIndex = img.dimensionIndex( Axes.Z );
 		final int cIndex = img.dimensionIndex( Axes.CHANNEL );

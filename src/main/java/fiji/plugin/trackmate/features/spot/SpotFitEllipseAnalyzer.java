@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -192,7 +192,7 @@ public class SpotFitEllipseAnalyzer< T extends RealType< T > > extends AbstractS
 	 * ]. We always have a > b. theta in radians measure the angle of the
 	 * ellipse long axis with the x axis, in radians, and positive means
 	 * counter-clockwise.
-	 * 
+	 *
 	 * Formulas from
 	 * https://en.wikipedia.org/wiki/Ellipse#In_Cartesian_coordinates
 	 */
@@ -244,6 +244,10 @@ public class SpotFitEllipseAnalyzer< T extends RealType< T > > extends AbstractS
 	 * Computes the Moore–Penrose pseudoinverse using the SVD method.
 	 *
 	 * Modified version of the original implementation by Kim van der Linde.
+	 *
+	 * @param x
+	 *            the input matrix
+	 * @return the pseudoinverse of the input matrix
 	 */
 	public static Matrix pinv( final Matrix x )
 	{

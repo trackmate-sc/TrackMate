@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -85,11 +85,19 @@ public class KalmanTracker implements SpotTracker, Benchmark, Cancelable
 	 */
 
 	/**
+	 * Create a new Kalman tracker.
+	 *
 	 * @param spots
 	 *            the spots to track.
 	 * @param maxSearchRadius
+	 *            the maximum search radius when growing a track.
 	 * @param maxFrameGap
+	 *            the maximum frame gap to bridge.
 	 * @param initialSearchRadius
+	 *            the initial search radius to create a track.
+	 * @param featurePenalties
+	 *            feature penalties to use in the cost function. Can be
+	 *            <code>null</code>.
 	 */
 	public KalmanTracker( final SpotCollection spots, final double maxSearchRadius, final int maxFrameGap, final double initialSearchRadius, final Map< String, Double > featurePenalties )
 	{

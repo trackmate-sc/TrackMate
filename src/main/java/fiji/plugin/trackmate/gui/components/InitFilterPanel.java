@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -59,10 +59,13 @@ public class InitFilterPanel extends JPanel
 	private double[] values;
 
 	/**
-	 * Default constructor, initialize component.
+	 * Creates a panel to set an initial feature filter on quality.
 	 *
 	 * @param filter
+	 *            the initial feature filter to display.
 	 * @param valueCollector
+	 *            a function that, given a feature key, returns an array of
+	 *            double values for all spots for that feature.
 	 */
 	public InitFilterPanel( final FeatureFilter filter, final Function< String, double[] > valueCollector )
 	{
@@ -135,7 +138,9 @@ public class InitFilterPanel extends JPanel
 	}
 
 	/**
-	 * Return the feature threshold on quality set by this panel.
+	 * Returns the feature threshold on quality set by this panel.
+	 *
+	 * @return the feature threshold on quality set by this panel.
 	 */
 	public FeatureFilter getFeatureThreshold()
 	{

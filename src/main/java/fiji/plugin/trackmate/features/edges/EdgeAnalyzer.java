@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -35,7 +35,7 @@ import net.imglib2.algorithm.MultiThreaded;
  * edge of a TrackMate model. An edge, or a link, is the single link that exists
  * between two spots after tracking.
  *
- * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt;
+ * @author Jean-Yves Tinevez
  */
 public interface EdgeAnalyzer extends Benchmark, FeatureAnalyzer, MultiThreaded
 {
@@ -66,6 +66,8 @@ public interface EdgeAnalyzer extends Benchmark, FeatureAnalyzer, MultiThreaded
 	 * <p>
 	 * Example of non-local edge feature: the local curvature of the trajectory,
 	 * which depends on the neighbor edges.
+	 *
+	 * @return true if this is a local edge analyzer.
 	 */
 	public boolean isLocal();
 

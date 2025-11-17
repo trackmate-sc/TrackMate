@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -31,11 +31,13 @@ import fiji.plugin.trackmate.tracking.jaqaman.costfunction.CostFunction;
  * A {@link CostMatrixCreator} that can generate a cost matrix from a list of
  * sources, a list of targets and a {@link CostFunction} that can generate a
  * cost for any combination.
- * 
+ *
  * @author Jean-Yves Tinevez - 2014
- * 
+ *
  * @param <K>
+ *            the type of the source objects.
  * @param <J>
+ *            the type of the target objects.
  */
 public class JaqamanLinkingCostMatrixCreator< K extends Comparable< K >, J extends Comparable< J > > implements CostMatrixCreator< K, J >
 {
@@ -165,7 +167,7 @@ public class JaqamanLinkingCostMatrixCreator< K extends Comparable< K >, J exten
 	 * Careful, it can be <code>null</code> if not acceptable costs have been
 	 * found for the specified configuration. In that case, the lists returned
 	 * by {@link #getSourceList()} and {@link #getTargetList()} are empty.
-	 * 
+	 *
 	 * @return a new {@link SparseCostMatrix} or <code>null</code>.
 	 */
 	@Override

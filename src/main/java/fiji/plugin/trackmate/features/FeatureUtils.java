@@ -162,12 +162,17 @@ public class FeatureUtils
 	}
 
 	/**
-	 * Missing or undefined values are not included.
+	 * Collects all defined feature values for the given feature key and object
+	 * type. Missing or undefined values are not included.
 	 *
 	 * @param featureKey
+	 *            the feature key to collect values for.
 	 * @param target
+	 *            the TrackMate object type.
 	 * @param model
+	 *            the TrackMate model.
 	 * @param visibleOnly
+	 *            if true, only values for visible objects are collected.
 	 * @return a new <code>double[]</code> array containing the numerical
 	 *         feature values.
 	 */

@@ -116,7 +116,7 @@ public abstract class Configurator
 	 * used concurrently in the same command. This will be used when creating
 	 * UIs.
 	 *
-	 * @return
+	 * @return a new {@link SelectableArguments} instance.
 	 */
 	protected SelectableArguments addSelectableArguments()
 	{
@@ -211,6 +211,8 @@ public abstract class Configurator
 
 		/**
 		 * Exposes all members of the selectable.
+		 *
+		 * @return the arguments in this selectable.
 		 */
 		public List< Argument< ?, ? > > getArguments()
 		{
@@ -788,6 +790,8 @@ public abstract class Configurator
 	 *
 	 * @param extraArg
 	 *            the argument to add to this CLI config.
+	 * @param <T>
+	 *            the argument type.
 	 * @return the argument
 	 */
 	protected < T extends Argument< ?, ? > > T addExtraArgument( final T extraArg )
@@ -1358,6 +1362,8 @@ public abstract class Configurator
 	 * @param backward
 	 *            the function to apply to the value to get the value back from
 	 *            the UI.
+	 * @param <O>
+	 *            the type of value the argument accepts.
 	 */
 	protected < O > void setDisplayTranslator( final Argument< ?, O > arg, final Function< O, O > forward, final Function< O, O > backward )
 	{

@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -132,7 +132,8 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 	 *            the graph to be iterated.
 	 * @param startVertex
 	 *            the vertex iteration to be started.
-	 *
+	 * @param comparator
+	 *            the comparator to sort the vertices when branching.
 	 * @throws IllegalArgumentException
 	 *             if <code>g==null</code> or does not contain
 	 *             <code>startVertex</code>
@@ -278,6 +279,9 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 
 	/**
 	 * This is where we add the multiple children in proper sorted order.
+	 *
+	 * @param vertex
+	 *            the vertex whose unseen children to add.
 	 */
 	protected void addUnseenChildrenOf( final V vertex )
 	{
@@ -353,7 +357,12 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 	}
 
 	/**
+	 * Executed when we encounter a vertex for the first time.
+	 *
+	 * @param vertex
+	 *            the vertex encountered.
 	 * @param edge
+	 *            the edge via which we encountered it.
 	 */
 	protected void encounterVertex( final V vertex, final E edge )
 	{
@@ -362,7 +371,13 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 	}
 
 	/**
+	 * Executed when we encounter a vertex that has already been seen, but is
+	 * still WHITE (meaning it is on the stack).
+	 *
+	 * @param vertex
+	 *            the vertex encountered again.
 	 * @param edge
+	 *            the edge via which we encountered it.
 	 */
 	protected void encounterVertexAgain( final V vertex, final E edge )
 	{

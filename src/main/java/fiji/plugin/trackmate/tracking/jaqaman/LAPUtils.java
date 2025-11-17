@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -43,6 +43,7 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_CUTOFF_PERCENTILE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_FRAME_GAP;
+import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_SEARCH_RADIUS;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_MERGING_FEATURE_PENALTIES;
@@ -74,7 +75,6 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
 import fiji.plugin.trackmate.Spot;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_SEARCH_RADIUS;
 
 public class LAPUtils
 {
@@ -102,7 +102,7 @@ public class LAPUtils
 	/**
 	 * Utility method to put a value in a map, contained in a mother map. Here
 	 * it is mainly use to feed feature penalties to LAP tracker settings map.
-	 * 
+	 *
 	 * @param motherMap
 	 *            the mother map
 	 * @param motherKey
@@ -138,7 +138,7 @@ public class LAPUtils
 	/**
 	 * Returns a new settings map filled with default values suitable for the
 	 * trajectory segments linking (gap/split/merge).
-	 * 
+	 *
 	 * @return a new map.
 	 */
 	public static final Map< String, Object > getDefaultSegmentSettingsMap()
@@ -183,8 +183,7 @@ public class LAPUtils
 	}
 
 	/**
-	 * Compute the cost to link two spots, in the default way for the TrackMate
-	 * trackmate.
+	 * Computes the cost to link two spots, in the default way for TrackMate.
 	 * <p>
 	 * This cost is calculated as follow:
 	 * <ul>
@@ -209,6 +208,19 @@ public class LAPUtils
 	 * For instance: if 2 spots differ by twice the value in a feature which is
 	 * in the penalty map with a factor of 1, they will <i>look</i> as if they
 	 * were twice as far.
+	 *
+	 * @param s0
+	 *            the first spot.
+	 * @param s1
+	 *            the second spot.
+	 * @param distanceCutOff
+	 *            the distance cutoff beyond which the cost is set to blocking
+	 *            value.
+	 * @param blockingValue
+	 *            the blocking value.
+	 * @param featurePenalties
+	 *            the map of feature penalties.
+	 * @return the linking cost.
 	 */
 	public static final double computeLinkingCostFor( final Spot s0, final Spot s1, final double distanceCutOff, final double blockingValue, final Map< String, Double > featurePenalties )
 	{
@@ -233,18 +245,22 @@ public class LAPUtils
 	}
 
 	/**
-	 * @return true if the settings map can be used with the LAP trackers. We do
-	 *         not check that all the spot features used in penalties are indeed
-	 *         found in all spots, because if such a feature is absent from one
-	 *         spot, the LAP trackers simply ignores the penalty and does not
-	 *         generate an error.
+	 * Returns <code>true</code> if the settings map can be used with the LAP
+	 * trackers. We do not check that all the spot features used in penalties
+	 * are indeed found in all spots, because if such a feature is absent from
+	 * one spot, the LAP trackers simply ignores the penalty and does not
+	 * generate an error.
+	 *
 	 * @param settings
 	 *            the map to test.
 	 * @param errorHolder
 	 *            a {@link StringBuilder} that will contain an error message if
 	 *            the check is not successful.
+	 * @param linking
+	 *            whether to check linking settings as well
+	 * @return true if the settings map is valid.
 	 */
-	public static final boolean checkSettingsValidity( final Map< String, Object > settings, final StringBuilder errorHolder, boolean linking )
+	public static final boolean checkSettingsValidity( final Map< String, Object > settings, final StringBuilder errorHolder, final boolean linking )
 	{
 		if ( null == settings )
 		{
@@ -254,12 +270,12 @@ public class LAPUtils
 
 		boolean ok = true;
 		// Linking
-                if (linking)
-                {
-                    ok = ok & checkParameter( settings, KEY_LINKING_MAX_DISTANCE, Double.class, errorHolder );
-                    ok = ok & checkFeatureMap( settings, KEY_LINKING_FEATURE_PENALTIES, errorHolder );
-                }
-                // Gap-closing
+		if ( linking )
+		{
+			ok = ok & checkParameter( settings, KEY_LINKING_MAX_DISTANCE, Double.class, errorHolder );
+			ok = ok & checkFeatureMap( settings, KEY_LINKING_FEATURE_PENALTIES, errorHolder );
+		}
+		// Gap-closing
 		ok = ok & checkParameter( settings, KEY_ALLOW_GAP_CLOSING, Boolean.class, errorHolder );
 		ok = ok & checkParameter( settings, KEY_GAP_CLOSING_MAX_DISTANCE, Double.class, errorHolder );
 		ok = ok & checkParameter( settings, KEY_GAP_CLOSING_MAX_FRAME_GAP, Integer.class, errorHolder );
@@ -276,14 +292,14 @@ public class LAPUtils
 		ok = ok & checkParameter( settings, KEY_CUTOFF_PERCENTILE, Double.class, errorHolder );
 		ok = ok & checkParameter( settings, KEY_ALTERNATIVE_LINKING_COST_FACTOR, Double.class, errorHolder );
 		ok = ok & checkParameter( settings, KEY_BLOCKING_VALUE, Double.class, errorHolder );
-                
-                // Check keys
+
+		// Check keys
 		final List< String > mandatoryKeys = new ArrayList<>();
 		if ( linking )
-                {
-                    mandatoryKeys.add( KEY_LINKING_MAX_DISTANCE );
-                }
-                mandatoryKeys.add( KEY_ALLOW_GAP_CLOSING );
+		{
+			mandatoryKeys.add( KEY_LINKING_MAX_DISTANCE );
+		}
+		mandatoryKeys.add( KEY_ALLOW_GAP_CLOSING );
 		mandatoryKeys.add( KEY_GAP_CLOSING_MAX_DISTANCE );
 		mandatoryKeys.add( KEY_GAP_CLOSING_MAX_FRAME_GAP );
 		mandatoryKeys.add( KEY_ALLOW_TRACK_SPLITTING );
@@ -295,18 +311,16 @@ public class LAPUtils
 		mandatoryKeys.add( KEY_BLOCKING_VALUE );
 		final List< String > optionalKeys = new ArrayList<>();
 		if ( linking )
-                {
-                    optionalKeys.add( KEY_LINKING_FEATURE_PENALTIES );
-                }
-                optionalKeys.add( KEY_GAP_CLOSING_FEATURE_PENALTIES );
+		{
+			optionalKeys.add( KEY_LINKING_FEATURE_PENALTIES );
+		}
+		optionalKeys.add( KEY_GAP_CLOSING_FEATURE_PENALTIES );
 		optionalKeys.add( KEY_SPLITTING_FEATURE_PENALTIES );
 		optionalKeys.add( KEY_MERGING_FEATURE_PENALTIES );
-                optionalKeys.add( KEY_KALMAN_SEARCH_RADIUS );
+		optionalKeys.add( KEY_KALMAN_SEARCH_RADIUS );
 		ok = ok & checkMapKeys( settings, mandatoryKeys, optionalKeys, errorHolder );
-                return ok;
+		return ok;
 	}
-        
-
 
 	/**
 	 * Check the validity of a feature penalty map in a settings map.
@@ -390,7 +404,7 @@ public class LAPUtils
 	/**
 	 * Display the cost matrix solved by the Hungarian algorithm in the LAP
 	 * approach.
-	 * 
+	 *
 	 * @param costs
 	 *            the cost matrix
 	 * @param nSegments

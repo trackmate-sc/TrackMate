@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -37,12 +37,6 @@ import static fiji.plugin.trackmate.tracking.jaqaman.LAPUtils.checkFeatureMap;
 import static fiji.plugin.trackmate.util.TMUtils.checkMapKeys;
 import static fiji.plugin.trackmate.util.TMUtils.checkParameter;
 
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.tracking.jaqaman.costfunction.CostFunction;
-import fiji.plugin.trackmate.tracking.jaqaman.costfunction.FeaturePenaltyCostFunction;
-import fiji.plugin.trackmate.tracking.jaqaman.costfunction.SquareDistCostFunction;
-import fiji.plugin.trackmate.util.Threads;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -50,9 +44,15 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import net.imglib2.algorithm.MultiThreaded;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultWeightedEdge;
+
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.tracking.jaqaman.costfunction.CostFunction;
+import fiji.plugin.trackmate.tracking.jaqaman.costfunction.FeaturePenaltyCostFunction;
+import fiji.plugin.trackmate.tracking.jaqaman.costfunction.SquareDistCostFunction;
+import fiji.plugin.trackmate.util.Threads;
+import net.imglib2.algorithm.MultiThreaded;
 
 /**
  * This class generates the top-left quadrant of the LAP segment linking cost
@@ -68,9 +68,9 @@ import org.jgrapht.graph.DefaultWeightedEdge;
  * non-infinite costs.
  * <li>Costs are based on square distance +/- feature penalties.
  * </ul>
- * 
+ *
  * @author Jean-Yves Tinevez - 2014
- * 
+ *
  */
 public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot, Spot >, MultiThreaded
 {
@@ -98,7 +98,11 @@ public class JaqamanSegmentCostMatrixCreator implements CostMatrixCreator< Spot,
 	/**
 	 * Instantiates a cost matrix creator for the top-left quadrant of the
 	 * segment linking cost matrix.
-	 * 
+	 *
+	 * @param graph
+	 *            the track segment graph.
+	 * @param settings
+	 *            the settings map.
 	 */
 	public JaqamanSegmentCostMatrixCreator( final Graph< Spot, DefaultWeightedEdge > graph, final Map< String, Object > settings )
 	{

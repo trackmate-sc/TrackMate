@@ -128,8 +128,11 @@ public class TrackMatePlugIn implements PlugIn
 	 * launched by this plugin.
 	 *
 	 * @param trackmate
+	 *            the {@link TrackMate} instance to use.
 	 * @param selectionModel
+	 *            the {@link SelectionModel} to use.
 	 * @param displaySettings
+	 *            the {@link DisplaySettings} to use.
 	 * @return a new sequence.
 	 */
 	protected WizardSequence createSequence( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings )
@@ -143,7 +146,7 @@ public class TrackMatePlugIn implements PlugIn
 	 * {@link TrackMate} instance.
 	 *
 	 * @param imp
-	 *
+	 *            the {@link ImagePlus} to operate on.
 	 * @return a new {@link Model} instance.
 	 */
 	protected Model createModel( final ImagePlus imp )
@@ -178,6 +181,10 @@ public class TrackMatePlugIn implements PlugIn
 	 * Hook for subclassers: <br>
 	 * Creates the TrackMate instance that will be controlled in the GUI.
 	 *
+	 * @param model
+	 *            the model to use.
+	 * @param settings
+	 *            the settings to use.
 	 * @return a new {@link TrackMate} instance.
 	 */
 	protected TrackMate createTrackMate( final Model model, final Settings settings )

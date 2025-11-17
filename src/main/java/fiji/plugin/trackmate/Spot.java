@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -257,7 +257,7 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 
 	/**
 	 * Set the name of this Spot.
-	 * 
+	 *
 	 * @param name
 	 *            the name to use.
 	 */
@@ -284,7 +284,7 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 
 	/**
 	 * Return a string representation of this spot, with calculated features.
-	 * 
+	 *
 	 * @return a string representation of the spot.
 	 */
 	public String echo()
@@ -369,10 +369,14 @@ public class Spot extends AbstractEuclideanSpace implements RealLocalizable, Com
 	}
 
 	/**
-	 * Copy the listed features of the spot src to the current spot
-	 * 
+	 * Copy the listed features of the source spot to this spot.
+	 *
+	 * @param src
+	 *            the source spot.
+	 * @param features
+	 *            the features to copy.
 	 */
-	public void copyFeatures( Spot src, final Map< String, Double > features )
+	public void copyFeatures( final Spot src, final Map< String, Double > features )
 	{
 		if ( null == features || features.isEmpty() )
 			return;

@@ -162,6 +162,8 @@ public class TmXmlWriter
 	 *
 	 * @param file
 	 *            the xml file to write to, will be overwritten.
+	 * @param logger
+	 *            the logger to use to report progress and write errors.
 	 */
 	public TmXmlWriter( final File file, final Logger logger )
 	{
@@ -181,6 +183,10 @@ public class TmXmlWriter
 	 * @see #appendLog(String)
 	 * @see #appendModel(Model)
 	 * @see #appendSettings(Settings)
+	 * @throws FileNotFoundException
+	 *             if the file cannot be created or opened.
+	 * @throws IOException
+	 *             if an I/O error occurs.
 	 */
 	public void writeToFile() throws FileNotFoundException, IOException
 	{

@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -32,21 +32,29 @@ public interface FeatureAnalyzer extends TrackMateModule
 
 	/**
 	 * Returns the list of features this analyzer can compute.
+	 *
+	 * @return the list of features.
 	 */
 	public List< String > getFeatures();
 
 	/**
 	 * Returns the map of short names for any feature the analyzer can compute.
+	 *
+	 * @return the map of feature short names.
 	 */
 	public Map< String, String > getFeatureShortNames();
 
 	/**
 	 * Returns the map of names for any feature this analyzer can compute.
+	 *
+	 * @return the map of feature names.
 	 */
 	public Map< String, String > getFeatureNames();
 
 	/**
 	 * Returns the map of feature dimension this analyzer can compute.
+	 *
+	 * @return the map of feature dimensions.
 	 */
 	public Map< String, Dimension > getFeatureDimensions();
 
@@ -54,6 +62,8 @@ public interface FeatureAnalyzer extends TrackMateModule
 	 * Returns the map that states whether the key feature is a feature that
 	 * returns integers. If <code>true</code>, then special treatment is applied
 	 * when saving/loading, etc. for clarity and precision.
+	 *
+	 * @return the map of isIntFeature flags.
 	 */
 	public Map< String, Boolean > getIsIntFeature();
 

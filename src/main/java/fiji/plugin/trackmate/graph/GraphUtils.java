@@ -48,6 +48,10 @@ public class GraphUtils
 	 *
 	 * @param directedGraph
 	 *            the {@link SimpleDirectedWeightedGraph} to be converted
+	 * @param <V>
+	 *            the vertex type.
+	 * @param <E>
+	 *            the edge type.
 	 * @return a {@link SimpleWeightedGraph} with the same vertices and edges as
 	 *         the input graph, but with undirected edges and the maximum weight
 	 *         between any two vertices
@@ -84,9 +88,12 @@ public class GraphUtils
 	}
 
 	/**
-	 * @return a pretty-print string representation of a {@link TrackModel}, as
-	 *         long it is a tree (each spot must not have more than one
-	 *         predecessor).
+	 * Returns a pretty-print string representation of a {@link TrackModel}, as
+	 * long it is a tree (each spot must not have more than one predecessor).
+	 *
+	 * @param model
+	 *            the track model to represent as a string.
+	 * @return a string representation of the given track model.
 	 * @throws IllegalArgumentException
 	 *             if the given graph is not a tree.
 	 */

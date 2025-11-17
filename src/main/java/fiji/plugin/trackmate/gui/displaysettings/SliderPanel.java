@@ -61,6 +61,8 @@ public class SliderPanel extends JPanel implements BoundedValue.UpdateListener
 	 *            label to show next to the slider.
 	 * @param model
 	 *            the value that is modified.
+	 * @param spinnerStepSize
+	 *            the step size for the spinner.
 	 */
 	public SliderPanel( final String name, final BoundedValue model, final int spinnerStepSize )
 	{

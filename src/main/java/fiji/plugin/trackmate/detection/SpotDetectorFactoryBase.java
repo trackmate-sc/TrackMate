@@ -48,6 +48,7 @@ public interface SpotDetectorFactoryBase< T extends RealType< T > & NativeType< 
 	 * @param model
 	 *            the current model, used to get info to display on the GUI
 	 *            panel.
+	 * @return a new configuration panel.
 	 */
 	public ConfigurationPanel getDetectorConfigurationPanel( final Settings settings, final Model model );
 

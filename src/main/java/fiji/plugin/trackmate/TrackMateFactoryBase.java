@@ -52,6 +52,10 @@ public interface TrackMateFactoryBase< F extends TrackMateFactoryBase< F > > ext
 	 * {@value DetectorKeys#XML_ATTRIBUTE_DETECTOR_NAME} that saves the target
 	 * {@link SpotDetectorFactory} key.
 	 *
+	 * @param settings
+	 *            the map to marshal.
+	 * @param element
+	 *            the JDom element to update.
 	 * @return an error message if marshaling was unsuccessful. If successful,
 	 *         returns <code>null</code>.
 	 */

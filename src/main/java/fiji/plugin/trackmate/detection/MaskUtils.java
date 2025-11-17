@@ -326,6 +326,8 @@ public class MaskUtils
 	 *
 	 * @param <T>
 	 *            the type of the input image. Must be real, scalar.
+	 * @param <R>
+	 *            the type of the quality image. Must be real, scalar.
 	 * @param input
 	 *            the input image.
 	 * @param interval

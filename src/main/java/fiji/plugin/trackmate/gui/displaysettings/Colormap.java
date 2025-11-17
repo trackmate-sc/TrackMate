@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -35,7 +35,7 @@ import org.jfree.chart.renderer.PaintScale;
  * This class implements a {@link PaintScale} that generate colors interpolated
  * within a list of given color, using a linear scale.
  *
- * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; - Sept 2010
+ * @author Jean-Yves Tinevez - Sept 2010
  */
 public class Colormap implements PaintScale, Serializable
 {
@@ -158,8 +158,18 @@ public class Colormap implements PaintScale, Serializable
 	 */
 
 	/**
-	 * Create a paint scale with given lower and upper bound, and a specified
+	 * Creates a paint scale with given lower and upper bound, and a specified
 	 * default color.
+	 *
+	 * @param name
+	 *            the name of this colormap.
+	 * @param lowerBound
+	 *            the lower bound of the scale.
+	 * @param upperBound
+	 *            the upper bound of the scale.
+	 * @param defaultColor
+	 *            the default color to return when no color is defined in the
+	 *            scale.
 	 */
 	public Colormap( final String name, final double lowerBound, final double upperBound, final Color defaultColor )
 	{
@@ -170,8 +180,15 @@ public class Colormap implements PaintScale, Serializable
 	}
 
 	/**
-	 * Create a paint scale with a given lower and upper bound and a default
+	 * Creates a paint scale with a given lower and upper bound and a default
 	 * black color.
+	 *
+	 * @param name
+	 *            the name of this colormap.
+	 * @param lowerBound
+	 *            the lower bound of the scale.
+	 * @param upperBound
+	 *            the upper bound of the scale.
 	 */
 	public Colormap( final String name, final double lowerBound, final double upperBound )
 	{
@@ -179,8 +196,11 @@ public class Colormap implements PaintScale, Serializable
 	}
 
 	/**
-	 * Create a paint scale with a lower bound of 0, an upper bound of 1 and a
+	 * Creates a paint scale with a lower bound of 0, an upper bound of 1 and a
 	 * default black color.
+	 *
+	 * @param name
+	 *            the name of this colormap.
 	 */
 	public Colormap( final String name )
 	{
@@ -197,10 +217,15 @@ public class Colormap implements PaintScale, Serializable
 	}
 
 	/**
-	 * Add a color to the color list of this paint scale, at the position given
+	 * Adds a color to the color list of this paint scale, at the position given
 	 * by <code>value</code>. If <code>value</code> is greater than the upper
 	 * bound or lower than the lower bound set at construction, this call will
 	 * be ignored.
+	 *
+	 * @param value
+	 *            the value at which to add the color.
+	 * @param color
+	 *            the color to add.
 	 */
 	public void add( final double value, final Color color )
 	{

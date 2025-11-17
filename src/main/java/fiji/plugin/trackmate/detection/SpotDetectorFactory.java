@@ -39,6 +39,7 @@ import net.imglib2.type.numeric.RealType;
  * @author Jean-Yves Tinevez
  *
  * @param <T>
+ *            the pixel type.
  */
 public interface SpotDetectorFactory< T extends RealType< T > & NativeType< T > > extends SpotDetectorFactoryBase< T >
 {
