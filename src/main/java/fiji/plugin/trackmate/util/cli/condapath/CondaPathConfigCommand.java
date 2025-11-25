@@ -8,19 +8,22 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.util.cli;
+package fiji.plugin.trackmate.util.cli.condapath;
 
+import java.awt.Component;
+import java.awt.Label;
+import java.awt.TextField;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -37,8 +40,13 @@ import fiji.plugin.trackmate.gui.Fonts;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.util.cli.CLIUtils;
+import fiji.plugin.trackmate.util.cli.condapath.CondaDetector.CondaInfo;
+import fiji.plugin.trackmate.util.cli.condapath.CondaDetector.CondaNotFoundException;
 import fiji.util.gui.GenericDialogPlus;
 import ij.IJ;
+import ij.ImageJ;
+import ij.gui.MultiLineLabel;
 
 @Plugin( type = Command.class,
 		label = "Configure the path to the Conda executable used in TrackMate...",
@@ -88,8 +96,8 @@ public class CondaPathConfigCommand implements Command
 		dialog.addMessage( "Conda executable path:" );
 		dialog.addFileField( "", condaRootPrefix, 40 );
 
-		dialog.addMessage( ""
-				+ "Please restart Fiji for these changes to be used in TrackMate." );
+		dialog.addButton( "Autodetect", e -> autoDetect( dialog ) );
+		dialog.addMessage( "\n\n" );
 
 		dialog.showDialog();
 
@@ -100,7 +108,41 @@ public class CondaPathConfigCommand implements Command
 		condaRootPrefix = dialog.getNextString();
 		prefs.put( CLIUtils.class, CLIUtils.CONDA_PATH_PREF_KEY, condaPath );
 		prefs.put( CLIUtils.class, CLIUtils.CONDA_ROOT_PREFIX_KEY, condaRootPrefix );
+		CLIUtils.clearEnvMap();
 		test();
+	}
+
+	private void autoDetect( final GenericDialogPlus dialog )
+	{
+		echo( "Auto-detecting...", dialog );
+		try
+		{
+			final CondaInfo condaInfo = CondaDetector.detect();
+			final TextField str1 = ( TextField ) dialog.getStringFields().get( 0 );
+			str1.setText( condaInfo.getCondaExecutable().toString() );
+			final TextField str2 = ( TextField ) dialog.getStringFields().get( 1 );
+			str2.setText( condaInfo.getRootPrefix().toString() );
+			echo( "Auto-detection successful!", dialog );
+		}
+		catch ( final CondaNotFoundException e )
+		{
+			echo( "Conda auto-detection failed:\n" + e.getMessage(), dialog );
+		}
+	}
+
+	private void echo( final String msg, final GenericDialogPlus dialog )
+	{
+		final Component comp = dialog.getMessage();
+		if ( comp != null && comp instanceof Label )
+		{
+			final Label label = ( Label ) comp;
+			label.setText( msg );
+		}
+		else if ( comp != null && comp instanceof MultiLineLabel )
+		{
+			final MultiLineLabel label = ( MultiLineLabel ) comp;
+			label.setText( msg );
+		}
 	}
 
 	public void test()
@@ -130,6 +172,7 @@ public class CondaPathConfigCommand implements Command
 
 	public static void main( final String[] args )
 	{
+		ImageJ.main( args );
 		TMUtils.getContext().getService( CommandService.class ).run( CondaPathConfigCommand.class, false );
 //		new CondaPathConfigCommand().test();
 	}
