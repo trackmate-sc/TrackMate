@@ -254,9 +254,14 @@ public class CondaDetector
 				{
 					final String content = new String( Files.readAllBytes( configPath ) );
 
-					// Look for conda initialization block
-					if ( content.contains( "conda.sh" ) || content.contains( "mamba.sh" ) ||
-							content.contains( "conda initialize" ) )
+					// Look for conda/mamba/micromamba references
+					// Check for explicit strings OR any conda-related content
+					if ( content.contains( "conda.sh" ) ||
+							content.contains( "mamba.sh" ) ||
+							content.contains( "conda initialize" ) ||
+							content.contains( "conda" ) ||
+							content.contains( "mamba" ) ||
+							content.contains( "micromamba" ) )
 					{
 						IJ.log( "  Checking: " + configFile );
 						final String condaExe = extractCondaExeFromConfig( content, configPath );
@@ -271,12 +276,17 @@ public class CondaDetector
 								IJ.log( "  Found conda by parsing: " + configFile );
 								return new CondaInfo( condaExe, rootPrefix, version );
 							}
+							else
+							{
+								IJ.log( "  Found executable but failed to validate: " + condaExe );
+							}
 						}
 					}
 				}
 				catch ( final IOException e )
 				{
 					// Can't read this config file, try next
+					IJ.log( "  Could not read: " + configFile );
 				}
 			}
 		}
@@ -286,85 +296,136 @@ public class CondaDetector
 	}
 
 	/**
-	 * Extract conda/mamba executable path from shell config content Handles
-	 * conda, mamba, mambaforge, miniforge installations
+	 * Extract conda/mamba/micromamba executable path from shell config content
+	 * Handles conda, mamba, mambaforge, miniforge, micromamba installations
 	 */
 	private static String extractCondaExeFromConfig( final String content, final Path configPath )
 	{
-		// Method 1: Look for __conda_setup pattern (most reliable for conda
-		// init)
+		// Method 1: Look for __conda_setup or __mamba_setup pattern
 		// Pattern: __conda_setup="$('/Users/username/mambaforge/bin/conda'
 		// 'shell.zsh' 'hook' 2> /dev/null)"
 		Pattern pattern = Pattern.compile(
-				"__conda_setup=[\"']\\$\\([\"']([^\"']+/(conda|mamba))[\"']" );
+				"__(conda|mamba)_setup=[\"']\\$\\([\"']([^\"']+/(conda|mamba|micromamba))[\"']" );
 		Matcher matcher = pattern.matcher( content );
 		if ( matcher.find() )
 		{
-			final String condaExe = matcher.group( 1 );
+			final String condaExe = matcher.group( 2 );
 			if ( new File( condaExe ).exists() )
+			{
+				IJ.log( "    Found via setup variable: " + condaExe );
 				return condaExe;
+			}
 		}
 
-		// Method 2: Look for explicit CONDA_EXE or MAMBA_EXE export
+		// Method 2: Look for explicit CONDA_EXE, MAMBA_EXE, or
+		// MAMBA_ROOT_PREFIX export
 		pattern = Pattern.compile(
-				"export (CONDA_EXE|MAMBA_EXE)=['\"]?([^'\"\\s]+)['\"]?" );
+				"export (CONDA_EXE|MAMBA_EXE|MAMBA_ROOT_PREFIX)=['\"]?([^'\"\\s]+)['\"]?" );
 		matcher = pattern.matcher( content );
-		if ( matcher.find() )
+		while ( matcher.find() )
 		{
-			final String exe = matcher.group( 2 );
+			final String varName = matcher.group( 1 );
+			String exe = matcher.group( 2 );
+
+			// If MAMBA_ROOT_PREFIX, append /bin/micromamba
+			if ( varName.equals( "MAMBA_ROOT_PREFIX" ) )
+				exe = exe + "/bin/micromamba";
+
 			if ( new File( exe ).exists() )
+			{
+				IJ.log( "    Found via " + varName + ": " + exe );
 				return exe;
+			}
 		}
 
-		// Method 3: Look for conda.sh or mamba.sh source with path
-		// Pattern: . "/Users/username/mambaforge/etc/profile.d/conda.sh"
+		// Method 3: Look for conda.sh, mamba.sh, or micromamba.sh source with
+		// path
 		pattern = Pattern.compile(
-				"[.\\s][\\s\"']*([^\"']+)/(etc/profile\\.d/(conda|mamba)\\.sh)[\"']" );
+				"[.\\s][\\s\"']*([^\"']+)/(etc/profile\\.d/(conda|mamba|micromamba)\\.sh)[\"']" );
 		matcher = pattern.matcher( content );
 		if ( matcher.find() )
 		{
 			final String rootPrefix = matcher.group( 1 );
-			// Try conda first, then mamba
+			// Try conda first, then mamba, then micromamba
 			final String condaExe = rootPrefix + "/bin/conda";
 			if ( new File( condaExe ).exists() )
+			{
+				IJ.log( "    Found via profile.d: " + condaExe );
 				return condaExe;
+			}
 			final String mambaExe = rootPrefix + "/bin/mamba";
 			if ( new File( mambaExe ).exists() )
+			{
+				IJ.log( "    Found via profile.d: " + mambaExe );
 				return mambaExe;
+			}
+			final String microExe = rootPrefix + "/bin/micromamba";
+			if ( new File( microExe ).exists() )
+			{
+				IJ.log( "    Found via profile.d: " + microExe );
+				return microExe;
+			}
 		}
 
-		// Method 4: Look for PATH export with conda/mamba
-		// Pattern: export PATH="/Users/username/mambaforge/bin:$PATH"
+		// Method 4: Look for PATH export with conda/mamba/micromamba
 		pattern = Pattern.compile(
-				"export PATH=[\"']([^\"':]+/(mambaforge|miniconda|anaconda|miniforge)\\d*/bin)[\"':]" );
+				"export PATH=[\"']([^\"':]+/(mambaforge|miniconda|anaconda|miniforge|micromamba)[^\"':]*)[\"':]" );
 		matcher = pattern.matcher( content );
 		if ( matcher.find() )
 		{
 			final String binDir = matcher.group( 1 );
-			// Try conda first
+			// Try conda, mamba, then micromamba
 			final String condaExe = binDir + "/conda";
 			if ( new File( condaExe ).exists() )
+			{
+				IJ.log( "    Found via PATH export: " + condaExe );
 				return condaExe;
-			// Try mamba
+			}
 			final String mambaExe = binDir + "/mamba";
 			if ( new File( mambaExe ).exists() )
+			{
+				IJ.log( "    Found via PATH export: " + mambaExe );
 				return mambaExe;
+			}
+			final String microExe = binDir + "/micromamba";
+			if ( new File( microExe ).exists() )
+			{
+				IJ.log( "    Found via PATH export: " + microExe );
+				return microExe;
+			}
 		}
 
-		// Method 5: Look for any mamba/conda bin directory in path assignments
-		// Pattern: path+=('/Users/username/mambaforge/bin') or similar
+		// Method 5: Look for any mamba/conda/micromamba bin directory in path
+		// assignments
+		// Pattern: path+=('/Users/username/mambaforge/bin')
+		// Pattern: export PATH="/Users/username/Applications/bin:$PATH" (where
+		// bin contains micromamba)
 		pattern = Pattern.compile(
-				"path[+=]+.*?[\"']([^\"']+/(mambaforge|miniforge|miniconda|anaconda)\\d*/bin)[\"']" );
+				"(?:path[+=]+|export PATH=)[^\"']*[\"']([^\"':]+/bin)[\"':]" );
 		matcher = pattern.matcher( content );
-		if ( matcher.find() )
+		while ( matcher.find() )
 		{
 			final String binDir = matcher.group( 1 );
+
+			// Check for conda, mamba, or micromamba in this bin directory
 			final String condaExe = binDir + "/conda";
 			if ( new File( condaExe ).exists() )
+			{
+				IJ.log( "    Found via path assignment: " + condaExe );
 				return condaExe;
+			}
 			final String mambaExe = binDir + "/mamba";
 			if ( new File( mambaExe ).exists() )
+			{
+				IJ.log( "    Found via path assignment: " + mambaExe );
 				return mambaExe;
+			}
+			final String microExe = binDir + "/micromamba";
+			if ( new File( microExe ).exists() )
+			{
+				IJ.log( "    Found via path assignment: " + microExe );
+				return microExe;
+			}
 		}
 
 		return null;
@@ -431,9 +492,12 @@ public class CondaDetector
 	 * <ul>
 	 * <li>Windows: D:\ProgramData\miniconda3\Scripts\conda.exe →
 	 * D:\ProgramData\miniconda3</li>
-	 * <li>Windows: C:\Users/user\AppData\Local\miniforge3\Library\bin\conda.bat
-	 * → C:\Users/user\AppData\Local\miniforge3</li>
+	 * <li>Windows:
+	 * C:\Users\\user\AppData\Local\miniforge3\Library\bin\conda.bat →
+	 * C:\Users\\user\AppData\Local\miniforge3</li>
 	 * <li>Linux: /home/user/miniconda3/bin/conda → /home/user/miniconda3</li>
+	 * <li>macOS: /Users/user/Applications/bin/micromamba →
+	 * /Users/user/Applications</li>
 	 * </ul>
 	 */
 	private static String deriveRootPrefix( final String condaExePath )
@@ -441,6 +505,7 @@ public class CondaDetector
 		try
 		{
 			final Path path = Paths.get( condaExePath ).toAbsolutePath().normalize();
+			final String exeName = path.getFileName().toString();
 
 			if ( isWindows() )
 			{
@@ -464,7 +529,8 @@ public class CondaDetector
 				}
 				else
 				{
-					// Standard location: Scripts\conda.exe or condabin\conda.bat
+					// Standard location: Scripts\conda.exe or
+					// condabin\conda.bat
 					// Go up 2 levels: Scripts\conda.exe -> Scripts -> root
 					final Path parent = path.getParent(); // Scripts or condabin
 					if ( parent != null )
@@ -477,14 +543,40 @@ public class CondaDetector
 			}
 			else
 			{
-				// Unix: /home/user/miniconda3/bin/conda ->
-				// /home/user/miniconda3
+				// Unix: typically /path/to/installation/bin/conda
 				final Path parent = path.getParent(); // bin
 				if ( parent != null )
 				{
-					final Path rootPrefix = parent.getParent(); // miniconda3
+					final Path rootPrefix = parent.getParent(); // installation
+																// root
 					if ( rootPrefix != null )
+					{
+						// Special case: micromamba might be installed in a
+						// generic bin directory
+						// like /Users/user/Applications/bin/micromamba
+						// In this case, we should check if there's a proper
+						// conda structure
+						if ( exeName.contains( "micromamba" ) )
+						{
+							// For micromamba, check if parent is a conda-like
+							// root
+							// (has envs, pkgs directories)
+							final File envsDir = new File( rootPrefix.toFile(), "envs" );
+							final File pkgsDir = new File( rootPrefix.toFile(), "pkgs" );
+
+							if ( !envsDir.exists() && !pkgsDir.exists() )
+							{
+								// This might be a standalone micromamba in a
+								// generic bin
+								// Use the bin's parent as root (e.g.,
+								// /Users/user/Applications)
+								IJ.log( "  Micromamba appears to be standalone installation" );
+								return rootPrefix.toString();
+							}
+						}
+
 						return rootPrefix.toString();
+					}
 				}
 			}
 		}
@@ -497,7 +589,7 @@ public class CondaDetector
 	}
 
 	/**
-	 * Get conda version by running `conda --version`
+	 * Get conda version by running `conda --version` or `micromamba --version`
 	 */
 	private static String getCondaVersion( final String condaExePath )
 	{
@@ -514,10 +606,12 @@ public class CondaDetector
 
 			if ( completed && process.exitValue() == 0 && output != null )
 			{
-				// Output format: "conda 23.7.4" or just "23.7.4"
+				// Output format: "conda 23.7.4", "mamba 1.5.8", or "micromamba
+				// 1.5.8"
 				final String version = output.trim()
 						.replace( "conda", "" )
 						.replace( "mamba", "" )
+						.replace( "micromamba", "" )
 						.trim();
 				return version;
 			}
