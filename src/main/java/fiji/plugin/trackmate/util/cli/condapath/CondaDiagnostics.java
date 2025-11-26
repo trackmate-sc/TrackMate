@@ -6,55 +6,57 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import ij.IJ;
+
 public class CondaDiagnostics
 {
 
 	public static void diagnose()
 	{
-		System.out.println( "╔═══════════════════════════════════════╗" );
-		System.out.println( "║   Conda Detection Diagnostics         ║" );
-		System.out.println( "╚═══════════════════════════════════════╝\n" );
+		IJ.log( "╔═══════════════════════════════════════╗" );
+		IJ.log( "║   Conda Detection Diagnostics         ║" );
+		IJ.log( "╚═══════════════════════════════════════╝\n" );
 
 		// Check Method 1: Environment variables
-		System.out.println( "Method 1: Environment Variables" );
-		System.out.println( "  CONDA_EXE:         " + System.getenv( "CONDA_EXE" ) );
-		System.out.println( "  CONDA_ROOT_PREFIX: " + System.getenv( "CONDA_ROOT_PREFIX" ) );
-		System.out.println( "  CONDA_PREFIX:      " + System.getenv( "CONDA_PREFIX" ) );
-		System.out.println( "  CONDA_DEFAULT_ENV: " + System.getenv( "CONDA_DEFAULT_ENV" ) );
+		IJ.log( "Method 1: Environment Variables" );
+		IJ.log( "  CONDA_EXE:         " + System.getenv( "CONDA_EXE" ) );
+		IJ.log( "  CONDA_ROOT_PREFIX: " + System.getenv( "CONDA_ROOT_PREFIX" ) );
+		IJ.log( "  CONDA_PREFIX:      " + System.getenv( "CONDA_PREFIX" ) );
+		IJ.log( "  CONDA_DEFAULT_ENV: " + System.getenv( "CONDA_DEFAULT_ENV" ) );
 
 		// Check Method 2: PATH
-		System.out.println( "\nMethod 2: PATH Search" );
+		IJ.log( "\nMethod 2: PATH Search" );
 		final String path = System.getenv( "PATH" );
-		System.out.println( "  PATH contains:" );
+		IJ.log( "  PATH contains:" );
 		if ( path != null )
 		{
 			for ( final String dir : path.split( ":" ) )
 			{
 				if ( dir.contains( "conda" ) || dir.contains( "anaconda" ) )
 				{
-					System.out.println( "    " + dir );
+					IJ.log( "    " + dir );
 				}
 			}
 		}
 
 		// Try which conda
 		final String whichResult = tryCommand( "which", "conda" );
-		System.out.println( "  which conda: " + ( whichResult != null ? whichResult : "not found" ) );
+		IJ.log( "  which conda: " + ( whichResult != null ? whichResult : "not found" ) );
 
 		// Check Method 3: Common locations
-		System.out.println( "\nMethod 3: Common Locations" );
+		IJ.log( "\nMethod 3: Common Locations" );
 		final List< String > locations = getCommonCondaLocations();
 		for ( final String loc : locations )
 		{
 			final File condaExe = new File( loc + "/bin/conda" );
 			if ( condaExe.exists() )
 			{
-				System.out.println( "  ✓ Found: " + condaExe.getAbsolutePath() );
+				IJ.log( "  ✓ Found: " + condaExe.getAbsolutePath() );
 			}
 		}
 
 		// Check shell config files
-		System.out.println( "\nMethod 4: Shell Configuration Files" );
+		IJ.log( "\nMethod 4: Shell Configuration Files" );
 		checkShellConfig();
 	}
 
@@ -73,33 +75,33 @@ public class CondaDiagnostics
 			final File file = new File( home, rcFile );
 			if ( file.exists() )
 			{
-				System.out.println( "  Checking " + rcFile + ":" );
+				IJ.log( "  Checking " + rcFile + ":" );
 				try
 				{
 					final String content = new String( java.nio.file.Files.readAllBytes( file.toPath() ) );
 					if ( content.contains( "conda" ) )
 					{
-						System.out.println( "    ✓ Contains conda initialization" );
+						IJ.log( "    ✓ Contains conda initialization" );
 
 						final String condaExe = extractCondaExeFromConfig( content );
 						if ( condaExe != null )
-							System.out.println( "    → CONDA_EXE would be: " + condaExe );
+							IJ.log( "    → CONDA_EXE would be: " + condaExe );
 					}
 					else if ( content.contains( "mamba" ) )
 					{
-						System.out.println( "    ✓ Contains micromamba initialization" );
+						IJ.log( "    ✓ Contains micromamba initialization" );
 						final String condaExe = extractCondaExeFromConfig( content );
 						if ( condaExe != null )
-							System.out.println( "    → CONDA_EXE would be: " + condaExe );
+							IJ.log( "    → CONDA_EXE would be: " + condaExe );
 					}
 					else
 					{
-						System.out.println( "    ✗ No conda or mamba initialization found" );
+						IJ.log( "    ✗ No conda or mamba initialization found" );
 					}
 				}
 				catch ( final Exception e )
 				{
-					System.out.println( "    ✗ Could not read file" );
+					IJ.log( "    ✗ Could not read file" );
 				}
 			}
 		}
