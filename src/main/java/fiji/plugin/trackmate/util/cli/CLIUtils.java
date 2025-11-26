@@ -75,6 +75,15 @@ public class CLIUtils
 	{
 		final List< String > cmd = CommandBuilder.build( cli );
 		final ProcessBuilder pb = new ProcessBuilder( cmd );
+		if ( cli instanceof CondaCLIConfigurator )
+		{
+			// Env variables.
+			final Map< String, String > env = new HashMap<>();
+			final String condaRootPrefix = getCondaRootPrefix();
+			env.put( "MAMBA_ROOT_PREFIX", condaRootPrefix );
+			env.put( "CONDA_ROOT_PREFIX", condaRootPrefix );
+			pb.environment().putAll( env );
+		}
 		pb.redirectOutput( ProcessBuilder.Redirect.appendTo( logFile ) );
 		pb.redirectError( ProcessBuilder.Redirect.appendTo( logFile ) );
 		return pb.start();

@@ -141,14 +141,22 @@ public abstract class CondaCLIConfigurator extends CLIConfigurator
 			// The executable stuff.
 			final String envname = ( String ) s;
 			cmd.add( envname );
-			// Important: don't buffer output
-			cmd.add( "--no-capture-output" );
+			// Only add these flags for conda/mamba, NOT for micromamba
+			if ( !isMicromamba( condaPath ) )
+			{
+				cmd.add( "--no-capture-output" );
+			}
 			// The rest of the command, split by spaces.
 			final String executableCommand = getCommand();
 			final String[] split = executableCommand.split( " " );
 			cmd.addAll( Arrays.asList( split ) );
 			return cmd;
 		} );
+	}
+
+	private static boolean isMicromamba( final String path )
+	{
+		return path != null && path.toLowerCase().contains( "micromamba" );
 	}
 
 	@Override
