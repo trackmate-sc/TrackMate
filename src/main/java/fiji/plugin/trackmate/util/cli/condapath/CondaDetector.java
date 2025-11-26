@@ -72,6 +72,14 @@ public class CondaDetector
 			return version;
 		}
 
+		/**
+		 * Check if this is micromamba (for command flag compatibility)
+		 */
+		public boolean isMicromamba()
+		{
+			return isMicromambaExecutable( condaExecutable );
+		}
+
 		@Override
 		public String toString()
 		{
@@ -209,9 +217,12 @@ public class CondaDetector
 	private static CondaInfo detectFromEnvironment()
 	{
 		IJ.log( "Method 1: Checking CONDA_EXE environment variable..." );
-		final String condaExe = System.getenv( "CONDA_EXE" );
+		String condaExe = System.getenv( "CONDA_EXE" );
 		if ( condaExe != null && new File( condaExe ).exists() )
 		{
+			// Resolve symlinks/aliases
+			condaExe = resolveRealExecutable( condaExe );
+
 			final String rootPrefix = deriveRootPrefix( condaExe );
 			final String version = getCondaVersion( condaExe );
 
@@ -264,10 +275,13 @@ public class CondaDetector
 							content.contains( "micromamba" ) )
 					{
 						IJ.log( "  Checking: " + configFile );
-						final String condaExe = extractCondaExeFromConfig( content, configPath );
+						String condaExe = extractCondaExeFromConfig( content, configPath );
 
 						if ( condaExe != null && new File( condaExe ).exists() )
 						{
+							// Resolve symlinks/aliases
+							condaExe = resolveRealExecutable( condaExe );
+
 							final String rootPrefix = deriveRootPrefix( condaExe );
 							final String version = getCondaVersion( condaExe );
 
@@ -437,9 +451,12 @@ public class CondaDetector
 	private static CondaInfo detectFromPath()
 	{
 		IJ.log( "Method 3: Searching system PATH..." );
-		final String condaExe = findInPath( "conda" );
+		String condaExe = findInPath( "conda" );
 		if ( condaExe != null )
 		{
+			// Resolve symlinks/aliases
+			condaExe = resolveRealExecutable( condaExe );
+
 			final String rootPrefix = deriveRootPrefix( condaExe );
 			final String version = getCondaVersion( condaExe );
 
@@ -467,9 +484,12 @@ public class CondaDetector
 			if ( !dir.exists() || !dir.isDirectory() )
 				continue;
 
-			final String condaExe = buildCondaExecutablePath( location );
+			String condaExe = buildCondaExecutablePath( location );
 			if ( condaExe != null && new File( condaExe ).exists() )
 			{
+				// Resolve symlinks/aliases
+				condaExe = resolveRealExecutable( condaExe );
+
 				final String version = getCondaVersion( condaExe );
 				if ( version != null )
 				{
@@ -486,19 +506,93 @@ public class CondaDetector
 	// ========== Helper Methods ==========
 
 	/**
-	 * Derive conda root prefix from executable path
-	 * <p>
-	 * Examples:
-	 * <ul>
-	 * <li>Windows: D:\ProgramData\miniconda3\Scripts\conda.exe →
-	 * D:\ProgramData\miniconda3</li>
-	 * <li>Windows:
-	 * C:\Users\\user\AppData\Local\miniforge3\Library\bin\conda.bat →
-	 * C:\Users\\user\AppData\Local\miniforge3</li>
-	 * <li>Linux: /home/user/miniconda3/bin/conda → /home/user/miniconda3</li>
-	 * <li>macOS: /Users/user/Applications/bin/micromamba →
-	 * /Users/user/Applications</li>
-	 * </ul>
+	 * Resolve symlinks and get the actual executable path This ensures we know
+	 * what conda/mamba/micromamba we're really using
+	 */
+	private static String resolveRealExecutable( final String executablePath )
+	{
+		if ( executablePath == null )
+			return null;
+
+		try
+		{
+			final File file = new File( executablePath );
+
+			// Resolve symlinks using canonical path
+			String realPath = file.getCanonicalPath();
+
+			// On Unix, also try readlink to be thorough
+			if ( !isWindows() && Files.isSymbolicLink( Paths.get( executablePath ) ) )
+			{
+				try
+				{
+					Path resolved = Files.readSymbolicLink( Paths.get( executablePath ) );
+					if ( !resolved.isAbsolute() )
+					{
+						// Resolve relative symlink
+						final Path parent = Paths.get( executablePath ).getParent();
+						resolved = parent.resolve( resolved ).normalize();
+					}
+					realPath = resolved.toString();
+
+					// Log symlink resolution
+					if ( !executablePath.equals( realPath ) )
+						IJ.log( "  Resolved symlink: " + executablePath + " -> " + realPath );
+				}
+				catch ( final IOException e )
+				{
+					// Fall back to canonical path
+				}
+			}
+
+			return realPath;
+		}
+		catch ( final IOException e )
+		{
+			IJ.log( "  Could not resolve path: " + executablePath );
+			return executablePath; // Return original if resolution fails
+		}
+	}
+
+	/**
+	 * Check if the executable is micromamba (even if aliased as conda) This is
+	 * used to determine command compatibility
+	 */
+	private static boolean isMicromambaExecutable( final String condaExePath )
+	{
+		// Quick check first - if path contains micromamba, it definitely is
+		if ( condaExePath != null && condaExePath.toLowerCase().contains( "micromamba" ) )
+			return true;
+
+		// Otherwise, run --version to check what it actually is
+		try
+		{
+			final List< String > command = buildSimpleCommand( condaExePath, "--version" );
+
+			final ProcessBuilder pb = new ProcessBuilder( command );
+			pb.redirectErrorStream( true );
+			final Process process = pb.start();
+
+			final String output = readProcessOutput( process );
+			final boolean completed = process.waitFor( 5, TimeUnit.SECONDS );
+
+			if ( completed && process.exitValue() == 0 && output != null )
+			{
+				// Check if output contains "micromamba"
+				return output.toLowerCase().contains( "micromamba" );
+			}
+		}
+		catch ( final Exception e )
+		{
+			// If we can't determine, assume it's not micromamba
+		}
+
+		return false;
+	}
+
+	/**
+	 * Derive conda root prefix from executable path For micromamba, tries to
+	 * get actual root prefix from micromamba info
 	 */
 	private static String deriveRootPrefix( final String condaExePath )
 	{
@@ -507,21 +601,30 @@ public class CondaDetector
 			final Path path = Paths.get( condaExePath ).toAbsolutePath().normalize();
 			final String exeName = path.getFileName().toString();
 
+			// Special handling for micromamba - query it directly
+			if ( exeName.contains( "micromamba" ) )
+			{
+				final String microRootPrefix = getMicromambaRootPrefix( condaExePath );
+				if ( microRootPrefix != null )
+				{
+					IJ.log( "  Micromamba root prefix from 'micromamba info': " + microRootPrefix );
+					return microRootPrefix;
+				}
+			}
+
 			if ( isWindows() )
 			{
-				// Check if this is the incorrect Library\bin location
+				// Windows logic (unchanged)
 				final String pathStr = path.toString();
 				if ( pathStr.contains( "\\Library\\bin\\conda" ) )
 				{
-					// This is a helper script, go up 3 levels:
-					// Library\bin\conda.bat -> Library\bin -> Library -> root
-					Path parent = path.getParent(); // bin
+					Path parent = path.getParent();
 					if ( parent != null )
 					{
-						parent = parent.getParent(); // Library
+						parent = parent.getParent();
 						if ( parent != null )
 						{
-							final Path rootPrefix = parent.getParent(); // miniforge3
+							final Path rootPrefix = parent.getParent();
 							if ( rootPrefix != null )
 								return rootPrefix.toString();
 						}
@@ -529,13 +632,10 @@ public class CondaDetector
 				}
 				else
 				{
-					// Standard location: Scripts\conda.exe or
-					// condabin\conda.bat
-					// Go up 2 levels: Scripts\conda.exe -> Scripts -> root
-					final Path parent = path.getParent(); // Scripts or condabin
+					final Path parent = path.getParent();
 					if ( parent != null )
 					{
-						final Path rootPrefix = parent.getParent(); // miniconda3
+						final Path rootPrefix = parent.getParent();
 						if ( rootPrefix != null )
 							return rootPrefix.toString();
 					}
@@ -547,31 +647,43 @@ public class CondaDetector
 				final Path parent = path.getParent(); // bin
 				if ( parent != null )
 				{
-					final Path rootPrefix = parent.getParent(); // installation
-																// root
+					// installation root
+					final Path rootPrefix = parent.getParent();
 					if ( rootPrefix != null )
 					{
-						// Special case: micromamba might be installed in a
-						// generic bin directory
-						// like /Users/user/Applications/bin/micromamba
-						// In this case, we should check if there's a proper
-						// conda structure
+						// For micromamba in generic bin (like /usr/local/bin)
+						// Check if this looks like a proper conda root
 						if ( exeName.contains( "micromamba" ) )
 						{
-							// For micromamba, check if parent is a conda-like
-							// root
-							// (has envs, pkgs directories)
 							final File envsDir = new File( rootPrefix.toFile(), "envs" );
 							final File pkgsDir = new File( rootPrefix.toFile(), "pkgs" );
 
 							if ( !envsDir.exists() && !pkgsDir.exists() )
 							{
-								// This might be a standalone micromamba in a
-								// generic bin
-								// Use the bin's parent as root (e.g.,
-								// /Users/user/Applications)
-								IJ.log( "  Micromamba appears to be standalone installation" );
-								return rootPrefix.toString();
+								// Not a proper conda root, try default
+								// micromamba locations
+								final String home = System.getProperty( "user.home" );
+								final String[] defaultMicroRoots = {
+										home + "/micromamba",
+										home + "/.mamba",
+										home + "/.local/share/mamba"
+								};
+
+								for ( final String defaultRoot : defaultMicroRoots )
+								{
+									final File defaultEnvs = new File( defaultRoot, "envs" );
+									if ( defaultEnvs.exists() )
+									{
+										IJ.log( "  Using default micromamba root: " + defaultRoot );
+										return defaultRoot;
+									}
+								}
+
+								// Fall back to ~/micromamba even if it doesn't
+								// exist yet
+								final String fallback = home + "/micromamba";
+								IJ.log( "  Using fallback micromamba root: " + fallback );
+								return fallback;
 							}
 						}
 
@@ -583,6 +695,53 @@ public class CondaDetector
 		catch ( final Exception e )
 		{
 			IJ.log( "Failed to derive root prefix from " + condaExePath + ": " + e.getMessage() );
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get micromamba root prefix by running 'micromamba info'
+	 */
+	private static String getMicromambaRootPrefix( final String micromambaPath )
+	{
+		try
+		{
+			final List< String > command = buildSimpleCommand( micromambaPath, "info" );
+
+			final ProcessBuilder pb = new ProcessBuilder( command );
+			pb.redirectErrorStream( true );
+			final Process process = pb.start();
+
+			final String output = readProcessOutput( process );
+			final boolean completed = process.waitFor( 10, TimeUnit.SECONDS );
+
+			if ( completed && process.exitValue() == 0 && output != null )
+			{
+				// Look for "base environment : /path/to/root"
+				final Pattern pattern = Pattern.compile( "base environment\\s*:\\s*([^\\s]+)" );
+				final Matcher matcher = pattern.matcher( output );
+				if ( matcher.find() )
+				{
+					final String rootPrefix = matcher.group( 1 );
+					if ( new File( rootPrefix ).exists() )
+						return rootPrefix;
+				}
+
+				// Alternative: look for "root prefix : /path/to/root"
+				final Pattern pattern2 = Pattern.compile( "root prefix\\s*:\\s*([^\\s]+)" );
+				final Matcher matcher2 = pattern2.matcher( output );
+				if ( matcher2.find() )
+				{
+					final String rootPrefix = matcher2.group( 1 );
+					if ( new File( rootPrefix ).exists() )
+						return rootPrefix;
+				}
+			}
+		}
+		catch ( final Exception e )
+		{
+			// Failed to query micromamba, will fall back to other methods
 		}
 
 		return null;
@@ -689,15 +848,25 @@ public class CondaDetector
 	}
 
 	/**
-	 * Build path to conda executable from installation directory
+	 * Build path to conda/mamba/micromamba executable from installation
+	 * directory
 	 */
 	private static String buildCondaExecutablePath( final String installDir )
 	{
 		if ( isWindows() )
 		{
-			// Try Scripts\conda.exe first (most common for
-			// miniconda/anaconda)
+			// Try Scripts\conda.exe first (most common for miniconda/anaconda)
 			String scriptsPath = Paths.get( installDir, "Scripts", "conda.exe" ).toString();
+			if ( new File( scriptsPath ).exists() )
+				return scriptsPath;
+
+			// Try Scripts\mamba.exe
+			scriptsPath = Paths.get( installDir, "Scripts", "mamba.exe" ).toString();
+			if ( new File( scriptsPath ).exists() )
+				return scriptsPath;
+
+			// Try Scripts\micromamba.exe
+			scriptsPath = Paths.get( installDir, "Scripts", "micromamba.exe" ).toString();
 			if ( new File( scriptsPath ).exists() )
 				return scriptsPath;
 
@@ -711,13 +880,22 @@ public class CondaDetector
 			if ( new File( scriptsPath ).exists() )
 				return scriptsPath;
 
-			// DO NOT check Library\bin - that's a helper script, not main
-			// conda
+			// DO NOT check Library\bin - that's a helper script, not main conda
 		}
 		else
 		{
-			// Unix: bin/conda
-			return Paths.get( installDir, "bin", "conda" ).toString();
+			// Unix: bin/conda, bin/mamba, or bin/micromamba
+			String binPath = Paths.get( installDir, "bin", "conda" ).toString();
+			if ( new File( binPath ).exists() )
+				return binPath;
+
+			binPath = Paths.get( installDir, "bin", "mamba" ).toString();
+			if ( new File( binPath ).exists() )
+				return binPath;
+
+			binPath = Paths.get( installDir, "bin", "micromamba" ).toString();
+			if ( new File( binPath ).exists() )
+				return binPath;
 		}
 
 		return null; // No valid conda executable found
@@ -740,20 +918,24 @@ public class CondaDetector
 			paths.add( home + "\\Anaconda3" );
 			paths.add( home + "\\miniforge3" );
 			paths.add( home + "\\mambaforge" );
+			paths.add( home + "\\micromamba" );
 
 			// AppData\Local installations (common for miniforge)
 			paths.add( home + "\\AppData\\Local\\miniforge3" );
 			paths.add( home + "\\AppData\\Local\\mambaforge" );
 			paths.add( home + "\\AppData\\Local\\miniconda3" );
 			paths.add( home + "\\AppData\\Local\\anaconda3" );
+			paths.add( home + "\\AppData\\Local\\micromamba" );
 
 			// System-wide installations
 			paths.add( "C:\\ProgramData\\miniconda3" );
 			paths.add( "C:\\ProgramData\\anaconda3" );
 			paths.add( "C:\\ProgramData\\miniforge3" );
 			paths.add( "C:\\ProgramData\\mambaforge" );
+			paths.add( "C:\\ProgramData\\micromamba" );
 			paths.add( "C:\\tools\\miniconda3" );
 			paths.add( "C:\\tools\\anaconda3" );
+			paths.add( "C:\\tools\\micromamba" );
 
 			// Check other drives
 			final String[] drives = { "D:", "E:", "F:" };
@@ -762,6 +944,7 @@ public class CondaDetector
 				paths.add( drive + "\\ProgramData\\miniconda3" );
 				paths.add( drive + "\\ProgramData\\anaconda3" );
 				paths.add( drive + "\\ProgramData\\miniforge3" );
+				paths.add( drive + "\\ProgramData\\micromamba" );
 			}
 
 		}
@@ -772,11 +955,16 @@ public class CondaDetector
 			paths.add( home + "/anaconda3" );
 			paths.add( home + "/miniforge3" );
 			paths.add( home + "/mambaforge" );
+			paths.add( home + "/micromamba" );
+			paths.add( home + "/Applications" );
 			paths.add( "/opt/miniconda3" );
 			paths.add( "/opt/anaconda3" );
 			paths.add( "/opt/conda" );
+			paths.add( "/opt/micromamba" );
 			paths.add( "/usr/local/miniconda3" );
 			paths.add( "/usr/local/anaconda3" );
+			paths.add( "/usr/local/micromamba" );
+			paths.add( "/usr/local/bin" );
 
 		}
 		else
@@ -786,11 +974,15 @@ public class CondaDetector
 			paths.add( home + "/anaconda3" );
 			paths.add( home + "/miniforge3" );
 			paths.add( home + "/mambaforge" );
+			paths.add( home + "/micromamba" );
+			paths.add( home + "/.local" );
 			paths.add( "/opt/conda" );
 			paths.add( "/opt/miniconda3" );
 			paths.add( "/opt/anaconda3" );
+			paths.add( "/opt/micromamba" );
 			paths.add( "/usr/local/miniconda3" );
 			paths.add( "/usr/local/anaconda3" );
+			paths.add( "/usr/local/micromamba" );
 		}
 
 		return paths;
@@ -1131,6 +1323,7 @@ public class CondaDetector
 			IJ.log( "  Conda Executable: " + info.getCondaExecutable() );
 			IJ.log( "  Root Prefix:      " + info.getRootPrefix() );
 			IJ.log( "  Version:          " + info.getVersion() );
+			IJ.log( "  Is Micromamba:    " + info.isMicromamba() );
 
 			// Validate the installation
 			IJ.log( "" );
@@ -1232,5 +1425,4 @@ public class CondaDetector
 			IJ.log( "  • If using mambaforge, ensure it's properly installed" );
 		}
 	}
-
 }
