@@ -99,6 +99,8 @@ public class CondaPathConfigCommand implements Command
 		dialog.addButton( "Autodetect", e -> autoDetect( dialog ) );
 		dialog.addMessage( "\n\n" );
 
+		dialog.addButton( "Diagnose", e -> diagnose() );
+
 		dialog.showDialog();
 
 		if ( dialog.wasCanceled() )
@@ -110,6 +112,11 @@ public class CondaPathConfigCommand implements Command
 		prefs.put( CLIUtils.class, CLIUtils.CONDA_ROOT_PREFIX_KEY, condaRootPrefix );
 		CLIUtils.clearEnvMap();
 		test();
+	}
+
+	private void diagnose()
+	{
+		new Thread( () -> CondaDiagnostics.diagnose() ).start();
 	}
 
 	private void autoDetect( final GenericDialogPlus dialog )
