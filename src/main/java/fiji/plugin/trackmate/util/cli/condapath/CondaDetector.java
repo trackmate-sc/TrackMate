@@ -15,6 +15,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import ij.IJ;
+
 /**
  * Detects conda installation and provides information needed to run conda
  * commands. Returns both the conda executable path and CONDA_ROOT_PREFIX.
@@ -78,8 +80,9 @@ public class CondaDetector
 		}
 	}
 
-	// ========== Data Classes ==========
-
+	/**
+	 * Container for conda environment information
+	 */
 	public static class CondaEnvironment
 	{
 		private final String name;
@@ -110,6 +113,21 @@ public class CondaDetector
 	}
 
 	/**
+	 * Custom exception for when conda cannot be found
+	 */
+	public static class CondaNotFoundException extends Exception
+	{
+		private static final long serialVersionUID = 1L;
+
+		public CondaNotFoundException( final String message )
+		{
+			super( message );
+		}
+	}
+
+	// ========== Main Detection Methods ==========
+
+	/**
 	 * Main entry point - detects conda and returns all necessary information
 	 */
 	public static CondaInfo detect() throws CondaNotFoundException
@@ -132,7 +150,7 @@ public class CondaDetector
 		throw new CondaNotFoundException(
 				"Could not find conda installation. Please ensure conda is installed and initialized.\n" +
 						"Suggestions:\n" +
-						"  1. Install Miniforge (https://conda-forge.org/download/)\n" +
+						"  1. Install Anaconda or Miniconda\n" +
 						"  2. Run 'conda init' in your terminal\n" +
 						"  3. Restart your application" );
 	}
@@ -150,18 +168,25 @@ public class CondaDetector
 
 	private static CondaInfo detectCondaInfo()
 	{
+		IJ.log( "Starting conda detection..." );
+
 		// Method 1: Use CONDA_EXE environment variable (fastest, most reliable)
 		CondaInfo info = detectFromEnvironment();
 		if ( info != null )
 			return info;
 
-		// Method 2: Parse shell config files (critical for macOS/Linux GUI
-		// apps)
+		// Method 2: Parse shell config files (critical for macOS/Linux GUI apps)
 		if ( isMac() || isLinux() )
 		{
 			info = detectFromShellConfig();
 			if ( info != null )
 				return info;
+		}
+		else
+		{
+			IJ.log( "Method 2: Parsing shell configuration files..." );
+			IJ.log( "  Skipped (only applicable on macOS/Linux)" );
+			IJ.log( "" );
 		}
 
 		// Method 3: Search in PATH
@@ -174,6 +199,7 @@ public class CondaDetector
 		if ( info != null )
 			return info;
 
+		IJ.log( "Failed to detect conda installation" );
 		return null;
 	}
 
@@ -182,6 +208,7 @@ public class CondaDetector
 	 */
 	private static CondaInfo detectFromEnvironment()
 	{
+		IJ.log( "Method 1: Checking CONDA_EXE environment variable..." );
 		final String condaExe = System.getenv( "CONDA_EXE" );
 		if ( condaExe != null && new File( condaExe ).exists() )
 		{
@@ -190,19 +217,22 @@ public class CondaDetector
 
 			if ( rootPrefix != null && version != null )
 			{
-				System.out.println( "✓ Found conda via CONDA_EXE environment variable" );
+				IJ.log( "  Found conda via CONDA_EXE: " + condaExe );
 				return new CondaInfo( condaExe, rootPrefix, version );
 			}
 		}
+		IJ.log( "  CONDA_EXE not set or invalid" );
 		return null;
 	}
 
 	/**
-	 * Method 2: Parse shell config files to find conda Essential for
-	 * macOS/Linux GUI applications that don't inherit shell environment
+	 * Method 2: Parse shell config files to find conda
+	 * Essential for macOS/Linux GUI applications that don't inherit shell
+	 * environment
 	 */
 	private static CondaInfo detectFromShellConfig()
 	{
+		IJ.log( "Method 2: Parsing shell configuration files..." );
 		final String home = System.getProperty( "user.home" );
 
 		// Check shell config files in order of likelihood
@@ -217,6 +247,7 @@ public class CondaDetector
 		for ( final String configFile : configFiles )
 		{
 			final Path configPath = Paths.get( home, configFile );
+
 			if ( Files.exists( configPath ) )
 			{
 				try
@@ -224,8 +255,10 @@ public class CondaDetector
 					final String content = new String( Files.readAllBytes( configPath ) );
 
 					// Look for conda initialization block
-					if ( content.contains( "conda.sh" ) || content.contains( "mamba.sh" ) || content.contains( "conda initialize" ) )
+					if ( content.contains( "conda.sh" ) || content.contains( "mamba.sh" ) ||
+							content.contains( "conda initialize" ) )
 					{
+						IJ.log( "  Checking: " + configFile );
 						final String condaExe = extractCondaExeFromConfig( content, configPath );
 
 						if ( condaExe != null && new File( condaExe ).exists() )
@@ -234,7 +267,10 @@ public class CondaDetector
 							final String version = getCondaVersion( condaExe );
 
 							if ( rootPrefix != null && version != null )
+							{
+								IJ.log( "  Found conda by parsing: " + configFile );
 								return new CondaInfo( condaExe, rootPrefix, version );
+							}
 						}
 					}
 				}
@@ -244,6 +280,8 @@ public class CondaDetector
 				}
 			}
 		}
+
+		IJ.log( "  No conda found in shell config files" );
 		return null;
 	}
 
@@ -255,9 +293,10 @@ public class CondaDetector
 	{
 		// Method 1: Look for __conda_setup pattern (most reliable for conda
 		// init)
-		// Pattern: __conda_setup="$('/Users/tinevez/mambaforge/bin/conda'
+		// Pattern: __conda_setup="$('/Users/username/mambaforge/bin/conda'
 		// 'shell.zsh' 'hook' 2> /dev/null)"
-		Pattern pattern = Pattern.compile( "__conda_setup=[\"']\\$\\([\"']([^\"']+/(conda|mamba))[\"']" );
+		Pattern pattern = Pattern.compile(
+				"__conda_setup=[\"']\\$\\([\"']([^\"']+/(conda|mamba))[\"']" );
 		Matcher matcher = pattern.matcher( content );
 		if ( matcher.find() )
 		{
@@ -267,7 +306,8 @@ public class CondaDetector
 		}
 
 		// Method 2: Look for explicit CONDA_EXE or MAMBA_EXE export
-		pattern = Pattern.compile( "export (CONDA_EXE|MAMBA_EXE)=['\"]?([^'\"\\s]+)['\"]?" );
+		pattern = Pattern.compile(
+				"export (CONDA_EXE|MAMBA_EXE)=['\"]?([^'\"\\s]+)['\"]?" );
 		matcher = pattern.matcher( content );
 		if ( matcher.find() )
 		{
@@ -277,10 +317,9 @@ public class CondaDetector
 		}
 
 		// Method 3: Look for conda.sh or mamba.sh source with path
-		// Pattern: . "/Users/tinevez/mambaforge/etc/profile.d/conda.sh"
-		// Pattern: if [ -f "/Users/tinevez/mambaforge/etc/profile.d/conda.sh"
-		// ]; then
-		pattern = Pattern.compile( "[.\\s][\\s\"']*([^\"']+)/(etc/profile\\.d/(conda|mamba)\\.sh)[\"']" );
+		// Pattern: . "/Users/username/mambaforge/etc/profile.d/conda.sh"
+		pattern = Pattern.compile(
+				"[.\\s][\\s\"']*([^\"']+)/(etc/profile\\.d/(conda|mamba)\\.sh)[\"']" );
 		matcher = pattern.matcher( content );
 		if ( matcher.find() )
 		{
@@ -295,8 +334,9 @@ public class CondaDetector
 		}
 
 		// Method 4: Look for PATH export with conda/mamba
-		// Pattern: export PATH="/Users/tinevez/mambaforge/bin:$PATH"
-		pattern = Pattern.compile( "export PATH=[\"']([^\"':]+/(mambaforge|miniconda|anaconda|miniforge)\\d*/bin)[\"':]" );
+		// Pattern: export PATH="/Users/username/mambaforge/bin:$PATH"
+		pattern = Pattern.compile(
+				"export PATH=[\"']([^\"':]+/(mambaforge|miniconda|anaconda|miniforge)\\d*/bin)[\"':]" );
 		matcher = pattern.matcher( content );
 		if ( matcher.find() )
 		{
@@ -312,8 +352,9 @@ public class CondaDetector
 		}
 
 		// Method 5: Look for any mamba/conda bin directory in path assignments
-		// Pattern: path+=('/Users/tinevez/mambaforge/bin') or similar
-		pattern = Pattern.compile( "path[+=]+.*?[\"']([^\"']+/(mambaforge|miniforge|miniconda|anaconda)\\d*/bin)[\"']" );
+		// Pattern: path+=('/Users/username/mambaforge/bin') or similar
+		pattern = Pattern.compile(
+				"path[+=]+.*?[\"']([^\"']+/(mambaforge|miniforge|miniconda|anaconda)\\d*/bin)[\"']" );
 		matcher = pattern.matcher( content );
 		if ( matcher.find() )
 		{
@@ -334,6 +375,7 @@ public class CondaDetector
 	 */
 	private static CondaInfo detectFromPath()
 	{
+		IJ.log( "Method 3: Searching system PATH..." );
 		final String condaExe = findInPath( "conda" );
 		if ( condaExe != null )
 		{
@@ -342,10 +384,11 @@ public class CondaDetector
 
 			if ( rootPrefix != null && version != null )
 			{
-				System.out.println( "✓ Found conda in system PATH" );
+				IJ.log( "  Found conda in PATH: " + condaExe );
 				return new CondaInfo( condaExe, rootPrefix, version );
 			}
 		}
+		IJ.log( "  Conda not found in PATH" );
 		return null;
 	}
 
@@ -354,7 +397,9 @@ public class CondaDetector
 	 */
 	private static CondaInfo detectFromCommonLocations()
 	{
+		IJ.log( "Method 4: Checking common installation locations..." );
 		final List< String > locations = getCommonCondaLocations();
+
 		for ( final String location : locations )
 		{
 			final File dir = new File( location );
@@ -362,23 +407,34 @@ public class CondaDetector
 				continue;
 
 			final String condaExe = buildCondaExecutablePath( location );
-			if ( new File( condaExe ).exists() )
+			if ( condaExe != null && new File( condaExe ).exists() )
 			{
 				final String version = getCondaVersion( condaExe );
 				if ( version != null )
+				{
+					IJ.log( "  Found conda at: " + location );
 					return new CondaInfo( condaExe, location, version );
+				}
 			}
 		}
 
+		IJ.log( "  No conda found in common locations" );
 		return null;
 	}
 
 	// ========== Helper Methods ==========
 
 	/**
-	 * Derive conda root prefix from executable path Examples: Windows:
-	 * D:\ProgramData\miniconda3\Scripts\conda.exe -> D:\ProgramData\miniconda3
-	 * Linux: /home/user/miniconda3/bin/conda -> /home/user/miniconda3
+	 * Derive conda root prefix from executable path
+	 * <p>
+	 * Examples:
+	 * <ul>
+	 * <li>Windows: D:\ProgramData\miniconda3\Scripts\conda.exe →
+	 * D:\ProgramData\miniconda3</li>
+	 * <li>Windows: C:\Users/user\AppData\Local\miniforge3\Library\bin\conda.bat
+	 * → C:\Users/user\AppData\Local\miniforge3</li>
+	 * <li>Linux: /home/user/miniconda3/bin/conda → /home/user/miniconda3</li>
+	 * </ul>
 	 */
 	private static String deriveRootPrefix( final String condaExePath )
 	{
@@ -386,34 +442,55 @@ public class CondaDetector
 		{
 			final Path path = Paths.get( condaExePath ).toAbsolutePath().normalize();
 
-			// Go up from Scripts/conda.exe or bin/conda to root
 			if ( isWindows() )
 			{
-				// D:\ProgramData\miniconda3\Scripts\conda.exe ->
-				// D:\ProgramData\miniconda3
-				final Path parent = path.getParent(); // Scripts
-				if ( parent != null )
+				// Check if this is the incorrect Library\bin location
+				final String pathStr = path.toString();
+				if ( pathStr.contains( "\\Library\\bin\\conda" ) )
 				{
-					final Path rootPrefix = parent.getParent(); // miniconda3
-					if ( rootPrefix != null )
-					{ return rootPrefix.toString(); }
+					// This is a helper script, go up 3 levels:
+					// Library\bin\conda.bat -> Library\bin -> Library -> root
+					Path parent = path.getParent(); // bin
+					if ( parent != null )
+					{
+						parent = parent.getParent(); // Library
+						if ( parent != null )
+						{
+							final Path rootPrefix = parent.getParent(); // miniforge3
+							if ( rootPrefix != null )
+								return rootPrefix.toString();
+						}
+					}
+				}
+				else
+				{
+					// Standard location: Scripts\conda.exe or condabin\conda.bat
+					// Go up 2 levels: Scripts\conda.exe -> Scripts -> root
+					final Path parent = path.getParent(); // Scripts or condabin
+					if ( parent != null )
+					{
+						final Path rootPrefix = parent.getParent(); // miniconda3
+						if ( rootPrefix != null )
+							return rootPrefix.toString();
+					}
 				}
 			}
 			else
 			{
-				// /home/user/miniconda3/bin/conda -> /home/user/miniconda3
+				// Unix: /home/user/miniconda3/bin/conda ->
+				// /home/user/miniconda3
 				final Path parent = path.getParent(); // bin
 				if ( parent != null )
 				{
 					final Path rootPrefix = parent.getParent(); // miniconda3
 					if ( rootPrefix != null )
-					{ return rootPrefix.toString(); }
+						return rootPrefix.toString();
 				}
 			}
 		}
 		catch ( final Exception e )
 		{
-			System.err.println( "Failed to derive root prefix: " + e.getMessage() );
+			IJ.log( "Failed to derive root prefix from " + condaExePath + ": " + e.getMessage() );
 		}
 
 		return null;
@@ -440,13 +517,14 @@ public class CondaDetector
 				// Output format: "conda 23.7.4" or just "23.7.4"
 				final String version = output.trim()
 						.replace( "conda", "" )
+						.replace( "mamba", "" )
 						.trim();
 				return version;
 			}
 		}
 		catch ( final Exception e )
 		{
-			System.err.println( "Failed to get conda version: " + e.getMessage() );
+			IJ.log( "Failed to get conda version from " + condaExePath + ": " + e.getMessage() );
 		}
 
 		return null;
@@ -472,23 +550,40 @@ public class CondaDetector
 
 			if ( output != null && !output.isEmpty() )
 			{
-				// Take first line if multiple results
-				String path = output.split( "\n" )[ 0 ].trim();
+				// 'where' on Windows may return multiple results
+				final String[] lines = output.split( "\n" );
 
-				// Resolve symlinks on Unix
-				if ( !isWindows() )
+				for ( final String line : lines )
 				{
-					try
-					{
-						path = new File( path ).getCanonicalPath();
-					}
-					catch ( final IOException e )
-					{
-						// Keep original path
-					}
-				}
+					String path = line.trim();
 
-				return path;
+					// Skip empty lines
+					if ( path.isEmpty() )
+						continue;
+
+					// On Windows, skip conda in Library\bin (it's a helper
+					// script)
+					if ( isWindows() && path.contains( "\\Library\\bin\\conda" ) )
+					{
+						IJ.log( "  Skipping helper script: " + path );
+						continue;
+					}
+
+					// Resolve symlinks on Unix
+					if ( !isWindows() )
+					{
+						try
+						{
+							path = new File( path ).getCanonicalPath();
+						}
+						catch ( final IOException e )
+						{
+							// Keep original path
+						}
+					}
+
+					return path;
+				}
 			}
 		}
 		catch ( final Exception e )
@@ -506,15 +601,24 @@ public class CondaDetector
 	{
 		if ( isWindows() )
 		{
-			// Try Scripts\conda.exe first
-			final String scriptsPath = Paths.get( installDir, "Scripts", "conda.exe" ).toString();
+			// Try Scripts\conda.exe first (most common for
+			// miniconda/anaconda)
+			String scriptsPath = Paths.get( installDir, "Scripts", "conda.exe" ).toString();
 			if ( new File( scriptsPath ).exists() )
-			{ return scriptsPath; }
+				return scriptsPath;
 
-			// Try condabin\conda.bat
+			// Try condabin\conda.bat (alternative for some installations)
 			final String condabinPath = Paths.get( installDir, "condabin", "conda.bat" ).toString();
 			if ( new File( condabinPath ).exists() )
-			{ return condabinPath; }
+				return condabinPath;
+
+			// Try miniforge/mambaforge location: Scripts\conda.bat
+			scriptsPath = Paths.get( installDir, "Scripts", "conda.bat" ).toString();
+			if ( new File( scriptsPath ).exists() )
+				return scriptsPath;
+
+			// DO NOT check Library\bin - that's a helper script, not main
+			// conda
 		}
 		else
 		{
@@ -522,7 +626,7 @@ public class CondaDetector
 			return Paths.get( installDir, "bin", "conda" ).toString();
 		}
 
-		return Paths.get( installDir, "conda" ).toString();
+		return null; // No valid conda executable found
 	}
 
 	/**
@@ -535,13 +639,25 @@ public class CondaDetector
 
 		if ( isWindows() )
 		{
-			// Windows locations
+			// Windows locations - User installations
 			paths.add( home + "\\miniconda3" );
 			paths.add( home + "\\anaconda3" );
 			paths.add( home + "\\Miniconda3" );
 			paths.add( home + "\\Anaconda3" );
+			paths.add( home + "\\miniforge3" );
+			paths.add( home + "\\mambaforge" );
+
+			// AppData\Local installations (common for miniforge)
+			paths.add( home + "\\AppData\\Local\\miniforge3" );
+			paths.add( home + "\\AppData\\Local\\mambaforge" );
+			paths.add( home + "\\AppData\\Local\\miniconda3" );
+			paths.add( home + "\\AppData\\Local\\anaconda3" );
+
+			// System-wide installations
 			paths.add( "C:\\ProgramData\\miniconda3" );
 			paths.add( "C:\\ProgramData\\anaconda3" );
+			paths.add( "C:\\ProgramData\\miniforge3" );
+			paths.add( "C:\\ProgramData\\mambaforge" );
 			paths.add( "C:\\tools\\miniconda3" );
 			paths.add( "C:\\tools\\anaconda3" );
 
@@ -551,6 +667,7 @@ public class CondaDetector
 			{
 				paths.add( drive + "\\ProgramData\\miniconda3" );
 				paths.add( drive + "\\ProgramData\\anaconda3" );
+				paths.add( drive + "\\ProgramData\\miniforge3" );
 			}
 
 		}
@@ -610,16 +727,14 @@ public class CondaDetector
 	private static String readProcessOutput( final Process process ) throws IOException
 	{
 		final StringBuilder output = new StringBuilder();
-		try (BufferedReader reader = new BufferedReader(
+		try (final BufferedReader reader = new BufferedReader(
 				new InputStreamReader( process.getInputStream() ) ))
 		{
 			String line;
 			while ( ( line = reader.readLine() ) != null )
 			{
 				if ( output.length() > 0 )
-				{
 					output.append( "\n" );
-				}
 				output.append( line );
 			}
 		}
@@ -644,21 +759,12 @@ public class CondaDetector
 		return System.getProperty( "os.name" ).toLowerCase().contains( "linux" );
 	}
 
-	// ========== Custom Exception ==========
-
-	public static class CondaNotFoundException extends Exception
-	{
-		private static final long serialVersionUID = 1L;
-
-		public CondaNotFoundException( final String message )
-		{
-			super( message );
-		}
-	}
+	// ========== Environment Discovery ==========
 
 	/**
-	 * Simple JSON parser for conda env list output Format: {"envs":
-	 * ["/path/to/env1", "/path/to/env2"]}
+	 * Simple JSON parser for conda env list output
+	 * <p>
+	 * Format: {"envs": ["/path/to/env1", "/path/to/env2"]}
 	 */
 	private static List< CondaEnvironment > parseEnvironmentsJson( final String json )
 	{
@@ -700,12 +806,11 @@ public class CondaDetector
 		return environments;
 	}
 
-
 	/**
 	 * Find all conda environments
 	 *
-	 * @throws CondaNotFoundException
-	 *             if conda is not found
+	 * @return List of conda environments
+	 * @throws CondaNotFoundException if conda is not found
 	 */
 	public static List< CondaEnvironment > findAllEnvironments() throws CondaNotFoundException
 	{
@@ -732,7 +837,8 @@ public class CondaDetector
 
 			// Read JSON output
 			final StringBuilder json = new StringBuilder();
-			try (BufferedReader reader = new BufferedReader( new InputStreamReader( process.getInputStream() ) ))
+			try (final BufferedReader reader = new BufferedReader(
+					new InputStreamReader( process.getInputStream() ) ))
 			{
 				String line;
 				while ( ( line = reader.readLine() ) != null )
@@ -744,20 +850,20 @@ public class CondaDetector
 			environments = parseEnvironmentsJson( json.toString() );
 
 		}
-		catch ( IOException | InterruptedException e )
+		catch ( final IOException | InterruptedException e )
 		{
-			System.err.println( "Failed to list conda environments: " + e.getMessage() );
+			IJ.log( "Failed to list conda environments: " + e.getMessage() );
 		}
 
 		return environments;
 	}
 
-	// ========== Demo ==========
-
 	/**
 	 * Check if a specific environment exists
 	 *
-	 * @throws CondaNotFoundException
+	 * @param envName Name of the environment to check
+	 * @return true if the environment exists
+	 * @throws CondaNotFoundException if conda is not found
 	 */
 	public static boolean environmentExists( final String envName ) throws CondaNotFoundException
 	{
@@ -768,7 +874,9 @@ public class CondaDetector
 	/**
 	 * Get path to a specific environment
 	 *
-	 * @throws CondaNotFoundException
+	 * @param envName Name of the environment
+	 * @return Path to the environment, or null if not found
+	 * @throws CondaNotFoundException if conda is not found
 	 */
 	public static String getEnvironmentPath( final String envName ) throws CondaNotFoundException
 	{
@@ -779,45 +887,56 @@ public class CondaDetector
 				.orElse( null );
 	}
 
+	// ========== Demo Main Method ==========
+
 	public static void main( final String[] args )
 	{
-		System.out.println( "╔══════════════════════════════╗" );
-		System.out.println( "║   Conda Detection System     ║" );
-		System.out.println( "╚══════════════════════════════╝\n" );
+		diagnose();
+	}
 
-		System.out.println( "Starting conda detection process...\n" );
+	public static void diagnose()
+	{
+
+		IJ.log( "╔════════════════════════════════════════╗" );
+		IJ.log( "║   Conda Detection Diagnosis System     ║" );
+		IJ.log( "╚════════════════════════════════════════╝" );
+		IJ.log( "" );
+
+		IJ.log( "Starting conda detection process..." );
+		IJ.log( "" );
 
 		// Show system information
-		System.out.println( "System Information:" );
-		System.out.println( "  OS:           " + System.getProperty( "os.name" ) );
-		System.out.println( "  Architecture: " + System.getProperty( "os.arch" ) );
-		System.out.println( "  User Home:    " + System.getProperty( "user.home" ) );
-		System.out.println();
+		IJ.log( "System Information:" );
+		IJ.log( "  OS:           " + System.getProperty( "os.name" ) );
+		IJ.log( "  Architecture: " + System.getProperty( "os.arch" ) );
+		IJ.log( "  User Home:    " + System.getProperty( "user.home" ) );
+		IJ.log( "" );
 
 		// Try each detection method explicitly for the demo
-		System.out.println( "Attempting Detection Methods:\n" );
+		IJ.log( "Attempting Detection Methods:" );
+		IJ.log( "" );
 
 		// Method 1: Environment variable
-		System.out.println( "Method 1: Checking CONDA_EXE environment variable..." );
+		IJ.log( "Method 1: Checking CONDA_EXE environment variable..." );
 		final String condaEnvVar = System.getenv( "CONDA_EXE" );
 		if ( condaEnvVar != null )
 		{
-			System.out.println( "  Found: " + condaEnvVar );
+			IJ.log( "  Found: " + condaEnvVar );
 			if ( new File( condaEnvVar ).exists() )
-				System.out.println( "  ✓ File exists and is accessible" );
+				IJ.log( "  ✓ File exists and is accessible" );
 			else
-				System.out.println( "  ✗ File does not exist" );
+				IJ.log( "  ✗ File does not exist" );
 		}
 		else
 		{
-			System.out.println( "  CONDA_EXE not set" );
+			IJ.log( "  CONDA_EXE not set" );
 		}
-		System.out.println();
+		IJ.log( "" );
 
 		// Method 2: Shell config (only on Mac/Linux)
 		if ( isMac() || isLinux() )
 		{
-			System.out.println( "Method 2: Parsing shell configuration files..." );
+			IJ.log( "Method 2: Parsing shell configuration files..." );
 			final String home = System.getProperty( "user.home" );
 			final String[] configFiles = {
 					".zshrc",
@@ -833,137 +952,142 @@ public class CondaDetector
 				final Path configPath = Paths.get( home, configFile );
 				if ( Files.exists( configPath ) )
 				{
-					System.out.println( "  Checking: " + configFile );
+					IJ.log( "  Checking: " + configFile );
 					try
 					{
 						final String content = new String( Files.readAllBytes( configPath ) );
 						if ( content.contains( "conda" ) || content.contains( "mamba" ) )
 						{
-							System.out.println( "    → Contains conda/mamba references" );
+							IJ.log( "    → Contains conda/mamba references" );
 							final String extracted = extractCondaExeFromConfig( content, configPath );
 							if ( extracted != null )
 							{
-								System.out.println( "    ✓ Extracted path: " + extracted );
+								IJ.log( "    ✓ Extracted path: " + extracted );
 								foundInConfig = true;
 							}
 							else
 							{
-								System.out.println( "    ✗ Could not extract conda path" );
+								IJ.log( "    ✗ Could not extract conda path" );
 							}
 						}
 						else
 						{
-							System.out.println( "    No conda references found" );
+							IJ.log( "    No conda references found" );
 						}
 					}
 					catch ( final IOException e )
 					{
-						System.out.println( "    ✗ Could not read file" );
+						IJ.log( "    ✗ Could not read file" );
 					}
 				}
 			}
 			if ( !foundInConfig )
-			{
-				System.out.println( "  No conda installation found in shell configs" );
-			}
-			System.out.println();
-		}
-
-		// Method 3: PATH search
-		System.out.println( "Method 3: Searching system PATH..." );
-		final String pathResult = findInPath( "conda" );
-		if ( pathResult != null )
-		{
-			System.out.println( "  ✓ Found in PATH: " + pathResult );
+				IJ.log( "  No conda installation found in shell configs" );
+			IJ.log( "" );
 		}
 		else
 		{
-			System.out.println( "  Conda not found in PATH" );
+			IJ.log( "Method 2: Parsing shell configuration files..." );
+			IJ.log( "  Skipped (only applicable on macOS/Linux)" );
+			IJ.log( "" );
 		}
-		System.out.println();
+
+		// Method 3: PATH search
+		IJ.log( "Method 3: Searching system PATH..." );
+		final String pathResult = findInPath( "conda" );
+		if ( pathResult != null )
+			IJ.log( "  ✓ Found in PATH: " + pathResult );
+		else
+			IJ.log( "  Conda not found in PATH" );
+		IJ.log( "" );
 
 		// Method 4: Common locations
-		System.out.println( "Method 4: Checking common installation locations..." );
+		IJ.log( "Method 4: Checking common installation locations..." );
 		final List< String > locations = getCommonCondaLocations();
-		System.out.println( "  Checking " + locations.size() + " potential locations:" );
+		IJ.log( "  Checking " + locations.size() + " potential locations:" );
 
 		boolean foundInCommon = false;
 		for ( final String location : locations )
 		{
 			final String condaExe = buildCondaExecutablePath( location );
-			if ( new File( condaExe ).exists() )
+			if ( condaExe != null && new File( condaExe ).exists() )
 			{
-				System.out.println( "  ✓ Found: " + condaExe );
+				IJ.log( "  ✓ Found: " + condaExe );
 				foundInCommon = true;
 			}
 		}
 		if ( !foundInCommon )
-		{
-			System.out.println( "  No conda installation found in common locations" );
-		}
-		System.out.println();
+			IJ.log( "  No conda installation found in common locations" );
+		IJ.log( "" );
 
 		// Now run the actual detection
-		System.out.println( "═══════════════════════════════════════════\n" );
-		System.out.println( "Running integrated detection...\n" );
+		IJ.log( "═══════════════════════════════════════════" );
+		IJ.log( "" );
+		IJ.log( "Running integrated detection..." );
+		IJ.log( "" );
 
 		try
 		{
 			final CondaInfo info = detect();
 
-			System.out.println( "\n✅ Conda detected successfully!\n" );
-			System.out.println( "Detection Results:" );
-			System.out.println( "  Conda Executable: " + info.getCondaExecutable() );
-			System.out.println( "  Root Prefix:      " + info.getRootPrefix() );
-			System.out.println( "  Version:          " + info.getVersion() );
+			IJ.log( "" );
+			IJ.log( "✅ Conda detected successfully!" );
+			IJ.log( "" );
+			IJ.log( "Detection Results:" );
+			IJ.log( "  Conda Executable: " + info.getCondaExecutable() );
+			IJ.log( "  Root Prefix:      " + info.getRootPrefix() );
+			IJ.log( "  Version:          " + info.getVersion() );
 
 			// Validate the installation
-			System.out.println( "\nValidating installation..." );
+			IJ.log( "" );
+			IJ.log( "Validating installation..." );
 			final File exeFile = new File( info.getCondaExecutable() );
-			System.out.println( "  Executable exists:   " + exeFile.exists() );
-			System.out.println( "  Executable size:     " + exeFile.length() + " bytes" );
-			System.out.println( "  Can execute:         " + exeFile.canExecute() );
+			IJ.log( "  Executable exists:   " + exeFile.exists() );
+			IJ.log( "  Executable size:     " + exeFile.length() + " bytes" );
+			IJ.log( "  Can execute:         " + exeFile.canExecute() );
 
 			final File rootDir = new File( info.getRootPrefix() );
-			System.out.println( "  Root prefix exists:  " + rootDir.exists() );
-			System.out.println( "  Root prefix is dir:  " + rootDir.isDirectory() );
+			IJ.log( "  Root prefix exists:  " + rootDir.exists() );
+			IJ.log( "  Root prefix is dir:  " + rootDir.isDirectory() );
 
 			// List all environments
-			System.out.println( "\n═══════════════════════════════════════════" );
-			System.out.println( "\nDiscovering conda environments..." );
+			IJ.log( "" );
+			IJ.log( "═══════════════════════════════════════════" );
+			IJ.log( "" );
+			IJ.log( "Discovering conda environments..." );
 
 			final List< CondaEnvironment > envs = findAllEnvironments();
 
 			if ( envs.isEmpty() )
 			{
-				System.out.println( "\n⚠ No environments found" );
+				IJ.log( "" );
+				IJ.log( "⚠ No environments found" );
 			}
 			else
 			{
-				System.out.println( "\n📦 Found " + envs.size() + " environment(s):\n" );
+				IJ.log( "" );
+				IJ.log( "📦 Found " + envs.size() + " environment(s):" );
+				IJ.log( "" );
 				for ( int i = 0; i < envs.size(); i++ )
 				{
 					final CondaEnvironment env = envs.get( i );
-					System.out.println( "  " + ( i + 1 ) + ". " + env.getName() );
-					System.out.println( "     Path: " + env.getPath() );
+					IJ.log( "  " + ( i + 1 ) + ". " + env.getName() );
+					IJ.log( "     Path: " + env.getPath() );
 
 					// Check if environment is valid
 					final File envDir = new File( env.getPath() );
 					if ( envDir.exists() )
 					{
-						final File envBin = new File( env.getPath(), isWindows() ? "python.exe" : "bin/python" );
+						final File envBin = new File( env.getPath(),
+								isWindows() ? "python.exe" : "bin/python" );
 						if ( envBin.exists() )
-						{
-							System.out.println( "     Status: ✓ Valid" );
-						}
+							IJ.log( "     Status: ✓ Valid" );
 						else
-						{
-							System.out.println( "     Status: ⚠ Missing Python" );
-						}
+							IJ.log( "     Status: ⚠ Missing Python" );
 					}
 					else
 					{
-						System.out.println( "     Status: ✗ Path does not exist" );
+						IJ.log( "     Status: ✗ Path does not exist" );
 					}
 				}
 
@@ -973,38 +1097,46 @@ public class CondaDetector
 					final int testIndex = new Random().nextInt( envs.size() );
 					final String testEnv = envs.get( testIndex ).getName();
 
-					System.out.println( "\n═══════════════════════════════════════════" );
-					System.out.println( "\nTesting environment lookup for: '" + testEnv + "'" );
+					IJ.log( "" );
+					IJ.log( "═══════════════════════════════════════════" );
+					IJ.log( "" );
+					IJ.log( "Testing environment lookup for: '" + testEnv + "'" );
 
 					if ( environmentExists( testEnv ) )
 					{
 						final String envPath = getEnvironmentPath( testEnv );
-						System.out.println( "  ✓ Environment found" );
-						System.out.println( "  Path: " + envPath );
+						IJ.log( "  ✓ Environment found" );
+						IJ.log( "  Path: " + envPath );
 					}
 					else
 					{
-						System.out.println( "  ✗ Environment not found (unexpected)" );
+						IJ.log( "  ✗ Environment not found (unexpected)" );
 					}
 				}
 			}
 
-			System.out.println( "\n═══════════════════════════════════════════" );
-			System.out.println( "\n✅ All checks completed successfully!" );
+			IJ.log( "" );
+			IJ.log( "═══════════════════════════════════════════" );
+			IJ.log( "" );
+			IJ.log( "✅ All checks completed successfully!" );
 
 		}
 		catch ( final CondaNotFoundException e )
 		{
-			System.err.println( "\n❌ Conda Detection Failed\n" );
-			System.err.println( e.getMessage() );
-			System.err.println( "\n═══════════════════════════════════════════" );
-			System.err.println( "\nTroubleshooting Tips:" );
-			System.err.println( "  • Ensure conda/miniconda/anaconda is installed" );
-			System.err.println( "  • Run 'conda init' in your terminal" );
-			System.err.println( "  • Check that conda is in your PATH" );
-			System.err.println( "  • Try running 'conda --version' in terminal" );
-			System.err.println( "  • If using mambaforge, ensure it's properly installed" );
-			System.exit( 1 );
+			IJ.log( "" );
+			IJ.log( "❌ Conda Detection Failed" );
+			IJ.log( "" );
+			IJ.log( e.getMessage() );
+			IJ.log( "" );
+			IJ.log( "═══════════════════════════════════════════" );
+			IJ.log( "" );
+			IJ.log( "Troubleshooting Tips:" );
+			IJ.log( "  • Ensure conda/miniconda/anaconda is installed" );
+			IJ.log( "  • Run 'conda init' in your terminal" );
+			IJ.log( "  • Check that conda is in your PATH" );
+			IJ.log( "  • Try running 'conda --version' in terminal" );
+			IJ.log( "  • If using mambaforge, ensure it's properly installed" );
 		}
 	}
+
 }
