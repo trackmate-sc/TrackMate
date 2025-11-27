@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -32,7 +32,6 @@ import java.awt.event.ItemEvent;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
-import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -45,7 +44,6 @@ import org.scijava.ui.behaviour.io.gui.CommandDescriptions;
 import org.scijava.ui.behaviour.util.Actions;
 
 import net.miginfocom.swing.MigLayout;
-import sc.fiji.labkit.ui.brush.PlanarModeController;
 
 /**
  * Panel with the tool buttons for brush, flood fill, etc... Activates and
@@ -103,99 +101,96 @@ public class TMLabelToolsPanel extends JPanel
 
 	private final TMSelectLabelController selectLabelController;
 
-	private final PlanarModeController planarModeController;
-
-	private JPanel brushOptionsPanel;
+	private final JPanel brushOptionsPanel;
 
 	private final ButtonGroup group = new ButtonGroup();
 
 	private Mode mode = ignore -> {};
 
-	private JToggleButton moveBtn;
+	private final JToggleButton moveBtn;
 
-	private JToggleButton drawBtn;
+	private final JToggleButton drawBtn;
 
-	private JToggleButton floodFillBtn;
+	private final JToggleButton floodFillBtn;
 
-	private JToggleButton eraseBtn;
+	private final JToggleButton eraseBtn;
 
-	private JToggleButton floodEraseBtn;
+	private final JToggleButton floodEraseBtn;
 
-	private JToggleButton selectLabelBtn;
+	private final JToggleButton selectLabelBtn;
 
 	public TMLabelToolsPanel(
 			final TMLabelBrushController brushController,
 			final TMFloodFillController floodFillController,
-			final TMSelectLabelController selectLabelController,
-			final PlanarModeController planarModeController )
+			final TMSelectLabelController selectLabelController )
 	{
-		this.brushController = brushController;
-		this.floodFillController = floodFillController;
-		this.selectLabelController = selectLabelController;
-		this.planarModeController = planarModeController;
+	    this.brushController = brushController;
+	    this.floodFillController = floodFillController;
+	    this.selectLabelController = selectLabelController;
 
-		setLayout( new MigLayout( "flowy, insets 0, gap 4pt, top", "[][][][][]",
-				"[]push" ) );
-		setBorder( BorderFactory.createEmptyBorder( 0, 0, 4, 0 ) );
-		initActionButtons();
-		add( initOptionPanel(), "wrap, growy" );
-		add( initPlanarModeButton(), "growy" );
-	}
+		// Create buttons first
+	    this.moveBtn = addActionButton( MOVE_TOOL_TIP, ignore -> {}, false, "/images/move.png" );
+	    this.drawBtn = addActionButton( DRAW_TOOL_TIP, brushController::setBrushActive, true, "/images/draw.png" );
+	    this.floodFillBtn = addActionButton( FLOOD_FILL_TOOL_TIP, floodFillController::setFloodFillActive, false, "/images/fill.png" );
+	    this.eraseBtn = addActionButton( ERASE_TOOL_TIP, brushController::setEraserActive, true, "/images/erase.png" );
+	    this.floodEraseBtn = addActionButton( FLOOD_ERASE_TOOL_TIP, floodFillController::setRemoveBlobActive, false, "/images/flooderase.png" );
+	    this.selectLabelBtn = addActionButton( SELECT_LABEL_TOOL_TIP, selectLabelController::setActive, false, "/images/pipette.png" );
+		this.brushOptionsPanel = initBrushOptionPanel();
 
-	private void setMode( final Mode mode )
-	{
-		this.mode.setActive( false );
-		this.mode = mode;
-		this.mode.setActive( true );
+		// Setup layout - horizontal with two areas: buttons and brush options
+		setLayout( new MigLayout( "insets 0, gap 4", "[shrink][grow, fill]", "[]" ) );
+	    setBorder( BorderFactory.createEmptyBorder( 0, 0, 4, 0 ) );
+
+		// Create tool buttons panel (horizontal layout)
+		final JPanel toolsPanel = new JPanel( new MigLayout( "insets 0, gap 2", "", "" ) );
+	    toolsPanel.add( moveBtn );
+		toolsPanel.add( drawBtn );
+		toolsPanel.add( eraseBtn );
+	    toolsPanel.add( floodFillBtn );
+	    toolsPanel.add( floodEraseBtn );
+	    toolsPanel.add( selectLabelBtn );
+		// Optionally add the planar mode button here
+		// toolsPanel.add( initPlanarModeButton() );
+
+		// Initialize and setup brush options panel
+
+		// Add both panels to the main panel
+		add( toolsPanel, "aligny top" );
+		add( brushOptionsPanel, "hidemode 3, wmax 220" );
+
+
+		// Set initial state - move tool selected, brush panel hidden
+		moveBtn.doClick();
 	}
 
 	private void setVisibility( final boolean brushVisible )
 	{
 		if ( brushOptionsPanel != null )
+		{
 			brushOptionsPanel.setVisible( brushVisible );
+			revalidate();
+			repaint();
+		}
 	}
 
-	private void initActionButtons()
+	private JPanel initBrushOptionPanel()
 	{
-		this.moveBtn = addActionButton( MOVE_TOOL_TIP, ignore -> {}, false, "/images/move.png" );
-		this.drawBtn = addActionButton( DRAW_TOOL_TIP, brushController::setBrushActive, true, "/images/draw.png" );
-		this.floodFillBtn = addActionButton( FLOOD_FILL_TOOL_TIP, floodFillController::setFloodFillActive, false, "/images/fill.png" );
-		this.eraseBtn = addActionButton( ERASE_TOOL_TIP, brushController::setEraserActive, true, "/images/erase.png" );
-		this.floodEraseBtn = addActionButton( FLOOD_ERASE_TOOL_TIP, floodFillController::setRemoveBlobActive, false, "/images/flooderase.png" );
-		this.selectLabelBtn = addActionButton( SELECT_LABEL_TOOL_TIP, selectLabelController::setActive, false, "/images/pipette.png" );
-		moveBtn.doClick();
-	}
+		final JPanel panel = new JPanel();
+		panel.setLayout( new MigLayout( "insets 0 8 0 4, gap 4", "", "[center]" ) );
 
-	private JPanel initOptionPanel()
-	{
-		final JPanel optionPane = new JPanel();
-		optionPane.setLayout( new MigLayout( "insets 0" ) );
-		optionPane.add( initOverrideCheckBox() );
-		optionPane.add( initBrushOptionPanel(), "al left" );
-		optionPane.setBackground( OPTIONS_BACKGROUND );
-		optionPane.setBorder( BorderFactory.createLineBorder( OPTIONS_BORDER ) );
-		return optionPane;
-	}
+		final JLabel label = new JLabel( "Brush size:" );
+		final JSlider brushSizeSlider = initBrushSizeSlider();
+		final JLabel valueLabel = initSliderValueLabel( brushSizeSlider );
 
-	private JToggleButton initPlanarModeButton()
-	{
-		final JToggleButton button = new JToggleButton();
-		final ImageIcon rotateIcon = getIcon( "/images/rotate.png" );
-		final ImageIcon planarIcon = getIcon( "/images/planes.png" );
-		button.setIcon( rotateIcon );
-		button.setFocusable( false );
-		final String ENABLE_TEXT = "Click to: Enable slice by slice editing of 3d images.";
-		final String DISABLE_TEXT = "Click to: Disable slice by slice editing and freely rotate 3d images.";
-		button.addActionListener( ignore -> {
-			final boolean selected = button.isSelected();
-			button.setIcon( selected ? planarIcon : rotateIcon );
-			button.setToolTipText( selected ? DISABLE_TEXT : ENABLE_TEXT );
-			planarModeController.setActive( selected );
-			floodFillController.setPlanarMode( selected );
-			brushController.setPlanarMode( selected );
-		} );
-		button.setToolTipText( ENABLE_TEXT );
-		return button;
+		panel.add( label );
+		panel.add( brushSizeSlider, "width 100:150:200" );
+		panel.add( valueLabel, "width 20:25:30" );
+
+		panel.setBackground( OPTIONS_BACKGROUND );
+		panel.setMaximumSize( new java.awt.Dimension( 300, 40 ) );
+		panel.setBorder( BorderFactory.createLineBorder( OPTIONS_BORDER ) );
+
+		return panel;
 	}
 
 	private JToggleButton addActionButton( final String toolTipText, final Mode mode, final boolean visibility, final String iconPath )
@@ -213,8 +208,13 @@ public class TMLabelToolsPanel extends JPanel
 			}
 		} );
 		group.add( button );
-		add( button, "wrap, top" );
 		return button;
+	}
+	private void setMode( final Mode mode )
+	{
+		this.mode.setActive( false );
+		this.mode = mode;
+		this.mode.setActive( true );
 	}
 
 	private ImageIcon getIcon( final String iconPath )
@@ -222,34 +222,9 @@ public class TMLabelToolsPanel extends JPanel
 		return new ImageIcon( this.getClass().getResource( iconPath ) );
 	}
 
-	private JPanel initBrushOptionPanel()
-	{
-		brushOptionsPanel = new JPanel();
-		brushOptionsPanel.setLayout( new MigLayout( "insets 4pt, gap 2pt, wmax 300" ) );
-		brushOptionsPanel.setOpaque( false );
-		brushOptionsPanel.add( new JLabel( "Brush size:" ), "grow" );
-		final JSlider brushSizeSlider = initBrushSizeSlider();
-		brushOptionsPanel.add( brushSizeSlider, "grow" );
-		brushOptionsPanel.add( initSliderValueLabel( brushSizeSlider ), "right" );
-		return brushOptionsPanel;
-	}
-
-	private JCheckBox initOverrideCheckBox()
-	{
-		final JCheckBox checkBox = new JCheckBox( "allow overlapping labels" );
-		checkBox.setOpaque( false );
-		checkBox.addItemListener( action -> {
-			final boolean overlapping = action.getStateChange() == ItemEvent.SELECTED;
-			brushController.setOverlapping( overlapping );
-			floodFillController.setOverlapping( overlapping );
-		} );
-		return checkBox;
-	}
-
 	private JSlider initBrushSizeSlider()
 	{
-		final JSlider brushSize = new JSlider( 1, 50, ( int ) brushController
-				.getBrushDiameter() );
+		final JSlider brushSize = new JSlider( 1, 50, ( int ) brushController.getBrushDiameter() );
 		brushSize.setFocusable( false );
 		brushSize.setPaintTrack( true );
 		brushSize.addChangeListener( e -> {
