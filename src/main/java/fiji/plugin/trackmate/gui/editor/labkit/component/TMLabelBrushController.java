@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 import javax.swing.Timer;
 
 import org.scijava.plugin.Plugin;
+import org.scijava.prefs.PrefService;
 import org.scijava.ui.behaviour.DragBehaviour;
 import org.scijava.ui.behaviour.ScrollBehaviour;
 import org.scijava.ui.behaviour.io.gui.CommandDescriptionProvider;
@@ -46,6 +47,7 @@ import org.scijava.ui.behaviour.util.Behaviours;
 import bdv.util.Affine3DHelpers;
 import bdv.util.BdvHandle;
 import bdv.viewer.ViewerPanel;
+import fiji.plugin.trackmate.util.TMUtils;
 import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
@@ -140,6 +142,12 @@ public class TMLabelBrushController
 		}
 	}
 
+	private static final String PREF_KEY_PAINT_MODE = "tm.labkit.brush.paintMode";
+
+	private static final String PREF_KEY_ERASE_MODE = "tm.labkit.brush.eraseMode";
+
+	private static final String PREF_KEY_BRUSH_DIAMETER = "tm.labkit.brush.diameter";
+
 	private final BdvHandle bdv;
 
 	private final ViewerPanel viewer;
@@ -156,11 +164,11 @@ public class TMLabelBrushController
 
 	private final PaintBehavior eraseBehaviour = new PaintBehavior( false );
 
-	private PaintBrushMode paintBrushMode = PaintBrushMode.REPLACE;
+	private PaintBrushMode paintBrushMode;
 
-	private EraseBrushMode eraseBrushMode = EraseBrushMode.REMOVE_ALL;
+	private EraseBrushMode eraseBrushMode;
 
-	private double brushDiameter = 1;
+	private double brushDiameter;
 
 	private final Notifier brushDiameterListeners = new Notifier();
 
@@ -177,6 +185,12 @@ public class TMLabelBrushController
 		updateBrushOverlayRadius();
 		viewer.getDisplay().overlays().add( brushCursor );
 		viewer.transformListeners().add( affineTransform3D -> updateBrushOverlayRadius() );
+
+		// Load defaults from prefs.
+		final PrefService prefs = TMUtils.getContext().getService( PrefService.class );
+		brushDiameter = prefs.getDouble( TMLabelBrushController.class, PREF_KEY_BRUSH_DIAMETER, 1. );
+		paintBrushMode = PaintBrushMode.valueOf( prefs.get( TMLabelBrushController.class, PREF_KEY_PAINT_MODE, PaintBrushMode.REPLACE.name() ) );
+		eraseBrushMode = EraseBrushMode.valueOf( prefs.get( TMLabelBrushController.class, PREF_KEY_ERASE_MODE, EraseBrushMode.REMOVE_ALL.name() ) );
 	}
 
 	public void setBrushActive( final boolean active )
@@ -213,6 +227,9 @@ public class TMLabelBrushController
 		updateBrushOverlayRadius();
 		triggerBrushOverlayRepaint();
 		brushDiameterListeners.notifyListeners();
+
+		final PrefService prefs = TMUtils.getContext().getService( PrefService.class );
+		prefs.put( TMLabelBrushController.class, PREF_KEY_BRUSH_DIAMETER, brushDiameter );
 	}
 
 	private void updateBrushOverlayRadius()
@@ -238,11 +255,17 @@ public class TMLabelBrushController
 	public void setPaintBrushMode( final PaintBrushMode paintBrushMode )
 	{
 		this.paintBrushMode = paintBrushMode;
+
+		final PrefService prefs = TMUtils.getContext().getService( PrefService.class );
+		prefs.put( TMLabelBrushController.class, PREF_KEY_PAINT_MODE, paintBrushMode.name() );
 	}
 
 	public void setEraseBrushMode( final EraseBrushMode eraseBrushMode )
 	{
 		this.eraseBrushMode = eraseBrushMode;
+
+		final PrefService prefs = TMUtils.getContext().getService( PrefService.class );
+		prefs.put( TMLabelBrushController.class, PREF_KEY_ERASE_MODE, eraseBrushMode.name() );
 	}
 
 	public PaintBrushMode getPaintBrushMode()
