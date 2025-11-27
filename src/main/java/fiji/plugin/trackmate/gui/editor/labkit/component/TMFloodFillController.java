@@ -37,6 +37,7 @@ import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
 import org.scijava.plugin.Plugin;
+import org.scijava.prefs.PrefService;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.gui.CommandDescriptionProvider;
 import org.scijava.ui.behaviour.io.gui.CommandDescriptions;
@@ -45,6 +46,7 @@ import org.scijava.ui.behaviour.util.RunnableAction;
 
 import bdv.util.BdvHandle;
 import bdv.viewer.ViewerPanel;
+import fiji.plugin.trackmate.util.TMUtils;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import net.imglib2.Localizable;
@@ -135,15 +137,19 @@ public class TMFloodFillController
 		}
 	}
 
+	private static final String PREF_KEY_FLOOD_FILL_MODE = "tm.labkit.floodFill.mode";
+
+	private static final String PREF_KEY_FLOOD_ERASE_MODE = "tm.labkit.floodErase.mode";
+
 	private final ViewerPanel viewer;
 
 	private final LabelingModel model;
 
 	private final BdvHandle bdv;
 
-	private FloodFillMode modeFill = FloodFillMode.REPLACE;
+	private FloodFillMode modeFill;
 
-	private FloodEraseMode modeErase = FloodEraseMode.REMOVE_ALL;
+	private FloodEraseMode modeErase;
 
 	private boolean planarMode = false;
 
@@ -193,6 +199,11 @@ public class TMFloodFillController
 
 		final RunnableAction nop = new RunnableAction( "nop", () -> {} );
 		nop.putValue( Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke( "F" ) );
+
+		// Load defaults from prefs
+		final PrefService prefs = TMUtils.getContext().getService( PrefService.class );
+		modeFill = FloodFillMode.valueOf( prefs.get( TMFloodFillController.class, PREF_KEY_FLOOD_FILL_MODE, FloodFillMode.REPLACE.name() ) );
+		modeErase = FloodEraseMode.valueOf( prefs.get( TMFloodFillController.class, PREF_KEY_FLOOD_ERASE_MODE, FloodEraseMode.REMOVE_ALL.name() ) );
 	}
 
 	private Label selectedLabel()
@@ -214,11 +225,17 @@ public class TMFloodFillController
 	public void setFloodFillMode( final FloodFillMode mode )
 	{
 		this.modeFill = mode;
+
+		final PrefService prefs = TMUtils.getContext().getService( PrefService.class );
+		prefs.put( TMFloodFillController.class, PREF_KEY_FLOOD_FILL_MODE, mode.name() );
 	}
 
 	public void setFloodEraseMode( final FloodEraseMode mode )
 	{
 		this.modeErase = mode;
+
+		final PrefService prefs = TMUtils.getContext().getService( PrefService.class );
+		prefs.put( TMFloodFillController.class, PREF_KEY_FLOOD_ERASE_MODE, mode.name() );
 	}
 
 	public FloodFillMode getFloodFillMode()
