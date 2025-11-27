@@ -489,6 +489,9 @@ public class TMLabelBrushController
 			setBrushDiameter( Math.min( Math.max( 1, brushDiameter + distance ), 50 ) );
 
 			// Show the brush at mouse location
+			if ( viewer.getDisplay().getMousePosition() == null )
+				return;
+
 			final int x = viewer.getDisplay().getMousePosition().x;
 			final int y = viewer.getDisplay().getMousePosition().y;
 			brushCursor.setPosition( x, y );
