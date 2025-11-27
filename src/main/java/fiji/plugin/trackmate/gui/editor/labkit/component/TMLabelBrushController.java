@@ -205,6 +205,16 @@ public class TMLabelBrushController
 		this.eraseBrushMode = eraseBrushMode;
 	}
 
+	public PaintBrushMode getPaintBrushMode()
+	{
+		return paintBrushMode;
+	}
+
+	public EraseBrushMode getEraseBrushMode()
+	{
+		return eraseBrushMode;
+	}
+
 	public void setPlanarMode( final boolean planarMode )
 	{
 		this.planarMode = planarMode;

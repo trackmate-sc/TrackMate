@@ -26,13 +26,17 @@ import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.KE
 import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.KEY_CONFIG_SCOPE;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Insets;
 import java.awt.event.ItemEvent;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JToggleButton;
@@ -65,7 +69,7 @@ public class TMLabelToolsPanel extends JPanel
 			"- <b>Mouse Wheel</b> or <b>+ / -</b> to zoom in and out.<br>" +
 			"- <b>← / →</b> or <b>F / G</b> to move through time.<br>" +
 			"- <b>Shift + R</b> to reset the view." +
-			 "</small></html>";
+			"</small></html>";
 
 	private static final String DRAW_TOOL_TIP = "<html><b>Add</b><br>" +
 			"<small>Keyboard shortcuts:<br>" +
@@ -101,8 +105,6 @@ public class TMLabelToolsPanel extends JPanel
 
 	private final TMSelectLabelController selectLabelController;
 
-	private final JPanel brushOptionsPanel;
-
 	private final ButtonGroup group = new ButtonGroup();
 
 	private Mode mode = ignore -> {};
@@ -119,48 +121,194 @@ public class TMLabelToolsPanel extends JPanel
 
 	private final JToggleButton selectLabelBtn;
 
+	private final JPanel brushOptionsPanel;
+
+	private final JPanel paintModePanel;
+
+	private final JPanel eraseModePanel;
+
+	private JComboBox< TMLabelBrushController.PaintBrushMode > paintModeCombo;
+
+	private JComboBox< TMLabelBrushController.EraseBrushMode > eraseModeCombo;
+
 	public TMLabelToolsPanel(
 			final TMLabelBrushController brushController,
 			final TMFloodFillController floodFillController,
 			final TMSelectLabelController selectLabelController )
 	{
-	    this.brushController = brushController;
-	    this.floodFillController = floodFillController;
-	    this.selectLabelController = selectLabelController;
+		this.brushController = brushController;
+		this.floodFillController = floodFillController;
+		this.selectLabelController = selectLabelController;
 
 		// Create buttons first
-	    this.moveBtn = addActionButton( MOVE_TOOL_TIP, ignore -> {}, false, "/images/move.png" );
-	    this.drawBtn = addActionButton( DRAW_TOOL_TIP, brushController::setBrushActive, true, "/images/draw.png" );
-	    this.floodFillBtn = addActionButton( FLOOD_FILL_TOOL_TIP, floodFillController::setFloodFillActive, false, "/images/fill.png" );
-	    this.eraseBtn = addActionButton( ERASE_TOOL_TIP, brushController::setEraserActive, true, "/images/erase.png" );
-	    this.floodEraseBtn = addActionButton( FLOOD_ERASE_TOOL_TIP, floodFillController::setRemoveBlobActive, false, "/images/flooderase.png" );
-	    this.selectLabelBtn = addActionButton( SELECT_LABEL_TOOL_TIP, selectLabelController::setActive, false, "/images/pipette.png" );
-		this.brushOptionsPanel = initBrushOptionPanel();
+		this.moveBtn = addActionButton( MOVE_TOOL_TIP, ignore -> {}, false, "/images/move.png" );
+		this.drawBtn = addActionButton( DRAW_TOOL_TIP, brushController::setBrushActive, true, "/images/draw.png" );
+		this.floodFillBtn = addActionButton( FLOOD_FILL_TOOL_TIP, floodFillController::setFloodFillActive, false, "/images/fill.png" );
+		this.eraseBtn = addActionButton( ERASE_TOOL_TIP, brushController::setEraserActive, true, "/images/erase.png" );
+		this.floodEraseBtn = addActionButton( FLOOD_ERASE_TOOL_TIP, floodFillController::setRemoveBlobActive, false, "/images/flooderase.png" );
+		this.selectLabelBtn = addActionButton( SELECT_LABEL_TOOL_TIP, selectLabelController::setActive, false, "/images/pipette.png" );
 
-		// Setup layout - horizontal with two areas: buttons and brush options
-		setLayout( new MigLayout( "insets 0, gap 4", "[shrink][grow, fill]", "[]" ) );
-	    setBorder( BorderFactory.createEmptyBorder( 0, 0, 4, 0 ) );
+		// Initialize all panels
+		this.brushOptionsPanel = initBrushSizePanel();
+		this.paintModePanel = initPaintModePanel();
+		this.eraseModePanel = initEraseModePanel();
+
+		// Setup layout - horizontal with multiple areas
+		setLayout( new MigLayout( "insets 0, gap 4", "", "[fill]" ) );
+		setBorder( BorderFactory.createEmptyBorder( 0, 0, 4, 0 ) );
 
 		// Create tool buttons panel (horizontal layout)
 		final JPanel toolsPanel = new JPanel( new MigLayout( "insets 0, gap 2", "", "" ) );
-	    toolsPanel.add( moveBtn );
+		toolsPanel.add( moveBtn );
 		toolsPanel.add( drawBtn );
 		toolsPanel.add( eraseBtn );
-	    toolsPanel.add( floodFillBtn );
-	    toolsPanel.add( floodEraseBtn );
-	    toolsPanel.add( selectLabelBtn );
-		// Optionally add the planar mode button here
-		// toolsPanel.add( initPlanarModeButton() );
+		toolsPanel.add( floodFillBtn );
+		toolsPanel.add( floodEraseBtn );
+		toolsPanel.add( selectLabelBtn );
 
-		// Initialize and setup brush options panel
-
-		// Add both panels to the main panel
+		// Add all panels to the main panel
 		add( toolsPanel, "aligny top" );
-		add( brushOptionsPanel, "hidemode 3, wmax 220" );
+		add( brushOptionsPanel, "hidemode 3, h 32!" );
+		add( paintModePanel, "hidemode 3, h 32!" );
+		add( eraseModePanel, "hidemode 3, h 32!" );
 
-
-		// Set initial state - move tool selected, brush panel hidden
+		// Set initial state - move tool selected, all option panels hidden
 		moveBtn.doClick();
+	}
+
+	private JPanel initBrushSizePanel()
+	{
+		final JPanel panel = new JPanel();
+		panel.setLayout( new MigLayout( "insets 4 8 4 8, gap 4, aligny center", "", "" ) );
+
+		final JLabel label = new JLabel( "Brush size:" );
+		final JSlider brushSizeSlider = initBrushSizeSlider();
+		final JLabel valueLabel = initSliderValueLabel( brushSizeSlider );
+
+		panel.add( label, "aligny center" );
+		panel.add( brushSizeSlider, "width 100:150:200, aligny center" );
+		panel.add( valueLabel, "width 20:25:30, aligny center" );
+
+		panel.setBackground( OPTIONS_BACKGROUND );
+		panel.setBorder( BorderFactory.createLineBorder( OPTIONS_BORDER ) );
+
+		return panel;
+	}
+
+	private JPanel initPaintModePanel()
+	{
+		final JPanel panel = new JPanel();
+		panel.setLayout( new MigLayout( "insets 4 8 4 8, gap 4", "", "[center]" ) );
+
+		final JLabel paintModeLabel = new JLabel( "Paint mode:" );
+		paintModeCombo = new JComboBox<>( TMLabelBrushController.PaintBrushMode.values() );
+		paintModeCombo.setSelectedItem( TMLabelBrushController.PaintBrushMode.REPLACE );
+		paintModeCombo.setFocusable( false );
+		paintModeCombo.setMaximumRowCount( 5 );
+
+		// Custom renderer for better display names
+		paintModeCombo.setRenderer( new DefaultListCellRenderer()
+		{
+			@Override
+			public Component getListCellRendererComponent( final JList< ? > list, final Object value,
+					final int index, final boolean isSelected, final boolean cellHasFocus )
+			{
+				super.getListCellRendererComponent( list, value, index, isSelected, cellHasFocus );
+				if ( value instanceof TMLabelBrushController.PaintBrushMode )
+				{
+					final TMLabelBrushController.PaintBrushMode mode =
+							( TMLabelBrushController.PaintBrushMode ) value;
+					switch ( mode )
+					{
+					case REPLACE:
+						setText( "Replace" );
+						setToolTipText( "Replace existing labels" );
+						break;
+					case ADD:
+						setText( "Add" );
+						setToolTipText( "Add to existing labels" );
+						break;
+					case DONT_OVERWRITE:
+						setText( "Don't overwrite" );
+						setToolTipText( "Only paint on background" );
+						break;
+					}
+				}
+				return this;
+			}
+		} );
+
+		paintModeCombo.addActionListener( e -> {
+			if ( paintModeCombo.getSelectedItem() != null )
+				brushController.setPaintBrushMode( ( TMLabelBrushController.PaintBrushMode ) paintModeCombo.getSelectedItem() );
+		} );
+
+		panel.add( paintModeLabel );
+		panel.add( paintModeCombo, "width 100:120:150" );
+
+		panel.setBackground( OPTIONS_BACKGROUND );
+		panel.setBorder( BorderFactory.createLineBorder( OPTIONS_BORDER ) );
+
+		// Add at the end:
+		System.out.println( "Paint panel preferred height: " + panel.getPreferredSize().height );
+		System.out.println( "Paint combo preferred height: " + paintModeCombo.getPreferredSize().height );
+
+		return panel;
+	}
+
+	private JPanel initEraseModePanel()
+	{
+		final JPanel panel = new JPanel();
+		panel.setLayout( new MigLayout( "insets 4 8 4 8, gap 4", "", "[center]" ) );
+
+		final JLabel eraseModeLabel = new JLabel( "Erase mode:" );
+		eraseModeCombo = new JComboBox<>( TMLabelBrushController.EraseBrushMode.values() );
+		eraseModeCombo.setSelectedItem( TMLabelBrushController.EraseBrushMode.REMOVE_ALL );
+		eraseModeCombo.setFocusable( false );
+		eraseModeCombo.setMaximumRowCount( 5 );
+
+		eraseModeCombo.setRenderer( new DefaultListCellRenderer()
+		{
+			@Override
+			public Component getListCellRendererComponent( final JList< ? > list, final Object value,
+					final int index, final boolean isSelected, final boolean cellHasFocus )
+			{
+				super.getListCellRendererComponent( list, value, index, isSelected, cellHasFocus );
+				if ( value instanceof TMLabelBrushController.EraseBrushMode )
+				{
+					final TMLabelBrushController.EraseBrushMode mode =
+							( TMLabelBrushController.EraseBrushMode ) value;
+					switch ( mode )
+					{
+					case REMOVE_SELECTED:
+						setText( "Selected only" );
+						setToolTipText( "Remove only the selected label" );
+						break;
+					case REMOVE_ALL:
+						setText( "All labels" );
+						setToolTipText( "Remove all labels" );
+						break;
+					}
+				}
+				return this;
+			}
+		} );
+
+		eraseModeCombo.addActionListener( e -> {
+			if ( eraseModeCombo.getSelectedItem() != null )
+				brushController.setEraseBrushMode( ( TMLabelBrushController.EraseBrushMode ) eraseModeCombo.getSelectedItem() );
+		} );
+
+		panel.add( eraseModeLabel );
+		panel.add( eraseModeCombo, "width 100:120:150" );
+
+		panel.setBackground( OPTIONS_BACKGROUND );
+		panel.setBorder( BorderFactory.createLineBorder( OPTIONS_BORDER ) );
+
+		System.out.println( "Erase panel preferred height: " + panel.getPreferredSize().height );
+		System.out.println( "Erase combo preferred height: " + eraseModeCombo.getPreferredSize().height );
+
+		return panel;
 	}
 
 	private void setVisibility( final boolean brushVisible )
@@ -168,32 +316,22 @@ public class TMLabelToolsPanel extends JPanel
 		if ( brushOptionsPanel != null )
 		{
 			brushOptionsPanel.setVisible( brushVisible );
-			revalidate();
-			repaint();
 		}
+
+		// Handle paint/erase mode panels visibility
+		if ( paintModePanel != null && eraseModePanel != null )
+		{
+			// These are controlled separately by the button selection
+		}
+
+		revalidate();
+		repaint();
 	}
 
-	private JPanel initBrushOptionPanel()
-	{
-		final JPanel panel = new JPanel();
-		panel.setLayout( new MigLayout( "insets 0 8 0 4, gap 4", "", "[center]" ) );
-
-		final JLabel label = new JLabel( "Brush size:" );
-		final JSlider brushSizeSlider = initBrushSizeSlider();
-		final JLabel valueLabel = initSliderValueLabel( brushSizeSlider );
-
-		panel.add( label );
-		panel.add( brushSizeSlider, "width 100:150:200" );
-		panel.add( valueLabel, "width 20:25:30" );
-
-		panel.setBackground( OPTIONS_BACKGROUND );
-		panel.setMaximumSize( new java.awt.Dimension( 300, 40 ) );
-		panel.setBorder( BorderFactory.createLineBorder( OPTIONS_BORDER ) );
-
-		return panel;
-	}
-
-	private JToggleButton addActionButton( final String toolTipText, final Mode mode, final boolean visibility, final String iconPath )
+	// Update the addActionButton method to handle showing/hiding the
+	// appropriate panels
+	private JToggleButton addActionButton( final String toolTipText, final Mode mode,
+			final boolean visibility, final String iconPath )
 	{
 		final JToggleButton button = new JToggleButton();
 		button.setIcon( getIcon( iconPath ) );
@@ -205,11 +343,32 @@ public class TMLabelToolsPanel extends JPanel
 			{
 				setMode( mode );
 				setVisibility( visibility );
+
+				// Show/hide appropriate mode panels
+				if ( paintModePanel != null && eraseModePanel != null )
+				{
+					if ( button == drawBtn )
+					{
+						paintModePanel.setVisible( true );
+						eraseModePanel.setVisible( false );
+					}
+					else if ( button == eraseBtn )
+					{
+						paintModePanel.setVisible( false );
+						eraseModePanel.setVisible( true );
+					}
+					else
+					{
+						paintModePanel.setVisible( false );
+						eraseModePanel.setVisible( false );
+					}
+				}
 			}
 		} );
 		group.add( button );
 		return button;
 	}
+
 	private void setMode( final Mode mode )
 	{
 		this.mode.setActive( false );
