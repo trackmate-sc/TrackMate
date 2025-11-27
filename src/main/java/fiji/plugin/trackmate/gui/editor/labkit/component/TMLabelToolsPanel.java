@@ -292,8 +292,8 @@ public class TMLabelToolsPanel extends JPanel
 
 	private static final String[] SELECT_PAN_TOOL_KEYS = new String[] { "F1" };
 	private static final String[] SELECT_DRAW_TOOL_KEYS = new String[] { "F2" };
-	private static final String[] SELECT_FLOOD_FILL_TOOL_KEYS = new String[] { "F3" };
-	private static final String[] SELECT_ERASE_TOOL_KEYS = new String[] { "F4" };
+	private static final String[] SELECT_ERASE_TOOL_KEYS = new String[] { "F3" };
+	private static final String[] SELECT_FLOOD_FILL_TOOL_KEYS = new String[] { "F4" };
 	private static final String[] SELECT_ERASE_FILL_TOOL_KEYS = new String[] { "F5" };
 	private static final String[] SELECT_LABEL_KEYS = new String[] { "F6" };
 
