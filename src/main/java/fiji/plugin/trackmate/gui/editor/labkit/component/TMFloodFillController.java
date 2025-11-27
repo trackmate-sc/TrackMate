@@ -77,9 +77,30 @@ public class TMFloodFillController
 	public enum FloodFillMode
 	{
 		/** The selected label is added to the existing labels. */
-		ADD,
+		ADD( "Add", "Add the selected label to the existing labels." ),
 		/** The existing labels are cleared before adding the selected label. */
-		REPLACE;
+		REPLACE( "Replace", "Replace the existing labels with the selected label." );
+
+		private final String name;
+
+		private final String tooltip;
+
+		FloodFillMode( final String name, final String tooltip )
+		{
+			this.name = name;
+			this.tooltip = tooltip;
+		}
+
+		@Override
+		public String toString()
+		{
+			return name;
+		}
+
+		public String getTooltip()
+		{
+			return tooltip;
+		}
 	}
 
 	/**
@@ -88,11 +109,30 @@ public class TMFloodFillController
 	public enum FloodEraseMode
 	{
 		/** The selected label is removed from the existing labels. */
-		REMOVE_SELECTED,
-		/**
-		 * All labels are cleared.
-		 */
-		REMOVE_ALL;
+		REMOVE_SELECTED( "Selected label", "Remove the selected label from the existing labels in the segment." ),
+		/** All labels are cleared. */
+		REMOVE_ALL( "Remove All", "Remove all labels from the existing labels." );
+
+		private final String name;
+
+		private final String tooltip;
+
+		FloodEraseMode( final String name, final String tooltip )
+		{
+			this.name = name;
+			this.tooltip = tooltip;
+		}
+
+		@Override
+		public String toString()
+		{
+			return name;
+		}
+
+		public String getTooltip()
+		{
+			return tooltip;
+		}
 	}
 
 	private final ViewerPanel viewer;
@@ -179,6 +219,16 @@ public class TMFloodFillController
 	public void setFloodEraseMode( final FloodEraseMode mode )
 	{
 		this.modeErase = mode;
+	}
+
+	public FloodFillMode getFloodFillMode()
+	{
+		return modeFill;
+	}
+
+	public FloodEraseMode getFloodEraseMode()
+	{
+		return modeErase;
 	}
 
 	public void setFloodFillActive( final boolean active )

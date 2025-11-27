@@ -26,17 +26,14 @@ import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.KE
 import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.KEY_CONFIG_SCOPE;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Insets;
 import java.awt.event.ItemEvent;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JToggleButton;
@@ -47,6 +44,10 @@ import org.scijava.ui.behaviour.io.gui.CommandDescriptionProvider;
 import org.scijava.ui.behaviour.io.gui.CommandDescriptions;
 import org.scijava.ui.behaviour.util.Actions;
 
+import fiji.plugin.trackmate.gui.editor.labkit.component.TMFloodFillController.FloodEraseMode;
+import fiji.plugin.trackmate.gui.editor.labkit.component.TMFloodFillController.FloodFillMode;
+import fiji.plugin.trackmate.gui.editor.labkit.component.TMLabelBrushController.EraseBrushMode;
+import fiji.plugin.trackmate.gui.editor.labkit.component.TMLabelBrushController.PaintBrushMode;
 import net.miginfocom.swing.MigLayout;
 
 /**
@@ -199,41 +200,16 @@ public class TMLabelToolsPanel extends JPanel
 		floodFillModeCombo.setFocusable( false );
 		floodFillModeCombo.setPreferredSize( new java.awt.Dimension( 130, 20 ) );
 
-		// Custom renderer for better display names
-		floodFillModeCombo.setRenderer( new DefaultListCellRenderer()
-		{
-			@Override
-			public Component getListCellRendererComponent( final JList< ? > list, final Object value,
-					final int index, final boolean isSelected, final boolean cellHasFocus )
-			{
-				super.getListCellRendererComponent( list, value, index, isSelected, cellHasFocus );
-				if ( value instanceof TMFloodFillController.FloodFillMode )
-				{
-					final TMFloodFillController.FloodFillMode mode =
-							( TMFloodFillController.FloodFillMode ) value;
-					switch ( mode )
-					{
-					case REPLACE:
-						setText( "Replace" );
-						setToolTipText( "Clear existing labels before filling" );
-						break;
-					case ADD:
-						setText( "Add" );
-						setToolTipText( "Add to existing labels" );
-						break;
-					}
-				}
-				return this;
-			}
-		} );
-
 		floodFillModeCombo.addActionListener( e -> {
-			if ( floodFillModeCombo.getSelectedItem() != null )
+			final FloodFillMode mode = ( FloodFillMode ) floodFillModeCombo.getSelectedItem();
+			if ( mode != null )
 			{
-				floodFillController.setFloodFillMode(
-						( TMFloodFillController.FloodFillMode ) floodFillModeCombo.getSelectedItem() );
+				floodFillController.setFloodFillMode( mode );
+				panel.setToolTipText( mode.getTooltip() );
+				floodFillModeCombo.setToolTipText( mode.getTooltip() );
 			}
 		} );
+		floodFillModeCombo.setSelectedItem( floodFillController.getFloodFillMode() );
 
 		panel.add( floodModeLabel, "aligny center" );
 		panel.add( floodFillModeCombo, "aligny center" );
@@ -255,53 +231,26 @@ public class TMLabelToolsPanel extends JPanel
 		floodEraseModeCombo.setFocusable( false );
 		floodEraseModeCombo.setPreferredSize( new java.awt.Dimension( 130, 20 ) );
 
-		floodEraseModeCombo.setRenderer( new DefaultListCellRenderer()
-		{
-			@Override
-			public Component getListCellRendererComponent( final JList< ? > list, final Object value,
-					final int index, final boolean isSelected, final boolean cellHasFocus )
-			{
-				super.getListCellRendererComponent( list, value, index, isSelected, cellHasFocus );
-				if ( value instanceof TMFloodFillController.FloodEraseMode )
-				{
-					final TMFloodFillController.FloodEraseMode mode =
-							( TMFloodFillController.FloodEraseMode ) value;
-					switch ( mode )
-					{
-					case REMOVE_SELECTED:
-						setText( "Selected only" );
-						setToolTipText( "Remove only the selected label" );
-						break;
-					case REMOVE_ALL:
-						setText( "All labels" );
-						setToolTipText( "Remove all labels in the region" );
-						break;
-					}
-				}
-				return this;
-			}
-		} );
-
 		floodEraseModeCombo.addActionListener( e -> {
-			if ( floodEraseModeCombo.getSelectedItem() != null )
+			final FloodEraseMode mode = ( FloodEraseMode ) floodEraseModeCombo.getSelectedItem();
+			if ( mode != null )
 			{
-				floodFillController.setFloodEraseMode(
-						( TMFloodFillController.FloodEraseMode ) floodEraseModeCombo.getSelectedItem() );
+				floodFillController.setFloodEraseMode( mode );
+				panel.setToolTipText( mode.getTooltip() );
+				floodEraseModeCombo.setToolTipText( mode.getTooltip() );
 			}
 		} );
+		floodEraseModeCombo.setSelectedItem( floodFillController.getFloodEraseMode() );
 
 		panel.add( floodEraseModeLabel, "aligny center" );
 		panel.add( floodEraseModeCombo, "aligny center" );
-
 		panel.setBackground( OPTIONS_BACKGROUND );
 		panel.setBorder( BorderFactory.createLineBorder( OPTIONS_BORDER ) );
-
 		return panel;
 	}
 
 	// Update the addActionButton method to handle showing/hiding all panels
-	private JToggleButton addActionButton( final String toolTipText, final Mode mode,
-			final boolean visibility, final String iconPath )
+	private JToggleButton addActionButton( final String toolTipText, final Mode mode, final boolean visibility, final String iconPath )
 	{
 		final JToggleButton button = new JToggleButton();
 		button.setIcon( getIcon( iconPath ) );
@@ -312,7 +261,8 @@ public class TMLabelToolsPanel extends JPanel
 			if ( ev.getStateChange() == ItemEvent.SELECTED )
 			{
 				setMode( mode );
-				setVisibility( visibility );
+				if ( brushOptionsPanel != null )
+					brushOptionsPanel.setVisible( visibility );
 
 				// Show/hide appropriate mode panels
 				if ( paintModePanel != null && eraseModePanel != null &&
@@ -373,58 +323,25 @@ public class TMLabelToolsPanel extends JPanel
 		panel.setLayout( new MigLayout( "insets 4 8 4 8, gap 4", "", "[center]" ) );
 
 		final JLabel paintModeLabel = new JLabel( "Paint mode:" );
-		paintModeCombo = new JComboBox<>( TMLabelBrushController.PaintBrushMode.values() );
-		paintModeCombo.setSelectedItem( TMLabelBrushController.PaintBrushMode.REPLACE );
+		paintModeCombo = new JComboBox< PaintBrushMode >( PaintBrushMode.values() );
+		paintModeCombo.setToolTipText( "" );
 		paintModeCombo.setFocusable( false );
 		paintModeCombo.setMaximumRowCount( 5 );
-
-		// Custom renderer for better display names
-		paintModeCombo.setRenderer( new DefaultListCellRenderer()
-		{
-			@Override
-			public Component getListCellRendererComponent( final JList< ? > list, final Object value,
-					final int index, final boolean isSelected, final boolean cellHasFocus )
+		paintModeCombo.addActionListener( e -> {
+			final PaintBrushMode mode = ( PaintBrushMode ) paintModeCombo.getSelectedItem();
+			if ( mode != null )
 			{
-				super.getListCellRendererComponent( list, value, index, isSelected, cellHasFocus );
-				if ( value instanceof TMLabelBrushController.PaintBrushMode )
-				{
-					final TMLabelBrushController.PaintBrushMode mode =
-							( TMLabelBrushController.PaintBrushMode ) value;
-					switch ( mode )
-					{
-					case REPLACE:
-						setText( "Replace" );
-						setToolTipText( "Replace existing labels" );
-						break;
-					case ADD:
-						setText( "Add" );
-						setToolTipText( "Add to existing labels" );
-						break;
-					case DONT_OVERWRITE:
-						setText( "Don't overwrite" );
-						setToolTipText( "Only paint on background" );
-						break;
-					}
-				}
-				return this;
+				brushController.setPaintBrushMode( mode );
+				panel.setToolTipText( mode.getTooltip() );
+				paintModeCombo.setToolTipText( mode.getTooltip() );
 			}
 		} );
-
-		paintModeCombo.addActionListener( e -> {
-			if ( paintModeCombo.getSelectedItem() != null )
-				brushController.setPaintBrushMode( ( TMLabelBrushController.PaintBrushMode ) paintModeCombo.getSelectedItem() );
-		} );
+		paintModeCombo.setSelectedItem( brushController.getPaintBrushMode() );
 
 		panel.add( paintModeLabel );
 		panel.add( paintModeCombo, "width 100:120:150" );
-
 		panel.setBackground( OPTIONS_BACKGROUND );
 		panel.setBorder( BorderFactory.createLineBorder( OPTIONS_BORDER ) );
-
-		// Add at the end:
-		System.out.println( "Paint panel preferred height: " + panel.getPreferredSize().height );
-		System.out.println( "Paint combo preferred height: " + paintModeCombo.getPreferredSize().height );
-
 		return panel;
 	}
 
@@ -434,70 +351,25 @@ public class TMLabelToolsPanel extends JPanel
 		panel.setLayout( new MigLayout( "insets 4 8 4 8, gap 4", "", "[center]" ) );
 
 		final JLabel eraseModeLabel = new JLabel( "Erase mode:" );
-		eraseModeCombo = new JComboBox<>( TMLabelBrushController.EraseBrushMode.values() );
-		eraseModeCombo.setSelectedItem( TMLabelBrushController.EraseBrushMode.REMOVE_ALL );
+		eraseModeCombo = new JComboBox<>( EraseBrushMode.values() );
 		eraseModeCombo.setFocusable( false );
 		eraseModeCombo.setMaximumRowCount( 5 );
-
-		eraseModeCombo.setRenderer( new DefaultListCellRenderer()
-		{
-			@Override
-			public Component getListCellRendererComponent( final JList< ? > list, final Object value,
-					final int index, final boolean isSelected, final boolean cellHasFocus )
+		eraseModeCombo.addActionListener( e -> {
+			final EraseBrushMode mode = ( EraseBrushMode ) eraseModeCombo.getSelectedItem();
+			if ( mode != null )
 			{
-				super.getListCellRendererComponent( list, value, index, isSelected, cellHasFocus );
-				if ( value instanceof TMLabelBrushController.EraseBrushMode )
-				{
-					final TMLabelBrushController.EraseBrushMode mode =
-							( TMLabelBrushController.EraseBrushMode ) value;
-					switch ( mode )
-					{
-					case REMOVE_SELECTED:
-						setText( "Selected only" );
-						setToolTipText( "Remove only the selected label" );
-						break;
-					case REMOVE_ALL:
-						setText( "All labels" );
-						setToolTipText( "Remove all labels" );
-						break;
-					}
-				}
-				return this;
+				brushController.setEraseBrushMode( ( EraseBrushMode ) eraseModeCombo.getSelectedItem() );
+				panel.setToolTipText( mode.getTooltip() );
+				eraseModeCombo.setToolTipText( mode.getTooltip() );
 			}
 		} );
-
-		eraseModeCombo.addActionListener( e -> {
-			if ( eraseModeCombo.getSelectedItem() != null )
-				brushController.setEraseBrushMode( ( TMLabelBrushController.EraseBrushMode ) eraseModeCombo.getSelectedItem() );
-		} );
+		eraseModeCombo.setSelectedItem( brushController.getEraseBrushMode() );
 
 		panel.add( eraseModeLabel );
 		panel.add( eraseModeCombo, "width 100:120:150" );
-
 		panel.setBackground( OPTIONS_BACKGROUND );
 		panel.setBorder( BorderFactory.createLineBorder( OPTIONS_BORDER ) );
-
-		System.out.println( "Erase panel preferred height: " + panel.getPreferredSize().height );
-		System.out.println( "Erase combo preferred height: " + eraseModeCombo.getPreferredSize().height );
-
 		return panel;
-	}
-
-	private void setVisibility( final boolean brushVisible )
-	{
-		if ( brushOptionsPanel != null )
-		{
-			brushOptionsPanel.setVisible( brushVisible );
-		}
-
-		// Handle paint/erase mode panels visibility
-		if ( paintModePanel != null && eraseModePanel != null )
-		{
-			// These are controlled separately by the button selection
-		}
-
-		revalidate();
-		repaint();
 	}
 
 	private void setMode( final Mode mode )

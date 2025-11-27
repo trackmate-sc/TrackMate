@@ -80,13 +80,32 @@ public class TMLabelBrushController
 	public enum PaintBrushMode
 	{
 		/** Replace existing labels with the painted label. */
-		REPLACE,
+		REPLACE( "Replace", "Paint over existing labels." ),
 		/** Add the painted label to existing labels. */
-		ADD,
-		/**
-		 * Only paint over the background. If a label exists, don't change it.
-		 */
-		DONT_OVERWRITE;
+		ADD( "Add", "Add selected label to existing ones." ),
+		/** Only paint over the background. If a label exists, don't change it.*/
+		DONT_OVERWRITE( "Preserve", "Don't overwrite existing labels, only paint on background." );
+
+		private final String name;
+
+		private final String tooltip;
+
+		PaintBrushMode( final String name, final String tooltip )
+		{
+			this.name = name;
+			this.tooltip = tooltip;
+		}
+
+		@Override
+		public String toString()
+		{
+			return name;
+		}
+
+		public String getTooltip()
+		{
+			return tooltip;
+		}
 	}
 
 	/**
@@ -95,9 +114,30 @@ public class TMLabelBrushController
 	public enum EraseBrushMode
 	{
 		/** Remove only the selected label. */
-		REMOVE_SELECTED,
+		REMOVE_SELECTED( "Selected label", "Remove only the selected label." ),
 		/** Remove all labels. */
-		REMOVE_ALL;
+		REMOVE_ALL( "All labels", "Remove all labels present at the brush location." );
+
+		private final String name;
+
+		private final String tooltip;
+
+		EraseBrushMode( final String name, final String tooltip )
+		{
+			this.name = name;
+			this.tooltip = tooltip;
+		}
+
+		@Override
+		public String toString()
+		{
+			return name;
+		}
+
+		public String getTooltip()
+		{
+			return tooltip;
+		}
 	}
 
 	private final BdvHandle bdv;
