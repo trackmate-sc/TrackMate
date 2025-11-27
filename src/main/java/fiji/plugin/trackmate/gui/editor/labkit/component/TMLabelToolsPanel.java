@@ -127,9 +127,17 @@ public class TMLabelToolsPanel extends JPanel
 
 	private final JPanel eraseModePanel;
 
+	private final JPanel floodFillModePanel;
+
+	private final JPanel floodEraseModePanel;
+
 	private JComboBox< TMLabelBrushController.PaintBrushMode > paintModeCombo;
 
 	private JComboBox< TMLabelBrushController.EraseBrushMode > eraseModeCombo;
+
+	private JComboBox< TMFloodFillController.FloodFillMode > floodFillModeCombo;
+
+	private JComboBox< TMFloodFillController.FloodEraseMode > floodEraseModeCombo;
 
 	public TMLabelToolsPanel(
 			final TMLabelBrushController brushController,
@@ -152,12 +160,14 @@ public class TMLabelToolsPanel extends JPanel
 		this.brushOptionsPanel = initBrushSizePanel();
 		this.paintModePanel = initPaintModePanel();
 		this.eraseModePanel = initEraseModePanel();
+		this.floodFillModePanel = initFloodFillModePanel();
+		this.floodEraseModePanel = initFloodEraseModePanel();
 
-		// Setup layout - horizontal with multiple areas
-		setLayout( new MigLayout( "insets 0, gap 4", "", "[fill]" ) );
+		// Setup layout
+		setLayout( new MigLayout( "insets 0, gap 4", "", "[]" ) );
 		setBorder( BorderFactory.createEmptyBorder( 0, 0, 4, 0 ) );
 
-		// Create tool buttons panel (horizontal layout)
+		// Create tool buttons panel
 		final JPanel toolsPanel = new JPanel( new MigLayout( "insets 0, gap 2", "", "" ) );
 		toolsPanel.add( moveBtn );
 		toolsPanel.add( drawBtn );
@@ -166,14 +176,176 @@ public class TMLabelToolsPanel extends JPanel
 		toolsPanel.add( floodEraseBtn );
 		toolsPanel.add( selectLabelBtn );
 
-		// Add all panels to the main panel
-		add( toolsPanel, "aligny top" );
+		// Add all panels
+		add( toolsPanel );
 		add( brushOptionsPanel, "hidemode 3, h 32!" );
 		add( paintModePanel, "hidemode 3, h 32!" );
 		add( eraseModePanel, "hidemode 3, h 32!" );
+		add( floodFillModePanel, "hidemode 3, h 32!" );
+		add( floodEraseModePanel, "hidemode 3, h 32!" );
 
-		// Set initial state - move tool selected, all option panels hidden
+		// Set initial state
 		moveBtn.doClick();
+	}
+
+	private JPanel initFloodFillModePanel()
+	{
+		final JPanel panel = new JPanel();
+		panel.setLayout( new MigLayout( "insets 4 8 4 8, gap 4", "", "[center]" ) );
+
+		final JLabel floodModeLabel = new JLabel( "Flood mode:" );
+		floodFillModeCombo = new JComboBox<>( TMFloodFillController.FloodFillMode.values() );
+		floodFillModeCombo.setSelectedItem( TMFloodFillController.FloodFillMode.REPLACE );
+		floodFillModeCombo.setFocusable( false );
+		floodFillModeCombo.setPreferredSize( new java.awt.Dimension( 130, 20 ) );
+
+		// Custom renderer for better display names
+		floodFillModeCombo.setRenderer( new DefaultListCellRenderer()
+		{
+			@Override
+			public Component getListCellRendererComponent( final JList< ? > list, final Object value,
+					final int index, final boolean isSelected, final boolean cellHasFocus )
+			{
+				super.getListCellRendererComponent( list, value, index, isSelected, cellHasFocus );
+				if ( value instanceof TMFloodFillController.FloodFillMode )
+				{
+					final TMFloodFillController.FloodFillMode mode =
+							( TMFloodFillController.FloodFillMode ) value;
+					switch ( mode )
+					{
+					case REPLACE:
+						setText( "Replace" );
+						setToolTipText( "Clear existing labels before filling" );
+						break;
+					case ADD:
+						setText( "Add" );
+						setToolTipText( "Add to existing labels" );
+						break;
+					}
+				}
+				return this;
+			}
+		} );
+
+		floodFillModeCombo.addActionListener( e -> {
+			if ( floodFillModeCombo.getSelectedItem() != null )
+			{
+				floodFillController.setFloodFillMode(
+						( TMFloodFillController.FloodFillMode ) floodFillModeCombo.getSelectedItem() );
+			}
+		} );
+
+		panel.add( floodModeLabel, "aligny center" );
+		panel.add( floodFillModeCombo, "aligny center" );
+
+		panel.setBackground( OPTIONS_BACKGROUND );
+		panel.setBorder( BorderFactory.createLineBorder( OPTIONS_BORDER ) );
+
+		return panel;
+	}
+
+	private JPanel initFloodEraseModePanel()
+	{
+		final JPanel panel = new JPanel();
+		panel.setLayout( new MigLayout( "insets 4 8 4 8, gap 4", "", "[center]" ) );
+
+		final JLabel floodEraseModeLabel = new JLabel( "Flood erase:" );
+		floodEraseModeCombo = new JComboBox<>( TMFloodFillController.FloodEraseMode.values() );
+		floodEraseModeCombo.setSelectedItem( TMFloodFillController.FloodEraseMode.REMOVE_ALL );
+		floodEraseModeCombo.setFocusable( false );
+		floodEraseModeCombo.setPreferredSize( new java.awt.Dimension( 130, 20 ) );
+
+		floodEraseModeCombo.setRenderer( new DefaultListCellRenderer()
+		{
+			@Override
+			public Component getListCellRendererComponent( final JList< ? > list, final Object value,
+					final int index, final boolean isSelected, final boolean cellHasFocus )
+			{
+				super.getListCellRendererComponent( list, value, index, isSelected, cellHasFocus );
+				if ( value instanceof TMFloodFillController.FloodEraseMode )
+				{
+					final TMFloodFillController.FloodEraseMode mode =
+							( TMFloodFillController.FloodEraseMode ) value;
+					switch ( mode )
+					{
+					case REMOVE_SELECTED:
+						setText( "Selected only" );
+						setToolTipText( "Remove only the selected label" );
+						break;
+					case REMOVE_ALL:
+						setText( "All labels" );
+						setToolTipText( "Remove all labels in the region" );
+						break;
+					}
+				}
+				return this;
+			}
+		} );
+
+		floodEraseModeCombo.addActionListener( e -> {
+			if ( floodEraseModeCombo.getSelectedItem() != null )
+			{
+				floodFillController.setFloodEraseMode(
+						( TMFloodFillController.FloodEraseMode ) floodEraseModeCombo.getSelectedItem() );
+			}
+		} );
+
+		panel.add( floodEraseModeLabel, "aligny center" );
+		panel.add( floodEraseModeCombo, "aligny center" );
+
+		panel.setBackground( OPTIONS_BACKGROUND );
+		panel.setBorder( BorderFactory.createLineBorder( OPTIONS_BORDER ) );
+
+		return panel;
+	}
+
+	// Update the addActionButton method to handle showing/hiding all panels
+	private JToggleButton addActionButton( final String toolTipText, final Mode mode,
+			final boolean visibility, final String iconPath )
+	{
+		final JToggleButton button = new JToggleButton();
+		button.setIcon( getIcon( iconPath ) );
+		button.setToolTipText( toolTipText );
+		button.setMargin( new Insets( 0, 0, 0, 0 ) );
+		button.setFocusable( false );
+		button.addItemListener( ev -> {
+			if ( ev.getStateChange() == ItemEvent.SELECTED )
+			{
+				setMode( mode );
+				setVisibility( visibility );
+
+				// Show/hide appropriate mode panels
+				if ( paintModePanel != null && eraseModePanel != null &&
+						floodFillModePanel != null && floodEraseModePanel != null )
+				{
+					// Hide all mode panels first
+					paintModePanel.setVisible( false );
+					eraseModePanel.setVisible( false );
+					floodFillModePanel.setVisible( false );
+					floodEraseModePanel.setVisible( false );
+
+					// Show the appropriate one
+					if ( button == drawBtn )
+					{
+						paintModePanel.setVisible( true );
+					}
+					else if ( button == eraseBtn )
+					{
+						eraseModePanel.setVisible( true );
+					}
+					else if ( button == floodFillBtn )
+					{
+						floodFillModePanel.setVisible( true );
+					}
+					else if ( button == floodEraseBtn )
+					{
+						floodEraseModePanel.setVisible( true );
+					}
+				}
+			}
+		} );
+		group.add( button );
+		return button;
 	}
 
 	private JPanel initBrushSizePanel()
@@ -326,47 +498,6 @@ public class TMLabelToolsPanel extends JPanel
 
 		revalidate();
 		repaint();
-	}
-
-	// Update the addActionButton method to handle showing/hiding the
-	// appropriate panels
-	private JToggleButton addActionButton( final String toolTipText, final Mode mode,
-			final boolean visibility, final String iconPath )
-	{
-		final JToggleButton button = new JToggleButton();
-		button.setIcon( getIcon( iconPath ) );
-		button.setToolTipText( toolTipText );
-		button.setMargin( new Insets( 0, 0, 0, 0 ) );
-		button.setFocusable( false );
-		button.addItemListener( ev -> {
-			if ( ev.getStateChange() == ItemEvent.SELECTED )
-			{
-				setMode( mode );
-				setVisibility( visibility );
-
-				// Show/hide appropriate mode panels
-				if ( paintModePanel != null && eraseModePanel != null )
-				{
-					if ( button == drawBtn )
-					{
-						paintModePanel.setVisible( true );
-						eraseModePanel.setVisible( false );
-					}
-					else if ( button == eraseBtn )
-					{
-						paintModePanel.setVisible( false );
-						eraseModePanel.setVisible( true );
-					}
-					else
-					{
-						paintModePanel.setVisible( false );
-						eraseModePanel.setVisible( false );
-					}
-				}
-			}
-		} );
-		group.add( button );
-		return button;
 	}
 
 	private void setMode( final Mode mode )
