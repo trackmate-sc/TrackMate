@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -26,7 +26,6 @@ import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.KE
 
 import java.awt.Adjustable;
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
@@ -57,10 +56,11 @@ import bdv.viewer.DisplayMode;
 import bdv.viewer.NavigationActions;
 import bdv.viewer.ViewerPanel;
 import fiji.plugin.trackmate.detection.DetectionUtils;
+import fiji.plugin.trackmate.gui.editor.labkit.component.TMFloodFillController.FloodEraseMode;
+import fiji.plugin.trackmate.gui.editor.labkit.component.TMFloodFillController.FloodFillMode;
 import net.miginfocom.swing.MigLayout;
 import sc.fiji.labkit.ui.bdv.BdvAutoContrast;
 import sc.fiji.labkit.ui.bdv.BdvLayer;
-import sc.fiji.labkit.ui.brush.PlanarModeController;
 import sc.fiji.labkit.ui.labeling.Label;
 import sc.fiji.labkit.ui.labeling.LabelsLayer;
 import sc.fiji.labkit.ui.models.Holder;
@@ -187,28 +187,19 @@ public class TMBasicLabelingComponent extends JPanel implements AutoCloseable
 
 	private JPanel initToolsPanel()
 	{
-		final PlanarModeController planarModeController = new PlanarModeController( bdvHandle, model, zSlider );
 		this.brushController = new TMLabelBrushController( bdvHandle, model );
 		this.floodFillController = new TMFloodFillController( bdvHandle, model );
 		this.selectLabelController = new TMSelectLabelController( bdvHandle, model );
 
-		this.toolsPanel = new TMLabelToolsPanel( brushController, floodFillController, selectLabelController, planarModeController );
+		this.toolsPanel = new TMLabelToolsPanel( brushController, floodFillController, selectLabelController );
 		// Hide the zSlider toggle button if we are 2D
 		final boolean is2D = DetectionUtils.is2D( model.imageForSegmentation().get() );
 		if ( is2D )
-		{
 			zSlider.setVisible( false );
-			final Component c = toolsPanel.getComponent( toolsPanel.getComponentCount() - 1 );
-			toolsPanel.remove( c );
-		}
 
-		// To edit TrackMate spots, the overlapping mode is always enabled.
-		floodFillController.setOverlapping( true );
-		brushController.setOverlapping( true );
-		// Remove the checkbox from the option panel
-		final JPanel c = ( JPanel ) toolsPanel.getComponent( toolsPanel.getComponentCount() - 1 );
-		// The overlapping mode toggle button
-		c.remove( c.getComponent( 0 ) );
+		// To edit TrackMate spots, fill and erase replace existing labels.
+		floodFillController.setFloodEraseMode( FloodEraseMode.REMOVE_ALL );
+		floodFillController.setFloodFillMode( FloodFillMode.REPLACE );
 
 		return toolsPanel;
 	}

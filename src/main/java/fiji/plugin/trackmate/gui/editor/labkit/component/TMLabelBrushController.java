@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -74,6 +74,32 @@ import sc.fiji.labkit.ui.utils.Notifier;
 public class TMLabelBrushController
 {
 
+	/**
+	 * Defines the behavior when painting with the brush.
+	 */
+	public enum PaintBrushMode
+	{
+		/** Replace existing labels with the painted label. */
+		REPLACE,
+		/** Add the painted label to existing labels. */
+		ADD,
+		/**
+		 * Only paint over the background. If a label exists, don't change it.
+		 */
+		DONT_OVERWRITE;
+	}
+
+	/**
+	 * Defines the behavior when erasing with the brush.
+	 */
+	public enum EraseBrushMode
+	{
+		/** Remove only the selected label. */
+		REMOVE_SELECTED,
+		/** Remove all labels. */
+		REMOVE_ALL;
+	}
+
 	private final BdvHandle bdv;
 
 	private final ViewerPanel viewer;
@@ -90,11 +116,13 @@ public class TMLabelBrushController
 
 	private final PaintBehavior eraseBehaviour = new PaintBehavior( false );
 
+	private PaintBrushMode paintBrushMode = PaintBrushMode.REPLACE;
+
+	private EraseBrushMode eraseBrushMode = EraseBrushMode.REMOVE_ALL;
+
 	private double brushDiameter = 1;
 
 	private final Notifier brushDiameterListeners = new Notifier();
-
-	private boolean overlapping = false;
 
 	private boolean keepBrushCursorVisible = false;
 
@@ -167,9 +195,14 @@ public class TMLabelBrushController
 		return brushDiameterListeners;
 	}
 
-	public void setOverlapping( final boolean overlapping )
+	public void setPaintBrushMode( final PaintBrushMode paintBrushMode )
 	{
-		this.overlapping = overlapping;
+		this.paintBrushMode = paintBrushMode;
+	}
+
+	public void setEraseBrushMode( final EraseBrushMode eraseBrushMode )
+	{
+		this.eraseBrushMode = eraseBrushMode;
 	}
 
 	public void setPlanarMode( final boolean planarMode )
@@ -180,13 +213,16 @@ public class TMLabelBrushController
 	private class PaintBehavior implements DragBehaviour
 	{
 
-		private final boolean value;
+		/**
+		 * If <code>true</code> we paint. If <code>false</code> we erase.
+		 */
+		private final boolean paint;
 
 		private RealPoint before;
 
-		public PaintBehavior( final boolean value )
+		public PaintBehavior( final boolean paint )
 		{
-			this.value = value;
+			this.paint = paint;
 		}
 
 		private void paint( final RealLocalizable screenCoordinates )
@@ -222,27 +258,46 @@ public class TMLabelBrushController
 		private Consumer< LabelingType< Label > > pixelOperation()
 		{
 			final Label label = model.selectedLabel().get();
-			if ( value )
+			if ( paint )
 			{
+				// Painting in new labels.
 				if ( label != null )
 				{
-					if ( overlapping )
+					switch ( paintBrushMode )
+					{
+					case REPLACE:
+						return pixel -> {
+							pixel.clear();
+							pixel.add( label );
+						};
+					case ADD:
 						return pixel -> pixel.add( label );
-					final List< Label > visibleLabels = getVisibleLabels();
-					return pixel -> {
-						pixel.removeAll( visibleLabels );
-						pixel.add( label );
-					};
+					case DONT_OVERWRITE:
+						return pixel -> {
+							if ( pixel.isEmpty() )
+								pixel.add( label );
+						};
+					default:
+						throw new IllegalArgumentException( "Unknown paint brush mode: " + paintBrushMode );
+					}
 				}
 				else
 					return pixel -> {};
 			}
 			else
 			{
-				if ( overlapping && label != null )
-					return pixel -> pixel.remove( label );
-				final List< Label > visibleLabels = getVisibleLabels();
-				return pixel -> pixel.removeAll( visibleLabels );
+				// Erasing tool.
+				switch ( eraseBrushMode )
+				{
+				case REMOVE_SELECTED:
+					if ( label != null ) // otherwise fall through
+						return pixel -> pixel.remove( label );
+				case REMOVE_ALL:
+					final List< Label > visibleLabels = getVisibleLabels();
+					return pixel -> pixel.removeAll( visibleLabels );
+				default:
+					throw new IllegalArgumentException( "Unknown erase brush mode: " + eraseBrushMode );
+				}
 			}
 		}
 
@@ -481,7 +536,7 @@ public class TMLabelBrushController
 	{
 		actions.namedAction( new ChangeBrushRadiusAction( INCREASE_BRUSH_RADIUS, 1. ), INCREASE_BRUSH_RADIUS_KEYS );
 		actions.namedAction( new ChangeBrushRadiusAction( DECREASE_BRUSH_RADIUS, -1. ), DECREASE_BRUSH_RADIUS_KEYS );
-		actions.namedAction( new ChangeBrushRadiusAction(INCREASE_BRUSH_RADIUS_FAST, 5.), INCREASE_BRUSH_RADIUS_FAST_KEYS );
+		actions.namedAction( new ChangeBrushRadiusAction( INCREASE_BRUSH_RADIUS_FAST, 5. ), INCREASE_BRUSH_RADIUS_FAST_KEYS );
 		actions.namedAction( new ChangeBrushRadiusAction( DECREASE_BRUSH_RADIUS_FAST, -5. ), DECREASE_BRUSH_RADIUS_FAST_KEYS );
 		behaviors.behaviour( paintBehaviour, PAINT, PAINT_KEYS );
 		behaviors.behaviour( eraseBehaviour, ERASE, ERASE_KEYS );
@@ -490,21 +545,35 @@ public class TMLabelBrushController
 	}
 
 	private static final String PAINT = "paint";
+
 	private static final String ERASE = "erase";
+
 	private static final String CHANGE_BRUSH_RADIUS = "change brush radius";
+
 	private static final String MOVE_BRUSH = "move brush";
+
 	private static final String INCREASE_BRUSH_RADIUS = "increase brush radius";
+
 	private static final String DECREASE_BRUSH_RADIUS = "decrease brush radius";
+
 	private static final String INCREASE_BRUSH_RADIUS_FAST = "increase brush radius fast";
+
 	private static final String DECREASE_BRUSH_RADIUS_FAST = "decrease brush radius fast";
 
 	private static final String[] PAINT_KEYS = new String[] { "A button1", "SPACE button1" };
+
 	private static final String[] ERASE_KEYS = new String[] { "D button1", "SPACE button2", "SPACE button3" };
-	private static final String[] CHANGE_BRUSH_RADIUS_KEYS =  new String[] { "A scroll", "D scroll", "SPACE scroll"};
-	private static final String[] MOVE_BRUSH_KEYS =  new String[] { "A", "D", "SPACE"};
+
+	private static final String[] CHANGE_BRUSH_RADIUS_KEYS = new String[] { "A scroll", "D scroll", "SPACE scroll" };
+
+	private static final String[] MOVE_BRUSH_KEYS = new String[] { "A", "D", "SPACE" };
+
 	private static final String[] INCREASE_BRUSH_RADIUS_KEYS = new String[] { "E" };
+
 	private static final String[] DECREASE_BRUSH_RADIUS_KEYS = new String[] { "Q" };
+
 	private static final String[] INCREASE_BRUSH_RADIUS_FAST_KEYS = new String[] { "shift E" };
+
 	private static final String[] DECREASE_BRUSH_RADIUS_FAST_KEYS = new String[] { "shift Q" };
 
 	@Plugin( type = CommandDescriptionProvider.class )

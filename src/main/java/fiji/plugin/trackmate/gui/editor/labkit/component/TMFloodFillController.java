@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -61,6 +61,7 @@ import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.Views;
 import sc.fiji.labkit.ui.brush.BdvMouseBehaviourUtils;
+import sc.fiji.labkit.ui.brush.FloodFillController;
 import sc.fiji.labkit.ui.labeling.Label;
 import sc.fiji.labkit.ui.models.LabelingModel;
 
@@ -70,13 +71,39 @@ import sc.fiji.labkit.ui.models.LabelingModel;
 public class TMFloodFillController
 {
 
+	/**
+	 * Defines the behavior when flood filling a region.
+	 */
+	public enum FloodFillMode
+	{
+		/** The selected label is added to the existing labels. */
+		ADD,
+		/** The existing labels are cleared before adding the selected label. */
+		REPLACE;
+	}
+
+	/**
+	 * Defines the behavior when erasing a region.
+	 */
+	public enum FloodEraseMode
+	{
+		/** The selected label is removed from the existing labels. */
+		REMOVE_SELECTED,
+		/**
+		 * All labels are cleared.
+		 */
+		REMOVE_ALL;
+	}
+
 	private final ViewerPanel viewer;
 
 	private final LabelingModel model;
 
 	private final BdvHandle bdv;
 
-	private boolean overlapping = false;
+	private FloodFillMode modeFill = FloodFillMode.REPLACE;
+
+	private FloodEraseMode modeErase = FloodEraseMode.REMOVE_ALL;
 
 	private boolean planarMode = false;
 
@@ -88,28 +115,33 @@ public class TMFloodFillController
 
 	private final FloodFillClick floodFillBehaviour = new FloodFillClick( () -> {
 		final Label selected = selectedLabel();
-		if ( overlapping )
-			return l -> l.add( selected );
-		else
+		switch ( modeFill )
 		{
+		case ADD:
+			return l -> l.add( selected );
+		case REPLACE:
 			final Collection< Label > visible = visibleLabels();
 			return l -> {
 				l.removeAll( visible );
 				l.add( selected );
 			};
+		default:
+			throw new IllegalArgumentException( "Unknown flood fill mode: " + modeFill );
+
 		}
 	} );
 
 	private final FloodFillClick floodEraseBehaviour = new FloodFillClick( () -> {
-		if ( overlapping )
+		switch ( modeErase )
 		{
+		case REMOVE_SELECTED:
 			final Label selected = selectedLabel();
 			return l -> l.remove( selected );
-		}
-		else
-		{
+		case REMOVE_ALL:
 			final Collection< Label > visible = visibleLabels();
 			return l -> l.removeAll( visible );
+		default:
+			throw new IllegalArgumentException( "Unknown flood fill mode: " + modeFill );
 		}
 	} );
 
@@ -139,9 +171,14 @@ public class TMFloodFillController
 		return labelLocation;
 	}
 
-	public void setOverlapping( final boolean override )
+	public void setFloodFillMode( final FloodFillMode mode )
 	{
-		this.overlapping = override;
+		this.modeFill = mode;
+	}
+
+	public void setFloodEraseMode( final FloodEraseMode mode )
+	{
+		this.modeErase = mode;
 	}
 
 	public void setFloodFillActive( final boolean active )
@@ -386,11 +423,12 @@ public class TMFloodFillController
 	}
 
 	private static final String FLOOD_FILL = "flood fill";
+
 	private static final String FLOOD_CLEAR = "flood clear";
 
 	private static final String[] FLOOD_FILL_KEYS = new String[] { "L button1" };
-	private static final String[] FLOOD_CLEAR_KEYS = new String[] { "R button1", "L button2", "L button3" };
 
+	private static final String[] FLOOD_CLEAR_KEYS = new String[] { "R button1", "L button2", "L button3" };
 
 	@Plugin( type = CommandDescriptionProvider.class )
 	public static class Descriptions extends CommandDescriptionProvider
