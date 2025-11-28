@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -37,6 +37,7 @@ import org.scijava.Context;
 import org.scijava.ui.behaviour.util.AbstractNamedAction;
 
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.DetectionUtils;
@@ -48,7 +49,9 @@ import fiji.plugin.trackmate.gui.editor.labkit.model.TMLabKitModel;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
 import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewUtils;
+import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.ImagePlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.CalibratedAxis;
@@ -207,7 +210,8 @@ public class LabkitLauncher
 
 	public static void main( final String[] args )
 	{
-		final String filename = "samples/MAX_Merged.xml";
+//		final String filename = "samples/MAX_Merged.xml";
+		final String filename = "samples/221031_Stat_Stage55_561nm_part1Conf_crop_f4.xml";
 		final TmXmlReader reader = new TmXmlReader( new File( filename ) );
 		if ( !reader.isReadingOk() )
 		{
@@ -220,7 +224,14 @@ public class LabkitLauncher
 		final Settings settings = reader.readSettings( imp );
 		final DisplaySettings ds = reader.getDisplaySettings();
 		final TrackMate trackmate = new TrackMate( model, settings );
+		final SelectionModel selectionModel = new SelectionModel( model );
 
-		LabkitLauncher.launch( trackmate, ds, 0 );
+		// Main view.
+		final TrackMateModelView displayer = new HyperStackDisplayer( model, selectionModel, settings.imp, ds );
+		displayer.render();
+		imp.setSlice( 7 );
+
+		// Editor
+		LabkitLauncher.launch( trackmate, ds, 6 );
 	}
 }
