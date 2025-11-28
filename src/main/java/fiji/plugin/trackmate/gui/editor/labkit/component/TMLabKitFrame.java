@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -65,7 +65,10 @@ import bdv.ui.keymap.Keymap;
 import bdv.ui.keymap.KeymapManager;
 import bdv.util.BdvOptions;
 import fiji.plugin.trackmate.gui.Icons;
+import fiji.plugin.trackmate.gui.editor.labkit.component.SrcOverAccumulateProjectorARGB.Factory;
 import fiji.plugin.trackmate.gui.editor.labkit.model.TMLabKitModel;
+import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
 import net.imglib2.Dimensions;
 import net.imglib2.util.Intervals;
 import net.miginfocom.swing.MigLayout;
@@ -97,6 +100,12 @@ public class TMLabKitFrame extends JFrame
 	{
 		final ImageLabelingModel imageLabelingModel = model.imageLabelingModel();
 
+		// How many sources?
+		final ImgPlus< ? > img = imageLabelingModel.imageForSegmentation().get();
+		final int cAxis = img.dimensionIndex( Axes.CHANNEL );
+		final int nChannels = cAxis < 0 ? 1 : ( int ) img.dimension( cAxis );
+		final int nSources = nChannels + 1; // for the labels
+
 		/*
 		 * Here we create a specific config for BDV, so that we can use a custom
 		 * keymap selected not to interfere with the TrackMate-Labkit keymap. I
@@ -109,10 +118,18 @@ public class TMLabKitFrame extends JFrame
 		final KeymapManager bdvKeymapManager = new KeymapManager();
 		final Keymap bdvKeymap = bdvKeymapManager.getForwardSelectedKeymap();
 		bdvKeymap.set( TMKeymapManager.loadBDVKeymap() );
+
+		// Create factory with initial alphas
+		// [grayscale alpha, labels alpha]
+		final float[] alphas = { 1.0f, 0.5f }; // FIXME
+		final Factory blendingFactory = new SrcOverAccumulateProjectorARGB.Factory( alphas );
+
 		final BdvOptions options = BdvOptions.options()
 				.inputTriggerConfig( bdvKeymap.getConfig() )
 				.keymapManager( bdvKeymapManager )
-				.appearanceManager( appearanceManager );
+				.appearanceManager( appearanceManager )
+				.accumulateProjectorFactory( blendingFactory )
+		;
 		if ( imageLabelingModel.spatialDimensions().numDimensions() < 3 )
 			options.is2D();
 
