@@ -64,11 +64,9 @@ import bdv.ui.appearance.AppearanceManager;
 import bdv.ui.keymap.Keymap;
 import bdv.ui.keymap.KeymapManager;
 import bdv.util.BdvOptions;
+import bdv.viewer.render.AlphaWeightedAccumulateProjectorARGB;
 import fiji.plugin.trackmate.gui.Icons;
-import fiji.plugin.trackmate.gui.editor.labkit.component.SrcOverAccumulateProjectorARGB.Factory;
 import fiji.plugin.trackmate.gui.editor.labkit.model.TMLabKitModel;
-import net.imagej.ImgPlus;
-import net.imagej.axis.Axes;
 import net.imglib2.Dimensions;
 import net.imglib2.util.Intervals;
 import net.miginfocom.swing.MigLayout;
@@ -100,12 +98,6 @@ public class TMLabKitFrame extends JFrame
 	{
 		final ImageLabelingModel imageLabelingModel = model.imageLabelingModel();
 
-		// How many sources?
-		final ImgPlus< ? > img = imageLabelingModel.imageForSegmentation().get();
-		final int cAxis = img.dimensionIndex( Axes.CHANNEL );
-		final int nChannels = cAxis < 0 ? 1 : ( int ) img.dimension( cAxis );
-		final int nSources = nChannels + 1; // for the labels
-
 		/*
 		 * Here we create a specific config for BDV, so that we can use a custom
 		 * keymap selected not to interfere with the TrackMate-Labkit keymap. I
@@ -119,16 +111,11 @@ public class TMLabKitFrame extends JFrame
 		final Keymap bdvKeymap = bdvKeymapManager.getForwardSelectedKeymap();
 		bdvKeymap.set( TMKeymapManager.loadBDVKeymap() );
 
-		// Create factory with initial alphas
-		// [grayscale alpha, labels alpha]
-		final float[] alphas = { 1.0f, 0.5f }; // FIXME
-		final Factory blendingFactory = new SrcOverAccumulateProjectorARGB.Factory( alphas );
-
 		final BdvOptions options = BdvOptions.options()
 				.inputTriggerConfig( bdvKeymap.getConfig() )
 				.keymapManager( bdvKeymapManager )
 				.appearanceManager( appearanceManager )
-				.accumulateProjectorFactory( blendingFactory )
+				.accumulateProjectorFactory( AlphaWeightedAccumulateProjectorARGB.factory )
 		;
 		if ( imageLabelingModel.spatialDimensions().numDimensions() < 3 )
 			options.is2D();
