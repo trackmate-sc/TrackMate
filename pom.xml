@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -57,57 +59,87 @@
 		<contributor>
 			<name>Nick Perry</name>
 			<url>https://imagej.net/people/nickp</url>
-			<roles><role>founder</role></roles>
-			<properties><id>nickp</id></properties>
+			<roles>
+				<role>founder</role>
+			</roles>
+			<properties>
+				<id>nickp</id>
+			</properties>
 		</contributor>
 		<contributor>
 			<name>Johannes Schindelin</name>
 			<url>https://imagej.net/people/dscho</url>
-			<roles><role>founder</role></roles>
-			<properties><id>dscho</id></properties>
+			<roles>
+				<role>founder</role>
+			</roles>
+			<properties>
+				<id>dscho</id>
+			</properties>
 		</contributor>
-		<contributor><name>Gary Baker</name></contributor>
+		<contributor>
+			<name>Gary Baker</name>
+		</contributor>
 		<contributor>
 			<name>Albert Cardona</name>
 			<url>https://imagej.net/people/acardona</url>
-			<properties><id>acardona</id></properties>
+			<properties>
+				<id>acardona</id>
+			</properties>
 		</contributor>
 		<contributor>
 			<name>Barry DeZonia</name>
 			<url>https://imagej.net/people/bdezonia</url>
-			<properties><id>bdezonia</id></properties>
+			<properties>
+				<id>bdezonia</id>
+			</properties>
 		</contributor>
 		<contributor>
 			<name>Stefan Helfrich</name>
 			<url>https://imagej.net/people/stelfrich</url>
-			<properties><id>stelfrich</id></properties>
+			<properties>
+				<id>stelfrich</id>
+			</properties>
 		</contributor>
 		<contributor>
 			<name>Mark Hiner</name>
 			<url>https://imagej.net/people/hinerm</url>
-			<properties><id>hinerm</id></properties>
+			<properties>
+				<id>hinerm</id>
+			</properties>
 		</contributor>
 		<contributor>
 			<name>Hadrien Mary</name>
 			<url>https://imagej.net/people/hadim</url>
-			<properties><id>hadim</id></properties>
+			<properties>
+				<id>hadim</id>
+			</properties>
 		</contributor>
 		<contributor>
 			<name>Tobias Pietzsch</name>
 			<url>https://imagej.net/peoplel/pietzsch</url>
-			<properties><id>tpietzsch</id></properties>
+			<properties>
+				<id>tpietzsch</id>
+			</properties>
 		</contributor>
-		<contributor><name>Barak Naveh</name></contributor>
-		<contributor><name>Chen Ye</name></contributor>
+		<contributor>
+			<name>Barak Naveh</name>
+		</contributor>
+		<contributor>
+			<name>Chen Ye</name>
+		</contributor>
 		<contributor>
 			<name>Robert Haase</name>
 			<url>https://imagej.net/people/haesleinhuepf</url>
-			<properties><id>haesleinhuepf</id></properties>
+			<properties>
+				<id>haesleinhuepf</id>
+			</properties>
 		</contributor>
 		<contributor>
 			<name>Jan Eglinger</name>
 			<url>https://imagej.net/people/imagejan</url>
-			<properties><id>imagejan</id></properties>
+			<properties>
+				<id>imagejan</id>
+			</properties>
 		</contributor>
 	</contributors>
 
@@ -142,7 +174,8 @@
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
 
-		<!-- NB: Use ImgLib2 style code formatting (https://github.com/scijava/scijava-coding-style) -->
+		<!-- NB: Use ImgLib2 style code formatting
+		(https://github.com/scijava/scijava-coding-style) -->
 		<scijava.coding-style>imglib2</scijava.coding-style>
 
 		<fontchooser.version>2.5.2</fontchooser.version>
