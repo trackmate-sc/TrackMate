@@ -64,7 +64,6 @@ import bdv.ui.appearance.AppearanceManager;
 import bdv.ui.keymap.Keymap;
 import bdv.ui.keymap.KeymapManager;
 import bdv.util.BdvOptions;
-import bdv.viewer.render.AlphaWeightedAccumulateProjectorARGB;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.editor.labkit.model.TMLabKitModel;
 import net.imglib2.Dimensions;
@@ -115,7 +114,6 @@ public class TMLabKitFrame extends JFrame
 				.inputTriggerConfig( bdvKeymap.getConfig() )
 				.keymapManager( bdvKeymapManager )
 				.appearanceManager( appearanceManager )
-				.accumulateProjectorFactory( AlphaWeightedAccumulateProjectorARGB.factory )
 		;
 		if ( imageLabelingModel.spatialDimensions().numDimensions() < 3 )
 			options.is2D();
