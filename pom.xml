@@ -180,6 +180,8 @@
 
 		<fontchooser.version>2.5.2</fontchooser.version>
 		<javaGeom.version>0.11.1</javaGeom.version>
+		<imglib2.version>8.0.0</imglib2.version>
+		<bigdataviewer-core.version>10.6.7</bigdataviewer-core.version>
 	</properties>
 
 	<dependencies>
