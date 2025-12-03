@@ -184,6 +184,7 @@ public class CondaDetector
 			return info;
 
 		// Method 2: Parse shell config files (critical for macOS/Linux GUI apps)
+		IJ.log( "" );
 		if ( isMac() || isLinux() )
 		{
 			info = detectFromShellConfig();
@@ -194,19 +195,21 @@ public class CondaDetector
 		{
 			IJ.log( "Method 2: Parsing shell configuration files..." );
 			IJ.log( "  Skipped (only applicable on macOS/Linux)" );
-			IJ.log( "" );
 		}
 
 		// Method 3: Search in PATH
+		IJ.log( "" );
 		info = detectFromPath();
 		if ( info != null )
 			return info;
 
 		// Method 4: Check common installation locations (fallback)
+		IJ.log( "" );
 		info = detectFromCommonLocations();
 		if ( info != null )
 			return info;
 
+		IJ.log( "" );
 		IJ.log( "Failed to detect conda installation" );
 		return null;
 	}
@@ -217,21 +220,32 @@ public class CondaDetector
 	private static CondaInfo detectFromEnvironment()
 	{
 		IJ.log( "Method 1: Checking CONDA_EXE environment variable..." );
+
+		// Check CONDA_EXE first
 		String condaExe = System.getenv( "CONDA_EXE" );
+
+		// Also check for _CONDA_EXE (sometimes set by conda)
+		if ( condaExe == null || condaExe.isEmpty() )
+			condaExe = System.getenv( "_CONDA_EXE" );
+
 		if ( condaExe != null && new File( condaExe ).exists() )
 		{
 			// Resolve symlinks/aliases
 			condaExe = resolveRealExecutable( condaExe );
 
-			final String rootPrefix = deriveRootPrefix( condaExe );
-			final String version = getCondaVersion( condaExe );
-
-			if ( rootPrefix != null && version != null )
+			if ( condaExe != null )
 			{
-				IJ.log( "  Found conda via CONDA_EXE: " + condaExe );
-				return new CondaInfo( condaExe, rootPrefix, version );
+				final String rootPrefix = deriveRootPrefix( condaExe );
+				final String version = getCondaVersion( condaExe );
+
+				if ( rootPrefix != null && version != null )
+				{
+					IJ.log( "  Found conda via CONDA_EXE: " + condaExe );
+					return new CondaInfo( condaExe, rootPrefix, version );
+				}
 			}
 		}
+
 		IJ.log( "  CONDA_EXE not set or invalid" );
 		return null;
 	}
@@ -794,12 +808,25 @@ public class CondaDetector
 
 		try
 		{
-			final Process process = new ProcessBuilder( command )
-					.redirectErrorStream( true )
-					.start();
+			final ProcessBuilder pb = new ProcessBuilder( command );
+			pb.redirectErrorStream( true );
+			final Process process = pb.start();
 
 			final String output = readProcessOutput( process );
-			process.waitFor( 5, TimeUnit.SECONDS );
+			final boolean completed = process.waitFor( 5, TimeUnit.SECONDS );
+
+			// Check exit code - 'where' returns non-zero when not found
+			if ( !completed )
+			{
+				IJ.log( "  Command timed out searching for '" + executable + "'" );
+				return null;
+			}
+
+			if ( process.exitValue() != 0 )
+			{
+				IJ.log( "  '" + executable + "' not found in PATH" );
+				return null;
+			}
 
 			if ( output != null && !output.isEmpty() )
 			{
@@ -814,11 +841,35 @@ public class CondaDetector
 					if ( path.isEmpty() )
 						continue;
 
+					// Skip error messages from Windows 'where' command
+					if ( path.startsWith( "INFO:" ) ||
+							path.startsWith( "ERROR:" ) ||
+							path.startsWith( "WARNING:" ) ||
+							path.contains( "Could not find" ) )
+					{
+						IJ.log( "  Skipping error message: " + path );
+						continue;
+					}
+
+					// Validate that this looks like a real path
+					if ( !isValidPath( path ) )
+					{
+						IJ.log( "  Skipping invalid path format: " + path );
+						continue;
+					}
+
 					// On Windows, skip conda in Library\bin (it's a helper
 					// script)
 					if ( isWindows() && path.contains( "\\Library\\bin\\conda" ) )
 					{
 						IJ.log( "  Skipping helper script: " + path );
+						continue;
+					}
+
+					// Verify the file actually exists
+					if ( !new File( path ).exists() )
+					{
+						IJ.log( "  Skipping non-existent path: " + path );
 						continue;
 					}
 
@@ -841,10 +892,59 @@ public class CondaDetector
 		}
 		catch ( final Exception e )
 		{
-			// Command failed
+			IJ.log( "  Error searching PATH: " + e.getMessage() );
 		}
 
 		return null;
+	}
+
+	/**
+	 * Validate that a string looks like a valid file path
+	 */
+	private static boolean isValidPath( final String path )
+	{
+		if ( path == null || path.isEmpty() )
+			return false;
+
+		// Check for obvious non-path patterns (error messages)
+		if ( path.startsWith( "INFO:" ) ||
+				path.startsWith( "ERROR:" ) ||
+				path.startsWith( "WARNING:" ) ||
+				path.toLowerCase().contains( "could not find" ) ||
+				path.toLowerCase().contains( "not recognized" ) )
+			return false;
+
+		if ( isWindows() )
+		{
+			// Windows paths should contain : (drive letter) or start with \\
+			// (UNC)
+			// or at least contain \ (subdirectory)
+			if ( !path.contains( ":" ) && !path.startsWith( "\\\\" ) && !path.contains( "\\" ) )
+			{
+				// Might be a relative path - check if file exists
+				if ( !new File( path ).exists() )
+					return false;
+			}
+
+			// Check for invalid Windows path characters that indicate error
+			// messages
+			final String invalidChars = "<>|\u0000";
+			for ( int i = 0; i < invalidChars.length(); i++ )
+			{
+				if ( path.indexOf( invalidChars.charAt( i ) ) >= 0 )
+					return false;
+			}
+		}
+		else
+		{
+			// Unix paths should start with / (absolute) or contain / (relative)
+			// Simple heuristic: if it's long, has spaces, but no /, probably an
+			// error message
+			if ( !path.contains( "/" ) && path.contains( " " ) && path.length() > 30 )
+				return false;
+		}
+
+		return true;
 	}
 
 	/**
