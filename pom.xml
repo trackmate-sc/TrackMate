@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -13,7 +11,7 @@
 
 	<groupId>sc.fiji</groupId>
 	<artifactId>TrackMate</artifactId>
-	<version>8.1.0-SNAPSHOT</version>
+	<version>8.1.0</version>
 
 	<name>TrackMate</name>
 	<description>TrackMate plugin for Fiji.</description>
@@ -153,7 +151,7 @@
 	<scm>
 		<connection>scm:git:https://github.com/trackmate-sc/TrackMate</connection>
 		<developerConnection>scm:git:git@github.com:trackmate-sc/TrackMate</developerConnection>
-		<tag>HEAD</tag>
+		<tag>TrackMate-8.1.0</tag>
 		<url>https://github.com/trackmate-sc/TrackMate</url>
 	</scm>
 	<issueManagement>
