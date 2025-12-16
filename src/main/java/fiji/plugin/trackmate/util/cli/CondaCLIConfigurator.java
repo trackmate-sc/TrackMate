@@ -146,9 +146,6 @@ public abstract class CondaCLIConfigurator extends CLIConfigurator
 			{
 				cmd.add( "--no-capture-output" );
 			}
-			// Call Python -m
-			cmd.add( "python" );
-			cmd.add( "-m" );
 			// The rest of the command, split by spaces.
 			final String executableCommand = getCommand();
 			final String[] split = executableCommand.split( " " );
