@@ -21,6 +21,7 @@
  */
 package fiji.plugin.trackmate.tracking.manual;
 
+import java.util.Collections;
 import java.util.Map;
 
 import javax.swing.ImageIcon;
@@ -92,6 +93,6 @@ public class ManualTrackerFactory implements SpotTrackerFactory
 	@Override
 	public Map< String, Object > getDefaultSettings()
 	{
-		return null;
+		return Collections.emptyMap();
 	}
 }

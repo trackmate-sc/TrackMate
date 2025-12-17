@@ -65,7 +65,6 @@ public class ManualDetectorFactory< T extends RealType< T > & NativeType< T > > 
 		return true;
 	}
 
-
 	@Override
 	public ConfigurationPanel getDetectorConfigurationPanel( final Settings settings, final Model model )
 	{
