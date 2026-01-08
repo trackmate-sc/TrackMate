@@ -39,6 +39,8 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import fiji.plugin.trackmate.gui.GuiUtils;
+
 /**
  * A {@link JSlider} with a {@link JSpinner} next to it, both modifying the same
  * {@link BoundedValue value}.
@@ -69,13 +71,15 @@ public class SliderPanelDouble extends JPanel implements BoundedValueDouble.Upda
 	}
 
 	/**
-	 * Create a {@link SliderPanelDouble} to modify a given {@link BoundedValueDouble value}.
+	 * Create a {@link SliderPanelDouble} to modify a given
+	 * {@link BoundedValueDouble value}.
 	 *
 	 * @param name
 	 *            label to show next to the slider.
 	 * @param model
 	 *            the value that is modified.
 	 * @param spinnerStepSize
+	 *            the steps size for the spinner created.
 	 */
 	public SliderPanelDouble(
 			final String name,
@@ -86,13 +90,21 @@ public class SliderPanelDouble extends JPanel implements BoundedValueDouble.Upda
 		setLayout( new BorderLayout( 10, 10 ) );
 		setPreferredSize( SliderPanel.PANEL_SIZE );
 
+		final int imin = 0;
+		final int imax = sliderLength;
+		int ivalue = toSlider( model.getCurrentValue() );
+		ivalue = Math.max( imin, ivalue );
+		ivalue = Math.min( imax, ivalue );
+		slider = new JSlider( SwingConstants.HORIZONTAL, imin, imax, ivalue );
+
+		spinner = new JSpinner();
 		dmin = model.getRangeMin();
 		dmax = model.getRangeMax();
-		final double val = Math.min( Math.max( model.getCurrentValue(), dmin ), dmax );
 
-		slider = new JSlider( SwingConstants.HORIZONTAL, 0, sliderLength, toSlider( val ) );
-		spinner = new JSpinner();
-		spinner.setModel( new SpinnerNumberModel( val, dmin, dmax, spinnerStepSize ) );
+		double value = model.getCurrentValue();
+		value = Math.min( dmax, value );
+		value = Math.max( dmin, value );
+		spinner.setModel( new SpinnerNumberModel( value, dmin, dmax, spinnerStepSize ) );
 
 		slider.addChangeListener( new ChangeListener()
 		{
@@ -152,6 +164,22 @@ public class SliderPanelDouble extends JPanel implements BoundedValueDouble.Upda
 		add( slider, BorderLayout.CENTER );
 		add( spinner, BorderLayout.EAST );
 
+		final MouseWheelListener mouseWheelListener = new MouseWheelListener()
+		{
+
+			@Override
+			public void mouseWheelMoved( final MouseWheelEvent e )
+			{
+				if ( !slider.isEnabled() )
+					return;
+				final int notches = e.getWheelRotation();
+				final int step = notches < 0 ? 1 : -1;
+				slider.setValue( slider.getValue() + step );
+			}
+		};
+		slider.addMouseWheelListener( mouseWheelListener );
+		spinner.addMouseWheelListener( mouseWheelListener );
+
 		this.model = model;
 		model.setUpdateListener( this );
 	}
@@ -176,16 +204,6 @@ public class SliderPanelDouble extends JPanel implements BoundedValueDouble.Upda
 	}
 
 	@Override
-	public void setFont( final Font font )
-	{
-		super.setFont( font );
-		if ( spinner != null )
-			spinner.setFont( font );
-		if ( slider != null )
-			slider.setFont( font );
-	}
-
-	@Override
 	public void setToolTipText( final String text )
 	{
 		super.setToolTipText( text );
@@ -193,6 +211,20 @@ public class SliderPanelDouble extends JPanel implements BoundedValueDouble.Upda
 			spinner.setToolTipText( text );
 		if ( slider != null )
 			slider.setToolTipText( text );
+	}
+
+	@Override
+	public void setEnabled( final boolean enabled )
+	{
+		spinner.setEnabled( enabled );
+		slider.setEnabled( enabled );
+		super.setEnabled( enabled );
+	}
+
+	@Override
+	public void setFont( final Font font )
+	{
+		GuiUtils.setFont( this, font );
 	}
 
 	@Override

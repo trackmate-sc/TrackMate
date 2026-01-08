@@ -200,9 +200,9 @@ public class SpotFitterPanel extends JPanel
 	}
 
 	/**
-	 * 1-based.
+	 * Returns the selected channel. 1-based.
 	 * 
-	 * @return
+	 * @return the selected channel.
 	 */
 	public int getSelectedChannel()
 	{

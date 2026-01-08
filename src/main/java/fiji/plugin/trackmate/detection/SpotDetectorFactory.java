@@ -39,6 +39,7 @@ import net.imglib2.type.numeric.RealType;
  * @author Jean-Yves Tinevez
  *
  * @param <T>
+ *            the pixel type in the image processed by the detector.
  */
 public interface SpotDetectorFactory< T extends RealType< T > & NativeType< T > > extends SpotDetectorFactoryBase< T >
 {
@@ -59,9 +60,8 @@ public interface SpotDetectorFactory< T extends RealType< T > & NativeType< T > 
 	 *            is 3D without time, then the interval must be 3D), not
 	 *            channel.
 	 * @param frame
-	 *            the frame index in the source image to operate on.
-	 * @return a new {@link SpotDetector} configured to operate on the given
-	 *         target frame.
+	 *            the frame index in the source image to operate on
+	 * @return a new detector.
 	 */
 	public SpotDetector< T > getDetector( final ImgPlus< T > img, final Map< String, Object > settings, final Interval interval, int frame );
 }

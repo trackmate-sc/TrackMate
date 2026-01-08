@@ -21,7 +21,7 @@
  */
 package fiji.plugin.trackmate.gui.components.detector;
 
-import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
+import static fiji.plugin.trackmate.detection.ThresholdDetectorFactory.KEY_INTENSITY_THRESHOLD;
 
 import java.util.Map;
 
@@ -29,7 +29,6 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.detection.LabelImageDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
-import fiji.plugin.trackmate.detection.ThresholdDetectorFactory;
 
 /**
  * Configuration panel for spot detectors based on label images.
@@ -59,15 +58,14 @@ public class LabelImageDetectorConfigurationPanel extends ThresholdDetectorConfi
 	public Map< String, Object > getSettings()
 	{
 		final Map< String, Object > lSettings = super.getSettings();
-		lSettings.remove( ThresholdDetectorFactory.KEY_INTENSITY_THRESHOLD );
+		lSettings.remove( KEY_INTENSITY_THRESHOLD );
 		return lSettings;
 	}
 
 	@Override
 	public void setSettings( final Map< String, Object > settings )
 	{
-		sliderChannel.setValue( ( Integer ) settings.get( KEY_TARGET_CHANNEL ) );
-		chkboxSimplify.setSelected( ( Boolean ) settings.get( ThresholdDetectorFactory.KEY_SIMPLIFY_CONTOURS ) );
+		setSettingsNonIntensity( settings );
 	}
 
 	/**

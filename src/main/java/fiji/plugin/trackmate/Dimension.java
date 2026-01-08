@@ -31,8 +31,13 @@ public enum Dimension
 	POSITION,
 	VELOCITY,
 	LENGTH,
-	AREA, TIME, ANGLE, RATE, // count per frames
-	ANGLE_RATE, STRING; // for non-numeric features
+	AREA,
+	VOLUME,
+	TIME,
+	ANGLE,
+	RATE, // count per frames
+	ANGLE_RATE,
+	STRING; // for non-numeric features
 
 	/*
 	 * We separated length and position so that x,y,z are plotted on a different

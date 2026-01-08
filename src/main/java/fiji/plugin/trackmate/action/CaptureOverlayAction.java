@@ -120,7 +120,7 @@ public class CaptureOverlayAction extends AbstractTMAction
 					TMUtils.getSpatialCalibration( imp ) );
 			if ( whiteBackground )
 			{
-				ImageProcessor ip = imp2.getProcessor();
+				final ImageProcessor ip = imp2.getProcessor();
 				ip.invertLut();
 				if ( imp2.getStackSize() > 1 )
 					imp2.getStack().setColorModel( ip.getColorModel() );
@@ -153,6 +153,8 @@ public class CaptureOverlayAction extends AbstractTMAction
 	 *            the first frame, inclusive, to capture.
 	 * @param last
 	 *            the last frame, inclusive, to capture.
+	 * @param logger
+	 *            a logger instance to echo capture progress.
 	 * @return a new ImagePlus.
 	 */
 	public static ImagePlus capture( final TrackMate trackmate, final int first, final int last, final Logger logger )

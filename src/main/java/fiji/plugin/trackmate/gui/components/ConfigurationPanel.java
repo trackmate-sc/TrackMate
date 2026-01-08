@@ -45,12 +45,18 @@ public abstract class ConfigurationPanel extends JPanel
 	public final ActionEvent PREVIEW_BUTTON_PUSHED = new ActionEvent( this, 0, "PreviewButtonPushed" );
 
 	/**
-	 * Echo the parameters of the given settings on this panel.
+	 * Echoes the parameters of the given settings on this panel.
+	 * 
+	 * @param settings
+	 *            the settings as a map.
 	 */
 	public abstract void setSettings( final Map< String, Object > settings );
 
 	/**
-	 * @return a new settings map object with its values set by this panel.
+	 * Returns a new settings map of string-object with its values set by this
+	 * panel.
+	 * 
+	 * @return a new map.
 	 */
 	public abstract Map< String, Object > getSettings();
 
