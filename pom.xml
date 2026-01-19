@@ -11,7 +11,7 @@
 
 	<groupId>sc.fiji</groupId>
 	<artifactId>TrackMate</artifactId>
-	<version>8.1.4-SNAPSHOT</version>
+	<version>8.1.5-SNAPSHOT</version>
 
 	<name>TrackMate</name>
 	<description>TrackMate plugin for Fiji.</description>
