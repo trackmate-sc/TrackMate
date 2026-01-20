@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -141,24 +141,13 @@ public abstract class CondaCLIConfigurator extends CLIConfigurator
 			// The executable stuff.
 			final String envname = ( String ) s;
 			cmd.add( envname );
-			// Only add '--no-capture-output' if:
-			// 1. we are NOT using micromamba, and
-			// 2. we are NOT on Windows (since it breaks .bat)
-			if ( !isMicromamba( condaPath ) && !os.contains( "win" ) )
-			{
-				cmd.add( "--no-capture-output" );
-			}
+
 			// The rest of the command, split by spaces.
 			final String executableCommand = getCommand();
 			final String[] split = executableCommand.split( " " );
 			cmd.addAll( Arrays.asList( split ) );
 			return cmd;
 		} );
-	}
-
-	private static boolean isMicromamba( final String path )
-	{
-		return path != null && path.toLowerCase().contains( "micromamba" );
 	}
 
 	@Override
