@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -23,6 +23,7 @@ package fiji.plugin.trackmate.tracking.overlap;
 
 import static fiji.plugin.trackmate.tracking.overlap.OverlapTrackerFactory.BASE_ERROR_MESSAGE;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -213,7 +214,7 @@ public class OverlapTracker extends MultiThreadedBenchmarkAlgorithm implements S
 			for ( final Spot target : targetGeometries.keySet() )
 			{
 				final Polygon2D targetPoly = targetGeometries.get( target );
-				futures.add( executors.submit( new FindBestSourceTask( target, targetPoly, sourceGeometries, minIoU ) ) );
+				futures.add( executors.submit( new FindBestSourceTask( target, targetPoly, sourceGeometries, minIoU, enlargeFactor, logger ) ) );
 			}
 
 			// Get results.
@@ -345,12 +346,18 @@ public class OverlapTracker extends MultiThreadedBenchmarkAlgorithm implements S
 
 		private final double minIoU;
 
-		public FindBestSourceTask( final Spot target, final Polygon2D targetPoly, final Map< Spot, Polygon2D > sourceGeometries, final double minIoU )
+		private final double scale;
+
+		private final Logger logger;
+
+		public FindBestSourceTask( final Spot target, final Polygon2D targetPoly, final Map< Spot, Polygon2D > sourceGeometries, final double minIoU, final double scale, final Logger logger )
 		{
 			this.target = target;
 			this.targetPoly = targetPoly;
 			this.sourceGeometries = sourceGeometries;
 			this.minIoU = minIoU;
+			this.scale = scale;
+			this.logger = logger;
 		}
 
 		@Override
@@ -362,7 +369,36 @@ public class OverlapTracker extends MultiThreadedBenchmarkAlgorithm implements S
 			for ( final Spot spot : sourceGeometries.keySet() )
 			{
 				final Polygon2D sourcePoly = sourceGeometries.get( spot );
-				final double intersection = Math.abs( Polygons2D.intersection( targetPoly, sourcePoly ).area() );
+				double intersection;
+				try
+				{
+					intersection = Math.abs( Polygons2D.intersection( targetPoly, sourcePoly ).area() );
+				}
+				catch ( final NullPointerException e )
+				{
+					/*
+					 * Sometimes the intersection computation fails with NPE.
+					 * The code crashes here:
+					 *
+					 * https://github.com/ChristianLutz/gpcj/blob/master/gpcj/
+					 * src/main/java/com/seisw/util/geom/Clip.java#L1604
+					 *
+					 * The issue is not with the polygons, they are good. It's a
+					 * bug in the Clip algorithm that doesn't handle certain
+					 * edge cases.
+					 *
+					 * When this happens, we catch the error, and compute an
+					 * approximation of the intersection with the bounding
+					 * boxes.
+					 */
+					logger.log( "Error trying to compute intersection between spots "
+							+ spot.ID() + " and " + target.ID() + "\n"
+							+ "Approximating with the bounding box.\n", Color.ORANGE.darker() );
+					final Rectangle2D sourceRectangle = toBoundingBox( spot, scale );
+					final Rectangle2D targetRectangle = toBoundingBox( target, scale );
+					final Polygon2D approxIntersection = Polygons2D.intersection( sourceRectangle, targetRectangle );
+					intersection = Math.abs( approxIntersection.area() );
+				}
 				if ( intersection == 0. )
 					continue;
 
