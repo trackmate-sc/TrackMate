@@ -136,7 +136,8 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 		ImagePlus imp = reader.readImage();
 		if ( null == imp )
 			imp = ViewUtils.makeEmpytImagePlus( model );
-
+                GuiUtils.userCheckImpDimensions( imp );
+                
 		/*
 		 * Read settings.
 		 */
