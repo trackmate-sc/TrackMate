@@ -21,6 +21,7 @@
  */
 package fiji.plugin.trackmate.gui;
 
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Desktop;
@@ -62,6 +63,7 @@ import javax.swing.text.JTextComponent;
 import org.scijava.prefs.PrefService;
 
 import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.Settings;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.measure.Calibration;
@@ -255,6 +257,44 @@ public class GuiUtils
 			}
 		}
 	}
+        
+        /**
+         * Check if the image dimensions and the dimensions in the settings match
+         * @param imp movie to check Z and T dimensions
+         * @param settings settings loaded from TrackMate file
+         */
+        public static final void checkDimensionsImpAndSettings( final ImagePlus imp, final Settings settings )
+	{
+		final int[] dims = imp.getDimensions();
+                // dimension of image and .xml metadata match, don't do anything
+                if ( ( settings.nslices == dims[3] ) && ( settings.nframes == dims[4] ) )
+                    return;
+                
+		if ( dims[ 4 ] == 1 && dims[ 3 ] > 1 )
+		{
+                    	switch ( JOptionPane.showConfirmDialog( null,
+					"It appears this image has 1 timepoint but "
+							+ dims[ 3 ]
+							+ " slices.\n"
+							+ "Do you want to swap Z and T?",
+					"Z/T swapped?", JOptionPane.YES_NO_CANCEL_OPTION ) )
+			{
+			case JOptionPane.YES_OPTION:
+				imp.setDimensions( dims[ 2 ], dims[ 4 ], dims[ 3 ] );
+				final Calibration calibration = imp.getCalibration();
+				if ( 0. == calibration.frameInterval )
+				{
+					calibration.frameInterval = 1;
+					calibration.setTimeUnit( "frame" );
+				}
+				break;
+
+			case JOptionPane.CANCEL_OPTION:
+				return;
+			}
+		}
+	}
+
 
 	public static void setSystemLookAndFeel()
 	{
