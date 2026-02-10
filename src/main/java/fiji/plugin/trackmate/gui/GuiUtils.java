@@ -275,7 +275,7 @@ public class GuiUtils
                     	switch ( JOptionPane.showConfirmDialog( null,
 					"It appears this image has 1 timepoint but "
 							+ dims[ 3 ]
-							+ " slices.\n"
+							+ " slices, while the TrackMate file has "+settings.nframes+" timepoint and "+settings.nslices+" slices.\n"
 							+ "Do you want to swap Z and T?",
 					"Z/T swapped?", JOptionPane.YES_NO_CANCEL_OPTION ) )
 			{

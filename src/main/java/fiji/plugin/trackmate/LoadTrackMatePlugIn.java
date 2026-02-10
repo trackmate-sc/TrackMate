@@ -153,6 +153,9 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 			settings = new Settings( imp );
 		}
                 
+                /**
+                 * Check if settings and image dimensions don't match in Z and T dimensions
+                 */
                 GuiUtils.checkDimensionsImpAndSettings( imp, settings );
 
 		/*
