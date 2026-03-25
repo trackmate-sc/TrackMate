@@ -43,8 +43,8 @@ public class SettingsPersistence
 		final TmXmlReader reader = new TmXmlReader( lastSettingsFile );
 		if ( !reader.isReadingOk() )
 		{
-			logger.error( "Could not read the last used settings file at " + lastSettingsFile + ".\n" );
-			logger.error( "Using built-in defaults.\n" );
+			logger.log( "No last-used settings found in '" + lastSettingsFile + "'.\n" );
+			logger.log( "Using built-in defaults.\n" );
 			return getDefaultSettings( imp );
 		}
 
