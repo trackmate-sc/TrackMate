@@ -71,7 +71,7 @@ function [ sf, ef, tf ] = trackmateFeatureDeclarations(filePath)
             'VariableSelectors', append('(', modelPath, ')/@', varNames));
         unitTbl = readtable(filePath, opt_unit);
     catch ME
-        switch ME
+        switch ME.identifier
             case 'MATLAB:UndefinedFunction'
                 % xmlImportOptions() Starts from R2021a
                 error('Your MATLAB is too old (pre-R2021a) to run this script.');
