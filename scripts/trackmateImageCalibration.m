@@ -25,13 +25,21 @@ function cal = trackmateImageCalibration(path)
 %   in physical units
 
 % __
-% Jean-Yves Tinevez - 2016
+% Jean-Yves Tinevez & contributors - 2026
 
     %% Open XML file
+    try
+        tree = matlab.io.xml.dom.Parser().parseFile(path);
+        root = tree.getDocumentElement;
+    catch ME
+        switch ME.identifier
+            case 'MATLAB:UndefinedFunction'
+                error("Your MATLAB is too old (pre-R2021a) to run this script.")
+            otherwise
+                throw(ME)
+        end
+    end
 
-    tree = xmlread(path);
-    root = tree.getFirstChild();
-    
     %% Prepare dim strings
     
     dimensionNames      = { 'x',            'y',            'z',            't' };
@@ -41,6 +49,7 @@ function cal = trackmateImageCalibration(path)
     
     %% Collect basic settings.
     
+    % //Settings[1]//BasicSettings[1]
     settings = root.getElementsByTagName('Settings');
     settings = settings.item(0);
     bs = settings.getElementsByTagName('BasicSettings');
@@ -48,6 +57,7 @@ function cal = trackmateImageCalibration(path)
     
     %% Collect image settings.
     
+    % //ImageData[1]
     id = root.getElementsByTagName('ImageData');
     id = id.item(0);
     
@@ -68,6 +78,7 @@ function cal = trackmateImageCalibration(path)
 
     %% Get physical units from model element.
     
+    % //Model[1]
     model = root.getElementsByTagName('Model');
     model = model.item(0);
     
@@ -77,7 +88,7 @@ function cal = trackmateImageCalibration(path)
     
         dim = dimensionNames{i};
         
-        cal.(dim).units = char(model.getAttribute(unitsNames{i}));
+        cal.(dim).units = model.getAttribute(unitsNames{i});
 
     end
 
