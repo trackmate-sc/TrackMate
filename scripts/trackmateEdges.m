@@ -168,9 +168,8 @@ function  trackMap = trackmateEdges(filePath, featureList)
             if strcmp('Track', tNode.TagName)
                 % Track level
                 iTracks = iTracks + 1;
-                at = tNode.getAttributes;
-                names{iTracks} = at.getNamedItem(TRACK_NAME_ATTRIBUTE).Value;
-                tracks(iTracks) = str2double(at.getNamedItem(TRACK_ID_ATTRIBUTE).Value);
+                names{iTracks} = tNode.getAttribute(TRACK_NAME_ATTRIBUTE);
+                tracks(iTracks) = str2double(tNode.getAttribute(TRACK_ID_ATTRIBUTE));
             end
             tNode = tNode.getNextElementSibling;
             end
@@ -255,9 +254,8 @@ function  trackMap = trackmateEdges(filePath, featureList)
         while ~isempty(edgeNode)
             if strcmp('Edge', edgeNode.TagName)
                 nEdges = nEdges+1;
-                attrs = edgeNode.getAttributes;
                 for i = 1 : nFeatures
-                    holders{i}(nEdges) = str2double(attrs.getNamedItem(featureList{i}).Value);
+                    holders{i}(nEdges) = str2double(edgeNode.getAttribute(featureList{i}));
                 end
             end
             edgeNode = edgeNode.getNextElementSibling;

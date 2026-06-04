@@ -165,12 +165,11 @@ function [ sf, ef, tf ] = trackmateFeatureDeclarations(filePath)
                 if strcmp('Feature', featNode.TagName)
                     % Feature node
                     iFeat = iFeat+1;
-                    attrs = featNode.getAttributes;
-                    key{iFeat} = attrs.getNamedItem(FEATURE_KEY_ATTRIBUTE).Value;
-                    name{iFeat} = attrs.getNamedItem(FEATURE_NAME_ATTRIBUTE).Value;
-                    shortName{iFeat} = attrs.getNamedItem(FEATURE_SHORTNAME_ATTRIBUTE).Value;
-                    dimension{iFeat} = attrs.getNamedItem(FEATURE_DIMENSION_ATTRIBUTE).Value;
-                    isInt(iFeat) = strcmp('true', attrs.getNamedItem(FEATURE_ISINT_ATTRIBUTE).Value);
+                    key{iFeat} = featNode.getAttribute(FEATURE_KEY_ATTRIBUTE);
+                    name{iFeat} = featNode.getAttribute(FEATURE_NAME_ATTRIBUTE);
+                    shortName{iFeat} = featNode.getAttribute(FEATURE_SHORTNAME_ATTRIBUTE);
+                    dimension{iFeat} = featNode.getAttribute(FEATURE_DIMENSION_ATTRIBUTE);
+                    isInt(iFeat) = strcmp('true', featNode.getAttribute(FEATURE_ISINT_ATTRIBUTE));
                 end
                 featNode = featNode.getNextElementSibling;
                 end

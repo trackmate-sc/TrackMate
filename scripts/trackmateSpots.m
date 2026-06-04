@@ -192,11 +192,10 @@ function [ spotTable, spotIDMap, rois ] = trackmateSpots(filePath, featureList)
                 while ~isempty(spotNode)
                 if strcmp('Spot', spotNode.TagName)
                     nSpots = nSpots + 1;
-                    attrMap = spotNode.getAttributes;
-                    holder{1}(nSpots) = str2double(attrMap.getNamedItem(featureList{1}).Value);
-                    holder{2}{nSpots} = attrMap.getNamedItem(featureList{2}).Value;
+                    holder{1}(nSpots) = str2double(spotNode.getAttribute(featureList{1}));
+                    holder{2}{nSpots} = spotNode.getAttribute(featureList{2});
                     for k = 3:nFeatures
-                        holder{k}(nSpots) = str2double(attrMap.getNamedItem(featureList{k}).Value);
+                        holder{k}(nSpots) = str2double(spotNode.getAttribute(featureList{k}));
                     end
 
                     if willReadROIs
