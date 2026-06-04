@@ -87,7 +87,7 @@ function [tracks, metadata] = importTrackMateTracks(file, clipz, scalet)
             case 'MATLAB:UndefinedFunction'
                 error("Your MATLAB is too old (pre-R2021a) to run this script.")
             otherwise
-                error(ME,'Failed to read XML file %s.',file);
+                error(ME.identifier,'Failed to read XML file %s.',file);
         end
     end
     

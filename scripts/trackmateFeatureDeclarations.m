@@ -75,7 +75,7 @@ function [ sf, ef, tf ] = trackmateFeatureDeclarations(filePath)
                     error("Your MATLAB is too old (pre-R2021a) to run this script.")
                 otherwise
                     % Attach the error to facilitate debugging.
-                    error(ME, 'Failed to read XML file %s.',filePath);
+                    error(ME.identifier, 'Failed to read XML file %s.',filePath);
             end
         end
         xmlDocFileName = filePath;
