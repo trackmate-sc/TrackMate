@@ -103,7 +103,7 @@ function [ spotTable, spotIDMap, rois ] = trackmateSpots(filePath, featureList)
     try
         fs = trackmateFeatureDeclarations( filePath );
     catch ME
-        throw(ME)
+        rethrow(ME)
     end
     rootObj = xmlDoc.getDocumentElement;
     modelNodes = rootObj.getElementsByTagName('Model');
@@ -115,14 +115,14 @@ function [ spotTable, spotIDMap, rois ] = trackmateSpots(filePath, featureList)
         % XPath: (TrackMate/Model/AllSpots/SpotsInFrame/Spot)[1]
         for j = 1:modelNodes.Length
             aSNode = modelNodes.node(j).getFirstElementChild;
-            while ~isempty(aSNode)
+            while ~spotFound && ~isempty(aSNode)
             if strcmp ('AllSpots', aSNode.TagName)
                 % AllSpots level
                 sIFNode = aSNode.getFirstElementChild;
-                while ~isempty(sIFNode)
+                while ~spotFound && ~isempty(sIFNode)
                 if strcmp('SpotsInFrame', sIFNode.TagName)
                     spotNode = sIFNode.getFirstElementChild;
-                    while ~isempty(spotNode)
+                    while ~spotFound && ~isempty(spotNode)
                     if strcmp('Spot', spotNode.TagName)
                         spotFound = true;
                         attrMap = spotNode.getAttributes;
@@ -131,6 +131,7 @@ function [ spotTable, spotIDMap, rois ] = trackmateSpots(filePath, featureList)
                         for k = 1:nFeatures
                             featureList{k} = attrMap.item(k-1).Name;
                         end
+                        break
                     end
                     spotNode = spotNode.getNextElementSibling;
                     end
