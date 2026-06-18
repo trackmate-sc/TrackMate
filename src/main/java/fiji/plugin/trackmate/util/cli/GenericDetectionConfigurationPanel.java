@@ -85,7 +85,8 @@ public class GenericDetectionConfigurationPanel extends GenericConfigurationPane
 				.model( model )
 				.settings( settings )
 				.detectorFactory( factorySupplier.get() )
-				.detectionSettingsSupplier( () -> getSettings() );
+				.detectionSettingsSupplier( () -> getSettings() )
+				.extraLogger( model.getLogger() );
 		if ( config instanceof HasInteractivePreview )
 		{
 			final HasInteractivePreview hasPreview = ( HasInteractivePreview ) config;

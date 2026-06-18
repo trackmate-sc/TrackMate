@@ -50,6 +50,9 @@ public class DetectionPreview
 
 	private TrackMate trackmate;
 
+	/** Receives the final summary (spots found / error) in addition to panel.logger. */
+	private Logger extraLogger = Logger.VOID_LOGGER;
+
 	protected DetectionPreview(
 			final Model model,
 			final Settings settings,
@@ -109,7 +112,9 @@ public class DetectionPreview
 
 				final Model sourceModel = out.getA();
 				final Double threshold = out.getB();
-				panel.logger.log( "Found " + sourceModel.getSpots().getNSpots( true ) + " spots." );
+				final String msg = "Found " + sourceModel.getSpots().getNSpots( true ) + " spots.";
+				panel.logger.log( msg );
+				extraLogger.log( "[Preview] " + msg + "\n" );
 
 				// Update target model.
 				updateModelAndHistogram( model, sourceModel, frame, threshold );
@@ -118,6 +123,7 @@ public class DetectionPreview
 			catch ( final Exception e )
 			{
 				panel.logger.error( e.getMessage() );
+				extraLogger.error( "[Preview] " + e.getMessage() + "\n" );
 				e.printStackTrace();
 			}
 			finally
@@ -198,6 +204,7 @@ public class DetectionPreview
 			if ( !detectionOk )
 			{
 				panel.logger.error( trackmate.getErrorMessage() );
+				extraLogger.error( "[Preview] " + trackmate.getErrorMessage() + "\n" );
 				return null;
 			}
 
@@ -450,6 +457,23 @@ public class DetectionPreview
 			return this;
 		}
 
+		private Logger extraLogger = Logger.VOID_LOGGER;
+
+		/**
+		 * Sets a secondary logger that receives only the final preview summary
+		 * (spots found count or error message). Useful to surface results in the
+		 * main TrackMate log when the primary logger is an in-panel widget.
+		 *
+		 * @param extraLogger
+		 *            the secondary logger.
+		 * @return this builder.
+		 */
+		public Builder extraLogger( final Logger extraLogger )
+		{
+			this.extraLogger = ( extraLogger != null ) ? extraLogger : Logger.VOID_LOGGER;
+			return this;
+		}
+
 		public DetectionPreview get()
 		{
 			if ( settings == null )
@@ -463,7 +487,7 @@ public class DetectionPreview
 			if ( frameSupplier == null )
 				throw new IllegalArgumentException( "The detection frame supplier cannot be null." );
 
-			return new DetectionPreview(
+			final DetectionPreview dp = new DetectionPreview(
 					model,
 					settings,
 					detectorFactory,
@@ -472,6 +496,8 @@ public class DetectionPreview
 					thresholdUpdater,
 					axisLabel,
 					thresholdKey );
+			dp.extraLogger = extraLogger;
+			return dp;
 		}
 	}
 }
