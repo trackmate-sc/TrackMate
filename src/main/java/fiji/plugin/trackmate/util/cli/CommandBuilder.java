@@ -30,7 +30,8 @@ import java.util.function.Function;
 import org.apache.commons.lang3.StringUtils;
 
 import fiji.plugin.trackmate.util.cli.CommandCLIConfigurator.ExecutablePath;
-import fiji.plugin.trackmate.util.cli.CondaCLIConfigurator.CondaEnvironmentCommand;
+import fiji.plugin.trackmate.util.cli.EnvCLIConfigurator.CondaEnvironmentCommand;
+import fiji.plugin.trackmate.util.cli.EnvCLIConfigurator.PixiEnvironmentCommand;
 import fiji.plugin.trackmate.util.cli.Configurator.AbstractStringArgument;
 import fiji.plugin.trackmate.util.cli.Configurator.Argument;
 import fiji.plugin.trackmate.util.cli.Configurator.ArgumentVisitor;
@@ -80,6 +81,14 @@ public class CommandBuilder implements ArgumentVisitor
 		if ( condaEnv.getValue() == null )
 			throw new IllegalArgumentException( "Conda environment is not set." );
 		tokens.addAll( translators.getOrDefault( condaEnv, v -> Collections.singletonList( "" + v ) ).apply( condaEnv.getValue() ) );
+	}
+
+	@Override
+	public void visit( final PixiEnvironmentCommand pixiEnv )
+	{
+		if ( pixiEnv.getValue() == null )
+			throw new IllegalArgumentException( "Pixi environment is not set." );
+		tokens.addAll( translators.getOrDefault( pixiEnv, v -> Collections.singletonList( "" + v ) ).apply( pixiEnv.getValue() ) );
 	}
 
 	@Override

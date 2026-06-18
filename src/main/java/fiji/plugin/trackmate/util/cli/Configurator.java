@@ -34,7 +34,8 @@ import java.util.function.Function;
 import org.apache.commons.lang3.StringUtils;
 
 import fiji.plugin.trackmate.util.cli.CommandCLIConfigurator.ExecutablePath;
-import fiji.plugin.trackmate.util.cli.CondaCLIConfigurator.CondaEnvironmentCommand;
+import fiji.plugin.trackmate.util.cli.EnvCLIConfigurator.CondaEnvironmentCommand;
+import fiji.plugin.trackmate.util.cli.EnvCLIConfigurator.PixiEnvironmentCommand;
 
 /**
  * Base class for CLI configurator tools. The implementation of a CLI
@@ -262,6 +263,11 @@ public abstract class Configurator
 		}
 
 		public default void visit( final CondaEnvironmentCommand condaEnvironmentCommand )
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		public default void visit( final PixiEnvironmentCommand pixiEnvironmentCommand )
 		{
 			throw new UnsupportedOperationException();
 		}

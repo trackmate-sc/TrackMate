@@ -19,21 +19,16 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.util.cli.condapath;
+package fiji.plugin.trackmate.util.cli.pixipath;
 
 import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -60,16 +55,16 @@ import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.util.cli.CLIUtils;
-import fiji.plugin.trackmate.util.cli.condapath.CondaDetector.CondaInfo;
-import fiji.plugin.trackmate.util.cli.condapath.CondaDetector.CondaNotFoundException;
+import fiji.plugin.trackmate.util.cli.pixipath.PixiDetector.PixiInfo;
+import fiji.plugin.trackmate.util.cli.pixipath.PixiDetector.PixiNotFoundException;
 import ij.IJ;
 import ij.ImageJ;
 
 @Plugin( type = Command.class,
-		label = "Configure the path to the Conda executable used in TrackMate...",
+		label = "Configure the path to the Pixi executable used in TrackMate...",
 		iconPath = "/icons/commands/information.png",
-		menuPath = "Edit > Options > Configure TrackMate Conda path..." )
-public class CondaPathConfigCommand implements Command
+		menuPath = "Edit > Options > Configure TrackMate Pixi path..." )
+public class PixiPathConfigCommand implements Command
 {
 
 	@Override
@@ -82,48 +77,32 @@ public class CondaPathConfigCommand implements Command
 	{
 		final PrefService prefs = TMUtils.getContext().getService( PrefService.class );
 
-		// Get or detect default paths
 		String findPath;
 		try
 		{
-			findPath = CLIUtils.findDefaultCondaPath();
+			findPath = CLIUtils.findDefaultPixiPath();
 		}
 		catch ( final IllegalArgumentException e )
 		{
-			findPath = "";
+			findPath = System.getProperty( "user.home" ) + "/.pixi/bin/pixi";
 		}
+		final String pixiPath = prefs.get( CLIUtils.class, CLIUtils.PIXI_PATH_PREF_KEY, findPath );
+		final String projectsRoot = prefs.get( CLIUtils.class, CLIUtils.PIXI_PROJECTS_ROOT_KEY, "" );
 
-		final String condaPath = prefs.get( CLIUtils.class, CLIUtils.CONDA_PATH_PREF_KEY, findPath );
-		final Path path = ( condaPath != null && !condaPath.isBlank() ) ? Paths.get( condaPath ) : null;
-		final Path parent = ( path != null ) ? path.getParent() : null;
-		final Path parentOfParent = ( parent != null ) ? parent.getParent() : null;
-		final String defaultValue = "";
-
-		String condaRootPrefix = ( parentOfParent != null )
-				? parentOfParent.toString()
-				: defaultValue;
-		condaRootPrefix = prefs.get( CLIUtils.class, CLIUtils.CONDA_ROOT_PREFIX_KEY, condaRootPrefix );
-
-		// Create non-modal dialog
-		final JDialog dialog = new JDialog( IJ.getInstance(), "TrackMate Conda Configuration", false );
+		final JDialog dialog = new JDialog( IJ.getInstance(), "TrackMate Pixi Configuration", false );
 		dialog.setIconImage( TRACKMATE_ICON.getImage() );
 		dialog.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
 
-		// Main panel with padding
 		final JPanel mainPanel = new JPanel( new BorderLayout( 10, 10 ) );
 		mainPanel.setBorder( new EmptyBorder( 15, 15, 15, 15 ) );
 		mainPanel.setBackground( Color.WHITE );
 
-		// ========== Header Panel ==========
-		final JPanel headerPanel = createHeaderPanel();
-		mainPanel.add( headerPanel, BorderLayout.NORTH );
+		mainPanel.add( createHeaderPanel(), BorderLayout.NORTH );
 
-		// ========== Center Panel (Form) ==========
 		final JPanel centerPanel = new JPanel();
 		centerPanel.setLayout( new BoxLayout( centerPanel, BoxLayout.Y_AXIS ) );
 		centerPanel.setBackground( Color.WHITE );
 
-		// Status label for feedback
 		final JTextArea statusArea = new JTextArea( 2, 50 );
 		statusArea.setEditable( false );
 		statusArea.setLineWrap( true );
@@ -134,47 +113,44 @@ public class CondaPathConfigCommand implements Command
 		statusArea.setBorder( BorderFactory.createCompoundBorder(
 				BorderFactory.createLineBorder( new Color( 180, 200, 220 ) ),
 				new EmptyBorder( 5, 8, 5, 8 ) ) );
-		statusArea.setText( "Configure conda paths or use auto-detection" );
+		statusArea.setText( "Configure pixi paths below" );
 
 		final JScrollPane statusScrollPane = new JScrollPane( statusArea );
 		statusScrollPane.setBorder( BorderFactory.createEmptyBorder() );
-		statusScrollPane.setMaximumSize( new Dimension( Integer.MAX_VALUE, 60 ) );
 		centerPanel.add( statusScrollPane );
 		centerPanel.add( Box.createVerticalStrut( 15 ) );
 
-		// Conda executable path
 		final JPanel execPanel = createPathPanel(
-				"Conda Executable Path",
-				"Path to the conda, mamba, or micromamba executable",
-				condaPath );
+				"Pixi Executable Path",
+				"Path to the pixi executable (e.g. ~/.pixi/bin/pixi)",
+				pixiPath,
+				false );
 		final JTextField execField = ( JTextField ) execPanel.getClientProperty( "textfield" );
 		final JButton execBrowseButton = ( JButton ) execPanel.getClientProperty( "browse" );
 		centerPanel.add( execPanel );
 		centerPanel.add( Box.createVerticalStrut( 10 ) );
 
-		// Conda root prefix
 		final JPanel rootPanel = createPathPanel(
-				"Conda Root Prefix",
-				"Root directory of conda installation (CONDA_ROOT_PREFIX)",
-				condaRootPrefix );
+				"Pixi Projects Root",
+				"Folder whose subdirectories are pixi projects (each contains a pixi.toml). Used by the \"find\" button in detector panels.",
+				projectsRoot,
+				true );
 		final JTextField rootField = ( JTextField ) rootPanel.getClientProperty( "textfield" );
 		final JButton rootBrowseButton = ( JButton ) rootPanel.getClientProperty( "browse" );
 		centerPanel.add( rootPanel );
 		centerPanel.add( Box.createVerticalStrut( 15 ) );
 
-		// Browse button actions
-		execBrowseButton.addActionListener( e -> browseForFile( execField, dialog ) );
-		rootBrowseButton.addActionListener( e -> browseForDirectory( rootField, dialog ) );
+		execBrowseButton.addActionListener( e -> browseFor( execField, dialog, false ) );
+		rootBrowseButton.addActionListener( e -> browseFor( rootField, dialog, true ) );
 
 		mainPanel.add( centerPanel, BorderLayout.CENTER );
 
-		// ========== Button Panel ==========
 		final JPanel buttonPanel = new JPanel( new FlowLayout( FlowLayout.RIGHT, 10, 0 ) );
 		buttonPanel.setBackground( Color.WHITE );
 
 		final JButton autoDetectButton = new JButton( "Auto-detect" );
 		autoDetectButton.setIcon( Icons.PREVIEW_ICON );
-		autoDetectButton.addActionListener( e -> autoDetect( execField, rootField, statusArea ) );
+		autoDetectButton.addActionListener( e -> autoDetect( execField, statusArea ) );
 
 		final JButton diagnoseButton = new JButton( "Diagnose" );
 		diagnoseButton.setIcon( Icons.COG_ICON );
@@ -182,7 +158,7 @@ public class CondaPathConfigCommand implements Command
 
 		final JButton testButton = new JButton( "Test" );
 		testButton.setIcon( Icons.EXECUTE_ICON );
-		testButton.addActionListener( e -> test( execField.getText(), rootField.getText(), statusArea ) );
+		testButton.addActionListener( e -> test( execField.getText(), statusArea ) );
 
 		final JButton okButton = new JButton( "OK" );
 		okButton.addActionListener( e -> saveAndClose( execField.getText(), rootField.getText(), prefs, dialog ) );
@@ -199,14 +175,11 @@ public class CondaPathConfigCommand implements Command
 
 		mainPanel.add( buttonPanel, BorderLayout.SOUTH );
 
-		// ========== Finalize Dialog ==========
 		dialog.add( mainPanel );
 		dialog.pack();
 		dialog.setLocationRelativeTo( IJ.getInstance() );
 		dialog.setVisible( true );
 	}
-
-	// ========== UI Component Factories ==========
 
 	private JPanel createHeaderPanel()
 	{
@@ -220,12 +193,11 @@ public class CondaPathConfigCommand implements Command
 		textPanel.setLayout( new BoxLayout( textPanel, BoxLayout.Y_AXIS ) );
 		textPanel.setBackground( Color.WHITE );
 
-		final JLabel titleLabel = new JLabel( "Conda Configuration" );
+		final JLabel titleLabel = new JLabel( "Pixi Configuration" );
 		titleLabel.setFont( Fonts.BIG_FONT );
 		titleLabel.setAlignmentX( Component.LEFT_ALIGNMENT );
 
-		final JLabel subtitleLabel = new JLabel(
-				"Configure conda executable for TrackMate modules" );
+		final JLabel subtitleLabel = new JLabel( "Configure pixi executable for TrackMate" );
 		subtitleLabel.setFont( Fonts.SMALL_FONT );
 		subtitleLabel.setForeground( Color.GRAY );
 		subtitleLabel.setAlignmentX( Component.LEFT_ALIGNMENT );
@@ -240,7 +212,7 @@ public class CondaPathConfigCommand implements Command
 		return headerPanel;
 	}
 
-	private JPanel createPathPanel( final String title, final String description, final String defaultPath )
+	private JPanel createPathPanel( final String title, final String description, final String defaultPath, final boolean directory )
 	{
 		final JPanel panel = new JPanel( new BorderLayout( 5, 5 ) );
 		panel.setBackground( Color.WHITE );
@@ -248,13 +220,11 @@ public class CondaPathConfigCommand implements Command
 				BorderFactory.createTitledBorder( title ),
 				new EmptyBorder( 5, 5, 5, 5 ) ) );
 
-		// Description
 		final JLabel descLabel = new JLabel( description );
 		descLabel.setFont( Fonts.SMALL_FONT );
 		descLabel.setForeground( Color.GRAY );
 		panel.add( descLabel, BorderLayout.NORTH );
 
-		// Path input panel
 		final JPanel inputPanel = new JPanel( new BorderLayout( 5, 0 ) );
 		inputPanel.setBackground( Color.WHITE );
 
@@ -268,169 +238,125 @@ public class CondaPathConfigCommand implements Command
 		inputPanel.add( browseButton, BorderLayout.EAST );
 
 		panel.add( inputPanel, BorderLayout.CENTER );
-
-		// Store components for later access
 		panel.putClientProperty( "textfield", textField );
 		panel.putClientProperty( "browse", browseButton );
 
 		return panel;
 	}
 
-	// ========== Action Handlers ==========
-
-	private void browseForFile( final JTextField textField, final JDialog parent )
+	private void browseFor( final JTextField textField, final JDialog parent, final boolean directory )
 	{
 		final JFileChooser chooser = new JFileChooser();
-		chooser.setDialogTitle( "Select Conda Executable" );
-		chooser.setFileSelectionMode( JFileChooser.FILES_ONLY );
+		chooser.setFileSelectionMode( directory ? JFileChooser.DIRECTORIES_ONLY : JFileChooser.FILES_ONLY );
+		chooser.setDialogTitle( directory ? "Select pixi projects root folder" : "Select pixi executable" );
 
 		final String currentPath = textField.getText();
 		if ( !currentPath.isEmpty() )
 		{
-			final File currentFile = new File( currentPath );
-			if ( currentFile.getParentFile() != null && currentFile.getParentFile().exists() )
-				chooser.setCurrentDirectory( currentFile.getParentFile() );
+			final File current = new File( currentPath );
+			final File startDir = directory ? current : ( current.getParentFile() != null ? current.getParentFile() : current );
+			if ( startDir.exists() )
+				chooser.setCurrentDirectory( startDir );
 		}
 
 		if ( chooser.showOpenDialog( parent ) == JFileChooser.APPROVE_OPTION )
-		{
-			final File selected = chooser.getSelectedFile();
-			textField.setText( selected.getAbsolutePath() );
-		}
+			textField.setText( chooser.getSelectedFile().getAbsolutePath() );
 	}
 
-	private void browseForDirectory( final JTextField textField, final JDialog parent )
-	{
-		final JFileChooser chooser = new JFileChooser();
-		chooser.setDialogTitle( "Select Conda Root Directory" );
-		chooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY );
-
-		final String currentPath = textField.getText();
-		if ( !currentPath.isEmpty() )
-		{
-			final File currentDir = new File( currentPath );
-			if ( currentDir.exists() )
-				chooser.setCurrentDirectory( currentDir );
-		}
-
-		if ( chooser.showOpenDialog( parent ) == JFileChooser.APPROVE_OPTION )
-		{
-			final File selected = chooser.getSelectedFile();
-			textField.setText( selected.getAbsolutePath() );
-		}
-	}
-
-	private void autoDetect( final JTextField execField, final JTextField rootField, final JTextArea statusArea )
+	private void autoDetect( final JTextField execField, final JTextArea statusArea )
 	{
 		statusArea.setForeground( new Color( 60, 120, 180 ) );
-		statusArea.setText( "Auto-detecting conda installation..." );
+		statusArea.setText( "Auto-detecting pixi installation..." );
 
 		new Thread( () -> {
 			try
 			{
-				final CondaInfo condaInfo = CondaDetector.detect();
+				final PixiInfo info = PixiDetector.detect();
 				SwingUtilities.invokeLater( () -> {
-					execField.setText( condaInfo.getCondaExecutable() );
-					rootField.setText( condaInfo.getRootPrefix() );
+					execField.setText( info.getPixiExecutable() );
 					statusArea.setForeground( new Color( 0, 128, 0 ) );
 					statusArea.setText( String.format(
-							"✓ Auto-detection successful!\nFound conda %s at: %s",
-							condaInfo.getVersion(),
-							condaInfo.getCondaExecutable() ) );
+							"Auto-detection successful! Found pixi %s at: %s",
+							info.getVersion(),
+							info.getPixiExecutable() ) );
 				} );
 			}
-			catch ( final CondaNotFoundException e )
+			catch ( final PixiNotFoundException e )
 			{
 				SwingUtilities.invokeLater( () -> {
 					statusArea.setForeground( new Color( 180, 0, 0 ) );
-					statusArea.setText( "✗ Auto-detection failed:\n" + e.getMessage() );
+					statusArea.setText( "Auto-detection failed: " + e.getMessage() );
 				} );
 			}
-		}, "Conda-AutoDetect" ).start();
+		}, "Pixi-AutoDetect" ).start();
 	}
 
 	private void diagnose()
 	{
 		new Thread( () -> {
-			IJ.log( "\n========== Conda Diagnostics ==========\n" );
-			CondaDetector.diagnose();
-		}, "Conda-Diagnose" ).start();
+			IJ.log( "\n========== Pixi Diagnostics ==========\n" );
+			PixiDetector.diagnose();
+		}, "Pixi-Diagnose" ).start();
 	}
 
-	private void test( final String execPath, final String rootPath, final JTextArea statusArea )
+	private void test( final String execPath, final JTextArea statusArea )
 	{
 		statusArea.setForeground( new Color( 60, 120, 180 ) );
-		statusArea.setText( "Testing conda configuration..." );
+		statusArea.setText( "Testing pixi executable..." );
 
 		new Thread( () -> {
 			try
 			{
-				// Temporarily set the paths for testing
-				final PrefService prefs = TMUtils.getContext().getService( PrefService.class );
-				final String oldExec = prefs.get( CLIUtils.class, CLIUtils.CONDA_PATH_PREF_KEY, "" );
-				final String oldRoot = prefs.get( CLIUtils.class, CLIUtils.CONDA_ROOT_PREFIX_KEY, "" );
-
-				prefs.put( CLIUtils.class, CLIUtils.CONDA_PATH_PREF_KEY, execPath );
-				prefs.put( CLIUtils.class, CLIUtils.CONDA_ROOT_PREFIX_KEY, rootPath );
-				CLIUtils.clearEnvMap();
-
-				final Map< String, String > map = CLIUtils.getEnvMap();
-				final StringBuilder str = new StringBuilder();
-				str.append( "✓ Test successful! Found " + map.size() + " environment(s):\n" );
-				map.forEach( ( k, v ) -> str.append( String.format( "  • %s\n", k ) ) );
-
+				final ProcessBuilder pb = new ProcessBuilder( execPath, "--version" );
+				pb.redirectErrorStream( true );
+				final Process process = pb.start();
+				final StringBuilder sb = new StringBuilder();
+				try ( final java.io.BufferedReader reader = new java.io.BufferedReader(
+						new java.io.InputStreamReader( process.getInputStream() ) ) )
+				{
+					String line;
+					while ( ( line = reader.readLine() ) != null )
+						sb.append( line );
+				}
+				final int exit = process.waitFor();
 				SwingUtilities.invokeLater( () -> {
-					statusArea.setForeground( new Color( 0, 128, 0 ) );
-					statusArea.setText( str.toString() );
+					if ( exit == 0 )
+					{
+						statusArea.setForeground( new Color( 0, 128, 0 ) );
+						statusArea.setText( "Test successful: " + sb.toString().trim() );
+					}
+					else
+					{
+						statusArea.setForeground( new Color( 180, 0, 0 ) );
+						statusArea.setText( "Test failed (exit " + exit + "): " + sb.toString().trim() );
+					}
 				} );
-
-				IJ.log( "\n========== Conda Test Results ==========\n" + str.toString() );
-
-				// Restore old values
-				prefs.put( CLIUtils.class, CLIUtils.CONDA_PATH_PREF_KEY, oldExec );
-				prefs.put( CLIUtils.class, CLIUtils.CONDA_ROOT_PREFIX_KEY, oldRoot );
-				CLIUtils.clearEnvMap();
-			}
-			catch ( final IOException e )
-			{
-				SwingUtilities.invokeLater( () -> {
-					statusArea.setForeground( new Color( 180, 0, 0 ) );
-					statusArea.setText( "✗ Test failed:\nConda executable path seems incorrect.\n" + e.getMessage() );
-				} );
-				IJ.error( "Conda Test Failed",
-						"Conda executable path seems to be incorrect.\nError: " + e.getMessage() );
 			}
 			catch ( final Exception e )
 			{
 				SwingUtilities.invokeLater( () -> {
 					statusArea.setForeground( new Color( 180, 0, 0 ) );
-					statusArea.setText( "✗ Test failed:\n" + e.getMessage() );
+					statusArea.setText( "Test failed: " + e.getMessage() );
 				} );
-				e.printStackTrace();
-				IJ.error( "Conda Test Failed",
-						"Error when running conda.\nError: " + e.getMessage() );
 			}
-		}, "Conda-Test" ).start();
+		}, "Pixi-Test" ).start();
 	}
 
-	private void saveAndClose( final String execPath, final String rootPath, final PrefService prefs, final JDialog dialog )
+	private void saveAndClose( final String execPath, final String projectsRoot, final PrefService prefs, final JDialog dialog )
 	{
-		prefs.put( CLIUtils.class, CLIUtils.CONDA_PATH_PREF_KEY, execPath );
-		prefs.put( CLIUtils.class, CLIUtils.CONDA_ROOT_PREFIX_KEY, rootPath );
-		CLIUtils.clearEnvMap();
+		prefs.put( CLIUtils.class, CLIUtils.PIXI_PATH_PREF_KEY, execPath );
+		prefs.put( CLIUtils.class, CLIUtils.PIXI_PROJECTS_ROOT_KEY, projectsRoot );
+		PixiDetector.clearCache();
 
-		IJ.log( "Conda configuration saved:" );
-		IJ.log( "  Executable: " + execPath );
-		IJ.log( "  Root Prefix: " + rootPath );
+		IJ.log( "Pixi configuration saved: executable = " + execPath );
+		IJ.log( "Pixi projects root = " + ( projectsRoot.isEmpty() ? "(not set)" : projectsRoot ) );
 
 		dialog.dispose();
 	}
 
-	// ========== Main for Testing ==========
-
 	public static void main( final String[] args )
 	{
 		ImageJ.main( args );
-		TMUtils.getContext().getService( CommandService.class ).run( CondaPathConfigCommand.class, false );
+		TMUtils.getContext().getService( CommandService.class ).run( PixiPathConfigCommand.class, false );
 	}
 }

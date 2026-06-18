@@ -8,12 +8,12 @@ f * #%L
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -33,7 +33,6 @@ import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedText
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.listElement;
 import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.stringElement;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -44,10 +43,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.DoubleSupplier;
 import java.util.function.Function;
@@ -83,7 +84,8 @@ import fiji.plugin.trackmate.gui.displaysettings.StyleElements.StyleElement;
 import fiji.plugin.trackmate.util.FileChooser;
 import fiji.plugin.trackmate.util.FileChooser.DialogType;
 import fiji.plugin.trackmate.util.cli.CommandCLIConfigurator.ExecutablePath;
-import fiji.plugin.trackmate.util.cli.CondaCLIConfigurator.CondaEnvironmentCommand;
+import fiji.plugin.trackmate.util.cli.EnvCLIConfigurator.CondaEnvironmentCommand;
+import fiji.plugin.trackmate.util.cli.EnvCLIConfigurator.PixiEnvironmentCommand;
 import fiji.plugin.trackmate.util.cli.Configurator.Argument;
 import fiji.plugin.trackmate.util.cli.Configurator.ArgumentVisitor;
 import fiji.plugin.trackmate.util.cli.Configurator.ChoiceArgument;
@@ -99,13 +101,13 @@ public class ConfigGuiBuilder implements ArgumentVisitor
 
 	private static final int tfCols = 4;
 
-	private final ConfigPanel panel;
+	final ConfigPanel panel;
 
-	private final GridBagConstraints c;
+	final GridBagConstraints c;
 
-	private int topInset = 5;
+	int topInset = 5;
 
-	private int bottomInset = 5;
+	int bottomInset = 5;
 
 	private final Map< Argument< ?, ? >, Function< ?, ? > > forwardUITranslators;
 
@@ -401,39 +403,13 @@ public class ConfigGuiBuilder implements ArgumentVisitor
 	@Override
 	public void visit( final CondaEnvironmentCommand arg )
 	{
-		if ( arg.getEnvironments().isEmpty() )
-		{
-			// No environment found. Tell the user.
-			final JLabel lbl = new JLabel( "<html>There was an error retrieving the "
-					+ "list of conda environments. "
-					+ "<p>"
-					+ "Did you configure Conda for TrackMate? "
-					+ "<p>"
-					+ "(Edit > Options > Configure TrackMate Conda path...)</html>" );
-			lbl.setFont( Fonts.SMALL_FONT );
-			lbl.setForeground( Color.RED );
-			lbl.setPreferredSize( new Dimension( 200, 40 ) );
-			addToLayout( arg.getHelp(), lbl );
-			return;
-		}
+		new LauncherEnvGuiSection( this ).visitConda( arg );
+	}
 
-		if ( !arg.isSet() )
-		{
-			if ( !arg.hasDefaultValue() )
-				throw new IllegalArgumentException( "The GUI builder requires all arguments and commands "
-						+ "to have a value or a default value. The argument '" + arg.getName() + "' misses both." );
-			arg.set( arg.getDefaultValue() );
-		}
-
-		final ListElement< String > element = listElement( arg.getName(), arg.getEnvironments(), arg::getValue, arg::set );
-		panel.elements.put( arg.getKey(), element );
-		final JComboBox< String > comboBox = linkedComboBoxSelector( element );
-		comboBox.setSelectedItem( arg.getValue() );
-		addToLayout(
-				arg.getHelp(),
-				new JLabel( element.getLabel() ),
-				comboBox,
-				null );
+	@Override
+	public void visit( final PixiEnvironmentCommand arg )
+	{
+		new LauncherEnvGuiSection( this ).visitPixi( arg );
 	}
 
 	/*
@@ -531,7 +507,7 @@ public class ConfigGuiBuilder implements ArgumentVisitor
 		}
 	}
 
-	private void addToLayout( final String help, final JLabel lbl, final JComponent comp, final Argument< ?, ? > arg )
+	void addToLayout( final String help, final JLabel lbl, final JComponent comp, final Argument< ?, ? > arg )
 	{
 		lbl.setText( lbl.getText() + " " );
 		lbl.setFont( Fonts.SMALL_FONT );
@@ -629,7 +605,7 @@ public class ConfigGuiBuilder implements ArgumentVisitor
 		}
 	}
 
-	private void addToLayout( final String help, final JComponent comp )
+	void addToLayout( final String help, final JComponent comp )
 	{
 		final JComponent header;
 		if ( panel.rdbtn != null )
@@ -671,9 +647,13 @@ public class ConfigGuiBuilder implements ArgumentVisitor
 	public static ConfigPanel build( final Configurator config )
 	{
 		final ConfigGuiBuilder builder = createBuilder( config );
-		// Could we make something more elegant than this?
+		// Skip if the command arg is already in the arguments list (dual-mode env configurators).
 		if ( config instanceof CLIConfigurator )
-			( ( CLIConfigurator ) config ).getCommandArg().accept( builder );
+		{
+			final Argument< ?, ? > cmdArg = ( ( CLIConfigurator ) config ).getCommandArg();
+			if ( !config.getArguments().contains( cmdArg ) )
+				cmdArg.accept( builder );
+		}
 		return build( config, builder );
 	}
 
@@ -711,13 +691,45 @@ public class ConfigGuiBuilder implements ArgumentVisitor
 				final Argument< ?, ? > arg = it.next();
 				buttons.put( arg, btn );
 				btn.setSelected( selectable.getSelection().equals( arg ) );
+				// Label launcher radio buttons so the choice is legible.
+				if ( EnvCLIConfigurator.KEY_LAUNCHER.equals( selectable.getKey() ) )
+				{
+					btn.setText( arg.getName() );
+					btn.setFont( Fonts.SMALL_FONT );
+				}
 			}
 		}
 
-		// Iterate over arguments, taking care of selectable group.
+		// Render the launcher selector (conda vs pixi) at the top, regardless of
+		// where those args ended up in the argument list after subclass reordering.
+		final Set< Argument< ?, ? > > launcherRendered = new HashSet<>();
+		for ( final SelectableArguments selectable : config.getSelectables() )
+		{
+			if ( EnvCLIConfigurator.KEY_LAUNCHER.equals( selectable.getKey() ) )
+			{
+				for ( final Argument< ?, ? > arg : selectable.getArguments() )
+				{
+					if ( !arg.isVisible() )
+						continue;
+					builder.setCurrentRadioButton( buttons.get( arg ) );
+					arg.accept( builder );
+					launcherRendered.add( arg );
+				}
+				// Separator after launcher section.
+				builder.c.gridx = 0;
+				builder.c.gridwidth = 3;
+				builder.c.insets = new java.awt.Insets( 5, 0, 5, 0 );
+				builder.panel.add( new JSeparator( JSeparator.HORIZONTAL ), builder.c );
+				builder.c.gridy++;
+			}
+		}
+
+		// Iterate over remaining arguments, skipping any already rendered above.
 		for ( final Argument< ?, ? > arg : config.getArguments() )
 		{
 			if ( !arg.isVisible() )
+				continue;
+			if ( launcherRendered.contains( arg ) )
 				continue;
 
 			builder.setCurrentRadioButton( buttons.get( arg ) );
@@ -776,7 +788,7 @@ public class ConfigGuiBuilder implements ArgumentVisitor
 		 */
 		final Map< String, StyleElement > elements = new LinkedHashMap<>();
 
-		private JRadioButton rdbtn;
+		JRadioButton rdbtn;
 
 		private static final long serialVersionUID = 1L;
 

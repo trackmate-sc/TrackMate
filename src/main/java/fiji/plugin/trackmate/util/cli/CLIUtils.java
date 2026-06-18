@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -58,7 +58,13 @@ public class CLIUtils
 
 	public static final String CONDA_ROOT_PREFIX_KEY = "trackmate.conda.root.prefix";
 
+	public static final String PIXI_PATH_PREF_KEY = "trackmate.pixi.path";
+
+	public static final String PIXI_PROJECTS_ROOT_KEY = "trackmate.pixi.projects.root";
+
+
 	private static Map< String, String > envMap;
+
 
 	/**
 	 * Creates and start a process that runs the command specified in the CLI.
@@ -75,7 +81,7 @@ public class CLIUtils
 	{
 		final List< String > cmd = CommandBuilder.build( cli );
 		final ProcessBuilder pb = new ProcessBuilder( cmd );
-		if ( cli instanceof CondaCLIConfigurator )
+		if ( cli instanceof EnvCLIConfigurator && ( ( EnvCLIConfigurator ) cli ).getLauncher() == EnvCLIConfigurator.Launcher.CONDA )
 		{
 			// Env variables.
 			final Map< String, String > env = new HashMap<>();
@@ -84,6 +90,7 @@ public class CLIUtils
 			env.put( "CONDA_ROOT_PREFIX", condaRootPrefix );
 			pb.environment().putAll( env );
 		}
+		// Pixi launcher: pixi run manages env activation itself, no extra env vars needed.
 		pb.redirectOutput( ProcessBuilder.Redirect.appendTo( logFile ) );
 		pb.redirectError( ProcessBuilder.Redirect.appendTo( logFile ) );
 		return pb.start();
@@ -341,15 +348,39 @@ public class CLIUtils
 			{
 				if ( envMap == null )
 				{
+					final String condaPath = getCondaPath();
+					if ( condaPath == null || condaPath.isEmpty() )
+					{
+						envMap = new HashMap<>();
+						return envMap;
+					}
+					final Path condaPathObj;
+					try
+					{
+						condaPathObj = Paths.get( condaPath );
+					}
+					catch ( final InvalidPathException e )
+					{
+						envMap = new HashMap<>();
+						return envMap;
+					}
+					if ( !Files.isExecutable( condaPathObj ) )
+					{
+						envMap = new HashMap<>();
+						return envMap;
+					}
 					// Prepare the command and environment variables.
 					// Command
-					final ProcessBuilder pb = new ProcessBuilder( Arrays.asList( getCondaPath(), "env", "list" ) );
+					final ProcessBuilder pb = new ProcessBuilder( Arrays.asList( condaPath, "env", "list" ) );
 					// Env variables.
 					final Map< String, String > env = new HashMap<>();
 					final String condaRootPrefix = getCondaRootPrefix();
 					env.put( "MAMBA_ROOT_PREFIX", condaRootPrefix );
 					env.put( "CONDA_ROOT_PREFIX", condaRootPrefix );
 					pb.environment().putAll( env );
+					// Pre-initialize to empty so a launch failure caches the
+					// result and avoids retrying on every getConfigurator() call.
+					envMap = new HashMap<>();
 					// Run and collect output.
 					final Process process = pb.start();
 					final BufferedReader stdOutput = new BufferedReader( new InputStreamReader( process.getInputStream() ) );
@@ -366,7 +397,6 @@ public class CLIUtils
 						throw new IOException( "Could not retrieve environment map properly:\n" + errorOutput );
 
 					String line;
-					envMap = new HashMap<>();
 					while ( ( line = stdOutput.readLine() ) != null )
 					{
 						line = line.trim();
@@ -424,7 +454,7 @@ public class CLIUtils
 		}
 		catch ( final IllegalArgumentException e )
 		{
-			findPath = "/usr/local/opt/micromamba/bin/micromamba";
+			findPath = "";
 		}
 		return prefs.get( CLIUtils.class, CLIUtils.CONDA_PATH_PREF_KEY, findPath );
 	}
@@ -432,8 +462,27 @@ public class CLIUtils
 	public static String getCondaRootPrefix()
 	{
 		final PrefService prefs = TMUtils.getContext().getService( PrefService.class );
-		final String findPath = "/usr/local/opt/micromamba";
-		return prefs.get( CLIUtils.class, CLIUtils.CONDA_ROOT_PREFIX_KEY, findPath );
+		final String prefRoot = prefs.get( CLIUtils.class, CLIUtils.CONDA_ROOT_PREFIX_KEY, "" );
+		if ( prefRoot != null && !prefRoot.isBlank() )
+			return prefRoot;
+
+		final String condaPath = getCondaPath();
+		if ( condaPath != null && !condaPath.isBlank() )
+		{
+			try
+			{
+				final Path path = Paths.get( condaPath );
+				final Path parent = path.getParent();
+				final Path parentOfParent = ( parent != null ) ? parent.getParent() : null;
+				if ( parentOfParent != null )
+					return parentOfParent.toString();
+			}
+			catch ( final InvalidPathException e )
+			{
+				// Fall through to empty default.
+			}
+		}
+		return "";
 	}
 
 	public static String findDefaultCondaPath() throws IllegalArgumentException
@@ -452,7 +501,6 @@ public class CLIUtils
 				? "/Library/micromamba/bin/micromamba"
 				: "/.local/share/micromamba/bin/micromamba" );
 		final String micromamba2 = "/usr/local/micromamba/bin/micromamba";
-		final String micromamba3 = "/usr/local/opt/micromamba/bin/micromamba";
 		final String micromamba4 = "/opt/micromamba/bin/micromamba";
 		final String micromamba5 = prefix + username + "/mambaforge/condabin/mamba";
 		final String[] toTest = new String[] {
@@ -464,7 +512,6 @@ public class CLIUtils
 				mamba2,
 				micromamba1,
 				micromamba2,
-				micromamba3,
 				micromamba4,
 				micromamba5
 		};
@@ -610,6 +657,188 @@ public class CLIUtils
 			return false;
 		}
 	}
+
+	// =====================================================================
+	// Pixi utilities
+	// =====================================================================
+
+	/**
+	 * Returns the user-configured root folder that contains pixi projects as
+	 * immediate subdirectories. Returns an empty string if not configured.
+	 */
+	public static String getPixiProjectsRoot()
+	{
+		final PrefService prefs = TMUtils.getContext().getService( PrefService.class );
+		return prefs.get( CLIUtils.class, PIXI_PROJECTS_ROOT_KEY, "" );
+	}
+
+	/**
+	 * Lists immediate subdirectories of the given root folder that contain a
+	 * {@code pixi.toml} file.
+	 *
+	 * @param root
+	 *            path to the folder that contains pixi projects as
+	 *            subdirectories.
+	 * @return sorted list of matching directories, or empty list if root is
+	 *         null/empty/missing.
+	 */
+	public static List< File > findPixiProjectsInRoot( final String root )
+	{
+		final List< File > found = new ArrayList<>();
+		if ( root == null || root.isEmpty() )
+			return found;
+		final File rootDir = new File( root );
+		if ( !rootDir.isDirectory() )
+			return found;
+
+		// If the root itself is a pixi project, include it as a candidate.
+		if ( new File( rootDir, "pixi.toml" ).isFile()
+				|| new File( rootDir, "pyproject.toml" ).isFile() )
+		{
+			found.add( rootDir );
+		}
+
+		final File[] children = rootDir.listFiles();
+		if ( children == null )
+			return found;
+		for ( final File child : children )
+		{
+			if ( child.equals( rootDir ) )
+				continue;
+			if ( child.isDirectory()
+					&& ( new File( child, "pixi.toml" ).isFile()
+							|| new File( child, "pyproject.toml" ).isFile() ) )
+				found.add( child );
+		}
+		found.sort( java.util.Comparator.comparing( File::getName ) );
+		return found;
+	}
+
+	/**
+	 * Returns the path to the pixi manifest file ({@code pixi.toml} or
+	 * {@code pyproject.toml}) inside the given project directory, or
+	 * {@code null} if neither exists.
+	 */
+	public static String getPixiManifestPath( final String projectDir )
+	{
+		if ( projectDir == null || projectDir.isEmpty() )
+			return null;
+		final File pixi = new File( projectDir, "pixi.toml" );
+		if ( pixi.isFile() )
+			return pixi.getAbsolutePath();
+		final File pyproject = new File( projectDir, "pyproject.toml" );
+		if ( pyproject.isFile() )
+			return pyproject.getAbsolutePath();
+		return null;
+	}
+
+	public static String getPixiPath()
+	{
+		final PrefService prefs = TMUtils.getContext().getService( PrefService.class );
+		String findPath;
+		try
+		{
+			findPath = findDefaultPixiPath();
+		}
+		catch ( final IllegalArgumentException e )
+		{
+			findPath = System.getProperty( "user.home" ) + "/.pixi/bin/pixi";
+		}
+		return prefs.get( CLIUtils.class, PIXI_PATH_PREF_KEY, findPath );
+	}
+
+	public static String findDefaultPixiPath() throws IllegalArgumentException
+	{
+		final String home = System.getProperty( "user.home" );
+		final String pixiHome = System.getenv( "PIXI_HOME" );
+		final String[] toTest = new String[] {
+				// User-local install (default)
+				home + "/.pixi/bin/pixi",
+				// PIXI_HOME override
+				( pixiHome != null ? pixiHome + "/bin/pixi" : "" ),
+				// System-wide installs
+				"/usr/local/bin/pixi",
+				"/usr/bin/pixi",
+				"/opt/pixi/bin/pixi",
+				// macOS Homebrew
+				"/opt/homebrew/bin/pixi",
+				"/usr/local/opt/pixi/bin/pixi",
+		};
+		for ( final String str : toTest )
+		{
+			if ( str.isEmpty() )
+				continue;
+			final Path path = Paths.get( str );
+			if ( Files.isExecutable( path ) )
+				return str;
+		}
+		throw new IllegalArgumentException( "Could not find a pixi executable within: " + Arrays.asList( toTest ) );
+	}
+
+	/**
+	 * Returns the version of a Python module installed in a pixi project
+	 * environment by running
+	 * {@code pixi run --manifest-path <dir>/pixi.toml --environment <env> -- python -c ...}.
+	 *
+	 * @param projectDir
+	 *            path to the folder containing pixi.toml.
+	 * @param envName
+	 *            the name of the pixi environment.
+	 * @param moduleName
+	 *            the name of the Python module.
+	 * @return the version string, or <code>null</code> if it could not be
+	 *         determined.
+	 */
+	public static String getPixiModuleVersion( final String projectDir, final String envName, final String moduleName )
+	{
+		if ( projectDir == null || projectDir.isEmpty() || envName == null || envName.isEmpty() )
+			return null;
+
+		final String manifest = getPixiManifestPath( projectDir );
+		final List< String > tokens = new ArrayList<>();
+		tokens.add( getPixiPath() );
+		tokens.add( "run" );
+		if ( manifest != null )
+		{
+			tokens.add( "--manifest-path" );
+			tokens.add( manifest );
+		}
+		tokens.add( "--environment" );
+		tokens.add( envName );
+		tokens.add( "--" );
+		tokens.add( "python" );
+		tokens.add( "-c" );
+		tokens.add( "import " + moduleName + "; print(" + moduleName + ".__version__)" );
+
+		final ProcessBuilder pb = new ProcessBuilder( tokens );
+		pb.redirectErrorStream( true );
+		try
+		{
+			final Process process = pb.start();
+			final BufferedReader reader = new BufferedReader(
+					new InputStreamReader( process.getInputStream() ) );
+			String line;
+			String prevLine = null;
+			final StringBuffer errorMsg = new StringBuffer();
+			while ( ( line = reader.readLine() ) != null )
+			{
+				prevLine = line;
+				errorMsg.append( '\n' + line );
+			}
+			final int exitCode = process.waitFor();
+			if ( exitCode == 0 )
+				return prevLine;
+			else
+				throw new Exception( "Error running command for '" + moduleName
+						+ "' in pixi env '" + envName + "'" + errorMsg );
+		}
+		catch ( final Exception e )
+		{
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 
 	public static void main( final String[] args ) throws Exception
 	{
