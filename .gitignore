@@ -21,3 +21,6 @@
 
 ## SciJava release tools
 pom.xml.releaseBackup
+
+# Agent file
+AGENTS.md
