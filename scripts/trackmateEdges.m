@@ -60,136 +60,201 @@ function  trackMap = trackmateEdges(filePath, featureList)
 
 
 % __
-% Jean-Yves Tinevez - 2016
+% Jean-Yves Tinevez & contributors - 2026
 
-%% Import the XPath classes.
-    import javax.xml.xpath.*
-    
     %% Constants definition.
 
-    TRACKMATE_ELEMENT           = 'TrackMate';
-    TRACK_ID_ATTRIBUTE          = 'TRACK_ID';
-    TRACK_NAME_ATTRIBUTE        = 'name';
-    SPOT_SOURCE_ID_ATTRIBUTE    = 'SPOT_SOURCE_ID';
-    SPOT_TARGET_ID_ATTRIBUTE    = 'SPOT_TARGET_ID';
+    TRACK_ID_ATTRIBUTE          = "TRACK_ID";
+    TRACK_NAME_ATTRIBUTE        = "name";
+    SPOT_SOURCE_ID_ATTRIBUTE    = "SPOT_SOURCE_ID";
+    SPOT_TARGET_ID_ATTRIBUTE    = "SPOT_TARGET_ID";
+    ATTRIBUTE_SUFFIX            = "__";
 
     %% Open file
 
+    % We'll call trackmateFeatureDeclarations() to fill in table properties
+    % no matter what, so let's reuse that one's validation function.
+    global isNotFirst modelStruct %#ok<GVMIS>
+    if isNotFirst
+        % Being called by other function
+        willClear = false;
+    else
+        isNotFirst = true;
+        willClear = true;
+    end
+    
     try
-        xmlDoc = xmlread( filePath );
-    catch
-        error('Failed to read XML file %s.',filePath);
+        [ ~, ef ] = trackmateFeatureDeclarations( filePath );
+    catch ME
+        rethrow(ME)
     end
-    xmlRoot = xmlDoc.getFirstChild();
-
-    if ~strcmp(xmlRoot.getTagName, TRACKMATE_ELEMENT)
-        error('MATLAB:trackMateGraph:BadXMLFile', ...
-            'File does not seem to be a proper TrackMate file.')
-    end
-    
-    
-    %% XPath initialization.
-    factory = XPathFactory.newInstance;
-    xPath = factory.newXPath;
-    
-    %% Retrieve edge feature list
-    if nargin < 2 || isempty( featureList )
-        xPathEdgeFilter = xPath.compile('//Edge');
-        edgeNode        = xPathEdgeFilter.evaluate(xmlDoc, XPathConstants.NODE );
-        featureList     = getEdgeFeatureList( edgeNode );
-    end
-    
-    % Add spot source and target, whether they are here or not.
-    featureList = union( SPOT_TARGET_ID_ATTRIBUTE, featureList, 'stable'  );
-    featureList = union( SPOT_SOURCE_ID_ATTRIBUTE, featureList, 'stable' );
-    nFeatures = numel( featureList );
     
     %% XPath to retrieve filtered track IDs.
 
-    xPathFTrackFilter   = xPath.compile('//Model/FilteredTracks/TrackID');
-    fTrackNodeList      = xPathFTrackFilter.evaluate(xmlDoc, XPathConstants.NODESET);
-    nFTracks            = fTrackNodeList.getLength();
+    % Prepare a map: trackName -> edge table. 
+    trackMap = containers.Map("KeyType", "char", "ValueType", "any");
     
-    fTrackIDs = NaN( nFTracks, 1);
-    for i = 1 : nFTracks
-        fTrackIDs( i ) = str2double( fTrackNodeList.item( i-1 ).getAttribute( TRACK_ID_ATTRIBUTE ) );
+    try
+        filteredIDStruct = [modelStruct.FilteredTracks];
+        filteredIDStruct = [filteredIDStruct.TrackID];
+        fTrackIDs = [filteredIDStruct.( TRACK_ID_ATTRIBUTE+ATTRIBUTE_SUFFIX )];
+        if ~isa(fTrackIDs, "double"); fTrackIDs = double(fTrackIDs); end
+    catch ME
+        switch ME.identifier
+            case 'MATLAB:nonExistentField'
+                % XPath points to 0 nodes
+                fTrackIDs = [];
+            otherwise
+                rethrow(ME)
+        end
     end
     
-    %% XPath to retrieve filtered track elements.
+    if isempty(fTrackIDs)
+        % No selected track, return empty map
+        if willClear
+            clear global isNotFirst modelStruct xmlDocFileName
+        end
+        return
+    end
     
-    xPathTrackFilter    = xPath.compile('//Model/AllTracks/Track');
-    trackNodeList       = xPathTrackFilter.evaluate(xmlDoc, XPathConstants.NODESET);
-    nTracks             = trackNodeList.getLength();
-    
-    % Prepare a map: trackName -> edge table. 
-    trackMap = containers.Map('KeyType', 'char', 'ValueType', 'any');
-    
-    xPathEdgeFilter     = xPath.compile('./Edge');
-    for i = 1 : nTracks
-       
-        trackNode       = trackNodeList.item( i-1 );
-        trackID         = str2double( trackNode.getAttribute( TRACK_ID_ATTRIBUTE ) );
-        trackName       = char( trackNode.getAttribute( TRACK_NAME_ATTRIBUTE ) );
-        
-        if any( trackID == fTrackIDs )
-           
-            edgeNodeList    = xPathEdgeFilter.evaluate( trackNode, XPathConstants.NODESET );
-            nEdges          = edgeNodeList.getLength();
-            features = NaN( nEdges, nFeatures );
-            
-            % Read all edge nodes.
-            for k = 1 : nEdges
-                node = edgeNodeList.item( k-1 );
-                for j = 1 : nFeatures
-                    features( k, j ) = str2double( node.getAttribute( featureList{ j } ) );
+    %% XPath to retrieve track elements.
+
+    try
+        tracksStruct = [modelStruct.AllTracks]; % Can be multiple?
+        tracksStruct = [tracksStruct.Track]; % Likely multiple
+    catch ME
+        switch ME.identifier
+            case 'MATLAB:nonExistentField'
+                % XPath points to 0 nodes
+                if willClear
+                    clear global isNotFirst modelStruct xmlDocFileName
+                end
+                return
+            otherwise
+                rethrow(ME)
+        end
+    end
+
+    %% Retrieve edge feature list
+    % Guess the attribute name from struct names
+    % Valid XML name is a superset of MATLAB variable name, so MATLAB
+    % may have modified them when importing into struct fields
+
+    % Combine knowledge from FeatureDeclarations and user input
+    if exist("featureList", "var")
+        fList = union( featureList, keys(ef));
+    else
+        fList = keys(ef);
+    end
+
+    [fList_mod, havemodd1] = matlab.lang.makeValidName(fList);
+    [fList_mod, havemodd2] = matlab.lang.makeUniqueStrings(fList_mod);
+    fList_mod = append(fList_mod, ATTRIBUTE_SUFFIX);
+    whichModified = havemodd1 | havemodd2;
+
+    if nargin < 2 || isempty( featureList )
+        % List of feature is all edge attributes. Look up the original name
+        % if it's *known* to be non-trivially renamed.
+        % Still, we will lose the original attribute name if it doesn't
+        % appear in <FeatureDeclarations>
+
+        featureList_mod = fieldnames(tracksStruct(1).Edge(1));
+        % May contain a Text field for the node's text
+        featureList_mod = featureList_mod(endsWith(featureList_mod, ATTRIBUTE_SUFFIX));
+        % Add spot source and target, whether they are here or not.
+        frontOfList = append([SPOT_SOURCE_ID_ATTRIBUTE; SPOT_TARGET_ID_ATTRIBUTE], ATTRIBUTE_SUFFIX);
+        featureList_mod = union(frontOfList, featureList_mod, "stable");
+        featureList = strings(size(featureList_mod));
+
+        if any(whichModified)
+            renameMap = containers.Map(fList_mod(whichModified), fList(whichModified));
+            willLookup = iskey(renameMap, cellstr(featureList_mod));
+            for k = 1:numel(featureList_mod)
+                feature_mod = featureList_mod{k};
+                if willLookup(k)
+                    featureList{k} = renameMap(feature_mod);
+                else
+                    featureList{k} = extractBefore(feature_mod, ...
+                        ATTRIBUTE_SUFFIX+textBoundary("end"));
                 end
             end
-            
-            % Create table.
-            edgeTable = table();
-            for j = 1 : nFeatures
-                edgeTable.( featureList{ j } )   = features( :, j );
-            end
-            
-            % Set table metadata.
-            edgeTable.Properties.DimensionNames = { 'Edge', 'Feature' };
-            
-            vNames = edgeTable.Properties.VariableNames;
-            nVNames = numel( vNames );
-            vDescriptions   = cell( nVNames, 1);
-            vUnits          = cell( nVNames, 1);
-            
-            [ ~, ef ] = trackmateFeatureDeclarations( filePath );
-            for l = 1 : nVNames
-                vn = vNames{ l };
-                vDescriptions{ l }  = ef( vn ).name;
-                vUnits{ l }         = ef( vn ).units;
-            end
-            edgeTable.Properties.VariableDescriptions   = vDescriptions;
-            edgeTable.Properties.VariableUnits          = vUnits;
-           
-            trackMap( trackName ) = edgeTable;
-            
+        else
+            featureList = extractBefore(featureList_mod, ...
+                ATTRIBUTE_SUFFIX+textBoundary("end"));
         end
-        
+
+    else
+        % List of feature is the input list. Still, the renaming is done
+        % according to real attributes, so we look up the modified names.
+        featureList = string(featureList(:));
+
+        % Add spot source and target, whether they are here or not.
+        frontOfList = [SPOT_SOURCE_ID_ATTRIBUTE; SPOT_TARGET_ID_ATTRIBUTE];
+        featureList = union( frontOfList, featureList, "stable" );
+
+        if any(whiwhModified)
+            renameMapRev = containers.Map(fList(whichModified), fList_mod(whichModified));
+            willLookup = iskey(renameMapRev, cellstr(featureList));
+            featureList_mod = strings(size(featureList));
+            for k = 1:numel(featureList)
+                feature = featureList{k};
+                if willLookup(k)
+                    featureList_mod{k} = renameMapRev(feature);
+                else
+                    featureList_mod{k} = append(feature, ATTRIBUTE_SUFFIX);
+                end
+            end
+        else
+            featureList_mod = append(featureList, ATTRIBUTE_SUFFIX);
+        end
     end
-    
-     %% Subfunction.
-    
-    function featureList = getEdgeFeatureList(node)
-        
-        attribute_map = node.getAttributes;
-        n_attributes = attribute_map.getLength;
-        
-        featureList = cell(n_attributes, 1);
-        index = 1;
-        for ii = 1 : n_attributes
-            
-            namel = node.getAttributes.item(ii-1).getName;
-            featureList{index} = char(namel);
-            index = index + 1;
-            
+
+    %% XPath to retrieve filtered track elements.
+
+    tracksID = [tracksStruct.(TRACK_ID_ATTRIBUTE+ATTRIBUTE_SUFFIX)];
+    if ~isa(tracksID, "double"); tracksID = double(tracksID); end
+
+    % Find the selected Track IDs and cache the result.
+    whichSel = ismember(tracksID, fTrackIDs);
+ 
+    % Prepare metadata once
+    if ~isempty(whichSel)
+        nVNames = numel( featureList );
+        vDescriptions = strings( nVNames, 1);
+        vUnits        = strings( nVNames, 1);
+
+        for l = 1 : nVNames
+            vn = featureList{ l };
+            vDescriptions{ l }  = ef( vn ).name;
+            vUnits{ l }         = ef( vn ).units;
         end
+    else
+        % None of the selected tracks were found, return empty map.
+        if willClear
+            clear global isNotFirst modelStruct xmlDocFileName
+        end
+        return
+    end
+
+    trackNames = [tracksStruct.(TRACK_NAME_ATTRIBUTE+ATTRIBUTE_SUFFIX)];
+    if ~isstring(trackNames); trackNames = string(trackNames); end
+
+    for iTracks = reshape(find(whichSel), 1, [])
+        edgeTable = struct2table([tracksStruct(iTracks).Edge], ...
+            "AsArray", true, "DimensionNames", {'Edge', 'Feature'});
+
+        [~,iAdd,iRemove] = setxor(featureList_mod, edgeTable.Properties.VariableNames);
+        edgeTable = removevars(edgeTable, iRemove);
+        edgeTable{:, featureList_mod(iAdd)} = NaN;
+        edgeTable = convertvars(edgeTable, @isstring, "double");
+
+        edgeTable = edgeTable(:, featureList_mod);
+        edgeTable = renamevars(edgeTable, featureList_mod, featureList);
+        % Set table metadata.
+        edgeTable.Properties.VariableDescriptions   = vDescriptions;
+        edgeTable.Properties.VariableUnits          = vUnits;
+
+        trackMap( trackNames{iTracks} ) = edgeTable;
     end
     
 end

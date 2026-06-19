@@ -63,9 +63,14 @@ function [tracks, metadata] = importTrackMateTracks(file, clipz, scalet)
 %   </particle>
 %   ...
 % </Tracks>
-%
-%
-% Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> - 2013
+
+
+% __
+% Jean-Yves Tinevez & contributors - 2026
+
+    %% Constants definition.
+    
+    ATTRIBUTE_SUFFIX            = "__";
 
     %% Input 
     
@@ -81,80 +86,71 @@ function [tracks, metadata] = importTrackMateTracks(file, clipz, scalet)
     %% Load and Test compliance
 
     try
-        doc = xmlread(file);
-    catch %#ok<CTCH>
-        error('Failed to read XML file %s.',file);
-    end
-    
-    root = doc.getDocumentElement;
-    
-    if ~strcmp(root.getTagName, 'Tracks')
-        error('MATLAB:importTrackMateTracks:BadXMLFile', ...
-            'File does not seem to be a proper track file.')
+        rootStruct = readstruct(file, "FileType", "xml", "StructSelector", "/Tracks", ...
+            "ImportAttributes", true, "AttributeSuffix", ATTRIBUTE_SUFFIX);
+    catch ME
+        switch ME.identifier
+            case 'MATLAB:UndefinedFunction'
+                error("Your MATLAB is too old (pre-R2021a) to run this script.");
+            case 'MATLAB:nonExistentField'
+                error('MATLAB:importTrackMateTracks:BadXMLFile', ...
+                    "File does not seem to be a proper track file.");
+            otherwise
+                error(ME.identifier, "Failed to read XML file %s.", file);
+        end
     end
     
     %% Get metadata
-    metadata.spaceUnits     = char( root.getAttribute('spaceUnits') );
-    metadata.timeUnits      = char( root.getAttribute('timeUnits') );
-    metadata.frameInterval  = str2double( root.getAttribute('frameInterval') );
-    metadata.date           = char( root.getAttribute('generationDateTime') );
-    metadata.source         = char( root.getAttribute('from') );
+    metadata.spaceUnits     = char(rootStruct.("spaceUnits"+ATTRIBUTE_SUFFIX));
+    metadata.timeUnits      = char(rootStruct.("timeUnits"+ATTRIBUTE_SUFFIX));
+    metadata.frameInterval  = rootStruct.("frameInterval"+ATTRIBUTE_SUFFIX);
+    if ~isa(metadata.frameInterval, "double")
+        metadata.frameInterval = double(metadata.frameInterval); end
+    % readstruct() recognizes date and transforms into Datetime. Probably need
+    % a datefmt argument here
+    metadata.date           = char(rootStruct.("generationDateTime"+ATTRIBUTE_SUFFIX));
+    metadata.source         = char(rootStruct.("from"+ATTRIBUTE_SUFFIX));
     
-    
-    %% Parse 
-    
-    nTracks = str2double( root.getAttribute('nTracks') );
-    tracks = cell(nTracks, 1);
-    trackNodes = root.getElementsByTagName('particle');
-    
-    for i = 1 : nTracks
-       
-        trackNode = trackNodes.item(i-1);
-        detectionNodes = trackNode.getElementsByTagName('detection');
-        
-        nSpots = str2double( trackNode.getAttribute('nSpots') );
-        nSpots = min( nSpots, detectionNodes.getLength() );
-        
-        A = NaN( nSpots, 4); % T, X, Y, Z
-        
-        for j = 1 : nSpots
-            
-            detectionNode = detectionNodes.item(j-1);
-            t = str2double(detectionNode.getAttribute('t'));
-            x = str2double(detectionNode.getAttribute('x'));
-            y = str2double(detectionNode.getAttribute('y'));
-            z = str2double(detectionNode.getAttribute('z'));
-            A(j, :) = [ t x y z ];
-            
-        end
-        
-        tracks{i} = A;
-        
-    end
-    
-    %% Clip Z dimension if possible and asked
-    
-    if clipz
-        
-        if all(cellfun(@(X) all( X(:,4) == 0), tracks))
-            % Remove the z coordinates since it is 0 everywhere
-            for i = 1 : nTracks
-                tracks{i} = tracks{i}(:, 1:3);
-            end
-        end
-        
-    end
     
     %% Scale time using physical units if required
+
+    % NaN is not greater than zero
+    willScaleT = scalet && metadata.frameInterval > 0;
+
+    %% Parse 
     
-    if scalet
-        if ~isnan(metadata.frameInterval) && metadata.frameInterval > 0
-            
-            % Scale time so that it is in physical units
-            for i = 1 : nTracks
-                tracks{i}(:, 1) = tracks{i}(:, 1) * metadata.frameInterval;
-            end
-            
+    nTracks = rootStruct.("nTracks"+ATTRIBUTE_SUFFIX);
+    if ~isa(nTracks, "double"); nTracks = double(nTracks); end
+    tracks = cell(nTracks, 1);
+    trackNodes = rootStruct.particle(1:nTracks);
+    
+    for i = 1 : nTracks
+        
+        trackNode = trackNodes(i);
+        detectionNodes = trackNode.detection;
+        
+        nSpots = double(trackNode.("nSpots"+ATTRIBUTE_SUFFIX));
+        nSpots = min( nSpots, numel(detectionNodes) );
+        detectionNodes = detectionNodes(1:nSpots);
+        
+        t = [detectionNodes.("t"+ATTRIBUTE_SUFFIX)];
+        if ~isa(t, "double"); t = double(t); end
+        x = [detectionNodes.("x"+ATTRIBUTE_SUFFIX)];
+        if ~isa(x, "double"); x = double(x); end
+        y = [detectionNodes.("y"+ATTRIBUTE_SUFFIX)];
+        if ~isa(y, "double"); y = double(y); end
+        z = [detectionNodes.("z"+ATTRIBUTE_SUFFIX)];
+        if ~isa(z, "double"); z = double(z); end
+
+        if willScaleT
+            t = t * metadata.frameInterval;
+        end
+
+        if clipz && all(z == 0)
+            % Remove the z coordinates since it is 0 everywhere
+            tracks{i} = [t(:) x(:) y(:)];
+        else
+            tracks{i} = [t(:) x(:) y(:) z(:)];
         end
         
     end

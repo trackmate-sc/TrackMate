@@ -80,140 +80,217 @@ function [ spotTable, spotIDMap, rois ] = trackmateSpots(filePath, featureList)
 
 
 % __
-% Jean-Yves Tinevez - 2016 - 2024
+% Jean-Yves Tinevez & contributors - 2026
 
-    %% Import the XPath classes.
-    import javax.xml.xpath.*
-    
     %% Constants definition.
 
-    TRACKMATE_ELEMENT           = 'TrackMate';
-    SPOT_ID_ATTRIBUTE           = 'ID';
-    SPOT_NAME_ATTRIBUTE         = 'name';
-    ROI_N_POINTS_ATTTRIBUTE     = 'ROI_N_POINTS';
+    SPOT_ID_ATTRIBUTE           = "ID";
+    SPOT_NAME_ATTRIBUTE         = "name";
+    ROI_N_POINTS_ATTTRIBUTE     = "ROI_N_POINTS";
+    ATTRIBUTE_SUFFIX            = "__";
 
     %% Open file.
+    % We'll call trackmateFeatureDeclarations() to fill in table properties
+    % no matter what, so let's reuse that one's validation function.
+    global isNotFirst modelStruct %#ok<GVMIS>
+    if isNotFirst
+        % Being called by other function
+        willClear = false;
+    else
+        isNotFirst = true;
+        willClear = true;
+    end
 
     try
-        xmlDoc = xmlread(filePath);
-    catch
-        error('Failed to read XML file %s.',filePath);
-    end
-    xmlRoot = xmlDoc.getFirstChild();
-
-    if ~strcmp(xmlRoot.getTagName, TRACKMATE_ELEMENT)
-        error('MATLAB:trackMateGraph:BadXMLFile', ...
-            'File does not seem to be a proper TrackMate file.')
+        fs = trackmateFeatureDeclarations( filePath );
+    catch ME
+        rethrow(ME)
     end
     
     
     %% XPath to retrieve spot nodes.
-    
-    % Use XPath to retrieve all visible spots.
-    factory = XPathFactory.newInstance;
-    xPath = factory.newXPath;
-    xPathFilter = xPath.compile('//Model/AllSpots/SpotsInFrame/Spot[@VISIBILITY=1]');
-    nodeList = xPathFilter.evaluate(xmlDoc, XPathConstants.NODESET);
-    
-    %% Retrieve spot feature list.
-    
-    if nargin < 2 || isempty( featureList )
-        featureList = getSpotFeatureList(nodeList.item(0));
-    end
-    
-    % Remove ID and name, because we will get them anyway.
-    featureList = setdiff( featureList, SPOT_ID_ATTRIBUTE );
-    featureList = setdiff( featureList, SPOT_NAME_ATTRIBUTE );
-    n_features = numel( featureList );
-    
-    %% Get filtered spot IDs.
+    % Indexing into a field of an array returns a comma-separated list -
+    % concatenate to mimic XPath's behavior. Struct arrays are horizontal.
+    try
+        spotsStruct = [modelStruct.AllSpots]; % Can be multiple?
+        spotsStruct = [spotsStruct.SpotsInFrame]; % Likely multiple
+        spotsStruct = [spotsStruct.Spot]; % Usually multiple
 
-    % Prepare holders.
-    nSpots      = nodeList.getLength();
-    ID          = NaN( nSpots, 1 );
-    name        = cell( nSpots, 1);
-    features    = NaN( nSpots, n_features );
-    rois        = cell( nSpots, 1);
-
-    % Read all spot nodes.
-    for i = 1 : nSpots
-        node = nodeList.item( i-1 );
-        ID( i )     = str2double( node.getAttribute( SPOT_ID_ATTRIBUTE ) );
-        name{ i }   = char( node.getAttribute( SPOT_NAME_ATTRIBUTE ) );
-        for j = 1 : n_features
-           features( i, j ) = str2double( node.getAttribute( featureList{ j } ) ); 
+        % Select the visible spots
+        spotsStruct = spotsStruct([spotsStruct.("VISIBILITY"+ATTRIBUTE_SUFFIX)] == 1);
+    catch ME
+        switch ME.identifier
+            case 'MATLAB:nonExistentField'
+                % XPath points to 0 nodes
+                spotsStruct = struct(SPOT_ID_ATTRIBUTE+ATTRIBUTE_SUFFIX, [], ...
+                    SPOT_NAME_ATTRIBUTE+ATTRIBUTE_SUFFIX, []);
+            otherwise
+                rethrow(ME)
         end
-        
-        % Read ROI coords if it's there.
-        if nargout >= 3
-            coords_str = node.getTextContent();
-            if ~isempty( coords_str )
-                A = sscanf(string(coords_str),'%f');
-                n_points = numel(A) / 2;
-                A = reshape( A, 2, n_points )';
-                rois{i} = A;
+    end
+
+    nSpots = numel(spotsStruct);
+
+    %% Retrieve spot feature list.
+    % Guess the attribute name from struct names
+    % Valid XML name is a superset of MATLAB variable name, so MATLAB
+    % may have modified them when importing into struct fields
+
+    % Combine knowledge from FeatureDeclarations and user input
+    if exist("featureList", "var")
+        fList = union( featureList, keys(fs));
+    else
+        fList = keys(fs);
+    end
+
+    [fList_mod, havemodd1] = matlab.lang.makeValidName(fList);
+    [fList_mod, havemodd2] = matlab.lang.makeUniqueStrings(fList_mod);
+    fList_mod = append(fList_mod, ATTRIBUTE_SUFFIX);
+    whichModified = havemodd1 | havemodd2;
+
+    if nargin < 2 || isempty( featureList )
+        % List of feature is all spot attributes. Look up the original name
+        % if it's *known* to be non-trivially renamed.
+        % Still, we will lose the original attribute name if it doesn't
+        % appear in <FeatureDeclarations>
+
+        featureList_mod = fieldnames(spotsStruct);
+        % May contain a Text field for the node's text
+        featureList_mod = featureList_mod(endsWith(featureList_mod, ATTRIBUTE_SUFFIX));
+        frontOfList = append([SPOT_ID_ATTRIBUTE; SPOT_NAME_ATTRIBUTE], ATTRIBUTE_SUFFIX);
+        featureList_mod = union(frontOfList, featureList_mod, "stable");
+        featureList = strings(size(featureList_mod));
+
+        if any(whichModified)
+            renameMap = containers.Map(fList_mod(whichModified), fList(whichModified));
+            willLookup = iskey(renameMap, cellstr(featureList_mod));
+            for k = 1:numel(featureList_mod)
+                feature_mod = featureList_mod{k};
+                if willLookup(k)
+                    featureList{k} = renameMap(feature_mod);
+                else
+                    featureList{k} = extractBefore(feature_mod, ...
+                        ATTRIBUTE_SUFFIX+textBoundary("end"));
+                end
+            end
+        else
+            featureList = extractBefore(featureList_mod, ...
+                ATTRIBUTE_SUFFIX+textBoundary("end"));
+        end
+
+    else
+        % List of feature is the input list. Still, the renaming is done
+        % according to real attributes, so we look up the modified names.
+        featureList = string(featureList(:));
+
+        % Push ID and name to the front
+        frontOfList = [SPOT_ID_ATTRIBUTE; SPOT_NAME_ATTRIBUTE];
+        featureList = union( frontOfList, featureList, "stable" );
+
+        if any(whiwhModified)
+            renameMapRev = containers.Map(fList(whichModified), fList_mod(whichModified));
+            willLookup = iskey(renameMapRev, cellstr(featureList));
+            featureList_mod = strings(size(featureList));
+            for k = 1:numel(featureList)
+                feature = featureList{k};
+                if willLookup(k)
+                    featureList_mod{k} = renameMapRev(feature);
+                else
+                    featureList_mod{k} = append(feature, ATTRIBUTE_SUFFIX);
+                end
+            end
+        else
+            featureList_mod = append(featureList, ATTRIBUTE_SUFFIX);
+        end
+    end
+
+    %% Create table
+    n_features = numel( featureList );
+    % Assigning an entire variable changes its type
+    spotTable = table('Size', [nSpots n_features], 'VariableNames', featureList, ...
+        'VariableTypes', repmat("double", size(featureList)));
+    for j = 1 : n_features
+        featureID = featureList_mod{j};
+        willBeChar = strcmp( SPOT_NAME_ATTRIBUTE + ATTRIBUTE_SUFFIX, featureID );
+
+        if isfield(spotsStruct, featureID)
+            % If *some* values are missing, they are read as missing() and
+            % automatically converted to corresponding missing values upon
+            % concatenation.
+            features = vertcat(spotsStruct.(featureID));
+
+            if willBeChar
+                if ~iscellstr(features) %#ok<ISCLSTR>
+                    if ~isstring(features)
+                        features = string(features);
+                    end
+                    features = cellstr(features);
+                end
+            elseif ~isa(features, "double")
+                % Is it even possible that other features are accidentally
+                % read as a string? Deal with that anyway
+                features = double(features);
+            end
+
+        else
+            % Asked for a non-existent attribute
+            if willBeChar
+                features = cellstr(strings(nSpots, 1));
+            else
+                features = nan(nSpots, 1 , "double");
             end
         end
-    end
-    
-    % Create table.
-    spotTable = table();
-    spotTable.( SPOT_ID_ATTRIBUTE )     = ID;
-    spotTable.( SPOT_NAME_ATTRIBUTE )   = name;
-    for j = 1 : n_features
-       spotTable.( featureList{ j } )   = features( :, j ); 
+
+        spotTable.( featureList{ j } ) = features;
     end
     
     % Set table metadata.
     spotTable.Properties.DimensionNames = { 'Spot', 'Feature' };
     
-    vNames = spotTable.Properties.VariableNames;
-    nVNames = numel( vNames );
-    vDescriptions   = cell( nVNames, 1);
-    vUnits          = cell( nVNames, 1);
-    
-    fs = trackmateFeatureDeclarations( filePath );
-    for k = 1 : nVNames
-        vn = vNames{ k };
-        if strcmp( SPOT_ID_ATTRIBUTE, vn )
-            vDescriptions{ k }  = 'Spot ID';
-            vUnits{ k }         = '';
-        elseif strcmp( SPOT_NAME_ATTRIBUTE, vn )
-            vDescriptions{ k }  = 'Spot name';
-            vUnits{ k }         = '';
-        elseif strcmp( ROI_N_POINTS_ATTTRIBUTE, vn )
-            vDescriptions{ k }  = 'ROI N points';
-            vUnits{ k }         = '';
-        else
-            vDescriptions{ k }  = fs( vn ).name;
-            vUnits{ k }         = fs( vn ).units;
-        end
-    end
+    [vDescriptions, vUnits] = cellfun(@lookupDescriptionAndUnit, ...
+        featureList, "UniformOutput", true);
     spotTable.Properties.VariableDescriptions   = vDescriptions;
     spotTable.Properties.VariableUnits          = vUnits;
     
     % Generate map ID -> table row number.
-    spotIDMap = containers.Map( ID, 1 : nSpots, ...
-        'UniformValues', true);
+    spotIDMap = containers.Map( spotTable.ID, 1 : nSpots, ...
+        "UniformValues", true);
+
+    %% Read ROI coords if it's requested.
+    if nargout >= 3
+        rois = cell(nSpots, 1);
+        if isfield(spotsStruct, "Text")
+            for i = 1 : nSpots
+                coords_str = spotsStruct(i).Text;
+                if ~isempty( coords_str )
+                    A = sscanf(coords_str, "%f");
+                    A = reshape(A, 2, []).';
+                    rois{i} = A;
+                end
+            end
+        end
+    end
+
+    if willClear
+        clear global isNotFirst modelStruct xmlDocFileName
+    end
     
     %% Subfunction.
     
-    function featureList = getSpotFeatureList(node)
-        
-        attribute_map = node.getAttributes;
-        nAttributes = attribute_map.getLength;
-        
-        featureList = cell(nAttributes - 1, 1); % -1 for the spot name, which we do not take
-        index = 1;
-        for ii = 1 : nAttributes
-            
-            namel = node.getAttributes.item(ii-1).getName;
-            if strcmp(namel, SPOT_NAME_ATTRIBUTE)
-                continue;
-            end
-            featureList{index} = char(namel);
-            index = index + 1;
-            
+    function [description, unit] = lookupDescriptionAndUnit(featureName)
+        switch featureName
+            case SPOT_ID_ATTRIBUTE
+                description = "Spot ID";
+                unit        = "";
+            case SPOT_NAME_ATTRIBUTE
+                description = "Spot ID";
+                unit        = "";
+            case ROI_N_POINTS_ATTTRIBUTE
+                description = "ROI N points";
+                unit        = "";
+            otherwise
+                description = string(fs( featureName ).name);
+                unit        = string(fs( featureName ).units);
         end
     end
     
