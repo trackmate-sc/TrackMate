@@ -90,7 +90,7 @@ function [G, rois] = trackmateGraph(filePath, spotFeatureList, edgeFeatureList, 
     
     if verbose
         fprintf("Importing spot table. ")
-        t = tic;
+        timer = tic;
     end
     
     if nargout >= 2 
@@ -101,7 +101,7 @@ function [G, rois] = trackmateGraph(filePath, spotFeatureList, edgeFeatureList, 
     
     
     if verbose
-        fprintf("Done in %.1f s.\n", toc(t))
+        fprintf("Done in %.1f s.\n", toc(timer))
     end
 
     
@@ -109,13 +109,13 @@ function [G, rois] = trackmateGraph(filePath, spotFeatureList, edgeFeatureList, 
     
     if verbose
         fprintf("Importing edge table. ")
-        t = tic;
+        timer = tic;
     end
     
     trackMap = trackmateEdges(filePath, edgeFeatureList);
     
     if verbose
-        fprintf("Done in %.1f s.\n", toc(t))
+        fprintf("Done in %.1f s.\n", toc(timer))
     end
     
     tmp = trackMap.values;
@@ -126,7 +126,7 @@ function [G, rois] = trackmateGraph(filePath, spotFeatureList, edgeFeatureList, 
     
     if verbose
         fprintf("Building graph. ")
-        t = tic;
+        timer = tic;
     end
     
     sourceID = edgeTable.( SPOT_SOURCE_ID_ATTRIBUTE );
@@ -141,7 +141,7 @@ function [G, rois] = trackmateGraph(filePath, spotFeatureList, edgeFeatureList, 
     G = digraph( edgeTable, spotTable );
     
     if verbose
-        fprintf("Done in %.1f s.\n", toc(t))
+        fprintf("Done in %.1f s.\n", toc(timer))
     end
     
     if willClear
