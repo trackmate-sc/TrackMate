@@ -237,10 +237,6 @@
 			<artifactId>imglib2-mesh</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>net.imagej</groupId>
-			<artifactId>imagej-ops</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigvolumeviewer</artifactId>
 		</dependency>
@@ -262,7 +258,6 @@
 			<artifactId>jogl-all</artifactId>
 			<classifier>${scijava.natives.classifier.jogl}</classifier>
 		</dependency>
-
 
 		<!-- ImgLib2 dependencies -->
 		<dependency>
@@ -310,17 +305,9 @@
 
 		<!-- Other dependencies -->
 		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-		</dependency>		
-		<dependency>
 			<groupId>com.github.vlsi.mxgraph</groupId>
 			<artifactId>jgraphx</artifactId>
 		</dependency>
-		<!--<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-		</dependency> -->
 		<dependency>
 			<groupId>com.itextpdf</groupId>
 			<artifactId>itextpdf</artifactId>
