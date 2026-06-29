@@ -597,6 +597,11 @@ public class CLIUtils
 		}
 	}
 
+	public static void clearEnvMap()
+	{
+		envMap = null;
+	}
+
 	public static void main( final String[] args ) throws Exception
 	{
 		System.out.println( "Conda path: " + getCondaPath() );
