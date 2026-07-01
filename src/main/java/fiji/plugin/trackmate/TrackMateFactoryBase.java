@@ -136,6 +136,22 @@ public interface TrackMateFactoryBase< F extends TrackMateFactoryBase< F > > ext
 				{
 					value = att.getBooleanValue();
 				}
+				else if ( klass.isEnum() )
+				{
+					@SuppressWarnings( "unchecked" )
+					final Class< Enum< ? > > enumClass = ( Class< Enum< ? > > ) klass;
+					final Enum< ? >[] enums = enumClass.getEnumConstants();
+					Enum< ? > tmp = null;
+					for ( final Enum< ? > e : enums )
+					{
+						if ( e.toString().equals( att.getValue() ) )
+						{
+							tmp = e;
+							break;
+						}
+					}
+					value = tmp;
+				}
 				else
 				{
 					return "When unmarshalling: Unsupported type " + klass.getSimpleName() + " for parameter " + keyString + " in factory " + getName();
