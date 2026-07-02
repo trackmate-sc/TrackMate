@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -164,7 +166,7 @@
 	</ciManagement>
 
 	<properties>
-        <enforcer.skip>true</enforcer.skip>
+		<enforcer.skip>true</enforcer.skip>
 		<package-name>fiji.plugin.trackmate</package-name>
 		<license.licenseName>gpl_v3</license.licenseName>
 		<license.copyrightOwners>TrackMate developers.</license.copyrightOwners>
@@ -182,17 +184,25 @@
 		<imglib2.version>8.0.0</imglib2.version>
 		<bigdataviewer-core.version>10.6.7</bigdataviewer-core.version>
 
-	    <!-- TrackMate >=8 requires Java 21 -->			
-	    <scijava.jvm.version>21</scijava.jvm.version>
-	    <scijava.jvm.build.version>[21,)</scijava.jvm.build.version>
-   	    <scijava.javadoc.url.java>https://docs.oracle.com/en/java/javase/21/docs/api/</scijava.javadoc.url.java>
-   	    <!-- If we don't do this, mvn javadoc:javadoc fails because of 
+		<!-- TrackMate >=8 requires Java 21 -->
+		<scijava.jvm.version>21</scijava.jvm.version>
+		<scijava.jvm.build.version>[21,)</scijava.jvm.build.version>
+		<scijava.javadoc.url.java>
+			https://docs.oracle.com/en/java/javase/21/docs/api/</scijava.javadoc.url.java>
+		<!-- If we don't do this, mvn javadoc:javadoc fails because of 
    	    Anisotropic_Diffusion_2D (bad naming, does not like the '2D' at the end), 
-   	    which is a depdency of Labkit.' -->			
-   	    <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
+   	    which is a depdency of Labkit.' -->
+		<maven.javadoc.failOnError>false</maven.javadoc.failOnError>
 	</properties>
 
 	<dependencies>
+
+		<!-- Config UI -->
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>config-ui</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -247,7 +257,7 @@
 		<dependency>
 			<groupId>org.jogamp.gluegen</groupId>
 			<artifactId>gluegen-rt</artifactId>
-		</dependency>			
+		</dependency>
 		<dependency>
 			<groupId>org.jogamp.gluegen</groupId>
 			<artifactId>gluegen-rt</artifactId>
