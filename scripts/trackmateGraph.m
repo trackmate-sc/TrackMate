@@ -58,7 +58,7 @@ function [G, rois] = trackmateGraph(filePath, spotFeatureList, edgeFeatureList, 
 %   >> axis equal
 
 % __
-% Jean-Yves Tinevez - 2016 - 2024
+% Jean-Yves Tinevez & contributors - 2026
 
 
     %% Constants definition.
@@ -78,11 +78,19 @@ function [G, rois] = trackmateGraph(filePath, spotFeatureList, edgeFeatureList, 
         end
     end
 
+    global isNotFirst %#ok<GVMIS>
+    if isNotFirst
+        willClear = false;
+    else
+        isNotFirst = true;
+        willClear = true;
+    end
+
     %% Import spot table.
     
     if verbose
         fprintf('Importing spot table. ')
-        tic
+        timr = tic;
     end
     
     if nargout >= 2 
@@ -93,7 +101,7 @@ function [G, rois] = trackmateGraph(filePath, spotFeatureList, edgeFeatureList, 
     
     
     if verbose
-        fprintf('Done in %.1f s.\n', toc)
+        fprintf('Done in %.1f s.\n', toc(timr))
     end
 
     
@@ -101,13 +109,13 @@ function [G, rois] = trackmateGraph(filePath, spotFeatureList, edgeFeatureList, 
     
     if verbose
         fprintf('Importing edge table. ')
-        tic
+        timr = tic;
     end
     
     trackMap = trackmateEdges(filePath, edgeFeatureList);
     
     if verbose
-        fprintf('Done in %.1f s.\n', toc)
+        fprintf('Done in %.1f s.\n', toc(timr))
     end
     
     tmp = trackMap.values;
@@ -118,7 +126,7 @@ function [G, rois] = trackmateGraph(filePath, spotFeatureList, edgeFeatureList, 
     
     if verbose
         fprintf('Building graph. ')
-        tic
+        timr = tic;
     end
     
     sourceID = edgeTable.( SPOT_SOURCE_ID_ATTRIBUTE );
@@ -128,14 +136,16 @@ function [G, rois] = trackmateGraph(filePath, spotFeatureList, edgeFeatureList, 
     t = cell2mat( values( spotIDMap, num2cell(targetID) ) );
     
     EndNodes = [ s t ];
-    nodeTable = table( EndNodes );
-    nt = horzcat( nodeTable, edgeTable );
+    edgeTable = addvars(edgeTable, EndNodes, 'Before', 1, 'NewVariableNames', 'EndNodes');
     
-    G = digraph( nt, spotTable );
+    G = digraph( edgeTable, spotTable );
     
     if verbose
-        fprintf('Done in %.1f s.\n', toc)
+        fprintf('Done in %.1f s.\n', toc(timr))
     end
     
+    if willClear
+        clear global isNotFirst xmlDoc xmlDocFileName
+    end
 
 end
