@@ -3,7 +3,6 @@ package fiji.plugin.trackmate.util.config;
 import static org.scijava.ui.config.utils.GuiUtils.isLikelyUrl;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Image;
 import java.util.Map;
@@ -69,7 +68,6 @@ public class GenericConfigPanel extends ConfigurationPanel
 			infoDisplay = GuiUtils.infoDisplay( "<a href=\"" + text + "\">" + text + "</a>", false );
 		else
 			infoDisplay = GuiUtils.infoDisplay( help, true );
-		infoDisplay.setMaximumSize( new Dimension( 100_000, 40 ) );
 		header.add( Box.createVerticalStrut( 5 ) );
 		header.add( infoDisplay );
 		add( header, BorderLayout.NORTH );
