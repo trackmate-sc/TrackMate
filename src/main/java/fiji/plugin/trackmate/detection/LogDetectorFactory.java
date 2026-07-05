@@ -113,26 +113,27 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T > > imp
 	{
 		final int nChannels = ( imp == null ) ? 1 : imp.getNChannels( );
 		final String units = ( imp == null ) ? "no image" : imp.getCalibration().getUnit();
-		return new LogDetectorConfig( nChannels, units  );
+		return new LogDetectorConfig( NAME, INFO_TEXT, nChannels, units );
 	}
 
 	/**
-	 * Specifies what are the parameters of the {@link LogDetector} and
-	 * DogDetector.
+	 * Specifies what are the parameters of the LogDetector.
 	 *
 	 * @author Jean-Yves Tinevez
 	 */
 	public static class LogDetectorConfig extends TrackMateConfigurator implements HasInteractivePreview
 	{
 
-		public LogDetectorConfig( final int nChannels, final String units )
+		public LogDetectorConfig( final String name, final String infoText, final int nChannels, final String units )
 		{
-			super( NAME, INFO_TEXT );
+			super( name, infoText );
 			addTargetChannel( nChannels );
 			addDiameter( units );
 			addThreshold();
 			addMedianFiltering();
 			addSubpixelLocalization();
+			
+			addIcon( new ImageIcon( Icons.class.getResource( "images/LoG-icon-64px.png" ) ).getImage() );
 		}
 
 		@Override

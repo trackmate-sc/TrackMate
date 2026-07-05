@@ -32,6 +32,7 @@ import java.util.Map;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.util.TMUtils;
+import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
@@ -75,6 +76,26 @@ public class DogDetectorFactory< T extends RealType< T > & NativeType< T >> exte
 		final DogDetector< T > detector = new DogDetector<>( imFrame, interval, calibration, radius, threshold, doSubpixel, doMedian );
 		detector.setNumThreads( 1 );
 		return detector;
+	}
+
+	@Override
+	public DogDetectorConfig createConfig( final ImagePlus imp )
+	{
+		final int nChannels = ( imp == null ) ? 1 : imp.getNChannels();
+		final String units = ( imp == null ) ? "no image" : imp.getCalibration().getUnit();
+		return new DogDetectorConfig( nChannels, units );
+	}
+
+	/**
+	 * Specifies what are the parameters of the DoG detector.
+	 */
+	public static class DogDetectorConfig extends LogDetectorConfig
+	{
+
+		public DogDetectorConfig( final int nChannels, final String units )
+		{
+			super( THIS_NAME, THIS_INFO_TEXT, nChannels, units );
+		}
 	}
 
 	@Override

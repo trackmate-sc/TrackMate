@@ -123,7 +123,7 @@ public class HessianDetectorFactory< T extends RealType< T > & NativeType< T > >
 	}
 
 	/**
-	 * Specifies what are the parameters of the {@link LogDetector}.
+	 * Specifies what are the parameters of the Hessian detector.
 	 *
 	 * @author Jean-Yves Tinevez
 	 */
@@ -132,7 +132,7 @@ public class HessianDetectorFactory< T extends RealType< T > & NativeType< T > >
 
 		public HessianDetectorCLI( final int nChannels, final String units )
 		{
-			super( nChannels, units );
+			super( NAME, INFO_TEXT, nChannels, units );
 			// Diameter in Z
 			final DoubleParam diameterZ = addDoubleParameter()
 					.key( KEY_RADIUS_Z )
