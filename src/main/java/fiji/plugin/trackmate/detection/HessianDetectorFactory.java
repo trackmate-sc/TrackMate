@@ -144,8 +144,7 @@ public class HessianDetectorFactory< T extends RealType< T > & NativeType< T > >
 			// Convert to diameter for display purposes.
 			setDisplayTranslator( diameterZ, r -> r * 2., d -> d / 2. );
 			// Change order
-			orderedElements.remove( diameterZ );
-			orderedElements.add( 2, diameterZ );
+			reorder( diameterZ, 2 );
 			// Normalize quality values
 			addBooleanParameter()
 					.key( KEY_NORMALIZE )
