@@ -53,8 +53,10 @@ public class GenericConfigPanel extends ConfigurationPanel
 		header.setBorder( BorderFactory.createEmptyBorder( 5, 5, 5, 5 ) );
 		header.setLayout( new BoxLayout( header, BoxLayout.Y_AXIS ) );
 
-		final Image icon = config.getIcon().getScaledInstance( 64, 64, Image.SCALE_SMOOTH );
-		final JLabel lblDetector = new JLabel( config.getName(), new ImageIcon( icon ), JLabel.RIGHT );
+		final ImageIcon icon = ( config.getIcon() != null )
+				? new ImageIcon( config.getIcon().getScaledInstance( 64, 64, Image.SCALE_SMOOTH ) )
+				: null;
+		final JLabel lblDetector = new JLabel( config.getName(), icon, JLabel.RIGHT );
 		lblDetector.setFont( FONT.deriveFont( Font.BOLD ) );
 		lblDetector.setHorizontalAlignment( SwingConstants.CENTER );
 		lblDetector.setAlignmentX( JLabel.CENTER_ALIGNMENT );
