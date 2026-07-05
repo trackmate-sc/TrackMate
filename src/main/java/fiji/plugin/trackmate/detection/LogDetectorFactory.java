@@ -26,11 +26,6 @@ import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DO_SUBPIXEL_LOCAL
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
-import static fiji.plugin.trackmate.util.cli.CommonTrackMateArguments.addDiameter;
-import static fiji.plugin.trackmate.util.cli.CommonTrackMateArguments.addMedianFiltering;
-import static fiji.plugin.trackmate.util.cli.CommonTrackMateArguments.addSubpixelLocalization;
-import static fiji.plugin.trackmate.util.cli.CommonTrackMateArguments.addTargetChannel;
-import static fiji.plugin.trackmate.util.cli.CommonTrackMateArguments.addThreshold;
 
 import java.util.Map;
 
@@ -38,11 +33,11 @@ import javax.swing.ImageIcon;
 
 import org.scijava.plugin.Plugin;
 
-import fiji.plugin.trackmate.detection.LogDetectorFactory.LogDetectorCLI;
+import fiji.plugin.trackmate.detection.LogDetectorFactory.LogDetectorConfig;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.util.TMUtils;
-import fiji.plugin.trackmate.util.cli.Configurator;
-import fiji.plugin.trackmate.util.cli.HasInteractivePreview;
+import fiji.plugin.trackmate.util.config.HasInteractivePreview;
+import fiji.plugin.trackmate.util.config.TrackMateConfigurator;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imglib2.Interval;
@@ -51,7 +46,7 @@ import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 
 @Plugin( type = SpotDetectorFactory.class )
-public class LogDetectorFactory< T extends RealType< T > & NativeType< T > > implements SpotDetectorFactory< T >, SpotDetectorFactoryGenericConfig< T, LogDetectorCLI >
+public class LogDetectorFactory< T extends RealType< T > & NativeType< T > > implements SpotDetectorFactory< T >, SpotDetectorConfigFactory< T, LogDetectorConfig >
 {
 
 	/** A string key identifying this factory. */
@@ -71,6 +66,7 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T > > imp
 			+ "</html>";
 
 	public static final ImageIcon ICON = new ImageIcon( Icons.class.getResource( "images/LoG-icon-64px.png" ) );
+
 
 	@Override
 	public SpotDetector< T > getDetector( final ImgPlus< T > img, final Map< String, Object > settings, final Interval interval, final int frame )
@@ -113,11 +109,11 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T > > imp
 	}
 
 	@Override
-	public LogDetectorCLI getConfigurator( final ImagePlus imp )
+	public LogDetectorConfig createConfig( final ImagePlus imp )
 	{
 		final int nChannels = ( imp == null ) ? 1 : imp.getNChannels( );
 		final String units = ( imp == null ) ? "no image" : imp.getCalibration().getUnit();
-		return new LogDetectorCLI( nChannels, units  );
+		return new LogDetectorConfig( nChannels, units  );
 	}
 
 	/**
@@ -126,16 +122,17 @@ public class LogDetectorFactory< T extends RealType< T > & NativeType< T > > imp
 	 *
 	 * @author Jean-Yves Tinevez
 	 */
-	public static class LogDetectorCLI extends Configurator implements HasInteractivePreview
+	public static class LogDetectorConfig extends TrackMateConfigurator implements HasInteractivePreview
 	{
 
-		public LogDetectorCLI( final int nChannels, final String units )
+		public LogDetectorConfig( final int nChannels, final String units )
 		{
-			addTargetChannel( this, nChannels );
-			addDiameter( this, units );
-			addThreshold( this );
-			addMedianFiltering( this );
-			addSubpixelLocalization( this );
+			super( NAME, INFO_TEXT );
+			addTargetChannel( nChannels );
+			addDiameter( units );
+			addThreshold();
+			addMedianFiltering();
+			addSubpixelLocalization();
 		}
 
 		@Override

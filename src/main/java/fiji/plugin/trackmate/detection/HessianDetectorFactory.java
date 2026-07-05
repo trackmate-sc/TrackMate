@@ -33,6 +33,7 @@ import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
 import java.util.Map;
 
 import org.scijava.plugin.Plugin;
+import org.scijava.ui.config.Parameters.DoubleParam;
 
 import fiji.plugin.trackmate.util.TMUtils;
 import ij.ImagePlus;
@@ -114,7 +115,7 @@ public class HessianDetectorFactory< T extends RealType< T > & NativeType< T > >
 	}
 
 	@Override
-	public HessianDetectorCLI getConfigurator( final ImagePlus imp )
+	public HessianDetectorCLI createConfig( final ImagePlus imp )
 	{
 		final int nChannels = ( imp == null ) ? 1 : imp.getNChannels();
 		final String units = ( imp == null ) ? "no image" : imp.getCalibration().getUnit();
@@ -126,14 +127,14 @@ public class HessianDetectorFactory< T extends RealType< T > & NativeType< T > >
 	 *
 	 * @author Jean-Yves Tinevez
 	 */
-	public static class HessianDetectorCLI extends LogDetectorCLI
+	public static class HessianDetectorCLI extends LogDetectorConfig
 	{
 
 		public HessianDetectorCLI( final int nChannels, final String units )
 		{
 			super( nChannels, units );
 			// Diameter in Z
-			final DoubleArgument diameterZ = addDoubleArgument()
+			final DoubleParam diameterZ = addDoubleParameter()
 					.key( KEY_RADIUS_Z )
 					.name( "Diameter along Z" )
 					.units( units )
@@ -143,10 +144,10 @@ public class HessianDetectorFactory< T extends RealType< T > & NativeType< T > >
 			// Convert to diameter for display purposes.
 			setDisplayTranslator( diameterZ, r -> r * 2., d -> d / 2. );
 			// Change order
-			arguments.remove( diameterZ );
-			arguments.add( 2, diameterZ );
+			orderedElements.remove( diameterZ );
+			orderedElements.add( 2, diameterZ );
 			// Normalize quality values
-			addFlag()
+			addBooleanParameter()
 					.key( KEY_NORMALIZE )
 					.name( "Normalize quality values" )
 					.defaultValue( DEFAULT_NORMALIZE )
