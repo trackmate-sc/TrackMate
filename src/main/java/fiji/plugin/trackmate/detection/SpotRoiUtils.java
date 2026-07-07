@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -23,6 +23,7 @@ package fiji.plugin.trackmate.detection;
 
 import java.awt.Polygon;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -35,23 +36,32 @@ import ij.process.FloatPolygon;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
+import net.imglib2.Interval;
 import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.algorithm.gauss3.Gauss3;
+import net.imglib2.converter.Converters;
+import net.imglib2.img.Img;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegion;
 import net.imglib2.roi.labeling.LabelRegions;
 import net.imglib2.type.BooleanType;
 import net.imglib2.type.NativeType;
+import net.imglib2.type.logic.BoolType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.IntType;
+import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.util.Intervals;
+import net.imglib2.util.Util;
+import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 
 /**
  * Utility classes to create 2D {@link fiji.plugin.trackmate.SpotRoi}s from
  * single time-point, single channel images.
- * 
+ *
  * @author Jean-Yves Tinevez, 2023
  */
 public class SpotRoiUtils
@@ -131,7 +141,7 @@ public class SpotRoiUtils
 		final List< Spot > spots = new ArrayList<>();
 		for ( final List< Spot > s : map.values() )
 			spots.addAll( s );
-		
+
 		return spots;
 	}
 
@@ -144,7 +154,7 @@ public class SpotRoiUtils
 	 * the label they correspond to in the label image. Because one spot
 	 * corresponds to one connected component in the label image, there might be
 	 * several spots for a label, hence the values of the map are list of spots.
-	 * 
+	 *
 	 * @param <R>
 	 *            the type that backs-up the labeling.
 	 * @param <S>
@@ -195,7 +205,13 @@ public class SpotRoiUtils
 		{
 			final LabelRegion< Integer > region = iterator.next();
 			// Analyze in zero-min region.
-			final List< Polygon > pp = maskToPolygons( Views.zeroMin( region ) );
+			final RandomAccessibleInterval< BoolType > mask = Views.zeroMin( region );
+			final List< Polygon > pp;
+			// Smooth if requested.
+			if ( smoothingScale > 0 )
+				pp = maskToPolygons( smoothMask( mask, smoothingScale, calibration ) );
+			else
+				pp = maskToPolygons( mask );
 			// Translate back to interval coords.
 			for ( final Polygon polygon : pp )
 				polygon.translate( ( int ) region.min( 0 ), ( int ) region.min( 1 ) );
@@ -387,6 +403,37 @@ public class SpotRoiUtils
 		final FloatPolygon simplifiedPolygon = new FloatPolygon( sX, sY );
 		final PolygonRoi fRoi = new PolygonRoi( simplifiedPolygon, PolygonRoi.POLYGON );
 		return fRoi;
+	}
+
+	/**
+	 * Smooths a 2D binary mask using a Gaussian filter.
+	 *
+	 * @param mask
+	 *            the binary mask to smooth.
+	 * @param smoothingScale
+	 *            the Gaussian sigma in physical units.
+	 * @param calibration
+	 *            the pixel calibration.
+	 * @return a new smoothed mask as a binary image.
+	 */
+	private static RandomAccessibleInterval< BoolType > smoothMask(
+			final RandomAccessibleInterval< BoolType > mask,
+			final double smoothingScale,
+			final double[] calibration )
+	{
+		final double[] sigmas = new double[ 2 ];
+		for ( int d = 0; d < 2; d++ )
+			sigmas[ d ] = smoothingScale / calibration[ d ];
+
+		final int[] halfkernelsizes = Gauss3.halfkernelsizes( sigmas );
+		final long[] borders = Arrays.stream( halfkernelsizes ).asLongStream().toArray();
+		final Interval outputSize = Intervals.expand( mask, borders );
+		final Img< FloatType > img = Util.getArrayOrCellImgFactory( outputSize, new FloatType() ).create( outputSize );
+		final RandomAccessibleInterval< FloatType > filtered = Views.translateInverse( img, borders );
+		Gauss3.gauss( sigmas, Views.extendZero( mask ), filtered );
+		final IntervalView< FloatType > crop = Views.interval( filtered, mask );
+		final RandomAccessibleInterval< BoolType > smoothedMask = Converters.convert( crop, ( i, o ) -> o.set( i.get() > 0.5f ), new BoolType() );
+		return smoothedMask;
 	}
 
 	/**
