@@ -66,7 +66,6 @@ import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.UpdateListener;
 import fiji.plugin.trackmate.util.FileChooser;
 import fiji.plugin.trackmate.util.FileChooser.DialogType;
 import fiji.plugin.trackmate.util.FileChooser.SelectionMode;
-import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.trackscheme.utils.SearchBar;
@@ -192,7 +191,7 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 		for ( final String feature : features )
 		{
 			final Dimension dimension = model.getFeatureModel().getSpotFeatureDimensions().get( feature );
-			final String units = TMUtils.getUnitsFor( dimension, model.getSpaceUnits(), model.getTimeUnits() );
+			final String units = dimension.units( model.getSpaceUnits(), model.getTimeUnits() );
 			featureUnits.put( feature, units );
 		}
 		final Map< String, Boolean > isInts = model.getFeatureModel().getSpotFeatureIsInt();

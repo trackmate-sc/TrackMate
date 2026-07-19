@@ -41,7 +41,6 @@ import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackModel;
-import fiji.plugin.trackmate.util.TMUtils;
 
 public class CSVExporter
 {
@@ -188,7 +187,7 @@ public class CSVExporter
 		for ( final String feature : features )
 		{
 			final Dimension dimension = model.getFeatureModel().getSpotFeatureDimensions().get( feature );
-			final String units = TMUtils.getUnitsFor( dimension, model.getSpaceUnits(), model.getTimeUnits() );
+			final String units = dimension.units( model.getSpaceUnits(), model.getTimeUnits() );
 			featureUnits.put( feature, units );
 		}
 		writeHeader( writer, features, featureNames, featureShortNames, featureUnits, extra );

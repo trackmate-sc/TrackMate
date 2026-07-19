@@ -42,7 +42,6 @@ import java.util.Set;
 import org.scijava.Context;
 import org.scijava.util.DoubleArray;
 
-import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
@@ -621,55 +620,7 @@ public class TMUtils
 		return threshold;
 	}
 
-	/**
-	 * Returns a String unit for the given dimension. When suitable, the unit is
-	 * taken from the settings field, which contains the spatial and time units.
-	 * Otherwise, default units are used.
-	 *
-	 * @param dimension
-	 *            the dimension.
-	 * @param spaceUnits
-	 *            the space units.
-	 * @param timeUnits
-	 *            the time units.
-	 * @return the units for the specified dimension.
-	 */
-	public static final String getUnitsFor( final Dimension dimension, final String spaceUnits, final String timeUnits )
-	{
-		switch ( dimension )
-		{
-		case ANGLE:
-			return "radians";
-		case INTENSITY:
-			return "counts";
-		case INTENSITY_SQUARED:
-			return "counts^2";
-		case NONE:
-			return "";
-		case POSITION:
-		case LENGTH:
-			return spaceUnits;
-		case AREA:
-			return spaceUnits + "^2";
-		case VOLUME:
-			return spaceUnits + "^3";
-		case QUALITY:
-			return "quality";
-		case COST:
-			return "cost";
-		case TIME:
-			return timeUnits;
-		case VELOCITY:
-			return spaceUnits + "/" + timeUnits;
-		case RATE:
-			return "/" + timeUnits;
-		case ANGLE_RATE:
-			return "rad/" + timeUnits;
-		default:
-		case STRING:
-			return null;
-		}
-	}
+
 
 	public static final String getCurrentTimeString()
 	{

@@ -66,7 +66,6 @@ import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
 import fiji.plugin.trackmate.util.FileChooser;
 import fiji.plugin.trackmate.util.FileChooser.DialogType;
 import fiji.plugin.trackmate.util.FileChooser.SelectionMode;
-import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 
@@ -294,7 +293,7 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 		final BiFunction< Branch, String, Double > featureFun = ( br, feature ) -> br.getFeature( feature );
 		final Map< String, String > featureUnits = new HashMap<>();
 		BRANCH_FEATURES_DIMENSIONS.forEach(
-				( f, d ) -> featureUnits.put( f, TMUtils.getUnitsFor( d, model.getSpaceUnits(), model.getTimeUnits() ) ) );
+				( f, d ) -> featureUnits.put( f, d.units( model.getSpaceUnits(), model.getTimeUnits() ) ) );
 		final Map< String, String > infoTexts = new HashMap<>();
 		final Function< Branch, String > labelGenerator = b -> b.toString();
 		final BiConsumer< Branch, String > labelSetter = null;
