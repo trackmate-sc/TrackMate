@@ -204,9 +204,17 @@
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
+		<!-- Logging dependencies -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
+		</dependency>
+
+		<!-- Geff dependency for IO -->
+		<dependency>
+			<groupId>org.litt</groupId>
+			<artifactId>geff</artifactId>
+			<version>1.1.1-SNAPSHOT</version>
 		</dependency>
 
 		<!-- Fiji dependencies -->
