@@ -84,6 +84,12 @@ public class SpotRoi extends SpotBase
 	}
 
 	@Override
+	public void accept( final SpotVisitor v )
+	{
+		v.visit( this );
+	}
+
+	@Override
 	public SpotRoi copy()
 	{
 		final double xc = getDoublePosition( 0 );

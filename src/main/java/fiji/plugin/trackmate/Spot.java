@@ -73,12 +73,13 @@ public interface Spot extends RealLocalizable, RealPositionable, RealInterval, C
 	 * PUBLIC METHODS
 	 */
 
+	public void accept( SpotVisitor v );
+
 	@Override
 	public default int compareTo( final Spot o )
 	{
 		return ID() - o.ID();
 	}
-
 
 	/**
 	 * Returns a copy of this spot. The class and all fields will be identical,
@@ -639,4 +640,23 @@ public interface Spot extends RealLocalizable, RealPositionable, RealInterval, C
 			return comparator.compare( o1.getName(), o2.getName() );
 		}
 	};
+
+	public static interface SpotVisitor
+	{
+
+		default void visit( final SpotBase spot )
+		{
+			throw new UnsupportedOperationException( "SpotBase not supported." );
+		}
+
+		default void visit( final SpotRoi spot )
+		{
+			throw new UnsupportedOperationException( "SpotRoi not supported." );
+		}
+
+		default void visit( final SpotMesh spot )
+		{
+			throw new UnsupportedOperationException( "SpotMesh not supported." );
+		}
+	}
 }

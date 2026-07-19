@@ -206,6 +206,12 @@ public class SpotBase extends AbstractEuclideanSpace implements Spot
 	 */
 	
 	@Override
+	public void accept( final SpotVisitor v )
+	{
+		v.visit( this );
+	}
+
+	@Override
 	public SpotBase copy()
 	{
 		final SpotBase o = new SpotBase( this );

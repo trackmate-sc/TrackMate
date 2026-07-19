@@ -85,6 +85,12 @@ public class SpotMesh extends SpotBase
 		setMesh( m );
 	}
 
+	@Override
+	public void accept( final SpotVisitor v )
+	{
+		v.visit( this );
+	}
+
 	public void setMesh( final Mesh m )
 	{
 		// Store a copy in a Buffer mesh.
