@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.io.geff;
 
 import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_STATE_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.TmXmlKeys.PLUGIN_VERSION_ATTRIBUTE_NAME;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import fiji.plugin.trackmate.Spot.SpotVisitor;
 import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.SpotRoi;
+import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
@@ -58,6 +60,7 @@ public class TmGeffWriter
 		this.trackmateInfo = new HashMap<>();
 		final Map< String, Object > extra = Map.of( "trackmate", trackmateInfo );
 		metadata.setExtra( extra );
+		trackmateInfo.put( PLUGIN_VERSION_ATTRIBUTE_NAME, TrackMate.PLUGIN_NAME_VERSION );
 	}
 
 	public void appendModel( final Model model )
