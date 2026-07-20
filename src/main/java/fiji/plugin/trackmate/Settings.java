@@ -74,6 +74,8 @@ public class Settings
 
 	public int nframes;
 
+	public int nchannels;
+
 	public String imageFolder;
 
 	public String imageFileName;
@@ -113,15 +115,15 @@ public class Settings
 	 */
 	public SpotDetectorFactoryBase< ? > detectorFactory;
 
-	/** The the tracker to use. */
-	public SpotTrackerFactory trackerFactory;
-
 	/**
 	 * Settings map for {@link fiji.plugin.trackmate.detection.SpotDetector}.
 	 *
 	 * @see fiji.plugin.trackmate.detection.DetectorKeys
 	 */
 	public Map< String, Object > detectorSettings = new HashMap<>();
+
+	/** The the tracker to use. */
+	public SpotTrackerFactory trackerFactory;
 
 	/**
 	 * Settings map for {@link fiji.plugin.trackmate.tracking.SpotTracker}.
@@ -133,15 +135,15 @@ public class Settings
 	// Filters
 
 	/**
-	 * The feature filter list.
-	 */
-	protected List< FeatureFilter > spotFilters = new ArrayList<>();
-
-	/**
 	 * The initial quality filter value that is used to clip spots of low
 	 * quality from spots.
 	 */
 	public Double initialSpotFilterValue = Double.valueOf( 0 );
+
+	/**
+	 * The feature filter list.
+	 */
+	protected List< FeatureFilter > spotFilters = new ArrayList<>();
 
 	/** The track filter list that is used to prune track and spots. */
 	protected List< FeatureFilter > trackFilters = new ArrayList<>();
@@ -199,6 +201,7 @@ public class Settings
 			this.imageFolder = "";
 			this.nframes = 0;
 			this.nslices = 0;
+			this.nchannels = 1;
 			return;
 		}
 
@@ -220,6 +223,7 @@ public class Settings
 		this.height = imp.getHeight();
 		this.nslices = imp.getNSlices();
 		this.nframes = imp.getNFrames();
+		this.nchannels = imp.getNChannels();
 		this.dx = imp.getCalibration().pixelWidth;
 		this.dy = imp.getCalibration().pixelHeight;
 		this.dz = imp.getCalibration().pixelDepth;
