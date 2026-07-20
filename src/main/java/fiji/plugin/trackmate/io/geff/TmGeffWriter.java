@@ -26,6 +26,7 @@ import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
+import fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 
@@ -78,6 +79,8 @@ public class TmGeffWriter
 			{
 				if ( edgeFeature.equals( EdgeTargetAnalyzer.SPOT_SOURCE_ID ) || edgeFeature.equals( EdgeTargetAnalyzer.SPOT_TARGET_ID ) )
 					continue;
+				if ( is2D && edgeFeature.equals( EdgeTimeLocationAnalyzer.Z_LOCATION ) )
+					continue;
 
 				final Double ef = fm.getEdgeFeature( edge, edgeFeature );
 				if ( ef == null )
@@ -123,6 +126,11 @@ public class TmGeffWriter
 		final Map< String, PropMetadata > edgePropsMetadata = new HashMap<>();
 		for ( final String edgeFeature : fm.getEdgeFeatures() )
 		{
+			if ( edgeFeature.equals( EdgeTargetAnalyzer.SPOT_SOURCE_ID ) || edgeFeature.equals( EdgeTargetAnalyzer.SPOT_TARGET_ID ) )
+				continue;
+			if ( is2D && edgeFeature.equals( EdgeTimeLocationAnalyzer.Z_LOCATION ) )
+				continue;
+
 			final String dType = fm.getEdgeFeatureIsInt().get( edgeFeature ) ? "int32" : "float64";
 			final Dimension dimension = fm.getEdgeFeatureDimensions().get( edgeFeature );
 			final String unit = dimension.units( spaceUnits, timeUnits );
