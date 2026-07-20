@@ -31,7 +31,14 @@ public class TmGeffWriterTestDrive
 		System.out.println( "Done." );
 
 		System.out.println( "Writing to " + savePath );
-		TmGeffWriter.write( model, savePath );
+
+		final TmGeffWriter geffWriter = new TmGeffWriter( savePath );
+		geffWriter.appendModel( model );
+		geffWriter.appendDisplaySettings( reader.getDisplaySettings() );
+		geffWriter.appendLog( reader.getLog() );
+		geffWriter.appendGUIState( reader.getGUIState() );
+		geffWriter.write();
+
 		System.out.println( "Done." );
 	}
 }

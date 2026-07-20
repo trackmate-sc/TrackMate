@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.io.geff;
 
+import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_STATE_ELEMENT_KEY;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,6 +17,8 @@ import org.mastodon.geff.GeffNode;
 import org.mastodon.geff.GeffNode.Builder;
 import org.mastodon.geff.PropMetadata;
 
+import com.google.gson.JsonElement;
+
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
@@ -27,13 +31,36 @@ import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
 import fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 
 public class TmGeffWriter
 {
 
-	public static void write( final Model model, final String zarrPath ) throws IOException
+	private static final String GEFF_VERSION = "1.0.0";
+
+	private final String zarrPath;
+
+	private final GeffMetadata metadata;
+
+	private final List< GeffNode > geffNodes = new ArrayList<>();
+
+	private final List< GeffEdge > geffEdges = new ArrayList<>();
+
+	private final Map< String, Object > trackmateInfo;
+
+	public TmGeffWriter( final String zarrPath )
+	{
+		this.zarrPath = zarrPath;
+		this.metadata = new GeffMetadata( GEFF_VERSION, true );
+		this.trackmateInfo = new HashMap<>();
+		final Map< String, Object > extra = Map.of( "trackmate", trackmateInfo );
+		metadata.setExtra( extra );
+	}
+
+	public void appendModel( final Model model )
 	{
 		final String spaceUnits = ZarrUnits.normalizeSpaceUnit( model.getSpaceUnits() );
 		final String timeUnits = ZarrUnits.normalizeTimeUnit( model.getTimeUnits() );
@@ -54,7 +81,7 @@ public class TmGeffWriter
 		final Set< DefaultWeightedEdge > edges = trackModel.edgeSet();
 		final FeatureModel fm = model.getFeatureModel();
 
-		final List< GeffEdge > geffEdges = new ArrayList<>();
+
 		int edgeId = 0;
 		for ( final DefaultWeightedEdge edge : edges )
 		{
@@ -94,17 +121,12 @@ public class TmGeffWriter
 		}
 
 		/*
-		 * Serialize tracks
-		 */
-		// TODO -> nodes with a specific path.
-
-		/*
 		 * Metadata
 		 */
 
 		// Axes
 		final List< GeffAxis > axes = buildAxes( spaceUnits, timeUnits, spots, is2D );
-		final GeffMetadata metadata = new GeffMetadata( "1.0.0", true, axes );
+		metadata.setGeffAxes( axes );
 
 		// Spot features
 		final Map< String, PropMetadata > nodePropsMetadata = new HashMap<>();
@@ -139,17 +161,32 @@ public class TmGeffWriter
 			edgePropsMetadata.put( edgeFeature, propMetadata );
 		}
 		metadata.setEdgePropsMetadata( edgePropsMetadata );
+	}
 
-		/*
-		 * Write to disk
-		 */
+	public void appendLog( final String log )
+	{
+		trackmateInfo.put( "log", log );
+	}
 
-		GeffNode.writeToZarr( visitor.nodes, zarrPath, metadata );
+	public void appendDisplaySettings( final DisplaySettings ds )
+	{
+		final JsonElement json = DisplaySettingsIO.toJsonTree( ds );
+		trackmateInfo.put( "displaySettings", json );
+	}
+
+	public void appendGUIState( final String currentPanelIdentifier )
+	{
+		trackmateInfo.put( GUI_STATE_ELEMENT_KEY, currentPanelIdentifier );
+	}
+
+	public void write() throws IOException
+	{
+		GeffNode.writeToZarr( geffNodes, zarrPath, metadata );
 		GeffEdge.writeToZarr( geffEdges, zarrPath, metadata );
 		GeffMetadata.writeToZarr( metadata, zarrPath );
 	}
 
-	private static List< GeffAxis > buildAxes( final String spaceUnit, final String timeUnit, final SpotCollection spots, final boolean is2d )
+	private static final List< GeffAxis > buildAxes( final String spaceUnit, final String timeUnit, final SpotCollection spots, final boolean is2d )
 	{
 		final String su = ZarrUnits.normalizeSpaceUnit( spaceUnit );
 		final String tu = ZarrUnits.normalizeTimeUnit( timeUnit );
@@ -174,7 +211,7 @@ public class TmGeffWriter
 		return axes;
 	}
 
-	private static double[] featureMinMax( final Iterable< Spot > iterable, final String feature )
+	private static final double[] featureMinMax( final Iterable< Spot > iterable, final String feature )
 	{
 		double min = Double.POSITIVE_INFINITY;
 		double max = Double.NEGATIVE_INFINITY;
@@ -189,17 +226,31 @@ public class TmGeffWriter
 		return new double[] { min, max };
 	}
 
-	public static class GeffSpotVisitor implements SpotVisitor
+	private static final double[] posMinMax( final Iterable< Spot > spots, final int d )
+	{
+		double min = Double.POSITIVE_INFINITY;
+		double max = Double.NEGATIVE_INFINITY;
+		for ( final Spot spot : spots )
+		{
+			final double left = spot.realMin( d );
+			final double right = spot.realMax( d );
+			if ( left < min )
+				min = left;
+			if ( right > max )
+				max = right;
+		}
+		return new double[] { min, max };
+	}
+
+	private class GeffSpotVisitor implements SpotVisitor
 	{
 
 		/** Features not in the general prop, because they are the core node. */
-		private static final Set< String > SLOP_PROPS = Set.of( "FRAME", "POSITION_X", "POSITION_Y", "POSITION_Z", "RADIUS" );
+		private static final Set< String > SKIP_PROPS = Set.of( "FRAME", "POSITION_X", "POSITION_Y", "POSITION_Z", "RADIUS" );
 
 		private int geffId = 0;
 
 		private final TObjectIntMap< Spot > spotToId = new TObjectIntHashMap< Spot >();
-
-		private final List< GeffNode > nodes = new ArrayList<>();
 
 		private final Map< String, Boolean > isInt;
 
@@ -217,7 +268,7 @@ public class TmGeffWriter
 			for ( final Map.Entry< String, Double > entry : features.entrySet() )
 			{
 				final String name = entry.getKey();
-				if ( SLOP_PROPS.contains( name ) )
+				if ( SKIP_PROPS.contains( name ) )
 					continue;
 
 				final Object val = ( isInt.get( name ) ? entry.getValue().intValue() : entry.getValue() );
@@ -239,7 +290,7 @@ public class TmGeffWriter
 
 			final GeffNode node = builder.build();
 			serializeFeatures( spot, node );
-			nodes.add( node );
+			geffNodes.add( node );
 			spotToId.put( spot, geffId++ );
 		}
 
@@ -265,24 +316,9 @@ public class TmGeffWriter
 					.polygonY( polygonY )
 					.build();
 			serializeFeatures( spot, node );
-			nodes.add( node );
+			geffNodes.add( node );
 			spotToId.put( spot, geffId++ );
 		}
 	}
 
-	public static final double[] posMinMax( final Iterable< Spot > spots, final int d )
-	{
-		double min = Double.POSITIVE_INFINITY;
-		double max = Double.NEGATIVE_INFINITY;
-		for ( final Spot spot : spots )
-		{
-			final double left = spot.realMin( d );
-			final double right = spot.realMax( d );
-			if ( left < min )
-				min = left;
-			if ( right > max )
-				max = right;
-		}
-		return new double[] { min, max };
-	}
 }
