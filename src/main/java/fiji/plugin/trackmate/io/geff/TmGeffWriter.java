@@ -1,8 +1,7 @@
-package fiji.plugin.trackmate.io;
+package fiji.plugin.trackmate.io.geff;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +12,7 @@ import org.mastodon.geff.GeffAxis;
 import org.mastodon.geff.GeffEdge;
 import org.mastodon.geff.GeffMetadata;
 import org.mastodon.geff.GeffNode;
+import org.mastodon.geff.GeffNode.Builder;
 import org.mastodon.geff.PropMetadata;
 
 import fiji.plugin.trackmate.Dimension;
@@ -24,6 +24,8 @@ import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.TrackModel;
+import fiji.plugin.trackmate.detection.DetectionUtils;
+import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 
@@ -32,13 +34,16 @@ public class TmGeffWriter
 
 	public static void write( final Model model, final String zarrPath ) throws IOException
 	{
+		final String spaceUnits = ZarrUnits.normalizeSpaceUnit( model.getSpaceUnits() );
+		final String timeUnits = ZarrUnits.normalizeTimeUnit( model.getTimeUnits() );
+		final boolean is2D = DetectionUtils.is2D( model );
 
 		/*
 		 * Serialize spots
 		 */
 		final SpotCollection spots = model.getSpots();
 		final Map< String, Boolean > isInt = model.getFeatureModel().getSpotFeatureIsInt();
-		final GeffSpotVisitor visitor = new GeffSpotVisitor( isInt );
+		final GeffSpotVisitor visitor = new GeffSpotVisitor( isInt, is2D );
 		spots.iterable( true ).forEach( spot -> spot.accept( visitor ) );
 
 		/*
@@ -47,7 +52,7 @@ public class TmGeffWriter
 		final TrackModel trackModel = model.getTrackModel();
 		final Set< DefaultWeightedEdge > edges = trackModel.edgeSet();
 		final FeatureModel fm = model.getFeatureModel();
-		
+
 		final List< GeffEdge > geffEdges = new ArrayList<>();
 		int edgeId = 0;
 		for ( final DefaultWeightedEdge edge : edges )
@@ -71,6 +76,9 @@ public class TmGeffWriter
 			// Feature
 			for ( final String edgeFeature : fm.getEdgeFeatures() )
 			{
+				if ( edgeFeature.equals( EdgeTargetAnalyzer.SPOT_SOURCE_ID ) || edgeFeature.equals( EdgeTargetAnalyzer.SPOT_TARGET_ID ) )
+					continue;
+
 				final Double ef = fm.getEdgeFeature( edge, edgeFeature );
 				if ( ef == null )
 					continue;
@@ -92,20 +100,21 @@ public class TmGeffWriter
 		 */
 
 		// Axes
-		final List< GeffAxis > axes = buildAxes( model.getTimeUnits(), model.getSpaceUnits() );
+		final List< GeffAxis > axes = buildAxes( spaceUnits, timeUnits, spots, is2D );
 		final GeffMetadata metadata = new GeffMetadata( "1.0.0", true, axes );
 
 		// Spot features
 		final Map< String, PropMetadata > nodePropsMetadata = new HashMap<>();
 		for ( final String spotFeature : fm.getSpotFeatures() )
 		{
+			if ( is2D && spotFeature.equals( Spot.POSITION_Z ) )
+				continue;
+
 			final String dType = isInt.get( spotFeature ) ? "int32" : "float64";
 			final Dimension dimension = fm.getSpotFeatureDimensions().get( spotFeature );
-			final String unit = dimension.units( model.getSpaceUnits(), model.getTimeUnits() );
+			final String unit = dimension.units( spaceUnits, timeUnits );
 			final String name = fm.getSpotFeatureNames().get( spotFeature );
-			// Description stores short names.
-			final String description = fm.getSpotFeatureShortNames().get( spotFeature );
-			final PropMetadata propMetadata = new PropMetadata( spotFeature, dType, false, unit, name, description );
+			final PropMetadata propMetadata = new PropMetadata( spotFeature, dType, false, unit, name, null );
 			nodePropsMetadata.put( spotFeature, propMetadata );
 		}
 		metadata.setNodePropsMetadata( nodePropsMetadata );
@@ -116,10 +125,9 @@ public class TmGeffWriter
 		{
 			final String dType = fm.getEdgeFeatureIsInt().get( edgeFeature ) ? "int32" : "float64";
 			final Dimension dimension = fm.getEdgeFeatureDimensions().get( edgeFeature );
-			final String unit = dimension.units( model.getSpaceUnits(), model.getTimeUnits() );
+			final String unit = dimension.units( spaceUnits, timeUnits );
 			final String name = fm.getEdgeFeatureNames().get( edgeFeature );
-			final String description = fm.getEdgeFeatureShortNames().get( edgeFeature );
-			final PropMetadata propMetadata = new PropMetadata( edgeFeature, dType, false, unit, name, description );
+			final PropMetadata propMetadata = new PropMetadata( edgeFeature, dType, false, unit, name, null );
 			edgePropsMetadata.put( edgeFeature, propMetadata );
 		}
 		metadata.setEdgePropsMetadata( edgePropsMetadata );
@@ -133,48 +141,44 @@ public class TmGeffWriter
 		GeffMetadata.writeToZarr( metadata, zarrPath );
 	}
 
-	private static List< GeffAxis > buildAxes( final String timeUnit, final String spaceUnit )
+	private static List< GeffAxis > buildAxes( final String spaceUnit, final String timeUnit, final SpotCollection spots, final boolean is2d )
 	{
-		return Arrays.asList(
-				GeffAxis.createTimeAxis( GeffAxis.NAME_TIME, timeUnit, null, null ),
-				GeffAxis.createSpaceAxis( GeffAxis.NAME_SPACE_X, normalizeSpaceUnit( spaceUnit ), null, null ),
-				GeffAxis.createSpaceAxis( GeffAxis.NAME_SPACE_Y, normalizeSpaceUnit( spaceUnit ), null, null ),
-				GeffAxis.createSpaceAxis( GeffAxis.NAME_SPACE_Z, normalizeSpaceUnit( spaceUnit ), null, null ) );
+		final String su = ZarrUnits.normalizeSpaceUnit( spaceUnit );
+		final String tu = ZarrUnits.normalizeTimeUnit( timeUnit );
+
+		final List< GeffAxis > axes = new ArrayList<>();
+
+		final double[] minMaxT = featureMinMax( spots.iterable( true ), Spot.FRAME );
+		axes.add( GeffAxis.createTimeAxis( Spot.FRAME, tu, minMaxT[ 0 ], minMaxT[ 1 ] ) );
+
+		final double[] minMaxX = posMinMax( spots.iterable( true ), 0 );
+		axes.add( GeffAxis.createSpaceAxis( Spot.POSITION_X, su, minMaxX[ 0 ], minMaxX[ 1 ] ) );
+
+		final double[] minMaxY = posMinMax( spots.iterable( true ), 1 );
+		axes.add( GeffAxis.createSpaceAxis( Spot.POSITION_Y, su, minMaxY[ 0 ], minMaxY[ 1 ] ) );
+
+		if ( !is2d )
+		{
+			final double[] minMaxZ = posMinMax( spots.iterable( true ), 2 );
+			axes.add( GeffAxis.createSpaceAxis( Spot.POSITION_Z, su, minMaxZ[ 0 ], minMaxZ[ 1 ] ) );
+		}
+
+		return axes;
 	}
 
-	/**
-	 * Maps common unit abbreviations to OME-Zarr compliant names. See
-	 * https://ngff.openmicroscopy.org/latest/#axes-md for the valid set.
-	 */
-	static String normalizeSpaceUnit( final String unit )
+	private static double[] featureMinMax( final Iterable< Spot > iterable, final String feature )
 	{
-		if ( unit == null || unit.isEmpty() )
-			return "pixel";
-		switch ( unit.trim() )
+		double min = Double.POSITIVE_INFINITY;
+		double max = Double.NEGATIVE_INFINITY;
+		for ( final Spot spot : iterable )
 		{
-		case "um":
-		case "µm":
-		case "μm":
-		case "micron":
-		case "microns":
-			return "micrometer";
-		case "nm":
-			return "nanometer";
-		case "mm":
-			return "millimeter";
-		case "cm":
-			return "centimeter";
-		case "m":
-			return "meter";
-		case "km":
-			return "kilometer";
-		case "pm":
-			return "picometer";
-		case "Å":
-			return "angstrom";
-		default:
-			return unit;
+			final double val = spot.getFeature( feature );
+			if ( val < min )
+				min = val;
+			if ( val > max )
+				max = val;
 		}
+		return new double[] { min, max };
 	}
 
 	public static class GeffSpotVisitor implements SpotVisitor
@@ -191,9 +195,12 @@ public class TmGeffWriter
 
 		private final Map< String, Boolean > isInt;
 
-		public GeffSpotVisitor( final Map< String, Boolean > isInt )
+		private final boolean is2d;
+
+		public GeffSpotVisitor( final Map< String, Boolean > isInt, final boolean is2d )
 		{
 			this.isInt = isInt;
+			this.is2d = is2d;
 		}
 
 		private void serializeFeatures( final Spot spot, final GeffNode node )
@@ -213,14 +220,16 @@ public class TmGeffWriter
 		@Override
 		public void visit( final SpotBase spot )
 		{
-			final GeffNode node = new GeffNode.Builder()
+			final Builder builder = new GeffNode.Builder()
 					.id( geffId )
 					.timepoint( spot.getFeature( Spot.FRAME ).intValue() )
 					.x( spot.getDoublePosition( 0 ) )
 					.y( spot.getDoublePosition( 1 ) )
-					.z( spot.getDoublePosition( 2 ) )
-					.radius( spot.getFeature( Spot.RADIUS ).doubleValue() )
-					.build();
+					.radius( spot.getFeature( Spot.RADIUS ).doubleValue() );
+			if ( !is2d )
+				builder.z( spot.getDoublePosition( 2 ) );
+
+			final GeffNode node = builder.build();
 			serializeFeatures( spot, node );
 			nodes.add( node );
 			spotToId.put( spot, geffId++ );
@@ -242,8 +251,7 @@ public class TmGeffWriter
 					.id( geffId )
 					.timepoint( spot.getFeature( Spot.FRAME ).intValue() )
 					.x( spot.getDoublePosition( 0 ) )
-					.y( spot.getDoublePosition( 1 ) )
-					.z( spot.getDoublePosition( 2 ) )
+					.y( spot.getDoublePosition( 1 ) ) // No Z <- 2D
 					.radius( spot.getFeature( Spot.RADIUS ).doubleValue() )
 					.polygonX( polygonX )
 					.polygonY( polygonY )
@@ -252,5 +260,21 @@ public class TmGeffWriter
 			nodes.add( node );
 			spotToId.put( spot, geffId++ );
 		}
+	}
+
+	public static final double[] posMinMax( final Iterable< Spot > spots, final int d )
+	{
+		double min = Double.POSITIVE_INFINITY;
+		double max = Double.NEGATIVE_INFINITY;
+		for ( final Spot spot : spots )
+		{
+			final double left = spot.realMin( d );
+			final double right = spot.realMax( d );
+			if ( left < min )
+				min = left;
+			if ( right > max )
+				max = right;
+		}
+		return new double[] { min, max };
 	}
 }
