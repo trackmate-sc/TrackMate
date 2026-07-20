@@ -6,7 +6,9 @@ import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.io.geff.TmGeffWriter;
+import ij.ImagePlus;
 
 public class TmGeffWriterTestDrive
 {
@@ -25,6 +27,8 @@ public class TmGeffWriterTestDrive
 		final String savePath = path.replace( ".xml", ".geff" );
 
 		final Model model = reader.getModel();
+		final ImagePlus imp = reader.readImage();
+		final Settings settings = reader.readSettings( imp );
 
 		System.out.println( "Deleting previous " + savePath );
 		FileUtils.deleteDirectory( new File( savePath ) );
@@ -34,6 +38,7 @@ public class TmGeffWriterTestDrive
 
 		final TmGeffWriter geffWriter = new TmGeffWriter( savePath );
 		geffWriter.appendModel( model );
+		geffWriter.appendSettings( settings );
 		geffWriter.appendDisplaySettings( reader.getDisplaySettings() );
 		geffWriter.appendLog( reader.getLog() );
 		geffWriter.appendGUIState( reader.getGUIState() );

@@ -23,6 +23,7 @@ import com.google.gson.JsonElement;
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.Spot.SpotVisitor;
 import fiji.plugin.trackmate.SpotBase;
@@ -35,6 +36,7 @@ import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
 import fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
+import fiji.plugin.trackmate.io.json.SettingsIO;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 
@@ -164,6 +166,12 @@ public class TmGeffWriter
 			edgePropsMetadata.put( edgeFeature, propMetadata );
 		}
 		metadata.setEdgePropsMetadata( edgePropsMetadata );
+	}
+
+	public void appendSettings( final Settings settings )
+	{
+		final JsonElement settingsJson = SettingsIO.toJsonTree( settings );
+		trackmateInfo.put( "settings", settingsJson );
 	}
 
 	public void appendLog( final String log )
