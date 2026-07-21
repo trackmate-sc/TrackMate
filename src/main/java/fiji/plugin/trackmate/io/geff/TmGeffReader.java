@@ -21,6 +21,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.SpotRoi;
+import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -116,7 +117,7 @@ public class TmGeffReader
 
 	private void readEdgesAndTracks( final Model model, final TIntObjectMap< Spot > spotIdMap, final TObjectIntMap< Spot > spotTrackIDMap )
 	{
-		final List< GeffEdge > edges = GeffEdge.readFromZarr( geffPath );
+		final List< GeffEdge > edges = GeffEdge.readFromZarr( geffPath, metadata );
 
 		final FeatureModel fm = model.getFeatureModel();
 		final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph = new SimpleWeightedGraph<>( DefaultWeightedEdge.class );
@@ -136,6 +137,10 @@ public class TmGeffReader
 			graph.addVertex( target );
 			final DefaultWeightedEdge e = graph.addEdge( source, target );
 			graph.setEdgeWeight( e, score );
+
+			// Put back source and target with TrackMate Spot ID
+			fm.putEdgeFeature( e, EdgeTargetAnalyzer.SPOT_SOURCE_ID, Double.valueOf( source.ID() ) );
+			fm.putEdgeFeature( e, EdgeTargetAnalyzer.SPOT_TARGET_ID, Double.valueOf( target.ID() ) );
 
 			// Features
 			final Map< String, Object > props = edge.getProps();
