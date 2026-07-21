@@ -84,8 +84,7 @@ public class TmGeffWriter
 		 * Serialize spots
 		 */
 		final SpotCollection spots = model.getSpots();
-		final Map< String, Boolean > isInt = model.getFeatureModel().getSpotFeatureIsInt();
-		final GeffSpotVisitor visitor = new GeffSpotVisitor( isInt, is2D, model.getTrackModel() );
+		final GeffSpotVisitor visitor = new GeffSpotVisitor( is2D, model.getTrackModel() );
 		spots.iterable( true ).forEach( spot -> spot.accept( visitor ) );
 
 		/*
@@ -123,12 +122,7 @@ public class TmGeffWriter
 					continue;
 
 				final Double ef = fm.getEdgeFeature( edge, edgeFeature );
-				if ( ef == null )
-					continue;
-				final Object val = ( fm.getEdgeFeatureIsInt().get( edgeFeature )
-						? ef.intValue()
-						: ef.doubleValue() );
-				edgeNode.setProp( edgeFeature, val );
+				edgeNode.setProp( edgeFeature, ef );
 			}
 			geffEdges.add( edgeNode );
 		}
@@ -151,6 +145,7 @@ public class TmGeffWriter
 		metadata.setDisplayHints( displayHints );
 
 		// Spot features
+		final Map< String, Boolean > isInt = model.getFeatureModel().getSpotFeatureIsInt();
 		final Map< String, PropMetadata > nodePropsMetadata = new HashMap<>();
 		for ( final String spotFeature : fm.getSpotFeatures() )
 		{
@@ -307,16 +302,13 @@ public class TmGeffWriter
 
 		private final TObjectIntMap< Spot > spotToId = new TObjectIntHashMap< Spot >();
 
-		private final Map< String, Boolean > isInt;
-
 		private final boolean is2d;
 
 
 		private final TrackModel trackModel;
 
-		public GeffSpotVisitor( final Map< String, Boolean > isInt, final boolean is2d, final TrackModel trackModel )
+		public GeffSpotVisitor( final boolean is2d, final TrackModel trackModel )
 		{
-			this.isInt = isInt;
 			this.is2d = is2d;
 			this.trackModel = trackModel;
 		}
@@ -330,8 +322,7 @@ public class TmGeffWriter
 				if ( SKIP_PROPS.contains( name ) )
 					continue;
 
-				final Object val = ( isInt.get( name ) ? entry.getValue().intValue() : entry.getValue() );
-				node.setProp( name, val );
+				node.setProp( name, entry.getValue() );
 			}
 
 			// Spot ID
