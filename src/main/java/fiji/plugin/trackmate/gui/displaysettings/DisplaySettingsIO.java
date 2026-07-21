@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.jdom2.Element;
@@ -66,12 +67,8 @@ public class DisplaySettingsIO
 		return getGson().toJsonTree( ds );
 	}
 
-	public static DisplaySettings fromJson( final String str )
+	private static void sanitize( final DisplaySettings ds )
 	{
-		final DisplaySettings ds = ( str == null || str.isEmpty() )
-				? DisplaySettings.defaultStyle().copy()
-				: getGson().fromJson( str, DisplaySettings.class );
-
 		// Sanitize min and max.
 		final double spotMin = ds.getSpotMin();
 		final double spotMax = ds.getSpotMax();
@@ -79,7 +76,20 @@ public class DisplaySettingsIO
 		final double trackMin = ds.getTrackMin();
 		final double trackMax = ds.getTrackMax();
 		ds.setTrackMinMax( Math.min( trackMin, trackMax ), Math.max( trackMin, trackMax ) );
+	}
 
+	public static DisplaySettings fromJson( final String str )
+	{
+		final DisplaySettings ds = ( str == null || str.isEmpty() ) ? readUserDefault() : getGson().fromJson( str, DisplaySettings.class );
+		sanitize( ds );
+		return ds;
+	}
+
+	public static DisplaySettings fromJsonTree( final Map< String, Object > displaySettingsJson )
+	{
+		final Gson gson = getGson();
+		final DisplaySettings ds = gson.fromJson( gson.toJsonTree( displaySettingsJson ), DisplaySettings.class );
+		sanitize( ds );
 		return ds;
 	}
 
