@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.io.geff;
 
 import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_STATE_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.TmXmlKeys.LOG_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.PLUGIN_VERSION_ATTRIBUTE_NAME;
 
 import java.io.IOException;
@@ -214,7 +215,7 @@ public class TmGeffWriter
 
 	public void appendLog( final String log )
 	{
-		trackmateInfo.put( "log", log );
+		trackmateInfo.put( LOG_ELEMENT_KEY, log );
 	}
 
 	public void appendDisplaySettings( final DisplaySettings ds )
