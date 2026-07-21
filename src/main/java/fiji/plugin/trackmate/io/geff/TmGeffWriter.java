@@ -86,7 +86,7 @@ public class TmGeffWriter
 		 */
 		final SpotCollection spots = model.getSpots();
 		final GeffSpotVisitor visitor = new GeffSpotVisitor( is2D, model.getTrackModel() );
-		spots.iterable( true ).forEach( spot -> spot.accept( visitor ) );
+		spots.iterable( false ).forEach( spot -> spot.accept( visitor ) );
 
 		/*
 		 * Serialize edges
@@ -145,8 +145,7 @@ public class TmGeffWriter
 			displayHints = displayHints.displayDepth( Spot.POSITION_Z );
 		metadata.setDisplayHints( displayHints );
 
-		// Spot features
-		final Map< String, Boolean > isInt = model.getFeatureModel().getSpotFeatureIsInt();
+		final Map< String, Boolean > isInt = fm.getSpotFeatureIsInt();
 		final Map< String, PropMetadata > nodePropsMetadata = new HashMap<>();
 		for ( final String spotFeature : fm.getSpotFeatures() )
 		{
