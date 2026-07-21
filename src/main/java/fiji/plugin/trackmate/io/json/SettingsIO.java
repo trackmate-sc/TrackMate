@@ -71,6 +71,31 @@ public class SettingsIO
 		final Gson gson = getGson( nChannels, updateTarget );
 		final JsonElement tree = gson.toJsonTree( settingsJson );
 		gson.fromJson( tree, Settings.class );
+
+		/*
+		 * Post-processing: Since we are dealing with a Map< String, Object >
+		 * settingsJson that is re returned by the N5Reader, we have some issues
+		 * with the Json tree. All numbers are deserialized as doubles, and we
+		 * need to convert some of them back to integers, particularly for the
+		 * detector and tracker settings. We do this by using the default
+		 * settings maps as a template, using the default value types to
+		 * properly case numbers.
+		 */
+		final Map< String, Object > detectorDS = updateTarget.detectorFactory.getDefaultSettings();
+		for ( final String key : detectorDS.keySet() )
+		{
+			final Object val = updateTarget.detectorSettings.get( key );
+			if ( val instanceof Double && detectorDS.get( key ) instanceof Integer )
+				updateTarget.detectorSettings.put( key, ( ( Double ) val ).intValue() );
+		}
+
+		final Map< String, Object > trackerDS = updateTarget.trackerFactory.getDefaultSettings();
+		for ( final String key : trackerDS.keySet() )
+		{
+			final Object val = updateTarget.trackerSettings.get( key );
+			if ( val instanceof Double && trackerDS.get( key ) instanceof Integer )
+				updateTarget.trackerSettings.put( key, ( ( Double ) val ).intValue() );
+		}
 	}
 
 	private static class FactoryTypeAdapter< T extends TrackMateModule > extends TypeAdapter< T >
