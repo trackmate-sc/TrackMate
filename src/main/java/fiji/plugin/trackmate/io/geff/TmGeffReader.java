@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.io.geff;
 
+import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_STATE_ELEMENT_KEY;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -45,6 +47,17 @@ public class TmGeffReader
 	public TmGeffReader( final String geffPath )
 	{
 		this.geffPath = geffPath;
+	}
+
+	public String getGUIState()
+	{
+		if ( null == metadata )
+			metadata = GeffMetadata.readFromZarr( geffPath );
+
+		@SuppressWarnings( "unchecked" )
+		final Map< String, Object > trackmateMD = ( Map< String, Object > ) metadata.getExtra().get( "trackmate" );
+		final String guiState = ( String ) trackmateMD.get( GUI_STATE_ELEMENT_KEY );
+		return guiState;
 	}
 
 	@SuppressWarnings( "unchecked" )
