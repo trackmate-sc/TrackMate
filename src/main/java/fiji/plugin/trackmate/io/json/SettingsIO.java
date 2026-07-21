@@ -2,12 +2,12 @@ package fiji.plugin.trackmate.io.json;
 
 import java.awt.Rectangle;
 import java.io.IOException;
+import java.util.Map;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.InstanceCreator;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
@@ -33,10 +33,9 @@ import ij.gui.Roi;
 public class SettingsIO
 {
 
-
-	private static Gson getGson( final int nChannels )
+	private static Gson getGson( final int nChannels, final Settings updateTarget )
 	{
-		return new GsonBuilder()
+		final GsonBuilder builder = new GsonBuilder()
 				.setPrettyPrinting()
 				.serializeSpecialFloatingPointValues()
 				.registerTypeHierarchyAdapter( Roi.class, new RoiTypeAdapter() )
@@ -44,24 +43,34 @@ public class SettingsIO
 				.registerTypeHierarchyAdapter( SpotTrackerFactory.class, new SpotTrackerTypeAdapter() )
 				.registerTypeHierarchyAdapter( SpotAnalyzerFactoryBase.class, new SpotAnalyzerAdapter( nChannels ) )
 				.registerTypeHierarchyAdapter( EdgeAnalyzer.class, new EdgeAnalyserTypeAdapter() )
-				.registerTypeHierarchyAdapter( TrackAnalyzer.class, new TrackAnalyserTypeAdapter() )
-				.create();
+				.registerTypeHierarchyAdapter( TrackAnalyzer.class, new TrackAnalyserTypeAdapter() );
+		if ( updateTarget != null )
+			builder.registerTypeAdapter( Settings.class, ( InstanceCreator< Settings > ) type -> updateTarget );
+		return builder.create();
 	}
 
 	public static JsonElement toJsonTree( final Settings settings )
 	{
-		return getGson( settings.nchannels ).toJsonTree( settings );
+		return getGson( settings.nchannels, null ).toJsonTree( settings );
 	}
 
-	public static Settings fromJsonTree( final String json )
+	public static void updateFromJsonTree( final Map< String, Object > settingsJson, final Settings updateTarget )
 	{
-		// Pass 1: extract nChannels cheaply from the JSON tree
-		final JsonObject jsonObject = JsonParser.parseString( json ).getAsJsonObject();
-		final int nChannels = jsonObject.has( "nchannels" )
-				? jsonObject.get( "nchannels" ).getAsInt()
-				: 1; // safe default
-		// Pass 2: deserialize the JSON tree into a Settings object
-		return getGson( nChannels ).fromJson( json, Settings.class );
+		final int nChannels;
+		if ( settingsJson.containsKey( "nchannels" ) )
+		{
+			final Object val = settingsJson.get( "nchannels" );
+			nChannels = ( val instanceof Number )
+					? ( ( Number ) val ).intValue()
+					: 1;
+		}
+		else
+		{
+			nChannels = 1;
+		}
+		final Gson gson = getGson( nChannels, updateTarget );
+		final JsonElement tree = gson.toJsonTree( settingsJson );
+		gson.fromJson( tree, Settings.class );
 	}
 
 	private static class FactoryTypeAdapter< T extends TrackMateModule > extends TypeAdapter< T >
