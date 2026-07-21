@@ -86,7 +86,7 @@ public class TmGeffWriter
 		 * Serialize spots
 		 */
 		final SpotCollection spots = model.getSpots();
-		final GeffSpotVisitor visitor = new GeffSpotVisitor( is2D, model.getTrackModel() );
+		final GeffSpotVisitor visitor = new GeffSpotVisitor( is2D, model.getTrackModel(), model.getFeatureModel().getSpotFeatureIsInt() );
 		spots.iterable( false ).forEach( spot -> spot.accept( visitor ) );
 
 		/*
@@ -315,25 +315,32 @@ public class TmGeffWriter
 
 		private final boolean is2d;
 
-
 		private final TrackModel trackModel;
 
-		public GeffSpotVisitor( final boolean is2d, final TrackModel trackModel )
+		private final Map< String, Boolean > isInt;
+
+		public GeffSpotVisitor( final boolean is2d, final TrackModel trackModel, final Map< String, Boolean > isInt )
 		{
 			this.is2d = is2d;
 			this.trackModel = trackModel;
+			this.isInt = isInt;
 		}
 
 		private void serializeFeatures( final Spot spot, final GeffNode node )
 		{
 			final Map< String, Double > features = spot.getFeatures();
-			for ( final Map.Entry< String, Double > entry : features.entrySet() )
+			for ( final String feature : features.keySet() )
 			{
-				final String name = entry.getKey();
-				if ( SKIP_PROPS.contains( name ) )
+				if ( SKIP_PROPS.contains( feature ) )
 					continue;
 
-				node.setProp( name, entry.getValue() );
+				final Double obj = spot.getFeature( feature );
+				final Object val;
+				if ( isInt.get( feature ) )
+					val = Integer.valueOf( obj.intValue() );
+				else
+					val = obj;
+				node.setProp( feature, val );
 			}
 
 			// Spot ID
