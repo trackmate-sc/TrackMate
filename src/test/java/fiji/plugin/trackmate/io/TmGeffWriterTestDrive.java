@@ -53,14 +53,23 @@ public class TmGeffWriterTestDrive
 
 		System.out.println( "Done." );
 
-		System.out.println( "Reading back from " + savePath );
+		System.out.println( "Reading the model back from " + savePath );
 		final TmGeffReader geffReader = new TmGeffReader( savePath );
 		final Model model2 = geffReader.getModel();
 		System.out.println( "Done." );
 
+		System.out.println( "Reading the image back from " + savePath );
+		final ImagePlus imp2 = geffReader.readImage();
+		imp2.show();
+		System.out.println( "Done." );
+
+		System.out.println( "Reading the settings object." );
+		final Settings settings2 = geffReader.readSettings( imp2 );
+		System.out.println( "Done." );
+
 		final SelectionModel sm = new SelectionModel( model2 );
 		final DisplaySettings ds = DisplaySettingsIO.readUserDefault();
-		final HyperStackDisplayer view = new HyperStackDisplayer( model2, sm, ds );
+		final HyperStackDisplayer view = new HyperStackDisplayer( model2, sm, imp2, ds );
 		view.render();
 
 		final AllSpotsTableView table = new AllSpotsTableView( model2, sm, ds, savePath );

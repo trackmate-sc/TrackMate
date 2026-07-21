@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.io.geff;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,20 +13,25 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 import org.mastodon.geff.GeffAxis;
 import org.mastodon.geff.GeffEdge;
 import org.mastodon.geff.GeffMetadata;
+import org.mastodon.geff.GeffMetadata.RelatedObjects;
 import org.mastodon.geff.GeffNode;
 
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
+import fiji.plugin.trackmate.io.json.SettingsIO;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
+import ij.IJ;
+import ij.ImagePlus;
 
 public class TmGeffReader
 {
@@ -37,6 +43,43 @@ public class TmGeffReader
 	public TmGeffReader( final String geffPath )
 	{
 		this.geffPath = geffPath;
+	}
+
+	public synchronized ImagePlus readImage()
+	{
+		if ( null == metadata )
+			metadata = GeffMetadata.readFromZarr( geffPath );
+
+		final RelatedObjects relatedObjects = metadata.getRelatedObjects();
+		if ( null == relatedObjects )
+			return null;
+
+		final List< String > imagePaths = relatedObjects.getImagePaths();
+		for ( final String imagePath : imagePaths )
+		{
+			final File imageFile = new File( new File( geffPath ).getParent(), imagePath );
+			if ( !imageFile.exists() || !imageFile.canRead() )
+				continue;
+
+			final ImagePlus imp = IJ.openImage( imageFile.getAbsolutePath() );
+			if ( null == imp )
+				continue;
+			return imp;
+		}
+		return null;
+	}
+
+	public synchronized Settings readSettings( final ImagePlus imp )
+	{
+		if ( null == metadata )
+			metadata = GeffMetadata.readFromZarr( geffPath );
+
+		final Map< String, Object > trackmateMD = ( Map< String, Object > ) metadata.getExtra().get( "trackmate" );
+		final Map< String, Object > settingsJson = ( Map< String, Object > ) trackmateMD.get( "settings" );
+
+		final Settings settings = new Settings( imp );
+		SettingsIO.updateFromJsonTree( settingsJson, settings );
+		return settings;
 	}
 
 	public synchronized Model getModel() throws IOException
@@ -165,7 +208,7 @@ public class TmGeffReader
 		model.getTrackModel().from( graph, connectedVertexSet, connectedEdgeSet, visibility, savedTrackNames );
 	}
 
-	private boolean readUnits( final Model model ) throws IOException
+	private boolean readUnits( final Model model )
 	{
 		final GeffAxis[] geffAxes = metadata.getGeffAxes();
 		String spaceUnits = null;
@@ -196,7 +239,7 @@ public class TmGeffReader
 		// Where is stored the track ID?
 		final String trackIdProp = metadata.getTrackNodeProps().get( "lineage" );
 
-		final List< GeffNode > geffNodes = GeffNode.readFromZarr( geffPath );
+		final List< GeffNode > geffNodes = GeffNode.readFromZarr( geffPath, metadata );
 		final SpotCollection spots = model.getSpots();
 		for ( final GeffNode node : geffNodes )
 		{
