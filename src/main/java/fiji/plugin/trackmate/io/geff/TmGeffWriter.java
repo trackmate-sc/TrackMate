@@ -4,6 +4,8 @@ import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_STATE_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.PLUGIN_VERSION_ATTRIBUTE_NAME;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +17,7 @@ import org.mastodon.geff.GeffAxis;
 import org.mastodon.geff.GeffEdge;
 import org.mastodon.geff.GeffMetadata;
 import org.mastodon.geff.GeffMetadata.DisplayHints;
+import org.mastodon.geff.GeffMetadata.RelatedObjects;
 import org.mastodon.geff.GeffNode;
 import org.mastodon.geff.GeffNode.Builder;
 import org.mastodon.geff.PropMetadata;
@@ -39,6 +42,7 @@ import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
 import fiji.plugin.trackmate.io.json.FeatureModelIO;
 import fiji.plugin.trackmate.io.json.SettingsIO;
+import fiji.plugin.trackmate.util.TMUtils;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 
@@ -184,8 +188,19 @@ public class TmGeffWriter
 
 	public void appendSettings( final Settings settings )
 	{
+		// All settings
 		final JsonElement settingsJson = SettingsIO.toJsonTree( settings );
 		trackmateInfo.put( "settings", settingsJson );
+
+		// Path to the image
+		String imagePathStr = TMUtils.getImagePathWithoutExtension( settings );
+		if ( settings.imageFileName != null && !settings.imageFileName.isEmpty() )
+			imagePathStr = imagePathStr + "." + settings.imageFileName.substring( settings.imageFileName.lastIndexOf( '.' ) + 1 );
+
+		// Make it relative to the save path
+		final Path imagePath = Paths.get( imagePathStr ).toAbsolutePath().normalize();
+		final Path savePath = Paths.get( zarrPath ).toAbsolutePath().normalize();
+		metadata.setRelatedObjects( new RelatedObjects().image( savePath.getParent().relativize( imagePath ).toString() ) );
 	}
 
 	public void appendLog( final String log )
