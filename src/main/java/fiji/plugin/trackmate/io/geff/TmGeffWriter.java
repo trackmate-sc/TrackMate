@@ -185,8 +185,21 @@ public class TmGeffWriter
 		metadata.setNodePropsMetadata( nodePropsMetadata );
 
 		// Edge features
+
+		// First, determine what edge features have an actual value.
+		final Set< String > edgeFeaturesWithValue = new HashSet<>();
+		for ( final DefaultWeightedEdge edge : edges )
+		{
+			for ( final String edgeFeature : fm.getEdgeFeatures() )
+			{
+				final Double ef = fm.getEdgeFeature( edge, edgeFeature );
+				if ( ef != null )
+					edgeFeaturesWithValue.add( edgeFeature );
+			}
+		}
+
 		final Map< String, PropMetadata > edgePropsMetadata = new HashMap<>();
-		for ( final String edgeFeature : fm.getEdgeFeatures() )
+		for ( final String edgeFeature : edgeFeaturesWithValue )
 		{
 			if ( edgeFeature.equals( EdgeTargetAnalyzer.SPOT_SOURCE_ID ) || edgeFeature.equals( EdgeTargetAnalyzer.SPOT_TARGET_ID ) )
 				continue;
