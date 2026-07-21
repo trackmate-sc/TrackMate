@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -145,11 +146,21 @@ public class TmGeffWriter
 			displayHints = displayHints.displayDepth( Spot.POSITION_Z );
 		metadata.setDisplayHints( displayHints );
 
+		// Spot features
+
+		// First, determine what spot features have an actual value.
+		final Set< String > spotFeaturesWithValue = new HashSet<>();
+		for ( final Spot spot : spots.iterable( false ) )
+			spotFeaturesWithValue.addAll( spot.getFeatures().keySet() );
+
+		// Then add only those to the metadata.
 		final Map< String, Boolean > isInt = fm.getSpotFeatureIsInt();
 		final Map< String, PropMetadata > nodePropsMetadata = new HashMap<>();
-		for ( final String spotFeature : fm.getSpotFeatures() )
+		for ( final String spotFeature : spotFeaturesWithValue )
 		{
 			if ( is2D && spotFeature.equals( Spot.POSITION_Z ) )
+				continue;
+			if ( spotFeature.equals( Spot.RADIUS ) )
 				continue;
 
 			final String dType = isInt.get( spotFeature ) ? "int32" : "float64";
