@@ -36,6 +36,7 @@ import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
 import fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
+import fiji.plugin.trackmate.io.json.FeatureModelIO;
 import fiji.plugin.trackmate.io.json.SettingsIO;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
@@ -166,6 +167,9 @@ public class TmGeffWriter
 			edgePropsMetadata.put( edgeFeature, propMetadata );
 		}
 		metadata.setEdgePropsMetadata( edgePropsMetadata );
+
+		// Feature declarations
+		trackmateInfo.put( "featureDeclarations", FeatureModelIO.toJsonTree( fm ) );
 	}
 
 	public void appendSettings( final Settings settings )
