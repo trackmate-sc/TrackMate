@@ -38,6 +38,7 @@ import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
 import fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer;
+import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
 import fiji.plugin.trackmate.io.json.FeatureModelIO;
@@ -84,7 +85,7 @@ public class TmGeffWriter
 		 */
 		final SpotCollection spots = model.getSpots();
 		final Map< String, Boolean > isInt = model.getFeatureModel().getSpotFeatureIsInt();
-		final GeffSpotVisitor visitor = new GeffSpotVisitor( isInt, is2D );
+		final GeffSpotVisitor visitor = new GeffSpotVisitor( isInt, is2D, model.getTrackModel() );
 		spots.iterable( true ).forEach( spot -> spot.accept( visitor ) );
 
 		/*
@@ -169,6 +170,11 @@ public class TmGeffWriter
 		// Add the 'radius' feature -> mandatory for GEFF
 		final PropMetadata radiusPropMetadata = new PropMetadata( "radius", "float64", false, spaceUnits, "Radius", "The radius of the spot" );
 		nodePropsMetadata.put( "radius", radiusPropMetadata );
+		// Add the TRACK_ID feature -> map it to the GEFF 'lineage' property
+		final PropMetadata trackIdPropMetadata = new PropMetadata( TrackIndexAnalyzer.TRACK_ID, "int32", false, null, "Track ID", "The TrackMate track ID of the spot" );
+		nodePropsMetadata.put( TrackIndexAnalyzer.TRACK_ID, trackIdPropMetadata );
+		final Map< String, String > trackNodePros = Map.of( "lineage", TrackIndexAnalyzer.TRACK_ID );
+		metadata.setTrackNodeProps( trackNodePros );
 
 		metadata.setNodePropsMetadata( nodePropsMetadata );
 
@@ -305,10 +311,14 @@ public class TmGeffWriter
 
 		private final boolean is2d;
 
-		public GeffSpotVisitor( final Map< String, Boolean > isInt, final boolean is2d )
+
+		private final TrackModel trackModel;
+
+		public GeffSpotVisitor( final Map< String, Boolean > isInt, final boolean is2d, final TrackModel trackModel )
 		{
 			this.isInt = isInt;
 			this.is2d = is2d;
+			this.trackModel = trackModel;
 		}
 
 		private void serializeFeatures( final Spot spot, final GeffNode node )
@@ -326,6 +336,10 @@ public class TmGeffWriter
 
 			// Spot ID
 			node.setProp( TRACKMATE_ID_PROP, spot.ID() );
+			// Track ID -> will be mapped to the 'lineage' GEFF property
+			final Integer trackID = trackModel.trackIDOf( spot );
+			if ( trackID != null )
+				node.setProp( TrackIndexAnalyzer.TRACK_ID, trackID.intValue() );
 		}
 
 		@Override
