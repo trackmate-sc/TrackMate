@@ -14,6 +14,7 @@ import org.mastodon.geff.GeffEdge;
 import org.mastodon.geff.GeffMetadata;
 import org.mastodon.geff.GeffNode;
 
+import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
@@ -55,7 +56,62 @@ public class TmGeffReader
 		// Read edges and tracks
 		readEdgesAndTracks( model, spotIdMap, spotTrackIDMap );
 
+		// Read feature declarations
+		readFeatureDeclarations( model.getFeatureModel() );
+
 		return model;
+	}
+
+	@SuppressWarnings( "unchecked" )
+	private void readFeatureDeclarations( final FeatureModel featureModel )
+	{
+		final Map< String, Object > trackmateMD = ( Map< String, Object > ) metadata.getExtra().get( "trackmate" );
+		final Map< String, Object > featureDeclarations = ( Map< String, Object > ) trackmateMD.get( "featureDeclarations" );
+
+		// Spot features
+		final List< String > spotFeatures = ( List< String > ) featureDeclarations.get( "spotFeatures" );
+		final Map< String, String > spotFeatureNames = ( Map< String, String > ) featureDeclarations.get( "spotFeatureNames" );
+		final Map< String, String > spotFeatureShortNames = ( Map< String, String > ) featureDeclarations.get( "spotFeatureShortNames" );
+		final Map< String, String > spotFeatureDimensionsStr = ( Map< String, String > ) featureDeclarations.get( "spotFeatureDimensions" );
+		final Map< String, Dimension > spotFeatureDimensions = new HashMap<>();
+		for ( final String feature : spotFeatureDimensionsStr.keySet() )
+		{
+			final String dimStr = spotFeatureDimensionsStr.get( feature );
+			final Dimension dim = Dimension.valueOf( dimStr );
+			spotFeatureDimensions.put( feature, dim );
+		}
+		final Map< String, Boolean > spotFeatureIsInt = ( Map< String, Boolean > ) featureDeclarations.get( "spotFeatureIsInt" );
+		featureModel.declareSpotFeatures( spotFeatures, spotFeatureNames, spotFeatureShortNames, spotFeatureDimensions, spotFeatureIsInt );
+
+		// Edge features
+		final List< String > edgeFeatures = ( List< String > ) featureDeclarations.get( "edgeFeatures" );
+		final Map< String, String > edgeFeatureNames = ( Map< String, String > ) featureDeclarations.get( "edgeFeatureNames" );
+		final Map< String, String > edgeFeatureShortNames = ( Map< String, String > ) featureDeclarations.get( "edgeFeatureShortNames" );
+		final Map< String, String > edgeFeatureDimensionsStr = ( Map< String, String > ) featureDeclarations.get( "edgeFeatureDimensions" );
+		final Map< String, Dimension > edgeFeatureDimensions = new HashMap<>();
+		for ( final String feature : edgeFeatureDimensionsStr.keySet() )
+		{
+			final String dimStr = edgeFeatureDimensionsStr.get( feature );
+			final Dimension dim = Dimension.valueOf( dimStr );
+			edgeFeatureDimensions.put( feature, dim );
+		}
+		final Map< String, Boolean > edgeFeatureIsInt = ( Map< String, Boolean > ) featureDeclarations.get( "edgeFeatureIsInt" );
+		featureModel.declareEdgeFeatures( edgeFeatures, edgeFeatureNames, edgeFeatureShortNames, edgeFeatureDimensions, edgeFeatureIsInt );
+
+		// Track features
+		final List< String > trackFeatures = ( List< String > ) featureDeclarations.get( "trackFeatures" );
+		final Map< String, String > trackFeatureNames = ( Map< String, String > ) featureDeclarations.get( "trackFeatureNames" );
+		final Map< String, String > trackFeatureShortNames = ( Map< String, String > ) featureDeclarations.get( "trackFeatureShortNames" );
+		final Map< String, String > trackFeatureDimensionsStr = ( Map< String, String > ) featureDeclarations.get( "trackFeatureDimensions" );
+		final Map< String, Dimension > trackFeatureDimensions = new HashMap<>();
+		for ( final String feature : trackFeatureDimensionsStr.keySet() )
+		{
+			final String dimStr = trackFeatureDimensionsStr.get( feature );
+			final Dimension dim = Dimension.valueOf( dimStr );
+			trackFeatureDimensions.put( feature, dim );
+		}
+		final Map< String, Boolean > trackFeatureIsInt = ( Map< String, Boolean > ) featureDeclarations.get( "trackFeatureIsInt" );
+		featureModel.declareTrackFeatures( trackFeatures, trackFeatureNames, trackFeatureShortNames, trackFeatureDimensions, trackFeatureIsInt );
 	}
 
 	private void readEdgesAndTracks( final Model model, final TIntObjectMap< Spot > spotIdMap, final TObjectIntMap< Spot > spotTrackIDMap )
