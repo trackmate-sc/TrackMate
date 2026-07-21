@@ -51,6 +51,8 @@ public class TmGeffWriter
 
 	private static final String GEFF_VERSION = "1.0.0";
 
+	static final String TRACKMATE_ID_PROP = "TRACKMATE_ID";
+
 	private final String zarrPath;
 
 	private final GeffMetadata metadata;
@@ -91,7 +93,6 @@ public class TmGeffWriter
 		final TrackModel trackModel = model.getTrackModel();
 		final Set< DefaultWeightedEdge > edges = trackModel.edgeSet();
 		final FeatureModel fm = model.getFeatureModel();
-
 
 		int edgeId = 0;
 		for ( final DefaultWeightedEdge edge : edges )
@@ -162,6 +163,13 @@ public class TmGeffWriter
 			final PropMetadata propMetadata = new PropMetadata( spotFeature, dType, false, unit, name, null );
 			nodePropsMetadata.put( spotFeature, propMetadata );
 		}
+		// Add the TRACKMATE_ID feature
+		final PropMetadata trackmateIdPropMetadata = new PropMetadata( TRACKMATE_ID_PROP, "int32", false, null, "TrackMate ID", "The TrackMate internal ID of spots" );
+		nodePropsMetadata.put( TRACKMATE_ID_PROP, trackmateIdPropMetadata );
+		// Add the 'radius' feature -> mandatory for GEFF
+		final PropMetadata radiusPropMetadata = new PropMetadata( "radius", "float64", false, spaceUnits, "Radius", "The radius of the spot" );
+		nodePropsMetadata.put( "radius", radiusPropMetadata );
+
 		metadata.setNodePropsMetadata( nodePropsMetadata );
 
 		// Edge features
@@ -288,6 +296,7 @@ public class TmGeffWriter
 		/** Features not in the general prop, because they are the core node. */
 		private static final Set< String > SKIP_PROPS = Set.of( "FRAME", "POSITION_X", "POSITION_Y", "POSITION_Z", "RADIUS" );
 
+
 		private int geffId = 0;
 
 		private final TObjectIntMap< Spot > spotToId = new TObjectIntHashMap< Spot >();
@@ -314,6 +323,9 @@ public class TmGeffWriter
 				final Object val = ( isInt.get( name ) ? entry.getValue().intValue() : entry.getValue() );
 				node.setProp( name, val );
 			}
+
+			// Spot ID
+			node.setProp( TRACKMATE_ID_PROP, spot.ID() );
 		}
 
 		@Override
