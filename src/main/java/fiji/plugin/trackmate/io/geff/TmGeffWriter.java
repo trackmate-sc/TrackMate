@@ -140,7 +140,7 @@ public class TmGeffWriter
 		DisplayHints displayHints = new DisplayHints()
 				.displayHorizontal( Spot.POSITION_X )
 				.displayVertical( Spot.POSITION_Y )
-				.displayTime( Spot.POSITION_T );
+				.displayTime( Spot.FRAME );
 		if ( !is2D )
 			displayHints = displayHints.displayDepth( Spot.POSITION_Z );
 		metadata.setDisplayHints( displayHints );
