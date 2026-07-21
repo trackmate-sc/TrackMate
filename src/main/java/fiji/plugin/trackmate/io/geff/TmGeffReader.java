@@ -25,6 +25,8 @@ import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
 import fiji.plugin.trackmate.io.json.SettingsIO;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TObjectIntMap;
@@ -43,6 +45,17 @@ public class TmGeffReader
 	public TmGeffReader( final String geffPath )
 	{
 		this.geffPath = geffPath;
+	}
+
+	@SuppressWarnings( "unchecked" )
+	public DisplaySettings getDisplaySettings()
+	{
+		if ( null == metadata )
+			metadata = GeffMetadata.readFromZarr( geffPath );
+
+		final Map< String, Object > trackmateMD = ( Map< String, Object > ) metadata.getExtra().get( "trackmate" );
+		final Map< String, Object > displaySettingsJson = ( Map< String, Object > ) trackmateMD.get( "displaySettings" );
+		return DisplaySettingsIO.fromJsonTree( displaySettingsJson );
 	}
 
 	public synchronized ImagePlus readImage()
@@ -69,6 +82,7 @@ public class TmGeffReader
 		return null;
 	}
 
+	@SuppressWarnings( "unchecked" )
 	public synchronized Settings readSettings( final ImagePlus imp )
 	{
 		if ( null == metadata )
