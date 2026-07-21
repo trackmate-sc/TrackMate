@@ -14,6 +14,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.mastodon.geff.GeffAxis;
 import org.mastodon.geff.GeffEdge;
 import org.mastodon.geff.GeffMetadata;
+import org.mastodon.geff.GeffMetadata.DisplayHints;
 import org.mastodon.geff.GeffNode;
 import org.mastodon.geff.GeffNode.Builder;
 import org.mastodon.geff.PropMetadata;
@@ -133,6 +134,15 @@ public class TmGeffWriter
 		// Axes
 		final List< GeffAxis > axes = buildAxes( spaceUnits, timeUnits, spots, is2D );
 		metadata.setGeffAxes( axes );
+
+		// Display hints
+		DisplayHints displayHints = new DisplayHints()
+				.displayHorizontal( Spot.POSITION_X )
+				.displayVertical( Spot.POSITION_Y )
+				.displayTime( Spot.POSITION_T );
+		if ( !is2D )
+			displayHints = displayHints.displayDepth( Spot.POSITION_Z );
+		metadata.setDisplayHints( displayHints );
 
 		// Spot features
 		final Map< String, PropMetadata > nodePropsMetadata = new HashMap<>();
