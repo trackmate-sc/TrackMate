@@ -23,6 +23,7 @@ import org.mastodon.geff.GeffMetadata.RelatedObjects;
 import org.mastodon.geff.GeffNode;
 import org.mastodon.geff.GeffNode.Builder;
 import org.mastodon.geff.PropMetadata;
+import org.mastodon.geff.VarlengthProperty;
 
 import com.google.gson.JsonElement;
 
@@ -362,6 +363,13 @@ public class TmGeffWriter
 			final Integer trackID = trackModel.trackIDOf( spot );
 			if ( trackID != null )
 				node.setProp( TrackIndexAnalyzer.TRACK_ID, trackID.intValue() );
+			// Name -> variable length property
+			final String name = spot.getName();
+			if ( name != null )
+			{
+				final Object[] bytes = toByteArray( name );
+				node.setVarlengthProperty( "name", new VarlengthProperty( "label", "uint8", bytes ) );
+			}
 		}
 
 		@Override
@@ -409,4 +417,12 @@ public class TmGeffWriter
 		}
 	}
 
+	private static final Object[] toByteArray( final String name )
+	{
+		final byte[] bytes = name.getBytes( java.nio.charset.StandardCharsets.UTF_8 );
+		final Object[] data = new Object[ bytes.length ];
+		for ( int i = 0; i < bytes.length; i++ )
+			data[ i ] = bytes[ i ] & 0xFF;
+		return data;
+	}
 }
