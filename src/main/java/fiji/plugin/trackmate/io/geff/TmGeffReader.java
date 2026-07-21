@@ -327,6 +327,10 @@ public class TmGeffReader
 					continue;
 				spot.putFeature( key, ( ( Number ) value ).doubleValue() );
 			}
+
+			// Names // TODO
+			spot.setName( "ID" + spot.ID() );
+
 		}
 		return spotIdMap;
 	}
