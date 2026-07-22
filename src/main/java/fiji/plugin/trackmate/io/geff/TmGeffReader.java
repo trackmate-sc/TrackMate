@@ -2,11 +2,13 @@ package fiji.plugin.trackmate.io.geff;
 
 import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_STATE_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.LOG_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.geff.TmGeffWriter.SPOT_NAME_PROP;
-import static fiji.plugin.trackmate.io.geff.TmGeffWriter.TRACKMATE_ID_PROP;
+import static fiji.plugin.trackmate.io.geff.TmGeffWriter.NAME_PROP;
+import static fiji.plugin.trackmate.io.geff.TmGeffWriter.TRACKMATE_SPOT_ID_PROP;
+import static fiji.plugin.trackmate.io.geff.TmGeffWriter.TRACK_GEFF_NAME;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -202,7 +204,11 @@ public class TmGeffReader
 
 	private void readEdgesAndTracks( final Model model, final TIntObjectMap< Spot > spotIdMap, final TObjectIntMap< Spot > spotTrackIDMap )
 	{
+		// Load files
+		final String geffTracksPath = Paths.get( geffPath, TRACK_GEFF_NAME ).toString();
 		final List< GeffEdge > edges = GeffEdge.readFromZarr( geffPath, metadata );
+		final GeffMetadata trackMetadata = GeffMetadata.readFromZarr( geffTracksPath );
+		final List< GeffNode > tracks = GeffNode.readFromZarr( geffTracksPath, trackMetadata );
 
 		final FeatureModel fm = model.getFeatureModel();
 		final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph = new SimpleWeightedGraph<>( DefaultWeightedEdge.class );
@@ -240,13 +246,35 @@ public class TmGeffReader
 			connectedEdgeSet.computeIfAbsent( trackID, k -> new HashSet<>() ).add( e );
 		}
 
-		// TODO save and read visibility
+		// Track visibility, name and feature values
 		final Map< Integer, Boolean > visibility = new HashMap<>( connectedEdgeSet.size() );
-		connectedEdgeSet.keySet().forEach( trackID -> visibility.put( trackID, true ) );
-		// TODO save and read track names
 		final Map< Integer, String > savedTrackNames = new HashMap<>();
-		connectedEdgeSet.keySet().forEach( trackID -> savedTrackNames.put( trackID, "Track " + trackID ) );
+		for ( final GeffNode track : tracks )
+		{
+			final int trackID = track.getId();
 
+			// Visibility
+			final Integer val = ( Integer ) track.getProp( SpotCollection.VISIBILITY );
+			final boolean isVisible = val > 0;
+			visibility.put( trackID, isVisible );
+
+			// Name
+			final VarlengthProperty nameProperty = track.getVarlengthProperty( NAME_PROP );
+			final Object[] bytes = nameProperty.getData();
+			final String name = fromByteArray( bytes );
+			savedTrackNames.put( trackID, name );
+
+			// Features
+			final Map< String, Object > props = track.getProps();
+			for ( final String feature : props.keySet() )
+			{
+				if ( feature.equals( SpotCollection.VISIBILITY ) || feature.equals( NAME_PROP ) )
+					continue;
+				fm.putTrackFeature( trackID, feature, ( ( Number ) props.get( feature ) ).doubleValue() );
+			}
+		}
+
+		// Rebuild track model
 		model.getTrackModel().from( graph, connectedVertexSet, connectedEdgeSet, visibility, savedTrackNames );
 	}
 
@@ -287,7 +315,7 @@ public class TmGeffReader
 		{
 			// Read its internal ID if present
 			int trackmateId;
-			final Object idObj = node.getProps().get( TRACKMATE_ID_PROP );
+			final Object idObj = node.getProps().get( TRACKMATE_SPOT_ID_PROP );
 			if ( null != idObj && idObj instanceof Integer )
 				trackmateId = ( Integer ) idObj;
 			else
@@ -332,7 +360,7 @@ public class TmGeffReader
 			spotTrackIDMap.put( spot, ( ( Number ) node.getProp( trackIdProp ) ).intValue() );
 
 			// Features
-			final Set< String > SKIP_FEATURES = Set.of( TRACKMATE_ID_PROP, Spot.RADIUS, Spot.POSITION_X, Spot.POSITION_Y, Spot.POSITION_Z );
+			final Set< String > SKIP_FEATURES = Set.of( TRACKMATE_SPOT_ID_PROP, Spot.RADIUS, Spot.POSITION_X, Spot.POSITION_Y, Spot.POSITION_Z );
 			final Map< String, Object > props = node.getProps();
 			for ( final Map.Entry< String, Object > entry : props.entrySet() )
 			{
@@ -344,7 +372,7 @@ public class TmGeffReader
 			}
 
 			// Names
-			final VarlengthProperty nameProperty = node.getVarlengthProperty( SPOT_NAME_PROP );
+			final VarlengthProperty nameProperty = node.getVarlengthProperty( NAME_PROP );
 			final Object[] bytes = nameProperty.getData();
 			final String name = fromByteArray( bytes );
 			spot.setName( name );

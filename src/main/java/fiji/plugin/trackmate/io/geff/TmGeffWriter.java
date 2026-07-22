@@ -39,10 +39,15 @@ import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.detection.DetectionUtils;
+import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
 import fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer;
+import fiji.plugin.trackmate.features.track.TrackDurationAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
+import fiji.plugin.trackmate.features.track.TrackLocationAnalyzer;
+import fiji.plugin.trackmate.features.track.TrackMotilityAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
 import fiji.plugin.trackmate.io.json.FeatureModelIO;
 import fiji.plugin.trackmate.io.json.SettingsIO;
@@ -55,24 +60,31 @@ public class TmGeffWriter
 
 	private static final String GEFF_VERSION = "1.0.0";
 
-	static final String TRACKMATE_ID_PROP = "TRACKMATE_ID";
+	static final String TRACKMATE_SPOT_ID_PROP = "trackmate_spot_id";
 
-	static final String SPOT_NAME_PROP = "name";
+	static final String NAME_PROP = "name";
 
-	private final String zarrPath;
+	static final String TRACK_GEFF_NAME = "tracks.geff";
+
+	private final String geffPath;
 
 	private final GeffMetadata metadata;
+
+	private final GeffMetadata trackMetadata;
 
 	private final List< GeffNode > geffNodes = new ArrayList<>();
 
 	private final List< GeffEdge > geffEdges = new ArrayList<>();
 
+	private final List< GeffNode > geffTrackNodes = new ArrayList<>();
+
 	private final Map< String, Object > trackmateInfo;
 
 	public TmGeffWriter( final String zarrPath )
 	{
-		this.zarrPath = zarrPath;
+		this.geffPath = zarrPath;
 		this.metadata = new GeffMetadata( GEFF_VERSION, true );
+		this.trackMetadata = new GeffMetadata( GEFF_VERSION, true );
 		this.trackmateInfo = new HashMap<>();
 		final Map< String, Object > extra = Map.of( "trackmate", trackmateInfo );
 		metadata.setExtra( extra );
@@ -137,7 +149,7 @@ public class TmGeffWriter
 		 */
 
 		// Axes
-		final List< GeffAxis > axes = buildAxes( spaceUnits, timeUnits, spots, is2D );
+		final List< GeffAxis > axes = buildAxes( spaceUnits, timeUnits, is2D, model );
 		metadata.setGeffAxes( axes );
 
 		// Display hints
@@ -174,13 +186,13 @@ public class TmGeffWriter
 			nodePropsMetadata.put( spotFeature, propMetadata );
 		}
 		// Add the TRACKMATE_ID feature
-		final PropMetadata trackmateIdPropMetadata = new PropMetadata( TRACKMATE_ID_PROP, "int32", false, null, "TrackMate ID", "The TrackMate internal ID of spots" );
-		nodePropsMetadata.put( TRACKMATE_ID_PROP, trackmateIdPropMetadata );
+		final PropMetadata trackmateIdPropMetadata = new PropMetadata( TRACKMATE_SPOT_ID_PROP, "int32", false, null, "TrackMate ID", "The TrackMate internal ID of spots" );
+		nodePropsMetadata.put( TRACKMATE_SPOT_ID_PROP, trackmateIdPropMetadata );
 		// Add the 'radius' feature -> mandatory for GEFF
 		final PropMetadata radiusPropMetadata = new PropMetadata( "radius", "float64", false, spaceUnits, "Radius", "The radius of the spot" );
 		nodePropsMetadata.put( "radius", radiusPropMetadata );
 		// Spot name property
-		nodePropsMetadata.put( SPOT_NAME_PROP, new PropMetadata( SPOT_NAME_PROP, "uint8", true, null, "Spot name", "The name of the spot" ) );
+		nodePropsMetadata.put( NAME_PROP, new PropMetadata( NAME_PROP, "uint8", true, null, "Spot name", "The name of the spot" ) );
 		// Add the TRACK_ID feature -> map it to the GEFF 'lineage' property
 		final PropMetadata trackIdPropMetadata = new PropMetadata( TrackIndexAnalyzer.TRACK_ID, "int32", false, null, "Track ID", "The TrackMate track ID of the spot" );
 		nodePropsMetadata.put( TrackIndexAnalyzer.TRACK_ID, trackIdPropMetadata );
@@ -222,6 +234,108 @@ public class TmGeffWriter
 
 		// Feature declarations
 		trackmateInfo.put( "featureDeclarations", FeatureModelIO.toJsonTree( fm ) );
+
+		/*
+		 * Tracks feature values -> on a sub GEFF file (geffception) that has no
+		 * edges, only nodes.
+		 */
+
+		for ( final Integer trackID : trackModel.trackIDs( false ) )
+		{
+			final double xt = fm.getTrackFeature( trackID, TrackLocationAnalyzer.X_LOCATION );
+			final double yt = fm.getTrackFeature( trackID, TrackLocationAnalyzer.Y_LOCATION );
+			final int tt = fm.getTrackFeature( trackID, TrackDurationAnalyzer.TRACK_START ).intValue();
+			final double radius = fm.getTrackFeature( trackID, TrackMotilityAnalyzer.TRACK_MAX_DISTANCE_TRAVELED ) / 2.;
+
+			final GeffNode.Builder builder = new GeffNode.Builder()
+					.id( trackID )
+					.timepoint( tt )
+					.x( xt )
+					.y( yt )
+					.radius( radius );
+			if ( !is2D )
+			{
+				final double zt = fm.getTrackFeature( trackID, TrackLocationAnalyzer.Z_LOCATION );
+				builder.z( zt );
+			}
+			final GeffNode trackNode = builder.build();
+
+			// Track features
+			for ( final String trackFeature : fm.getTrackFeatures() )
+			{
+				Object val;
+				if ( fm.getTrackFeatureIsInt().get( trackFeature ) )
+					val = Integer.valueOf( fm.getTrackFeature( trackID, trackFeature ).intValue() );
+				else
+					val = fm.getTrackFeature( trackID, trackFeature );
+				trackNode.setProp( trackFeature, val );
+			}
+			// Track visibility property
+			final Integer visibility = trackModel.isVisible( trackID ) ? 1 : 0;
+			trackNode.setProp( SpotCollection.VISIBILITY, visibility );
+			// Add the 'radius' feature -> mandatory for GEFF
+			final PropMetadata trackRadiusPropMetadata = new PropMetadata( "radius", "float64", false, spaceUnits, "Radius", "The radius of excursion of the track" );
+			nodePropsMetadata.put( "radius", trackRadiusPropMetadata );
+			// Track name -> variable length property
+			final String trackName = trackModel.name( trackID );
+			final Object[] bytes = toByteArray( trackName );
+			trackNode.setVarlengthProperty( NAME_PROP, new VarlengthProperty( NAME_PROP, "uint8", bytes ) );
+
+			geffTrackNodes.add( trackNode );
+		}
+
+		/*
+		 * Tracks metadata
+		 */
+
+		// Axes
+		final List< GeffAxis > trackAxes = buildTrackAxes( spaceUnits, timeUnits, is2D, model );
+		trackMetadata.setGeffAxes( trackAxes );
+
+		// Display hints
+		DisplayHints trackDisplayHints = new DisplayHints()
+				.displayHorizontal( TrackLocationAnalyzer.X_LOCATION )
+				.displayVertical( TrackLocationAnalyzer.Y_LOCATION )
+				.displayTime( TrackDurationAnalyzer.TRACK_START );
+		if ( !is2D )
+			trackDisplayHints = trackDisplayHints.displayDepth( TrackLocationAnalyzer.Z_LOCATION );
+		trackMetadata.setDisplayHints( trackDisplayHints );
+
+		// Track features
+
+		// First, determine what track features have an actual value.
+		final Set< String > trackFeaturesWithValue = new HashSet<>();
+		for ( final DefaultWeightedEdge edge : edges )
+		{
+			for ( final String trackFeature : fm.getTrackFeatures() )
+			{
+				final Double ef = fm.getEdgeFeature( edge, trackFeature );
+				if ( ef != null )
+					trackFeaturesWithValue.add( trackFeature );
+			}
+		}
+
+		// Then add only those to the metadata.
+		final Map< String, Boolean > trackIsInt = fm.getTrackFeatureIsInt();
+		final Map< String, PropMetadata > trackNodePropsMetadata = new HashMap<>();
+		for ( final String trackFeature : trackFeaturesWithValue )
+		{
+			if ( is2D && trackFeature.equals( TrackLocationAnalyzer.Z_LOCATION ) )
+				continue;
+
+			final String dType = trackIsInt.get( trackFeature ) ? "int32" : "float64";
+			final Dimension dimension = fm.getSpotFeatureDimensions().get( trackFeature );
+			final String unit = dimension.units( spaceUnits, timeUnits );
+			final String name = fm.getSpotFeatureNames().get( trackFeature );
+			final PropMetadata propMetadata = new PropMetadata( trackFeature, dType, false, unit, name, null );
+			trackNodePropsMetadata.put( trackFeature, propMetadata );
+		}
+		// Track visibility property
+		trackNodePropsMetadata.put( SpotCollection.VISIBILITY, new PropMetadata( SpotCollection.VISIBILITY, "int32", false, null, Spot.FEATURE_NAMES.get( SpotCollection.VISIBILITY ), "Whether the track is visible in the display" ) );
+		// Track name property
+		trackNodePropsMetadata.put( NAME_PROP, new PropMetadata( NAME_PROP, "uint8", true, null, "Track name", "The name of the track" ) );
+
+		trackMetadata.setNodePropsMetadata( trackNodePropsMetadata );
 	}
 
 	public void appendSettings( final Settings settings )
@@ -237,7 +351,7 @@ public class TmGeffWriter
 
 		// Make it relative to the save path
 		final Path imagePath = Paths.get( imagePathStr ).toAbsolutePath().normalize();
-		final Path savePath = Paths.get( zarrPath ).toAbsolutePath().normalize();
+		final Path savePath = Paths.get( geffPath ).toAbsolutePath().normalize();
 		metadata.setRelatedObjects( new RelatedObjects().image( savePath.getParent().relativize( imagePath ).toString() ) );
 	}
 
@@ -259,65 +373,17 @@ public class TmGeffWriter
 
 	public void write() throws IOException
 	{
-		GeffNode.writeToZarr( geffNodes, zarrPath, metadata );
-		GeffEdge.writeToZarr( geffEdges, zarrPath, metadata );
-		GeffMetadata.writeToZarr( metadata, zarrPath );
-	}
+		// Core GEFF
+		GeffNode.writeToZarr( geffNodes, geffPath, metadata );
+		GeffEdge.writeToZarr( geffEdges, geffPath, metadata );
+		GeffMetadata.writeToZarr( metadata, geffPath );
 
-	private static final List< GeffAxis > buildAxes( final String spaceUnit, final String timeUnit, final SpotCollection spots, final boolean is2d )
-	{
-		final String su = ZarrUnits.normalizeSpaceUnit( spaceUnit );
-		final String tu = ZarrUnits.normalizeTimeUnit( timeUnit );
-
-		final List< GeffAxis > axes = new ArrayList<>();
-
-		final double[] minMaxT = featureMinMax( spots.iterable( true ), Spot.FRAME );
-		axes.add( GeffAxis.createTimeAxis( Spot.FRAME, tu, minMaxT[ 0 ], minMaxT[ 1 ] ) );
-
-		final double[] minMaxX = posMinMax( spots.iterable( true ), 0 );
-		axes.add( GeffAxis.createSpaceAxis( Spot.POSITION_X, su, minMaxX[ 0 ], minMaxX[ 1 ] ) );
-
-		final double[] minMaxY = posMinMax( spots.iterable( true ), 1 );
-		axes.add( GeffAxis.createSpaceAxis( Spot.POSITION_Y, su, minMaxY[ 0 ], minMaxY[ 1 ] ) );
-
-		if ( !is2d )
-		{
-			final double[] minMaxZ = posMinMax( spots.iterable( true ), 2 );
-			axes.add( GeffAxis.createSpaceAxis( Spot.POSITION_Z, su, minMaxZ[ 0 ], minMaxZ[ 1 ] ) );
-		}
-
-		return axes;
-	}
-
-	private static final double[] featureMinMax( final Iterable< Spot > iterable, final String feature )
-	{
-		double min = Double.POSITIVE_INFINITY;
-		double max = Double.NEGATIVE_INFINITY;
-		for ( final Spot spot : iterable )
-		{
-			final double val = spot.getFeature( feature );
-			if ( val < min )
-				min = val;
-			if ( val > max )
-				max = val;
-		}
-		return new double[] { min, max };
-	}
-
-	private static final double[] posMinMax( final Iterable< Spot > spots, final int d )
-	{
-		double min = Double.POSITIVE_INFINITY;
-		double max = Double.NEGATIVE_INFINITY;
-		for ( final Spot spot : spots )
-		{
-			final double left = spot.realMin( d );
-			final double right = spot.realMax( d );
-			if ( left < min )
-				min = left;
-			if ( right > max )
-				max = right;
-		}
-		return new double[] { min, max };
+		// Track GEFF
+		final String geffTracksPath = Paths.get( geffPath, TRACK_GEFF_NAME ).toString();
+		GeffNode.writeToZarr( geffTrackNodes, geffTracksPath, trackMetadata );
+		// Required to be a valid GEFF:
+		GeffEdge.writeToZarr( new ArrayList<>(), geffTracksPath, trackMetadata );
+		GeffMetadata.writeToZarr( trackMetadata, geffTracksPath );
 	}
 
 	private class GeffSpotVisitor implements SpotVisitor
@@ -361,7 +427,7 @@ public class TmGeffWriter
 			}
 
 			// Spot ID
-			node.setProp( TRACKMATE_ID_PROP, spot.ID() );
+			node.setProp( TRACKMATE_SPOT_ID_PROP, spot.ID() );
 			// Track ID -> will be mapped to the 'lineage' GEFF property
 			final Integer trackID = trackModel.trackIDOf( spot );
 			if ( trackID != null )
@@ -371,7 +437,7 @@ public class TmGeffWriter
 			if ( name != null )
 			{
 				final Object[] bytes = toByteArray( name );
-				node.setVarlengthProperty( SPOT_NAME_PROP, new VarlengthProperty( SPOT_NAME_PROP, "uint8", bytes ) );
+				node.setVarlengthProperty( NAME_PROP, new VarlengthProperty( NAME_PROP, "uint8", bytes ) );
 			}
 		}
 
@@ -427,5 +493,45 @@ public class TmGeffWriter
 		for ( int i = 0; i < bytes.length; i++ )
 			data[ i ] = bytes[ i ] & 0xFF;
 		return data;
+	}
+
+	private static final List< GeffAxis > buildAxes( final String spaceUnit, final String timeUnit, final boolean is2d, final Model model )
+	{
+		final String[] spaceFeatures = is2d
+				? new String[] { Spot.POSITION_X, Spot.POSITION_Y }
+				: new String[] { Spot.POSITION_X, Spot.POSITION_Y, Spot.POSITION_Z };
+		return axesOf( TrackMateObject.SPOTS, spaceFeatures, Spot.FRAME, spaceUnit, timeUnit, model );
+	}
+
+	private static final List< GeffAxis > buildTrackAxes( final String spaceUnit, final String timeUnit, final boolean is2d, final Model model )
+	{
+		final String[] spaceFeatures = is2d
+				? new String[] { TrackLocationAnalyzer.X_LOCATION, TrackLocationAnalyzer.Y_LOCATION }
+				: new String[] { TrackLocationAnalyzer.X_LOCATION, TrackLocationAnalyzer.Y_LOCATION, TrackLocationAnalyzer.Z_LOCATION };
+		return axesOf( TrackMateObject.TRACKS, spaceFeatures, TrackDurationAnalyzer.TRACK_START, spaceUnit, timeUnit, model );
+	}
+
+	private static final List< GeffAxis > axesOf(
+			final TrackMateObject obj,
+			final String[] spaceFeatures,
+			final String timeFeature,
+			final String spaceUnit,
+			final String timeUnit,
+			final Model model )
+	{
+		final String su = ZarrUnits.normalizeSpaceUnit( spaceUnit );
+		final String tu = ZarrUnits.normalizeTimeUnit( timeUnit );
+
+		final List< GeffAxis > axes = new ArrayList<>();
+
+		final double[] minMaxT = FeatureUtils.autoMinMax( model, obj, timeFeature, false );
+		axes.add( GeffAxis.createTimeAxis( timeFeature, tu, minMaxT[ 0 ], minMaxT[ 1 ] ) );
+
+		for ( final String spaceFeature : spaceFeatures )
+		{
+			final double[] minMaxX = FeatureUtils.autoMinMax( model, obj, spaceFeature, false );
+			axes.add( GeffAxis.createSpaceAxis( spaceFeature, su, minMaxX[ 0 ], minMaxX[ 1 ] ) );
+		}
+		return axes;
 	}
 }
