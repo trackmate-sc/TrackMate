@@ -1,5 +1,17 @@
 package fiji.plugin.trackmate.io.geff;
 
+import static fiji.plugin.trackmate.Spot.FRAME;
+import static fiji.plugin.trackmate.Spot.POSITION_X;
+import static fiji.plugin.trackmate.Spot.POSITION_Y;
+import static fiji.plugin.trackmate.Spot.POSITION_Z;
+import static fiji.plugin.trackmate.Spot.RADIUS;
+import static fiji.plugin.trackmate.SpotCollection.VISIBILITY;
+import static fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer.SPOT_SOURCE_ID;
+import static fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer.SPOT_TARGET_ID;
+import static fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer.Z_LOCATION;
+import static fiji.plugin.trackmate.features.track.TrackDurationAnalyzer.TRACK_START;
+import static fiji.plugin.trackmate.features.track.TrackIndexAnalyzer.TRACK_ID;
+import static fiji.plugin.trackmate.features.track.TrackMotilityAnalyzer.TRACK_MAX_DISTANCE_TRAVELED;
 import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_STATE_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.LOG_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.PLUGIN_VERSION_ATTRIBUTE_NAME;
@@ -40,12 +52,7 @@ import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.features.FeatureUtils;
-import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
-import fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer;
-import fiji.plugin.trackmate.features.track.TrackDurationAnalyzer;
-import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackLocationAnalyzer;
-import fiji.plugin.trackmate.features.track.TrackMotilityAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
@@ -121,7 +128,7 @@ public class TmGeffWriter
 			if ( srcId == null || tgtId == null )
 				continue;
 
-			final boolean swap = source.getFeature( Spot.FRAME ) > target.getFeature( Spot.FRAME );
+			final boolean swap = source.getFeature( FRAME ) > target.getFeature( FRAME );
 			final GeffEdge edgeNode = new GeffEdge.Builder()
 					.setId( edgeId++ )
 					.setSourceNodeId( swap ? tgtId : srcId )
@@ -133,9 +140,9 @@ public class TmGeffWriter
 			// Feature
 			for ( final String edgeFeature : fm.getEdgeFeatures() )
 			{
-				if ( edgeFeature.equals( EdgeTargetAnalyzer.SPOT_SOURCE_ID ) || edgeFeature.equals( EdgeTargetAnalyzer.SPOT_TARGET_ID ) )
+				if ( edgeFeature.equals( SPOT_SOURCE_ID ) || edgeFeature.equals( SPOT_TARGET_ID ) )
 					continue;
-				if ( is2D && edgeFeature.equals( EdgeTimeLocationAnalyzer.Z_LOCATION ) )
+				if ( is2D && edgeFeature.equals( Z_LOCATION ) )
 					continue;
 
 				final Double ef = fm.getEdgeFeature( edge, edgeFeature );
@@ -154,11 +161,11 @@ public class TmGeffWriter
 
 		// Display hints
 		DisplayHints displayHints = new DisplayHints()
-				.displayHorizontal( Spot.POSITION_X )
-				.displayVertical( Spot.POSITION_Y )
-				.displayTime( Spot.FRAME );
+				.displayHorizontal( POSITION_X )
+				.displayVertical( POSITION_Y )
+				.displayTime( FRAME );
 		if ( !is2D )
-			displayHints = displayHints.displayDepth( Spot.POSITION_Z );
+			displayHints = displayHints.displayDepth( POSITION_Z );
 		metadata.setDisplayHints( displayHints );
 
 		// Spot features
@@ -173,9 +180,9 @@ public class TmGeffWriter
 		final Map< String, PropMetadata > nodePropsMetadata = new HashMap<>();
 		for ( final String spotFeature : spotFeaturesWithValue )
 		{
-			if ( is2D && spotFeature.equals( Spot.POSITION_Z ) )
+			if ( is2D && spotFeature.equals( POSITION_Z ) )
 				continue;
-			if ( spotFeature.equals( Spot.RADIUS ) )
+			if ( spotFeature.equals( RADIUS ) || spotFeature.equals( TRACK_ID ) )
 				continue;
 
 			final String dType = isInt.get( spotFeature ) ? "int32" : "float64";
@@ -194,9 +201,9 @@ public class TmGeffWriter
 		// Spot name property
 		nodePropsMetadata.put( NAME_PROP, new PropMetadata( NAME_PROP, "uint8", true, null, "Spot name", "The name of the spot" ) );
 		// Add the TRACK_ID feature -> map it to the GEFF 'lineage' property
-		final PropMetadata trackIdPropMetadata = new PropMetadata( TrackIndexAnalyzer.TRACK_ID, "int32", false, null, "Track ID", "The TrackMate track ID of the spot" );
-		nodePropsMetadata.put( TrackIndexAnalyzer.TRACK_ID, trackIdPropMetadata );
-		final Map< String, String > trackNodePros = Map.of( "lineage", TrackIndexAnalyzer.TRACK_ID );
+		final PropMetadata trackIdPropMetadata = new PropMetadata( TRACK_ID, "int32", false, null, "Track ID", "The TrackMate track ID of the spot" );
+		nodePropsMetadata.put( TRACK_ID, trackIdPropMetadata );
+		final Map< String, String > trackNodePros = Map.of( "lineage", TRACK_ID );
 		metadata.setTrackNodeProps( trackNodePros );
 
 		metadata.setNodePropsMetadata( nodePropsMetadata );
@@ -218,9 +225,9 @@ public class TmGeffWriter
 		final Map< String, PropMetadata > edgePropsMetadata = new HashMap<>();
 		for ( final String edgeFeature : edgeFeaturesWithValue )
 		{
-			if ( edgeFeature.equals( EdgeTargetAnalyzer.SPOT_SOURCE_ID ) || edgeFeature.equals( EdgeTargetAnalyzer.SPOT_TARGET_ID ) )
+			if ( edgeFeature.equals( SPOT_SOURCE_ID ) || edgeFeature.equals( SPOT_TARGET_ID ) )
 				continue;
-			if ( is2D && edgeFeature.equals( EdgeTimeLocationAnalyzer.Z_LOCATION ) )
+			if ( is2D && edgeFeature.equals( Z_LOCATION ) )
 				continue;
 
 			final String dType = fm.getEdgeFeatureIsInt().get( edgeFeature ) ? "int32" : "float64";
@@ -244,8 +251,8 @@ public class TmGeffWriter
 		{
 			final double xt = fm.getTrackFeature( trackID, TrackLocationAnalyzer.X_LOCATION );
 			final double yt = fm.getTrackFeature( trackID, TrackLocationAnalyzer.Y_LOCATION );
-			final int tt = fm.getTrackFeature( trackID, TrackDurationAnalyzer.TRACK_START ).intValue();
-			final double radius = fm.getTrackFeature( trackID, TrackMotilityAnalyzer.TRACK_MAX_DISTANCE_TRAVELED ) / 2.;
+			final int tt = fm.getTrackFeature( trackID, TRACK_START ).intValue();
+			final double radius = fm.getTrackFeature( trackID, TRACK_MAX_DISTANCE_TRAVELED ) / 2.;
 
 			final GeffNode.Builder builder = new GeffNode.Builder()
 					.id( trackID )
@@ -272,7 +279,7 @@ public class TmGeffWriter
 			}
 			// Track visibility property
 			final Integer visibility = trackModel.isVisible( trackID ) ? 1 : 0;
-			trackNode.setProp( SpotCollection.VISIBILITY, visibility );
+			trackNode.setProp( VISIBILITY, visibility );
 			// Add the 'radius' feature -> mandatory for GEFF
 			final PropMetadata trackRadiusPropMetadata = new PropMetadata( "radius", "float64", false, spaceUnits, "Radius", "The radius of excursion of the track" );
 			nodePropsMetadata.put( "radius", trackRadiusPropMetadata );
@@ -296,7 +303,7 @@ public class TmGeffWriter
 		DisplayHints trackDisplayHints = new DisplayHints()
 				.displayHorizontal( TrackLocationAnalyzer.X_LOCATION )
 				.displayVertical( TrackLocationAnalyzer.Y_LOCATION )
-				.displayTime( TrackDurationAnalyzer.TRACK_START );
+				.displayTime( TRACK_START );
 		if ( !is2D )
 			trackDisplayHints = trackDisplayHints.displayDepth( TrackLocationAnalyzer.Z_LOCATION );
 		trackMetadata.setDisplayHints( trackDisplayHints );
@@ -331,7 +338,7 @@ public class TmGeffWriter
 			trackNodePropsMetadata.put( trackFeature, propMetadata );
 		}
 		// Track visibility property
-		trackNodePropsMetadata.put( SpotCollection.VISIBILITY, new PropMetadata( SpotCollection.VISIBILITY, "int32", false, null, Spot.FEATURE_NAMES.get( SpotCollection.VISIBILITY ), "Whether the track is visible in the display" ) );
+		trackNodePropsMetadata.put( VISIBILITY, new PropMetadata( VISIBILITY, "int32", false, null, Spot.FEATURE_NAMES.get( VISIBILITY ), "Whether the track is visible in the display" ) );
 		// Track name property
 		trackNodePropsMetadata.put( NAME_PROP, new PropMetadata( NAME_PROP, "uint8", true, null, "Track name", "The name of the track" ) );
 
@@ -390,7 +397,7 @@ public class TmGeffWriter
 	{
 
 		/** Features not in the general prop, because they are the core node. */
-		private static final Set< String > SKIP_PROPS = Set.of( "FRAME", "POSITION_X", "POSITION_Y", "POSITION_Z", "RADIUS" );
+		private static final Set< String > SKIP_PROPS = Set.of( FRAME, POSITION_X, POSITION_Y, POSITION_Z, RADIUS, TRACK_ID );
 
 		private int geffId = 0;
 
@@ -431,7 +438,7 @@ public class TmGeffWriter
 			// Track ID -> will be mapped to the 'lineage' GEFF property
 			final Integer trackID = trackModel.trackIDOf( spot );
 			if ( trackID != null )
-				node.setProp( TrackIndexAnalyzer.TRACK_ID, trackID.intValue() );
+				node.setProp( TRACK_ID, trackID.intValue() );
 			// Name -> variable length property
 			final String name = spot.getName();
 			if ( name != null )
@@ -446,10 +453,10 @@ public class TmGeffWriter
 		{
 			final Builder builder = new GeffNode.Builder()
 					.id( geffId )
-					.timepoint( spot.getFeature( Spot.FRAME ).intValue() )
+					.timepoint( spot.getFeature( FRAME ).intValue() )
 					.x( spot.getDoublePosition( 0 ) )
 					.y( spot.getDoublePosition( 1 ) )
-					.radius( spot.getFeature( Spot.RADIUS ).doubleValue() );
+					.radius( spot.getFeature( RADIUS ).doubleValue() );
 			if ( !is2d )
 				builder.z( spot.getDoublePosition( 2 ) );
 
@@ -473,10 +480,10 @@ public class TmGeffWriter
 
 			final GeffNode node = new GeffNode.Builder()
 					.id( geffId )
-					.timepoint( spot.getFeature( Spot.FRAME ).intValue() )
+					.timepoint( spot.getFeature( FRAME ).intValue() )
 					.x( spot.getDoublePosition( 0 ) )
 					.y( spot.getDoublePosition( 1 ) ) // No Z <- 2D
-					.radius( spot.getFeature( Spot.RADIUS ).doubleValue() )
+					.radius( spot.getFeature( RADIUS ).doubleValue() )
 					.polygonX( polygonX )
 					.polygonY( polygonY )
 					.build();
@@ -498,9 +505,9 @@ public class TmGeffWriter
 	private static final List< GeffAxis > buildAxes( final String spaceUnit, final String timeUnit, final boolean is2d, final Model model )
 	{
 		final String[] spaceFeatures = is2d
-				? new String[] { Spot.POSITION_X, Spot.POSITION_Y }
-				: new String[] { Spot.POSITION_X, Spot.POSITION_Y, Spot.POSITION_Z };
-		return axesOf( TrackMateObject.SPOTS, spaceFeatures, Spot.FRAME, spaceUnit, timeUnit, model );
+				? new String[] { POSITION_X, POSITION_Y }
+				: new String[] { POSITION_X, POSITION_Y, POSITION_Z };
+		return axesOf( TrackMateObject.SPOTS, spaceFeatures, FRAME, spaceUnit, timeUnit, model );
 	}
 
 	private static final List< GeffAxis > buildTrackAxes( final String spaceUnit, final String timeUnit, final boolean is2d, final Model model )
@@ -508,7 +515,7 @@ public class TmGeffWriter
 		final String[] spaceFeatures = is2d
 				? new String[] { TrackLocationAnalyzer.X_LOCATION, TrackLocationAnalyzer.Y_LOCATION }
 				: new String[] { TrackLocationAnalyzer.X_LOCATION, TrackLocationAnalyzer.Y_LOCATION, TrackLocationAnalyzer.Z_LOCATION };
-		return axesOf( TrackMateObject.TRACKS, spaceFeatures, TrackDurationAnalyzer.TRACK_START, spaceUnit, timeUnit, model );
+		return axesOf( TrackMateObject.TRACKS, spaceFeatures, TRACK_START, spaceUnit, timeUnit, model );
 	}
 
 	private static final List< GeffAxis > axesOf(

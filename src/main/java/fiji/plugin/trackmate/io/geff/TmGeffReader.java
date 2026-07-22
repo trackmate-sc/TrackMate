@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.io.geff;
-
+import static fiji.plugin.trackmate.SpotCollection.VISIBILITY;
+import static fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer.SPOT_SOURCE_ID;
+import static fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer.SPOT_TARGET_ID;
 import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_STATE_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.LOG_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.geff.TmGeffWriter.NAME_PROP;
@@ -32,7 +34,6 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.SpotRoi;
-import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
 import fiji.plugin.trackmate.io.json.SettingsIO;
@@ -230,8 +231,8 @@ public class TmGeffReader
 			graph.setEdgeWeight( e, score );
 
 			// Put back source and target with TrackMate Spot ID
-			fm.putEdgeFeature( e, EdgeTargetAnalyzer.SPOT_SOURCE_ID, Double.valueOf( source.ID() ) );
-			fm.putEdgeFeature( e, EdgeTargetAnalyzer.SPOT_TARGET_ID, Double.valueOf( target.ID() ) );
+			fm.putEdgeFeature( e, SPOT_SOURCE_ID, Double.valueOf( source.ID() ) );
+			fm.putEdgeFeature( e, SPOT_TARGET_ID, Double.valueOf( target.ID() ) );
 
 			// Features
 			final Map< String, Object > props = edge.getProps();
@@ -254,7 +255,7 @@ public class TmGeffReader
 			final int trackID = track.getId();
 
 			// Visibility
-			final Integer val = ( Integer ) track.getProp( SpotCollection.VISIBILITY );
+			final Integer val = ( Integer ) track.getProp( VISIBILITY );
 			final boolean isVisible = val > 0;
 			visibility.put( trackID, isVisible );
 
@@ -268,7 +269,7 @@ public class TmGeffReader
 			final Map< String, Object > props = track.getProps();
 			for ( final String feature : props.keySet() )
 			{
-				if ( feature.equals( SpotCollection.VISIBILITY ) || feature.equals( NAME_PROP ) )
+				if ( feature.equals( VISIBILITY ) || feature.equals( NAME_PROP ) )
 					continue;
 				fm.putTrackFeature( trackID, feature, ( ( Number ) props.get( feature ) ).doubleValue() );
 			}
