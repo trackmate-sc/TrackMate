@@ -57,6 +57,8 @@ public class TmGeffWriter
 
 	static final String TRACKMATE_ID_PROP = "TRACKMATE_ID";
 
+	static final String SPOT_NAME_PROP = "name";
+
 	private final String zarrPath;
 
 	private final GeffMetadata metadata;
@@ -177,6 +179,8 @@ public class TmGeffWriter
 		// Add the 'radius' feature -> mandatory for GEFF
 		final PropMetadata radiusPropMetadata = new PropMetadata( "radius", "float64", false, spaceUnits, "Radius", "The radius of the spot" );
 		nodePropsMetadata.put( "radius", radiusPropMetadata );
+		// Spot name property
+		nodePropsMetadata.put( SPOT_NAME_PROP, new PropMetadata( SPOT_NAME_PROP, "uint8", true, null, "Spot name", "The name of the spot" ) );
 		// Add the TRACK_ID feature -> map it to the GEFF 'lineage' property
 		final PropMetadata trackIdPropMetadata = new PropMetadata( TrackIndexAnalyzer.TRACK_ID, "int32", false, null, "Track ID", "The TrackMate track ID of the spot" );
 		nodePropsMetadata.put( TrackIndexAnalyzer.TRACK_ID, trackIdPropMetadata );
@@ -322,7 +326,6 @@ public class TmGeffWriter
 		/** Features not in the general prop, because they are the core node. */
 		private static final Set< String > SKIP_PROPS = Set.of( "FRAME", "POSITION_X", "POSITION_Y", "POSITION_Z", "RADIUS" );
 
-
 		private int geffId = 0;
 
 		private final TObjectIntMap< Spot > spotToId = new TObjectIntHashMap< Spot >();
@@ -368,7 +371,7 @@ public class TmGeffWriter
 			if ( name != null )
 			{
 				final Object[] bytes = toByteArray( name );
-				node.setVarlengthProperty( "name", new VarlengthProperty( "label", "uint8", bytes ) );
+				node.setVarlengthProperty( SPOT_NAME_PROP, new VarlengthProperty( SPOT_NAME_PROP, "uint8", bytes ) );
 			}
 		}
 

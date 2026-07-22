@@ -2,6 +2,8 @@ package fiji.plugin.trackmate.io.geff;
 
 import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_STATE_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.LOG_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.geff.TmGeffWriter.SPOT_NAME_PROP;
+import static fiji.plugin.trackmate.io.geff.TmGeffWriter.TRACKMATE_ID_PROP;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +20,7 @@ import org.mastodon.geff.GeffEdge;
 import org.mastodon.geff.GeffMetadata;
 import org.mastodon.geff.GeffMetadata.RelatedObjects;
 import org.mastodon.geff.GeffNode;
+import org.mastodon.geff.VarlengthProperty;
 
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.FeatureModel;
@@ -284,7 +287,7 @@ public class TmGeffReader
 		{
 			// Read its internal ID if present
 			int trackmateId;
-			final Object idObj = node.getProps().get( TmGeffWriter.TRACKMATE_ID_PROP );
+			final Object idObj = node.getProps().get( TRACKMATE_ID_PROP );
 			if ( null != idObj && idObj instanceof Integer )
 				trackmateId = ( Integer ) idObj;
 			else
@@ -329,7 +332,7 @@ public class TmGeffReader
 			spotTrackIDMap.put( spot, ( ( Number ) node.getProp( trackIdProp ) ).intValue() );
 
 			// Features
-			final Set< String > SKIP_FEATURES = Set.of( TmGeffWriter.TRACKMATE_ID_PROP, Spot.RADIUS, Spot.POSITION_X, Spot.POSITION_Y, Spot.POSITION_Z );
+			final Set< String > SKIP_FEATURES = Set.of( TRACKMATE_ID_PROP, Spot.RADIUS, Spot.POSITION_X, Spot.POSITION_Y, Spot.POSITION_Z );
 			final Map< String, Object > props = node.getProps();
 			for ( final Map.Entry< String, Object > entry : props.entrySet() )
 			{
@@ -340,10 +343,21 @@ public class TmGeffReader
 				spot.putFeature( key, ( ( Number ) value ).doubleValue() );
 			}
 
-			// Names // TODO
-			spot.setName( "ID" + spot.ID() );
+			// Names
+			final VarlengthProperty nameProperty = node.getVarlengthProperty( SPOT_NAME_PROP );
+			final Object[] bytes = nameProperty.getData();
+			final String name = fromByteArray( bytes );
+			spot.setName( name );
 
 		}
 		return spotIdMap;
+	}
+
+	private static final String fromByteArray( final Object[] bytes )
+	{
+		final byte[] recoveredBytes0 = new byte[ bytes.length ];
+		for ( int i = 0; i < bytes.length; i++ )
+			recoveredBytes0[ i ] = ( ( Integer ) bytes[ i ] ).byteValue();
+		return new String( recoveredBytes0, java.nio.charset.StandardCharsets.UTF_8 );
 	}
 }
