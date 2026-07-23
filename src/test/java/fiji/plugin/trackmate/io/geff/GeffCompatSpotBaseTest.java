@@ -17,6 +17,7 @@ import org.junit.rules.TemporaryFolder;
 
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.io.TmXmlReader;
 
@@ -50,15 +51,38 @@ public class GeffCompatSpotBaseTest extends GeffTestBase
 			throw new Exception( reader.getErrorMessage() );
 
 		final Model initialModel = reader.getModel();
+		final Settings initialSettings = reader.readSettings( null );
 		final String geffFile = new File( temporaryFolder.getRoot(), "test.geff" ).getAbsolutePath();
 		final TmGeffWriter geffWriter = new TmGeffWriter( geffFile );
 		geffWriter.appendModel( initialModel );
+		geffWriter.appendSettings( initialSettings );
 		geffWriter.write();
 
 		final TmGeffReader geffReader = new TmGeffReader( geffFile );
-		final Model readBackModel = geffReader.getModel();
 
+		final Model readBackModel = geffReader.getModel();
 		testModelEquality( initialModel, readBackModel );
+
+		final Settings readBackSettings = geffReader.readSettings( null );
+		testSettingsEquality( initialSettings, readBackSettings );
+	}
+
+	private void testSettingsEquality( final Settings initialSettings, final Settings readBackSettings )
+	{
+
+		assertThat( initialSettings )
+				.withRepresentation( new StandardRepresentation()
+				{
+					@Override
+					public String toStringOf( final Object obj )
+					{
+						if ( obj instanceof final Settings s )
+							return String.format( "Settings[%d]", s.hashCode() );
+						return super.toStringOf( obj );
+					}
+				} )
+				.usingRecursiveComparison()
+				.isEqualTo( readBackSettings );
 	}
 
 	private void testModelEquality( final Model initialModel, final Model readBackModel )
@@ -123,7 +147,6 @@ public class GeffCompatSpotBaseTest extends GeffTestBase
 
 		compareTrackModels( initialModel.getTrackModel(), readBackModel.getTrackModel() );
 	}
-
 
 	private void compareTrackModels( final TrackModel actual, final TrackModel expected )
 	{
