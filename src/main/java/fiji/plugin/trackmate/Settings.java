@@ -74,8 +74,6 @@ public class Settings
 
 	public int nframes;
 
-	public int nchannels;
-
 	public String imageFolder;
 
 	public String imageFileName;
@@ -201,7 +199,6 @@ public class Settings
 			this.imageFolder = "";
 			this.nframes = 0;
 			this.nslices = 0;
-			this.nchannels = 1;
 			return;
 		}
 
@@ -223,7 +220,6 @@ public class Settings
 		this.height = imp.getHeight();
 		this.nslices = imp.getNSlices();
 		this.nframes = imp.getNFrames();
-		this.nchannels = imp.getNChannels();
 		this.dx = imp.getCalibration().pixelWidth;
 		this.dy = imp.getCalibration().pixelHeight;
 		this.dz = imp.getCalibration().pixelDepth;

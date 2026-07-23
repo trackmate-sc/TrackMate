@@ -51,23 +51,13 @@ public class SettingsIO
 
 	public static JsonElement toJsonTree( final Settings settings )
 	{
-		return getGson( settings.nchannels, null ).toJsonTree( settings );
+		final int nChannels = ( settings.imp == null ) ? 1 : settings.imp.getNChannels();
+		return getGson( nChannels, null ).toJsonTree( settings );
 	}
 
 	public static void updateFromJsonTree( final Map< String, Object > settingsJson, final Settings updateTarget )
 	{
-		final int nChannels;
-		if ( settingsJson.containsKey( "nchannels" ) )
-		{
-			final Object val = settingsJson.get( "nchannels" );
-			nChannels = ( val instanceof Number )
-					? ( ( Number ) val ).intValue()
-					: 1;
-		}
-		else
-		{
-			nChannels = 1;
-		}
+		final int nChannels = ( updateTarget.imp == null ) ? 1 : updateTarget.imp.getNChannels();
 		final Gson gson = getGson( nChannels, updateTarget );
 		final JsonElement tree = gson.toJsonTree( settingsJson );
 		gson.fromJson( tree, Settings.class );
