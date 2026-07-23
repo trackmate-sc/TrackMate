@@ -35,6 +35,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.SpotRoi;
+import fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
 import fiji.plugin.trackmate.io.json.SettingsIO;
@@ -235,7 +236,13 @@ public class TmGeffReader
 			fm.putEdgeFeature( e, SPOT_SOURCE_ID, Double.valueOf( source.ID() ) );
 			fm.putEdgeFeature( e, SPOT_TARGET_ID, Double.valueOf( target.ID() ) );
 
-			// Features
+			// We did not serialize Z features for the 2D case, but we need to
+			// put them back when reading, because the feature model expects
+			// them to be there. These default values will be overwritten if the
+			// edge has a Z feature value.
+			fm.putEdgeFeature( e, EdgeTimeLocationAnalyzer.Z_LOCATION, Double.valueOf( 0. ) );
+
+			// Other Features
 			final Map< String, Object > props = edge.getProps();
 			for ( final String feature : props.keySet() )
 				fm.putEdgeFeature( e, feature, ( ( Number ) props.get( feature ) ).doubleValue() );
