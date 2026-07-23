@@ -133,8 +133,6 @@ public class TmGeffWriter
 					.setId( edgeId++ )
 					.setSourceNodeId( swap ? tgtId : srcId )
 					.setTargetNodeId( swap ? srcId : tgtId )
-					.setScore( trackModel.getEdgeWeight( edge ) )
-					.setDistance( Math.sqrt( source.squareDistanceTo( target ) ) )
 					.build();
 
 			// Feature

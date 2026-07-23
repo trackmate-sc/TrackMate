@@ -35,6 +35,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.SpotRoi;
+import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
 import fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
@@ -225,12 +226,10 @@ public class TmGeffReader
 			final Spot source = spotIdMap.get( sid );
 			final int tid = edge.getTargetNodeId();
 			final Spot target = spotIdMap.get( tid );
-			final double score = edge.getScore();
 
 			graph.addVertex( source );
 			graph.addVertex( target );
 			final DefaultWeightedEdge e = graph.addEdge( source, target );
-			graph.setEdgeWeight( e, score );
 
 			// Put back source and target with TrackMate Spot ID
 			fm.putEdgeFeature( e, SPOT_SOURCE_ID, Double.valueOf( source.ID() ) );
@@ -246,6 +245,10 @@ public class TmGeffReader
 			final Map< String, Object > props = edge.getProps();
 			for ( final String feature : props.keySet() )
 				fm.putEdgeFeature( e, feature, ( ( Number ) props.get( feature ) ).doubleValue() );
+
+			// Put back edge weight
+			final Double weight = fm.getEdgeFeature( e, EdgeTargetAnalyzer.EDGE_COST );
+			graph.setEdgeWeight( e, weight );
 
 			// Track ID
 			final int trackID = spotTrackIDMap.get( source );
