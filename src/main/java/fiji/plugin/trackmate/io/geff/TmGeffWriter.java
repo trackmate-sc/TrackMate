@@ -100,8 +100,8 @@ public class TmGeffWriter
 
 	public void appendModel( final Model model )
 	{
-		final String spaceUnits = ZarrUnits.normalizeSpaceUnit( model.getSpaceUnits() );
-		final String timeUnits = ZarrUnits.normalizeTimeUnit( model.getTimeUnits() );
+		final String spaceUnits = model.getSpaceUnits();
+		final String timeUnits = model.getTimeUnits();
 		final boolean is2D = DetectionUtils.is2D( model );
 
 		/*
@@ -526,8 +526,8 @@ public class TmGeffWriter
 			final String timeUnit,
 			final Model model )
 	{
-		final String su = ZarrUnits.normalizeSpaceUnit( spaceUnit );
-		final String tu = ZarrUnits.normalizeTimeUnit( timeUnit );
+		final String su = spaceUnit;
+		final String tu = timeUnit;
 
 		final List< GeffAxis > axes = new ArrayList<>();
 
