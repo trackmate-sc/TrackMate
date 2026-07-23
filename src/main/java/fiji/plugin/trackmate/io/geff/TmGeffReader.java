@@ -2,6 +2,7 @@ package fiji.plugin.trackmate.io.geff;
 import static fiji.plugin.trackmate.SpotCollection.VISIBILITY;
 import static fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer.SPOT_SOURCE_ID;
 import static fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer.SPOT_TARGET_ID;
+import static fiji.plugin.trackmate.features.track.TrackIndexAnalyzer.TRACK_ID;
 import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_STATE_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.LOG_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.geff.TmGeffWriter.NAME_PROP;
@@ -361,7 +362,7 @@ public class TmGeffReader
 			spotTrackIDMap.put( spot, ( ( Number ) node.getProp( trackIdProp ) ).intValue() );
 
 			// Features
-			final Set< String > SKIP_FEATURES = Set.of( TRACKMATE_SPOT_ID_PROP, Spot.RADIUS, Spot.POSITION_X, Spot.POSITION_Y, Spot.POSITION_Z );
+			final Set< String > SKIP_FEATURES = Set.of( TRACKMATE_SPOT_ID_PROP, TRACK_ID, Spot.RADIUS, Spot.POSITION_X, Spot.POSITION_Y, Spot.POSITION_Z );
 			final Map< String, Object > props = node.getProps();
 			for ( final Map.Entry< String, Object > entry : props.entrySet() )
 			{
