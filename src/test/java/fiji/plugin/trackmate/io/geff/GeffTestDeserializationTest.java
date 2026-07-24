@@ -3,6 +3,7 @@ package fiji.plugin.trackmate.io.geff;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -18,6 +19,9 @@ import org.junit.rules.TemporaryFolder;
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.io.TmXmlReader;
@@ -26,14 +30,14 @@ import fiji.plugin.trackmate.io.TmXmlReader;
  * Tests that check that a TrackMate model, settings etc, can be written and
  * read to / from a GEFF file, and that the resulting objects are identical.
  */
-public class GeffTestDeserialization extends GeffTestBase
+public class GeffTestDeserializationTest extends GeffTestBase
 {
 
 	/**
 	 * A TrackMate XML file generated with TrackMate v8, containing only
 	 * 'SpotBase' spots.
 	 */
-	static final String SPOT_BASE_PATH = GeffTestDeserialization.class
+	static final String SPOT_BASE_PATH = GeffTestDeserializationTest.class
 			.getResource( "FakeTracks.xml" )
 			.getFile();
 
@@ -41,7 +45,7 @@ public class GeffTestDeserialization extends GeffTestBase
 	 * A TrackMate XML file generated with TrackMate v8, containing only
 	 * 'SpotRoi' spots.
 	 */
-	static final String SPOT_ROI_PATH = GeffTestDeserialization.class
+	static final String SPOT_ROI_PATH = GeffTestDeserializationTest.class
 			.getResource( "MAX_Merged.xml" )
 			.getFile();
 
@@ -156,8 +160,12 @@ public class GeffTestDeserialization extends GeffTestBase
 					}
 				} )
 				.usingRecursiveComparison()
+				.withEqualsForType(
+						// Used to pair spots in sets.
+						( a, b ) -> a.ID() == b.ID(), Spot.class )
 				.ignoringFields(
 						// Treated separately
+						"spots",
 						"featureModel",
 						"trackModel",
 						// Listeners
@@ -172,6 +180,12 @@ public class GeffTestDeserialization extends GeffTestBase
 						"spotsUpdated",
 						"eventCache" )
 				.isEqualTo( readBackModel );
+
+		/*
+		 * SpotCollection
+		 */
+
+		compareSpotCollections( initialModel.getSpots(), readBackModel.getSpots() );
 
 		/*
 		 * Feature model
@@ -203,6 +217,97 @@ public class GeffTestDeserialization extends GeffTestBase
 		 */
 
 		compareTrackModels( initialModel.getTrackModel(), readBackModel.getTrackModel() );
+	}
+
+	private static void compareSpotCollections( final SpotCollection actual, final SpotCollection expected )
+	{
+		// Same frames
+		assertThat( actual.keySet() )
+				.as( "SpotCollection frames" )
+				.containsExactlyInAnyOrderElementsOf( expected.keySet() );
+
+		actual.keySet().forEach( frame -> {
+
+			final Iterable< Spot > actualSpots = actual.iterable( frame, false );
+			final Iterable< Spot > expectedSpots = expected.iterable( frame, false );
+
+			// Same number of spots per frame
+			assertThat( actualSpots )
+					.as( "number of spots in frame %d", frame )
+					.hasSameSizeAs( expectedSpots );
+
+			// Build ID -> Spot lookup for expected
+			final Map< Integer, Spot > expectedById = new HashMap<>();
+			expectedSpots.forEach( s -> expectedById.put( s.ID(), s ) );
+
+			actualSpots.forEach( actualSpot -> {
+
+				// Spot exists in expected
+				final Spot expectedSpot = expectedById.get( actualSpot.ID() );
+				assertThat( expectedSpot )
+						.as( "Spot ID=%d missing in frame %d", actualSpot.ID(), frame )
+						.isNotNull();
+
+				// Delegate to single-spot comparison
+				assertSpotEquals( actualSpot, expectedSpot );
+			} );
+		} );
+	}
+
+	private static void assertSpotEquals( final Spot actual, final Spot expected )
+	{
+		// 1. Check same implementation type
+		assertThat( actual.getClass() )
+				.as( "Spot ID=%d implementation type", actual.ID() )
+				.isEqualTo( expected.getClass() );
+
+		// 2. Basic identity
+		assertThat( actual.ID() )
+				.as( "Spot ID" )
+				.isEqualTo( expected.ID() );
+
+		assertThat( actual.getName() )
+				.as( "Spot ID=%d name", actual.ID() )
+				.isEqualTo( expected.getName() );
+
+		// 3. Feature keys
+		assertThat( actual.getFeatures().keySet() )
+				.as( "Spot ID=%d feature keys", actual.ID() )
+				.containsExactlyInAnyOrderElementsOf(
+						expected.getFeatures().keySet() );
+
+		// 4. Feature values
+		assertThat( actual.getFeatures() )
+				.as( "Spot ID=%d feature values", actual.ID() )
+				.allSatisfy( ( key, value ) -> assertThat( value )
+						.as( "Spot ID=%d feature '%s'", actual.ID(), key )
+						.isEqualTo(
+								expected.getFeatures().getOrDefault( key, Double.NaN ) ) );
+
+		// 5. SpotRoi-specific: polygon coordinates
+		if ( actual instanceof SpotRoi )
+			assertSpotRoiEquals( ( SpotRoi ) actual, ( SpotRoi ) expected );
+	}
+
+	private static void assertSpotRoiEquals( final SpotRoi actual, final SpotRoi expected )
+	{
+		// Number of polygon vertices
+		assertThat( actual.nPoints() )
+				.as( "SpotRoi ID=%d number of polygon points", actual.ID() )
+				.isEqualTo( expected.nPoints() );
+
+		// X coordinates of polygon vertices (relative to center)
+		for ( int i = 0; i < actual.nPoints(); i++ )
+		{
+			final int idx = i; // for lambda capture
+			assertThat( actual.xr( i ) )
+					.as( "SpotRoi ID=%d polygon x[%d]", actual.ID(), idx )
+					.isEqualTo( expected.xr( i ) );
+
+			assertThat( actual.yr( i ) )
+					.as( "SpotRoi ID=%d polygon y[%d]", actual.ID(), idx )
+					.isEqualTo( expected.yr( i ) );
+		}
 	}
 
 	private void compareTrackModels( final TrackModel actual, final TrackModel expected )
