@@ -49,6 +49,14 @@ public class GeffTestDeserializationTest extends GeffTestBase
 			.getResource( "MAX_Merged.xml" )
 			.getFile();
 
+	/**
+	 * A TrackMate XML file generated with TrackMate v8, containing 'SpotBase
+	 * and 'SpotRoi' spots.
+	 */
+	static final String SPOT_MIXED_PATH = GeffTestDeserializationTest.class
+			.getResource( "MAX_Merged-mixed.xml" )
+			.getFile();
+
 	@Test
 	public void testSpotBaseSerialization() throws Exception
 	{
@@ -59,6 +67,12 @@ public class GeffTestDeserializationTest extends GeffTestBase
 	public void testSpotRoiSerialization() throws Exception
 	{
 		testModelSerialization( SPOT_ROI_PATH );
+	}
+
+	@Test
+	public void testSpotMixedSerialization() throws Exception
+	{
+		testModelSerialization( SPOT_MIXED_PATH );
 	}
 
 	/**
