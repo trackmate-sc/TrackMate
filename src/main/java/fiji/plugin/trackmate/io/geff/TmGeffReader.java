@@ -364,9 +364,9 @@ public class TmGeffReader
 				spot = new SpotBase( trackmateId );
 				spot.setPosition( node.getX(), 0 );
 				spot.setPosition( node.getY(), 1 );
-				spot.setPosition( is2D ? 0. : node.getZ(), 2 );
 				spot.putFeature( Spot.RADIUS, node.getRadius() );
 			}
+			spot.setPosition( is2D ? 0. : node.getZ(), 2 );
 			spots.add( spot, frame );
 			spotIdMap.put( node.getId(), spot );
 			spotTrackIDMap.put( spot, ( ( Number ) node.getProp( trackIdProp ) ).intValue() );
