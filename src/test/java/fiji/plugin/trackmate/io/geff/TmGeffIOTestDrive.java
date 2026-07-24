@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.io;
+package fiji.plugin.trackmate.io.geff;
 
 import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
 
@@ -25,8 +25,7 @@ import fiji.plugin.trackmate.gui.wizard.TrackMateWizardSequence;
 import fiji.plugin.trackmate.gui.wizard.WizardSequence;
 import fiji.plugin.trackmate.gui.wizard.descriptors.LogPanelDescriptor2;
 import fiji.plugin.trackmate.gui.wizard.descriptors.StartDialogDescriptor;
-import fiji.plugin.trackmate.io.geff.TmGeffReader;
-import fiji.plugin.trackmate.io.geff.TmGeffWriter;
+import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
@@ -37,7 +36,7 @@ public class TmGeffIOTestDrive
 
 	public static void main( final String[] args ) throws IOException
 	{
-		final String path = "samples/FakeTracks.xml";
+		final String path = GeffTestDeserialization.SPOT_ROI_PATH;
 		System.out.println( "Reading from " + path );
 		final TmXmlReader reader = new TmXmlReader( new File( path ) );
 		if ( !reader.isReadingOk() )
