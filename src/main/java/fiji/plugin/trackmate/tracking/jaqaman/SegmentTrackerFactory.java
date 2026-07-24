@@ -31,7 +31,6 @@ import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_GAP_CLOSING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_MERGING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALLOW_TRACK_SPLITTING;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_ALTERNATIVE_LINKING_COST_FACTOR;
-import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_BLOCKING_VALUE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_CUTOFF_PERCENTILE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_GAP_CLOSING_MAX_DISTANCE;
@@ -109,7 +108,6 @@ public abstract class SegmentTrackerFactory implements SpotTrackerFactory
 		// Others
 		ok = ok & writeAttribute( settings, element, KEY_CUTOFF_PERCENTILE, Double.class, str );
 		ok = ok & writeAttribute( settings, element, KEY_ALTERNATIVE_LINKING_COST_FACTOR, Double.class, str );
-		ok = ok & writeAttribute( settings, element, KEY_BLOCKING_VALUE, Double.class, str );
 
 		if ( !ok )
 			return str.toString();
@@ -188,7 +186,6 @@ public abstract class SegmentTrackerFactory implements SpotTrackerFactory
 		// Others
 		ok = ok & readDoubleAttribute( element, settings, KEY_CUTOFF_PERCENTILE, errorHolder );
 		ok = ok & readDoubleAttribute( element, settings, KEY_ALTERNATIVE_LINKING_COST_FACTOR, errorHolder );
-		ok = ok & readDoubleAttribute( element, settings, KEY_BLOCKING_VALUE, errorHolder );
 
 		return ok;
 	}
