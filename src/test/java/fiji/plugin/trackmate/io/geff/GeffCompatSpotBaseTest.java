@@ -19,6 +19,7 @@ import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackModel;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.io.TmXmlReader;
 
 /**
@@ -52,10 +53,17 @@ public class GeffCompatSpotBaseTest extends GeffTestBase
 
 		final Model initialModel = reader.getModel();
 		final Settings initialSettings = reader.readSettings( null );
+		final DisplaySettings initialDisplaySettings = reader.getDisplaySettings();
+		final String initialLog = reader.getLog();
+		final String initialGUIState = reader.getGUIState();
+
 		final String geffFile = new File( temporaryFolder.getRoot(), "test.geff" ).getAbsolutePath();
 		final TmGeffWriter geffWriter = new TmGeffWriter( geffFile );
 		geffWriter.appendModel( initialModel );
 		geffWriter.appendSettings( initialSettings );
+		geffWriter.appendDisplaySettings( initialDisplaySettings );
+		geffWriter.appendLog( initialLog );
+		geffWriter.appendGUIState( initialGUIState );
 		geffWriter.write();
 
 		final TmGeffReader geffReader = new TmGeffReader( geffFile );
@@ -65,6 +73,36 @@ public class GeffCompatSpotBaseTest extends GeffTestBase
 
 		final Settings readBackSettings = geffReader.readSettings( null );
 		testSettingsEquality( initialSettings, readBackSettings );
+
+		final DisplaySettings readBackDisplaySettings = geffReader.getDisplaySettings();
+		testDisplaySettingsEquality( initialDisplaySettings, readBackDisplaySettings );
+
+		final String readBackLog = geffReader.getLog();
+		assertThat( readBackLog )
+				.as( "TrackMate log" )
+				.isEqualTo( initialLog );
+
+		final String readBackGUIState = geffReader.getGUIState();
+		assertThat( readBackGUIState )
+				.as( "TrackMate GUI state" )
+				.isEqualTo( initialGUIState );
+	}
+
+	private void testDisplaySettingsEquality( final DisplaySettings initialDisplaySettings, final DisplaySettings readBackDisplaySettings )
+	{
+		assertThat( initialDisplaySettings )
+				.withRepresentation( new StandardRepresentation()
+				{
+					@Override
+					public String toStringOf( final Object obj )
+					{
+						if ( obj instanceof final DisplaySettings ds )
+							return String.format( "DisplaySettings[%d]", ds.hashCode() );
+						return super.toStringOf( obj );
+					}
+				} )
+				.usingRecursiveComparison()
+				.isEqualTo( readBackDisplaySettings );
 	}
 
 	private void testSettingsEquality( final Settings initialSettings, final Settings readBackSettings )
