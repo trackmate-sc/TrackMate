@@ -23,19 +23,39 @@ import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.io.TmXmlReader;
 
 /**
- * Tests that a TrackMate XML file can be read and written to a GEFF file, and
- * that the resulting objects are identical.
+ * Tests that check that a TrackMate model, settings etc, can be written and
+ * read to / from a GEFF file, and that the resulting objects are identical.
  */
-public class GeffCompatSpotBaseTest extends GeffTestBase
+public class GeffTestDeserialization extends GeffTestBase
 {
 
 	/**
 	 * A TrackMate XML file generated with TrackMate v8, containing only
 	 * 'SpotBase' spots.
 	 */
-	private static final String PATH = GeffCompatSpotBaseTest.class
+	static final String SPOT_BASE_PATH = GeffTestDeserialization.class
 			.getResource( "FakeTracks.xml" )
 			.getFile();
+
+	/**
+	 * A TrackMate XML file generated with TrackMate v8, containing only
+	 * 'SpotRoi' spots.
+	 */
+	static final String SPOT_ROI_PATH = GeffTestDeserialization.class
+			.getResource( "MAX_Merged.xml" )
+			.getFile();
+
+	@Test
+	public void testSpotBaseSerialization() throws Exception
+	{
+		testModelSerialization( SPOT_BASE_PATH );
+	}
+
+	@Test
+	public void testSpotRoiSerialization() throws Exception
+	{
+		testModelSerialization( SPOT_ROI_PATH );
+	}
 
 	/**
 	 * JUnit 4 rule that creates a temporary folder that is guaranteed to exist
@@ -44,10 +64,9 @@ public class GeffCompatSpotBaseTest extends GeffTestBase
 	@Rule
 	public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-	@Test
-	public void testModelSerialization() throws Exception
+	protected void testModelSerialization( final String path ) throws Exception
 	{
-		final TmXmlReader reader = new TmXmlReader( new File( PATH ) );
+		final TmXmlReader reader = new TmXmlReader( new File( path ) );
 		if ( !reader.isReadingOk() )
 			throw new Exception( reader.getErrorMessage() );
 
