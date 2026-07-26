@@ -5,6 +5,7 @@ import java.util.Deque;
 
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.img.Img;
 import net.imglib2.type.numeric.integer.UnsignedIntType;
 import net.imglib2.util.ImgUtil;
 import net.imglib2.util.Util;
@@ -172,7 +173,10 @@ public class UndoRedoStack
 	{
 		final RandomAccessibleInterval< UnsignedIntType > current = getFrame( frame );
 		if ( snapshot == null )
-			this.snapshot = Util.getArrayOrCellImgFactory( current, new UnsignedIntType() ).create( current );
+		{
+			final Img< UnsignedIntType > img = Util.getArrayOrCellImgFactory( current, new UnsignedIntType() ).create( current );
+			this.snapshot = img.view().translate( current.minAsLongArray() );
+		}
 		ImgUtil.copy( current, snapshot );
 	}
 

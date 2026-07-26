@@ -460,7 +460,7 @@ public class TMLabelBrushController
 
 			// Initialize stroke region
 			final double radius = getBrushDisplayRadius();
-			strokeRegion = createStrokeRegion( posToImageCoords( coords ), radiusToImageCoords( radius ) );
+			strokeRegion = createStrokeRegion( posToImageCoords( coords ), ( int ) Math.ceil( brushDiameter / 2. ) );
 
 			// Snapshot the current state for undo/redo
 			model.undoRedo().startUndo( viewer.state().getCurrentTimepoint() );
@@ -494,18 +494,20 @@ public class TMLabelBrushController
 			brushCursor.setFontVisible( true );
 
 			final UndoRedoStack undo = model.undoRedo();
-			undo.setUndoPoint( viewer.state().getCurrentTimepoint(), strokeRegion );
+			undo.setUndoPoint(
+					viewer.state().getCurrentTimepoint(),
+					Intervals.intersect( getFrameLabeling(), strokeRegion ) );
 		}
 
 		/** Creates an interval representing the initial brush stroke region. */
-		private static final FinalInterval createStrokeRegion( final double[] center, final double[] radius )
+		private static final FinalInterval createStrokeRegion( final double[] center, final int radius )
 		{
 			final long[] min = new long[ 2 ];
 			final long[] max = new long[ 2 ];
 			for ( int d = 0; d < 2; d++ )
 			{
-				min[ d ] = ( long ) Math.floor( center[ d ] - radius[ d ] );
-				max[ d ] = ( long ) Math.ceil( center[ d ] + radius[ d ] );
+				min[ d ] = ( long ) Math.floor( center[ d ] - radius );
+				max[ d ] = ( long ) Math.ceil( center[ d ] + radius );
 			}
 			return new FinalInterval( min, max );
 		}
