@@ -50,6 +50,7 @@ import fiji.plugin.trackmate.gui.editor.labkit.model.TMImageLabelingModel;
 import fiji.plugin.trackmate.gui.editor.labkit.model.UndoRedoStack;
 import fiji.plugin.trackmate.util.TMUtils;
 import net.imglib2.FinalInterval;
+import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealLocalizable;
@@ -302,7 +303,7 @@ public class TMLabelBrushController
 		/**
 		 * The bounding box of the current stroke, used for undo/redo region.
 		 */
-		private FinalInterval strokeRegion;
+		private Interval strokeRegion;
 
 		private final boolean is2D;
 
@@ -510,7 +511,7 @@ public class TMLabelBrushController
 		}
 
 		/** Expands the stroke region to include a new brush position. */
-		private static final FinalInterval expandStrokeRegion( final FinalInterval current, final double[] centerA, final double[] centerB, final double[] radius )
+		private static final Interval expandStrokeRegion( final Interval current, final double[] centerA, final double[] centerB, final double[] radius )
 		{
 			final long[] min = new long[ current.numDimensions() ];
 			final long[] max = new long[ current.numDimensions() ];

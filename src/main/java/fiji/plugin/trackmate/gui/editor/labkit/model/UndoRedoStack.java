@@ -3,7 +3,6 @@ package fiji.plugin.trackmate.gui.editor.labkit.model;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.integer.UnsignedIntType;
@@ -62,7 +61,7 @@ public class UndoRedoStack
 	 * <p>
 	 * This method <b>must</b> be called before any edit operation is performed,
 	 * to capture the state of the labeling before the edit. After the edit is
-	 * performed, call {@link #setUndoPoint(int, FinalInterval)} to record the
+	 * performed, call {@link #setUndoPoint(int, Interval)} to record the
 	 * edit operation.
 	 * 
 	 * @param frame
@@ -87,7 +86,7 @@ public class UndoRedoStack
 	 * @param region
 	 *            the region of the labeling that was affected by the edit.
 	 */
-	public void setUndoPoint( final int frame, final FinalInterval region )
+	public void setUndoPoint( final int frame, final Interval region )
 	{
 		final UndoableCommand current = new UndoableCommand( getFrame( frame ), region, frame );
 		current.captureBefore( snapshot );
