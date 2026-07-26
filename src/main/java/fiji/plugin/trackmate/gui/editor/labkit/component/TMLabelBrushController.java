@@ -286,9 +286,7 @@ public class TMLabelBrushController
 	private class PaintBehavior implements DragBehaviour
 	{
 
-		/**
-		 * If <code>true</code> we paint. If <code>false</code> we erase.
-		 */
+		/** If <code>true</code> we paint. If <code>false</code> we erase. */
 		private final boolean paint;
 
 		private RealPoint before;
@@ -305,8 +303,7 @@ public class TMLabelBrushController
 				RandomAccessible< LabelingType< Label > > extended = extendLabelingType( getFrame() );
 				final double radius = Math.max( 0, ( brushDiameter - 1 ) * 0.5 );
 				final AffineTransform3D m = displayToImageTransformation();
-				final double[] screen = { screenCoordinates.getDoublePosition( 0 ), screenCoordinates
-						.getDoublePosition( 1 ), 0 };
+				final double[] screen = { screenCoordinates.getDoublePosition( 0 ), screenCoordinates.getDoublePosition( 1 ), 0 };
 				double[] center = new double[ 3 ];
 				m.apply( screen, center );
 				if ( extended.numDimensions() == 3 && planarMode )
@@ -315,8 +312,7 @@ public class TMLabelBrushController
 				final double pixelWidth = RealPoints.length( labelTransform.d( 0 ) );
 				final double pixelHeight = RealPoints.length( labelTransform.d( 1 ) );
 				final double pixelDepth = RealPoints.length( labelTransform.d( 2 ) );
-				double[] axes = { radius, radius * pixelWidth / pixelHeight, radius * pixelWidth /
-						pixelDepth };
+				double[] axes = { radius, radius * pixelWidth / pixelHeight, radius * pixelWidth / pixelDepth };
 				if ( extended.numDimensions() == 2 )
 				{
 					center = Arrays.copyOf( center, 2 );
@@ -325,7 +321,6 @@ public class TMLabelBrushController
 				final IterableRegion< BitType > region = Ellipsoid.asIterableRegion( center, axes );
 				Regions.sample( region, extended ).forEach( pixelOperation() );
 			}
-
 		}
 
 		private Consumer< LabelingType< Label > > pixelOperation()
@@ -383,11 +378,9 @@ public class TMLabelBrushController
 			return visibleLabels;
 		}
 
-		private RandomAccessible< LabelingType< Label > > extendLabelingType(
-				final RandomAccessibleInterval< LabelingType< Label > > slice )
+		private static final RandomAccessible< LabelingType< Label > > extendLabelingType( final RandomAccessibleInterval< LabelingType< Label > > slice )
 		{
-			final LabelingType< Label > variable = slice.randomAccess()
-					.setPositionAndGet( Intervals.minAsLongArray( slice ) ).createVariable();
+			final LabelingType< Label > variable = slice.randomAccess().setPositionAndGet( Intervals.minAsLongArray( slice ) ).createVariable();
 			variable.clear();
 			@SuppressWarnings( "deprecation" )
 			final RandomAccessible< LabelingType< Label > > extended = Views.extendValue( slice, variable );
@@ -411,32 +404,19 @@ public class TMLabelBrushController
 
 		private void paint( final RealLocalizable a, final RealLocalizable b )
 		{
-			final long distance = ( long ) ( 4 * ( distance( a, b ) + 1 ) );
+			final double dist = LinAlgHelpers.distance( a.positionAsDoubleArray(), b.positionAsDoubleArray() );
+			final long distance = ( long ) ( 4 * ( dist + 1 ) );
 			final long step = ( long ) Math.max( brushDiameter, 1.0 );
+
+			final RealPoint location = new RealPoint( a.numDimensions() );
 			for ( long i = 0; i < distance; i += step )
-				paint( interpolate( ( double ) i / ( double ) distance, a, b ) );
-		}
+			{
+				final double ratio = ( double ) i / ( double ) distance;
+				for ( int d = 0; d < location.numDimensions(); d++ )
+					location.setPosition( ratio * a.getDoublePosition( d ) + ( 1 - ratio ) * b.getDoublePosition( d ), d );
 
-		RealLocalizable interpolate( final double ratio, final RealLocalizable a,
-				final RealLocalizable b )
-		{
-			final RealPoint result = new RealPoint( a.numDimensions() );
-			for ( int d = 0; d < result.numDimensions(); d++ )
-				result.setPosition( ratio * a.getDoublePosition( d ) + ( 1 - ratio ) * b
-						.getDoublePosition( d ), d );
-			return result;
-		}
-
-		double distance( final RealLocalizable a, final RealLocalizable b )
-		{
-			return LinAlgHelpers.distance( asArray( a ), asArray( b ) );
-		}
-
-		private double[] asArray( final RealLocalizable a )
-		{
-			final double[] result = new double[ a.numDimensions() ];
-			a.localize( result );
-			return result;
+				paint( location );
+			}
 		}
 
 		@Override
@@ -485,23 +465,16 @@ public class TMLabelBrushController
 
 	private double getBrushDisplayRadius()
 	{
-		return brushDiameter * 0.5 * getScale( model.labelTransformation() ) *
-				getScale( paintBehaviour.viewerTransformation() );
-	}
-
-	// TODO: find a good place
-	private double getScale( final AffineTransform3D transformation )
-	{
-		return Affine3DHelpers.extractScale( transformation, 0 );
+		final double labelScale = Affine3DHelpers.extractScale( model.labelTransformation(), 0 );
+		final double viewScale = Affine3DHelpers.extractScale( paintBehaviour.viewerTransformation(), 0 );
+		return brushDiameter * 0.5 * labelScale * viewScale;
 	}
 
 	private RandomAccessibleInterval< LabelingType< Label > > getFrame()
 	{
-		final RandomAccessibleInterval< LabelingType< Label > > frame = model.labeling()
-				.get();
+		final RandomAccessibleInterval< LabelingType< Label > > frame = model.labeling().get();
 		if ( this.model.isTimeSeries() )
-			return Views.hyperSlice( frame, frame
-					.numDimensions() - 1, viewer.state().getCurrentTimepoint() );
+			return Views.hyperSlice( frame, frame.numDimensions() - 1, viewer.state().getCurrentTimepoint() );
 		return frame;
 	}
 
@@ -512,10 +485,8 @@ public class TMLabelBrushController
 		final long[] max = new long[ 2 ];
 		for ( int d = 0; d < 2; d++ )
 		{
-			min[ d ] = ( long ) ( Math.min( a.getDoublePosition( d ), b.getDoublePosition(
-					d ) ) - radius );
-			max[ d ] = ( long ) ( Math.ceil( Math.max( a.getDoublePosition( d ), b
-					.getDoublePosition( d ) ) ) + radius );
+			min[ d ] = ( long ) ( Math.min( a.getDoublePosition( d ), b.getDoublePosition( d ) ) - radius );
+			max[ d ] = ( long ) ( Math.ceil( Math.max( a.getDoublePosition( d ), b.getDoublePosition( d ) ) ) + radius );
 		}
 		model.dataChangedNotifier().notifyListeners( new FinalInterval( min, max ) );
 	}
@@ -524,8 +495,7 @@ public class TMLabelBrushController
 	{
 
 		@Override
-		public void scroll( final double wheelRotation, final boolean isHorizontal,
-				final int x, final int y )
+		public void scroll( final double wheelRotation, final boolean isHorizontal, final int x, final int y )
 		{
 			if ( !isHorizontal )
 			{
