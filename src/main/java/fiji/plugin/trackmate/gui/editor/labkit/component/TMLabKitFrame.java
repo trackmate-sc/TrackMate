@@ -64,6 +64,7 @@ import bdv.ui.keymap.Keymap;
 import bdv.ui.keymap.KeymapManager;
 import bdv.util.BdvOptions;
 import fiji.plugin.trackmate.gui.Icons;
+import fiji.plugin.trackmate.gui.editor.labkit.model.TMImageLabelingModel;
 import fiji.plugin.trackmate.gui.editor.labkit.model.TMLabKitModel;
 import net.imglib2.Dimensions;
 import net.imglib2.util.Intervals;
@@ -94,7 +95,7 @@ public class TMLabKitFrame extends JFrame
 
 	public TMLabKitFrame( final TMLabKitModel model )
 	{
-		final ImageLabelingModel imageLabelingModel = model.imageLabelingModel();
+		final TMImageLabelingModel imageLabelingModel = model.imageLabelingModel();
 
 		/*
 		 * Here we create a specific config for BDV, so that we can use a custom
