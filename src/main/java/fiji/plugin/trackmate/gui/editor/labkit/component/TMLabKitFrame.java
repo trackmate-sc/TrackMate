@@ -52,7 +52,6 @@ import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-import org.scijava.ui.behaviour.MouseAndKeyHandler;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.io.gui.CommandDescriptionProvider.Scope;
 import org.scijava.ui.behaviour.util.Actions;
@@ -153,10 +152,6 @@ public class TMLabKitFrame extends JFrame
 		final TriggerBehaviourBindings triggerbindings = new TriggerBehaviourBindings();
 		SwingUtilities.replaceUIActionMap( getRootPane(), keybindings.getConcatenatedActionMap() );
 		SwingUtilities.replaceUIInputMap( getRootPane(), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, keybindings.getConcatenatedInputMap() );
-		final MouseAndKeyHandler mouseAndKeyHandler = new MouseAndKeyHandler();
-		mouseAndKeyHandler.setInputMap( triggerbindings.getConcatenatedInputTriggerMap() );
-		mouseAndKeyHandler.setBehaviourMap( triggerbindings.getConcatenatedBehaviourMap() );
-		addHandler( mouseAndKeyHandler );
 
 		final TMKeymapManager keymapManager = new TMKeymapManager();
 		final InputTriggerConfig inputTriggerConfig = keymapManager.getForwardSelectedKeymap().getConfig();
