@@ -50,6 +50,7 @@ import fiji.plugin.trackmate.gui.editor.labkit.model.TMImageLabelingModel;
 import fiji.plugin.trackmate.util.TMUtils;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
+import net.imglib2.Interval;
 import net.imglib2.Localizable;
 import net.imglib2.Point;
 import net.imglib2.RandomAccess;
@@ -286,7 +287,15 @@ public class TMFloodFillController
 				final Consumer< Set< Label > > operation = operationFactory.get();
 				if ( askUser( frame, seed, operation ) )
 				{
-					FloodFill.doFloodFillOnActiveLabels( frame, seed, operation );
+					// Start undo before modifying
+					final int frameIndex = viewer.state().getCurrentTimepoint();
+					model.undoRedo().startUndo( frameIndex );
+
+					// Execute flood fill and get the affected region
+					final Interval region = FloodFill.doFloodFillOnActiveLabels( frame, seed, operation );
+
+					// Set undo point after modifying
+					model.undoRedo().setUndoPoint( frameIndex, region );
 				}
 			}
 		}
@@ -352,19 +361,20 @@ public class TMFloodFillController
 		 *            Seed point.
 		 * @param operation
 		 *            Operation that is performed for the flood filled pixels.
+		 * @return the bounding box of the filled region as a {@link Interval}.
 		 */
-		public static void doFloodFillOnActiveLabels(
+		public static Interval doFloodFillOnActiveLabels(
 				final RandomAccessibleInterval< LabelingType< Label > > labeling,
 				final Point seed,
 				final Consumer< ? super LabelingType< Label > > operation )
 		{
 			final Set< Label > seedValue = getPixel( labeling, seed ).copy();
 			final Predicate< LabelingType< Label > > visit = value -> activeLabelsAreEquals( value, seedValue );
-			cachedFloodFill( labeling, seed, visit, operation );
+			return cachedFloodFill( labeling, seed, visit, operation );
 		}
 
 		// package-private to allow testing
-		static < T > void cachedFloodFill(
+		static < T > Interval cachedFloodFill(
 				final RandomAccessibleInterval< LabelingType< T > > image,
 				final Localizable seed,
 				final Predicate< ? super LabelingType< T > > visit,
@@ -372,10 +382,10 @@ public class TMFloodFillController
 		{
 			final Predicate< LabelingType< T > > cachedVisit = new CacheForPredicateLabelingType<>( visit );
 			final Consumer< LabelingType< T > > cachedOperation = new CacheForOperationLabelingType<>( operation );
-			doFloodFill( image, seed, cachedVisit, cachedOperation );
+			return doFloodFill( image, seed, cachedVisit, cachedOperation );
 		}
 
-		private static < T extends Type< T > > void doFloodFill(
+		private static < T extends Type< T > > Interval doFloodFill(
 				final RandomAccessibleInterval< T > image,
 				final Localizable seed,
 				final Predicate< T > visit,
@@ -387,12 +397,13 @@ public class TMFloodFillController
 			final T seedValueChanged = seedValue.copy();
 			operation.accept( seedValueChanged );
 			if ( visit.test( seedValueChanged ) )
-				return;
+				return null;
 			final BiPredicate< T, T > filter = ( f, s ) -> visit.test( f );
 			@SuppressWarnings( "deprecation" )
 			final ExtendedRandomAccessibleInterval< T, RandomAccessibleInterval< T > > target = Views.extendValue( image, seedValueChanged );
 			final DiamondShape shape = new DiamondShape( 1 );
-			net.imglib2.algorithm.fill.FloodFill.fill( target, target, seed, shape, filter, operation );
+
+			return fiji.plugin.trackmate.gui.editor.labkit.util.FloodFill.fill( target, target, seed, shape, filter, operation );
 		}
 
 		private static boolean activeLabelsAreEquals( final LabelingType< Label > a, final Set< Label > b )
