@@ -42,6 +42,7 @@ import bdv.ui.keymap.KeymapManager;
 import bdv.ui.keymap.KeymapSettingsPage;
 import fiji.plugin.trackmate.gui.editor.labkit.model.TMLabKitModel;
 import fiji.plugin.trackmate.gui.editor.labkit.model.TMTransformationModel;
+import fiji.plugin.trackmate.gui.editor.labkit.model.UndoRedoStack;
 
 public class TMLabKitActions
 {
@@ -75,12 +76,25 @@ public class TMLabKitActions
 
 		final TMTransformationModel transformationModel = ( TMTransformationModel ) model.imageLabelingModel().transformationModel();
 		actions.runnableAction( () -> transformationModel.resetView(), RESET_VIEW, RESET_VIEW_KEYS );
+
+		/*
+		 * Undo / redo actions
+		 */
+
+		final UndoRedoStack undoRedo = model.imageLabelingModel().undoRedo();
+		actions.runnableAction( () -> undoRedo.undo(), UNDO, UNDO_KEYS );
+		actions.runnableAction( () -> undoRedo.redo(), REDO, REDO_KEYS );
 	}
 
 
 	private static final String RESET_VIEW = "reset view";
 	private static final String[] RESET_VIEW_KEYS = new String[] { "shift R " };
 
+	private static final String UNDO = "undo";
+	private static final String[] UNDO_KEYS = new String[] { "ctrl Z", "meta Z" };
+	private static final String REDO = "redo";
+	private static final String[] REDO_KEYS = new String[] { "ctrl shift Z", "meta shift Z" };
+	
 	@Plugin( type = CommandDescriptionProvider.class )
 	public static class Descriptions extends CommandDescriptionProvider
 	{
@@ -95,6 +109,8 @@ public class TMLabKitActions
 			descriptions.add( RESET_VIEW, RESET_VIEW_KEYS, "Reset the view." );
 			descriptions.add( BigDataViewerActions.PREFERENCES_DIALOG, BigDataViewerActions.PREFERENCES_DIALOG_KEYS, "Show the Preferences dialog." );
 			descriptions.add( CloseWindowActions.CLOSE_DIALOG, CloseWindowActions.CLOSE_DIALOG_KEYS, "Close the active dialog." );
+			descriptions.add( UNDO, UNDO_KEYS, "Undo the last edit." );
+			descriptions.add( REDO, REDO_KEYS, "Redo the last undone edit." );
 		}
 	}
 }

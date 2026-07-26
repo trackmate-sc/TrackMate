@@ -27,7 +27,6 @@ import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.KE
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -47,6 +46,8 @@ import org.scijava.ui.behaviour.util.Behaviours;
 import bdv.util.Affine3DHelpers;
 import bdv.util.BdvHandle;
 import bdv.viewer.ViewerPanel;
+import fiji.plugin.trackmate.gui.editor.labkit.model.TMImageLabelingModel;
+import fiji.plugin.trackmate.gui.editor.labkit.model.UndoRedoStack;
 import fiji.plugin.trackmate.util.TMUtils;
 import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessible;
@@ -66,7 +67,6 @@ import sc.fiji.labkit.ui.brush.BrushCursor;
 import sc.fiji.labkit.ui.brush.neighborhood.Ellipsoid;
 import sc.fiji.labkit.ui.brush.neighborhood.RealPoints;
 import sc.fiji.labkit.ui.labeling.Label;
-import sc.fiji.labkit.ui.models.LabelingModel;
 import sc.fiji.labkit.ui.panel.GuiUtils;
 import sc.fiji.labkit.ui.utils.Notifier;
 
@@ -85,7 +85,9 @@ public class TMLabelBrushController
 		REPLACE( "Replace", "Paint over existing labels." ),
 		/** Add the painted label to existing labels. */
 		ADD( "Add", "Add selected label to existing ones." ),
-		/** Only paint over the background. If a label exists, don't change it.*/
+		/**
+		 * Only paint over the background. If a label exists, don't change it.
+		 */
 		DONT_OVERWRITE( "Preserve", "Don't overwrite existing labels, only paint on background." );
 
 		private final String name;
@@ -152,7 +154,7 @@ public class TMLabelBrushController
 
 	private final ViewerPanel viewer;
 
-	private final LabelingModel model;
+	private final TMImageLabelingModel model;
 
 	private final BrushCursor brushCursor;
 
@@ -160,9 +162,9 @@ public class TMLabelBrushController
 
 	private final MouseAdapter moveBrushAdapter = GuiUtils.toMouseListener( moveBrushBehaviour );
 
-	private final PaintBehavior paintBehaviour = new PaintBehavior( true );
+	private final PaintBehavior paintBehaviour;
 
-	private final PaintBehavior eraseBehaviour = new PaintBehavior( false );
+	private final PaintBehavior eraseBehaviour;
 
 	private PaintBrushMode paintBrushMode;
 
@@ -176,8 +178,13 @@ public class TMLabelBrushController
 
 	private boolean planarMode = false;
 
-	public TMLabelBrushController( final BdvHandle bdv, final LabelingModel model )
+	public TMLabelBrushController( final BdvHandle bdv, final TMImageLabelingModel model )
 	{
+		// Behaviors
+		final boolean is2D = model.labeling().get().numDimensions() == 2;
+		this.paintBehaviour = new PaintBehavior( true, is2D );
+		this.eraseBehaviour = new PaintBehavior( false, is2D );
+
 		this.bdv = bdv;
 		this.viewer = bdv.getViewerPanel();
 		this.brushCursor = new BrushCursor( model );
@@ -185,6 +192,7 @@ public class TMLabelBrushController
 		updateBrushOverlayRadius();
 		viewer.getDisplay().overlays().add( brushCursor );
 		viewer.transformListeners().add( affineTransform3D -> updateBrushOverlayRadius() );
+
 
 		// Load defaults from prefs.
 		final PrefService prefs = TMUtils.getContext().getService( PrefService.class );
@@ -291,36 +299,57 @@ public class TMLabelBrushController
 
 		private RealPoint before;
 
-		public PaintBehavior( final boolean paint )
+		/**
+		 * The bounding box of the current stroke, used for undo/redo region.
+		 */
+		private FinalInterval strokeRegion;
+
+		private final boolean is2D;
+
+		public PaintBehavior( final boolean paint, final boolean is2D )
 		{
 			this.paint = paint;
+			this.is2D = is2D;
 		}
 
 		private void paint( final RealLocalizable screenCoordinates )
 		{
 			synchronized ( viewer )
 			{
-				RandomAccessible< LabelingType< Label > > extended = extendLabelingType( getFrame() );
 				final double radius = Math.max( 0, ( brushDiameter - 1 ) * 0.5 );
-				final AffineTransform3D m = displayToImageTransformation();
-				final double[] screen = { screenCoordinates.getDoublePosition( 0 ), screenCoordinates.getDoublePosition( 1 ), 0 };
-				double[] center = new double[ 3 ];
-				m.apply( screen, center );
-				if ( extended.numDimensions() == 3 && planarMode )
+				final double[] center = posToImageCoords( screenCoordinates );
+				final double[] axes = radiusToImageCoords( radius );
+
+				RandomAccessible< LabelingType< Label > > extended = extendLabelingType( getFrameLabeling() );
+				if ( !is2D && planarMode )
 					extended = Views.hyperSlice( extended, 2, Math.round( center[ 2 ] ) );
-				final AffineTransform3D labelTransform = model.labelTransformation();
-				final double pixelWidth = RealPoints.length( labelTransform.d( 0 ) );
-				final double pixelHeight = RealPoints.length( labelTransform.d( 1 ) );
-				final double pixelDepth = RealPoints.length( labelTransform.d( 2 ) );
-				double[] axes = { radius, radius * pixelWidth / pixelHeight, radius * pixelWidth / pixelDepth };
-				if ( extended.numDimensions() == 2 )
-				{
-					center = Arrays.copyOf( center, 2 );
-					axes = Arrays.copyOf( axes, 2 );
-				}
+
 				final IterableRegion< BitType > region = Ellipsoid.asIterableRegion( center, axes );
 				Regions.sample( region, extended ).forEach( pixelOperation() );
 			}
+		}
+
+		private double[] radiusToImageCoords( final double radius )
+		{
+			final AffineTransform3D labelTransform = model.labelTransformation();
+			final double pixelWidth = RealPoints.length( labelTransform.d( 0 ) );
+			final double pixelHeight = RealPoints.length( labelTransform.d( 1 ) );
+			if ( is2D )
+				return new double[] { radius, radius * pixelWidth / pixelHeight };
+
+			final double pixelDepth = RealPoints.length( labelTransform.d( 2 ) );
+			return new double[] { radius, radius * pixelWidth / pixelHeight, radius * pixelWidth / pixelDepth };
+		}
+
+		private double[] posToImageCoords( final RealLocalizable screenCoordinates )
+		{
+			final AffineTransform3D m = displayToImageTransformation();
+			final double[] screen = { screenCoordinates.getDoublePosition( 0 ), screenCoordinates.getDoublePosition( 1 ), 0 };
+			final double[] center = new double[ 3 ];
+			m.apply( screen, center );
+			if ( is2D )
+				return new double[] { center[ 0 ], center[ 1 ] };
+			return center;
 		}
 
 		private Consumer< LabelingType< Label > > pixelOperation()
@@ -427,8 +456,15 @@ public class TMLabelBrushController
 			makeLabelVisible();
 			final RealPoint coords = new RealPoint( x, y );
 			this.before = coords;
-			paint( coords );
+
+			// Initialize stroke region
 			final double radius = getBrushDisplayRadius();
+			strokeRegion = createStrokeRegion( posToImageCoords( coords ), radiusToImageCoords( radius ) );
+
+			// Snapshot the current state for undo/redo
+			model.undoRedo().startUndo( viewer.state().getCurrentTimepoint() );
+
+			paint( coords );
 			fireBitmapChanged( coords, coords, radius );
 		}
 
@@ -440,6 +476,13 @@ public class TMLabelBrushController
 			paint( before, coords );
 			final double radius = getBrushDisplayRadius();
 			fireBitmapChanged( before, coords, radius );
+
+			// Expand stroke region
+			strokeRegion = expandStrokeRegion(
+					strokeRegion,
+					posToImageCoords( before ),
+					posToImageCoords( coords ),
+					radiusToImageCoords( radius ) );
 			this.before = coords;
 		}
 
@@ -448,6 +491,35 @@ public class TMLabelBrushController
 		{
 			brushCursor.setPosition( x, y );
 			brushCursor.setFontVisible( true );
+
+			final UndoRedoStack undo = model.undoRedo();
+			undo.setUndoPoint( viewer.state().getCurrentTimepoint(), strokeRegion );
+		}
+
+		/** Creates an interval representing the initial brush stroke region. */
+		private static final FinalInterval createStrokeRegion( final double[] center, final double[] radius )
+		{
+			final long[] min = new long[ 2 ];
+			final long[] max = new long[ 2 ];
+			for ( int d = 0; d < 2; d++ )
+			{
+				min[ d ] = ( long ) Math.floor( center[ d ] - radius[ d ] );
+				max[ d ] = ( long ) Math.ceil( center[ d ] + radius[ d ] );
+			}
+			return new FinalInterval( min, max );
+		}
+
+		/** Expands the stroke region to include a new brush position. */
+		private static final FinalInterval expandStrokeRegion( final FinalInterval current, final double[] centerA, final double[] centerB, final double[] radius )
+		{
+			final long[] min = new long[ current.numDimensions() ];
+			final long[] max = new long[ current.numDimensions() ];
+			for ( int d = 0; d < current.numDimensions(); d++ )
+			{
+				min[ d ] = Math.min( current.min( d ), ( long ) Math.floor( Math.min( centerA[ d ], centerB[ d ] ) - radius[ d ] ) );
+				max[ d ] = Math.max( current.max( d ), ( long ) Math.ceil( Math.max( centerA[ d ], centerB[ d ] ) + radius[ d ] ) );
+			}
+			return new FinalInterval( min, max );
 		}
 	}
 
@@ -470,7 +542,12 @@ public class TMLabelBrushController
 		return brushDiameter * 0.5 * labelScale * viewScale;
 	}
 
-	private RandomAccessibleInterval< LabelingType< Label > > getFrame()
+	/**
+	 * Returns the labeling of the current frame.
+	 * 
+	 * @return the labeling of the current frame
+	 */
+	private RandomAccessibleInterval< LabelingType< Label > > getFrameLabeling()
 	{
 		final RandomAccessibleInterval< LabelingType< Label > > frame = model.labeling().get();
 		if ( this.model.isTimeSeries() )
