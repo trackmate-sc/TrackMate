@@ -3,13 +3,10 @@ import static fiji.plugin.trackmate.SpotCollection.VISIBILITY;
 import static fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer.SPOT_SOURCE_ID;
 import static fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer.SPOT_TARGET_ID;
 import static fiji.plugin.trackmate.features.track.TrackIndexAnalyzer.TRACK_ID;
-import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_STATE_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.LOG_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.geff.TmGeffWriter.NAME_PROP;
 import static fiji.plugin.trackmate.io.geff.TmGeffWriter.TRACKMATE_SPOT_ID_PROP;
 import static fiji.plugin.trackmate.io.geff.TmGeffWriter.TRACK_GEFF_NAME;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -23,11 +20,9 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 import org.mastodon.geff.GeffAxis;
 import org.mastodon.geff.GeffEdge;
 import org.mastodon.geff.GeffMetadata;
-import org.mastodon.geff.GeffMetadata.RelatedObjects;
 import org.mastodon.geff.GeffNode;
 import org.mastodon.geff.VarlengthProperty;
 
-import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
@@ -39,12 +34,10 @@ import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
 import fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
-import fiji.plugin.trackmate.io.json.SettingsIO;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
-import ij.IJ;
 import ij.ImagePlus;
 
 public class TmGeffReader
@@ -61,72 +54,75 @@ public class TmGeffReader
 
 	public String getLog()
 	{
-		if ( null == metadata )
-			metadata = GeffMetadata.readFromZarr( geffPath );
-
-		@SuppressWarnings( "unchecked" )
-		final Map< String, Object > trackmateMD = ( Map< String, Object > ) metadata.getExtra().get( "trackmate" );
-		final String log = ( String ) trackmateMD.get( LOG_ELEMENT_KEY );
-		return log;
+//		if ( null == metadata )
+//			metadata = GeffMetadata.readFromZarr( geffPath );
+//
+//		@SuppressWarnings( "unchecked" )
+//		final Map< String, Object > trackmateMD = ( Map< String, Object > ) metadata.getExtra().get( "trackmate" );
+//		final String log = ( String ) trackmateMD.get( LOG_ELEMENT_KEY );
+//		return log;
+		return "LOG NOT READ YET"; // TODO
 	}
 
 	public String getGUIState()
 	{
-		if ( null == metadata )
-			metadata = GeffMetadata.readFromZarr( geffPath );
-
-		@SuppressWarnings( "unchecked" )
-		final Map< String, Object > trackmateMD = ( Map< String, Object > ) metadata.getExtra().get( "trackmate" );
-		final String guiState = ( String ) trackmateMD.get( GUI_STATE_ELEMENT_KEY );
-		return guiState;
+//		if ( null == metadata )
+//			metadata = GeffMetadata.readFromZarr( geffPath );
+//
+//		@SuppressWarnings( "unchecked" )
+//		final Map< String, Object > trackmateMD = ( Map< String, Object > ) metadata.getExtra().get( "trackmate" );
+//		final String guiState = ( String ) trackmateMD.get( GUI_STATE_ELEMENT_KEY );
+//		return guiState;
+		return "ConfigureViews"; // TODO
 	}
 
 	@SuppressWarnings( "unchecked" )
 	public DisplaySettings getDisplaySettings()
 	{
-		if ( null == metadata )
-			metadata = GeffMetadata.readFromZarr( geffPath );
-
-		final Map< String, Object > trackmateMD = ( Map< String, Object > ) metadata.getExtra().get( "trackmate" );
-		final Map< String, Object > displaySettingsJson = ( Map< String, Object > ) trackmateMD.get( "displaySettings" );
-		return DisplaySettingsIO.fromJsonTree( displaySettingsJson );
+//		if ( null == metadata )
+//			metadata = GeffMetadata.readFromZarr( geffPath );
+//
+//		final Map< String, Object > trackmateMD = ( Map< String, Object > ) metadata.getExtra().get( "trackmate" );
+//		final Map< String, Object > displaySettingsJson = ( Map< String, Object > ) trackmateMD.get( "displaySettings" );
+//		return DisplaySettingsIO.fromJsonTree( displaySettingsJson );
+		return DisplaySettingsIO.readUserDefault(); // TODO
 	}
 
 	public synchronized ImagePlus readImage()
 	{
-		if ( null == metadata )
-			metadata = GeffMetadata.readFromZarr( geffPath );
-
-		final RelatedObjects relatedObjects = metadata.getRelatedObjects();
-		if ( null == relatedObjects )
-			return null;
-
-		final List< String > imagePaths = relatedObjects.getImagePaths();
-		for ( final String imagePath : imagePaths )
-		{
-			final File imageFile = new File( new File( geffPath ).getParent(), imagePath );
-			if ( !imageFile.exists() || !imageFile.canRead() )
-				continue;
-
-			final ImagePlus imp = IJ.openImage( imageFile.getAbsolutePath() );
-			if ( null == imp )
-				continue;
-			return imp;
-		}
-		return null;
+//		if ( null == metadata )
+//			metadata = GeffMetadata.readFromZarr( geffPath );
+//
+//		final RelatedObjects relatedObjects = metadata.getRelatedObjects();
+//		if ( null == relatedObjects )
+//			return null;
+//
+//		final List< String > imagePaths = relatedObjects.getImagePaths();
+//		for ( final String imagePath : imagePaths )
+//		{
+//			final File imageFile = new File( new File( geffPath ).getParent(), imagePath );
+//			if ( !imageFile.exists() || !imageFile.canRead() )
+//				continue;
+//
+//			final ImagePlus imp = IJ.openImage( imageFile.getAbsolutePath() );
+//			if ( null == imp )
+//				continue;
+//			return imp;
+//		}
+		return null; // TODO
 	}
 
 	@SuppressWarnings( "unchecked" )
 	public synchronized Settings readSettings( final ImagePlus imp )
 	{
-		if ( null == metadata )
-			metadata = GeffMetadata.readFromZarr( geffPath );
-
-		final Map< String, Object > trackmateMD = ( Map< String, Object > ) metadata.getExtra().get( "trackmate" );
-		final Map< String, Object > settingsJson = ( Map< String, Object > ) trackmateMD.get( "settings" );
+//		if ( null == metadata )
+//			metadata = GeffMetadata.readFromZarr( geffPath );
+//
+//		final Map< String, Object > trackmateMD = ( Map< String, Object > ) metadata.getExtra().get( "trackmate" );
+//		final Map< String, Object > settingsJson = ( Map< String, Object > ) trackmateMD.get( "settings" );
 
 		final Settings settings = new Settings( imp );
-		SettingsIO.updateFromJsonTree( settingsJson, settings );
+//		SettingsIO.updateFromJsonTree( settingsJson, settings ); // TODO
 		return settings;
 	}
 
@@ -157,53 +153,53 @@ public class TmGeffReader
 	@SuppressWarnings( "unchecked" )
 	private void readFeatureDeclarations( final FeatureModel featureModel )
 	{
-		final Map< String, Object > trackmateMD = ( Map< String, Object > ) metadata.getExtra().get( "trackmate" );
-		final Map< String, Object > featureDeclarations = ( Map< String, Object > ) trackmateMD.get( "featureDeclarations" );
-
-		// Spot features
-		final List< String > spotFeatures = ( List< String > ) featureDeclarations.get( "spotFeatures" );
-		final Map< String, String > spotFeatureNames = ( Map< String, String > ) featureDeclarations.get( "spotFeatureNames" );
-		final Map< String, String > spotFeatureShortNames = ( Map< String, String > ) featureDeclarations.get( "spotFeatureShortNames" );
-		final Map< String, String > spotFeatureDimensionsStr = ( Map< String, String > ) featureDeclarations.get( "spotFeatureDimensions" );
-		final Map< String, Dimension > spotFeatureDimensions = new HashMap<>();
-		for ( final String feature : spotFeatureDimensionsStr.keySet() )
-		{
-			final String dimStr = spotFeatureDimensionsStr.get( feature );
-			final Dimension dim = Dimension.valueOf( dimStr );
-			spotFeatureDimensions.put( feature, dim );
-		}
-		final Map< String, Boolean > spotFeatureIsInt = ( Map< String, Boolean > ) featureDeclarations.get( "spotFeatureIsInt" );
-		featureModel.declareSpotFeatures( spotFeatures, spotFeatureNames, spotFeatureShortNames, spotFeatureDimensions, spotFeatureIsInt );
-
-		// Edge features
-		final List< String > edgeFeatures = ( List< String > ) featureDeclarations.get( "edgeFeatures" );
-		final Map< String, String > edgeFeatureNames = ( Map< String, String > ) featureDeclarations.get( "edgeFeatureNames" );
-		final Map< String, String > edgeFeatureShortNames = ( Map< String, String > ) featureDeclarations.get( "edgeFeatureShortNames" );
-		final Map< String, String > edgeFeatureDimensionsStr = ( Map< String, String > ) featureDeclarations.get( "edgeFeatureDimensions" );
-		final Map< String, Dimension > edgeFeatureDimensions = new HashMap<>();
-		for ( final String feature : edgeFeatureDimensionsStr.keySet() )
-		{
-			final String dimStr = edgeFeatureDimensionsStr.get( feature );
-			final Dimension dim = Dimension.valueOf( dimStr );
-			edgeFeatureDimensions.put( feature, dim );
-		}
-		final Map< String, Boolean > edgeFeatureIsInt = ( Map< String, Boolean > ) featureDeclarations.get( "edgeFeatureIsInt" );
-		featureModel.declareEdgeFeatures( edgeFeatures, edgeFeatureNames, edgeFeatureShortNames, edgeFeatureDimensions, edgeFeatureIsInt );
-
-		// Track features
-		final List< String > trackFeatures = ( List< String > ) featureDeclarations.get( "trackFeatures" );
-		final Map< String, String > trackFeatureNames = ( Map< String, String > ) featureDeclarations.get( "trackFeatureNames" );
-		final Map< String, String > trackFeatureShortNames = ( Map< String, String > ) featureDeclarations.get( "trackFeatureShortNames" );
-		final Map< String, String > trackFeatureDimensionsStr = ( Map< String, String > ) featureDeclarations.get( "trackFeatureDimensions" );
-		final Map< String, Dimension > trackFeatureDimensions = new HashMap<>();
-		for ( final String feature : trackFeatureDimensionsStr.keySet() )
-		{
-			final String dimStr = trackFeatureDimensionsStr.get( feature );
-			final Dimension dim = Dimension.valueOf( dimStr );
-			trackFeatureDimensions.put( feature, dim );
-		}
-		final Map< String, Boolean > trackFeatureIsInt = ( Map< String, Boolean > ) featureDeclarations.get( "trackFeatureIsInt" );
-		featureModel.declareTrackFeatures( trackFeatures, trackFeatureNames, trackFeatureShortNames, trackFeatureDimensions, trackFeatureIsInt );
+//		final Map< String, Object > trackmateMD = ( Map< String, Object > ) metadata.getExtra().get( "trackmate" );
+//		final Map< String, Object > featureDeclarations = ( Map< String, Object > ) trackmateMD.get( "featureDeclarations" );
+//
+//		// Spot features
+//		final List< String > spotFeatures = ( List< String > ) featureDeclarations.get( "spotFeatures" );
+//		final Map< String, String > spotFeatureNames = ( Map< String, String > ) featureDeclarations.get( "spotFeatureNames" );
+//		final Map< String, String > spotFeatureShortNames = ( Map< String, String > ) featureDeclarations.get( "spotFeatureShortNames" );
+//		final Map< String, String > spotFeatureDimensionsStr = ( Map< String, String > ) featureDeclarations.get( "spotFeatureDimensions" );
+//		final Map< String, Dimension > spotFeatureDimensions = new HashMap<>();
+//		for ( final String feature : spotFeatureDimensionsStr.keySet() )
+//		{
+//			final String dimStr = spotFeatureDimensionsStr.get( feature );
+//			final Dimension dim = Dimension.valueOf( dimStr );
+//			spotFeatureDimensions.put( feature, dim );
+//		}
+//		final Map< String, Boolean > spotFeatureIsInt = ( Map< String, Boolean > ) featureDeclarations.get( "spotFeatureIsInt" );
+//		featureModel.declareSpotFeatures( spotFeatures, spotFeatureNames, spotFeatureShortNames, spotFeatureDimensions, spotFeatureIsInt );
+//
+//		// Edge features
+//		final List< String > edgeFeatures = ( List< String > ) featureDeclarations.get( "edgeFeatures" );
+//		final Map< String, String > edgeFeatureNames = ( Map< String, String > ) featureDeclarations.get( "edgeFeatureNames" );
+//		final Map< String, String > edgeFeatureShortNames = ( Map< String, String > ) featureDeclarations.get( "edgeFeatureShortNames" );
+//		final Map< String, String > edgeFeatureDimensionsStr = ( Map< String, String > ) featureDeclarations.get( "edgeFeatureDimensions" );
+//		final Map< String, Dimension > edgeFeatureDimensions = new HashMap<>();
+//		for ( final String feature : edgeFeatureDimensionsStr.keySet() )
+//		{
+//			final String dimStr = edgeFeatureDimensionsStr.get( feature );
+//			final Dimension dim = Dimension.valueOf( dimStr );
+//			edgeFeatureDimensions.put( feature, dim );
+//		}
+//		final Map< String, Boolean > edgeFeatureIsInt = ( Map< String, Boolean > ) featureDeclarations.get( "edgeFeatureIsInt" );
+//		featureModel.declareEdgeFeatures( edgeFeatures, edgeFeatureNames, edgeFeatureShortNames, edgeFeatureDimensions, edgeFeatureIsInt );
+//
+//		// Track features
+//		final List< String > trackFeatures = ( List< String > ) featureDeclarations.get( "trackFeatures" );
+//		final Map< String, String > trackFeatureNames = ( Map< String, String > ) featureDeclarations.get( "trackFeatureNames" );
+//		final Map< String, String > trackFeatureShortNames = ( Map< String, String > ) featureDeclarations.get( "trackFeatureShortNames" );
+//		final Map< String, String > trackFeatureDimensionsStr = ( Map< String, String > ) featureDeclarations.get( "trackFeatureDimensions" );
+//		final Map< String, Dimension > trackFeatureDimensions = new HashMap<>();
+//		for ( final String feature : trackFeatureDimensionsStr.keySet() )
+//		{
+//			final String dimStr = trackFeatureDimensionsStr.get( feature );
+//			final Dimension dim = Dimension.valueOf( dimStr );
+//			trackFeatureDimensions.put( feature, dim );
+//		}
+//		final Map< String, Boolean > trackFeatureIsInt = ( Map< String, Boolean > ) featureDeclarations.get( "trackFeatureIsInt" );
+//		featureModel.declareTrackFeatures( trackFeatures, trackFeatureNames, trackFeatureShortNames, trackFeatureDimensions, trackFeatureIsInt );
 	}
 
 	private void readEdgesAndTracks( final Model model, final TIntObjectMap< Spot > spotIdMap, final TObjectIntMap< Spot > spotTrackIDMap )
