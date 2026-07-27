@@ -114,7 +114,7 @@ public class TMLabKitActions
 	private static final String undoRedoMsg( final Interval interval, final boolean hasTime )
 	{
 		String out = ( hasTime )
-				? " at frame " + interval.dimension( interval.numDimensions() - 1 ) + " @ "
+				? " at frame " + interval.min( interval.numDimensions() - 1 ) + " @ "
 				: " @ ";
 		out += "[" + interval.min( 0 );
 		for ( int i = 1; i < interval.numDimensions() - 1; i++ )
