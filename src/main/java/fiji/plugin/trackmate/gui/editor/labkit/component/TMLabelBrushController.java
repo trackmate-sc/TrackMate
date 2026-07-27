@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -494,9 +494,7 @@ public class TMLabelBrushController
 			brushCursor.setFontVisible( true );
 
 			final UndoRedoStack undo = model.undoRedo();
-			undo.setUndoPoint(
-					viewer.state().getCurrentTimepoint(),
-					Intervals.intersect( getFrameLabeling(), strokeRegion ) );
+			undo.setUndoPoint( Intervals.intersect( getFrameLabeling(), strokeRegion ) );
 		}
 
 		/** Creates an interval representing the initial brush stroke region. */
@@ -547,7 +545,7 @@ public class TMLabelBrushController
 
 	/**
 	 * Returns the labeling of the current frame.
-	 * 
+	 *
 	 * @return the labeling of the current frame
 	 */
 	private RandomAccessibleInterval< LabelingType< Label > > getFrameLabeling()

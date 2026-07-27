@@ -30,6 +30,8 @@ public class UndoRedoStack
 	 */
 	private RandomAccessibleInterval< UnsignedIntType > snapshot;
 
+	private int currentFrame = -1;
+
 	/**
 	 * Creates a new UndoRedoStack, set to operate on the specified model, with
 	 * the specified maximum size.
@@ -48,7 +50,7 @@ public class UndoRedoStack
 	/**
 	 * Creates a new UndoRedoStack for the specified model, with a default
 	 * maximum size of 50 commands.
-	 * 
+	 *
 	 * @param model
 	 *            the model to operate on.
 	 */
@@ -64,13 +66,15 @@ public class UndoRedoStack
 	 * to capture the state of the labeling before the edit. After the edit is
 	 * performed, call {@link #setUndoPoint(int, Interval)} to record the
 	 * edit operation.
-	 * 
+	 *
 	 * @param frame
 	 *            the time point of the labeling on which the edit operation is
 	 *            performed.
 	 */
 	public void startUndo( final int frame )
 	{
+		if ( currentFrame >= 0 )
+			throw new IllegalStateException( "UndoRedoStack: startUndo called before previous undo operation was completed. Call setUndoPoint after performing the edit operation." );
 		snapshot( frame );
 	}
 
@@ -87,12 +91,13 @@ public class UndoRedoStack
 	 * @param region
 	 *            the region of the labeling that was affected by the edit.
 	 */
-	public void setUndoPoint( final int frame, final Interval region )
+	public void setUndoPoint( final Interval region )
 	{
-		final UndoableCommand current = new UndoableCommand( getFrame( frame ), region, frame );
+		final UndoableCommand current = new UndoableCommand( getFrame( currentFrame ), region, currentFrame );
 		current.captureBefore( snapshot );
-		current.captureAfter( getFrame( frame ) );
+		current.captureAfter( getFrame( currentFrame ) );
 		push( current );
+		currentFrame = -1;
 	}
 
 	private void push( final UndoableCommand command )
@@ -171,6 +176,7 @@ public class UndoRedoStack
 
 	private void snapshot( final int frame )
 	{
+		this.currentFrame = frame;
 		final RandomAccessibleInterval< UnsignedIntType > current = getFrame( frame );
 		if ( snapshot == null )
 		{
