@@ -8,6 +8,7 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.type.numeric.integer.UnsignedIntType;
 import net.imglib2.util.ImgUtil;
+import net.imglib2.util.Intervals;
 import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 
@@ -113,7 +114,9 @@ public class UndoRedoStack
 	 * Undo the last operation.
 	 *
 	 * @return the region affected by the undo, or <code>null</code> if nothing
-	 *         was undone
+	 *         was undone. The last dimension of the returned interval is the
+	 *         time point of the labeling on which the undo operation was
+	 *         performed.
 	 */
 	public Interval undo()
 	{
@@ -124,14 +127,16 @@ public class UndoRedoStack
 		command.restoreBefore( getFrame( command.frame ) );
 		redoStack.addLast( command );
 		model.dataChangedNotifier().notifyListeners( null );
-		return command.region;
+		return Intervals.addDimension( command.region, command.frame, command.frame );
 	}
 
 	/**
 	 * Redo the last undone operation.
 	 *
 	 * @return the region affected by the redo, or <code>null</code> if nothing
-	 *         was redone
+	 *         was redone. The last dimension of the returned interval is the
+	 *         time point of the labeling on which the redo operation was
+	 *         performed.
 	 */
 	public Interval redo()
 	{
@@ -142,7 +147,7 @@ public class UndoRedoStack
 		command.restoreAfter( getFrame( command.frame ) );
 		undoStack.addLast( command );
 		model.dataChangedNotifier().notifyListeners( null );
-		return command.region;
+		return Intervals.addDimension( command.region, command.frame, command.frame );
 	}
 
 	/**

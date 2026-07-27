@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -63,6 +63,7 @@ import bdv.ui.appearance.AppearanceManager;
 import bdv.ui.keymap.Keymap;
 import bdv.ui.keymap.KeymapManager;
 import bdv.util.BdvOptions;
+import bdv.viewer.ViewerPanel;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.editor.labkit.model.TMImageLabelingModel;
 import fiji.plugin.trackmate.gui.editor.labkit.model.TMLabKitModel;
@@ -120,6 +121,7 @@ public class TMLabKitFrame extends JFrame
 
 		// Main central panel, config specific for BDV.
 		final TMBasicLabelingComponent mainPanel = new TMBasicLabelingComponent( this, imageLabelingModel, options );
+		final ViewerPanel viewerPanel = mainPanel.getBdvHandle().getViewerPanel();
 
 		// Left side bar.
 		final JPanel leftPanel = new JPanel();
@@ -180,6 +182,7 @@ public class TMLabKitFrame extends JFrame
 				myActions,
 				model,
 				this,
+				viewerPanel,
 				keybindings,
 				keymapManager,
 				appearanceManager );
