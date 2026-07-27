@@ -27,9 +27,7 @@ import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.KE
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
-import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import javax.swing.Timer;
 
@@ -391,21 +389,11 @@ public class TMLabelBrushController
 					if ( label != null ) // otherwise fall through
 						return pixel -> pixel.remove( label );
 				case REMOVE_ALL:
-					final List< Label > visibleLabels = getVisibleLabels();
-					return pixel -> pixel.removeAll( visibleLabels );
+					return pixel -> pixel.clear();
 				default:
 					throw new IllegalArgumentException( "Unknown erase brush mode: " + eraseBrushMode );
 				}
 			}
-		}
-
-		private List< Label > getVisibleLabels()
-		{
-			final List< Label > visibleLabels =
-					model.labeling().get().getLabels().stream()
-							.filter( Label::isVisible )
-							.collect( Collectors.toList() );
-			return visibleLabels;
 		}
 
 		private static final RandomAccessible< LabelingType< Label > > extendLabelingType( final RandomAccessibleInterval< LabelingType< Label > > slice )
