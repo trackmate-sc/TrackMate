@@ -3,7 +3,9 @@ package fiji.plugin.trackmate.undo;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 
@@ -11,6 +13,9 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.ModelChangeListener;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.Spot.SpotVisitor;
+import fiji.plugin.trackmate.SpotBase;
+import fiji.plugin.trackmate.SpotRoi;
 
 public class UndoRedoStack implements ModelChangeListener
 {
@@ -23,7 +28,12 @@ public class UndoRedoStack implements ModelChangeListener
 
 	private final Deque< ModelUndoableCommand > redoStack = new ArrayDeque<>();
 
+	private final Map< Spot, Map< String, Double > > spotFeatureValuesBefore = new HashMap<>();
+
+	private final Map< SpotRoi, double[][] > spotPolygonValuesBefore = new HashMap<>();
+
 	private final int maxSize;
+
 
 	public UndoRedoStack( final Model model )
 	{
@@ -73,14 +83,9 @@ public class UndoRedoStack implements ModelChangeListener
 		if ( paused )
 			return;
 
-		System.out.println(); // DEBUG
-		System.out.println( "UndoRedoStack: model changed" ); // DEBUG
 		if ( event.getEventID() == ModelChangeEvent.MODEL_MODIFIED )
 		{
-			System.out.println( "Model modified" ); // DEBUG
-			System.out.println( event ); // DEBUG
 			final ModelUndoableCommand command = toCommand( event );
-
 			redoStack.clear();
 			if ( undoStack.size() >= maxSize )
 				undoStack.removeFirst();
@@ -105,7 +110,15 @@ public class UndoRedoStack implements ModelChangeListener
 			else if ( event.getSpotFlag( spot ) == ModelChangeEvent.FLAG_SPOT_MODIFIED )
 			{
 				// TODO: Store feature values BEFORE
-				System.out.println( "Spot modified: " + spot ); // DEBUG
+				final Map< String, Double > previousFeatureValues = spotFeatureValuesBefore.get( spot );
+				command.spotFeatureValuesBefore.put( spot, previousFeatureValues );
+				command.spotFeatureValuesAfter.put( spot, new HashMap<>( spot.getFeatures() ) );
+				if ( spot instanceof SpotRoi )
+				{
+					final SpotRoi spotRoi = ( SpotRoi ) spot;
+					command.spotPolygonValuesBefore.put( spotRoi, spotPolygonValuesBefore.get( spotRoi ) );
+					command.spotPolygonValuesAfter.put( spotRoi, toPolygon( spotRoi ) );
+				}
 			}
 		}
 		for ( final DefaultWeightedEdge edge : event.getEdges() )
@@ -130,22 +143,32 @@ public class UndoRedoStack implements ModelChangeListener
 				System.out.println( "Edge modified: " + edge ); // DEBUG
 			}
 		}
+		spotFeatureValuesBefore.clear();
 		return command;
 	}
 
 	private static class ModelUndoableCommand
 	{
 
-		static record EdgeRep( Spot source, Spot target, double weight )
+
+		private static record EdgeRep( Spot source, Spot target, double weight )
 		{}
 
-		public final List< EdgeRep > edgesRemoved = new ArrayList<>();
+		private final List< EdgeRep > edgesRemoved = new ArrayList<>();
 
-		public final List< EdgeRep > edgesAdded = new ArrayList<>();
+		private final List< EdgeRep > edgesAdded = new ArrayList<>();
 
 		private final List< Spot > spotsAdded = new ArrayList<>();
 
 		private final List< Spot > spotsRemoved = new ArrayList<>();
+
+		private final Map< Spot, Map< String, Double > > spotFeatureValuesBefore = new HashMap<>();
+
+		private final Map< Spot, Map< String, Double > > spotFeatureValuesAfter = new HashMap<>();
+
+		public Map< SpotRoi, double[][] > spotPolygonValuesBefore = new HashMap<>();
+
+		public Map< SpotRoi, double[][] > spotPolygonValuesAfter = new HashMap<>();
 
 		public void restoreBefore( final Model model )
 		{
@@ -164,6 +187,18 @@ public class UndoRedoStack implements ModelChangeListener
 
 				for ( final EdgeRep edge : edgesRemoved )
 					model.addEdge( edge.source, edge.target, edge.weight );
+
+				for ( final Spot spot : spotFeatureValuesBefore.keySet() )
+				{
+					spotFeatureValuesBefore.get( spot ).forEach( ( key, value ) -> spot.putFeature( key, value ) );
+					if ( spot instanceof SpotRoi )
+					{
+						final SpotRoi spotRoi = ( SpotRoi ) spot;
+						final double[][] polygonBefore = spotPolygonValuesBefore.get( spotRoi );
+						updatePolygon( spotRoi, polygonBefore );
+					}
+					model.updateFeatures( spot );
+				}
 			}
 			finally
 			{
@@ -189,6 +224,18 @@ public class UndoRedoStack implements ModelChangeListener
 
 				for ( final EdgeRep edge : edgesAdded )
 					model.addEdge( edge.source, edge.target, edge.weight );
+
+				for ( final Spot spot : spotFeatureValuesAfter.keySet() )
+				{
+					spotFeatureValuesAfter.get( spot ).forEach( ( key, value ) -> spot.putFeature( key, value ) );
+					if ( spot instanceof SpotRoi )
+					{
+						final SpotRoi spotRoi = ( SpotRoi ) spot;
+						final double[][] polygonAfter = spotPolygonValuesAfter.get( spotRoi );
+						updatePolygon( spotRoi, polygonAfter );
+					}
+					model.updateFeatures( spot );
+				}
 			}
 			finally
 			{
@@ -196,5 +243,52 @@ public class UndoRedoStack implements ModelChangeListener
 			}
 			model.resumeUndo();
 		}
+	}
+
+	private class UndoStorer implements SpotVisitor
+	{
+
+		@Override
+		public void visit( final SpotBase spot )
+		{
+			spotFeatureValuesBefore.put( spot, new HashMap<>( spot.getFeatures() ) );
+		}
+
+		@Override
+		public void visit( final SpotRoi spot )
+		{
+			visit( ( SpotBase ) spot );
+			spotPolygonValuesBefore.put( spot, toPolygon( spot ) );
+		}
+	}
+
+	private final UndoStorer undoStorer = new UndoStorer();
+
+	private static final double[][] toPolygon( final SpotRoi spot )
+	{
+		final int nPoints = spot.nPoints();
+		final double[] x = new double[ nPoints ];
+		final double[] y = new double[ nPoints ];
+		for ( int i = 0; i < nPoints; i++ )
+		{
+			x[ i ] = spot.xr( i );
+			y[ i ] = spot.yr( i );
+		}
+		return new double[][] { x, y };
+	}
+
+	private static final void updatePolygon( final SpotRoi spot, final double[][] polygon )
+	{
+		final int nPoints = spot.nPoints();
+		for ( int i = 0; i < nPoints; i++ )
+		{
+			spot.setXr( i, polygon[ 0 ][ i ] );
+			spot.setYr( i, polygon[ 1 ][ i ] );
+		}
+	}
+
+	public void flagForUndo( final Spot spot )
+	{
+		spot.accept( undoStorer );
 	}
 }

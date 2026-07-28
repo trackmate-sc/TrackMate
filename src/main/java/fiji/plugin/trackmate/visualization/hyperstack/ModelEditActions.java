@@ -236,7 +236,10 @@ public class ModelEditActions
 	public void startMoveSpot()
 	{
 		if ( null == quickEditedSpot )
+		{
 			quickEditedSpot = getSpotAtMouseLocation();
+			model.flagForUndo( quickEditedSpot );
+		}
 	}
 
 	public void moveSpot( final Point mouseLocation )
@@ -278,6 +281,7 @@ public class ModelEditActions
 		if ( null == target )
 			return;
 
+		model.flagForUndo( target );
 		final double radius = target.getFeature( Spot.RADIUS );
 		final int factor = ( increase ) ? -1 : 1;
 		final double dx = imp.getCalibration().pixelWidth;

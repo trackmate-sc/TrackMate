@@ -981,23 +981,54 @@ public class Model
 		}
 	}
 
+	/**
+	 * Pauses the undo recording.
+	 * <p>
+	 * This is useful when a process is going to make a lot of changes to the
+	 * model that we don't want to be recorded in the undo stack.
+	 */
 	public void pauseUndo()
 	{
 		undoRedoStack.pauseUndo();
 	}
 
+	/**
+	 * Resumes the undo recording.
+	 */
 	public void resumeUndo()
 	{
 		undoRedoStack.resumeUndo();
 	}
 
+	/**
+	 * Undo the last action.
+	 */
 	public void undo()
 	{
 		undoRedoStack.undo();
 	}
 
+	/**
+	 * Redo the last undone action.
+	 */
 	public void redo()
 	{
 		undoRedoStack.redo();
+	}
+
+	/**
+	 * Flags the specified spot for undo.
+	 * <p>
+	 * This method must be called only when the spot is going to be modified
+	 * (change position, radius, features, etc.) and <b>before</b> the
+	 * modification is done. This will store the current state of the spot in
+	 * the undo stack, so that it can be restored later if the user calls undo.
+	 *
+	 * @param spot
+	 *            the spot to flag for undo.
+	 */
+	public void flagForUndo( final Spot spot )
+	{
+		undoRedoStack.flagForUndo( spot );
 	}
 }
