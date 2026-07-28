@@ -546,4 +546,14 @@ public class ModelEditActions
 	{
 		trackNavigator.previousTrack();
 	}
+
+	public void undo()
+	{
+		model.undo();
+	}
+
+	public void redo()
+	{
+		model.redo();
+	}
 }

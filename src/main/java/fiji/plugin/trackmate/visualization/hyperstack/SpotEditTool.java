@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -118,7 +118,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	/**
 	 * Returns the singleton instance for this tool. If it was not previously
 	 * instantiated, this calls instantiates it.
-	 * 
+	 *
 	 * @return the instance.
 	 */
 	public static SpotEditTool getInstance()
@@ -132,7 +132,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	/**
 	 * Returns <code>true</code> if the tool is currently present in ImageJ
 	 * toolbar.
-	 * 
+	 *
 	 * @return <code>true</code> if the tool is currently present in ImageJ
 	 *         toolbar.
 	 */
@@ -195,7 +195,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 	/**
 	 * Registers the given {@link HyperStackDisplayer}. If this method is not
 	 * called, the tool will not respond.
-	 * 
+	 *
 	 * @param displayer
 	 *            the displayer to register.
 	 */
@@ -289,6 +289,21 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 		switch ( e.getKeyCode() )
 		{
 
+		// Undo / redo
+		case KeyEvent.VK_Z:
+		{
+
+			if ( e.isControlDown() || e.isMetaDown() )
+			{
+				if ( e.isShiftDown() )
+					actions.redo();
+				else
+					actions.undo();
+				e.consume();
+			}
+			break;
+		}
+
 		// Track navigation actions.
 		case KeyEvent.VK_UP:
 		{
@@ -326,7 +341,7 @@ public class SpotEditTool extends AbstractTool implements MouseMotionListener, M
 			e.consume();
 			break;
 		}
-		
+
 		// Delete currently edited spot
 		case KeyEvent.VK_DELETE:
 		{
