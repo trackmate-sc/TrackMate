@@ -2,13 +2,16 @@ package fiji.plugin.trackmate.undo;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 
+import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.ModelChangeListener;
@@ -16,6 +19,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.Spot.SpotVisitor;
 import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotRoi;
+import fiji.plugin.trackmate.TrackModel;
 
 public class UndoRedoStack implements ModelChangeListener
 {
@@ -32,8 +36,9 @@ public class UndoRedoStack implements ModelChangeListener
 
 	private final Map< SpotRoi, double[][] > spotPolygonValuesBefore = new HashMap<>();
 
-	private final int maxSize;
+	private final Map< DefaultWeightedEdge, Map< String, Double > > edgeFeatureValuesBefore = new HashMap<>();
 
+	private final int maxSize;
 
 	public UndoRedoStack( final Model model )
 	{
@@ -139,8 +144,8 @@ public class UndoRedoStack implements ModelChangeListener
 			}
 			else if ( event.getEdgeFlag( edge ) == ModelChangeEvent.FLAG_EDGE_MODIFIED )
 			{
-				// TODO: Store feature values BEFORE
-				System.out.println( "Edge modified: " + edge ); // DEBUG
+				command.edgeFeatureValuesBefore.put( edge, edgeFeatureValuesBefore.get( edge ) );
+				command.edgeFeatureValuesAfter.put( edge, copyEdgeFeatures( edge ) );
 			}
 		}
 		spotFeatureValuesBefore.clear();
@@ -149,7 +154,6 @@ public class UndoRedoStack implements ModelChangeListener
 
 	private static class ModelUndoableCommand
 	{
-
 
 		private static record EdgeRep( Spot source, Spot target, double weight )
 		{}
@@ -166,9 +170,13 @@ public class UndoRedoStack implements ModelChangeListener
 
 		private final Map< Spot, Map< String, Double > > spotFeatureValuesAfter = new HashMap<>();
 
-		public Map< SpotRoi, double[][] > spotPolygonValuesBefore = new HashMap<>();
+		private final Map< SpotRoi, double[][] > spotPolygonValuesBefore = new HashMap<>();
 
-		public Map< SpotRoi, double[][] > spotPolygonValuesAfter = new HashMap<>();
+		private final Map< SpotRoi, double[][] > spotPolygonValuesAfter = new HashMap<>();
+
+		private final Map< DefaultWeightedEdge, Map< String, Double > > edgeFeatureValuesBefore = new HashMap<>();
+
+		private final Map< DefaultWeightedEdge, Map< String, Double > > edgeFeatureValuesAfter = new HashMap<>();
 
 		public void restoreBefore( final Model model )
 		{
@@ -199,6 +207,9 @@ public class UndoRedoStack implements ModelChangeListener
 					}
 					model.updateFeatures( spot );
 				}
+
+				for ( final DefaultWeightedEdge edge : edgeFeatureValuesBefore.keySet() )
+					edgeFeatureValuesBefore.get( edge ).forEach( ( key, value ) -> model.getFeatureModel().putEdgeFeature( edge, key, value ) );
 			}
 			finally
 			{
@@ -236,6 +247,9 @@ public class UndoRedoStack implements ModelChangeListener
 					}
 					model.updateFeatures( spot );
 				}
+
+				for ( final DefaultWeightedEdge edge : edgeFeatureValuesAfter.keySet() )
+					edgeFeatureValuesAfter.get( edge ).forEach( ( key, value ) -> model.getFeatureModel().putEdgeFeature( edge, key, value ) );
 			}
 			finally
 			{
@@ -251,7 +265,13 @@ public class UndoRedoStack implements ModelChangeListener
 		@Override
 		public void visit( final SpotBase spot )
 		{
+			// Spot features.
 			spotFeatureValuesBefore.put( spot, new HashMap<>( spot.getFeatures() ) );
+			// Touching edge features.
+			final TrackModel trackModel = model.getTrackModel();
+			final Set< DefaultWeightedEdge > touchingEdges = trackModel.edgesOf( spot );
+			for ( final DefaultWeightedEdge edge : touchingEdges )
+				edgeFeatureValuesBefore.put( edge, copyEdgeFeatures( edge ) );
 		}
 
 		@Override
@@ -262,7 +282,25 @@ public class UndoRedoStack implements ModelChangeListener
 		}
 	}
 
+	private final Map< String, Double > copyEdgeFeatures( final DefaultWeightedEdge edge )
+	{
+		final FeatureModel featureModel = model.getFeatureModel();
+		final Collection< String > edgeFeatures = featureModel.getEdgeFeatures();
+		final Map< String, Double > featureValues = new HashMap<>();
+		for ( final String feature : edgeFeatures )
+		{
+			final Double value = featureModel.getEdgeFeature( edge, feature );
+			featureValues.put( feature, value );
+		}
+		return featureValues;
+	}
+
 	private final UndoStorer undoStorer = new UndoStorer();
+
+	public void flagForUndo( final Spot spot )
+	{
+		spot.accept( undoStorer );
+	}
 
 	private static final double[][] toPolygon( final SpotRoi spot )
 	{
@@ -287,8 +325,4 @@ public class UndoRedoStack implements ModelChangeListener
 		}
 	}
 
-	public void flagForUndo( final Spot spot )
-	{
-		spot.accept( undoStorer );
-	}
 }
