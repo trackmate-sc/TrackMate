@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -32,6 +32,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
 import fiji.plugin.trackmate.features.FeatureFilter;
+import fiji.plugin.trackmate.undo.UndoRedoStack;
 
 /**
  * The model for the data managed by TrackMate.
@@ -43,7 +44,7 @@ import fiji.plugin.trackmate.features.FeatureFilter;
  * built in coherent sets.
  * </p>
  *
- * @author Jean-Yves Tinevez &lt;tinevez@pasteur.fr&gt; - 2010-2013
+ * @author Jean-Yves Tinevez - 2010-2026
  */
 public class Model
 {
@@ -122,14 +123,17 @@ public class Model
 	 */
 	Set< ModelChangeListener > modelChangeListeners = new LinkedHashSet<>();
 
+	private final UndoRedoStack undoRedoStack;
+
 	/*
 	 * CONSTRUCTOR
 	 */
 
 	public Model()
 	{
-		featureModel = createFeatureModel();
-		trackModel = createTrackModel();
+		this.featureModel = createFeatureModel();
+		this.trackModel = createTrackModel();
+		this.undoRedoStack = new UndoRedoStack( this ); // TODO
 		addModelChangeListener( new SpotMeshSliceCacheInvalidator() );
 	}
 
@@ -831,7 +835,7 @@ public class Model
 		{
 			System.out.println( "[TrackMateModel] #flushUpdate()." );
 			System.out.println( "[TrackMateModel] #flushUpdate(): Event cache is :" + eventCache );
-			System.out.println( "[TrackMateModel] #flushUpdate(): Track content is:\n" + trackModel.echo() );
+//			System.out.println( "[TrackMateModel] #flushUpdate(): Track content is:\n" + trackModel.echo() );
 		}
 
 		/*
@@ -975,5 +979,25 @@ public class Model
 					.filter( s -> ( s instanceof SpotMesh ) )
 					.forEach( s -> ( ( SpotMesh ) s ).resetZSliceCache() );
 		}
+	}
+
+	public void pauseUndo()
+	{
+		undoRedoStack.pauseUndo();
+	}
+
+	public void resumeUndo()
+	{
+		undoRedoStack.resumeUndo();
+	}
+
+	public void undo()
+	{
+		undoRedoStack.undo();
+	}
+
+	public void redo()
+	{
+		undoRedoStack.redo();
 	}
 }
