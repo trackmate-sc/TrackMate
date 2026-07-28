@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -197,7 +197,7 @@ public class TmXmlReader
 
 	/**
 	 * Initializes this reader to read the file given in argument.
-	 * 
+	 *
 	 * @param file
 	 *            the file to read.
 	 */
@@ -233,7 +233,7 @@ public class TmXmlReader
 	/**
 	 * Returns the log text saved in the file, or <code>null</code> if log text
 	 * was not saved.
-	 * 
+	 *
 	 * @return the log.
 	 */
 	public String getLog()
@@ -370,6 +370,7 @@ public class TmXmlReader
 			return null;
 
 		final Model model = createModel();
+		model.pauseUndo(); // TODO
 
 		// Physical units
 		final String spaceUnits = modelElement.getAttributeValue( SPATIAL_UNITS_ATTRIBUTE_NAME );
@@ -407,6 +408,7 @@ public class TmXmlReader
 		}
 
 		// That's it
+		model.resumeUndo();
 		return model;
 	}
 
@@ -540,7 +542,7 @@ public class TmXmlReader
 
 	/**
 	 * Returns the version string stored in the file.
-	 * 
+	 *
 	 * @return the version string stored in the file.
 	 */
 	public String getVersion()

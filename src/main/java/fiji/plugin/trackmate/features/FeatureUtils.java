@@ -387,6 +387,7 @@ public class FeatureUtils
 	public static final Model DUMMY_MODEL = new Model();
 	static
 	{
+		DUMMY_MODEL.pauseUndo();
 		final Random ran = new Random();
 		DUMMY_MODEL.beginUpdate();
 		try
