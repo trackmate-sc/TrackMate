@@ -38,6 +38,8 @@ public class UndoRedoStack implements ModelChangeListener
 
 	private final Map< DefaultWeightedEdge, Map< String, Double > > edgeFeatureValuesBefore = new HashMap<>();
 
+	private final Map< Spot, String > spotNameBefore = new HashMap<>();
+
 	private final int maxSize;
 
 	public UndoRedoStack( final Model model )
@@ -114,10 +116,12 @@ public class UndoRedoStack implements ModelChangeListener
 			}
 			else if ( event.getSpotFlag( spot ) == ModelChangeEvent.FLAG_SPOT_MODIFIED )
 			{
-				// TODO: Store feature values BEFORE
 				final Map< String, Double > previousFeatureValues = spotFeatureValuesBefore.get( spot );
 				command.spotFeatureValuesBefore.put( spot, previousFeatureValues );
 				command.spotFeatureValuesAfter.put( spot, new HashMap<>( spot.getFeatures() ) );
+				final String previousName = spotNameBefore.get( spot );
+				command.spotNameBefore.put( spot, previousName );
+				command.spotNameAfter.put( spot, spot.getName() );
 				if ( spot instanceof SpotRoi )
 				{
 					final SpotRoi spotRoi = ( SpotRoi ) spot;
@@ -149,6 +153,9 @@ public class UndoRedoStack implements ModelChangeListener
 			}
 		}
 		spotFeatureValuesBefore.clear();
+		edgeFeatureValuesBefore.clear();
+		spotPolygonValuesBefore.clear();
+		spotNameBefore.clear();
 		return command;
 	}
 
@@ -178,6 +185,10 @@ public class UndoRedoStack implements ModelChangeListener
 
 		private final Map< DefaultWeightedEdge, Map< String, Double > > edgeFeatureValuesAfter = new HashMap<>();
 
+		private final Map< Spot, String > spotNameAfter = new HashMap<>();
+
+		private final Map< Spot, String > spotNameBefore = new HashMap<>();
+
 		public void restoreBefore( final Model model )
 		{
 			model.pauseUndo();
@@ -198,6 +209,7 @@ public class UndoRedoStack implements ModelChangeListener
 
 				for ( final Spot spot : spotFeatureValuesBefore.keySet() )
 				{
+					spot.setName( spotNameBefore.get( spot ) );
 					spotFeatureValuesBefore.get( spot ).forEach( ( key, value ) -> spot.putFeature( key, value ) );
 					if ( spot instanceof SpotRoi )
 					{
@@ -207,9 +219,13 @@ public class UndoRedoStack implements ModelChangeListener
 					}
 					model.updateFeatures( spot );
 				}
-
 				for ( final DefaultWeightedEdge edge : edgeFeatureValuesBefore.keySet() )
-					edgeFeatureValuesBefore.get( edge ).forEach( ( key, value ) -> model.getFeatureModel().putEdgeFeature( edge, key, value ) );
+					edgeFeatureValuesBefore.get( edge ).forEach( ( key, value ) -> {
+						if ( value == null )
+							model.getFeatureModel().removeEdgeFeature( edge, key );
+						else
+							model.getFeatureModel().putEdgeFeature( edge, key, value );
+					} );
 			}
 			finally
 			{
@@ -238,6 +254,7 @@ public class UndoRedoStack implements ModelChangeListener
 
 				for ( final Spot spot : spotFeatureValuesAfter.keySet() )
 				{
+					spot.setName( spotNameAfter.get( spot ) );
 					spotFeatureValuesAfter.get( spot ).forEach( ( key, value ) -> spot.putFeature( key, value ) );
 					if ( spot instanceof SpotRoi )
 					{
@@ -247,9 +264,13 @@ public class UndoRedoStack implements ModelChangeListener
 					}
 					model.updateFeatures( spot );
 				}
-
 				for ( final DefaultWeightedEdge edge : edgeFeatureValuesAfter.keySet() )
-					edgeFeatureValuesAfter.get( edge ).forEach( ( key, value ) -> model.getFeatureModel().putEdgeFeature( edge, key, value ) );
+					edgeFeatureValuesAfter.get( edge ).forEach( ( key, value ) -> {
+						if ( value == null )
+							model.getFeatureModel().removeEdgeFeature( edge, key );
+						else
+							model.getFeatureModel().putEdgeFeature( edge, key, value );
+					} );
 			}
 			finally
 			{
@@ -272,6 +293,8 @@ public class UndoRedoStack implements ModelChangeListener
 			final Set< DefaultWeightedEdge > touchingEdges = trackModel.edgesOf( spot );
 			for ( final DefaultWeightedEdge edge : touchingEdges )
 				edgeFeatureValuesBefore.put( edge, copyEdgeFeatures( edge ) );
+			// Spot name.
+			spotNameBefore.put( spot, spot.getName() );
 		}
 
 		@Override

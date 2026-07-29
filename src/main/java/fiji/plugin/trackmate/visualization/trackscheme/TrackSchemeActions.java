@@ -97,9 +97,9 @@ public class TrackSchemeActions
 		return new RunnableAction( "redo", () -> model.redo() );
 	}
 
-	public static Action getEditAction( final TrackSchemeGraphComponent graphComponent )
+	public static Action getEditAction( final Model model, final TrackSchemeGraphComponent graphComponent )
 	{
-		return new EditAction( "edit", EDIT_ICON, graphComponent );
+		return new EditAction( "edit", EDIT_ICON, model, graphComponent );
 	}
 
 	public static Action getHomeAction( final TrackSchemeGraphComponent graphComponent )
@@ -388,9 +388,12 @@ public class TrackSchemeActions
 
 		private final TrackSchemeGraphComponent graphComponent;
 
-		public EditAction( final String name, final Icon icon, final TrackSchemeGraphComponent graphComponent )
+		private final Model model;
+
+		public EditAction( final String name, final Icon icon, final Model model, final TrackSchemeGraphComponent graphComponent )
 		{
 			super( name, icon );
+			this.model = model;
 			this.graphComponent = graphComponent;
 		}
 
@@ -430,13 +433,24 @@ public class TrackSchemeActions
 				@Override
 				public void invoke( final Object sender, final mxEventObject evt )
 				{
-					for ( final mxCell cell : vertices )
+					model.beginUpdate();
+					try
 					{
-						cell.setValue( tc.getValue() );
-						graph.getSpotFor( cell ).setName( tc.getValue().toString() );
+						for ( final mxCell cell : vertices )
+						{
+							cell.setValue( tc.getValue() );
+							final Spot spot = graph.getSpotFor( cell );
+							model.flagForUndo( spot ); // name change undoable
+							spot.setName( tc.getValue().toString() );
+							model.updateFeatures( spot );
+						}
+						lGraphComponent.refresh();
+						lGraphComponent.removeListener( this );
 					}
-					lGraphComponent.refresh();
-					lGraphComponent.removeListener( this );
+					finally
+					{
+						model.endUpdate();
+					}
 				}
 			} );
 		}

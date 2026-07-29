@@ -115,7 +115,7 @@ public class TrackSchemeKeyboardHandler
 	{
 		final ActionMap map = ( ActionMap ) UIManager.get( "ScrollPane.actionMap" );
 
-		map.put( "edit", TrackSchemeActions.getEditAction( graphComponent ) );
+		map.put( "edit", TrackSchemeActions.getEditAction( model, graphComponent ) );
 		map.put( "delete", mxGraphActions.getDeleteAction() );
 
 		map.put( "home", TrackSchemeActions.getHomeAction( graphComponent ) );
