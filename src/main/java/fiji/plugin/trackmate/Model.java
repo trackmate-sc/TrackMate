@@ -610,37 +610,6 @@ public class Model
 	}
 
 	/**
-	 * Mark the specified spot for update. At the end of the model transaction,
-	 * its features will be recomputed, and other edge and track features that
-	 * depends on it will be as well.
-	 * <p>
-	 * For the model update to happen correctly and listeners to be notified
-	 * properly, a call to this method must happen within a transaction, as in:
-	 *
-	 * <pre>
-	 * model.beginUpdate();
-	 * try {
-	 * 	... // model modifications here
-	 * } finally {
-	 * 	model.endUpdate();
-	 * }
-	 * </pre>
-	 *
-	 * @param spotToUpdate
-	 *            the spot to mark for update
-	 */
-	public synchronized void updateFeatures( final Spot spotToUpdate )
-	{
-		spotsUpdated.add( spotToUpdate ); // Enlist for feature update when
-		// transaction is marked as finished
-		final Set< DefaultWeightedEdge > touchingEdges = trackModel.edgesOf( spotToUpdate );
-		if ( null != touchingEdges )
-		{
-			trackModel.edgesModified.addAll( touchingEdges );
-		}
-	}
-
-	/**
 	 * Creates a new edge between two spots, with the specified weight.
 	 * <p>
 	 * For the model update to happen correctly and listeners to be notified
@@ -1017,18 +986,35 @@ public class Model
 	}
 
 	/**
-	 * Flags the specified spot for undo.
+	 * Starts the edition of a spot.
 	 * <p>
-	 * This method must be called only when the spot is going to be modified
-	 * (change position, radius, features, etc.) and <b>before</b> the
-	 * modification is done. This will store the current state of the spot in
-	 * the undo stack, so that it can be restored later if the user calls undo.
+	 * This method must be called <i>before</i> a spot is modified (moving it,
+	 * changing a feature value, editing its name, ...), so that the undo stack
+	 * can record its current state. For the model update to happen correctly
+	 * and listeners to be notified properly, a call to this method must happen
+	 * within a transaction, as in:
+	 *
+	 * <pre>
+	 * model.beginUpdate();
+	 * try {
+	 * 	model.beforeEdit( spot );
+	 * 	... // model modifications here
+	 * } finally {
+	 * 	model.endUpdate();
+	 * }
+	 * </pre>
 	 *
 	 * @param spot
-	 *            the spot to flag for undo.
+	 *            the spot to mark for update
 	 */
-	public void flagForUndo( final Spot spot )
+	public void beforeEdit( final Spot spot )
 	{
+		// Capture current state of the spot for undo
 		undoRedoStack.flagForUndo( spot );
+		// Enlist for feature update when transaction is marked as finished
+		spotsUpdated.add( spot );
+		final Set< DefaultWeightedEdge > touchingEdges = trackModel.edgesOf( spot );
+		if ( null != touchingEdges )
+			trackModel.edgesModified.addAll( touchingEdges );
 	}
 }

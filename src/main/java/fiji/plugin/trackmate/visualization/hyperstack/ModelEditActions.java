@@ -238,7 +238,8 @@ public class ModelEditActions
 		if ( null == quickEditedSpot )
 		{
 			quickEditedSpot = getSpotAtMouseLocation();
-			model.flagForUndo( quickEditedSpot );
+			model.beginUpdate();
+			model.beforeEdit( quickEditedSpot );
 		}
 	}
 
@@ -263,15 +264,7 @@ public class ModelEditActions
 	{
 		if ( null == quickEditedSpot )
 			return;
-		model.beginUpdate();
-		try
-		{
-			model.updateFeatures( quickEditedSpot );
-		}
-		finally
-		{
-			model.endUpdate();
-		}
+		model.endUpdate();
 		quickEditedSpot = null;
 	}
 
@@ -281,7 +274,7 @@ public class ModelEditActions
 		if ( null == target )
 			return;
 
-		model.flagForUndo( target );
+		// Compute new radius.
 		final double radius = target.getFeature( Spot.RADIUS );
 		final int factor = ( increase ) ? -1 : 1;
 		final double dx = imp.getCalibration().pixelWidth;
@@ -293,20 +286,21 @@ public class ModelEditActions
 		if ( newRadius <= dx )
 			return;
 
-		// Store new value of radius for next spot creation.
-		previousRadius = newRadius;
-
 		// Actually scale the spot.
-		target.scale( radius / newRadius );
-
-		// Scale spot
-		target.putFeature( Spot.RADIUS, newRadius );
-
 		model.beginUpdate();
 		try
 		{
-			model.updateFeatures( target );
+			model.beforeEdit( target );
+			target.scale( radius / newRadius );
+			// Store new value of radius for next spot creation.
+			previousRadius = newRadius;
+			// Scale spot
+			target.putFeature( Spot.RADIUS, newRadius );
 			logger.log( String.format( Locale.US, "Changed spot " + target + " radius to %.1f " + model.getSpaceUnits() + ".\n", radius ) );
+		}
+		catch ( final Exception e )
+		{
+			e.printStackTrace();
 		}
 		finally
 		{

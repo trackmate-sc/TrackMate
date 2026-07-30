@@ -209,6 +209,7 @@ public class UndoRedoStack implements ModelChangeListener
 
 				for ( final Spot spot : spotFeatureValuesBefore.keySet() )
 				{
+					model.beforeEdit( spot ); // to notify about update
 					spot.setName( spotNameBefore.get( spot ) );
 					spotFeatureValuesBefore.get( spot ).forEach( ( key, value ) -> spot.putFeature( key, value ) );
 					if ( spot instanceof SpotRoi )
@@ -217,7 +218,6 @@ public class UndoRedoStack implements ModelChangeListener
 						final double[][] polygonBefore = spotPolygonValuesBefore.get( spotRoi );
 						updatePolygon( spotRoi, polygonBefore );
 					}
-					model.updateFeatures( spot );
 				}
 				for ( final DefaultWeightedEdge edge : edgeFeatureValuesBefore.keySet() )
 					edgeFeatureValuesBefore.get( edge ).forEach( ( key, value ) -> {
@@ -254,6 +254,7 @@ public class UndoRedoStack implements ModelChangeListener
 
 				for ( final Spot spot : spotFeatureValuesAfter.keySet() )
 				{
+					model.beforeEdit( spot ); // to notify about update
 					spot.setName( spotNameAfter.get( spot ) );
 					spotFeatureValuesAfter.get( spot ).forEach( ( key, value ) -> spot.putFeature( key, value ) );
 					if ( spot instanceof SpotRoi )
@@ -262,7 +263,6 @@ public class UndoRedoStack implements ModelChangeListener
 						final double[][] polygonAfter = spotPolygonValuesAfter.get( spotRoi );
 						updatePolygon( spotRoi, polygonAfter );
 					}
-					model.updateFeatures( spot );
 				}
 				for ( final DefaultWeightedEdge edge : edgeFeatureValuesAfter.keySet() )
 					edgeFeatureValuesAfter.get( edge ).forEach( ( key, value ) -> {
@@ -322,6 +322,8 @@ public class UndoRedoStack implements ModelChangeListener
 
 	public void flagForUndo( final Spot spot )
 	{
+		if ( paused )
+			return;
 		spot.accept( undoStorer );
 	}
 

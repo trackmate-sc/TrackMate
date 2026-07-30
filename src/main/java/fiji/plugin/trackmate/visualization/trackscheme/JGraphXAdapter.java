@@ -79,9 +79,8 @@ public class JGraphXAdapter extends mxGraph implements GraphListener< Spot, Defa
 			if ( null == spot )
 				return;
 			final String str = ( String ) value;
-			tmm.flagForUndo( spot ); // to make name change undoable
+			tmm.beforeEdit( spot ); // to make name change undoable
 			spot.setName( str );
-			tmm.updateFeatures( spot );
 			getModel().setValue( cell, str );
 
 			if ( autoSize )

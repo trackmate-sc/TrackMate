@@ -440,9 +440,8 @@ public class TrackSchemeActions
 						{
 							cell.setValue( tc.getValue() );
 							final Spot spot = graph.getSpotFor( cell );
-							model.flagForUndo( spot ); // name change undoable
+							model.beforeEdit( spot ); // name change undoable
 							spot.setName( tc.getValue().toString() );
-							model.updateFeatures( spot );
 						}
 						lGraphComponent.refresh();
 						lGraphComponent.removeListener( this );

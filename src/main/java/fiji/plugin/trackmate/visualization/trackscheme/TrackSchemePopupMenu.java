@@ -160,9 +160,8 @@ public class TrackSchemePopupMenu extends JPopupMenu
 					{
 						lCell.setValue( tc.getValue() );
 						final Spot spot = trackScheme.getGraph().getSpotFor( lCell );
-						model.flagForUndo( spot ); // name change undoable
+						model.beforeEdit( spot ); // name change undoable
 						spot.setName( tc.getValue().toString() );
-						model.updateFeatures( spot );
 					}
 					graphComponent.refresh();
 					graphComponent.removeListener( this );

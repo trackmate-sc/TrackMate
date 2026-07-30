@@ -168,8 +168,8 @@ public class EdgeVelocityAnalyzerTest
 		model.beginUpdate();
 		try
 		{
+			model.beforeEdit( aspot );
 			aspot.putFeature( Spot.POSITION_X, -1000d );
-			model.updateFeatures( aspot );
 		}
 		finally
 		{

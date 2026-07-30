@@ -351,9 +351,8 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 			model.beginUpdate();
 			try
 			{
-				model.flagForUndo( spot ); // to make name change undoable
+				model.beforeEdit( spot ); // to make name change undoable
 				spot.setName( label );
-				model.updateFeatures( spot );
 			}
 			finally
 			{

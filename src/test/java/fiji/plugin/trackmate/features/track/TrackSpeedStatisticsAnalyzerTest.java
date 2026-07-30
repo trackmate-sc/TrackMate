@@ -319,8 +319,8 @@ public class TrackSpeedStatisticsAnalyzerTest
 		model.beginUpdate();
 		try
 		{
+			model.beforeEdit( lastSpot );
 			lastSpot.putFeature( Spot.POSITION_X, 2 * lastSpot.getFeature( Spot.POSITION_X ) );
-			model.updateFeatures( lastSpot );
 		}
 		finally
 		{

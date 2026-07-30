@@ -76,18 +76,16 @@ public class AutoNamingPerformer
 		{
 			// Name the spots in the root branch.
 			final Spot first = root.get( 0 );
-			model.flagForUndo( first ); // undo name changes.
+			model.beforeEdit( first ); // undo name changes.
 			rule.nameRoot( first, trackModel );
-			model.updateFeatures( first );
 
 			// Other spots in the root branch.
 			Spot predecessor = first;
 			for ( int i = 1; i < root.size(); i++ )
 			{
 				final Spot current = root.get( i );
-				model.flagForUndo( current ); // undo name changes.
+				model.beforeEdit( current ); // undo name changes.
 				rule.nameSpot( current, predecessor );
-				model.updateFeatures( current );
 				predecessor = current;
 			}
 
@@ -116,10 +114,8 @@ public class AutoNamingPerformer
 
 				// Name the branch first spots.
 				for ( final Spot sibling : siblings )
-					model.flagForUndo( sibling ); // undo name changes.
+					model.beforeEdit( sibling ); // undo name changes.
 				rule.nameBranches( mother, siblings );
-				for ( final Spot sibling : siblings )
-					model.updateFeatures( sibling );
 
 				// Name the spots inside each branch.
 				for ( final List< Spot > cb : childrenBranches )
@@ -128,9 +124,8 @@ public class AutoNamingPerformer
 					for ( int i = 1; i < cb.size(); i++ )
 					{
 						final Spot current = cb.get( i );
-						model.flagForUndo( current ); // undo name changes.
+						model.beforeEdit( current ); // undo name changes.
 						rule.nameSpot( current, parent );
-						model.updateFeatures( current );
 						parent = current;
 					}
 				}
