@@ -87,18 +87,28 @@ public class UndoRedoStack implements ModelChangeListener
 	@Override
 	public void modelChanged( final ModelChangeEvent event )
 	{
+		if ( event.getEventID() != ModelChangeEvent.MODEL_MODIFIED )
+		{
+			// Only deal with model modified events. Other events are not
+			// undoable and results in clearing the undo/redo stack.
+			undoStack.clear();
+			redoStack.clear();
+			spotFeatureValuesBefore.clear();
+			edgeFeatureValuesBefore.clear();
+			spotPolygonValuesBefore.clear();
+			spotNameBefore.clear();
+			return;
+		}
+
 		if ( paused )
 			return;
 
-		if ( event.getEventID() == ModelChangeEvent.MODEL_MODIFIED )
-		{
-			final ModelUndoableCommand command = toCommand( event );
-			redoStack.clear();
-			if ( undoStack.size() >= maxSize )
-				undoStack.removeFirst();
+		final ModelUndoableCommand command = toCommand( event );
+		redoStack.clear();
+		if ( undoStack.size() >= maxSize )
+			undoStack.removeFirst();
 
-			undoStack.addLast( command );
-		}
+		undoStack.addLast( command );
 	}
 
 	private ModelUndoableCommand toCommand( final ModelChangeEvent event )
