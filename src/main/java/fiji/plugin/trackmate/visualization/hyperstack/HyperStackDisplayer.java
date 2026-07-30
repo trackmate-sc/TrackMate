@@ -29,6 +29,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.visualization.AbstractTrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewUtils;
+import fiji.plugin.trackmate.visualization.hyperstack.behaviours.TrackMateImpBehaviour;
 import ij.ImagePlus;
 import ij.gui.Overlay;
 import ij.gui.Roi;
@@ -159,7 +160,14 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 		addOverlay( spotOverlay );
 		addOverlay( trackOverlay );
 		imp.updateAndDraw();
-		registerEditTool();
+//		registerEditTool();
+
+		/*
+		 * Play with UI behaviour
+		 */
+
+		// Print all registered key listeners to console
+		TrackMateImpBehaviour.install( model, imp );
 	}
 
 	@Override
