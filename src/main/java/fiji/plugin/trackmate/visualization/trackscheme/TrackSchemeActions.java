@@ -47,8 +47,6 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Icon;
 
-import org.scijava.ui.behaviour.util.RunnableAction;
-
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxICell;
 import com.mxgraph.swing.util.mxGraphActions;
@@ -86,16 +84,6 @@ public class TrackSchemeActions
 
 	private TrackSchemeActions()
 	{}
-
-	public static Action getUndoAction( final Model model )
-	{
-		return new RunnableAction( "undo", () -> model.undo() );
-	}
-
-	public static Action getRedoAction( final Model model )
-	{
-		return new RunnableAction( "redo", () -> model.redo() );
-	}
 
 	public static Action getEditAction( final Model model, final TrackSchemeGraphComponent graphComponent )
 	{

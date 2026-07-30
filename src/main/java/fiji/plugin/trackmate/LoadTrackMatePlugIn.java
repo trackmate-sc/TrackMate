@@ -220,6 +220,8 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 		frame.setVisible( true );
 		final Dimension size = frame.getSize();
 		frame.setSize( size.width, size.height + 1 );
+		// Undo / redo
+		TrackMateModelView.registerUndoShortcut( frame, model );
 
 		// Text
 		final LogPanelDescriptor2 logDescriptor = ( LogPanelDescriptor2 ) sequence.logDescriptor();

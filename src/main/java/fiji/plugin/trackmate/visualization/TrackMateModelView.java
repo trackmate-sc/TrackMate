@@ -21,6 +21,16 @@
  */
 package fiji.plugin.trackmate.visualization;
 
+import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
+
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JRootPane;
+import javax.swing.KeyStroke;
+
+import org.scijava.ui.behaviour.util.RunnableAction;
+
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 
@@ -75,4 +85,23 @@ public interface TrackMateModelView
 	 */
 	public String getKey();
 
+	/*
+	 * Utilities
+	 */
+
+	public static void registerUndoShortcut( final JFrame frame, final Model model )
+	{
+		final JRootPane root = frame.getRootPane();
+
+		// Ctrl on Windows/Linux, Command on macOS
+		final int menuMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
+		final KeyStroke undoKey = KeyStroke.getKeyStroke( KeyEvent.VK_Z, menuMask );
+		final KeyStroke redoKey = KeyStroke.getKeyStroke( KeyEvent.VK_Z, menuMask | KeyEvent.SHIFT_DOWN_MASK );
+
+		root.getInputMap( JComponent.WHEN_IN_FOCUSED_WINDOW ).put( undoKey, "undo" );
+		root.getInputMap( JComponent.WHEN_IN_FOCUSED_WINDOW ).put( redoKey, "redo" );
+
+		root.getActionMap().put( "undo", new RunnableAction( "undo", () -> model.undo() ) );
+		root.getActionMap().put( "redo", new RunnableAction( "redo", () -> model.redo() ) );
+	}
 }

@@ -109,6 +109,8 @@ public class TrackMatePlugIn implements PlugIn
 			// Wizard.
 			final WizardSequence sequence = createSequence( trackmate, selectionModel, displaySettings );
 			final JFrame frame = sequence.run( "TrackMate on " + imp.getShortTitle() );
+			// Undo / redo
+			TrackMateModelView.registerUndoShortcut( frame, model );
 			frame.setIconImage( TRACKMATE_ICON.getImage() );
 			GuiUtils.positionWindow( frame, imp.getWindow() );
 			frame.setVisible( true );

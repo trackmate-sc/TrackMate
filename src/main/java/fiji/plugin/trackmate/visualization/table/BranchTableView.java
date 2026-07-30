@@ -111,6 +111,9 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 		toolbar.add( Box.createHorizontalGlue() );
 		mainPanel.add( toolbar, BorderLayout.NORTH );
 
+		// Undo/redo.
+		TrackMateModelView.registerUndoShortcut( this, model );
+
 		getContentPane().add( mainPanel );
 		pack();
 	}

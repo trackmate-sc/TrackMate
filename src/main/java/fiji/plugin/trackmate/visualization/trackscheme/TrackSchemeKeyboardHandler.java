@@ -98,11 +98,6 @@ public class TrackSchemeKeyboardHandler
 		map.put( KeyStroke.getKeyStroke( "PAGE_DOWN" ), "selectNextTrack" );
 		map.put( KeyStroke.getKeyStroke( "PAGE_UP" ), "selectPreviousTrack" );
 
-		map.put( KeyStroke.getKeyStroke( "control Z" ), "undo" );
-		map.put( KeyStroke.getKeyStroke( "meta Z" ), "undo" );
-		map.put( KeyStroke.getKeyStroke( "control shift Z" ), "redo" );
-		map.put( KeyStroke.getKeyStroke( "meta shift Z" ), "redo" );
-
 		return map;
 	}
 
@@ -197,10 +192,6 @@ public class TrackSchemeKeyboardHandler
 				navigator.previousTrack();
 			}
 		} );
-
-		map.put( "undo", TrackSchemeActions.getUndoAction( model ) );
-		map.put( "redo", TrackSchemeActions.getRedoAction( model ) );
-
 		return map;
 	}
 

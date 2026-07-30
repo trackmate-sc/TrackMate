@@ -53,6 +53,7 @@ import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import fiji.util.SplitString;
+import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij.Macro;
@@ -409,6 +410,8 @@ public class TrackMateRunner extends TrackMatePlugIn
 					// Wizard.
 					final WizardSequence sequence = createSequence( trackmate, selectionModel, displaySettings );
 					final JFrame frame = sequence.run( "TrackMate on " + imp.getShortTitle() );
+					// Undo / redo
+					TrackMateModelView.registerUndoShortcut( frame, model );
 					frame.setIconImage( TRACKMATE_ICON.getImage() );
 					GuiUtils.positionWindow( frame, imp.getWindow() );
 					frame.setVisible( true );

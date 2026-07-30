@@ -42,6 +42,7 @@ import com.mxgraph.swing.handler.mxRubberband;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.util.TrackNavigator;
+import fiji.plugin.trackmate.visualization.TrackMateModelView;
 
 public class TrackSchemeFrame extends JFrame
 {
@@ -117,6 +118,9 @@ public class TrackSchemeFrame extends JFrame
 		final TrackSchemeKeyboardHandler keyboardHandler = new TrackSchemeKeyboardHandler( trackScheme.getModel(), graphComponent, new TrackNavigator( trackScheme.getModel(), trackScheme.getSelectionModel() ) );
 		keyboardHandler.installKeyboardActions( graphComponent );
 		keyboardHandler.installKeyboardActions( infoPane );
+
+		// Undo / redo
+		TrackMateModelView.registerUndoShortcut( this, trackScheme.getModel() );
 	}
 
 	/*

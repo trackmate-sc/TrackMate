@@ -129,6 +129,9 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 		getContentPane().add( mainPanel );
 		pack();
 
+		// Register key bindings for undo and redo.
+		TrackMateModelView.registerUndoShortcut( this, model );
+
 		/*
 		 * Listeners.
 		 */
