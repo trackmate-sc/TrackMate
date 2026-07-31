@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.traverse.GraphIterator;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
@@ -231,6 +232,52 @@ public class TrackNavigator
 			final Spot next = successors.iterator().next();
 			selectionModel.clearSelection();
 			selectionModel.addSpotToSelection( next );
+		}
+	}
+
+	public synchronized void root()
+	{
+		final Spot spot = getASpot();
+		if ( null == spot )
+			return;
+
+		final GraphIterator< Spot, DefaultWeightedEdge > it = model.getTrackModel().getDirectedDepthFirstIterator( spot, true );
+		NEXT_SPOT: while ( it.hasNext() )
+		{
+			final Spot next = it.next();
+			final Set< DefaultWeightedEdge > edges = model.getTrackModel().edgesOf( next );
+			for ( final DefaultWeightedEdge edge : edges )
+			{
+				if ( model.getTrackModel().getEdgeTarget( edge ).equals( next ) )
+					continue NEXT_SPOT;
+			}
+
+			selectionModel.clearSelection();
+			selectionModel.addSpotToSelection( next );
+			return;
+		}
+	}
+
+	public synchronized void leaf()
+	{
+		final Spot spot = getASpot();
+		if ( null == spot )
+			return;
+
+		final GraphIterator< Spot, DefaultWeightedEdge > it = model.getTrackModel().getDirectedDepthFirstIterator( spot, false );
+		NEXT_SPOT: while ( it.hasNext() )
+		{
+			final Spot next = it.next();
+			final Set< DefaultWeightedEdge > edges = model.getTrackModel().edgesOf( next );
+			for ( final DefaultWeightedEdge edge : edges )
+			{
+				if ( model.getTrackModel().getEdgeSource( edge ).equals( next ) )
+					continue NEXT_SPOT;
+			}
+
+			selectionModel.clearSelection();
+			selectionModel.addSpotToSelection( next );
+			return;
 		}
 	}
 
