@@ -25,6 +25,8 @@ public class SpotEditBehaviours
 	private static final String DELETE_SPOT = "delete spot";
 	private static final String LINK_SPOTS = "link spots";
 	private static final String LINK_SPOTS_BACKWARD = "link spots backward";
+	private static final String CLICK_SELECT_SPOT = "click select spot";
+	private static final String CLICK_SELECT_ADD_SPOT = "click select add spot";
 	
 	private static final String[] MOVE_SPOT_KEYS = new String[] { "SPACE" };
 	private static final String[] INCREASE_SPOT_RADIUS_KEYS = new String[] { "E" };
@@ -35,21 +37,76 @@ public class SpotEditBehaviours
 	private static final String[] DELETE_SPOT_KEYS = new String[] { "D" };
 	private static final String[] LINK_SPOTS_KEYS = new String[] { "L" };
 	private static final String[] LINK_SPOTS_BACKWARD_KEYS = new String[] { "shift L" };
-	
+	private static final String[] CLICK_SELECT_SPOT_KEYS = new String[] { "button1" };
+	private static final String[] CLICK_SELECT_ADD_SPOT_KEYS = new String[] { "shift button1" };
 
 	static boolean autoLinkingmode = false;
 
 	public static final void install( final Behaviours behaviours, final Model model, final SelectionModel selectionModel, final ImagePlus imp )
 	{
 		behaviours.behaviour( new MoveSpotBehaviour( model, imp ), MOVE_SPOT, MOVE_SPOT_KEYS );
+
 		behaviours.behaviour( new ResizeSpotBehaviour( model, imp, true, false ), INCREASE_SPOT_RADIUS, INCREASE_SPOT_RADIUS_KEYS );
 		behaviours.behaviour( new ResizeSpotBehaviour( model, imp, true, true ), INCREASE_SPOT_RADIUS_FAST, INCREASE_SPOT_RADIUS_FAST_KEYS );
 		behaviours.behaviour( new ResizeSpotBehaviour( model, imp, false, false ), DECREASE_SPOT_RADIUS, DECREASE_SPOT_RADIUS_KEYS );
 		behaviours.behaviour( new ResizeSpotBehaviour( model, imp, false, true ), DECREASE_SPOT_RADIUS_FAST, DECREASE_SPOT_RADIUS_FAST_KEYS );
+
 		behaviours.behaviour( new AddSpotBehaviour( model, selectionModel, imp ), ADD_SPOT, ADD_SPOT_KEYS );
 		behaviours.behaviour( new DeleteSpotBehaviour( model, selectionModel, imp ), DELETE_SPOT, DELETE_SPOT_KEYS );
+
 		behaviours.behaviour( new LinkSpotsBehaviour( model, imp, false ), LINK_SPOTS, LINK_SPOTS_KEYS );
 		behaviours.behaviour( new LinkSpotsBehaviour( model, imp, true ), LINK_SPOTS_BACKWARD, LINK_SPOTS_BACKWARD_KEYS );
+
+		behaviours.behaviour( new ClickSelectSpotBehaviour( model, selectionModel, imp ), CLICK_SELECT_SPOT, CLICK_SELECT_SPOT_KEYS );
+		behaviours.behaviour( new ClickSelectAddSpotBehaviour( model, selectionModel, imp ), CLICK_SELECT_ADD_SPOT, CLICK_SELECT_ADD_SPOT_KEYS );
+	}
+
+	private static class ClickSelectAddSpotBehaviour extends AbstractSpotEditBehaviour implements ClickBehaviour
+	{
+
+		private final SelectionModel selectionModel;
+
+		public ClickSelectAddSpotBehaviour( final Model model, final SelectionModel selectionModel, final ImagePlus imp )
+		{
+			super( model, imp );
+			this.selectionModel = selectionModel;
+		}
+
+		@Override
+		public void click( final int x, final int y )
+		{
+			final RealLocalizable pos = toWorldCoords( x, y );
+			final Spot target = getSpotAtMouseLocation( pos );
+			if ( null == target )
+				return;
+			if ( selectionModel.getSpotSelection().contains( target ) )
+				selectionModel.removeSpotFromSelection( target );
+			else
+				selectionModel.addSpotToSelection( target );
+		}
+	}
+
+	private static class ClickSelectSpotBehaviour extends AbstractSpotEditBehaviour implements ClickBehaviour
+	{
+
+		private final SelectionModel selectionModel;
+
+		public ClickSelectSpotBehaviour( final Model model, final SelectionModel selectionModel, final ImagePlus imp )
+		{
+			super( model, imp );
+			this.selectionModel = selectionModel;
+		}
+
+		@Override
+		public void click( final int x, final int y )
+		{
+			selectionModel.clearSelection();
+			final RealLocalizable pos = toWorldCoords( x, y );
+			final Spot target = getSpotAtMouseLocation( pos );
+			if ( null == target )
+				return;
+			selectionModel.addSpotToSelection( target );
+		}
 	}
 
 	private static class DeleteSpotBehaviour extends AbstractSpotEditBehaviour implements ClickBehaviour

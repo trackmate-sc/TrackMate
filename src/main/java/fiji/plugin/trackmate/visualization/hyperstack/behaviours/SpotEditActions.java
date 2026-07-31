@@ -51,6 +51,9 @@ public class SpotEditActions
 	private static final String[] NEXT_TIMEPOINT_KEYS = new String[] { "RIGHT" };
 	private static final String[] PREVIOUS_TIMEPOINT_KEYS = new String[] { "LEFT" };
 
+	private static final String SEMI_AUTOMATIC_TRACKING = "semi-automatic tracking";
+	private static final String[] SEMI_AUTOMATIC_TRACKING_KEYS = new String[] { "shift A" };
+
 	static
 	{
 		final int menuMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
@@ -87,8 +90,12 @@ public class SpotEditActions
 		actions.runnableAction( () -> {}, "do nothing", new String[] { "W" } );
 
 		// Change timepoint
-		actions.runnableAction( () -> imp.setT( imp.getT() + 1 ), NEXT_TIMEPOINT, NEXT_TIMEPOINT_KEYS );
-		actions.runnableAction( () -> imp.setT( imp.getT() - 1 ), PREVIOUS_TIMEPOINT, PREVIOUS_TIMEPOINT_KEYS );
+		actions.runnableAction( () -> imp.setT( imp.getT() + SemiAutoTracking.params.stepwiseTimeBrowsing ), NEXT_TIMEPOINT, NEXT_TIMEPOINT_KEYS );
+		actions.runnableAction( () -> imp.setT( imp.getT() - SemiAutoTracking.params.stepwiseTimeBrowsing ), PREVIOUS_TIMEPOINT, PREVIOUS_TIMEPOINT_KEYS );
+		
+		// Semi-automatic tracking
+		final SemiAutoTracking semiAutoTracking = new SemiAutoTracking( model, selectionModel, imp );
+		actions.runnableAction( () -> semiAutoTracking.run(), SEMI_AUTOMATIC_TRACKING, SEMI_AUTOMATIC_TRACKING_KEYS );
 	}
 
 	private static void deleteSpotSelection( final Model model, final SelectionModel selectionModel )
@@ -107,6 +114,40 @@ public class SpotEditActions
 		finally
 		{
 			model.endUpdate();
+		}
+	}
+
+	public static class SpotEditToolParams
+	{
+
+		/*
+		 * Semi-auto tracking parameters
+		 */
+		/**
+		 * The fraction of the initial quality above which we keep new spots.
+		 * The highest, the more intolerant.
+		 */
+		double qualityThreshold = 0.5;
+
+		/**
+		 * How close must be the new spot found to be accepted, in radius units.
+		 */
+		double distanceTolerance = 2d;
+
+		/**
+		 * We process at most nFrames. Make it 0 or negative to have no bounds.
+		 */
+		int nFrames = 10;
+
+		/**
+		 * By how many frames to jump when we do step-wide time browsing.
+		 */
+		int stepwiseTimeBrowsing = 1;
+
+		@Override
+		public String toString()
+		{
+			return super.toString() + ": " + "QualityThreshold = " + qualityThreshold + ", DistanceTolerance = " + distanceTolerance + ", nFrames = " + nFrames;
 		}
 	}
 }
