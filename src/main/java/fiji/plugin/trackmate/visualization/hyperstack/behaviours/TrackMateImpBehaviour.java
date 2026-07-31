@@ -19,6 +19,7 @@ import org.scijava.ui.behaviour.util.InputActionBindings;
 import org.scijava.ui.behaviour.util.TriggerBehaviourBindings;
 
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
 import ij.ImagePlus;
 import ij.gui.ImageCanvas;
 
@@ -26,12 +27,17 @@ public class TrackMateImpBehaviour
 {
 
 	/**
-	 * Attaches ui-behaviour interaction handling to a given AWT Canvas.
+	 * Attaches ui-behaviour interaction handling to a given {@link ImagePlus}.
 	 * 
-	 * @param canvas
-	 *            The target AWT Canvas to bind actions and behaviours to.
+	 * @param model
+	 *            the model to operate on.
+	 * @param selectionModel
+	 *            the selection model to read what is selected and to update the
+	 *            selection.
+	 * @param imp
+	 *            the ImagePlus to attach the behaviours to.
 	 */
-	public static void install( final Model model, final ImagePlus imp )
+	public static void install( final Model model, final SelectionModel selectionModel, final ImagePlus imp )
 	{
 		// 1. Ensure the canvas can accept focus for keyboard shortcuts
 		final ImageCanvas canvas = imp.getCanvas();
@@ -65,9 +71,6 @@ public class TrackMateImpBehaviour
 		canvas.addMouseListener( proxy );
 		canvas.addMouseMotionListener( proxy );
 		canvas.addMouseWheelListener( proxy );
-
-		// Re-add the original ImageJ KeyListener after the proxy
-		canvas.addKeyListener( ijKeyListener );
 
 		// The behaviours.
 		final Behaviours behaviours = new Behaviours( inputTriggerMap, behaviourMap, config );
@@ -114,10 +117,14 @@ public class TrackMateImpBehaviour
 			}
 		} );
 
-		behaviours.behaviour( new MoveSpotBehaviour( model, imp ), "move-spot", "SPACE" );
-		behaviours.behaviour( new ResizeSpotBehaviour( model, imp, true, false ), "increase-spot-radius", "E" );
-		behaviours.behaviour( new ResizeSpotBehaviour( model, imp, true, true ), "increase-spot-radius-fast", "shift E" );
-		behaviours.behaviour( new ResizeSpotBehaviour( model, imp, false, false ), "decrease-spot-radius", "Q" );
-		behaviours.behaviour( new ResizeSpotBehaviour( model, imp, false, true ), "decrease-spot-radius-fast", "shift Q" );
+		// Re-add the original ImageJ KeyListener after all proxies
+		canvas.addKeyListener( ijKeyListener );
+
+		/*
+		 * Flesh out commands.
+		 */
+
+		SpotEditBehaviours.install( behaviours, model, selectionModel, imp );
+		SpotEditActions.install( actions, model, selectionModel, imp );
 	}
 }

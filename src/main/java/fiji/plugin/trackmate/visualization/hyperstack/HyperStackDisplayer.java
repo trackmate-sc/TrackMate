@@ -167,7 +167,7 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 		 */
 
 		// Print all registered key listeners to console
-		TrackMateImpBehaviour.install( model, imp );
+		TrackMateImpBehaviour.install( model, selectionModel, imp );
 	}
 
 	@Override
