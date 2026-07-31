@@ -31,10 +31,6 @@ public class SpotEditActions
 	private static final String NAVIGATE_TO_PREVIOUS_TRACK = "navigate to previous track";
 	private static final String NAVIGATE_TO_NEXT_TRACK = "navigate to next track";
 
-	private static final String DELETE_SELECTED_SPOTS = "delete selected spots";
-
-	private static final String TOGGLE_AUTO_LINKING = "toggle auto-linking";
-
 	private static final String[] NAVIGATE_TO_PARENT_KEYS = new String[] { "UP" };
 	private static final String[] NAVIGATE_TO_CHILD_KEYS = new String[] { "DOWN" };
 	private static final String[] NAVIGATE_TO_PREVIOUS_SIBLING_KEYS = new String[] { "LEFT" };
@@ -44,9 +40,16 @@ public class SpotEditActions
 	private static final String[] NAVIGATE_TO_PREVIOUS_TRACK_KEYS = new String[] { "PAGE_UP" };
 	private static final String[] NAVIGATE_TO_NEXT_TRACK_KEYS = new String[] { "PAGE_DOWN" };
 
+	private static final String DELETE_SELECTED_SPOTS = "delete selected spots";
 	private static final String[] DELETE_SELECTED_SPOTS_KEYS = new String[] { "BACK_SPACE", "DELETE" };
-
+	
+	private static final String TOGGLE_AUTO_LINKING = "toggle auto-linking";
 	private static final String[] TOGGLE_AUTO_LINKING_KEYS = new String[] { "ctrl L" };
+	
+	private static final String NEXT_TIMEPOINT = "next timepoint";
+	private static final String PREVIOUS_TIMEPOINT = "previous timepoint";
+	private static final String[] NEXT_TIMEPOINT_KEYS = new String[] { "RIGHT" };
+	private static final String[] PREVIOUS_TIMEPOINT_KEYS = new String[] { "LEFT" };
 
 	static
 	{
@@ -82,6 +85,10 @@ public class SpotEditActions
 
 		// Avoid closing the window when pressing W
 		actions.runnableAction( () -> {}, "do nothing", new String[] { "W" } );
+
+		// Change timepoint
+		actions.runnableAction( () -> imp.setT( imp.getT() + 1 ), NEXT_TIMEPOINT, NEXT_TIMEPOINT_KEYS );
+		actions.runnableAction( () -> imp.setT( imp.getT() - 1 ), PREVIOUS_TIMEPOINT, PREVIOUS_TIMEPOINT_KEYS );
 	}
 
 	private static void deleteSpotSelection( final Model model, final SelectionModel selectionModel )
