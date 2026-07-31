@@ -126,5 +126,7 @@ public class TrackMateImpBehaviour
 
 		SpotEditBehaviours.install( behaviours, model, selectionModel, imp );
 		SpotEditActions.install( actions, model, selectionModel, imp );
+		// Select spots with freehand ROI.
+		SelectSpotsWithRoiListener.install( model, selectionModel, imp );
 	}
 }
