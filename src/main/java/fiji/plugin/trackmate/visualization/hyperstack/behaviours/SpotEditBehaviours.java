@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.visualization.hyperstack.behaviours;
 
+import java.util.Set;
+
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.DragBehaviour;
 import org.scijava.ui.behaviour.util.Behaviours;
@@ -7,63 +9,156 @@ import org.scijava.ui.behaviour.util.Behaviours;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.SpotBase;
 import ij.ImagePlus;
-import ij.gui.ImageCanvas;
 import net.imglib2.RealLocalizable;
-import net.imglib2.RealPoint;
 
 public class SpotEditBehaviours
 {
+	
+	private static final String MOVE_SPOT = "move spot";
+	private static final String INCREASE_SPOT_RADIUS = "increase spot radius";
+	private static final String INCREASE_SPOT_RADIUS_FAST = "increase spot radius fast";
+	private static final String DECREASE_SPOT_RADIUS = "decrease spot radius";
+	private static final String DECREASE_SPOT_RADIUS_FAST = "decrease spot radius fast";
+	private static final String ADD_SPOT = "add spot";
+	private static final String DELETE_SPOT = "delete spot";
+	private static final String LINK_SPOTS = "link spots";
+	private static final String LINK_SPOTS_BACKWARD = "link spots backward";
+	
+	private static final String[] MOVE_SPOT_KEYS = new String[] { "SPACE" };
+	private static final String[] INCREASE_SPOT_RADIUS_KEYS = new String[] { "E" };
+	private static final String[] INCREASE_SPOT_RADIUS_FAST_KEYS = new String[] { "shift E" };
+	private static final String[] DECREASE_SPOT_RADIUS_KEYS = new String[] { "Q" };
+	private static final String[] DECREASE_SPOT_RADIUS_FAST_KEYS = new String[] { "shift Q" };
+	private static final String[] ADD_SPOT_KEYS = new String[] { "A" };
+	private static final String[] DELETE_SPOT_KEYS = new String[] { "D" };
+	private static final String[] LINK_SPOTS_KEYS = new String[] { "L" };
+	private static final String[] LINK_SPOTS_BACKWARD_KEYS = new String[] { "shift L" };
+	
+
+	static boolean autoLinkingmode = false;
 
 	public static final void install( final Behaviours behaviours, final Model model, final SelectionModel selectionModel, final ImagePlus imp )
 	{
-		behaviours.behaviour( new MoveSpotBehaviour( model, imp ), "move-spot", "SPACE" );
-		behaviours.behaviour( new ResizeSpotBehaviour( model, imp, true, false ), "increase-spot-radius", "E" );
-		behaviours.behaviour( new ResizeSpotBehaviour( model, imp, true, true ), "increase-spot-radius-fast", "shift E" );
-		behaviours.behaviour( new ResizeSpotBehaviour( model, imp, false, false ), "decrease-spot-radius", "Q" );
-		behaviours.behaviour( new ResizeSpotBehaviour( model, imp, false, true ), "decrease-spot-radius-fast", "shift Q" );
+		behaviours.behaviour( new MoveSpotBehaviour( model, imp ), MOVE_SPOT, MOVE_SPOT_KEYS );
+		behaviours.behaviour( new ResizeSpotBehaviour( model, imp, true, false ), INCREASE_SPOT_RADIUS, INCREASE_SPOT_RADIUS_KEYS );
+		behaviours.behaviour( new ResizeSpotBehaviour( model, imp, true, true ), INCREASE_SPOT_RADIUS_FAST, INCREASE_SPOT_RADIUS_FAST_KEYS );
+		behaviours.behaviour( new ResizeSpotBehaviour( model, imp, false, false ), DECREASE_SPOT_RADIUS, DECREASE_SPOT_RADIUS_KEYS );
+		behaviours.behaviour( new ResizeSpotBehaviour( model, imp, false, true ), DECREASE_SPOT_RADIUS_FAST, DECREASE_SPOT_RADIUS_FAST_KEYS );
+		behaviours.behaviour( new AddSpotBehaviour( model, selectionModel, imp ), ADD_SPOT, ADD_SPOT_KEYS );
+		behaviours.behaviour( new DeleteSpotBehaviour( model, selectionModel, imp ), DELETE_SPOT, DELETE_SPOT_KEYS );
+		behaviours.behaviour( new LinkSpotsBehaviour( model, imp, false ), LINK_SPOTS, LINK_SPOTS_KEYS );
+		behaviours.behaviour( new LinkSpotsBehaviour( model, imp, true ), LINK_SPOTS_BACKWARD, LINK_SPOTS_BACKWARD_KEYS );
 	}
 
-	private static class AbstractSpotEditBehaviour
+	private static class DeleteSpotBehaviour extends AbstractSpotEditBehaviour implements ClickBehaviour
 	{
 
-		protected Spot movedSpot;
+		private final SelectionModel selectionModel;
 
-		protected final Model model;
-
-		protected final ImagePlus imp;
-
-		protected final double[] calibration;
-
-		public AbstractSpotEditBehaviour( final Model model, final ImagePlus imp )
+		public DeleteSpotBehaviour( final Model model, final SelectionModel selectionModel, final ImagePlus imp )
 		{
-			this.model = model;
-			this.imp = imp;
-			this.calibration = TMUtils.getSpatialCalibration( imp );
+			super( model, imp );
+			this.selectionModel = selectionModel;
 		}
 
-		protected Spot getSpotAtMouseLocation( final RealLocalizable pos )
+		@Override
+		public void click( final int x, final int y )
 		{
+			final RealLocalizable pos = toWorldCoords( x, y );
+			final Spot target = getSpotAtMouseLocation( pos );
+			if ( null == target )
+				return;
+
+			selectionModel.removeSpotFromSelection( target );
+			model.beginUpdate();
+			try
+			{
+				model.removeSpot( target );
+			}
+			finally
+			{
+				model.endUpdate();
+			}
+		}
+	}
+
+	private static class AddSpotBehaviour extends AbstractSpotEditBehaviour implements ClickBehaviour
+	{
+
+		private final SelectionModel selectionModel;
+
+		public AddSpotBehaviour( final Model model, final SelectionModel selectionModel, final ImagePlus imp )
+		{
+			super( model, imp );
+			this.selectionModel = selectionModel;
+		}
+
+		@Override
+		public void click( final int x, final int y )
+		{
+			final RealLocalizable pos = toWorldCoords( x, y );
+			// Forbid adding a spot if there is already one at this location.
+			if ( getSpotAtMouseLocation( pos ) != null )
+				return;
+
+			final double radius = ResizeSpotBehaviour.previousRadius;
+			final SpotBase newSpot = new SpotBase( pos, radius, -1. );
+
+			final double dt = imp.getCalibration().frameInterval;
 			final int frame = imp.getFrame() - 1;
-			return model.getSpots().getSpotAt( pos, frame, true );
-		}
+			newSpot.putFeature( Spot.POSITION_T, frame * dt );
+			newSpot.putFeature( Spot.FRAME, Double.valueOf( frame ) );
 
-		protected RealLocalizable toWorldCoords( final int x, final int y )
-		{
-			final ImageCanvas canvas = imp.getCanvas();
-			final double xw = ( -0.5 + canvas.offScreenXD( x ) ) * calibration[ 0 ];
-			final double yw = ( -0.5 + canvas.offScreenYD( y ) ) * calibration[ 1 ];
-			final double zw = ( imp.getSlice() - 1 ) * calibration[ 2 ];
-			return new RealPoint( xw, yw, zw );
+			model.beginUpdate();
+			try
+			{
+				model.addSpotTo( newSpot, frame );
+			}
+			finally
+			{
+				model.endUpdate();
+			}
+
+			/*
+			 * If we are in auto-link mode, we create an edge with spot in
+			 * selection, if there is just one and if it is in a previous frame
+			 */
+			if ( autoLinkingmode )
+			{
+				final Set< Spot > spotSelection = selectionModel.getSpotSelection();
+				if ( spotSelection.size() == 1 )
+				{
+					final Spot source = spotSelection.iterator().next();
+					if ( newSpot.diffTo( source, Spot.FRAME ) != 0 )
+					{
+						model.beginUpdate();
+						try
+						{
+							model.addEdge( source, newSpot, -1 );
+						}
+						finally
+						{
+							model.endUpdate();
+						}
+					}
+				}
+				selectionModel.clearSpotSelection();
+				selectionModel.addSpotToSelection( newSpot );
+			}
 		}
 	}
 
 	private static class MoveSpotBehaviour extends AbstractSpotEditBehaviour implements DragBehaviour
 	{
 
-		/** Offset between mouse click and spot center, in world coordinates. */
+		/**
+		 * Offset between mouse click and spot center, in world coordinates.
+		 */
 		private final double[] delta = new double[ 2 ];
+
+		private Spot movedSpot;
 
 		public MoveSpotBehaviour( final Model model, final ImagePlus imp )
 		{
