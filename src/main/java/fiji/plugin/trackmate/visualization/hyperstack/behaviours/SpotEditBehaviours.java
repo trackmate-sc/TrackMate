@@ -13,8 +13,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotBase;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
-import fiji.plugin.trackmate.visualization.ui.TrackMateKeymapManager;
+import fiji.plugin.trackmate.visualization.ui.KeyConfigContexts;
 import ij.ImagePlus;
 import net.imglib2.RealLocalizable;
 
@@ -331,7 +330,7 @@ public class SpotEditBehaviours
 	{
 		public Descriptions()
 		{
-			super( TrackMateKeymapManager.KEY_CONFIG_SCOPE, HyperStackDisplayer.KEY_CONFIG_CONTEXT );
+			super( KeyConfigContexts.KEY_CONFIG_SCOPE, KeyConfigContexts.HYPERSTACK_DISPLAYER );
 		}
 
 		@Override

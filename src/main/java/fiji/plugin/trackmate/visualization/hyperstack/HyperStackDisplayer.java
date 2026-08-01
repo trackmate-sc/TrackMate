@@ -35,6 +35,7 @@ import fiji.plugin.trackmate.visualization.hyperstack.behaviours.SelectSpotsWith
 import fiji.plugin.trackmate.visualization.hyperstack.behaviours.SpotEditActions;
 import fiji.plugin.trackmate.visualization.hyperstack.behaviours.SpotEditBehaviours;
 import fiji.plugin.trackmate.visualization.hyperstack.behaviours.TrackMateConfigDialog;
+import fiji.plugin.trackmate.visualization.ui.KeyConfigContexts;
 import ij.ImagePlus;
 import ij.gui.Overlay;
 import ij.gui.Roi;
@@ -49,12 +50,6 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 	protected TrackOverlay trackOverlay;
 
 	public static final String KEY = "HYPERSTACKDISPLAYER";
-
-	/**
-	 * The key configuration context for actions and behaviours specific to this
-	 * displayer.
-	 */
-	public static final String KEY_CONFIG_CONTEXT = "trackmate-main-view";
 
 	/*
 	 * CONSTRUCTORS
@@ -174,7 +169,7 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 		 * UI behaviours and actions
 		 */
 
-		final ImagePlusBehavioursAdapter adapter = new ImagePlusBehavioursAdapter( imp, keymapManager, KEY_CONFIG_CONTEXT );
+		final ImagePlusBehavioursAdapter adapter = new ImagePlusBehavioursAdapter( imp, keymapManager, KeyConfigContexts.HYPERSTACK_DISPLAYER );
 		SpotEditBehaviours.install( adapter.behaviours(), model, selectionModel, imp );
 		SpotEditActions.install( adapter.actions(), model, selectionModel, imp );
 		// Select spots with freehand ROI.

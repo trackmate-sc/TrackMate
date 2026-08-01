@@ -1,5 +1,12 @@
 package fiji.plugin.trackmate.visualization.hyperstack.behaviours;
 
+import static fiji.plugin.trackmate.visualization.ui.KeyConfigContexts.ALL_SPOTS_TABLE;
+import static fiji.plugin.trackmate.visualization.ui.KeyConfigContexts.HYPERSTACK_DISPLAYER;
+import static fiji.plugin.trackmate.visualization.ui.KeyConfigContexts.KEY_CONFIG_SCOPE;
+import static fiji.plugin.trackmate.visualization.ui.KeyConfigContexts.TRACKMATE;
+import static fiji.plugin.trackmate.visualization.ui.KeyConfigContexts.TRACKSCHEME;
+import static fiji.plugin.trackmate.visualization.ui.KeyConfigContexts.TRACK_TABLE;
+
 import java.awt.Frame;
 
 import org.scijava.plugin.Plugin;
@@ -14,8 +21,6 @@ import bdv.ui.keymap.Keymap;
 import bdv.ui.keymap.KeymapManager;
 import bdv.ui.keymap.KeymapSettingsPage;
 import fiji.plugin.trackmate.gui.GuiUtils;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
-import fiji.plugin.trackmate.visualization.ui.TrackMateKeymapManager;
 
 public class TrackMateConfigDialog
 {
@@ -23,7 +28,7 @@ public class TrackMateConfigDialog
 	public static void prefDialog( final Frame frame, final Keymap keymap, final KeymapManager keymapManager, final Actions actions )
 	{
 		final PreferencesDialog preferencesDialog = new PreferencesDialog( frame, keymap,
-				new String[] { HyperStackDisplayer.KEY_CONFIG_CONTEXT } );
+				new String[] { TRACKMATE, HYPERSTACK_DISPLAYER, TRACKSCHEME, ALL_SPOTS_TABLE, TRACK_TABLE } );
 		GuiUtils.positionWindow( preferencesDialog, frame );
 		BigDataViewerActions.toggleDialogAction( actions, preferencesDialog, BigDataViewerActions.PREFERENCES_DIALOG, BigDataViewerActions.PREFERENCES_DIALOG_KEYS );
 		preferencesDialog.addPage( new KeymapSettingsPage( "Keymap", keymapManager, keymapManager.getCommandDescriptions() ) );
@@ -34,7 +39,7 @@ public class TrackMateConfigDialog
 	{
 		public Descriptions()
 		{
-			super( TrackMateKeymapManager.KEY_CONFIG_SCOPE, HyperStackDisplayer.KEY_CONFIG_CONTEXT );
+			super( KEY_CONFIG_SCOPE, TRACKMATE );
 		}
 
 		@Override
