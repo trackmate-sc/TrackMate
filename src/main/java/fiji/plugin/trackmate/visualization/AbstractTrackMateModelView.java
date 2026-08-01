@@ -30,13 +30,12 @@ import fiji.plugin.trackmate.SelectionChangeListener;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.visualization.ui.TrackMateKeymapManager;
 
 /**
- * An abstract class for spot displayers, that can overlay detected spots and
- * tracks on top of the image data.
- * <p>
+ * An abstract class for TrackMate views.
  *
- * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; Jan 2011
+ * @author Jean-Yves Tinevez
  */
 public abstract class AbstractTrackMateModelView implements SelectionChangeListener, TrackMateModelView, ModelChangeListener
 {
@@ -51,6 +50,12 @@ public abstract class AbstractTrackMateModelView implements SelectionChangeListe
 	protected final SelectionModel selectionModel;
 
 	protected final DisplaySettings displaySettings;
+
+	/*
+	 * STATIC FIELD
+	 */
+
+	protected static final TrackMateKeymapManager keymapManager = new TrackMateKeymapManager();
 
 	/*
 	 * PROTECTED CONSTRUCTOR
