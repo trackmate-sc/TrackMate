@@ -2,8 +2,11 @@ package fiji.plugin.trackmate.visualization.hyperstack.behaviours;
 
 import java.util.Set;
 
+import org.scijava.plugin.Plugin;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.DragBehaviour;
+import org.scijava.ui.behaviour.io.gui.CommandDescriptionProvider;
+import org.scijava.ui.behaviour.io.gui.CommandDescriptions;
 import org.scijava.ui.behaviour.util.Behaviours;
 
 import fiji.plugin.trackmate.Model;
@@ -318,6 +321,31 @@ public class SpotEditBehaviours
 			{
 				model.endUpdate();
 			}
+		}
+	}
+
+	@Plugin( type = CommandDescriptionProvider.class )
+	public static class Descriptions extends CommandDescriptionProvider
+	{
+		public Descriptions()
+		{
+			super( TrackMateImpBehaviour.KEY_CONFIG_SCOPE, TrackMateImpBehaviour.KEY_CONFIG_CONTEXT );
+		}
+
+		@Override
+		public void getCommandDescriptions( final CommandDescriptions descriptions )
+		{
+			descriptions.add( MOVE_SPOT, MOVE_SPOT_KEYS, "Move a spot by dragging it." );
+			descriptions.add( INCREASE_SPOT_RADIUS, INCREASE_SPOT_RADIUS_KEYS, "Increase the radius of a spot." );
+			descriptions.add( INCREASE_SPOT_RADIUS_FAST, INCREASE_SPOT_RADIUS_FAST_KEYS, "Increase the radius of a spot (fast)." );
+			descriptions.add( DECREASE_SPOT_RADIUS, DECREASE_SPOT_RADIUS_KEYS, "Decrease the radius of a spot." );
+			descriptions.add( DECREASE_SPOT_RADIUS_FAST, DECREASE_SPOT_RADIUS_FAST_KEYS, "Decrease the radius of a spot (fast)." );
+			descriptions.add( ADD_SPOT, ADD_SPOT_KEYS, "Add a new spot at the mouse location." );
+			descriptions.add( DELETE_SPOT, DELETE_SPOT_KEYS, "Delete the spot at the mouse location." );
+			descriptions.add( LINK_SPOTS, LINK_SPOTS_KEYS, "Link two spots forward in time by dragging from a source spot to a target spot in the next time-point." );
+			descriptions.add( LINK_SPOTS_BACKWARD, LINK_SPOTS_BACKWARD_KEYS, "Link two spots backward in time by dragging from a source spot to a target spot in the previous time-point." );
+			descriptions.add( CLICK_SELECT_SPOT, CLICK_SELECT_SPOT_KEYS, "Select a spot at the mouse location." );
+			descriptions.add( CLICK_SELECT_ADD_SPOT, CLICK_SELECT_ADD_SPOT_KEYS, "Add or remove a spot from the selection at the mouse location." );
 		}
 	}
 }

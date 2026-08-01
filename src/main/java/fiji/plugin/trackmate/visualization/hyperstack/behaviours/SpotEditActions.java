@@ -5,6 +5,9 @@ import java.awt.event.InputEvent;
 import java.util.ArrayList;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
+import org.scijava.plugin.Plugin;
+import org.scijava.ui.behaviour.io.gui.CommandDescriptionProvider;
+import org.scijava.ui.behaviour.io.gui.CommandDescriptions;
 import org.scijava.ui.behaviour.util.Actions;
 
 import fiji.plugin.trackmate.Model;
@@ -40,8 +43,8 @@ public class SpotEditActions
 	private static final String[] NAVIGATE_TO_PREVIOUS_TRACK_KEYS = new String[] { "PAGE_UP" };
 	private static final String[] NAVIGATE_TO_NEXT_TRACK_KEYS = new String[] { "PAGE_DOWN" };
 
-	private static final String DELETE_SELECTED_SPOTS = "delete selected spots";
-	private static final String[] DELETE_SELECTED_SPOTS_KEYS = new String[] { "BACK_SPACE", "DELETE" };
+	private static final String DELETE_SELECTION = "delete selection";
+	private static final String[] DELETE_SELECTION_KEYS = new String[] { "BACK_SPACE", "DELETE" };
 	
 	private static final String TOGGLE_AUTO_LINKING = "toggle auto-linking";
 	private static final String[] TOGGLE_AUTO_LINKING_KEYS = new String[] { "ctrl L" };
@@ -81,7 +84,7 @@ public class SpotEditActions
 		actions.runnableAction( () -> trackNavigator.nextTrack(), NAVIGATE_TO_NEXT_TRACK, NAVIGATE_TO_NEXT_TRACK_KEYS );
 
 		// Delete
-		actions.runnableAction( () -> deleteSpotSelection( model, selectionModel ), DELETE_SELECTED_SPOTS, DELETE_SELECTED_SPOTS_KEYS );
+		actions.runnableAction( () -> deleteSelection( model, selectionModel ), DELETE_SELECTION, DELETE_SELECTION_KEYS );
 
 		// Toggle auto-linking
 		actions.runnableAction( () -> SpotEditBehaviours.autoLinkingmode = !SpotEditBehaviours.autoLinkingmode, TOGGLE_AUTO_LINKING, TOGGLE_AUTO_LINKING_KEYS );
@@ -98,7 +101,7 @@ public class SpotEditActions
 		actions.runnableAction( () -> semiAutoTracking.run(), SEMI_AUTOMATIC_TRACKING, SEMI_AUTOMATIC_TRACKING_KEYS );
 	}
 
-	private static void deleteSpotSelection( final Model model, final SelectionModel selectionModel )
+	private static void deleteSelection( final Model model, final SelectionModel selectionModel )
 	{
 		final ArrayList< Spot > spotSelection = new ArrayList<>( selectionModel.getSpotSelection() );
 		final ArrayList< DefaultWeightedEdge > edgeSelection = new ArrayList<>( selectionModel.getEdgeSelection() );
@@ -114,6 +117,38 @@ public class SpotEditActions
 		finally
 		{
 			model.endUpdate();
+		}
+	}
+
+	@Plugin( type = CommandDescriptionProvider.class )
+	public static class Descriptions extends CommandDescriptionProvider
+	{
+		public Descriptions()
+		{
+			super( TrackMateImpBehaviour.KEY_CONFIG_SCOPE, TrackMateImpBehaviour.KEY_CONFIG_CONTEXT );
+		}
+
+		@Override
+		public void getCommandDescriptions( final CommandDescriptions descriptions )
+		{
+			descriptions.add( UNDO_ACTION, UNDO_ACTION_KEYS, "Undo the last edit." );
+			descriptions.add( REDO_ACTION, REDO_ACTION_KEYS, "Redo the last undone edit." );
+
+			descriptions.add( NAVIGATE_TO_PARENT, NAVIGATE_TO_PARENT_KEYS, "Navigate to the parent of the selected spot." );
+			descriptions.add( NAVIGATE_TO_CHILD, NAVIGATE_TO_CHILD_KEYS, "Navigate to the child of the selected spot." );
+			descriptions.add( NAVIGATE_TO_PREVIOUS_SIBLING, NAVIGATE_TO_PREVIOUS_SIBLING_KEYS, "Navigate to the previous sibling of the selected spot." );
+			descriptions.add( NAVIGATE_TO_NEXT_SIBLING, NAVIGATE_TO_NEXT_SIBLING_KEYS, "Navigate to the next sibling of the selected spot." );
+			descriptions.add( NAVIGATE_TO_ROOT, NAVIGATE_TO_ROOT_KEYS, "Navigate to the root of the current track." );
+			descriptions.add( NAVIGATE_TO_LEAF, NAVIGATE_TO_LEAF_KEYS, "Navigate to the leaf of the current track." );
+			descriptions.add( NAVIGATE_TO_PREVIOUS_TRACK, NAVIGATE_TO_PREVIOUS_TRACK_KEYS, "Navigate to the previous track." );
+			descriptions.add( NAVIGATE_TO_NEXT_TRACK, NAVIGATE_TO_NEXT_TRACK_KEYS, "Navigate to the next track." );
+
+			descriptions.add( DELETE_SELECTION, DELETE_SELECTION_KEYS, "Delete the selected spots and edges." );
+			descriptions.add( TOGGLE_AUTO_LINKING, TOGGLE_AUTO_LINKING_KEYS, "Toggle the auto-linking mode." );
+			descriptions.add( NEXT_TIMEPOINT, NEXT_TIMEPOINT_KEYS, "Go to the next timepoint." );
+			descriptions.add( PREVIOUS_TIMEPOINT, PREVIOUS_TIMEPOINT_KEYS, "Go to the previous timepoint." );
+			descriptions.add( SEMI_AUTOMATIC_TRACKING, SEMI_AUTOMATIC_TRACKING_KEYS, "Run semi-automatic tracking on the selected spots." );
+			descriptions.add( "do nothing", new String[] { "W" }, "Do nothing. This is to avoid closing the window when pressing W." );
 		}
 	}
 }

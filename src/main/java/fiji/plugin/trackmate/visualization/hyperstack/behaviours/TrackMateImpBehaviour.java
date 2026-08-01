@@ -9,22 +9,32 @@ import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.KeyStroke;
 
+import org.scijava.Context;
 import org.scijava.ui.behaviour.BehaviourMap;
 import org.scijava.ui.behaviour.InputTriggerMap;
 import org.scijava.ui.behaviour.MouseAndKeyHandler;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
+import org.scijava.ui.behaviour.io.gui.CommandDescriptionProvider.Scope;
+import org.scijava.ui.behaviour.io.gui.CommandDescriptionsBuilder;
 import org.scijava.ui.behaviour.util.Actions;
 import org.scijava.ui.behaviour.util.Behaviours;
 import org.scijava.ui.behaviour.util.InputActionBindings;
 import org.scijava.ui.behaviour.util.TriggerBehaviourBindings;
 
+import bdv.ui.keymap.Keymap;
+import bdv.ui.keymap.KeymapManager;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.util.TMUtils;
 import ij.ImagePlus;
 import ij.gui.ImageCanvas;
 
 public class TrackMateImpBehaviour
 {
+
+	static final String KEY_CONFIG_CONTEXT = "trackmate";
+
+	public static final Scope KEY_CONFIG_SCOPE = new Scope( "TrackMate" );
 
 	/**
 	 * Attaches ui-behaviour interaction handling to a given {@link ImagePlus}.
@@ -46,14 +56,46 @@ public class TrackMateImpBehaviour
 		// A. Behaviours framework
 
 		// Initialize configuration and binding registries
-		final InputTriggerConfig config = new InputTriggerConfig();
 		final InputActionBindings actionBindings = new InputActionBindings();
 		final TriggerBehaviourBindings behaviourBindings = new TriggerBehaviourBindings();
 
-		// Initialize the Behaviours framework
+		final KeymapManager keymapManager = new KeymapManager()
+		{
+			@Override
+			public synchronized void discoverCommandDescriptions()
+			{
+				final CommandDescriptionsBuilder builder = new CommandDescriptionsBuilder();
+				final Context context = TMUtils.getContext();
+				context.inject( builder );
+				builder.discoverProviders( KEY_CONFIG_SCOPE );
+				setCommandDescriptions( builder.build() );
+			}
+		};
+		keymapManager.discoverCommandDescriptions();
+		final InputTriggerConfig config = keymapManager.getForwardSelectedKeymap().getConfig();
+
+		// Behaviours.
+		final Behaviours behaviours = new Behaviours( config, KEY_CONFIG_CONTEXT );
+		behaviours.install( behaviourBindings, "trackmate-beaviors" );
+
+		// Actions
+		final InputMap inputMap = actionBindings.getConcatenatedInputMap();
+		final ActionMap actionMap = actionBindings.getConcatenatedActionMap();
+		final Actions actions = new Actions( config, KEY_CONFIG_CONTEXT );
+		actions.install( actionBindings, "trackmate-actions" );
+
+		final Keymap keymap = keymapManager.getForwardSelectedKeymap();
+		keymap.updateListeners().add( () -> {
+			actions.updateKeyConfig( keymap.getConfig() );
+			behaviours.updateKeyConfig( keymap.getConfig() );
+		} );
+		actions.updateKeyConfig( keymap.getConfig() );
+		behaviours.updateKeyConfig( keymap.getConfig() );
+
+		// Initialize the handler
 		final MouseAndKeyHandler handler = new MouseAndKeyHandler();
-		final InputTriggerMap inputTriggerMap = new InputTriggerMap();
-		final BehaviourMap behaviourMap = new BehaviourMap();
+		final InputTriggerMap inputTriggerMap = behaviours.getInputTriggerMap();
+		final BehaviourMap behaviourMap = behaviours.getBehaviourMap();
 		handler.setInputMap( inputTriggerMap );
 		handler.setBehaviourMap( behaviourMap );
 
@@ -71,21 +113,6 @@ public class TrackMateImpBehaviour
 		canvas.addMouseListener( proxy );
 		canvas.addMouseMotionListener( proxy );
 		canvas.addMouseWheelListener( proxy );
-
-		// The behaviours.
-		final Behaviours behaviours = new Behaviours( inputTriggerMap, behaviourMap, config );
-		behaviours.install( behaviourBindings, "trackmate-beaviors" );
-
-		// Actions
-		final InputMap inputMap = actionBindings.getConcatenatedInputMap();
-		final ActionMap actionMap = actionBindings.getConcatenatedActionMap();
-		final Actions actions = new Actions( inputMap, actionMap, config );
-		actions.install( actionBindings, "trackmate-actions" );
-
-		// This is the debug
-		actions.runnableAction( () -> {
-			System.out.println( "Reset action triggered!" );
-		}, "reset-view", "R" );
 
 		// Direct Key Event Proxy Bridge. This was done with Gemini.
 		// Because an AWT Canvas bypasses Swing's ActionMap dispatch pipeline,
@@ -128,5 +155,7 @@ public class TrackMateImpBehaviour
 		SpotEditActions.install( actions, model, selectionModel, imp );
 		// Select spots with freehand ROI.
 		SelectSpotsWithRoiListener.install( model, selectionModel, imp );
+
+		TrackMateConfigDialog.prefDialog( imp.getWindow(), keymap, keymapManager, actions );
 	}
 }
