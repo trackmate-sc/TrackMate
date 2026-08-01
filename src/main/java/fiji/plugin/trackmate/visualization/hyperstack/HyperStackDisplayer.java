@@ -170,7 +170,7 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 		 * UI behaviours and actions
 		 */
 
-		final ImagePlusBehavioursAdapter adapter = new ImagePlusBehavioursAdapter( imp, keymapManager, KeyConfigContexts.HYPERSTACK_DISPLAYER );
+		final ImagePlusBehavioursAdapter adapter = new ImagePlusBehavioursAdapter( imp, keymapManager, new String[] { KeyConfigContexts.HYPERSTACK_DISPLAYER, KeyConfigContexts.TRACKMATE } );
 		SpotEditBehaviours.install( adapter.behaviours(), model, selectionModel, imp );
 		HyperStackDisplayerActions.install( adapter.actions(), model, selectionModel, imp );
 		TrackMateActions.install( adapter.actions(), model, selectionModel );

@@ -60,7 +60,7 @@ public class ImagePlusBehavioursAdapter
 
 	private final Behaviours behaviours;
 
-	public ImagePlusBehavioursAdapter( final ImagePlus imp, final KeymapManager keymapManager, final String keyConfigContext )
+	public ImagePlusBehavioursAdapter( final ImagePlus imp, final KeymapManager keymapManager, final String[] keyConfigContexts )
 	{
 		final ImageCanvas canvas = imp.getCanvas();
 		canvas.setFocusable( true );
@@ -72,14 +72,14 @@ public class ImagePlusBehavioursAdapter
 		final InputTriggerConfig config = keymapManager.getForwardSelectedKeymap().getConfig();
 
 		// Behaviours
-		this.behaviours = new Behaviours( config, keyConfigContext );
-		behaviours.install( behaviourBindings, keyConfigContext + "-beaviors" );
+		this.behaviours = new Behaviours( config, keyConfigContexts );
+		behaviours.install( behaviourBindings, keyConfigContexts[ 0 ] + "-behaviours" );
 
 		// Actions
 		final InputMap inputMap = actionBindings.getConcatenatedInputMap();
 		final ActionMap actionMap = actionBindings.getConcatenatedActionMap();
-		this.actions = new Actions( config, keyConfigContext );
-		actions.install( actionBindings, keyConfigContext + "-actions" );
+		this.actions = new Actions( config, keyConfigContexts );
+		actions.install( actionBindings, keyConfigContexts[ 0 ] + "-actions" );
 
 		final Keymap keymap = keymapManager.getForwardSelectedKeymap();
 		keymap.updateListeners().add( () -> {
