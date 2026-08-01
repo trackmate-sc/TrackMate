@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.visualization.hyperstack.behaviours;
+package fiji.plugin.trackmate.visualization.ui;
 
 import java.awt.Toolkit;
 import java.awt.event.InputEvent;
@@ -14,10 +14,8 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.util.TrackNavigator;
-import fiji.plugin.trackmate.visualization.ui.KeyConfigContexts;
-import ij.ImagePlus;
 
-public class SpotEditActions
+public class TrackMateActions
 {
 
 	private static final String UNDO_ACTION = "undo";
@@ -47,17 +45,6 @@ public class SpotEditActions
 	private static final String DELETE_SELECTION = "delete selection";
 	private static final String[] DELETE_SELECTION_KEYS = new String[] { "BACK_SPACE", "DELETE" };
 	
-	private static final String TOGGLE_AUTO_LINKING = "toggle auto-linking";
-	private static final String[] TOGGLE_AUTO_LINKING_KEYS = new String[] { "ctrl L" };
-	
-	private static final String NEXT_TIMEPOINT = "next timepoint";
-	private static final String PREVIOUS_TIMEPOINT = "previous timepoint";
-	private static final String[] NEXT_TIMEPOINT_KEYS = new String[] { "RIGHT" };
-	private static final String[] PREVIOUS_TIMEPOINT_KEYS = new String[] { "LEFT" };
-
-	private static final String SEMI_AUTOMATIC_TRACKING = "semi-automatic tracking";
-	private static final String[] SEMI_AUTOMATIC_TRACKING_KEYS = new String[] { "shift A" };
-
 	static
 	{
 		final int menuMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
@@ -66,7 +53,7 @@ public class SpotEditActions
 		REDO_ACTION_KEYS = new String[] { modifier + " Y", modifier + " shift Z" };
 	}
 
-	public static final void install( final Actions actions, final Model model, final SelectionModel selectionModel, final ImagePlus imp )
+	public static final void install( final Actions actions, final Model model, final SelectionModel selectionModel )
 	{
 		final TrackNavigator trackNavigator = new TrackNavigator( model, selectionModel );
 
@@ -84,22 +71,8 @@ public class SpotEditActions
 		actions.runnableAction( () -> trackNavigator.previousTrack(), NAVIGATE_TO_PREVIOUS_TRACK, NAVIGATE_TO_PREVIOUS_TRACK_KEYS );
 		actions.runnableAction( () -> trackNavigator.nextTrack(), NAVIGATE_TO_NEXT_TRACK, NAVIGATE_TO_NEXT_TRACK_KEYS );
 
-		// Delete
+		// Delete selection
 		actions.runnableAction( () -> deleteSelection( model, selectionModel ), DELETE_SELECTION, DELETE_SELECTION_KEYS );
-
-		// Toggle auto-linking
-		actions.runnableAction( () -> SpotEditBehaviours.autoLinkingmode = !SpotEditBehaviours.autoLinkingmode, TOGGLE_AUTO_LINKING, TOGGLE_AUTO_LINKING_KEYS );
-
-		// Avoid closing the window when pressing W
-		actions.runnableAction( () -> {}, "do nothing", new String[] { "W" } );
-
-		// Change timepoint
-		actions.runnableAction( () -> imp.setT( imp.getT() + SemiAutoTracking.params.stepwiseTimeBrowsing ), NEXT_TIMEPOINT, NEXT_TIMEPOINT_KEYS );
-		actions.runnableAction( () -> imp.setT( imp.getT() - SemiAutoTracking.params.stepwiseTimeBrowsing ), PREVIOUS_TIMEPOINT, PREVIOUS_TIMEPOINT_KEYS );
-		
-		// Semi-automatic tracking
-		final SemiAutoTracking semiAutoTracking = new SemiAutoTracking( model, selectionModel, imp );
-		actions.runnableAction( () -> semiAutoTracking.run(), SEMI_AUTOMATIC_TRACKING, SEMI_AUTOMATIC_TRACKING_KEYS );
 	}
 
 	private static void deleteSelection( final Model model, final SelectionModel selectionModel )
@@ -126,7 +99,7 @@ public class SpotEditActions
 	{
 		public Descriptions()
 		{
-			super( KeyConfigContexts.KEY_CONFIG_SCOPE, KeyConfigContexts.HYPERSTACK_DISPLAYER );
+			super( KeyConfigContexts.KEY_CONFIG_SCOPE, KeyConfigContexts.TRACKMATE );
 		}
 
 		@Override
@@ -145,11 +118,6 @@ public class SpotEditActions
 			descriptions.add( NAVIGATE_TO_NEXT_TRACK, NAVIGATE_TO_NEXT_TRACK_KEYS, "Navigate to the next track." );
 
 			descriptions.add( DELETE_SELECTION, DELETE_SELECTION_KEYS, "Delete the selected spots and edges." );
-			descriptions.add( TOGGLE_AUTO_LINKING, TOGGLE_AUTO_LINKING_KEYS, "Toggle the auto-linking mode." );
-			descriptions.add( NEXT_TIMEPOINT, NEXT_TIMEPOINT_KEYS, "Go to the next timepoint." );
-			descriptions.add( PREVIOUS_TIMEPOINT, PREVIOUS_TIMEPOINT_KEYS, "Go to the previous timepoint." );
-			descriptions.add( SEMI_AUTOMATIC_TRACKING, SEMI_AUTOMATIC_TRACKING_KEYS, "Run semi-automatic tracking on the selected spots." );
-			descriptions.add( "do nothing", new String[] { "W" }, "Do nothing. This is to avoid closing the window when pressing W." );
 		}
 	}
 }

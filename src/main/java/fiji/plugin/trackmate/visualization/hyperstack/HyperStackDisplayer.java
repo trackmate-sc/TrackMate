@@ -30,12 +30,13 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.visualization.AbstractTrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewUtils;
+import fiji.plugin.trackmate.visualization.hyperstack.behaviours.HyperStackDisplayerActions;
 import fiji.plugin.trackmate.visualization.hyperstack.behaviours.ImagePlusBehavioursAdapter;
 import fiji.plugin.trackmate.visualization.hyperstack.behaviours.SelectSpotsWithRoiListener;
-import fiji.plugin.trackmate.visualization.hyperstack.behaviours.SpotEditActions;
 import fiji.plugin.trackmate.visualization.hyperstack.behaviours.SpotEditBehaviours;
 import fiji.plugin.trackmate.visualization.hyperstack.behaviours.TrackMateConfigDialog;
 import fiji.plugin.trackmate.visualization.ui.KeyConfigContexts;
+import fiji.plugin.trackmate.visualization.ui.TrackMateActions;
 import ij.ImagePlus;
 import ij.gui.Overlay;
 import ij.gui.Roi;
@@ -171,7 +172,8 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 
 		final ImagePlusBehavioursAdapter adapter = new ImagePlusBehavioursAdapter( imp, keymapManager, KeyConfigContexts.HYPERSTACK_DISPLAYER );
 		SpotEditBehaviours.install( adapter.behaviours(), model, selectionModel, imp );
-		SpotEditActions.install( adapter.actions(), model, selectionModel, imp );
+		HyperStackDisplayerActions.install( adapter.actions(), model, selectionModel, imp );
+		TrackMateActions.install( adapter.actions(), model, selectionModel );
 		// Select spots with freehand ROI.
 		SelectSpotsWithRoiListener.install( model, selectionModel, imp );
 		// Pref dialog.
