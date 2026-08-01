@@ -21,6 +21,7 @@
  */
 package fiji.plugin.trackmate.visualization.hyperstack;
 
+import bdv.ui.keymap.Keymap;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.SelectionChangeEvent;
@@ -29,7 +30,11 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.visualization.AbstractTrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewUtils;
-import fiji.plugin.trackmate.visualization.hyperstack.behaviours.TrackMateImpBehaviour;
+import fiji.plugin.trackmate.visualization.hyperstack.behaviours.ImagePlusBehavioursAdapter;
+import fiji.plugin.trackmate.visualization.hyperstack.behaviours.SelectSpotsWithRoiListener;
+import fiji.plugin.trackmate.visualization.hyperstack.behaviours.SpotEditActions;
+import fiji.plugin.trackmate.visualization.hyperstack.behaviours.SpotEditBehaviours;
+import fiji.plugin.trackmate.visualization.hyperstack.behaviours.TrackMateConfigDialog;
 import ij.ImagePlus;
 import ij.gui.Overlay;
 import ij.gui.Roi;
@@ -43,9 +48,13 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 
 	protected TrackOverlay trackOverlay;
 
-	private SpotEditTool editTool;
-
 	public static final String KEY = "HYPERSTACKDISPLAYER";
+
+	/**
+	 * The key configuration context for actions and behaviours specific to this
+	 * displayer.
+	 */
+	public static final String KEY_CONFIG_CONTEXT = "trackmate-main-view";
 
 	/*
 	 * CONSTRUCTORS
@@ -160,14 +169,19 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 		addOverlay( spotOverlay );
 		addOverlay( trackOverlay );
 		imp.updateAndDraw();
-//		registerEditTool();
 
 		/*
-		 * Play with UI behaviour
+		 * UI behaviours and actions
 		 */
 
-		// Print all registered key listeners to console
-		TrackMateImpBehaviour.install( model, selectionModel, imp );
+		final ImagePlusBehavioursAdapter adapter = new ImagePlusBehavioursAdapter( imp, keymapManager, KEY_CONFIG_CONTEXT );
+		SpotEditBehaviours.install( adapter.behaviours(), model, selectionModel, imp );
+		SpotEditActions.install( adapter.actions(), model, selectionModel, imp );
+		// Select spots with freehand ROI.
+		SelectSpotsWithRoiListener.install( model, selectionModel, imp );
+		// Pref dialog.
+		final Keymap keymap = keymapManager.getForwardSelectedKeymap();
+		TrackMateConfigDialog.prefDialog( imp.getWindow(), keymap, keymapManager, adapter.actions() );
 	}
 
 	@Override
@@ -198,19 +212,6 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 	public SelectionModel getSelectionModel()
 	{
 		return selectionModel;
-	}
-
-	/*
-	 * PRIVATE METHODS
-	 */
-
-	private void registerEditTool()
-	{
-		editTool = SpotEditTool.getInstance();
-		if ( !SpotEditTool.isLaunched() )
-			editTool.run( "" );
-
-		editTool.register( this );
 	}
 
 	@Override

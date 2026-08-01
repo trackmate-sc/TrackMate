@@ -13,14 +13,18 @@ import bdv.tools.PreferencesDialog;
 import bdv.ui.keymap.Keymap;
 import bdv.ui.keymap.KeymapManager;
 import bdv.ui.keymap.KeymapSettingsPage;
+import fiji.plugin.trackmate.gui.GuiUtils;
+import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
+import fiji.plugin.trackmate.visualization.ui.TrackMateKeymapManager;
 
 public class TrackMateConfigDialog
 {
 
 	public static void prefDialog( final Frame frame, final Keymap keymap, final KeymapManager keymapManager, final Actions actions )
 	{
-		final PreferencesDialog preferencesDialog = new PreferencesDialog( frame, keymap, new String[] { TrackMateImpBehaviour.KEY_CONFIG_CONTEXT } );
-		fiji.plugin.trackmate.gui.GuiUtils.positionWindow( preferencesDialog, frame );
+		final PreferencesDialog preferencesDialog = new PreferencesDialog( frame, keymap,
+				new String[] { HyperStackDisplayer.KEY_CONFIG_CONTEXT } );
+		GuiUtils.positionWindow( preferencesDialog, frame );
 		BigDataViewerActions.toggleDialogAction( actions, preferencesDialog, BigDataViewerActions.PREFERENCES_DIALOG, BigDataViewerActions.PREFERENCES_DIALOG_KEYS );
 		preferencesDialog.addPage( new KeymapSettingsPage( "Keymap", keymapManager, keymapManager.getCommandDescriptions() ) );
 	}
@@ -30,7 +34,7 @@ public class TrackMateConfigDialog
 	{
 		public Descriptions()
 		{
-			super( TrackMateImpBehaviour.KEY_CONFIG_SCOPE, TrackMateImpBehaviour.KEY_CONFIG_CONTEXT );
+			super( TrackMateKeymapManager.KEY_CONFIG_SCOPE, HyperStackDisplayer.KEY_CONFIG_CONTEXT );
 		}
 
 		@Override
@@ -40,5 +44,4 @@ public class TrackMateConfigDialog
 			descriptions.add( BigDataViewerActions.PREFERENCES_DIALOG, BigDataViewerActions.PREFERENCES_DIALOG_KEYS, "Open the preferences dialog." );
 		}
 	}
-
 }
