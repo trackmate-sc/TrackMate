@@ -1,9 +1,13 @@
 package fiji.plugin.trackmate.visualization.trackscheme.behaviours;
 
+import org.scijava.plugin.Plugin;
+import org.scijava.ui.behaviour.io.gui.CommandDescriptionProvider;
+import org.scijava.ui.behaviour.io.gui.CommandDescriptions;
 import org.scijava.ui.behaviour.util.Actions;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackSchemeGraphComponent;
+import fiji.plugin.trackmate.visualization.ui.KeyConfigContexts;
 
 public class TrackSchemeActions
 {
@@ -64,5 +68,33 @@ public class TrackSchemeActions
 		actions.namedAction( new PanAction( PAN_DOWN_RIGHT, PAN_AMOUNT, PAN_AMOUNT, graphComponent ), PAN_DOWN_RIGHT_KEYS );
 		actions.namedAction( new PanAction( PAN_DOWN_LEFT, -PAN_AMOUNT, PAN_AMOUNT, graphComponent ), PAN_DOWN_LEFT_KEYS );
 		actions.namedAction( new PanAction( PAN_UP_LEFT, -PAN_AMOUNT, -PAN_AMOUNT, graphComponent ), PAN_UP_LEFT_KEYS );
+	}
+
+	@Plugin( type = CommandDescriptionProvider.class )
+	public static class Descriptions extends CommandDescriptionProvider
+	{
+		public Descriptions()
+		{
+			super( KeyConfigContexts.KEY_CONFIG_SCOPE, KeyConfigContexts.TRACKSCHEME );
+		}
+
+		@Override
+		public void getCommandDescriptions( final CommandDescriptions descriptions )
+		{
+			descriptions.add( EDIT_NAME, EDIT_NAME_KEYS, "Edit the name of the selected spots." );
+			descriptions.add( ZOOM_IN, ZOOM_IN_KEYS, "Zoom in." );
+			descriptions.add( ZOOM_OUT, ZOOM_OUT_KEYS, "Zoom out." );
+			descriptions.add( RESET_ZOOM, RESET_ZOOM_KEYS, "Reset zoom." );
+			descriptions.add( CENTER_ON_FIRST_SELECTED, CENTER_ON_FIRST_SELECTED_KEYS, "Center the view on the first selected spot." );
+			descriptions.add( CENTER_ON_LAST_SELECTED, CENTER_ON_LAST_SELECTED_KEYS, "Center the view on the last selected spot." );
+			descriptions.add( PAN_LEFT, PAN_LEFT_KEYS, "Pan left." );
+			descriptions.add( PAN_RIGHT, PAN_RIGHT_KEYS, "Pan right." );
+			descriptions.add( PAN_UP, PAN_UP_KEYS, "Pan up." );
+			descriptions.add( PAN_DOWN, PAN_DOWN_KEYS, "Pan down." );
+			descriptions.add( PAN_UP_RIGHT, PAN_UP_RIGHT_KEYS, "Pan up and right." );
+			descriptions.add( PAN_DOWN_RIGHT, PAN_DOWN_RIGHT_KEYS, "Pan down and right." );
+			descriptions.add( PAN_DOWN_LEFT, PAN_DOWN_LEFT_KEYS, "Pan down and left." );
+			descriptions.add( PAN_UP_LEFT, PAN_UP_LEFT_KEYS, "Pan up and left." );
+		}
 	}
 }
