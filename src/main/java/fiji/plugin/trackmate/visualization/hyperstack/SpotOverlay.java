@@ -60,8 +60,6 @@ public class SpotOverlay extends Roi
 
 	private static final long serialVersionUID = 1L;
 
-	protected Spot editingSpot;
-
 	protected final double[] calibration;
 
 	protected FontMetrics fm;
@@ -145,9 +143,6 @@ public class SpotOverlay extends Roi
 			// Track display mode only displays selection.
 			for ( final Spot spot : spotSelection )
 			{
-				if ( spot == editingSpot )
-					continue;
-
 				final int sFrame = spot.getFeature( Spot.FRAME ).intValue();
 				if ( sFrame != frame )
 					continue;
@@ -169,7 +164,7 @@ public class SpotOverlay extends Roi
 			{
 				final Spot spot = iterator.next();
 
-				if ( editingSpot == spot || ( spotSelection != null && spotSelection.contains( spot ) ) )
+				if ( spotSelection != null && spotSelection.contains( spot ) )
 					continue;
 
 				final Color color = colorGenerator.color( spot );
@@ -189,9 +184,6 @@ public class SpotOverlay extends Roi
 				g2d.setColor( displaySettings.getHighlightColor() );
 				for ( final Spot spot : spotSelection )
 				{
-					if ( spot == editingSpot )
-						continue;
-
 					final int sFrame = spot.getFeature( Spot.FRAME ).intValue();
 					if ( sFrame != frame )
 						continue;
@@ -202,32 +194,6 @@ public class SpotOverlay extends Roi
 		}
 
 		drawExtraLayer( g2d, frame );
-
-		/*
-		 * Deal with editing spot - we always draw it with its center at the
-		 * current z, current t (it moves along with the current slice).
-		 */
-		if ( null != editingSpot )
-		{
-			g2d.setColor( displaySettings.getHighlightColor() );
-			g2d.setStroke( new BasicStroke(
-					( float ) displaySettings.getLineThickness(),
-					BasicStroke.CAP_ROUND,
-					BasicStroke.JOIN_ROUND,
-					1.0f,
-					new float[] { 5f, 5f }, 0 ) );
-			final double x = editingSpot.getFeature( Spot.POSITION_X );
-			final double y = editingSpot.getFeature( Spot.POSITION_Y );
-			final double radius = editingSpot.getFeature( Spot.RADIUS ) / calibration[ 0 ] * lMag;
-			// In pixel units
-			final double xp = x / calibration[ 0 ] + 0.5d;
-			final double yp = y / calibration[ 1 ] + 0.5d;
-			// Scale to image zoom
-			final double xs = ( xp - xcorner ) * lMag;
-			final double ys = ( yp - ycorner ) * lMag;
-			final double radiusRatio = displaySettings.getSpotDisplayRadius();
-			g2d.drawOval( ( int ) Math.round( xs - radius * radiusRatio ), ( int ) Math.round( ys - radius * radiusRatio ), ( int ) Math.round( 2 * radius * radiusRatio ), ( int ) Math.round( 2 * radius * radiusRatio ) );
-		}
 
 		// Restore graphic device original settings
 		g2d.setTransform( originalTransform );
