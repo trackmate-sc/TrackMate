@@ -21,7 +21,6 @@
  */
 package fiji.plugin.trackmate.visualization.hyperstack;
 
-import bdv.ui.keymap.Keymap;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.SelectionChangeEvent;
@@ -34,9 +33,9 @@ import fiji.plugin.trackmate.visualization.hyperstack.behaviours.HyperStackDispl
 import fiji.plugin.trackmate.visualization.hyperstack.behaviours.ImagePlusBehavioursAdapter;
 import fiji.plugin.trackmate.visualization.hyperstack.behaviours.SelectSpotsWithRoiListener;
 import fiji.plugin.trackmate.visualization.hyperstack.behaviours.SpotEditBehaviours;
-import fiji.plugin.trackmate.visualization.hyperstack.behaviours.TrackMateConfigDialog;
 import fiji.plugin.trackmate.visualization.ui.KeyConfigContexts;
 import fiji.plugin.trackmate.visualization.ui.TrackMateActions;
+import fiji.plugin.trackmate.visualization.ui.TrackMateConfigDialog;
 import fiji.plugin.trackmate.visualization.ui.TrackMateKeymapManager;
 import ij.ImagePlus;
 import ij.gui.Overlay;
@@ -171,16 +170,23 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 		 * UI behaviours and actions
 		 */
 
-		final TrackMateKeymapManager keymapManager = TrackMateKeymapManager.keymapManager;
-		final ImagePlusBehavioursAdapter adapter = new ImagePlusBehavioursAdapter( imp, keymapManager, new String[] { KeyConfigContexts.HYPERSTACK_DISPLAYER, KeyConfigContexts.TRACKMATE } );
-		SpotEditBehaviours.install( adapter.behaviours(), model, selectionModel, imp );
-		HyperStackDisplayerActions.install( adapter.actions(), model, selectionModel, imp );
-		TrackMateActions.install( adapter.actions(), model, selectionModel );
-		// Select spots with freehand ROI.
-		SelectSpotsWithRoiListener.install( model, selectionModel, imp );
-		// Pref dialog.
-		final Keymap keymap = keymapManager.getForwardSelectedKeymap();
-		TrackMateConfigDialog.prefDialog( imp.getWindow(), keymap, keymapManager, adapter.actions() );
+		try
+		{
+			final TrackMateKeymapManager keymapManager = TrackMateKeymapManager.keymapManager;
+			final ImagePlusBehavioursAdapter adapter = new ImagePlusBehavioursAdapter( imp, keymapManager, new String[] { KeyConfigContexts.HYPERSTACK_DISPLAYER, KeyConfigContexts.TRACKMATE } );
+//			adapter.actions().runnableAction( () -> System.out.println( "TROLOLO" ), "refresh", new String[] { "R" } );
+			SpotEditBehaviours.install( adapter.behaviours(), model, selectionModel, imp );
+			HyperStackDisplayerActions.install( adapter.actions(), model, selectionModel, imp );
+			TrackMateActions.install( adapter.actions(), model, selectionModel );
+			// Select spots with freehand ROI.
+			SelectSpotsWithRoiListener.install( model, selectionModel, imp );
+			// Pref dialog.
+			TrackMateConfigDialog.prefDialog( imp.getWindow(), adapter.actions() );
+		}
+		catch ( final Exception e )
+		{
+			e.printStackTrace();
+		}
 	}
 
 	@Override

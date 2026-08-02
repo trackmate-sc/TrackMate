@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.visualization.hyperstack.behaviours;
+package fiji.plugin.trackmate.visualization.ui;
 
 import static fiji.plugin.trackmate.visualization.ui.KeyConfigContexts.ALL_SPOTS_TABLE;
 import static fiji.plugin.trackmate.visualization.ui.KeyConfigContexts.HYPERSTACK_DISPLAYER;
@@ -18,15 +18,16 @@ import bdv.BigDataViewerActions;
 import bdv.tools.CloseWindowActions;
 import bdv.tools.PreferencesDialog;
 import bdv.ui.keymap.Keymap;
-import bdv.ui.keymap.KeymapManager;
 import bdv.ui.keymap.KeymapSettingsPage;
 import fiji.plugin.trackmate.gui.GuiUtils;
 
 public class TrackMateConfigDialog
 {
 
-	public static void prefDialog( final Frame frame, final Keymap keymap, final KeymapManager keymapManager, final Actions actions )
+	public static void prefDialog( final Frame frame, final Actions actions )
 	{
+		final TrackMateKeymapManager keymapManager = TrackMateKeymapManager.keymapManager;
+		final Keymap keymap = keymapManager.getForwardSelectedKeymap();
 		final PreferencesDialog preferencesDialog = new PreferencesDialog( frame, keymap,
 				new String[] { TRACKMATE, HYPERSTACK_DISPLAYER, TRACKSCHEME, ALL_SPOTS_TABLE, TRACK_TABLE } );
 		GuiUtils.positionWindow( preferencesDialog, frame );
