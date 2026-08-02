@@ -21,6 +21,7 @@
  */
 package fiji.plugin.trackmate.visualization;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import fiji.plugin.trackmate.Model;
@@ -30,7 +31,6 @@ import fiji.plugin.trackmate.SelectionChangeListener;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.visualization.ui.TrackMateKeymapManager;
 
 /**
  * An abstract class for TrackMate views.
@@ -51,11 +51,7 @@ public abstract class AbstractTrackMateModelView implements SelectionChangeListe
 
 	protected final DisplaySettings displaySettings;
 
-	/*
-	 * STATIC FIELD
-	 */
-
-	protected static final TrackMateKeymapManager keymapManager = new TrackMateKeymapManager();
+	protected final ArrayList< Runnable > runOnClose;
 
 	/*
 	 * PROTECTED CONSTRUCTOR
@@ -66,13 +62,38 @@ public abstract class AbstractTrackMateModelView implements SelectionChangeListe
 		this.selectionModel = selectionModel;
 		this.model = model;
 		this.displaySettings = displaySettings;
+		runOnClose = new ArrayList<>();
+
 		model.addModelChangeListener( this );
 		selectionModel.addSelectionChangeListener( this );
+		onClose( () -> {
+			model.removeModelChangeListener( this );
+			selectionModel.removeSelectionChangeListener( this );
+		} );
 	}
 
 	/*
 	 * PUBLIC METHODS
 	 */
+
+
+	/**
+	 * Adds the specified {@link Runnable} to the list of runnables to execute
+	 * when this view is closed.
+	 *
+	 * @param runnable
+	 *            the {@link Runnable} to add.
+	 */
+	public synchronized void onClose( final Runnable runnable )
+	{
+		runOnClose.add( runnable );
+	}
+
+	protected synchronized void close()
+	{
+		runOnClose.forEach( Runnable::run );
+		runOnClose.clear();
+	}
 
 	/**
 	 * This needs to be overridden for concrete implementation to display
