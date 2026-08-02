@@ -37,6 +37,7 @@ import fiji.plugin.trackmate.visualization.hyperstack.behaviours.SpotEditBehavio
 import fiji.plugin.trackmate.visualization.hyperstack.behaviours.TrackMateConfigDialog;
 import fiji.plugin.trackmate.visualization.ui.KeyConfigContexts;
 import fiji.plugin.trackmate.visualization.ui.TrackMateActions;
+import fiji.plugin.trackmate.visualization.ui.TrackMateKeymapManager;
 import ij.ImagePlus;
 import ij.gui.Overlay;
 import ij.gui.Roi;
@@ -170,6 +171,7 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 		 * UI behaviours and actions
 		 */
 
+		final TrackMateKeymapManager keymapManager = TrackMateKeymapManager.keymapManager;
 		final ImagePlusBehavioursAdapter adapter = new ImagePlusBehavioursAdapter( imp, keymapManager, new String[] { KeyConfigContexts.HYPERSTACK_DISPLAYER, KeyConfigContexts.TRACKMATE } );
 		SpotEditBehaviours.install( adapter.behaviours(), model, selectionModel, imp );
 		HyperStackDisplayerActions.install( adapter.actions(), model, selectionModel, imp );
