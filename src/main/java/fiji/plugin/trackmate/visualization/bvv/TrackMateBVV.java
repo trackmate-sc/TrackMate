@@ -26,9 +26,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
-
 import org.joml.Matrix4f;
 
 import bdv.viewer.animate.TranslationAnimator;
@@ -43,7 +40,6 @@ import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.visualization.AbstractTrackMateModelView;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import ij.ImagePlus;
 import net.imglib2.RealLocalizable;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -100,10 +96,6 @@ public class TrackMateBVV< T extends Type< T > > extends AbstractTrackMateModelV
 				it.forEach( s -> meshMap.computeIfAbsent( s, BVVUtils::createMesh ).draw( gl, pvm, vm, selectionModel.getSpotSelection().contains( s ) ) );
 			}
 		} );
-
-		// Undo / redo
-		final JFrame frame = ( JFrame ) SwingUtilities.getWindowAncestor( viewer );
-		TrackMateModelView.registerUndoShortcut( frame, model );
 	}
 
 	@Override

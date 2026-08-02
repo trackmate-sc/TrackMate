@@ -157,9 +157,6 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 		getContentPane().add( mainPanel );
 		pack();
 
-		// Undo / redo
-		TrackMateModelView.registerUndoShortcut( this, model );
-
 		/*
 		 * Listeners.
 		 */
