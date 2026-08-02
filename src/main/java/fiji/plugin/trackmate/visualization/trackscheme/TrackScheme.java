@@ -67,6 +67,7 @@ import fiji.plugin.trackmate.visualization.AbstractTrackMateModelView;
 import fiji.plugin.trackmate.visualization.trackscheme.behaviours.TrackSchemeActions;
 import fiji.plugin.trackmate.visualization.ui.KeyConfigContexts;
 import fiji.plugin.trackmate.visualization.ui.TrackMateActions;
+import fiji.plugin.trackmate.visualization.ui.TrackMateConfigDialog;
 import ij.ImagePlus;
 
 public class TrackScheme extends AbstractTrackMateModelJFrameView
@@ -796,6 +797,8 @@ public class TrackScheme extends AbstractTrackMateModelJFrameView
 				attachKeybindings( gui.graphComponent );
 				TrackSchemeActions.install( actions, model, gui.graphComponent );
 				TrackMateActions.install( actions, model, selectionModel );
+				// Pref dialog.
+				TrackMateConfigDialog.prefDialog( gui, actions );
 
 				gui.logger.setProgress( 0 );
 				final long end = System.currentTimeMillis();
