@@ -62,10 +62,14 @@ import fiji.plugin.trackmate.SelectionChangeEvent;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.visualization.AbstractTrackMateModelJFrameView;
 import fiji.plugin.trackmate.visualization.AbstractTrackMateModelView;
+import fiji.plugin.trackmate.visualization.trackscheme.behaviours.TrackSchemeActions;
+import fiji.plugin.trackmate.visualization.ui.KeyConfigContexts;
+import fiji.plugin.trackmate.visualization.ui.TrackMateActions;
 import ij.ImagePlus;
 
-public class TrackScheme extends AbstractTrackMateModelView
+public class TrackScheme extends AbstractTrackMateModelJFrameView
 {
 	public static final String INFO_TEXT = "<html>"
 			+ "TrackScheme displays the tracking results as track lanes, <br>"
@@ -163,8 +167,9 @@ public class TrackScheme extends AbstractTrackMateModelView
 
 	public TrackScheme( final Model model, final SelectionModel selectionModel, final DisplaySettings displaySettings )
 	{
-		super( model, selectionModel, displaySettings );
+		super( model, selectionModel, displaySettings, KeyConfigContexts.TRACKSCHEME );
 		this.gui = new TrackSchemeFrame( this, displaySettings );
+		setWindow( gui );
 		final String title = "TrackScheme";
 		gui.setTitle( title );
 		gui.setSize( DEFAULT_SIZE );
@@ -298,7 +303,6 @@ public class TrackScheme extends AbstractTrackMateModelView
 	 */
 	private mxICell updateCellOf( final Spot spot )
 	{
-
 		mxICell cell = graph.getCellFor( spot );
 		graph.getModel().beginUpdate();
 		try
@@ -740,6 +744,9 @@ public class TrackScheme extends AbstractTrackMateModelView
 	@Override
 	public void render()
 	{
+		if ( graph != null )
+			return;
+
 		final long start = System.currentTimeMillis();
 		// Graph to mirror model
 		this.graph = createGraph();
@@ -784,6 +791,11 @@ public class TrackScheme extends AbstractTrackMateModelView
 
 				gui.graphComponent.zoomOut();
 				gui.graphComponent.zoomOut();
+
+				// Actions and behaviours
+				attachKeybindings( gui.graphComponent );
+				TrackSchemeActions.install( actions, model, gui.graphComponent );
+				TrackMateActions.install( actions, model, selectionModel );
 
 				gui.logger.setProgress( 0 );
 				final long end = System.currentTimeMillis();
