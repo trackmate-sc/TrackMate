@@ -50,6 +50,8 @@ public class WindowManager
 
 	private final List< Window > windows = new ArrayList<>();
 
+	private HyperStackDisplayer mainView;
+
 	public WindowManager( final GuiModel guiModel )
 	{
 		this.guiModel = guiModel;
@@ -67,10 +69,11 @@ public class WindowManager
 
 	public HyperStackDisplayer createHyperStackDisplayer()
 	{
-		final HyperStackDisplayer displayer = new HyperStackDisplayer( guiModel );
-		registerView( displayer );
-		displayer.render();
-		return displayer;
+		if ( mainView != null )
+			throw new IllegalStateException( "There can be only one main view." );
+		this.mainView = new HyperStackDisplayer( guiModel );
+		mainView.render();
+		return mainView;
 	}
 
 	public TMLabKitFrame createSpotEditor( final boolean singleTimepoint )
@@ -141,8 +144,8 @@ public class WindowManager
 	}
 
 	/**
-	 * Registers a frame created by this window manager. This is useful for
-	 * windows and dialogs that are not TrackMateModelView.
+	 * Registers a frame in this window manager. This is useful for windows and
+	 * dialogs that are not TrackMateModelView.
 	 * 
 	 * @param frame
 	 *            the frame to register.
