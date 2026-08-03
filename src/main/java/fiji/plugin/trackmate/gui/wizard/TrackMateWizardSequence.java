@@ -22,12 +22,18 @@
 package fiji.plugin.trackmate.gui.wizard;
 
 import java.awt.Window;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.WindowConstants;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
@@ -40,6 +46,7 @@ import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.ModelFeatureUpdater;
 import fiji.plugin.trackmate.gui.GuiModel;
+import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.components.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.components.LogPanel;
@@ -65,7 +72,9 @@ import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.tracking.SpotImageTrackerFactory;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import fiji.plugin.trackmate.tracking.manual.ManualTrackerFactory;
+import fiji.plugin.trackmate.util.ImpCloseWindowListener;
 import fiji.plugin.trackmate.visualization.AbstractTrackMateModelJFrameView;
+import ij.gui.ImageWindow;
 
 public class TrackMateWizardSequence extends AbstractTrackMateModelJFrameView implements WizardSequence
 {
@@ -397,7 +406,7 @@ public class TrackMateWizardSequence extends AbstractTrackMateModelJFrameView im
 		}
 
 		final ConfigurationPanel trackerConfigurationPanel;
-		if (trackerFactory instanceof SpotImageTrackerFactory)
+		if ( trackerFactory instanceof SpotImageTrackerFactory )
 		{
 			trackerConfigurationPanel = ( ( SpotImageTrackerFactory ) trackerFactory ).getTrackerConfigurationPanel( model, settings.imp );
 		}
@@ -423,11 +432,48 @@ public class TrackMateWizardSequence extends AbstractTrackMateModelJFrameView im
 	public JFrame run( final String title )
 	{
 		this.frame = WizardSequence.super.run( title );
-		setWindow( frame );
-		onClose( () -> {
-			guiModel.getModel().setLogger( Logger.VOID_LOGGER );
+		final ImageWindow window = guiModel.getSettings().imp.getWindow();
+
+		// Build a confirmation dialog, add it to the wizard window and the
+		// image window.
+		final BooleanSupplier confirmClose = () -> {
+			final int choice = JOptionPane.showOptionDialog( window, ""
+					+ "This will close the image and\n"
+					+ "terminate this TrackMate session. \n"
+					+ "Close window?",
+					"End TrackMate session?",
+					JOptionPane.YES_NO_OPTION,
+					JOptionPane.QUESTION_MESSAGE,
+					Icons.TRACKMATE_ICON_64x64,
+					null,
+					JOptionPane.NO_OPTION );
+			return ( choice == JOptionPane.YES_OPTION );
+		};
+		final Runnable onClosed = () -> {
 			guiModel.getWindowManager().closeAll();
-		} );
+			frame.dispose();
+		};
+
+		// Intercept closing the image -> ask for confirmation.
+		ImpCloseWindowListener.wrap( window, confirmClose, onClosed );
+
+		// Intercept closing the main window.
+		frame.setDefaultCloseOperation( WindowConstants.DO_NOTHING_ON_CLOSE );
+		final WindowListener closeConfirm = new WindowAdapter()
+		{
+
+			@Override
+			public void windowClosing( final WindowEvent e )
+			{
+				if ( confirmClose.getAsBoolean() )
+				{
+					onClosed.run();
+					window.dispose();
+				}
+			};
+		};
+		frame.addWindowListener( closeConfirm );
+		setWindow( frame );
 		return frame;
 	}
 
