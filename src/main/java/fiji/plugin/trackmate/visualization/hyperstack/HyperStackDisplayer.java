@@ -22,6 +22,8 @@
 package fiji.plugin.trackmate.visualization.hyperstack;
 
 import java.awt.Window;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import org.scijava.ui.behaviour.util.Actions;
 import org.scijava.ui.behaviour.util.WrappedActionMap;
@@ -79,14 +81,6 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 		onClose( () -> displaySettings.listeners().remove( refresher ) );
 	}
 
-	/*
-	 * PROTECTED METHODS
-	 */
-
-	/*
-	 * PUBLIC METHODS
-	 */
-
 	/**
 	 * Exposes the {@link ImagePlus} on which the model is drawn by this view.
 	 *
@@ -140,6 +134,15 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 		imp.setOpenAsHyperStack( true );
 		if ( !imp.isVisible() )
 			imp.show();
+
+		imp.getWindow().addWindowListener( new WindowAdapter()
+		{
+			@Override
+			public void windowClosing( final WindowEvent e )
+			{
+				close();
+			}
+		} );
 
 		addOverlay( spotOverlay );
 		addOverlay( trackOverlay );
