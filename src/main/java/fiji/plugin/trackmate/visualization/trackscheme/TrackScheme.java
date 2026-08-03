@@ -25,8 +25,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.Window;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,13 +60,11 @@ import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.SelectionChangeEvent;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.visualization.AbstractTrackMateModelJFrameView;
 import fiji.plugin.trackmate.visualization.AbstractTrackMateModelView;
 import fiji.plugin.trackmate.visualization.trackscheme.behaviours.TrackSchemeActions;
 import fiji.plugin.trackmate.visualization.ui.KeyConfigContexts;
-import fiji.plugin.trackmate.visualization.ui.TrackMateActions;
-import fiji.plugin.trackmate.visualization.ui.TrackMateConfigDialog;
 import ij.ImagePlus;
 
 public class TrackScheme extends AbstractTrackMateModelJFrameView
@@ -166,24 +163,15 @@ public class TrackScheme extends AbstractTrackMateModelJFrameView
 	 * CONSTRUCTORS
 	 */
 
-	public TrackScheme( final Model model, final SelectionModel selectionModel, final DisplaySettings displaySettings )
+	public TrackScheme( final GuiModel guiModel )
 	{
-		super( model, selectionModel, displaySettings, KeyConfigContexts.TRACKSCHEME );
-		this.gui = new TrackSchemeFrame( this, displaySettings );
+		super( guiModel, KeyConfigContexts.TRACKSCHEME );
+		this.gui = new TrackSchemeFrame( this, guiModel.getDisplaySettings() );
 		setWindow( gui );
 		final String title = "TrackScheme";
 		gui.setTitle( title );
 		gui.setSize( DEFAULT_SIZE );
 		
-		displaySettings.listeners().add( () -> doTrackStyle() );
-		gui.addWindowListener( new WindowAdapter()
-		{
-			@Override
-			public void windowClosing( final WindowEvent e )
-			{
-				model.removeModelChangeListener( TrackScheme.this );
-			}
-		} );
 		gui.setLocationByPlatform( true );
 		gui.setLocationRelativeTo( null );
 		gui.setVisible( true );
@@ -196,11 +184,6 @@ public class TrackScheme extends AbstractTrackMateModelJFrameView
 	public void setSpotImageUpdater( final SpotImageUpdater spotImageUpdater )
 	{
 		this.spotImageUpdater = spotImageUpdater;
-	}
-
-	public SelectionModel getSelectionModel()
-	{
-		return selectionModel;
 	}
 
 	/**
@@ -225,9 +208,7 @@ public class TrackScheme extends AbstractTrackMateModelJFrameView
 	{
 		Integer columnIndex = rowLengths.get( frame );
 		if ( null == columnIndex )
-		{
 			columnIndex = 2;
-		}
 		return columnIndex + 1;
 	}
 
@@ -274,7 +255,7 @@ public class TrackScheme extends AbstractTrackMateModelJFrameView
 	{
 		gui.logger.setStatus( "Creating graph adapter." );
 
-		final JGraphXAdapter lGraph = new JGraphXAdapter( model );
+		final JGraphXAdapter lGraph = new JGraphXAdapter( guiModel.getModel() );
 		lGraph.setAllowLoops( false );
 		lGraph.setAllowDanglingEdges( false );
 		lGraph.setCellsCloneable( false );
@@ -326,7 +307,7 @@ public class TrackScheme extends AbstractTrackMateModelJFrameView
 			if ( spotImageUpdater != null && doThumbnailCapture )
 			{
 				String style = cell.getStyle();
-				final double radiusFactor = displaySettings.getSpotDisplayRadius();
+				final double radiusFactor = guiModel.getDisplaySettings().getSpotDisplayRadius();
 				final String imageStr = spotImageUpdater.getImageString( spot, radiusFactor );
 				style = mxStyleUtils.setStyle( style, mxConstants.STYLE_IMAGE, "data:image/base64," + imageStr );
 				graph.getModel().setStyle( cell, style );
@@ -361,7 +342,7 @@ public class TrackScheme extends AbstractTrackMateModelJFrameView
 		final mxGeometry geometry = new mxGeometry( x, y, DEFAULT_CELL_WIDTH, DEFAULT_CELL_HEIGHT );
 		cellAdded.setGeometry( geometry );
 		// Set its style
-		final double radiusFactor = displaySettings.getSpotDisplayRadius();
+		final double radiusFactor = guiModel.getDisplaySettings().getSpotDisplayRadius();
 		if ( null != spotImageUpdater && doThumbnailCapture )
 		{
 			final String imageStr = spotImageUpdater.getImageString( spot, radiusFactor );
@@ -378,6 +359,7 @@ public class TrackScheme extends AbstractTrackMateModelJFrameView
 	 */
 	private void importTrack( final int trackIndex )
 	{
+		final Model model = guiModel.getModel();
 		model.beginUpdate();
 		graph.getModel().beginUpdate();
 		try
@@ -423,6 +405,7 @@ public class TrackScheme extends AbstractTrackMateModelJFrameView
 		{
 			final mxIGraphModel graphModel = graph.getModel();
 			cell.setValue( "New" );
+			final Model model = guiModel.getModel();
 			model.beginUpdate();
 			graphModel.beginUpdate();
 			try
@@ -495,7 +478,7 @@ public class TrackScheme extends AbstractTrackMateModelJFrameView
 			{
 				graphModel.endUpdate();
 				model.endUpdate();
-				selectionModel.clearEdgeSelection();
+				guiModel.getSelectionModel().clearEdgeSelection();
 			}
 		}
 	}
@@ -512,6 +495,7 @@ public class TrackScheme extends AbstractTrackMateModelJFrameView
 
 		doFireSelectionChangeEvent = false;
 
+		final SelectionModel selectionModel = guiModel.getSelectionModel();
 		final ArrayList< Object > newSelection = new ArrayList<>( selectionModel.getSpotSelection().size() + selectionModel.getEdgeSelection().size() );
 		final Iterator< DefaultWeightedEdge > edgeIt = selectionModel.getEdgeSelection().iterator();
 		while ( edgeIt.hasNext() )
@@ -566,6 +550,7 @@ public class TrackScheme extends AbstractTrackMateModelJFrameView
 		if ( event.getEventID() != ModelChangeEvent.MODEL_MODIFIED )
 			return;
 
+		final Model model = guiModel.getModel();
 		graph.getModel().beginUpdate();
 		try
 		{
@@ -758,15 +743,17 @@ public class TrackScheme extends AbstractTrackMateModelJFrameView
 			@Override
 			public void run()
 			{
+				final Model model = guiModel.getModel();
+
 				// Pass graph to GUI
 				gui.logger.setStatus( "Generating GUI components." );
 				gui.init( graph );
 
 				// Init functions that set look and position
 				gui.logger.setStatus( "Creating style manager." );
-				TrackScheme.this.stylist = new TrackSchemeStylist( model, graph, displaySettings );
+				TrackScheme.this.stylist = new TrackSchemeStylist( guiModel.getModel(), graph, guiModel.getDisplaySettings() );
 				gui.logger.setStatus( "Creating layout manager." );
-				TrackScheme.this.graphLayout = new TrackSchemeGraphLayout( graph, model, gui.graphComponent );
+				TrackScheme.this.graphLayout = new TrackSchemeGraphLayout( graph, guiModel.getModel(), gui.graphComponent );
 
 				// Execute style and layout
 				gui.logger.setProgress( 0.75 );
@@ -794,11 +781,9 @@ public class TrackScheme extends AbstractTrackMateModelJFrameView
 				gui.graphComponent.zoomOut();
 
 				// Actions and behaviours
-				attachKeybindings( gui.graphComponent );
 				TrackSchemeActions.install( actions, model, gui.graphComponent );
-				TrackMateActions.install( actions, model, selectionModel );
-				// Pref dialog.
-				TrackMateConfigDialog.prefDialog( gui, actions );
+				// DEBUG
+				actions.runnableAction( () -> System.out.println( "[TrackScheme] TROLOLO" ), "trolol", "R" );
 
 				gui.logger.setProgress( 0 );
 				final long end = System.currentTimeMillis();
@@ -810,19 +795,13 @@ public class TrackScheme extends AbstractTrackMateModelJFrameView
 
 	@Override
 	public void refresh()
-	{}
+	{
+		doTrackStyle();
+	}
 
 	@Override
 	public void clear()
-	{
-		System.out.println( "[TrackScheme] clear() called" );
-	}
-
-	@Override
-	public Model getModel()
-	{
-		return model;
-	}
+	{}
 
 	/*
 	 * PRIVATE METHODS
@@ -932,6 +911,7 @@ public class TrackScheme extends AbstractTrackMateModelJFrameView
 		}
 
 		doFireSelectionChangeEvent = false;
+		final SelectionModel selectionModel = guiModel.getSelectionModel();
 
 		if ( !edgesToAdd.isEmpty() )
 			selectionModel.addEdgeToSelection( edgesToAdd );
@@ -996,6 +976,8 @@ public class TrackScheme extends AbstractTrackMateModelJFrameView
 
 			// Clean model
 			doFireModelChangeEvent = false;
+			final Model model = guiModel.getModel();
+			final SelectionModel selectionModel = guiModel.getSelectionModel();
 			model.beginUpdate();
 			try
 			{
@@ -1106,6 +1088,7 @@ public class TrackScheme extends AbstractTrackMateModelJFrameView
 	private void createThumbnails()
 	{
 		// Group spots per frame
+		final Model model = guiModel.getModel();
 		final Set< Integer > frames = model.getSpots().keySet();
 		final HashMap< Integer, HashSet< Spot > > spotPerFrame = new HashMap<>( frames.size() );
 		for ( final Integer frame : frames )
@@ -1124,7 +1107,7 @@ public class TrackScheme extends AbstractTrackMateModelJFrameView
 		if ( null != spotImageUpdater )
 		{
 			gui.logger.setStatus( "Collecting spot thumbnails." );
-			final double radiusFactor = displaySettings.getSpotDisplayRadius();
+			final double radiusFactor = guiModel.getDisplaySettings().getSpotDisplayRadius();
 			int index = 0;
 			try
 			{
@@ -1205,6 +1188,8 @@ public class TrackScheme extends AbstractTrackMateModelJFrameView
 	 */
 	public void linkSpots()
 	{
+		final Model model = guiModel.getModel();
+		final SelectionModel selectionModel = guiModel.getSelectionModel();
 
 		// Sort spots by time
 		final TreeMap< Integer, Spot > spotsInTime = new TreeMap<>();
@@ -1352,12 +1337,18 @@ public class TrackScheme extends AbstractTrackMateModelJFrameView
 			inspectionEdges.add( dwe );
 		}
 		// Forward to selection model
-		selectionModel.selectTrack( inspectionSpots, inspectionEdges, direction );
+		guiModel.getSelectionModel().selectTrack( inspectionSpots, inspectionEdges, direction );
 	}
 
 	@Override
 	public String getKey()
 	{
 		return KEY;
+	}
+
+	@Override
+	public Window getWindow()
+	{
+		return gui;
 	}
 }

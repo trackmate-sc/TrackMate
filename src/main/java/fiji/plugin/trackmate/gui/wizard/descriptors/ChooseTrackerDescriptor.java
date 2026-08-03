@@ -23,8 +23,10 @@ package fiji.plugin.trackmate.gui.wizard.descriptors;
 
 import java.util.Map;
 
-import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.features.FeatureUtils;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.components.ModuleChooserPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
@@ -39,25 +41,20 @@ public class ChooseTrackerDescriptor extends WizardPanelDescriptor
 
 	private static final String KEY = "ChooseTracker";
 
-	private final TrackMate trackmate;
-
 	private final TrackerProvider trackerProvider;
 
-	private final DisplaySettings displaySettings;
+	private final GuiModel guiModel;
 
-	public ChooseTrackerDescriptor(
-			final TrackerProvider trackerProvider,
-			final TrackMate trackmate,
-			final DisplaySettings displaySettings )
+	public ChooseTrackerDescriptor( final TrackerProvider trackerProvider, final GuiModel guiModel )
 	{
 		super( KEY );
-		this.trackmate = trackmate;
 		this.trackerProvider = trackerProvider;
-		this.displaySettings = displaySettings;
+		this.guiModel = guiModel;
 
+		final Settings settings = guiModel.getSettings();
 		String selectedTracker = SimpleSparseLAPTrackerFactory.THIS2_TRACKER_KEY; // default
-		if ( null != trackmate.getSettings().trackerFactory )
-			selectedTracker = trackmate.getSettings().trackerFactory.getKey();
+		if ( null != settings.trackerFactory )
+			selectedTracker = settings.trackerFactory.getKey();
 
 		this.targetPanel = new ModuleChooserPanel<>( trackerProvider, "tracker", selectedTracker );
 	}
@@ -65,8 +62,8 @@ public class ChooseTrackerDescriptor extends WizardPanelDescriptor
 	private void setCurrentChoiceFromPlugin()
 	{
 		String key = SimpleSparseLAPTrackerFactory.THIS2_TRACKER_KEY; // default
-		if ( null != trackmate.getSettings().trackerFactory )
-			key = trackmate.getSettings().trackerFactory.getKey();
+		if ( null != guiModel.getSettings().trackerFactory )
+			key = guiModel.getSettings().trackerFactory.getKey();
 
 		@SuppressWarnings( "unchecked" )
 		final ModuleChooserPanel< SpotTrackerFactory > component = ( fiji.plugin.trackmate.gui.components.ModuleChooserPanel< SpotTrackerFactory > ) targetPanel;
@@ -82,6 +79,9 @@ public class ChooseTrackerDescriptor extends WizardPanelDescriptor
 	@Override
 	public void aboutToHidePanel()
 	{
+		final Model model = guiModel.getModel();
+		final Settings settings = guiModel.getSettings();
+
 		// Configure the detector provider with choice made in panel
 		@SuppressWarnings( "unchecked" )
 		final ModuleChooserPanel< SpotTrackerFactory > component = ( fiji.plugin.trackmate.gui.components.ModuleChooserPanel< SpotTrackerFactory > ) targetPanel;
@@ -92,24 +92,24 @@ public class ChooseTrackerDescriptor extends WizardPanelDescriptor
 
 		if ( null == factory )
 		{
-			trackmate.getModel().getLogger().error( "[ChooseTrackerDescriptor] Cannot find tracker named " + trackerKey + " in current TrackMate modules." );
+			model.getLogger().error( "[ChooseTrackerDescriptor] Cannot find tracker named " + trackerKey + " in current TrackMate modules." );
 			return;
 		}
-		trackmate.getSettings().trackerFactory = factory;
+		settings.trackerFactory = factory;
 
 		/*
 		 * Compare current settings with default ones, and substitute default
 		 * ones only if the old ones are absent or not compatible with it.
 		 */
-		final Map< String, Object > currentSettings = trackmate.getSettings().trackerSettings;
+		final Map< String, Object > currentSettings = settings.trackerSettings;
 		if ( factory.checkSettings( currentSettings ) != null )
 		{
 			final Map< String, Object > defaultSettings = factory.getDefaultSettings();
-			trackmate.getSettings().trackerSettings = defaultSettings;
+			settings.trackerSettings = defaultSettings;
 		}
 
 		// Settings persistence.
-		SettingsPersistence.saveLastUsedSettings( trackmate.getSettings(), trackmate.getModel().getLogger() );
+		SettingsPersistence.saveLastUsedSettings( settings, model.getLogger() );
 	}
 
 	@Override
@@ -117,10 +117,12 @@ public class ChooseTrackerDescriptor extends WizardPanelDescriptor
 	{
 		// Delete tracks and put back default coloring if needed.
 		return () -> {
+			final Model model = guiModel.getModel();
+			final DisplaySettings displaySettings = guiModel.getDisplaySettings();
 			if ( displaySettings.getSpotColorByType() == TrackMateObject.TRACKS
 					|| displaySettings.getSpotColorByType() == TrackMateObject.EDGES )
 				displaySettings.setSpotColorBy( TrackMateObject.DEFAULT, FeatureUtils.USE_UNIFORM_COLOR_KEY );
-			trackmate.getModel().clearTracks( true );
+			model.clearTracks( true );
 		};
 	}
 }

@@ -28,24 +28,26 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
 import fiji.plugin.trackmate.util.Threads;
+import ij.ImagePlus;
 
 public class AutoNamingController
 {
-
-	private final TrackMate trackmate;
 
 	private final AutoNamingPanel gui;
 
 	private final Logger logger;
 
-	public AutoNamingController( final TrackMate trackmate, final Logger logger )
+	private final GuiModel guiModel;
+
+	public AutoNamingController( final GuiModel guiModel, final Logger logger )
 	{
-		this.trackmate = trackmate;
+		this.guiModel = guiModel;
 		this.logger = logger;
 
 		final Collection< AutoNamingRule > namingRules = new ArrayList<>( 3 );
@@ -60,6 +62,7 @@ public class AutoNamingController
 
 	private void run( final AutoNamingRule autoNaming )
 	{
+		final Model model = guiModel.getModel();
 		final EverythingDisablerAndReenabler disabler = new EverythingDisablerAndReenabler( gui, new Class[] { JLabel.class } );
 		disabler.disable();
 		Threads.run( "TrackMateAutoNamingThread", () ->
@@ -68,8 +71,8 @@ public class AutoNamingController
 			{
 				logger.log( "Applying naming rule: " + autoNaming.toString() + ".\n" );
 				logger.setStatus( "Spot auto-naming" );
-				AutoNamingPerformer.autoNameSpots( trackmate.getModel(), autoNaming );
-				trackmate.getModel().notifyFeaturesComputed();
+				AutoNamingPerformer.autoNameSpots( model, autoNaming );
+				model.notifyFeaturesComputed();
 				logger.log( "Spot auto-naming done.\n" );
 			}
 			finally
@@ -88,7 +91,11 @@ public class AutoNamingController
 		frame.setIconImage( Icons.TRACK_SCHEME_ICON.getImage() );
 		frame.setSize( 500, 400 );
 		frame.getContentPane().add( gui );
-		GuiUtils.positionWindow( frame, trackmate.getSettings().imp.getCanvas() );
+		final ImagePlus imp = guiModel.getSettings().imp;
+		if ( imp != null )
+			GuiUtils.positionWindow( frame, imp.getCanvas() );
+		else
+			frame.setLocationRelativeTo( null );
 		frame.setVisible( true );
 	}
 }

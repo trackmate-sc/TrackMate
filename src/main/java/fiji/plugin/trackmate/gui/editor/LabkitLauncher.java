@@ -21,38 +21,28 @@
  */
 package fiji.plugin.trackmate.gui.editor;
 
-import java.awt.Component;
-import java.awt.event.ActionEvent;
 import java.io.File;
 
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JRootPane;
 import javax.swing.JSeparator;
-import javax.swing.SwingUtilities;
 
 import org.scijava.Context;
-import org.scijava.ui.behaviour.util.AbstractNamedAction;
 
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.detection.DetectionUtils;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame;
 import fiji.plugin.trackmate.gui.editor.labkit.model.TMLabKitModel;
 import fiji.plugin.trackmate.io.TmXmlReader;
-import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
 import fiji.plugin.trackmate.util.TMUtils;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewUtils;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.ImagePlus;
+import ij.gui.Roi;
 import net.imagej.axis.Axes;
 import net.imagej.axis.CalibratedAxis;
 import net.imglib2.Interval;
@@ -61,25 +51,24 @@ import sc.fiji.labkit.ui.labeling.Labeling;
 public class LabkitLauncher
 {
 
-	private static final boolean ENABLE_SPOT_EDITOR = true;
-
 	private static boolean simplify = true;
 
-	public static final TMLabKitFrame launch( final TrackMate trackmate, final DisplaySettings displaySettings, final int timepoint )
+	public static final TMLabKitFrame launch( final GuiModel guiModel, final int timepoint )
 	{
 		// Input model.
-		final Model model = trackmate.getModel();
+		final Model model = guiModel.getModel();
 
 		// Input image.
-		ImagePlus imp = trackmate.getSettings().imp;
+		ImagePlus imp = guiModel.getSettings().imp;
 		if ( null == imp )
-			imp = ViewUtils.makeEmpytImagePlus( model );
+			imp = ViewUtils.makeEmptyImagePlus( model );
 
 		// ROI & interval.
 		final Interval interval = TMUtils.createROIInterval( imp );
 
 		// Create the LabKit model.
 		final Context context = TMUtils.getContext();
+		final DisplaySettings displaySettings = guiModel.getDisplaySettings();
 		final TMLabKitModel lbModel = TMLabKitModel.create( model, imp, interval, displaySettings, timepoint, context );
 
 		// Create the UI for editing.
@@ -157,61 +146,10 @@ public class LabkitLauncher
 		}.start();
 	}
 
-	public static final AbstractNamedAction getLaunchAction( final TrackMate trackmate, final DisplaySettings ds )
-	{
-		final AbstractNamedAction action = new AbstractNamedAction( "launch labkit editor" )
-		{
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public void actionPerformed( final ActionEvent ae )
-			{
-				new Thread( "TrackMate editor thread" )
-				{
-					@Override
-
-					public void run()
-					{
-						final JRootPane parent = SwingUtilities.getRootPane( ( Component ) ae.getSource() );
-						final EverythingDisablerAndReenabler disabler = new EverythingDisablerAndReenabler( parent, new Class[] { JLabel.class } );
-						disabler.disable();
-						try
-						{
-							// Is shift pressed?
-							final int mod = ae.getModifiers();
-							final boolean shiftPressed = ( mod & ActionEvent.SHIFT_MASK ) > 0;
-							final boolean singleTimepoint = !shiftPressed;
-							final ImagePlus imp = trackmate.getSettings().imp;
-							int timepoint;
-							if ( imp == null )
-								timepoint = -1;
-							else
-								timepoint = singleTimepoint ? imp.getFrame() - 1 : -1;
-
-							final TMLabKitFrame labKitFrame = LabkitLauncher.launch( trackmate, ds, timepoint );
-							labKitFrame.onCloseListeners().addListener( disabler::reenable );
-						}
-						catch ( final Exception e )
-						{
-							e.printStackTrace();
-							disabler.reenable();
-						}
-					};
-				}.start();
-			}
-		}; // Disable if the image is not 2D.
-		if ( !DetectionUtils.is2D( trackmate.getSettings().imp ) )
-			action.setEnabled( false );
-		else
-			action.setEnabled( ENABLE_SPOT_EDITOR );
-		return action;
-	}
-
 	public static void main( final String[] args )
 	{
-//		final String filename = "samples/MAX_Merged.xml";
-		final String filename = "samples/221031_Stat_Stage55_561nm_part1Conf_crop_f4.xml";
+		final String filename = "samples/MAX_Merged.xml";
+//		final String filename = "samples/221031_Stat_Stage55_561nm_part1Conf_crop_f4.xml";
 		final TmXmlReader reader = new TmXmlReader( new File( filename ) );
 		if ( !reader.isReadingOk() )
 		{
@@ -221,17 +159,16 @@ public class LabkitLauncher
 
 		final Model model = reader.getModel();
 		final ImagePlus imp = reader.readImage();
+		imp.setRoi( new Roi( 10, 30, 100, 100 ) );
 		final Settings settings = reader.readSettings( imp );
 		final DisplaySettings ds = reader.getDisplaySettings();
-		final TrackMate trackmate = new TrackMate( model, settings );
-		final SelectionModel selectionModel = new SelectionModel( model );
+		final GuiModel guiModel = new GuiModel( model, settings, ds );
 
 		// Main view.
-		final TrackMateModelView displayer = new HyperStackDisplayer( model, selectionModel, settings.imp, ds );
-		displayer.render();
+		guiModel.getWindowManager().createHyperStackDisplayer();
 		imp.setSlice( 7 );
 
 		// Editor
-		LabkitLauncher.launch( trackmate, ds, 6 );
+		LabkitLauncher.launch( guiModel, -1 );
 	}
 }

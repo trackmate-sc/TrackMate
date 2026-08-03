@@ -21,11 +21,9 @@
  */
 package fiji.plugin.trackmate.gui.wizard.descriptors;
 
-import javax.swing.Action;
-
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.components.ConfigureViewsPanel;
 import fiji.plugin.trackmate.gui.components.FeatureDisplaySelector;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
 
 public class ConfigureViewsDescriptor extends WizardPanelDescriptor
@@ -33,25 +31,9 @@ public class ConfigureViewsDescriptor extends WizardPanelDescriptor
 
 	public static final String KEY = "ConfigureViews";
 
-	public ConfigureViewsDescriptor(
-			final DisplaySettings ds,
-			final FeatureDisplaySelector featureSelector,
-			final Action launchBVVAction,
-			final Action launchTrackSchemeAction,
-			final Action showTrackTablesAction,
-			final Action showSpotTableAction,
-			final Action launchLabkitAction,
-			final String spaceUnits )
+	public ConfigureViewsDescriptor( final GuiModel guiModel, final FeatureDisplaySelector featureSelector )
 	{
 		super( KEY );
-		this.targetPanel = new ConfigureViewsPanel(
-				ds,
-				featureSelector,
-				spaceUnits,
-				launchBVVAction,
-				launchTrackSchemeAction,
-				showTrackTablesAction,
-				showSpotTableAction,
-				launchLabkitAction );
+		this.targetPanel = new ConfigureViewsPanel( guiModel, featureSelector );
 	}
 }

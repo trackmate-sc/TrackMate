@@ -192,7 +192,7 @@ public class Process2DZ< T extends RealType< T > & NativeType< T > >
 		}
 
 		// Get 2D+T masks
-		final ImagePlus lblImp = LabelImgExporter.createLabelImagePlus( trackmate, false, true, LabelIdPainting.LABEL_IS_TRACK_ID );
+		final ImagePlus lblImp = LabelImgExporter.createLabelImagePlus( trackmate.getModel(), imp, false, true, LabelIdPainting.LABEL_IS_TRACK_ID );
 
 		/*
 		 * Exposes tracked labels as a 3D image and segment them again with

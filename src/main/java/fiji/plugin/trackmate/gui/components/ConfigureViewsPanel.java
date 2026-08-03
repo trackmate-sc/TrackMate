@@ -24,7 +24,11 @@ package fiji.plugin.trackmate.gui.components;
 import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
 import static fiji.plugin.trackmate.gui.Fonts.FONT;
 import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
+import static fiji.plugin.trackmate.gui.Icons.BVV_ICON;
 import static fiji.plugin.trackmate.gui.Icons.EDIT_SETTINGS_ICON;
+import static fiji.plugin.trackmate.gui.Icons.SPOT_TABLE_ICON;
+import static fiji.plugin.trackmate.gui.Icons.TRACK_SCHEME_ICON_16x16;
+import static fiji.plugin.trackmate.gui.Icons.TRACK_TABLES_ICON;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -34,9 +38,10 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.Action;
+import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -44,19 +49,27 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRootPane;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 
+import fiji.plugin.trackmate.detection.DetectionUtils;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.Icons;
+import fiji.plugin.trackmate.gui.WindowManager;
 import fiji.plugin.trackmate.gui.displaysettings.ConfigTrackMateDisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackDisplayMode;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.UpdateListener;
-import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame;
+import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
+import fiji.plugin.trackmate.util.Threads;
 import fiji.plugin.trackmate.util.WrapLayout;
+import ij.ImagePlus;
 
 /**
  * A configuration panel used to tune the aspect of spots and tracks in multiple
@@ -70,22 +83,20 @@ public class ConfigureViewsPanel extends JPanel
 
 	private static final long serialVersionUID = 1L;
 
-	private static final Color BORDER_COLOR = new java.awt.Color( 192, 192, 192 );
+	private static final Color BORDER_COLOR = new Color( 192, 192, 192 );
+
+	private final WindowManager windowManager;
+
+	private final GuiModel guiModel;
 
 	/*
 	 * CONSTRUCTOR
 	 */
 
-	public ConfigureViewsPanel(
-			final DisplaySettings ds,
-			final FeatureDisplaySelector featureSelector,
-			final String spaceUnits,
-			final Action launchBVVAction,
-			final Action launchTrackSchemeAction,
-			final Action showTrackTablesAction,
-			final Action showSpotTableAction,
-			final Action launchLabKitAction )
+	public ConfigureViewsPanel( final GuiModel guiModel, final FeatureDisplaySelector featureSelector )
 	{
+		this.guiModel = guiModel;
+		this.windowManager = guiModel.getWindowManager();
 		this.setPreferredSize( new Dimension( 300, 521 ) );
 		this.setSize( 300, 500 );
 
@@ -114,6 +125,7 @@ public class ConfigureViewsPanel extends JPanel
 		 * Settings editor.
 		 */
 
+		final DisplaySettings ds = guiModel.getDisplaySettings();
 		final JFrame editor = ConfigTrackMateDisplaySettings.editor( ds,
 				"Configure the display settings used in this current session.",
 				"TrackMate display settings" );
@@ -348,6 +360,7 @@ public class ConfigureViewsPanel extends JPanel
 		spinnerDrawingZDepth.setFont( SMALL_FONT );
 		panelDrawingZDepth.add( spinnerDrawingZDepth );
 
+		final String spaceUnits = guiModel.getModel().getSpaceUnits();
 		final JLabel lblDrawingZDepthUnits = new JLabel( spaceUnits );
 		lblDrawingZDepthUnits.setFont( SMALL_FONT );
 		panelDrawingZDepth.add( lblDrawingZDepthUnits );
@@ -360,45 +373,31 @@ public class ConfigureViewsPanel extends JPanel
 		panelButtons.setLayout( new WrapLayout() );
 
 		// BVV button.
-		final JButton btnShowBVV = new JButton( launchBVVAction );
+		final JButton btnShowBVV = new JButton( new LaunchBVVAction() );
 		panelButtons.add( btnShowBVV );
 		btnShowBVV.setFont( FONT );
 
 		// TrackScheme button.
-		final JButton btnShowTrackScheme = new JButton( launchTrackSchemeAction );
+		final JButton btnShowTrackScheme = new JButton( new LaunchTrackSchemeAction() );
 		panelButtons.add( btnShowTrackScheme );
 		btnShowTrackScheme.setFont( FONT );
 
 		// Do analysis button.
-		final JButton btnShowTrackTables = new JButton( showTrackTablesAction );
+		final JButton btnShowTrackTables = new JButton( new ShowTrackTablesAction() );
 		panelButtons.add( btnShowTrackTables );
 		btnShowTrackTables.setFont( FONT );
 
-		final JButton btnShowSpotTable = new JButton( showSpotTableAction );
+		final JButton btnShowSpotTable = new JButton( new ShowSpotTableAction() );
 		panelButtons.add( btnShowSpotTable );
 		btnShowSpotTable.setFont( FONT );
 
 		// Labkit button.
-		// Is labkit available?
-		if ( TMUtils.isClassPresent( "sc.fiji.labkit.ui.LabkitFrame" ) && launchLabKitAction.isEnabled() )
-		{
-			final JButton btnLabKit = new JButton( launchLabKitAction );
-			btnLabKit.setFont( FONT );
-			btnLabKit.setText( "Launch spot editor" );
-			btnLabKit.setIcon( GuiUtils.scaleImage( Icons.SEGMENTATION_EDITOR_ICON_64x64, 16, 16 ) );
-			btnLabKit.setToolTipText( "<html>"
-					+ "Launch the Labkit editor to edit spot segmentation<br> "
-					+ "on the time-point currently displayed in the main<br> "
-					+ "view."
-					+ "<p>"
-					+ "If a ROI is present in the image, only the spots and the<br> "
-					+ "image in the ROI will be opened for edition in LabKit<br> "
-					+ "(this can speed up editing large images)."
-					+ "<p>"
-					+ "Shift + click will launch the editor on all the<br> "
-					+ "time-points in the movie.</html>" );
-			panelButtons.add( btnLabKit );
-		}
+		final JButton btnLabKit = new JButton( new LaunchSpotEditorAction() );
+		btnLabKit.setFont( FONT );
+		btnLabKit.setText( "Launch spot editor" );
+		btnLabKit.setIcon( GuiUtils.scaleImage( Icons.SEGMENTATION_EDITOR_ICON_64x64, 16, 16 ) );
+		btnLabKit.setToolTipText( SPOT_EDITOR_TOOLTIP );
+		panelButtons.add( btnLabKit );
 
 		panelButtons.setSize( new Dimension( 300, 1 ) );
 		final GridBagConstraints gbcPanelButtons = new GridBagConstraints();
@@ -489,4 +488,139 @@ public class ConfigureViewsPanel extends JPanel
 				setEnabled( ( Container ) component, enabled );
 		}
 	}
+
+	/*
+	 * Actions that launches the different views.
+	 */
+
+	private class LaunchSpotEditorAction extends AbstractAction
+	{
+		private static final long serialVersionUID = 1L;
+
+		private LaunchSpotEditorAction()
+		{
+			super( "Launch spot editor", Icons.SEGMENTATION_EDITOR_ICON_64x64 );
+			putValue( SHORT_DESCRIPTION, "Launch the Labkit editor to edit spot segmentation." );
+			// TODO when we go for 3D editor.
+			setEnabled( DetectionUtils.is2D( guiModel.getSettings().imp ) );
+		}
+
+		@Override
+		public void actionPerformed( final ActionEvent ae )
+		{
+			Threads.run( "Launching spot editor thread", () -> {
+				final JRootPane parent = SwingUtilities.getRootPane( ( Component ) ae.getSource() );
+				final EverythingDisablerAndReenabler disabler = new EverythingDisablerAndReenabler( parent, new Class[] { JLabel.class } );
+				disabler.disable();
+				try
+				{
+					// Is shift pressed?
+					final int mod = ae.getModifiers();
+					final boolean shiftPressed = ( mod & ActionEvent.SHIFT_MASK ) > 0;
+					final TMLabKitFrame spotEditor = windowManager.createSpotEditor( !shiftPressed );
+					spotEditor.onCloseListeners().addListener( disabler::reenable );
+				}
+				catch ( final Exception e )
+				{
+					e.printStackTrace();
+					disabler.reenable();
+				}
+			} );
+		}
+	}
+
+	private class LaunchBVVAction extends AbstractAction
+	{
+		private static final long serialVersionUID = 1L;
+
+		private LaunchBVVAction()
+		{
+			super( "3D view", BVV_ICON );
+			putValue( SHORT_DESCRIPTION, BVV_BUTTON_TOOLTIP );
+			final ImagePlus imp = guiModel.getSettings().imp;
+			final boolean enabled = ( imp != null ) && !DetectionUtils.is2D( imp );
+			setEnabled( enabled );
+		}
+
+		@Override
+		public void actionPerformed( final ActionEvent e )
+		{
+			Threads.run( "Launching BVV thread", () -> windowManager.createBVV() );
+		}
+	}
+
+	private class LaunchTrackSchemeAction extends AbstractAction
+	{
+		private static final long serialVersionUID = 1L;
+
+		private LaunchTrackSchemeAction()
+		{
+			super( "TrackScheme", TRACK_SCHEME_ICON_16x16 );
+			putValue( SHORT_DESCRIPTION, TRACKSCHEME_BUTTON_TOOLTIP );
+		}
+
+		@Override
+		public void actionPerformed( final ActionEvent e )
+		{
+			Threads.run( "Launching TrackScheme thread", () -> windowManager.createTrackScheme() );
+		}
+	}
+
+	private class ShowTrackTablesAction extends AbstractAction
+	{
+		private static final long serialVersionUID = 1L;
+
+		private ShowTrackTablesAction()
+		{
+			super( "Tracks", TRACK_TABLES_ICON );
+			putValue( SHORT_DESCRIPTION, TRACK_TABLES_BUTTON_TOOLTIP );
+		}
+
+		@Override
+		public void actionPerformed( final ActionEvent e )
+		{
+			Threads.run( "Launching tracks table thread", () -> windowManager.createTrackTable() );
+		}
+	}
+
+	private class ShowSpotTableAction extends AbstractAction
+	{
+		private static final long serialVersionUID = 1L;
+
+		private ShowSpotTableAction()
+		{
+			super( "Spots", SPOT_TABLE_ICON );
+			putValue( SHORT_DESCRIPTION, SPOT_TABLE_BUTTON_TOOLTIP );
+		}
+
+		@Override
+		public void actionPerformed( final ActionEvent e )
+		{
+			Threads.run( "Launching all spots table thread", () -> windowManager.createAllSpotsTable() );
+		}
+	}
+
+	private static final String SPOT_TABLE_BUTTON_TOOLTIP = "Export the features of all spots to ImageJ tables.";
+
+	private static final String TRACKSCHEME_BUTTON_TOOLTIP = "<html>Launch a new instance of TrackScheme.</html>";
+
+	private static final String BVV_BUTTON_TOOLTIP = "<html>Launch a new 3D viewer.</html>";
+
+	private static final String TRACK_TABLES_BUTTON_TOOLTIP = "<html>"
+			+ "Export the features of all tracks, edges and all <br>"
+			+ "spots belonging to a track to ImageJ tables."
+			+ "</html>";
+
+	private static final String SPOT_EDITOR_TOOLTIP = "<html>"
+			+ "Launch the Labkit editor to edit spot segmentation<br> "
+			+ "on the time-point currently displayed in the main<br> "
+			+ "view."
+			+ "<p>"
+			+ "If a ROI is present in the image, only the spots and the<br> "
+			+ "image in the ROI will be opened for edition in LabKit<br> "
+			+ "(this can speed up editing large images)."
+			+ "<p>"
+			+ "Shift + click will launch the editor on all the<br> "
+			+ "time-points in the movie.</html>";
+
 }

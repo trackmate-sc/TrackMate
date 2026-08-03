@@ -83,7 +83,7 @@ public class TrackSchemePopupMenu extends JPopupMenu
 		{
 			final DefaultWeightedEdge edge = trackScheme.getGraph().getEdgeFor( mxCell );
 			final Double value = Double.valueOf( previousColor.getRGB() );
-			trackScheme.getModel().getFeatureModel().putEdgeFeature( edge, ManualEdgeColorAnalyzer.FEATURE, value );
+			trackScheme.getGuiModel().getModel().getFeatureModel().putEdgeFeature( edge, ManualEdgeColorAnalyzer.FEATURE, value );
 		}
 	}
 
@@ -152,7 +152,7 @@ public class TrackSchemePopupMenu extends JPopupMenu
 			@Override
 			public void invoke( final Object sender, final mxEventObject evt )
 			{
-				final Model model = trackScheme.getModel();
+				final Model model = trackScheme.getGuiModel().getModel();
 				model.beginUpdate();
 				try
 				{
@@ -293,7 +293,7 @@ public class TrackSchemePopupMenu extends JPopupMenu
 			}
 
 			// Link
-			final Action linkAction = new AbstractAction( "Link " + trackScheme.getSelectionModel().getSpotSelection().size() + " spots" )
+			final Action linkAction = new AbstractAction( "Link " + trackScheme.getGuiModel().getSelectionModel().getSpotSelection().size() + " spots" )
 			{
 				@Override
 				public void actionPerformed( final ActionEvent e )
@@ -301,10 +301,8 @@ public class TrackSchemePopupMenu extends JPopupMenu
 					linkSpots();
 				}
 			};
-			if ( trackScheme.getSelectionModel().getSpotSelection().size() > 1 )
-			{
+			if ( trackScheme.getGuiModel().getSelectionModel().getSpotSelection().size() > 1 )
 				add( linkAction );
-			}
 		}
 
 		/*
@@ -396,7 +394,7 @@ public class TrackSchemePopupMenu extends JPopupMenu
 				for ( final mxCell mxCell : edges )
 				{
 					final DefaultWeightedEdge edge = trackScheme.getGraph().getEdgeFor( mxCell );
-					trackScheme.getModel().getFeatureModel().removeEdgeFeature( edge, ManualEdgeColorAnalyzer.FEATURE );
+					trackScheme.getGuiModel().getModel().getFeatureModel().removeEdgeFeature( edge, ManualEdgeColorAnalyzer.FEATURE );
 				}
 
 				SwingUtilities.invokeLater( new Runnable()

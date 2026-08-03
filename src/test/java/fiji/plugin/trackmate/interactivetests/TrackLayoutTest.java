@@ -22,8 +22,7 @@
 package fiji.plugin.trackmate.interactivetests;
 
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
 public class TrackLayoutTest
@@ -31,10 +30,9 @@ public class TrackLayoutTest
 
 	public static void main( final String[] args )
 	{
-
 		final Model model = GraphTest.getExampleModel();
-
-		final TrackScheme trackScheme = new TrackScheme( model, new SelectionModel( model ), DisplaySettings.defaultStyle().copy() );
+		final GuiModel guiModel = new GuiModel( model );
+		final TrackScheme trackScheme = new TrackScheme( guiModel );
 		trackScheme.render();
 	}
 }

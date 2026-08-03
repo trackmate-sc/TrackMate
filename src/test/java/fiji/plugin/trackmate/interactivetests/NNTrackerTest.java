@@ -31,13 +31,10 @@ import org.scijava.util.AppUtils;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTracker;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.ImagePlus;
 
 public class NNTrackerTest
@@ -89,7 +86,7 @@ public class NNTrackerTest
 		// Load Image
 		ij.ImageJ.main( args );
 
-		final TrackMateModelView sd2d = new HyperStackDisplayer( model, new SelectionModel( model ), imp, DisplaySettings.defaultStyle().copy() );
-		sd2d.render();
+		final GuiModel guiModel = new GuiModel( model, imp );
+		guiModel.getWindowManager().createHyperStackDisplayer();
 	}
 }

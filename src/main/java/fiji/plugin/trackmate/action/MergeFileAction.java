@@ -37,11 +37,9 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotBase;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.util.TMUtils;
@@ -67,9 +65,9 @@ public class MergeFileAction extends AbstractTMAction
 			+ "</html>";
 
 	@Override
-	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
+	public void execute( final GuiModel guiModel, final Frame parent )
 	{
-		File file = TMUtils.proposeTrackMateSaveFile( trackmate.getSettings(), logger );
+		File file = TMUtils.proposeTrackMateSaveFile( guiModel.getSettings(), logger );
 		if ( null == file )
 		{
 			final File folder = new File( System.getProperty( "user.dir" ) ).getParentFile().getParentFile();
@@ -92,7 +90,7 @@ public class MergeFileAction extends AbstractTMAction
 
 		// Model
 		final Model modelToMerge = reader.getModel();
-		final Model model = trackmate.getModel();
+		final Model model = guiModel.getModel();
 		final int nNewTracks = modelToMerge.getTrackModel().nTracks( true );
 
 		int progress = 0;

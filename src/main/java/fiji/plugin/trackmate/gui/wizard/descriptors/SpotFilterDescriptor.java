@@ -34,6 +34,7 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.FeatureFilter;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.components.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.components.FilterGuiPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
@@ -48,18 +49,18 @@ public class SpotFilterDescriptor extends WizardPanelDescriptor
 
 	private static final String KEY = "SpotFilter";
 
-	private final TrackMate trackmate;
+	private final GuiModel guiModel;
 
 	public SpotFilterDescriptor(
-			final TrackMate trackmate,
+			final GuiModel guiModel,
 			final List< FeatureFilter > filters,
 			final FeatureDisplaySelector featureSelector )
 	{
 		super( KEY );
-		this.trackmate = trackmate;
+		this.guiModel = guiModel;
 		final FilterGuiPanel component = new FilterGuiPanel(
-				trackmate.getModel(),
-				trackmate.getSettings(),
+				guiModel.getModel(),
+				guiModel.getSettings(),
 				TrackMateObject.SPOTS,
 				filters,
 				Spot.QUALITY,
@@ -72,7 +73,8 @@ public class SpotFilterDescriptor extends WizardPanelDescriptor
 	private void filterSpots()
 	{
 		final FilterGuiPanel component = ( FilterGuiPanel ) targetPanel;
-		trackmate.getSettings().setSpotFilters( component.getFeatureFilters() );
+		guiModel.getSettings().setSpotFilters( component.getFeatureFilters() );
+		final TrackMate trackmate = guiModel.getTrackMate();
 		trackmate.execSpotFiltering( false );
 	}
 
@@ -88,11 +90,12 @@ public class SpotFilterDescriptor extends WizardPanelDescriptor
 				disabler.disable();
 				try
 				{
-
-					final Model model = trackmate.getModel();
+					final Model model = guiModel.getModel();
+					final Settings settings = guiModel.getSettings();
+					final TrackMate trackmate = guiModel.getTrackMate();
 					final Logger logger = model.getLogger();
 					final String str = "Initial thresholding with a quality threshold above "
-							+ String.format( "%.1f", trackmate.getSettings().initialSpotFilterValue )
+							+ String.format( "%.1f", settings.initialSpotFilterValue )
 							+ " ...\n";
 					logger.log( str, Logger.BLUE_COLOR );
 					final int ntotal = model.getSpots().getNSpots( false );
@@ -106,7 +109,6 @@ public class SpotFilterDescriptor extends WizardPanelDescriptor
 					 */
 
 					final AnalyzerSelection analyzerSelection = AnalyzerSelectionIO.readUserDefault();
-					final Settings settings = trackmate.getSettings();
 					analyzerSelection.configure( settings );
 					logger.log( "\nAdding the following spot feature analyzers...\n", Logger.BLUE_COLOR );
 					final StringBuilder strb = new StringBuilder();
@@ -128,11 +130,11 @@ public class SpotFilterDescriptor extends WizardPanelDescriptor
 					// Calculate features
 					final long start = System.currentTimeMillis();
 
-					final Logger oldLogger = trackmate.getModel().getLogger();
-					trackmate.getModel().setLogger( panel.getLogger() );
+					final Logger oldLogger = model.getLogger();
+					model.setLogger( panel.getLogger() );
 					trackmate.computeSpotFeatures( true );
 					final long end = System.currentTimeMillis();
-					trackmate.getModel().setLogger( oldLogger );
+					model.setLogger( oldLogger );
 					if ( trackmate.isCanceled() )
 						logger.log( "Spot feature calculation canceled.\nSome spots will have missing feature values.\n" );
 					logger.log( String.format( "Calculating features done in %.1f s.\n", ( end - start ) / 1e3f ) );
@@ -154,19 +156,21 @@ public class SpotFilterDescriptor extends WizardPanelDescriptor
 	public void displayingPanel()
 	{
 		final FilterGuiPanel component = ( FilterGuiPanel ) targetPanel;
-		trackmate.getSettings().setSpotFilters( component.getFeatureFilters() );
-		trackmate.execSpotFiltering( false );
+		guiModel.getSettings().setSpotFilters( component.getFeatureFilters() );
+		guiModel.getTrackMate().execSpotFiltering( false );
 	}
 
 	@Override
 	public void aboutToHidePanel()
 	{
-		final Logger logger = trackmate.getModel().getLogger();
+		final Model model = guiModel.getModel();
+		final Settings settings = guiModel.getSettings();
+		final TrackMate trackmate = guiModel.getTrackMate();
+		final Logger logger = model.getLogger();
 		logger.log( "\nPerforming spot filtering on the following features:\n", Logger.BLUE_COLOR );
-		final Model model = trackmate.getModel();
 		final FilterGuiPanel component = ( FilterGuiPanel ) targetPanel;
 		final List< FeatureFilter > featureFilters = component.getFeatureFilters();
-		trackmate.getSettings().setSpotFilters( featureFilters );
+		settings.setSpotFilters( featureFilters );
 		trackmate.execSpotFiltering( false );
 
 		final int ntotal = model.getSpots().getNSpots( false );
@@ -178,7 +182,7 @@ public class SpotFilterDescriptor extends WizardPanelDescriptor
 		{
 			for ( final FeatureFilter ft : featureFilters )
 			{
-				String str = "  - on " + trackmate.getModel().getFeatureModel().getSpotFeatureNames().get( ft.feature );
+				String str = "  - on " + model.getFeatureModel().getSpotFeatureNames().get( ft.feature );
 				if ( ft.isAbove )
 					str += " above ";
 				else
@@ -192,12 +196,12 @@ public class SpotFilterDescriptor extends WizardPanelDescriptor
 		}
 
 		// Settings persistence.
-		SettingsPersistence.saveLastUsedSettings( trackmate.getSettings(), logger );
+		SettingsPersistence.saveLastUsedSettings( settings, logger );
 	}
 
 	@Override
 	public Cancelable getCancelable()
 	{
-		return trackmate;
+		return guiModel.getTrackMate();
 	}
 }

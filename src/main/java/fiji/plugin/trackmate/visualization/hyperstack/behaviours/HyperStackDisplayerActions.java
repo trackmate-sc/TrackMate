@@ -17,8 +17,8 @@ public class HyperStackDisplayerActions
 	
 	private static final String NEXT_TIMEPOINT = "next timepoint";
 	private static final String PREVIOUS_TIMEPOINT = "previous timepoint";
-	private static final String[] NEXT_TIMEPOINT_KEYS = new String[] { "RIGHT" };
-	private static final String[] PREVIOUS_TIMEPOINT_KEYS = new String[] { "LEFT" };
+	private static final String[] NEXT_TIMEPOINT_KEYS = new String[] { "G" };
+	private static final String[] PREVIOUS_TIMEPOINT_KEYS = new String[] { "F" };
 
 	private static final String SEMI_AUTOMATIC_TRACKING = "semi-automatic tracking";
 	private static final String[] SEMI_AUTOMATIC_TRACKING_KEYS = new String[] { "shift A" };
@@ -41,6 +41,8 @@ public class HyperStackDisplayerActions
 		// Semi-automatic tracking
 		final SemiAutoTracking semiAutoTracking = new SemiAutoTracking( model, selectionModel, imp );
 		actions.runnableAction( () -> semiAutoTracking.run(), SEMI_AUTOMATIC_TRACKING, SEMI_AUTOMATIC_TRACKING_KEYS );
+
+		actions.runnableAction( () -> System.out.println( "[HyperStackDisplayer] TROLOLO" ), "refresh", new String[] { "R" } ); // DEBUG
 	}
 
 	@Plugin( type = CommandDescriptionProvider.class )

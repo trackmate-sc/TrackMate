@@ -24,13 +24,17 @@ package fiji.plugin.trackmate.visualization;
 import java.util.ArrayList;
 import java.util.Map;
 
+import javax.swing.SwingUtilities;
+
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeListener;
 import fiji.plugin.trackmate.SelectionChangeEvent;
 import fiji.plugin.trackmate.SelectionChangeListener;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.UpdateListener;
 
 /**
  * An abstract class for TrackMate views.
@@ -44,31 +48,30 @@ public abstract class AbstractTrackMateModelView implements SelectionChangeListe
 	 * FIELDS
 	 */
 
-	/** The model displayed by this class. */
-	protected final Model model;
-
-	protected final SelectionModel selectionModel;
-
-	protected final DisplaySettings displaySettings;
-
 	protected final ArrayList< Runnable > runOnClose;
+
+	protected final GuiModel guiModel;
 
 	/*
 	 * PROTECTED CONSTRUCTOR
 	 */
 
-	protected AbstractTrackMateModelView( final Model model, final SelectionModel selectionModel, final DisplaySettings displaySettings )
+	protected AbstractTrackMateModelView( final GuiModel guiModel )
 	{
-		this.selectionModel = selectionModel;
-		this.model = model;
-		this.displaySettings = displaySettings;
+		this.guiModel = guiModel;
 		runOnClose = new ArrayList<>();
 
+		final Model model = guiModel.getModel();
+		final SelectionModel selectionModel = guiModel.getSelectionModel();
+		final DisplaySettings displaySettings = guiModel.getDisplaySettings();
 		model.addModelChangeListener( this );
 		selectionModel.addSelectionChangeListener( this );
+		final UpdateListener refresher = () -> SwingUtilities.invokeLater( this::refresh );
+		displaySettings.listeners().add( refresher );
 		onClose( () -> {
 			model.removeModelChangeListener( this );
 			selectionModel.removeSelectionChangeListener( this );
+			displaySettings.listeners().remove( refresher );
 		} );
 	}
 
@@ -116,8 +119,8 @@ public abstract class AbstractTrackMateModelView implements SelectionChangeListe
 	}
 
 	@Override
-	public Model getModel()
+	public GuiModel getGuiModel()
 	{
-		return model;
+		return guiModel;
 	}
 }

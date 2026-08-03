@@ -65,7 +65,7 @@ public class ViewUtils
 		return imp;
 	}
 
-	public static final ImagePlus makeEmpytImagePlus( final Model model )
+	public static final ImagePlus makeEmptyImagePlus( final Model model )
 	{
 
 		double maxX = 0;

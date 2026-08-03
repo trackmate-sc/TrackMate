@@ -40,6 +40,7 @@ import com.mxgraph.swing.mxGraphOutline;
 import com.mxgraph.swing.handler.mxRubberband;
 
 import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 
 public class TrackSchemeFrame extends JFrame
@@ -100,7 +101,8 @@ public class TrackSchemeFrame extends JFrame
 		graphComponent = createGraphComponent();
 
 		// Add the info pane
-		infoPane = new InfoPane( trackScheme.getModel(), trackScheme.getSelectionModel() );
+		final GuiModel guiModel = trackScheme.getGuiModel();
+		infoPane = new InfoPane( guiModel.getModel(), guiModel.getSelectionModel() );
 
 		// Add the graph outline
 		final mxGraphOutline graphOutline = new mxGraphOutline( graphComponent );

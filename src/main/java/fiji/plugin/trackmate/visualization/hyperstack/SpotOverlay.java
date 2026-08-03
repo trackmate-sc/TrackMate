@@ -155,7 +155,6 @@ public class SpotOverlay extends Roi
 				g2d.setColor( color );
 				drawSpot( g2d, spot, zslice, xcorner, ycorner, lMag, filled );
 			}
-
 		}
 		else
 		{

@@ -36,12 +36,10 @@ import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.SpotMesh;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.io.IOUtils;
 import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.Meshes;
@@ -70,15 +68,15 @@ public class MeshSeriesExporter extends AbstractTMAction
 			"</html>";
 
 	@Override
-	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
+	public void execute( final GuiModel guiModel, final Frame parent )
 	{
 		logger.log( "Exporting spot 3D meshes to a file series.\n" );
-		final Model model = trackmate.getModel();
+		final Model model = guiModel.getModel();
 		File file;
 		final File folder = new File( System.getProperty( "user.dir" ) ).getParentFile().getParentFile();
 		try
 		{
-			String filename = trackmate.getSettings().imageFileName;
+			String filename = guiModel.getSettings().imageFileName;
 			int i = filename.indexOf( "." );
 			if ( i < 0 )
 				i = filename.length();

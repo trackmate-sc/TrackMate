@@ -21,7 +21,6 @@
  */
 package fiji.plugin.trackmate.visualization;
 
-import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Arrays;
@@ -37,12 +36,12 @@ import org.scijava.ui.behaviour.util.Actions;
 import org.scijava.ui.behaviour.util.Behaviours;
 import org.scijava.ui.behaviour.util.InputActionBindings;
 import org.scijava.ui.behaviour.util.TriggerBehaviourBindings;
+import org.scijava.ui.behaviour.util.WrappedActionMap;
+import org.scijava.ui.behaviour.util.WrappedInputMap;
 
 import bdv.ui.keymap.Keymap;
 import bdv.ui.keymap.Keymap.UpdateListener;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.visualization.ui.KeyConfigContexts;
 import fiji.plugin.trackmate.visualization.ui.TrackMateKeymapManager;
 
@@ -65,9 +64,9 @@ public abstract class AbstractTrackMateModelJFrameView extends AbstractTrackMate
 
 	protected final Behaviours behaviours;
 
-	protected AbstractTrackMateModelJFrameView( final Model model, final SelectionModel selectionModel, final DisplaySettings displaySettings, final String... keyConfigContexts )
+	protected AbstractTrackMateModelJFrameView( final GuiModel guiModel, final String... keyConfigContexts )
 	{
-		super( model, selectionModel, displaySettings );
+		super( guiModel );
 		final Set< String > c = new LinkedHashSet<>( Arrays.asList( KeyConfigContexts.TRACKMATE ) );
 		c.addAll( Arrays.asList( keyConfigContexts ) );
 		final String[] kccs = c.toArray( new String[] {} );
@@ -94,9 +93,16 @@ public abstract class AbstractTrackMateModelJFrameView extends AbstractTrackMate
 		mouseAndKeyHandler.setInputMap( triggerbindings.getConcatenatedInputTriggerMap() );
 		mouseAndKeyHandler.setBehaviourMap( triggerbindings.getConcatenatedBehaviourMap() );
 
+		// Register global actions, if any.
+		final Actions globalActions = guiModel.getGlobalActions();
+		if ( globalActions != null )
+		{
+			keybindings.addActionMap( "global", new WrappedActionMap( globalActions.getActionMap() ) );
+			keybindings.addInputMap( "global", new WrappedInputMap( globalActions.getInputMap() ) );
+		}
 	}
 
-	protected void setWindow( final Window frame )
+	protected void setWindow( final JFrame frame )
 	{
 		frame.addWindowListener( new WindowAdapter()
 		{
@@ -106,9 +112,10 @@ public abstract class AbstractTrackMateModelJFrameView extends AbstractTrackMate
 				close();
 			}
 		} );
+		attachKeybindings( frame.getRootPane() );
 	}
 
-	protected void attachKeybindings( final JComponent component )
+	private void attachKeybindings( final JComponent component )
 	{
 		SwingUtilities.replaceUIActionMap( component, keybindings.getConcatenatedActionMap() );
 		SwingUtilities.replaceUIInputMap( component, JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, keybindings.getConcatenatedInputMap() );

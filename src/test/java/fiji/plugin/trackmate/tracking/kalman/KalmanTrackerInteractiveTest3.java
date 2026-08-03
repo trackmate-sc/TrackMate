@@ -25,15 +25,13 @@ import java.util.Random;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
-import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 import ij.ImageJ;
 
 public class KalmanTrackerInteractiveTest3
@@ -87,12 +85,9 @@ public class KalmanTrackerInteractiveTest3
 		final TrackIndexAnalyzer ta = new TrackIndexAnalyzer();
 		ta.process( model.getTrackModel().trackIDs( true ), model );
 
-		final SelectionModel selectionModel = new SelectionModel( model );
-		final HyperStackDisplayer view = new HyperStackDisplayer( model, selectionModel, ds );
-		view.render();
-
-		final TrackScheme trackscheme = new TrackScheme( model, selectionModel, ds );
-		trackscheme.render();
+		final GuiModel guiModel = new GuiModel( model );
+		guiModel.getWindowManager().createHyperStackDisplayer();
+		guiModel.getWindowManager().createTrackScheme();
 
 		return model;
 	}
