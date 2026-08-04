@@ -1,7 +1,10 @@
 package fiji.plugin.trackmate.visualization.hyperstack.behaviours.semiautotracking;
 
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.util.ArrayList;
 
+import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import org.scijava.listeners.Listeners;
@@ -20,20 +23,36 @@ public class SpotEditToolSettingsPage implements SettingsPage
 
 	private final SemiAutoTrackingParams tmpParams;
 
-	private final ConfigPanel panel;
+	private final JPanel mainPanel;
 
 	public SpotEditToolSettingsPage( final String treePath, final SemiAutoTrackingParams params )
 	{
 		this.treePath = treePath;
 		this.modificationListeners = new Listeners.SynchronizedList<>();
 		this.tmpParams = new SemiAutoTrackingParams();
-		this.panel = GuiBuilder.build( tmpParams );
+		tmpParams.set( params );
+		final ConfigPanel configPanel = GuiBuilder.build( tmpParams );
 		tmpParams.updateListeners().add( () -> modificationListeners.list.forEach( ModificationListener::setModified ) );
-		onApply( () -> params.set( tmpParams ) );
+		onApply( () -> {
+			params.set( tmpParams );
+			SemiAutoTrackingParamsIO.savePrefs( params );
+		} );
 		onCancel( () -> {
 			tmpParams.set( params );
-			panel.refresh();
+			configPanel.refresh();
 		} );
+
+		this.mainPanel = new JPanel();
+		mainPanel.setLayout( new BorderLayout() );
+		mainPanel.add( configPanel, BorderLayout.CENTER );
+		final JPanel buttonPanel = new JPanel( new FlowLayout( FlowLayout.RIGHT, 5, 5 ) );
+		final JButton reset = new JButton( "Reset" );
+		reset.addActionListener( e -> {
+			tmpParams.set( new SemiAutoTrackingParams() );
+			configPanel.refresh();
+		} );
+		buttonPanel.add( reset );
+		mainPanel.add( buttonPanel, BorderLayout.SOUTH );
 	}
 
 	@Override
@@ -45,7 +64,7 @@ public class SpotEditToolSettingsPage implements SettingsPage
 	@Override
 	public JPanel getJPanel()
 	{
-		return panel;
+		return mainPanel;
 	}
 
 	@Override

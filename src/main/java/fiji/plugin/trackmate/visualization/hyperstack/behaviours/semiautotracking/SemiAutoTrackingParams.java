@@ -17,7 +17,7 @@ public class SemiAutoTrackingParams extends Configurator
 
 	private final IntParam stepwiseTimeBrowsing;
 
-	private final Listeners.SynchronizedList< UpdateListener > updateListeners;
+	private final transient Listeners.SynchronizedList< UpdateListener > updateListeners;
 
 	public SemiAutoTrackingParams()
 	{
