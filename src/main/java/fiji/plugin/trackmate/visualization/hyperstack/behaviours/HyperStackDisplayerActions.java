@@ -21,7 +21,7 @@ public class HyperStackDisplayerActions
 	private static final String[] PREVIOUS_TIMEPOINT_KEYS = new String[] { "F" };
 
 	private static final String SEMI_AUTOMATIC_TRACKING = "semi-automatic tracking";
-	private static final String[] SEMI_AUTOMATIC_TRACKING_KEYS = new String[] { "shift A" };
+	private static final String[] SEMI_AUTOMATIC_TRACKING_KEYS = new String[] { "shift T" };
 	
 	private static final String DO_NOTHING_ACTION = "do nothing";
 	private static final String[] DO_NOTHING_ACTION_KEYS = new String[] { "W" };
