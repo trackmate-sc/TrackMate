@@ -28,24 +28,22 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JSeparator;
 
-import org.scijava.Context;
-
+import bdv.ui.appearance.AppearanceManager;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.editor.labkit.component.EditorKeymapManager;
 import fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame;
 import fiji.plugin.trackmate.gui.editor.labkit.model.TMLabKitModel;
 import fiji.plugin.trackmate.io.TmXmlReader;
-import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.ViewUtils;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import net.imagej.axis.Axes;
 import net.imagej.axis.CalibratedAxis;
-import net.imglib2.Interval;
 import sc.fiji.labkit.ui.labeling.Labeling;
 
 public class LabkitLauncher
@@ -63,16 +61,13 @@ public class LabkitLauncher
 		if ( null == imp )
 			imp = ViewUtils.makeEmptyImagePlus( model );
 
-		// ROI & interval.
-		final Interval interval = TMUtils.createROIInterval( imp );
-
 		// Create the LabKit model.
-		final Context context = TMUtils.getContext();
-		final DisplaySettings displaySettings = guiModel.getDisplaySettings();
-		final TMLabKitModel lbModel = TMLabKitModel.create( model, imp, interval, displaySettings, timepoint, context );
+		final TMLabKitModel lbModel = TMLabKitModel.create( guiModel, timepoint );
 
 		// Create the UI for editing.
-		final TMLabKitFrame labkit = new TMLabKitFrame( lbModel );
+		final EditorKeymapManager keymapManager = guiModel.getEditorKeymapManager();
+		final AppearanceManager appearanceManager = guiModel.getAppearanceManager();
+		final TMLabKitFrame labkit = new TMLabKitFrame( lbModel, keymapManager, appearanceManager );
 		GuiUtils.positionWindow( labkit, imp.getWindow() );
 		labkit.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
 

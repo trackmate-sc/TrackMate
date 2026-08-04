@@ -1,15 +1,19 @@
 package fiji.plugin.trackmate.gui;
 
+import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.EDITOR_KEYMAP_HOME;
+
 import org.scijava.object.ObjectService;
 import org.scijava.ui.behaviour.KeyPressedManager;
 import org.scijava.ui.behaviour.util.Actions;
 
+import bdv.ui.appearance.AppearanceManager;
 import bdv.ui.keymap.Keymap;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.editor.labkit.component.EditorKeymapManager;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.ui.KeyConfigContexts;
 import fiji.plugin.trackmate.visualization.ui.TrackMateActions;
@@ -23,6 +27,7 @@ import ij.Prefs;
 public class GuiModel
 {
 
+	
 	private final Model model;
 
 	private final SelectionModel selectionModel;
@@ -34,6 +39,10 @@ public class GuiModel
 	private final KeyPressedManager keyPressedManager;
 
 	private final TrackMateKeymapManager keymapManager;
+
+	private final EditorKeymapManager editorKeymapManager;
+
+	private final AppearanceManager appearanceManager;
 
 	private final Settings settings;
 
@@ -61,6 +70,8 @@ public class GuiModel
 		this.trackmate = createTrackMate( model, settings );
 		
 		// Keymap and actions
+		this.editorKeymapManager = new EditorKeymapManager();
+		this.appearanceManager = new AppearanceManager( EDITOR_KEYMAP_HOME );
 		this.keyPressedManager = new KeyPressedManager();
 		this.keymapManager = new TrackMateKeymapManager();
 		final Keymap keymap = keymapManager.getForwardSelectedKeymap();
@@ -179,6 +190,11 @@ public class GuiModel
 		return keymapManager;
 	}
 
+	public EditorKeymapManager getEditorKeymapManager()
+	{
+		return editorKeymapManager;
+	}
+
 	public Model getModel()
 	{
 		return model;
@@ -207,5 +223,10 @@ public class GuiModel
 	public WindowManager getWindowManager()
 	{
 		return windowManager;
+	}
+
+	public AppearanceManager getAppearanceManager()
+	{
+		return appearanceManager;
 	}
 }

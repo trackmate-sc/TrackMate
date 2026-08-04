@@ -21,7 +21,7 @@
  */
 package fiji.plugin.trackmate.gui.editor.labkit.component;
 
-import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.KEYMAP_HOME;
+import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.EDITOR_KEYMAP_HOME;
 import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.KEY_CONFIG_SCOPE;
 
 import java.io.IOException;
@@ -37,19 +37,19 @@ import bdv.ui.keymap.Keymap;
 import bdv.ui.keymap.KeymapManager;
 import fiji.plugin.trackmate.util.TMUtils;
 
-public class TMKeymapManager extends KeymapManager
+public class EditorKeymapManager extends KeymapManager
 {
 
 	private static final String DEFAULT_KEYMAP_PATH = "/keymaps/Default-BDV.yaml";
 
-	public TMKeymapManager()
+	public EditorKeymapManager()
 	{
-		super( KEYMAP_HOME );
+		super( EDITOR_KEYMAP_HOME );
 	}
 
 	static Keymap loadBDVKeymap()
 	{
-		final InputStream inputStream = TMKeymapManager.class.getResourceAsStream( DEFAULT_KEYMAP_PATH );
+		final InputStream inputStream = EditorKeymapManager.class.getResourceAsStream( DEFAULT_KEYMAP_PATH );
 
 		if ( inputStream == null )
 		{
