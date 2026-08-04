@@ -1,5 +1,7 @@
 package fiji.plugin.trackmate.visualization.hyperstack.behaviours;
 
+import java.util.Set;
+
 import org.scijava.plugin.Plugin;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.DragBehaviour;
@@ -10,9 +12,11 @@ import org.scijava.ui.behaviour.util.Behaviours;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.visualization.ui.KeyConfigContexts;
 import ij.ImagePlus;
 import net.imglib2.RealLocalizable;
+import net.imglib2.util.Util;
 
 public class SpotEditBehaviours
 {
@@ -36,7 +40,7 @@ public class SpotEditBehaviours
 	private static final String[] INCREASE_SPOT_RADIUS_FAST_KEYS = new String[] { "shift E" };
 	private static final String[] DECREASE_SPOT_RADIUS_KEYS = new String[] { "Q" };
 	private static final String[] DECREASE_SPOT_RADIUS_FAST_KEYS = new String[] { "shift Q" };
-	private static final String[] ADD_SPOT_KEYS = new String[] { "A" };
+	private static final String[] ADD_SPOT_KEYS = new String[] { "not mapped" };
 	private static final String[] DELETE_SPOT_KEYS = new String[] { "D" };
 	private static final String[] LINK_SPOTS_KEYS = new String[] { "L" };
 	private static final String[] LINK_SPOTS_BACKWARD_KEYS = new String[] { "shift L" };
@@ -56,6 +60,7 @@ public class SpotEditBehaviours
 		behaviours.behaviour( new ResizeSpotBehaviour( model, imp, false, false ), DECREASE_SPOT_RADIUS, DECREASE_SPOT_RADIUS_KEYS );
 		behaviours.behaviour( new ResizeSpotBehaviour( model, imp, false, true ), DECREASE_SPOT_RADIUS_FAST, DECREASE_SPOT_RADIUS_FAST_KEYS );
 
+		behaviours.behaviour( new AddSpotBehaviour( model, selectionModel, imp ), ADD_SPOT, ADD_SPOT_KEYS );
 		behaviours.behaviour( new DeleteSpotBehaviour( model, selectionModel, imp ), DELETE_SPOT, DELETE_SPOT_KEYS );
 
 		behaviours.behaviour( new LinkSpotsBehaviour( model, imp, false ), LINK_SPOTS, LINK_SPOTS_KEYS );
@@ -145,6 +150,80 @@ public class SpotEditBehaviours
 			{
 				model.endUpdate();
 			}
+		}
+	}
+
+	private static class AddSpotBehaviour extends AbstractSpotEditBehaviour implements DragBehaviour
+	{
+
+		private final SelectionModel selectionModel;
+
+		private SpotBase newSpot;
+
+		public AddSpotBehaviour( final Model model, final SelectionModel selectionModel, final ImagePlus imp )
+		{
+			super( model, imp );
+			this.selectionModel = selectionModel;
+		}
+
+		@Override
+		public void init( final int x, final int y )
+		{
+			if ( null != newSpot )
+				return;
+
+			final RealLocalizable pos = toWorldCoords( x, y );
+			// Forbid adding a spot if there is already one at this location.
+			if ( getSpotAtMouseLocation( pos ) != null )
+				return;
+
+			final double radius = ResizeSpotBehaviour.previousRadius;
+			this.newSpot = new SpotBase( pos, radius, -1. );
+
+			final double dt = imp.getCalibration().frameInterval;
+			final int frame = imp.getFrame() - 1;
+			newSpot.putFeature( Spot.POSITION_T, frame * dt );
+			newSpot.putFeature( Spot.FRAME, Double.valueOf( frame ) );
+
+			model.beginUpdate();
+			model.addSpotTo( newSpot, frame );
+
+			/*
+			 * If we are in auto-link mode, we create an edge with spot in
+			 * selection, if there is just one and if it is in a previous frame
+			 */
+			if ( autoLinkingmode )
+			{
+				final Set< Spot > spotSelection = selectionModel.getSpotSelection();
+				if ( spotSelection.size() == 1 )
+				{
+					final Spot source = spotSelection.iterator().next();
+					if ( newSpot.diffTo( source, Spot.FRAME ) != 0 )
+						model.addEdge( source, newSpot, -1 );
+				}
+				selectionModel.clearSpotSelection();
+				selectionModel.addSpotToSelection( newSpot );
+			}
+			imp.updateAndDraw();
+		}
+
+		@Override
+		public void drag( final int x, final int y )
+		{
+			final RealLocalizable pos = toWorldCoords( x, y );
+			newSpot.setPosition( pos.getDoublePosition( 0 ), 0 );
+			newSpot.setPosition( pos.getDoublePosition( 1 ), 1 );
+			imp.updateAndDraw();
+			System.out.println( Util.printCoordinates( newSpot ) );
+
+		}
+
+		@Override
+		public void end( final int x, final int y )
+		{
+			model.endUpdate();
+			newSpot = null;
+			imp.updateAndDraw();
 		}
 	}
 
@@ -284,6 +363,8 @@ public class SpotEditBehaviours
 			descriptions.add( LINK_SPOTS_BACKWARD, LINK_SPOTS_BACKWARD_KEYS, "Link two spots backward in time by dragging from a source spot to a target spot in the previous time-point." );
 			descriptions.add( CLICK_SELECT_SPOT, CLICK_SELECT_SPOT_KEYS, "Select a spot at the mouse location." );
 			descriptions.add( CLICK_SELECT_ADD_SPOT, CLICK_SELECT_ADD_SPOT_KEYS, "Add or remove a spot from the selection at the mouse location." );
+			descriptions.add( ADD_AND_LINK_SPOTS_FORWARD, ADD_AND_LINK_SPOTS_FORWARD_KEYS, "Add a new spot at the mouse location or link the source spot to a new target spot in the next time-point." );
+			descriptions.add( ADD_AND_LINK_SPOTS_BACKWARD, ADD_AND_LINK_SPOTS_BACKWARD_KEYS, "Add a new spot at the mouse location or link the source spot to a new target spot in the previous time-point." );
 		}
 	}
 }
