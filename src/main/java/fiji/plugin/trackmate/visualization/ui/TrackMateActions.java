@@ -3,6 +3,7 @@ package fiji.plugin.trackmate.visualization.ui;
 import java.awt.Toolkit;
 import java.awt.event.InputEvent;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.scijava.plugin.Plugin;
@@ -45,12 +46,22 @@ public class TrackMateActions
 	private static final String DELETE_SELECTION = "delete selection";
 	private static final String[] DELETE_SELECTION_KEYS = new String[] { "BACK_SPACE", "DELETE" };
 	
+	private static final String SELECT_ALL = "select all";
+	private static final String SELECT_ALL_SPOTS = "select all spots";
+	private static final String SELECT_ALL_LINKS = "select all links";
+	private static final String[] SELECT_ALL_KEYS;
+	private static final String[] SELECT_ALL_SPOTS_KEYS;
+	private static final String[] SELECT_ALL_LINKS_KEYS;
+	
 	static
 	{
 		final int menuMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
 		final String modifier = ( menuMask == InputEvent.CTRL_DOWN_MASK ) ? "ctrl" : "meta";
 		UNDO_ACTION_KEYS = new String[] { modifier + " Z" };
 		REDO_ACTION_KEYS = new String[] { modifier + " Y", modifier + " shift Z" };
+		SELECT_ALL_KEYS = new String[] { modifier + " A" };
+		SELECT_ALL_SPOTS_KEYS = new String[] { modifier + " shift A" };
+		SELECT_ALL_LINKS_KEYS = new String[] { modifier + " alt A" };
 	}
 
 	public static final void install( final Actions actions, final Model model, final SelectionModel selectionModel )
@@ -73,6 +84,31 @@ public class TrackMateActions
 
 		// Delete selection
 		actions.runnableAction( () -> deleteSelection( model, selectionModel ), DELETE_SELECTION, DELETE_SELECTION_KEYS );
+
+		// Select all
+		actions.runnableAction( () -> selectAll( model, selectionModel ), SELECT_ALL, SELECT_ALL_KEYS );
+		actions.runnableAction( () -> selectAllSpots( model, selectionModel ), SELECT_ALL_SPOTS, SELECT_ALL_SPOTS_KEYS );
+		actions.runnableAction( () -> selectAllLinks( model, selectionModel ), SELECT_ALL_LINKS, SELECT_ALL_LINKS_KEYS );
+	}
+
+	private static void selectAll( final Model model, final SelectionModel selectionModel )
+	{
+		selectAllSpots( model, selectionModel );
+		selectAllLinks( model, selectionModel );
+	}
+
+	private static void selectAllSpots( final Model model, final SelectionModel selectionModel )
+	{
+		final List< Spot > spotsToAdd = new ArrayList<>();
+		model.getSpots().iterable( true ).forEach( spotsToAdd::add );
+		selectionModel.addSpotToSelection( spotsToAdd );
+	}
+
+	private static void selectAllLinks( final Model model, final SelectionModel selectionModel )
+	{
+		final List< DefaultWeightedEdge > edgesToAdd = new ArrayList<>();
+		model.getTrackModel().edgeSet().forEach( edgesToAdd::add );
+		selectionModel.addEdgeToSelection( edgesToAdd );
 	}
 
 	private static void deleteSelection( final Model model, final SelectionModel selectionModel )
@@ -118,6 +154,9 @@ public class TrackMateActions
 			descriptions.add( NAVIGATE_TO_NEXT_TRACK, NAVIGATE_TO_NEXT_TRACK_KEYS, "Navigate to the next track." );
 
 			descriptions.add( DELETE_SELECTION, DELETE_SELECTION_KEYS, "Delete the selected spots and edges." );
+			descriptions.add( SELECT_ALL, SELECT_ALL_KEYS, "Select all spots and edges." );
+			descriptions.add( SELECT_ALL_SPOTS, SELECT_ALL_SPOTS_KEYS, "Select all spots." );
+			descriptions.add( SELECT_ALL_LINKS, SELECT_ALL_LINKS_KEYS, "Select all edges." );
 		}
 	}
 }
