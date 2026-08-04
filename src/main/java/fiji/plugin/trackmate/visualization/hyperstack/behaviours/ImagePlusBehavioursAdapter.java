@@ -34,6 +34,7 @@ import bdv.ui.keymap.KeymapManager;
 import gnu.trove.set.TIntSet;
 import ij.ImagePlus;
 import ij.gui.ImageCanvas;
+import ij.gui.ImageWindow;
 
 /**
  * Adapter class that connects a {@link ImagePlus} to the SciJava Behaviours
@@ -65,7 +66,7 @@ public class ImagePlusBehavioursAdapter
 	public ImagePlusBehavioursAdapter( final ImagePlus imp, final KeymapManager keymapManager, final String[] keyConfigContexts )
 	{
 		final ImageCanvas canvas = imp.getCanvas();
-		canvas.setFocusable( true );
+		final ImageWindow window = imp.getWindow();
 
 		// Initialize configuration and binding registries
 		this.keybindings = new InputActionBindings();
@@ -100,9 +101,13 @@ public class ImagePlusBehavioursAdapter
 
 		// Put the IJ key listener at the end of the chain, so that we can
 		// intercept events before they reach it.
-		final KeyListener[] keyListeners = canvas.getKeyListeners();
-		for ( final KeyListener keyListener : keyListeners )
+		final KeyListener[] canvasKeyListeners = canvas.getKeyListeners();
+		for ( final KeyListener keyListener : canvasKeyListeners )
 			canvas.removeKeyListener( keyListener );
+		// The same for the window
+		final KeyListener[] windowKeyListeners = window.getKeyListeners();
+		for ( final KeyListener keyListener : windowKeyListeners )
+			window.removeKeyListener( keyListener );
 
 		/*
 		 * Connect the handler to the AWT component for Mouse handling We need
@@ -115,13 +120,17 @@ public class ImagePlusBehavioursAdapter
 		canvas.addMouseListener( proxy );
 		canvas.addMouseMotionListener( proxy );
 		canvas.addMouseWheelListener( proxy );
+		window.addKeyListener( proxy );
+		window.addMouseListener( proxy );
+		window.addMouseMotionListener( proxy );
+		window.addMouseWheelListener( proxy );
 
 		/*
 		 * Direct Key Event Proxy Bridge. Because an AWT Canvas bypasses Swing's
 		 * ActionMap dispatch pipeline, we manually intercept the KeyStrokes and
 		 * route them to our Action map.
 		 */
-		canvas.addKeyListener( new KeyAdapter()
+		final KeyAdapter actionsRoutingProxy = new KeyAdapter()
 		{
 			@Override
 			public void keyPressed( final KeyEvent e )
@@ -145,11 +154,15 @@ public class ImagePlusBehavioursAdapter
 					}
 				}
 			}
-		} );
+		};
+		canvas.addKeyListener( actionsRoutingProxy );
+		window.addKeyListener( actionsRoutingProxy );
 
 		// Re-add the original ImageJ KeyListener after all proxies
-		for ( final KeyListener keyListener : keyListeners )
+		for ( final KeyListener keyListener : canvasKeyListeners )
 			canvas.addKeyListener( keyListener );
+		for ( final KeyListener keyListener : windowKeyListeners )
+			window.addKeyListener( keyListener );
 	}
 
 	public Actions actions()
@@ -204,6 +217,7 @@ public class ImagePlusBehavioursAdapter
 			catch ( final Exception ex )
 			{
 				this.getMaskMethod = null;
+				System.err.println( "[ImagePlusBehavioursAdapter] Failed to extract getMask() method from MouseAndKeyHandler via reflection. Behavioral trigger matching will be disabled." ); // DEBUG
 			}
 		}
 
@@ -220,8 +234,7 @@ public class ImagePlusBehavioursAdapter
 			try
 			{
 				// Retrieve the calculated normalization bitmask from the
-				// handler
-				// instance
+				// handler instance
 				final int mask = ( Integer ) getMaskMethod.invoke( delegate, e );
 
 				// Keep the primitive TIntSet collection directly without
@@ -248,6 +261,7 @@ public class ImagePlusBehavioursAdapter
 			}
 			catch ( final Exception ex )
 			{
+				System.err.println( "[ImagePlusBehavioursAdapter] Exception occurred while checking for matching behaviour: " + ex.getMessage() ); // DEBUG
 				// Prevent crashes from faulty reflections, letting the event
 				// propagate unconsumed
 			}
