@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.visualization.hyperstack.behaviours;
 
 import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Shape;
@@ -11,6 +12,14 @@ import org.scijava.ui.behaviour.DragBehaviour;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.Spot.SpotVisitor;
+import fiji.plugin.trackmate.SpotBase;
+import fiji.plugin.trackmate.SpotMesh;
+import fiji.plugin.trackmate.SpotRoi;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.visualization.hyperstack.PaintSpotMesh;
+import fiji.plugin.trackmate.visualization.hyperstack.PaintSpotRoi;
+import fiji.plugin.trackmate.visualization.hyperstack.PaintSpotSphere;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import net.imglib2.KDTree;
@@ -60,6 +69,8 @@ public class LinkSpotsBehaviour extends AbstractSpotEditBehaviour implements Dra
 		// Keep track of the source.
 		this.source = spot;
 		overlay.source = source;
+		overlay.sourcePixelPos[ 0 ] = x;
+		overlay.sourcePixelPos[ 1 ] = y;
 
 		// Move to next frame if forward, previous frame if backward.
 		final int targetFrame = backward ? frame - 1 : frame + 1;
@@ -150,25 +161,28 @@ public class LinkSpotsBehaviour extends AbstractSpotEditBehaviour implements Dra
 
 		private static final long serialVersionUID = 1L;
 
-		private static final Stroke sourceStroke = new BasicStroke( 1f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f, new float[] { 5f, 5f }, 0.0f );
+		private static final Stroke sourceStroke = new BasicStroke( 2f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f, new float[] { 5f, 5f }, 0.0f );
 
-		private static final Stroke targetStroke = new BasicStroke( 1f );
+		private static final Stroke targetStroke = new BasicStroke( 2f );
 
 		private Spot source;
+
+		public final int[] sourcePixelPos = new int[ 2 ];
 
 		private Spot target;
 
 		public final int[] targetPixelPos = new int[ 2 ];
 
-		private final int[] bb = new int[ 4 ];
-
 		private final ArrowShape arrow = new ArrowShape();
 
 		private final CrossedLineShape crossedLine = new CrossedLineShape();
 
+		private final SpotPainter painter;
+
 		public LinkSpotsOverlay( final ImagePlus imp )
 		{
 			super( 0, 0, imp );
+			this.painter = new SpotPainter();
 		}
 
 		@Override
@@ -177,28 +191,26 @@ public class LinkSpotsBehaviour extends AbstractSpotEditBehaviour implements Dra
 			if ( source == null )
 				return;
 
-			final int xcorner = ic.offScreenX( 0 );
-			final int ycorner = ic.offScreenY( 0 );
-			final double magnification = getMagnification();
 			final Graphics2D g2d = ( Graphics2D ) g;
+			g2d.setColor( Color.WHITE );
+			painter.setGraphics( g2d );
 
 			// Source bounding box
-			boundingBox( source, xcorner, ycorner, magnification );
 			g2d.setStroke( sourceStroke );
-			g2d.drawRect( bb[ 0 ], bb[ 1 ], bb[ 2 ], bb[ 3 ] );
+			source.accept( painter );
 
 			// Arrow to current pos.
 			if ( backward )
 			{
 				arrow.x1d = targetPixelPos[ 0 ];
 				arrow.y1d = targetPixelPos[ 1 ];
-				arrow.x2d = bb[ 0 ] + bb[ 2 ] / 2;
-				arrow.y2d = bb[ 1 ] + bb[ 3 ] / 2;
+				arrow.x2d = sourcePixelPos[ 0 ];
+				arrow.y2d = sourcePixelPos[ 1 ];
 			}
 			else
 			{
-				arrow.x1d = bb[ 0 ] + bb[ 2 ] / 2;
-				arrow.y1d = bb[ 1 ] + bb[ 3 ] / 2;
+				arrow.x1d = sourcePixelPos[ 0 ];
+				arrow.y1d = sourcePixelPos[ 1 ];
 				arrow.x2d = targetPixelPos[ 0 ];
 				arrow.y2d = targetPixelPos[ 1 ];
 			}
@@ -214,32 +226,55 @@ public class LinkSpotsBehaviour extends AbstractSpotEditBehaviour implements Dra
 
 			// Target bounding box
 			if ( target != null )
-			{
-				boundingBox( target, xcorner, ycorner, magnification );
-				g2d.drawRect( bb[ 0 ], bb[ 1 ], bb[ 2 ], bb[ 3 ] );
-			}
+				target.accept( painter );
 		}
 
-		private final void boundingBox(
-				final Spot spot,
-				final double xcorner,
-				final double ycorner,
-				final double magnification )
+		private class SpotPainter implements SpotVisitor
 		{
-			// Pixel coords.
-			final double xpmin = spot.realMin( 0 ) / calibration[ 0 ] + 0.5f;
-			final double ypmin = spot.realMin( 1 ) / calibration[ 1 ] + 0.5f;
-			final double xpmax = spot.realMax( 0 ) / calibration[ 0 ] + 0.5f;
-			final double ypmax = spot.realMax( 1 ) / calibration[ 1 ] + 0.5f;
-			// Display window coordinates.
-			final double xsmin = ( xpmin - xcorner ) * magnification;
-			final double ysmin = ( ypmin - ycorner ) * magnification;
-			final double xsmax = ( xpmax - xcorner ) * magnification;
-			final double ysmax = ( ypmax - ycorner ) * magnification;
-			bb[ 0 ] = ( int ) Math.round( xsmin );
-			bb[ 1 ] = ( int ) Math.round( ysmin );
-			bb[ 2 ] = ( int ) Math.round( xsmax - xsmin );
-			bb[ 3 ] = ( int ) Math.round( ysmax - ysmin );
+
+			private final PaintSpotRoi paintSpotRoi;
+
+			private final PaintSpotSphere paintSpotSphere;
+
+			private final PaintSpotMesh paintSpotMesh;
+
+			private final DisplaySettings displaySettings;
+
+			private Graphics2D g2d;
+
+			public SpotPainter()
+			{
+				this.displaySettings = DisplaySettings.defaultStyle().copy( "Link spot overlay settings" );
+				displaySettings.setSpotUniformColor( Color.WHITE );
+				displaySettings.setSpotShowName( true );
+				displaySettings.setLineThickness( 2. );
+				this.paintSpotSphere = new PaintSpotSphere( imp, calibration, displaySettings );
+				this.paintSpotRoi = new PaintSpotRoi( imp, calibration, displaySettings );
+				this.paintSpotMesh = new PaintSpotMesh( imp, calibration, displaySettings );
+			}
+
+			private void setGraphics( final Graphics2D g2d )
+			{
+				this.g2d = g2d;
+			}
+
+			@Override
+			public void visit( final SpotBase spot )
+			{
+				paintSpotSphere.paint( g2d, spot );
+			}
+
+			@Override
+			public void visit( final SpotRoi spot )
+			{
+				paintSpotRoi.paint( g2d, spot );
+			}
+
+			@Override
+			public void visit( final SpotMesh spot )
+			{
+				paintSpotMesh.paint( g2d, spot );
+			}
 		}
 	}
 
