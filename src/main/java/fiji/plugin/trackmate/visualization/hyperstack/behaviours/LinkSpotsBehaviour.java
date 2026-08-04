@@ -31,15 +31,15 @@ public class LinkSpotsBehaviour extends AbstractSpotEditBehaviour implements Dra
 
 	private static final String OVERLAY_NAME = "LinkSpotActionOverlay";
 
-	private final boolean backward;
+	protected final boolean backward;
 
-	private Spot source;
+	protected Spot source;
 
-	private Spot target;
+	protected Spot target;
 
-	private NearestNeighborSearchOnKDTree< Spot > search;
+	protected NearestNeighborSearchOnKDTree< Spot > search;
 
-	private final LinkSpotsOverlay overlay;
+	protected final LinkSpotsOverlay overlay;
 
 	public LinkSpotsBehaviour( final Model model, final ImagePlus imp, final boolean backward )
 	{
@@ -156,7 +156,7 @@ public class LinkSpotsBehaviour extends AbstractSpotEditBehaviour implements Dra
 		}
 	}
 
-	private class LinkSpotsOverlay extends Roi
+	class LinkSpotsOverlay extends Roi
 	{
 
 		private static final long serialVersionUID = 1L;
@@ -165,17 +165,17 @@ public class LinkSpotsBehaviour extends AbstractSpotEditBehaviour implements Dra
 
 		private static final Stroke targetStroke = new BasicStroke( 2f );
 
-		private Spot source;
+		Spot source;
 
-		public final int[] sourcePixelPos = new int[ 2 ];
+		final int[] sourcePixelPos = new int[ 2 ];
 
-		private Spot target;
+		Spot target;
 
-		public final int[] targetPixelPos = new int[ 2 ];
+		final int[] targetPixelPos = new int[ 2 ];
 
 		private final ArrowShape arrow = new ArrowShape();
 
-		private final CrossedLineShape crossedLine = new CrossedLineShape();
+		final CrossedLineShape crossedLine = new CrossedLineShape();
 
 		private final SpotPainter painter;
 
@@ -188,43 +188,44 @@ public class LinkSpotsBehaviour extends AbstractSpotEditBehaviour implements Dra
 		@Override
 		public void drawOverlay( final Graphics g )
 		{
-			if ( source == null )
-				return;
-
 			final Graphics2D g2d = ( Graphics2D ) g;
 			g2d.setColor( Color.WHITE );
 			painter.setGraphics( g2d );
 
-			// Source bounding box
-			g2d.setStroke( sourceStroke );
-			source.accept( painter );
-
-			// Arrow to current pos.
-			if ( backward )
+			if ( source != null )
 			{
-				arrow.x1d = targetPixelPos[ 0 ];
-				arrow.y1d = targetPixelPos[ 1 ];
-				arrow.x2d = sourcePixelPos[ 0 ];
-				arrow.y2d = sourcePixelPos[ 1 ];
-			}
-			else
-			{
-				arrow.x1d = sourcePixelPos[ 0 ];
-				arrow.y1d = sourcePixelPos[ 1 ];
-				arrow.x2d = targetPixelPos[ 0 ];
-				arrow.y2d = targetPixelPos[ 1 ];
-			}
-			crossedLine.x1d = arrow.x1d;
-			crossedLine.y1d = arrow.y1d;
-			crossedLine.x2d = arrow.x2d;
-			crossedLine.y2d = arrow.y2d;
+				// Source outline
+				g2d.setStroke( sourceStroke );
+				source.accept( painter );
 
+				// Arrow to current pos.
+				if ( backward )
+				{
+					arrow.x1d = targetPixelPos[ 0 ];
+					arrow.y1d = targetPixelPos[ 1 ];
+					arrow.x2d = sourcePixelPos[ 0 ];
+					arrow.y2d = sourcePixelPos[ 1 ];
+				}
+				else
+				{
+					arrow.x1d = sourcePixelPos[ 0 ];
+					arrow.y1d = sourcePixelPos[ 1 ];
+					arrow.x2d = targetPixelPos[ 0 ];
+					arrow.y2d = targetPixelPos[ 1 ];
+				}
+				crossedLine.x1d = arrow.x1d;
+				crossedLine.y1d = arrow.y1d;
+				crossedLine.x2d = arrow.x2d;
+				crossedLine.y2d = arrow.y2d;
+
+				g2d.setStroke( targetStroke );
+				g2d.draw( crossedLine.getPath() );
+				if ( !crossedLine.crossed )
+					g2d.fill( arrow.getPath() );
+			}
+
+			// Target outline
 			g2d.setStroke( targetStroke );
-			g2d.draw( crossedLine.getPath() );
-			if ( !crossedLine.crossed )
-				g2d.fill( arrow.getPath() );
-
-			// Target bounding box
 			if ( target != null )
 				target.accept( painter );
 		}
@@ -420,7 +421,7 @@ public class LinkSpotsBehaviour extends AbstractSpotEditBehaviour implements Dra
 		}
 	}
 
-	private static class CrossedLineShape
+	static class CrossedLineShape
 	{
 
 		private final Path2D.Double path = new Path2D.Double( Path2D.WIND_NON_ZERO );
@@ -431,7 +432,7 @@ public class LinkSpotsBehaviour extends AbstractSpotEditBehaviour implements Dra
 
 		private double x1d, y1d, x2d, y2d;
 
-		private boolean crossed = false;
+		boolean crossed = false;
 
 		private Path2D.Double getPath()
 		{
