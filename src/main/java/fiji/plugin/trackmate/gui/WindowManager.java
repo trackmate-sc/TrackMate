@@ -35,6 +35,7 @@ import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.bvv.TrackMateBVV;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
+import fiji.plugin.trackmate.visualization.hyperstack.behaviours.semiautotracking.SpotEditToolSettingsPage;
 import fiji.plugin.trackmate.visualization.table.AllSpotsTableView;
 import fiji.plugin.trackmate.visualization.table.TrackTableView;
 import fiji.plugin.trackmate.visualization.trackscheme.SpotImageUpdater;
@@ -67,6 +68,7 @@ public class WindowManager
 		preferencesDialog.setTitle( "TrackMate Preferences" );
 		preferencesDialog.setLocationRelativeTo( null );
 		BigDataViewerActions.toggleDialogAction( globalActions, preferencesDialog, BigDataViewerActions.PREFERENCES_DIALOG, BigDataViewerActions.PREFERENCES_DIALOG_KEYS );
+		preferencesDialog.addPage( new SpotEditToolSettingsPage( "Semi-auto tracking", guiModel.getSemiAutoTrackingParams() ) );
 		preferencesDialog.addPage( new KeymapSettingsPage( "Global keymap", keymapManager, keymapManager.getCommandDescriptions() ) );
 		preferencesDialog.addPage( new KeymapSettingsPage( "Editor keymap", guiModel.getEditorKeymapManager(), guiModel.getEditorKeymapManager().getCommandDescriptions() ) );
 		preferencesDialog.addPage( new AppearanceSettingsPage( "Editor appearance", guiModel.getAppearanceManager() ) );

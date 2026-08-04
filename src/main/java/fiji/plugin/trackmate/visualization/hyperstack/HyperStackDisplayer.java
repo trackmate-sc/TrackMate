@@ -159,14 +159,13 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 			final TrackMateKeymapManager keymapManager = guiModel.getKeymapManager();
 			final ImagePlusBehavioursAdapter adapter = new ImagePlusBehavioursAdapter( imp, keymapManager, new String[] { KeyConfigContexts.HYPERSTACK_DISPLAYER, KeyConfigContexts.TRACKMATE } );
 			SpotEditBehaviours.install( adapter.behaviours(), model, selectionModel, imp );
-			HyperStackDisplayerActions.install( adapter.actions(), model, selectionModel, imp );
+			HyperStackDisplayerActions.install( adapter.actions(), guiModel, imp );
 			// Select spots with freehand ROI.
 			SelectSpotsWithRoiListener.install( model, selectionModel, imp );
 			// Global actions.
 			final Actions globalActions = guiModel.getGlobalActions();
 			adapter.keybindings().addActionMap( "global", new WrappedActionMap( globalActions.getActionMap() ) );
 			adapter.keybindings().addInputMap( "global", new WrappedInputMap( globalActions.getInputMap() ) );
-
 		}
 		catch ( final Exception e )
 		{

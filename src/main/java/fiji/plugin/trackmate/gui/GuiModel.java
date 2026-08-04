@@ -15,6 +15,7 @@ import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.editor.labkit.component.EditorKeymapManager;
 import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.visualization.hyperstack.behaviours.semiautotracking.SemiAutoTrackingParams;
 import fiji.plugin.trackmate.visualization.ui.KeyConfigContexts;
 import fiji.plugin.trackmate.visualization.ui.TrackMateActions;
 import fiji.plugin.trackmate.visualization.ui.TrackMateKeymapManager;
@@ -26,13 +27,14 @@ import ij.Prefs;
  */
 public class GuiModel
 {
-
 	
 	private final Model model;
 
 	private final SelectionModel selectionModel;
 
 	private final DisplaySettings displaySettings;
+
+	private final SemiAutoTrackingParams semiAutoTrackingparams;
 
 	private final Actions globalActions;
 
@@ -68,6 +70,7 @@ public class GuiModel
 		this.selectionModel = new SelectionModel( model );
 		this.displaySettings = displaySettings;
 		this.trackmate = createTrackMate( model, settings );
+		this.semiAutoTrackingparams = new SemiAutoTrackingParams();
 		
 		// Keymap and actions
 		this.editorKeymapManager = new EditorKeymapManager();
@@ -228,5 +231,10 @@ public class GuiModel
 	public AppearanceManager getAppearanceManager()
 	{
 		return appearanceManager;
+	}
+
+	public SemiAutoTrackingParams getSemiAutoTrackingParams()
+	{
+		return semiAutoTrackingparams;
 	}
 }
