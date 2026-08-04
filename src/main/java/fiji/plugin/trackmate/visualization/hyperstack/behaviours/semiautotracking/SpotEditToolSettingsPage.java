@@ -28,8 +28,12 @@ public class SpotEditToolSettingsPage implements SettingsPage
 		this.modificationListeners = new Listeners.SynchronizedList<>();
 		this.tmpParams = new SemiAutoTrackingParams();
 		this.panel = GuiBuilder.build( tmpParams );
+		tmpParams.updateListeners().add( () -> modificationListeners.list.forEach( ModificationListener::setModified ) );
 		onApply( () -> params.set( tmpParams ) );
-		onCancel( () -> tmpParams.set( params ) );
+		onCancel( () -> {
+			tmpParams.set( params );
+			panel.refresh();
+		} );
 	}
 
 	@Override

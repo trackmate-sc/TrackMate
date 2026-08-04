@@ -1,8 +1,10 @@
 package fiji.plugin.trackmate.visualization.hyperstack.behaviours.semiautotracking;
 
+import org.scijava.listeners.Listeners;
 import org.scijava.ui.config.Configurator;
 import org.scijava.ui.config.Parameters.DoubleParam;
 import org.scijava.ui.config.Parameters.IntParam;
+import org.scijava.ui.config.Parameters.UpdateListener;
 
 public class SemiAutoTrackingParams extends Configurator
 {
@@ -15,9 +17,13 @@ public class SemiAutoTrackingParams extends Configurator
 
 	private final IntParam stepwiseTimeBrowsing;
 
+	private final Listeners.SynchronizedList< UpdateListener > updateListeners;
+
 	public SemiAutoTrackingParams()
 	{
 		super( "Semi-automatic tracking parameters", "Parameters that configures the semi-automatic tracking tool." );
+		this.updateListeners = new Listeners.SynchronizedList<>();
+		final UpdateListener updateListener = () -> notifyUpdateListeners();
 
 		this.qualityThreshold = addDoubleParameter()
 				.key( "QUALITY_THRESHOLD" )
@@ -26,6 +32,7 @@ public class SemiAutoTrackingParams extends Configurator
 				.defaultValue( 0.5d )
 				.min( 0. )
 				.max( 2. )
+				.updateListener( updateListener )
 				.get();
 
 		this.distanceTolerance = addDoubleParameter()
@@ -35,6 +42,7 @@ public class SemiAutoTrackingParams extends Configurator
 				.defaultValue( 2d )
 				.min( 0. )
 				.max( 10. )
+				.updateListener( updateListener )
 				.get();
 
 		this.nFrames = addIntParameter()
@@ -43,6 +51,7 @@ public class SemiAutoTrackingParams extends Configurator
 				.help( "The number of frames to process in one go. Set to 0 to have no bounds." )
 				.defaultValue( 10 )
 				.min( 0 )
+				.updateListener( updateListener )
 				.get();
 
 		this.stepwiseTimeBrowsing = addIntParameter()
@@ -51,7 +60,18 @@ public class SemiAutoTrackingParams extends Configurator
 				.help( "By how many frames to jump when we do step-wise time browsing." )
 				.defaultValue( 1 )
 				.min( 1 )
+				.updateListener( updateListener )
 				.get();
+	}
+
+	private void notifyUpdateListeners()
+	{
+		updateListeners.list.forEach( UpdateListener::parameterUpdated );
+	}
+
+	public Listeners< UpdateListener > updateListeners()
+	{
+		return updateListeners;
 	}
 
 	public double qualityThreshold()
@@ -80,5 +100,13 @@ public class SemiAutoTrackingParams extends Configurator
 		this.distanceTolerance.set( other.distanceTolerance() );
 		this.nFrames.set( other.nFrames() );
 		this.stepwiseTimeBrowsing.set( other.stepwiseTimeBrowsing() );
+		notifyUpdateListeners();
+	}
+
+	@Override
+	public String toString()
+	{
+		return String.format( "SemiAutoTrackingParams [qualityThreshold=%.2f, distanceTolerance=%.2f, nFrames=%d, stepwiseTimeBrowsing=%d]",
+				qualityThreshold(), distanceTolerance(), nFrames(), stepwiseTimeBrowsing() );
 	}
 }
