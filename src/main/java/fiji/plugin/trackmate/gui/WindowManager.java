@@ -24,6 +24,7 @@ import org.scijava.ui.behaviour.util.Actions;
 import bdv.BigDataViewerActions;
 import bdv.tools.CloseWindowActions;
 import bdv.tools.PreferencesDialog;
+import bdv.ui.appearance.AppearanceSettingsPage;
 import bdv.ui.keymap.Keymap;
 import bdv.ui.keymap.KeymapSettingsPage;
 import bdv.util.InvokeOnEDT;
@@ -63,8 +64,12 @@ public class WindowManager
 
 		// Preferences dialog
 		final PreferencesDialog preferencesDialog = new PreferencesDialog( null, keymap, new String[] { TRACKMATE, HYPERSTACK_DISPLAYER, TRACKSCHEME, ALL_SPOTS_TABLE, TRACK_TABLE } );
+		preferencesDialog.setTitle( "TrackMate Preferences" );
+		preferencesDialog.setLocationRelativeTo( null );
 		BigDataViewerActions.toggleDialogAction( globalActions, preferencesDialog, BigDataViewerActions.PREFERENCES_DIALOG, BigDataViewerActions.PREFERENCES_DIALOG_KEYS );
-		preferencesDialog.addPage( new KeymapSettingsPage( "Keymap", keymapManager, keymapManager.getCommandDescriptions() ) );
+		preferencesDialog.addPage( new KeymapSettingsPage( "Global keymap", keymapManager, keymapManager.getCommandDescriptions() ) );
+		preferencesDialog.addPage( new KeymapSettingsPage( "Editor keymap", guiModel.getEditorKeymapManager(), guiModel.getEditorKeymapManager().getCommandDescriptions() ) );
+		preferencesDialog.addPage( new AppearanceSettingsPage( "Editor appearance", guiModel.getAppearanceManager() ) );
 	}
 
 	public HyperStackDisplayer createHyperStackDisplayer()
