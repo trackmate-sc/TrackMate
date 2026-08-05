@@ -27,7 +27,6 @@ import static fiji.plugin.trackmate.gui.Icons.REVERT_ICON;
 import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -36,7 +35,6 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -107,10 +105,7 @@ public class ConfigTrackMateDisplaySettings implements Command
 		 */
 		
 		final DisplaySettingsPanel editor = new DisplaySettingsPanel( ds );
-		final JScrollPane scrollPane = new JScrollPane( editor, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER );
-		scrollPane.setPreferredSize( new Dimension( 350, 500 ) );
-		scrollPane.getVerticalScrollBar().setUnitIncrement( 16 );
-		configPanel.add( scrollPane, BorderLayout.CENTER );
+		configPanel.add( editor, BorderLayout.CENTER );
 		
 		/*
 		 * Listeners.
