@@ -29,6 +29,7 @@ import bdv.ui.keymap.Keymap;
 import bdv.ui.keymap.KeymapSettingsPage;
 import bdv.util.InvokeOnEDT;
 import bvv.vistools.BvvHandle;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsConfigPage;
 import fiji.plugin.trackmate.gui.editor.LabkitLauncher;
 import fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame;
 import fiji.plugin.trackmate.util.TMUtils;
@@ -68,9 +69,10 @@ public class WindowManager
 		preferencesDialog.setTitle( "TrackMate Preferences" );
 		preferencesDialog.setLocationRelativeTo( null );
 		BigDataViewerActions.toggleDialogAction( globalActions, preferencesDialog, BigDataViewerActions.PREFERENCES_DIALOG, BigDataViewerActions.PREFERENCES_DIALOG_KEYS );
-		preferencesDialog.addPage( new SpotEditToolSettingsPage( "Semi-auto tracking", guiModel.getSemiAutoTrackingParams() ) );
+		preferencesDialog.addPage( new DisplaySettingsConfigPage( "Display settings", guiModel.getDisplaySettingsManager() ) );
 		preferencesDialog.addPage( new KeymapSettingsPage( "Global keymap", keymapManager, keymapManager.getCommandDescriptions() ) );
 		preferencesDialog.addPage( new KeymapSettingsPage( "Editor keymap", guiModel.getEditorKeymapManager(), guiModel.getEditorKeymapManager().getCommandDescriptions() ) );
+		preferencesDialog.addPage( new SpotEditToolSettingsPage( "Semi-auto tracking", guiModel.getSemiAutoTrackingParams() ) );
 		preferencesDialog.addPage( new AppearanceSettingsPage( "Editor appearance", guiModel.getAppearanceManager() ) );
 	}
 
