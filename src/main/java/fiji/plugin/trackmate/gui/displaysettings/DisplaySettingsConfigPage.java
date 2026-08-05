@@ -20,7 +20,7 @@ public class DisplaySettingsConfigPage extends SelectAndEditProfileSettingsPage<
 	{
 		super(
 				treePath,
-				new StyleProfileManager<>( displaySettingsManager, new DisplaySettingsManager( false ) ),
+				new StyleProfileManager<>( displaySettingsManager, new DisplaySettingsManager( null, false ) ),
 				new DisplaySettingsPanel( displaySettingsManager.getSelectedStyle() ) );
 	}
 

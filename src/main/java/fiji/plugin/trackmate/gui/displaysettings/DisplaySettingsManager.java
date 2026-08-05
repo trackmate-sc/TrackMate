@@ -23,16 +23,33 @@ public class DisplaySettingsManager extends AbstractStyleManager< DisplaySetting
 
 	public DisplaySettingsManager()
 	{
-		this( true );
+		this( null, true );
 	}
 
-	public DisplaySettingsManager( final boolean loadStyles )
+	/**
+	 * Creates a new DisplaySettingsManager.
+	 * 
+	 * @param styleToManage
+	 *            the style that will be managed by this manager. If
+	 *            <code>null</code>, the default style will be used.
+	 * @param loadStyles
+	 *            if <code>true</code>, the styles will be loaded from the
+	 *            {@link #DISPLAY_SETTINGS_FOLDER} folder. If styleToManage is
+	 *            <code>null</code>, the main style will be set to the style
+	 *            that was loaded from the folder.
+	 */
+	public DisplaySettingsManager( final DisplaySettings styleToManage, final boolean loadStyles )
 	{
-		forwardDefaultStyle = DisplaySettings.defaultStyle().copy();
+		final boolean loadSelectedStyle = ( null == styleToManage );
+		if ( loadSelectedStyle )
+			forwardDefaultStyle = DisplaySettings.defaultStyle().copy();
+		else
+			forwardDefaultStyle = styleToManage;
+
 		updateForwardDefaultListeners = () -> forwardDefaultStyle.set( selectedStyle );
 		selectedStyle.listeners().add( updateForwardDefaultListeners );
 		if ( loadStyles )
-			loadStyles();
+			loadStyles( loadSelectedStyle );
 	}
 
 	public DisplaySettings getForwardDefaultStyle()
@@ -59,9 +76,9 @@ public class DisplaySettingsManager extends AbstractStyleManager< DisplaySetting
 		return List.of( ds1, ds2 );
 	}
 
-	public void loadStyles()
+	public void loadStyles( final boolean loadSelectedStyle )
 	{
-		loadStyles( DISPLAY_SETTINGS_FOLDER );
+		loadStyles( DISPLAY_SETTINGS_FOLDER, loadSelectedStyle );
 	}
 
 	@Override
@@ -70,7 +87,7 @@ public class DisplaySettingsManager extends AbstractStyleManager< DisplaySetting
 		saveStyles( DISPLAY_SETTINGS_FOLDER );
 	}
 
-	public void loadStyles( final String folder )
+	public void loadStyles( final String folder, final boolean loadSelectedStyle )
 	{
 		// Load the selected style name from the text file
 		final File selectedFile = new File( folder, SELECTED_STYLE_FILENAME );
@@ -82,7 +99,9 @@ public class DisplaySettingsManager extends AbstractStyleManager< DisplaySetting
 		catch ( final IOException e )
 		{}
 
-		setSelectedStyle( builtinStyles.get( 0 ) );
+		if ( loadSelectedStyle )
+			setSelectedStyle( builtinStyles.get( 0 ) );
+
 		userStyles.clear();
 		final Set< String > names = builtinStyles.stream().map( DisplaySettings::getName ).collect( Collectors.toSet() );
 		
@@ -103,13 +122,24 @@ public class DisplaySettingsManager extends AbstractStyleManager< DisplaySetting
 				continue;
 			}
 			userStyles.add( ds );
-			if ( ds.getName().equals( selectedName ) )
+			if ( ds.getName().equals( selectedName ) && loadSelectedStyle )
 				setSelectedStyle( ds );
 		}
-		for ( final DisplaySettings ds : builtinStyles )
+
+		if ( loadSelectedStyle )
 		{
-			if ( ds.getName().equals( selectedName ) )
-				setSelectedStyle( ds );
+			for ( final DisplaySettings ds : builtinStyles )
+			{
+				if ( ds.getName().equals( selectedName ) )
+					setSelectedStyle( ds );
+			}
+		}
+		else
+		{
+			final DisplaySettings copy = forwardDefaultStyle.copy();
+			userStyles.removeIf( ds -> ds.getName().equals( copy.getName() ) );
+			userStyles.add( copy );
+			setSelectedStyle( copy );
 		}
 	}
 
