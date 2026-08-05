@@ -24,7 +24,6 @@ package fiji.plugin.trackmate.gui.displaysettings;
 import java.awt.Color;
 import java.awt.Font;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -88,6 +87,25 @@ public class DisplaySettingsIO
 		return builder.setPrettyPrinting().create();
 	}
 
+	public static void write( final DisplaySettings ds, final String path )
+	{
+		final String str = toJson( ds );
+		final File file = new File( path );
+
+		if ( !file.exists() )
+			file.getParentFile().mkdirs();
+
+		try (FileWriter writer = new FileWriter( file ))
+		{
+			writer.append( str );
+		}
+		catch ( final IOException e )
+		{
+			System.err.println( "Could not write the settings to " + file );
+			e.printStackTrace();
+		}
+	}
+
 	public static void saveToUserDefault( final DisplaySettings ds )
 	{
 		final String str = toJson( ds );
@@ -106,6 +124,23 @@ public class DisplaySettingsIO
 		}
 	}
 
+	public static DisplaySettings read( final String path )
+	{
+		try (FileReader reader = new FileReader( path ))
+		{
+			final String str = Files.lines( Paths.get( path ) )
+					.collect( Collectors.joining( System.lineSeparator() ) );
+
+			return fromJson( str );
+		}
+		catch ( final IOException e )
+		{
+			System.err.println( "Could not read the file: " + path );
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 	public static DisplaySettings readUserDefault()
 	{
 		if ( !userDefaultFile.exists() )
@@ -114,26 +149,9 @@ public class DisplaySettingsIO
 			saveToUserDefault( ds );
 			return ds;
 		}
-
-		try (FileReader reader = new FileReader( userDefaultFile ))
-		{
-			final String str = Files.lines( Paths.get( userDefaultFile.getAbsolutePath() ) )
-					.collect( Collectors.joining( System.lineSeparator() ) );
-
-			return fromJson( str );
-		}
-		catch ( final FileNotFoundException e )
-		{
-			System.err.println( "Could not find the user default settings file: " + userDefaultFile
-					+ ". Using built-in default setting." );
-			e.printStackTrace();
-		}
-		catch ( final IOException e )
-		{
-			System.err.println( "Could not read the user default settings file: " + userDefaultFile
-					+ ". Using built-in default setting." );
-			e.printStackTrace();
-		}
+		final DisplaySettings ds = read( userDefaultFile.getAbsolutePath() );
+		if ( ds != null )
+			return ds;
 		return DisplaySettings.defaultStyle().copy();
 	}
 
