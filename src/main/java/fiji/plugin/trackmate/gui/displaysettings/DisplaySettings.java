@@ -29,9 +29,10 @@ import java.util.Objects;
 
 import org.scijava.listeners.Listeners;
 
+import bdv.ui.settings.style.Style;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 
-public class DisplaySettings
+public class DisplaySettings implements Style< DisplaySettings >
 {
 
 	/** The display settings name. */
@@ -148,6 +149,7 @@ public class DisplaySettings
 	 *            the name for the copied render settings.
 	 * @return a new {@link DisplaySettings} instance.
 	 */
+	@Override
 	public DisplaySettings copy( final String name )
 	{
 		final DisplaySettings rs = new DisplaySettings();
@@ -157,6 +159,7 @@ public class DisplaySettings
 		return rs;
 	}
 
+	@Override
 	public DisplaySettings copy()
 	{
 		return copy( null );
@@ -208,11 +211,13 @@ public class DisplaySettings
 		notifyListeners();
 	}
 
+	@Override
 	public String getName()
 	{
 		return name;
 	}
 
+	@Override
 	public synchronized void setName( final String name )
 	{
 		if ( !Objects.equals( this.name, name ) )
@@ -788,7 +793,7 @@ public class DisplaySettings
 	{
 		DEFAULT( "Default" ), SPOTS( "spots" ), EDGES( "edges" ), TRACKS( "tracks" );
 
-		private String name;
+		private final String name;
 
 		private TrackMateObject( final String name )
 		{
