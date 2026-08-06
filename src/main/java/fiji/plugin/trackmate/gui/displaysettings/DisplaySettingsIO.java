@@ -50,8 +50,6 @@ import com.google.gson.stream.JsonWriter;
 public class DisplaySettingsIO
 {
 
-	private static File userDefaultFile = new File( new File( System.getProperty( "user.home" ), ".trackmate" ), "userdefaultsettings.json" );
-
 	public static void toXML( final DisplaySettings ds, final Element dsel )
 	{
 		dsel.setText( toJson( ds ) );
@@ -64,7 +62,9 @@ public class DisplaySettingsIO
 
 	public static DisplaySettings fromJson( final String str )
 	{
-		final DisplaySettings ds = ( str == null || str.isEmpty() ) ? readUserDefault() : getGson().fromJson( str, DisplaySettings.class );
+		final DisplaySettings ds = ( str == null || str.isEmpty() )
+				? DisplaySettings.defaultStyle().copy()
+				: getGson().fromJson( str, DisplaySettings.class );
 
 		// Sanitize min and max.
 		final double spotMin = ds.getSpotMin();
@@ -106,24 +106,6 @@ public class DisplaySettingsIO
 		}
 	}
 
-	public static void saveToUserDefault( final DisplaySettings ds )
-	{
-		final String str = toJson( ds );
-
-		if ( !userDefaultFile.exists() )
-			userDefaultFile.getParentFile().mkdirs();
-
-		try (FileWriter writer = new FileWriter( userDefaultFile ))
-		{
-			writer.append( str );
-		}
-		catch ( final IOException e )
-		{
-			System.err.println( "Could not write the user default settings to " + userDefaultFile );
-			e.printStackTrace();
-		}
-	}
-
 	public static DisplaySettings read( final String path )
 	{
 		try (FileReader reader = new FileReader( path ))
@@ -143,16 +125,8 @@ public class DisplaySettingsIO
 
 	public static DisplaySettings readUserDefault()
 	{
-		if ( !userDefaultFile.exists() )
-		{
-			final DisplaySettings ds = DisplaySettings.defaultStyle().copy( "User-default" );
-			saveToUserDefault( ds );
-			return ds;
-		}
-		final DisplaySettings ds = read( userDefaultFile.getAbsolutePath() );
-		if ( ds != null )
-			return ds;
-		return DisplaySettings.defaultStyle().copy();
+		return new DisplaySettingsManager().getInstance().copy();
+
 	}
 
 	/**
@@ -271,10 +245,5 @@ public class DisplaySettingsIO
 				return Color.WHITE;
 			}
 		}
-	}
-
-	public static void main( final String[] args )
-	{
-		System.out.println( readUserDefault() );
 	}
 }

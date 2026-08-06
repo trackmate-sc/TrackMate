@@ -8,7 +8,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import bdv.ui.settings.style.AbstractStyleManager;
+import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackDisplayMode;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 
 public class DisplaySettingsManager extends AbstractStyleManager< DisplaySettingsManager, DisplaySettings >
 {
@@ -21,38 +23,48 @@ public class DisplaySettingsManager extends AbstractStyleManager< DisplaySetting
 
 	private final DisplaySettings.UpdateListener updateForwardDefaultListeners;
 
+	/**
+	 * Creates a new DisplaySettingsManager.
+	 * 
+	 * @param instance
+	 *            the style that will be managed by this manager. If
+	 *            <code>null</code>, a new instance will be created with the
+	 *            default style.
+	 * @param loadStyles
+	 *            if <code>true</code>, the styles will be loaded from the
+	 *            {@link #DISPLAY_SETTINGS_FOLDER} folder.
+	 */
+	public DisplaySettingsManager( final DisplaySettings instance, final boolean loadStyles )
+	{
+		final boolean instanceProvided = ( null != instance );
+		if ( instanceProvided )
+			forwardDefaultStyle = instance;
+		else
+			forwardDefaultStyle = DisplaySettings.defaultStyle().copy();
+
+		updateForwardDefaultListeners = () -> forwardDefaultStyle.set( selectedStyle );
+		selectedStyle.listeners().add( updateForwardDefaultListeners );
+		if ( loadStyles )
+			loadStyles( instanceProvided );
+	}
+
+	/**
+	 * Creates a new DisplaySettingsManager and loads the styles from the
+	 * {@link #DISPLAY_SETTINGS_FOLDER} folder. The {@link #getInstance()} will
+	 * be set to the last configured style by the user.
+	 */
 	public DisplaySettingsManager()
 	{
 		this( null, true );
 	}
 
 	/**
-	 * Creates a new DisplaySettingsManager.
+	 * Exposes the style that is managed by this manager. This instance will be
+	 * modified by the settings editor using this manager.
 	 * 
-	 * @param styleToManage
-	 *            the style that will be managed by this manager. If
-	 *            <code>null</code>, the default style will be used.
-	 * @param loadStyles
-	 *            if <code>true</code>, the styles will be loaded from the
-	 *            {@link #DISPLAY_SETTINGS_FOLDER} folder. If styleToManage is
-	 *            <code>null</code>, the main style will be set to the style
-	 *            that was loaded from the folder.
+	 * @return the style that is managed by this manager.
 	 */
-	public DisplaySettingsManager( final DisplaySettings styleToManage, final boolean loadStyles )
-	{
-		final boolean loadSelectedStyle = ( null == styleToManage );
-		if ( loadSelectedStyle )
-			forwardDefaultStyle = DisplaySettings.defaultStyle().copy();
-		else
-			forwardDefaultStyle = styleToManage;
-
-		updateForwardDefaultListeners = () -> forwardDefaultStyle.set( selectedStyle );
-		selectedStyle.listeners().add( updateForwardDefaultListeners );
-		if ( loadStyles )
-			loadStyles( loadSelectedStyle );
-	}
-
-	public DisplaySettings getForwardDefaultStyle()
+	public DisplaySettings getInstance()
 	{
 		return forwardDefaultStyle;
 	}
@@ -70,15 +82,23 @@ public class DisplaySettingsManager extends AbstractStyleManager< DisplaySetting
 	protected List< DisplaySettings > loadBuiltinStyles()
 	{
 		final DisplaySettings ds1 = DisplaySettings.defaultStyle();
-		final DisplaySettings ds2 = ds1.copy( "Dragon tail" );
-		ds2.setLineThickness( 2. );
-		ds2.setTrackDisplayMode( TrackDisplayMode.LOCAL_BACKWARD );
-		return List.of( ds1, ds2 );
+
+		final DisplaySettings ds2 = ds1.copy( "Color by track" );
+		ds2.setTrackColorBy( TrackMateObject.TRACKS, TrackIndexAnalyzer.TRACK_INDEX );
+		ds2.setSpotColorBy( TrackMateObject.TRACKS, TrackIndexAnalyzer.TRACK_INDEX );
+
+		final DisplaySettings ds3 = ds2.copy( "Dragon tail" );
+		ds3.setLineThickness( 2. );
+		ds3.setTrackDisplayMode( TrackDisplayMode.LOCAL_BACKWARD );
+		ds3.setSpotFilled( true );
+		ds3.setSpotTransparencyAlpha( 0.8 );
+
+		return List.of( ds1, ds2, ds3 );
 	}
 
-	public void loadStyles( final boolean loadSelectedStyle )
+	public void loadStyles( final boolean instanceProvided )
 	{
-		loadStyles( DISPLAY_SETTINGS_FOLDER, loadSelectedStyle );
+		loadStyles( DISPLAY_SETTINGS_FOLDER, instanceProvided );
 	}
 
 	@Override
@@ -87,7 +107,7 @@ public class DisplaySettingsManager extends AbstractStyleManager< DisplaySetting
 		saveStyles( DISPLAY_SETTINGS_FOLDER );
 	}
 
-	public void loadStyles( final String folder, final boolean loadSelectedStyle )
+	public void loadStyles( final String folder, final boolean instanceProvided )
 	{
 		// Load the selected style name from the text file
 		final File selectedFile = new File( folder, SELECTED_STYLE_FILENAME );
@@ -99,7 +119,7 @@ public class DisplaySettingsManager extends AbstractStyleManager< DisplaySetting
 		catch ( final IOException e )
 		{}
 
-		if ( loadSelectedStyle )
+		if ( !instanceProvided )
 			setSelectedStyle( builtinStyles.get( 0 ) );
 
 		userStyles.clear();
@@ -122,11 +142,11 @@ public class DisplaySettingsManager extends AbstractStyleManager< DisplaySetting
 				continue;
 			}
 			userStyles.add( ds );
-			if ( ds.getName().equals( selectedName ) && loadSelectedStyle )
+			if ( ds.getName().equals( selectedName ) && !instanceProvided )
 				setSelectedStyle( ds );
 		}
 
-		if ( loadSelectedStyle )
+		if ( !instanceProvided )
 		{
 			for ( final DisplaySettings ds : builtinStyles )
 			{
