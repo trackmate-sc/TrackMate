@@ -21,25 +21,25 @@
  */
 package fiji.plugin.trackmate.gui.displaysettings;
 
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.booleanElement;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.boundedDoubleElement;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.colorElement;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.colormapElement;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.doubleElement;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.enumElement;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.featureElement;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.fontElement;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.intElement;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.label;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedCheckBox;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedColorButton;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedColormapChooser;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedComboBoxEnumSelector;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedFeatureSelector;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedFontButton;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedFormattedTextField;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedSliderPanel;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.separator;
+import static fiji.plugin.trackmate.gui.displaysettings.TrackMateStyleElements.featureElement;
+import static fiji.plugin.trackmate.gui.displaysettings.TrackMateStyleElements.linkedFeatureSelector;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.booleanElement;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.boundedDoubleElement;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.colorElement;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.colormapElement;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.doubleElement;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.enumElement;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.fontElement;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.intElement;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.label;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.linkedCheckBox;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.linkedColorButton;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.linkedColormapChooser;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.linkedComboBoxEnumSelector;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.linkedFontButton;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.linkedFormattedTextField;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.linkedSliderPanel;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.separator;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -61,6 +61,17 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import org.scijava.listeners.Listeners;
+import org.scijava.ui.config.visitors.gui.elements.StyleElement;
+import org.scijava.ui.config.visitors.gui.elements.StyleElements.BooleanElement;
+import org.scijava.ui.config.visitors.gui.elements.StyleElements.BoundedDoubleElement;
+import org.scijava.ui.config.visitors.gui.elements.StyleElements.ColorElement;
+import org.scijava.ui.config.visitors.gui.elements.StyleElements.ColormapElement;
+import org.scijava.ui.config.visitors.gui.elements.StyleElements.DoubleElement;
+import org.scijava.ui.config.visitors.gui.elements.StyleElements.EnumElement;
+import org.scijava.ui.config.visitors.gui.elements.StyleElements.FontElement;
+import org.scijava.ui.config.visitors.gui.elements.StyleElements.IntElement;
+import org.scijava.ui.config.visitors.gui.elements.StyleElements.LabelElement;
+import org.scijava.ui.config.visitors.gui.elements.StyleElements.Separator;
 
 import com.itextpdf.text.Font;
 
@@ -69,19 +80,8 @@ import bdv.ui.settings.SelectAndEditProfileSettingsPage.ProfileEditPanel;
 import bdv.ui.settings.style.StyleProfile;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackDisplayMode;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.UpdateListener;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.BooleanElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.BoundedDoubleElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.ColorElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.ColormapElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.DoubleElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.EnumElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.FeatureElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.FontElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.IntElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.LabelElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.Separator;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.StyleElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.StyleElementVisitor;
+import fiji.plugin.trackmate.gui.displaysettings.TrackMateStyleElements.FeatureElement;
+import fiji.plugin.trackmate.gui.displaysettings.TrackMateStyleElements.TrackMateStyleElementVisitor;
 
 public class DisplaySettingsPanel extends JPanel implements ProfileEditPanel< StyleProfile< DisplaySettings > >, UpdateListener
 {
@@ -217,7 +217,7 @@ public class DisplaySettingsPanel extends JPanel implements ProfileEditPanel< St
 				separator() );
 	}
 
-	private static class GuiVisitor implements StyleElementVisitor
+	private static class GuiVisitor implements TrackMateStyleElementVisitor
 	{
 
 		private final JPanel panel;
@@ -277,7 +277,7 @@ public class DisplaySettingsPanel extends JPanel implements ProfileEditPanel< St
 		public void visit( final DoubleElement element )
 		{
 			addToLayout(
-					linkedFormattedTextField( element ),
+					linkedFormattedTextField( element, null, null ),
 					new JLabel( element.getLabel() ) );
 		}
 

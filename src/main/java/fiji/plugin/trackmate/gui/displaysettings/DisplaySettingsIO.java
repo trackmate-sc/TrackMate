@@ -33,6 +33,7 @@ import java.nio.file.Paths;
 import java.util.stream.Collectors;
 
 import org.jdom2.Element;
+import org.scijava.ui.config.visitors.gui.elements.colormap.Colormap;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

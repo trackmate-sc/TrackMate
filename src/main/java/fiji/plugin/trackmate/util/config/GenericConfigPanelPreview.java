@@ -5,10 +5,10 @@ import java.util.function.DoubleConsumer;
 import java.util.function.Supplier;
 
 import org.scijava.ui.config.Configurator;
+import org.scijava.ui.config.visitors.gui.elements.StyleElement;
 import org.scijava.ui.config.visitors.gui.elements.StyleElements.BoundedDoubleElement;
 import org.scijava.ui.config.visitors.gui.elements.StyleElements.DoubleElement;
 import org.scijava.ui.config.visitors.gui.elements.StyleElements.IntElement;
-import org.scijava.ui.config.visitors.gui.elements.StyleElements.StyleElement;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;

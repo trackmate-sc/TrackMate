@@ -28,6 +28,7 @@ import java.awt.Font;
 import java.util.Objects;
 
 import org.scijava.listeners.Listeners;
+import org.scijava.ui.config.visitors.gui.elements.colormap.Colormap;
 
 import bdv.ui.settings.style.Style;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
