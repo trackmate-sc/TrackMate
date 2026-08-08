@@ -312,7 +312,7 @@ public class TrackModel
 		edgesModified.add( edge );
 	}
 
-	Boolean setVisibility( final Integer trackID, final boolean visible )
+	public boolean setVisibility( final Integer trackID, final boolean visible )
 	{
 		return visibility.put( trackID, Boolean.valueOf( visible ) );
 	}
@@ -1312,7 +1312,7 @@ public class TrackModel
 							for ( final Spot v : targetVCS )
 								vertexToID.put( v, newid );
 
-							final Boolean targetVisibility = visibility.get( id );
+							final boolean targetVisibility = visibility.get( id );
 							visibility.put( newid, targetVisibility );
 							names.put( newid, nameGenerator.next() );
 							// Transaction: both children tracks are marked for
