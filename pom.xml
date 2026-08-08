@@ -194,6 +194,18 @@
 		<maven.javadoc.failOnError>false</maven.javadoc.failOnError>
 	</properties>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<argLine>-Djava.awt.headless=true</argLine>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
 	<dependencies>
 
 		<!-- Config UI -->
