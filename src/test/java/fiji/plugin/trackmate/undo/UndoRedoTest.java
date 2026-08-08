@@ -242,6 +242,52 @@ public class UndoRedoTest
 		}
 	}
 
+	@Test
+	public void testUndoRedoSpotMove()
+	{
+		final Spot spot = model.getSpots().iterator( 0, true ).next();
+		final double originalX = spot.getDoublePosition( 0 );
+		final double originalY = spot.getDoublePosition( 1 );
+		final double originalZ = spot.getDoublePosition( 2 );
+		final double newX = originalX + 10.0;
+		final double newY = originalY + 10.0;
+		final double newZ = originalZ + 10.0;
+
+		model.beginUpdate();
+		try
+		{
+			model.beforeEdit( spot );
+			spot.setPosition( newX, 0 );
+			spot.setPosition( newY, 1 );
+			spot.setPosition( newZ, 2 );
+		}
+		finally
+		{
+			model.endUpdate();
+		}
+
+		// Verify the spot was moved
+		assertThat( spot.getDoublePosition( 0 ) ).isEqualTo( newX );
+		assertThat( spot.getDoublePosition( 1 ) ).isEqualTo( newY );
+		assertThat( spot.getDoublePosition( 2 ) ).isEqualTo( newZ );
+
+		// Undo command.
+		model.undo();
+
+		// Verify position is restored after undo
+		assertThat( spot.getDoublePosition( 0 ) ).isEqualTo( originalX );
+		assertThat( spot.getDoublePosition( 1 ) ).isEqualTo( originalY );
+		assertThat( spot.getDoublePosition( 2 ) ).isEqualTo( originalZ );
+
+		// Redo command.
+		model.redo();
+
+		// Verify position is restored after redo
+		assertThat( spot.getDoublePosition( 0 ) ).isEqualTo( newX );
+		assertThat( spot.getDoublePosition( 1 ) ).isEqualTo( newY );
+		assertThat( spot.getDoublePosition( 2 ) ).isEqualTo( newZ );
+	}
+
 	private void testCore( final Runnable doModifs )
 	{
 		// Must succeed: model is not modified yet.

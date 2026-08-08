@@ -189,7 +189,8 @@ public class UndoRedoStack implements ModelChangeListener
 				final String currentName = spot.getName();
 
 				// Only store features that actually changed
-				final Map< String, Double > changedFeatures = new HashMap<>();
+				final Map< String, Double > changedFeaturesBefore = new HashMap<>();
+				final Map< String, Double > changedFeaturesAfter = new HashMap<>();
 				for ( final Map.Entry< String, Double > entry : previousFeatureValues.entrySet() )
 				{
 					final String key = entry.getKey();
@@ -198,17 +199,16 @@ public class UndoRedoStack implements ModelChangeListener
 					if ( beforeValue == null && afterValue != null ||
 							beforeValue != null && !beforeValue.equals( afterValue ) )
 					{
-						changedFeatures.put( key, beforeValue );
+						changedFeaturesBefore.put( key, beforeValue );
+						changedFeaturesAfter.put( key, afterValue );
 					}
 				}
-				// Also check for features that were added (not in before but in after)
-				// These don't need to be stored for undo, but we need to know to remove them
-				// Actually, for undo we only need to restore what was there before
 
 				// Only store if there are actual changes
-				if ( !changedFeatures.isEmpty() )
+				if ( !changedFeaturesBefore.isEmpty() )
 				{
-					command.spotFeatureValuesBefore.put( spot, changedFeatures );
+					command.spotFeatureValuesBefore.put( spot, changedFeaturesBefore );
+					command.spotFeatureValuesAfter.put( spot, changedFeaturesAfter );
 				}
 
 				// Store name only if it changed
@@ -228,6 +228,35 @@ public class UndoRedoStack implements ModelChangeListener
 					{
 						command.spotPolygonValuesBefore.put( spotRoi, polygonBefore );
 						command.spotPolygonValuesAfter.put( spotRoi, polygonAfter );
+					}
+				}
+			}
+			else if ( flag == ModelChangeEvent.FLAG_SPOT_FRAME_CHANGED )
+			{
+				// Spot moved - capture position features that changed
+				final Map< String, Double > previousFeatureValues = spotFeatureValuesBefore.get( spot );
+				final Map< String, Double > currentFeatureValues = spot.getFeatures();
+
+				if ( previousFeatureValues != null )
+				{
+					final Map< String, Double > changedFeaturesBefore = new HashMap<>();
+					final Map< String, Double > changedFeaturesAfter = new HashMap<>();
+
+					for ( final String posKey : new String[] { Spot.POSITION_X, Spot.POSITION_Y, Spot.POSITION_Z } )
+					{
+						final Double beforeValue = previousFeatureValues.get( posKey );
+						final Double afterValue = currentFeatureValues.get( posKey );
+						if ( beforeValue != null && ( afterValue == null || !beforeValue.equals( afterValue ) ) )
+						{
+							changedFeaturesBefore.put( posKey, beforeValue );
+							changedFeaturesAfter.put( posKey, afterValue );
+						}
+					}
+
+					if ( !changedFeaturesBefore.isEmpty() )
+					{
+						command.spotFeatureValuesBefore.put( spot, changedFeaturesBefore );
+						command.spotFeatureValuesAfter.put( spot, changedFeaturesAfter );
 					}
 				}
 			}
