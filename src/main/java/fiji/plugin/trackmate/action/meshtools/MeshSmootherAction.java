@@ -27,22 +27,20 @@ import javax.swing.ImageIcon;
 
 import org.scijava.plugin.Plugin;
 
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.action.AbstractTMAction;
 import fiji.plugin.trackmate.action.TrackMateAction;
 import fiji.plugin.trackmate.action.TrackMateActionFactory;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.Icons;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 
 public class MeshSmootherAction extends AbstractTMAction
 {
 
 	@Override
-	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
+	public void execute( final GuiModel guiModel, final Frame parent )
 	{
-		final MeshSmootherController controller = new MeshSmootherController( trackmate.getModel(), selectionModel, logger );
-		controller.setNumThreads( trackmate.getNumThreads() );
+		final MeshSmootherController controller = new MeshSmootherController( guiModel.getModel(), guiModel.getSelectionModel(), logger );
+		controller.setNumThreads( guiModel.getTrackMate().getNumThreads() );
 		controller.show( parent );
 	}
 

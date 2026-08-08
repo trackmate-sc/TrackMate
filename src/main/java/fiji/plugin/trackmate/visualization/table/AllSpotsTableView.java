@@ -22,11 +22,10 @@
 package fiji.plugin.trackmate.visualization.table;
 
 import static fiji.plugin.trackmate.gui.Icons.CSV_ICON;
-import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.event.WindowAdapter;
+import java.awt.Window;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -54,57 +53,58 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
-import fiji.plugin.trackmate.ModelChangeListener;
 import fiji.plugin.trackmate.SelectionChangeEvent;
-import fiji.plugin.trackmate.SelectionChangeListener;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
+import fiji.plugin.trackmate.gui.GuiModel;
+import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.UpdateListener;
 import fiji.plugin.trackmate.util.FileChooser;
 import fiji.plugin.trackmate.util.FileChooser.DialogType;
 import fiji.plugin.trackmate.util.FileChooser.SelectionMode;
+import fiji.plugin.trackmate.visualization.AbstractTrackMateModelJFrameView;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.trackscheme.utils.SearchBar;
 
-public class AllSpotsTableView extends JFrame implements TrackMateModelView, ModelChangeListener, SelectionChangeListener
+public class AllSpotsTableView extends AbstractTrackMateModelJFrameView
 {
-
-	private static final long serialVersionUID = 1L;
 
 	private static final String KEY = "SPOT_TABLE";
 
 	private String selectedFile;
 
-	private final Model model;
-
 	private final TablePanel< Spot > spotTable;
 
 	private final AtomicBoolean ignoreSelectionChange = new AtomicBoolean( false );
 
-	private final SelectionModel selectionModel;
+	private final JFrame frame;
 
-	public AllSpotsTableView( final Model model, final SelectionModel selectionModel, final DisplaySettings ds, final String imageFileName )
+	public AllSpotsTableView( final GuiModel guiModel, final String imageFileName )
 	{
-		super( "All spots table" );
-		setIconImage( TRACKMATE_ICON.getImage() );
-		this.model = model;
-		this.selectionModel = selectionModel;
+		super( guiModel );
 		this.selectedFile = imageFileName + "_allspots.csv";
 
 		/*
 		 * GUI.
 		 */
 
+		// Frame.
+		this.frame = new JFrame( "All Spots Table" );
+		frame.setIconImage( Icons.TRACKMATE_ICON.getImage() );
+
+		setWindow( frame );
+
+		// Main panel.
 		final JPanel mainPanel = new JPanel();
 		mainPanel.setLayout( new BorderLayout() );
+		frame.getContentPane().add( mainPanel );
 
 		// Table.
+		final Model model = guiModel.getModel();
+		final DisplaySettings ds = guiModel.getDisplaySettings();
 		this.spotTable = createSpotTable( model, ds );
-
 		mainPanel.add( spotTable.getPanel(), BorderLayout.CENTER );
 
 		// Tool bar.
@@ -125,41 +125,20 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 		} );
 		toolbar.add( tglColoring );
 		mainPanel.add( toolbar, BorderLayout.NORTH );
+		frame.pack();
 
-		getContentPane().add( mainPanel );
-		pack();
+		// Listeners.
+		spotTable.getTable().getSelectionModel().addListSelectionListener( new SpotTableSelectionListener() );
 
-		// Register key bindings for undo and redo.
-		TrackMateModelView.registerUndoShortcut( this, model );
-
-		/*
-		 * Listeners.
-		 */
-
-		spotTable.getTable().getSelectionModel().addListSelectionListener(
-				new SpotTableSelectionListener() );
-
-		final UpdateListener refresher = () -> refresh();
-		ds.listeners().add( refresher );
-		selectionModel.addSelectionChangeListener( this );
-		model.addModelChangeListener( this );
-		addWindowListener( new WindowAdapter()
-		{
-			@Override
-			public void windowClosing( final java.awt.event.WindowEvent e )
-			{
-				selectionModel.removeSelectionChangeListener( AllSpotsTableView.this );
-				model.removeModelChangeListener( AllSpotsTableView.this );
-				ds.listeners().remove( refresher );
-			};
-		} );
+		// Actions
+		actions.runnableAction( () -> System.out.println( "TROLOLO" ), "trololo", "R" ); // DEBUG
 	}
 
 	public void exportToCsv()
 	{
 
 		final File file = FileChooser.chooseFile(
-				this,
+				frame,
 				selectedFile,
 				new FileNameExtensionFilter( "CSV files", "csv" ),
 				"Export table to CSV",
@@ -180,7 +159,7 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 		}
 		catch ( final IOException e )
 		{
-			model.getLogger().error( "Problem exporting to file "
+			guiModel.getModel().getLogger().error( "Problem exporting to file "
 					+ csvFile + "\n" + e.getMessage() );
 		}
 	}
@@ -274,14 +253,14 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 	@Override
 	public void render()
 	{
-		setLocationRelativeTo( null );
-		setVisible( true );
+		frame.setLocationRelativeTo( null );
+		frame.setVisible( true );
 	}
 
 	@Override
 	public void refresh()
 	{
-		repaint();
+		frame.repaint();
 	}
 
 	@Override
@@ -294,7 +273,7 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 		}
 
 		final List< Spot > spots = new ArrayList<>();
-		for ( final Spot spot : model.getSpots().iterable( true ) )
+		for ( final Spot spot : guiModel.getModel().getSpots().iterable( true ) )
 			spots.add( spot );
 		spotTable.setObjects( spots );
 
@@ -312,7 +291,7 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 		ignoreSelectionChange.set( true );
 
 		// Vertices table.
-		final Set< Spot > selectedVertices = selectionModel.getSpotSelection();
+		final Set< Spot > selectedVertices = guiModel.getSelectionModel().getSpotSelection();
 		final JTable vt = spotTable.getTable();
 		vt.getSelectionModel().clearSelection();
 		for ( final Spot spot : selectedVertices )
@@ -344,20 +323,10 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 	}
 
 	@Override
-	public Model getModel()
-	{
-		return model;
-	}
-
-	@Override
 	public String getKey()
 	{
 		return KEY;
 	}
-
-	@Override
-	public void clear()
-	{}
 
 	/**
 	 * Forward spot table selection to selection model.
@@ -378,11 +347,22 @@ public class AllSpotsTableView extends JFrame implements TrackMateModelView, Mod
 			for ( final int row : selectedRows )
 				toSelect.add( spotTable.getObjectForViewRow( row ) );
 
+			final SelectionModel selectionModel = guiModel.getSelectionModel();
 			selectionModel.clearSelection();
 			selectionModel.addSpotToSelection( toSelect );
 			refresh();
 
 			ignoreSelectionChange.set( false );
 		}
+	}
+
+	@Override
+	public void clear()
+	{}
+
+	@Override
+	public Window getWindow()
+	{
+		return frame;
 	}
 }

@@ -32,9 +32,9 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import fiji.plugin.trackmate.gui.displaysettings.SliderPanelDouble;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.BoundedDoubleElement;
+import org.scijava.ui.config.visitors.gui.elements.SliderPanelDouble;
+import org.scijava.ui.config.visitors.gui.elements.StyleElements;
+import org.scijava.ui.config.visitors.gui.elements.StyleElements.BoundedDoubleElement;
 
 public class PanelSmoothContour extends JPanel
 {

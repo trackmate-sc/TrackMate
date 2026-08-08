@@ -24,13 +24,13 @@ package fiji.plugin.trackmate.mesh;
 import java.io.File;
 
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotMesh;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.util.TMUtils;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.CompositeImage;
 import ij.ImageJ;
 import ij.ImagePlus;
@@ -57,13 +57,13 @@ public class DebugZSlicer
 			final ImagePlus imp = reader.readImage();
 			imp.show();
 			final double[] calibration = TMUtils.getSpatialCalibration( imp );
+			final Settings settings = reader.readSettings( imp );
 
 			final Model model = reader.getModel();
-			final SelectionModel selection = new SelectionModel( model );
 			final DisplaySettings ds = reader.getDisplaySettings();
+			final GuiModel guiModel = new GuiModel( model, settings, ds );
 
-			final HyperStackDisplayer view = new HyperStackDisplayer( model, selection, imp, ds );
-			view.render();
+			guiModel.getWindowManager().createHyperStackDisplayer();
 			imp.setDisplayMode( CompositeImage.GRAYSCALE );
 
 			final Spot spot = model.getSpots().iterable( true ).iterator().next();

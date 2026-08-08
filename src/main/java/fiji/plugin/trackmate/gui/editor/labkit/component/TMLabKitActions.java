@@ -25,6 +25,7 @@ import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.KE
 import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.KEY_CONFIG_SCOPE;
 
 import java.awt.Font;
+import java.awt.Frame;
 
 import javax.swing.SwingUtilities;
 
@@ -55,7 +56,7 @@ public class TMLabKitActions
 	public static void install(
 			final Actions actions,
 			final TMLabKitModel model,
-			final TMLabKitFrame frame,
+			final Frame frame,
 			final ViewerPanel viewerPanel,
 			final InputActionBindings keybindings,
 			final KeymapManager keymapManager,
@@ -68,11 +69,12 @@ public class TMLabKitActions
 		 */
 
 		final PreferencesDialog preferencesDialog = new PreferencesDialog( frame, keymap, new String[] { KEY_CONFIG_CONTEXT } );
+		preferencesDialog.setTitle( "Editor Preferences" );
 		fiji.plugin.trackmate.gui.GuiUtils.positionWindow( preferencesDialog, frame );
 		BigDataViewerActions.toggleDialogAction( actions, preferencesDialog, BigDataViewerActions.PREFERENCES_DIALOG, BigDataViewerActions.PREFERENCES_DIALOG_KEYS );
 
-		preferencesDialog.addPage( new KeymapSettingsPage( "Keymap", keymapManager, keymapManager.getCommandDescriptions() ) );
-		preferencesDialog.addPage( new AppearanceSettingsPage( "Appearance", appearanceManager ) );
+		preferencesDialog.addPage( new KeymapSettingsPage( "Editor keymap", keymapManager, keymapManager.getCommandDescriptions() ) );
+		preferencesDialog.addPage( new AppearanceSettingsPage( "Editor appearance", appearanceManager ) );
 		appearanceManager.appearance().updateListeners().add( frame::repaint );
 		SwingUtilities.invokeLater( () -> appearanceManager.updateLookAndFeel() );
 

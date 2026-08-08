@@ -22,11 +22,10 @@
 package fiji.plugin.trackmate.visualization.table;
 
 import static fiji.plugin.trackmate.gui.Icons.CSV_ICON;
-import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.event.WindowAdapter;
+import java.awt.Window;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -58,31 +57,27 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
-import fiji.plugin.trackmate.ModelChangeListener;
 import fiji.plugin.trackmate.SelectionChangeEvent;
-import fiji.plugin.trackmate.SelectionChangeListener;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
 import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
+import fiji.plugin.trackmate.gui.GuiModel;
+import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.UpdateListener;
 import fiji.plugin.trackmate.util.FileChooser;
 import fiji.plugin.trackmate.util.FileChooser.DialogType;
 import fiji.plugin.trackmate.util.FileChooser.SelectionMode;
+import fiji.plugin.trackmate.visualization.AbstractTrackMateModelJFrameView;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.trackscheme.utils.SearchBar;
 
-public class TrackTableView extends JFrame implements TrackMateModelView, ModelChangeListener, SelectionChangeListener
+public class TrackTableView extends AbstractTrackMateModelJFrameView
 {
 
-	private static final long serialVersionUID = 1L;
-
 	private static final String KEY = "TRACK_TABLES";
-
-	private final Model model;
 
 	private final TablePanel< Spot > spotTable;
 
@@ -92,17 +87,17 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 
 	private final AtomicBoolean ignoreSelectionChange = new AtomicBoolean( false );
 
-	private final SelectionModel selectionModel;
-
 	private String imagePath;
 
-	public TrackTableView( final Model model, final SelectionModel selectionModel, final DisplaySettings ds, final String imagePath )
+	private final JFrame frame;
+
+	public TrackTableView( final GuiModel guiModel, final String imagePath )
 	{
-		super( "Track tables" );
+		super( guiModel );
 		this.imagePath = imagePath;
-		setIconImage( TRACKMATE_ICON.getImage() );
-		this.model = model;
-		this.selectionModel = selectionModel;
+		final Model model = guiModel.getModel();
+		final SelectionModel selectionModel = guiModel.getSelectionModel();
+		final DisplaySettings ds = guiModel.getDisplaySettings();
 
 		/*
 		 * GUI.
@@ -117,12 +112,9 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 		this.trackTable = createTrackTable( model, ds );
 
 		// Listeners.
-		spotTable.getTable().getSelectionModel().addListSelectionListener(
-				new SpotTableSelectionListener() );
-		edgeTable.getTable().getSelectionModel().addListSelectionListener(
-				new EdgeTableSelectionListener() );
-		trackTable.getTable().getSelectionModel().addListSelectionListener(
-				new TrackTableSelectionListener() );
+		spotTable.getTable().getSelectionModel().addListSelectionListener( new SpotTableSelectionListener() );
+		edgeTable.getTable().getSelectionModel().addListSelectionListener( new EdgeTableSelectionListener() );
+		trackTable.getTable().getSelectionModel().addListSelectionListener( new TrackTableSelectionListener() );
 
 		// Tabbed pane.
 		final JTabbedPane tabbedPane = new JTabbedPane( JTabbedPane.LEFT );
@@ -154,11 +146,11 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 		toolbar.add( tglColoring );
 		mainPanel.add( toolbar, BorderLayout.NORTH );
 
-		getContentPane().add( mainPanel );
-		pack();
-
-		// Undo / redo
-		TrackMateModelView.registerUndoShortcut( this, model );
+		this.frame = new JFrame( "Track Tables" );
+		frame.setIconImage( Icons.TRACKMATE_ICON.getImage() );
+		setWindow( frame );
+		frame.getContentPane().add( mainPanel );
+		frame.pack();
 
 		/*
 		 * Listeners.
@@ -168,15 +160,10 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 		ds.listeners().add( refresher );
 		selectionModel.addSelectionChangeListener( this );
 		model.addModelChangeListener( this );
-		addWindowListener( new WindowAdapter()
-		{
-			@Override
-			public void windowClosing( final java.awt.event.WindowEvent e )
-			{
-				selectionModel.removeSelectionChangeListener( TrackTableView.this );
-				model.removeModelChangeListener( TrackTableView.this );
-				ds.listeners().remove( refresher );
-			};
+		onClose( () -> {
+			ds.listeners().remove( refresher );
+			selectionModel.removeSelectionChangeListener( this );
+			model.removeModelChangeListener( this );
 		} );
 	}
 
@@ -207,7 +194,7 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 		}
 
 		final File file = FileChooser.chooseFile(
-				this,
+				frame,
 				selectedFile,
 				new FileNameExtensionFilter( "CSV files", "csv" ),
 				"Export table to CSV",
@@ -223,7 +210,7 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 		}
 		catch ( final IOException e )
 		{
-			model.getLogger().error( "Problem exporting to file "
+			guiModel.getModel().getLogger().error( "Problem exporting to file "
 					+ file + "\n" + e.getMessage() );
 		}
 		imagePath = selectedFile;
@@ -424,14 +411,14 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 	@Override
 	public void render()
 	{
-		setLocationRelativeTo( null );
-		setVisible( true );
+		frame.setLocationRelativeTo( null );
+		frame.setVisible( true );
 	}
 
 	@Override
 	public void refresh()
 	{
-		repaint();
+		frame.repaint();
 	}
 
 	@Override
@@ -442,7 +429,7 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 			refresh();
 			return;
 		}
-
+		final Model model = guiModel.getModel();
 		final List< Spot > spots = new ArrayList<>();
 		for ( final Integer trackID : model.getTrackModel().unsortedTrackIDs( true ) )
 			spots.addAll( model.getTrackModel().trackSpots( trackID ) );
@@ -470,6 +457,7 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 		ignoreSelectionChange.set( true );
 
 		// Vertices table.
+		final SelectionModel selectionModel = guiModel.getSelectionModel();
 		final Set< Spot > selectedVertices = selectionModel.getSpotSelection();
 		final JTable vt = spotTable.getTable();
 		vt.getSelectionModel().clearSelection();
@@ -529,12 +517,6 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 	}
 
 	@Override
-	public Model getModel()
-	{
-		return model;
-	}
-
-	@Override
 	public String getKey()
 	{
 		return KEY;
@@ -578,6 +560,7 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 			for ( final int row : selectedRows )
 				toSelect.add( spotTable.getObjectForViewRow( row ) );
 
+			final SelectionModel selectionModel = guiModel.getSelectionModel();
 			selectionModel.clearSelection();
 			selectionModel.addSpotToSelection( toSelect );
 			refresh();
@@ -605,6 +588,7 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 			for ( final int row : selectedRows )
 				toSelect.add( edgeTable.getObjectForViewRow( row ) );
 
+			final SelectionModel selectionModel = guiModel.getSelectionModel();
 			selectionModel.clearSelection();
 			selectionModel.addEdgeToSelection( toSelect );
 			refresh();
@@ -626,6 +610,8 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 				return;
 
 			ignoreSelectionChange.set( true );
+			final Model model = guiModel.getModel();
+			final SelectionModel selectionModel = guiModel.getSelectionModel();
 
 			final Set< Spot > spots = new HashSet<>();
 			final Set< DefaultWeightedEdge > edges = new HashSet<>();
@@ -645,5 +631,11 @@ public class TrackTableView extends JFrame implements TrackMateModelView, ModelC
 			ignoreSelectionChange.set( false );
 
 		}
+	}
+
+	@Override
+	public Window getWindow()
+	{
+		return frame;
 	}
 }

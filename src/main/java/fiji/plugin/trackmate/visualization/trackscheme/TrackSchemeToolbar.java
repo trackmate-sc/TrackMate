@@ -310,7 +310,7 @@ public class TrackSchemeToolbar extends JToolBar
 		add( loopDisplayDecorationsButton );
 		// Separator
 		addSeparator();
-		add( new SearchBar( trackScheme.getModel(), trackScheme ) );
+		add( new SearchBar( trackScheme.getGuiModel().getModel(), trackScheme ) );
 		add( Box.createHorizontalGlue() );
 
 		final Dimension dim = new Dimension( 100, 30 );

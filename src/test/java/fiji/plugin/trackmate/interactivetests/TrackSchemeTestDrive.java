@@ -26,9 +26,9 @@ import java.io.File;
 import org.scijava.util.AppUtils;
 
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.edges.EdgeSpeedAnalyzer;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.io.TmXmlReader;
@@ -54,8 +54,8 @@ public class TrackSchemeTestDrive
 		ds.setTrackColorBy( TrackMateObject.EDGES, EdgeSpeedAnalyzer.DISPLACEMENT );
 
 		// Instantiate displayer
-		final SelectionModel sm = new SelectionModel( model );
-		final TrackScheme trackscheme = new TrackScheme( model, sm, ds );
+		final GuiModel guiModel = new GuiModel( model, ds );
+		final TrackScheme trackscheme = new TrackScheme( guiModel );
 		trackscheme.render();
 		trackscheme.refresh();
 	}

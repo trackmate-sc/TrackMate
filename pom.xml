@@ -179,7 +179,6 @@
 		(https://github.com/scijava/scijava-coding-style) -->
 		<scijava.coding-style>imglib2</scijava.coding-style>
 
-		<fontchooser.version>2.5.2</fontchooser.version>
 		<javaGeom.version>0.11.1</javaGeom.version>
 		<imglib2.version>8.0.0</imglib2.version>
 		<bigdataviewer-core.version>10.6.7</bigdataviewer-core.version>
@@ -201,7 +200,7 @@
 		<dependency>
 			<groupId>org.scijava</groupId>
 			<artifactId>config-ui</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.0.1</version>
 		</dependency>
 
 		<!-- Logging dependencies -->
@@ -390,11 +389,6 @@
 			<groupId>math.geom2d</groupId>
 			<artifactId>javaGeom</artifactId>
 			<version>${javaGeom.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.drjekyll</groupId>
-			<artifactId>fontchooser</artifactId>
-			<version>${fontchooser.version}</version>
 		</dependency>
 
 		<!-- Test dependencies -->

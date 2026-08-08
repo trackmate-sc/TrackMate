@@ -24,9 +24,7 @@ package fiji.plugin.trackmate.mesh;
 import java.io.File;
 
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.ImageJ;
@@ -56,9 +54,7 @@ public class DemoContour
 		final ImagePlus imp = reader.readImage();
 		imp.show();
 
-		final SelectionModel selection = new SelectionModel( model );
-		final DisplaySettings ds = DisplaySettingsIO.readUserDefault();
-		final HyperStackDisplayer view = new HyperStackDisplayer( model, selection, imp, ds );
+		final HyperStackDisplayer view = new HyperStackDisplayer( new GuiModel( model, imp ) );
 		view.render();
 	}
 }

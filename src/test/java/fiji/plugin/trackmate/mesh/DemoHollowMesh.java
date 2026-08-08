@@ -22,16 +22,13 @@
 package fiji.plugin.trackmate.mesh;
 
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.ThresholdDetectorFactory;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.util.TMUtils;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij.gui.NewImage;
@@ -53,16 +50,13 @@ public class DemoHollowMesh
 		settings.detectorSettings.put( ThresholdDetectorFactory.KEY_INTENSITY_THRESHOLD, 120. );
 		settings.detectorSettings.put( ThresholdDetectorFactory.KEY_SIMPLIFY_CONTOURS, false );
 
-		final TrackMate trackmate = new TrackMate( settings );
+		final Model model = new Model();
+		final GuiModel guiModel = new GuiModel( model, imp );
+		final TrackMate trackmate = guiModel.getTrackMate();
 		trackmate.execDetection();
-
-		final Model model = trackmate.getModel();
 		model.getSpots().setVisible( true );
-		final SelectionModel selection = new SelectionModel( model );
-		final DisplaySettings ds = DisplaySettingsIO.readUserDefault();
 
-		final HyperStackDisplayer view = new HyperStackDisplayer( model, selection, imp, ds );
-		view.render();
+		guiModel.getWindowManager().createHyperStackDisplayer();
 	}
 
 	public static ImagePlus makeImg()

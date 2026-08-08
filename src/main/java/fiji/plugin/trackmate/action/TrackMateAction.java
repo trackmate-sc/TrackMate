@@ -24,9 +24,8 @@ package fiji.plugin.trackmate.action;
 import java.awt.Frame;
 
 import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.GuiModel;
 
 /**
  * This interface describe a track mate action, that can be run on a
@@ -38,19 +37,14 @@ public interface TrackMateAction
 {
 
 	/**
-	 * Executes this action within an application specified by the parameters.
+	 * Executes this action.
 	 *
-	 * @param trackmate
-	 *            the {@link TrackMate} instance to use to execute the action.
-	 * @param selectionModel
-	 *            the {@link SelectionModel} currently used in the application,
-	 * @param displaySettings
-	 *            the {@link DisplaySettings} used to render the views in the
-	 *            application.
+	 * @param guiModel
+	 *            the {@link GuiModel} that contains the required data.
 	 * @param parent
 	 *            the user-interface parent window.
 	 */
-	public void execute( TrackMate trackmate, SelectionModel selectionModel, DisplaySettings displaySettings, Frame parent );
+	public void execute( GuiModel guiModel, Frame parent );
 
 	/**
 	 * Sets the logger that will receive logs when this action is executed.

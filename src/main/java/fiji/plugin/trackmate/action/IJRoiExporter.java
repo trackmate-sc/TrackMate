@@ -32,10 +32,9 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotRoi;
-import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.DetectionUtils;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.Icons;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.gui.OvalRoi;
@@ -131,7 +130,7 @@ public class IJRoiExporter
 	{
 
 		@Override
-		public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
+		public void execute( final GuiModel guiModel, final Frame parent )
 		{
 			// Show dialog.
 			final GenericDialog dialog = new GenericDialog( "Export spots to IJ ROIs", parent );
@@ -146,10 +145,11 @@ public class IJRoiExporter
 				return;
 
 			// Execute.
+			final SelectionModel selectionModel = guiModel.getSelectionModel();
 			final Iterable< Spot > spots;
 			final int choice = Arrays.asList( choices ).indexOf( dialog.getNextRadioButton() );
 			if ( choice == 0 )
-				spots = trackmate.getModel().getSpots().iterable( true );
+				spots = guiModel.getModel().getSpots().iterable( true );
 			else if ( choice == 1 )
 				spots = selectionModel.getSpotSelection();
 			else
@@ -160,7 +160,7 @@ public class IJRoiExporter
 				spots = selectionModel.getSpotSelection();
 			}
 
-			final IJRoiExporter exporter = new IJRoiExporter( trackmate.getSettings().imp, logger );
+			final IJRoiExporter exporter = new IJRoiExporter( guiModel.getSettings().imp, logger );
 			exporter.export( spots );
 		}
 	}

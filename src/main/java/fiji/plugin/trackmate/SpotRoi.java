@@ -296,6 +296,7 @@ public class SpotRoi extends SpotBase
 	@Override
 	public void scale( final double alpha )
 	{
+		super.scale( alpha );
 		for ( int i = 0; i < x.length; i++ )
 		{
 			final double x = this.x[ i ];

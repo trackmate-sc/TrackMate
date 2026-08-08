@@ -27,8 +27,7 @@ import java.io.File;
 
 import javax.swing.JFrame;
 
-import org.scijava.object.ObjectService;
-
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
@@ -37,13 +36,9 @@ import fiji.plugin.trackmate.gui.featureselector.AnalyzerSelectionIO;
 import fiji.plugin.trackmate.gui.wizard.TrackMateWizardSequence;
 import fiji.plugin.trackmate.gui.wizard.WizardSequence;
 import fiji.plugin.trackmate.io.SettingsPersistence;
-import fiji.plugin.trackmate.util.TMUtils;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
-import ij.Prefs;
 import ij.WindowManager;
 import ij.plugin.PlugIn;
 
@@ -98,19 +93,15 @@ public class TrackMatePlugIn implements PlugIn
 			// Main objects.
 			final Settings settings = createSettings( imp );
 			final Model model = createModel( imp );
-			final TrackMate trackmate = createTrackMate( model, settings );
-			final SelectionModel selectionModel = new SelectionModel( model );
 			final DisplaySettings displaySettings = createDisplaySettings();
+			final GuiModel guiModel = new GuiModel( model, settings, displaySettings );
 
 			// Main view.
-			final TrackMateModelView displayer = new HyperStackDisplayer( model, selectionModel, imp, displaySettings );
-			displayer.render();
+			guiModel.getWindowManager().createHyperStackDisplayer();
 
 			// Wizard.
-			final WizardSequence sequence = createSequence( trackmate, selectionModel, displaySettings );
+			final WizardSequence sequence = createSequence( guiModel );
 			final JFrame frame = sequence.run( "TrackMate on " + imp.getShortTitle() );
-			// Undo / redo
-			TrackMateModelView.registerUndoShortcut( frame, model );
 			frame.setIconImage( TRACKMATE_ICON.getImage() );
 			GuiUtils.positionWindow( frame, imp.getWindow() );
 			frame.setVisible( true );
@@ -130,18 +121,16 @@ public class TrackMatePlugIn implements PlugIn
 	 * Hook for subclassers: <br>
 	 * Will create and position the sequence that will be played by the wizard
 	 * launched by this plugin.
+	 * 
+	 * @param guiModel
+	 *            the {@link GuiModel} that will be used to store the data of
+	 *            the wizard.
 	 *
-	 * @param trackmate
-	 *            the TrackMate instance.
-	 * @param selectionModel
-	 *            the selection model.
-	 * @param displaySettings
-	 *            the display settings.
 	 * @return a new sequence.
 	 */
-	protected WizardSequence createSequence( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings )
+	protected WizardSequence createSequence( final GuiModel guiModel )
 	{
-		return new TrackMateWizardSequence( trackmate, selectionModel, displaySettings );
+		return new TrackMateWizardSequence( guiModel );
 	}
 
 	/**
@@ -180,37 +169,6 @@ public class TrackMatePlugIn implements PlugIn
 		final AnalyzerSelection analyzerSelection = AnalyzerSelectionIO.readUserDefault();
 		analyzerSelection.configure( settings );
 		return settings;
-	}
-
-	/**
-	 * Hook for subclassers: <br>
-	 * Creates the TrackMate instance that will be controlled in the GUI.
-	 * 
-	 * @param model
-	 *            the model to create the TrackMate instance with.
-	 * @param settings
-	 *            the settings to create the TrackMate instance with.
-	 * @return a new {@link TrackMate} instance.
-	 */
-	protected TrackMate createTrackMate( final Model model, final Settings settings )
-	{
-		/*
-		 * Since we are now sure that we will be working on this model with this
-		 * settings, we need to pass to the model the units from the settings.
-		 */
-		final String spaceUnits = settings.imp.getCalibration().getXUnit();
-		final String timeUnits = settings.imp.getCalibration().getTimeUnit();
-		model.setPhysicalUnits( spaceUnits, timeUnits );
-
-		final TrackMate trackmate = new TrackMate( model, settings );
-		final ObjectService objectService = TMUtils.getContext().service( ObjectService.class );
-		if ( objectService != null )
-			objectService.addObject( trackmate );
-
-		// Set the num of threads from IJ prefs.
-		trackmate.setNumThreads( Prefs.getThreads() );
-
-		return trackmate;
 	}
 
 	protected DisplaySettings createDisplaySettings()

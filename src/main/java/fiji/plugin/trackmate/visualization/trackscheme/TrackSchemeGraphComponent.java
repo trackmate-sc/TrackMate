@@ -59,6 +59,7 @@ import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxGraphView;
 
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 
 public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEventListener
@@ -514,7 +515,8 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 						if ( column >= columnWidths.length )
 							return;
 
-						final String oldName = trackScheme.getModel().getTrackModel().name( columnTrackIDs[ column ] );
+						final GuiModel guiModel = trackScheme.getGuiModel();
+						final String oldName = guiModel.getModel().getTrackModel().name( columnTrackIDs[ column ] );
 						final Integer trackID = columnTrackIDs[ column ];
 
 						int cwidth = columnWidths[ column ] * xcs;
@@ -552,10 +554,10 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 							{
 								// Prevent setting the name of a track that has
 								// been deleted.
-								if ( trackScheme.getModel().getTrackModel().unsortedTrackIDs( false ).contains( trackID ) )
+								if ( guiModel.getModel().getTrackModel().unsortedTrackIDs( false ).contains( trackID ) )
 								{
 									final String newname = textArea.getText();
-									trackScheme.getModel().getTrackModel().setName( trackID, newname );
+									guiModel.getModel().getTrackModel().setName( trackID, newname );
 								}
 								scrollPane.remove( textArea );
 								ColumnHeader.this.remove( scrollPane );
@@ -597,7 +599,8 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 				if ( index == 0 )
 					index = 1;
 
-				String columnName = trackScheme.getModel().getTrackModel().name( columnTrackIDs[ index - 1 ] );
+				final GuiModel guiModel = trackScheme.getGuiModel();
+				String columnName = guiModel.getModel().getTrackModel().name( columnTrackIDs[ index - 1 ] );
 				if ( null == columnName )
 					columnName = "Name not set";
 
@@ -642,7 +645,8 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 					if ( minx > paintBounds.x + paintBounds.width || maxx < paintBounds.x )
 						continue;
 
-					String columnName = trackScheme.getModel().getTrackModel().name( columnTrackIDs[ i ] );
+					final GuiModel guiModel = trackScheme.getGuiModel();
+					String columnName = guiModel.getModel().getTrackModel().name( columnTrackIDs[ i ] );
 					if ( null == columnName )
 						columnName = "Name not set";
 

@@ -40,6 +40,7 @@ import fiji.plugin.trackmate.action.ExportTracksToXML;
 import fiji.plugin.trackmate.detection.DetectorKeys;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.track.TrackBranchingAnalyzer;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.components.LogPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
@@ -297,15 +298,14 @@ public class TrackMateRunner extends TrackMatePlugIn
 				}
 
 				/*
-				 * Instantiate TrackMate.
+				 * Instantiate GUImodel.
 				 */
 
 				final Settings settings = createSettings( imp );
 				final Model model = createModel( imp );
-				final SelectionModel selectionModel = new SelectionModel( model );
 				model.setLogger( logger );
-				final TrackMate trackmate = createTrackMate( model, settings );
 				final DisplaySettings displaySettings = createDisplaySettings();
+				final GuiModel guiModel = new GuiModel( model, settings, displaySettings );
 
 				/*
 				 * Configure default settings.
@@ -403,21 +403,20 @@ public class TrackMateRunner extends TrackMatePlugIn
 						imp.show();
 					}
 					GuiUtils.userCheckImpDimensions( imp );
+
 					// Main view.
-					final TrackMateModelView displayer = new HyperStackDisplayer( model, selectionModel, imp, displaySettings );
-					displayer.render();
+					guiModel.getWindowManager().createHyperStackDisplayer();
 
 					// Wizard.
-					final WizardSequence sequence = createSequence( trackmate, selectionModel, displaySettings );
+					final WizardSequence sequence = createSequence( guiModel );
 					final JFrame frame = sequence.run( "TrackMate on " + imp.getShortTitle() );
-					// Undo / redo
-					TrackMateModelView.registerUndoShortcut( frame, model );
 					frame.setIconImage( TRACKMATE_ICON.getImage() );
 					GuiUtils.positionWindow( frame, imp.getWindow() );
 					frame.setVisible( true );
 					return;
 				}
 
+				final TrackMate trackmate = guiModel.getTrackMate();
 				final String welcomeMessage = TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION + " started on:\n" + TMUtils.getCurrentTimeString() + '\n';
 				logger.log( welcomeMessage );
 				if ( !trackmate.checkInput() || !trackmate.process() )
@@ -437,8 +436,8 @@ public class TrackMateRunner extends TrackMatePlugIn
 					final TmXmlWriter writer = new TmXmlWriter( save_path, logger );
 
 					writer.appendLog( logger.toString() );
-					writer.appendModel( trackmate.getModel() );
-					writer.appendSettings( trackmate.getSettings() );
+					writer.appendModel( model );
+					writer.appendSettings( settings );
 
 					try
 					{
@@ -504,11 +503,11 @@ public class TrackMateRunner extends TrackMatePlugIn
 					 */
 
 					// Main view.
-					final TrackMateModelView displayer = new HyperStackDisplayer( model, selectionModel, imp, displaySettings );
+					final TrackMateModelView displayer = new HyperStackDisplayer( guiModel );
 					displayer.render();
 
 					// Wizard.
-					final WizardSequence sequence = createSequence( trackmate, selectionModel, displaySettings );
+					final WizardSequence sequence = createSequence( guiModel );
 					sequence.setCurrent( ConfigureViewsDescriptor.KEY );
 					final JFrame frame = sequence.run( "TrackMate on " + imp.getShortTitle() );
 					frame.setIconImage( TRACKMATE_ICON.getImage() );

@@ -31,11 +31,10 @@ import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.GuiModel;
 
 public class RecomputeFeatureAction extends AbstractTMAction
 {
@@ -52,9 +51,9 @@ public class RecomputeFeatureAction extends AbstractTMAction
 
 
 	@Override
-	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
+	public void execute( final GuiModel guiModel, final Frame parent )
 	{
-		recompute( trackmate, logger );
+		recompute( guiModel.getTrackMate(), logger );
 	}
 
 	@Plugin( type = TrackMateActionFactory.class )

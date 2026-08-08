@@ -52,8 +52,6 @@ import static fiji.plugin.trackmate.io.TmXmlKeys.FILTER_VALUE_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.io.TmXmlKeys.FRAME_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_STATE_ATTRIBUTE;
 import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_STATE_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_VIEW_ATTRIBUTE;
-import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_VIEW_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_FILENAME_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_FOLDER_ATTRIBUTE_NAME;
@@ -124,7 +122,6 @@ import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Logger.StringBuilderLogger;
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotBase;
@@ -148,11 +145,7 @@ import fiji.plugin.trackmate.providers.Spot3DMorphologyAnalyzerProvider;
 import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
-import fiji.plugin.trackmate.providers.ViewProvider;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
-import fiji.plugin.trackmate.visualization.ViewFactory;
-import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imglib2.mesh.Mesh;
@@ -280,81 +273,6 @@ public class TmXmlReader
 			return DisplaySettingsIO.readUserDefault();
 		}
 		return DisplaySettingsIO.fromJson( dsel.getText() );
-	}
-
-	/**
-	 * Returns the collection of views that were saved in this file. The views
-	 * returned are not rendered yet.
-	 *
-	 * @param provider
-	 *            the {@link ViewProvider} to instantiate the view. Each saved
-	 *            view must be known by the specified provider.
-	 * @param model
-	 *            the model to display in the views.
-	 * @param settings
-	 *            the settings to build the views.
-	 * @param selectionModel
-	 *            the {@link SelectionModel} model that will be shared with the
-	 *            new views.
-	 * @param displaySettings
-	 *            the display settings to pass to the view.
-	 * @return the collection of views.
-	 * @see TrackMateModelView#render()
-	 */
-	public Collection< TrackMateModelView > getViews(
-			final ViewProvider provider,
-			final Model model,
-			final Settings settings,
-			final SelectionModel selectionModel,
-			final DisplaySettings displaySettings )
-	{
-		final Element guiel = root.getChild( GUI_STATE_ELEMENT_KEY );
-		if ( null != guiel )
-		{
-
-			final List< Element > children = guiel.getChildren( GUI_VIEW_ELEMENT_KEY );
-			final Collection< TrackMateModelView > views = new ArrayList<>( children.size() );
-
-			for ( final Element child : children )
-			{
-				final String viewKey = child.getAttributeValue( GUI_VIEW_ATTRIBUTE );
-				if ( null == viewKey )
-				{
-					logger.error( "Could not find view key attribute for element " + child + ".\n" );
-					ok = false;
-				}
-				else
-				{
-					// Do not instantiate TrackScheme if found in the file.
-					if ( viewKey.equals( TrackScheme.KEY ) )
-						continue;
-
-					final ViewFactory factory = provider.getFactory( viewKey );
-					if ( null == factory )
-					{
-						logger.error( "Unknown view factory for key " + viewKey + ".\n" );
-						ok = false;
-						continue;
-					}
-
-					final TrackMateModelView view = factory.create( model, settings, selectionModel, displaySettings );
-					if ( null == view )
-					{
-						logger.error( "Unknown view for key " + viewKey + ".\n" );
-						ok = false;
-					}
-					else
-					{
-						views.add( view );
-					}
-				}
-			}
-			return views;
-		}
-
-		logger.error( "Could not find GUI state element.\n" );
-		ok = false;
-		return new ArrayList<>();
 	}
 
 	/**
