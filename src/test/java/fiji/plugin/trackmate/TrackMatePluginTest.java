@@ -35,7 +35,7 @@ public class TrackMatePluginTest {
 		final TestTrackMatePlugin testPlugin = new TestTrackMatePlugin();
 		testPlugin.setUp();
 		final ObjectService objectService = testPlugin.getLocalContext().service(ObjectService.class);
-		
+
 		final List<TrackMate> trackMateInstances = objectService.getObjects(TrackMate.class);
 		assertTrue(trackMateInstances.size() == 1);
 		assertTrue(trackMateInstances.get(0) instanceof TrackMate);

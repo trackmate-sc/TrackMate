@@ -1,5 +1,6 @@
 package fiji.plugin.trackmate.visualization.ui;
 
+import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.event.InputEvent;
 import java.util.ArrayList;
@@ -55,7 +56,16 @@ public class TrackMateActions
 	
 	static
 	{
-		final int menuMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
+		int menuMask;
+		try
+		{
+			menuMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
+		}
+		catch ( final HeadlessException e )
+		{
+			// Default to Ctrl in headless environments (CI, tests)
+			menuMask = InputEvent.CTRL_DOWN_MASK;
+		}
 		final String modifier = ( menuMask == InputEvent.CTRL_DOWN_MASK ) ? "ctrl" : "meta";
 		UNDO_ACTION_KEYS = new String[] { modifier + " Z" };
 		REDO_ACTION_KEYS = new String[] { modifier + " Y", modifier + " shift Z" };
