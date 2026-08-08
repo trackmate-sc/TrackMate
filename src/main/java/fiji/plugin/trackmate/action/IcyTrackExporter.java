@@ -31,9 +31,7 @@ import javax.swing.ImageIcon;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.io.IcyTrackFormatWriter;
 
@@ -51,10 +49,10 @@ public class IcyTrackExporter extends AbstractTMAction
 	private static final String KEY = "ICY_EXPORTER";
 
 	@Override
-	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
+	public void execute( final GuiModel guiModel, final Frame parent )
 	{
 		logger.log( "Exporting tracks to Icy format.\n" );
-		final Model model = trackmate.getModel();
+		final Model model = guiModel.getModel();
 		final int ntracks = model.getTrackModel().nTracks( true );
 		if ( ntracks == 0 )
 		{
@@ -65,7 +63,7 @@ public class IcyTrackExporter extends AbstractTMAction
 		File folder;
 		try
 		{
-			folder = new File( trackmate.getSettings().imp.getOriginalFileInfo().directory );
+			folder = new File( guiModel.getSettings().imp.getOriginalFileInfo().directory );
 		}
 		catch ( final NullPointerException npe )
 		{
@@ -75,7 +73,7 @@ public class IcyTrackExporter extends AbstractTMAction
 		File file;
 		try
 		{
-			String filename = trackmate.getSettings().imageFileName;
+			String filename = guiModel.getSettings().imageFileName;
 			final int dotLoca = filename.indexOf( "." );
 			if ( dotLoca > 0 )
 				filename = filename.substring( 0, dotLoca );
@@ -95,9 +93,9 @@ public class IcyTrackExporter extends AbstractTMAction
 		logger.log( "  Writing to file.\n" );
 
 		final double[] calibration = new double[ 3 ];
-		calibration[ 0 ] = trackmate.getSettings().dx;
-		calibration[ 1 ] = trackmate.getSettings().dy;
-		calibration[ 2 ] = trackmate.getSettings().dz;
+		calibration[ 0 ] = guiModel.getSettings().dx;
+		calibration[ 1 ] = guiModel.getSettings().dy;
+		calibration[ 2 ] = guiModel.getSettings().dz;
 		final IcyTrackFormatWriter writer = new IcyTrackFormatWriter( file, model, calibration );
 
 		if ( !writer.checkInput() || !writer.process() )

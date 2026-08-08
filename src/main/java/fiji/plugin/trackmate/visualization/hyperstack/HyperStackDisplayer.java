@@ -21,14 +21,30 @@
  */
 package fiji.plugin.trackmate.visualization.hyperstack;
 
+import java.awt.Window;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
+import org.scijava.ui.behaviour.util.Actions;
+import org.scijava.ui.behaviour.util.WrappedActionMap;
+import org.scijava.ui.behaviour.util.WrappedInputMap;
+
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.SelectionChangeEvent;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.UpdateListener;
 import fiji.plugin.trackmate.visualization.AbstractTrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewUtils;
+import fiji.plugin.trackmate.visualization.hyperstack.behaviours.HyperStackDisplayerActions;
+import fiji.plugin.trackmate.visualization.hyperstack.behaviours.ImagePlusBehavioursAdapter;
+import fiji.plugin.trackmate.visualization.hyperstack.behaviours.SelectSpotsWithRoiListener;
+import fiji.plugin.trackmate.visualization.hyperstack.behaviours.SpotEditBehaviours;
+import fiji.plugin.trackmate.visualization.ui.KeyConfigContexts;
+import fiji.plugin.trackmate.visualization.ui.TrackMateKeymapManager;
 import ij.ImagePlus;
 import ij.gui.Overlay;
 import ij.gui.Roi;
@@ -38,11 +54,9 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 
 	protected final ImagePlus imp;
 
-	protected SpotOverlay spotOverlay;
+	protected final SpotOverlay spotOverlay;
 
-	protected TrackOverlay trackOverlay;
-
-	private SpotEditTool editTool;
+	protected final TrackOverlay trackOverlay;
 
 	public static final String KEY = "HYPERSTACKDISPLAYER";
 
@@ -50,57 +64,22 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 	 * CONSTRUCTORS
 	 */
 
-	public HyperStackDisplayer( final Model model, final SelectionModel selectionModel, final ImagePlus imp, final DisplaySettings displaySettings )
+	public HyperStackDisplayer( final GuiModel guiModel )
 	{
-		super( model, selectionModel, displaySettings );
-		if ( null != imp )
-			this.imp = imp;
+		super( guiModel );
+		if ( null != guiModel.getSettings().imp )
+			this.imp = guiModel.getSettings().imp;
 		else
-			this.imp = ViewUtils.makeEmpytImagePlus( model );
+			this.imp = ViewUtils.makeEmptyImagePlus( guiModel.getModel() );
 
-		this.spotOverlay = createSpotOverlay( displaySettings );
-		this.trackOverlay = createTrackOverlay( displaySettings );
-		displaySettings.listeners().add( () -> refresh() );
+		final DisplaySettings displaySettings = guiModel.getDisplaySettings();
+		this.spotOverlay = new SpotOverlay( guiModel.getModel(), imp, guiModel.getDisplaySettings() );
+		this.trackOverlay = new TrackOverlay( guiModel.getModel(), imp, guiModel.getDisplaySettings() );
+
+		final UpdateListener refresher = () -> refresh();
+		displaySettings.listeners().add( refresher );
+		onClose( () -> displaySettings.listeners().remove( refresher ) );
 	}
-
-	public HyperStackDisplayer( final Model model, final SelectionModel selectionModel, final DisplaySettings displaySettings )
-	{
-		this( model, selectionModel, null, displaySettings );
-	}
-
-	/*
-	 * PROTECTED METHODS
-	 */
-
-	/**
-	 * Hook for subclassers. Instantiate here the overlay you want to use for
-	 * the spots.
-	 * 
-	 * @param displaySettings
-	 *            the display settings.
-	 * @return the spot overlay
-	 */
-	protected SpotOverlay createSpotOverlay( final DisplaySettings displaySettings )
-	{
-		return new SpotOverlay( model, imp, displaySettings );
-	}
-
-	/**
-	 * Hook for subclassers. Instantiate here the overlay you want to use for
-	 * the spots.
-	 * 
-	 * @param displaySettings
-	 *            the display settings.
-	 * @return the track overlay
-	 */
-	protected TrackOverlay createTrackOverlay( final DisplaySettings displaySettings )
-	{
-		return new TrackOverlay( model, imp, displaySettings );
-	}
-
-	/*
-	 * PUBLIC METHODS
-	 */
 
 	/**
 	 * Exposes the {@link ImagePlus} on which the model is drawn by this view.
@@ -131,8 +110,8 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 	public void selectionChanged( final SelectionChangeEvent event )
 	{
 		// Highlight selection
-		trackOverlay.setHighlight( selectionModel.getEdgeSelection() );
-		spotOverlay.setSpotSelection( selectionModel.getSpotSelection() );
+		trackOverlay.setHighlight( guiModel.getSelectionModel().getEdgeSelection() );
+		spotOverlay.setSpotSelection( guiModel.getSelectionModel().getSpotSelection() );
 		// Center on last spot
 		super.selectionChanged( event );
 		// Redraw
@@ -156,10 +135,42 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 		if ( !imp.isVisible() )
 			imp.show();
 
+		imp.getWindow().addWindowListener( new WindowAdapter()
+		{
+			@Override
+			public void windowClosing( final WindowEvent e )
+			{
+				close();
+			}
+		} );
+
 		addOverlay( spotOverlay );
 		addOverlay( trackOverlay );
 		imp.updateAndDraw();
-		registerEditTool();
+
+		/*
+		 * UI behaviours and actions
+		 */
+
+		try
+		{
+			final Model model = guiModel.getModel();
+			final SelectionModel selectionModel = guiModel.getSelectionModel();
+			final TrackMateKeymapManager keymapManager = guiModel.getKeymapManager();
+			final ImagePlusBehavioursAdapter adapter = new ImagePlusBehavioursAdapter( imp, keymapManager, new String[] { KeyConfigContexts.HYPERSTACK_DISPLAYER, KeyConfigContexts.TRACKMATE } );
+			SpotEditBehaviours.install( adapter.behaviours(), model, selectionModel, imp );
+			HyperStackDisplayerActions.install( adapter.actions(), guiModel, imp );
+			// Select spots with freehand ROI.
+			SelectSpotsWithRoiListener.install( model, selectionModel, imp );
+			// Global actions.
+			final Actions globalActions = guiModel.getGlobalActions();
+			adapter.keybindings().addActionMap( "global", new WrappedActionMap( globalActions.getActionMap() ) );
+			adapter.keybindings().addInputMap( "global", new WrappedInputMap( globalActions.getInputMap() ) );
+		}
+		catch ( final Exception e )
+		{
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -187,27 +198,15 @@ public class HyperStackDisplayer extends AbstractTrackMateModelView
 		imp.getOverlay().add( overlay );
 	}
 
-	public SelectionModel getSelectionModel()
-	{
-		return selectionModel;
-	}
-
-	/*
-	 * PRIVATE METHODS
-	 */
-
-	private void registerEditTool()
-	{
-		editTool = SpotEditTool.getInstance();
-		if ( !SpotEditTool.isLaunched() )
-			editTool.run( "" );
-
-		editTool.register( this );
-	}
-
 	@Override
 	public String getKey()
 	{
 		return KEY;
+	}
+
+	@Override
+	public Window getWindow()
+	{
+		return imp.getWindow();
 	}
 }

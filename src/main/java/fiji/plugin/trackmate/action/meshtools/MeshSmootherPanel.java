@@ -39,14 +39,15 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTabbedPane;
 
-import fiji.plugin.trackmate.gui.displaysettings.SliderPanel;
-import fiji.plugin.trackmate.gui.displaysettings.SliderPanelDouble;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.BoundedDoubleElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.EnumElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.IntElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.StyleElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.StyleElementVisitor;
+import org.scijava.ui.config.visitors.gui.elements.SliderPanel;
+import org.scijava.ui.config.visitors.gui.elements.SliderPanelDouble;
+import org.scijava.ui.config.visitors.gui.elements.StyleElement;
+import org.scijava.ui.config.visitors.gui.elements.StyleElementVisitor;
+import org.scijava.ui.config.visitors.gui.elements.StyleElements;
+import org.scijava.ui.config.visitors.gui.elements.StyleElements.BoundedDoubleElement;
+import org.scijava.ui.config.visitors.gui.elements.StyleElements.EnumElement;
+import org.scijava.ui.config.visitors.gui.elements.StyleElements.IntElement;
+
 import net.imglib2.mesh.alg.TaubinSmoothing.TaubinWeightType;
 
 public class MeshSmootherPanel extends JPanel

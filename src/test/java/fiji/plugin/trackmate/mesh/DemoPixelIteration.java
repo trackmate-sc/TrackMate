@@ -24,16 +24,13 @@ package fiji.plugin.trackmate.mesh;
 import java.awt.Color;
 
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.ThresholdDetectorFactory;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.util.TMUtils;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
@@ -78,11 +75,12 @@ public class DemoPixelIteration
 			settings.detectorSettings.put(
 					ThresholdDetectorFactory.KEY_INTENSITY_THRESHOLD, 100. );
 
-			final TrackMate trackmate = new TrackMate( settings );
+			final Model model = new Model();
+			final GuiModel guiModel = new GuiModel( model, settings );
+			final TrackMate trackmate = guiModel.getTrackMate();
 			trackmate.setNumThreads( 4 );
 			trackmate.execDetection();
 
-			final Model model = trackmate.getModel();
 			final SpotCollection spots = model.getSpots();
 			spots.setVisible( true );
 
@@ -111,11 +109,7 @@ public class DemoPixelIteration
 				}
 			}
 
-			final SelectionModel sm = new SelectionModel( model );
-			final DisplaySettings ds = DisplaySettingsIO.readUserDefault();
-			final HyperStackDisplayer view = new HyperStackDisplayer( model, sm, imp, ds );
-			view.render();
-
+			guiModel.getWindowManager().createHyperStackDisplayer();
 			imp.setSlice( 19 );
 			imp.resetDisplayRange();
 			imp.setLut( LUT.createLutFromColor( Color.BLUE ) );

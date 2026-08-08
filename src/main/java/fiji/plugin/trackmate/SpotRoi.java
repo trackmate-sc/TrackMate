@@ -140,6 +140,21 @@ public class SpotRoi extends SpotBase
 	}
 
 	/**
+	 * Sets the X coordinates of the ith vertex of the polygon, <i>relative to
+	 * the spot center</i>, in physical coordinates. This method is meant to be
+	 * used for undo / redo operations, and should not be used otherwise.
+	 *
+	 * @param i
+	 *            the index of the vertex.
+	 * @param x
+	 *            the vertex X position.
+	 */
+	public void setXr( final int i, final double x )
+	{
+		this.x[ i ] = x;
+	}
+
+	/**
 	 * Returns the Y coordinates of the ith vertex of the polygon, <i>relative
 	 * to the spot center</i>, in physical coordinates.
 	 *
@@ -150,6 +165,21 @@ public class SpotRoi extends SpotBase
 	public double yr( final int i )
 	{
 		return y[ i ];
+	}
+
+	/**
+	 * Sets the Y coordinates of the ith vertex of the polygon, <i>relative to
+	 * the spot center</i>, in physical coordinates. This method is meant to be
+	 * used for undo / redo operations, and should not be used otherwise.
+	 *
+	 * @param i
+	 *            the index of the vertex.
+	 * @param y
+	 *            the vertex Y position.
+	 */
+	public void setYr( final int i, final double y )
+	{
+		this.y[ i ] = y;
 	}
 
 	public int nPoints()
@@ -266,6 +296,7 @@ public class SpotRoi extends SpotBase
 	@Override
 	public void scale( final double alpha )
 	{
+		super.scale( alpha );
 		for ( int i = 0; i < x.length; i++ )
 		{
 			final double x = this.x[ i ];

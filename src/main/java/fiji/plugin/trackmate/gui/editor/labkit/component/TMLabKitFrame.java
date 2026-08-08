@@ -86,7 +86,7 @@ public class TMLabKitFrame extends JFrame
 
 	private static final long serialVersionUID = 1L;
 
-	static final String KEYMAP_HOME = new File( new File( System.getProperty( "user.home" ), ".trackmate" ), "editor" ).getAbsolutePath();
+	public static final String EDITOR_KEYMAP_HOME = new File( new File( System.getProperty( "user.home" ), ".trackmate" ), "editor" ).getAbsolutePath();
 
 	static final String KEY_CONFIG_CONTEXT = "trackmate-labkit";
 
@@ -94,9 +94,11 @@ public class TMLabKitFrame extends JFrame
 
 	private final Notifier onCloseListeners = new Notifier();
 
-	public TMLabKitFrame( final TMLabKitModel model )
+	public TMLabKitFrame( final TMLabKitModel model, final EditorKeymapManager kmp, final AppearanceManager am )
 	{
 		final TMImageLabelingModel imageLabelingModel = model.imageLabelingModel();
+		final EditorKeymapManager keymapManager = ( kmp == null ) ? new EditorKeymapManager() : kmp;
+		final AppearanceManager appearanceManager = ( am == null ) ? new AppearanceManager( EDITOR_KEYMAP_HOME ) : am;
 
 		/*
 		 * Here we create a specific config for BDV, so that we can use a custom
@@ -106,10 +108,9 @@ public class TMLabKitFrame extends JFrame
 		 * So the only solution is to initialize the BDV window with a custom
 		 * keymap, configured rationally, and leave it as is.
 		 */
-		final AppearanceManager appearanceManager = new AppearanceManager( KEYMAP_HOME );
 		final KeymapManager bdvKeymapManager = new KeymapManager();
 		final Keymap bdvKeymap = bdvKeymapManager.getForwardSelectedKeymap();
-		bdvKeymap.set( TMKeymapManager.loadBDVKeymap() );
+		bdvKeymap.set( EditorKeymapManager.loadBDVKeymap() );
 
 		final BdvOptions options = BdvOptions.options()
 				.inputTriggerConfig( bdvKeymap.getConfig() )
@@ -156,7 +157,6 @@ public class TMLabKitFrame extends JFrame
 		SwingUtilities.replaceUIActionMap( getRootPane(), keybindings.getConcatenatedActionMap() );
 		SwingUtilities.replaceUIInputMap( getRootPane(), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, keybindings.getConcatenatedInputMap() );
 
-		final TMKeymapManager keymapManager = new TMKeymapManager();
 		final InputTriggerConfig inputTriggerConfig = keymapManager.getForwardSelectedKeymap().getConfig();
 
 		// Actions instance

@@ -35,12 +35,10 @@ import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.GlasbeyLut;
 import ij.ImagePlus;
@@ -78,7 +76,7 @@ public class LabelImgExporter extends AbstractTMAction
 	public static final String NAME = "Export label image";
 
 	@Override
-	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame gui )
+	public void execute( final GuiModel guiModel, final Frame gui )
 	{
 		/*
 		 * Ask use for option.
@@ -116,78 +114,9 @@ public class LabelImgExporter extends AbstractTMAction
 		 * Generate label image.
 		 */
 
-		createLabelImagePlus( trackmate, exportSpotsAsDots, exportTracksOnly, labelIdPainting, logger ).show();
-	}
-
-	/**
-	 * Creates a new label {@link ImagePlus} where the spots of the specified
-	 * model are painted with their shape, with their track ID as pixel value.
-	 *
-	 * @param trackmate
-	 *            the trackmate instance from which we takes the spots to paint.
-	 *            The label image will have the same calibration, name and
-	 *            dimension from the input image stored in the trackmate
-	 *            settings. The output label image will have the same size that
-	 *            of this input image, except for the number of channels, which
-	 *            will be 1.
-	 * @param exportSpotsAsDots
-	 *            if <code>true</code>, spots will be painted as single dots. If
-	 *            <code>false</code> they will be painted with their shape.
-	 * @param exportTracksOnly
-	 *            if <code>true</code>, only the spots belonging to visible
-	 *            tracks will be painted. If <code>false</code>, spots not
-	 *            belonging to a track will be painted with a unique ID,
-	 *            different from the track IDs and different for each spot.
-	 * @param labeIdPainting
-	 *            specifies how to paint the label ID of spots.
-	 *
-	 * @return a new {@link ImagePlus}.
-	 */
-	public static final ImagePlus createLabelImagePlus(
-			final TrackMate trackmate,
-			final boolean exportSpotsAsDots,
-			final boolean exportTracksOnly,
-			final LabelIdPainting labeIdPainting
-			)
-	{
-		return createLabelImagePlus( trackmate, exportSpotsAsDots, exportTracksOnly, labeIdPainting, Logger.VOID_LOGGER );
-	}
-
-	/**
-	 * Creates a new label {@link ImagePlus} where the spots of the specified
-	 * model are painted with their shape, with their track ID as pixel value.
-	 *
-	 * @param trackmate
-	 *            the trackmate instance from which we takes the spots to paint.
-	 *            The label image will have the same calibration, name and
-	 *            dimension from the input image stored in the trackmate
-	 *            settings. The output label image will have the same size that
-	 *            of this input image, except for the number of channels, which
-	 *            will be 1.
-	 * @param exportSpotsAsDots
-	 *            if <code>true</code>, spots will be painted as single dots. If
-	 *            <code>false</code> they will be painted with their shape.
-	 * @param exportTracksOnly
-	 *            if <code>true</code>, only the spots belonging to visible
-	 *            tracks will be painted. If <code>false</code>, spots not
-	 *            belonging to a track will be painted with a unique ID,
-	 *            different from the track IDs and different for each spot.
-	 * @param labelIdPainting
-	 *            specifies how to paint the label ID of spots.
-	 * @param logger
-	 *            a {@link Logger} instance, to report progress of the export
-	 *            process.
-	 *
-	 * @return a new {@link ImagePlus}.
-	 */
-	public static final ImagePlus createLabelImagePlus(
-			final TrackMate trackmate,
-			final boolean exportSpotsAsDots,
-			final boolean exportTracksOnly,
-			final LabelIdPainting labelIdPainting,
-			final Logger logger )
-	{
-		return createLabelImagePlus( trackmate.getModel(), trackmate.getSettings().imp, exportSpotsAsDots, exportTracksOnly, labelIdPainting, logger );
+		final Model model = guiModel.getModel();
+		final ImagePlus imp = guiModel.getSettings().imp;
+		createLabelImagePlus( model, imp, exportSpotsAsDots, exportTracksOnly, labelIdPainting, logger ).show();
 	}
 
 	/**

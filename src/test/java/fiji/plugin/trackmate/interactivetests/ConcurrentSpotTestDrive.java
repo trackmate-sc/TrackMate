@@ -68,7 +68,7 @@ public class ConcurrentSpotTestDrive
 		trackmate.execDetection();
 
 		// Retrieve spots
-		final SpotCollection spots = trackmate.getModel().getSpots();
+		final SpotCollection spots = model.getSpots();
 
 		// Parse spots and detect duplicate IDs
 		final int[] IDs = new int[ Spot.IDcounter.get() + 1 ];

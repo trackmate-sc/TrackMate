@@ -33,6 +33,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.features.FeatureUtils;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.util.TMUtils;
@@ -131,6 +132,16 @@ public class TMLabKitModel implements SegmentationModel
 	public boolean isTrained()
 	{
 		throw new UnsupportedOperationException( "TrackMate editor does not have segmenting capabilities" );
+	}
+
+	public final static TMLabKitModel create( final GuiModel guiModel, final int timepoint )
+	{
+		final Model model = guiModel.getModel();
+		final ImagePlus imp = guiModel.getSettings().imp;
+		final Interval interval = TMUtils.createROIInterval( imp );
+		final DisplaySettings displaySettings = guiModel.getDisplaySettings();
+		final Context context = TMUtils.getContext();
+		return create( model, imp, interval, displaySettings, timepoint, context );
 	}
 
 	/**
