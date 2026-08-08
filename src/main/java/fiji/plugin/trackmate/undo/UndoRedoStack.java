@@ -184,16 +184,51 @@ public class UndoRedoStack implements ModelChangeListener
 			else if ( flag == ModelChangeEvent.FLAG_SPOT_MODIFIED )
 			{
 				final Map< String, Double > previousFeatureValues = spotFeatureValuesBefore.get( spot );
-				command.spotFeatureValuesBefore.put( spot, previousFeatureValues );
-				command.spotFeatureValuesAfter.put( spot, new HashMap<>( spot.getFeatures() ) );
+				final Map< String, Double > currentFeatureValues = spot.getFeatures();
 				final String previousName = spotNameBefore.get( spot );
-				command.spotNameBefore.put( spot, previousName );
-				command.spotNameAfter.put( spot, spot.getName() );
+				final String currentName = spot.getName();
+
+				// Only store features that actually changed
+				final Map< String, Double > changedFeatures = new HashMap<>();
+				for ( final Map.Entry< String, Double > entry : previousFeatureValues.entrySet() )
+				{
+					final String key = entry.getKey();
+					final Double beforeValue = entry.getValue();
+					final Double afterValue = currentFeatureValues.get( key );
+					if ( beforeValue == null && afterValue != null ||
+							beforeValue != null && !beforeValue.equals( afterValue ) )
+					{
+						changedFeatures.put( key, beforeValue );
+					}
+				}
+				// Also check for features that were added (not in before but in after)
+				// These don't need to be stored for undo, but we need to know to remove them
+				// Actually, for undo we only need to restore what was there before
+
+				// Only store if there are actual changes
+				if ( !changedFeatures.isEmpty() )
+				{
+					command.spotFeatureValuesBefore.put( spot, changedFeatures );
+				}
+
+				// Store name only if it changed
+				if ( previousName != null && !previousName.equals( currentName ) )
+				{
+					command.spotNameBefore.put( spot, previousName );
+					command.spotNameAfter.put( spot, currentName );
+				}
+
 				if ( spot instanceof SpotRoi )
 				{
 					final SpotRoi spotRoi = ( SpotRoi ) spot;
-					command.spotPolygonValuesBefore.put( spotRoi, spotPolygonValuesBefore.get( spotRoi ) );
-					command.spotPolygonValuesAfter.put( spotRoi, toPolygon( spotRoi ) );
+					final double[][] polygonBefore = spotPolygonValuesBefore.get( spotRoi );
+					final double[][] polygonAfter = toPolygon( spotRoi );
+					// Only store if polygon changed
+					if ( !polygonsEqual( polygonBefore, polygonAfter ) )
+					{
+						command.spotPolygonValuesBefore.put( spotRoi, polygonBefore );
+						command.spotPolygonValuesAfter.put( spotRoi, polygonAfter );
+					}
 				}
 			}
 		}
@@ -232,8 +267,37 @@ public class UndoRedoStack implements ModelChangeListener
 			}
 			else if ( event.getEdgeFlag( edge ) == ModelChangeEvent.FLAG_EDGE_MODIFIED )
 			{
-				command.edgeFeatureValuesBefore.put( edge, edgeFeatureValuesBefore.get( edge ) );
-				command.edgeFeatureValuesAfter.put( edge, copyEdgeFeatures( edge ) );
+				// Only store edge features that actually changed
+				// Note: beforeFeatures can be null if the edge wasn't flagged with beforeEdit()
+				final Map< String, Double > beforeFeatures = edgeFeatureValuesBefore.get( edge );
+				final Map< String, Double > afterFeatures = copyEdgeFeatures( edge );
+
+				if ( beforeFeatures != null )
+				{
+					final Map< String, Double > changedFeatures = new HashMap<>();
+
+					for ( final Map.Entry< String, Double > entry : beforeFeatures.entrySet() )
+					{
+						final String key = entry.getKey();
+						final Double beforeValue = entry.getValue();
+						final Double afterValue = afterFeatures.get( key );
+						if ( beforeValue == null && afterValue != null ||
+								beforeValue != null && !beforeValue.equals( afterValue ) )
+						{
+							changedFeatures.put( key, beforeValue );
+						}
+					}
+
+					if ( !changedFeatures.isEmpty() )
+					{
+						command.edgeFeatureValuesBefore.put( edge, changedFeatures );
+					}
+				}
+				else
+				{
+					// No before state captured, store all features for safety
+					command.edgeFeatureValuesBefore.put( edge, afterFeatures );
+				}
 			}
 		}
 		spotFeatureValuesBefore.clear();
@@ -323,16 +387,29 @@ public class UndoRedoStack implements ModelChangeListener
 				for ( final EdgeRep edge : edgesRemoved )
 					model.addEdge( edge.source, edge.target, edge.weight );
 
-				for ( final Spot spot : spotFeatureValuesBefore.keySet() )
+				// Collect all spots that need restoration (features, name, or polygon changed)
+				final Set< Spot > spotsToRestore = new HashSet<>();
+				spotsToRestore.addAll( spotFeatureValuesBefore.keySet() );
+				spotsToRestore.addAll( spotNameBefore.keySet() );
+				spotsToRestore.addAll( spotPolygonValuesBefore.keySet() );
+
+				for ( final Spot spot : spotsToRestore )
 				{
 					model.beforeEdit( spot ); // to notify about update
-					spot.setName( spotNameBefore.get( spot ) );
-					spotFeatureValuesBefore.get( spot ).forEach( ( key, value ) -> spot.putFeature( key, value ) );
+					final String nameBefore = spotNameBefore.get( spot );
+					if ( nameBefore != null )
+						spot.setName( nameBefore );
+
+					final Map< String, Double > featuresBefore = spotFeatureValuesBefore.get( spot );
+					if ( featuresBefore != null )
+						featuresBefore.forEach( ( key, value ) -> spot.putFeature( key, value ) );
+
 					if ( spot instanceof SpotRoi )
 					{
 						final SpotRoi spotRoi = ( SpotRoi ) spot;
 						final double[][] polygonBefore = spotPolygonValuesBefore.get( spotRoi );
-						updatePolygon( spotRoi, polygonBefore );
+						if ( polygonBefore != null )
+							updatePolygon( spotRoi, polygonBefore );
 					}
 				}
 				for ( final DefaultWeightedEdge edge : edgeFeatureValuesBefore.keySet() )
@@ -372,16 +449,29 @@ public class UndoRedoStack implements ModelChangeListener
 				for ( final EdgeRep edge : edgesAdded )
 					model.addEdge( edge.source, edge.target, edge.weight );
 
-				for ( final Spot spot : spotFeatureValuesAfter.keySet() )
+				// Collect all spots that need restoration (features, name, or polygon changed)
+				final Set< Spot > spotsToRestore = new HashSet<>();
+				spotsToRestore.addAll( spotFeatureValuesAfter.keySet() );
+				spotsToRestore.addAll( spotNameAfter.keySet() );
+				spotsToRestore.addAll( spotPolygonValuesAfter.keySet() );
+
+				for ( final Spot spot : spotsToRestore )
 				{
 					model.beforeEdit( spot ); // to notify about update
-					spot.setName( spotNameAfter.get( spot ) );
-					spotFeatureValuesAfter.get( spot ).forEach( ( key, value ) -> spot.putFeature( key, value ) );
+					final String nameAfter = spotNameAfter.get( spot );
+					if ( nameAfter != null )
+						spot.setName( nameAfter );
+
+					final Map< String, Double > featuresAfter = spotFeatureValuesAfter.get( spot );
+					if ( featuresAfter != null )
+						featuresAfter.forEach( ( key, value ) -> spot.putFeature( key, value ) );
+
 					if ( spot instanceof SpotRoi )
 					{
 						final SpotRoi spotRoi = ( SpotRoi ) spot;
 						final double[][] polygonAfter = spotPolygonValuesAfter.get( spotRoi );
-						updatePolygon( spotRoi, polygonAfter );
+						if ( polygonAfter != null )
+							updatePolygon( spotRoi, polygonAfter );
 					}
 				}
 				for ( final DefaultWeightedEdge edge : edgeFeatureValuesAfter.keySet() )
@@ -596,5 +686,29 @@ public class UndoRedoStack implements ModelChangeListener
 			spot.setXr( i, polygon[ 0 ][ i ] );
 			spot.setYr( i, polygon[ 1 ][ i ] );
 		}
+	}
+
+	private static final boolean polygonsEqual( final double[][] a, final double[][] b )
+	{
+		if ( a == null && b == null )
+			return true;
+		if ( a == null || b == null )
+			return false;
+		if ( a.length != b.length )
+			return false;
+		if ( a.length == 0 )
+			return true;
+		if ( a[ 0 ].length != b[ 0 ].length )
+			return false;
+
+		for ( int i = 0; i < a[ 0 ].length; i++ )
+		{
+			if ( Double.compare( a[ 0 ][ i ], b[ 0 ][ i ] ) != 0 ||
+					Double.compare( a[ 1 ][ i ], b[ 1 ][ i ] ) != 0 )
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 }
