@@ -43,9 +43,9 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.AbstractFeatureGrapher;
 import fiji.plugin.trackmate.features.ModelDataset;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
@@ -63,15 +63,11 @@ public class PlotNSpotsVsTimeAction extends AbstractTMAction
 			"</html>";
 
 	@Override
-	public void execute(
-			final TrackMate trackmate,
-			final SelectionModel selectionModel,
-			final DisplaySettings displaySettings,
-			final Frame parent )
+	public void execute( final GuiModel guiModel, final Frame parent )
 	{
 		// Collect data
-		final Model model = trackmate.getModel();
-		final Settings settings = trackmate.getSettings();
+		final Model model = guiModel.getModel();
+		final Settings settings = guiModel.getSettings();
 		final SpotCollection spots = model.getSpots();
 
 		final int maxFrame = spots.keySet().stream().mapToInt( Integer::intValue ).max().getAsInt();
@@ -83,6 +79,8 @@ public class PlotNSpotsVsTimeAction extends AbstractTMAction
 			nSpots[ frame ] = spots.getNSpots( frame, true );
 			time[ frame ] = frame * settings.dt;
 		}
+		final SelectionModel selectionModel = guiModel.getSelectionModel();
+		final DisplaySettings displaySettings = guiModel.getDisplaySettings();
 		final NSpotPerFrameDataset dataset = new NSpotPerFrameDataset( model, selectionModel, displaySettings, time, nSpots );
 		final String yFeature = "N spots";
 		final Map< String, Dimension > dimMap = new HashMap<>( 2 );

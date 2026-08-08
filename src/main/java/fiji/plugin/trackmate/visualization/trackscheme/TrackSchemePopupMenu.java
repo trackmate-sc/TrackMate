@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -41,6 +41,7 @@ import com.mxgraph.util.mxEvent;
 import com.mxgraph.util.mxEventObject;
 import com.mxgraph.util.mxEventSource.mxIEventListener;
 
+import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
 import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
@@ -82,7 +83,7 @@ public class TrackSchemePopupMenu extends JPopupMenu
 		{
 			final DefaultWeightedEdge edge = trackScheme.getGraph().getEdgeFor( mxCell );
 			final Double value = Double.valueOf( previousColor.getRGB() );
-			trackScheme.getModel().getFeatureModel().putEdgeFeature( edge, ManualEdgeColorAnalyzer.FEATURE, value );
+			trackScheme.getGuiModel().getModel().getFeatureModel().putEdgeFeature( edge, ManualEdgeColorAnalyzer.FEATURE, value );
 		}
 	}
 
@@ -151,13 +152,24 @@ public class TrackSchemePopupMenu extends JPopupMenu
 			@Override
 			public void invoke( final Object sender, final mxEventObject evt )
 			{
-				for ( final mxCell lCell : vertices )
+				final Model model = trackScheme.getGuiModel().getModel();
+				model.beginUpdate();
+				try
 				{
-					lCell.setValue( tc.getValue() );
-					trackScheme.getGraph().getSpotFor( lCell ).setName( tc.getValue().toString() );
+					for ( final mxCell lCell : vertices )
+					{
+						lCell.setValue( tc.getValue() );
+						final Spot spot = trackScheme.getGraph().getSpotFor( lCell );
+						model.beforeEdit( spot ); // name change undoable
+						spot.setName( tc.getValue().toString() );
+					}
+					graphComponent.refresh();
+					graphComponent.removeListener( this );
 				}
-				graphComponent.refresh();
-				graphComponent.removeListener( this );
+				finally
+				{
+					model.endUpdate();
+				}
 			}
 		} );
 	}
@@ -281,7 +293,7 @@ public class TrackSchemePopupMenu extends JPopupMenu
 			}
 
 			// Link
-			final Action linkAction = new AbstractAction( "Link " + trackScheme.getSelectionModel().getSpotSelection().size() + " spots" )
+			final Action linkAction = new AbstractAction( "Link " + trackScheme.getGuiModel().getSelectionModel().getSpotSelection().size() + " spots" )
 			{
 				@Override
 				public void actionPerformed( final ActionEvent e )
@@ -289,10 +301,8 @@ public class TrackSchemePopupMenu extends JPopupMenu
 					linkSpots();
 				}
 			};
-			if ( trackScheme.getSelectionModel().getSpotSelection().size() > 1 )
-			{
+			if ( trackScheme.getGuiModel().getSelectionModel().getSpotSelection().size() > 1 )
 				add( linkAction );
-			}
 		}
 
 		/*
@@ -384,7 +394,7 @@ public class TrackSchemePopupMenu extends JPopupMenu
 				for ( final mxCell mxCell : edges )
 				{
 					final DefaultWeightedEdge edge = trackScheme.getGraph().getEdgeFor( mxCell );
-					trackScheme.getModel().getFeatureModel().removeEdgeFeature( edge, ManualEdgeColorAnalyzer.FEATURE );
+					trackScheme.getGuiModel().getModel().getFeatureModel().removeEdgeFeature( edge, ManualEdgeColorAnalyzer.FEATURE );
 				}
 
 				SwingUtilities.invokeLater( new Runnable()

@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -46,9 +46,11 @@ import org.scijava.ui.behaviour.util.RunnableAction;
 
 import bdv.util.BdvHandle;
 import bdv.viewer.ViewerPanel;
+import fiji.plugin.trackmate.gui.editor.labkit.model.TMImageLabelingModel;
 import fiji.plugin.trackmate.util.TMUtils;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
+import net.imglib2.Interval;
 import net.imglib2.Localizable;
 import net.imglib2.Point;
 import net.imglib2.RandomAccess;
@@ -65,7 +67,6 @@ import net.imglib2.view.Views;
 import sc.fiji.labkit.ui.brush.BdvMouseBehaviourUtils;
 import sc.fiji.labkit.ui.brush.FloodFillController;
 import sc.fiji.labkit.ui.labeling.Label;
-import sc.fiji.labkit.ui.models.LabelingModel;
 
 /**
  * Copied from FloodFillController
@@ -143,7 +144,7 @@ public class TMFloodFillController
 
 	private final ViewerPanel viewer;
 
-	private final LabelingModel model;
+	private final TMImageLabelingModel model;
 
 	private final BdvHandle bdv;
 
@@ -155,8 +156,7 @@ public class TMFloodFillController
 
 	private Collection< Label > visibleLabels()
 	{
-		return model.labeling().get().getLabels().stream().filter( Label::isVisible )
-				.collect( Collectors.toList() );
+		return model.labeling().get().getLabels().stream().filter( Label::isVisible ).collect( Collectors.toList() );
 	}
 
 	private final FloodFillClick floodFillBehaviour = new FloodFillClick( () -> {
@@ -191,7 +191,7 @@ public class TMFloodFillController
 		}
 	} );
 
-	public TMFloodFillController( final BdvHandle bdv, final LabelingModel model )
+	public TMFloodFillController( final BdvHandle bdv, final TMImageLabelingModel model )
 	{
 		this.bdv = bdv;
 		this.viewer = bdv.getViewerPanel();
@@ -286,7 +286,17 @@ public class TMFloodFillController
 				final Point seed = roundAndReduceDimension( imageCoordinates, frame.numDimensions() );
 				final Consumer< Set< Label > > operation = operationFactory.get();
 				if ( askUser( frame, seed, operation ) )
-					FloodFill.doFloodFillOnActiveLabels( frame, seed, operation );
+				{
+					// Start undo before modifying
+					final int frameIndex = viewer.state().getCurrentTimepoint();
+					model.undoRedo().startUndo( frameIndex );
+
+					// Execute flood fill and get the affected region
+					final Interval region = FloodFill.doFloodFillOnActiveLabels( frame, seed, operation );
+
+					// Set undo point after modifying
+					model.undoRedo().setUndoPoint( region );
+				}
 			}
 		}
 
@@ -297,8 +307,12 @@ public class TMFloodFillController
 			{
 				final String message = "Are you sure to flood fill the background of this 3d image?" +
 						"\n(This may take a while to compute.)";
-				final int result = JOptionPane.showConfirmDialog( viewer, message, "Flood Fill 3D Image",
-						JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE );
+				final int result = JOptionPane.showConfirmDialog(
+						viewer,
+						message,
+						"Flood Fill 3D Image",
+						JOptionPane.OK_CANCEL_OPTION,
+						JOptionPane.QUESTION_MESSAGE );
 				return result == JOptionPane.OK_OPTION;
 			}
 			return true;
@@ -323,11 +337,9 @@ public class TMFloodFillController
 
 	private RandomAccessibleInterval< LabelingType< Label > > labeling()
 	{
-		final RandomAccessibleInterval< LabelingType< Label > > label = model.labeling()
-				.get();
+		final RandomAccessibleInterval< LabelingType< Label > > label = model.labeling().get();
 		if ( model.isTimeSeries() )
-			return Views.hyperSlice( label, label
-					.numDimensions() - 1, viewer.state().getCurrentTimepoint() );
+			return Views.hyperSlice( label, label.numDimensions() - 1, viewer.state().getCurrentTimepoint() );
 		return label;
 	}
 
@@ -348,30 +360,35 @@ public class TMFloodFillController
 		 * @param seed
 		 *            Seed point.
 		 * @param operation
-		 *            Operation that es performed for the flood filled pixels.
+		 *            Operation that is performed for the flood filled pixels.
+		 * @return the bounding box of the filled region as a {@link Interval}.
 		 */
-		public static void doFloodFillOnActiveLabels(
-				final RandomAccessibleInterval< LabelingType< Label > > labeling, final Point seed,
+		public static Interval doFloodFillOnActiveLabels(
+				final RandomAccessibleInterval< LabelingType< Label > > labeling,
+				final Point seed,
 				final Consumer< ? super LabelingType< Label > > operation )
 		{
 			final Set< Label > seedValue = getPixel( labeling, seed ).copy();
-			final Predicate< LabelingType< Label > > visit = value -> activeLabelsAreEquals( value,
-					seedValue );
-			cachedFloodFill( labeling, seed, visit, operation );
+			final Predicate< LabelingType< Label > > visit = value -> activeLabelsAreEquals( value, seedValue );
+			return cachedFloodFill( labeling, seed, visit, operation );
 		}
 
 		// package-private to allow testing
-		static < T > void cachedFloodFill(
-				final RandomAccessibleInterval< LabelingType< T > > image, final Localizable seed,
-				final Predicate< ? super LabelingType< T > > visit, final Consumer< ? super LabelingType< T > > operation )
+		static < T > Interval cachedFloodFill(
+				final RandomAccessibleInterval< LabelingType< T > > image,
+				final Localizable seed,
+				final Predicate< ? super LabelingType< T > > visit,
+				final Consumer< ? super LabelingType< T > > operation )
 		{
 			final Predicate< LabelingType< T > > cachedVisit = new CacheForPredicateLabelingType<>( visit );
 			final Consumer< LabelingType< T > > cachedOperation = new CacheForOperationLabelingType<>( operation );
-			doFloodFill( image, seed, cachedVisit, cachedOperation );
+			return doFloodFill( image, seed, cachedVisit, cachedOperation );
 		}
 
-		private static < T extends Type< T > > void doFloodFill(
-				final RandomAccessibleInterval< T > image, final Localizable seed, final Predicate< T > visit,
+		private static < T extends Type< T > > Interval doFloodFill(
+				final RandomAccessibleInterval< T > image,
+				final Localizable seed,
+				final Predicate< T > visit,
 				final Consumer< T > operation )
 		{
 			final RandomAccess< T > ra = image.randomAccess();
@@ -380,36 +397,33 @@ public class TMFloodFillController
 			final T seedValueChanged = seedValue.copy();
 			operation.accept( seedValueChanged );
 			if ( visit.test( seedValueChanged ) )
-				return;
+				return null;
 			final BiPredicate< T, T > filter = ( f, s ) -> visit.test( f );
 			@SuppressWarnings( "deprecation" )
-			final ExtendedRandomAccessibleInterval< T, RandomAccessibleInterval< T > > target =
-					Views.extendValue( image, seedValueChanged );
+			final ExtendedRandomAccessibleInterval< T, RandomAccessibleInterval< T > > target = Views.extendValue( image, seedValueChanged );
 			final DiamondShape shape = new DiamondShape( 1 );
-			net.imglib2.algorithm.fill.FloodFill.fill( target, target, seed, shape,
-					filter, operation );
+
+			return fiji.plugin.trackmate.gui.editor.labkit.util.FloodFill.fill( target, target, seed, shape, filter, operation );
 		}
 
-		private static boolean activeLabelsAreEquals( final LabelingType< Label > a,
-				final Set< Label > b )
+		private static boolean activeLabelsAreEquals( final LabelingType< Label > a, final Set< Label > b )
 		{
-			final boolean bIsSubSetOfA = b.stream().filter( Label::isVisible ).allMatch(
-					a::contains );
-			final boolean aIsSubSetOfB = a.stream().filter( Label::isVisible ).allMatch(
-					b::contains );
+			final boolean bIsSubSetOfA = b.stream().filter( Label::isVisible ).allMatch( a::contains );
+			final boolean aIsSubSetOfB = a.stream().filter( Label::isVisible ).allMatch( b::contains );
 			return aIsSubSetOfB && bIsSubSetOfA;
 		}
 
-		private static < T > T getPixel( final RandomAccessible< T > image,
-				final Localizable position )
+		private static < T > T getPixel( final RandomAccessible< T > image, final Localizable position )
 		{
 			final RandomAccess< T > ra = image.randomAccess();
 			ra.setPosition( position );
 			return ra.get();
 		}
 
-		public static boolean isBackgroundFloodFill( final RandomAccessibleInterval< LabelingType< Label > > frame,
-				final Point seed, final Consumer< Set< Label > > operation )
+		public static boolean isBackgroundFloodFill(
+				final RandomAccessibleInterval< LabelingType< Label > > frame,
+				final Point seed,
+				final Consumer< Set< Label > > operation )
 		{
 			final LabelingType< Label > seedValue = frame.randomAccess().setPositionAndGet( seed );
 			final LabelingType< Label > changedSeedValue = seedValue.copy();
@@ -421,8 +435,7 @@ public class TMFloodFillController
 			return isBackgroundFill && operationHasEffect;
 		}
 
-		private static class CacheForPredicateLabelingType< T > implements
-				Predicate< LabelingType< T > >
+		private static class CacheForPredicateLabelingType< T > implements Predicate< LabelingType< T > >
 		{
 
 			private final Predicate< ? super LabelingType< T > > predicate;
@@ -451,8 +464,7 @@ public class TMFloodFillController
 			}
 		}
 
-		private static class CacheForOperationLabelingType< T > implements
-				Consumer< LabelingType< T > >
+		private static class CacheForOperationLabelingType< T > implements Consumer< LabelingType< T > >
 		{
 
 			private final Consumer< ? super LabelingType< T > > operation;

@@ -24,12 +24,11 @@ package fiji.plugin.trackmate.mesh;
 import java.util.List;
 
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.detection.ThresholdDetector;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.ImageJ;
 import ij.ImagePlus;
@@ -66,10 +65,8 @@ public class DefaultMesh
 			System.out.println( spot );
 		}
 
-		final SelectionModel selectionModel = new SelectionModel( model );
-		final DisplaySettings ds = DisplaySettingsIO.readUserDefault();
-		final HyperStackDisplayer view = new HyperStackDisplayer( model, selectionModel, imp, ds );
-		view.render();
+		final GuiModel guiModel = new GuiModel( model, new Settings( imp ) );
+		guiModel.getWindowManager().createHyperStackDisplayer();
 	}
 
 	public static void main2( final String[] args )
@@ -99,9 +96,7 @@ public class DefaultMesh
 			model.endUpdate();
 		}
 
-		final SelectionModel selectionModel = new SelectionModel( model );
-		final DisplaySettings ds = DisplaySettingsIO.readUserDefault();
-		final HyperStackDisplayer view = new HyperStackDisplayer( model, selectionModel, imp, ds );
+		final HyperStackDisplayer view = new HyperStackDisplayer( new GuiModel( model, imp ) );
 		view.render();
 	}
 }

@@ -56,7 +56,7 @@ public class GraphTest
 		final TreeSet< Spot > spots = new TreeSet<>( Spot.frameComparator );
 		spots.addAll( model.getTrackModel().vertexSet() );
 		final Spot first = spots.first();
-		final GraphIterator< Spot, DefaultWeightedEdge > iterator = model.getTrackModel().getDepthFirstIterator( first, true );
+		final GraphIterator< Spot, DefaultWeightedEdge > iterator = model.getTrackModel().getDirectedDepthFirstIterator( first, false );
 
 		while ( iterator.hasNext() )
 		{
@@ -123,6 +123,7 @@ public class GraphTest
 
 		// Add them to the graph
 
+		model.pauseUndo();
 		model.beginUpdate();
 		try
 		{
@@ -167,6 +168,7 @@ public class GraphTest
 		finally
 		{
 			model.endUpdate();
+			model.resumeUndo();
 		}
 
 		// Done!
@@ -191,6 +193,7 @@ public class GraphTest
 		}
 
 		// Update model
+		model.pauseUndo();
 		model.beginUpdate();
 		try
 		{
@@ -206,6 +209,7 @@ public class GraphTest
 		finally
 		{
 			model.endUpdate();
+			model.resumeUndo();
 		}
 
 		return model;

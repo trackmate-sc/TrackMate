@@ -34,9 +34,9 @@ import javax.swing.JOptionPane;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.ViewUtils;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
@@ -74,9 +74,9 @@ public class CaptureOverlayAction extends AbstractTMAction
 	private static boolean whiteBackground = false;
 
 	@Override
-	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame gui )
+	public void execute( final GuiModel guiModel, final Frame gui )
 	{
-		final ImagePlus imp = trackmate.getSettings().imp;
+		final ImagePlus imp = guiModel.getSettings().imp;
 
 		if ( firstFrame < 0 )
 			firstFrame = 1;
@@ -127,7 +127,9 @@ public class CaptureOverlayAction extends AbstractTMAction
 				imp2.updateAndRepaintWindow();
 			}
 			// Add overlay to it.
-			final HyperStackDisplayer displayer = new HyperStackDisplayer( trackmate.getModel(), new SelectionModel( trackmate.getModel() ), imp2, displaySettings );
+			final Settings settings2 = new Settings( imp2 );
+			final GuiModel guiModel2 = new GuiModel( guiModel.getModel(), settings2, guiModel.getDisplaySettings() );
+			final HyperStackDisplayer displayer = guiModel2.getWindowManager().createHyperStackDisplayer();
 			displayer.render();
 			final ImagePlus capture = capture( imp2, firstFrame, lastFrame, logger );
 			imp2.close();
@@ -135,7 +137,7 @@ public class CaptureOverlayAction extends AbstractTMAction
 		}
 		else
 		{
-			final ImagePlus capture = capture( trackmate, firstFrame, lastFrame, logger );
+			final ImagePlus capture = capture( guiModel.getTrackMate(), firstFrame, lastFrame, logger );
 			capture.show();
 		}
 

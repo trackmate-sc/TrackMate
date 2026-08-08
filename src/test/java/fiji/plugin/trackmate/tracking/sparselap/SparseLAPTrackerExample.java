@@ -53,13 +53,10 @@ import java.util.Map;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.tracking.jaqaman.SparseLAPTracker;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
-import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
 public class SparseLAPTrackerExample
 {
@@ -103,15 +100,10 @@ public class SparseLAPTrackerExample
 
 		model.setTracks( tracker.getResult(), true );
 
-		final DisplaySettings ds = DisplaySettings.defaultStyle().copy();
-
 		ij.ImageJ.main( args );
-		final SelectionModel sm = new SelectionModel( model );
-		final HyperStackDisplayer view = new HyperStackDisplayer( model, sm, ds );
-		view.render();
-		final TrackScheme trackScheme = new TrackScheme( model, sm, ds );
-		trackScheme.render();
-
+		final GuiModel guiModel = new GuiModel( model );
+		guiModel.getWindowManager().createHyperStackDisplayer();
+		guiModel.getWindowManager().createTrackScheme();
 	}
 
 }

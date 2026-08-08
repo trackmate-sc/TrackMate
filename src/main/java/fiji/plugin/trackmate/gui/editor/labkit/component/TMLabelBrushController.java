@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -27,10 +27,7 @@ import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.KE
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
-import java.util.Arrays;
-import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import javax.swing.Timer;
 
@@ -47,8 +44,11 @@ import org.scijava.ui.behaviour.util.Behaviours;
 import bdv.util.Affine3DHelpers;
 import bdv.util.BdvHandle;
 import bdv.viewer.ViewerPanel;
+import fiji.plugin.trackmate.gui.editor.labkit.model.TMImageLabelingModel;
+import fiji.plugin.trackmate.gui.editor.labkit.model.UndoRedoStack;
 import fiji.plugin.trackmate.util.TMUtils;
 import net.imglib2.FinalInterval;
+import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealLocalizable;
@@ -66,7 +66,6 @@ import sc.fiji.labkit.ui.brush.BrushCursor;
 import sc.fiji.labkit.ui.brush.neighborhood.Ellipsoid;
 import sc.fiji.labkit.ui.brush.neighborhood.RealPoints;
 import sc.fiji.labkit.ui.labeling.Label;
-import sc.fiji.labkit.ui.models.LabelingModel;
 import sc.fiji.labkit.ui.panel.GuiUtils;
 import sc.fiji.labkit.ui.utils.Notifier;
 
@@ -85,7 +84,9 @@ public class TMLabelBrushController
 		REPLACE( "Replace", "Paint over existing labels." ),
 		/** Add the painted label to existing labels. */
 		ADD( "Add", "Add selected label to existing ones." ),
-		/** Only paint over the background. If a label exists, don't change it.*/
+		/**
+		 * Only paint over the background. If a label exists, don't change it.
+		 */
 		DONT_OVERWRITE( "Preserve", "Don't overwrite existing labels, only paint on background." );
 
 		private final String name;
@@ -152,7 +153,7 @@ public class TMLabelBrushController
 
 	private final ViewerPanel viewer;
 
-	private final LabelingModel model;
+	private final TMImageLabelingModel model;
 
 	private final BrushCursor brushCursor;
 
@@ -160,9 +161,9 @@ public class TMLabelBrushController
 
 	private final MouseAdapter moveBrushAdapter = GuiUtils.toMouseListener( moveBrushBehaviour );
 
-	private final PaintBehavior paintBehaviour = new PaintBehavior( true );
+	private final PaintBehavior paintBehaviour;
 
-	private final PaintBehavior eraseBehaviour = new PaintBehavior( false );
+	private final PaintBehavior eraseBehaviour;
 
 	private PaintBrushMode paintBrushMode;
 
@@ -176,8 +177,13 @@ public class TMLabelBrushController
 
 	private boolean planarMode = false;
 
-	public TMLabelBrushController( final BdvHandle bdv, final LabelingModel model )
+	public TMLabelBrushController( final BdvHandle bdv, final TMImageLabelingModel model )
 	{
+		// Behaviors
+		final boolean is2D = model.labeling().get().numDimensions() == 2;
+		this.paintBehaviour = new PaintBehavior( true, is2D );
+		this.eraseBehaviour = new PaintBehavior( false, is2D );
+
 		this.bdv = bdv;
 		this.viewer = bdv.getViewerPanel();
 		this.brushCursor = new BrushCursor( model );
@@ -185,6 +191,7 @@ public class TMLabelBrushController
 		updateBrushOverlayRadius();
 		viewer.getDisplay().overlays().add( brushCursor );
 		viewer.transformListeners().add( affineTransform3D -> updateBrushOverlayRadius() );
+
 
 		// Load defaults from prefs.
 		final PrefService prefs = TMUtils.getContext().getService( PrefService.class );
@@ -286,46 +293,62 @@ public class TMLabelBrushController
 	private class PaintBehavior implements DragBehaviour
 	{
 
-		/**
-		 * If <code>true</code> we paint. If <code>false</code> we erase.
-		 */
+		/** If <code>true</code> we paint. If <code>false</code> we erase. */
 		private final boolean paint;
 
 		private RealPoint before;
 
-		public PaintBehavior( final boolean paint )
+		/**
+		 * The bounding box of the current stroke, used for undo/redo region.
+		 */
+		private Interval strokeRegion;
+
+		private final boolean is2D;
+
+		public PaintBehavior( final boolean paint, final boolean is2D )
 		{
 			this.paint = paint;
+			this.is2D = is2D;
 		}
 
 		private void paint( final RealLocalizable screenCoordinates )
 		{
 			synchronized ( viewer )
 			{
-				RandomAccessible< LabelingType< Label > > extended = extendLabelingType( getFrame() );
 				final double radius = Math.max( 0, ( brushDiameter - 1 ) * 0.5 );
-				final AffineTransform3D m = displayToImageTransformation();
-				final double[] screen = { screenCoordinates.getDoublePosition( 0 ), screenCoordinates
-						.getDoublePosition( 1 ), 0 };
-				double[] center = new double[ 3 ];
-				m.apply( screen, center );
-				if ( extended.numDimensions() == 3 && planarMode )
+				final double[] center = posToImageCoords( screenCoordinates );
+				final double[] axes = radiusToImageCoords( radius );
+
+				RandomAccessible< LabelingType< Label > > extended = extendLabelingType( getFrameLabeling() );
+				if ( !is2D && planarMode )
 					extended = Views.hyperSlice( extended, 2, Math.round( center[ 2 ] ) );
-				final AffineTransform3D labelTransform = model.labelTransformation();
-				final double pixelWidth = RealPoints.length( labelTransform.d( 0 ) );
-				final double pixelHeight = RealPoints.length( labelTransform.d( 1 ) );
-				final double pixelDepth = RealPoints.length( labelTransform.d( 2 ) );
-				double[] axes = { radius, radius * pixelWidth / pixelHeight, radius * pixelWidth /
-						pixelDepth };
-				if ( extended.numDimensions() == 2 )
-				{
-					center = Arrays.copyOf( center, 2 );
-					axes = Arrays.copyOf( axes, 2 );
-				}
+
 				final IterableRegion< BitType > region = Ellipsoid.asIterableRegion( center, axes );
 				Regions.sample( region, extended ).forEach( pixelOperation() );
 			}
+		}
 
+		private double[] radiusToImageCoords( final double radius )
+		{
+			final AffineTransform3D labelTransform = model.labelTransformation();
+			final double pixelWidth = RealPoints.length( labelTransform.d( 0 ) );
+			final double pixelHeight = RealPoints.length( labelTransform.d( 1 ) );
+			if ( is2D )
+				return new double[] { radius, radius * pixelWidth / pixelHeight };
+
+			final double pixelDepth = RealPoints.length( labelTransform.d( 2 ) );
+			return new double[] { radius, radius * pixelWidth / pixelHeight, radius * pixelWidth / pixelDepth };
+		}
+
+		private double[] posToImageCoords( final RealLocalizable screenCoordinates )
+		{
+			final AffineTransform3D m = displayToImageTransformation();
+			final double[] screen = { screenCoordinates.getDoublePosition( 0 ), screenCoordinates.getDoublePosition( 1 ), 0 };
+			final double[] center = new double[ 3 ];
+			m.apply( screen, center );
+			if ( is2D )
+				return new double[] { center[ 0 ], center[ 1 ] };
+			return center;
 		}
 
 		private Consumer< LabelingType< Label > > pixelOperation()
@@ -366,28 +389,16 @@ public class TMLabelBrushController
 					if ( label != null ) // otherwise fall through
 						return pixel -> pixel.remove( label );
 				case REMOVE_ALL:
-					final List< Label > visibleLabels = getVisibleLabels();
-					return pixel -> pixel.removeAll( visibleLabels );
+					return pixel -> pixel.clear();
 				default:
 					throw new IllegalArgumentException( "Unknown erase brush mode: " + eraseBrushMode );
 				}
 			}
 		}
 
-		private List< Label > getVisibleLabels()
+		private static final RandomAccessible< LabelingType< Label > > extendLabelingType( final RandomAccessibleInterval< LabelingType< Label > > slice )
 		{
-			final List< Label > visibleLabels =
-					model.labeling().get().getLabels().stream()
-							.filter( Label::isVisible )
-							.collect( Collectors.toList() );
-			return visibleLabels;
-		}
-
-		private RandomAccessible< LabelingType< Label > > extendLabelingType(
-				final RandomAccessibleInterval< LabelingType< Label > > slice )
-		{
-			final LabelingType< Label > variable = slice.randomAccess()
-					.setPositionAndGet( Intervals.minAsLongArray( slice ) ).createVariable();
+			final LabelingType< Label > variable = slice.randomAccess().setPositionAndGet( Intervals.minAsLongArray( slice ) ).createVariable();
 			variable.clear();
 			@SuppressWarnings( "deprecation" )
 			final RandomAccessible< LabelingType< Label > > extended = Views.extendValue( slice, variable );
@@ -411,32 +422,19 @@ public class TMLabelBrushController
 
 		private void paint( final RealLocalizable a, final RealLocalizable b )
 		{
-			final long distance = ( long ) ( 4 * ( distance( a, b ) + 1 ) );
+			final double dist = LinAlgHelpers.distance( a.positionAsDoubleArray(), b.positionAsDoubleArray() );
+			final long distance = ( long ) ( 4 * ( dist + 1 ) );
 			final long step = ( long ) Math.max( brushDiameter, 1.0 );
+
+			final RealPoint location = new RealPoint( a.numDimensions() );
 			for ( long i = 0; i < distance; i += step )
-				paint( interpolate( ( double ) i / ( double ) distance, a, b ) );
-		}
+			{
+				final double ratio = ( double ) i / ( double ) distance;
+				for ( int d = 0; d < location.numDimensions(); d++ )
+					location.setPosition( ratio * a.getDoublePosition( d ) + ( 1 - ratio ) * b.getDoublePosition( d ), d );
 
-		RealLocalizable interpolate( final double ratio, final RealLocalizable a,
-				final RealLocalizable b )
-		{
-			final RealPoint result = new RealPoint( a.numDimensions() );
-			for ( int d = 0; d < result.numDimensions(); d++ )
-				result.setPosition( ratio * a.getDoublePosition( d ) + ( 1 - ratio ) * b
-						.getDoublePosition( d ), d );
-			return result;
-		}
-
-		double distance( final RealLocalizable a, final RealLocalizable b )
-		{
-			return LinAlgHelpers.distance( asArray( a ), asArray( b ) );
-		}
-
-		private double[] asArray( final RealLocalizable a )
-		{
-			final double[] result = new double[ a.numDimensions() ];
-			a.localize( result );
-			return result;
+				paint( location );
+			}
 		}
 
 		@Override
@@ -447,8 +445,15 @@ public class TMLabelBrushController
 			makeLabelVisible();
 			final RealPoint coords = new RealPoint( x, y );
 			this.before = coords;
-			paint( coords );
+
+			// Initialize stroke region
 			final double radius = getBrushDisplayRadius();
+			strokeRegion = createStrokeRegion( posToImageCoords( coords ), ( int ) Math.ceil( brushDiameter / 2. ) );
+
+			// Snapshot the current state for undo/redo
+			model.undoRedo().startUndo( viewer.state().getCurrentTimepoint() );
+
+			paint( coords );
 			fireBitmapChanged( coords, coords, radius );
 		}
 
@@ -460,6 +465,13 @@ public class TMLabelBrushController
 			paint( before, coords );
 			final double radius = getBrushDisplayRadius();
 			fireBitmapChanged( before, coords, radius );
+
+			// Expand stroke region
+			strokeRegion = expandStrokeRegion(
+					strokeRegion,
+					posToImageCoords( before ),
+					posToImageCoords( coords ),
+					radiusToImageCoords( radius ) );
 			this.before = coords;
 		}
 
@@ -468,6 +480,35 @@ public class TMLabelBrushController
 		{
 			brushCursor.setPosition( x, y );
 			brushCursor.setFontVisible( true );
+
+			final UndoRedoStack undo = model.undoRedo();
+			undo.setUndoPoint( Intervals.intersect( getFrameLabeling(), strokeRegion ) );
+		}
+
+		/** Creates an interval representing the initial brush stroke region. */
+		private static final FinalInterval createStrokeRegion( final double[] center, final int radius )
+		{
+			final long[] min = new long[ 2 ];
+			final long[] max = new long[ 2 ];
+			for ( int d = 0; d < 2; d++ )
+			{
+				min[ d ] = ( long ) Math.floor( center[ d ] - radius );
+				max[ d ] = ( long ) Math.ceil( center[ d ] + radius );
+			}
+			return new FinalInterval( min, max );
+		}
+
+		/** Expands the stroke region to include a new brush position. */
+		private static final Interval expandStrokeRegion( final Interval current, final double[] centerA, final double[] centerB, final double[] radius )
+		{
+			final long[] min = new long[ current.numDimensions() ];
+			final long[] max = new long[ current.numDimensions() ];
+			for ( int d = 0; d < current.numDimensions(); d++ )
+			{
+				min[ d ] = Math.min( current.min( d ), ( long ) Math.floor( Math.min( centerA[ d ], centerB[ d ] ) - radius[ d ] ) );
+				max[ d ] = Math.max( current.max( d ), ( long ) Math.ceil( Math.max( centerA[ d ], centerB[ d ] ) + radius[ d ] ) );
+			}
+			return new FinalInterval( min, max );
 		}
 	}
 
@@ -485,23 +526,21 @@ public class TMLabelBrushController
 
 	private double getBrushDisplayRadius()
 	{
-		return brushDiameter * 0.5 * getScale( model.labelTransformation() ) *
-				getScale( paintBehaviour.viewerTransformation() );
+		final double labelScale = Affine3DHelpers.extractScale( model.labelTransformation(), 0 );
+		final double viewScale = Affine3DHelpers.extractScale( paintBehaviour.viewerTransformation(), 0 );
+		return brushDiameter * 0.5 * labelScale * viewScale;
 	}
 
-	// TODO: find a good place
-	private double getScale( final AffineTransform3D transformation )
+	/**
+	 * Returns the labeling of the current frame.
+	 *
+	 * @return the labeling of the current frame
+	 */
+	private RandomAccessibleInterval< LabelingType< Label > > getFrameLabeling()
 	{
-		return Affine3DHelpers.extractScale( transformation, 0 );
-	}
-
-	private RandomAccessibleInterval< LabelingType< Label > > getFrame()
-	{
-		final RandomAccessibleInterval< LabelingType< Label > > frame = model.labeling()
-				.get();
+		final RandomAccessibleInterval< LabelingType< Label > > frame = model.labeling().get();
 		if ( this.model.isTimeSeries() )
-			return Views.hyperSlice( frame, frame
-					.numDimensions() - 1, viewer.state().getCurrentTimepoint() );
+			return Views.hyperSlice( frame, frame.numDimensions() - 1, viewer.state().getCurrentTimepoint() );
 		return frame;
 	}
 
@@ -512,10 +551,8 @@ public class TMLabelBrushController
 		final long[] max = new long[ 2 ];
 		for ( int d = 0; d < 2; d++ )
 		{
-			min[ d ] = ( long ) ( Math.min( a.getDoublePosition( d ), b.getDoublePosition(
-					d ) ) - radius );
-			max[ d ] = ( long ) ( Math.ceil( Math.max( a.getDoublePosition( d ), b
-					.getDoublePosition( d ) ) ) + radius );
+			min[ d ] = ( long ) ( Math.min( a.getDoublePosition( d ), b.getDoublePosition( d ) ) - radius );
+			max[ d ] = ( long ) ( Math.ceil( Math.max( a.getDoublePosition( d ), b.getDoublePosition( d ) ) ) + radius );
 		}
 		model.dataChangedNotifier().notifyListeners( new FinalInterval( min, max ) );
 	}
@@ -524,8 +561,7 @@ public class TMLabelBrushController
 	{
 
 		@Override
-		public void scroll( final double wheelRotation, final boolean isHorizontal,
-				final int x, final int y )
+		public void scroll( final double wheelRotation, final boolean isHorizontal, final int x, final int y )
 		{
 			if ( !isHorizontal )
 			{

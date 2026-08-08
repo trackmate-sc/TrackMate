@@ -23,9 +23,11 @@ package fiji.plugin.trackmate.gui.wizard.descriptors;
 
 import java.util.Map;
 
-import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.components.ModuleChooserPanel;
 import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
 import fiji.plugin.trackmate.io.SettingsPersistence;
@@ -36,19 +38,19 @@ public class ChooseDetectorDescriptor extends WizardPanelDescriptor
 
 	private static final String KEY = "ChooseDetector";
 
-	private final TrackMate trackmate;
-
 	private final DetectorProvider detectorProvider;
 
-	public ChooseDetectorDescriptor( final DetectorProvider detectorProvider, final TrackMate trackmate )
+	private final GuiModel guiModel;
+
+	public ChooseDetectorDescriptor( final DetectorProvider detectorProvider, final GuiModel guiModel )
 	{
 		super( KEY );
-		this.trackmate = trackmate;
 		this.detectorProvider = detectorProvider;
+		this.guiModel = guiModel;
 
 		String selectedDetector = LogDetectorFactory.DETECTOR_KEY; // default
-		if ( null != trackmate.getSettings().detectorFactory )
-			selectedDetector = trackmate.getSettings().detectorFactory.getKey();
+		if ( null != guiModel.getSettings().detectorFactory )
+			selectedDetector = guiModel.getSettings().detectorFactory.getKey();
 
 		this.targetPanel = new ModuleChooserPanel<>( detectorProvider, "detector", selectedDetector );
 	}
@@ -56,8 +58,8 @@ public class ChooseDetectorDescriptor extends WizardPanelDescriptor
 	private void setCurrentChoiceFromPlugin()
 	{
 		String key = LogDetectorFactory.DETECTOR_KEY; // back to default
-		if ( null != trackmate.getSettings().detectorFactory )
-			key = trackmate.getSettings().detectorFactory.getKey();
+		if ( null != guiModel.getSettings().detectorFactory )
+			key = guiModel.getSettings().detectorFactory.getKey();
 
 		@SuppressWarnings( { "rawtypes", "unchecked" } )
 		final ModuleChooserPanel< SpotDetectorFactoryBase > component = ( fiji.plugin.trackmate.gui.components.ModuleChooserPanel< SpotDetectorFactoryBase > ) targetPanel;
@@ -73,6 +75,9 @@ public class ChooseDetectorDescriptor extends WizardPanelDescriptor
 	@Override
 	public void aboutToHidePanel()
 	{
+		final Model model = guiModel.getModel();
+		final Settings settings = guiModel.getSettings();
+
 		// Configure the detector provider with choice made in panel
 		@SuppressWarnings( { "rawtypes", "unchecked" } )
 		final ModuleChooserPanel< SpotDetectorFactoryBase > component = ( fiji.plugin.trackmate.gui.components.ModuleChooserPanel< SpotDetectorFactoryBase > ) targetPanel;
@@ -83,37 +88,37 @@ public class ChooseDetectorDescriptor extends WizardPanelDescriptor
 
 		if ( null == factory )
 		{
-			trackmate.getModel().getLogger().error( "[ChooseDetectorDescriptor] Cannot find detector named " + detectorKey + " in current TrackMate modules." );
+			model.getLogger().error( "[ChooseDetectorDescriptor] Cannot find detector named " + detectorKey + " in current TrackMate modules." );
 			return;
 		}
-		trackmate.getSettings().detectorFactory = factory;
+		settings.detectorFactory = factory;
 
 		/*
 		 * Compare current settings with default ones, and substitute default
 		 * ones only if the old ones are absent or not compatible with it.
 		 */
-		final Map< String, Object > currentSettings = trackmate.getSettings().detectorSettings;
+		final Map< String, Object > currentSettings = settings.detectorSettings;
 		if ( factory.checkSettings( currentSettings ) != null )
 		{
 			final String error = factory.checkSettings( currentSettings );
 			if ( error == null )
 			{
-				trackmate.getSettings().detectorSettings = currentSettings;
+				settings.detectorSettings = currentSettings;
 			}
 			else
 			{
 				final Map< String, Object > defaultSettings = factory.getDefaultSettings();
-				trackmate.getSettings().detectorSettings = defaultSettings;
+				settings.detectorSettings = defaultSettings;
 			}
 		}
 
 		// Settings persistence.
-		SettingsPersistence.saveLastUsedSettings( trackmate.getSettings(), trackmate.getModel().getLogger() );
+		SettingsPersistence.saveLastUsedSettings( settings, model.getLogger() );
 	}
 
 	@Override
 	public Runnable getBackwardRunnable()
 	{
-		return () -> trackmate.getModel().clearSpots( true );
+		return () -> guiModel.getModel().clearSpots( true );
 	}
 }

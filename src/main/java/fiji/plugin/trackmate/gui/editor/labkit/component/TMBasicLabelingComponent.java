@@ -58,13 +58,13 @@ import bdv.viewer.ViewerPanel;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.gui.editor.labkit.component.TMFloodFillController.FloodEraseMode;
 import fiji.plugin.trackmate.gui.editor.labkit.component.TMFloodFillController.FloodFillMode;
+import fiji.plugin.trackmate.gui.editor.labkit.model.TMImageLabelingModel;
 import net.miginfocom.swing.MigLayout;
 import sc.fiji.labkit.ui.bdv.BdvAutoContrast;
 import sc.fiji.labkit.ui.bdv.BdvLayer;
 import sc.fiji.labkit.ui.labeling.Label;
 import sc.fiji.labkit.ui.labeling.LabelsLayer;
 import sc.fiji.labkit.ui.models.Holder;
-import sc.fiji.labkit.ui.models.ImageLabelingModel;
 import sc.fiji.labkit.ui.models.LabelingModel;
 
 /**
@@ -81,7 +81,7 @@ public class TMBasicLabelingComponent extends JPanel implements AutoCloseable
 
 	private final JFrame dialogBoxOwner;
 
-	private final ImageLabelingModel model;
+	private final TMImageLabelingModel model;
 
 	private JSlider zSlider;
 
@@ -95,7 +95,7 @@ public class TMBasicLabelingComponent extends JPanel implements AutoCloseable
 
 	public TMBasicLabelingComponent(
 			final JFrame dialogBoxOwner,
-			final ImageLabelingModel model,
+			final TMImageLabelingModel model,
 			final BdvOptions options )
 	{
 		this.model = model;

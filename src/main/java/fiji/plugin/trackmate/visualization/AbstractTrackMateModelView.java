@@ -21,7 +21,10 @@
  */
 package fiji.plugin.trackmate.visualization;
 
+import java.util.ArrayList;
 import java.util.Map;
+
+import javax.swing.SwingUtilities;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeListener;
@@ -29,14 +32,14 @@ import fiji.plugin.trackmate.SelectionChangeEvent;
 import fiji.plugin.trackmate.SelectionChangeListener;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.UpdateListener;
 
 /**
- * An abstract class for spot displayers, that can overlay detected spots and
- * tracks on top of the image data.
- * <p>
+ * An abstract class for TrackMate views.
  *
- * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; Jan 2011
+ * @author Jean-Yves Tinevez
  */
 public abstract class AbstractTrackMateModelView implements SelectionChangeListener, TrackMateModelView, ModelChangeListener
 {
@@ -45,29 +48,55 @@ public abstract class AbstractTrackMateModelView implements SelectionChangeListe
 	 * FIELDS
 	 */
 
-	/** The model displayed by this class. */
-	protected final Model model;
+	protected final ArrayList< Runnable > runOnClose;
 
-	protected final SelectionModel selectionModel;
-
-	protected final DisplaySettings displaySettings;
+	protected final GuiModel guiModel;
 
 	/*
 	 * PROTECTED CONSTRUCTOR
 	 */
 
-	protected AbstractTrackMateModelView( final Model model, final SelectionModel selectionModel, final DisplaySettings displaySettings )
+	protected AbstractTrackMateModelView( final GuiModel guiModel )
 	{
-		this.selectionModel = selectionModel;
-		this.model = model;
-		this.displaySettings = displaySettings;
+		this.guiModel = guiModel;
+		runOnClose = new ArrayList<>();
+
+		final Model model = guiModel.getModel();
+		final SelectionModel selectionModel = guiModel.getSelectionModel();
+		final DisplaySettings displaySettings = guiModel.getDisplaySettings();
 		model.addModelChangeListener( this );
 		selectionModel.addSelectionChangeListener( this );
+		final UpdateListener refresher = () -> SwingUtilities.invokeLater( this::refresh );
+		displaySettings.listeners().add( refresher );
+		onClose( () -> {
+			model.removeModelChangeListener( this );
+			selectionModel.removeSelectionChangeListener( this );
+			displaySettings.listeners().remove( refresher );
+		} );
 	}
 
 	/*
 	 * PUBLIC METHODS
 	 */
+
+
+	/**
+	 * Adds the specified {@link Runnable} to the list of runnables to execute
+	 * when this view is closed.
+	 *
+	 * @param runnable
+	 *            the {@link Runnable} to add.
+	 */
+	public synchronized void onClose( final Runnable runnable )
+	{
+		runOnClose.add( runnable );
+	}
+
+	protected synchronized void close()
+	{
+		runOnClose.forEach( Runnable::run );
+		runOnClose.clear();
+	}
 
 	/**
 	 * This needs to be overridden for concrete implementation to display
@@ -90,8 +119,8 @@ public abstract class AbstractTrackMateModelView implements SelectionChangeListe
 	}
 
 	@Override
-	public Model getModel()
+	public GuiModel getGuiModel()
 	{
-		return model;
+		return guiModel;
 	}
 }

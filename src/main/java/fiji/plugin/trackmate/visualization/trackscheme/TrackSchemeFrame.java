@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -40,8 +40,8 @@ import com.mxgraph.swing.mxGraphOutline;
 import com.mxgraph.swing.handler.mxRubberband;
 
 import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.util.TrackNavigator;
 
 public class TrackSchemeFrame extends JFrame
 {
@@ -101,7 +101,8 @@ public class TrackSchemeFrame extends JFrame
 		graphComponent = createGraphComponent();
 
 		// Add the info pane
-		infoPane = new InfoPane( trackScheme.getModel(), trackScheme.getSelectionModel() );
+		final GuiModel guiModel = trackScheme.getGuiModel();
+		infoPane = new InfoPane( guiModel.getModel(), guiModel.getSelectionModel() );
 
 		// Add the graph outline
 		final mxGraphOutline graphOutline = new mxGraphOutline( graphComponent );
@@ -113,10 +114,6 @@ public class TrackSchemeFrame extends JFrame
 		final JSplitPane splitPane = new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, inner, graphComponent );
 		splitPane.setDividerLocation( 170 );
 		getContentPane().add( splitPane, BorderLayout.CENTER );
-
-		final TrackSchemeKeyboardHandler keyboardHandler = new TrackSchemeKeyboardHandler( graphComponent, new TrackNavigator( trackScheme.getModel(), trackScheme.getSelectionModel() ) );
-		keyboardHandler.installKeyboardActions( graphComponent );
-		keyboardHandler.installKeyboardActions( infoPane );
 	}
 
 	/*

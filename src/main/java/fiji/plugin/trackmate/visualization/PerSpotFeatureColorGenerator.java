@@ -24,10 +24,10 @@ package fiji.plugin.trackmate.visualization;
 import java.awt.Color;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
+import org.scijava.ui.config.visitors.gui.elements.colormap.Colormap;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.gui.displaysettings.Colormap;
 
 public class PerSpotFeatureColorGenerator implements TrackColorGenerator
 {
