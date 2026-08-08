@@ -22,8 +22,9 @@
 package fiji.plugin.trackmate;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeTrue;
 
+import java.awt.GraphicsEnvironment;
 import java.util.List;
 
 import org.junit.Test;
@@ -34,7 +35,7 @@ public class TrackMatePluginTest {
 	@Test
 	public void testTrackMateRegistration() {
 		// Skip this test in headless mode - it requires GUI initialization
-		assumeFalse("Skipping GUI test in headless mode", Boolean.getBoolean("java.awt.headless"));
+		assumeTrue("Skipping GUI test in headless mode", !GraphicsEnvironment.isHeadless());
 
 		final TestTrackMatePlugin testPlugin = new TestTrackMatePlugin();
 		testPlugin.setUp();
