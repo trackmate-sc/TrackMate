@@ -233,7 +233,17 @@ public class TrackTableView extends AbstractTrackMateModelJFrameView
 		final Map< String, Boolean > isInts = model.getFeatureModel().getTrackFeatureIsInt();
 		final Map< String, String > infoTexts = new HashMap<>();
 		final Function< Integer, String > labelGenerator = id -> model.getTrackModel().name( id );
-		final BiConsumer< Integer, String > labelSetter = ( id, label ) -> model.getTrackModel().setName( id, label );
+		final BiConsumer< Integer, String > labelSetter = ( id, label ) -> {
+			model.beginUpdate();
+			try
+			{
+				model.setTrackName( id, label );
+			}
+			finally
+			{
+				model.endUpdate();
+			}
+		};
 
 		final Supplier< FeatureColorGenerator< Integer > > coloring =
 				() -> FeatureUtils.createWholeTrackColorGenerator( model, ds );

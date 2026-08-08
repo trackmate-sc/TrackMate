@@ -59,6 +59,7 @@ import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxGraphView;
 
+import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 
@@ -557,7 +558,16 @@ public class TrackSchemeGraphComponent extends mxGraphComponent implements mxIEv
 								if ( guiModel.getModel().getTrackModel().unsortedTrackIDs( false ).contains( trackID ) )
 								{
 									final String newname = textArea.getText();
-									guiModel.getModel().getTrackModel().setName( trackID, newname );
+									final Model model = guiModel.getModel();
+									model.beginUpdate();
+									try
+									{
+										model.setTrackName( trackID, newname );
+									}
+									finally
+									{
+										model.endUpdate();
+									}
 								}
 								scrollPane.remove( textArea );
 								ColumnHeader.this.remove( scrollPane );
