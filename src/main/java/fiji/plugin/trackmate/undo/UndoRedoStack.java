@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,6 +40,12 @@ public class UndoRedoStack implements ModelChangeListener
 	private final Map< DefaultWeightedEdge, Map< String, Double > > edgeFeatureValuesBefore = new HashMap<>();
 
 	private final Map< Spot, String > spotNameBefore = new HashMap<>();
+
+	/**
+	 * Track states before the operation, keyed by track ID. Only holds "before"
+	 * values.
+	 */
+	private final Map< Integer, TrackState > trackStatesBefore = new HashMap<>();
 
 	private final int maxSize;
 
@@ -91,12 +98,14 @@ public class UndoRedoStack implements ModelChangeListener
 		{
 			// Only deal with model modified events. Other events are not
 			// undoable and results in clearing the undo/redo stack.
+
 			undoStack.clear();
 			redoStack.clear();
 			spotFeatureValuesBefore.clear();
 			edgeFeatureValuesBefore.clear();
 			spotPolygonValuesBefore.clear();
 			spotNameBefore.clear();
+			trackStatesBefore.clear();
 			return;
 		}
 
@@ -114,6 +123,49 @@ public class UndoRedoStack implements ModelChangeListener
 	private ModelUndoableCommand toCommand( final ModelChangeEvent event )
 	{
 		final ModelUndoableCommand command = new ModelUndoableCommand();
+
+		// First, process track states that were flagged via flagTrackForUndo()
+		// (e.g., for track renames or before merge operations)
+		// We need to fill in the "after" state
+		for ( final Map.Entry< Integer, TrackState > entry : trackStatesBefore.entrySet() )
+		{
+			final Integer trackId = entry.getKey();
+			final TrackState beforeState = entry.getValue();
+			final TrackModel trackModel = model.getTrackModel();
+
+			// Capture "after" state (current state after the modification)
+			// Track may no longer exist if it was removed (all spots deleted)
+			final String nameAfter = trackModel.name( trackId );
+			// Check if track still exists before getting visibility (isVisible
+			// throws NPE for non-existent tracks)
+			final Boolean visibilityAfter = nameAfter != null ? trackModel.isVisible( trackId ) : null;
+			final Set< Spot > spotsAfter = trackModel.trackSpots( trackId );
+
+			final TrackState fullState = new TrackState(
+					beforeState.nameBefore,
+					beforeState.visibilityBefore,
+					nameAfter != null ? nameAfter : beforeState.nameBefore,
+					visibilityAfter != null ? visibilityAfter : beforeState.visibilityBefore,
+					spotsAfter != null ? new HashSet<>( spotsAfter ) : new HashSet<>( beforeState.spots ) );
+			command.trackStatesBefore.put( trackId, fullState );
+		}
+
+		// Also capture track states for tracks affected by edge/spot operations
+		// (these only have "before" state captured, "after" will be same as
+		// before for now)
+		for ( final Integer trackId : event.getTrackUpdated() )
+		{
+			if ( !command.trackStatesBefore.containsKey( trackId ) )
+			{
+				final TrackModel trackModel = model.getTrackModel();
+				final String name = trackModel.name( trackId );
+				final boolean visibility = trackModel.isVisible( trackId );
+				final Set< Spot > spots = new HashSet<>( trackModel.trackSpots( trackId ) );
+				final TrackState state = new TrackState( name, visibility, name, visibility, spots );
+				command.trackStatesBefore.put( trackId, state );
+			}
+		}
+
 		for ( final Spot spot : event.getSpots() )
 		{
 			if ( event.getSpotFlag( spot ) == ModelChangeEvent.FLAG_SPOT_ADDED )
@@ -166,7 +218,36 @@ public class UndoRedoStack implements ModelChangeListener
 		edgeFeatureValuesBefore.clear();
 		spotPolygonValuesBefore.clear();
 		spotNameBefore.clear();
+		trackStatesBefore.clear();
 		return command;
+	}
+
+	/**
+	 * Holds the state of a track before and after an operation. Used to restore
+	 * track names and visibility after undo/redo.
+	 */
+	private static class TrackState
+	{
+		final String nameBefore;
+
+		final String nameAfter;
+
+		final boolean visibilityBefore;
+
+		final boolean visibilityAfter;
+
+		final Set< Spot > spots;
+
+		TrackState( final String nameBefore, final boolean visibilityBefore,
+				final String nameAfter, final boolean visibilityAfter,
+				final Set< Spot > spots )
+		{
+			this.nameBefore = nameBefore;
+			this.visibilityBefore = visibilityBefore;
+			this.nameAfter = nameAfter;
+			this.visibilityAfter = visibilityAfter;
+			this.spots = spots;
+		}
 	}
 
 	private static class ModelUndoableCommand
@@ -198,6 +279,9 @@ public class UndoRedoStack implements ModelChangeListener
 		private final Map< Spot, String > spotNameAfter = new HashMap<>();
 
 		private final Map< Spot, String > spotNameBefore = new HashMap<>();
+
+		/** Track states before the operation, keyed by track ID. */
+		private final Map< Integer, TrackState > trackStatesBefore = new HashMap<>();
 
 		public void restoreBefore( final Model model )
 		{
@@ -236,6 +320,10 @@ public class UndoRedoStack implements ModelChangeListener
 						else
 							model.getFeatureModel().putEdgeFeature( edge, key, value );
 					} );
+
+				// Restore track names and visibility after topology is rebuilt
+				// (undo = restore before state)
+				restoreTrackStatesFromCommand( model, true );
 			}
 			finally
 			{
@@ -281,12 +369,98 @@ public class UndoRedoStack implements ModelChangeListener
 						else
 							model.getFeatureModel().putEdgeFeature( edge, key, value );
 					} );
+
+				// Restore track names and visibility after topology is rebuilt
+				// (redo = restore after state)
+				restoreTrackStatesFromCommand( model, false );
 			}
 			finally
 			{
 				model.endUpdate();
 			}
 			model.resumeUndo();
+		}
+
+		/**
+		 * Restores track names and visibility from the captured states in the
+		 * command. After an undo or redo operation, the track topology is
+		 * rebuilt by the {@link TrackModel.MyGraphListener}, but track names
+		 * and visibility are not restored. This method finds the tracks that
+		 * contain the spots from the captured states and restores their names
+		 * and visibility.
+		 *
+		 * @param model
+		 *            the model
+		 * @param restoreBefore
+		 *            if true, restore the "before" state (undo); if false,
+		 *            restore the "after" state (redo)
+		 */
+		private void restoreTrackStatesFromCommand( final Model model, final boolean restoreBefore )
+		{
+			final TrackModel trackModel = model.getTrackModel();
+
+			// Build a map from spot ID to current track ID
+			final Map< Integer, Integer > spotToCurrentTrackId = new HashMap<>();
+			for ( final Integer trackId : trackModel.trackIDs( false ) )
+			{
+				for ( final Spot spot : trackModel.trackSpots( trackId ) )
+					spotToCurrentTrackId.put( spot.ID(), trackId );
+			}
+
+			// Group captured track states by the current track they map to
+			// This handles the case where multiple tracks (e.g., from a split)
+			// merge back into one
+			final Map< Integer, Map.Entry< Integer, TrackState > > currentTrackToBestState = new HashMap<>();
+
+			for ( final Map.Entry< Integer, TrackState > entry : trackStatesBefore.entrySet() )
+			{
+				final Integer oldTrackId = entry.getKey();
+				final TrackState state = entry.getValue();
+
+				// Find a spot from the old track that still exists
+				Spot referenceSpot = null;
+				for ( final Spot spot : state.spots )
+				{
+					if ( trackModel.vertexSet().contains( spot ) )
+					{
+						referenceSpot = spot;
+						break;
+					}
+				}
+
+				if ( referenceSpot != null )
+				{
+					final Integer currentTrackId = spotToCurrentTrackId.get( referenceSpot.ID() );
+					if ( currentTrackId != null )
+					{
+						// If this current track already has a state, keep the
+						// one with the lowest oldTrackId
+						// (the original track before split)
+						if ( !currentTrackToBestState.containsKey( currentTrackId ) || oldTrackId < currentTrackToBestState.get( currentTrackId ).getKey() )
+							currentTrackToBestState.put( currentTrackId, entry );
+					}
+				}
+			}
+
+			// Now restore names - each current track gets at most one name
+			// restoration
+			for ( final Map.Entry< Integer, Map.Entry< Integer, TrackState > > e : currentTrackToBestState.entrySet() )
+			{
+				final Integer currentTrackId = e.getKey();
+				final Map.Entry< Integer, TrackState > stateEntry = e.getValue();
+				final TrackState state = stateEntry.getValue();
+
+				// Choose which state to restore based on restoreBefore flag
+				final String nameToRestore = restoreBefore ? state.nameBefore : state.nameAfter;
+				final boolean visibilityToRestore = restoreBefore ? state.visibilityBefore : state.visibilityAfter;
+
+				// Restore name and visibility
+				trackModel.setName( currentTrackId, nameToRestore );
+				trackModel.setVisibility( currentTrackId, visibilityToRestore );
+			}
+
+			// Don't clear trackStatesBefore - it's part of the command and may
+			// be needed for redo
 		}
 	}
 
@@ -337,6 +511,48 @@ public class UndoRedoStack implements ModelChangeListener
 		spot.accept( undoStorer );
 	}
 
+	/**
+	 * Flags a track for undo by capturing its current name and visibility. This
+	 * should be called before modifying a track's name or structure.
+	 *
+	 * @param trackId
+	 *            the track ID to flag for undo
+	 */
+	public void flagTrackForUndo( final Integer trackId )
+	{
+		if ( paused )
+		{
+
+			return;
+		}
+		final TrackModel trackModel = model.getTrackModel();
+		final String currentName = trackModel.name( trackId );
+		final boolean currentVisibility = trackModel.isVisible( trackId );
+		final Set< Spot > currentSpots = new HashSet<>( trackModel.trackSpots( trackId ) );
+		// Capture "before" state; "after" state will be filled in toCommand()
+		trackStatesBefore.put( trackId, new TrackState( currentName, currentVisibility, null, false, currentSpots ) );
+	}
+
+	/**
+	 * Flags all tracks for undo by capturing their current names and
+	 * visibility. This should be called before operations that may restructure
+	 * tracks (e.g., adding/removing edges that may merge or split tracks).
+	 */
+	public void flagAllTracksForUndo()
+	{
+		if ( paused )
+			return;
+		final TrackModel trackModel = model.getTrackModel();
+		for ( final Integer trackId : trackModel.trackIDs( false ) )
+		{
+			final String currentName = trackModel.name( trackId );
+			final boolean currentVisibility = trackModel.isVisible( trackId );
+			final Set< Spot > currentSpots = new HashSet<>( trackModel.trackSpots( trackId ) );
+			// Capture "before" state; "after" will be filled in toCommand()
+			trackStatesBefore.put( trackId, new TrackState( currentName, currentVisibility, null, false, currentSpots ) );
+		}
+	}
+
 	private static final double[][] toPolygon( final SpotRoi spot )
 	{
 		final int nPoints = spot.nPoints();
@@ -359,5 +575,4 @@ public class UndoRedoStack implements ModelChangeListener
 			spot.setYr( i, polygon[ 1 ][ i ] );
 		}
 	}
-
 }

@@ -147,7 +147,7 @@ public class MergeFileAction extends AbstractTMAction
 
 				final String trackName = modelToMerge.getTrackModel().name( id );
 				final int newId = model.getTrackModel().trackIDOf( newSpot );
-				model.getTrackModel().setName( newId, trackName );
+				model.setTrackName( newId, trackName );
 
 				progress++;
 				logger.setProgress( ( double ) progress / nNewTracks );

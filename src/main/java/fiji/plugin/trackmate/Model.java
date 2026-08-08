@@ -91,6 +91,11 @@ public class Model
 	private final HashSet< Spot > spotsUpdated = new HashSet<>();
 
 	/**
+	 * Track IDs whose names were modified during the current transaction.
+	 */
+	private final HashSet< Integer > tracksNamedModified = new HashSet<>();
+
+	/**
 	 * The event cache. During a transaction, some modifications might trigger
 	 * the need to fire a model change event. We want to fire these events only
 	 * when the transaction closes (when the updateLevel reaches 0), so we store
@@ -598,6 +603,8 @@ public class Model
 			if ( DEBUG )
 				System.out.println( "[TrackMateModel] Removing spot " + spotToRemove + " from frame " + fromFrame );
 
+			// Flag all tracks for undo before removing spot (may split tracks)
+			undoRedoStack.flagAllTracksForUndo();
 			trackModel.removeSpot( spotToRemove );
 			// changes to edges will be caught automatically by the
 			// TrackGraphModel
@@ -634,6 +641,15 @@ public class Model
 	 */
 	public synchronized DefaultWeightedEdge addEdge( final Spot source, final Spot target, final double weight )
 	{
+		// Check if this edge will merge two tracks
+		final Integer sourceTrackId = trackModel.trackIDOf( source );
+		final Integer targetTrackId = trackModel.trackIDOf( target );
+		if ( sourceTrackId != null && targetTrackId != null && !sourceTrackId.equals( targetTrackId ) )
+		{
+			// Flag both tracks for undo before merging
+			undoRedoStack.flagTrackForUndo( sourceTrackId );
+			undoRedoStack.flagTrackForUndo( targetTrackId );
+		}
 		return trackModel.addEdge( source, target, weight );
 	}
 
@@ -649,6 +665,8 @@ public class Model
 	 */
 	public synchronized DefaultWeightedEdge removeEdge( final Spot source, final Spot target )
 	{
+		// Flag all tracks for undo before removing edge (may split tracks)
+		undoRedoStack.flagAllTracksForUndo();
 		return trackModel.removeEdge( source, target );
 	}
 
@@ -674,6 +692,8 @@ public class Model
 	 */
 	public synchronized boolean removeEdge( final DefaultWeightedEdge edge )
 	{
+		// Flag all tracks for undo before removing edge (may split tracks)
+		undoRedoStack.flagAllTracksForUndo();
 		return trackModel.removeEdge( edge );
 	}
 
@@ -733,6 +753,37 @@ public class Model
 			eventCache.add( ModelChangeEvent.TRACKS_VISIBILITY_CHANGED );
 		}
 		return oldvis;
+	}
+
+	/**
+	 * Sets the name of the track with the specified ID.
+	 * <p>
+	 * This method captures the current track state for undo support before
+	 * changing the name. For the model update to happen correctly and listeners
+	 * to be notified properly, a call to this method must happen within a
+	 * transaction, as in:
+	 *
+	 * <pre>
+	 * model.beginUpdate();
+	 * try {
+	 * 	model.setTrackName( trackId, "MyTrackName" );
+	 * } finally {
+	 * 	model.endUpdate();
+	 * }
+	 * </pre>
+	 *
+	 * @param trackID
+	 *            the track ID.
+	 * @param name
+	 *            the name for the track.
+	 */
+	public synchronized void setTrackName( final Integer trackID, final String name )
+	{
+		// Capture current track state for undo
+		undoRedoStack.flagTrackForUndo( trackID );
+		trackModel.setName( trackID, name );
+		// Mark track as having its name modified for the event system
+		tracksNamedModified.add( trackID );
 	}
 
 	/**
@@ -799,7 +850,6 @@ public class Model
 	 */
 	private void flushUpdate()
 	{
-
 		if ( DEBUG )
 		{
 			System.out.println( "[TrackMateModel] #flushUpdate()." );
@@ -823,6 +873,9 @@ public class Model
 		{
 			tracksToUpdate.add( trackModel.trackIDOf( modifiedEdge ) );
 		}
+
+		// Add tracks whose names were modified
+		tracksToUpdate.addAll( tracksNamedModified );
 
 		// Deal with new or moved spots: we need to update their features.
 		final int nSpotsToUpdate = spotsAdded.size() + spotsMoved.size() + spotsUpdated.size();
@@ -888,9 +941,12 @@ public class Model
 		// Configure it with the tracks we found need updating
 		event.setTracksUpdated( tracksToUpdate );
 
+		// Fire the event if there are any changes to signal
+		final boolean hasChanges = nEdgesToSignal + nSpotsToSignal > 0 || !tracksNamedModified.isEmpty();
+
 		try
 		{
-			if ( nEdgesToSignal + nSpotsToSignal > 0 )
+			if ( hasChanges )
 			{
 				if ( DEBUG )
 				{
@@ -925,6 +981,7 @@ public class Model
 			spotsRemoved.clear();
 			spotsMoved.clear();
 			spotsUpdated.clear();
+			tracksNamedModified.clear();
 			trackModel.edgesAdded.clear();
 			trackModel.edgesRemoved.clear();
 			trackModel.edgesModified.clear();
