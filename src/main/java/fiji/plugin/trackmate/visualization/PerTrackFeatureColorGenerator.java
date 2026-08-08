@@ -30,12 +30,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
+import org.scijava.ui.config.visitors.gui.elements.colormap.Colormap;
 
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
-import fiji.plugin.trackmate.gui.displaysettings.Colormap;
 
 /**
  * A {@link TrackColorGenerator} that generate colors based on the whole track

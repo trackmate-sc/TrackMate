@@ -22,9 +22,12 @@
 package fiji.plugin.trackmate.visualization.bvv;
 
 import java.awt.Color;
+import java.awt.Window;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import javax.swing.SwingUtilities;
 
 import org.joml.Matrix4f;
 
@@ -34,10 +37,13 @@ import bvv.core.util.MatrixMath;
 import bvv.vistools.BvvHandle;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
+import fiji.plugin.trackmate.SelectionChangeListener;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.features.FeatureUtils;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.UpdateListener;
 import fiji.plugin.trackmate.visualization.AbstractTrackMateModelView;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 import ij.ImagePlus;
@@ -56,16 +62,26 @@ public class TrackMateBVV< T extends Type< T > > extends AbstractTrackMateModelV
 
 	private final Map< Spot, StupidMesh > meshMap;
 
-	public TrackMateBVV( final Model model, final SelectionModel selectionModel, final ImagePlus imp, final DisplaySettings displaySettings )
+	public TrackMateBVV( final GuiModel guiModel, final ImagePlus imp )
 	{
-		super( model, selectionModel, displaySettings );
+		super( guiModel );
 		this.imp = imp;
 		this.meshMap = new HashMap<>();
+
+		final Model model = guiModel.getModel();
+		final SelectionModel selectionModel = guiModel.getSelectionModel();
+		final DisplaySettings displaySettings = guiModel.getDisplaySettings();
 		final Iterable< Spot > it = model.getSpots().iterable( true );
 		it.forEach( s -> meshMap.computeIfAbsent( s, BVVUtils::createMesh ) );
 		updateColor();
-		displaySettings.listeners().add( this::updateColor );
-		selectionModel.addSelectionChangeListener( e -> refresh() );
+		final UpdateListener colorUpdater = () -> updateColor();
+		displaySettings.listeners().add( colorUpdater );
+		final SelectionChangeListener refresher = e -> refresh();
+		selectionModel.addSelectionChangeListener( refresher );
+		onClose( () -> {
+			displaySettings.listeners().remove( colorUpdater );
+			selectionModel.removeSelectionChangeListener( refresher );
+		} );
 	}
 
 	/**
@@ -85,15 +101,15 @@ public class TrackMateBVV< T extends Type< T > > extends AbstractTrackMateModelV
 		this.handle = BVVUtils.createViewer( imp );
 		final VolumeViewerPanel viewer = handle.getViewerPanel();
 		viewer.setRenderScene( ( gl, data ) -> {
-			if ( displaySettings.isSpotVisible() )
+			if ( guiModel.getDisplaySettings().isSpotVisible() )
 			{
 				final Matrix4f pvm = new Matrix4f( data.getPv() );
 				final Matrix4f view = MatrixMath.affine( data.getRenderTransformWorldToScreen(), new Matrix4f() );
 				final Matrix4f vm = MatrixMath.screen( data.getDCam(), data.getScreenWidth(), data.getScreenHeight(), new Matrix4f() ).mul( view );
 
 				final int t = data.getTimepoint();
-				final Iterable< Spot > it = model.getSpots().iterable( t, true );
-				it.forEach( s -> meshMap.computeIfAbsent( s, BVVUtils::createMesh ).draw( gl, pvm, vm, selectionModel.getSpotSelection().contains( s ) ) );
+				final Iterable< Spot > it = guiModel.getModel().getSpots().iterable( t, true );
+				it.forEach( s -> meshMap.computeIfAbsent( s, BVVUtils::createMesh ).draw( gl, pvm, vm, guiModel.getSelectionModel().getSpotSelection().contains( s ) ) );
 			}
 		} );
 	}
@@ -193,7 +209,7 @@ public class TrackMateBVV< T extends Type< T > > extends AbstractTrackMateModelV
 
 	private void updateColor()
 	{
-		final FeatureColorGenerator< Spot > spotColorGenerator = FeatureUtils.createSpotColorGenerator( model, displaySettings );
+		final FeatureColorGenerator< Spot > spotColorGenerator = FeatureUtils.createSpotColorGenerator( guiModel.getModel(), guiModel.getDisplaySettings() );
 		for ( final Entry< Spot, StupidMesh > entry : meshMap.entrySet() )
 		{
 			final StupidMesh sm = entry.getValue();
@@ -201,10 +217,17 @@ public class TrackMateBVV< T extends Type< T > > extends AbstractTrackMateModelV
 				continue;
 
 			final Color color = spotColorGenerator.color( entry.getKey() );
-			final float alpha = ( float ) displaySettings.getSpotTransparencyAlpha();
+			final float alpha = ( float ) guiModel.getDisplaySettings().getSpotTransparencyAlpha();
 			sm.setColor( color, alpha );
-			sm.setSelectionColor( displaySettings.getHighlightColor(), alpha );
+			sm.setSelectionColor( guiModel.getDisplaySettings().getHighlightColor(), alpha );
 		}
 		refresh();
+	}
+
+	@Override
+	public Window getWindow()
+	{
+		final VolumeViewerPanel viewerPanel = handle.getViewerPanel();
+		return SwingUtilities.getWindowAncestor( viewerPanel );
 	}
 }

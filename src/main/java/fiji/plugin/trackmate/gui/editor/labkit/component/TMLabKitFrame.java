@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -52,7 +52,6 @@ import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-import org.scijava.ui.behaviour.MouseAndKeyHandler;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.io.gui.CommandDescriptionProvider.Scope;
 import org.scijava.ui.behaviour.util.Actions;
@@ -64,7 +63,9 @@ import bdv.ui.appearance.AppearanceManager;
 import bdv.ui.keymap.Keymap;
 import bdv.ui.keymap.KeymapManager;
 import bdv.util.BdvOptions;
+import bdv.viewer.ViewerPanel;
 import fiji.plugin.trackmate.gui.Icons;
+import fiji.plugin.trackmate.gui.editor.labkit.model.TMImageLabelingModel;
 import fiji.plugin.trackmate.gui.editor.labkit.model.TMLabKitModel;
 import net.imglib2.Dimensions;
 import net.imglib2.util.Intervals;
@@ -85,7 +86,7 @@ public class TMLabKitFrame extends JFrame
 
 	private static final long serialVersionUID = 1L;
 
-	static final String KEYMAP_HOME = new File( new File( System.getProperty( "user.home" ), ".trackmate" ), "editor" ).getAbsolutePath();
+	public static final String EDITOR_KEYMAP_HOME = new File( new File( System.getProperty( "user.home" ), ".trackmate" ), "editor" ).getAbsolutePath();
 
 	static final String KEY_CONFIG_CONTEXT = "trackmate-labkit";
 
@@ -93,9 +94,11 @@ public class TMLabKitFrame extends JFrame
 
 	private final Notifier onCloseListeners = new Notifier();
 
-	public TMLabKitFrame( final TMLabKitModel model )
+	public TMLabKitFrame( final TMLabKitModel model, final EditorKeymapManager kmp, final AppearanceManager am )
 	{
-		final ImageLabelingModel imageLabelingModel = model.imageLabelingModel();
+		final TMImageLabelingModel imageLabelingModel = model.imageLabelingModel();
+		final EditorKeymapManager keymapManager = ( kmp == null ) ? new EditorKeymapManager() : kmp;
+		final AppearanceManager appearanceManager = ( am == null ) ? new AppearanceManager( EDITOR_KEYMAP_HOME ) : am;
 
 		/*
 		 * Here we create a specific config for BDV, so that we can use a custom
@@ -105,10 +108,9 @@ public class TMLabKitFrame extends JFrame
 		 * So the only solution is to initialize the BDV window with a custom
 		 * keymap, configured rationally, and leave it as is.
 		 */
-		final AppearanceManager appearanceManager = new AppearanceManager( KEYMAP_HOME );
 		final KeymapManager bdvKeymapManager = new KeymapManager();
 		final Keymap bdvKeymap = bdvKeymapManager.getForwardSelectedKeymap();
-		bdvKeymap.set( TMKeymapManager.loadBDVKeymap() );
+		bdvKeymap.set( EditorKeymapManager.loadBDVKeymap() );
 
 		final BdvOptions options = BdvOptions.options()
 				.inputTriggerConfig( bdvKeymap.getConfig() )
@@ -120,6 +122,7 @@ public class TMLabKitFrame extends JFrame
 
 		// Main central panel, config specific for BDV.
 		final TMBasicLabelingComponent mainPanel = new TMBasicLabelingComponent( this, imageLabelingModel, options );
+		final ViewerPanel viewerPanel = mainPanel.getBdvHandle().getViewerPanel();
 
 		// Left side bar.
 		final JPanel leftPanel = new JPanel();
@@ -153,12 +156,7 @@ public class TMLabKitFrame extends JFrame
 		final TriggerBehaviourBindings triggerbindings = new TriggerBehaviourBindings();
 		SwingUtilities.replaceUIActionMap( getRootPane(), keybindings.getConcatenatedActionMap() );
 		SwingUtilities.replaceUIInputMap( getRootPane(), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, keybindings.getConcatenatedInputMap() );
-		final MouseAndKeyHandler mouseAndKeyHandler = new MouseAndKeyHandler();
-		mouseAndKeyHandler.setInputMap( triggerbindings.getConcatenatedInputTriggerMap() );
-		mouseAndKeyHandler.setBehaviourMap( triggerbindings.getConcatenatedBehaviourMap() );
-		addHandler( mouseAndKeyHandler );
 
-		final TMKeymapManager keymapManager = new TMKeymapManager();
 		final InputTriggerConfig inputTriggerConfig = keymapManager.getForwardSelectedKeymap().getConfig();
 
 		// Actions instance
@@ -184,6 +182,7 @@ public class TMLabKitFrame extends JFrame
 				myActions,
 				model,
 				this,
+				viewerPanel,
 				keybindings,
 				keymapManager,
 				appearanceManager );

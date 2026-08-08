@@ -34,6 +34,7 @@ import org.scijava.util.VersionUtils;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactoryBase;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.components.LogPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
@@ -45,9 +46,7 @@ import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.io.SettingsPersistence;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.util.TMUtils;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewUtils;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
@@ -135,7 +134,7 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 
 		ImagePlus imp = reader.readImage();
 		if ( null == imp )
-			imp = ViewUtils.makeEmpytImagePlus( model );
+			imp = ViewUtils.makeEmptyImagePlus( model );
 
 		/*
 		 * Read settings.
@@ -180,20 +179,17 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 					analyzer.getFeatureDimensions(),
 					analyzer.getIsIntFeature() );
 
-		/*
-		 * Create TrackMate.
-		 */
-
-		final TrackMate trackmate = createTrackMate( model, settings );
-
-		// Hook actions
-		postRead( trackmate );
-
 		// Display settings.
 		final DisplaySettings displaySettings = reader.getDisplaySettings();
 
-		// Selection model.
-		final SelectionModel selectionModel = new SelectionModel( model );
+		/*
+		 * Create GuiModel.
+		 */
+
+		final GuiModel guiModel = new GuiModel( model, settings, displaySettings );
+
+		// Hook actions
+		postRead( guiModel );
 
 		if ( !reader.isReadingOk() )
 		{
@@ -202,8 +198,7 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 		}
 
 		// Main view.
-		final TrackMateModelView displayer = new HyperStackDisplayer( model, selectionModel, settings.imp, displaySettings );
-		displayer.render();
+		guiModel.getWindowManager().createHyperStackDisplayer();
 
 		// GUI state
 		String panelIdentifier = reader.getGUIState();
@@ -212,7 +207,7 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 			panelIdentifier = ConfigureViewsDescriptor.KEY;
 
 		// Wizard.
-		final WizardSequence sequence = createSequence( trackmate, selectionModel, displaySettings );
+		final WizardSequence sequence = createSequence( guiModel );
 		sequence.setCurrent( panelIdentifier );
 		final JFrame frame = sequence.run( "TrackMate on " + settings.imp.getShortTitle() );
 		frame.setIconImage( TRACKMATE_ICON.getImage() );
@@ -268,13 +263,13 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 
 	/**
 	 * Hook for subclassers:<br>
-	 * The {@link TrackMate} object is loaded and properly configured. This
+	 * The {@link guiModel} object is loaded and properly configured. This
 	 * method is called just before the controller and GUI are launched.
 	 *
 	 * @param trackmate
-	 *            the {@link TrackMate} instance that was fledged after loading.
+	 *            the {@link guiModel} instance that was fledged after loading.
 	 */
-	protected void postRead( final TrackMate trackmate )
+	protected void postRead( final GuiModel guiModel )
 	{}
 
 	/**
@@ -297,13 +292,20 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 
 	public static void main( final String[] args )
 	{
-		GuiUtils.setSystemLookAndFeel();
-		ImageJ.main( args );
-		final LoadTrackMatePlugIn plugIn = new LoadTrackMatePlugIn();
+		try
+		{
+			GuiUtils.setSystemLookAndFeel();
+			ImageJ.main( args );
+			final LoadTrackMatePlugIn plugIn = new LoadTrackMatePlugIn();
 //		plugIn.run( null );
 //		plugIn.run( "samples/FakeTracks.xml" );
-		plugIn.run( "samples/MAX_Merged.xml" );
+			plugIn.run( "samples/MAX_Merged.xml" );
 //		plugIn.run( "c:/Users/tinevez/Development/TrackMateWS/TrackMate-Cellpose/samples/R2_multiC.xml" );
 //		plugIn.run( "/Users/tinevez/Desktop/230901_DeltaRcsB-ZipA-mCh_timestep5min_Stage9_reg/230901_DeltaRcsB-ZipA-mCh_timestep5min_Stage9_reg_merge65.xml" );
+		}
+		catch ( final Throwable t )
+		{
+			t.printStackTrace();
+		}
 	}
 }

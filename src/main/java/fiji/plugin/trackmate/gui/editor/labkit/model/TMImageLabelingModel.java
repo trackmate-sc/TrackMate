@@ -44,12 +44,15 @@ public class TMImageLabelingModel extends ImageLabelingModel
 
 	private RandomAccessibleInterval< UnsignedIntType > initialIndexImg;
 
+	private final UndoRedoStack undoStack;
+
 	public TMImageLabelingModel( final InputImage inputImage )
 	{
 		super( inputImage );
 		final ImgPlus< ? > image = inputImage.imageForSegmentation();
+		this.undoStack = new UndoRedoStack( this );
 		final boolean  isTimeSeries = ImgPlusViewsOld.hasAxis( image, Axes.TIME );
-		tmTranslationModel = new TMTransformationModel( isTimeSeries );
+		this.tmTranslationModel = new TMTransformationModel( isTimeSeries );
 	}
 
 	@Override
@@ -72,5 +75,15 @@ public class TMImageLabelingModel extends ImageLabelingModel
 	{
 		this.initialMapping = initialMapping;
 		this.initialIndexImg = initialIndexImg;
+	}
+
+	/**
+	 * Returns the undo/redo stack associated with this model.
+	 * 
+	 * @return the undo/redo stack.
+	 */
+	public UndoRedoStack undoRedo()
+	{
+		return undoStack;
 	}
 }

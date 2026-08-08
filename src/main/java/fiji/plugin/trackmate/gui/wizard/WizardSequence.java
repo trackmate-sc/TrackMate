@@ -21,9 +21,6 @@
  */
 package fiji.plugin.trackmate.gui.wizard;
 
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-
 import javax.swing.JFrame;
 
 /**
@@ -51,22 +48,8 @@ public interface WizardSequence
 		frame.setSize( 350, 560 );
 		frame.setTitle( title );
 		controller.init();
-		frame.addWindowListener( new WindowAdapter()
-		{
-			@Override
-			public void windowClosing( final WindowEvent e )
-			{
-				onClose();
-			};
-		} );
 		return frame;
 	}
-
-	/**
-	 * Method called when the wizard is closed.
-	 */
-	public default void onClose()
-	{}
 
 	/**
 	 * Returns the descriptor currently displayed.

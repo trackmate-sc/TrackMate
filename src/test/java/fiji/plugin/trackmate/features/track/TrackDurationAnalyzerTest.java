@@ -275,8 +275,8 @@ public class TrackDurationAnalyzerTest
 		model.beginUpdate();
 		try
 		{
+			model.beforeEdit( aspot );
 			aspot.putFeature( Spot.POSITION_T, aspot.getFeature( Spot.POSITION_T ) + increment );
-			model.updateFeatures( aspot );
 		}
 		finally
 		{

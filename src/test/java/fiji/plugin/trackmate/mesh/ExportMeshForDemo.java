@@ -31,6 +31,7 @@ import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.MaskDetectorFactory;
 import fiji.plugin.trackmate.detection.ThresholdDetectorFactory;
+import fiji.plugin.trackmate.gui.GuiModel;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imglib2.mesh.io.stl.STLMeshIO;
@@ -50,11 +51,11 @@ public class ExportMeshForDemo
 			settings.detectorSettings = settings.detectorFactory.getDefaultSettings();
 			settings.detectorSettings.put( ThresholdDetectorFactory.KEY_SIMPLIFY_CONTOURS, false );
 
-			final TrackMate trackmate = new TrackMate( settings );
+			final Model model = new Model();
+			final GuiModel guiModel = new GuiModel( model, settings );
+			final TrackMate trackmate = guiModel.getTrackMate();
 			trackmate.setNumThreads( 4 );
 			trackmate.execDetection();
-
-			final Model model = trackmate.getModel();
 			final SpotCollection spots = model.getSpots();
 			spots.setVisible( true );
 

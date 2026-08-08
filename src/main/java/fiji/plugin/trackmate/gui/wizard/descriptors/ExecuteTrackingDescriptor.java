@@ -26,10 +26,12 @@ import java.util.IntSummaryStatistics;
 import org.scijava.Cancelable;
 
 import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.components.LogPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
@@ -40,31 +42,30 @@ public class ExecuteTrackingDescriptor extends WizardPanelDescriptor
 
 	public static final String KEY = "ExecuteTracking";
 
-	private final TrackMate trackmate;
+	private final GuiModel guiModel;
 
-	private final DisplaySettings displaySettings;
-
-	public ExecuteTrackingDescriptor( final TrackMate trackmate, final LogPanel logPanel, final DisplaySettings displaySettings )
+	public ExecuteTrackingDescriptor( final GuiModel guiModel, final LogPanel logPanel )
 	{
 		super( KEY );
-		this.trackmate = trackmate;
+		this.guiModel = guiModel;
 		this.targetPanel = logPanel;
-		this.displaySettings = displaySettings;
 	}
 
 	@Override
 	public Runnable getForwardRunnable()
 	{
 		return () -> {
+			final TrackMate trackmate = guiModel.getTrackMate();
+			final Model model = guiModel.getModel();
 			final long start = System.currentTimeMillis();
 			final boolean ok = trackmate.execTracking();
 			if ( !ok )
-				trackmate.getModel().getLogger().error( trackmate.getErrorMessage() + '\n' );
+				model.getLogger().error( trackmate.getErrorMessage() + '\n' );
 			final long end = System.currentTimeMillis();
 
-			final Logger logger = trackmate.getModel().getLogger();
+			final Logger logger = model.getLogger();
 			logger.log( String.format( "Tracking done in %.1f s.\n", ( end - start ) / 1e3f ) );
-			final TrackModel trackModel = trackmate.getModel().getTrackModel();
+			final TrackModel trackModel = model.getTrackModel();
 			final int nTracks = trackModel.nTracks( false );
 			final IntSummaryStatistics stats = trackModel.unsortedTrackIDs( false ).stream()
 					.mapToInt( id -> trackModel.trackSpots( id ).size() )
@@ -75,6 +76,7 @@ public class ExecuteTrackingDescriptor extends WizardPanelDescriptor
 			logger.log( String.format( "  - max size: %d spots.\n", stats.getMax() ) );
 
 			// Possibly tweak display settings: color spots by track id.
+			final DisplaySettings displaySettings = guiModel.getDisplaySettings();
 			if ( displaySettings.getSpotColorByType() == TrackMateObject.DEFAULT )
 				if ( displaySettings.getSpotColorByFeature().equals( FeatureUtils.USE_UNIFORM_COLOR_KEY ) )
 					displaySettings.setSpotColorBy( TrackMateObject.TRACKS, TrackIndexAnalyzer.TRACK_INDEX );
@@ -84,6 +86,6 @@ public class ExecuteTrackingDescriptor extends WizardPanelDescriptor
 	@Override
 	public Cancelable getCancelable()
 	{
-		return trackmate;
+		return guiModel.getTrackMate();
 	}
 }

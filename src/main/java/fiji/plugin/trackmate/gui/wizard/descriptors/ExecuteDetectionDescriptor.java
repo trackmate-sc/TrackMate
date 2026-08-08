@@ -23,8 +23,10 @@ package fiji.plugin.trackmate.gui.wizard.descriptors;
 
 import org.scijava.Cancelable;
 
+import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.components.LogPanel;
 import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
 
@@ -33,12 +35,12 @@ public class ExecuteDetectionDescriptor extends WizardPanelDescriptor
 
 	public static final String KEY = "ExecuteDetection";
 
-	private final TrackMate trackmate;
+	private final GuiModel guiModel;
 
-	public ExecuteDetectionDescriptor( final TrackMate trackmate, final LogPanel logPanel )
+	public ExecuteDetectionDescriptor( final GuiModel guiModel, final LogPanel logPanel )
 	{
 		super( KEY );
-		this.trackmate = trackmate;
+		this.guiModel = guiModel;
 		this.targetPanel = logPanel;
 	}
 
@@ -46,23 +48,24 @@ public class ExecuteDetectionDescriptor extends WizardPanelDescriptor
 	public Runnable getForwardRunnable()
 	{
 		return () -> {
-
+			final Model model = guiModel.getModel();
+			final Settings settings = guiModel.getSettings();
+			final TrackMate trackmate = guiModel.getTrackMate();
 			// Read ROI from imp NOW.
-			final Settings settings = trackmate.getSettings();
 			settings.setRoi( settings.imp.getRoi() );
 			// Exec detection.
 			final long start = System.currentTimeMillis();
 			final boolean ok = trackmate.execDetection();
 			if ( !ok )
-				trackmate.getModel().getLogger().error( trackmate.getErrorMessage() + '\n' );
+				model.getLogger().error( trackmate.getErrorMessage() + '\n' );
 			final long end = System.currentTimeMillis();
-			trackmate.getModel().getLogger().log( String.format( "Detection done in %.1f s.\n", ( end - start ) / 1e3f ) );
+			model.getLogger().log( String.format( "Detection done in %.1f s.\n", ( end - start ) / 1e3f ) );
 		};
 	}
 
 	@Override
 	public Cancelable getCancelable()
 	{
-		return trackmate;
+		return guiModel.getTrackMate();
 	}
 }

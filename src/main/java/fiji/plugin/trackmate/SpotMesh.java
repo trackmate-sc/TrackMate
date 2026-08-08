@@ -262,6 +262,7 @@ public class SpotMesh extends SpotBase
 	@Override
 	public void scale( final double alpha )
 	{
+		super.scale( alpha );
 		final net.imglib2.mesh.Vertices vertices = mesh.vertices();
 		final long nVertices = vertices.size();
 		for ( int v = 0; v < nVertices; v++ )
