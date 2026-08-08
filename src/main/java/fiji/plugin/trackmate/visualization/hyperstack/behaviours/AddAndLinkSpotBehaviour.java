@@ -23,7 +23,7 @@ public class AddAndLinkSpotBehaviour extends LinkSpotsBehaviour
 	@Override
 	public void init( final int x, final int y )
 	{
-		if ( source != null && target != null )
+		if ( source != null || target != null )
 			return;
 
 		final RealLocalizable pos = toWorldCoords( x, y );
@@ -40,7 +40,7 @@ public class AddAndLinkSpotBehaviour extends LinkSpotsBehaviour
 		}
 		else
 		{
-			// We a source, link from it.
+			// We have a source, link from it.
 			// Cannot link if at first frame and backward, etc.
 			final int frame = spot.getFeature( Spot.FRAME ).intValue();
 			if ( backward && frame == 0 )
@@ -61,8 +61,15 @@ public class AddAndLinkSpotBehaviour extends LinkSpotsBehaviour
 			// Build KD-tree of target frame spots.
 			final Iterable< Spot > targetSpots = model.getSpots().iterable( targetFrame, true );
 			final int nTargetSpots = model.getSpots().getNSpots( targetFrame, true );
-			final KDTree< Spot > tree = new KDTree< Spot >( nTargetSpots, targetSpots, targetSpots );
-			this.search = new NearestNeighborSearchOnKDTree<>( tree );
+			if ( nTargetSpots > 0 )
+			{
+				final KDTree< Spot > tree = new KDTree< Spot >( nTargetSpots, targetSpots, targetSpots );
+				this.search = new NearestNeighborSearchOnKDTree<>( tree );
+			}
+			else
+			{
+				this.search = null;
+			}
 		}
 
 		// Add a new spot at the mouse location in the target frame.
