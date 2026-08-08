@@ -13,6 +13,7 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsManager;
 import fiji.plugin.trackmate.gui.editor.labkit.component.EditorKeymapManager;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.hyperstack.behaviours.semiautotracking.SemiAutoTrackingParams;
@@ -53,6 +54,8 @@ public class GuiModel
 
 	private final WindowManager windowManager;
 
+	private final DisplaySettingsManager dsManager;
+
 	/**
 	 * Creates a new GuiModel.
 	 * 
@@ -82,6 +85,9 @@ public class GuiModel
 		keymap.updateListeners().add( () -> getGlobalActions().updateKeyConfig( keymap.getConfig() ) );
 		this.globalActions = new Actions( keymapManager.getForwardSelectedKeymap().getConfig(), KeyConfigContexts.TRACKMATE );
 		TrackMateActions.install( globalActions, model, selectionModel );
+
+		// Other managers
+		this.dsManager = new DisplaySettingsManager( displaySettings, true );
 
 		// Window manager
 		this.windowManager = new WindowManager( this );
@@ -242,5 +248,10 @@ public class GuiModel
 	public SemiAutoTrackingParams getSemiAutoTrackingParams()
 	{
 		return semiAutoTrackingparams;
+	}
+
+	public DisplaySettingsManager getDisplaySettingsManager()
+	{
+		return dsManager;
 	}
 }

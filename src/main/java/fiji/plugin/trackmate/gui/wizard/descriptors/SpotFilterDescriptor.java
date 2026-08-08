@@ -34,6 +34,7 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.FeatureFilter;
+import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.components.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.components.FilterGuiPanel;
@@ -139,6 +140,11 @@ public class SpotFilterDescriptor extends WizardPanelDescriptor
 						logger.log( "Spot feature calculation canceled.\nSome spots will have missing feature values.\n" );
 					logger.log( String.format( "Calculating features done in %.1f s.\n", ( end - start ) / 1e3f ) );
 					panel.showProgressBar( false );
+
+					// If spots are not very visible because of the display
+					// settings, make them visible.
+					guiModel.getDisplaySettings().setSpotVisible( true );
+					guiModel.getDisplaySettings().setSpotColorBy( TrackMateObject.SPOTS, FeatureUtils.USE_UNIFORM_COLOR_KEY );
 
 					// Refresh component.
 					panel.refreshValues();

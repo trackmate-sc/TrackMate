@@ -25,7 +25,6 @@ import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
 import static fiji.plugin.trackmate.gui.Fonts.FONT;
 import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
 import static fiji.plugin.trackmate.gui.Icons.BVV_ICON;
-import static fiji.plugin.trackmate.gui.Icons.EDIT_SETTINGS_ICON;
 import static fiji.plugin.trackmate.gui.Icons.SPOT_TABLE_ICON;
 import static fiji.plugin.trackmate.gui.Icons.TRACK_SCHEME_ICON_16x16;
 import static fiji.plugin.trackmate.gui.Icons.TRACK_TABLES_ICON;
@@ -46,7 +45,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
@@ -61,7 +59,6 @@ import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.WindowManager;
-import fiji.plugin.trackmate.gui.displaysettings.ConfigTrackMateDisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackDisplayMode;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.UpdateListener;
@@ -97,6 +94,7 @@ public class ConfigureViewsPanel extends JPanel
 	{
 		this.guiModel = guiModel;
 		this.windowManager = guiModel.getWindowManager();
+		final DisplaySettings ds = guiModel.getDisplaySettings();
 		this.setPreferredSize( new Dimension( 300, 521 ) );
 		this.setSize( 300, 500 );
 
@@ -120,28 +118,6 @@ public class ConfigureViewsPanel extends JPanel
 		gbcLabelDisplayOptions.gridx = 0;
 		gbcLabelDisplayOptions.gridy = 0;
 		add( lblDisplayOptions, gbcLabelDisplayOptions );
-
-		/*
-		 * Settings editor.
-		 */
-
-		final DisplaySettings ds = guiModel.getDisplaySettings();
-		final JFrame editor = ConfigTrackMateDisplaySettings.editor( ds,
-				"Configure the display settings used in this current session.",
-				"TrackMate display settings" );
-		editor.setLocationRelativeTo( this.getParent() );
-		editor.setDefaultCloseOperation( JFrame.HIDE_ON_CLOSE );
-
-		final JButton btnEditSettings = new JButton( "Edit settings", EDIT_SETTINGS_ICON );
-		btnEditSettings.addActionListener( e -> editor.setVisible( !editor.isVisible() ) );
-
-		final GridBagConstraints gbcBtnEditSettings = new GridBagConstraints();
-		gbcBtnEditSettings.fill = GridBagConstraints.NONE;
-		gbcBtnEditSettings.insets = new Insets( 5, 5, 5, 5 );
-		gbcBtnEditSettings.anchor = GridBagConstraints.EAST;
-		gbcBtnEditSettings.gridx = 1;
-		gbcBtnEditSettings.gridy = 0;
-		add( btnEditSettings, gbcBtnEditSettings );
 
 		/*
 		 * Display spot checkbox.

@@ -21,26 +21,28 @@
  */
 package fiji.plugin.trackmate.gui.displaysettings;
 
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.booleanElement;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.boundedDoubleElement;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.colorElement;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.colormapElement;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.doubleElement;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.enumElement;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.featureElement;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.fontElement;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.intElement;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.label;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedCheckBox;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedColorButton;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedColormapChooser;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedComboBoxEnumSelector;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedFeatureSelector;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedFontButton;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedFormattedTextField;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.linkedSliderPanel;
-import static fiji.plugin.trackmate.gui.displaysettings.StyleElements.separator;
+import static fiji.plugin.trackmate.gui.displaysettings.TrackMateStyleElements.featureElement;
+import static fiji.plugin.trackmate.gui.displaysettings.TrackMateStyleElements.linkedFeatureSelector;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.booleanElement;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.boundedDoubleElement;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.colorElement;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.colormapElement;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.doubleElement;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.enumElement;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.fontElement;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.intElement;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.label;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.linkedCheckBox;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.linkedColorButton;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.linkedColormapChooser;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.linkedComboBoxEnumSelector;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.linkedFontButton;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.linkedFormattedTextField;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.linkedSliderPanel;
+import static org.scijava.ui.config.visitors.gui.elements.StyleElements.separator;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -53,194 +55,105 @@ import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
+import org.scijava.listeners.Listeners;
+import org.scijava.ui.config.visitors.gui.elements.StyleElement;
+import org.scijava.ui.config.visitors.gui.elements.StyleElements.BooleanElement;
+import org.scijava.ui.config.visitors.gui.elements.StyleElements.BoundedDoubleElement;
+import org.scijava.ui.config.visitors.gui.elements.StyleElements.ColorElement;
+import org.scijava.ui.config.visitors.gui.elements.StyleElements.ColormapElement;
+import org.scijava.ui.config.visitors.gui.elements.StyleElements.DoubleElement;
+import org.scijava.ui.config.visitors.gui.elements.StyleElements.EnumElement;
+import org.scijava.ui.config.visitors.gui.elements.StyleElements.FontElement;
+import org.scijava.ui.config.visitors.gui.elements.StyleElements.IntElement;
+import org.scijava.ui.config.visitors.gui.elements.StyleElements.LabelElement;
+import org.scijava.ui.config.visitors.gui.elements.StyleElements.Separator;
+
 import com.itextpdf.text.Font;
 
+import bdv.ui.settings.ModificationListener;
+import bdv.ui.settings.SelectAndEditProfileSettingsPage.ProfileEditPanel;
+import bdv.ui.settings.style.StyleProfile;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackDisplayMode;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.BooleanElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.BoundedDoubleElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.ColorElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.ColormapElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.DoubleElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.EnumElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.FeatureElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.FontElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.IntElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.LabelElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.Separator;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.StyleElement;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.StyleElementVisitor;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.UpdateListener;
+import fiji.plugin.trackmate.gui.displaysettings.TrackMateStyleElements.FeatureElement;
+import fiji.plugin.trackmate.gui.displaysettings.TrackMateStyleElements.TrackMateStyleElementVisitor;
 
-public class DisplaySettingsPanel extends JPanel
+public class DisplaySettingsPanel extends JPanel implements ProfileEditPanel< StyleProfile< DisplaySettings > >, UpdateListener
 {
 	private static final long serialVersionUID = 1L;
 
 	private static final int tfCols = 4;
 
-	private final JColorChooser colorChooser;
+	private final Listeners.SynchronizedList< ModificationListener > modificationListeners;
 
 	private final List< StyleElement > styleElements;
 
+	private final DisplaySettings editedStyle;
+
 	public DisplaySettingsPanel( final DisplaySettings ds )
 	{
-		super( new GridBagLayout() );
+		super( new BorderLayout() );
 
-		colorChooser = new JColorChooser();
-		styleElements = styleElements( ds );
-
-		ds.listeners().add( () -> {
-			styleElements.forEach( StyleElement::update );
-			repaint();
-		} );
-
-		final GridBagConstraints c = new GridBagConstraints();
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 1.0;
-		c.gridwidth = 1;
-		c.gridx = 0;
-		c.gridy = 0;
-
-		c.insets = new Insets( 2, 5, 2, 5 );
-
-		styleElements.forEach( element -> element.accept(
-				new StyleElementVisitor()
-				{
-					@Override
-					public void visit( final Separator element )
-					{
-						add( Box.createVerticalStrut( 10 ), c );
-						++c.gridy;
-						addToLayout( new JSeparator( JSeparator.HORIZONTAL ) );
-					}
-
-					@Override
-					public void visit( final LabelElement element )
-					{
-						final JLabel label = new JLabel( element.getLabel() );
-						label.setFont( getFont().deriveFont( Font.BOLD ).deriveFont( getFont().getSize() + 2f ) );
-						addToLayout( label );
-					}
-
-					@Override
-					public void visit( final BooleanElement element )
-					{
-						final JCheckBox checkbox = linkedCheckBox( element, "" );
-						checkbox.setHorizontalAlignment( SwingConstants.TRAILING );
-						addToLayout(
-								checkbox,
-								new JLabel( element.getLabel() ) );
-					}
-
-					@Override
-					public void visit( final BoundedDoubleElement element )
-					{
-						addToLayout(
-								linkedSliderPanel( element, tfCols, 0.1 ),
-								new JLabel( element.getLabel() ) );
-					}
-
-					@Override
-					public void visit( final DoubleElement element )
-					{
-						addToLayout(
-								linkedFormattedTextField( element ),
-								new JLabel( element.getLabel() ) );
-					}
-
-					@Override
-					public void visit( final IntElement element )
-					{
-						addToLayout(
-								linkedSliderPanel( element, tfCols ),
-								new JLabel( element.getLabel() ) );
-					}
-
-					@Override
-					public void visit( final ColorElement element )
-					{
-						addToLayoutFlushRight(
-								linkedColorButton( element, colorChooser ),
-								new JLabel( element.getLabel() ) );
-					}
-
-					@Override
-					public void visit( final FeatureElement element )
-					{
-						addToLayout(
-								linkedFeatureSelector( element ),
-								new JLabel( element.getLabel() ) );
-					}
-
-					@Override
-					public < E > void visit( final EnumElement< E > element )
-					{
-						addToLayout(
-								linkedComboBoxEnumSelector( element ),
-								new JLabel( element.getLabel() ) );
-					}
-
-					@Override
-					public void visit( final ColormapElement element )
-					{
-						addToLayout(
-								linkedColormapChooser( element ),
-								new JLabel( element.getLabel() ) );
-					}
-
-					@Override
-					public void visit( final FontElement element )
-					{
-						addToLayout(
-								linkedFontButton( element, SwingUtilities.getWindowAncestor( DisplaySettingsPanel.this ) ),
-								new JLabel( element.getLabel() ) );
-					}
-
-					private void addToLayout( final JComponent comp1, final JComponent comp2 )
-					{
-						c.gridwidth = 1;
-						c.anchor = GridBagConstraints.LINE_END;
-						add( comp1, c );
-						c.gridx++;
-						c.weightx = 0.0;
-						c.anchor = GridBagConstraints.LINE_START;
-						add( comp2, c );
-						c.gridx = 0;
-						c.weightx = 1.0;
-						c.gridy++;
-					}
-
-					private void addToLayoutFlushRight( final JComponent comp1, final JComponent comp2 )
-					{
-						c.fill =
-								c.gridwidth = 1;
-						c.fill = GridBagConstraints.NONE;
-						c.anchor = GridBagConstraints.EAST;
-						add( comp1, c );
-						c.gridx++;
-						c.weightx = 0.0;
-						c.fill = GridBagConstraints.HORIZONTAL;
-						c.anchor = GridBagConstraints.LINE_START;
-						add( comp2, c );
-						c.gridx = 0;
-						c.weightx = 1.0;
-						c.gridy++;
-					}
-
-					private void addToLayout( final JComponent comp )
-					{
-						c.gridwidth = 2;
-						c.anchor = GridBagConstraints.LINE_START;
-						c.gridx = 0;
-						c.weightx = 1.0;
-						add( comp, c );
-						c.gridy++;
-					}
-				} ) );
+		this.editedStyle = ds.copy( "Edited" );
+		this.styleElements = styleElements( editedStyle );
+		this.modificationListeners = new Listeners.SynchronizedList<>();
+		editedStyle.listeners().add( this );
+		
+		final JPanel panel = new JPanel( new GridBagLayout() );
+		final GuiVisitor visitor = new GuiVisitor( panel );
+		styleElements.forEach( element -> element.accept( visitor ) );
+		final JScrollPane scrollPane = new JScrollPane( panel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER );
+		scrollPane.getVerticalScrollBar().setUnitIncrement( 8 );
+		add( scrollPane, BorderLayout.CENTER );
+		setPreferredSize( new Dimension( 350, 500 ) );
 	}
 
+	@Override
+	public Listeners< ModificationListener > modificationListeners()
+	{
+		return modificationListeners;
+	}
+
+	@Override
+	public JPanel getJPanel()
+	{
+		return this;
+	}
+
+	private boolean trackModifications = true;
+
+	@Override
+	public void loadProfile( final StyleProfile< DisplaySettings > profile )
+	{
+		trackModifications = false;
+		editedStyle.set( profile.getStyle() );
+		trackModifications = true;
+	}
+
+	@Override
+	public void storeProfile( final StyleProfile< DisplaySettings > profile )
+	{
+		trackModifications = false;
+		editedStyle.setName( profile.getStyle().getName() );
+		trackModifications = true;
+		profile.getStyle().set( editedStyle );
+	}
+
+	@Override
+	public void displaySettingsChanged()
+	{
+		styleElements.forEach( StyleElement::update );
+		if ( trackModifications )
+		{
+			repaint();
+			modificationListeners.list.forEach( ModificationListener::setModified );
+		}
+	}
 
 	private List< StyleElement > styleElements( final DisplaySettings ds )
 	{
@@ -302,5 +215,158 @@ public class DisplaySettingsPanel extends JPanel
 				booleanElement( "fill box", ds::isTrackSchemeFillBox, ds::setTrackschemeFillBox ),
 
 				separator() );
+	}
+
+	private static class GuiVisitor implements TrackMateStyleElementVisitor
+	{
+
+		private final JPanel panel;
+
+		private final GridBagConstraints c;
+
+		private final JColorChooser colorChooser;
+
+		public GuiVisitor( final JPanel panel )
+		{
+			this.panel = panel;
+			this.colorChooser = new JColorChooser();
+			this.c = new GridBagConstraints();
+			c.fill = GridBagConstraints.HORIZONTAL;
+			c.weightx = 1.0;
+			c.gridwidth = 1;
+			c.gridx = 0;
+			c.gridy = 0;
+			c.insets = new Insets( 2, 5, 2, 5 );
+		}
+
+		@Override
+		public void visit( final Separator element )
+		{
+			panel.add( Box.createVerticalStrut( 10 ), c );
+			++c.gridy;
+			addToLayout( new JSeparator( JSeparator.HORIZONTAL ) );
+		}
+
+		@Override
+		public void visit( final LabelElement element )
+		{
+			final JLabel label = new JLabel( element.getLabel() );
+			label.setFont( panel.getFont().deriveFont( Font.BOLD ).deriveFont( panel.getFont().getSize() + 2f ) );
+			addToLayout( label );
+		}
+
+		@Override
+		public void visit( final BooleanElement element )
+		{
+			final JCheckBox checkbox = linkedCheckBox( element, "" );
+			checkbox.setHorizontalAlignment( SwingConstants.TRAILING );
+			addToLayout(
+					checkbox,
+					new JLabel( element.getLabel() ) );
+		}
+
+		@Override
+		public void visit( final BoundedDoubleElement element )
+		{
+			addToLayout(
+					linkedSliderPanel( element, tfCols, 0.1 ),
+					new JLabel( element.getLabel() ) );
+		}
+
+		@Override
+		public void visit( final DoubleElement element )
+		{
+			addToLayout(
+					linkedFormattedTextField( element, null, null ),
+					new JLabel( element.getLabel() ) );
+		}
+
+		@Override
+		public void visit( final IntElement element )
+		{
+			addToLayout(
+					linkedSliderPanel( element, tfCols ),
+					new JLabel( element.getLabel() ) );
+		}
+
+		@Override
+		public void visit( final ColorElement element )
+		{
+			addToLayoutFlushRight(
+					linkedColorButton( element, colorChooser ),
+					new JLabel( element.getLabel() ) );
+		}
+
+		@Override
+		public void visit( final FeatureElement element )
+		{
+			addToLayout(
+					linkedFeatureSelector( element ),
+					new JLabel( element.getLabel() ) );
+		}
+
+		@Override
+		public < E > void visit( final EnumElement< E > element )
+		{
+			addToLayout(
+					linkedComboBoxEnumSelector( element ),
+					new JLabel( element.getLabel() ) );
+		}
+
+		@Override
+		public void visit( final ColormapElement element )
+		{
+			addToLayout(
+					linkedColormapChooser( element ),
+					new JLabel( element.getLabel() ) );
+		}
+
+		@Override
+		public void visit( final FontElement element )
+		{
+			addToLayout(
+					linkedFontButton( element, SwingUtilities.getWindowAncestor( panel ) ),
+					new JLabel( element.getLabel() ) );
+		}
+
+		private void addToLayout( final JComponent comp1, final JComponent comp2 )
+		{
+			c.gridwidth = 1;
+			c.anchor = GridBagConstraints.LINE_END;
+			panel.add( comp1, c );
+			c.gridx++;
+			c.weightx = 0.0;
+			c.anchor = GridBagConstraints.LINE_START;
+			panel.add( comp2, c );
+			c.gridx = 0;
+			c.weightx = 1.0;
+			c.gridy++;
+		}
+
+		private void addToLayoutFlushRight( final JComponent comp1, final JComponent comp2 )
+		{
+			c.fill = c.gridwidth = 1;
+			c.fill = GridBagConstraints.NONE;
+			c.anchor = GridBagConstraints.EAST;
+			panel.add( comp1, c );
+			c.gridx++;
+			c.weightx = 0.0;
+			c.fill = GridBagConstraints.HORIZONTAL;
+			c.anchor = GridBagConstraints.LINE_START;
+			panel.add( comp2, c );
+			c.gridx = 0;
+			c.weightx = 1.0;
+			c.gridy++;
+		}
+
+		private void addToLayout( final JComponent comp )
+		{
+			c.gridwidth = 2;
+			c.anchor = GridBagConstraints.LINE_START;
+			c.gridx = 0;
+			c.weightx = 1.0;
+			panel.add( comp, c );
+			c.gridy++;
+		}
 	}
 }
