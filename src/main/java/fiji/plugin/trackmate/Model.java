@@ -905,7 +905,10 @@ public class Model
 			}
 			for ( final Spot spot : spotsRemoved )
 			{
-				event.putSpotFlag( spot, ModelChangeEvent.FLAG_SPOT_REMOVED );
+				// Skip spots that were both added and removed in the same transaction
+				// (they are transient and should not be flagged as removed)
+				if ( !spotsAdded.contains( spot ) )
+					event.putSpotFlag( spot, ModelChangeEvent.FLAG_SPOT_REMOVED );
 			}
 			for ( final Spot spot : spotsMoved )
 			{

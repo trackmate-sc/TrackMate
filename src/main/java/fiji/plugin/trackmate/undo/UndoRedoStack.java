@@ -166,17 +166,22 @@ public class UndoRedoStack implements ModelChangeListener
 			}
 		}
 
+		// First pass: collect spots by their flag
 		for ( final Spot spot : event.getSpots() )
 		{
-			if ( event.getSpotFlag( spot ) == ModelChangeEvent.FLAG_SPOT_ADDED )
+			final Integer flag = event.getSpotFlag( spot );
+			if ( flag == null )
+				continue;
+
+			if ( flag == ModelChangeEvent.FLAG_SPOT_ADDED )
 			{
 				command.spotsAdded.add( spot );
 			}
-			else if ( event.getSpotFlag( spot ) == ModelChangeEvent.FLAG_SPOT_REMOVED )
+			else if ( flag == ModelChangeEvent.FLAG_SPOT_REMOVED )
 			{
 				command.spotsRemoved.add( spot );
 			}
-			else if ( event.getSpotFlag( spot ) == ModelChangeEvent.FLAG_SPOT_MODIFIED )
+			else if ( flag == ModelChangeEvent.FLAG_SPOT_MODIFIED )
 			{
 				final Map< String, Double > previousFeatureValues = spotFeatureValuesBefore.get( spot );
 				command.spotFeatureValuesBefore.put( spot, previousFeatureValues );
@@ -192,6 +197,23 @@ public class UndoRedoStack implements ModelChangeListener
 				}
 			}
 		}
+
+		// Second pass: handle spots that were both added and removed in the same transaction
+		// (they are transient and should be removed from both lists)
+		final Set< Spot > transientSpots = new HashSet<>();
+		for ( final Spot removedSpot : command.spotsRemoved )
+		{
+			for ( final Spot addedSpot : command.spotsAdded )
+			{
+				if ( removedSpot.ID() == addedSpot.ID() )
+				{
+					transientSpots.add( removedSpot );
+					break;
+				}
+			}
+		}
+		command.spotsAdded.removeAll( transientSpots );
+		command.spotsRemoved.removeAll( transientSpots );
 		for ( final DefaultWeightedEdge edge : event.getEdges() )
 		{
 			if ( event.getEdgeFlag( edge ) == ModelChangeEvent.FLAG_EDGE_ADDED )
