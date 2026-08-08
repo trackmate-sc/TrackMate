@@ -201,7 +201,7 @@
 		<dependency>
 			<groupId>org.scijava</groupId>
 			<artifactId>config-ui</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.0.6</version>
 		</dependency>
 
 		<!-- Logging dependencies -->
