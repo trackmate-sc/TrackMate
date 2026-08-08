@@ -123,6 +123,7 @@ public class GraphTest
 
 		// Add them to the graph
 
+		model.pauseUndo();
 		model.beginUpdate();
 		try
 		{
@@ -167,6 +168,7 @@ public class GraphTest
 		finally
 		{
 			model.endUpdate();
+			model.resumeUndo();
 		}
 
 		// Done!
@@ -191,6 +193,7 @@ public class GraphTest
 		}
 
 		// Update model
+		model.pauseUndo();
 		model.beginUpdate();
 		try
 		{
@@ -206,6 +209,7 @@ public class GraphTest
 		finally
 		{
 			model.endUpdate();
+			model.resumeUndo();
 		}
 
 		return model;
