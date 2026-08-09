@@ -265,32 +265,17 @@ public class SpotMesh extends SpotBase
 		super.scale( alpha );
 		final net.imglib2.mesh.Vertices vertices = mesh.vertices();
 		final long nVertices = vertices.size();
+		final float fAlpha = ( float ) alpha;
 		for ( int v = 0; v < nVertices; v++ )
 		{
-			final float x = vertices.xf( v );
-			final float y = vertices.yf( v );
-			final float z = vertices.zf( v );
-
-			// Spherical coords.
-			if ( x == 0. && y == 0. )
-			{
-				if ( z == 0 )
-					continue;
-
-				vertices.setPositionf( v, 0f, 0f, ( float ) ( z * alpha ) );
-				continue;
-			}
-			final double r = Math.sqrt( x * x + y * y + z * z );
-			final double theta = Math.acos( z / r );
-			final double phi = Math.signum( y ) * Math.acos( x / Math.sqrt( x * x + y * y ) );
-
-			final double ra = r * alpha;
-			final float xa = ( float ) ( ra * Math.sin( theta ) * Math.cos( phi ) );
-			final float ya = ( float ) ( ra * Math.sin( theta ) * Math.sin( phi ) );
-			final float za = ( float ) ( ra * Math.cos( theta ) );
+			// Exploit the fact that the mesh is centered on (0,0,0).
+			final float xa = fAlpha * vertices.xf( v );
+			final float ya = fAlpha * vertices.yf( v );
+			final float za = fAlpha * vertices.zf( v );
 			vertices.setPositionf( v, xa, ya, za );
 		}
 		this.boundingBox = Meshes.boundingBox( mesh );
+		resetZSliceCache();
 	}
 
 	@Override
