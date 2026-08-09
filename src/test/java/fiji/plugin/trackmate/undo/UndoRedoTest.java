@@ -2,6 +2,7 @@ package fiji.plugin.trackmate.undo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.within;
 
 import java.util.Set;
 
@@ -14,8 +15,10 @@ import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotBase;
+import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.interactivetests.GraphTest;
+import net.imglib2.mesh.impl.nio.BufferMesh;
 
 public class UndoRedoTest
 {
@@ -286,6 +289,173 @@ public class UndoRedoTest
 		assertThat( spot.getDoublePosition( 0 ) ).isEqualTo( newX );
 		assertThat( spot.getDoublePosition( 1 ) ).isEqualTo( newY );
 		assertThat( spot.getDoublePosition( 2 ) ).isEqualTo( newZ );
+	}
+
+	@Test
+	public void testUndoChangeSpotMesh()
+	{
+		// Create a simple tetrahedron mesh
+		final BufferMesh originalMesh = createTetrahedronMesh();
+		final SpotMesh spotWithMesh = new SpotMesh( originalMesh, -1., "TestSpotMesh" );
+
+		// Add spot to model
+		model.beginUpdate();
+		try
+		{
+			model.addSpotTo( spotWithMesh, 0 );
+		}
+		finally
+		{
+			model.endUpdate();
+		}
+
+		// Capture original vertex positions
+		final int nVertices = originalMesh.vertices().size();
+		final float[] originalX = new float[ nVertices ];
+		final float[] originalY = new float[ nVertices ];
+		final float[] originalZ = new float[ nVertices ];
+		for ( int i = 0; i < nVertices; i++ )
+		{
+			originalX[ i ] = originalMesh.vertices().xf( i );
+			originalY[ i ] = originalMesh.vertices().yf( i );
+			originalZ[ i ] = originalMesh.vertices().zf( i );
+		}
+
+		// Modify the mesh (move first vertex)
+		model.beginUpdate();
+		try
+		{
+			model.beforeEdit( spotWithMesh );
+			spotWithMesh.getMesh().vertices().setPositionf( 0,
+					originalX[ 0 ] + 1.0f,
+					originalY[ 0 ] + 1.0f,
+					originalZ[ 0 ] + 1.0f );
+		}
+		finally
+		{
+			model.endUpdate();
+		}
+
+		// Verify the mesh was changed
+		assertThat( spotWithMesh.getMesh().vertices().xf( 0 ) )
+				.as( "Mesh vertex X[0] should be modified" )
+				.isEqualTo( originalX[ 0 ] + 1.0f );
+
+		// Undo command.
+		model.undo();
+
+		// Verify mesh is restored (use offset comparison for floating point tolerance)
+		for ( int i = 0; i < nVertices; i++ )
+		{
+			assertThat( spotWithMesh.getMesh().vertices().xf( i ) )
+					.as( "Mesh vertex X[%d] should be restored after undo", i )
+					.isEqualTo( originalX[ i ], within( 1e-5f ) );
+			assertThat( spotWithMesh.getMesh().vertices().yf( i ) )
+					.as( "Mesh vertex Y[%d] should be restored after undo", i )
+					.isEqualTo( originalY[ i ], within( 1e-5f ) );
+			assertThat( spotWithMesh.getMesh().vertices().zf( i ) )
+					.as( "Mesh vertex Z[%d] should be restored after undo", i )
+					.isEqualTo( originalZ[ i ], within( 1e-5f ) );
+		}
+	}
+
+	@Test
+	public void testUndoRedoSpotMeshScale()
+	{
+		// Create a simple tetrahedron mesh
+		final BufferMesh originalMesh = createTetrahedronMesh();
+		final SpotMesh spotWithMesh = new SpotMesh( originalMesh, -1., "TestSpotMesh" );
+
+		// Add spot to model
+		model.beginUpdate();
+		try
+		{
+			model.addSpotTo( spotWithMesh, 0 );
+		}
+		finally
+		{
+			model.endUpdate();
+		}
+
+		// Capture original vertex positions and radius
+		final int nVertices = originalMesh.vertices().size();
+		final float[] originalX = new float[ nVertices ];
+		final float[] originalY = new float[ nVertices ];
+		final float[] originalZ = new float[ nVertices ];
+		final double originalRadius = spotWithMesh.getFeature( Spot.RADIUS );
+		for ( int i = 0; i < nVertices; i++ )
+		{
+			originalX[ i ] = originalMesh.vertices().xf( i );
+			originalY[ i ] = originalMesh.vertices().yf( i );
+			originalZ[ i ] = originalMesh.vertices().zf( i );
+		}
+
+		// Scale the mesh by factor of 2
+		final double scaleFactor = 2.0;
+		model.beginUpdate();
+		try
+		{
+			model.beforeEdit( spotWithMesh );
+			spotWithMesh.scale( scaleFactor );
+		}
+		finally
+		{
+			model.endUpdate();
+		}
+
+		// Verify the mesh was scaled
+		assertThat( spotWithMesh.getFeature( Spot.RADIUS ) )
+				.as( "Radius should be scaled" )
+				.isCloseTo( originalRadius * scaleFactor, within( 1e-10 ) );
+
+		// Undo command
+		model.undo();
+
+		// Verify radius is restored
+		assertThat( spotWithMesh.getFeature( Spot.RADIUS ) )
+				.as( "Radius should be restored after undo" )
+				.isCloseTo( originalRadius, within( 1e-10 ) );
+
+		// Verify mesh vertices are restored
+		for ( int i = 0; i < nVertices; i++ )
+		{
+			assertThat( spotWithMesh.getMesh().vertices().xf( i ) )
+					.as( "Mesh vertex X[%d] should be restored after undo", i )
+					.isCloseTo( originalX[ i ], within( 1e-5f ) );
+			assertThat( spotWithMesh.getMesh().vertices().yf( i ) )
+					.as( "Mesh vertex Y[%d] should be restored after undo", i )
+					.isCloseTo( originalY[ i ], within( 1e-5f ) );
+			assertThat( spotWithMesh.getMesh().vertices().zf( i ) )
+					.as( "Mesh vertex Z[%d] should be restored after undo", i )
+					.isCloseTo( originalZ[ i ], within( 1e-5f ) );
+		}
+
+		// Redo command
+		model.redo();
+
+		// Verify radius is restored after redo
+		assertThat( spotWithMesh.getFeature( Spot.RADIUS ) )
+				.as( "Radius should be restored after redo" )
+				.isCloseTo( originalRadius * scaleFactor, within( 1e-10 ) );
+	}
+
+	/**
+	 * Creates a simple tetrahedron mesh for testing.
+	 */
+	private static BufferMesh createTetrahedronMesh()
+	{
+		final BufferMesh mesh = new BufferMesh( 4, 4 );
+		// 4 vertices of a tetrahedron
+		mesh.vertices().add( 0.0f, 0.0f, 1.0f );
+		mesh.vertices().add( 0.0f, 0.942809f, -0.333333f );
+		mesh.vertices().add( -0.816497f, -0.471405f, -0.333333f );
+		mesh.vertices().add( 0.816497f, -0.471405f, -0.333333f );
+		// 4 triangles
+		mesh.triangles().add( 0, 1, 2 );
+		mesh.triangles().add( 0, 2, 3 );
+		mesh.triangles().add( 0, 3, 1 );
+		mesh.triangles().add( 1, 3, 2 );
+		return mesh;
 	}
 
 	private void testCore( final Runnable doModifs )
