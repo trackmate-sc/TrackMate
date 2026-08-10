@@ -521,7 +521,11 @@ public class ConfigureViewsPanel extends JPanel
 		@Override
 		public void actionPerformed( final ActionEvent e )
 		{
-			Threads.run( "Launching BVV thread", () -> windowManager.createBVV() );
+			Threads.run( "Launching BVV thread", () -> {
+				setEnabled( false );
+				windowManager.createBVV();
+				setEnabled( true );
+			} );
 		}
 	}
 
