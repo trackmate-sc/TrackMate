@@ -22,10 +22,9 @@ import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.TrackModel;
+import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.Meshes;
 import net.imglib2.mesh.impl.nio.BufferMesh;
-import net.imglib2.mesh.impl.nio.BufferMesh.Triangles;
-import net.imglib2.mesh.impl.nio.BufferMesh.Vertices;
 
 public class UndoRedoStack implements ModelChangeListener
 {
@@ -244,7 +243,7 @@ public class UndoRedoStack implements ModelChangeListener
 					final BufferMesh meshBefore = spotMeshValuesBefore.get( spotMesh );
 					final BufferMesh meshAfter = copyMesh( spotMesh );
 					// Only store if mesh changed
-					if ( !meshesEqual( meshBefore, meshAfter ) )
+					if ( !Meshes.equals( meshBefore, meshAfter ) )
 					{
 						command.spotMeshValuesBefore.put( spotMesh, meshBefore );
 						command.spotMeshValuesAfter.put( spotMesh, meshAfter );
@@ -282,7 +281,8 @@ public class UndoRedoStack implements ModelChangeListener
 			}
 		}
 
-		// Second pass: handle spots that were both added and removed in the same transaction
+		// Second pass: handle spots that were both added and removed in the
+		// same transaction
 		// (they are transient and should be removed from both lists)
 		final Set< Spot > transientSpots = new HashSet<>();
 		for ( final Spot removedSpot : command.spotsRemoved )
@@ -317,7 +317,8 @@ public class UndoRedoStack implements ModelChangeListener
 			else if ( event.getEdgeFlag( edge ) == ModelChangeEvent.FLAG_EDGE_MODIFIED )
 			{
 				// Only store edge features that actually changed
-				// Note: beforeFeatures can be null if the edge wasn't flagged with beforeEdit()
+				// Note: beforeFeatures can be null if the edge wasn't flagged
+				// with beforeEdit()
 				final Map< String, Double > beforeFeatures = edgeFeatureValuesBefore.get( edge );
 				final Map< String, Double > afterFeatures = copyEdgeFeatures( edge );
 
@@ -441,7 +442,8 @@ public class UndoRedoStack implements ModelChangeListener
 				for ( final EdgeRep edge : edgesRemoved )
 					model.addEdge( edge.source, edge.target, edge.weight );
 
-				// Collect all spots that need restoration (features, name, polygon, or mesh changed)
+				// Collect all spots that need restoration (features, name,
+				// polygon, or mesh changed)
 				final Set< Spot > spotsToRestore = new HashSet<>();
 				spotsToRestore.addAll( spotFeatureValuesBefore.keySet() );
 				spotsToRestore.addAll( spotNameBefore.keySet() );
@@ -512,7 +514,8 @@ public class UndoRedoStack implements ModelChangeListener
 				for ( final EdgeRep edge : edgesAdded )
 					model.addEdge( edge.source, edge.target, edge.weight );
 
-				// Collect all spots that need restoration (features, name, polygon, or mesh changed)
+				// Collect all spots that need restoration (features, name,
+				// polygon, or mesh changed)
 				final Set< Spot > spotsToRestore = new HashSet<>();
 				spotsToRestore.addAll( spotFeatureValuesAfter.keySet() );
 				spotsToRestore.addAll( spotNameAfter.keySet() );
@@ -790,7 +793,7 @@ public class UndoRedoStack implements ModelChangeListener
 
 	private static final BufferMesh copyMesh( final SpotMesh spot )
 	{
-		final BufferMesh source = spot.getMesh();
+		final Mesh source = spot.getMesh();
 		final BufferMesh copy = new BufferMesh( source.vertices().size(), source.triangles().size() );
 		Meshes.copy( source, copy );
 		// This copy is centered on (0,0,0) so we need to translate it to the
@@ -802,53 +805,5 @@ public class UndoRedoStack implements ModelChangeListener
 	private static final void updateMesh( final SpotMesh spot, final BufferMesh mesh )
 	{
 		spot.setMesh( mesh );
-	}
-
-	private static final boolean meshesEqual( final BufferMesh a, final BufferMesh b )
-	{
-		if ( a == null && b == null )
-			return true;
-		if ( a == null || b == null )
-			return false;
-
-		final Vertices verticesA = a.vertices();
-		final Vertices verticesB = b.vertices();
-		final long nVerticesA = verticesA.size();
-		final long nVerticesB = verticesB.size();
-
-		if ( nVerticesA != nVerticesB )
-			return false;
-
-		// Compare vertex positions
-		for ( long i = 0; i < nVerticesA; i++ )
-		{
-			if ( Float.compare( verticesA.xf( i ), verticesB.xf( i ) ) != 0 ||
-				Float.compare( verticesA.yf( i ), verticesB.yf( i ) ) != 0 ||
-				Float.compare( verticesA.zf( i ), verticesB.zf( i ) ) != 0 )
-			{
-				return false;
-			}
-		}
-
-		// Compare triangles
-		final Triangles trianglesA = a.triangles();
-		final Triangles trianglesB = b.triangles();
-		final long nTrianglesA = trianglesA.size();
-		final long nTrianglesB = trianglesB.size();
-
-		if ( nTrianglesA != nTrianglesB )
-			return false;
-
-		for ( long i = 0; i < nTrianglesA; i++ )
-		{
-			if ( trianglesA.vertex0( i ) != trianglesB.vertex0( i ) ||
-				trianglesA.vertex1( i ) != trianglesB.vertex1( i ) ||
-				trianglesA.vertex2( i ) != trianglesB.vertex2( i ) )
-			{
-				return false;
-			}
-		}
-
-		return true;
 	}
 }
