@@ -22,14 +22,12 @@
 package fiji.plugin.trackmate.action.meshtools;
 
 import java.awt.Component;
-import java.util.Collection;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.gui.GuiUtils;
@@ -48,18 +46,15 @@ public class MeshSmootherController implements MultiThreaded
 
 	private final MeshSmoother smoother;
 
-	private final Logger logger;
-
 	public MeshSmootherController( final Model model, final SelectionModel selectionModel, final Logger logger )
 	{
 		this.model = model;
 		this.selectionModel = selectionModel;
-		this.logger = logger;
 		this.gui = new MeshSmootherPanel();
-		this.smoother = new MeshSmoother( logger );
+		this.smoother = new MeshSmoother( model, logger );
 
 		gui.btnRun.addActionListener( e -> run( gui.getModel() ) );
-		gui.btnUndo.addActionListener( e -> undo() );
+		gui.btnUndo.addActionListener( e -> model.undo() );
 	}
 
 	public void show( final Component parent )
@@ -85,8 +80,7 @@ public class MeshSmootherController implements MultiThreaded
 			try
 			{
 				enabler.disable();
-				final Collection< Spot > modifiedSpots = smoother.smooth( smootherModel, spots );
-				fireEvent( modifiedSpots );
+				smoother.smooth( smootherModel, spots );
 			}
 			catch ( final Exception err )
 			{
@@ -97,33 +91,6 @@ public class MeshSmootherController implements MultiThreaded
 				enabler.reenable();
 			}
 		}, "TrackMate mesh smoother thread" ).start();
-	}
-
-	private void undo()
-	{
-		new Thread( () -> {
-			final EverythingDisablerAndReenabler enabler = new EverythingDisablerAndReenabler( gui, new Class[] { JLabel.class } );
-			try
-			{
-				enabler.disable();
-				final Collection< Spot > modifiedSpots = smoother.undo();
-				fireEvent( modifiedSpots );
-			}
-			finally
-			{
-				enabler.reenable();
-			}
-		}, "TrackMate mesh smoothing undoer thread" ).start();
-	}
-
-	private void fireEvent( final Collection< Spot > modifiedSpots )
-	{
-		logger.log( "Updating spot features and meshes.\n" );
-		final ModelChangeEvent event = new ModelChangeEvent( this, ModelChangeEvent.MODEL_MODIFIED );
-		event.addAllSpots( modifiedSpots );
-		modifiedSpots.forEach( s -> event.putSpotFlag( s, ModelChangeEvent.FLAG_SPOT_MODIFIED ) );
-		model.getModelChangeListener().forEach( l -> l.modelChanged( event ) );
-		logger.log( "Done.\n" );
 	}
 
 	@Override

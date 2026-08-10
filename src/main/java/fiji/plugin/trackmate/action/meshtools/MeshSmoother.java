@@ -24,22 +24,21 @@ package fiji.plugin.trackmate.action.meshtools;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import fiji.plugin.trackmate.Logger;
+import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.util.Threads;
 import net.imglib2.algorithm.MultiThreaded;
-import net.imglib2.mesh.Meshes;
+import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.alg.TaubinSmoothing;
 import net.imglib2.mesh.alg.TaubinSmoothing.TaubinWeightType;
 import net.imglib2.mesh.impl.nio.BufferMesh;
-import net.imglib2.util.ValuePair;
+import net.imglib2.mesh.view.TranslateMesh;
 
 public class MeshSmoother implements MultiThreaded
 {
@@ -48,42 +47,17 @@ public class MeshSmoother implements MultiThreaded
 
 	private static final TimeUnit TIME_OUT_UNITS = TimeUnit.HOURS;
 
-	/** Stores initial position and mesh of the spot. */
-
-	private final ConcurrentHashMap< SpotMesh, ValuePair< BufferMesh, double[] > > undoMap;
-
 	private final Logger logger;
 
 	private int numThreads;
 
+	private final Model model;
 
-	public MeshSmoother( final Logger logger )
+	public MeshSmoother( final Model model, final Logger logger )
 	{
+		this.model = model;
 		this.logger = logger;
-		this.undoMap = new ConcurrentHashMap<>();
 		setNumThreads();
-	}
-
-
-	public List< Spot > undo()
-	{
-		logger.setStatus( "Undoing mesh smoothing" );
-		final Set< SpotMesh > keys = undoMap.keySet();
-		final int nSpots = keys.size();
-		int i = 0;
-		logger.log( "Undoing mesh smoothing for " + nSpots + " spots.\n" );
-		final List< Spot > modifiedSpots = new ArrayList<>();
-		for ( final SpotMesh sm : keys )
-		{
-			final ValuePair< BufferMesh, double[] > old = undoMap.get( sm );
-			sm.setMesh( old.getA() );
-			sm.setPosition( old.getB() );
-			modifiedSpots.add( sm );
-			logger.setProgress( ( double ) ( ++i ) / nSpots );
-		}
-		logger.setStatus( "" );
-		logger.log( "Done.\n" );
-		return modifiedSpots;
 	}
 
 	public List< Spot > smooth( final MeshSmootherModel smootherModel, final Iterable< Spot > spots )
@@ -101,27 +75,30 @@ public class MeshSmoother implements MultiThreaded
 		logger.log( String.format( " - %s: %d\n", "N iterations", nIters ) );
 		logger.log( String.format( " - %s: %s\n", "weights", weightType ) );
 
-		final AtomicInteger ai = new AtomicInteger( 0 );
-		final ExecutorService executors = Threads.newFixedThreadPool( numThreads );
-		final List< Spot > modifiedSpots = new ArrayList<>();
-		for ( final Spot spot : spots )
-		{
-			if ( SpotMesh.class.isInstance( spot ) )
-			{
-				final SpotMesh sm = ( SpotMesh ) spot;
-				executors.execute( process( sm, nIters, mu, lambda, weightType, ai, nSpots ) );
-				modifiedSpots.add( sm );
-			}
-		}
-
-		executors.shutdown();
+		model.beginUpdate();
 		try
 		{
+			final AtomicInteger ai = new AtomicInteger( 0 );
+			final ExecutorService executors = Threads.newFixedThreadPool( numThreads );
+			final List< Spot > modifiedSpots = new ArrayList<>();
+			for ( final Spot spot : spots )
+			{
+				if ( SpotMesh.class.isInstance( spot ) )
+				{
+					final SpotMesh sm = ( SpotMesh ) spot;
+					model.beforeEdit( sm );
+					executors.execute( process( sm, nIters, mu, lambda, weightType, ai, nSpots ) );
+					modifiedSpots.add( sm );
+				}
+			}
+
+			executors.shutdown();
 			final boolean ok = executors.awaitTermination( TIME_OUT_DELAY, TIME_OUT_UNITS );
 			if ( !ok )
 				logger.error( "Timeout of " + TIME_OUT_DELAY + " " + TIME_OUT_UNITS + " reached while smoothing.\n" );
 
 			logger.log( "Done.\n" );
+			return modifiedSpots;
 		}
 		catch ( final InterruptedException e )
 		{
@@ -132,8 +109,9 @@ public class MeshSmoother implements MultiThreaded
 		{
 			logger.setProgress( 1 );
 			logger.setStatus( "" );
+			model.endUpdate();
 		}
-		return modifiedSpots;
+		return null;
 	}
 
 	private static final int count( final Iterable< Spot > spots )
@@ -162,21 +140,9 @@ public class MeshSmoother implements MultiThreaded
 			@Override
 			public void run()
 			{
-				final BufferMesh mesh = sm.getMesh();
-				final double[] center = new double[ 3 ];
-				sm.localize( center );
-
-				// Store for undo.
-				if ( !undoMap.containsKey( sm ) )
-				{
-					final ValuePair< BufferMesh, double[] > pair = new ValuePair<>( mesh, center );
-					undoMap.put( sm, pair );
-				}
-
-				// Process.
-				Meshes.translate( mesh, center );
+				final Mesh mesh = sm.getMesh();
 				final BufferMesh smoothedMesh = TaubinSmoothing.smooth( mesh, nIters, lambda, mu, weightType );
-				sm.setMesh( smoothedMesh );
+				sm.setMesh( TranslateMesh.translate( smoothedMesh, sm ) );
 
 				logger.setProgress( ( double ) ai.incrementAndGet() / nSpots );
 			}
