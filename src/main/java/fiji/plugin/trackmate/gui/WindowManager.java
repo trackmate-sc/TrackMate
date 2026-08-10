@@ -1,6 +1,7 @@
 package fiji.plugin.trackmate.gui;
 
 import static fiji.plugin.trackmate.visualization.ui.KeyConfigContexts.ALL_SPOTS_TABLE;
+import static fiji.plugin.trackmate.visualization.ui.KeyConfigContexts.BIGVOLUMEVIEWER;
 import static fiji.plugin.trackmate.visualization.ui.KeyConfigContexts.HYPERSTACK_DISPLAYER;
 import static fiji.plugin.trackmate.visualization.ui.KeyConfigContexts.KEY_CONFIG_SCOPE;
 import static fiji.plugin.trackmate.visualization.ui.KeyConfigContexts.TRACKMATE;
@@ -14,8 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import javax.swing.SwingUtilities;
-
 import org.scijava.plugin.Plugin;
 import org.scijava.ui.behaviour.io.gui.CommandDescriptionProvider;
 import org.scijava.ui.behaviour.io.gui.CommandDescriptions;
@@ -28,7 +27,6 @@ import bdv.ui.appearance.AppearanceSettingsPage;
 import bdv.ui.keymap.Keymap;
 import bdv.ui.keymap.KeymapSettingsPage;
 import bdv.util.InvokeOnEDT;
-import bvv.vistools.BvvHandle;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsConfigPage;
 import fiji.plugin.trackmate.gui.editor.LabkitLauncher;
 import fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame;
@@ -65,7 +63,7 @@ public class WindowManager
 		final Actions globalActions = guiModel.getGlobalActions();
 
 		// Preferences dialog
-		final PreferencesDialog preferencesDialog = new PreferencesDialog( null, keymap, new String[] { TRACKMATE, HYPERSTACK_DISPLAYER, TRACKSCHEME, ALL_SPOTS_TABLE, TRACK_TABLE } );
+		final PreferencesDialog preferencesDialog = new PreferencesDialog( null, keymap, new String[] { TRACKMATE, HYPERSTACK_DISPLAYER, TRACKSCHEME, ALL_SPOTS_TABLE, TRACK_TABLE, BIGVOLUMEVIEWER } );
 		preferencesDialog.setTitle( "TrackMate Preferences" );
 		preferencesDialog.setLocationRelativeTo( null );
 		BigDataViewerActions.toggleDialogAction( globalActions, preferencesDialog, BigDataViewerActions.PREFERENCES_DIALOG, BigDataViewerActions.PREFERENCES_DIALOG_KEYS );
@@ -116,8 +114,6 @@ public class WindowManager
 			final TrackMateBVV< ? > tbvv = new TrackMateBVV<>( guiModel, imp );
 			registerView( tbvv );
 			tbvv.render();
-			final BvvHandle bvvHandle = tbvv.getBvvHandle();
-			SwingUtilities.getWindowAncestor( bvvHandle.getViewerPanel() ).setLocationRelativeTo( null );
 			return tbvv;
 		}
 		return null;
