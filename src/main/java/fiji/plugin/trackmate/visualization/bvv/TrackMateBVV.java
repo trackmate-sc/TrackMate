@@ -22,19 +22,21 @@
 package fiji.plugin.trackmate.visualization.bvv;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Window;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.swing.SwingUtilities;
-
 import org.joml.Matrix4f;
+import org.scijava.ui.config.utils.GuiUtils;
 
+import bdv.tools.InitializeViewerState;
 import bdv.viewer.animate.TranslationAnimator;
+import bvv.core.BigVolumeViewer;
+import bvv.core.VolumeViewerFrame;
 import bvv.core.VolumeViewerPanel;
 import bvv.core.util.MatrixMath;
-import bvv.vistools.BvvHandle;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.SelectionChangeListener;
@@ -57,16 +59,13 @@ public class TrackMateBVV< T extends Type< T > > extends AbstractTrackMateModelB
 
 	private static final String KEY = "BIGVOLUMEVIEWER";
 
-	private final ImagePlus imp;
-
-	private BvvHandle handle;
-
 	private final Map< Spot, StupidMesh > meshMap;
+
+	private final BigVolumeViewer bvvInstance;
 
 	public TrackMateBVV( final GuiModel guiModel, final ImagePlus imp )
 	{
-		super( guiModel, KeyConfigContexts.BIGVOLUMEVIEWER );
-		this.imp = imp;
+		super( guiModel, KeyConfigContexts.BIGVOLUMEVIEWER, bvv.core.KeyConfigContexts.BIGVOLUMEVIEWER );
 		this.meshMap = new HashMap<>();
 
 		final Model model = guiModel.getModel();
@@ -83,26 +82,10 @@ public class TrackMateBVV< T extends Type< T > > extends AbstractTrackMateModelB
 			displaySettings.listeners().remove( colorUpdater );
 			selectionModel.removeSelectionChangeListener( refresher );
 		} );
-	}
 
-	/**
-	 * Returns the {@link BvvHandle} that contains this view. Returns
-	 * <code>null</code> if this view has not been rendered yet.
-	 * 
-	 * @return the BVV handle, or <code>null</code>.
-	 */
-	public BvvHandle getBvvHandle()
-	{
-		return handle;
-	}
+		this.bvvInstance = BVVUtils.createBvv( guiModel );
 
-	@Override
-	public void render()
-	{
-		this.handle = BVVUtils.createViewer( imp );
-		setHandle( handle );
-		final VolumeViewerPanel viewer = handle.getViewerPanel();
-
+		final VolumeViewerPanel viewer = bvvInstance.getViewer();
 		viewer.setRenderScene( ( gl, data ) -> {
 			if ( guiModel.getDisplaySettings().isSpotVisible() )
 			{
@@ -111,33 +94,45 @@ public class TrackMateBVV< T extends Type< T > > extends AbstractTrackMateModelB
 				final Matrix4f vm = MatrixMath.screen( data.getDCam(), data.getScreenWidth(), data.getScreenHeight(), new Matrix4f() ).mul( view );
 
 				final int t = data.getTimepoint();
-				final Iterable< Spot > it = guiModel.getModel().getSpots().iterable( t, true );
-				it.forEach( s -> meshMap.computeIfAbsent( s, BVVUtils::createMesh ).draw( gl, pvm, vm, guiModel.getSelectionModel().getSpotSelection().contains( s ) ) );
+				final Iterable< Spot > its = guiModel.getModel().getSpots().iterable( t, true );
+				its.forEach( s -> meshMap.computeIfAbsent( s, BVVUtils::createMesh ).draw( gl, pvm, vm, guiModel.getSelectionModel().getSpotSelection().contains( s ) ) );
 			}
 		} );
+		synchronized ( this )
+		{
+			initTransformPending = true;
+			tryInitTransform( viewer );
+		}
+
+		final VolumeViewerFrame frame = bvvInstance.getViewerFrame();
+		setWindow( frame );
+		GuiUtils.positionWindow( frame, guiModel.getSettings().imp.getWindow() );
+	}
+
+	@Override
+	public void render()
+	{
+		bvvInstance.getViewerFrame().setVisible( true );
 	}
 
 	@Override
 	public void refresh()
 	{
-		if ( handle != null )
-			handle.getViewerPanel().requestRepaint();
+		if ( bvvInstance != null )
+			bvvInstance.getViewer().requestRepaint();
 	}
 
 	@Override
 	public void clear()
-	{
-		// TODO Auto-generated method stub
-
-	}
+	{}
 
 	@Override
 	public void centerViewOn( final Spot spot )
 	{
-		if ( handle == null )
+		if ( bvvInstance == null )
 			return;
 
-		final VolumeViewerPanel panel = handle.getViewerPanel();
+		final VolumeViewerPanel panel = bvvInstance.getViewer();
 		panel.setTimepoint( spot.getFeature( Spot.FRAME ).intValue() );
 
 		final AffineTransform3D c = panel.state().getViewerTransform();
@@ -230,7 +225,23 @@ public class TrackMateBVV< T extends Type< T > > extends AbstractTrackMateModelB
 	@Override
 	public Window getWindow()
 	{
-		final VolumeViewerPanel viewerPanel = handle.getViewerPanel();
-		return SwingUtilities.getWindowAncestor( viewerPanel );
+		return bvvInstance.getViewerFrame();
+	}
+
+	private boolean initTransformPending;
+
+	private synchronized void tryInitTransform( final VolumeViewerPanel viewer )
+	{
+		if ( viewer.getDisplay().getWidth() <= 0 || viewer.getDisplay().getHeight() <= 0 )
+			return;
+
+		if ( initTransformPending )
+		{
+			initTransformPending = false;
+
+			final Dimension dim = viewer.getDisplay().getSize();
+			final AffineTransform3D viewerTransform = InitializeViewerState.initTransform( dim.width, dim.height, false, viewer.state().snapshot() );
+			viewer.state().setViewerTransform( viewerTransform );
+		}
 	}
 }

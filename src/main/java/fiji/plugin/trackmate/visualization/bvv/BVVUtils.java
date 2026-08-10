@@ -21,27 +21,45 @@
  */
 package fiji.plugin.trackmate.visualization.bvv;
 
-import bvv.vistools.Bvv;
-import bvv.vistools.BvvFunctions;
-import bvv.vistools.BvvHandle;
-import bvv.vistools.BvvSource;
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.scijava.ui.behaviour.io.InputTriggerConfig;
+
+import bdv.BigDataViewer;
+import bdv.cache.CacheControl.CacheControls;
+import bdv.tools.brightness.ConverterSetup;
+import bdv.ui.appearance.AppearanceManager;
+import bdv.util.RandomAccessibleIntervalSource;
+import bdv.util.RandomAccessibleIntervalSource4D;
+import bdv.viewer.ConverterSetups;
+import bdv.viewer.DisplayMode;
+import bdv.viewer.Source;
+import bdv.viewer.SourceAndConverter;
+import bvv.core.BigVolumeViewer;
+import bvv.core.VolumeViewerOptions;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotMesh;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.visualization.ui.TrackMateKeymapManager;
 import ij.CompositeImage;
 import ij.ImagePlus;
-import ij.process.ImageProcessor;
+import ij.measure.Calibration;
 import ij.process.LUT;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
-import net.imglib2.img.display.imagej.ImgPlusViews;
+import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.converter.Converter;
 import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.Meshes;
 import net.imglib2.mesh.impl.nio.BufferMesh;
 import net.imglib2.mesh.util.Icosahedron;
 import net.imglib2.mesh.view.TranslateMesh;
-import net.imglib2.type.Type;
+import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
+import net.imglib2.type.numeric.RealType;
 
 public class BVVUtils
 {
@@ -59,86 +77,169 @@ public class BVVUtils
 		return new StupidMesh( Icosahedron.sphere( spot, spot.getFeature( Spot.RADIUS ).doubleValue() ) );
 	}
 
-	public static final < T extends Type< T > > BvvHandle createViewer( final ImagePlus imp )
+	public static final < T extends RealType< T > > BigVolumeViewer createBvv( final GuiModel guiModel )
 	{
-		final double[] cal = TMUtils.getSpatialCalibration( imp );
 
-		// Convert and split by channels.
+		/*
+		 * Wire BVV options to TrackMate config objects.
+		 */
+
+		final ImagePlus imp = guiModel.getSettings().imp;
+		final TrackMateKeymapManager keymapManager = guiModel.getKeymapManager();
+		final InputTriggerConfig config = keymapManager.getForwardSelectedKeymap().getConfig();
+		final AppearanceManager appearanceManager = guiModel.getAppearanceManager();
+		
+		final VolumeViewerOptions options = VolumeViewerOptions.options()
+				.inputTriggerConfig( config )
+				.maxAllowedStepInVoxels( 0 )
+				.renderWidth( 1024 )
+				.renderHeight( 1024 )
+				.keymapManager( keymapManager )
+				.appearanceManager( appearanceManager )
+				.height( 512 )
+				.width( 512 );
+
+		/*
+		 * Create BVV sources
+		 */
+
+		// Scaling
+		final Calibration cal = imp.getCalibration();
+		final AffineTransform3D sourceTransform = new AffineTransform3D();
+		sourceTransform.set(
+				cal.pixelWidth, 0, 0, 0,
+				0, cal.pixelHeight, 0, 0,
+				0, 0, cal.pixelDepth, 0 );
+
+		// Image data
 		final ImgPlus< T > img = TMUtils.rawWraps( imp );
 		final int cAxis = img.dimensionIndex( Axes.CHANNEL );
-		final BvvHandle bvvHandle;
-		if ( cAxis < 0 )
-		{
-			final BvvSource source = BvvFunctions.show( img, imp.getShortTitle(),
-					Bvv.options()
-							.maxAllowedStepInVoxels( 0 )
-							.renderWidth( 1024 )
-							.renderHeight( 1024 )
-							.preferredSize( 512, 512 )
-							.frameTitle( "3D view " + imp.getShortTitle() )
-							.sourceTransform( cal ) );
-			source.setDisplayRange( imp.getDisplayRangeMin(), imp.getDisplayRangeMax() );
-			if ( imp.getLuts().length > 0 )
-			{
-				final LUT lut = imp.getLuts()[ 0 ];
-				final int rgb = lut.getColorModel().getRGB( ( int ) imp.getDisplayRangeMax() );
-				source.setColor( new ARGBType( rgb ) );
-			}
-			bvvHandle = source.getBvvHandle();
-		}
-		else
-		{
-			BvvHandle h = null;
-			final long nChannels = img.dimension( cAxis );
-			final String st = imp.getShortTitle();
-			for ( int c = 0; c < nChannels; c++ )
-			{
-				final ImgPlus< T > channel = ImgPlusViews.hyperSlice( img, cAxis, c );
-				final BvvSource source;
-				if ( h == null )
-				{
-					source = BvvFunctions.show( channel, st + "_c" + ( c + 1 ),
-							Bvv.options()
-									.maxAllowedStepInVoxels( 0 )
-									.renderWidth( 1024 )
-									.renderHeight( 1024 )
-									.preferredSize( 512, 512 )
-									.frameTitle( "3D view " + imp.getShortTitle() )
-									.sourceTransform( cal ) );
-					h = source.getBvvHandle();
-				}
-				else
-				{
-					source = BvvFunctions.show( channel, st + "_c" + ( c + 1 ),
-							Bvv.options()
-									.maxAllowedStepInVoxels( 0 )
-									.renderWidth( 1024 )
-									.renderHeight( 1024 )
-									.preferredSize( 512, 512 )
-									.sourceTransform( cal )
-									.addTo( h ) );
+		final int nChannels = ( int ) ( ( cAxis < 0 ) ? 1 : img.dimension( cAxis ) );
+		final int tAxis = img.dimensionIndex( Axes.TIME );
+		final int nTimePoints = ( int ) ( ( tAxis < 0 ) ? 0 : img.dimension( tAxis ) );
 
-				}
-				final int i = imp.getStackIndex( c + 1, 1, 1 );
-				if ( imp instanceof CompositeImage )
-				{
-					final CompositeImage cp = ( CompositeImage ) imp;
-					source.setDisplayRange( cp.getChannelLut( c + 1 ).min, cp.getChannelLut( c + 1 ).max );
-				}
-				else
-				{
-					final ImageProcessor ip = imp.getStack().getProcessor( i );
-					source.setDisplayRange( ip.getMin(), ip.getMax() );
-				}
-				if ( imp.getLuts().length > 0 )
-				{
-					final LUT lut = imp.getLuts()[ c ];
-					final int rgb = lut.getColorModel().getRGB( ( int ) imp.getDisplayRangeMax() );
-					source.setColor( new ARGBType( rgb ) );
-				}
+		// Source and converter setup
+		final List< SourceAndConverter< ? > > sources = new ArrayList<>( nChannels );
+		final List< ConverterSetup > setups = new ArrayList< ConverterSetup >( nChannels );
+		for ( int c = 0; c < nChannels; c++ )
+		{
+			final RandomAccessibleInterval< T > channelRai =
+					( cAxis < 0 )
+							? img
+							: img.view().slice( cAxis, c );
+			
+			final String sourceName = ( cAxis < 0 ) ? "" : "Ch " + ( c + 1 );
+			final Source< T > source;
+			if ( nTimePoints > 1 )
+			{
+				source = new RandomAccessibleIntervalSource4D<>(
+						channelRai,
+						channelRai.getType(),
+						sourceTransform,
+						sourceName );
 			}
-			bvvHandle = h;
+			else
+			{
+				source = new RandomAccessibleIntervalSource<>(
+						channelRai,
+						channelRai.getType(),
+						sourceTransform,
+						sourceName );
+			}
+
+			final Converter< T, ARGBType > converterToARGB = BigDataViewer.createConverterToARGB( channelRai.getType() );
+			final SourceAndConverter< T > soc = new SourceAndConverter< T >( source, converterToARGB );
+			sources.add( soc );
+			final ConverterSetup setup = BigDataViewer.createConverterSetup( soc, c );
+			setups.add( setup );
 		}
-		return bvvHandle;
+
+		final CacheControls cacheControl = new CacheControls();
+		final String title = "3D view " + imp.getShortTitle();
+		final BigVolumeViewer bvv = new BigVolumeViewer( setups, sources, nTimePoints, cacheControl, title, options );
+		syncDisplayAndLUTs( bvv, sources, imp );
+		return bvv;
+	}
+
+	public static void syncDisplayAndLUTs(
+			final BigVolumeViewer bvv,
+			final List< SourceAndConverter< ? > > sources,
+			final ImagePlus imp )
+	{
+		// Display mode.
+		final DisplayMode displayMode = getDisplayMode( imp );
+		bvv.getViewer().setDisplayMode( displayMode );
+
+		// LUT & min max
+		final ConverterSetups converterSetups = bvv.getConverterSetups();
+		final int nChannels = sources.size();
+		for ( int c = 0; c < nChannels; c++ )
+		{
+			final List< ConverterSetup > css = converterSetups.getConverterSetups( sources );
+			final ConverterSetup setup = css.get( c );
+
+			double minRange;
+			double maxRange;
+			Color channelColor;
+			if ( imp instanceof CompositeImage )
+			{
+				final CompositeImage ci = ( CompositeImage ) imp;
+				final LUT lut = ci.getChannelLut( c + 1 );
+				minRange = lut.min;
+				maxRange = lut.max;
+				channelColor = new Color( lut.getRGB( 255 ) );
+			}
+			else
+			{
+				imp.setPosition( c + 1, 1, 1 );
+				minRange = imp.getDisplayRangeMin();
+				maxRange = imp.getDisplayRangeMax();
+
+				final LUT lut = imp.getProcessor().getLut();
+				if ( lut != null )
+					channelColor = new Color( lut.getRGB( 255 ) );
+				else
+					channelColor = Color.WHITE;
+			}
+
+			// Apply
+			setup.setDisplayRange( minRange, maxRange );
+			final int argb = ARGBType.rgba(
+					channelColor.getRed(),
+					channelColor.getGreen(),
+					channelColor.getBlue(),
+					255 );
+			setup.setColor( new ARGBType( argb ) );
+		}
+	}
+
+	/**
+	 * Determines the BVV DisplayMode based on an ImagePlus instance.
+	 */
+	public static DisplayMode getDisplayMode( final ImagePlus imp )
+	{
+		// Check if the ImagePlus is a CompositeImage (multi-channel UI mode)
+		if ( imp instanceof CompositeImage )
+		{
+			final CompositeImage ci = ( CompositeImage ) imp;
+
+			switch ( ci.getMode() )
+			{
+			case CompositeImage.COMPOSITE:
+				return DisplayMode.FUSED;
+
+			case CompositeImage.COLOR:
+			case CompositeImage.GRAYSCALE:
+				return DisplayMode.SINGLE;
+
+			default:
+				return DisplayMode.FUSED;
+			}
+		}
+
+		if ( imp.getNChannels() > 1 )
+			return DisplayMode.FUSED;
+		else
+			return DisplayMode.SINGLE;
 	}
 }
