@@ -43,7 +43,6 @@ import bdv.ui.keymap.Keymap;
 import bdv.ui.keymap.Keymap.UpdateListener;
 import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.visualization.ui.KeyConfigContexts;
-import fiji.plugin.trackmate.visualization.ui.TrackMateKeymapManager;
 
 /**
  * An abstract class for TrackMate views that display content in a
@@ -74,7 +73,7 @@ public abstract class AbstractTrackMateModelJFrameView extends AbstractTrackMate
 		this.keybindings = new InputActionBindings();
 		this.triggerbindings = new TriggerBehaviourBindings();
 
-		final Keymap keymap = TrackMateKeymapManager.keymapManager.getForwardSelectedKeymap();
+		final Keymap keymap = guiModel.getKeymapManager().getForwardSelectedKeymap();
 
 		this.actions = new Actions( keymap.getConfig(), kccs );
 		actions.install( keybindings, "view" );

@@ -13,8 +13,6 @@ public class TrackMateKeymapManager extends KeymapManager
 
 	private static final String KEYMAP_HOME = new File( System.getProperty( "user.home" ), ".trackmate" ).getAbsolutePath();
 
-	public static final TrackMateKeymapManager keymapManager = new TrackMateKeymapManager();
-
 	public TrackMateKeymapManager()
 	{
 		super( KEYMAP_HOME );
