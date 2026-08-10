@@ -44,14 +44,15 @@ import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.UpdateListener;
-import fiji.plugin.trackmate.visualization.AbstractTrackMateModelView;
+import fiji.plugin.trackmate.visualization.AbstractTrackMateModelBvvView;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
+import fiji.plugin.trackmate.visualization.ui.KeyConfigContexts;
 import ij.ImagePlus;
 import net.imglib2.RealLocalizable;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.Type;
 
-public class TrackMateBVV< T extends Type< T > > extends AbstractTrackMateModelView
+public class TrackMateBVV< T extends Type< T > > extends AbstractTrackMateModelBvvView
 {
 
 	private static final String KEY = "BIGVOLUMEVIEWER";
@@ -64,7 +65,7 @@ public class TrackMateBVV< T extends Type< T > > extends AbstractTrackMateModelV
 
 	public TrackMateBVV( final GuiModel guiModel, final ImagePlus imp )
 	{
-		super( guiModel );
+		super( guiModel, KeyConfigContexts.BIGVOLUMEVIEWER );
 		this.imp = imp;
 		this.meshMap = new HashMap<>();
 
@@ -99,7 +100,9 @@ public class TrackMateBVV< T extends Type< T > > extends AbstractTrackMateModelV
 	public void render()
 	{
 		this.handle = BVVUtils.createViewer( imp );
+		setHandle( handle );
 		final VolumeViewerPanel viewer = handle.getViewerPanel();
+
 		viewer.setRenderScene( ( gl, data ) -> {
 			if ( guiModel.getDisplaySettings().isSpotVisible() )
 			{

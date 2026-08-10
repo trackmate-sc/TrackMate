@@ -38,4 +38,9 @@ public interface KeyConfigContexts
 	 */
 	String TRACK_TABLE = "track-table";
 
+	/**
+	 * The action or behaviour applies to the BVV views.
+	 */
+	String BIGVOLUMEVIEWER = "bigvolumeviewer";
+
 }
