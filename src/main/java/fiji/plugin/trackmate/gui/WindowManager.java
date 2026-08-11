@@ -1,7 +1,6 @@
 package fiji.plugin.trackmate.gui;
 
 import static fiji.plugin.trackmate.visualization.ui.KeyConfigContexts.ALL_SPOTS_TABLE;
-import static fiji.plugin.trackmate.visualization.ui.KeyConfigContexts.BIGVOLUMEVIEWER;
 import static fiji.plugin.trackmate.visualization.ui.KeyConfigContexts.HYPERSTACK_DISPLAYER;
 import static fiji.plugin.trackmate.visualization.ui.KeyConfigContexts.KEY_CONFIG_SCOPE;
 import static fiji.plugin.trackmate.visualization.ui.KeyConfigContexts.TRACKMATE;
@@ -27,7 +26,6 @@ import bdv.ui.appearance.AppearanceSettingsPage;
 import bdv.ui.keymap.Keymap;
 import bdv.ui.keymap.KeymapSettingsPage;
 import bdv.util.InvokeOnEDT;
-import bvv.core.KeyConfigContexts;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsConfigPage;
 import fiji.plugin.trackmate.gui.editor.LabkitLauncher;
 import fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame;
@@ -65,15 +63,17 @@ public class WindowManager
 
 		// Preferences dialog
 		final PreferencesDialog preferencesDialog = new PreferencesDialog( null, keymap,
-				new String[] { TRACKMATE, HYPERSTACK_DISPLAYER, TRACKSCHEME, ALL_SPOTS_TABLE, TRACK_TABLE, BIGVOLUMEVIEWER, KeyConfigContexts.BIGVOLUMEVIEWER } );
+				new String[] { TRACKMATE, HYPERSTACK_DISPLAYER, TRACKSCHEME, ALL_SPOTS_TABLE, TRACK_TABLE } );
+
 		preferencesDialog.setTitle( "TrackMate Preferences" );
 		preferencesDialog.setLocationRelativeTo( null );
 		BigDataViewerActions.toggleDialogAction( globalActions, preferencesDialog, BigDataViewerActions.PREFERENCES_DIALOG, BigDataViewerActions.PREFERENCES_DIALOG_KEYS );
 		preferencesDialog.addPage( new DisplaySettingsConfigPage( "Display settings", guiModel.getDisplaySettingsManager() ) );
 		preferencesDialog.addPage( new KeymapSettingsPage( "Global keymap", keymapManager, keymapManager.getCommandDescriptions() ) );
-		preferencesDialog.addPage( new KeymapSettingsPage( "Editor keymap", guiModel.getEditorKeymapManager(), guiModel.getEditorKeymapManager().getCommandDescriptions() ) );
+		preferencesDialog.addPage( new KeymapSettingsPage( "Spot editor keymap", guiModel.getEditorKeymapManager(), guiModel.getEditorKeymapManager().getCommandDescriptions() ) );
+		preferencesDialog.addPage( new KeymapSettingsPage( "3D View keymap", guiModel.getBvvKeymapManager(), guiModel.getBvvKeymapManager().getCommandDescriptions() ) );
 		preferencesDialog.addPage( new SpotEditToolSettingsPage( "Semi-auto tracking", guiModel.getSemiAutoTrackingParams() ) );
-		preferencesDialog.addPage( new AppearanceSettingsPage( "Editor appearance", guiModel.getAppearanceManager() ) );
+		preferencesDialog.addPage( new AppearanceSettingsPage( "BDVs appearance", guiModel.getAppearanceManager() ) );
 	}
 
 	public HyperStackDisplayer createHyperStackDisplayer()
