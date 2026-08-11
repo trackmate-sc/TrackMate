@@ -18,6 +18,7 @@ import fiji.plugin.trackmate.gui.editor.labkit.component.EditorKeymapManager;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.hyperstack.behaviours.semiautotracking.SemiAutoTrackingParams;
 import fiji.plugin.trackmate.visualization.hyperstack.behaviours.semiautotracking.SemiAutoTrackingParamsIO;
+import fiji.plugin.trackmate.visualization.bvv.BVVKeymapManager;
 import fiji.plugin.trackmate.visualization.ui.KeyConfigContexts;
 import fiji.plugin.trackmate.visualization.ui.TrackMateActions;
 import fiji.plugin.trackmate.visualization.ui.TrackMateKeymapManager;
@@ -43,6 +44,8 @@ public class GuiModel
 	private final KeyPressedManager keyPressedManager;
 
 	private final TrackMateKeymapManager keymapManager;
+
+	private final BVVKeymapManager bvvKeymapManager;
 
 	private final EditorKeymapManager editorKeymapManager;
 
@@ -78,6 +81,7 @@ public class GuiModel
 
 		// Keymap and actions
 		this.editorKeymapManager = new EditorKeymapManager();
+		this.bvvKeymapManager = new BVVKeymapManager();
 		this.appearanceManager = new AppearanceManager( EDITOR_KEYMAP_HOME );
 		this.keyPressedManager = new KeyPressedManager();
 		this.keymapManager = new TrackMateKeymapManager();
@@ -208,6 +212,11 @@ public class GuiModel
 	public EditorKeymapManager getEditorKeymapManager()
 	{
 		return editorKeymapManager;
+	}
+
+	public BVVKeymapManager getBvvKeymapManager()
+	{
+		return bvvKeymapManager;
 	}
 
 	public Model getModel()

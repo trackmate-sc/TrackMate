@@ -24,10 +24,7 @@ public class TrackMateKeymapManager extends KeymapManager
 		final CommandDescriptionsBuilder builder = new CommandDescriptionsBuilder();
 		final Context context = TMUtils.getContext();
 		context.inject( builder );
-		builder.discoverProviders(
-				KeyConfigContexts.KEY_CONFIG_SCOPE, // TrackMate scope
-				bvv.core.KeyConfigScopes.BIGVOLUMEVIEWER, // BVV
-				bdv.KeyConfigScopes.BIGDATAVIEWER ); // BDV, required by BVV
+		builder.discoverProviders( KeyConfigContexts.KEY_CONFIG_SCOPE );
 		setCommandDescriptions( builder.build() );
 	}
 }
