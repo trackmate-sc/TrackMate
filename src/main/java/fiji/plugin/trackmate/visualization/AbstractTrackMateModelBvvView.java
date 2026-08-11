@@ -14,6 +14,7 @@ import org.scijava.ui.behaviour.util.WrappedInputMap;
 
 import bdv.ui.keymap.Keymap;
 import bdv.ui.keymap.Keymap.UpdateListener;
+import bdv.ui.keymap.KeymapManager;
 import bvv.core.VolumeViewerFrame;
 import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.visualization.ui.KeyConfigContexts;
@@ -25,13 +26,13 @@ public abstract class AbstractTrackMateModelBvvView extends AbstractTrackMateMod
 
 	protected final Actions actions;
 
-	protected AbstractTrackMateModelBvvView( final GuiModel guiModel, final String... keyConfigContexts )
+	protected AbstractTrackMateModelBvvView( final GuiModel guiModel, final KeymapManager keymapManager, final String... keyConfigContexts )
 	{
 		super( guiModel );
 		final Set< String > c = new LinkedHashSet<>( Arrays.asList( KeyConfigContexts.TRACKMATE ) );
 		c.addAll( Arrays.asList( keyConfigContexts ) );
 		final String[] kccs = c.toArray( new String[] {} );
-		final Keymap keymap = guiModel.getKeymapManager().getForwardSelectedKeymap();
+		final Keymap keymap = keymapManager.getForwardSelectedKeymap();
 		this.behaviours = new Behaviours( keymap.getConfig(), kccs );
 		this.actions = new Actions( keymap.getConfig(), kccs );
 	}
@@ -45,7 +46,7 @@ public abstract class AbstractTrackMateModelBvvView extends AbstractTrackMateMod
 		actions.install( keybindings, "view2" );
 		behaviours.install( triggerbindings, "view2" );
 
-		final Keymap keymap = guiModel.getKeymapManager().getForwardSelectedKeymap();
+		final Keymap keymap = guiModel.getBvvKeymapManager().getForwardSelectedKeymap();
 		final UpdateListener updateListener = () -> {
 			behaviours.updateKeyConfig( keymap.getConfig() );
 			actions.updateKeyConfig( keymap.getConfig() );
@@ -56,6 +57,7 @@ public abstract class AbstractTrackMateModelBvvView extends AbstractTrackMateMod
 		final MouseAndKeyHandler mouseAndKeyHandler = new MouseAndKeyHandler();
 		mouseAndKeyHandler.setInputMap( triggerbindings.getConcatenatedInputTriggerMap() );
 		mouseAndKeyHandler.setBehaviourMap( triggerbindings.getConcatenatedBehaviourMap() );
+		mouseAndKeyHandler.setKeypressManager( guiModel.getKeyPressedManager(), viewerFrame.getViewerPanel().getDisplay().getComponent() );
 
 		// Register global actions, if any.
 		final Actions globalActions = guiModel.getGlobalActions();

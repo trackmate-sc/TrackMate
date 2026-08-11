@@ -65,7 +65,7 @@ public class TrackMateBVV< T extends Type< T > > extends AbstractTrackMateModelB
 
 	public TrackMateBVV( final GuiModel guiModel, final ImagePlus imp )
 	{
-		super( guiModel, KeyConfigContexts.BIGVOLUMEVIEWER, bvv.core.KeyConfigContexts.BIGVOLUMEVIEWER );
+		super( guiModel, guiModel.getBvvKeymapManager(), KeyConfigContexts.BIGVOLUMEVIEWER, bvv.core.KeyConfigContexts.BIGVOLUMEVIEWER );
 		this.meshMap = new HashMap<>();
 
 		final Model model = guiModel.getModel();

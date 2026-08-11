@@ -43,7 +43,6 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.util.TMUtils;
-import fiji.plugin.trackmate.visualization.ui.TrackMateKeymapManager;
 import ij.CompositeImage;
 import ij.ImagePlus;
 import ij.measure.Calibration;
@@ -85,17 +84,18 @@ public class BVVUtils
 		 */
 
 		final ImagePlus imp = guiModel.getSettings().imp;
-		final TrackMateKeymapManager keymapManager = guiModel.getKeymapManager();
-		final InputTriggerConfig config = keymapManager.getForwardSelectedKeymap().getConfig();
+		final BVVKeymapManager bvvKeymapManager = guiModel.getBvvKeymapManager();
+		final InputTriggerConfig config = bvvKeymapManager.getForwardSelectedKeymap().getConfig();
 		final AppearanceManager appearanceManager = guiModel.getAppearanceManager();
-		
+
 		final VolumeViewerOptions options = VolumeViewerOptions.options()
 				.inputTriggerConfig( config )
 				.maxAllowedStepInVoxels( 0 )
 				.renderWidth( 1024 )
 				.renderHeight( 1024 )
-				.keymapManager( keymapManager )
+				.keymapManager( bvvKeymapManager )
 				.appearanceManager( appearanceManager )
+				.shareKeyPressedEvents( guiModel.getKeyPressedManager() )
 				.height( 512 )
 				.width( 512 );
 
