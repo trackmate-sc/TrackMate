@@ -118,6 +118,7 @@ public abstract class AbstractTrackMateModelJFrameView extends AbstractTrackMate
 	{
 		SwingUtilities.replaceUIActionMap( component, keybindings.getConcatenatedActionMap() );
 		SwingUtilities.replaceUIInputMap( component, JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, keybindings.getConcatenatedInputMap() );
+		mouseAndKeyHandler.setKeypressManager( guiModel.getKeyPressedManager(), component );
 		component.addKeyListener( mouseAndKeyHandler );
 		component.addMouseListener( mouseAndKeyHandler );
 		component.addMouseMotionListener( mouseAndKeyHandler );
