@@ -62,6 +62,7 @@ import net.imglib2.algorithm.neighborhood.DiamondShape;
 import net.imglib2.roi.labeling.LabelingType;
 import net.imglib2.type.Type;
 import net.imglib2.type.numeric.IntegerType;
+import net.imglib2.util.Intervals;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.Views;
 import sc.fiji.labkit.ui.brush.BdvMouseBehaviourUtils;
@@ -278,10 +279,15 @@ public class TMFloodFillController
 			synchronized ( viewer )
 			{
 				RandomAccessibleInterval< LabelingType< Label > > frame = labeling();
+				final long z;
 				if ( frame.numDimensions() == 3 && planarMode )
 				{
-					final long z = Math.round( imageCoordinates.getDoublePosition( 2 ) );
+					z = Math.round( imageCoordinates.getDoublePosition( 2 ) );
 					frame = Views.hyperSlice( frame, 2, z );
+				}
+				else
+				{
+					z = -1;
 				}
 				final Point seed = roundAndReduceDimension( imageCoordinates, frame.numDimensions() );
 				final Consumer< Set< Label > > operation = operationFactory.get();
@@ -292,7 +298,12 @@ public class TMFloodFillController
 					model.undoRedo().startUndo( frameIndex );
 
 					// Execute flood fill and get the affected region
-					final Interval region = FloodFill.doFloodFillOnActiveLabels( frame, seed, operation );
+					Interval region = FloodFill.doFloodFillOnActiveLabels( frame, seed, operation );
+
+					// If the fill region is 2D and the input 3D, upgrade the
+					// region to 3D, and set the 3rd dim to Z.
+					if ( z >= 0 )
+						region = Intervals.addDimension( region, z, z );
 
 					// Set undo point after modifying
 					model.undoRedo().setUndoPoint( region );

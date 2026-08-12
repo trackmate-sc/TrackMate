@@ -477,8 +477,6 @@ public class ConfigureViewsPanel extends JPanel
 		{
 			super( "Launch spot editor", Icons.SEGMENTATION_EDITOR_ICON_64x64 );
 			putValue( SHORT_DESCRIPTION, "Launch the Labkit editor to edit spot segmentation." );
-			// TODO when we go for 3D editor.
-			setEnabled( DetectionUtils.is2D( guiModel.getSettings().imp ) );
 		}
 
 		@Override

@@ -62,6 +62,7 @@ import fiji.plugin.trackmate.gui.editor.labkit.model.TMImageLabelingModel;
 import net.miginfocom.swing.MigLayout;
 import sc.fiji.labkit.ui.bdv.BdvAutoContrast;
 import sc.fiji.labkit.ui.bdv.BdvLayer;
+import sc.fiji.labkit.ui.brush.PlanarModeController;
 import sc.fiji.labkit.ui.labeling.Label;
 import sc.fiji.labkit.ui.labeling.LabelsLayer;
 import sc.fiji.labkit.ui.models.Holder;
@@ -191,11 +192,25 @@ public class TMBasicLabelingComponent extends JPanel implements AutoCloseable
 		this.floodFillController = new TMFloodFillController( bdvHandle, model );
 		this.selectLabelController = new TMSelectLabelController( bdvHandle, model );
 
-		this.toolsPanel = new TMLabelToolsPanel( brushController, floodFillController, selectLabelController );
 		// Hide the zSlider toggle button if we are 2D
 		final boolean is2D = DetectionUtils.is2D( model.imageForSegmentation().get() );
 		if ( is2D )
 			zSlider.setVisible( false );
+		final PlanarModeController planarModeController = is2D
+				? null
+				: new PlanarModeController( bdvHandle, model, zSlider );
+
+		/*
+		 * Fix the viewer transform after deactivating planar mode. We must
+		 * reset the view to a proper 3D state after deactivating planar mode,
+		 * otherwise the 3D view becomes weirdly distorted. This is because the
+		 * planar mode controller modifies the viewer transform to make it look
+		 * like a 2D view, and we need to reset it back to a proper 3D view when
+		 * we exit planar mode. The issue is that it resets the view but that's
+		 * life.
+		 */
+		final Runnable onDeactivatePlanarMode = () -> model.transformationModel().resetView();
+		this.toolsPanel = new TMLabelToolsPanel( brushController, floodFillController, selectLabelController, planarModeController, onDeactivatePlanarMode );
 
 		// To edit TrackMate spots, fill and erase replace existing labels.
 		floodFillController.setFloodEraseMode( FloodEraseMode.REMOVE_ALL );
