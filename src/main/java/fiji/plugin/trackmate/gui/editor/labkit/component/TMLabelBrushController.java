@@ -488,9 +488,9 @@ public class TMLabelBrushController
 		/** Creates an interval representing the initial brush stroke region. */
 		private static final FinalInterval createStrokeRegion( final double[] center, final int radius )
 		{
-			final long[] min = new long[ 2 ];
-			final long[] max = new long[ 2 ];
-			for ( int d = 0; d < 2; d++ )
+			final long[] min = new long[ center.length ];
+			final long[] max = new long[ center.length ];
+			for ( int d = 0; d < center.length; d++ )
 			{
 				min[ d ] = ( long ) Math.floor( center[ d ] - radius );
 				max[ d ] = ( long ) Math.ceil( center[ d ] + radius );
