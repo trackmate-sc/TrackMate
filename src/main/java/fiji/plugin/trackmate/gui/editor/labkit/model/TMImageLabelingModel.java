@@ -33,7 +33,6 @@ import sc.fiji.labkit.ui.inputimage.ImgPlusViewsOld;
 import sc.fiji.labkit.ui.inputimage.InputImage;
 import sc.fiji.labkit.ui.labeling.Label;
 import sc.fiji.labkit.ui.models.ImageLabelingModel;
-import sc.fiji.labkit.ui.models.TransformationModel;
 
 public class TMImageLabelingModel extends ImageLabelingModel
 {
@@ -56,7 +55,7 @@ public class TMImageLabelingModel extends ImageLabelingModel
 	}
 
 	@Override
-	public TransformationModel transformationModel()
+	public TMTransformationModel transformationModel()
 	{
 		return tmTranslationModel;
 	}
