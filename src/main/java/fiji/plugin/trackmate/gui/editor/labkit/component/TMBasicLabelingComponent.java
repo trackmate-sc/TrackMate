@@ -199,7 +199,18 @@ public class TMBasicLabelingComponent extends JPanel implements AutoCloseable
 		final PlanarModeController planarModeController = is2D
 				? null
 				: new PlanarModeController( bdvHandle, model, zSlider );
-		this.toolsPanel = new TMLabelToolsPanel( brushController, floodFillController, selectLabelController, planarModeController );
+
+		/*
+		 * Fix the viewer transform after deactivating planar mode. We must
+		 * reset the view to a proper 3D state after deactivating planar mode,
+		 * otherwise the 3D view becomes weirdly distorted. This is because the
+		 * planar mode controller modifies the viewer transform to make it look
+		 * like a 2D view, and we need to reset it back to a proper 3D view when
+		 * we exit planar mode. The issue is that it resets the view but that's
+		 * life.
+		 */
+		final Runnable onDeactivatePlanarMode = () -> model.transformationModel().resetView();
+		this.toolsPanel = new TMLabelToolsPanel( brushController, floodFillController, selectLabelController, planarModeController, onDeactivatePlanarMode );
 
 		// To edit TrackMate spots, fill and erase replace existing labels.
 		floodFillController.setFloodEraseMode( FloodEraseMode.REMOVE_ALL );

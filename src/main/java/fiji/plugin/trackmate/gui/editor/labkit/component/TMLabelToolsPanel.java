@@ -109,6 +109,8 @@ public class TMLabelToolsPanel extends JPanel
 
 	private final PlanarModeController planarModeController;
 
+	private final Runnable onDeactivatePlanarMode;
+
 	private final ButtonGroup group = new ButtonGroup();
 
 	private Mode mode = ignore -> {};
@@ -149,12 +151,14 @@ public class TMLabelToolsPanel extends JPanel
 			final TMLabelBrushController brushController,
 			final TMFloodFillController floodFillController,
 			final TMSelectLabelController selectLabelController,
-			final PlanarModeController planarModeController )
+			final PlanarModeController planarModeController,
+			final Runnable onDeactivatePlanarMode )
 	{
 		this.brushController = brushController;
 		this.floodFillController = floodFillController;
 		this.selectLabelController = selectLabelController;
 		this.planarModeController = planarModeController;
+		this.onDeactivatePlanarMode = onDeactivatePlanarMode;
 
 		// Create buttons first
 		this.moveBtn = addActionButton( MOVE_TOOL_TIP, ignore -> {}, false, "/images/move.png" );
@@ -438,6 +442,9 @@ public class TMLabelToolsPanel extends JPanel
 			planarModeController.setActive( selected );
 			floodFillController.setPlanarMode( selected );
 			brushController.setPlanarMode( selected );
+			// Call the callback when deactivating planar mode to fix the transform
+			if ( !selected && onDeactivatePlanarMode != null )
+				onDeactivatePlanarMode.run();
 		} );
 		button.setToolTipText( ENABLE_TEXT );
 		return button;
