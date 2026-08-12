@@ -52,7 +52,7 @@ import sc.fiji.labkit.ui.labeling.Labeling;
 public class LabkitImporter
 {
 
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 
 	private final Model model;
 
