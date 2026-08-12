@@ -354,10 +354,6 @@ public class TMLabKitModel implements SegmentationModel
 						? new AxisType[] { Axes.X, Axes.Y }
 						: new AxisType[] { Axes.X, Axes.Y, Axes.TIME };
 
-		// For now: 2D only.
-		if ( is3D )
-			throw new UnsupportedOperationException( "Using LabKit with TrackMate is only supported for 2D for now." );
-
 		// N dimensions.
 		final int nDims = is3D
 				? singleTimePoint ? 3 : 4
