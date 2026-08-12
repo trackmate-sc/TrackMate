@@ -49,6 +49,7 @@ import fiji.plugin.trackmate.gui.editor.labkit.component.TMFloodFillController.F
 import fiji.plugin.trackmate.gui.editor.labkit.component.TMLabelBrushController.EraseBrushMode;
 import fiji.plugin.trackmate.gui.editor.labkit.component.TMLabelBrushController.PaintBrushMode;
 import net.miginfocom.swing.MigLayout;
+import sc.fiji.labkit.ui.brush.PlanarModeController;
 
 /**
  * Panel with the tool buttons for brush, flood fill, etc... Activates and
@@ -106,6 +107,8 @@ public class TMLabelToolsPanel extends JPanel
 
 	private final TMSelectLabelController selectLabelController;
 
+	private final PlanarModeController planarModeController;
+
 	private final ButtonGroup group = new ButtonGroup();
 
 	private Mode mode = ignore -> {};
@@ -132,6 +135,8 @@ public class TMLabelToolsPanel extends JPanel
 
 	private final JPanel floodEraseModePanel;
 
+	private final JToggleButton planarModePanel;
+
 	private JComboBox< TMLabelBrushController.PaintBrushMode > paintModeCombo;
 
 	private JComboBox< TMLabelBrushController.EraseBrushMode > eraseModeCombo;
@@ -143,11 +148,13 @@ public class TMLabelToolsPanel extends JPanel
 	public TMLabelToolsPanel(
 			final TMLabelBrushController brushController,
 			final TMFloodFillController floodFillController,
-			final TMSelectLabelController selectLabelController )
+			final TMSelectLabelController selectLabelController,
+			final PlanarModeController planarModeController )
 	{
 		this.brushController = brushController;
 		this.floodFillController = floodFillController;
 		this.selectLabelController = selectLabelController;
+		this.planarModeController = planarModeController;
 
 		// Create buttons first
 		this.moveBtn = addActionButton( MOVE_TOOL_TIP, ignore -> {}, false, "/images/move.png" );
@@ -163,6 +170,7 @@ public class TMLabelToolsPanel extends JPanel
 		this.eraseModePanel = initEraseModePanel();
 		this.floodFillModePanel = initFloodFillModePanel();
 		this.floodEraseModePanel = initFloodEraseModePanel();
+		this.planarModePanel = initPlanarModeButton();
 
 		// Setup layout
 		setLayout( new MigLayout( "insets 0, gap 4", "", "[]" ) );
@@ -184,6 +192,8 @@ public class TMLabelToolsPanel extends JPanel
 		add( eraseModePanel, "hidemode 3, h 32!" );
 		add( floodFillModePanel, "hidemode 3, h 32!" );
 		add( floodEraseModePanel, "hidemode 3, h 32!" );
+		if ( planarModePanel != null )
+			add( planarModePanel, "aligny center, pushx, alignx right" );
 
 		// Set initial state
 		moveBtn.doClick();
@@ -407,6 +417,30 @@ public class TMLabelToolsPanel extends JPanel
 			valLabel.setText( String.valueOf( brushSize.getValue() ) );
 		} );
 		return valLabel;
+	}
+
+	private JToggleButton initPlanarModeButton()
+	{
+		if ( planarModeController == null )
+			return null;
+
+		final JToggleButton button = new JToggleButton();
+		final ImageIcon rotateIcon = getIcon( "/images/rotate.png" );
+		final ImageIcon planarIcon = getIcon( "/images/planes.png" );
+		button.setIcon( rotateIcon );
+		button.setFocusable( false );
+		final String ENABLE_TEXT = "Click to: Enable slice by slice editing of 3d images.";
+		final String DISABLE_TEXT = "Click to: Disable slice by slice editing and freely rotate 3d images.";
+		button.addActionListener( ignore -> {
+			final boolean selected = button.isSelected();
+			button.setIcon( selected ? planarIcon : rotateIcon );
+			button.setToolTipText( selected ? DISABLE_TEXT : ENABLE_TEXT );
+			planarModeController.setActive( selected );
+			floodFillController.setPlanarMode( selected );
+			brushController.setPlanarMode( selected );
+		} );
+		button.setToolTipText( ENABLE_TEXT );
+		return button;
 	}
 
 	private interface Mode

@@ -62,6 +62,7 @@ import fiji.plugin.trackmate.gui.editor.labkit.model.TMImageLabelingModel;
 import net.miginfocom.swing.MigLayout;
 import sc.fiji.labkit.ui.bdv.BdvAutoContrast;
 import sc.fiji.labkit.ui.bdv.BdvLayer;
+import sc.fiji.labkit.ui.brush.PlanarModeController;
 import sc.fiji.labkit.ui.labeling.Label;
 import sc.fiji.labkit.ui.labeling.LabelsLayer;
 import sc.fiji.labkit.ui.models.Holder;
@@ -191,11 +192,14 @@ public class TMBasicLabelingComponent extends JPanel implements AutoCloseable
 		this.floodFillController = new TMFloodFillController( bdvHandle, model );
 		this.selectLabelController = new TMSelectLabelController( bdvHandle, model );
 
-		this.toolsPanel = new TMLabelToolsPanel( brushController, floodFillController, selectLabelController );
 		// Hide the zSlider toggle button if we are 2D
 		final boolean is2D = DetectionUtils.is2D( model.imageForSegmentation().get() );
 		if ( is2D )
 			zSlider.setVisible( false );
+		final PlanarModeController planarModeController = is2D
+				? null
+				: new PlanarModeController( bdvHandle, model, zSlider );
+		this.toolsPanel = new TMLabelToolsPanel( brushController, floodFillController, selectLabelController, planarModeController );
 
 		// To edit TrackMate spots, fill and erase replace existing labels.
 		floodFillController.setFloodEraseMode( FloodEraseMode.REMOVE_ALL );
