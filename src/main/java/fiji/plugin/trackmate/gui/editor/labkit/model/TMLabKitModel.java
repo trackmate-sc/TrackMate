@@ -288,6 +288,12 @@ public class TMLabKitModel implements SegmentationModel
 			max[ yAxis ] = interval.max( yAxis );
 			final RandomAccessibleInterval crop = Views.interval( view, min, max );
 			fov = ImgPlus.wrapRAI( crop );
+			// Copy space axes.
+			final int[] spaceAxes = ( view.dimensionIndex( Axes.Z ) >= 0 )
+					? new int[] { xAxis, yAxis, view.dimensionIndex( Axes.Z ) }
+					: new int[] { xAxis, yAxis };
+			for ( final int d : spaceAxes )
+				fov.setAxis( view.axis( d ), d );
 			// Copy time axis if we have it.
 			if ( !singleTimePoint && timeAxis >= 0 )
 				fov.setAxis( view.axis( timeAxis ), timeAxis );
@@ -421,7 +427,7 @@ public class TMLabKitModel implements SegmentationModel
 		// Write spots in it with index = id + 1 and build a map index -> spot.
 		final SpotCollection spots = model.getSpots();
 		final Map< Label, Spot > spotLabels = new HashMap<>();
-		final long[] sourceImgMax = new long[] { imp.getWidth() - 1, imp.getHeight() - 1 };
+		final long[] sourceImgMax = new long[] { imp.getWidth() - 1, imp.getHeight() - 1, imp.getNSlices() - 1 };
 		if ( singleTimePoint )
 		{
 			processFrame( labeling, lblImgPlus, spots, timepoint, origin, colorGen, spotLabels, sourceImgMax );
@@ -509,18 +515,21 @@ public class TMLabKitModel implements SegmentationModel
 		}
 		else
 		{
-			final long[] intervalMax = new long[ 2 ];
+			final int nSpaceDims = ( lblImgPlus.dimensionIndex( Axes.Z ) < 0 ) ? 2 : 3;
+			final long[] intervalMax = new long[ nSpaceDims ];
+			final long[] intervalMin = new long[ nSpaceDims ];
 			img.max( intervalMax );
 			// Are we touching the border of the source image?
-			for ( int d = 0; d < 2; d++ )
+			for ( int d = 0; d < nSpaceDims; d++ )
 			{
+				intervalMin[ d ] = origin[ d ];
 				if ( sourceImgMax[ d ] == intervalMax[ d ] )
 					intervalMax[ d ]++;
 			}
-			final FinalInterval imgBB = Intervals.createMinMax( origin[ 0 ], origin[ 1 ], intervalMax[ 0 ], intervalMax[ 1 ] );
+			final FinalInterval imgBB = new FinalInterval( intervalMin, intervalMax );
 
-			final long[] min = new long[ 2 ];
-			final long[] max = new long[ 2 ];
+			final long[] min = new long[ nSpaceDims ];
+			final long[] max = new long[ nSpaceDims ];
 			final FinalInterval spotBB = FinalInterval.wrap( min, max );
 			for ( final Spot spot : spotsThisFrame )
 			{
