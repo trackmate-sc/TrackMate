@@ -69,12 +69,12 @@ public class TMLabKitActions
 		 */
 
 		final PreferencesDialog preferencesDialog = new PreferencesDialog( frame, keymap, new String[] { KEY_CONFIG_CONTEXT } );
-		preferencesDialog.setTitle( "Editor Preferences" );
+		preferencesDialog.setTitle( "Segmentation editor Preferences" );
 		fiji.plugin.trackmate.gui.GuiUtils.positionWindow( preferencesDialog, frame );
 		BigDataViewerActions.toggleDialogAction( actions, preferencesDialog, BigDataViewerActions.PREFERENCES_DIALOG, BigDataViewerActions.PREFERENCES_DIALOG_KEYS );
 
 		preferencesDialog.addPage( new KeymapSettingsPage( "Editor keymap", keymapManager, keymapManager.getCommandDescriptions() ) );
-		preferencesDialog.addPage( new AppearanceSettingsPage( "Editor appearance", appearanceManager ) );
+		preferencesDialog.addPage( new AppearanceSettingsPage( "BDVs appearance", appearanceManager ) );
 		appearanceManager.appearance().updateListeners().add( frame::repaint );
 		SwingUtilities.invokeLater( () -> appearanceManager.updateLookAndFeel() );
 
@@ -82,7 +82,7 @@ public class TMLabKitActions
 		 * View actions
 		 */
 
-		final TMTransformationModel transformationModel = ( TMTransformationModel ) model.imageLabelingModel().transformationModel();
+		final TMTransformationModel transformationModel = model.imageLabelingModel().transformationModel();
 		actions.runnableAction( () -> transformationModel.resetView(), RESET_VIEW, RESET_VIEW_KEYS );
 
 		/*

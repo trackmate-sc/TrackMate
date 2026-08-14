@@ -88,7 +88,7 @@ public class TMLabKitFrame extends JFrame
 
 	public static final String EDITOR_KEYMAP_HOME = new File( new File( System.getProperty( "user.home" ), ".trackmate" ), "editor" ).getAbsolutePath();
 
-	static final String KEY_CONFIG_CONTEXT = "trackmate-labkit";
+	static final String KEY_CONFIG_CONTEXT = "segmentation-editor";
 
 	static final Scope KEY_CONFIG_SCOPE = new Scope( KEY_CONFIG_CONTEXT );
 

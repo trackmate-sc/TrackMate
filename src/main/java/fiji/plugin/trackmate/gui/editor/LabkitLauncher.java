@@ -41,7 +41,6 @@ import fiji.plugin.trackmate.gui.editor.labkit.model.TMLabKitModel;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.visualization.ViewUtils;
 import ij.ImagePlus;
-import ij.gui.Roi;
 import net.imagej.axis.Axes;
 import net.imagej.axis.CalibratedAxis;
 import sc.fiji.labkit.ui.labeling.Labeling;
@@ -71,14 +70,14 @@ public class LabkitLauncher
 		GuiUtils.positionWindow( labkit, imp.getWindow() );
 		labkit.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
 
-		// Hook to perform reimport when we close the UI.
+		// Hook to perform re-import when we close the UI.
 		labkit.onCloseListeners().addListener( () -> reimport( lbModel, timepoint ) );
 
 		// Show the UI.
 		labkit.setIconImage( Icons.SEGMENTATION_EDITOR_ICON.getImage() );
 		labkit.setSize( 1000, 800 );
 		GuiUtils.positionWindow( labkit, imp.getWindow() );
-		labkit.setTitle( "TrackMate editor on " + imp.getShortTitle() );
+		labkit.setTitle( "Segmentation editor on " + imp.getShortTitle() );
 		labkit.setVisible( true );
 		return labkit;
 	}
@@ -86,7 +85,7 @@ public class LabkitLauncher
 	private static void reimport( final TMLabKitModel lbModel, final int timepoint )
 	{
 
-		new Thread( "TrackMate-LabKit-Importer-thread" )
+		new Thread( "TrackMate-Labkit-Importer-thread" )
 		{
 			@Override
 			public void run()
@@ -143,7 +142,8 @@ public class LabkitLauncher
 
 	public static void main( final String[] args )
 	{
-		final String filename = "samples/MAX_Merged.xml";
+//		final String filename = "samples/MAX_Merged.xml";
+		final String filename = "samples/CElegans3D-smoothed-mask-orig-02.xml";
 //		final String filename = "samples/221031_Stat_Stage55_561nm_part1Conf_crop_f4.xml";
 		final TmXmlReader reader = new TmXmlReader( new File( filename ) );
 		if ( !reader.isReadingOk() )
@@ -154,16 +154,19 @@ public class LabkitLauncher
 
 		final Model model = reader.getModel();
 		final ImagePlus imp = reader.readImage();
-		imp.setRoi( new Roi( 10, 30, 100, 100 ) );
+//		imp.setRoi( new Roi( 10, 30, 200, 100 ) );
 		final Settings settings = reader.readSettings( imp );
 		final DisplaySettings ds = reader.getDisplaySettings();
 		final GuiModel guiModel = new GuiModel( model, settings, ds );
 
 		// Main view.
+		final int frame = 6;
 		guiModel.getWindowManager().createHyperStackDisplayer();
-		imp.setSlice( 7 );
+		imp.setT( frame + 1 );
+		imp.setZ( imp.getNSlices() / 2 + 1 );
+//		imp.setDisplayMode( CompositeImage.COMPOSITE );
 
 		// Editor
-		LabkitLauncher.launch( guiModel, -1 );
+		LabkitLauncher.launch( guiModel, frame );
 	}
 }

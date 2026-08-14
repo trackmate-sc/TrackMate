@@ -21,7 +21,7 @@ public interface KeyConfigContexts
 	 * The action or behaviour applies to the {@link HyperStackDisplayer} view
 	 * (the main view).
 	 */
-	String HYPERSTACK_DISPLAYER = "trackmate-main-view";
+	String HYPERSTACK_DISPLAYER = "main-view";
 
 	/**
 	 * The action or behaviour applies to TrackScheme views.
@@ -41,6 +41,6 @@ public interface KeyConfigContexts
 	/**
 	 * The action or behaviour applies to the BVV views.
 	 */
-	String BIGVOLUMEVIEWER = "bigvolumeviewer";
+	String BIGVOLUMEVIEWER = "3d-view";
 
 }

@@ -69,8 +69,8 @@ public class WindowManager
 		preferencesDialog.setLocationRelativeTo( null );
 		BigDataViewerActions.toggleDialogAction( globalActions, preferencesDialog, BigDataViewerActions.PREFERENCES_DIALOG, BigDataViewerActions.PREFERENCES_DIALOG_KEYS );
 		preferencesDialog.addPage( new DisplaySettingsConfigPage( "Display settings", guiModel.getDisplaySettingsManager() ) );
-		preferencesDialog.addPage( new KeymapSettingsPage( "Global keymap", keymapManager, keymapManager.getCommandDescriptions() ) );
-		preferencesDialog.addPage( new KeymapSettingsPage( "Spot editor keymap", guiModel.getEditorKeymapManager(), guiModel.getEditorKeymapManager().getCommandDescriptions() ) );
+		preferencesDialog.addPage( new KeymapSettingsPage( "Global keymaps", keymapManager, keymapManager.getCommandDescriptions() ) );
+		preferencesDialog.addPage( new KeymapSettingsPage( "Editor keymap", guiModel.getEditorKeymapManager(), guiModel.getEditorKeymapManager().getCommandDescriptions() ) );
 		preferencesDialog.addPage( new KeymapSettingsPage( "3D View keymap", guiModel.getBvvKeymapManager(), guiModel.getBvvKeymapManager().getCommandDescriptions() ) );
 		preferencesDialog.addPage( new SpotEditToolSettingsPage( "Semi-auto tracking", guiModel.getSemiAutoTrackingParams() ) );
 		preferencesDialog.addPage( new AppearanceSettingsPage( "BDVs appearance", guiModel.getAppearanceManager() ) );
