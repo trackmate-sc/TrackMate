@@ -222,22 +222,19 @@ public class ImpBdvShowable implements BdvShowable
 	private static ImgPlus< ? extends NumericType< ? > > prepareImage(
 			final ImgPlus< ? extends NumericType< ? > > image )
 	{
-		final List< AxisType > order = Arrays.asList( Axes.X, Axes.Y, Axes.Z, Axes.CHANNEL,
-				Axes.TIME );
+		final List< AxisType > order = Arrays.asList( Axes.X, Axes.Y, Axes.Z, Axes.CHANNEL, Axes.TIME );
 		return ImgPlusViewsOld.sortAxes( labelAxes( image ), order );
 	}
 
-	private static ImgPlus< ? extends NumericType< ? > > labelAxes(
-			final ImgPlus< ? extends NumericType< ? > > image )
+	private static ImgPlus< ? extends NumericType< ? > > labelAxes( final ImgPlus< ? extends NumericType< ? > > image )
 	{
 		if ( image.firstElement() instanceof ARGBType )
-			return ImgPlusViewsOld
-					.fixAxes( image, Arrays.asList( Axes.X, Axes.Y, Axes.Z, Axes.TIME ) );
+			return ImgPlusViewsOld.fixAxes( image, Arrays.asList( Axes.X, Axes.Y, Axes.Z, Axes.TIME ) );
+
 		if ( image.numDimensions() == 4 )
-			return ImgPlusViewsOld.fixAxes( image, Arrays
-					.asList( Axes.X, Axes.Y, Axes.Z, Axes.TIME, Axes.CHANNEL ) );
-		return ImgPlusViewsOld.fixAxes( image, Arrays.asList( Axes.X, Axes.Y, Axes.Z,
-				Axes.CHANNEL, Axes.TIME ) );
+			return ImgPlusViewsOld.fixAxes( image, Arrays.asList( Axes.X, Axes.Y, Axes.Z, Axes.TIME, Axes.CHANNEL ) );
+
+		return ImgPlusViewsOld.fixAxes( image, Arrays.asList( Axes.X, Axes.Y, Axes.Z, Axes.CHANNEL, Axes.TIME ) );
 	}
 
 	private double getCalibration( final AxisType axisType )
