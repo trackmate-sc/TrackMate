@@ -25,6 +25,7 @@ import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
 import static fiji.plugin.trackmate.gui.Fonts.FONT;
 import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
 import static fiji.plugin.trackmate.gui.Icons.BVV_ICON;
+import static fiji.plugin.trackmate.gui.Icons.EDIT_SETTINGS_ICON;
 import static fiji.plugin.trackmate.gui.Icons.SPOT_TABLE_ICON;
 import static fiji.plugin.trackmate.gui.Icons.TRACK_SCHEME_ICON_16x16;
 import static fiji.plugin.trackmate.gui.Icons.TRACK_TABLES_ICON;
@@ -41,6 +42,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -54,6 +56,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 
+import bdv.BigDataViewerActions;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.GuiUtils;
@@ -118,6 +121,24 @@ public class ConfigureViewsPanel extends JPanel
 		gbcLabelDisplayOptions.gridx = 0;
 		gbcLabelDisplayOptions.gridy = 0;
 		add( lblDisplayOptions, gbcLabelDisplayOptions );
+
+		/*
+		 * Preferences dialog.
+		 */
+
+		final JButton btnPrefs = new JButton( EDIT_SETTINGS_ICON );
+		final Action prefDialogAction = guiModel.getGlobalActions().getActionMap().get( BigDataViewerActions.PREFERENCES_DIALOG );
+		btnPrefs.setAction( prefDialogAction );
+		btnPrefs.setIcon( EDIT_SETTINGS_ICON );
+		btnPrefs.setText( "Prefs" );
+
+		final GridBagConstraints gbcBtnEditSettings = new GridBagConstraints();
+		gbcBtnEditSettings.fill = GridBagConstraints.NONE;
+		gbcBtnEditSettings.insets = new Insets( 5, 5, 5, 5 );
+		gbcBtnEditSettings.anchor = GridBagConstraints.EAST;
+		gbcBtnEditSettings.gridx = 1;
+		gbcBtnEditSettings.gridy = 0;
+		add( btnPrefs, gbcBtnEditSettings );
 
 		/*
 		 * Display spot checkbox.
