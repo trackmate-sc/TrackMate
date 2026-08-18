@@ -40,6 +40,7 @@ import fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame;
 import fiji.plugin.trackmate.gui.editor.labkit.model.TMLabKitModel;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.visualization.ViewUtils;
+import fiji.plugin.trackmate.visualization.bvv.BVVKeymapManager;
 import ij.ImagePlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.CalibratedAxis;
@@ -65,8 +66,9 @@ public class LabkitLauncher
 
 		// Create the UI for editing.
 		final EditorKeymapManager keymapManager = guiModel.getEditorKeymapManager();
+		final BVVKeymapManager bvvKeymapManager = guiModel.getBvvKeymapManager();
 		final AppearanceManager appearanceManager = guiModel.getAppearanceManager();
-		final TMLabKitFrame labkit = new TMLabKitFrame( lbModel, keymapManager, appearanceManager );
+		final TMLabKitFrame labkit = new TMLabKitFrame( lbModel, keymapManager, bvvKeymapManager, appearanceManager );
 		GuiUtils.positionWindow( labkit, imp.getWindow() );
 		labkit.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
 

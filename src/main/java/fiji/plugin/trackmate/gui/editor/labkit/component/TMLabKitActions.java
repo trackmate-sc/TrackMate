@@ -60,6 +60,7 @@ public class TMLabKitActions
 			final ViewerPanel viewerPanel,
 			final InputActionBindings keybindings,
 			final KeymapManager keymapManager,
+			final KeymapManager bdvKeymapManager,
 			final AppearanceManager appearanceManager )
 	{
 		final Keymap keymap = keymapManager.getForwardSelectedKeymap();
@@ -74,7 +75,8 @@ public class TMLabKitActions
 		BigDataViewerActions.toggleDialogAction( actions, preferencesDialog, BigDataViewerActions.PREFERENCES_DIALOG, BigDataViewerActions.PREFERENCES_DIALOG_KEYS );
 
 		preferencesDialog.addPage( new KeymapSettingsPage( "Editor keymap", keymapManager, keymapManager.getCommandDescriptions() ) );
-		preferencesDialog.addPage( new AppearanceSettingsPage( "BDVs appearance", appearanceManager ) );
+		preferencesDialog.addPage( new KeymapSettingsPage( "BDV navigation keymap", bdvKeymapManager, bdvKeymapManager.getCommandDescriptions() ) );
+		preferencesDialog.addPage( new AppearanceSettingsPage( "BDV appearance", appearanceManager ) );
 		appearanceManager.appearance().updateListeners().add( frame::repaint );
 		SwingUtilities.invokeLater( () -> appearanceManager.updateLookAndFeel() );
 

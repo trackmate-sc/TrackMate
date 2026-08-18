@@ -61,12 +61,12 @@ import org.scijava.ui.behaviour.util.TriggerBehaviourBindings;
 
 import bdv.ui.appearance.AppearanceManager;
 import bdv.ui.keymap.Keymap;
-import bdv.ui.keymap.KeymapManager;
 import bdv.util.BdvOptions;
 import bdv.viewer.ViewerPanel;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.editor.labkit.model.TMImageLabelingModel;
 import fiji.plugin.trackmate.gui.editor.labkit.model.TMLabKitModel;
+import fiji.plugin.trackmate.visualization.bvv.BVVKeymapManager;
 import net.imglib2.Dimensions;
 import net.imglib2.util.Intervals;
 import net.miginfocom.swing.MigLayout;
@@ -94,29 +94,19 @@ public class TMLabKitFrame extends JFrame
 
 	private final Notifier onCloseListeners = new Notifier();
 
-	public TMLabKitFrame( final TMLabKitModel model, final EditorKeymapManager kmp, final AppearanceManager am )
+	public TMLabKitFrame( final TMLabKitModel model, final EditorKeymapManager kmp, final BVVKeymapManager bvvKmp, final AppearanceManager am )
 	{
 		final TMImageLabelingModel imageLabelingModel = model.imageLabelingModel();
 		final EditorKeymapManager keymapManager = ( kmp == null ) ? new EditorKeymapManager() : kmp;
+		final BVVKeymapManager bdvKeymapManager = ( bvvKmp == null ) ? new BVVKeymapManager() : bvvKmp;
 		final AppearanceManager appearanceManager = ( am == null ) ? new AppearanceManager( EDITOR_KEYMAP_HOME ) : am;
 
-		/*
-		 * Here we create a specific config for BDV, so that we can use a custom
-		 * keymap selected not to interfere with the TrackMate-Labkit keymap. I
-		 * could not find a way to update the BDV keymap dynamically (the
-		 * Actions instances are private, so I could not add a listener to it).
-		 * So the only solution is to initialize the BDV window with a custom
-		 * keymap, configured rationally, and leave it as is.
-		 */
-		final KeymapManager bdvKeymapManager = new KeymapManager();
 		final Keymap bdvKeymap = bdvKeymapManager.getForwardSelectedKeymap();
-		bdvKeymap.set( EditorKeymapManager.loadBDVKeymap() );
-
 		final BdvOptions options = BdvOptions.options()
 				.inputTriggerConfig( bdvKeymap.getConfig() )
 				.keymapManager( bdvKeymapManager )
-				.appearanceManager( appearanceManager )
-		;
+				.appearanceManager( appearanceManager );
+
 		if ( imageLabelingModel.spatialDimensions().numDimensions() < 3 )
 			options.is2D();
 
@@ -185,6 +175,7 @@ public class TMLabKitFrame extends JFrame
 				viewerPanel,
 				keybindings,
 				keymapManager,
+				bdvKeymapManager,
 				appearanceManager );
 		mainPanel.install( myActions, myBehaviours );
 
