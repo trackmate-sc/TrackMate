@@ -71,9 +71,9 @@ public class WindowManager
 		preferencesDialog.addPage( new DisplaySettingsConfigPage( "Display settings", guiModel.getDisplaySettingsManager() ) );
 		preferencesDialog.addPage( new KeymapSettingsPage( "Global keymaps", keymapManager, keymapManager.getCommandDescriptions() ) );
 		preferencesDialog.addPage( new KeymapSettingsPage( "Editor keymap", guiModel.getEditorKeymapManager(), guiModel.getEditorKeymapManager().getCommandDescriptions() ) );
-		preferencesDialog.addPage( new KeymapSettingsPage( "3D View keymap", guiModel.getBvvKeymapManager(), guiModel.getBvvKeymapManager().getCommandDescriptions() ) );
+		preferencesDialog.addPage( new KeymapSettingsPage( "BDV navigation keymap", guiModel.getBvvKeymapManager(), guiModel.getBvvKeymapManager().getCommandDescriptions() ) );
 		preferencesDialog.addPage( new SpotEditToolSettingsPage( "Semi-auto tracking", guiModel.getSemiAutoTrackingParams() ) );
-		preferencesDialog.addPage( new AppearanceSettingsPage( "BDVs appearance", guiModel.getAppearanceManager() ) );
+		preferencesDialog.addPage( new AppearanceSettingsPage( "BDV appearance", guiModel.getAppearanceManager() ) );
 	}
 
 	public HyperStackDisplayer createHyperStackDisplayer()
