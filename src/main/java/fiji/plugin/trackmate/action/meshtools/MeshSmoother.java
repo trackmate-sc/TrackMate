@@ -83,7 +83,7 @@ public class MeshSmoother implements MultiThreaded
 			final List< Spot > modifiedSpots = new ArrayList<>();
 			for ( final Spot spot : spots )
 			{
-				if ( SpotMesh.class.isInstance( spot ) )
+				if ( spot instanceof SpotMesh )
 				{
 					final SpotMesh sm = ( SpotMesh ) spot;
 					model.beforeEdit( sm );
@@ -116,7 +116,7 @@ public class MeshSmoother implements MultiThreaded
 
 	private static final int count( final Iterable< Spot > spots )
 	{
-		if ( Collection.class.isInstance( spots ) )
+		if ( spots instanceof Collection )
 			return ( ( Collection< ? > ) spots ).size();
 
 		int n = 0;
