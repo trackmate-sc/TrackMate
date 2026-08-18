@@ -89,13 +89,10 @@ function [ spotTable, spotIDMap, rois ] = trackmateSpots(filePath, featureList)
     ROI_N_POINTS_ATTTRIBUTE     = 'ROI_N_POINTS';
 
     %% Open file.
-    global isNotFirst xmlDoc %#ok<GVMIS>
-    if isNotFirst
-        % Being called by other function
-        willClear = false;
-    else
-        isNotFirst = true;
-        willClear = true;
+    global TRACKMATEISNOTENTRY TRACKMATEXMLDOC %#ok<GVMIS>
+    if isempty(TRACKMATEISNOTENTRY)
+        TRACKMATEISNOTENTRY = true;
+        willClear = onCleanup(@()clear('global', 'TRACKMATEISNOTENTRY', 'TRACKMATEXMLDOC', 'TRACKMATEDOCNAME'));
     end
 
     % We'll call trackmateFeatureDeclarations() to fill in table properties
@@ -105,7 +102,7 @@ function [ spotTable, spotIDMap, rois ] = trackmateSpots(filePath, featureList)
     catch ME
         rethrow(ME)
     end
-    rootObj = xmlDoc.getDocumentElement;
+    rootObj = TRACKMATEXMLDOC.getDocumentElement;
     modelNodes = rootObj.getElementsByTagName('Model');
     
     %% Retrieve spot feature list.
@@ -244,10 +241,6 @@ function [ spotTable, spotIDMap, rois ] = trackmateSpots(filePath, featureList)
     if nargout >= 2
         spotIDMap = containers.Map( spotTable.ID, 1 : nSpots, ...
         'UniformValues', true);
-    end
-    
-    if willClear
-        clear global isNotFirst xmlDoc xmlDocFileName
     end
 
     %% Subfunction.

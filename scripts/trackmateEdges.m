@@ -71,13 +71,10 @@ function  trackMap = trackmateEdges(filePath, featureList)
     SPOT_TARGET_ID_ATTRIBUTE    = 'SPOT_TARGET_ID';
 
     %% Open file
-    global isNotFirst xmlDoc %#ok<GVMIS>
-    if isNotFirst
-        % Being called by other function
-        willClear = false;
-    else
-        isNotFirst = true;
-        willClear = true;
+    global TRACKMATEISNOTENTRY TRACKMATEXMLDOC %#ok<GVMIS>
+    if isempty(TRACKMATEISNOTENTRY)
+        TRACKMATEISNOTENTRY = true;
+        willClear = onCleanup(@()clear('global', 'TRACKMATEISNOTENTRY', 'TRACKMATEXMLDOC', 'TRACKMATEDOCNAME'));
     end
     % We'll call trackmateFeatureDeclarations() to fill in table properties
     % no matter what, so let's reuse that one's validation function.
@@ -87,7 +84,7 @@ function  trackMap = trackmateEdges(filePath, featureList)
         rethrow(ME)
     end
 
-    rootObj = xmlDoc.getDocumentElement;
+    rootObj = TRACKMATEXMLDOC.getDocumentElement;
     modelNodes = rootObj.getElementsByTagName('Model');
     
     %% Retrieve edge feature list
@@ -144,9 +141,6 @@ function  trackMap = trackmateEdges(filePath, featureList)
 
     if isempty(fTracks)
         % No selected track, return empty map
-        if willClear
-            clear global isNotFirst xmlDoc xmlDocFileName
-        end
         return
     end
     
@@ -196,9 +190,6 @@ function  trackMap = trackmateEdges(filePath, featureList)
         end
     else
         % None of the selected tracks were found, return empty map.
-        if willClear
-            clear global isNotFirst xmlDoc xmlDocFileName
-        end
         return
     end
     
@@ -234,10 +225,6 @@ function  trackMap = trackmateEdges(filePath, featureList)
         end
         aTNode = aTNode.getNextElementSibling;
         end
-    end
-        
-    if willClear
-        clear global isNotFirst xmlDoc xmlDocFileName
     end
     
      %% Subfunction.

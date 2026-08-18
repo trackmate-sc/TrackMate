@@ -55,20 +55,19 @@ function [ sf, ef, tf ] = trackmateFeatureDeclarations(filePath)
     
     %% Open and check XML.
     % Parsing a large file takes time. Cache the document until return.
-    global isNotFirst xmlDoc xmlDocFileName %#ok<GVMIS>
-    if isNotFirst
-        % Being called by other function
-        willClear = false;
+    global TRACKMATEISNOTENTRY TRACKMATEXMLDOC TRACKMATEDOCNAME %#ok<GVMIS>
+    if isempty(TRACKMATEISNOTENTRY)
+        TRACKMATEISNOTENTRY = true;
+        willClear = onCleanup(@()clear('global', 'TRACKMATEISNOTENTRY', 'TRACKMATEXMLDOC', 'TRACKMATEDOCNAME'));
     else
-        isNotFirst = true;
-        willClear = true;
+        willClear = onCleanup.empty;
     end
     
     % Either being called by user, or being called by other functions and
     % is the first run. Or somehow was used to work on another file.
-    if willClear || isempty(xmlDoc) || ~strcmp(xmlDocFileName, filePath)
+    if isempty(willClear) || isempty(TRACKMATEXMLDOC) || ~strcmp(TRACKMATEDOCNAME, filePath)
         try
-            xmlDoc = matlab.io.xml.dom.Parser().parseFile( filePath );
+            TRACKMATEXMLDOC = matlab.io.xml.dom.Parser().parseFile( filePath );
         catch ME
             switch ME.identifier
                 case 'MATLAB:UndefinedFunction'
@@ -78,10 +77,10 @@ function [ sf, ef, tf ] = trackmateFeatureDeclarations(filePath)
                     error(ME.identifier, 'Failed to read XML file %s.',filePath);
             end
         end
-        xmlDocFileName = filePath;
+        TRACKMATEDOCNAME = filePath;
     end
 
-    rootNode = xmlDoc.getDocumentElement;
+    rootNode = TRACKMATEXMLDOC.getDocumentElement;
     if isempty(rootNode) || ~strcmp(TRACKMATE_ELEMENT, rootNode.TagName)
         error('MATLAB:trackMateGraph:BadXMLFile', ...
             'File does not seem to be a proper TrackMate file.')
@@ -128,10 +127,6 @@ function [ sf, ef, tf ] = trackmateFeatureDeclarations(filePath)
         % /TrackMate/Model/FeatureDeclarations/TrackFeatures/Feature
         tf = makeFeatureTable('TrackFeatures', modelNode);
         tf = transformFeatureTable(tf, spaceUnits, timeUnits);
-    end
-    
-    if willClear
-        clear global isNotFirst xmlDoc xmlDocFileName
     end
     
     

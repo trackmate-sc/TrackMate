@@ -78,12 +78,10 @@ function [G, rois] = trackmateGraph(filePath, spotFeatureList, edgeFeatureList, 
         end
     end
 
-    global isNotFirst %#ok<GVMIS>
-    if isNotFirst
-        willClear = false;
-    else
-        isNotFirst = true;
-        willClear = true;
+    global TRACKMATEISNOTENTRY %#ok<GVMIS>
+    if isempty(TRACKMATEISNOTENTRY)
+        TRACKMATEISNOTENTRY = true;
+        willClear = onCleanup(@()clear('global', 'TRACKMATEISNOTENTRY', 'TRACKMATEXMLDOC', 'TRACKMATEDOCNAME'));
     end
 
     %% Import spot table.
@@ -142,10 +140,6 @@ function [G, rois] = trackmateGraph(filePath, spotFeatureList, edgeFeatureList, 
     
     if verbose
         fprintf('Done in %.1f s.\n', toc(timr))
-    end
-    
-    if willClear
-        clear global isNotFirst xmlDoc xmlDocFileName
     end
 
 end
