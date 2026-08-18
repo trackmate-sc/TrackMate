@@ -65,7 +65,7 @@ function [ sf, ef, tf ] = trackmateFeatureDeclarations(filePath)
     
     % Either being called by user, or being called by other functions and
     % is the first run. Or somehow was used to work on another file.
-    if isempty(willClear) || isempty(TRACKMATEXMLDOC) || ~strcmp(TRACKMATEDOCNAME, filePath)
+    if ~isempty(willClear) || isempty(TRACKMATEXMLDOC) || ~strcmp(TRACKMATEDOCNAME, filePath)
         try
             TRACKMATEXMLDOC = matlab.io.xml.dom.Parser().parseFile( filePath );
         catch ME
