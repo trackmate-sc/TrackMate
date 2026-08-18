@@ -437,6 +437,19 @@ public class TMLabelBrushController
 			}
 		}
 
+		/**
+		 * Returns the labeling of the current frame.
+		 *
+		 * @return the labeling of the current frame
+		 */
+		private RandomAccessibleInterval< LabelingType< Label > > getFrameLabeling()
+		{
+			final RandomAccessibleInterval< LabelingType< Label > > frame = model.labeling().get();
+			if ( TMLabelBrushController.this.model.isTimeSeries() )
+				return Views.hyperSlice( frame, frame.numDimensions() - 1, viewer.state().getCurrentTimepoint() );
+			return frame;
+		}
+
 		@Override
 		public void init( final int x, final int y )
 		{
@@ -531,18 +544,6 @@ public class TMLabelBrushController
 		return brushDiameter * 0.5 * labelScale * viewScale;
 	}
 
-	/**
-	 * Returns the labeling of the current frame.
-	 *
-	 * @return the labeling of the current frame
-	 */
-	private RandomAccessibleInterval< LabelingType< Label > > getFrameLabeling()
-	{
-		final RandomAccessibleInterval< LabelingType< Label > > frame = model.labeling().get();
-		if ( this.model.isTimeSeries() )
-			return Views.hyperSlice( frame, frame.numDimensions() - 1, viewer.state().getCurrentTimepoint() );
-		return frame;
-	}
 
 	private void fireBitmapChanged( final RealPoint a, final RealPoint b, double radius )
 	{
