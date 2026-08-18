@@ -49,7 +49,6 @@ import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.UpdateListener;
 import fiji.plugin.trackmate.visualization.AbstractTrackMateModelBvvView;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.ui.KeyConfigContexts;
-import ij.ImagePlus;
 import net.imglib2.RealLocalizable;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.Type;
@@ -63,7 +62,7 @@ public class TrackMateBVV< T extends Type< T > > extends AbstractTrackMateModelB
 
 	private final BigVolumeViewer bvvInstance;
 
-	public TrackMateBVV( final GuiModel guiModel, final ImagePlus imp )
+	public TrackMateBVV( final GuiModel guiModel )
 	{
 		super( guiModel, guiModel.getBvvKeymapManager(), KeyConfigContexts.BIGVOLUMEVIEWER, bvv.core.KeyConfigContexts.BIGVOLUMEVIEWER );
 		this.meshMap = new HashMap<>();

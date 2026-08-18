@@ -113,7 +113,7 @@ public class WindowManager
 		final ImagePlus imp = guiModel.getSettings().imp;
 		if ( imp != null )
 		{
-			final TrackMateBVV< ? > tbvv = new TrackMateBVV<>( guiModel, imp );
+			final TrackMateBVV< ? > tbvv = new TrackMateBVV<>( guiModel );
 			registerView( tbvv );
 			tbvv.render();
 			return tbvv;
