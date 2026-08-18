@@ -167,8 +167,8 @@ public class TrackMateBVV< T extends Type< T > > extends AbstractTrackMateModelB
 		target.localize( pos );
 		t.apply( pos, vPos );
 
-		final double dx = width / 2 - vPos[ 0 ] + t.get( 0, 3 );
-		final double dy = height / 2 - vPos[ 1 ] + t.get( 1, 3 );
+		final double dx = width / 2. - vPos[ 0 ] + t.get( 0, 3 );
+		final double dy = height / 2. - vPos[ 1 ] + t.get( 1, 3 );
 		final double dz = -vPos[ 2 ] + t.get( 2, 3 );
 
 		return new double[] { dx, dy, dz };
