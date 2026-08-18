@@ -80,140 +80,186 @@ function [ spotTable, spotIDMap, rois ] = trackmateSpots(filePath, featureList)
 
 
 % __
-% Jean-Yves Tinevez - 2016 - 2024
+% Jean-Yves Tinevez & contributors - 2026
+arguments
+    filePath    {mustBeTextScalar, mustBeFile}
+    featureList string                         = strings(0)
+end
 
-    %% Import the XPath classes.
-    import javax.xml.xpath.*
-    
     %% Constants definition.
 
-    TRACKMATE_ELEMENT           = 'TrackMate';
     SPOT_ID_ATTRIBUTE           = 'ID';
     SPOT_NAME_ATTRIBUTE         = 'name';
     ROI_N_POINTS_ATTTRIBUTE     = 'ROI_N_POINTS';
 
     %% Open file.
+    global TRACKMATEISNOTENTRY TRACKMATEXMLDOC %#ok<GVMIS>
+    if isempty(TRACKMATEISNOTENTRY)
+        TRACKMATEISNOTENTRY = true;
+        willClear = onCleanup(@()clear('global', 'TRACKMATEISNOTENTRY', 'TRACKMATEXMLDOC', 'TRACKMATEDOCNAME'));
+    end
 
+    % We'll call trackmateFeatureDeclarations() to fill in table properties
+    % no matter what, so let's reuse that one's validation function.
     try
-        xmlDoc = xmlread(filePath);
-    catch
-        error('Failed to read XML file %s.',filePath);
+        fs = trackmateFeatureDeclarations( filePath );
+    catch ME
+        rethrow(ME)
     end
-    xmlRoot = xmlDoc.getFirstChild();
-
-    if ~strcmp(xmlRoot.getTagName, TRACKMATE_ELEMENT)
-        error('MATLAB:trackMateGraph:BadXMLFile', ...
-            'File does not seem to be a proper TrackMate file.')
-    end
-    
-    
-    %% XPath to retrieve spot nodes.
-    
-    % Use XPath to retrieve all visible spots.
-    factory = XPathFactory.newInstance;
-    xPath = factory.newXPath;
-    xPathFilter = xPath.compile('//Model/AllSpots/SpotsInFrame/Spot[@VISIBILITY=1]');
-    nodeList = xPathFilter.evaluate(xmlDoc, XPathConstants.NODESET);
+    rootObj = TRACKMATEXMLDOC.getDocumentElement;
+    modelNodes = rootObj.getElementsByTagName('Model');
     
     %% Retrieve spot feature list.
     
-    if nargin < 2 || isempty( featureList )
-        featureList = getSpotFeatureList(nodeList.item(0));
+    if isempty( featureList )
+        spotFound = false;
+        % XPath: (TrackMate/Model/AllSpots/SpotsInFrame/Spot)[1]
+        for j = 1:modelNodes.Length
+            aSNode = modelNodes.node(j).getFirstElementChild;
+            while ~spotFound && ~isempty(aSNode)
+            if strcmp ('AllSpots', aSNode.TagName)
+                % AllSpots level
+                sIFNode = aSNode.getFirstElementChild;
+                while ~spotFound && ~isempty(sIFNode)
+                if strcmp('SpotsInFrame', sIFNode.TagName)
+                    spotNode = sIFNode.getFirstElementChild;
+                    while ~spotFound && ~isempty(spotNode)
+                    if strcmp('Spot', spotNode.TagName)
+                        spotFound = true;
+                        attrMap = spotNode.getAttributes;
+                        nFeatures = attrMap.Length;
+                        featureList = strings(attrMap.Length, 1);
+                        for k = 1:nFeatures
+                            featureList{k} = attrMap.item(k-1).Name;
+                        end
+                        break
+                    end
+                    spotNode = spotNode.getNextElementSibling;
+                    end
+                end
+                sIFNode = sIFNode.getNextElementSibling;
+                end
+            end
+            aSNode = aSNode.getNextElementSibling;
+            end
+        end
     end
     
     % Remove ID and name, because we will get them anyway.
     featureList = setdiff( featureList, SPOT_ID_ATTRIBUTE );
     featureList = setdiff( featureList, SPOT_NAME_ATTRIBUTE );
+    featureList = [{SPOT_ID_ATTRIBUTE; SPOT_NAME_ATTRIBUTE}; featureList];
     n_features = numel( featureList );
     
     %% Get filtered spot IDs.
 
+    % Assuming every Spot node resides in the right place.
+    neSpots = 0;
+    for j = 1:modelNodes.Length
+        neSpots = neSpots + modelNodes.node(j).getElementsByTagName('Spot').Length;
+    end
+
     % Prepare holders.
-    nSpots      = nodeList.getLength();
-    ID          = NaN( nSpots, 1 );
-    name        = cell( nSpots, 1);
-    features    = NaN( nSpots, n_features );
-    rois        = cell( nSpots, 1);
+    holder = cell(1, n_features);
+    holder{1} = zeros(neSpots, 1);
+    holder{2} = strings(neSpots, 1);
+    for k = 3:n_features
+            holder{k} = zeros(neSpots, 1);
+    end
+
+    % Read ROI coords if it's requested
+    if nargout >= 3
+        willReadROIs = true;
+        rois = cell(neSpots, 1);
+    else
+        willReadROIs = false;
+    end
 
     % Read all spot nodes.
-    for i = 1 : nSpots
-        node = nodeList.item( i-1 );
-        ID( i )     = str2double( node.getAttribute( SPOT_ID_ATTRIBUTE ) );
-        name{ i }   = char( node.getAttribute( SPOT_NAME_ATTRIBUTE ) );
-        for j = 1 : n_features
-           features( i, j ) = str2double( node.getAttribute( featureList{ j } ) ); 
-        end
-        
-        % Read ROI coords if it's there.
-        if nargout >= 3
-            coords_str = node.getTextContent();
-            if ~isempty( coords_str )
-                A = sscanf(string(coords_str),'%f');
-                n_points = numel(A) / 2;
-                A = reshape( A, 2, n_points )';
-                rois{i} = A;
+    nSpots = 0;
+    % XPath: //Model/AllSpots/SpotsInFrame/Spot
+    for j = 1:modelNodes.Length
+        aSNode = modelNodes.node(j).getFirstElementChild;
+        while ~isempty(aSNode)
+        if strcmp ('AllSpots', aSNode.TagName)
+            % AllSpots level
+            sIFNode = aSNode.getFirstElementChild;
+            while ~isempty(sIFNode)
+            if strcmp('SpotsInFrame', sIFNode.TagName)
+                % SpotsInFrame level.
+                spotNode = sIFNode.getFirstElementChild;
+                while ~isempty(spotNode)
+                if strcmp('Spot', spotNode.TagName)
+                    nSpots = nSpots + 1;
+                    holder{1}(nSpots) = double(string(spotNode.getAttribute(featureList{1})));
+                    holder{2}{nSpots} = spotNode.getAttribute(featureList{2});
+                    for k = 3:nFeatures
+                        holder{k}(nSpots) = double(string(spotNode.getAttribute(featureList{k})));
+                    end
+
+                    if willReadROIs
+                        coords_str = spotNode.TextContent;
+                        if ~isempty(coords_str)
+                            A = sscanf( coords_str, '%f' );
+                            A = reshape( A, 2, [] ).';
+                            rois{nSpots} = A;
+                        end
+                    end
+                end
+                spotNode = spotNode.getNextElementSibling;
+                end
             end
+            sIFNode = sIFNode.getNextElementSibling;
+            end
+        end
+        aSNode = aSNode.getNextElementSibling;
+        end
+    end
+
+    if nSpots ~= neSpots
+        for k = 1 : nFeatures
+            holder{k}(nSpots+1:end) = [];
+        end
+        if willReadROIs
+            rois(nSpots+1:end) = [];
         end
     end
     
     % Create table.
-    spotTable = table();
-    spotTable.( SPOT_ID_ATTRIBUTE )     = ID;
-    spotTable.( SPOT_NAME_ATTRIBUTE )   = name;
-    for j = 1 : n_features
-       spotTable.( featureList{ j } )   = features( :, j ); 
-    end
+    holder{2} = cellstr(holder{2});
+    spotTable = table(holder{:}, 'VariableNames', featureList);
     
     % Set table metadata.
     spotTable.Properties.DimensionNames = { 'Spot', 'Feature' };
     
-    vNames = spotTable.Properties.VariableNames;
-    nVNames = numel( vNames );
-    vDescriptions   = cell( nVNames, 1);
-    vUnits          = cell( nVNames, 1);
+    [vDescriptions,vUnits] = cellfun(@determineDescriptions, ...
+        featureList, 'UniformOutput', false);
     
-    fs = trackmateFeatureDeclarations( filePath );
-    for k = 1 : nVNames
-        vn = vNames{ k };
-        if strcmp( SPOT_ID_ATTRIBUTE, vn )
-            vDescriptions{ k }  = 'Spot ID';
-            vUnits{ k }         = '';
-        elseif strcmp( SPOT_NAME_ATTRIBUTE, vn )
-            vDescriptions{ k }  = 'Spot name';
-            vUnits{ k }         = '';
-        elseif strcmp( ROI_N_POINTS_ATTTRIBUTE, vn )
-            vDescriptions{ k }  = 'ROI N points';
-            vUnits{ k }         = '';
-        else
-            vDescriptions{ k }  = fs( vn ).name;
-            vUnits{ k }         = fs( vn ).units;
-        end
-    end
     spotTable.Properties.VariableDescriptions   = vDescriptions;
     spotTable.Properties.VariableUnits          = vUnits;
     
     % Generate map ID -> table row number.
-    spotIDMap = containers.Map( ID, 1 : nSpots, ...
+    if nargout >= 2
+        spotIDMap = containers.Map( spotTable.ID, 1 : nSpots, ...
         'UniformValues', true);
-    
+    end
+
     %% Subfunction.
     
-    function featureList = getSpotFeatureList(node)
-        
-        attribute_map = node.getAttributes;
-        nAttributes = attribute_map.getLength;
-        
-        featureList = cell(nAttributes - 1, 1); % -1 for the spot name, which we do not take
-        index = 1;
-        for ii = 1 : nAttributes
-            
-            namel = node.getAttributes.item(ii-1).getName;
-            if strcmp(namel, SPOT_NAME_ATTRIBUTE)
-                continue;
-            end
-            featureList{index} = char(namel);
-            index = index + 1;
-            
+    function  [desc, unit] = determineDescriptions( varName )
+        switch ( varName )
+            case SPOT_ID_ATTRIBUTE
+                desc = 'Spot ID';
+                unit = '';
+            case SPOT_NAME_ATTRIBUTE
+                desc = 'Spot name';
+                unit = '';
+            case ROI_N_POINTS_ATTTRIBUTE
+                desc = 'ROI N points';
+                unit = '';
+            otherwise
+                desc = fs(varName).name;
+                unit = fs(varName).units;
         end
     end
     
