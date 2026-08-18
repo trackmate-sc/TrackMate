@@ -340,7 +340,7 @@ public class ThresholdDetectorConfigurationPanel extends ConfigurationPanel
 	public void setSettings( final Map< String, Object > settings )
 	{
 		setSettingsNonIntensity( settings );
-		final Double intensityThreshold = Double.valueOf( ( Double ) settings.get( KEY_INTENSITY_THRESHOLD ) );
+		final Double intensityThreshold = ( Double ) settings.get( KEY_INTENSITY_THRESHOLD );
 		if ( intensityThreshold == null || intensityThreshold == 0. )
 			autoThreshold();
 		else
