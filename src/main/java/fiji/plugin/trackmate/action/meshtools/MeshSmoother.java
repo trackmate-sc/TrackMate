@@ -103,7 +103,7 @@ public class MeshSmoother implements MultiThreaded
 		catch ( final InterruptedException e )
 		{
 			logger.error( e.getMessage() );
-			e.printStackTrace();
+			Thread.currentThread().interrupt();
 		}
 		finally
 		{
