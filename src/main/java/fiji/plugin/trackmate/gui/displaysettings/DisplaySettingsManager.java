@@ -188,7 +188,11 @@ public class DisplaySettingsManager extends AbstractStyleManager< DisplaySetting
 			{
 				final String filename = file.getName().substring( 0, file.getName().length() - 5 );
 				if ( !userStyleNames.contains( filename ) )
-					file.delete();
+				{
+					if ( !file.delete() )
+						System.err.println( "Could not delete the duplicate settings file " + file.getAbsolutePath() + "." );
+
+				}
 			}
 		}
 
