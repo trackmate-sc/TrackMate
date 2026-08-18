@@ -40,6 +40,9 @@ function [ sf, ef, tf ] = trackmateFeatureDeclarations(filePath)
 
 % __
 % Jean-Yves Tinevez & contributors - 2026
+arguments
+    filePath {mustBeTextScalar, mustBeFile}
+end
 
 
     %% Constants definition.
@@ -136,7 +139,7 @@ function [ sf, ef, tf ] = trackmateFeatureDeclarations(filePath)
     function ft = makeFeatureTable(featName, modelNode)
         ft = table( 'Size', [0 5], ...
             'VariableNames', {'key' 'name' 'shortName' 'dimension' 'isInt'}, ...
-            'VariableTypes', {'string' 'string' 'string' 'string' 'logical'});
+            'VariableTypes', {'string' 'string' 'string' 'string' 'logical'} );
 
         declNode = modelNode.getFirstElementChild;
         while ~isempty(declNode)
@@ -180,10 +183,7 @@ function [ sf, ef, tf ] = trackmateFeatureDeclarations(filePath)
         declNode = declNode.getNextElementSibling;
         end
 
-        ft.(1) = cellstr(ft.(1));
-        ft.(2) = cellstr(ft.(2));
-        ft.(3) = cellstr(ft.(3));
-        ft.(4) = cellstr(ft.(4));
+        ft = convertvars(ft, 1:4, 'cellstr');
     end
 
     % Fill in the Units, and transform into Map

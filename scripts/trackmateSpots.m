@@ -81,6 +81,10 @@ function [ spotTable, spotIDMap, rois ] = trackmateSpots(filePath, featureList)
 
 % __
 % Jean-Yves Tinevez & contributors - 2026
+arguments
+    filePath    {mustBeTextScalar, mustBeFile}
+    featureList string                         = strings(0)
+end
 
     %% Constants definition.
 
@@ -107,7 +111,7 @@ function [ spotTable, spotIDMap, rois ] = trackmateSpots(filePath, featureList)
     
     %% Retrieve spot feature list.
     
-    if nargin < 2 || isempty( featureList )
+    if isempty( featureList )
         spotFound = false;
         % XPath: (TrackMate/Model/AllSpots/SpotsInFrame/Spot)[1]
         for j = 1:modelNodes.Length
@@ -138,9 +142,6 @@ function [ spotTable, spotIDMap, rois ] = trackmateSpots(filePath, featureList)
             end
             aSNode = aSNode.getNextElementSibling;
             end
-        end
-        if ~spotFound
-            featureList = strings(0);
         end
     end
     

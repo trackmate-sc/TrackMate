@@ -67,17 +67,11 @@ function [tracks, metadata] = importTrackMateTracks(file, clipz, scalet)
 
 % __
 % Jean-Yves Tinevez & contributors - 2026
-
-    %% Input 
-    
-    if nargin < 2
-        clipz = false;
-    end
-    
-    if nargin < 3
-        scalet = false;
-    end
-
+arguments
+    file   {mustBeTextScalar, mustBeFile}
+    clipz  logical  {mustBeScalarOrEmpty} = false
+    scalet logical  {mustBeScalarOrEmpty} = false
+end
 
     %% Load and Test compliance
 

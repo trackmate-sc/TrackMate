@@ -61,6 +61,10 @@ function  trackMap = trackmateEdges(filePath, featureList)
 
 % __
 % Jean-Yves Tinevez & contributors - 2026
+arguments
+    filePath    {mustBeTextScalar, mustBeFile}
+    featureList string                         = strings(0);
+end
 
     
     %% Constants definition.
@@ -88,7 +92,7 @@ function  trackMap = trackmateEdges(filePath, featureList)
     modelNodes = rootObj.getElementsByTagName('Model');
     
     %% Retrieve edge feature list
-    if nargin < 2 || isempty( featureList )
+    if isempty( featureList )
         % //Edge. Why not full path?
         edgeList = rootObj.getElementsByTagName( 'Edge' );
         if edgeList.Length > 0
@@ -98,8 +102,6 @@ function  trackMap = trackmateEdges(filePath, featureList)
             for k = 1 : nFeatures
                 featureList{k} = attrMap.item(k-1).Name;
             end
-        else
-            featureList = strings(0);
         end
     end
     
@@ -175,13 +177,13 @@ function  trackMap = trackmateEdges(filePath, featureList)
     tracks(iTracks+1:neTracks) = [];
 
     % Find the selected Track IDs and cache the result.
-    whichSel = ismember( tracks, fTracks);
+    whichSel = ismember( tracks, fTracks );
 
     % Prepare metadata once
     if ~isempty(whichSel)
         nVNames = numel( featureList );
-        vDescriptions = strings( nVNames, 1);
-        vUnits        = strings( nVNames, 1);
+        vDescriptions = strings( nVNames, 1 );
+        vUnits        = strings( nVNames, 1 );
 
         for l = 1 : nVNames
             vn = featureList{ l };

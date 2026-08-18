@@ -26,6 +26,9 @@ function cal = trackmateImageCalibration(path)
 
 % __
 % Jean-Yves Tinevez & contributors - 2026
+arguments
+    path {mustBeTextScalar, mustBeFile}
+end
 
     %% Open XML file
     try

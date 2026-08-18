@@ -59,6 +59,12 @@ function [G, rois] = trackmateGraph(filePath, spotFeatureList, edgeFeatureList, 
 
 % __
 % Jean-Yves Tinevez & contributors - 2026
+arguments
+    filePath        {mustBeTextScalar, mustBeFile}
+    spotFeatureList string                         = strings(0)
+    edgeFeatureList string                         = strings(0)
+    verbose         logical  {mustBeScalarOrEmpty} = true
+end
 
 
     %% Constants definition.
@@ -68,16 +74,6 @@ function [G, rois] = trackmateGraph(filePath, spotFeatureList, edgeFeatureList, 
 
     %% Deal with inputs.
     
-    if nargin < 4
-        verbose = true;
-        if nargin < 3
-            edgeFeatureList = [];
-            if nargin < 2
-                spotFeatureList = [];
-            end
-        end
-    end
-
     global TRACKMATEISNOTENTRY %#ok<GVMIS>
     if isempty(TRACKMATEISNOTENTRY)
         TRACKMATEISNOTENTRY = true;
